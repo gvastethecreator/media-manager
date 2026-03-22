@@ -59,12 +59,12 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
 		// Generar ticks
 		const ticks = showTicks
 			? Array.from({ length: tickCount }, (_, i) => (
-				<div
-					className="absolute top-1/2 h-1.5 w-0.5 -translate-y-1/2 rounded-full bg-border/60"
-					key={i}
-					style={{ left: `${(i / (tickCount - 1)) * 100}%` }}
-				/>
-			))
+					<div
+						className="absolute top-1/2 h-1.5 w-0.5 -translate-y-1/2 rounded-full bg-border/60"
+						key={i}
+						style={{ left: `${(i / (tickCount - 1)) * 100}%` }}
+					/>
+				))
 			: null;
 
 		return (

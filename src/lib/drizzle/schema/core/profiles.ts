@@ -17,7 +17,9 @@ export const profiles = sqliteTable('Profile', {
 	color: text('color').notNull().default('#3b82f6'),
 	description: text('description'),
 	isActive: integer('isActive', { mode: 'boolean' }).notNull().default(false),
-	createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+	createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+		.notNull()
+		.default(sql`(CURRENT_TIMESTAMP)`),
 	updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	settingsId: text('settingsId'),
 	imageId: text('imageId'),

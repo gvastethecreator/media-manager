@@ -23,45 +23,38 @@ import { TaskCard } from '@/components/cards/task-card';
 import type { TaskWithStats } from '@/types/entities/task';
 
 const task: TaskWithStats = {
-  id: 1,
-  title: "Implementar autenticación",
-  emoji: "🔐",
-  status: "in_progress",
-  priority: "high",
-  progress: 65,
-  description: "Añadir JWT y refresh tokens",
-  category: "Backend",
-  tags: ["auth", "security", "jwt"],
-  dueDate: new Date('2025-10-01'),
-  estimatedHours: 8,
-  actualHours: 5.5,
-  isFavorite: false,
-  isArchived: false,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  _count: {
-    subtasks: 3,
-    images: 2,
-    videos: 0,
-    albums: 1,
-    characters: 0,
-  },
+	id: 1,
+	title: 'Implementar autenticación',
+	emoji: '🔐',
+	status: 'in_progress',
+	priority: 'high',
+	progress: 65,
+	description: 'Añadir JWT y refresh tokens',
+	category: 'Backend',
+	tags: ['auth', 'security', 'jwt'],
+	dueDate: new Date('2025-10-01'),
+	estimatedHours: 8,
+	actualHours: 5.5,
+	isFavorite: false,
+	isArchived: false,
+	createdAt: new Date(),
+	updatedAt: new Date(),
+	_count: {
+		subtasks: 3,
+		images: 2,
+		videos: 0,
+		albums: 1,
+		characters: 0,
+	},
 };
 
-<TaskCard 
-  task={task} 
-  onClick={() => console.log('Task clicked')} 
-/>
+<TaskCard task={task} onClick={() => console.log('Task clicked')} />;
 ```
 
 ## 🎨 Modo TCG
 
 ```tsx
-<TaskCard 
-  task={task} 
-  tcgMode={true}
-  compact={false}
-/>
+<TaskCard task={task} tcgMode={true} compact={false} />
 ```
 
 Activa:
@@ -74,10 +67,7 @@ Activa:
 ## 📐 Modo Compact
 
 ```tsx
-<TaskCard 
-  task={task} 
-  compact={true}
-/>
+<TaskCard task={task} compact={true} />
 ```
 
 Dimensiones: **240x300px** (vs 300x420px normal)
@@ -89,20 +79,20 @@ Dimensiones: **240x300px** (vs 300x420px normal)
 ## 🔒 Estados Disabled/Selected
 
 ```tsx
-<TaskCard 
-  task={task} 
-  disabled={true}       // Opacity 50%, cursor not-allowed
-  isSelected={true}     // Ring 4px primary/60
+<TaskCard
+	task={task}
+	disabled={true} // Opacity 50%, cursor not-allowed
+	isSelected={true} // Ring 4px primary/60
 />
 ```
 
 ## 🎭 Acciones Rápidas
 
 ```tsx
-<TaskCard 
-  task={task} 
-  onToggleFavorite={() => console.log('Toggle favorite')}
-  onToggleArchived={() => console.log('Toggle archived')}
+<TaskCard
+	task={task}
+	onToggleFavorite={() => console.log('Toggle favorite')}
+	onToggleArchived={() => console.log('Toggle archived')}
 />
 ```
 
@@ -127,10 +117,7 @@ Dimensiones: **240x300px** (vs 300x420px normal)
 ## 📊 Progress Bar Color Logic
 
 ```typescript
-progress === 100 ? 'bg-green-500'
-: progress >= 75 ? 'bg-blue-500'
-: progress >= 50 ? 'bg-yellow-500'
-: 'bg-gray-500'
+progress === 100 ? 'bg-green-500' : progress >= 75 ? 'bg-blue-500' : progress >= 50 ? 'bg-yellow-500' : 'bg-gray-500';
 ```
 
 ## ⏰ Due Date Logic
@@ -214,7 +201,7 @@ whileTap={{ scale: 0.98 }}
 ## 📝 Notas Técnicas
 
 - **onClick signature**: motion.div NO recibe event parameter, solo `() => void`
-- **Color darkening**: Secondary color = primary * 0.6 factor
+- **Color darkening**: Secondary color = primary \* 0.6 factor
 - **Timestamps**: Relative format con `getRelativeTime` helper (maneja null con 'N/A')
 - **TCG gradient**: `background-size: 200%` + `animation: gradient-shift 3s infinite`
 - **Relation intensity**: `Math.min(0.5 + (totalRelations / 50) * 0.5, 0.9)`
@@ -222,11 +209,7 @@ whileTap={{ scale: 0.98 }}
 ## 🎨 Estilos Personalizados
 
 ```tsx
-<TaskCard 
-  task={task} 
-  className="shadow-2xl"
-  style={{ transform: 'rotate(2deg)' }}
-/>
+<TaskCard task={task} className="shadow-2xl" style={{ transform: 'rotate(2deg)' }} />
 ```
 
 Props `className` y `style` se aplican al motion.div root.
@@ -237,18 +220,18 @@ Props `className` y `style` se aplican al motion.div root.
 import { useTaskStore } from '@/stores/task.store';
 
 const TaskList = () => {
-  const tasks = useTaskStore(s => s.tasks);
-  const toggleFavorite = useTaskStore(s => s.toggleFavorite);
-  const toggleArchived = useTaskStore(s => s.toggleArchived);
-  
-  return tasks.map(task => (
-    <TaskCard
-      key={task.id}
-      task={task}
-      onToggleFavorite={() => toggleFavorite(task.id)}
-      onToggleArchived={() => toggleArchived(task.id)}
-    />
-  ));
+	const tasks = useTaskStore((s) => s.tasks);
+	const toggleFavorite = useTaskStore((s) => s.toggleFavorite);
+	const toggleArchived = useTaskStore((s) => s.toggleArchived);
+
+	return tasks.map((task) => (
+		<TaskCard
+			key={task.id}
+			task={task}
+			onToggleFavorite={() => toggleFavorite(task.id)}
+			onToggleArchived={() => toggleArchived(task.id)}
+		/>
+	));
 };
 ```
 
@@ -259,9 +242,9 @@ import { render } from '@testing-library/react';
 import { TaskCard } from './task-card';
 
 test('renders task with progress bar', () => {
-  const task = { /* ... */ progress: 75 };
-  const { getByText } = render(<TaskCard task={task} />);
-  expect(getByText('75%')).toBeInTheDocument();
+	const task = { /* ... */ progress: 75 };
+	const { getByText } = render(<TaskCard task={task} />);
+	expect(getByText('75%')).toBeInTheDocument();
 });
 ```
 

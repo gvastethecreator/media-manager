@@ -19,12 +19,6 @@ export type {
 export { ThumbnailQuality } from './base';
 
 // 🔧 LEGACY: Exportaciones del archivo types.ts (en transición)
-export type {
-	ThumbnailMetadata,
-	ThumbnailRelations,
-} from './types';
+export type { ThumbnailMetadata, ThumbnailRelations } from './types';
 
-export {
-	ThumbnailFormat,
-	thumbnailBaseSchema,
-} from './types';
+export { ThumbnailFormat, thumbnailBaseSchema } from './types';

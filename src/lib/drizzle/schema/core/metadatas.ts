@@ -21,7 +21,9 @@ export const metadatas = sqliteTable(
 		type: text('type').default('string'),
 		category: text('category'),
 		description: text('description'),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

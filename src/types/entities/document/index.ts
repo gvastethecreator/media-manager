@@ -14,13 +14,6 @@
  */
 
 // --- Tipos de Input ---
-export type {
-	DocumentCreateInput,
-	DocumentUpdateInput,
-} from '../../../transformers/document/validators';
+export type { DocumentCreateInput, DocumentUpdateInput } from '../../../transformers/document/validators';
 // --- Tipos Canónicos ---
-export type {
-	DocumentBase,
-	DocumentStatistics,
-	DocumentWithStats,
-} from './base';
+export type { DocumentBase, DocumentStatistics, DocumentWithStats } from './base';

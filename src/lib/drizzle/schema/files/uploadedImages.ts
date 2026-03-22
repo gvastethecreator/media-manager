@@ -25,7 +25,9 @@ export const uploadedImages = sqliteTable(
 		category: text('category').notNull().default('user'),
 		width: integer('width'),
 		height: integer('height'),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

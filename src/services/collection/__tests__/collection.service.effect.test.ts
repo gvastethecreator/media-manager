@@ -13,6 +13,45 @@ import { CollectionHasContentError, CollectionNotFound, CollectionValidationErro
 
 // ============= Test Helpers =============
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isSqliteBusyError = (error: unknown) => {
+	if (!(error instanceof Error)) {
+		return false;
+	}
+
+	return error.message.includes('SQLITE_BUSY') || error.message.includes('database is locked');
+};
+
+const withSqliteRetry = async <T>(operation: () => Promise<T>, retries = 20): Promise<T> => {
+	let lastError: unknown;
+
+	for (let attempt = 0; attempt <= retries; attempt++) {
+		try {
+			return await operation();
+		} catch (error) {
+			lastError = error;
+			if (!isSqliteBusyError(error) || attempt === retries) {
+				throw error;
+			}
+
+			await wait(50 * (attempt + 1));
+		}
+	}
+
+	throw lastError;
+};
+
+const cleanupTestData = () =>
+	withSqliteRetry(async () => {
+		await wait(50);
+		await db.delete(imageCollections);
+		await db.delete(images);
+		await db.delete(collections);
+		await db.delete(folders);
+		await wait(50);
+	});
+
 /**
  * Ejecuta un Effect con el CollectionService en el contexto
  */
@@ -36,23 +75,27 @@ const createTestCollection = async (data: {
 	parentId?: string | null;
 }) => {
 	const now = new Date();
-	const [collection] = await db
-		.insert(collections)
-		.values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			emoji: data.emoji ?? null,
-			color: data.color ?? null,
-			description: data.description ?? null,
-			featuredImage: null,
-			isFavorite: data.isFavorite ?? false,
-			lastImageAddedAt: null,
-			lastVideoAddedAt: null,
-			parentId: data.parentId ?? null,
-			createdAt: now,
-			updatedAt: now,
-		})
-		.returning();
+	const createdCollections = (await withSqliteRetry(() =>
+		db
+			.insert(collections)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				emoji: data.emoji ?? null,
+				color: data.color ?? null,
+				description: data.description ?? null,
+				featuredImage: null,
+				isFavorite: data.isFavorite ?? false,
+				lastImageAddedAt: null,
+				lastVideoAddedAt: null,
+				parentId: data.parentId ?? null,
+				createdAt: now,
+				updatedAt: now,
+			})
+			.returning()
+	)) as Array<typeof collections.$inferSelect>;
+	const [collection] = createdCollections;
+	await wait(10);
 	return collection;
 };
 
@@ -60,54 +103,81 @@ const createTestImage = async () => {
 	const now = new Date();
 
 	// Create a dummy folder first (required by folderId NOT NULL constraint)
-	const [folder] = await db
-		.insert(folders)
-		.values({
-			id: crypto.randomUUID(),
-			name: `test-folder-${Date.now()}`,
-			path: `/test/folder-${Date.now()}`,
-			depth: 0,
-			parentId: null,
-			isFavorite: false,
-			presetId: null,
-			createdAt: now,
-			updatedAt: now,
-		})
-		.returning();
+	const createdFolders = (await withSqliteRetry(() =>
+		db
+			.insert(folders)
+			.values({
+				id: crypto.randomUUID(),
+				name: `test-folder-${Date.now()}`,
+				path: `/test/folder-${Date.now()}`,
+				depth: 0,
+				parentId: null,
+				isFavorite: false,
+				presetId: null,
+				createdAt: now,
+				updatedAt: now,
+			})
+			.returning()
+	)) as Array<typeof folders.$inferSelect>;
+	const [folder] = createdFolders;
+	await wait(10);
 
 	// Generate a valid SHA-256 hash (64 hex characters)
 	const timestamp = Date.now().toString();
 	const validHash = timestamp.padStart(64, '0'); // Pad with zeros to 64 chars
 
-	const [image] = await db
-		.insert(images)
-		.values({
-			id: crypto.randomUUID(),
-			name: `test-image-${Date.now()}.jpg`,
-			path: `/test/image-${Date.now()}.jpg`,
-			url: `http://localhost/test/image-${Date.now()}.jpg`,
-			size: 1024,
-			width: 800,
-			height: 600,
-			format: 'jpg',
-			entityType: 'image',
-			hash: validHash, // SHA-256 format: exactly 64 hex characters
-			folderId: folder.id, // Assign folderId to satisfy NOT NULL constraint
-			createdAt: now,
-			updatedAt: now,
-		})
-		.returning();
+	const createdImages = (await withSqliteRetry(() =>
+		db
+			.insert(images)
+			.values({
+				id: crypto.randomUUID(),
+				name: `test-image-${Date.now()}.jpg`,
+				path: `/test/image-${Date.now()}.jpg`,
+				url: `http://localhost/test/image-${Date.now()}.jpg`,
+				size: 1024,
+				width: 800,
+				height: 600,
+				format: 'jpg',
+				entityType: 'image',
+				hash: validHash, // SHA-256 format: exactly 64 hex characters
+				folderId: folder.id, // Assign folderId to satisfy NOT NULL constraint
+				createdAt: now,
+				updatedAt: now,
+			})
+			.returning()
+	)) as Array<typeof images.$inferSelect>;
+	const [image] = createdImages;
+	await wait(10);
 	return image;
 };
 
+const linkImageToCollection = async (imageId: string, collectionId: string) =>
+	withSqliteRetry(() =>
+		db.insert(imageCollections).values({
+			A: imageId,
+			B: collectionId,
+		})
+	);
+
+const linkImagesToCollection = async (pairs: Array<{ imageId: string; collectionId: string }>) =>
+	withSqliteRetry(() =>
+		db.insert(imageCollections).values(
+			pairs.map(({ imageId, collectionId }) => ({
+				A: imageId,
+				B: collectionId,
+			}))
+		)
+	);
+
 // ============= Cleanup =============
+
+beforeEach(async () => {
+	await cleanupTestData();
+});
 
 afterEach(async () => {
 	// Clean up test data in correct order (relations first, then entities)
-	await db.delete(imageCollections);
-	await db.delete(images);
-	await db.delete(collections);
-	await db.delete(folders);
+	await cleanupTestData();
 });
 
 // ============= CRUD TESTS =============
@@ -232,10 +302,7 @@ describe('CollectionService - CRUD Operations', () => {
 			const image = await createTestImage();
 
 			// Add image to collection
-			await db.insert(imageCollections).values({
-				A: image.id, // imageId
-				B: collection.id, // collectionId
-			});
+			await linkImageToCollection(image.id, collection.id);
 
 			const result = await runEffect(Effect.flatMap(CollectionService, (service) => service.getById(collection.id)));
 
@@ -489,10 +556,7 @@ describe('CollectionService - CRUD Operations', () => {
 			const collection = await createTestCollection({ name: 'Collection with Images' });
 			const image = await createTestImage();
 
-			await db.insert(imageCollections).values({
-				A: image.id,
-				B: collection.id,
-			});
+			await linkImageToCollection(image.id, collection.id);
 
 			const error = await runEffectExpectFailure(
 				Effect.flatMap(CollectionService, (service) => service.delete(collection.id, false))
@@ -509,10 +573,7 @@ describe('CollectionService - CRUD Operations', () => {
 			const collection = await createTestCollection({ name: 'Collection with Images' });
 			const image = await createTestImage();
 
-			await db.insert(imageCollections).values({
-				A: image.id,
-				B: collection.id,
-			});
+			await linkImageToCollection(image.id, collection.id);
 
 			await runEffect(Effect.flatMap(CollectionService, (service) => service.delete(collection.id, true)));
 
@@ -604,10 +665,7 @@ describe('CollectionService - Relation Operations', () => {
 			const image = await createTestImage();
 
 			// Add image first
-			await db.insert(imageCollections).values({
-				A: image.id,
-				B: collection.id,
-			});
+			await linkImageToCollection(image.id, collection.id);
 
 			await runEffect(Effect.flatMap(CollectionService, (service) => service.removeImage(collection.id, image.id)));
 
@@ -631,9 +689,9 @@ describe('CollectionService - Relation Operations', () => {
 			const image1 = await createTestImage();
 			const image2 = await createTestImage();
 
-			await db.insert(imageCollections).values([
-				{ A: image1.id, B: collection.id },
-				{ A: image2.id, B: collection.id },
+			await linkImagesToCollection([
+				{ imageId: image1.id, collectionId: collection.id },
+				{ imageId: image2.id, collectionId: collection.id },
 			]);
 
 			const result = await runEffect(Effect.flatMap(CollectionService, (service) => service.getImages(collection.id)));
@@ -742,10 +800,7 @@ describe('CollectionService - Search Operations', () => {
 			});
 			const image = await createTestImage();
 
-			await db.insert(imageCollections).values({
-				A: image.id,
-				B: collection.id,
-			});
+			await linkImageToCollection(image.id, collection.id);
 
 			const result = await runEffect(Effect.flatMap(CollectionService, (service) => service.search('Test')));
 

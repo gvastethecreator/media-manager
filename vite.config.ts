@@ -17,11 +17,7 @@ function getManualChunkName(id: string) {
 	if (matchesPackage('@tanstack/react-query')) return 'query';
 	if (matchesPackage('gsap') || matchesPackage('lucide-react')) return 'ui';
 	if (matchesPackage('zustand') || matchesPackage('lodash') || matchesPackage('date-fns')) return 'vendor';
-	if (
-		matchesPackage('clsx') ||
-		matchesPackage('tailwind-merge') ||
-		matchesPackage('class-variance-authority')
-	)
+	if (matchesPackage('clsx') || matchesPackage('tailwind-merge') || matchesPackage('class-variance-authority'))
 		return 'utils';
 
 	return undefined;
@@ -205,6 +201,8 @@ export default defineConfig({
 		testTimeout: 30_000,
 		hookTimeout: 30_000,
 		fileParallelism: false,
+		maxWorkers: 1,
+		minWorkers: 1,
 		pool: 'forks',
 		isolate: true,
 		reporters: ['default'],
@@ -281,7 +279,7 @@ export default defineConfig({
 			'db:check': {
 				command: 'bun run db:check',
 			},
-			'tsc': {
+			tsc: {
 				command: 'bun run tsc',
 			},
 		},

@@ -30,7 +30,7 @@
 	position: absolute;
 	inset: -2px;
 	z-index: -1;
-	content: "";
+	content: '';
 	background: linear-gradient(
 		135deg,
 		transparent 0%,
@@ -73,7 +73,7 @@
 	font-size: 14px;
 	color: rgb(var(--effect-highlight-rgb));
 	pointer-events: none;
-	content: "▶";
+	content: '▶';
 	background: rgba(var(--effect-shadow-rgb), 0.7);
 	border-radius: 50%;
 	transform: translate(-50%, -50%) scale(0);

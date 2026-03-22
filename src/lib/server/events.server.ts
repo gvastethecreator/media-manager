@@ -183,6 +183,10 @@ export function getEventSubscribers() {
 	return eventSubscribers;
 }
 
+function isServerRuntime() {
+	return typeof globalThis.window === 'undefined' || globalThis.window == null;
+}
+
 /**
  * Emite un evento directamente en el servidor (sin HTTP)
  */
@@ -222,7 +226,7 @@ function emitDirect(event: EventData) {
 export async function emit(event: EventData) {
 	try {
 		// Detectar si estamos en el servidor (Node.js) o cliente (navegador)
-		const isServer = typeof window === 'undefined';
+		const isServer = isServerRuntime();
 
 		if (isServer) {
 			// En el servidor, emitir directamente
@@ -230,7 +234,7 @@ export async function emit(event: EventData) {
 		} else {
 			// En el cliente, usar HTTP
 			logger.info('🚀 Emitiendo evento (cliente HTTP):', eventLogPreview(event));
-			const response = await fetch('/api/events', {
+			const response = await globalThis.fetch('/api/events', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(event),

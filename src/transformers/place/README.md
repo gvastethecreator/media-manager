@@ -85,46 +85,55 @@ sequenceDiagram
 ## 📋 Tipos Principales
 
 ### `PlaceBase`
+
 Tipo base con campos fundamentales del lugar.
 
 ### `PlaceComplete`
+
 Tipo completo con relaciones y conteos incluidos.
 
 ### `PlaceResource`
+
 ```typescript
 interface PlaceResource {
-  name: string;
-  description?: string;
-  quantity: number;
-  abundance: number; // ✅ AGREGADO
-  value: number;
-  renewable: boolean;
+	name: string;
+	description?: string;
+	quantity: number;
+	abundance: number; // ✅ AGREGADO
+	value: number;
+	renewable: boolean;
 }
 ```
 
 ### `PlaceFilters`
+
 Filtros para búsqueda y filtrado de lugares.
 
 ## 🛠️ Funciones Principales
 
 ### Transformers
+
 - `mapCreatePlaceDataToDrizzle()` - ✅ Corregida
 - `mapUpdatePlaceDataToDrizzle()` - ✅ Validada
 - `fromDrizzlePlace()` - ✅ Funcional
 
 ### Store
+
 - `selectPlace()` - ✅ Agregada
 - `getSelectedPlace()` - ✅ Agregada
 - `setPlaces()`, `addPlace()`, `updatePlace()` - ✅ Validadas
 
 ### Actions
+
 - `getPlaces()` - ✅ Optimizada con PLACE_INCLUDE simplificado
 - `createPlace()`, `updatePlace()`, `deletePlace()` - ✅ Funcionales
 
 ## 🎨 Componentes
 
 ### PlaceCard
+
 Tarjeta principal con soporte para:
+
 - ✅ Modo TCG con efectos holográficos
 - ✅ Modo compacto para vistas densas
 - ✅ Gestión correcta de tipos `null/undefined`

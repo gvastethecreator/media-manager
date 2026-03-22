@@ -92,11 +92,11 @@ src/utils/activity/
 
 ```typescript
 interface ActivityBase {
-  id: string;
-  type: string;
-  description: string;
-  imageId?: string | null;
-  createdAt: Date;
+	id: string;
+	type: string;
+	description: string;
+	imageId?: string | null;
+	createdAt: Date;
 }
 ```
 
@@ -104,17 +104,17 @@ interface ActivityBase {
 
 ```typescript
 interface ActivityComplete extends ActivityBase {
-  image?: {
-    id: string;
-    name: string;
-    path: string;
-    thumbnail?: string | null;
-  } | null;
-  iconEmoji?: string;
-  iconColor?: string;
-  category?: string;
-  isSelected?: boolean;
-  isExpanded?: boolean;
+	image?: {
+		id: string;
+		name: string;
+		path: string;
+		thumbnail?: string | null;
+	} | null;
+	iconEmoji?: string;
+	iconColor?: string;
+	category?: string;
+	isSelected?: boolean;
+	isExpanded?: boolean;
 }
 ```
 
@@ -122,9 +122,9 @@ interface ActivityComplete extends ActivityBase {
 
 ```typescript
 interface ActivityState {
-  core: ActivityCoreState;
-  ui: ActivityUIState;
-  filters: ActivityFiltersState;
+	core: ActivityCoreState;
+	ui: ActivityUIState;
+	filters: ActivityFiltersState;
 }
 ```
 
@@ -346,14 +346,14 @@ function ActivityFilters() {
 ```typescript
 // Solo se persisten configuraciones de usuario
 partialize: (state) => ({
-  ui: {
-    groupByDate: state.ui.groupByDate,
-  },
-  filters: {
-    sortBy: state.filters.sortBy,
-    onlyAlerts: state.filters.onlyAlerts,
-  },
-})
+	ui: {
+		groupByDate: state.ui.groupByDate,
+	},
+	filters: {
+		sortBy: state.filters.sortBy,
+		onlyAlerts: state.filters.onlyAlerts,
+	},
+});
 ```
 
 ### Memoización

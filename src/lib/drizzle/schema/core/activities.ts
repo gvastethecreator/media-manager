@@ -24,7 +24,9 @@ export const activities = sqliteTable(
 		ipAddress: text('ipAddress'),
 		userAgent: text('userAgent'),
 		sessionId: text('sessionId'),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 	},
 	(table) => ({
 		typeIdx: index('Activity_type_idx').on(table.type),

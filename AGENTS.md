@@ -415,8 +415,8 @@ import { ThemeProvider, useTheme } from '@/components/ui/theme-provider';
 
 // En App.tsx
 <ThemeProvider defaultTheme="system" storageKey="theme">
-  {children}
-</ThemeProvider>
+	{children}
+</ThemeProvider>;
 
 // En componentes
 const { theme, setTheme, themes, resolvedTheme } = useTheme();
@@ -481,29 +481,26 @@ ease-dt-default, ease-dt-in, ease-dt-out, ease-dt-bounce
 ### Component Variants
 
 ```typescript
-const buttonVariants = cva(
-  'base-classes',
-  {
-    variants: {
-      variant: {
-        default: '...',
-        destructive: '...',
-        outline: '...',
-        ghost: '...',
-      },
-      size: {
-        default: 'h-9 px-4 py-2',
-        sm: 'h-8 px-3',
-        lg: 'h-10 px-8',
-        icon: 'h-9 w-9',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
-  }
-);
+const buttonVariants = cva('base-classes', {
+	variants: {
+		variant: {
+			default: '...',
+			destructive: '...',
+			outline: '...',
+			ghost: '...',
+		},
+		size: {
+			default: 'h-9 px-4 py-2',
+			sm: 'h-8 px-3',
+			lg: 'h-10 px-8',
+			icon: 'h-9 w-9',
+		},
+	},
+	defaultVariants: {
+		variant: 'default',
+		size: 'default',
+	},
+});
 ```
 
 ---
@@ -515,35 +512,36 @@ const buttonVariants = cva(
 **Schema Definition**:
 
 ```typescript
-export const videos = sqliteTable('Video', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  path: text('path').notNull(),
-  // ... fields
-}, (table) => ({
-  folderIdIdx: index('Video_folderId_idx').on(table.folderId),
-  hashIdx: index('Video_hash_idx').on(table.hash),
-}));
+export const videos = sqliteTable(
+	'Video',
+	{
+		id: text('id').primaryKey(),
+		name: text('name').notNull(),
+		path: text('path').notNull(),
+		// ... fields
+	},
+	(table) => ({
+		folderIdIdx: index('Video_folderId_idx').on(table.folderId),
+		hashIdx: index('Video_hash_idx').on(table.hash),
+	})
+);
 ```
 
 **Queries in Services**:
 
 ```typescript
 // Basic query
-const videos = await db
-  .select()
-  .from(videos)
-  .where(eq(videos.folderId, folderId));
+const videos = await db.select().from(videos).where(eq(videos.folderId, folderId));
 
 // With relations
 const videosWithCounts = await db
-  .select({
-    ...getTableColumns(videos),
-    _count: { albums: sql<number>`count(*)` }
-  })
-  .from(videos)
-  .leftJoin(imageAlbums, eq(videos.id, imageAlbums.videoId))
-  .groupBy(videos.id);
+	.select({
+		...getTableColumns(videos),
+		_count: { albums: sql<number>`count(*)` },
+	})
+	.from(videos)
+	.leftJoin(imageAlbums, eq(videos.id, imageAlbums.videoId))
+	.groupBy(videos.id);
 ```
 
 ### Relations Pattern
@@ -551,12 +549,16 @@ const videosWithCounts = await db
 Many-to-many relationships use junction tables:
 
 ```typescript
-export const imageTags = sqliteTable('_ImageToTag', {
-  A: text('A').notNull(), // imageId
-  B: text('B').notNull(), // tagId
-}, (table) => ({
-  AB_unique: uniqueIndex('_ImageToTag_AB_unique').on(table.A, table.B),
-}));
+export const imageTags = sqliteTable(
+	'_ImageToTag',
+	{
+		A: text('A').notNull(), // imageId
+		B: text('B').notNull(), // tagId
+	},
+	(table) => ({
+		AB_unique: uniqueIndex('_ImageToTag_AB_unique').on(table.A, table.B),
+	})
+);
 ```
 
 **Relations must be added to** `src/lib/drizzle/relations.ts`
@@ -577,16 +579,16 @@ import { renderHook } from '@testing-library/react';
 import { useVideo } from '@/hooks/useVideo';
 
 describe('useVideo', () => {
-  beforeEach(() => {
-    // Setup mocks, clear state
-  });
+	beforeEach(() => {
+		// Setup mocks, clear state
+	});
 
-  it('should fetch video successfully', async () => {
-    const { result } = renderHook(() => useVideo('test-id'));
+	it('should fetch video successfully', async () => {
+		const { result } = renderHook(() => useVideo('test-id'));
 
-    // Assertions
-    expect(result.current.data).toBeDefined();
-  });
+		// Assertions
+		expect(result.current.data).toBeDefined();
+	});
 });
 ```
 
@@ -608,10 +610,10 @@ describe('useVideo', () => {
 import { test, expect } from '@playwright/test';
 
 test.describe('Videos Page', () => {
-  test('should display videos list', async ({ page }) => {
-    await page.goto('http://localhost:5173/videos');
-    await expect(page.locator('.video-card')).toHaveCount(3);
-  });
+	test('should display videos list', async ({ page }) => {
+		await page.goto('http://localhost:5173/videos');
+		await expect(page.locator('.video-card')).toHaveCount(3);
+	});
 });
 ```
 
@@ -669,11 +671,11 @@ The project uses feature flags for gradual migrations:
 ```typescript
 // src/config/features.ts
 export const FEATURES = {
-  USE_EFFECT_TAGS: process.env.USE_EFFECT_TAGS !== 'false',
-  USE_EFFECT_IMAGES: process.env.USE_EFFECT_IMAGES !== 'false',
-  USE_EFFECT_VIDEOS: process.env.USE_EFFECT_VIDEOS !== 'false',
-  USE_EFFECT_AUDIOS: process.env.USE_EFFECT_AUDIOS !== 'false',
-  USE_EFFECT_FOLDERS: process.env.USE_EFFECT_FOLDERS === 'true',
+	USE_EFFECT_TAGS: process.env.USE_EFFECT_TAGS !== 'false',
+	USE_EFFECT_IMAGES: process.env.USE_EFFECT_IMAGES !== 'false',
+	USE_EFFECT_VIDEOS: process.env.USE_EFFECT_VIDEOS !== 'false',
+	USE_EFFECT_AUDIOS: process.env.USE_EFFECT_AUDIOS !== 'false',
+	USE_EFFECT_FOLDERS: process.env.USE_EFFECT_FOLDERS === 'true',
 } as const;
 ```
 
@@ -737,9 +739,9 @@ For large lists (1000+ items), use `@tanstack/react-virtual`:
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 const virtualizer = useVirtualizer({
-  count: items.length,
-  getScrollElement: () => parentRef.current,
-  estimateSize: () => 200,
+	count: items.length,
+	getScrollElement: () => parentRef.current,
+	estimateSize: () => 200,
 });
 ```
 
@@ -758,9 +760,7 @@ const LazyComponent = React.lazy(() => import('./HeavyComponent'));
 Routes are automatically split by Vite. For manual splits:
 
 ```typescript
-const AsyncComponent = lazy(() =>
-  import('./AsyncComponent').then(m => ({ default: m.AsyncComponent }))
-);
+const AsyncComponent = lazy(() => import('./AsyncComponent').then((m) => ({ default: m.AsyncComponent })));
 ```
 
 ---
@@ -776,70 +776,67 @@ The project is migrating to Effect-TS for functional error handling and composit
 ```typescript
 // 1. Define errors with Data.TaggedError
 export class VideoNotFound extends Data.TaggedError('VideoNotFound')<{
-  readonly id: string;
+	readonly id: string;
 }> {}
 
 // 2. Define service interface
 export interface VideoServiceInterface {
-  readonly getById: (id: string) => Effect.Effect<VideoWithStats, VideoError>;
-  readonly getAll: (options?: GetOptions) => Effect.Effect<VideoListResult, VideoError>;
-  readonly create: (input: CreateVideoInput) => Effect.Effect<Video, VideoError>;
-  readonly update: (id: string, input: UpdateVideoInput) => Effect.Effect<Video, VideoError>;
-  readonly delete: (id: string) => Effect.Effect<void, VideoError>;
+	readonly getById: (id: string) => Effect.Effect<VideoWithStats, VideoError>;
+	readonly getAll: (options?: GetOptions) => Effect.Effect<VideoListResult, VideoError>;
+	readonly create: (input: CreateVideoInput) => Effect.Effect<Video, VideoError>;
+	readonly update: (id: string, input: UpdateVideoInput) => Effect.Effect<Video, VideoError>;
+	readonly delete: (id: string) => Effect.Effect<void, VideoError>;
 }
 
 // 3. Create Context.Tag for dependency injection
-export class VideoService extends Context.Tag('VideoService')<
-  VideoService,
-  VideoServiceInterface
->() {}
+export class VideoService extends Context.Tag('VideoService')<VideoService, VideoServiceInterface>() {}
 
 // 4. Implement the service
 export const make = (): VideoServiceInterface => {
-  const getById = (id: string): Effect.Effect<VideoWithStats, VideoError> =>
-    Effect.gen(function* () {
-      // Access dependencies
-      const db = yield* DrizzleService;
+	const getById = (id: string): Effect.Effect<VideoWithStats, VideoError> =>
+		Effect.gen(function* () {
+			// Access dependencies
+			const db = yield* DrizzleService;
 
-      // Query database
-      const [video] = yield* Effect.tryPromise({
-        try: () => db.select().from(videos).where(eq(videos.id, id)).limit(1),
-        catch: (error) => new DatabaseError({ message: String(error), cause: error })
-      });
+			// Query database
+			const [video] = yield* Effect.tryPromise({
+				try: () => db.select().from(videos).where(eq(videos.id, id)).limit(1),
+				catch: (error) => new DatabaseError({ message: String(error), cause: error }),
+			});
 
-      if (!video) {
-        return yield* Effect.fail(new VideoNotFound({ id }));
-      }
+			if (!video) {
+				return yield* Effect.fail(new VideoNotFound({ id }));
+			}
 
-      // Transform result
-      return yield* Effect.succeed(fromDrizzleVideoWithCounts(video));
-    });
+			// Transform result
+			return yield* Effect.succeed(fromDrizzleVideoWithCounts(video));
+		});
 
-  const getAll = (options?: GetOptions): Effect.Effect<VideoListResult, VideoError> =>
-    Effect.gen(function* () {
-      const db = yield* DrizzleService;
+	const getAll = (options?: GetOptions): Effect.Effect<VideoListResult, VideoError> =>
+		Effect.gen(function* () {
+			const db = yield* DrizzleService;
 
-      // Build query
-      let query = db.select().from(videos);
-      if (options?.search) {
-        query = query.where(like(videos.name, `%${options.search}%`));
-      }
-      if (options?.limit) {
-        query = query.limit(options.limit);
-      }
-      if (options?.offset) {
-        query = query.offset(options.offset);
-      }
+			// Build query
+			let query = db.select().from(videos);
+			if (options?.search) {
+				query = query.where(like(videos.name, `%${options.search}%`));
+			}
+			if (options?.limit) {
+				query = query.limit(options.limit);
+			}
+			if (options?.offset) {
+				query = query.offset(options.offset);
+			}
 
-      const results = yield* Effect.tryPromise({
-        try: () => query,
-        catch: (error) => new DatabaseError({ message: String(error), cause: error })
-      });
+			const results = yield* Effect.tryPromise({
+				try: () => query,
+				catch: (error) => new DatabaseError({ message: String(error), cause: error }),
+			});
 
-      return { videos: results, total: results.length };
-    });
+			return { videos: results, total: results.length };
+		});
 
-  return { getById, getAll, /* ... */ };
+	return { getById, getAll /* ... */ };
 };
 
 // 5. Create Layer
@@ -857,37 +854,37 @@ import { VideoService, VideoServiceLive } from '@/services/video/video.service.e
 const router = express.Router();
 
 router.get('/:id', async (req, res) => {
-  const { id } = req.params;
+	const { id } = req.params;
 
-  const effect = Effect.gen(function* () {
-    // Inject service
-    const videoService = yield* VideoService;
+	const effect = Effect.gen(function* () {
+		// Inject service
+		const videoService = yield* VideoService;
 
-    // Call service method
-    const video = yield* videoService.getById(id);
+		// Call service method
+		const video = yield* videoService.getById(id);
 
-    return res.json(video);
-  }).pipe(Effect.provide(VideoServiceLive));
+		return res.json(video);
+	}).pipe(Effect.provide(VideoServiceLive));
 
-  await runEffectForExpress(effect, res);
+	await runEffectForExpress(effect, res);
 });
 
 router.post('/', async (req, res) => {
-  const effect = Effect.gen(function* () {
-    const videoService = yield* VideoService;
+	const effect = Effect.gen(function* () {
+		const videoService = yield* VideoService;
 
-    // Validate input
-    const input = yield* Effect.tryPromise({
-      try: () => createVideoSchema.parseAsync(req.body),
-      catch: (error) => new ValidationError({ message: 'Invalid input', cause: error })
-    });
+		// Validate input
+		const input = yield* Effect.tryPromise({
+			try: () => createVideoSchema.parseAsync(req.body),
+			catch: (error) => new ValidationError({ message: 'Invalid input', cause: error }),
+		});
 
-    const video = yield* videoService.create(input);
+		const video = yield* videoService.create(input);
 
-    return res.status(201).json(video);
-  }).pipe(Effect.provide(VideoServiceLive));
+		return res.status(201).json(video);
+	}).pipe(Effect.provide(VideoServiceLive));
 
-  await runEffectForExpress(effect, res);
+	await runEffectForExpress(effect, res);
 });
 
 export default router;
@@ -904,22 +901,19 @@ The `runEffectForExpress` adapter handles:
 
 ```typescript
 // src/lib/effect/adapters/express.adapter.ts
-export async function runEffectForExpress<R>(
-  effect: Effect.Effect<R, unknown>,
-  res: express.Response
-): Promise<void> {
-  const result = await Effect.runPromise(effect);
+export async function runEffectForExpress<R>(effect: Effect.Effect<R, unknown>, res: express.Response): Promise<void> {
+	const result = await Effect.runPromise(effect);
 
-  if (result._tag === 'Left') {
-    // Error case
-    const httpError = errorToHttpStatus(result.left);
-    res.status(httpError.status).json({
-      error: httpError.message,
-      ...(process.env.NODE_ENV === 'development' && { details: httpError.details })
-    });
-  } else {
-    // Success case - result is already sent via res.json()
-  }
+	if (result._tag === 'Left') {
+		// Error case
+		const httpError = errorToHttpStatus(result.left);
+		res.status(httpError.status).json({
+			error: httpError.message,
+			...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
+		});
+	} else {
+		// Success case - result is already sent via res.json()
+	}
 }
 ```
 
@@ -929,19 +923,21 @@ export async function runEffectForExpress<R>(
 
 ```typescript
 const effect = Effect.gen(function* () {
-  const a = yield* Effect.succeed(1);
-  const b = yield* Effect.succeed(2);
-  return a + b; // 3
+	const a = yield* Effect.succeed(1);
+	const b = yield* Effect.succeed(2);
+	return a + b; // 3
 });
 ```
 
 **Effect.tryPromise**: Convert promises to Effects
 
 ```typescript
-const result = yield* Effect.tryPromise({
-  try: () => fs.readFile(path),
-  catch: (error) => new FileReadError({ path, error })
-});
+const result =
+	yield *
+	Effect.tryPromise({
+		try: () => fs.readFile(path),
+		catch: (error) => new FileReadError({ path, error }),
+	});
 ```
 
 **Context.Tag**: Dependency injection
@@ -951,7 +947,7 @@ const result = yield* Effect.tryPromise({
 export class Database extends Context.Tag('Database')<Database, DB>() {}
 
 // Use in service
-const db = yield* Database;
+const db = yield * Database;
 
 // Provide in Layer
 export const DatabaseLive = Layer.effect(Database, makeDb());
@@ -960,10 +956,7 @@ export const DatabaseLive = Layer.effect(Database, makeDb());
 **Layers**: Compose dependencies
 
 ```typescript
-const MainLive = Layer.provide(
-  VideoServiceLive,
-  DatabaseLive.pipe(Layer.provide(LoggerService))
-);
+const MainLive = Layer.provide(VideoServiceLive, DatabaseLive.pipe(Layer.provide(LoggerService)));
 ```
 
 ---
@@ -984,11 +977,11 @@ The project has a comprehensive batch operations system for handling multiple fi
 ```typescript
 // EventEmitter-based pattern for browser compatibility
 class EventEmitter {
-  private readonly events = new Map<string, Set<BatchListener<any>>>();
+	private readonly events = new Map<string, Set<BatchListener<any>>>();
 
-  on<TEvent extends BatchEvents['type']>(event, listener): this;
-  emit<TEvent>(event, payload): boolean;
-  removeListener(event, listener): this;
+	on<TEvent extends BatchEvents['type']>(event, listener): this;
+	emit<TEvent>(event, payload): boolean;
+	removeListener(event, listener): this;
 }
 
 // Batch operation types
@@ -996,15 +989,15 @@ type BatchOperationType = 'copy' | 'move' | 'delete' | 'reindex' | 'tag';
 type BatchOperationStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
 
 interface BatchOperation {
-  id: string;
-  type: BatchOperationType;
-  items: AnyEntityWithStats[];
-  status: BatchOperationStatus;
-  progress: number;
-  total: number;
-  startedAt: Date;
-  completedAt?: Date;
-  error?: string;
+	id: string;
+	type: BatchOperationType;
+	items: AnyEntityWithStats[];
+	status: BatchOperationStatus;
+	progress: number;
+	total: number;
+	startedAt: Date;
+	completedAt?: Date;
+	error?: string;
 }
 ```
 
@@ -1013,14 +1006,14 @@ interface BatchOperation {
 ```typescript
 // 1. Start operation
 const operationId = batchFileOperationsService.startOperation({
-  type: 'move',
-  items: selectedEntities,
-  destination: folderId
+	type: 'move',
+	items: selectedEntities,
+	destination: folderId,
 });
 
 // 2. Listen for progress updates
 batchFileOperationsService.on('operationProgress', (operation) => {
-  console.log(`${operation.progress}/${operation.total} completed`);
+	console.log(`${operation.progress}/${operation.total} completed`);
 });
 
 // 3. Pause/Resume/Cancel
@@ -1048,9 +1041,9 @@ Long-running operations use a centralized progress tracking system:
 import { progressTrackingService } from '@/services/progress/progress-tracking.service';
 
 const tracker = progressTrackingService.createTracker({
-  operationId: 'reindex-folder-123',
-  total: 1000,
-  label: 'Reindexing folder'
+	operationId: 'reindex-folder-123',
+	total: 1000,
+	label: 'Reindexing folder',
 });
 
 // Update progress
@@ -1071,18 +1064,18 @@ For real-time progress updates from backend to frontend:
 
 ```typescript
 router.get('/events', (req, res) => {
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
+	res.setHeader('Content-Type', 'text/event-stream');
+	res.setHeader('Cache-Control', 'no-cache');
+	res.setHeader('Connection', 'keep-alive');
 
-  // Send events
-  const sendEvent = (data) => {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
+	// Send events
+	const sendEvent = (data) => {
+		res.write(`data: ${JSON.stringify(data)}\n\n`);
+	};
 
-  progressTrackingService.on('progress', (data) => {
-    sendEvent({ type: 'progress', data });
-  });
+	progressTrackingService.on('progress', (data) => {
+		sendEvent({ type: 'progress', data });
+	});
 });
 ```
 
@@ -1092,8 +1085,8 @@ router.get('/events', (req, res) => {
 const eventSource = new EventSource('/api/operations/events');
 
 eventSource.addEventListener('progress', (event) => {
-  const data = JSON.parse(event.data);
-  console.log('Progress update:', data);
+	const data = JSON.parse(event.data);
+	console.log('Progress update:', data);
 });
 ```
 
@@ -1251,14 +1244,14 @@ Stage 3: Thumbnail Generation
 
 **Supported File Types**:
 
-| Extension | Entity Type | Processor |
-|-----------|--------------|------------|
-| .jpg, .jpeg, .png, .gif, .webp | Image | ImageProcessor |
-| .mp4, .mov, .avi, .mkv | Video | VideoProcessor |
-| .mp3, .wav, .flac, .ogg | Audio | AudioProcessor |
-| .pdf, .doc, .docx, .txt | Document | DocumentProcessor |
-| .json | JSON File | JsonProcessor |
-| .glb, .gltf, .obj | 3D File | File3DProcessor |
+| Extension                      | Entity Type | Processor         |
+| ------------------------------ | ----------- | ----------------- |
+| .jpg, .jpeg, .png, .gif, .webp | Image       | ImageProcessor    |
+| .mp4, .mov, .avi, .mkv         | Video       | VideoProcessor    |
+| .mp3, .wav, .flac, .ogg        | Audio       | AudioProcessor    |
+| .pdf, .doc, .docx, .txt        | Document    | DocumentProcessor |
+| .json                          | JSON File   | JsonProcessor     |
+| .glb, .gltf, .obj              | 3D File     | File3DProcessor   |
 
 **Usage**:
 
@@ -1272,10 +1265,7 @@ const result = await mapper.createEntityFromFile('/path/to/file.jpg', 'folder-id
 // Returns: { success: true, entityType: 'image', entityId: 'uuid' }
 
 // Process multiple files
-const stats = await mapper.processFiles([
-  '/path/to/image1.jpg',
-  '/path/to/video.mp4'
-], 'folder-id');
+const stats = await mapper.processFiles(['/path/to/image1.jpg', '/path/to/video.mp4'], 'folder-id');
 // Returns: { totalFiles: 2, successful: 2, failed: 0, ... }
 ```
 
@@ -1300,29 +1290,29 @@ The undo/redo system allows users to revert file operations like copy, move, del
 
 ```typescript
 export interface UndoableAction {
-  id: string;
-  type: UndoActionType;
-  timestamp: number;
-  description: string;
-  execute: () => Promise<void>;
-  undo: () => Promise<void>;
-  canUndo: () => boolean;
-  originalData?: any;
-  targetData?: any;
+	id: string;
+	type: UndoActionType;
+	timestamp: number;
+	description: string;
+	execute: () => Promise<void>;
+	undo: () => Promise<void>;
+	canUndo: () => boolean;
+	originalData?: any;
+	targetData?: any;
 }
 
 export type UndoActionType =
-  | 'copy'
-  | 'move'
-  | 'delete'
-  | 'rename'
-  | 'create-folder'
-  | 'paste'
-  | 'duplicate'
-  | 'add-to-collection'
-  | 'remove-from-collection'
-  | 'add-tag'
-  | 'remove-tag';
+	| 'copy'
+	| 'move'
+	| 'delete'
+	| 'rename'
+	| 'create-folder'
+	| 'paste'
+	| 'duplicate'
+	| 'add-to-collection'
+	| 'remove-from-collection'
+	| 'add-tag'
+	| 'remove-tag';
 ```
 
 **Usage**:
@@ -1342,8 +1332,8 @@ await undoRedoManager.redo();
 
 // Listen to state changes
 undoRedoManager.on('stateChanged', (state) => {
-  console.log('Can undo:', state.canUndo);
-  console.log('Can redo:', state.canRedo);
+	console.log('Can undo:', state.canUndo);
+	console.log('Can redo:', state.canRedo);
 });
 ```
 
@@ -1367,24 +1357,24 @@ Tauri wraps the web application as a desktop app with native Rust capabilities.
 
 ```json
 {
-  "productName": "Image Manager",
-  "version": "0.1.0",
-  "identifier": "com.imagemanager.app",
-  "build": {
-    "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "bun run dev:vite",
-    "beforeBuildCommand": "bun run build:vite"
-  },
-  "bundle": {
-    "active": true,
-    "targets": "all",
-    "resources": {
-      "../dist/server/index.js": "server/index.js",
-      "../dist/server/wrapper.js": "server/wrapper.js",
-      "../dist/server/db.sqlite": "server/db.sqlite"
-    }
-  }
+	"productName": "Image Manager",
+	"version": "0.1.0",
+	"identifier": "com.imagemanager.app",
+	"build": {
+		"frontendDist": "../dist",
+		"devUrl": "http://localhost:5173",
+		"beforeDevCommand": "bun run dev:vite",
+		"beforeBuildCommand": "bun run build:vite"
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"resources": {
+			"../dist/server/index.js": "server/index.js",
+			"../dist/server/wrapper.js": "server/wrapper.js",
+			"../dist/server/db.sqlite": "server/db.sqlite"
+		}
+	}
 }
 ```
 
@@ -1445,10 +1435,10 @@ All 20 entity views use a unified TCG (Trading Card Game) card pattern.
 
 ```typescript
 interface EntityCardProps {
-  entity: AnyEntityWithStats;
-  onClick: (entity: AnyEntityWithStats) => void;
-  onContextMenu?: (event, entity) => void;
-  isSelected?: boolean;
+	entity: AnyEntityWithStats;
+	onClick: (entity: AnyEntityWithStats) => void;
+	onContextMenu?: (event, entity) => void;
+	isSelected?: boolean;
 }
 ```
 

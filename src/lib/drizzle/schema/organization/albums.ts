@@ -29,7 +29,9 @@ export const albums = sqliteTable(
 		metadata: text('metadata'),
 		lastImageAddedAt: integer('lastImageAddedAt', { mode: 'timestamp_ms' }),
 		lastVideoAddedAt: integer('lastVideoAddedAt', { mode: 'timestamp_ms' }),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

@@ -21,11 +21,7 @@
 }
 
 .fb-entity-badge {
-	color: color-mix(
-		in oklch,
-		var(--fb-entity-color) 65%,
-		hsl(var(--foreground))
-	);
+	color: color-mix(in oklch, var(--fb-entity-color) 65%, hsl(var(--foreground)));
 	background: color-mix(in oklch, var(--fb-entity-color) 18%, transparent);
 	border: 1px solid color-mix(in oklch, var(--fb-entity-color) 35%, transparent);
 }

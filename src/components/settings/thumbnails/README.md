@@ -84,12 +84,12 @@ const { settings, updateSettings } = useSettings();
 import { ThumbnailsSettings } from '@/components/settings/thumbnails/thumbnails-settings';
 
 export default function ThumbnailsPage() {
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-xl font-bold mb-4">Configuración de Miniaturas</h1>
-      <ThumbnailsSettings />
-    </div>
-  );
+	return (
+		<div className="container mx-auto p-4">
+			<h1 className="text-xl font-bold mb-4">Configuración de Miniaturas</h1>
+			<ThumbnailsSettings />
+		</div>
+	);
 }
 ```
 
@@ -106,10 +106,7 @@ El componente implementa varias acciones para gestionar las miniaturas:
 ```typescript
 // Ejemplo de acción para optimizar miniaturas
 const handleOptimizeThumbnails = () =>
-  handleThumbnailProcess(
-    (callbacks) => thumbnailActions.optimizeThumbnails(callbacks),
-    'Optimización'
-  );
+	handleThumbnailProcess((callbacks) => thumbnailActions.optimizeThumbnails(callbacks), 'Optimización');
 ```
 
 ## Notas de Implementación

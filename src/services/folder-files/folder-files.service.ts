@@ -403,10 +403,13 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		}
 
 		// Construir query final
-		const combinedQuery = unionQueries.reduce((acc, q, i) => {
-			if (i === 0) return q;
-			return sql`${acc} UNION ALL ${q}`;
-		}, sql``);
+		const combinedQuery = unionQueries.reduce(
+			(acc, q, i) => {
+				if (i === 0) return q;
+				return sql`${acc} UNION ALL ${q}`;
+			},
+			sql``
+		);
 
 		// Mapeo de columnas de ordenamiento
 		const sortColumn =

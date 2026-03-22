@@ -11,12 +11,7 @@ export {
 	formatVideoSize,
 	getVideoFormatDescription,
 } from './format-helpers';
-export {
-	extractVideoTagSuggestions,
-	getVideoQualityLabel,
-	hasCompleteMetadata,
-	isHDVideo,
-} from './metadata-helpers';
+export { extractVideoTagSuggestions, getVideoQualityLabel, hasCompleteMetadata, isHDVideo } from './metadata-helpers';
 export {
 	generateAnimatedVideoThumbnail,
 	generateStaticVideoThumbnail,

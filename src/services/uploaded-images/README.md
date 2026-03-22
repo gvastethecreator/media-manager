@@ -18,11 +18,11 @@ import { uploadedImagesService } from '@/services/uploaded-images';
 
 // Crear una nueva imagen subida
 const result = await uploadedImagesService.createUploadedImage({
-  name: 'mi-imagen.jpg',
-  path: '/uploads/mi-imagen.jpg',
-  type: 'thumbnail',
-  category: 'user',
-  // ...más parámetros
+	name: 'mi-imagen.jpg',
+	path: '/uploads/mi-imagen.jpg',
+	type: 'thumbnail',
+	category: 'user',
+	// ...más parámetros
 });
 ```
 

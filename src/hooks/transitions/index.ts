@@ -17,10 +17,7 @@ export type {
 // Hooks Enter/Exit
 export { useEnterExit, useEnterExitGroup } from './use-enter-exit';
 // Hooks de tarjetas de entidades
-export {
-	useEntityCardGroupTransition,
-	useEntityCardTransition,
-} from './use-entity-card-transition';
+export { useEntityCardGroupTransition, useEntityCardTransition } from './use-entity-card-transition';
 // Hooks FLIP
 export { useFlip, useFlipGroup } from './use-flip';
 // Hooks Morphing

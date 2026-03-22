@@ -6,12 +6,7 @@
  */
 
 // --- Transformadores principales ---
-export {
-	getFavoritesSummary,
-	groupFavoritesByType,
-	toFavoriteWithStats,
-	toFavoriteWithStatsList,
-} from './mappers';
+export { getFavoritesSummary, groupFavoritesByType, toFavoriteWithStats, toFavoriteWithStatsList } from './mappers';
 // --- Schema de Drizzle ---
 // TODO: Implementar schema cuando sea necesario
 // --- Serializadores ---

@@ -41,38 +41,38 @@ El componente PromptCard consume el siguiente modelo de datos:
 
 ```typescript
 interface PromptCardData {
-  id: string;
-  name: string;
-  emoji?: string | null;
-  color?: string | null;
-  description?: string | null;
-  purpose?: string | null;
-  content?: string | null;
-  category?: string | null;
-  parsedParameters?: Record<string, any>;
-  parsedTags?: string[];
-  parameters?: string | null;
-  isFavorite?: boolean;
-  model?: string | null;
-  featuredImage?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  recentImages?: { id: string; thumbnailUrl: string }[];
-  _count?: {
-    images?: number;
-    videos?: number;
-    albums?: number;
-    collections?: number;
-    tags?: number;
-    concepts?: number;
-    notes?: number;
-    characters?: number;
-    places?: number;
-    worldItems?: number;
-    properties?: number;
-    wildcards?: number;
-    groups?: number;
-  };
+	id: string;
+	name: string;
+	emoji?: string | null;
+	color?: string | null;
+	description?: string | null;
+	purpose?: string | null;
+	content?: string | null;
+	category?: string | null;
+	parsedParameters?: Record<string, any>;
+	parsedTags?: string[];
+	parameters?: string | null;
+	isFavorite?: boolean;
+	model?: string | null;
+	featuredImage?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	recentImages?: { id: string; thumbnailUrl: string }[];
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		concepts?: number;
+		notes?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		properties?: number;
+		wildcards?: number;
+		groups?: number;
+	};
 }
 ```
 
@@ -88,10 +88,10 @@ import { getPromptById } from '@/components/cards/prompt-card/prompt-server-acti
 const prompt = await getPromptById('prompt-id');
 
 return (
-  <div>
-    <h2>Ejemplo de Prompt</h2>
-    {prompt && <PromptCard prompt={prompt} />}
-  </div>
+	<div>
+		<h2>Ejemplo de Prompt</h2>
+		{prompt && <PromptCard prompt={prompt} />}
+	</div>
 );
 ```
 
@@ -104,11 +104,7 @@ return (
 ### Con Manejador de Clic
 
 ```tsx
-<PromptCard
-  prompt={prompt}
-  onClick={() => handleSelectPrompt(prompt.id)}
-  isSelected={selectedPromptId === prompt.id}
-/>
+<PromptCard prompt={prompt} onClick={() => handleSelectPrompt(prompt.id)} isSelected={selectedPromptId === prompt.id} />
 ```
 
 ### Sin Efectos TCG
@@ -119,13 +115,13 @@ return (
 
 ## Propiedades
 
-| Propiedad   | Tipo                 | Descripción                                  |
-|-------------|----------------------|----------------------------------------------|
-| prompt      | PromptCardData       | Datos del prompt a mostrar                   |
-| tcgMode     | boolean              | Habilita efectos visuales de carta TCG       |
-| compact     | boolean              | Mostrar en modo compacto (menos información) |
-| disabled    | boolean              | Deshabilitar interacciones                   |
-| onClick     | () => void           | Función al hacer clic                        |
-| isSelected  | boolean              | Indica si la tarjeta está seleccionada       |
-| className   | string               | Clases CSS adicionales                       |
-| style       | React.CSSProperties  | Estilos CSS adicionales                      |
+| Propiedad  | Tipo                | Descripción                                  |
+| ---------- | ------------------- | -------------------------------------------- |
+| prompt     | PromptCardData      | Datos del prompt a mostrar                   |
+| tcgMode    | boolean             | Habilita efectos visuales de carta TCG       |
+| compact    | boolean             | Mostrar en modo compacto (menos información) |
+| disabled   | boolean             | Deshabilitar interacciones                   |
+| onClick    | () => void          | Función al hacer clic                        |
+| isSelected | boolean             | Indica si la tarjeta está seleccionada       |
+| className  | string              | Clases CSS adicionales                       |
+| style      | React.CSSProperties | Estilos CSS adicionales                      |

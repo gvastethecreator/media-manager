@@ -45,7 +45,10 @@ export async function withTransaction<T>(
 export async function testDatabaseConnection(): Promise<boolean> {
 	try {
 		// Ejecutar una consulta simple para verificar la conexión
-		await db.select({ one: sql`1` }).from(folders).limit(1);
+		await db
+			.select({ one: sql`1` })
+			.from(folders)
+			.limit(1);
 		return true;
 	} catch (error) {
 		console.error('❌ Error al conectar con la base de datos:', error);

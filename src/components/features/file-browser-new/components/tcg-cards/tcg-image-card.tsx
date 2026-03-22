@@ -14,8 +14,10 @@ import { TCGCardBase, type TCGCardBaseProps } from './tcg-card-base';
 // TIPOS
 // ============================================================================
 
-export interface TCGImageCardProps
-	extends Omit<TCGCardBaseProps, 'thumbnailContent' | 'footerContent' | 'accentColor'> {
+export interface TCGImageCardProps extends Omit<
+	TCGCardBaseProps,
+	'thumbnailContent' | 'footerContent' | 'accentColor'
+> {
 	item: ImageBrowserItem;
 	/** Mostrar metadatos EXIF */
 	showExif?: boolean;

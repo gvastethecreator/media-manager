@@ -41,8 +41,7 @@
 
 	/* Contenedor stacking */
 	isolation: isolate;
-	transform: perspective(1000px) rotateX(var(--rotate-x, 0deg))
-		rotateY(var(--rotate-y, 0deg));
+	transform: perspective(1000px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg));
 
 	/* 3D perspective */
 	transform-style: preserve-3d;
@@ -57,8 +56,8 @@
 	box-shadow:
 		0 8px 16px -4px oklch(0 0 0 / 0.25),
 		0 12px 24px -6px var(--shadow-color);
-	transform: perspective(1000px) rotateX(var(--rotate-x, 0deg))
-		rotateY(var(--rotate-y, 0deg)) translateY(-4px) scale(1.02);
+	transform: perspective(1000px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) translateY(-4px)
+		scale(1.02);
 }
 
 .tcg-card:focus-visible {
@@ -152,11 +151,7 @@
 	padding: 3px;
 	background: linear-gradient(
 		145deg,
-		color-mix(
-			in oklch,
-			var(--accent-color) 100%,
-			var(--primary-foreground) 40%
-		),
+		color-mix(in oklch, var(--accent-color) 100%, var(--primary-foreground) 40%),
 		var(--accent-color),
 		color-mix(in oklch, var(--accent-color) 100%, var(--dt-neutral-900) 20%)
 	);
@@ -196,20 +191,12 @@
 	overflow: hidden;
 
 	/* Fondo interno */
-	background: linear-gradient(
-		180deg,
-		var(--card) 0%,
-		color-mix(in oklch, var(--card) 98%, var(--muted)) 100%
-	);
+	background: linear-gradient(180deg, var(--card) 0%, color-mix(in oklch, var(--card) 98%, var(--muted)) 100%);
 	border-radius: 10px;
 }
 
 .tcg-card:hover .tcg-card__inner {
-	background: linear-gradient(
-		180deg,
-		var(--card) 0%,
-		color-mix(in oklch, var(--card) 92%, var(--accent-color)) 100%
-	);
+	background: linear-gradient(180deg, var(--card) 0%, color-mix(in oklch, var(--card) 92%, var(--accent-color)) 100%);
 }
 
 /* ============================================================================
@@ -234,7 +221,7 @@
 	position: absolute;
 	inset: -10%;
 	z-index: 0;
-	content: "";
+	content: '';
 	background-image: var(--thumb-url);
 	background-position: center;
 	background-size: cover;
@@ -247,7 +234,7 @@
 	position: absolute;
 	inset: 0;
 	z-index: 1;
-	content: "";
+	content: '';
 	background: linear-gradient(
 		180deg,
 		color-mix(in oklch, var(--card) 10%, transparent) 0%,
@@ -312,13 +299,8 @@
 	padding: 8px 10px;
 
 	/* Fondo con gradiente sutil */
-	background: linear-gradient(
-		180deg,
-		color-mix(in oklch, var(--card) 90%, var(--accent-color)) 0%,
-		var(--card) 100%
-	);
-	border-top: 1px solid
-		color-mix(in oklch, var(--accent-color) 30%, transparent);
+	background: linear-gradient(180deg, color-mix(in oklch, var(--card) 90%, var(--accent-color)) 0%, var(--card) 100%);
+	border-top: 1px solid color-mix(in oklch, var(--accent-color) 30%, transparent);
 }
 
 /* Relaciones (tags, álbumes, colecciones) */
@@ -347,11 +329,7 @@
 	z-index: 0;
 	pointer-events: none;
 
-	background: radial-gradient(
-		ellipse at center,
-		var(--accent-color) 0%,
-		transparent 70%
-	);
+	background: radial-gradient(ellipse at center, var(--accent-color) 0%, transparent 70%);
 	border-radius: 16px;
 	opacity: 0.4;
 	animation: tcg-glow-pulse 2s ease-in-out infinite;
@@ -459,8 +437,7 @@
 	min-height: 0;
 	padding: 8px 12px;
 	border-top: none;
-	border-left: 1px solid
-		color-mix(in oklch, var(--accent-color) 30%, transparent);
+	border-left: 1px solid color-mix(in oklch, var(--accent-color) 30%, transparent);
 }
 
 /* ============================================================================
@@ -491,11 +468,7 @@
 	font-size: 12px;
 	color: var(--primary-foreground);
 
-	background: color-mix(
-		in oklch,
-		var(--accent-color) 90%,
-		var(--dt-neutral-900) 20%
-	);
+	background: color-mix(in oklch, var(--accent-color) 90%, var(--dt-neutral-900) 20%);
 	border-radius: 6px;
 	box-shadow: 0 2px 4px oklch(0 0 0 / 0.3);
 }

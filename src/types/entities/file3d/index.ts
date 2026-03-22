@@ -6,12 +6,6 @@
  *   El tipo canónico para usar en la aplicación es **`File3DWithStats`**.
  */
 
-export type {
-	File3DBase,
-	File3DCreateInput,
-	File3DStatistics,
-	File3DUpdateInput,
-	File3DWithStats,
-} from './base';
+export type { File3DBase, File3DCreateInput, File3DStatistics, File3DUpdateInput, File3DWithStats } from './base';
 
 // export * from './file3d.schema'; // Descomentar cuando se creen los esquemas Zod

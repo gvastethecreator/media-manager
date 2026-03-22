@@ -30,17 +30,17 @@ const buttonVariants = cva(
 		variants: {
 			variant: {
 				default:
-					'border-2 border-primary/20 bg-linear-to-b from-primary to-primary/90 text-primary-foreground shadow-dt-2 hover:from-primary/95 hover:to-primary/85 hover:shadow-dt-3 active:translate-y-px active:shadow-dt-1',
+					'border-2 border-primary/20 bg-linear-to-b from-primary to-primary/90 text-primary-foreground shadow-dt-2 hover:from-primary/95 hover:to-primary/85 hover:shadow-dt-3 active:scale-[0.98] active:shadow-dt-1',
 				primary:
-					'border-2 border-primary/20 bg-linear-to-b from-primary to-primary/90 text-primary-foreground shadow-dt-2 hover:from-primary/95 hover:to-primary/85 hover:shadow-dt-3 active:translate-y-px active:shadow-dt-1',
+					'border-2 border-primary/20 bg-linear-to-b from-primary to-primary/90 text-primary-foreground shadow-dt-2 hover:from-primary/95 hover:to-primary/85 hover:shadow-dt-3 active:scale-[0.98] active:shadow-dt-1',
 				destructive:
-					'border-2 border-destructive/20 bg-linear-to-b from-destructive to-destructive/90 text-destructive-foreground shadow-dt-2 hover:from-destructive/95 hover:to-destructive/85 hover:shadow-dt-3 active:translate-y-px active:shadow-dt-1',
+					'border-2 border-destructive/20 bg-linear-to-b from-destructive to-destructive/90 text-destructive-foreground shadow-dt-2 hover:from-destructive/95 hover:to-destructive/85 hover:shadow-dt-3 active:scale-[0.98] active:shadow-dt-1',
 				outline:
-					'border-2 border-input bg-background shadow-dt-1 hover:border-accent hover:bg-accent hover:text-accent-foreground hover:shadow-dt-2 active:translate-y-px active:shadow-dt-0',
+					'border-2 border-input bg-background shadow-dt-1 hover:border-accent hover:bg-accent hover:text-accent-foreground hover:shadow-dt-2 active:scale-[0.98] active:shadow-dt-0',
 				secondary:
-					'border-2 border-secondary/30 bg-linear-to-b from-secondary to-secondary/90 text-secondary-foreground shadow-dt-1 hover:from-secondary/95 hover:to-secondary/80 hover:shadow-dt-2 active:translate-y-px active:shadow-dt-0',
-				dim: 'border-2 border-transparent bg-muted/40 text-muted-foreground shadow-dt-0 hover:bg-muted/60 hover:text-foreground hover:shadow-dt-1 active:translate-y-px active:bg-muted/70',
-				ghost: 'hover:bg-accent hover:text-accent-foreground hover:shadow-dt-1 active:bg-accent/80',
+					'border-2 border-secondary/30 bg-linear-to-b from-secondary to-secondary/90 text-secondary-foreground shadow-dt-1 hover:from-secondary/95 hover:to-secondary/80 hover:shadow-dt-2 active:scale-[0.98] active:shadow-dt-0',
+				dim: 'border-2 border-transparent bg-muted/40 text-muted-foreground shadow-dt-0 hover:bg-muted/60 hover:text-foreground hover:shadow-dt-1 active:scale-[0.98] active:bg-muted/70',
+				ghost: 'hover:bg-accent hover:text-accent-foreground hover:shadow-dt-1 active:scale-[0.98] active:bg-accent/80',
 				link: 'text-primary underline-offset-4 hover:underline',
 			},
 			size: {
@@ -67,8 +67,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-		VariantProps<typeof buttonVariants> {
+	extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
 	asChild?: boolean;
 	loading?: boolean;
 	/**

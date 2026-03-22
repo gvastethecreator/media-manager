@@ -1,5 +1,5 @@
 /* TCG Card Styles - Must be at the top before Tailwind */
-@import "../components/ui/tcg/tcg-card.css";
+@import '../components/ui/tcg/tcg-card.css';
 
 @tailwind base;
 @tailwind components;
@@ -59,8 +59,8 @@
 
 	body {
 		font-feature-settings:
-			"rlig" 1,
-			"calt" 1;
+			'rlig' 1,
+			'calt' 1;
 		color: hsl(var(--foreground));
 		background-color: hsl(var(--background));
 	}

@@ -26,12 +26,7 @@ export type {
 // --- Tipos Canónicos (NUEVO) ---
 export { TAG_COUNTS_RELATIONS } from './base';
 // --- Esquemas de Validación ---
-export {
-	RelatedTagSchema,
-	TagFiltersSchema,
-	TagImageRelationSchema,
-	TagSchema,
-} from './schema';
+export { RelatedTagSchema, TagFiltersSchema, TagImageRelationSchema, TagSchema } from './schema';
 // --- Tipos adicionales ---
 export type { TagPreview } from './types';
 // --- Enumeraciones ---

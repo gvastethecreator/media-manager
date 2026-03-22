@@ -67,7 +67,10 @@ export async function validateName(entityType: keyof typeof entityTableMap, name
 	}
 
 	// Verificar que no exista
-	const [result] = await db.select({ count: sql<number>`count(*)` }).from(table).where(sql`name = ${name}`);
+	const [result] = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(table)
+		.where(sql`name = ${name}`);
 
 	if (result.count > 0) {
 		throw new Error(`Ya existe ${entityType === 'property' ? 'una propiedad' : 'un elemento'} con este nombre`);

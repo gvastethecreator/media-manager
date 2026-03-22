@@ -23,18 +23,10 @@ export type {
 	ConceptWithStats,
 } from './base';
 // --- Enumeraciones ---
-export {
-	ConceptCategory,
-	ConceptSortOption,
-	ConceptStatus,
-	ConceptViewMode,
-} from './enums';
+export { ConceptCategory, ConceptSortOption, ConceptStatus, ConceptViewMode } from './enums';
 
 // Tipos adicionales desde types.ts
-export type {
-	ConceptCreateInput,
-	ConceptUpdateInput,
-} from './types';
+export type { ConceptCreateInput, ConceptUpdateInput } from './types';
 
 /**
  * Filtros para búsqueda de conceptos

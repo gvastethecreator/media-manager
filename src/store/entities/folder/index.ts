@@ -29,12 +29,7 @@ export const useFolderStore = create<CompleteFolderStore>()(
 // Exportar selectores
 export * from './selectors';
 // Exportar tipos para uso externo
-export type {
-	CompleteFolderStore,
-	FolderFiltersSlice,
-	FolderNavigationSlice,
-	FolderStore,
-} from './types';
+export type { CompleteFolderStore, FolderFiltersSlice, FolderNavigationSlice, FolderStore } from './types';
 
 // Exportar funciones auxiliares
 export const folderStoreHelpers = {

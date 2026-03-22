@@ -6,12 +6,7 @@
  * Legacy eliminado.
  */
 
-export {
-	ActivityCategory,
-	ActivityEventType,
-	ActivitySortCriteria,
-	ActivityType,
-} from './enums';
+export { ActivityCategory, ActivityEventType, ActivitySortCriteria, ActivityType } from './enums';
 export type {
 	Activity,
 	ActivityBase,

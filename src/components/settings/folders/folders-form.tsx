@@ -156,7 +156,7 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 				</div>
 			</div>
 
-			{/* Hidden submit button to allow Enter key submission without visual clutter if desired, 
+			{/* Hidden submit button to allow Enter key submission without visual clutter if desired,
                 OR we can add an explicit "Add" button if we want to follow the design 1:1 which doesn't seem to show one 
                 but usually one is needed. The reference image DOES NOT show an "Add" button, just "Re-index All". 
                 However, for UX we probably need a way to submit. 

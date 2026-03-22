@@ -20,39 +20,42 @@ graph TD
 ## 🎯 Patrón CharacterWithStats
 
 ### Características Principales:
+
 - **📊 Estadísticas Pre-calculadas**: Todos los conteos calculados una vez
 - **⚡ Consultas Optimizadas**: Solo conteos, sin relaciones completas
 - **🎮 Sistema RPG**: Power level y rareza automáticos
 - **🔄 Transformación Eficiente**: Conversión directa desde Drizzle
 
 ### Estructura del Tipo:
+
 ```typescript
 interface CharacterWithStats extends CharacterBase {
-  _count: {
-    images: number;
-    videos: number;
-    // ... todos los conteos
-  };
-  statistics: {
-    totalImages: number;
-    totalVideos: number;
-    totalAssociations: number;
-    powerLevel: number; // Calculado automáticamente
-    rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-    lastUpdated: Date;
-  };
+	_count: {
+		images: number;
+		videos: number;
+		// ... todos los conteos
+	};
+	statistics: {
+		totalImages: number;
+		totalVideos: number;
+		totalAssociations: number;
+		powerLevel: number; // Calculado automáticamente
+		rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+		lastUpdated: Date;
+	};
 }
 ```
 
 ## 🔧 Funciones Principales
 
 ### `fromDrizzleCharacter()`
+
 Transforma DrizzleCharacterWithCounts a CharacterWithStats con estadísticas optimizadas.
 
 ```typescript
 const character = await db.query.characters.findFirst({
-  where: eq(characters.id, id),
-  with: CHARACTER_SELECT_WITH_STATS
+	where: eq(characters.id, id),
+	with: CHARACTER_SELECT_WITH_STATS,
 });
 
 const transformed = fromDrizzleCharacter(character);
@@ -62,12 +65,16 @@ const transformed = fromDrizzleCharacter(character);
 ```
 
 ### `calculatePowerLevel()`
+
 Sistema de poder basado en nivel y asociaciones:
+
 - **Fórmula**: `(nivel × 10) + (asociaciones × 2) + bonificación_alto_nivel`
 - **Uso**: Determinar rareza y mostrar en UI
 
 ### `determineRarityLevel()`
+
 Sistema automático de rareza:
+
 - **Legendary**: Nivel ≥20 OR Power ≥500 OR Asociaciones ≥100
 - **Epic**: Nivel ≥15 OR Power ≥300 OR Asociaciones ≥50
 - **Rare**: Nivel ≥10 OR Power ≥200 OR Asociaciones ≥25
@@ -77,21 +84,25 @@ Sistema automático de rareza:
 ## 📈 Beneficios de Rendimiento
 
 ### Antes (CharacterComplete):
+
 ```typescript
 // ❌ Carga todas las relaciones
 const character = await db.query.characters.findFirst({
-  where: eq(characters.id, id),
-  with: { /* todas las relaciones */ }
+	where: eq(characters.id, id),
+	with: {
+		/* todas las relaciones */
+	},
 });
 // 🐌 Lento, consume mucha memoria
 ```
 
 ### Ahora (CharacterWithStats):
+
 ```typescript
 // ✅ Solo conteos optimizados
 const character = await db.query.characters.findFirst({
-  where: eq(characters.id, id),
-  with: CHARACTER_SELECT_WITH_STATS
+	where: eq(characters.id, id),
+	with: CHARACTER_SELECT_WITH_STATS,
 });
 const transformed = fromDrizzleCharacter(character);
 // ⚡ 60-80% más rápido
@@ -101,6 +112,7 @@ const transformed = fromDrizzleCharacter(character);
 ## 🎮 Integración RPG
 
 ### Campos Específicos:
+
 - `level`: Nivel del personaje (1-100)
 - `class`: Clase RPG (warrior, mage, rogue, etc.)
 - `race`: Raza del personaje
@@ -108,6 +120,7 @@ const transformed = fromDrizzleCharacter(character);
 - `stats`: Estadísticas JSON (strength, dexterity, etc.)
 
 ### Metadatos de Juego:
+
 - `psychologicalProfile`: Perfil psicológico
 - `socialProfile`: Perfil social
 - `abilities`: Habilidades especiales
@@ -116,6 +129,7 @@ const transformed = fromDrizzleCharacter(character);
 ## 💡 Ejemplos de Uso
 
 ### Obtener Personaje Optimizado:
+
 ```typescript
 import { getCharacter } from '@/app/actions/characters/character.actions';
 
@@ -126,19 +140,21 @@ const character = await getCharacter(id);
 ```
 
 ### Crear Personaje:
+
 ```typescript
 import { createCharacter } from '@/app/actions/characters/character.actions';
 
 const newCharacter = await createCharacter({
-  name: 'Ayla',
-  class: 'warrior',
-  level: 15,
-  // ... otros campos
+	name: 'Ayla',
+	class: 'warrior',
+	level: 15,
+	// ... otros campos
 });
 // ✅ Automáticamente calcula power level y rareza
 ```
 
 ### Usar en Componentes:
+
 ```typescript
 import { CharacterCard } from '@/components/cards/character-card';
 
@@ -153,11 +169,13 @@ import { CharacterCard } from '@/components/cards/character-card';
 ## 🔄 Migración desde Legacy
 
 ### Tipos Eliminados:
+
 - ❌ `CharacterExtended` → ✅ `CharacterWithStats`
 - ❌ `CharacterComplete` → ✅ Solo cuando necesario
 - ❌ `CharacterWithRelations` → ✅ `CharacterWithStats`
 
 ### Funciones Actualizadas:
+
 - ✅ `fromDrizzleCharacter()`: Retorna CharacterWithStats
 - ✅ `CHARACTER_SELECT_WITH_STATS`: Consulta optimizada para Drizzle
 - ✅ Store con estructura Record para acceso O(1)
@@ -165,6 +183,7 @@ import { CharacterCard } from '@/components/cards/character-card';
 ## 🏗️ Arquitectura
 
 ### Capas del Sistema:
+
 1. **Database**: Drizzle con consultas optimizadas
 2. **Transformers**: Conversión con estadísticas
 3. **Actions**: Server actions con tipos correctos
@@ -172,6 +191,7 @@ import { CharacterCard } from '@/components/cards/character-card';
 5. **Components**: UI con datos pre-calculados
 
 ### Flujo de Datos:
+
 ```
 Drizzle Query → fromDrizzleCharacter → CharacterWithStats → Store → UI
 ```

@@ -46,18 +46,18 @@ graph TB
 
 ```typescript
 interface AlbumState {
-  albums: AlbumComplete[]     // 📚 Álbumes con campos parseados
-  isLoading: boolean          // ⏳ Estado de carga
-  error: string | null        // ❌ Error actual
-  lastUpdated: number | null  // 🕐 Última actualización
+	albums: AlbumComplete[]; // 📚 Álbumes con campos parseados
+	isLoading: boolean; // ⏳ Estado de carga
+	error: string | null; // ❌ Error actual
+	lastUpdated: number | null; // 🕐 Última actualización
 
-  ui: AlbumUIState           // 🎮 Estado de interfaz
-  filters: AlbumFiltersState // 🔍 Estado de filtros
+	ui: AlbumUIState; // 🎮 Estado de interfaz
+	filters: AlbumFiltersState; // 🔍 Estado de filtros
 
-  // Selectores
-  getAlbumById: (id: string) => AlbumComplete | undefined
-  getFilteredAlbums: () => AlbumComplete[]
-  getSortedAlbums: () => AlbumComplete[]
+	// Selectores
+	getAlbumById: (id: string) => AlbumComplete | undefined;
+	getFilteredAlbums: () => AlbumComplete[];
+	getSortedAlbums: () => AlbumComplete[];
 }
 ```
 
@@ -65,15 +65,15 @@ interface AlbumState {
 
 ```typescript
 interface AlbumUIState {
-  selectedIds: string[]                        // ✅ IDs seleccionados
-  viewMode: AlbumViewMode                     // 👁️ Modo de vista (grid, list, etc.)
-  isViewerOpen: boolean                       // 🖼️ Visor abierto
-  currentAlbumId: string | null               // 📍 Álbum actual
-  displayState: Record<string, AlbumDisplayState> // 📊 Estados de display
-  draggedAlbumId: string | null               // 🔄 Álbum siendo arrastrado
-  dropTargetAlbumId: string | null            // 🎯 Target de drop
-  highlightedId: string | null                // ⭐ Álbum resaltado
-  expandedIds: string[]                       // 📂 Álbumes expandidos
+	selectedIds: string[]; // ✅ IDs seleccionados
+	viewMode: AlbumViewMode; // 👁️ Modo de vista (grid, list, etc.)
+	isViewerOpen: boolean; // 🖼️ Visor abierto
+	currentAlbumId: string | null; // 📍 Álbum actual
+	displayState: Record<string, AlbumDisplayState>; // 📊 Estados de display
+	draggedAlbumId: string | null; // 🔄 Álbum siendo arrastrado
+	dropTargetAlbumId: string | null; // 🎯 Target de drop
+	highlightedId: string | null; // ⭐ Álbum resaltado
+	expandedIds: string[]; // 📂 Álbumes expandidos
 }
 ```
 
@@ -81,29 +81,29 @@ interface AlbumUIState {
 
 ```typescript
 interface AlbumFiltersState {
-  // Búsqueda
-  query: string              // 🔍 Query principal
-  searchQuery: string        // 🔍 Alias para compatibilidad
+	// Búsqueda
+	query: string; // 🔍 Query principal
+	searchQuery: string; // 🔍 Alias para compatibilidad
 
-  // Ordenamiento y filtros
-  sortBy: AlbumSortCriteria  // 📊 Criterio de ordenamiento
-  filterByType: AlbumType | null     // 🏷️ Filtro por tipo
-  filterByParentId: string | null    // 👨‍👩‍👧‍👦 Filtro por padre
-  filterFavorites: boolean           // ⭐ Solo favoritos
-  filterShared: boolean              // 🤝 Solo compartidos
-  filterArchived: boolean            // 📦 Solo archivados
+	// Ordenamiento y filtros
+	sortBy: AlbumSortCriteria; // 📊 Criterio de ordenamiento
+	filterByType: AlbumType | null; // 🏷️ Filtro por tipo
+	filterByParentId: string | null; // 👨‍👩‍👧‍👦 Filtro por padre
+	filterFavorites: boolean; // ⭐ Solo favoritos
+	filterShared: boolean; // 🤝 Solo compartidos
+	filterArchived: boolean; // 📦 Solo archivados
 
-  // Filtros de contenido
-  hasImages?: boolean        // 🖼️ Tiene imágenes
-  hasVideos?: boolean        // 🎬 Tiene videos
-  categories?: string[]      // 🏷️ Categorías
-  types?: string[]          // 📝 Tipos
+	// Filtros de contenido
+	hasImages?: boolean; // 🖼️ Tiene imágenes
+	hasVideos?: boolean; // 🎬 Tiene videos
+	categories?: string[]; // 🏷️ Categorías
+	types?: string[]; // 📝 Tipos
 
-  // Rango de fechas
-  dateRange: {
-    from: Date | null        // 📅 Fecha desde
-    to: Date | null          // 📅 Fecha hasta
-  }
+	// Rango de fechas
+	dateRange: {
+		from: Date | null; // 📅 Fecha desde
+		to: Date | null; // 📅 Fecha hasta
+	};
 }
 ```
 
@@ -213,39 +213,30 @@ return <AlbumGrid albums={albums} />
 ### **Filtrar Álbumes**
 
 ```typescript
-const {
-  getFilteredAlbums,
-  updateFilters,
-  filters
-} = useAlbumStore()
+const { getFilteredAlbums, updateFilters, filters } = useAlbumStore();
 
-const filteredAlbums = getFilteredAlbums()
+const filteredAlbums = getFilteredAlbums();
 
 // Filtrar por favoritos
-updateFilters({ filterFavorites: true })
+updateFilters({ filterFavorites: true });
 
 // Buscar por nombre
-updateFilters({ searchQuery: 'vacaciones' })
+updateFilters({ searchQuery: 'vacaciones' });
 ```
 
 ### **Selección Múltiple**
 
 ```typescript
-const {
-  selectedIds,
-  selectMultipleAlbums,
-  toggleSelection,
-  clearSelection
-} = useAlbumStore()
+const { selectedIds, selectMultipleAlbums, toggleSelection, clearSelection } = useAlbumStore();
 
 // Seleccionar todos
-selectMultipleAlbums(albums.map(a => a.id))
+selectMultipleAlbums(albums.map((a) => a.id));
 
 // Toggle individual
-toggleSelection(albumId)
+toggleSelection(albumId);
 
 // Limpiar selección
-clearSelection()
+clearSelection();
 ```
 
 ## 🔍 Selectores Optimizados
