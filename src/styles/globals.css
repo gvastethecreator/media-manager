@@ -80,6 +80,34 @@
 		scrollbar-width: thin;
 	}
 
+	.ui-motion-standard {
+		@apply transition-all duration-dt-normal ease-dt-out;
+	}
+
+	.ui-overlay-hover-soft {
+		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out hover:opacity-20;
+	}
+
+	.ui-overlay-hover-strong {
+		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out hover:opacity-30;
+	}
+
+	.ui-overlay-hover-glow {
+		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out hover:opacity-100;
+	}
+
+	.ui-overlay-group-soft {
+		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out group-hover:opacity-20;
+	}
+
+	.ui-overlay-group-strong {
+		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out group-hover:opacity-30;
+	}
+
+	.ui-overlay-group-glow {
+		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out group-hover:opacity-100;
+	}
+
 	.scrollbar-thin::-webkit-scrollbar {
 		width: 6px;
 		height: 6px;
@@ -102,14 +130,25 @@
 /* Animation improvements */
 @layer utilities {
 	.animate-in {
-		animation-duration: 0.3s;
-		animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+		animation-duration: var(--dt-duration-normal);
+		animation-timing-function: var(--dt-ease-out);
 		animation-fill-mode: both;
 	}
 
 	.animate-out {
-		animation-duration: 0.2s;
-		animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+		animation-duration: var(--dt-duration-fast);
+		animation-timing-function: var(--dt-ease-in);
 		animation-fill-mode: both;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
 	}
 }

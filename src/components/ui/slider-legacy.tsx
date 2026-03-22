@@ -6,6 +6,11 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
+ * @deprecated Usa `@/components/ui/slider`.
+ * Se mantiene temporalmente para compatibilidad retroactiva.
+ */
+
+/**
  * Slider legacy con Design Tokens v2
  * - Track con borde 2px y sombra inset
  * - Thumb con gradiente y sombra elevada
