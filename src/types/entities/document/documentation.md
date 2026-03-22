@@ -31,9 +31,9 @@ import { createDocument, updateDocument, getDocument } from '@/transformers/docu
 
 // Crear un nuevo documento
 const nuevoDocumento = await createDocument({
-  name: 'Guía de uso',
-  filePath: '/docs/guia-uso.md',
-  content: '# Guía de uso\n\nEste documento explica cómo utilizar la aplicación.\n\n## Inicio rápido\n...'
+	name: 'Guía de uso',
+	filePath: '/docs/guia-uso.md',
+	content: '# Guía de uso\n\nEste documento explica cómo utilizar la aplicación.\n\n## Inicio rápido\n...',
 });
 
 // Obtener un documento existente
@@ -41,7 +41,8 @@ const documento = await getDocument(nuevoDocumento.id);
 
 // Actualizar un documento existente
 await updateDocument(nuevoDocumento.id, {
-  content: '# Guía de uso actualizada\n\nEste documento explica cómo utilizar la aplicación de manera efectiva.\n\n## Inicio rápido\n...'
+	content:
+		'# Guía de uso actualizada\n\nEste documento explica cómo utilizar la aplicación de manera efectiva.\n\n## Inicio rápido\n...',
 });
 ```
 
@@ -54,7 +55,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createDocument()
-    
+
     Transformer->>DB: prisma.document.create()
     DB-->>Transformer: Document
     Transformer-->>API: transformDocument()

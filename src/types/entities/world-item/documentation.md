@@ -36,24 +36,24 @@ import { createWorldItem, updateWorldItem, searchWorldItems } from '@/transforme
 
 // Crear un nuevo objeto del mundo
 const nuevoItem = await createWorldItem({
-  name: 'Espada legendaria',
-  type: 'weapon',
-  rarity: 'legendary',
-  description: 'Una espada forjada con metales antiguos',
-  effects: [{ name: 'Llamas eternas', description: 'Causa daño por fuego adicional' }]
+	name: 'Espada legendaria',
+	type: 'weapon',
+	rarity: 'legendary',
+	description: 'Una espada forjada con metales antiguos',
+	effects: [{ name: 'Llamas eternas', description: 'Causa daño por fuego adicional' }],
 });
 
 // Buscar objetos
 const items = await searchWorldItems({
-  filters: {
-    query: 'Espada',
-    rarities: ['legendary']
-  }
+	filters: {
+		query: 'Espada',
+		rarities: ['legendary'],
+	},
 });
 
 // Actualizar un objeto existente
 await updateWorldItem(nuevoItem.id, {
-  properties: [{ name: 'Durabilidad', value: 100 }]
+	properties: [{ name: 'Durabilidad', value: 100 }],
 });
 ```
 
@@ -66,7 +66,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createWorldItem()
-    
+
     Transformer->>DB: db.worldItem.create()
     DB-->>Transformer: WorldItem
     Transformer-->>API: transformWorldItem()

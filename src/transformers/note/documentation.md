@@ -62,18 +62,18 @@ Representa la estructura básica de una nota:
 
 ```typescript
 interface Note {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  priority: number;
-  status: string;
-  tags?: string; // JSON string
-  featuredImage: string | null;
-  isFavorite: boolean;
-  presetId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	title: string;
+	content: string;
+	category: string;
+	priority: number;
+	status: string;
+	tags?: string; // JSON string
+	featuredImage: string | null;
+	isFavorite: boolean;
+	presetId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 ```
 
@@ -83,14 +83,14 @@ Extiende `Note` con propiedades adicionales para la UI:
 
 ```typescript
 interface NoteExtended extends Note {
-  isSelected: boolean;
-  isHighlighted: boolean;
-  isEditing: boolean;
-  isExpanded: boolean;
-  displayOrder: number;
-  tagsArray: string[];
-  statusDisplay: { label: string, color: string };
-  priorityLevel: { label: string, color: string };
+	isSelected: boolean;
+	isHighlighted: boolean;
+	isEditing: boolean;
+	isExpanded: boolean;
+	displayOrder: number;
+	tagsArray: string[];
+	statusDisplay: { label: string; color: string };
+	priorityLevel: { label: string; color: string };
 }
 ```
 
@@ -100,17 +100,17 @@ Extiende `Note` con información estadística:
 
 ```typescript
 interface NoteWithStats extends Note {
-  lastUpdated: Date;
-  imageCount: number;
-  videoCount: number;
-  albumCount: number;
-  tagCount: number;
-  characterCount: number;
-  conceptCount: number;
-  importanceLevel: number;
-  contentLength: number;
-  relatedItemsCount: number;
-  distribution: Array<{name: string, count: number}>;
+	lastUpdated: Date;
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	tagCount: number;
+	characterCount: number;
+	conceptCount: number;
+	importanceLevel: number;
+	contentLength: number;
+	relatedItemsCount: number;
+	distribution: Array<{ name: string; count: number }>;
 }
 ```
 
@@ -145,8 +145,8 @@ import { transformNote } from '@/transformers/note';
 
 // Datos de Drizzle
 const DrizzleNote = await Drizzle.note.findUnique({
-  where: { id: 'note-id-here' },
-  include: { _count: true }
+	where: { id: 'note-id-here' },
+	include: { _count: true },
 });
 
 // Transformar a Note
@@ -187,8 +187,8 @@ console.log(noteWithStats.contentLength); // Longitud del contenido
 
 ```typescript
 const updatedNote = await updateNote({
-  id: noteId,
-  note: { title: 'Nuevo título' } // Solo actualiza el título
+	id: noteId,
+	note: { title: 'Nuevo título' }, // Solo actualiza el título
 });
 ```
 

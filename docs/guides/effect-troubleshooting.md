@@ -22,6 +22,7 @@
 ### Issue 1: "then is not a function" en Effect.tryPromise
 
 **Síntoma:**
+
 ```
 TypeError: evaluate().then is not a function
 ```
@@ -30,20 +31,26 @@ TypeError: evaluate().then is not a function
 Drizzle con driver `libsql` retorna query builders "thenable" (tienen método `.then()`) pero no son verdaderas Promises hasta que se esperan.
 
 **Solución:**
+
 ```typescript
 // ❌ INCORRECTO
-const result = yield* Effect.tryPromise({
-  try: () => db.select().from(albums).where(eq(albums.id, id))
-});
+const result =
+	yield *
+	Effect.tryPromise({
+		try: () => db.select().from(albums).where(eq(albums.id, id)),
+	});
 
 // ✅ CORRECTO
-const result = yield* Effect.tryPromise({
-  try: async () => await db.select().from(albums).where(eq(albums.id, id)),
-  catch: (error) => fromUnknownError('operation', error),
-});
+const result =
+	yield *
+	Effect.tryPromise({
+		try: async () => await db.select().from(albums).where(eq(albums.id, id)),
+		catch: (error) => fromUnknownError('operation', error),
+	});
 ```
 
 **Explicación:**
+
 - `async () => await query` fuerza la resolución de la Promise
 - El `await` convierte el thenable en Promise real
 - Effect.tryPromise necesita una función que retorne Promise, no thenable
@@ -55,6 +62,7 @@ const result = yield* Effect.tryPromise({
 ### Issue 2: Query ejecuta pero retorna array vacío
 
 **Síntoma:**
+
 ```typescript
 const albums = await service.create({ name: 'Test' });
 console.log(albums); // []
@@ -64,6 +72,7 @@ console.log(albums); // []
 El query se ejecuta pero en base de datos incorrecta (mock en lugar de real).
 
 **Diagnóstico:**
+
 ```typescript
 // Agregar logs temporales
 console.log('[DEBUG] DB Client type:', db.constructor.name);
@@ -72,11 +81,11 @@ console.log('[DEBUG] Insert result:', result);
 
 **Solución:**
 Verificar que la detección de environment use DB real en tests:
+
 ```typescript
-const isServerOrTest = typeof process !== 'undefined' && 
-  (typeof window === 'undefined' || 
-   process.env.NODE_ENV === 'test' || 
-   typeof (globalThis as any).Bun !== 'undefined');
+const isServerOrTest =
+	typeof process !== 'undefined' &&
+	(typeof window === 'undefined' || process.env.NODE_ENV === 'test' || typeof (globalThis as any).Bun !== 'undefined');
 ```
 
 ---
@@ -93,28 +102,29 @@ Tests insertan datos pero queries SELECT retornan vacío. IDs generados como "mo
 
 **Solución:**
 En `src/lib/drizzle/index.ts`:
+
 ```typescript
 // ❌ INCORRECTO
 if (typeof window === 'undefined') {
-  // Servidor: usa DB real
+	// Servidor: usa DB real
 } else {
-  // Browser: usa mock
+	// Browser: usa mock
 }
 
 // ✅ CORRECTO
-const isServerOrTest = typeof process !== 'undefined' && 
-  (typeof window === 'undefined' || 
-   process.env.NODE_ENV === 'test' || 
-   typeof (globalThis as any).Bun !== 'undefined');
+const isServerOrTest =
+	typeof process !== 'undefined' &&
+	(typeof window === 'undefined' || process.env.NODE_ENV === 'test' || typeof (globalThis as any).Bun !== 'undefined');
 
 if (isServerOrTest) {
-  // Servidor o test: usa DB real
+	// Servidor o test: usa DB real
 } else {
-  // Browser: usa mock
+	// Browser: usa mock
 }
 ```
 
 **Verificación:**
+
 ```bash
 bun test src/services/album/__tests__/album.service.effect.test.ts
 
@@ -128,6 +138,7 @@ bun test src/services/album/__tests__/album.service.effect.test.ts
 ### Issue 4: Tests fallan con "window is not defined"
 
 **Síntoma:**
+
 ```
 ReferenceError: window is not defined
 ```
@@ -137,15 +148,16 @@ Código ejecutándose en Node.js/Bun intenta acceder a `window`.
 
 **Solución:**
 Usar detección defensiva:
+
 ```typescript
 // ❌ INCORRECTO
 if (window.location.href) {
-  // código browser
+	// código browser
 }
 
 // ✅ CORRECTO
 if (typeof window !== 'undefined' && window.location?.href) {
-  // código browser
+	// código browser
 }
 ```
 
@@ -156,6 +168,7 @@ if (typeof window !== 'undefined' && window.location?.href) {
 ### Issue 5: "Expected UUID, actual [nanoid]"
 
 **Síntoma:**
+
 ```
 AlbumValidationError: Expected UUID, actual "juO3ZL-S7P3gZe_xoqQl-"
 ```
@@ -165,33 +178,33 @@ Schema usa tipo `UUID` estricto (formato `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
 
 **Solución:**
 Crear tipo `ID` genérico en `src/lib/effect/schemas/common.ts`:
+
 ```typescript
-export const ID = Schema.String.pipe(
-  Schema.minLength(1),
-  Schema.maxLength(30)
-).annotations({
-  identifier: 'ID',
-  title: 'Entity Identifier',
-  description: 'Unique identifier (nanoid format)',
+export const ID = Schema.String.pipe(Schema.minLength(1), Schema.maxLength(30)).annotations({
+	identifier: 'ID',
+	title: 'Entity Identifier',
+	description: 'Unique identifier (nanoid format)',
 });
 ```
 
 Actualizar schemas de entidades:
+
 ```typescript
 // ❌ INCORRECTO
 export const Album = Schema.Struct({
-  id: UUID,  // Muy estricto
-  // ...
+	id: UUID, // Muy estricto
+	// ...
 });
 
 // ✅ CORRECTO
 export const Album = Schema.Struct({
-  id: ID,  // Acepta nanoid
-  // ...
+	id: ID, // Acepta nanoid
+	// ...
 });
 ```
 
 **Cuándo usar cada uno:**
+
 - `ID`: Para primary keys generadas con nanoid (mayoría de casos)
 - `UUID`: Solo si el ID debe ser específicamente UUID v4 format
 
@@ -200,6 +213,7 @@ export const Album = Schema.Struct({
 ### Issue 6: Schema.decodeUnknownSync con Effect.tryPromise
 
 **Síntoma:**
+
 ```
 Error: decodeUnknownSync is not async but wrapped in tryPromise
 ```
@@ -208,6 +222,7 @@ Error: decodeUnknownSync is not async but wrapped in tryPromise
 `Schema.decodeUnknownSync` es síncrono, no debe usar `Effect.tryPromise`.
 
 **Solución:**
+
 ```typescript
 // ❌ INCORRECTO - tryPromise para sync
 const validated = yield* Effect.tryPromise({
@@ -227,6 +242,7 @@ const validated = yield* Effect.try({
 ```
 
 **Regla general:**
+
 - `Effect.tryPromise` → Operaciones **asíncronas** (DB, HTTP, File I/O)
 - `Effect.try` → Operaciones **síncronas** (validación, parsing, transform)
 
@@ -237,6 +253,7 @@ const validated = yield* Effect.try({
 ### Issue 7: displayMessage retorna string vacío
 
 **Síntoma:**
+
 ```typescript
 const error = new AlbumNotFound({ albumId: 'test-123' });
 console.log(error.displayMessage); // ""  ← vacío!
@@ -246,38 +263,40 @@ console.log(error.displayMessage); // ""  ← vacío!
 Campo opcional `message?: string` no existe en instancia si no se provee. El getter falla silenciosamente.
 
 **Solución:**
+
 ```typescript
 // ❌ INCORRECTO - campo opcional causa problemas
 export class AlbumNotFound extends Data.TaggedError('AlbumNotFound')<{
-  readonly albumId: string;
-  readonly message?: string;  // Opcional problemático
+	readonly albumId: string;
+	readonly message?: string; // Opcional problemático
 }> {
-  get displayMessage(): string {
-    return this.message ?? `Album no encontrado: ${this.albumId}`;
-  }
+	get displayMessage(): string {
+		return this.message ?? `Album no encontrado: ${this.albumId}`;
+	}
 }
 
 // ✅ CORRECTO - solo campos requeridos
 export class AlbumNotFound extends Data.TaggedError('AlbumNotFound')<{
-  readonly albumId: string;  // Solo requerido
+	readonly albumId: string; // Solo requerido
 }> {
-  get displayMessage(): string {
-    return `Album no encontrado: ${this.albumId}`;
-  }
+	get displayMessage(): string {
+		return `Album no encontrado: ${this.albumId}`;
+	}
 }
 ```
 
 **Regla:**
+
 - **NO usar campos opcionales** en getters de TaggedError
 - Si necesitas mensaje custom, hazlo campo **requerido**:
   ```typescript
   export class CustomError extends Data.TaggedError('CustomError')<{
-    readonly context: string;
-    readonly customMessage: string;  // Requerido, no opcional
+  	readonly context: string;
+  	readonly customMessage: string; // Requerido, no opcional
   }> {
-    get displayMessage(): string {
-      return `${this.context}: ${this.customMessage}`;
-    }
+  	get displayMessage(): string {
+  		return `${this.context}: ${this.customMessage}`;
+  	}
   }
   ```
 
@@ -286,6 +305,7 @@ export class AlbumNotFound extends Data.TaggedError('AlbumNotFound')<{
 ### Issue 8: Error no se puede serializar JSON
 
 **Síntoma:**
+
 ```
 Error: Cannot convert circular structure to JSON
 ```
@@ -295,23 +315,24 @@ TaggedError con referencias circulares o métodos no serializables.
 
 **Solución:**
 Agregar método `toJSON`:
+
 ```typescript
 export class AlbumError extends Data.TaggedError('AlbumError')<{
-  readonly albumId: string;
-  readonly details: unknown;
+	readonly albumId: string;
+	readonly details: unknown;
 }> {
-  get displayMessage(): string {
-    return `Error con álbum: ${this.albumId}`;
-  }
+	get displayMessage(): string {
+		return `Error con álbum: ${this.albumId}`;
+	}
 
-  toJSON() {
-    return {
-      _tag: this._tag,
-      albumId: this.albumId,
-      message: this.displayMessage,
-      // Evitar serializar 'details' si puede tener referencias circulares
-    };
-  }
+	toJSON() {
+		return {
+			_tag: this._tag,
+			albumId: this.albumId,
+			message: this.displayMessage,
+			// Evitar serializar 'details' si puede tener referencias circulares
+		};
+	}
 }
 ```
 
@@ -325,23 +346,28 @@ export class AlbumError extends Data.TaggedError('AlbumError')<{
 Request toma >100ms adicionales después de agregar validación Effect.
 
 **Diagnóstico:**
+
 ```typescript
 const start = performance.now();
-const validated = yield* Effect.try({
-  try: () => Schema.decodeUnknownSync(LargeSchema)(data)
-});
+const validated =
+	yield *
+	Effect.try({
+		try: () => Schema.decodeUnknownSync(LargeSchema)(data),
+	});
 console.log(`Validation took: ${performance.now() - start}ms`);
 ```
 
 **Soluciones:**
 
 **A) Usar decode en lugar de decodeUnknownSync:**
+
 ```typescript
 // Más rápido si data ya está parcialmente validada
-Schema.decode(Album)(data)
+Schema.decode(Album)(data);
 ```
 
 **B) Cache de schemas compilados:**
+
 ```typescript
 // Compilar schema una vez
 const decodeAlbum = Schema.decodeUnknownSync(Album);
@@ -351,11 +377,12 @@ const validated = decodeAlbum(data);
 ```
 
 **C) Validación lazy para fields grandes:**
+
 ```typescript
 export const AlbumWithLargeMetadata = Schema.Struct({
-  id: ID,
-  name: NonEmptyString,
-  metadata: Schema.Lazy(() => LargeMetadataSchema),  // Solo valida si se accede
+	id: ID,
+	name: NonEmptyString,
+	metadata: Schema.Lazy(() => LargeMetadataSchema), // Solo valida si se accede
 });
 ```
 
@@ -370,21 +397,22 @@ Tests consumen cada vez más memoria, eventualmente fallan con OOM.
 Datos no limpiados entre tests, referencias retenidas.
 
 **Solución:**
+
 ```typescript
 describe('AlbumService', () => {
-  afterEach(async () => {
-    // Limpiar tablas
-    await db.delete(albums);
-    await db.delete(imageAlbums);
-    
-    // Si usas cache o stores
-    cache.clear();
-  });
-  
-  afterAll(async () => {
-    // Cerrar conexiones
-    await db.close();
-  });
+	afterEach(async () => {
+		// Limpiar tablas
+		await db.delete(albums);
+		await db.delete(imageAlbums);
+
+		// Si usas cache o stores
+		cache.clear();
+	});
+
+	afterAll(async () => {
+		// Cerrar conexiones
+		await db.close();
+	});
 });
 ```
 
@@ -395,6 +423,7 @@ describe('AlbumService', () => {
 ### Issue 11: Type mismatch entre Effect.gen y función normal
 
 **Síntoma:**
+
 ```
 Type 'Effect<Album, AlbumError, AlbumService>' is not assignable to type 'Promise<Album>'
 ```
@@ -403,33 +432,33 @@ Type 'Effect<Album, AlbumError, AlbumService>' is not assignable to type 'Promis
 Mezclar Effect y async/await sin conversión.
 
 **Solución:**
+
 ```typescript
 // ❌ INCORRECTO - Effect sin ejecutar
 async function getAlbum(id: string): Promise<Album> {
-  return Effect.gen(function* () {
-    const service = yield* AlbumService;
-    return yield* service.getById(id);
-  });  // Retorna Effect, no Promise
+	return Effect.gen(function* () {
+		const service = yield* AlbumService;
+		return yield* service.getById(id);
+	}); // Retorna Effect, no Promise
 }
 
 // ✅ CORRECTO - Ejecutar Effect con runPromise
 async function getAlbum(id: string): Promise<Album> {
-  const effect = Effect.gen(function* () {
-    const service = yield* AlbumService;
-    return yield* service.getById(id);
-  });
-  
-  return Effect.runPromise(
-    Effect.provide(effect, AlbumServiceLive)
-  );
+	const effect = Effect.gen(function* () {
+		const service = yield* AlbumService;
+		return yield* service.getById(id);
+	});
+
+	return Effect.runPromise(Effect.provide(effect, AlbumServiceLive));
 }
 ```
 
 ---
 
-### Issue 12: Cannot find name 'yield*'
+### Issue 12: Cannot find name 'yield\*'
 
 **Síntoma:**
+
 ```
 Error: Cannot find name 'yield'
 Property 'yield' does not exist
@@ -439,15 +468,16 @@ Property 'yield' does not exist
 Función no es generator o falta `function*`.
 
 **Solución:**
+
 ```typescript
 // ❌ INCORRECTO - función normal
 Effect.gen(() => {
-  const service = yield* AlbumService;  // Error!
+	const service = yield * AlbumService; // Error!
 });
 
 // ✅ CORRECTO - función generator
 Effect.gen(function* () {
-  const service = yield* AlbumService;  // OK
+	const service = yield* AlbumService; // OK
 });
 ```
 

@@ -31,7 +31,9 @@ export const videos = sqliteTable(
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isHidden: integer('isHidden', { mode: 'boolean' }).notNull().default(false),
 		folderId: text('folderId').notNull(),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

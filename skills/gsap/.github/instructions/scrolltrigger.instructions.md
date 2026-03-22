@@ -1,5 +1,5 @@
 ---
-applyTo: ["**/*scroll*", "**/*ScrollTrigger*", "**/scroll*"]
+applyTo: ['**/*scroll*', '**/*ScrollTrigger*', '**/scroll*']
 ---
 
 # ScrollTrigger — path-specific instructions
@@ -15,4 +15,4 @@ When writing or suggesting scroll-linked GSAP code (ScrollTrigger):
 - **start** / **end** format: `"triggerPosition viewportPosition"` (e.g. `"top center"`, `"bottom top"`). Use `endTrigger` if the end is based on a different element.
 - Call **ScrollTrigger.refresh()** after DOM or layout changes that affect trigger positions (e.g. new content, fonts loaded). Viewport resize is handled automatically.
 - Create ScrollTriggers in **top-to-bottom** page order, or set **refreshPriority** so they refresh in that order when creation order differs.
-- When removing elements or changing routes (SPAs), **kill** ScrollTrigger instances: `ScrollTrigger.getAll().forEach(t => t.kill())` or kill by id. 
+- When removing elements or changing routes (SPAs), **kill** ScrollTrigger instances: `ScrollTrigger.getAll().forEach(t => t.kill())` or kill by id.

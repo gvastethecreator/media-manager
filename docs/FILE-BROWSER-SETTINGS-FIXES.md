@@ -54,6 +54,7 @@ resetLocalStorage: () => {
 **Solución:** Agregados al store `view-options.slice.ts`:
 
 #### Interface ViewOptionsState:
+
 ```typescript
 showThumbnails: boolean;
 showMetadata: boolean;
@@ -64,6 +65,7 @@ animationDuration: number;
 ```
 
 #### Funciones agregadas:
+
 - `setShowThumbnails` / `toggleShowThumbnails`
 - `setShowMetadata` / `toggleShowMetadata`
 - `setShowTags` / `toggleShowTags`
@@ -72,6 +74,7 @@ animationDuration: number;
 - `setAnimationDuration`
 
 #### Valores por defecto:
+
 ```typescript
 showThumbnails: true,
 showMetadata: true,
@@ -82,6 +85,7 @@ animationDuration: 300,
 ```
 
 #### Merge para compatibilidad:
+
 ```typescript
 merged.showThumbnails ??= DEFAULT_STATE.showThumbnails;
 merged.showMetadata ??= DEFAULT_STATE.showMetadata;
@@ -99,7 +103,7 @@ merged.animationDuration ??= DEFAULT_STATE.animationDuration;
 
 **Problema:** No había UI para controlar los nuevos settings visuales.
 
-**Solución:** 
+**Solución:**
 
 1. **Actualizado `settings.hooks.tsx`:**
    - Agregados todos los exports de los nuevos settings
@@ -112,44 +116,47 @@ merged.animationDuration ??= DEFAULT_STATE.animationDuration;
    - Cambiado Accordion a `type="multiple"` para permitir múltiples secciones abiertas
 
 ```tsx
-{/* 3. VISUALIZACIÓN */}
+{
+	/* 3. VISUALIZACIÓN */
+}
 <AccordionItem className="border-border/40" value="visual">
-  <AccordionTrigger className="py-3 hover:no-underline">
-    <div className="flex items-center gap-2.5">
-      <Eye className="h-4 w-4" style={{ color: 'var(--dt-warning-500)' }} />
-      <span className="font-semibold text-sm">Visualización</span>
-    </div>
-  </AccordionTrigger>
-  <AccordionContent className="space-y-3 pb-4">
-    {/* Elementos a mostrar */}
-    <div className="space-y-3">
-      <Row>
-        <Label className="font-medium text-muted-foreground text-xs">Mostrar thumbnails</Label>
-        <Switch checked={showThumbnails} onCheckedChange={toggleShowThumbnails} />
-      </Row>
-      {/* ... más toggles ... */}
-    </div>
-    
-    {/* Animaciones */}
-    <div className="space-y-3 pt-2">
-      <Row>
-        <Label className="font-medium text-muted-foreground text-xs">Activar animaciones</Label>
-        <Switch checked={enableAnimations} onCheckedChange={toggleEnableAnimations} />
-      </Row>
-      <Row>
-        <Label className="font-medium text-muted-foreground text-xs">Duración (ms)</Label>
-        <Input
-          disabled={!enableAnimations}
-          value={animationDuration}
-          onChange={(e) => setAnimationDuration(Number(e.target.value))}
-        />
-      </Row>
-    </div>
-  </AccordionContent>
-</AccordionItem>
+	<AccordionTrigger className="py-3 hover:no-underline">
+		<div className="flex items-center gap-2.5">
+			<Eye className="h-4 w-4" style={{ color: 'var(--dt-warning-500)' }} />
+			<span className="font-semibold text-sm">Visualización</span>
+		</div>
+	</AccordionTrigger>
+	<AccordionContent className="space-y-3 pb-4">
+		{/* Elementos a mostrar */}
+		<div className="space-y-3">
+			<Row>
+				<Label className="font-medium text-muted-foreground text-xs">Mostrar thumbnails</Label>
+				<Switch checked={showThumbnails} onCheckedChange={toggleShowThumbnails} />
+			</Row>
+			{/* ... más toggles ... */}
+		</div>
+
+		{/* Animaciones */}
+		<div className="space-y-3 pt-2">
+			<Row>
+				<Label className="font-medium text-muted-foreground text-xs">Activar animaciones</Label>
+				<Switch checked={enableAnimations} onCheckedChange={toggleEnableAnimations} />
+			</Row>
+			<Row>
+				<Label className="font-medium text-muted-foreground text-xs">Duración (ms)</Label>
+				<Input
+					disabled={!enableAnimations}
+					value={animationDuration}
+					onChange={(e) => setAnimationDuration(Number(e.target.value))}
+				/>
+			</Row>
+		</div>
+	</AccordionContent>
+</AccordionItem>;
 ```
 
 **Archivos:**
+
 - `src/components/features/file-browser-new/components/settings/settings.hooks.tsx`
 - `src/components/features/file-browser-new/components/settings/file-browser-settings.tsx`
 
@@ -167,39 +174,42 @@ El setting `includeSubfolders` ya estaba completamente funcional:
 4. **Invalidación:** TanStack Query invalida automáticamente al cambiar
 
 **Flujo de datos:**
+
 ```
-useViewOptionsStore.includeSubfolders 
-  → useDataSource hook 
-    → useFolderFilesPaginated 
+useViewOptionsStore.includeSubfolders
+  → useDataSource hook
+    → useFolderFilesPaginated
       → GET /api/folders/{id}/files?includeSubfolders={bool}
 ```
 
 **Query Key:**
+
 ```typescript
-['folder-files', folderId, { includeSubfolders, limit, offset, search, sortBy, sortOrder }]
+['folder-files', folderId, { includeSubfolders, limit, offset, search, sortBy, sortOrder }];
 ```
 
 ---
 
 ## 📊 Estado de Settings - Antes vs Después
 
-| Setting | Estado Anterior | Estado Actual |
-|---------|----------------|---------------|
-| `itemSize` | ❌ No sincronizado | ✅ Sincronizado con views.* |
-| `resetLocalStorage` | ❌ Re-persistía | ✅ Recarga página |
-| `showThumbnails` | ❌ No existía | ✅ Implementado + UI |
-| `showMetadata` | ❌ No existía | ✅ Implementado + UI |
-| `showTags` | ❌ No existía | ✅ Implementado + UI |
-| `showStats` | ❌ No existía | ✅ Implementado + UI |
-| `enableAnimations` | ❌ No existía | ✅ Implementado + UI |
-| `animationDuration` | ❌ No existía | ✅ Implementado + UI |
-| `includeSubfolders` | ✅ Funcionaba | ✅ Verificado OK |
+| Setting             | Estado Anterior    | Estado Actual                |
+| ------------------- | ------------------ | ---------------------------- |
+| `itemSize`          | ❌ No sincronizado | ✅ Sincronizado con views.\* |
+| `resetLocalStorage` | ❌ Re-persistía    | ✅ Recarga página            |
+| `showThumbnails`    | ❌ No existía      | ✅ Implementado + UI         |
+| `showMetadata`      | ❌ No existía      | ✅ Implementado + UI         |
+| `showTags`          | ❌ No existía      | ✅ Implementado + UI         |
+| `showStats`         | ❌ No existía      | ✅ Implementado + UI         |
+| `enableAnimations`  | ❌ No existía      | ✅ Implementado + UI         |
+| `animationDuration` | ❌ No existía      | ✅ Implementado + UI         |
+| `includeSubfolders` | ✅ Funcionaba      | ✅ Verificado OK             |
 
 ---
 
 ## 🎯 Próximos Pasos (Opcionales)
 
 ### Prioridad Media
+
 1. **Aplicar settings visuales en las vistas:**
    - Usar `showThumbnails` para mostrar/ocultar thumbnails
    - Usar `showMetadata` para mostrar/ocultar metadatos en cards
@@ -213,6 +223,7 @@ useViewOptionsStore.includeSubfolders
    - Permitir reordenar columnas
 
 ### Prioridad Baja
+
 3. **Settings por tipo de entidad:**
    - Configuraciones diferentes para images vs videos vs documents
 

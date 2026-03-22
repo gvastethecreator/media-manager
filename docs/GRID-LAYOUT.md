@@ -14,14 +14,14 @@ grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2x
 
 ### Breakpoints y Columnas
 
-| Breakpoint | Tamaño | Columnas |
-|------------|--------|----------|
-| Default | < 640px | 2 columnas |
-| sm | 640px+ | 3 columnas |
-| md | 768px+ | 4 columnas |
-| lg | 1024px+ | 4 columnas |
-| xl | 1280px+ | **5 columnas** ← TARGET |
-| 2xl | 1536px+ | 6 columnas |
+| Breakpoint | Tamaño  | Columnas                |
+| ---------- | ------- | ----------------------- |
+| Default    | < 640px | 2 columnas              |
+| sm         | 640px+  | 3 columnas              |
+| md         | 768px+  | 4 columnas              |
+| lg         | 1024px+ | 4 columnas              |
+| xl         | 1280px+ | **5 columnas** ← TARGET |
+| 2xl        | 1536px+ | 6 columnas              |
 
 ## Componente GridLayout
 
@@ -35,27 +35,29 @@ Se creó un componente reutilizable para estandarizar las grillas:
 import { GridLayout, GRID_PRESETS } from '@/components/layout/grid-layout';
 
 <GridLayout {...GRID_PRESETS.default}>
-  {items.map(item => <Card key={item.id} data={item} />)}
-</GridLayout>
+	{items.map((item) => (
+		<Card key={item.id} data={item} />
+	))}
+</GridLayout>;
 ```
 
 ### Props Disponibles
 
-| Prop | Tipo | Default | Descripción |
-|------|------|---------|-------------|
-| `density` | 'compact' \| 'default' \| 'comfortable' \| 'spacious' | 'default' | Densidad del grid |
-| `gap` | 'none' \| 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' | 'md' | Tamaño del gap |
-| `padding` | 'none' \| 'sm' \| 'md' \| 'lg' \| 'xl' | 'md' | Padding del contenedor |
-| `animated` | boolean | true | Animaciones de entrada |
+| Prop       | Tipo                                                  | Default   | Descripción            |
+| ---------- | ----------------------------------------------------- | --------- | ---------------------- |
+| `density`  | 'compact' \| 'default' \| 'comfortable' \| 'spacious' | 'default' | Densidad del grid      |
+| `gap`      | 'none' \| 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'        | 'md'      | Tamaño del gap         |
+| `padding`  | 'none' \| 'sm' \| 'md' \| 'lg' \| 'xl'                | 'md'      | Padding del contenedor |
+| `animated` | boolean                                               | true      | Animaciones de entrada |
 
 ### Presets Predefinidos
 
 ```typescript
-GRID_PRESETS.default      // 5 cols en xl - estándar
-GRID_PRESETS.compact      // 6 cols en xl - más denso
-GRID_PRESETS.comfortable  // 5 cols en xl - items más grandes
-GRID_PRESETS.spacious     // 4 cols en xl - items grandes
-GRID_PRESETS.files        // 6 cols en xl - para archivos
+GRID_PRESETS.default; // 5 cols en xl - estándar
+GRID_PRESETS.compact; // 6 cols en xl - más denso
+GRID_PRESETS.comfortable; // 5 cols en xl - items más grandes
+GRID_PRESETS.spacious; // 4 cols en xl - items grandes
+GRID_PRESETS.files; // 6 cols en xl - para archivos
 ```
 
 ## Vistas Actualizadas
@@ -101,16 +103,16 @@ Si necesitas implementar el grid manualmente en una vista:
 
 ```tsx
 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-  {items.map((item, index) => (
-    <motion.div
-      key={item.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-    >
-      <Card data={item} />
-    </motion.div>
-  ))}
+	{items.map((item, index) => (
+		<motion.div
+			key={item.id}
+			initial={{ opacity: 0, y: 20 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ delay: index * 0.05 }}
+		>
+			<Card data={item} />
+		</motion.div>
+	))}
 </div>
 ```
 

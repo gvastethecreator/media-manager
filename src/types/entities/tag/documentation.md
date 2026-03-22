@@ -46,11 +46,11 @@ import { createTag, getTags } from '@/app/actions/tags/crud.actions';
 
 // 1. Crear un nuevo tag
 const newTagData = {
-  name: 'Estilo Artístico',
-  emoji: '🎨',
-  color: '#8b5cf6',
-  category: 'style',
-  description: 'Tags relacionados con estilos artísticos y visuales.'
+	name: 'Estilo Artístico',
+	emoji: '🎨',
+	color: '#8b5cf6',
+	category: 'style',
+	description: 'Tags relacionados con estilos artísticos y visuales.',
 };
 const newTag = await createTag(newTagData);
 // newTag es de tipo TagWithStats

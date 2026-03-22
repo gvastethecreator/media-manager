@@ -31,11 +31,11 @@ import { createAudio, updateAudio, getAudio } from '@/transformers/audio';
 
 // Crear un nuevo archivo de audio
 const nuevoAudio = await createAudio({
-  name: 'Música de ambiente',
-  filePath: '/audio/ambiente.mp3',
-  format: 'mp3',
-  duration: 180, // duración en segundos (3 minutos)
-  size: 4096000 // tamaño en bytes (4MB)
+	name: 'Música de ambiente',
+	filePath: '/audio/ambiente.mp3',
+	format: 'mp3',
+	duration: 180, // duración en segundos (3 minutos)
+	size: 4096000, // tamaño en bytes (4MB)
 });
 
 // Obtener un archivo de audio existente
@@ -43,8 +43,8 @@ const audio = await getAudio(nuevoAudio.id);
 
 // Actualizar un archivo de audio existente
 await updateAudio(nuevoAudio.id, {
-  name: 'Música de ambiente - Remix',
-  duration: 210 // nueva duración (3:30 minutos)
+	name: 'Música de ambiente - Remix',
+	duration: 210, // nueva duración (3:30 minutos)
 });
 ```
 
@@ -58,7 +58,7 @@ sequenceDiagram
     participant DB
     Client->>API: createAudio()
     API->>Transformer: mapCreateAudioDataToPrisma()
-    
+
     DB-->>Transformer: Audio
     Transformer-->>API: transformAudio()
     API-->>Client: AudioBase

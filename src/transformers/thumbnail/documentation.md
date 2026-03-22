@@ -29,24 +29,29 @@ graph TD
 ## Componentes
 
 ### Schema (`schema.ts`)
+
 - **ZodThumbnailSchema**: Validación con Zod del modelo Thumbnail base
 - Derivado directamente del schema de Drizzle
 
 ### Validators (`validators.ts`)
+
 - **validateThumbnail**: Validación de objetos Thumbnail
 - **validateThumbnailCreate**: Validación de datos de creación
 - **validateThumbnailUpdate**: Validación de datos de actualización
 
 ### Mappers (`mappers.ts`)
+
 - **toThumbnailWithStats**: Convierte ThumbnailBase → ThumbnailWithStats
 - Calcula estadísticas automáticamente (aspectRatio, compressionRatio, qualityScore, etc.)
 
 ### Serializers (`serializers.ts`)
+
 - **serializeThumbnail**: ThumbnailBase → JSON para API
 - **serializeThumbnailWithStats**: ThumbnailWithStats → JSON para API
 - Optimizado para respuestas de red
 
 ### Transformer (`transformer.ts`)
+
 - **transformThumbnail**: Función principal de transformación
 - Maneja datos con/sin estadísticas
 - Normalización automática de campos legacy
@@ -58,13 +63,13 @@ import { transformThumbnail } from '@/transformers/thumbnail';
 
 // Con estadísticas calculadas
 const thumbnailWithStats = await transformThumbnail(thumbnailData, {
-  includeStats: true,
-  usageCount: 42
+	includeStats: true,
+	usageCount: 42,
 });
 
 // Sin estadísticas (más rápido)
 const thumbnailBasic = await transformThumbnail(thumbnailData, {
-  includeStats: false
+	includeStats: false,
 });
 ```
 
@@ -75,7 +80,6 @@ const thumbnailBasic = await transformThumbnail(thumbnailData, {
 - **qualityScore**: Score de calidad (0-100) basado en resolución y formato
 - **usageCount**: Número de veces que se ha usado este thumbnail
 - **storageEfficiency**: Eficiencia de almacenamiento (calidad vs tamaño)
-
 
 - Tipos base migrados a definiciones locales
 - Transformadores actualizados a lógica Drizzle
@@ -94,4 +98,4 @@ const thumbnailBasic = await transformThumbnail(thumbnailData, {
 
 ---
 
-*Migrado a Drizzle/tipos locales - 2025-01-27*
+_Migrado a Drizzle/tipos locales - 2025-01-27_

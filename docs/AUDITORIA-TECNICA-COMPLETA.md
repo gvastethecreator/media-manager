@@ -13,14 +13,14 @@ Image Manager es un sistema de gestión multimedia con una arquitectura cliente-
 
 ### Hallazgos Clave
 
-| Categoría | Estado | Severidad |
-|-----------|--------|-----------|
-| Arquitectura | 🟢 Buena | Baja |
-| Type Safety | 🟡 Regular | Media |
-| Calidad de Código | 🟡 Regular | Media |
-| Testing | 🟢 Buena | Baja |
-| Documentación | 🟡 Regular | Media |
-| Deuda Técnica | 🔴 Alta | **Alta** |
+| Categoría         | Estado     | Severidad |
+| ----------------- | ---------- | --------- |
+| Arquitectura      | 🟢 Buena   | Baja      |
+| Type Safety       | 🟡 Regular | Media     |
+| Calidad de Código | 🟡 Regular | Media     |
+| Testing           | 🟢 Buena   | Baja      |
+| Documentación     | 🟡 Regular | Media     |
+| Deuda Técnica     | 🔴 Alta    | **Alta**  |
 
 ---
 
@@ -64,7 +64,7 @@ tags?: any[];
 
 ---
 
-### 2. Consola Directa vs Sistema de Logging (188+ console.*) 🟡 MEDIA
+### 2. Consola Directa vs Sistema de Logging (188+ console.\*) 🟡 MEDIA
 
 **Descripción:** Código usa `console.log/error/warn` directamente en lugar del sistema de logging centralizado.
 
@@ -243,20 +243,20 @@ src/services/
 
 ### Complejidad Ciclomática
 
-| Módulo | Complejidad | Estado |
-|--------|-------------|--------|
-| `folder-reindex.service.ts` | Alta | 🟡 Refactorizar |
-| `image.service.effect.ts` | Media | 🟢 Aceptable |
-| `video.service.effect.ts` | Media | 🟢 Aceptable |
-| Transformers | Baja-Media | 🟢 Aceptable |
+| Módulo                      | Complejidad | Estado          |
+| --------------------------- | ----------- | --------------- |
+| `folder-reindex.service.ts` | Alta        | 🟡 Refactorizar |
+| `image.service.effect.ts`   | Media       | 🟢 Aceptable    |
+| `video.service.effect.ts`   | Media       | 🟢 Aceptable    |
+| Transformers                | Baja-Media  | 🟢 Aceptable    |
 
 ### Cobertura de Tests
 
-| Tipo | Cobertura | Estado |
-|------|-----------|--------|
-| Unidad (Vitest) | ~50% | 🟡 Mejorable |
-| E2E (Playwright) | Parcial | 🟡 En progreso |
-| Integración | Baja | 🔴 Priorizar |
+| Tipo             | Cobertura | Estado         |
+| ---------------- | --------- | -------------- |
+| Unidad (Vitest)  | ~50%      | 🟡 Mejorable   |
+| E2E (Playwright) | Parcial   | 🟡 En progreso |
+| Integración      | Baja      | 🔴 Priorizar   |
 
 **Recomendación:** Subir cobertura de unidad a 70% antes de producción.
 
@@ -283,7 +283,7 @@ src/services/
 ### Prioridad 2: Alto (Próximo Sprint)
 
 1. **Estandarizar logging**
-   - Reemplazar console.*
+   - Reemplazar console.\*
    - Configurar niveles apropiados
    - Agregar reglas de linting
 

@@ -82,35 +82,35 @@ Representa la estructura base de un personaje.
 
 ```typescript
 interface CharacterBase {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string;
-  description: string | null;
-  shortcut: string | null;
-  category: string | null;
-  level: number;
-  class: string;
-  race: string;
-  type: string | null;
-  alignment: string;
-  backstory: string;
-  stats: string; // String JSON
-  psychologicalProfile: string;
-  socialProfile: string;
-  relationships: string; // String JSON
-  goals: string; // String JSON
-  fears: string; // String JSON
-  beliefs: string; // String JSON
-  personality: string; // String JSON
-  skills: string; // String JSON
-  abilities: string; // String JSON
-  featuredImage: string | null;
-  isFavorite: boolean;
-  sortBy: string;
-  filters: string; // String JSON
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	level: number;
+	class: string;
+	race: string;
+	type: string | null;
+	alignment: string;
+	backstory: string;
+	stats: string; // String JSON
+	psychologicalProfile: string;
+	socialProfile: string;
+	relationships: string; // String JSON
+	goals: string; // String JSON
+	fears: string; // String JSON
+	beliefs: string; // String JSON
+	personality: string; // String JSON
+	skills: string; // String JSON
+	abilities: string; // String JSON
+	featuredImage: string | null;
+	isFavorite: boolean;
+	sortBy: string;
+	filters: string; // String JSON
+	createdAt: Date;
+	updatedAt: Date;
 }
 ```
 
@@ -120,13 +120,13 @@ Extiende `Character` con propiedades adicionales útiles para la UI.
 
 ```typescript
 interface CharacterExtended extends CharacterComplete {
-  isSelected: boolean;
-  isHighlighted: boolean;
-  previewContent: string;
-  parsedParameters: Record<string, any>;
-  parsedTags: string[];
-  lastUpdated: Date;
-  importance: number;
+	isSelected: boolean;
+	isHighlighted: boolean;
+	previewContent: string;
+	parsedParameters: Record<string, any>;
+	parsedTags: string[];
+	lastUpdated: Date;
+	importance: number;
 }
 ```
 
@@ -136,24 +136,24 @@ Extiende `Character` con estadísticas calculadas.
 
 ```typescript
 interface CharacterWithStats extends CharacterComplete {
-  stats: {
-    imageCount: number;
-    videoCount: number;
-    albumCount: number;
-    tagCount: number;
-    noteCount: number;
-    placeCount: number;
-    worldItemCount: number;
-    conceptCount: number;
-    promptCount: number;
-    wildcardCount: number;
-    propertyCount: number;
-    groupCount: number;
-    relatedCharacterCount: number;
-    totalContentItems: number;
-    lastUpdated: Date;
-    lastUsed: Date;
-  }
+	stats: {
+		imageCount: number;
+		videoCount: number;
+		albumCount: number;
+		tagCount: number;
+		noteCount: number;
+		placeCount: number;
+		worldItemCount: number;
+		conceptCount: number;
+		promptCount: number;
+		wildcardCount: number;
+		propertyCount: number;
+		groupCount: number;
+		relatedCharacterCount: number;
+		totalContentItems: number;
+		lastUpdated: Date;
+		lastUsed: Date;
+	};
 }
 ```
 
@@ -222,10 +222,10 @@ import { validateCreateCharacterData } from '@/transformers/character/validators
 
 const validation = validateCreateCharacterData(inputData);
 if (validation.success) {
-  // Crear personaje con datos validados
-  const character = await createCharacter(validation.data);
+	// Crear personaje con datos validados
+	const character = await createCharacter(validation.data);
 } else {
-  console.error(validation.error);
+	console.error(validation.error);
 }
 ```
 

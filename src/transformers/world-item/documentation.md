@@ -45,7 +45,7 @@ sequenceDiagram
 
     Client->>Actions: fetchWorldItems()
     Actions->>Service: getWorldItems()
-    
+
     Database-->>Service: WorldItems[]
     Service->>Transformer: transformWorldItems()
     Transformer-->>Service: transformed WorldItems[]
@@ -62,26 +62,26 @@ Representa la estructura básica de un objeto del mundo:
 
 ```typescript
 interface WorldItem {
-  id: string;
-  name: string;
-  description?: string;
-  emoji?: string;
-  color?: string;
-  type: string;
-  rarity: string;
-  category?: string;
-  attributes: string | WorldItemAttribute[];
-  effects: string | WorldItemEffect[];
-  requirements: string | WorldItemRequirement[];
-  stats: string | Record<string, number>;
-  origin: string;
-  size: string;
-  featuredImage?: string;
-  isFavorite: boolean;
-  sortBy: string;
-  filters: string | WorldItemFilter[];
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	type: string;
+	rarity: string;
+	category?: string;
+	attributes: string | WorldItemAttribute[];
+	effects: string | WorldItemEffect[];
+	requirements: string | WorldItemRequirement[];
+	stats: string | Record<string, number>;
+	origin: string;
+	size: string;
+	featuredImage?: string;
+	isFavorite: boolean;
+	sortBy: string;
+	filters: string | WorldItemFilter[];
+	createdAt: Date;
+	updatedAt: Date;
 }
 ```
 
@@ -91,15 +91,15 @@ Extiende `WorldItem` con propiedades adicionales para la UI:
 
 ```typescript
 interface WorldItemExtended extends WorldItem {
-  isSelected: boolean;
-  isHighlighted: boolean;
-  isEditing: boolean;
-  isExpanded: boolean;
-  displayOrder: number;
-  attributesArray: WorldItemAttribute[];
-  effectsArray: WorldItemEffect[];
-  requirementsArray: WorldItemRequirement[];
-  statsObject: Record<string, number>;
+	isSelected: boolean;
+	isHighlighted: boolean;
+	isEditing: boolean;
+	isExpanded: boolean;
+	displayOrder: number;
+	attributesArray: WorldItemAttribute[];
+	effectsArray: WorldItemEffect[];
+	requirementsArray: WorldItemRequirement[];
+	statsObject: Record<string, number>;
 }
 ```
 
@@ -109,16 +109,16 @@ Extiende `WorldItem` con información estadística:
 
 ```typescript
 interface WorldItemWithStats extends WorldItem {
-  lastUpdated: Date;
-  imageCount: number;
-  videoCount: number;
-  albumCount: number;
-  tagCount: number;
-  characterCount: number;
-  placeCount: number;
-  rarityLevel: number;
-  statsDisplay: Array<{name: string, value: number}>;
-  distribution: Array<{name: string, count: number}>;
+	lastUpdated: Date;
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	tagCount: number;
+	characterCount: number;
+	placeCount: number;
+	rarityLevel: number;
+	statsDisplay: Array<{ name: string; value: number }>;
+	distribution: Array<{ name: string; count: number }>;
 }
 ```
 
@@ -153,8 +153,8 @@ import { transformWorldItem } from '@/transformers/world-item';
 
 // Datos de Drizzle
 const drizzleWorldItem = await db.query.worldItems.findFirst({
-  where: (worldItems, { eq }) => eq(worldItems.id, 'worlditem-id-here'),
-  with: { _count: true }
+	where: (worldItems, { eq }) => eq(worldItems.id, 'worlditem-id-here'),
+	with: { _count: true },
 });
 
 // Transformar a WorldItem
@@ -195,8 +195,8 @@ console.log(worldItemWithStats.rarityLevel); // Nivel de rareza calculado
 
 ```typescript
 const updatedWorldItem = await updateWorldItem({
-  id: worldItemId,
-  worldItem: { name: 'Nuevo nombre' } // Solo actualiza el nombre
+	id: worldItemId,
+	worldItem: { name: 'Nuevo nombre' }, // Solo actualiza el nombre
 });
 ```
 

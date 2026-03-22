@@ -10,6 +10,7 @@
 ### 1. Eliminación de Archivos Legacy Duplicados
 
 Archivos eliminados que tenían versiones .effect.ts migradas:
+
 - ✅ `src/server/routes/files.ts` → migrado a `files.effect.ts`
 - ✅ `src/server/routes/metadata.ts` → migrado a `metadata.effect.ts`
 - ✅ `src/server/routes/search.ts` → migrado a `search.effect.ts`
@@ -23,6 +24,7 @@ Archivos eliminados que tenían versiones .effect.ts migradas:
 ### 2. Eliminación de Archivos Huérfanos No Usados
 
 Archivos eliminados que no estaban siendo importados:
+
 - ✅ `src/server/routes/dev.ts` - Utilidad de desarrollo no usada
 - ✅ `src/server/routes/file-changes.ts` - Sin uso detectado
 - ✅ `src/server/routes/file-sync.ts` - Sin uso detectado
@@ -35,6 +37,7 @@ Archivos eliminados que no estaban siendo importados:
 ### 3. Eliminación de Archivos Local-Files (Deshabilitados)
 
 Archivos eliminados que estaban deshabilitados desde julio 2024:
+
 - ✅ `src/server/routes/local-files.ts`
 - ✅ `src/server/routes/local-files-simple.ts`
 
@@ -45,10 +48,12 @@ Archivos eliminados que estaban deshabilitados desde julio 2024:
 ### 4. Estandarización de Importaciones
 
 Cambios en `src/server/index.ts`:
+
 - ✅ Eliminadas 16 extensiones `.js` de importaciones
 - ✅ Ahora todas las importaciones usan el formato consistente sin extensión
 
 **Ejemplo:**
+
 ```typescript
 // Antes (inconsistente)
 import albumsEffectRouter from './routes/albums.effect.js';
@@ -66,17 +71,20 @@ import activityRouter from './routes/activity';
 Archivos reorganizados en subdirectorios dedicados:
 
 #### Debug (`src/server/routes/debug/`)
+
 - ✅ `debug.ts` → `debug/index.ts`
 - ✅ `debug-entity-types.ts` → `debug/entity-types.ts`
 - ✅ `albums-debug.ts` → `debug/albums.ts`
 - ✅ `characters-debug.ts` → `debug/characters.ts`
 
 #### Test (`src/server/routes/test/`)
+
 - ✅ `test-characters.ts` → `test/characters.ts`
 - ✅ `metadata-simple-test.ts` → `test/metadata-simple.ts`
 - ✅ `metadata-advanced-test.ts` → `test/metadata-advanced.ts`
 
 **Cambios en importaciones:**
+
 ```typescript
 // Antes
 import debugEntityTypesRouter from './routes/debug-entity-types';
@@ -93,14 +101,15 @@ import testCharactersRouter from './routes/test/characters';
 
 ### Conteo de Archivos
 
-| Categoría | Antes | Después | Cambio |
-|-----------|-------|---------|--------|
-| **Rutas Effect (.effect.ts)** | 25 | 25 | = |
-| **Rutas Legacy (.ts)** | 22 | 11 | -11 |
-| **Archivos Debug/Test** | 7 | 7 | = (reorganizados) |
-| **Total archivos** | ~54 | ~43 | **-11** |
+| Categoría                     | Antes | Después | Cambio            |
+| ----------------------------- | ----- | ------- | ----------------- |
+| **Rutas Effect (.effect.ts)** | 25    | 25      | =                 |
+| **Rutas Legacy (.ts)**        | 22    | 11      | -11               |
+| **Archivos Debug/Test**       | 7     | 7       | = (reorganizados) |
+| **Total archivos**            | ~54   | ~43     | **-11**           |
 
 ### Archivos Eliminados Totales
+
 - 5 duplicados (tenían versión .effect.ts)
 - 4 huérfanos (no importados)
 - 2 deshabilitados (local-files)
@@ -112,12 +121,14 @@ import testCharactersRouter from './routes/test/characters';
 ## ✅ Verificación Final
 
 ### TypeScript
+
 ```bash
 $ bun run tsc
 ✅ Sin errores
 ```
 
 ### Biome Linting
+
 ```bash
 $ bun run biome
 ⚠️ 27 errores pre-existentes (no relacionados con cambios)

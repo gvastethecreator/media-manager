@@ -195,7 +195,9 @@ export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadRe
 		);
 
 		if (errors.length > 0) {
-			logger.warn(`⚠️ Se omitieron ${errors.length} archivos debido a errores (posiblemente nombres largos o permisos)`);
+			logger.warn(
+				`⚠️ Se omitieron ${errors.length} archivos debido a errores (posiblemente nombres largos o permisos)`
+			);
 		}
 
 		// Usar transformer para serializar el resultado

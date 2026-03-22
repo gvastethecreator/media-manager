@@ -13,11 +13,11 @@ El tipo principal y canónico que debe usarse en componentes de React, stores de
 - **Definición**: `src/types/entities/property/base.ts`
 - **Interfaz**:
 
-    ```typescript
-    interface PropertyWithStats extends PropertyBase {
-      stats: PropertyStatistics;
-    }
-    ```
+  ```typescript
+  interface PropertyWithStats extends PropertyBase {
+  	stats: PropertyStatistics;
+  }
+  ```
 
 - **Contiene**:
   - `PropertyBase`: El modelo `Property` base, directamente alineado con el esquema de Drizzle.
@@ -37,23 +37,23 @@ Este objeto proporciona métricas clave sobre el uso y la completitud de una pro
 ## Flujo de Datos
 
 1. **Server Actions (`@/app/actions/properties`)**:
-    - Las funciones (`getProperties`, `getProperty`, etc.) usan el cliente de Drizzle.
-    - **IMPRESCINDIBLE**: Todas las consultas deben incluir los conteos de relaciones para obtener los `_count` de las relaciones.
-    - **Ejemplo**: `with(relations)`
+   - Las funciones (`getProperties`, `getProperty`, etc.) usan el cliente de Drizzle.
+   - **IMPRESCINDIBLE**: Todas las consultas deben incluir los conteos de relaciones para obtener los `_count` de las relaciones.
+   - **Ejemplo**: `with(relations)`
 
 2. **Transformers (`@/transformers/property`)**:
-    - La función `toPropertyWithStats` (en `mappers.ts`) es la única responsable de convertir el dato de Drizzle (`PropertyWithCounts`) al tipo canónico (`PropertyWithStats`).
-    - Calcula todas las `PropertyStatistics` a partir del objeto `_count`.
+   - La función `toPropertyWithStats` (en `mappers.ts`) es la única responsable de convertir el dato de Drizzle (`PropertyWithCounts`) al tipo canónico (`PropertyWithStats`).
+   - Calcula todas las `PropertyStatistics` a partir del objeto `_count`.
 
 3. **Zustand Store (`@/store/entities/property`)**:
-    - El store solo debe almacenar objetos del tipo `PropertyWithStats`.
-    - La lógica de negocio y las llamadas a las server actions están en el slice `core.ts`.
-    - El estado se normaliza en `properties: Record<string, PropertyWithStats>`.
+   - El store solo debe almacenar objetos del tipo `PropertyWithStats`.
+   - La lógica de negocio y las llamadas a las server actions están en el slice `core.ts`.
+   - El estado se normaliza en `properties: Record<string, PropertyWithStats>`.
 
 4. **Componentes de React**:
-    - Los componentes deben consumir los datos del store de Zustand.
-    - Deben usar `PropertyWithStats` para mostrar tanto los datos base como las estadísticas.
-    - Para las mutaciones (crear, actualizar), deben llamar a las acciones expuestas por el store (`createProperty`, `updateProperty`, etc.).
+   - Los componentes deben consumir los datos del store de Zustand.
+   - Deben usar `PropertyWithStats` para mostrar tanto los datos base como las estadísticas.
+   - Para las mutaciones (crear, actualizar), deben llamar a las acciones expuestas por el store (`createProperty`, `updateProperty`, etc.).
 
 ## Diagrama de Flujo
 

@@ -10,6 +10,7 @@
 ### 1. Eliminación de Componentes Huérfanos (Alta Prioridad)
 
 **Directorios eliminados en `src/components/entities/`:**
+
 - ✅ `audio/` - audio-card.tsx, audio-list.tsx (sin uso)
 - ✅ `document/` - document-card.tsx, document-list.tsx (sin uso)
 - ✅ `file3d/` - file3d-card.tsx, file3d-list.tsx (sin uso)
@@ -26,17 +27,20 @@
 **11 archivos renombrados:**
 
 #### `src/components/batch-operations/`:
+
 - `BatchOperationDialog.tsx` → `batch-operation-dialog.tsx`
 - `BatchOperationsIndicator.tsx` → `batch-operations-indicator.tsx`
 - `BatchOperationsPanel.tsx` → `batch-operations-panel.tsx`
 
 #### `src/components/transitions/`:
+
 - `TransitionGroup.tsx` → `transition-group.tsx`
 - `FlipContainer.tsx` → `flip-container.tsx`
 - `MorphContainer.tsx` → `morph-container.tsx`
 - `ViewTransition.tsx` → `view-transition.tsx`
 
 #### `src/components/entities/profile/`:
+
 - `ProfileCard.tsx` → `profile-card.tsx`
 - `ProfileManager.tsx` → `profile-manager.tsx`
 - `ProfileList.tsx` → `profile-list.tsx`
@@ -49,6 +53,7 @@
 ### 3. Refactorización de Barrel Files (index.ts) (Media Prioridad)
 
 **Barrel files eliminados/refactorizados:**
+
 - ✅ `src/components/cards/image-card/index.tsx` → renombrado a `image-card.tsx`
 - ✅ `src/components/cards/uploaded-image-card/index.tsx` → renombrado a `uploaded-image-card.tsx`
 - ✅ `src/components/features/file-browser-new/components/media-thumbnail/index.ts` → eliminado
@@ -57,6 +62,7 @@
 - ✅ `src/components/ui/tag/index.tsx` → renombrado a `tag-input.tsx`
 
 **Barrel files mantenidos (uso legítimo):**
+
 - ✅ `src/components/features/file-browser-new/components/tcg-cards/index.tsx` - Complex dispatcher
 - ✅ `src/components/ui/index.ts` - Central UI exports
 - ✅ `src/components/views/mixed/index.tsx` - Container pattern
@@ -90,6 +96,7 @@
 ### 5. Eliminación de Archivos Duplicados y Temporales (Previo)
 
 **Archivos ya eliminados en sesión anterior:**
+
 - `src/components/features/file-viewer/json-advanced-viewer.tsx` (duplicado)
 - `src/components/features/file-viewer/write-file.cjs` (temporal)
 - `src/components/features/file-viewer/write-part2.cjs` (temporal)
@@ -101,14 +108,14 @@
 
 ## 📊 Estadísticas de Normalización
 
-| Categoría | Cantidad | Archivos/Directorios |
-|-----------|----------|----------------------|
-| **Directorios eliminados (huérfanos)** | 4 | entities/audio/, entities/document/, entities/file3d/, entities/json-file/ |
-| **Archivos renombrados (PascalCase → kebab-case)** | 11 | Ver lista arriba |
-| **Barrel files eliminados/refactorizados** | 6 | Ver lista arriba |
-| **Imports corregidos** | 17 | Ver lista arriba |
-| **Archivos eliminados (duplicados/temporales)** | 6 | Sesión anterior |
-| **Total cambios** | **~44** | |
+| Categoría                                          | Cantidad | Archivos/Directorios                                                       |
+| -------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| **Directorios eliminados (huérfanos)**             | 4        | entities/audio/, entities/document/, entities/file3d/, entities/json-file/ |
+| **Archivos renombrados (PascalCase → kebab-case)** | 11       | Ver lista arriba                                                           |
+| **Barrel files eliminados/refactorizados**         | 6        | Ver lista arriba                                                           |
+| **Imports corregidos**                             | 17       | Ver lista arriba                                                           |
+| **Archivos eliminados (duplicados/temporales)**    | 6        | Sesión anterior                                                            |
+| **Total cambios**                                  | **~44**  |                                                                            |
 
 ---
 
@@ -148,6 +155,7 @@ src/components/
 ## ✅ Verificación Final
 
 ### TypeScript
+
 ```bash
 $ npx tsc --noEmit
 ✅ Errores de imports resueltos
@@ -161,16 +169,19 @@ $ npx tsc --noEmit
 ## 🎉 Resultados Logrados
 
 ### Código Más Limpio
+
 - ✅ Sin componentes huérfanos duplicados
 - ✅ Sin archivos temporales ni scripts
 - ✅ Nombres de archivos consistentes (kebab-case)
 
 ### Mantenibilidad
+
 - ✅ Estructura de directorios clara
 - ✅ Barrel files justificados o eliminados
 - ✅ Imports actualizados automáticamente
 
 ### Consistencia
+
 - ✅ 11 archivos renombrados a kebab-case
 - ✅ 6 barrel files refactorizados
 - ✅ 17 imports corregidos

@@ -60,24 +60,24 @@ Representa la estructura básica de un lugar:
 
 ```typescript
 interface Place {
-  id: string;
-  name: string;
-  description?: string;
-  emoji?: string;
-  color?: string;
-  type: PlaceType;
-  category?: PlaceCategory;
-  region?: string;
-  climate?: string;
-  population?: number;
-  government?: string;
-  dangers?: string | string[];
-  resources?: string | string[];
-  lore?: string;
-  history?: string;
-  stats?: string | Record<string, number>;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	type: PlaceType;
+	category?: PlaceCategory;
+	region?: string;
+	climate?: string;
+	population?: number;
+	government?: string;
+	dangers?: string | string[];
+	resources?: string | string[];
+	lore?: string;
+	history?: string;
+	stats?: string | Record<string, number>;
+	createdAt: Date;
+	updatedAt: Date;
 }
 ```
 
@@ -87,14 +87,14 @@ Extiende `Place` con propiedades adicionales para la UI:
 
 ```typescript
 interface PlaceExtended extends Place {
-  isSelected: boolean;
-  isHighlighted: boolean;
-  isEditing: boolean;
-  isExpanded: boolean;
-  displayOrder: number;
-  dangersArray: string[];
-  resourcesArray: string[];
-  statsObject: Record<string, number>;
+	isSelected: boolean;
+	isHighlighted: boolean;
+	isEditing: boolean;
+	isExpanded: boolean;
+	displayOrder: number;
+	dangersArray: string[];
+	resourcesArray: string[];
+	statsObject: Record<string, number>;
 }
 ```
 
@@ -104,16 +104,16 @@ Extiende `Place` con información estadística:
 
 ```typescript
 interface PlaceWithStats extends Place {
-  lastUpdated: Date;
-  imageCount: number;
-  videoCount: number;
-  albumCount: number;
-  tagCount: number;
-  characterCount: number;
-  worldItemCount: number;
-  importanceLevel: number;
-  statsDisplay: Array<{name: string, value: number}>;
-  distribution: Array<{name: string, count: number}>;
+	lastUpdated: Date;
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	tagCount: number;
+	characterCount: number;
+	worldItemCount: number;
+	importanceLevel: number;
+	statsDisplay: Array<{ name: string; value: number }>;
+	distribution: Array<{ name: string; count: number }>;
 }
 ```
 
@@ -148,8 +148,8 @@ import { transformPlace } from '@/transformers/place';
 
 // Datos de Drizzle
 const DrizzlePlace = await Drizzle.place.findUnique({
-  where: { id: 'place-id-here' },
-  include: { _count: true }
+	where: { id: 'place-id-here' },
+	include: { _count: true },
 });
 
 // Transformar a Place
@@ -190,8 +190,8 @@ console.log(placeWithStats.importanceLevel); // Nivel de importancia calculado
 
 ```typescript
 const updatedPlace = await updatePlace({
-  id: placeId,
-  place: { name: 'Nuevo nombre' } // Solo actualiza el nombre
+	id: placeId,
+	place: { name: 'Nuevo nombre' }, // Solo actualiza el nombre
 });
 ```
 

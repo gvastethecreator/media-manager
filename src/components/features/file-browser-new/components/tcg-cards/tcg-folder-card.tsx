@@ -12,8 +12,10 @@ import { TCGCardBase, type TCGCardBaseProps } from './tcg-card-base';
 // TIPOS
 // ============================================================================
 
-export interface TCGFolderCardProps
-	extends Omit<TCGCardBaseProps, 'thumbnailContent' | 'footerContent' | 'accentColor'> {
+export interface TCGFolderCardProps extends Omit<
+	TCGCardBaseProps,
+	'thumbnailContent' | 'footerContent' | 'accentColor'
+> {
 	item: FolderBrowserItem;
 }
 

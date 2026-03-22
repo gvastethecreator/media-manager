@@ -45,7 +45,7 @@ sequenceDiagram
     participant DB
     Client->>API: createCharacter()
     API->>Transformer: mapCreateCharacterDataToDrizzle()
-    
+
     DB-->>Transformer: Character
     Transformer-->>API: transformCharacter()
     API-->>Client: CharacterComplete

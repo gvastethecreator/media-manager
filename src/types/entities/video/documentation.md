@@ -52,7 +52,7 @@ sequenceDiagram
     participant DB
     Client->>API: createVideo()
     API->>Transformer: mapCreateVideoDataToDrizzle()
-    
+
     DB-->>Transformer: Video
     Transformer-->>API: transformVideo()
     API-->>Client: VideoComplete

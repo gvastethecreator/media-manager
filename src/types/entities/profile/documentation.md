@@ -33,12 +33,12 @@ import { createProfile, updateProfile, getProfile } from '@/transformers/profile
 
 // Crear un nuevo perfil
 const nuevoPerfil = await createProfile({
-  name: 'Usuario Principal',
-  emoji: '👨‍💻',
-  color: '#3b82f6',
-  theme: 'dark',
-  language: 'es',
-  description: 'Perfil principal del sistema'
+	name: 'Usuario Principal',
+	emoji: '👨‍💻',
+	color: '#3b82f6',
+	theme: 'dark',
+	language: 'es',
+	description: 'Perfil principal del sistema',
 });
 
 // Obtener un perfil existente
@@ -46,9 +46,9 @@ const perfil = await getProfile(nuevoPerfil.id);
 
 // Actualizar un perfil existente
 await updateProfile(nuevoPerfil.id, {
-  name: 'Usuario Actualizado',
-  theme: 'light',
-  description: 'Perfil actualizado con nueva configuración'
+	name: 'Usuario Actualizado',
+	theme: 'light',
+	description: 'Perfil actualizado con nueva configuración',
 });
 ```
 
@@ -61,7 +61,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createProfile()
-    
+
     Transformer->>DB: db.profile.create()
     DB-->>Transformer: Profile
     Transformer-->>API: transformProfile()

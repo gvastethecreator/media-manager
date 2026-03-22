@@ -32,8 +32,7 @@ const spinnerVariants = cva('inline-flex items-center justify-center transition-
 });
 
 export interface LoadingSpinnerProps
-	extends React.HTMLAttributes<HTMLOutputElement>,
-		VariantProps<typeof spinnerVariants> {
+	extends React.HTMLAttributes<HTMLOutputElement>, VariantProps<typeof spinnerVariants> {
 	/** Texto descriptivo para accesibilidad */
 	label?: string;
 	/** Mostrar texto junto al spinner */

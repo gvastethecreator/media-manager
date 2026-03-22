@@ -9,9 +9,8 @@ async function checkThumbnailStatus() {
 		console.log('🔍 Verificando estado de thumbnails...\n');
 
 		const { db } = await import('../src/lib/drizzle/index.js');
-		const { videos, audios, documents, jsonFiles, file3Ds, metadatas } = await import(
-			'../src/lib/drizzle/schema/index.js'
-		);
+		const { videos, audios, documents, jsonFiles, file3Ds, metadatas } =
+			await import('../src/lib/drizzle/schema/index.js');
 		const { eq, and, isNull } = await import('drizzle-orm');
 
 		// Verificar videos

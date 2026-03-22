@@ -55,7 +55,9 @@ export const jsonFiles = sqliteTable(
 		minified: integer('minified', { mode: 'boolean' }).default(false),
 		prettyPrinted: integer('prettyPrinted', { mode: 'boolean' }).default(false),
 		parsedContent: text('parsedContent'),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

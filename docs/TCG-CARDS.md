@@ -7,9 +7,11 @@ Sistema completo de cards estilo TCG con efectos 3D, shaders sutiles, colores di
 ## Componentes Creados
 
 ### 1. `useTilt3D` Hook
+
 **Ubicación**: `src/hooks/use-tilt-3d.ts`
 
 Hook que proporciona efecto de inclinación 3D al hover:
+
 - Rotación X/Y basada en posición del mouse
 - Efecto de escala suave
 - Reflejo/glare dinámico
@@ -18,17 +20,19 @@ Hook que proporciona efecto de inclinación 3D al hover:
 
 ```typescript
 const { ref, style, glareStyle, handlers } = useTilt3D({
-  maxTilt: 15,
-  scale: 1.03,
-  enableGlare: true,
-  glareOpacity: 0.3
+	maxTilt: 15,
+	scale: 1.03,
+	enableGlare: true,
+	glareOpacity: 0.3,
 });
 ```
 
 ### 2. `TCGCard` Componente Base
+
 **Ubicación**: `src/components/ui/tcg/tcg-card.tsx`
 
 Componente base de carta TCG con:
+
 - Efectos 3D integrados
 - Bordes dinámicos con gradiente
 - Textura sutil (grain)
@@ -52,9 +56,11 @@ Componente base de carta TCG con:
 ```
 
 ### 3. `TCGEntityCard` Componente
+
 **Ubicación**: `src/components/cards/tcg-entity-card.tsx`
 
 Integración completa con entidades:
+
 - Soporte para todos los tipos de entidad
 - Thumbnails automáticos
 - Colores dinámicos según tipo
@@ -63,19 +69,15 @@ Integración completa con entidades:
 - Metadatos (formato, tamaño)
 
 ```tsx
-<TCGEntityCard
-  entity={entity}
-  size="lg"
-  variant="tcg"
-  isSelected={selected}
-  onClick={handleClick}
-/>
+<TCGEntityCard entity={entity} size="lg" variant="tcg" isSelected={selected} onClick={handleClick} />
 ```
 
 ## Estilos CSS
+
 **Ubicación**: `src/components/ui/tcg/tcg-card.css`
 
 Incluye:
+
 - Variables CSS para personalización
 - Gradientes y sombras dinámicas
 - Animaciones keyframes (shimmer, glow, pulse)
@@ -90,21 +92,21 @@ El sistema `EntityCard` ahora soporta la variante `'tcg'`:
 
 ```tsx
 // Usando variant directamente
-<EntityCard 
-  entity={entity} 
-  variant="tcg" 
+<EntityCard
+  entity={entity}
+  variant="tcg"
   size="lg"
 />
 
 // Usando preset
-<EntityCard 
-  entity={entity} 
+<EntityCard
+  entity={entity}
   preset="tcg-mode"
 />
 
 // Usando tcgMode (legacy)
-<EntityCard 
-  entity={entity} 
+<EntityCard
+  entity={entity}
   tcgMode={true}
   size="lg"
 />
@@ -120,6 +122,7 @@ El sistema `EntityCard` ahora soporta la variante `'tcg'`:
 ## Rareza de Cartas
 
 La rareza afecta los efectos visuales:
+
 - `common`: Efectos básicos
 - `uncommon`: Glow verde suave
 - `rare`: Glow azul + shimmer
@@ -132,25 +135,30 @@ La rareza se calcula automáticamente basada en el número de relaciones de la e
 ## Características Visuales
 
 ### Efectos 3D
+
 - Perspectiva 1000px
 - Rotación máxima 15°
 - Escala 1.03 en hover
 - Transición 400ms ease-out
 
 ### Shaders y Texturas
+
 - Fondo con gradiente sutil
 - Textura grain (3% opacity)
 - Overlay de integración en thumbnails
 - Reflejo dinámico siguiendo el mouse
 
 ### Bordes Dinámicos
+
 - Borde de 2-4px según rareza
 - Gradiente del color de la entidad
 - Sombra elevada (shadow-dt)
 - Glow animado para rarezas altas
 
 ### Colores
+
 Usa las variables CSS de entidades:
+
 - `--entity-image`: Azul
 - `--entity-video`: Rojo
 - `--entity-audio`: Sky
@@ -168,34 +176,33 @@ Usa las variables CSS de entidades:
 ## Ejemplos de Uso
 
 ### Card Básica
+
 ```tsx
 <TCGEntityCard entity={imageEntity} size="md" />
 ```
 
 ### Card con Eventos
+
 ```tsx
-<TCGEntityCard 
-  entity={videoEntity}
-  size="lg"
-  isSelected={isSelected}
-  onClick={(e) => handleSelect(e, entity.id)}
-  onDoubleClick={() => openEntity(entity.id)}
+<TCGEntityCard
+	entity={videoEntity}
+	size="lg"
+	isSelected={isSelected}
+	onClick={(e) => handleSelect(e, entity.id)}
+	onDoubleClick={() => openEntity(entity.id)}
 />
 ```
 
 ### Card Compacta
+
 ```tsx
-<TCGEntityCard 
-  entity={folderEntity}
-  size="sm"
-  isCompact={true}
-  disable3D={true}
-/>
+<TCGEntityCard entity={folderEntity} size="sm" isCompact={true} disable3D={true} />
 ```
 
 ## Integración
 
 Los estilos CSS se importan automáticamente en `globals.css`:
+
 ```css
 @import '../components/ui/tcg/tcg-card.css';
 ```

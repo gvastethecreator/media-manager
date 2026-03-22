@@ -11,14 +11,14 @@
 
 **Directorios eliminados y archivos movidos:**
 
-| Directorio Original | Nueva Ubicación |
-|--------------------|-----------------|
-| `settings/audio/` → | `settings/media/audio-settings.tsx` |
-| `settings/video/` → | `settings/media/videos-settings.tsx` |
-| `settings/document/` → | `settings/media/document-settings.tsx` |
-| `settings/file3d/` → | `settings/media/file3d-settings.tsx` |
-| `settings/json-file/` → | `settings/media/json-file-settings.tsx` |
-| `settings/image/` → | `settings/media/scanned-images-settings.tsx` |
+| Directorio Original           | Nueva Ubicación                               |
+| ----------------------------- | --------------------------------------------- |
+| `settings/audio/` →           | `settings/media/audio-settings.tsx`           |
+| `settings/video/` →           | `settings/media/videos-settings.tsx`          |
+| `settings/document/` →        | `settings/media/document-settings.tsx`        |
+| `settings/file3d/` →          | `settings/media/file3d-settings.tsx`          |
+| `settings/json-file/` →       | `settings/media/json-file-settings.tsx`       |
+| `settings/image/` →           | `settings/media/scanned-images-settings.tsx`  |
 | `settings/uploaded-images/` → | `settings/media/uploaded-images-settings.tsx` |
 
 **Total:** 7 directorios eliminados, 7 archivos consolidados en `settings/media/`
@@ -28,6 +28,7 @@
 ### 2. Eliminación de Legacy Entity Settings (Alta Prioridad)
 
 **Directorios entity eliminados (ya migrados a modern/):**
+
 - ✅ `settings/albums/` - Migrado a OrganizationSettingsModern
 - ✅ `settings/characters/` - Migrado a WorldbuildingSettingsModern
 - ✅ `settings/collections/` - Migrado a OrganizationSettingsModern
@@ -48,6 +49,7 @@
 ### 3. Unificación de Create Forms (Media Prioridad)
 
 **Forms consolidados en `settings/forms/`:**
+
 - `forms/create-album-form.tsx`
 - `forms/create-character-form.tsx`
 - `forms/create-collection-form.tsx`
@@ -64,6 +66,7 @@
 **Total:** 12 archivos de forms unificados
 
 **Imports actualizados:**
+
 - `modern/organization-settings-modern.tsx`
 - `modern/taxonomy-settings-modern.tsx`
 - `modern/worldbuilding-settings-modern.tsx`
@@ -73,11 +76,13 @@
 ### 4. Eliminación de Componentes Duplicados (Media Prioridad)
 
 **Componente eliminado:**
+
 - ✅ `settings/common/basic-settings-card.tsx`
   - **Razón:** No se usaba en ninguna parte
   - **Función:** Placeholder para settings no implementados
 
 **Componente mantenido:**
+
 - ✅ `settings/modern/settings-card.tsx`
   - Componente principal usado en toda la UI de settings moderna
 
@@ -86,6 +91,7 @@
 ### 5. Eliminación de Archivos Huérfanos
 
 **Archivos/directorios vacíos eliminados:**
+
 - ✅ `settings/uploaded-images/` (solo tenía README.md)
 - ✅ `settings/common/basic-settings-card.tsx` (sin uso)
 
@@ -93,13 +99,13 @@
 
 ## 📊 Estadísticas Finales
 
-| Categoría | Cantidad |
-|-----------|----------|
-| **Directorios media eliminados** | 7 |
-| **Directorios entity eliminados** | 12 |
-| **Forms unificados** | 12 |
-| **Componentes duplicados eliminados** | 1 |
-| **Total directorios/archivos eliminados** | **~33** |
+| Categoría                                 | Cantidad |
+| ----------------------------------------- | -------- |
+| **Directorios media eliminados**          | 7        |
+| **Directorios entity eliminados**         | 12       |
+| **Forms unificados**                      | 12       |
+| **Componentes duplicados eliminados**     | 1        |
+| **Total directorios/archivos eliminados** | **~33**  |
 
 ---
 
@@ -147,6 +153,7 @@ src/components/settings/
 ## ✅ Verificación Final
 
 ### TypeScript
+
 ```bash
 $ npx tsc --noEmit
 ✅ Errores de imports resueltos
@@ -155,6 +162,7 @@ $ npx tsc --noEmit
 ```
 
 ### Imports Actualizados
+
 - `media-settings-modern.tsx` → imports desde `../media/`
 - `modern-settings-view.tsx` → imports desde `../media/`
 - `organization-settings-modern.tsx` → imports desde `../forms/`
@@ -166,18 +174,21 @@ $ npx tsc --noEmit
 ## 🎉 Resultados Logrados
 
 ### Estructura Limpia
+
 - ✅ Sin directorios de un solo archivo dispersos
 - ✅ Forms centralizados en ubicación lógica
 - ✅ Media settings organizados en directorio unificado
 - ✅ Legacy entity settings completamente migrados
 
 ### Mantenibilidad
+
 - ✅ Un solo lugar para forms de creación
 - ✅ Un solo lugar para settings de media
 - ✅ Imports claros y consistentes
 - ✅ Sin código duplicado
 
 ### Consistencia
+
 - ✅ Nomenclatura consistente (kebab-case)
 - ✅ Estructura de directorios clara
 - ✅ Separación de concerns (media, forms, modern, etc.)
@@ -187,9 +198,11 @@ $ npx tsc --noEmit
 ## 📝 Notas
 
 ### Errores de TypeScript (Pendientes - No Relacionados)
+
 Los 4 errores en `navigation/constants/categories.ts` sobre valores `ViewType` inválidos (`"worldItems"`, `"jsonFiles"`, etc.) son pre-existentes y requieren corrección manual.
 
 ### Próximos Pasos Opcionales (Baja Prioridad)
+
 1. Simplificar el directorio `folders/` (25+ archivos, muy extenso)
 2. Revisar si `panels/`, `profiles/`, `shortcuts/` necesitan limpieza similar
 3. Consolidar READMEs si es necesario

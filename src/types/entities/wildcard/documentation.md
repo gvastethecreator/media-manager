@@ -36,23 +36,23 @@ import { WildcardSortCriteria } from '@/types/entities/wildcard';
 
 // Crear un nuevo wildcard
 const nuevoWildcard = await createWildcard({
-  name: 'Nombres',
-  emoji: '👤',
-  color: '#8b5cf6',
-  category: 'personal',
-  children: JSON.stringify(['Ana', 'Carlos', 'Elena', 'Miguel', 'Laura'])
+	name: 'Nombres',
+	emoji: '👤',
+	color: '#8b5cf6',
+	category: 'personal',
+	children: JSON.stringify(['Ana', 'Carlos', 'Elena', 'Miguel', 'Laura']),
 });
 
 // Obtener wildcards por categoría
 const wildcardsPorCategoria = await getWildcards({
-  filters: { categories: ['personal'] },
-  sortBy: WildcardSortCriteria.NAME_ASC
+	filters: { categories: ['personal'] },
+	sortBy: WildcardSortCriteria.NAME_ASC,
 });
 
 // Actualizar un wildcard existente
 await updateWildcard(nuevoWildcard.id, {
-  children: JSON.stringify(['Ana', 'Carlos', 'Elena', 'Miguel', 'Laura', 'David', 'Sofía']),
-  isFavorite: true
+	children: JSON.stringify(['Ana', 'Carlos', 'Elena', 'Miguel', 'Laura', 'David', 'Sofía']),
+	isFavorite: true,
 });
 ```
 
@@ -66,7 +66,7 @@ sequenceDiagram
     participant DB
     Client->>API: createWildcard()
     API->>Transformer: mapCreateWildcardDataToDrizzle()
-    
+
     DB-->>Transformer: Wildcard
     Transformer-->>API: transformWildcard()
     API-->>Client: WildcardComplete

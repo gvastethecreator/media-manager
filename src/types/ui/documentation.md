@@ -33,22 +33,22 @@ import { createSettings, updateSettings, getSettings } from '@/transformers/sett
 
 // Crear nuevas configuraciones
 const nuevasSettings = await createSettings({
-  theme: 'dark',
-  language: 'es',
-  profileId: 'profile-123',
-  data: {
-    fontFamily: 'system',
-    fontSize: 'md',
-    animations: true,
-    thumbnailsRespectAspectRatio: true,
-    thumbnailsBorderRadius: {
-      grid: 8,
-      card: 12,
-      mosaic: 4
-    },
-    thumbnailsAnimations: true,
-    thumbnailsUltraPerformance: false
-  }
+	theme: 'dark',
+	language: 'es',
+	profileId: 'profile-123',
+	data: {
+		fontFamily: 'system',
+		fontSize: 'md',
+		animations: true,
+		thumbnailsRespectAspectRatio: true,
+		thumbnailsBorderRadius: {
+			grid: 8,
+			card: 12,
+			mosaic: 4,
+		},
+		thumbnailsAnimations: true,
+		thumbnailsUltraPerformance: false,
+	},
 });
 
 // Obtener configuraciones existentes
@@ -56,11 +56,11 @@ const settings = await getSettings(nuevasSettings.id);
 
 // Actualizar configuraciones existentes
 await updateSettings(nuevasSettings.id, {
-  theme: 'light',
-  data: {
-    thumbnailsAnimations: false,
-    thumbnailsUltraPerformance: true
-  }
+	theme: 'light',
+	data: {
+		thumbnailsAnimations: false,
+		thumbnailsUltraPerformance: true,
+	},
 });
 ```
 
@@ -74,7 +74,7 @@ sequenceDiagram
     participant DB
     Client->>API: createSettings()
     API->>Transformer: mapCreateSettingsDataToDrizzle()
-    
+
     DB-->>Transformer: Settings
     Transformer-->>API: transformSettings()
     API-->>Client: SettingsBase

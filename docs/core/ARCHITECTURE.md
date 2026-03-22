@@ -202,11 +202,11 @@ export const useSelectionStore = create<SelectionState>()(
 ```typescript
 // Ejemplo: Hook de imágenes
 export function useImages(folderId: string) {
-  return useQuery({
-    queryKey: ['images', 'byFolder', folderId],
-    queryFn: () => imagesApi.getByFolder(folderId),
-    staleTime: 5 * 60 * 1000, // 5 minutos
-  });
+	return useQuery({
+		queryKey: ['images', 'byFolder', folderId],
+		queryFn: () => imagesApi.getByFolder(folderId),
+		staleTime: 5 * 60 * 1000, // 5 minutos
+	});
 }
 ```
 
@@ -235,11 +235,11 @@ export const imageService = {
   getById: async (id: string) => { ... },
   update: async (id: string, input: UpdateImageInput) => { ... },
   delete: async (id: string) => { ... },
-  
+
   // Operaciones específicas
   getByFolder: async (folderId: string) => { ... },
   generateThumbnail: async (id: string) => { ... },
-  
+
   // Con Effect-TS
   getByIdEffect: (id: string) => Effect.gen(function* () { ... }),
 };
@@ -253,22 +253,26 @@ El esquema está organizado por dominios:
 
 ```typescript
 // Ejemplo: Tabla de imágenes
-export const images = sqliteTable('Image', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  path: text('path').notNull(),
-  hash: text('hash').notNull(),
-  size: integer('size').notNull(),
-  width: integer('width').notNull(),
-  height: integer('height').notNull(),
-  thumbnail: text('thumbnail'),
-  folderId: text('folderId').notNull(),
-  createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull(),
-  updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }),
-}, (table) => ({
-  folderIdIdx: index('Image_folderId_idx').on(table.folderId),
-  hashIdx: index('Image_hash_idx').on(table.hash),
-}));
+export const images = sqliteTable(
+	'Image',
+	{
+		id: text('id').primaryKey(),
+		name: text('name').notNull(),
+		path: text('path').notNull(),
+		hash: text('hash').notNull(),
+		size: integer('size').notNull(),
+		width: integer('width').notNull(),
+		height: integer('height').notNull(),
+		thumbnail: text('thumbnail'),
+		folderId: text('folderId').notNull(),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull(),
+		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }),
+	},
+	(table) => ({
+		folderIdIdx: index('Image_folderId_idx').on(table.folderId),
+		hashIdx: index('Image_hash_idx').on(table.hash),
+	})
+);
 ```
 
 #### Relaciones Many-to-Many
@@ -277,12 +281,16 @@ Las relaciones se manejan con tablas intermedias:
 
 ```typescript
 // Ejemplo: Imagen a Tags
-export const imageTags = sqliteTable('_ImageToTag', {
-  A: text('A').notNull(), // imageId
-  B: text('B').notNull(), // tagId
-}, (table) => ({
-  AB_unique: uniqueIndex('_ImageToTag_AB_unique').on(table.A, table.B),
-}));
+export const imageTags = sqliteTable(
+	'_ImageToTag',
+	{
+		A: text('A').notNull(), // imageId
+		B: text('B').notNull(), // tagId
+	},
+	(table) => ({
+		AB_unique: uniqueIndex('_ImageToTag_AB_unique').on(table.A, table.B),
+	})
+);
 ```
 
 ### 4.4 Capa de API (Express Routes)
@@ -325,19 +333,19 @@ Los transformadores convierten datos de BD a vistas:
 ```typescript
 // src/transformers/image/
 export function imageToView(image: DrizzleImage): ImageView {
-  return {
-    ...image,
-    formattedSize: formatFileSize(image.size),
-    thumbnailUrl: `/api/images/${image.id}/thumbnail`,
-  };
+	return {
+		...image,
+		formattedSize: formatFileSize(image.size),
+		thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+	};
 }
 
 export function imageToStats(image: DrizzleImage, counts: Counts): ImageWithStats {
-  return {
-    ...imageToView(image),
-    tagCount: counts.tags,
-    albumCount: counts.albums,
-  };
+	return {
+		...imageToView(image),
+		tagCount: counts.tags,
+		albumCount: counts.albums,
+	};
 }
 ```
 
@@ -348,10 +356,10 @@ Los features experimentales se controlan con flags:
 ```typescript
 // src/config/features.ts
 export const FEATURES = {
-  USE_EFFECT_TAGS: process.env.USE_EFFECT_TAGS !== 'false',
-  USE_EFFECT_IMAGES: process.env.USE_EFFECT_IMAGES !== 'false',
-  USE_EFFECT_VIDEOS: process.env.USE_EFFECT_VIDEOS !== 'false',
-  USE_EFFECT_AUDIOS: process.env.USE_EFFECT_AUDIOS !== 'false',
+	USE_EFFECT_TAGS: process.env.USE_EFFECT_TAGS !== 'false',
+	USE_EFFECT_IMAGES: process.env.USE_EFFECT_IMAGES !== 'false',
+	USE_EFFECT_VIDEOS: process.env.USE_EFFECT_VIDEOS !== 'false',
+	USE_EFFECT_AUDIOS: process.env.USE_EFFECT_AUDIOS !== 'false',
 };
 ```
 
@@ -365,7 +373,7 @@ emitImageEvent(IMAGE_EVENTS.CREATED, { id, name });
 
 // Suscripción
 onImageEvent(IMAGE_EVENTS.CREATED, (data) => {
-  refreshQueries(['images']);
+	refreshQueries(['images']);
 });
 ```
 

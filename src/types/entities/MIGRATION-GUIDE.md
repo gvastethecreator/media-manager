@@ -2,8 +2,6 @@
 
 ## Resumen
 
-
-
 > **⚠️ NOTA DE MIGRACIÓN**: Este proyecto está migrando gradualmente de Prisma a Drizzle ORM. Durante la transición, ambos ORMs coexisten. Ver [Guía de Coexistencia](../../../docs/migration-drizzle/02-coexistence-guide.md) para detalles sobre la migración en curso.
 
 ## ✅ Entidades migradas
@@ -58,8 +56,8 @@ Para cada entidad, seguimos este patrón:
 
    ```typescript
    export interface EntityRelations {
-     images?: Image[];
-     // otras relaciones
+   	images?: Image[];
+   	// otras relaciones
    }
    ```
 
@@ -67,8 +65,8 @@ Para cada entidad, seguimos este patrón:
 
    ```typescript
    export interface EntityCounts {
-     images?: number;
-     // otros contadores
+   	images?: number;
+   	// otros contadores
    }
    ```
 
@@ -76,15 +74,15 @@ Para cada entidad, seguimos este patrón:
 
    ```typescript
    export interface EntityCreateInput {
-     name: string;
-     // otros campos requeridos
-     images?: { connect: { id: string }[] };
+   	name: string;
+   	// otros campos requeridos
+   	images?: { connect: { id: string }[] };
    }
 
    export interface EntityUpdateInput {
-     name?: string;
-     // campos opcionales
-     images?: { set?: { id: string }[] };
+   	name?: string;
+   	// campos opcionales
+   	images?: { set?: { id: string }[] };
    }
    ```
 
@@ -121,20 +119,20 @@ import type { Entity, EntityCreateInput, EntityUpdateInput } from '@/types/entit
 
 // Crear nueva entidad
 const createInput: EntityCreateInput = {
-  name: 'Nueva entidad',
-  // otros campos
+	name: 'Nueva entidad',
+	// otros campos
 };
 
 // Actualizar entidad
 const updateInput: EntityUpdateInput = {
-  name: 'Nombre actualizado',
-  // otros campos
+	name: 'Nombre actualizado',
+	// otros campos
 };
 
 // Usar el tipo base
 const entity: Entity = {
-  id: '123',
-  name: 'Entidad',
-  // otros campos requeridos por la base de datos
+	id: '123',
+	name: 'Entidad',
+	// otros campos requeridos por la base de datos
 };
 ```

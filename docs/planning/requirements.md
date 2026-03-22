@@ -5,6 +5,7 @@
 Este proyecto tiene como objetivo mejorar significativamente el navegador de archivos (file-browser.tsx) implementando funcionalidades avanzadas de navegación, visualización y gestión de archivos. El navegador actual ya tiene una base sólida con:
 
 **Arquitectura Existente:**
+
 - ✅ Soporte multi-entidad con `AnyEntityWithStats` y `EntityStatsType`
 - ✅ Sistema completo de vistas: `ListView`, `GridView`, `CardsView`, `MasonryView`, `TrueMasonryView`
 - ✅ Virtualización avanzada con `base-virtualized-view.tsx` y TanStack Virtual
@@ -19,6 +20,7 @@ Este proyecto tiene como objetivo mejorar significativamente el navegador de arc
 - ✅ Sistema de configuración avanzado con transformers y validators
 
 **Áreas de Mejora Identificadas:**
+
 - Menú contextual necesita operaciones adicionales (copiar, pegar, renombrar, mover)
 - Vistas necesitan mostrar más metadata y ser más personalizables
 - Falta soporte completo para todos los tipos de EntityStatsType en file viewer
@@ -33,6 +35,7 @@ Este proyecto tiene como objetivo mejorar significativamente el navegador de arc
 **User Story:** Como usuario, quiero poder hacer click derecho en archivos y carpetas para acceder a opciones de gestión avanzadas, para poder realizar acciones comunes de manera eficiente y tener acceso completo a todas las funcionalidades del sistema.
 
 **Current State:** Sistema de menú contextual existente en `src/components/features/file-browser/context-menu/` con:
+
 - `context-menu.tsx` - Componente principal implementado
 - `types.ts` - Tipos `ContextMenuAction` y `FileContextMenuProps` definidos
 - `context-action-handler.ts` - Manejador de acciones básico implementado
@@ -64,6 +67,7 @@ Este proyecto tiene como objetivo mejorar significativamente el navegador de arc
 **User Story:** Como usuario, quiero diferentes modos de visualización para archivos, para poder elegir la vista que mejor se adapte a mi flujo de trabajo.
 
 **Current State:** Sistema completo de vistas existente en `src/components/features/file-browser/views/` con:
+
 - `list-view.tsx` - Vista de lista básica implementada
 - `grid-view.tsx` - Vista de grid implementada
 - `cards-view.tsx` - Vista de cards implementada con EntityCard integration
@@ -160,12 +164,15 @@ Este proyecto tiene como objetivo mejorar significativamente el navegador de arc
 6. WHEN la selección está activa THEN el sistema SHALL mostrar feedback visual claro
 7. WHEN el usuario cancela la selección (Escape) THEN el sistema SHALL limpiar la selección
 8. WHEN hay elementos seleccionados THEN el sistema SHALL habilitar acciones masivas
+
 ###
- Requirement 8 - User Experience Improvements
+
+Requirement 8 - User Experience Improvements
 
 **User Story:** Como usuario, quiero una experiencia de navegación fluida y sin interferencias, para poder interactuar naturalmente con los archivos.
 
 **Current Issues:**
+
 - CSS `user-select` puede interferir con la selección de elementos
 - No hay manera de deseleccionar elementos haciendo click en espacio vacío
 

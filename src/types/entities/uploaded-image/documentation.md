@@ -46,7 +46,11 @@ graph TD
 ## Ejemplo de uso
 
 ```typescript
-import { createUploadedImage, processUploadedImage, searchUploadedImages } from '@/transformers/uploaded-image/transformer';
+import {
+	createUploadedImage,
+	processUploadedImage,
+	searchUploadedImages,
+} from '@/transformers/uploaded-image/transformer';
 
 const upload = await createUploadedImage({ file: fileObject });
 const procesada = await processUploadedImage(upload.id);
@@ -64,7 +68,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createUploadedImage()
-    
+
     Transformer->>DB: db.uploadedImage.create()
     DB-->>Transformer: UploadedImage
     Transformer-->>API: transformUploadedImage()

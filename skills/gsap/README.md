@@ -16,6 +16,7 @@
   ──●────●────●────●────●────●──
    AI Skills for Claude • Cursor • Copilot
 ```
+
 GSAP Timeline → Tweens → ScrollTrigger → MotionPath → Flip → more...
 
 # GSAP AI Skills
@@ -53,26 +54,26 @@ Copy the `skills/` folder into your agent’s skill directory:
 
 Clone this repo and copy the skill folders into the appropriate directory for your agent:
 
-| Agent | Skill Directory | Docs |
-|-------|-----------------|------|
-| Claude Code | `~/.claude/skills/` | [docs](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills) |
-| Cursor | `~/.cursor/skills/` | [docs](https://docs.cursor.com/context/rules) |
-| OpenCode | `~/.config/opencode/skills/` | [docs](https://opencode.ai/docs/skills/) |
-| OpenAI Codex | `~/.codex/skills/` | [docs](https://developers.openai.com/codex/skills/) |
-| Pi | `~/.pi/agent/skills/` | [docs](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent#skills) |
+| Agent        | Skill Directory              | Docs                                                                               |
+| ------------ | ---------------------------- | ---------------------------------------------------------------------------------- |
+| Claude Code  | `~/.claude/skills/`          | [docs](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills)     |
+| Cursor       | `~/.cursor/skills/`          | [docs](https://docs.cursor.com/context/rules)                                      |
+| OpenCode     | `~/.config/opencode/skills/` | [docs](https://opencode.ai/docs/skills/)                                           |
+| OpenAI Codex | `~/.codex/skills/`           | [docs](https://developers.openai.com/codex/skills/)                                |
+| Pi           | `~/.pi/agent/skills/`        | [docs](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent#skills) |
 
 ## Skills
 
-| Skill | Description |
-|-------|-------------|
-| **gsap-core** | Core API: `gsap.to()` / `from()` / `fromTo()`, easing, duration, stagger, defaults |
-| **gsap-timeline** | Timelines: sequencing, position parameter, labels, nesting, playback |
-| **gsap-scrolltrigger** | ScrollTrigger: scroll-linked animations, pinning, scrub, triggers, refresh & cleanup |
-| **gsap-plugins** | Plugins: ScrollToPlugin, ScrollSmoother, Flip, Draggable, Inertia, Observer, SplitText, ScrambleText, SVG & physics plugins, CustomEase, EasePack, GSDevTools, etc. |
-| **gsap-utils** | gsap.utils: clamp, mapRange, normalize, interpolate, random, snap, toArray, selector, wrap, pipe, and other helpers |
-| **gsap-react** | React: useGSAP hook, refs, `gsap.context()`, cleanup, SSR |
-| **gsap-performance** | Performance: transforms over layout props, will-change, batching, ScrollTrigger tips |
-| **gsap-frameworks** | Vue, Svelte, etc.: lifecycle, scoping selectors, cleanup on unmount |
+| Skill                  | Description                                                                                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **gsap-core**          | Core API: `gsap.to()` / `from()` / `fromTo()`, easing, duration, stagger, defaults                                                                                  |
+| **gsap-timeline**      | Timelines: sequencing, position parameter, labels, nesting, playback                                                                                                |
+| **gsap-scrolltrigger** | ScrollTrigger: scroll-linked animations, pinning, scrub, triggers, refresh & cleanup                                                                                |
+| **gsap-plugins**       | Plugins: ScrollToPlugin, ScrollSmoother, Flip, Draggable, Inertia, Observer, SplitText, ScrambleText, SVG & physics plugins, CustomEase, EasePack, GSDevTools, etc. |
+| **gsap-utils**         | gsap.utils: clamp, mapRange, normalize, interpolate, random, snap, toArray, selector, wrap, pipe, and other helpers                                                 |
+| **gsap-react**         | React: useGSAP hook, refs, `gsap.context()`, cleanup, SSR                                                                                                           |
+| **gsap-performance**   | Performance: transforms over layout props, will-change, batching, ScrollTrigger tips                                                                                |
+| **gsap-frameworks**    | Vue, Svelte, etc.: lifecycle, scoping selectors, cleanup on unmount                                                                                                 |
 
 ## Quick reference (for AI agents)
 
@@ -80,30 +81,27 @@ Canonical GSAP pattern to suggest or generate:
 
 ```javascript
 // 1. Imports and plugin registration (once per app)
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 // 2. Single tween — prefer transform aliases and autoAlpha
-gsap.to(".box", { x: 100, autoAlpha: 1, duration: 0.6, ease: "power2.inOut" });
+gsap.to('.box', { x: 100, autoAlpha: 1, duration: 0.6, ease: 'power2.inOut' });
 
 // 3. Timeline for sequencing (prefer over chained delay)
-const tl = gsap.timeline({ defaults: { duration: 0.5, ease: "power2" } });
-tl.to(".a", { x: 100 })
-  .to(".b", { y: 50 }, "+=0.2")
-  .to(".c", { opacity: 0 }, "-=0.1");
+const tl = gsap.timeline({ defaults: { duration: 0.5, ease: 'power2' } });
+tl.to('.a', { x: 100 }).to('.b', { y: 50 }, '+=0.2').to('.c', { opacity: 0 }, '-=0.1');
 
 // 4. ScrollTrigger — attach to timeline or top-level tween; call refresh after layout changes
 const tl2 = gsap.timeline({
-  scrollTrigger: {
-    trigger: ".section",
-    start: "top center",
-    end: "bottom center",
-    scrub: true
-  }
+	scrollTrigger: {
+		trigger: '.section',
+		start: 'top center',
+		end: 'bottom center',
+		scrub: true,
+	},
 });
-tl2.to(".panel", { x: 100 })
-   .to(".panel", { rotation: 5, duration: 0.7 });
+tl2.to('.panel', { x: 100 }).to('.panel', { rotation: 5, duration: 0.7 });
 // After DOM/layout changes: ScrollTrigger.refresh();
 
 // 5. React: useGSAP + scope + cleanup (no selector without scope)

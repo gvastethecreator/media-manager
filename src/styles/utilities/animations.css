@@ -322,7 +322,7 @@
 	position: absolute;
 	inset: 0;
 	pointer-events: none;
-	content: "";
+	content: '';
 	background: radial-gradient(circle, currentColor 10%, transparent 10.01%);
 	opacity: 0;
 	transform: scale(0);
@@ -345,23 +345,19 @@
 }
 
 .animate-slide-up {
-	animation: dt-slide-up-fade var(--dt-duration-normal) var(--dt-ease-out)
-		forwards;
+	animation: dt-slide-up-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
 }
 
 .animate-slide-down {
-	animation: dt-slide-down-fade var(--dt-duration-normal) var(--dt-ease-out)
-		forwards;
+	animation: dt-slide-down-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
 }
 
 .animate-slide-left {
-	animation: dt-slide-left-fade var(--dt-duration-normal) var(--dt-ease-out)
-		forwards;
+	animation: dt-slide-left-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
 }
 
 .animate-slide-right {
-	animation: dt-slide-right-fade var(--dt-duration-normal) var(--dt-ease-out)
-		forwards;
+	animation: dt-slide-right-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
 }
 
 .animate-scale-in {
@@ -373,8 +369,7 @@
 }
 
 .animate-zoom-bounce {
-	animation: dt-zoom-bounce var(--dt-duration-normal) var(--dt-ease-bounce)
-		forwards;
+	animation: dt-zoom-bounce var(--dt-duration-normal) var(--dt-ease-bounce) forwards;
 }
 
 /* =====================================================
@@ -390,23 +385,13 @@
 }
 
 .animate-skeleton-shimmer {
-	background: linear-gradient(
-		90deg,
-		var(--dt-neutral-200) 0%,
-		var(--dt-neutral-100) 50%,
-		var(--dt-neutral-200) 100%
-	);
+	background: linear-gradient(90deg, var(--dt-neutral-200) 0%, var(--dt-neutral-100) 50%, var(--dt-neutral-200) 100%);
 	background-size: 200% 100%;
 	animation: dt-skeleton-shimmer 1.5s var(--dt-ease-default) infinite;
 }
 
 .dark .animate-skeleton-shimmer {
-	background: linear-gradient(
-		90deg,
-		var(--dt-neutral-800) 0%,
-		var(--dt-neutral-700) 50%,
-		var(--dt-neutral-800) 100%
-	);
+	background: linear-gradient(90deg, var(--dt-neutral-800) 0%, var(--dt-neutral-700) 50%, var(--dt-neutral-800) 100%);
 	background-size: 200% 100%;
 }
 
@@ -456,8 +441,7 @@
 
 .stagger-children > * {
 	opacity: 0;
-	animation: dt-slide-up-fade var(--dt-duration-normal) var(--dt-ease-out)
-		forwards;
+	animation: dt-slide-up-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
 }
 
 .stagger-children > *:nth-child(1) {

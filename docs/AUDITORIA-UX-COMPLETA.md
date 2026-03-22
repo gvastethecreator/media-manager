@@ -24,13 +24,13 @@ Se realizó una auditoría exhaustiva de la experiencia de usuario de la aplicac
 
 **Problema:** La aplicación carecía de componentes esenciales para una experiencia de usuario completa.
 
-| Componente | Estado Anterior | Estado Actual | Prioridad |
-|------------|-----------------|---------------|-----------|
-| Página 404 | No existía | ✅ Implementada | Crítica |
-| Error Boundary Global | No existía | ✅ Implementado | Crítica |
-| Loading States Globales | Fragmentados | ✅ Consolidados | Alta |
-| Skip Links | No existía | ✅ Implementados | Media |
-| Smart Breadcrumbs | Básicos | ✅ Mejorados | Media |
+| Componente              | Estado Anterior | Estado Actual    | Prioridad |
+| ----------------------- | --------------- | ---------------- | --------- |
+| Página 404              | No existía      | ✅ Implementada  | Crítica   |
+| Error Boundary Global   | No existía      | ✅ Implementado  | Crítica   |
+| Loading States Globales | Fragmentados    | ✅ Consolidados  | Alta      |
+| Skip Links              | No existía      | ✅ Implementados | Media     |
+| Smart Breadcrumbs       | Básicos         | ✅ Mejorados     | Media     |
 
 **Solución aplicada:**
 
@@ -56,10 +56,12 @@ Se realizó una auditoría exhaustiva de la experiencia de usuario de la aplicac
 
 ```tsx
 // SkipLinks implementados
-<SkipLinks links={[
-  { to: 'main-content', label: 'Saltar al contenido principal' },
-  { to: 'navigation', label: 'Saltar a navegación' },
-]} />
+<SkipLinks
+	links={[
+		{ to: 'main-content', label: 'Saltar al contenido principal' },
+		{ to: 'navigation', label: 'Saltar a navegación' },
+	]}
+/>
 ```
 
 #### 2.2 Landmarks Semánticos
@@ -83,7 +85,7 @@ Se realizó una auditoría exhaustiva de la experiencia de usuario de la aplicac
 
 ```tsx
 <output aria-live="polite" aria-busy="true">
-  <span className="sr-only">Cargando imágenes...</span>
+	<span className="sr-only">Cargando imágenes...</span>
 </output>
 ```
 
@@ -180,10 +182,7 @@ Se realizó una auditoría exhaustiva de la experiencia de usuario de la aplicac
 
 ```css
 /* Tokens de timing */
---dt-duration-instant: 50ms
---dt-duration-fast: 150ms
---dt-duration-normal: 250ms
---dt-duration-slow: 400ms
+--dt-duration-instant: 50ms --dt-duration-fast: 150ms --dt-duration-normal: 250ms --dt-duration-slow: 400ms;
 ```
 
 #### 5.2 Hover States
@@ -303,16 +302,16 @@ xl: 1280px  /* Desktop grande */
 
 ### Nuevos Componentes Creados
 
-| Componente | Ubicación | Descripción |
-|------------|-----------|-------------|
-| NotFoundPage | `src/app/not-found.tsx` | Página 404 profesional |
-| ErrorBoundary | `src/components/error/error-boundary.tsx` | Manejo global de errores |
-| SkipLinks | `src/components/a11y/skip-links.tsx` | Navegación accesible |
-| SmartBreadcrumbs | `src/components/navigation/smart-breadcrumbs.tsx` | Breadcrumbs inteligentes |
-| GlobalLoading | `src/components/loading/global-loading.tsx` | Estados de carga globales |
-| LoadingCard | `src/components/loading/global-loading.tsx` | Skeleton para cards |
-| LoadingGrid | `src/components/loading/global-loading.tsx` | Grid de skeletons |
-| PageLoading | `src/components/loading/global-loading.tsx` | Loading de página |
+| Componente       | Ubicación                                         | Descripción               |
+| ---------------- | ------------------------------------------------- | ------------------------- |
+| NotFoundPage     | `src/app/not-found.tsx`                           | Página 404 profesional    |
+| ErrorBoundary    | `src/components/error/error-boundary.tsx`         | Manejo global de errores  |
+| SkipLinks        | `src/components/a11y/skip-links.tsx`              | Navegación accesible      |
+| SmartBreadcrumbs | `src/components/navigation/smart-breadcrumbs.tsx` | Breadcrumbs inteligentes  |
+| GlobalLoading    | `src/components/loading/global-loading.tsx`       | Estados de carga globales |
+| LoadingCard      | `src/components/loading/global-loading.tsx`       | Skeleton para cards       |
+| LoadingGrid      | `src/components/loading/global-loading.tsx`       | Grid de skeletons         |
+| PageLoading      | `src/components/loading/global-loading.tsx`       | Loading de página         |
 
 ### Mejoras en Componentes Existentes
 
@@ -331,7 +330,7 @@ xl: 1280px  /* Desktop grande */
 
 ```tsx
 <ErrorBoundary>
-  <App />
+	<App />
 </ErrorBoundary>
 ```
 
@@ -366,12 +365,12 @@ xl: 1280px  /* Desktop grande */
 
 ### Antes vs Después
 
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| Componentes de error | 0 | 2 | +2 |
-| Estados de carga | 3 fragmentados | 4 consistentes | +33% |
-| Componentes de a11y | 0 | 1 | +1 |
-| Navegación contextual | Básica | Inteligente | +100% |
+| Métrica               | Antes          | Después        | Mejora |
+| --------------------- | -------------- | -------------- | ------ |
+| Componentes de error  | 0              | 2              | +2     |
+| Estados de carga      | 3 fragmentados | 4 consistentes | +33%   |
+| Componentes de a11y   | 0              | 1              | +1     |
+| Navegación contextual | Básica         | Inteligente    | +100%  |
 
 ---
 
@@ -393,4 +392,4 @@ La auditoría identificó y resolvió problemas críticos en la experiencia de u
 
 ---
 
-*Documento generado automáticamente el 2026-01-30*
+_Documento generado automáticamente el 2026-01-30_

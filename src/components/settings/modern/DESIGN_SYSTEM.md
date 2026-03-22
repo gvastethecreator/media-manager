@@ -47,16 +47,17 @@ Layout principal con sidebar y contenido.
 
 ```tsx
 <ModernSettingsLayout
-  categories={SETTINGS_CATEGORIES}
-  activeSection="system"
-  activeItemId="general"
-  onNavigate={(section, item) => console.log(section, item)}
+	categories={SETTINGS_CATEGORIES}
+	activeSection="system"
+	activeItemId="general"
+	onNavigate={(section, item) => console.log(section, item)}
 >
-  {/* Contenido aquí */}
+	{/* Contenido aquí */}
 </ModernSettingsLayout>
 ```
 
 **Props:**
+
 - `categories` - Array de categorías de navegación
 - `activeSection` - ID de categoría activa
 - `activeItemId` - ID de item activo
@@ -68,19 +69,20 @@ Tarjeta contenedora para secciones de configuración.
 
 ```tsx
 <SettingsCard
-  icon={<Cog />}
-  title="Título"
-  description="Descripción opcional"
-  variant="default"  // default | outlined | elevated
-  color="var(--primary)"
+	icon={<Cog />}
+	title="Título"
+	description="Descripción opcional"
+	variant="default" // default | outlined | elevated
+	color="var(--primary)"
 >
-  <SettingsRow label="Opción">
-    <Switch />
-  </SettingsRow>
+	<SettingsRow label="Opción">
+		<Switch />
+	</SettingsRow>
 </SettingsCard>
 ```
 
 **Variantes:**
+
 - `default` - Fondo de tarjeta con borde
 - `outlined` - Fondo transparente con borde doble
 - `elevated` - Con sombra
@@ -91,11 +93,11 @@ Fila individual para opciones de configuración.
 
 ```tsx
 <SettingsRow
-  label="Título de la opción"
-  description="Descripción explicativa"
-  border={false}  // Separador inferior
+	label="Título de la opción"
+	description="Descripción explicativa"
+	border={false} // Separador inferior
 >
-  <Switch />  {/* Toggle, Input, etc. */}
+	<Switch /> {/* Toggle, Input, etc. */}
 </SettingsRow>
 ```
 
@@ -105,12 +107,12 @@ Agrupación lógica de SettingsRow.
 
 ```tsx
 <SettingsGroup title="Grupo de opciones">
-  <SettingsRow label="Opción 1">
-    <Switch />
-  </SettingsRow>
-  <SettingsRow label="Opción 2">
-    <Input />
-  </SettingsRow>
+	<SettingsRow label="Opción 1">
+		<Switch />
+	</SettingsRow>
+	<SettingsRow label="Opción 2">
+		<Input />
+	</SettingsRow>
 </SettingsGroup>
 ```
 
@@ -145,16 +147,16 @@ Agrupación lógica de SettingsRow.
 ```tsx
 // src/components/settings/modern/custom-settings-modern.tsx
 export function CustomSettingsModern() {
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Mi Sección</h2>
-      <SettingsCard icon={<Star />} title="Configuración">
-        <SettingsRow label="Opción">
-          <Switch />
-        </SettingsRow>
-      </SettingsCard>
-    </div>
-  );
+	return (
+		<div className="space-y-6">
+			<h2 className="text-2xl font-semibold">Mi Sección</h2>
+			<SettingsCard icon={<Star />} title="Configuración">
+				<SettingsRow label="Opción">
+					<Switch />
+				</SettingsRow>
+			</SettingsCard>
+		</div>
+	);
 }
 ```
 
@@ -162,15 +164,16 @@ export function CustomSettingsModern() {
 
 ```tsx
 switch (itemId) {
-  case 'custom-item':
-    return <CustomSettingsModern />;
-  // ...
+	case 'custom-item':
+		return <CustomSettingsModern />;
+	// ...
 }
 ```
 
 ### Toggle entre Layouts
 
 El componente `SettingsView` principal tiene un toggle para alternar entre:
+
 - **Moderno**: Sidebar izquierda, breadcrumbs, cards organizadas
 - **Clásico**: Layout de tabs verticales existente
 
@@ -180,12 +183,12 @@ El componente `SettingsView` principal tiene un toggle para alternar entre:
 
 ### Desde Settings Clásico
 
-| Clásico | Moderno |
-|----------|----------|
+| Clásico         | Moderno                            |
+| --------------- | ---------------------------------- |
 | Tabs verticales | Sidebar con categorías expandibles |
-| URL `?tab=xxx` | URL `?section=xxx&item=yyy` |
-| Contenido plano | Cards con headers y descripciones |
-| Sin breadcrumbs | Breadcrumbs contextuales |
+| URL `?tab=xxx`  | URL `?section=xxx&item=yyy`        |
+| Contenido plano | Cards con headers y descripciones  |
+| Sin breadcrumbs | Breadcrumbs contextuales           |
 
 ### Pasos de Migración
 
@@ -200,6 +203,7 @@ El componente `SettingsView` principal tiene un toggle para alternar entre:
 ## 🛣️ Roadmap
 
 ### Fase 1 - Actual (Completado ✅)
+
 - [x] Layout principal
 - [x] Sistema de categorías
 - [x] Componentes UI reutilizables
@@ -208,12 +212,14 @@ El componente `SettingsView` principal tiene un toggle para alternar entre:
 - [x] Toggle entre layouts
 
 ### Fase 2 - Próximo
+
 - [ ] Settings de Storage
 - [ ] Settings de Database
 - [ ] Settings de Thumbnails
 - [ ] Settings de Folders
 
 ### Fase 3 - Futuro
+
 - [ ] Settings de todas las entidades
 - [ ] Búsqueda avanzada en sidebar
 - [ ] Estado de carga skeleton
@@ -227,20 +233,12 @@ El componente `SettingsView` principal tiene un toggle para alternar entre:
 ### Colores por Categoría
 
 ```css
---entity-system: hsl(var(--primary))
---entity-folder: var(--entity-folder)
---entity-image: var(--entity-image)
---entity-tag: var(--entity-tag)
---entity-album: var(--entity-album)
---entity-collection: var(--entity-collection)
---entity-character: var(--entity-character)
---entity-place: var(--entity-place)
---entity-world-item: var(--entity-world-item)
---entity-concept: var(--entity-concept)
---entity-prompt: var(--entity-prompt)
---entity-note: var(--entity-note)
---entity-wildcard: var(--entity-wildcard)
---entity-property: var(--entity-property)
+--entity-system: hsl(var(--primary)) --entity-folder: var(--entity-folder) --entity-image: var(--entity-image)
+	--entity-tag: var(--entity-tag) --entity-album: var(--entity-album) --entity-collection: var(--entity-collection)
+	--entity-character: var(--entity-character) --entity-place: var(--entity-place)
+	--entity-world-item: var(--entity-world-item) --entity-concept: var(--entity-concept)
+	--entity-prompt: var(--entity-prompt) --entity-note: var(--entity-note) --entity-wildcard: var(--entity-wildcard)
+	--entity-property: var(--entity-property);
 ```
 
 ### Espaciado

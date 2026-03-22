@@ -15,23 +15,23 @@
 
 4. **Unificar adaptador de errores en rutas legacy**
    - Resultado: respuestas API consistentes.
-2. **Reemplazar `require` en `images.effect.ts`**
+5. **Reemplazar `require` en `images.effect.ts`**
    - Resultado: compatibilidad ESM/TS segura.
-3. **Normalizar cálculos con guardas (width/height/size)**
+6. **Normalizar cálculos con guardas (width/height/size)**
    - Resultado: sin `NaN` en métricas.
 
 ## P2 — Medio
 
 7. **Unificar layout virtualizado/no virtualizado en cards**
    - Resultado: tamaños consistentes.
-2. **Eliminar estado no usado en `cards.tsx`**
+8. **Eliminar estado no usado en `cards.tsx`**
    - Resultado: menos ruido en UI.
-3. **Evaluar destino de `local-files`**
+9. **Evaluar destino de `local-files`**
    - Resultado: deuda técnica resuelta.
 
 ## P3 — Bajo
 
 10. **Retirar `@ts-nocheck` en rutas de debug**
     - Resultado: tipado mínimo garantizado.
-2. **Documentar migración Effect por entidad**
+11. **Documentar migración Effect por entidad**
     - Resultado: roadmap claro.

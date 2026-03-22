@@ -666,33 +666,43 @@ Integración de un asistente de IA conversacional que comprende el contexto del 
 El desarrollo se organizará en fases trimestrales, enfocándose en entregar valor incremental.
 
 ### Fase 1 (Q1 2025) - Foundation & Core Tools
-*Enfoque: Establecer las bases de la nueva arquitectura y entregar herramientas de alto impacto.*
+
+_Enfoque: Establecer las bases de la nueva arquitectura y entregar herramientas de alto impacto._
+
 - **Feature 1:** Vista de Relaciones entre Entidades
 - **Feature 3:** Exportación de Informes Completos
 - **Feature 4:** Herramientas de Edición Masiva
 - **Duración estimada: 8-10 semanas**
 
 ### Fase 2 (Q2 2025) - Intelligence & Automation
-*Enfoque: Integrar la inteligencia artificial y automatizar tareas de organización.*
+
+_Enfoque: Integrar la inteligencia artificial y automatizar tareas de organización._
+
 - **Feature 2:** Integración con IA para Generación de Contenido
 - **Feature 9:** Ordenamiento Semántico y Visual
 - **Duración estimada: 11-14 semanas**
 
 ### Fase 3 (Q3 2025) - Advanced Creative & Narrative Tools
-*Enfoque: Potenciar la creatividad y la gestión de mundos complejos.*
+
+_Enfoque: Potenciar la creatividad y la gestión de mundos complejos._
+
 - **Feature 5:** Gestión Compleja de LORE y Worldbuilding
 - **Feature 6:** Creación de StoryBoards y Secuencias
 - **Feature 7:** Asistente de Curación Inteligente
 - **Duración estimada: 11-14 semanas**
 
 ### Fase 4 (Q4 2025) - Integration & Extensibility
-*Enfoque: Conectar con el exterior y abrir la plataforma a la personalización.*
+
+_Enfoque: Conectar con el exterior y abrir la plataforma a la personalización._
+
 - **Feature 8:** Integración con Servicios Externos
 - **Feature 10:** Generación de Webs Dinámicas
 - **Feature 12:** Sistema Modular de Entidades Personalizadas
 - **Duración estimada: 14-18 semanas**
 
 ### Fase 5 (Post-2025) - Future & Experimental
-*Enfoque: Explorar la siguiente frontera de la interacción y la asistencia inteligente.*
+
+_Enfoque: Explorar la siguiente frontera de la interacción y la asistencia inteligente._
+
 - **Feature 11:** Análisis de Sentimientos y Mood Boards
 - **Feature 13:** Inteligencia Artificial Conversacional

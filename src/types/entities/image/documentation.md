@@ -54,7 +54,7 @@ sequenceDiagram
     participant DB
     Client->>API: createImage()
     API->>Transformer: mapCreateImageDataToDrizzle()
-    
+
     DB-->>Transformer: Image
     Transformer-->>API: transformImage()
     API-->>Client: ImageComplete

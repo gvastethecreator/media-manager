@@ -49,9 +49,11 @@ graph LR
 ### Mappers (`mappers.ts`)
 
 #### `toCollectionWithStats(collection, counts)`
+
 Convierte un `CollectionBase` y sus conteos a `CollectionWithStats`.
 
 **Parámetros:**
+
 - `collection: CollectionBase` - Datos base de la colección
 - `counts: CollectionCounts['_count']` - Conteos de relaciones
 
@@ -60,18 +62,22 @@ Convierte un `CollectionBase` y sus conteos a `CollectionWithStats`.
 ### Transformers (`transformer.ts`)
 
 #### `fromDrizzleCollection(drizzleCollection, counts)`
+
 Transforma datos de Drizzle a nuestro tipo canónico.
 
 **Parámetros:**
+
 - `drizzleCollection: CollectionBase | null` - Datos desde Drizzle
 - `counts: CollectionCounts` - Conteos de relaciones
 
 **Retorna:** `CollectionWithStats | null`
 
 #### `fromDrizzleCollections(drizzleCollections)`
+
 Transforma múltiples colecciones de Drizzle.
 
 **Parámetros:**
+
 - `drizzleCollections: Array<{collection: CollectionBase, counts: CollectionCounts}>` - Array de datos
 
 **Retorna:** `CollectionWithStats[]`
@@ -79,29 +85,37 @@ Transforma múltiples colecciones de Drizzle.
 ### Serializers (`serializers.ts`)
 
 #### `deserializeFilters(jsonString)`
+
 Deserializa el campo JSON `filters`.
 
 #### `serializeFilters(filters)`
+
 Serializa filtros a JSON string.
 
 #### `deserializeSortBy(jsonString)` / `serializeSortBy()`
+
 Manejo de criterios de ordenamiento.
 
 #### `deserializeEditions(jsonString)` / `serializeEditions()`
+
 Manejo de ediciones de la colección.
 
 ### Validators (`validators.ts`)
 
 #### `validateCollectionBase(data)`
+
 Valida datos como `CollectionBase`.
 
 #### `validateCollectionWithStats(data)`
+
 Valida datos como `CollectionWithStats`.
 
 #### `validateCollectionCounts(data)`
+
 Valida conteos de relaciones.
 
 #### `sanitizeCollectionData(data)`
+
 Sanea y aplica valores por defecto.
 
 ## 🛡️ Validación con Zod
@@ -126,9 +140,9 @@ const validCollection = validateCollectionBase(rawData);
 // Validación con esquema
 const result = CollectionBaseSchema.safeParse(rawData);
 if (result.success) {
-  console.log('Datos válidos:', result.data);
+	console.log('Datos válidos:', result.data);
 } else {
-  console.error('Errores de validación:', result.error.errors);
+	console.error('Errores de validación:', result.error.errors);
 }
 ```
 
@@ -180,11 +194,11 @@ Todos los transformadores usan la clase `TransformerError` para errores consiste
 
 ```typescript
 try {
-  const result = validateCollectionBase(data);
+	const result = validateCollectionBase(data);
 } catch (error) {
-  if (error instanceof TransformerError) {
-    console.error('Error de transformación:', error.message);
-  }
+	if (error instanceof TransformerError) {
+		console.error('Error de transformación:', error.message);
+	}
 }
 ```
 
@@ -196,8 +210,10 @@ Para validar el funcionamiento:
 import { fromDrizzleCollection, validateCollectionWithStats } from '@/transformers/collection';
 
 // Datos de prueba
-const mockCollection: CollectionBase = { /* ... */ };
-const mockCounts = { images: 5, videos: 2, /* ... */ };
+const mockCollection: CollectionBase = {
+	/* ... */
+};
+const mockCounts = { images: 5, videos: 2 /* ... */ };
 
 // Probar transformación
 const result = fromDrizzleCollection(mockCollection, mockCounts);
@@ -224,6 +240,7 @@ expect(() => validateCollectionWithStats(result)).not.toThrow();
 ### Compatibilidad
 
 Los transformadores mantienen **100% compatibilidad** con:
+
 - ✅ Stores existentes que usan `CollectionWithStats`
 - ✅ Vistas que consumen estos tipos
 - ✅ Servicios que manejan colecciones

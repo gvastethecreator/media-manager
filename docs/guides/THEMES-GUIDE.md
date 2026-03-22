@@ -21,22 +21,22 @@ Image Manager cuenta con un sistema de themes robusto y flexible que permite per
 
 ### 14 Temas Personalizados Disponibles
 
-| Tema | Descripción | Ideal para |
-|------|-------------|------------|
-| `light` | Tema claro con grises suaves | Uso diurno, oficina |
-| `dark` | Tema oscuro por defecto | Uso nocturno, ahorro de batería |
-| `cafe` | Tonos marrones cálidos | Ambiente relajado |
-| `violeta` | Púrpuras oscuros | Creatividad, diseño |
-| `madera` | Tonos madera neutros | Natural, orgánico |
-| `nocturno` | Azulado para fatiga visual | Lectura prolongada |
-| `verde` | Esmeralda oscuro | Naturaleza, calma |
-| `atardecer` | Naranjas y rojos cálidos | Creatividad, energía |
-| `corporativo` | Azul profesional | Entornos empresariales |
-| `carbon` | Negro carbón minimalista | Alto contraste |
-| `teal` | Verde azulado | Frescura, modernidad |
-| `citrico` | Amarillos vibrantes | Energía, positividad |
-| `aurora` | Inspirado en auroras boreales | Fantasía, creatividad |
-| `neon` | Estilo cyberpunk/neón | Gaming, moderno |
+| Tema          | Descripción                   | Ideal para                      |
+| ------------- | ----------------------------- | ------------------------------- |
+| `light`       | Tema claro con grises suaves  | Uso diurno, oficina             |
+| `dark`        | Tema oscuro por defecto       | Uso nocturno, ahorro de batería |
+| `cafe`        | Tonos marrones cálidos        | Ambiente relajado               |
+| `violeta`     | Púrpuras oscuros              | Creatividad, diseño             |
+| `madera`      | Tonos madera neutros          | Natural, orgánico               |
+| `nocturno`    | Azulado para fatiga visual    | Lectura prolongada              |
+| `verde`       | Esmeralda oscuro              | Naturaleza, calma               |
+| `atardecer`   | Naranjas y rojos cálidos      | Creatividad, energía            |
+| `corporativo` | Azul profesional              | Entornos empresariales          |
+| `carbon`      | Negro carbón minimalista      | Alto contraste                  |
+| `teal`        | Verde azulado                 | Frescura, modernidad            |
+| `citrico`     | Amarillos vibrantes           | Energía, positividad            |
+| `aurora`      | Inspirado en auroras boreales | Fantasía, creatividad           |
+| `neon`        | Estilo cyberpunk/neón         | Gaming, moderno                 |
 
 ### ThemeProvider con Soporte para 'system'
 
@@ -48,15 +48,16 @@ import { ThemeProvider } from '@/providers/theme-provider';
 
 // En tu aplicación
 function App() {
-  return (
-    <ThemeProvider defaultTheme="system" storageKey="theme">
-      <YourApp />
-    </ThemeProvider>
-  );
+	return (
+		<ThemeProvider defaultTheme="system" storageKey="theme">
+			<YourApp />
+		</ThemeProvider>
+	);
 }
 ```
 
 **Características:**
+
 - Soporte para tema `system` que detecta automáticamente la preferencia del OS
 - Persistencia en localStorage
 - Transiciones fluidas entre themes
@@ -70,15 +71,16 @@ import { ThemeToggle } from '@/components/core/theme/theme-toggle';
 
 // Uso en cualquier componente
 function Header() {
-  return (
-    <header>
-      <ThemeToggle />
-    </header>
-  );
+	return (
+		<header>
+			<ThemeToggle />
+		</header>
+	);
 }
 ```
 
 **Features del toggle:**
+
 - Dropdown con todos los themes disponibles
 - Indicador visual del tema actual
 - Animaciones suaves entre iconos (sol/luna)
@@ -90,20 +92,20 @@ function Header() {
 import { useTheme } from '@/components/ui/theme-provider';
 
 function MyComponent() {
-  const { theme, setTheme, themes, resolvedTheme } = useTheme();
-  
-  // theme: tema actual seleccionado (incluye 'system')
-  // resolvedTheme: tema resuelto ('light' o 'dark') cuando theme es 'system'
-  // themes: array con todos los themes disponibles
-  // setTheme: función para cambiar el tema
-  
-  return (
-    <div>
-      <p>Tema actual: {theme}</p>
-      <p>Tema resuelto: {resolvedTheme}</p>
-      <button onClick={() => setTheme('dark')}>Cambiar a dark</button>
-    </div>
-  );
+	const { theme, setTheme, themes, resolvedTheme } = useTheme();
+
+	// theme: tema actual seleccionado (incluye 'system')
+	// resolvedTheme: tema resuelto ('light' o 'dark') cuando theme es 'system'
+	// themes: array con todos los themes disponibles
+	// setTheme: función para cambiar el tema
+
+	return (
+		<div>
+			<p>Tema actual: {theme}</p>
+			<p>Tema resuelto: {resolvedTheme}</p>
+			<button onClick={() => setTheme('dark')}>Cambiar a dark</button>
+		</div>
+	);
 }
 ```
 
@@ -141,22 +143,22 @@ Variables principales que cambian según el tema:
 ```
 
 **Uso en Tailwind:**
+
 ```tsx
 <div className="bg-background text-foreground">
-  <button className="bg-primary text-primary-foreground hover:bg-primary/90">
-    Click me
-  </button>
+	<button className="bg-primary text-primary-foreground hover:bg-primary/90">Click me</button>
 </div>
 ```
 
 **Uso en CSS inline:**
+
 ```tsx
 <div style={{ backgroundColor: 'var(--background)' }}>
-  <span style={{ color: 'var(--primary)' }}>Texto</span>
+	<span style={{ color: 'var(--primary)' }}>Texto</span>
 </div>
 ```
 
-### Design Tokens (--dt-*)
+### Design Tokens (--dt-\*)
 
 Sistema completo de tokens de diseño en `src/styles/design-tokens.css`:
 
@@ -194,33 +196,18 @@ Sistema completo de tokens de diseño en `src/styles/design-tokens.css`:
 #### Timing y Easing
 
 ```css
---dt-duration-instant: 50ms   /* Micro-interacciones */
---dt-duration-fast: 150ms     /* Hover, focus */
---dt-duration-normal: 250ms   /* Transiciones estándar */
---dt-duration-slow: 400ms     /* Animaciones elaboradas */
-
---dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1)
---dt-ease-in: cubic-bezier(0.4, 0, 1, 1)
---dt-ease-out: cubic-bezier(0, 0, 0.2, 1)
---dt-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1)
+--dt-duration-instant: 50ms /* Micro-interacciones */ --dt-duration-fast: 150ms /* Hover, focus */
+	--dt-duration-normal: 250ms /* Transiciones estándar */ --dt-duration-slow: 400ms /* Animaciones elaboradas */
+	--dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1) --dt-ease-in: cubic-bezier(0.4, 0, 1, 1)
+	--dt-ease-out: cubic-bezier(0, 0, 0.2, 1) --dt-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 ```
 
 #### Bordes y Radius
 
 ```css
---dt-border-width: 2px
---dt-border-width-thin: 1px
---dt-border-soft
---dt-border-medium
---dt-border-strong
---dt-border-focus
-
---dt-radius-xs: 2px
---dt-radius-sm: 4px
---dt-radius-md: 6px
---dt-radius-lg: 8px
---dt-radius-xl: 12px
---dt-radius-full: 9999px
+--dt-border-width: 2px --dt-border-width-thin: 1px --dt-border-soft --dt-border-medium --dt-border-strong
+	--dt-border-focus --dt-radius-xs: 2px --dt-radius-sm: 4px --dt-radius-md: 6px --dt-radius-lg: 8px --dt-radius-xl: 12px
+	--dt-radius-full: 9999px;
 ```
 
 ### Tokens de Entidades
@@ -229,38 +216,39 @@ Colores específicos para cada tipo de entidad en `src/styles/tokens.css`:
 
 ```css
 /* Entidades de contenido */
---entity-image: oklch(0.59 0.2 255);      /* Azul */
---entity-video: oklch(0.63 0.24 29);      /* Rojo */
---entity-audio: oklch(0.68 0.16 201);     /* Sky */
---entity-document: oklch(0.55 0.1 250);   /* Slate */
---entity-file-3d: oklch(0.65 0.15 277);   /* Índigo */
---entity-json: oklch(0.7 0.15 350);       /* Rosa */
+--entity-image: oklch(0.59 0.2 255); /* Azul */
+--entity-video: oklch(0.63 0.24 29); /* Rojo */
+--entity-audio: oklch(0.68 0.16 201); /* Sky */
+--entity-document: oklch(0.55 0.1 250); /* Slate */
+--entity-file-3d: oklch(0.65 0.15 277); /* Índigo */
+--entity-json: oklch(0.7 0.15 350); /* Rosa */
 
 /* Entidades de organización */
---entity-folder: oklch(0.75 0.18 85);     /* Amarillo */
---entity-album: oklch(0.59 0.23 293);     /* Violeta */
+--entity-folder: oklch(0.75 0.18 85); /* Amarillo */
+--entity-album: oklch(0.59 0.23 293); /* Violeta */
 --entity-collection: oklch(0.63 0.2 195); /* Cyan */
---entity-group: oklch(0.64 0.17 175);     /* Teal */
---entity-favorite: oklch(0.75 0.18 85);   /* Ámbar */
+--entity-group: oklch(0.64 0.17 175); /* Teal */
+--entity-favorite: oklch(0.75 0.18 85); /* Ámbar */
 
 /* Entidades creativas */
---entity-character: oklch(0.7 0.2 350);   /* Rosa */
---entity-place: oklch(0.64 0.17 175);     /* Teal */
+--entity-character: oklch(0.7 0.2 350); /* Rosa */
+--entity-place: oklch(0.64 0.17 175); /* Teal */
 --entity-world-item: oklch(0.72 0.2 130); /* Lima */
---entity-concept: oklch(0.72 0.18 65);    /* Ámbar */
+--entity-concept: oklch(0.72 0.18 65); /* Ámbar */
 
 /* Entidades de metadatos */
---entity-tag: oklch(0.7 0.2 350);         /* Rosa */
---entity-prompt: oklch(0.64 0.17 165);    /* Esmeralda */
---entity-note: oklch(0.63 0.24 29);       /* Rojo */
---entity-property: oklch(0.7 0.15 350);   /* Rosa claro */
---entity-wildcard: oklch(0.7 0.2 350);    /* Rosa */
+--entity-tag: oklch(0.7 0.2 350); /* Rosa */
+--entity-prompt: oklch(0.64 0.17 165); /* Esmeralda */
+--entity-note: oklch(0.63 0.24 29); /* Rojo */
+--entity-property: oklch(0.7 0.15 350); /* Rosa claro */
+--entity-wildcard: oklch(0.7 0.2 350); /* Rosa */
 
 /* Entidades de sistema */
---entity-system: oklch(0.55 0.12 240);    /* Azul grisáceo */
+--entity-system: oklch(0.55 0.12 240); /* Azul grisáceo */
 ```
 
 **Uso práctico:**
+
 ```tsx
 // En componentes React
 <div style={{ color: 'var(--entity-image)' }}>Imagen</div>
@@ -316,13 +304,13 @@ Cuando necesites ajustar la opacidad de un color, usa `color-mix()`:
 
 ```tsx
 // BIEN - Usar color-mix para opacidad
-<div style={{ 
-  background: 'color-mix(in oklch, var(--primary) 30%, transparent)' 
+<div style={{
+  background: 'color-mix(in oklch, var(--primary) 30%, transparent)'
 }} />
 
 // BIEN - Combinar colores
-<div style={{ 
-  background: 'color-mix(in oklch, var(--entity-image) 20%, var(--background))' 
+<div style={{
+  background: 'color-mix(in oklch, var(--entity-image) 20%, var(--background))'
 }} />
 
 // BIEN - En CSS con oklch(from)
@@ -335,8 +323,8 @@ Cuando necesites ajustar la opacidad de un color, usa `color-mix()`:
 
 ```tsx
 // ❌ MAL
-<button 
-  style={{ 
+<button
+  style={{
     background: '#3b82f6',
     color: 'white'
   }}
@@ -363,7 +351,7 @@ import { Button } from '@/components/ui/button';
 
 ```tsx
 // ❌ MAL
-<div style={{ 
+<div style={{
   border: '1px solid #e5e7eb',
   background: '#ffffff',
   boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
@@ -373,7 +361,7 @@ import { Button } from '@/components/ui/button';
 <div className="border bg-card shadow-dt-1" />
 
 // O con CSS
-<div style={{ 
+<div style={{
   border: '1px solid var(--border)',
   background: 'var(--card)',
   boxShadow: 'var(--dt-shadow-1)'
@@ -384,7 +372,7 @@ import { Button } from '@/components/ui/button';
 
 ```tsx
 // ❌ MAL
-<div style={{ 
+<div style={{
   background: 'rgba(59, 130, 246, 0.2)',
   color: '#3b82f6',
   border: '1px solid rgba(59, 130, 246, 0.4)'
@@ -393,7 +381,7 @@ import { Button } from '@/components/ui/button';
 </div>
 
 // ✅ BIEN
-<div style={{ 
+<div style={{
   background: 'color-mix(in oklch, var(--entity-image) 20%, transparent)',
   color: 'var(--entity-image)',
   border: '1px solid color-mix(in oklch, var(--entity-image) 40%, transparent)'
@@ -402,7 +390,7 @@ import { Button } from '@/components/ui/button';
 </div>
 
 // O usando clases de Tailwind con color-mix
-<div className="bg-[color:color-mix(in_oklch,var(--entity-image)_20%,transparent)] 
+<div className="bg-[color:color-mix(in_oklch,var(--entity-image)_20%,transparent)]
                 text-[color:var(--entity-image)]">
   Imagen
 </div>
@@ -435,8 +423,8 @@ Durante la migración al sistema de themes, se corrigieron múltiples archivos q
 <div style={{ background: 'rgba(59, 130, 246, 0.2)' }} />
 
 // DESPUÉS
-<div style={{ 
-  background: 'color-mix(in oklch, var(--primary) 20%, transparent)' 
+<div style={{
+  background: 'color-mix(in oklch, var(--primary) 20%, transparent)'
 }} />
 ```
 
@@ -473,15 +461,15 @@ const entityColors = {
 
 Los siguientes archivos fueron actualizados para usar el sistema de themes:
 
-| Archivo | Cambios Principales |
-|---------|---------------------|
-| `src/styles/tokens.css` | Definición de tokens de entidades y colores funcionales |
-| `src/styles/design-tokens.css` | Paletas de color, sombras, timing, borders |
-| `src/app/themes.css` | Definiciones de los 14 temas personalizados |
-| `src/styles/utilities/theme-system.css` | Sistema de transiciones y utilities |
-| `src/components/cards/*` | Migración de colores hardcodeados a tokens |
-| `src/components/ui/*.tsx` | Componentes UI usando variables CSS |
-| `src/components/views/*` | Vistas usando tokens de entidades |
+| Archivo                                 | Cambios Principales                                     |
+| --------------------------------------- | ------------------------------------------------------- |
+| `src/styles/tokens.css`                 | Definición de tokens de entidades y colores funcionales |
+| `src/styles/design-tokens.css`          | Paletas de color, sombras, timing, borders              |
+| `src/app/themes.css`                    | Definiciones de los 14 temas personalizados             |
+| `src/styles/utilities/theme-system.css` | Sistema de transiciones y utilities                     |
+| `src/components/cards/*`                | Migración de colores hardcodeados a tokens              |
+| `src/components/ui/*.tsx`               | Componentes UI usando variables CSS                     |
+| `src/components/views/*`                | Vistas usando tokens de entidades                       |
 
 ---
 
@@ -494,15 +482,15 @@ El sistema incluye transiciones fluidas automáticas cuando se cambia entre them
 ```css
 /* src/app/themes.css - Al final del archivo */
 html {
-  transition:
-    background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    outline-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    text-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	transition:
+		background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		outline-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		text-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 ```
 
@@ -513,29 +501,27 @@ Para transiciones más controladas, usa la clase `theme-transitioning`:
 ```tsx
 // Aplica transiciones a todos los elementos hijos
 <div className="theme-transitioning">
-  <Card />
-  <Button />
-  <Text />
+	<Card />
+	<Button />
+	<Text />
 </div>
 ```
 
 **Definición en CSS:**
+
 ```css
 /* src/styles/utilities/theme-system.css */
 .theme-transitioning,
 .theme-transitioning *,
 .theme-transitioning *::before,
 .theme-transitioning *::after {
-  transition:
-    background-color var(--dt-theme-transition-duration)
-    var(--dt-theme-transition-timing),
-    border-color var(--dt-theme-transition-duration)
-    var(--dt-theme-transition-timing),
-    color var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
-    fill var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
-    stroke var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
-    box-shadow var(--dt-theme-transition-duration)
-    var(--dt-theme-transition-timing) !important;
+	transition:
+		background-color var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
+		border-color var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
+		color var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
+		fill var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
+		stroke var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
+		box-shadow var(--dt-theme-transition-duration) var(--dt-theme-transition-timing) !important;
 }
 ```
 
@@ -545,8 +531,8 @@ La duración estándar de transiciones de tema es **300ms**:
 
 ```css
 :root {
-  --dt-theme-transition-duration: 300ms;
-  --dt-theme-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+	--dt-theme-transition-duration: 300ms;
+	--dt-theme-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 ```
 
@@ -556,12 +542,12 @@ El sistema respeta la preferencia del usuario de reducir movimiento:
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-  .theme-transitioning,
-  .theme-transitioning *,
-  .theme-transitioning *::before,
-  .theme-transitioning *::after {
-    transition-duration: 0.01ms !important;
-  }
+	.theme-transitioning,
+	.theme-transitioning *,
+	.theme-transitioning *::before,
+	.theme-transitioning *::after {
+		transition-duration: 0.01ms !important;
+	}
 }
 ```
 
@@ -575,50 +561,50 @@ Agrega una nueva sección en `src/app/themes.css`:
 
 ```css
 /* Tema Personalizado - Ejemplo: Ocean */
-html[data-theme="ocean"] {
-  /* Variables base */
-  --background: oklch(0.2 0.04 220);
-  --foreground: oklch(0.95 0.01 220);
-  --card: oklch(0.25 0.05 220);
-  --card-foreground: oklch(0.95 0.01 220);
-  --popover: oklch(0.25 0.05 220);
-  --popover-foreground: oklch(0.95 0.01 220);
-  
-  /* Colores principales */
-  --primary: oklch(0.6 0.18 220);
-  --primary-foreground: oklch(0.1 0.01 220);
-  --secondary: oklch(0.3 0.06 220);
-  --secondary-foreground: oklch(0.95 0.01 220);
-  
-  /* Estados */
-  --muted: oklch(0.3 0.05 220);
-  --muted-foreground: oklch(0.7 0.03 220);
-  --accent: oklch(0.55 0.12 220);
-  --accent-foreground: oklch(0.95 0.01 220);
-  --destructive: oklch(0.6 0.15 20);
-  --destructive-foreground: oklch(0.95 0.01 220);
-  
-  /* UI elements */
-  --border: oklch(0.35 0.04 220);
-  --input: oklch(0.35 0.04 220);
-  --ring: oklch(0.6 0.18 220);
-  
-  /* Sidebar */
-  --sidebar-background: oklch(0.15 0.03 220);
-  --sidebar-foreground: oklch(0.95 0.01 220);
-  --sidebar-primary: oklch(0.6 0.18 220);
-  --sidebar-primary-foreground: oklch(0.1 0.01 220);
-  --sidebar-accent: oklch(0.3 0.06 220);
-  --sidebar-accent-foreground: oklch(0.95 0.01 220);
-  --sidebar-border: oklch(0.3 0.04 220);
-  --sidebar-ring: oklch(0.6 0.18 220);
-  
-  /* Gráficos */
-  --chart-1: oklch(0.6 0.18 220);
-  --chart-2: oklch(0.55 0.15 240);
-  --chart-3: oklch(0.65 0.12 200);
-  --chart-4: oklch(0.5 0.14 180);
-  --chart-5: oklch(0.7 0.16 260);
+html[data-theme='ocean'] {
+	/* Variables base */
+	--background: oklch(0.2 0.04 220);
+	--foreground: oklch(0.95 0.01 220);
+	--card: oklch(0.25 0.05 220);
+	--card-foreground: oklch(0.95 0.01 220);
+	--popover: oklch(0.25 0.05 220);
+	--popover-foreground: oklch(0.95 0.01 220);
+
+	/* Colores principales */
+	--primary: oklch(0.6 0.18 220);
+	--primary-foreground: oklch(0.1 0.01 220);
+	--secondary: oklch(0.3 0.06 220);
+	--secondary-foreground: oklch(0.95 0.01 220);
+
+	/* Estados */
+	--muted: oklch(0.3 0.05 220);
+	--muted-foreground: oklch(0.7 0.03 220);
+	--accent: oklch(0.55 0.12 220);
+	--accent-foreground: oklch(0.95 0.01 220);
+	--destructive: oklch(0.6 0.15 20);
+	--destructive-foreground: oklch(0.95 0.01 220);
+
+	/* UI elements */
+	--border: oklch(0.35 0.04 220);
+	--input: oklch(0.35 0.04 220);
+	--ring: oklch(0.6 0.18 220);
+
+	/* Sidebar */
+	--sidebar-background: oklch(0.15 0.03 220);
+	--sidebar-foreground: oklch(0.95 0.01 220);
+	--sidebar-primary: oklch(0.6 0.18 220);
+	--sidebar-primary-foreground: oklch(0.1 0.01 220);
+	--sidebar-accent: oklch(0.3 0.06 220);
+	--sidebar-accent-foreground: oklch(0.95 0.01 220);
+	--sidebar-border: oklch(0.3 0.04 220);
+	--sidebar-ring: oklch(0.6 0.18 220);
+
+	/* Gráficos */
+	--chart-1: oklch(0.6 0.18 220);
+	--chart-2: oklch(0.55 0.15 240);
+	--chart-3: oklch(0.65 0.12 200);
+	--chart-4: oklch(0.5 0.14 180);
+	--chart-5: oklch(0.7 0.16 260);
 }
 ```
 
@@ -628,21 +614,21 @@ Agrega el tema a la lista en `src/providers/theme-provider.tsx`:
 
 ```tsx
 const customThemes = [
-  'light',
-  'dark',
-  'cafe',
-  'violeta',
-  'madera',
-  'nocturno',
-  'verde',
-  'atardecer',
-  'corporativo',
-  'carbon',
-  'teal',
-  'citrico',
-  'aurora',
-  'neon',
-  'ocean', // <-- Nuevo tema
+	'light',
+	'dark',
+	'cafe',
+	'violeta',
+	'madera',
+	'nocturno',
+	'verde',
+	'atardecer',
+	'corporativo',
+	'carbon',
+	'teal',
+	'citrico',
+	'aurora',
+	'neon',
+	'ocean', // <-- Nuevo tema
 ];
 ```
 
@@ -651,10 +637,10 @@ const customThemes = [
 Si tu tema necesita ajustes específicos en modo oscuro, agrégalos en `src/styles/design-tokens.css`:
 
 ```css
-html[data-theme="ocean"] {
-  /* Ajustes específicos para tema ocean */
-  --dt-shadow-color: oklch(0 0 0 / 0.3);
-  --dt-border-soft: var(--dt-border-width) solid oklch(1 0 0 / 0.06);
+html[data-theme='ocean'] {
+	/* Ajustes específicos para tema ocean */
+	--dt-shadow-color: oklch(0 0 0 / 0.3);
+	--dt-border-soft: var(--dt-border-width) solid oklch(1 0 0 / 0.06);
 }
 ```
 
@@ -664,9 +650,23 @@ Si necesitas soporte específico en el contexto de themes, actualiza `src/lib/co
 
 ```tsx
 // Asegúrate de que el tipo incluya el nuevo tema
-export type Theme = 'light' | 'dark' | 'system' | 'cafe' | 'violeta' | 
-  'madera' | 'nocturno' | 'verde' | 'atardecer' | 'corporativo' | 
-  'carbon' | 'teal' | 'citrico' | 'aurora' | 'neon' | 'ocean';
+export type Theme =
+	| 'light'
+	| 'dark'
+	| 'system'
+	| 'cafe'
+	| 'violeta'
+	| 'madera'
+	| 'nocturno'
+	| 'verde'
+	| 'atardecer'
+	| 'corporativo'
+	| 'carbon'
+	| 'teal'
+	| 'citrico'
+	| 'aurora'
+	| 'neon'
+	| 'ocean';
 ```
 
 ### Paso 5: Probar el Tema

@@ -109,28 +109,28 @@ Las propiedades se utilizan para:
 ```tsx
 // Componente de vista de propiedades
 function PropertyView({ propertyId }) {
-  const property = usePropertyStore(state => state.getProperty(propertyId));
-  const propertyWithStats = transformPropertyToWithStats(property);
+	const property = usePropertyStore((state) => state.getProperty(propertyId));
+	const propertyWithStats = transformPropertyToWithStats(property);
 
-  return (
-    <div className="property-view">
-      <PropertyHeader property={propertyWithStats} />
-      <PropertyStats stats={propertyWithStats.stats} />
-      <RelatedItemsList property={propertyWithStats} />
-    </div>
-  );
+	return (
+		<div className="property-view">
+			<PropertyHeader property={propertyWithStats} />
+			<PropertyStats stats={propertyWithStats.stats} />
+			<RelatedItemsList property={propertyWithStats} />
+		</div>
+	);
 }
 
 // Crear una nueva propiedad
 async function createNewProperty(data) {
-  try {
-    const newProperty = await createProperty(data);
-    usePropertyStore.getState().addProperty(newProperty);
-    return newProperty;
-  } catch (error) {
-    console.error('Error al crear propiedad:', error);
-    throw error;
-  }
+	try {
+		const newProperty = await createProperty(data);
+		usePropertyStore.getState().addProperty(newProperty);
+		return newProperty;
+	} catch (error) {
+		console.error('Error al crear propiedad:', error);
+		throw error;
+	}
 }
 ```
 

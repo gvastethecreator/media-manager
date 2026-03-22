@@ -35,33 +35,33 @@ import { createPrompt, updatePrompt, searchPrompts, executePrompt } from '@/tran
 
 // Crear un nuevo prompt
 const nuevoPrompt = await createPrompt({
-  name: 'Paisaje fantástico',
-  content: 'Un paisaje fantástico con montañas flotantes, cascadas de luz y criaturas místicas',
-  purpose: 'Generación de imágenes',
-  category: 'image',
-  parameters: {
-    width: { type: 'number', value: 1024, description: 'Ancho de la imagen' },
-    style: { type: 'select', value: 'fantástico', options: ['realista', 'fantástico', 'abstracto'] }
-  }
+	name: 'Paisaje fantástico',
+	content: 'Un paisaje fantástico con montañas flotantes, cascadas de luz y criaturas místicas',
+	purpose: 'Generación de imágenes',
+	category: 'image',
+	parameters: {
+		width: { type: 'number', value: 1024, description: 'Ancho de la imagen' },
+		style: { type: 'select', value: 'fantástico', options: ['realista', 'fantástico', 'abstracto'] },
+	},
 });
 
 // Buscar prompts
 const prompts = await searchPrompts({
-  filters: {
-    query: 'paisaje',
-    categories: ['image']
-  }
+	filters: {
+		query: 'paisaje',
+		categories: ['image'],
+	},
 });
 
 // Actualizar un prompt existente
 await updatePrompt(nuevoPrompt.id, {
-  content: 'Un paisaje onírico con montañas flotantes...'
+	content: 'Un paisaje onírico con montañas flotantes...',
 });
 
 // Ejecutar un prompt con parámetros
 const resultado = await executePrompt({
-  promptId: nuevoPrompt.id,
-  variables: { style: 'acuarela' }
+	promptId: nuevoPrompt.id,
+	variables: { style: 'acuarela' },
 });
 ```
 
@@ -75,7 +75,7 @@ sequenceDiagram
     participant DB
     Client->>API: createPrompt()
     API->>Transformer: mapCreatePromptDataToDrizzle()
-    
+
     DB-->>Transformer: Prompt
     Transformer-->>API: transformPrompt()
     API-->>Client: PromptComplete

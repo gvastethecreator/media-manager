@@ -7,6 +7,7 @@ Este documento describe el diseño técnico para las mejoras del navegador de ar
 ### Current Architecture Analysis
 
 **Existing Strengths:**
+
 - ✅ **Complete View System**: `ListView`, `GridView`, `CardsView`, `MasonryView`, `TrueMasonryView` all implemented
 - ✅ **Advanced Virtualization**: `base-virtualized-view.tsx` with TanStack Virtual and ResizeObserver
 - ✅ **Comprehensive Entity Support**: Full `EntityStatsType` enum with stores for image, video, audio, etc.
@@ -19,6 +20,7 @@ Este documento describe el diseño técnico para las mejoras del navegador de ar
 - ✅ **Settings Architecture**: Comprehensive settings system with persistence and validation
 
 **Specific Areas for Enhancement:**
+
 - **Context Menu Operations**: Missing copy, paste, rename, move operations in existing handlers
 - **View Metadata Display**: Existing views need to show more entity metadata using available data
 - **File Viewer Multi-Format**: Current viewer only supports images, needs video/audio/document support
@@ -105,6 +107,7 @@ graph TD
 ### 1. Enhanced Context Menu System (Building on Existing)
 
 #### FileContextMenu (Enhancement of Existing)
+
 **Current Implementation:** `src/components/features/file-browser/context-menu/context-menu.tsx`
 **Current Types:** `src/components/features/file-browser/context-menu/types.ts`
 
@@ -137,173 +140,188 @@ interface MultiSelectionContextMenuProps {
 ```
 
 #### EmptySpaceContextMenu (New)
+
 ```typescript
 interface EmptySpaceContextMenuProps {
-  onAction: (action: EmptySpaceAction, data?: any) => Promise<void>;
-  position: { x: number; y: number };
-  currentPath?: string;
-  canPaste: boolean;
+	onAction: (action: EmptySpaceAction, data?: any) => Promise<void>;
+	position: { x: number; y: number };
+	currentPath?: string;
+	canPaste: boolean;
 }
 
 type EmptySpaceAction =
-  | 'select-all' | 'paste' | 'refresh' | 'new-folder'
-  | 'change-view' | 'sort-by' | 'show-hidden'
-  | 'scan-folder' | 'properties';
+	| 'select-all'
+	| 'paste'
+	| 'refresh'
+	| 'new-folder'
+	| 'change-view'
+	| 'sort-by'
+	| 'show-hidden'
+	| 'scan-folder'
+	| 'properties';
 ```
 
 ### 2. Enhanced View Components
 
 #### ListView (Enhanced)
+
 ```typescript
 interface EnhancedListViewProps extends BaseVirtualizedViewProps<AnyEntityWithStats> {
-  showMetadata: boolean;
-  showThumbnails: boolean;
-  showTags: boolean;
-  showStats: boolean;
-  columnConfig: ListColumnConfig[];
+	showMetadata: boolean;
+	showThumbnails: boolean;
+	showTags: boolean;
+	showStats: boolean;
+	columnConfig: ListColumnConfig[];
 }
 
 interface ListColumnConfig {
-  key: string;
-  label: string;
-  width: number | 'auto';
-  sortable: boolean;
-  visible: boolean;
-  renderer?: (item: AnyEntityWithStats) => React.ReactNode;
+	key: string;
+	label: string;
+	width: number | 'auto';
+	sortable: boolean;
+	visible: boolean;
+	renderer?: (item: AnyEntityWithStats) => React.ReactNode;
 }
 ```
 
 #### GridView (Enhanced)
+
 ```typescript
 interface EnhancedGridViewProps extends BaseVirtualizedViewProps<AnyEntityWithStats> {
-  aspectRatio: 'auto' | 'square' | '4:3' | '16:9' | 'custom';
-  customAspectRatio?: number;
-  showLabels: boolean;
-  showOverlay: boolean;
-  hoverInfo: 'none' | 'basic' | 'detailed';
+	aspectRatio: 'auto' | 'square' | '4:3' | '16:9' | 'custom';
+	customAspectRatio?: number;
+	showLabels: boolean;
+	showOverlay: boolean;
+	hoverInfo: 'none' | 'basic' | 'detailed';
 }
 ```
 
 #### CardsView (Enhanced)
+
 ```typescript
 interface EnhancedCardsViewProps extends BaseVirtualizedViewProps<AnyEntityWithStats> {
-  cardStyle: 'compact' | 'detailed' | 'minimal';
-  showActions: boolean;
-  showMetadata: boolean;
-  interactiveMode: boolean;
+	cardStyle: 'compact' | 'detailed' | 'minimal';
+	showActions: boolean;
+	showMetadata: boolean;
+	interactiveMode: boolean;
 }
 ```
 
 ### 3. File Operations System
 
 #### FileOperationsService
+
 ```typescript
 class FileOperationsService {
-  async copyToClipboard(items: AnyEntityWithStats[]): Promise<void>;
-  async pasteFromClipboard(targetPath: string): Promise<AnyEntityWithStats[]>;
-  async moveItems(items: AnyEntityWithStats[], targetPath: string): Promise<void>;
-  async deleteItems(items: AnyEntityWithStats[]): Promise<void>;
-  async renameItem(item: AnyEntityWithStats, newName: string): Promise<AnyEntityWithStats>;
-  async duplicateItems(items: AnyEntityWithStats[]): Promise<AnyEntityWithStats[]>;
-  async downloadItems(items: AnyEntityWithStats[]): Promise<void>;
-  async openInExplorer(item: AnyEntityWithStats): Promise<void>;
+	async copyToClipboard(items: AnyEntityWithStats[]): Promise<void>;
+	async pasteFromClipboard(targetPath: string): Promise<AnyEntityWithStats[]>;
+	async moveItems(items: AnyEntityWithStats[], targetPath: string): Promise<void>;
+	async deleteItems(items: AnyEntityWithStats[]): Promise<void>;
+	async renameItem(item: AnyEntityWithStats, newName: string): Promise<AnyEntityWithStats>;
+	async duplicateItems(items: AnyEntityWithStats[]): Promise<AnyEntityWithStats[]>;
+	async downloadItems(items: AnyEntityWithStats[]): Promise<void>;
+	async openInExplorer(item: AnyEntityWithStats): Promise<void>;
 }
 ```
 
 #### ClipboardManager
+
 ```typescript
 interface ClipboardData {
-  items: AnyEntityWithStats[];
-  operation: 'copy' | 'cut';
-  timestamp: number;
-  source: string;
+	items: AnyEntityWithStats[];
+	operation: 'copy' | 'cut';
+	timestamp: number;
+	source: string;
 }
 
 class ClipboardManager {
-  private clipboardData: ClipboardData | null = null;
+	private clipboardData: ClipboardData | null = null;
 
-  copy(items: AnyEntityWithStats[]): void;
-  cut(items: AnyEntityWithStats[]): void;
-  paste(targetPath: string): Promise<AnyEntityWithStats[]>;
-  canPaste(): boolean;
-  clear(): void;
+	copy(items: AnyEntityWithStats[]): void;
+	cut(items: AnyEntityWithStats[]): void;
+	paste(targetPath: string): Promise<AnyEntityWithStats[]>;
+	canPaste(): boolean;
+	clear(): void;
 }
 ```
 
 ### 4. Drag Selection System
 
 #### DragSelectionManager
+
 ```typescript
 interface DragSelectionConfig {
-  enabled: boolean;
-  multiSelect: boolean;
-  selectOnDrag: boolean;
-  threshold: number;
+	enabled: boolean;
+	multiSelect: boolean;
+	selectOnDrag: boolean;
+	threshold: number;
 }
 
 class DragSelectionManager {
-  private isSelecting: boolean = false;
-  private startPoint: { x: number; y: number } | null = null;
-  private selectionRect: DOMRect | null = null;
+	private isSelecting: boolean = false;
+	private startPoint: { x: number; y: number } | null = null;
+	private selectionRect: DOMRect | null = null;
 
-  startSelection(event: MouseEvent): void;
-  updateSelection(event: MouseEvent): void;
-  endSelection(): string[];
-  cancelSelection(): void;
-  getSelectedItems(): AnyEntityWithStats[];
+	startSelection(event: MouseEvent): void;
+	updateSelection(event: MouseEvent): void;
+	endSelection(): string[];
+	cancelSelection(): void;
+	getSelectedItems(): AnyEntityWithStats[];
 }
 ```
 
 #### SelectionOverlay
+
 ```typescript
 interface SelectionOverlayProps {
-  isActive: boolean;
-  startPoint: { x: number; y: number };
-  currentPoint: { x: number; y: number };
-  selectedItems: string[];
+	isActive: boolean;
+	startPoint: { x: number; y: number };
+	currentPoint: { x: number; y: number };
+	selectedItems: string[];
 }
 ```
 
 ### 5. Enhanced File Viewer System (Building on Existing)
 
 #### Multi-Format File Viewer (Enhancement of Existing)
+
 **Current Implementation:** `src/components/features/file-viewer/file-viewer.tsx`
 **Current Store:** Uses `useFileViewerStore` for state management
 
 ```typescript
 // Extending existing file viewer to support multiple formats
 interface EnhancedFileViewerProps {
-  // Inherits from existing useFileViewerStore state
-  supportedFormats: EntityStatsType[];
-  renderers: Map<EntityStatsType, FileViewerRenderer>;
+	// Inherits from existing useFileViewerStore state
+	supportedFormats: EntityStatsType[];
+	renderers: Map<EntityStatsType, FileViewerRenderer>;
 }
 
 interface FileViewerRenderer {
-  canHandle(item: AnyEntityWithStats): boolean;
-  render(item: AnyEntityWithStats, props: ViewerRenderProps): React.ReactNode;
-  getControls?(item: AnyEntityWithStats): React.ReactNode;
+	canHandle(item: AnyEntityWithStats): boolean;
+	render(item: AnyEntityWithStats, props: ViewerRenderProps): React.ReactNode;
+	getControls?(item: AnyEntityWithStats): React.ReactNode;
 }
 
 // New viewer components to create
 interface VideoViewerProps {
-  video: VideoWithStats;
-  onClose: () => void;
-  onNext: () => void;
-  onPrevious: () => void;
+	video: VideoWithStats;
+	onClose: () => void;
+	onNext: () => void;
+	onPrevious: () => void;
 }
 
 interface AudioViewerProps {
-  audio: AudioWithStats;
-  onClose: () => void;
-  onNext: () => void;
-  onPrevious: () => void;
+	audio: AudioWithStats;
+	onClose: () => void;
+	onNext: () => void;
+	onPrevious: () => void;
 }
 
 interface DocumentViewerProps {
-  document: DocumentWithStats;
-  onClose: () => void;
-  onNext: () => void;
-  onPrevious: () => void;
+	document: DocumentWithStats;
+	onClose: () => void;
+	onNext: () => void;
+	onPrevious: () => void;
 }
 ```
 
@@ -314,32 +332,32 @@ interface DocumentViewerProps {
 ```typescript
 // Extend existing EntityStatsType support
 interface EntityTypeConfig {
-  type: EntityStatsType;
-  icon: React.ComponentType;
-  color: string;
-  supportedOperations: ContextMenuAction[];
-  viewerRenderer?: FileViewerRenderer;
-  thumbnailGenerator?: (item: AnyEntityWithStats) => Promise<string>;
+	type: EntityStatsType;
+	icon: React.ComponentType;
+	color: string;
+	supportedOperations: ContextMenuAction[];
+	viewerRenderer?: FileViewerRenderer;
+	thumbnailGenerator?: (item: AnyEntityWithStats) => Promise<string>;
 }
 
 const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
-  [EntityStatsType.IMAGE]: {
-    type: EntityStatsType.IMAGE,
-    icon: ImageIcon,
-    color: '#3b82f6',
-    supportedOperations: ['open', 'preview', 'download', 'copy', 'rename', 'delete'],
-    viewerRenderer: new ImageViewerRenderer(),
-    thumbnailGenerator: generateImageThumbnail,
-  },
-  [EntityStatsType.VIDEO]: {
-    type: EntityStatsType.VIDEO,
-    icon: VideoIcon,
-    color: '#ef4444',
-    supportedOperations: ['open', 'preview', 'download', 'copy', 'rename', 'delete'],
-    viewerRenderer: new VideoViewerRenderer(),
-    thumbnailGenerator: generateVideoThumbnail,
-  },
-  // ... more configurations
+	[EntityStatsType.IMAGE]: {
+		type: EntityStatsType.IMAGE,
+		icon: ImageIcon,
+		color: '#3b82f6',
+		supportedOperations: ['open', 'preview', 'download', 'copy', 'rename', 'delete'],
+		viewerRenderer: new ImageViewerRenderer(),
+		thumbnailGenerator: generateImageThumbnail,
+	},
+	[EntityStatsType.VIDEO]: {
+		type: EntityStatsType.VIDEO,
+		icon: VideoIcon,
+		color: '#ef4444',
+		supportedOperations: ['open', 'preview', 'download', 'copy', 'rename', 'delete'],
+		viewerRenderer: new VideoViewerRenderer(),
+		thumbnailGenerator: generateVideoThumbnail,
+	},
+	// ... more configurations
 };
 ```
 
@@ -347,25 +365,25 @@ const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 ```typescript
 interface ViewConfiguration {
-  type: 'list' | 'grid' | 'cards' | 'masonry';
-  settings: ViewSettings;
-  customizations: ViewCustomizations;
+	type: 'list' | 'grid' | 'cards' | 'masonry';
+	settings: ViewSettings;
+	customizations: ViewCustomizations;
 }
 
 interface ViewSettings {
-  itemSize: number;
-  spacing: number;
-  showMetadata: boolean;
-  showThumbnails: boolean;
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
+	itemSize: number;
+	spacing: number;
+	showMetadata: boolean;
+	showThumbnails: boolean;
+	sortBy: string;
+	sortDirection: 'asc' | 'desc';
 }
 
 interface ViewCustomizations {
-  columns?: ListColumnConfig[];
-  aspectRatio?: string;
-  cardStyle?: string;
-  hoverBehavior?: string;
+	columns?: ListColumnConfig[];
+	aspectRatio?: string;
+	cardStyle?: string;
+	hoverBehavior?: string;
 }
 ```
 
@@ -375,18 +393,18 @@ interface ViewCustomizations {
 
 ```typescript
 enum FileOperationError {
-  PERMISSION_DENIED = 'PERMISSION_DENIED',
-  FILE_NOT_FOUND = 'FILE_NOT_FOUND',
-  DISK_FULL = 'DISK_FULL',
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  INVALID_OPERATION = 'INVALID_OPERATION',
-  CONCURRENT_MODIFICATION = 'CONCURRENT_MODIFICATION',
+	PERMISSION_DENIED = 'PERMISSION_DENIED',
+	FILE_NOT_FOUND = 'FILE_NOT_FOUND',
+	DISK_FULL = 'DISK_FULL',
+	NETWORK_ERROR = 'NETWORK_ERROR',
+	INVALID_OPERATION = 'INVALID_OPERATION',
+	CONCURRENT_MODIFICATION = 'CONCURRENT_MODIFICATION',
 }
 
 interface ErrorRecoveryStrategy {
-  canRecover(error: FileOperationError): boolean;
-  recover(error: FileOperationError, context: any): Promise<void>;
-  getErrorMessage(error: FileOperationError): string;
+	canRecover(error: FileOperationError): boolean;
+	recover(error: FileOperationError, context: any): Promise<void>;
+	getErrorMessage(error: FileOperationError): string;
 }
 ```
 
@@ -394,16 +412,16 @@ interface ErrorRecoveryStrategy {
 
 ```typescript
 interface FileOperationResult<T> {
-  success: boolean;
-  data?: T;
-  error?: FileOperationError;
-  recoveryOptions?: RecoveryOption[];
+	success: boolean;
+	data?: T;
+	error?: FileOperationError;
+	recoveryOptions?: RecoveryOption[];
 }
 
 interface RecoveryOption {
-  label: string;
-  action: () => Promise<void>;
-  destructive: boolean;
+	label: string;
+	action: () => Promise<void>;
+	destructive: boolean;
 }
 ```
 
@@ -489,128 +507,134 @@ interface RecoveryOption {
 ## Missing Components Analysis
 
 ### 1. Keyboard Shortcuts System
+
 **Current State:** No global hotkey system detected
 **Need:** Comprehensive keyboard navigation and shortcuts
 
 ```typescript
 interface KeyboardShortcutConfig {
-  key: string;
-  modifiers: ('ctrl' | 'shift' | 'alt' | 'meta')[];
-  action: string;
-  context?: 'global' | 'file-browser' | 'file-viewer';
-  description: string;
+	key: string;
+	modifiers: ('ctrl' | 'shift' | 'alt' | 'meta')[];
+	action: string;
+	context?: 'global' | 'file-browser' | 'file-viewer';
+	description: string;
 }
 
 class KeyboardShortcutManager {
-  private shortcuts: Map<string, KeyboardShortcutConfig> = new Map();
+	private shortcuts: Map<string, KeyboardShortcutConfig> = new Map();
 
-  register(shortcut: KeyboardShortcutConfig): void;
-  unregister(key: string): void;
-  handleKeyDown(event: KeyboardEvent): boolean;
-  getShortcutsForContext(context: string): KeyboardShortcutConfig[];
+	register(shortcut: KeyboardShortcutConfig): void;
+	unregister(key: string): void;
+	handleKeyDown(event: KeyboardEvent): boolean;
+	getShortcutsForContext(context: string): KeyboardShortcutConfig[];
 }
 ```
 
 ### 2. Settings Integration
+
 **Current State:** Basic settings store exists but not integrated with file browser
 **Need:** Deep integration with user preferences
 
 ```typescript
 interface FileBrowserSettings {
-  defaultView: 'list' | 'grid' | 'cards' | 'masonry';
-  itemSize: number;
-  showHiddenFiles: boolean;
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
-  thumbnailQuality: 'low' | 'medium' | 'high';
-  enableAnimations: boolean;
-  doubleClickAction: 'open' | 'preview' | 'select';
-  contextMenuBehavior: 'click' | 'hover';
-  dragSelectionEnabled: boolean;
+	defaultView: 'list' | 'grid' | 'cards' | 'masonry';
+	itemSize: number;
+	showHiddenFiles: boolean;
+	sortBy: string;
+	sortDirection: 'asc' | 'desc';
+	thumbnailQuality: 'low' | 'medium' | 'high';
+	enableAnimations: boolean;
+	doubleClickAction: 'open' | 'preview' | 'select';
+	contextMenuBehavior: 'click' | 'hover';
+	dragSelectionEnabled: boolean;
 }
 ```
 
 ### 3. Undo/Redo System
+
 **Current State:** Not implemented
 **Need:** Action history for file operations
 
 ```typescript
 interface UndoableAction {
-  id: string;
-  type: string;
-  timestamp: number;
-  execute: () => Promise<void>;
-  undo: () => Promise<void>;
-  canUndo: () => boolean;
-  description: string;
+	id: string;
+	type: string;
+	timestamp: number;
+	execute: () => Promise<void>;
+	undo: () => Promise<void>;
+	canUndo: () => boolean;
+	description: string;
 }
 
 class UndoRedoManager {
-  private history: UndoableAction[] = [];
-  private currentIndex: number = -1;
+	private history: UndoableAction[] = [];
+	private currentIndex: number = -1;
 
-  execute(action: UndoableAction): Promise<void>;
-  undo(): Promise<void>;
-  redo(): Promise<void>;
-  canUndo(): boolean;
-  canRedo(): boolean;
-  clear(): void;
+	execute(action: UndoableAction): Promise<void>;
+	undo(): Promise<void>;
+	redo(): Promise<void>;
+	canUndo(): boolean;
+	canRedo(): boolean;
+	clear(): void;
 }
 ```
 
 ### 4. Progress Tracking System
+
 **Current State:** Basic loading states in stores
 **Need:** Detailed progress for long operations
 
 ```typescript
 interface OperationProgress {
-  id: string;
-  type: 'copy' | 'move' | 'delete' | 'download' | 'scan';
-  status: 'pending' | 'running' | 'completed' | 'error' | 'cancelled';
-  progress: number; // 0-100
-  currentItem?: string;
-  totalItems: number;
-  processedItems: number;
-  startTime: number;
-  estimatedTimeRemaining?: number;
-  error?: string;
+	id: string;
+	type: 'copy' | 'move' | 'delete' | 'download' | 'scan';
+	status: 'pending' | 'running' | 'completed' | 'error' | 'cancelled';
+	progress: number; // 0-100
+	currentItem?: string;
+	totalItems: number;
+	processedItems: number;
+	startTime: number;
+	estimatedTimeRemaining?: number;
+	error?: string;
 }
 ```
 
 ### 5. Caching and Offline Support
+
 **Current State:** Basic resource caching in useImageResources
 **Need:** Comprehensive caching strategy
 
 ```typescript
 interface CacheStrategy {
-  thumbnails: {
-    maxSize: number;
-    ttl: number;
-    compression: boolean;
-  };
-  metadata: {
-    maxEntries: number;
-    ttl: number;
-  };
-  fileContent: {
-    maxSize: number;
-    types: string[];
-  };
+	thumbnails: {
+		maxSize: number;
+		ttl: number;
+		compression: boolean;
+	};
+	metadata: {
+		maxEntries: number;
+		ttl: number;
+	};
+	fileContent: {
+		maxSize: number;
+		types: string[];
+	};
 }
 ```
 
 ### 6. Accessibility Enhancements
+
 **Current State:** Basic accessibility, needs improvement
 **Need:** Full WCAG compliance
 
 ```typescript
 interface AccessibilityConfig {
-  announceSelectionChanges: boolean;
-  keyboardNavigationMode: 'grid' | 'list';
-  focusManagement: 'auto' | 'manual';
-  screenReaderOptimizations: boolean;
-  highContrastMode: boolean;
-  reducedMotion: boolean;
+	announceSelectionChanges: boolean;
+	keyboardNavigationMode: 'grid' | 'list';
+	focusManagement: 'auto' | 'manual';
+	screenReaderOptimizations: boolean;
+	highContrastMode: boolean;
+	reducedMotion: boolean;
 }
 ```
 
@@ -653,6 +677,7 @@ interface AccessibilityConfig {
 ## Integration Points
 
 ### 1. Toast Notification System
+
 **Current:** `toastService` from `@/lib/ui/toast` is available
 **Integration:** Use for operation feedback and error messages
 
@@ -663,6 +688,7 @@ toastService.success(`${selectedFiles.length} archivos copiados`);
 ```
 
 ### 2. Navigation System
+
 **Current:** React Router with `useNavigate` hook
 **Integration:** Context menu actions should navigate appropriately
 
@@ -670,11 +696,12 @@ toastService.success(`${selectedFiles.length} archivos copiados`);
 // Navigate to entity detail views from context menu
 const navigate = useNavigate();
 const openEntityDetail = (entity: AnyEntityWithStats) => {
-  navigate(`/${entity.entityType}/${entity.id}`);
+	navigate(`/${entity.entityType}/${entity.id}`);
 };
 ```
 
 ### 3. Settings Store Integration
+
 **Current:** `useSettingsStore` with persistence
 **Integration:** File browser preferences should sync with global settings
 
@@ -685,6 +712,7 @@ const fileBrowserSettings = settings?.fileBrowser || defaultFileBrowserSettings;
 ```
 
 ### 4. Activity Logging
+
 **Current:** Activity store tracks user actions
 **Integration:** File operations should be logged for audit trail
 
@@ -692,17 +720,19 @@ const fileBrowserSettings = settings?.fileBrowser || defaultFileBrowserSettings;
 // Log file operations for activity tracking
 const { logActivity } = useActivityStore();
 await logActivity({
-  action: 'file_operation',
-  entityType: 'file',
-  entityId: file.id,
-  details: { operation: 'copy', destination: targetPath }
+	action: 'file_operation',
+	entityType: 'file',
+	entityId: file.id,
+	details: { operation: 'copy', destination: targetPath },
 });
 ```
 
 ## Migration Strategy
 
 ### Phase 1: Foundation and Context Menu (Week 1-2)
+
 **Priority: High**
+
 - Implement KeyboardShortcutManager
 - Expand existing FileContextMenu with all operations
 - Add EmptySpaceContextMenu and MultiSelectionContextMenu
@@ -710,13 +740,16 @@ await logActivity({
 - Add basic undo/redo for destructive operations
 
 **Deliverables:**
+
 - Enhanced context menu system
 - Keyboard shortcuts for common operations
 - Basic file operations (copy, paste, delete, rename)
 - Toast notifications for all operations
 
 ### Phase 2: View Enhancements (Week 3-4)
+
 **Priority: High**
+
 - Enhance ListView with configurable columns and metadata
 - Improve GridView with aspect ratio controls
 - Add interactive features to CardsView
@@ -724,13 +757,16 @@ await logActivity({
 - Integrate with settings store for view preferences
 
 **Deliverables:**
+
 - Rich metadata display in all views
 - Customizable view configurations
 - Settings integration
 - Performance optimizations
 
 ### Phase 3: File Operations and Progress (Week 5-6)
+
 **Priority: Medium**
+
 - Implement comprehensive FileOperationsService
 - Add ClipboardManager with system integration
 - Implement progress tracking for long operations
@@ -738,13 +774,16 @@ await logActivity({
 - Integrate with activity logging
 
 **Deliverables:**
+
 - Complete file operations system
 - Progress indicators for long operations
 - Batch operation support
 - Activity logging integration
 
 ### Phase 4: Advanced Features (Week 7-8)
+
 **Priority: Medium**
+
 - Implement drag selection system
 - Enhance file viewer for multi-format support
 - Add caching strategy for better performance
@@ -752,13 +791,16 @@ await logActivity({
 - Add offline support capabilities
 
 **Deliverables:**
+
 - Drag selection functionality
 - Multi-format file viewer
 - Comprehensive caching system
 - WCAG compliance improvements
 
 ### Phase 5: Polish and Integration (Week 9-10)
+
 **Priority: Low**
+
 - Comprehensive testing suite
 - Performance optimization and profiling
 - Bug fixes and edge case handling
@@ -766,6 +808,7 @@ await logActivity({
 - Final integration testing
 
 **Deliverables:**
+
 - Complete test coverage
 - Performance benchmarks
 - User documentation
@@ -774,6 +817,7 @@ await logActivity({
 ## Risk Mitigation
 
 ### Technical Risks
+
 1. **Performance Degradation**
    - Risk: New features may impact virtualization performance
    - Mitigation: Continuous performance monitoring and optimization
@@ -790,6 +834,7 @@ await logActivity({
    - Fallback: Graceful degradation for unsupported features
 
 ### User Experience Risks
+
 1. **Learning Curve**
    - Risk: Too many new features may overwhelm users
    - Mitigation: Gradual rollout and user onboarding
@@ -801,6 +846,7 @@ await logActivity({
    - Validation: Screen reader testing and keyboard navigation
 
 ### Integration Risks
+
 1. **Store Conflicts**
    - Risk: New stores may conflict with existing ones
    - Mitigation: Careful state management and isolation

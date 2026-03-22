@@ -32,17 +32,17 @@ graph TD
 import { createPlace, updatePlace, searchPlaces } from '@/transformers/place';
 
 const nuevoLugar = await createPlace({
-  name: 'Bosque Encantado',
-  type: 'forest',
-  description: 'Un bosque mágico lleno de criaturas míticas'
+	name: 'Bosque Encantado',
+	type: 'forest',
+	description: 'Un bosque mágico lleno de criaturas míticas',
 });
 
 const lugares = await searchPlaces({
-  where: { searchQuery: 'Bosque' }
+	where: { searchQuery: 'Bosque' },
 });
 
 await updatePlace(nuevoLugar.id, {
-  resources: [{ name: 'Flores mágicas', description: 'Plantas con propiedades curativas' }]
+	resources: [{ name: 'Flores mágicas', description: 'Plantas con propiedades curativas' }],
 });
 ```
 
@@ -55,7 +55,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createPlace()
-    
+
     Transformer->>DB: db.place.create()
     DB-->>Transformer: Place
     Transformer-->>API: transformPlace()

@@ -31,13 +31,13 @@ graph TD
     A[Drizzle DB] --> B[File3DBase]
     B --> C[fromDrizzleFile3D]
     C --> D[File3DWithStats]
-    
+
     E[App Types] --> F[toDrizzleFile3D]
     F --> G[Drizzle Insert/Update]
-    
+
     D --> H[serializeFile3D]
     H --> I[API Response]
-    
+
     J[Input Data] --> K[validateFile3D]
     K --> L[Valid File3DBase]
 ```
@@ -50,7 +50,7 @@ graph TD
 // Conversión básica Drizzle → App
 fromDrizzleFile3D(drizzle: DrizzleFile3D): File3D
 
-// Conversión básica App → Drizzle  
+// Conversión básica App → Drizzle
 toDrizzleFile3D(file: File3D): DrizzleFile3D
 ```
 
@@ -87,11 +87,13 @@ validateFile3Ds(data: unknown[]): File3DBase[]
 ## 🎯 Tipos Utilizados
 
 ### Base Types
+
 - `File3DBase` - Tipo base de archivo 3D
 - `File3DStatistics` - Estadísticas específicas de archivo 3D
 - `File3DWithStats` - Tipo completo con estadísticas
 
 ### Estadísticas Incluidas
+
 - `polygonCount` - Número de polígonos del modelo
 - `textureSize` - Tamaño de texturas en bytes
 - `format` - Formato del archivo 3D
@@ -135,12 +137,14 @@ const drizzleData = toDrizzleFile3D(validFile3D);
 ## 🔍 Migración Completada
 
 ### Eliminado
+
 - ❌ Imports de Drizzle
 - ❌ Funciones `fromDrizzleFile3D`
 - ❌ Tipos `DrizzleFile3D`
 - ❌ Referencias legacy
 
 ### Agregado
+
 - ✅ Tipos locales completos
 - ✅ Validación con Zod
 - ✅ Transformación con estadísticas

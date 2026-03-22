@@ -8,13 +8,13 @@
 
 ## 📊 Resumen Ejecutivo
 
-| Categoría | Estado | Detalle |
-|-----------|--------|---------|
-| **Vistas Implementadas** | ✅ 95% | 7/7 vistas modernas + 12 vistas específicas |
-| **Integración API** | ✅ Real | Todas las vistas usan datos reales vía React Query |
-| **Funcionalidad CRUD** | ✅ Completa | Crear, editar, eliminar en todas las entidades |
-| **Logs/Actividad** | ⚠️ Parcial | Solo Files tiene logs reales; falta en otras |
-| **Reindex-All** | ❌ No integrado | Función existe pero no está en Files Settings |
+| Categoría                | Estado          | Detalle                                            |
+| ------------------------ | --------------- | -------------------------------------------------- |
+| **Vistas Implementadas** | ✅ 95%          | 7/7 vistas modernas + 12 vistas específicas        |
+| **Integración API**      | ✅ Real         | Todas las vistas usan datos reales vía React Query |
+| **Funcionalidad CRUD**   | ✅ Completa     | Crear, editar, eliminar en todas las entidades     |
+| **Logs/Actividad**       | ⚠️ Parcial      | Solo Files tiene logs reales; falta en otras       |
+| **Reindex-All**          | ❌ No integrado | Función existe pero no está en Files Settings      |
 
 ---
 
@@ -70,14 +70,15 @@ Settings (ModernSettingsView)
 
 ### 1. System Settings (`system-settings-modern.tsx`)
 
-| Aspecto | Estado | Detalle |
-|---------|--------|---------|
-| **Datos** | ⚠️ Mixto | Stats reales pero CPU/memory/uptime simulados |
-| **API Integration** | ✅ Real | `useSystemStats`, `useRepairSystem`, `useResetDatabase` |
-| **CRUD** | ✅ Acciones | Reparar y resetear base de datos |
-| **Logs** | ❌ No | Usa toast notifications |
+| Aspecto             | Estado      | Detalle                                                 |
+| ------------------- | ----------- | ------------------------------------------------------- |
+| **Datos**           | ⚠️ Mixto    | Stats reales pero CPU/memory/uptime simulados           |
+| **API Integration** | ✅ Real     | `useSystemStats`, `useRepairSystem`, `useResetDatabase` |
+| **CRUD**            | ✅ Acciones | Reparar y resetear base de datos                        |
+| **Logs**            | ❌ No       | Usa toast notifications                                 |
 
 **Funcionalidades:**
+
 - Monitoreo de sistema (DB size, entidades totales)
 - Reparación de base de datos
 - Reset completo (destructivo con confirmación)
@@ -87,14 +88,15 @@ Settings (ModernSettingsView)
 
 ### 2. Appearance Settings (`appearance-settings-modern.tsx`)
 
-| Aspecto | Estado | Detalle |
-|---------|--------|---------|
-| **Datos** | ✅ Real | `useInterfaceSettingsStore`, `useTheme` |
-| **API Integration** | ✅ Real | Persistencia via store global |
-| **CRUD** | ✅ Edición | Modifica preferencias |
-| **Logs** | ❌ No | |
+| Aspecto             | Estado     | Detalle                                 |
+| ------------------- | ---------- | --------------------------------------- |
+| **Datos**           | ✅ Real    | `useInterfaceSettingsStore`, `useTheme` |
+| **API Integration** | ✅ Real    | Persistencia via store global           |
+| **CRUD**            | ✅ Edición | Modifica preferencias                   |
+| **Logs**            | ❌ No      |                                         |
 
 **Funcionalidades:**
+
 - Tema: claro / oscuro / automático
 - Tamaño de fuente (xs, sm, base, lg, xl)
 - Animaciones globales on/off
@@ -106,14 +108,15 @@ Settings (ModernSettingsView)
 
 ### 3. Files Settings (`files-settings-modern.tsx`) ⭐
 
-| Aspecto | Estado | Detalle |
-|---------|--------|---------|
-| **Datos** | ✅ Real | Carpetas y stats reales |
-| **API Integration** | ✅ Real | 5 mutations activas |
-| **CRUD** | ✅ Completo | Todas las operaciones |
-| **Logs** | ✅ **SÍ** | `ReindexTerminal` con logs reales |
+| Aspecto             | Estado      | Detalle                           |
+| ------------------- | ----------- | --------------------------------- |
+| **Datos**           | ✅ Real     | Carpetas y stats reales           |
+| **API Integration** | ✅ Real     | 5 mutations activas               |
+| **CRUD**            | ✅ Completo | Todas las operaciones             |
+| **Logs**            | ✅ **SÍ**   | `ReindexTerminal` con logs reales |
 
 **Funcionalidades:**
+
 - Gestión de carpetas (grid/list view)
 - Reindexado individual con configuración avanzada
 - **Terminal de procesamiento en vivo** (logs reales)
@@ -128,14 +131,15 @@ Settings (ModernSettingsView)
 
 ### 4. Media Settings (`media-settings-modern.tsx`)
 
-| Aspecto | Estado | Detalle |
-|---------|--------|---------|
-| **Datos** | ⚠️ Mixto | Contadores reales, settings locales |
-| **API Integration** | ⚠️ Parcial | Solo lectura de stats |
-| **CRUD** | ❌ No | Solo visualiza |
-| **Logs** | ❌ No | |
+| Aspecto             | Estado     | Detalle                             |
+| ------------------- | ---------- | ----------------------------------- |
+| **Datos**           | ⚠️ Mixto   | Contadores reales, settings locales |
+| **API Integration** | ⚠️ Parcial | Solo lectura de stats               |
+| **CRUD**            | ❌ No      | Solo visualiza                      |
+| **Logs**            | ❌ No      |                                     |
 
 **Funcionalidades:**
+
 - Selector de tipo de media (6 tipos)
 - Settings por tipo (solo UI local, no persisten):
   - Imágenes: auto-rotate EXIF, high quality preview, metadata panel, zoom
@@ -151,14 +155,15 @@ Settings (ModernSettingsView)
 
 ### 5. Organization Settings (`organization-settings-modern.tsx`)
 
-| Aspecto | Estado | Detalle |
-|---------|--------|---------|
-| **Datos** | ✅ Real | `useAlbums`, `useCollections`, `useGroups` |
-| **API Integration** | ✅ Real | Delete mutations |
-| **CRUD** | ✅ Completo | Todas las operaciones |
-| **Logs** | ❌ No | |
+| Aspecto             | Estado      | Detalle                                    |
+| ------------------- | ----------- | ------------------------------------------ |
+| **Datos**           | ✅ Real     | `useAlbums`, `useCollections`, `useGroups` |
+| **API Integration** | ✅ Real     | Delete mutations                           |
+| **CRUD**            | ✅ Completo | Todas las operaciones                      |
+| **Logs**            | ❌ No       |                                            |
 
 **Funcionalidades:**
+
 - Tabs: Albums / Colecciones / Grupos
 - Estadísticas dinámicas por tipo
 - Cards grid/list para cada entidad
@@ -169,14 +174,15 @@ Settings (ModernSettingsView)
 
 ### 6. Taxonomy Settings (`taxonomy-settings-modern.tsx`)
 
-| Aspecto | Estado | Detalle |
-|---------|--------|---------|
-| **Datos** | ✅ Real | `useTags`, `useProperties` |
-| **API Integration** | ✅ Real | Delete mutations |
-| **CRUD** | ✅ Completo | Todas las operaciones |
-| **Logs** | ❌ No | |
+| Aspecto             | Estado      | Detalle                    |
+| ------------------- | ----------- | -------------------------- |
+| **Datos**           | ✅ Real     | `useTags`, `useProperties` |
+| **API Integration** | ✅ Real     | Delete mutations           |
+| **CRUD**            | ✅ Completo | Todas las operaciones      |
+| **Logs**            | ❌ No       |                            |
 
 **Funcionalidades:**
+
 - Tabs: Etiquetas / Propiedades
 - Estadísticas: total, relaciones/asignaciones
 - Tarjetas con emoji y color
@@ -187,14 +193,15 @@ Settings (ModernSettingsView)
 
 ### 7. Worldbuilding Settings (`worldbuilding-settings-modern.tsx`)
 
-| Aspecto | Estado | Detalle |
-|---------|--------|---------|
-| **Datos** | ✅ Real | 7 hooks (characters, places, items, concepts, prompts, notes, wildcards) |
-| **API Integration** | ✅ Real | 7 delete mutations |
-| **CRUD** | ✅ Completo | Todas las operaciones |
-| **Logs** | ❌ No | |
+| Aspecto             | Estado      | Detalle                                                                  |
+| ------------------- | ----------- | ------------------------------------------------------------------------ |
+| **Datos**           | ✅ Real     | 7 hooks (characters, places, items, concepts, prompts, notes, wildcards) |
+| **API Integration** | ✅ Real     | 7 delete mutations                                                       |
+| **CRUD**            | ✅ Completo | Todas las operaciones                                                    |
+| **Logs**            | ❌ No       |                                                                          |
 
 **Funcionalidades:**
+
 - 7 tipos de entidades con tarjetas específicas
 - Estadísticas: total, favoritos, con imágenes
 - Formularios de creación/edición modales
@@ -206,6 +213,7 @@ Settings (ModernSettingsView)
 ## 🔍 Vistas Específicas por Entidad
 
 Todas las vistas específicas (`albums-settings`, `tags-settings`, etc.) están implementadas y funcionando con:
+
 - ✅ Datos reales de la API
 - ✅ Crear/Editar/Eliminar entidades
 - ✅ Formularios modales
@@ -240,11 +248,13 @@ Todas las vistas específicas (`albums-settings`, `tags-settings`, etc.) están 
 **Estado:** Solo `files-settings-modern` tiene panel de logs (ReindexTerminal)
 
 **API Disponible:** `src/lib/api/activity.ts` con hooks completos:
+
 - `useActivities()` - Lista de actividades
 - `useActivityStats()` - Estadísticas
 - `useCreateActivity()` - Crear actividad
 
 **Vistas que podrían beneficiarse:**
+
 - System Settings: Logs de sistema
 - Organization: Actividad de albums/colecciones
 - Taxonomy: Cambios en tags/propiedades
@@ -261,6 +271,7 @@ Todas las vistas específicas (`albums-settings`, `tags-settings`, etc.) están 
 **Impacto:** Los cambios se pierden al recargar
 
 **Solución:**
+
 - Crear tabla/campos en BD para media settings
 - O usar `localStorage` con persistencia
 - Implementar mutations para guardar
@@ -274,6 +285,7 @@ Todas las vistas específicas (`albums-settings`, `tags-settings`, etc.) están 
 **API Disponible:** `src/server/utils/system-metrics.ts` (creado recientemente)
 
 **Solución:**
+
 - Integrar endpoint `/api/system/stats` en `useSystemStats`
 - Mostrar datos reales de CPU, memoria, disco
 
@@ -326,14 +338,14 @@ Todas las vistas específicas (`albums-settings`, `tags-settings`, etc.) están 
 
 ## 📊 Métricas de Implementación
 
-| Métrica | Valor |
-|---------|-------|
-| Vistas implementadas | 29/29 (100%) |
-| Integración API | 100% datos reales |
-| Funcionalidad CRUD | 100% completa |
-| Logs reales | 1/29 (3.4%) |
-| Funciones faltantes críticas | 1 (reindex-all) |
-| Mejoras recomendadas | 5 |
+| Métrica                      | Valor             |
+| ---------------------------- | ----------------- |
+| Vistas implementadas         | 29/29 (100%)      |
+| Integración API              | 100% datos reales |
+| Funcionalidad CRUD           | 100% completa     |
+| Logs reales                  | 1/29 (3.4%)       |
+| Funciones faltantes críticas | 1 (reindex-all)   |
+| Mejoras recomendadas         | 5                 |
 
 ---
 
@@ -342,6 +354,7 @@ Todas las vistas específicas (`albums-settings`, `tags-settings`, etc.) están 
 Las Settings Views están **funcionalmente completas** para operaciones básicas CRUD. La arquitectura moderna con categorías y layout responsive está bien implementada.
 
 **Fortalezas:**
+
 - ✅ Todas las vistas implementadas
 - ✅ Datos reales de API
 - ✅ CRUD completo
@@ -349,6 +362,7 @@ Las Settings Views están **funcionalmente completas** para operaciones básicas
 - ✅ Terminal de logs en Files (ejemplo a seguir)
 
 **Áreas de mejora:**
+
 - 🔴 Falta reindex-all en UI
 - 🟡 Media settings no persisten
 - 🟡 System stats incompletos

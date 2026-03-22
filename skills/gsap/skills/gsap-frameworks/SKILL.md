@@ -23,30 +23,30 @@ Apply when writing or reviewing GSAP code in Vue (or Nuxt), Svelte (or SvelteKit
 Use **onMounted** to run GSAP after the component is in the DOM. Use **onUnmounted** to clean up.
 
 ```javascript
-import { onMounted, onUnmounted, ref } from "vue";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { onMounted, onUnmounted, ref } from 'vue';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger); // once per app, e.g. in main.js
 
 export default {
-  setup() {
-    const container = ref(null);
-    let ctx;
+	setup() {
+		const container = ref(null);
+		let ctx;
 
-    onMounted(() => {
-      if (!container.value) return;
-      ctx = gsap.context(() => {
-        gsap.to(".box", { x: 100, duration: 0.6 });
-        gsap.from(".item", { autoAlpha: 0, y: 20, stagger: 0.1 });
-      }, container.value);
-    });
+		onMounted(() => {
+			if (!container.value) return;
+			ctx = gsap.context(() => {
+				gsap.to('.box', { x: 100, duration: 0.6 });
+				gsap.from('.item', { autoAlpha: 0, y: 20, stagger: 0.1 });
+			}, container.value);
+		});
 
-    onUnmounted(() => {
-      ctx?.revert();
-    });
+		onUnmounted(() => {
+			ctx?.revert();
+		});
 
-    return { container };
-  }
+		return { container };
+	},
 };
 ```
 
@@ -134,9 +134,9 @@ ScrollTrigger instances are created when you use the `scrollTrigger` config on a
 
 ## When to Create vs Kill
 
-| Lifecycle        | Action |
-|-----------------|--------|
-| **Mounted**      | Create tweens and ScrollTriggers inside **gsap.context(scope)**. |
+| Lifecycle             | Action                                                                                                            |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Mounted**           | Create tweens and ScrollTriggers inside **gsap.context(scope)**.                                                  |
 | **Unmount / Destroy** | Call **ctx.revert()** so all animations and ScrollTriggers in that context are killed and inline styles reverted. |
 
 Do not create GSAP animations in the component’s setup or in a synchronous top-level script that runs before the root element exists. Wait for **onMounted** / **onMount** (or equivalent) so the container ref is in the DOM.

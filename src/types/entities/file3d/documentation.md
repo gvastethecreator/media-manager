@@ -31,10 +31,10 @@ import { createFile3D, updateFile3D, getFile3D } from '@/transformers/file3d';
 
 // Crear un nuevo archivo 3D
 const nuevoArchivo = await createFile3D({
-  name: 'Modelo de producto',
-  filePath: '/models/producto.glb',
-  format: 'glb',
-  size: 2048576 // tamaño en bytes (2MB)
+	name: 'Modelo de producto',
+	filePath: '/models/producto.glb',
+	format: 'glb',
+	size: 2048576, // tamaño en bytes (2MB)
 });
 
 // Obtener un archivo 3D existente
@@ -42,8 +42,8 @@ const archivo = await getFile3D(nuevoArchivo.id);
 
 // Actualizar un archivo 3D existente
 await updateFile3D(nuevoArchivo.id, {
-  name: 'Modelo de producto actualizado',
-  size: 3145728 // tamaño actualizado (3MB)
+	name: 'Modelo de producto actualizado',
+	size: 3145728, // tamaño actualizado (3MB)
 });
 ```
 
@@ -57,7 +57,7 @@ sequenceDiagram
     participant DB
     Client->>API: createFile3D()
     API->>Transformer: mapCreateFile3DDataToDrizzle()
-    
+
     DB-->>Transformer: File3D
     Transformer-->>API: transformFile3D()
     API-->>Client: File3DBase

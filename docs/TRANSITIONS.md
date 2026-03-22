@@ -47,20 +47,20 @@ src/
 import { useFlip } from '@/hooks/transitions';
 
 function MiComponente() {
-  const { ref, executeFlip } = useFlip({ id: 'mi-elemento' });
-  const [expandido, setExpandido] = useState(false);
+	const { ref, executeFlip } = useFlip({ id: 'mi-elemento' });
+	const [expandido, setExpandido] = useState(false);
 
-  const handleClick = () => {
-    executeFlip(() => {
-      setExpandido(!expandido);
-    });
-  };
+	const handleClick = () => {
+		executeFlip(() => {
+			setExpandido(!expandido);
+		});
+	};
 
-  return (
-    <div ref={ref} onClick={handleClick}>
-      Contenido
-    </div>
-  );
+	return (
+		<div ref={ref} onClick={handleClick}>
+			Contenido
+		</div>
+	);
 }
 ```
 
@@ -70,19 +70,19 @@ function MiComponente() {
 import { TransitionGroup, TransitionItem } from '@/components/transitions';
 
 function MiLista({ items }) {
-  return (
-    <TransitionGroup
-      isVisible={items.length > 0}
-      staggerDelay={50}
-      enterConfig={{ type: 'slide', direction: 'bottom' }}
-    >
-      {items.map((item, index) => (
-        <TransitionItem key={item.id} id={item.id} index={index}>
-          <div>{item.name}</div>
-        </TransitionItem>
-      ))}
-    </TransitionGroup>
-  );
+	return (
+		<TransitionGroup
+			isVisible={items.length > 0}
+			staggerDelay={50}
+			enterConfig={{ type: 'slide', direction: 'bottom' }}
+		>
+			{items.map((item, index) => (
+				<TransitionItem key={item.id} id={item.id} index={index}>
+					<div>{item.name}</div>
+				</TransitionItem>
+			))}
+		</TransitionGroup>
+	);
 }
 ```
 
@@ -92,17 +92,13 @@ function MiLista({ items }) {
 import { MorphContainer } from '@/components/transitions';
 
 function MiMorph() {
-  const [forma, setForma] = useState('square');
+	const [forma, setForma] = useState('square');
 
-  return (
-    <MorphContainer
-      morphId="mi-forma"
-      shape={forma}
-      className="w-32 h-32 bg-primary"
-    >
-      Contenido
-    </MorphContainer>
-  );
+	return (
+		<MorphContainer morphId="mi-forma" shape={forma} className="w-32 h-32 bg-primary">
+			Contenido
+		</MorphContainer>
+	);
 }
 ```
 
@@ -112,16 +108,16 @@ function MiMorph() {
 import { useEntityCardTransition } from '@/hooks/transitions';
 
 function FolderCard({ folder, onClick }) {
-  const { cardRef, handleCardClick } = useEntityCardTransition({
-    entityId: folder.id,
-    entityType: 'folder',
-  });
+	const { cardRef, handleCardClick } = useEntityCardTransition({
+		entityId: folder.id,
+		entityType: 'folder',
+	});
 
-  return (
-    <div ref={cardRef} onClick={() => handleCardClick(() => onClick(folder))}>
-      {/* Contenido de la tarjeta */}
-    </div>
-  );
+	return (
+		<div ref={cardRef} onClick={() => handleCardClick(() => onClick(folder))}>
+			{/* Contenido de la tarjeta */}
+		</div>
+	);
 }
 ```
 
@@ -133,12 +129,12 @@ function FolderCard({ folder, onClick }) {
 import { customEasings } from '@/lib/transitions';
 
 // Easings principales
-customEasings.easeOutSuper      // Salida súper suave
-customEasings.elasticSubtle     // Elástico sutil
-customEasings.bounceSubtle      // Rebote sutil
-customEasings.quickSlow         // Desaceleración rápida
-customEasings.liquid            // Movimiento líquido
-customEasings.scaleOrganic      // Escala orgánica
+customEasings.easeOutSuper; // Salida súper suave
+customEasings.elasticSubtle; // Elástico sutil
+customEasings.bounceSubtle; // Rebote sutil
+customEasings.quickSlow; // Desaceleración rápida
+customEasings.liquid; // Movimiento líquido
+customEasings.scaleOrganic; // Escala orgánica
 ```
 
 ### Easings Contextuales
@@ -147,11 +143,11 @@ customEasings.scaleOrganic      // Escala orgánica
 import { contextualEasings } from '@/lib/transitions';
 
 // Según contexto
-contextualEasings.navigation    // Para navegación
-contextualEasings.element       // Para elementos
-contextualEasings.modal         // Para modales
-contextualEasings.list          // Para listas
-contextualEasings.shared        // Para elementos compartidos
+contextualEasings.navigation; // Para navegación
+contextualEasings.element; // Para elementos
+contextualEasings.modal; // Para modales
+contextualEasings.list; // Para listas
+contextualEasings.shared; // Para elementos compartidos
 ```
 
 ## 🧩 Presets de Animación
@@ -161,11 +157,11 @@ contextualEasings.shared        // Para elementos compartidos
 ```typescript
 import { enterPresets } from '@/lib/transitions';
 
-enterPresets.slideIn    // Entrada deslizante
-enterPresets.scaleIn    // Entrada con escala
-enterPresets.blurIn     // Entrada con desenfoque
-enterPresets.elasticIn  // Entrada elástica
-enterPresets.zoomIn     // Zoom desde lejos
+enterPresets.slideIn; // Entrada deslizante
+enterPresets.scaleIn; // Entrada con escala
+enterPresets.blurIn; // Entrada con desenfoque
+enterPresets.elasticIn; // Entrada elástica
+enterPresets.zoomIn; // Zoom desde lejos
 ```
 
 ### Presets de Salida
@@ -173,10 +169,10 @@ enterPresets.zoomIn     // Zoom desde lejos
 ```typescript
 import { exitPresets } from '@/lib/transitions';
 
-exitPresets.slideOut    // Salida deslizante
-exitPresets.scaleOut    // Salida con escala
-exitPresets.blurOut     // Salida con desenfoque
-exitPresets.zoomOut     // Zoom hacia lejos
+exitPresets.slideOut; // Salida deslizante
+exitPresets.scaleOut; // Salida con escala
+exitPresets.blurOut; // Salida con desenfoque
+exitPresets.zoomOut; // Zoom hacia lejos
 ```
 
 ## 📐 Direcciones de Transición
@@ -244,11 +240,7 @@ import { EntityCardTransition, EntityCardGridTransition } from '@/components/tra
 ### Configuración Global
 
 ```typescript
-import { 
-  getFlipEngine, 
-  getEnterExitCoordinator,
-  enableTransitionsDebug 
-} from '@/lib/transitions';
+import { getFlipEngine, getEnterExitCoordinator, enableTransitionsDebug } from '@/lib/transitions';
 
 // Habilitar debug
 enableTransitionsDebug();
@@ -262,14 +254,14 @@ getEnterExitCoordinator().clearAll();
 
 ```css
 :root {
-  /* Duraciones */
-  --transition-duration-fast: 200ms;
-  --transition-duration-normal: 350ms;
-  --transition-duration-slow: 500ms;
-  
-  /* Easings */
-  --transition-easing-smooth: cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-easing-bounce: cubic-bezier(0.68, -0.15, 0.265, 1.15);
+	/* Duraciones */
+	--transition-duration-fast: 200ms;
+	--transition-duration-normal: 350ms;
+	--transition-duration-slow: 500ms;
+
+	/* Easings */
+	--transition-easing-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+	--transition-easing-bounce: cubic-bezier(0.68, -0.15, 0.265, 1.15);
 }
 ```
 
@@ -286,7 +278,7 @@ enableTransitionsDebug();
 O agregar clase al HTML:
 
 ```html
-<html class="debug-transitions">
+<html class="debug-transitions"></html>
 ```
 
 ### Métricas de Rendimiento
@@ -306,25 +298,25 @@ const metrics = getFlipEngine().getMetrics();
 import { useFlipGroup } from '@/hooks/transitions';
 
 function GridReordable() {
-  const { registerRef, executeFlip } = useFlipGroup({
-    ids: items.map(i => i.id),
-  });
+	const { registerRef, executeFlip } = useFlipGroup({
+		ids: items.map((i) => i.id),
+	});
 
-  const reorder = () => {
-    executeFlip(() => {
-      // Reordenar items
-    });
-  };
+	const reorder = () => {
+		executeFlip(() => {
+			// Reordenar items
+		});
+	};
 
-  return (
-    <div className="grid">
-      {items.map(item => (
-        <div key={item.id} ref={registerRef(item.id)}>
-          {item.content}
-        </div>
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid">
+			{items.map((item) => (
+				<div key={item.id} ref={registerRef(item.id)}>
+					{item.content}
+				</div>
+			))}
+		</div>
+	);
 }
 ```
 
@@ -334,17 +326,17 @@ function GridReordable() {
 import { useMorphLoop } from '@/hooks/transitions';
 
 function EfectoLiquido() {
-  const { ref, start, stop } = useMorphLoop({
-    id: 'liquid-effect',
-    shapes: ['circle', 'organic', 'blob', 'organic'],
-    interval: 2000,
-  });
+	const { ref, start, stop } = useMorphLoop({
+		id: 'liquid-effect',
+		shapes: ['circle', 'organic', 'blob', 'organic'],
+		interval: 2000,
+	});
 
-  return (
-    <div ref={ref} className="liquid-container">
-      Contenido
-    </div>
-  );
+	return (
+		<div ref={ref} className="liquid-container">
+			Contenido
+		</div>
+	);
 }
 ```
 
@@ -356,15 +348,11 @@ import { getEnterExitCoordinator } from '@/lib/transitions';
 const coordinator = getEnterExitCoordinator();
 
 // Secuencia personalizada
-await coordinator.coordinateReplace(
-  elementosSalientes,
-  elementosEntrantes,
-  {
-    exitConfig: { type: 'slide', direction: 'left' },
-    enterConfig: { type: 'slide', direction: 'right' },
-    overlap: 0.2,
-  }
-);
+await coordinator.coordinateReplace(elementosSalientes, elementosEntrantes, {
+	exitConfig: { type: 'slide', direction: 'left' },
+	enterConfig: { type: 'slide', direction: 'right' },
+	overlap: 0.2,
+});
 ```
 
 ## 📝 Notas de Implementación

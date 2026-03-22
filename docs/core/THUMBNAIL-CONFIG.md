@@ -11,27 +11,28 @@ Se ha implementado un sistema completo de configuración avanzada para la genera
 ## 🆕 Características Implementadas
 
 ### 1. **Tipo `ThumbnailAdvancedConfig`**
+
 📁 `src/types/thumbnails-advanced.config.ts`
 
 Nuevo tipo TypeScript con configuración completa:
 
 ```typescript
 interface ThumbnailAdvancedConfig {
-  retry: ThumbnailRetryConfig;
-  processing: ThumbnailProcessingConfig;
-  entities: {
-    video: EntityThumbnailConfig;
-    audio: EntityThumbnailConfig;
-    image: EntityThumbnailConfig;
-    document: EntityThumbnailConfig;
-    jsonFile: EntityThumbnailConfig;
-    file3d: EntityThumbnailConfig;
-  };
-  verboseLogging: boolean;
-  generateOnIndex: boolean;
-  savePlaceholdersOnError: boolean;
-  autoCleanOrphans: boolean;
-  autoCleanInterval: number;
+	retry: ThumbnailRetryConfig;
+	processing: ThumbnailProcessingConfig;
+	entities: {
+		video: EntityThumbnailConfig;
+		audio: EntityThumbnailConfig;
+		image: EntityThumbnailConfig;
+		document: EntityThumbnailConfig;
+		jsonFile: EntityThumbnailConfig;
+		file3d: EntityThumbnailConfig;
+	};
+	verboseLogging: boolean;
+	generateOnIndex: boolean;
+	savePlaceholdersOnError: boolean;
+	autoCleanOrphans: boolean;
+	autoCleanInterval: number;
 }
 ```
 
@@ -39,22 +40,22 @@ interface ThumbnailAdvancedConfig {
 
 Cada tipo de archivo tiene configuración independiente:
 
-| Tipo | Timeout | Formato | Estrategia Fallback |
-|------|---------|---------|-------------------|
-| 🎬 Video | 30s | WebP | Aggressive |
-| 🎵 Audio | 15s | PNG | Aggressive |
-| 🖼️ Imagen | 10s | WebP | Conservative |
-| 📄 Documento | 20s | PNG | Aggressive |
-| 📝 JSON | 10s | SVG | Aggressive |
-| 🎲 3D | 25s | PNG | Aggressive |
+| Tipo         | Timeout | Formato | Estrategia Fallback |
+| ------------ | ------- | ------- | ------------------- |
+| 🎬 Video     | 30s     | WebP    | Aggressive          |
+| 🎵 Audio     | 15s     | PNG     | Aggressive          |
+| 🖼️ Imagen    | 10s     | WebP    | Conservative        |
+| 📄 Documento | 20s     | PNG     | Aggressive          |
+| 📝 JSON      | 10s     | SVG     | Aggressive          |
+| 🎲 3D        | 25s     | PNG     | Aggressive          |
 
 ### 3. **Estrategias de Fallback**
 
 ```typescript
 enum ThumbnailFallbackStrategy {
-  AGGRESSIVE = 'aggressive',    // Intentar todos los fallbacks
-  CONSERVATIVE = 'conservative', // Solo primer fallback
-  NONE = 'none'                 // Fallar inmediatamente
+	AGGRESSIVE = 'aggressive', // Intentar todos los fallbacks
+	CONSERVATIVE = 'conservative', // Solo primer fallback
+	NONE = 'none', // Fallar inmediatamente
 }
 ```
 
@@ -62,10 +63,10 @@ enum ThumbnailFallbackStrategy {
 
 ```typescript
 interface ThumbnailRetryConfig {
-  enabled: boolean;              // Habilitar reintentos
-  maxRetries: number;            // Máximo 10 reintentos
-  retryDelay: number;            // Delay base en ms
-  exponentialBackoff: boolean;   // Backoff exponencial
+	enabled: boolean; // Habilitar reintentos
+	maxRetries: number; // Máximo 10 reintentos
+	retryDelay: number; // Delay base en ms
+	exponentialBackoff: boolean; // Backoff exponencial
 }
 ```
 
@@ -73,45 +74,52 @@ interface ThumbnailRetryConfig {
 
 ```typescript
 interface ThumbnailProcessingConfig {
-  concurrency: number;           // 1-16 workers
-  batchSize: number;             // 10-500 archivos por lote
-  prioritizeRecent: boolean;     // Priorizar archivos nuevos
-  pauseOnHighLoad: boolean;      // Pausar bajo carga alta
-  cpuThreshold: number;          // Threshold de CPU (50-95%)
+	concurrency: number; // 1-16 workers
+	batchSize: number; // 10-500 archivos por lote
+	prioritizeRecent: boolean; // Priorizar archivos nuevos
+	pauseOnHighLoad: boolean; // Pausar bajo carga alta
+	cpuThreshold: number; // Threshold de CPU (50-95%)
 }
 ```
 
 ## 🎨 Componentes UI
 
 ### 1. **ThumbnailAdvancedSettings**
+
 📁 `src/components/settings/thumbnails/thumbnail-advanced-settings.tsx`
 
 Componente colapsable con secciones:
 
 #### **🚀 Procesamiento**
+
 - Slider de concurrencia (1-16)
 - Slider de tamaño de lote (10-500)
 - Switch para priorizar recientes
 
 #### **🔄 Reintentos**
+
 - Toggle para habilitar/deshabilitar
 - Slider de máximo de reintentos (0-10)
 - Toggle para backoff exponencial
 
 #### **🎯 Configuración por Tipo**
+
 Para cada tipo de entidad:
+
 - Switch enable/disable
 - Slider de timeout (5-120s)
 - Selector de estrategia de fallback
 - Selector de formato preferido
 
 #### **🔧 Opciones Generales**
+
 - Generar al indexar
 - Guardar placeholders en error
 - Logging detallado
 - Botón de reset a defaults
 
 ### 2. **Integración en ThumbnailsSettings**
+
 📁 `src/components/settings/thumbnails/thumbnails-settings.tsx`
 
 - Agregado import de `ThumbnailAdvancedSettings`
@@ -121,6 +129,7 @@ Para cada tipo de entidad:
 ## 🔧 Servicios
 
 ### **ThumbnailConfigService**
+
 📁 `src/services/thumbnail-config/thumbnail-config.service.ts`
 
 Servicio singleton para acceso centralizado:
@@ -144,23 +153,23 @@ thumbnailConfigService.log('Procesando video...', videoId);
 
 ### **Métodos Disponibles**
 
-| Método | Descripción |
-|--------|-------------|
-| `setConfig(config)` | Actualizar configuración |
-| `getConfig()` | Obtener configuración completa |
-| `getEntityConfig(type)` | Obtener config específica |
-| `shouldUseFallback(type, attempt)` | Verificar uso de fallback |
-| `calculateRetryDelay(attempt)` | Calcular delay de reintento |
-| `isRetryEnabled()` | Verificar reintentos habilitados |
-| `getMaxRetries()` | Obtener máximo de reintentos |
-| `getConcurrency()` | Obtener concurrencia |
-| `getBatchSize()` | Obtener tamaño de lote |
-| `isVerboseLogging()` | Verificar logging detallado |
-| `shouldSavePlaceholders()` | Verificar guardar placeholders |
-| `shouldGenerateOnIndex()` | Verificar generar al indexar |
-| `subscribe(callback)` | Suscribirse a cambios |
-| `log(message, ...args)` | Log condicional |
-| `reset()` | Reset a defaults |
+| Método                             | Descripción                      |
+| ---------------------------------- | -------------------------------- |
+| `setConfig(config)`                | Actualizar configuración         |
+| `getConfig()`                      | Obtener configuración completa   |
+| `getEntityConfig(type)`            | Obtener config específica        |
+| `shouldUseFallback(type, attempt)` | Verificar uso de fallback        |
+| `calculateRetryDelay(attempt)`     | Calcular delay de reintento      |
+| `isRetryEnabled()`                 | Verificar reintentos habilitados |
+| `getMaxRetries()`                  | Obtener máximo de reintentos     |
+| `getConcurrency()`                 | Obtener concurrencia             |
+| `getBatchSize()`                   | Obtener tamaño de lote           |
+| `isVerboseLogging()`               | Verificar logging detallado      |
+| `shouldSavePlaceholders()`         | Verificar guardar placeholders   |
+| `shouldGenerateOnIndex()`          | Verificar generar al indexar     |
+| `subscribe(callback)`              | Suscribirse a cambios            |
+| `log(message, ...args)`            | Log condicional                  |
+| `reset()`                          | Reset a defaults                 |
 
 ## 📊 Estructura de Datos
 
@@ -168,21 +177,21 @@ thumbnailConfigService.log('Procesando video...', videoId);
 
 ```typescript
 export const ThumbnailAdvancedConfigSchema = z.object({
-  retry: ThumbnailRetryConfigSchema,
-  processing: ThumbnailProcessingConfigSchema,
-  entities: z.object({
-    video: EntityThumbnailConfigSchema,
-    audio: EntityThumbnailConfigSchema,
-    image: EntityThumbnailConfigSchema,
-    document: EntityThumbnailConfigSchema,
-    jsonFile: EntityThumbnailConfigSchema,
-    file3d: EntityThumbnailConfigSchema,
-  }),
-  verboseLogging: z.boolean(),
-  generateOnIndex: z.boolean(),
-  savePlaceholdersOnError: z.boolean(),
-  autoCleanOrphans: z.boolean(),
-  autoCleanInterval: z.number().int().min(0).max(168),
+	retry: ThumbnailRetryConfigSchema,
+	processing: ThumbnailProcessingConfigSchema,
+	entities: z.object({
+		video: EntityThumbnailConfigSchema,
+		audio: EntityThumbnailConfigSchema,
+		image: EntityThumbnailConfigSchema,
+		document: EntityThumbnailConfigSchema,
+		jsonFile: EntityThumbnailConfigSchema,
+		file3d: EntityThumbnailConfigSchema,
+	}),
+	verboseLogging: z.boolean(),
+	generateOnIndex: z.boolean(),
+	savePlaceholdersOnError: z.boolean(),
+	autoCleanOrphans: z.boolean(),
+	autoCleanInterval: z.number().int().min(0).max(168),
 });
 ```
 
@@ -203,6 +212,7 @@ graph TD
 ## 📝 Próximos Pasos
 
 ### **Fase 1: Integración con Procesadores** ⚠️ PENDIENTE
+
 - [ ] Modificar `VideoProcessor` para leer config
 - [ ] Modificar `AudioProcessor` para leer config
 - [ ] Modificar `File3DProcessor` para leer config
@@ -211,16 +221,19 @@ graph TD
 - [ ] Modificar `ImageProcessor` para leer config
 
 ### **Fase 2: Concurrencia Dinámica** ⚠️ PENDIENTE
+
 - [ ] Modificar `FileEntityMapperCore` para usar `getConcurrency()`
 - [ ] Implementar pausado por carga alta
 - [ ] Implementar priorización de archivos
 
 ### **Fase 3: Sistema de Reintentos** ⚠️ PENDIENTE
+
 - [ ] Implementar lógica de reintentos en procesadores
 - [ ] Implementar backoff exponencial
 - [ ] Tracking de intentos en metadata
 
 ### **Fase 4: Stats Detalladas** ⚠️ PENDIENTE
+
 - [ ] Agregar stats por tipo de entidad
 - [ ] Gráficos de éxito/fallo por tipo
 - [ ] Tiempos promedio por tipo
@@ -233,22 +246,22 @@ graph TD
 ```typescript
 // Unit tests
 describe('ThumbnailConfigService', () => {
-  it('should calculate exponential backoff correctly');
-  it('should respect fallback strategy');
-  it('should notify subscribers on config change');
+	it('should calculate exponential backoff correctly');
+	it('should respect fallback strategy');
+	it('should notify subscribers on config change');
 });
 
 // Integration tests
 describe('ThumbnailAdvancedSettings', () => {
-  it('should persist config to localStorage');
-  it('should update processors config');
+	it('should persist config to localStorage');
+	it('should update processors config');
 });
 
 // E2E tests
 describe('Thumbnail Generation with Advanced Config', () => {
-  it('should respect timeout settings');
-  it('should use fallbacks according to strategy');
-  it('should retry failed generations');
+	it('should respect timeout settings');
+	it('should use fallbacks according to strategy');
+	it('should retry failed generations');
 });
 ```
 
@@ -268,10 +281,10 @@ import { thumbnailConfigService } from '@/services/thumbnail-config';
 
 // Actualizar concurrencia
 thumbnailConfigService.setConfig({
-  processing: {
-    ...thumbnailConfigService.getConfig().processing,
-    concurrency: 8
-  }
+	processing: {
+		...thumbnailConfigService.getConfig().processing,
+		concurrency: 8,
+	},
 });
 ```
 
@@ -282,15 +295,15 @@ import { thumbnailConfigService } from '@/services/thumbnail-config';
 
 async generateThumbnail(entity: Video) {
   const config = thumbnailConfigService.getEntityConfig('video');
-  
+
   // Usar timeout configurado
   const timeoutMs = config.timeout * 1000;
-  
+
   // Verificar si usar fallback
   if (thumbnailConfigService.shouldUseFallback('video', attemptNumber)) {
     await this.tryFallback();
   }
-  
+
   // Log condicional
   thumbnailConfigService.log('Generando thumbnail', entity.id);
 }
@@ -299,18 +312,21 @@ async generateThumbnail(entity: Video) {
 ## 🎯 Beneficios
 
 ### **Para Usuarios**
+
 - ✅ Control total sobre generación de thumbnails
 - ✅ Optimización de recursos (CPU, memoria)
 - ✅ Mejor debugging con logging detallado
 - ✅ Configuración específica por tipo de archivo
 
 ### **Para Desarrolladores**
+
 - ✅ API centralizada y tipada
 - ✅ Suscripción a cambios de configuración
 - ✅ Helpers para casos comunes
 - ✅ Validación con Zod
 
 ### **Para el Sistema**
+
 - ✅ Menor carga con concurrencia ajustable
 - ✅ Mejor resiliencia con reintentos
 - ✅ Fallbacks configurables
@@ -319,12 +335,14 @@ async generateThumbnail(entity: Video) {
 ## 📈 Métricas de Impacto
 
 ### **Antes**
+
 - ❌ Concurrencia hardcoded (4)
 - ❌ Timeout hardcoded (30s)
 - ❌ Sin reintentos
 - ❌ Fallbacks no configurables
 
 ### **Después**
+
 - ✅ Concurrencia configurable (1-16)
 - ✅ Timeout por tipo (5-120s)
 - ✅ Reintentos con backoff exponencial

@@ -10,7 +10,7 @@ Los transformadores de **UploadedImage** permiten mapear, serializar, deserializ
 
 ```mermaid
 flowchart TD
-    
+
     B -->|toUploadedImageListItem| C[UploadedImageListItem]
     B -->|toUploadedImageCard| D[UploadedImageCard]
     B -->|parseUploadedImageSearchParams| E[DbQueryInput]

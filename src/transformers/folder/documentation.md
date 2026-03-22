@@ -31,16 +31,16 @@ graph TD
     A[Drizzle DB] --> B[FolderBase]
     B --> C[fromDrizzleFolderWithCounts]
     C --> D[FolderWithStats + Estadísticas]
-    
+
     E[App Types] --> F[toDrizzleFolder]
     F --> G[Drizzle Insert/Update]
-    
+
     D --> H[serializeFolder]
     H --> I[API Response]
-    
+
     J[Input Data] --> K[validateFolder]
     K --> L[Valid FolderBase]
-    
+
     M[Folder Array] --> N[buildFolderTree]
     N --> O[Hierarchical Structure]
 ```
@@ -109,6 +109,7 @@ validateFolderId(id: string): string
 ## 🎯 Tipos Utilizados
 
 ### Base Types
+
 - `FolderBase` - Tipo base de carpeta
 - `FolderStatistics` - Estadísticas avanzadas de carpeta
 - `FolderWithStats` - Tipo completo con estadísticas
@@ -116,24 +117,29 @@ validateFolderId(id: string): string
 ### Estadísticas Incluidas
 
 #### 📊 Métricas de Jerarquía
+
 - `hierarchyDepth` - Profundidad en el árbol de carpetas
 - `totalDescendants` - Total de carpetas descendientes
 - `directChildren` - Hijos directos
 
 #### 📈 Métricas de Contenido
+
 - `contentDiversity` - Variedad de contenido (0-100)
 - `organizationScore` - Puntuación de organización (0-100)
 - `totalItems` - Total de elementos
 
 #### 📁 Distribución de Contenido
+
 - `imageCount`, `videoCount`, `noteCount`, `documentCount`, `folderCount`
 
 #### 📏 Métricas de Tamaño
+
 - `formattedSize` - Tamaño formateado ("1.2 GB")
 - `averageFileSize` - Tamaño promedio por archivo
 - `largestFile` - Archivo más grande
 
 #### 🏷️ Auto-tagging
+
 - `autoTags` - Tags generados automáticamente
 - `qualityGrade` - Calificación de calidad (A, B, C, D)
 
@@ -153,6 +159,7 @@ validateFolderId(id: string): string
 ```
 
 ### Quality Grade
+
 - **A (85-100)**: Excelente organización
 - **B (70-84)**: Buena organización
 - **C (50-69)**: Organización regular
@@ -161,11 +168,13 @@ validateFolderId(id: string): string
 ## 🏷️ Auto-tagging Inteligente
 
 ### Tags de Jerarquía
+
 - `root` - Carpetas de nivel raíz
 - `deep` - Carpetas con profundidad >4
 - `leaf` - Carpetas sin subcarpetas
 
 ### Tags de Contenido
+
 - `images` - Predominantemente imágenes
 - `videos` - Predominantemente videos
 - `multimedia` - Mix de contenido
@@ -174,6 +183,7 @@ validateFolderId(id: string): string
 - `massive` - >200 elementos
 
 ### Tags de Organización
+
 - `well-organized` - Score ≥85
 - `organized` - Score ≥70
 - `needs-organization` - Score <50
@@ -229,12 +239,14 @@ const folder = getFolderById(foldersRecord, 'folder-id');
 ## 🔍 Migración Completada
 
 ### Eliminado
+
 - ❌ Imports de Drizzle
 - ❌ Funciones `fromDrizzleFolder*`
 - ❌ Tipos `DrizzleFolder*`
 - ❌ Referencias legacy y aliases deprecated
 
 ### Agregado
+
 - ✅ Tipos locales completos
 - ✅ Validación exhaustiva con Zod
 - ✅ Sistema de estadísticas avanzado

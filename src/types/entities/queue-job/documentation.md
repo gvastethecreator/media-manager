@@ -49,7 +49,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createQueueJob()
-    
+
     Transformer->>DB: db.queueJob.create()
     DB-->>Transformer: QueueJob
     Transformer-->>API: transformQueueJob()

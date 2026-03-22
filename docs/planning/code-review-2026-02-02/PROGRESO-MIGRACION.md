@@ -30,6 +30,7 @@ Todas las rutas legacy han sido migradas a Effect-TS:
 5. **✅ download.ts → download.effect.ts**
 
 **Patrones implementados:**
+
 - Errores tipados con `Data.TaggedError`
 - Servicios Effect con `Context.Tag` y `Layer`
 - Composición con `Effect.gen`
@@ -119,14 +120,14 @@ Migrar las siguientes rutas legacy a Effect-TS:
 
 ## 📊 Estadísticas
 
-| Categoría | Completado | Total | % |
-|-----------|-----------|-------|---|
-| Fase 0 (Preparación) | 2 | 2 | 100% |
-| Fase 1 (Alto Impacto) | 5 | 5 | 100% |
-| Fase 2 (Sistema) | 0 | 10 | 0% |
-| Fase 3 (Debug/Stubs) | 0 | 10 | 0% |
-| Correcciones Críticas | 3 | 5 | 60% |
-| **Total** | **10** | **32** | **31%** |
+| Categoría             | Completado | Total  | %       |
+| --------------------- | ---------- | ------ | ------- |
+| Fase 0 (Preparación)  | 2          | 2      | 100%    |
+| Fase 1 (Alto Impacto) | 5          | 5      | 100%    |
+| Fase 2 (Sistema)      | 0          | 10     | 0%      |
+| Fase 3 (Debug/Stubs)  | 0          | 10     | 0%      |
+| Correcciones Críticas | 3          | 5      | 60%     |
+| **Total**             | **10**     | **32** | **31%** |
 
 ---
 
@@ -156,6 +157,7 @@ Migrar las siguientes rutas legacy a Effect-TS:
 ## 📁 Archivos Creados
 
 ### Nuevas Rutas Effect-TS (Fase 1)
+
 - `src/server/routes/files.effect.ts`
 - `src/server/routes/search.effect.ts`
 - `src/server/routes/metadata.effect.ts`
@@ -163,6 +165,7 @@ Migrar las siguientes rutas legacy a Effect-TS:
 - `src/server/routes/download.effect.ts`
 
 ### Archivos Modificados
+
 - `src/server/index.ts` (corregida duplicidad /api/audio)
 - `src/transformers/image/transformer.ts` (datos deterministas, inmutabilidad)
 

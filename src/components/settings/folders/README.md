@@ -85,12 +85,12 @@ El componente utiliza server actions para operaciones del sistema de archivos:
 import { FoldersSettings } from '@/components/settings/folders/folders-settings';
 
 export default function FoldersPage() {
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-xl font-bold mb-4">Configuración de Carpetas</h1>
-      <FoldersSettings />
-    </div>
-  );
+	return (
+		<div className="container mx-auto p-4">
+			<h1 className="text-xl font-bold mb-4">Configuración de Carpetas</h1>
+			<FoldersSettings />
+		</div>
+	);
 }
 ```
 
@@ -107,21 +107,21 @@ El componente implementa varias acciones para gestionar carpetas:
 ```typescript
 // Ejemplo de acción para escanear una carpeta
 const handleScanFolder = async (folderId: string) => {
-  try {
-    setScanning(folderId);
-    const result = await scanFolder(folderId);
+	try {
+		setScanning(folderId);
+		const result = await scanFolder(folderId);
 
-    if (result.success) {
-      toastService.success(`Se han encontrado ${result.stats.newFiles} archivos nuevos`);
-      loadFolders(); // Recargar estadísticas
-    } else {
-      toastService.error(result.error || 'Error al escanear la carpeta');
-    }
-  } catch (error) {
-    toastService.error('Error al escanear la carpeta');
-  } finally {
-    setScanning(null);
-  }
+		if (result.success) {
+			toastService.success(`Se han encontrado ${result.stats.newFiles} archivos nuevos`);
+			loadFolders(); // Recargar estadísticas
+		} else {
+			toastService.error(result.error || 'Error al escanear la carpeta');
+		}
+	} catch (error) {
+		toastService.error('Error al escanear la carpeta');
+	} finally {
+		setScanning(null);
+	}
 };
 ```
 
@@ -136,15 +136,18 @@ const handleScanFolder = async (folderId: string) => {
 # 📄 Settings de Carpetas (`folders-settings.tsx`)
 
 ## 📁 Migración a Tipos Canónicos
+
 Este módulo y sus hooks han sido migrados en junio 2024 para usar exclusivamente el tipo canónico `FolderComplete`, eliminando cualquier referencia legacy a `ExtendedFolder`. Esto garantiza consistencia, type safety y compatibilidad futura.
 
 ## 📚 Estructura y Flujo Principal
+
 - **Carga de carpetas:** Se obtienen todas las carpetas usando el hook `useFolders` y se almacenan en el estado como `FolderComplete[]`.
 - **Selección y edición:** Al seleccionar una carpeta, se muestra el detalle y se puede editar usando el formulario canónico.
 - **Creación y actualización:** Los handlers usan siempre `FolderComplete` y actualizan el estado global tras cada operación.
 - **Eliminación y reindexado:** Los handlers eliminan o reindexan carpetas y actualizan el estado.
 
 ## 🔗 Diagrama de Relaciones
+
 ```mermaid
 graph TD
     A[folders-settings.tsx] -->|usa| B(FolderComplete)
@@ -155,14 +158,17 @@ graph TD
 ```
 
 ## 🧩 Ejemplo de Uso
+
 ```tsx
 <FoldersSettings />
 ```
 
 ## 🚦 Notas
+
 - Todos los datos y props usan `FolderComplete`.
 - Se eliminó cualquier import o type assertion legacy.
 - Documentación y migración conforme a las reglas del workspace.
 
 ---
+
 _Actualizado: junio 2024_

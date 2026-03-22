@@ -17,7 +17,7 @@ graph TD
     Wildcard --> Actions[Actions]
 
     Transformers --> T1[fromDrizzleWildcard]
-    
+
     Transformers --> T3[extendWildcard]
     Transformers --> T4[extendWildcards]
     Transformers --> T5[Serializers]
@@ -90,19 +90,19 @@ Tipo base derivado del esquema de la base de datos que define los campos fundame
 
 ```typescript
 export interface WildcardBase {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string;
-  description: string | null;
-  shortcut: string | null;
-  category: string | null;
-  children: string; // JSON string de hijos
-  featuredImage: string | null;
-  isFavorite: boolean;
-  parentId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	children: string; // JSON string de hijos
+	featuredImage: string | null;
+	isFavorite: boolean;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 ```
 
@@ -112,10 +112,10 @@ Extiende WildcardBase con campos JSON deserializados:
 
 ```typescript
 export interface WildcardComplete extends WildcardBase {
-  parsedChildren?: any[];
-  _relations?: WildcardRelations;
-  _count?: WildcardCounts;
-  _ui?: WildcardUI;
+	parsedChildren?: any[];
+	_relations?: WildcardRelations;
+	_count?: WildcardCounts;
+	_ui?: WildcardUI;
 }
 ```
 
@@ -125,13 +125,13 @@ Añade propiedades UI adicionales para visualización:
 
 ```typescript
 export interface WildcardExtended extends WildcardComplete {
-  isSelected?: boolean;
-  isHighlighted?: boolean;
-  displayName?: string;
-  isExpandable?: boolean;
-  isExpanded?: boolean;
-  shortcutDisplay?: string;
-  lastUpdated?: Date;
+	isSelected?: boolean;
+	isHighlighted?: boolean;
+	displayName?: string;
+	isExpandable?: boolean;
+	isExpanded?: boolean;
+	shortcutDisplay?: string;
+	lastUpdated?: Date;
 }
 ```
 
@@ -141,16 +141,16 @@ Versión con estadísticas calculadas:
 
 ```typescript
 export interface WildcardWithStats extends WildcardComplete {
-  stats: {
-    childCount: number;
-    imageCount: number;
-    videoCount: number;
-    promptCount: number;
-    totalContentItems: number;
-    depth: number;
-    usageCount: number;
-    lastUpdated: Date;
-  }
+	stats: {
+		childCount: number;
+		imageCount: number;
+		videoCount: number;
+		promptCount: number;
+		totalContentItems: number;
+		depth: number;
+		usageCount: number;
+		lastUpdated: Date;
+	};
 }
 ```
 
@@ -234,24 +234,24 @@ import { transformWildcard } from '@/transformers/wildcard';
 
 // Datos crudos
 const rawWildcard = {
-  id: '123',
-  name: 'Nombres de personajes',
-  emoji: '👤',
-  color: '#3B82F6',
-  description: 'Nombres aleatorios para personajes',
-  shortcut: 'name',
-  category: 'personajes',
-  children: '[{"value":"Ana"},{"value":"Pedro"},{"value":"María"},{"value":"Juan"}]',
-  isFavorite: true,
-  parentId: null,
-  createdAt: new Date(),
-  updatedAt: new Date()
+	id: '123',
+	name: 'Nombres de personajes',
+	emoji: '👤',
+	color: '#3B82F6',
+	description: 'Nombres aleatorios para personajes',
+	shortcut: 'name',
+	category: 'personajes',
+	children: '[{"value":"Ana"},{"value":"Pedro"},{"value":"María"},{"value":"Juan"}]',
+	isFavorite: true,
+	parentId: null,
+	createdAt: new Date(),
+	updatedAt: new Date(),
 };
 
 // Transformar con deserialización
 const wildcard = transformWildcard(rawWildcard, {
-  deserializeFields: true,
-  validateFields: true
+	deserializeFields: true,
+	validateFields: true,
 });
 
 console.log(wildcard.parsedChildren); // Array de objetos: [{value:'Ana'}, {value:'Pedro'}, ...]

@@ -33,9 +33,10 @@ export interface EntityTransformer<TEntity extends EntityBase, TStats extends En
 /**
  * 🛠️ Clase base para transformadores de entidades
  */
-export abstract class BaseEntityTransformer<TEntity extends EntityBase, TStats extends EntityStats>
-	implements EntityTransformer<TEntity, TStats>
-{
+export abstract class BaseEntityTransformer<
+	TEntity extends EntityBase,
+	TStats extends EntityStats,
+> implements EntityTransformer<TEntity, TStats> {
 	protected constructor(
 		protected readonly entityType: EntityStatsTypeValue,
 		protected readonly logger = serverLogger

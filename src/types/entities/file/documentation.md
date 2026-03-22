@@ -51,7 +51,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createFile()
-    
+
     Transformer->>DB: prisma.file.create()
     DB-->>Transformer: File
     Transformer-->>API: transformFile()

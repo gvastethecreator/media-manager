@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
 	<div
 		className={cn(
-			'rounded-dt-lg border-2 border-border/50 bg-linear-to-b from-card to-card/95 text-card-foreground shadow-dt-2 transition-all duration-dt-normal ease-dt-out hover:-translate-y-0.5 hover:shadow-dt-3',
+			'rounded-dt-lg border-2 border-border/50 bg-linear-to-b from-card to-card/95 text-card-foreground shadow-dt-2 transition-all duration-dt-normal ease-dt-out hover:-translate-y-1 hover:shadow-dt-4 active:scale-[0.99] active:shadow-dt-1',
 			// Focus visible para accesibilidad - útil cuando Card es interactivo
 			'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
 			className

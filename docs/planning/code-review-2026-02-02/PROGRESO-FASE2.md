@@ -35,13 +35,13 @@
 
 ## 📊 Estadísticas de Progreso
 
-| Fase | Estado | Rutas Migradas | Legacy Eliminado |
-|------|--------|----------------|------------------|
-| FASE 0 | ✅ Completa | 1 (audio-waveforms) | 0 |
-| FASE 1 | ✅ Completa | 5 (files, search, metadata, thumbnails, download) | 5 |
-| FASE 2 | ✅ Completa | 6 (profiles, events, favorites, tasks, documents, settings) | 6 |
-| FASE 3 | 🔄 Pendiente | 0 | 0 |
-| **Total** | **62%** | **12 rutas** | **11 archivos** |
+| Fase      | Estado       | Rutas Migradas                                              | Legacy Eliminado |
+| --------- | ------------ | ----------------------------------------------------------- | ---------------- |
+| FASE 0    | ✅ Completa  | 1 (audio-waveforms)                                         | 0                |
+| FASE 1    | ✅ Completa  | 5 (files, search, metadata, thumbnails, download)           | 5                |
+| FASE 2    | ✅ Completa  | 6 (profiles, events, favorites, tasks, documents, settings) | 6                |
+| FASE 3    | 🔄 Pendiente | 0                                                           | 0                |
+| **Total** | **62%**      | **12 rutas**                                                | **11 archivos**  |
 
 ---
 
@@ -50,6 +50,7 @@
 Las siguientes rutas aún están en formato legacy:
 
 ### Rutas de Debug y Test
+
 - `debug.ts`
 - `debug-entity-types.ts`
 - `test-characters.ts`
@@ -59,6 +60,7 @@ Las siguientes rutas aún están en formato legacy:
 - `metadata-advanced-test.ts`
 
 ### Rutas de Thumbnails Especializados
+
 - `3d-thumbnails.ts`
 - `json-thumbnails.ts`
 - `videos-thumbnail.ts`
@@ -66,10 +68,12 @@ Las siguientes rutas aún están en formato legacy:
 - `thumbnails-unified.ts`
 
 ### Rutas de Archivos Locales
+
 - `local-files.ts`
 - `local-files-simple.ts`
 
 ### Otras Rutas
+
 - `file-changes.ts`
 - `file-sync.ts`
 
@@ -78,6 +82,7 @@ Las siguientes rutas aún están en formato legacy:
 ## ✅ Checklist de Verificación
 
 ### Backend
+
 - [x] No hay rutas duplicadas en `src/server/index.ts`
 - [x] Todas las rutas críticas usan adaptador Effect
 - [x] Sin `console.*` en rutas productivas migradas
@@ -85,6 +90,7 @@ Las siguientes rutas aún están en formato legacy:
 - [x] `bun run tsc` sin errores
 
 ### Migración Effect-TS
+
 - [x] 12 rutas migradas con patrón Effect completo
 - [x] Errores tipados con `Data.TaggedError` donde aplica
 - [x] Validación de inputs con Zod
@@ -92,6 +98,7 @@ Las siguientes rutas aún están en formato legacy:
 - [x] 11 archivos legacy eliminados
 
 ### Correcciones Previas
+
 - [x] Duplicidad `/api/audio` resuelta
 - [x] Datos aleatorios en transformers eliminados
 - [x] Mutación de inputs corregida
@@ -102,6 +109,7 @@ Las siguientes rutas aún están en formato legacy:
 ## 📁 Archivos Creados en esta Sesión
 
 ### Nuevas Rutas Effect-TS (FASE 2)
+
 - `src/server/routes/profiles.effect.ts`
 - `src/server/routes/events.effect.ts`
 - `src/server/routes/favorites.effect.ts`
@@ -110,9 +118,11 @@ Las siguientes rutas aún están en formato legacy:
 - `src/server/routes/settings.effect.ts`
 
 ### Archivos Modificados
+
 - `src/server/index.ts` - Actualizado con nuevas rutas Effect
 
 ### Archivos Eliminados (Legacy)
+
 - `src/server/routes/profiles.ts`
 - `src/server/routes/events.ts`
 - `src/server/routes/favorites.ts`
@@ -173,6 +183,7 @@ Migrar rutas de debug y stubs:
 ## 📈 Cobertura Effect-TS
 
 ### Rutas Core (100% ✅)
+
 - ✅ folders, images, tags, albums, collections
 - ✅ characters, places, concepts, prompts
 - ✅ audios, videos, groups, wildcards, notes
@@ -181,9 +192,11 @@ Migrar rutas de debug y stubs:
 - ✅ profiles, events, favorites, tasks, documents, settings
 
 ### Rutas Sistema (100% ✅)
+
 - ✅ system, stats, queue, activity
 
 ### Rutas Debug/Stubs (0% 🔄)
+
 - 🔄 12 rutas pendientes de migración o eliminación
 
 ---

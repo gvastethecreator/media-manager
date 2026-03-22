@@ -22,9 +22,9 @@ Servicio centralizado que maneja la generación y recuperación de thumbnails pa
 ```typescript
 // Obtener o generar thumbnail
 const result = await thumbnailUnifiedService.getThumbnail('video', entityId, {
-  width: 320,
-  height: 180,
-  quality: 'medium'
+	width: 320,
+	height: 180,
+	quality: 'medium',
 });
 
 // Verificar si existe thumbnail
@@ -32,8 +32,8 @@ const hasThumbnail = await thumbnailUnifiedService.hasThumbnail('image', entityI
 
 // Generar en batch
 const results = await thumbnailUnifiedService.generateBatch([
-  { entityType: 'image', entityId: 'id1' },
-  { entityType: 'video', entityId: 'id2' }
+	{ entityType: 'image', entityId: 'id1' },
+	{ entityType: 'video', entityId: 'id2' },
 ]);
 ```
 
@@ -73,9 +73,9 @@ Hook React para obtener thumbnails de forma declarativa:
 
 ```typescript
 const { url, loading, error, refresh } = useThumbnail('video', entityId, {
-  width: 320,
-  height: 180,
-  quality: 'medium'
+	width: 320,
+	height: 180,
+	quality: 'medium',
 });
 
 // El hook automáticamente:
@@ -90,12 +90,12 @@ Funciones para generar URLs de thumbnails:
 
 ```typescript
 import {
-  generateAdvancedImageThumbnail,
-  generateAdvancedVideoThumbnail,
-  generateAudioWaveform,
-  generateDocumentPreview,
-  generateJsonPreview,
-  generate3DModelThumbnail
+	generateAdvancedImageThumbnail,
+	generateAdvancedVideoThumbnail,
+	generateAudioWaveform,
+	generateDocumentPreview,
+	generateJsonPreview,
+	generate3DModelThumbnail,
 } from '@/config/thumbnail-generators';
 
 // Usar en componentes
@@ -130,22 +130,24 @@ El componente existente (`src/components/features/file-browser-new/components/me
 
 ## Almacenamiento
 
-| Tipo | Ubicación | Formato |
-|------|-----------|---------|
-| Imágenes | Campo `thumbnail` (base64) | WebP |
-| Videos | Campo `thumbnail` (base64) | WebP |
-| Audio | `metadata.waveform.data` (base64) | SVG |
+| Tipo       | Ubicación                                      | Formato    |
+| ---------- | ---------------------------------------------- | ---------- |
+| Imágenes   | Campo `thumbnail` (base64)                     | WebP       |
+| Videos     | Campo `thumbnail` (base64)                     | WebP       |
+| Audio      | `metadata.waveform.data` (base64)              | SVG        |
 | Documentos | Tabla `metadatas` (id: `{entityId}-thumbnail`) | SVG base64 |
-| JSON | `metadata.thumbnail.data` (base64) | SVG |
-| 3D | `metadata.thumbnail.data` (base64) | SVG |
+| JSON       | `metadata.thumbnail.data` (base64)             | SVG        |
+| 3D         | `metadata.thumbnail.data` (base64)             | SVG        |
 
 ## Caché y Performance
 
 ### Backend
+
 - Headers de caché: `Cache-Control: public, max-age=31536000` (1 año)
 - Thumbnails se generan una sola vez y se reutilizan
 
 ### Frontend
+
 - Caché en memoria con LRU (5 minutos)
 - Lazy loading con viewport gating
 - Animaciones de video precargadas solo cuando es necesario
@@ -158,21 +160,17 @@ El componente existente (`src/components/features/file-browser-new/components/me
 import { useThumbnail } from '@/hooks/use-thumbnail';
 
 function MediaCard({ item }) {
-  const { url, loading, error, placeholder } = useThumbnail(
-    item.entityType,
-    item.id,
-    { width: 300, height: 300, quality: 'medium' }
-  );
+	const { url, loading, error, placeholder } = useThumbnail(item.entityType, item.id, {
+		width: 300,
+		height: 300,
+		quality: 'medium',
+	});
 
-  return (
-    <div className="media-card">
-      {loading ? (
-        <div className="skeleton" />
-      ) : (
-        <img src={url || placeholder} alt={item.name} />
-      )}
-    </div>
-  );
+	return (
+		<div className="media-card">
+			{loading ? <div className="skeleton" /> : <img src={url || placeholder} alt={item.name} />}
+		</div>
+	);
 }
 ```
 
@@ -183,14 +181,14 @@ import { thumbnailUnifiedService } from '@/services/thumbnail';
 
 // Generar thumbnail específico
 const result = await thumbnailUnifiedService.getThumbnail('document', docId, {
-  force: true // Forzar regeneración
+	force: true, // Forzar regeneración
 });
 
 // Generar múltiples
 await thumbnailUnifiedService.generateBatch([
-  { entityType: 'image', entityId: 'img1' },
-  { entityType: 'audio', entityId: 'audio1' },
-  { entityType: 'video', entityId: 'vid1' }
+	{ entityType: 'image', entityId: 'img1' },
+	{ entityType: 'audio', entityId: 'audio1' },
+	{ entityType: 'video', entityId: 'vid1' },
 ]);
 ```
 

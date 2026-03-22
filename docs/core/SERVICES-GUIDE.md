@@ -97,27 +97,27 @@ import { imageService, IMAGE_EVENTS } from '@/services/image';
 
 // CRUD básico
 const image = await imageService.create({
-  name: 'imagen.jpg',
-  path: '/path/to/image.jpg',
-  size: 1024000,
-  width: 1920,
-  height: 1080,
-  hash: 'sha256hash...',
-  folderId: 'folder_123',
+	name: 'imagen.jpg',
+	path: '/path/to/image.jpg',
+	size: 1024000,
+	width: 1920,
+	height: 1080,
+	hash: 'sha256hash...',
+	folderId: 'folder_123',
 });
 
 const images = await imageService.getImages({
-  folderId: 'folder_123',
-  page: 1,
-  pageSize: 50,
-  sortBy: 'createdAt',
-  sortOrder: 'desc',
-  isFavorite: true,
+	folderId: 'folder_123',
+	page: 1,
+	pageSize: 50,
+	sortBy: 'createdAt',
+	sortOrder: 'desc',
+	isFavorite: true,
 });
 
 await imageService.update('img_123', {
-  name: 'nuevo-nombre.jpg',
-  isFavorite: true,
+	name: 'nuevo-nombre.jpg',
+	isFavorite: true,
 });
 
 await imageService.delete('img_123');
@@ -128,10 +128,10 @@ const byPath = await imageService.getByPathAndFolder('/path/to/image.jpg', 'fold
 
 // Thumbnails
 const thumbnail = await imageService.generateThumbnail('img_123', {
-  width: 300,
-  height: 200,
-  quality: 80,
-  format: 'webp',
+	width: 300,
+	height: 200,
+	quality: 80,
+	format: 'webp',
 });
 
 // Tags y relaciones
@@ -151,11 +151,11 @@ import { emitImageEvent, onImageEvent, IMAGE_EVENTS } from '@/services/image';
 
 // Suscribirse a eventos
 onImageEvent(IMAGE_EVENTS.CREATED, (data) => {
-  console.log('Nueva imagen:', data.id);
+	console.log('Nueva imagen:', data.id);
 });
 
 onImageEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, (data) => {
-  console.log('Thumbnail listo:', data.id);
+	console.log('Thumbnail listo:', data.id);
 });
 
 // Los eventos disponibles son:
@@ -171,9 +171,9 @@ onImageEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, (data) => {
 ```typescript
 // image-processing.ts
 export const THUMBNAIL_QUALITY_CONFIG = {
-  small: { width: 150, height: 150, quality: 70 },
-  medium: { width: 300, height: 300, quality: 80 },
-  large: { width: 600, height: 600, quality: 85 },
+	small: { width: 150, height: 150, quality: 70 },
+	medium: { width: 300, height: 300, quality: 80 },
+	large: { width: 600, height: 600, quality: 85 },
 };
 ```
 
@@ -190,10 +190,10 @@ import { folderService } from '@/services/folder';
 
 // CRUD
 const folder = await folderService.create({
-  path: '/home/user/images',
-  name: 'Mis Imágenes',
-  isRoot: true,
-  isWatched: true,
+	path: '/home/user/images',
+	name: 'Mis Imágenes',
+	isRoot: true,
+	isWatched: true,
 });
 
 const folders = await folderService.getAll({ isRoot: true });
@@ -202,16 +202,16 @@ const tree = await folderService.getTree('folder_123');
 
 // Reindexación
 const result = await folderService.reindex('folder_123', {
-  onProgress: (progress) => {
-    console.log(`${progress.phase}: ${progress.current}/${progress.total}`);
-  },
+	onProgress: (progress) => {
+		console.log(`${progress.phase}: ${progress.current}/${progress.total}`);
+	},
 });
 
 // Contenidos
 const contents = await folderService.getContents('folder_123', {
-  includeImages: true,
-  includeVideos: true,
-  includeSubfolders: true,
+	includeImages: true,
+	includeVideos: true,
+	includeSubfolders: true,
 });
 
 // Estadísticas
@@ -256,11 +256,11 @@ import { tagService } from '@/services/tag';
 
 // CRUD
 const tag = await tagService.create({
-  name: 'Paisaje',
-  description: 'Fotografías de paisajes naturales',
-  color: '#10b981',
-  emoji: '🏔️',
-  category: 'nature',
+	name: 'Paisaje',
+	description: 'Fotografías de paisajes naturales',
+	color: '#10b981',
+	emoji: '🏔️',
+	category: 'nature',
 });
 
 const tags = await tagService.getAll({ category: 'nature' });
@@ -292,10 +292,10 @@ import { albumService } from '@/services/album';
 
 // CRUD
 const album = await albumService.create({
-  name: 'Vacaciones 2025',
-  description: 'Fotos del viaje a la playa',
-  color: '#f59e0b',
-  emoji: '🏖️',
+	name: 'Vacaciones 2025',
+	description: 'Fotos del viaje a la playa',
+	color: '#f59e0b',
+	emoji: '🏖️',
 });
 
 const albums = await albumService.getAll();
@@ -313,8 +313,8 @@ await albumService.setCoverImage('album_123', 'img_1');
 
 // Ordenamiento
 await albumService.reorderItems('album_123', [
-  { id: 'img_2', order: 1 },
-  { id: 'img_1', order: 2 },
+	{ id: 'img_2', order: 1 },
+	{ id: 'img_1', order: 2 },
 ]);
 ```
 
@@ -331,24 +331,24 @@ import { videoService } from '@/services/video';
 
 // Similar a imageService pero con campos específicos de video
 const video = await videoService.create({
-  name: 'video.mp4',
-  path: '/path/to/video.mp4',
-  size: 50000000,
-  width: 1920,
-  height: 1080,
-  duration: 120.5, // segundos
-  frameRate: 30,
-  bitrate: 5000000,
-  codec: 'h264',
-  hash: 'sha256hash...',
-  folderId: 'folder_123',
+	name: 'video.mp4',
+	path: '/path/to/video.mp4',
+	size: 50000000,
+	width: 1920,
+	height: 1080,
+	duration: 120.5, // segundos
+	frameRate: 30,
+	bitrate: 5000000,
+	codec: 'h264',
+	hash: 'sha256hash...',
+	folderId: 'folder_123',
 });
 
 // Thumbnail (extrae frame)
 await videoService.generateThumbnail('vid_123', {
-  timestamp: 5, // segundo 5
-  width: 300,
-  height: 200,
+	timestamp: 5, // segundo 5
+	width: 300,
+	height: 200,
 });
 ```
 
@@ -364,20 +364,20 @@ Procesa archivos de audio.
 import { audioService } from '@/services/audio';
 
 const audio = await audioService.create({
-  name: 'cancion.mp3',
-  path: '/path/to/cancion.mp3',
-  size: 5000000,
-  duration: 180.5,
-  bitrate: 320000,
-  sampleRate: 44100,
-  channels: 2,
-  codec: 'mp3',
-  artist: 'Artista',
-  album: 'Álbum',
-  title: 'Canción',
-  year: 2025,
-  hash: 'sha256hash...',
-  folderId: 'folder_123',
+	name: 'cancion.mp3',
+	path: '/path/to/cancion.mp3',
+	size: 5000000,
+	duration: 180.5,
+	bitrate: 320000,
+	sampleRate: 44100,
+	channels: 2,
+	codec: 'mp3',
+	artist: 'Artista',
+	album: 'Álbum',
+	title: 'Canción',
+	year: 2025,
+	hash: 'sha256hash...',
+	folderId: 'folder_123',
 });
 
 // Waveform para visualización
@@ -396,29 +396,27 @@ Gestiona personajes para worldbuilding.
 import { characterService } from '@/services/character';
 
 const character = await characterService.create({
-  name: 'Elara Moonshadow',
-  description: 'Elfa maga del bosque encantado',
-  race: 'Elf',
-  class: 'Mage',
-  level: 15,
-  alignment: 'Neutral Good',
-  age: 250,
-  gender: 'Female',
-  backstory: 'Nacida en el bosque de Silverwind...',
-  personality: 'Sabia, reservada, curiosa',
-  appearance: 'Cabello plateado, ojos violeta...',
-  stats: {
-    strength: 8,
-    dexterity: 14,
-    constitution: 10,
-    intelligence: 18,
-    wisdom: 16,
-    charisma: 12,
-  },
-  abilities: ['Fireball', 'Shield', 'Teleport'],
-  relationships: [
-    { characterId: 'char_456', type: 'ally', description: 'Compañero de aventuras' },
-  ],
+	name: 'Elara Moonshadow',
+	description: 'Elfa maga del bosque encantado',
+	race: 'Elf',
+	class: 'Mage',
+	level: 15,
+	alignment: 'Neutral Good',
+	age: 250,
+	gender: 'Female',
+	backstory: 'Nacida en el bosque de Silverwind...',
+	personality: 'Sabia, reservada, curiosa',
+	appearance: 'Cabello plateado, ojos violeta...',
+	stats: {
+		strength: 8,
+		dexterity: 14,
+		constitution: 10,
+		intelligence: 18,
+		wisdom: 16,
+		charisma: 12,
+	},
+	abilities: ['Fireball', 'Shield', 'Teleport'],
+	relationships: [{ characterId: 'char_456', type: 'ally', description: 'Compañero de aventuras' }],
 });
 
 // Imágenes asociadas
@@ -450,9 +448,9 @@ const advanced = await metadataService.extractAdvanced('/path/to/image.png');
 
 // Guardar metadatos custom
 await metadataService.save('img_123', 'image', {
-  key: 'custom_field',
-  value: 'valor personalizado',
-  source: 'manual',
+	key: 'custom_field',
+	value: 'valor personalizado',
+	source: 'manual',
 });
 
 // Obtener todos los metadatos
@@ -472,13 +470,13 @@ import { thumbnailService } from '@/services/thumbnail';
 
 // Generar thumbnail
 const thumbnail = await thumbnailService.generate({
-  sourcePath: '/path/to/image.jpg',
-  entityId: 'img_123',
-  entityType: 'image',
-  width: 300,
-  height: 200,
-  quality: 80,
-  format: 'webp',
+	sourcePath: '/path/to/image.jpg',
+	entityId: 'img_123',
+	entityType: 'image',
+	width: 300,
+	height: 200,
+	quality: 80,
+	format: 'webp',
 });
 
 // Obtener thumbnail
@@ -590,9 +588,9 @@ toastService.info('Información');
 toastService.warning('Advertencia');
 
 toastService.promise(asyncOperation(), {
-  loading: 'Procesando...',
-  success: 'Completado',
-  error: 'Error',
+	loading: 'Procesando...',
+	success: 'Completado',
+	error: 'Error',
 });
 ```
 
@@ -617,8 +615,8 @@ Tracking de operaciones largas.
 import { progressService } from '@/services/progress';
 
 const tracker = progressService.create('reindex', {
-  total: 1000,
-  description: 'Reindexando carpeta...',
+	total: 1000,
+	description: 'Reindexando carpeta...',
 });
 
 tracker.update(100); // 10% completado
@@ -641,27 +639,27 @@ import { Effect, pipe } from 'effect';
 import type { ServiceError } from '@/lib/effect/errors';
 
 export const getImageByIdEffect = (id: string) =>
-  Effect.gen(function* () {
-    const image = yield* Effect.tryPromise({
-      try: () => db.query.images.findFirst({ where: eq(images.id, id) }),
-      catch: (e) => new DatabaseError({ cause: e }),
-    });
+	Effect.gen(function* () {
+		const image = yield* Effect.tryPromise({
+			try: () => db.query.images.findFirst({ where: eq(images.id, id) }),
+			catch: (e) => new DatabaseError({ cause: e }),
+		});
 
-    if (!image) {
-      return yield* Effect.fail(new NotFoundError({ entityType: 'image', id }));
-    }
+		if (!image) {
+			return yield* Effect.fail(new NotFoundError({ entityType: 'image', id }));
+		}
 
-    return image;
-  });
+		return image;
+	});
 
 // Uso
 const result = await Effect.runPromise(
-  pipe(
-    getImageByIdEffect('img_123'),
-    Effect.catchAll((error) => {
-      // Manejo tipado de errores
-    })
-  )
+	pipe(
+		getImageByIdEffect('img_123'),
+		Effect.catchAll((error) => {
+			// Manejo tipado de errores
+		})
+	)
 );
 ```
 
@@ -670,10 +668,10 @@ const result = await Effect.runPromise(
 ```typescript
 // src/config/features.ts
 export const FEATURES = {
-  USE_EFFECT_TAGS: true,    // TagService con Effect
-  USE_EFFECT_IMAGES: true,  // ImageService con Effect
-  USE_EFFECT_VIDEOS: true,  // VideoService con Effect
-  USE_EFFECT_AUDIOS: true,  // AudioService con Effect
+	USE_EFFECT_TAGS: true, // TagService con Effect
+	USE_EFFECT_IMAGES: true, // ImageService con Effect
+	USE_EFFECT_VIDEOS: true, // VideoService con Effect
+	USE_EFFECT_AUDIOS: true, // AudioService con Effect
 };
 ```
 
@@ -702,33 +700,30 @@ import type { ImageRow } from '@/lib/drizzle/schema';
 import type { ImageView, ImageWithStats } from '@/types/entities/image';
 
 export function imageToView(row: ImageRow): ImageView {
-  return {
-    id: row.id,
-    name: row.name,
-    path: row.path,
-    size: row.size,
-    width: row.width,
-    height: row.height,
-    aspectRatio: row.width / row.height,
-    formattedSize: formatBytes(row.size),
-    thumbnailUrl: row.thumbnail ? undefined : `/api/images/${row.id}/thumbnail`,
-    thumbnail: row.thumbnail,
-    isFavorite: row.isFavorite,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-  };
+	return {
+		id: row.id,
+		name: row.name,
+		path: row.path,
+		size: row.size,
+		width: row.width,
+		height: row.height,
+		aspectRatio: row.width / row.height,
+		formattedSize: formatBytes(row.size),
+		thumbnailUrl: row.thumbnail ? undefined : `/api/images/${row.id}/thumbnail`,
+		thumbnail: row.thumbnail,
+		isFavorite: row.isFavorite,
+		createdAt: row.createdAt,
+		updatedAt: row.updatedAt,
+	};
 }
 
-export function imageToStats(
-  row: ImageRow,
-  counts: { tags: number; albums: number }
-): ImageWithStats {
-  return {
-    ...imageToView(row),
-    _count: counts,
-    tagCount: counts.tags,
-    albumCount: counts.albums,
-  };
+export function imageToStats(row: ImageRow, counts: { tags: number; albums: number }): ImageWithStats {
+	return {
+		...imageToView(row),
+		_count: counts,
+		tagCount: counts.tags,
+		albumCount: counts.albums,
+	};
 }
 ```
 

@@ -53,7 +53,7 @@ sequenceDiagram
     participant DB
     Client->>API: createFavorite()
     API->>Transformer: mapCreateFavoriteDataToDrizzle()
-    
+
     DB-->>Transformer: Favorite
     Transformer-->>API: transformFavorite()
     API-->>Client: FavoriteComplete

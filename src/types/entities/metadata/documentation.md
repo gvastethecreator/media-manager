@@ -50,7 +50,7 @@ sequenceDiagram
     participant DB
     Client->>API: createMetadata()
     API->>Transformer: mapCreateMetadataDataToDrizzle()
-    
+
     DB-->>Transformer: Metadata
     Transformer-->>API: transformMetadata()
     API-->>Client: MetadataComplete

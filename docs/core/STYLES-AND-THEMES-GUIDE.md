@@ -40,22 +40,22 @@ src/
 
 ### Temas Disponibles
 
-| Tema | Descripción |
-|------|-------------|
-| `light` | Tema claro con tonos grises |
-| `dark` | Tema oscuro estándar |
-| `cafe` | Tonos cálidos marrones |
-| `violeta` | Púrpura oscuro |
-| `madera` | Tonos tierra |
-| `nocturno` | Azul oscuro para reducir fatiga visual |
-| `verde` | Tonos verdes |
-| `atardecer` | Naranjas y rojos cálidos |
-| `corporativo` | Azul profesional |
-| `carbon` | Negro profundo con acentos grises |
-| `teal` | Verde azulado |
-| `citrico` | Amarillos vibrantes |
-| `aurora` | Inspirado en auroras boreales |
-| `neon` | Cyberpunk con colores brillantes |
+| Tema          | Descripción                            |
+| ------------- | -------------------------------------- |
+| `light`       | Tema claro con tonos grises            |
+| `dark`        | Tema oscuro estándar                   |
+| `cafe`        | Tonos cálidos marrones                 |
+| `violeta`     | Púrpura oscuro                         |
+| `madera`      | Tonos tierra                           |
+| `nocturno`    | Azul oscuro para reducir fatiga visual |
+| `verde`       | Tonos verdes                           |
+| `atardecer`   | Naranjas y rojos cálidos               |
+| `corporativo` | Azul profesional                       |
+| `carbon`      | Negro profundo con acentos grises      |
+| `teal`        | Verde azulado                          |
+| `citrico`     | Amarillos vibrantes                    |
+| `aurora`      | Inspirado en auroras boreales          |
+| `neon`        | Cyberpunk con colores brillantes       |
 
 ---
 
@@ -137,13 +137,13 @@ src/
 ### Ubicación: `src/lib/styles/color-tokens.ts`
 
 ```typescript
-import { 
-  ENTITY_COLOR_VARS, 
-  ENTITY_TAILWIND_CLASSES,
-  getEntityColor,
-  getEntityClasses,
-  DEFAULT_ENTITY_COLOR,
-  PRESET_COLORS_HEX 
+import {
+	ENTITY_COLOR_VARS,
+	ENTITY_TAILWIND_CLASSES,
+	getEntityColor,
+	getEntityClasses,
+	DEFAULT_ENTITY_COLOR,
+	PRESET_COLORS_HEX,
 } from '@/lib/styles/color-tokens';
 
 // Obtener variable CSS para usar en style
@@ -160,11 +160,11 @@ const defaultColor = DEFAULT_ENTITY_COLOR; // "#3b82f6"
 ### Colores para Gráficos: `src/lib/styles/chart-colors.ts`
 
 ```typescript
-import { 
-  CHART_COLORS, 
-  METRIC_COLORS, 
+import {
+  CHART_COLORS,
+  METRIC_COLORS,
   FILE_TYPE_COLORS,
-  getChartColor 
+  getChartColor
 } from '@/lib/styles/chart-colors';
 
 // Uso en Recharts
@@ -238,7 +238,7 @@ Para propiedades que el usuario puede personalizar (color de tag, color de grupo
 import { PRESET_COLORS_HEX, DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 
 // El color se guarda en DB como hex y se usa en style
-<div style={{ backgroundColor: entity.color ?? DEFAULT_ENTITY_COLOR }} />
+<div style={{ backgroundColor: entity.color ?? DEFAULT_ENTITY_COLOR }} />;
 ```
 
 ---
@@ -261,11 +261,11 @@ Buscar patrones en el código:
 
 ### Paso 3: Reemplazar
 
-| Antes | Después |
-|-------|---------|
-| `#3b82f6` | `text-blue-500` o `var(--primary)` |
-| `bg-[#ef4444]` | `bg-red-500` o `bg-destructive` |
-| `style={{ color: '#10b981' }}` | `className="text-emerald-500"` |
+| Antes                          | Después                            |
+| ------------------------------ | ---------------------------------- |
+| `#3b82f6`                      | `text-blue-500` o `var(--primary)` |
+| `bg-[#ef4444]`                 | `bg-red-500` o `bg-destructive`    |
+| `style={{ color: '#10b981' }}` | `className="text-emerald-500"`     |
 
 ---
 
@@ -275,15 +275,12 @@ Buscar patrones en el código:
 
 ```tsx
 export function EntityCard({ entity }: Props) {
-  return (
-    <div className="bg-card text-card-foreground border border-border rounded-lg">
-      <div 
-        className="w-4 h-4 rounded-full"
-        style={{ backgroundColor: entity.color ?? DEFAULT_ENTITY_COLOR }}
-      />
-      <span className="text-foreground">{entity.name}</span>
-    </div>
-  );
+	return (
+		<div className="bg-card text-card-foreground border border-border rounded-lg">
+			<div className="w-4 h-4 rounded-full" style={{ backgroundColor: entity.color ?? DEFAULT_ENTITY_COLOR }} />
+			<span className="text-foreground">{entity.name}</span>
+		</div>
+	);
 }
 ```
 
@@ -293,18 +290,15 @@ export function EntityCard({ entity }: Props) {
 import { CHART_COLORS, FILE_TYPE_COLORS } from '@/lib/styles/chart-colors';
 
 export function FileTypeChart({ data }) {
-  return (
-    <PieChart>
-      <Pie data={data}>
-        {data.map((entry, i) => (
-          <Cell 
-            key={entry.name}
-            fill={FILE_TYPE_COLORS[entry.type] ?? getChartColor(i)} 
-          />
-        ))}
-      </Pie>
-    </PieChart>
-  );
+	return (
+		<PieChart>
+			<Pie data={data}>
+				{data.map((entry, i) => (
+					<Cell key={entry.name} fill={FILE_TYPE_COLORS[entry.type] ?? getChartColor(i)} />
+				))}
+			</Pie>
+		</PieChart>
+	);
 }
 ```
 
@@ -314,10 +308,7 @@ export function FileTypeChart({ data }) {
 import { ColorPicker } from '@/components/ui/color-picker';
 // ColorPicker ya usa PRESET_COLORS_HEX internamente
 
-<ColorPicker
-  value={formData.color}
-  onChange={(color) => setFormData({ ...formData, color })}
-/>
+<ColorPicker value={formData.color} onChange={(color) => setFormData({ ...formData, color })} />;
 ```
 
 ---
@@ -328,10 +319,10 @@ El sistema incluye transiciones suaves al cambiar de tema:
 
 ```css
 html {
-  transition:
-    background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	transition:
+		background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 ```
 

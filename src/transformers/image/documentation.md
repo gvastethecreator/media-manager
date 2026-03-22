@@ -84,16 +84,16 @@ Las Server Actions utilizan estos transformers para procesar datos antes de devo
 ```typescript
 // En src/app/actions/images/crud.actions.ts
 export async function getImage(id: string): Promise<Image | null> {
-  const DrizzleImage = await Drizzle.image.findUnique({ where: { id } });
-  if (!DrizzleImage) return null;
-  return fromDrizzleImage(DrizzleImage);
+	const DrizzleImage = await Drizzle.image.findUnique({ where: { id } });
+	if (!DrizzleImage) return null;
+	return fromDrizzleImage(DrizzleImage);
 }
 
 // En un componente/hook cliente
 const image = await getImage(id);
 if (image) {
-  const extendedImage = extendImage(image);
-  // Usar extendedImage en la UI
+	const extendedImage = extendImage(image);
+	// Usar extendedImage en la UI
 }
 ```
 

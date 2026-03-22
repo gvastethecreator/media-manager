@@ -97,11 +97,7 @@
 		var(--dt-primary-600) 100%
 	);
 
-	--dt-g-secondary-solid: linear-gradient(
-		135deg,
-		var(--dt-neutral-200) 0%,
-		var(--dt-neutral-300) 100%
-	);
+	--dt-g-secondary-solid: linear-gradient(135deg, var(--dt-neutral-200) 0%, var(--dt-neutral-300) 100%);
 
 	--dt-g-success-solid: linear-gradient(
 		135deg,
@@ -125,24 +121,12 @@
 	);
 
 	/* Soft: Muy sutil, para superficies */
-	--dt-g-primary-soft: linear-gradient(
-		135deg,
-		oklch(0.97 0.01 240 / 0.8) 0%,
-		oklch(0.95 0.02 240 / 0.9) 100%
-	);
+	--dt-g-primary-soft: linear-gradient(135deg, oklch(0.97 0.01 240 / 0.8) 0%, oklch(0.95 0.02 240 / 0.9) 100%);
 
-	--dt-g-surface-soft: linear-gradient(
-		180deg,
-		oklch(1 0 0 / 0.02) 0%,
-		oklch(0 0 0 / 0.02) 100%
-	);
+	--dt-g-surface-soft: linear-gradient(180deg, oklch(1 0 0 / 0.02) 0%, oklch(0 0 0 / 0.02) 100%);
 
 	/* Glass: Para overlays y modales */
-	--dt-g-glass: linear-gradient(
-		135deg,
-		oklch(1 0 0 / 0.1) 0%,
-		oklch(1 0 0 / 0.05) 100%
-	);
+	--dt-g-glass: linear-gradient(135deg, oklch(1 0 0 / 0.1) 0%, oklch(1 0 0 / 0.05) 100%);
 
 	/* =====================================================
    * 🌑 SOMBRAS POR ELEVACIÓN
@@ -164,14 +148,10 @@
 	--dt-shadow-2: 0 2px 4px oklch(0 0 0 / 0.04), 0 4px 8px oklch(0 0 0 / 0.08);
 
 	/* Elevación 3: Alta (popovers, tooltips) */
-	--dt-shadow-3:
-		0 4px 8px oklch(0 0 0 / 0.04), 0 8px 16px oklch(0 0 0 / 0.08),
-		0 16px 32px oklch(0 0 0 / 0.04);
+	--dt-shadow-3: 0 4px 8px oklch(0 0 0 / 0.04), 0 8px 16px oklch(0 0 0 / 0.08), 0 16px 32px oklch(0 0 0 / 0.04);
 
 	/* Elevación 4: Máxima (modales) */
-	--dt-shadow-4:
-		0 8px 16px oklch(0 0 0 / 0.06), 0 16px 32px oklch(0 0 0 / 0.1),
-		0 32px 64px oklch(0 0 0 / 0.06);
+	--dt-shadow-4: 0 8px 16px oklch(0 0 0 / 0.06), 0 16px 32px oklch(0 0 0 / 0.1), 0 32px 64px oklch(0 0 0 / 0.06);
 
 	/* Inset shadows (presión/tacto) */
 	--dt-inset-1: inset 0 1px 2px oklch(0 0 0 / 0.08);
@@ -223,8 +203,7 @@
    * ===================================================== */
 	--dt-focus-ring: 0 0 0 2px var(--background), 0 0 0 4px var(--dt-primary-500);
 
-	--dt-focus-ring-error:
-		0 0 0 2px var(--background), 0 0 0 4px var(--dt-danger-500);
+	--dt-focus-ring-error: 0 0 0 2px var(--background), 0 0 0 4px var(--dt-danger-500);
 
 	--dt-focus-ring-inset: inset 0 0 0 2px var(--dt-primary-500);
 }
@@ -233,11 +212,11 @@
  * 🌙 DARK MODE OVERRIDES
  * ===================================================== */
 html.dark,
-html[data-theme="dark"],
-html[data-theme="nocturno"],
-html[data-theme="carbon"],
-html[data-theme="neon"],
-html[data-theme="aurora"] {
+html[data-theme='dark'],
+html[data-theme='nocturno'],
+html[data-theme='carbon'],
+html[data-theme='neon'],
+html[data-theme='aurora'] {
 	--dt-shadow-color: oklch(0 0 0 / 0.3);
 	--dt-shadow-color-strong: oklch(0 0 0 / 0.5);
 
@@ -253,25 +232,13 @@ html[data-theme="aurora"] {
 
 	--dt-shadow-2: 0 2px 4px oklch(0 0 0 / 0.15), 0 4px 8px oklch(0 0 0 / 0.25);
 
-	--dt-shadow-3:
-		0 4px 8px oklch(0 0 0 / 0.15), 0 8px 16px oklch(0 0 0 / 0.25),
-		0 16px 32px oklch(0 0 0 / 0.15);
+	--dt-shadow-3: 0 4px 8px oklch(0 0 0 / 0.15), 0 8px 16px oklch(0 0 0 / 0.25), 0 16px 32px oklch(0 0 0 / 0.15);
 
-	--dt-shadow-4:
-		0 8px 16px oklch(0 0 0 / 0.2), 0 16px 32px oklch(0 0 0 / 0.3),
-		0 32px 64px oklch(0 0 0 / 0.2);
+	--dt-shadow-4: 0 8px 16px oklch(0 0 0 / 0.2), 0 16px 32px oklch(0 0 0 / 0.3), 0 32px 64px oklch(0 0 0 / 0.2);
 
-	--dt-g-surface-soft: linear-gradient(
-		180deg,
-		oklch(1 0 0 / 0.03) 0%,
-		oklch(0 0 0 / 0.03) 100%
-	);
+	--dt-g-surface-soft: linear-gradient(180deg, oklch(1 0 0 / 0.03) 0%, oklch(0 0 0 / 0.03) 100%);
 
-	--dt-g-primary-soft: linear-gradient(
-		135deg,
-		oklch(0.25 0.04 240 / 0.6) 0%,
-		oklch(0.2 0.05 240 / 0.7) 100%
-	);
+	--dt-g-primary-soft: linear-gradient(135deg, oklch(0.25 0.04 240 / 0.6) 0%, oklch(0.2 0.05 240 / 0.7) 100%);
 }
 
 /* =====================================================

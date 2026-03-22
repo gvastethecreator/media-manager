@@ -10,7 +10,8 @@
 ### 1. Eliminación de Archivos Duplicados
 
 **Archivos duplicados encontrados y eliminados:**
-- ✅ `src/components/features/file-viewer/json-advanced-viewer.tsx` 
+
+- ✅ `src/components/features/file-viewer/json-advanced-viewer.tsx`
   - **Duplicado de:** `src/components/features/file-viewer/viewers/json-advanced-viewer.tsx`
   - **Razón:** El archivo raíz no se importaba, todos usaban el de viewers/
   - **Verificación:** file-content-renderer.tsx importa desde './viewers/'
@@ -22,6 +23,7 @@
 ### 2. Eliminación de Archivos Script Temporales
 
 **Archivos .cjs temporales eliminados:**
+
 - ✅ `src/components/features/file-viewer/write-file.cjs`
 - ✅ `src/components/features/file-viewer/write-part2.cjs`
 - ✅ `src/components/features/file-viewer/write-part3.cjs`
@@ -33,12 +35,14 @@
 ### 3. Eliminación de Directorio Legacy
 
 **Directorio file-browser legacy eliminado:**
+
 - ✅ `src/components/features/file-browser/` (completo)
   - Incluía: `navigation/keyboard-navigation.ts`
   - **Estado:** No se usaba en ninguna parte del código
   - **Verificación:** Todos los imports son de `file-browser-new/`
 
 **Test huérfano eliminado:**
+
 - ✅ `tests/unit/keyboard-navigation.spec.ts`
   - **Razón:** Testeaba el componente eliminado
   - **API diferente:** El hook actual en `src/hooks/` tiene API incompatible
@@ -49,25 +53,27 @@
 
 ## 📊 Estadísticas de Limpieza
 
-| Categoría | Cantidad | Detalle |
-|-----------|----------|---------|
-| **Duplicados** | 1 | json-advanced-viewer.tsx |
-| **Scripts temporales** | 3 | Archivos .cjs de escritura |
-| **Directorios legacy** | 1 | file-browser/ completo |
-| **Tests huérfanos** | 1 | keyboard-navigation.spec.ts |
-| **TOTAL** | **6** | Archivos/directorios eliminados |
+| Categoría              | Cantidad | Detalle                         |
+| ---------------------- | -------- | ------------------------------- |
+| **Duplicados**         | 1        | json-advanced-viewer.tsx        |
+| **Scripts temporales** | 3        | Archivos .cjs de escritura      |
+| **Directorios legacy** | 1        | file-browser/ completo          |
+| **Tests huérfanos**    | 1        | keyboard-navigation.spec.ts     |
+| **TOTAL**              | **6**    | Archivos/directorios eliminados |
 
 ---
 
 ## ✅ Verificación Final
 
 ### TypeScript
+
 ```bash
 $ bun run tsc
 ✅ Sin errores
 ```
 
 ### Biome
+
 ```bash
 $ bun run biome
 ⚠️  Errores pre-existentes no relacionados (tcg-card-base.tsx)
@@ -78,7 +84,9 @@ $ bun run biome
 ## 🎯 Estado de los Viewers
 
 ### Ubicación Actual (Correcta)
+
 Los viewers están correctamente ubicados en:
+
 ```
 src/components/features/file-viewer/viewers/
 ├── audio-viewer.tsx
@@ -95,6 +103,7 @@ src/components/features/file-viewer/viewers/
 ```
 
 **Nota:** Los viewers en `src/components/viewers/` (raíz) contienen:
+
 - `code-viewer.tsx`
 - `pdf-viewer.tsx`
 
@@ -137,6 +146,7 @@ src/components/
 - Los viewers están correctamente consolidados en `file-viewer/viewers/`
 
 **Próximos pasos opcionales (baja prioridad):**
+
 - Estandarizar nombres PascalCase → kebab-case (batch-operations/, transitions/)
 - Reorganizar entidades: merge `entities/` + `entity/`
 - Consolidar barrel files según AGENTS.md

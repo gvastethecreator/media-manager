@@ -1,136 +1,136 @@
 {
-  "version": "1.0.0",
-  "lastUpdate": "2024-12-18T20:04:46-03:00",
-  "appearance": {
-    "darkMode": false,
-    "compactMode": false,
-    "potatoMode": false,
-    "thumbnailSize": 150,
-    "sortBy": "name",
-    "collectionPagination": {
-      "enabled": true,
-      "itemsPerPage": 50
-    },
-    "folderPagination": {
-      "enabled": true,
-      "itemsPerPage": 50
-    },
-    "startPage": "dashboard",
-    "autoUpdate": true
-  },
-  "folders": [],
-  "collections": [],
-  "tags": [],
-  "shortcuts": [
-    {
-      "id": "settings",
-      "action": "Abrir configuración",
-      "keys": "Ctrl + ,",
-      "category": "navigation"
-    },
-    {
-      "id": "search",
-      "action": "Buscar",
-      "keys": "Ctrl + F",
-      "category": "navigation"
-    },
-    {
-      "id": "reload",
-      "action": "Recargar vista",
-      "keys": "F5",
-      "category": "view"
-    },
-    {
-      "id": "dashboard",
-      "action": "Ir a Dashboard",
-      "keys": "Alt + H",
-      "category": "navigation"
-    },
-    {
-      "id": "folders",
-      "action": "Ir a Carpetas",
-      "keys": "Alt + F",
-      "category": "navigation"
-    },
-    {
-      "id": "collections",
-      "action": "Ir a Colecciones",
-      "keys": "Alt + C",
-      "category": "navigation"
-    },
-    {
-      "id": "gallery",
-      "action": "Ir a Galería",
-      "keys": "Alt + G",
-      "category": "navigation"
-    },
-    {
-      "id": "tags",
-      "action": "Ir a Etiquetas",
-      "keys": "Alt + T",
-      "category": "navigation"
-    }
-  ],
-  "profiles": [
-    {
-      "id": "default",
-      "name": "Default",
-      "emoji": "🎨",
-      "color": "#4f46e5",
-      "theme": "system",
-      "language": "es",
-      "syncSettings": true,
-      "notifications": true,
-      "customSettings": {
-        "appearance": {},
-        "folders": [],
-        "collections": [],
-        "tags": [],
-        "shortcuts": []
-      }
-    }
-  ],
-  "system": {
-    "info": {
-      "os": "windows",
-      "version": "1.0.0",
-      "lastUpdate": "2024-12-18T20:04:46-03:00",
-      "database": "sqlite",
-      "memory": {
-        "used": 0,
-        "total": 512,
-        "percentage": 0
-      },
-      "storage": {
-        "used": 0,
-        "total": 1024,
-        "percentage": 0
-      }
-    },
-    "backup": {
-      "autoBackup": true,
-      "frequency": "daily",
-      "location": "./backups",
-      "maxBackups": 7,
-      "compressBackups": true
-    },
-    "maintenance": {
-      "autoClean": true,
-      "cleanupRules": {
-        "tempFiles": true,
-        "emptyFolders": true,
-        "unusedThumbnails": true,
-        "oldBackups": true
-      },
-      "optimizationSchedule": "weekly"
-    },
-    "logging": {
-      "debugMode": false,
-      "logLevel": "info",
-      "maxLogSize": 10,
-      "rotateLogsAfterDays": 7,
-      "exportFormat": "json"
-    }
-  },
-  "activeProfile": "default"
+	"version": "1.0.0",
+	"lastUpdate": "2024-12-18T20:04:46-03:00",
+	"appearance": {
+		"darkMode": false,
+		"compactMode": false,
+		"potatoMode": false,
+		"thumbnailSize": 150,
+		"sortBy": "name",
+		"collectionPagination": {
+			"enabled": true,
+			"itemsPerPage": 50
+		},
+		"folderPagination": {
+			"enabled": true,
+			"itemsPerPage": 50
+		},
+		"startPage": "dashboard",
+		"autoUpdate": true
+	},
+	"folders": [],
+	"collections": [],
+	"tags": [],
+	"shortcuts": [
+		{
+			"id": "settings",
+			"action": "Abrir configuración",
+			"keys": "Ctrl + ,",
+			"category": "navigation"
+		},
+		{
+			"id": "search",
+			"action": "Buscar",
+			"keys": "Ctrl + F",
+			"category": "navigation"
+		},
+		{
+			"id": "reload",
+			"action": "Recargar vista",
+			"keys": "F5",
+			"category": "view"
+		},
+		{
+			"id": "dashboard",
+			"action": "Ir a Dashboard",
+			"keys": "Alt + H",
+			"category": "navigation"
+		},
+		{
+			"id": "folders",
+			"action": "Ir a Carpetas",
+			"keys": "Alt + F",
+			"category": "navigation"
+		},
+		{
+			"id": "collections",
+			"action": "Ir a Colecciones",
+			"keys": "Alt + C",
+			"category": "navigation"
+		},
+		{
+			"id": "gallery",
+			"action": "Ir a Galería",
+			"keys": "Alt + G",
+			"category": "navigation"
+		},
+		{
+			"id": "tags",
+			"action": "Ir a Etiquetas",
+			"keys": "Alt + T",
+			"category": "navigation"
+		}
+	],
+	"profiles": [
+		{
+			"id": "default",
+			"name": "Default",
+			"emoji": "🎨",
+			"color": "#4f46e5",
+			"theme": "system",
+			"language": "es",
+			"syncSettings": true,
+			"notifications": true,
+			"customSettings": {
+				"appearance": {},
+				"folders": [],
+				"collections": [],
+				"tags": [],
+				"shortcuts": []
+			}
+		}
+	],
+	"system": {
+		"info": {
+			"os": "windows",
+			"version": "1.0.0",
+			"lastUpdate": "2024-12-18T20:04:46-03:00",
+			"database": "sqlite",
+			"memory": {
+				"used": 0,
+				"total": 512,
+				"percentage": 0
+			},
+			"storage": {
+				"used": 0,
+				"total": 1024,
+				"percentage": 0
+			}
+		},
+		"backup": {
+			"autoBackup": true,
+			"frequency": "daily",
+			"location": "./backups",
+			"maxBackups": 7,
+			"compressBackups": true
+		},
+		"maintenance": {
+			"autoClean": true,
+			"cleanupRules": {
+				"tempFiles": true,
+				"emptyFolders": true,
+				"unusedThumbnails": true,
+				"oldBackups": true
+			},
+			"optimizationSchedule": "weekly"
+		},
+		"logging": {
+			"debugMode": false,
+			"logLevel": "info",
+			"maxLogSize": 10,
+			"rotateLogsAfterDays": 7,
+			"exportFormat": "json"
+		}
+	},
+	"activeProfile": "default"
 }

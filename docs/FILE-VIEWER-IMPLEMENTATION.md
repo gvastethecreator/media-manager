@@ -3,9 +3,11 @@
 ## ✅ Funciones Implementadas
 
 ### 1. Visor 3D Real con Three.js ✅
+
 **Archivo:** `src/components/features/file-viewer/viewers/three-d-viewer.tsx`
 
 **Características:**
+
 - ✅ Soporte para formatos GLB, GLTF, OBJ, STL
 - ✅ Renderizado con React Three Fiber
 - ✅ Controles de órbita (rotar, zoom, pan)
@@ -18,16 +20,20 @@
 - ✅ Manejo de errores
 
 **Tecnologías:**
+
 - Three.js (ya instalado en el proyecto)
 - React Three Fiber (@react-three/fiber)
 - React Three Drei (@react-three/drei)
 
 ### 2. Waveform para Audio ✅
+
 **Archivos:**
+
 - `src/components/features/file-viewer/viewers/waveform-visualizer.tsx` (nuevo)
 - `src/components/features/file-viewer/viewers/audio-viewer.tsx` (actualizado)
 
 **Características:**
+
 - ✅ Visualización de forma de onda usando Web Audio API
 - ✅ 200 barras de amplitud
 - ✅ Normalización automática
@@ -40,6 +46,7 @@
 - ✅ Estados de loading y error
 
 **Tecnologías:**
+
 - Web Audio API (nativo del navegador)
 - HTML5 Canvas API
 - React hooks (useRef, useEffect, useState)
@@ -47,49 +54,55 @@
 ### 3. Operaciones de Archivos (Tareas Anteriores) ✅
 
 **Rename (Individual y Batch):**
+
 - Modal con soporte para patrones `{n}`, `{n:3}`, `{name}`, `{ext}`
 - Vista previa de cambios
 - Número inicial configurable
 - Invalidación completa de cache
 
 **Delete (Individual y Múltiple):**
+
 - Confirmación con preview
 - Soporte batch
 - Diferenciación archivos/carpetas
 
 **Move (Mover entre carpetas):**
+
 - Selección de carpeta destino
 - Reindexación automática
 - Invalidación de cache
 
 ## 📊 Estado de Formatos Soportados
 
-| Tipo | Formatos | Visor | Estado |
-|------|----------|-------|--------|
-| **Imágenes** | jpg, jpeg, png, gif, webp, avif, bmp, tiff, tif, svg, ico | Nativo `<img>` | ✅ 100% |
-| **Video** | mp4, webm, avi, mov, mkv, flv, wmv, m4v, mpg, mpeg, 3gp | Video nativo + Controles custom | ✅ 100% |
-| **Audio** | mp3, wav, flac, aac, ogg, wma, m4a, opus, aiff | Audio nativo + **Waveform** | ✅ 100% |
-| **Documentos** | pdf | iframe nativo | ✅ 100% |
-| **Texto** | txt, md, rtf | `<pre>` tag | ✅ 100% |
-| **JSON** | json | Pretty print básico | ⚠️ 80% (syntax highlighting básico) |
-| **Office** | doc, docx, xls, xlsx, ppt, pptx | Descarga/Apertura externa | ⚠️ 50% (falta visor nativo) |
-| **3D Models** | glb, gltf, obj, stl | **Three.js + React Three Fiber** | ✅ 90% |
-| **Genérico** | zip, rar, otros | Icono + Metadatos | ✅ 100% |
+| Tipo           | Formatos                                                  | Visor                            | Estado                              |
+| -------------- | --------------------------------------------------------- | -------------------------------- | ----------------------------------- |
+| **Imágenes**   | jpg, jpeg, png, gif, webp, avif, bmp, tiff, tif, svg, ico | Nativo `<img>`                   | ✅ 100%                             |
+| **Video**      | mp4, webm, avi, mov, mkv, flv, wmv, m4v, mpg, mpeg, 3gp   | Video nativo + Controles custom  | ✅ 100%                             |
+| **Audio**      | mp3, wav, flac, aac, ogg, wma, m4a, opus, aiff            | Audio nativo + **Waveform**      | ✅ 100%                             |
+| **Documentos** | pdf                                                       | iframe nativo                    | ✅ 100%                             |
+| **Texto**      | txt, md, rtf                                              | `<pre>` tag                      | ✅ 100%                             |
+| **JSON**       | json                                                      | Pretty print básico              | ⚠️ 80% (syntax highlighting básico) |
+| **Office**     | doc, docx, xls, xlsx, ppt, pptx                           | Descarga/Apertura externa        | ⚠️ 50% (falta visor nativo)         |
+| **3D Models**  | glb, gltf, obj, stl                                       | **Three.js + React Three Fiber** | ✅ 90%                              |
+| **Genérico**   | zip, rar, otros                                           | Icono + Metadatos                | ✅ 100%                             |
 
 ## 📝 Archivos Creados/Modificados
 
 ### Nuevos Archivos (2)
+
 ```
 src/components/features/file-viewer/viewers/three-d-viewer.tsx (reescrito)
 src/components/features/file-viewer/viewers/waveform-visualizer.tsx (nuevo)
 ```
 
 ### Archivos Modificados (1)
+
 ```
 src/components/features/file-viewer/viewers/audio-viewer.tsx (integración waveform)
 ```
 
 ### Dependencias Utilizadas
+
 - `three` (^0.182.0) - Ya instalado
 - `@react-three/fiber` (^9.5.0) - Ya instalado
 - `@react-three/drei` - Ya instalado (implícito por three)
@@ -99,10 +112,11 @@ src/components/features/file-viewer/viewers/audio-viewer.tsx (integración wavef
 ## 🎯 Features Destacadas
 
 ### Visor 3D
+
 ```typescript
 // Uso:
-<ThreeDViewer 
-  src="/path/to/model.glb" 
+<ThreeDViewer
+  src="/path/to/model.glb"
   fileName="modelo.glb"
 />
 
@@ -116,6 +130,7 @@ src/components/features/file-viewer/viewers/audio-viewer.tsx (integración wavef
 ```
 
 ### Waveform
+
 ```typescript
 // Uso:
 <WaveformVisualizer
@@ -146,15 +161,16 @@ src/components/features/file-viewer/viewers/audio-viewer.tsx (integración wavef
 
 ### APIs del Sistema
 
-| Endpoint | Uso |
-|----------|-----|
-| `GET /api/files/{id}/stream` | Streaming de audio |
-| `GET /api/models/{id}` | Descarga de modelos 3D |
+| Endpoint                           | Uso                        |
+| ---------------------------------- | -------------------------- |
+| `GET /api/files/{id}/stream`       | Streaming de audio         |
+| `GET /api/models/{id}`             | Descarga de modelos 3D     |
 | `POST /api/files/open-in-explorer` | Abrir en explorador nativo |
 
 ## 🧪 Testing
 
 ### Pruebas Realizadas
+
 - [x] Carga de modelos GLB
 - [x] Carga de modelos OBJ
 - [x] Waveform generado desde audio MP3
@@ -165,6 +181,7 @@ src/components/features/file-viewer/viewers/audio-viewer.tsx (integración wavef
 - [x] Descarga desde visor 3D
 
 ### Pruebas Pendientes (requieren archivos de prueba)
+
 - [ ] Modelos STL
 - [ ] Modelos GLTF (con texturas externas)
 - [ ] Archivos FLAC (waveform)
@@ -173,12 +190,14 @@ src/components/features/file-viewer/viewers/audio-viewer.tsx (integración wavef
 ## 📈 Mejoras Futuras (Opcionales)
 
 ### Prioridad Media
+
 1. **Syntax Highlighting JSON:** Integrar PrismJS o react-syntax-highlighter
 2. **Visor Office:** Microsoft Office Online o mammoth.js para DOCX
 3. **Transcripción Audio:** Speech-to-text para generar subtítulos
 4. **Metadatos EXIF:** Mostrar datos de cámara para imágenes
 
 ### Prioridad Baja
+
 5. **Comparación Imágenes:** Modo side-by-side
 6. **OCR:** Extraer texto de PDFs escaneados
 7. **Thumbnails 3D:** Generar vistas previas automáticas de modelos

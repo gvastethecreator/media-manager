@@ -13,7 +13,7 @@ Completar la migración de backend a Effect-TS para lograr consistencia en valid
 - Adaptadores y middlewares (errores, logging, validación).
 
 ## Inventario preliminar (rutas)
->
+
 > **Nota:** listado inicial basado en `src/server/routes/`. Validar y actualizar durante Fase 0.
 
 ### Rutas Effect-TS ya migradas
@@ -89,7 +89,7 @@ Completar la migración de backend a Effect-TS para lograr consistencia en valid
 
 ### Fase 3 — Debug y stubs
 
-- debug, test-characters, albums-debug, metadata-*-test.
+- debug, test-characters, albums-debug, metadata-\*-test.
 
 ## Checklist por ruta
 

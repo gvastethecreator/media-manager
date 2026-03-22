@@ -6,7 +6,7 @@ Este directorio reúne los hooks de React utilizados en toda la aplicación. Se 
 - **folder/**: lógica relacionada con la navegación y carga de carpetas.
 - Hooks utilitarios como `useMobile`, `useSettings` o `useProfileTheme`.
 
-La mayoría de estos hooks consumen *Server Actions* o servicios y aprovechan React Query para el manejo de datos asíncronos.
+La mayoría de estos hooks consumen _Server Actions_ o servicios y aprovechan React Query para el manejo de datos asíncronos.
 
 ```mermaid
 flowchart TD

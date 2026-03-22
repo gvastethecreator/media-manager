@@ -9,8 +9,6 @@
 
 ## Descripción
 
-
-
 ## Estructura de Archivos
 
 ```text
@@ -44,29 +42,29 @@ src/transformers/settings/
 
 ```typescript
 interface Settings {
-  appearance: {
-    theme: 'light' | 'dark' | 'system';
-    fontSize: number; // 12-24
-    language: 'es' | 'en';
-    reducedAnimations: boolean;
-    highContrast: boolean;
-  };
-  notifications: {
-    enabled: boolean;
-    email: boolean;
-    desktop: boolean;
-    frequency: 'daily' | 'weekly' | 'monthly';
-  };
-  privacy: {
-    shareUsageData: boolean;
-    storeCookies: boolean;
-    storeHistory: boolean;
-  };
-  advanced: {
-    apiKey: string | null;
-    devMode: boolean;
-    experimentalFeatures: boolean;
-  };
+	appearance: {
+		theme: 'light' | 'dark' | 'system';
+		fontSize: number; // 12-24
+		language: 'es' | 'en';
+		reducedAnimations: boolean;
+		highContrast: boolean;
+	};
+	notifications: {
+		enabled: boolean;
+		email: boolean;
+		desktop: boolean;
+		frequency: 'daily' | 'weekly' | 'monthly';
+	};
+	privacy: {
+		shareUsageData: boolean;
+		storeCookies: boolean;
+		storeHistory: boolean;
+	};
+	advanced: {
+		apiKey: string | null;
+		devMode: boolean;
+		experimentalFeatures: boolean;
+	};
 }
 ```
 
@@ -120,7 +118,7 @@ const validUpdate = validateSettingsUpdate(partialData);
 import { toDatabase, normalize } from '@/transformers/settings/transformer';
 
 const defaultSettings = normalize({
-  appearance: { theme: 'dark', language: 'es' }
+	appearance: { theme: 'dark', language: 'es' },
 });
 
 const dbData = toDatabase(defaultSettings, userId);
@@ -133,8 +131,8 @@ const dbData = toDatabase(defaultSettings, userId);
 import { toUpdateDatabase } from '@/transformers/settings/transformer';
 
 const updateData = {
-  appearance: { theme: 'light' },
-  notifications: { enabled: false }
+	appearance: { theme: 'light' },
+	notifications: { enabled: false },
 };
 
 const dbUpdate = toUpdateDatabase(updateData);
@@ -161,10 +159,10 @@ El transformer utiliza Zod para validación robusta:
 ```typescript
 // Esquemas disponibles
 import {
-  settingsSchema,
-  updateSettingsSchema,
-  appearanceSchema,
-  notificationsSchema
+	settingsSchema,
+	updateSettingsSchema,
+	appearanceSchema,
+	notificationsSchema,
 } from '@/transformers/settings/schema';
 
 // Validación segura
@@ -172,9 +170,9 @@ import { safeValidateSettings } from '@/transformers/settings/validators';
 
 const result = safeValidateSettings(data);
 if (result.success) {
-  console.log('Datos válidos:', result.data);
+	console.log('Datos válidos:', result.data);
 } else {
-  console.error('Error:', result.error);
+	console.error('Error:', result.error);
 }
 ```
 
@@ -246,11 +244,11 @@ graph TD
 
 ### Funciones Migradas
 
-| Legacy (Drizzle) | Nuevo (Drizzle) | Ubicación |
-|---|---|---|
-| `fromDrizzleSettings` | `fromStorageSettings` | `serializers.ts` |
-| `toDrizzleSettings` | `toStorageSettings` | `serializers.ts` |
-| `mapSettingsUpdateToDrizzle` | `fromSettingsUpdateToDb` | `mappers.ts` |
+| Legacy (Drizzle)             | Nuevo (Drizzle)          | Ubicación        |
+| ---------------------------- | ------------------------ | ---------------- |
+| `fromDrizzleSettings`        | `fromStorageSettings`    | `serializers.ts` |
+| `toDrizzleSettings`          | `toStorageSettings`      | `serializers.ts` |
+| `mapSettingsUpdateToDrizzle` | `fromSettingsUpdateToDb` | `mappers.ts`     |
 
 ### Compatibilidad Legacy
 
@@ -272,16 +270,16 @@ import { serializeSettings } from '@/transformers/settings';
 import { validateSettings } from '@/transformers/settings/validators';
 
 describe('Settings Validation', () => {
-  it('should validate complete settings', () => {
-    const settings = {
-      appearance: { theme: 'dark', fontSize: 16, language: 'es', reducedAnimations: false, highContrast: false },
-      notifications: { enabled: true, email: false, desktop: true, frequency: 'daily' },
-      privacy: { shareUsageData: false, storeCookies: true, storeHistory: true },
-      advanced: { apiKey: null, devMode: false, experimentalFeatures: false }
-    };
+	it('should validate complete settings', () => {
+		const settings = {
+			appearance: { theme: 'dark', fontSize: 16, language: 'es', reducedAnimations: false, highContrast: false },
+			notifications: { enabled: true, email: false, desktop: true, frequency: 'daily' },
+			privacy: { shareUsageData: false, storeCookies: true, storeHistory: true },
+			advanced: { apiKey: null, devMode: false, experimentalFeatures: false },
+		};
 
-    expect(() => validateSettings(settings)).not.toThrow();
-  });
+		expect(() => validateSettings(settings)).not.toThrow();
+	});
 });
 ```
 
@@ -291,20 +289,20 @@ describe('Settings Validation', () => {
 import { fromDbToSettings, fromSettingsToDbInsert } from '@/transformers/settings/mappers';
 
 describe('Settings Mappers', () => {
-  it('should convert from DB to app format', () => {
-    const dbData = {
-      id: '1',
-      theme: 'dark',
-      language: 'es',
-      data: JSON.stringify({ fontSize: 18, devMode: true }),
-      profileId: 'user-1'
-    };
+	it('should convert from DB to app format', () => {
+		const dbData = {
+			id: '1',
+			theme: 'dark',
+			language: 'es',
+			data: JSON.stringify({ fontSize: 18, devMode: true }),
+			profileId: 'user-1',
+		};
 
-    const settings = fromDbToSettings(dbData);
-    expect(settings.appearance.theme).toBe('dark');
-    expect(settings.appearance.fontSize).toBe(18);
-    expect(settings.advanced.devMode).toBe(true);
-  });
+		const settings = fromDbToSettings(dbData);
+		expect(settings.appearance.theme).toBe('dark');
+		expect(settings.appearance.fontSize).toBe(18);
+		expect(settings.advanced.devMode).toBe(true);
+	});
 });
 ```
 

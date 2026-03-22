@@ -39,19 +39,19 @@ El proyecto nació como solución para organizar imágenes generadas con IA, evo
 
 #### Multimedia Principal
 
-| Tipo | Extensiones Soportadas |
-|------|------------------------|
-| **Imágenes** | JPG, PNG, WebP, GIF |
-| **Videos** | MP4, WebM, MOV, AVI, MKV |
-| **Audio** | WAV, FLAC, MP3, OGG, M4A, AAC, WMA |
+| Tipo         | Extensiones Soportadas             |
+| ------------ | ---------------------------------- |
+| **Imágenes** | JPG, PNG, WebP, GIF                |
+| **Videos**   | MP4, WebM, MOV, AVI, MKV           |
+| **Audio**    | WAV, FLAC, MP3, OGG, M4A, AAC, WMA |
 
 #### Contenido Especializado
 
-| Tipo | Extensiones Soportadas |
-|------|------------------------|
-| **Modelos 3D** | OBJ, FBX, GLB (optimizados para web) |
-| **Documentos** | MD, TXT, CSV |
-| **Datos Estructurados** | JSON |
+| Tipo                    | Extensiones Soportadas               |
+| ----------------------- | ------------------------------------ |
+| **Modelos 3D**          | OBJ, FBX, GLB (optimizados para web) |
+| **Documentos**          | MD, TXT, CSV                         |
+| **Datos Estructurados** | JSON                                 |
 
 ### 2.2 Sistema de Organización
 
@@ -163,41 +163,41 @@ El proyecto nació como solución para organizar imágenes generadas con IA, evo
 
 ### 3.1 Navegación de Archivos
 
-| ID | Requerimiento | Prioridad |
-|----|---------------|-----------|
-| RF-01 | El sistema debe permitir navegación por carpetas con estructura jerárquica | Alta |
-| RF-02 | El sistema debe soportar múltiples modos de vista (Grid, Lista, Masonry, Cards) | Alta |
-| RF-03 | El sistema debe implementar virtualización para manejo de +1000 archivos | Alta |
-| RF-04 | El sistema debe generar thumbnails optimizados automáticamente | Alta |
-| RF-05 | El sistema debe extraer y mostrar metadatos EXIF/XMP | Media |
+| ID    | Requerimiento                                                                   | Prioridad |
+| ----- | ------------------------------------------------------------------------------- | --------- |
+| RF-01 | El sistema debe permitir navegación por carpetas con estructura jerárquica      | Alta      |
+| RF-02 | El sistema debe soportar múltiples modos de vista (Grid, Lista, Masonry, Cards) | Alta      |
+| RF-03 | El sistema debe implementar virtualización para manejo de +1000 archivos        | Alta      |
+| RF-04 | El sistema debe generar thumbnails optimizados automáticamente                  | Alta      |
+| RF-05 | El sistema debe extraer y mostrar metadatos EXIF/XMP                            | Media     |
 
 ### 3.2 Organización de Contenido
 
-| ID | Requerimiento | Prioridad |
-|----|---------------|-----------|
-| RF-06 | El sistema debe permitir crear y gestionar tags con colores y emojis | Alta |
-| RF-07 | El sistema debe permitir crear álbumes y añadir archivos | Alta |
-| RF-08 | El sistema debe soportar relaciones many-to-many entre entidades | Alta |
-| RF-09 | El sistema debe calcular estadísticas por entidad (conteos, favoritos) | Media |
-| RF-10 | El sistema debe permitir búsqueda avanzada con múltiples filtros | Media |
+| ID    | Requerimiento                                                          | Prioridad |
+| ----- | ---------------------------------------------------------------------- | --------- |
+| RF-06 | El sistema debe permitir crear y gestionar tags con colores y emojis   | Alta      |
+| RF-07 | El sistema debe permitir crear álbumes y añadir archivos               | Alta      |
+| RF-08 | El sistema debe soportar relaciones many-to-many entre entidades       | Alta      |
+| RF-09 | El sistema debe calcular estadísticas por entidad (conteos, favoritos) | Media     |
+| RF-10 | El sistema debe permitir búsqueda avanzada con múltiples filtros       | Media     |
 
 ### 3.3 Visualización
 
-| ID | Requerimiento | Prioridad |
-|----|---------------|-----------|
-| RF-11 | El sistema debe proporcionar un visor de archivos integrado | Alta |
-| RF-12 | El sistema debe soportar navegación por teclado en el visor | Media |
-| RF-13 | El sistema debe mostrar panel de detalles contextual | Media |
-| RF-14 | El sistema debe soportar zoom y pan en imágenes | Baja |
+| ID    | Requerimiento                                               | Prioridad |
+| ----- | ----------------------------------------------------------- | --------- |
+| RF-11 | El sistema debe proporcionar un visor de archivos integrado | Alta      |
+| RF-12 | El sistema debe soportar navegación por teclado en el visor | Media     |
+| RF-13 | El sistema debe mostrar panel de detalles contextual        | Media     |
+| RF-14 | El sistema debe soportar zoom y pan en imágenes             | Baja      |
 
 ### 3.4 Gestión de Archivos
 
-| ID | Requerimiento | Prioridad |
-|----|---------------|-----------|
-| RF-15 | El sistema debe permitir reindexar carpetas | Alta |
-| RF-16 | El sistema debe detectar cambios en sistema de archivos | Media |
-| RF-17 | El sistema debe soportar operaciones bulk (selección múltiple) | Media |
-| RF-18 | El sistema debe integrar menú contextual con operaciones | Media |
+| ID    | Requerimiento                                                  | Prioridad |
+| ----- | -------------------------------------------------------------- | --------- |
+| RF-15 | El sistema debe permitir reindexar carpetas                    | Alta      |
+| RF-16 | El sistema debe detectar cambios en sistema de archivos        | Media     |
+| RF-17 | El sistema debe soportar operaciones bulk (selección múltiple) | Media     |
+| RF-18 | El sistema debe integrar menú contextual con operaciones       | Media     |
 
 ---
 
@@ -205,38 +205,38 @@ El proyecto nació como solución para organizar imágenes generadas con IA, evo
 
 ### 4.1 Rendimiento
 
-| ID | Requerimiento | Métrica |
-|----|---------------|---------|
+| ID     | Requerimiento                                      | Métrica       |
+| ------ | -------------------------------------------------- | ------------- |
 | RNF-01 | El sistema debe mantener 60 FPS con +1000 archivos | 60 FPS mínimo |
-| RNF-02 | Las operaciones de UI deben responder en <100ms | < 100ms |
-| RNF-03 | La generación de thumbnails debe ser asíncrona | Background |
-| RNF-04 | El sistema debe usar lazy loading para recursos | On-demand |
+| RNF-02 | Las operaciones de UI deben responder en <100ms    | < 100ms       |
+| RNF-03 | La generación de thumbnails debe ser asíncrona     | Background    |
+| RNF-04 | El sistema debe usar lazy loading para recursos    | On-demand     |
 
 ### 4.2 Usabilidad
 
-| ID | Requerimiento |
-|----|---------------|
+| ID     | Requerimiento                                                    |
+| ------ | ---------------------------------------------------------------- |
 | RNF-05 | La interfaz debe ser responsive y adaptarse a diferentes tamaños |
-| RNF-06 | El sistema debe soportar temas claro/oscuro |
-| RNF-07 | El sistema debe proporcionar feedback visual para operaciones |
-| RNF-08 | La navegación debe ser consistente en toda la aplicación |
+| RNF-06 | El sistema debe soportar temas claro/oscuro                      |
+| RNF-07 | El sistema debe proporcionar feedback visual para operaciones    |
+| RNF-08 | La navegación debe ser consistente en toda la aplicación         |
 
 ### 4.3 Mantenibilidad
 
-| ID | Requerimiento |
-|----|---------------|
+| ID     | Requerimiento                                       |
+| ------ | --------------------------------------------------- |
 | RNF-09 | El código debe estar tipado con TypeScript estricto |
-| RNF-10 | La arquitectura debe ser modular y extensible |
-| RNF-11 | El sistema debe tener logging configurable |
-| RNF-12 | Las APIs deben estar documentadas |
+| RNF-10 | La arquitectura debe ser modular y extensible       |
+| RNF-11 | El sistema debe tener logging configurable          |
+| RNF-12 | Las APIs deben estar documentadas                   |
 
 ### 4.4 Compatibilidad
 
-| ID | Requerimiento |
-|----|---------------|
-| RNF-13 | El sistema debe funcionar como aplicación web |
+| ID     | Requerimiento                                                   |
+| ------ | --------------------------------------------------------------- |
+| RNF-13 | El sistema debe funcionar como aplicación web                   |
 | RNF-14 | El sistema debe funcionar como aplicación de escritorio (Tauri) |
-| RNF-15 | El sistema debe soportar Windows, macOS y Linux |
+| RNF-15 | El sistema debe soportar Windows, macOS y Linux                 |
 
 ---
 
@@ -344,15 +344,15 @@ El proyecto nació como solución para organizar imágenes generadas con IA, evo
 
 ## 8. Glosario
 
-| Término | Definición |
-|---------|------------|
-| **Entity** | Cualquier objeto del dominio (imagen, video, tag, álbum, etc.) |
-| **EntityStats** | Estadísticas asociadas a una entidad (conteos, favoritos) |
-| **Folder** | Carpeta física del sistema de archivos indexada |
-| **Reindex** | Proceso de escaneo y actualización de archivos en una carpeta |
-| **Thumbnail** | Imagen miniatura generada para preview |
-| **Wildcard** | Variable dinámica para generación de contenido |
-| **Worldbuilding** | Módulo para construcción de mundos ficticios |
+| Término           | Definición                                                     |
+| ----------------- | -------------------------------------------------------------- |
+| **Entity**        | Cualquier objeto del dominio (imagen, video, tag, álbum, etc.) |
+| **EntityStats**   | Estadísticas asociadas a una entidad (conteos, favoritos)      |
+| **Folder**        | Carpeta física del sistema de archivos indexada                |
+| **Reindex**       | Proceso de escaneo y actualización de archivos en una carpeta  |
+| **Thumbnail**     | Imagen miniatura generada para preview                         |
+| **Wildcard**      | Variable dinámica para generación de contenido                 |
+| **Worldbuilding** | Módulo para construcción de mundos ficticios                   |
 
 ---
 

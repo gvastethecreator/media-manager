@@ -9,15 +9,15 @@
 
 ### Stack de Generación de Thumbnails
 
-| Tipo de Archivo | Herramienta Principal | Fallback |
-|-----------------|----------------------|----------|
-| Imágenes | Sharp | N/A |
-| Videos (animado) | mediabunny → FFmpeg | Placeholder SVG |
-| Videos (estático) | mediabunny → FFmpeg | Placeholder SVG |
-| Documentos | SVG Generator | N/A |
-| JSON | SVG Generator | N/A |
-| Audio | Waveform (no implementado) | Placeholder |
-| 3D | Placeholder SVG | N/A |
+| Tipo de Archivo   | Herramienta Principal      | Fallback        |
+| ----------------- | -------------------------- | --------------- |
+| Imágenes          | Sharp                      | N/A             |
+| Videos (animado)  | mediabunny → FFmpeg        | Placeholder SVG |
+| Videos (estático) | mediabunny → FFmpeg        | Placeholder SVG |
+| Documentos        | SVG Generator              | N/A             |
+| JSON              | SVG Generator              | N/A             |
+| Audio             | Waveform (no implementado) | Placeholder     |
+| 3D                | Placeholder SVG            | N/A             |
 
 ### Flujo de Procesamiento
 
@@ -49,7 +49,7 @@ FileEntityMapperCore
 // ❌ Problema: Si mediabunny retorna null, no entra al catch
 const result = await generateAnimatedVideoThumbnailMediabunny(videoPath, options);
 if (result) {
-    return result;
+	return result;
 }
 // ❌ Nunca llega aquí si result es null
 ```
@@ -78,7 +78,7 @@ if (existsSync(FFMEG_LOCAL_PATH)) return true;
 
 ```typescript
 // ❌ Problema potencial con rutas en Windows
-'"${videoPath}"'  // y '"${tempOutputPath}"'
+'"${videoPath}"'; // y '"${tempOutputPath}"'
 ```
 
 **Solución**: Usar la opción `{ shell: true, windowsHide: true }` con `execAsync` o evitar comillas innecesarias.
@@ -140,7 +140,7 @@ export async function generateAnimatedVideoThumbnail(
     // ✅ Fallback a FFmpeg - también si mediabunny retorna null
     try {
         const { generateAnimatedVideoThumbnailFFmpeg, isFFmpegAvailable } = await import('./ffmpeg-thumbnails.js');
-        
+
         // ✅ Verificar binario local primero
         const ffmpegAvailable = await isFFmpegAvailable(true); // true = incluir binario local
         if (!ffmpegAvailable) {
@@ -160,18 +160,18 @@ export async function generateAnimatedVideoThumbnail(
 
 ```typescript
 export async function isFFmpegAvailable(useLocal: boolean = false): Promise<boolean> {
-    // ✅ Verificar binario local primero
-    if (useLocal) {
-        const localPath = join(process.cwd(), 'bin', process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
-        if (existsSync(localPath)) return true;
-    }
-    
-    try {
-        const { stdout } = await execAsync('ffmpeg -version');
-        return stdout.includes('ffmpeg version');
-    } catch {
-        return false;
-    }
+	// ✅ Verificar binario local primero
+	if (useLocal) {
+		const localPath = join(process.cwd(), 'bin', process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
+		if (existsSync(localPath)) return true;
+	}
+
+	try {
+		const { stdout } = await execAsync('ffmpeg -version');
+		return stdout.includes('ffmpeg version');
+	} catch {
+		return false;
+	}
 }
 ```
 
@@ -195,9 +195,9 @@ Sería útil agregar logging de éxito/fallo por tipo de archivo:
 ```typescript
 // En phase6-thumbnails.ts
 logger.info('🖼️ Thumbnails completados', {
-    image: { success: imagesSuccess, failed: imagesFailed },
-    video: { success: videosSuccess, failed: videosFailed },
-    document: { success: docsSuccess, failed: docsFailed },
+	image: { success: imagesSuccess, failed: imagesFailed },
+	video: { success: videosSuccess, failed: videosFailed },
+	document: { success: docsSuccess, failed: docsFailed },
 });
 ```
 
@@ -236,14 +236,14 @@ FFmpeg está disponible en:
 
 Del reporte [`reports/thumbnail-diagnosis-2025-10-11T01-07-31.md`](reports/thumbnail-diagnosis-2025-10-11T01-07-31.md):
 
-| Tipo | Éxito | Parcial | Error | Estado |
-|------|-------|---------|-------|--------|
-| image | 1 | 0 | 0 | ✅ |
-| video | 0 | 1 | 0 | ⚠️ |
-| audio | 1 | 1 | 0 | ⚠️ |
-| document | 2 | 0 | 0 | ✅ |
-| jsonFile | 1 | 0 | 0 | ✅ |
-| file3d | 1 | 0 | 0 | ✅ |
+| Tipo     | Éxito | Parcial | Error | Estado |
+| -------- | ----- | ------- | ----- | ------ |
+| image    | 1     | 0       | 0     | ✅     |
+| video    | 0     | 1       | 0     | ⚠️     |
+| audio    | 1     | 1       | 0     | ⚠️     |
+| document | 2     | 0       | 0     | ✅     |
+| jsonFile | 1     | 0       | 0     | ✅     |
+| file3d   | 1     | 0       | 0     | ✅     |
 
 **Problemas principales**:
 

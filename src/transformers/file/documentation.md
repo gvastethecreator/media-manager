@@ -11,25 +11,25 @@ El transformador File gestiona archivos del sistema con capacidades de análisis
 
 ### 🔄 Transformaciones
 
-* **toFileWithStats**: Enriquece archivos base con estadísticas calculadas
-* **toFileWithStatsList**: Procesa listas de archivos con estadísticas
+- **toFileWithStats**: Enriquece archivos base con estadísticas calculadas
+- **toFileWithStatsList**: Procesa listas de archivos con estadísticas
 
 ### 📊 Estadísticas Calculadas
 
-* **formattedSize**: Tamaño legible para humanos (KB, MB, GB)
-* **typeLabel**: Tipo de archivo legible (Imagen, Video, Documento)
-* **iconName**: Ícono recomendado para el tipo de archivo
-* **colorCode**: Color recomendado para el tipo de archivo
-* **daysSinceModified**: Días desde la última modificación
-* **daysSinceAccessed**: Días desde el último acceso
-* **isRecent**: Indicador de archivo reciente (≤ 7 días)
-* **isLarge**: Indicador de archivo grande (> 100MB)
+- **formattedSize**: Tamaño legible para humanos (KB, MB, GB)
+- **typeLabel**: Tipo de archivo legible (Imagen, Video, Documento)
+- **iconName**: Ícono recomendado para el tipo de archivo
+- **colorCode**: Color recomendado para el tipo de archivo
+- **daysSinceModified**: Días desde la última modificación
+- **daysSinceAccessed**: Días desde el último acceso
+- **isRecent**: Indicador de archivo reciente (≤ 7 días)
+- **isLarge**: Indicador de archivo grande (> 100MB)
 
 ### 🔒 Serialización y Estructura
 
-* **serializeFileWithStats**: Serialización completa con estadísticas
-* **serializeDirectoryStructure**: Estructura jerárquica de directorios
-* **serializeFileGroupedStats**: Agrupación por tipo con totales
+- **serializeFileWithStats**: Serialización completa con estadísticas
+- **serializeDirectoryStructure**: Estructura jerárquica de directorios
+- **serializeFileGroupedStats**: Agrupación por tipo con totales
 
 ## Arquitectura
 

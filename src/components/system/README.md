@@ -5,6 +5,7 @@ Este módulo contiene el componente `ReindexLogsViewer` que muestra en tiempo re
 Ruta UI expuesta: `/admin/reindex` (via React Router)
 
 Depende de los endpoints del servidor:
+
 - `GET /api/reindex-logs/stats`
 - `GET /api/reindex-logs/errors` (param `limit`)
 - `GET /api/reindex-logs/warnings` (param `limit`)

@@ -31,20 +31,24 @@ import { createJsonFile, updateJsonFile, getJsonFile } from '@/transformers/json
 
 // Crear un nuevo archivo JSON
 const nuevoArchivo = await createJsonFile({
-  name: 'Configuración de usuario',
-  filePath: '/configs/user-config.json',
-  content: JSON.stringify({
-    theme: 'dark',
-    language: 'es',
-    notifications: {
-      email: true,
-      push: false
-    },
-    preferences: {
-      autoSave: true,
-      compactView: false
-    }
-  }, null, 2)
+	name: 'Configuración de usuario',
+	filePath: '/configs/user-config.json',
+	content: JSON.stringify(
+		{
+			theme: 'dark',
+			language: 'es',
+			notifications: {
+				email: true,
+				push: false,
+			},
+			preferences: {
+				autoSave: true,
+				compactView: false,
+			},
+		},
+		null,
+		2
+	),
 });
 
 // Obtener un archivo JSON existente
@@ -52,18 +56,22 @@ const archivo = await getJsonFile(nuevoArchivo.id);
 
 // Actualizar un archivo JSON existente
 await updateJsonFile(nuevoArchivo.id, {
-  content: JSON.stringify({
-    theme: 'light',
-    language: 'es',
-    notifications: {
-      email: true,
-      push: true
-    },
-    preferences: {
-      autoSave: true,
-      compactView: true
-    }
-  }, null, 2)
+	content: JSON.stringify(
+		{
+			theme: 'light',
+			language: 'es',
+			notifications: {
+				email: true,
+				push: true,
+			},
+			preferences: {
+				autoSave: true,
+				compactView: true,
+			},
+		},
+		null,
+		2
+	),
 });
 ```
 
@@ -77,7 +85,7 @@ sequenceDiagram
     participant DB
     Client->>API: createJsonFile()
     API->>Transformer: mapCreateJsonFileDataToDrizzle()
-    
+
     DB-->>Transformer: JsonFile
     Transformer-->>API: transformJsonFile()
     API-->>Client: JsonFileBase

@@ -50,7 +50,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createTask()
-    
+
     Transformer->>DB: prisma.task.create()
     DB-->>Transformer: Task
     Transformer-->>API: transformTask()

@@ -64,17 +64,6 @@ export {
 	VideoMimeType,
 } from './primitives';
 
-export {
-	Property,
-	PropertyCategory,
-	PropertyCreate,
-	PropertyFilters,
-	PropertyUpdate,
-} from './property';
+export { Property, PropertyCategory, PropertyCreate, PropertyFilters, PropertyUpdate } from './property';
 
-export {
-	Wildcard,
-	WildcardCreate,
-	WildcardFilters,
-	WildcardUpdate,
-} from './wildcard';
+export { Wildcard, WildcardCreate, WildcardFilters, WildcardUpdate } from './wildcard';

@@ -81,20 +81,20 @@ Tipo base derivado del schema de Drizzle que define los campos fundamentales:
 
 ```typescript
 export interface PromptBase {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string;
-  description: string | null;
-  content: string;
-  purpose: string;
-  category: string;
-  parameters: string; // String JSON que representa un objeto
-  tags: string;      // String JSON que representa un array
-  featuredImage: string | null;
-  isFavorite: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	content: string;
+	purpose: string;
+	category: string;
+	parameters: string; // String JSON que representa un objeto
+	tags: string; // String JSON que representa un array
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
 }
 ```
 
@@ -104,11 +104,11 @@ Extiende PromptBase con campos JSON deserializados:
 
 ```typescript
 export interface PromptComplete extends Omit<PromptBase, 'parameters' | 'tags'> {
-  parameters: Record<string, any>; // Objeto deserializado
-  tags: string[];                 // Array deserializado
-  _count?: PromptCounts;
-  _relations?: PromptRelations;
-  _ui?: PromptUI;
+	parameters: Record<string, any>; // Objeto deserializado
+	tags: string[]; // Array deserializado
+	_count?: PromptCounts;
+	_relations?: PromptRelations;
+	_ui?: PromptUI;
 }
 ```
 
@@ -118,11 +118,11 @@ Añade propiedades UI adicionales para visualización:
 
 ```typescript
 export interface PromptExtended extends PromptComplete {
-  isSelected?: boolean;
-  isHighlighted?: boolean;
-  previewContent?: string;
-  lastUpdated?: Date;
-  importance?: number;
+	isSelected?: boolean;
+	isHighlighted?: boolean;
+	previewContent?: string;
+	lastUpdated?: Date;
+	importance?: number;
 }
 ```
 
@@ -132,21 +132,21 @@ Versión con estadísticas calculadas:
 
 ```typescript
 export interface PromptWithStats extends PromptComplete {
-  stats: {
-    imageCount: number;
-    videoCount: number;
-    albumCount: number;
-    tagCount: number;
-    noteCount: number;
-    conceptCount: number;
-    characterCount: number;
-    placeCount: number;
-    worldItemCount: number;
-    wildcardCount: number;
-    totalContentItems: number;
-    lastUpdated: Date;
-    lastUsed: Date;
-  }
+	stats: {
+		imageCount: number;
+		videoCount: number;
+		albumCount: number;
+		tagCount: number;
+		noteCount: number;
+		conceptCount: number;
+		characterCount: number;
+		placeCount: number;
+		worldItemCount: number;
+		wildcardCount: number;
+		totalContentItems: number;
+		lastUpdated: Date;
+		lastUsed: Date;
+	};
 }
 ```
 
@@ -172,12 +172,14 @@ Transforma un array de objetos a `PromptComplete[]`.
 ### `transformPromptToExtended`
 
 Transforma un prompt a su versión extendida para UI.
+
 - **Entrada**: Objeto prompt.
 - **Salida**: `PromptExtended` con propiedades adicionales para UI.
 
 ### `transformPromptToWithStats`
 
 Transforma un prompt a su versión con estadísticas.
+
 - **Entrada**: Objeto prompt.
 - **Salida**: `PromptWithStats` con estadísticas calculadas.
 
@@ -216,25 +218,25 @@ import { transformPrompt } from '@/transformers/prompt';
 
 // Datos crudos
 const rawPrompt = {
-  id: '123',
-  name: 'Generador de personajes',
-  emoji: '👤',
-  color: '#3B82F6',
-  description: 'Genera personajes para historias',
-  content: 'Crea un personaje con las siguientes características: {{características}}',
-  purpose: 'Worldbuilding',
-  category: 'character',
-  parameters: '{"características": "personalidad, apariencia, historia"}',
-  tags: '["personaje", "creación", "worldbuilding"]',
-  isFavorite: true,
-  createdAt: new Date(),
-  updatedAt: new Date()
+	id: '123',
+	name: 'Generador de personajes',
+	emoji: '👤',
+	color: '#3B82F6',
+	description: 'Genera personajes para historias',
+	content: 'Crea un personaje con las siguientes características: {{características}}',
+	purpose: 'Worldbuilding',
+	category: 'character',
+	parameters: '{"características": "personalidad, apariencia, historia"}',
+	tags: '["personaje", "creación", "worldbuilding"]',
+	isFavorite: true,
+	createdAt: new Date(),
+	updatedAt: new Date(),
 };
 
 // Transformar
 const prompt = transformPrompt(rawPrompt, {
-  deserializeFields: true,
-  validateFields: true
+	deserializeFields: true,
+	validateFields: true,
 });
 
 console.log(prompt.parameters); // Objeto: { características: 'personalidad, apariencia, historia' }

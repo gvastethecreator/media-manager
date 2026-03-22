@@ -3,6 +3,7 @@
 ## Resumen de Cambios Realizados
 
 ### 1. Componente Base Reutilizable (`entity-settings-view.tsx`)
+
 - ✅ Creado componente genérico `EntitySettingsView<T>` para estandarizar vistas de settings
 - ✅ Define interfaces comunes: `EntityWithStats`, `StatConfig`, `FilterConfig`, `CardActions`, `FormProps`
 - ✅ Implementa patrón de estadísticas, filtros, búsqueda, grid/list view
@@ -11,6 +12,7 @@
 ### 2. Vistas Modernas Migradas
 
 #### Organization Settings (`organization-settings-modern.tsx`)
+
 - ✅ Migrado a datos reales con React Query hooks
 - ✅ Integrados: Albums, Collections, Groups
 - ✅ Usa formularios existentes: `CreateAlbumForm`, `CreateCollectionForm`, `CreateGroupForm`
@@ -18,6 +20,7 @@
 - ⚠️ Tiene errores de tipos con componente `EntityList` genérico (necesita simplificación)
 
 #### Taxonomy Settings (`taxonomy-settings-modern.tsx`)
+
 - ✅ Migrado a datos reales con React Query hooks
 - ✅ Integrados: Tags, Properties
 - ✅ Usa formularios existentes: `CreateTagForm`, `CreatePropertyForm`
@@ -25,6 +28,7 @@
 - ✅ Stats dinámicos
 
 #### Worldbuilding Settings (`worldbuilding-settings-modern.tsx`)
+
 - ✅ Migrado a datos reales con React Query hooks
 - ✅ Integrados: Characters, Places, World Items, Concepts, Prompts, Notes, Wildcards
 - ✅ Usa formularios existentes para todas las entidades
@@ -32,6 +36,7 @@
 - ✅ Stats dinámicos por entidad
 
 #### Files Settings (`files-settings-modern.tsx`)
+
 - ✅ Migrado a datos reales con React Query hooks
 - ✅ Integrados: Folders (con reindexación), Thumbnails
 - ✅ Stats dinámicos de carpetas y miniaturas
@@ -39,11 +44,13 @@
 - ✅ Acciones de mantenimiento: Optimizar, Reprocesar, Limpiar
 
 ### 3. Layout Moderno
+
 - ✅ `ModernSettingsView` - Vista principal con navegación por categorías
 - ✅ `ModernSettingsLayout` - Layout con sidebar izquierda, breadcrumbs, búsqueda
 - ✅ `SETTINGS_CATEGORIES` - Definición de 7 categorías y 29 items de navegación
 
 ### 4. Estructura de Categorías
+
 ```
 Sistema (system)
   ├── General
@@ -89,7 +96,8 @@ Worldbuilding (worldbuilding)
 ## Pendientes y Problemas Conocidos
 
 ### Errores de Tipos (TypeScript)
-1. **organization-settings-modern.tsx**: 
+
+1. **organization-settings-modern.tsx**:
    - Incompatibilidad entre `EntityList<T>` genérico y tipos específicos
    - `AlbumWithStats`, `CollectionWithStats`, `GroupWithStats` no son asignables a `EntityWithStats`
    - Solución propuesta: Simplificar `EntityList` o eliminar tipos genéricos
@@ -97,6 +105,7 @@ Worldbuilding (worldbuilding)
 2. **CreateGroupForm**: No tiene prop `onCreated` (verificar interfaz)
 
 ### Mejoras Recomendadas
+
 1. **Unificar Settings Clásico y Moderno**:
    - Eliminar `settings-view.tsx` clásico
    - Mantener solo layout moderno
@@ -113,6 +122,7 @@ Worldbuilding (worldbuilding)
    - Agregar más acciones de mantenimiento
 
 ### Archivos Modificados/Creados
+
 ```
 src/components/settings/common/
   ├── entity-settings-view.tsx (NUEVO)
@@ -143,6 +153,7 @@ docs/
 ## Conclusión
 
 Se ha logrado una migración significativa de las vistas de settings al nuevo diseño moderno:
+
 - ✅ Componente base reutilizable creado
 - ✅ 4 vistas principales migradas a datos reales
 - ✅ Integración con formularios existentes
