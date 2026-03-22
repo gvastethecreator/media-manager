@@ -168,9 +168,9 @@ function MenuItem({
 		<div className="group relative">
 			<button
 				className={cn(
-					'flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm',
+					'flex min-h-10 w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm transition-colors duration-dt-fast ease-dt-out',
 					'hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
-					'focus:outline-none disabled:pointer-events-none disabled:opacity-50',
+					'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
 					destructive && 'text-destructive hover:bg-destructive/10 focus:bg-destructive/10'
 				)}
 				disabled={disabled}
@@ -189,7 +189,7 @@ function MenuItem({
 					className={cn(
 						'absolute top-0 left-full z-50 ml-1',
 						open ? 'visible opacity-100' : 'invisible opacity-0',
-						'transition-all duration-150'
+						'transition-all duration-dt-fast ease-dt-out'
 					)}
 					ref={subMenuRef}
 				>
@@ -219,7 +219,7 @@ function SubMenu({ children, className }: { children: React.ReactNode; className
 
 	return (
 		<div
-			className={cn('min-w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md', className)}
+			className={cn('min-w-56 rounded-dt-md border-2 border-border/50 bg-linear-to-b from-popover to-popover/98 p-1 text-popover-foreground shadow-dt-3', className)}
 			ref={menuRef}
 		>
 			{children}
@@ -326,9 +326,9 @@ function EntityMenuItem({
 				aria-expanded={open}
 				aria-haspopup="menu"
 				className={cn(
-					'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
+					'relative flex min-h-10 w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors duration-dt-fast ease-dt-out',
 					'hover:bg-accent hover:text-accent-foreground',
-					'focus:bg-accent focus:text-accent-foreground'
+					'focus:bg-accent focus:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
 				)}
 				onBlur={closeWithDelay}
 				onFocus={openWithDelay}
@@ -346,7 +346,7 @@ function EntityMenuItem({
 				className={cn(
 					'absolute top-0 left-full z-50 ml-1',
 					open ? 'visible opacity-100' : 'invisible opacity-0',
-					'transition-all duration-150',
+					'transition-all duration-dt-fast ease-dt-out',
 					open ? 'translate-x-0' : 'translate-x-1'
 				)}
 				ref={subMenuRef}
@@ -359,9 +359,9 @@ function EntityMenuItem({
 							<button
 								autoFocus={index === 0}
 								className={cn(
-									'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
+									'relative flex min-h-10 w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors duration-dt-fast ease-dt-out',
 									'hover:bg-accent hover:text-accent-foreground',
-									'focus:bg-accent focus:text-accent-foreground'
+									'focus:bg-accent focus:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
 								)}
 								key={entity.id}
 								onClick={() => onSelect(baseAction as ContextMenuAction, entity.id)}
@@ -551,7 +551,7 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 
 	return (
 		<div
-			className="fixed z-50 min-w-64 rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+			className="fixed z-50 min-w-64 rounded-dt-md border-2 border-border/50 bg-linear-to-b from-popover to-popover/98 p-1 text-popover-foreground shadow-dt-3"
 			ref={menuRef}
 			style={{
 				left: position.x,

@@ -31,33 +31,6 @@ const FONT_SIZE_MAP: Record<string, string> = {
 	'2xl': '18px',
 };
 
-function ensureFontLoaded(family: string) {
-	const id = `dynamic-font-${family}`;
-	if (document.getElementById(id)) return;
-	const GOOGLE_FONTS: Record<string, string> = {
-		inter: 'Inter:wght@400;500;600;700',
-		roboto: 'Roboto:wght@400;500;700',
-		'open-sans': 'Open+Sans:wght@400;600;700',
-		lato: 'Lato:wght@400;700',
-		montserrat: 'Montserrat:wght@400;600;700',
-		poppins: 'Poppins:wght@400;500;600;700',
-		'source-sans': 'Source+Sans+3:wght@400;600;700',
-		playfair: 'Playfair+Display:wght@400;600;700',
-		merriweather: 'Merriweather:wght@400;700',
-		'jetbrains-mono': 'JetBrains+Mono:wght@400;600;700',
-		'fira-code': 'Fira+Code:wght@400;600;700',
-		'ubuntu-mono': 'Ubuntu+Mono:wght@400;700',
-		rounded: 'Nunito:wght@400;600;700',
-	};
-	const spec = GOOGLE_FONTS[family];
-	if (!spec) return;
-	const link = document.createElement('link');
-	link.id = id;
-	link.rel = 'stylesheet';
-	link.href = `https://fonts.googleapis.com/css2?family=${spec}&display=swap`;
-	document.head.appendChild(link);
-}
-
 export function useApplyInterfacePreferences() {
 	const preferences = useInterfaceSettingsStore((s) => s.preferences);
 
@@ -76,14 +49,13 @@ export function useApplyInterfacePreferences() {
 		} else {
 			root.classList.add('reduce-motion');
 		}
+		root.style.setProperty('--app-font-family', fontStack);
 
 		// Border radius CSS variables
 		const borderRadius = preferences.thumbnailsBorderRadius;
 		root.style.setProperty('--border-radius-grid', `${borderRadius.grid}px`);
 		root.style.setProperty('--border-radius-card', `${borderRadius.card}px`);
 		root.style.setProperty('--border-radius-mosaic', `${borderRadius.mosaic}px`);
-
-		ensureFontLoaded(preferences.fontFamily);
 	}, [preferences]);
 }
 

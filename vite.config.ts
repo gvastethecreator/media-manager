@@ -161,6 +161,8 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: [
+			{ find: '@', replacement: resolve(import.meta.dirname, 'src') },
+			{ find: '@components', replacement: resolve(import.meta.dirname, 'src/components') },
 			// Alias para m?dulos de Node.js que no deben incluirse en el bundle del cliente
 			{ find: 'fs/promises', replacement: emptyModule },
 			{ find: 'fs', replacement: emptyModule },
@@ -202,7 +204,6 @@ export default defineConfig({
 		hookTimeout: 30_000,
 		fileParallelism: false,
 		maxWorkers: 1,
-		minWorkers: 1,
 		pool: 'forks',
 		isolate: true,
 		reporters: ['default'],

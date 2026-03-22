@@ -1,27 +1,34 @@
 import React from 'react';
 import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
 
+const FONT_STACK: Record<string, string> = {
+	system: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+	inter: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+	roboto: 'Roboto, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+	'open-sans': '"Open Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+	lato: 'Lato, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+	montserrat: 'Montserrat, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+	poppins: 'Poppins, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+	'source-sans': '"Source Sans 3", "Source Sans Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+	serif: 'Georgia, Cambria, "Times New Roman", Times, serif',
+	georgia: 'Georgia, Cambria, "Times New Roman", Times, serif',
+	playfair: '"Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif',
+	merriweather: 'Merriweather, Georgia, Cambria, "Times New Roman", Times, serif',
+	mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+	'jetbrains-mono': '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+	'fira-code': '"Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+	'ubuntu-mono': '"Ubuntu Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+	rounded: 'Nunito, Quicksand, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+};
+
 export function InterfaceSynchronizer() {
 	const preferences = useInterfaceSettingsStore((s) => s.preferences);
 
 	React.useEffect(() => {
 		const root = document.documentElement;
-		// Google Fonts: dynamically load if not 'system'
-		if (preferences.fontFamily && preferences.fontFamily !== 'system') {
-			const fontUrl = `https://fonts.googleapis.com/css2?family=${preferences.fontFamily.replace(/-/g, '+')}:wght@400;700&display=swap`;
-			let fontLink = document.getElementById('dynamic-font-link') as HTMLLinkElement | null;
-			if (!fontLink) {
-				fontLink = document.createElement('link');
-				fontLink.id = 'dynamic-font-link';
-				fontLink.rel = 'stylesheet';
-				document.head.appendChild(fontLink);
-			}
-			fontLink.href = fontUrl;
-			// Escaping quotes for font-family string
-			root.style.setProperty('--app-font-family', `'${preferences.fontFamily.replace(/-/g, ' ')}', sans-serif`);
-		} else {
-			root.style.setProperty('--app-font-family', 'inherit');
-		}
+		const fontStack = FONT_STACK[preferences.fontFamily] || FONT_STACK.system;
+		root.style.setProperty('--app-font-family', fontStack);
+		document.body.style.fontFamily = fontStack;
 
 		// Font size
 		const fontSizeMap: Record<string, string> = {

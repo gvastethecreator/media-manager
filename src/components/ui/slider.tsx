@@ -1,9 +1,8 @@
 'use client';
 
 import * as SliderPrimitive from '@radix-ui/react-slider';
-import gsap from 'gsap';
 import * as React from 'react';
-import { useEffect, useRef } from 'react';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { cn } from '@/lib/utils';
 
 /**
@@ -25,36 +24,13 @@ interface SliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimit
 
 const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
 	({ className, animated = true, showTicks, tickCount = 5, ...props }, ref) => {
-		const thumbsRef = useRef<(HTMLSpanElement | null)[]>([]);
-		const [activeThumb, setActiveThumb] = React.useState<number | null>(null);
-
-		useEffect(() => {
-			if (!animated || activeThumb === null) return;
-
-			const thumb = thumbsRef.current[activeThumb];
-			if (!thumb) return;
-
-			gsap.killTweensOf(thumb);
-			gsap.fromTo(
-				thumb,
-				{ scale: 1 },
-				{
-					scale: 1.15,
-					duration: 0.2,
-					ease: 'power1.out',
-					yoyo: true,
-					repeat: 1,
-				}
-			);
-		}, [activeThumb, animated]);
-
-		const handlePointerDown = (index: number) => {
-			setActiveThumb(index);
-		};
-
-		const handlePointerUp = () => {
-			setActiveThumb(null);
-		};
+		const prefersReducedMotion = useReducedMotion();
+		const isAnimated = animated && !prefersReducedMotion;
+		const values = React.useMemo(() => {
+			const raw = props.value ?? props.defaultValue;
+			return Array.isArray(raw) && raw.length > 0 ? raw : [0];
+		}, [props.value, props.defaultValue]);
+		const ariaProps = props['aria-label'] || props['aria-labelledby'] ? {} : ({ 'aria-label': 'Control deslizante' } as const);
 
 		// Generar ticks
 		const ticks = showTicks
@@ -72,10 +48,10 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
 				<SliderPrimitive.Root
 					className={cn(
 						'relative flex w-full touch-none select-none items-center',
-						'h-6' // Altura del área interactiva
+						'min-h-11'
 					)}
-					onPointerUp={handlePointerUp}
 					ref={ref}
+					{...ariaProps}
 					{...props}
 				>
 					<SliderPrimitive.Track
@@ -94,39 +70,29 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
 							className={cn(
 								'absolute h-full',
 								// Gradiente sutil
-								'bg-gradient-to-r from-primary/90 to-primary',
+								'bg-linear-to-r from-primary/90 to-primary',
 								// Sombra interior
 								'shadow-dt-inset-1'
 							)}
 						/>
 					</SliderPrimitive.Track>
-					{props.defaultValue?.map((_, index) => (
+					{values.map((_, index) => (
 						<SliderPrimitive.Thumb
 							className={cn(
-								// Base
 								'block h-5 w-5 rounded-full',
-								// Fondo
-								'bg-gradient-to-b from-background to-muted',
-								// Borde 2px semitransparente
+								'bg-linear-to-b from-background to-muted',
 								'border-2 border-border/40',
-								// Sombra elevada elegante
 								'shadow-dt-2',
-								// Brillo sutil
-								'relative before:absolute before:inset-x-0 before:top-0.5 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary-foreground/50 before:to-transparent',
-								// Estados
-								'transition-[box-shadow,border-color] duration-200',
+								'relative before:absolute before:inset-x-0 before:top-0.5 before:h-px before:bg-linear-to-r before:from-transparent before:via-primary-foreground/50 before:to-transparent',
+								isAnimated
+									? 'transition-[transform,box-shadow,border-color] duration-dt-fast ease-dt-out hover:scale-[1.04] active:scale-[0.98]'
+									: 'transition-none',
 								'hover:border-primary/50 hover:shadow-[0_3px_12px_rgba(var(--primary-rgb),0.25)]',
 								'focus-visible:border-primary/50 focus-visible:shadow-[0_3px_12px_rgba(var(--primary-rgb),0.3)]',
-								// Focus ring
-								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2',
-								// Disabled
-								'disabled:pointer-events-none disabled:opacity-40'
+								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+								'disabled:pointer-events-none disabled:opacity-50'
 							)}
 							key={index}
-							onPointerDown={() => handlePointerDown(index)}
-							ref={(el) => {
-								thumbsRef.current[index] = el;
-							}}
 						/>
 					))}
 				</SliderPrimitive.Root>

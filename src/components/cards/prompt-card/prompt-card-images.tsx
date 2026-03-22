@@ -88,7 +88,7 @@ export function PromptCardImages({
 											alt="Imagen destacada"
 											className={cn(
 												'h-full w-full object-cover',
-												tcgMode && 'transition-transform duration-700 hover:scale-110'
+												tcgMode && 'transition-transform duration-dt-slow ease-dt-out hover:scale-110'
 											)}
 											loading="lazy"
 											onError={() => setIsLoading(false)}
@@ -100,14 +100,14 @@ export function PromptCardImages({
 										{tcgMode && (
 											<>
 												<div
-													className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-20"
+													className="ui-overlay-hover-soft"
 													style={{
 														background: `linear-gradient(45deg, transparent 0%, color-mix(in oklab, ${primaryColor}, transparent 20%) 45%, white 50%, color-mix(in oklab, ${primaryColor}, transparent 20%) 55%, transparent 100%)`,
 														backgroundSize: '200% 200%',
 														animation: 'shine 5s ease-in-out infinite',
 													}}
 												/>
-												<div className="absolute bottom-0 left-0 h-1/4 w-full bg-gradient-to-t from-black/40 to-transparent" />
+												<div className="absolute bottom-0 left-0 h-1/4 w-full bg-linear-to-t from-black/40 to-transparent" />
 											</>
 										)}
 									</div>
