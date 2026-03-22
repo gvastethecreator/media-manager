@@ -8,6 +8,11 @@ import { cn } from '@/lib/utils';
 
 // Legacy context menu kept for backward compatibility.
 
+/**
+ * @deprecated Usa `@/components/ui/context-menu`.
+ * Se mantiene temporalmente para compatibilidad retroactiva.
+ */
+
 const ContextMenu = ContextMenuPrimitive.Root;
 
 const ContextMenuTrigger = ContextMenuPrimitive.Trigger;

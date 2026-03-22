@@ -6,6 +6,11 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
+ * @deprecated Usa `@/components/ui/switch`.
+ * Se mantiene temporalmente para compatibilidad retroactiva.
+ */
+
+/**
  * Switch legacy con Design Tokens v2
  * - Borde 2px para mayor definición
  * - Gradiente en estado checked
