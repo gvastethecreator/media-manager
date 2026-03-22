@@ -79,8 +79,8 @@ export function validateFieldType(value: unknown, type: string, fieldName: strin
  * 🎨 Maneja campos de UI comunes
  */
 export interface UIFields {
-	emoji?: string;
 	color?: string;
+	emoji?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 }
@@ -106,7 +106,7 @@ export interface BaseTransformerOptions {
  * ✨ Resultado de una transformación
  */
 export interface TransformerResult<T> {
-	success: boolean;
 	data?: T;
 	error?: Error;
+	success: boolean;
 }

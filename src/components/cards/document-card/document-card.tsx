@@ -2,8 +2,8 @@ import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface DocumentCardProps extends React.HTMLAttributes<HTMLDivElement> {
-	document: any;
 	className?: string;
+	document: any;
 }
 
 export const DocumentCard = memo(function DocumentCard({ document, className, onClick, ...rest }: DocumentCardProps) {

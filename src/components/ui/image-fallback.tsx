@@ -4,14 +4,14 @@ import { cn } from '@/lib/utils';
 
 // Propiedades básicas para el componente
 interface ImageFallbackProps {
-	src?: string;
 	alt: string;
 	className?: string;
 	fallbackClassName?: string;
-	width?: number | string;
 	height?: number | string;
-	onLoad?: () => void;
 	onError?: () => void;
+	onLoad?: () => void;
+	src?: string;
+	width?: number | string;
 }
 
 /**

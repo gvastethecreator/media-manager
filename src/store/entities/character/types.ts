@@ -53,27 +53,26 @@ export function getAllCharacters(characters: Record<string, CharacterWithStats>)
  * 🎭 Estado principal del store de Character
  */
 export interface CharacterState {
-	// 📦 Datos principales
-	characters: Record<string, CharacterWithStats>; // 🎭 Personajes con estadísticas pre-calculadas
-
-	// 🎨 Estado UI
-	viewConfig: CharacterViewConfig;
-	selectedCharacterId: string | null;
-	hoveredCharacterId: string | null;
-	expandedCharacterIds: string[];
-
-	// ⏳ Estado de carga y errores
-	isLoading: boolean;
-	error: string | null;
-
 	// 🔍 Filtrado y ordenamiento
 	activeFilters: CharacterFilterItem[];
-	searchTerm: string;
-	defaultSortOption: CharacterSortOption;
+	// 📦 Datos principales
+	characters: Record<string, CharacterWithStats>; // 🎭 Personajes con estadísticas pre-calculadas
 	currentSortOption: CharacterSortOption;
+	defaultSortOption: CharacterSortOption;
+	error: string | null;
+	expandedCharacterIds: string[];
 
 	// 📊 Agrupamiento
 	groupBy: string;
+	hoveredCharacterId: string | null;
+
+	// ⏳ Estado de carga y errores
+	isLoading: boolean;
+	searchTerm: string;
+	selectedCharacterId: string | null;
+
+	// 🎨 Estado UI
+	viewConfig: CharacterViewConfig;
 }
 
 /**
@@ -83,81 +82,80 @@ export interface CharacterCoreSlice {
 	// ➕ Operaciones de escritura
 	addCharacter: (character: CharacterWithStats) => void;
 	bulkAddCharacters: (characters: CharacterWithStats[]) => void;
-	updateCharacter: (id: string, updates: Partial<CharacterWithStats>) => void;
-	bulkUpdateCharacters: (updates: Array<{ id: string; updates: Partial<CharacterWithStats> }>) => void;
-	removeCharacter: (id: string) => void;
 	bulkRemoveCharacters: (ids: string[]) => void;
+	bulkUpdateCharacters: (updates: Array<{ id: string; updates: Partial<CharacterWithStats> }>) => void;
 	clearCharacters: () => void;
+	getAllCharacters: () => CharacterWithStats[];
 
 	// 📖 Operaciones de lectura
 	getCharacterById: (id: string) => CharacterWithStats | undefined;
-	getAllCharacters: () => CharacterWithStats[];
 	getCharactersByIds: (ids: string[]) => CharacterWithStats[];
+	refreshAllCharacters: () => Promise<void>;
+	refreshCharacter: (id: string) => Promise<void>;
+	removeCharacter: (id: string) => void;
 
 	// 🔄 Operaciones de sincronización
 	syncCharacters: (characters: CharacterWithStats[]) => void;
-	refreshCharacter: (id: string) => Promise<void>;
-	refreshAllCharacters: () => Promise<void>;
+	updateCharacter: (id: string, updates: Partial<CharacterWithStats>) => void;
 }
 
 /**
  * 🎨 Slice de interfaz de usuario
  */
 export interface CharacterUISlice {
+	clearSelection: () => void;
+	collapseAllCharacters: () => void;
+	collapseCharacter: (id: string) => void;
+	expandAllCharacters: () => void;
+	expandCharacter: (id: string) => void;
+	resetViewConfig: () => void;
 	// 🎯 Selección
 	selectCharacter: (id: string | null) => void;
-	toggleCharacterSelection: (id: string) => void;
-	clearSelection: () => void;
 
 	// 🖱️ Hover
 	setHoveredCharacter: (id: string | null) => void;
 
 	// 📂 Expansión
 	toggleCharacterExpansion: (id: string) => void;
-	expandCharacter: (id: string) => void;
-	collapseCharacter: (id: string) => void;
-	expandAllCharacters: () => void;
-	collapseAllCharacters: () => void;
+	toggleCharacterSelection: (id: string) => void;
 
 	// ⚙️ Configuración de vista
 	updateViewConfig: (config: Partial<CharacterViewConfig>) => void;
-	resetViewConfig: () => void;
 }
 
 /**
  * 🔍 Slice de filtrado y ordenamiento
  */
 export interface CharacterFiltersSlice {
-	// 🔍 Búsqueda
-	setSearchTerm: (term: string) => void;
-	clearSearch: () => void;
-
 	// 🏷️ Filtros
 	addFilter: (filter: CharacterFilterItem) => void;
-	removeFilter: (filterId: string) => void;
-	clearFilters: () => void;
-	toggleFilter: (filter: CharacterFilterItem) => void;
-	filterByClass: (characterClass: CharacterClass | null) => void;
-	filterByRace: (race: CharacterRace | null) => void;
-	filterByLevel: (minLevel: number | null, maxLevel: number | null) => void;
-	filterByCategory: (category: CharacterCategory | null) => void;
-	filterByAlignment: (alignment: CharacterAlignment | null) => void;
-	filterByFavorites: (onlyFavorites: boolean) => void;
 	applyFilters: (filters: CharacterFilterItem[]) => void;
+	clearFilters: () => void;
+	clearSearch: () => void;
+	filterByAlignment: (alignment: CharacterAlignment | null) => void;
+	filterByCategory: (category: CharacterCategory | null) => void;
+	filterByClass: (characterClass: CharacterClass | null) => void;
+	filterByFavorites: (onlyFavorites: boolean) => void;
+	filterByLevel: (minLevel: number | null, maxLevel: number | null) => void;
+	filterByRace: (race: CharacterRace | null) => void;
 
-	// 📊 Ordenamiento
-	setSortOption: (option: CharacterSortOption) => void;
-	toggleSortDirection: () => void;
+	// 📖 Getters computados
+	getFilteredCharacters: () => CharacterWithStats[];
+	getGroupedCharacters: () => Record<string, CharacterWithStats[]>;
+	getSortedCharacters: () => CharacterWithStats[];
+	removeFilter: (filterId: string) => void;
 	resetSorting: () => void;
 	setDefaultSortOption: (option: CharacterSortOption) => void;
 
 	// 📊 Agrupamiento
 	setGroupBy: (groupBy: 'none' | 'class' | 'race' | 'category' | 'level') => void;
+	// 🔍 Búsqueda
+	setSearchTerm: (term: string) => void;
 
-	// 📖 Getters computados
-	getFilteredCharacters: () => CharacterWithStats[];
-	getSortedCharacters: () => CharacterWithStats[];
-	getGroupedCharacters: () => Record<string, CharacterWithStats[]>;
+	// 📊 Ordenamiento
+	setSortOption: (option: CharacterSortOption) => void;
+	toggleFilter: (filter: CharacterFilterItem) => void;
+	toggleSortDirection: () => void;
 }
 
 /**

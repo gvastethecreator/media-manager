@@ -8,20 +8,20 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface SettingsCardProps {
+	/** Hijos de la tarjeta */
+	children: React.ReactNode;
+	/** Clases adicionales */
+	className?: string;
+	/** Color del icono/borde */
+	color?: string;
+	/** Descripción opcional */
+	description?: string;
 	/** Icono opcional para la tarjeta */
 	icon?: React.ReactNode;
 	/** Título de la sección */
 	title: string;
-	/** Descripción opcional */
-	description?: string;
-	/** Clases adicionales */
-	className?: string;
-	/** Hijos de la tarjeta */
-	children: React.ReactNode;
 	/** Variantes de estilo */
 	variant?: 'default' | 'outlined' | 'elevated';
-	/** Color del icono/borde */
-	color?: string;
 }
 
 /**
@@ -84,10 +84,10 @@ SettingsCard.displayName = 'SettingsCard';
  * Útil para opciones individuales con toggle/input
  */
 export interface SettingsRowProps {
-	label: string;
-	description?: string;
-	children: React.ReactNode;
 	border?: boolean;
+	children: React.ReactNode;
+	description?: string;
+	label: string;
 }
 
 export const SettingsRow = ({ label, description, children, border = false }: SettingsRowProps) => {
@@ -112,8 +112,8 @@ export const SettingsRow = ({ label, description, children, border = false }: Se
  * Múltiples SettingsRow dentro de un contenedor
  */
 export interface SettingsGroupProps {
-	title?: string;
 	children: React.ReactNode;
+	title?: string;
 }
 
 export const SettingsGroup = ({ title, children }: SettingsGroupProps) => {

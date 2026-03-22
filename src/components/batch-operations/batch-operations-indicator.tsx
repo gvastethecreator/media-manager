@@ -15,13 +15,13 @@ import { cn } from '@/lib/utils';
 import { BatchOperationsPanel } from './batch-operations-panel';
 
 interface BatchOperationsIndicatorProps {
-	className?: string;
-	/** Show detailed progress in the indicator */
-	showProgress?: boolean;
-	/** Position of the popover */
-	popoverSide?: 'top' | 'bottom' | 'left' | 'right';
 	/** Auto-hide when no operations */
 	autoHide?: boolean;
+	className?: string;
+	/** Position of the popover */
+	popoverSide?: 'top' | 'bottom' | 'left' | 'right';
+	/** Show detailed progress in the indicator */
+	showProgress?: boolean;
 }
 
 export function BatchOperationsIndicator({

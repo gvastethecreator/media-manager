@@ -4,9 +4,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 
 interface ColorPickerProps {
-	value: string;
-	onChange: (value: string) => void;
 	className?: string;
+	onChange: (value: string) => void;
+	value: string;
 }
 
 const presetColors = [

@@ -5,8 +5,8 @@ import { cn } from '@/lib/utils';
 import type { ImageItem } from './file-viewer.types';
 
 interface FileInfoPanelProps {
-	item: ImageItem;
 	className?: string;
+	item: ImageItem;
 }
 
 /**

@@ -2,42 +2,42 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
 
 export interface AIGenerationMetadata {
-	prompt?: string;
-	negativePrompt?: string;
-	model?: string;
-	sampler?: string;
-	steps?: number;
 	cfgScale?: number;
+	model?: string;
+	negativePrompt?: string;
+	prompt?: string;
+	sampler?: string;
 	seed?: number;
 	size?: {
 		width: number;
 		height: number;
 	};
 	software?: string;
+	steps?: number;
 	version?: string;
 	[key: string]: unknown;
 }
 
 export interface MetadataExtractionResult {
-	success: boolean;
-	metadata: Record<string, unknown>;
 	aiMetadata?: AIGenerationMetadata;
 	errors?: string[];
+	metadata: Record<string, unknown>;
 	parser?: string;
+	success: boolean;
 }
 
 export interface MetadataUpdateInput {
-	id: string;
-	entityType?: string | null;
-	entityId?: string | null;
-	key?: string | null;
-	value?: string | null;
-	type?: string | null;
-	isPublic?: boolean;
 	category?: string | null;
 	description?: string | null;
+	entityId?: string | null;
+	entityType?: string | null;
+	id: string;
 	imageId?: string; // Añadir esta propiedad
+	isPublic?: boolean;
+	key?: string | null;
 	metadata?: Record<string, unknown>; // Añadir esta propiedad
+	type?: string | null;
+	value?: string | null;
 }
 
 export interface BulkMetadataUpdateInput {

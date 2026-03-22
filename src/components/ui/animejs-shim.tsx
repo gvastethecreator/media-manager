@@ -1,6 +1,6 @@
 'use client';
 
-import { animate, type JSAnimation, set } from 'animejs';
+import gsap from 'gsap';
 import type { JSX } from 'react';
 import { type CSSProperties, createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 
@@ -9,14 +9,14 @@ type EasingType = 'easeIn' | 'easeOut' | 'easeInOut' | 'linear' | string;
 type AnimationVariantType = 'spring' | 'tween' | 'inertia' | 'decay' | 'keyframes';
 
 interface TransitionConfig {
+	damping?: number;
+	delay?: number;
 	duration?: number;
 	ease?: string | EasingType;
-	delay?: number;
-	type?: AnimationVariantType;
-	stiffness?: number;
-	damping?: number;
 	mass?: number;
 	staggerChildren?: number;
+	stiffness?: number;
+	type?: AnimationVariantType;
 }
 
 // Variants support
@@ -33,48 +33,48 @@ interface AnimatePresenceContextType {
 const AnimatePresenceContext = createContext<AnimatePresenceContextType>({});
 
 interface AnimationState {
+	filter?: string;
 	opacity?: number;
-	x?: number;
-	y?: number;
-	scale?: number;
-	rotation?: number;
 	rotateX?: number;
 	rotateY?: number;
 	rotateZ?: number;
-	filter?: string;
+	rotation?: number;
+	scale?: number;
 	transition?: TransitionConfig;
+	x?: number;
+	y?: number;
 	// Support for variants
 	[key: string]: any;
 }
 
 interface MotionProps {
+	animate?: AnimationState | string;
 	children?: ReactNode;
 	className?: string;
-	style?: CSSProperties;
-	onClick?: () => void;
-	onMouseEnter?: () => void;
-	onMouseLeave?: () => void;
-	onMouseMove?: (event: React.MouseEvent) => void;
-	onBlur?: () => void;
-	onFocus?: () => void;
-	// Animation props
-	initial?: AnimationState | false | string;
-	animate?: AnimationState | string;
-	exit?: AnimationState | string;
-	whileHover?: AnimationState;
-	whileTap?: AnimationState;
-	transition?: TransitionConfig;
-	layout?: boolean;
-	layoutId?: string;
-	// Variants support
-	variants?: AnimationVariants;
 	// Drag props for compatibility
 	drag?: boolean | 'x' | 'y';
 	dragConstraints?: object;
+	exit?: AnimationState | string;
+	// Animation props
+	initial?: AnimationState | false | string;
+	layout?: boolean;
+	layoutId?: string;
+	onBlur?: () => void;
+	onClick?: () => void;
 	onDrag?: (event: any, info: any) => void;
-	onDragStart?: (event: any, info: any) => void;
 	onDragEnd?: (event: any, info: any) => void;
+	onDragStart?: (event: any, info: any) => void;
+	onFocus?: () => void;
+	onMouseEnter?: () => void;
+	onMouseLeave?: () => void;
+	onMouseMove?: (event: React.MouseEvent) => void;
 	onWheel?: (event: any) => void;
+	style?: CSSProperties;
+	transition?: TransitionConfig;
+	// Variants support
+	variants?: AnimationVariants;
+	whileHover?: AnimationState;
+	whileTap?: AnimationState;
 }
 
 // Helper function to resolve variant or direct animation state
@@ -93,23 +93,23 @@ function resolveAnimation(
 	return fallback;
 }
 
-// Map common GSAP/Framer easings to Anime.js
+// Map common Framer/legacy easing names to GSAP
 function mapEasing(ease?: string): string {
-	if (!ease) return 'easeOutQuad';
+	if (!ease) return 'power2.out';
 	const map: Record<string, string> = {
-		'power1.in': 'easeInQuad',
-		'power1.out': 'easeOutQuad',
-		'power1.inOut': 'easeInOutQuad',
-		'power2.in': 'easeInQuad', // Anime uses Quad/Cubic etc
-		'power2.out': 'easeOutQuad',
-		'power2.inOut': 'easeInOutQuad',
-		'power3.in': 'easeInCubic',
-		'power3.out': 'easeOutCubic',
-		'power3.inOut': 'easeInOutCubic',
-		'back.in': 'easeInBack',
-		'back.out': 'easeOutBack',
-		'back.inOut': 'easeInOutBack',
-		linear: 'linear',
+		easeIn: 'power1.in',
+		easeOut: 'power1.out',
+		easeInOut: 'power1.inOut',
+		easeInQuad: 'power1.in',
+		easeOutQuad: 'power1.out',
+		easeInOutQuad: 'power1.inOut',
+		easeInCubic: 'power2.in',
+		easeOutCubic: 'power2.out',
+		easeInOutCubic: 'power2.inOut',
+		easeInBack: 'back.in(1.7)',
+		easeOutBack: 'back.out(1.7)',
+		easeInOutBack: 'back.inOut(1.7)',
+		linear: 'none',
 	};
 	return map[ease] || ease;
 }
@@ -125,14 +125,14 @@ function cleanProps(props: Record<string, any>) {
 	return clean;
 }
 
-// Map properties to Anime.js format
+// Normalize motion props to GSAP-friendly properties
 function mapProperties(props: AnimationState) {
 	const { x, y, rotation, rotateX, rotateY, rotateZ, transition, ...rest } = props;
 	return cleanProps({
 		...rest,
-		translateX: x,
-		translateY: y,
-		rotate: rotation,
+		x,
+		y,
+		rotation,
 		rotateX,
 		rotateY,
 		rotateZ,
@@ -172,7 +172,7 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 
 		const elementRef = useRef<HTMLElement>(null);
 		const presenceContext = useContext(AnimatePresenceContext);
-		const activeAnimationRef = useRef<JSAnimation | null>(null);
+		const activeAnimationRef = useRef<gsap.core.Tween | null>(null);
 
 		// Resolve animations using variants
 		const resolvedInitial = resolveAnimation(variants, initial);
@@ -186,7 +186,7 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 			if (resolvedInitial) {
 				const initialProps = mapProperties(resolvedInitial);
 				if (Object.keys(initialProps).length > 0) {
-					set(elementRef.current, initialProps);
+					gsap.set(elementRef.current, initialProps);
 				}
 			}
 		}, [resolvedInitial]); // Run once on mount
@@ -200,15 +200,15 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 
 			const animProps = {
 				...targetProps,
-				duration: (transition.duration || 0.3) * 1000, // Anime.js uses ms
-				easing: mapEasing(transition.ease as string),
-				delay: (transition.delay || 0) * 1000,
+				duration: transition.duration || 0.3,
+				ease: mapEasing(transition.ease as string),
+				delay: transition.delay || 0,
 			};
 
-			activeAnimationRef.current = animate(elementRef.current, animProps);
+			activeAnimationRef.current = gsap.to(elementRef.current, animProps);
 
 			return () => {
-				// Optional: cleanup
+				activeAnimationRef.current?.kill();
 			};
 		}, [resolvedAnimate, transition]);
 
@@ -220,16 +220,16 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 
 				const animProps = {
 					...targetProps,
-					duration: (transition.duration || 0.2) * 1000,
-					easing: mapEasing(transition.ease as string),
-					complete: () => {
+					duration: transition.duration || 0.2,
+					ease: mapEasing(transition.ease as string),
+					onComplete: () => {
 						presenceContext.onExitComplete?.();
 					},
 				};
 
-				const exitAnim = animate(elementRef.current, animProps);
+				const exitAnim = gsap.to(elementRef.current, animProps);
 				return () => {
-					exitAnim.pause();
+					exitAnim.kill();
 				};
 			}
 		}, [resolvedExit, presenceContext, transition]);
@@ -240,15 +240,15 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 		const handleMouseEnter = () => {
 			if (whileHover && elementRef.current) {
 				isHoverAnimatingRef.current = true;
-				activeAnimationRef.current?.pause();
+				activeAnimationRef.current?.kill();
 
 				const hoverProps = mapProperties(whileHover);
 				if (Object.keys(hoverProps).length > 0) {
-					animate(elementRef.current, {
+					gsap.to(elementRef.current, {
 						...hoverProps,
-						duration: 150,
-						easing: 'easeOutQuad',
-						complete: () => {
+						duration: 0.15,
+						ease: 'power1.out',
+						onComplete: () => {
 							isHoverAnimatingRef.current = false;
 						},
 					});
@@ -263,11 +263,11 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 				// Return to animate state
 				const targetProps = mapProperties(resolvedAnimate);
 				if (Object.keys(targetProps).length > 0) {
-					animate(elementRef.current, {
+					gsap.to(elementRef.current, {
 						...targetProps,
-						duration: 150,
-						easing: 'easeOutQuad',
-						complete: () => {
+						duration: 0.15,
+						ease: 'power1.out',
+						onComplete: () => {
 							isHoverAnimatingRef.current = false;
 						},
 					});
@@ -280,11 +280,12 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 			if (whileTap && elementRef.current) {
 				const tapProps = mapProperties(whileTap);
 				if (Object.keys(tapProps).length > 0) {
-					animate(elementRef.current, {
+					gsap.to(elementRef.current, {
 						...tapProps,
-						duration: 80,
-						easing: 'easeOutQuad',
-						direction: 'alternate', // Simulate yoyo
+						duration: 0.08,
+						ease: 'power1.out',
+						yoyo: true,
+						repeat: 1,
 					});
 				}
 			}
@@ -402,10 +403,10 @@ export function useTransform(source: any, inputRange: number[], outputRange: num
 
 // Easing constants
 export const Easing = {
-	easeIn: 'easeInQuad',
-	easeOut: 'easeOutQuad',
-	easeInOut: 'easeInOutQuad',
-	linear: 'linear',
+	easeIn: 'power1.in',
+	easeOut: 'power1.out',
+	easeInOut: 'power1.inOut',
+	linear: 'none',
 } as const;
 
 // Export types

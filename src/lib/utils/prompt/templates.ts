@@ -25,16 +25,16 @@ export enum TemplateType {
  * Estructura de una plantilla de prompt
  */
 interface PromptTemplate {
-	id: string;
-	name: string;
-	description: string;
 	category: PromptCategory;
-	model: PromptModel;
 	content: string;
-	templateType: TemplateType;
-	parameters: Record<string, any>;
+	description: string;
 	exampleVariables?: Record<string, any>;
+	id: string;
+	model: PromptModel;
+	name: string;
+	parameters: Record<string, any>;
 	tags: string[];
+	templateType: TemplateType;
 }
 
 /**

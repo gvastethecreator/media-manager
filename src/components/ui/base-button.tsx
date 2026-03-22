@@ -359,8 +359,8 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps extends useRender.ComponentProps<'button'>, VariantProps<typeof buttonVariants> {
-	selected?: boolean;
 	asChild?: boolean;
+	selected?: boolean;
 }
 
 function Button({

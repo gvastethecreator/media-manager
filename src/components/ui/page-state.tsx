@@ -5,12 +5,12 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { cn } from '@/lib/utils';
 
 export interface PageStateProps {
+	actions?: ReactNode;
+	className?: string;
+	description?: string;
+	heightClassName?: string;
 	mode: 'loading' | 'error';
 	title?: string;
-	description?: string;
-	actions?: ReactNode;
-	heightClassName?: string;
-	className?: string;
 }
 
 export function PageState(props: PageStateProps) {

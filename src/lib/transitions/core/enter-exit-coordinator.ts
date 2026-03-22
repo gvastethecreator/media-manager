@@ -10,8 +10,8 @@
  * - Evita animaciones conflictivas
  */
 
-import type { AnimeInstance } from '@/lib/anime';
-import { anime } from '@/lib/anime';
+import type { AnimationInstance } from '@/lib/animation';
+import { animate } from '@/lib/animation';
 import { getDirectionalEnterPreset } from '../animations/presets';
 import type { EnterConfig, EnterExitConfig, ExitConfig, TransitionDirection, TransitionGroupConfig } from '../types';
 import { getDirectionTracker } from './direction-tracker';
@@ -50,16 +50,16 @@ const DEFAULT_EXIT_CONFIG: Required<ExitConfig> = {
 // ============================================================================
 
 interface ElementEntry {
-	id: string;
-	element: HTMLElement;
-	index: number;
-	group?: string;
 	config?: Partial<EnterExitConfig>;
+	element: HTMLElement;
+	group?: string;
+	id: string;
+	index: number;
 }
 
 interface ActiveTransition {
+	animation: AnimationInstance;
 	element: HTMLElement;
-	animation: AnimeInstance;
 	type: 'enter' | 'exit';
 }
 
@@ -287,7 +287,7 @@ export class EnterExitCoordinator {
 		void element.offsetHeight;
 
 		// Configurar animación
-		const animation = await anime({
+		const animation = await animate({
 			targets: element,
 			opacity: [config.initialOpacity ?? 0, 1],
 			translateX: transforms.translateX,
@@ -340,7 +340,7 @@ export class EnterExitCoordinator {
 			}
 		}
 
-		const animation = await anime({
+		const animation = await animate({
 			targets: element,
 			opacity: [1, config.finalOpacity ?? 0],
 			translateX: transforms.translateX,

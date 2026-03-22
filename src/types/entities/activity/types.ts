@@ -11,18 +11,18 @@ import { z } from 'zod';
  * Interfaz base canónica para Activity
  */
 export interface ActivityBase {
-	id: string;
-	type: string;
-	entityType: string;
-	entityId: string;
 	action: string;
-	userId: string;
-	description: string;
-	metadata?: Record<string, unknown> | null;
-	ipAddress?: string | null;
-	userAgent?: string | null;
-	sessionId?: string | null;
 	createdAt: Date;
+	description: string;
+	entityId: string;
+	entityType: string;
+	id: string;
+	ipAddress?: string | null;
+	metadata?: Record<string, unknown> | null;
+	sessionId?: string | null;
+	type: string;
+	userAgent?: string | null;
+	userId: string;
 }
 
 /**
@@ -36,17 +36,17 @@ export interface ActivityMetadata {
  * Interfaz extendida para Activity (con info de imagen y UI)
  */
 export interface Activity extends ActivityBase {
+	category?: string;
+	iconColor?: string;
+	iconEmoji?: string;
 	image?: {
 		id: string;
 		name: string;
 		path: string;
 		thumbnail?: string | null;
 	} | null;
-	iconEmoji?: string;
-	iconColor?: string;
-	category?: string;
-	isSelected?: boolean;
 	isExpanded?: boolean;
+	isSelected?: boolean;
 }
 
 /**
@@ -59,16 +59,16 @@ export type ActivityComplete = Activity;
  * Input para creación
  */
 export interface CreateActivityData {
-	type: string;
-	entityType: string;
-	entityId: string;
 	action: string;
-	userId: string;
 	description: string;
-	metadata?: Record<string, unknown>;
+	entityId: string;
+	entityType: string;
 	ipAddress?: string;
-	userAgent?: string;
+	metadata?: Record<string, unknown>;
 	sessionId?: string;
+	type: string;
+	userAgent?: string;
+	userId: string;
 }
 
 /**
@@ -80,13 +80,13 @@ export type ActivityUpdateInput = Partial<Omit<ActivityBase, 'id' | 'createdAt'>
  * Filtros para búsqueda de actividades
  */
 export interface ActivityFilters {
-	types?: string[];
-	startDate?: Date;
 	endDate?: Date;
 	imageId?: string;
-	searchQuery?: string;
 	limit?: number;
 	offset?: number;
+	searchQuery?: string;
+	startDate?: Date;
+	types?: string[];
 }
 
 /**
@@ -94,8 +94,8 @@ export interface ActivityFilters {
  */
 export interface ActivityListResponse {
 	activities: Activity[];
-	totalCount: number;
 	hasMore: boolean;
+	totalCount: number;
 }
 
 /**

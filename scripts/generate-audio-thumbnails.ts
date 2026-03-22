@@ -10,16 +10,16 @@ import { audios } from '../src/lib/drizzle/schema';
 const BATCH_SIZE = 10;
 
 interface AudioInfo {
+	album?: string;
+	artist?: string;
+	bitrate?: number;
+	duration?: number;
+	format?: string;
 	id: string;
+	metadata?: string;
 	name: string;
 	path: string;
-	duration?: number;
-	bitrate?: number;
 	sampleRate?: number;
-	format?: string;
-	artist?: string;
-	album?: string;
-	metadata?: string;
 }
 
 /**

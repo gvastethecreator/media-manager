@@ -56,14 +56,14 @@ function TCGCorners() {
 }
 
 interface TagCardImagesProps {
-	tagId: string;
-	primaryColor: string;
-	secondaryColor: string;
-	rarity?: TagRarity;
-	featuredImage?: { id: string; thumbnailUrl: string; url?: string; name?: string | null; isVideo?: boolean } | null;
-	tcgMode?: boolean;
 	compact?: boolean;
+	featuredImage?: { id: string; thumbnailUrl: string; url?: string; name?: string | null; isVideo?: boolean } | null;
 	images?: Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>;
+	primaryColor: string;
+	rarity?: TagRarity;
+	secondaryColor: string;
+	tagId: string;
+	tcgMode?: boolean;
 }
 
 /**

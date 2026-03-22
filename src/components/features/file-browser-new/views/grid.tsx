@@ -12,20 +12,20 @@ import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '.
 import type { GridViewConfig } from '../types/view.types';
 
 export interface GridViewProps extends Omit<BrowserViewProps, 'config'> {
+	/** ID activo */
+	activeId?: string | null;
 	/** Configuración de grid */
 	config: GridViewConfig;
 	/** Tamaño de item (override) */
 	itemSize?: number;
+	/** Handler de context menu */
+	onItemContextMenu?: ItemContextMenuHandler;
 	/** Página actual (para paginación) */
 	page?: number;
 	/** Tamaño de página */
 	pageSize?: number;
 	/** IDs seleccionados */
 	selectedIds?: Set<string>;
-	/** ID activo */
-	activeId?: string | null;
-	/** Handler de context menu */
-	onItemContextMenu?: ItemContextMenuHandler;
 }
 
 export function GridView({

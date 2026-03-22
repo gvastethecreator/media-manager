@@ -26,17 +26,39 @@ import type { MediaMetadata } from '@/types/metadata.types';
 
 const metadataLogger = serverLogger.withContext('MetadataService');
 
-// Cache simple en memoria para metadatos (migrado desde server actions)
+// Cache en memoria con límite para prevenir memory leaks
+const CACHE_MAX_SIZE = 5000;
 const metadataCache = new Map<string, MediaMetadata>();
 
+/** Agrega al cache con evicción LRU simple (elimina entradas más antiguas al exceder límite) */
+function cacheSet(key: string, value: MediaMetadata): void {
+	if (metadataCache.size >= CACHE_MAX_SIZE) {
+		// Eliminar la primera entrada (más antigua en Map)
+		const firstKey = metadataCache.keys().next().value;
+		if (firstKey !== undefined) metadataCache.delete(firstKey);
+	}
+	metadataCache.set(key, value);
+}
+
+/** Obtiene del cache y promueve (LRU) */
+function cacheGet(key: string): MediaMetadata | undefined {
+	const val = metadataCache.get(key);
+	if (val !== undefined) {
+		// Promover: eliminar y re-insertar al final
+		metadataCache.delete(key);
+		metadataCache.set(key, val);
+	}
+	return val;
+}
+
 export interface MetadataOptions {
-	skipExif?: boolean;
-	skipIptc?: boolean;
-	skipXmp?: boolean;
 	retry?: {
 		maxRetries: number;
 		delay: number;
 	};
+	skipExif?: boolean;
+	skipIptc?: boolean;
+	skipXmp?: boolean;
 }
 
 const DEFAULT_RETRY_CONFIG = {
@@ -421,7 +443,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	const normalizedPath = normalizePathForCache(path);
 
 	// Verificar cache
-	const cached = metadataCache.get(normalizedPath);
+	const cached = cacheGet(normalizedPath);
 	if (
 		cached &&
 		typeof cached === 'object' &&
@@ -552,7 +574,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	};
 
 	// Guardar en cache
-	metadataCache.set(normalizedPath, finalMetadata);
+	cacheSet(normalizedPath, finalMetadata);
 	return finalMetadata;
 }
 

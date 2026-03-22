@@ -9,8 +9,8 @@ import { cn } from '@/lib/utils';
 import { ModernSettingsView } from './modern/modern-settings-view';
 
 interface SettingsModalProps {
-	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	open: boolean;
 }
 
 /**

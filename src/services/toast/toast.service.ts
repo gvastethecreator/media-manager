@@ -9,7 +9,6 @@ export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'default';
 
 // Opciones de notificación adaptadas a la API de sonner
 export interface ToastOptions extends Omit<ExternalToast, 'description'> {
-	description?: React.ReactNode;
 	action?: {
 		label: string;
 		onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
@@ -18,6 +17,7 @@ export interface ToastOptions extends Omit<ExternalToast, 'description'> {
 		label: string;
 		onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 	};
+	description?: React.ReactNode;
 }
 
 // Categorías de notificaciones

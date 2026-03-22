@@ -9,27 +9,27 @@ import { getFlipEngine } from '@/lib/transitions/core/flip-engine';
 import type { FlipOptions } from '@/lib/transitions/types';
 
 interface UseFlipOptions {
-	/** ID único para el elemento FLIP */
-	id: string;
-	/** Si está habilitado */
-	enabled?: boolean;
-	/** Opciones de animación */
-	options?: FlipOptions;
 	/** Dependencias para reiniciar */
 	deps?: React.DependencyList;
+	/** Si está habilitado */
+	enabled?: boolean;
+	/** ID único para el elemento FLIP */
+	id: string;
+	/** Opciones de animación */
+	options?: FlipOptions;
 }
 
 interface UseFlipReturn {
-	/** Ref para asignar al elemento */
-	ref: React.RefObject<HTMLElement | null>;
-	/** Ejecuta el ciclo FLIP manualmente */
-	executeFlip: (changeCallback: () => void) => Promise<void>;
 	/** Captura estado FIRST */
 	captureFirst: () => void;
 	/** Captura estado LAST y ejecuta PLAY */
 	captureLastAndPlay: () => Promise<void>;
+	/** Ejecuta el ciclo FLIP manualmente */
+	executeFlip: (changeCallback: () => void) => Promise<void>;
 	/** Si está en transición */
 	isTransitioning: boolean;
+	/** Ref para asignar al elemento */
+	ref: React.RefObject<HTMLElement | null>;
 }
 
 /**

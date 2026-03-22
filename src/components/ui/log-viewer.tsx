@@ -11,21 +11,21 @@ import { Switch } from './switch';
 import { Tabs, TabsList, TabsTrigger } from './tabs';
 
 export interface LogEntry {
-	id: string;
-	timestamp: string;
-	level: 'debug' | 'info' | 'warn' | 'error' | 'success';
-	message: string;
 	context?: string;
 	data?: any;
+	id: string;
+	level: 'debug' | 'info' | 'warn' | 'error' | 'success';
+	message: string;
+	timestamp: string;
 }
 
 interface LogViewerProps {
-	title?: string;
+	autoScroll?: boolean;
+	className?: string;
 	logs?: LogEntry[];
 	maxHeight?: string;
-	autoScroll?: boolean;
 	onClear?: () => void;
-	className?: string;
+	title?: string;
 }
 
 const LOG_COLORS = {

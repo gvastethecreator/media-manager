@@ -11,31 +11,31 @@ import type { EnterConfig, ExitConfig } from '@/lib/transitions';
 import { getEnterExitCoordinator, getFlipEngine } from '@/lib/transitions';
 
 interface UseEntityCardTransitionOptions {
+	/** Si está habilitada la transición */
+	enabled?: boolean;
 	/** ID de la entidad */
 	entityId: string;
 	/** Tipo de entidad */
 	entityType: 'folder' | 'image' | 'video' | 'audio' | 'document' | 'tag' | 'character' | 'collection' | 'album';
-	/** Si está seleccionada */
-	isSelected?: boolean;
 	/** Si está expandida (vista detalle) */
 	isExpanded?: boolean;
-	/** Si está habilitada la transición */
-	enabled?: boolean;
+	/** Si está seleccionada */
+	isSelected?: boolean;
 }
 
 interface UseEntityCardTransitionReturn {
 	/** Ref para la tarjeta */
 	cardRef: React.RefObject<HTMLDivElement | null>;
-	/** Ref para la imagen/ícono (elemento compartido) */
-	mediaRef: React.RefObject<HTMLElement | null>;
 	/** Ejecuta transición al hacer click */
 	handleCardClick: (callback: () => void) => Promise<void>;
-	/** Ejecuta transición de selección */
-	handleSelectionChange: (selected: boolean) => Promise<void>;
 	/** Ejecuta transición de expansión */
 	handleExpandChange: (expanded: boolean) => Promise<void>;
+	/** Ejecuta transición de selección */
+	handleSelectionChange: (selected: boolean) => Promise<void>;
 	/** Estado de transición */
 	isTransitioning: boolean;
+	/** Ref para la imagen/ícono (elemento compartido) */
+	mediaRef: React.RefObject<HTMLElement | null>;
 	/** Clases CSS para el estado actual */
 	transitionClasses: string;
 }

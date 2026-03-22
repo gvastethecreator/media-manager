@@ -3,14 +3,14 @@ import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface FolderCardContentProps {
+	childrenCount?: number;
 	description?: string | null;
+	featuredImage?: string | null;
+	lastIndexed?: Date | null;
+	primaryColor: string;
+	tcgMode?: boolean;
 	totalFiles: number;
 	totalSize: number;
-	lastIndexed?: Date | null;
-	childrenCount?: number;
-	primaryColor: string;
-	featuredImage?: string | null;
-	tcgMode?: boolean;
 }
 
 /**

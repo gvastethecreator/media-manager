@@ -10,26 +10,26 @@ import { getFlipEngine } from '@/lib/transitions';
 import { cn } from '@/lib/utils';
 
 interface FlipContainerProps {
-	/** ID único del contenedor */
-	flipId: string;
+	/** Si debe animar en el primer render */
+	animateOnMount?: boolean;
 	/** Contenido */
 	children: React.ReactNode;
 	/** Clases CSS adicionales */
 	className?: string;
 	/** Si las transiciones están habilitadas */
 	enabled?: boolean;
-	/** Opciones de animación FLIP */
-	options?: FlipOptions;
-	/** Si debe animar en el primer render */
-	animateOnMount?: boolean;
-	/** Callback cuando inicia la transición */
-	onFlipStart?: () => void;
-	/** Callback cuando completa la transición */
-	onFlipComplete?: () => void;
+	/** ID único del contenedor */
+	flipId: string;
 	/** Handler de click */
 	onClick?: () => void;
 	/** Handler de doble click */
 	onDoubleClick?: () => void;
+	/** Callback cuando completa la transición */
+	onFlipComplete?: () => void;
+	/** Callback cuando inicia la transición */
+	onFlipStart?: () => void;
+	/** Opciones de animación FLIP */
+	options?: FlipOptions;
 	/** Estilos inline */
 	style?: React.CSSProperties;
 }

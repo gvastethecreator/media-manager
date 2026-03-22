@@ -12,6 +12,7 @@ import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
 import { FolderService, FolderServiceLive } from '@/services/folder/folder.service.effect';
 import { FolderReindexService } from '@/services/folder/reindex/folder-reindex.service';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
 
@@ -54,8 +55,8 @@ router.get(
 				fileTypes,
 			} = req.query as Record<string, string | undefined>;
 
-			const parsedLimit = Math.min(Math.max(1, Number.parseInt(limit || '150', 10) || 150), 500);
-			const parsedOffset = Math.max(0, Number.parseInt(offset || '0', 10) || 0);
+			const parsedLimit = sanitizeLimit(limit, 150, 500);
+			const parsedOffset = sanitizeOffset(offset);
 			const parsedFileTypes = fileTypes
 				? fileTypes
 						.split(',')
@@ -132,8 +133,8 @@ router.get(
 
 			const options = {
 				search: search as string | undefined,
-				limit: Number.parseInt(limit as string, 10),
-				offset: Number.parseInt(offset as string, 10),
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
 				orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt') || 'name',
 				orderDirection: (sortOrder as 'asc' | 'desc') || 'asc',
 				parentId: parentId === 'null' ? null : (parentId as string | null | undefined),

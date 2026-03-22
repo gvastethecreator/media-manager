@@ -16,13 +16,13 @@ const logger = serverLogger.withContext('AudioWaveformRoute');
  * 🎵 Interfaz para opciones de generación de waveform
  */
 interface AudioWaveformOptions {
-	width?: number;
-	height?: number;
-	color?: string;
 	backgroundColor?: string;
 	bars?: number;
-	style?: 'bars' | 'curve' | 'filled';
+	color?: string;
+	height?: number;
 	showAxis?: boolean;
+	style?: 'bars' | 'curve' | 'filled';
+	width?: number;
 }
 
 /**
@@ -36,11 +36,11 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas
  * 📊 Interfaz para información de audio
  */
 interface AudioInfo {
-	duration: number;
-	sampleRate: number;
-	channels: number;
-	format: string;
 	bitRate?: number;
+	channels: number;
+	duration: number;
+	format: string;
+	sampleRate: number;
 }
 
 /**

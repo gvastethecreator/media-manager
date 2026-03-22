@@ -24,53 +24,53 @@ export enum ThumbnailFallbackStrategy {
 export interface ThumbnailRetryConfig {
 	/** Habilitar reintentos automáticos */
 	enabled: boolean;
+	/** Usar backoff exponencial */
+	exponentialBackoff: boolean;
 	/** Número máximo de reintentos */
 	maxRetries: number;
 	/** Delay entre reintentos en ms */
 	retryDelay: number;
-	/** Usar backoff exponencial */
-	exponentialBackoff: boolean;
 }
 
 /**
  * ⚙️ Configuración específica por tipo de entidad
  */
 export interface EntityThumbnailConfig {
-	/** Timeout en segundos */
-	timeout: number;
 	/** Habilitar generación para este tipo */
 	enabled: boolean;
 	/** Estrategia de fallback */
 	fallbackStrategy: ThumbnailFallbackStrategy;
 	/** Formato preferido de salida */
 	preferredFormat: 'webp' | 'jpeg' | 'png' | 'svg';
+	/** Timeout en segundos */
+	timeout: number;
 }
 
 /**
  * 🚀 Configuración de procesamiento
  */
 export interface ThumbnailProcessingConfig {
-	/** Número de workers concurrentes */
-	concurrency: number;
 	/** Tamaño de lote para procesamiento masivo */
 	batchSize: number;
-	/** Priorizar archivos recientes */
-	prioritizeRecent: boolean;
-	/** Pausar procesamiento bajo carga alta */
-	pauseOnHighLoad: boolean;
+	/** Número de workers concurrentes */
+	concurrency: number;
 	/** Threshold de CPU para pausar (%) */
 	cpuThreshold: number;
+	/** Pausar procesamiento bajo carga alta */
+	pauseOnHighLoad: boolean;
+	/** Priorizar archivos recientes */
+	prioritizeRecent: boolean;
 }
 
 /**
  * 📊 Configuración avanzada completa de thumbnails
  */
 export interface ThumbnailAdvancedConfig {
-	/** Configuración de reintentos */
-	retry: ThumbnailRetryConfig;
+	/** Intervalo de limpieza automática en horas (0 = deshabilitado) */
+	autoCleanInterval: number;
 
-	/** Configuración de procesamiento */
-	processing: ThumbnailProcessingConfig;
+	/** Limpiar thumbnails huérfanos automáticamente */
+	autoCleanOrphans: boolean;
 
 	/** Configuración por tipo de entidad */
 	entities: {
@@ -82,20 +82,19 @@ export interface ThumbnailAdvancedConfig {
 		file3d: EntityThumbnailConfig;
 	};
 
-	/** Habilitar logging detallado */
-	verboseLogging: boolean;
-
 	/** Generar thumbnails durante indexación inicial */
 	generateOnIndex: boolean;
+
+	/** Configuración de procesamiento */
+	processing: ThumbnailProcessingConfig;
+	/** Configuración de reintentos */
+	retry: ThumbnailRetryConfig;
 
 	/** Guardar placeholders en caso de fallo */
 	savePlaceholdersOnError: boolean;
 
-	/** Limpiar thumbnails huérfanos automáticamente */
-	autoCleanOrphans: boolean;
-
-	/** Intervalo de limpieza automática en horas (0 = deshabilitado) */
-	autoCleanInterval: number;
+	/** Habilitar logging detallado */
+	verboseLogging: boolean;
 }
 
 /**

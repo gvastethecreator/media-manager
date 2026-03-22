@@ -6,7 +6,7 @@
  */
 
 import { Schema } from '@effect/schema';
-import { and, asc, count, desc, eq, isNotNull, like, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, isNotNull, like, or } from 'drizzle-orm';
 import { Context, Effect, Layer, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
 import { groupTags, images, imageTags, tags, videoTags } from '@/lib/drizzle/schema';
@@ -38,22 +38,22 @@ const logger = serverLogger.withContext('TagService.Effect');
  * Interface para el servicio TagService
  */
 export interface TagServiceInterface {
+	readonly create: (input: TagCreate) => Effect.Effect<TagWithStats, TagError>;
+	readonly delete: (id: string) => Effect.Effect<void, TagError>;
+	readonly getAll: (options?: GetTagsOptions) => Effect.Effect<GetTagsResult, TagError>;
 	readonly getById: (id: string) => Effect.Effect<Tag, TagError>;
 	readonly getByIdWithStats: (id: string) => Effect.Effect<TagWithStats, TagError>;
-	readonly getAll: (options?: GetTagsOptions) => Effect.Effect<GetTagsResult, TagError>;
-	readonly create: (input: TagCreate) => Effect.Effect<TagWithStats, TagError>;
-	readonly update: (input: TagUpdate) => Effect.Effect<TagWithStats, TagError>;
-	readonly delete: (id: string) => Effect.Effect<void, TagError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<Tag, TagError>;
 	readonly getImageCount: (id: string) => Effect.Effect<number, TagError>;
-	readonly getRelationsCounts: (id: string) => Effect.Effect<TagCounts, TagError>;
 	readonly getImages: (
 		id: string
 	) => Effect.Effect<Array<{ id: string; name: string | null; path: string; thumbnailPath: string | null }>, TagError>;
+	readonly getRelationsCounts: (id: string) => Effect.Effect<TagCounts, TagError>;
 	readonly getThumbnails: (
 		id: string,
 		limit?: number
 	) => Effect.Effect<Array<{ id: string; name: string | null; thumbnailUrl: string }>, TagError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<Tag, TagError>;
+	readonly update: (input: TagUpdate) => Effect.Effect<TagWithStats, TagError>;
 }
 
 /**
@@ -212,6 +212,80 @@ const make = (): TagServiceInterface => {
 		});
 
 	/**
+	 * Obtiene conteos de relaciones para múltiples tags en batch (evita N+1)
+	 */
+	const getBatchRelationsCounts = (ids: string[]): Effect.Effect<Map<string, TagCounts>, TagError> =>
+		Effect.gen(function* () {
+			if (ids.length === 0) return new Map();
+
+			const emptyCounts = (): TagCounts => ({
+				images: 0,
+				videos: 0,
+				documents: 0,
+				file3Ds: 0,
+				jsonFiles: 0,
+				audios: 0,
+				albums: 0,
+				collections: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			});
+
+			const [imageResults, videoResults, groupResults] = yield* Effect.tryPromise<
+				[
+					Array<{ tagId: string; count: number }>,
+					Array<{ tagId: string; count: number }>,
+					Array<{ tagId: string; count: number }>,
+				],
+				TagError
+			>({
+				try: () =>
+					Promise.all([
+						db
+							.select({ tagId: imageTags.B, count: count() })
+							.from(imageTags)
+							.where(inArray(imageTags.B, ids))
+							.groupBy(imageTags.B),
+						db
+							.select({ tagId: videoTags.A, count: count() })
+							.from(videoTags)
+							.where(inArray(videoTags.A, ids))
+							.groupBy(videoTags.A),
+						db
+							.select({ tagId: groupTags.B, count: count() })
+							.from(groupTags)
+							.where(inArray(groupTags.B, ids))
+							.groupBy(groupTags.B),
+					]),
+				catch: (error: unknown) => fromUnknownError('getBatchRelationsCounts', error),
+			});
+
+			const result = new Map<string, TagCounts>();
+
+			const imageMap = new Map(imageResults.map((r) => [r.tagId, r.count]));
+			const videoMap = new Map(videoResults.map((r) => [r.tagId, r.count]));
+			const groupMap = new Map(groupResults.map((r) => [r.tagId, r.count]));
+
+			for (const id of ids) {
+				result.set(id, {
+					...emptyCounts(),
+					images: imageMap.get(id) ?? 0,
+					videos: videoMap.get(id) ?? 0,
+					groups: groupMap.get(id) ?? 0,
+				} as TagCounts);
+			}
+
+			return result;
+		});
+
+	/**
 	 * Obtiene un tag con estadísticas completas
 	 */
 	const getByIdWithStats = (id: string): Effect.Effect<TagWithStats, TagError> =>
@@ -325,22 +399,42 @@ const make = (): TagServiceInterface => {
 				catch: (error) => fromUnknownError('getAll.count', error),
 			});
 
-			// Enriquecer cada tag con stats
-			const tagsWithStats: TagWithStats[] = [];
-			for (const rawTag of rawTags) {
+			// Enriquecer tags con stats en batch (evita N+1)
+			const tagIds = rawTags.map((t) => t.id);
+			const countsMap = yield* getBatchRelationsCounts(tagIds);
+
+			const tagsWithStats: TagWithStats[] = rawTags.map((rawTag) => {
 				const tag = Schema.decodeUnknownSync(Tag)(rawTag);
-				const counts = yield* getRelationsCounts(tag.id);
+				const counts = countsMap.get(tag.id) ?? {
+					images: 0,
+					videos: 0,
+					documents: 0,
+					file3Ds: 0,
+					jsonFiles: 0,
+					audios: 0,
+					albums: 0,
+					collections: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					notes: 0,
+					wildcards: 0,
+					properties: 0,
+					groups: 0,
+				};
 				const stats = calculateTagStatistics(tag, counts);
 
-				tagsWithStats.push({
+				return {
 					...tag,
-					shortcut: tag.shortcut ?? null, // Normalize undefined to null
+					shortcut: tag.shortcut ?? null,
 					entityType: 'tag' as const,
 					stats,
 					_count: counts,
 					statistics: stats,
-				});
-			}
+				};
+			});
 
 			logger.info(`✅ ${tagsWithStats.length} tags obtenidos de ${totalCount} totales`);
 

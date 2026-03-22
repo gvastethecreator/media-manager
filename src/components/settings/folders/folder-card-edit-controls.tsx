@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 import { SimpleTooltip } from './common/simple-tooltip';
 
 interface EditModeControlsProps {
-	onSave: () => void;
-	onCancel: () => void;
 	isDisabled: boolean;
+	onCancel: () => void;
+	onSave: () => void;
 }
 
 export function EditModeControls({ onSave, onCancel, isDisabled }: EditModeControlsProps) {

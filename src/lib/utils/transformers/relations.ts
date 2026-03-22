@@ -8,10 +8,10 @@ const logger = new Logger({ context: 'TransformerRelations' });
  * 🔄 Tipo para definición de relaciones
  */
 export interface RelationDefinition {
-	type: (typeof RELATION_TYPES)[keyof typeof RELATION_TYPES];
-	target: string;
 	inverse?: string;
 	required?: boolean;
+	target: string;
+	type: (typeof RELATION_TYPES)[keyof typeof RELATION_TYPES];
 }
 
 /**

@@ -13,17 +13,17 @@ import type { FolderFile } from './folder-files.service';
 const logger = serverLogger.withContext('FolderFilesStream');
 
 export interface StreamOptions {
+	batchSize?: number;
+	delayMs?: number;
+	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
 	folderId: string;
 	includeSubfolders?: boolean;
 	search?: string;
-	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
-	batchSize?: number;
-	delayMs?: number;
 }
 
 export interface StreamChunk {
-	type: 'data' | 'metadata' | 'complete' | 'error';
 	data?: FolderFile[];
+	error?: string;
 	metadata?: {
 		totalEstimate: number;
 		processedCount: number;
@@ -31,7 +31,7 @@ export interface StreamChunk {
 		totalBatches: number;
 		queryTime: number;
 	};
-	error?: string;
+	type: 'data' | 'metadata' | 'complete' | 'error';
 }
 
 /**

@@ -14,27 +14,27 @@ import { cn } from '@/lib/utils';
 
 // Tipos para los items de navegación
 export interface SettingsNavItem {
-	id: string;
-	label: string;
-	icon: React.ReactNode;
 	color: string;
 	description?: string;
+	icon: React.ReactNode;
+	id: string;
+	label: string;
 }
 
 export interface SettingsCategory {
-	id: string;
-	label: string;
-	icon: React.ReactNode;
-	color: string;
-	items: SettingsNavItem[];
 	badge?: number;
+	color: string;
+	icon: React.ReactNode;
+	id: string;
+	items: SettingsNavItem[];
+	label: string;
 }
 
 interface ModernSettingsLayoutProps {
+	activeItemId?: string;
+	activeSection?: string;
 	categories: SettingsCategory[];
 	children: React.ReactNode;
-	activeSection?: string;
-	activeItemId?: string;
 	onNavigate?: (categoryId: string, itemId: string) => void;
 }
 

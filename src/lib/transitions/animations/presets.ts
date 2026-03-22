@@ -10,7 +10,7 @@
  * - Optimizaciones específicas
  */
 
-import type { AnimeParams } from '@/lib/anime';
+import type { AnimationParams } from '@/lib/animation';
 import type { TransitionDirection } from '../types';
 import { contextualEasings, customEasings } from './easings';
 
@@ -19,13 +19,13 @@ import { contextualEasings, customEasings } from './easings';
 // ============================================================================
 
 interface AnimationPreset {
-	name: string;
 	description: string;
-	params: Partial<AnimeParams>;
-	initialStyles?: Partial<CSSStyleDeclaration>;
 	finalStyles?: Partial<CSSStyleDeclaration>;
-	useWillChange?: string[];
+	initialStyles?: Partial<CSSStyleDeclaration>;
+	name: string;
+	params: Partial<AnimationParams>;
 	useGPU?: boolean;
+	useWillChange?: string[];
 }
 
 // ============================================================================
@@ -590,9 +590,12 @@ export function applyPreset(element: HTMLElement, preset: AnimationPreset, rever
 }
 
 /**
- * Obtiene configuración de anime.js desde un preset
+ * Obtiene configuración de animación desde un preset
  */
-export function getAnimeConfig(preset: AnimationPreset, overrides: Partial<AnimeParams> = {}): Partial<AnimeParams> {
+export function getAnimationConfig(
+	preset: AnimationPreset,
+	overrides: Partial<AnimationParams> = {}
+): Partial<AnimationParams> {
 	return {
 		...preset.params,
 		...overrides,

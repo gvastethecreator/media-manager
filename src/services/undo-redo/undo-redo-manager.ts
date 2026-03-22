@@ -10,8 +10,8 @@ import { clientLogger } from '@/lib/logger/client-logger';
 
 // Browser-compatible EventEmitter implementation
 interface UndoRedoEvents {
-	type: 'stateChanged';
 	payload: UndoRedoState;
+	type: 'stateChanged';
 }
 type URListener<T> = (payload: T) => void;
 
@@ -67,24 +67,24 @@ import { toastService } from '../toast/toast.service';
 
 // Undo/Redo action types
 export interface UndoableAction {
-	/** Unique action identifier */
-	id: string;
-	/** Action type */
-	type: UndoActionType;
-	/** Timestamp when action was executed */
-	timestamp: number;
+	/** Check if action can be undone */
+	canUndo: () => boolean;
 	/** Action description for UI */
 	description: string;
 	/** Execute the action */
 	execute: () => Promise<void>;
-	/** Undo the action */
-	undo: () => Promise<void>;
-	/** Check if action can be undone */
-	canUndo: () => boolean;
+	/** Unique action identifier */
+	id: string;
 	/** Original data for undo operation */
 	originalData?: any;
 	/** Target data for redo operation */
 	targetData?: any;
+	/** Timestamp when action was executed */
+	timestamp: number;
+	/** Action type */
+	type: UndoActionType;
+	/** Undo the action */
+	undo: () => Promise<void>;
 }
 
 export type UndoActionType =
@@ -101,25 +101,25 @@ export type UndoActionType =
 	| 'remove-tag';
 
 export interface UndoRedoOptions {
-	/** Maximum number of actions to keep in history */
-	maxHistorySize?: number;
 	/** Enable automatic cleanup of old actions */
 	autoCleanup?: boolean;
 	/** Cleanup interval in milliseconds */
 	cleanupInterval?: number;
+	/** Maximum number of actions to keep in history */
+	maxHistorySize?: number;
 }
 
 export interface UndoRedoState {
-	/** Current position in history */
-	currentIndex: number;
-	/** Total actions in history */
-	totalActions: number;
-	/** Can undo current action */
-	canUndo: boolean;
 	/** Can redo next action */
 	canRedo: boolean;
+	/** Can undo current action */
+	canUndo: boolean;
+	/** Current position in history */
+	currentIndex: number;
 	/** Last action description */
 	lastAction?: string;
+	/** Total actions in history */
+	totalActions: number;
 }
 
 /**

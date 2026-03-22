@@ -25,7 +25,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
+import { Slider } from '@/components/ui/slider-legacy';
 import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
 import type { ToolbarProps } from '../types/props.types';
@@ -48,28 +48,28 @@ const VIEW_LABELS: Record<ViewMode, string> = {
 };
 
 export interface FileBrowserToolbarProps extends ToolbarProps {
-	/** Modo de vista actual */
-	viewMode: ViewMode;
-	/** Handler para cambiar vista */
-	onViewModeChange?: (mode: ViewMode) => void;
-	/** Items seleccionados */
-	selectedCount?: number;
-	/** Handler para seleccionar todos */
-	onSelectAll?: () => void;
-	/** Handler para limpiar selección */
-	onClearSelection?: () => void;
 	/** Tamaño actual de item */
 	itemSize?: number;
+	/** Handler para limpiar selección */
+	onClearSelection?: () => void;
 	/** Handler para cambiar tamaño de item */
 	onItemSizeChange?: (size: number) => void;
-	/** Query de búsqueda */
-	searchQuery?: string;
 	/** Handler para cambiar búsqueda */
 	onSearchChange?: (query: string) => void;
-	/** Opciones de ordenamiento */
-	sortOptions?: SortOption[];
+	/** Handler para seleccionar todos */
+	onSelectAll?: () => void;
 	/** Handler para cambiar ordenamiento */
 	onSortChange?: (field: string) => void;
+	/** Handler para cambiar vista */
+	onViewModeChange?: (mode: ViewMode) => void;
+	/** Query de búsqueda */
+	searchQuery?: string;
+	/** Items seleccionados */
+	selectedCount?: number;
+	/** Opciones de ordenamiento */
+	sortOptions?: SortOption[];
+	/** Modo de vista actual */
+	viewMode: ViewMode;
 }
 
 export function FileBrowserToolbar({

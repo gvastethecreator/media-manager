@@ -1,22 +1,22 @@
 /**
- * @file UI Components v3 - Barrel Export Consolidado
+ * @file UI Components - Barrel Export Consolidado
  * @module components/ui
- * @description Exportaciones centralizadas de todos los componentes UI rediseñados v3
+ * @description Exportaciones centralizadas de los componentes UI finales y sus variantes legacy
  *
  * USO RECOMENDADO:
  * Importar desde aquí para garantizar consistencia visual:
  * import { Switch, Checkbox, RadioGroup } from '@/components/ui';
  *
- * NOTA: Los componentes v3 incluyen animaciones animejs por defecto.
+ * NOTA: Los componentes finales incluyen animaciones GSAP por defecto.
  * Para desactivar animaciones: <Switch animated={false} />
  */
 
 // ============================================
-// FORM CONTROLS - Controles de formulario (v3 RECOMENDADOS)
+// FORM CONTROLS - Controles de formulario (RECOMENDADOS)
 // ============================================
-export { Checkbox, type CheckboxProps } from './checkbox-v3';
+export { Checkbox, type CheckboxProps } from './checkbox';
 // ============================================
-// NAVIGATION & MENUS - Navegación y menús (v3 RECOMENDADOS)
+// NAVIGATION & MENUS - Navegación y menús (RECOMENDADOS)
 // ============================================
 export {
 	ContextMenu,
@@ -32,7 +32,7 @@ export {
 	ContextMenuSubContent,
 	ContextMenuSubTrigger,
 	ContextMenuTrigger,
-} from './context-menu-v3';
+} from './context-menu';
 export {
 	Menubar,
 	MenubarCheckboxItem,
@@ -48,10 +48,10 @@ export {
 	MenubarSubContent,
 	MenubarSubTrigger,
 	MenubarTrigger,
-} from './menubar-v3';
-export { RadioGroup, RadioGroupItem, type RadioGroupItemProps, type RadioGroupProps } from './radio-group-v3';
-export { Slider, type SliderProps } from './slider-v3';
-export { Switch, type SwitchProps } from './switch-v3';
+} from './menubar';
+export { RadioGroup, RadioGroupItem, type RadioGroupItemProps, type RadioGroupProps } from './radio-group';
+export { Slider, type SliderProps } from './slider';
+export { Switch, type SwitchProps } from './switch';
 
 export {
 	Toolbar,
@@ -60,19 +60,19 @@ export {
 	ToolbarSeparator,
 	ToolbarToggleGroup,
 	ToolbarToggleItem,
-} from './toolbar-v3';
+} from './toolbar';
 
 // ============================================
 // LEGACY EXPORTS - Componentes antiguos (deprecados, para compatibilidad)
 // ============================================
-// NOTA: Estos componentes serán removidos en una versión futura.
-// Por favor migra a los componentes v3 para mejor UX y animaciones.
+// NOTA: Estos componentes existen solo por compatibilidad.
+// Prefiere importar los componentes finales desde este barrel.
 
 // Form Controls Legacy (sin animaciones)
-export { Checkbox as CheckboxLegacy } from './checkbox';
+export { Checkbox as CheckboxLegacy } from './checkbox-legacy';
 // Navigation Legacy (sin animaciones)
-export * as ContextMenuLegacy from './context-menu';
-export * as MenubarLegacy from './menubar';
-export { RadioGroup as RadioGroupLegacy, RadioGroupItem as RadioGroupItemLegacy } from './radio-group';
-export { Slider as SliderLegacy } from './slider';
-export { Switch as SwitchLegacy } from './switch';
+export * as ContextMenuLegacy from './context-menu-legacy';
+export * as MenubarLegacy from './menubar-legacy';
+export { RadioGroup as RadioGroupLegacy, RadioGroupItem as RadioGroupItemLegacy } from './radio-group-legacy';
+export { Slider as SliderLegacy } from './slider-legacy';
+export { Switch as SwitchLegacy } from './switch-legacy';

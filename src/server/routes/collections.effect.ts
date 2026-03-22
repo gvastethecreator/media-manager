@@ -11,6 +11,7 @@ import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { CollectionCreateInput, CollectionUpdateInput } from '@/lib/effect/schemas/entities';
 import { CollectionService, CollectionServiceLive } from '@/services/collection/collection.service.effect';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
 
@@ -35,8 +36,8 @@ router.get(
 
 			const options = {
 				search: search as string | undefined,
-				limit: Number.parseInt(limit as string, 10),
-				offset: Number.parseInt(offset as string, 10),
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
 				orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt') || 'createdAt',
 				orderDirection: (sortOrder as 'asc' | 'desc') || 'desc',
 				parentId: parentId === 'null' ? null : (parentId as string | null | undefined),

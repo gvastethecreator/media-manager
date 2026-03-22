@@ -13,107 +13,111 @@
  * 🗂️ Store principal de UI para gestión de estado de interfaz
  */
 export interface UIStore {
-	theme: 'light' | 'dark' | 'auto';
-	sidebarCollapsed: boolean;
-	viewMode: 'grid' | 'list' | 'masonry' | 'cards';
-	gridSize: 'small' | 'medium' | 'large' | 'xl';
-	showMetadata: boolean;
-	showThumbnails: boolean;
 	animationsEnabled: boolean;
-	notifications: {
-		enabled: boolean;
-		position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-		duration: number;
+	error: string | null;
+	gridSize: 'small' | 'medium' | 'large' | 'xl';
+	loading: {
+		global: boolean;
+		operations: Record<string, boolean>;
 	};
 	modals: {
 		open: string[];
 		data: Record<string, unknown>;
 	};
-	loading: {
-		global: boolean;
-		operations: Record<string, boolean>;
+	notifications: {
+		enabled: boolean;
+		position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+		duration: number;
 	};
-	error: string | null;
+	showMetadata: boolean;
+	showThumbnails: boolean;
+	sidebarCollapsed: boolean;
+	theme: 'light' | 'dark' | 'auto';
+	viewMode: 'grid' | 'list' | 'masonry' | 'cards';
 }
 
 /**
  * Configuración específica para vista Grid
  */
 export interface GridViewConfig {
-	/** Número mínimo de columnas */
-	minColumns: number;
-	/** Número máximo de columnas */
-	maxColumns: number;
-	/** Tamaño base de los elementos */
-	itemSize: number;
-	/** Espaciado entre elementos */
-	gap: number;
 	/** Relación de aspecto (width/height) */
 	aspectRatio: number;
-	/** Mostrar información al hover */
-	showInfoOnHover: boolean;
 	/** Animaciones de hover */
 	enableHoverAnimations: boolean;
+	/** Espaciado entre elementos */
+	gap: number;
+	/** Tamaño base de los elementos */
+	itemSize: number;
+	/** Número máximo de columnas */
+	maxColumns: number;
+	/** Número mínimo de columnas */
+	minColumns: number;
+	/** Mostrar información al hover */
+	showInfoOnHover: boolean;
 }
 
 /**
  * Configuración específica para vista Cards
  */
 export interface CardsViewConfig {
-	/** Número mínimo de columnas */
-	minColumns: number;
-	/** Número máximo de columnas */
-	maxColumns: number;
-	/** Ancho base de las tarjetas */
-	cardWidth: number;
 	/** Alto de las tarjetas */
 	cardHeight: number;
+	/** Ancho base de las tarjetas */
+	cardWidth: number;
 	/** Espaciado entre tarjetas */
 	gap: number;
+	/** Número máximo de columnas */
+	maxColumns: number;
+	/** Número mínimo de columnas */
+	minColumns: number;
+	/** Tamaño de la vista previa de imagen */
+	previewSize: 'small' | 'medium' | 'large';
+	/** Mostrar badges (favoritos, etiquetas, etc.) */
+	showBadges: boolean;
 	/** Mostrar metadatos en las tarjetas */
 	showMetadata: boolean;
 	/** Mostrar información técnica */
 	showTechnicalInfo: boolean;
-	/** Mostrar badges (favoritos, etiquetas, etc.) */
-	showBadges: boolean;
-	/** Tamaño de la vista previa de imagen */
-	previewSize: 'small' | 'medium' | 'large';
 }
 
 /**
  * Configuración específica para vista Masonry/Mosaico
  */
 export interface MasonryViewConfig {
-	/** Número mínimo de columnas */
-	minColumns: number;
-	/** Número máximo de columnas */
-	maxColumns: number;
-	/** Ancho base de las columnas */
-	columnWidth: number;
+	/** Balanceo de columnas automático */
+	autoBalance: boolean;
 	/** Espaciado entre columnas */
 	columnGap: number;
-	/** Espaciado entre filas */
-	rowGap: number;
+	/** Ancho base de las columnas */
+	columnWidth: number;
+	/** Número máximo de columnas */
+	maxColumns: number;
 	/** Altura máxima de los elementos */
 	maxItemHeight: number;
+	/** Número mínimo de columnas */
+	minColumns: number;
 	/** Altura mínima de los elementos */
 	minItemHeight: number;
 	/** Respetar aspect ratio original */
 	respectAspectRatio: boolean;
-	/** Balanceo de columnas automático */
-	autoBalance: boolean;
+	/** Espaciado entre filas */
+	rowGap: number;
 }
 
 /**
  * Configuración específica para vista List
  */
 export interface ListViewConfig {
-	/** Altura de cada fila */
-	rowHeight: number;
+	/** Compactar información */
+	compactMode: boolean;
 	/** Espaciado entre filas */
 	rowGap: number;
+	/** Altura de cada fila */
+	rowHeight: number;
 	/** Mostrar miniaturas */
 	showThumbnails: boolean;
+	/** Mostrar líneas zebra */
+	showZebraStripes: boolean;
 	/** Tamaño de las miniaturas */
 	thumbnailSize: 'none' | 'small' | 'medium' | 'large';
 	/** Columnas visibles */
@@ -126,23 +130,12 @@ export interface ListViewConfig {
 		dimensions: boolean;
 		tags: boolean;
 	};
-	/** Mostrar líneas zebra */
-	showZebraStripes: boolean;
-	/** Compactar información */
-	compactMode: boolean;
 }
 
 /**
  * Configuración general del FileBrowser
  */
 export interface FileBrowserConfig {
-	/** Configuraciones por vista */
-	views: {
-		grid: GridViewConfig;
-		cards: CardsViewConfig;
-		masonry: MasonryViewConfig;
-		list: ListViewConfig;
-	};
 	/** Configuración general */
 	general: {
 		/** Modo de vista por defecto */
@@ -175,12 +168,23 @@ export interface FileBrowserConfig {
 		/** Calidad de miniaturas */
 		thumbnailQuality: 'low' | 'medium' | 'high';
 	};
+	/** Configuraciones por vista */
+	views: {
+		grid: GridViewConfig;
+		cards: CardsViewConfig;
+		masonry: MasonryViewConfig;
+		list: ListViewConfig;
+	};
 }
 
 /**
  * Preferencias de interfaz de usuario (UI)
  */
 export interface InterfacePreferences {
+	/** Animaciones habilitadas */
+	animations: boolean;
+	/** Configuración específica del FileBrowser */
+	fileBrowser: FileBrowserConfig;
 	/** Familia tipográfica seleccionada */
 	fontFamily:
 		| 'system'
@@ -217,28 +221,24 @@ export interface InterfacePreferences {
 		| 'teal'
 		| 'citrico'
 		| 'system';
-	/** Animaciones habilitadas */
-	animations: boolean;
-	/** Respetar aspect ratio en modo grilla */
-	thumbnailsRespectAspectRatio: boolean;
+	/** Animaciones de thumbnails */
+	thumbnailsAnimations: boolean;
 	/** Borde redondeado de thumbnails por modo */
 	thumbnailsBorderRadius: {
 		grid: number;
 		card: number;
 		mosaic: number;
 	};
-	/** Animaciones de thumbnails */
-	thumbnailsAnimations: boolean;
+	/** Respetar aspect ratio en modo grilla */
+	thumbnailsRespectAspectRatio: boolean;
 	/** Modo ultra performance para thumbnails */
 	thumbnailsUltraPerformance: boolean;
-	/** Configuración específica del FileBrowser */
-	fileBrowser: FileBrowserConfig;
 	/** Otros flags visuales futuros */
 	[key: string]: unknown;
 }
 
 export interface InterfaceSettingsState {
 	preferences: InterfacePreferences;
-	updatedAt: number;
 	setPreferences: (preferences: Partial<InterfacePreferences>) => void;
+	updatedAt: number;
 }

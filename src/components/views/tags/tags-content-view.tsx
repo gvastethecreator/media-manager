@@ -3,7 +3,7 @@ import { memo, useMemo } from 'react';
 import { TagCard } from '@/components/cards/tag-card/tag-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTags } from '@/lib/api/tags';
 import { toTagWithStats } from '@/transformers/tag';

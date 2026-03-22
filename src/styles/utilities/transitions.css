@@ -31,8 +31,8 @@
 }
 
 ::view-transition-old(slide-up-element) {
-	animation: none;
 	opacity: 0;
+	animation: none;
 }
 
 ::view-transition-new(slide-up-element) {
@@ -86,8 +86,8 @@
 
 /* Estado: oculto */
 .state-exited {
-	opacity: 0;
 	display: none;
+	opacity: 0;
 }
 
 /* =====================================================
@@ -187,8 +187,8 @@
 }
 
 .image-reveal > img[data-loaded="true"] + .image-placeholder {
-	opacity: 0;
 	pointer-events: none;
+	opacity: 0;
 }
 
 .dark .image-reveal > .image-placeholder {
@@ -349,9 +349,9 @@
 	.list-stagger > *,
 	.list-item-exit,
 	.list-item-enter {
-		animation: none !important;
 		opacity: 1 !important;
 		transform: none !important;
+		animation: none !important;
 	}
 
 	/* Modal/Dialog sin transición */

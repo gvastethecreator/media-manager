@@ -10,10 +10,10 @@ import { useWorldItemStore } from './index';
  * Tipos para estadísticas de WorldItem
  */
 export interface WorldItemStats {
-	total: number;
-	byType: Record<string, number>;
 	byCategory: Record<string, number>;
+	byType: Record<string, number>;
 	favorites: number;
+	total: number;
 }
 
 /**

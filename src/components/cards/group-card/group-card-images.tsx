@@ -5,26 +5,26 @@ import {
 	computeRarityVisualConfig,
 	rarityAccessibilityLabel,
 } from '@/components/cards/shared/rarity-style';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 interface GroupCardImagesProps {
-	/** Imágenes a mostrar (rutas) */
-	images?: string[];
-	/** Videos a mostrar (rutas de thumbnails) */
-	videos?: string[];
+	/** Si está en modo compacto */
+	compact?: boolean;
 	/** Emoji del grupo para mostrar si no hay imágenes */
 	emoji?: string;
+	/** Si está habilitado el efecto holográfico */
+	holographicEffect?: boolean;
+	/** Imágenes a mostrar (rutas) */
+	images?: string[];
 	/** Color primario para estilizado */
 	primaryColor?: string;
 	/** Nivel de rareza (1-10) para determinar efectos */
 	rarityLevel?: number;
-	/** Si está habilitado el efecto holográfico */
-	holographicEffect?: boolean;
 	/** Si está en modo tarjeta TCG */
 	tcgMode?: boolean;
-	/** Si está en modo compacto */
-	compact?: boolean;
+	/** Videos a mostrar (rutas de thumbnails) */
+	videos?: string[];
 }
 
 /**

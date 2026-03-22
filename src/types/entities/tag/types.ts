@@ -10,12 +10,12 @@ import type { TagWithStats } from './base';
 export type { TagWithStats } from './base';
 
 export interface TagBase extends EntityBase {
-	name: string;
+	category: string | null;
+	color: string | null;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	category: string | null;
 	isFavorite: boolean;
+	name: string;
 	totalImages: number;
 	totalVideos: number;
 }
@@ -24,22 +24,22 @@ export interface TagCreateInput extends Omit<TagBase, 'id' | 'createdAt' | 'upda
 export interface TagUpdateInput extends Partial<TagCreateInput> {}
 
 export interface TagFilters {
-	search?: string;
-	isFavorite?: boolean;
 	category?: string;
-	hasImage?: boolean;
-	hasVideo?: boolean;
 	hasAlbum?: boolean;
-	hasCollection?: boolean;
 	hasCharacter?: boolean;
-	hasPlace?: boolean;
-	hasWorldItem?: boolean;
+	hasCollection?: boolean;
 	hasConcept?: boolean;
-	hasPrompt?: boolean;
-	hasNote?: boolean;
-	hasWildcard?: boolean;
-	hasProperty?: boolean;
 	hasGroup?: boolean;
+	hasImage?: boolean;
+	hasNote?: boolean;
+	hasPlace?: boolean;
+	hasPrompt?: boolean;
+	hasProperty?: boolean;
+	hasVideo?: boolean;
+	hasWildcard?: boolean;
+	hasWorldItem?: boolean;
+	isFavorite?: boolean;
+	search?: string;
 }
 
 export enum TagSortCriteria {
@@ -59,14 +59,13 @@ export enum TagSortCriteria {
 // para evitar duplicación y conflictos de tipos
 
 export interface TagPaginationOptions {
-	page?: number;
 	limit?: number;
+	page?: number;
 	sortBy?: TagSortCriteria;
 	sortDirection?: 'asc' | 'desc';
 }
 
 export interface TagsResponse {
-	tags: TagWithStats[];
 	pagination: {
 		page: number;
 		limit: number;
@@ -75,6 +74,7 @@ export interface TagsResponse {
 		hasNextPage: boolean;
 		hasPreviousPage: boolean;
 	};
+	tags: TagWithStats[];
 }
 
 export type TagComplete = TagWithStats;

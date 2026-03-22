@@ -17,22 +17,6 @@ export interface UseUndoRedoOptions {
 }
 
 export interface UseUndoRedoReturn {
-	/** Current undo/redo state */
-	state: UndoRedoState;
-	/** Execute an undoable action */
-	execute: (action: UndoableAction) => Promise<void>;
-	/** Undo the last action */
-	undo: () => Promise<void>;
-	/** Redo the next action */
-	redo: () => Promise<void>;
-	/** Check if undo is possible */
-	canUndo: boolean;
-	/** Check if redo is possible */
-	canRedo: boolean;
-	/** Clear all history */
-	clear: () => void;
-	/** Get action history */
-	getHistory: () => UndoableAction[];
 	/** Create common actions */
 	actions: {
 		createCopyAction: (items: AnyEntityWithStats[], targetPath: string) => UndoableAction;
@@ -40,6 +24,22 @@ export interface UseUndoRedoReturn {
 		createDeleteAction: (items: AnyEntityWithStats[]) => UndoableAction;
 		createRenameAction: (item: AnyEntityWithStats, newName: string) => UndoableAction;
 	};
+	/** Check if redo is possible */
+	canRedo: boolean;
+	/** Check if undo is possible */
+	canUndo: boolean;
+	/** Clear all history */
+	clear: () => void;
+	/** Execute an undoable action */
+	execute: (action: UndoableAction) => Promise<void>;
+	/** Get action history */
+	getHistory: () => UndoableAction[];
+	/** Redo the next action */
+	redo: () => Promise<void>;
+	/** Current undo/redo state */
+	state: UndoRedoState;
+	/** Undo the last action */
+	undo: () => Promise<void>;
 }
 
 /**

@@ -13,8 +13,8 @@ import type { AnyEntityWithStats } from '@/types/entities';
 const logger = clientLogger.withContext('MixedContentView');
 
 interface MixedContentViewProps {
-	filterType?: string;
 	filterId?: string | null;
+	filterType?: string;
 }
 
 export function MixedContentView(_props: MixedContentViewProps = {}) {

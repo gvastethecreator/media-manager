@@ -6,14 +6,14 @@
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortOption<T = string> {
-	field: T;
 	direction: SortDirection;
+	field: T;
 	label: string;
 }
 
 export interface SortConfig<T = string> {
-	field: T;
 	direction: SortDirection;
+	field: T;
 }
 
 /**

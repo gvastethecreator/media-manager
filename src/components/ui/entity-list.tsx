@@ -23,9 +23,9 @@ import { ChevronLeft, ChevronRight, LayoutGrid, List as ListIcon, Rows, Search, 
 import { useMemo, useState } from 'react';
 import { EntityCard, type EntityCardProps } from '@/components/cards/entity-card';
 import type { BaseCardProps } from '@/components/cards/types/card-layout.types';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { motion } from '@/components/ui/motion-shim';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -48,14 +48,24 @@ export type EntityItem = Omit<BaseCardProps, 'onClick' | 'href'> & {
 
 export interface EntityListProps {
 	/**
-	 * Lista de entidades para mostrar
+	 * Permitir seleccionar ítems (múltiples)
 	 */
-	items: EntityItem[];
+	allowSelection?: boolean;
 
 	/**
-	 * Título de la lista
+	 * Permitir cambiar el tipo de vista
 	 */
-	title?: string;
+	allowViewChange?: boolean;
+
+	/**
+	 * Filtros disponibles por categoría
+	 */
+	categoryFilters?: string[];
+
+	/**
+	 * Clases adicionales para el contenedor
+	 */
+	className?: string;
 
 	/**
 	 * Descripción de la lista
@@ -66,75 +76,15 @@ export interface EntityListProps {
 	 * Elemento a mostrar cuando no hay ítems
 	 */
 	emptyState?: React.ReactNode;
-
 	/**
-	 * Tipo de vista (grid, list, compact)
+	 * Lista de entidades para mostrar
 	 */
-	viewType?: 'grid' | 'list' | 'compact';
-
-	/**
-	 * Permitir cambiar el tipo de vista
-	 */
-	allowViewChange?: boolean;
-
-	/**
-	 * Mostrar la barra de búsqueda
-	 */
-	showSearch?: boolean;
-
-	/**
-	 * Mostrar los filtros
-	 */
-	showFilters?: boolean;
-
-	/**
-	 * Permitir seleccionar ítems (múltiples)
-	 */
-	allowSelection?: boolean;
-
-	/**
-	 * Función llamada cuando se seleccionan ítems
-	 */
-	onSelectionChange?: (selectedIds: string[]) => void;
-
-	/**
-	 * Texto del input de búsqueda
-	 */
-	searchPlaceholder?: string;
-
-	/**
-	 * Mostrar paginación
-	 */
-	pagination?: boolean;
+	items: EntityItem[];
 
 	/**
 	 * Número de ítems por página
 	 */
 	itemsPerPage?: number;
-
-	/**
-	 * Tipos de ordenación disponibles
-	 */
-	sortOptions?: Array<{
-		label: string;
-		value: string;
-		sortFn?: (a: EntityItem, b: EntityItem) => number;
-	}>;
-
-	/**
-	 * Filtros disponibles por categoría
-	 */
-	categoryFilters?: string[];
-
-	/**
-	 * Filtros disponibles por etiquetas
-	 */
-	tagFilters?: string[];
-
-	/**
-	 * Clases adicionales para el contenedor
-	 */
-	className?: string;
 
 	/**
 	 * Función llamada al hacer clic en item (reemplaza onClick del item)
@@ -147,9 +97,58 @@ export interface EntityListProps {
 	onItemDoubleClick?: (id: string) => void;
 
 	/**
+	 * Función llamada cuando se seleccionan ítems
+	 */
+	onSelectionChange?: (selectedIds: string[]) => void;
+
+	/**
+	 * Mostrar paginación
+	 */
+	pagination?: boolean;
+
+	/**
+	 * Texto del input de búsqueda
+	 */
+	searchPlaceholder?: string;
+
+	/**
+	 * Mostrar los filtros
+	 */
+	showFilters?: boolean;
+
+	/**
+	 * Mostrar la barra de búsqueda
+	 */
+	showSearch?: boolean;
+
+	/**
+	 * Tipos de ordenación disponibles
+	 */
+	sortOptions?: Array<{
+		label: string;
+		value: string;
+		sortFn?: (a: EntityItem, b: EntityItem) => number;
+	}>;
+
+	/**
+	 * Filtros disponibles por etiquetas
+	 */
+	tagFilters?: string[];
+
+	/**
 	 * Modo TCG para las tarjetas
 	 */
 	tcgMode?: boolean;
+
+	/**
+	 * Título de la lista
+	 */
+	title?: string;
+
+	/**
+	 * Tipo de vista (grid, list, compact)
+	 */
+	viewType?: 'grid' | 'list' | 'compact';
 }
 
 /**

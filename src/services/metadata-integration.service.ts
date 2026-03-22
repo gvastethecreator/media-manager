@@ -6,8 +6,6 @@
 import type { AIEngine, MetadataExtractionResult } from '../types/metadata-origin.types';
 
 export interface UIMetadataResult {
-	success: boolean;
-	metadata?: MetadataExtractionResult;
 	error?: string;
 	formatted?: {
 		origin?: {
@@ -23,6 +21,8 @@ export interface UIMetadataResult {
 		xmp?: Array<{ key: string; value: string; category: 'xmp' }>;
 		video?: Array<{ key: string; value: string; category: 'video' }>;
 	};
+	metadata?: MetadataExtractionResult;
+	success: boolean;
 }
 
 export class MetadataIntegrationService {

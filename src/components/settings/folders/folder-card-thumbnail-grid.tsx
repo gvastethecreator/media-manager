@@ -4,10 +4,10 @@ import { cn } from '@/lib/utils';
 import { normalizeThumbailUrl } from './utils/folder-helpers';
 
 interface ThumbnailGridProps {
-	images: Array<{ id: string; name: string; thumbnailUrl?: string; thumbnail?: string }>;
-	totalImages: number;
 	className?: string;
+	images: Array<{ id: string; name: string; thumbnailUrl?: string; thumbnail?: string }>;
 	showCount?: boolean;
+	totalImages: number;
 }
 
 export const ThumbnailGrid = memo(function ThumbnailGrid({

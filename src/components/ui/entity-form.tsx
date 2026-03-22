@@ -3,14 +3,14 @@ import { useEffect, useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { motion } from '@/components/ui/motion-shim';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch-v3';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { toastService } from '@/lib/ui/toast';
@@ -33,39 +33,23 @@ export type EntityFieldType =
 // Definición de un campo para el formulario
 export interface EntityFormField {
 	/**
-	 * Nombre del campo (corresponde a la propiedad en el objeto de datos)
-	 */
-	name: string;
-
-	/**
-	 * Etiqueta para mostrar en el formulario
-	 */
-	label: string;
-
-	/**
-	 * Tipo de campo
-	 */
-	type: EntityFieldType;
-
-	/**
 	 * Texto de ayuda para mostrar debajo del campo
 	 */
 	description?: string;
 
 	/**
-	 * Indica si el campo es requerido
+	 * Si debe ocupar ancho completo (en diseño de columnas)
 	 */
-	required?: boolean;
+	fullWidth?: boolean;
 
 	/**
-	 * Placeholder del campo
+	 * Etiqueta para mostrar en el formulario
 	 */
-	placeholder?: string;
-
+	label: string;
 	/**
-	 * Orden del campo en el formulario
+	 * Nombre del campo (corresponde a la propiedad en el objeto de datos)
 	 */
-	order?: number;
+	name: string;
 
 	/**
 	 * Opciones para campos select o multiselect
@@ -76,9 +60,29 @@ export interface EntityFormField {
 	}>;
 
 	/**
-	 * Si debe ocupar ancho completo (en diseño de columnas)
+	 * Orden del campo en el formulario
 	 */
-	fullWidth?: boolean;
+	order?: number;
+
+	/**
+	 * Placeholder del campo
+	 */
+	placeholder?: string;
+
+	/**
+	 * Propiedades adicionales específicas para cada tipo de campo
+	 */
+	props?: Record<string, any>;
+
+	/**
+	 * Indica si el campo es requerido
+	 */
+	required?: boolean;
+
+	/**
+	 * Tipo de campo
+	 */
+	type: EntityFieldType;
 
 	/**
 	 * Validación personalizada (además de required)
@@ -91,59 +95,19 @@ export interface EntityFormField {
 		pattern?: RegExp;
 		customMessage?: string;
 	};
-
-	/**
-	 * Propiedades adicionales específicas para cada tipo de campo
-	 */
-	props?: Record<string, any>;
 }
 
 // Props del componente EntityForm
 export interface EntityFormProps {
-	/**
-	 * Título del formulario
-	 */
-	title?: string;
-
-	/**
-	 * Descripción del formulario
-	 */
-	description?: string;
-
-	/**
-	 * Campos a mostrar en el formulario
-	 */
-	fields: EntityFormField[];
-
-	/**
-	 * Datos iniciales para el formulario
-	 */
-	initialData?: Record<string, any>;
-
-	/**
-	 * Función a ejecutar al enviar el formulario (después de validación)
-	 */
-	onSubmit: (data: Record<string, any>) => Promise<void> | void;
-
-	/**
-	 * Función a ejecutar al cancelar
-	 */
-	onCancel?: () => void;
-
-	/**
-	 * Texto del botón de envío
-	 */
-	submitLabel?: string;
-
 	/**
 	 * Texto del botón de cancelar
 	 */
 	cancelLabel?: string;
 
 	/**
-	 * Indicador de validación asíncrona en curso
+	 * Clases adicionales
 	 */
-	isLoading?: boolean;
+	className?: string;
 
 	/**
 	 * Si debe mostrar un modal de confirmación antes de enviar
@@ -156,19 +120,14 @@ export interface EntityFormProps {
 	confirmMessage?: string;
 
 	/**
-	 * Si debe mostrar un mensaje toast al completar
+	 * Descripción del formulario
 	 */
-	showToastOnSuccess?: boolean;
+	description?: string;
 
 	/**
-	 * Mensaje para el toast de éxito
+	 * Campos a mostrar en el formulario
 	 */
-	successMessage?: string;
-
-	/**
-	 * URL a la que redirigir después de enviar con éxito
-	 */
-	redirectUrl?: string;
+	fields: EntityFormField[];
 
 	/**
 	 * Estilo del formulario
@@ -176,9 +135,48 @@ export interface EntityFormProps {
 	formStyle?: 'default' | 'compact' | 'card';
 
 	/**
-	 * Clases adicionales
+	 * Datos iniciales para el formulario
 	 */
-	className?: string;
+	initialData?: Record<string, any>;
+
+	/**
+	 * Indicador de validación asíncrona en curso
+	 */
+	isLoading?: boolean;
+
+	/**
+	 * Función a ejecutar al cancelar
+	 */
+	onCancel?: () => void;
+
+	/**
+	 * Función a ejecutar al enviar el formulario (después de validación)
+	 */
+	onSubmit: (data: Record<string, any>) => Promise<void> | void;
+
+	/**
+	 * URL a la que redirigir después de enviar con éxito
+	 */
+	redirectUrl?: string;
+
+	/**
+	 * Si debe mostrar un mensaje toast al completar
+	 */
+	showToastOnSuccess?: boolean;
+
+	/**
+	 * Texto del botón de envío
+	 */
+	submitLabel?: string;
+
+	/**
+	 * Mensaje para el toast de éxito
+	 */
+	successMessage?: string;
+	/**
+	 * Título del formulario
+	 */
+	title?: string;
 }
 
 /**

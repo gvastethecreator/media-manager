@@ -1,22 +1,10 @@
 import React, { useMemo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 
 export interface StatItem {
-	/**
-	 * Valor numérico de la estadística
-	 */
-	value: number;
-	/**
-	 * Etiqueta para la estadística
-	 */
-	label: string;
-	/**
-	 * Icono opcional (componente de Lucide o SVG)
-	 */
-	icon?: React.ReactNode;
 	/**
 	 * Color personalizado para esta estadística (hex, rgb, nombre de color)
 	 */
@@ -26,24 +14,24 @@ export interface StatItem {
 	 */
 	description?: string;
 	/**
+	 * Icono opcional (componente de Lucide o SVG)
+	 */
+	icon?: React.ReactNode;
+	/**
 	 * Identificador único para la estadística, usado como key
 	 */
 	id?: string;
+	/**
+	 * Etiqueta para la estadística
+	 */
+	label: string;
+	/**
+	 * Valor numérico de la estadística
+	 */
+	value: number;
 }
 
 export interface EntityStatsProps {
-	/**
-	 * Estadísticas a mostrar
-	 */
-	stats: StatItem[];
-	/**
-	 * Color principal para utilizar en las estadísticas (se usa como fallback)
-	 */
-	primaryColor?: string;
-	/**
-	 * Tamaño del componente
-	 */
-	size?: 'sm' | 'md' | 'lg';
 	/**
 	 * Activar animación al aparecer
 	 */
@@ -56,6 +44,18 @@ export interface EntityStatsProps {
 	 * Clases adicionales
 	 */
 	className?: string;
+	/**
+	 * Color principal para utilizar en las estadísticas (se usa como fallback)
+	 */
+	primaryColor?: string;
+	/**
+	 * Tamaño del componente
+	 */
+	size?: 'sm' | 'md' | 'lg';
+	/**
+	 * Estadísticas a mostrar
+	 */
+	stats: StatItem[];
 }
 
 /**

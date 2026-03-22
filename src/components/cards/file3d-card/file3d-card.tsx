@@ -1,32 +1,32 @@
 import { BoxIcon, DownloadIcon, EyeIcon, RotateCcwIcon, ZoomInIcon } from 'lucide-react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 interface File3DCardProps {
-	/** Datos del archivo 3D a mostrar */
-	file3d: File3DWithStats;
-	/** Tamaño compacto con menos información */
-	compact?: boolean;
-	/** Modo TCG con efectos especiales de carta */
-	tcgMode?: boolean;
-	/** Deshabilitar interacciones */
-	disabled?: boolean;
 	/** Clase CSS adicional para la carta */
 	className?: string;
-	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
-	/** Si la tarjeta está seleccionada */
-	isSelected?: boolean;
+	/** Tamaño compacto con menos información */
+	compact?: boolean;
+	/** Deshabilitar interacciones */
+	disabled?: boolean;
+	/** Datos del archivo 3D a mostrar */
+	file3d: File3DWithStats;
 	/** Si la tarjeta está activa */
 	isActive?: boolean;
 	/** Si está en modo scroll (para optimización) */
 	isScrolling?: boolean;
+	/** Si la tarjeta está seleccionada */
+	isSelected?: boolean;
+	/** Función a ejecutar al hacer clic en la tarjeta */
+	onClick?: () => void;
 	/** Si debe cargar contenido */
 	shouldLoad?: boolean;
+	/** Modo TCG con efectos especiales de carta */
+	tcgMode?: boolean;
 }
 
 /**

@@ -18,17 +18,17 @@ export type UpdateFile3DInput = File3DUpdateInput;
  * Filtros para búsqueda de archivos 3D
  */
 export interface File3DFilters {
-	search?: string;
+	folderId?: string;
 	format?: string;
-	isFavorite?: boolean;
-	isArchived?: boolean;
-	minSize?: number;
-	maxSize?: number;
 	hasAnimations?: boolean;
 	hasTextures?: boolean;
-	minVertices?: number;
+	isArchived?: boolean;
+	isFavorite?: boolean;
+	maxSize?: number;
 	maxVertices?: number;
-	folderId?: string;
+	minSize?: number;
+	minVertices?: number;
+	search?: string;
 }
 
 /**
@@ -43,8 +43,8 @@ export interface File3DSortOptions {
  * Opciones de paginación para archivos 3D
  */
 export interface File3DPaginationOptions extends File3DSortOptions {
-	page?: number;
 	limit?: number;
+	page?: number;
 }
 
 /**

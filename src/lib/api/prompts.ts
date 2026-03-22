@@ -4,9 +4,21 @@ import type { PromptWithStats } from '@/types/entities/prompt';
 import { apiClient } from './client';
 
 export interface PromptFilters {
-	search?: string;
+	category?: string;
+	composition?: string;
+	content?: string;
+	featuredImage?: string;
+	inspiration?: string;
+	isFavorite?: boolean;
+	isPublic?: boolean;
+	lighting?: string;
 	limit?: number;
+	mood?: string;
+	notes?: string;
 	offset?: number;
+	parameters?: string;
+	parentId?: string;
+	search?: string;
 	sortBy?:
 		| 'name'
 		| 'createdAt'
@@ -26,69 +38,57 @@ export interface PromptFilters {
 		| 'featuredImage'
 		| 'parentId';
 	sortOrder?: 'asc' | 'desc';
-	category?: string;
-	isPublic?: boolean;
-	isFavorite?: boolean;
-	type?: string;
-	content?: string;
-	parameters?: string;
 	style?: string;
-	mood?: string;
-	lighting?: string;
-	composition?: string;
 	technique?: string;
-	inspiration?: string;
-	notes?: string;
-	featuredImage?: string;
-	parentId?: string;
+	type?: string;
 }
 
 export interface PromptCreateInput {
-	name: string;
+	category?: string | null;
+	color?: string | null;
+	composition?: string | null;
+	content?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	isPublic?: boolean;
+	featuredImage?: string | null;
+	inspiration?: string | null;
 	isFavorite?: boolean;
+	isPublic?: boolean;
+	lighting?: string | null;
+	mood?: string | null;
+	name: string;
+	notes?: string | null;
+	parameters?: string | null;
+	parentId?: string | null;
+	style?: string | null;
+	technique?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	content?: string | null;
-	parameters?: string | null;
-	style?: string | null;
-	mood?: string | null;
-	lighting?: string | null;
-	composition?: string | null;
-	technique?: string | null;
-	inspiration?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
 }
 
 export interface PromptUpdateInput {
-	name?: string;
+	category?: string | null;
+	color?: string | null;
+	composition?: string | null;
+	content?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	isPublic?: boolean;
+	featuredImage?: string | null;
+	inspiration?: string | null;
 	isFavorite?: boolean;
+	isPublic?: boolean;
+	lighting?: string | null;
+	mood?: string | null;
+	name?: string;
+	notes?: string | null;
+	parameters?: string | null;
+	parentId?: string | null;
+	style?: string | null;
+	technique?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	content?: string | null;
-	parameters?: string | null;
-	style?: string | null;
-	mood?: string | null;
-	lighting?: string | null;
-	composition?: string | null;
-	technique?: string | null;
-	inspiration?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
 }
 
 export interface PromptsResponse {

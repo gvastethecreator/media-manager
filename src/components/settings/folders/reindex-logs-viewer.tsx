@@ -12,23 +12,23 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import type { ReindexLogEntry } from '@/lib/logger/reindex-file-logger';
 
 interface LogStats {
-	errorLogPath: string;
-	warningLogPath: string;
-	errorLogSize: number;
-	warningLogSize: number;
 	errorLogExists: boolean;
+	errorLogPath: string;
+	errorLogSize: number;
 	warningLogExists: boolean;
+	warningLogPath: string;
+	warningLogSize: number;
 }
 
 interface LogResponse<T = ReindexLogEntry[]> {
-	success: boolean;
-	data: T;
-	count?: number;
-	period?: string;
 	breakdown?: {
 		errors: number;
 		warnings: number;
 	};
+	count?: number;
+	data: T;
+	period?: string;
+	success: boolean;
 }
 
 /**

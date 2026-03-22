@@ -4,26 +4,26 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 
 interface LogEntry {
+	folderId?: string;
+	folderPath?: string;
 	id: string;
-	timestamp: string;
+	isFolderMain?: boolean; // Marca si es un log de carpeta principal (no progress ni complete)
+	isSticky?: boolean; // Marca si debe ser sticky
 	level: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
 	message: string;
 	source?: string;
-	folderId?: string;
-	folderPath?: string;
-	isFolderMain?: boolean; // Marca si es un log de carpeta principal (no progress ni complete)
-	isSticky?: boolean; // Marca si debe ser sticky
+	timestamp: string;
 }
 
 interface ReindexTerminalProps {
-	/** Si está en modo activo (mostrando logs en tiempo real) */
-	isActive?: boolean;
 	/** Clase CSS adicional */
 	className?: string;
-	/** Callback cuando se recibe un log */
-	onLogReceived?: (log: LogEntry) => void;
 	/** Logs iniciales */
 	initialLogs?: LogEntry[];
+	/** Si está en modo activo (mostrando logs en tiempo real) */
+	isActive?: boolean;
+	/** Callback cuando se recibe un log */
+	onLogReceived?: (log: LogEntry) => void;
 	/** Progreso actual (0-100) */
 	progress?: number;
 	/** Si mostrar barra de progreso */
@@ -53,7 +53,7 @@ const LOG_COLORS = {
 
 /**
  * Componente que simula una terminal para mostrar logs de reindexado en tiempo real
- * Optimizado para mantener solo 100 líneas máximo con animaciones Anime.js
+ * Optimizado para mantener solo 100 líneas máximo con animaciones GSAP
  */
 export function ReindexTerminal({
 	isActive = false,
@@ -103,10 +103,10 @@ export function ReindexTerminal({
 		return `${secs}s`;
 	};
 
-	// Animación para nuevas líneas con Anime.js
+	// Animación para nuevas líneas con GSAP
 	const animateNewLog = useCallback(async (element: HTMLElement) => {
-		const animeLib = await import('@/lib/anime');
-		await animeLib.animate({
+		const animationLib = await import('@/lib/animation');
+		await animationLib.animate({
 			targets: element,
 			translateX: [-20, 0],
 			opacity: [0, 1],

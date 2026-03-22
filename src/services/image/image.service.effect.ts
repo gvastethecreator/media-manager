@@ -1188,9 +1188,17 @@ import { Context, Layer } from 'effect';
  * Interface for ImageService
  */
 export interface ImageServiceInterface {
+	readonly countByFolder: (folderId: string) => Effect.Effect<number, ImageError, never>;
 	readonly create: (input: typeof ImageCreateInput.Type) => Effect.Effect<Image, ImageError, never>;
-	readonly getById: (id: string) => Effect.Effect<Image, ImageError, never>;
-	readonly getByIdWithStats: (id: string) => Effect.Effect<ImageWithStats, ImageError, never>;
+	readonly deleteById: (
+		id: string,
+		options?: { force?: boolean }
+	) => Effect.Effect<{ success: boolean }, ImageError, never>;
+	readonly deleteManyByIds: (
+		ids: string[],
+		options?: { force?: boolean }
+	) => Effect.Effect<{ deletedCount: number }, ImageError, never>;
+	readonly generateThumbnail: (imageId: string) => Effect.Effect<void, ImageError, never>;
 	readonly getAll: (options?: {
 		limit?: number;
 		offset?: number;
@@ -1219,31 +1227,23 @@ export interface ImageServiceInterface {
 		ImageError,
 		never
 	>;
-	readonly update: (id: string, input: typeof ImageUpdateInput.Type) => Effect.Effect<Image, ImageError, never>;
-	readonly deleteById: (
-		id: string,
-		options?: { force?: boolean }
-	) => Effect.Effect<{ success: boolean }, ImageError, never>;
-	readonly deleteManyByIds: (
-		ids: string[],
-		options?: { force?: boolean }
-	) => Effect.Effect<{ deletedCount: number }, ImageError, never>;
-	readonly getByHash: (hash: string) => Effect.Effect<Image, ImageError, never>;
-	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Image, ImageError, never>;
 	readonly getAllFavorites: () => Effect.Effect<Image[], ImageError, never>;
 	readonly getByFolder: (
 		folderId: string,
 		options?: { limit?: number; offset?: number }
 	) => Effect.Effect<Image[], ImageError, never>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<Image, ImageError, never>;
+	readonly getByHash: (hash: string) => Effect.Effect<Image, ImageError, never>;
+	readonly getById: (id: string) => Effect.Effect<Image, ImageError, never>;
+	readonly getByIdWithStats: (id: string) => Effect.Effect<ImageWithStats, ImageError, never>;
+	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Image, ImageError, never>;
+	readonly getOriginalImage: (imageId: string) => Effect.Effect<Buffer, ImageError, never>;
+	readonly getThumbnail: (imageId: string) => Effect.Effect<Buffer, ImageError, never>;
 	readonly setFavoriteMany: (
 		ids: string[],
 		isFavorite: boolean
 	) => Effect.Effect<{ updatedCount: number }, ImageError, never>;
-	readonly countByFolder: (folderId: string) => Effect.Effect<number, ImageError, never>;
-	readonly generateThumbnail: (imageId: string) => Effect.Effect<void, ImageError, never>;
-	readonly getThumbnail: (imageId: string) => Effect.Effect<Buffer, ImageError, never>;
-	readonly getOriginalImage: (imageId: string) => Effect.Effect<Buffer, ImageError, never>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<Image, ImageError, never>;
+	readonly update: (id: string, input: typeof ImageUpdateInput.Type) => Effect.Effect<Image, ImageError, never>;
 }
 
 /**

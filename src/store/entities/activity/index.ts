@@ -29,52 +29,43 @@ const storeLogger = clientLogger.withContext('ActivityStore');
 export interface ActivityState {
 	// Datos principales
 	activities: Record<string, ActivityComplete>;
-	isLoading: boolean;
-	error: string | null;
-	lastUpdated: number | null;
-
-	// Estado UI
-	selectedIds: string[];
-	expandedIds: string[];
-	highlightedId: string | null;
-	detailActivityId: string | null;
-	isDetailModalOpen: boolean;
-	groupByDate: boolean;
-
-	// Estado de filtros
-	sortBy: ActivitySortCriteria;
-	searchQuery: string;
-	selectedCategories: string[];
-	onlyAlerts: boolean;
 	dateRange: {
 		from: Date | null;
 		to: Date | null;
 	};
+	detailActivityId: string | null;
+	error: string | null;
+	expandedIds: string[];
 	filterByImageId: string | null;
+	groupByDate: boolean;
+	highlightedId: string | null;
+	isDetailModalOpen: boolean;
+	isLoading: boolean;
+	lastUpdated: number | null;
+	onlyAlerts: boolean;
+	searchQuery: string;
+	selectedCategories: string[];
+
+	// Estado UI
+	selectedIds: string[];
+
+	// Estado de filtros
+	sortBy: ActivitySortCriteria;
 }
 
 /**
  * Store completo de actividades con todas las operaciones
  */
 export interface ActivityStore extends ActivityState {
-	// Getters
-	getActivity: (id: string) => ActivityComplete | undefined;
-	getActivities: () => ActivityComplete[];
-	getActivitiesByImageId: (imageId: string) => ActivityComplete[];
+	addActivities: (activities: ActivityBase[]) => void;
 
 	// Operaciones
 	addActivity: (activity: ActivityBase) => void;
-	addActivities: (activities: ActivityBase[]) => void;
-	deleteActivity: (id: string) => void;
 	clearActivities: () => void;
-
-	// Estado de carga
-	setLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
-
-	// Acciones asíncronas
-	fetchActivity: (id: string) => Promise<ActivityComplete | undefined>;
-	fetchActivities: (filters?: ActivityFilters) => Promise<ActivityListResponse | undefined>;
+	clearFilters: () => void;
+	clearSelection: () => void;
+	closeDetailModal: () => void;
+	collapseActivity: (id: string) => void;
 	createActivity: (data: {
 		type: string;
 		description?: string;
@@ -82,30 +73,39 @@ export interface ActivityStore extends ActivityState {
 		entityId?: string;
 		metadata?: Record<string, any>;
 	}) => Promise<ActivityComplete | undefined>;
+	deleteActivity: (id: string) => void;
+	expandActivity: (id: string) => void;
+	fetchActivities: (filters?: ActivityFilters) => Promise<ActivityListResponse | undefined>;
+
+	// Acciones asíncronas
+	fetchActivity: (id: string) => Promise<ActivityComplete | undefined>;
+	getActivities: () => ActivityComplete[];
+	getActivitiesByImageId: (imageId: string) => ActivityComplete[];
+	// Getters
+	getActivity: (id: string) => ActivityComplete | undefined;
+	openDetailModal: (id: string) => void;
 	removeActivity: (id: string) => Promise<boolean>;
 
 	// UI Actions
 	selectActivity: (id: string) => void;
-	unselectActivity: (id: string) => void;
-	toggleSelectActivity: (id: string) => void;
 	selectMultipleActivities: (ids: string[]) => void;
-	clearSelection: () => void;
-	expandActivity: (id: string) => void;
-	collapseActivity: (id: string) => void;
-	toggleExpandActivity: (id: string) => void;
+	setDateRange: (from: Date | null, to: Date | null) => void;
+	setError: (error: string | null) => void;
+	setFilterByImageId: (imageId: string | null) => void;
 	setHighlightedActivity: (id: string | null) => void;
-	openDetailModal: (id: string) => void;
-	closeDetailModal: () => void;
-	toggleGroupByDate: () => void;
+
+	// Estado de carga
+	setLoading: (isLoading: boolean) => void;
+	setSearchQuery: (query: string) => void;
+	setSelectedCategories: (categories: string[]) => void;
 
 	// Filter Actions
 	setSortBy: (sortBy: ActivitySortCriteria) => void;
-	setSearchQuery: (query: string) => void;
-	setSelectedCategories: (categories: string[]) => void;
+	toggleExpandActivity: (id: string) => void;
+	toggleGroupByDate: () => void;
 	toggleOnlyAlerts: () => void;
-	setDateRange: (from: Date | null, to: Date | null) => void;
-	setFilterByImageId: (imageId: string | null) => void;
-	clearFilters: () => void;
+	toggleSelectActivity: (id: string) => void;
+	unselectActivity: (id: string) => void;
 }
 
 // Estado inicial para el store

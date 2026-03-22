@@ -56,12 +56,12 @@ const mapToImageCardVariant = (cardVariant: CardVariant): 'default' | 'minimal' 
 
 // Contexto para renderers
 interface RenderCtx {
-	entity: AnyEntityWithStats;
-	isSelected?: boolean;
 	className?: string;
 	config: ReturnType<typeof useCardLayout>['config'];
+	entity: AnyEntityWithStats;
 	finalOnClick?: (e: React.MouseEvent) => void;
 	finalOnDoubleClick?: () => void;
+	isSelected?: boolean;
 	thumbnailQuality?: 'low' | 'medium' | 'high';
 }
 

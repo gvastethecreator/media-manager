@@ -4,33 +4,33 @@ import type { ImageWithStats } from '@/types/entities/image';
 import { apiClient } from './client';
 
 export interface GroupFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface GroupCreateInput {
-	name: string;
-	description?: string | null;
-	color?: string | null;
-	emoji?: string | null;
-	isFavorite?: boolean;
 	category?: string | null;
+	color?: string | null;
+	description?: string | null;
+	emoji?: string | null;
 	filters?: string | null;
 	isActive?: boolean;
+	isFavorite?: boolean;
+	name: string;
 }
 
 export interface GroupUpdateInput {
-	name?: string;
-	description?: string | null;
-	color?: string | null;
-	emoji?: string | null;
-	isFavorite?: boolean;
 	category?: string | null;
+	color?: string | null;
+	description?: string | null;
+	emoji?: string | null;
 	filters?: string | null;
 	isActive?: boolean;
+	isFavorite?: boolean;
+	name?: string;
 }
 
 export interface GroupsResponse {

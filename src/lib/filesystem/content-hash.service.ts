@@ -30,14 +30,14 @@ export class ContentHashError extends Error {
  * Resultado del cálculo de hash
  */
 export interface ContentHashResult {
-	/** Hash SHA-256 del contenido */
-	hash: string;
-	/** Tamaño del archivo en bytes */
-	size: number;
-	/** Fecha de modificación del archivo */
-	modifiedAt: Date;
 	/** Si el archivo cambió comparado con el hash anterior */
 	hasChanged: boolean;
+	/** Hash SHA-256 del contenido */
+	hash: string;
+	/** Fecha de modificación del archivo */
+	modifiedAt: Date;
+	/** Tamaño del archivo en bytes */
+	size: number;
 }
 
 /**
@@ -135,18 +135,18 @@ export const calculateMultipleFileHashes = (
  * Detecta archivos que han cambiado comparando hashes actuales con los almacenados
  */
 export interface ChangedFileDetection {
-	/** Ruta del archivo */
-	path: string;
+	/** Hash actual calculado */
+	currentHash: string;
+	/** Tamaño actual del archivo */
+	currentSize: number;
 	/** Tipo de entidad */
 	entityType: 'image' | 'video' | 'audio' | 'document' | 'file3d';
 	/** ID del archivo en la base de datos */
 	id: string;
-	/** Hash actual calculado */
-	currentHash: string;
+	/** Ruta del archivo */
+	path: string;
 	/** Hash almacenado en la base de datos */
 	storedHash: string;
-	/** Tamaño actual del archivo */
-	currentSize: number;
 }
 
 export const detectChangedFiles = (

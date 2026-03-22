@@ -8,12 +8,12 @@ import React, { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ImageThumbnailProps {
-	path: string; // Puede ser ruta o id; preferimos id cuando venga
-	name: string;
-	size?: number;
 	className?: string;
 	fallbackIcon?: React.ReactNode;
 	id?: string; // opcional: id explícito de imagen
+	name: string;
+	path: string; // Puede ser ruta o id; preferimos id cuando venga
+	size?: number;
 	thumbnailUrl?: string; // opcional: si ya viene resuelto
 }
 

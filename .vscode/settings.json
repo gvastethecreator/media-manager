@@ -3,7 +3,7 @@
     "editor.formatOnSave": true,
     "workbench.iconTheme": "flow-dark",
     "projectColors.mainColor": "#060609",
-    "window.title": "IMAGE MANAGER",
+    "window.title": "MEDIA MANAGER",
     "workbench.colorCustomizations": {
         "[Bearded Theme Black & Gold]": {},
         "statusBarItem.warningBackground": "#060609",
@@ -49,7 +49,7 @@
         "titleBar.inactiveBackground": "#060609",
         "titleBar.inactiveForeground": "#ffffff90"
     },
-    "projectColors.name": "IMAGE MANAGER",
+    "projectColors.name": "MEDIA MANAGER",
     "projectColors.isActivityBarColored": false,
     "projectColors.isTitleBarColored": true,
     "projectColors.isStatusBarColored": true,

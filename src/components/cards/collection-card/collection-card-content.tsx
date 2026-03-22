@@ -1,7 +1,7 @@
 import { Bookmark, Calendar, Currency, Diamond, Globe, Link, Tag } from 'lucide-react';
 import { useMemo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
 import { Badge } from '@/components/ui/badge';
+import { motion } from '@/components/ui/motion-shim';
 import type { CollectionEdition } from '@/types/entities/collection';
 
 // Regex para limpiar URLs (extraído a nivel superior para mejor performance)
@@ -9,21 +9,21 @@ const URL_PROTOCOL_REGEX = /https?:\/\/(www\.)?/;
 
 interface CollectionCardContentProps {
 	description?: string | null;
-	platform?: string | null;
-	price?: number | null;
-	network?: string | null;
-	tokenId?: string | null;
-	url?: string | null;
 	editions?: CollectionEdition[] | string | null;
-	primaryColor: string;
-	secondaryColor?: string;
 	featuredImage?: string | null;
-	sourceImage?: string | null;
 	metadata?: {
 		rarityLevel: 'Common' | 'Uncommon' | 'Rare' | 'Mythic';
 		cardId: string;
 		totalItems: number;
 	};
+	network?: string | null;
+	platform?: string | null;
+	price?: number | null;
+	primaryColor: string;
+	secondaryColor?: string;
+	sourceImage?: string | null;
+	tokenId?: string | null;
+	url?: string | null;
 }
 
 /**
@@ -36,10 +36,10 @@ export function CollectionCardContent(props: CollectionCardContentProps) {
 }
 
 interface CollectionContentState extends CollectionCardContentProps {
-	editionsList: CollectionEdition[];
-	formattedPrice: string | null;
 	backgroundImage?: string | null;
 	derivedSecondaryColor: string;
+	editionsList: CollectionEdition[];
+	formattedPrice: string | null;
 	rarityColors: { border: string; background: string; text: string };
 }
 
@@ -180,12 +180,12 @@ const PropertiesBox: React.FC<{
 );
 
 interface PropertiesGridProps {
-	platform?: string | null;
 	formattedPrice: string | null;
 	network?: string | null;
+	platform?: string | null;
+	primaryColor: string;
 	tokenId?: string | null;
 	url?: string | null;
-	primaryColor: string;
 }
 
 const PropertiesGrid: React.FC<PropertiesGridProps> = ({ platform, formattedPrice, network, tokenId, url }) => (

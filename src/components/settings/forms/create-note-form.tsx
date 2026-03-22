@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox-v3';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -33,12 +33,12 @@ const noteSchema = z.object({
 type NoteFormData = z.infer<typeof noteSchema>;
 
 interface CreateNoteFormProps {
-	note?: NoteBase | null;
 	isEditing?: boolean;
-	onSuccess?: (note: NoteWithStats) => void;
-	onUpdated?: (note: NoteWithStats) => void;
+	note?: NoteBase | null;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
+	onSuccess?: (note: NoteWithStats) => void;
+	onUpdated?: (note: NoteWithStats) => void;
 }
 
 export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, onPreview }: CreateNoteFormProps) {

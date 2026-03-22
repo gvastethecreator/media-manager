@@ -8,38 +8,6 @@ import type { WorldItemComplete, WorldItemStatistics } from '../../types/entitie
 
 // Tipos locales equivalentes a Drizzle
 interface DrizzleWorldItemFromDrizzle {
-	id: string;
-	name: string;
-	description: string | null;
-	type: string;
-	category: string;
-	rarity: string;
-	value: number | null;
-	weight: number | null;
-	featuredImage: string | null;
-	attributes: string;
-	effects: string;
-	requirements: string;
-	stats: string;
-	propertiesJson: string;
-	filters: string;
-	tagsJson: string;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	images?: Array<{ id: string; name: string }>;
-	videos?: Array<{ id: string; name: string }>;
-	albums?: Array<{ id: string; name: string }>;
-	collections?: Array<{ id: string; name: string }>;
-	tags?: Array<{ id: string; name: string }>;
-	characters?: Array<{ id: string; name: string }>;
-	places?: Array<{ id: string; name: string }>;
-	concepts?: Array<{ id: string; name: string }>;
-	prompts?: Array<{ id: string; name: string }>;
-	notes?: Array<{ id: string; content: string }>;
-	wildcards?: Array<{ id: string; name: string }>;
-	properties?: Array<{ key: string; value: unknown }>;
-	groups?: Array<{ id: string; name: string }>;
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -55,6 +23,38 @@ interface DrizzleWorldItemFromDrizzle {
 		properties?: number;
 		groups?: number;
 	};
+	albums?: Array<{ id: string; name: string }>;
+	attributes: string;
+	category: string;
+	characters?: Array<{ id: string; name: string }>;
+	collections?: Array<{ id: string; name: string }>;
+	concepts?: Array<{ id: string; name: string }>;
+	createdAt: Date;
+	description: string | null;
+	effects: string;
+	featuredImage: string | null;
+	filters: string;
+	groups?: Array<{ id: string; name: string }>;
+	id: string;
+	images?: Array<{ id: string; name: string }>;
+	isFavorite: boolean;
+	name: string;
+	notes?: Array<{ id: string; content: string }>;
+	places?: Array<{ id: string; name: string }>;
+	prompts?: Array<{ id: string; name: string }>;
+	properties?: Array<{ key: string; value: unknown }>;
+	propertiesJson: string;
+	rarity: string;
+	requirements: string;
+	stats: string;
+	tags?: Array<{ id: string; name: string }>;
+	tagsJson: string;
+	type: string;
+	updatedAt: Date;
+	value: number | null;
+	videos?: Array<{ id: string; name: string }>;
+	weight: number | null;
+	wildcards?: Array<{ id: string; name: string }>;
 }
 
 /**

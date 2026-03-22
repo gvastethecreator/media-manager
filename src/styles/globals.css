@@ -58,11 +58,11 @@
 	}
 
 	body {
-		background-color: hsl(var(--background));
-		color: hsl(var(--foreground));
 		font-feature-settings:
 			"rlig" 1,
 			"calt" 1;
+		color: hsl(var(--foreground));
+		background-color: hsl(var(--background));
 	}
 
 	/* Ensure full height propagation */
@@ -103,13 +103,13 @@
 @layer utilities {
 	.animate-in {
 		animation-duration: 0.3s;
-		animation-fill-mode: both;
 		animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+		animation-fill-mode: both;
 	}
 
 	.animate-out {
 		animation-duration: 0.2s;
-		animation-fill-mode: both;
 		animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+		animation-fill-mode: both;
 	}
 }

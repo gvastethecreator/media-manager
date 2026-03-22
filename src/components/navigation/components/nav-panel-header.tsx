@@ -1,7 +1,6 @@
 // MIGRADO PARA VITE - Arreglado sistema de theming
 import { BookOpen, Bug, Eye, Home, IdCard, Moon, Palette, Settings2, Sun } from 'lucide-react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -9,18 +8,19 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { motion } from '@/components/ui/motion-shim';
 import { useTheme } from '@/components/ui/theme-provider';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/ui.store';
 
 interface NavPanelHeaderProps {
+	isAnimating?: boolean;
 	isCollapsed?: boolean;
-	onOpenSettings: () => void;
 	onOpenDevelopment: () => void;
 	onOpenEntityCards: () => void;
+	onOpenSettings: () => void;
 	onToggleZenMode?: () => void; // 🧘 Nuevo prop para modo zen
-	isAnimating?: boolean;
 }
 
 // Componente de botón memoizado para evitar re-renderizados

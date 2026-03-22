@@ -18,30 +18,30 @@ import type { SortOption, TableViewConfig } from '../types/view.types';
 import { ENTITY_TYPE_DISPLAY_NAMES } from '../utils/grouping';
 
 export interface TableViewProps extends Omit<BrowserViewProps, 'config'> {
+	/** ID activo */
+	activeId?: string | null;
 	/** Configuración de tabla */
 	config: TableViewConfig;
+	/** Handler de context menu */
+	onItemContextMenu?: ItemContextMenuHandler;
+	/** Handler de cambio de sort */
+	onSortChange?: (field: string) => void;
 	/** Página actual (para paginación) */
 	page?: number;
 	/** Tamaño de página */
 	pageSize?: number;
 	/** IDs seleccionados */
 	selectedIds?: Set<string>;
-	/** ID activo */
-	activeId?: string | null;
 	/** Opciones de ordenamiento */
 	sortOptions?: SortOption[];
-	/** Handler de cambio de sort */
-	onSortChange?: (field: string) => void;
-	/** Handler de context menu */
-	onItemContextMenu?: ItemContextMenuHandler;
 }
 
 interface TableColumn {
 	key: string;
 	label: string;
-	width?: number;
-	sortable?: boolean;
 	render?: (item: BrowserItem) => React.ReactNode;
+	sortable?: boolean;
+	width?: number;
 }
 
 /**

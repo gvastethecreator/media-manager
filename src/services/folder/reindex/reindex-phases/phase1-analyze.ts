@@ -55,6 +55,7 @@ export async function phase1_analyzeStructure(options: ReindexOptions): Promise<
 						recursive: true,
 						includeHidden: options.includeHidden,
 						limit: 0,
+						maxDepth: 99,
 					});
 
 					// Agregar subcarpetas encontradas que no estén en BD
@@ -83,6 +84,7 @@ export async function phase1_analyzeStructure(options: ReindexOptions): Promise<
 					recursive: true,
 					includeHidden: options.includeHidden,
 					limit: 0,
+					maxDepth: 99,
 				});
 				totalFiles += scan.files?.length || 0;
 			} catch (error) {

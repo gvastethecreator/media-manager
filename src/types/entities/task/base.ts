@@ -32,20 +32,20 @@ export enum TaskPriority {
  * 🗿 Modelo base de Task, derivado del schema de Drizzle.
  */
 export interface TaskBase {
-	id: string;
-	title: string;
-	description: string | null;
-	status: TaskStatus;
-	priority: TaskPriority;
-	dueDate: Date | null;
-	completedAt: Date | null;
-	estimatedHours: number | null;
 	actualHours: number | null;
 	assigneeId: string | null;
-	projectId: string | null;
-	tags: string[];
-	metadata: string | null;
+	completedAt: Date | null;
 	createdAt: Date;
+	description: string | null;
+	dueDate: Date | null;
+	estimatedHours: number | null;
+	id: string;
+	metadata: string | null;
+	priority: TaskPriority;
+	projectId: string | null;
+	status: TaskStatus;
+	tags: string[];
+	title: string;
 	updatedAt: Date;
 }
 
@@ -56,12 +56,12 @@ import { EntityStats } from '../entity.types';
  */
 export interface TaskStatistics extends EntityStats {
 	completionRate: number; // Porcentaje de progreso
-	timeEfficiency: number; // actualHours / estimatedHours
-	priorityScore: number; // Score basado en prioridad y vencimiento
-	daysRemaining: number; // Días hasta vencimiento
-	daysOverdue: number; // Días de retraso (si aplica)
-	isBlocked: boolean; // Si hay dependencias sin completar
 	complexityScore: number; // Score de complejidad estimado
+	daysOverdue: number; // Días de retraso (si aplica)
+	daysRemaining: number; // Días hasta vencimiento
+	isBlocked: boolean; // Si hay dependencias sin completar
+	priorityScore: number; // Score basado en prioridad y vencimiento
+	timeEfficiency: number; // actualHours / estimatedHours
 }
 
 /**
@@ -76,34 +76,34 @@ export interface TaskWithStats extends TaskBase {
  * 📝 Datos para crear un Task
  */
 export interface TaskCreateInput {
-	title: string;
+	assigneeId?: string | null;
 	description?: string | null;
-	status?: TaskStatus;
-	priority?: TaskPriority;
 	dueDate?: Date | null;
 	estimatedHours?: number | null;
-	assigneeId?: string | null;
-	projectId?: string | null;
-	tags?: string[];
 	metadata?: string | null;
+	priority?: TaskPriority;
+	projectId?: string | null;
+	status?: TaskStatus;
+	tags?: string[];
+	title: string;
 }
 
 /**
  * 📝 Datos para actualizar un Task
  */
 export interface TaskUpdateInput {
-	title?: string;
-	description?: string | null;
-	status?: TaskStatus;
-	priority?: TaskPriority;
-	dueDate?: Date | null;
-	completedAt?: Date | null;
-	estimatedHours?: number | null;
 	actualHours?: number | null;
 	assigneeId?: string | null;
-	projectId?: string | null;
-	tags?: string[];
+	completedAt?: Date | null;
+	description?: string | null;
+	dueDate?: Date | null;
+	estimatedHours?: number | null;
 	metadata?: string | null;
+	priority?: TaskPriority;
+	projectId?: string | null;
+	status?: TaskStatus;
+	tags?: string[];
+	title?: string;
 }
 
 // ----------------------------------------------------------------

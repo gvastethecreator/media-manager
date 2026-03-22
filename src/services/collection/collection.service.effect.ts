@@ -45,13 +45,13 @@ const logger = createSafeLogger('CollectionService.Effect');
  * Opciones para obtener colecciones
  */
 export interface GetCollectionsOptions {
-	search?: string;
-	parentId?: string | null;
+	limit?: number;
+	offset?: number;
 	onlyFavorites?: boolean;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt';
 	orderDirection?: 'asc' | 'desc';
-	limit?: number;
-	offset?: number;
+	parentId?: string | null;
+	search?: string;
 }
 
 /**
@@ -59,9 +59,9 @@ export interface GetCollectionsOptions {
  */
 export interface GetCollectionsResult {
 	collections: CollectionWithStats[];
-	total: number;
 	limit: number;
 	offset: number;
+	total: number;
 }
 
 /**
@@ -76,40 +76,39 @@ export interface CollectionCounts {
  * Resultado de operación bulk
  */
 export interface BulkOperationResult {
-	successful: number;
-	failed: number;
 	errors: Array<{ id: string; error: string }>;
+	failed: number;
+	successful: number;
 }
 
 /**
  * Interface para el servicio CollectionService
  */
 export interface CollectionServiceInterface {
-	// CRUD Operations
-	readonly getById: (id: string) => Effect.Effect<CollectionWithStats, CollectionError>;
-	readonly getAll: (options?: GetCollectionsOptions) => Effect.Effect<GetCollectionsResult, CollectionError>;
+	// Relation Operations
+	readonly addImages: (collectionId: string, imageIds: string[]) => Effect.Effect<{ added: number }, CollectionError>;
 	readonly create: (
 		input: Schema.Schema.Type<typeof CollectionCreateInput>
 	) => Effect.Effect<CollectionWithStats, CollectionError>;
-	readonly update: (
-		id: string,
-		input: Schema.Schema.Type<typeof CollectionUpdateInput>
-	) => Effect.Effect<CollectionWithStats, CollectionError>;
 	readonly delete: (id: string, force?: boolean) => Effect.Effect<void, CollectionError>;
-
-	// Relation Operations
-	readonly addImages: (collectionId: string, imageIds: string[]) => Effect.Effect<{ added: number }, CollectionError>;
-	readonly removeImage: (collectionId: string, imageId: string) => Effect.Effect<void, CollectionError>;
+	readonly getAll: (options?: GetCollectionsOptions) => Effect.Effect<GetCollectionsResult, CollectionError>;
+	// CRUD Operations
+	readonly getById: (id: string) => Effect.Effect<CollectionWithStats, CollectionError>;
 	readonly getImages: (
 		collectionId: string,
 		options?: { limit?: number; offset?: number }
 	) => Effect.Effect<any[], CollectionError>;
-
-	// Stats Operations
-	readonly toggleFavorite: (id: string) => Effect.Effect<CollectionWithStats, CollectionError>;
+	readonly removeImage: (collectionId: string, imageId: string) => Effect.Effect<void, CollectionError>;
 
 	// Search Operations
 	readonly search: (query: string) => Effect.Effect<CollectionWithStats[], CollectionError>;
+
+	// Stats Operations
+	readonly toggleFavorite: (id: string) => Effect.Effect<CollectionWithStats, CollectionError>;
+	readonly update: (
+		id: string,
+		input: Schema.Schema.Type<typeof CollectionUpdateInput>
+	) => Effect.Effect<CollectionWithStats, CollectionError>;
 }
 
 /**

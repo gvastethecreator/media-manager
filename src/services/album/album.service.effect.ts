@@ -43,15 +43,15 @@ const logger = createSafeLogger('AlbumService.Effect');
  * Opciones para obtener álbumes
  */
 export interface GetAlbumsOptions {
+	category?: string;
 	includeArchived?: boolean;
 	includePrivate?: boolean;
-	search?: string;
-	category?: string;
+	limit?: number;
+	offset?: number;
 	onlyFavorites?: boolean;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages';
 	orderDirection?: 'asc' | 'desc';
-	limit?: number;
-	offset?: number;
+	search?: string;
 }
 
 /**
@@ -59,69 +59,69 @@ export interface GetAlbumsOptions {
  */
 export interface GetAlbumsResult {
 	albums: AlbumWithStats[];
-	total: number;
 	limit: number;
 	offset: number;
+	total: number;
 }
 
 /**
  * Contadores de relaciones de un álbum
  */
 export interface AlbumCounts {
-	images: number;
-	videos: number;
-	collections: number;
-	tags: number;
 	characters: number;
-	places: number;
-	worldItems: number;
+	collections: number;
 	concepts: number;
-	prompts: number;
-	notes: number;
-	wildcards: number;
-	properties: number;
 	groups: number;
+	images: number;
+	notes: number;
+	places: number;
+	prompts: number;
+	properties: number;
+	tags: number;
+	videos: number;
+	wildcards: number;
+	worldItems: number;
 }
 
 /**
  * Estadísticas calculadas de un álbum
  */
 export interface AlbumStatistics {
+	completenessScore: number;
+	lastImageAddedAt: Date | null;
+	lastUpdated: Date;
+	lastVideoAddedAt: Date | null;
 	totalImages: number;
-	totalVideos: number;
-	totalSize: number;
 	totalItems: number;
 	totalRelations: number;
-	lastImageAddedAt: Date | null;
-	lastVideoAddedAt: Date | null;
-	completenessScore: number;
-	lastUpdated: Date;
+	totalSize: number;
+	totalVideos: number;
 }
 
 /**
  * Interface para el servicio AlbumService
  */
 export interface AlbumServiceInterface {
+	readonly addImage: (albumId: string, imageId: string) => Effect.Effect<void, AlbumError>;
+	readonly addImages: (albumId: string, imageIds: string[]) => Effect.Effect<{ added: number }, AlbumError>;
+	readonly bulkDelete: (ids: string[]) => Effect.Effect<{ deleted: number; failed: string[] }, AlbumError>;
+	readonly create: (input: Schema.Schema.Type<typeof AlbumCreateInput>) => Effect.Effect<AlbumWithStats, AlbumError>;
+	readonly delete: (id: string) => Effect.Effect<void, AlbumError>;
+	readonly getAll: (options?: GetAlbumsOptions) => Effect.Effect<GetAlbumsResult, AlbumError>;
 	readonly getById: (id: string) => Effect.Effect<Album, AlbumError>;
 	readonly getByIdWithStats: (id: string) => Effect.Effect<AlbumWithStats, AlbumError>;
-	readonly getAll: (options?: GetAlbumsOptions) => Effect.Effect<GetAlbumsResult, AlbumError>;
-	readonly create: (input: Schema.Schema.Type<typeof AlbumCreateInput>) => Effect.Effect<AlbumWithStats, AlbumError>;
-	readonly update: (
-		id: string,
-		input: Schema.Schema.Type<typeof AlbumUpdateInput>
-	) => Effect.Effect<AlbumWithStats, AlbumError>;
-	readonly delete: (id: string) => Effect.Effect<void, AlbumError>;
-	readonly bulkDelete: (ids: string[]) => Effect.Effect<{ deleted: number; failed: string[] }, AlbumError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<Album, AlbumError>;
-	readonly getRelationsCounts: (id: string) => Effect.Effect<AlbumCounts, AlbumError>;
-	readonly addImage: (albumId: string, imageId: string) => Effect.Effect<void, AlbumError>;
-	readonly removeImage: (albumId: string, imageId: string) => Effect.Effect<void, AlbumError>;
-	readonly addImages: (albumId: string, imageIds: string[]) => Effect.Effect<{ added: number }, AlbumError>;
-	readonly removeImages: (albumId: string, imageIds: string[]) => Effect.Effect<{ removed: number }, AlbumError>;
 	readonly getImages: (
 		albumId: string,
 		options?: { limit?: number; offset?: number }
 	) => Effect.Effect<any[], AlbumError>;
+	readonly getRelationsCounts: (id: string) => Effect.Effect<AlbumCounts, AlbumError>;
+	readonly removeImage: (albumId: string, imageId: string) => Effect.Effect<void, AlbumError>;
+	readonly removeImages: (albumId: string, imageIds: string[]) => Effect.Effect<{ removed: number }, AlbumError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<Album, AlbumError>;
+	readonly update: (
+		id: string,
+		input: Schema.Schema.Type<typeof AlbumUpdateInput>
+	) => Effect.Effect<AlbumWithStats, AlbumError>;
 }
 
 /**

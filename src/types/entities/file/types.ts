@@ -19,13 +19,13 @@ export type FileCreateInput = Omit<FileBase, 'id' | 'createdAt' | 'updatedAt' | 
 export type FileUpdateInput = Partial<Omit<FileBase, 'id'>>;
 
 export interface FileFilterOptions {
-	searchTerm?: string;
-	fileTypes?: FileType[];
 	extensions?: string[];
-	minSize?: number;
+	fileTypes?: FileType[];
 	maxSize?: number;
+	minSize?: number;
 	modifiedAfter?: Date;
 	modifiedBefore?: Date;
+	searchTerm?: string;
 	sortBy?: keyof FileBase;
 	sortOrder?: 'asc' | 'desc';
 }
@@ -34,12 +34,12 @@ export interface FileFilterOptions {
  * Resultado de la lectura de un directorio
  */
 export interface DirectoryReadResult {
-	path: string;
-	items: FileBase[]; // mezcla de archivos y carpetas
-	files: FileInfo[];
 	directories: DirectoryInfo[];
-	totalItems: number;
+	files: FileInfo[];
 	hasMore: boolean;
+	items: FileBase[]; // mezcla de archivos y carpetas
+	path: string;
+	totalItems: number;
 	// Campos agregados opcionalmente por el servidor
 	totalSize?: number;
 }
@@ -48,33 +48,33 @@ export interface DirectoryReadResult {
  * Resultado de operaciones de copia o movimiento de archivos
  */
 export interface FileCopyMoveResult {
-	success: boolean;
-	sourcePath: string;
+	destInfo: FileBase;
 	destPath: string;
+	error?: string;
 	isDirectory: boolean;
 	sourceInfo: FileBase;
-	destInfo: FileBase;
+	sourcePath: string;
+	success: boolean;
 	timestamp: Date;
-	error?: string;
 }
 
 /**
  * Opciones para operaciones de archivo
  */
 export interface FileOperationOptions {
-	overwrite?: boolean;
-	recursive?: boolean;
-	preserveTimestamps?: boolean;
 	filter?: (path: string) => boolean;
+	overwrite?: boolean;
+	preserveTimestamps?: boolean;
+	recursive?: boolean;
 }
 
 /**
  * Resultado de operaciones generales de archivo
  */
 export interface FileOperationResult {
-	success: boolean;
-	path: string;
-	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename';
-	file?: FileBase;
 	error?: string;
+	file?: FileBase;
+	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename';
+	path: string;
+	success: boolean;
 }

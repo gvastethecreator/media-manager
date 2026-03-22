@@ -13,10 +13,10 @@ import { serverLogger } from '@/lib/logger/server-logger';
 const logger = serverLogger.withContext('FFmpegThumbnailService');
 
 interface FFmpegThumbnailOptions {
-	timestampSeconds?: number;
-	width?: number;
 	height?: number;
 	quality?: number; // 1-31, donde 1 es mejor calidad
+	timestampSeconds?: number;
+	width?: number;
 }
 
 /**

@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox-v3';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -60,12 +60,12 @@ type PlaceFormValues = z.infer<typeof placeFormSchema>;
  * @param onPreview Callback para vista previa
  */
 interface CreatePlaceFormProps {
-	place?: PlaceWithStats;
 	isEditing?: boolean;
-	onCreated?: (place: PlaceWithStats) => void;
-	onUpdated?: (place: PlaceWithStats) => void;
 	onCancel?: () => void;
+	onCreated?: (place: PlaceWithStats) => void;
 	onPreview?: (data: any) => void;
+	onUpdated?: (place: PlaceWithStats) => void;
+	place?: PlaceWithStats;
 }
 
 export function CreatePlaceForm({

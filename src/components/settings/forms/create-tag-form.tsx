@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox-v3';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -17,12 +17,12 @@ import { toastService } from '@/services/toast/toast.service';
 import { TagCategory, TagWithStats } from '@/types/entities/tag';
 
 interface CreateTagFormProps {
-	tag?: TagWithStats | null;
 	isEditing?: boolean;
-	onCreated?: (tag: TagWithStats) => void;
-	onUpdated?: (tag: TagWithStats) => void;
 	onCancel?: () => void;
+	onCreated?: (tag: TagWithStats) => void;
 	onPreview?: (data: any) => void;
+	onUpdated?: (tag: TagWithStats) => void;
+	tag?: TagWithStats | null;
 }
 
 export function CreateTagForm({

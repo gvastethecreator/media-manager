@@ -6,68 +6,68 @@
 import type { TaskWithStats } from '@/types/entities/task';
 
 export interface TaskCardProps {
-	/** Task a mostrar */
-	task: TaskWithStats;
-	/** Callback al hacer click */
-	onClick?: () => void;
 	/** Clases CSS adicionales */
 	className?: string;
-	/** Estilos inline */
-	style?: React.CSSProperties;
-	/** Modo TCG (Trading Card Game) */
-	tcgMode?: boolean;
 	/** Modo compacto */
 	compact?: boolean;
-	/** Si está seleccionado */
-	isSelected?: boolean;
 	/** Si está deshabilitado */
 	disabled?: boolean;
 	/** Si es interactivo */
 	interactive?: boolean;
+	/** Si está seleccionado */
+	isSelected?: boolean;
+	/** Callback al hacer click */
+	onClick?: () => void;
+	/** Estilos inline */
+	style?: React.CSSProperties;
+	/** Task a mostrar */
+	task: TaskWithStats;
+	/** Modo TCG (Trading Card Game) */
+	tcgMode?: boolean;
 }
 
 export interface TaskCardContentProps {
-	description?: string | null;
-	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority: 'low' | 'medium' | 'high' | 'urgent';
-	progress: number;
+	actualHours?: number | null;
 	category?: string | null;
-	tags?: string[];
+	compact: boolean;
+	daysUntilDue?: number | null;
+	description?: string | null;
 	dueDate?: Date | null;
 	estimatedHours?: number | null;
-	actualHours?: number | null;
+	isOverdue: boolean;
 	notes?: string | null;
 	primaryColor: string;
+	priority: 'low' | 'medium' | 'high' | 'urgent';
+	progress: number;
 	secondaryColor: string;
+	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+	tags?: string[];
 	tcgMode: boolean;
-	compact: boolean;
-	isOverdue: boolean;
-	daysUntilDue?: number | null;
 }
 
 export interface TaskCardFooterProps {
-	createdAt: Date;
-	updatedAt: Date | null;
-	subtasksCount: number;
-	imagesCount: number;
-	videosCount: number;
 	albumsCount: number;
 	charactersCount: number;
+	createdAt: Date;
+	imagesCount: number;
 	primaryColor: string;
 	secondaryColor: string;
+	subtasksCount: number;
 	tcgMode: boolean;
 	totalRelations: number;
+	updatedAt: Date | null;
+	videosCount: number;
 }
 
 export interface TaskCardHeaderProps {
-	title: string;
 	emoji?: string | null;
-	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority: 'low' | 'medium' | 'high' | 'urgent';
-	isFavorite: boolean;
 	isArchived: boolean;
-	primaryColor: string;
-	tcgMode: boolean;
-	onToggleFavorite?: () => void;
+	isFavorite: boolean;
 	onToggleArchive?: () => void;
+	onToggleFavorite?: () => void;
+	primaryColor: string;
+	priority: 'low' | 'medium' | 'high' | 'urgent';
+	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+	tcgMode: boolean;
+	title: string;
 }

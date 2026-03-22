@@ -23,6 +23,7 @@ import {
 	optimizeThumbnails,
 	reprocessThumbnails,
 } from '../services/thumbnail.service';
+import { sanitizeLimit } from '../utils/pagination';
 
 // ==========================================
 // 1. Definir errores tipados
@@ -47,23 +48,23 @@ export class BatchSizeExceeded extends Data.TaggedError('BatchSizeExceeded')<{
 // ==========================================
 
 export interface ThumbnailServiceInterface {
+	readonly batchGetThumbnails: (
+		requests: { imageId: string; quality?: string }[]
+	) => Effect.Effect<unknown, BatchSizeExceeded | ThumbnailGenerationFailed>;
+	readonly bulkGenerateThumbnails: (
+		imageIds: string[],
+		options: Record<string, unknown>
+	) => Effect.Effect<unknown, BatchSizeExceeded | ThumbnailGenerationFailed>;
+	readonly cleanThumbnails: (options: Record<string, unknown>) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
+	readonly deleteThumbnail: (imageId: string) => Effect.Effect<unknown, ThumbnailNotFound | ThumbnailGenerationFailed>;
+	readonly getLastProcessed: (limit: number) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
 	readonly getThumbnail: (
 		imageId: string,
 		quality: string
 	) => Effect.Effect<unknown, ThumbnailNotFound | ThumbnailGenerationFailed>;
 	readonly getThumbnailStats: () => Effect.Effect<unknown, ThumbnailGenerationFailed>;
-	readonly bulkGenerateThumbnails: (
-		imageIds: string[],
-		options: Record<string, unknown>
-	) => Effect.Effect<unknown, BatchSizeExceeded | ThumbnailGenerationFailed>;
-	readonly batchGetThumbnails: (
-		requests: { imageId: string; quality?: string }[]
-	) => Effect.Effect<unknown, BatchSizeExceeded | ThumbnailGenerationFailed>;
-	readonly deleteThumbnail: (imageId: string) => Effect.Effect<unknown, ThumbnailNotFound | ThumbnailGenerationFailed>;
-	readonly cleanThumbnails: (options: Record<string, unknown>) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
 	readonly optimizeThumbnails: (options: Record<string, unknown>) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
 	readonly reprocessThumbnails: (options: Record<string, unknown>) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
-	readonly getLastProcessed: (limit: number) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
 }
 
 export class ThumbnailService extends Context.Tag('ThumbnailService')<ThumbnailService, ThumbnailServiceInterface>() {}
@@ -400,7 +401,7 @@ router.get('/reprocess', async (req, res) => {
  */
 router.get('/last-processed', async (req, res) => {
 	const { limit = '9' } = req.query;
-	const limitNum = Number.parseInt(limit as string, 10);
+	const limitNum = sanitizeLimit(limit, 9, 100);
 
 	const effect = Effect.gen(function* () {
 		const service = yield* ThumbnailService;

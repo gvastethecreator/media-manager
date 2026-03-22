@@ -17,32 +17,32 @@ export type ThumbnailEntityType = 'image' | 'video' | 'audio' | 'document' | 'js
  * Opciones de thumbnail
  */
 export interface ThumbnailOptions {
-	width?: number;
+	force?: boolean;
 	height?: number;
 	quality?: 'low' | 'medium' | 'high';
-	force?: boolean;
+	width?: number;
 }
 
 /**
  * Estado del thumbnail
  */
 export interface ThumbnailState {
-	url: string | null;
-	loading: boolean;
 	error: string | null;
 	exists: boolean;
+	loading: boolean;
+	url: string | null;
 }
 
 /**
  * Información del thumbnail
  */
 export interface ThumbnailInfo {
-	hasThumbnail: boolean;
-	mimeType?: string;
-	width?: number;
-	height?: number;
-	url?: string;
 	generatedAt?: string;
+	hasThumbnail: boolean;
+	height?: number;
+	mimeType?: string;
+	url?: string;
+	width?: number;
 }
 
 // ===================== CONSTANTES =====================
@@ -78,6 +78,7 @@ export function useThumbnail(
 	const retriesRef = useRef(0);
 	const maxRetries = 2;
 	const generateThumbnailRef = useRef<() => Promise<void>>(async () => {});
+	const currentUrlRef = useRef<string | null>(null);
 
 	const fetchThumbnail = useCallback(async () => {
 		if (!(entityType && entityId)) {
@@ -111,7 +112,12 @@ export function useThumbnail(
 
 			if (response.ok) {
 				const blob = await response.blob();
+				// Revocar URL anterior antes de crear nueva (previene memory leak)
+				if (currentUrlRef.current) {
+					URL.revokeObjectURL(currentUrlRef.current);
+				}
 				const objectUrl = URL.createObjectURL(blob);
+				currentUrlRef.current = objectUrl;
 
 				setState({
 					url: objectUrl,
@@ -202,11 +208,12 @@ export function useThumbnail(
 				abortControllerRef.current.abort();
 			}
 			// Limpiar object URL si existe
-			if (state.url?.startsWith('blob:')) {
-				URL.revokeObjectURL(state.url);
+			if (currentUrlRef.current) {
+				URL.revokeObjectURL(currentUrlRef.current);
+				currentUrlRef.current = null;
 			}
 		};
-	}, [fetchThumbnail, state.url]);
+	}, [fetchThumbnail]);
 
 	return {
 		...state,
@@ -228,9 +235,16 @@ export function useThumbnailsBatch(
 	const [urls, setUrls] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const abortRef = useRef<AbortController | null>(null);
 
 	const fetchBatch = useCallback(async () => {
 		if (requests.length === 0) return;
+
+		// Cancelar petición anterior
+		if (abortRef.current) {
+			abortRef.current.abort();
+		}
+		abortRef.current = new AbortController();
 
 		setLoading(true);
 		setError(null);
@@ -240,6 +254,7 @@ export function useThumbnailsBatch(
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ requests, options }),
+				signal: abortRef.current.signal,
 			});
 
 			if (!response.ok) {
@@ -262,6 +277,7 @@ export function useThumbnailsBatch(
 				setUrls(newUrls);
 			}
 		} catch (err) {
+			if (err instanceof Error && err.name === 'AbortError') return;
 			setError(err instanceof Error ? err.message : 'Batch fetch failed');
 		} finally {
 			setLoading(false);
@@ -270,6 +286,9 @@ export function useThumbnailsBatch(
 
 	useEffect(() => {
 		fetchBatch();
+		return () => {
+			abortRef.current?.abort();
+		};
 	}, [fetchBatch]);
 
 	return { urls, loading, error, refresh: fetchBatch };
@@ -284,6 +303,7 @@ export function useThumbnailInfo(entityType: ThumbnailEntityType | null, entityI
 	const [info, setInfo] = useState<ThumbnailInfo | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const abortRef = useRef<AbortController | null>(null);
 
 	const fetchInfo = useCallback(async () => {
 		if (!(entityType && entityId)) {
@@ -291,11 +311,18 @@ export function useThumbnailInfo(entityType: ThumbnailEntityType | null, entityI
 			return;
 		}
 
+		if (abortRef.current) {
+			abortRef.current.abort();
+		}
+		abortRef.current = new AbortController();
+
 		setLoading(true);
 		setError(null);
 
 		try {
-			const response = await fetch(`/api/thumbnails/unified/info/${entityType}/${entityId}`);
+			const response = await fetch(`/api/thumbnails/unified/info/${entityType}/${entityId}`, {
+				signal: abortRef.current.signal,
+			});
 
 			if (response.ok) {
 				const data = await response.json();
@@ -304,6 +331,7 @@ export function useThumbnailInfo(entityType: ThumbnailEntityType | null, entityI
 				throw new Error(`HTTP ${response.status}`);
 			}
 		} catch (err) {
+			if (err instanceof Error && err.name === 'AbortError') return;
 			setError(err instanceof Error ? err.message : 'Failed to fetch info');
 		} finally {
 			setLoading(false);
@@ -312,6 +340,9 @@ export function useThumbnailInfo(entityType: ThumbnailEntityType | null, entityI
 
 	useEffect(() => {
 		fetchInfo();
+		return () => {
+			abortRef.current?.abort();
+		};
 	}, [fetchInfo]);
 
 	return { info, loading, error, refresh: fetchInfo };

@@ -10,11 +10,11 @@ const SERVICE_NAME = 'ImageProcessingService';
 const imageLogger = serverLogger.withContext(SERVICE_NAME);
 
 export interface ImageProcessingOptions {
+	fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
+	format?: 'jpeg' | 'png' | 'webp';
+	height?: number;
 	quality?: number;
 	width?: number;
-	height?: number;
-	format?: 'jpeg' | 'png' | 'webp';
-	fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
 }
 
 /**

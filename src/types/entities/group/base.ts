@@ -2,28 +2,28 @@
  * 🗿 Modelo base de Group, basado en el esquema de Drizzle.
  */
 export interface GroupBase {
-	id: string;
-	name: string;
+	cardId?: string;
+	category?: string | null;
+	color?: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	isFavorite?: boolean;
-	organizationType?: string | null;
-	organizationLevel?: number;
-	rarityLevel?: string | null;
-	flexibilityScore?: number;
-	power?: number;
-	hp?: number;
-	mp?: number;
-	cardId?: string;
+	featuredImage?: string;
 	filters?: any;
+	flexibilityScore?: number;
+	hp?: number;
+	id: string;
+	isFavorite?: boolean;
+	mp?: number;
+	name: string;
+	organizationLevel?: number;
+	organizationType?: string | null;
+	power?: number;
+	rarityLevel?: string | null;
 	recentImages?: any[];
 	recentVideos?: any[];
 	shortcut?: string;
 	sortBy?: string;
-	featuredImage?: string;
-	createdAt: Date;
 	updatedAt: Date;
 }
 
@@ -43,10 +43,6 @@ export interface GroupStatistics extends EntityStats {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface GroupWithStats extends GroupBase {
-	entityType: 'group';
-	stats: GroupStatistics;
-	/** Alias para compatibilidad - apunta a stats */
-	statistics?: GroupStatistics;
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -63,13 +59,16 @@ export interface GroupWithStats extends GroupBase {
 		properties?: number;
 		groups?: number;
 	};
+	entityType: 'group';
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: GroupStatistics;
+	stats: GroupStatistics;
 }
 
 /**
  * 🌟 Tipo completo de Group con todas las relaciones
  */
 export interface GroupComplete extends GroupWithStats {
-	tags: string[];
 	relations: {
 		images: string[];
 		videos: string[];
@@ -85,6 +84,7 @@ export interface GroupComplete extends GroupWithStats {
 		properties: string[];
 		groups: string[];
 	};
+	tags: string[];
 }
 
 /**

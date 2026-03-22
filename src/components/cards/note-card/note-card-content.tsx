@@ -19,14 +19,14 @@ import { useNoteCounts } from '@/lib/api/notes';
 import { cn } from '@/lib/utils';
 
 interface NoteCardContentProps {
-	content?: string | null;
 	category?: string | null;
-	tags?: string[] | null;
-	status?: string | null;
-	priority?: number | null;
-	primaryColor: string;
-	secondaryColor: string;
+	content?: string | null;
 	noteId: string;
+	primaryColor: string;
+	priority?: number | null;
+	secondaryColor: string;
+	status?: string | null;
+	tags?: string[] | null;
 	tcgMode?: boolean;
 }
 
@@ -40,11 +40,11 @@ export function NoteCardContent(props: NoteCardContentProps) {
 }
 
 interface NoteCardContentState extends NoteCardContentProps {
-	renderKey: string;
-	hasTags: boolean;
 	hasContent: boolean;
+	hasTags: boolean;
 	priorityLabel: string;
 	relationCounts: Record<string, number> | undefined;
+	renderKey: string;
 	totalRelations: number;
 }
 

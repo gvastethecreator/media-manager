@@ -31,26 +31,25 @@ export enum FavoriteEntityType {
  * Representa las propiedades fundamentales de un favorito sin estadísticas calculadas.
  */
 export interface FavoriteBase {
-	// Identificación
-	id: string;
+	// Propiedades adicionales
+	addedAt: Date;
+	category: string | null;
+
+	// Timestamps del sistema
+	createdAt: Date;
 
 	// Entidad favorita
 	entityId: string;
 	entityType: FavoriteEntityType;
+	// Identificación
+	id: string;
+	notes: string | null;
+	priority: number | null;
+	profileId: string | null;
+	updatedAt: Date;
 
 	// Usuario (opcional para compatibilidad)
 	userId: string | null;
-	profileId: string | null;
-
-	// Propiedades adicionales
-	addedAt: Date;
-	notes: string | null;
-	category: string | null;
-	priority: number | null;
-
-	// Timestamps del sistema
-	createdAt: Date;
-	updatedAt: Date;
 }
 
 import { EntityStats } from '../entity.types';
@@ -59,16 +58,16 @@ import { EntityStats } from '../entity.types';
  * 📊 Estadísticas calculadas y métricas para un favorito.
  */
 export interface FavoriteStatistics extends EntityStats {
+	/** Días desde que se marcó como favorito */
+	daysSinceFavorited: number;
 	/** Tipo de entidad legible para humanos */
 	entityTypeName: string;
 	/** Fecha de creación formateada */
 	formattedCreatedAt: string;
-	/** Días desde que se marcó como favorito */
-	daysSinceFavorited: number;
-	/** Indicador si es un favorito reciente (menos de 7 días) */
-	isRecent: boolean;
 	/** Indicador si es un favorito antiguo (más de 30 días) */
 	isOld: boolean;
+	/** Indicador si es un favorito reciente (menos de 7 días) */
+	isRecent: boolean;
 }
 
 /**

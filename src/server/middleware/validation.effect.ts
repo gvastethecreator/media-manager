@@ -18,10 +18,10 @@ const logger = serverLogger.withContext('ValidationMiddleware');
  */
 export interface ValidationError {
 	_tag: 'ValidationError';
-	message: string;
-	field: string;
-	received: unknown;
 	expected: string;
+	field: string;
+	message: string;
+	received: unknown;
 }
 
 /**

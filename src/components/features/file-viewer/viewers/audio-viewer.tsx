@@ -6,7 +6,7 @@
 import { Download, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider-v3';
+import { Slider } from '@/components/ui/slider';
 import { formatDurationSeconds as formatDuration, formatFileSize } from '@/lib/utils';
 import type { AudioWithStats } from '@/types/entities/audio';
 import { WaveformVisualizer } from './waveform-visualizer';

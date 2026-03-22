@@ -4,16 +4,16 @@
  */
 
 export interface KeyboardShortcutConfig {
-	/** Tecla principal (ej: 'a', 'Delete', 'F2', 'Escape') */
-	key: string;
-	/** Modificadores requeridos */
-	modifiers: readonly ('ctrl' | 'shift' | 'alt' | 'meta')[];
 	/** Acción a ejecutar */
 	action: string;
 	/** Contexto donde aplica el shortcut */
 	context?: 'global' | 'file-browser' | 'file-viewer' | 'context-menu';
 	/** Descripción del shortcut */
 	description: string;
+	/** Tecla principal (ej: 'a', 'Delete', 'F2', 'Escape') */
+	key: string;
+	/** Modificadores requeridos */
+	modifiers: readonly ('ctrl' | 'shift' | 'alt' | 'meta')[];
 	/** Si debe prevenir el comportamiento por defecto */
 	preventDefault?: boolean;
 	/** Si debe detener la propagación del evento */

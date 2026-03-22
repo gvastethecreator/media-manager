@@ -7,69 +7,68 @@ import type { PromptExecutionParams, PromptExecutionResult, PromptFilters } from
  * Store completo de Prompts combinando todas las slices
  */
 export interface PromptStore {
-	// Estado - CoreSlice
-	prompts: PromptWithStats[];
-	selectedPrompt: PromptWithStats | null;
-	isLoading: boolean;
-	error: string | null;
-
-	// Acciones - CoreSlice
-	loadPrompts: () => Promise<void>;
-	createPrompt: (data: Omit<PromptBase, 'id'>) => Promise<void>;
-	updatePrompt: (id: string, data: Partial<PromptBase>) => Promise<void>;
-	deletePrompt: (id: string) => Promise<void>;
-	selectPrompt: (prompt: PromptWithStats | null) => void;
-	reset: () => void;
-
-	// Estado - FiltersSlice
-	filters: PromptFilters;
-	sortBy: PromptSortOption;
-	page: number;
-	pageSize: number;
-
-	// Estado - UISlice
-	viewMode: PromptViewMode;
-	isCreateModalOpen: boolean;
-	isEditModalOpen: boolean;
-	isDeleteDialogOpen: boolean;
-	isDetailsDrawerOpen: boolean;
-	isExecuteModalOpen: boolean;
-
-	// Acciones - FiltersSlice
-	setFilters: (filters: Partial<PromptFilters>) => void;
-	setSortBy: (sortOption: PromptSortOption) => void;
-	setPage: (page: number) => void;
-	setPageSize: (size: number) => void;
-	setCategoryFilter: (category: string | null) => void;
-	setSearchFilter: (search: string) => void;
-	setTagsFilter: (tags: string[]) => void;
-	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
+	// Acciones - RelationsSlice
+	addPromptToEntity: (promptId: string, entityId: string, entityType: EntityType) => Promise<void>;
+	clearExecutionResult: () => void;
 	clearFilters: () => void;
-
-	// Acciones - UISlice
-	openCreateModal: () => void;
 	closeCreateModal: () => void;
-	openEditModal: () => void;
-	closeEditModal: () => void;
-	openDeleteDialog: () => void;
 	closeDeleteDialog: () => void;
-	openDetailsDrawer: () => void;
 	closeDetailsDrawer: () => void;
-	openExecuteModal: () => void;
+	closeEditModal: () => void;
 	closeExecuteModal: () => void;
-	setViewMode: (mode: PromptViewMode) => void;
-	resetUI: () => void;
-
-	// Estado - ExecutionSlice
-	isExecuting: boolean;
-	executionResult: PromptExecutionResult | null;
-	executionError: string | null;
+	createPrompt: (data: Omit<PromptBase, 'id'>) => Promise<void>;
+	deletePrompt: (id: string) => Promise<void>;
+	error: string | null;
 
 	// Acciones - ExecutionSlice
 	executePrompt: (params: PromptExecutionParams) => Promise<PromptExecutionResult | null>;
-	clearExecutionResult: () => void;
+	executionError: string | null;
+	executionResult: PromptExecutionResult | null;
 
-	// Acciones - RelationsSlice
-	addPromptToEntity: (promptId: string, entityId: string, entityType: EntityType) => Promise<void>;
+	// Estado - FiltersSlice
+	filters: PromptFilters;
+	isCreateModalOpen: boolean;
+	isDeleteDialogOpen: boolean;
+	isDetailsDrawerOpen: boolean;
+	isEditModalOpen: boolean;
+	isExecuteModalOpen: boolean;
+
+	// Estado - ExecutionSlice
+	isExecuting: boolean;
+	isLoading: boolean;
+
+	// Acciones - CoreSlice
+	loadPrompts: () => Promise<void>;
+
+	// Acciones - UISlice
+	openCreateModal: () => void;
+	openDeleteDialog: () => void;
+	openDetailsDrawer: () => void;
+	openEditModal: () => void;
+	openExecuteModal: () => void;
+	page: number;
+	pageSize: number;
+	// Estado - CoreSlice
+	prompts: PromptWithStats[];
 	removePromptFromEntity: (promptId: string, entityId: string, entityType: EntityType) => Promise<void>;
+	reset: () => void;
+	resetUI: () => void;
+	selectedPrompt: PromptWithStats | null;
+	selectPrompt: (prompt: PromptWithStats | null) => void;
+	setCategoryFilter: (category: string | null) => void;
+
+	// Acciones - FiltersSlice
+	setFilters: (filters: Partial<PromptFilters>) => void;
+	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
+	setPage: (page: number) => void;
+	setPageSize: (size: number) => void;
+	setSearchFilter: (search: string) => void;
+	setSortBy: (sortOption: PromptSortOption) => void;
+	setTagsFilter: (tags: string[]) => void;
+	setViewMode: (mode: PromptViewMode) => void;
+	sortBy: PromptSortOption;
+	updatePrompt: (id: string, data: Partial<PromptBase>) => Promise<void>;
+
+	// Estado - UISlice
+	viewMode: PromptViewMode;
 }

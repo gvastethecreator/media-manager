@@ -12,24 +12,18 @@ const executionLogger = serverLogger.withContext('PromptExecution');
  */
 export interface PromptExecutionConfig {
 	/**
+	 * Número máximo de tokens en la respuesta
+	 */
+	maxTokens?: number;
+	/**
 	 * Modelo a utilizar (si se omite, se usa el definido en el prompt)
 	 */
 	model?: PromptModel | string;
 
 	/**
-	 * Variables para reemplazar en el contenido
+	 * Opciones adicionales específicas del modelo
 	 */
-	variables?: Record<string, any>;
-
-	/**
-	 * Temperatura para la generación (0-1)
-	 */
-	temperature?: number;
-
-	/**
-	 * Número máximo de tokens en la respuesta
-	 */
-	maxTokens?: number;
+	modelOptions?: Record<string, any>;
 
 	/**
 	 * Si se debe registrar esta ejecución en el historial
@@ -37,14 +31,19 @@ export interface PromptExecutionConfig {
 	saveToHistory?: boolean;
 
 	/**
+	 * Temperatura para la generación (0-1)
+	 */
+	temperature?: number;
+
+	/**
 	 * Timeout para la ejecución en milisegundos
 	 */
 	timeoutMs?: number;
 
 	/**
-	 * Opciones adicionales específicas del modelo
+	 * Variables para reemplazar en el contenido
 	 */
-	modelOptions?: Record<string, any>;
+	variables?: Record<string, any>;
 }
 
 /**
@@ -52,13 +51,13 @@ export interface PromptExecutionConfig {
  */
 interface AIModelResponse {
 	content: string;
+	executionTime: number;
+	model: string;
 	tokens?: {
 		prompt: number;
 		completion: number;
 		total: number;
 	};
-	model: string;
-	executionTime: number;
 }
 
 /**

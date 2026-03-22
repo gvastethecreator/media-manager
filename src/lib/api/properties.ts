@@ -3,34 +3,34 @@ import type { PropertyWithStats } from '@/types/entities/property';
 import { apiClient } from './client';
 
 export interface PropertyFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 	type?: string;
 }
 
 export interface PropertyCreateInput {
-	name: string;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name: string;
+	shortcut?: string | null;
 }
 
 export interface PropertyUpdateInput {
-	name?: string;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name?: string;
+	shortcut?: string | null;
 }
 
 export interface PropertiesResponse {

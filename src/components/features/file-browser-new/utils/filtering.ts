@@ -107,10 +107,10 @@ export function filterSynthetic(items: BrowserItem[]): BrowserItem[] {
  * Pipeline de filtrado completo
  */
 export interface FilterPipeline {
-	search?: string;
 	entityTypes?: string[];
-	filters?: FilterOption[];
 	excludeSynthetic?: boolean;
+	filters?: FilterOption[];
+	search?: string;
 }
 
 export function applyFilterPipeline(items: BrowserItem[], pipeline: FilterPipeline): BrowserItem[] {

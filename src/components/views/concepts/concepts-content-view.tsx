@@ -3,28 +3,28 @@ import React from 'react';
 import { ConceptCard } from '@/components/cards/concept-card/concept-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import type { ConceptWithStats } from '@/types/entities/concept';
 
 interface ConceptsContentViewProps {
 	concepts: ConceptWithStats[];
-	isLoading: boolean;
 	error: string | null;
-	showForm: boolean;
-	newConceptName: string;
-	newConceptDescription: string;
-	searchTerm: string;
-	setShowForm: (show: boolean) => void;
-	setNewConceptName: (name: string) => void;
-	setNewConceptDescription: (description: string) => void;
-	setSearchTerm: (term: string) => void;
 	handleConceptSelect: (conceptId: string) => void;
 	handleCreateConcept: () => Promise<void>;
+	isLoading: boolean;
+	newConceptDescription: string;
+	newConceptName: string;
+	searchTerm: string;
+	setNewConceptDescription: (description: string) => void;
+	setNewConceptName: (name: string) => void;
+	setSearchTerm: (term: string) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 const ConceptsContentView: React.FC<ConceptsContentViewProps> = ({

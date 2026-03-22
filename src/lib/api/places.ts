@@ -4,9 +4,26 @@ import type { PlaceWithStats } from '@/types/entities/place';
 import { apiClient } from './client';
 
 export interface PlaceFilters {
-	search?: string;
+	category?: string;
+	climate?: string;
+	culture?: string;
+	dangers?: string;
+	economy?: string;
+	featuredImage?: string;
+	geography?: string;
+	government?: string;
+	history?: string;
+	isFavorite?: boolean;
+	isPublic?: boolean;
+	landmarks?: string;
 	limit?: number;
+	location?: string;
+	notes?: string;
 	offset?: number;
+	parentId?: string;
+	population?: string;
+	resources?: string;
+	search?: string;
 	sortBy?:
 		| 'name'
 		| 'createdAt'
@@ -29,78 +46,61 @@ export interface PlaceFilters {
 		| 'featuredImage'
 		| 'parentId';
 	sortOrder?: 'asc' | 'desc';
-	category?: string;
-	isPublic?: boolean;
-	isFavorite?: boolean;
 	type?: string;
-	location?: string;
-	climate?: string;
-	population?: string;
-	government?: string;
-	economy?: string;
-	culture?: string;
-	history?: string;
-	geography?: string;
-	landmarks?: string;
-	dangers?: string;
-	resources?: string;
-	notes?: string;
-	featuredImage?: string;
-	parentId?: string;
 }
 
 export interface PlaceCreateInput {
-	name: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+	climate?: string | null;
+	color?: string | null;
+	culture?: string | null;
+	dangers?: string | null;
+	description?: string | null;
+	economy?: string | null;
+	emoji?: string | null;
+	featuredImage?: string | null;
+	geography?: string | null;
+	government?: string | null;
+	history?: string | null;
 	isFavorite?: boolean;
+	isPublic?: boolean;
+	landmarks?: string | null;
+	location?: string | null;
+	name: string;
+	notes?: string | null;
+	parentId?: string | null;
+	population?: string | null;
+	resources?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	location?: string | null;
-	climate?: string | null;
-	population?: string | null;
-	government?: string | null;
-	economy?: string | null;
-	culture?: string | null;
-	history?: string | null;
-	geography?: string | null;
-	landmarks?: string | null;
-	dangers?: string | null;
-	resources?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
 }
 
 export interface PlaceUpdateInput {
-	name?: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+	climate?: string | null;
+	color?: string | null;
+	culture?: string | null;
+	dangers?: string | null;
+	description?: string | null;
+	economy?: string | null;
+	emoji?: string | null;
+	featuredImage?: string | null;
+	geography?: string | null;
+	government?: string | null;
+	history?: string | null;
 	isFavorite?: boolean;
+	isPublic?: boolean;
+	landmarks?: string | null;
+	location?: string | null;
+	name?: string;
+	notes?: string | null;
+	parentId?: string | null;
+	population?: string | null;
+	resources?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	location?: string | null;
-	climate?: string | null;
-	population?: string | null;
-	government?: string | null;
-	economy?: string | null;
-	culture?: string | null;
-	history?: string | null;
-	geography?: string | null;
-	landmarks?: string | null;
-	dangers?: string | null;
-	resources?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
 }
 
 export interface PlacesResponse {

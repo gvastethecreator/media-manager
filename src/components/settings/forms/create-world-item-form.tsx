@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch-v3';
+import { Switch } from '@/components/ui/switch';
 import { useCreateWorldItem, useUpdateWorldItem } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
@@ -58,12 +58,12 @@ type WorldItemFormInput = Pick<
 };
 
 interface CreateWorldItemFormProps {
-	worldItem?: WorldItemComplete | null;
 	isEditing?: boolean;
-	onCreated?: (data: WorldItemCreateInput) => void;
-	onUpdated?: (item: WorldItemComplete) => void;
 	onCancel?: () => void;
+	onCreated?: (data: WorldItemCreateInput) => void;
 	onPreview?: (item: WorldItemComplete) => void;
+	onUpdated?: (item: WorldItemComplete) => void;
+	worldItem?: WorldItemComplete | null;
 }
 
 export function CreateWorldItemForm({

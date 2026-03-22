@@ -15,8 +15,8 @@ interface RowAction<TData> {
 }
 
 interface DataTableRowActionsProps<TData> {
-	row: Row<TData>;
 	actions: RowAction<TData>[];
+	row: Row<TData>;
 }
 
 export function DataTableRowActions<TData>({ row, actions }: DataTableRowActionsProps<TData>) {

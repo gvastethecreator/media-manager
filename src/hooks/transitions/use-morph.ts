@@ -1,7 +1,7 @@
 /**
  * @file Hook useMorph
  * @module hooks/transitions/use-morph
- * @description Hook React para morphing de formas con anime.js
+ * @description Hook React para morphing de formas con GSAP y el motor de transiciones
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -9,27 +9,27 @@ import { getMorphEngine } from '@/lib/transitions/core/morph-engine';
 import type { MorphConfig } from '@/lib/transitions/types';
 
 interface UseMorphOptions {
+	/** Configuración base */
+	config?: MorphConfig;
+	/** Si está habilitado */
+	enabled?: boolean;
 	/** ID único del elemento */
 	id: string;
 	/** Forma inicial */
 	initialShape?: string;
-	/** Si está habilitado */
-	enabled?: boolean;
-	/** Configuración base */
-	config?: MorphConfig;
 }
 
 interface UseMorphReturn {
-	/** Ref para asignar al elemento */
-	ref: React.RefObject<HTMLElement | null>;
-	/** Mofhea a una nueva forma */
-	morphTo: (shape: string, overrideConfig?: Partial<MorphConfig>) => Promise<void>;
-	/** Mofhea entre dos formas específicas */
-	morph: (fromShape: string, toShape: string, overrideConfig?: Partial<MorphConfig>) => Promise<void>;
 	/** Forma actual */
 	currentShape: string;
 	/** Si está animando */
 	isMorphing: boolean;
+	/** Mofhea entre dos formas específicas */
+	morph: (fromShape: string, toShape: string, overrideConfig?: Partial<MorphConfig>) => Promise<void>;
+	/** Mofhea a una nueva forma */
+	morphTo: (shape: string, overrideConfig?: Partial<MorphConfig>) => Promise<void>;
+	/** Ref para asignar al elemento */
+	ref: React.RefObject<HTMLElement | null>;
 }
 
 /**

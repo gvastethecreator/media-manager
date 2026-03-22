@@ -37,10 +37,10 @@ export enum TransformerErrorCode {
  * ⚙️ Opciones para crear un error de transformador
  */
 export interface TransformerErrorOptions {
-	code: TransformerErrorCode;
-	message: string;
 	cause?: Error;
+	code: TransformerErrorCode;
 	context?: Record<string, unknown>;
+	message: string;
 }
 
 /**

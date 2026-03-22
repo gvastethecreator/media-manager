@@ -51,8 +51,8 @@
 }
 
 .flip-container.flip-transitioning {
-	will-change: transform, opacity;
 	pointer-events: none;
+	will-change: transform, opacity;
 }
 
 /* ==========================================================================
@@ -115,10 +115,9 @@
    ========================================================================== */
 
 .liquid-container {
-	will-change: border-radius;
-	/* Suavizar borde orgánico */
 	-webkit-backface-visibility: hidden;
 	backface-visibility: hidden;
+	will-change: border-radius;
 }
 
 .liquid-container.liquid-active {
@@ -157,9 +156,10 @@
 }
 
 .transition-entering::after {
-	content: "";
 	position: absolute;
 	inset: 0;
+	pointer-events: none;
+	content: "";
 	background: linear-gradient(
 		90deg,
 		transparent,
@@ -167,7 +167,6 @@
 		transparent
 	);
 	animation: shimmer-enter 0.6s ease-out;
-	pointer-events: none;
 }
 
 .transition-exiting {
@@ -221,8 +220,8 @@
 }
 
 .transition-hover-lift:hover {
-	transform: translateY(-2px);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transform: translateY(-2px);
 }
 
 .transition-hover-scale {
@@ -353,9 +352,9 @@
 	.morph-container,
 	.animate-presence,
 	.liquid-container {
+		transition-duration: 0.01ms !important;
 		animation-duration: 0.01ms !important;
 		animation-iteration-count: 1 !important;
-		transition-duration: 0.01ms !important;
 		will-change: auto !important;
 	}
 
@@ -373,8 +372,8 @@
 /* GPU acceleration para elementos animados */
 .gpu-accelerated {
 	transform: translateZ(0);
-	backface-visibility: hidden;
 	perspective: 1000px;
+	backface-visibility: hidden;
 }
 
 /* Containment para aislamiento de layout */
@@ -384,8 +383,8 @@
 
 /* Forzar capa de composición */
 .composite-layer {
-	will-change: transform;
 	transform: translate3d(0, 0, 0);
+	will-change: transform;
 }
 
 /* ==========================================================================
@@ -407,16 +406,16 @@
 
 /* Indicador visual de frames */
 .debug-frames::before {
-	content: "";
 	position: fixed;
 	top: 10px;
 	right: 10px;
+	z-index: 9999;
 	width: 10px;
 	height: 10px;
+	content: "";
 	background: lime;
 	border-radius: 50%;
 	animation: frame-pulse 16ms linear infinite;
-	z-index: 9999;
 }
 
 @keyframes frame-pulse {

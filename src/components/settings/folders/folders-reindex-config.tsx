@@ -9,18 +9,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch-v3';
+import { Switch } from '@/components/ui/switch';
 
 interface StructuredReindexConfigProps {
-	isOpen: boolean;
-	onToggle: () => void;
-	useStructuredFlow: boolean;
-	onUseStructuredFlowChange: (value: boolean) => void;
-	skipThumbnails: boolean;
-	onSkipThumbnailsChange: (value: boolean) => void;
-	skipMetadata: boolean;
-	onSkipMetadataChange: (value: boolean) => void;
 	disabled?: boolean;
+	isOpen: boolean;
+	onSkipMetadataChange: (value: boolean) => void;
+	onSkipThumbnailsChange: (value: boolean) => void;
+	onToggle: () => void;
+	onUseStructuredFlowChange: (value: boolean) => void;
+	skipMetadata: boolean;
+	skipThumbnails: boolean;
+	useStructuredFlow: boolean;
 }
 
 export function StructuredReindexConfig({

@@ -10,24 +10,24 @@ import type { NoteStore } from '../types';
 const coreLogger = clientLogger.withContext('NoteStore:Core');
 
 export interface CoreSlice {
-	// Estado principal
-	notes: Record<string, NoteWithStats>;
-	selectedNote: NoteWithStats | null;
-	selectedNoteId: string | null;
-	selectedNoteIds: string[];
-	isMultiSelectMode: boolean;
-	isLoading: boolean;
-	loading: boolean; // Alias para compatibilidad
+	createNote: (note: NoteCreateInput) => Promise<void>;
+	deleteNote: (id: string) => Promise<void>;
 	error: string | null;
-	version: string;
+	isLoading: boolean;
+	isMultiSelectMode: boolean;
+	loading: boolean; // Alias para compatibilidad
 
 	// Acciones
 	loadNotes: () => Promise<void>;
-	createNote: (note: NoteCreateInput) => Promise<void>;
-	updateNote: (id: string, note: NoteUpdateInput) => Promise<void>;
-	deleteNote: (id: string) => Promise<void>;
-	selectNote: (note: NoteWithStats | null) => void;
+	// Estado principal
+	notes: Record<string, NoteWithStats>;
 	reset: () => void;
+	selectedNote: NoteWithStats | null;
+	selectedNoteId: string | null;
+	selectedNoteIds: string[];
+	selectNote: (note: NoteWithStats | null) => void;
+	updateNote: (id: string, note: NoteUpdateInput) => Promise<void>;
+	version: string;
 }
 
 function getPriorityLabel(priority: number): string {

@@ -2,24 +2,24 @@ import { Building2, Cloud, Compass, Droplets, Mountain, Palmtree, Sparkles, Spro
 import { cn } from '@/lib/utils';
 
 interface PlaceCardHeaderProps {
-	/** Nombre del lugar */
-	name: string;
-	/** Emoji que representa el lugar */
-	emoji: string;
-	/** Color primario para el tema */
-	color: string;
-	/** Región donde se encuentra el lugar */
-	region?: string;
-	/** Tipo de lugar (ciudad, bosque, etc.) */
-	type?: string;
 	/** Clima del lugar */
 	climate?: string;
-	/** Si el lugar está marcado como favorito */
-	isFavorite?: boolean;
-	/** Si está en modo TCG con efectos especiales */
-	tcgMode?: boolean;
+	/** Color primario para el tema */
+	color: string;
 	/** Si está en modo compacto */
 	compact?: boolean;
+	/** Emoji que representa el lugar */
+	emoji: string;
+	/** Si el lugar está marcado como favorito */
+	isFavorite?: boolean;
+	/** Nombre del lugar */
+	name: string;
+	/** Región donde se encuentra el lugar */
+	region?: string;
+	/** Si está en modo TCG con efectos especiales */
+	tcgMode?: boolean;
+	/** Tipo de lugar (ciudad, bosque, etc.) */
+	type?: string;
 }
 
 /**

@@ -3,20 +3,20 @@
  * @module components/entities/profile/ProfileCard
  */
 
-import { motion } from '@/components/ui/animejs-shim';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { ProfileExtended } from '@/types/entities/profile';
 
 export interface ProfileCardProps {
-	profile: ProfileExtended;
-	isSelected?: boolean;
-	isExpanded?: boolean;
-	onSelect?: (profile: ProfileExtended) => void;
-	onExpand?: (profile: ProfileExtended) => void;
 	className?: string;
+	isExpanded?: boolean;
+	isSelected?: boolean;
+	onExpand?: (profile: ProfileExtended) => void;
+	onSelect?: (profile: ProfileExtended) => void;
+	profile: ProfileExtended;
 }
 
 /**

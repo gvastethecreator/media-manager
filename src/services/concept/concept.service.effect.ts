@@ -23,49 +23,49 @@ import {
 const logger = serverLogger.withContext('ConceptService.Effect');
 
 export interface GetConceptsOptions {
-	search?: string;
 	category?: string;
+	limit?: number;
+	offset?: number;
 	onlyFavorites?: boolean;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt';
 	orderDirection?: 'asc' | 'desc';
-	limit?: number;
-	offset?: number;
+	search?: string;
 }
 
 export interface GetConceptsResult {
 	concepts: ConceptWithStats[];
-	total: number;
 	limit: number;
 	offset: number;
+	total: number;
 }
 
 export interface ConceptRelationCounts {
-	images: number;
-	videos: number;
 	albums: number;
-	collections: number;
-	tags: number;
 	characters: number;
-	places: number;
-	worldItems: number;
-	prompts: number;
-	notes: number;
-	wildcards: number;
-	properties: number;
+	collections: number;
 	groups: number;
+	images: number;
+	notes: number;
+	places: number;
+	prompts: number;
+	properties: number;
+	tags: number;
+	videos: number;
+	wildcards: number;
+	worldItems: number;
 }
 
 export class ConceptService extends Context.Tag('ConceptService')<ConceptService, ConceptServiceInterface>() {}
 
 export interface ConceptServiceInterface {
-	readonly getById: (id: string) => Effect.Effect<Concept, ConceptError>;
-	readonly getAll: (options?: GetConceptsOptions) => Effect.Effect<GetConceptsResult, ConceptError>;
 	readonly create: (input: ConceptCreateInput) => Effect.Effect<Concept, ConceptError>;
-	readonly update: (id: string, input: ConceptUpdateInput) => Effect.Effect<Concept, ConceptError>;
 	readonly delete: (id: string) => Effect.Effect<void, ConceptError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<Concept, ConceptError>;
+	readonly getAll: (options?: GetConceptsOptions) => Effect.Effect<GetConceptsResult, ConceptError>;
+	readonly getById: (id: string) => Effect.Effect<Concept, ConceptError>;
 	readonly getImages: (id: string) => Effect.Effect<any[], ConceptError>;
 	readonly getRelationCounts: (id: string) => Effect.Effect<ConceptRelationCounts, ConceptError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<Concept, ConceptError>;
+	readonly update: (id: string, input: ConceptUpdateInput) => Effect.Effect<Concept, ConceptError>;
 }
 
 const make = (): ConceptServiceInterface => {

@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { useCharacter, useRecentCharacterMedia } from '@/lib/api/characters';
 import { cn } from '@/lib/utils';
 import { CardContainer } from '../card-container';

@@ -14,9 +14,9 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface ThreeDViewerProps {
-	src: string;
-	fileName?: string;
 	className?: string;
+	fileName?: string;
+	src: string;
 }
 
 // Modelo 3D que carga y renderiza el archivo - MEMOIZADO

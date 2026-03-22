@@ -10,8 +10,8 @@
  * PLAY: Anima desde la inversa hasta el estado natural
  */
 
-import type { AnimeInstance } from '@/lib/anime';
-import { anime } from '@/lib/anime';
+import type { AnimationInstance } from '@/lib/animation';
+import { animate } from '@/lib/animation';
 import type { FlipElementConfig, FlipOptions, FlipState, PerformanceMetrics } from '../types';
 
 // ============================================================================
@@ -88,7 +88,7 @@ function parseBorderRadius(radius: string): { x: number; y: number } {
 export class FlipEngine {
 	private elements = new Map<string, FlipElementConfig>();
 	private readonly states = new Map<string, FlipState>();
-	private readonly activeAnimations = new Map<string, AnimeInstance>();
+	private readonly activeAnimations = new Map<string, AnimationInstance>();
 	private isTransitioning = false;
 	private readonly metrics: PerformanceMetrics = {
 		startTime: 0,
@@ -230,7 +230,7 @@ export class FlipEngine {
 		config.element.style.willChange = 'transform, opacity';
 
 		// Crear y ejecutar animación principal
-		const animation = await anime({
+		const animation = await animate({
 			targets: config.element,
 			translateX: [state.transform.x, 0],
 			translateY: [state.transform.y, 0],
@@ -261,7 +261,7 @@ export class FlipEngine {
 			const lastRadius = parseBorderRadius(currentRadius);
 
 			if (firstRadius.x !== lastRadius.x || firstRadius.y !== lastRadius.y) {
-				await anime({
+				await animate({
 					targets: config.element,
 					borderRadius: [`${firstRadius.x}px`, `${lastRadius.x}px`],
 					duration: options.duration,
@@ -273,7 +273,7 @@ export class FlipEngine {
 
 		// Animar opacidad si está habilitado
 		if (options.animateOpacity) {
-			await anime({
+			await animate({
 				targets: config.element,
 				opacity: [state.styles.opacity, 1],
 				duration: options.duration * 0.8,

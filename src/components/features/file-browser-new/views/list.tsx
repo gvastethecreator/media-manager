@@ -14,18 +14,18 @@ import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '.
 import type { ListViewConfig } from '../types/view.types';
 
 export interface ListViewProps extends Omit<BrowserViewProps, 'config'> {
+	/** ID activo */
+	activeId?: string | null;
 	/** Configuración de lista */
 	config: ListViewConfig;
+	/** Handler de context menu */
+	onItemContextMenu?: ItemContextMenuHandler;
 	/** Página actual (para paginación) */
 	page?: number;
 	/** Tamaño de página */
 	pageSize?: number;
 	/** IDs seleccionados */
 	selectedIds?: Set<string>;
-	/** ID activo */
-	activeId?: string | null;
-	/** Handler de context menu */
-	onItemContextMenu?: ItemContextMenuHandler;
 }
 
 export function ListView({

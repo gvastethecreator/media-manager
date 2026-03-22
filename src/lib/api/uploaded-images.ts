@@ -3,21 +3,21 @@ import type { UploadedImageFilters, UploadedImageResult, UploadedImageStats } fr
 import { apiClient } from './client';
 
 export interface UploadedImageCreateInput {
+	hash: string;
+	imageId: string;
+	metadata?: string | null;
 	name: string;
 	path: string;
 	size: number;
-	hash: string;
-	metadata?: string | null;
-	imageId: string;
 }
 
 export interface UploadedImageUpdateInput {
+	hash?: string;
+	imageId?: string;
+	metadata?: string | null;
 	name?: string;
 	path?: string;
 	size?: number;
-	hash?: string;
-	metadata?: string | null;
-	imageId?: string;
 }
 
 export interface UploadedImagesResponse {

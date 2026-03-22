@@ -13,25 +13,29 @@ const uiLogger = clientLogger.withContext('WildcardStore:UI');
 
 // Slice para operaciones de UI
 export interface WildcardUISlice {
-	// Selección
-	selectWildcard: (id: string) => void;
-	deselectWildcard: (id: string) => void;
-	toggleWildcardSelection: (id: string) => void;
-	selectMultipleWildcards: (ids: string[]) => void;
 	clearWildcardSelection: () => void;
+	closeViewer: () => void;
+	collapseAllWildcards: () => void;
+	collapseBranch: (id: string) => void;
+	collapseWildcard: (id: string) => void;
+	deselectWildcard: (id: string) => void;
+	expandAllWildcards: () => void;
+
+	// Opciones jerárquicas específicas
+	expandBranch: (id: string) => void;
+	expandWildcard: (id: string) => void;
 	isWildcardSelected: (id: string) => boolean;
 
 	// Visor
 	openViewer: (wildcardId: string) => void;
-	closeViewer: () => void;
-	setCurrentWildcard: (wildcardId: string | null) => void;
 
-	// Vista
-	setViewMode: (mode: WildcardViewMode) => void;
-
-	// Estados visuales
-	setWildcardDisplayState: (wildcardId: string, state: Partial<WildcardDisplayState>) => void;
+	// Reset
+	resetUI: () => void;
 	resetWildcardDisplayState: (wildcardId: string) => void;
+	selectMultipleWildcards: (ids: string[]) => void;
+	// Selección
+	selectWildcard: (id: string) => void;
+	setCurrentWildcard: (wildcardId: string | null) => void;
 
 	// Drag & drop
 	setDraggedWildcard: (id: string | null) => void;
@@ -40,19 +44,15 @@ export interface WildcardUISlice {
 	// Navegación
 	setHighlightedWildcard: (id: string | null) => void;
 
+	// Vista
+	setViewMode: (mode: WildcardViewMode) => void;
+
+	// Estados visuales
+	setWildcardDisplayState: (wildcardId: string, state: Partial<WildcardDisplayState>) => void;
+
 	// Expansión (para vistas jerárquicas)
 	toggleWildcardExpanded: (id: string) => void;
-	expandWildcard: (id: string) => void;
-	collapseWildcard: (id: string) => void;
-	expandAllWildcards: () => void;
-	collapseAllWildcards: () => void;
-
-	// Opciones jerárquicas específicas
-	expandBranch: (id: string) => void;
-	collapseBranch: (id: string) => void;
-
-	// Reset
-	resetUI: () => void;
+	toggleWildcardSelection: (id: string) => void;
 }
 
 export const createWildcardUISlice: StateCreator<

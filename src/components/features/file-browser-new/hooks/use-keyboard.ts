@@ -9,24 +9,24 @@ import type { ItemClickHandler, ItemDoubleClickHandler } from '../types/props.ty
 import type { ViewMode } from '../types/view.types';
 
 export interface UseKeyboardNavigationOptions {
-	/** Items para navegar */
-	items: BrowserItem[];
 	/** ID del item activo actual */
 	activeId: string | null;
-	/** Modo de vista actual */
-	viewMode: ViewMode;
+	/** Columnas (para navegación grid) */
+	columns?: number;
+	/** Ref del contenedor */
+	containerRef: React.RefObject<HTMLElement | null>;
+	/** Deshabilitado */
+	disabled?: boolean;
+	/** Items para navegar */
+	items: BrowserItem[];
+	/** Handler para cambiar item activo */
+	onActiveChange?: (id: string | null) => void;
 	/** Handler de click */
 	onItemClick?: ItemClickHandler;
 	/** Handler de doble click / Enter */
 	onItemDoubleClick?: ItemDoubleClickHandler;
-	/** Handler para cambiar item activo */
-	onActiveChange?: (id: string | null) => void;
-	/** Ref del contenedor */
-	containerRef: React.RefObject<HTMLElement | null>;
-	/** Columnas (para navegación grid) */
-	columns?: number;
-	/** Deshabilitado */
-	disabled?: boolean;
+	/** Modo de vista actual */
+	viewMode: ViewMode;
 }
 
 export interface UseKeyboardNavigationResult {

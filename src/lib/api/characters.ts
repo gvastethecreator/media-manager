@@ -4,59 +4,59 @@ import type { ImageWithStats } from '@/types/entities/image';
 import { apiClient } from './client';
 
 export interface CharacterFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface CharacterCreateInput {
-	name: string;
+	age?: string | null;
+	background?: string | null;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	isPublic?: boolean;
-	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	age?: string | null;
+	equipment?: string | null;
+	featuredImage?: string | null;
 	gender?: string | null;
-	species?: string | null;
+	isFavorite?: boolean;
+	isPublic?: boolean;
+	name: string;
+	notes?: string | null;
 	occupation?: string | null;
+	parentId?: string | null;
 	personality?: string | null;
-	background?: string | null;
 	relationships?: string | null;
 	skills?: string | null;
-	equipment?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
+	species?: string | null;
+	totalImages?: number;
+	totalVideos?: number;
 }
 
 export interface CharacterUpdateInput {
-	name?: string;
+	age?: string | null;
+	background?: string | null;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	isPublic?: boolean;
-	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	age?: string | null;
+	equipment?: string | null;
+	featuredImage?: string | null;
 	gender?: string | null;
-	species?: string | null;
+	isFavorite?: boolean;
+	isPublic?: boolean;
+	name?: string;
+	notes?: string | null;
 	occupation?: string | null;
+	parentId?: string | null;
 	personality?: string | null;
-	background?: string | null;
 	relationships?: string | null;
 	skills?: string | null;
-	equipment?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
+	species?: string | null;
+	totalImages?: number;
+	totalVideos?: number;
 }
 
 export interface CharactersResponse {

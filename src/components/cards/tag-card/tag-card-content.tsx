@@ -70,25 +70,25 @@ function DecorativeIcon({ tcgMode, primaryColor }: { tcgMode: boolean; primaryCo
 }
 
 interface TagCardContentProps {
-	description?: string | null;
-	shortcut?: string | null;
-	primaryColor: string;
-	secondaryColor?: string;
-	tcgMode?: boolean;
-	rarity?: TagRarity;
-	imagesCount?: number;
-	videosCount?: number;
 	albumsCount?: number;
-	collectionsCount?: number;
 	charactersCount?: number;
-	placesCount?: number;
-	worldItemsCount?: number;
+	collectionsCount?: number;
 	conceptsCount?: number;
-	promptsCount?: number;
-	notesCount?: number;
-	wildcardsCount?: number;
-	propertiesCount?: number;
+	description?: string | null;
 	groupsCount?: number;
+	imagesCount?: number;
+	notesCount?: number;
+	placesCount?: number;
+	primaryColor: string;
+	promptsCount?: number;
+	propertiesCount?: number;
+	rarity?: TagRarity;
+	secondaryColor?: string;
+	shortcut?: string | null;
+	tcgMode?: boolean;
+	videosCount?: number;
+	wildcardsCount?: number;
+	worldItemsCount?: number;
 }
 
 /**

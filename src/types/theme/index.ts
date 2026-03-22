@@ -9,50 +9,18 @@
  * Siguiendo el sistema OKLCH del proyecto
  */
 export interface ThemeColors {
+	// Accent
+	accent: string;
+	accentForeground: string;
 	// Colores base
 	background: string;
-	foreground: string;
+
+	// Bordes e inputs
+	border: string;
 
 	// Tarjetas y popovers
 	card: string;
 	cardForeground: string;
-	popover: string;
-	popoverForeground: string;
-
-	// Colores primarios
-	primary: string;
-	primaryForeground: string;
-
-	// Colores secundarios
-	secondary: string;
-	secondaryForeground: string;
-
-	// Muted (elementos deshabilitados/suaves)
-	muted: string;
-	mutedForeground: string;
-
-	// Accent
-	accent: string;
-	accentForeground: string;
-
-	// Destructive
-	destructive: string;
-	destructiveForeground: string;
-
-	// Bordes e inputs
-	border: string;
-	input: string;
-	ring: string;
-
-	// Sidebar
-	sidebarBackground: string;
-	sidebarForeground: string;
-	sidebarPrimary: string;
-	sidebarPrimaryForeground: string;
-	sidebarAccent: string;
-	sidebarAccentForeground: string;
-	sidebarBorder: string;
-	sidebarRing: string;
 
 	// Charts (opcional)
 	chart1?: string;
@@ -60,30 +28,61 @@ export interface ThemeColors {
 	chart3?: string;
 	chart4?: string;
 	chart5?: string;
+
+	// Destructive
+	destructive: string;
+	destructiveForeground: string;
+	foreground: string;
+	input: string;
+
+	// Muted (elementos deshabilitados/suaves)
+	muted: string;
+	mutedForeground: string;
+	popover: string;
+	popoverForeground: string;
+
+	// Colores primarios
+	primary: string;
+	primaryForeground: string;
+	ring: string;
+
+	// Colores secundarios
+	secondary: string;
+	secondaryForeground: string;
+	sidebarAccent: string;
+	sidebarAccentForeground: string;
+
+	// Sidebar
+	sidebarBackground: string;
+	sidebarBorder: string;
+	sidebarForeground: string;
+	sidebarPrimary: string;
+	sidebarPrimaryForeground: string;
+	sidebarRing: string;
 }
 
 /**
  * Metadatos de un tema
  */
 export interface ThemeMetadata {
-	/** ID único del tema */
-	id: string;
-	/** Nombre mostrado */
-	name: string;
-	/** Descripción del tema */
-	description?: string;
 	/** Autor del tema */
 	author?: string;
-	/** Si es un tema oscuro o claro */
-	isDark: boolean;
-	/** Fecha de creación */
-	createdAt: string;
-	/** Fecha de última modificación */
-	updatedAt: string;
 	/** Si el tema está basado en uno existente */
 	baseTheme?: string;
+	/** Fecha de creación */
+	createdAt: string;
+	/** Descripción del tema */
+	description?: string;
+	/** ID único del tema */
+	id: string;
+	/** Si es un tema oscuro o claro */
+	isDark: boolean;
+	/** Nombre mostrado */
+	name: string;
 	/** Tags para categorización */
 	tags?: string[];
+	/** Fecha de última modificación */
+	updatedAt: string;
 }
 
 /**
@@ -97,11 +96,11 @@ export interface CustomTheme extends ThemeMetadata {
  * Tema predefinido del sistema
  */
 export interface BuiltInTheme {
-	id: string;
-	name: string;
 	description: string;
-	isDark: boolean;
 	icon: 'sun' | 'moon' | 'monitor';
+	id: string;
+	isDark: boolean;
+	name: string;
 	/** Color representativo para preview */
 	previewColor: string;
 }
@@ -228,10 +227,10 @@ export const BUILT_IN_THEMES: BuiltInTheme[] = [
  * Estructura del estado de temas en el store
  */
 export interface ThemeStoreState {
-	/** Temas personalizados del usuario */
-	customThemes: CustomTheme[];
 	/** Tema activo (puede ser built-in o custom) */
 	activeThemeId: string;
+	/** Temas personalizados del usuario */
+	customThemes: CustomTheme[];
 	/** Si el tema activo es personalizado */
 	isCustomTheme: boolean;
 }
@@ -242,8 +241,8 @@ export interface ThemeStoreState {
 export interface ThemeStoreActions {
 	/** Añadir nuevo tema personalizado */
 	addCustomTheme: (theme: CustomTheme) => void;
-	/** Actualizar tema existente */
-	updateCustomTheme: (id: string, updates: Partial<CustomTheme>) => void;
+	/** Aplicar tema al DOM */
+	applyTheme: (themeId: string) => void;
 	/** Eliminar tema personalizado */
 	deleteCustomTheme: (id: string) => void;
 	/** Duplicar tema (built-in o custom) para editar */
@@ -252,8 +251,8 @@ export interface ThemeStoreActions {
 	exportTheme: (id: string) => string;
 	/** Importar tema desde JSON */
 	importTheme: (json: string) => CustomTheme | null;
-	/** Aplicar tema al DOM */
-	applyTheme: (themeId: string) => void;
+	/** Actualizar tema existente */
+	updateCustomTheme: (id: string, updates: Partial<CustomTheme>) => void;
 }
 
 /**
@@ -336,10 +335,10 @@ export const THEME_CSS_VAR_MAP: Record<keyof ThemeColors, string> = {
  * Categorías de colores para el editor
  */
 export interface ThemeColorCategory {
+	colors: (keyof ThemeColors)[];
+	description: string;
 	id: string;
 	name: string;
-	description: string;
-	colors: (keyof ThemeColors)[];
 }
 
 export const THEME_COLOR_CATEGORIES: ThemeColorCategory[] = [

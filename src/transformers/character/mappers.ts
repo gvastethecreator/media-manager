@@ -15,85 +15,85 @@ import type {
 
 // Tipos locales equivalentes a Drizzle
 interface DrizzleCharacterCreateInput {
-	id?: string;
-	name: string;
+	age?: string | null;
+	background?: string | null;
+	category?: string | null;
+	color?: string | null;
+	createdAt?: Date;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	equipment?: string | null;
+	featuredImage?: string | null;
+	gender?: string | null;
+	id?: string;
 
 	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	age?: string | null;
-	gender?: string | null;
-	species?: string | null;
+	name: string;
+	notes?: string | null;
 	occupation?: string | null;
+	parentId?: string | null;
 	personality?: string | null;
-	background?: string | null;
 	relationships?: string | null;
 	skills?: string | null;
-	equipment?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-	createdAt?: Date;
+	species?: string | null;
+	totalImages?: number;
+	totalVideos?: number;
 	updatedAt?: Date;
 }
 
 interface DrizzleCharacterUpdateInput {
-	name?: string;
+	age?: string | null;
+	background?: string | null;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	equipment?: string | null;
+	featuredImage?: string | null;
+	gender?: string | null;
 
 	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	age?: string | null;
-	gender?: string | null;
-	species?: string | null;
+	name?: string;
+	notes?: string | null;
 	occupation?: string | null;
+	parentId?: string | null;
 	personality?: string | null;
-	background?: string | null;
 	relationships?: string | null;
 	skills?: string | null;
-	equipment?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
+	species?: string | null;
+	totalImages?: number;
+	totalVideos?: number;
 	updatedAt?: Date;
 }
 
 interface DrizzleCharacterWhereInput {
-	id?: string;
-	name?: { contains?: string };
-	description?: { contains?: string };
+	age?: { gte?: number; lte?: number };
+	background?: { contains?: string };
 	category?: { in?: string[] };
+	description?: { contains?: string };
+	equipment?: { contains?: string };
+	featuredImage?: { contains?: string };
+	gender?: { in?: string[] };
+	id?: string;
 
 	isFavorite?: boolean;
-	age?: { gte?: number; lte?: number };
-	gender?: { in?: string[] };
-	species?: { in?: string[] };
+	name?: { contains?: string };
+	notes?: { contains?: string };
+	OR?: DrizzleCharacterWhereInput[];
 	occupation?: { contains?: string };
+	parentId?: string;
 	personality?: { contains?: string };
-	background?: { contains?: string };
 	relationships?: { contains?: string };
 	skills?: { contains?: string };
-	equipment?: { contains?: string };
-	notes?: { contains?: string };
-	featuredImage?: { contains?: string };
-	parentId?: string;
-	OR?: DrizzleCharacterWhereInput[];
+	species?: { in?: string[] };
 	tags?: { some?: { id?: { in?: string[] } } };
 }
 
 interface DrizzleCharacterFindManyArgs {
-	where?: DrizzleCharacterWhereInput;
 	orderBy?: { [key: string]: 'asc' | 'desc' } | { [key: string]: 'asc' | 'desc' }[];
 	skip?: number;
 	take?: number;
+	where?: DrizzleCharacterWhereInput;
 	// Los includes se manejan por separado en Drizzle con joins
 }
 

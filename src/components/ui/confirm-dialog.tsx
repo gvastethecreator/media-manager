@@ -16,28 +16,28 @@ import { FocusTrap } from './focus-trap';
 export type ConfirmVariant = 'danger' | 'warning' | 'info' | 'success';
 
 export interface ConfirmDialogProps {
-	/** Si está abierto */
-	open: boolean;
-	/** Callback al cerrar */
-	onClose: () => void;
-	/** Callback al confirmar */
-	onConfirm: () => void;
-	/** Título del dialog */
-	title: string;
-	/** Descripción detallada */
-	description?: string;
-	/** Texto del botón de confirmar */
-	confirmText?: string;
 	/** Texto del botón de cancelar */
 	cancelText?: string;
-	/** Variante visual */
-	variant?: ConfirmVariant;
-	/** Mostrar icono */
-	showIcon?: boolean;
+	/** Texto del botón de confirmar */
+	confirmText?: string;
+	/** Descripción detallada */
+	description?: string;
 	/** Deshabilitar confirmar temporalmente (cooldown) */
 	disableConfirmDuration?: number;
 	/** Callback al cancelar (opcional, si no se proporciona usa onClose) */
 	onCancel?: () => void;
+	/** Callback al cerrar */
+	onClose: () => void;
+	/** Callback al confirmar */
+	onConfirm: () => void;
+	/** Si está abierto */
+	open: boolean;
+	/** Mostrar icono */
+	showIcon?: boolean;
+	/** Título del dialog */
+	title: string;
+	/** Variante visual */
+	variant?: ConfirmVariant;
 }
 
 const variantConfig = {

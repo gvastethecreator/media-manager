@@ -19,9 +19,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 interface JsonFlowViewerProps {
+	className?: string;
 	content: string;
 	fileName?: string;
-	className?: string;
 }
 
 // Componente de nodo personalizado para el diagrama

@@ -19,28 +19,28 @@ import { TCGVideoCard } from './tcg-video-card';
 // ============================================================================
 
 export interface TCGCardProps {
-	item: BrowserItem;
-	/** Ancho de la tarjeta */
-	width: number;
-	/** Alto opcional */
-	height?: number;
-	/** Variante de vista */
-	variant: 'grid' | 'card' | 'masonry' | 'list';
-	/** Seleccionada */
-	isSelected?: boolean;
-	/** Activa (folder abierto, etc) */
-	isActive?: boolean;
 	/** Animación de entrada */
 	animateIn?: boolean;
+	/** Estilos adicionales */
+	className?: string;
+	/** Alto opcional */
+	height?: number;
+	/** Activa (folder abierto, etc) */
+	isActive?: boolean;
+	/** Seleccionada */
+	isSelected?: boolean;
+	item: BrowserItem;
 	/** Orden para animación escalonada */
 	layoutOrder?: number;
 	/** Handlers */
 	onClick?: (e: React.MouseEvent) => void;
-	onDoubleClick?: () => void;
 	onContextMenu?: (e: React.MouseEvent) => void;
-	/** Estilos adicionales */
-	className?: string;
+	onDoubleClick?: () => void;
 	style?: CSSProperties;
+	/** Variante de vista */
+	variant: 'grid' | 'card' | 'masonry' | 'list';
+	/** Ancho de la tarjeta */
+	width: number;
 }
 
 // ============================================================================

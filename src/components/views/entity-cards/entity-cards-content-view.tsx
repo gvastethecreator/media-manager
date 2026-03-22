@@ -5,9 +5,9 @@ import type { AnyEntityWithStats } from '@/types/entities';
 
 interface EntityCardsContentViewProps {
 	data: NavigationData | undefined;
-	isLoading: boolean;
-	isError: boolean;
 	error: Error | null;
+	isError: boolean;
+	isLoading: boolean;
 }
 
 const EntityCardsContentView: React.FC<EntityCardsContentViewProps> = memo(function EntityCardsContentView({

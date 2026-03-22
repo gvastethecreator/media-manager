@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 import type { FolderBase } from '@/types/entities/folder';
 
 interface FolderCardFooterProps {
+	children?: ReactNode;
 	folder: Pick<FolderBase, 'id' | 'name' | 'color'>;
 	tcgMode?: boolean;
-	children?: ReactNode;
 }
 
 /**

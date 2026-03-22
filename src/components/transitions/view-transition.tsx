@@ -13,27 +13,27 @@ import { useViewTransition } from '@/providers/ViewTransitionProvider';
  * Props para el componente ViewTransition
  */
 export interface ViewTransitionProps {
+	/** Elemento HTML a renderizar */
+	as?: keyof React.JSX.IntrinsicElements;
+	/** Si debe aplicar el nombre automáticamente */
+	autoName?: boolean;
 	/** Contenido a animar */
 	children: React.ReactNode;
-	/** Nombre único para transiciones compartidas */
-	name?: string;
-	/** Tipo de transición */
-	type?: 'navigation' | 'modal' | 'drawer' | 'list' | 'shared';
+	/** Clase CSS adicional */
+	className?: string;
 	/** Configuración específica para esta transición */
 	config?: {
 		duration?: number;
 		easing?: 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear';
 	};
-	/** Clase CSS adicional */
-	className?: string;
-	/** Elemento HTML a renderizar */
-	as?: keyof React.JSX.IntrinsicElements;
-	/** Callback cuando la transición comienza */
-	onTransitionStart?: () => void;
+	/** Nombre único para transiciones compartidas */
+	name?: string;
 	/** Callback cuando la transición termina */
 	onTransitionEnd?: () => void;
-	/** Si debe aplicar el nombre automáticamente */
-	autoName?: boolean;
+	/** Callback cuando la transición comienza */
+	onTransitionStart?: () => void;
+	/** Tipo de transición */
+	type?: 'navigation' | 'modal' | 'drawer' | 'list' | 'shared';
 	/** Props adicionales para el elemento */
 	[key: string]: any;
 }
@@ -42,10 +42,10 @@ export interface ViewTransitionProps {
  * Ref para controlar ViewTransition imperatively
  */
 export interface ViewTransitionRef {
-	/** Ejecutar transición manual */
-	transition: (callback: () => void) => Promise<void>;
 	/** Elemento DOM */
 	element: HTMLElement | null;
+	/** Ejecutar transición manual */
+	transition: (callback: () => void) => Promise<void>;
 }
 
 /**
@@ -199,10 +199,10 @@ export function useViewTransitionRef() {
  * Componente para transiciones de grupo (múltiples elementos)
  */
 export interface ViewTransitionGroupProps {
-	children: React.ReactNode;
-	name: string;
-	className?: string;
 	as?: keyof React.JSX.IntrinsicElements;
+	children: React.ReactNode;
+	className?: string;
+	name: string;
 }
 
 export function ViewTransitionGroup({

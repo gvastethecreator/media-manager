@@ -22,16 +22,16 @@ import { generateNameFromPattern } from '../hooks/use-rename';
 import type { BrowserItem } from '../types/item.types';
 
 export interface RenameDialogProps {
+	/** Si está procesando */
+	isLoading?: boolean;
 	/** Si el diálogo está abierto */
 	isOpen: boolean;
 	/** Items a renombrar */
 	items: BrowserItem[];
-	/** Callback al confirmar */
-	onConfirm: (newNames: Array<{ id: string; newName: string }>) => void;
 	/** Callback al cancelar */
 	onCancel: () => void;
-	/** Si está procesando */
-	isLoading?: boolean;
+	/** Callback al confirmar */
+	onConfirm: (newNames: Array<{ id: string; newName: string }>) => void;
 }
 
 export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = false }: RenameDialogProps) {

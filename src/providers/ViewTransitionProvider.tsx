@@ -51,8 +51,8 @@ const DEFAULT_CONFIG: ViewTransitionConfig = {
  * Props del ViewTransitionProvider
  */
 interface ViewTransitionProviderProps {
-	config?: Partial<ViewTransitionConfig>;
 	children: ReactNode;
+	config?: Partial<ViewTransitionConfig>;
 }
 
 /**

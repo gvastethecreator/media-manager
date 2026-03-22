@@ -3,14 +3,14 @@ import { cn } from '@/lib/utils';
 import { TagCategory, TagRarity } from '@/store/entities/tag/types';
 
 export interface TagCardHeaderProps {
-	name: string;
-	emoji: string;
-	color: string;
 	category?: string | null | TagCategory;
-	rarity?: string | TagRarity;
-	isFavorite?: boolean;
-	tcgMode?: boolean;
+	color: string;
 	compact?: boolean;
+	emoji: string;
+	isFavorite?: boolean;
+	name: string;
+	rarity?: string | TagRarity;
+	tcgMode?: boolean;
 }
 
 /**

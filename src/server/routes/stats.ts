@@ -3,6 +3,7 @@ import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { getFolderStats, getStats, getSystemStats, getSystemStatsExtended } from '../services/stats.service';
+import { sanitizeLimit } from '../utils/pagination';
 
 const router = express.Router();
 
@@ -62,7 +63,7 @@ router.get(
 			try: async () => {
 				const { limit = '50' } = req.query;
 				const stats = await getSystemStats();
-				return stats?.recentActivity?.slice(0, Number.parseInt(limit as string, 10)) || [];
+				return stats?.recentActivity?.slice(0, sanitizeLimit(limit, 50, 200)) || [];
 			},
 			catch: (error) => {
 				serverLogger.error('Error getting recent activity:', error);
@@ -80,7 +81,7 @@ router.get(
 			try: async () => {
 				const { limit = '10' } = req.query;
 				const stats = await getSystemStats();
-				return stats?.topTags?.slice(0, Number.parseInt(limit as string, 10)) || [];
+				return stats?.topTags?.slice(0, sanitizeLimit(limit, 10, 100)) || [];
 			},
 			catch: (error) => {
 				serverLogger.error('Error getting top tags:', error);

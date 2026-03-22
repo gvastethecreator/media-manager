@@ -10,11 +10,8 @@ import { circuitBreakerRegistry } from './circuit-breaker';
 const logger = clientLogger.withContext('ReindexMonitor');
 
 export interface OperationMetrics {
-	operationId: string;
-	startTime: number;
-	endTime?: number;
 	duration?: number;
-	status: 'running' | 'completed' | 'failed' | 'timeout';
+	endTime?: number;
 	error?: string;
 	metadata: {
 		folderId?: string;
@@ -22,14 +19,17 @@ export interface OperationMetrics {
 		fileCount?: number;
 		type: 'single-folder' | 'auto-index' | 'global-reindex';
 	};
+	operationId: string;
+	startTime: number;
+	status: 'running' | 'completed' | 'failed' | 'timeout';
 }
 
 export interface SystemHealth {
 	activeOperations: number;
 	averageOperationTime: number;
+	circuitBreakerStatus: Record<string, any>;
 	errorRate: number;
 	memoryPressure: 'low' | 'medium' | 'high';
-	circuitBreakerStatus: Record<string, any>;
 }
 
 /**

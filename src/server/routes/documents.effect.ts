@@ -18,10 +18,10 @@ const logger = serverLogger.withContext('DocumentsEffect');
  * 📄 Interfaz para opciones de generación de preview de documento
  */
 interface DocumentPreviewOptions {
-	page?: number;
-	width?: number;
 	height?: number;
+	page?: number;
 	quality?: 'low' | 'medium' | 'high';
+	width?: number;
 }
 
 /**

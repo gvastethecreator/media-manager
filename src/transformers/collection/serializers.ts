@@ -17,20 +17,20 @@ import type {
 
 // Tipos locales equivalentes a Drizzle
 interface DrizzleCollectionCreateInput {
-	name: string;
 	description?: string | null;
-	filters?: string;
-	sortBy?: string;
 	editions?: string;
+	filters?: string;
+	name: string;
+	sortBy?: string;
 	// Las relaciones se manejan por separado en Drizzle
 }
 
 interface DrizzleCollectionUpdateInput {
-	name?: string;
 	description?: string | null;
-	filters?: string;
-	sortBy?: string;
 	editions?: string;
+	filters?: string;
+	name?: string;
+	sortBy?: string;
 	// Las relaciones se manejan por separado en Drizzle
 }
 

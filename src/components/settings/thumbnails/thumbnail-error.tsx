@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 interface ThumbnailErrorProps {
+	description?: string;
 	error: Error | string;
 	onRetry?: () => void;
-	title?: string;
-	description?: string;
 	showDetails?: boolean;
+	title?: string;
 }
 
 /**

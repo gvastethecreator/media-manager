@@ -2,10 +2,10 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export interface SectionProps {
+	children: ReactNode;
+	color?: string;
 	icon: LucideIcon;
 	title: string;
-	color?: string;
-	children: ReactNode;
 }
 
 export interface RowProps {
@@ -13,20 +13,20 @@ export interface RowProps {
 }
 
 export interface ColorPickerProps {
-	value: string;
 	onChange: (value: string) => void;
+	value: string;
 }
 
 export interface ViewModeItem {
-	value: string;
-	label: string;
-	icon: LucideIcon;
 	color: string;
+	icon: LucideIcon;
+	label: string;
+	value: string;
 }
 
 export interface RenderingModeItem {
-	value: string;
-	label: string;
-	icon: LucideIcon;
 	color: string;
+	icon: LucideIcon;
+	label: string;
+	value: string;
 }

@@ -9,14 +9,14 @@ import Selecto from 'selecto';
 interface UseSelectoProps {
 	/** Contenedor donde se aplicará la selección */
 	container?: string | HTMLElement;
-	/** Selector de elementos que se pueden seleccionar */
-	selectableTargets?: string[];
-	/** Callback cuando se seleccionan elementos */
-	onSelect?: (elements: Element[]) => void;
-	/** Callback cuando se deseleccionan elementos */
-	onDeselect?: (elements: Element[]) => void;
 	/** Si la selección está habilitada */
 	enabled?: boolean;
+	/** Callback cuando se deseleccionan elementos */
+	onDeselect?: (elements: Element[]) => void;
+	/** Callback cuando se seleccionan elementos */
+	onSelect?: (elements: Element[]) => void;
+	/** Selector de elementos que se pueden seleccionar */
+	selectableTargets?: string[];
 }
 
 export function useSelecto({

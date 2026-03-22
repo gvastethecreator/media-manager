@@ -33,28 +33,28 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
  * 🎨 Configuración completa para cada tipo de entidad
  */
 export interface EntityTypeConfig {
-	/** Tipo de entidad */
-	type: EntityStatsType;
+	/** Color principal (hex) */
+	color: string;
 	/** Nombre para mostrar */
 	displayName: string;
 	/** Nombre plural */
 	displayNamePlural: string;
-	/** Icono de Lucide React */
-	icon: LucideIcon;
-	/** Color principal (hex) */
-	color: string;
-	/** Color secundario opcional para gradientes */
-	secondaryColor?: string;
 	/** Emoji representativo */
 	emoji: string;
-	/** Operaciones soportadas en menú contextual */
-	supportedOperations: ContextMenuAction[];
-	/** Formatos de archivo soportados (si aplica) */
-	supportedFormats?: string[];
-	/** Función para generar thumbnail */
-	thumbnailGenerator?: (item: AnyEntityWithStats) => Promise<string>;
+	/** Icono de Lucide React */
+	icon: LucideIcon;
 	/** Configuración adicional específica del tipo */
 	metadata?: Record<string, unknown>;
+	/** Color secundario opcional para gradientes */
+	secondaryColor?: string;
+	/** Formatos de archivo soportados (si aplica) */
+	supportedFormats?: string[];
+	/** Operaciones soportadas en menú contextual */
+	supportedOperations: ContextMenuAction[];
+	/** Función para generar thumbnail */
+	thumbnailGenerator?: (item: AnyEntityWithStats) => Promise<string>;
+	/** Tipo de entidad */
+	type: EntityStatsType;
 }
 
 /**

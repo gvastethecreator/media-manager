@@ -9,7 +9,7 @@
 
 import type React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { AnimatePresence, motion } from '@/components/ui/animejs-shim';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';

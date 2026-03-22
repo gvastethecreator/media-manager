@@ -8,12 +8,19 @@
  * Configuración de ViewTransition para diferentes tipos de animación
  */
 export interface ViewTransitionConfig {
-	/** Habilitar ViewTransition globalmente */
-	enabled: boolean;
+	/** Configuraciones de CSS personalizadas */
+	css: {
+		/** Clases CSS personalizadas para diferentes tipos */
+		customClasses: Record<string, string>;
+		/** Duraciones específicas por elemento */
+		durations: Record<string, number>;
+	};
 	/** Duración por defecto de las transiciones (ms) */
 	duration: number;
 	/** Función de easing por defecto */
 	easing: ViewTransitionEasing;
+	/** Habilitar ViewTransition globalmente */
+	enabled: boolean;
 	/** Reducir movimiento para usuarios con sensibilidad vestibular */
 	reduceMotion: boolean;
 	/** Configuraciones específicas por tipo */
@@ -31,27 +38,20 @@ export interface ViewTransitionConfig {
 		/** Transiciones de selección */
 		selection: ViewTransitionTypeConfig;
 	};
-	/** Configuraciones de CSS personalizadas */
-	css: {
-		/** Clases CSS personalizadas para diferentes tipos */
-		customClasses: Record<string, string>;
-		/** Duraciones específicas por elemento */
-		durations: Record<string, number>;
-	};
 }
 
 /**
  * Configuración específica para un tipo de transición
  */
 export interface ViewTransitionTypeConfig {
-	/** Habilitar este tipo de transición */
-	enabled: boolean;
+	/** Clase CSS personalizada */
+	className?: string;
 	/** Duración específica (sobrescribe la global) */
 	duration?: number;
 	/** Easing específico (sobrescribe el global) */
 	easing?: ViewTransitionEasing;
-	/** Clase CSS personalizada */
-	className?: string;
+	/** Habilitar este tipo de transición */
+	enabled: boolean;
 	/** Configuración adicional específica del tipo */
 	options?: Record<string, unknown>;
 }
@@ -65,9 +65,9 @@ export type ViewTransitionEasing = 'linear' | 'ease' | 'ease-in' | 'ease-out' | 
  * Opciones para iniciar una transición
  */
 export interface ViewTransitionOptions {
+	className?: string;
 	duration?: number;
 	easing?: ViewTransitionEasing;
-	className?: string;
 	type?: ViewTransitionType;
 }
 
@@ -104,38 +104,38 @@ export type ViewTransitionType =
 export interface ViewTransitionProps {
 	/** Contenido a animar */
 	children: React.ReactNode;
-	/** Nombre único para transiciones compartidas */
-	name?: string;
-	/** Tipo de transición */
-	type?: ViewTransitionType;
-	/** Configuración específica para esta transición */
-	config?: Partial<ViewTransitionTypeConfig>;
 	/** Clase CSS adicional */
 	className?: string;
-	/** Callback cuando la transición comienza */
-	onTransitionStart?: () => void;
-	/** Callback cuando la transición termina */
-	onTransitionEnd?: () => void;
+	/** Configuración específica para esta transición */
+	config?: Partial<ViewTransitionTypeConfig>;
+	/** Nombre único para transiciones compartidas */
+	name?: string;
 	/** Callback cuando la transición es cancelada */
 	onTransitionCancel?: () => void;
+	/** Callback cuando la transición termina */
+	onTransitionEnd?: () => void;
+	/** Callback cuando la transición comienza */
+	onTransitionStart?: () => void;
+	/** Tipo de transición */
+	type?: ViewTransitionType;
 }
 
 /**
  * Estado de una transición activa
  */
 export interface ViewTransitionState {
-	/** ID único de la transición */
-	id: string;
-	/** Tipo de transición */
-	type: ViewTransitionType;
-	/** Estado actual */
-	status: 'idle' | 'preparing' | 'running' | 'finished' | 'cancelled';
-	/** Timestamp de inicio */
-	startTime: number;
 	/** Duración estimada */
 	duration: number;
+	/** ID único de la transición */
+	id: string;
 	/** Progreso (0-1) */
 	progress: number;
+	/** Timestamp de inicio */
+	startTime: number;
+	/** Estado actual */
+	status: 'idle' | 'preparing' | 'running' | 'finished' | 'cancelled';
+	/** Tipo de transición */
+	type: ViewTransitionType;
 }
 
 /**
@@ -156,34 +156,34 @@ export interface ViewTransitionContextValue {
  * Opciones para el hook useViewTransition
  */
 export interface UseViewTransitionOptions {
-	/** Tipo de transición por defecto */
-	type?: ViewTransitionType;
-	/** Nombre para transiciones compartidas */
-	name?: string;
-	/** Configuración específica */
-	config?: Partial<ViewTransitionTypeConfig>;
 	/** Auto-detectar cambios en el contenido */
 	autoDetect?: boolean;
-	/** Callback cuando la transición es exitosa */
-	onSuccess?: () => void;
+	/** Configuración específica */
+	config?: Partial<ViewTransitionTypeConfig>;
+	/** Nombre para transiciones compartidas */
+	name?: string;
 	/** Callback cuando la transición falla */
 	onError?: (error: Error) => void;
+	/** Callback cuando la transición es exitosa */
+	onSuccess?: () => void;
+	/** Tipo de transición por defecto */
+	type?: ViewTransitionType;
 }
 
 /**
  * Resultado del hook useViewTransition
  */
 export interface UseViewTransitionResult {
-	/** Función para iniciar la transición */
-	startTransition: (callback: () => void) => Promise<void>;
-	/** Estado actual de la transición */
-	state: ViewTransitionState | null;
-	/** Si hay una transición en progreso */
-	isTransitioning: boolean;
 	/** Si ViewTransition está soportado y habilitado */
 	canTransition: boolean;
 	/** Configuración efectiva */
 	effectiveConfig: ViewTransitionTypeConfig;
+	/** Si hay una transición en progreso */
+	isTransitioning: boolean;
+	/** Función para iniciar la transición */
+	startTransition: (callback: () => void) => Promise<void>;
+	/** Estado actual de la transición */
+	state: ViewTransitionState | null;
 }
 
 /**
@@ -236,6 +236,8 @@ export const DEFAULT_VIEW_TRANSITION_CONFIG: ViewTransitionConfig = {
  * Tipos para la integración con React experimental
  */
 export interface ReactViewTransitionAPI {
+	addTransitionType: (type: string) => void;
+	startTransition: (callback: () => void) => void;
 	ViewTransition: React.ComponentType<{
 		children: React.ReactNode;
 		name?: string;
@@ -249,15 +251,13 @@ export interface ReactViewTransitionAPI {
 		onShare?: (element: Element, types: string[]) => void;
 		onUpdate?: (element: Element, types: string[]) => void;
 	}>;
-	addTransitionType: (type: string) => void;
-	startTransition: (callback: () => void) => void;
 }
 
 /**
  * Shim/Polyfill para compatibilidad con versiones de React que no soportan ViewTransition
  */
 export interface ViewTransitionPolyfill {
+	addTransitionType: (type: string) => void;
 	isNative: boolean;
 	startViewTransition: (callback: () => void) => Promise<void>;
-	addTransitionType: (type: string) => void;
 }

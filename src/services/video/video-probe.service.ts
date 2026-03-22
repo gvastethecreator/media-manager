@@ -9,13 +9,13 @@ import { ALL_FORMATS, BufferSource, Input } from 'mediabunny';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 export interface VideoProbeData {
-	duration: number | null;
-	width: number | null;
-	height: number | null;
-	codec: string | null;
-	format: string | null;
 	bitRate: number | null;
+	codec: string | null;
+	duration: number | null;
+	format: string | null;
+	height: number | null;
 	raw?: any;
+	width: number | null;
 }
 
 export class VideoProbeService {

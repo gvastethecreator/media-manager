@@ -1,8 +1,8 @@
 import { ChevronRight, Grid, List, type LucideIcon } from 'lucide-react';
 import type React from 'react';
 import { memo, useCallback, useMemo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
+import { motion } from '@/components/ui/motion-shim';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
@@ -119,18 +119,18 @@ const CategoryCountersComponent = memo(function CategoryCounters({
 });
 
 interface NavCategoryItemProps {
-	id: ViewType;
-	label: string;
 	color: string;
 	icon: LucideIcon;
+	id: ViewType;
+	imageCount: number;
 	isCollapsed: boolean;
 	isCurrent: boolean;
 	itemCount: number;
-	imageCount: number;
+	label: string;
 	onClick: () => void;
 	onToggleCollapse: (event: React.MouseEvent | React.KeyboardEvent) => void;
-	showLabel?: boolean;
 	onToggleViewMode?: () => void;
+	showLabel?: boolean;
 	viewMode?: 'list' | 'grid';
 }
 

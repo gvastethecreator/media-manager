@@ -35,10 +35,10 @@ const favoriteLogger = serverLogger.withContext('FavoriteService');
 
 // Tipo para el resultado de la consulta de favoritos
 interface FavoriteRecord {
-	id: string;
-	entityType: string;
-	entityId: string;
 	addedAt: Date;
+	entityId: string;
+	entityType: string;
+	id: string;
 }
 
 // Mapeo de entity type a tabla
@@ -76,18 +76,18 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 };
 
 export interface FavoriteFilters {
-	search?: string;
 	entityType?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'addedAt' | 'entityType';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface FavoriteResult {
+	hasMore: boolean;
 	items: FavoriteWithStats[];
 	total: number;
-	hasMore: boolean;
 }
 
 /**

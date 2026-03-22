@@ -40,24 +40,31 @@ const systemLogger = serverLogger.withContext('System');
 const settingsLogger = serverLogger.withContext('Settings');
 
 interface NavigationStats {
-	totalImages: number;
-	totalFolders: number;
-	totalCollections: number;
-	totalTags: number;
+	recentActivity: unknown[];
+	topTags: Array<{ id: string; name: string; count: number }>;
+	totalActivities: number;
 	totalAlbums: number;
 	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalFavorites: number;
-	totalActivities: number;
-	totalSize: number;
-	totalViews: number;
+	totalCollections: number;
 	totalDownloads: number;
-	topTags: Array<{ id: string; name: string; count: number }>;
-	recentActivity: unknown[];
+	totalFavorites: number;
+	totalFolders: number;
+	totalImages: number;
+	totalPlaces: number;
+	totalSize: number;
+	totalTags: number;
+	totalViews: number;
+	totalWorldItems: number;
 }
 
 export interface NavigationData {
+	albums: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	audios: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
+	characters: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
+	concepts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	documents: Array<{ id: string; name: string; type?: string; itemCount?: number }>;
+	file3ds: Array<{ id: string; name: string; format?: string; itemCount?: number }>;
 	folders: Array<{
 		id: string;
 		name: string;
@@ -66,24 +73,17 @@ export interface NavigationData {
 		parentId?: string | null;
 		_count?: { images: number; videos: number };
 	}>;
-	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
-	tags: Array<{ id: string; name: string; count?: number }>;
-	albums: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	characters: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	places: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	worldItems: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	concepts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	prompts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	notes: Array<{ id: string; title: string; content?: string; itemCount?: number }>;
 	groups: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	properties: Array<{ id: string; name: string; value?: string; itemCount?: number }>;
-	wildcards: Array<{ id: string; name: string; pattern?: string; itemCount?: number }>;
-	audios: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
-	documents: Array<{ id: string; name: string; type?: string; itemCount?: number }>;
 	jsonFiles: Array<{ id: string; name: string; size?: number; itemCount?: number }>;
-	file3ds: Array<{ id: string; name: string; format?: string; itemCount?: number }>;
-	videos: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
+	notes: Array<{ id: string; title: string; content?: string; itemCount?: number }>;
+	places: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	prompts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	properties: Array<{ id: string; name: string; value?: string; itemCount?: number }>;
 	stats: NavigationStats;
+	tags: Array<{ id: string; name: string; count?: number }>;
+	videos: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
+	wildcards: Array<{ id: string; name: string; pattern?: string; itemCount?: number }>;
+	worldItems: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
 }
 
 export async function getNavigationData(): Promise<NavigationData> {
@@ -292,36 +292,36 @@ export async function revalidateNavigation() {
 
 // Interfaz para estadísticas del sistema en tiempo real
 export interface RuntimeSystemStats {
-	totalImages: number;
-	totalVideos: number;
-	totalAudio: number;
-	totalFolders: number;
-	totalAlbums: number;
-	totalCharacters: number;
-	totalCollections: number;
-	totalTags: number;
-	storageUsed: number;
-	storageAvailable: number;
 	dbSize: number;
 	lastBackup?: string;
+	storageAvailable: number;
+	storageUsed: number;
+	totalAlbums: number;
+	totalAudio: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalFolders: number;
+	totalImages: number;
+	totalTags: number;
+	totalVideos: number;
 }
 
 export interface SystemRuntimeStats {
-	cpuUsage: number;
-	memoryUsage: number;
 	cacheSize: number;
+	cpuUsage: number;
 	dbSize: number;
+	hostname: string;
+	memoryUsage: number;
+	nodeVersion: string;
 	totalEntities: number;
 	uptime: number;
-	nodeVersion: string;
-	hostname: string;
 }
 
 // Respuesta estándar para operaciones del sistema
 export interface SystemResponse {
-	success: boolean;
-	message: string;
 	data?: unknown;
+	message: string;
+	success: boolean;
 }
 
 /**
@@ -583,9 +583,9 @@ export async function getSystemVersion(): Promise<{
  * Respuesta estándar para operaciones de configuración
  */
 export interface SettingsResponse {
-	success: boolean;
-	message: string;
 	data?: Settings;
+	message: string;
+	success: boolean;
 }
 
 /**

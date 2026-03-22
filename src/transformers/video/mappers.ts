@@ -107,40 +107,40 @@ const logger = serverLogger.withContext('VideoMapper');
 
 // Tipos de datos para Drizzle
 interface DrizzleCreateVideoData {
-	name: string;
 	description?: string | null;
-	path: string;
-	size: number;
 	duration: number;
-	width?: number | null;
+	folderId: string;
 	height?: number | null;
-	metadata?: string | null;
-	thumbnail?: string | null;
-	thumbnailSize?: number | null;
-	thumbnailWidth?: number | null;
-	thumbnailHeight?: number | null;
-	isPublic?: boolean;
 	isFavorite?: boolean;
 	isHidden?: boolean;
-	folderId: string;
+	isPublic?: boolean;
+	metadata?: string | null;
+	name: string;
+	path: string;
+	size: number;
+	thumbnail?: string | null;
+	thumbnailHeight?: number | null;
+	thumbnailSize?: number | null;
+	thumbnailWidth?: number | null;
+	width?: number | null;
 }
 
 type DrizzleUpdateVideoData = Partial<Omit<DrizzleCreateVideoData, 'folderId'>>;
 
 interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
-	OR?: DrizzleWhereFilter[];
-	name?: { contains?: string; equals?: string };
-	description?: { contains?: string; equals?: string };
-	isFavorite?: boolean;
-	folderId?: { in?: string[] };
 	createdAt?: { gte?: Date; lte?: Date };
+	description?: { contains?: string; equals?: string };
 	duration?: { gte?: number; lte?: number };
-	width?: { gte?: number; lte?: number };
+	folderId?: { in?: string[] };
 	height?: { gte?: number; lte?: number };
-	size?: { gte?: number; lte?: number };
+	isFavorite?: boolean;
 	metadata?: { not?: null } | null;
+	name?: { contains?: string; equals?: string };
+	OR?: DrizzleWhereFilter[];
+	size?: { gte?: number; lte?: number };
 	thumbnail?: { not?: null } | null;
+	width?: { gte?: number; lte?: number };
 }
 
 interface DrizzleFindManyArgs {

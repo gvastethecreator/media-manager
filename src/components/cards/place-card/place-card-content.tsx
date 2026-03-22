@@ -3,18 +3,18 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface PlaceCardContentProps {
-	description?: string;
-	region?: string;
-	type?: string;
 	climate?: string;
-	population: number;
-	government?: string;
-	parsedResources?: Array<{ name: string; abundance: number; description?: string }>;
-	parsedDangers?: Array<{ type: string; level: number; description?: string }>;
-	parsedStats?: Record<string, number>;
-	primaryColor?: string;
-	tcgMode?: boolean;
 	compact?: boolean;
+	description?: string;
+	government?: string;
+	parsedDangers?: Array<{ type: string; level: number; description?: string }>;
+	parsedResources?: Array<{ name: string; abundance: number; description?: string }>;
+	parsedStats?: Record<string, number>;
+	population: number;
+	primaryColor?: string;
+	region?: string;
+	tcgMode?: boolean;
+	type?: string;
 }
 
 /**

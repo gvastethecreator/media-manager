@@ -14,9 +14,9 @@ import type { NextFunction, Request, Response } from 'express';
  */
 export interface ValidationError {
 	_tag: 'ValidationError';
-	message: string;
-	field?: string;
 	details: unknown;
+	field?: string;
+	message: string;
 	timestamp: Date;
 }
 
@@ -184,7 +184,7 @@ function convertQueryValue(value: any): any {
 	// Number (solo si parece un número)
 	if (/^-?\d+(\.\d+)?$/.test(value)) {
 		const num = Number(value);
-		if (!Number.isNaN(num)) return num;
+		if (!Number.isNaN(num) && Number.isFinite(num)) return num;
 	}
 
 	// Mantener como string

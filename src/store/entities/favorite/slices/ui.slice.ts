@@ -13,22 +13,22 @@ const logger = clientLogger.withContext('FavoriteStore.UISlice');
 
 // Estado
 export interface UIState {
-	viewMode: FavoriteViewMode;
+	selectedIds: string[];
 	sortCriteria: FavoriteSortCriteria;
 	sortDirection: 'asc' | 'desc';
-	selectedIds: string[];
+	viewMode: FavoriteViewMode;
 }
 
 // Acciones
 export interface UIActions {
-	setViewMode: (mode: FavoriteViewMode) => void;
-	setSortCriteria: (criteria: FavoriteSortCriteria) => void;
-	toggleSortDirection: () => void;
-	selectFavorite: (id: string) => void;
-	deselectFavorite: (id: string) => void;
-	toggleSelection: (id: string) => void;
-	selectAll: () => void;
 	deselectAll: () => void;
+	deselectFavorite: (id: string) => void;
+	selectAll: () => void;
+	selectFavorite: (id: string) => void;
+	setSortCriteria: (criteria: FavoriteSortCriteria) => void;
+	setViewMode: (mode: FavoriteViewMode) => void;
+	toggleSelection: (id: string) => void;
+	toggleSortDirection: () => void;
 }
 
 // Slice del store para UI

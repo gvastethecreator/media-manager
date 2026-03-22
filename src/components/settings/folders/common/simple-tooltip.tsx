@@ -10,11 +10,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
  */
 
 interface SimpleTooltipProps {
+	align?: 'start' | 'center' | 'end';
 	children: ReactNode;
+	className?: string;
 	content: string | ReactNode;
 	side?: 'top' | 'bottom' | 'left' | 'right';
-	align?: 'start' | 'center' | 'end';
-	className?: string;
 }
 
 /**

@@ -20,73 +20,73 @@ const logger = serverLogger.withContext('FolderMappers');
 
 // Tipos locales equivalentes a Drizzle (migración a Drizzle)
 interface DrizzleFolderCreateInput {
-	id?: string;
-	name: string;
-	path: string;
+	color?: string | null;
+	createdAt?: Date;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
 	featuredImage?: string | null;
+	id?: string;
 	isFavorite?: boolean;
+	lastIndexed?: Date | null;
+	name: string;
+	parentId?: string | null;
+	path: string;
+	presetId?: string | null;
 	totalFiles?: number;
 	totalSize?: number;
-	lastIndexed?: Date | null;
-	parentId?: string | null;
-	presetId?: string | null;
-	createdAt?: Date;
 	updatedAt?: Date;
 }
 
 interface DrizzleFolderUpdateInput {
-	name?: string;
-	path?: string;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	lastIndexed?: Date | null;
+	name?: string;
+	parentId?: string | null;
+	path?: string;
+	presetId?: string | null;
 	totalFiles?: number;
 	totalSize?: number;
-	lastIndexed?: Date | null;
-	parentId?: string | null;
-	presetId?: string | null;
 	updatedAt?: Date;
 }
 
 interface DrizzleFolderWhereInput {
-	id?: string;
-	name?: { contains?: string };
 	description?: { contains?: string };
-	path?: string;
-	isFavorite?: boolean;
-	parentId?: string | null;
-	OR?: DrizzleFolderWhereInput[];
+	id?: string;
 	images?: { some?: any };
+	isFavorite?: boolean;
+	name?: { contains?: string };
+	OR?: DrizzleFolderWhereInput[];
+	parentId?: string | null;
+	path?: string;
 }
 
 interface DrizzleFolderFindManyArgs {
+	include?: any;
+	orderBy?: any;
 	skip?: number;
 	take?: number;
-	orderBy?: any;
 	where?: DrizzleFolderWhereInput;
-	include?: any;
 }
 
 interface DrizzleFolder {
-	id: string;
-	name: string;
-	path: string;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
 	featuredImage: string | null;
+	id: string;
 	isFavorite: boolean;
+	lastIndexed: Date | null;
+	name: string;
+	parentId: string | null;
+	path: string;
+	presetId: string | null;
 	totalFiles: number;
 	totalSize: number;
-	lastIndexed: Date | null;
-	parentId: string | null;
-	presetId: string | null;
-	createdAt: Date;
 	updatedAt: Date;
 }
 

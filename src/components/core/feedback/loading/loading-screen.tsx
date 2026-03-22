@@ -1,15 +1,15 @@
 import { CircleDashed } from 'lucide-react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 
 interface LoadingScreenProps {
-	message?: string;
+	/** Clases extra para personalizar el contenedor */
+	className?: string;
 	/**
 	 * Si es true, el overlay podrá recibir eventos de puntero.
 	 * Por defecto es false para no interferir con la UI/Tests.
 	 */
 	interactive?: boolean;
-	/** Clases extra para personalizar el contenedor */
-	className?: string;
+	message?: string;
 }
 
 export function LoadingScreen({ message = 'Cargando...', interactive = false, className = '' }: LoadingScreenProps) {

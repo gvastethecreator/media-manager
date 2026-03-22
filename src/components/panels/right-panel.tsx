@@ -57,9 +57,9 @@ const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
 
 interface RightPanelProps {
 	className?: string;
+	isAnimating?: boolean;
 	isCollapsed?: boolean;
 	onToggleCollapse?: () => void;
-	isAnimating?: boolean;
 }
 
 /**

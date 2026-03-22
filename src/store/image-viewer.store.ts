@@ -7,18 +7,18 @@ const viewerLogger = clientLogger.withContext('ImageViewer');
 
 // Interfaz para el estado del visor - MIGRADO A EntityWithStats
 interface ImageViewerState {
-	isOpen: boolean;
-	images: EntityWithStats[];
-	currentIndex: number;
-	zoom: number;
-	rotation: number;
-	openViewer: (images: EntityWithStats[], initialIndex?: number) => void;
 	closeViewer: () => void;
+	currentIndex: number;
+	images: EntityWithStats[];
+	isOpen: boolean;
 	nextImage: () => void;
+	openViewer: (images: EntityWithStats[], initialIndex?: number) => void;
 	previousImage: () => void;
+	rotation: number;
 	setCurrentIndex: (index: number) => void;
-	setZoom: (zoom: number) => void;
 	setRotation: (rotation: number) => void;
+	setZoom: (zoom: number) => void;
+	zoom: number;
 }
 
 // Crear el store - MIGRADO A EntityWithStats

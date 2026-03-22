@@ -52,16 +52,16 @@ const iconContainerVariants = cva('flex items-center justify-center rounded-full
 });
 
 export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof emptyStateVariants> {
-	/** Icono a mostrar */
-	icon: LucideIcon;
-	/** Título principal */
-	title: string;
-	/** Descripción detallada */
-	description: string;
 	/** Acciones disponibles */
 	actions?: React.ReactNode;
+	/** Descripción detallada */
+	description: string;
+	/** Icono a mostrar */
+	icon: LucideIcon;
 	/** Variante del icono */
 	iconVariant?: 'default' | 'primary' | 'warning' | 'error' | 'success';
+	/** Título principal */
+	title: string;
 }
 
 export function EmptyState({

@@ -18,32 +18,32 @@ const logger = serverLogger.withContext('NoteMappers');
 
 // Tipos locales para Drizzle ORM
 interface DrizzleCreateNoteData {
-	title: string;
-	content: string;
 	category: string;
+	content: string;
+	isFavorite: boolean;
 	priority: number;
 	status: string;
-	isFavorite: boolean;
+	title: string;
 }
 
 type DrizzleUpdateNoteData = Partial<DrizzleCreateNoteData>;
 
 interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
-	OR?: DrizzleWhereFilter[];
-	title?: { contains?: string; equals?: string };
-	content?: { contains?: string; equals?: string };
 	category?: { in?: string[] };
+	content?: { contains?: string; equals?: string };
+	isFavorite?: boolean;
+	OR?: DrizzleWhereFilter[];
 	priority?: { in?: number[] };
 	status?: { in?: string[] };
-	isFavorite?: boolean;
+	title?: { contains?: string; equals?: string };
 }
 
 interface DrizzleFindManyArgs {
-	where?: DrizzleWhereFilter;
 	orderBy?: { [key: string]: 'asc' | 'desc' };
 	skip?: number;
 	take?: number;
+	where?: DrizzleWhereFilter;
 }
 
 interface DrizzleUpdateResult {

@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 
 export interface VideoTextProps {
 	/**
-	 * The video source URL or array of sources for multiple formats
+	 * Whether to autoplay the video
+	 * @default true
 	 */
-	src: string | string[];
+	autoPlay?: boolean;
 	/**
 	 * The content to display (will have the video "inside" it)
 	 */
@@ -17,26 +18,6 @@ export interface VideoTextProps {
 	 * Additional className for the container
 	 */
 	className?: string;
-	/**
-	 * Whether to autoplay the video
-	 * @default true
-	 */
-	autoPlay?: boolean;
-	/**
-	 * Whether to mute the video
-	 * @default true
-	 */
-	muted?: boolean;
-	/**
-	 * Whether to loop the video
-	 * @default true
-	 */
-	loop?: boolean;
-	/**
-	 * Whether to preload the video
-	 * @default "auto"
-	 */
-	preload?: 'auto' | 'metadata' | 'none';
 	/**
 	 * Font size for the text mask (in viewport width units or CSS units)
 	 * @default "20vw"
@@ -48,17 +29,36 @@ export interface VideoTextProps {
 	 */
 	fontWeight?: string | number;
 	/**
-	 * Callback when video starts playing
+	 * Whether to loop the video
+	 * @default true
 	 */
-	onPlay?: () => void;
+	loop?: boolean;
+	/**
+	 * Whether to mute the video
+	 * @default true
+	 */
+	muted?: boolean;
+	/**
+	 * Callback when video ends
+	 */
+	onEnded?: () => void;
 	/**
 	 * Callback when video is paused
 	 */
 	onPause?: () => void;
 	/**
-	 * Callback when video ends
+	 * Callback when video starts playing
 	 */
-	onEnded?: () => void;
+	onPlay?: () => void;
+	/**
+	 * Whether to preload the video
+	 * @default "auto"
+	 */
+	preload?: 'auto' | 'metadata' | 'none';
+	/**
+	 * The video source URL or array of sources for multiple formats
+	 */
+	src: string | string[];
 }
 
 /**

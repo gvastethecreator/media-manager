@@ -9,15 +9,15 @@ import { serverLogger } from '../../lib/logger/server-logger';
  * Incluye los métodos principales de logging con contexto automático
  */
 export interface RequestLogger {
-	debug(message: string, context?: unknown): void;
-	info(message: string, context?: unknown): void;
-	warn(message: string, context?: unknown): void;
-	error(message: string, context?: unknown): void;
-	success(message: string, context?: unknown): void;
-	http(message: string, context?: unknown): void;
-	db(message: string, context?: unknown): void;
 	api(message: string, context?: unknown): void;
+	db(message: string, context?: unknown): void;
+	debug(message: string, context?: unknown): void;
+	error(message: string, context?: unknown): void;
+	http(message: string, context?: unknown): void;
+	info(message: string, context?: unknown): void;
+	success(message: string, context?: unknown): void;
 	system(message: string, context?: unknown): void;
+	warn(message: string, context?: unknown): void;
 }
 
 // Configuración de logging

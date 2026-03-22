@@ -39,10 +39,10 @@
 }
 
 .tactile-button:disabled {
-	opacity: 0.5;
 	cursor: not-allowed;
-	transform: none;
+	opacity: 0.5;
 	filter: grayscale(0.3);
+	transform: none;
 }
 
 /* Botón con gradiente primario */
@@ -102,9 +102,9 @@
 }
 
 .input-enhanced:disabled {
-	opacity: 0.5;
 	cursor: not-allowed;
 	background: var(--muted);
+	opacity: 0.5;
 }
 
 .input-enhanced[aria-invalid="true"],
@@ -252,8 +252,8 @@
 .toast-enhanced {
 	background: var(--popover);
 	border: var(--dt-border-width) solid var(--border);
-	border-left-width: 4px;
 	border-left-color: var(--dt-primary-500);
+	border-left-width: 4px;
 	border-radius: var(--dt-radius-md);
 	box-shadow: var(--dt-shadow-3);
 }
@@ -276,28 +276,28 @@
 
 .border-gradient {
 	position: relative;
+	overflow: hidden;
 	background: var(--card);
 	border-radius: var(--dt-radius-md);
-	overflow: hidden;
 }
 
 .border-gradient::before {
-	content: "";
 	position: absolute;
 	inset: 0;
 	padding: var(--dt-border-width);
+	pointer-events: none;
+	content: "";
 	background: linear-gradient(
 		135deg,
 		var(--dt-primary-400),
 		var(--dt-primary-600)
 	);
+	border-radius: inherit;
 	-webkit-mask:
 		linear-gradient(#fff 0 0) content-box,
 		linear-gradient(#fff 0 0);
 	-webkit-mask-composite: xor;
 	mask-composite: exclude;
-	border-radius: inherit;
-	pointer-events: none;
 }
 
 /* =====================================================
@@ -335,9 +335,9 @@
 }
 
 .progress-bar-enhanced {
+	overflow: hidden;
 	background: oklch(from var(--dt-primary-500) l c h / 0.2);
 	border-radius: var(--dt-radius-full);
-	overflow: hidden;
 }
 
 .progress-indicator-enhanced {

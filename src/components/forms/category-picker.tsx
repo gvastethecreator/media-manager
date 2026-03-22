@@ -5,8 +5,8 @@ import type { createPropertySchema } from '@/types/validations/property';
 type PropertyCategory = z.infer<typeof createPropertySchema>['category'];
 
 interface CategoryPickerProps {
-	value: PropertyCategory;
 	onChange: (value: PropertyCategory) => void;
+	value: PropertyCategory;
 }
 
 const categories: Array<{ value: PropertyCategory; label: string; icon: string }> = [

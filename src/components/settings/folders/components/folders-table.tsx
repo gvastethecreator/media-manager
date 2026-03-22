@@ -120,16 +120,16 @@ function formatDate(date: string | Date | null): string {
 }
 
 interface FoldersTableProps {
-	orderedFolders: any[];
 	folders: any[];
-	selectedFolder: string | null;
-	progressByFolder: Record<string, any>;
-	processStatus: any;
-	isProcessing: boolean;
-	isGloballyProcessing: boolean;
 	globalCurrentFolderId: string | null | undefined;
+	isGloballyProcessing: boolean;
+	isProcessing: boolean;
 	onFolderClick: (id: string) => void;
 	onReindex: (id: string) => void;
+	orderedFolders: any[];
+	processStatus: any;
+	progressByFolder: Record<string, any>;
+	selectedFolder: string | null;
 }
 
 /**

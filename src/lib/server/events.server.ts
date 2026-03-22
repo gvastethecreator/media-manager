@@ -104,13 +104,13 @@ export type EventType =
 	| 'directory:deleted';
 
 export interface EventData<T = unknown> {
-	type: EventType;
-	id?: string;
-	objectId?: string;
-	worldItemId?: string;
-	imageId?: string;
 	data?: T;
+	id?: string;
+	imageId?: string;
+	objectId?: string;
 	timestamp?: number;
+	type: EventType;
+	worldItemId?: string;
 }
 
 // Store para eventos en memoria (compartido con el endpoint)

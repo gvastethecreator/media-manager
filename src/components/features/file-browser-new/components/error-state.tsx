@@ -8,14 +8,14 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface ErrorStateProps {
-	/** Título del error */
-	title?: string;
+	/** Clase CSS adicional */
+	className?: string;
 	/** Mensaje de error */
 	message?: string;
 	/** Handler de reintento */
 	onRetry?: () => void;
-	/** Clase CSS adicional */
-	className?: string;
+	/** Título del error */
+	title?: string;
 }
 
 export function FileBrowserErrorState({

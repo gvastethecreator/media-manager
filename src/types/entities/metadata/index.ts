@@ -3,14 +3,14 @@ export * from './types';
 
 // Tipos para operaciones
 export interface CreateMetadataData {
-	imageId: string;
-	format: string;
-	width: number;
-	height: number;
-	size: number;
 	colorSpace?: string;
+	format: string;
 	hasAlpha?: boolean;
+	height: number;
+	imageId: string;
 	orientation?: number;
+	size: number;
+	width: number;
 }
 
 export type UpdateMetadataData = Partial<CreateMetadataData>;

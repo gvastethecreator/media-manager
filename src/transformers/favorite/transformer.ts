@@ -18,11 +18,11 @@ import {
 
 // Tipos locales equivalentes a Drizzle
 interface DrizzleFavorite {
-	id: string;
+	createdAt: Date;
 	entityId: string;
 	entityType: string;
+	id: string;
 	profileId: string;
-	createdAt: Date;
 	updatedAt: Date;
 }
 

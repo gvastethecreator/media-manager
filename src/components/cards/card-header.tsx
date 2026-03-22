@@ -2,14 +2,14 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CardHeaderProps {
-	title: string;
-	subtitle?: string;
-	icon?: ReactNode;
-	emoji?: string;
-	primaryColor: string;
+	children?: ReactNode;
 	className?: string;
 	compact?: boolean;
-	children?: ReactNode;
+	emoji?: string;
+	icon?: ReactNode;
+	primaryColor: string;
+	subtitle?: string;
+	title: string;
 }
 
 /**

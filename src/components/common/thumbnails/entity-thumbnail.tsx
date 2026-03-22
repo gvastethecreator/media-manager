@@ -6,7 +6,7 @@
  */
 
 import { memo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { useEntityThumbnails, useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -15,24 +15,24 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import { ImageThumbnail } from './image-thumbnail';
 
 interface EntityThumbnailProps {
-	/** Entidad para la cual generar el thumbnail */
-	entity: AnyEntityWithStats;
-	/** Tamaño del thumbnail */
-	size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-	/** Calidad del thumbnail a generar */
-	quality?: 'low' | 'medium' | 'high';
-	/** Clases CSS adicionales */
-	className?: string;
-	/** Si mostrar overlay con información */
-	showOverlay?: boolean;
 	/** Si aplicar animaciones */
 	animated?: boolean;
-	/** Callback cuando se hace clic */
-	onClick?: () => void;
-	/** Si está en modo de carga */
-	loading?: boolean;
 	/** Aspecto ratio personalizado */
 	aspectRatio?: string;
+	/** Clases CSS adicionales */
+	className?: string;
+	/** Entidad para la cual generar el thumbnail */
+	entity: AnyEntityWithStats;
+	/** Si está en modo de carga */
+	loading?: boolean;
+	/** Callback cuando se hace clic */
+	onClick?: () => void;
+	/** Calidad del thumbnail a generar */
+	quality?: 'low' | 'medium' | 'high';
+	/** Si mostrar overlay con información */
+	showOverlay?: boolean;
+	/** Tamaño del thumbnail */
+	size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }
 
 const sizeClasses = {
@@ -206,11 +206,11 @@ EntityThumbnailCompact.displayName = 'EntityThumbnailCompact';
  * Grid de thumbnails para mostrar múltiples entidades
  */
 interface EntityThumbnailGridProps {
+	className?: string;
 	entities: AnyEntityWithStats[];
 	maxItems?: number;
-	size?: EntityThumbnailProps['size'];
-	className?: string;
 	onEntityClick?: (entity: AnyEntityWithStats) => void;
+	size?: EntityThumbnailProps['size'];
 }
 
 export const EntityThumbnailGrid = memo<EntityThumbnailGridProps>(

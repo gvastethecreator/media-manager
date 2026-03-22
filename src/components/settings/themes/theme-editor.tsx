@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch-v3';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -21,16 +21,16 @@ import { ThemeColorPicker } from './theme-color-picker';
 import { ThemePreview } from './theme-preview';
 
 interface ThemeEditorProps {
-	/** Tema a editar (null para crear nuevo) */
-	theme: CustomTheme | null;
-	/** Callback al guardar */
-	onSave: (theme: CustomTheme) => void;
+	/** Clase adicional */
+	className?: string;
 	/** Callback al cancelar */
 	onCancel: () => void;
 	/** Callback al eliminar */
 	onDelete?: (themeId: string) => void;
-	/** Clase adicional */
-	className?: string;
+	/** Callback al guardar */
+	onSave: (theme: CustomTheme) => void;
+	/** Tema a editar (null para crear nuevo) */
+	theme: CustomTheme | null;
 }
 
 /**

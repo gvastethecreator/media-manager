@@ -16,14 +16,13 @@ const logger = serverLogger.withContext('BaseTransformer');
  */
 export interface EntityTransformer<TEntity extends EntityBase, TStats extends EntityStats> {
 	/**
-	 * Transforma una entidad base en una entidad con estadísticas
-	 */
-	transform(entity: TEntity): TEntity & { stats: TStats; entityType: EntityStatsTypeValue };
-
-	/**
 	 * Calcula las estadísticas para una entidad
 	 */
 	calculateStats(entity: TEntity): TStats;
+	/**
+	 * Transforma una entidad base en una entidad con estadísticas
+	 */
+	transform(entity: TEntity): TEntity & { stats: TStats; entityType: EntityStatsTypeValue };
 
 	/**
 	 * Valida una entidad

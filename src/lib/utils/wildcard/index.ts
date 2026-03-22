@@ -310,9 +310,9 @@ function calculateDepthFromRoot(wildcard: WildcardComplete, wildcardMap: Map<str
  * Interfaz para nodo del árbol de Wildcards
  */
 export interface WildcardTreeNode {
-	wildcard: WildcardComplete;
 	children: WildcardTreeNode[];
 	depth: number;
+	wildcard: WildcardComplete;
 }
 
 /**

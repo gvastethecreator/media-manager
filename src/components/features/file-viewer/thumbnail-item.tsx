@@ -1,6 +1,6 @@
 import { Box, File, FileJson, FileText, Image as ImageIcon, Music, Video } from 'lucide-react';
 import { memo, useEffect, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { ImageItem } from './file-viewer.types';
 import { isValidSrc, THUMBNAIL_SIZES } from './file-viewer.types';

@@ -8,14 +8,9 @@ import { type ProfileBase, ThemeMode } from '@/types/entities/profile';
 // Contexto para acceso síncrono al perfil
 export interface ProfileContextValue {
 	/**
-	 * Perfil activo - puede ser null si aún no se ha cargado
+	 * Error asociado al perfil
 	 */
-	profile: ProfileBase | null;
-
-	/**
-	 * Indicador de carga del perfil
-	 */
-	isLoading: boolean;
+	error: string | null;
 
 	/**
 	 * Modo oscuro actual (true = oscuro, false = claro)
@@ -23,9 +18,13 @@ export interface ProfileContextValue {
 	isDarkMode: boolean;
 
 	/**
-	 * Error asociado al perfil
+	 * Indicador de carga del perfil
 	 */
-	error: string | null;
+	isLoading: boolean;
+	/**
+	 * Perfil activo - puede ser null si aún no se ha cargado
+	 */
+	profile: ProfileBase | null;
 }
 
 const ProfileContext = createContext<ProfileContextValue>({

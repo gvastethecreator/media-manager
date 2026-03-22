@@ -12,16 +12,16 @@ const logger = clientLogger.withContext('CircuitBreaker');
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
 export interface CircuitBreakerConfig {
-	/** Número máximo de fallos antes de abrir el circuito */
-	failureThreshold: number;
-	/** Tiempo en ms antes de intentar cerrar el circuito */
-	recoveryTimeout: number;
-	/** Tiempo máximo en ms para una operación individual */
-	operationTimeout: number;
 	/** Multiplicador para backoff exponencial */
 	backoffMultiplier: number;
+	/** Número máximo de fallos antes de abrir el circuito */
+	failureThreshold: number;
 	/** Tiempo máximo de backoff en ms */
 	maxBackoffTime: number;
+	/** Tiempo máximo en ms para una operación individual */
+	operationTimeout: number;
+	/** Tiempo en ms antes de intentar cerrar el circuito */
+	recoveryTimeout: number;
 }
 
 export const DEFAULT_CIRCUIT_CONFIG: CircuitBreakerConfig = {
@@ -33,11 +33,11 @@ export const DEFAULT_CIRCUIT_CONFIG: CircuitBreakerConfig = {
 };
 
 export interface CircuitBreakerState {
-	state: CircuitState;
+	currentBackoffTime: number;
 	failureCount: number;
 	lastFailureTime: number;
 	nextAttemptTime: number;
-	currentBackoffTime: number;
+	state: CircuitState;
 }
 
 /**

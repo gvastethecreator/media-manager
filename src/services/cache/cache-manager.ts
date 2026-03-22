@@ -2,43 +2,43 @@ import { EntityStatsType } from '../../types/file-browser/entity-stats';
 import { FileItem } from '../../types/file-browser/file-item';
 
 interface CacheEntry<T> {
-	data: T;
-	timestamp: number;
-	ttl: number;
 	accessCount: number;
+	data: T;
 	lastAccessed: number;
 	size: number;
 	tags: string[];
+	timestamp: number;
+	ttl: number;
 }
 
 interface CacheConfig {
-	maxSize: number; // Maximum cache size in bytes
-	maxEntries: number; // Maximum number of entries
-	defaultTtl: number; // Default TTL in milliseconds
 	cleanupInterval: number; // Cleanup interval in milliseconds
 	compressionEnabled: boolean;
-	persistToDisk: boolean;
+	defaultTtl: number; // Default TTL in milliseconds
 	diskCachePath?: string;
+	maxEntries: number; // Maximum number of entries
+	maxSize: number; // Maximum cache size in bytes
+	persistToDisk: boolean;
 }
 
 interface CacheStatistics {
-	hits: number;
-	misses: number;
-	evictions: number;
-	totalSize: number;
-	entryCount: number;
-	hitRate: number;
 	averageAccessTime: number;
+	entryCount: number;
+	evictions: number;
+	hitRate: number;
+	hits: number;
 	memoryUsage: number;
+	misses: number;
+	totalSize: number;
 }
 
 interface CacheEvents {
+	onClear?: () => void;
+	onError?: (error: Error, operation: string) => void;
+	onEvict?: (key: string, entry: CacheEntry<any>) => void;
 	onHit?: (key: string, entry: CacheEntry<any>) => void;
 	onMiss?: (key: string) => void;
 	onSet?: (key: string, entry: CacheEntry<any>) => void;
-	onEvict?: (key: string, entry: CacheEntry<any>) => void;
-	onClear?: () => void;
-	onError?: (error: Error, operation: string) => void;
 }
 
 type CacheKey = string;

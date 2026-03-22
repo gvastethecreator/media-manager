@@ -5,20 +5,12 @@
  */
 
 export interface ImageItem {
-	id: string;
-	name: string;
-	type: string;
-	path: string;
-	size: number;
-	width: number | null;
-	height: number | null;
-	url?: string;
-	thumbnail: string | null;
-	thumbnailUrl?: string;
-	src?: string;
 	alt?: string;
-	mimeType?: string;
+	height: number | null;
+	id: string;
 	metadata: string | null;
+	mimeType?: string;
+	name: string;
 	parsedMetadata?: {
 		dimensions?: {
 			width: number;
@@ -27,6 +19,14 @@ export interface ImageItem {
 		mimeType?: string;
 		isLocal?: boolean;
 	};
+	path: string;
+	size: number;
+	src?: string;
+	thumbnail: string | null;
+	thumbnailUrl?: string;
+	type: string;
+	url?: string;
+	width: number | null;
 }
 
 export interface PaneState {

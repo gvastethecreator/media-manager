@@ -9,6 +9,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { ImageService, ImageServiceLive } from '@/services/image/image.service.effect';
+import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 
 const router = express.Router();
 
@@ -40,8 +41,8 @@ router.get('/', async (req, res) => {
 
 		const options = {
 			search: search as string | undefined,
-			limit: Number.parseInt(limit as string, 10),
-			offset: Number.parseInt(offset as string, 10),
+			limit: sanitizeLimit(limit as string),
+			offset: sanitizeOffset(offset as string),
 			orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt' | 'size' | 'width' | 'height') || 'createdAt',
 			orderDirection: (sortOrder as 'asc' | 'desc') || 'desc',
 			folderId: folderId as string | undefined,
@@ -113,11 +114,11 @@ router.get('/folder/:folderId', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const imageService = yield* ImageService;
 
-		const { limit = '50', offset = '0' } = req.query;
+		const { limit, offset } = req.query;
 
 		const options = {
-			limit: Number.parseInt(limit as string, 10),
-			offset: Number.parseInt(offset as string, 10),
+			limit: sanitizeLimit(limit as string),
+			offset: sanitizeOffset(offset as string),
 		};
 
 		const images = yield* imageService.getByFolder(req.params.folderId, options);
@@ -210,6 +211,8 @@ router.post('/batch/favorite', async (req, res) => {
 			yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
 		}
 
+		validateBatchSize(ids);
+
 		const count = yield* imageService.setFavoriteMany(ids, isFavorite);
 		return { success: true, count };
 	}).pipe(Effect.provide(ImageServiceLive));
@@ -246,6 +249,8 @@ router.delete('/batch', async (req, res) => {
 		if (!Array.isArray(ids)) {
 			yield* Effect.fail(new Error('Invalid request: ids must be array'));
 		}
+
+		validateBatchSize(ids);
 
 		const count = yield* imageService.deleteManyByIds(ids, { force });
 		return { success: true, count };
@@ -334,17 +339,37 @@ router.get('/:id/content', async (req, res) => {
  * GET /images/:id/original - Obtener imagen original
  */
 router.get('/:id/original', async (req, res) => {
-	const effect = Effect.gen(function* () {
-		const imageService = yield* ImageService;
-		const buffer = yield* imageService.getOriginalImage(req.params.id);
-		return buffer;
-	}).pipe(Effect.provide(ImageServiceLive));
-
 	try {
-		const buffer = await Effect.runPromise(effect);
-		// Detectar mime type desde buffer o usar default
-		res.set('Content-Type', 'image/jpeg'); // TODO: Detectar tipo correcto
-		res.send(buffer);
+		const result = await Effect.runPromise(
+			Effect.gen(function* () {
+				const imageService = yield* ImageService;
+				const image = yield* imageService.getById(req.params.id);
+				const buffer = yield* imageService.getOriginalImage(req.params.id);
+				return { buffer, path: image?.path };
+			}).pipe(Effect.provide(ImageServiceLive))
+		);
+
+		const ext = result.path?.split('.').pop()?.toLowerCase();
+		const mimeMap: Record<string, string> = {
+			png: 'image/png',
+			jpg: 'image/jpeg',
+			jpeg: 'image/jpeg',
+			gif: 'image/gif',
+			webp: 'image/webp',
+			svg: 'image/svg+xml',
+			bmp: 'image/bmp',
+			avif: 'image/avif',
+			ico: 'image/x-icon',
+		};
+		const mimeType = (ext && mimeMap[ext]) || 'application/octet-stream';
+
+		res.set({
+			'Content-Type': mimeType,
+			'Content-Length': result.buffer.length.toString(),
+			'Cache-Control': 'public, max-age=31536000',
+			'X-Content-Type-Options': 'nosniff',
+		});
+		res.send(result.buffer);
 	} catch (error) {
 		const httpError = require('@/lib/effect/adapters/express.adapter').errorToHttpStatus(error);
 		res.status(httpError.status).json({

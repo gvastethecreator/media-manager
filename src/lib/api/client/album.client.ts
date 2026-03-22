@@ -8,12 +8,12 @@ const API_BASE_PATH = '/api/albums';
 
 interface PaginatedResponse<T> {
 	data: T[];
+	message?: string;
 	pagination: {
 		total: number;
 		limit: number;
 		offset: number;
 	};
-	message?: string;
 }
 
 export async function getAlbumsFromApi(): Promise<AlbumWithStats[]> {

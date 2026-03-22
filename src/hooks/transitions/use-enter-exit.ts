@@ -9,36 +9,36 @@ import { getEnterExitCoordinator } from '@/lib/transitions/core/enter-exit-coord
 import type { EnterConfig, ExitConfig, TransitionDirection } from '@/lib/transitions/types';
 
 interface UseEnterExitOptions {
-	/** ID único */
-	id: string;
-	/** Si está visible (controlado) */
-	isVisible?: boolean;
+	/** Si está habilitado */
+	enabled?: boolean;
 	/** Configuración de entrada */
 	enterConfig?: EnterConfig;
 	/** Configuración de salida */
 	exitConfig?: ExitConfig;
-	/** Si está habilitado */
-	enabled?: boolean;
 	/** Grupo para coordinación */
 	group?: string;
+	/** ID único */
+	id: string;
+	/** Si está visible (controlado) */
+	isVisible?: boolean;
+	onEnterComplete?: () => void;
 	/** Callbacks */
 	onEnterStart?: () => void;
-	onEnterComplete?: () => void;
-	onExitStart?: () => void;
 	onExitComplete?: () => void;
+	onExitStart?: () => void;
 }
 
 interface UseEnterExitReturn {
-	/** Ref para asignar al elemento */
-	ref: React.RefObject<HTMLElement | null>;
-	/** Estado actual de visibilidad */
-	isVisible: boolean;
-	/** Estado de transición */
-	isTransitioning: boolean;
 	/** Muestra el elemento con animación */
 	enter: (direction?: TransitionDirection) => Promise<void>;
 	/** Oculta el elemento con animación */
 	exit: (direction?: TransitionDirection) => Promise<void>;
+	/** Estado de transición */
+	isTransitioning: boolean;
+	/** Estado actual de visibilidad */
+	isVisible: boolean;
+	/** Ref para asignar al elemento */
+	ref: React.RefObject<HTMLElement | null>;
 	/** Toggle visibilidad */
 	toggle: () => Promise<void>;
 }
@@ -186,20 +186,23 @@ export function useEnterExit(options: UseEnterExitOptions): UseEnterExitReturn {
 // ============================================================================
 
 interface GroupElement {
-	id: string;
-	ref: React.RefObject<HTMLElement | null>;
-	index: number;
 	config?: { enter?: EnterConfig; exit?: ExitConfig };
+	id: string;
+	index: number;
+	ref: React.RefObject<HTMLElement | null>;
 }
 
 interface UseEnterExitGroupOptions {
-	groupId: string;
 	enabled?: boolean;
 	globalEnterConfig?: EnterConfig;
 	globalExitConfig?: ExitConfig;
+	groupId: string;
 }
 
 interface UseEnterExitGroupReturn {
+	enterAll: (direction?: TransitionDirection) => Promise<void>;
+	exitAll: (direction?: TransitionDirection) => Promise<void>;
+	isTransitioning: boolean;
 	registerElement: (
 		id: string,
 		index: number,
@@ -208,9 +211,6 @@ interface UseEnterExitGroupReturn {
 		ref: React.RefObject<HTMLElement | null>;
 		id: string;
 	};
-	enterAll: (direction?: TransitionDirection) => Promise<void>;
-	exitAll: (direction?: TransitionDirection) => Promise<void>;
-	isTransitioning: boolean;
 }
 
 /**

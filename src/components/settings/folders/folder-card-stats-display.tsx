@@ -11,11 +11,11 @@ interface FolderStatsDisplayProps {
 }
 
 interface MicroProgressBarProps {
-	label: string;
+	color: string;
 	count: number;
 	icon: React.ComponentType<{ className?: string }>;
+	label: string;
 	total: number;
-	color: string;
 }
 
 const MicroProgressBar = memo(function MicroProgressBar({

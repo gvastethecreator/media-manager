@@ -6,28 +6,28 @@ import { cn } from '@/lib/utils';
 
 export interface JsonViewerProps {
 	/**
+	 * Clases CSS adicionales
+	 */
+	className?: string;
+	/**
 	 * Contenido JSON como string
 	 */
 	content: string;
-	/**
-	 * Altura máxima del viewer en píxeles
-	 * @default 300
-	 */
-	maxHeight?: number;
 	/**
 	 * Si debe estar expandido por defecto
 	 * @default false
 	 */
 	defaultExpanded?: boolean;
 	/**
-	 * Clases CSS adicionales
-	 */
-	className?: string;
-	/**
 	 * Si debe mostrar syntax highlighting
 	 * @default true
 	 */
 	enableSyntaxHighlight?: boolean;
+	/**
+	 * Altura máxima del viewer en píxeles
+	 * @default 300
+	 */
+	maxHeight?: number;
 	/**
 	 * Límite de líneas antes de mostrar scroll
 	 * @default 15

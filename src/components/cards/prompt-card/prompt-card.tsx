@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { useRecentPromptImages } from '@/lib/api/prompts';
 import { cn } from '@/lib/utils';
 import type { PromptWithStats } from '@/types/entities/prompt';
@@ -9,22 +9,22 @@ import { PromptCardFooter } from './prompt-card-footer';
 import { PromptCardImages } from './prompt-card-images';
 
 export interface PromptCardProps {
-	/** Prompt a mostrar */
-	prompt: PromptWithStats;
-	/** Si está en modo TCG con efectos visuales especiales */
-	tcgMode?: boolean;
+	/** Clases CSS adicionales */
+	className?: string;
 	/** Si está en modo compacto con menos información */
 	compact?: boolean;
 	/** Deshabilitar interacciones con la tarjeta */
 	disabled?: boolean;
-	/** Función a ejecutar al hacer clic */
-	onClick?: () => void;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
-	/** Clases CSS adicionales */
-	className?: string;
+	/** Función a ejecutar al hacer clic */
+	onClick?: () => void;
+	/** Prompt a mostrar */
+	prompt: PromptWithStats;
 	/** Estilos CSS adicionales */
 	style?: React.CSSProperties;
+	/** Si está en modo TCG con efectos visuales especiales */
+	tcgMode?: boolean;
 }
 
 // Helper function para calcular el total de relaciones

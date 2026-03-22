@@ -8,14 +8,14 @@
 import { useCallback, useEffect, useRef } from 'react';
 
 interface KeyboardShortcut {
-	/** Tecla o combinación (ej: 'Escape', 'Control+k', 'ArrowDown') */
-	key: string;
 	/** Callback cuando se activa */
 	action: () => void;
-	/** Prevenir default del navegador */
-	preventDefault?: boolean;
+	/** Tecla o combinación (ej: 'Escape', 'Control+k', 'ArrowDown') */
+	key: string;
 	/** Solo activar cuando el elemento está enfocado */
 	onlyWhenFocused?: boolean;
+	/** Prevenir default del navegador */
+	preventDefault?: boolean;
 	/** Elemento target (default: document) */
 	target?: HTMLElement | Window | null;
 }

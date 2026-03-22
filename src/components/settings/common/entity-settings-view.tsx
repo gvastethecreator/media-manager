@@ -4,10 +4,12 @@
  * @description Componente genérico que unifica la lógica común de todas las vistas de settings
  */
 
+import { useGSAP } from '@gsap/react';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+import gsap from 'gsap';
 import type { LucideIcon } from 'lucide-react';
 import { Grid3X3, List, Loader2, Plus, Search } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -22,8 +24,8 @@ import { cn } from '@/lib/utils';
 
 export interface EntityWithStats {
 	id: string;
-	name: string;
 	isFavorite?: boolean;
+	name: string;
 	stats?: {
 		imageCount?: number;
 		videoCount?: number;
@@ -33,25 +35,25 @@ export interface EntityWithStats {
 }
 
 export interface ListFilters {
-	search?: string;
 	limit?: number;
+	search?: string;
 	[offset: string]: unknown;
 }
 
 export interface PaginatedResponse<T> {
 	data: T[];
-	total: number;
 	page: number;
 	pageSize: number;
+	total: number;
 }
 
 export interface StatConfig<T> {
+	color: string;
+	getSubtitle?: (items: T[]) => string;
+	getValue: (items: T[]) => number | string;
+	icon: React.ReactNode;
 	key: string;
 	label: string;
-	icon: React.ReactNode;
-	color: string;
-	getValue: (items: T[]) => number | string;
-	getSubtitle?: (items: T[]) => string;
 }
 
 export interface FilterConfig {
@@ -65,44 +67,43 @@ export interface FilterConfig {
 }
 
 export interface CardActions {
-	onEdit: () => void;
 	onDelete: () => void;
+	onEdit: () => void;
 }
 
 export interface FormProps<T> {
 	entity?: T | null;
 	isEditing: boolean;
-	onSuccess: (entity: T) => void;
 	onCancel: () => void;
+	onSuccess: (entity: T) => void;
 }
 
 export interface EntitySettingsViewProps<T extends EntityWithStats> {
-	// Configuración de identidad
-	entityType: string;
+	// Opciones adicionales
+	className?: string;
+	color: string;
 	entityLabel: string;
 	entityLabelPlural: string;
-	icon: React.ElementType;
-	color: string;
-
-	// Hooks de API
-	useListQuery: (filters: ListFilters) => UseQueryResult<PaginatedResponse<T>, Error>;
-	useDeleteMutation: () => UseMutationResult<void, Error, string>;
+	// Configuración de identidad
+	entityType: string;
 
 	// Configuración
 	filterConfig?: FilterConfig;
-	statsConfig: StatConfig<T>[];
-
-	// Render personalizado
-	renderCard: (entity: T, actions: CardActions, isGrid: boolean) => React.ReactNode;
-	renderForm: (props: FormProps<T>) => React.ReactNode;
-
-	// Opciones adicionales
-	className?: string;
 	gridCols?: {
 		sm?: number;
 		md?: number;
 		lg?: number;
 	};
+	icon: React.ElementType;
+
+	// Render personalizado
+	renderCard: (entity: T, actions: CardActions, isGrid: boolean) => React.ReactNode;
+	renderForm: (props: FormProps<T>) => React.ReactNode;
+	statsConfig: StatConfig<T>[];
+	useDeleteMutation: () => UseMutationResult<void, Error, string>;
+
+	// Hooks de API
+	useListQuery: (filters: ListFilters) => UseQueryResult<PaginatedResponse<T>, Error>;
 }
 
 // ============================================================================
@@ -181,6 +182,22 @@ export function EntitySettingsView<T extends EntityWithStats>({
 			return matches;
 		});
 	}, [entities, searchQuery, onlyFavorites, filterConfig]);
+
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	// GSAP Animations
+	useGSAP(
+		() => {
+			if (!filteredEntities || filteredEntities.length === 0) return;
+
+			gsap.fromTo(
+				'.entity-card-anim',
+				{ opacity: 0, y: 20, scale: 0.95 },
+				{ opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.05, ease: 'back.out(1.2)', clearProps: 'all' }
+			);
+		},
+		{ scope: containerRef, dependencies: [viewMode, filteredEntities?.length, isLoading] }
+	);
 
 	// -------------------------------------------------------------------------
 	// HANDLERS
@@ -276,7 +293,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 	// RENDER PRINCIPAL
 	// -------------------------------------------------------------------------
 	return (
-		<div className={cn('space-y-6', className)}>
+		<div className={cn('space-y-6', className)} ref={containerRef}>
 			{/* Header */}
 			<div>
 				<h2 className="font-semibold text-2xl text-foreground">{entityLabelPlural}</h2>
@@ -315,7 +332,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 						<div className="relative">
 							<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 							<Input
-								className="w-[280px] pl-9"
+								className="w-70 pl-9"
 								onChange={(e) => setSearchQuery(e.target.value)}
 								placeholder={`Buscar ${entityLabelPlural.toLowerCase()}...`}
 								value={searchQuery}
@@ -392,12 +409,23 @@ export function EntitySettingsView<T extends EntityWithStats>({
 						className={cn(
 							'gap-4',
 							viewMode === 'grid'
-								? `grid grid-cols-1 sm:grid-cols-${gridCols.sm || 1} md:grid-cols-${gridCols.md || 2} lg:grid-cols-${gridCols.lg || 3}`
+								? (() => {
+										// Hardcode grid classes so tailwind can extract them
+										const totalCols = gridCols.lg || 3;
+										if (totalCols >= 4)
+											return 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6';
+										if (totalCols === 3)
+											return 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5';
+										if (totalCols === 2) return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+										return 'grid grid-cols-1 sm:grid-cols-2';
+									})()
 								: 'flex flex-col'
 						)}
 					>
 						{filteredEntities.map((entity) => (
-							<div key={entity.id}>{renderCard(entity, renderActions(entity), viewMode === 'grid')}</div>
+							<div className="entity-card-anim h-full w-full" key={entity.id}>
+								{renderCard(entity, renderActions(entity), viewMode === 'grid')}
+							</div>
 						))}
 					</div>
 				</ScrollArea>

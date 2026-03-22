@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { getRarityGradient } from '@/components/cards/shared/rarity-gradients';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { useRecentPlaceMedia } from '@/lib/api/places';
 import { cn } from '@/lib/utils';
 import { PlaceWithStats } from '@/types/entities/place';
@@ -11,20 +11,20 @@ import { PlaceCardHeader } from './place-card-header';
 import { PlaceCardImages } from './place-card-images';
 
 export interface PlaceCardProps {
-	/** Lugar a mostrar */
-	place: PlaceWithStats;
-	/** Tamaño compacto con menos información */
-	compact?: boolean;
-	/** Modo TCG con efectos especiales de carta */
-	tcgMode?: boolean;
-	/** Deshabilitar interacciones */
-	disabled?: boolean;
 	/** Clase CSS adicional para la carta */
 	className?: string;
-	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
+	/** Tamaño compacto con menos información */
+	compact?: boolean;
+	/** Deshabilitar interacciones */
+	disabled?: boolean;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
+	/** Función a ejecutar al hacer clic en la tarjeta */
+	onClick?: () => void;
+	/** Lugar a mostrar */
+	place: PlaceWithStats;
+	/** Modo TCG con efectos especiales de carta */
+	tcgMode?: boolean;
 }
 
 /**
@@ -51,20 +51,20 @@ function computeSecondaryColor(color: string | undefined, type: string | undefin
 }
 
 interface DerivedPlaceData {
-	primaryColor: string;
-	secondaryColor: string;
-	rarityLevel: number;
-	power: number;
-	healthPoints: number;
-	valueLevel: number;
 	cardId: string;
-	imagesCount: number;
-	videosCount: number;
 	cardMedia: Array<{ id: string; name: string; thumbnailUrl: string; url: string; type: string; isVideo: boolean }>;
-	parsedResources: { name: string; abundance: number; description?: string }[];
+	healthPoints: number;
+	imagesCount: number;
 	parsedDangers: { type: string; level: number; description?: string }[];
+	parsedResources: { name: string; abundance: number; description?: string }[];
 	parsedStats: Record<string, number>;
 	population: number;
+	power: number;
+	primaryColor: string;
+	rarityLevel: number;
+	secondaryColor: string;
+	valueLevel: number;
+	videosCount: number;
 }
 
 function normalizeArrays(parsedResources: unknown, parsedDangers: unknown, parsedStats: unknown) {
@@ -165,8 +165,8 @@ const PlaceCardError: React.FC<{ className?: string; message: string }> = ({ cla
 );
 
 interface PlaceCardViewProps extends Omit<PlaceCardProps, 'placeId'> {
-	place: PlaceWithStats;
 	derived: DerivedPlaceData;
+	place: PlaceWithStats;
 }
 
 const TCGEffects: React.FC<{

@@ -2,20 +2,20 @@ import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CardContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+	/** Contenido del componente */
+	children: React.ReactNode;
+	/** Clases CSS adicionales */
+	className?: string;
+	/** Nivel de glow effect */
+	glowLevel?: 0 | 1 | 2 | 3;
+	/** Si la tarjeta está siendo hovereada */
+	isHovered?: boolean;
 	/** Color primario para estilos */
 	primaryColor?: string;
 	/** Color secundario para estilos */
 	secondaryColor?: string;
-	/** Nivel de glow effect */
-	glowLevel?: 0 | 1 | 2 | 3;
-	/** Clases CSS adicionales */
-	className?: string;
 	/** Estilos CSS adicionales */
 	style?: React.CSSProperties;
-	/** Contenido del componente */
-	children: React.ReactNode;
-	/** Si la tarjeta está siendo hovereada */
-	isHovered?: boolean;
 }
 
 /**

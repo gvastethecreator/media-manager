@@ -1,7 +1,7 @@
 import { Sparkles, Tag } from 'lucide-react';
 import type React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
 import type { TagWithStats } from '@/types/entities/tag';
@@ -187,34 +187,34 @@ function useTagCardInteractions(onClick?: () => void, disabled?: boolean) {
 }
 
 export interface TagCardProps {
-	tag: TagWithStats;
-	onClick?: () => void;
 	className?: string;
-	style?: React.CSSProperties;
-	tcgMode?: boolean;
-	isSelected?: boolean;
 	compact?: boolean;
 	disabled?: boolean;
 	interactive?: boolean;
+	isSelected?: boolean;
+	onClick?: () => void;
+	style?: React.CSSProperties;
+	tag: TagWithStats;
+	tcgMode?: boolean;
 }
 
 // Componente interior para el contenido de la tarjeta
 interface TagCardInnerContentProps {
-	tagData: any;
 	cardColor: string;
-	secondaryColor: string;
-	tcgMode: boolean;
-	isHovered: boolean;
 	category: string | null;
 	compact: boolean;
+	createdAt: Date;
+	description?: string | null;
 	emoji: string | null;
+	id: string;
 	isFavorite: boolean;
+	isHovered: boolean;
 	name: string;
 	processedFeaturedImage: any;
-	id: string;
-	description?: string | null;
+	secondaryColor: string;
 	shortcut?: string | null;
-	createdAt: Date;
+	tagData: any;
+	tcgMode: boolean;
 	updatedAt: Date;
 }
 

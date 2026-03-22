@@ -6,67 +6,67 @@
 
 // Tipos locales para mock (equivalentes a Drizzle)
 interface MockImage {
+	addedAt: Date;
+	createdAt: Date;
+	folderId: string | null;
+	height: number | null;
 	id: string;
+	isFavorite: boolean;
+	metadata: string | null;
 	name: string | null;
 	path: string;
 	size: number;
-	width: number | null;
-	height: number | null;
-	metadata: string | null;
 	thumbnail: Buffer | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
 	thumbnailError: string | null;
 	thumbnailErrorAt: Date | null;
+	thumbnailHeight: number | null;
 	thumbnailOptimizedAt: Date | null;
-	isFavorite: boolean;
-	folderId: string | null;
-	addedAt: Date;
-	createdAt: Date;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
 	updatedAt: Date;
+	width: number | null;
 }
 
 interface MockTag {
-	id: string;
-	name: string;
+	category: string | null;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	category: string | null;
-	shortcut: string | null;
 	featuredImage: string | null;
+	id: string;
 	isFavorite: boolean;
-	createdAt: Date;
+	name: string;
+	shortcut: string | null;
 	updatedAt: Date;
 }
 
 interface MockCollection {
-	id: string;
-	name: string;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	isPrivate: boolean;
-	isFavorite: boolean;
 	featuredImage: string | null;
-	userId: string | null;
-	createdAt: Date;
+	id: string;
+	isFavorite: boolean;
+	isPrivate: boolean;
+	name: string;
 	updatedAt: Date;
+	userId: string | null;
 }
 
 interface MockAlbum {
-	id: string;
-	name: string;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	isPrivate: boolean;
-	isFavorite: boolean;
 	featuredImage: string | null;
-	userId: string | null;
-	createdAt: Date;
+	id: string;
+	isFavorite: boolean;
+	isPrivate: boolean;
+	name: string;
 	updatedAt: Date;
+	userId: string | null;
 }
 
 /**

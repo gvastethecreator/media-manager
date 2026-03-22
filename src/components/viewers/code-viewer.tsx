@@ -6,8 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { toastService } from '@/lib/ui/toast';
 
 interface CodeViewerProps {
-	isOpen: boolean;
-	onOpenChange: (open: boolean) => void;
 	file: {
 		id: string;
 		name: string;
@@ -15,6 +13,8 @@ interface CodeViewerProps {
 		url?: string;
 		language?: string;
 	};
+	isOpen: boolean;
+	onOpenChange: (open: boolean) => void;
 }
 
 export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {

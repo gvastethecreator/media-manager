@@ -3,10 +3,10 @@ import { cn } from '@/lib/utils';
 import { Input } from './input';
 
 interface ShortcutPickerProps {
-	name: string;
-	defaultValue?: string;
-	onChange?: (value: string) => void;
 	className?: string;
+	defaultValue?: string;
+	name: string;
+	onChange?: (value: string) => void;
 }
 
 export function ShortcutPicker({ name, defaultValue = '', onChange, className }: ShortcutPickerProps) {

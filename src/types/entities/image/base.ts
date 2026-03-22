@@ -11,30 +11,30 @@ import type { TagWithStats } from '../tag';
  * 🖼️ Modelo base de Image, basado en el esquema de Drizzle.
  */
 export interface ImageBase {
-	id: string;
-	name: string;
+	addedAt: Date;
+	createdAt: Date;
 	description: string | null;
-	path: string;
+	folderId: string;
 	hash: string;
-	size: number;
-	width: number;
 	height: number;
+	id: string;
+	isFavorite: boolean;
 	metadata: string | null;
+	name: string;
+	noteId: string | null;
+	path: string;
+	size: number;
+	tags?: TagWithStats[];
 	thumbnail: string | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
-	thumbnailMimeType: string | null;
 	thumbnailError: string | null;
 	thumbnailErrorAt: Date | null;
+	thumbnailHeight: number | null;
+	thumbnailMimeType: string | null;
 	thumbnailOptimizedAt: Date | null;
-	isFavorite: boolean;
-	folderId: string;
-	noteId: string | null;
-	createdAt: Date;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
 	updatedAt: Date;
-	addedAt: Date;
-	tags?: TagWithStats[];
+	width: number;
 }
 
 import type { EntityStats } from '../entity.types';
@@ -58,14 +58,6 @@ export type ImageStats = ImageStatistics;
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface ImageWithStats extends ImageBase {
-	entityType: 'image';
-	stats: ImageStatistics;
-	thumbnailUrl: string;
-	fullUrl: string;
-
-	// Propiedades adicionales de archivo
-	type?: string;
-
 	_count?: {
 		albums?: number;
 		collections?: number;
@@ -80,6 +72,13 @@ export interface ImageWithStats extends ImageBase {
 		properties?: number;
 		groups?: number;
 	};
+	entityType: 'image';
+	fullUrl: string;
+	stats: ImageStatistics;
+	thumbnailUrl: string;
+
+	// Propiedades adicionales de archivo
+	type?: string;
 }
 
 export interface DrizzleImageWithCounts extends ImageBase {

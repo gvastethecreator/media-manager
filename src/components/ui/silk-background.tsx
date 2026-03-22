@@ -12,11 +12,11 @@ interface UniformValue<T = number | Color> {
 }
 
 interface SilkUniforms {
-	uSpeed: UniformValue<number>;
-	uScale: UniformValue<number>;
-	uNoiseIntensity: UniformValue<number>;
 	uColor: UniformValue<Color>;
+	uNoiseIntensity: UniformValue<number>;
 	uRotation: UniformValue<number>;
+	uScale: UniformValue<number>;
+	uSpeed: UniformValue<number>;
 	uTime: UniformValue<number>;
 	[uniform: string]: IUniform;
 }
@@ -112,11 +112,11 @@ const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane({ uniforms
 SilkPlane.displayName = 'SilkPlane';
 
 export interface SilkProps {
-	speed?: number;
-	scale?: number;
 	color?: string;
 	noiseIntensity?: number;
 	rotation?: number;
+	scale?: number;
+	speed?: number;
 }
 
 const Silk: React.FC<SilkProps> = ({

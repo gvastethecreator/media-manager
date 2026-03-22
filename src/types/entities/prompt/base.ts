@@ -10,33 +10,33 @@
  * 🗿 Modelo base de Prompt, derivado del schema de Drizzle.
  */
 export interface PromptBase {
-	id: string;
-	name: string;
-	title?: string; // Alias para name en algunos contextos
+	category: string | null;
+	color: string | null;
+	composition: string | null;
+	content: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	category: string | null;
+	featuredImage: string | null;
+	id: string;
+	inspiration: string | null;
 
 	isFavorite: boolean;
+	lighting: string | null;
+	model?: string | null; // Modelo de IA asociado
+	mood: string | null;
+	name: string;
+	notes: string | null;
+	parameters: string | null;
+	parentId: string | null;
+	purpose?: string | null; // Propósito del prompt
+	style: string | null;
+	tags?: string[] | string; // Tags serializados
+	technique: string | null;
+	title?: string; // Alias para name en algunos contextos
 	totalImages: number;
 	totalVideos: number;
 	type: string | null;
-	content: string | null;
-	parameters: string | null;
-	style: string | null;
-	mood: string | null;
-	lighting: string | null;
-	composition: string | null;
-	technique: string | null;
-	inspiration: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	parentId: string | null;
-	model?: string | null; // Modelo de IA asociado
-	purpose?: string | null; // Propósito del prompt
-	tags?: string[] | string; // Tags serializados
-	createdAt: Date;
 	updatedAt: Date;
 }
 
@@ -46,51 +46,51 @@ import { EntityStats } from '../entity.types';
  * 📊 Estadísticas específicas de Prompt con métricas de IA
  */
 export interface PromptStatistics extends EntityStats {
-	// Métricas de contenido
-	totalContentItems: number;
 	averageContentLength: number;
-	parametersCount: number;
-	tagsCount: number;
-
-	// Conteos específicos para compatibilidad con prompt-card
-	totalImages: number;
-	totalVideos: number;
-	totalCollections: number;
-	totalAlbums: number;
-	totalConcepts: number;
-	totalNotes: number;
-	totalCharacters: number;
-	totalProperties: number;
-	totalWildcards: number;
-	totalGroups: number;
-	totalPlaces: number;
+	averageExecutionTime: number;
+	completenessScore: number;
+	confidenceScore: number;
+	createdThisMonth: boolean;
+	creativeScore: number;
+	executedToday: boolean;
 
 	// Métricas de IA y uso
 	executionCount: number;
-	successRate: number;
-	averageExecutionTime: number;
-	confidenceScore: number;
-	popularityScore: number;
-
-	// Análisis temporal
-	lastExecutedAt: Date | null;
-	createdThisMonth: boolean;
-	updatedThisWeek: boolean;
-	executedToday: boolean;
 
 	// Análisis de calidad
 	hasDescription: boolean;
 	hasFeaturedImage: boolean;
-	isWellStructured: boolean; // Tiene parámetros y tags
-	qualityGrade: 'A' | 'B' | 'C' | 'D';
-	completenessScore: number;
-	creativeScore: number;
-	technicalScore: number;
-	usabilityScore: number;
 
 	// File system functions
 	isDirectory: boolean;
 	isFile: boolean;
+	isWellStructured: boolean; // Tiene parámetros y tags
+
+	// Análisis temporal
+	lastExecutedAt: Date | null;
+	parametersCount: number;
+	popularityScore: number;
+	qualityGrade: 'A' | 'B' | 'C' | 'D';
+	successRate: number;
+	tagsCount: number;
+	technicalScore: number;
+	totalAlbums: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalConcepts: number;
+	// Métricas de contenido
+	totalContentItems: number;
+	totalGroups: number;
+
+	// Conteos específicos para compatibilidad con prompt-card
+	totalImages: number;
+	totalNotes: number;
+	totalPlaces: number;
+	totalProperties: number;
+	totalVideos: number;
+	totalWildcards: number;
+	updatedThisWeek: boolean;
+	usabilityScore: number;
 }
 
 /**
@@ -119,9 +119,6 @@ export interface PromptCounts {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface PromptWithStats extends PromptBase {
-	entityType: 'prompt';
-	stats: PromptStatistics;
-	tags?: any; // Para compatibilidad con prompt-card.tsx
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -137,56 +134,59 @@ export interface PromptWithStats extends PromptBase {
 		properties?: number;
 		groups?: number;
 	};
+	entityType: 'prompt';
+	stats: PromptStatistics;
+	tags?: any; // Para compatibilidad con prompt-card.tsx
 }
 
 /**
  * 📝 Datos para crear un Prompt
  */
 export interface PromptCreateInput {
-	name: string;
+	category?: string | null;
+	color?: string | null;
+	composition?: string | null;
+	content?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	featuredImage?: string | null;
+	inspiration?: string | null;
 
 	isFavorite?: boolean;
-	type?: string | null;
-	content?: string | null;
-	parameters?: string | null;
-	style?: string | null;
-	mood?: string | null;
 	lighting?: string | null;
-	composition?: string | null;
-	technique?: string | null;
-	inspiration?: string | null;
+	mood?: string | null;
+	name: string;
 	notes?: string | null;
-	featuredImage?: string | null;
+	parameters?: string | null;
 	parentId?: string | null;
+	style?: string | null;
+	technique?: string | null;
+	type?: string | null;
 }
 
 /**
  * 📝 Datos para actualizar un Prompt
  */
 export interface PromptUpdateInput {
-	name?: string;
+	category?: string | null;
+	color?: string | null;
+	composition?: string | null;
+	content?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	featuredImage?: string | null;
+	inspiration?: string | null;
 
 	isFavorite?: boolean;
-	type?: string | null;
-	content?: string | null;
-	parameters?: string | null;
-	style?: string | null;
-	mood?: string | null;
 	lighting?: string | null;
-	composition?: string | null;
-	technique?: string | null;
-	inspiration?: string | null;
+	mood?: string | null;
+	name?: string;
 	notes?: string | null;
-	featuredImage?: string | null;
+	parameters?: string | null;
 	parentId?: string | null;
+	style?: string | null;
+	technique?: string | null;
+	type?: string | null;
 }
 
 // ----------------------------------------------------------------

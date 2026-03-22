@@ -11,14 +11,14 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 export interface ImageZoomDialogProps {
-	/** Si el diálogo está abierto */
-	isOpen: boolean;
 	/** URL de la imagen */
 	imageUrl: string;
-	/** Nombre/título de la imagen */
-	title?: string;
+	/** Si el diálogo está abierto */
+	isOpen: boolean;
 	/** Callback al cerrar */
 	onClose: () => void;
+	/** Nombre/título de la imagen */
+	title?: string;
 }
 
 export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', onClose }: ImageZoomDialogProps) {

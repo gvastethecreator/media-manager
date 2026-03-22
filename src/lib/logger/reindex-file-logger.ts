@@ -9,19 +9,19 @@ import path from 'path';
 import { serverLogger } from './server-logger';
 
 export interface ReindexLogEntry {
-	timestamp: string;
-	level: 'ERROR' | 'WARN';
-	source: 'circuit-breaker' | 'auto-indexing' | 'folder-stats' | 'monitor' | 'operation-queue' | 'file-browser';
-	operationId?: string;
-	folderId?: string;
-	folderPath?: string;
-	message: string;
 	context?: any;
 	error?: {
 		name: string;
 		message: string;
 		stack?: string;
 	};
+	folderId?: string;
+	folderPath?: string;
+	level: 'ERROR' | 'WARN';
+	message: string;
+	operationId?: string;
+	source: 'circuit-breaker' | 'auto-indexing' | 'folder-stats' | 'monitor' | 'operation-queue' | 'file-browser';
+	timestamp: string;
 }
 
 /**

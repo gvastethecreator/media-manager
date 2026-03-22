@@ -23,32 +23,32 @@ import {
 const logger = serverLogger.withContext('PlaceService.Effect');
 
 export interface GetPlacesOptions {
-	search?: string;
 	category?: string;
+	limit?: number;
+	offset?: number;
 	onlyFavorites?: boolean;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt';
 	orderDirection?: 'asc' | 'desc';
-	limit?: number;
-	offset?: number;
+	search?: string;
 }
 
 export interface GetPlacesResult {
-	places: PlaceWithStats[];
-	total: number;
 	limit: number;
 	offset: number;
+	places: PlaceWithStats[];
+	total: number;
 }
 
 export class PlaceService extends Context.Tag('PlaceService')<PlaceService, PlaceServiceInterface>() {}
 
 export interface PlaceServiceInterface {
-	readonly getById: (id: string) => Effect.Effect<Place, PlaceError>;
-	readonly getAll: (options?: GetPlacesOptions) => Effect.Effect<GetPlacesResult, PlaceError>;
 	readonly create: (input: PlaceCreateInput) => Effect.Effect<Place, PlaceError>;
-	readonly update: (id: string, input: PlaceUpdateInput) => Effect.Effect<Place, PlaceError>;
 	readonly delete: (id: string) => Effect.Effect<void, PlaceError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<Place, PlaceError>;
+	readonly getAll: (options?: GetPlacesOptions) => Effect.Effect<GetPlacesResult, PlaceError>;
+	readonly getById: (id: string) => Effect.Effect<Place, PlaceError>;
 	readonly getImages: (id: string) => Effect.Effect<any[], PlaceError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<Place, PlaceError>;
+	readonly update: (id: string, input: PlaceUpdateInput) => Effect.Effect<Place, PlaceError>;
 }
 
 const make = (): PlaceServiceInterface => {

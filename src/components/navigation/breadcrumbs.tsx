@@ -1,7 +1,6 @@
 import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
 import React, { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from '@/components/ui/animejs-shim';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -10,11 +9,11 @@ import {
 	BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
+import { motion } from '@/components/ui/motion-shim';
 import { ViewType } from '@/components/views/types';
 import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 
 interface BreadcrumbsProps {
-	currentView: ViewType;
 	currentItem?: {
 		id?: string | null;
 		name?: string;
@@ -31,13 +30,14 @@ interface BreadcrumbsProps {
 		// Para vistas de carpeta: cadena de breadcrumbs jerárquicos
 		breadcrumbs?: Array<{ id: string; name: string; path: string }>;
 	};
+	currentView: ViewType;
 }
 
 interface BreadcrumbConfig {
-	label: string;
-	path: string;
 	contentPath?: string;
 	icon?: React.ReactNode;
+	label: string;
+	path: string;
 }
 
 const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> & Record<string, BreadcrumbConfig> = {

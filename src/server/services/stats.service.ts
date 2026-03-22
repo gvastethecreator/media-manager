@@ -31,46 +31,13 @@ import { createStatsError, StatsErrorCode, statsLogger } from './stats';
 
 // Interfaces
 export interface GeneralStats {
-	totalImages: number;
-	totalVideos: number;
-	totalAudio: number;
-	totalDocuments: number;
-	totalJsonFiles: number;
-	totalFile3D: number;
-	totalFolders: number;
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalNotes: number;
-	totalProperties: number;
-	totalWildcards: number;
-	totalFavorites: number;
-	totalThumbnails: number;
-	totalMetadata: number;
-	totalViews: number;
-	totalDownloads: number;
-	totalSize: number;
-	totalActivities: number;
-	// Información de espacio
-	usedSpace?: number;
-	freeSpace?: number;
 	diskUsage?: {
 		total: number;
 		used: number;
 		free: number;
 		usedPercentage: number;
 	};
-	topTags: Array<{
-		id: string;
-		name: string;
-		color: string;
-		count: number;
-	}>;
+	freeSpace?: number;
 	recentActivity: Array<{
 		id: string;
 		type: string;
@@ -82,27 +49,42 @@ export interface GeneralStats {
 			thumbnail: Uint8Array | null;
 		} | null;
 	}>;
+	topTags: Array<{
+		id: string;
+		name: string;
+		color: string;
+		count: number;
+	}>;
+	totalActivities: number;
+	totalAlbums: number;
+	totalAudio: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalConcepts: number;
+	totalDocuments: number;
+	totalDownloads: number;
+	totalFavorites: number;
+	totalFile3D: number;
+	totalFolders: number;
+	totalImages: number;
+	totalJsonFiles: number;
+	totalMetadata: number;
+	totalNotes: number;
+	totalPlaces: number;
+	totalPrompts: number;
+	totalProperties: number;
+	totalSize: number;
+	totalTags: number;
+	totalThumbnails: number;
+	totalVideos: number;
+	totalViews: number;
+	totalWildcards: number;
+	totalWorldItems: number;
+	// Información de espacio
+	usedSpace?: number;
 }
 
 export interface StatsResponse {
-	collections: Array<{
-		id: string;
-		name: string;
-		count: number;
-		color?: string;
-		emoji?: string;
-	}>;
-	folders: Array<{
-		id: string;
-		name: string;
-		count: number;
-	}>;
-	tags: Array<{
-		id: string;
-		name: string;
-		count: number;
-		color: string;
-	}>;
 	albums: Array<{
 		id: string;
 		name: string;
@@ -115,11 +97,29 @@ export interface StatsResponse {
 		count: number;
 		emoji: string;
 	}>;
+	collections: Array<{
+		id: string;
+		name: string;
+		count: number;
+		color?: string;
+		emoji?: string;
+	}>;
+	folders: Array<{
+		id: string;
+		name: string;
+		count: number;
+	}>;
 	places: Array<{
 		id: string;
 		name: string;
 		count: number;
 		emoji: string;
+	}>;
+	tags: Array<{
+		id: string;
+		name: string;
+		count: number;
+		color: string;
 	}>;
 	worldItems: Array<{
 		id: string;
@@ -131,12 +131,12 @@ export interface StatsResponse {
 
 // Tipo para las etiquetas populares
 interface TopTag {
-	id: string;
-	name: string;
-	color: string;
 	_count: {
 		images: number;
 	};
+	color: string;
+	id: string;
+	name: string;
 }
 
 // Helpers internos para reducir complejidad en la obtención de estadísticas
@@ -148,12 +148,12 @@ interface SizeRow {
 }
 
 interface MediaCounts {
-	images: number;
-	videos: number;
 	audios: number;
 	documents: number;
-	jsonFiles: number;
 	file3Ds: number;
+	images: number;
+	jsonFiles: number;
+	videos: number;
 }
 
 async function fetchMediaCounts(): Promise<MediaCounts> {
@@ -176,11 +176,11 @@ async function fetchMediaCounts(): Promise<MediaCounts> {
 }
 
 interface OrgCounts {
-	folders: number;
 	albums: number;
 	collections: number;
-	tags: number;
 	favorites: number;
+	folders: number;
+	tags: number;
 }
 
 async function fetchOrgCounts(): Promise<OrgCounts> {
@@ -202,13 +202,13 @@ async function fetchOrgCounts(): Promise<OrgCounts> {
 
 interface WorldCounts {
 	characters: number;
-	places: number;
-	worldItems: number;
 	concepts: number;
-	prompts: number;
 	notes: number;
+	places: number;
+	prompts: number;
 	properties: number;
 	wildcards: number;
+	worldItems: number;
 }
 
 async function fetchWorldCounts(): Promise<WorldCounts> {
@@ -244,8 +244,8 @@ async function fetchWorldCounts(): Promise<WorldCounts> {
 }
 
 interface SystemCounts {
-	thumbnails: number;
 	metadatas: number;
+	thumbnails: number;
 }
 
 async function fetchSystemCounts(): Promise<SystemCounts> {
@@ -366,10 +366,10 @@ export async function getSystemStats(): Promise<GeneralStats | null> {
 
 // Nuevos tipos para stats de entidades extendidas
 export interface ExtendedStats {
-	totalDocuments: number;
 	totalAudio: number;
-	totalJsonFiles: number;
+	totalDocuments: number;
 	totalFile3D: number;
+	totalJsonFiles: number;
 }
 
 // Función para obtener estadísticas detalladas de carpetas
@@ -576,11 +576,11 @@ export async function getSystemStatsExtended(): Promise<(GeneralStats & Extended
 
 // Interfaces para los mapeos de datos
 interface EntityWithImageCount {
-	id: string;
-	name: string;
 	_count: {
 		images: number;
 	};
+	id: string;
+	name: string;
 }
 
 interface CollectionWithData extends EntityWithImageCount {

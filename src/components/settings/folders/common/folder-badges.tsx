@@ -17,28 +17,28 @@ const FILE_TYPE_ICONS = {
 
 // ===== TIPOS =====
 interface FileTypeBadgeProps {
-	type: keyof typeof FILE_TYPE_ICONS;
 	count: number;
-	variant?: 'default' | 'outline' | 'secondary';
 	size?: 'micro' | 'small' | 'normal';
+	type: keyof typeof FILE_TYPE_ICONS;
+	variant?: 'default' | 'outline' | 'secondary';
 }
 
 interface FolderBadgeProps {
 	count: number;
-	variant?: 'default' | 'outline' | 'secondary';
 	size?: 'micro' | 'small' | 'normal';
+	variant?: 'default' | 'outline' | 'secondary';
 }
 
 interface SizeBadgeProps {
 	bytes: number;
-	variant?: 'default' | 'outline' | 'secondary';
 	size?: 'micro' | 'small' | 'normal';
+	variant?: 'default' | 'outline' | 'secondary';
 }
 
 interface TotalFilesBadgeProps {
 	folderStats?: FolderStatsResponse;
-	variant?: 'default' | 'outline' | 'secondary';
 	size?: 'micro' | 'small' | 'normal';
+	variant?: 'default' | 'outline' | 'secondary';
 }
 
 // ===== COMPONENTES DE BADGE MEMOIZADOS =====
