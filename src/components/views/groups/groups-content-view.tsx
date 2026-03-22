@@ -134,7 +134,7 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 									transition={{ delay: index * 0.1 }}
 								>
 									<div
-										className="h-full w-full transition-all duration-300 ease-in-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
+										className="h-full w-full transition-all duration-dt-normal ease-dt-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
 										data-group-id={group.id}
 									>
 										<MemoizedGroupCard group={group} onGroupClick={onGroupClick} />

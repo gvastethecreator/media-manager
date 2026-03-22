@@ -184,7 +184,7 @@ export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', on
 				>
 					<img
 						alt={title}
-						className="max-h-full max-w-full select-none object-contain transition-transform duration-200 ease-out"
+						className="max-h-full max-w-full select-none object-contain transition-transform duration-dt-fast ease-dt-out"
 						draggable={false}
 						src={imageUrl}
 						style={{

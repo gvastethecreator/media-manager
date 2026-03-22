@@ -178,10 +178,10 @@ export function ThumbnailTransition({
 		<div
 			className={cn(
 				'thumbnail-transition',
-				'transition-all duration-200',
+				'transition-all duration-dt-fast ease-dt-out',
 				isSelected && 'scale-105 ring-2 ring-primary',
 				isActive && 'scale-102',
-				'cursor-pointer hover:scale-105'
+				'cursor-pointer hover:scale-[1.04] active:scale-[0.98]'
 			)}
 			onClick={handleClick}
 			ref={ref as React.RefObject<HTMLDivElement>}
@@ -240,7 +240,7 @@ export function ThumbnailGridTransition({
 			{thumbnailIds.map((id, index) => (
 				<TransitionItem id={`thumb-${id}`} index={index} key={id}>
 					<div
-						className={cn('flex-shrink-0', selectedId === id && 'rounded-lg ring-2 ring-primary')}
+						className={cn('shrink-0', selectedId === id && 'rounded-lg ring-2 ring-primary')}
 						onClick={() => onSelect?.(id)}
 					>
 						{renderThumbnail(id, index)}

@@ -82,6 +82,46 @@ interface SilkPlaneProps {
 	uniforms: SilkUniforms;
 }
 
+function resolveCssColor(color: string): string {
+	if (typeof document === 'undefined') {
+		return color;
+	}
+
+	let resolvedColor = color;
+
+	if (color.startsWith('var(')) {
+		const temp = document.createElement('div');
+		temp.style.color = color;
+		document.body.appendChild(temp);
+		resolvedColor = getComputedStyle(temp).color || color;
+		document.body.removeChild(temp);
+	}
+
+	const canvas = document.createElement('canvas');
+	canvas.width = 1;
+	canvas.height = 1;
+	const context = canvas.getContext('2d', { willReadFrequently: true });
+
+	if (!context) {
+		return resolvedColor;
+	}
+
+	try {
+		context.clearRect(0, 0, 1, 1);
+		context.fillStyle = resolvedColor;
+		context.fillRect(0, 0, 1, 1);
+		const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data;
+
+		if (a === 0) {
+			return resolvedColor;
+		}
+
+		return `rgb(${r}, ${g}, ${b})`;
+	} catch {
+		return resolvedColor;
+	}
+}
+
 const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
 	const { viewport } = useThree();
 
@@ -130,19 +170,12 @@ const Silk: React.FC<SilkProps> = ({
 
 	const uniforms = useMemo<SilkUniforms>(() => {
 		const threeColor = new Color();
+		const normalizedColor = resolveCssColor(color);
 
-		// Resolver variable CSS si es necesario
-		if (color.startsWith('var(')) {
-			if (typeof window !== 'undefined') {
-				const temp = document.createElement('div');
-				temp.style.color = color;
-				document.body.appendChild(temp);
-				const computed = getComputedStyle(temp).color;
-				document.body.removeChild(temp);
-				threeColor.set(computed);
-			}
-		} else {
-			threeColor.set(color);
+		try {
+			threeColor.set(normalizedColor);
+		} catch {
+			threeColor.set('rgb(38, 49, 73)');
 		}
 
 		return {

@@ -142,7 +142,7 @@ export const TaskCard = memo(function TaskCard({
 				'overflow-hidden rounded-[4.75%]',
 				'border-2 shadow-md',
 				// Interacción
-				'transition-all duration-300 ease-out',
+				'ui-motion-standard',
 				interactive && !disabled && 'cursor-pointer hover:shadow-xl',
 				isSelected && 'ring-4 ring-primary/60',
 				disabled && 'cursor-not-allowed opacity-50',
@@ -159,7 +159,7 @@ export const TaskCard = memo(function TaskCard({
 			{...(onClick && !disabled ? { onClick: handleClick } : {})}
 		>
 			<CardContainer
-				className="transition-all duration-300"
+				className="ui-motion-standard"
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 			>
@@ -217,7 +217,7 @@ export const TaskCard = memo(function TaskCard({
 					<>
 						{/* Holographic effect */}
 						<div
-							className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-30"
+							className="ui-overlay-hover-strong"
 							style={{
 								backgroundImage: `
 									linear-gradient(125deg,
@@ -254,7 +254,7 @@ export const TaskCard = memo(function TaskCard({
 
 				{/* Glow effect on hover */}
 				{tcgMode && (
-					<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
+					<div className="ui-overlay-hover-glow">
 						<div
 							className="absolute inset-0 -z-10 rounded-[4.75%] blur-sm"
 							style={{ boxShadow: `0 0 15px 2px ${primaryColor}` }}

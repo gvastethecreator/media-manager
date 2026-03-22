@@ -183,14 +183,14 @@ const TCGEffects: React.FC<{
 	return (
 		<>
 			<div
-				className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-30"
+				className="ui-overlay-hover-strong z-1"
 				style={{
 					backgroundImage: `linear-gradient(125deg, transparent 0%, color-mix(in oklab, ${primaryColor}, transparent 70%) 25%, color-mix(in oklab, ${secondaryColor}, transparent 70%) 50%, color-mix(in oklab, ${primaryColor}, transparent 70%) 75%, transparent 100%)`,
 					backgroundSize: '200% 200%',
 					animation: 'gradient-shift 3s ease infinite',
 				}}
 			/>
-			<div className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-20">
+			<div className="ui-overlay-hover-soft z-1">
 				<div
 					className="absolute inset-0"
 					style={{

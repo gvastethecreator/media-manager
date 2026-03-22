@@ -81,31 +81,103 @@
 	}
 
 	.ui-motion-standard {
-		@apply transition-all duration-dt-normal ease-dt-out;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: all;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.ui-touch-target {
+		min-height: 44px;
+		min-width: 44px;
+	}
+
+	.ui-touch-target-dense {
+		min-height: 40px;
+		min-width: 40px;
 	}
 
 	.ui-overlay-hover-soft {
-		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out hover:opacity-20;
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.ui-overlay-hover-soft:hover {
+		opacity: 0.2;
 	}
 
 	.ui-overlay-hover-strong {
-		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out hover:opacity-30;
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.ui-overlay-hover-strong:hover {
+		opacity: 0.3;
 	}
 
 	.ui-overlay-hover-glow {
-		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out hover:opacity-100;
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.ui-overlay-hover-glow:hover {
+		opacity: 1;
 	}
 
 	.ui-overlay-group-soft {
-		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out group-hover:opacity-20;
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
 	}
 
 	.ui-overlay-group-strong {
-		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out group-hover:opacity-30;
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
 	}
 
 	.ui-overlay-group-glow {
-		@apply pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out group-hover:opacity-100;
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.group:hover .ui-overlay-group-soft {
+		opacity: 0.2;
+	}
+
+	.group:hover .ui-overlay-group-strong {
+		opacity: 0.3;
+	}
+
+	.group:hover .ui-overlay-group-glow {
+		opacity: 1;
 	}
 
 	.scrollbar-thin::-webkit-scrollbar {

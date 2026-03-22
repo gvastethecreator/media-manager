@@ -89,7 +89,7 @@ function TCGVisualEffects({
 	return (
 		<>
 			<div
-				className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-30"
+				className="ui-overlay-hover-strong"
 				style={{
 					backgroundImage: `linear-gradient(125deg, transparent 0%, color-mix(in oklab, ${primaryColor}, transparent 70%) 25%, color-mix(in oklab, ${rarityColor}, transparent 70%) 50%, color-mix(in oklab, ${primaryColor}, transparent 70%) 75%, transparent 100%)`,
 					backgroundSize: '200% 200%',

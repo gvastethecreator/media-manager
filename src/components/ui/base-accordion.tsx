@@ -47,7 +47,7 @@ const accordionHeaderVariants = cva('flex', {
 });
 
 const accordionTriggerVariants = cva(
-	'flex flex-1 cursor-pointer items-center justify-between gap-2.5 py-4 font-medium text-foreground transition-all [&[data-panel-open]>svg]:rotate-180',
+	'flex flex-1 cursor-pointer items-center justify-between gap-2.5 py-4 font-medium text-foreground transition-all duration-dt-fast ease-dt-out [&[data-panel-open]>svg]:rotate-180',
 	{
 		variants: {
 			variant: {
@@ -57,7 +57,7 @@ const accordionTriggerVariants = cva(
 			},
 			indicator: {
 				arrow: '',
-				plus: '[&>svg>path:last-child]:origin-center [&>svg>path:last-child]:transition-all [&>svg>path:last-child]:duration-200 [&[data-panel-open]>svg>path:last-child]:rotate-90 [&[data-panel-open]>svg>path:last-child]:opacity-0 [&[data-panel-open]>svg]:rotate-180',
+				plus: '[&>svg>path:last-child]:origin-center [&>svg>path:last-child]:transition-all [&>svg>path:last-child]:duration-dt-fast [&>svg>path:last-child]:ease-dt-out [&[data-panel-open]>svg>path:last-child]:rotate-90 [&[data-panel-open]>svg>path:last-child]:opacity-0 [&[data-panel-open]>svg]:rotate-180',
 				none: '',
 			},
 		},
@@ -69,7 +69,7 @@ const accordionTriggerVariants = cva(
 );
 
 const accordionPanelVariants = cva(
-	'h-[var(--accordion-panel-height)] overflow-hidden text-accent-foreground text-sm transition-[height] ease-out data-[ending-style]:h-0 data-[starting-style]:h-0',
+	'h-[var(--accordion-panel-height)] overflow-hidden text-accent-foreground text-sm transition-[height] duration-dt-normal ease-dt-out data-[ending-style]:h-0 data-[starting-style]:h-0',
 	{
 		variants: {
 			variant: {
@@ -153,9 +153,11 @@ function AccordionTrigger(props: React.ComponentProps<typeof Accordion.Trigger>)
 			{...rest}
 		>
 			{children}
-			{indicator === 'plus' && <Plus className="size-4 shrink-0 transition-transform duration-200" strokeWidth={1} />}
+			{indicator === 'plus' && (
+				<Plus className="size-4 shrink-0 transition-transform duration-dt-fast ease-dt-out" strokeWidth={1} />
+			)}
 			{indicator === 'arrow' && (
-				<ChevronDown className="size-4 shrink-0 transition-transform duration-200" strokeWidth={1} />
+				<ChevronDown className="size-4 shrink-0 transition-transform duration-dt-fast ease-dt-out" strokeWidth={1} />
 			)}
 		</Accordion.Trigger>
 	);

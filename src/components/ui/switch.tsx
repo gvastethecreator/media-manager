@@ -50,13 +50,13 @@ const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, 
 					className={cn(
 						'block h-5 w-5 rounded-full',
 						// Fondo del thumb con gradiente sutil
-						'bg-gradient-to-b from-background to-muted',
+						'bg-linear-to-b from-background to-muted',
 						// Borde semitransparente
 						'border border-border/30',
 						// Sombra elevada elegante
 						'shadow-dt-2',
 						// Brillo sutil en la parte superior
-						'relative before:absolute before:inset-x-0 before:top-0.5 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary-foreground/50 before:to-transparent',
+						'relative before:absolute before:inset-x-0 before:top-0.5 before:h-px before:bg-linear-to-r before:from-transparent before:via-primary-foreground/50 before:to-transparent',
 						// Transición suave para propiedades CSS
 						animated
 							? 'transition-[transform,box-shadow,border-color] duration-dt-fast ease-dt-out data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0'

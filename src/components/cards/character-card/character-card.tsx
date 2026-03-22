@@ -58,7 +58,7 @@ function TcgVisualOverlays({
 	return (
 		<>
 			<div
-				className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-30"
+				className="ui-overlay-hover-strong z-1"
 				style={{
 					backgroundImage: `
 						linear-gradient(125deg,
@@ -72,7 +72,7 @@ function TcgVisualOverlays({
 					animation: 'gradient-shift 3s ease infinite',
 				}}
 			/>
-			<div className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-20">
+			<div className="ui-overlay-hover-soft z-1">
 				<div
 					className="absolute inset-0"
 					style={{
@@ -190,7 +190,7 @@ function CardShell({
 		>
 			<CardContainer
 				className={cn(
-					'transition-all duration-300',
+					'ui-motion-standard',
 					isHovered && 'scale-[1.02]',
 					isSelected && 'ring-4 ring-primary/60'
 				)}

@@ -67,10 +67,10 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 	}, [stats.distribution]);
 
 	return (
-		<Card className="animate-fade-up rounded-dt-md border-border/50 bg-card/80 shadow-dt-1 transition-shadow duration-dt-normal hover:shadow-dt-2">
+		<Card className="group animate-fade-up rounded-dt-md border-border/50 bg-card/80 shadow-dt-1 transition-shadow duration-dt-normal ease-dt-out hover:shadow-dt-2">
 			<CardHeader className="p-3 pb-2">
 				<CardTitle className="flex items-center gap-2 text-sm">
-					<span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-dt-sm bg-primary/10 text-primary transition-transform duration-dt-normal group-hover:scale-110">
+					<span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-dt-sm bg-primary/10 text-primary transition-transform duration-dt-normal ease-dt-out group-hover:scale-110">
 						{icon}
 					</span>
 					<span className="heading-sm">{title}</span>

@@ -115,7 +115,7 @@ class ProfileServiceImpl {
 			const queryWithPagination = query.limit(limit).offset((page - 1) * limit);
 
 			// 5. Ejecutar consulta
-			const drizzleProfiles = await queryWithPagination;
+			const drizzleProfiles = await queryWithPagination.execute();
 
 			// 6. Validar que el resultado sea un array (puede estar vacío)
 			if (!Array.isArray(drizzleProfiles)) {
@@ -237,7 +237,8 @@ class ProfileServiceImpl {
 				.from(profiles)
 				.leftJoin(settings, eq(settings.profileId, profiles.id))
 				.where(eq(profiles.isActive, true))
-				.limit(1);
+				.limit(1)
+				.execute();
 
 			// Restructurar el resultado para que sea compatible con el transformador legacy
 			let drizzleResult = null;
@@ -308,7 +309,8 @@ class ProfileServiceImpl {
 				.from(profiles)
 				.leftJoin(settings, eq(settings.profileId, profiles.id))
 				.where(eq(profiles.id, id))
-				.limit(1);
+				.limit(1)
+				.execute();
 
 			// Restructurar el resultado para que sea compatible con el transformador legacy
 			let drizzleResult = null;

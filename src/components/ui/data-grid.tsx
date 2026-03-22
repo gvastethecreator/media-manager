@@ -186,7 +186,7 @@ function DataGridContainer({
 	border: boolean;
 }) {
 	return (
-		<div className={cn('grid w-full', border && 'rounded-lg border border-border', className)} data-slot="data-grid">
+		<div className={cn('grid w-full', border && 'rounded-dt-lg border-2 border-border/50 shadow-dt-1', className)} data-slot="data-grid">
 			{children}
 		</div>
 	);

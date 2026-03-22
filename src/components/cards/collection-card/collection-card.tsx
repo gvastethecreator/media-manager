@@ -124,7 +124,7 @@ export function CollectionCard({
 				// Textura y efectos
 				'after:pointer-events-none after:absolute after:inset-0 after:z-10 after:bg-noise-subtle after:opacity-30 after:content-[""]',
 				// Interacción
-				'transition-all duration-300 ease-out',
+				'ui-motion-standard',
 				'hover:scale-[1.02] hover:shadow-lg',
 				'active:scale-[0.98]',
 				// Cursor
@@ -142,14 +142,14 @@ export function CollectionCard({
 			whileTap={{ scale: 0.98 }}
 		>
 			{/* Resplandor de borde en hover */}
-			<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
+			<div className="ui-overlay-hover-glow">
 				<div className="absolute inset-0 -z-10 rounded-[4.75%] blur-md" style={glowStyle} />
 			</div>
 
 			{/* Textura holográfica tipo TCG */}
 			<div className="pointer-events-none absolute inset-0 z-1 bg-noise-subtle opacity-5 mix-blend-overlay" />
 			<div
-				className="pointer-events-none absolute inset-0 z-1 bg-gradient-to-br opacity-10 transition-opacity duration-300 hover:opacity-20"
+				className="ui-overlay-hover-soft z-1 bg-gradient-to-br opacity-10"
 				style={{
 					background: `linear-gradient(45deg, transparent 25%, color-mix(in oklab, ${primaryColor}, transparent 50%) 50%, transparent 75%)`,
 				}}
