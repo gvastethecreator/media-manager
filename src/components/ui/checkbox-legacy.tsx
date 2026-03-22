@@ -12,6 +12,11 @@ type CheckboxProps = React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Roo
 	size?: CheckboxSize;
 };
 
+/**
+ * @deprecated Usa `@/components/ui/checkbox`.
+ * Se mantiene temporalmente para compatibilidad retroactiva.
+ */
+
 const sizeClasses: Record<CheckboxSize, { root: string; icon: string }> = {
 	sm: { root: 'h-4 w-4', icon: 'h-3 w-3' },
 	md: { root: 'h-5 w-5', icon: 'h-4 w-4' },

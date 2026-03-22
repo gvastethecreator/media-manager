@@ -1,9 +1,7 @@
 'use client';
 
 import * as SwitchPrimitives from '@radix-ui/react-switch';
-import gsap from 'gsap';
 import * as React from 'react';
-import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -22,36 +20,12 @@ interface SwitchProps extends React.ComponentPropsWithoutRef<typeof SwitchPrimit
 
 const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, SwitchProps>(
 	({ className, animated = true, onCheckedChange, ...props }, ref) => {
-		const thumbRef = useRef<HTMLSpanElement>(null);
-		const [isChecked, setIsChecked] = React.useState(props.checked || props.defaultChecked);
-		const animationRef = useRef<gsap.core.Tween | null>(null);
-
-		useEffect(() => {
-			if (!(animated && thumbRef.current)) return;
-
-			animationRef.current?.kill();
-			animationRef.current = gsap.to(thumbRef.current, {
-				x: isChecked ? 20 : 0,
-				duration: 0.5,
-				ease: 'elastic.out(1, 0.5)',
-			});
-
-			return () => {
-				animationRef.current?.kill();
-			};
-		}, [isChecked, animated]);
-
-		const handleCheckedChange = (checked: boolean) => {
-			setIsChecked(checked);
-			onCheckedChange?.(checked);
-		};
-
 		return (
 			<SwitchPrimitives.Root
 				className={cn(
 					// Base styles
-					'peer inline-flex h-7 w-12 shrink-0 cursor-pointer items-center',
-					'rounded-full border-2 transition-all duration-300',
+					'peer inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2',
+					animated ? 'transition-all duration-dt-normal ease-dt-out' : 'transition-none',
 					// Borde semitransparente sutil
 					'border-border/40',
 					// Fondo según estado
@@ -60,15 +34,15 @@ const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, 
 					// Sombra interior sutil
 					'shadow-dt-inset-1',
 					// Focus states
-					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2',
+					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
 					// Disabled
-					'disabled:cursor-not-allowed disabled:opacity-40',
+					'disabled:cursor-not-allowed disabled:opacity-50',
 					// Hover effects
 					'hover:border-border/60 hover:shadow-[0_0_12px_rgba(var(--primary-rgb),0.1)]',
 					'data-[state=checked]:hover:border-primary/50',
 					className
 				)}
-				onCheckedChange={handleCheckedChange}
+				onCheckedChange={onCheckedChange}
 				ref={ref}
 				{...props}
 			>
@@ -84,14 +58,12 @@ const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, 
 						// Brillo sutil en la parte superior
 						'relative before:absolute before:inset-x-0 before:top-0.5 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary-foreground/50 before:to-transparent',
 						// Transición suave para propiedades CSS
-						'transition-[box-shadow,border-color] duration-200',
+						animated
+							? 'transition-[transform,box-shadow,border-color] duration-dt-fast ease-dt-out data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0'
+							: 'transition-none data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0',
 						// Posición base
 						'ml-0.5'
 					)}
-					ref={thumbRef}
-					style={{
-						willChange: animated ? 'transform' : undefined,
-					}}
 				/>
 			</SwitchPrimitives.Root>
 		);
