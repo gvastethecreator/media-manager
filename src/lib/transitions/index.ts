@@ -62,7 +62,7 @@ export {
 	compositePresets,
 	enterPresets,
 	exitPresets,
-	getAnimeConfig,
+	getAnimationConfig,
 	getDirectionalEnterPreset,
 	getDirectionalExitPreset,
 	statePresets,
