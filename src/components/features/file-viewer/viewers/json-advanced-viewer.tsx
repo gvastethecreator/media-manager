@@ -124,16 +124,16 @@ function TreeNode({ name, value, depth = 0, isLast = false, searchTerm = '' }: T
 		return (
 			<div className="flex items-start gap-1 py-0.5 font-mono text-sm" style={{ paddingLeft: `${depth * 16}px` }}>
 				<span className="select-none text-muted-foreground">{isLast ? '└─' : '├─'}</span>
-				<span className={cn('text-blue-600 dark:text-blue-400', isMatch && 'bg-yellow-200 dark:bg-yellow-900')}>
+				<span className={cn('text-dt-primary-600 dark:text-dt-primary-400', isMatch && 'bg-dt-warning-200 dark:bg-dt-warning-900')}>
 					{name}:
 				</span>
 				<span
 					className={cn(
 						'ml-1',
-						type === 'string' && 'text-green-600 dark:text-green-400',
-						type === 'number' && 'text-orange-600 dark:text-orange-400',
-						type === 'boolean' && 'text-purple-600 dark:text-purple-400',
-						type === 'null' && 'text-gray-500'
+						type === 'string' && 'text-dt-success-600 dark:text-dt-success-400',
+						type === 'number' && 'text-dt-warning-600 dark:text-dt-warning-400',
+						type === 'boolean' && 'text-dt-danger-600 dark:text-dt-danger-400',
+						type === 'null' && 'text-dt-neutral-500'
 					)}
 				>
 					{type === 'string' ? `"${formatValue(value)}"` : formatValue(value)}
@@ -150,7 +150,7 @@ function TreeNode({ name, value, depth = 0, isLast = false, searchTerm = '' }: T
 			<div
 				className={cn(
 					'flex cursor-pointer items-center gap-1 rounded py-0.5 hover:bg-muted/50',
-					isMatch && 'bg-yellow-200 dark:bg-yellow-900'
+					isMatch && 'bg-dt-warning-200 dark:bg-dt-warning-900'
 				)}
 				onClick={() => setIsExpanded(!isExpanded)}
 				onKeyDown={(e) => {
@@ -167,7 +167,7 @@ function TreeNode({ name, value, depth = 0, isLast = false, searchTerm = '' }: T
 					{hasChildren && (isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />)}
 					{!hasChildren && <span className="w-4" />}
 				</span>
-				<span className="font-mono text-blue-600 dark:text-blue-400">{name}:</span>
+				<span className="font-mono text-dt-primary-600 dark:text-dt-primary-400">{name}:</span>
 				{type === 'array' && (
 					<Badge className="ml-1 text-xs" variant="secondary">
 						[{count}]

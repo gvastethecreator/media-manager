@@ -64,8 +64,10 @@ console.log();
 const SERVER_SRC = 'src/server/index.ts';
 const SERVER_DIR = 'src/server';
 const REQUIRED_DEPS = ['music-metadata', 'ffprobe-static'];
+const SERVER_PORT = Number(serverEnv.API_PORT || serverEnv.PORT || 4000);
 
 let serverProcess = null;
+let bootSequence = 0;
 
 // NOTE:
 // En desarrollo, preferimos ejecutar el entrypoint TS directamente.
@@ -88,8 +90,33 @@ function checkRequiredDependencies() {
 	return true;
 }
 
+async function waitForHealth(url, currentBoot, { retries = 50, intervalMs = 250 } = {}) {
+	for (let i = 0; i < retries; i++) {
+		if (currentBoot !== bootSequence) {
+			return false;
+		}
+
+		try {
+			const response = await fetch(url, { method: 'GET' });
+			if (response.ok) {
+				return true;
+			}
+		} catch {
+			// seguir intentando mientras arranca
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+	}
+
+	return false;
+}
+
 // Función para iniciar el servidor
 function startServer() {
+	bootSequence += 1;
+	const currentBoot = bootSequence;
+	const healthUrl = `http://localhost:${SERVER_PORT}/health`;
+
 	if (serverProcess) {
 		console.log(chalk.yellow('🔄 Reiniciando servidor...'));
 		serverProcess.kill();
@@ -115,6 +142,12 @@ function startServer() {
 	serverProcess.on('close', (code) => {
 		if (code !== 0 && code !== null) {
 			console.log(chalk.red(`❌ Servidor terminó con código ${code}`));
+		}
+	});
+
+	void waitForHealth(healthUrl, currentBoot).then((isReady) => {
+		if (isReady) {
+			console.log(chalk.green(`✅ Backend listo en http://localhost:${SERVER_PORT}`));
 		}
 	});
 }
