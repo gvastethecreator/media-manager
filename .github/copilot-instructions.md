@@ -9,12 +9,12 @@ Este archivo guía a agentes IA (GitHub Copilot, Claude, etc.) para ser producti
 **Image Manager** es un sistema monolítico para gestión inteligente de archivos multimedia con arquitectura React 19 + Express/Bun + Drizzle ORM + SQLite.
 
 ### Stack Clave
-- **Frontend**: React 19 + TypeScript + Vite + Zustand + TanStack Query
+- **Frontend**: React 19 + TypeScript + Vite+ (Vite + Rolldown) + Zustand + TanStack Query
 - **Backend**: Express (Bun runtime) con HMR
 - **Database**: Drizzle ORM + SQLite (libsql)
 - **Testing**: Vitest + Playwright
 - **Desktop**: Tauri 2 (opcional)
-- **Linting**: Biome (formatter + linter)
+- **Linting**: Oxc (Oxlint + Oxfmt) con `Vite+` para checks unificados
 
 ### Dominios Principales
 - 📂 **Archivos**: Images, Videos, Audios, Documents, JSON, 3D
@@ -105,7 +105,7 @@ Criterios fuertes = loop independiente. Criterios débiles ("hazlo funcionar") =
 ### Iniciar Desarrollo
 ```bash
 bun run dev:full      # Full stack (frontend + backend + HMR) — más común
-bun run dev:vite      # Solo frontend (Vite dev server)
+bun run dev:vite      # Solo frontend (Vite+ dev server)
 bun run dev:server:hot # Solo backend (Express con HMR)
 ```
 
@@ -114,8 +114,10 @@ bun run dev:server:hot # Solo backend (Express con HMR)
 bun run build         # Build completo (Vite + server)
 bun run test          # Tests unitarios (Vitest)
 bun run test:e2e      # Tests E2E (Playwright)
-bun run biome         # Lint + format check
-bun run biome:fix     # Auto-fix lint issues
+bun run check         # Gate operativo (lint + typecheck)
+bun run check:full    # Auditoría completa Vite+ (lint + format repo)
+bun run lint          # Lint directo con Oxlint
+bun run format        # Formato con Oxfmt
 bun run tsc           # Type check
 ```
 
@@ -209,7 +211,7 @@ Response → Store (Zustand) → React Components
 ❌ **NUNCA** hagas `src/services/<entity>/index.ts` con re-exports.
 ✅ **Importa directo**: `import { videoService } from '@/services/video/video.service.effect'`
 
-**Razón**: Performance + claridad (Biome lo prefiere).
+**Razón**: Performance + claridad.
 
 ### 2. **Transformers = Punto Único de Enriquecimiento**
 - Servicios: retornan datos crudos de Drizzle
@@ -322,7 +324,7 @@ src/
 - ❌ Evitar ternarios anidados (preferir early returns)
 - ❌ Evitar `dangerouslySetInnerHTML` (XSS risk)
 
-### Biome (Linting/Formatting)
+### Oxc (Linting/Formatting)
 - Indentation: **tabs** (width: 2)
 - Semicolons: **sempre**
 - Quotes: **single** (`'...'` no `"..."`)
@@ -489,7 +491,7 @@ test('should display images grid', async ({ page }) => {
 1. **Buscar contexto** (semantic search) en patterns existentes
 2. **Crear TODO list** (si es multi-paso)
 3. **Implementar cambios** (aplicar patrones encontrados)
-4. **Validar**: `bun run tsc && bun run biome && bun run test`
+4. **Validar**: `bun run tsc && bun run check && bun run test`
 5. **Marcar tasks completadas** en TODO
 
 ### Ejemplo:
@@ -534,7 +536,7 @@ lsof -i :4000
 R: Schema → Service → Transformer → Route → Store → Component
 
 **P: ¿Por qué no hay `index.ts` en services/?**
-R: Performance + Biome lint rules. Importa directo de `service.ts`.
+R: Performance + claridad. Importa directo de `service.ts`.
 
 **P: ¿Cómo debuguear una query lenta?**
 R: `bun run db:studio` + inspector Network en DevTools

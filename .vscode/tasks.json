@@ -28,7 +28,7 @@
       }
     },
     {
-      "label": "🌐 Desarrollo: Frontend (Vite)",
+      "label": "🌐 Desarrollo: Frontend (Vite+)",
       "type": "shell",
       "command": "bun run dev:vite",
       "group": "build",
@@ -81,7 +81,7 @@
       }
     },
     {
-      "label": "🏗️ Build: Frontend",
+      "label": "🏗️ Build: Frontend (Vite+)",
       "type": "shell",
       "command": "bun run build:vite",
       "group": "build",
@@ -119,6 +119,13 @@
     },
     // Calidad de código
     {
+      "label": "🧩 Check: Vite+",
+      "type": "shell",
+      "command": "bun run check",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
       "label": "🎨 Format: Check",
       "type": "shell",
       "command": "bun run format:check",
@@ -133,16 +140,16 @@
       "problemMatcher": []
     },
     {
-      "label": "🔍 Biome: Check",
+      "label": "🔍 Lint: Oxc",
       "type": "shell",
-      "command": "bun run biome",
+      "command": "bun run lint",
       "group": "build",
       "problemMatcher": []
     },
     {
-      "label": "🔧 Biome: Fix",
+      "label": "🔧 Lint: Oxc Fix",
       "type": "shell",
-      "command": "bun run biome:fix",
+      "command": "bun run lint:fix",
       "group": "build",
       "problemMatcher": []
     },

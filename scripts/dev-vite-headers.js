@@ -6,17 +6,16 @@
  */
 
 const { spawn } = require('child_process');
-const path = require('path');
 
 // Configurar variables de entorno para manejar headers grandes
 // Aumentamos a 128KB para asegurar que cookies grandes no bloqueen la carga
 process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --max-http-header-size=131072`;
 
-console.log('🚀 Iniciando Vite con soporte para headers grandes (128KB)...');
+console.log('🚀 Iniciando Vite+ con soporte para headers grandes (128KB)...');
 console.log('🔧 NODE_OPTIONS:', process.env.NODE_OPTIONS);
 
-// Ejecutar Vite
-const viteProcess = spawn('bunx', ['vite'], {
+// Ejecutar Vite+ (vp dev)
+const viteProcess = spawn('bun', ['run', 'dev:vite:app'], {
 	stdio: 'inherit',
 	shell: true,
 	cwd: process.cwd(),
@@ -29,17 +28,17 @@ viteProcess.on('error', (error) => {
 });
 
 viteProcess.on('close', (code) => {
-	console.log(`🔚 Vite terminó con código: ${code}`);
+	console.log(`🔚 Vite+ terminó con código: ${code}`);
 	process.exit(code);
 });
 
 // Manejar señales de terminación
 process.on('SIGINT', () => {
-	console.log('\n👋 Deteniendo Vite...');
+	console.log('\n👋 Deteniendo Vite+...');
 	viteProcess.kill('SIGINT');
 });
 
 process.on('SIGTERM', () => {
-	console.log('\n👋 Deteniendo Vite...');
+	console.log('\n👋 Deteniendo Vite+...');
 	viteProcess.kill('SIGTERM');
 });

@@ -53,7 +53,7 @@ bun run db:push
 bun run db:seed
 
 # 6. Verificar instalación
-bun run biome
+bun run lint
 bun run tsc
 ```
 
@@ -64,7 +64,7 @@ Extensiones recomendadas:
 ```json
 {
   "recommendations": [
-    "biomejs.biome",
+    "oxc.oxc-vscode",
     "bradlc.vscode-tailwindcss",
     "formulahendry.auto-rename-tag",
     "christian-kohler.path-intellisense",
@@ -78,7 +78,7 @@ Configuración de settings.json:
 ```json
 {
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "biomejs.biome",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
   "typescript.preferences.importModuleSpecifier": "non-relative"
 }
 ```
@@ -590,7 +590,7 @@ test(audio): agregar tests de waveform
 Checklist antes de crear PR:
 
 - [ ] Tests pasan (`bun run test`)
-- [ ] Linting pasa (`bun run biome`)
+- [ ] Linting pasa (`bun run lint`)
 - [ ] Type checking pasa (`bun run tsc`)
 - [ ] No hay `console.log` (solo logger)
 - [ ] No hay `any` innecesarios
@@ -603,7 +603,7 @@ Checklist antes de crear PR:
 bun run prepare
 
 # Hooks ejecutan:
-# 1. biome check
+# 1. vp check / bun run check
 # 2. tsc --noEmit
 # 3. test:changed
 ```
@@ -616,7 +616,7 @@ bun run prepare
 - [Documentación de Effect-TS](https://effect.website/)
 - [Drizzle ORM Docs](https://orm.drizzle.team/)
 - [TanStack Query Docs](https://tanstack.com/query/latest)
-- [Biome Configuration](https://biomejs.dev/reference/configuration/)
+- [Oxc Docs](https://oxc.rs/docs/guide/usage/linter.html)
 
 ---
 
