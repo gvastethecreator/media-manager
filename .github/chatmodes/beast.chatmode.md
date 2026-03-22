@@ -130,7 +130,7 @@ Seeds sólo crean entidades abstractas (no media binaria). Respetar política: n
 
 ### 7. Tests y Calidad
 - E2E: usar Playwright scripts (`test:e2e`, `test:ui`). Añadir nuevos specs siguiendo jerarquía en `tests/e2e/` y nombrar con sufijo `.spec.ts`.
-- Lint/format: usar scripts con logging tolerante: `bun run biome`, `bun run format:check`. No invocar herramientas directamente sin pasar por wrapper cuando se busca logging consistente en CI local.
+- Lint/format: usar scripts con logging tolerante: `bun run lint`, `bun run format:check` o `bun run check`. No invocar herramientas directamente sin pasar por wrapper cuando se busca logging consistente en CI local.
 - Tipos: `bun run tsc` (no emitir). Corregir tipos antes de commits grandes.
 
 ### 8. Logging y Observabilidad Dev

@@ -119,8 +119,8 @@ function categorizeByTool(line, lowerLine, categories) {
 		categories.typescript.push(line);
 	} else if (lowerLine.includes('eslint')) {
 		categories.eslint.push(line);
-	} else if (lowerLine.includes('biome')) {
-		categories.biome.push(line);
+	} else if (lowerLine.includes('oxlint') || lowerLine.includes('oxfmt') || lowerLine.includes('vite+')) {
+		categories.oxc.push(line);
 	} else if (line.trim()) {
 		categories.other.push(line);
 	}
@@ -140,7 +140,7 @@ export function parseLogsByCategory(logFile) {
 		info: [],
 		typescript: [],
 		eslint: [],
-		biome: [],
+		oxc: [],
 		other: [],
 	};
 
@@ -248,7 +248,14 @@ export function generatePostExecutionSummary(logFile, command) {
 // Función auxiliar para detectar si es una herramienta de linting/checking
 function isLintingTool(command) {
 	return (
-		command.includes('biome') || command.includes('eslint') || command.includes('tsc') || command.includes('prettier')
+		command.includes('vp check') ||
+		command.includes('vp lint') ||
+		command.includes('vp fmt') ||
+		command.includes('oxlint') ||
+		command.includes('oxfmt') ||
+		command.includes('eslint') ||
+		command.includes('tsc') ||
+		command.includes('prettier')
 	);
 }
 
@@ -257,8 +264,11 @@ function detectToolFromCommand(command) {
 	if (command.includes('tsc') || command.includes('typescript')) {
 		return 'tsc';
 	}
-	if (command.includes('biome')) {
-		return 'biome';
+	if (command.includes('vp check') || command.includes('vp lint') || command.includes('vp fmt')) {
+		return 'vite-plus';
+	}
+	if (command.includes('oxlint') || command.includes('oxfmt')) {
+		return 'oxc';
 	}
 	if (command.includes('eslint')) {
 		return 'eslint';

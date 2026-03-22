@@ -1,6 +1,22 @@
 {
     "workbench.colorTheme": "Bearded Theme Aquarelle Hydrangea",
     "editor.formatOnSave": true,
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "[typescript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
     "workbench.iconTheme": "flow-dark",
     "projectColors.mainColor": "#060609",
     "window.title": "MEDIA MANAGER",

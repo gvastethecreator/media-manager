@@ -1,6 +1,6 @@
 ## Reglas de código (adaptadas al stack)
 
-Contexto: Bun (server) + React SPA (frontend) + Tailwind + shadcn. Sin Next.js ni Solid. Biome es el linter/formatter.
+Contexto: Bun (server) + React SPA (frontend) + Tailwind + shadcn. Sin Next.js ni Solid. Oxc (`oxlint` + `oxfmt`) es el linter/formatter y Vite+ maneja las tareas de frontend.
 
 ### Accesibilidad (a11y)
 - Evitar `accessKey` y `tabIndex` positivo.
@@ -40,8 +40,10 @@ Contexto: Bun (server) + React SPA (frontend) + Tailwind + shadcn. Sin Next.js n
 - Preferir `Response.json`/`new Response` según corresponda; no bloquear el event loop con trabajo pesado.
 
 ### Cómo se aplica
-- Biome aplica formateo y reglas recomendadas; ver `biome.json` y `.biomeignore`.
-- Para más checks usa: `bun run biome:check` y revisa `logs/` con `bun run logs:check`.
+- Oxc aplica formateo y linting; ver `oxlint.config.ts` y `oxfmt.json`.
+- Para checks unificados usa: `bun run check`.
+- Para lint directo usa: `bun run lint`.
+- Para formato usa: `bun run format` o `bun run format:check`.
 
 ### Ejemplo (manejo de errores)
 ```ts
