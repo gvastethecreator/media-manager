@@ -70,7 +70,7 @@ export function ImageFallback({
 		<div className={cn('relative', className)} style={containerStyle}>
 			<img
 				alt={alt}
-				className="h-full w-full object-cover transition-opacity duration-300"
+				className="h-full w-full object-cover transition-opacity duration-dt-normal ease-dt-out"
 				onError={handleError}
 				onLoad={handleLoad}
 				ref={imgRef}

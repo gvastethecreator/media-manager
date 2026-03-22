@@ -54,16 +54,16 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 	});
 
 	return (
-		<div className="space-y-4">
+		<div aria-busy={false} className="space-y-4">
 			<DataTableToolbar table={table} />
-			<div className="rounded-md border">
-				<Table>
+			<div className="rounded-dt-md border-2 border-border/50 shadow-dt-1">
+				<Table role="grid">
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
-							<TableRow key={headerGroup.id}>
+							<TableRow className="border-border/40" key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {
 									return (
-										<TableHead key={header.id}>
+										<TableHead className="text-muted-foreground" key={header.id}>
 											{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
 										</TableHead>
 									);
@@ -74,7 +74,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 					<TableBody>
 						{table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
-								<TableRow data-state={row.getIsSelected() && 'selected'} key={row.id}>
+								<TableRow className="transition-colors duration-dt-fast ease-dt-out hover:bg-muted/40" data-state={row.getIsSelected() && 'selected'} key={row.id}>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
 									))}
@@ -82,7 +82,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 							))
 						) : (
 							<TableRow>
-								<TableCell className="h-24 text-center" colSpan={columns.length}>
+								<TableCell className="h-24 text-center text-muted-foreground" colSpan={columns.length}>
 									No hay resultados.
 								</TableCell>
 							</TableRow>

@@ -69,8 +69,8 @@ const CategoryCard = memo(function CategoryCard({ title, icon: Icon, count, href
 	return (
 		<Link
 			className={cn(
-				'group relative overflow-hidden rounded-dt-xs border transition-all duration-dt-normal',
-				'hover:scale-[1.01]'
+				'group relative overflow-hidden rounded-dt-xs border transition-all duration-dt-normal ease-dt-out',
+				'hover:scale-[1.01] active:scale-[0.99]'
 			)}
 			style={{
 				background: 'var(--card)',
@@ -79,7 +79,7 @@ const CategoryCard = memo(function CategoryCard({ title, icon: Icon, count, href
 			to={href}
 		>
 			<div
-				className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+				className="absolute inset-0 opacity-0 transition-opacity duration-dt-normal ease-dt-out group-hover:opacity-100"
 				style={{
 					background: `radial-gradient(600px circle at top right, color-mix(in oklch, ${color} 15%, transparent), transparent 50%)`,
 				}}
@@ -106,7 +106,7 @@ const CategoryCard = memo(function CategoryCard({ title, icon: Icon, count, href
 				<div
 					className={cn(
 						'flex h-5 w-5 items-center justify-center rounded-full',
-						'transition-all duration-dt-normal',
+						'transition-all duration-dt-normal ease-dt-out',
 						'opacity-0 group-hover:opacity-100',
 						'-translate-x-1 group-hover:translate-x-0'
 					)}
@@ -531,12 +531,12 @@ export const Dashboard = memo(function Dashboard() {
 						<div className="flex items-center gap-3">
 							<div className="relative">
 								<div className="absolute inset-0 rounded-full bg-primary/15 blur-xl" />
-								<div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/70 to-primary/40 shadow-dt-2">
+								<div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-primary/70 to-primary/40 shadow-dt-2">
 									<Sparkles className="h-5 w-5 text-primary-foreground" />
 								</div>
 							</div>
 							<div>
-								<h1 className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-2xl text-transparent">
+								<h1 className="bg-linear-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-2xl text-transparent">
 									Dashboard
 								</h1>
 								<p className="text-muted-foreground/70 text-xs">Bienvenido a tu gestor de multimedia</p>
@@ -580,13 +580,13 @@ export const Dashboard = memo(function Dashboard() {
 					<div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
 						<section>
 							<div className="mb-3 flex items-center gap-2">
-								<div className="h-4 w-1 rounded-full bg-[var(--entity-image)]" />
+								<div className="h-4 w-1 rounded-full bg-(--entity-image)" />
 								<h2 className="font-semibold text-base text-foreground">Media</h2>
 							</div>
 							<div className="grid grid-cols-2 gap-3">
 								{mediaCategories.map((category, index) => (
 									<div
-										className="fade-in animate-in duration-400"
+										className="fade-in animate-in duration-dt-normal ease-dt-out"
 										key={category.title}
 										style={{ animationDelay: `${index * 50}ms` }}
 									>
@@ -598,13 +598,13 @@ export const Dashboard = memo(function Dashboard() {
 
 						<section>
 							<div className="mb-3 flex items-center gap-2">
-								<div className="h-4 w-1 rounded-full bg-[var(--entity-folder)]" />
+								<div className="h-4 w-1 rounded-full bg-(--entity-folder)" />
 								<h2 className="font-semibold text-base text-foreground">Organización</h2>
 							</div>
 							<div className="grid grid-cols-2 gap-3">
 								{orgCategories.map((category, index) => (
 									<div
-										className="fade-in animate-in duration-400"
+										className="fade-in animate-in duration-dt-normal ease-dt-out"
 										key={category.title}
 										style={{ animationDelay: `${index * 50}ms` }}
 									>
@@ -618,13 +618,13 @@ export const Dashboard = memo(function Dashboard() {
 					<div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
 						<section>
 							<div className="mb-3 flex items-center gap-2">
-								<div className="h-4 w-1 rounded-full bg-[var(--entity-character)]" />
+								<div className="h-4 w-1 rounded-full bg-(--entity-character)" />
 								<h2 className="font-semibold text-base text-foreground">Worldbuilding</h2>
 							</div>
 							<div className="grid grid-cols-2 gap-3">
 								{worldbuildingCategories.map((category, index) => (
 									<div
-										className="fade-in animate-in duration-400"
+										className="fade-in animate-in duration-dt-normal ease-dt-out"
 										key={category.title}
 										style={{ animationDelay: `${index * 50}ms` }}
 									>
@@ -642,7 +642,7 @@ export const Dashboard = memo(function Dashboard() {
 							<div className="grid grid-cols-2 gap-3">
 								{extraCategories.map((category, index) => (
 									<div
-										className="fade-in animate-in duration-400"
+										className="fade-in animate-in duration-dt-normal ease-dt-out"
 										key={category.title}
 										style={{ animationDelay: `${index * 50}ms` }}
 									>
@@ -691,7 +691,7 @@ export const Dashboard = memo(function Dashboard() {
 								</div>
 								<div className="relative h-1.5 overflow-hidden rounded-full bg-border/30">
 									<div
-										className="h-full rounded-full bg-primary transition-all duration-1000"
+										className="h-full rounded-full bg-primary transition-all duration-dt-slow ease-dt-out"
 										style={{ width: `${storageUsedPercentage}%` }}
 									/>
 								</div>

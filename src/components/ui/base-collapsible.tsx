@@ -34,7 +34,7 @@ function CollapsiblePanel({ className, children, ...props }: React.ComponentProp
 	return (
 		<BaseCollapsible.Panel
 			className={cn(
-				'h-[var(--collapsible-panel-height)] overflow-hidden transition-all ease-out data-[ending-style]:h-0 data-[starting-style]:h-0',
+				'h-[var(--collapsible-panel-height)] overflow-hidden transition-all duration-dt-normal ease-dt-out data-[ending-style]:h-0 data-[starting-style]:h-0',
 				className
 			)}
 			data-slot="collapsible-panel"

@@ -22,6 +22,21 @@ type EntityKey =
 	| 'wildcards'
 	| 'worldItems';
 
+const entityKeys: EntityKey[] = [
+	'albums',
+	'collections',
+	'concepts',
+	'characters',
+	'groups',
+	'notes',
+	'places',
+	'properties',
+	'prompts',
+	'tags',
+	'wildcards',
+	'worldItems',
+];
+
 interface CatalogSection {
 	error?: string;
 	items: MinimalItem[];
@@ -85,10 +100,9 @@ export const useEntityCatalogStore = create<EntityCatalogStore>()(
 
 				// Marcar loading
 				set((s) => {
-					for (const k of Object.keys(s) as Array<keyof CatalogState>) {
-						const key = k as EntityKey;
-						if ((s as any)[key]?.loaded) continue; // no tocar los ya cargados
-						if ((s as any)[key]) (s as any)[key].loading = true;
+					for (const key of entityKeys) {
+						if (s[key].loaded) continue;
+						s[key].loading = true;
 					}
 				});
 
@@ -141,13 +155,10 @@ export const useEntityCatalogStore = create<EntityCatalogStore>()(
 				} catch (err: any) {
 					const msg = err?.message || 'Error al precargar entidades';
 					set((s) => {
-						for (const k of Object.keys(s) as Array<keyof CatalogState>) {
-							const key = k as EntityKey;
-							if ((s as any)[key]) {
-								(s as any)[key].loading = false;
-								(s as any)[key].loaded = false;
-								(s as any)[key].error = msg;
-							}
+						for (const key of entityKeys) {
+							s[key].loading = false;
+							s[key].loaded = false;
+							s[key].error = msg;
 						}
 					});
 				}

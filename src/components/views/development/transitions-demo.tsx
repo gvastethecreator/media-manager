@@ -259,7 +259,7 @@ function MorphDemo() {
 				<div className="flex items-center justify-center rounded-lg bg-muted/30 p-8">
 					<MorphContainer
 						className={cn(
-							'flex h-32 w-32 items-center justify-center font-bold text-white transition-colors duration-300',
+							'flex h-32 w-32 items-center justify-center font-bold text-white transition-colors duration-dt-normal ease-dt-out',
 							color
 						)}
 						config={{ duration: 500, easing: customEasings.liquid }}

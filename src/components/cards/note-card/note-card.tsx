@@ -130,7 +130,7 @@ export const NoteCard = memo(function NoteCard({ noteId, onClick, className, sty
 				'h-[420px] w-[300px] overflow-hidden rounded-[4.75%]',
 				tcgMode ? 'border-[3px] shadow-xl' : 'border-2 shadow-md',
 				// Interacción
-				'transition-all duration-300 ease-out',
+				'ui-motion-standard',
 				'hover:scale-[1.02] hover:shadow-lg',
 				'active:scale-[0.98]',
 				// Cursor
@@ -148,7 +148,7 @@ export const NoteCard = memo(function NoteCard({ noteId, onClick, className, sty
 			whileTap={{ scale: 0.98 }}
 		>
 			{/* Resplandor de borde en hover */}
-			<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
+			<div className="ui-overlay-hover-glow">
 				<div
 					className="absolute inset-0 -z-10 rounded-[4.75%] blur-sm"
 					style={{ boxShadow: `0 0 15px 2px ${primaryColor}` }}
