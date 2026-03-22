@@ -15,12 +15,12 @@ import { cn } from '@/lib/utils';
 // ============================================================================
 
 interface FileViewerTransitionProps {
-	/** Si el viewer está abierto */
-	isOpen: boolean;
 	/** Contenido */
 	children: React.ReactNode;
 	/** ID del archivo actual */
 	fileId?: string;
+	/** Si el viewer está abierto */
+	isOpen: boolean;
 	/** Callback al cerrar */
 	onClose?: () => void;
 }
@@ -83,12 +83,12 @@ export function FileViewerTransition({ isOpen, children, fileId, onClose }: File
 // ============================================================================
 
 interface FileNavigationTransitionProps {
+	/** Contenido */
+	children: React.ReactNode;
 	/** ID del archivo actual */
 	currentFileId: string;
 	/** Dirección de navegación */
 	direction: 'next' | 'previous';
-	/** Contenido */
-	children: React.ReactNode;
 }
 
 /**
@@ -127,16 +127,16 @@ export function FileNavigationTransition({ currentFileId, direction, children }:
 // ============================================================================
 
 interface ThumbnailTransitionProps {
-	/** ID de la thumbnail */
-	thumbnailId: string;
-	/** Si está seleccionada */
-	isSelected?: boolean;
-	/** Si está activa (hover) */
-	isActive?: boolean;
 	/** Contenido */
 	children: React.ReactNode;
+	/** Si está activa (hover) */
+	isActive?: boolean;
+	/** Si está seleccionada */
+	isSelected?: boolean;
 	/** Click handler */
 	onClick?: () => void;
+	/** ID de la thumbnail */
+	thumbnailId: string;
 }
 
 /**
@@ -199,14 +199,14 @@ export function ThumbnailTransition({
 // ============================================================================
 
 interface ThumbnailGridTransitionProps {
-	/** IDs de las thumbnails */
-	thumbnailIds: string[];
-	/** ID seleccionado */
-	selectedId?: string;
-	/** Render de cada thumbnail */
-	renderThumbnail: (id: string, index: number) => React.ReactNode;
 	/** Cambio de selección */
 	onSelect?: (id: string) => void;
+	/** Render de cada thumbnail */
+	renderThumbnail: (id: string, index: number) => React.ReactNode;
+	/** ID seleccionado */
+	selectedId?: string;
+	/** IDs de las thumbnails */
+	thumbnailIds: string[];
 }
 
 /**
@@ -256,12 +256,12 @@ export function ThumbnailGridTransition({
 // ============================================================================
 
 interface ToolbarTransitionProps {
+	/** Contenido */
+	children: React.ReactNode;
 	/** Si está visible */
 	isVisible: boolean;
 	/** Posición */
 	position?: 'top' | 'bottom';
-	/** Contenido */
-	children: React.ReactNode;
 }
 
 /**

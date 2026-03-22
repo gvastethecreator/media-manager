@@ -4,37 +4,37 @@ import type { NoteWithStats } from '@/types/entities/note';
 import { apiClient } from './client';
 
 export interface NoteFilters {
-	search?: string;
+	category?: string;
+	isFavorite?: boolean;
 	limit?: number;
 	offset?: number;
+	priority?: number;
+	search?: string;
 	sortBy?: 'title' | 'createdAt' | 'updatedAt' | 'priority' | 'status' | 'category';
 	sortOrder?: 'asc' | 'desc';
-	category?: string;
-	priority?: number;
 	status?: string;
-	isFavorite?: boolean;
 }
 
 export interface NoteCreateInput {
-	title: string;
-	content?: string | null;
 	category?: string | null;
-	priority?: number;
-	status?: string | null;
+	content?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
+	priority?: number;
+	status?: string | null;
+	title: string;
 }
 
 export interface NoteUpdateInput {
-	title?: string;
-	content?: string | null;
 	category?: string | null;
-	priority?: number;
-	status?: string | null;
+	content?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
+	priority?: number;
+	status?: string | null;
+	title?: string;
 }
 
 export interface NotesResponse {

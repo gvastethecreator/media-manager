@@ -6,18 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider-v3';
-import { Switch } from '@/components/ui/switch-v3';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { toastService } from '@/lib/ui/toast';
 import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
 
 interface EntityCardConfig {
 	cardSize: number;
+	cardStyle: string;
+	densityMode: string;
+	hoverEffects: boolean;
 	showMetadata: boolean;
 	showPreview: boolean;
-	cardStyle: string;
-	hoverEffects: boolean;
-	densityMode: string;
 }
 
 const defaultCardConfig: EntityCardConfig = {

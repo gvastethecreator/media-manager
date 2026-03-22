@@ -10,18 +10,18 @@ const coreLogger = clientLogger.withContext('ConceptStore:Core');
 export interface CoreSlice {
 	// Estado
 	concepts: ConceptWithStats[];
-	selectedConcept: ConceptWithStats | null;
-	isLoading: boolean;
+	createConcept: (concept: ConceptCreateInput) => Promise<void>;
+	deleteConcept: (id: string) => Promise<void>;
 	error: string | null;
+	isLoading: boolean;
 
 	// Acciones
 	loadConcepts: () => Promise<void>;
-	setConcepts: (concepts: ConceptWithStats[]) => void;
-	createConcept: (concept: ConceptCreateInput) => Promise<void>;
-	updateConcept: (id: string, concept: ConceptUpdateInput) => Promise<void>;
-	deleteConcept: (id: string) => Promise<void>;
-	selectConcept: (concept: ConceptWithStats | null) => void;
 	reset: () => void;
+	selectConcept: (concept: ConceptWithStats | null) => void;
+	selectedConcept: ConceptWithStats | null;
+	setConcepts: (concepts: ConceptWithStats[]) => void;
+	updateConcept: (id: string, concept: ConceptUpdateInput) => Promise<void>;
 }
 
 export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (set, get) => ({

@@ -19,24 +19,23 @@ export enum PromptExportFormat {
  */
 export interface PromptExportConfig {
 	/**
+	 * Nombre del archivo de exportación
+	 */
+	fileName?: string;
+	/**
 	 * Formato de exportación
 	 */
 	format: PromptExportFormat;
 
 	/**
-	 * Si se deben incluir metadatos (solo aplicable a algunos formatos)
-	 */
-	includeMetadata?: boolean;
-
-	/**
-	 * Nombre del archivo de exportación
-	 */
-	fileName?: string;
-
-	/**
 	 * Opciones específicas por formato
 	 */
 	formatOptions?: Record<string, any>;
+
+	/**
+	 * Si se deben incluir metadatos (solo aplicable a algunos formatos)
+	 */
+	includeMetadata?: boolean;
 }
 
 /**
@@ -49,11 +48,6 @@ export interface PromptExportResult {
 	content: string;
 
 	/**
-	 * Tipo MIME para descarga
-	 */
-	mimeType: string;
-
-	/**
 	 * Nombre de archivo sugerido para descarga
 	 */
 	fileName: string;
@@ -62,6 +56,11 @@ export interface PromptExportResult {
 	 * Formato usado para la exportación
 	 */
 	format: PromptExportFormat;
+
+	/**
+	 * Tipo MIME para descarga
+	 */
+	mimeType: string;
 }
 
 /**

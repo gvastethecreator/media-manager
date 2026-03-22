@@ -1,6 +1,5 @@
 import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
 import React from 'react';
-import { motion } from '@/components/ui/animejs-shim';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -16,13 +15,14 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EntityStats, StatItem } from '@/components/ui/entity-stats';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 export interface EntityHeaderAction {
 	/**
-	 * Etiqueta para el botón
+	 * URL para navegación
 	 */
-	label: string;
+	href?: string;
 
 	/**
 	 * Icono para el botón
@@ -30,56 +30,35 @@ export interface EntityHeaderAction {
 	icon?: React.ReactNode;
 
 	/**
+	 * Si mostrar en el menú desplegable en lugar de como botón independiente
+	 */
+	inDropdown?: boolean;
+	/**
+	 * Etiqueta para el botón
+	 */
+	label: string;
+
+	/**
 	 * Función a ejecutar al hacer clic
 	 */
 	onClick?: () => void;
 
 	/**
-	 * URL para navegación
+	 * Posición en la lista (menor número = más a la izquierda)
 	 */
-	href?: string;
+	order?: number;
 
 	/**
 	 * Variante del botón
 	 */
 	variant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary';
-
-	/**
-	 * Si mostrar en el menú desplegable en lugar de como botón independiente
-	 */
-	inDropdown?: boolean;
-
-	/**
-	 * Posición en la lista (menor número = más a la izquierda)
-	 */
-	order?: number;
 }
 
 export interface EntityHeaderProps {
 	/**
-	 * Título principal
+	 * Acciones disponibles para la entidad
 	 */
-	title: string;
-
-	/**
-	 * Subtítulo opcional
-	 */
-	subtitle?: string;
-
-	/**
-	 * Descripción opcional
-	 */
-	description?: string;
-
-	/**
-	 * Icono para mostrar junto al título
-	 */
-	icon?: React.ReactNode;
-
-	/**
-	 * URL de retorno (generalmente a la página de listado)
-	 */
-	backUrl?: string;
+	actions?: EntityHeaderAction[];
 
 	/**
 	 * Texto para el enlace de retorno
@@ -87,24 +66,9 @@ export interface EntityHeaderProps {
 	backLabel?: string;
 
 	/**
-	 * Color principal
+	 * URL de retorno (generalmente a la página de listado)
 	 */
-	primaryColor?: string;
-
-	/**
-	 * Items de estadísticas para mostrar
-	 */
-	stats?: StatItem[];
-
-	/**
-	 * Acciones disponibles para la entidad
-	 */
-	actions?: EntityHeaderAction[];
-
-	/**
-	 * URL de imagen destacada
-	 */
-	featuredImage?: string;
+	backUrl?: string;
 
 	/**
 	 * Items para la ruta de navegación (breadcrumbs)
@@ -113,6 +77,26 @@ export interface EntityHeaderProps {
 		label: string;
 		href?: string;
 	}>;
+
+	/**
+	 * Clases adicionales para el contenedor
+	 */
+	className?: string;
+
+	/**
+	 * Descripción opcional
+	 */
+	description?: string;
+
+	/**
+	 * URL de imagen destacada
+	 */
+	featuredImage?: string;
+
+	/**
+	 * Icono para mostrar junto al título
+	 */
+	icon?: React.ReactNode;
 
 	/**
 	 * Si es favorito
@@ -125,19 +109,33 @@ export interface EntityHeaderProps {
 	onToggleFavorite?: () => void;
 
 	/**
-	 * Si se debe mostrar el botón de favorito
+	 * Color principal
 	 */
-	showFavoriteButton?: boolean;
-
-	/**
-	 * Clases adicionales para el contenedor
-	 */
-	className?: string;
+	primaryColor?: string;
 
 	/**
 	 * Contenido personalizado para la sección derecha
 	 */
 	rightContent?: React.ReactNode;
+
+	/**
+	 * Si se debe mostrar el botón de favorito
+	 */
+	showFavoriteButton?: boolean;
+
+	/**
+	 * Items de estadísticas para mostrar
+	 */
+	stats?: StatItem[];
+
+	/**
+	 * Subtítulo opcional
+	 */
+	subtitle?: string;
+	/**
+	 * Título principal
+	 */
+	title: string;
 }
 
 /**

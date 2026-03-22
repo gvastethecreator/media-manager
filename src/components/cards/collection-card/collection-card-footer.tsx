@@ -2,14 +2,14 @@ import { Calendar, Database, Heart, Image } from 'lucide-react';
 import { formatDate } from '@/lib/utils/date';
 
 interface CollectionCardFooterProps {
+	compact?: boolean;
 	createdAt: Date | string;
-	updatedAt: Date | string;
-	imagesCount?: number;
 	entitiesCount?: number;
+	imagesCount?: number;
+	isFavorite?: boolean;
 	primaryColor: string;
 	secondaryColor: string;
-	isFavorite?: boolean;
-	compact?: boolean;
+	updatedAt: Date | string;
 }
 
 /**

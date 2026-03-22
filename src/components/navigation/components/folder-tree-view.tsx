@@ -8,10 +8,10 @@ import type { CategoryChild } from '../types';
 
 interface FolderTreeViewProps {
 	className?: string;
-	parentId?: string | null;
-	selectedFolderId?: string | null;
 	isCollapsed?: boolean;
 	onItemClick?: (id: string) => void;
+	parentId?: string | null;
+	selectedFolderId?: string | null;
 }
 
 interface FolderWithChildren extends CategoryChild {

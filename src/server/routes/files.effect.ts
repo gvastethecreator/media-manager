@@ -45,29 +45,29 @@ export class FileNotFound extends Data.TaggedError('FileNotFound')<{
 // ==========================================
 
 export interface FileServiceInterface {
+	readonly copyFile: (
+		sourcePath: string,
+		destPath: string,
+		options?: { overwrite?: boolean }
+	) => Effect.Effect<{ success: true; data: unknown }, FileOperationFailed>;
+	readonly createDirectory: (
+		path: string,
+		options?: { recursive?: boolean }
+	) => Effect.Effect<{ success: true; data: unknown }, FileOperationFailed>;
 	readonly getDirectoryInfo: (
 		path: string
 	) => Effect.Effect<
 		{ success: true; data: { path: string; items: unknown[]; total: number } },
 		DirectoryNotFound | FileOperationFailed
 	>;
-	readonly createDirectory: (
-		path: string,
-		options?: { recursive?: boolean }
+	readonly moveFile: (
+		sourcePath: string,
+		destPath: string,
+		options?: { overwrite?: boolean }
 	) => Effect.Effect<{ success: true; data: unknown }, FileOperationFailed>;
 	readonly renameFile: (
 		oldPath: string,
 		newPath: string,
-		options?: { overwrite?: boolean }
-	) => Effect.Effect<{ success: true; data: unknown }, FileOperationFailed>;
-	readonly copyFile: (
-		sourcePath: string,
-		destPath: string,
-		options?: { overwrite?: boolean }
-	) => Effect.Effect<{ success: true; data: unknown }, FileOperationFailed>;
-	readonly moveFile: (
-		sourcePath: string,
-		destPath: string,
 		options?: { overwrite?: boolean }
 	) => Effect.Effect<{ success: true; data: unknown }, FileOperationFailed>;
 }

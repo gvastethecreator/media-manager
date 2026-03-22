@@ -3,20 +3,20 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface GroupCardFooterProps {
-	id: string;
-	name: string;
-	isFavorite?: boolean;
+	cardId?: string;
 	category?: string;
+	compact?: boolean;
+	hp?: number;
+	id: string;
+	imagesCount?: number;
+	isFavorite?: boolean;
+	mp?: number;
+	name: string;
 	organizationType?: string;
 	power?: number;
-	rarityLevel?: number;
-	hp?: number;
-	mp?: number;
 	primaryColor?: string;
-	cardId?: string;
+	rarityLevel?: number;
 	tcgMode?: boolean;
-	compact?: boolean;
-	imagesCount?: number;
 	videosCount?: number;
 }
 

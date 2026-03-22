@@ -17,16 +17,16 @@ import { cn } from '@/lib/utils';
 import type { BrowserItem } from '../types/item.types';
 
 export interface DeleteDialogProps {
+	/** Si está procesando */
+	isLoading?: boolean;
 	/** Si el diálogo está abierto */
 	isOpen: boolean;
 	/** Items a eliminar */
 	items: BrowserItem[];
-	/** Callback al confirmar la eliminación */
-	onConfirm: () => void;
 	/** Callback al cancelar/cerrar */
 	onCancel: () => void;
-	/** Si está procesando */
-	isLoading?: boolean;
+	/** Callback al confirmar la eliminación */
+	onConfirm: () => void;
 }
 
 export function DeleteDialog({ isOpen, items, onConfirm, onCancel, isLoading = false }: DeleteDialogProps) {

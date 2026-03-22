@@ -4,10 +4,10 @@ import { cn } from '@/lib/utils';
 import { StatusBadge } from './status-badge';
 
 export interface ServiceStatus {
-	name: string;
-	status: 'online' | 'offline' | 'warning';
 	description: string;
 	icon: LucideIcon;
+	name: string;
+	status: 'online' | 'offline' | 'warning';
 }
 
 export function ServiceCard({ service }: { service: ServiceStatus }) {

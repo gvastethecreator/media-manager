@@ -11,8 +11,8 @@ import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from
 
 export interface DocumentCoreState {
 	documents: Record<string, DocumentWithStats>;
-	isLoading: boolean;
 	error: string | null;
+	isLoading: boolean;
 	lastUpdated: number | null;
 }
 
@@ -23,11 +23,11 @@ export type DocumentFilterState = Record<string, never>;
 // --- Acciones del Slice ---
 
 export interface DocumentCoreActions {
-	loadDocuments: () => Promise<void>;
-	fetchDocuments: () => Promise<void>; // Alias para loadDocuments
 	createDocument: (data: DocumentCreateInput) => Promise<void>;
-	updateDocument: (id: string, data: DocumentUpdateInput) => Promise<void>;
 	deleteDocument: (id: string) => Promise<void>;
+	fetchDocuments: () => Promise<void>; // Alias para loadDocuments
+	loadDocuments: () => Promise<void>;
+	updateDocument: (id: string, data: DocumentUpdateInput) => Promise<void>;
 }
 
 export type DocumentUIActions = Record<string, never>;

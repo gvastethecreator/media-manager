@@ -9,13 +9,18 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider-v3';
-import { Switch } from '@/components/ui/switch-v3';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { toastService } from '@/lib/ui/toast';
 import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
 import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
 
 interface PanelConfig {
+	breadcrumbs: {
+		visible: boolean;
+		showHome: boolean;
+		maxItems: number;
+	};
 	leftPanel: {
 		visible: boolean;
 		width: number;
@@ -32,11 +37,6 @@ interface PanelConfig {
 		visible: boolean;
 		position: 'top' | 'bottom';
 		sticky: boolean;
-	};
-	breadcrumbs: {
-		visible: boolean;
-		showHome: boolean;
-		maxItems: number;
 	};
 }
 

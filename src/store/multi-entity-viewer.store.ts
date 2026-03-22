@@ -5,14 +5,14 @@ import type { AnyEntityWithStats } from '@/types/entities';
 const viewerLogger = clientLogger.withContext('MultiEntityViewer');
 
 interface MultiEntityViewerState {
-	isOpen: boolean;
-	entities: AnyEntityWithStats[];
-	currentIndex: number;
-	openViewer: (entities: AnyEntityWithStats[], initialIndex?: number) => void;
 	closeViewer: () => void;
-	setCurrentIndex: (index: number) => void;
+	currentIndex: number;
+	entities: AnyEntityWithStats[];
+	isOpen: boolean;
 	nextEntity: () => void;
+	openViewer: (entities: AnyEntityWithStats[], initialIndex?: number) => void;
 	previousEntity: () => void;
+	setCurrentIndex: (index: number) => void;
 }
 
 export const useMultiEntityViewerStore = create<MultiEntityViewerState>((set, get) => ({

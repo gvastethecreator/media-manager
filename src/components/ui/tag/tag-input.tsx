@@ -5,16 +5,16 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 interface TagInputContextValue {
-	tags: string[];
+	addTag: (tag: string) => void;
+	disabled: boolean;
+	handleInputBlur: () => void;
+	handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	handleInputFocus: () => void;
+	handleInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 	input: string;
 	isFocused: boolean;
-	addTag: (tag: string) => void;
 	removeTag: (index: number) => void;
-	handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-	handleInputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-	handleInputFocus: () => void;
-	handleInputBlur: () => void;
-	disabled: boolean;
+	tags: string[];
 }
 
 const TagInputContext = React.createContext<TagInputContextValue | null>(null);
@@ -28,12 +28,12 @@ const useTagInput = () => {
 };
 
 export interface TagInputProps extends React.PropsWithChildren {
-	value?: string[];
+	className?: string;
 	defaultValue?: string[];
+	disabled?: boolean;
 	onChange?: (tags: string[]) => void;
 	placeholder?: string;
-	className?: string;
-	disabled?: boolean;
+	value?: string[];
 }
 
 function TagInputProvider({ children, value, defaultValue = [], onChange, disabled = false }: TagInputProps) {

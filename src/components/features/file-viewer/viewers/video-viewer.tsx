@@ -11,11 +11,11 @@ import { cn } from '@/lib/utils';
 import { type VideoWithStats } from '@/types/entities/video/types';
 
 interface VideoViewerProps {
-	video: VideoWithStats;
 	className?: string;
+	onClose?: () => void;
 	onNext?: () => void;
 	onPrevious?: () => void;
-	onClose?: () => void;
+	video: VideoWithStats;
 }
 
 export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNext, onPrevious, onClose }) => {

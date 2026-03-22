@@ -59,14 +59,14 @@ export type FileProcessingStatus = (typeof FileProcessingStatus)[keyof typeof Fi
  * Propiedades base comunes que todos los FileItem deben tener para funcionar en los componentes
  */
 export interface FileItemBase {
+	createdAt: Date;
+	entityType: string;
 	id: string;
+	isFavorite?: boolean;
 	name: string;
 	size: number;
 	thumbnailUrl?: string;
-	createdAt: Date;
 	updatedAt: Date;
-	isFavorite?: boolean;
-	entityType: string;
 }
 
 /**
@@ -95,8 +95,8 @@ export type FileItem =
  * Etiqueta relacionada para archivos
  */
 export interface RelatedTag {
-	id: string;
-	name: string;
 	color: string;
 	count?: number;
+	id: string;
+	name: string;
 }

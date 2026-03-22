@@ -2,25 +2,25 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
 
 export interface ThumbnailInfo {
-	id: string;
-	entityType: string;
-	entityId: string;
-	size: string;
-	path: string;
-	width: number;
-	height: number;
-	format: string;
-	quality: number;
-	fileSize: number;
-	isGenerated: boolean;
 	createdAt: Date;
+	entityId: string;
+	entityType: string;
+	fileSize: number;
+	format: string;
+	height: number;
+	id: string;
+	isGenerated: boolean;
+	path: string;
+	quality: number;
+	size: string;
 	updatedAt: Date;
+	width: number;
 }
 
 export interface ThumbnailGenerationOptions {
-	sizes?: ('small' | 'medium' | 'large')[];
 	force?: boolean; // regenerar si ya existe
 	quality?: number; // 1-100
+	sizes?: ('small' | 'medium' | 'large')[];
 }
 
 export interface BulkThumbnailOptions extends ThumbnailGenerationOptions {
@@ -28,23 +28,23 @@ export interface BulkThumbnailOptions extends ThumbnailGenerationOptions {
 }
 
 export interface ThumbnailStats {
-	totalThumbnails: number;
-	totalSize: number;
 	averageSize: number;
 	bySize: {
 		small: { count: number; totalSize: number };
 		medium: { count: number; totalSize: number };
 		large: { count: number; totalSize: number };
 	};
+	totalSize: number;
+	totalThumbnails: number;
 }
 
 export interface ThumbnailResponse {
+	error?: string;
+	height?: number;
+	mimeType?: string;
+	size?: number;
 	thumbnailUrl?: string;
 	width?: number;
-	height?: number;
-	size?: number;
-	mimeType?: string;
-	error?: string;
 }
 
 export interface LastProcessedThumbnail {
@@ -54,9 +54,9 @@ export interface LastProcessedThumbnail {
 }
 
 export interface ProcessOptions {
-	onProgress?: (status: any) => void;
-	onError?: (error: unknown) => void;
 	onComplete?: (data: any) => void;
+	onError?: (error: unknown) => void;
+	onProgress?: (status: any) => void;
 }
 
 // Query keys

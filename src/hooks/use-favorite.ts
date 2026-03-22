@@ -18,14 +18,14 @@ export interface UseFavoriteOptions {
 }
 
 export interface UseFavoriteResult {
-	/** Si es favorito actualmente */
-	isFavorite: boolean;
-	/** Función para toggle de favorito */
-	toggleFavorite: () => void;
-	/** Si está procesando */
-	isLoading: boolean;
 	/** Error si ocurrió */
 	error: Error | null;
+	/** Si es favorito actualmente */
+	isFavorite: boolean;
+	/** Si está procesando */
+	isLoading: boolean;
+	/** Función para toggle de favorito */
+	toggleFavorite: () => void;
 }
 
 /**

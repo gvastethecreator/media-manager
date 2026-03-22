@@ -20,17 +20,17 @@ export enum ThumbnailQuality {
  * 🗿 Modelo base de Thumbnail, derivado del schema de Drizzle.
  */
 export interface ThumbnailBase {
+	createdAt: Date;
+	format: string;
+	height: number;
 	id: string;
+	path: string;
+	quality: ThumbnailQuality;
+	size: number;
 	sourceId: string;
 	sourceType: string;
-	path: string;
-	size: number;
-	width: number;
-	height: number;
-	format: string;
-	quality: ThumbnailQuality;
-	createdAt: Date;
 	updatedAt: Date;
+	width: number;
 }
 
 /**
@@ -40,8 +40,8 @@ export interface ThumbnailStatistics {
 	aspectRatio: number; // Ratio width/height
 	compressionRatio: number; // Estimación de compresión basada en tamaño vs dimensiones
 	qualityScore: number; // Score de calidad basado en resolución y formato
-	usageCount: number; // Número de veces que se ha usado este thumbnail
 	storageEfficiency: number; // Eficiencia de almacenamiento (calidad vs tamaño)
+	usageCount: number; // Número de veces que se ha usado este thumbnail
 }
 
 /**
@@ -56,26 +56,26 @@ export interface ThumbnailWithStats extends ThumbnailBase {
  * 📝 Datos para crear un Thumbnail
  */
 export interface ThumbnailCreateInput {
+	format: string;
+	height: number;
+	path: string;
+	quality?: ThumbnailQuality;
+	size: number;
 	sourceId: string;
 	sourceType: string;
-	path: string;
-	size: number;
 	width: number;
-	height: number;
-	format: string;
-	quality?: ThumbnailQuality;
 }
 
 /**
  * 📝 Datos para actualizar un Thumbnail
  */
 export interface ThumbnailUpdateInput {
+	format?: string;
+	height?: number;
 	path?: string;
+	quality?: ThumbnailQuality;
 	size?: number;
 	width?: number;
-	height?: number;
-	format?: string;
-	quality?: ThumbnailQuality;
 }
 
 // ----------------------------------------------------------------

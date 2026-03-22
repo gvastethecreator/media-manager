@@ -4,18 +4,6 @@ import type { CategoryChild, NavigationCategory } from '../types';
 
 // Tipo que representa cualquier posible item de navegación
 interface NavItem {
-	id: string;
-	name?: string;
-	title?: string;
-	emoji?: string;
-	color?: string;
-	path?: string;
-	description?: string;
-	totalFiles?: number;
-	totalSize?: number;
-	imageCount?: number;
-	itemCount?: number; // Conteo total de elementos
-	parentId?: string | null; // Para jerarquía de carpetas
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -23,6 +11,18 @@ interface NavItem {
 		collections?: number;
 		tags?: number;
 	};
+	color?: string;
+	description?: string;
+	emoji?: string;
+	id: string;
+	imageCount?: number;
+	itemCount?: number; // Conteo total de elementos
+	name?: string;
+	parentId?: string | null; // Para jerarquía de carpetas
+	path?: string;
+	title?: string;
+	totalFiles?: number;
+	totalSize?: number;
 }
 
 /**

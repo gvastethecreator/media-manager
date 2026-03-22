@@ -17,13 +17,13 @@ import { MarkdownViewer } from './viewers/markdown-viewer';
 import { ThreeDViewer } from './viewers/three-d-viewer';
 
 export interface FileContentRendererProps {
-	item: ImageItem;
+	className?: string;
 	contentUrl: string;
 	isLoading?: boolean;
+	item: ImageItem;
 	onError?: () => void;
 	onLoad?: () => void;
 	transformStyle?: React.CSSProperties;
-	className?: string;
 }
 
 function detectFileType(item: ImageItem): 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d' | 'unknown' {

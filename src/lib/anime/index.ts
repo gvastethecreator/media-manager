@@ -1,17 +1,22 @@
 /**
- * @file Wrapper y exportaciones de anime.js
+ * @file Wrapper de animación sobre GSAP
  * @module lib/anime
- * @description Exportación tipada y configurada de anime.js para el proyecto
+ * @description API compatible con el sistema de transiciones, respaldada por GSAP
  */
 
-// Definir tipos locales para animejs
+import gsap from 'gsap';
+
+// ============================================================================
+// Tipos (mantenidos para compatibilidad con consumers existentes)
+// ============================================================================
+
 export interface AnimeInstance {
-	play: () => void;
 	pause: () => void;
+	play: () => void;
+	progress: number;
 	restart: () => void;
 	reverse: () => void;
 	seek: (progress: number) => void;
-	progress: number;
 }
 
 export interface AnimeTimelineInstance extends AnimeInstance {
@@ -19,35 +24,119 @@ export interface AnimeTimelineInstance extends AnimeInstance {
 }
 
 export interface AnimeParams extends Record<string, unknown> {
-	targets?: string | NodeList | HTMLElement[] | HTMLElement | Record<string, unknown>;
-	duration?: number;
-	delay?: number | ((el: HTMLElement, i: number) => number);
-	easing?: string;
 	autoplay?: boolean;
-	loop?: boolean | number;
-	direction?: 'normal' | 'reverse' | 'alternate';
-	update?: (anim: AnimeInstance) => void;
-	complete?: (anim: AnimeInstance) => void;
 	begin?: (anim: AnimeInstance) => void;
+	complete?: (anim: AnimeInstance) => void;
+	delay?: number | ((el: HTMLElement, i: number) => number);
+	direction?: 'normal' | 'reverse' | 'alternate';
+	duration?: number;
+	easing?: string;
+	loop?: boolean | number;
+	targets?: string | NodeList | HTMLElement[] | HTMLElement | Record<string, unknown>;
+	update?: (anim: AnimeInstance) => void;
 }
 
-// Importar anime dinámicamente para evitar problemas SSR
-let animeModule: typeof import('animejs') | null = null;
+// ============================================================================
+// Mapeo de easings legacy → GSAP
+// ============================================================================
 
-async function getAnime() {
-	if (!animeModule) {
-		animeModule = await import('animejs');
-	}
-	// La nueva versión de animejs exporta diferente
-	return (animeModule as any).default || animeModule;
+function mapEasing(easing?: string): string {
+	if (!easing) return 'power2.out';
+	const map: Record<string, string> = {
+		easeInOutCubic: 'power2.inOut',
+		easeOutExpo: 'expo.out',
+		easeInExpo: 'expo.in',
+		easeOutQuad: 'power1.out',
+		easeInOutSine: 'sine.inOut',
+		easeOutCubic: 'power2.out',
+		easeInCubic: 'power2.in',
+		linear: 'none',
+	};
+	return map[easing] ?? easing;
 }
+
+// ============================================================================
+// Adaptador GSAP Tween → AnimeInstance
+// ============================================================================
+
+function wrapTween(tween: gsap.core.Tween): AnimeInstance {
+	return {
+		pause: () => tween.pause(),
+		play: () => tween.play(),
+		get progress() {
+			return tween.progress() * 100;
+		},
+		restart: () => tween.restart(),
+		reverse: () => tween.reverse(),
+		seek: (progress: number) => tween.progress(progress / 100),
+	};
+}
+
+// ============================================================================
+// API pública (misma firma que antes)
+// ============================================================================
 
 /**
- * Crea una animación con animejs
+ * Crea una animación GSAP con la misma interfaz que el wrapper previo
  */
 export async function anime(params: AnimeParams): Promise<AnimeInstance> {
-	const animeLib = await getAnime();
-	return animeLib(params) as AnimeInstance;
+	const {
+		targets,
+		duration = 400,
+		easing,
+		delay = 0,
+		begin,
+		complete,
+		update,
+		loop,
+		direction,
+		autoplay = true,
+		...props
+	} = params;
+
+	// Separar propiedades con arrays [from, to] para usar fromTo
+	const fromProps: Record<string, unknown> = {};
+	const toProps: Record<string, unknown> = {};
+	let hasArrayProps = false;
+
+	for (const [key, value] of Object.entries(props)) {
+		if (Array.isArray(value) && value.length === 2) {
+			fromProps[key] = value[0];
+			toProps[key] = value[1];
+			hasArrayProps = true;
+		} else {
+			toProps[key] = value;
+		}
+	}
+
+	const wrapper = { progress: 0 } as AnimeInstance;
+
+	const gsapVars: gsap.TweenVars = {
+		...toProps,
+		duration: (duration as number) / 1000,
+		ease: mapEasing(easing as string | undefined),
+		delay: typeof delay === 'number' ? delay / 1000 : 0,
+		paused: !autoplay,
+		repeat: loop === true ? -1 : typeof loop === 'number' ? loop - 1 : 0,
+		yoyo: direction === 'alternate',
+		onStart: () => begin?.(wrapper),
+		onComplete: () => complete?.(wrapper),
+		onUpdate(this: gsap.core.Tween) {
+			wrapper.progress = (this?.progress?.() ?? 0) * 100;
+			update?.(wrapper);
+		},
+	};
+
+	let tween: gsap.core.Tween;
+
+	if (hasArrayProps) {
+		tween = gsap.fromTo(targets as gsap.TweenTarget, { ...fromProps }, gsapVars);
+	} else {
+		tween = gsap.to(targets as gsap.TweenTarget, gsapVars);
+	}
+
+	Object.assign(wrapper, wrapTween(tween));
+	return wrapper;
 }
 
 /**
@@ -58,11 +147,32 @@ export async function animate(params: AnimeParams): Promise<AnimeInstance> {
 }
 
 /**
- * Crea una línea de tiempo de animación
+ * Crea una línea de tiempo GSAP
  */
 export async function createTimeline(params?: AnimeParams): Promise<AnimeTimelineInstance> {
-	const animeLib = await getAnime();
-	return animeLib.timeline(params) as AnimeTimelineInstance;
+	const tl = gsap.timeline({
+		paused: params?.autoplay === false,
+		repeat: params?.loop === true ? -1 : typeof params?.loop === 'number' ? params.loop - 1 : 0,
+		yoyo: params?.direction === 'alternate',
+	});
+
+	const instance = wrapTween(tl as unknown as gsap.core.Tween) as AnimeTimelineInstance;
+	instance.add = (addParams: unknown, offset?: string | number) => {
+		const p = addParams as AnimeParams;
+		const { targets, duration = 400, easing, delay = 0, ...rest } = p;
+		tl.to(
+			targets as gsap.TweenTarget,
+			{
+				...rest,
+				duration: (duration as number) / 1000,
+				ease: mapEasing(easing as string | undefined),
+				delay: typeof delay === 'number' ? delay / 1000 : 0,
+			},
+			offset
+		);
+		return instance;
+	};
+	return instance;
 }
 
 /**
@@ -72,11 +182,16 @@ export async function stagger(
 	elements: string | NodeList | HTMLElement[],
 	params: AnimeParams & { stagger?: number | ((el: HTMLElement, i: number) => number) }
 ): Promise<AnimeInstance> {
-	const animeLib = await getAnime();
-	return animeLib({
-		targets: elements,
-		...params,
-	}) as AnimeInstance;
+	const { stagger: staggerVal, duration = 400, easing, delay = 0, ...rest } = params;
+	const gsapStagger = typeof staggerVal === 'number' ? staggerVal / 1000 : undefined;
+	const tween = gsap.to(elements as gsap.TweenTarget, {
+		...rest,
+		duration: (duration as number) / 1000,
+		ease: mapEasing(easing as string | undefined),
+		delay: typeof delay === 'number' ? delay / 1000 : 0,
+		stagger: gsapStagger,
+	});
+	return wrapTween(tween);
 }
 
 /**
@@ -90,12 +205,7 @@ export async function createControllableAnimation(params: AnimeParams): Promise<
 	seek: (progress: number) => void;
 	instance: AnimeInstance;
 }> {
-	const animeLib = await getAnime();
-	const instance = animeLib({
-		autoplay: false,
-		...params,
-	}) as AnimeInstance;
-
+	const instance = await anime({ ...params, autoplay: false });
 	return {
 		play: () => instance.play(),
 		pause: () => instance.pause(),
@@ -106,5 +216,4 @@ export async function createControllableAnimation(params: AnimeParams): Promise<
 	};
 }
 
-// Export default para compatibilidad
 export { anime as default };

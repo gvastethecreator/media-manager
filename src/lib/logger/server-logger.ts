@@ -103,11 +103,11 @@ const _SERVER_LOG_STYLES = {
 
 export interface ServerLoggerOptions {
 	context?: string;
-	timestamp?: boolean;
 	level?: LogLevel;
-	showRequestId?: boolean;
-	showPerformance?: boolean;
 	showMemoryUsage?: boolean;
+	showPerformance?: boolean;
+	showRequestId?: boolean;
+	timestamp?: boolean;
 }
 
 export class ServerLogger {

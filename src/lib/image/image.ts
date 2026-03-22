@@ -6,23 +6,23 @@ import { formatBytes } from '@/lib/utils/format.utils';
 export type ImageFormat = 'webp' | 'jpeg' | 'png';
 
 export interface ProcessImageOptions {
-	width: number;
-	height: number;
-	quality: number;
-	format?: ImageFormat;
-	fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
-	position?: 'top' | 'right top' | 'right' | 'right bottom' | 'bottom' | 'left bottom' | 'left' | 'left top' | 'center';
 	background?: string;
-	withoutEnlargement?: boolean;
+	fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
+	format?: ImageFormat;
+	height: number;
+	position?: 'top' | 'right top' | 'right' | 'right bottom' | 'bottom' | 'left bottom' | 'left' | 'left top' | 'center';
+	quality: number;
+	width: number;
 	withMetadata?: boolean;
+	withoutEnlargement?: boolean;
 }
 
 export interface ProcessImageResult {
 	buffer: Buffer;
-	width: number;
-	height: number;
 	format: ImageFormat;
+	height: number;
 	size: number;
+	width: number;
 }
 
 const DEFAULT_OPTIONS: Partial<ProcessImageOptions> = {

@@ -8,16 +8,16 @@ import type { ExtendedFolder, ExtendedProcessStatus } from './folder-types';
 
 interface NormalModeControlsProps {
 	folder: ExtendedFolder;
-	selectedFolder: string | null;
-	isGloballyProcessing: boolean;
-	isReindexing: boolean;
-	processStatus: ExtendedProcessStatus;
-	onEdit: () => void;
-	onToggleExpanded?: (folderId: string) => void;
-	onReindex: (folderId: string) => void;
-	onFolderClick: (folderId: string) => void;
 	hasChildren: boolean;
 	isExpanded?: boolean;
+	isGloballyProcessing: boolean;
+	isReindexing: boolean;
+	onEdit: () => void;
+	onFolderClick: (folderId: string) => void;
+	onReindex: (folderId: string) => void;
+	onToggleExpanded?: (folderId: string) => void;
+	processStatus: ExtendedProcessStatus;
+	selectedFolder: string | null;
 }
 
 export const NormalModeControls = memo(function NormalModeControls({

@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 interface ImagePickerProps {
-	value: string | null;
-	onChange: (value: string | null) => void;
 	className?: string;
+	onChange: (value: string | null) => void;
+	value: string | null;
 }
 
 export function ImagePicker({ value, onChange, className }: ImagePickerProps) {

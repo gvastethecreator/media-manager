@@ -2,8 +2,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface JSONSyntaxHighlighterProps {
-	content: string;
 	className?: string;
+	content: string;
 	maxHeight?: string;
 	showLineNumbers?: boolean;
 }
@@ -166,11 +166,11 @@ export const JSONSyntaxHighlighter: React.FC<JSONSyntaxHighlighterProps> = ({
  * Componente colapsible para JSON grande
  */
 interface CollapsibleJSONProps {
-	content: string;
-	maxHeight?: string;
-	collapsedHeight?: string;
 	className?: string;
+	collapsedHeight?: string;
+	content: string;
 	defaultExpanded?: boolean;
+	maxHeight?: string;
 	showLineNumbers?: boolean;
 }
 

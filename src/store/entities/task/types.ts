@@ -39,13 +39,13 @@ export type SortDirection = 'asc' | 'desc';
  * Filtros para tareas
  */
 export interface TaskFilters {
-	status?: string[];
-	priority?: string[];
-	type?: string[];
-	tags?: string[];
-	search?: string;
 	createdAfter?: Date | null;
 	createdBefore?: Date | null;
+	priority?: string[];
+	search?: string;
+	status?: string[];
+	tags?: string[];
+	type?: string[];
 	updatedAfter?: Date | null;
 	updatedBefore?: Date | null;
 }
@@ -54,55 +54,61 @@ export interface TaskFilters {
  * Estado para selección de tareas
  */
 export interface SelectionState {
-	selectedIds: string[];
 	lastSelectedId: string | null;
+	selectedIds: string[];
 }
 
 /**
  * 📊 Estado principal del store de tareas
  */
 export interface TaskState {
-	// 📋 Datos principales
-	tasks: TaskWithStats[];
 	currentTask: TaskWithStats | null;
-	isLoading: boolean;
-	isLoadingMore: boolean;
 	error: string | null;
-	lastUpdated: number | null;
-	total: number;
-	hasMore: boolean;
-
-	// 🎮 UI y configuración
-	ui: TaskUIState;
 	filters: TaskFiltersState;
+	getFilteredTasks: () => TaskWithStats[];
+	getSortedTasks: () => TaskWithStats[];
 
 	// 🔍 Selectores y getters
 	getTaskById: (id: string) => TaskWithStats | undefined;
-	getFilteredTasks: () => TaskWithStats[];
-	getSortedTasks: () => TaskWithStats[];
+	hasMore: boolean;
+	isLoading: boolean;
+	isLoadingMore: boolean;
+	lastUpdated: number | null;
+	// 📋 Datos principales
+	tasks: TaskWithStats[];
+	total: number;
+
+	// 🎮 UI y configuración
+	ui: TaskUIState;
 }
 
 /**
  * 🎮 Estado de UI del store
  */
 export interface TaskUIState {
-	selectedIds: string[];
-	viewMode: TaskViewMode;
-	isViewerOpen: boolean;
 	currentTaskId: string | null;
 	displayState: Record<string, any>;
-	highlightedId: string | null;
-	expandedIds: string[];
-	isCreateModalOpen: boolean;
-	isEditModalOpen: boolean;
-	isDeleteModalOpen: boolean;
 	editingId: string | null;
+	expandedIds: string[];
+	highlightedId: string | null;
+	isCreateModalOpen: boolean;
+	isDeleteModalOpen: boolean;
+	isEditModalOpen: boolean;
+	isViewerOpen: boolean;
+	selectedIds: string[];
+	viewMode: TaskViewMode;
 }
 
 /**
  * 🔍 Estado de filtros del store
  */
 export interface TaskFiltersState {
+	// Rango de fechas
+	dateRange: {
+		from: Date | null;
+		to: Date | null;
+	};
+	priority: string[];
 	// Filtros básicos
 	query: string;
 	searchQuery: string; // Alias para compatibilidad
@@ -111,62 +117,55 @@ export interface TaskFiltersState {
 
 	// Filtros específicos
 	status: string[];
-	priority: string[];
-	type: string[];
 	tags: string[];
-
-	// Rango de fechas
-	dateRange: {
-		from: Date | null;
-		to: Date | null;
-	};
+	type: string[];
 }
 
 /**
  * 🔄 Acciones disponibles en el store
  */
 export interface TaskActions {
-	// 📥 Carga de datos
-	fetchTasks: (options?: TaskSearchOptions) => Promise<void>;
-	fetchTaskById: (id: string) => Promise<void>;
-	loadMore: () => Promise<void>;
+	clearFilters: () => void;
+	clearSelection: () => void;
+	closeCreateModal: () => void;
+	closeDeleteModal: () => void;
+	closeEditModal: () => void;
+	completeTask: (id: string) => Promise<void>;
 
 	// ✏️ CRUD
 	createTask: (input: TaskCreateInput) => Promise<void>;
-	updateTask: (id: string, input: TaskUpdateInput) => Promise<void>;
 	deleteTask: (id: string) => Promise<void>;
 	deleteTasks: (ids: string[]) => Promise<void>;
+	fetchTaskById: (id: string) => Promise<void>;
+	// 📥 Carga de datos
+	fetchTasks: (options?: TaskSearchOptions) => Promise<void>;
+	loadMore: () => Promise<void>;
 
-	// ⭐ Operaciones especiales
-	toggleFavorite: (id: string) => Promise<void>;
-	toggleArchive: (id: string) => Promise<void>;
-	updateProgress: (id: string, progress: number) => Promise<void>;
-	completeTask: (id: string) => Promise<void>;
+	// 🎨 Modales
+	openCreateModal: () => void;
+	openDeleteModal: (id: string) => void;
+	openEditModal: (id: string) => void;
 
 	// 🔄 Refetch y reset
 	refetch: () => Promise<void>;
 	reset: () => void;
+	selectMultipleTasks: (ids: string[]) => void;
 
 	// 🎮 Acciones UI
 	selectTask: (id: string | null) => void;
-	selectMultipleTasks: (ids: string[]) => void;
-	toggleSelection: (id: string) => void;
-	clearSelection: () => void;
-
-	// 🎨 Modales
-	openCreateModal: () => void;
-	closeCreateModal: () => void;
-	openEditModal: (id: string) => void;
-	closeEditModal: () => void;
-	openDeleteModal: (id: string) => void;
-	closeDeleteModal: () => void;
-
-	// 🔍 Filtros
-	updateFilters: (filters: Partial<TaskFiltersState>) => void;
-	clearFilters: () => void;
 	setSearchQuery: (query: string) => void;
 	setSortBy: (sortBy: TaskSortCriteria) => void;
 	setSortOrder: (sortOrder: 'asc' | 'desc') => void;
+	toggleArchive: (id: string) => Promise<void>;
+
+	// ⭐ Operaciones especiales
+	toggleFavorite: (id: string) => Promise<void>;
+	toggleSelection: (id: string) => void;
+
+	// 🔍 Filtros
+	updateFilters: (filters: Partial<TaskFiltersState>) => void;
+	updateProgress: (id: string, progress: number) => Promise<void>;
+	updateTask: (id: string, input: TaskUpdateInput) => Promise<void>;
 }
 
 /**

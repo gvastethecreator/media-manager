@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 // Importar tipos correctos de entities
 import type { CollectionWithStats } from '@/types/entities/collection';
@@ -9,13 +9,13 @@ import { CollectionCardHeader } from './collection-card-header';
 import { CollectionCardImages } from './collection-card-images';
 
 export interface CollectionCardProps {
-	collection: CollectionWithStats;
-	onClick?: () => void;
 	className?: string;
-	style?: React.CSSProperties;
+	collection: CollectionWithStats;
 	compact?: boolean;
+	onClick?: () => void;
 	showEntitiesCount?: boolean;
 	showImagesCount?: boolean;
+	style?: React.CSSProperties;
 }
 
 /**

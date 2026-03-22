@@ -8,9 +8,9 @@ import { toastService } from '@/lib/ui/toast';
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface PdfViewerProps {
+	file: { id: string; name: string; url: string };
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
-	file: { id: string; name: string; url: string };
 }
 
 export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {

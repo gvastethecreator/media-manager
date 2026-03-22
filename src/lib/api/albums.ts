@@ -7,9 +7,9 @@ import { apiClient } from './client';
 export type { AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/types/entities/album';
 
 export interface AlbumFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 }

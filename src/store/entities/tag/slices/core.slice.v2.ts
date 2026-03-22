@@ -17,36 +17,36 @@ const logger = clientLogger.withContext('TagCoreSlice');
  * 📊 Estado principal (core) del store de Tag - Patrón Record optimizado
  */
 export interface TagCoreState {
-	/** Tags organizados por ID para acceso O(1) */
-	tags: Record<string, TagWithStats>;
-	/** Si se están cargando datos */
-	isLoading: boolean;
 	/** Mensaje de error si existe */
 	error: string | null;
+	/** Si se están cargando datos */
+	isLoading: boolean;
 	/** Timestamp de última actualización */
 	lastUpdated: number | null;
+	/** Tags organizados por ID para acceso O(1) */
+	tags: Record<string, TagWithStats>;
 }
 
 /**
  * 🔄 Acciones del core slice
  */
 export interface TagCoreActions {
-	/** Carga todos los tags */
-	loadTags: () => Promise<TagWithStats[]>;
-	/** Obtiene todos los tags como array */
-	getTags: () => TagWithStats[];
-	/** Obtiene un tag por su ID */
-	getTagById: (id: string) => TagWithStats | undefined;
 	/** Crea un nuevo tag */
 	createTag: (data: TagCreateInput) => Promise<TagWithStats | null>;
-	/** Actualiza un tag existente */
-	updateTag: (id: string, data: TagUpdateInput) => Promise<void>;
 	/** Elimina un tag */
 	deleteTag: (id: string) => Promise<void>;
-	/** Actualiza múltiples tags */
-	setTags: (tags: TagWithStats[]) => void;
+	/** Obtiene un tag por su ID */
+	getTagById: (id: string) => TagWithStats | undefined;
+	/** Obtiene todos los tags como array */
+	getTags: () => TagWithStats[];
+	/** Carga todos los tags */
+	loadTags: () => Promise<TagWithStats[]>;
 	/** Recarga los tags forzando una nueva petición */
 	refreshTags: () => Promise<TagWithStats[]>;
+	/** Actualiza múltiples tags */
+	setTags: (tags: TagWithStats[]) => void;
+	/** Actualiza un tag existente */
+	updateTag: (id: string, data: TagUpdateInput) => Promise<void>;
 }
 
 /**

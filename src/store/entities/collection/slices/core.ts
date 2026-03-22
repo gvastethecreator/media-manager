@@ -21,31 +21,31 @@ import type { CollectionState } from '../types';
  * Slice principal con operaciones CRUD básicas para colecciones
  */
 export interface CollectionCoreSlice {
-	// Operaciones de consulta
-	getCollectionById: (id: string) => CollectionWithStats | undefined;
-	getCollections: () => CollectionWithStats[];
-	getSelectedCollection: () => CollectionWithStats | undefined;
-
-	// Operaciones de mutación
-	setCollections: (collections: CollectionWithStats[]) => void;
 	addCollection: (collection: CollectionWithStats) => void;
-	updateCollection: (id: string, data: Partial<CollectionWithStats>) => void;
-	removeCollection: (id: string) => void;
-	selectCollection: (id: string | null) => void;
-
-	// Estado de carga y errores
-	setLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
+	createCollectionServer: (data: CollectionCreateInput) => Promise<CollectionWithStats | undefined>;
 
 	// Acciones asíncronas con Server Actions
 	fetchCollection: (id: string) => Promise<CollectionWithStats | undefined>;
 	fetchCollections: () => Promise<CollectionWithStats[]>;
-	createCollectionServer: (data: CollectionCreateInput) => Promise<CollectionWithStats | undefined>;
+	// Operaciones de consulta
+	getCollectionById: (id: string) => CollectionWithStats | undefined;
+	getCollections: () => CollectionWithStats[];
+	getSelectedCollection: () => CollectionWithStats | undefined;
+	removeCollection: (id: string) => void;
+	removeCollectionServer: (id: string) => Promise<boolean>;
+	selectCollection: (id: string | null) => void;
+
+	// Operaciones de mutación
+	setCollections: (collections: CollectionWithStats[]) => void;
+	setError: (error: string | null) => void;
+
+	// Estado de carga y errores
+	setLoading: (isLoading: boolean) => void;
+	updateCollection: (id: string, data: Partial<CollectionWithStats>) => void;
 	updateCollectionServer: (
 		id: string,
 		data: Partial<CollectionUpdateInput>
 	) => Promise<CollectionWithStats | undefined>;
-	removeCollectionServer: (id: string) => Promise<boolean>;
 }
 
 /**

@@ -6,23 +6,23 @@ import type { NoteStore } from '../types';
 const selectionLogger = clientLogger.withContext('NoteStore:Selection');
 
 export interface SelectionSlice {
+	clearSelection: () => void;
+	isMultiSelectMode: boolean;
+
+	// Reset
+	resetSelection: () => void;
+	selectAllNotes: () => void;
 	// Estado
 	selectedNoteId: string | null;
 	selectedNoteIds: string[];
-	isMultiSelectMode: boolean;
 
 	// Acciones - selección individual
 	selectNote: (note: NoteWithStats | null) => void;
-	unselectNote: () => void;
 
 	// Acciones - selección múltiple
 	toggleMultiSelectMode: () => void;
 	toggleNoteSelection: (id: string) => void;
-	selectAllNotes: () => void;
-	clearSelection: () => void;
-
-	// Reset
-	resetSelection: () => void;
+	unselectNote: () => void;
 }
 
 // Estado inicial por defecto para selección

@@ -37,56 +37,56 @@ export type DownloadQuality = 'original' | 'high' | 'medium' | 'low';
  * Download options interface
  */
 export interface DownloadOptions {
-	/** Download format */
-	format?: DownloadFormat;
-	/** Image quality (for image files) */
-	quality?: DownloadQuality;
+	/** Enable batch download optimization */
+	batchOptimization?: boolean;
 	/** Enable compression */
 	compress?: boolean;
 	/** Compression level (0-9) */
 	compressionLevel?: number;
 	/** Custom filename */
 	filename?: string;
-	/** Show progress tracking */
-	showProgress?: boolean;
-	/** Enable batch download optimization */
-	batchOptimization?: boolean;
+	/** Download format */
+	format?: DownloadFormat;
 	/** Maximum concurrent downloads */
 	maxConcurrent?: number;
+	/** Image quality (for image files) */
+	quality?: DownloadQuality;
+	/** Show progress tracking */
+	showProgress?: boolean;
 }
 
 /**
  * Download result interface
  */
 export interface DownloadResult {
-	/** Success status */
-	success: boolean;
-	/** Downloaded file path/name */
-	filename: string;
-	/** File size in bytes */
-	size: number;
 	/** Download duration in milliseconds */
 	duration: number;
 	/** Error message if failed */
 	error?: string;
+	/** Downloaded file path/name */
+	filename: string;
+	/** File size in bytes */
+	size: number;
+	/** Success status */
+	success: boolean;
 }
 
 /**
  * Batch download result interface
  */
 export interface BatchDownloadResult {
-	/** Overall success status */
-	success: boolean;
-	/** Total files processed */
-	totalFiles: number;
-	/** Successfully downloaded files */
-	successfulDownloads: number;
 	/** Failed downloads */
 	failedDownloads: number;
 	/** Individual download results */
 	results: DownloadResult[];
+	/** Overall success status */
+	success: boolean;
+	/** Successfully downloaded files */
+	successfulDownloads: number;
 	/** Total download duration */
 	totalDuration: number;
+	/** Total files processed */
+	totalFiles: number;
 	/** Total size downloaded */
 	totalSize: number;
 }

@@ -38,21 +38,21 @@ function toMediaItem(item: BrowserItem): MediaItem {
 }
 
 export interface MediaItemProps {
-	item: BrowserItem;
-	size: number;
-	isSelected?: boolean;
+	animateIn?: boolean;
+	className?: string;
 	isActive?: boolean;
+	isSelected?: boolean;
+	item: BrowserItem;
 	layoutItem?: boolean;
 	layoutOrder?: number;
-	variant?: 'grid' | 'masonry';
-	animateIn?: boolean;
 	onClick?: (e: React.MouseEvent) => void;
-	onDoubleClick?: () => void;
 	onContextMenu?: (e: React.MouseEvent) => void;
-	className?: string;
+	onDoubleClick?: () => void;
+	size: number;
 	style?: React.CSSProperties;
 	/** Test id opcional (compatibilidad E2E) */
 	testId?: string;
+	variant?: 'grid' | 'masonry';
 	/** Modo de vista para ajustar el render */
 	viewMode?: 'grid' | 'list' | 'masonry' | 'table' | 'cards';
 }

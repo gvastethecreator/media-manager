@@ -37,68 +37,68 @@ export enum PropertyViewMode {
  * 📊 Estado principal (core) del store de Property
  */
 export interface PropertyCoreState {
-	properties: Record<string, PropertyWithStats>;
-	isLoading: boolean;
 	error: string | null;
+	isLoading: boolean;
 	lastUpdated: number | null;
+	properties: Record<string, PropertyWithStats>;
 }
 
 /**
  * 🔄 Acciones del core slice
  */
 export interface PropertyCoreActions {
-	loadProperties: () => Promise<PropertyWithStats[]>;
 	createProperty: (data: PropertyCreateInput) => Promise<PropertyWithStats | null>;
-	updateProperty: (id: string, data: PropertyUpdateInput) => Promise<void>;
 	deleteProperty: (id: string) => Promise<void>;
+	loadProperties: () => Promise<PropertyWithStats[]>;
 	setProperties: (properties: PropertyWithStats[]) => void;
+	updateProperty: (id: string, data: PropertyUpdateInput) => Promise<void>;
 }
 
 /**
  * 🎨 Estado de UI para propiedades
  */
 export interface PropertyUIState {
-	selectedId: string | null;
 	editingId: string | null;
 	highlightedId: string | null;
-	viewMode: PropertyViewMode;
 	isCreateModalOpen: boolean;
-	isEditModalOpen: boolean;
 	isDeleteModalOpen: boolean;
+	isEditModalOpen: boolean;
+	selectedId: string | null;
+	viewMode: PropertyViewMode;
 }
 
 /**
  * 🎯 Acciones del UI slice
  */
 export interface PropertyUIActions {
-	selectProperty: (id: string | null) => void;
-	startEditing: (id: string | null) => void;
-	highlightProperty: (id: string | null) => void;
-	setViewMode: (mode: PropertyViewMode) => void;
-	openCreateModal: () => void;
 	closeCreateModal: () => void;
-	openEditModal: (id: string) => void;
-	closeEditModal: () => void;
-	openDeleteModal: (id: string) => void;
 	closeDeleteModal: () => void;
+	closeEditModal: () => void;
+	highlightProperty: (id: string | null) => void;
+	openCreateModal: () => void;
+	openDeleteModal: (id: string) => void;
+	openEditModal: (id: string) => void;
+	selectProperty: (id: string | null) => void;
+	setViewMode: (mode: PropertyViewMode) => void;
+	startEditing: (id: string | null) => void;
 }
 
 /**
  * 🔍 Filtros para propiedades
  */
 export interface PropertyFilters {
-	sortBy: PropertySortCriteria;
-	searchTerm: string;
 	category: string | null;
 	onlyFavorites: boolean;
+	searchTerm: string;
+	sortBy: PropertySortCriteria;
 }
 
 /**
  * 🔍 Acciones del filter slice
  */
 export interface PropertyFilterActions {
-	updateFilters: (filters: Partial<PropertyFilters>) => void;
 	clearFilters: () => void;
+	updateFilters: (filters: Partial<PropertyFilters>) => void;
 }
 
 /**

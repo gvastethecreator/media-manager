@@ -24,10 +24,10 @@ export interface PromptExtended extends PromptBase {
 		properties: number;
 		groups: number;
 	};
-	parsedTags?: string[];
-	parsedParameters?: Record<string, any>;
-	previewContent?: string;
 	lastUpdated?: Date;
+	parsedParameters?: Record<string, any>;
+	parsedTags?: string[];
+	previewContent?: string;
 	stats?: PromptStats;
 }
 
@@ -40,12 +40,12 @@ export type ExtendedPrompt = PromptExtended;
  * Interfaz para filtros de prompts
  */
 export interface PromptFilters {
-	search?: string;
 	category?: string;
-	tags?: string[];
-	onlyFavorites?: boolean;
-	startDate?: Date;
 	endDate?: Date;
+	onlyFavorites?: boolean;
+	search?: string;
+	startDate?: Date;
+	tags?: string[];
 }
 
 /**
@@ -53,9 +53,9 @@ export interface PromptFilters {
  */
 export interface PromptsPaginatedResponse {
 	items: PromptExtended[];
-	total: number;
 	page: number;
 	pageSize: number;
+	total: number;
 	totalPages: number;
 }
 
@@ -63,8 +63,6 @@ export interface PromptsPaginatedResponse {
  * Interfaz para parámetros de ejecución de un prompt
  */
 export interface PromptExecutionParams {
-	promptId: string;
-	variables?: Record<string, any>;
 	context?: string;
 	options?: {
 		maxTokens?: number;
@@ -74,32 +72,34 @@ export interface PromptExecutionParams {
 		presencePenalty?: number;
 		model?: string;
 	};
+	promptId: string;
+	variables?: Record<string, any>;
 }
 
 /**
  * Interfaz para resultado de ejecución de un prompt
  */
 export interface PromptExecutionResult {
-	promptId: string;
 	content: string;
+	executionTime?: number;
+	model?: string;
+	promptId: string;
+	timestamp: Date;
 	tokens?: {
 		prompt: number;
 		completion: number;
 		total: number;
 	};
-	model?: string;
-	executionTime?: number;
-	timestamp: Date;
 }
 
 /**
  * Estadísticas de uso de un prompt
  */
 export interface PromptStats {
-	usageCount: number;
-	successRate: number;
 	averageExecutionTime: number;
 	lastExecuted?: Date;
 	popularity: number;
 	rating?: number;
+	successRate: number;
+	usageCount: number;
 }

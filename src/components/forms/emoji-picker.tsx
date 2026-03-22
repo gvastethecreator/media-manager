@@ -6,9 +6,9 @@ import { Button } from '../ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 interface EmojiPickerProps {
-	value: string;
-	onChange: (value: string) => void;
 	className?: string;
+	onChange: (value: string) => void;
+	value: string;
 }
 
 // 🎯 Categorías de emojis organizadas por uso en el proyecto

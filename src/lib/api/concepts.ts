@@ -4,9 +4,19 @@ import type { ImageWithStats } from '@/types/entities/image';
 import { apiClient } from './client';
 
 export interface ConceptFilters {
-	search?: string;
+	applications?: string;
+	category?: string;
+	complexity?: string;
+	examples?: string;
+	featuredImage?: string;
+	isFavorite?: boolean;
+	isPublic?: boolean;
 	limit?: number;
+	notes?: string;
 	offset?: number;
+	parentId?: string;
+	relatedConcepts?: string;
+	search?: string;
 	sortBy?:
 		| 'name'
 		| 'createdAt'
@@ -22,57 +32,47 @@ export interface ConceptFilters {
 		| 'featuredImage'
 		| 'parentId';
 	sortOrder?: 'asc' | 'desc';
-	category?: string;
-	isPublic?: boolean;
-	isFavorite?: boolean;
 	type?: string;
-	complexity?: string;
-	applications?: string;
-	examples?: string;
-	relatedConcepts?: string;
-	notes?: string;
-	featuredImage?: string;
-	parentId?: string;
 }
 
 export interface ConceptCreateInput {
-	name: string;
+	applications?: string | null;
+	category?: string | null;
+	color?: string | null;
+	complexity?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	isPublic?: boolean;
+	examples?: string | null;
+	featuredImage?: string | null;
 	isFavorite?: boolean;
+	isPublic?: boolean;
+	name: string;
+	notes?: string | null;
+	parentId?: string | null;
+	relatedConcepts?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	complexity?: string | null;
-	applications?: string | null;
-	examples?: string | null;
-	relatedConcepts?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
 }
 
 export interface ConceptUpdateInput {
-	name?: string;
+	applications?: string | null;
+	category?: string | null;
+	color?: string | null;
+	complexity?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	isPublic?: boolean;
+	examples?: string | null;
+	featuredImage?: string | null;
 	isFavorite?: boolean;
+	isPublic?: boolean;
+	name?: string;
+	notes?: string | null;
+	parentId?: string | null;
+	relatedConcepts?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	complexity?: string | null;
-	applications?: string | null;
-	examples?: string | null;
-	relatedConcepts?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
 }
 
 export interface ConceptsResponse {

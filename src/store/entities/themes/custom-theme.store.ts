@@ -21,10 +21,10 @@ interface CustomThemeStoreState {
 	customThemes: CustomTheme[];
 	/** ID del tema actualmente en edición (null si no hay editor abierto) */
 	editingThemeId: string | null;
-	/** Tema temporal para preview sin guardar */
-	previewTheme: CustomTheme | null;
 	/** Si estamos en modo preview */
 	isPreviewMode: boolean;
+	/** Tema temporal para preview sin guardar */
+	previewTheme: CustomTheme | null;
 }
 
 /**
@@ -33,33 +33,33 @@ interface CustomThemeStoreState {
 interface CustomThemeStoreActions {
 	// CRUD de temas
 	addCustomTheme: (theme: CustomTheme) => void;
-	updateCustomTheme: (id: string, updates: Partial<Omit<CustomTheme, 'id'>>) => void;
-	deleteCustomTheme: (id: string) => void;
-
-	// Edición
-	startEditing: (themeId: string | null) => void;
-	stopEditing: () => void;
-
-	// Preview
-	setPreviewTheme: (theme: CustomTheme | null) => void;
 	applyPreview: () => void;
+
+	// Aplicar al DOM
+	applyThemeToDOM: (theme: CustomTheme) => void;
 	cancelPreview: () => void;
 
 	// Creación desde base
 	createFromBuiltIn: (builtInId: string, name: string) => CustomTheme;
+	deleteCustomTheme: (id: string) => void;
 	duplicateTheme: (themeId: string, newName: string) => CustomTheme;
 
 	// Importar/Exportar
 	exportTheme: (themeId: string) => string | null;
-	importTheme: (json: string) => CustomTheme | null;
-
-	// Aplicar al DOM
-	applyThemeToDOM: (theme: CustomTheme) => void;
-	resetToActiveTheme: () => void;
 
 	// Utilidades
 	getThemeById: (id: string) => CustomTheme | null;
+	importTheme: (json: string) => CustomTheme | null;
 	isCustomTheme: (id: string) => boolean;
+	resetToActiveTheme: () => void;
+
+	// Preview
+	setPreviewTheme: (theme: CustomTheme | null) => void;
+
+	// Edición
+	startEditing: (themeId: string | null) => void;
+	stopEditing: () => void;
+	updateCustomTheme: (id: string, updates: Partial<Omit<CustomTheme, 'id'>>) => void;
 }
 
 type CustomThemeStore = CustomThemeStoreState & CustomThemeStoreActions;

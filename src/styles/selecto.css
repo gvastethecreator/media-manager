@@ -3,41 +3,41 @@
 /* Área de selección activa */
 .selecto-selection {
 	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
 	background: var(--selection-bg);
 	border: 2px solid color-mix(in oklab, var(--primary), transparent 40%);
 	border-radius: 4px;
-	z-index: 1000;
-	pointer-events: none;
-	transition: all 0.1s ease;
 	backdrop-filter: blur(1px);
+	transition: all 0.1s ease;
 }
 
 /* Elementos que están siendo seleccionados (durante el drag) */
 .selecto-selecting {
+	position: relative;
+	z-index: 10;
 	outline: 2px solid color-mix(in oklab, var(--primary), transparent 40%) !important;
 	outline-offset: 2px;
 	transform: scale(1.02);
 	transition: all 0.1s ease;
-	z-index: 10;
-	position: relative;
 }
 
 /* Elementos que ya están seleccionados */
 .selecto-selected {
+	position: relative;
+	z-index: 5;
 	outline: 2px solid var(--marked-border) !important;
 	outline-offset: 2px;
 	background: var(--marked-bg);
 	transform: scale(1.01);
 	transition: all 0.2s ease;
-	z-index: 5;
-	position: relative;
 }
 
 /* Elementos seleccionables */
 [data-selectable="true"] {
+	position: relative;
 	cursor: pointer;
 	transition: all 0.15s ease;
-	position: relative;
 }
 
 [data-selectable="true"]:hover {
@@ -54,18 +54,18 @@
 
 /* Desactivar selección de texto durante la selección */
 .selecto-active {
-	user-select: none !important;
-	-webkit-user-select: none !important;
 	-moz-user-select: none !important;
 	-ms-user-select: none !important;
+	-webkit-user-select: none !important;
+	user-select: none !important;
 }
 
 /* Optimizaciones de rendimiento */
 .selecto-selection,
 .selecto-selecting,
 .selecto-selected {
-	will-change: transform, outline;
 	contain: layout style paint;
+	will-change: transform, outline;
 }
 
 /* Tema oscuro */
@@ -115,13 +115,13 @@
 	}
 
 	.selecto-selecting {
-		outline-color: var(--primary) !important;
 		outline-width: 3px !important;
+		outline-color: var(--primary) !important;
 	}
 
 	.selecto-selected {
-		outline-color: var(--status-success) !important;
 		outline-width: 3px !important;
+		outline-color: var(--status-success) !important;
 		background: color-mix(in oklch, var(--status-success) 15%, transparent);
 	}
 }
@@ -132,8 +132,8 @@
 	.selecto-selecting,
 	.selecto-selected,
 	[data-selectable="true"] {
+		transform: none !important;
 		transition: none !important;
 		animation: none !important;
-		transform: none !important;
 	}
 }

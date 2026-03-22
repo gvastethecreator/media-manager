@@ -8,8 +8,8 @@ import type { LoadingStateProps } from '../types/props.types';
 import type { ViewMode } from '../types/view.types';
 
 interface SkeletonItemProps {
-	size: number;
 	className?: string;
+	size: number;
 }
 
 function SkeletonItem({ size, className }: SkeletonItemProps) {

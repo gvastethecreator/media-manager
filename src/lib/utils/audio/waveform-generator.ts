@@ -8,18 +8,18 @@
  * Configuración para generación de waveform
  */
 export interface WaveformConfig {
-	/** Ancho de la imagen en pixels */
-	width?: number;
-	/** Alto de la imagen en pixels */
-	height?: number;
-	/** Color de la waveform (hex) */
-	waveColor?: string;
 	/** Color de fondo (hex) */
 	backgroundColor?: string;
-	/** Número de samples a mostrar */
-	samples?: number;
+	/** Alto de la imagen en pixels */
+	height?: number;
 	/** Calidad de output (0-100) */
 	quality?: number;
+	/** Número de samples a mostrar */
+	samples?: number;
+	/** Color de la waveform (hex) */
+	waveColor?: string;
+	/** Ancho de la imagen en pixels */
+	width?: number;
 }
 
 /**
@@ -28,12 +28,12 @@ export interface WaveformConfig {
 export interface WaveformResult {
 	/** Buffer de imagen PNG */
 	buffer: Buffer;
-	/** Tamaño del buffer en bytes */
-	size: number;
 	/** Dimensiones de la imagen */
 	dimensions: { width: number; height: number };
 	/** Formato */
 	format: 'png';
+	/** Tamaño del buffer en bytes */
+	size: number;
 }
 
 /**

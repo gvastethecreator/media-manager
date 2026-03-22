@@ -55,16 +55,15 @@ export class ReindexIncrementalService extends Context.Tag('ReindexIncrementalSe
 
 export interface ReindexIncrementalServiceInterface {
 	/**
+	 * Verifica si una carpeta necesita reindexado
+	 */
+	readonly checkNeedsReindex: (folderId: string) => Effect.Effect<boolean, IncrementalReindexError>;
+	/**
 	 * Ejecuta reindexado incremental o completo
 	 */
 	readonly executeIncrementalReindex: (
 		options: IncrementalReindexOptions
 	) => Effect.Effect<IncrementalReindexStats, IncrementalReindexError>;
-
-	/**
-	 * Verifica si una carpeta necesita reindexado
-	 */
-	readonly checkNeedsReindex: (folderId: string) => Effect.Effect<boolean, IncrementalReindexError>;
 
 	/**
 	 * Reindexa archivos específicos que cambiaron

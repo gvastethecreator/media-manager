@@ -14,42 +14,41 @@ const logger = serverLogger.withContext('FolderFilesService');
 
 // Tipos para el servicio agregado
 export interface FolderFile {
+	createdAt: Date;
+	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
+	extension: string;
+	folderId: string;
 	id: string;
+	// Metadatos específicos por tipo (opcional)
+	metadata?: Record<string, any>;
 	name: string;
 	path: string;
 	size: number;
-	createdAt: Date;
-	updatedAt: Date;
-	folderId: string;
-	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
-	extension: string;
-	// Metadatos específicos por tipo (opcional)
-	metadata?: Record<string, any>;
-	// Thumbnail info para imágenes/videos
-	thumbnailPath?: string;
 	// Stats específicos
 	stats?: {
 		views?: number;
 		downloads?: number;
 		isFavorite?: boolean;
 	};
+	// Thumbnail info para imágenes/videos
+	thumbnailPath?: string;
+	updatedAt: Date;
 }
 
 export interface GetFolderFilesOptions {
+	cursor?: string; // Para cursor-based pagination
+	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
 	folderId: string;
 	includeSubfolders?: boolean;
 	limit?: number;
 	offset?: number;
-	cursor?: string; // Para cursor-based pagination
 	search?: string;
 	sortBy?: 'name' | 'size' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
-	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
 }
 
 export interface GetFolderFilesResult {
 	files: FolderFile[];
-	total: number;
 	hasMore: boolean;
 	nextCursor?: string;
 	pagination: {
@@ -62,6 +61,7 @@ export interface GetFolderFilesResult {
 		queryTime: number;
 		processedRecords: number;
 	};
+	total: number;
 }
 
 /**

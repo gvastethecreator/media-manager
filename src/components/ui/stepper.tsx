@@ -16,23 +16,23 @@ interface StepIndicators {
 
 interface StepperContextValue {
 	activeStep: number;
-	setActiveStep: (step: number) => void;
-	stepsCount: number;
-	orientation: StepperOrientation;
-	registerTrigger: (node: HTMLButtonElement | null) => void;
-	triggerNodes: HTMLButtonElement[];
-	focusNext: (currentIdx: number) => void;
-	focusPrev: (currentIdx: number) => void;
 	focusFirst: () => void;
 	focusLast: () => void;
+	focusNext: (currentIdx: number) => void;
+	focusPrev: (currentIdx: number) => void;
 	indicators: StepIndicators;
+	orientation: StepperOrientation;
+	registerTrigger: (node: HTMLButtonElement | null) => void;
+	setActiveStep: (step: number) => void;
+	stepsCount: number;
+	triggerNodes: HTMLButtonElement[];
 }
 
 interface StepItemContextValue {
-	step: number;
-	state: StepState;
 	isDisabled: boolean;
 	isLoading: boolean;
+	state: StepState;
+	step: number;
 }
 
 const StepperContext = createContext<StepperContextValue | undefined>(undefined);
@@ -52,10 +52,10 @@ function useStepItem() {
 
 interface StepperProps extends React.HTMLAttributes<HTMLDivElement> {
 	defaultValue?: number;
-	value?: number;
+	indicators?: StepIndicators;
 	onValueChange?: (value: number) => void;
 	orientation?: StepperOrientation;
-	indicators?: StepIndicators;
+	value?: number;
 }
 
 function Stepper({
@@ -164,10 +164,10 @@ function Stepper({
 }
 
 interface StepperItemProps extends React.HTMLAttributes<HTMLDivElement> {
-	step: number;
 	completed?: boolean;
 	disabled?: boolean;
 	loading?: boolean;
+	step: number;
 }
 
 function StepperItem({
@@ -393,8 +393,8 @@ function StepperPanel({ children, className }: React.ComponentProps<'div'>) {
 }
 
 interface StepperContentProps extends React.ComponentProps<'div'> {
-	value: number;
 	forceMount?: boolean;
+	value: number;
 }
 
 function StepperContent({ value, forceMount, children, className }: StepperContentProps) {

@@ -42,22 +42,22 @@ type ProfileState = typeof initialState;
 
 // Acciones del store
 interface ProfileActions {
+	applySystemTheme: () => void;
 	// Acciones para perfil activo
 	fetchActiveProfile: () => Promise<ProfileTransformed | null>;
-	setActiveProfileById: (id: string) => Promise<boolean>;
 
 	// Acciones para lista de perfiles
 	fetchProfiles: (filters?: ProfileFilters, pagination?: ProfilePaginationOptions) => Promise<PaginatedProfiles>;
-	setFilters: (filters: Partial<ProfileFilters>) => void;
-	setPagination: (pagination: Partial<ProfilePaginationOptions>) => void;
-
-	// Gestión de preferencias
-	updateTheme: (theme: ThemeMode) => void;
-	updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => void;
-	applySystemTheme: () => void;
 
 	// Resetear el store
 	reset: () => void;
+	setActiveProfileById: (id: string) => Promise<boolean>;
+	setFilters: (filters: Partial<ProfileFilters>) => void;
+	setPagination: (pagination: Partial<ProfilePaginationOptions>) => void;
+	updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => void;
+
+	// Gestión de preferencias
+	updateTheme: (theme: ThemeMode) => void;
 }
 
 // Tipo completo del store

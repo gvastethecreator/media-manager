@@ -509,15 +509,15 @@ export function OrganizationSettingsModern() {
 // ============================================================================
 
 interface EntityListProps {
-	items: any[];
-	isLoading: boolean;
-	stats: any[];
-	onCreate: () => void;
-	onEdit: (item: any) => void;
-	onDelete: (id: string) => Promise<void>;
-	renderCard: (item: any, actions: CardActions, isGrid: boolean) => React.ReactNode;
 	entityLabel: string;
 	entityLabelPlural: string;
+	isLoading: boolean;
+	items: any[];
+	onCreate: () => void;
+	onDelete: (id: string) => Promise<void>;
+	onEdit: (item: any) => void;
+	renderCard: (item: any, actions: CardActions, isGrid: boolean) => React.ReactNode;
+	stats: any[];
 }
 
 function EntityList({

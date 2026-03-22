@@ -13,87 +13,87 @@ const logger = clientLogger.withContext('FolderFilesPaginated');
 
 // Tipos para el hook
 export interface FolderFile {
+	createdAt: string;
+	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
+	extension: string;
+	folderId: string;
 	id: string;
+	metadata?: Record<string, any>;
 	name: string;
 	path: string;
 	size: number;
-	createdAt: string;
-	updatedAt: string;
-	folderId: string;
-	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
-	extension: string;
-	metadata?: Record<string, any>;
-	thumbnailPath?: string;
 	stats?: {
 		views?: number;
 		downloads?: number;
 		isFavorite?: boolean;
 	};
+	thumbnailPath?: string;
+	updatedAt: string;
 }
 
 export interface FolderFilesResponse {
 	files: FolderFile[];
+	folder?: {
+		id: string;
+		name: string;
+		path: string;
+	};
+	hasMore: boolean;
 	pagination: {
 		limit: number;
 		offset: number;
 		totalPages: number;
 		currentPage: number;
 	};
-	total: number;
-	hasMore: boolean;
 	performance: {
 		queryTime: number;
 		processedRecords: number;
 	};
-	folder?: {
-		id: string;
-		name: string;
-		path: string;
-	};
+	total: number;
 }
 
 export interface FolderStatsResponse {
-	images: number;
-	videos: number;
 	audios: number;
 	documents: number;
-	jsonFiles: number;
 	file3Ds: number;
-	total: number;
 	folder?: {
 		id: string;
 		name: string;
 		path: string;
 	};
+	images: number;
+	jsonFiles: number;
+	total: number;
+	videos: number;
 }
 
 export interface UseFolderFilesPaginatedOptions {
+	enabled?: boolean;
+	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
 	folderId: string | null;
 	includeSubfolders?: boolean;
 	pageSize?: number;
 	search?: string;
 	sortBy?: 'name' | 'size' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
-	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
-	enabled?: boolean;
 }
 
 export interface UseFolderFilesPaginatedResult {
+	currentPage: number;
+	error: Error | null;
 	files: MediaItem[];
 	flatFiles: FolderFile[];
+	hasMore: boolean;
+	invalidate: () => void;
+	isFetching: boolean;
 	isLoading: boolean;
 	isLoadingMore: boolean;
-	isFetching: boolean;
-	error: Error | null;
-	hasMore: boolean;
-	loadMore: () => void;
-	total: number;
 	loadedCount: number;
-	currentPage: number;
-	totalPages: number;
+	loadMore: () => void;
 	queryTime?: number;
 	refetch: () => Promise<void>;
-	invalidate: () => void;
+	total: number;
+	totalPages: number;
 }
 
 /**

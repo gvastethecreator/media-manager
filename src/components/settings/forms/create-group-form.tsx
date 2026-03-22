@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox-v3';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -30,9 +30,9 @@ type FormData = z.infer<typeof groupFormSchema>;
 interface CreateGroupFormProps {
 	group?: GroupWithStats;
 	isEditing?: boolean;
-	onSubmit: (data: CreateGroupInput) => Promise<void>;
 	onCancel: () => void;
 	onPreview?: () => void;
+	onSubmit: (data: CreateGroupInput) => Promise<void>;
 }
 
 export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, onPreview }: CreateGroupFormProps) {

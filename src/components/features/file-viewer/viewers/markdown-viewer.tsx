@@ -6,8 +6,8 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface MarkdownViewerProps {
-	content: string;
 	className?: string;
+	content: string;
 }
 
 export function MarkdownViewer({ content, className }: MarkdownViewerProps) {

@@ -10,26 +10,26 @@ import type { BaseCardProps, CardLayoutConfig } from '../types/card-layout.types
 import { resolveLayoutConfig } from '../types/card-layout.types';
 
 interface UseCardLayoutReturn {
-	/** Clases CSS para el contenedor principal */
-	containerClasses: string;
-	/** Clases CSS para el contenido */
-	contentClasses: string;
-	/** Clases CSS para la imagen/thumbnail */
-	imageClasses: string;
-	/** Clases CSS para el texto */
-	textClasses: string;
-	/** Clases CSS para los metadatos */
-	metadataClasses: string;
-	/** Estilos inline para el contenedor */
-	containerStyles: React.CSSProperties;
 	/** Configuración de  resuelta */
 	config: CardLayoutConfig;
+	/** Clases CSS para el contenedor principal */
+	containerClasses: string;
+	/** Estilos inline para el contenedor */
+	containerStyles: React.CSSProperties;
+	/** Clases CSS para el contenido */
+	contentClasses: string;
 	/** Información de dimensiones */
 	dimensions: {
 		width?: number | string;
 		height?: number | string;
 		aspectRatio?: string;
 	};
+	/** Clases CSS para la imagen/thumbnail */
+	imageClasses: string;
+	/** Clases CSS para los metadatos */
+	metadataClasses: string;
+	/** Clases CSS para el texto */
+	textClasses: string;
 }
 
 /**

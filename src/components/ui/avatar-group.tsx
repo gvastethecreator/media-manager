@@ -1,31 +1,31 @@
 'use client';
 
 import * as React from 'react';
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from '@/components/ui/animejs-shim';
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 type AnimationVariantType = 'spring' | 'tween' | 'inertia' | 'decay' | 'keyframes';
 type AnimationType = 'default' | 'flip' | 'reveal';
 
 interface AvatarGroupContextValue {
-	tooltipClassName?: string;
 	animation?: 'default' | 'flip' | 'reveal';
+	tooltipClassName?: string;
 }
 
 const AvatarGroupContext = React.createContext<AvatarGroupContextValue | null>(null);
 
 interface AvatarGroupProps {
+	animation?: AnimationType;
 	children: React.ReactNode;
 	className?: string;
 	tooltipClassName?: string;
-	animation?: AnimationType;
 }
 
 interface AvatarGroupItemProps {
+	animation?: AnimationType;
 	children: React.ReactNode;
 	className?: string;
 	tooltipClassName?: string;
-	animation?: AnimationType;
 }
 
 interface AvatarGroupTooltipProps {

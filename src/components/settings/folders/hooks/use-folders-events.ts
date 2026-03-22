@@ -56,8 +56,8 @@ const TOAST_MIN_INTERVAL = 1500; // ms
 
 // 🆕 Batching de eventos folder:progress
 interface BufferedFolderProgress {
-	status: ProcessStatus;
 	lastUpdate: number;
+	status: ProcessStatus;
 }
 const FOLDER_FLUSH_INTERVAL = 150; // ms ventana de coalescencia
 const folderBufferRef: { current: Map<string, BufferedFolderProgress> } = { current: new Map() };
@@ -113,16 +113,16 @@ function bufferFolderProgress(status: ProcessStatus) {
 }
 
 interface FolderEventsCallbacks {
-	onProgress?: (status: ProcessStatus) => void;
-	onError?: (error: ErrorResponse) => void;
 	onComplete?: (data: FolderResponse) => void;
-	onStats?: (stats: FolderStats) => void;
+	onDirectoryDeleted?: (payload: { folderId?: string; path?: string }) => void;
+	onError?: (error: ErrorResponse) => void;
+	onProgress?: (status: ProcessStatus) => void;
 	onReindexAllProgress?: (
 		status: ProcessStatus & {
 			currentFolder?: string;
 		}
 	) => void;
-	onDirectoryDeleted?: (payload: { folderId?: string; path?: string }) => void;
+	onStats?: (stats: FolderStats) => void;
 }
 
 /**

@@ -8,28 +8,31 @@ Este documento establece el estándar para el sistema de animaciones en Image Ma
 
 **REGLA CRÍTICA**: Todos los componentes deben usar **una sola** de estas tres opciones:
 
-1. **`@/components/ui/animejs-shim`** (RECOMENDADO para compatibilidad Framer Motion)
+1. **`@/components/ui/motion-shim`** (RECOMENDADO para compatibilidad declarativa)
 2. **`@/lib/anime`** (Para animaciones complejas con timeline)
 3. **CSS Animations** (Para animaciones simples hover/estados)
 
 **❌ PROHIBIDO**:
+
 - Mezclar múltiples sistemas en un mismo componente
-- Importar `'animejs'` directamente (usar el wrapper o shim)
-- Usar Framer Motion directo (ya reemplazado por shim)
+- Importar otra librería de animación directamente si ya existe solución en `motion-shim` o `@/lib/anime`
+- Reintroducir librerías de animación adicionales en componentes nuevos
 
 ---
 
-## 📦 Opción 1: Animejs Shim (Recomendado)
+## 📦 Opción 1: Motion Shim (Recomendado)
 
 ### Cuándo usar
+
 - Componentes React que necesitan animaciones de entrada/salida
-- Reemplazo de Framer Motion
+- Reemplazo de APIs declarativas de motion
 - Animaciones hover/tap/exit
 - Grids con stagger animations
 
 ### API
+
 ```typescript
-import { motion, AnimatePresence } from '@/components/ui/animejs-shim';
+import { motion, AnimatePresence } from '@/components/ui/motion-shim';
 
 // Componente básico
 <motion.div
@@ -66,14 +69,16 @@ const variants = {
 ```
 
 ### Componentes disponibles
+
 ```typescript
 motion.div, motion.button, motion.span, motion.img
 motion.section, motion.article, motion.header
 motion.footer, motion.nav, motion.main
-// ... y más (ver animejs-shim.tsx)
+// ... y más (ver motion-shim.tsx)
 ```
 
 ### Props soportadas
+
 - `initial`: Estado inicial
 - `animate`: Estado objetivo
 - `exit`: Estado al desmontar (requiere AnimatePresence)
@@ -89,12 +94,14 @@ motion.footer, motion.nav, motion.main
 ## 📦 Opción 2: Lib Anime (Para casos avanzados)
 
 ### Cuándo usar
+
 - Animaciones con timeline complejas
 - Stagger animations programáticas
 - Animaciones que necesitan control (play/pause/seek)
 - Integración con sistema de transiciones morph/flip
 
 ### API
+
 ```typescript
 import { anime, animate, createTimeline, stagger } from '@/lib/anime';
 
@@ -126,12 +133,14 @@ await stagger('.items', {
 ## 📦 Opción 3: CSS Animations
 
 ### Cuándo usar
+
 - Animaciones simples de hover/focus
 - Estados de loading
 - Transiciones básicas
 - Cuando no se necesita JavaScript
 
 ### Clases disponibles
+
 ```css
 /* Entrada */
 .animate-fade-in
@@ -156,6 +165,7 @@ await stagger('.items', {
 ```
 
 ### Uso en Tailwind
+
 ```html
 <div class="transition-all duration-dt-fast ease-dt-out hover:scale-105" />
 <div class="animate-fade-in duration-dt-normal" />
@@ -166,6 +176,7 @@ await stagger('.items', {
 ## 🎨 Design Tokens para Animaciones
 
 ### Duraciones
+
 ```css
 --dt-duration-instant: 50ms   /* Micro-interacciones */
 --dt-duration-fast: 150ms     /* Hover, focus */
@@ -174,6 +185,7 @@ await stagger('.items', {
 ```
 
 ### Timing Functions
+
 ```css
 --dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1)
 --dt-ease-in: cubic-bezier(0.4, 0, 1, 1)
@@ -182,6 +194,7 @@ await stagger('.items', {
 ```
 
 ### Tailwind Classes
+
 ```
 duration-dt-instant, duration-dt-fast, duration-dt-normal, duration-dt-slow
 ease-dt-default, ease-dt-in, ease-dt-out, ease-dt-bounce
@@ -193,7 +206,8 @@ ease-dt-default, ease-dt-in, ease-dt-out, ease-dt-bounce
 
 **SIEMPRE** respetar `prefers-reduced-motion`:
 
-### Con Animejs Shim
+### Con Motion Shim
+
 ```typescript
 // Ya manejado automáticamente en shim
 // Pero para animaciones complejas:
@@ -205,6 +219,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 ```
 
 ### Con CSS
+
 ```css
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -223,41 +238,46 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 ## 📊 Performance
 
 ### Mejores prácticas
+
 1. **Usar `transform` y `opacity`** - Son las propiedades más performantes
 2. **Evitar animar `width`, `height`, `top`, `left`** - Causan reflow
 3. **Usar `will-change` con moderación** - Solo en elementos animados frecuentemente
-4. **Lazy loading de animejs** - El shim ya lo hace automáticamente
+4. **Centralización del runtime** - El shim concentra la semántica declarativa sobre GSAP
 5. **Debounce/throttle** - Para animaciones basadas en scroll/mouse
 
 ### Métricas objetivo
+
 - **First Contentful Paint**: < 1.8s
 - **Largest Contentful Paint**: < 2.5s
 - **Animation frame rate**: 60fps consistente
 
 ---
 
-## 🔄 Migración desde Framer Motion
+## 🔄 Migración desde APIs declarativas previas
 
 ### Cambios necesarios
-```typescript
-// ❌ Antes (Framer Motion)
-import { motion, AnimatePresence } from 'framer-motion';
 
-// ✅ Después (Animejs Shim)
-import { motion, AnimatePresence } from '@/components/ui/animejs-shim';
+```typescript
+// ❌ Antes (otra librería de animación)
+import { motion, AnimatePresence } from 'some-other-motion-library';
+
+// ✅ Después (motion-shim)
+import { motion, AnimatePresence } from '@/components/ui/motion-shim';
 ```
 
 ### Diferencias
-1. **Easing**: Framer usa strings como "easeOut", animejs usa "easeOutQuad"
-2. **Spring**: Framer tiene springs nativos, animejs usa easing bezier
-3. **Layout animations**: Soporte limitado en shim (usar layout/layoutId)
-4. **Drag**: API diferente, ver documentación de animejs
+
+1. **Easing**: El shim acepta nombres declarativos y los traduce a GSAP
+2. **Spring**: El shim simplifica casos comunes; para física avanzada usa GSAP directo
+3. **Layout animations**: Soporte limitado en shim (usar `layout`/`layoutId` cuando aplique)
+4. **Drag**: La API de compatibilidad es acotada; para casos avanzados usar una integración específica
 
 ---
 
 ## 📝 Ejemplos por Caso de Uso
 
 ### Grid de cards con stagger
+
 ```typescript
 {items.map((item, index) => (
   <motion.div
@@ -272,6 +292,7 @@ import { motion, AnimatePresence } from '@/components/ui/animejs-shim';
 ```
 
 ### Hover effect
+
 ```typescript
 <motion.button
   whileHover={{ scale: 1.05 }}
@@ -283,6 +304,7 @@ import { motion, AnimatePresence } from '@/components/ui/animejs-shim';
 ```
 
 ### Página con entrada suave
+
 ```typescript
 <motion.div
   initial={{ opacity: 0 }}
@@ -294,6 +316,7 @@ import { motion, AnimatePresence } from '@/components/ui/animejs-shim';
 ```
 
 ### Modal con backdrop
+
 ```typescript
 <AnimatePresence>
   {isOpen && (
@@ -322,11 +345,13 @@ import { motion, AnimatePresence } from '@/components/ui/animejs-shim';
 ## 🔍 Debugging
 
 ### Herramientas útiles
+
 1. **React Scan** - Ya instalado en el proyecto (detecta re-renders)
 2. **Chrome DevTools > Animations** - Inspeccionar animaciones CSS
 3. **Chrome DevTools > Performance** - Medir FPS y tiempos
 
 ### Logs de desarrollo
+
 ```typescript
 import { clientLogger } from '@/lib/logger/client-logger';
 
@@ -338,8 +363,8 @@ clientLogger.debug('Animation started', { element: 'card', type: 'fade-in' });
 
 ## 📚 Referencias
 
-- [Anime.js Documentation](https://animejs.com/)
-- [Framer Motion API](https://www.framer.com/motion/) (para comparación)
+- [GSAP Documentation](https://gsap.com/docs/v3/)
+- [Motion API patterns](https://www.framer.com/motion/) (solo como referencia conceptual de ergonomía)
 - [MDN: prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
 - [Design Tokens CSS](../styles/design-tokens.css)
 
@@ -361,8 +386,8 @@ Antes de entregar un componente con animaciones:
 
 ## 🚀 Próximos Pasos
 
-1. **Audit completo** - Revisar todos los componentes y migrar los que usan imports directos de animejs
-2. **Componentes v3** - Actualizar a usar siempre el shim
+1. **Audit completo** - Revisar componentes nuevos para mantener GSAP como estándar único
+2. **Componentes v3** - Actualizar a usar siempre el shim o `@/lib/anime`
 3. **Testing** - Agregar tests de accesibilidad para reduced-motion
 4. **Documentación** - Mantener actualizada esta guía
 

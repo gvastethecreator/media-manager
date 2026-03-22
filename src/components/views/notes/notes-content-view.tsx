@@ -3,7 +3,7 @@ import { memo, useMemo } from 'react';
 import { NoteCard } from '@/components/cards/note-card/note-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNotes } from '@/lib/api/notes';
 import type { NoteWithStats } from '@/types/entities/note';

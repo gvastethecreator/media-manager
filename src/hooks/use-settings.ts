@@ -8,32 +8,32 @@ import { useSettingsStore } from '@/store/settings.store';
 import type { Settings, SettingsUpdate } from '@/types/settings';
 
 interface UseSettingsReturn {
-	/** Configuración actual */
-	settings: Settings | null;
-	/** Estado de carga */
-	isLoading: boolean;
-	/** Error actual */
-	error: string | null;
-	/** Si está guardando */
-	isSaving: boolean;
-	/** Si está inicializado */
-	isInitialized: boolean;
 	/** Perfil activo */
 	activeProfileId: string | null;
+	/** Error actual */
+	error: string | null;
 	/** Inicializar configuración */
 	initialize: () => Promise<void>;
-	/** Actualizar configuración */
-	updateSettings: (updates: SettingsUpdate) => Promise<void>;
-	/** Resetear configuración */
-	resetSettings: () => Promise<void>;
-	/** Cargar configuración del sistema */
-	loadSystemSettings: () => Promise<void>;
+	/** Si está inicializado */
+	isInitialized: boolean;
+	/** Estado de carga */
+	isLoading: boolean;
+	/** Si está guardando */
+	isSaving: boolean;
 	/** Cargar configuración de perfil */
 	loadProfileSettings: (profileId: string) => Promise<void>;
+	/** Cargar configuración del sistema */
+	loadSystemSettings: () => Promise<void>;
+	/** Resetear configuración */
+	resetSettings: () => Promise<void>;
 	/** Establecer perfil activo */
 	setActiveProfile: (profileId: string | null) => void;
 	/** Establecer error */
 	setError: (error: string | null) => void;
+	/** Configuración actual */
+	settings: Settings | null;
+	/** Actualizar configuración */
+	updateSettings: (updates: SettingsUpdate) => Promise<void>;
 }
 
 /**

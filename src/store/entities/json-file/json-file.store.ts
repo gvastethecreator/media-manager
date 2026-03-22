@@ -26,35 +26,35 @@ export type JsonFileFilters = Record<string, any>;
  * 🏪 Estado del store de JsonFile
  */
 export interface JsonFileState {
-	// Estado de datos
-	jsonFiles: JsonFileWithStats[];
-	selectedJsonFiles: JsonFileWithStats[];
+	clearFilters: () => void;
+	clearSelection: () => void;
+	createJsonFile: (data: JsonFileCreateInput) => Promise<JsonFileWithStats | undefined>;
 	currentJsonFile: JsonFileWithStats | null;
-
-	// Estado de UI
-	loading: boolean;
+	deleteJsonFile: (id: string) => Promise<void>;
+	deselectJsonFile: (jsonFileId: string) => void;
 	error: string | null;
-	filters: JsonFileFilters;
 
 	// Acciones de datos
 	fetchJsonFiles: () => Promise<void>;
-	createJsonFile: (data: JsonFileCreateInput) => Promise<JsonFileWithStats | undefined>;
-	updateJsonFile: (id: string, data: JsonFileUpdateInput) => Promise<JsonFileWithStats | undefined>;
-	deleteJsonFile: (id: string) => Promise<void>;
-
-	// Acciones de selección
-	selectJsonFile: (jsonFile: JsonFileWithStats) => void;
-	deselectJsonFile: (jsonFileId: string) => void;
-	clearSelection: () => void;
-
-	// Acciones de filtrado
-	setFilters: (filters: Partial<JsonFileFilters>) => void;
-	clearFilters: () => void;
+	filters: JsonFileFilters;
 
 	// Utilidades
 	getJsonFileById: (id: string) => JsonFileWithStats | undefined;
 	getSortedJsonFiles: () => JsonFileWithStats[];
+	// Estado de datos
+	jsonFiles: JsonFileWithStats[];
+
+	// Estado de UI
+	loading: boolean;
+	selectedJsonFiles: JsonFileWithStats[];
+
+	// Acciones de selección
+	selectJsonFile: (jsonFile: JsonFileWithStats) => void;
+
+	// Acciones de filtrado
+	setFilters: (filters: Partial<JsonFileFilters>) => void;
 	toggleFavorite: (id: string) => Promise<void>;
+	updateJsonFile: (id: string, data: JsonFileUpdateInput) => Promise<JsonFileWithStats | undefined>;
 }
 
 const useJsonFileStoreBase = create<JsonFileState>()(

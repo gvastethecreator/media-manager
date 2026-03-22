@@ -7,22 +7,22 @@ const modelsLogger = serverLogger.withContext('PromptModels');
  * Interfaz para metadatos de modelo de IA
  */
 export interface AIModelMetadata {
-	id: PromptModel;
-	name: string;
-	provider: string;
+	apiVersionRequired?: string;
+	contextSize: number;
 	description: string;
 	icon: string;
+	id: PromptModel;
+	isAvailable: boolean;
 	maxTokens: number;
+	name: string;
+	order: number;
+	provider: string;
 	supports: {
 		images: boolean;
 		code: boolean;
 		functions: boolean;
 		assistants: boolean;
 	};
-	contextSize: number;
-	order: number;
-	isAvailable: boolean;
-	apiVersionRequired?: string;
 }
 
 /**

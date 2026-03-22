@@ -3,16 +3,16 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export interface ParsedPromptSegment {
-	type: 'text' | 'lora' | 'embedding' | 'weight' | 'network';
 	content: string;
-	weight?: number;
 	metadata?: Record<string, any>;
+	type: 'text' | 'lora' | 'embedding' | 'weight' | 'network';
+	weight?: number;
 }
 
 export interface PromptParserProps {
-	prompt: string;
 	className?: string;
 	onLorasDetected?: (loras: string[]) => void;
+	prompt: string;
 }
 
 const LORA_PATTERN = /<lora:([^:>]+)(?::([0-9.]+))?>/gi;

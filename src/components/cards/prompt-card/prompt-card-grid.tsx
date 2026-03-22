@@ -9,26 +9,26 @@ import type { PromptWithStats } from '@/types/entities/prompt';
 import { PromptCard } from './prompt-card';
 
 interface PromptCardGridProps {
-	/** Título del grid */
-	title?: string;
-	/** Mostrar barra de búsqueda */
-	showSearch?: boolean;
-	/** Si está cargando */
-	isLoading?: boolean;
-	/** Datos iniciales */
-	initialPrompts?: PromptWithStats[];
-	/** Función a ejecutar al hacer click en un prompt */
-	onPromptClick?: (prompt: PromptWithStats) => void;
-	/** Si las tarjetas están en modo TCG */
-	tcgMode?: boolean;
 	/** Si las tarjetas están en modo compacto */
 	compact?: boolean;
-	/** Si alguna tarjeta está seleccionada */
-	selectedPromptId?: string | null;
-	/** Placeholder de la búsqueda */
-	searchPlaceholder?: string;
+	/** Datos iniciales */
+	initialPrompts?: PromptWithStats[];
+	/** Si está cargando */
+	isLoading?: boolean;
 	/** Máximo de tarjetas a mostrar */
 	maxPrompts?: number;
+	/** Función a ejecutar al hacer click en un prompt */
+	onPromptClick?: (prompt: PromptWithStats) => void;
+	/** Placeholder de la búsqueda */
+	searchPlaceholder?: string;
+	/** Si alguna tarjeta está seleccionada */
+	selectedPromptId?: string | null;
+	/** Mostrar barra de búsqueda */
+	showSearch?: boolean;
+	/** Si las tarjetas están en modo TCG */
+	tcgMode?: boolean;
+	/** Título del grid */
+	title?: string;
 }
 
 /**

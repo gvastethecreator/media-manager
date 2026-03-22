@@ -8,12 +8,12 @@
 import { cn } from '@/lib/utils';
 
 interface SkipLinkProps {
-	/** ID del elemento principal al que saltar */
-	targetId?: string;
 	/** Texto del enlace */
 	children?: React.ReactNode;
 	/** Clases adicionales */
 	className?: string;
+	/** ID del elemento principal al que saltar */
+	targetId?: string;
 }
 
 /**

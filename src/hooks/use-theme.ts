@@ -29,9 +29,9 @@ const customThemes = [
 type Theme = (typeof customThemes)[number] | 'system';
 
 interface UseThemeReturn {
-	theme: Theme;
-	setTheme: (theme: Theme) => void;
 	resolvedTheme: (typeof customThemes)[number];
+	setTheme: (theme: Theme) => void;
+	theme: Theme;
 	themes: readonly string[];
 }
 

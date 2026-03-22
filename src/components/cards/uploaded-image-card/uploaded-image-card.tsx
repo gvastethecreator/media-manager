@@ -2,8 +2,8 @@ import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface UploadedImageCardProps extends React.HTMLAttributes<HTMLDivElement> {
-	uploadedImage: any;
 	className?: string;
+	uploadedImage: any;
 }
 
 export const UploadedImageCard = memo(function UploadedImageCard({

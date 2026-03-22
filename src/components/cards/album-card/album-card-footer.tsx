@@ -3,11 +3,11 @@ import type { Album } from '@/types/entities/album';
 
 interface AlbumCardFooterProps {
 	album: Album;
-	totalEntities: number;
 	cardId: string;
+	primaryColor: string;
 	rarityLevel: string;
 	tcgMode?: boolean;
-	primaryColor: string;
+	totalEntities: number;
 }
 
 /**

@@ -4,14 +4,14 @@ import { cn } from '@/lib/utils';
 type TColorProp = string | string[];
 
 interface ShineBorderProps {
+	borderRadius?: number;
 	/**
 	 * Border width in pixels. Between 1 and 3.
 	 */
 	borderWidth?: 1 | 2 | 3;
-	borderRadius?: number;
-	color?: TColorProp;
-	className?: string;
 	children: React.ReactNode;
+	className?: string;
+	color?: TColorProp;
 }
 
 /**

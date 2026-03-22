@@ -3,14 +3,14 @@ import type { Issue } from '../cards/issue-card';
 import { ServiceStatus } from '../cards/service-card';
 
 export interface ServerAlert {
+	createdAt: Date;
+	details: string | null;
 	id: string;
 	level: 'info' | 'warning' | 'error' | 'critical';
+	message: string;
+	resolved: boolean;
 	service: string;
 	title: string;
-	message: string;
-	details: string | null;
-	resolved: boolean;
-	createdAt: Date;
 }
 
 export async function getFeatures(): Promise<Feature[]> {

@@ -3,30 +3,30 @@ import { ViewType } from '@/components/views/types';
 
 // Definición del tipo para el item actual
 export interface NavigationItem {
+	_count?: { images: number };
+	color?: string;
+	count?: number;
+	createdAt?: Date;
+	description?: string;
+	emoji?: string;
 	id?: string | null;
+	itemType?: string;
+	lastIndexed?: Date;
 	name?: string;
 	path?: string;
-	description?: string;
-	color?: string;
-	emoji?: string;
-	count?: number;
 	totalSize?: number;
-	lastIndexed?: Date;
-	createdAt?: Date;
-	itemType?: string;
-	_count?: { images: number };
 }
 
 interface NavigationState {
-	currentView: ViewType;
-	navigationDirection: number;
 	currentItem: NavigationItem | null;
-	setCurrentView: (view: ViewType) => void;
-	setNavigationDirection: (direction: number) => void;
-	setCurrentItem: (item: NavigationItem | null) => void;
+	currentView: ViewType;
 	getCurrentItem: () => NavigationItem | null;
 	navigateToHome: () => void;
 	navigateToMainFromContent: () => void;
+	navigationDirection: number;
+	setCurrentItem: (item: NavigationItem | null) => void;
+	setCurrentView: (view: ViewType) => void;
+	setNavigationDirection: (direction: number) => void;
 }
 
 export const useNavigationStore = create<NavigationState>((set, get) => ({

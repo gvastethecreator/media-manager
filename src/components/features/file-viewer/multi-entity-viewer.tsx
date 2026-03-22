@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { AnimatePresence, motion } from '@/components/ui/animejs-shim';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { DocumentWithStats } from '@/types/entities/document';
@@ -19,8 +19,8 @@ import { GenericFileViewer } from './viewers/generic-file-viewer';
 import { VideoViewer } from './viewers/video-viewer';
 
 interface MultiEntityViewerProps {
-	entities: AnyEntityWithStats[];
 	currentIndex: number;
+	entities: AnyEntityWithStats[];
 	isOpen: boolean;
 	onClose: () => void;
 	onIndexChange: (index: number) => void;

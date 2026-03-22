@@ -28,13 +28,13 @@ const ACCENT_COLOR = 'var(--entity-folder, oklch(0.7 0.15 55))'; // Naranja/marr
 // ============================================================================
 
 interface FolderStats {
-	images?: number;
-	videos?: number;
 	audios?: number;
 	documents?: number;
-	jsonFiles?: number;
 	file3ds?: number;
+	images?: number;
+	jsonFiles?: number;
 	total: number;
+	videos?: number;
 }
 
 function getFolderStats(folder: FolderBrowserItem['data']): FolderStats {

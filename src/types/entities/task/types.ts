@@ -14,28 +14,28 @@ import type { VideoWithStats } from '../video';
  * Contiene todos los campos de la tabla Drizzle
  */
 export interface TaskBase {
-	id: string;
-	title: string;
-	description: string | null;
-	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority: 'low' | 'medium' | 'high' | 'urgent';
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-	tags: string | null; // JSON stringified array
-	dueDate: Date | null;
-	completedAt: Date | null;
-	estimatedHours: number | null;
 	actualHours: number | null;
-	progress: number;
 	assignedTo: string | null;
-	parentTaskId: string | null;
-	projectId: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	isArchived: boolean;
+	category: string | null;
+	color: string | null;
+	completedAt: Date | null;
 	createdAt: Date;
+	description: string | null;
+	dueDate: Date | null;
+	emoji: string | null;
+	estimatedHours: number | null;
+	featuredImage: string | null;
+	id: string;
+	isArchived: boolean;
+	isFavorite: boolean;
+	notes: string | null;
+	parentTaskId: string | null;
+	priority: 'low' | 'medium' | 'high' | 'urgent';
+	progress: number;
+	projectId: string | null;
+	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+	tags: string | null; // JSON stringified array
+	title: string;
 	updatedAt: Date | null;
 }
 
@@ -43,11 +43,11 @@ export interface TaskBase {
  * 📊 Estadísticas de Task
  */
 export interface TaskStatistics {
-	subtasks: number;
-	images: number;
-	videos: number;
 	albums: number;
 	characters: number;
+	images: number;
+	subtasks: number;
+	videos: number;
 }
 
 /**
@@ -62,12 +62,12 @@ export interface TaskWithStats extends TaskBase {
  * 🔗 Relaciones de Task con otras entidades
  */
 export interface TaskRelations {
-	subtasks?: TaskWithStats[];
-	parentTask?: TaskWithStats | null;
-	images?: ImageWithStats[];
-	videos?: VideoWithStats[];
 	albums?: AlbumWithStats[];
 	characters?: CharacterWithStats[];
+	images?: ImageWithStats[];
+	parentTask?: TaskWithStats | null;
+	subtasks?: TaskWithStats[];
+	videos?: VideoWithStats[];
 }
 
 /**
@@ -79,91 +79,91 @@ export interface TaskComplete extends TaskWithStats, TaskRelations {}
  * ✏️ Input para crear un nuevo task
  */
 export interface TaskCreateInput {
-	title: string;
-	description?: string;
-	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority?: 'low' | 'medium' | 'high' | 'urgent';
-	emoji?: string;
-	color?: string;
-	category?: string;
-	tags?: string[];
-	dueDate?: Date;
-	estimatedHours?: number;
 	assignedTo?: string;
-	parentTaskId?: string;
-	projectId?: string;
-	notes?: string;
+	category?: string;
+	color?: string;
+	description?: string;
+	dueDate?: Date;
+	emoji?: string;
+	estimatedHours?: number;
 	featuredImage?: string;
 	isFavorite?: boolean;
+	notes?: string;
+	parentTaskId?: string;
+	priority?: 'low' | 'medium' | 'high' | 'urgent';
+	projectId?: string;
+	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+	tags?: string[];
+	title: string;
 }
 
 /**
  * ✏️ Input para actualizar un task existente
  */
 export interface TaskUpdateInput {
-	title?: string;
-	description?: string;
-	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority?: 'low' | 'medium' | 'high' | 'urgent';
-	emoji?: string;
-	color?: string;
-	category?: string;
-	tags?: string[];
-	dueDate?: Date;
-	completedAt?: Date;
-	estimatedHours?: number;
 	actualHours?: number;
-	progress?: number;
 	assignedTo?: string;
-	parentTaskId?: string;
-	projectId?: string;
-	notes?: string;
+	category?: string;
+	color?: string;
+	completedAt?: Date;
+	description?: string;
+	dueDate?: Date;
+	emoji?: string;
+	estimatedHours?: number;
 	featuredImage?: string;
-	isFavorite?: boolean;
 	isArchived?: boolean;
+	isFavorite?: boolean;
+	notes?: string;
+	parentTaskId?: string;
+	priority?: 'low' | 'medium' | 'high' | 'urgent';
+	progress?: number;
+	projectId?: string;
+	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+	tags?: string[];
+	title?: string;
 }
 
 /**
  * 🔍 Filtros para búsqueda de tasks
  */
 export interface TaskFilters {
-	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority?: 'low' | 'medium' | 'high' | 'urgent';
-	category?: string;
 	assignedTo?: string;
-	isFavorite?: boolean;
+	category?: string;
 	isArchived?: boolean;
+	isFavorite?: boolean;
 	parentTaskId?: string;
+	priority?: 'low' | 'medium' | 'high' | 'urgent';
 	projectId?: string;
 	search?: string;
+	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
 }
 
 /**
  * 🔎 Opciones de búsqueda con ordenamiento y paginación
  */
 export interface TaskSearchOptions extends TaskFilters {
-	sortBy?: 'title' | 'createdAt' | 'updatedAt' | 'dueDate' | 'priority' | 'status';
-	sortOrder?: 'asc' | 'desc';
 	limit?: number;
 	offset?: number;
+	sortBy?: 'title' | 'createdAt' | 'updatedAt' | 'dueDate' | 'priority' | 'status';
+	sortOrder?: 'asc' | 'desc';
 }
 
 /**
  * 📦 Resultado de búsqueda paginado
  */
 export interface TaskSearchResult {
+	hasMore: boolean;
 	tasks: TaskWithStats[];
 	total: number;
-	hasMore: boolean;
 }
 
 /**
  * 📋 Task extendido para UI con campos procesados
  */
 export interface TaskExtended extends TaskWithStats {
-	parsedTags: string[];
-	isOverdue: boolean;
-	daysUntilDue: number | null;
 	completionPercentage: number;
+	daysUntilDue: number | null;
+	isOverdue: boolean;
+	parsedTags: string[];
 	timeSpentPercentage: number | null;
 }

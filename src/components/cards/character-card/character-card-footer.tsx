@@ -4,31 +4,31 @@ import React from 'react';
 import { getCardIdFromUrl } from '@/lib/utils/index';
 
 interface CharacterCardFooterProps {
-	/** ID o URL del personaje */
-	id: string;
-	/** Color primario de la tarjeta */
-	primaryColor: string;
-	/** Número de imágenes del personaje */
-	imagesCount?: number;
-	/** Número de videos del personaje */
-	videosCount?: number;
-	/** Nivel de rareza (1-10) */
-	rarityLevel?: number;
+	/** Alineación del personaje */
+	alignment?: string;
+	cardId?: string;
+	compact?: boolean;
 	/** HP del personaje (puntos de vida) */
 	hp?: number;
+	/** ID o URL del personaje */
+	id: string;
+	/** Número de imágenes del personaje */
+	imagesCount?: number;
+	level?: number | null;
 	/** MP del personaje (puntos de maná) */
 	mp?: number;
 	/** Clasificación de poder (1-10) */
 	power?: number;
-	/** Alineación del personaje */
-	alignment?: string;
+	/** Color primario de la tarjeta */
+	primaryColor: string;
+	/** Nivel de rareza (1-10) */
+	rarityLevel?: number;
 	/** Habilidades principales del personaje */
 	skills?: { name: string; level: number }[];
 	/** Si está en modo TCG con efectos especiales */
 	tcgMode?: boolean;
-	cardId?: string;
-	level?: number | null;
-	compact?: boolean;
+	/** Número de videos del personaje */
+	videosCount?: number;
 }
 
 /**

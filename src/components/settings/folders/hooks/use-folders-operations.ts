@@ -90,10 +90,10 @@ const clearMetadataCache = () => {
 };
 
 interface UseOperationsOptions {
-	onStartProcessing: (folderId: string) => void;
-	onLoadData: () => Promise<void>;
 	onError: (error: Error | string) => void;
+	onLoadData: () => Promise<void>;
 	onReindexAllStart: () => void;
+	onStartProcessing: (folderId: string) => void;
 }
 
 export function useFoldersOperations({

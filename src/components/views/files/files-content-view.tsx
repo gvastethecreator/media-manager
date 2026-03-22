@@ -2,12 +2,12 @@ import { FileIcon, Upload } from 'lucide-react';
 import React, { useCallback } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
@@ -15,21 +15,21 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import type { FileWithStats } from '@/types/entities/file';
 
 interface FilesContentViewProps {
-	files: FileWithStats[];
-	isLoading: boolean;
 	error: string | null;
 	fileCount: number;
+	files: FileWithStats[];
+	handleFileClick: (file: FileWithStats) => void;
+	handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
+	handleFileUpload: (files: File[]) => Promise<void>;
+	isLoading: boolean;
 	isUploadDialogOpen: boolean;
-	uploadFiles: File[];
-	uploadProgress: number;
 	isUploading: boolean;
 	setIsUploadDialogOpen: (isOpen: boolean) => void;
+	setIsUploading: (isUploading: boolean) => void;
 	setUploadFiles: (files: File[]) => void;
 	setUploadProgress: (progress: number) => void;
-	setIsUploading: (isUploading: boolean) => void;
-	handleFileClick: (file: FileWithStats) => void;
-	handleFileUpload: (files: File[]) => Promise<void>;
-	handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
+	uploadFiles: File[];
+	uploadProgress: number;
 }
 
 const MemoizedEntityCard = React.memo(

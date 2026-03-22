@@ -14,14 +14,14 @@ import { Effect, Schema } from 'effect';
  * Estructura para datos de creación de álbum compatible con Drizzle
  */
 export interface CreateAlbumData {
-	name: string;
-	description?: string | null;
-	emoji?: string | null;
 	color?: string | null;
 	coverImage?: string | null;
+	description?: string | null;
+	emoji?: string | null;
+	folderId?: string | null;
 	isFavorite?: boolean;
 	metadata?: unknown;
-	folderId?: string | null;
+	name: string;
 	tags?: readonly string[];
 }
 
@@ -29,17 +29,17 @@ export interface CreateAlbumData {
  * Estructura para filtros de álbum compatible con Drizzle
  */
 export interface DrizzleAlbumFilters {
-	name?: string;
+	createdAfter?: Date;
+	createdBefore?: Date;
 	description?: string;
-	isFavorite?: boolean;
 	folderId?: string | null;
 	hasCoverImage?: boolean;
 	hasDescription?: boolean;
-	minImages?: number;
+	isFavorite?: boolean;
 	maxImages?: number;
+	minImages?: number;
+	name?: string;
 	tags?: readonly string[];
-	createdAfter?: Date;
-	createdBefore?: Date;
 }
 
 // ============= Error Types =============

@@ -12,11 +12,11 @@ import type { FolderWithStats } from '@/types/entities/folder';
  * Interface para breadcrumb items
  */
 export interface BreadcrumbItem {
+	emoji?: string;
 	id: string;
+	isActive: boolean;
 	name: string;
 	path: string;
-	emoji?: string;
-	isActive: boolean;
 }
 
 /**

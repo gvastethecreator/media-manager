@@ -4,26 +4,26 @@ import { join } from 'path';
 export type ThumbsProvider = 'db' | 'disk';
 
 export interface ThumbsConfig {
+	concurrency: number; // p-queue
+	http: {
+		maxAgeSeconds: number;
+		immutable: boolean;
+	};
+	memory: {
+		enabled: boolean;
+		maxEntries: number;
+	};
 	provider: ThumbsProvider;
 	rootDir: string; // carpeta raíz de cache disco
-	subdirs: {
-		byQuality: boolean; // agrupar por calidad/tamaño
-	};
 	sizes: {
 		low: { width: number; height: number };
 		medium: { width: number; height: number };
 		high: { width: number; height: number };
 	};
+	subdirs: {
+		byQuality: boolean; // agrupar por calidad/tamaño
+	};
 	ttlMs: number; // tiempo de vida recomendado para limpiar
-	http: {
-		maxAgeSeconds: number;
-		immutable: boolean;
-	};
-	concurrency: number; // p-queue
-	memory: {
-		enabled: boolean;
-		maxEntries: number;
-	};
 }
 
 const defaultRoot = join(process.cwd(), '.image-cache', 'thumbnails');

@@ -22,22 +22,22 @@ interface RenameBatchInput {
 }
 
 interface RenameResult {
-	/** Renombrar un solo archivo */
-	renameItem: (itemId: string, newName: string) => Promise<void>;
+	/** Error si ocurrió */
+	error: Error | null;
+	/** Si está procesando */
+	isLoading: boolean;
+	/** Si la operación fue exitosa */
+	isSuccess: boolean;
+	/** Progreso del renombrado en batch (0-100) */
+	progress: number;
 	/** Renombrar múltiples archivos con patrón */
 	renameBatch: (
 		items: Array<{ id: string; currentName: string }>,
 		pattern: string,
 		startNumber?: number
 	) => Promise<void>;
-	/** Si está procesando */
-	isLoading: boolean;
-	/** Error si ocurrió */
-	error: Error | null;
-	/** Si la operación fue exitosa */
-	isSuccess: boolean;
-	/** Progreso del renombrado en batch (0-100) */
-	progress: number;
+	/** Renombrar un solo archivo */
+	renameItem: (itemId: string, newName: string) => Promise<void>;
 	/** Resetear estado */
 	reset: () => void;
 }

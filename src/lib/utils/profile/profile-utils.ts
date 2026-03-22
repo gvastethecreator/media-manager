@@ -14,16 +14,16 @@ import {
 
 // Tipo local para Profile de Drizzle
 interface DrizzleProfile {
-	id: string;
-	name: string;
+	color: string;
+	createdAt: Date;
 	description: string | null;
 	emoji: string;
-	color: string;
-	isActive: boolean;
-	createdAt: Date;
-	updatedAt: Date | null;
-	settingsId: string | null;
+	id: string;
 	imageId: string | null;
+	isActive: boolean;
+	name: string;
+	settingsId: string | null;
+	updatedAt: Date | null;
 }
 
 /**

@@ -14,9 +14,9 @@ const logger = serverLogger.withContext('OriginDetectorService');
 interface EnginePatternSpec {
 	metadata_keys?: string[];
 	metadata_patterns?: RegExp[];
-	software_patterns?: RegExp[];
 	png_chunk_keys?: string[];
 	png_chunk_patterns?: RegExp[];
+	software_patterns?: RegExp[];
 	specific_combinations: string[][];
 }
 

@@ -2,20 +2,12 @@ import type { TagWithStats } from '@/types/entities/tag/base';
 import { apiClient } from '../client';
 
 export interface ImageCardData {
-	id: string;
-	name: string;
-	path: string;
-	size?: number;
-	width?: number;
-	height?: number;
-	thumbnailWidth?: number;
-	thumbnailHeight?: number;
-	thumbnail?: string;
-	isFavorite?: boolean;
+	createdAt: Date;
 	folderId?: string;
 	format?: string;
-	createdAt: Date;
-	updatedAt: Date;
+	height?: number;
+	id: string;
+	isFavorite?: boolean;
 	metadata?: {
 		camera?: { make?: string; model?: string };
 		lens?: string;
@@ -25,6 +17,9 @@ export interface ImageCardData {
 		description?: string;
 		size?: number;
 	};
+	name: string;
+	path: string;
+	size?: number;
 	stats?: {
 		viewCount?: number;
 		favoriteCount?: number;
@@ -37,29 +32,31 @@ export interface ImageCardData {
 		noteCount?: number;
 	};
 	tags?: TagWithStats[];
+	thumbnail?: string;
+	thumbnailHeight?: number;
+	thumbnailWidth?: number;
+	updatedAt: Date;
+	width?: number;
 }
 
 export interface GetImagesOptions {
-	limit?: number;
-	offset?: number;
-	searchTerm?: string;
-	format?: string;
-	orderBy?: 'name' | 'size' | 'createdAt' | 'updatedAt';
-	orderDir?: 'asc' | 'desc';
 	albumId?: string;
 	collectionId?: string;
-	tagIds?: string[];
-	minWidth?: number;
+	format?: string;
+	limit?: number;
+	maxHeight?: number;
 	maxWidth?: number;
 	minHeight?: number;
-	maxHeight?: number;
+	minWidth?: number;
+	offset?: number;
+	orderBy?: 'name' | 'size' | 'createdAt' | 'updatedAt';
+	orderDir?: 'asc' | 'desc';
+	searchTerm?: string;
+	tagIds?: string[];
 }
 
 export interface ImageStats {
-	totalImages: number;
-	totalSize: number;
 	averageSize: number;
-	formatDistribution: Record<string, number>;
 	dimensionStats: {
 		minWidth: number;
 		maxWidth: number;
@@ -68,6 +65,9 @@ export interface ImageStats {
 		averageWidth: number;
 		averageHeight: number;
 	};
+	formatDistribution: Record<string, number>;
+	totalImages: number;
+	totalSize: number;
 }
 
 /**

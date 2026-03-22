@@ -1,6 +1,6 @@
 import { BookOpen, ScrollText } from 'lucide-react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { useNote, useNoteCounts, useRecentNoteImages } from '@/lib/api/notes';
 import { cn } from '@/lib/utils';
 import type { NoteComplete } from '@/types/entities/note';
@@ -10,9 +10,9 @@ import { NoteCardFooter } from './note-card-footer';
 import { NoteCardImages } from './note-card-images';
 
 export interface NoteCardProps {
+	className?: string;
 	noteId: string;
 	onClick?: (noteData: NoteComplete) => void;
-	className?: string;
 	style?: React.CSSProperties;
 	tcgMode?: boolean;
 }

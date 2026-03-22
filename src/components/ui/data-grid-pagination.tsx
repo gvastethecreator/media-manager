@@ -7,16 +7,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 interface DataGridPaginationProps {
-	sizes?: number[];
-	sizesInfo?: string;
-	sizesLabel?: string;
-	sizesDescription?: string;
-	sizesSkeleton?: ReactNode;
-	more?: boolean;
-	moreLimit?: number;
+	className?: string;
 	info?: string;
 	infoSkeleton?: ReactNode;
-	className?: string;
+	more?: boolean;
+	moreLimit?: number;
+	sizes?: number[];
+	sizesDescription?: string;
+	sizesInfo?: string;
+	sizesLabel?: string;
+	sizesSkeleton?: ReactNode;
 }
 
 function DataGridPagination(props: DataGridPaginationProps) {

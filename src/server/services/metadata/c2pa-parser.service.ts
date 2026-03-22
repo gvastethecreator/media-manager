@@ -11,14 +11,6 @@ import { serverLogger } from '@/lib/logger/server-logger';
 const logger = serverLogger.withContext('C2PAService');
 
 export interface C2PAData {
-	// Información básica de proveniencia
-	hasCredentials: boolean;
-	isValid?: boolean;
-
-	// Información del emisor
-	issuer?: string;
-	issuerName?: string;
-
 	// Información de la cadena de custodia
 	claimChain?: Array<{
 		label: string;
@@ -29,14 +21,21 @@ export interface C2PAData {
 
 	// Hashes e integridad
 	contentHash?: string;
-	manifestHash?: string;
 
 	// Información técnica
 	format?: string;
-	version?: string;
+	// Información básica de proveniencia
+	hasCredentials: boolean;
+
+	// Información del emisor
+	issuer?: string;
+	issuerName?: string;
+	isValid?: boolean;
+	manifestHash?: string;
 
 	// Errores de validación
 	validationErrors?: string[];
+	version?: string;
 	warnings?: string[];
 }
 

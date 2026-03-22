@@ -7,7 +7,7 @@
 
 import { cva, type VariantProps } from 'class-variance-authority';
 import { memo, type ReactNode } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 /**
@@ -71,18 +71,18 @@ type GridLayoutVariantProps = VariantProps<typeof gridLayoutVariants>;
  * Props del componente GridLayout
  */
 export interface GridLayoutProps extends GridLayoutVariantProps {
-	/** Contenido del grid (items) */
-	children: ReactNode;
-	/** Clases CSS adicionales */
-	className?: string;
-	/** Clases adicionales para cada item del grid */
-	itemClassName?: string;
 	/** Si animar los items individualmente */
 	animateItems?: boolean;
 	/** Delay base para animaciones (en segundos) */
 	animationDelay?: number;
 	/** Stagger entre items (en segundos) */
 	animationStagger?: number;
+	/** Contenido del grid (items) */
+	children: ReactNode;
+	/** Clases CSS adicionales */
+	className?: string;
+	/** Clases adicionales para cada item del grid */
+	itemClassName?: string;
 	/** Si usar virtualización (para listas largas) */
 	virtualized?: boolean;
 }
@@ -150,16 +150,16 @@ export const GridLayout = memo(function GridLayout({
  * Aplica animaciones individuales si es necesario
  */
 export interface GridItemProps {
-	/** Contenido del item */
-	children: ReactNode;
-	/** Index para animación staggered */
-	index?: number;
 	/** Si animar este item */
 	animated?: boolean;
-	/** Delay adicional */
-	delay?: number;
+	/** Contenido del item */
+	children: ReactNode;
 	/** Clases adicionales */
 	className?: string;
+	/** Delay adicional */
+	delay?: number;
+	/** Index para animación staggered */
+	index?: number;
 }
 
 export const GridItem = memo(function GridItem({

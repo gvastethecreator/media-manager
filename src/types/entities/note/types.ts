@@ -24,20 +24,20 @@ import type { WorldItemWithStats } from '../world-item';
  * 📝 Tipo base canónico para Note
  */
 export interface NoteBase {
-	id: string;
-	title: string;
-	content: string;
-	summary?: string;
-	emoji?: string | null;
-	color?: string | null;
 	category: string;
-	priority: number;
-	status: string;
+	color?: string | null;
+	content: string;
+	createdAt: Date;
+	emoji?: string | null;
 	featuredImage: string | null;
+	id: string;
 	isFavorite: boolean;
 	presetId: string | null;
+	priority: number;
+	status: string;
+	summary?: string;
 	tags?: any;
-	createdAt: Date;
+	title: string;
 	updatedAt: Date;
 }
 
@@ -45,87 +45,81 @@ export interface NoteBase {
  * 🆕 Datos para crear un Note
  */
 export interface NoteCreateInput {
-	title: string;
-	content?: string;
-	summary?: string;
+	albums?: string[];
 	category?: string;
-	priority?: number;
-	status?: string;
+	characters?: string[];
+	collections?: string[];
 	color?: string;
+	concepts?: string[];
+	content?: string;
 	emoji?: string;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
-	presetId?: string | null;
-	images?: string[];
-	videos?: string[];
-	albums?: string[];
-	collections?: string[];
-	tags?: string[];
-	characters?: string[];
-	places?: string[];
-	worldItems?: string[];
-	concepts?: string[];
-	prompts?: string[];
-	wildcards?: string[];
-	properties?: string[];
 	groups?: string[];
+	images?: string[];
+	isFavorite?: boolean;
+	places?: string[];
+	presetId?: string | null;
+	priority?: number;
+	prompts?: string[];
+	properties?: string[];
+	status?: string;
+	summary?: string;
+	tags?: string[];
+	title: string;
+	videos?: string[];
+	wildcards?: string[];
+	worldItems?: string[];
 }
 
 /**
  * 📝 Datos para actualizar un Note
  */
 export interface NoteUpdateInput {
-	title?: string;
-	content?: string;
-	summary?: string;
+	albums?: string[];
 	category?: string;
-	priority?: number;
-	status?: string;
+	characters?: string[];
+	collections?: string[];
 	color?: string;
+	concepts?: string[];
+	content?: string;
 	emoji?: string;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
-	presetId?: string | null;
-	images?: string[];
-	videos?: string[];
-	albums?: string[];
-	collections?: string[];
-	tags?: string[];
-	characters?: string[];
-	places?: string[];
-	worldItems?: string[];
-	concepts?: string[];
-	prompts?: string[];
-	wildcards?: string[];
-	properties?: string[];
 	groups?: string[];
+	images?: string[];
+	isFavorite?: boolean;
+	places?: string[];
+	presetId?: string | null;
+	priority?: number;
+	prompts?: string[];
+	properties?: string[];
+	status?: string;
+	summary?: string;
+	tags?: string[];
+	title?: string;
+	videos?: string[];
+	wildcards?: string[];
+	worldItems?: string[];
 }
 
 /**
  * 🔎 Filtros de búsqueda para Note
  */
 export interface NoteFilters {
-	searchQuery?: string;
 	categories?: string[];
-	priorities?: number[];
-	statuses?: string[];
-	onlyFavorites?: boolean;
 	contentContains?: string;
-	hasTags?: boolean;
 	hasImages?: boolean;
+	hasTags?: boolean;
 	hasVideos?: boolean;
+	onlyFavorites?: boolean;
+	priorities?: number[];
+	searchQuery?: string;
+	statuses?: string[];
 }
 
 /**
  * 🔎 Opciones de búsqueda para Note
  */
 export interface NoteSearchOptions {
-	skip?: number;
-	take?: number;
-	orderBy?: {
-		[key in keyof NoteBase]?: 'asc' | 'desc';
-	};
-	where?: NoteFilters;
 	include?: {
 		images?: boolean;
 		videos?: boolean;
@@ -142,39 +136,45 @@ export interface NoteSearchOptions {
 		groups?: boolean;
 		_count?: boolean;
 	};
+	orderBy?: {
+		[key in keyof NoteBase]?: 'asc' | 'desc';
+	};
+	skip?: number;
+	take?: number;
+	where?: NoteFilters;
 }
 
 /**
  * 📊 Resultado de búsqueda de Notes
  */
 export interface NoteSearchResult {
+	hasMore: boolean;
 	items: NoteComplete[];
 	total: number;
-	hasMore: boolean;
 }
 
 /**
  * 🛠️ Opciones para el transformer de Note
  */
 export interface NoteTransformerOptions {
-	includeRelations?: boolean;
-	includeCount?: boolean;
-	validateFields?: boolean;
-	deserializeFields?: boolean;
-	includeUI?: boolean;
 	customFields?: (keyof NoteComplete)[];
+	deserializeFields?: boolean;
+	includeCount?: boolean;
+	includeRelations?: boolean;
+	includeUI?: boolean;
+	validateFields?: boolean;
 }
 
 /**
  * 🔗 Interfaz para notas relacionadas
  */
 export interface RelatedNote {
-	id: string;
-	title: string;
-	excerpt?: string;
 	category?: string;
 	count: number;
+	excerpt?: string;
+	id: string;
 	strength: number;
+	title: string;
 }
 
 /**
@@ -252,35 +252,19 @@ import { EntityStats } from '../entity.types';
  * 📊 Estadísticas de Note
  */
 export interface NoteStatistics extends EntityStats {
-	wordCount: number;
-	readingTime: number;
 	completionScore: number;
 
 	// File system functions
 	isDirectory: boolean;
 	isFile: boolean;
+	readingTime: number;
+	wordCount: number;
 }
 
 /**
  * 📝 Note completo con relaciones
  */
 export interface NoteComplete extends NoteBase {
-	entityType: 'note';
-	// Relaciones
-	images?: ImageComplete[];
-	videos?: VideoWithStats[];
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemWithStats[];
-	concepts?: ConceptWithStats[];
-	prompts?: PromptComplete[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyComplete[];
-	groups?: GroupWithStats[];
-
 	// Conteos
 	_count?: {
 		images?: number;
@@ -297,17 +281,27 @@ export interface NoteComplete extends NoteBase {
 		properties?: number;
 		groups?: number;
 	};
+	albums?: AlbumWithStats[];
+	characters?: CharacterWithStats[];
+	collections?: CollectionWithStats[];
+	concepts?: ConceptWithStats[];
+	entityType: 'note';
+	groups?: GroupWithStats[];
+	// Relaciones
+	images?: ImageComplete[];
+	places?: PlaceComplete[];
+	prompts?: PromptComplete[];
+	properties?: PropertyComplete[];
+	tags?: TagWithStats[];
+	videos?: VideoWithStats[];
+	wildcards?: WildcardWithStats[];
+	worldItems?: WorldItemWithStats[];
 }
 
 /**
  * 📊 Note con estadísticas
  */
 export interface NoteWithStats extends NoteBase {
-	entityType: 'note';
-	// Propiedades requeridas para compatibilidad con AnyEntityWithStats
-	name: string; // Alias para title
-	description: string | null; // Alias para summary o content
-	stats: NoteStatistics; // Campo principal (statistics es alias legacy)
 	_count?: {
 		images: number;
 		videos: number;
@@ -323,6 +317,11 @@ export interface NoteWithStats extends NoteBase {
 		properties: number;
 		groups: number;
 	};
+	description: string | null; // Alias para summary o content
+	entityType: 'note';
+	// Propiedades requeridas para compatibilidad con AnyEntityWithStats
+	name: string; // Alias para title
+	stats: NoteStatistics; // Campo principal (statistics es alias legacy)
 }
 
 // Esquema Zod para validación

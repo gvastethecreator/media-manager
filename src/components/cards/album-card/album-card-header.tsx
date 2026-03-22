@@ -4,8 +4,8 @@ import type { Album } from '@/types/entities/album';
 
 interface AlbumCardHeaderProps {
 	album: Album;
-	primaryColor: string;
 	compact?: boolean;
+	primaryColor: string;
 }
 
 /**

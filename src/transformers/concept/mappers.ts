@@ -17,81 +17,81 @@ import { ConceptSortOption } from '@/types/entities/concept';
 
 // Tipos locales equivalentes a Drizzle
 interface DrizzleConceptCreateInput {
-	id?: string;
-	name: string;
+	applications?: string | null;
+	category?: string | null;
+	color?: string | null;
+	complexity?: string | null;
+	createdAt?: Date;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	examples?: string | null;
+	featuredImage?: string | null;
+	id?: string;
 
 	isFavorite?: boolean;
+	name: string;
+	notes?: string | null;
+	parentId?: string | null;
+	relatedConcepts?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	complexity?: string | null;
-	applications?: string | null;
-	examples?: string | null;
-	relatedConcepts?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-	createdAt?: Date;
 	updatedAt?: Date;
 }
 
 interface DrizzleConceptUpdateInput {
-	name?: string;
+	applications?: string | null;
+	category?: string | null;
+	color?: string | null;
+	complexity?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	examples?: string | null;
+	featuredImage?: string | null;
 
 	isFavorite?: boolean;
+	name?: string;
+	notes?: string | null;
+	parentId?: string | null;
+	relatedConcepts?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	complexity?: string | null;
-	applications?: string | null;
-	examples?: string | null;
-	relatedConcepts?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
 	updatedAt?: Date;
 }
 
 interface DrizzleConceptWhereInput {
-	id?: string;
-	name?: { contains?: string };
-	description?: { contains?: string };
+	applications?: { contains?: string };
 	category?: { in?: string[] } | string;
+	complexity?: { in?: string[] };
+	description?: { contains?: string };
+	examples?: { contains?: string };
+	featuredImage?: { contains?: string };
+	id?: string;
 
 	isFavorite?: boolean;
-	type?: { in?: string[] };
-	complexity?: { in?: string[] };
-	applications?: { contains?: string };
-	examples?: { contains?: string };
-	relatedConcepts?: { contains?: string };
+	name?: { contains?: string };
 	notes?: { contains?: string };
-	featuredImage?: { contains?: string };
-	parentId?: string;
 	OR?: DrizzleConceptWhereInput[];
+	parentId?: string;
+	relatedConcepts?: { contains?: string };
 	tagEntities?: { some?: { id?: { in?: string[] } } };
+	type?: { in?: string[] };
 }
 
 interface DrizzleConceptOrderByInput {
-	name?: 'asc' | 'desc';
-	createdAt?: 'asc' | 'desc';
-	updatedAt?: 'asc' | 'desc';
 	category?: 'asc' | 'desc';
+	createdAt?: 'asc' | 'desc';
+	name?: 'asc' | 'desc';
+	updatedAt?: 'asc' | 'desc';
 }
 
 interface DrizzleConceptFindManyArgs {
-	where?: DrizzleConceptWhereInput;
+	include?: unknown;
 	orderBy?: DrizzleConceptOrderByInput;
 	skip?: number;
 	take?: number;
-	include?: unknown;
+	where?: DrizzleConceptWhereInput;
 }
 
 /**

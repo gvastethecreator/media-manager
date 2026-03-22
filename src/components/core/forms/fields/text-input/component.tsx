@@ -3,9 +3,9 @@ import React from 'react';
 import { Input as BaseTextInput } from '@/components/ui/input';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-	label?: string;
-	id: string;
 	error?: string;
+	id: string;
+	label?: string;
 }
 
 const TextInput: React.FC<TextInputProps> = ({

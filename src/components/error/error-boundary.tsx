@@ -6,8 +6,8 @@
 import { AlertTriangle, Bug, Home, RefreshCw } from 'lucide-react';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
+import { motion } from '@/components/ui/motion-shim';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 interface Props {
@@ -17,9 +17,9 @@ interface Props {
 }
 
 interface State {
-	hasError: boolean;
 	error: Error | null;
 	errorInfo: ErrorInfo | null;
+	hasError: boolean;
 }
 
 /**

@@ -6,56 +6,13 @@
  * Estadísticas generales del sistema (22 entidades)
  */
 export interface GeneralStats {
-	// Archivos multimedia
-	totalImages: number;
-	totalVideos: number;
-	totalAudio: number;
-	totalDocuments: number;
-	totalJsonFiles: number;
-	totalFile3D: number;
-
-	// Organización
-	totalFolders: number;
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalFavorites: number;
-
-	// Worldbuilding
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalNotes: number;
-	totalProperties: number;
-	totalWildcards: number;
-
-	// Sistema
-	totalThumbnails: number;
-	totalMetadata: number;
-	totalViews: number;
-	totalDownloads: number;
-	totalSize: number;
-	totalActivities: number;
-
-	// Información de espacio en disco
-	usedSpace?: number;
-	freeSpace?: number;
 	diskUsage?: {
 		total: number;
 		used: number;
 		free: number;
 		usedPercentage: number;
 	};
-
-	// Top tags y actividad reciente
-	topTags: Array<{
-		id: string;
-		name: string;
-		color: string;
-		count: number;
-	}>;
+	freeSpace?: number;
 	recentActivity: Array<{
 		id: string;
 		type: string;
@@ -67,30 +24,55 @@ export interface GeneralStats {
 			thumbnail: Uint8Array | null;
 		} | null;
 	}>;
+
+	// Top tags y actividad reciente
+	topTags: Array<{
+		id: string;
+		name: string;
+		color: string;
+		count: number;
+	}>;
+	totalActivities: number;
+	totalAlbums: number;
+	totalAudio: number;
+
+	// Worldbuilding
+	totalCharacters: number;
+	totalCollections: number;
+	totalConcepts: number;
+	totalDocuments: number;
+	totalDownloads: number;
+	totalFavorites: number;
+	totalFile3D: number;
+
+	// Organización
+	totalFolders: number;
+	// Archivos multimedia
+	totalImages: number;
+	totalJsonFiles: number;
+	totalMetadata: number;
+	totalNotes: number;
+	totalPlaces: number;
+	totalPrompts: number;
+	totalProperties: number;
+	totalSize: number;
+	totalTags: number;
+
+	// Sistema
+	totalThumbnails: number;
+	totalVideos: number;
+	totalViews: number;
+	totalWildcards: number;
+	totalWorldItems: number;
+
+	// Información de espacio en disco
+	usedSpace?: number;
 }
 
 /**
  * Response para estadísticas agrupadas por entidad
  */
 export interface StatsResponse {
-	collections: Array<{
-		id: string;
-		name: string;
-		count: number;
-		color?: string;
-		emoji?: string;
-	}>;
-	folders: Array<{
-		id: string;
-		name: string;
-		count: number;
-	}>;
-	tags: Array<{
-		id: string;
-		name: string;
-		count: number;
-		color: string;
-	}>;
 	albums: Array<{
 		id: string;
 		name: string;
@@ -103,11 +85,29 @@ export interface StatsResponse {
 		count: number;
 		emoji: string;
 	}>;
+	collections: Array<{
+		id: string;
+		name: string;
+		count: number;
+		color?: string;
+		emoji?: string;
+	}>;
+	folders: Array<{
+		id: string;
+		name: string;
+		count: number;
+	}>;
 	places: Array<{
 		id: string;
 		name: string;
 		count: number;
 		emoji: string;
+	}>;
+	tags: Array<{
+		id: string;
+		name: string;
+		count: number;
+		color: string;
 	}>;
 	worldItems: Array<{
 		id: string;
@@ -121,10 +121,10 @@ export interface StatsResponse {
  * Estadísticas extendidas (entidades adicionales)
  */
 export interface ExtendedStats {
-	totalDocuments: number;
 	totalAudio: number;
-	totalJsonFiles: number;
+	totalDocuments: number;
 	totalFile3D: number;
+	totalJsonFiles: number;
 }
 
 /**
@@ -141,23 +141,23 @@ export interface SizeRow {
  * Conteos de archivos multimedia
  */
 export interface MediaCounts {
-	images: number;
-	videos: number;
 	audios: number;
 	documents: number;
-	jsonFiles: number;
 	file3Ds: number;
+	images: number;
+	jsonFiles: number;
+	videos: number;
 }
 
 /**
  * Conteos de entidades organizacionales
  */
 export interface OrgCounts {
-	folders: number;
 	albums: number;
 	collections: number;
-	tags: number;
 	favorites: number;
+	folders: number;
+	tags: number;
 }
 
 /**
@@ -165,55 +165,55 @@ export interface OrgCounts {
  */
 export interface WorldCounts {
 	characters: number;
-	places: number;
-	worldItems: number;
 	concepts: number;
-	prompts: number;
 	notes: number;
+	places: number;
+	prompts: number;
 	properties: number;
 	wildcards: number;
+	worldItems: number;
 }
 
 /**
  * Conteos de entidades del sistema
  */
 export interface SystemCounts {
-	thumbnails: number;
 	metadatas: number;
+	thumbnails: number;
 }
 
 /**
  * Sumas de tamaños por tipo de archivo
  */
 export interface SizeSums {
-	totalFoldersSize: number;
 	totalAudioSize: number;
 	totalDocumentSize: number;
-	totalJsonSize: number;
 	totalFile3DSize: number;
+	totalFoldersSize: number;
+	totalJsonSize: number;
 }
 
 /**
  * Tag popular con conteo de imágenes
  */
 export interface TopTag {
-	id: string;
-	name: string;
-	color: string;
 	_count: {
 		images: number;
 	};
+	color: string;
+	id: string;
+	name: string;
 }
 
 /**
  * Entidad genérica con conteo de imágenes
  */
 export interface EntityWithImageCount {
-	id: string;
-	name: string;
 	_count: {
 		images: number;
 	};
+	id: string;
+	name: string;
 }
 
 /**
@@ -242,10 +242,9 @@ export interface EntityWithEmoji extends EntityWithImageCount {
  * Resultado de búsqueda con imágenes asociadas
  */
 export interface EntitySearchResult {
-	id: string;
-	name: string;
-	emoji?: string;
 	color?: string;
+	emoji?: string;
+	id: string;
 	images: Array<{
 		id: string;
 		name: string;
@@ -254,4 +253,5 @@ export interface EntitySearchResult {
 		size: number;
 		createdAt: Date;
 	}>;
+	name: string;
 }

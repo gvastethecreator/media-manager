@@ -16,6 +16,7 @@ import {
 	searchFilesFts,
 	searchImages,
 } from '../services/search.service';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 // ==========================================
 // 1. Definir errores tipados
@@ -44,6 +45,12 @@ export interface SearchServiceInterface {
 		limit: number,
 		offset: number
 	) => Effect.Effect<SearchResponse & { took: number; engine: string }, SearchFailed>;
+	readonly searchFilesFts: (
+		query: string,
+		limit: number,
+		offset: number,
+		ftsRequired: boolean
+	) => Effect.Effect<SearchFilesResult & { took: number; engine: string }, FtsNotAvailable | SearchFailed>;
 	readonly searchImages: (
 		query: string,
 		limit: number
@@ -51,12 +58,6 @@ export interface SearchServiceInterface {
 		{ items: unknown[]; results: unknown[]; total: number; query: string; took: number; engine: string },
 		SearchFailed
 	>;
-	readonly searchFilesFts: (
-		query: string,
-		limit: number,
-		offset: number,
-		ftsRequired: boolean
-	) => Effect.Effect<SearchFilesResult & { took: number; engine: string }, FtsNotAvailable | SearchFailed>;
 }
 
 export class SearchService extends Context.Tag('SearchService')<SearchService, SearchServiceInterface>() {}
@@ -153,8 +154,8 @@ router.get('/', async (req, res) => {
 		return;
 	}
 
-	const parsedLimit = Math.min(100, Number.parseInt(limit as string, 10) || 50);
-	const parsedOffset = Math.max(0, Number.parseInt(offset as string, 10) || 0);
+	const parsedLimit = Math.min(100, sanitizeLimit(limit));
+	const parsedOffset = Math.max(0, sanitizeOffset(offset));
 	const validTypes = ['all', 'image', 'video', 'audio', 'document'];
 	const searchType = validTypes.includes(type as string)
 		? (type as 'all' | 'image' | 'video' | 'audio' | 'document')
@@ -181,7 +182,7 @@ router.get('/images', async (req, res) => {
 
 	const effect = Effect.gen(function* () {
 		const searchService = yield* SearchService;
-		return yield* searchService.searchImages(query, Number.parseInt(limit as string, 10));
+		return yield* searchService.searchImages(query, sanitizeLimit(limit, 100, 500));
 	}).pipe(Effect.provide(SearchServiceLive));
 
 	await runEffectForExpress(effect, res);
@@ -192,8 +193,8 @@ router.get('/images', async (req, res) => {
  */
 router.get('/fts', async (req, res) => {
 	const q = typeof req.query.q === 'string' ? req.query.q : undefined;
-	const limit = Number.parseInt((req.query.limit as string) || '50', 10);
-	const offset = Number.parseInt((req.query.offset as string) || '0', 10);
+	const limit = sanitizeLimit(req.query.limit, 50);
+	const offset = sanitizeOffset(req.query.offset);
 
 	if (!q || q.trim().length === 0) {
 		res.status(400).json({ error: 'El parámetro q es requerido' });

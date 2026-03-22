@@ -21,24 +21,24 @@ import { ConfirmDialog, type ConfirmDialogProps, type ConfirmVariant } from './c
 // ============================================================================
 
 interface FeedbackContextValue {
-	/** Mostrar diálogo de confirmación */
-	confirm: (options: Omit<ConfirmOptions, 'onConfirm' | 'onCancel'>) => Promise<boolean>;
 	/** Mostrar alerta destructiva */
 	alert: (options: AlertOptions) => Promise<void>;
+	/** Mostrar diálogo de confirmación */
+	confirm: (options: Omit<ConfirmOptions, 'onConfirm' | 'onCancel'>) => Promise<boolean>;
 }
 
 interface ConfirmOptions extends Omit<ConfirmDialogProps, 'open' | 'onClose'> {
-	/** Callback si confirma */
-	onConfirm: () => void | Promise<void>;
 	/** Callback si cancela */
 	onCancel?: () => void;
+	/** Callback si confirma */
+	onConfirm: () => void | Promise<void>;
 }
 
 interface AlertOptions {
-	title: string;
-	description?: string;
-	variant?: ConfirmVariant;
 	confirmText?: string;
+	description?: string;
+	title: string;
+	variant?: ConfirmVariant;
 }
 
 const FeedbackContext = createContext<FeedbackContextValue | null>(null);

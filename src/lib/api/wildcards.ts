@@ -3,9 +3,9 @@ import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from
 import { apiClient } from './client';
 
 export interface WildcardFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 }

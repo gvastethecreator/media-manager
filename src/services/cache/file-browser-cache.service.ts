@@ -12,13 +12,13 @@ const cacheLogger = clientLogger.withContext('FileBrowserCache');
 
 // Configuración del caché
 interface CacheConfig {
-	maxThumbnails: number;
-	maxMetadata: number;
-	maxDirectoryListings: number;
-	thumbnailTTL: number; // Time to live en ms
-	metadataTTL: number;
-	directoryTTL: number;
 	cleanupInterval: number;
+	directoryTTL: number;
+	maxDirectoryListings: number;
+	maxMetadata: number;
+	maxThumbnails: number;
+	metadataTTL: number;
+	thumbnailTTL: number; // Time to live en ms
 }
 
 const DEFAULT_CONFIG: CacheConfig = {
@@ -33,16 +33,16 @@ const DEFAULT_CONFIG: CacheConfig = {
 
 // Tipos de entrada de caché
 interface CacheEntry<T> {
-	data: T;
-	timestamp: number;
 	accessCount: number;
+	data: T;
 	lastAccessed: number;
 	size: number; // Tamaño estimado en bytes
+	timestamp: number;
 }
 
 interface ThumbnailCacheEntry extends CacheEntry<string> {
-	quality: 'low' | 'medium' | 'high';
 	dimensions: { width: number; height: number };
+	quality: 'low' | 'medium' | 'high';
 }
 
 interface MetadataCacheEntry extends CacheEntry<Partial<AnyEntityWithStats>> {
@@ -50,8 +50,8 @@ interface MetadataCacheEntry extends CacheEntry<Partial<AnyEntityWithStats>> {
 }
 
 interface DirectoryCacheEntry extends CacheEntry<FileItem[]> {
-	path: string;
 	itemCount: number;
+	path: string;
 }
 
 // Implementación de caché LRU

@@ -5,10 +5,10 @@ import { serverLogger } from '@/lib/logger/server-logger';
 const perfLogger = serverLogger.withContext('DB:Perf');
 
 export interface QueryMetrics {
+	iso: string;
 	label: string;
 	ms: number;
 	rows: number | null;
-	iso: string;
 }
 
 /**

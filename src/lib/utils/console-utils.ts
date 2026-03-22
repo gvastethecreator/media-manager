@@ -33,12 +33,12 @@ function isDev(): boolean {
  * Opciones para el manejo de logs
  */
 interface ConsoleOptions {
-	/** Redirigir al sistema de logging */
-	redirectToLogger?: boolean;
 	/** Incluir timestamp */
 	includeTimestamp?: boolean;
 	/** Prefijo para los mensajes */
 	prefix?: string;
+	/** Redirigir al sistema de logging */
+	redirectToLogger?: boolean;
 }
 
 const defaultOptions: ConsoleOptions = {

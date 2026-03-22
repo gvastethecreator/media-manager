@@ -1,7 +1,7 @@
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import { CardHeader } from '@/components/cards/card-header';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { ConceptCardProps } from './concept-card.types';
 import { ConceptCardContent } from './concept-card-content';

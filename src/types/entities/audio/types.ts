@@ -4,21 +4,21 @@ import type { AudioStatistics, AudioWithStats } from './base';
 export type { AudioBase, AudioStatistics, AudioWithStats } from './base';
 
 export interface AudioFilters {
-	search?: string;
-	isFavorite?: boolean;
+	artist?: string[];
 	format?: string[];
 	genre?: string[];
-	artist?: string[];
-	year?: number[];
-	minDuration?: number;
+	isFavorite?: boolean;
 	maxDuration?: number;
-	minSize?: number;
 	maxSize?: number;
+	minDuration?: number;
+	minSize?: number;
+	search?: string;
+	year?: number[];
 }
 
 export interface AudioSortCriteria {
-	field: keyof AudioWithStats;
 	direction: 'asc' | 'desc';
+	field: keyof AudioWithStats;
 }
 
 export interface AudioPaginationOptions {
@@ -28,60 +28,59 @@ export interface AudioPaginationOptions {
 
 export interface AudiosResponse {
 	audios: AudioWithStats[];
-	total: number;
 	page: number;
 	pageSize: number;
+	total: number;
 	totalPages: number;
 }
 
 export interface AudioFormData {
-	name: string;
-	description?: string;
-	emoji?: string;
-	color?: string;
-	isFavorite?: boolean;
-	filePath: string;
-	fileName: string;
-	fileSize?: number;
-	format?: string;
-	duration?: number;
-	bitrate?: number;
-	sampleRate?: number;
-	channels?: number;
-	metadata?: Record<string, any>;
 	album?: string;
 	artist?: string;
+	bitrate?: number;
+	channels?: number;
+	color?: string;
+	description?: string;
+	duration?: number;
+	emoji?: string;
+	fileName: string;
+	filePath: string;
+	fileSize?: number;
+	format?: string;
 	genre?: string;
-	year?: number;
-	track?: number;
+	isFavorite?: boolean;
 	lyrics?: string;
+	metadata?: Record<string, any>;
+	name: string;
+	sampleRate?: number;
+	track?: number;
+	year?: number;
 }
 
 export interface AudioUIInput {
-	name: string;
-	description?: string;
-	emoji?: string;
-	color?: string;
-	isFavorite?: boolean;
-	filePath: string;
-	fileName: string;
-	fileSize?: number;
-	format?: string;
-	duration?: number;
-	bitrate?: number;
-	sampleRate?: number;
-	channels?: number;
-	metadata?: Record<string, any>;
 	album?: string;
 	artist?: string;
+	bitrate?: number;
+	channels?: number;
+	color?: string;
+	description?: string;
+	duration?: number;
+	emoji?: string;
+	fileName: string;
+	filePath: string;
+	fileSize?: number;
+	format?: string;
 	genre?: string;
-	year?: number;
-	track?: number;
+	isFavorite?: boolean;
 	lyrics?: string;
+	metadata?: Record<string, any>;
+	name: string;
+	sampleRate?: number;
+	track?: number;
+	year?: number;
 }
 
 export interface AudioComplete extends AudioWithStats {
-	tags: string[];
 	relations: {
 		images: string[];
 		videos: string[];
@@ -97,6 +96,7 @@ export interface AudioComplete extends AudioWithStats {
 		albums: string[];
 		collections: string[];
 	};
+	tags: string[];
 }
 
 export type AudioSortOption =
@@ -130,53 +130,53 @@ export type AudioViewMode = 'grid' | 'list' | 'compact';
 // Additional types for compatibility
 export interface AudioSearchOptions {
 	filters?: AudioFilters;
-	sort?: AudioSortCriteria;
 	pagination?: AudioPaginationOptions;
+	sort?: AudioSortCriteria;
 }
 
 export interface AudioViewConfig {
-	viewMode: AudioViewMode;
-	sortBy: AudioSortOption;
 	filters: AudioFilters;
+	sortBy: AudioSortOption;
+	viewMode: AudioViewMode;
 }
 
 export interface AudioUIProps {
-	totalAudios: number;
-	totalSize: number;
-	totalDuration: number;
+	artists: string[];
 	formats: string[];
 	genres: string[];
-	artists: string[];
+	totalAudios: number;
+	totalDuration: number;
+	totalSize: number;
 }
 
 export interface AudioCounts {
 	albums?: number;
-	collections?: number;
-	tags?: number;
 	characters?: number;
-	places?: number;
-	worldItems?: number;
+	collections?: number;
 	concepts?: number;
-	prompts?: number;
-	notes?: number;
-	wildcards?: number;
-	properties?: number;
 	groups?: number;
+	notes?: number;
+	places?: number;
+	prompts?: number;
+	properties?: number;
+	tags?: number;
+	wildcards?: number;
+	worldItems?: number;
 }
 
 export interface AudioRelations {
 	albums?: any[];
-	collections?: any[];
-	tags?: any[];
 	characters?: any[];
-	places?: any[];
-	worldItems?: any[];
+	collections?: any[];
 	concepts?: any[];
-	prompts?: any[];
-	notes?: any[];
-	wildcards?: any[];
-	properties?: any[];
 	groups?: any[];
+	notes?: any[];
+	places?: any[];
+	prompts?: any[];
+	properties?: any[];
+	tags?: any[];
+	wildcards?: any[];
+	worldItems?: any[];
 }
 
 export interface AudioExtended extends AudioWithStats {
@@ -184,8 +184,8 @@ export interface AudioExtended extends AudioWithStats {
 }
 
 export interface AudioExtendedComplete extends AudioWithStats {
-	tags: string[];
 	relations: AudioRelations;
+	tags: string[];
 }
 
 export interface AudioWithRelations extends AudioWithStats {

@@ -10,19 +10,19 @@ import type { FileEntityType } from '@/services/files/file-actions.service';
 import { moveFile } from '@/services/files/file-actions.service';
 
 interface MoveOptions {
-	/** ID del archivo a mover */
-	fileId: string;
 	/** Tipo de entidad */
 	entityType: FileEntityType;
+	/** ID del archivo a mover */
+	fileId: string;
 	/** ID de la carpeta destino */
 	targetFolderId: string;
 }
 
 interface MoveResult {
-	/** Ejecuta la operación de mover */
-	move: (options: MoveOptions) => Promise<void>;
 	/** Indica si está procesando */
 	isMoving: boolean;
+	/** Ejecuta la operación de mover */
+	move: (options: MoveOptions) => Promise<void>;
 }
 
 /**

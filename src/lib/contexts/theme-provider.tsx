@@ -26,20 +26,20 @@ const customThemes = [
 type Theme = (typeof customThemes)[number] | 'system';
 
 interface ThemeContextType {
-	theme: Theme;
-	setTheme: (theme: Theme) => void;
 	resolvedTheme: (typeof customThemes)[number];
+	setTheme: (theme: Theme) => void;
+	theme: Theme;
 	themes: readonly string[];
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export interface ThemeProviderProps {
+	attribute?: string;
 	children: React.ReactNode;
 	defaultTheme?: Theme;
-	storageKey?: string;
-	attribute?: string;
 	enableSystem?: boolean;
+	storageKey?: string;
 }
 
 // Componente de debug para monitorear cambios en el tema (mantenido)

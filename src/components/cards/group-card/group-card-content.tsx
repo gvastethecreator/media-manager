@@ -3,11 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface GroupCardContentProps {
-	description?: string;
 	category?: string;
-	organizationType?: string;
-	flexibilityScore?: number;
-	filtersCount?: number;
+	compact?: boolean;
+	description?: string;
 	entityCounts?: {
 		images?: number;
 		videos?: number;
@@ -23,9 +21,11 @@ interface GroupCardContentProps {
 		properties?: number;
 		tags?: number;
 	};
+	filtersCount?: number;
+	flexibilityScore?: number;
+	organizationType?: string;
 	primaryColor?: string;
 	tcgMode?: boolean;
-	compact?: boolean;
 }
 
 /**

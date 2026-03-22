@@ -7,22 +7,22 @@ import type { ConceptStore } from '../types';
 const filtersLogger = clientLogger.withContext('ConceptStore:Filters');
 
 export interface FiltersSlice {
+	clearFilters: () => void;
 	// Estado
 	filters: ConceptFilters;
-	sortBy: ConceptSortOption;
 	page: number;
 	pageSize: number;
+	setCategoryFilter: (category: string | null) => void;
 
 	// Acciones
 	setFilters: (filters: Partial<ConceptFilters>) => void;
-	setSortBy: (sortBy: ConceptSortOption) => void;
+	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
 	setPage: (page: number) => void;
 	setPageSize: (pageSize: number) => void;
-	setCategoryFilter: (category: string | null) => void;
 	setSearchFilter: (search: string) => void;
+	setSortBy: (sortBy: ConceptSortOption) => void;
 	setTagsFilter: (tags: string[]) => void;
-	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
-	clearFilters: () => void;
+	sortBy: ConceptSortOption;
 }
 
 export const createFiltersSlice: StateCreator<ConceptStore, [], [], FiltersSlice> = (set) => ({

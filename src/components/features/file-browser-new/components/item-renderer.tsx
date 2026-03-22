@@ -40,9 +40,9 @@ const ENTITY_COLORS: Record<BrowserEntityType, string> = {
  * Thumbnail de item
  */
 interface ItemThumbnailProps {
+	className?: string;
 	item: BrowserItem;
 	size: number;
-	className?: string;
 }
 
 export function ItemThumbnail({ item, size, className }: ItemThumbnailProps) {

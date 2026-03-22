@@ -31,17 +31,17 @@ export enum FavoriteEntityType {
  * Representa la estructura de un favorito en la base de datos.
  */
 export interface FavoriteBase {
-	id: string;
+	addedAt: Date;
+	category: string | null;
+	createdAt: Date;
 	entityId: string;
 	entityType: FavoriteEntityType;
-	userId: string | null;
-	profileId: string | null;
-	addedAt: Date;
+	id: string;
 	notes: string | null;
-	category: string | null;
 	priority: number | null;
-	createdAt: Date;
+	profileId: string | null;
 	updatedAt: Date;
+	userId: string | null;
 }
 
 /**
@@ -64,13 +64,13 @@ export interface FavoriteComplete extends FavoriteBase, FavoriteRelations {}
  * ⭐ Favorito extendido con propiedades adicionales para la UI
  */
 export interface FavoriteExtended extends FavoriteComplete {
+	_count?: Record<string, number>;
+	entityColor?: string;
+	entityIcon?: string;
 	entityName?: string;
 	entityPreview?: string;
-	entityIcon?: string;
-	entityColor?: string;
-	isSelected?: boolean;
 	isHovered?: boolean;
-	_count?: Record<string, number>;
+	isSelected?: boolean;
 }
 
 /**
@@ -84,17 +84,15 @@ export interface FavoriteWithImage extends FavoriteComplete {
  * ⭐ Estadísticas de favoritos
  */
 export interface FavoriteStats {
-	totalCount: number;
 	byType: Record<string, number>;
 	recentlyAdded: FavoriteComplete[];
+	totalCount: number;
 }
 
 /**
  * ⭐ Favorito con estadísticas calculadas
  */
 export interface FavoriteWithStats extends Omit<FavoriteComplete, 'entityType'> {
-	entityType: 'favorite';
-	statistics?: FavoriteStats;
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -111,6 +109,8 @@ export interface FavoriteWithStats extends Omit<FavoriteComplete, 'entityType'> 
 		properties?: number;
 		groups?: number;
 	};
+	entityType: 'favorite';
+	statistics?: FavoriteStats;
 }
 
 /**
@@ -118,36 +118,36 @@ export interface FavoriteWithStats extends Omit<FavoriteComplete, 'entityType'> 
  */
 export interface FavoriteSearchResult {
 	favorites: FavoriteWithStats[];
-	total: number;
-	page: number;
-	limit: number;
 	hasMore: boolean;
+	limit: number;
+	page: number;
+	total: number;
 }
 
 /**
  * ⭐ Agrupación de favoritos por tipo
  */
 export interface FavoritesByType {
-	type: string;
-	displayName: string;
-	icon: string;
 	color: string;
 	count: number;
+	displayName: string;
+	icon: string;
 	items: FavoriteComplete[];
+	type: string;
 }
 
 /**
  * ⭐ Filtros para favoritos
  */
 export interface FavoriteFilters {
-	entityType?: string[];
 	createdAfter?: Date | null;
 	createdBefore?: Date | null;
-	search?: string;
+	entityType?: string[];
 	limit?: number;
 	offset?: number;
-	sort?: string;
 	order?: 'asc' | 'desc';
+	search?: string;
+	sort?: string;
 }
 
 /**
@@ -162,6 +162,10 @@ export interface FavoriteUpdateInput extends Partial<FavoriteCreateInput> {
  */
 export interface FavoriteSearchOptions {
 	filters?: FavoriteFilters;
+	include?: {
+		entity?: boolean;
+		stats?: boolean;
+	};
 	pagination?: {
 		page?: number;
 		pageSize?: number;
@@ -169,10 +173,6 @@ export interface FavoriteSearchOptions {
 	sort?: {
 		field?: string;
 		direction?: 'asc' | 'desc';
-	};
-	include?: {
-		entity?: boolean;
-		stats?: boolean;
 	};
 }
 

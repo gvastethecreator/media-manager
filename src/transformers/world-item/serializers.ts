@@ -12,21 +12,21 @@ import type { WorldItemEffect, WorldItemProperty, WorldItemRequirement } from '.
 
 // Tipos para serializers compatibles
 interface WorldItemAttribute {
+	description?: string;
 	name: string;
 	value: string | number;
-	description?: string;
 }
 
 interface WorldItemFilter {
-	property: string;
 	operator: string;
+	property: string;
 	value: unknown;
 }
 
 interface WorldItemStat {
 	name: string;
-	value: number;
 	type?: string;
+	value: number;
 }
 
 const logger = serverLogger.withContext('WorldItemSerializers');

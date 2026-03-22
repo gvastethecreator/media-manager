@@ -4,6 +4,8 @@
  * @description Configuración de archivos: carpetas y miniaturas
  */
 
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import {
 	AlertCircle,
 	Folder,
@@ -18,14 +20,14 @@ import {
 	Trash2,
 	Zap,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch-v3';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
 	useCreateFolder,
@@ -72,35 +74,37 @@ function FolderCard({
 }) {
 	if (isGrid) {
 		return (
-			<Card className="group overflow-hidden">
-				<div className="relative aspect-video bg-muted">
-					<div className="absolute inset-0 flex items-center justify-center">
-						<Folder className="h-12 w-12 text-muted-foreground/30" />
+			<Card className="group relative flex flex-col justify-between overflow-hidden p-4 transition-colors hover:bg-muted/50">
+				<div className="flex items-start justify-between">
+					<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+						<Folder className="h-6 w-6 text-primary" />
 					</div>
-					<div
-						className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 transition-opacity group-hover:opacity-100"
-						style={{ backgroundColor: 'color-mix(in oklch, var(--background) 50%, transparent)' }}
-					>
-						<Button onClick={actions.onEdit} size="sm" variant="secondary">
-							Editar
+					<div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+						<Button className="h-8 w-8" onClick={actions.onEdit} size="icon" variant="ghost">
+							<Settings2 className="h-4 w-4" />
 						</Button>
-						<Button disabled={isReindexing} onClick={onReindex} size="sm" variant="outline">
-							{isReindexing ? '...' : 'Reindexar'}
+						<Button className="h-8 w-8" disabled={isReindexing} onClick={onReindex} size="icon" variant="ghost">
+							{isReindexing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+						</Button>
+						<Button className="h-8 w-8 text-destructive" onClick={actions.onDelete} size="icon" variant="ghost">
+							<Trash2 className="h-4 w-4" />
 						</Button>
 					</div>
 				</div>
-				<CardHeader className="p-4">
-					<CardTitle className="truncate text-base">{folder.name}</CardTitle>
-					<p className="truncate text-muted-foreground text-sm">{folder.path}</p>
-				</CardHeader>
-				<CardContent className="p-4 pt-0">
-					<div className="flex items-center justify-between text-muted-foreground text-sm">
-						<span>{folder.stats?.imageCount || 0} imágenes</span>
-						<Badge className="text-sm" variant="default">
-							Activo
-						</Badge>
-					</div>
-				</CardContent>
+				<div className="mt-4">
+					<CardTitle className="truncate text-base" title={folder.name}>
+						{folder.name}
+					</CardTitle>
+					<p className="truncate text-muted-foreground text-sm" title={folder.path}>
+						{folder.path}
+					</p>
+				</div>
+				<div className="mt-4 flex items-center justify-between text-muted-foreground text-sm">
+					<span>{folder.stats?.imageCount || 0} imágenes</span>
+					<Badge className="text-xs" variant="secondary">
+						Activo
+					</Badge>
+				</div>
 			</Card>
 		);
 	}
@@ -185,6 +189,22 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 	const thumbnailStats = thumbnailStatsQuery.data as unknown as
 		| { total: number; pending: number; errors: number; totalSize?: number }
 		| undefined;
+
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	// GSAP Animations
+	useGSAP(
+		() => {
+			if (!folders || folders.length === 0) return;
+
+			gsap.fromTo(
+				'.folder-card-anim',
+				{ opacity: 0, y: 20, scale: 0.95 },
+				{ opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.05, ease: 'back.out(1.2)', clearProps: 'all' }
+			);
+		},
+		{ scope: containerRef, dependencies: [viewMode, activeTab, folders?.length, foldersQuery.isLoading] }
+	);
 
 	// Stats
 	const folderStats = useMemo(
@@ -309,7 +329,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 	);
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6" ref={containerRef}>
 			{/* Header */}
 			<div>
 				<h2 className="font-semibold text-2xl text-foreground">Archivos y Almacenamiento</h2>
@@ -318,8 +338,26 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 				</p>
 			</div>
 
+			{/* Reindex Terminal - Movido a la parte superior - Solo visible cuando hay actividad */}
+			{(reindexFolderMutation.isPending || reindexAllFoldersMutation.isPending) && (
+				<div className="mt-6 border-border/30 border-b pb-6">
+					<div className="mb-4 flex items-center justify-between">
+						<h3 className="flex items-center gap-2 font-medium text-base">
+							<Zap className="h-4 w-4 text-primary" />
+							Terminal de Procesamiento
+						</h3>
+						<span className="text-muted-foreground text-xs">
+							{reindexingFolderId ? 'Reindexando carpeta...' : 'Reindexando todas las carpetas...'}
+						</span>
+					</div>
+					<Card className="h-75 overflow-hidden border-border/30 bg-muted/50">
+						<ReindexTerminal className="h-full" isActive={true} showProgress={true} />
+					</Card>
+				</div>
+			)}
+
 			<Tabs onValueChange={setActiveTab} value={activeTab}>
-				<TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+				<TabsList className="grid w-full grid-cols-2 lg:w-100">
 					<TabsTrigger className="gap-2" value="folders">
 						<Folder className="h-4 w-4" />
 						Carpetas
@@ -451,7 +489,9 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 						) : (
 							<div
 								className={
-									viewMode === 'grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'flex flex-col gap-2'
+									viewMode === 'grid'
+										? 'grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+										: 'flex flex-col gap-2'
 								}
 							>
 								{folders.map((folder: FolderWithStats) => (
@@ -526,7 +566,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 										onValueChange={(v) => handleQualityChange(v as ThumbnailQuality)}
 										value={settings?.thumbnailQuality || ThumbnailQuality.MEDIUM}
 									>
-										<SelectTrigger className="w-[200px]">
+										<SelectTrigger className="w-50">
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
@@ -589,7 +629,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 
 			{/* Folder Form Dialog */}
 			<Dialog onOpenChange={setShowFolderForm} open={showFolderForm}>
-				<DialogContent className="sm:max-w-[600px]">
+				<DialogContent className="sm:max-w-150">
 					<DialogHeader>
 						<DialogTitle>{editingFolder ? 'Editar Carpeta' : 'Agregar Carpeta'}</DialogTitle>
 					</DialogHeader>
@@ -620,24 +660,6 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 				skipThumbnails={skipThumbnails}
 				useStructuredFlow={useStructuredFlow}
 			/>
-
-			{/* Reindex Terminal - Solo visible cuando hay actividad de reindexado */}
-			{(reindexFolderMutation.isPending || reindexAllFoldersMutation.isPending) && (
-				<div className="mt-6 border-border/30 border-t pt-6">
-					<div className="mb-4 flex items-center justify-between">
-						<h3 className="flex items-center gap-2 font-medium text-base">
-							<Zap className="h-4 w-4 text-primary" />
-							Terminal de Procesamiento
-						</h3>
-						<span className="text-muted-foreground text-xs">
-							{reindexingFolderId ? 'Reindexando carpeta...' : 'Reindexando todas las carpetas...'}
-						</span>
-					</div>
-					<Card className="h-[300px] overflow-hidden border-border/30 bg-muted/50">
-						<ReindexTerminal className="h-full" isActive={true} showProgress={true} />
-					</Card>
-				</div>
-			)}
 		</div>
 	);
 }

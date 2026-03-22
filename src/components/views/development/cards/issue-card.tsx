@@ -3,11 +3,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from './status-badge';
 
 export interface Issue {
-	id: string;
-	title: string;
 	description: string;
+	id: string;
 	severity: 'low' | 'medium' | 'high' | 'critical';
 	status: 'open' | 'in-progress' | 'resolved';
+	title: string;
 }
 
 export function IssueCard({ issue }: { issue: Issue }) {

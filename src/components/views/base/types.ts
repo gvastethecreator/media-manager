@@ -6,29 +6,9 @@ import type { EntityWithStats } from '@/types/entities/entity.types';
  */
 export interface BaseContentProps {
 	/**
-	 * Los items a mostrar en la vista
+	 * Clase CSS adicional para el contenedor
 	 */
-	items?: EntityWithStats[];
-
-	/**
-	 * Estado de carga de la vista
-	 */
-	isLoading?: boolean;
-
-	/**
-	 * Error en la vista, si existe
-	 */
-	error?: string | null;
-
-	/**
-	 * Función para alternar la selección de un item
-	 */
-	toggleItemSelection?: (item: EntityWithStats, isMultiSelect: boolean) => void;
-
-	/**
-	 * ID del contenedor actual (folder, collection, etc)
-	 */
-	currentContainerId?: string | null;
+	className?: string;
 
 	/**
 	 * Nombre del contenedor actual
@@ -36,9 +16,9 @@ export interface BaseContentProps {
 	containerName?: string | null;
 
 	/**
-	 * Función para establecer el contenedor actual
+	 * ID del contenedor actual (folder, collection, etc)
 	 */
-	setCurrentContainer?: (id: string) => Promise<void>;
+	currentContainerId?: string | null;
 
 	/**
 	 * Configuración personalizada para el estado vacío
@@ -50,14 +30,18 @@ export interface BaseContentProps {
 	};
 
 	/**
-	 * Clase CSS adicional para el contenedor
+	 * Error en la vista, si existe
 	 */
-	className?: string;
+	error?: string | null;
 
 	/**
-	 * Función para recargar los items de la vista
+	 * Estado de carga de la vista
 	 */
-	onRefresh?: () => Promise<void>;
+	isLoading?: boolean;
+	/**
+	 * Los items a mostrar en la vista
+	 */
+	items?: EntityWithStats[];
 
 	/**
 	 * Función personalizada para manejar el clic en un item
@@ -68,6 +52,21 @@ export interface BaseContentProps {
 	 * Función personalizada para manejar el doble clic en un item
 	 */
 	onItemDoubleClick?: (item: EntityWithStats) => void;
+
+	/**
+	 * Función para recargar los items de la vista
+	 */
+	onRefresh?: () => Promise<void>;
+
+	/**
+	 * Función para establecer el contenedor actual
+	 */
+	setCurrentContainer?: (id: string) => Promise<void>;
+
+	/**
+	 * Función para alternar la selección de un item
+	 */
+	toggleItemSelection?: (item: EntityWithStats, isMultiSelect: boolean) => void;
 }
 
 /**

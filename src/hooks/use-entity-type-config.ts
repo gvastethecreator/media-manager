@@ -27,28 +27,28 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
  * 🎯 Resultado del hook useEntityTypeConfig
  */
 export interface UseEntityTypeConfigResult {
-	/** Configuración completa del tipo de entidad */
-	config: EntityTypeConfig | undefined;
 	/** Color principal */
 	color: string;
-	/** Color secundario (si existe) */
-	secondaryColor?: string;
-	/** Icono de Lucide React */
-	icon: React.ComponentType<any>;
+	/** Configuración completa del tipo de entidad */
+	config: EntityTypeConfig | undefined;
 	/** Nombre para mostrar */
 	displayName: string;
 	/** Nombre plural para mostrar */
 	displayNamePlural: string;
 	/** Emoji representativo */
 	emoji: string;
-	/** Operaciones soportadas */
-	supportedOperations: string[];
-	/** Metadatos específicos del tipo */
-	metadata: Record<string, unknown>;
-	/** Función para verificar si un formato es soportado */
-	isFormatSupported: (format: string) => boolean;
 	/** Función para generar thumbnail */
 	generateThumbnail: (item: AnyEntityWithStats, options?: Record<string, any>) => Promise<string>;
+	/** Icono de Lucide React */
+	icon: React.ComponentType<any>;
+	/** Función para verificar si un formato es soportado */
+	isFormatSupported: (format: string) => boolean;
+	/** Metadatos específicos del tipo */
+	metadata: Record<string, unknown>;
+	/** Color secundario (si existe) */
+	secondaryColor?: string;
+	/** Operaciones soportadas */
+	supportedOperations: string[];
 }
 
 /**

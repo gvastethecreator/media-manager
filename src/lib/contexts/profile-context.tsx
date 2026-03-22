@@ -9,14 +9,14 @@ import type { TagBase } from '@/types/entities/tag';
 type ViewType = 'files' | 'collections' | 'folders' | 'tags';
 
 interface ProfileContextType {
+	collections: CollectionBase[];
 	currentUser: User;
+	currentView: ViewType;
+	folders: FolderBase[];
 	openProfileSettings: () => void;
 	openSettingsTab: (tab: string) => void;
-	collections: CollectionBase[];
-	folders: FolderBase[];
-	tags: TagBase[];
-	currentView: ViewType;
 	setCurrentView: (view: ViewType) => void;
+	tags: TagBase[];
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);

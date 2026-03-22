@@ -9,26 +9,26 @@ const viewLogger = clientLogger.withContext('FileViewStore');
  * Interfaz para el estado del store de visualización de archivos
  */
 export interface FileViewState {
-	// Estado de visualización
-	viewMode: ViewMode;
-	sortBy: string;
-	sortOrder: 'asc' | 'desc';
-
-	// Preferencias de UI
-	showThumbnails: boolean;
-	showMetadata: boolean;
-	thumbnailSize: 'none' | 'small' | 'medium' | 'large';
 	animationsEnabled: boolean;
+	resetViewSettings: () => void;
+	setAnimationsEnabled: (enabled: boolean) => void;
+	setShowMetadata: (show: boolean) => void;
+	setShowThumbnails: (show: boolean) => void;
+	setSortBy: (field: string) => void;
+	setSortOrder: (order: 'asc' | 'desc') => void;
+	setThumbnailSize: (size: 'none' | 'small' | 'medium' | 'large') => void;
 
 	// Acciones
 	setViewMode: (mode: ViewMode) => void;
-	setSortBy: (field: string) => void;
-	setSortOrder: (order: 'asc' | 'desc') => void;
-	setShowThumbnails: (show: boolean) => void;
-	setShowMetadata: (show: boolean) => void;
-	setThumbnailSize: (size: 'none' | 'small' | 'medium' | 'large') => void;
-	setAnimationsEnabled: (enabled: boolean) => void;
-	resetViewSettings: () => void;
+	showMetadata: boolean;
+
+	// Preferencias de UI
+	showThumbnails: boolean;
+	sortBy: string;
+	sortOrder: 'asc' | 'desc';
+	thumbnailSize: 'none' | 'small' | 'medium' | 'large';
+	// Estado de visualización
+	viewMode: ViewMode;
 }
 
 /**

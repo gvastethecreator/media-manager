@@ -10,8 +10,8 @@
  * - Cambios de color coordinados
  */
 
-import type { AnimeInstance } from '@/lib/anime';
-import { anime } from '@/lib/anime';
+import type { AnimationInstance } from '@/lib/animation';
+import { animate } from '@/lib/animation';
 import type { MorphConfig, MorphState } from '../types';
 
 // ============================================================================
@@ -124,7 +124,7 @@ function parseComplexBorderRadius(value: string): number[] {
 
 export class MorphEngine {
 	private readonly states = new Map<string, MorphState>();
-	private readonly activeAnimations = new Map<string, AnimeInstance>();
+	private readonly activeAnimations = new Map<string, AnimationInstance>();
 
 	/**
 	 * Registra un elemento para morphing
@@ -171,7 +171,7 @@ export class MorphEngine {
 		element.style.overflow = 'hidden';
 
 		// Crear animación
-		const animation = await anime({
+		const animation = await animate({
 			targets: element,
 			borderRadius: [fromRadius, toRadius],
 			duration: options.duration,
@@ -308,7 +308,7 @@ export async function createLiquidMorph(
 	element: HTMLElement,
 	intensity = 0.3,
 	duration = 1000
-): Promise<AnimeInstance> {
+): Promise<AnimationInstance> {
 	// Crear keyframes para efecto orgánico
 	const keyframes = [];
 	const steps = 8;
@@ -328,7 +328,7 @@ export async function createLiquidMorph(
 		});
 	}
 
-	return anime({
+	return animate({
 		targets: element,
 		keyframes,
 		duration,
@@ -360,7 +360,7 @@ export function createExpandFromPoint(
 		// Estado inicial: clip-path pequeño
 		element.style.clipPath = `circle(0% at ${originX}% ${originY}%)`;
 
-		anime({
+		animate({
 			targets: element,
 			clipPath: `circle(150% at ${originX}% ${originY}%)`,
 			duration: options.duration,
@@ -393,7 +393,7 @@ export function createContractToPoint(
 	const targetY = ((target.y - rect.top) / rect.height) * 100;
 
 	return new Promise((resolve) => {
-		anime({
+		animate({
 			targets: element,
 			clipPath: [`circle(150% at ${targetX}% ${targetY}%)`, `circle(0% at ${targetX}% ${targetY}%)`],
 			duration: options.duration,

@@ -58,16 +58,16 @@ function FavoriteIndicator({ isFavorite, tcgMode }: { isFavorite: boolean; tcgMo
 }
 
 interface TagCardFooterProps {
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	imagesCount: number;
-	videosCount?: number;
-	primaryColor: string;
-	secondaryColor: string;
-	rarity?: TagRarity;
-	isFavorite?: boolean;
-	tcgMode?: boolean;
 	compact?: boolean;
+	createdAt: Date | string;
+	imagesCount: number;
+	isFavorite?: boolean;
+	primaryColor: string;
+	rarity?: TagRarity;
+	secondaryColor: string;
+	tcgMode?: boolean;
+	updatedAt: Date | string;
+	videosCount?: number;
 }
 
 /**

@@ -1,9 +1,11 @@
 'use client';
 
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { animate } from 'animejs';
+import gsap from 'gsap';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+
+// Final GSAP-driven toolbar implementation.
 
 // ============================================================================
 // ANIMATION UTILITIES
@@ -13,10 +15,10 @@ const useToolbarAnimation = () => {
 	const animateButtonHover = React.useCallback((element: HTMLElement, isHovering: boolean) => {
 		if (!element) return;
 
-		animate(element, {
+		gsap.to(element, {
 			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
 			scale: isHovering ? 1.05 : 1,
-			duration: 150,
+			duration: 0.15,
 			ease: 'cubicBezier(0.4, 0, 0.2, 1)',
 		});
 	}, []);
@@ -24,7 +26,7 @@ const useToolbarAnimation = () => {
 	const animateButtonPressed = React.useCallback((element: HTMLElement, isPressed: boolean) => {
 		if (!element) return;
 
-		animate(element, {
+		gsap.to(element, {
 			scale: isPressed ? 0.95 : 1,
 			backgroundColor: isPressed ? 'color-mix(in oklch, var(--accent) 20%, transparent)' : 'transparent',
 			duration: 100,
@@ -35,12 +37,12 @@ const useToolbarAnimation = () => {
 	const animateToggle = React.useCallback((element: HTMLElement, isToggled: boolean) => {
 		if (!element) return;
 
-		animate(element, {
+		gsap.to(element, {
 			backgroundColor: isToggled ? 'color-mix(in oklch, var(--primary) 15%, transparent)' : 'transparent',
 			borderColor: isToggled
 				? 'color-mix(in oklch, var(--primary) 50%, transparent)'
 				: 'color-mix(in oklch, var(--border) 20%, transparent)',
-			duration: 200,
+			duration: 0.2,
 			ease: 'cubicBezier(0.4, 0, 0.2, 1)',
 		});
 	}, []);
@@ -48,13 +50,19 @@ const useToolbarAnimation = () => {
 	const animateSeparator = React.useCallback((element: HTMLElement) => {
 		if (!element) return;
 
-		animate(element, {
-			opacity: [0.3, 1, 0.3],
-			duration: 2000,
-			ease: 'easeInOutSine',
-			loop: true,
-			direction: 'alternate',
-		});
+		gsap.fromTo(
+			element,
+			{
+				opacity: 0.3,
+			},
+			{
+				opacity: 1,
+				duration: 0.2,
+				ease: 'power1.inOut',
+				yoyo: true,
+				repeat: -1,
+			}
+		);
 	}, []);
 
 	return { animateButtonHover, animateButtonPressed, animateToggle, animateSeparator };
@@ -105,19 +113,19 @@ Toolbar.displayName = 'Toolbar';
 
 interface ToolbarButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	/**
-	 * Si el botón está en estado de toggle activo
-	 * @default false
+	 * Si debe animar el estado pressed
+	 * @default true
 	 */
-	pressed?: boolean;
+	animatePressed?: boolean;
 	/**
 	 * Icono opcional para mostrar en el botón
 	 */
 	icon?: React.ReactNode;
 	/**
-	 * Si debe animar el estado pressed
-	 * @default true
+	 * Si el botón está en estado de toggle activo
+	 * @default false
 	 */
-	animatePressed?: boolean;
+	pressed?: boolean;
 }
 
 const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(

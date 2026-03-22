@@ -3,9 +3,9 @@ import type { VideoWithStats } from '@/types/entities/video';
 import { apiClient } from './client';
 
 export interface VideoFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size' | 'duration' | 'width' | 'height';
 	sortOrder?: 'asc' | 'desc';
 }

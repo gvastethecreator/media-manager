@@ -14,12 +14,12 @@ interface ExtendedWorldItemFilters extends WorldItemFilters {
 }
 
 export interface WorldItemFiltersSlice {
-	filters: ExtendedWorldItemFilters;
-	updateFilters: (filters: Partial<ExtendedWorldItemFilters>) => void;
 	clearFilters: () => void;
+	filters: ExtendedWorldItemFilters;
 	getFilteredWorldItems: () => WorldItem[];
 	getSortedWorldItems: () => WorldItem[];
 	setSearchQuery: (query: string) => void;
+	updateFilters: (filters: Partial<ExtendedWorldItemFilters>) => void;
 }
 
 export const createWorldItemFiltersSlice: StateCreator<

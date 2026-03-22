@@ -2,11 +2,11 @@ import { Heart } from 'lucide-react';
 import React from 'react';
 import { FavoriteCard } from '@/components/cards/favorite-card/favorite-card';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
@@ -39,21 +39,21 @@ function transformToExtended(favorite: FavoriteWithStats): FavoriteExtended {
 }
 
 interface FavoritesContentViewProps {
-	favorites: FavoriteWithStats[];
-	isLoading: boolean;
-	error: Error | null;
-	localSearch: string;
-	showForm: boolean;
-	newFavoriteName: string;
-	newFavoriteDescription: string;
-	selectedFavoriteId: string | null;
-	setShowForm: (show: boolean) => void;
-	setNewFavoriteName: (name: string) => void;
-	setNewFavoriteDescription: (description: string) => void;
-	handleFavoriteSelect: (favoriteId: string) => void;
-	handleCreateFavorite: () => void;
-	handleRetry: () => void;
 	className?: string;
+	error: Error | null;
+	favorites: FavoriteWithStats[];
+	handleCreateFavorite: () => void;
+	handleFavoriteSelect: (favoriteId: string) => void;
+	handleRetry: () => void;
+	isLoading: boolean;
+	localSearch: string;
+	newFavoriteDescription: string;
+	newFavoriteName: string;
+	selectedFavoriteId: string | null;
+	setNewFavoriteDescription: (description: string) => void;
+	setNewFavoriteName: (name: string) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({

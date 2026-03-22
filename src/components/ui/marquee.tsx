@@ -2,42 +2,42 @@ import React, { ComponentPropsWithoutRef, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface MarqueeProps extends ComponentPropsWithoutRef<'section'> {
+	/** Optional accessible name; defaults to 'Marquesina' */
+	ariaLabel?: string;
+	/** ARIA live politeness; avoid announcing by default */
+	ariaLive?: 'off' | 'polite' | 'assertive';
+	/**
+	 * If true, automatically repeats children enough to fill the visible area
+	 */
+	autoFill?: boolean;
+	/**
+	 * Content to be displayed in the marquee
+	 */
+	children: React.ReactNode;
 	/**
 	 * Optional CSS class name to apply custom styles
 	 */
 	className?: string;
-	/**
-	 * Whether to reverse the animation direction
-	 * @default false
-	 */
-	reverse?: boolean;
 	/**
 	 * Whether to pause the animation on hover
 	 * @default false
 	 */
 	pauseOnHover?: boolean;
 	/**
-	 * Content to be displayed in the marquee
-	 */
-	children: React.ReactNode;
-	/**
-	 * Whether to animate vertically instead of horizontally
-	 * @default false
-	 */
-	vertical?: boolean;
-	/**
 	 * Number of times to repeat the content
 	 * @default 4
 	 */
 	repeat?: number;
 	/**
-	 * If true, automatically repeats children enough to fill the visible area
+	 * Whether to reverse the animation direction
+	 * @default false
 	 */
-	autoFill?: boolean;
-	/** Optional accessible name; defaults to 'Marquesina' */
-	ariaLabel?: string;
-	/** ARIA live politeness; avoid announcing by default */
-	ariaLive?: 'off' | 'polite' | 'assertive';
+	reverse?: boolean;
+	/**
+	 * Whether to animate vertically instead of horizontally
+	 * @default false
+	 */
+	vertical?: boolean;
 }
 
 export function Marquee({

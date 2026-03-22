@@ -14,43 +14,42 @@ import { FileStore } from '..';
 
 // Estado
 export interface CoreState {
-	// Datos
-	files: FileWithStats[];
 	currentDirectory: string | null;
-	parentDirectories: string[];
-	isLoading: boolean;
+	directoryCount: number;
 	error: string | null;
 
 	// Estadísticas
 	fileCount: number;
-	directoryCount: number;
-	totalSize: number;
+	// Datos
+	files: FileWithStats[];
 	hasMore: boolean;
+	isLoading: boolean;
+	parentDirectories: string[];
+	totalSize: number;
 }
 
 // Acciones
 export interface CoreActions {
-	// Setters básicos
-	setFiles: (files: FileWithStats[]) => void;
-	setCurrentDirectory: (path: string | null) => void;
-	setParentDirectories: (paths: string[]) => void;
-	setIsLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
-	setDirectoryStats: (stats: Pick<CoreState, 'fileCount' | 'directoryCount' | 'totalSize' | 'hasMore'>) => void;
-
 	// Operaciones
 	addFile: (file: FileWithStats) => void;
-	updateFile: (id: string, file: Partial<FileWithStats>) => void;
-	removeFile: (id: string) => void;
 
 	// Operaciones avanzadas
 	navigateToDirectory: (path: string) => Promise<void>;
 	navigateUp: () => Promise<void>;
-	updateDirectoryContents: (result: DirectoryReadResult) => void;
-	updateFilesFromRaw: (files: FileBaseFromTypes[]) => void;
+	removeFile: (id: string) => void;
 
 	// Operaciones masivas
 	reset: () => void;
+	setCurrentDirectory: (path: string | null) => void;
+	setDirectoryStats: (stats: Pick<CoreState, 'fileCount' | 'directoryCount' | 'totalSize' | 'hasMore'>) => void;
+	setError: (error: string | null) => void;
+	// Setters básicos
+	setFiles: (files: FileWithStats[]) => void;
+	setIsLoading: (isLoading: boolean) => void;
+	setParentDirectories: (paths: string[]) => void;
+	updateDirectoryContents: (result: DirectoryReadResult) => void;
+	updateFile: (id: string, file: Partial<FileWithStats>) => void;
+	updateFilesFromRaw: (files: FileBaseFromTypes[]) => void;
 }
 
 // Estado inicial

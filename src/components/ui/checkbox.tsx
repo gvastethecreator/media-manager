@@ -1,47 +1,109 @@
 'use client';
 
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-import { Check } from 'lucide-react';
+import gsap from 'gsap';
+import { Check, Minus } from 'lucide-react';
 import * as React from 'react';
-
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
+
+/**
+ * Checkbox final - Elegante y Animado
+ *
+ * Características:
+ * - Borde 2px semitransparente con transiciones suaves
+ * - Animación de escala al hacer check
+ * - Icono de check con animación de stroke
+ * - Estados indeterminado, checked y unchecked visuamente distintos
+ * - Efectos hover sutiles con sombra
+ */
 
 type CheckboxSize = 'sm' | 'md' | 'lg';
 
-type CheckboxProps = React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> & {
+interface CheckboxProps extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> {
+	animated?: boolean;
 	size?: CheckboxSize;
-};
+}
 
 const sizeClasses: Record<CheckboxSize, { root: string; icon: string }> = {
-	sm: { root: 'h-4 w-4', icon: 'h-3 w-3' },
-	md: { root: 'h-5 w-5', icon: 'h-4 w-4' },
-	lg: { root: 'h-6 w-6', icon: 'h-5 w-5' },
+	sm: { root: 'h-4 w-4', icon: 'h-2.5 w-2.5' },
+	md: { root: 'h-5 w-5', icon: 'h-3.5 w-3.5' },
+	lg: { root: 'h-6 w-6', icon: 'h-4 w-4' },
 };
 
-/**
- * Checkbox con Design Tokens v2
- * - Borde 2px para mayor definición
- * - Gradiente en estado checked
- * - Sombra sutil
- * - Transiciones suaves
- */
 const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
-	({ className, size = 'md', ...props }, ref) => (
-		<CheckboxPrimitive.Root
-			className={cn(
-				'peer grid shrink-0 place-content-center rounded-dt-xs border-2 border-primary/50 bg-background shadow-dt-1 transition-all duration-dt-fast ease-dt-out hover:border-primary hover:shadow-dt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-primary/30 data-[state=checked]:bg-linear-to-b data-[state=checked]:from-primary data-[state=checked]:to-primary/90 data-[state=checked]:text-primary-foreground',
-				sizeClasses[size].root,
-				className
-			)}
-			ref={ref}
-			{...props}
-		>
-			<CheckboxPrimitive.Indicator className={cn('grid place-content-center text-current')}>
-				<Check className={cn(sizeClasses[size].icon)} />
-			</CheckboxPrimitive.Indicator>
-		</CheckboxPrimitive.Root>
-	)
+	({ className, size = 'md', animated = true, ...props }, ref) => {
+		const indicatorRef = useRef<HTMLSpanElement>(null);
+		const rootRef = useRef<HTMLButtonElement>(null);
+
+		useEffect(() => {
+			if (!(animated && indicatorRef.current)) return;
+
+			if (props.checked) {
+				gsap.killTweensOf(indicatorRef.current);
+				gsap.fromTo(
+					indicatorRef.current,
+					{ scale: 0.5, opacity: 0 },
+					{
+						scale: 1,
+						opacity: 1,
+						duration: 0.4,
+						ease: 'elastic.out(1, 0.6)',
+					}
+				);
+			}
+		}, [props.checked, animated]);
+
+		return (
+			<CheckboxPrimitive.Root
+				className={cn(
+					// Base layout
+					'peer grid shrink-0 place-content-center rounded-md',
+					// Borde 2px semitransparente
+					'border-2 border-border/50',
+					// Fondo según estado
+					'bg-background',
+					'data-[state=checked]:border-primary/50 data-[state=checked]:bg-primary',
+					'data-[state=indeterminate]:border-primary/50 data-[state=indeterminate]:bg-primary/80',
+					// Sombra sutil
+					'shadow-dt-1',
+					// Transiciones suaves
+					'transition-all duration-200 ease-out',
+					// Hover effects
+					'hover:border-border/70 hover:shadow-dt-2',
+					'hover:data-[state=checked]:shadow-[0_2px_12px_rgba(var(--primary-rgb),0.25)]',
+					// Focus states
+					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2',
+					// Disabled
+					'disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none',
+					sizeClasses[size].root,
+					className
+				)}
+				ref={(node) => {
+					if (typeof ref === 'function') {
+						ref(node);
+					} else if (ref) {
+						ref.current = node;
+					}
+					rootRef.current = node || null;
+				}}
+				{...props}
+			>
+				<CheckboxPrimitive.Indicator
+					className={cn('grid place-content-center text-primary-foreground', 'origin-center')}
+					ref={indicatorRef}
+				>
+					{props.checked === 'indeterminate' ? (
+						<Minus className={cn(sizeClasses[size].icon)} strokeWidth={3} />
+					) : (
+						<Check className={cn(sizeClasses[size].icon)} strokeWidth={3} />
+					)}
+				</CheckboxPrimitive.Indicator>
+			</CheckboxPrimitive.Root>
+		);
+	}
 );
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
 export { Checkbox };
+export type { CheckboxProps };

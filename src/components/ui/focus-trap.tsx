@@ -9,18 +9,18 @@ import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface FocusTrapProps {
-	/** Contenido a encapsular */
-	children: React.ReactNode;
 	/** Si el trap está activo */
 	active?: boolean;
-	/** Callback cuando se presiona Escape */
-	onEscape?: () => void;
-	/** Elemento a enfocar inicialmente (auto = primer elemento focusable) */
-	initialFocus?: 'auto' | 'first' | 'last' | string;
-	/** Restaurar foco al desactivar */
-	restoreFocus?: boolean;
+	/** Contenido a encapsular */
+	children: React.ReactNode;
 	/** Clases adicionales */
 	className?: string;
+	/** Elemento a enfocar inicialmente (auto = primer elemento focusable) */
+	initialFocus?: 'auto' | 'first' | 'last' | string;
+	/** Callback cuando se presiona Escape */
+	onEscape?: () => void;
+	/** Restaurar foco al desactivar */
+	restoreFocus?: boolean;
 }
 
 const FOCUSABLE_SELECTORS = [

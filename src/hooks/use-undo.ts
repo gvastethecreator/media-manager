@@ -9,20 +9,20 @@ import { useCallback, useRef, useState } from 'react';
 import { toastService } from '@/lib/ui/toast';
 
 interface UndoableAction<T = unknown> {
-	/** ID único de la acción */
-	id: string;
-	/** Descripción para mostrar al usuario */
-	description: string;
-	/** Timestamp de cuándo se ejecutó */
-	timestamp: number;
 	/** Datos necesarios para revertir */
 	data: T;
-	/** Función para deshacer */
-	undo: () => Promise<void> | void;
+	/** Descripción para mostrar al usuario */
+	description: string;
+	/** ID único de la acción */
+	id: string;
 	/** Función opcional para rehacer */
 	redo?: () => Promise<void> | void;
+	/** Timestamp de cuándo se ejecutó */
+	timestamp: number;
 	/** Tiempo de vida en ms (default: 30000 = 30s) */
 	ttl?: number;
+	/** Función para deshacer */
+	undo: () => Promise<void> | void;
 }
 
 interface UseUndoOptions {

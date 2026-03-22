@@ -11,21 +11,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 // Tipos genéricos para flexibilidad
 export interface FormField<T = unknown> {
-	name: string;
 	label: string;
+	name: string;
 	render: (props: { value: T; onChange: (v: T) => void }) => React.ReactNode;
 }
 
 export interface DynamicCreateFormProps<T extends Record<string, any> = Record<string, any>> {
 	/**
+	 * Función de submit (recibe los datos del formulario)
+	 */
+	onSubmit: (data: T & { name: string }) => Promise<void>;
+	/**
 	 * Lista de campos opcionales disponibles para la entidad (ej: emoji, color, categoría...)
 	 * Cada campo debe tener: name, label, render (función que retorna el campo JSX)
 	 */
 	optionalFields: FormField[];
-	/**
-	 * Función de submit (recibe los datos del formulario)
-	 */
-	onSubmit: (data: T & { name: string }) => Promise<void>;
 	/**
 	 * Texto del botón principal
 	 */

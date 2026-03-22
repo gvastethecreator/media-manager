@@ -7,34 +7,34 @@
 import { apiClient } from '../client';
 
 export interface WildcardCardData {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	category: string | null;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	shortcut: string | null;
-	parentId: string | null;
-	children?: any[];
 	_count: {
 		images: number;
 		videos: number;
 		childWildcards: number;
 	};
+	category: string | null;
+	children?: any[];
+	color: string;
+	createdAt: Date;
+	description: string | null;
+	emoji: string;
+	featuredImage: string | null;
+	id: string;
+	isFavorite: boolean;
+	name: string;
+	parentId: string | null;
 	recentImages?: string[];
+	shortcut: string | null;
+	updatedAt: Date;
 }
 
 export interface GetWildcardsOptions {
-	limit?: number;
 	category?: string;
-	parentId?: string | null;
-	searchTerm?: string;
+	limit?: number;
 	orderBy?: 'name' | 'updatedAt' | 'createdAt';
 	orderDir?: 'asc' | 'desc';
+	parentId?: string | null;
+	searchTerm?: string;
 }
 
 export const wildcardsApi = {

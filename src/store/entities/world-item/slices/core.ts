@@ -19,18 +19,18 @@ import type { WorldItemActions, WorldItemState } from '../types';
 const worldItemLogger = clientLogger.withContext('WorldItemStoreCore');
 
 export interface WorldItemCoreSlice {
-	worldItems: WorldItem[];
-	isLoading: boolean;
-	error: string | null;
-	loadWorldItems: () => Promise<void>;
-	createWorldItem: (item: CreateWorldItemData) => Promise<void>;
-	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
-	deleteWorldItem: (id: string) => Promise<void>;
-	getWorldItemById: (id: string) => WorldItem | undefined;
-	setWorldItems: (worldItems: WorldItem[]) => void;
 	addWorldItem: (worldItem: WorldItem) => void;
+	createWorldItem: (item: CreateWorldItemData) => Promise<void>;
+	deleteWorldItem: (id: string) => Promise<void>;
+	error: string | null;
+	getWorldItemById: (id: string) => WorldItem | undefined;
+	isLoading: boolean;
+	loadWorldItems: () => Promise<void>;
 	resetStore: () => void;
 	setError: (error: string | null) => void;
+	setWorldItems: (worldItems: WorldItem[]) => void;
+	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
+	worldItems: WorldItem[];
 }
 
 export const createWorldItemCoreSlice: StateCreator<WorldItemState & WorldItemActions, [], [], WorldItemCoreSlice> = (

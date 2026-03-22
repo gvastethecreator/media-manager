@@ -17,11 +17,24 @@ const activityLogger = serverLogger.withContext('ActivityService');
  */
 export interface ActivityService {
 	/**
+	 * Elimina todas las actividades o las que coincidan con los filtros
+	 * @param filters Filtros opcionales
+	 * @returns Número de actividades eliminadas
+	 */
+	clearAll(filters?: ActivityFilters): Promise<number>;
+	/**
 	 * Crea una nueva actividad
 	 * @param data Datos para la creación
 	 * @returns Actividad creada
 	 */
 	create(data: CreateActivityData): Promise<Activity>;
+
+	/**
+	 * Elimina una actividad por su identificador
+	 * @param id Identificador de la actividad
+	 * @returns true si se eliminó correctamente
+	 */
+	delete(id: string): Promise<boolean>;
 
 	/**
 	 * Busca una actividad por su identificador
@@ -36,20 +49,6 @@ export interface ActivityService {
 	 * @returns Respuesta con actividades y metadatos
 	 */
 	list(filters?: ActivityFilters): Promise<ActivityListResponse>;
-
-	/**
-	 * Elimina una actividad por su identificador
-	 * @param id Identificador de la actividad
-	 * @returns true si se eliminó correctamente
-	 */
-	delete(id: string): Promise<boolean>;
-
-	/**
-	 * Elimina todas las actividades o las que coincidan con los filtros
-	 * @param filters Filtros opcionales
-	 * @returns Número de actividades eliminadas
-	 */
-	clearAll(filters?: ActivityFilters): Promise<number>;
 }
 
 /**

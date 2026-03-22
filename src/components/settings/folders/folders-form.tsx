@@ -21,16 +21,16 @@ declare global {
 }
 
 interface DirectoryHandle {
+	fullPath?: string;
 	name: string;
 	path?: string;
-	fullPath?: string;
 	[key: string]: unknown;
 }
 
 interface FolderFormProps {
-	onAddFolder: (path: string) => Promise<void>;
-	isProcessing: boolean;
 	isLoading: boolean;
+	isProcessing: boolean;
+	onAddFolder: (path: string) => Promise<void>;
 }
 
 export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormProps) {

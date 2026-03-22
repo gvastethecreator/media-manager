@@ -80,136 +80,134 @@ export enum VideoViewMode {
  * 📝 Tipo base para Video - definición canónica
  */
 export interface VideoBase {
-	id: string;
-	name: string;
+	createdAt: Date;
 	description: string | null;
-	path: string;
-	hash: string;
-	size: number;
 	duration: number;
-	width: number | null;
+	folderId: string;
+	hash: string;
 	height: number | null;
-	metadata: string | null;
-	thumbnail: string | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
+	id: string;
 
 	isFavorite: boolean;
 	isHidden: boolean;
 	isPublic: boolean;
-	folderId: string;
-	createdAt: Date;
+	metadata: string | null;
+	name: string;
+	path: string;
+	size: number;
+	thumbnail: string | null;
+	thumbnailHeight: number | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
 	updatedAt: Date;
+	width: number | null;
 }
 
 /**
  * ➕ Input para crear un nuevo video
  */
 export interface VideoCreateInput {
-	name: string;
+	// Relaciones opcionales por IDs
+	albumIds?: string[];
+	characterIds?: string[];
+	collectionIds?: string[];
+	conceptIds?: string[];
 	description?: string | null;
-	path: string;
-	hash: string;
-	mimeType?: string;
-	size: number;
 	duration: number;
-	width?: number | null;
+	folderId: string;
+	groupIds?: string[];
+	hash: string;
 	height?: number | null;
-	metadata?: string | null;
-	thumbnail?: Buffer | null;
-	thumbnailSize?: number | null;
-	thumbnailWidth?: number | null;
-	thumbnailHeight?: number | null;
 
 	isFavorite?: boolean;
 	isHidden?: boolean;
 	isPublic?: boolean;
-	folderId: string;
-
-	// Relaciones opcionales por IDs
-	albumIds?: string[];
-	collectionIds?: string[];
-	tagIds?: string[];
-	characterIds?: string[];
-	placeIds?: string[];
-	worldItemIds?: string[];
-	conceptIds?: string[];
-	promptIds?: string[];
+	metadata?: string | null;
+	mimeType?: string;
+	name: string;
 	noteIds?: string[];
-	wildcardIds?: string[];
+	path: string;
+	placeIds?: string[];
+	promptIds?: string[];
 	propertyIds?: string[];
-	groupIds?: string[];
+	size: number;
+	tagIds?: string[];
+	thumbnail?: Buffer | null;
+	thumbnailHeight?: number | null;
+	thumbnailSize?: number | null;
+	thumbnailWidth?: number | null;
+	width?: number | null;
+	wildcardIds?: string[];
+	worldItemIds?: string[];
 }
 
 /**
  * 🔄 Input para actualizar un video
  */
 export interface VideoUpdateInput {
-	name?: string;
+	// Relaciones opcionales por IDs
+	albumIds?: string[];
+	characterIds?: string[];
+	collectionIds?: string[];
+	conceptIds?: string[];
 	description?: string | null;
-	path?: string;
-	size?: number;
 	duration?: number;
-	width?: number | null;
+	folderId?: string;
+	groupIds?: string[];
 	height?: number | null;
-	metadata?: string | null;
-	thumbnail?: Buffer | null;
-	thumbnailSize?: number | null;
-	thumbnailWidth?: number | null;
-	thumbnailHeight?: number | null;
 
 	isFavorite?: boolean;
 	isHidden?: boolean;
 	isPublic?: boolean;
-	folderId?: string;
-
-	// Relaciones opcionales por IDs
-	albumIds?: string[];
-	collectionIds?: string[];
-	tagIds?: string[];
-	characterIds?: string[];
-	placeIds?: string[];
-	worldItemIds?: string[];
-	conceptIds?: string[];
-	promptIds?: string[];
+	metadata?: string | null;
+	name?: string;
 	noteIds?: string[];
-	wildcardIds?: string[];
+	path?: string;
+	placeIds?: string[];
+	promptIds?: string[];
 	propertyIds?: string[];
-	groupIds?: string[];
+	size?: number;
+	tagIds?: string[];
+	thumbnail?: Buffer | null;
+	thumbnailHeight?: number | null;
+	thumbnailSize?: number | null;
+	thumbnailWidth?: number | null;
+	width?: number | null;
+	wildcardIds?: string[];
+	worldItemIds?: string[];
 }
 
 /**
  * 🔍 Filtros para búsqueda de videos
  */
 export interface VideoFilters {
-	search?: string;
-	folders?: string[];
-	tags?: string[];
 	albums?: string[];
-	collections?: string[];
 	characters?: string[];
+	collections?: string[];
 	dateRange?: {
 		start?: Date;
 		end?: Date;
 	};
+	duplicateStatus?: ('unique' | 'duplicate' | 'similar')[];
+	folders?: string[];
+	hasAudio?: boolean;
+	hasMetadata?: boolean;
+	hasSubtitles?: boolean;
+	hasThumbnail?: boolean;
 	isFavorite?: boolean;
+	maxDuration?: number;
+	maxHeight?: number;
+	maxSize?: number;
+	maxWidth?: number;
+	minDuration?: number;
+	minHeight?: number;
+	minQualityScore?: number;
+	minSize?: number;
+	minWidth?: number;
 
 	qualityLevel?: VideoQuality[];
-	minDuration?: number;
-	maxDuration?: number;
-	minWidth?: number;
-	maxWidth?: number;
-	minHeight?: number;
-	maxHeight?: number;
-	minSize?: number;
-	maxSize?: number;
-	hasMetadata?: boolean;
-	hasThumbnail?: boolean;
-	hasAudio?: boolean;
-	hasSubtitles?: boolean;
-	duplicateStatus?: ('unique' | 'duplicate' | 'similar')[];
-	minQualityScore?: number;
+	search?: string;
+	tags?: string[];
 	technicalGrade?: ('A' | 'B' | 'C' | 'D')[];
 }
 
@@ -218,36 +216,23 @@ export interface VideoFilters {
  */
 export interface VideoRelations {
 	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
 	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemWithStats[];
+	collections?: CollectionWithStats[];
 	concepts?: ConceptWithStats[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyComplete[];
 	groups?: GroupWithStats[];
+	notes?: NoteComplete[];
+	places?: PlaceComplete[];
+	prompts?: PromptComplete[];
+	properties?: PropertyComplete[];
+	tags?: TagWithStats[];
+	wildcards?: WildcardWithStats[];
+	worldItems?: WorldItemWithStats[];
 }
 
 /**
  * 🎥 Video completo con relaciones
  */
 export interface VideoComplete extends VideoBase {
-	stats?: VideoStatistics;
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemWithStats[];
-	concepts?: ConceptWithStats[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyComplete[];
-	groups?: GroupWithStats[];
 	_count?: {
 		albums?: number;
 		collections?: number;
@@ -262,14 +247,27 @@ export interface VideoComplete extends VideoBase {
 		properties?: number;
 		groups?: number;
 	};
+	albums?: AlbumWithStats[];
+	characters?: CharacterWithStats[];
+	collections?: CollectionWithStats[];
+	concepts?: ConceptWithStats[];
+	groups?: GroupWithStats[];
+	notes?: NoteComplete[];
+	places?: PlaceComplete[];
+	prompts?: PromptComplete[];
+	properties?: PropertyComplete[];
+	stats?: VideoStatistics;
+	tags?: TagWithStats[];
+	wildcards?: WildcardWithStats[];
+	worldItems?: WorldItemWithStats[];
 }
 
 /**
  * 📄 Opciones de paginación
  */
 export interface VideoPaginationOptions {
-	page?: number;
 	limit?: number;
+	page?: number;
 	sortBy?: VideoSortCriteria;
 	sortDirection?: 'asc' | 'desc';
 }
@@ -278,15 +276,6 @@ export interface VideoPaginationOptions {
  * 🎥 Tipo completo para Video con relaciones y estadísticas
  */
 export interface VideoWithStats extends VideoBase {
-	entityType: 'video';
-	stats: VideoStatistics;
-	/** Alias para compatibilidad - apunta a stats */
-	statistics?: VideoStatistics;
-	thumbnailUrl: string | null;
-	frameRate?: number;
-	videoCodec?: string;
-	audioCodec?: string;
-	bitrate?: number;
 	_count?: {
 		albums?: number;
 		collections?: number;
@@ -301,13 +290,21 @@ export interface VideoWithStats extends VideoBase {
 		properties?: number;
 		groups?: number;
 	};
+	audioCodec?: string;
+	bitrate?: number;
+	entityType: 'video';
+	frameRate?: number;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: VideoStatistics;
+	stats: VideoStatistics;
+	thumbnailUrl: string | null;
+	videoCodec?: string;
 }
 
 /**
  * 📊 Resultado paginado de búsqueda
  */
 export interface PaginatedVideos {
-	videos: VideoWithStats[];
 	pagination: {
 		page: number;
 		limit: number;
@@ -316,51 +313,52 @@ export interface PaginatedVideos {
 		hasNextPage: boolean;
 		hasPreviousPage: boolean;
 	};
+	videos: VideoWithStats[];
 }
 
 /**
  * 📈 Estadísticas generales de videos
  */
 export interface VideoStats {
-	total: number;
-	totalSize: number;
-	totalDuration: number;
 	averageDuration: number;
 	averageSize: number;
+	byFolder: Record<string, number>;
 	byFormat: Record<string, number>;
 	byQuality: Record<VideoQuality, number>;
-	byFolder: Record<string, number>;
+	duplicates: number;
 	favorites: number;
+	highQuality: number; // Grade A+B
 	public: number;
-	withThumbnails: number;
+	total: number;
+	totalDownloads: number;
+	totalDuration: number;
+	totalSize: number;
+	totalViews: number;
 	withAudio: number;
 	withSubtitles: number;
-	duplicates: number;
-	highQuality: number; // Grade A+B
-	totalViews: number;
-	totalDownloads: number;
+	withThumbnails: number;
 }
 
 /**
  * 🎮 Estado de reproducción
  */
 export interface VideoPlayState {
-	isPlaying: boolean;
 	currentTime: number;
 	duration: number;
-	volume: number;
 	isMuted: boolean;
+	isPlaying: boolean;
 	playbackRate: number;
+	volume: number;
 }
 
 /**
  * 🎬 Metadatos de video
  */
 export interface VideoMetadata {
-	codec?: string;
-	bitrate?: number;
-	frameRate?: number;
 	audioCodec?: string;
+	bitrate?: number;
+	codec?: string;
+	frameRate?: number;
 	subtitles?: boolean;
 	[key: string]: any;
 }

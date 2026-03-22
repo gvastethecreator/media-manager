@@ -57,8 +57,8 @@ const createFileError = (
 interface ClipboardData {
 	items: AnyEntityWithStats[];
 	operation: 'copy' | 'cut';
-	timestamp: number;
 	source: string;
+	timestamp: number;
 }
 
 /**

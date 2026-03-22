@@ -39,17 +39,17 @@ export type UploadedImageType = EntityUploadedImageType;
  * Interfaz para archivo subido
  */
 export interface UploadedFile {
+	error?: string;
 	id: EntityId;
+	metadata: JSONString<MediaMetadata>;
+	mimeType: string;
 	name: string;
 	originalName: string;
 	path: string;
-	type: UploadedFileType;
-	mimeType: string;
+	progress: number;
 	size: number;
 	status: UploadStatus;
-	progress: number;
-	error?: string;
-	metadata: JSONString<MediaMetadata>;
+	type: UploadedFileType;
 	uploadedAt: Date;
 	userId: EntityId;
 }
@@ -58,34 +58,34 @@ export interface UploadedFile {
  * Opciones de carga
  */
 export interface UploadOptions {
-	generateThumbnails?: boolean;
-	processMetadata?: boolean;
 	allowedTypes?: UploadedFileType[];
-	maxSize?: number;
-	destination?: string;
-	overwrite?: boolean;
 	batch?: boolean;
+	destination?: string;
+	generateThumbnails?: boolean;
+	maxSize?: number;
+	overwrite?: boolean;
+	processMetadata?: boolean;
 }
 
 /**
  * Resultado de carga
  */
 export interface UploadResult {
-	success: boolean;
-	file?: UploadedFile;
 	error?: string;
+	file?: UploadedFile;
+	success: boolean;
 }
 
 /**
  * Estado de carga múltiple
  */
 export interface BatchUploadState {
-	total: number;
 	completed: number;
-	failed: number;
-	inProgress: number;
-	files: Map<string, UploadedFile>;
 	errors: Map<string, string>;
+	failed: number;
+	files: Map<string, UploadedFile>;
+	inProgress: number;
+	total: number;
 }
 
 // Validaciones Zod
@@ -140,13 +140,13 @@ export const uploadResultSchema = z.object({
  * Metadata for uploaded images
  */
 export interface UploadedImageMetadata {
-	mimeType?: string;
-	format?: string;
-	quality?: number;
 	compression?: number;
+	format?: string;
+	hash?: string;
+	mimeType?: string;
 	originalName?: string;
 	originalPath?: string;
-	hash?: string;
+	quality?: number;
 	[key: string]: unknown;
 }
 
@@ -154,60 +154,60 @@ export interface UploadedImageMetadata {
  * Dimensions with aspect ratio
  */
 export interface UploadedImageDimensions {
-	width: number;
-	height: number;
 	aspectRatio: number;
+	height: number;
+	width: number;
 }
 
 /**
  * Stats for uploaded images
  */
 export interface UploadedImageStats {
-	total: number;
-	byType: Record<UploadedImageType, number>;
-	totalSize: number;
 	averageSize: number;
+	byType: Record<UploadedImageType, number>;
+	total: number;
+	totalSize: number;
 }
 
 /**
  * Filters for querying uploaded images
  */
 export interface UploadedImageFilters {
-	type?: UploadedImageType;
 	category?: string;
-	minWidth?: number;
+	maxHeight?: number;
+	maxSize?: number;
 	maxWidth?: number;
 	minHeight?: number;
-	maxHeight?: number;
 	minSize?: number;
-	maxSize?: number;
+	minWidth?: number;
+	page?: number;
+	pageSize?: number;
 	search?: string;
 	sortBy?: 'createdAt' | 'name' | 'size' | 'type';
 	sortOrder?: 'asc' | 'desc';
-	page?: number;
-	pageSize?: number;
+	type?: UploadedImageType;
 }
 
 /**
  * Result type for a single uploaded image
  */
 export interface UploadedImageResult {
+	category: string;
+	createdAt: Date;
+	dimensions: UploadedImageDimensions;
+	hash: string;
+	height: number;
 	id: string;
+	imageId: string;
+	metadata: UploadedImageMetadata | null;
 	name: string;
 	path: string;
-	type: UploadedImageType;
-	category: string;
-	hash: string;
-	imageId: string;
 	size: number;
-	width: number;
-	height: number;
-	metadata: UploadedImageMetadata | null;
-	dimensions: UploadedImageDimensions;
-	url: string;
 	thumbnailUrl?: string;
-	createdAt: Date;
+	type: UploadedImageType;
 	updatedAt: Date;
+	url: string;
+	width: number;
 }
 
 /**
@@ -215,10 +215,10 @@ export interface UploadedImageResult {
  */
 export interface UploadedImageResults {
 	items: UploadedImageResult[];
-	total: number;
 	page: number;
 	pageSize: number;
 	stats: UploadedImageStats;
+	total: number;
 }
 
 export interface UploadedImageFile extends Partial<File> {
@@ -227,28 +227,28 @@ export interface UploadedImageFile extends Partial<File> {
 }
 
 export interface CreateUploadedImageParams {
-	name: string;
-	type: UploadedImageType;
 	category: string;
-	file: UploadedImageFile;
 	dimensions: UploadedImageDimensions;
-	metadata?: UploadedImageMetadata;
+	file: UploadedImageFile;
 	hash?: string;
 	imageId?: string;
+	metadata?: UploadedImageMetadata;
+	name: string;
 	processingOptions?: UploadedImageProcessingOptions;
+	type: UploadedImageType;
 }
 
 export interface UpdateUploadedImageParams {
-	id: string;
-	name?: string;
-	type?: UploadedImageType;
 	category?: string;
-	file?: UploadedImageFile;
 	dimensions?: UploadedImageDimensions;
-	metadata?: UploadedImageMetadata;
+	file?: UploadedImageFile;
 	hash?: string;
+	id: string;
 	imageId?: string;
+	metadata?: UploadedImageMetadata;
+	name?: string;
 	processingOptions?: UploadedImageProcessingOptions;
+	type?: UploadedImageType;
 }
 
 export interface GetUploadedImagesParams {
@@ -260,8 +260,8 @@ export interface GetUploadedImagesParams {
 
 export interface UploadedImageEvents {
 	IMAGE_CREATED: string;
-	IMAGE_UPDATED: string;
 	IMAGE_DELETED: string;
+	IMAGE_UPDATED: string;
 	IMAGES_CHANGED: string;
 }
 
@@ -273,16 +273,16 @@ export const UPLOADED_IMAGE_EVENTS: UploadedImageEvents = {
 };
 
 export interface UploadedImageProcessingOptions {
-	width?: number;
-	height?: number;
-	quality?: number;
-	format?: 'jpeg' | 'png' | 'webp';
-	fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
-	position?: 'center' | 'top' | 'right top' | 'right' | 'right bottom' | 'bottom' | 'left bottom' | 'left' | 'left top';
 	background?: string;
-	withoutEnlargement?: boolean;
-	progressive?: boolean;
+	fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
+	format?: 'jpeg' | 'png' | 'webp';
+	height?: number;
 	optimizationLevel?: number;
+	position?: 'center' | 'top' | 'right top' | 'right' | 'right bottom' | 'bottom' | 'left bottom' | 'left' | 'left top';
+	progressive?: boolean;
+	quality?: number;
+	width?: number;
+	withoutEnlargement?: boolean;
 }
 
 // Tipos inferidos

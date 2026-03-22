@@ -4,7 +4,7 @@
  * @description Badge que muestra información visual del tipo de entidad con iconos y colores
  */
 
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 // imports limpios: eliminados ComponentProps y Badge no usados
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
@@ -15,20 +15,20 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
  * 🏷️ Props para EntityTypeBadge
  */
 export interface EntityTypeBadgeProps {
-	/** Tipo de entidad */
-	type: EntityStatsType;
+	/** Mostrar animación al hacer hover */
+	animated?: boolean;
+	/** Clase CSS adicional */
+	className?: string;
 	/** Mostrar texto además del icono */
 	showText?: boolean;
 	/** Mostrar tooltip con información adicional */
 	showTooltip?: boolean;
 	/** Tamaño del badge */
 	size?: 'sm' | 'md' | 'lg';
+	/** Tipo de entidad */
+	type: EntityStatsType;
 	/** Variante visual */
 	variant?: 'solid' | 'outline' | 'ghost';
-	/** Mostrar animación al hacer hover */
-	animated?: boolean;
-	/** Clase CSS adicional */
-	className?: string;
 }
 
 /**
@@ -141,14 +141,14 @@ export function EntityTypeBadge({
  * 📊 Componente para mostrar estadísticas de tipos de entidad
  */
 export interface EntityTypeStatsProps {
-	/** Estadísticas por tipo */
-	stats: Record<EntityStatsType, number>;
 	/** Mostrar solo tipos con elementos */
 	hideEmpty?: boolean;
 	/** Límite de tipos a mostrar */
 	limit?: number;
 	/** Orientación del  */
 	orientation?: 'horizontal' | 'vertical';
+	/** Estadísticas por tipo */
+	stats: Record<EntityStatsType, number>;
 }
 
 export function EntityTypeStats({ stats, hideEmpty = true, limit, orientation = 'horizontal' }: EntityTypeStatsProps) {
@@ -184,14 +184,14 @@ export function EntityTypeStats({ stats, hideEmpty = true, limit, orientation = 
  * 🎨 Componente para selector de tipo de entidad
  */
 export interface EntityTypeSelectorProps {
-	/** Tipo seleccionado actualmente */
-	selected?: EntityStatsType[];
-	/** Callback cuando cambia la selección */
-	onSelectionChange?: (types: EntityStatsType[]) => void;
 	/** Tipos disponibles (si no se especifica, muestra todos) */
 	availableTypes?: EntityStatsType[];
 	/** Permitir selección múltiple */
 	multiple?: boolean;
+	/** Callback cuando cambia la selección */
+	onSelectionChange?: (types: EntityStatsType[]) => void;
+	/** Tipo seleccionado actualmente */
+	selected?: EntityStatsType[];
 	/** Tamaño de los badges */
 	size?: 'sm' | 'md' | 'lg';
 }

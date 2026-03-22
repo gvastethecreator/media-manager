@@ -9,15 +9,15 @@ import { MicroCell } from './micro-cell';
 import { EmptyFoldersState } from './ui-primitives';
 
 interface FoldersGridProps {
-	orderedFolders: any[];
-	selectedFolder: string | null;
-	progressByFolder: Record<string, any>;
-	processStatus: any;
-	isProcessing: boolean;
-	isGloballyProcessing: boolean;
 	globalCurrentFolderId: string | null | undefined;
+	isGloballyProcessing: boolean;
+	isProcessing: boolean;
 	onFolderClick: (id: string) => void;
 	onReindex?: (id: string) => void;
+	orderedFolders: any[];
+	processStatus: any;
+	progressByFolder: Record<string, any>;
+	selectedFolder: string | null;
 } /**
  * Vista de grid para carpetas con diseño adaptativo
  */

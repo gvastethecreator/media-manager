@@ -14,30 +14,30 @@ const groupLogger = clientLogger.withContext('GroupFilters');
 
 // Slice para filtrado y ordenación
 export interface GroupFiltersSlice {
-	// Estado de filtros
-	sortBy: GroupSortCriteria;
-	searchQuery: string;
-	filterByType: GroupType | null;
-	filterByCategory: string | null;
-	filterFavorites: boolean;
+	applyFilters: (groups: GroupWithStats[]) => GroupWithStats[];
+	applySort: (groups: GroupWithStats[]) => GroupWithStats[];
 	dateRange: {
 		from: Date | null;
 		to: Date | null;
 	};
-
-	// Establecer filtros
-	setSortBy: (sortBy: GroupSortCriteria) => void;
-	setSearchQuery: (query: string) => void;
-	setFilterByType: (type: GroupType | null) => void;
-	setFilterByCategory: (category: string | null) => void;
-	setFilterFavorites: (onlyFavorites: boolean) => void;
-	setDateRange: (from: Date | null, to: Date | null) => void;
-	resetFilters: () => void;
+	filterByCategory: string | null;
+	filterByType: GroupType | null;
+	filterFavorites: boolean;
 
 	// Obtener grupos filtrados
 	getFilteredGroups: () => GroupWithStats[];
-	applySort: (groups: GroupWithStats[]) => GroupWithStats[];
-	applyFilters: (groups: GroupWithStats[]) => GroupWithStats[];
+	resetFilters: () => void;
+	searchQuery: string;
+	setDateRange: (from: Date | null, to: Date | null) => void;
+	setFilterByCategory: (category: string | null) => void;
+	setFilterByType: (type: GroupType | null) => void;
+	setFilterFavorites: (onlyFavorites: boolean) => void;
+	setSearchQuery: (query: string) => void;
+
+	// Establecer filtros
+	setSortBy: (sortBy: GroupSortCriteria) => void;
+	// Estado de filtros
+	sortBy: GroupSortCriteria;
 }
 
 // Creador del slice

@@ -4,19 +4,19 @@
  * Tipo para información de generación de IA
  */
 export interface AIGenerationInfo {
-	type?: string;
-	prompt?: string;
-	model?: string;
-	sampler?: string;
-	negative_prompt?: string;
-	steps?: number;
-	cfg_scale?: number;
 	cfg?: number;
-	seed?: number;
-	scheduler?: string;
+	cfg_scale?: number;
 	clip_skip?: number | string;
-	workflow?: string;
 	extra_params?: Record<string, unknown>;
+	model?: string;
+	negative_prompt?: string;
+	prompt?: string;
+	sampler?: string;
+	scheduler?: string;
+	seed?: number;
+	steps?: number;
+	type?: string;
+	workflow?: string;
 	[key: string]: unknown;
 }
 

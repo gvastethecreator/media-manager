@@ -11,31 +11,31 @@ export const EntityType = {
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
 
 export interface FileInfo {
+	extension: string;
+	folderId: string;
+	hash?: string;
+	lastModified: Date;
 	name: string;
 	path: string;
 	size: number;
-	extension: string;
-	hash?: string;
-	lastModified: Date;
-	folderId: string;
 }
 
 export interface EntityCreationResult {
-	success: boolean;
-	entityType: EntityType;
 	entityId?: string;
+	entityType: EntityType;
 	error?: string;
+	success: boolean;
 }
 
 export interface EntityCreationStats {
-	totalFiles: number;
-	processed: number;
-	successful: number;
-	failed: number;
 	errors: Array<{
 		file: string;
 		error: string;
 	}>;
+	failed: number;
+	processed: number;
+	successful: number;
+	totalFiles: number;
 }
 
 export const ENTITY_TYPE_MAPPING: Record<EntityType, string[]> = {

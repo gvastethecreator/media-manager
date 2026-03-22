@@ -4,14 +4,14 @@ import { type IAudioMetadata, parseBuffer } from 'music-metadata';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 export interface AudioMetadataExtract {
-	duration: number | null;
 	bitrate: number | null;
-	sampleRate: number | null;
 	channels: number | null;
-	format: string | null;
 	codec: string | null;
-	tags: Record<string, any> | null;
+	duration: number | null;
+	format: string | null;
 	raw?: any;
+	sampleRate: number | null;
+	tags: Record<string, any> | null;
 }
 
 export class AudioMetadataService {

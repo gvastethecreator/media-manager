@@ -8,11 +8,11 @@ import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
 
 export interface FolderCardProps {
-	folder: FolderWithStats;
-	onClick?: () => void;
-	href?: string;
 	className?: string;
+	folder: FolderWithStats;
+	href?: string;
 	interactive?: boolean;
+	onClick?: () => void;
 	tcgMode?: boolean;
 }
 

@@ -25,27 +25,6 @@ enum VideoQualityLocal {
 
 // Tipos locales equivalentes a Drizzle (migración a Drizzle)
 interface DrizzleVideoWithCounts {
-	id: string;
-	name: string | null;
-	path: string;
-	hash: string;
-	size: number;
-	width: number | null;
-	height: number | null;
-	duration: number;
-	metadata: string | null;
-	thumbnail: Buffer | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
-	thumbnailError: string | null;
-	thumbnailErrorAt: Date | null;
-	thumbnailOptimizedAt: Date | null;
-	isFavorite: boolean;
-	folderId: string | null;
-	addedAt: Date;
-	createdAt: Date;
-	updatedAt: Date;
 	_count?: {
 		albums?: number;
 		collections?: number;
@@ -60,6 +39,27 @@ interface DrizzleVideoWithCounts {
 		properties?: number;
 		groups?: number;
 	};
+	addedAt: Date;
+	createdAt: Date;
+	duration: number;
+	folderId: string | null;
+	hash: string;
+	height: number | null;
+	id: string;
+	isFavorite: boolean;
+	metadata: string | null;
+	name: string | null;
+	path: string;
+	size: number;
+	thumbnail: Buffer | null;
+	thumbnailError: string | null;
+	thumbnailErrorAt: Date | null;
+	thumbnailHeight: number | null;
+	thumbnailOptimizedAt: Date | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	updatedAt: Date;
+	width: number | null;
 }
 
 type DrizzleVideoFromDrizzle = DrizzleVideoWithCounts & {

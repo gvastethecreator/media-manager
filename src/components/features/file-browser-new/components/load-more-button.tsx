@@ -8,18 +8,18 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface LoadMoreButtonProps {
+	/** Clase CSS adicional */
+	className?: string;
 	/** Si hay más items */
 	hasMore: boolean;
 	/** Si está cargando */
 	isLoading: boolean;
 	/** Items cargados */
 	loadedCount: number;
-	/** Total de items */
-	totalCount: number;
 	/** Handler de carga */
 	onLoadMore: () => void;
-	/** Clase CSS adicional */
-	className?: string;
+	/** Total de items */
+	totalCount: number;
 }
 
 export function LoadMoreButton({

@@ -15,11 +15,20 @@ const uiLogger = clientLogger.withContext('QueueJobStore:UI');
  * Slice que contiene el estado y las acciones de la interfaz de usuario
  */
 export interface QueueJobUISlice {
+	clearSelection: () => void;
+	closeDetailsModal: () => void;
+
+	// Acciones para vista de detalles
+	openDetailsModal: (jobId: string) => void;
+
+	// Acciones para reseteo
+	resetUIState: () => void;
+	selectJobs: (jobIds: string[]) => void;
+
+	// Acciones para estado de cancelación
+	setIsCancelling: (isCancelling: boolean) => void;
 	// Acciones para estado de creación
 	setIsCreating: (isCreating: boolean) => void;
-
-	// Acciones para estado de actualización
-	setIsUpdating: (isUpdating: boolean) => void;
 
 	// Acciones para estado de eliminación
 	setIsDeleting: (isDeleting: boolean) => void;
@@ -27,23 +36,14 @@ export interface QueueJobUISlice {
 	// Acciones para estado de reintento
 	setIsRetrying: (isRetrying: boolean) => void;
 
-	// Acciones para estado de cancelación
-	setIsCancelling: (isCancelling: boolean) => void;
-
-	// Acciones para vista de detalles
-	openDetailsModal: (jobId: string) => void;
-	closeDetailsModal: () => void;
-
-	// Acciones para selección de trabajos
-	toggleSelected: (jobId: string) => void;
-	selectJobs: (jobIds: string[]) => void;
-	clearSelection: () => void;
+	// Acciones para estado de actualización
+	setIsUpdating: (isUpdating: boolean) => void;
 
 	// Acciones para vista
 	setViewMode: (mode: 'grid' | 'list' | 'table') => void;
 
-	// Acciones para reseteo
-	resetUIState: () => void;
+	// Acciones para selección de trabajos
+	toggleSelected: (jobId: string) => void;
 }
 
 /**

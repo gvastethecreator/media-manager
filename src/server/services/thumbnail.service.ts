@@ -23,12 +23,12 @@ const queue = new PQueue({ concurrency: thumbsConfig.concurrency });
 const inflight = new Map<string, Promise<LibThumbResult>>();
 
 export interface ThumbnailResponse {
+	error?: string;
+	height?: number;
+	mimeType?: string;
+	size?: number;
 	thumbnailUrl?: string;
 	width?: number;
-	height?: number;
-	size?: number;
-	mimeType?: string;
-	error?: string;
 }
 
 export async function getThumbnail(

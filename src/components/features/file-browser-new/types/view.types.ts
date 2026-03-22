@@ -17,21 +17,21 @@ export type RenderMode = 'canvas' | 'virtualized' | 'simple';
  * Configuración base de vista
  */
 export interface ViewConfigBase {
-	/** Modo de renderizado */
-	renderMode: RenderMode;
 	/** Gap entre items */
 	gap: number;
+	/** Modo de renderizado */
+	renderMode: RenderMode;
 }
 
 /**
  * Configuración para vistas tipo grid
  */
 export interface GridViewConfig extends ViewConfigBase {
-	kind: 'grid';
-	/** Tamaño de celda en píxeles */
-	itemSize: number;
 	/** Columnas fijas (0 = auto) */
 	columns: number;
+	/** Tamaño de celda en píxeles */
+	itemSize: number;
+	kind: 'grid';
 }
 
 /**
@@ -47,19 +47,19 @@ export interface ListViewConfig extends ViewConfigBase {
  * Configuración para vistas tipo masonry
  */
 export interface MasonryViewConfig extends ViewConfigBase {
-	kind: 'masonry';
 	/** Ancho mínimo de columna */
 	columnWidth: number;
+	kind: 'masonry';
 	/** Padding del contenedor */
 	padding?: number;
-	/** TCG: revelar info solo en hover */
-	tcgHoverReveal?: boolean;
 	/** TCG: efecto holográfico */
 	tcgHolo?: boolean;
-	/** TCG: sombras */
-	tcgShadows?: boolean;
+	/** TCG: revelar info solo en hover */
+	tcgHoverReveal?: boolean;
 	/** TCG: bordes redondeados */
 	tcgRounded?: boolean;
+	/** TCG: sombras */
+	tcgShadows?: boolean;
 	/** TCG: tilt 3D en hover */
 	tcgTilt?: boolean;
 }
@@ -79,9 +79,9 @@ export interface TableViewConfig extends ViewConfigBase {
  * Configuración para vistas tipo cards
  */
 export interface CardsViewConfig extends ViewConfigBase {
-	kind: 'cards';
 	/** Tamaño de card */
 	cardSize: number;
+	kind: 'cards';
 	/** Mostrar detalles */
 	showDetails: boolean;
 }
@@ -140,8 +140,8 @@ export const DEFAULT_VIEW_CONFIGS: Record<ViewMode, ViewConfig> = {
  * Opciones de ordenamiento
  */
 export interface SortOption {
-	field: string;
 	direction: 'asc' | 'desc';
+	field: string;
 }
 
 /**
@@ -149,27 +149,27 @@ export interface SortOption {
  */
 export interface FilterOption {
 	field: string;
-	value: unknown;
 	operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'startsWith' | 'endsWith';
+	value: unknown;
 }
 
 /**
  * Estado de paginación
  */
 export interface PaginationState {
+	hasMore: boolean;
 	page: number;
 	pageSize: number;
 	totalItems: number;
 	totalPages: number;
-	hasMore: boolean;
 }
 
 /**
  * Opciones de scroll infinito
  */
 export interface InfiniteScrollOptions {
-	enabled: boolean;
-	threshold: number;
 	autoLoad: boolean;
 	cooldownMs: number;
+	enabled: boolean;
+	threshold: number;
 }

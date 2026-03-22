@@ -7,11 +7,11 @@ const categoriesLogger = serverLogger.withContext('PromptCategories');
  * Interfaz para metadatos de categoría de prompt
  */
 export interface PromptCategoryMetadata {
-	id: PromptCategory;
-	name: string;
+	color: string;
 	description: string;
 	icon: string;
-	color: string;
+	id: PromptCategory;
+	name: string;
 	order: number;
 }
 

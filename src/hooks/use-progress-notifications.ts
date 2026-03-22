@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import type { ProgressNotification } from '@/types/file-browser/progress-tracking';
 
 export interface UseProgressNotificationsReturn {
-	notifications: ProgressNotification[];
-	unreadCount: number;
-	markAsRead: (id: string) => void;
-	removeNotification: (id: string) => void;
 	clearAll: () => void;
+	markAsRead: (id: string) => void;
+	notifications: ProgressNotification[];
+	removeNotification: (id: string) => void;
+	unreadCount: number;
 }
 
 export function useProgressNotifications(): UseProgressNotificationsReturn {

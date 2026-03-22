@@ -4,19 +4,23 @@ import {
 	computeRarityVisualConfig,
 	rarityAccessibilityLabel,
 } from '@/components/cards/shared/rarity-style';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 // Imágenes con thumbnails para el componente de galería
 export interface ThumbnailImage {
 	id: string;
-	thumbnailUrl: string;
-	name?: string;
-	url?: string;
 	isVideo?: boolean;
+	name?: string;
+	thumbnailUrl: string;
+	url?: string;
 }
 
 interface CharacterCardImagesProps {
+	/** Si está en modo compacto */
+	compact?: boolean;
+	/** Si está habilitado el efecto holográfico */
+	holographicEffect?: boolean;
 	/** Imágenes a mostrar (rutas) */
 	images?: string[];
 	/** URL de la imagen destacada */
@@ -25,12 +29,8 @@ interface CharacterCardImagesProps {
 	primaryColor?: string;
 	/** Nivel de rareza (1-10) para determinar efectos */
 	rarityLevel?: number;
-	/** Si está habilitado el efecto holográfico */
-	holographicEffect?: boolean;
 	/** Si está en modo tarjeta TCG */
 	tcgMode?: boolean;
-	/** Si está en modo compacto */
-	compact?: boolean;
 }
 
 // Eliminado getHolographicEffects: sustituido por buildHolographicStyle + config centralizada.
@@ -45,13 +45,13 @@ export function CharacterCardImages(props: CharacterCardImagesProps) {
 }
 
 interface CharacterCardImagesState extends CharacterCardImagesProps {
+	active: boolean;
+	ariaLabel: string;
 	displayImage: string | null;
 	hasImage: boolean;
-	viewAngle: { x: number; y: number };
-	setViewAngle: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
-	active: boolean;
 	holographicStyle: React.CSSProperties;
-	ariaLabel: string;
+	setViewAngle: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+	viewAngle: { x: number; y: number };
 }
 
 function useCharacterCardImagesState({

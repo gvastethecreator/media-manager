@@ -8,12 +8,12 @@ import { WorldItemViewMode } from '@/types/entities/world-item';
 import type { WorldItemActions, WorldItemState, WorldItemUIState } from '../types';
 
 export interface WorldItemUISlice {
-	ui: WorldItemUIState;
-	selectWorldItem: (id: string | null) => void;
-	startEditing: (id: string | null) => void;
-	highlightWorldItem: (id: string | null) => void;
-	setViewMode: (mode: WorldItemViewMode) => void;
 	clearSelection: () => void;
+	highlightWorldItem: (id: string | null) => void;
+	selectWorldItem: (id: string | null) => void;
+	setViewMode: (mode: WorldItemViewMode) => void;
+	startEditing: (id: string | null) => void;
+	ui: WorldItemUIState;
 }
 
 export const createWorldItemUISlice: StateCreator<WorldItemState & WorldItemActions, [], [], WorldItemUISlice> = (

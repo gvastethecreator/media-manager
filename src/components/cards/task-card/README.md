@@ -65,6 +65,7 @@ const task: TaskWithStats = {
 ```
 
 Activa:
+
 - Gradiente holográfico animado (125deg, 3s infinite)
 - Decoraciones de esquina (4 corners con borde redondeado)
 - Glow on hover (inset shadow 15px blur)
@@ -80,6 +81,7 @@ Activa:
 ```
 
 Dimensiones: **240x300px** (vs 300x420px normal)
+
 - Oculta notas
 - Muestra máximo 2 tags
 - Layout optimizado para grids densos
@@ -107,12 +109,14 @@ Dimensiones: **240x300px** (vs 300x420px normal)
 ## 🎨 Status & Priority Colors
 
 **Status Colors:**
+
 - `pending`: `#6b7280` (gray)
 - `in_progress`: `#3b82f6` (blue)
 - `completed`: `#10b981` (green)
 - `cancelled`: `#ef4444` (red)
 
 **Priority Colors:**
+
 - `low`: `#6b7280` (gray)
 - `medium`: `#eab308` (yellow)
 - `high`: `#f97316` (orange)
@@ -138,6 +142,7 @@ progress === 100 ? 'bg-green-500'
 ## 🏷️ Tags Parsing
 
 Maneja automáticamente:
+
 - Array directo: `['tag1', 'tag2']`
 - JSON string: `'["tag1","tag2"]'`
 - Fallback a array vacío si falla parsing
@@ -145,6 +150,7 @@ Maneja automáticamente:
 ## 🔗 Relaciones
 
 Contadores mostrados en footer:
+
 - **ListTree**: Subtasks
 - **Image**: Imágenes
 - **Video**: Videos
@@ -176,23 +182,26 @@ task-card/
 ## 🧩 Sub-componentes
 
 ### TaskCardHeader
+
 Props: `title`, `emoji`, `status`, `priority`, `isFavorite`, `isArchived`, callbacks
 
 ### TaskCardContent
+
 Props: `description`, `status`, `priority`, `progress`, `category`, `tags`, `dueDate`, `estimatedHours`, `actualHours`, `notes`, `isOverdue`, `daysUntilDue`, `colors`, `compact`
 
 ### TaskCardFooter
+
 Props: `createdAt`, `updatedAt`, `subtasksCount`, `imagesCount`, `videosCount`, `albumsCount`, `charactersCount`, `colors`
 
 ## 🎯 Dependencias
 
-- `framer-motion` (via `@/components/motion-shim`)
+- `motion-shim` con GSAP (via `@/components/ui/motion-shim`)
 - `lucide-react` (icons)
 - `@/lib/utils` (cn utility)
 - `@/components/cards/card-container`
 - `@/components/cards/card-header`
 
-## 🔄 Animaciones Framer Motion
+## 🔄 Animaciones declarativas
 
 ```typescript
 initial={{ opacity: 0, y: 20 }}

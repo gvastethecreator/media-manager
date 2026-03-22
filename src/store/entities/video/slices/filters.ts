@@ -9,19 +9,19 @@ import { VideoSortCriteria } from '@/types/entities/video/enums';
 import type { VideoStore } from '..';
 
 export interface VideoFiltersState {
-	sortBy: VideoSortCriteria;
-	searchQuery: string;
-	filterByFolderId: string | null;
-	filterFavorites: boolean;
-	filterByDuration: {
-		min: number | null;
-		max: number | null;
-	};
-	filterByResolution: string | null;
 	dateRange: {
 		from: Date | null;
 		to: Date | null;
 	};
+	filterByDuration: {
+		min: number | null;
+		max: number | null;
+	};
+	filterByFolderId: string | null;
+	filterByResolution: string | null;
+	filterFavorites: boolean;
+	searchQuery: string;
+	sortBy: VideoSortCriteria;
 }
 
 export const initialFiltersState: VideoFiltersState = {
@@ -42,20 +42,20 @@ export const initialFiltersState: VideoFiltersState = {
 
 // Slice para filtrado y ordenación
 export interface VideoFiltersSlice extends VideoFiltersState {
-	// Establecer filtros
-	setSortBy: (sortBy: VideoSortCriteria) => void;
-	setSearchQuery: (query: string) => void;
-	setFilterByFolder: (folderId: string | null) => void;
-	setFilterFavorites: (onlyFavorites: boolean) => void;
-	setFilterByDuration: (min: number | null, max: number | null) => void;
-	setFilterByResolution: (resolution: string | null) => void;
-	setDateRange: (from: Date | null, to: Date | null) => void;
-	resetFilters: () => void;
+	applyFilters: (videos: VideoWithStats[]) => VideoWithStats[];
+	applySort: (videos: VideoWithStats[]) => VideoWithStats[];
 
 	// Obtener videos filtrados
 	getFilteredVideos: () => VideoWithStats[];
-	applySort: (videos: VideoWithStats[]) => VideoWithStats[];
-	applyFilters: (videos: VideoWithStats[]) => VideoWithStats[];
+	resetFilters: () => void;
+	setDateRange: (from: Date | null, to: Date | null) => void;
+	setFilterByDuration: (min: number | null, max: number | null) => void;
+	setFilterByFolder: (folderId: string | null) => void;
+	setFilterByResolution: (resolution: string | null) => void;
+	setFilterFavorites: (onlyFavorites: boolean) => void;
+	setSearchQuery: (query: string) => void;
+	// Establecer filtros
+	setSortBy: (sortBy: VideoSortCriteria) => void;
 }
 
 // Creador del slice

@@ -2,11 +2,11 @@ import React, { memo, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface VideoCardProps extends React.HTMLAttributes<HTMLDivElement> {
-	video: any;
-	compact?: boolean;
-	tcgMode?: boolean;
 	className?: string;
+	compact?: boolean;
 	isSelected?: boolean;
+	tcgMode?: boolean;
+	video: any;
 }
 
 export const VideoCard = memo(function VideoCard({ video, className, onClick, compact, ...rest }: VideoCardProps) {

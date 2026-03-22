@@ -11,29 +11,29 @@ export type { GroupBase, GroupStatistics, GroupWithStats } from './base';
 
 // Nombre canónico con prefijo Group para evitar ambigüedades en re-exportaciones
 export interface GroupCreateInput {
-	name: string;
+	category?: string;
+	color?: string;
 	description?: string;
 	emoji?: string;
-	color?: string;
-	category?: string;
-	isFavorite?: boolean;
-	shortcut?: string;
-	sortBy?: string;
 	featuredImage?: string;
 	filters?: any;
+	isFavorite?: boolean;
+	name: string;
+	shortcut?: string;
+	sortBy?: string;
 }
 
 export interface GroupUpdateInput {
-	name?: string;
+	category?: string;
+	color?: string;
 	description?: string;
 	emoji?: string;
-	color?: string;
-	category?: string;
-	isFavorite?: boolean;
-	shortcut?: string;
-	sortBy?: string;
 	featuredImage?: string;
 	filters?: any;
+	isFavorite?: boolean;
+	name?: string;
+	shortcut?: string;
+	sortBy?: string;
 }
 
 // Alias retro‑compatibles (si algún código antiguo usa los nombres sin prefijo)
@@ -43,8 +43,8 @@ export type UpdateGroupInput = GroupUpdateInput; // TODO: eliminar tras migraci�
 export type GroupSortKey = 'name' | 'category' | 'createdAt';
 
 export interface GroupFilters {
-	search?: string;
 	hasImages?: boolean;
+	search?: string;
 	sortBy?:
 		| 'name'
 		| 'createdAt'
@@ -61,54 +61,54 @@ export interface GroupFilters {
 }
 
 export interface GroupRelations {
-	images?: ImageBase[];
 	albums?: any[];
-	collections?: any[];
-	tags?: any[];
 	characters?: any[];
-	places?: any[];
-	worldItems?: any[];
+	collections?: any[];
 	concepts?: any[];
-	prompts?: any[];
+	images?: ImageBase[];
 	notes?: any[];
-	wildcards?: any[];
+	places?: any[];
+	prompts?: any[];
 	properties?: any[];
+	tags?: any[];
+	wildcards?: any[];
+	worldItems?: any[];
 }
 
 export interface GroupSearchResult {
 	groups: GroupBase[];
-	total: number;
-	page: number;
-	limit: number;
 	hasMore: boolean;
+	limit: number;
+	page: number;
+	total: number;
 }
 
 export interface GroupCoreSlice {
-	groups: GroupBase[];
-	selectedGroupId: string | null;
-	loading: boolean;
 	error: string | null;
+	groups: GroupBase[];
+	loading: boolean;
+	selectedGroupId: string | null;
 }
 
 export interface GroupDisplayState {
-	viewMode: 'grid' | 'list' | 'detail';
-	sortBy: string;
-	sortOrder: 'asc' | 'desc';
 	filters: GroupFilters;
 	selectedItems: string[];
 	showFavorites: boolean;
+	sortBy: string;
+	sortOrder: 'asc' | 'desc';
+	viewMode: 'grid' | 'list' | 'detail';
 }
 
 export interface GroupViewConfig {
-	viewType: 'grid' | 'list' | 'table';
-	gridColumns: number;
 	cardSize: 'small' | 'medium' | 'large';
+	compactView: boolean;
+	enableAnimations: boolean;
+	gridColumns: number;
+	groupBy: string | null;
+	imageCount: number;
+	showImages: boolean;
+	showStats: boolean;
 	sortBy: string;
 	sortDirection: 'asc' | 'desc';
-	showImages: boolean;
-	imageCount: number;
-	enableAnimations: boolean;
-	groupBy: string | null;
-	showStats: boolean;
-	compactView: boolean;
+	viewType: 'grid' | 'list' | 'table';
 }

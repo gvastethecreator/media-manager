@@ -7,19 +7,19 @@
 import type { ProcessStatus } from '@/types/folders';
 
 export interface SimpleStats {
-	totalFiles: number;
+	errors: Array<{ file: string; error: string }>;
+	failed: number;
 	processed: number;
 	successful: number;
-	failed: number;
-	errors: Array<{ file: string; error: string }>;
+	totalFiles: number;
 }
 
 export type ProgressEmitter = (status: ProcessStatus) => void;
 
 export interface ProcessOptions {
 	concurrency?: number;
-	progressEmitter?: ProgressEmitter;
 	microPauseMs?: number;
+	progressEmitter?: ProgressEmitter;
 }
 
 export interface FileEntityMapper {
@@ -32,8 +32,8 @@ export interface FileEntityMapper {
 }
 
 export interface AggregateResult {
+	imageCount?: number;
+	lastIndexed?: Date;
 	totalFiles: number;
 	totalSize: number;
-	lastIndexed?: Date;
-	imageCount?: number;
 }

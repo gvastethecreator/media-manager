@@ -7,47 +7,47 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { InfiniteScrollOptions, PaginationState } from '../types/view.types';
 
 export interface UsePaginationOptions {
-	/** Total de items */
-	totalItems: number;
-	/** Tamaño de página */
-	pageSize: number;
-	/** Página inicial */
-	initialPage?: number;
-	/** Callback cuando cambia la página */
-	onPageChange?: (page: number) => void;
-	/** Opciones de scroll infinito */
-	infiniteScroll?: InfiniteScrollOptions;
 	/** Si hay más items disponibles */
 	hasMoreItems?: boolean;
-	/** Callback para cargar más */
-	onLoadMore?: () => void;
+	/** Opciones de scroll infinito */
+	infiniteScroll?: InfiniteScrollOptions;
+	/** Página inicial */
+	initialPage?: number;
 	/** Si está cargando más */
 	isLoadingMore?: boolean;
+	/** Callback para cargar más */
+	onLoadMore?: () => void;
+	/** Callback cuando cambia la página */
+	onPageChange?: (page: number) => void;
+	/** Tamaño de página */
+	pageSize: number;
+	/** Total de items */
+	totalItems: number;
 }
 
 export interface UsePaginationResult {
-	/** Estado de paginación */
-	state: PaginationState;
-	/** Ir a página específica */
-	goToPage: (page: number) => void;
-	/** Ir a página anterior */
-	prevPage: () => void;
-	/** Ir a página siguiente */
-	nextPage: () => void;
-	/** Ir a primera página */
-	firstPage: () => void;
-	/** Ir a última página */
-	lastPage: () => void;
-	/** Items de la página actual (para slicing) */
-	pageRange: { start: number; end: number };
-	/** Handler de scroll para infinite scroll */
-	scrollHandler: (container: HTMLElement) => void;
-	/** Si puede ir a página anterior */
-	canPrev: boolean;
 	/** Si puede ir a página siguiente */
 	canNext: boolean;
+	/** Si puede ir a página anterior */
+	canPrev: boolean;
+	/** Ir a primera página */
+	firstPage: () => void;
+	/** Ir a página específica */
+	goToPage: (page: number) => void;
+	/** Ir a última página */
+	lastPage: () => void;
+	/** Ir a página siguiente */
+	nextPage: () => void;
+	/** Items de la página actual (para slicing) */
+	pageRange: { start: number; end: number };
+	/** Ir a página anterior */
+	prevPage: () => void;
+	/** Handler de scroll para infinite scroll */
+	scrollHandler: (container: HTMLElement) => void;
 	/** Items mostrados actualmente */
 	shownCount: number;
+	/** Estado de paginación */
+	state: PaginationState;
 }
 
 /**

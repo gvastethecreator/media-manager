@@ -17,10 +17,10 @@ import {
 import { ScannedImagesSettings } from '@/components/settings/media/scanned-images-settings';
 import { FilesSettingsModern } from '@/components/settings/modern/files-settings-modern';
 import { TaxonomySettingsModern } from '@/components/settings/modern/taxonomy-settings-modern';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { ViewProps } from '../types';

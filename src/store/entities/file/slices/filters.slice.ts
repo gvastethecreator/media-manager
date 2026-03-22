@@ -17,32 +17,32 @@ export interface FiltersState {
 	// Opciones de filtro
 	filterOptions: FileFilterOptions;
 
+	// Búsqueda
+	searchTerm: string;
+
 	// Ordenación
 	sortBy: SortField;
 	sortDirection: SortDirection;
-
-	// Búsqueda
-	searchTerm: string;
 }
 
 // Acciones
 export interface FiltersActions {
+	getFilteredAndSortedFiles: () => FileWithStats[];
+
+	// Selectores
+	getFilteredFiles: () => FileWithStats[];
+	resetFilters: () => void;
+
+	// Filtros
+	setFilterOptions: (options: FileFilterOptions) => void;
+
+	// Búsqueda
+	setSearchTerm: (term: string) => void;
 	// Setters
 	setSortBy: (field: SortField) => void;
 	setSortDirection: (direction: SortDirection) => void;
 	toggleSortDirection: () => void;
-
-	// Filtros
-	setFilterOptions: (options: FileFilterOptions) => void;
 	updateFilterOption: <K extends keyof FileFilterOptions>(key: K, value: FileFilterOptions[K]) => void;
-	resetFilters: () => void;
-
-	// Búsqueda
-	setSearchTerm: (term: string) => void;
-
-	// Selectores
-	getFilteredFiles: () => FileWithStats[];
-	getFilteredAndSortedFiles: () => FileWithStats[];
 }
 
 // Estado inicial

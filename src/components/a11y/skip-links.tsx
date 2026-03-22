@@ -7,17 +7,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SkipLink {
-	/** ID del elemento destino */
-	to: string;
 	/** Texto del enlace */
 	label: string;
+	/** ID del elemento destino */
+	to: string;
 }
 
 interface SkipLinksProps {
-	/** Links configurables */
-	links?: SkipLink[];
 	/** Clases adicionales */
 	className?: string;
+	/** Links configurables */
+	links?: SkipLink[];
 }
 
 /**

@@ -10,19 +10,19 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 type Theme = 'dark' | 'light' | 'system';
 
 interface ThemeContextType {
-	theme: Theme;
-	setTheme: (theme: Theme) => void;
 	resolvedTheme: 'dark' | 'light';
+	setTheme: (theme: Theme) => void;
+	theme: Theme;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 interface ThemeProviderProps {
+	attribute?: string;
 	children: React.ReactNode;
 	defaultTheme?: Theme;
-	storageKey?: string;
-	attribute?: string;
 	enableSystem?: boolean;
+	storageKey?: string;
 }
 
 export function ThemeProvider({

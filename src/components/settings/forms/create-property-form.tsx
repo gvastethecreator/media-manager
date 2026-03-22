@@ -16,12 +16,12 @@ import { DynamicCreateForm } from '../common/dynamic-create-form';
 type FormData = z.infer<typeof CreatePropertySchema>;
 
 interface CreatePropertyFormProps {
-	property?: Property;
 	isEditing?: boolean;
-	onCreated: (data: Property) => void;
-	onUpdated: (data: Property) => void;
 	onCancel: () => void;
+	onCreated: (data: Property) => void;
 	onPreview?: () => void;
+	onUpdated: (data: Property) => void;
+	property?: Property;
 }
 
 export function CreatePropertyForm({

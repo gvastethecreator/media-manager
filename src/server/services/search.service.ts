@@ -27,9 +27,9 @@ export async function searchImages(query: string, limit = 100): Promise<FileItem
 export type SearchEngine = 'fts5' | 'like';
 
 export interface SearchFilesResult {
+	engine: SearchEngine;
 	items: Array<{ id: string; name: string; path: string; tags: string; score?: number }>;
 	total: number;
-	engine: SearchEngine;
 }
 
 export async function searchFilesFts(query: string, limit = 50, offset = 0): Promise<SearchFilesResult> {
@@ -89,12 +89,12 @@ export type SearchResultType = 'image' | 'video' | 'audio' | 'document';
 
 export interface SearchResponse {
 	query: string;
-	type: SearchResultType | 'all';
-	total: number;
 	results: Array<{
 		type: SearchResultType;
 		data: any;
 	}>;
+	total: number;
+	type: SearchResultType | 'all';
 }
 
 async function searchImagesUnified(query: string, limit: number, offset: number) {

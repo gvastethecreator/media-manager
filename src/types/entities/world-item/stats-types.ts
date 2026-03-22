@@ -7,12 +7,12 @@
  * Estadísticas de un objeto del mundo
  */
 export interface WorldItemStats {
-	power?: number;
 	defense?: number;
 	durability?: number;
-	weight?: number;
-	value?: number;
 	level?: number;
+	power?: number;
+	value?: number;
+	weight?: number;
 	// Estadísticas adicionales como clave-valor
 	[key: string]: number | undefined;
 }
@@ -21,31 +21,31 @@ export interface WorldItemStats {
  * Efecto que puede producir un objeto del mundo
  */
 export interface WorldItemEffect {
-	name: string;
+	chance?: number;
 	description?: string;
+	duration?: number;
+	name: string;
 	type: string;
 	value: number;
-	duration?: number;
-	chance?: number;
 }
 
 /**
  * Requisito para usar un objeto del mundo
  */
 export interface WorldItemRequirement {
+	description?: string;
 	type: string;
 	value: number;
-	description?: string;
 }
 
 /**
  * Propiedad de un objeto del mundo
  */
 export interface WorldItemProperty {
-	name: string;
-	value: string | number;
 	description?: string;
 	icon?: string;
+	name: string;
+	value: string | number;
 }
 
 /**
@@ -59,11 +59,11 @@ export interface WorldItemAttributes {
  * Vista general de estadísticas para objetos del mundo
  */
 export interface WorldItemStatsOverview {
-	totalItems: number;
+	averageLevel: number;
 	byRarity: Record<string, number>;
 	byType: Record<string, number>;
-	averageLevel: number;
 	highestValue: number;
+	totalItems: number;
 	totalValue: number;
 }
 

@@ -13,11 +13,11 @@ const SDMATRIX_REGEX = /s+dmatrix/gi; // Variaciones de 'sdmatrix'
 const OUTPUTS_PATH_REGEX = /(.*)\/?#outputs\/?(.*)/; // Normalizar segmento #outputs
 
 interface CacheOptions {
-	ttl?: number; // Time to live in milliseconds
+	allowStale?: boolean; // Allow returning stale items
 	maxSize?: number; // Maximum number of items in cache
 	name?: string; // Cache name for logging
+	ttl?: number; // Time to live in milliseconds
 	updateAgeOnGet?: boolean; // Update item age on get
-	allowStale?: boolean; // Allow returning stale items
 }
 
 export class CacheManager<T> {
@@ -175,10 +175,10 @@ export const metadataCache = new CacheManager<FileMetadata>({
 
 interface SearchResult {
 	items: unknown[];
-	total: number;
 	page: number;
 	perPage: number;
 	query?: string;
+	total: number;
 }
 
 export const searchCache = new CacheManager<SearchResult>({
@@ -190,9 +190,9 @@ export const searchCache = new CacheManager<SearchResult>({
 });
 
 interface StatsData {
+	averageSize: number;
 	totalFiles: number;
 	totalSize: number;
-	averageSize: number;
 	[key: string]: number | string | Record<string, number | string>;
 }
 

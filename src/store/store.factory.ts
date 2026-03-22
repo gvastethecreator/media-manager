@@ -4,11 +4,6 @@ import { clientLogger } from '../lib/logger/client-logger';
 import type { BaseEntity, BaseStore, ExtendedStore, StoreHook } from './types';
 
 export interface StoreOptions<T> {
-	name: string;
-	logger?: typeof clientLogger;
-	persistOptions?: PersistOptions<T, Partial<T>>;
-	devtoolOptions?: DevtoolsOptions;
-	initialState?: Partial<T>;
 	actions?: {
 		beforeCreate?: (data: any) => Promise<any> | any;
 		afterCreate?: (item: any) => Promise<void> | void;
@@ -17,6 +12,11 @@ export interface StoreOptions<T> {
 		beforeDelete?: (id: string) => Promise<void> | void;
 		afterDelete?: (id: string) => Promise<void> | void;
 	};
+	devtoolOptions?: DevtoolsOptions;
+	initialState?: Partial<T>;
+	logger?: typeof clientLogger;
+	name: string;
+	persistOptions?: PersistOptions<T, Partial<T>>;
 }
 
 /**

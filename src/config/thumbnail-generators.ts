@@ -14,10 +14,10 @@ import type { DisplayableEntity } from '@/types/entities';
 export interface ThumbnailConfig {
 	/** Calidad por defecto */
 	defaultQuality: ThumbnailQuality;
-	/** Dimensiones preferidas */
-	preferredSize: { width: number; height: number };
 	/** Formato de salida */
 	outputFormat: 'webp' | 'jpeg' | 'png';
+	/** Dimensiones preferidas */
+	preferredSize: { width: number; height: number };
 	/** Si soporta animación */
 	supportsAnimation: boolean;
 }

@@ -15,9 +15,9 @@ const TAURI_COMMANDS = {
 } as const;
 
 interface BackendStatus {
-	isRunning: boolean;
-	isChecking: boolean;
 	error: string | null;
+	isChecking: boolean;
+	isRunning: boolean;
 }
 
 export function useTauriBackend() {

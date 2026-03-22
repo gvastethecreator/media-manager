@@ -12,78 +12,78 @@ import type { PaginationState, SortOption, ViewConfig, ViewMode } from '../types
  * Estado del File Browser
  */
 export interface FileBrowserState {
-	// Datos
-	items: BrowserItem[];
-	groups: BrowserItemGroup[] | null;
-	linearItems: BrowserItem[];
-	realItemCount: number;
+	activeId: string | null;
+	error: string | null;
 
-	// Vista
-	viewMode: ViewMode;
-	viewConfig: ViewConfig;
-	itemSize: number;
-
-	// Búsqueda y filtros
-	searchQuery: string;
-	sortOptions: SortOption[];
+	// Carpeta actual
+	folderId: string | null;
 	groupByType: boolean;
+	groups: BrowserItemGroup[] | null;
+	hasMore: boolean;
 
 	// Estado de carga
 	isLoading: boolean;
 	isLoadingMore: boolean;
-	error: string | null;
+	itemSize: number;
+	// Datos
+	items: BrowserItem[];
+	linearItems: BrowserItem[];
 
 	// Paginación
 	pagination: PaginationState;
-	hasMore: boolean;
-
-	// Selección
-	selectedIds: Set<string>;
-	activeId: string | null;
+	parentFolderId: string | null;
+	realItemCount: number;
 
 	// Scroll
 	scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 
-	// Carpeta actual
-	folderId: string | null;
-	parentFolderId: string | null;
+	// Búsqueda y filtros
+	searchQuery: string;
+
+	// Selección
+	selectedIds: Set<string>;
+	sortOptions: SortOption[];
+	viewConfig: ViewConfig;
+
+	// Vista
+	viewMode: ViewMode;
 }
 
 /**
  * Acciones del File Browser
  */
 export interface FileBrowserActions {
+	clearSelection: () => void;
+
+	// Handlers
+	handleItemClick: ItemClickHandler;
+	handleItemDoubleClick: ItemDoubleClickHandler;
+	loadMore: () => void;
 	// Navegación
 	navigateToFolder: (folderId: string) => void;
 	navigateToParent: () => void;
 
+	// Datos
+	refresh: () => Promise<void>;
+	selectAll: () => void;
+
 	// Selección
 	selectItem: (id: string) => void;
-	toggleSelection: (id: string) => void;
 	selectRange: (fromId: string, toId: string) => void;
-	selectAll: () => void;
-	clearSelection: () => void;
 	setActiveItem: (id: string | null) => void;
-
-	// Vista
-	setViewMode: (mode: ViewMode) => void;
-	setItemSize: (size: number) => void;
 	setGroupByType: (enabled: boolean) => void;
+	setItemSize: (size: number) => void;
+
+	// Scroll
+	setScrollContainer: (el: HTMLDivElement | null) => void;
 
 	// Búsqueda y filtros
 	setSearchQuery: (query: string) => void;
 	setSortOptions: (options: SortOption[]) => void;
 
-	// Datos
-	refresh: () => Promise<void>;
-	loadMore: () => void;
-
-	// Handlers
-	handleItemClick: ItemClickHandler;
-	handleItemDoubleClick: ItemDoubleClickHandler;
-
-	// Scroll
-	setScrollContainer: (el: HTMLDivElement | null) => void;
+	// Vista
+	setViewMode: (mode: ViewMode) => void;
+	toggleSelection: (id: string) => void;
 }
 
 /**

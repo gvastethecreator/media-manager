@@ -1,11 +1,11 @@
 import { CalendarIcon, Filter, RotateCcw, Save, SearchIcon, SlidersHorizontal, Trash } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox-v3';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-v3';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
@@ -27,6 +27,20 @@ export type FilterType =
 // Definición de un filtro
 export interface EntityFilterDefinition {
 	/**
+	 * Si el filtro está desplegado por defecto
+	 */
+	defaultExpanded?: boolean;
+
+	/**
+	 * Valor por defecto
+	 */
+	defaultValue?: any;
+
+	/**
+	 * Icono para el filtro
+	 */
+	icon?: React.ReactNode;
+	/**
 	 * ID único del filtro
 	 */
 	id: string;
@@ -35,11 +49,12 @@ export interface EntityFilterDefinition {
 	 * Etiqueta para mostrar
 	 */
 	label: string;
+	max?: number;
 
 	/**
-	 * Tipo de filtro
+	 * Valores mínimo y máximo para filtros numéricos
 	 */
-	type: FilterType;
+	min?: number;
 
 	/**
 	 * Opciones para select, multiselect, radio, checkbox
@@ -55,30 +70,14 @@ export interface EntityFilterDefinition {
 	placeholder?: string;
 
 	/**
-	 * Si el filtro está desplegado por defecto
+	 * Tipo de filtro
 	 */
-	defaultExpanded?: boolean;
-
-	/**
-	 * Valor por defecto
-	 */
-	defaultValue?: any;
-
-	/**
-	 * Valores mínimo y máximo para filtros numéricos
-	 */
-	min?: number;
-	max?: number;
+	type: FilterType;
 
 	/**
 	 * Función para validar el valor
 	 */
 	validate?: (value: any) => boolean;
-
-	/**
-	 * Icono para el filtro
-	 */
-	icon?: React.ReactNode;
 }
 
 // Filtro guardado
@@ -97,54 +96,9 @@ export interface SavedFilter {
 // Props del componente EntityFilter
 export interface EntityFilterProps {
 	/**
-	 * Definiciones de filtros disponibles
-	 */
-	filters: EntityFilterDefinition[];
-
-	/**
-	 * Valores iniciales de los filtros
-	 */
-	initialValues?: Record<string, any>;
-
-	/**
-	 * Función llamada cuando cambian los filtros
-	 */
-	onChange: (values: Record<string, any>) => void;
-
-	/**
-	 * Si mostrar barra de búsqueda rápida
-	 */
-	showQuickSearch?: boolean;
-
-	/**
-	 * Placeholder para búsqueda rápida
-	 */
-	searchPlaceholder?: string;
-
-	/**
 	 * Si permite guardar filtros favoritos
 	 */
 	allowSavedFilters?: boolean;
-
-	/**
-	 * Filtros guardados iniciales
-	 */
-	savedFilters?: SavedFilter[];
-
-	/**
-	 * Función llamada cuando se guarda un filtro
-	 */
-	onSaveFilter?: (filter: SavedFilter) => void;
-
-	/**
-	 * Función llamada cuando se elimina un filtro
-	 */
-	onDeleteSavedFilter?: (name: string) => void;
-
-	/**
-	 * Si mostrar contador de filtros activos
-	 */
-	showActiveCount?: boolean;
 
 	/**
 	 * Clases adicionales
@@ -160,6 +114,50 @@ export interface EntityFilterProps {
 	 * Si debe ser compacto (menos espaciado)
 	 */
 	compact?: boolean;
+	/**
+	 * Definiciones de filtros disponibles
+	 */
+	filters: EntityFilterDefinition[];
+
+	/**
+	 * Valores iniciales de los filtros
+	 */
+	initialValues?: Record<string, any>;
+
+	/**
+	 * Función llamada cuando cambian los filtros
+	 */
+	onChange: (values: Record<string, any>) => void;
+
+	/**
+	 * Función llamada cuando se elimina un filtro
+	 */
+	onDeleteSavedFilter?: (name: string) => void;
+
+	/**
+	 * Función llamada cuando se guarda un filtro
+	 */
+	onSaveFilter?: (filter: SavedFilter) => void;
+
+	/**
+	 * Filtros guardados iniciales
+	 */
+	savedFilters?: SavedFilter[];
+
+	/**
+	 * Placeholder para búsqueda rápida
+	 */
+	searchPlaceholder?: string;
+
+	/**
+	 * Si mostrar contador de filtros activos
+	 */
+	showActiveCount?: boolean;
+
+	/**
+	 * Si mostrar barra de búsqueda rápida
+	 */
+	showQuickSearch?: boolean;
 }
 
 /**

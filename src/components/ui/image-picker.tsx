@@ -5,12 +5,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { cn } from '@/lib/utils';
 
 export interface ImagePickerProps {
-	value?: string | null;
-	defaultValue?: string | null;
-	onChange?: (value: string | null) => void;
 	className?: string;
+	defaultValue?: string | null;
 	disabled?: boolean;
+	onChange?: (value: string | null) => void;
 	placeholder?: string;
+	value?: string | null;
 }
 
 export function ImagePicker({

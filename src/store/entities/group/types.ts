@@ -18,12 +18,12 @@ import { GroupSortCriteria, GroupType } from '@/types/entities/group/enums';
  * Estado del core para el store de grupos
  */
 export interface GroupCoreState {
+	/** Error si existe */
+	error: string | null;
 	/** Array de grupos */
 	groups: GroupWithStats[];
 	/** Estado de carga */
 	isLoading: boolean;
-	/** Error si existe */
-	error: string | null;
 	/** Fecha de última actualización */
 	lastUpdated: number | null;
 }
@@ -38,12 +38,6 @@ export interface GroupDisplayState {
 }
 
 export interface GroupUIState {
-	/** IDs de grupos seleccionados */
-	selectedIds: string[];
-	/** Modo de visualización actual */
-	viewMode: GroupViewMode;
-	/** Si el visor está abierto */
-	isViewerOpen: boolean;
 	/** ID del grupo actual en el visor */
 	currentGroupId: string | null;
 	/** Estado de visualización por ID de grupo */
@@ -52,99 +46,105 @@ export interface GroupUIState {
 	draggedGroupId: string | null;
 	/** ID del grupo objetivo de soltar */
 	dropTargetGroupId: string | null;
-	/** ID del grupo resaltado */
-	highlightedId: string | null;
 	/** IDs de grupos expandidos */
 	expandedIds: string[];
+	/** ID del grupo resaltado */
+	highlightedId: string | null;
+	/** Si el visor está abierto */
+	isViewerOpen: boolean;
+	/** IDs de grupos seleccionados */
+	selectedIds: string[];
 	/** Configuración de vista */
 	viewConfig: GroupViewConfig;
+	/** Modo de visualización actual */
+	viewMode: GroupViewMode;
 }
 
 /**
  * Estado de filtros para el store de grupos
  */
 export interface GroupFilterState {
-	/** Criterio de ordenación */
-	sortBy: GroupSortCriteria;
-	/** Término de búsqueda */
-	searchQuery: string;
-	/** Filtro por tipo */
-	filterByType: GroupType | null;
-	/** Filtro por categoría */
-	filterByCategory: string | null;
-	/** Filtro de favoritos */
-	filterFavorites: boolean;
 	/** Rango de fechas */
 	dateRange: {
 		from: Date | null;
 		to: Date | null;
 	};
+	/** Filtro por categoría */
+	filterByCategory: string | null;
+	/** Filtro por tipo */
+	filterByType: GroupType | null;
+	/** Filtro de favoritos */
+	filterFavorites: boolean;
+	/** Término de búsqueda */
+	searchQuery: string;
+	/** Criterio de ordenación */
+	sortBy: GroupSortCriteria;
 }
 
 /**
  * Acciones del core para el store de grupos
  */
 export interface GroupCoreActions {
-	loadGroups: () => Promise<void>;
 	createGroup: (data: GroupCreateInput) => Promise<void>;
-	updateGroup: (id: string, data: GroupUpdateInput) => Promise<void>;
 	deleteGroup: (id: string) => Promise<void>;
+	loadGroups: () => Promise<void>;
+	updateGroup: (id: string, data: GroupUpdateInput) => Promise<void>;
 }
 
 /**
  * Acciones de UI para el store de grupos
  */
 export interface GroupUIActions {
-	setSelectedIds: (ids: string[]) => void;
-	// Selección de grupos
-	selectGroup: (id: string | null) => void;
-	deselectGroup: (id: string) => void;
-	toggleGroupSelection: (id: string) => void;
-	selectMultipleGroups: (ids: string[]) => void;
 	clearSelection: () => void;
+	closeViewer: () => void;
+	collapseAllGroups: () => void;
+	collapseGroup: (id: string) => void;
+	deselectGroup: (id: string) => void;
+	expandAllGroups: () => void;
+	// Expansión de grupos
+	expandGroup: (id: string) => void;
+	getCurrentGroup: () => GroupWithStats | null;
+	getDraggedGroup: () => string | null;
+	getDropTargetGroup: () => string | null;
+	getGroupDisplayState: (id: string) => GroupDisplayState;
+	getHighlightedGroup: () => string | null;
 	getSelectedGroups: () => string[];
+	getViewMode: () => GroupViewMode;
+	// Resaltado
+	highlightGroup: (id: string | null) => void;
+	isGroupExpanded: (id: string) => boolean;
 	isGroupSelected: (id: string) => boolean;
 	// Visor de grupos
 	openViewer: (groupId: string) => void;
-	closeViewer: () => void;
-	getCurrentGroup: () => GroupWithStats | null;
-	// Modo de visualización
-	setViewMode: (viewMode: GroupViewMode) => void;
-	getViewMode: () => GroupViewMode;
-	// Estado de visualización
-	setGroupDisplayState: (id: string, state: GroupDisplayState) => void;
-	getGroupDisplayState: (id: string) => GroupDisplayState;
-	// Expansión de grupos
-	expandGroup: (id: string) => void;
-	collapseGroup: (id: string) => void;
-	toggleGroupExpansion: (id: string) => void;
-	isGroupExpanded: (id: string) => boolean;
-	expandAllGroups: () => void;
-	collapseAllGroups: () => void;
+	// Selección de grupos
+	selectGroup: (id: string | null) => void;
+	selectMultipleGroups: (ids: string[]) => void;
 	// Drag & Drop
 	setDraggedGroup: (id: string | null) => void;
 	setDropTargetGroup: (id: string | null) => void;
-	getDraggedGroup: () => string | null;
-	getDropTargetGroup: () => string | null;
-	// Resaltado
-	highlightGroup: (id: string | null) => void;
-	getHighlightedGroup: () => string | null;
+	// Estado de visualización
+	setGroupDisplayState: (id: string, state: GroupDisplayState) => void;
+	setSelectedIds: (ids: string[]) => void;
+	// Modo de visualización
+	setViewMode: (viewMode: GroupViewMode) => void;
+	toggleGroupExpansion: (id: string) => void;
+	toggleGroupSelection: (id: string) => void;
 }
 
 /**
  * Acciones de filtros para el store de grupos
  */
 export interface GroupFilterActions {
+	applyFilters: (groups: GroupWithStats[]) => GroupWithStats[];
+	applySort: (groups: GroupWithStats[]) => GroupWithStats[];
+	getFilteredGroups: () => GroupWithStats[];
+	resetFilters: () => void;
+	setDateRange: (from: Date | null, to: Date | null) => void;
+	setFilterByCategory: (category: string | null) => void;
+	setFilterByType: (type: GroupType | null) => void;
+	setFilterFavorites: (onlyFavorites: boolean) => void;
 	setSearchQuery: (query: string) => void;
 	setSortBy: (sortBy: GroupSortCriteria) => void;
-	setFilterByType: (type: GroupType | null) => void;
-	setFilterByCategory: (category: string | null) => void;
-	setFilterFavorites: (onlyFavorites: boolean) => void;
-	setDateRange: (from: Date | null, to: Date | null) => void;
-	resetFilters: () => void;
-	getFilteredGroups: () => GroupWithStats[];
-	applySort: (groups: GroupWithStats[]) => GroupWithStats[];
-	applyFilters: (groups: GroupWithStats[]) => GroupWithStats[];
 }
 
 /**
@@ -152,8 +152,8 @@ export interface GroupFilterActions {
  */
 export interface GroupState {
 	core: GroupCoreState;
-	ui: GroupUIState;
 	filters: GroupFilterState;
+	ui: GroupUIState;
 }
 
 /**

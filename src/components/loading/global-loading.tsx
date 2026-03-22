@@ -8,18 +8,18 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface GlobalLoadingProps {
+	/** Clases adicionales */
+	className?: string;
 	/** Mensaje de carga */
 	message?: string;
-	/** Submensaje opcional */
-	subMessage?: string;
+	/** Mostrar overlay completo */
+	overlay?: boolean;
 	/** Progreso (0-100) */
 	progress?: number;
 	/** Tamaño del spinner */
 	size?: 'sm' | 'md' | 'lg';
-	/** Mostrar overlay completo */
-	overlay?: boolean;
-	/** Clases adicionales */
-	className?: string;
+	/** Submensaje opcional */
+	subMessage?: string;
 }
 
 const sizeClasses = {

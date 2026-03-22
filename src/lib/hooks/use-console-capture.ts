@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
 interface ConsoleMessage {
-	type: 'log' | 'warn' | 'error' | 'info';
+	args: any[];
 	message: string;
 	timestamp: number;
-	args: any[];
+	type: 'log' | 'warn' | 'error' | 'info';
 }
 
 export function useConsoleCapture() {

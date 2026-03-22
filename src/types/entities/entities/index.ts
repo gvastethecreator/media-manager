@@ -27,9 +27,9 @@ export enum EntityType {
  * Interface genérica para cualquier entidad base en el sistema
  */
 export interface EntityBase {
+	createdAt: Date;
 	id: string;
 	name: string;
-	createdAt: Date;
 	updatedAt: Date;
 }
 
@@ -37,12 +37,12 @@ export interface EntityBase {
  * Interface para una relación entre entidades
  */
 export interface EntityRelation {
+	createdAt: Date;
 	id: string;
 	sourceId: string;
 	sourceType: EntityType;
 	targetId: string;
 	targetType: EntityType;
-	createdAt: Date;
 }
 
 // Re-export for backwards compatibility

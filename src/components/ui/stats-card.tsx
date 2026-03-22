@@ -9,7 +9,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 
 export interface StatsCardProps {
-	title: string;
 	icon: React.ReactNode;
 	isLoading?: boolean;
 	stats: {
@@ -35,6 +34,7 @@ export interface StatsCardProps {
 			count: number;
 		}>;
 	};
+	title: string;
 }
 
 export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {

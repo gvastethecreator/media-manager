@@ -14,21 +14,21 @@ import type { AlbumWithStats } from '@/types/entities/album';
 interface CreateAlbumFormProps {
 	album?: AlbumWithStats | null;
 	isEditing?: boolean;
-	onCreated?: (album: AlbumWithStats) => void;
-	onUpdated?: (album: AlbumWithStats) => void;
-	onReset?: () => void;
 	onCancel?: () => void;
+	onCreated?: (album: AlbumWithStats) => void;
 	onPreview?: (formData: FormData) => void;
+	onReset?: () => void;
 	onSubmit?: (newAlbum: AlbumWithStats) => void;
+	onUpdated?: (album: AlbumWithStats) => void;
 }
 
 // Interfaz para los datos del formulario
 interface FormData {
-	name: string;
+	category: string;
+	color: string;
 	description: string;
 	emoji: string;
-	color: string;
-	category: string;
+	name: string;
 }
 
 export function CreateAlbumForm({

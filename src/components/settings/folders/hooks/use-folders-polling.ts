@@ -2,8 +2,8 @@
 // Este stub evita errores de importación y reduce complejidad a cero.
 
 export interface UsePollingOptions {
-	onStatusUpdate: (status: unknown) => void;
 	onComplete: (folderId: string) => void;
+	onStatusUpdate: (status: unknown) => void;
 }
 
 export function useFoldersPolling(_: UsePollingOptions) {

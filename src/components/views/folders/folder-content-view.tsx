@@ -13,10 +13,10 @@ const logger = clientLogger.withContext('FolderContentView');
 
 interface FolderContentViewProps {
 	folderId?: string;
+	isRetrying?: boolean;
+	onRefreshFolder?: () => void;
 	// Props para integración con toolbar
 	onScanFolder?: () => void;
-	onRefreshFolder?: () => void;
-	isRetrying?: boolean;
 }
 
 export function FolderContentView({

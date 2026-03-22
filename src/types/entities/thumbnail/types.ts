@@ -41,17 +41,17 @@ export enum ThumbnailFormat {
  * Metadatos del thumbnail
  */
 export interface ThumbnailMetadata {
-	compression?: {
-		algorithm?: string;
-		level?: number;
-		originalSize?: number;
-		savings?: number;
-	};
 	color?: {
 		dominant?: string;
 		palette?: string[];
 		brightness?: number;
 		contrast?: number;
+	};
+	compression?: {
+		algorithm?: string;
+		level?: number;
+		originalSize?: number;
+		savings?: number;
 	};
 	processing?: {
 		duration?: number;
@@ -65,19 +65,19 @@ export interface ThumbnailMetadata {
  * Tipo base canónico para Thumbnail
  */
 export interface ThumbnailBase {
-	id: string;
-	entityType: string;
-	entityId: string;
-	size: string;
-	path: string;
-	width: number;
-	height: number;
-	format: string;
-	quality: number;
-	fileSize: number;
-	isGenerated: boolean;
 	createdAt: Date;
+	entityId: string;
+	entityType: string;
+	fileSize: number;
+	format: string;
+	height: number;
+	id: string;
+	isGenerated: boolean;
+	path: string;
+	quality: number;
+	size: string;
 	updatedAt: Date;
+	width: number;
 }
 
 /**
@@ -99,9 +99,9 @@ export interface ThumbnailCreateInput extends Omit<ThumbnailBase, 'id' | 'create
  * Input para actualización de Thumbnail
  */
 export interface ThumbnailUpdateInput extends Partial<Omit<ThumbnailBase, 'id' | 'sourceId' | 'sourceType'>> {
-	metadata?: ThumbnailMetadata;
 	errorMessage?: string | null;
 	errorTimestamp?: Date | null;
+	metadata?: ThumbnailMetadata;
 	optimizedAt?: Date | null;
 }
 

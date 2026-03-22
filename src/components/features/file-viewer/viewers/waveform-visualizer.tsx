@@ -10,20 +10,20 @@ import { cn } from '@/lib/utils';
 interface WaveformVisualizerProps {
 	/** URL del archivo de audio */
 	audioUrl: string;
-	/** Progreso de reproducción (0-100) */
-	progress: number;
+	/** Clases adicionales */
+	className?: string;
+	/** Altura del canvas */
+	height?: number;
 	/** Si está reproduciendo */
 	isPlaying: boolean;
 	/** Callback al hacer clic en una posición */
 	onPositionClick?: (percent: number) => void;
-	/** Clases adicionales */
-	className?: string;
-	/** Color de la forma de onda */
-	waveColor?: string;
+	/** Progreso de reproducción (0-100) */
+	progress: number;
 	/** Color del progreso */
 	progressColor?: string;
-	/** Altura del canvas */
-	height?: number;
+	/** Color de la forma de onda */
+	waveColor?: string;
 }
 
 export function WaveformVisualizer({

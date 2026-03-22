@@ -4,10 +4,10 @@
  */
 
 export interface EmojiData {
-	emoji: string;
-	name: string;
 	category: string;
+	emoji: string;
 	keywords: string[];
+	name: string;
 }
 
 export const emojiCategories = {

@@ -11,7 +11,7 @@
  */
 
 import * as crypto from 'node:crypto';
-import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, like, lte, or } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import {
@@ -51,33 +51,33 @@ const videoServiceLogger = serverLogger.withContext(SERVICE_NAME);
  * Input para crear un nuevo video
  */
 export interface CreateVideoInput {
-	name: string;
 	description?: string | null;
+	duration: number;
+	folderId: string;
+	hash: string;
+	height?: number | null;
+	isFavorite?: boolean;
+	isHidden?: boolean;
+	name: string;
 	path: string;
 	size: number;
-	hash: string;
-	duration: number;
 	width?: number | null;
-	height?: number | null;
-	isHidden?: boolean;
-	isFavorite?: boolean;
-	folderId: string;
 }
 
 /**
  * Input para actualizar un video existente
  */
 export interface UpdateVideoInput {
-	name?: string;
 	description?: string | null;
+	duration?: number;
+	folderId?: string;
+	height?: number | null;
+	isFavorite?: boolean;
+	isHidden?: boolean;
+	name?: string;
 	path?: string;
 	size?: number;
-	duration?: number;
 	width?: number | null;
-	height?: number | null;
-	isHidden?: boolean;
-	isFavorite?: boolean;
-	folderId?: string;
 }
 
 /**
@@ -87,17 +87,17 @@ export interface VideoFilters {
 	folderId?: string;
 	isFavorite?: boolean;
 	isHidden?: boolean;
-	minDuration?: number;
-	maxDuration?: number;
-	minWidth?: number;
-	maxWidth?: number;
-	minHeight?: number;
-	maxHeight?: number;
-	minSize?: number;
-	maxSize?: number;
-	search?: string;
 	limit?: number;
+	maxDuration?: number;
+	maxHeight?: number;
+	maxSize?: number;
+	maxWidth?: number;
+	minDuration?: number;
+	minHeight?: number;
+	minSize?: number;
+	minWidth?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'size' | 'duration' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 }
@@ -106,30 +106,30 @@ export interface VideoFilters {
  * Video básico (sin relaciones)
  */
 export interface Video {
-	id: string;
-	name: string;
-	description: string | null;
-	path: string;
-	hash: string;
-	size: number;
-	duration: number;
-	width: number | null;
-	height: number | null;
-	metadata: string | null;
-	thumbnail: string | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
-	isFavorite: boolean;
-	isHidden: boolean;
-	folderId: string;
 	createdAt: Date;
-	updatedAt: Date | null;
+	description: string | null;
+	duration: number;
 	folder?: {
 		id: string;
 		name: string;
 		path: string;
 	} | null;
+	folderId: string;
+	hash: string;
+	height: number | null;
+	id: string;
+	isFavorite: boolean;
+	isHidden: boolean;
+	metadata: string | null;
+	name: string;
+	path: string;
+	size: number;
+	thumbnail: string | null;
+	thumbnailHeight: number | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	updatedAt: Date | null;
+	width: number | null;
 }
 
 /**
@@ -161,40 +161,35 @@ export type VideosListResult = Video[];
  * Estadísticas por formato de video
  */
 export interface VideoFormatStats {
-	format: string;
-	count: number;
-	sumSize: number;
 	avgDuration: number;
-	avgWidth: number;
 	avgHeight: number;
+	avgWidth: number;
+	count: number;
+	format: string;
+	sumSize: number;
 }
 
 /**
  * Interface del servicio de videos
  */
 export interface VideoServiceInterface {
+	readonly countByFolder: (folderId: string) => Effect.Effect<number, VideoError>;
 	// CRUD básico
 	readonly create: (input: CreateVideoInput) => Effect.Effect<Video, VideoError>;
-	readonly getById: (id: string) => Effect.Effect<Video, VideoError>;
-	readonly getByIdWithStats: (id: string) => Effect.Effect<VideoWithStats, VideoError>;
-	readonly getAll: (filters: VideoFilters) => Effect.Effect<VideosListResult, VideoError>;
-	readonly update: (id: string, input: UpdateVideoInput) => Effect.Effect<Video, VideoError>;
 	readonly deleteById: (id: string, force?: boolean) => Effect.Effect<void, VideoError>;
 	readonly deleteManyByIds: (ids: string[], force?: boolean) => Effect.Effect<number, VideoError>;
-
-	// Queries especializadas
-	readonly getByHash: (hash: string) => Effect.Effect<Video | null, VideoError>;
-	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Video | null, VideoError>;
+	readonly getAll: (filters: VideoFilters) => Effect.Effect<VideosListResult, VideoError>;
 	readonly getAllFavorites: (filters: Omit<VideoFilters, 'isFavorite'>) => Effect.Effect<VideosListResult, VideoError>;
 	readonly getByFolder: (
 		folderId: string,
 		filters: Omit<VideoFilters, 'folderId'>
 	) => Effect.Effect<VideosListResult, VideoError>;
-	readonly countByFolder: (folderId: string) => Effect.Effect<number, VideoError>;
 
-	// Operaciones de toggle/batch
-	readonly toggleFavorite: (id: string) => Effect.Effect<Video, VideoError>;
-	readonly setFavoriteMany: (ids: string[], isFavorite: boolean) => Effect.Effect<number, VideoError>;
+	// Queries especializadas
+	readonly getByHash: (hash: string) => Effect.Effect<Video | null, VideoError>;
+	readonly getById: (id: string) => Effect.Effect<Video, VideoError>;
+	readonly getByIdWithStats: (id: string) => Effect.Effect<VideoWithStats, VideoError>;
+	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Video | null, VideoError>;
 
 	// Operaciones específicas de video
 	readonly getFormatStats: () => Effect.Effect<VideoFormatStats[], VideoError>;
@@ -206,6 +201,11 @@ export interface VideoServiceInterface {
 		width?: number,
 		height?: number
 	) => Effect.Effect<Buffer, VideoError>;
+	readonly setFavoriteMany: (ids: string[], isFavorite: boolean) => Effect.Effect<number, VideoError>;
+
+	// Operaciones de toggle/batch
+	readonly toggleFavorite: (id: string) => Effect.Effect<Video, VideoError>;
+	readonly update: (id: string, input: UpdateVideoInput) => Effect.Effect<Video, VideoError>;
 }
 
 /**
@@ -676,10 +676,7 @@ const make = (): VideoServiceInterface => {
 			// Eliminar videos
 			const deletedRows = yield* Effect.tryPromise({
 				try: async () => {
-					const deleted = await db
-						.delete(videos)
-						.where(or(...ids.map((id) => eq(videos.id, id))))
-						.returning({ id: videos.id });
+					const deleted = await db.delete(videos).where(inArray(videos.id, ids)).returning({ id: videos.id });
 					return deleted;
 				},
 				catch: (error) => toVideoError(error, 'deleteManyByIds'),
@@ -859,7 +856,7 @@ const make = (): VideoServiceInterface => {
 					const updated = await db
 						.update(videos)
 						.set({ isFavorite, updatedAt: new Date() })
-						.where(or(...ids.map((id) => eq(videos.id, id))))
+						.where(inArray(videos.id, ids))
 						.returning({ id: videos.id });
 					return updated;
 				},

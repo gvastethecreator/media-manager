@@ -16,10 +16,10 @@ import { cn } from '@/lib/utils';
 // ============================================================================
 
 interface SettingsPageTransitionProps {
-	/** Contenido */
-	children: React.ReactNode;
 	/** Sección activa */
 	activeSection?: string;
+	/** Contenido */
+	children: React.ReactNode;
 }
 
 /**
@@ -53,18 +53,18 @@ export function SettingsPageTransition({ children, activeSection }: SettingsPage
 // ============================================================================
 
 interface SettingsSectionTransitionProps {
-	/** ID de la sección */
-	sectionId: string;
-	/** Título */
-	title: React.ReactNode;
-	/** Descripción */
-	description?: React.ReactNode;
 	/** Contenido */
 	children: React.ReactNode;
+	/** Descripción */
+	description?: React.ReactNode;
 	/** Si está expandida */
 	isExpanded?: boolean;
 	/** Toggle */
 	onToggle?: () => void;
+	/** ID de la sección */
+	sectionId: string;
+	/** Título */
+	title: React.ReactNode;
 }
 
 /**
@@ -135,18 +135,18 @@ export function SettingsSectionTransition({
 // ============================================================================
 
 interface SettingsItemTransitionProps {
-	/** ID del item */
-	itemId: string;
-	/** Índice para stagger */
-	index?: number;
-	/** Label */
-	label: React.ReactNode;
-	/** Descripción */
-	description?: React.ReactNode;
 	/** Control */
 	control: React.ReactNode;
+	/** Descripción */
+	description?: React.ReactNode;
+	/** Índice para stagger */
+	index?: number;
 	/** Si está deshabilitado */
 	isDisabled?: boolean;
+	/** ID del item */
+	itemId: string;
+	/** Label */
+	label: React.ReactNode;
 }
 
 /**
@@ -185,10 +185,10 @@ export function SettingsItemTransition({
 // ============================================================================
 
 interface SettingsFormTransitionProps {
-	/** ID del formulario */
-	formId: string;
 	/** Contenido */
 	children: React.ReactNode;
+	/** ID del formulario */
+	formId: string;
 	/** Si está guardando */
 	isSaving?: boolean;
 }
@@ -230,10 +230,10 @@ export function SettingsFormTransition({ formId, children, isSaving }: SettingsF
 interface SettingsToastTransitionProps {
 	/** Si está visible */
 	isVisible: boolean;
-	/** Tipo */
-	type?: 'success' | 'error' | 'info';
 	/** Mensaje */
 	message: React.ReactNode;
+	/** Tipo */
+	type?: 'success' | 'error' | 'info';
 }
 
 /**

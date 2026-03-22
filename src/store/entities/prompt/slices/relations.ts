@@ -7,16 +7,15 @@ import type { PromptStore } from '../types';
 const relationsLogger = clientLogger.withContext('PromptStore:Relations');
 
 export interface RelationsSlice {
-	// Acciones generales
-	addPromptToEntity: (promptId: string, entityId: string, entityType: EntityType) => Promise<void>;
-	removePromptFromEntity: (promptId: string, entityId: string, entityType: EntityType) => Promise<void>;
-
 	// Acciones específicas para nuevas relaciones
 	addGroupToPrompt: (promptId: string, groupId: string) => Promise<void>;
-	removeGroupFromPrompt: (promptId: string, groupId: string) => Promise<void>;
+	// Acciones generales
+	addPromptToEntity: (promptId: string, entityId: string, entityType: EntityType) => Promise<void>;
 	addPropertyToPrompt: (promptId: string, propertyId: string) => Promise<void>;
-	removePropertyFromPrompt: (promptId: string, propertyId: string) => Promise<void>;
 	addWildcardToPrompt: (promptId: string, wildcardId: string) => Promise<void>;
+	removeGroupFromPrompt: (promptId: string, groupId: string) => Promise<void>;
+	removePromptFromEntity: (promptId: string, entityId: string, entityType: EntityType) => Promise<void>;
+	removePropertyFromPrompt: (promptId: string, propertyId: string) => Promise<void>;
 	removeWildcardFromPrompt: (promptId: string, wildcardId: string) => Promise<void>;
 	updatePromptRelations: (
 		promptId: string,

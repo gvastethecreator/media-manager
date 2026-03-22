@@ -41,13 +41,13 @@ export type {
  */
 export interface ConceptFilters {
 	category?: string | string[];
+	onlyFavorites?: boolean;
+	page?: number;
+	pageSize?: number;
 	search?: string;
 	sortBy?: 'name' | 'category' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
-	page?: number;
-	pageSize?: number;
 	tags?: string[];
-	onlyFavorites?: boolean;
 }
 
 /**
@@ -55,13 +55,13 @@ export interface ConceptFilters {
  */
 export interface ConceptResults {
 	items: import('./base').ConceptBase[];
-	total: number;
 	page: number;
 	pageSize: number;
 	stats?: {
 		totalConcepts: number;
 		categoriesStats: Record<string, number>;
 	};
+	total: number;
 }
 
 // Alias para compatibilidad

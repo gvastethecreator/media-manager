@@ -8,9 +8,9 @@ import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 export interface PropertyCardProps {
-	property: PropertyWithStats;
-	onClick?: () => void;
 	className?: string;
+	onClick?: () => void;
+	property: PropertyWithStats;
 	showBadges?: boolean;
 }
 

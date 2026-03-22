@@ -7,12 +7,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 
 interface EmojiPickerProps {
-	value?: string;
-	onEmojiSelect?: (emoji: string) => void;
-	onChange?: (emoji: string) => void;
-	compact?: boolean;
-	showLabel?: boolean;
 	className?: string;
+	compact?: boolean;
+	onChange?: (emoji: string) => void;
+	onEmojiSelect?: (emoji: string) => void;
+	showLabel?: boolean;
+	value?: string;
 }
 
 // 🎯 Emojis frecuentes para el proyecto de gestión de imágenes

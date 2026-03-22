@@ -1,6 +1,6 @@
 import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import { WorldItemRarity, WorldItemType, WorldItemWithStats } from '@/types/entities/world-item';
 import { CardHeader } from '../card-header';
@@ -119,18 +119,18 @@ function TCGVisualEffects({
 }
 
 export interface WorldItemCardProps {
-	worldItemId: string;
-	worldItem?: WorldItemWithStats;
-	isLoading?: boolean;
-	error?: Error;
-	onClick?: (worldItemData: WorldItemWithStats) => void;
 	className?: string;
-	style?: React.CSSProperties;
-	tcgMode?: boolean;
-	isSelected?: boolean;
 	compact?: boolean;
 	disabled?: boolean;
+	error?: Error;
 	interactive?: boolean;
+	isLoading?: boolean;
+	isSelected?: boolean;
+	onClick?: (worldItemData: WorldItemWithStats) => void;
+	style?: React.CSSProperties;
+	tcgMode?: boolean;
+	worldItem?: WorldItemWithStats;
+	worldItemId: string;
 }
 
 /**
@@ -374,9 +374,9 @@ interface WorldItemCardPresentationalProps {
 		type: WorldItemType;
 		description?: string | null;
 	};
+	handleKeyDown: (e: React.KeyboardEvent) => void;
 	icon: React.ReactNode;
 	onHoverChange: (v: boolean) => void;
-	handleKeyDown: (e: React.KeyboardEvent) => void;
 	tcgMode: boolean;
 }
 
@@ -436,9 +436,11 @@ function WorldItemCardPresentational({
 
 interface ArticleWrapperProps {
 	ariaLabel: string;
+	children: React.ReactNode;
 	className?: string;
 	compact?: boolean;
 	disabled?: boolean;
+	handleKeyDown: (e: React.KeyboardEvent) => void;
 	id: string;
 	interactive?: boolean;
 	onClick?: (w: WorldItemWithStats) => void;
@@ -446,10 +448,8 @@ interface ArticleWrapperProps {
 	primaryColor: string;
 	rarityGlow: number;
 	rest: Record<string, unknown>;
-	handleKeyDown: (e: React.KeyboardEvent) => void;
 	style?: React.CSSProperties;
 	tcgMode: boolean;
-	children: React.ReactNode;
 }
 
 function ArticleWrapper(props: ArticleWrapperProps) {

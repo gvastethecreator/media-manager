@@ -59,17 +59,17 @@
 }
 
 .theme-indicator::after {
-	content: "";
 	position: absolute;
 	inset: 0;
+	content: "";
 	border-radius: inherit;
 	opacity: 0;
 	transition: opacity var(--dt-motion-normal);
 }
 
 .theme-indicator:hover::after {
-	opacity: 0.1;
 	background: currentColor;
+	opacity: 0.1;
 }
 
 /* =====================================================
@@ -173,10 +173,10 @@ html:not(.dark) {
 	justify-content: center;
 	width: 2.5rem;
 	height: 2.5rem;
-	border-radius: var(--dt-radius-full);
+	cursor: pointer;
 	background: transparent;
 	border: none;
-	cursor: pointer;
+	border-radius: var(--dt-radius-full);
 	transition: background-color var(--dt-motion-fast);
 }
 
@@ -193,10 +193,10 @@ html:not(.dark) {
 	position: relative;
 	width: 3.5rem;
 	height: 2rem;
-	border-radius: var(--dt-radius-full);
-	background: var(--muted);
-	transition: background-color var(--dt-theme-transition-duration);
 	cursor: pointer;
+	background: var(--muted);
+	border-radius: var(--dt-radius-full);
+	transition: background-color var(--dt-theme-transition-duration);
 }
 
 .dark .theme-toggle-track {
@@ -209,8 +209,8 @@ html:not(.dark) {
 	left: 0.25rem;
 	width: 1.5rem;
 	height: 1.5rem;
-	border-radius: var(--dt-radius-full);
 	background: var(--background);
+	border-radius: var(--dt-radius-full);
 	box-shadow: var(--dt-shadow-md);
 	transition: transform var(--dt-motion-normal)
 		var(--dt-theme-transition-timing);
@@ -228,8 +228,8 @@ html:not(.dark) {
 .theme-transition-mask {
 	position: fixed;
 	inset: 0;
-	pointer-events: none;
 	z-index: 9999;
+	pointer-events: none;
 	background: radial-gradient(
 		circle at var(--mask-x, 50%) var(--mask-y, 50%),
 		transparent 0%,
@@ -290,21 +290,21 @@ html:not(.dark) {
 
 .theme-saved-indicator {
 	position: fixed;
-	bottom: var(--dt-space-4);
 	right: var(--dt-space-4);
+	bottom: var(--dt-space-4);
+	z-index: 50;
 	padding: var(--dt-space-2) var(--dt-space-4);
+	font-size: var(--dt-text-sm);
+	pointer-events: none;
 	background: var(--card);
 	border: 1px solid var(--border);
 	border-radius: var(--dt-radius-md);
 	box-shadow: var(--dt-shadow-lg);
-	font-size: var(--dt-text-sm);
 	opacity: 0;
 	transform: translateY(100%);
 	transition:
 		opacity var(--dt-motion-fast),
 		transform var(--dt-motion-fast);
-	pointer-events: none;
-	z-index: 50;
 }
 
 .theme-saved-indicator.visible {

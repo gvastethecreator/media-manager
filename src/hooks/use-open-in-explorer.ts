@@ -16,14 +16,14 @@ export interface OpenInExplorerOptions {
 }
 
 export interface UseOpenInExplorerResult {
-	/** Función para abrir en explorador */
-	openInExplorer: (options: OpenInExplorerOptions) => Promise<boolean>;
-	/** Si está procesando */
-	isLoading: boolean;
 	/** Error si ocurrió */
 	error: Error | null;
 	/** Si la función está disponible (solo en entorno desktop/Tauri) */
 	isAvailable: boolean;
+	/** Si está procesando */
+	isLoading: boolean;
+	/** Función para abrir en explorador */
+	openInExplorer: (options: OpenInExplorerOptions) => Promise<boolean>;
 }
 
 /**

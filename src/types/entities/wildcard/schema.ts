@@ -30,9 +30,9 @@ export const WildcardStatsSchema = z.object({
  * Tipo para hijos de comodín (recursivo)
  */
 export interface WildcardChild {
+	children?: WildcardChild[];
 	id: string;
 	name: string;
-	children?: WildcardChild[];
 }
 
 /**

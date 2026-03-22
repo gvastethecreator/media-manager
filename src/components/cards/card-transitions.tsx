@@ -16,14 +16,14 @@ import { cn } from '@/lib/utils';
 // ============================================================================
 
 interface EntityCardTransitionBaseProps {
+	/** Contenido */
+	children: React.ReactNode;
 	/** ID de la entidad */
 	entityId: string;
 	/** Tipo de entidad */
 	entityType: 'folder' | 'image' | 'video' | 'audio' | 'document' | 'tag' | 'character' | 'collection' | 'album';
 	/** Si está seleccionada */
 	isSelected?: boolean;
-	/** Contenido */
-	children: React.ReactNode;
 	/** Click handler */
 	onClick?: () => void;
 	/** Doble click handler */
@@ -35,12 +35,12 @@ interface EntityCardTransitionBaseProps {
 // ============================================================================
 
 interface EntityCardTransitionProps extends EntityCardTransitionBaseProps {
+	/** Clases adicionales */
+	className?: string;
 	/** Si es modo compacto */
 	isCompact?: boolean;
 	/** Si está favorito */
 	isFavorite?: boolean;
-	/** Clases adicionales */
-	className?: string;
 }
 
 /**
@@ -151,14 +151,14 @@ export function EntityCardTransition({
 // ============================================================================
 
 interface EntityCardGridTransitionProps {
-	/** IDs de las entidades */
-	entityIds: string[];
-	/** Render de cada tarjeta */
-	renderCard: (id: string, index: number) => React.ReactNode;
-	/** Tipo de layout */
-	layout?: 'grid' | 'list' | 'masonry';
 	/** Columnas para grid */
 	columns?: number;
+	/** IDs de las entidades */
+	entityIds: string[];
+	/** Tipo de layout */
+	layout?: 'grid' | 'list' | 'masonry';
+	/** Render de cada tarjeta */
+	renderCard: (id: string, index: number) => React.ReactNode;
 }
 
 /**
@@ -210,12 +210,12 @@ export function EntityCardGridTransition({
 // ============================================================================
 
 interface EntityListTransitionProps {
+	/** Si usar dividers */
+	dividers?: boolean;
 	/** IDs de las entidades */
 	entityIds: string[];
 	/** Render de cada item */
 	renderItem: (id: string, index: number) => React.ReactNode;
-	/** Si usar dividers */
-	dividers?: boolean;
 }
 
 /**
@@ -259,12 +259,12 @@ export function EntityListTransition({ entityIds, renderItem, dividers = true }:
 interface ExpandableCardTransitionProps {
 	/** ID de la tarjeta */
 	cardId: string;
-	/** Si está expandida */
-	isExpanded: boolean;
 	/** Contenido compacto */
 	compactContent: React.ReactNode;
 	/** Contenido expandido */
 	expandedContent: React.ReactNode;
+	/** Si está expandida */
+	isExpanded: boolean;
 	/** Toggle expand */
 	onToggle: () => void;
 }
@@ -307,12 +307,12 @@ export function ExpandableCardTransition({
 // ============================================================================
 
 interface EntityPreviewTransitionProps {
+	/** Contenido del preview */
+	children: React.ReactNode;
 	/** ID de la entidad */
 	entityId: string;
 	/** Si está visible */
 	isVisible: boolean;
-	/** Contenido del preview */
-	children: React.ReactNode;
 	/** Posición */
 	position?: 'top' | 'bottom' | 'left' | 'right';
 }

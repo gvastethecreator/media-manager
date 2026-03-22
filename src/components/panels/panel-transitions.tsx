@@ -16,16 +16,16 @@ import { cn } from '@/lib/utils';
 // ============================================================================
 
 interface NavPanelTransitionProps {
-	/** Si está expandido */
-	isExpanded: boolean;
-	/** Si está animando */
-	isAnimating?: boolean;
 	/** Contenido */
 	children: React.ReactNode;
-	/** Ancho cuando está expandido */
-	expandedWidth?: string;
 	/** Ancho cuando está colapsado */
 	collapsedWidth?: string;
+	/** Ancho cuando está expandido */
+	expandedWidth?: string;
+	/** Si está animando */
+	isAnimating?: boolean;
+	/** Si está expandido */
+	isExpanded: boolean;
 }
 
 /**
@@ -58,16 +58,16 @@ export function NavPanelTransition({ isExpanded, isAnimating, children }: NavPan
 // ============================================================================
 
 interface DetailsPanelTransitionProps {
-	/** Si está visible */
-	isVisible: boolean;
-	/** Si está animando */
-	isAnimating?: boolean;
 	/** Contenido */
 	children: React.ReactNode;
-	/** Contenido del header */
-	header?: React.ReactNode;
 	/** Contenido del footer */
 	footer?: React.ReactNode;
+	/** Contenido del header */
+	header?: React.ReactNode;
+	/** Si está animando */
+	isAnimating?: boolean;
+	/** Si está visible */
+	isVisible: boolean;
 }
 
 /**
@@ -120,16 +120,16 @@ export function DetailsPanelTransition({
 // ============================================================================
 
 interface PanelItemTransitionProps {
-	/** ID del item */
-	itemId: string;
-	/** Índice para stagger */
-	index?: number;
-	/** Si está seleccionado */
-	isSelected?: boolean;
-	/** Si está activo (hover) */
-	isActive?: boolean;
 	/** Contenido */
 	children: React.ReactNode;
+	/** Índice para stagger */
+	index?: number;
+	/** Si está activo (hover) */
+	isActive?: boolean;
+	/** Si está seleccionado */
+	isSelected?: boolean;
+	/** ID del item */
+	itemId: string;
 	/** Click handler */
 	onClick?: () => void;
 }
@@ -175,16 +175,16 @@ export function PanelItemTransition({
 // ============================================================================
 
 interface PanelSectionTransitionProps {
+	/** Contenido */
+	children: React.ReactNode;
+	/** Si está expandida */
+	isExpanded?: boolean;
+	/** Toggle expand */
+	onToggle?: () => void;
 	/** ID de la sección */
 	sectionId: string;
 	/** Título */
 	title?: React.ReactNode;
-	/** Si está expandida */
-	isExpanded?: boolean;
-	/** Contenido */
-	children: React.ReactNode;
-	/** Toggle expand */
-	onToggle?: () => void;
 }
 
 /**
@@ -249,14 +249,14 @@ export function PanelSectionTransition({
 // ============================================================================
 
 interface ResizablePanelTransitionProps {
+	/** Contenido */
+	children: React.ReactNode;
+	/** Si está colapsado */
+	isCollapsed: boolean;
 	/** ID del panel */
 	panelId: string;
 	/** Tamaño actual (%) */
 	size: number;
-	/** Si está colapsado */
-	isCollapsed: boolean;
-	/** Contenido */
-	children: React.ReactNode;
 }
 
 /**
@@ -285,10 +285,10 @@ export function ResizablePanelTransition({ panelId, size, isCollapsed, children 
 // ============================================================================
 
 interface PanelOverlayTransitionProps {
-	/** Si está visible */
-	isVisible: boolean;
 	/** Contenido */
 	children: React.ReactNode;
+	/** Si está visible */
+	isVisible: boolean;
 	/** Cerrar al click */
 	onClose?: () => void;
 }

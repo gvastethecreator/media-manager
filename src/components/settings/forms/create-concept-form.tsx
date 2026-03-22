@@ -32,10 +32,10 @@ type ConceptForm = z.infer<typeof conceptSchema>;
 interface CreateConceptFormProps {
 	concept?: ConceptExtended | null;
 	isEditing?: boolean;
-	onCreated?: (concept: ConceptWithStats) => void;
-	onUpdated?: (concept: ConceptWithStats) => void;
 	onCancel?: () => void;
+	onCreated?: (concept: ConceptWithStats) => void;
 	onPreview?: (data: any) => void;
+	onUpdated?: (concept: ConceptWithStats) => void;
 }
 
 export function CreateConceptForm({

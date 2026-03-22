@@ -16,26 +16,26 @@ const router = express.Router();
  */
 interface Model3DThumbnailOptions {
 	angle?: number;
-	lightIntensity?: number;
-	backgroundColor?: string;
-	width?: number;
-	height?: number;
-	wireframe?: boolean;
-	cameraDistance?: number;
 	autoRotate?: boolean;
+	backgroundColor?: string;
+	cameraDistance?: number;
+	height?: number;
+	lightIntensity?: number;
+	width?: number;
+	wireframe?: boolean;
 }
 
 /**
  * � Interfaz para información básica del modelo 3D
  */
 interface Model3DInfo {
-	vertices: number;
-	faces: number;
-	materials: number;
 	boundingBox: {
 		min: [number, number, number];
 		max: [number, number, number];
 	};
+	faces: number;
+	materials: number;
+	vertices: number;
 }
 
 /**

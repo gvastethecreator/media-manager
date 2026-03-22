@@ -37,10 +37,10 @@ export enum EntityErrorCode {
 
 // Interfaz para objetos de error serializables
 export interface SerializableError {
-	name: string;
-	message: string;
-	code: EntityErrorCode;
 	cause?: unknown;
+	code: EntityErrorCode;
+	message: string;
+	name: string;
 }
 
 // Clase base para errores de entidades

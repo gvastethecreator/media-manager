@@ -30,36 +30,36 @@ export enum Language {
  * Tipo base canónico para Profile
  */
 export interface ProfileBase {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	isActive: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	settingsId: string | null;
-	imageId: string | null;
-	// Propiedades adicionales para compatibilidad
-	email?: string;
 	avatar?: string | null;
 	bio?: string | null;
-	website?: string | null;
+	color: string;
+	createdAt: Date;
+	description: string | null;
+	// Propiedades adicionales para compatibilidad
+	email?: string;
+	emoji: string;
+	id: string;
+	imageId: string | null;
+	isActive: boolean;
 	location?: string | null;
+	name: string;
 	preferences?: ProfilePreferences;
+	settingsId: string | null;
+	updatedAt: Date;
+	website?: string | null;
 }
 
 /**
  * Input para creación
  */
 export interface ProfileCreateInput {
-	name: string;
-	emoji?: string;
 	color?: string;
-	theme?: ThemeMode;
-	language?: Language;
 	description?: string;
+	emoji?: string;
 	isActive?: boolean;
+	language?: Language;
+	name: string;
+	theme?: ThemeMode;
 }
 
 /**
@@ -79,77 +79,77 @@ import { EntityStats } from '../entity.types';
  * Estadísticas del perfil
  */
 export interface ProfileStatistics extends EntityStats {
-	folderCount: number;
-	lastAccessed: Date | null;
-	totalStorageUsed: number;
 	activeDays: number;
 	createdThisMonth: number;
+	folderCount: number;
+	isVerified?: boolean;
 	// Propiedades adicionales para compatibilidad con serializers
 	joinDate?: Date;
-	isVerified?: boolean;
+	lastAccessed: Date | null;
+	totalStorageUsed: number;
 }
 
 /**
  * Perfil con estadísticas
  */
 export interface ProfileWithStats extends ProfileBase {
-	stats: ProfileStatistics;
 	entityType: 'profile';
+	stats: ProfileStatistics;
 }
 
 /**
  * Tipo extendido para UI con información adicional
  */
 export interface ProfileExtended extends ProfileBase {
+	albumCount?: number;
+	avatarUrl?: string | null;
 	// Estadísticas adicionales
 	imageCount?: number;
-	albumCount?: number;
 	lastAccessed?: Date | null;
 	// Preferencias del perfil
 	preferences?: ProfilePreferences;
 	// Propiedades adicionales para UI
 	theme?: ThemeMode;
-	avatarUrl?: string | null;
 }
 
 /**
  * Preferencias del perfil
  */
 export interface ProfilePreferences {
-	theme: ThemeMode;
 	color: string;
+	defaultSort: 'name' | 'date' | 'size' | 'type';
+	defaultView: 'grid' | 'list' | 'gallery' | 'compact';
 	emoji: string;
-	language: Language;
 	enableAnimations: boolean;
-	enableSounds: boolean;
 	enableHaptics: boolean;
 	enableNotifications: boolean;
-	defaultView: 'grid' | 'list' | 'gallery' | 'compact';
-	defaultSort: 'name' | 'date' | 'size' | 'type';
-	itemsPerPage: number;
-	showHiddenFiles: boolean;
-	highContrast: boolean;
-	reducedMotion: boolean;
+	enableSounds: boolean;
 	fontSize: 'small' | 'medium' | 'large';
+	highContrast: boolean;
+	itemsPerPage: number;
+	language: Language;
 	outlineElements: boolean;
+	reducedMotion: boolean;
+	showHiddenFiles: boolean;
+	theme: ThemeMode;
 }
 
 /**
  * Filtros para búsqueda de perfiles
  */
 export interface ProfileFilters {
-	search?: string;
 	isActive?: boolean;
-	theme?: ThemeMode;
 	language?: Language;
+	search?: string;
+	theme?: ThemeMode;
 }
 
 /**
  * Opciones de paginación para perfiles
  */
 export interface ProfilePaginationOptions {
-	page?: number;
 	limit?: number;
+	page?: number;
 	sortBy?: 'name' | 'isActive' | 'createdAt' | 'updatedAt';
 	sortDirection?: 'asc' | 'desc';
 }
@@ -159,9 +159,9 @@ export interface ProfilePaginationOptions {
  */
 export interface PaginatedProfiles {
 	items: ProfileExtended[];
-	total: number;
-	page: number;
 	limit: number;
+	page: number;
+	total: number;
 	totalPages: number;
 }
 

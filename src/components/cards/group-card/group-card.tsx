@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { useRecentGroupMedia } from '@/lib/api/groups';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';

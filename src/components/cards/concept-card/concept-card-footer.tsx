@@ -3,18 +3,18 @@ import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from '@/lib/utils/date';
 
 interface ConceptCardFooterProps {
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	imagesCount?: number;
-	videosCount?: number;
-	promptsCount?: number;
-	notesCount?: number;
-	totalRelations?: number;
-	isFavorite?: boolean;
 	category?: string | null;
+	createdAt: Date | string;
+	imagesCount?: number;
+	isFavorite?: boolean;
+	notesCount?: number;
 	primaryColor: string;
+	promptsCount?: number;
 	secondaryColor: string;
 	tcgMode?: boolean;
+	totalRelations?: number;
+	updatedAt: Date | string;
+	videosCount?: number;
 }
 
 /**

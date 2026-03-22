@@ -99,32 +99,32 @@ const joinPaths = (a: string, b: string): string => {
 
 // Batch operation types
 export interface BatchOperation {
-	/** Unique operation identifier */
-	id: string;
-	/** Operation type */
-	type: BatchOperationType;
-	/** Items to process */
-	items: AnyEntityWithStats[];
-	/** Target path for copy/move operations */
-	targetPath?: string;
-	/** Operation options */
-	options?: BatchOperationOptions;
-	/** Operation status */
-	status: BatchOperationStatus;
-	/** Priority level */
-	priority: BatchOperationPriority;
-	/** Creation timestamp */
-	createdAt: number;
-	/** Start timestamp */
-	startedAt?: number;
 	/** Completion timestamp */
 	completedAt?: number;
+	/** Creation timestamp */
+	createdAt: number;
+	/** Errors */
+	errors: BatchOperationError[];
+	/** Unique operation identifier */
+	id: string;
+	/** Items to process */
+	items: AnyEntityWithStats[];
+	/** Operation options */
+	options?: BatchOperationOptions;
+	/** Priority level */
+	priority: BatchOperationPriority;
 	/** Progress information */
 	progress: BatchProgress;
 	/** Results */
 	results: BatchOperationResult[];
-	/** Errors */
-	errors: BatchOperationError[];
+	/** Start timestamp */
+	startedAt?: number;
+	/** Operation status */
+	status: BatchOperationStatus;
+	/** Target path for copy/move operations */
+	targetPath?: string;
+	/** Operation type */
+	type: BatchOperationType;
 }
 
 export type BatchOperationType = 'copy' | 'move' | 'delete' | 'rename';
@@ -132,63 +132,63 @@ export type BatchOperationStatus = 'queued' | 'running' | 'completed' | 'failed'
 export type BatchOperationPriority = 'low' | 'normal' | 'high' | 'urgent';
 
 export interface BatchOperationOptions extends FileOperationOptions {
-	/** Maximum concurrent operations */
-	maxConcurrency?: number;
-	/** Retry failed operations */
-	retryOnFailure?: boolean;
-	/** Maximum retry attempts */
-	maxRetries?: number;
-	/** Continue on errors */
-	continueOnError?: boolean;
-	/** Show progress notifications */
-	showProgress?: boolean;
 	/** Auto-cleanup completed operations */
 	autoCleanup?: boolean;
+	/** Continue on errors */
+	continueOnError?: boolean;
 	/** Custom operation description */
 	description?: string;
+	/** Maximum concurrent operations */
+	maxConcurrency?: number;
+	/** Maximum retry attempts */
+	maxRetries?: number;
 	/** Operation priority */
 	priority?: BatchOperationPriority;
+	/** Retry failed operations */
+	retryOnFailure?: boolean;
+	/** Show progress notifications */
+	showProgress?: boolean;
 }
 
 export interface BatchProgress {
-	/** Total items */
-	total: number;
-	/** Processed items */
-	processed: number;
-	/** Failed items */
-	failed: number;
-	/** Skipped items */
-	skipped: number;
-	/** Progress percentage */
-	percentage: number;
 	/** Current item being processed */
 	currentItem?: string;
 	/** Estimated time remaining */
 	estimatedTimeRemaining?: number;
+	/** Failed items */
+	failed: number;
+	/** Progress percentage */
+	percentage: number;
+	/** Processed items */
+	processed: number;
+	/** Skipped items */
+	skipped: number;
 	/** Throughput (items per second) */
 	throughput?: number;
+	/** Total items */
+	total: number;
 }
 
 export interface BatchOperationResult {
-	/** Source item */
-	item: AnyEntityWithStats;
-	/** Operation success */
-	success: boolean;
-	/** Result data */
-	result?: FileCopyMoveResult | FileOperationResult;
 	/** Error if failed */
 	error?: string;
+	/** Source item */
+	item: AnyEntityWithStats;
 	/** Processing time */
 	processingTime: number;
+	/** Result data */
+	result?: FileCopyMoveResult | FileOperationResult;
+	/** Operation success */
+	success: boolean;
 }
 
 export interface BatchOperationError {
+	/** Error code */
+	code?: FileErrorCode;
 	/** Source item */
 	item: AnyEntityWithStats;
 	/** Error message */
 	message: string;
-	/** Error code */
-	code?: FileErrorCode;
 	/** Retry count */
 	retryCount: number;
 	/** Timestamp */

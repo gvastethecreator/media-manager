@@ -8,25 +8,25 @@ import { useCallback, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 
 export interface ShareOptions {
-	/** Título del contenido a compartir */
-	title: string;
-	/** Texto descriptivo */
-	text?: string;
-	/** URL a compartir */
-	url?: string;
 	/** Archivos a compartir (solo si la API lo soporta) */
 	files?: File[];
+	/** Texto descriptivo */
+	text?: string;
+	/** Título del contenido a compartir */
+	title: string;
+	/** URL a compartir */
+	url?: string;
 }
 
 export interface UseShareResult {
-	/** Función para compartir */
-	share: (options: ShareOptions) => Promise<boolean>;
-	/** Si está procesando */
-	isLoading: boolean;
 	/** Si la API de compartir está disponible */
 	canShare: boolean;
 	/** Error si ocurrió */
 	error: Error | null;
+	/** Si está procesando */
+	isLoading: boolean;
+	/** Función para compartir */
+	share: (options: ShareOptions) => Promise<boolean>;
 }
 
 /**

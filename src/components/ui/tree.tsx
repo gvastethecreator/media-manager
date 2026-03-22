@@ -10,10 +10,10 @@ import { cn } from '@/lib/utils';
 type ToggleIconType = 'chevron' | 'plus-minus';
 
 interface TreeContextValue<T = any> {
-	indent: number;
 	currentItem?: ItemInstance<T>;
-	tree?: any;
+	indent: number;
 	toggleIconType?: ToggleIconType;
+	tree?: any;
 }
 
 const TreeContext = React.createContext<TreeContextValue>({
@@ -29,8 +29,8 @@ function useTreeContext<T = any>() {
 
 interface TreeProps extends React.HTMLAttributes<HTMLDivElement> {
 	indent?: number;
-	tree?: any;
 	toggleIconType?: ToggleIconType;
+	tree?: any;
 }
 
 function Tree({ indent = 20, tree, className, toggleIconType = 'chevron', ...props }: TreeProps) {
@@ -54,9 +54,9 @@ function Tree({ indent = 20, tree, className, toggleIconType = 'chevron', ...pro
 }
 
 interface TreeItemProps<T = any> extends React.HTMLAttributes<HTMLButtonElement> {
-	item: ItemInstance<T>;
-	indent?: number;
 	asChild?: boolean;
+	indent?: number;
+	item: ItemInstance<T>;
 }
 
 function TreeItem<T = any>({ item, className, asChild, children, ...props }: Omit<TreeItemProps<T>, 'indent'>) {

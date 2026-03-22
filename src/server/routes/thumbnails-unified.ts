@@ -324,22 +324,16 @@ router.get('/stats', async (_req, res) => {
 				.from(videos)
 				.where(and(eq(videos.thumbnail, videos.thumbnail))),
 			// Audio con waveform (buscando en metadata)
-			db
-				.select({ count: db.fn.count() })
-				.from(audios),
+			db.select({ count: db.fn.count() }).from(audios),
 			// Documentos con thumbnail (en metadatas)
 			db
 				.select({ count: db.fn.count() })
 				.from(metadatas)
 				.where(and(eq(metadatas.entityType, 'document'), eq(metadatas.key, 'thumbnail'))),
 			// JSON con thumbnail
-			db
-				.select({ count: db.fn.count() })
-				.from(jsonFiles),
+			db.select({ count: db.fn.count() }).from(jsonFiles),
 			// 3D con thumbnail
-			db
-				.select({ count: db.fn.count() })
-				.from(file3Ds),
+			db.select({ count: db.fn.count() }).from(file3Ds),
 		]);
 
 		// Totales

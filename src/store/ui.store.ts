@@ -12,26 +12,26 @@ export type ThumbnailSize = 'none' | 'small' | 'medium' | 'large';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface UIState {
-	// Estado
-	view: ViewMode;
-	thumbnailSize: ThumbnailSize;
-	zoomLevel: number;
-	isSettingsOpen: boolean;
 	isRightPanelCollapsed: boolean;
-	searchQuery: string;
-	theme: ThemeMode;
-	showSettings: boolean;
+	isSettingsOpen: boolean;
 	lastUpdate: number;
+	resetState: () => void;
+	searchQuery: string;
+	setSearchQuery: (query: string) => void;
+	setTheme: (theme: ThemeMode) => void;
+	setThumbnailSize: (size: ThumbnailSize) => void;
 
 	// Acciones
 	setView: (view: ViewMode) => void;
-	setThumbnailSize: (size: ThumbnailSize) => void;
 	setZoomLevel: (level: number) => void;
-	toggleSettings: () => void;
+	showSettings: boolean;
+	theme: ThemeMode;
+	thumbnailSize: ThumbnailSize;
 	toggleRightPanel: () => void;
-	setSearchQuery: (query: string) => void;
-	setTheme: (theme: ThemeMode) => void;
-	resetState: () => void;
+	toggleSettings: () => void;
+	// Estado
+	view: ViewMode;
+	zoomLevel: number;
 }
 
 // Constantes

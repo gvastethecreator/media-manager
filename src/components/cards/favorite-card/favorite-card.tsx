@@ -5,10 +5,10 @@ import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 interface FavoriteCardProps {
-	favorite: FavoriteExtended;
-	onSelect?: () => void;
-	isSelected?: boolean;
 	className?: string;
+	favorite: FavoriteExtended;
+	isSelected?: boolean;
+	onSelect?: () => void;
 }
 
 /**

@@ -16,16 +16,16 @@ export type MasonryAlgorithm = 'shortest-column' | 'balanced' | 'left-to-right';
 export interface MasonrySpacingConfig {
 	/** Espaciado entre elementos */
 	gap: number;
-	/** Padding del contenedor */
-	padding: number;
-	/** Ancho mínimo de columna */
-	minColumnWidth: number;
+	/** Número máximo de columnas */
+	maxColumns: number;
 	/** Ancho máximo de columna */
 	maxColumnWidth: number;
 	/** Número mínimo de columnas */
 	minColumns: number;
-	/** Número máximo de columnas */
-	maxColumns: number;
+	/** Ancho mínimo de columna */
+	minColumnWidth: number;
+	/** Padding del contenedor */
+	padding: number;
 }
 
 /**
@@ -34,16 +34,16 @@ export interface MasonrySpacingConfig {
 export interface MasonryHeightConfig {
 	/** Altura base para elementos sin dimensiones conocidas */
 	baseHeight: number;
-	/** Altura mínima permitida */
-	minHeight: number;
+	/** Aspect ratios por defecto por tipo de entidad */
+	defaultAspectRatios: Record<string, number>;
 	/** Altura máxima permitida */
 	maxHeight: number;
+	/** Altura mínima permitida */
+	minHeight: number;
 	/** Usar dimensiones reales cuando estén disponibles */
 	useRealDimensions: boolean;
 	/** Factor de variación para contenido dinámico */
 	variationFactor: number;
-	/** Aspect ratios por defecto por tipo de entidad */
-	defaultAspectRatios: Record<string, number>;
 }
 
 /**
@@ -54,40 +54,40 @@ export interface MasonryOptimizationConfig {
 	algorithm: MasonryAlgorithm;
 	/** Rebalancear columnas automáticamente */
 	autoRebalance: boolean;
-	/** Intentar minimizar espacios vacíos */
-	minimizeGaps: boolean;
-	/** Considerar aspect ratio de contenido */
-	respectAspectRatio: boolean;
 	/** Batch size para renderizado */
 	batchSize: number;
+	/** Intentar minimizar espacios vacíos */
+	minimizeGaps: boolean;
 	/** Debounce para recálculos en ms */
 	recalculateDebounce: number;
+	/** Considerar aspect ratio de contenido */
+	respectAspectRatio: boolean;
 }
 
 /**
  * Configuración completa de MasonryView
  */
 export interface MasonryViewConfig {
-	/** Configuración de espaciado */
-	spacing: MasonrySpacingConfig;
-	/** Configuración de alturas */
-	height: MasonryHeightConfig;
-	/** Configuración de optimización */
-	optimization: MasonryOptimizationConfig;
-	/** Animaciones habilitadas */
-	animationsEnabled: boolean;
-	/** Duración de animaciones en ms */
-	animationDuration: number;
-	/** Efecto hover habilitado */
-	hoverEffects: boolean;
-	/** Mostrar sombras */
-	showShadows: boolean;
-	/** Bordes redondeados */
-	roundedCorners: boolean;
 	/** Permitir selección múltiple */
 	allowMultiSelect: boolean;
+	/** Duración de animaciones en ms */
+	animationDuration: number;
+	/** Animaciones habilitadas */
+	animationsEnabled: boolean;
+	/** Configuración de alturas */
+	height: MasonryHeightConfig;
+	/** Efecto hover habilitado */
+	hoverEffects: boolean;
+	/** Configuración de optimización */
+	optimization: MasonryOptimizationConfig;
+	/** Bordes redondeados */
+	roundedCorners: boolean;
 	/** Mostrar indicadores de selección */
 	showSelectionIndicators: boolean;
+	/** Mostrar sombras */
+	showShadows: boolean;
+	/** Configuración de espaciado */
+	spacing: MasonrySpacingConfig;
 }
 
 /**
@@ -284,36 +284,26 @@ export const MASONRY_PRESETS: Record<string, Partial<MasonryViewConfig>> = {
  * Item posicionado en el layout masonry
  */
 export interface MasonryLayoutItem {
+	/** Aspect ratio calculado o estimado */
+	aspectRatio: number;
+	/** Índice de columna */
+	columnIndex: number;
+	/** Alto del item */
+	height: number;
 	/** Entidad del item */
 	item: AnyEntityWithStats;
+	/** Ancho del item */
+	width: number;
 	/** Posición X */
 	x: number;
 	/** Posición Y */
 	y: number;
-	/** Ancho del item */
-	width: number;
-	/** Alto del item */
-	height: number;
-	/** Índice de columna */
-	columnIndex: number;
-	/** Aspect ratio calculado o estimado */
-	aspectRatio: number;
 }
 
 /**
  * Resultado del cálculo de layout
  */
 export interface MasonryLayoutResult {
-	/** Items posicionados */
-	items: MasonryLayoutItem[];
-	/** Altura total del contenedor */
-	totalHeight: number;
-	/** Número de columnas */
-	columns: number;
-	/** Ancho de cada columna */
-	columnWidth: number;
-	/** Altura de cada columna */
-	columnHeights: number[];
 	/** Métricas de balance */
 	balance: {
 		/** Diferencia entre columna más alta y más baja */
@@ -323,6 +313,16 @@ export interface MasonryLayoutResult {
 		/** Factor de balance (0-1, donde 1 es perfectamente balanceado) */
 		balanceFactor: number;
 	};
+	/** Altura de cada columna */
+	columnHeights: number[];
+	/** Número de columnas */
+	columns: number;
+	/** Ancho de cada columna */
+	columnWidth: number;
+	/** Items posicionados */
+	items: MasonryLayoutItem[];
+	/** Altura total del contenedor */
+	totalHeight: number;
 }
 
 /**

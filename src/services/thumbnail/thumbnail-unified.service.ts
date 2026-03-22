@@ -25,35 +25,35 @@ export type ThumbnailEntityType = 'image' | 'video' | 'audio' | 'document' | 'js
  * Opciones de generación de thumbnail
  */
 export interface ThumbnailOptions {
-	width?: number;
+	force?: boolean;
 	height?: number;
 	quality?: 'low' | 'medium' | 'high';
-	force?: boolean;
+	width?: number;
 }
 
 /**
  * Resultado de generación de thumbnail
  */
 export interface ThumbnailResult {
-	success: boolean;
 	data?: Buffer;
-	mimeType?: string;
-	width?: number;
-	height?: number;
 	error?: string;
 	generated?: boolean;
+	height?: number;
+	mimeType?: string;
+	success: boolean;
+	width?: number;
 }
 
 /**
  * Información de thumbnail para una entidad
  */
 export interface ThumbnailInfo {
-	hasThumbnail: boolean;
-	mimeType?: string;
-	width?: number;
-	height?: number;
-	url?: string;
 	generatedAt?: Date;
+	hasThumbnail: boolean;
+	height?: number;
+	mimeType?: string;
+	url?: string;
+	width?: number;
 }
 
 // ===================== CONSTANTES =====================

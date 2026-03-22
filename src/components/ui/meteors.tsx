@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface MeteorsProps {
-	number?: number;
 	className?: string;
+	number?: number;
 }
 
 export const Meteors = ({ number = 20 }: MeteorsProps) => {

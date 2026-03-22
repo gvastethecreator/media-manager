@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils';
 
 export interface BadgeProps extends useRender.ComponentProps<'span'>, VariantProps<typeof badgeVariants> {
 	asChild?: boolean;
-	dotClassName?: string;
 	disabled?: boolean;
+	dotClassName?: string;
 }
 
 export interface BadgeButtonProps extends useRender.ComponentProps<'button'>, VariantProps<typeof badgeButtonVariants> {

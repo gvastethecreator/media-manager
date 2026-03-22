@@ -14,27 +14,27 @@ const thumbLogger = serverLogger.withContext('Thumbnail');
 const CACHE_DIR_BASE = join(process.cwd(), '.image-cache', 'thumbnails');
 
 export interface ThumbnailOptions {
-	quality: ThumbnailQuality;
+	background?: string;
 	format?: ImageFormat;
 	preserveMetadata?: boolean;
-	background?: string;
 	progressive?: boolean;
+	quality: ThumbnailQuality;
 }
 
 export interface ThumbnailResult {
 	buffer: Buffer;
-	width: number;
-	height: number;
 	format: ImageFormat;
-	size: number;
+	height: number;
 	originalSize?: number;
+	size: number;
+	width: number;
 }
 
 export interface OptimizeResult {
 	data: Buffer;
+	height: number;
 	size: number;
 	width: number;
-	height: number;
 }
 
 const SUPPORTED_FORMATS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif']);

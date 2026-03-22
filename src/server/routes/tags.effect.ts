@@ -11,6 +11,7 @@ import express from 'express';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { TagCreate, TagUpdate } from '@/services/tag/tag-schemas';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
 
@@ -25,8 +26,8 @@ router.get('/', async (req, res) => {
 
 		const options = {
 			search: search as string | undefined,
-			limit: Number.parseInt(limit as string, 10),
-			offset: Number.parseInt(offset as string, 10),
+			limit: sanitizeLimit(limit as string),
+			offset: sanitizeOffset(offset as string),
 			orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt' | 'popularity') || 'name',
 			orderDirection: (sortOrder as 'asc' | 'desc') || 'asc',
 			onlyFavorites: onlyFavorites === 'true',

@@ -43,11 +43,11 @@ type MutableInput = Record<string, unknown>;
 export class File3DService extends Context.Tag('File3DService')<File3DService, File3DServiceInterface>() {}
 
 export interface File3DServiceInterface {
+	readonly create: (input: MutableInput) => Effect.Effect<File3DRow, File3DError>;
+	readonly delete: (id: string) => Effect.Effect<void, File3DError>;
 	readonly getAll: (options?: ListOptions) => Effect.Effect<{ data: File3DRow[]; total: number }, File3DError>;
 	readonly getById: (id: string) => Effect.Effect<File3DRow, File3DError>;
-	readonly create: (input: MutableInput) => Effect.Effect<File3DRow, File3DError>;
 	readonly update: (id: string, input: MutableInput) => Effect.Effect<File3DRow, File3DError>;
-	readonly delete: (id: string) => Effect.Effect<void, File3DError>;
 }
 
 const makeFile3DService = (): File3DServiceInterface => {
@@ -121,12 +121,12 @@ export const File3DServiceLive = Layer.effect(File3DService, Effect.succeed(make
 export class DocumentService extends Context.Tag('DocumentService')<DocumentService, DocumentServiceInterface>() {}
 
 export interface DocumentServiceInterface {
+	readonly create: (input: MutableInput) => Effect.Effect<DocumentRow, DocumentError>;
+	readonly delete: (id: string) => Effect.Effect<void, DocumentError>;
 	readonly getAll: (options?: ListOptions) => Effect.Effect<{ data: DocumentRow[]; total: number }, DocumentError>;
 	readonly getById: (id: string) => Effect.Effect<DocumentRow, DocumentError>;
-	readonly create: (input: MutableInput) => Effect.Effect<DocumentRow, DocumentError>;
-	readonly update: (id: string, input: MutableInput) => Effect.Effect<DocumentRow, DocumentError>;
-	readonly delete: (id: string) => Effect.Effect<void, DocumentError>;
 	readonly getImages: (id: string) => Effect.Effect<any[], DocumentError>;
+	readonly update: (id: string, input: MutableInput) => Effect.Effect<DocumentRow, DocumentError>;
 }
 
 const makeDocumentService = (): DocumentServiceInterface => {
@@ -202,12 +202,12 @@ export const DocumentServiceLive = Layer.effect(DocumentService, Effect.succeed(
 export class JsonFileService extends Context.Tag('JsonFileService')<JsonFileService, JsonFileServiceInterface>() {}
 
 export interface JsonFileServiceInterface {
+	readonly create: (input: MutableInput) => Effect.Effect<JsonFileRow, JsonFileError>;
+	readonly delete: (id: string) => Effect.Effect<void, JsonFileError>;
 	readonly getAll: (options?: ListOptions) => Effect.Effect<{ data: JsonFileRow[]; total: number }, JsonFileError>;
 	readonly getById: (id: string) => Effect.Effect<JsonFileRow, JsonFileError>;
-	readonly create: (input: MutableInput) => Effect.Effect<JsonFileRow, JsonFileError>;
-	readonly update: (id: string, input: MutableInput) => Effect.Effect<JsonFileRow, JsonFileError>;
-	readonly delete: (id: string) => Effect.Effect<void, JsonFileError>;
 	readonly getImages: (id: string) => Effect.Effect<any[], JsonFileError>;
+	readonly update: (id: string, input: MutableInput) => Effect.Effect<JsonFileRow, JsonFileError>;
 }
 
 const makeJsonFileService = (): JsonFileServiceInterface => {
@@ -286,13 +286,13 @@ export class UploadedImagesService extends Context.Tag('UploadedImagesService')<
 >() {}
 
 export interface UploadedImagesServiceInterface {
+	readonly create: (input: MutableInput) => Effect.Effect<UploadedImageRow, UploadedImagesError>;
+	readonly delete: (id: string) => Effect.Effect<void, UploadedImagesError>;
 	readonly getAll: (
 		options?: ListOptions
 	) => Effect.Effect<{ data: UploadedImageRow[]; total: number }, UploadedImagesError>;
 	readonly getById: (id: string) => Effect.Effect<UploadedImageRow, UploadedImagesError>;
-	readonly create: (input: MutableInput) => Effect.Effect<UploadedImageRow, UploadedImagesError>;
 	readonly update: (id: string, input: MutableInput) => Effect.Effect<UploadedImageRow, UploadedImagesError>;
-	readonly delete: (id: string) => Effect.Effect<void, UploadedImagesError>;
 }
 
 const makeUploadedImagesService = (): UploadedImagesServiceInterface => {

@@ -16,34 +16,34 @@ export interface UseSelectionOptions {
 }
 
 export interface UseSelectionResult {
+	/** ID del item activo */
+	activeId: string | null;
+	/** Limpiar selección */
+	clearSelection: () => void;
+	/** Procesar click con modificadores */
+	handleClick: (item: BrowserItem, modifiers?: ClickModifiers) => void;
+	/** Si hay selección */
+	hasSelection: boolean;
+	/** Verificar si item está activo */
+	isActive: (id: string) => boolean;
+	/** Verificar si item está seleccionado */
+	isSelected: (id: string) => boolean;
+	/** Seleccionar todos los items */
+	selectAll: () => void;
+	/** Cantidad de items seleccionados */
+	selectedCount: number;
 	/** IDs seleccionados */
 	selectedIds: string[];
 	/** Set de IDs seleccionados (para lookup rápido) */
 	selectedSet: Set<string>;
-	/** ID del item activo */
-	activeId: string | null;
-	/** Cantidad de items seleccionados */
-	selectedCount: number;
-	/** Si hay selección */
-	hasSelection: boolean;
 	/** Seleccionar un item (reemplaza selección) */
 	selectItem: (id: string) => void;
-	/** Toggle selección de un item */
-	toggleSelection: (id: string) => void;
 	/** Seleccionar rango de items */
 	selectRange: (fromId: string, toId: string) => void;
-	/** Seleccionar todos los items */
-	selectAll: () => void;
-	/** Limpiar selección */
-	clearSelection: () => void;
 	/** Establecer item activo */
 	setActiveItem: (id: string | null) => void;
-	/** Procesar click con modificadores */
-	handleClick: (item: BrowserItem, modifiers?: ClickModifiers) => void;
-	/** Verificar si item está seleccionado */
-	isSelected: (id: string) => boolean;
-	/** Verificar si item está activo */
-	isActive: (id: string) => boolean;
+	/** Toggle selección de un item */
+	toggleSelection: (id: string) => void;
 }
 
 /**

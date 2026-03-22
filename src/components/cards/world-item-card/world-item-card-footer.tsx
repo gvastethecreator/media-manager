@@ -4,12 +4,12 @@ import { formatDistanceToNow } from '@/lib/utils/date';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 
 interface WorldItemCardFooterProps {
-	worldItem: WorldItemWithStats;
 	_totalRelations: number;
+	compact?: boolean;
+	intensityFactor: number;
 	primaryColor: string;
 	secondaryColor: string;
-	intensityFactor: number;
-	compact?: boolean;
+	worldItem: WorldItemWithStats;
 }
 
 /**
