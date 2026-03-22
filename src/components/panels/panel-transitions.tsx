@@ -106,11 +106,11 @@ export function DetailsPanelTransition({
 			className={cn('details-panel-transition flex h-full flex-col', 'bg-background', isAnimating && 'animating')}
 			ref={ref as React.RefObject<HTMLDivElement>}
 		>
-			{header && <div className="details-panel-header flex-shrink-0 border-border border-b p-4">{header}</div>}
+			{header && <div className="details-panel-header shrink-0 border-border border-b p-4">{header}</div>}
 
 			<div className="details-panel-content flex-1 overflow-auto p-4">{children}</div>
 
-			{footer && <div className="details-panel-footer flex-shrink-0 border-border border-t p-4">{footer}</div>}
+			{footer && <div className="details-panel-footer shrink-0 border-border border-t p-4">{footer}</div>}
 		</div>
 	);
 }
@@ -315,7 +315,7 @@ export function PanelOverlayTransition({ isVisible, children, onClose }: PanelOv
 			}}
 			present={isVisible}
 		>
-			<div className="panel-overlay fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={onClose}>
+			<div className="panel-overlay ui-overlay-backdrop-soft fixed inset-0 z-40" onClick={onClose}>
 				<div className="panel-overlay-content absolute" onClick={(e) => e.stopPropagation()}>
 					{children}
 				</div>

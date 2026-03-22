@@ -24,7 +24,7 @@ export function LoadingScreen({ message = 'Cargando...', interactive = false, cl
 			initial={{ opacity: 0 }}
 		>
 			<CircleDashed className="h-10 w-10 animate-spin text-primary" />
-			<p className="p-2 text-white/70 text-xs">{message}</p>
+			<p className="ui-overlay-text-muted p-2 text-xs">{message}</p>
 		</motion.div>
 	);
 }

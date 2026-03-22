@@ -117,7 +117,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	const dialogClassName = useMemo(
 		() =>
 			cn(
-				'fixed inset-0 z-9999 m-0 flex h-screen w-screen flex-col overflow-hidden bg-black/95 p-0 backdrop-blur-md',
+				'fixed inset-0 z-9999 m-0 flex h-screen w-screen flex-col overflow-hidden bg-[color:var(--overlay-backdrop-ultra)] p-0 backdrop-blur-md',
 				isOpen ? 'flex' : 'hidden'
 			),
 		[isOpen]
@@ -140,7 +140,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 			</div>
 
 			{/* Toolbar Fijo - Zona Superior */}
-			<div className="absolute top-0 right-0 left-0 z-[100] h-[60px] shrink-0">
+			<div className="absolute top-0 right-0 left-0 shrink-0" style={{ height: 60, zIndex: 100 }}>
 				<div className="flex h-full items-center justify-between px-4 py-3">
 					<ToolbarActions
 						closeButtonRef={closeButtonRef}
@@ -238,12 +238,12 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 			</div>
 
 			{/* Carousel Fijo - Zona Inferior */}
-			<div className="absolute right-0 bottom-0 left-0 z-[100] flex h-[100px] shrink-0 items-center justify-center pb-4">
+			<div className="absolute right-0 bottom-0 left-0 flex shrink-0 items-center justify-center pb-4" style={{ height: 100, zIndex: 100 }}>
 				<ThumbnailNavigation currentIndex={currentIndex} images={images} onSelectImage={handleSelectImage} />
 			</div>
 
 			{/* Hints */}
-			<div className="pointer-events-none fixed bottom-[120px] left-4 z-50 text-white/60 text-xs">
+			<div className="ui-overlay-text-muted pointer-events-none fixed left-4 z-50 text-xs" style={{ bottom: 120 }}>
 				<p>Flechas: navegar · Rueda: zoom · Arrastrar: mover</p>
 				<p>ESC: cerrar · R: restablecer</p>
 			</div>

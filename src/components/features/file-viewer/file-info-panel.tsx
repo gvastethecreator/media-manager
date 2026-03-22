@@ -30,13 +30,13 @@ export const FileInfoPanel = memo(function FileInfoPanel({ item, className }: Fi
 
 	// Determinar icono según tipo
 	const getIcon = () => {
-		if (mimeType.startsWith('image/')) return <FileImage className="h-5 w-5 text-blue-400" />;
-		if (mimeType.startsWith('video/')) return <FileVideo className="h-5 w-5 text-red-400" />;
-		if (mimeType.startsWith('audio/')) return <FileAudio className="h-5 w-5 text-orange-400" />;
-		if (ext === 'json') return <FileCode className="h-5 w-5 text-green-400" />;
-		if (['obj', 'fbx', 'gltf', 'glb'].includes(ext)) return <FileBox className="h-5 w-5 text-purple-400" />;
-		if (ext === 'pdf') return <FileText className="h-5 w-5 text-red-500" />;
-		return <Folder className="h-5 w-5 text-gray-400" />;
+		if (mimeType.startsWith('image/')) return <FileImage className="h-5 w-5 text-dt-primary-400" />;
+		if (mimeType.startsWith('video/')) return <FileVideo className="h-5 w-5 text-dt-danger-400" />;
+		if (mimeType.startsWith('audio/')) return <FileAudio className="h-5 w-5 text-dt-warning-400" />;
+		if (ext === 'json') return <FileCode className="h-5 w-5 text-dt-success-400" />;
+		if (['obj', 'fbx', 'gltf', 'glb'].includes(ext)) return <FileBox className="h-5 w-5 text-dt-primary-500" />;
+		if (ext === 'pdf') return <FileText className="h-5 w-5 text-dt-danger-500" />;
+		return <Folder className="h-5 w-5 text-dt-neutral-400" />;
 	};
 
 	return (

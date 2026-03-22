@@ -112,7 +112,7 @@ export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', on
 		<Dialog onOpenChange={(open) => !open && onClose()} open={isOpen}>
 			<DialogContent
 				className={cn(
-					'max-h-[95vh] max-w-[95vw] overflow-hidden border-0 bg-black/95 p-0',
+					'max-h-[95vh] max-w-[95vw] overflow-hidden border-0 bg-(--overlay-backdrop-ultra) p-0',
 					isFullscreen && 'fixed inset-0 max-h-none max-w-none rounded-none'
 				)}
 				onEscapeKeyDown={onClose}
@@ -121,13 +121,13 @@ export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', on
 				<DialogTitle className="sr-only">{title}</DialogTitle>
 
 				{/* Header con controles */}
-				<div className="absolute top-0 right-0 left-0 z-50 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent p-4">
-					<span className="max-w-[50%] truncate font-medium text-sm text-white/90">{title}</span>
+				<div className="absolute top-0 right-0 left-0 z-50 flex items-center justify-between bg-linear-to-b from-(--overlay-backdrop-strong) to-transparent p-4">
+					<span className="ui-overlay-text max-w-[50%] truncate font-medium text-sm">{title}</span>
 					<div className="flex items-center gap-2">
 						{/* Controles de zoom */}
-						<div className="flex items-center gap-1 rounded-lg bg-black/50 p-1">
+						<div className="ui-overlay-control-surface flex items-center gap-1 rounded-lg p-1">
 							<Button
-								className="h-8 w-8 text-white hover:bg-white/20"
+								className="ui-overlay-text h-8 w-8 hover:bg-(--overlay-control-bg-hover)"
 								disabled={scale <= 0.5}
 								onClick={handleZoomOut}
 								size="icon"
@@ -135,9 +135,9 @@ export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', on
 							>
 								<ZoomOut className="h-4 w-4" />
 							</Button>
-							<span className="w-12 text-center text-white text-xs">{Math.round(scale * 100)}%</span>
+							<span className="ui-overlay-text w-12 text-center text-xs">{Math.round(scale * 100)}%</span>
 							<Button
-								className="h-8 w-8 text-white hover:bg-white/20"
+								className="ui-overlay-text h-8 w-8 hover:bg-(--overlay-control-bg-hover)"
 								disabled={scale >= 5}
 								onClick={handleZoomIn}
 								size="icon"
@@ -146,7 +146,7 @@ export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', on
 								<ZoomIn className="h-4 w-4" />
 							</Button>
 							<Button
-								className="h-8 w-8 text-white hover:bg-white/20"
+								className="ui-overlay-text h-8 w-8 hover:bg-(--overlay-control-bg-hover)"
 								disabled={scale === 1 && position.x === 0 && position.y === 0}
 								onClick={handleReset}
 								size="icon"
@@ -158,7 +158,7 @@ export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', on
 
 						{/* Fullscreen */}
 						<Button
-							className="h-8 w-8 text-white hover:bg-white/20"
+							className="ui-overlay-text h-8 w-8 hover:bg-(--overlay-control-bg-hover)"
 							onClick={toggleFullscreen}
 							size="icon"
 							variant="ghost"
@@ -167,7 +167,12 @@ export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', on
 						</Button>
 
 						{/* Cerrar */}
-						<Button className="h-8 w-8 text-white hover:bg-white/20" onClick={onClose} size="icon" variant="ghost">
+						<Button
+							className="ui-overlay-text h-8 w-8 hover:bg-(--overlay-control-bg-hover)"
+							onClick={onClose}
+							size="icon"
+							variant="ghost"
+						>
 							<X className="h-4 w-4" />
 						</Button>
 					</div>
@@ -194,7 +199,7 @@ export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', on
 				</div>
 
 				{/* Instrucciones */}
-				<div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1.5 text-white/50 text-xs">
+				<div className="ui-overlay-control-surface ui-overlay-text-muted pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-3 py-1.5 text-xs">
 					Scroll para zoom • Arrastrar para mover • Doble click para reset
 				</div>
 			</DialogContent>
