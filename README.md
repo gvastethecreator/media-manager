@@ -4,7 +4,7 @@
 
 [![React](https://img.shields.io/badge/React-19.2.4-61DAFB?logo=react)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?logo=typescript)](https://www.typescriptlang.org)
-[![Vite](https://img.shields.io/badge/Vite-7.3.1-646CFF?logo=vite)](https://vitejs.dev)
+[![Vite+](https://img.shields.io/badge/Vite%2B-0.1.13-646CFF?logo=vite)](https://viteplus.dev)
 [![Bun](https://img.shields.io/badge/Bun-1.2+-000000?logo=bun)](https://bun.sh)
 [![Drizzle](https://img.shields.io/badge/Drizzle-ORM-C5F74F)](https://orm.drizzle.team)
 [![Tauri](https://img.shields.io/badge/Tauri-2.9+-FFC131?logo=tauri)](https://tauri.app)
@@ -70,9 +70,9 @@ Sistema integral para la gestión inteligente de archivos multimedia, diseñado 
 
 | Capa | Tecnologías |
 |------|-------------|
-| **Frontend** | React 19, TypeScript 5.9, Vite 7, Tailwind CSS 4 |
+| **Frontend** | React 19, TypeScript 5.9, Vite+ (Vite + Rolldown), Tailwind CSS 4 |
 | **Estado** | Zustand 5, TanStack Query 5, Immer |
-| **UI/UX** | Radix UI, Framer Motion, Lucide Icons |
+| **UI/UX** | Radix UI, GSAP, Lucide Icons |
 | **Backend** | Express 5, Bun Runtime, Effect-TS |
 | **Database** | Drizzle ORM, SQLite (libsql), FTS5 |
 | **Desktop** | Tauri 2 (Rust) |
@@ -142,7 +142,7 @@ USE_EFFECT_AUDIOS=true
 # Desarrollo completo (frontend + backend + HMR)
 bun run dev:full
 
-# Solo frontend (Vite)
+# Solo frontend (Vite+)
 bun run dev:vite
 
 # Solo backend con HMR
@@ -220,8 +220,10 @@ image-manager/
 
 | Comando | Descripción |
 |---------|-------------|
-| `bun run biome` | Lint con Biome |
-| `bun run biome:fix` | Lint + auto-fix |
+| `bun run check` | Gate operativo: lint + typecheck |
+| `bun run check:full` | Auditoría completa con Vite+ (lint + format del repo) |
+| `bun run lint` | Lint con Oxc / Oxlint |
+| `bun run lint:fix` | Lint con auto-fix cuando aplique |
 | `bun run format` | Formatear código |
 | `bun run tsc` | TypeScript check |
 
@@ -322,7 +324,7 @@ bun run test:e2e:debug
 
 ### Configuración
 
-- **Vitest**: Entorno jsdom, cobertura mínima 50%
+- **Vitest / Vite+ Test**: Entorno jsdom, cobertura mínima 50%
 - **Playwright**: Chrome, timeout 60s, auto-starts dev server
 
 ---
