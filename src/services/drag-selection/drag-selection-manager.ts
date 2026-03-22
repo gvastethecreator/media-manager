@@ -2,56 +2,56 @@ import type { SelectionState } from '@/store/selection.store';
 import { useSelectionStore } from '@/store/selection.store';
 
 export interface DragSelectionConfig {
-	enabled: boolean;
-	multiSelect?: boolean;
-	threshold: number; // Minimum distance to start drag selection
-	scrollSpeed?: number;
-	scrollThreshold?: number;
-	selectOnDrag?: boolean;
-	clearOnStart?: boolean;
-	visualFeedback?: boolean;
 	autoScroll?: {
 		enabled: boolean;
 		speed: number;
 		threshold: number;
 		maxSpeed: number;
 	};
-	modifiers?: {
-		add: string;
-		subtract: string;
-		toggle: string;
-	};
-	selectableClass?: string;
-	selectedClass?: string;
-	selectingClass?: string;
+	clearOnStart?: boolean;
 	containerClass?: string;
+	enabled: boolean;
 	keyModifiers?: {
 		add: string[]; // Keys to add to selection (e.g., ['Control', 'Meta'])
 		subtract: string[]; // Keys to subtract from selection (e.g., ['Alt'])
 		toggle: string[]; // Keys to toggle selection (e.g., ['Shift'])
 	};
+	modifiers?: {
+		add: string;
+		subtract: string;
+		toggle: string;
+	};
+	multiSelect?: boolean;
+	scrollSpeed?: number;
+	scrollThreshold?: number;
+	selectableClass?: string;
+	selectedClass?: string;
+	selectingClass?: string;
+	selectOnDrag?: boolean;
+	threshold: number; // Minimum distance to start drag selection
+	visualFeedback?: boolean;
 }
 
 export interface DragSelectionState {
-	isActive: boolean;
-	startPoint: { x: number; y: number } | null;
 	currentPoint: { x: number; y: number } | null;
-	selectionRect: DOMRect | null;
-	selectedElements: Set<string>;
+	isActive: boolean;
 	mode: 'select' | 'add' | 'subtract' | 'toggle';
 	scrolling: {
 		x: number;
 		y: number;
 		active: boolean;
 	};
+	selectedElements: Set<string>;
+	selectionRect: DOMRect | null;
+	startPoint: { x: number; y: number } | null;
 }
 
 export interface DragSelectionEvents {
+	onScroll?: (direction: { x: number; y: number }) => void;
+	onSelectionCancel?: (state: DragSelectionState) => void;
+	onSelectionEnd?: (state: DragSelectionState, selectedIds: string[]) => void;
 	onSelectionStart?: (state: DragSelectionState) => void;
 	onSelectionUpdate?: (state: DragSelectionState, selectedIds: string[]) => void;
-	onSelectionEnd?: (state: DragSelectionState, selectedIds: string[]) => void;
-	onSelectionCancel?: (state: DragSelectionState) => void;
-	onScroll?: (direction: { x: number; y: number }) => void;
 }
 
 const defaultConfig: DragSelectionConfig = {

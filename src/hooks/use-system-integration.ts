@@ -12,63 +12,63 @@ import type { AnyEntityWithStats } from '@/types/entities';
 
 // File System Access API types
 interface FilePickerAcceptType {
-	description?: string;
 	accept: Record<string, string | string[]>;
+	description?: string;
 }
 
 interface SaveFilePickerOptions {
+	excludeAcceptAllOption?: boolean;
 	suggestedName?: string;
 	types?: FilePickerAcceptType[];
-	excludeAcceptAllOption?: boolean;
 }
 
 interface OpenFilePickerOptions {
+	excludeAcceptAllOption?: boolean;
 	multiple?: boolean;
 	types?: FilePickerAcceptType[];
-	excludeAcceptAllOption?: boolean;
 }
 
 const logger = clientLogger.withContext('SystemIntegration');
 
 interface SystemIntegrationOptions {
-	enableFileAssociations?: boolean;
-	enableContextMenu?: boolean;
-	enableSystemNotifications?: boolean;
 	enableClipboardIntegration?: boolean;
+	enableContextMenu?: boolean;
+	enableFileAssociations?: boolean;
+	enableSystemNotifications?: boolean;
 }
 
 interface SystemCapabilities {
-	hasFileSystemAccess: boolean;
-	hasClipboardAccess: boolean;
-	hasNotificationAccess: boolean;
 	canShowDirectoryPicker: boolean;
-	canShowSaveFilePicker: boolean;
 	canShowOpenFilePicker: boolean;
+	canShowSaveFilePicker: boolean;
+	hasClipboardAccess: boolean;
+	hasFileSystemAccess: boolean;
+	hasNotificationAccess: boolean;
 }
 
 interface UseSystemIntegrationReturn {
 	capabilities: SystemCapabilities;
+
+	// Clipboard operations
+	copyToClipboard: (items: AnyEntityWithStats[]) => Promise<boolean>;
 	isSupported: boolean;
 
 	// File system operations
 	openInExplorer: (path: string) => Promise<boolean>;
-	selectInExplorer: (path: string) => Promise<boolean>;
 	openWithDefaultApp: (path: string) => Promise<boolean>;
-
-	// Directory operations
-	showDirectoryPicker: () => Promise<FileSystemDirectoryHandle | null>;
-	showSaveFilePicker: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle | null>;
-	showOpenFilePicker: (options?: OpenFilePickerOptions) => Promise<FileSystemFileHandle[] | null>;
-
-	// Clipboard operations
-	copyToClipboard: (items: AnyEntityWithStats[]) => Promise<boolean>;
 	pasteFromClipboard: () => Promise<File[] | null>;
-
-	// System notifications
-	showSystemNotification: (title: string, options?: NotificationOptions) => Promise<boolean>;
 
 	// File associations
 	registerFileHandler: (extension: string, handler: (file: File) => void) => boolean;
+	selectInExplorer: (path: string) => Promise<boolean>;
+
+	// Directory operations
+	showDirectoryPicker: () => Promise<FileSystemDirectoryHandle | null>;
+	showOpenFilePicker: (options?: OpenFilePickerOptions) => Promise<FileSystemFileHandle[] | null>;
+	showSaveFilePicker: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle | null>;
+
+	// System notifications
+	showSystemNotification: (title: string, options?: NotificationOptions) => Promise<boolean>;
 	unregisterFileHandler: (extension: string) => boolean;
 }
 

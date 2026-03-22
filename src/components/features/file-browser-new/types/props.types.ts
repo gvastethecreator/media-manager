@@ -29,6 +29,8 @@ export type ItemDoubleClickHandler = (item: BrowserItem) => void;
  * Props del componente FileBrowser principal
  */
 export interface FileBrowserProps {
+	/** Clase CSS adicional */
+	className?: string;
 	/** ID de carpeta a mostrar */
 	folderId?: string | null;
 	/** Items directos (alternativa a folderId) */
@@ -37,8 +39,6 @@ export interface FileBrowserProps {
 	onItemClick?: ItemClickHandler;
 	/** Handler de doble click */
 	onItemDoubleClick?: ItemDoubleClickHandler;
-	/** Clase CSS adicional */
-	className?: string;
 }
 
 /**
@@ -50,26 +50,26 @@ export type ItemContextMenuHandler = (e: React.MouseEvent, item: BrowserItem) =>
  * Props para vistas individuales
  */
 export interface BrowserViewProps {
-	/** Items a mostrar */
-	items: BrowserItem[];
-	/** Grupos (si está agrupado) */
-	groups?: BrowserItemGroup[] | null;
-	/** Handler de click */
-	onItemClick?: ItemClickHandler;
-	/** Handler de doble click */
-	onItemDoubleClick?: ItemDoubleClickHandler;
-	/** Handler de context menu */
-	onItemContextMenu?: ItemContextMenuHandler;
 	/** Configuración de la vista */
 	config: ViewConfig;
-	/** Contenedor de scroll (para virtualización) */
-	scrollContainer?: HTMLElement | null;
-	/** Callback cuando el contenedor está listo */
-	onContainerReady?: (el: HTMLDivElement | null) => void;
-	/** Callback cuando el root del layout está listo */
-	onLayoutRootReady?: (el: HTMLElement | null) => void;
+	/** Grupos (si está agrupado) */
+	groups?: BrowserItemGroup[] | null;
+	/** Items a mostrar */
+	items: BrowserItem[];
 	/** Límite de items animados en layout */
 	layoutItemLimit?: number;
+	/** Callback cuando el contenedor está listo */
+	onContainerReady?: (el: HTMLDivElement | null) => void;
+	/** Handler de click */
+	onItemClick?: ItemClickHandler;
+	/** Handler de context menu */
+	onItemContextMenu?: ItemContextMenuHandler;
+	/** Handler de doble click */
+	onItemDoubleClick?: ItemDoubleClickHandler;
+	/** Callback cuando el root del layout está listo */
+	onLayoutRootReady?: (el: HTMLElement | null) => void;
+	/** Contenedor de scroll (para virtualización) */
+	scrollContainer?: HTMLElement | null;
 	/** Suprime animación de aparición (p.ej. al cambiar vista) */
 	suppressAppearAnimation?: boolean;
 	/** Configuración de virtualización */
@@ -86,22 +86,22 @@ export interface BrowserViewProps {
  * Props para renderizador de items
  */
 export interface ItemRendererProps {
-	/** Item a renderizar */
-	item: BrowserItem;
-	/** Tamaño del item */
-	size: number;
-	/** Si está seleccionado */
-	isSelected?: boolean;
-	/** Si es el item activo */
-	isActive?: boolean;
-	/** Handler de click */
-	onClick?: (e: React.MouseEvent) => void;
-	/** Handler de doble click */
-	onDoubleClick?: (e: React.MouseEvent) => void;
-	/** Handler de context menu */
-	onContextMenu?: (e: React.MouseEvent) => void;
 	/** Clase CSS adicional */
 	className?: string;
+	/** Si es el item activo */
+	isActive?: boolean;
+	/** Si está seleccionado */
+	isSelected?: boolean;
+	/** Item a renderizar */
+	item: BrowserItem;
+	/** Handler de click */
+	onClick?: (e: React.MouseEvent) => void;
+	/** Handler de context menu */
+	onContextMenu?: (e: React.MouseEvent) => void;
+	/** Handler de doble click */
+	onDoubleClick?: (e: React.MouseEvent) => void;
+	/** Tamaño del item */
+	size: number;
 	/** Estilo inline */
 	style?: React.CSSProperties;
 }
@@ -110,50 +110,44 @@ export interface ItemRendererProps {
  * Props del toolbar
  */
 export interface ToolbarProps {
-	/** IDs de items seleccionables */
-	itemIds: string[];
-	/** Si está cargando */
-	isLoading?: boolean;
-	/** Handler de refresh */
-	onRefresh?: () => void;
 	/** Clase CSS adicional */
 	className?: string;
+	/** Si está cargando */
+	isLoading?: boolean;
+	/** IDs de items seleccionables */
+	itemIds: string[];
+	/** Handler de refresh */
+	onRefresh?: () => void;
 }
 
 /**
  * Props del status bar
  */
 export interface StatusBarProps {
-	/** Total de items */
-	totalItems: number;
-	/** Items mostrados actualmente */
-	shownItems: number;
-	/** Items seleccionados */
-	selectedCount: number;
-	/** Si está cargando */
-	isLoading?: boolean;
-	/** Estado de paginación */
-	pagination?: PaginationState;
-	/** Handler de página anterior */
-	onPrevPage?: () => void;
-	/** Handler de página siguiente */
-	onNextPage?: () => void;
-	/** Handler de refresh */
-	onRefresh?: () => void;
 	/** Clase CSS adicional */
 	className?: string;
+	/** Si está cargando */
+	isLoading?: boolean;
+	/** Handler de página siguiente */
+	onNextPage?: () => void;
+	/** Handler de página anterior */
+	onPrevPage?: () => void;
+	/** Handler de refresh */
+	onRefresh?: () => void;
+	/** Estado de paginación */
+	pagination?: PaginationState;
+	/** Items seleccionados */
+	selectedCount: number;
+	/** Items mostrados actualmente */
+	shownItems: number;
+	/** Total de items */
+	totalItems: number;
 }
 
 /**
  * Props de estado vacío
  */
 export interface EmptyStateProps {
-	/** Título */
-	title?: string;
-	/** Descripción */
-	description?: string;
-	/** Icono (componente React) */
-	icon?: React.ComponentType<{ className?: string }>;
 	/** Acción opcional */
 	action?: {
 		label: string;
@@ -161,20 +155,26 @@ export interface EmptyStateProps {
 	};
 	/** Clase CSS adicional */
 	className?: string;
+	/** Descripción */
+	description?: string;
+	/** Icono (componente React) */
+	icon?: React.ComponentType<{ className?: string }>;
+	/** Título */
+	title?: string;
 }
 
 /**
  * Props de estado de carga
  */
 export interface LoadingStateProps {
-	/** Modo de vista actual */
-	viewMode: ViewMode;
-	/** Tamaño de item */
-	itemSize?: number;
-	/** Conteo de items a simular */
-	itemCount?: number;
 	/** Clase CSS adicional */
 	className?: string;
+	/** Conteo de items a simular */
+	itemCount?: number;
+	/** Tamaño de item */
+	itemSize?: number;
+	/** Modo de vista actual */
+	viewMode: ViewMode;
 }
 
 /**

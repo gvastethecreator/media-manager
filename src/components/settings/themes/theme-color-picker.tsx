@@ -10,29 +10,29 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Slider } from '@/components/ui/slider';
+import { Slider } from '@/components/ui/slider-legacy';
 import { cn } from '@/lib/utils';
 
 interface ThemeColorPickerProps {
-	/** Valor actual en formato OKLCH */
-	value: string;
-	/** Callback cuando cambia el color */
-	onChange: (value: string) => void;
-	/** Etiqueta del color */
-	label: string;
-	/** Descripción opcional */
-	description?: string;
-	/** Valor por defecto para reset */
-	defaultValue?: string;
 	/** Clase adicional */
 	className?: string;
+	/** Valor por defecto para reset */
+	defaultValue?: string;
+	/** Descripción opcional */
+	description?: string;
+	/** Etiqueta del color */
+	label: string;
+	/** Callback cuando cambia el color */
+	onChange: (value: string) => void;
+	/** Valor actual en formato OKLCH */
+	value: string;
 }
 
 interface OKLCHColor {
-	l: number; // 0-1 (lightness)
+	a?: number; // 0-1 (alpha)
 	c: number; // 0-0.4 (chroma)
 	h: number; // 0-360 (hue)
-	a?: number; // 0-1 (alpha)
+	l: number; // 0-1 (lightness)
 }
 
 /**

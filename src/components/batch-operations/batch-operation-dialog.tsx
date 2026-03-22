@@ -9,7 +9,7 @@ import { AlertTriangle, Copy, FolderOpen, Move, Settings, Trash2 } from 'lucide-
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox-v3';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
 	Dialog,
 	DialogContent,
@@ -31,13 +31,13 @@ import type { AnyEntityWithStats } from '@/types/entities';
 export type BatchOperationDialogType = 'copy' | 'move' | 'delete';
 
 interface BatchOperationDialogProps {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	type: BatchOperationDialogType;
 	items: AnyEntityWithStats[];
-	targetPath?: string;
-	onConfirm: (options: BatchOperationOptions & { targetPath?: string }) => void;
 	onCancel?: () => void;
+	onConfirm: (options: BatchOperationOptions & { targetPath?: string }) => void;
+	onOpenChange: (open: boolean) => void;
+	open: boolean;
+	targetPath?: string;
+	type: BatchOperationDialogType;
 }
 
 export function BatchOperationDialog({

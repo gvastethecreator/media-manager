@@ -2,10 +2,10 @@ import { serverLogger } from '../logger/server-logger';
 
 // Interfaz para las opciones del logger de acciones
 export interface ActionLoggerOptions {
-	showParams?: boolean;
-	showResult?: boolean;
 	sensitiveParamFields?: string[];
 	sensitiveResultFields?: string[];
+	showParams?: boolean;
+	showResult?: boolean;
 }
 
 // Opciones predeterminadas

@@ -2,43 +2,43 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
 
 export interface SystemStats {
-	totalImages: number;
-	totalVideos: number;
-	totalAudio: number;
-	totalFolders: number;
-	totalAlbums: number;
-	totalCharacters: number;
-	totalCollections: number;
-	totalTags: number;
-	totalDocuments: number;
-	totalJsonFiles: number;
-	totalFile3D: number;
-	storageUsed: number;
-	storageAvailable: number;
-	dbSize: number;
 	databaseSize: number;
+	dbSize: number;
 	formattedDatabaseSize: string;
 	lastBackup?: string;
+	storageAvailable: number;
+	storageUsed: number;
+	totalAlbums: number;
+	totalAudio: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalDocuments: number;
+	totalFile3D: number;
+	totalFolders: number;
+	totalImages: number;
+	totalJsonFiles: number;
+	totalTags: number;
+	totalVideos: number;
 }
 
 export interface SystemVersion {
-	version: string;
 	buildDate: string;
 	commitHash: string;
 	environment: string;
+	version: string;
 }
 
 export interface SystemResponse {
-	success: boolean;
 	message: string;
+	success: boolean;
 	timestamp: string;
 }
 
 export interface Settings {
+	createdAt: string;
+	data: Record<string, unknown>;
 	id: string;
 	profileId?: string;
-	data: Record<string, unknown>;
-	createdAt: string;
 	updatedAt: string;
 }
 

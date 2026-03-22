@@ -6,10 +6,6 @@ import { cn } from '@/lib/utils';
 
 export interface SvgTextProps {
 	/**
-	 * The SVG content to display inside the text
-	 */
-	svg: ReactNode;
-	/**
 	 * The content to display (will have the SVG "inside" it)
 	 */
 	children: ReactNode;
@@ -27,6 +23,10 @@ export interface SvgTextProps {
 	 * @default "bold"
 	 */
 	fontWeight?: string | number;
+	/**
+	 * The SVG content to display inside the text
+	 */
+	svg: ReactNode;
 }
 
 /**

@@ -18,6 +18,7 @@ import {
 import { ConceptService, ConceptServiceLive } from '@/services/concept/concept.service.effect';
 import { PlaceService, PlaceServiceLive } from '@/services/place/place.service.effect';
 import { PromptService, PromptServiceLive } from '@/services/prompt/prompt.service.effect';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 // ============= Places Router =============
 
@@ -39,8 +40,8 @@ placesRouter.get(
 			} = req.query;
 			const options = {
 				search: search as string | undefined,
-				limit: Number.parseInt(limit as string, 10),
-				offset: Number.parseInt(offset as string, 10),
+				limit: sanitizeLimit(limit),
+				offset: sanitizeOffset(offset),
 				orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt') || 'createdAt',
 				orderDirection: (sortOrder as 'asc' | 'desc') || 'desc',
 				category: category as string | undefined,
@@ -154,8 +155,8 @@ conceptsRouter.get(
 			} = req.query;
 			const options = {
 				search: search as string | undefined,
-				limit: Number.parseInt(limit as string, 10),
-				offset: Number.parseInt(offset as string, 10),
+				limit: sanitizeLimit(limit),
+				offset: sanitizeOffset(offset),
 				orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt') || 'createdAt',
 				orderDirection: (sortOrder as 'asc' | 'desc') || 'desc',
 				category: category as string | undefined,
@@ -262,8 +263,8 @@ promptsRouter.get(
 			} = req.query;
 			const options = {
 				search: search as string | undefined,
-				limit: Number.parseInt(limit as string, 10),
-				offset: Number.parseInt(offset as string, 10),
+				limit: sanitizeLimit(limit),
+				offset: sanitizeOffset(offset),
 				orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt') || 'createdAt',
 				orderDirection: (sortOrder as 'asc' | 'desc') || 'desc',
 				category: category as string | undefined,

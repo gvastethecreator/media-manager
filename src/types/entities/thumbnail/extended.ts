@@ -10,29 +10,29 @@ import { ThumbnailBase, ThumbnailMetadata, thumbnailBaseSchema } from './types';
  * Interfaz completa para Thumbnail con información adicional
  */
 export interface ThumbnailComplete extends ThumbnailBase {
-	url: string;
-	metadata?: ThumbnailMetadata | null;
-	errorMessage?: string | null;
-	errorTimestamp?: Date | null;
-	optimizedAt?: Date | null;
 	_count?: {
 		usages?: number;
 	};
+	errorMessage?: string | null;
+	errorTimestamp?: Date | null;
+	metadata?: ThumbnailMetadata | null;
+	optimizedAt?: Date | null;
+	url: string;
 }
 
 /**
  * Interfaz para estadísticas de Thumbnail
  */
 export interface ThumbnailStats {
-	totalSize: number;
+	averageHeight: number;
 	averageSize: number;
 	averageWidth: number;
-	averageHeight: number;
+	errorRate: number;
 	formatsDistribution: Record<string, number>;
-	qualityDistribution: Record<string, number>;
 	lastGenerated: Date | null;
 	optimizationRate: number;
-	errorRate: number;
+	qualityDistribution: Record<string, number>;
+	totalSize: number;
 }
 
 /**
@@ -46,15 +46,15 @@ export interface ThumbnailWithStats extends ThumbnailComplete {
  * Interfaz para Thumbnail con propiedades de UI
  */
 export interface ThumbnailExtended extends ThumbnailComplete {
+	downloadUrl: string;
+	formattedCreatedAt: string;
+	formattedDimensions: string;
 	// Propiedades de UI
 	formattedSize: string;
-	formattedCreatedAt: string;
 	formattedUpdatedAt: string;
-	formattedDimensions: string;
-	optimizationStatus: 'optimized' | 'not-optimized' | 'error';
 	hasFailed: boolean;
+	optimizationStatus: 'optimized' | 'not-optimized' | 'error';
 	viewUrl: string;
-	downloadUrl: string;
 }
 
 // Validaciones Zod

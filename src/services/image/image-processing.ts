@@ -13,12 +13,12 @@ import { SERVICE_NAME } from './image-utils';
  * Opciones para el procesamiento de imágenes
  */
 export interface ImageProcessingOptions {
-	quality?: number;
-	width?: number;
-	height?: number;
-	format?: 'webp' | 'jpeg' | 'png';
 	fit?: 'cover' | 'contain' | 'inside' | 'outside';
+	format?: 'webp' | 'jpeg' | 'png';
+	height?: number;
+	quality?: number;
 	type?: string;
+	width?: number;
 }
 
 /**

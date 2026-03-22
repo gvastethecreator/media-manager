@@ -7,12 +7,12 @@ import { Button } from './button';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
 interface EmojiPickerProps {
-	onEmojiSelect?: (emoji: string) => void;
-	value?: string;
 	className?: string;
 	compact?: boolean;
-	showLabel?: boolean;
 	onChange?: (emoji: string) => void;
+	onEmojiSelect?: (emoji: string) => void;
+	showLabel?: boolean;
+	value?: string;
 }
 
 // 🎯 Emojis comunes para el proyecto de gestión de imágenes

@@ -4,17 +4,16 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface PromptCardContentProps {
-	name: string;
-	description?: string | null;
-	content?: string;
-	purpose?: string;
-	parameters?: Record<string, any> | string;
 	category?: string;
-	tags?: string[] | string;
-	emoji?: string | null;
 	color?: string;
+	compact?: boolean;
+	content?: string;
+	description?: string | null;
+	emoji?: string | null;
+	name: string;
+	parameters?: Record<string, any> | string;
 	primaryColor: string;
-	secondaryColor?: string;
+	purpose?: string;
 	relationCounts?: {
 		characters?: number;
 		notes?: number;
@@ -24,8 +23,9 @@ interface PromptCardContentProps {
 		collections?: number;
 		albums?: number;
 	};
+	secondaryColor?: string;
+	tags?: string[] | string;
 	tcgMode?: boolean;
-	compact?: boolean;
 }
 
 /**

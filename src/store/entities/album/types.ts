@@ -14,8 +14,8 @@ export type { AlbumCreateInput as CreateAlbumInput, AlbumUpdateInput as UpdateAl
 
 export interface AlbumCoreState {
 	albums: Record<string, AlbumWithStats>;
-	isLoading: boolean;
 	error: string | null;
+	isLoading: boolean;
 	lastUpdated: number | null;
 }
 
@@ -28,12 +28,12 @@ export type AlbumFilterState = Record<never, never>;
 // --- Acciones del Slice ---
 
 export interface AlbumCoreActions {
-	loadAlbums: () => Promise<void>;
 	createAlbum: (data: AlbumCreateInput) => Promise<void>;
-	updateAlbum: (id: string, data: AlbumUpdateInput) => Promise<void>;
 	deleteAlbum: (id: string) => Promise<void>;
 	// Getters
 	getSortedAlbums: () => AlbumWithStats[];
+	loadAlbums: () => Promise<void>;
+	updateAlbum: (id: string, data: AlbumUpdateInput) => Promise<void>;
 }
 
 export interface AlbumUIActions {

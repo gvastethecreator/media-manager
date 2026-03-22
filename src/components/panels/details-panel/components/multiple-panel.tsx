@@ -4,8 +4,8 @@ import type { AnyEntityWithStats } from '@/types/entities';
 import { getEntityIcon } from '../utils/icon-utils';
 
 interface MultiplePanelProps {
-	items: AnyEntityWithStats[];
 	className?: string;
+	items: AnyEntityWithStats[];
 }
 
 export const MultiplePanel: React.FC<MultiplePanelProps> = ({ items, className = '' }) => {

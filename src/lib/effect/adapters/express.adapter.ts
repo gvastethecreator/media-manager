@@ -17,9 +17,9 @@ const logger = serverLogger.withContext('ExpressAdapter');
  * Tipo para errores con status HTTP
  */
 export interface HttpError {
-	readonly status: number;
-	readonly message: string;
 	readonly details?: unknown;
+	readonly message: string;
+	readonly status: number;
 }
 
 /**

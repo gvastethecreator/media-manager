@@ -121,61 +121,61 @@ const FILE3D_EXTENSIONS = new Set(['.obj', '.fbx', '.gltf', '.glb', '.dae', '.3d
  * Interfaz para los resultados del escaneo de carpetas - OPTIMIZADA ⚡
  */
 export interface FolderScanResult {
-	path: string; // Ruta de la carpeta escaneada
-	files: FileInfo[]; // Lista de archivos encontrados
+	audios: FileInfo[]; // Archivos de audio (acceso directo)
 	directories: DirectoryInfo[]; // Lista de subcarpetas encontradas
-	totalFiles: number; // Total de archivos (incluye subcarpetas si recursive es true)
-	totalDirectories: number; // Total de directorios
-	totalSize: number; // Tamaño total en bytes
-	scannedAt: Date; // Fecha y hora del escaneo
+	documents: FileInfo[]; // Archivos de documento (acceso directo)
 	error?: string; // Error si ocurrió alguno
+	file3Ds: FileInfo[]; // Archivos 3D (acceso directo)
+	files: FileInfo[]; // Lista de archivos encontrados
 	// 🚀 PROPIEDADES OPTIMIZADAS - MULTI-FORMATO
 	images: FileInfo[]; // Archivos de imagen (acceso directo)
-	videos: FileInfo[]; // Archivos de video (acceso directo)
-	audios: FileInfo[]; // Archivos de audio (acceso directo)
-	documents: FileInfo[]; // Archivos de documento (acceso directo)
 	jsonFiles: FileInfo[]; // Archivos JSON (acceso directo)
-	file3Ds: FileInfo[]; // Archivos 3D (acceso directo)
 	others: FileInfo[]; // Otros archivos (acceso directo)
+	path: string; // Ruta de la carpeta escaneada
+	scannedAt: Date; // Fecha y hora del escaneo
 	stats?: ScanStats; // Estadísticas del escaneo
+	totalDirectories: number; // Total de directorios
+	totalFiles: number; // Total de archivos (incluye subcarpetas si recursive es true)
+	totalSize: number; // Tamaño total en bytes
+	videos: FileInfo[]; // Archivos de video (acceso directo)
 }
 
 /**
  * Interfaz para información de archivos
  */
 export interface FileInfo {
+	extension: string; // Extensión del archivo (con punto)
+	isDirectory: false; // Flag para indicar que es un archivo
+	modifiedAt: Date; // Fecha de última modificación
 	name: string; // Nombre del archivo con extensión
 	path: string; // Ruta completa al archivo
 	relativePath: string; // Ruta relativa desde la carpeta base
-	extension: string; // Extensión del archivo (con punto)
 	size: number; // Tamaño en bytes
-	modifiedAt: Date; // Fecha de última modificación
-	isDirectory: false; // Flag para indicar que es un archivo
 }
 
 /**
  * Interfaz para información de directorios
  */
 export interface DirectoryInfo {
+	isDirectory: true; // Flag para indicar que es un directorio
+	modifiedAt: Date; // Fecha de última modificación
 	name: string; // Nombre del directorio
 	path: string; // Ruta completa al directorio
 	relativePath: string; // Ruta relativa desde la carpeta base
-	modifiedAt: Date; // Fecha de última modificación
-	isDirectory: true; // Flag para indicar que es un directorio
 }
 
 /**
  * Opciones para el escaneo de carpetas
  */
 export interface ScanFolderOptions {
-	recursive?: boolean; // Escanear subcarpetas recursivamente
-	maxDepth?: number; // Profundidad máxima de escaneo (si recursive es true)
-	includeExtensions?: string[]; // Extensiones a incluir (con punto)
 	excludeExtensions?: string[]; // Extensiones a excluir (con punto)
+	includeExtensions?: string[]; // Extensiones a incluir (con punto)
 	includeHidden?: boolean; // Incluir archivos/carpetas ocultos
-	sortFiles?: 'name' | 'size' | 'date'; // Ordenar archivos por
-	sortDirection?: 'asc' | 'desc'; // Dirección de ordenación
 	limit?: number; // Límite de archivos a devolver
+	maxDepth?: number; // Profundidad máxima de escaneo (si recursive es true)
+	recursive?: boolean; // Escanear subcarpetas recursivamente
+	sortDirection?: 'asc' | 'desc'; // Dirección de ordenación
+	sortFiles?: 'name' | 'size' | 'date'; // Ordenar archivos por
 }
 
 /**
@@ -399,8 +399,8 @@ export async function getFolderFileSystemStats(folderPath: string): Promise<{
  */
 export interface ScanStats {
 	images: FileInfo[];
-	videos: FileInfo[];
 	others: FileInfo[];
+	videos: FileInfo[];
 }
 
 /**

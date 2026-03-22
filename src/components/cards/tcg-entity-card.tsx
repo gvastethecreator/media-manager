@@ -16,26 +16,26 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
  * Props para TCGEntityCard
  */
 export interface TCGEntityCardProps {
+	/** Clases adicionales */
+	className?: string;
+	/** Si deshabilitar efectos 3D */
+	disable3D?: boolean;
 	/** Entidad a mostrar */
 	entity: AnyEntityWithStats;
+	/** Si está en modo compacto */
+	isCompact?: boolean;
 	/** Si está seleccionada */
 	isSelected?: boolean;
 	/** Callback al hacer clic */
 	onClick?: (e: React.MouseEvent) => void;
 	/** Callback al hacer doble clic */
 	onDoubleClick?: () => void;
-	/** Tamaño de la carta */
-	size?: 'sm' | 'md' | 'lg' | 'xl';
-	/** Si está en modo compacto */
-	isCompact?: boolean;
 	/** Rareza calculada automáticamente o especificada */
 	rarity?: TCGCardRarity;
-	/** Clases adicionales */
-	className?: string;
+	/** Tamaño de la carta */
+	size?: 'sm' | 'md' | 'lg' | 'xl';
 	/** Calidad del thumbnail */
 	thumbnailQuality?: 'low' | 'medium' | 'high';
-	/** Si deshabilitar efectos 3D */
-	disable3D?: boolean;
 }
 
 /**

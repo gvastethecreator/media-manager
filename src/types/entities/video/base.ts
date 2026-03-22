@@ -12,41 +12,40 @@ import type { EntityStats } from '../entity.types';
  * Representa las propiedades fundamentales de un video sin estadísticas calculadas.
  */
 export interface VideoBase {
-	// Identificación
-	id: string;
-	name: string;
+	// Timestamps del sistema
+	createdAt: Date;
 	description: string | null;
-
-	// Propiedades del archivo
-	path: string;
-	hash: string;
-	size: number;
 
 	// Propiedades de video específicas
 	duration: number;
-	width: number | null;
+
+	// Relaciones
+	folderId: string;
+	hash: string;
 	height: number | null;
-
-	// Metadatos
-	metadata: string | null;
-
-	// Thumbnail
-	thumbnail: Buffer | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
+	// Identificación
+	id: string;
 
 	// Estados
 	isFavorite: boolean;
 	isHidden: boolean;
 	isPublic: boolean;
 
-	// Relaciones
-	folderId: string;
+	// Metadatos
+	metadata: string | null;
+	name: string;
 
-	// Timestamps del sistema
-	createdAt: Date;
+	// Propiedades del archivo
+	path: string;
+	size: number;
+
+	// Thumbnail
+	thumbnail: Buffer | null;
+	thumbnailHeight: number | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
 	updatedAt: Date;
+	width: number | null;
 }
 
 /**
@@ -54,40 +53,40 @@ export interface VideoBase {
  * Extiende EntityStats con propiedades específicas de videos.
  */
 export interface VideoStatistics extends EntityStats {
-	// Métricas técnicas de video
-	durationMinutes: number;
-	durationHours: number;
-	megabytes: number;
-	gigabytes: number;
 	aspectRatio: string;
-	resolution: string;
-	formattedSize: string;
-	formattedDuration: string;
-
-	// Métricas de calidad
-	qualityLevel: 'low' | 'medium' | 'high' | 'ultra' | 'unknown';
-	technicalGrade: 'A' | 'B' | 'C' | 'D';
-	hasAudio: boolean;
-	hasSubtitles: boolean;
 	bitrate: number | null;
-	frameRate: number | null;
-
-	// Métricas de uso específicas de video
-	views: number;
-	likes: number;
 	downloads: number;
-	lastViewed: Date | null;
 
 	// Estado de duplicados
 	duplicateStatus: 'unique' | 'duplicate' | 'similar';
+	durationHours: number;
+	// Métricas técnicas de video
+	durationMinutes: number;
+	formattedDuration: string;
+	formattedSize: string;
+	frameRate: number | null;
+	gigabytes: number;
+	hasAudio: boolean;
+	hasSubtitles: boolean;
+
+	// Funciones de archivo del sistema
+	isDirectory?: () => boolean;
+	isFile?: () => boolean;
+	lastViewed: Date | null;
+	likes: number;
+	megabytes: number;
+
+	// Métricas de calidad
+	qualityLevel: 'low' | 'medium' | 'high' | 'ultra' | 'unknown';
+	resolution: string;
+	technicalGrade: 'A' | 'B' | 'C' | 'D';
 	thumbnailUrl: string | null;
 
 	// Métricas de relaciones
 	totalRelations: number;
 
-	// Funciones de archivo del sistema
-	isDirectory?: () => boolean;
-	isFile?: () => boolean;
+	// Métricas de uso específicas de video
+	views: number;
 }
 
 /**
@@ -100,18 +99,6 @@ export type VideoStats = VideoStatistics;
  * Este es el tipo canónico que debe usarse en la aplicación.
  */
 export interface VideoWithStats extends VideoBase {
-	entityType: 'video';
-	stats: VideoStatistics;
-	/** Alias para compatibilidad - apunta a stats */
-	statistics?: VideoStatistics;
-	thumbnailUrl: string | null;
-	fullUrl: string;
-	fps?: number;
-	codec?: string;
-
-	// Propiedades adicionales de archivo
-	type?: string;
-
 	_count?: {
 		albums?: number;
 		collections?: number;
@@ -126,4 +113,15 @@ export interface VideoWithStats extends VideoBase {
 		properties?: number;
 		groups?: number;
 	};
+	codec?: string;
+	entityType: 'video';
+	fps?: number;
+	fullUrl: string;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: VideoStatistics;
+	stats: VideoStatistics;
+	thumbnailUrl: string | null;
+
+	// Propiedades adicionales de archivo
+	type?: string;
 }

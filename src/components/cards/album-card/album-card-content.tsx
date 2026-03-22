@@ -4,9 +4,9 @@ import type { Album } from '@/types/entities/album';
 interface AlbumCardContentProps {
 	album: Album;
 	imagesCount: number;
-	videosCount: number;
 	primaryColor: string;
 	tcgMode?: boolean;
+	videosCount: number;
 }
 
 /**

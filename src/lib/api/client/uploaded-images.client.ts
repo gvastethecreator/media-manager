@@ -14,9 +14,9 @@ export interface GetUploadedImagesParams extends UploadedImageFilters {
 
 export interface UploadedImagesResponse {
 	items: UploadedImageResult[];
-	total: number;
 	page: number;
 	pageSize: number;
+	total: number;
 }
 
 export async function getUploadedImagesFromApi(params: GetUploadedImagesParams = {}): Promise<UploadedImagesResponse> {

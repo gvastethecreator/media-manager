@@ -36,63 +36,63 @@ export type CardVariant =
 
 /** Configuración de layout para una card */
 export interface CardLayoutConfig {
+	/** Ratio de aspecto */
+	aspectRatio?: string | number;
+	/** Densidad de información */
+	density?: 'low' | 'medium' | 'high';
+	/** Alto específico (overrides size) */
+	height?: number;
 	/** Tipo de layout */
 	layout: CardLayout;
+	/** Orientación para s horizontales */
+	orientation?: 'left' | 'right' | 'center';
+	/** Mostrar acciones */
+	showActions?: boolean;
+	/** Mostrar información adicional */
+	showDetails?: boolean;
+	/** Mostrar metadatos */
+	showMetadata?: boolean;
+	/** Mostrar estadísticas */
+	showStats?: boolean;
+	/** Mostrar tags/etiquetas */
+	showTags?: boolean;
 	/** Tamaño de la card */
 	size: CardSize;
 	/** Variante visual */
 	variant: CardVariant;
 	/** Ancho específico (overrides size) */
 	width?: number;
-	/** Alto específico (overrides size) */
-	height?: number;
-	/** Ratio de aspecto */
-	aspectRatio?: string | number;
-	/** Mostrar información adicional */
-	showDetails?: boolean;
-	/** Mostrar tags/etiquetas */
-	showTags?: boolean;
-	/** Mostrar estadísticas */
-	showStats?: boolean;
-	/** Mostrar metadatos */
-	showMetadata?: boolean;
-	/** Mostrar acciones */
-	showActions?: boolean;
-	/** Orientación para s horizontales */
-	orientation?: 'left' | 'right' | 'center';
-	/** Densidad de información */
-	density?: 'low' | 'medium' | 'high';
 }
 
 /** Props base para todas las cards con  */
 export interface BaseCardProps {
 	/** Configuración de  */
 	Config?: Partial<CardLayoutConfig>;
-	/** Layout rápido (shortcut) */
-	layout?: CardLayout;
-	/** Tamaño rápido (shortcut) */
-	size?: CardSize;
-	/** Variante rápida (shortcut) */
-	variant?: CardVariant;
 	/** Clase CSS adicional */
 	className?: string;
-	/** Si la card está seleccionada */
-	isSelected?: boolean;
+	/** Props legacy para compatibilidad */
+	compact?: boolean;
 	/** Si la card está activa */
 	isActive?: boolean;
 	/** Si la card está en estado de carga */
 	isLoading?: boolean;
+	/** Si la card está seleccionada */
+	isSelected?: boolean;
+	/** Layout rápido (shortcut) */
+	layout?: CardLayout;
 	/** Callback de click */
 	onClick?: (e: React.MouseEvent) => void;
-	/** Callback de doble click */
-	onDoubleClick?: () => void;
 	/** Callback de menú contextual */
 	onContextMenu?: (e: React.MouseEvent) => void;
+	/** Callback de doble click */
+	onDoubleClick?: () => void;
+	/** Tamaño rápido (shortcut) */
+	size?: CardSize;
+	tcgMode?: boolean;
 	/** Calidad de thumbnail preferida */
 	thumbnailQuality?: 'low' | 'medium' | 'high';
-	/** Props legacy para compatibilidad */
-	compact?: boolean;
-	tcgMode?: boolean;
+	/** Variante rápida (shortcut) */
+	variant?: CardVariant;
 }
 
 /** Configuraciones predefinidas para diferentes contextos */

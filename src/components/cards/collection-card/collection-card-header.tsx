@@ -2,12 +2,12 @@ import { Dices, Gem, Globe, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CollectionCardHeaderProps {
-	name: string;
-	emoji: string;
-	color: string;
 	category?: string | null;
-	platform?: string | null;
+	color: string;
+	emoji: string;
 	isFavorite?: boolean;
+	name: string;
+	platform?: string | null;
 }
 
 /**

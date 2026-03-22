@@ -13,8 +13,8 @@ import { Effect } from 'effect';
  */
 export interface TransformError {
 	_tag: 'TransformError';
-	message: string;
 	cause?: unknown;
+	message: string;
 	timestamp: Date;
 }
 

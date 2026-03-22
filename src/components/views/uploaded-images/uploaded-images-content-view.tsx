@@ -3,7 +3,7 @@ import { memo, useMemo } from 'react';
 import { UploadedImageCard } from '@/components/cards/uploaded-image-card/uploaded-image-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useUploadedImages } from '@/lib/api/uploaded-images';
 import { adaptUploadedImageResultToWithStats } from '@/transformers/uploaded-image';

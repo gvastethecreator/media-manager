@@ -6,14 +6,14 @@ import type { PromptStore } from '../types';
 const executionLogger = clientLogger.withContext('PromptStore:Execution');
 
 export interface ExecutionSlice {
-	// Estado
-	isExecuting: boolean;
-	executionResult: PromptExecutionResult | null;
-	executionError: string | null;
+	clearExecutionResult: () => void;
 
 	// Acciones
 	executePrompt: (params: PromptExecutionParams) => Promise<PromptExecutionResult | null>;
-	clearExecutionResult: () => void;
+	executionError: string | null;
+	executionResult: PromptExecutionResult | null;
+	// Estado
+	isExecuting: boolean;
 }
 
 // Acción mock para desarrollo (se reemplazará con server action real)

@@ -15,18 +15,18 @@ import { useSelecto } from './use-selecto';
 const logger = clientLogger.withContext('AdvancedSelection');
 
 interface UseAdvancedSelectionProps {
+	/** Contenedor para la selección con drag */
+	dragContainer?: string | HTMLElement;
+	/** Habilitar selección con drag usando react-selecto */
+	enableDragSelection?: boolean;
 	/** Items disponibles para selección */
 	items: AnyEntityWithStats[];
 	/** Callback cuando se abre el menú contextual */
 	onContextMenu?: (e: React.MouseEvent, item: AnyEntityWithStats, selectedItems: AnyEntityWithStats[]) => void;
-	/** Callback opcional cuando se selecciona un item */
-	onItemSelect?: (item: AnyEntityWithStats) => void;
 	/** Callback opcional cuando se hace click en un item */
 	onItemClick?: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
-	/** Habilitar selección con drag usando react-selecto */
-	enableDragSelection?: boolean;
-	/** Contenedor para la selección con drag */
-	dragContainer?: string | HTMLElement;
+	/** Callback opcional cuando se selecciona un item */
+	onItemSelect?: (item: AnyEntityWithStats) => void;
 }
 
 export function useAdvancedSelection({

@@ -18,12 +18,12 @@ import { cn } from '@/lib/utils';
 
 interface DataGridColumnFilterProps<TData, TValue> {
 	column?: Column<TData, TValue>;
-	title?: string;
 	options: {
 		label: string;
 		value: string;
 		icon?: React.ComponentType<{ className?: string }>;
 	}[];
+	title?: string;
 }
 
 function DataGridColumnFilter<TData, TValue>({ column, title, options }: DataGridColumnFilterProps<TData, TValue>) {

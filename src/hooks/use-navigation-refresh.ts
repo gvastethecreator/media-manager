@@ -6,9 +6,9 @@ import { clientLogger } from '@/lib/logger/client-logger';
 const logger = clientLogger.withContext('NavigationRefresh');
 
 interface FolderEvent {
-	type: string;
 	data?: unknown;
 	timestamp?: number;
+	type: string;
 }
 
 /**

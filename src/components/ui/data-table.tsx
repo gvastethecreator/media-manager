@@ -21,8 +21,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
-	onUpdate?: (data: TData) => Promise<void>;
 	onDelete?: (data: TData) => Promise<void>;
+	onUpdate?: (data: TData) => Promise<void>;
 }
 
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {

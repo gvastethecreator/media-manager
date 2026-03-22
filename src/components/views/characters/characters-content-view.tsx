@@ -4,30 +4,30 @@ import { CharacterCard } from '@/components/cards/character-card/character-card'
 import { adaptCharacterWithStats } from '@/components/cards/character-card/character-card-adapter';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import type { CharacterWithStats } from '@/types/entities/character';
 
 interface CharactersContentViewProps {
 	characters: CharacterWithStats[];
-	isLoading: boolean;
+	className?: string;
 	error: Error | null;
-	localSearch: string;
-	showForm: boolean;
-	newCharacterName: string;
-	newCharacterDescription: string;
-	selectedCharacterId: string | null;
-	setShowForm: (show: boolean) => void;
-	setNewCharacterName: (name: string) => void;
-	setNewCharacterDescription: (description: string) => void;
 	handleCharacterSelect: (characterId: string) => void;
 	handleCreateCharacter: () => void;
 	handleRetry: () => void;
-	className?: string;
+	isLoading: boolean;
+	localSearch: string;
+	newCharacterDescription: string;
+	newCharacterName: string;
+	selectedCharacterId: string | null;
+	setNewCharacterDescription: (description: string) => void;
+	setNewCharacterName: (name: string) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 const CharactersContentView: React.FC<CharactersContentViewProps> = ({

@@ -36,8 +36,8 @@ import { batchFileOperationsService } from './batch-operations.service';
 type FileInfo = FileBase;
 
 interface DirectoryReadResult {
-	path: string;
 	items: FileInfo[];
+	path: string;
 	total: number;
 }
 

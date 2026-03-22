@@ -24,34 +24,34 @@ export type File3DFilters = Record<string, any>;
  * 🏪 Estado del store de File3D
  */
 export interface File3DState {
-	// Estado de datos
-	file3Ds: File3DWithStats[];
-	selectedFile3Ds: File3DWithStats[];
+	clearFilters: () => void;
+	clearSelection: () => void;
+	createFile3D: (data: File3DCreateInput) => Promise<File3DWithStats | undefined>;
 	currentFile3D: File3DWithStats | null;
-
-	// Estado de UI
-	loading: boolean;
+	deleteFile3D: (id: string) => Promise<void>;
+	deselectFile3D: (file3DId: string) => void;
 	error: string | null;
-	filters: File3DFilters;
 
 	// Acciones de datos
 	fetchFile3Ds: () => Promise<void>;
-	createFile3D: (data: File3DCreateInput) => Promise<File3DWithStats | undefined>;
-	updateFile3D: (id: string, data: File3DUpdateInput) => Promise<File3DWithStats | undefined>;
-	deleteFile3D: (id: string) => Promise<void>;
-
-	// Acciones de selección
-	selectFile3D: (file3D: File3DWithStats) => void;
-	deselectFile3D: (file3DId: string) => void;
-	clearSelection: () => void;
-
-	// Acciones de filtrado
-	setFilters: (filters: Partial<File3DFilters>) => void;
-	clearFilters: () => void;
+	// Estado de datos
+	file3Ds: File3DWithStats[];
+	filters: File3DFilters;
 
 	// Utilidades
 	getFile3DById: (id: string) => File3DWithStats | undefined;
+
+	// Estado de UI
+	loading: boolean;
+	selectedFile3Ds: File3DWithStats[];
+
+	// Acciones de selección
+	selectFile3D: (file3D: File3DWithStats) => void;
+
+	// Acciones de filtrado
+	setFilters: (filters: Partial<File3DFilters>) => void;
 	toggleFavorite: (id: string) => Promise<void>;
+	updateFile3D: (id: string, data: File3DUpdateInput) => Promise<File3DWithStats | undefined>;
 }
 
 const useFile3DStoreBase = create<File3DState>()(

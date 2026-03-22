@@ -101,12 +101,12 @@ router.post(
 
 // Tipos para respuestas de eventos
 interface EventsListResponse {
-	type?: string;
 	count?: number;
-	total?: number;
 	events?: EventData[];
-	totalTypes?: number;
 	summary?: Array<{ type: string; count: number; lastEvent: number | null }>;
+	total?: number;
+	totalTypes?: number;
+	type?: string;
 }
 
 /**

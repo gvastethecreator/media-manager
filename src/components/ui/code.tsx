@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 
 export interface CodeProps extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof codeVariants> {
 	asChild?: boolean;
-	showCopyButton?: boolean;
 	copyText?: string;
+	showCopyButton?: boolean;
 }
 
 const codeVariants = cva('relative rounded-md bg-muted font-medium font-mono text-sm', {

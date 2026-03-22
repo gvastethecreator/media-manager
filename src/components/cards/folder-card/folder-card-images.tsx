@@ -4,8 +4,8 @@ import { formatBytes } from '@/lib/utils/format.utils';
 
 export interface FolderCardImagesProps {
 	featuredImage?: string | null;
-	recentImages?: string[] | null;
 	primaryColor: string;
+	recentImages?: string[] | null;
 	secondaryColor?: string;
 	tcgMode?: boolean;
 	totalFiles?: number;

@@ -24,90 +24,67 @@ const logger = serverLogger.withContext('TaskService');
 // =================================================================================
 
 export interface TaskCreateInput {
-	title: string;
-	description?: string;
-	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority?: 'low' | 'medium' | 'high' | 'urgent';
-	emoji?: string;
-	color?: string;
-	category?: string;
-	tags?: string[];
-	dueDate?: Date;
-	estimatedHours?: number;
 	assignedTo?: string;
-	parentTaskId?: string;
-	projectId?: string;
-	notes?: string;
+	category?: string;
+	color?: string;
+	description?: string;
+	dueDate?: Date;
+	emoji?: string;
+	estimatedHours?: number;
 	featuredImage?: string;
 	isFavorite?: boolean;
+	notes?: string;
+	parentTaskId?: string;
+	priority?: 'low' | 'medium' | 'high' | 'urgent';
+	projectId?: string;
+	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+	tags?: string[];
+	title: string;
 }
 
 export interface TaskUpdateInput {
-	title?: string;
-	description?: string;
-	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority?: 'low' | 'medium' | 'high' | 'urgent';
-	emoji?: string;
-	color?: string;
-	category?: string;
-	tags?: string[];
-	dueDate?: Date;
-	completedAt?: Date;
-	estimatedHours?: number;
 	actualHours?: number;
-	progress?: number;
 	assignedTo?: string;
-	parentTaskId?: string;
-	projectId?: string;
-	notes?: string;
+	category?: string;
+	color?: string;
+	completedAt?: Date;
+	description?: string;
+	dueDate?: Date;
+	emoji?: string;
+	estimatedHours?: number;
 	featuredImage?: string;
-	isFavorite?: boolean;
 	isArchived?: boolean;
+	isFavorite?: boolean;
+	notes?: string;
+	parentTaskId?: string;
+	priority?: 'low' | 'medium' | 'high' | 'urgent';
+	progress?: number;
+	projectId?: string;
+	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+	tags?: string[];
+	title?: string;
 }
 
 export interface TaskFilters {
-	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority?: 'low' | 'medium' | 'high' | 'urgent';
-	category?: string;
 	assignedTo?: string;
-	isFavorite?: boolean;
+	category?: string;
 	isArchived?: boolean;
+	isFavorite?: boolean;
 	parentTaskId?: string;
+	priority?: 'low' | 'medium' | 'high' | 'urgent';
 	projectId?: string;
 	search?: string;
+	status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
 }
 
 export interface TaskSearchOptions extends TaskFilters {
-	sortBy?: 'title' | 'createdAt' | 'updatedAt' | 'dueDate' | 'priority' | 'status';
-	sortOrder?: 'asc' | 'desc';
 	limit?: number;
 	offset?: number;
+	sortBy?: 'title' | 'createdAt' | 'updatedAt' | 'dueDate' | 'priority' | 'status';
+	sortOrder?: 'asc' | 'desc';
 }
 
 export interface TaskWithStats {
-	id: string;
-	title: string;
-	description: string | null;
-	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	priority: 'low' | 'medium' | 'high' | 'urgent';
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-	tags: string | null;
-	dueDate: Date | null;
-	completedAt: Date | null;
-	estimatedHours: number | null;
-	actualHours: number | null;
-	progress: number;
-	assignedTo: string | null;
-	parentTaskId: string | null;
-	projectId: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	isArchived: boolean;
-	createdAt: Date;
-	updatedAt: Date | null;
 	_count: {
 		subtasks: number;
 		images: number;
@@ -115,6 +92,29 @@ export interface TaskWithStats {
 		albums: number;
 		characters: number;
 	};
+	actualHours: number | null;
+	assignedTo: string | null;
+	category: string | null;
+	color: string | null;
+	completedAt: Date | null;
+	createdAt: Date;
+	description: string | null;
+	dueDate: Date | null;
+	emoji: string | null;
+	estimatedHours: number | null;
+	featuredImage: string | null;
+	id: string;
+	isArchived: boolean;
+	isFavorite: boolean;
+	notes: string | null;
+	parentTaskId: string | null;
+	priority: 'low' | 'medium' | 'high' | 'urgent';
+	progress: number;
+	projectId: string | null;
+	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+	tags: string | null;
+	title: string;
+	updatedAt: Date | null;
 }
 
 // =================================================================================

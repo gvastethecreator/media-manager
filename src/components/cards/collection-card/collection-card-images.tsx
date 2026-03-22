@@ -1,5 +1,5 @@
 import { ImageOffIcon, VideoIcon } from 'lucide-react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRecentCollectionMedia } from '@/lib/api/collections';
 
@@ -84,25 +84,23 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 			<div className="relative z-1 grid h-full grid-cols-3 gap-1">
 				{sortedThumbnails.length > 0
 					? // Mostrar hasta 3 imágenes
-						sortedThumbnails
-							.slice(0, 3)
-							.map((thumbnail, idx) => (
-								<motion.div
-									animate={{ opacity: 1, y: 0 }}
-									className="relative h-full overflow-hidden rounded-sm bg-muted/30 shadow-sm"
-									initial={{ opacity: 0, y: 10 }}
-									key={thumbnail.id}
-									transition={{ duration: 0.3, delay: idx * 0.1 }}
-								>
-									<img alt="" className="h-full w-full object-cover" loading="lazy" src={thumbnail.thumbnailUrl} />
-									{/* Indicador para videos */}
-									{thumbnail.isVideo && (
-										<div className="absolute right-1 bottom-1 rounded-full bg-black/60 p-0.5">
-											<VideoIcon className="h-4 w-4 text-white" />
-										</div>
-									)}
-								</motion.div>
-							))
+						sortedThumbnails.slice(0, 3).map((thumbnail, idx) => (
+							<motion.div
+								animate={{ opacity: 1, y: 0 }}
+								className="relative h-full overflow-hidden rounded-sm bg-muted/30 shadow-sm"
+								initial={{ opacity: 0, y: 10 }}
+								key={thumbnail.id}
+								transition={{ duration: 0.3, delay: idx * 0.1 }}
+							>
+								<img alt="" className="h-full w-full object-cover" loading="lazy" src={thumbnail.thumbnailUrl} />
+								{/* Indicador para videos */}
+								{thumbnail.isVideo && (
+									<div className="absolute right-1 bottom-1 rounded-full bg-black/60 p-0.5">
+										<VideoIcon className="h-4 w-4 text-white" />
+									</div>
+								)}
+							</motion.div>
+						))
 					: // Placeholder cuando no hay imágenes
 						renderPlaceholder()}
 			</div>

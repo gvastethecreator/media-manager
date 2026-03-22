@@ -11,21 +11,21 @@ import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '..
 
 // Tipo local equivalente a Drizzle (migración a Drizzle)
 interface DrizzleQueueJob {
-	id: string;
-	queue: string;
-	data: string; // JSON
-	status: string; // Drizzle devuelve string, no enum
 	attempts: number;
-	maxAttempts: number;
-	error?: string | null;
-	progress: number;
-	startedAt?: Date | null;
-	finishedAt?: Date | null;
 	createdAt: Date;
-	updatedAt: Date;
-	priority: number;
+	data: string; // JSON
+	error?: string | null;
+	finishedAt?: Date | null;
+	id: string;
+	maxAttempts: number;
 	metadata?: string | null; // JSON
+	priority: number;
+	progress: number;
+	queue: string;
 	retryAt?: Date | null;
+	startedAt?: Date | null;
+	status: string; // Drizzle devuelve string, no enum
+	updatedAt: Date;
 }
 
 const logger = serverLogger.withContext('QueueJobTransformer');

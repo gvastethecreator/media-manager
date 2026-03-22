@@ -15,45 +15,45 @@ import { useFolderFilesPaginated } from './use-folder-files-paginated';
 const logger = clientLogger.withContext('UseDataSource');
 
 export interface UseDataSourceOptions {
-	/** ID de carpeta a cargar */
-	folderId: string | null;
 	/** Items directos (alternativa a folder) */
 	directItems?: BrowserItem[];
+	/** Habilitado */
+	enabled?: boolean;
+	/** ID de carpeta a cargar */
+	folderId: string | null;
+	/** Incluir subcarpetas */
+	includeSubfolders?: boolean;
 	/** Tamaño de página */
 	pageSize?: number;
 	/** Modo de paginación */
 	paginationMode?: 'pagination' | 'infinite';
-	/** Incluir subcarpetas */
-	includeSubfolders?: boolean;
-	/** Habilitado */
-	enabled?: boolean;
 }
 
 export interface UseDataSourceResult {
-	/** Items cargados */
-	items: BrowserItem[];
+	/** Error si existe */
+	error: string | null;
+	/** Si hay más items por cargar */
+	hasMore: boolean;
+	/** Invalidar cache */
+	invalidate: () => void;
 	/** Si está cargando inicialmente */
 	isLoading: boolean;
 	/** Si está cargando más items */
 	isLoadingMore: boolean;
-	/** Error si existe */
-	error: string | null;
-	/** Total de items disponibles */
-	totalCount: number;
+	/** Items cargados */
+	items: BrowserItem[];
 	/** Items cargados hasta ahora */
 	loadedCount: number;
-	/** Si hay más items por cargar */
-	hasMore: boolean;
 	/** Cargar más items */
 	loadMore: () => void;
-	/** Recargar datos */
-	refresh: () => Promise<void>;
-	/** Invalidar cache */
-	invalidate: () => void;
-	/** Ref del contenedor de scroll */
-	scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 	/** ID de la carpeta padre */
 	parentFolderId: string | null;
+	/** Recargar datos */
+	refresh: () => Promise<void>;
+	/** Ref del contenedor de scroll */
+	scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+	/** Total de items disponibles */
+	totalCount: number;
 }
 
 /**

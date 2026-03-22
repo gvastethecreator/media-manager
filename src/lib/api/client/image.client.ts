@@ -13,17 +13,16 @@ export interface GetImagesOptions {
 	folderId?: string;
 	limit?: number;
 	offset?: number;
+	page?: number;
+	pageSize?: number;
 	search?: string;
 	sortBy?: string;
 	sortOrder?: 'asc' | 'desc';
-	pageSize?: number;
-	page?: number;
 }
 
 export interface GetImagesResult {
-	images: ImageWithStats[];
-	total: number;
 	hasMore: boolean;
+	images: ImageWithStats[];
 	pagination: {
 		total: number;
 		limit: number;
@@ -31,6 +30,7 @@ export interface GetImagesResult {
 		hasNext: boolean;
 		hasPrev: boolean;
 	};
+	total: number;
 }
 
 /**

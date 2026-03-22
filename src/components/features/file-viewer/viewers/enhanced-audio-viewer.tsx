@@ -4,14 +4,15 @@ import { Disc3, Download, Music2, Pause, Play, Volume2, VolumeX } from 'lucide-r
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider-v3';
+import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { WaveformVisualizer } from './waveform-visualizer';
 
 interface EnhancedAudioViewerProps {
 	audioUrl: string;
-	fileName?: string;
+	className?: string;
 	coverArtUrl?: string | null;
+	fileName?: string;
 	metadata?: {
 		title?: string;
 		artist?: string;
@@ -23,7 +24,6 @@ interface EnhancedAudioViewerProps {
 		channels?: number;
 		duration?: number;
 	} | null;
-	className?: string;
 }
 
 export function EnhancedAudioViewer({

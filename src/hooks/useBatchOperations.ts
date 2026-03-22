@@ -17,65 +17,65 @@ import { toastService } from '@/services/toast/toast.service';
 import type { AnyEntityWithStats } from '@/types/entities';
 
 export interface UseBatchOperationsOptions {
+	/** Auto-cleanup completed operations */
+	autoCleanup?: boolean;
+	/** Maximum number of operations to track */
+	maxOperations?: number;
 	/** Auto-refresh interval in milliseconds */
 	refreshInterval?: number;
 	/** Filter operations by status */
 	statusFilter?: BatchOperationStatus[];
 	/** Filter operations by type */
 	typeFilter?: BatchOperationType[];
-	/** Maximum number of operations to track */
-	maxOperations?: number;
-	/** Auto-cleanup completed operations */
-	autoCleanup?: boolean;
 }
 
 export interface BatchOperationSummary {
-	total: number;
-	queued: number;
-	running: number;
+	cancelled: number;
 	completed: number;
 	failed: number;
-	cancelled: number;
 	paused: number;
+	queued: number;
+	running: number;
+	total: number;
 }
 
 export interface UseBatchOperationsReturn {
-	/** All operations */
-	operations: BatchOperation[];
 	/** Active operations (queued, running, paused) */
 	activeOperations: BatchOperation[];
+	/** Cancel operation */
+	cancelOperation: (operationId: string) => boolean;
+	/** Clear completed operations */
+	clearCompleted: () => void;
 	/** Completed operations (completed, failed, cancelled) */
 	completedOperations: BatchOperation[];
-	/** Operation summary statistics */
-	summary: BatchOperationSummary;
+	/** Get specific operation */
+	getOperation: (operationId: string) => BatchOperation | undefined;
 	/** Whether any operations are currently running */
 	isProcessing: boolean;
+	/** All operations */
+	operations: BatchOperation[];
+	/** Pause operation */
+	pauseOperation: (operationId: string) => boolean;
 	/** Queue a copy operation */
 	queueCopyOperation: (
 		items: AnyEntityWithStats[],
 		targetPath: string,
 		options?: BatchOperationOptions
 	) => Promise<string>;
+	/** Queue a delete operation */
+	queueDeleteOperation: (items: AnyEntityWithStats[], options?: BatchOperationOptions) => Promise<string>;
 	/** Queue a move operation */
 	queueMoveOperation: (
 		items: AnyEntityWithStats[],
 		targetPath: string,
 		options?: BatchOperationOptions
 	) => Promise<string>;
-	/** Queue a delete operation */
-	queueDeleteOperation: (items: AnyEntityWithStats[], options?: BatchOperationOptions) => Promise<string>;
-	/** Get specific operation */
-	getOperation: (operationId: string) => BatchOperation | undefined;
-	/** Cancel operation */
-	cancelOperation: (operationId: string) => boolean;
-	/** Pause operation */
-	pauseOperation: (operationId: string) => boolean;
-	/** Resume operation */
-	resumeOperation: (operationId: string) => boolean;
-	/** Clear completed operations */
-	clearCompleted: () => void;
 	/** Refresh operations list */
 	refresh: () => void;
+	/** Resume operation */
+	resumeOperation: (operationId: string) => boolean;
+	/** Operation summary statistics */
+	summary: BatchOperationSummary;
 }
 
 /**

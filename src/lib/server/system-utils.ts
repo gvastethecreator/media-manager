@@ -21,20 +21,20 @@ export interface SystemInfo {
 		used: number;
 		usedPercent: number;
 	};
-	uptime: {
-		system: number;
+	network: {
+		interfaces: string[];
+	};
+	nodejs: {
+		version: string;
+		pid: number;
 	};
 	platform: {
 		type: string;
 		release: string;
 		arch: string;
 	};
-	nodejs: {
-		version: string;
-		pid: number;
-	};
-	network: {
-		interfaces: string[];
+	uptime: {
+		system: number;
 	};
 }
 

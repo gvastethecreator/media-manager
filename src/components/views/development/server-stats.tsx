@@ -24,30 +24,27 @@ interface SystemStats {
 		used: string;
 		usedPercentage: number;
 	};
-	uptime: string;
-	platform: string;
-	nodeVersion: string;
 	network: {
 		interface: string;
 		address: string;
 		netmask: string;
 		mac: string;
 	}[];
+	nodeVersion: string;
+	platform: string;
+	uptime: string;
 }
 
 interface AppStats {
-	requests: {
-		total: number;
-		success: number;
-		error: number;
-		pending: number;
-		successRate?: string;
+	cache: {
+		hits: number;
+		misses: number;
+		ratio: string;
 	};
-	performance: {
-		avgResponseTime: string;
-		minResponseTime: string;
-		maxResponseTime: string;
-		p95ResponseTime: string;
+	database: {
+		queries: number;
+		avgQueryTime: string;
+		slowQueries: number;
 	};
 	errors: {
 		count: number;
@@ -57,15 +54,18 @@ interface AppStats {
 			tipo: string;
 		};
 	};
-	database: {
-		queries: number;
-		avgQueryTime: string;
-		slowQueries: number;
+	performance: {
+		avgResponseTime: string;
+		minResponseTime: string;
+		maxResponseTime: string;
+		p95ResponseTime: string;
 	};
-	cache: {
-		hits: number;
-		misses: number;
-		ratio: string;
+	requests: {
+		total: number;
+		success: number;
+		error: number;
+		pending: number;
+		successRate?: string;
 	};
 }
 

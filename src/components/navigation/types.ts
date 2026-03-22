@@ -39,35 +39,35 @@ export type NavigationCategory =
  * Representa un elemento de categoría en el panel de navegación
  */
 export interface CategoryItem {
-	id: ViewType;
-	icon: LucideIcon;
-	label: string;
 	color: string;
+	icon: LucideIcon;
+	id: ViewType;
+	label: string;
 }
 
 /**
  * Representa un elemento hijo dentro de una categoría
  */
 export interface CategoryChild {
-	id: string;
-	name: string;
-	label?: string;
-	title?: string; // Para notas que usan title en lugar de name
-	emoji?: string;
-	color?: string;
-	path?: string;
-	description?: string;
-	icon?: LucideIcon;
-	itemCount?: number; // Conteo total de elementos
-	totalFiles?: number;
-	totalSize?: number;
-	parentId?: string | null; // Para jerarquía de carpetas
 	_count?: {
 		images?: number;
 		folders?: number;
 		collections?: number;
 		tags?: number;
 	};
+	color?: string;
+	description?: string;
+	emoji?: string;
+	icon?: LucideIcon;
+	id: string;
+	itemCount?: number; // Conteo total de elementos
+	label?: string;
+	name: string;
+	parentId?: string | null; // Para jerarquía de carpetas
+	path?: string;
+	title?: string; // Para notas que usan title en lugar de name
+	totalFiles?: number;
+	totalSize?: number;
 }
 
 /**
@@ -75,7 +75,7 @@ export interface CategoryChild {
  */
 export interface NavPanelProps {
 	initialData: NavigationData;
+	isAnimating?: boolean;
 	isCollapsed?: boolean;
 	onToggleCollapse?: () => void;
-	isAnimating?: boolean;
 }

@@ -5,16 +5,12 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import type { AnimeInstance } from '@/lib/anime';
+import type { AnimationInstance } from '@/lib/animation';
 import type { MorphConfig } from '@/lib/transitions';
 import { generateBorderRadius, generateClipPath, getMorphEngine } from '@/lib/transitions';
 import { cn } from '@/lib/utils';
 
 interface MorphContainerProps {
-	/** ID único */
-	morphId: string;
-	/** Forma actual */
-	shape: string;
 	/** Contenido */
 	children: React.ReactNode;
 	/** Clases CSS */
@@ -23,6 +19,10 @@ interface MorphContainerProps {
 	config?: MorphConfig;
 	/** Si está habilitado */
 	enabled?: boolean;
+	/** ID único */
+	morphId: string;
+	/** Forma actual */
+	shape: string;
 	/** Estilos adicionales */
 	style?: React.CSSProperties;
 }
@@ -120,22 +120,22 @@ export const MorphContainer = React.memo(function MorphContainer({
 // ============================================================================
 
 interface MorphPathProps {
-	/** ID único */
-	id: string;
-	/** Path inicial */
-	fromPath: string;
-	/** Path final */
-	toPath: string;
-	/** Progreso (0-1) */
-	progress: number;
 	/** Clases CSS */
 	className?: string;
 	/** Color de relleno */
 	fill?: string;
+	/** Path inicial */
+	fromPath: string;
+	/** ID único */
+	id: string;
+	/** Progreso (0-1) */
+	progress: number;
 	/** Color de trazo */
 	stroke?: string;
 	/** Ancho de trazo */
 	strokeWidth?: number;
+	/** Path final */
+	toPath: string;
 }
 
 /**
@@ -156,7 +156,7 @@ export const MorphPath = React.memo(function MorphPath({
 	// Interpolación simple de paths (para morphing complejo usar biblioteca especializada)
 	const interpolatePath = (from: string, to: string, t: number): string => {
 		// Por ahora hacemos un crossfade simple
-		// En producción, usar algo como flubber o anime.js con morphSVG
+		// En producción, usar algo como flubber o una solución de morphing compatible con GSAP/SVG
 		return t < 0.5 ? from : to;
 	};
 
@@ -180,16 +180,16 @@ export const MorphPath = React.memo(function MorphPath({
 // ============================================================================
 
 interface LiquidContainerProps {
+	/** Si está activo */
+	active?: boolean;
 	/** Contenido */
 	children: React.ReactNode;
 	/** Clases CSS */
 	className?: string;
-	/** Intensidad del efecto (0-1) */
-	intensity?: number;
 	/** Duración del ciclo (ms) */
 	duration?: number;
-	/** Si está activo */
-	active?: boolean;
+	/** Intensidad del efecto (0-1) */
+	intensity?: number;
 }
 
 /**
@@ -203,7 +203,7 @@ export const LiquidContainer = React.memo(function LiquidContainer({
 	active = true,
 }: LiquidContainerProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
-	const animationRef = useRef<AnimeInstance | null>(null);
+	const animationRef = useRef<AnimationInstance | null>(null);
 
 	useEffect(() => {
 		if (!(active && containerRef.current)) return;

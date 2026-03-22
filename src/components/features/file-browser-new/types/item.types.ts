@@ -12,73 +12,73 @@ export type BrowserEntityType = 'folder' | 'image' | 'video' | 'audio' | 'docume
  * Item base del browser - tipo canónico unificado
  */
 export interface BrowserItem {
-	/** ID único de la entidad */
-	id: string;
-	/** Entidad original (para integraciones/handlers que requieren el shape completo) */
-	raw?: Record<string, unknown>;
-	/** Nombre para mostrar */
-	name: string;
-	/** Tipo de entidad normalizado */
-	entityType: BrowserEntityType;
-	/** URL del thumbnail (opcional) */
-	thumbnailUrl?: string | null;
-	/** Tipo MIME (para archivos) */
-	mimeType?: string | null;
-	/** Fecha de creación */
-	createdAt?: Date | string | number;
-	/** Tamaño en bytes (para archivos) */
-	size?: number;
-	/** Ruta del archivo */
-	path?: string;
-	/** Dimensiones (para imágenes/videos) */
-	width?: number;
-	height?: number;
-	/** ID del padre (para folders) */
-	parentId?: string | null;
-	/** Conteo de items (para folders) */
-	totalItems?: number;
-	/** Emoji personalizado (para folders) */
-	emoji?: string | null;
 	/** Color personalizado (para folders) */
 	color?: string | null;
+	/** Fecha de creación */
+	createdAt?: Date | string | number;
+	/** Emoji personalizado (para folders) */
+	emoji?: string | null;
+	/** Tipo de entidad normalizado */
+	entityType: BrowserEntityType;
+	height?: number;
+	/** ID único de la entidad */
+	id: string;
 	/** Flag para items sintéticos (como "..") */
 	isSynthetic?: boolean;
+	/** Tipo MIME (para archivos) */
+	mimeType?: string | null;
+	/** Nombre para mostrar */
+	name: string;
+	/** ID del padre (para folders) */
+	parentId?: string | null;
+	/** Ruta del archivo */
+	path?: string;
+	/** Entidad original (para integraciones/handlers que requieren el shape completo) */
+	raw?: Record<string, unknown>;
+	/** Tamaño en bytes (para archivos) */
+	size?: number;
+	/** URL del thumbnail (opcional) */
+	thumbnailUrl?: string | null;
+	/** Conteo de items (para folders) */
+	totalItems?: number;
+	/** Dimensiones (para imágenes/videos) */
+	width?: number;
 }
 
 /**
  * Item con información de selección
  */
 export interface SelectableBrowserItem extends BrowserItem {
-	isSelected: boolean;
 	isActive: boolean;
+	isSelected: boolean;
 }
 
 /**
  * Grupo de items para vistas agrupadas
  */
 export interface BrowserItemGroup {
-	/** Clave única del grupo */
-	key: string;
+	/** Conteo total de items */
+	count: number;
 	/** Nombre para mostrar */
 	displayName: string;
 	/** Items del grupo */
 	items: BrowserItem[];
-	/** Conteo total de items */
-	count: number;
+	/** Clave única del grupo */
+	key: string;
 }
 
 /**
  * Resultado de procesamiento de items
  */
 export interface ProcessedItems {
-	/** Items después de búsqueda y sort */
-	items: BrowserItem[];
-	/** Items sin sintéticos (para conteos) */
-	realItems: BrowserItem[];
 	/** Grupos (si agrupación habilitada) */
 	groups: BrowserItemGroup[] | null;
+	/** Items después de búsqueda y sort */
+	items: BrowserItem[];
 	/** IDs lineales para navegación */
 	linearIds: string[];
+	/** Items sin sintéticos (para conteos) */
+	realItems: BrowserItem[];
 }
 
 /**
@@ -212,7 +212,6 @@ export function createParentNavItem(parentId: string): BrowserItem {
  * Browser item con datos específicos de imagen
  */
 export interface ImageBrowserItem extends BrowserItem {
-	entityType: 'image';
 	data: {
 		id: string;
 		name: string;
@@ -234,13 +233,13 @@ export interface ImageBrowserItem extends BrowserItem {
 		focalLength?: number | null;
 		dateTaken?: string | null;
 	};
+	entityType: 'image';
 }
 
 /**
  * Browser item con datos específicos de video
  */
 export interface VideoBrowserItem extends BrowserItem {
-	entityType: 'video';
 	data: {
 		id: string;
 		name: string;
@@ -260,13 +259,13 @@ export interface VideoBrowserItem extends BrowserItem {
 		videoCodec?: string | null;
 		audioCodec?: string | null;
 	};
+	entityType: 'video';
 }
 
 /**
  * Browser item con datos específicos de audio
  */
 export interface AudioBrowserItem extends BrowserItem {
-	entityType: 'audio';
 	data: {
 		id: string;
 		name: string;
@@ -290,13 +289,13 @@ export interface AudioBrowserItem extends BrowserItem {
 		year?: number | null;
 		trackNumber?: number | null;
 	};
+	entityType: 'audio';
 }
 
 /**
  * Browser item con datos específicos de documento
  */
 export interface DocumentBrowserItem extends BrowserItem {
-	entityType: 'document';
 	data: {
 		id: string;
 		name: string;
@@ -312,13 +311,13 @@ export interface DocumentBrowserItem extends BrowserItem {
 		author?: string | null;
 		pageCount?: number | null;
 	};
+	entityType: 'document';
 }
 
 /**
  * Browser item con datos específicos de archivo JSON
  */
 export interface JsonFileBrowserItem extends BrowserItem {
-	entityType: 'jsonFile';
 	data: {
 		id: string;
 		name: string;
@@ -335,13 +334,13 @@ export interface JsonFileBrowserItem extends BrowserItem {
 		schemaType?: string | null;
 		errorMessage?: string | null;
 	};
+	entityType: 'jsonFile';
 }
 
 /**
  * Browser item con datos específicos de archivo 3D
  */
 export interface File3DBrowserItem extends BrowserItem {
-	entityType: 'file3d';
 	data: {
 		id: string;
 		name: string;
@@ -359,13 +358,13 @@ export interface File3DBrowserItem extends BrowserItem {
 		meshCount?: number | null;
 		hasAnimations?: boolean;
 	};
+	entityType: 'file3d';
 }
 
 /**
  * Browser item con datos específicos de carpeta
  */
 export interface FolderBrowserItem extends BrowserItem {
-	entityType: 'folder';
 	data: {
 		id: string;
 		name: string;
@@ -384,19 +383,20 @@ export interface FolderBrowserItem extends BrowserItem {
 			children?: number;
 		};
 	};
+	entityType: 'folder';
 }
 
 /**
  * Mapeo de tipos de entidad a sus tipos específicos
  */
 export interface EntityTypeMapping {
-	image: ImageBrowserItem;
-	video: VideoBrowserItem;
 	audio: AudioBrowserItem;
 	document: DocumentBrowserItem;
-	jsonFile: JsonFileBrowserItem;
 	file3d: File3DBrowserItem;
 	folder: FolderBrowserItem;
+	image: ImageBrowserItem;
+	jsonFile: JsonFileBrowserItem;
+	video: VideoBrowserItem;
 }
 
 /**

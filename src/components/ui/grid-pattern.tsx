@@ -3,13 +3,13 @@ import { useId } from 'react';
 import { cn } from '@/lib/utils';
 
 interface GridPatternProps {
-	width?: number;
+	className?: string;
 	height?: number;
-	x?: number;
-	y?: number;
 	squares?: [x: number, y: number][];
 	strokeDasharray?: string;
-	className?: string;
+	width?: number;
+	x?: number;
+	y?: number;
 	[key: string]: unknown;
 }
 

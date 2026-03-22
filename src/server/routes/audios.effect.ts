@@ -12,6 +12,7 @@ import { db } from '@/lib/drizzle/index.js';
 import { audios } from '@/lib/drizzle/schema/index.js';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { AudioService, AudioServiceLive } from '@/services/audio/audio.service.effect';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
 
@@ -45,8 +46,8 @@ router.get('/', async (req, res) => {
 
 		const filters = {
 			search: search as string | undefined,
-			limit: Number.parseInt(limit as string, 10),
-			offset: Number.parseInt(offset as string, 10),
+			limit: sanitizeLimit(limit as string),
+			offset: sanitizeOffset(offset as string),
 			sortBy: (sortBy as 'name' | 'size' | 'duration' | 'bitrate' | 'createdAt' | 'updatedAt') || 'createdAt',
 			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
 			folderId: folderId as string | undefined,
@@ -89,8 +90,8 @@ router.get('/favorites', async (req, res) => {
 
 		const filters = {
 			search: search as string | undefined,
-			limit: Number.parseInt(limit as string, 10),
-			offset: Number.parseInt(offset as string, 10),
+			limit: sanitizeLimit(limit as string),
+			offset: sanitizeOffset(offset as string),
 			sortBy: (sortBy as 'name' | 'size' | 'duration' | 'bitrate' | 'createdAt' | 'updatedAt') || 'createdAt',
 			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
 		};
@@ -161,8 +162,8 @@ router.get('/folder/:folderId', async (req, res) => {
 
 		const filters = {
 			search: search as string | undefined,
-			limit: Number.parseInt(limit as string, 10),
-			offset: Number.parseInt(offset as string, 10),
+			limit: sanitizeLimit(limit as string),
+			offset: sanitizeOffset(offset as string),
 			sortBy: (sortBy as 'name' | 'size' | 'duration' | 'bitrate' | 'createdAt' | 'updatedAt') || 'createdAt',
 			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
 		};

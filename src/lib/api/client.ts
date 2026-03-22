@@ -12,8 +12,8 @@ const apiLogger = clientLogger.withContext('ApiClient');
 export interface ApiResponse<T = unknown> {
 	data?: T;
 	error?: string;
-	success: boolean;
 	message?: string;
+	success: boolean;
 }
 
 export class ApiClient {
@@ -107,7 +107,12 @@ export class ApiClient {
 			const response = await fetch(url, config);
 
 			if (!response.ok) {
-				const errorText = await response.text();
+				let errorText: string;
+				try {
+					errorText = await response.text();
+				} catch {
+					errorText = response.statusText;
+				}
 				const errorMessage = `HTTP ${response.status}: ${errorText}`;
 				apiLogger.error(`❌ Error en ${method} ${endpoint}`, {
 					status: response.status,
@@ -116,7 +121,12 @@ export class ApiClient {
 				throw new Error(errorMessage);
 			}
 
-			const result = await response.json();
+			let result: T;
+			try {
+				result = await response.json();
+			} catch {
+				throw new Error(`Invalid JSON response from ${method} ${endpoint}`);
+			}
 			apiLogger.info(`✅ ${method} ${endpoint} exitoso`);
 
 			return result;

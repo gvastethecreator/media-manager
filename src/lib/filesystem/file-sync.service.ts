@@ -18,6 +18,14 @@ const syncLogger = serverLogger.withContext('FileSync');
  * Resultado de la sincronización de archivos
  */
 export interface FileSyncResult {
+	/** Errores durante la sincronización */
+	errors: string[];
+	/** Archivos nuevos detectados en el sistema */
+	newFiles: Array<{
+		path: string;
+		name: string;
+		extension: string;
+	}>;
 	/** Archivos eliminados de la BD (ya no existen en el sistema) */
 	removedFiles: Array<{
 		id: string;
@@ -25,14 +33,6 @@ export interface FileSyncResult {
 		name: string;
 		type: 'image' | 'video' | 'audio' | 'document' | 'file3d';
 	}>;
-	/** Archivos nuevos detectados en el sistema */
-	newFiles: Array<{
-		path: string;
-		name: string;
-		extension: string;
-	}>;
-	/** Errores durante la sincronización */
-	errors: string[];
 	/** Estadísticas del proceso */
 	stats: {
 		totalChecked: number;
@@ -50,14 +50,14 @@ export interface FileSyncResult {
 export interface FileSyncOptions {
 	/** Solo simular, no hacer cambios reales */
 	dryRun?: boolean;
-	/** Incluir archivos ocultos */
-	includeHidden?: boolean;
-	/** Verificar solo archivos modificados desde esta fecha */
-	modifiedSince?: Date;
 	/** Tipos de entidades a sincronizar */
 	entityTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'file3d'>;
 	/** Forzar sincronización incluso si hay errores */
 	forceSync?: boolean;
+	/** Incluir archivos ocultos */
+	includeHidden?: boolean;
+	/** Verificar solo archivos modificados desde esta fecha */
+	modifiedSince?: Date;
 	/** Callback para reportar progreso de archivos individuales */
 	onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void>;
 }
@@ -122,6 +122,8 @@ export class FileSyncService {
 			const scanResult = await scanFolder(folder.path, {
 				recursive: true,
 				includeHidden,
+				limit: 0, // No folder item limit
+				maxDepth: 99, // Allow deep recursive scanning
 			});
 
 			const filesystemPaths = new Set(scanResult.files.map((file) => normalizePath(file.path)));

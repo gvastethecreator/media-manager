@@ -15,11 +15,11 @@ const router = express.Router();
  * 📝 Interfaz para opciones de generación de preview JSON
  */
 interface JsonPreviewOptions {
-	maxLines?: number;
-	width?: number;
 	height?: number;
-	theme?: 'light' | 'dark';
+	maxLines?: number;
 	showLineNumbers?: boolean;
+	theme?: 'light' | 'dark';
+	width?: number;
 }
 
 /**

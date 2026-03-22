@@ -12,24 +12,24 @@ import { useWildcards } from '@/lib/api/wildcards';
 import { useWorldItems } from '@/lib/api/world-items';
 
 export interface EntityOption {
+	icon?: string;
 	id: string;
 	name: string;
-	icon?: string;
 }
 
 export interface ContextMenuEntities {
 	albums: EntityOption[];
-	collections: EntityOption[];
-	groups: EntityOption[];
-	tags: EntityOption[];
-	worldItems: EntityOption[];
 	characters: EntityOption[];
+	collections: EntityOption[];
 	concepts: EntityOption[];
+	groups: EntityOption[];
 	notes: EntityOption[];
 	places: EntityOption[];
 	prompts: EntityOption[];
 	properties: EntityOption[];
+	tags: EntityOption[];
 	wildcards: EntityOption[];
+	worldItems: EntityOption[];
 }
 
 // Helper function to convert entity with name to EntityOption

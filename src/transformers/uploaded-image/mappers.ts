@@ -9,14 +9,14 @@ import type { UploadedImageCreateInput, UploadedImageUpdateInput } from '../../t
 
 // Tipos de datos para Drizzle
 interface DrizzleUploadedImageCreateInput {
+	createdAt?: Date;
+	hash: string;
 	id?: string;
+	imageId: string;
+	metadata?: string | null;
 	name: string;
 	path: string;
 	size: number;
-	hash: string;
-	metadata?: string | null;
-	imageId: string;
-	createdAt?: Date;
 }
 
 type DrizzleUploadedImageUpdateInput = Partial<Omit<DrizzleUploadedImageCreateInput, 'hash' | 'imageId'>>;

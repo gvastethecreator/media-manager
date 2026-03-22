@@ -2,32 +2,32 @@
 
 import { ChevronRight, File, Folder, FolderOpen } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { AnimatePresence, motion } from '@/components/ui/animejs-shim';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 // Types
 export interface TreeNode {
-	id: string;
-	label: string;
-	icon?: React.ReactNode;
 	children?: TreeNode[];
 	data?: any;
+	icon?: React.ReactNode;
+	id: string;
+	label: string;
 }
 
 export interface TreeViewProps {
-	data: TreeNode[];
+	animateExpand?: boolean;
 	className?: string;
+	data: TreeNode[];
+	defaultExpandedIds?: string[];
+	indent?: number;
+	multiSelect?: boolean;
 	onNodeClick?: (node: TreeNode) => void;
 	onNodeExpand?: (nodeId: string, expanded: boolean) => void;
-	defaultExpandedIds?: string[];
-	showLines?: boolean;
-	showIcons?: boolean;
-	selectable?: boolean;
-	multiSelect?: boolean;
-	selectedIds?: string[];
 	onSelectionChange?: (selectedIds: string[]) => void;
-	indent?: number;
-	animateExpand?: boolean;
+	selectable?: boolean;
+	selectedIds?: string[];
+	showIcons?: boolean;
+	showLines?: boolean;
 }
 
 // Main TreeView component

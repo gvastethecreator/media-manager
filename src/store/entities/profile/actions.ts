@@ -15,43 +15,43 @@ import type { ProfileStoreState } from './types';
 export interface ProfileActions {
 	// Acciones para el perfil activo
 	fetchActiveProfile: () => Promise<void>;
-	setActiveProfile: (profile: ProfileExtended | null) => void;
-	setIsLoadingActive: (isLoading: boolean) => void;
-	setActiveProfileError: (error: string | null) => void;
 
 	// Acciones para la lista de perfiles
 	fetchProfiles: () => Promise<void>;
-	setProfiles: (profiles: ProfileExtended[]) => void;
-	setIsLoadingProfiles: (isLoading: boolean) => void;
-	setProfilesError: (error: string | null) => void;
-	setTotalProfiles: (total: number) => void;
-	setCurrentPage: (page: number) => void;
-
-	// Acciones para filtros y paginación
-	setFilters: (filters: ProfileFilters) => void;
-	setPagination: (pagination: ProfilePaginationOptions) => void;
-
-	// Acciones para la configuración de vista
-	setViewMode: (mode: 'grid' | 'list' | 'cards') => void;
-	setShowStats: (show: boolean) => void;
-	setShowDescription: (show: boolean) => void;
-	setGridColumns: (columns: 2 | 3 | 4) => void;
-	setCardSize: (size: 'small' | 'medium' | 'large') => void;
-
-	// Acciones para el estado de UI
-	setSelectedProfileId: (id: string | null) => void;
-	setHoveredProfileId: (id: string | null) => void;
-	toggleExpandedProfileId: (id: string) => void;
-
-	// Acciones para filtros
-	setActiveFilters: (filters: string[]) => void;
-	setSearchTerm: (term: string) => void;
-	setSortOption: (option: string) => void;
-	setGroupBy: (groupBy: 'none' | 'theme' | 'language' | 'status') => void;
 
 	// Acciones compuestas
 	resetFilters: () => void;
 	resetUI: () => void;
+
+	// Acciones para filtros
+	setActiveFilters: (filters: string[]) => void;
+	setActiveProfile: (profile: ProfileExtended | null) => void;
+	setActiveProfileError: (error: string | null) => void;
+	setCardSize: (size: 'small' | 'medium' | 'large') => void;
+	setCurrentPage: (page: number) => void;
+
+	// Acciones para filtros y paginación
+	setFilters: (filters: ProfileFilters) => void;
+	setGridColumns: (columns: 2 | 3 | 4) => void;
+	setGroupBy: (groupBy: 'none' | 'theme' | 'language' | 'status') => void;
+	setHoveredProfileId: (id: string | null) => void;
+	setIsLoadingActive: (isLoading: boolean) => void;
+	setIsLoadingProfiles: (isLoading: boolean) => void;
+	setPagination: (pagination: ProfilePaginationOptions) => void;
+	setProfiles: (profiles: ProfileExtended[]) => void;
+	setProfilesError: (error: string | null) => void;
+	setSearchTerm: (term: string) => void;
+
+	// Acciones para el estado de UI
+	setSelectedProfileId: (id: string | null) => void;
+	setShowDescription: (show: boolean) => void;
+	setShowStats: (show: boolean) => void;
+	setSortOption: (option: string) => void;
+	setTotalProfiles: (total: number) => void;
+
+	// Acciones para la configuración de vista
+	setViewMode: (mode: 'grid' | 'list' | 'cards') => void;
+	toggleExpandedProfileId: (id: string) => void;
 }
 
 /**

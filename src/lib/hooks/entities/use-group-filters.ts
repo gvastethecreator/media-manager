@@ -6,9 +6,9 @@ interface UseGroupFiltersProps {
 }
 
 interface GroupFiltersState {
+	onlyFavorites: boolean;
 	searchQuery: string;
 	selectedCategories: string[];
-	onlyFavorites: boolean;
 }
 
 export function useGroupFilters({ groups }: UseGroupFiltersProps) {

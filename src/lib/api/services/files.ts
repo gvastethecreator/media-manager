@@ -4,21 +4,21 @@ import type { FileInfo } from '@/types/file-entity-mapper';
 // Tipos definidos para las operaciones de archivos
 interface DirectoryReadResult {
 	files: FileInfo[];
-	total: number;
 	path: string;
+	total: number;
 }
 
 interface FileCopyMoveResult {
-	success: boolean;
-	sourcePath: string;
 	destPath: string;
 	message?: string;
+	sourcePath: string;
+	success: boolean;
 }
 
 interface FileOperationOptions {
 	overwrite?: boolean;
-	recursive?: boolean;
 	preserveTimestamps?: boolean;
+	recursive?: boolean;
 }
 
 import apiClient from '../client';

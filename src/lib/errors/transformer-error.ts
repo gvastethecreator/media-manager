@@ -135,11 +135,11 @@ export enum TransformerErrorCode {
  * Interfaz para el contexto de error
  */
 export interface TransformerErrorContext {
-	entityType?: string;
 	entityId?: string;
-	operation?: string;
-	field?: string;
+	entityType?: string;
 	expected?: string;
+	field?: string;
+	operation?: string;
 	received?: string;
 	[key: string]: any;
 }

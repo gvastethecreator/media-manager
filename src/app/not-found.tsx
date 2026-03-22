@@ -6,8 +6,8 @@
 import { ArrowLeft, FileQuestion, Home, Search } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
+import { motion } from '@/components/ui/motion-shim';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 /**

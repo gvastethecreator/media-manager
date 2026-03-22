@@ -12,13 +12,13 @@ export interface PerViewConfigBase {
 }
 
 export interface GridLikeViewConfig extends PerViewConfigBase {
-	itemSize: number; // tamaño de celda o tarjeta
 	gap?: number;
+	itemSize: number; // tamaño de celda o tarjeta
 	padding?: number;
-	tcgHoverReveal?: boolean;
 	tcgHolo?: boolean;
-	tcgShadows?: boolean;
+	tcgHoverReveal?: boolean;
 	tcgRounded?: boolean;
+	tcgShadows?: boolean;
 	tcgTilt?: boolean;
 }
 
@@ -31,43 +31,81 @@ export type PerViewConfig =
 	| ({ kind: 'list' | 'table' } & ListLikeViewConfig);
 
 export interface SortOption {
-	field: string;
 	direction: 'asc' | 'desc';
+	field: string;
 }
 
 export interface FilterOption {
 	field: string;
-	value: string | number | boolean | null;
 	operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'startsWith' | 'endsWith';
+	value: string | number | boolean | null;
 }
 
 export interface ViewOptionsState {
-	viewMode: ViewMode;
-	itemSize: number;
-	sortOptions: SortOption[];
-	sortVersion: number; // Incrementa en cada cambio de sortOptions para invalidar caches derivados
-	filterOptions: FilterOption[];
-	searchQuery: string;
-	groupByEntityType: boolean;
-	useCanvasRendering: boolean;
-	includeSubfolders: boolean;
-	backgroundColor: string;
-	showThumbnails: boolean;
-	showMetadata: boolean;
-	showTags: boolean;
-	showStats: boolean;
-	enableAnimations: boolean;
+	addFilterOption: (option: FilterOption) => void;
+	addSortOption: (option: SortOption) => void;
 	animationDuration: number;
-	pagination: {
-		mode: PaginationMode;
-		pageSize: number;
-	};
+	backgroundColor: string;
+	enableAnimations: boolean;
+	filterOptions: FilterOption[];
+	groupByEntityType: boolean;
+	includeSubfolders: boolean;
 	infiniteScroll: {
 		enabled: boolean;
 		threshold: number; // Píxeles desde el bottom para activar carga automática
 		autoLoad: boolean; // Si debe cargar automáticamente o usar botón manual
 		cooldownMs: number; // Tiempo mínimo entre cargas automáticas
 	};
+	itemSize: number;
+	pagination: {
+		mode: PaginationMode;
+		pageSize: number;
+	};
+	removeFilterOption: (field: string) => void;
+	removeSortOption: (field: string) => void;
+	resetAll: () => void;
+	resetFilters: () => void;
+	resetLocalStorage: () => void;
+	searchQuery: string;
+	setAnimationDuration: (duration: number) => void;
+	setBackgroundColor: (color: string) => void;
+	setEnableAnimations: (enabled: boolean) => void;
+	setFilterOptions: (options: FilterOption[]) => void;
+	setGroupByEntityType: (enabled: boolean) => void;
+	setIncludeSubfolders: (enabled: boolean) => void;
+	setInfiniteScroll: (patch: Partial<ViewOptionsState['infiniteScroll']>) => void;
+	setItemSize: (size: number) => void;
+	setPageSize: (size: number) => void;
+	setPaginationMode: (mode: PaginationMode) => void;
+	setRenderingMode: (view: ViewKey, mode: RenderingMode) => void;
+	setSearchQuery: (query: string) => void;
+	setShowMetadata: (enabled: boolean) => void;
+	setShowStats: (enabled: boolean) => void;
+	setShowTags: (enabled: boolean) => void;
+	setShowThumbnails: (enabled: boolean) => void;
+	setSortOptions: (options: SortOption[]) => void;
+	setUseCanvasRendering: (enabled: boolean) => void;
+	setViewConfig: (view: ViewKey, patch: Partial<PerViewConfig>) => void;
+	setViewMode: (mode: ViewMode) => void;
+	setVirtualization: (patch: Partial<ViewOptionsState['virtualization']>) => void;
+	showMetadata: boolean;
+	showStats: boolean;
+	showTags: boolean;
+	showThumbnails: boolean;
+	sortOptions: SortOption[];
+	sortVersion: number; // Incrementa en cada cambio de sortOptions para invalidar caches derivados
+	toggleEnableAnimations: () => void;
+	toggleGroupByEntityType: () => void;
+	toggleIncludeSubfolders: () => void;
+	toggleInfiniteScrollAutoLoad: () => void;
+	toggleInfiniteScrollEnabled: () => void;
+	toggleShowMetadata: () => void;
+	toggleShowStats: () => void;
+	toggleShowTags: () => void;
+	toggleShowThumbnails: () => void;
+	toggleUseCanvasRendering: () => void;
+	useCanvasRendering: boolean;
+	viewMode: ViewMode;
 	views: Record<ViewKey, PerViewConfig>;
 	virtualization: {
 		enabled: boolean;
@@ -76,44 +114,6 @@ export interface ViewOptionsState {
 		estimatedItemHeight: number;
 		maxItems: number; // Límite máximo de elementos en memoria
 	};
-	setUseCanvasRendering: (enabled: boolean) => void;
-	toggleUseCanvasRendering: () => void;
-	setIncludeSubfolders: (enabled: boolean) => void;
-	toggleIncludeSubfolders: () => void;
-	setBackgroundColor: (color: string) => void;
-	setPaginationMode: (mode: PaginationMode) => void;
-	setPageSize: (size: number) => void;
-	setViewMode: (mode: ViewMode) => void;
-	setItemSize: (size: number) => void;
-	setSortOptions: (options: SortOption[]) => void;
-	addSortOption: (option: SortOption) => void;
-	removeSortOption: (field: string) => void;
-	setFilterOptions: (options: FilterOption[]) => void;
-	addFilterOption: (option: FilterOption) => void;
-	removeFilterOption: (field: string) => void;
-	setSearchQuery: (query: string) => void;
-	setGroupByEntityType: (enabled: boolean) => void;
-	toggleGroupByEntityType: () => void;
-	setRenderingMode: (view: ViewKey, mode: RenderingMode) => void;
-	setViewConfig: (view: ViewKey, patch: Partial<PerViewConfig>) => void;
-	setVirtualization: (patch: Partial<ViewOptionsState['virtualization']>) => void;
-	setInfiniteScroll: (patch: Partial<ViewOptionsState['infiniteScroll']>) => void;
-	toggleInfiniteScrollEnabled: () => void;
-	toggleInfiniteScrollAutoLoad: () => void;
-	setShowThumbnails: (enabled: boolean) => void;
-	toggleShowThumbnails: () => void;
-	setShowMetadata: (enabled: boolean) => void;
-	toggleShowMetadata: () => void;
-	setShowTags: (enabled: boolean) => void;
-	toggleShowTags: () => void;
-	setShowStats: (enabled: boolean) => void;
-	toggleShowStats: () => void;
-	setEnableAnimations: (enabled: boolean) => void;
-	toggleEnableAnimations: () => void;
-	setAnimationDuration: (duration: number) => void;
-	resetFilters: () => void;
-	resetAll: () => void;
-	resetLocalStorage: () => void;
 }
 
 const DEFAULT_STATE = {

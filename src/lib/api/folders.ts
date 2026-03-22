@@ -23,35 +23,35 @@ import {
 } from './services/folders';
 
 export interface FolderFilters {
-	parentId?: string | null;
-	search?: string;
 	limit?: number;
 	offset?: number;
+	parentId?: string | null;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface FolderCreateInput {
-	name: string;
-	path: string;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name: string;
 	parentId?: string | null;
+	path: string;
 	presetId?: string | null;
 }
 
 export interface FolderUpdateInput {
-	name?: string;
-	description?: string | null;
-	path?: string;
-	emoji?: string | null;
 	color?: string | null;
+	description?: string | null;
+	emoji?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name?: string;
 	parentId?: string | null;
+	path?: string;
 	presetId?: string | null;
 }
 

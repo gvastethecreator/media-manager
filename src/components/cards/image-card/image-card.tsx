@@ -5,15 +5,15 @@ import { cn } from '@/lib/utils';
 export type ImageCardVariant = 'default' | 'minimal' | 'polaroid' | 'tcg';
 
 export interface ImageCardProps extends React.HTMLAttributes<HTMLDivElement> {
-	imageId: string;
-	thumbnailUrl?: string;
-	variant?: ImageCardVariant;
 	aspectRatio?: string;
+	className?: string;
+	imageId: string;
 	showRelations?: boolean;
 	showTags?: boolean;
 	tcgMode?: boolean;
 	thumbnailQuality?: 'low' | 'medium' | 'high';
-	className?: string;
+	thumbnailUrl?: string;
+	variant?: ImageCardVariant;
 }
 
 export const ImageCard = memo(function ImageCard({

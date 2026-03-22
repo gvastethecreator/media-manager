@@ -11,10 +11,10 @@ import type { TagWithStats } from '@/types/entities/tag';
  */
 export interface GetTagsOptions {
 	includeArchived?: boolean;
-	search?: string;
+	onlyFavorites?: boolean;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt';
 	orderDirection?: 'asc' | 'desc';
-	onlyFavorites?: boolean;
+	search?: string;
 }
 
 /**

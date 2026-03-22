@@ -36,22 +36,22 @@ export type Audio = AudioBase & {
  * Filtros para consultas de audio
  */
 export interface AudioFilters {
+	album?: string;
+	artist?: string;
 	folderId?: string;
-	isFavorite?: boolean;
-	isArchived?: boolean;
-	search?: string;
 	format?: string;
 	genre?: string;
-	artist?: string;
-	album?: string;
-	minDuration?: number;
+	isArchived?: boolean;
+	isFavorite?: boolean;
+	limit?: number;
+	maxBitrate?: number;
 	maxDuration?: number;
-	minSize?: number;
 	maxSize?: number;
 	minBitrate?: number;
-	maxBitrate?: number;
-	limit?: number;
+	minDuration?: number;
+	minSize?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size' | 'duration' | 'bitrate';
 	sortOrder?: 'asc' | 'desc';
 }
@@ -65,43 +65,43 @@ export type AudiosListResult = Audio[];
  * Estadísticas por formato de audio
  */
 export interface AudioFormatStats {
-	format: string;
-	count: number;
-	sumSize: number;
-	avgDuration: number;
 	avgBitrate: number;
+	avgDuration: number;
 	avgSampleRate: number;
+	count: number;
+	format: string;
+	sumSize: number;
 }
 
 /**
  * Interface del servicio de audios
  */
 export interface AudioServiceInterface {
+	readonly countByFolder: (folderId: string) => Effect.Effect<number, AudioError>;
 	// CRUD básico
 	readonly create: (input: AudioCreateInput) => Effect.Effect<Audio, AudioError>;
-	readonly getById: (id: string) => Effect.Effect<Audio, AudioError>;
-	readonly getByIdWithStats: (id: string) => Effect.Effect<AudioWithStats, AudioError>;
-	readonly getAll: (filters: AudioFilters) => Effect.Effect<AudiosListResult, AudioError>;
-	readonly update: (id: string, input: AudioUpdateInput) => Effect.Effect<Audio, AudioError>;
 	readonly deleteById: (id: string, force?: boolean) => Effect.Effect<void, AudioError>;
 	readonly deleteManyByIds: (ids: string[], force?: boolean) => Effect.Effect<number, AudioError>;
-
-	// Queries especializadas
-	readonly getByHash: (hash: string) => Effect.Effect<Audio | null, AudioError>;
-	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Audio | null, AudioError>;
+	readonly getAll: (filters: AudioFilters) => Effect.Effect<AudiosListResult, AudioError>;
 	readonly getAllFavorites: (filters: Omit<AudioFilters, 'isFavorite'>) => Effect.Effect<AudiosListResult, AudioError>;
 	readonly getByFolder: (
 		folderId: string,
 		filters: Omit<AudioFilters, 'folderId'>
 	) => Effect.Effect<AudiosListResult, AudioError>;
-	readonly countByFolder: (folderId: string) => Effect.Effect<number, AudioError>;
 
-	// Operaciones de toggle/batch
-	readonly toggleFavorite: (id: string) => Effect.Effect<Audio, AudioError>;
-	readonly setFavoriteMany: (ids: string[], isFavorite: boolean) => Effect.Effect<number, AudioError>;
+	// Queries especializadas
+	readonly getByHash: (hash: string) => Effect.Effect<Audio | null, AudioError>;
+	readonly getById: (id: string) => Effect.Effect<Audio, AudioError>;
+	readonly getByIdWithStats: (id: string) => Effect.Effect<AudioWithStats, AudioError>;
+	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Audio | null, AudioError>;
 
 	// Operaciones específicas de audio
 	readonly getFormatStats: () => Effect.Effect<AudioFormatStats[], AudioError>;
+	readonly setFavoriteMany: (ids: string[], isFavorite: boolean) => Effect.Effect<number, AudioError>;
+
+	// Operaciones de toggle/batch
+	readonly toggleFavorite: (id: string) => Effect.Effect<Audio, AudioError>;
+	readonly update: (id: string, input: AudioUpdateInput) => Effect.Effect<Audio, AudioError>;
 }
 
 /**

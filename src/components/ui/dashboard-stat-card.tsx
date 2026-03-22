@@ -98,18 +98,18 @@ const subtitleColorMap: Record<string, string> = {
 export interface DashboardStatCardProps
 	extends React.HTMLAttributes<HTMLDivElement>,
 		VariantProps<typeof statCardVariants> {
-	/** Icono de la tarjeta */
-	icon: LucideIcon;
-	/** Título/etiqueta de la estadística */
-	label: string;
-	/** Valor principal a mostrar */
-	value: string | number;
-	/** Subtítulo o descripción adicional */
-	subtitle?: string;
 	/** Contenido adicional (badges, trends, etc) */
 	extra?: ReactNode;
+	/** Icono de la tarjeta */
+	icon: LucideIcon;
 	/** Si está en estado de carga */
 	isLoading?: boolean;
+	/** Título/etiqueta de la estadística */
+	label: string;
+	/** Subtítulo o descripción adicional */
+	subtitle?: string;
+	/** Valor principal a mostrar */
+	value: string | number;
 }
 
 /* =====================================================

@@ -22,42 +22,42 @@ const fileCtxLogger = clientLogger.withContext('FileContext');
 export type { EntityWithStats };
 
 interface FileContextType {
-	files: EntityWithStats[];
-	selectedFiles: string[];
+	addFiles: (files: EntityWithStats[]) => void;
+	addTags: (fileIds: string[], tags: string[]) => void;
+	addToCollection: (fileIds: string[], collectionId: string) => void;
+	clearSelection: () => void;
+	copyFiles: (fileIds: string[], targetPath: string) => void;
 	currentItems: EntityWithStats[];
-	selectedItems: EntityWithStats[];
-	isLoading: boolean;
-	sortBy: 'name' | 'date' | 'size';
-	sortOrder: 'asc' | 'desc';
-	viewMode: 'grid' | 'list';
-	thumbnailSize: 'none' | 'small' | 'medium' | 'large';
-	loading: boolean;
+	deselectFiles: (fileIds: string[]) => void;
+	downloadFiles: (fileIds: string[]) => Promise<void>;
 	error: string | null;
+	files: EntityWithStats[];
+	getSortedFiles: () => EntityWithStats[];
+	handleSelectItem: (item: EntityWithStats) => void;
+	isLoading: boolean;
+	loading: boolean;
+	moveFiles: (fileIds: string[], targetPath: string) => void;
+	removeFiles: (fileIds: string[]) => void;
+	removeFromCollection: (fileIds: string[], collectionId: string) => void;
+	removeTags: (fileIds: string[], tags: string[]) => void;
+	renameFile: (fileId: string, newName: string) => void;
+	selectedFiles: string[];
+	selectedItems: EntityWithStats[];
+	selectFiles: (fileIds: string[]) => void;
 
 	// Actions
 	setFiles: (files: EntityWithStats[]) => void;
-	addFiles: (files: EntityWithStats[]) => void;
-	removeFiles: (fileIds: string[]) => void;
-	selectFiles: (fileIds: string[]) => void;
-	deselectFiles: (fileIds: string[]) => void;
-	clearSelection: () => void;
-	handleSelectItem: (item: EntityWithStats) => void;
-	toggleItemSelection: (item: EntityWithStats, multiSelect?: boolean) => void;
 	setSortBy: (sortBy: 'name' | 'date' | 'size') => void;
 	setSortOrder: (order: 'asc' | 'desc') => void;
-	setViewMode: (mode: 'grid' | 'list') => void;
 	setThumbnailSize: (size: 'none' | 'small' | 'medium' | 'large') => void;
+	setViewMode: (mode: 'grid' | 'list') => void;
+	sortBy: 'name' | 'date' | 'size';
+	sortOrder: 'asc' | 'desc';
+	thumbnailSize: 'none' | 'small' | 'medium' | 'large';
 	toggleFavorite: (fileId: string) => void;
-	addToCollection: (fileIds: string[], collectionId: string) => void;
-	removeFromCollection: (fileIds: string[], collectionId: string) => void;
-	addTags: (fileIds: string[], tags: string[]) => void;
-	removeTags: (fileIds: string[], tags: string[]) => void;
-	moveFiles: (fileIds: string[], targetPath: string) => void;
-	copyFiles: (fileIds: string[], targetPath: string) => void;
-	renameFile: (fileId: string, newName: string) => void;
+	toggleItemSelection: (item: EntityWithStats, multiSelect?: boolean) => void;
 	uploadFiles: (files: File[]) => Promise<void>;
-	downloadFiles: (fileIds: string[]) => Promise<void>;
-	getSortedFiles: () => EntityWithStats[];
+	viewMode: 'grid' | 'list';
 }
 
 const FileContext = createContext<FileContextType | undefined>(undefined);

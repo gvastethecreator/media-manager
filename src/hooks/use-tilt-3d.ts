@@ -7,29 +7,23 @@
 import { useCallback, useRef, useState } from 'react';
 
 export interface Tilt3DOptions {
-	/** Máximo ángulo de inclinación en grados (default: 15) */
-	maxTilt?: number;
-	/** Escala al hacer hover (default: 1.05) */
-	scale?: number;
-	/** Velocidad de transición en ms (default: 400) */
-	transitionSpeed?: number;
-	/** Brillo del reflejo (default: 0.4) */
-	glareOpacity?: number;
 	/** Si mostrar efecto de brillo (default: true) */
 	enableGlare?: boolean;
+	/** Brillo del reflejo (default: 0.4) */
+	glareOpacity?: number;
+	/** Máximo ángulo de inclinación en grados (default: 15) */
+	maxTilt?: number;
 	/** Si perspectiva se aplica al contenedor (default: true) */
 	perspective?: boolean;
 	/** Valor de perspectiva en px (default: 1000) */
 	perspectiveValue?: number;
+	/** Escala al hacer hover (default: 1.05) */
+	scale?: number;
+	/** Velocidad de transición en ms (default: 400) */
+	transitionSpeed?: number;
 }
 
 export interface Tilt3DState {
-	/** Rotación X calculada */
-	rotateX: number;
-	/** Rotación Y calculada */
-	rotateY: number;
-	/** Escala actual */
-	scale: number;
 	/** Opacidad del reflejo */
 	glareOpacity: number;
 	/** Posición del reflejo X (0-100%) */
@@ -38,23 +32,29 @@ export interface Tilt3DState {
 	glareY: number;
 	/** Si el mouse está sobre el elemento */
 	isHovering: boolean;
+	/** Rotación X calculada */
+	rotateX: number;
+	/** Rotación Y calculada */
+	rotateY: number;
+	/** Escala actual */
+	scale: number;
 }
 
 export interface Tilt3DReturn {
-	/** Ref para asignar al elemento */
-	ref: React.RefObject<HTMLDivElement | null>;
-	/** Estado actual del tilt */
-	state: Tilt3DState;
+	/** Estilos para el efecto de reflejo */
+	glareStyle: React.CSSProperties;
 	/** Handlers para aplicar al elemento */
 	handlers: {
 		onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
 		onMouseEnter: () => void;
 		onMouseLeave: () => void;
 	};
+	/** Ref para asignar al elemento */
+	ref: React.RefObject<HTMLDivElement | null>;
+	/** Estado actual del tilt */
+	state: Tilt3DState;
 	/** Estilos calculados para el elemento */
 	style: React.CSSProperties;
-	/** Estilos para el efecto de reflejo */
-	glareStyle: React.CSSProperties;
 }
 
 /**

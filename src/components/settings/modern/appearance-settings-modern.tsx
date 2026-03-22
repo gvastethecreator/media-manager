@@ -7,8 +7,8 @@
 import { Check, Edit, Image as ImageIcon, LayoutGrid, Monitor, Moon, Palette, Plus, Sun, Type } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-v3';
-import { Switch } from '@/components/ui/switch-v3';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
 import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
 import { useInterfaceSettingsStore } from '@/store/entities/settings/store';

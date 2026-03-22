@@ -60,15 +60,15 @@ const syncLogger = serverLogger.withContext('FolderSync');
  */
 export interface FolderSyncResult {
 	added: Array<{ id: string; path: string; name: string }>; // Carpetas agregadas
-	removed: Array<{ id: string; path: string; name: string }>; // Carpetas eliminadas
-	updated: Array<{ id: string; oldPath: string; newPath: string }>; // Carpetas actualizadas
 	errors: string[]; // Errores durante la sincronización
+	removed: Array<{ id: string; path: string; name: string }>; // Carpetas eliminadas
 	stats: {
 		totalProcessed: number;
 		duration: number;
 		startTime: Date;
 		endTime: Date;
 	};
+	updated: Array<{ id: string; oldPath: string; newPath: string }>; // Carpetas actualizadas
 }
 
 /**
@@ -76,10 +76,10 @@ export interface FolderSyncResult {
  */
 export interface FolderSyncOptions {
 	dryRun?: boolean; // Solo simular, no hacer cambios reales
-	maxDepth?: number; // Profundidad máxima de escaneo
-	includeHidden?: boolean; // Incluir carpetas ocultas
-	ignorePatterns?: string[]; // Patrones de carpetas a ignorar
 	forceSync?: boolean; // Forzar sincronización incluso si hay errores
+	ignorePatterns?: string[]; // Patrones de carpetas a ignorar
+	includeHidden?: boolean; // Incluir carpetas ocultas
+	maxDepth?: number; // Profundidad máxima de escaneo
 }
 
 /**
@@ -237,6 +237,7 @@ async function scanFileSystemFromRoot(
 			recursive: true,
 			maxDepth: options.maxDepth,
 			includeHidden: options.includeHidden,
+			limit: 0,
 		});
 
 		// Agregar todas las subcarpetas encontradas
@@ -406,9 +407,7 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 							tx.delete(imageConcepts).where(inArray(imageConcepts.A, ids)),
 							tx.delete(imagePrompts).where(inArray(imagePrompts.A, ids)),
 							tx.delete(imageNotes).where(inArray(imageNotes.A, ids)),
-							tx
-								.delete(groupImages)
-								.where(inArray(groupImages.A, ids)), // Fixed: usando A en lugar de imageId
+							tx.delete(groupImages).where(inArray(groupImages.A, ids)), // Fixed: usando A en lugar de imageId
 						]);
 					}
 				}
@@ -428,9 +427,7 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 							tx.delete(videoConcepts).where(inArray(videoConcepts.A, ids)),
 							tx.delete(videoPrompts).where(inArray(videoPrompts.A, ids)),
 							tx.delete(videoNotes).where(inArray(videoNotes.A, ids)),
-							tx
-								.delete(groupVideos)
-								.where(inArray(groupVideos.A, ids)), // Fixed: usando A en lugar de videoId
+							tx.delete(groupVideos).where(inArray(groupVideos.A, ids)), // Fixed: usando A en lugar de videoId
 						]);
 					}
 				}

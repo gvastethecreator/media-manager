@@ -16,14 +16,14 @@ export interface MoveFilesOptions {
 }
 
 export interface UseMoveResult {
-	/** Función para mover archivos */
-	moveFiles: (options: MoveFilesOptions) => Promise<void>;
-	/** Si está procesando */
-	isLoading: boolean;
 	/** Error si ocurrió */
 	error: Error | null;
+	/** Si está procesando */
+	isLoading: boolean;
 	/** Si la operación fue exitosa */
 	isSuccess: boolean;
+	/** Función para mover archivos */
+	moveFiles: (options: MoveFilesOptions) => Promise<void>;
 	/** Resetear estado */
 	reset: () => void;
 }

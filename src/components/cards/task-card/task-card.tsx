@@ -6,7 +6,7 @@
 
 import { memo, useCallback, useMemo } from 'react';
 import { CardContainer } from '@/components/cards/card-container';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { TaskCardProps } from './task-card.types';
 import { TaskCardContent } from './task-card-content';

@@ -22,9 +22,9 @@ import { cn, formatFileSize } from '@/lib/utils';
 import { useImageStore } from '@/store/entities/image';
 
 interface FolderStatsDisplayProps {
+	className?: string;
 	folderId: string;
 	folderName?: string;
-	className?: string;
 }
 
 const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({

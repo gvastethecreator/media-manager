@@ -22,18 +22,18 @@ export interface FiltersState {
 
 // Acciones
 export interface FiltersActions {
-	// Gestión de filtros
-	setFilters: (filters: Partial<FavoriteFilters>) => void;
 	clearFilters: () => void;
-
-	// Filtros específicos
-	setEntityTypeFilter: (types: string[]) => void;
-	setDateRangeFilter: (from: Date | null, to: Date | null) => void;
-	setSearchFilter: (query: string) => void;
+	getActiveFilters: () => string[];
 
 	// Selectores
 	getFilteredFavorites: () => FavoriteExtended[];
-	getActiveFilters: () => string[];
+	setDateRangeFilter: (from: Date | null, to: Date | null) => void;
+
+	// Filtros específicos
+	setEntityTypeFilter: (types: string[]) => void;
+	// Gestión de filtros
+	setFilters: (filters: Partial<FavoriteFilters>) => void;
+	setSearchFilter: (query: string) => void;
 }
 
 // Helpers

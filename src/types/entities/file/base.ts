@@ -28,37 +28,37 @@ export enum FileType {
  * Representa las propiedades fundamentales de un archivo sin estadísticas calculadas.
  */
 export interface FileBase {
-	// Identificación
-	id: string;
-	name: string;
-	path: string;
-
-	// Propiedades del archivo
-	size: number;
-	hash: string;
-	mimeType: string;
-	extension: string;
-	type: FileType;
-
-	// Metadatos del sistema
-	isDirectory: boolean;
-	parentPath: string;
 	absolutePath: string;
-	relativePath: string;
-
-	// Fechas del sistema de archivos
-	modifiedAt: Date;
 	accessedAt: Date;
+
+	// Timestamps del sistema
+	createdAt: Date;
+	extension: string;
 
 	// Relaciones
 	folderId: string | null;
+	hash: string;
+	// Identificación
+	id: string;
+
+	// Metadatos del sistema
+	isDirectory: boolean;
 
 	// Estados
 	isHidden: boolean;
 	isReadonly: boolean;
+	mimeType: string;
 
-	// Timestamps del sistema
-	createdAt: Date;
+	// Fechas del sistema de archivos
+	modifiedAt: Date;
+	name: string;
+	parentPath: string;
+	path: string;
+	relativePath: string;
+
+	// Propiedades del archivo
+	size: number;
+	type: FileType;
 	updatedAt: Date;
 }
 
@@ -68,34 +68,34 @@ import { EntityStats } from '../entity.types';
  * 📊 Estadísticas calculadas y métricas para un archivo.
  */
 export interface FileStatistics extends EntityStats {
-	/** Tamaño formateado legible para humanos */
-	formattedSize: string;
-	/** Tipo de archivo legible para humanos */
-	typeLabel: string;
-	/** Ícono recomendado para el tipo de archivo */
-	iconName: string;
-	/** Color recomendado para el tipo de archivo */
-	colorCode: string;
-	/** Días desde la última modificación */
-	daysSinceModified: number;
-	/** Días desde el último acceso */
-	daysSinceAccessed: number;
-	/** Indica si es un archivo reciente (modificado en los últimos 7 días) */
-	isRecent: boolean;
-	/** Indica si es un archivo grande (> 100MB) */
-	isLarge: boolean;
-	/** Fecha de modificación formateada */
-	formattedModifiedAt: string;
-	/** Número de elementos hijos (solo para directorios) */
-	childCount: number;
-	/** Ruta relativa corta para mostrar */
-	shortPath: string;
 	/** Checksum del archivo para verificación de integridad */
 	checksum: string;
+	/** Número de elementos hijos (solo para directorios) */
+	childCount: number;
+	/** Color recomendado para el tipo de archivo */
+	colorCode: string;
+	/** Días desde el último acceso */
+	daysSinceAccessed: number;
+	/** Días desde la última modificación */
+	daysSinceModified: number;
+	/** Fecha de modificación formateada */
+	formattedModifiedAt: string;
+	/** Tamaño formateado legible para humanos */
+	formattedSize: string;
+	/** Ícono recomendado para el tipo de archivo */
+	iconName: string;
 
 	// File system functions
 	isDirectory: boolean;
 	isFile: boolean;
+	/** Indica si es un archivo grande (> 100MB) */
+	isLarge: boolean;
+	/** Indica si es un archivo reciente (modificado en los últimos 7 días) */
+	isRecent: boolean;
+	/** Ruta relativa corta para mostrar */
+	shortPath: string;
+	/** Tipo de archivo legible para humanos */
+	typeLabel: string;
 }
 
 /**
@@ -103,8 +103,7 @@ export interface FileStatistics extends EntityStats {
  * Este es el tipo canónico que debe usarse en la aplicación.
  */
 export interface FileWithStats extends FileBase {
-	stats: FileStatistics;
-
 	// Campos opcionales para compatibilidad con DisplayableEntity
 	description?: string | null;
+	stats: FileStatistics;
 }

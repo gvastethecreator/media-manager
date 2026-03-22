@@ -4,36 +4,36 @@ import type { ImageWithStats } from '@/types/entities/image';
 import { apiClient } from './client';
 
 export interface FavoriteFilters {
-	search?: string;
+	category?: string;
+	endDate?: Date;
+	entityId?: string;
+	entityType?: string;
 	limit?: number;
 	offset?: number;
+	priority?: number;
+	search?: string;
 	sortBy?: 'addedAt' | 'createdAt' | 'updatedAt' | 'priority' | 'entityType' | 'category';
 	sortOrder?: 'asc' | 'desc';
-	entityType?: string;
-	entityId?: string;
-	userId?: string;
-	category?: string;
-	priority?: number;
 	startDate?: Date;
-	endDate?: Date;
+	userId?: string;
 }
 
 export interface FavoriteCreateInput {
+	category?: string | null;
 	entityId: string;
 	entityType: string;
-	userId?: string | null;
 	notes?: string | null;
-	category?: string | null;
 	priority?: number | null;
+	userId?: string | null;
 }
 
 export interface FavoriteUpdateInput {
+	category?: string | null;
 	entityId?: string;
 	entityType?: string;
-	userId?: string | null;
 	notes?: string | null;
-	category?: string | null;
 	priority?: number | null;
+	userId?: string | null;
 }
 
 export interface FavoritesResponse {

@@ -11,19 +11,19 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface PageHeadingProps {
-	title: string;
-	description?: string;
 	actions?: ReactNode;
-	backLink?: string;
-	backLabel?: string;
-	className?: string;
-	titleClassName?: string;
-	descriptionClassName?: string;
 	actionsClassName?: string;
-	/** Icono opcional junto al título */
-	icon?: ReactNode;
+	backLabel?: string;
+	backLink?: string;
 	/** Badge o etiqueta junto al título */
 	badge?: ReactNode;
+	className?: string;
+	description?: string;
+	descriptionClassName?: string;
+	/** Icono opcional junto al título */
+	icon?: ReactNode;
+	title: string;
+	titleClassName?: string;
 }
 
 /**

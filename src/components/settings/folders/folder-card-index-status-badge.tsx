@@ -8,9 +8,9 @@ import { formatRelativeDate } from './utils/folder-helpers';
 export type IndexStatus = 'indexed' | 'outdated' | 'pending' | 'not_found' | 'error';
 
 interface FolderIndexStatusBadgeProps {
-	status: IndexStatus;
-	lastIndexed: Date | null;
 	className?: string;
+	lastIndexed: Date | null;
+	status: IndexStatus;
 }
 
 export function FolderIndexStatusBadge({ status, lastIndexed, className }: FolderIndexStatusBadgeProps) {

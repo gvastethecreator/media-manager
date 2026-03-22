@@ -23,32 +23,32 @@ import {
 const logger = serverLogger.withContext('PromptService.Effect');
 
 export interface GetPromptsOptions {
-	search?: string;
 	category?: string;
+	limit?: number;
+	offset?: number;
 	onlyFavorites?: boolean;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt';
 	orderDirection?: 'asc' | 'desc';
-	limit?: number;
-	offset?: number;
+	search?: string;
 }
 
 export interface GetPromptsResult {
-	prompts: PromptWithStats[];
-	total: number;
 	limit: number;
 	offset: number;
+	prompts: PromptWithStats[];
+	total: number;
 }
 
 export class PromptService extends Context.Tag('PromptService')<PromptService, PromptServiceInterface>() {}
 
 export interface PromptServiceInterface {
-	readonly getById: (id: string) => Effect.Effect<Prompt, PromptError>;
-	readonly getAll: (options?: GetPromptsOptions) => Effect.Effect<GetPromptsResult, PromptError>;
 	readonly create: (input: PromptCreateInput) => Effect.Effect<Prompt, PromptError>;
-	readonly update: (id: string, input: PromptUpdateInput) => Effect.Effect<Prompt, PromptError>;
 	readonly delete: (id: string) => Effect.Effect<void, PromptError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<Prompt, PromptError>;
+	readonly getAll: (options?: GetPromptsOptions) => Effect.Effect<GetPromptsResult, PromptError>;
+	readonly getById: (id: string) => Effect.Effect<Prompt, PromptError>;
 	readonly getImages: (id: string) => Effect.Effect<any[], PromptError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<Prompt, PromptError>;
+	readonly update: (id: string, input: PromptUpdateInput) => Effect.Effect<Prompt, PromptError>;
 }
 
 const make = (): PromptServiceInterface => {

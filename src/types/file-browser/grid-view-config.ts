@@ -29,38 +29,38 @@ export type GridLayoutStyle = 'packed' | 'uniform' | 'masonry';
  * Configuración de una overlay de información
  */
 export interface GridHoverOverlay {
-	/** Si mostrar nombre del archivo */
-	showName: boolean;
-	/** Si mostrar tamaño del archivo */
-	showSize: boolean;
-	/** Si mostrar fecha de modificación */
-	showDate: boolean;
-	/** Si mostrar tipo de archivo */
-	showType: boolean;
-	/** Si mostrar dimensiones (para imágenes/videos) */
-	showDimensions: boolean;
-	/** Si mostrar duración (para videos/audio) */
-	showDuration: boolean;
-	/** Si mostrar etiquetas */
-	showTags: boolean;
 	/** Posición del overlay */
 	position: 'center' | 'bottom' | 'top';
 	/** Si mostrar fondo semi-transparente */
 	showBackground: boolean;
+	/** Si mostrar fecha de modificación */
+	showDate: boolean;
+	/** Si mostrar dimensiones (para imágenes/videos) */
+	showDimensions: boolean;
+	/** Si mostrar duración (para videos/audio) */
+	showDuration: boolean;
+	/** Si mostrar nombre del archivo */
+	showName: boolean;
+	/** Si mostrar tamaño del archivo */
+	showSize: boolean;
+	/** Si mostrar etiquetas */
+	showTags: boolean;
+	/** Si mostrar tipo de archivo */
+	showType: boolean;
 }
 
 /**
  * Configuración de labels para items
  */
 export interface GridLabelConfig {
+	/** Máximo número de líneas para el nombre */
+	maxLines: number;
 	/** Posición de los labels */
 	position: GridLabelPosition;
 	/** Si mostrar nombre completo o truncado */
 	showFullName: boolean;
 	/** Si mostrar información adicional */
 	showMetadata: boolean;
-	/** Máximo número de líneas para el nombre */
-	maxLines: number;
 	/** Si mostrar en tooltip el nombre completo */
 	showTooltip: boolean;
 }
@@ -69,36 +69,36 @@ export interface GridLabelConfig {
  * Configuración completa del GridView
  */
 export interface GridViewConfig {
+	/** Si permitir selección múltiple con Ctrl/Shift */
+	allowMultiSelect: boolean;
+	/** Duración de animaciones en ms */
+	animationDuration: number;
+	/** Animaciones habilitadas */
+	animationsEnabled: boolean;
 	/** Aspect ratio para todos los items */
 	aspectRatio: GridAspectRatio;
 	/** Aspect ratio personalizado (width:height) */
 	customAspectRatio?: { width: number; height: number };
+	/** Espaciado entre items */
+	gap: number;
 	/** Configuración de hover overlay */
 	hoverInfo: GridHoverInfo;
 	/** Configuración detallada del overlay */
 	hoverOverlay: GridHoverOverlay;
 	/** Configuración de labels */
 	labelConfig: GridLabelConfig;
-	/** Tamaño mínimo de items en pixels */
-	minItemSize: number;
-	/** Tamaño máximo de items en pixels */
-	maxItemSize: number;
-	/** Espaciado entre items */
-	gap: number;
-	/** Padding del contenedor */
-	padding: number;
 	/** Estilo de layout */
 	layoutStyle: GridLayoutStyle;
-	/** Si mostrar thumbnails */
-	showThumbnails: boolean;
-	/** Si permitir selección múltiple con Ctrl/Shift */
-	allowMultiSelect: boolean;
+	/** Tamaño máximo de items en pixels */
+	maxItemSize: number;
+	/** Tamaño mínimo de items en pixels */
+	minItemSize: number;
+	/** Padding del contenedor */
+	padding: number;
 	/** Si mostrar indicadores de selección */
 	showSelectionIndicators: boolean;
-	/** Animaciones habilitadas */
-	animationsEnabled: boolean;
-	/** Duración de animaciones en ms */
-	animationDuration: number;
+	/** Si mostrar thumbnails */
+	showThumbnails: boolean;
 }
 
 /**

@@ -84,8 +84,8 @@ FolderIcon.displayName = 'FolderIcon';
 // ===== FOLDER METADATA COMPONENT =====
 interface FolderMetadataProps {
 	folder: ExtendedFolder;
-	parentFolderName?: string;
 	indexStatus: IndexStatus;
+	parentFolderName?: string;
 	statusMessage?: ReactNode;
 }
 
@@ -206,19 +206,19 @@ FolderStatsSummary.displayName = 'FolderStatsSummary';
 // ===== MAIN FOLDER CARD COMPONENT =====
 
 interface FolderCardProps {
-	folder: ExtendedFolder;
-	selectedFolder: string | null;
-	isProcessing: boolean;
-	processStatus: ExtendedProcessStatus;
-	isGloballyProcessing: boolean;
-	globalCurrentFolderId?: string | null;
 	allFolders?: ExtendedFolder[];
-	onReindex: (folderId: string) => void;
-	onFolderClick: (folderId: string) => void;
+	folder: ExtendedFolder;
 	getFolderIndexStatus: (folder: ExtendedFolder) => IndexStatus;
-	onUpdateFolder?: (folderId: string, updates: { emoji?: string; description?: string; isFavorite?: boolean }) => void;
-	onToggleExpanded?: (folderId: string) => void;
+	globalCurrentFolderId?: string | null;
 	isExpanded?: boolean;
+	isGloballyProcessing: boolean;
+	isProcessing: boolean;
+	onFolderClick: (folderId: string) => void;
+	onReindex: (folderId: string) => void;
+	onToggleExpanded?: (folderId: string) => void;
+	onUpdateFolder?: (folderId: string, updates: { emoji?: string; description?: string; isFavorite?: boolean }) => void;
+	processStatus: ExtendedProcessStatus;
+	selectedFolder: string | null;
 }
 
 export const FolderCard = memo(

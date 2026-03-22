@@ -34,12 +34,12 @@ const spinnerVariants = cva('inline-flex items-center justify-center transition-
 export interface LoadingSpinnerProps
 	extends React.HTMLAttributes<HTMLOutputElement>,
 		VariantProps<typeof spinnerVariants> {
-	/** Estado actual: loading, success, error */
-	state?: 'loading' | 'success' | 'error';
 	/** Texto descriptivo para accesibilidad */
 	label?: string;
 	/** Mostrar texto junto al spinner */
 	showLabel?: boolean;
+	/** Estado actual: loading, success, error */
+	state?: 'loading' | 'success' | 'error';
 }
 
 export function LoadingSpinner({
@@ -101,12 +101,12 @@ export interface ProgressLoaderProps extends React.HTMLAttributes<HTMLDivElement
 	progress: number;
 	/** Mostrar porcentaje */
 	showPercentage?: boolean;
+	/** Tamaño */
+	size?: 'sm' | 'md' | 'lg';
 	/** Texto de estado */
 	status?: string;
 	/** Variante de color */
 	variant?: 'default' | 'primary' | 'success';
-	/** Tamaño */
-	size?: 'sm' | 'md' | 'lg';
 }
 
 export function ProgressLoader({
@@ -161,10 +161,10 @@ export function ProgressLoader({
 export interface SkeletonLoaderProps extends React.HTMLAttributes<HTMLDivElement> {
 	/** Variante de animación */
 	animation?: 'pulse' | 'shimmer';
-	/** Forma */
-	shape?: 'rectangle' | 'circle' | 'text';
 	/** Líneas de texto */
 	lines?: number;
+	/** Forma */
+	shape?: 'rectangle' | 'circle' | 'text';
 }
 
 export function SkeletonLoader({

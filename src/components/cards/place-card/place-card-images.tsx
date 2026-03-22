@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 interface CardMediaItem {
 	id: string;
+	isVideo?: boolean;
 	name?: string | null;
 	thumbnailUrl: string;
 	url?: string;
-	isVideo?: boolean;
 }
 
 interface PlaceCardImagesProps {
+	/** Si está en modo compacto */
+	compact?: boolean;
+	/** Si está habilitado el efecto holográfico */
+	holographicEffect?: boolean;
 	/** Imágenes a mostrar (rutas) */
 	images?: CardMediaItem[];
 	/** URL de la imagen destacada */
@@ -19,12 +23,8 @@ interface PlaceCardImagesProps {
 	primaryColor?: string;
 	/** Nivel de rareza (1-10) para determinar efectos */
 	rarityLevel?: number;
-	/** Si está habilitado el efecto holográfico */
-	holographicEffect?: boolean;
 	/** Si está en modo tarjeta TCG */
 	tcgMode?: boolean;
-	/** Si está en modo compacto */
-	compact?: boolean;
 }
 
 /**

@@ -1,24 +1,20 @@
 import { ArrowUpRight, Brain, Heart, Shield, Sparkles, Star, Swords, User, Wand, Zap } from 'lucide-react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 
 import type { CharacterStats } from '@/types/entities/character';
 
 interface CharacterCardContentProps {
-	description?: string | null;
-	primaryColor?: string;
-	secondaryColor?: string;
-	backstory?: string | null;
-	stats?: CharacterStats | null;
 	abilities?: Array<{ name: string; description?: string }> | Record<string, any> | null;
-	personality?: string[] | null;
-	fears?: string[] | null;
-	goals?: string[] | null;
+	alignment?: string | null;
+	backstory?: string | null;
 	beliefs?: string[] | null;
 	characterClass?: string | null;
-	race?: string | null;
+	compact?: boolean;
+	description?: string | null;
+	fears?: string[] | null;
+	goals?: string[] | null;
 	level?: number | null;
-	alignment?: string | null;
 	metadata?: {
 		power?: number;
 		healthPoints?: number;
@@ -26,9 +22,13 @@ interface CharacterCardContentProps {
 		rarityLevel?: string;
 		cardId?: string;
 	};
-	compact?: boolean;
-	tcgMode?: boolean;
 	onImageClick?: (imageId: string) => void;
+	personality?: string[] | null;
+	primaryColor?: string;
+	race?: string | null;
+	secondaryColor?: string;
+	stats?: CharacterStats | null;
+	tcgMode?: boolean;
 }
 
 export function CharacterCardContent({

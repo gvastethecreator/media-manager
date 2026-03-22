@@ -24,6 +24,7 @@ import {
 } from '@/services/task/task.service';
 import { serializeTask, serializeTasks } from '@/transformers/task';
 import type { TaskCreateInput, TaskUpdateInput } from '@/types/entities/task';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = Router();
 const logger = serverLogger.withContext('TasksEffect');
@@ -65,8 +66,8 @@ router.get(
 				isArchived: isArchived === 'true',
 				sortBy: sortBy as 'title' | 'createdAt' | 'updatedAt' | 'dueDate' | 'status' | 'priority',
 				sortOrder: sortOrder as 'asc' | 'desc',
-				limit: Number.parseInt(limit as string, 10),
-				offset: Number.parseInt(offset as string, 10),
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
 			};
 
 			const result = yield* Effect.tryPromise({

@@ -3,21 +3,21 @@ import { cn } from '@/lib/utils';
 import { CollapsibleJSON } from './json-syntax-highlighter';
 
 export interface MetadataTableRow {
+	category?: string;
+	className?: string;
+	compact?: boolean;
+	fullWidth?: boolean;
 	icon?: React.ComponentType<any>;
 	iconColor?: string;
 	label: string;
 	value: React.ReactNode;
-	fullWidth?: boolean;
-	className?: string;
-	compact?: boolean;
-	category?: string;
 }
 export interface MetadataTableProps {
-	title?: React.ReactNode;
-	rows: MetadataTableRow[];
 	className?: string;
 	dense?: boolean;
 	multiColumn?: boolean;
+	rows: MetadataTableRow[];
+	title?: React.ReactNode;
 }
 
 const renderRowValue = (row: MetadataTableRow): React.ReactNode => {

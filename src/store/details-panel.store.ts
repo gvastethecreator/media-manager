@@ -3,21 +3,21 @@ import { persist } from 'zustand/middleware';
 import type { AnyEntityWithStats } from '@/types/entities';
 
 interface DetailsPanelState {
-	isVisible: boolean;
 	isFixed: boolean;
-	showStatsWhenEmpty: boolean;
+	isVisible: boolean;
 	selectedItems: AnyEntityWithStats[];
+	setFixed: (fixed: boolean) => void;
+	setSelectedItems: (items: AnyEntityWithStats[]) => void;
+	setShowInterfaceSettings: (show: boolean) => void;
+	setShowStatsWhenEmpty: (show: boolean) => void;
+	setVisible: (visible: boolean) => void;
 	// Nuevo: mostrar sección de configuración de interfaz dentro del RightPanel
 	showInterfaceSettings: boolean;
-	toggleVisibility: () => void;
+	showStatsWhenEmpty: boolean;
 	toggleFixed: () => void;
-	toggleShowStatsWhenEmpty: () => void;
 	toggleInterfaceSettings: () => void;
-	setVisible: (visible: boolean) => void;
-	setFixed: (fixed: boolean) => void;
-	setShowStatsWhenEmpty: (show: boolean) => void;
-	setShowInterfaceSettings: (show: boolean) => void;
-	setSelectedItems: (items: AnyEntityWithStats[]) => void;
+	toggleShowStatsWhenEmpty: () => void;
+	toggleVisibility: () => void;
 }
 
 export const useDetailsPanel = create<DetailsPanelState>()(

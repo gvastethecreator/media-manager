@@ -15,33 +15,6 @@ import type { PlaceSearchOptions } from '@/types/entities/place/types';
 
 // Tipos locales equivalentes a Drizzle
 interface DrizzlePlaceWithCounts {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-
-	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	type: string | null;
-	location: string | null;
-	climate: string | null;
-	population: string | null;
-	government: string | null;
-	economy: string | null;
-	culture: string | null;
-	history: string | null;
-	geography: string | null;
-	landmarks: string | null;
-	dangers: string | null;
-	resources: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	parentId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
 	_count?: {
 		images?: number;
 		tags?: number;
@@ -50,33 +23,60 @@ interface DrizzlePlaceWithCounts {
 		collections?: number;
 		concepts?: number;
 	};
+	category: string | null;
+	climate: string | null;
+	color: string | null;
+	createdAt: Date;
+	culture: string | null;
+	dangers: string | null;
+	description: string | null;
+	economy: string | null;
+	emoji: string | null;
+	featuredImage: string | null;
+	geography: string | null;
+	government: string | null;
+	history: string | null;
+	id: string;
+
+	isFavorite: boolean;
+	landmarks: string | null;
+	location: string | null;
+	name: string;
+	notes: string | null;
+	parentId: string | null;
+	population: string | null;
+	resources: string | null;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	updatedAt: Date;
 }
 
 interface DrizzleCreatePlaceData {
-	name: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
 	category?: string | null;
+	climate?: string | null;
+	color?: string | null;
+	culture?: string | null;
+	dangers?: string | null; // JSON
+	description?: string | null;
+	economy?: string | null;
+	emoji?: string | null;
+	featuredImage?: string | null;
+	geography?: string | null;
+	government?: string | null;
+	history?: string | null;
 
 	isFavorite?: boolean;
+	landmarks?: string | null;
+	location?: string | null;
+	name: string;
+	notes?: string | null;
+	parentId?: string | null;
+	population?: string | null;
+	resources?: string | null; // JSON
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	location?: string | null;
-	climate?: string | null;
-	population?: string | null;
-	government?: string | null;
-	economy?: string | null;
-	culture?: string | null;
-	history?: string | null;
-	geography?: string | null;
-	landmarks?: string | null;
-	dangers?: string | null; // JSON
-	resources?: string | null; // JSON
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
 }
 
 type DrizzleUpdatePlaceData = Partial<DrizzleCreatePlaceData>;
@@ -87,21 +87,21 @@ interface DrizzleOrderBy {
 
 interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
-	OR?: DrizzleWhereFilter[];
-	name?: { contains?: string; equals?: string };
+	category?: { equals?: string; in?: string[] };
 	description?: { contains?: string; equals?: string };
 	history?: { contains?: string; equals?: string };
-	category?: { equals?: string; in?: string[] };
-	type?: { equals?: string; in?: string[] };
-	location?: { equals?: string };
 	isFavorite?: boolean;
+	location?: { equals?: string };
+	name?: { contains?: string; equals?: string };
+	OR?: DrizzleWhereFilter[];
+	type?: { equals?: string; in?: string[] };
 }
 
 interface DrizzleFindManyArgs {
-	where?: DrizzleWhereFilter;
 	orderBy?: DrizzleOrderBy;
 	skip?: number;
 	take?: number;
+	where?: DrizzleWhereFilter;
 }
 
 /**

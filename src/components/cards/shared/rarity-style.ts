@@ -13,21 +13,21 @@ import type React from 'react';
 export type RarityTier = 'common' | 'rare' | 'epic' | 'legendary' | 'mythic';
 
 export interface RarityVisualConfig {
-	/** Nivel numérico continuo (0..N) */
-	level: number;
-	/** Tier nominal derivado del nivel */
-	tier: RarityTier;
 	/** Número de puntos/dots a mostrar (visual) */
 	dots: number;
+	enableAnimatedTexture: boolean;
 	/** Efectos */
 	enableGlow: boolean;
 	enableHolo: boolean;
-	enableAnimatedTexture: boolean;
+	/** Nivel numérico continuo (0..N) */
+	level: number;
 	thresholds: {
 		glow: boolean;
 		holo: boolean;
 		texture: boolean;
 	};
+	/** Tier nominal derivado del nivel */
+	tier: RarityTier;
 }
 
 const RARITY_ORDER: RarityTier[] = ['common', 'rare', 'epic', 'legendary', 'mythic'];
@@ -42,8 +42,8 @@ export const RARITY_THRESHOLDS = {
 
 export interface ComputeRarityOptions {
 	level?: number; // Tiene prioridad
-	tier?: RarityTier | string | null;
 	overrideDots?: number;
+	tier?: RarityTier | string | null;
 }
 
 export function mapLevelToTier(level: number): RarityTier {

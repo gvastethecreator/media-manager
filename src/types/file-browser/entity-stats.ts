@@ -34,46 +34,46 @@ export enum EntityStatsType {
  * Estadísticas base para todas las entidades
  */
 export interface BaseEntityStats {
-	totalItems: number;
-	totalAssociations: number;
 	lastUpdated: Date;
+	totalAssociations: number;
+	totalItems: number;
 }
 
 /**
  * Estadísticas completas de entidades
  */
 export interface EntityStats extends BaseEntityStats {
-	imageCount: number;
-	videoCount: number;
 	albumsCount: number;
-	collectionCount: number;
-	tagCount: number;
+	audioCount: number;
 	characterCount: number;
-	worldItemCount: number;
+	collectionCount: number;
 	conceptCount: number;
-	promptCount: number;
+	documentCount: number;
+	file3dCount: number;
+	folderCount: number;
+	groupCount: number;
+	imageCount: number;
+	jsonFileCount: number;
 	noteCount: number;
 	placeCount: number;
-	groupCount: number;
+	promptCount: number;
 	propertyCount: number;
-	wildcardCount: number;
-	folderCount: number;
-	audioCount: number;
-	documentCount: number;
-	jsonFileCount: number;
-	file3dCount: number;
+	tagCount: number;
 	uploadedImageCount: number;
+	videoCount: number;
+	wildcardCount: number;
+	worldItemCount: number;
 }
 
 /**
  * Interfaz genérica para entidades con estadísticas
  */
 export interface EntityWithStats<T = EntityStats> {
+	createdAt: Date;
+	description?: string | null;
+	entityType: EntityStatsType;
 	id: string;
 	name: string;
-	description?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
 	stats: T;
-	entityType: EntityStatsType;
+	updatedAt: Date;
 }
