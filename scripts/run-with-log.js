@@ -39,7 +39,7 @@ if (!logName || commandArgs.length === 0) {
 	console.error('🚀 Script Universal de Logging con Tolerancia Inteligente');
 	console.error('');
 	console.error('Detección automática de tipos de comando:');
-	console.error('  📏 Linting: biome, eslint, prettier');
+	console.error('  📏 Linting: oxlint, oxfmt, vp check/lint/fmt, eslint, prettier');
 	console.error('  🧪 Testing: playwright');
 	console.error('  📝 TypeScript: tsc --noEmit');
 	console.error('  🏗️  Build: otros comandos (modo estricto)');
@@ -54,9 +54,11 @@ const fullCommand = commandArgs.join(' ');
 
 // Comandos que pueden devolver exit code 1 pero no son errores críticos
 const LINTING_COMMANDS = [
-	'biome check',
-	'biome format',
-	'biome ci',
+	'vp check',
+	'vp lint',
+	'vp fmt',
+	'oxlint',
+	'oxfmt',
 	'eslint',
 	'prettier',
 	'tsc --noEmit', // TypeScript check sin emit también puede fallar con errores de tipo

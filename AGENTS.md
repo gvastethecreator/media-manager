@@ -12,6 +12,7 @@ This guide provides essential information for AI agents working in this reposito
 **Runtime**: Bun 1.2+ (can use Node.js 20+ as fallback)
 
 **Deployment Options**:
+
 - **Web App**: Full-stack (React + Express) via `bun run dev:full`
 - **Desktop App**: Tauri 2 wrapper around the web app via `bun run dev:tauri`
 
@@ -25,7 +26,7 @@ This guide provides essential information for AI agents working in this reposito
 # Full development (frontend + backend + HMR)
 bun run dev:full
 
-# Frontend only (Vite dev server)
+# Frontend only (Vite+ dev server)
 bun run dev:vite
 
 # Backend only (Express with HMR)
@@ -68,12 +69,18 @@ bun run test:e2e:debug   # Debug mode
 ### Code Quality
 
 ```bash
+# Operational quality gate
+bun run check
+
+# Full repo audit with Vite+
+bun run check:full
+
 # Lint and format check
-bun run biome
+bun run lint
 bun run format:check
 
 # Auto-fix issues
-bun run biome:fix
+bun run lint:fix
 bun run format
 
 # Type checking
@@ -125,7 +132,8 @@ bun run build:tauri
 ```
 
 **Tauri Integration**:
-- React frontend runs at `http://localhost:5173` (Vite dev server)
+
+- React frontend runs at `http://localhost:5173` (Vite+ dev server)
 - Express backend runs at `http://localhost:4000` (server)
 - Tauri Rust bridge (`src-tauri/src/`) provides:
   - `check_backend_health()` - Verify backend is running
@@ -190,10 +198,11 @@ src/services/video/
 ├── video-events.ts          # Event emitters
 └── video-errors.effect.ts   # Error handling
 
-⚠️ **IMPORTANT**: We intentionally avoid barrel files (`index.ts`) in services and transformers for performance reasons and Biome best practices. Import directly from specific files.
+⚠️ **IMPORTANT**: We intentionally avoid barrel files (`index.ts`) in services and transformers for performance and clarity. Import directly from specific files.
 ```
 
 **Service Methods Pattern**:
+
 - `list(filters, pagination)` - Query with filters
 - `get(id)` - Single entity fetch
 - `create(input)` - Create new entity
@@ -215,6 +224,7 @@ src/transformers/video/
 ```
 
 **Naming Convention**:
+
 - `fromDrizzle<Entity>WithCounts(drizzleEntity)` - Main transformer
 - Return type: `<Entity>WithStats` (includes computed stats)
 
@@ -236,6 +246,7 @@ router.post('/:id/thumbnail', generateThumbnail)
 ```
 
 **Route Handler Structure**:
+
 1. Validate input with Zod schemas
 2. Call service layer (not Drizzle directly)
 3. Transform results with transformers
@@ -300,23 +311,27 @@ import { videoService } from '../../../services/video/video.service.effect';
 ```
 
 Available aliases:
+
 - `@/*` → `./src/*`
 - `@components/*` → `./src/components/*`
 
 ### 7. Component Architecture
 
 **UI Primitives** (`src/components/ui/`):
+
 - Based on Radix UI
 - Styled with Tailwind CSS
 - Use `cva` (class-variance-authority) for variants
 - Follow shadcn/ui patterns
 
 **Views** (`src/components/views/`):
+
 - One view per entity
 - Pattern: `<EntityView>`, `<EntityContentView>`, `<Entity>ContentView>`
 - Include proper TypeScript types
 
 **Features** (`src/components/features/`):
+
 - Complex, multi-component features
 - Example: file-browser, file-viewer
 
@@ -329,6 +344,7 @@ Available aliases:
 El proyecto usa un sistema completo de tokens CSS centralizados:
 
 **Archivos principales:**
+
 - `src/styles/tokens.css` - Tokens semánticos de color (entidades, estados, UI)
 - `src/styles/design-tokens.css` - Design tokens v2.0 (paletas, sombras, timing)
 - `src/styles/utilities/theme-system.css` - Sistema de themes y transiciones
@@ -337,6 +353,7 @@ El proyecto usa un sistema completo de tokens CSS centralizados:
 - `src/styles/utilities/typography.css` - Sistema tipográfico
 
 **Tokens de color disponibles:**
+
 ```css
 /* Variables de tema (shadcn/ui compatibles) */
 --background, --foreground
@@ -375,6 +392,7 @@ El proyecto usa un sistema completo de tokens CSS centralizados:
 ### Sistema de Themes
 
 **14 temas disponibles:**
+
 - `light` - Tema claro por defecto
 - `dark` - Tema oscuro por defecto
 - `cafe` - Tonos marrones cálidos
@@ -391,6 +409,7 @@ El proyecto usa un sistema completo de tokens CSS centralizados:
 - `neon` - Estilo cyberpunk/neón
 
 **Uso del Theme Provider:**
+
 ```tsx
 import { ThemeProvider, useTheme } from '@/components/ui/theme-provider';
 
@@ -405,6 +424,7 @@ setTheme('dark'); // o cualquier tema disponible
 ```
 
 **Theme Toggle:**
+
 ```tsx
 import { ThemeToggle } from '@/components/core/theme/theme-toggle';
 
@@ -419,6 +439,7 @@ import { ThemeToggle } from '@/components/core/theme/theme-toggle';
 - Transiciones fluidas entre themes (300ms)
 
 **Clases de utilidad disponibles:**
+
 ```css
 /* Bordes */
 rounded-dt-xs, rounded-dt-sm, rounded-dt-md, rounded-dt-lg, rounded-dt-xl
@@ -437,6 +458,7 @@ ease-dt-default, ease-dt-in, ease-dt-out, ease-dt-bounce
 ### Reglas de Estilo IMPORTANTES
 
 **❌ NUNCA usar colores hardcodeados:**
+
 ```tsx
 // MAL - No hacer esto
 <div style={{ color: '#3b82f6' }} />
@@ -445,6 +467,7 @@ ease-dt-default, ease-dt-in, ease-dt-out, ease-dt-bounce
 ```
 
 **✅ SIEMPRE usar tokens CSS:**
+
 ```tsx
 // BIEN - Usar variables CSS
 <div className="text-primary" />
@@ -568,6 +591,7 @@ describe('useVideo', () => {
 ```
 
 **Vitest Configuration**:
+
 - Environment: `jsdom`
 - Globals enabled (no need to import describe/it/expect)
 - File parallelism: `false` (to avoid SQLITE_BUSY)
@@ -592,6 +616,7 @@ test.describe('Videos Page', () => {
 ```
 
 **Playwright Configuration**:
+
 - Base URL: `http://localhost:5173`
 - Timeout: 60s default, 10s expectations
 - Auto-starts dev server: `bun run dev:full`
@@ -601,9 +626,10 @@ test.describe('Videos Page', () => {
 
 ## 🔧 Code Style & Linting
 
-### Biome Configuration
+### Oxc Configuration
 
 **Formatter**:
+
 - Indent style: Tab
 - Indent width: 2
 - Line width: 120
@@ -612,6 +638,7 @@ test.describe('Videos Page', () => {
 - Semicolons: Always
 
 **Key Rules**:
+
 - `noForEach`: Error (use for...of or map instead)
 - `useTemplate`: Error (use template literals)
 - `useConst`: Error (prefer const over let)
@@ -620,11 +647,14 @@ test.describe('Videos Page', () => {
 ### Running Lint/Format
 
 ```bash
-# Check for issues
-bun run biome
+# Check operational health
+bun run check
+
+# Full repo formatting audit
+bun run check:full
 
 # Auto-fix
-bun run biome:fix
+bun run lint:fix
 
 # Format files
 bun run format
@@ -648,6 +678,7 @@ export const FEATURES = {
 ```
 
 **Effect-TS Migration Pattern**:
+
 - Legacy service: `src/services/<entity>/<entity>.service.ts`
 - Effect version: `src/services/<entity>/<entity>.service.effect.ts`
 - Router chooses based on feature flag
@@ -689,7 +720,7 @@ Scripts should be wrapped with logging utilities:
 bun run scripts/run-with-log.js <alias> <command>
 
 # Example
-bun run scripts/run-with-log.js test-unit vitest run --coverage
+bun run scripts/run-with-log.js test-unit vp test --run --coverage
 ```
 
 Logs are saved in `/logs` directory with ISO timestamps.
@@ -865,6 +896,7 @@ export default router;
 ### Effect Adapter
 
 The `runEffectForExpress` adapter handles:
+
 - Effect execution
 - Error mapping to HTTP status codes
 - Response sending
@@ -894,6 +926,7 @@ export async function runEffectForExpress<R>(
 ### Key Effect Concepts
 
 **Effect.gen**: Generator-based sequencing
+
 ```typescript
 const effect = Effect.gen(function* () {
   const a = yield* Effect.succeed(1);
@@ -903,6 +936,7 @@ const effect = Effect.gen(function* () {
 ```
 
 **Effect.tryPromise**: Convert promises to Effects
+
 ```typescript
 const result = yield* Effect.tryPromise({
   try: () => fs.readFile(path),
@@ -911,6 +945,7 @@ const result = yield* Effect.tryPromise({
 ```
 
 **Context.Tag**: Dependency injection
+
 ```typescript
 // Define
 export class Database extends Context.Tag('Database')<Database, DB>() {}
@@ -923,6 +958,7 @@ export const DatabaseLive = Layer.effect(Database, makeDb());
 ```
 
 **Layers**: Compose dependencies
+
 ```typescript
 const MainLive = Layer.provide(
   VideoServiceLive,
@@ -939,10 +975,12 @@ const MainLive = Layer.provide(
 The project has a comprehensive batch operations system for handling multiple file operations:
 
 **Key Files**:
+
 - `src/services/file/batch-operations.service.ts` - Core batch service
 - `src/components/batch-operations/` - UI components
 
 **Service Pattern**:
+
 ```typescript
 // EventEmitter-based pattern for browser compatibility
 class EventEmitter {
@@ -971,6 +1009,7 @@ interface BatchOperation {
 ```
 
 **Usage Pattern**:
+
 ```typescript
 // 1. Start operation
 const operationId = batchFileOperationsService.startOperation({
@@ -997,12 +1036,14 @@ Long-running operations use a centralized progress tracking system:
 **Service**: `src/services/progress/progress-tracking.service.ts`
 
 **Features**:
+
 - Real-time progress updates
 - Operation queuing and priority
 - Error handling and retry logic
 - Duration estimation
 
 **Usage**:
+
 ```typescript
 import { progressTrackingService } from '@/services/progress/progress-tracking.service';
 
@@ -1027,6 +1068,7 @@ tracker.error(new Error('Failed to process file'));
 For real-time progress updates from backend to frontend:
 
 **Route Pattern** (server-side):
+
 ```typescript
 router.get('/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
@@ -1045,6 +1087,7 @@ router.get('/events', (req, res) => {
 ```
 
 **Client-side**:
+
 ```typescript
 const eventSource = new EventSource('/api/operations/events');
 
@@ -1055,6 +1098,7 @@ eventSource.addEventListener('progress', (event) => {
 ```
 
 **Example SSE Endpoints**:
+
 - `/thumbnails/events` - Thumbnail generation progress
 - `/reindex/events` - Folder reindexing progress
 - `/batch/events` - Batch operation progress
@@ -1066,12 +1110,14 @@ eventSource.addEventListener('progress', (event) => {
 ### Thumbnail Architecture
 
 **Components**:
+
 - `src/services/thumbnail/thumbnail-events.service.ts` - Event-driven thumbnail generation
 - `src/services/media/ffmpeg-thumbnail.service.ts` - Video thumbnails (FFmpeg)
 - `src/services/media/mediabunny-thumbnail.service.ts` - Unified thumbnail service
 - `src/transformers/thumbnail/` - Thumbnail DTO transformers
 
 **Thumbnail Generation Flow**:
+
 ```
 Request Thumbnail
     ↓
@@ -1085,6 +1131,7 @@ Return thumbnail data
 ```
 
 **API Endpoints**:
+
 ```bash
 # Get thumbnail
 GET /thumbnails/image/:imageId?quality=medium
@@ -1103,6 +1150,7 @@ GET /thumbnails/events
 ```
 
 **Thumbnail Quality Levels**:
+
 - `thumbnail` - Small (100x100)
 - `small` - Small (200x200)
 - `medium` - Medium (400x400)
@@ -1110,6 +1158,7 @@ GET /thumbnails/events
 - `original` - Original size
 
 **Thumbnail States**:
+
 - `thumbnail` - BLOB data in DB
 - `thumbnailError` - Error message if generation failed
 - `thumbnailErrorAt` - Timestamp of error
@@ -1124,23 +1173,27 @@ GET /thumbnails/events
 **Core Concept**: Files are only reprocessed if their SHA-256 hash changes.
 
 **Key Files**:
+
 - `src/services/folder/reindex/reindex-incremental.service.effect.ts` - Effect-TS implementation
 - `src/services/file-changes/file-change-detector.service.effect.ts` - Change detection
 - `docs/guides/REINDEX-INCREMENTAL.md` - Full documentation
 
 **How It Works**:
+
 1. Calculate SHA-256 hash of file content
 2. Compare with stored hash in database
 3. If different → Process file (extract metadata, generate thumbnail)
 4. If same → Skip (no changes detected)
 
 **Benefits**:
+
 - 95% time savings on incremental reindex
 - Detects file content changes (not just modification time)
 - Works with renamed/moved files
 - No unnecessary thumbnail regeneration
 
 **API**:
+
 ```bash
 # Start incremental reindex
 POST /folders/:id/reindex { mode: 'incremental' }
@@ -1153,6 +1206,7 @@ GET /folders/:id/reindex/status
 ```
 
 **Reindex Modes**:
+
 - `full` - Process all files (slow, initial indexing)
 - `incremental` - Only process changed files (fast, subsequent indexing)
 
@@ -1167,6 +1221,7 @@ Handles automatic detection and routing of files to correct entity types.
 **Service**: `src/services/file-entity-mapper/`
 
 **Architecture**:
+
 - **Core Service** (`core.service.ts`) - Orchestrates the 3-stage pipeline
 - **Processors** (`processors/`) - Specialized handlers per file type:
   - `image.processor.ts` - EXIF/IPTC/XMP/AI metadata
@@ -1177,6 +1232,7 @@ Handles automatic detection and routing of files to correct entity types.
   - `json.processor.ts` - Validation + preview
 
 **3-Stage Pipeline**:
+
 ```
 Stage 1: Basic Creation
   - Quick pre-check (stat + extension)
@@ -1194,6 +1250,7 @@ Stage 3: Thumbnail Generation
 ```
 
 **Supported File Types**:
+
 | Extension | Entity Type | Processor |
 |-----------|--------------|------------|
 | .jpg, .jpeg, .png, .gif, .webp | Image | ImageProcessor |
@@ -1204,6 +1261,7 @@ Stage 3: Thumbnail Generation
 | .glb, .gltf, .obj | 3D File | File3DProcessor |
 
 **Usage**:
+
 ```typescript
 import { FileEntityMapperCore } from '@/services/file-entity-mapper';
 
@@ -1232,12 +1290,14 @@ The undo/redo system allows users to revert file operations like copy, move, del
 **Service**: `src/services/undo-redo/undo-redo-manager.ts`
 
 **Key Features**:
+
 - Action history with branching support
 - EventEmitter for state change notifications
 - Automatic cleanup of old actions
 - Browser-compatible implementation
 
 **Undoable Action Pattern**:
+
 ```typescript
 export interface UndoableAction {
   id: string;
@@ -1266,6 +1326,7 @@ export type UndoActionType =
 ```
 
 **Usage**:
+
 ```typescript
 import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
 
@@ -1295,6 +1356,7 @@ undoRedoManager.on('stateChanged', (state) => {
 Tauri wraps the web application as a desktop app with native Rust capabilities.
 
 **Key Components**:
+
 - **Frontend**: React app running at `http://localhost:5173`
 - **Backend**: Express server running at `http://localhost:4000`
 - **Rust Bridge**: `src-tauri/src/` - Native commands
@@ -1351,11 +1413,13 @@ async fn open_in_explorer(path: String) -> Result<(), String> {
 ### Desktop vs Web Behavior
 
 **Web Mode**:
+
 - Runs in browser
 - Backend at `localhost:4000` (must be started separately)
 - No native file system access
 
 **Desktop Mode**:
+
 - Runs in Tauri window
 - Backend bundled in app
 - Native file system access via Tauri APIs
@@ -1370,6 +1434,7 @@ async fn open_in_explorer(path: String) -> Result<(), String> {
 All 20 entity views use a unified TCG (Trading Card Game) card pattern.
 
 **Card Features**:
+
 - Holographic effects on hover
 - Dynamic gradients by entity type
 - Golden glow for favorites
@@ -1377,6 +1442,7 @@ All 20 entity views use a unified TCG (Trading Card Game) card pattern.
 - Smooth animations (60fps)
 
 **Card Structure**:
+
 ```typescript
 interface EntityCardProps {
   entity: AnyEntityWithStats;
@@ -1387,6 +1453,7 @@ interface EntityCardProps {
 ```
 
 **Available Cards**:
+
 - `EntityCard` - Generic card (search, favorites, mixed views)
 - `AlbumCard`, `CollectionCard`, `GroupCard` - Organization entities
 - `CharacterCard`, `PlaceCard`, `ConceptCard`, `WorldItemCard` - Worldbuilding
@@ -1434,6 +1501,7 @@ export function EntityView({}: ViewProps) {
 ```
 
 **View Structure**:
+
 ```
 src/components/views/<entity>/
 ├── <entity>-view.tsx          # Main view component
@@ -1614,8 +1682,9 @@ bun run db:studio
 # Type check
 bun run tsc
 
-# Fix with Biome (some type issues)
-bun run biome:fix
+# Fix de lint/format cuando aplique
+bun run lint:fix
+bun run format
 ```
 
 ### Rebuild After Dependency Changes
@@ -1647,6 +1716,7 @@ bun run dev:full
 8. **Search context FIRST before creating TODO**
 
 **STOP EXECUTION IF**:
+
 - No TODO created before action
 - No context searched first
 - Tasks not marked complete
@@ -1671,7 +1741,7 @@ bun run dev:full
 ### Build Errors
 
 1. Check all imports use absolute paths
-2. Run `bun run biome:fix` for lint issues
+2. Run `bun run lint:fix` for lint issues
 3. Check circular dependencies in transformers
 
 ### Database Issues
@@ -1690,7 +1760,7 @@ bun run dev:full
 || Build | `bun run build` |
 || Test unit | `bun run test` |
 || Test E2E | `bun run test:e2e` |
-|| Lint | `bun run biome` |
+|| Lint | `bun run lint` |
 || Format | `bun run format` |
 || Type check | `bun run tsc` |
 || DB Studio | `bun run db:studio` |
