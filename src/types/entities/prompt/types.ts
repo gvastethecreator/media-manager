@@ -29,46 +29,28 @@ export type { PromptBase, PromptStatistics, PromptWithStats } from './base';
  * Interface for prompt parameters
  */
 export interface PromptParameter {
-	key: string;
-	value: any;
-	type?: string;
 	description?: string;
+	key: string;
+	type?: string;
+	value: any;
 }
 
 /**
  * Extended prompt type for UI with parsed fields
  */
 export interface PromptExtended extends PromptBase {
-	parsedTags: string[];
-	parsedParameters: PromptParameter[];
-	previewContent?: string;
 	lastUpdated?: Date;
 	// Additional fields for UI
 	notesEntities?: NoteWithStats[];
+	parsedParameters: PromptParameter[];
+	parsedTags: string[];
+	previewContent?: string;
 }
 
 /**
  * 🎯 Tipo completo para Prompt con todas las relaciones y campos JSON deserializados.
  */
 export interface PromptComplete extends Omit<PromptBase, 'notes'> {
-	// Campos serializados/deserializados
-	tags?: string[] | string;
-
-	// Relaciones
-	images?: ImageWithStats[];
-	videos?: VideoWithStats[];
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tagEntities?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemWithStats[];
-	concepts?: ConceptWithStats[];
-	notes?: NoteWithStats[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyComplete[];
-	groups?: GroupWithStats[];
-
 	// Conteos
 	_count?: {
 		images?: number;
@@ -85,38 +67,55 @@ export interface PromptComplete extends Omit<PromptBase, 'notes'> {
 		properties?: number;
 		groups?: number;
 	};
+	albums?: AlbumWithStats[];
+	characters?: CharacterWithStats[];
+	collections?: CollectionWithStats[];
+	concepts?: ConceptWithStats[];
+	groups?: GroupWithStats[];
+
+	// Relaciones
+	images?: ImageWithStats[];
+	notes?: NoteWithStats[];
+	places?: PlaceComplete[];
+	properties?: PropertyComplete[];
+	tagEntities?: TagWithStats[];
+	// Campos serializados/deserializados
+	tags?: string[] | string;
+	videos?: VideoWithStats[];
+	wildcards?: WildcardWithStats[];
+	worldItems?: WorldItemWithStats[];
 }
 
 /**
  * ➕ Input para crear un nuevo prompt.
  */
 export interface PromptCreateInput {
-	name: string;
+	category?: string | null;
+	color?: string | null;
+	composition?: string | null;
+	content?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	featuredImage?: string | null;
+	groups?: (string | { id: string })[];
+	inspiration?: string | null;
 
 	isFavorite?: boolean;
+	lighting?: string | null;
+	mood?: string | null;
+	name: string;
+	notes?: string | null;
+	parameters?: string | null;
+	parentId?: string | null;
+	properties?: (string | { id: string })[];
+	purpose?: string | null;
+	style?: string | null;
+	// Relaciones
+	tags?: (string | { id: string })[];
+	technique?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	content?: string | null;
-	parameters?: string | null;
-	style?: string | null;
-	mood?: string | null;
-	lighting?: string | null;
-	composition?: string | null;
-	technique?: string | null;
-	inspiration?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-	purpose?: string | null;
-	// Relaciones
-	tags?: (string | { id: string })[];
-	groups?: (string | { id: string })[];
-	properties?: (string | { id: string })[];
 	wildcards?: (string | { id: string })[];
 }
 
@@ -124,32 +123,32 @@ export interface PromptCreateInput {
  * 🔄 Input para actualizar un prompt existente.
  */
 export interface PromptUpdateInput {
-	name?: string;
+	category?: string | null;
+	color?: string | null;
+	composition?: string | null;
+	content?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	featuredImage?: string | null;
+	groups?: (string | { id: string })[];
+	inspiration?: string | null;
 
 	isFavorite?: boolean;
+	lighting?: string | null;
+	mood?: string | null;
+	name?: string;
+	notes?: string | null;
+	parameters?: string | null;
+	parentId?: string | null;
+	properties?: (string | { id: string })[];
+	purpose?: string | null;
+	style?: string | null;
+	// Relaciones
+	tags?: (string | { id: string })[];
+	technique?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	content?: string | null;
-	parameters?: string | null;
-	style?: string | null;
-	mood?: string | null;
-	lighting?: string | null;
-	composition?: string | null;
-	technique?: string | null;
-	inspiration?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-	purpose?: string | null;
-	// Relaciones
-	tags?: (string | { id: string })[];
-	groups?: (string | { id: string })[];
-	properties?: (string | { id: string })[];
 	wildcards?: (string | { id: string })[];
 }
 
@@ -157,9 +156,6 @@ export interface PromptUpdateInput {
  * 🔍 Opciones para buscar y filtrar prompts.
  */
 export interface PromptSearchOptions {
-	skip?: number;
-	take?: number;
-	orderBy?: Record<string, 'asc' | 'desc'>;
 	filters?: {
 		search?: string;
 		category?: string | string[];
@@ -169,6 +165,9 @@ export interface PromptSearchOptions {
 		contentContains?: string;
 	};
 	includeRelations?: boolean;
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	skip?: number;
+	take?: number;
 }
 
 /**
@@ -176,10 +175,10 @@ export interface PromptSearchOptions {
  */
 export interface PromptStats {
 	imageCount: number;
-	videoCount: number;
-	tagCount: number;
 	noteCount: number;
+	tagCount: number;
 	totalContentItems: number;
+	videoCount: number;
 }
 
 /**
@@ -187,65 +186,65 @@ export interface PromptStats {
  */
 export interface PromptSearchResult {
 	data: PromptWithStats[];
-	total: number;
-	page: number;
-	pageSize: number;
-	totalPages: number;
 	hasNext: boolean;
 	hasPrevious: boolean;
+	page: number;
+	pageSize: number;
+	total: number;
+	totalPages: number;
 }
 
 /**
  * ⚡ Resultado de ejecución de un prompt
  */
 export interface PromptExecutionResult {
-	id: string;
-	promptId: string;
+	completedAt?: Date;
 	content: string;
-	parameters?: Record<string, any>;
-	result?: string;
-	status: 'pending' | 'running' | 'completed' | 'failed';
+	createdAt: Date;
 	error?: string;
 	executionTime?: number;
+	id: string;
 	model?: string;
+	parameters?: Record<string, any>;
+	promptId: string;
+	result?: string;
+	status: 'pending' | 'running' | 'completed' | 'failed';
 	tokens?: {
 		total?: number;
 		prompt?: number;
 		completion?: number;
 	};
-	createdAt: Date;
-	completedAt?: Date;
 }
 
 /**
  * ⚙️ Parámetros para ejecutar un prompt
  */
 export interface PromptExecutionParams {
-	promptId: string;
-	parameters?: Record<string, any>;
 	model?: string;
 	options?: Record<string, any>;
+	parameters?: Record<string, any>;
+	promptId: string;
 }
 
 /**
  * 🏷️ Filtros para prompts
  */
 export interface PromptFilters {
-	category?: string[];
 	categories?: string[]; // Alias para compatibilidad
-	type?: string[];
-	tags?: string[];
-
-	isFavorite?: boolean;
-	search?: string;
-	searchQuery?: string; // Alias para compatibilidad
-	purpose?: string[];
-	purposes?: string[]; // Alias para compatibilidad
-	onlyFavorites?: boolean;
+	category?: string[];
 	dateRange?: {
 		from?: Date;
 		to?: Date;
 	};
+
+	isFavorite?: boolean;
+	onlyFavorites?: boolean;
+	purpose?: string[];
+	purposes?: string[]; // Alias para compatibilidad
+	search?: string;
+	searchQuery?: string; // Alias para compatibilidad
+	tags?: string[];
+	type?: string[];
 }
 
 /**
@@ -259,13 +258,13 @@ export interface PromptWithRelations extends PromptComplete {
  * 🔗 Prompt simplificado para relaciones
  */
 export interface PromptRelated {
-	id: string;
-	name: string;
+	category: string | null;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	category: string | null;
-	createdAt: Date;
+	id: string;
+	name: string;
 	updatedAt: Date;
 }
 
@@ -273,73 +272,73 @@ export interface PromptRelated {
  * 🗄️ Tipos para Drizzle ORM
  */
 export interface DrizzleCreatePromptData {
-	id?: string;
-	name: string;
+	category?: string | null;
+	color?: string | null;
+	composition?: string | null;
+	content?: string | null;
+	createdAt?: Date;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	featuredImage?: string | null;
+	id?: string;
+	inspiration?: string | null;
 
 	isFavorite?: boolean;
+	lighting?: string | null;
+	mood?: string | null;
+	name: string;
+	notes?: string | null;
+	parameters?: string | null;
+	parentId?: string | null;
+	purpose?: string | null;
+	style?: string | null;
+	technique?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	content?: string | null;
-	parameters?: string | null;
-	style?: string | null;
-	mood?: string | null;
-	lighting?: string | null;
-	composition?: string | null;
-	technique?: string | null;
-	inspiration?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-	purpose?: string | null;
-	createdAt?: Date;
 	updatedAt?: Date;
 }
 
 export interface DrizzleUpdatePromptData {
-	name?: string;
+	category?: string | null;
+	color?: string | null;
+	composition?: string | null;
+	content?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	featuredImage?: string | null;
+	inspiration?: string | null;
 
 	isFavorite?: boolean;
+	lighting?: string | null;
+	mood?: string | null;
+	name?: string;
+	notes?: string | null;
+	parameters?: string | null;
+	parentId?: string | null;
+	purpose?: string | null;
+	style?: string | null;
+	technique?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	content?: string | null;
-	parameters?: string | null;
-	style?: string | null;
-	mood?: string | null;
-	lighting?: string | null;
-	composition?: string | null;
-	technique?: string | null;
-	inspiration?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-	purpose?: string | null;
 	updatedAt?: Date;
 }
 
 export interface DrizzleWhereFilter {
-	id?: any;
-	name?: any;
+	AND?: DrizzleWhereFilter[];
 	category?: any;
-	type?: any;
+	content?: any;
+	createdAt?: any;
+	id?: any;
 
 	isFavorite?: any;
-	content?: any;
-	purpose?: any;
-	createdAt?: any;
-	updatedAt?: any;
-	AND?: DrizzleWhereFilter[];
-	OR?: DrizzleWhereFilter[];
 	NOT?: DrizzleWhereFilter;
+	name?: any;
+	OR?: DrizzleWhereFilter[];
+	purpose?: any;
+	type?: any;
+	updatedAt?: any;
 }
 
 export interface DrizzleOrderBy {

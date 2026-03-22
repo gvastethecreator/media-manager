@@ -172,7 +172,7 @@ Se realizó una auditoría exhaustiva de la experiencia de usuario de la aplicac
 
 **Estado actual:**
 
-- ✅ Sistema de animaciones con Anime.js
+- ✅ Sistema de animaciones unificado con GSAP
 - ✅ Variantes para reduced motion
 - ⚠️ Falta de consistencia en duraciones
 

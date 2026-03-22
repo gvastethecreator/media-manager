@@ -9,26 +9,25 @@ import { MetadataStore } from '..';
 
 // Estado
 export interface CoreState {
+	error: string | null;
+	isLoading: boolean;
 	// Datos
 	metadatas: MetadataWithStats[];
-	isLoading: boolean;
-	error: string | null;
 }
 
 // Acciones
 export interface CoreActions {
-	// Setters básicos
-	setMetadatas: (metadatas: MetadataWithStats[]) => void;
-	setIsLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
-
 	// Operaciones
 	addMetadata: (metadata: MetadataWithStats) => void;
-	updateMetadata: (id: string, metadata: Partial<MetadataWithStats>) => void;
 	removeMetadata: (id: string) => void;
 
 	// Operaciones masivas
 	reset: () => void;
+	setError: (error: string | null) => void;
+	setIsLoading: (isLoading: boolean) => void;
+	// Setters básicos
+	setMetadatas: (metadatas: MetadataWithStats[]) => void;
+	updateMetadata: (id: string, metadata: Partial<MetadataWithStats>) => void;
 }
 
 // Estado inicial

@@ -153,20 +153,20 @@ export function StatusBadge({
  * ===================================================== */
 
 export interface ActionFeedbackProps {
-	/** Estado actual */
-	state: 'idle' | 'loading' | 'success' | 'error';
+	/** Clase adicional */
+	className?: string;
 	/** Mensaje para cada estado */
 	messages?: {
 		loading?: string;
 		success?: string;
 		error?: string;
 	};
-	/** Duración del estado success/error antes de volver a idle (ms) */
-	resetDelay?: number;
 	/** Callback cuando vuelve a idle */
 	onReset?: () => void;
-	/** Clase adicional */
-	className?: string;
+	/** Duración del estado success/error antes de volver a idle (ms) */
+	resetDelay?: number;
+	/** Estado actual */
+	state: 'idle' | 'loading' | 'success' | 'error';
 }
 
 export function ActionFeedback({ state, messages = {}, resetDelay = 2000, onReset, className }: ActionFeedbackProps) {
@@ -210,8 +210,6 @@ export function ActionFeedback({ state, messages = {}, resetDelay = 2000, onRese
  * ===================================================== */
 
 export interface OperationProgressProps extends React.HTMLAttributes<HTMLDivElement> {
-	/** Total de items */
-	total: number;
 	/** Items completados */
 	completed: number;
 	/** Items con error */
@@ -220,6 +218,8 @@ export interface OperationProgressProps extends React.HTMLAttributes<HTMLDivElem
 	operation?: string;
 	/** Mostrar detalles */
 	showDetails?: boolean;
+	/** Total de items */
+	total: number;
 }
 
 export function OperationProgress({
@@ -275,10 +275,10 @@ export function OperationProgress({
  * ===================================================== */
 
 export interface ContextualHintProps extends React.HTMLAttributes<HTMLDivElement> {
-	/** Icono */
-	icon?: LucideIcon;
 	/** Puede cerrarse */
 	dismissible?: boolean;
+	/** Icono */
+	icon?: LucideIcon;
 	/** Callback al cerrar */
 	onDismiss?: () => void;
 }

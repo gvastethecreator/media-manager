@@ -40,18 +40,18 @@ const MasonryThumbnail = memo(function MasonryThumbnail({
 });
 
 export interface MasonryViewProps extends Omit<BrowserViewProps, 'config'> {
+	/** ID activo */
+	activeId?: string | null;
 	/** Configuración de masonry */
 	config: MasonryViewConfig;
+	/** Handler de context menu */
+	onItemContextMenu?: ItemContextMenuHandler;
 	/** Página actual */
 	page?: number;
 	/** Tamaño de página */
 	pageSize?: number;
 	/** IDs seleccionados */
 	selectedIds?: Set<string>;
-	/** ID activo */
-	activeId?: string | null;
-	/** Handler de context menu */
-	onItemContextMenu?: ItemContextMenuHandler;
 }
 
 // ============================================================================

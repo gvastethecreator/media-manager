@@ -29,11 +29,11 @@ function useMousePosition(): MousePosition {
 
 interface ParticlesProps {
 	className?: string;
-	quantity?: number;
-	staticity?: number;
-	ease?: number;
-	size?: number;
 	color?: string;
+	ease?: number;
+	quantity?: number;
+	size?: number;
+	staticity?: number;
 	vx?: number;
 	vy?: number;
 }
@@ -67,16 +67,16 @@ function parseColor(color: string, canvas: HTMLCanvasElement): number[] {
 }
 
 interface Circle {
-	x: number;
-	y: number;
-	translateX: number;
-	translateY: number;
-	size: number;
 	alpha: number;
-	targetAlpha: number;
 	dx: number;
 	dy: number;
 	magnetism: number;
+	size: number;
+	targetAlpha: number;
+	translateX: number;
+	translateY: number;
+	x: number;
+	y: number;
 }
 
 const Particles: React.FC<ParticlesProps> = ({

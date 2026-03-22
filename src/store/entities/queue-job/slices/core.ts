@@ -32,22 +32,22 @@ const coreLogger = clientLogger.withContext('QueueJobStore:Core');
  * Slice que contiene el estado y las acciones principales para los trabajos en cola
  */
 export interface QueueJobCoreSlice {
+	cancelJob: (id: string) => Promise<QueueJobExtended>;
+
+	// Acciones CRUD
+	createJob: (input: CreateQueueJobInput) => Promise<QueueJobExtended>;
+	deleteJob: (id: string) => Promise<void>;
 	// Acciones de carga
 	loadJobs: () => Promise<void>;
 	loadStats: () => Promise<void>;
 
-	// Acciones CRUD
-	createJob: (input: CreateQueueJobInput) => Promise<QueueJobExtended>;
-	updateJob: (id: string, input: UpdateQueueJobInput) => Promise<QueueJobExtended>;
-	deleteJob: (id: string) => Promise<void>;
+	// Reseteo
+	resetJobs: () => void;
 
 	// Acciones específicas
 	retryJob: (id: string) => Promise<QueueJobExtended>;
-	cancelJob: (id: string) => Promise<QueueJobExtended>;
 	selectJob: (job?: QueueJobExtended) => void;
-
-	// Reseteo
-	resetJobs: () => void;
+	updateJob: (id: string, input: UpdateQueueJobInput) => Promise<QueueJobExtended>;
 }
 
 /**

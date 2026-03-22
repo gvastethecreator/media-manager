@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-const emptyModule = resolve(__dirname, 'src/config/empty.ts');
+const emptyModule = resolve(import.meta.dirname, 'src/config/empty.ts');
 
 export default defineConfig({
 	plugins: [
@@ -86,7 +86,7 @@ export default defineConfig({
 					react: ['react', 'react-dom'],
 					router: ['react-router-dom'],
 					query: ['@tanstack/react-query'],
-					ui: ['animejs', 'lucide-react'],
+					ui: ['gsap', 'lucide-react'],
 					vendor: ['zustand', 'lodash', 'date-fns'],
 					utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
 				},
@@ -136,7 +136,8 @@ export default defineConfig({
 			'react',
 			'react-dom',
 			'react-router-dom',
-			'animejs',
+			'gsap',
+			'@gsap/react',
 			'@tanstack/react-query',
 			'zustand',
 			'lucide-react',

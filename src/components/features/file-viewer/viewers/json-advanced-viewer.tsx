@@ -27,11 +27,11 @@ import { cn } from '@/lib/utils';
 type ViewMode = 'tree' | 'table' | 'graph' | 'cards' | 'stats';
 
 interface JsonAdvancedViewerProps {
+	className?: string;
 	/** Contenido JSON como string o objeto */
 	content: string | object;
 	/** Nombre del archivo */
 	fileName?: string;
-	className?: string;
 }
 
 // ============ UTILIDADES ============
@@ -104,11 +104,11 @@ function getValueType(value: any): string {
 // ============ VISTA TREE ============
 
 interface TreeNodeProps {
-	name: string;
-	value: any;
 	depth?: number;
 	isLast?: boolean;
+	name: string;
 	searchTerm?: string;
+	value: any;
 }
 
 function TreeNode({ name, value, depth = 0, isLast = false, searchTerm = '' }: TreeNodeProps) {

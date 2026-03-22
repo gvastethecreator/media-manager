@@ -3,29 +3,29 @@ import React, { memo } from 'react';
 import { GroupCard } from '@/components/cards/group-card/group-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { GroupWithStats } from '@/types/entities/group';
 
 interface GroupsContentViewProps {
-	groups: GroupWithStats[];
-	isLoading: boolean;
-	error: string | null;
-	showForm: boolean;
-	newGroupName: string;
-	newGroupDescription: string;
-	optimisticGroups: GroupWithStats[];
-	setShowForm: (show: boolean) => void;
-	setNewGroupName: (name: string) => void;
-	setNewGroupDescription: (description: string) => void;
-	handleGroupClick: (group: GroupWithStats) => void;
-	handleCreateGroup: () => void;
 	className?: string;
+	error: string | null;
+	groups: GroupWithStats[];
+	handleCreateGroup: () => void;
+	handleGroupClick: (group: GroupWithStats) => void;
+	isLoading: boolean;
+	newGroupDescription: string;
+	newGroupName: string;
+	optimisticGroups: GroupWithStats[];
+	setNewGroupDescription: (description: string) => void;
+	setNewGroupName: (name: string) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 // Componente memoizado para cada tarjeta de grupo

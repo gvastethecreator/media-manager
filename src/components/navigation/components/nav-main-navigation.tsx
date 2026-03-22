@@ -36,8 +36,8 @@ import { NavCategoryChildren } from './nav-category-children';
 
 interface NavMainNavigationProps {
 	currentView: string;
-	onNavigate?: (id: ViewType) => void;
 	isCollapsed?: boolean;
+	onNavigate?: (id: ViewType) => void;
 }
 
 const NavMainNavigationComponent = memo(function NavMainNavigationImpl({

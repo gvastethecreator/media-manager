@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider-v3';
+import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEntityCardTransition, useFlip } from '@/hooks/transitions';
 import { customEasings, getEnterExitCoordinator, getFlipEngine } from '@/lib/transitions';
@@ -315,10 +315,10 @@ function EntityCardDemo() {
 
 interface EntityCardDemoItemProps {
 	entity: { id: string; type: 'folder' | 'image' | 'video'; name: string; count: number };
-	isSelected: boolean;
 	isExpanded: boolean;
-	onSelect: () => void;
+	isSelected: boolean;
 	onExpand: () => void;
+	onSelect: () => void;
 }
 
 function EntityCardDemoItem({ entity, isSelected, isExpanded, onSelect, onExpand }: EntityCardDemoItemProps) {

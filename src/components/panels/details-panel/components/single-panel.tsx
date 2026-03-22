@@ -50,9 +50,9 @@ import { MetadataTable } from './metadata-table';
 import { CollapsiblePrompt } from './prompt-parser';
 
 interface SinglePanelProps {
-	item: AnyEntityWithStats;
-	enhancedMetadata: Array<{ key: string; value: string; category?: string }>;
 	className?: string;
+	enhancedMetadata: Array<{ key: string; value: string; category?: string }>;
+	item: AnyEntityWithStats;
 }
 
 const copyToClipboard = async (text: string): Promise<boolean> => {

@@ -57,12 +57,12 @@ const formatNumber = (num: number): string => {
 };
 
 interface CategoryCardProps {
-	title: string;
-	icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+	color: string;
 	count: number;
 	href: string;
-	color: string;
+	icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
 	stats?: { label: string; value: string }[];
+	title: string;
 }
 
 const CategoryCard = memo(function CategoryCard({ title, icon: Icon, count, href, color, stats }: CategoryCardProps) {
@@ -135,7 +135,7 @@ const QuickStatItem = memo(function QuickStatItem({
 	value,
 	color,
 }: {
-	icon: React.ComponentType<{ className?: string }>;
+	icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
 	label: string;
 	value: string;
 	color: string;

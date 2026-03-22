@@ -63,12 +63,14 @@ GRID_PRESETS.files        // 6 cols en xl - para archivos
 Las siguientes vistas fueron actualizadas para usar el estándar de 5 columnas:
 
 ✅ **Core Views**:
+
 - `files-content-view.tsx`
 - `favorites-content-view.tsx`
 - `uploaded-images-content-view.tsx`
 - `all-images-content-view.tsx` (usa FileBrowser)
 
 ✅ **Entity Views**:
+
 - `albums-content-view.tsx`
 - `collections-content-view.tsx`
 - `tags-content-view.tsx`
@@ -83,6 +85,7 @@ Las siguientes vistas fueron actualizadas para usar el estándar de 5 columnas:
 - `properties-content-view.tsx`
 
 ✅ **Detail Views** (también actualizadas):
+
 - `group-content-view.tsx`
 - `tags-content-view.tsx`
 - `properties-content-view.tsx`
@@ -136,5 +139,5 @@ Para verificar las grillas en diferentes tamaños:
 - Se usa `gap-4` (1rem / 16px) entre items
 - El contenedor tiene `container mx-auto` para centrar
 - `p-6` (1.5rem / 24px) de padding en el contenedor
-- Las animaciones usan `motion.div` de animejs-shim
+- Las animaciones usan `motion.div` de `@/components/ui/motion-shim`
 - El stagger delay es de 0.05s entre items

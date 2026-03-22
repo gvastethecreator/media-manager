@@ -6,44 +6,43 @@
 import type { AnyEntityWithStats } from '@/types/entities';
 
 export interface DetailsPanelProps {
-	selectedItems: AnyEntityWithStats[];
 	className?: string;
+	selectedItems: AnyEntityWithStats[];
 }
 
 export interface MetadataField {
+	category?: string;
 	key: string;
 	value: string;
-	category?: string;
 }
 
 export interface BasicMetadataField {
+	icon: React.ComponentType<any>;
 	key: string;
 	value: string;
-	icon: React.ComponentType<any>;
 }
 
 export interface RelatedEntity {
-	type: string;
+	color: string;
 	count: number;
 	icon: React.ComponentType<any>;
-	color: string;
+	type: string;
 }
 
 export interface DisplayData {
-	type: 'empty' | 'single' | 'multiple';
 	item?: AnyEntityWithStats;
 	items?: AnyEntityWithStats[];
+	type: 'empty' | 'single' | 'multiple';
 }
 
 export interface EnhancedMetadataOptions {
+	detectAIOrigin?: boolean;
 	includeExif?: boolean;
 	includeIptc?: boolean;
 	includeXmp?: boolean;
-	detectAIOrigin?: boolean;
 }
 
 export interface EnhancedMetadataResult {
-	success: boolean;
 	error?: string;
 	metadata?: {
 		aiMetadata?: any;
@@ -59,4 +58,5 @@ export interface EnhancedMetadataResult {
 			confidence?: number;
 		};
 	};
+	success: boolean;
 }

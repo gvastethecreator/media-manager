@@ -7,12 +7,12 @@ import { FolderTreeView } from './folder-tree-view';
 
 interface NavCategoryChildrenProps {
 	categoryId: string;
-	isCollapsed: boolean;
-	selectedChildId: string | null;
 	currentView: string;
+	isCollapsed: boolean;
 	items: CategoryChild[];
 	onItemClick: (id: string) => void;
 	onToggleViewMode?: (mode: ViewMode) => void;
+	selectedChildId: string | null;
 }
 
 const NavCategoryChildrenComponent = memo(function NavCategoryChildrenImpl({

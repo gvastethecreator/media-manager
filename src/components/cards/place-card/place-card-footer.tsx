@@ -3,16 +3,16 @@ import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/date';
 
 interface PlaceCardFooterProps {
+	cardId?: string;
+	compact?: boolean;
 	createdAt?: Date;
+	healthPoints?: number;
 	imagesCount?: number;
-	videosCount?: number;
+	power?: number;
 	primaryColor?: string;
 	secondaryColor?: string;
-	power?: number;
-	healthPoints?: number;
-	cardId?: string;
 	tcgMode?: boolean;
-	compact?: boolean;
+	videosCount?: number;
 }
 
 /**

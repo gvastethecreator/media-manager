@@ -21,41 +21,41 @@ import type {
 
 // Tipos de datos para Drizzle
 interface DrizzleWorldItemCreateInput {
-	name: string;
-	description?: string | null;
-	type: string;
-	category: string;
-	rarity: string;
-	value?: number | null;
-	weight?: number | null;
-	featuredImage?: string | null;
 	attributes: string;
+	category: string;
+	description?: string | null;
 	effects: string;
+	featuredImage?: string | null;
+	filters: string;
+	isFavorite?: boolean;
+	name: string;
+	properties: string;
+	rarity: string;
 	requirements: string;
 	stats: string;
-	properties: string;
-	filters: string;
 	tags: string;
-	isFavorite?: boolean;
+	type: string;
+	value?: number | null;
+	weight?: number | null;
 	// Las relaciones se manejan por separado en Drizzle
 }
 
 type DrizzleWorldItemUpdateInput = Partial<DrizzleWorldItemCreateInput>;
 
 interface DrizzleWorldItemWhereInput {
-	OR?: Array<{ name?: { contains?: string }; description?: { contains?: string } }>;
-	type?: { in?: string[] };
 	category?: { in?: string[] };
-	rarity?: { in?: string[] };
-	isFavorite?: boolean;
 	images?: { some?: Record<string, never> } | { none?: Record<string, never> };
+	isFavorite?: boolean;
+	OR?: Array<{ name?: { contains?: string }; description?: { contains?: string } }>;
+	rarity?: { in?: string[] };
+	type?: { in?: string[] };
 }
 
 interface DrizzleWorldItemFindManyArgs {
-	where?: DrizzleWorldItemWhereInput;
 	orderBy?: { [key: string]: 'asc' | 'desc' };
-	take?: number;
 	skip?: number;
+	take?: number;
+	where?: DrizzleWorldItemWhereInput;
 }
 
 interface DrizzleWorldItemOrderByInput {

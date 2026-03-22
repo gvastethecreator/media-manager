@@ -15,8 +15,8 @@ interface DeleteInput {
 
 interface DeleteResult {
 	deleteItems: (itemIds: string[]) => Promise<void>;
-	isLoading: boolean;
 	error: Error | null;
+	isLoading: boolean;
 	isSuccess: boolean;
 }
 

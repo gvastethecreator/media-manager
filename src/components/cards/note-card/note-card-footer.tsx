@@ -4,16 +4,16 @@ import { formatDistanceToNow } from '@/lib/utils/date';
 
 interface NoteCardFooterProps {
 	createdAt: Date | string;
-	updatedAt: Date | string;
 	imagesCount: number;
-	videosCount: number;
-	relationsCount: number;
 	isFavorite?: boolean;
-	status?: string | null;
-	priority?: number | null;
 	primaryColor: string;
+	priority?: number | null;
+	relationsCount: number;
 	secondaryColor: string;
+	status?: string | null;
 	tcgMode?: boolean;
+	updatedAt: Date | string;
+	videosCount: number;
 }
 
 /**

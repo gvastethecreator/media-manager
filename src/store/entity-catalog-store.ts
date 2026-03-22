@@ -23,10 +23,10 @@ type EntityKey =
 	| 'worldItems';
 
 interface CatalogSection {
-	items: MinimalItem[];
-	loading: boolean;
-	loaded: boolean;
 	error?: string;
+	items: MinimalItem[];
+	loaded: boolean;
+	loading: boolean;
 }
 
 type CatalogState = Record<EntityKey, CatalogSection> & {
@@ -34,8 +34,8 @@ type CatalogState = Record<EntityKey, CatalogSection> & {
 };
 
 interface CatalogActions {
-	preload: () => Promise<void>;
 	getItems: (key: EntityKey) => MinimalItem[];
+	preload: () => Promise<void>;
 }
 
 export type EntityCatalogStore = CatalogState & CatalogActions;

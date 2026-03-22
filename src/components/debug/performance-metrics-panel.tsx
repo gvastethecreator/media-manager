@@ -4,16 +4,16 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 const PERF_DEFAULT_FILTER = /(grid|cards)-view-initial-render/;
 
 interface PerfEntryInfo {
-	name: string;
 	duration: number;
-	startTime: number;
 	entryType: string;
+	name: string;
+	startTime: number;
 }
 
 interface PerformanceMetricsPanelProps {
-	filter?: RegExp;
-	className?: string;
 	autoUpdateMs?: number;
+	className?: string;
+	filter?: RegExp;
 }
 
 // Panel ligero para mostrar medidas performance.measure creadas en runtime.

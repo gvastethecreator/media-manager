@@ -15,9 +15,9 @@ import { cn } from '@/lib/utils';
 
 interface TransitionGroupContextValue {
 	groupId: string;
+	isAnimating: boolean;
 	registerElement: (id: string, index: number) => (element: HTMLElement | null) => void;
 	unregisterElement: (id: string) => void;
-	isAnimating: boolean;
 }
 
 const TransitionGroupContext = React.createContext<TransitionGroupContextValue | null>(null);
@@ -31,31 +31,31 @@ export function useTransitionGroup(): TransitionGroupContextValue | null {
 // ============================================================================
 
 interface TransitionGroupProps {
-	/** ID del grupo (opcional, se genera automáticamente) */
-	id?: string;
+	/** Si debe animar en mount */
+	animateOnMount?: boolean;
 	/** Elementos hijos */
 	children: React.ReactNode;
 	/** Clases CSS */
 	className?: string;
-	/** Si está visible */
-	isVisible?: boolean;
 	/** Configuración de entrada */
 	enterConfig?: EnterConfig;
 	/** Configuración de salida */
 	exitConfig?: ExitConfig;
-	/** Delay de stagger entre elementos (ms) */
-	staggerDelay?: number;
+	/** ID del grupo (opcional, se genera automáticamente) */
+	id?: string;
+	/** Si está visible */
+	isVisible?: boolean;
 	/** Delay máximo de stagger */
 	maxStaggerDelay?: number;
-	/** Dirección del stagger */
-	staggerDirection?: 'forward' | 'reverse' | 'random';
-	/** Si debe animar en mount */
-	animateOnMount?: boolean;
+	onEnterComplete?: () => void;
 	/** Callbacks */
 	onEnterStart?: () => void;
-	onEnterComplete?: () => void;
-	onExitStart?: () => void;
 	onExitComplete?: () => void;
+	onExitStart?: () => void;
+	/** Delay de stagger entre elementos (ms) */
+	staggerDelay?: number;
+	/** Dirección del stagger */
+	staggerDirection?: 'forward' | 'reverse' | 'random';
 }
 
 // ============================================================================
@@ -292,19 +292,19 @@ export const TransitionItem = React.memo(function TransitionItem({
 });
 
 // ============================================================================
-// Componente AnimatePresence (similar a Framer Motion)
+// Componente AnimatePresence con API declarativa compatible
 // ============================================================================
 
 interface AnimatePresenceProps {
 	children: React.ReactNode;
-	/** Si el elemento está presente */
-	present: boolean;
+	/** Clases CSS */
+	className?: string;
 	/** Configuración de entrada */
 	enter?: EnterConfig;
 	/** Configuración de salida */
 	exit?: ExitConfig;
-	/** Clases CSS */
-	className?: string;
+	/** Si el elemento está presente */
+	present: boolean;
 }
 
 /**

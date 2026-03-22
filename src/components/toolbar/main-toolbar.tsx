@@ -9,16 +9,16 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { ViewBreadcrumbs } from '../navigation/breadcrumbs';
 
 export interface ViewToolbarProps {
-	isRightPanelCollapsed?: boolean;
-	toggleRightPanelCollapse?: () => void;
-	isLeftPanelCollapsed?: boolean;
-	toggleLeftPanelCollapse?: () => void;
 	// Props adicionales para integración con file-browser
 	allItemIds?: string[];
 	currentFolderId?: string;
+	isLeftPanelCollapsed?: boolean;
 	isRetrying?: boolean;
+	isRightPanelCollapsed?: boolean;
 	onRefreshFolder?: () => Promise<void>;
 	onScanFolder?: () => Promise<void>;
+	toggleLeftPanelCollapse?: () => void;
+	toggleRightPanelCollapse?: () => void;
 	// Nota: Las acciones específicas de carpeta (scan, refresh) están en file-browser-toolbar.tsx
 }
 

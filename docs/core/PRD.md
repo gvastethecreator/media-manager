@@ -250,7 +250,7 @@ El proyecto nació como solución para organizar imágenes generadas con IA, evo
 - **Data Fetching:** TanStack Query 5.90.14
 - **UI Components:** Radix UI + Tailwind CSS 4.1.18
 - **Virtualización:** TanStack Virtual 3.13.13
-- **Animaciones:** Anime.js 4.3.5
+- **Animaciones:** GSAP 3.14.x + `motion-shim`
 
 ### 5.2 Backend
 

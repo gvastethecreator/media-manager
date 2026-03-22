@@ -6,13 +6,13 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 
 interface ConceptCardContentProps {
-	description?: string | null;
-	content?: string | null;
 	category?: string | null;
-	tags?: string[] | string | null;
+	conceptId: string;
+	content?: string | null;
+	description?: string | null;
 	primaryColor: string;
 	secondaryColor?: string;
-	conceptId: string;
+	tags?: string[] | string | null;
 	tcgMode?: boolean;
 }
 

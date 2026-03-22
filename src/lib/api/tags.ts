@@ -4,33 +4,33 @@ import type { TagWithStats } from '@/types/entities/tag';
 import { apiClient } from './client';
 
 export interface TagFilters {
-	search?: string;
-	limit?: number;
-	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos';
-	sortOrder?: 'asc' | 'desc';
 	category?: string;
 	isFavorite?: boolean;
+	limit?: number;
+	offset?: number;
+	search?: string;
+	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos';
+	sortOrder?: 'asc' | 'desc';
 }
 
 export interface TagCreateInput {
-	name: string;
-	description?: string | null;
-	color?: string | null;
-	emoji?: string | null;
 	category?: string | null;
+	color?: string | null;
+	description?: string | null;
+	emoji?: string | null;
 	isFavorite?: boolean;
+	name: string;
 	totalImages?: number;
 	totalVideos?: number;
 }
 
 export interface TagUpdateInput {
-	name?: string;
-	description?: string | null;
-	color?: string | null;
-	emoji?: string | null;
 	category?: string | null;
+	color?: string | null;
+	description?: string | null;
+	emoji?: string | null;
 	isFavorite?: boolean;
+	name?: string;
 	totalImages?: number;
 	totalVideos?: number;
 }

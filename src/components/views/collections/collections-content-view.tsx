@@ -3,27 +3,27 @@ import { memo } from 'react';
 import { CollectionCard } from '@/components/cards/collection-card/collection-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import type { CollectionWithStats } from '@/types/entities/collection';
 
 interface CollectionsContentViewProps {
+	className?: string;
 	collections: CollectionWithStats[];
-	isLoading: boolean;
 	error: string | null;
-	showForm: boolean;
-	newCollectionName: string;
-	newCollectionDescription: string;
-	setShowForm: (show: boolean) => void;
-	setNewCollectionName: (name: string) => void;
-	setNewCollectionDescription: (description: string) => void;
 	handleCollectionClick: (collection: CollectionWithStats) => void;
 	handleCreateCollection: () => void;
-	className?: string;
+	isLoading: boolean;
+	newCollectionDescription: string;
+	newCollectionName: string;
+	setNewCollectionDescription: (description: string) => void;
+	setNewCollectionName: (name: string) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 const MemoizedCollectionCard = memo(CollectionCard);

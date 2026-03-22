@@ -59,15 +59,25 @@ export const collectionsApi = {
 };
 
 export interface CollectionCardData {
-	id: string;
-	name: string;
-	description?: string | null;
 	category?: string | null;
 	color?: string | null;
-	emoji?: string | null;
-	isPrivate?: boolean;
 	createdAt: Date;
-	updatedAt: Date;
+	description?: string | null;
+	emoji?: string | null;
+	id: string;
+	isPrivate?: boolean;
+	metadata?: {
+		coverImageUrl?: string | null;
+		lastModified?: Date | string;
+		itemTypes?: string[];
+	};
+	name: string;
+	recentItems?: Array<{
+		id: string;
+		type: 'image' | 'video' | 'album';
+		thumbnailUrl?: string;
+		name?: string;
+	}>;
 	stats: {
 		imageCount: number;
 		videoCount: number;
@@ -79,37 +89,27 @@ export interface CollectionCardData {
 		noteCount: number;
 		totalItems: number;
 	};
-	recentItems?: Array<{
-		id: string;
-		type: 'image' | 'video' | 'album';
-		thumbnailUrl?: string;
-		name?: string;
-	}>;
-	metadata?: {
-		coverImageUrl?: string | null;
-		lastModified?: Date | string;
-		itemTypes?: string[];
-	};
+	updatedAt: Date;
 }
 
 export interface GetCollectionsOptions {
-	limit?: number;
-	offset?: number;
-	searchTerm?: string;
 	category?: string;
-	orderBy?: 'name' | 'createdAt' | 'updatedAt' | 'itemCount';
-	orderDir?: 'asc' | 'desc';
 	includePrivate?: boolean;
 	includeStats?: boolean;
+	limit?: number;
+	offset?: number;
+	orderBy?: 'name' | 'createdAt' | 'updatedAt' | 'itemCount';
+	orderDir?: 'asc' | 'desc';
+	searchTerm?: string;
 	userId?: string;
 }
 
 export interface CollectionStats {
-	totalCollections: number;
-	totalItems: number;
+	averageItemsPerCollection: number;
 	categoryDistribution: Record<string, number>;
 	itemTypeDistribution: Record<string, number>;
-	averageItemsPerCollection: number;
+	totalCollections: number;
+	totalItems: number;
 }
 
 /**

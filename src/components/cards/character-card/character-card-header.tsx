@@ -2,15 +2,15 @@ import { Heart, Shield, Sparkles, Sword, Wand } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CharacterCardHeaderProps {
-	name: string;
-	emoji: string | null;
-	color: string;
-	isFavorite?: boolean;
 	class?: string | null;
+	color: string;
+	compact?: boolean;
+	emoji: string | null;
+	isFavorite?: boolean;
 	level?: number | null;
+	name: string;
 	race?: string | null;
 	tcgMode?: boolean;
-	compact?: boolean;
 }
 
 export function CharacterCardHeader({

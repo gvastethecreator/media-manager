@@ -14,23 +14,23 @@ const logger = clientLogger.withContext('FavoriteStore.ApiSlice');
 
 // Estado para operaciones API
 export interface ApiState {
-	isApiLoading: boolean;
 	apiError: string | null;
+	isApiLoading: boolean;
 	lastFetch: Date | null;
 }
 
 // Acciones para operaciones API
 export interface ApiActions {
-	// Operaciones CRUD
-	fetchFavorites: () => Promise<void>;
+	clearApiError: () => void;
 	createFavorite: (entityId: string, entityType: string) => Promise<void>;
 	deleteFavorite: (id: string) => Promise<void>;
-	toggleFavorite: (entityId: string, entityType: string) => Promise<boolean>;
+	// Operaciones CRUD
+	fetchFavorites: () => Promise<void>;
+	setApiError: (error: string | null) => void;
 
 	// Estados de API
 	setApiLoading: (loading: boolean) => void;
-	setApiError: (error: string | null) => void;
-	clearApiError: () => void;
+	toggleFavorite: (entityId: string, entityType: string) => Promise<boolean>;
 }
 
 // Slice del store para API

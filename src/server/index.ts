@@ -65,6 +65,29 @@ app.use((req, res, next) => {
 });
 
 const PORT = Number.parseInt(process.env.API_PORT || process.env.PORT || '4000', 10);
+
+// Security headers
+import helmet from 'helmet';
+
+app.use(
+	helmet({
+		contentSecurityPolicy: false, // Deshabilitado para SPA (Vite inyecta scripts inline)
+		crossOriginEmbedderPolicy: false, // Permite cargar recursos cross-origin (thumbnails, etc.)
+	})
+);
+
+// Rate limiting para prevenir DoS
+import rateLimit from 'express-rate-limit';
+
+const apiLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutos
+	max: 1000, // Límite generoso para app local
+	standardHeaders: true,
+	legacyHeaders: false,
+	message: { error: 'Too many requests, please try again later.' },
+});
+app.use('/api/', apiLimiter);
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 

@@ -14,26 +14,19 @@ import type { ThumbnailAdvancedConfig } from '@/types/thumbnails-advanced.config
 import { DEFAULT_THUMBNAIL_ADVANCED_CONFIG } from '@/types/thumbnails-advanced.config';
 
 export interface Settings {
-	// Configuraciones básicas
-	theme: 'light' | 'dark' | 'system';
-	language: 'es' | 'en';
-	notifications: boolean;
-	thumbnailQuality: 'low' | 'medium' | 'high' | ThumbnailQuality;
+	activeProfile?: string | null;
 	autoBackup: boolean;
 	compressUploads: boolean;
-	defaultView: 'grid' | 'list';
 	defaultSort: 'name' | 'date' | 'size';
 	defaultSortOrder: 'asc' | 'desc';
 	defaultThumbnailSize: 'small' | 'medium' | 'large';
-
-	// Configuraciones avanzadas
-	videoThumbnailAnimation?: boolean;
-	thumbnailAdvancedConfig?: ThumbnailAdvancedConfig;
-	shortcuts?: { [key: string]: string };
+	defaultView: 'grid' | 'list';
+	language: 'es' | 'en';
+	notifications: boolean;
 
 	// Colecciones, etiquetas y perfiles
 	profiles?: ProfileExtended[];
-	activeProfile?: string | null;
+	shortcuts?: { [key: string]: string };
 
 	// Información del sistema
 	system?: {
@@ -41,20 +34,27 @@ export interface Settings {
 		memoryUsage?: number;
 		cacheSize?: number;
 	};
+	// Configuraciones básicas
+	theme: 'light' | 'dark' | 'system';
+	thumbnailAdvancedConfig?: ThumbnailAdvancedConfig;
+	thumbnailQuality: 'low' | 'medium' | 'high' | ThumbnailQuality;
+
+	// Configuraciones avanzadas
+	videoThumbnailAnimation?: boolean;
 }
 
 interface SettingsContextType {
-	settings: Settings;
-	updateSettings: (settings: Partial<Settings>) => Promise<void>;
-	resetSettings: () => void;
-	isLoading: boolean;
+	deleteProfile: (id: string) => Promise<void>;
 	error: string | null;
+	isLoading: boolean;
+	resetSettings: () => void;
+	setActiveProfile: (id: string) => Promise<void>;
+	settings: Settings;
 
 	// Funciones para colecciones, etiquetas y perfiles
 
 	updateProfile: (id: string | null, data: CreateProfileInput | UpdateProfileInput) => Promise<void>;
-	setActiveProfile: (id: string) => Promise<void>;
-	deleteProfile: (id: string) => Promise<void>;
+	updateSettings: (settings: Partial<Settings>) => Promise<void>;
 }
 
 const defaultSettings: Settings = {

@@ -70,26 +70,26 @@ export interface ContextMenuPayload {
 export interface ItemContextMenuProps {
 	/** Si el menú está abierto */
 	isOpen: boolean;
-	/** Posición del menú */
-	position: { x: number; y: number } | null;
-	/** Items seleccionados */
-	selectedItems: BrowserItem[];
 	/** Handler de acciones */
 	onAction: (action: ContextMenuAction, payload: ContextMenuPayload) => void;
 	/** Handler de cierre */
 	onClose: () => void;
+	/** Posición del menú */
+	position: { x: number; y: number } | null;
+	/** Items seleccionados */
+	selectedItems: BrowserItem[];
 }
 
 // --- Componentes internos ---
 
 interface MenuItemProps {
+	action?: ContextMenuAction;
+	destructive?: boolean;
+	disabled?: boolean;
 	icon: React.ReactNode;
 	label: string;
-	action?: ContextMenuAction;
-	onSelect?: (action: ContextMenuAction) => void;
 	onClick?: () => void;
-	disabled?: boolean;
-	destructive?: boolean;
+	onSelect?: (action: ContextMenuAction) => void;
 	submenu?: React.ReactNode;
 }
 

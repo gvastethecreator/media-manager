@@ -3,10 +3,10 @@ import { Suspense, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface PromptCardImagesProps {
-	/** Imagen principal a mostrar */
-	mainImage?: string | null;
 	/** Todas las im?genes a mostrar */
 	images?: string[];
+	/** Imagen principal a mostrar */
+	mainImage?: string | null;
 	/** Color primario para estilos */
 	primaryColor: string;
 	/** Color secundario para estilos */

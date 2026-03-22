@@ -5,9 +5,9 @@ import { useRecentWorldItemImages } from '@/lib/api/world-items';
 import { cn } from '@/lib/utils';
 
 interface WorldItemCardImagesProps {
-	worldItemId: string;
 	primaryColor: string;
 	secondaryColor: string;
+	worldItemId: string;
 }
 
 /**

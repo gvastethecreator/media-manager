@@ -3,26 +3,26 @@ import type { FileItem } from '@/types/files';
 import { apiClient } from './client';
 
 export interface SearchFilters {
-	query: string;
 	limit?: number;
-	type?: 'images' | 'videos' | 'audio' | 'all' | 'image' | 'video' | 'audio' | 'document';
+	query: string;
 	sortBy?: 'relevance' | 'date' | 'name';
 	sortOrder?: 'asc' | 'desc';
+	type?: 'images' | 'videos' | 'audio' | 'all' | 'image' | 'video' | 'audio' | 'document';
 }
 
 export interface SearchResult {
 	items: FileItem[];
-	total: number;
 	query: string;
 	took: number;
+	total: number;
 }
 
 // Nuevo tipo para búsqueda unificada
 export interface SearchParams {
-	query: string;
-	type?: 'all' | 'image' | 'video' | 'audio' | 'document';
 	limit?: number;
 	offset?: number;
+	query: string;
+	type?: 'all' | 'image' | 'video' | 'audio' | 'document';
 }
 
 // Tipos FTS
@@ -33,11 +33,11 @@ export interface FtsItem {
 	tags?: string;
 }
 export interface FtsResult {
+	engine: 'fts5' | 'like';
 	items: FtsItem[];
-	total: number;
 	query: string;
 	took: number;
-	engine: 'fts5' | 'like';
+	total: number;
 }
 
 // Query keys

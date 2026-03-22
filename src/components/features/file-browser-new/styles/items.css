@@ -21,19 +21,19 @@
 }
 
 .fb-entity-badge {
-	background: color-mix(in oklch, var(--fb-entity-color) 18%, transparent);
-	border: 1px solid color-mix(in oklch, var(--fb-entity-color) 35%, transparent);
 	color: color-mix(
 		in oklch,
 		var(--fb-entity-color) 65%,
 		hsl(var(--foreground))
 	);
+	background: color-mix(in oklch, var(--fb-entity-color) 18%, transparent);
+	border: 1px solid color-mix(in oklch, var(--fb-entity-color) 35%, transparent);
 }
 
 .fb-entity-badge--overlay {
+	color: hsl(var(--foreground));
 	background: color-mix(in oklch, var(--fb-entity-color) 55%, transparent);
 	border-color: color-mix(in oklch, var(--fb-entity-color) 60%, transparent);
-	color: hsl(var(--foreground));
 }
 
 .fb-thumb-overlay {
@@ -51,7 +51,7 @@
 	}
 
 	.file-browser-item .file-browser-item-content {
-		animation: none;
 		opacity: 1;
+		animation: none;
 	}
 }

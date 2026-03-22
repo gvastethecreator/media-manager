@@ -25,7 +25,7 @@ El frontend de Image Manager está construido con React 19 y Vite, utilizando un
 | TanStack Query | 5.90.14 | Data fetching |
 | TanStack Virtual | 3.13.13 | Virtualización |
 | React Router | 7.11.0 | Routing |
-| Anime.js | 4.3.5 | Animaciones |
+| GSAP | 3.14.2 | Animaciones |
 
 ---
 
@@ -762,26 +762,22 @@ export function cn(...inputs: ClassValue[]) {
 
 ## 10. Animaciones
 
-### 10.1 Anime.js
+### 10.1 GSAP y motion-shim
 
 ```tsx
-import anime from 'animejs';
+import { motion } from '@/components/ui/motion-shim';
 import { useEffect, useRef } from 'react';
 
 function AnimatedCard({ item }) {
-  const cardRef = useRef(null);
-
-  useEffect(() => {
-    anime({
-      targets: cardRef.current,
-      opacity: [0, 1],
-      translateY: [20, 0],
-      duration: 300,
-      easing: 'easeOutQuad',
-    });
-  }, []);
-
-  return <div ref={cardRef}>{/* contenido */}</div>;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
+      {/* contenido */}
+    </motion.div>
+  );
 }
 ```
 

@@ -5,10 +5,10 @@ import { cn } from '@/lib/utils';
 
 interface AlbumCardImagesProps {
 	albumId: string;
+	className?: string;
+	compact?: boolean;
 	recentImages?: string[];
 	recentVideos?: string[];
-	compact?: boolean;
-	className?: string;
 }
 
 /**

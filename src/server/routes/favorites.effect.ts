@@ -10,6 +10,7 @@ import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = Router();
 const logger = serverLogger.withContext('FavoritesEffect');
@@ -28,8 +29,8 @@ router.get(
 
 			const filters = {
 				entityType: entityType as string | undefined,
-				limit: Number.parseInt(limit as string, 10),
-				offset: Number.parseInt(offset as string, 10),
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
 				sortOrder: sortOrder as 'asc' | 'desc',
 			};
 

@@ -64,12 +64,12 @@ export interface EntityDiscriminator {
  * Interfaz base para entidades que pueden ser mostradas en la UI.
  */
 export interface DisplayableEntityBase {
+	createdAt: Date;
+	description?: string | null;
+	entityType: EntityType;
 	id: string;
 	name: string;
-	description?: string | null;
-	createdAt: Date;
 	updatedAt: Date;
-	entityType: EntityType;
 }
 
 /**
@@ -103,28 +103,28 @@ export type DisplayableEntity =
  * las propiedades necesarias para ser mostradas en la interfaz.
  */
 export interface DisplayableEntityExtended extends DisplayableEntityBase {
-	// Campos específicos de UI
-	path?: string;
-	url?: string;
-	thumbnailUrl?: string;
+	category?: string | null;
+	color?: string | null;
+
+	// Campos extendidos opcionales
+	emoji?: string | null;
+	featuredImage?: string | null;
+
+	// Relaciones
+	folderId?: string;
 	fullUrl?: string;
 
 	// Estado
 	isFavorite?: boolean;
 	isHidden?: boolean;
 	isPublic?: boolean;
-
-	// Relaciones
-	folderId?: string;
-	parentId?: string;
-
-	// Campos extendidos opcionales
-	emoji?: string | null;
-	color?: string | null;
-	featuredImage?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
 	metadata?: string | null;
+	parentId?: string;
+	// Campos específicos de UI
+	path?: string;
+	shortcut?: string | null;
+	thumbnailUrl?: string;
+	url?: string;
 }
 
 /**

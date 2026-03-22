@@ -6,29 +6,29 @@
 import { ChevronRight, FileText, Folder, Grid, Home, Image, Music, Settings, Video } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { AnimatePresence, motion } from '@/components/ui/animejs-shim';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 interface BreadcrumbItem {
-	/** Label del breadcrumb */
-	label: string;
-	/** Path para navegación */
-	path?: string;
 	/** Icono opcional */
 	icon?: React.ComponentType<{ className?: string }>;
 	/** Si es clickable */
 	isClickable?: boolean;
+	/** Label del breadcrumb */
+	label: string;
+	/** Path para navegación */
+	path?: string;
 }
 
 interface SmartBreadcrumbsProps {
-	/** Items personalizados (opcional) */
-	items?: BreadcrumbItem[];
 	/** Clase adicional */
 	className?: string;
-	/** Mostrar home icon */
-	showHome?: boolean;
+	/** Items personalizados (opcional) */
+	items?: BreadcrumbItem[];
 	/** Separador personalizado */
 	separator?: React.ReactNode;
+	/** Mostrar home icon */
+	showHome?: boolean;
 }
 
 /**

@@ -11,30 +11,6 @@ import type { CharacterAssociationStats, CharacterWithStats } from '../../types/
 
 // Tipos locales equivalentes a Drizzle
 interface DrizzleCharacterWithCounts {
-	id: string;
-	name: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-
-	isFavorite: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	age?: string | null;
-	gender?: string | null;
-	species?: string | null;
-	occupation?: string | null;
-	personality?: string | null;
-	background?: string | null;
-	relationships?: string | null;
-	skills?: string | null;
-	equipment?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -52,27 +28,51 @@ interface DrizzleCharacterWithCounts {
 		relatedCharacters?: number;
 		relatedTo?: number;
 	};
+	age?: string | null;
+	background?: string | null;
+	category?: string | null;
+	color?: string | null;
+	createdAt: Date;
+	description?: string | null;
+	emoji?: string | null;
+	equipment?: string | null;
+	featuredImage?: string | null;
+	gender?: string | null;
+	id: string;
+
+	isFavorite: boolean;
+	name: string;
+	notes?: string | null;
+	occupation?: string | null;
+	parentId?: string | null;
+	personality?: string | null;
+	relationships?: string | null;
+	skills?: string | null;
+	species?: string | null;
+	totalImages?: number;
+	totalVideos?: number;
+	updatedAt: Date;
 }
 
 interface DrizzleCharacterCreateInput {
-	name: string;
+	age?: string | null;
+	background?: string | null;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	isFavorite?: boolean;
-	age?: string | null;
+	equipment?: string | null;
+	featuredImage?: string | null;
 	gender?: string | null;
-	species?: string | null;
+	isFavorite?: boolean;
+	name: string;
+	notes?: string | null;
 	occupation?: string | null;
+	parentId?: string | null;
 	personality?: string | null;
-	background?: string | null;
 	relationships?: string | null;
 	skills?: string | null;
-	equipment?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
+	species?: string | null;
 }
 
 type DrizzleCharacterUpdateInput = Partial<DrizzleCharacterCreateInput>;

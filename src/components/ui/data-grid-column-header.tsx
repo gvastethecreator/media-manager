@@ -31,10 +31,10 @@ import { cn } from '@/lib/utils';
 
 interface DataGridColumnHeaderProps<TData, TValue> extends HTMLAttributes<HTMLDivElement> {
 	column: Column<TData, TValue>;
-	title?: string;
+	filter?: ReactNode;
 	icon?: ReactNode;
 	pinnable?: boolean;
-	filter?: ReactNode;
+	title?: string;
 	visibility?: boolean;
 }
 

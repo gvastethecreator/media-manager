@@ -159,8 +159,8 @@ export type GroupingType = 'none' | 'entityType' | 'date' | 'custom';
  * Opciones de agrupación
  */
 export interface GroupingOptions {
-	type: GroupingType;
 	field?: string;
+	type: GroupingType;
 }
 
 /**

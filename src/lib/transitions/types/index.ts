@@ -4,7 +4,7 @@
  * @description Tipos TypeScript para FLIP, morphing y transiciones direccionales
  */
 
-import type { AnimeInstance, AnimeParams } from '@/lib/anime';
+import type { AnimationInstance, AnimationParams } from '@/lib/animation';
 
 // ============================================================================
 // Tipos Básicos
@@ -37,6 +37,11 @@ export type EntryExitType = 'slide' | 'scale' | 'clip' | 'morph' | 'blur';
 export interface FlipState {
 	/** Rectángulo del elemento en estado inicial */
 	rect: DOMRect;
+	/** Estilos computados relevantes */
+	styles: {
+		borderRadius: string;
+		opacity: number;
+	};
 	/** Transformación calculada */
 	transform: {
 		x: number;
@@ -44,21 +49,20 @@ export interface FlipState {
 		scaleX: number;
 		scaleY: number;
 	};
-	/** Estilos computados relevantes */
-	styles: {
-		borderRadius: string;
-		opacity: number;
-	};
 }
 
 /** Opciones para el motor FLIP */
 export interface FlipOptions {
+	/** Si debe animar border-radius */
+	animateBorderRadius?: boolean;
+	/** Si debe animar opacidad */
+	animateOpacity?: boolean;
+	/** Delay antes de iniciar */
+	delay?: number;
 	/** Duración de la animación en ms */
 	duration?: number;
 	/** Easing de la animación */
 	easing?: string;
-	/** Delay antes de iniciar */
-	delay?: number;
 	/** Transformaciones adicionales */
 	extraTransforms?: {
 		/** Rotación en grados */
@@ -66,24 +70,20 @@ export interface FlipOptions {
 		/** Opacidad final */
 		opacity?: number;
 	};
+	onComplete?: () => void;
 	/** Callbacks */
 	onStart?: () => void;
 	onUpdate?: (progress: number) => void;
-	onComplete?: () => void;
-	/** Si debe animar border-radius */
-	animateBorderRadius?: boolean;
-	/** Si debe animar opacidad */
-	animateOpacity?: boolean;
 	/** Reducir movimiento para accesibilidad */
 	respectPrefersReducedMotion?: boolean;
 }
 
 /** Configuración de un elemento FLIP */
 export interface FlipElementConfig {
-	/** ID único del elemento */
-	id: string;
 	/** Referencia al elemento DOM */
 	element: HTMLElement;
+	/** ID único del elemento */
+	id: string;
 	/** Opciones específicas para este elemento */
 	options?: Partial<FlipOptions>;
 }
@@ -94,18 +94,18 @@ export interface FlipElementConfig {
 
 /** Configuración de morphing de formas */
 export interface MorphConfig {
+	/** Delay */
+	delay?: number;
 	/** Duración de la animación */
 	duration?: number;
 	/** Easing */
 	easing?: string;
-	/** Delay */
-	delay?: number;
 	/** Forma inicial (path SVG o descriptor) */
 	fromShape?: string;
-	/** Forma final */
-	toShape?: string;
 	/** Propiedades a animar */
 	properties?: MorphProperty[];
+	/** Forma final */
+	toShape?: string;
 }
 
 /** Propiedades que pueden morpharse */
@@ -120,12 +120,12 @@ export type MorphProperty =
 
 /** Estado de morphing */
 export interface MorphState {
+	/** Instancia de animación compatible */
+	animation?: AnimationInstance;
 	/** Forma actual */
 	currentShape: string;
 	/** Progreso (0-1) */
 	progress: number;
-	/** Instancia de anime.js */
-	animation?: AnimeInstance;
 }
 
 // ============================================================================
@@ -134,63 +134,63 @@ export interface MorphState {
 
 /** Configuración de entrada */
 export interface EnterConfig {
-	/** Tipo de animación de entrada */
-	type?: EntryExitType;
+	/** Delay antes de iniciar (stagger) */
+	delay?: number;
 	/** Dirección de origen */
 	direction?: TransitionDirection;
 	/** Distancia de desplazamiento */
 	distance?: number;
-	/** Escala inicial */
-	initialScale?: number;
-	/** Opacidad inicial */
-	initialOpacity?: number;
-	/** Blur inicial */
-	initialBlur?: number;
 	/** Duración */
 	duration?: number;
-	/** Delay antes de iniciar (stagger) */
-	delay?: number;
 	/** Easing */
 	easing?: string;
+	/** Blur inicial */
+	initialBlur?: number;
+	/** Opacidad inicial */
+	initialOpacity?: number;
+	/** Escala inicial */
+	initialScale?: number;
+	/** Tipo de animación de entrada */
+	type?: EntryExitType;
 }
 
 /** Configuración de salida */
 export interface ExitConfig {
-	/** Tipo de animación de salida */
-	type?: EntryExitType;
+	/** Delay antes de iniciar */
+	delay?: number;
 	/** Dirección de destino */
 	direction?: TransitionDirection;
 	/** Distancia de desplazamiento */
 	distance?: number;
-	/** Escala final */
-	finalScale?: number;
-	/** Opacidad final */
-	finalOpacity?: number;
-	/** Blur final */
-	finalBlur?: number;
 	/** Duración */
 	duration?: number;
-	/** Delay antes de iniciar */
-	delay?: number;
 	/** Easing */
 	easing?: string;
+	/** Blur final */
+	finalBlur?: number;
+	/** Opacidad final */
+	finalOpacity?: number;
+	/** Escala final */
+	finalScale?: number;
 	/** Si debe mantener el espacio mientras sale */
 	keepSpace?: boolean;
+	/** Tipo de animación de salida */
+	type?: EntryExitType;
 }
 
 /** Configuración combinada entrada/salida */
 export interface EnterExitConfig {
 	enter?: EnterConfig;
 	exit?: ExitConfig;
+	/** Grupo al que pertenece (para stagger) */
+	group?: string;
+	/** Índice en el grupo */
+	index?: number;
 	/** Coordenadas de origen para animación coordinada */
 	origin?: {
 		x: number;
 		y: number;
 	};
-	/** Grupo al que pertenece (para stagger) */
-	group?: string;
-	/** Índice en el grupo */
-	index?: number;
 	/** Delay base para el grupo */
 	staggerDelay?: number;
 }
@@ -201,24 +201,24 @@ export interface EnterExitConfig {
 
 /** Configuración de elemento compartido */
 export interface SharedElementConfig {
-	/** ID único del elemento compartido */
-	id: string;
-	/** Tipo de transición */
-	type?: 'morph' | 'crossfade' | 'slide' | 'scale';
-	/** Duración */
-	duration?: number;
-	/** Si debe mantener el aspecto ratio */
-	maintainAspectRatio?: boolean;
 	/** Clip path durante la transición */
 	clipPath?: boolean;
+	/** Duración */
+	duration?: number;
+	/** ID único del elemento compartido */
+	id: string;
+	/** Si debe mantener el aspecto ratio */
+	maintainAspectRatio?: boolean;
+	/** Tipo de transición */
+	type?: 'morph' | 'crossfade' | 'slide' | 'scale';
 }
 
 /** Estado de un elemento compartido */
 export interface SharedElementState {
 	id: string;
+	isTransitioning: boolean;
 	sourceRect: DOMRect;
 	targetRect: DOMRect;
-	isTransitioning: boolean;
 }
 
 // ============================================================================
@@ -229,38 +229,38 @@ export interface SharedElementState {
 export interface TransitionGroupConfig {
 	/** ID del grupo */
 	id: string;
-	/** Tipo de stagger */
-	staggerType?: 'equal' | 'start' | 'end' | 'center';
-	/** Delay entre elementos */
-	staggerDelay?: number;
 	/** Delay máximo total */
 	maxStaggerDelay?: number;
+	/** Delay entre elementos */
+	staggerDelay?: number;
 	/** Dirección del stagger */
 	staggerDirection?: 'forward' | 'reverse' | 'random';
+	/** Tipo de stagger */
+	staggerType?: 'equal' | 'start' | 'end' | 'center';
 }
 
 /** Secuencia de animaciones */
 export interface AnimationSequence {
 	/** ID de la secuencia */
 	id: string;
-	/** Pasos de la secuencia */
-	steps: AnimationStep[];
 	/** Si debe ejecutarse en paralelo o secuencial */
 	mode?: 'sequential' | 'parallel';
 	/** Callback al completar */
 	onComplete?: () => void;
+	/** Pasos de la secuencia */
+	steps: AnimationStep[];
 }
 
 /** Paso de animación */
 export interface AnimationStep {
-	/** ID del paso */
-	id: string;
-	/** Elementos a animar */
-	elements: string[];
 	/** Configuración de animación */
-	animation: Partial<AnimeParams>;
+	animation: Partial<AnimationParams>;
 	/** Delay antes de este paso */
 	delay?: number;
+	/** Elementos a animar */
+	elements: string[];
+	/** ID del paso */
+	id: string;
 	/** Offset desde el paso anterior (para timeline) */
 	offset?: number | string;
 }
@@ -271,32 +271,32 @@ export interface AnimationStep {
 
 /** Opciones de optimización */
 export interface PerformanceOptions {
-	/** Usar will-change */
-	useWillChange?: boolean;
-	/** Usar contain: layout */
-	useContainment?: boolean;
-	/** Limitar framerate */
-	maxFPS?: number;
-	/** Usar transform3d para GPU acceleration */
-	useGPUAcceleration?: boolean;
 	/** Reducir calidad en dispositivos lentos */
 	adaptiveQuality?: boolean;
+	/** Limitar framerate */
+	maxFPS?: number;
+	/** Usar contain: layout */
+	useContainment?: boolean;
+	/** Usar transform3d para GPU acceleration */
+	useGPUAcceleration?: boolean;
+	/** Usar will-change */
+	useWillChange?: boolean;
 }
 
 /** Métricas de rendimiento */
 export interface PerformanceMetrics {
-	/** Tiempo de inicio */
-	startTime: number;
-	/** Tiempo de fin */
-	endTime?: number;
 	/** Duración real */
 	actualDuration?: number;
-	/** Frames renderizados */
-	framesRendered?: number;
 	/** Frame rate promedio */
 	averageFPS?: number;
+	/** Tiempo de fin */
+	endTime?: number;
+	/** Frames renderizados */
+	framesRendered?: number;
 	/** Jank detectado */
 	jankDetected?: boolean;
+	/** Tiempo de inicio */
+	startTime: number;
 }
 
 // ============================================================================
@@ -305,43 +305,43 @@ export interface PerformanceMetrics {
 
 /** Props para componente FlipContainer */
 export interface FlipContainerProps {
-	/** ID único */
-	flipId: string;
-	/** Si está habilitado */
-	enabled?: boolean;
-	/** Opciones FLIP */
-	options?: FlipOptions;
-	/** Clases CSS */
-	className?: string;
 	/** Contenido */
 	children: React.ReactNode;
+	/** Clases CSS */
+	className?: string;
+	/** Si está habilitado */
+	enabled?: boolean;
+	/** ID único */
+	flipId: string;
+	onComplete?: () => void;
 	/** Callbacks */
 	onStart?: () => void;
-	onComplete?: () => void;
+	/** Opciones FLIP */
+	options?: FlipOptions;
 }
 
 /** Props para componente MorphElement */
 export interface MorphElementProps {
+	/** Contenido */
+	children: React.ReactNode;
+	/** Clases CSS */
+	className?: string;
+	/** Configuración de morphing */
+	config?: MorphConfig;
 	/** ID único */
 	morphId: string;
 	/** Forma actual */
 	shape: string;
-	/** Configuración de morphing */
-	config?: MorphConfig;
-	/** Clases CSS */
-	className?: string;
-	/** Contenido */
-	children: React.ReactNode;
 }
 
 /** Props para TransitionGroup */
 export interface TransitionGroupProps {
-	/** Configuración del grupo */
-	config: TransitionGroupConfig;
-	/** Clases CSS */
-	className?: string;
 	/** Contenido */
 	children: React.ReactNode;
+	/** Clases CSS */
+	className?: string;
+	/** Configuración del grupo */
+	config: TransitionGroupConfig;
 }
 
 // ============================================================================
@@ -350,26 +350,26 @@ export interface TransitionGroupProps {
 
 /** Valor del contexto de transiciones */
 export interface TransitionsContextValue {
-	/** Registra un elemento para FLIP */
-	registerFlipElement: (config: FlipElementConfig) => void;
-	/** Desregistra un elemento FLIP */
-	unregisterFlipElement: (id: string) => void;
 	/** Ejecuta transición FLIP */
 	executeFlip: (ids?: string[]) => Promise<void>;
-	/** Registra un elemento compartido */
-	registerSharedElement: (config: SharedElementConfig) => void;
-	/** Inicia transición de elemento compartido */
-	transitionSharedElement: (id: string, targetElement: HTMLElement) => Promise<void>;
-	/** Ejecuta secuencia de animaciones */
-	runSequence: (sequence: AnimationSequence) => Promise<void>;
-	/** Si hay transiciones activas */
-	isTransitioning: boolean;
 	/** Configuración global */
 	globalConfig: {
 		duration: number;
 		easing: string;
 		reducedMotion: boolean;
 	};
+	/** Si hay transiciones activas */
+	isTransitioning: boolean;
+	/** Registra un elemento para FLIP */
+	registerFlipElement: (config: FlipElementConfig) => void;
+	/** Registra un elemento compartido */
+	registerSharedElement: (config: SharedElementConfig) => void;
+	/** Ejecuta secuencia de animaciones */
+	runSequence: (sequence: AnimationSequence) => Promise<void>;
+	/** Inicia transición de elemento compartido */
+	transitionSharedElement: (id: string, targetElement: HTMLElement) => Promise<void>;
+	/** Desregistra un elemento FLIP */
+	unregisterFlipElement: (id: string) => void;
 }
 
 // ============================================================================
@@ -398,8 +398,8 @@ export type AnimationState = 'idle' | 'preparing' | 'running' | 'completed' | 'c
 
 /** Evento de transición */
 export interface TransitionEvent {
-	type: 'start' | 'update' | 'complete' | 'cancel';
 	id: string;
-	timestamp: number;
 	progress?: number;
+	timestamp: number;
+	type: 'start' | 'update' | 'complete' | 'cancel';
 }

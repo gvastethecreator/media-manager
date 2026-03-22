@@ -1,26 +1,26 @@
 import { Grid3x3, List, RefreshCw, Settings as SettingsIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch-v3';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { GlobalReindexProgress } from './global-reindex-progress';
 
 type ViewMode = 'table' | 'grid';
 
 interface FoldersHeaderProps {
-	viewMode: ViewMode;
+	globalProgress: number;
+	isGloballyProcessing: boolean;
+	onGlobalReindex: () => void;
+	onSkipMetadataChange: (value: boolean) => void;
+	onSkipThumbnailsChange: (value: boolean) => void;
+	onToggleAdvancedConfig: () => void;
+	onUseStructuredFlowChange: (value: boolean) => void;
 	onViewModeChange: (mode: ViewMode) => void;
 	showAdvancedConfig: boolean;
-	onToggleAdvancedConfig: () => void;
-	useStructuredFlow: boolean;
-	onUseStructuredFlowChange: (value: boolean) => void;
-	skipThumbnails: boolean;
-	onSkipThumbnailsChange: (value: boolean) => void;
 	skipMetadata: boolean;
-	onSkipMetadataChange: (value: boolean) => void;
-	isGloballyProcessing: boolean;
-	globalProgress: number;
-	onGlobalReindex: () => void;
+	skipThumbnails: boolean;
+	useStructuredFlow: boolean;
+	viewMode: ViewMode;
 }
 
 /**

@@ -6,10 +6,10 @@
  */
 
 import { Schema } from '@effect/schema';
-import { and, asc, count, desc, eq, isNull, like, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, isNull, like, or, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { folders } from '@/lib/drizzle/schema';
+import { folders, images, videos } from '@/lib/drizzle/schema';
 import { Folder, FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
@@ -36,13 +36,13 @@ const MAX_HIERARCHY_DEPTH = 10;
  * Opciones para obtener folders
  */
 export interface GetFoldersOptions {
-	search?: string;
-	onlyFavorites?: boolean;
-	parentId?: string | null;
 	limit?: number;
 	offset?: number;
+	onlyFavorites?: boolean;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalFiles';
 	orderDirection?: 'asc' | 'desc';
+	parentId?: string | null;
+	search?: string;
 }
 
 /**
@@ -50,9 +50,9 @@ export interface GetFoldersOptions {
  */
 export interface GetFoldersResult {
 	folders: FolderWithStats[];
-	total: number;
 	limit: number;
 	offset: number;
+	total: number;
 }
 
 /**
@@ -83,34 +83,34 @@ export interface FolderAncestors {
  * Resultado de eliminación masiva
  */
 export interface BulkDeleteResult {
-	successful: string[];
 	failed: Array<{ id: string; error: string }>;
+	successful: string[];
 }
 
 /**
  * Interface para el servicio FolderService
  */
 export interface FolderServiceInterface {
+	readonly bulkDelete: (ids: string[], force?: boolean) => Effect.Effect<BulkDeleteResult, FolderError>;
+	readonly create: (input: Schema.Schema.Type<typeof FolderCreateInput>) => Effect.Effect<FolderWithStats, FolderError>;
+	readonly delete: (id: string, force?: boolean) => Effect.Effect<void, FolderError>;
+	readonly getAll: (options?: GetFoldersOptions) => Effect.Effect<GetFoldersResult, FolderError>;
+	readonly getAncestors: (id: string) => Effect.Effect<FolderAncestors, FolderError>;
 	// CRUD Básico
 	readonly getById: (id: string) => Effect.Effect<FolderWithStats, FolderError>;
-	readonly getAll: (options?: GetFoldersOptions) => Effect.Effect<GetFoldersResult, FolderError>;
+	readonly getByPath: (path: string) => Effect.Effect<FolderWithStats, FolderError>;
+
+	// Operaciones Jerárquicas
+	readonly getChildren: (parentId: string | null) => Effect.Effect<FolderWithStats[], FolderError>;
 	readonly getTree: () => Effect.Effect<FolderWithStats[], FolderError>;
-	readonly create: (input: Schema.Schema.Type<typeof FolderCreateInput>) => Effect.Effect<FolderWithStats, FolderError>;
+	readonly moveTo: (id: string, newParentId: string | null) => Effect.Effect<FolderWithStats, FolderError>;
+
+	// Stats & Favorites
+	readonly toggleFavorite: (id: string) => Effect.Effect<FolderWithStats, FolderError>;
 	readonly update: (
 		id: string,
 		input: Schema.Schema.Type<typeof FolderUpdateInput>
 	) => Effect.Effect<FolderWithStats, FolderError>;
-	readonly delete: (id: string, force?: boolean) => Effect.Effect<void, FolderError>;
-	readonly bulkDelete: (ids: string[], force?: boolean) => Effect.Effect<BulkDeleteResult, FolderError>;
-
-	// Operaciones Jerárquicas
-	readonly getChildren: (parentId: string | null) => Effect.Effect<FolderWithStats[], FolderError>;
-	readonly getAncestors: (id: string) => Effect.Effect<FolderAncestors, FolderError>;
-	readonly moveTo: (id: string, newParentId: string | null) => Effect.Effect<FolderWithStats, FolderError>;
-	readonly getByPath: (path: string) => Effect.Effect<FolderWithStats, FolderError>;
-
-	// Stats & Favorites
-	readonly toggleFavorite: (id: string) => Effect.Effect<FolderWithStats, FolderError>;
 }
 
 /**
@@ -125,26 +125,23 @@ export class FolderService extends Context.Tag('FolderService')<FolderService, F
  */
 const getRelationsCounts = (folderId: string): Effect.Effect<FolderCounts, FolderError> =>
 	Effect.gen(function* () {
-		logger.info(`📊 Obteniendo conteos para carpeta: ${folderId}`);
-
-		// Contar subcarpetas
-		const childrenCountResult = yield* Effect.tryPromise<Array<{ count: number }>, FolderError>({
-			try: async () => await db.select({ count: count() }).from(folders).where(eq(folders.parentId, folderId)),
-			catch: (error: unknown) => fromUnknownError('getRelationsCounts:children', error),
+		const [childrenCountResult, imageCountResult, videoCountResult] = yield* Effect.tryPromise<
+			[Array<{ count: number }>, Array<{ count: number }>, Array<{ count: number }>],
+			FolderError
+		>({
+			try: () =>
+				Promise.all([
+					db.select({ count: count() }).from(folders).where(eq(folders.parentId, folderId)),
+					db.select({ count: count() }).from(images).where(eq(images.folderId, folderId)),
+					db.select({ count: count() }).from(videos).where(eq(videos.folderId, folderId)),
+				]),
+			catch: (error: unknown) => fromUnknownError('getRelationsCounts', error),
 		});
 
-		const childrenCount = childrenCountResult[0]?.count ?? 0;
-
-		// TODO: Agregar conteos de imágenes y videos cuando estén implementadas las relaciones
-		const imageCount = 0;
-		const videoCount = 0;
-
-		logger.info('✅ Conteos obtenidos:', { childrenCount, imageCount, videoCount });
-
 		return {
-			children: childrenCount,
-			images: imageCount,
-			videos: videoCount,
+			children: childrenCountResult[0]?.count ?? 0,
+			images: imageCountResult[0]?.count ?? 0,
+			videos: videoCountResult[0]?.count ?? 0,
 		};
 	});
 
@@ -647,11 +644,52 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('getTree:validation', error),
 				});
 
-				// Enriquecer con conteos (opcional, pero good to have)
-				// Por ahora simple para evitar query N+1 masivo
+				// Batch enrichment: count children, images, videos per folder in 3 queries
+				const folderIds = validatedFolders.map((f) => f.id);
+
+				const [childrenCounts, imageCounts, videoCounts] =
+					folderIds.length > 0
+						? yield* Effect.tryPromise<
+								[
+									Array<{ id: string; count: number }>,
+									Array<{ id: string; count: number }>,
+									Array<{ id: string; count: number }>,
+								],
+								FolderError
+							>({
+								try: () =>
+									Promise.all([
+										db
+											.select({ id: folders.parentId, count: count() })
+											.from(folders)
+											.where(inArray(folders.parentId, folderIds))
+											.groupBy(folders.parentId),
+										db
+											.select({ id: images.folderId, count: count() })
+											.from(images)
+											.where(inArray(images.folderId, folderIds))
+											.groupBy(images.folderId),
+										db
+											.select({ id: videos.folderId, count: count() })
+											.from(videos)
+											.where(inArray(videos.folderId, folderIds))
+											.groupBy(videos.folderId),
+									]),
+								catch: (error: unknown) => fromUnknownError('getTree:counts', error),
+							})
+						: [[], [], []];
+
+				const childrenMap = new Map(childrenCounts.map((r) => [r.id, r.count]));
+				const imageMap = new Map(imageCounts.map((r) => [r.id, r.count]));
+				const videoMap = new Map(videoCounts.map((r) => [r.id, r.count]));
+
 				return validatedFolders.map((f) => ({
 					...f,
-					_count: { children: 0, images: 0, videos: 0 }, // Placeholder
+					_count: {
+						children: childrenMap.get(f.id) ?? 0,
+						images: imageMap.get(f.id) ?? 0,
+						videos: videoMap.get(f.id) ?? 0,
+					},
 				})) as FolderWithStats[];
 			}),
 

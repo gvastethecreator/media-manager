@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import type { ImageItem } from './file-viewer.types';
 import { ThumbnailItem } from './thumbnail-item';
 

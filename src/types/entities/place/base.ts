@@ -17,34 +17,34 @@ export type EntityWithStats<T, S> = T & { stats: S };
  * Incluye todos los campos escalares y las relaciones básicas.
  */
 export interface PlaceBase {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
 	category: string | null;
+	climate: string | null;
+	color: string | null;
+	createdAt: Date;
+	culture: string | null;
+	dangers: string | null;
+	description: string | null;
+	economy: string | null;
+	emoji: string | null;
+	featuredImage: string | null;
+	geography: string | null;
+	government: string | null;
+	history: string | null;
+	id: string;
 
 	isFavorite: boolean;
+	landmarks: string | null;
+	location: string | null;
+	lore?: string;
+	name: string;
+	notes: string | null;
+	parentId: string | null;
+	population: string | null;
+	resources: string | null;
+	shortcut?: string;
 	totalImages: number;
 	totalVideos: number;
 	type: string | null;
-	location: string | null;
-	climate: string | null;
-	population: string | null;
-	government: string | null;
-	economy: string | null;
-	culture: string | null;
-	history: string | null;
-	geography: string | null;
-	landmarks: string | null;
-	dangers: string | null;
-	resources: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	parentId: string | null;
-	lore?: string;
-	shortcut?: string;
-	createdAt: Date;
 	updatedAt: Date;
 }
 
@@ -57,20 +57,20 @@ import { EntityStats } from '../entity.types';
  * Estas estadísticas proporcionan una visión más profunda del contexto y la relevancia del lugar.
  */
 export interface PlaceStatistics extends EntityStats {
-	/** Relevancia espacial calculada (ej: cercanía a otros puntos de interés) */
-	spatialRelevance: number;
 	/** Puntuación de la completitud de la información del lugar */
 	completenessScore: number;
 	/** Nivel de contexto geográfico (ej: cuánta información de los alrededores se tiene) */
 	geoContextLevel: number;
-	/** Popularidad basada en el número de entidades relacionadas */
-	popularity: number;
 	/** Fecha de última actualización */
 	// lastUpdated: Date; // Comentado temporalmente para resolver errores
 
 	// File system functions
 	isDirectory: boolean;
 	isFile: boolean;
+	/** Popularidad basada en el número de entidades relacionadas */
+	popularity: number;
+	/** Relevancia espacial calculada (ej: cercanía a otros puntos de interés) */
+	spatialRelevance: number;
 }
 
 /**
@@ -121,12 +121,12 @@ export type PlaceWithStats = PlaceBase & {
  * Tipo para respuesta de Places con métodos de array
  */
 export interface PlacesResponse {
-	items: PlaceWithStats[];
-	total: number;
-	length: number; // Alias para total
-	reduce: <T>(callback: (acc: T, place: PlaceWithStats, index: number) => T, initial: T) => T;
 	filter: (callback: (place: PlaceWithStats, index: number) => boolean) => PlaceWithStats[];
+	items: PlaceWithStats[];
+	length: number; // Alias para total
 	map: <T>(callback: (place: PlaceWithStats, index: number) => T) => T[];
+	reduce: <T>(callback: (acc: T, place: PlaceWithStats, index: number) => T, initial: T) => T;
+	total: number;
 }
 
 /**

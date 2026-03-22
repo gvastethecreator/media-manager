@@ -2,13 +2,13 @@ import type { CharacterCardData } from '@/components/cards/character-card/charac
 import { apiClient } from '../client';
 
 export interface GetCharactersOptions {
+	category?: string;
+	includeStats?: boolean;
 	limit?: number;
 	offset?: number;
-	searchTerm?: string;
-	category?: string;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt' | 'relationCount';
 	orderDir?: 'asc' | 'desc';
-	includeStats?: boolean;
+	searchTerm?: string;
 }
 
 /**

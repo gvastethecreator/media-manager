@@ -8,18 +8,18 @@ import { cn } from '@/lib/utils';
 import type { ThemeColors } from '@/types/theme';
 
 interface ThemePreviewProps {
+	/** Clase adicional */
+	className?: string;
 	/** Colores del tema a previsualizar */
 	colors: ThemeColors;
-	/** Nombre del tema */
-	name?: string;
 	/** Si está seleccionado */
 	isSelected?: boolean;
+	/** Nombre del tema */
+	name?: string;
 	/** Callback al hacer click */
 	onClick?: () => void;
 	/** Tamaño del preview */
 	size?: 'sm' | 'md' | 'lg';
-	/** Clase adicional */
-	className?: string;
 }
 
 /**

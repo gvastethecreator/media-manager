@@ -36,10 +36,10 @@ function Skeleton({ className, animation = 'shimmer', ...props }: SkeletonProps)
  * ===================================================== */
 
 export interface SkeletonTextProps extends React.HTMLAttributes<HTMLDivElement> {
-	/** Número de líneas */
-	lines?: number;
 	/** Última línea más corta */
 	lastLineShort?: boolean;
+	/** Número de líneas */
+	lines?: number;
 }
 
 function SkeletonText({ lines = 3, lastLineShort = true, className, ...props }: SkeletonTextProps) {
@@ -112,10 +112,10 @@ function SkeletonList({ count = 5, showAvatar = true, className, ...props }: Ske
  * ===================================================== */
 
 export interface SkeletonGridProps extends React.HTMLAttributes<HTMLDivElement> {
-	/** Número de items */
-	count?: number;
 	/** Columnas */
 	columns?: 2 | 3 | 4 | 5 | 6;
+	/** Número de items */
+	count?: number;
 }
 
 function SkeletonGrid({ count = 6, columns = 3, className, ...props }: SkeletonGridProps) {

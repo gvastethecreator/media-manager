@@ -4,13 +4,13 @@ import { formatDate } from '@/lib/utils/date';
 
 interface PromptCardFooterProps {
 	createdAt: Date;
-	updatedAt: Date;
 	imagesCount: number;
-	videosCount: number;
-	tagsCount: number;
 	primaryColor: string;
 	secondaryColor?: string;
+	tagsCount: number;
 	tcgMode?: boolean;
+	updatedAt: Date;
+	videosCount: number;
 }
 
 /**

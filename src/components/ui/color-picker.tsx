@@ -11,11 +11,11 @@ import { cn } from '@/lib/utils';
 const PRESET_COLORS = PRESET_COLORS_HEX;
 
 interface ColorPickerProps {
-	value?: string;
-	onChange: (value: string) => void;
 	className?: string;
 	compact?: boolean;
+	onChange: (value: string) => void;
 	showLabel?: boolean;
+	value?: string;
 }
 
 export function ColorPicker({

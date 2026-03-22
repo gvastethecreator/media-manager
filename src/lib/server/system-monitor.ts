@@ -23,21 +23,21 @@ interface SystemStats {
 		processUsed: number;
 		processUsedPercent: number;
 	};
-	uptime: {
-		system: number;
-		process: number;
-	};
 	network: {
 		interfaces: string[];
+	};
+	nodejs: {
+		version: string;
+		pid: number;
 	};
 	platform: {
 		type: string;
 		release: string;
 		arch: string;
 	};
-	nodejs: {
-		version: string;
-		pid: number;
+	uptime: {
+		system: number;
+		process: number;
 	};
 }
 

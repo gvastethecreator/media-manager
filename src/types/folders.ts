@@ -4,67 +4,61 @@
  */
 
 export interface ProcessStatus {
-	isProcessing: boolean;
-	progress?: number;
-	message?: string;
 	error?: string;
-	folderId?: string; // ID de la carpeta siendo procesada
-	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete';
-	timestamp?: number;
 	filesProcessed?: number;
-	totalFiles?: number;
+	folderId?: string; // ID de la carpeta siendo procesada
+	isProcessing: boolean;
+	message?: string;
+	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete';
+	progress?: number;
 	status?: 'processing' | 'completed' | 'error'; // Estado del proceso
+	timestamp?: number;
+	totalFiles?: number;
 }
 
 export interface ErrorResponse {
-	error: string;
-	message?: string; // Agregar message que se usa en el código
 	code?: string;
 	details?: Record<string, unknown>;
+	error: string;
 	folderId?: string; // Agregar folderId que se usa
+	message?: string; // Agregar message que se usa en el código
 	timestamp?: number; // Para compatibilidad con eventos
 }
 
 export interface FolderResponse {
+	createdAt: string;
+	folderId?: string; // Para compatibilidad con eventos
 	id: string;
-	path: string;
 	name: string;
 	parentId?: string;
-	createdAt: string;
-	updatedAt: string;
-	folderId?: string; // Para compatibilidad con eventos
+	path: string;
 	success?: boolean; // Para respuestas de operaciones
+	updatedAt: string;
 }
 
 // Stats generales de carpetas (shape devuelto por /api/stats/folders)
 export interface FolderStats {
-	totalFolders: number;
-	totalFiles: number;
-	totalImages: number;
-	totalVideos: number;
-	totalAudio: number;
-	totalDocuments: number;
-	totalOthers: number;
-	totalSize: number;
-	formattedSize: string;
 	// Nuevos campos para BD y thumbnails
 	databaseSize?: number;
 	formattedDatabaseSize?: string;
-	thumbnailsCacheSize?: number;
+	formattedSize: string;
 	formattedThumbnailsCacheSize?: string;
-	totalThumbnails?: number;
 	// Compatibilidad: timestamp ISO del último escaneo
 	lastScanned?: string;
+	thumbnailsCacheSize?: number;
+	totalAudio: number;
+	totalDocuments: number;
+	totalFiles: number;
+	totalFolders: number;
+	totalImages: number;
+	totalOthers: number;
+	totalSize: number;
+	totalThumbnails?: number;
+	totalVideos: number;
 }
 
 // Tipo específico para el hook useFolderStats (más simple)
 export interface FolderStatsResponse {
-	totalImages: number;
-	totalVideos: number;
-	totalAudio: number;
-	totalDocuments: number;
-	totalOthers: number;
-	totalSize: number;
 	lastActivity: Date | null;
 	recentImages?: Array<{
 		id: string;
@@ -73,4 +67,10 @@ export interface FolderStatsResponse {
 		// Algunos endpoints devuelven `thumbnail` (base64) en lugar de `thumbnailUrl`
 		thumbnail?: string;
 	}>;
+	totalAudio: number;
+	totalDocuments: number;
+	totalImages: number;
+	totalOthers: number;
+	totalSize: number;
+	totalVideos: number;
 }

@@ -36,14 +36,14 @@ const logger = serverLogger.withContext('CharacterService.Effect');
  * Opciones para obtener characters
  */
 export interface GetCharactersOptions {
-	search?: string;
-	parentId?: string | null;
 	category?: string;
+	limit?: number;
+	offset?: number;
 	onlyFavorites?: boolean;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt';
 	orderDirection?: 'asc' | 'desc';
-	limit?: number;
-	offset?: number;
+	parentId?: string | null;
+	search?: string;
 }
 
 /**
@@ -51,67 +51,66 @@ export interface GetCharactersOptions {
  */
 export interface GetCharactersResult {
 	characters: CharacterWithStats[];
-	total: number;
 	limit: number;
 	offset: number;
+	total: number;
 }
 
 /**
  * Contadores de relaciones de un character
  */
 export interface CharacterCounts {
-	images: number;
-	videos: number;
-	notes: number;
-	tags: number;
-	groups: number;
-	properties: number;
-	places: number;
-	worldItems: number;
-	concepts: number;
-	prompts: number;
-	collections: number;
 	albums: number;
+	collections: number;
+	concepts: number;
+	groups: number;
+	images: number;
+	notes: number;
+	places: number;
+	prompts: number;
+	properties: number;
+	tags: number;
+	videos: number;
 	wildcards: number;
+	worldItems: number;
 }
 
 /**
  * Estadísticas calculadas de un character
  */
 export interface CharacterStatistics {
+	completenessScore: number;
+	lastImageAddedAt: Date | null;
+	lastUpdated: Date;
+	lastVideoAddedAt: Date | null;
 	totalImages: number;
-	totalVideos: number;
 	totalNotes: number;
 	totalRelations: number;
-	lastImageAddedAt: Date | null;
-	lastVideoAddedAt: Date | null;
-	completenessScore: number;
-	lastUpdated: Date;
+	totalVideos: number;
 }
 
 /**
  * Interface para el servicio CharacterService
  */
 export interface CharacterServiceInterface {
+	// Relation Operations
+	readonly addImage: (characterId: string, imageId: string) => Effect.Effect<void, CharacterError>;
+	readonly addNote: (characterId: string, noteId: string) => Effect.Effect<void, CharacterError>;
+	readonly bulkDelete: (ids: string[]) => Effect.Effect<{ deleted: number; failed: string[] }, CharacterError>;
+	readonly create: (input: CharacterCreateInput) => Effect.Effect<CharacterWithStats, CharacterError>;
+	readonly delete: (id: string) => Effect.Effect<void, CharacterError>;
+	readonly getAll: (options?: GetCharactersOptions) => Effect.Effect<GetCharactersResult, CharacterError>;
 	// CRUD Básico
 	readonly getById: (id: string) => Effect.Effect<Character, CharacterError>;
-	readonly getAll: (options?: GetCharactersOptions) => Effect.Effect<GetCharactersResult, CharacterError>;
-	readonly create: (input: CharacterCreateInput) => Effect.Effect<CharacterWithStats, CharacterError>;
-	readonly update: (id: string, input: CharacterUpdateInput) => Effect.Effect<CharacterWithStats, CharacterError>;
-	readonly delete: (id: string) => Effect.Effect<void, CharacterError>;
-	readonly bulkDelete: (ids: string[]) => Effect.Effect<{ deleted: number; failed: string[] }, CharacterError>;
-
-	// UI Operations
-	readonly toggleFavorite: (id: string) => Effect.Effect<Character, CharacterError>;
 
 	// Stats Operations
 	readonly getRelationsCounts: (id: string) => Effect.Effect<CharacterCounts, CharacterError>;
-
-	// Relation Operations
-	readonly addImage: (characterId: string, imageId: string) => Effect.Effect<void, CharacterError>;
 	readonly removeImage: (characterId: string, imageId: string) => Effect.Effect<void, CharacterError>;
-	readonly addNote: (characterId: string, noteId: string) => Effect.Effect<void, CharacterError>;
 	readonly removeNote: (characterId: string, noteId: string) => Effect.Effect<void, CharacterError>;
+
+	// UI Operations
+	readonly toggleFavorite: (id: string) => Effect.Effect<Character, CharacterError>;
+	readonly update: (id: string, input: CharacterUpdateInput) => Effect.Effect<CharacterWithStats, CharacterError>;
 }
 
 /**

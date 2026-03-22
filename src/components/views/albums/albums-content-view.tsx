@@ -14,31 +14,31 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import type { AlbumWithStats } from '@/types/entities/album';
 
 interface AlbumsContentViewProps {
-	albums: AlbumWithStats[];
-	isLoading: boolean;
-	error: string | null;
-	showForm: boolean;
-	editingAlbum: AlbumWithStats | null;
-	albumName: string;
 	albumDescription: string;
-	setShowForm: (show: boolean) => void;
-	setEditingAlbum: (album: AlbumWithStats | null) => void;
-	setAlbumName: (name: string) => void;
-	setAlbumDescription: (description: string) => void;
-	handleAlbumClick: (album: AlbumWithStats) => void;
-	handleEditAlbum: (album: AlbumWithStats) => void;
-	handleDeleteAlbum: (albumId: string) => void;
-	handleSubmitForm: () => void;
+	albumName: string;
+	albums: AlbumWithStats[];
 	className?: string;
+	editingAlbum: AlbumWithStats | null;
+	error: string | null;
+	handleAlbumClick: (album: AlbumWithStats) => void;
+	handleDeleteAlbum: (albumId: string) => void;
+	handleEditAlbum: (album: AlbumWithStats) => void;
+	handleSubmitForm: () => void;
+	isLoading: boolean;
+	setAlbumDescription: (description: string) => void;
+	setAlbumName: (name: string) => void;
+	setEditingAlbum: (album: AlbumWithStats | null) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 const MemoizedAlbumCard = React.memo(

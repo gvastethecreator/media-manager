@@ -4,6 +4,7 @@
  * @description Base component con efectos holográficos y animaciones
  */
 
+import gsap from 'gsap';
 import type { CSSProperties, ReactNode } from 'react';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
@@ -15,37 +16,37 @@ import './tcg-cards.css';
 // ============================================================================
 
 export interface TCGCardBaseProps {
-	item: BrowserItem;
-	/** Ancho de la tarjeta en px */
-	width: number;
-	/** Alto de la tarjeta en px (calculado automático si no se provee) */
-	height?: number;
-	/** Variante de la tarjeta */
-	variant: 'grid' | 'card' | 'masonry' | 'list';
-	/** Si está seleccionada */
-	isSelected?: boolean;
-	/** Si está activa */
-	isActive?: boolean;
-	/** Permite animación de entrada */
-	animateIn?: boolean;
-	/** Orden para animación escalonada */
-	layoutOrder?: number;
-	/** Contenido del thumbnail */
-	thumbnailContent: ReactNode;
-	/** Contenido del footer (info) */
-	footerContent?: ReactNode;
 	/** Color de acento de la entidad */
 	accentColor: string;
-	/** Rareza visual (afecta brillo/efecto) */
-	rarity?: 'common' | 'rare' | 'epic' | 'legendary';
-	/** Handlers */
-	onClick?: (e: React.MouseEvent) => void;
-	onDoubleClick?: () => void;
-	onContextMenu?: (e: React.MouseEvent) => void;
+	/** Permite animación de entrada */
+	animateIn?: boolean;
 	/** Estilos adicionales */
 	className?: string;
+	/** Contenido del footer (info) */
+	footerContent?: ReactNode;
+	/** Alto de la tarjeta en px (calculado automático si no se provee) */
+	height?: number;
+	/** Si está activa */
+	isActive?: boolean;
+	/** Si está seleccionada */
+	isSelected?: boolean;
+	item: BrowserItem;
+	/** Orden para animación escalonada */
+	layoutOrder?: number;
+	/** Handlers */
+	onClick?: (e: React.MouseEvent) => void;
+	onContextMenu?: (e: React.MouseEvent) => void;
+	onDoubleClick?: () => void;
+	/** Rareza visual (afecta brillo/efecto) */
+	rarity?: 'common' | 'rare' | 'epic' | 'legendary';
 	style?: CSSProperties;
 	testId?: string;
+	/** Contenido del thumbnail */
+	thumbnailContent: ReactNode;
+	/** Variante de la tarjeta */
+	variant: 'grid' | 'card' | 'masonry' | 'list';
+	/** Ancho de la tarjeta en px */
+	width: number;
 }
 
 // ============================================================================
@@ -108,24 +109,13 @@ export const TCGCardBase = memo(
 			const rafId = requestAnimationFrame(() => {
 				const delay = layoutOrder != null ? Math.min(layoutOrder * 20, 200) : 0;
 
-				// Import dinámico con timeout para no bloquear
+				// Programar animación sin bloquear el hilo principal
 				const timer = setTimeout(() => {
-					const runAnimation = async () => {
-						try {
-							const { animate } = await import('animejs');
-							animate(card, {
-								opacity: [0, 1],
-								translateY: [12, 0],
-								scale: [0.96, 1],
-								ease: 'easeOutQuad',
-								duration: 350,
-								delay,
-							});
-						} catch {
-							// Silenciar errores de import
-						}
-					};
-					runAnimation();
+					gsap.fromTo(
+						card,
+						{ opacity: 0, y: 12, scale: 0.96 },
+						{ opacity: 1, y: 0, scale: 1, ease: 'power1.out', duration: 0.35, delay: delay / 1000 }
+					);
 				}, 0);
 
 				return () => clearTimeout(timer);

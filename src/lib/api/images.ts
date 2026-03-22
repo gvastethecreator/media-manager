@@ -5,22 +5,22 @@ import { apiClient } from './client';
 
 // Tipos para filtros de imágenes
 export interface ImageFilters {
-	folderId?: string;
-	isFavorite?: boolean;
-	minWidth?: number;
-	maxWidth?: number;
-	minHeight?: number;
-	maxHeight?: number;
-	minSize?: number;
-	maxSize?: number;
-	search?: string;
-	tags?: string[];
 	albums?: string[];
 	characters?: string[];
+	folderId?: string;
+	isFavorite?: boolean;
 	limit?: number;
+	maxHeight?: number;
+	maxSize?: number;
+	maxWidth?: number;
+	minHeight?: number;
+	minSize?: number;
+	minWidth?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size' | 'width' | 'height';
 	sortOrder?: 'asc' | 'desc';
+	tags?: string[];
 }
 
 export interface ImagesResponse {

@@ -20,16 +20,16 @@ import type { FolderWithStats } from '@/types/entities/folder';
 import type { BrowserItem } from '../types/item.types';
 
 export interface MoveDialogProps {
+	/** Si está procesando */
+	isLoading?: boolean;
 	/** Si el diálogo está abierto */
 	isOpen: boolean;
 	/** Archivos a mover */
 	items: BrowserItem[];
-	/** Callback al confirmar */
-	onConfirm: (targetFolderId: string) => void;
 	/** Callback al cancelar */
 	onCancel: () => void;
-	/** Si está procesando */
-	isLoading?: boolean;
+	/** Callback al confirmar */
+	onConfirm: (targetFolderId: string) => void;
 }
 
 export function MoveDialog({ isOpen, items, onConfirm, onCancel, isLoading = false }: MoveDialogProps) {

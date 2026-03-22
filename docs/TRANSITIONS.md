@@ -1,6 +1,6 @@
 # Sistema de Transiciones - Image Manager
 
-Sistema completo de transiciones fluidas y coherentes para la aplicación Image Manager, basado en View Transitions API, FLIP (First Last Invert Play) y anime.js.
+Sistema completo de transiciones fluidas y coherentes para la aplicación Image Manager, basado en View Transitions API, FLIP (First Last Invert Play) y GSAP.
 
 ## 🎯 Características Principales
 
@@ -196,7 +196,7 @@ El sistema incluye automáticamente:
 - **Reduced Motion**: Respeto de `prefers-reduced-motion`
 - **Adaptive Quality**: Ajuste según capacidades del dispositivo
 
-### Verificar soporte del navegador:
+### Verificar soporte del navegador
 
 ```typescript
 import { checkBrowserSupport } from '@/lib/transitions';
@@ -205,7 +205,7 @@ const support = checkBrowserSupport();
 // { flip: true, morph: true, webAnimations: true, clipPath: true }
 ```
 
-### Respetar preferencias de accesibilidad:
+### Respetar preferencias de accesibilidad
 
 ```typescript
 import { shouldReduceMotion, getAdjustedDuration } from '@/lib/transitions';
@@ -377,7 +377,7 @@ await coordinator.coordinateReplace(
 
 ## 🔗 Dependencias
 
-- `anime.js`: Para animaciones avanzadas
+- `gsap`: Para animaciones avanzadas
 - React 19: Para hooks y componentes
 - TypeScript: Tipado completo
 

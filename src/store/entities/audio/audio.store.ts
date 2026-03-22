@@ -26,33 +26,33 @@ export type AudioFilters = Record<string, any>;
 export interface AudioState {
 	// Estado de datos
 	audios: AudioWithStats[];
-	selectedAudios: AudioWithStats[];
+	clearFilters: () => void;
+	clearSelection: () => void;
+	createAudio: (data: AudioCreateInput) => Promise<AudioWithStats | undefined>;
 	currentAudio: AudioWithStats | null;
+	deleteAudio: (id: string) => Promise<void>;
+	deselectAudio: (audioId: string) => void;
+	error: string | null;
+
+	// Acciones de datos
+	fetchAudios: () => Promise<void>;
+	filters: AudioFilters;
+
+	// Utilidades
+	getAudioById: (id: string) => AudioWithStats | undefined;
 
 	// Estado de UI
 	isLoading: boolean;
 	loading: boolean;
-	error: string | null;
-	filters: AudioFilters;
-
-	// Acciones de datos
-	fetchAudios: () => Promise<void>;
-	createAudio: (data: AudioCreateInput) => Promise<AudioWithStats | undefined>;
-	updateAudio: (id: string, data: AudioUpdateInput) => Promise<AudioWithStats | undefined>;
-	deleteAudio: (id: string) => Promise<void>;
 
 	// Acciones de selección
 	selectAudio: (audio: AudioWithStats) => void;
-	deselectAudio: (audioId: string) => void;
-	clearSelection: () => void;
+	selectedAudios: AudioWithStats[];
 
 	// Acciones de filtrado
 	setFilters: (filters: Partial<AudioFilters>) => void;
-	clearFilters: () => void;
-
-	// Utilidades
-	getAudioById: (id: string) => AudioWithStats | undefined;
 	toggleFavorite: (id: string) => Promise<void>;
+	updateAudio: (id: string, data: AudioUpdateInput) => Promise<AudioWithStats | undefined>;
 }
 
 const useAudioStoreBase = create<AudioState>()(

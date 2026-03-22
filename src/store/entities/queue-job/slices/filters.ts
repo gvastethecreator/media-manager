@@ -15,40 +15,40 @@ const filtersLogger = clientLogger.withContext('QueueJobStore:Filters');
  * Slice que contiene el estado y las acciones de filtrado
  */
 export interface QueueJobFiltersSlice {
-	// Búsqueda por texto
-	setSearchTerm: (searchTerm: string) => void;
-
-	// Filtros de estado
-	setStatusFilter: (status: QueueJobStatus | null) => void;
-	toggleStatusFilter: (status: QueueJobStatus) => void;
-
-	// Filtros de tipo
-	setTypeFilter: (type: QueueJobType | null) => void;
-	toggleTypeFilter: (type: QueueJobType) => void;
-
-	// Filtros de rango de fechas
-	setDateRange: (startDate: Date | null, endDate: Date | null) => void;
-
-	// Filtros de usuarios
-	setUserFilter: (userId: string | null) => void;
-
-	// Filtros de prioridad
-	setPriorityFilter: (priority: number | null) => void;
-
-	// Ordenamiento
-	setSortField: (field: QueueJobSortField) => void;
-	setSortOrder: (order: QueueJobSortOrder) => void;
-
-	// Paginación
-	setPage: (page: number) => void;
-	setPageSize: (pageSize: number) => void;
+	loadSavedFilters: () => void;
 
 	// Reseteo de filtros
 	resetFilters: () => void;
 
 	// Persistencia de filtros
 	saveFilters: () => void;
-	loadSavedFilters: () => void;
+
+	// Filtros de rango de fechas
+	setDateRange: (startDate: Date | null, endDate: Date | null) => void;
+
+	// Paginación
+	setPage: (page: number) => void;
+	setPageSize: (pageSize: number) => void;
+
+	// Filtros de prioridad
+	setPriorityFilter: (priority: number | null) => void;
+	// Búsqueda por texto
+	setSearchTerm: (searchTerm: string) => void;
+
+	// Ordenamiento
+	setSortField: (field: QueueJobSortField) => void;
+	setSortOrder: (order: QueueJobSortOrder) => void;
+
+	// Filtros de estado
+	setStatusFilter: (status: QueueJobStatus | null) => void;
+
+	// Filtros de tipo
+	setTypeFilter: (type: QueueJobType | null) => void;
+
+	// Filtros de usuarios
+	setUserFilter: (userId: string | null) => void;
+	toggleStatusFilter: (status: QueueJobStatus) => void;
+	toggleTypeFilter: (type: QueueJobType) => void;
 }
 
 /**

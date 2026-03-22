@@ -18,34 +18,34 @@ export type TCGCardRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary
  * Props del componente TCGCard
  */
 export interface TCGCardProps extends React.HTMLAttributes<HTMLDivElement> {
-	/** Contenido de la carta */
-	children: ReactNode;
 	/** Color principal de la carta (variable CSS o valor) */
 	accentColor?: string;
-	/** Color secundario para gradientes */
-	secondaryColor?: string;
-	/** Rareza de la carta (afecta efectos visuales) */
-	rarity?: TCGCardRarity;
-	/** Tamaño de la carta */
-	size?: 'sm' | 'md' | 'lg' | 'xl';
-	/** Si está seleccionada */
-	isSelected?: boolean;
-	/** Si está en modo compacto */
-	isCompact?: boolean;
-	/** Si deshabilitar efectos 3D */
-	disable3D?: boolean;
-	/** Thumbnail/Imagen de la carta */
-	thumbnail?: ReactNode;
-	/** Header de la carta (título, icono) */
-	header?: ReactNode;
-	/** Footer de la carta (stats, info) */
-	footer?: ReactNode;
-	/** Efecto de brillo personalizado */
-	glareIntensity?: number;
-	/** Clases adicionales para el frame */
-	frameClassName?: string;
+	/** Contenido de la carta */
+	children: ReactNode;
 	/** Clases adicionales para el contenido */
 	contentClassName?: string;
+	/** Si deshabilitar efectos 3D */
+	disable3D?: boolean;
+	/** Footer de la carta (stats, info) */
+	footer?: ReactNode;
+	/** Clases adicionales para el frame */
+	frameClassName?: string;
+	/** Efecto de brillo personalizado */
+	glareIntensity?: number;
+	/** Header de la carta (título, icono) */
+	header?: ReactNode;
+	/** Si está en modo compacto */
+	isCompact?: boolean;
+	/** Si está seleccionada */
+	isSelected?: boolean;
+	/** Rareza de la carta (afecta efectos visuales) */
+	rarity?: TCGCardRarity;
+	/** Color secundario para gradientes */
+	secondaryColor?: string;
+	/** Tamaño de la carta */
+	size?: 'sm' | 'md' | 'lg' | 'xl';
+	/** Thumbnail/Imagen de la carta */
+	thumbnail?: ReactNode;
 }
 
 /**
@@ -248,16 +248,16 @@ TCGCard.displayName = 'TCGCard';
  * Componente para el header de carta TCG (título + coste/tipo)
  */
 export interface TCGCardHeaderProps {
+	/** Color de acento */
+	accentColor?: string;
+	/** Coste (mana, energía, etc) - elemento a la derecha */
+	cost?: ReactNode;
 	/** Título/Nombre de la carta */
 	title: string;
 	/** Icono o elemento visual del tipo */
 	typeIcon?: ReactNode;
 	/** Texto del tipo */
 	typeText?: string;
-	/** Coste (mana, energía, etc) - elemento a la derecha */
-	cost?: ReactNode;
-	/** Color de acento */
-	accentColor?: string;
 }
 
 export const TCGCardHeader = memo(function TCGCardHeader({
@@ -287,12 +287,12 @@ export const TCGCardHeader = memo(function TCGCardHeader({
  * Componente para stats de carta TCG
  */
 export interface TCGCardStatsProps {
-	/** Stats a mostrar */
-	stats: { label: string; value: string | number; icon?: ReactNode }[];
-	/** Disposición: horizontal o vertical */
-	layout?: 'horizontal' | 'vertical';
 	/** Color de acento */
 	accentColor?: string;
+	/** Disposición: horizontal o vertical */
+	layout?: 'horizontal' | 'vertical';
+	/** Stats a mostrar */
+	stats: { label: string; value: string | number; icon?: ReactNode }[];
 }
 
 export const TCGCardStats = memo(function TCGCardStats({
@@ -324,10 +324,10 @@ export const TCGCardStats = memo(function TCGCardStats({
 export interface TCGCardBadgeProps {
 	/** Texto del badge */
 	children: ReactNode;
-	/** Variante visual */
-	variant?: 'rarity' | 'type' | 'set';
 	/** Color personalizado */
 	color?: string;
+	/** Variante visual */
+	variant?: 'rarity' | 'type' | 'set';
 }
 
 export const TCGCardBadge = memo(function TCGCardBadge({ children, variant = 'type', color }: TCGCardBadgeProps) {

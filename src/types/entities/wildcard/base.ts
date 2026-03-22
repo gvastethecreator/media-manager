@@ -15,39 +15,39 @@
  * Los wildcards son elementos flexibles que pueden representar casi cualquier cosa.
  */
 export interface WildcardBase {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-	shortcut: string | null;
-	children: string | null;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	parentId: string | null;
-	type: string | null;
-	content: string | null;
-	difficulty: string | null;
-	theme: string | null;
-	isActive: boolean;
-	version: number;
 	author: string | null;
+	category: string | null;
+	children: string | null;
+	color: string | null;
+	content: string | null;
 	createdAt: Date;
-	updatedAt: Date;
+	description: string | null;
+	difficulty: string | null;
+	emoji: string | null;
+	featuredImage: string | null;
+	id: string;
+	isActive: boolean;
+	isFavorite: boolean;
+	name: string;
+	parentId: string | null;
+	shortcut: string | null;
 	// Relaciones
 	tags?: TagBase[];
+	theme: string | null;
+	type: string | null;
+	updatedAt: Date;
+	version: number;
 }
 
 /**
  * 🃏 TAG BASE TYPE (para relaciones)
  */
 export interface TagBase {
+	color: string | null;
+	description: string | null;
+	emoji: string | null;
 	id: string;
 	name: string;
-	color: string | null;
-	emoji: string | null;
-	description: string | null;
 }
 
 import { EntityStats } from '../entity.types';
@@ -60,16 +60,16 @@ import { EntityStats } from '../entity.types';
 export interface WildcardStatistics extends EntityStats {
 	/** Puntuación de adaptabilidad basada en la diversidad de su contenido y relaciones. */
 	adaptabilityScore: number;
-	/** Nivel de uso en diferentes contextos (imágenes, personajes, etc.). */
-	usageDiversity: number;
 	/** Puntuación de la completitud de la información del wildcard. */
 	completenessScore: number;
-	/** Popularidad basada en el número de entidades relacionadas. */
-	popularity: number;
 
 	// File system functions
 	isDirectory: boolean;
 	isFile: boolean;
+	/** Popularidad basada en el número de entidades relacionadas. */
+	popularity: number;
+	/** Nivel de uso en diferentes contextos (imágenes, personajes, etc.). */
+	usageDiversity: number;
 }
 
 /**
@@ -96,10 +96,6 @@ export interface WildcardWithCounts extends WildcardBase {
  * debe usar en toda la UI y la lógica de negocio.
  */
 export interface WildcardWithStats extends WildcardBase {
-	entityType: 'wildcard';
-	stats: WildcardStatistics;
-	/** Alias para compatibilidad - apunta a stats */
-	statistics?: WildcardStatistics;
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -117,13 +113,16 @@ export interface WildcardWithStats extends WildcardBase {
 		properties?: number;
 		groups?: number;
 	};
+	entityType: 'wildcard';
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: WildcardStatistics;
+	stats: WildcardStatistics;
 }
 
 /**
  * 🌟 Tipo completo de Wildcard con todas las relaciones
  */
 export interface WildcardComplete extends WildcardWithStats {
-	tags: TagBase[];
 	relations: {
 		images: string[];
 		videos: string[];
@@ -139,6 +138,7 @@ export interface WildcardComplete extends WildcardWithStats {
 		properties: string[];
 		groups: string[];
 	};
+	tags: TagBase[];
 }
 
 /**
@@ -147,16 +147,16 @@ export interface WildcardComplete extends WildcardWithStats {
  * Tipo para la creación de un nuevo wildcard.
  */
 export interface WildcardCreateInput {
-	name: string;
+	category?: string | null;
+	children?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
-	children?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name: string;
 	parentId?: string | null;
+	shortcut?: string | null;
 }
 
 /**
@@ -165,16 +165,16 @@ export interface WildcardCreateInput {
  * Tipo para la actualización de un wildcard existente.
  */
 export interface WildcardUpdateInput {
-	name?: string;
+	category?: string | null;
+	children?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
-	children?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name?: string;
 	parentId?: string | null;
+	shortcut?: string | null;
 }
 
 /**
@@ -183,12 +183,12 @@ export interface WildcardUpdateInput {
  * Tipo para previsualizaciones de wildcards, con un subconjunto de campos.
  */
 export interface WildcardPreview {
-	id: string;
-	name: string;
-	description: string | null;
 	createdAt: Date;
-	updatedAt: Date;
+	description: string | null;
+	id: string;
 	imageUrl?: string;
+	name: string;
+	updatedAt: Date;
 }
 
 // ----------------------------------------------------------------

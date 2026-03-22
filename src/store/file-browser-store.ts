@@ -5,21 +5,21 @@ import type { FileBrowserViewType, ViewConfiguration } from '@/types/file-browse
 
 interface FileBrowserState {
 	currentViewType: FileBrowserViewType;
-	viewConfigurations: Record<FileBrowserViewType, ViewConfiguration>;
+	enableAnimations: boolean;
+	showHiddenFiles: boolean;
 	sortBy: string;
 	sortDirection: 'asc' | 'desc';
-	showHiddenFiles: boolean;
-	enableAnimations: boolean;
+	viewConfigurations: Record<FileBrowserViewType, ViewConfiguration>;
 }
 
 interface FileBrowserActions {
-	setViewType: (viewType: FileBrowserViewType) => void;
-	updateViewConfiguration: (viewType: FileBrowserViewType, config: ViewConfiguration) => void;
+	setEnableAnimations: (enable: boolean) => void;
+	setShowHiddenFiles: (show: boolean) => void;
 	setSortBy: (sortBy: string) => void;
 	setSortDirection: (direction: 'asc' | 'desc') => void;
+	setViewType: (viewType: FileBrowserViewType) => void;
 	toggleSortDirection: () => void;
-	setShowHiddenFiles: (show: boolean) => void;
-	setEnableAnimations: (enable: boolean) => void;
+	updateViewConfiguration: (viewType: FileBrowserViewType, config: ViewConfiguration) => void;
 }
 
 type FileBrowserStore = FileBrowserState & FileBrowserActions;

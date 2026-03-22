@@ -11,37 +11,37 @@ const selectionLogger = clientLogger.withContext('SelectionStore');
  * Fusiona las APIs de selection.store.ts y selection.slice.ts
  */
 export interface SelectionState {
-	// Estado
-	selectedItems: EntityWithStats[];
-	selectedIds: string[];
-	lastSelectedItem: EntityWithStats | null;
-	focusedId: string | null;
 	activeId: string | null; // Alias de focusedId para compatibilidad
-	isMultiSelectMode: boolean;
-
-	// Acciones principales
-	toggleSelection: (id: string, item?: EntityWithStats) => void;
-	selectItem: (item: EntityWithStats) => void;
-	deselectItem: (id: string) => void;
-	clearSelection: () => void;
-	setMultiSelectMode: (enabled: boolean) => void;
-	setFocusedId: (id: string | null) => void;
-	setActiveId: (id: string | null) => void; // Alias de setFocusedId
-	addToSelection: (id: string) => void;
 	addSelectedId: (id: string) => void; // Alias de addToSelection
-	removeFromSelection: (id: string) => void;
-	removeSelectedId: (id: string) => void; // Alias de removeFromSelection
-	toggleSelectedId: (id: string) => void; // Toggle simple por ID
-	setSelection: (ids: string[]) => void;
-	selectRange: (ids: string[]) => void;
-	setSelectedIds: (ids: string[]) => void;
-	selectAll: (items: EntityWithStats[] | string[]) => void;
+	addToSelection: (id: string) => void;
+	clearSelection: () => void;
+	deselectItem: (id: string) => void;
+	focusedId: string | null;
 	invertSelection: (allIds: string[]) => void;
+	isActive: (id: string) => boolean;
 
 	// Selectores
 	isItemSelected: (id: string) => boolean;
+	isMultiSelectMode: boolean;
 	isSelected: (id: string) => boolean; // Alias
-	isActive: (id: string) => boolean;
+	lastSelectedItem: EntityWithStats | null;
+	removeFromSelection: (id: string) => void;
+	removeSelectedId: (id: string) => void; // Alias de removeFromSelection
+	selectAll: (items: EntityWithStats[] | string[]) => void;
+	selectedIds: string[];
+	// Estado
+	selectedItems: EntityWithStats[];
+	selectItem: (item: EntityWithStats) => void;
+	selectRange: (ids: string[]) => void;
+	setActiveId: (id: string | null) => void; // Alias de setFocusedId
+	setFocusedId: (id: string | null) => void;
+	setMultiSelectMode: (enabled: boolean) => void;
+	setSelectedIds: (ids: string[]) => void;
+	setSelection: (ids: string[]) => void;
+	toggleSelectedId: (id: string) => void; // Toggle simple por ID
+
+	// Acciones principales
+	toggleSelection: (id: string, item?: EntityWithStats) => void;
 }
 
 /**

@@ -7,24 +7,24 @@ import type { NoteStore } from '../types';
 const filtersLogger = clientLogger.withContext('NoteStore:Filters');
 
 export interface FiltersSlice {
+	clearFilters: () => void;
 	// Estado
 	filters: NoteFilters;
-	sortBy: NoteSortOption;
 	page: number;
 	pageSize: number;
+	setCategoryFilter: (category: string | null) => void;
 
 	// Acciones
 	setFilters: (filters: Partial<NoteFilters>) => void;
-	setSortBy: (sortBy: NoteSortOption) => void;
+	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
 	setPage: (page: number) => void;
 	setPageSize: (pageSize: number) => void;
-	setCategoryFilter: (category: string | null) => void;
-	setStatusFilter: (status: string | null) => void;
 	setPriorityFilter: (priority: number | null) => void;
 	setSearchFilter: (search: string) => void;
+	setSortBy: (sortBy: NoteSortOption) => void;
+	setStatusFilter: (status: string | null) => void;
 	setTagsFilter: (tags: string[]) => void;
-	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
-	clearFilters: () => void;
+	sortBy: NoteSortOption;
 }
 
 export const createFiltersSlice: StateCreator<NoteStore, [], [], FiltersSlice> = (set) => ({

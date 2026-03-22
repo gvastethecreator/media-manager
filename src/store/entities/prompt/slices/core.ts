@@ -7,20 +7,20 @@ import type { PromptStore } from '../types';
 const coreLogger = clientLogger.withContext('PromptStore:Core');
 
 export interface CoreSlice {
-	// Estado
-	prompts: PromptWithStats[];
-	selectedPrompt: PromptWithStats | null;
-	isLoading: boolean;
+	createPrompt: (prompt: PromptCreateInput) => Promise<void>;
+	deletePrompt: (id: string) => Promise<void>;
 	error: string | null;
+	isLoading: boolean;
 
 	// Acciones
 	loadPrompts: () => Promise<void>;
-	setPrompts: (prompts: PromptWithStats[]) => void;
-	createPrompt: (prompt: PromptCreateInput) => Promise<void>;
-	updatePrompt: (id: string, prompt: PromptUpdateInput) => Promise<void>;
-	deletePrompt: (id: string) => Promise<void>;
-	selectPrompt: (prompt: PromptWithStats | null) => void;
+	// Estado
+	prompts: PromptWithStats[];
 	reset: () => void;
+	selectedPrompt: PromptWithStats | null;
+	selectPrompt: (prompt: PromptWithStats | null) => void;
+	setPrompts: (prompts: PromptWithStats[]) => void;
+	updatePrompt: (id: string, prompt: PromptUpdateInput) => Promise<void>;
 }
 
 // Importar las server actions reales

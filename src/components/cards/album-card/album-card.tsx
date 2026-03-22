@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { AlbumCardContent } from './album-card-content';
@@ -26,11 +26,11 @@ export interface AlbumCardProps {
 			thumbnailSize?: 'small' | 'medium' | 'large';
 		};
 	};
-	onClick?: () => void;
 	className?: string;
-	style?: React.CSSProperties;
 	compact?: boolean;
 	isSelected?: boolean;
+	onClick?: () => void;
+	style?: React.CSSProperties;
 	tcgMode?: boolean;
 }
 

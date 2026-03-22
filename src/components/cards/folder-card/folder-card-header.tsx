@@ -2,13 +2,13 @@ import { FolderTreeIcon, Star } from 'lucide-react';
 import { memo, useMemo } from 'react';
 
 interface FolderCardHeaderProps {
-	name: string;
 	emoji?: string | null;
+	isFavorite?: boolean;
+	name: string;
+	path?: string;
 	primaryColor: string;
 	secondaryColor?: string;
-	path?: string;
 	tcgMode?: boolean;
-	isFavorite?: boolean;
 }
 
 /**

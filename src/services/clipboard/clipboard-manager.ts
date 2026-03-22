@@ -32,16 +32,10 @@ export type ClipboardFormat = (typeof ClipboardFormat)[keyof typeof ClipboardFor
  * Clipboard data structure with metadata
  */
 export interface ClipboardData {
-	/** Items being copied/cut */
-	items: AnyEntityWithStats[];
-	/** Operation type */
-	operation: 'copy' | 'cut';
-	/** Timestamp when operation was performed */
-	timestamp: number;
-	/** Source context (e.g., 'file-browser', 'image-viewer') */
-	source: string;
 	/** Supported formats for this clipboard data */
 	formats: ClipboardFormat[];
+	/** Items being copied/cut */
+	items: AnyEntityWithStats[];
 	/** Additional metadata */
 	metadata: {
 		/** Total size of all items */
@@ -53,18 +47,24 @@ export interface ClipboardData {
 		/** Whether items can be pasted to other applications */
 		canPasteToSystem: boolean;
 	};
+	/** Operation type */
+	operation: 'copy' | 'cut';
+	/** Source context (e.g., 'file-browser', 'image-viewer') */
+	source: string;
+	/** Timestamp when operation was performed */
+	timestamp: number;
 }
 
 /**
  * System clipboard integration options
  */
 export interface SystemClipboardOptions {
-	/** Include file paths as text */
-	includeText: boolean;
 	/** Include HTML representation */
 	includeHtml: boolean;
 	/** Include images as data URLs */
 	includeImages: boolean;
+	/** Include file paths as text */
+	includeText: boolean;
 	/** Include file URIs */
 	includeUris: boolean;
 	/** Maximum image size for clipboard (in bytes) */
@@ -75,14 +75,14 @@ export interface SystemClipboardOptions {
  * Clipboard validation result
  */
 export interface ClipboardValidation {
-	/** Whether clipboard data is valid */
-	isValid: boolean;
 	/** Validation errors */
 	errors: string[];
-	/** Warnings */
-	warnings: string[];
+	/** Whether clipboard data is valid */
+	isValid: boolean;
 	/** Supported operations */
 	supportedOperations: ('copy' | 'cut' | 'paste')[];
+	/** Warnings */
+	warnings: string[];
 }
 
 /**

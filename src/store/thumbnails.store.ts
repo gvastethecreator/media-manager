@@ -3,10 +3,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import type { ThumbnailStats } from '@/types/thumbnails';
 
 export interface ProcessStatus {
-	status: string;
-	progress: number;
 	current?: number;
-	total?: number;
 	currentFile?: string;
 	lastProcessed?: {
 		id: string;
@@ -14,21 +11,24 @@ export interface ProcessStatus {
 		processedAt: string;
 		saved?: number;
 	};
+	progress: number;
+	status: string;
+	total?: number;
 }
 
 interface ThumbnailStore {
+	error: string | null;
+	initialize: () => Promise<void>;
 	isLoading: boolean;
 	isProcessing: boolean;
-	error: string | null;
-	stats: ThumbnailStats;
 	processStatus: ProcessStatus;
+	reset: () => void;
+	setError: (error: string | null) => void;
 	setLoading: (loading: boolean) => void;
 	setProcessing: (processing: boolean) => void;
-	setError: (error: string | null) => void;
-	setStats: (stats: Partial<ThumbnailStats>) => void;
 	setProcessStatus: (status: Partial<ProcessStatus>) => void;
-	initialize: () => Promise<void>;
-	reset: () => void;
+	setStats: (stats: Partial<ThumbnailStats>) => void;
+	stats: ThumbnailStats;
 }
 
 const initialStats: ThumbnailStats = {

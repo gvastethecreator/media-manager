@@ -3,7 +3,7 @@
  * @module file-browser-new/file-browser
  */
 
-// import { createLayout } from 'animejs'; // TODO: Revisar si es necesario
+// TODO: Evaluar una estrategia de layout animation nativa con GSAP si vuelve a ser necesaria.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useMove } from '@/hooks/use-move';
@@ -57,7 +57,7 @@ export function FileBrowser({
 	// Ref del contenedor principal
 	const containerRef = useRef<HTMLElement>(null);
 	const layoutRootRef = useRef<HTMLElement | null>(null);
-	// TODO: createLayout no está disponible en animejs v4+, investigar alternativa
+	// TODO: Si reaparece esta necesidad, implementar layout transitions con GSAP o FLIP.
 	// const layoutRef = useRef<ReturnType<typeof createLayout> | null>(null);
 	const layoutRef = useRef<{ destroy: () => void } | null>(null);
 	const { toast } = useToast();
@@ -104,10 +104,10 @@ export function FileBrowser({
 		paginationMode === 'infinite'
 			? infiniteScroll
 			: {
-					...infiniteScroll,
-					enabled: false,
-					autoLoad: false,
-				};
+				...infiniteScroll,
+				enabled: false,
+				autoLoad: false,
+			};
 
 	// Navegación por teclado
 	const { handleNativeKeyDown } = useKeyboardNavigation({
@@ -330,7 +330,7 @@ export function FileBrowser({
 
 		if (!el) return;
 
-		// TODO: createLayout no está disponible en animejs v4+
+		// TODO: Resolver con GSAP/FLIP si se necesita layout animation avanzada.
 		// Se necesita implementar una alternativa para animaciones de layout
 		// layoutRef.current = createLayout(el, { ... });
 	}, []);
@@ -343,7 +343,7 @@ export function FileBrowser({
 	}, []);
 
 	const runLayoutUpdate = useCallback((action: () => void, options?: { duration?: number; ease?: string }) => {
-		// TODO: createLayout no está disponible en animejs v4+
+		// TODO: Resolver con GSAP/FLIP si se necesita layout animation avanzada.
 		// Se necesita implementar alternativa para animaciones de layout
 		action();
 	}, []);
@@ -379,17 +379,17 @@ export function FileBrowser({
 							config.kind === 'masonry'
 								? config
 								: {
-										kind: 'masonry',
-										renderMode: 'canvas',
-										gap: 8,
-										columnWidth: 200,
-										padding: 16,
-										tcgHoverReveal: true,
-										tcgHolo: true,
-										tcgShadows: true,
-										tcgRounded: true,
-										tcgTilt: true,
-									}
+									kind: 'masonry',
+									renderMode: 'canvas',
+									gap: 8,
+									columnWidth: 200,
+									padding: 16,
+									tcgHoverReveal: true,
+									tcgHolo: true,
+									tcgShadows: true,
+									tcgRounded: true,
+									tcgTilt: true,
+								}
 						}
 						page={effectiveInfiniteScroll.enabled ? undefined : browser.pagination.page}
 						pageSize={browser.pagination.pageSize}
@@ -404,12 +404,12 @@ export function FileBrowser({
 							config.kind === 'table'
 								? config
 								: {
-										kind: 'table',
-										renderMode: 'canvas',
-										gap: 0,
-										rowHeight: 32,
-										visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
-									}
+									kind: 'table',
+									renderMode: 'canvas',
+									gap: 0,
+									rowHeight: 32,
+									visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
+								}
 						}
 						onSortChange={browser.toggleSortField}
 						page={effectiveInfiniteScroll.enabled ? undefined : browser.pagination.page}

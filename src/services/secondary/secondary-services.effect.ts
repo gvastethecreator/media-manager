@@ -36,12 +36,12 @@ const logger = serverLogger.withContext('SecondaryServices.Effect');
 export class GroupService extends Context.Tag('GroupService')<GroupService, GroupServiceInterface>() {}
 
 export interface GroupServiceInterface {
+	readonly create: (input: any) => Effect.Effect<any, GroupError>;
+	readonly delete: (id: string) => Effect.Effect<void, GroupError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, GroupError>;
 	readonly getById: (id: string) => Effect.Effect<any, GroupError>;
-	readonly create: (input: any) => Effect.Effect<any, GroupError>;
-	readonly update: (id: string, input: any) => Effect.Effect<any, GroupError>;
-	readonly delete: (id: string) => Effect.Effect<void, GroupError>;
 	readonly toggleFavorite: (id: string) => Effect.Effect<any, GroupError>;
+	readonly update: (id: string, input: any) => Effect.Effect<any, GroupError>;
 }
 
 const makeGroupService = (): GroupServiceInterface => {
@@ -130,12 +130,12 @@ export const GroupServiceLive = Layer.effect(GroupService, Effect.succeed(makeGr
 export class WildcardService extends Context.Tag('WildcardService')<WildcardService, WildcardServiceInterface>() {}
 
 export interface WildcardServiceInterface {
+	readonly create: (input: any) => Effect.Effect<any, WildcardError>;
+	readonly delete: (id: string) => Effect.Effect<void, WildcardError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, WildcardError>;
 	readonly getById: (id: string) => Effect.Effect<any, WildcardError>;
-	readonly create: (input: any) => Effect.Effect<any, WildcardError>;
-	readonly update: (id: string, input: any) => Effect.Effect<any, WildcardError>;
-	readonly delete: (id: string) => Effect.Effect<void, WildcardError>;
 	readonly toggleFavorite: (id: string) => Effect.Effect<any, WildcardError>;
+	readonly update: (id: string, input: any) => Effect.Effect<any, WildcardError>;
 }
 
 const makeWildcardService = (): WildcardServiceInterface => {
@@ -224,12 +224,12 @@ export const WildcardServiceLive = Layer.effect(WildcardService, Effect.succeed(
 export class NoteService extends Context.Tag('NoteService')<NoteService, NoteServiceInterface>() {}
 
 export interface NoteServiceInterface {
+	readonly create: (input: any) => Effect.Effect<any, NoteError>;
+	readonly delete: (id: string) => Effect.Effect<void, NoteError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, NoteError>;
 	readonly getById: (id: string) => Effect.Effect<any, NoteError>;
-	readonly create: (input: any) => Effect.Effect<any, NoteError>;
-	readonly update: (id: string, input: any) => Effect.Effect<any, NoteError>;
-	readonly delete: (id: string) => Effect.Effect<void, NoteError>;
 	readonly getImages: (id: string) => Effect.Effect<any[], NoteError>;
+	readonly update: (id: string, input: any) => Effect.Effect<any, NoteError>;
 }
 
 const makeNoteService = (): NoteServiceInterface => {
@@ -317,11 +317,11 @@ export const NoteServiceLive = Layer.effect(NoteService, Effect.succeed(makeNote
 export class PropertyService extends Context.Tag('PropertyService')<PropertyService, PropertyServiceInterface>() {}
 
 export interface PropertyServiceInterface {
+	readonly create: (input: any) => Effect.Effect<any, PropertyError>;
+	readonly delete: (id: string) => Effect.Effect<void, PropertyError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, PropertyError>;
 	readonly getById: (id: string) => Effect.Effect<any, PropertyError>;
-	readonly create: (input: any) => Effect.Effect<any, PropertyError>;
 	readonly update: (id: string, input: any) => Effect.Effect<any, PropertyError>;
-	readonly delete: (id: string) => Effect.Effect<void, PropertyError>;
 }
 
 const makePropertyService = (): PropertyServiceInterface => {
@@ -395,11 +395,11 @@ export const PropertyServiceLive = Layer.effect(PropertyService, Effect.succeed(
 export class WorldItemService extends Context.Tag('WorldItemService')<WorldItemService, WorldItemServiceInterface>() {}
 
 export interface WorldItemServiceInterface {
+	readonly create: (input: any) => Effect.Effect<any, WorldItemError>;
+	readonly delete: (id: string) => Effect.Effect<void, WorldItemError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, WorldItemError>;
 	readonly getById: (id: string) => Effect.Effect<any, WorldItemError>;
-	readonly create: (input: any) => Effect.Effect<any, WorldItemError>;
 	readonly update: (id: string, input: any) => Effect.Effect<any, WorldItemError>;
-	readonly delete: (id: string) => Effect.Effect<void, WorldItemError>;
 }
 
 const makeWorldItemService = (): WorldItemServiceInterface => {

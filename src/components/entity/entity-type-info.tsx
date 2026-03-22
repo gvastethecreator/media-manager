@@ -7,9 +7,9 @@
 
 import { Download, Edit3, ExternalLink, Eye, MoreHorizontal, Share2, Star, Trash2 } from 'lucide-react';
 import { memo } from 'react';
-import { motion } from '@/components/ui/animejs-shim';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { motion } from '@/components/ui/motion-shim';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format.utils';
@@ -19,18 +19,18 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import { EntityTypeBadge } from './entity-type-badge';
 
 interface EntityTypeInfoProps {
+	/** Clases CSS adicionales */
+	className?: string;
 	/** Entidad para mostrar información */
 	entity: AnyEntityWithStats;
 	/** Modo de visualización */
 	mode?: 'compact' | 'detailed' | 'full';
+	/** Callbacks para acciones */
+	onAction?: (action: string, entity: AnyEntityWithStats) => void;
 	/** Si mostrar acciones disponibles */
 	showActions?: boolean;
 	/** Si mostrar estadísticas */
 	showStats?: boolean;
-	/** Clases CSS adicionales */
-	className?: string;
-	/** Callbacks para acciones */
-	onAction?: (action: string, entity: AnyEntityWithStats) => void;
 }
 
 /**

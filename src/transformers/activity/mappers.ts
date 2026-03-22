@@ -7,32 +7,32 @@
 import { type ActivityFilters, ActivityType, type CreateActivityData } from '../../types/entities/activity/index';
 
 interface DrizzleCreateActivityData {
-	type: string;
-	entityType: string;
-	entityId: string;
 	action: string;
-	userId: string;
 	description: string;
-	metadata?: Record<string, any> | null;
+	entityId: string;
+	entityType: string;
 	ipAddress?: string | null;
-	userAgent?: string | null;
+	metadata?: Record<string, any> | null;
 	sessionId?: string | null;
+	type: string;
+	userAgent?: string | null;
+	userId: string;
 }
 
 interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
-	OR?: DrizzleWhereFilter[];
-	type?: { in?: string[] };
-	imageId?: string;
 	createdAt?: { gte?: Date; lte?: Date };
 	description?: { contains?: string };
+	imageId?: string;
+	OR?: DrizzleWhereFilter[];
+	type?: { in?: string[] };
 }
 
 interface DrizzleFindManyArgs {
-	where?: DrizzleWhereFilter;
-	take?: number;
-	skip?: number;
 	orderBy?: { [key: string]: 'asc' | 'desc' };
+	skip?: number;
+	take?: number;
+	where?: DrizzleWhereFilter;
 	// Los includes se manejan por separado en Drizzle
 }
 

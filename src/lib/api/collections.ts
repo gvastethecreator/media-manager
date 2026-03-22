@@ -4,43 +4,43 @@ import type { ImageWithStats } from '@/types/entities/image';
 import { apiClient } from './client';
 
 export interface CollectionFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface CollectionCreateInput {
-	name: string; // Requerido
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
 	featuredImage?: string | null;
-	isPublic?: boolean;
 	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	totalSize?: number;
+	isPublic?: boolean;
 	lastImageAddedAt?: Date | null;
 	lastVideoAddedAt?: Date | null;
+	name: string; // Requerido
 	parentId?: string | null;
+	totalImages?: number;
+	totalSize?: number;
+	totalVideos?: number;
 }
 
 export interface CollectionUpdateInput {
-	name?: string;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
 	featuredImage?: string | null;
-	isPublic?: boolean;
 	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	totalSize?: number;
+	isPublic?: boolean;
 	lastImageAddedAt?: Date | null;
 	lastVideoAddedAt?: Date | null;
+	name?: string;
 	parentId?: string | null;
+	totalImages?: number;
+	totalSize?: number;
+	totalVideos?: number;
 }
 
 export interface CollectionsResponse {

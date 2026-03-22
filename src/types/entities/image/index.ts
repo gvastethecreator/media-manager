@@ -30,9 +30,9 @@ export type ImageComplete = ImageWithStats;
 export type ImageCreateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
 export type ImageUpdateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
 export interface ImageSearchOptions {
+	orderBy?: Record<string, 'asc' | 'desc'>;
 	skip?: number;
 	take?: number;
-	orderBy?: Record<string, 'asc' | 'desc'>;
 	where?: Record<string, unknown>;
 }
 

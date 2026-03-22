@@ -13,60 +13,60 @@ import type { AlbumCreateInput, AlbumStatistics, AlbumWithStats } from '../../ty
  * Tipo para datos de álbum que vienen de Drizzle con relaciones
  */
 interface DrizzleAlbumWithRelations {
-	id: string;
-	name: string;
+	category: string | null;
+	characters?: { id: string }[];
+	collections?: { id: string }[];
+	color: string | null;
+	concepts?: { id: string }[];
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
 	featuredImage: string | null;
+	filters: string | null;
+	groups?: { id: string }[];
+	id: string;
+	images?: { id: string }[];
 
 	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	totalSize: number;
-	filters: string | null;
-	shortcut: string | null;
-	category: string | null;
-	metadata: Record<string, any> | null;
 	lastImageAddedAt: Date | null;
 	lastVideoAddedAt: Date | null;
-	createdAt: Date;
-	updatedAt: Date;
-	images?: { id: string }[];
-	videos?: { id: string }[];
-	collections?: { id: string }[];
-	tags?: { id: string }[];
-	characters?: { id: string }[];
-	places?: { id: string }[];
-	worldItems?: { id: string }[];
-	concepts?: { id: string }[];
-	prompts?: { id: string }[];
+	metadata: Record<string, any> | null;
+	name: string;
 	notes?: { id: string }[];
-	wildcards?: { id: string }[];
+	places?: { id: string }[];
+	prompts?: { id: string }[];
 	properties?: { id: string }[];
-	groups?: { id: string }[];
+	shortcut: string | null;
+	tags?: { id: string }[];
+	totalImages: number;
+	totalSize: number;
+	totalVideos: number;
+	updatedAt: Date;
+	videos?: { id: string }[];
+	wildcards?: { id: string }[];
+	worldItems?: { id: string }[];
 }
 
 /**
  * Estructura para datos de creación de álbum compatible con Drizzle
  */
 interface DrizzleCreateAlbumData {
-	name: string;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
 	featuredImage?: string | null;
+	filters?: string | null;
 
 	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	totalSize?: number;
-	filters?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
-	metadata?: string | null;
 	lastImageAddedAt?: Date | null;
 	lastVideoAddedAt?: Date | null;
+	metadata?: string | null;
+	name: string;
+	shortcut?: string | null;
+	totalImages?: number;
+	totalSize?: number;
+	totalVideos?: number;
 }
 
 /**
@@ -74,18 +74,18 @@ interface DrizzleCreateAlbumData {
  */
 interface DrizzleAlbumFilters {
 	AND?: DrizzleAlbumFilters[];
-	OR?: DrizzleAlbumFilters[];
-	name?: { contains?: string };
 	category?: { in?: string[] };
-	isFavorite?: boolean;
 	createdAt?: { gte?: Date; lte?: Date };
+	isFavorite?: boolean;
+	name?: { contains?: string };
+	OR?: DrizzleAlbumFilters[];
 }
 
 interface DrizzleFindManyArgs {
-	where?: DrizzleAlbumFilters;
-	take?: number;
-	skip?: number;
 	orderBy?: { [key: string]: 'asc' | 'desc' };
+	skip?: number;
+	take?: number;
+	where?: DrizzleAlbumFilters;
 }
 
 /**

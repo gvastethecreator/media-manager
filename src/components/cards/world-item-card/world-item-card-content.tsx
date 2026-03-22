@@ -10,15 +10,15 @@ import type {
 } from '@/types/entities/world-item/stats-types';
 
 interface WorldItemCardContentProps {
-	description?: string | null;
-	properties?: WorldItemProperty[] | string | null;
-	requirements?: Record<string, WorldItemRequirement> | string | null;
 	attributes?: string[] | string | null;
+	description?: string | null;
 	effects?: WorldItemEffect[] | string | null;
-	stats?: WorldItemStats | string | null;
 	origin?: string | null;
-	rarity?: string | null;
 	primaryColor?: string;
+	properties?: WorldItemProperty[] | string | null;
+	rarity?: string | null;
+	requirements?: Record<string, WorldItemRequirement> | string | null;
+	stats?: WorldItemStats | string | null;
 }
 
 /**

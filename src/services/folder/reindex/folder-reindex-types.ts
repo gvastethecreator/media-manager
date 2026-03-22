@@ -7,36 +7,36 @@
  * Resultado de una fase de reindexado
  */
 export interface ReindexPhaseResult {
-	success: boolean;
-	processed: number;
-	failed: number;
-	errors: string[];
 	duration: number;
+	errors: string[];
+	failed: number;
+	processed: number;
 	/** Indica si la fase fue saltada intencionalmente */
 	skipped?: boolean;
+	success: boolean;
 }
 
 /**
  * Resultado del análisis de estructura de carpetas
  */
 export interface ReindexAnalysisResult {
-	totalFolders: number;
+	estimatedDuration: number;
 	existingFolders: Array<{ id: string; path: string; name: string; exists: boolean }>;
 	missingFolders: Array<{ id: string; path: string; name: string }>;
 	newSubfolders: Array<{ path: string; parentId: string | null; name: string }>;
 	totalFiles: number;
-	estimatedDuration: number;
+	totalFolders: number;
 }
 
 /**
  * Opciones de configuración para el reindexado
  */
 export interface ReindexOptions {
-	folderId?: string; // Si se especifica, solo reindexar esta carpeta
-	includeSubfolders?: boolean;
-	includeHidden?: boolean;
 	concurrency?: number;
 	emitEvents?: boolean;
-	skipThumbnails?: boolean;
+	folderId?: string; // Si se especifica, solo reindexar esta carpeta
+	includeHidden?: boolean;
+	includeSubfolders?: boolean;
 	skipMetadata?: boolean;
+	skipThumbnails?: boolean;
 }

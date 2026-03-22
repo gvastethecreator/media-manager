@@ -2,15 +2,15 @@ import { FolderIcon, FolderTreeIcon, LibraryBigIcon, PackageOpenIcon } from 'luc
 import { cn } from '@/lib/utils';
 
 interface GroupCardHeaderProps {
-	name: string;
-	emoji?: string;
-	color?: string;
 	category?: string;
-	organizationType?: string;
-	organizationLevel?: number;
-	isFavorite?: boolean;
-	tcgMode?: boolean;
+	color?: string;
 	compact?: boolean;
+	emoji?: string;
+	isFavorite?: boolean;
+	name: string;
+	organizationLevel?: number;
+	organizationType?: string;
+	tcgMode?: boolean;
 }
 
 /**

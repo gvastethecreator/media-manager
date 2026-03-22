@@ -3,13 +3,13 @@ import { useCallback, useState } from 'react';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
 import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
-import { motion } from '@/components/ui/animejs-shim';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 
 import { useToast } from '@/components/ui/use-toast';
@@ -18,9 +18,12 @@ import type { AnyEntityWithStats } from '@/types/entities';
 import type { ImageWithStats } from '@/types/entities/image';
 
 interface AllImagesContentViewProps {
-	images: ImageWithStats[];
-	isLoading: boolean;
 	error: string | null;
+	handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
+	handleFileUpload: (files: File[]) => Promise<void>;
+	handleImageClick: (item: AnyEntityWithStats) => void;
+	handleImageDoubleClick: (item: AnyEntityWithStats) => void;
+	images: ImageWithStats[];
 	indexingStatus: {
 		indexedFolders: number;
 		totalFolders: number;
@@ -28,12 +31,9 @@ interface AllImagesContentViewProps {
 		errors: Array<{ folderId: string; message: string }>;
 	};
 	isIndexing: boolean;
+	isLoading: boolean;
 	progress: number;
 	startIndexing: () => void;
-	handleImageClick: (item: AnyEntityWithStats) => void;
-	handleImageDoubleClick: (item: AnyEntityWithStats) => void;
-	handleFileUpload: (files: File[]) => Promise<void>;
-	handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({

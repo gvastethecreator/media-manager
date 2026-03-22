@@ -32,16 +32,16 @@ export type EntityType =
 	| 'favorite';
 
 interface AddToEntityParams {
-	entityType: EntityType;
 	entityId: string;
+	entityType: EntityType;
 	mediaIds: string[];
 }
 
 interface AddToEntityResult {
-	success: boolean;
 	added: number;
-	failed: number;
 	errors?: string[];
+	failed: number;
+	success: boolean;
 }
 
 /**

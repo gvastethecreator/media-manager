@@ -7,12 +7,12 @@
  * Interfaz para errores de metadatos
  */
 export interface MetadataErrorData {
-	name: string;
-	message: string;
-	path: string;
+	cause?: unknown;
 	code: string;
 	details?: Record<string, unknown>;
-	cause?: unknown;
+	message: string;
+	name: string;
+	path: string;
 }
 
 /**

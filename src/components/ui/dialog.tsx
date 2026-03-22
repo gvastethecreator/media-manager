@@ -52,12 +52,12 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
  * - ARIA labels automáticos
  */
 interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
-	/** Si debe usar FocusTrap (default: true) */
-	trapFocus?: boolean;
 	/** Si debe cerrar con Escape (default: true) */
 	closeOnEscape?: boolean;
 	/** Callback al cerrar con Escape */
 	onEscapeKeyDown?: (event: KeyboardEvent) => void;
+	/** Si debe usar FocusTrap (default: true) */
+	trapFocus?: boolean;
 }
 
 const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.Content>, DialogContentProps>(

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox-v3';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -58,10 +58,10 @@ type FormValues = z.infer<typeof createCharacterSchema>;
 interface CreateCharacterFormProps {
 	character?: CharacterWithStats | null;
 	isEditing?: boolean;
-	onCreated?: (character: CharacterWithStats) => void;
-	onUpdated?: (character: CharacterWithStats) => void;
 	onCancel?: () => void;
+	onCreated?: (character: CharacterWithStats) => void;
 	onPreview?: (data: any) => void;
+	onUpdated?: (character: CharacterWithStats) => void;
 }
 
 export function CreateCharacterForm({

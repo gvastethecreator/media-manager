@@ -30,72 +30,72 @@ export interface UseFileBrowserOptions {
 }
 
 export interface UseFileBrowserResult {
-	// Datos procesados
-	items: BrowserItem[];
-	groups: BrowserItemGroup[] | null;
-	linearItems: BrowserItem[];
-	realItemCount: number;
-
-	// Vista
-	viewMode: ViewMode;
-	viewConfig: ViewConfig;
-	itemSize: number;
-	setViewMode: (mode: ViewMode) => void;
-	setItemSize: (size: number) => void;
-
-	// Búsqueda y ordenamiento
-	searchQuery: string;
-	setSearchQuery: (query: string) => void;
-	sortOptions: SortOption[];
-	setSortOptions: (options: SortOption[]) => void;
-	toggleSortField: (field: string) => void;
+	activeId: string | null;
+	clearSelection: () => void;
+	containerRef: React.RefObject<HTMLDivElement | null>;
+	error: string | null;
+	folderId: string | null;
 	groupByType: boolean;
-	setGroupByType: (enabled: boolean) => void;
+	groups: BrowserItemGroup[] | null;
+	handleItemClick: ItemClickHandler;
+	handleItemDoubleClick: ItemDoubleClickHandler;
+	hasMore: boolean;
+	isActive: (id: string) => boolean;
 
 	// Estado de carga
 	isLoading: boolean;
 	isLoadingMore: boolean;
-	error: string | null;
-
-	// Paginación
-	pagination: PaginationState;
-	hasMore: boolean;
-	loadMore: () => void;
-	nextPage: () => void;
-	prevPage: () => void;
-	shownCount: number;
-
-	// Selección
-	selectedIds: string[];
-	selectedSet: Set<string>;
-	activeId: string | null;
-	handleItemClick: ItemClickHandler;
-	handleItemDoubleClick: ItemDoubleClickHandler;
-	selectAll: () => void;
-	clearSelection: () => void;
 	isSelected: (id: string) => boolean;
-	isActive: (id: string) => boolean;
-	setActiveItem: (id: string | null) => void;
+	itemSize: number;
+	// Datos procesados
+	items: BrowserItem[];
+	linearItems: BrowserItem[];
+	loadMore: () => void;
 
 	// Navegación
 	navigateToFolder: (folderId: string) => void;
 	navigateToParent: () => void;
-	folderId: string | null;
-	parentFolderId: string | null;
+	nextPage: () => void;
 
-	// Refs
-	scrollContainerRef: React.RefObject<HTMLDivElement | null>;
-	containerRef: React.RefObject<HTMLDivElement | null>;
-	setScrollContainer: (el: HTMLDivElement | null) => void;
+	// Paginación
+	pagination: PaginationState;
+	parentFolderId: string | null;
+	prevPage: () => void;
+	realItemCount: number;
 
 	// Acciones
 	refresh: () => Promise<void>;
 
-	// Estados UI
-	showPreloader: boolean;
+	// Refs
+	scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+
+	// Búsqueda y ordenamiento
+	searchQuery: string;
+	selectAll: () => void;
+
+	// Selección
+	selectedIds: string[];
+	selectedSet: Set<string>;
+	setActiveItem: (id: string | null) => void;
+	setGroupByType: (enabled: boolean) => void;
+	setItemSize: (size: number) => void;
+	setScrollContainer: (el: HTMLDivElement | null) => void;
+	setSearchQuery: (query: string) => void;
+	setSortOptions: (options: SortOption[]) => void;
+	setViewMode: (mode: ViewMode) => void;
+	shouldRenderContent: boolean;
 	showEmptyState: boolean;
 	showErrorState: boolean;
-	shouldRenderContent: boolean;
+	shownCount: number;
+
+	// Estados UI
+	showPreloader: boolean;
+	sortOptions: SortOption[];
+	toggleSortField: (field: string) => void;
+	viewConfig: ViewConfig;
+
+	// Vista
+	viewMode: ViewMode;
 }
 
 /**

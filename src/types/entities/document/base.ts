@@ -12,51 +12,51 @@ import { EntityStats } from '../entity.types';
  * Representa las propiedades fundamentales de un documento sin estadísticas calculadas.
  */
 export interface DocumentBase {
-	// Identificación
-	id: string;
-	name: string;
-	path: string;
+	author: string | null;
 
-	// Propiedades del archivo
-	size: number;
-	hash: string;
-	mimeType: string;
+	// Contenido
+	content: string | null;
+
+	// Timestamps del sistema
+	createdAt: Date;
+	creationDate: Date | null;
+	creator: string | null;
+
+	// Campos adicionales para compatibilidad con DisplayableEntity
+	description?: string | null;
+	encrypted: boolean | null;
 	extension: string;
 
 	// Relaciones
 	folderId: string;
+	hash: string;
+	// Identificación
+	id: string;
+	isArchived: boolean;
 
 	// Estados
 	isFavorite: boolean;
-	isArchived: boolean;
+	keywords: string | null;
+	language: string | null;
+	mimeType: string;
+	modificationDate: Date | null;
+	name: string;
 
 	// Metadatos de documento
 	pageCount: number | null;
-	wordCount: number | null;
-	language: string | null;
+	path: string;
+	producer: string | null;
+
+	// Propiedades del archivo
+	size: number;
+	subject: string | null;
+	summary: string | null;
 
 	// Metadatos de PDF/documento
 	title: string | null;
-	author: string | null;
-	subject: string | null;
-	keywords: string | null;
-	creator: string | null;
-	producer: string | null;
-	creationDate: Date | null;
-	modificationDate: Date | null;
-	encrypted: boolean | null;
-	version: string | null;
-
-	// Contenido
-	content: string | null;
-	summary: string | null;
-
-	// Timestamps del sistema
-	createdAt: Date;
 	updatedAt: Date;
-
-	// Campos adicionales para compatibilidad con DisplayableEntity
-	description?: string | null;
+	version: string | null;
+	wordCount: number | null;
 }
 
 /**

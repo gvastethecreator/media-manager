@@ -38,12 +38,12 @@ const promptSchema = z.object({
 type PromptForm = z.infer<typeof promptSchema>;
 
 interface CreatePromptFormProps {
-	prompt?: PromptBase | null;
 	isEditing?: boolean;
-	onCreated?: (prompt: PromptBase) => void;
-	onUpdated?: (prompt: PromptBase) => void;
 	onCancel?: () => void;
+	onCreated?: (prompt: PromptBase) => void;
 	onPreview?: (data: any) => void;
+	onUpdated?: (prompt: PromptBase) => void;
+	prompt?: PromptBase | null;
 }
 
 export function CreatePromptForm({

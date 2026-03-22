@@ -4,25 +4,25 @@
  */
 
 export interface MediaMetadata {
+	created?: Date;
 	dimensions?: {
 		width: number;
 		height: number;
 	};
-	format?: string;
-	fileSize?: number;
-	created?: Date;
-	modified?: Date;
 	exif?: Record<string, unknown>;
+	fileSize?: number;
+	format?: string;
+	modified?: Date;
 	[key: string]: unknown;
 }
 
 export interface AIMetadata {
-	model?: string;
-	prompt?: string;
-	negativePrompt?: string;
-	seed?: number;
-	samplingSteps?: number;
 	cfgScale?: number;
-	samplingMethod?: string;
 	extraParameters?: Record<string, unknown>;
+	model?: string;
+	negativePrompt?: string;
+	prompt?: string;
+	samplingMethod?: string;
+	samplingSteps?: number;
+	seed?: number;
 }

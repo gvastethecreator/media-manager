@@ -11,43 +11,42 @@ export type ViewMode = 'list' | 'grid' | 'table';
 
 // Estado
 export interface UIState {
-	// Selección
-	selectedMetadataIds: string[];
-
-	// Visualización
-	viewMode: ViewMode;
+	// Detalles
+	activeMetadataId: string | null;
 
 	// Modales
 	isCreateModalOpen: boolean;
 	isDeleteModalOpen: boolean;
 	isDetailsModalOpen: boolean;
+	// Selección
+	selectedMetadataIds: string[];
 
-	// Detalles
-	activeMetadataId: string | null;
+	// Visualización
+	viewMode: ViewMode;
 }
 
 // Acciones
 export interface UIActions {
-	// Selección
-	selectMetadata: (id: string) => void;
-	deselectMetadata: (id: string) => void;
-	toggleSelectMetadata: (id: string) => void;
-	selectAllMetadatas: () => void;
+	closeCreateModal: () => void;
+	closeDeleteModal: () => void;
+	closeDetailsModal: () => void;
 	deselectAllMetadatas: () => void;
-
-	// Visualización
-	setViewMode: (mode: ViewMode) => void;
+	deselectMetadata: (id: string) => void;
 
 	// Modales
 	openCreateModal: () => void;
-	closeCreateModal: () => void;
 	openDeleteModal: () => void;
-	closeDeleteModal: () => void;
 	openDetailsModal: (id: string) => void;
-	closeDetailsModal: () => void;
+	selectAllMetadatas: () => void;
+	// Selección
+	selectMetadata: (id: string) => void;
 
 	// Activo
 	setActiveMetadataId: (id: string | null) => void;
+
+	// Visualización
+	setViewMode: (mode: ViewMode) => void;
+	toggleSelectMetadata: (id: string) => void;
 }
 
 // Estado inicial

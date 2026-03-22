@@ -81,8 +81,6 @@ class TypedEventEmitter {
 }
 
 export interface ProgressOptions {
-	/** Show toast notifications */
-	showToast?: boolean;
 	/** Auto-dismiss completed operations */
 	autoDismiss?: boolean;
 	/** Auto-dismiss delay in milliseconds */
@@ -91,12 +89,14 @@ export interface ProgressOptions {
 	cancellable?: boolean;
 	/** Custom operation description */
 	description?: string;
-	/** Total number of items */
-	totalItems?: number;
-	/** Priority level */
-	priority?: number;
 	/** Metadata */
 	metadata?: Record<string, any>;
+	/** Priority level */
+	priority?: number;
+	/** Show toast notifications */
+	showToast?: boolean;
+	/** Total number of items */
+	totalItems?: number;
 }
 
 export type ProgressCallback = (operation: ProgressOperation) => void;
