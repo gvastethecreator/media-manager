@@ -180,6 +180,39 @@
 		opacity: 1;
 	}
 
+	.ui-overlay-backdrop-soft {
+		background-color: var(--overlay-backdrop-soft);
+		backdrop-filter: blur(4px);
+	}
+
+	.ui-overlay-backdrop-medium {
+		background-color: var(--overlay-backdrop-medium);
+		backdrop-filter: blur(8px);
+	}
+
+	.ui-overlay-backdrop-strong {
+		background-color: var(--overlay-backdrop-strong);
+		backdrop-filter: blur(8px);
+	}
+
+	.ui-overlay-control-surface {
+		border: 1px solid var(--overlay-control-border);
+		background-color: var(--overlay-control-bg);
+		backdrop-filter: blur(12px);
+	}
+
+	.ui-overlay-control-surface:hover {
+		background-color: var(--overlay-control-bg-hover);
+	}
+
+	.ui-overlay-text {
+		color: var(--overlay-foreground);
+	}
+
+	.ui-overlay-text-muted {
+		color: var(--overlay-foreground-muted);
+	}
+
 	.scrollbar-thin::-webkit-scrollbar {
 		width: 6px;
 		height: 6px;

@@ -111,7 +111,7 @@ export const NoteCard = memo(function NoteCard({ noteId, onClick, className, sty
 		return (
 			<div
 				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-dt-danger-100 md:w-[320px] dark:bg-dt-danger-900',
 					className
 				)}
 			>

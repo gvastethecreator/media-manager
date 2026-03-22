@@ -63,7 +63,7 @@ export function FileViewerTransition({ isOpen, children, fileId, onClose }: File
 			className={cn(
 				'file-viewer-transition fixed inset-0 z-50',
 				'flex items-center justify-center',
-				'bg-black/80 backdrop-blur-sm',
+				'ui-overlay-backdrop-strong',
 				isTransitioning && 'transitioning'
 			)}
 			onClick={(e) => {
