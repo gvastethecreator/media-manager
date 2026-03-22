@@ -9,6 +9,10 @@ import './styles/scrollbar.css';
 import './styles/selecto.css';
 import './styles/view-transition.css';
 
+if (import.meta.env.DEV) {
+	void import('react-grab');
+}
+
 const container = document.getElementById('root');
 if (!container) {
 	throw new Error('No se encontró el elemento root');
