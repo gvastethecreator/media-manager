@@ -97,8 +97,7 @@ const AccordionContext = React.createContext<AccordionContextType>({
 
 // Base UI Accordion Root
 interface AccordionRootProps
-	extends React.ComponentProps<typeof Accordion.Root>,
-		VariantProps<typeof accordionRootVariants> {
+	extends React.ComponentProps<typeof Accordion.Root>, VariantProps<typeof accordionRootVariants> {
 	indicator?: 'arrow' | 'plus' | 'none';
 }
 

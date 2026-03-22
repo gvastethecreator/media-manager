@@ -107,7 +107,7 @@
 	opacity: 0.5;
 }
 
-.input-enhanced[aria-invalid="true"],
+.input-enhanced[aria-invalid='true'],
 .input-enhanced.input-error {
 	border-color: var(--dt-danger-500);
 	box-shadow:
@@ -156,8 +156,7 @@
 
 .badge-enhanced {
 	background: var(--dt-g-primary-soft);
-	border: var(--dt-border-width) solid
-		oklch(from var(--dt-primary-500) l c h / 0.2);
+	border: var(--dt-border-width) solid oklch(from var(--dt-primary-500) l c h / 0.2);
 	border-radius: var(--dt-radius-sm);
 	box-shadow: var(--dt-shadow-1);
 	transition: transform var(--dt-duration-fast) var(--dt-ease-bounce);
@@ -168,29 +167,17 @@
 }
 
 .badge-destructive {
-	background: linear-gradient(
-		135deg,
-		var(--dt-danger-100),
-		var(--dt-danger-200)
-	);
+	background: linear-gradient(135deg, var(--dt-danger-100), var(--dt-danger-200));
 	border-color: oklch(from var(--dt-danger-500) l c h / 0.3);
 }
 
 .badge-success {
-	background: linear-gradient(
-		135deg,
-		var(--dt-success-100),
-		var(--dt-success-200)
-	);
+	background: linear-gradient(135deg, var(--dt-success-100), var(--dt-success-200));
 	border-color: oklch(from var(--dt-success-500) l c h / 0.3);
 }
 
 .badge-warning {
-	background: linear-gradient(
-		135deg,
-		var(--dt-warning-100),
-		var(--dt-warning-200)
-	);
+	background: linear-gradient(135deg, var(--dt-warning-100), var(--dt-warning-200));
 	border-color: oklch(from var(--dt-warning-500) l c h / 0.3);
 }
 
@@ -213,7 +200,7 @@
 	border-color: oklch(from var(--border) l c h / 0.5);
 }
 
-.nav-item-enhanced[data-active="true"],
+.nav-item-enhanced[data-active='true'],
 .nav-item-enhanced.active {
 	background: var(--dt-g-primary-soft);
 	border-color: var(--dt-primary-500);
@@ -239,7 +226,7 @@
 	background: oklch(from var(--muted) l c h / 0.5);
 }
 
-.table-row-enhanced[data-selected="true"],
+.table-row-enhanced[data-selected='true'],
 .table-row-enhanced.selected {
 	background: oklch(from var(--dt-primary-500) l c h / 0.1);
 	box-shadow: inset 3px 0 0 var(--dt-primary-500);
@@ -286,12 +273,8 @@
 	inset: 0;
 	padding: var(--dt-border-width);
 	pointer-events: none;
-	content: "";
-	background: linear-gradient(
-		135deg,
-		var(--dt-primary-400),
-		var(--dt-primary-600)
-	);
+	content: '';
+	background: linear-gradient(135deg, var(--dt-primary-400), var(--dt-primary-600));
 	border-radius: inherit;
 	-webkit-mask:
 		linear-gradient(#fff 0 0) content-box,

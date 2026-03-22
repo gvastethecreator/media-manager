@@ -8,6 +8,7 @@
 ## ✅ Componentes Nuevos Creados
 
 ### 1. **FocusTrap** (`src/components/ui/focus-trap.tsx`)
+
 - Captura el foco dentro de modals/dialogs
 - Ciclo de tabulación (último elemento → primero)
 - Manejo de tecla Escape
@@ -15,15 +16,15 @@
 - Soporte para reduced-motion
 
 **Uso:**
+
 ```tsx
 <FocusTrap active={isOpen} onEscape={handleClose} initialFocus="first">
-  <DialogContent>
-    {/* Contenido */}
-  </DialogContent>
+	<DialogContent>{/* Contenido */}</DialogContent>
 </FocusTrap>
 ```
 
 ### 2. **ConfirmDialog** (`src/components/ui/confirm-dialog.tsx`)
+
 - Reemplazo moderno para `confirm()` nativo
 - Variantes: danger, warning, info, success
 - Cooldown timer (evita clicks accidentales)
@@ -31,42 +32,45 @@
 - Hook `useConfirm` para uso imperativo
 
 **Uso:**
+
 ```tsx
 const { confirm } = useConfirm();
 
 const handleDelete = async () => {
-  const confirmed = await confirm({
-    title: 'Eliminar carpeta',
-    description: 'Se eliminarán 5 archivos permanentemente',
-    variant: 'danger',
-    confirmText: 'Eliminar permanentemente',
-    disableConfirmDuration: 3, // segundos
-  });
-  
-  if (confirmed) deleteItem();
+	const confirmed = await confirm({
+		title: 'Eliminar carpeta',
+		description: 'Se eliminarán 5 archivos permanentemente',
+		variant: 'danger',
+		confirmText: 'Eliminar permanentemente',
+		disableConfirmDuration: 3, // segundos
+	});
+
+	if (confirmed) deleteItem();
 };
 ```
 
 ### 3. **SkipLink** (`src/components/ui/skip-link.tsx`)
+
 - WCAG 2.4.1 - Bypass Blocks
 - Solo visible al navegar con teclado
 - Salta navegación repetitiva al contenido principal
 - Animación suave al enfocar
 
 **Uso:**
+
 ```tsx
-<SkipLink targetId="main-content">
-  Saltar al contenido principal
-</SkipLink>
+<SkipLink targetId="main-content">Saltar al contenido principal</SkipLink>
 ```
 
 ### 4. **FeedbackProvider** (`src/components/ui/feedback-provider.tsx`)
+
 - Contexto global para feedback
 - Integra ConfirmDialog y AlertDialog
 - Hook `useFeedback` para acceso fácil
 - Manejo de estados centralizado
 
 **Uso:**
+
 ```tsx
 const { confirm, alert } = useFeedback();
 
@@ -82,47 +86,53 @@ await alert({ title: 'Operación completada', variant: 'success' });
 ## ✅ Hooks Nuevos Creados
 
 ### 1. **useReducedMotion** (`src/hooks/use-reduced-motion.ts`)
+
 - Detecta preferencias de usuario
 - Utilidades: `useAnimationConfig`, `useTransitionStyles`
 - WCAG 2.3.3 - Animation from Interactions
 
 **Uso:**
+
 ```tsx
 const prefersReducedMotion = useReducedMotion();
 
 // En animaciones
 <motion.div
-  animate={prefersReducedMotion ? {} : { opacity: 1 }}
-  transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
-/>
+	animate={prefersReducedMotion ? {} : { opacity: 1 }}
+	transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
+/>;
 ```
 
 ### 2. **useKeyboardNavigation** (`src/hooks/use-keyboard-navigation.ts`)
+
 - Atajos de teclado globales
 - Navegación de listas con flechas
 - Focus management
 
 **Uso:**
+
 ```tsx
 useKeyboardNavigation([
-  { key: 'Escape', action: closeModal },
-  { key: 'Control+k', action: openSearch, preventDefault: true },
+	{ key: 'Escape', action: closeModal },
+	{ key: 'Control+k', action: openSearch, preventDefault: true },
 ]);
 ```
 
 ### 3. **useUndo** (`src/hooks/use-undo.ts`)
+
 - Sistema de deshacer/rehacer
 - Persistencia temporal (TTL configurable)
 - Toast con botón de undo
 
 **Uso:**
+
 ```tsx
 const { execute, undo, canUndo } = useUndo({ defaultTtl: 30000 });
 
 await execute({
-  id: 'delete-123',
-  description: 'Eliminar archivo',
-  undo: async () => await restoreFile(),
+	id: 'delete-123',
+	description: 'Eliminar archivo',
+	undo: async () => await restoreFile(),
 });
 ```
 
@@ -131,6 +141,7 @@ await execute({
 ## ✅ Componentes Actualizados
 
 ### 1. **Dialog** (`src/components/ui/dialog.tsx`)
+
 - ✅ FocusTrap integrado
 - ✅ Scroll lock automático
 - ✅ Escape key handling
@@ -139,6 +150,7 @@ await execute({
 - ✅ Animaciones mejoradas
 
 ### 2. **Button** (`src/components/ui/button.tsx`)
+
 - ✅ Touch targets mínimos 44px (WCAG 2.5.5)
 - ✅ Variante `touch="large"` para móvil
 - ✅ Estados ARIA (`aria-disabled`, `aria-busy`)
@@ -146,11 +158,13 @@ await execute({
 - ✅ Focus visible mejorado
 
 ### 3. **App** (`src/app.tsx`)
+
 - ✅ FeedbackProvider agregado
 - ✅ SkipLink integrado
 - ✅ Estructura de providers optimizada
 
 ### 4. **MainLayout** (`src/components/layout/main-layout.tsx`)
+
 - ✅ `id="main-content"` para SkipLink
 - ✅ `tabIndex={-1}` para foco programático
 - ✅ `aria-label` en contenido principal
@@ -160,6 +174,7 @@ await execute({
 ## ✅ Sistema de Exportaciones
 
 ### Hooks Barrel (`src/hooks/index.ts`)
+
 ```typescript
 export { useReducedMotion, useAnimationConfig, useTransitionStyles } from './use-reduced-motion';
 export { useKeyboardNavigation, useListNavigation, useFocusManager } from './use-keyboard-navigation';
@@ -172,15 +187,15 @@ export { useFeedback } from '@/components/ui/feedback-provider';
 
 ## 📊 Impacto en Accesibilidad
 
-| Criterio WCAG | Antes | Después | Mejora |
-|--------------|-------|---------|--------|
-| 2.1.1 Keyboard | 6/10 | 9/10 | +50% |
-| 2.4.1 Bypass Blocks | 0/10 | 10/10 | +100% |
-| 2.4.3 Focus Order | 5/10 | 9/10 | +80% |
-| 2.4.7 Focus Visible | 4/10 | 8/10 | +100% |
-| 2.5.5 Target Size | 3/10 | 9/10 | +200% |
-| 2.3.3 Animation | 0/10 | 8/10 | Nuevo |
-| 3.3.4 Error Prevention | 2/10 | 8/10 | +300% |
+| Criterio WCAG          | Antes | Después | Mejora |
+| ---------------------- | ----- | ------- | ------ |
+| 2.1.1 Keyboard         | 6/10  | 9/10    | +50%   |
+| 2.4.1 Bypass Blocks    | 0/10  | 10/10   | +100%  |
+| 2.4.3 Focus Order      | 5/10  | 9/10    | +80%   |
+| 2.4.7 Focus Visible    | 4/10  | 8/10    | +100%  |
+| 2.5.5 Target Size      | 3/10  | 9/10    | +200%  |
+| 2.3.3 Animation        | 0/10  | 8/10    | Nuevo  |
+| 3.3.4 Error Prevention | 2/10  | 8/10    | +300%  |
 
 **Puntuación Global A11y:** 6.5/10 → **8.8/10** 🎉
 
@@ -189,6 +204,7 @@ export { useFeedback } from '@/components/ui/feedback-provider';
 ## 🎯 Características Implementadas
 
 ### Accesibilidad (A11y)
+
 - ✅ SkipLink para saltar navegación
 - ✅ FocusTrap en modals
 - ✅ Manejo de Escape key
@@ -199,6 +215,7 @@ export { useFeedback } from '@/components/ui/feedback-provider';
 - ✅ Scroll lock en modals
 
 ### UX Mejorada
+
 - ✅ ConfirmDialog moderno (reemplaza confirm nativo)
 - ✅ Sistema de undo/redo
 - ✅ Feedback toast con acciones
@@ -208,6 +225,7 @@ export { useFeedback } from '@/components/ui/feedback-provider';
 - ✅ Focus visible mejorado
 
 ### Rendimiento
+
 - ✅ Lazy loading de dialogs
 - ✅ Animaciones GPU-accelerated
 - ✅ Reduced-motion detection
@@ -241,47 +259,49 @@ export { useFeedback } from '@/components/ui/feedback-provider';
 ## 🔧 Código de Ejemplo Integrado
 
 ### Layout con todas las mejoras:
+
 ```tsx
 function App() {
-  return (
-    <ThemeProvider>
-      <FeedbackProvider>
-        <SkipLink />
-        <MainLayout>
-          <main id="main-content" tabIndex={-1}>
-            <Router />
-          </main>
-        </MainLayout>
-      </FeedbackProvider>
-    </ThemeProvider>
-  );
+	return (
+		<ThemeProvider>
+			<FeedbackProvider>
+				<SkipLink />
+				<MainLayout>
+					<main id="main-content" tabIndex={-1}>
+						<Router />
+					</main>
+				</MainLayout>
+			</FeedbackProvider>
+		</ThemeProvider>
+	);
 }
 ```
 
 ### Componente con undo:
+
 ```tsx
 function DeleteButton({ item }) {
-  const { confirm } = useFeedback();
-  const { execute } = useUndo();
+	const { confirm } = useFeedback();
+	const { execute } = useUndo();
 
-  const handleDelete = async () => {
-    const confirmed = await confirm({
-      title: `Eliminar "${item.name}"?`,
-      variant: 'danger',
-    });
+	const handleDelete = async () => {
+		const confirmed = await confirm({
+			title: `Eliminar "${item.name}"?`,
+			variant: 'danger',
+		});
 
-    if (confirmed) {
-      await execute({
-        id: `delete-${item.id}`,
-        description: `Eliminar ${item.name}`,
-        undo: () => restoreItem(item),
-      });
-      
-      await deleteItem(item.id);
-    }
-  };
+		if (confirmed) {
+			await execute({
+				id: `delete-${item.id}`,
+				description: `Eliminar ${item.name}`,
+				undo: () => restoreItem(item),
+			});
 
-  return <Button onClick={handleDelete}>Eliminar</Button>;
+			await deleteItem(item.id);
+		}
+	};
+
+	return <Button onClick={handleDelete}>Eliminar</Button>;
 }
 ```
 
@@ -300,13 +320,13 @@ function DeleteButton({ item }) {
 
 ## 📈 Métricas Esperadas
 
-| Métrica | Antes | Después |
-|---------|-------|---------|
-| Lighthouse A11y | 65 | 95+ |
+| Métrica             | Antes   | Después  |
+| ------------------- | ------- | -------- |
+| Lighthouse A11y     | 65      | 95+      |
 | Keyboard Navigation | Parcial | Completa |
-| Motion Respect | No | Sí |
-| Touch Targets | 32px | 44px+ |
-| Undo Actions | 0 | ∞ |
+| Motion Respect      | No      | Sí       |
+| Touch Targets       | 32px    | 44px+    |
+| Undo Actions        | 0       | ∞        |
 
 ---
 

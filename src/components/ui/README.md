@@ -27,38 +27,38 @@ import { EntityStats } from '@/components/ui/entity-stats';
 
 // Ejemplo de uso
 <EntityStats
-  stats={[
-    { value: 128, label: 'imágenes', icon: <CameraIcon /> },
-    { value: 12, label: 'vídeos', icon: <FilmIcon /> }
-  ]}
-  primaryColor="#3b82f6"
-  size="md"
-  animated={true}
-  asBadges={false}
-/>
+	stats={[
+		{ value: 128, label: 'imágenes', icon: <CameraIcon /> },
+		{ value: 12, label: 'vídeos', icon: <FilmIcon /> },
+	]}
+	primaryColor="#3b82f6"
+	size="md"
+	animated={true}
+	asBadges={false}
+/>;
 ```
 
 #### Props
 
-| Prop | Tipo | Default | Descripción |
-|------|------|---------|-------------|
-| `stats` | `StatItem[]` | - | Array de estadísticas a mostrar |
-| `primaryColor` | `string` | '#3b82f6' | Color principal para las estadísticas |
-| `size` | `'sm' \| 'md' \| 'lg'` | 'md' | Tamaño del componente |
-| `animated` | `boolean` | `true` | Activar animación al aparecer |
-| `asBadges` | `boolean` | `false` | Mostrar como badges en lugar de lista |
-| `className` | `string` | - | Clases adicionales |
+| Prop           | Tipo                   | Default   | Descripción                           |
+| -------------- | ---------------------- | --------- | ------------------------------------- |
+| `stats`        | `StatItem[]`           | -         | Array de estadísticas a mostrar       |
+| `primaryColor` | `string`               | '#3b82f6' | Color principal para las estadísticas |
+| `size`         | `'sm' \| 'md' \| 'lg'` | 'md'      | Tamaño del componente                 |
+| `animated`     | `boolean`              | `true`    | Activar animación al aparecer         |
+| `asBadges`     | `boolean`              | `false`   | Mostrar como badges en lugar de lista |
+| `className`    | `string`               | -         | Clases adicionales                    |
 
 #### StatItem Interface
 
 ```ts
 interface StatItem {
-  value: number;        // Valor numérico
-  label: string;        // Etiqueta descriptiva
-  icon?: React.ReactNode; // Icono opcional
-  color?: string;       // Color personalizado
-  description?: string; // Descripción para tooltip
-  id?: string;          // ID único para la estadística
+	value: number; // Valor numérico
+	label: string; // Etiqueta descriptiva
+	icon?: React.ReactNode; // Icono opcional
+	color?: string; // Color personalizado
+	description?: string; // Descripción para tooltip
+	id?: string; // ID único para la estadística
 }
 ```
 
@@ -95,24 +95,24 @@ import { EntityCard } from '@/components/ui/entity-card';
 
 #### Props
 
-| Prop | Tipo | Default | Descripción |
-|------|------|---------|-------------|
-| `title` | `string` | - | Título de la tarjeta |
-| `subtitle` | `string` | - | Subtítulo opcional |
-| `description` | `string` | - | Descripción corta |
-| `icon` | `React.ReactNode` | - | Icono para mostrar junto al título |
-| `primaryColor` | `string` | '#3b82f6' | Color principal para la tarjeta |
-| `secondaryColor` | `string` | - | Color secundario para gradientes |
-| `href` | `string` | - | URL para navegación |
-| `onClick` | `() => void` | - | Función para manejar clic |
-| `stats` | `StatItem[]` | - | Estadísticas a mostrar |
-| `tcgMode` | `boolean` | `false` | Activar modo TCG |
-| `compact` | `boolean` | `false` | Modo compacto con menos altura |
-| `interactive` | `boolean` | `true` | Si debe ser interactiva |
-| `thumbnails` | `string[]` | - | Imágenes en miniatura |
-| `className` | `string` | - | Clases adicionales |
-| `footer` | `React.ReactNode` | - | Contenido adicional para el pie |
-| `animationMode` | `'hover' \| 'always' \| 'none'` | 'hover' | Modo de animación |
+| Prop             | Tipo                            | Default   | Descripción                        |
+| ---------------- | ------------------------------- | --------- | ---------------------------------- |
+| `title`          | `string`                        | -         | Título de la tarjeta               |
+| `subtitle`       | `string`                        | -         | Subtítulo opcional                 |
+| `description`    | `string`                        | -         | Descripción corta                  |
+| `icon`           | `React.ReactNode`               | -         | Icono para mostrar junto al título |
+| `primaryColor`   | `string`                        | '#3b82f6' | Color principal para la tarjeta    |
+| `secondaryColor` | `string`                        | -         | Color secundario para gradientes   |
+| `href`           | `string`                        | -         | URL para navegación                |
+| `onClick`        | `() => void`                    | -         | Función para manejar clic          |
+| `stats`          | `StatItem[]`                    | -         | Estadísticas a mostrar             |
+| `tcgMode`        | `boolean`                       | `false`   | Activar modo TCG                   |
+| `compact`        | `boolean`                       | `false`   | Modo compacto con menos altura     |
+| `interactive`    | `boolean`                       | `true`    | Si debe ser interactiva            |
+| `thumbnails`     | `string[]`                      | -         | Imágenes en miniatura              |
+| `className`      | `string`                        | -         | Clases adicionales                 |
+| `footer`         | `React.ReactNode`               | -         | Contenido adicional para el pie    |
+| `animationMode`  | `'hover' \| 'always' \| 'none'` | 'hover'   | Modo de animación                  |
 
 ### EntityList
 
@@ -120,41 +120,41 @@ Componente para mostrar listas de entidades con opciones avanzadas de búsqueda,
 
 ```jsx
 <EntityList
-  items={entities}
-  title="Mis Imágenes"
-  description="Colección de imágenes personales"
-  onItemClick={(id) => handleImageClick(id)}
-  categoryFilters={['Naturaleza', 'Ciudad', 'Personas']}
-  tagFilters={['favorito', 'vacaciones', 'trabajo']}
-  showSearch={true}
-  pagination={true}
-  itemsPerPage={12}
+	items={entities}
+	title="Mis Imágenes"
+	description="Colección de imágenes personales"
+	onItemClick={(id) => handleImageClick(id)}
+	categoryFilters={['Naturaleza', 'Ciudad', 'Personas']}
+	tagFilters={['favorito', 'vacaciones', 'trabajo']}
+	showSearch={true}
+	pagination={true}
+	itemsPerPage={12}
 />
 ```
 
 **Props:**
 
-| Prop | Tipo | Default | Descripción |
-|------|------|---------|-------------|
-| `items` | `EntityItem[]` | `[]` | Array de entidades a mostrar |
-| `title` | `string` | `'Entidades'` | Título de la lista |
-| `description` | `string` | `undefined` | Descripción opcional |
-| `emptyState` | `ReactNode` | (predeterminado) | Contenido personalizado para estado vacío |
-| `viewType` | `'grid' \| 'list' \| 'compact'` | `'grid'` | Tipo de visualización inicial |
-| `allowViewChange` | `boolean` | `true` | Permitir cambiar el tipo de vista |
-| `showSearch` | `boolean` | `true` | Mostrar barra de búsqueda |
-| `showFilters` | `boolean` | `true` | Mostrar controles de filtrado |
-| `allowSelection` | `boolean` | `false` | Permitir selección múltiple de ítems |
-| `onSelectionChange` | `(ids: string[]) => void` | `undefined` | Callback al cambiar la selección |
-| `searchPlaceholder` | `string` | `'Buscar...'` | Texto del placeholder de búsqueda |
-| `pagination` | `boolean` | `true` | Activar paginación |
-| `itemsPerPage` | `number` | `9` | Ítems a mostrar por página |
-| `sortOptions` | `Array<{label: string, value: string, sortFn?: (a, b) => number}>` | (predeterminados) | Opciones de ordenación |
-| `categoryFilters` | `string[]` | `[]` | Categorías disponibles para filtrar |
-| `tagFilters` | `string[]` | `[]` | Etiquetas disponibles para filtrar |
-| `className` | `string` | `''` | Clases CSS adicionales |
-| `onItemClick` | `(id: string) => void` | `undefined` | Función a llamar al hacer clic en un ítem |
-| `tcgMode` | `boolean` | `false` | Usar modo de tarjeta de trading para EntityCards |
+| Prop                | Tipo                                                               | Default           | Descripción                                      |
+| ------------------- | ------------------------------------------------------------------ | ----------------- | ------------------------------------------------ |
+| `items`             | `EntityItem[]`                                                     | `[]`              | Array de entidades a mostrar                     |
+| `title`             | `string`                                                           | `'Entidades'`     | Título de la lista                               |
+| `description`       | `string`                                                           | `undefined`       | Descripción opcional                             |
+| `emptyState`        | `ReactNode`                                                        | (predeterminado)  | Contenido personalizado para estado vacío        |
+| `viewType`          | `'grid' \| 'list' \| 'compact'`                                    | `'grid'`          | Tipo de visualización inicial                    |
+| `allowViewChange`   | `boolean`                                                          | `true`            | Permitir cambiar el tipo de vista                |
+| `showSearch`        | `boolean`                                                          | `true`            | Mostrar barra de búsqueda                        |
+| `showFilters`       | `boolean`                                                          | `true`            | Mostrar controles de filtrado                    |
+| `allowSelection`    | `boolean`                                                          | `false`           | Permitir selección múltiple de ítems             |
+| `onSelectionChange` | `(ids: string[]) => void`                                          | `undefined`       | Callback al cambiar la selección                 |
+| `searchPlaceholder` | `string`                                                           | `'Buscar...'`     | Texto del placeholder de búsqueda                |
+| `pagination`        | `boolean`                                                          | `true`            | Activar paginación                               |
+| `itemsPerPage`      | `number`                                                           | `9`               | Ítems a mostrar por página                       |
+| `sortOptions`       | `Array<{label: string, value: string, sortFn?: (a, b) => number}>` | (predeterminados) | Opciones de ordenación                           |
+| `categoryFilters`   | `string[]`                                                         | `[]`              | Categorías disponibles para filtrar              |
+| `tagFilters`        | `string[]`                                                         | `[]`              | Etiquetas disponibles para filtrar               |
+| `className`         | `string`                                                           | `''`              | Clases CSS adicionales                           |
+| `onItemClick`       | `(id: string) => void`                                             | `undefined`       | Función a llamar al hacer clic en un ítem        |
+| `tcgMode`           | `boolean`                                                          | `false`           | Usar modo de tarjeta de trading para EntityCards |
 
 ### TagInput
 
@@ -344,41 +344,41 @@ import { EntityForm, EntityFormField } from '@/components/ui/entity-form';
 
 // Definir campos
 const fields: EntityFormField[] = [
-  {
-    name: 'name',
-    label: 'Nombre',
-    type: 'text',
-    required: true,
-    validation: {
-      minLength: 3,
-      maxLength: 50,
-    }
-  },
-  {
-    name: 'description',
-    label: 'Descripción',
-    type: 'textarea',
-    fullWidth: true,
-  },
-  // ... más campos
+	{
+		name: 'name',
+		label: 'Nombre',
+		type: 'text',
+		required: true,
+		validation: {
+			minLength: 3,
+			maxLength: 50,
+		},
+	},
+	{
+		name: 'description',
+		label: 'Descripción',
+		type: 'textarea',
+		fullWidth: true,
+	},
+	// ... más campos
 ];
 
 // Usar en componente
 function MyForm() {
-  const handleSubmit = async (data) => {
-    // Procesar datos
-    console.log(data);
-  };
+	const handleSubmit = async (data) => {
+		// Procesar datos
+		console.log(data);
+	};
 
-  return (
-    <EntityForm
-      title="Crear entidad"
-      description="Complete los campos para crear una nueva entidad"
-      fields={fields}
-      onSubmit={handleSubmit}
-      initialData={{ name: 'Valor inicial' }}
-    />
-  );
+	return (
+		<EntityForm
+			title="Crear entidad"
+			description="Complete los campos para crear una nueva entidad"
+			fields={fields}
+			onSubmit={handleSubmit}
+			initialData={{ name: 'Valor inicial' }}
+		/>
+	);
 }
 ```
 
@@ -401,37 +401,37 @@ Componente de encabezado para páginas de entidades, que incluye título, descri
 import { EntityHeader } from '@/components/ui/entity-header';
 
 function EntityDetailPage() {
-  return (
-    <EntityHeader
-      title="Mi Entidad"
-      subtitle="Categoría: General"
-      description="Descripción detallada de la entidad..."
-      backUrl="/entidades"
-      primaryColor="#3b82f6"
-      stats={[
-        { label: 'Elementos', value: 42 },
-        { label: 'Vistas', value: 1024 },
-      ]}
-      breadcrumbItems={[
-        { label: 'Inicio', href: '/' },
-        { label: 'Entidades', href: '/entidades' },
-        { label: 'Mi Entidad' },
-      ]}
-      actions={[
-        {
-          label: 'Editar',
-          icon: <PencilIcon />,
-          onClick: () => handleEdit(),
-        },
-        {
-          label: 'Eliminar',
-          variant: 'destructive',
-          inDropdown: true,
-          onClick: () => handleDelete(),
-        },
-      ]}
-    />
-  );
+	return (
+		<EntityHeader
+			title="Mi Entidad"
+			subtitle="Categoría: General"
+			description="Descripción detallada de la entidad..."
+			backUrl="/entidades"
+			primaryColor="#3b82f6"
+			stats={[
+				{ label: 'Elementos', value: 42 },
+				{ label: 'Vistas', value: 1024 },
+			]}
+			breadcrumbItems={[
+				{ label: 'Inicio', href: '/' },
+				{ label: 'Entidades', href: '/entidades' },
+				{ label: 'Mi Entidad' },
+			]}
+			actions={[
+				{
+					label: 'Editar',
+					icon: <PencilIcon />,
+					onClick: () => handleEdit(),
+				},
+				{
+					label: 'Eliminar',
+					variant: 'destructive',
+					inDropdown: true,
+					onClick: () => handleDelete(),
+				},
+			]}
+		/>
+	);
 }
 ```
 
@@ -466,42 +466,35 @@ Componente avanzado para filtros complejos de entidades, con soporte para guarda
 import { EntityFilter, EntityFilterDefinition } from '@/components/ui/entity-filter';
 
 function FilteredList() {
-  const [filterValues, setFilterValues] = useState({});
+	const [filterValues, setFilterValues] = useState({});
 
-  // Definir filtros
-  const filters: EntityFilterDefinition[] = [
-    {
-      id: 'category',
-      label: 'Categoría',
-      type: 'select',
-      options: [
-        { label: 'General', value: 'general' },
-        { label: 'Técnico', value: 'technical' },
-      ],
-    },
-    {
-      id: 'isActive',
-      label: 'Activo',
-      type: 'boolean',
-    },
-    // ... más filtros
-  ];
+	// Definir filtros
+	const filters: EntityFilterDefinition[] = [
+		{
+			id: 'category',
+			label: 'Categoría',
+			type: 'select',
+			options: [
+				{ label: 'General', value: 'general' },
+				{ label: 'Técnico', value: 'technical' },
+			],
+		},
+		{
+			id: 'isActive',
+			label: 'Activo',
+			type: 'boolean',
+		},
+		// ... más filtros
+	];
 
-  return (
-    <div>
-      <EntityFilter
-        filters={filters}
-        onChange={setFilterValues}
-        showQuickSearch={true}
-        allowSavedFilters={true}
-      />
+	return (
+		<div>
+			<EntityFilter filters={filters} onChange={setFilterValues} showQuickSearch={true} allowSavedFilters={true} />
 
-      {/* Mostrar resultados filtrados */}
-      <div>
-        Resultados que coinciden con los filtros: {filterValues.toString()}
-      </div>
-    </div>
-  );
+			{/* Mostrar resultados filtrados */}
+			<div>Resultados que coinciden con los filtros: {filterValues.toString()}</div>
+		</div>
+	);
 }
 ```
 

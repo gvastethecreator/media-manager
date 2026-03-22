@@ -68,15 +68,15 @@ import { getAlbumCardData } from '@/components/cards/album-card/album-server-act
 
 // En un server component
 async function AlbumsList() {
-  const albums = await getAlbumsForCards({ limit: 10 });
+	const albums = await getAlbumsForCards({ limit: 10 });
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {albums.map(album => (
-        <AlbumCard key={album.id} album={album} />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			{albums.map((album) => (
+				<AlbumCard key={album.id} album={album} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -86,17 +86,13 @@ async function AlbumsList() {
 import { AlbumCard } from '@/components/cards/album-card';
 
 function CompactAlbumsList({ albums }) {
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-      {albums.map(album => (
-        <AlbumCard
-          key={album.id}
-          album={album}
-          compact={true}
-        />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+			{albums.map((album) => (
+				<AlbumCard key={album.id} album={album} compact={true} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -106,17 +102,13 @@ function CompactAlbumsList({ albums }) {
 import { AlbumCard } from '@/components/cards/album-card';
 
 function AlbumSelector({ albums, onSelect }) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {albums.map(album => (
-        <AlbumCard
-          key={album.id}
-          album={album}
-          onClick={() => onSelect(album)}
-        />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			{albums.map((album) => (
+				<AlbumCard key={album.id} album={album} onClick={() => onSelect(album)} />
+			))}
+		</div>
+	);
 }
 ```
 

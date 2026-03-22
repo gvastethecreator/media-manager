@@ -22,12 +22,12 @@ Componente principal para selección de emojis con dos modos de uso:
 
 ```typescript
 interface EmojiPickerProps {
- value?: string;              // Emoji seleccionado actual
- onEmojiSelect?: (emoji: string) => void;  // Callback al seleccionar
- onChange?: (emoji: string) => void;       // Callback alternativo
- compact?: boolean;           // Modo compacto (default: true)
- showLabel?: boolean;         // Mostrar icono de sonrisa (default: true)
- className?: string;          // Clases CSS adicionales
+	value?: string; // Emoji seleccionado actual
+	onEmojiSelect?: (emoji: string) => void; // Callback al seleccionar
+	onChange?: (emoji: string) => void; // Callback alternativo
+	compact?: boolean; // Modo compacto (default: true)
+	showLabel?: boolean; // Mostrar icono de sonrisa (default: true)
+	className?: string; // Clases CSS adicionales
 }
 ```
 
@@ -59,7 +59,7 @@ Componente para mostrar listas categorizadas de emojis del directorio `public/em
 ```tsx
 import EmojiList from '@/components/core/emojis/emoji-list';
 
-<EmojiList />
+<EmojiList />;
 ```
 
 ## 🎯 Emojis Frecuentes
@@ -68,10 +68,46 @@ El proyecto incluye una selección curada de emojis frecuentes específicos para
 
 ```typescript
 const frequentEmojis = [
- '📦', '🗃️', '🧰', '💎', '🏆', '🎁', '🔮', '⚔️', '🛡️', '📚',
- '🧙‍♂️', '🧝‍♀️', '🧪', '🧬', '🔍', '🔑', '💰', '🪙', '🧿', '🏺',
- '🍄', '🌿', '🔥', '💧', '⚡', '🌪️', '❄️', '🪄', '🧠', '💀',
- '🎨', '🎮', '🎲', '🎭', '🎪', '🎰', '🎳', '🎯', '🎱', '🎤',
+	'📦',
+	'🗃️',
+	'🧰',
+	'💎',
+	'🏆',
+	'🎁',
+	'🔮',
+	'⚔️',
+	'🛡️',
+	'📚',
+	'🧙‍♂️',
+	'🧝‍♀️',
+	'🧪',
+	'🧬',
+	'🔍',
+	'🔑',
+	'💰',
+	'🪙',
+	'🧿',
+	'🏺',
+	'🍄',
+	'🌿',
+	'🔥',
+	'💧',
+	'⚡',
+	'🌪️',
+	'❄️',
+	'🪄',
+	'🧠',
+	'💀',
+	'🎨',
+	'🎮',
+	'🎲',
+	'🎭',
+	'🎪',
+	'🎰',
+	'🎳',
+	'🎯',
+	'🎱',
+	'🎤',
 ];
 ```
 
@@ -103,9 +139,9 @@ Los componentes usan Tailwind CSS y pueden personalizarse:
 
 ```tsx
 <EmojiPicker
- className="custom-emoji-picker"
- compact={true}
- // Los estilos se aplican al contenedor principal
+	className="custom-emoji-picker"
+	compact={true}
+	// Los estilos se aplican al contenedor principal
 />
 ```
 

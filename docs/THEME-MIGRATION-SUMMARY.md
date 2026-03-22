@@ -16,16 +16,19 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
 ### 1. Eliminación de Colores Hardcodeados
 
 #### `src/lib/styles/color-tokens.ts`
+
 - **Antes:** Array `PRESET_COLORS_HEX` con 16 colores hex hardcodeados (`#22c55e`, `#eab308`, etc.)
 - **Después:** Array `PRESET_COLORS_CSS` usando variables CSS (`var(--dt-success-500)`, `var(--dt-warning-500)`, etc.)
 - **Impacto:** Todos los colores ahora respetan el tema activo
 
 #### `src/components/ui/button.tsx`
+
 - **Antes:** `background: rgba(255, 255, 255, 0.3)` para efecto ripple
 - **Después:** `background: color-mix(in oklch, var(--primary-foreground) 30%, transparent)`
 - **Impacto:** El ripple ahora se adapta al color del tema
 
 #### `src/lib/styles/chart-colors.ts`
+
 - **Antes:** `'oklch(0.7 0.15 90)'` hardcodeado para `others`
 - **Después:** `'var(--preset-citrico)'`
 - **Impacto:** Consistencia con el sistema de tokens
@@ -33,25 +36,30 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
 ### 2. Actualización de Variables CSS
 
 #### `src/styles/tokens.css`
+
 - **Agregado:** `--preset-citrico: oklch(0.7 0.15 90);`
 - **Razón:** Completar la paleta de preset colors para uso consistente
 
 ### 3. Sincronización de Temas
 
 #### `src/components/ui/theme-provider.tsx`
+
 - **Agregados:** Temas `aurora` y `neon` a la lista de `customThemes`
 - **Total:** 14 temas personalizados + `system`
 
 #### `src/hooks/use-theme.ts`
+
 - **Agregados:** Temas `aurora` y `neon`
 - **Impacto:** Hook useTheme ahora reconoce todos los temas
 
 #### `src/providers/theme-provider.tsx`
+
 - **Agregados:** Temas `aurora` y `neon`
 
 ### 4. Mejora del Theme Toggle
 
 #### `src/components/navigation/components/nav-panel-header.tsx`
+
 - **Actualizado:** Función `getThemeIcon` con iconos específicos para cada tema
 - **Mejoras:**
   - `light` → Sun
@@ -67,6 +75,7 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
 ### 5. Documentación
 
 #### `AGENTS.md`
+
 - **Agregada:** Sección completa de "Design System & Styling"
 - **Contenido:**
   - Tokens de color disponibles
@@ -76,6 +85,7 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
   - Clases de utilidad Tailwind
 
 #### `docs/THEME-SYSTEM-GUIDE.md` (Nuevo)
+
 - **Contenido:** Guía completa del sistema de themes
 - **Secciones:**
   - Visión General
@@ -88,6 +98,7 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
   - Solución de Problemas
 
 #### `docs/THEME-AUDIT-REPORT.md` (Nuevo)
+
 - **Contenido:** Auditoría detallada del estado de los estilos
 - **Incluye:** Fortalezas, problemas identificados, recomendaciones
 
@@ -95,28 +106,29 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
 
 ## 🎨 Temas Disponibles (14)
 
-| # | Tema | Tipo | Descripción |
-|---|------|------|-------------|
-| 1 | `light` | Básico | Tema claro estándar |
-| 2 | `dark` | Básico | Tema oscuro estándar |
-| 3 | `cafe` | Especial | Tonos marrones cálidos |
-| 4 | `violeta` | Especial | Púrpuras oscuros |
-| 5 | `madera` | Especial | Tonos madera neutros |
-| 6 | `nocturno` | Especial | Azulado reducido brillo |
-| 7 | `verde` | Especial | Esmeralda oscuro |
-| 8 | `atardecer` | Especial | Naranjas y rojos |
-| 9 | `corporativo` | Especial | Azul profesional |
-| 10 | `carbon` | Especial | Negro carbón |
-| 11 | `teal` | Especial | Verde azulado |
-| 12 | `citrico` | Especial | Amarillos vibrantes |
-| 13 | `aurora` | Especial | Inspirado en auroras boreales |
-| 14 | `neon` | Especial | Estilo cyberpunk/neón |
+| #   | Tema          | Tipo     | Descripción                   |
+| --- | ------------- | -------- | ----------------------------- |
+| 1   | `light`       | Básico   | Tema claro estándar           |
+| 2   | `dark`        | Básico   | Tema oscuro estándar          |
+| 3   | `cafe`        | Especial | Tonos marrones cálidos        |
+| 4   | `violeta`     | Especial | Púrpuras oscuros              |
+| 5   | `madera`      | Especial | Tonos madera neutros          |
+| 6   | `nocturno`    | Especial | Azulado reducido brillo       |
+| 7   | `verde`       | Especial | Esmeralda oscuro              |
+| 8   | `atardecer`   | Especial | Naranjas y rojos              |
+| 9   | `corporativo` | Especial | Azul profesional              |
+| 10  | `carbon`      | Especial | Negro carbón                  |
+| 11  | `teal`        | Especial | Verde azulado                 |
+| 12  | `citrico`     | Especial | Amarillos vibrantes           |
+| 13  | `aurora`      | Especial | Inspirado en auroras boreales |
+| 14  | `neon`        | Especial | Estilo cyberpunk/neón         |
 
 ---
 
 ## 📁 Tokens de Color Disponibles
 
 ### Variables de Tema
+
 - `--background`, `--foreground`
 - `--card`, `--card-foreground`
 - `--popover`, `--popover-foreground`
@@ -128,6 +140,7 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
 - `--border`, `--input`, `--ring`
 
 ### Design Tokens
+
 - `--dt-primary-50` a `--dt-primary-950`
 - `--dt-neutral-50` a `--dt-neutral-950`
 - `--dt-success-50` a `--dt-success-900`
@@ -135,6 +148,7 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
 - `--dt-danger-50` a `--dt-danger-900`
 
 ### Colores de Entidades
+
 - `--entity-image`, `--entity-video`, `--entity-audio`
 - `--entity-folder`, `--entity-album`, `--entity-collection`
 - `--entity-character`, `--entity-place`, `--entity-tag`
@@ -176,6 +190,7 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
 ## 🧪 Verificación
 
 ### Tests Realizados
+
 - ✅ `bun run biome` - Formato aplicado a 1908 archivos
 - ✅ TypeScript compila sin errores
 - ✅ Theme Provider integrado en App.tsx
@@ -183,6 +198,7 @@ Se realizó una revisión exhaustiva del sistema de themes y estilos del proyect
 - ✅ 14 temas sincronizados en todos los providers
 
 ### Archivos Modificados (10)
+
 1. `src/lib/styles/color-tokens.ts`
 2. `src/components/ui/button.tsx`
 3. `src/lib/styles/chart-colors.ts`

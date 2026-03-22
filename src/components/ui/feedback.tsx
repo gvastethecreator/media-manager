@@ -38,8 +38,7 @@ const inlineFeedbackVariants = cva(
 );
 
 export interface InlineFeedbackProps
-	extends React.HTMLAttributes<HTMLDivElement>,
-		VariantProps<typeof inlineFeedbackVariants> {
+	extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof inlineFeedbackVariants> {
 	/** Icono personalizado */
 	icon?: LucideIcon;
 	/** Mostrar icono */
@@ -106,8 +105,7 @@ const statusBadgeVariants = cva(
 );
 
 export interface StatusBadgeProps
-	extends React.HTMLAttributes<HTMLSpanElement>,
-		VariantProps<typeof statusBadgeVariants> {
+	extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof statusBadgeVariants> {
 	/** Mostrar indicador animado */
 	animated?: boolean;
 }

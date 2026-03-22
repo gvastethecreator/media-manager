@@ -110,7 +110,11 @@ const make = (): ReindexIncrementalServiceInterface => {
 				folderIds = [folderId];
 			} else {
 				const allFoldersResult = yield* Effect.tryPromise<Array<{ id: string }>, IncrementalReindexError>({
-					try: () => db.select({ id: folders.id }).from(folders).where(sql`${folders.parentId} IS NULL`),
+					try: () =>
+						db
+							.select({ id: folders.id })
+							.from(folders)
+							.where(sql`${folders.parentId} IS NULL`),
 					catch: (error) => fromUnknownError('get-folders', error),
 				});
 				folderIds = allFoldersResult.map((f) => f.id);

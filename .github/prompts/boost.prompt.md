@@ -12,7 +12,7 @@ Your goal is to iteratively refine the user’s prompt by:
 - Organizing the prompt into clear sections or steps
 - Ensuring the prompt is easy to understand and follow
 
-Use tools to gather sufficient information about the task. 
+Use tools to gather sufficient information about the task.
 
 If you need clarification on some of the details, ask specific questions to the user ONE AT A TIME.
 

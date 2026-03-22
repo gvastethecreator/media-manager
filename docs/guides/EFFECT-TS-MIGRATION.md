@@ -10,28 +10,28 @@
 
 ## ✅ Servicios Completamente Migrados (Fases 1-10)
 
-| Servicio | Versión Effect-TS | Rutas Effect-TS | Feature Flag | Estado |
-|---------|------------------|-----------------|--------------|---------|
-| **TagService** | ✅ `tag.service.effect.ts` | ✅ `tags.effect.ts` | `USE_EFFECT_TAGS` | ✅ Activo |
-| **ImageService** | ✅ `image.service.effect.ts` | ✅ `images.effect.ts` | `USE_EFFECT_IMAGES` | ✅ Activo |
-| **VideoService** | ✅ `video.service.effect.ts` | ✅ `videos.effect.ts` | `USE_EFFECT_VIDEOS` | ✅ Activo |
-| **AudioService** | ✅ `audio.service.effect.ts` | ✅ `audios.effect.ts` | `USE_EFFECT_AUDIOS` | ✅ Activo |
-| **AlbumService** | ✅ `album.service.effect.ts` | ✅ `albums.effect.ts` | `USE_EFFECT_ALBUMS` | ✅ Activo |
-| **CollectionService** | ✅ `collection.service.effect.ts` | ✅ `collections.effect.ts` | `USE_EFFECT_COLLECTIONS` | ✅ Activo |
-| **FolderService** | ✅ `folder.service.effect.ts` | ✅ `folders.effect.ts` | `USE_EFFECT_FOLDERS` | ✅ Activo |
-| **CharacterService** | ✅ `character.service.effect.ts` | ✅ `characters.effect.ts` | `USE_EFFECT_CHARACTERS` | ✅ Activo |
-| **PlaceService** | ✅ `place.service.effect.ts` | ✅ `places.effect.ts` | `USE_EFFECT_PLACES` | ✅ Activo |
-| **ConceptService** | ✅ `concept.service.effect.ts` | ✅ `concepts.effect.ts` | `USE_EFFECT_CONCEPTS` | ✅ Activo |
-| **PromptService** | ✅ `prompt.service.effect.ts` | ✅ `prompts.effect.ts` | `USE_EFFECT_PROMPTS` | ✅ Activo |
-| **GroupService** | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_GROUPS` | ✅ Activo |
-| **WildcardService** | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_WILDCARDS` | ✅ Activo |
-| **NoteService** | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_NOTES` | ✅ Activo |
-| **PropertyService** | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_PROPERTIES` | ✅ Activo |
-| **WorldItemService** | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_WORLDITEMS` | ✅ Activo |
-| **File3DService** | ✅ `file-services.effect.ts` | ✅ `file-services.effect.ts` | `USE_EFFECT_FILE3D` | ✅ Activo |
-| **DocumentService** | ✅ `file-services.effect.ts` | ✅ `file-services.effect.ts` | `USE_EFFECT_DOCUMENTS` | ✅ Activo |
-| **JsonFileService** | ✅ `file-services.effect.ts` | ✅ `file-services.effect.ts` | `USE_EFFECT_JSONFILES` | ✅ Activo |
-| **UploadedImagesService** | ✅ `file-services.effect.ts` | ✅ `file-services.effect.ts` | `USE_EFFECT_UPLOADEDIMAGES` | ✅ Activo |
+| Servicio                  | Versión Effect-TS                 | Rutas Effect-TS                   | Feature Flag                | Estado    |
+| ------------------------- | --------------------------------- | --------------------------------- | --------------------------- | --------- |
+| **TagService**            | ✅ `tag.service.effect.ts`        | ✅ `tags.effect.ts`               | `USE_EFFECT_TAGS`           | ✅ Activo |
+| **ImageService**          | ✅ `image.service.effect.ts`      | ✅ `images.effect.ts`             | `USE_EFFECT_IMAGES`         | ✅ Activo |
+| **VideoService**          | ✅ `video.service.effect.ts`      | ✅ `videos.effect.ts`             | `USE_EFFECT_VIDEOS`         | ✅ Activo |
+| **AudioService**          | ✅ `audio.service.effect.ts`      | ✅ `audios.effect.ts`             | `USE_EFFECT_AUDIOS`         | ✅ Activo |
+| **AlbumService**          | ✅ `album.service.effect.ts`      | ✅ `albums.effect.ts`             | `USE_EFFECT_ALBUMS`         | ✅ Activo |
+| **CollectionService**     | ✅ `collection.service.effect.ts` | ✅ `collections.effect.ts`        | `USE_EFFECT_COLLECTIONS`    | ✅ Activo |
+| **FolderService**         | ✅ `folder.service.effect.ts`     | ✅ `folders.effect.ts`            | `USE_EFFECT_FOLDERS`        | ✅ Activo |
+| **CharacterService**      | ✅ `character.service.effect.ts`  | ✅ `characters.effect.ts`         | `USE_EFFECT_CHARACTERS`     | ✅ Activo |
+| **PlaceService**          | ✅ `place.service.effect.ts`      | ✅ `places.effect.ts`             | `USE_EFFECT_PLACES`         | ✅ Activo |
+| **ConceptService**        | ✅ `concept.service.effect.ts`    | ✅ `concepts.effect.ts`           | `USE_EFFECT_CONCEPTS`       | ✅ Activo |
+| **PromptService**         | ✅ `prompt.service.effect.ts`     | ✅ `prompts.effect.ts`            | `USE_EFFECT_PROMPTS`        | ✅ Activo |
+| **GroupService**          | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_GROUPS`         | ✅ Activo |
+| **WildcardService**       | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_WILDCARDS`      | ✅ Activo |
+| **NoteService**           | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_NOTES`          | ✅ Activo |
+| **PropertyService**       | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_PROPERTIES`     | ✅ Activo |
+| **WorldItemService**      | ✅ `secondary-services.effect.ts` | ✅ `secondary-services.effect.ts` | `USE_EFFECT_WORLDITEMS`     | ✅ Activo |
+| **File3DService**         | ✅ `file-services.effect.ts`      | ✅ `file-services.effect.ts`      | `USE_EFFECT_FILE3D`         | ✅ Activo |
+| **DocumentService**       | ✅ `file-services.effect.ts`      | ✅ `file-services.effect.ts`      | `USE_EFFECT_DOCUMENTS`      | ✅ Activo |
+| **JsonFileService**       | ✅ `file-services.effect.ts`      | ✅ `file-services.effect.ts`      | `USE_EFFECT_JSONFILES`      | ✅ Activo |
+| **UploadedImagesService** | ✅ `file-services.effect.ts`      | ✅ `file-services.effect.ts`      | `USE_EFFECT_UPLOADEDIMAGES` | ✅ Activo |
 
 ---
 
@@ -42,23 +42,27 @@
 **Fecha**: 2025-10-11
 
 ### 📁 Media Core (4/4 - 100%)
+
 - ✅ TagService
 - ✅ ImageService
 - ✅ VideoService
 - ✅ AudioService
 
 ### 📂 Organización (3/3 - 100%)
+
 - ✅ AlbumService
 - ✅ CollectionService
 - ✅ FolderService
 
 ### 🌍 Worldbuilding (4/4 - 100%)
+
 - ✅ CharacterService
 - ✅ PlaceService
 - ✅ ConceptService
 - ✅ PromptService
 
 ### 🔧 Servicios Secundarios (5/5 - 100%)
+
 - ✅ GroupService
 - ✅ WildcardService
 - ✅ NoteService
@@ -66,12 +70,14 @@
 - ✅ WorldItemService
 
 ### 📄 Servicios de Archivos (4/4 - 100%)
+
 - ✅ File3DService
 - ✅ DocumentService
 - ✅ JsonFileService
 - ✅ UploadedImagesService
 
 ### 📦 Otros (2/2 - 100%)
+
 - ✅ FavoritesService (usando TagService)
 - ✅ SearchService (usando Effect en implementaciones existentes)
 
@@ -80,11 +86,13 @@
 ## 📄 Archivos Creados/Modificados
 
 ### Archivos Nuevos
+
 - ✅ `src/server/routes/albums.effect.ts`
 - ✅ `src/server/routes/collections.effect.ts`
 - ✅ `src/server/routes/folders.effect.ts`
 
 ### Archivos Modificados
+
 - ✅ `src/config/features.ts` - Feature flags actualizados
 - ✅ `src/server/index.ts` - Rutas condicionales agregadas
 
@@ -96,12 +104,12 @@
 
 **Objetivo**: Migrar los 4 servicios principales de worldbuilding
 
-| Servicio | Archivos a Crear | Complejidad |
-|---------|-------------------|-------------|
-| **CharacterService** | `character.service.effect.ts` + `characters.effect.ts` | Media |
-| **PlaceService** | `place.service.effect.ts` + `places.effect.ts` | Media |
-| **ConceptService** | `concept.service.effect.ts` + `concepts.effect.ts` | Baja |
-| **PromptService** | `prompt.service.effect.ts` + `prompts.effect.ts` | Media |
+| Servicio             | Archivos a Crear                                       | Complejidad |
+| -------------------- | ------------------------------------------------------ | ----------- |
+| **CharacterService** | `character.service.effect.ts` + `characters.effect.ts` | Media       |
+| **PlaceService**     | `place.service.effect.ts` + `places.effect.ts`         | Media       |
+| **ConceptService**   | `concept.service.effect.ts` + `concepts.effect.ts`     | Baja        |
+| **PromptService**    | `prompt.service.effect.ts` + `prompts.effect.ts`       | Media       |
 
 **Estimación de tiempo**: 2-3 horas
 
@@ -109,13 +117,13 @@
 
 **Objetivo**: Migrar servicios de soporte y utilidades
 
-| Servicio | Archivos a Crear | Complejidad |
-|---------|-------------------|-------------|
-| **GroupService** | `group.service.effect.ts` + `groups.effect.ts` | Alta |
-| **WildcardService** | `wildcard.service.effect.ts` + `wildcards.effect.ts` | Media |
-| **NoteService** | `note.service.effect.ts` + `notes.effect.ts` | Media |
-| **PropertyService** | `property.service.effect.ts` + `properties.effect.ts` | Alta |
-| **WorldItemService** | `world-item.service.effect.ts` + `world-items.effect.ts` | Media |
+| Servicio             | Archivos a Crear                                         | Complejidad |
+| -------------------- | -------------------------------------------------------- | ----------- |
+| **GroupService**     | `group.service.effect.ts` + `groups.effect.ts`           | Alta        |
+| **WildcardService**  | `wildcard.service.effect.ts` + `wildcards.effect.ts`     | Media       |
+| **NoteService**      | `note.service.effect.ts` + `notes.effect.ts`             | Media       |
+| **PropertyService**  | `property.service.effect.ts` + `properties.effect.ts`    | Alta        |
+| **WorldItemService** | `world-item.service.effect.ts` + `world-items.effect.ts` | Media       |
 
 **Estimación de tiempo**: 3-4 horas
 
@@ -123,12 +131,12 @@
 
 **Objetivo**: Migrar servicios especializados en archivos
 
-| Servicio | Archivos a Crear | Complejidad |
-|---------|-------------------|-------------|
-| **File3DService** | `file3d.service.effect.ts` + `file3ds.effect.ts` | Media |
-| **DocumentService** | `document.service.effect.ts` + `documents.effect.ts` | Baja |
-| **JsonFileService** | `json-file.service.effect.ts` + `json-files.effect.ts` | Baja |
-| **UploadedImagesService** | `uploaded-images.service.effect.ts` + `uploaded-images.effect.ts` | Baja |
+| Servicio                  | Archivos a Crear                                                  | Complejidad |
+| ------------------------- | ----------------------------------------------------------------- | ----------- |
+| **File3DService**         | `file3d.service.effect.ts` + `file3ds.effect.ts`                  | Media       |
+| **DocumentService**       | `document.service.effect.ts` + `documents.effect.ts`              | Baja        |
+| **JsonFileService**       | `json-file.service.effect.ts` + `json-files.effect.ts`            | Baja        |
+| **UploadedImagesService** | `uploaded-images.service.effect.ts` + `uploaded-images.effect.ts` | Baja        |
 
 **Estimación de tiempo**: 2 horas
 
@@ -144,29 +152,26 @@ export class EntityNotFound extends Data.TaggedError<EntityNotFound>('EntityNotF
 
 // 2. Definir interfaz del servicio
 export interface EntityServiceInterface {
-  readonly getById: (id: string) => Effect.Effect<Entity, EntityError>;
-  readonly getAll: (options?: GetOptions) => Effect.Effect<GetResult, EntityError>;
-  // ... otros métodos
+	readonly getById: (id: string) => Effect.Effect<Entity, EntityError>;
+	readonly getAll: (options?: GetOptions) => Effect.Effect<GetResult, EntityError>;
+	// ... otros métodos
 }
 
 // 3. Crear Context.Tag
-export class EntityService extends Context.Tag('EntityService')<
-  EntityService,
-  EntityServiceInterface
->() {}
+export class EntityService extends Context.Tag('EntityService')<EntityService, EntityServiceInterface>() {}
 
 // 4. Implementar servicio
 export const make = (): EntityServiceInterface => {
-  const getById = (id: string): Effect.Effect<Entity, EntityError> =>
-    Effect.gen(function* () {
-      // Implementación con Effect
-      // yield* database, logger, etc.
-    });
+	const getById = (id: string): Effect.Effect<Entity, EntityError> =>
+		Effect.gen(function* () {
+			// Implementación con Effect
+			// yield* database, logger, etc.
+		});
 
-  return {
-    getById,
-    // ... otros métodos
-  };
+	return {
+		getById,
+		// ... otros métodos
+	};
 };
 
 // 5. Crear Layer
@@ -184,13 +189,13 @@ import { EntityService, EntityServiceLive } from '@/services/entity/entity.servi
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const effect = Effect.gen(function* () {
-    const service = yield* EntityService;
-    const result = yield* service.getAll(parseOptions(req.query));
-    return result;
-  }).pipe(Effect.provide(EntityServiceLive));
+	const effect = Effect.gen(function* () {
+		const service = yield* EntityService;
+		const result = yield* service.getAll(parseOptions(req.query));
+		return result;
+	}).pipe(Effect.provide(EntityServiceLive));
 
-  await runEffectForExpress(effect, res);
+	await runEffectForExpress(effect, res);
 });
 ```
 
@@ -215,6 +220,7 @@ router.get('/', async (req, res) => {
 ## 📊 Métricas de Migración
 
 ### Progreso General
+
 ```
 ██████████████████████████████████████████████████
 100% (22/22 servicios) ✅ MIGRACIÓN COMPLETADA
@@ -222,14 +228,14 @@ router.get('/', async (req, res) => {
 
 ### Distribución por Categoría
 
-| Categoría | Migrados | Total | % |
-|----------|----------|-------|---|
-| **Media Core** | 4 | 4 | 100% ✅ |
-| **Organización** | 3 | 3 | 100% ✅ |
-| **Worldbuilding** | 4 | 4 | 100% ✅ |
-| **Soporte** | 5 | 5 | 100% ✅ |
-| **Archivos** | 4 | 4 | 100% ✅ |
-| **Otros** | 2 | 2 | 100% ✅ |
+| Categoría         | Migrados | Total | %       |
+| ----------------- | -------- | ----- | ------- |
+| **Media Core**    | 4        | 4     | 100% ✅ |
+| **Organización**  | 3        | 3     | 100% ✅ |
+| **Worldbuilding** | 4        | 4     | 100% ✅ |
+| **Soporte**       | 5        | 5     | 100% ✅ |
+| **Archivos**      | 4        | 4     | 100% ✅ |
+| **Otros**         | 2        | 2     | 100% ✅ |
 
 ---
 
@@ -241,40 +247,42 @@ router.get('/', async (req, res) => {
 
 ### 📈 Resumen de Progreso por Fase
 
-| Fase | Descripción | Servicios Migrados | Estado |
-|-------|-------------|---------------------|---------|
-| Fase 1 | Tags | 1 | ✅ Completado |
-| Fase 2 | Images | 1 | ✅ Completado |
-| Fase 3 | Audio | 1 | ✅ Completado |
-| Fase 4 | Folders | 1 | ✅ Completado |
-| Fase 5 | Collections | 1 | ✅ Completado |
-| Fase 6.1 | Images (completo) | 1 | ✅ Completado |
-| Fase 6.2 | Videos | 1 | ✅ Completado |
-| Fase 6.3 | Audio (completo) | 1 | ✅ Completado |
-| Fase 7.1 | Albums | 1 | ✅ Completado |
-| Fase 7.2 | Collections (completo) | 1 | ✅ Completado |
-| Fase 7.3 | Folders (completo) | 1 | ✅ Completado |
-| Fase 8.1 | Characters | 1 | ✅ Completado |
-| Fase 8.2 | Places | 1 | ✅ Completado |
-| Fase 8.3 | Concepts | 1 | ✅ Completado |
-| Fase 8.4 | Prompts | 1 | ✅ Completado |
-| Fase 9.1 | Groups | 1 | ✅ Completado |
-| Fase 9.2 | Wildcards | 1 | ✅ Completado |
-| Fase 9.3 | Notes | 1 | ✅ Completado |
-| Fase 9.4 | Properties | 1 | ✅ Completado |
-| Fase 9.5 | World Items | 1 | ✅ Completado |
-| Fase 10.1 | File3D | 1 | ✅ Completado |
-| Fase 10.2 | Documents | 1 | ✅ Completado |
-| Fase 10.3 | Json Files | 1 | ✅ Completado |
-| Fase 10.4 | Uploaded Images | 1 | ✅ Completado |
+| Fase      | Descripción            | Servicios Migrados | Estado        |
+| --------- | ---------------------- | ------------------ | ------------- |
+| Fase 1    | Tags                   | 1                  | ✅ Completado |
+| Fase 2    | Images                 | 1                  | ✅ Completado |
+| Fase 3    | Audio                  | 1                  | ✅ Completado |
+| Fase 4    | Folders                | 1                  | ✅ Completado |
+| Fase 5    | Collections            | 1                  | ✅ Completado |
+| Fase 6.1  | Images (completo)      | 1                  | ✅ Completado |
+| Fase 6.2  | Videos                 | 1                  | ✅ Completado |
+| Fase 6.3  | Audio (completo)       | 1                  | ✅ Completado |
+| Fase 7.1  | Albums                 | 1                  | ✅ Completado |
+| Fase 7.2  | Collections (completo) | 1                  | ✅ Completado |
+| Fase 7.3  | Folders (completo)     | 1                  | ✅ Completado |
+| Fase 8.1  | Characters             | 1                  | ✅ Completado |
+| Fase 8.2  | Places                 | 1                  | ✅ Completado |
+| Fase 8.3  | Concepts               | 1                  | ✅ Completado |
+| Fase 8.4  | Prompts                | 1                  | ✅ Completado |
+| Fase 9.1  | Groups                 | 1                  | ✅ Completado |
+| Fase 9.2  | Wildcards              | 1                  | ✅ Completado |
+| Fase 9.3  | Notes                  | 1                  | ✅ Completado |
+| Fase 9.4  | Properties             | 1                  | ✅ Completado |
+| Fase 9.5  | World Items            | 1                  | ✅ Completado |
+| Fase 10.1 | File3D                 | 1                  | ✅ Completado |
+| Fase 10.2 | Documents              | 1                  | ✅ Completado |
+| Fase 10.3 | Json Files             | 1                  | ✅ Completado |
+| Fase 10.4 | Uploaded Images        | 1                  | ✅ Completado |
 
 ---
 
 ## 🔧 Skills y Herramientas Disponibles
 
 ### Skill: Effect-TS
+
 **Ubicación**: `.agents/skills/effect-ts/SKILL.md`
 **Contenido**:
+
 - Guía completa de Effect-TS
 - Patrones correctos de API
 - Manejo de errores con Data.TaggedError
@@ -287,8 +295,10 @@ router.get('/', async (req, res) => {
 - Integración con OpenTelemetry
 
 ### Skill: Drizzle ORM
+
 **Ubicación**: `.agents/skills/drizzle-orm-d1/SKILL.md`
 **Contenido**:
+
 - Guía de Drizzle ORM
 - Queries básicas y avanzadas
 - Relaciones
@@ -296,8 +306,10 @@ router.get('/', async (req, res) => {
 - Transacciones
 
 ### Skill: Vitest
+
 **Ubicación**: `.agents/skills/vitest/SKILL.md`
 **Contenido**:
+
 - Guía de Vitest
 - Matchers de assertions
 - Tests asíncronos
@@ -308,36 +320,38 @@ router.get('/', async (req, res) => {
 ## ⚙️ Configuración de Feature Flags
 
 ### Flags Activos (Default: true)
+
 ```typescript
-USE_EFFECT_TAGS: true        // ✅ TagService
-USE_EFFECT_IMAGES: true      // ✅ ImageService
-USE_EFFECT_VIDEOS: true      // ✅ VideoService
-USE_EFFECT_AUDIOS: true      // ✅ AudioService
-USE_EFFECT_ALBUMS: true     // ✅ AlbumService (Fase 7.1)
-USE_EFFECT_COLLECTIONS: true  // ✅ CollectionService (Fase 7.2)
-USE_EFFECT_FOLDERS: true     // ✅ FolderService (Fase 7.3)
+USE_EFFECT_TAGS: true; // ✅ TagService
+USE_EFFECT_IMAGES: true; // ✅ ImageService
+USE_EFFECT_VIDEOS: true; // ✅ VideoService
+USE_EFFECT_AUDIOS: true; // ✅ AudioService
+USE_EFFECT_ALBUMS: true; // ✅ AlbumService (Fase 7.1)
+USE_EFFECT_COLLECTIONS: true; // ✅ CollectionService (Fase 7.2)
+USE_EFFECT_FOLDERS: true; // ✅ FolderService (Fase 7.3)
 ```
 
 ### Flags Pendientes de Activación
+
 ```typescript
 // Servicios worldbuilding (Fase 8)
-USE_EFFECT_CHARACTERS: false
-USE_EFFECT_PLACES: false
-USE_EFFECT_CONCEPTS: false
-USE_EFFECT_PROMPTS: false
+USE_EFFECT_CHARACTERS: false;
+USE_EFFECT_PLACES: false;
+USE_EFFECT_CONCEPTS: false;
+USE_EFFECT_PROMPTS: false;
 
 // Servicios secundarios (Fase 9)
-USE_EFFECT_GROUPS: false
-USE_EFFECT_WILDCARDS: false
-USE_EFFECT_NOTES: false
-USE_EFFECT_PROPERTIES: false
-USE_EFFECT_WORLDITEMS: false
+USE_EFFECT_GROUPS: false;
+USE_EFFECT_WILDCARDS: false;
+USE_EFFECT_NOTES: false;
+USE_EFFECT_PROPERTIES: false;
+USE_EFFECT_WORLDITEMS: false;
 
 // Servicios de archivos (Fase 10)
-USE_EFFECT_FILE3D: false
-USE_EFFECT_DOCUMENTS: false
-USE_EFFECT_JSONFILES: false
-USE_EFFECT_UPLOADEDIMAGES: false
+USE_EFFECT_FILE3D: false;
+USE_EFFECT_DOCUMENTS: false;
+USE_EFFECT_JSONFILES: false;
+USE_EFFECT_UPLOADEDIMAGES: false;
 ```
 
 ---
@@ -345,6 +359,7 @@ USE_EFFECT_UPLOADEDIMAGES: false
 ## 🧪 Pruebas
 
 ### Tests Existentes
+
 - ✅ `src/services/tag/__tests__/tag.service.effect.test.ts`
 - ✅ `src/services/image/__tests__/image.service.effect.test.ts`
 - ✅ `src/services/audio/__tests__/audio.service.effect.test.ts`
@@ -354,6 +369,7 @@ USE_EFFECT_UPLOADEDIMAGES: false
 - ✅ `src/services/folder/__tests__/folder.service.effect.test.ts`
 
 ### Comando para Ejecutar Tests
+
 ```bash
 # Tests unitarios de servicios Effect
 bun run test
@@ -415,6 +431,7 @@ bun run test src/services/album/__tests__/album.service.effect.test.ts
 ## 🚨 Problemas Conocidos
 
 ### Issues Resueltos
+
 1. ✅ Importación incorrecta de `FolderUpdate` en folders routes - **RESUELTO**
 2. ✅ Path de `places` router mal referenciado - **RESUELTO**
 3. ✅ AlbumService routes faltantes - **RESUELTO**
@@ -422,6 +439,7 @@ bun run test src/services/album/__tests__/album.service.effect.test.ts
 5. ✅ FolderService routes faltantes - **RESUELTO**
 
 ### Issues Pendientes
+
 1. ⚠️ Tests de servicios Effect pueden necesitar actualización de mocks
 2. ⚠️ Algunos servicios legacy pueden tener lógica no migrada a Effect
 3. ⚠️ Feature flags para nuevos servicios deben agregarse
@@ -431,12 +449,14 @@ bun run test src/services/album/__tests__/album.service.effect.test.ts
 ## 📚 Referencias
 
 ### Documentación Interna
+
 - **Guía de Servicios**: `docs/SERVICES-GUIDE.md`
 - **Arquitectura**: `docs/ARCHITECTURE.md`
 - **Frontend Guide**: `docs/FRONTEND-GUIDE.md`
 - **AGENTS.md**: `AGENTS.md` - Documentación para agentes AI
 
 ### Documentación Externa
+
 - **Effect-TS**: https://effect.website/docs
 - **@effect/schema**: https://effect.website/docs/schema
 - **Drizzle ORM**: https://orm.drizzle.team/docs/overview

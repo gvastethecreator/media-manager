@@ -34,13 +34,13 @@
 }
 
 /* Elementos seleccionables */
-[data-selectable="true"] {
+[data-selectable='true'] {
 	position: relative;
 	cursor: pointer;
 	transition: all 0.15s ease;
 }
 
-[data-selectable="true"]:hover {
+[data-selectable='true']:hover {
 	outline: 1px solid color-mix(in oklab, var(--primary), transparent 70%);
 	outline-offset: 1px;
 	transform: scale(1.005);
@@ -100,7 +100,7 @@
 		outline-offset: 3px;
 	}
 
-	[data-selectable="true"]:hover {
+	[data-selectable='true']:hover {
 		outline-width: 2px;
 		outline-offset: 2px;
 	}
@@ -131,7 +131,7 @@
 	.selecto-selection,
 	.selecto-selecting,
 	.selecto-selected,
-	[data-selectable="true"] {
+	[data-selectable='true'] {
 		transform: none !important;
 		transition: none !important;
 		animation: none !important;

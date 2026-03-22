@@ -27,13 +27,7 @@
 	cursor: pointer;
 	user-select: none;
 	background:
-		linear-gradient(
-			145deg,
-			rgba(255, 255, 255, 0.1) 0%,
-			transparent 50%,
-			rgba(0, 0, 0, 0.1) 100%
-		),
-		var(--tcg-bg);
+		linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%), var(--tcg-bg);
 	border-radius: var(--tcg-radius);
 	backdrop-filter: blur(10px);
 	transform-style: preserve-3d;
@@ -51,17 +45,12 @@
 	background:
 		linear-gradient(var(--tcg-bg), var(--tcg-bg)) padding-box,
 		linear-gradient(
-			135deg,
-			color-mix(in oklch, var(--tcg-accent) 80%, transparent) 0%,
-			color-mix(
-					in oklch,
-					var(--tcg-accent-secondary, var(--tcg-accent)) 40%,
-					transparent
-				)
-				50%,
-			color-mix(in oklch, var(--tcg-accent) 80%, transparent) 100%
-		)
-		border-box;
+				135deg,
+				color-mix(in oklch, var(--tcg-accent) 80%, transparent) 0%,
+				color-mix(in oklch, var(--tcg-accent-secondary, var(--tcg-accent)) 40%, transparent) 50%,
+				color-mix(in oklch, var(--tcg-accent) 80%, transparent) 100%
+			)
+			border-box;
 	border: var(--tcg-border-width) solid transparent;
 	border-radius: var(--tcg-radius);
 	box-shadow:
@@ -221,11 +210,7 @@
 	position: absolute;
 	inset: 0;
 	pointer-events: none;
-	background: linear-gradient(
-		to bottom,
-		transparent 60%,
-		color-mix(in oklch, var(--tcg-accent) 20%, transparent) 100%
-	);
+	background: linear-gradient(to bottom, transparent 60%, color-mix(in oklch, var(--tcg-accent) 20%, transparent) 100%);
 }
 
 /* ========================================
@@ -531,11 +516,11 @@
 }
 
 /* Efecto de borde animado para cartas míticas */
-.tcg-card__frame[data-rarity="mythic"]::before {
+.tcg-card__frame[data-rarity='mythic']::before {
 	position: absolute;
 	inset: -2px;
 	z-index: -1;
-	content: "";
+	content: '';
 	background: linear-gradient(
 		90deg,
 		var(--tcg-accent) 0%,
@@ -598,13 +583,7 @@
 @media (prefers-color-scheme: dark) {
 	.tcg-card {
 		background:
-			linear-gradient(
-				145deg,
-				rgba(255, 255, 255, 0.05) 0%,
-				transparent 50%,
-				rgba(0, 0, 0, 0.2) 100%
-			),
-			var(--tcg-bg);
+			linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%, rgba(0, 0, 0, 0.2) 100%), var(--tcg-bg);
 	}
 
 	.tcg-card__texture {

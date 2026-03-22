@@ -122,12 +122,12 @@ import { videoService } from '@/services/index';
 
 // Subir un video a una carpeta específica
 const newVideo = await videoService.uploadVideo({
-  file: videoFile, // Objeto File del navegador
-  title: 'Viaje a la montaña',
-  description: 'Video del viaje familiar a Sierra Nevada',
-  folderId: 'folder-id-123',
-  tags: ['viaje', 'montaña', 'familia'],
-  isPrivate: false
+	file: videoFile, // Objeto File del navegador
+	title: 'Viaje a la montaña',
+	description: 'Video del viaje familiar a Sierra Nevada',
+	folderId: 'folder-id-123',
+	tags: ['viaje', 'montaña', 'familia'],
+	isPrivate: false,
 });
 ```
 
@@ -138,19 +138,19 @@ import { videoService } from '@/services/index';
 
 // Obtener videos con filtros avanzados
 const videos = await videoService.getVideos({
-  search: 'viaje',
-  tags: ['montaña'],
-  folderId: 'folder-id-123',
-  minDuration: 60, // En segundos
-  maxDuration: 600, // En segundos
-  minResolution: '720p',
-  formats: ['mp4', 'mov'],
-  dateFrom: new Date('2023-01-01'),
-  dateTo: new Date('2023-12-31'),
-  sortBy: 'uploadedAt',
-  sortDirection: 'desc',
-  page: 1,
-  limit: 20
+	search: 'viaje',
+	tags: ['montaña'],
+	folderId: 'folder-id-123',
+	minDuration: 60, // En segundos
+	maxDuration: 600, // En segundos
+	minResolution: '720p',
+	formats: ['mp4', 'mov'],
+	dateFrom: new Date('2023-01-01'),
+	dateTo: new Date('2023-12-31'),
+	sortBy: 'uploadedAt',
+	sortDirection: 'desc',
+	page: 1,
+	limit: 20,
 });
 ```
 
@@ -161,11 +161,11 @@ import { videoService } from '@/services/index';
 
 // Actualizar propiedades de un video
 const updatedVideo = await videoService.updateVideo('video-id-123', {
-  title: 'Nuevo título del video',
-  description: 'Descripción actualizada',
-  isPrivate: true,
-  tags: ['etiqueta1', 'etiqueta2'],
-  folderId: 'nueva-carpeta-id'
+	title: 'Nuevo título del video',
+	description: 'Descripción actualizada',
+	isPrivate: true,
+	tags: ['etiqueta1', 'etiqueta2'],
+	folderId: 'nueva-carpeta-id',
 });
 ```
 
@@ -176,10 +176,10 @@ import { videoService } from '@/services/index';
 
 // Generar una versión optimizada del video
 const processedVideo = await videoService.processVideo('video-id-123', {
-  generateThumbnails: true,
-  extractMetadata: true,
-  convertToFormat: 'mp4',
-  resolutions: ['480p', '720p', '1080p']
+	generateThumbnails: true,
+	extractMetadata: true,
+	convertToFormat: 'mp4',
+	resolutions: ['480p', '720p', '1080p'],
 });
 ```
 
@@ -199,67 +199,67 @@ console.log(`Bitrate: ${metadata.bitrate} kbps`);
 
 ## Relaciones con Otras Entidades
 
-| Entidad        | Tipo de Relación     | Descripción                                        |
-|----------------|----------------------|----------------------------------------------------|
-| **Folder**     | Muchos a uno         | Los videos pertenecen a carpetas                   |
-| **Tag**        | Muchos a muchos      | Los videos pueden tener múltiples etiquetas        |
-| **Album**      | Muchos a muchos      | Los videos pueden formar parte de álbumes          |
-| **Collection** | Muchos a muchos      | Los videos pueden estar en colecciones             |
-| **Metadata**   | Uno a uno            | Cada video tiene metadatos asociados               |
-| **Thumbnail**  | Uno a muchos         | Un video puede tener múltiples miniaturas          |
-| **Activity**   | Referencial          | Las actividades pueden referenciar videos          |
-| **User**       | Muchos a uno         | Los videos pertenecen a usuarios                   |
+| Entidad        | Tipo de Relación | Descripción                                 |
+| -------------- | ---------------- | ------------------------------------------- |
+| **Folder**     | Muchos a uno     | Los videos pertenecen a carpetas            |
+| **Tag**        | Muchos a muchos  | Los videos pueden tener múltiples etiquetas |
+| **Album**      | Muchos a muchos  | Los videos pueden formar parte de álbumes   |
+| **Collection** | Muchos a muchos  | Los videos pueden estar en colecciones      |
+| **Metadata**   | Uno a uno        | Cada video tiene metadatos asociados        |
+| **Thumbnail**  | Uno a muchos     | Un video puede tener múltiples miniaturas   |
+| **Activity**   | Referencial      | Las actividades pueden referenciar videos   |
+| **User**       | Muchos a uno     | Los videos pertenecen a usuarios            |
 
 ## Modelo de Datos
 
 ```typescript
 // Modelo simplificado de Video
 interface Video {
-  id: string;                  // Identificador único
-  title: string;               // Título del video
-  description?: string;        // Descripción opcional
-  path: string;                // Ruta completa en el sistema de archivos
-  originalFilename: string;    // Nombre de archivo original
-  mimeType: string;            // Tipo MIME (video/mp4, video/webm, etc.)
-  size: number;                // Tamaño en bytes
-  width: number;               // Ancho en píxeles
-  height: number;              // Alto en píxeles
-  duration: number;            // Duración en segundos
-  format: VideoFormat;         // Formato (mp4, mov, webm, etc.)
-  folderId?: string;           // ID de la carpeta contenedora
-  isPrivate: boolean;          // Indica si el video es privado
-  isFavorite: boolean;         // Indica si está marcado como favorito
-  status: VideoStatus;         // Estado del video (ACTIVE, PROCESSING, etc.)
-  uploadedAt: Date;            // Fecha de subida
-  recordedAt?: Date;           // Fecha de grabación (si disponible)
-  createdAt: Date;             // Fecha de creación
-  updatedAt: Date;             // Fecha de última actualización
+	id: string; // Identificador único
+	title: string; // Título del video
+	description?: string; // Descripción opcional
+	path: string; // Ruta completa en el sistema de archivos
+	originalFilename: string; // Nombre de archivo original
+	mimeType: string; // Tipo MIME (video/mp4, video/webm, etc.)
+	size: number; // Tamaño en bytes
+	width: number; // Ancho en píxeles
+	height: number; // Alto en píxeles
+	duration: number; // Duración en segundos
+	format: VideoFormat; // Formato (mp4, mov, webm, etc.)
+	folderId?: string; // ID de la carpeta contenedora
+	isPrivate: boolean; // Indica si el video es privado
+	isFavorite: boolean; // Indica si está marcado como favorito
+	status: VideoStatus; // Estado del video (ACTIVE, PROCESSING, etc.)
+	uploadedAt: Date; // Fecha de subida
+	recordedAt?: Date; // Fecha de grabación (si disponible)
+	createdAt: Date; // Fecha de creación
+	updatedAt: Date; // Fecha de última actualización
 }
 
 // Extensión con metadatos técnicos
 interface VideoWithMetadata extends Video {
-  metadata: {
-    videoCodec?: string;       // Codec de video (H.264, VP9, etc.)
-    audioCodec?: string;       // Codec de audio (AAC, MP3, etc.)
-    bitrate?: number;          // Tasa de bits total (kbps)
-    videoBitrate?: number;     // Tasa de bits de video (kbps)
-    audioBitrate?: number;     // Tasa de bits de audio (kbps)
-    frameRate?: number;        // Cuadros por segundo
-    audioChannels?: number;    // Número de canales de audio
-    audioSampleRate?: number;  // Tasa de muestreo de audio (Hz)
-    rotation?: number;         // Rotación del video (grados)
-    hasAudio: boolean;         // Indica si tiene pista de audio
-  }
+	metadata: {
+		videoCodec?: string; // Codec de video (H.264, VP9, etc.)
+		audioCodec?: string; // Codec de audio (AAC, MP3, etc.)
+		bitrate?: number; // Tasa de bits total (kbps)
+		videoBitrate?: number; // Tasa de bits de video (kbps)
+		audioBitrate?: number; // Tasa de bits de audio (kbps)
+		frameRate?: number; // Cuadros por segundo
+		audioChannels?: number; // Número de canales de audio
+		audioSampleRate?: number; // Tasa de muestreo de audio (Hz)
+		rotation?: number; // Rotación del video (grados)
+		hasAudio: boolean; // Indica si tiene pista de audio
+	};
 }
 
 // Extensión con relaciones
 interface VideoComplete extends VideoWithMetadata {
-  folder?: Folder;             // Carpeta contenedora
-  thumbnails: Thumbnail[];     // Miniaturas asociadas
-  tags: Tag[];                 // Etiquetas asociadas
-  albums: Album[];             // Álbumes que contienen este video
-  collections: Collection[];   // Colecciones que contienen este video
-  user: User;                  // Usuario propietario
+	folder?: Folder; // Carpeta contenedora
+	thumbnails: Thumbnail[]; // Miniaturas asociadas
+	tags: Tag[]; // Etiquetas asociadas
+	albums: Album[]; // Álbumes que contienen este video
+	collections: Collection[]; // Colecciones que contienen este video
+	user: User; // Usuario propietario
 }
 ```
 
@@ -283,13 +283,13 @@ interface VideoComplete extends VideoWithMetadata {
 
 ## Solución de Problemas Comunes
 
-| Problema | Solución |
-|----------|----------|
-| **Videos corruptos** | Utilice `videoService.verifyVideoIntegrity()` para detección |
-| **Transcodificación fallida** | Revise logs con `videoService.getProcessingLogs()` |
-| **Miniaturas faltantes** | Regenere con `videoService.regenerateThumbnails()` |
-| **Metadatos incorrectos** | Actualice con `videoService.refreshMetadata()` |
-| **Problemas de reproducción** | Verifique formato con `videoService.checkCompatibility()` |
+| Problema                      | Solución                                                     |
+| ----------------------------- | ------------------------------------------------------------ |
+| **Videos corruptos**          | Utilice `videoService.verifyVideoIntegrity()` para detección |
+| **Transcodificación fallida** | Revise logs con `videoService.getProcessingLogs()`           |
+| **Miniaturas faltantes**      | Regenere con `videoService.regenerateThumbnails()`           |
+| **Metadatos incorrectos**     | Actualice con `videoService.refreshMetadata()`               |
+| **Problemas de reproducción** | Verifique formato con `videoService.checkCompatibility()`    |
 
 ## Roadmap y Mejoras Futuras
 

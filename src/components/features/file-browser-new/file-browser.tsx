@@ -104,10 +104,10 @@ export function FileBrowser({
 		paginationMode === 'infinite'
 			? infiniteScroll
 			: {
-				...infiniteScroll,
-				enabled: false,
-				autoLoad: false,
-			};
+					...infiniteScroll,
+					enabled: false,
+					autoLoad: false,
+				};
 
 	// Navegación por teclado
 	const { handleNativeKeyDown } = useKeyboardNavigation({
@@ -379,17 +379,17 @@ export function FileBrowser({
 							config.kind === 'masonry'
 								? config
 								: {
-									kind: 'masonry',
-									renderMode: 'canvas',
-									gap: 8,
-									columnWidth: 200,
-									padding: 16,
-									tcgHoverReveal: true,
-									tcgHolo: true,
-									tcgShadows: true,
-									tcgRounded: true,
-									tcgTilt: true,
-								}
+										kind: 'masonry',
+										renderMode: 'canvas',
+										gap: 8,
+										columnWidth: 200,
+										padding: 16,
+										tcgHoverReveal: true,
+										tcgHolo: true,
+										tcgShadows: true,
+										tcgRounded: true,
+										tcgTilt: true,
+									}
 						}
 						page={effectiveInfiniteScroll.enabled ? undefined : browser.pagination.page}
 						pageSize={browser.pagination.pageSize}
@@ -404,12 +404,12 @@ export function FileBrowser({
 							config.kind === 'table'
 								? config
 								: {
-									kind: 'table',
-									renderMode: 'canvas',
-									gap: 0,
-									rowHeight: 32,
-									visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
-								}
+										kind: 'table',
+										renderMode: 'canvas',
+										gap: 0,
+										rowHeight: 32,
+										visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
+									}
 						}
 						onSortChange={browser.toggleSortField}
 						page={effectiveInfiniteScroll.enabled ? undefined : browser.pagination.page}

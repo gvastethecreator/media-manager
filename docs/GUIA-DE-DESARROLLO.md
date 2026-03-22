@@ -63,13 +63,13 @@ Extensiones recomendadas:
 
 ```json
 {
-  "recommendations": [
-    "oxc.oxc-vscode",
-    "bradlc.vscode-tailwindcss",
-    "formulahendry.auto-rename-tag",
-    "christian-kohler.path-intellisense",
-    "ms-playwright.playwright"
-  ]
+	"recommendations": [
+		"oxc.oxc-vscode",
+		"bradlc.vscode-tailwindcss",
+		"formulahendry.auto-rename-tag",
+		"christian-kohler.path-intellisense",
+		"ms-playwright.playwright"
+	]
 }
 ```
 
@@ -77,9 +77,9 @@ Configuración de settings.json:
 
 ```json
 {
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "oxc.oxc-vscode",
-  "typescript.preferences.importModuleSpecifier": "non-relative"
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"typescript.preferences.importModuleSpecifier": "non-relative"
 }
 ```
 
@@ -172,14 +172,14 @@ function UserCard(props: any) {
 
 ### Nomenclatura
 
-| Elemento | Convención | Ejemplo |
-|----------|------------|---------|
-| Componentes | PascalCase | `UserCard`, `FileBrowser` |
-| Hooks | camelCase con `use` | `useFileSync`, `useDebounce` |
-| Servicios | camelCase | `imageService`, `folderService` |
-| Tipos/Interfaces | PascalCase | `UserProps`, `ImageStats` |
-| Constantes | UPPER_SNAKE_CASE | `MAX_FILE_SIZE`, `API_URL` |
-| Archivos | kebab-case | `use-file-sync.ts`, `image-service.ts` |
+| Elemento         | Convención          | Ejemplo                                |
+| ---------------- | ------------------- | -------------------------------------- |
+| Componentes      | PascalCase          | `UserCard`, `FileBrowser`              |
+| Hooks            | camelCase con `use` | `useFileSync`, `useDebounce`           |
+| Servicios        | camelCase           | `imageService`, `folderService`        |
+| Tipos/Interfaces | PascalCase          | `UserProps`, `ImageStats`              |
+| Constantes       | UPPER_SNAKE_CASE    | `MAX_FILE_SIZE`, `API_URL`             |
+| Archivos         | kebab-case          | `use-file-sync.ts`, `image-service.ts` |
 
 ### Importaciones
 
@@ -247,31 +247,34 @@ import { Effect } from 'effect';
 
 // Definir errores específicos
 class ImageNotFound {
-  readonly _tag = 'ImageNotFound';
-  constructor(readonly imageId: string) {}
+	readonly _tag = 'ImageNotFound';
+	constructor(readonly imageId: string) {}
 }
 
 class ImageDatabaseError {
-  readonly _tag = 'ImageDatabaseError';
-  constructor(readonly operation: string, readonly error: unknown) {}
+	readonly _tag = 'ImageDatabaseError';
+	constructor(
+		readonly operation: string,
+		readonly error: unknown
+	) {}
 }
 
 export type ImageError = ImageNotFound | ImageDatabaseError;
 
 // Servicio con Effect-TS
 export const getById = (id: string): Effect.Effect<Image, ImageError> =>
-  Effect.gen(function* () {
-    const result = yield* Effect.tryPromise({
-      try: () => db.query.images.findFirst({ where: eq(images.id, id) }),
-      catch: (error) => new ImageDatabaseError('getById', error),
-    });
+	Effect.gen(function* () {
+		const result = yield* Effect.tryPromise({
+			try: () => db.query.images.findFirst({ where: eq(images.id, id) }),
+			catch: (error) => new ImageDatabaseError('getById', error),
+		});
 
-    if (!result) {
-      return yield* Effect.fail(new ImageNotFound(id));
-    }
+		if (!result) {
+			return yield* Effect.fail(new ImageNotFound(id));
+		}
 
-    return result;
-  });
+		return result;
+	});
 ```
 
 ### Transformer Pattern
@@ -283,24 +286,24 @@ import type { Image as DrizzleImage } from '@/lib/drizzle/schema';
 import type { ImageWithStats } from '@/types/entities/image';
 
 export const transformImageToWithStats = (
-  image: DrizzleImage & { _count?: Record<string, number> }
+	image: DrizzleImage & { _count?: Record<string, number> }
 ): Effect.Effect<ImageWithStats, ImageTransformError> =>
-  Effect.gen(function* () {
-    // Validación
-    if (!image.id) {
-      return yield* Effect.fail(new ImageTransformError('ID requerido'));
-    }
+	Effect.gen(function* () {
+		// Validación
+		if (!image.id) {
+			return yield* Effect.fail(new ImageTransformError('ID requerido'));
+		}
 
-    // Transformación
-    return {
-      ...image,
-      stats: {
-        albumCount: image._count?.albums ?? 0,
-        tagCount: image._count?.tags ?? 0,
-        // ...
-      },
-    };
-  });
+		// Transformación
+		return {
+			...image,
+			stats: {
+				albumCount: image._count?.albums ?? 0,
+				tagCount: image._count?.tags ?? 0,
+				// ...
+			},
+		};
+	});
 ```
 
 ### Store Pattern (Zustand)
@@ -312,40 +315,40 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 interface ImageState {
-  images: ImageWithStats[];
-  selectedId: string | null;
-  isLoading: boolean;
-  
-  // Actions
-  setImages: (images: ImageWithStats[]) => void;
-  selectImage: (id: string | null) => void;
-  fetchImages: (folderId: string) => Promise<void>;
+	images: ImageWithStats[];
+	selectedId: string | null;
+	isLoading: boolean;
+
+	// Actions
+	setImages: (images: ImageWithStats[]) => void;
+	selectImage: (id: string | null) => void;
+	fetchImages: (folderId: string) => Promise<void>;
 }
 
 export const useImageStore = create<ImageState>()(
-  devtools(
-    immer((set, get) => ({
-      images: [],
-      selectedId: null,
-      isLoading: false,
+	devtools(
+		immer((set, get) => ({
+			images: [],
+			selectedId: null,
+			isLoading: false,
 
-      setImages: (images) => set({ images }),
-      
-      selectImage: (id) => set({ selectedId: id }),
-      
-      fetchImages: async (folderId) => {
-        set({ isLoading: true });
-        try {
-          const images = await imageApi.getByFolder(folderId);
-          set({ images, isLoading: false });
-        } catch (error) {
-          set({ isLoading: false });
-          throw error;
-        }
-      },
-    })),
-    { name: 'ImageStore' }
-  )
+			setImages: (images) => set({ images }),
+
+			selectImage: (id) => set({ selectedId: id }),
+
+			fetchImages: async (folderId) => {
+				set({ isLoading: true });
+				try {
+					const images = await imageApi.getByFolder(folderId);
+					set({ images, isLoading: false });
+				} catch (error) {
+					set({ isLoading: false });
+					throw error;
+				}
+			},
+		})),
+		{ name: 'ImageStore' }
+	)
 );
 ```
 
@@ -406,38 +409,38 @@ import { Effect } from 'effect';
 import { getById } from '../image.service.effect';
 
 describe('ImageService', () => {
-  beforeEach(async () => {
-    // Limpiar datos de test
-    await cleanupTestData();
-  });
+	beforeEach(async () => {
+		// Limpiar datos de test
+		await cleanupTestData();
+	});
 
-  describe('getById', () => {
-    it('should return image when found', async () => {
-      // Arrange
-      const testImage = await createTestImage();
+	describe('getById', () => {
+		it('should return image when found', async () => {
+			// Arrange
+			const testImage = await createTestImage();
 
-      // Act
-      const result = await Effect.runPromise(getById(testImage.id));
+			// Act
+			const result = await Effect.runPromise(getById(testImage.id));
 
-      // Assert
-      expect(result.id).toBe(testImage.id);
-      expect(result.name).toBe(testImage.name);
-    });
+			// Assert
+			expect(result.id).toBe(testImage.id);
+			expect(result.name).toBe(testImage.name);
+		});
 
-    it('should fail with ImageNotFound when image does not exist', async () => {
-      // Act & Assert
-      const result = await Effect.runPromise(
-        getById('non-existent-id').pipe(
-          Effect.match({
-            onFailure: (error) => error,
-            onSuccess: () => null,
-          })
-        )
-      );
+		it('should fail with ImageNotFound when image does not exist', async () => {
+			// Act & Assert
+			const result = await Effect.runPromise(
+				getById('non-existent-id').pipe(
+					Effect.match({
+						onFailure: (error) => error,
+						onSuccess: () => null,
+					})
+				)
+			);
 
-      expect(result).toBeInstanceOf(ImageNotFound);
-    });
-  });
+			expect(result).toBeInstanceOf(ImageNotFound);
+		});
+	});
 });
 ```
 
@@ -479,27 +482,27 @@ describe('ImageView', () => {
 import { test, expect } from '@playwright/test';
 
 test.describe('Image Browser', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173/images');
-  });
+	test.beforeEach(async ({ page }) => {
+		await page.goto('http://localhost:5173/images');
+	});
 
-  test('should display images in grid view', async ({ page }) => {
-    // Arrange
-    await page.waitForSelector('[data-testid="image-grid"]');
+	test('should display images in grid view', async ({ page }) => {
+		// Arrange
+		await page.waitForSelector('[data-testid="image-grid"]');
 
-    // Assert
-    const images = await page.locator('[data-testid="image-card"]').count();
-    expect(images).toBeGreaterThan(0);
-  });
+		// Assert
+		const images = await page.locator('[data-testid="image-card"]').count();
+		expect(images).toBeGreaterThan(0);
+	});
 
-  test('should filter images by tag', async ({ page }) => {
-    // Act
-    await page.click('[data-testid="tag-filter"]');
-    await page.click('text=Landscape');
+	test('should filter images by tag', async ({ page }) => {
+		// Act
+		await page.click('[data-testid="tag-filter"]');
+		await page.click('text=Landscape');
 
-    // Assert
-    await expect(page.locator('[data-testid="image-card"]')).toHaveCount(5);
-  });
+		// Assert
+		await expect(page.locator('[data-testid="image-card"]')).toHaveCount(5);
+	});
 });
 ```
 
@@ -515,13 +518,13 @@ const logger = serverLogger.withContext('Debug');
 
 // Debug de Effect
 const result = await Effect.runPromise(
-  someEffect.pipe(
-    Effect.tap((value) => logger.debug('Valor intermedio', { value })),
-    Effect.catchAll((error) => {
-      logger.error('Error en effect', { error });
-      return Effect.fail(error);
-    })
-  )
+	someEffect.pipe(
+		Effect.tap((value) => logger.debug('Valor intermedio', { value })),
+		Effect.catchAll((error) => {
+			logger.error('Error en effect', { error });
+			return Effect.fail(error);
+		})
+	)
 );
 ```
 
@@ -538,8 +541,8 @@ const result = await Effect.runPromise(
 const logger = clientLogger.withContext('ComponentName');
 
 useEffect(() => {
-  logger.debug('Component mounted', { props });
-  return () => logger.debug('Component unmounted');
+	logger.debug('Component mounted', { props });
+	return () => logger.debug('Component unmounted');
 }, []);
 ```
 
@@ -638,13 +641,13 @@ Usar Effect-TS para código nuevo:
 
 ```typescript
 Effect.tryPromise({
-  try: () => api.call(),
-  catch: (error) => new ApiError(error),
+	try: () => api.call(),
+	catch: (error) => new ApiError(error),
 }).pipe(
-  Effect.catchTag('ApiError', (error) => {
-    toast.error('Error en API');
-    return Effect.succeed(null);
-  })
+	Effect.catchTag('ApiError', (error) => {
+		toast.error('Error en API');
+		return Effect.succeed(null);
+	})
 );
 ```
 
@@ -652,12 +655,10 @@ Effect.tryPromise({
 
 ```typescript
 Effect.gen(function* () {
-  const value = yield* someEffect;
-  console.log(value); // Breakpoint aquí
-  return value;
-}).pipe(
-  Effect.tap((value) => console.log('Final:', value))
-);
+	const value = yield* someEffect;
+	console.log(value); // Breakpoint aquí
+	return value;
+}).pipe(Effect.tap((value) => console.log('Final:', value)));
 ```
 
 ---

@@ -38,11 +38,10 @@ const result = await mapper.createEntityFromFile('/path/to/image.jpg', 'folder-i
 console.log(result); // { success: true, entityType: 'image', entityId: 'uuid' }
 
 // Procesar múltiples archivos
-const stats = await mapper.processFiles([
-  '/path/to/image1.jpg',
-  '/path/to/video.mp4',
-  '/path/to/document.pdf'
-], 'folder-id');
+const stats = await mapper.processFiles(
+	['/path/to/image1.jpg', '/path/to/video.mp4', '/path/to/document.pdf'],
+	'folder-id'
+);
 console.log(stats); // { totalFiles: 3, successful: 3, failed: 0, ... }
 ```
 
@@ -117,40 +116,45 @@ await processor.generateThumbnail(filePath, entityId);
 ## 🎯 Características Principales
 
 ### ✅ Performance Optimizado
+
 - **Skip temprano**: Validación de tamaño ANTES de hash costoso
 - **Caché LRU**: Hash reutilizado si mtime/size no cambian
 - **Cola de concurrencia**: Procesamiento paralelo (4 workers por defecto)
 - **Serialización básica**: Orden determinista en tests
 
 ### ✅ Modularidad
+
 - **Procesadores especializados**: Un procesador por tipo de media
 - **Single Responsibility**: Cada módulo tiene una responsabilidad clara
 - **Fácil extensión**: Agregar nuevo tipo = nuevo procesador
 
 ### ✅ Observabilidad
+
 - **Métricas granulares**: Por fase y por tipo de entidad
 - **Logs en JSONL**: `logs/metrics-media.jsonl`
 - **Tracking de errores**: Errores detallados por archivo
 
 ### ✅ Compatibilidad
+
 - **API legacy preservada**: Zero breaking changes
 - **Migración gradual**: Código existente funciona sin cambios
 - **Nueva API disponible**: Para código nuevo
 
 ## 📚 Tipos de Entidades Soportados
 
-| Tipo | Extensiones | Procesador |
-|------|------------|------------|
-| **Image** | .jpg, .jpeg, .png, .gif, .webp, .bmp, .svg | ImageProcessor |
-| **Video** | .mp4, .avi, .mov, .mkv, .webm, .flv | VideoProcessor |
-| **Audio** | .mp3, .wav, .ogg, .m4a, .flac, .aac | AudioProcessor |
-| **Document** | .pdf, .doc, .docx, .txt, .md, .rtf | DocumentProcessor |
-| **3D Model** | .gltf, .glb, .obj, .stl | File3DProcessor |
-| **JSON** | .json | JsonProcessor |
+| Tipo         | Extensiones                                | Procesador        |
+| ------------ | ------------------------------------------ | ----------------- |
+| **Image**    | .jpg, .jpeg, .png, .gif, .webp, .bmp, .svg | ImageProcessor    |
+| **Video**    | .mp4, .avi, .mov, .mkv, .webm, .flv        | VideoProcessor    |
+| **Audio**    | .mp3, .wav, .ogg, .m4a, .flac, .aac        | AudioProcessor    |
+| **Document** | .pdf, .doc, .docx, .txt, .md, .rtf         | DocumentProcessor |
+| **3D Model** | .gltf, .glb, .obj, .stl                    | File3DProcessor   |
+| **JSON**     | .json                                      | JsonProcessor     |
 
 ## 🛠️ Utilidades
 
 ### Hash Utils
+
 ```typescript
 import { calculateFileHash, clearHashCache } from '@/services/file-entity-mapper';
 
@@ -159,6 +163,7 @@ clearHashCache(); // Para tests
 ```
 
 ### File Info Utils
+
 ```typescript
 import { getEntityTypeFromExtension, getMimeTypeFromExtension } from '@/services/file-entity-mapper';
 
@@ -167,6 +172,7 @@ const mime = getMimeTypeFromExtension('.jpg'); // 'image/jpeg'
 ```
 
 ### Metrics Collector
+
 ```typescript
 import { MetricsCollector } from '@/services/file-entity-mapper';
 
@@ -180,47 +186,51 @@ await metrics.flushMetrics(); // Escribe a logs/metrics-media.jsonl
 ## 🧪 Testing
 
 ### Mock de Procesadores
+
 ```typescript
 import { vi } from 'vitest';
 import type { ImageProcessor } from '@/services/file-entity-mapper';
 
 const mockProcessor = {
-  checkExists: vi.fn().mockResolvedValue(false),
-  createBasicEntity: vi.fn().mockResolvedValue('entity-id'),
-  extractMetadata: vi.fn().mockResolvedValue({ success: true }),
-  generateThumbnail: vi.fn().mockResolvedValue({ success: true })
+	checkExists: vi.fn().mockResolvedValue(false),
+	createBasicEntity: vi.fn().mockResolvedValue('entity-id'),
+	extractMetadata: vi.fn().mockResolvedValue({ success: true }),
+	generateThumbnail: vi.fn().mockResolvedValue({ success: true }),
 };
 ```
 
 ### Test de Utilidades
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { calculateFileHash } from '@/services/file-entity-mapper';
 
 describe('Hash Utils', () => {
-  it('should calculate SHA-256 hash', async () => {
-    const hash = await calculateFileHash('/path/to/test.jpg');
-    expect(hash).toMatch(/^[a-f0-9]{64}$/);
-  });
+	it('should calculate SHA-256 hash', async () => {
+		const hash = await calculateFileHash('/path/to/test.jpg');
+		expect(hash).toMatch(/^[a-f0-9]{64}$/);
+	});
 });
 ```
 
 ## 📈 Métricas y Logging
 
 ### Formato de Métricas
+
 ```json
 {
-  "ts": "2025-10-02T02:30:00.000Z",
-  "phases": {
-    "basic": [120, 95, 110],
-    "metadata_image": [450, 480, 430],
-    "metadata_video": [1200, 1150, 1180],
-    "thumbnail": [350, 320, 340]
-  }
+	"ts": "2025-10-02T02:30:00.000Z",
+	"phases": {
+		"basic": [120, 95, 110],
+		"metadata_image": [450, 480, 430],
+		"metadata_video": [1200, 1150, 1180],
+		"thumbnail": [350, 320, 340]
+	}
 }
 ```
 
 ### Análisis de Performance
+
 ```bash
 # Ver métricas
 cat logs/metrics-media.jsonl | jq '.phases'

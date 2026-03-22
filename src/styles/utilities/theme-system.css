@@ -29,21 +29,17 @@
 .theme-transitioning *::before,
 .theme-transitioning *::after {
 	transition:
-		background-color var(--dt-theme-transition-duration)
-		var(--dt-theme-transition-timing),
-		border-color var(--dt-theme-transition-duration)
-		var(--dt-theme-transition-timing),
+		background-color var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
+		border-color var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
 		color var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
 		fill var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
 		stroke var(--dt-theme-transition-duration) var(--dt-theme-transition-timing),
-		box-shadow var(--dt-theme-transition-duration)
-		var(--dt-theme-transition-timing) !important;
+		box-shadow var(--dt-theme-transition-duration) var(--dt-theme-transition-timing) !important;
 }
 
 /* Deshabilitar transiciones de layout durante cambio de tema */
 .theme-transitioning * {
-	transition-property:
-		background-color, border-color, color, fill, stroke, box-shadow !important;
+	transition-property: background-color, border-color, color, fill, stroke, box-shadow !important;
 }
 
 /* =====================================================
@@ -61,7 +57,7 @@
 .theme-indicator::after {
 	position: absolute;
 	inset: 0;
-	content: "";
+	content: '';
 	border-radius: inherit;
 	opacity: 0;
 	transition: opacity var(--dt-motion-normal);
@@ -88,8 +84,7 @@
 }
 
 .dark img:not([data-no-filter]) {
-	filter: brightness(var(--dt-image-brightness))
-		contrast(var(--dt-image-contrast));
+	filter: brightness(var(--dt-image-brightness)) contrast(var(--dt-image-contrast));
 }
 
 /* Prevenir flash de tema incorrecto */
@@ -212,8 +207,7 @@ html:not(.dark) {
 	background: var(--background);
 	border-radius: var(--dt-radius-full);
 	box-shadow: var(--dt-shadow-md);
-	transition: transform var(--dt-motion-normal)
-		var(--dt-theme-transition-timing);
+	transition: transform var(--dt-motion-normal) var(--dt-theme-transition-timing);
 }
 
 .dark .theme-toggle-thumb {
@@ -251,17 +245,17 @@ html:not(.dark) {
 
 /* Auto-detectar preferencia cuando está en modo "system" */
 @media (prefers-color-scheme: dark) {
-	html[data-theme="system"] {
+	html[data-theme='system'] {
 		color-scheme: dark;
 	}
 
-	html[data-theme="system"] body {
+	html[data-theme='system'] body {
 		/* Aplica estilos de tema oscuro */
 	}
 }
 
 @media (prefers-color-scheme: light) {
-	html[data-theme="system"] {
+	html[data-theme='system'] {
 		color-scheme: light;
 	}
 }

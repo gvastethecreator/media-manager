@@ -7,13 +7,15 @@
 **Estado:** ✅ **ARREGLADO**
 
 **Problemas encontrados y corregidos:**
+
 1. ✅ **Botón Edit decorativo** - Removido el botón de Edit en `collection-content` que no hacía nada
 2. ✅ **Props no utilizadas** - Limpiadas las props `onScanFolder`, `onRefreshFolder`, `isRetrying` que no se usaban
 3. ✅ **Documentación** - Agregados comentarios explicando que las acciones de carpeta están en `file-browser-toolbar.tsx`
 
 **Funcionalidad actual:**
+
 - Toggle panel izquierdo: ✅ Funcional
-- Toggle panel derecho: ✅ Funcional  
+- Toggle panel derecho: ✅ Funcional
 - Breadcrumbs: ✅ Funcional
 - Botón Settings: ✅ Funcional (abre panel de configuración)
 
@@ -44,6 +46,7 @@
 **Estado:** ✅ **COMPLETAMENTE FUNCIONAL**
 
 **Elementos verificados:**
+
 - Contador de items ("X de Y elementos"): ✅ Funcional
 - Info de selección ("X seleccionados"): ✅ Funcional
 - Paginación (Página X / Y): ✅ Funcional
@@ -51,6 +54,7 @@
 - Estado de carga (Spinner): ✅ Funcional
 
 **Props correctamente implementadas:**
+
 ```typescript
 totalItems: number
 shownItems: number
@@ -68,15 +72,16 @@ onPrevPage/onNextPage: () => void
 
 **Secciones implementadas y verificadas:**
 
-| Sección | Funcionalidad | Persistencia |
-|---------|--------------|--------------|
-| **Apariencia** | View mode, color de fondo, tamaño de items | ✅ localStorage |
-| **Organización** | Agrupar por tipo, modo recursivo, búsqueda | ✅ localStorage |
-| **Visualización** | Thumbnails, metadata, tags, stats, animaciones | ✅ localStorage |
-| **Rendimiento** | Virtualización, paginación, infinite scroll | ✅ localStorage |
-| **Avanzado** | Reset filtros, limpiar todo, reset localStorage | ✅ Funcional |
+| Sección           | Funcionalidad                                   | Persistencia    |
+| ----------------- | ----------------------------------------------- | --------------- |
+| **Apariencia**    | View mode, color de fondo, tamaño de items      | ✅ localStorage |
+| **Organización**  | Agrupar por tipo, modo recursivo, búsqueda      | ✅ localStorage |
+| **Visualización** | Thumbnails, metadata, tags, stats, animaciones  | ✅ localStorage |
+| **Rendimiento**   | Virtualización, paginación, infinite scroll     | ✅ localStorage |
+| **Avanzado**      | Reset filtros, limpiar todo, reset localStorage | ✅ Funcional    |
 
 **Nuevos settings agregados en esta revisión:**
+
 - ✅ `showThumbnails` - Toggle para mostrar/ocultar thumbnails
 - ✅ `showMetadata` - Toggle para mostrar/ocultar metadata
 - ✅ `showTags` - Toggle para mostrar/ocultar tags
@@ -85,6 +90,7 @@ onPrevPage/onNextPage: () => void
 - ✅ `animationDuration` - Input numérico para duración en ms
 
 **Correcciones aplicadas:**
+
 1. ✅ Sincronización de `itemSize` global con `views.*.itemSize`
 2. ✅ `resetLocalStorage` ahora recarga la página en lugar de re-persistir
 3. ✅ UI nueva con sección "Visualización" en el Accordion
@@ -98,6 +104,7 @@ onPrevPage/onNextPage: () => void
 **Estado:** ✅ **COMPLETAMENTE IMPLEMENTADO**
 
 **Funcionalidad:**
+
 - CRUD completo de Albums (crear, editar, eliminar)
 - CRUD completo de Collections
 - CRUD completo de Groups
@@ -114,6 +121,7 @@ onPrevPage/onNextPage: () => void
 **Estado:** ✅ **COMPLETAMENTE IMPLEMENTADO**
 
 **Funcionalidad:**
+
 - CRUD completo de Tags
 - CRUD completo de Properties
 - Búsqueda y filtrado
@@ -130,6 +138,7 @@ onPrevPage/onNextPage: () => void
 **Estado:** ✅ **COMPLETAMENTE IMPLEMENTADO**
 
 **Funcionalidad:**
+
 - CRUD para 7 entidades: Characters, Places, World Items, Concepts, Prompts, Notes, Wildcards
 - Sistema dinámico escalable con ENTITY_CONFIG
 - Estadísticas por entidad
@@ -145,10 +154,12 @@ onPrevPage/onNextPage: () => void
 **Estado:** ⚠️ **PARCIALMENTE IMPLEMENTADO**
 
 **Problema identificado:**
+
 - Las configuraciones son locales (useState) y **NO persisten**
 - Al recargar la página se pierden los cambios
 
 **Settings afectados:**
+
 - Image settings (autoRotate, highQualityPreview, etc.)
 - Video settings (autoplay, muted, volume, etc.)
 - Audio settings (autoplay, visualizer, etc.)
@@ -157,6 +168,7 @@ onPrevPage/onNextPage: () => void
 - JSON settings (formatOnLoad, lineNumbers, etc.)
 
 **Lo que SÍ funciona:**
+
 - Los contadores de archivos (datos reales de useSystemStats)
 
 **Solución requerida:**
@@ -171,6 +183,7 @@ Crear un store de Zustand para media settings o usar el store existente `useInte
 **Estado:** ✅ **FUNCIONAL CON OBSERVACIÓN**
 
 **Funcionalidad implementada:**
+
 - Tema (light/dark/system) - ✅ Persistencia global
 - Tamaño de fuente (xs/sm/base/lg/xl) - ✅ Persistencia global
 - Animaciones globales - ✅ Persistencia global
@@ -179,6 +192,7 @@ Crear un store de Zustand para media settings o usar el store existente `useInte
 
 **Observación:**
 El reporte mencionaba que `density` está hardcodeado. Sin embargo, revisando el código, el sistema de density (compact/comfortable) **ya existe** en el store `useInterfaceSettingsStore` bajo `fileBrowser.views.list.compactMode`, pero:
+
 1. No hay UI en Appearance Settings para cambiarlo globalmente
 2. Solo está disponible para la vista de lista
 
@@ -191,6 +205,7 @@ El reporte mencionaba que `density` está hardcodeado. Sin embargo, revisando el
 **Estado:** ✅ **FUNCIONAL**
 
 **Funcionalidad:**
+
 - Estadísticas de base de datos (tamaño, conteos) - ✅ Datos reales
 - Reparar sistema - ✅ Conectado a API
 - Resetear base de datos - ✅ Con confirmación
@@ -206,6 +221,7 @@ El reporte mencionaba que `density` está hardcodeado. Sin embargo, revisando el
 **Estado:** ✅ **COMPLETAMENTE FUNCIONAL**
 
 **Funcionalidad:**
+
 - Lista de carpetas con datos reales
 - Reindexado con configuración avanzada
 - Gestión de miniaturas (optimizar, reprocesar, limpiar)
@@ -216,19 +232,19 @@ El reporte mencionaba que `density` está hardcodeado. Sin embargo, revisando el
 
 ## 📊 Resumen General
 
-| Componente | Estado % | Notas |
-|------------|----------|-------|
-| **Toolbar Principal** | 100% | ✅ Mockups removidos, funcional |
-| **File Browser Toolbar** | 100% | ✅ Completamente funcional |
-| **Status Bar** | 100% | ✅ Completamente funcional |
-| **File Browser Settings** | 100% | ✅ Nuevos settings agregados |
-| **Organization Settings** | 100% | ✅ CRUD completo funcional |
-| **Taxonomy Settings** | 100% | ✅ CRUD completo funcional |
-| **Worldbuilding Settings** | 100% | ✅ CRUD completo funcional |
-| **Appearance Settings** | 95% | ✅ Funcional (density existe en store) |
-| **System Settings** | 90% | ✅ Funcional (stats de sistema dependen de Tauri) |
-| **Files Settings** | 100% | ✅ Completamente funcional |
-| **Media Settings** | 60% | ⚠️ UI funcional, falta persistencia |
+| Componente                 | Estado % | Notas                                             |
+| -------------------------- | -------- | ------------------------------------------------- |
+| **Toolbar Principal**      | 100%     | ✅ Mockups removidos, funcional                   |
+| **File Browser Toolbar**   | 100%     | ✅ Completamente funcional                        |
+| **Status Bar**             | 100%     | ✅ Completamente funcional                        |
+| **File Browser Settings**  | 100%     | ✅ Nuevos settings agregados                      |
+| **Organization Settings**  | 100%     | ✅ CRUD completo funcional                        |
+| **Taxonomy Settings**      | 100%     | ✅ CRUD completo funcional                        |
+| **Worldbuilding Settings** | 100%     | ✅ CRUD completo funcional                        |
+| **Appearance Settings**    | 95%      | ✅ Funcional (density existe en store)            |
+| **System Settings**        | 90%      | ✅ Funcional (stats de sistema dependen de Tauri) |
+| **Files Settings**         | 100%     | ✅ Completamente funcional                        |
+| **Media Settings**         | 60%      | ⚠️ UI funcional, falta persistencia               |
 
 ---
 

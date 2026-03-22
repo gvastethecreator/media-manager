@@ -9,6 +9,7 @@ Este archivo guía a agentes IA (GitHub Copilot, Claude, etc.) para ser producti
 **Image Manager** es un sistema monolítico para gestión inteligente de archivos multimedia con arquitectura React 19 + Express/Bun + Drizzle ORM + SQLite.
 
 ### Stack Clave
+
 - **Frontend**: React 19 + TypeScript + Vite+ (Vite + Rolldown) + Zustand + TanStack Query
 - **Backend**: Express (Bun runtime) con HMR
 - **Database**: Drizzle ORM + SQLite (libsql)
@@ -17,6 +18,7 @@ Este archivo guía a agentes IA (GitHub Copilot, Claude, etc.) para ser producti
 - **Linting**: Oxc (Oxlint + Oxfmt) con `Vite+` para checks unificados
 
 ### Dominios Principales
+
 - 📂 **Archivos**: Images, Videos, Audios, Documents, JSON, 3D
 - 🏷️ **Organización**: Folders, Tags, Albums, Collections, Groups, Favorites
 - 🌍 **Worldbuilding**: Characters, Places, Concepts, World Items
@@ -38,6 +40,7 @@ Estas reglas reducen errores comunes de LLMs. Prioriza claridad sobre velocidad.
 - Si algo es confuso, detente y pregunta en lugar de proceder
 
 **Ejemplo**:
+
 ```
 Usuario: "Agregar validación"
 ❌ Mal: Validar silenciosamente e implementar
@@ -68,6 +71,7 @@ Cuando edites código existente:
 - ✅ Si notas código muerto pre-existente, menciona (no borres)
 
 **Si TUS cambios crean órfanos** (imports/variables sin usar):
+
 - ✅ Elimina solo lo que TUS cambios hicieron innecesario
 - ❌ No elimines código muerto pre-existente
 
@@ -90,6 +94,7 @@ Objetivo: "Tests pasen antes y después del refactor"
 ```
 
 **Para tareas multi-paso**:
+
 ```
 1. [Paso] → verificar: [cómo confirmar]
 2. [Paso] → verificar: [cómo confirmar]
@@ -103,6 +108,7 @@ Criterios fuertes = loop independiente. Criterios débiles ("hazlo funcionar") =
 ## ⚡ Desarrollo: Comandos Esenciales
 
 ### Iniciar Desarrollo
+
 ```bash
 bun run dev:full      # Full stack (frontend + backend + HMR) — más común
 bun run dev:vite      # Solo frontend (Vite+ dev server)
@@ -110,6 +116,7 @@ bun run dev:server:hot # Solo backend (Express con HMR)
 ```
 
 ### Build & Testing
+
 ```bash
 bun run build         # Build completo (Vite + server)
 bun run test          # Tests unitarios (Vitest)
@@ -122,6 +129,7 @@ bun run tsc           # Type check
 ```
 
 ### Database
+
 ```bash
 bun run db:studio        # Abre Drizzle Studio (GUI)
 bun run db:reset         # ⚠️ Destructivo: resetea DB
@@ -129,6 +137,7 @@ bun run db:check         # Verifica estado
 ```
 
 ### Logs & Debugging
+
 ```bash
 bun run logs:list     # Lista logs generados
 bun run check:errors  # Resume errores compilación/tipos
@@ -166,25 +175,28 @@ Response → Store (Zustand) → React Components
 ### Ejemplo Real: Obtener Imágenes por Carpeta
 
 1. **Ruta** (`src/server/routes/images.ts`):
+
    ```typescript
    router.get('/:folderId/list', async (req, res) => {
-     const images = await imageService.getByFolder(req.params.folderId);
-     const transformed = images.map(fromDrizzleImageWithStats);
-     res.json(transformed);
+   	const images = await imageService.getByFolder(req.params.folderId);
+   	const transformed = images.map(fromDrizzleImageWithStats);
+   	res.json(transformed);
    });
    ```
 
 2. **Servicio** (`src/services/image/image.service.ts`):
+
    ```typescript
    export async function getByFolder(folderId: string) {
-     return db.query.images.findMany({
-       where: eq(images.folderId, folderId),
-       with: { tags: true, albums: true }
-     });
+   	return db.query.images.findMany({
+   		where: eq(images.folderId, folderId),
+   		with: { tags: true, albums: true },
+   	});
    }
    ```
 
 3. **Transformer** (`src/transformers/image/transformer.ts`):
+
    ```typescript
    export function fromDrizzleImageWithStats(drizzleImage: any) {
      return {
@@ -197,9 +209,9 @@ Response → Store (Zustand) → React Components
 
 4. **Frontend** (Hook + Store):
    ```typescript
-   const images = useImageStore(s => s.images);
+   const images = useImageStore((s) => s.images);
    useEffect(() => {
-     imageService.getByFolder(folderId).then(data => setImages(data));
+   	imageService.getByFolder(folderId).then((data) => setImages(data));
    }, []);
    ```
 
@@ -208,12 +220,14 @@ Response → Store (Zustand) → React Components
 ## 🎨 Patrones & Convenciones Críticas
 
 ### 1. **Sin Archivos Barrel en Services/Transformers**
+
 ❌ **NUNCA** hagas `src/services/<entity>/index.ts` con re-exports.
 ✅ **Importa directo**: `import { videoService } from '@/services/video/video.service.effect'`
 
 **Razón**: Performance + claridad.
 
 ### 2. **Transformers = Punto Único de Enriquecimiento**
+
 - Servicios: retornan datos crudos de Drizzle
 - Transformers: agregan `_count`, `_stats`, enumerables, conversiones
 - Routes: llaman transformers antes de enviar respuesta
@@ -222,6 +236,7 @@ Response → Store (Zustand) → React Components
 ✅ Correcto: Toda transformación centralizada en `transformer.ts`
 
 ### 3. **Stores Zustand: Fine-Grained, No Mega-Stores**
+
 ```typescript
 // ✅ Bien: Store específica + selectors
 const useImageStore = create<ImageState>()(
@@ -238,16 +253,18 @@ export const useLoadImages = () => useImageStore(s => s.loadImages);
 ❌ Evitar: Un mega-store global con todo.
 
 ### 4. **TanStack Query Keys: Semánticos**
+
 ```typescript
 // ✅ Patrón: [entidad, operación, identificador]
 const { data } = useQuery({
-  queryKey: ['images', 'byFolder', folderId],
-  queryFn: () => imageService.getByFolder(folderId),
-  staleTime: 5 * 60 * 1000,
+	queryKey: ['images', 'byFolder', folderId],
+	queryFn: () => imageService.getByFolder(folderId),
+	staleTime: 5 * 60 * 1000,
 });
 ```
 
 ### 5. **Feature Flags para Migraciones Effect-TS**
+
 ```typescript
 // src/config/features.ts
 export const FEATURES = {
@@ -264,11 +281,12 @@ if (FEATURES.USE_EFFECT_IMAGES) {
 ```
 
 ### 6. **Validación con Zod en Routes**
+
 ```typescript
 router.post('/', async (req, res) => {
-  const input = createImageSchema.parse(req.body);
-  const image = await imageService.create(input);
-  res.json(fromDrizzleImageWithStats(image));
+	const input = createImageSchema.parse(req.body);
+	const image = await imageService.create(input);
+	res.json(fromDrizzleImageWithStats(image));
 });
 ```
 
@@ -307,17 +325,20 @@ src/
 ## 🎯 Convenciones de Código
 
 ### TypeScript Strict (siempre activo)
+
 - ❌ Evitar `any`, `!` (non-null assertion)
 - ✅ Usar type narrowing y refinements
 - ✅ `export type` / `import type` para tipos
 
 ### Nombres de Variables
+
 - **Services**: `<entity>Service` → `imageService`
 - **Transformers**: `fromDrizzle<Entity>WithStats`, `mappers`, `serializers`
 - **Stores**: `use<Entity>Store` → `useImageStore`
 - **Routes**: `GET /api/<entity>`, `POST /api/<entity>`, etc.
 
 ### React/JSX
+
 - ✅ Hooks desde top del componente + dependencias correctas
 - ✅ Lazy loading de rutas (Vite lo hace automático)
 - ✅ `React.memo()` para optimizar re-renders
@@ -325,6 +346,7 @@ src/
 - ❌ Evitar `dangerouslySetInnerHTML` (XSS risk)
 
 ### Oxc (Linting/Formatting)
+
 - Indentation: **tabs** (width: 2)
 - Semicolons: **sempre**
 - Quotes: **single** (`'...'` no `"..."`)
@@ -335,6 +357,7 @@ src/
 ## 🗄️ Database: Drizzle ORM Essentials
 
 ### Schema Organization
+
 ```
 src/lib/drizzle/schema/
 ├── core/           # queueJobs, profiles, settings, thumbnails, etc.
@@ -346,22 +369,24 @@ src/lib/drizzle/schema/
 ```
 
 ### Patrón de Query Común
+
 ```typescript
 // Con relaciones y conteos
 const images = await db
-  .select({
-    ...getTableColumns(images),
-    _count: {
-      tags: sql<number>`count(distinct ${imageTags.B})`
-    }
-  })
-  .from(images)
-  .leftJoin(imageTags, eq(images.id, imageTags.A))
-  .where(eq(images.folderId, folderId))
-  .groupBy(images.id);
+	.select({
+		...getTableColumns(images),
+		_count: {
+			tags: sql<number>`count(distinct ${imageTags.B})`,
+		},
+	})
+	.from(images)
+	.leftJoin(imageTags, eq(images.id, imageTags.A))
+	.where(eq(images.folderId, folderId))
+	.groupBy(images.id);
 ```
 
 ### Migrations
+
 ```bash
 bunx drizzle-kit generate    # Genera migration
 bunx drizzle-kit push        # Aplica migration
@@ -373,6 +398,7 @@ bun run db:studio            # GUI para inspeccionar DB
 ## 🧪 Testing: Patrones
 
 ### Unit Tests (Vitest)
+
 - Ubicación: `src/**/*.{test,spec}.ts` o `tests/unit/`
 - Config: `jsdom` environment, `fileParallelism: false` (SQLite)
 - Globals enabled (no importar describe/it/expect)
@@ -382,14 +408,15 @@ import { describe, it, expect } from 'vitest';
 import { imageService } from '@/services/image/image.service';
 
 describe('imageService', () => {
-  it('should list images by folder', async () => {
-    const result = await imageService.getByFolder('folder-1');
-    expect(result).toHaveLength(5);
-  });
+	it('should list images by folder', async () => {
+		const result = await imageService.getByFolder('folder-1');
+		expect(result).toHaveLength(5);
+	});
 });
 ```
 
 ### E2E Tests (Playwright)
+
 - Ubicación: `tests/e2e/*.spec.ts`
 - Base URL: `http://localhost:5173`
 - Auto-starts dev server: `bun run dev:full`
@@ -398,8 +425,8 @@ describe('imageService', () => {
 import { test, expect } from '@playwright/test';
 
 test('should display images grid', async ({ page }) => {
-  await page.goto('/images');
-  await expect(page.locator('.image-card')).toHaveCount(3);
+	await page.goto('/images');
+	await expect(page.locator('.image-card')).toHaveCount(3);
 });
 ```
 
@@ -433,13 +460,16 @@ test('should display images grid', async ({ page }) => {
 ## 🎨 Design System: Tokens CSS
 
 ### Uso de Variables
+
 ✅ **Siempre usar tokens**:
+
 ```tsx
 <div className="text-dt-primary-500 bg-card shadow-dt-2" />
 <div style={{ background: 'var(--primary)' }} />
 ```
 
 ❌ **Nunca hardcodear colores**:
+
 ```tsx
 <div style={{ color: '#3b82f6' }} />          // ❌
 <div className="text-[#3b82f6]" />            // ❌
@@ -447,6 +477,7 @@ test('should display images grid', async ({ page }) => {
 ```
 
 ### Paletas Disponibles
+
 ```css
 /* Design tokens v2.0 */
 --dt-primary-50 a --dt-primary-950
@@ -470,6 +501,7 @@ test('should display images grid', async ({ page }) => {
 ```
 
 ### 14 Temas Disponibles
+
 `light`, `dark`, `cafe`, `violeta`, `madera`, `nocturno`, `verde`, `atardecer`, `corporativo`, `carbon`, `teal`, `citrico`, `aurora`, `neon`
 
 ---
@@ -495,6 +527,7 @@ test('should display images grid', async ({ page }) => {
 5. **Marcar tasks completadas** en TODO
 
 ### Ejemplo:
+
 ```
 TODO:
 1. ✅ Entender patrón de servicio (búsqueda)
@@ -509,9 +542,11 @@ TODO:
 ## ⚠️ Gotchas & Troubleshooting
 
 ### `SQLITE_BUSY` en tests
+
 - ✅ Solución: `fileParallelism: false` en `vitest.config.ts`
 
 ### Port 4000 en uso
+
 ```bash
 # Windows
 netstat -ano | findstr :4000 | findstr LISTENING
@@ -521,10 +556,12 @@ lsof -i :4000
 ```
 
 ### Build size large
+
 - Vite chunking automático: 28+ chunks
 - Lazy loading en rutas: verificar `router.tsx`
 
 ### Types not found
+
 - ✅ Imports con `@/types/entities/<entity>/index.ts`
 - Verificar tsconfig.json paths
 

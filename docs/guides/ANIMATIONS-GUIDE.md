@@ -71,9 +71,9 @@ const variants = {
 ### Componentes disponibles
 
 ```typescript
-motion.div, motion.button, motion.span, motion.img
-motion.section, motion.article, motion.header
-motion.footer, motion.nav, motion.main
+(motion.div, motion.button, motion.span, motion.img);
+(motion.section, motion.article, motion.header);
+(motion.footer, motion.nav, motion.main);
 // ... y más (ver motion-shim.tsx)
 ```
 
@@ -107,24 +107,22 @@ import { anime, animate, createTimeline, stagger } from '@/lib/anime';
 
 // Animación simple
 await animate({
-  targets: '.element',
-  translateX: 250,
-  duration: 800,
-  easing: 'easeOutQuad'
+	targets: '.element',
+	translateX: 250,
+	duration: 800,
+	easing: 'easeOutQuad',
 });
 
 // Timeline
 const timeline = await createTimeline();
-timeline
-  .add({ targets: '.el1', translateX: 100 }, 0)
-  .add({ targets: '.el2', translateX: 100 }, '+=100');
+timeline.add({ targets: '.el1', translateX: 100 }, 0).add({ targets: '.el2', translateX: 100 }, '+=100');
 
 // Stagger
 await stagger('.items', {
-  translateY: [20, 0],
-  opacity: [0, 1],
-  delay: (el, i) => i * 100,
-  duration: 500
+	translateY: [20, 0],
+	opacity: [0, 1],
+	delay: (el, i) => i * 100,
+	duration: 500,
 });
 ```
 
@@ -178,19 +176,15 @@ await stagger('.items', {
 ### Duraciones
 
 ```css
---dt-duration-instant: 50ms   /* Micro-interacciones */
---dt-duration-fast: 150ms     /* Hover, focus */
---dt-duration-normal: 250ms   /* Transiciones UI */
---dt-duration-slow: 400ms     /* Entradas, modals */
+--dt-duration-instant: 50ms /* Micro-interacciones */ --dt-duration-fast: 150ms /* Hover, focus */
+	--dt-duration-normal: 250ms /* Transiciones UI */ --dt-duration-slow: 400ms /* Entradas, modals */;
 ```
 
 ### Timing Functions
 
 ```css
---dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1)
---dt-ease-in: cubic-bezier(0.4, 0, 1, 1)
---dt-ease-out: cubic-bezier(0, 0, 0.2, 1)
---dt-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55)
+--dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1) --dt-ease-in: cubic-bezier(0.4, 0, 1, 1)
+	--dt-ease-out: cubic-bezier(0, 0, 0.2, 1) --dt-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 ```
 
 ### Tailwind Classes

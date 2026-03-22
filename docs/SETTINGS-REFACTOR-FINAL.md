@@ -5,7 +5,9 @@
 ### Resumen de Cambios Realizados
 
 #### 1. Componente Base Reutilizable
+
 **Archivo:** `src/components/settings/common/entity-settings-view.tsx`
+
 - Creado componente genérico `EntitySettingsView<T>` para estandarizar vistas de settings
 - Define interfaces comunes: `EntityWithStats`, `StatConfig`, `FilterConfig`, `CardActions`, `FormProps`
 - Implementa patrón de estadísticas, filtros, búsqueda, grid/list view
@@ -13,7 +15,9 @@
 #### 2. Vistas Modernas Migradas a Datos Reales
 
 ##### Organization Settings
+
 **Archivo:** `src/components/settings/modern/organization-settings-modern.tsx`
+
 - ✅ Albums, Collections, Groups con datos reales via React Query
 - ✅ Formularios integrados: CreateAlbumForm, CreateCollectionForm, CreateGroupForm
 - ✅ Stats dinámicos calculados desde datos reales
@@ -21,21 +25,27 @@
 - ✅ Búsqueda y filtrado
 
 ##### Taxonomy Settings
+
 **Archivo:** `src/components/settings/modern/taxonomy-settings-modern.tsx`
+
 - ✅ Tags, Properties con datos reales
 - ✅ Formularios integrados: CreateTagForm, CreatePropertyForm
 - ✅ Categorías de tags con filtros visuales
 - ✅ Stats dinámicos
 
 ##### Worldbuilding Settings
+
 **Archivo:** `src/components/settings/modern/worldbuilding-settings-modern.tsx`
+
 - ✅ 7 entidades: Characters, Places, World Items, Concepts, Prompts, Notes, Wildcards
 - ✅ Formularios específicos para cada entidad
 - ✅ Selector visual de tipo de entidad con contadores
 - ✅ Manejo especial para wildcards (usa onSubmit en lugar de onCreated/onUpdated)
 
 ##### Files Settings
+
 **Archivo:** `src/components/settings/modern/files-settings-modern.tsx`
+
 - ✅ Folders con reindexación funcional
 - ✅ Thumbnails con estadísticas reales
 - ✅ Configuración de calidad de miniaturas
@@ -44,19 +54,23 @@
 #### 3. Correcciones de Errores
 
 ##### Tipos Genéricos Simplificados
+
 - Simplificados tipos en `EntityList` para evitar incompatibilidades
 - Uso de `any` estratégico donde los tipos específicos no son críticos
 
 ##### Interfaces de Formularios
+
 - Corregidas diferencias entre formularios:
   - Albums/Collections/Tags/Properties: `onCreated`/`onUpdated`
   - Groups: `onSubmit`
   - Wildcards: `onSubmit`
 
 ##### Propiedades de Entidades
+
 - Corregido `Property.dataType` → `Property.type` (el campo no existía)
 
 ##### Stats Configuration
+
 - Corregido llamadas a `getSubtitle` sin argumentos donde no los aceptaba
 
 ### Estructura Final de Navegación

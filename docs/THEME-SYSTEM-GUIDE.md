@@ -75,27 +75,29 @@ Tailwind usa var(--color-name)
 ## Temas Disponibles
 
 ### Temas Básicos
-| Tema | Descripción | Caso de uso |
-|------|-------------|-------------|
-| `light` | Tema claro estándar | Uso diurno |
-| `dark` | Tema oscuro estándar | Uso nocturno |
-| `system` | Automático según OS | Preferencia del sistema |
+
+| Tema     | Descripción          | Caso de uso             |
+| -------- | -------------------- | ----------------------- |
+| `light`  | Tema claro estándar  | Uso diurno              |
+| `dark`   | Tema oscuro estándar | Uso nocturno            |
+| `system` | Automático según OS  | Preferencia del sistema |
 
 ### Temas Especiales
-| Tema | Descripción | Caso de uso |
-|------|-------------|-------------|
-| `cafe` | Tonos marrones cálidos | Ambiente acogedor |
-| `violeta` | Púrpuras oscuros | Creatividad |
-| `madera` | Tonos madera neutros | Naturaleza |
-| `nocturno` | Azulado reducido brillo | Fatiga visual |
-| `verde` | Esmeralda oscuro | Enfoque |
-| `atardecer` | Naranjas y rojos | Relajación |
-| `corporativo` | Azul profesional | Entornos de trabajo |
-| `carbon` | Negro carbón | Contraste máximo |
-| `teal` | Verde azulado | Moderno |
-| `citrico` | Amarillos vibrantes | Energía |
-| `aurora` | Azules, púrpuras, verdes | Inspiración |
-| `neon` | Cyberpunk brillante | Creatividad extrema |
+
+| Tema          | Descripción              | Caso de uso         |
+| ------------- | ------------------------ | ------------------- |
+| `cafe`        | Tonos marrones cálidos   | Ambiente acogedor   |
+| `violeta`     | Púrpuras oscuros         | Creatividad         |
+| `madera`      | Tonos madera neutros     | Naturaleza          |
+| `nocturno`    | Azulado reducido brillo  | Fatiga visual       |
+| `verde`       | Esmeralda oscuro         | Enfoque             |
+| `atardecer`   | Naranjas y rojos         | Relajación          |
+| `corporativo` | Azul profesional         | Entornos de trabajo |
+| `carbon`      | Negro carbón             | Contraste máximo    |
+| `teal`        | Verde azulado            | Moderno             |
+| `citrico`     | Amarillos vibrantes      | Energía             |
+| `aurora`      | Azules, púrpuras, verdes | Inspiración         |
+| `neon`        | Cyberpunk brillante      | Creatividad extrema |
 
 ---
 
@@ -161,25 +163,25 @@ Estas variables cambian según el tema activo:
 
 ```css
 /* Contenido */
---entity-image: oklch(0.59 0.2 255);      /* Azul */
---entity-video: oklch(0.63 0.24 29);      /* Rojo */
---entity-audio: oklch(0.68 0.16 201);     /* Sky */
---entity-document: oklch(0.55 0.1 250);   /* Slate */
---entity-file: oklch(0.55 0.1 250);       /* Gris */
---entity-file-3d: oklch(0.65 0.15 277);   /* Índigo */
+--entity-image: oklch(0.59 0.2 255); /* Azul */
+--entity-video: oklch(0.63 0.24 29); /* Rojo */
+--entity-audio: oklch(0.68 0.16 201); /* Sky */
+--entity-document: oklch(0.55 0.1 250); /* Slate */
+--entity-file: oklch(0.55 0.1 250); /* Gris */
+--entity-file-3d: oklch(0.65 0.15 277); /* Índigo */
 
 /* Organización */
---entity-folder: oklch(0.75 0.18 85);     /* Amarillo */
---entity-album: oklch(0.59 0.23 293);     /* Violeta */
+--entity-folder: oklch(0.75 0.18 85); /* Amarillo */
+--entity-album: oklch(0.59 0.23 293); /* Violeta */
 --entity-collection: oklch(0.63 0.2 195); /* Cyan */
---entity-group: oklch(0.64 0.17 175);     /* Teal */
+--entity-group: oklch(0.64 0.17 175); /* Teal */
 
 /* Metadatos */
---entity-character: oklch(0.7 0.2 350);   /* Rosa */
---entity-place: oklch(0.64 0.17 175);     /* Teal */
---entity-tag: oklch(0.7 0.2 350);         /* Rosa */
---entity-prompt: oklch(0.64 0.17 165);    /* Esmeralda */
---entity-note: oklch(0.63 0.24 29);       /* Rojo */
+--entity-character: oklch(0.7 0.2 350); /* Rosa */
+--entity-place: oklch(0.64 0.17 175); /* Teal */
+--entity-tag: oklch(0.7 0.2 350); /* Rosa */
+--entity-prompt: oklch(0.64 0.17 165); /* Esmeralda */
+--entity-note: oklch(0.63 0.24 29); /* Rojo */
 ```
 
 ---
@@ -192,20 +194,22 @@ Estas variables cambian según el tema activo:
 import { useTheme } from '@/components/ui/theme-provider';
 
 function MyComponent() {
-  const { theme, setTheme, themes, resolvedTheme } = useTheme();
+	const { theme, setTheme, themes, resolvedTheme } = useTheme();
 
-  return (
-    <div>
-      <p>Tema actual: {theme}</p>
-      <p>Tema resuelto: {resolvedTheme}</p>
-      
-      <select onChange={(e) => setTheme(e.target.value)}>
-        {themes.map((t) => (
-          <option key={t} value={t}>{t}</option>
-        ))}
-      </select>
-    </div>
-  );
+	return (
+		<div>
+			<p>Tema actual: {theme}</p>
+			<p>Tema resuelto: {resolvedTheme}</p>
+
+			<select onChange={(e) => setTheme(e.target.value)}>
+				{themes.map((t) => (
+					<option key={t} value={t}>
+						{t}
+					</option>
+				))}
+			</select>
+		</div>
+	);
 }
 ```
 
@@ -215,11 +219,11 @@ function MyComponent() {
 import { ThemeToggle } from '@/components/core/theme/theme-toggle';
 
 function Header() {
-  return (
-    <header>
-      <ThemeToggle />
-    </header>
-  );
+	return (
+		<header>
+			<ThemeToggle />
+		</header>
+	);
 }
 ```
 
@@ -246,21 +250,21 @@ function Header() {
 ```css
 /* ✅ USAR - Variables CSS */
 .my-component {
-  background: var(--background);
-  color: var(--foreground);
-  border: 1px solid var(--border);
+	background: var(--background);
+	color: var(--foreground);
+	border: 1px solid var(--border);
 }
 
 /* ✅ USAR - Con opacidad (color-mix) */
 .my-overlay {
-  background: color-mix(in oklch, var(--primary) 50%, transparent);
+	background: color-mix(in oklch, var(--primary) 50%, transparent);
 }
 
 /* ✅ USAR - Design Tokens */
 .my-button {
-  background: var(--dt-primary-500);
-  box-shadow: var(--dt-shadow-2);
-  transition: all var(--dt-duration-fast) var(--dt-ease-out);
+	background: var(--dt-primary-500);
+	box-shadow: var(--dt-shadow-2);
+	transition: all var(--dt-duration-fast) var(--dt-ease-out);
 }
 ```
 
@@ -278,10 +282,7 @@ const style = { color: 'var(--entity-video)' };
 // Para gráficos (Recharts)
 import { CHART_COLORS, withOpacity } from '@/lib/styles/chart-colors';
 
-const data = [
-  { color: CHART_COLORS.primary },
-  { color: withOpacity(CHART_COLORS.secondary, 0.5) },
-];
+const data = [{ color: CHART_COLORS.primary }, { color: withOpacity(CHART_COLORS.secondary, 0.5) }];
 ```
 
 ---
@@ -344,27 +345,27 @@ const isDark = theme === 'dark';               // ❌ (puede haber más themes o
 ### Ejemplo 1: Botón con color hardcodeado
 
 **Antes:**
+
 ```tsx
-<button style={{ background: '#3b82f6', color: 'white' }}>
-  Click me
-</button>
+<button style={{ background: '#3b82f6', color: 'white' }}>Click me</button>
 ```
 
 **Después:**
+
 ```tsx
-<button className="bg-primary text-primary-foreground">
-  Click me
-</button>
+<button className="bg-primary text-primary-foreground">Click me</button>
 ```
 
 ### Ejemplo 2: Overlay con opacidad
 
 **Antes:**
+
 ```tsx
 <div style={{ background: 'rgba(0, 0, 0, 0.5)' }} />
 ```
 
 **Después:**
+
 ```tsx
 // Opción 1: Usar color del tema
 <div className="bg-black/50" />  // Tailwind opacity
@@ -376,17 +377,19 @@ const isDark = theme === 'dark';               // ❌ (puede haber más themes o
 ### Ejemplo 3: Colores de entidad dinámica
 
 **Antes:**
+
 ```tsx
 const COLORS = {
-  image: '#3b82f6',
-  video: '#ef4444',
-  audio: '#0ea5e9',
+	image: '#3b82f6',
+	video: '#ef4444',
+	audio: '#0ea5e9',
 };
 
-<div style={{ color: COLORS[type] }} />
+<div style={{ color: COLORS[type] }} />;
 ```
 
 **Después:**
+
 ```tsx
 <div style={{ color: `var(--entity-${type})` }} />
 // o
@@ -402,7 +405,7 @@ const COLORS = {
 ```tsx
 // Verificar que ThemeProvider envuelve la app
 <ThemeProvider defaultTheme="system" storageKey="theme">
-  <App />
+	<App />
 </ThemeProvider>
 
 // Verificar que el atributo data-theme existe en <html>
@@ -414,7 +417,9 @@ const COLORS = {
 ```css
 /* Asegurar que las transiciones están habilitadas */
 html {
-  transition: background-color 0.4s ease, color 0.4s ease;
+	transition:
+		background-color 0.4s ease,
+		color 0.4s ease;
 }
 ```
 
@@ -448,6 +453,7 @@ html {
 ## Changelog
 
 ### v2.0 (2026-01-30)
+
 - ✅ Eliminados todos los colores hex hardcodeados
 - ✅ Agregados temas `aurora` y `neon`
 - ✅ Actualizado Theme Provider con 14 temas

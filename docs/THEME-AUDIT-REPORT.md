@@ -11,6 +11,7 @@
 El proyecto cuenta con una infraestructura sólida de temas y tokens CSS. Se identificaron **14 temas personalizados** y un sistema de tokens bien estructurado. Sin embargo, se encontraron algunas inconsistencias que requieren corrección.
 
 ### Fortalezas ✅
+
 1. Sistema de tokens CSS robusto (`design-tokens.css`, `tokens.css`)
 2. Theme Provider implementado con 13 temas personalizados
 3. Tailwind configurado para usar variables CSS
@@ -18,6 +19,7 @@ El proyecto cuenta con una infraestructura sólida de temas y tokens CSS. Se ide
 5. Componente Theme Toggle ya existe
 
 ### Problemas Identificados ⚠️
+
 1. Colores hex hardcodeados en `color-tokens.ts` (líneas 205-226)
 2. Efecto ripple en `button.tsx` usa `rgba(255, 255, 255, 0.3)` hardcodeado
 3. Algunos colores oklch hardcodeados en `chart-colors.ts`
@@ -56,28 +58,29 @@ src/
 
 ## 🎨 Temas Disponibles
 
-| Tema | Descripción | Estado |
-|------|-------------|--------|
-| `light` | Tema claro por defecto | ✅ |
-| `dark` | Tema oscuro por defecto | ✅ |
-| `cafe` | Tonos marrones cálidos | ✅ |
-| `violeta` | Púrpuras oscuros | ✅ |
-| `madera` | Tonos madera neutros | ✅ |
-| `nocturno` | Azulado para fatiga visual | ✅ |
-| `verde` | Esmeralda oscuro | ✅ |
-| `atardecer` | Naranjas y rojos | ✅ |
-| `corporativo` | Azul profesional | ✅ |
-| `carbon` | Negro carbón | ✅ |
-| `teal` | Verde azulado | ✅ |
-| `citrico` | Amarillos vibrantes | ✅ |
-| `aurora` | Inspirado en auroras boreales | ✅ |
-| `neon` | Estilo cyberpunk/neón | ✅ |
+| Tema          | Descripción                   | Estado |
+| ------------- | ----------------------------- | ------ |
+| `light`       | Tema claro por defecto        | ✅     |
+| `dark`        | Tema oscuro por defecto       | ✅     |
+| `cafe`        | Tonos marrones cálidos        | ✅     |
+| `violeta`     | Púrpuras oscuros              | ✅     |
+| `madera`      | Tonos madera neutros          | ✅     |
+| `nocturno`    | Azulado para fatiga visual    | ✅     |
+| `verde`       | Esmeralda oscuro              | ✅     |
+| `atardecer`   | Naranjas y rojos              | ✅     |
+| `corporativo` | Azul profesional              | ✅     |
+| `carbon`      | Negro carbón                  | ✅     |
+| `teal`        | Verde azulado                 | ✅     |
+| `citrico`     | Amarillos vibrantes           | ✅     |
+| `aurora`      | Inspirado en auroras boreales | ✅     |
+| `neon`        | Estilo cyberpunk/neón         | ✅     |
 
 ---
 
 ## 🔧 Sistema de Tokens
 
 ### Tokens de Color Semánticos
+
 ```css
 /* Entidades de contenido */
 --entity-image: oklch(0.59 0.2 255);
@@ -97,6 +100,7 @@ src/
 ```
 
 ### Design Tokens v2.0
+
 ```css
 /* Paletas */
 --dt-primary-50 a --dt-primary-950
@@ -124,31 +128,33 @@ src/
 ## ⚠️ Colores Hardcodeados Encontrados
 
 ### 1. `src/lib/styles/color-tokens.ts` (Líneas 205-226)
+
 ```typescript
 // ❌ HEX hardcodeados
 export const PRESET_COLORS_HEX = [
-  '#22c55e', // green
-  '#eab308', // yellow
-  '#ec4899', // pink
-  '#8b5cf6', // purple
-  '#06b6d4', // cyan
-  '#f97316', // orange
-  '#14b8a6', // teal
-  '#f43f5e', // rose
-  '#6366f1', // indigo
-  '#0ea5e9', // sky
-  '#64748b', // slate
-  '#6b7280', // gray
-  '#d946ef', // fuchsia
-  '#84cc16', // lime
-  '#0891b2', // cyan-dark
-  '#9333ea', // purple-dark
+	'#22c55e', // green
+	'#eab308', // yellow
+	'#ec4899', // pink
+	'#8b5cf6', // purple
+	'#06b6d4', // cyan
+	'#f97316', // orange
+	'#14b8a6', // teal
+	'#f43f5e', // rose
+	'#6366f1', // indigo
+	'#0ea5e9', // sky
+	'#64748b', // slate
+	'#6b7280', // gray
+	'#d946ef', // fuchsia
+	'#84cc16', // lime
+	'#0891b2', // cyan-dark
+	'#9333ea', // purple-dark
 ];
 ```
 
 **Solución:** Reemplazar con variables CSS o valores OKLCH del sistema.
 
 ### 2. `src/components/ui/button.tsx` (Línea 114)
+
 ```typescript
 // ❌ RGBA hardcodeado para ripple
 rippleElement.style.cssText = `
@@ -160,6 +166,7 @@ rippleElement.style.cssText = `
 **Solución:** Usar variable CSS o `currentColor` con opacidad.
 
 ### 3. `src/lib/styles/chart-colors.ts` (Línea 58)
+
 ```typescript
 // ❌ OKLCH hardcodeado
 others: 'oklch(0.7 0.15 90)', // --preset-citrico
@@ -172,16 +179,19 @@ others: 'oklch(0.7 0.15 90)', // --preset-citrico
 ## 📝 Recomendaciones
 
 ### Prioridad Alta
+
 1. ✅ Migrar colores HEX en `color-tokens.ts` a variables CSS
 2. ✅ Reemplazar `rgba(255, 255, 255, 0.3)` en ripple con variable temática
 3. ✅ Consolidar variables duplicadas entre archivos CSS
 
 ### Prioridad Media
+
 4. Agregar documentación de uso de tokens en AGENTS.md
 5. Crear guía visual de todos los temas disponibles
 6. Implementar theme toggle en la UI principal
 
 ### Prioridad Baja
+
 7. Auditar componentes individuales por colores inline
 8. Crear tests visuales para regresión de temas
 

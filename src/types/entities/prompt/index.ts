@@ -9,12 +9,7 @@ export type {
 	PromptWithStats,
 } from './base';
 
-export {
-	PromptCategory,
-	PromptSortCriteria,
-	PromptSortOption,
-	PromptViewMode,
-} from './enums';
+export { PromptCategory, PromptSortCriteria, PromptSortOption, PromptViewMode } from './enums';
 
 export type {
 	PromptExecutionParams,

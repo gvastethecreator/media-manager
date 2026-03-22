@@ -21,61 +21,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 
-// Animaciones de entrada del menú usando IntersectionObserver
-const useMenuAnimation = (elementRef: React.RefObject<HTMLElement | null>) => {
-	const [hasAnimated, setHasAnimated] = useState(false);
-
-	useEffect(() => {
-		const element = elementRef.current;
-		if (!element || hasAnimated) return;
-
-		// Configurar IntersectionObserver para detectar cuando aparece
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting && !hasAnimated) {
-						setHasAnimated(true);
-						gsap.killTweensOf(element);
-						gsap.fromTo(
-							element,
-							{ opacity: 0, scale: 0.95 },
-							{ opacity: 1, scale: 1, duration: 0.15, ease: 'power1.out' }
-						);
-					}
-				});
-			},
-			{ threshold: 0.1 }
-		);
-
-		observer.observe(element);
-
-		return () => {
-			observer.disconnect();
-		};
-	}, [hasAnimated, elementRef]);
-
-	const resetAnimation = useCallback(() => {
-		setHasAnimated(false);
-	}, []);
-
-	return { resetAnimation };
-};
-
-// Animación de flecha en submenús
-const useArrowAnimation = (elementRef: React.RefObject<HTMLDivElement | null>, isOpen: boolean) => {
-	useEffect(() => {
-		if (!elementRef.current) return;
-
-		const element = elementRef.current;
-		gsap.killTweensOf(element);
-		gsap.to(element, {
-			x: isOpen ? 3 : 0,
-			duration: isOpen ? 0.2 : 0.15,
-			ease: 'power1.out',
-		});
-	}, [isOpen, elementRef]);
-};
-
 const ContextMenu = ContextMenuPrimitive.Root;
 
 const ContextMenuTrigger = ContextMenuPrimitive.Trigger;
@@ -97,11 +42,6 @@ const ContextMenuSubTrigger = React.forwardRef<
 		inset?: boolean;
 	}
 >(({ className, inset, children, ...props }, ref) => {
-	const [isOpen, setIsOpen] = useState(false);
-	const arrowRef = useRef<HTMLDivElement>(null);
-
-	useArrowAnimation(arrowRef, isOpen);
-
 	return (
 		<ContextMenuPrimitive.SubTrigger
 			className={cn(
@@ -115,13 +55,11 @@ const ContextMenuSubTrigger = React.forwardRef<
 				'data-disabled:pointer-events-none data-disabled:opacity-50',
 				className
 			)}
-			onPointerEnter={() => setIsOpen(true)}
-			onPointerLeave={() => setIsOpen(false)}
 			ref={ref}
 			{...props}
 		>
 			{children}
-			<div className="ml-auto" ref={arrowRef}>
+			<div className="ml-auto transition-transform duration-dt-fast data-[state=open]:translate-x-1">
 				<ChevronRight className="h-4 w-4 text-muted-foreground" />
 			</div>
 		</ContextMenuPrimitive.SubTrigger>
@@ -136,25 +74,15 @@ const ContextMenuSubContent = React.forwardRef<
 	React.ElementRef<typeof ContextMenuPrimitive.SubContent>,
 	React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubContent>
 >(({ className, ...props }, ref) => {
-	const contentRef = useRef<HTMLDivElement>(null);
-	useMenuAnimation(contentRef);
-
 	return (
 		<ContextMenuPrimitive.SubContent
 			className={cn(
 				'z-50 min-w-32 origin-[--radix-context-menu-content-transform-origin] overflow-hidden',
 				'rounded-dt-md border-2 border-border/40 bg-popover p-1',
-				'text-popover-foreground shadow-dt-3',
+				'text-popover-foreground shadow-dt-3 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
 				className
 			)}
-			ref={(node) => {
-				contentRef.current = node;
-				if (typeof ref === 'function') {
-					ref(node);
-				} else if (ref) {
-					ref.current = node;
-				}
-			}}
+			ref={ref}
 			{...props}
 		/>
 	);
@@ -171,9 +99,6 @@ const ContextMenuContent = React.forwardRef<
 	React.ElementRef<typeof ContextMenuPrimitive.Content>,
 	React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Content>
 >(({ className, ...props }, ref) => {
-	const contentRef = useRef<HTMLDivElement>(null);
-	useMenuAnimation(contentRef);
-
 	return (
 		<ContextMenuPrimitive.Portal>
 			<ContextMenuPrimitive.Content
@@ -182,17 +107,10 @@ const ContextMenuContent = React.forwardRef<
 					'origin-[--radix-context-menu-content-transform-origin]',
 					'overflow-y-auto overflow-x-hidden rounded-dt-md',
 					'border-2 border-border/40 bg-popover p-1',
-					'text-popover-foreground shadow-dt-3',
+					'text-popover-foreground shadow-dt-3 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
 					className
 				)}
-				ref={(node) => {
-					contentRef.current = node;
-					if (typeof ref === 'function') {
-						ref(node);
-					} else if (ref) {
-						ref.current = node;
-					}
-				}}
+				ref={ref}
 				{...props}
 			/>
 		</ContextMenuPrimitive.Portal>

@@ -36,8 +36,4 @@ export type {
 } from './types';
 // Exportar enums como valores
 // Exportar el esquema de validación
-export {
-	Language,
-	ProfileSchema,
-	ThemeMode,
-} from './types';
+export { Language, ProfileSchema, ThemeMode } from './types';

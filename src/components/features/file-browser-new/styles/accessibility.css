@@ -20,8 +20,8 @@
 }
 
 /* Mejorar accesibilidad de botones en la toolbar del file-browser */
-[data-testid^="view-mode-"][role="menuitemradio"]:focus-visible,
-[data-testid^="view-mode-"][role="menuitemradio"]:focus {
+[data-testid^='view-mode-'][role='menuitemradio']:focus-visible,
+[data-testid^='view-mode-'][role='menuitemradio']:focus {
 	outline: 2px solid var(--ring);
 	outline-offset: 2px;
 }
