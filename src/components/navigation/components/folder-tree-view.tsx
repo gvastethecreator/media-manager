@@ -19,6 +19,27 @@ interface FolderWithChildren extends FolderWithStats {
 	hasChildren?: boolean;
 }
 
+function getFolderFileCount(folder: FolderWithChildren): number {
+	const counts = folder._count;
+	const summedCount =
+		(counts?.images ?? 0) +
+		(counts?.videos ?? 0) +
+		(counts?.audios ?? 0) +
+		(counts?.documents ?? 0) +
+		(counts?.jsonFiles ?? 0) +
+		(counts?.file3Ds ?? 0);
+
+	if (typeof counts?.totalFiles === 'number') {
+		return counts.totalFiles;
+	}
+
+	if (summedCount > 0) {
+		return summedCount;
+	}
+
+	return folder.totalFiles ?? 0;
+}
+
 /**
  * Construye recursivamente el árbol de carpetas desde datos planos
  */
@@ -78,7 +99,7 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 	const isExpanded = expandedFolders.has(folder.id);
 	const isSelected = selectedFolderId === folder.id;
 	const hasChildren = folder.hasChildren && folder.children && folder.children.length > 0;
-	const fileCount = folder.totalFiles ?? (folder._count?.images ?? 0) + (folder._count?.videos ?? 0);
+	const fileCount = getFolderFileCount(folder);
 
 	const handleClick = useCallback(() => {
 		if (hasChildren && !isExpanded) {

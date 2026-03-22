@@ -6,7 +6,7 @@
 
 import { Effect, Exit } from 'effect';
 import { db } from '@/lib/drizzle';
-import { folders } from '@/lib/drizzle/schema';
+import { documents, folders } from '@/lib/drizzle/schema';
 import { FolderService, FolderServiceLive } from '../folder.service.effect';
 import {
 	FolderCircularReferenceError,
@@ -31,6 +31,7 @@ describe('FolderService Effect', () => {
 	// Cleanup después de cada test
 	afterEach(async () => {
 		try {
+			await db.delete(documents);
 			// Borrar TODAS las carpetas de test
 			await db.delete(folders);
 		} catch (error) {
@@ -474,6 +475,40 @@ describe('FolderService Effect', () => {
 	});
 
 	describe('Hierarchical Operations', () => {
+		describe('getTree', () => {
+			it('should include non-image file counts for sidebar tree badges', async () => {
+				const service = Effect.gen(function* () {
+					return yield* FolderService;
+				});
+
+				const folderService = await runEffect(service);
+				const child = await runEffect(
+					folderService.create({
+						name: 'Docs Child',
+						path: '/docs-child',
+						parentId: null,
+					})
+				);
+
+				await db.insert(documents).values({
+					id: 'doc-sidebar-count-test',
+					name: 'manual.pdf',
+					path: '/docs-child/manual.pdf',
+					size: 1234,
+					hash: 'a'.repeat(64),
+					mimeType: 'application/pdf',
+					extension: '.pdf',
+					folderId: child.id,
+				});
+
+				const result = await runEffect(folderService.getTree());
+				const treeChild = result.find((folder) => folder.id === child.id);
+
+				expect(treeChild?._count?.documents).toBe(1);
+				expect(treeChild?._count?.totalFiles).toBe(1);
+			});
+		});
+
 		describe('getChildren', () => {
 			it('should get root folders when parentId is null', async () => {
 				const service = Effect.gen(function* () {

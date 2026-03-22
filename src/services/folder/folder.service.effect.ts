@@ -9,7 +9,7 @@ import { Schema } from '@effect/schema';
 import { and, asc, count, desc, eq, inArray, isNull, like, or, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { folders, images, videos } from '@/lib/drizzle/schema';
+import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema';
 import { Folder, FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
@@ -59,8 +59,13 @@ export interface GetFoldersResult {
  * Contadores de relaciones de una carpeta
  */
 export interface FolderCounts {
+	audios: number;
 	children: number;
+	documents: number;
+	file3Ds: number;
 	images: number;
+	jsonFiles: number;
+	totalFiles: number;
 	videos: number;
 }
 
@@ -125,8 +130,24 @@ export class FolderService extends Context.Tag('FolderService')<FolderService, F
  */
 const getRelationsCounts = (folderId: string): Effect.Effect<FolderCounts, FolderError> =>
 	Effect.gen(function* () {
-		const [childrenCountResult, imageCountResult, videoCountResult] = yield* Effect.tryPromise<
-			[Array<{ count: number }>, Array<{ count: number }>, Array<{ count: number }>],
+		const [
+			childrenCountResult,
+			imageCountResult,
+			videoCountResult,
+			audioCountResult,
+			documentCountResult,
+			jsonCountResult,
+			file3DCountResult,
+		] = yield* Effect.tryPromise<
+			[
+				Array<{ count: number }>,
+				Array<{ count: number }>,
+				Array<{ count: number }>,
+				Array<{ count: number }>,
+				Array<{ count: number }>,
+				Array<{ count: number }>,
+				Array<{ count: number }>,
+			],
 			FolderError
 		>({
 			try: () =>
@@ -134,14 +155,30 @@ const getRelationsCounts = (folderId: string): Effect.Effect<FolderCounts, Folde
 					db.select({ count: count() }).from(folders).where(eq(folders.parentId, folderId)),
 					db.select({ count: count() }).from(images).where(eq(images.folderId, folderId)),
 					db.select({ count: count() }).from(videos).where(eq(videos.folderId, folderId)),
+					db.select({ count: count() }).from(audios).where(eq(audios.folderId, folderId)),
+					db.select({ count: count() }).from(documents).where(eq(documents.folderId, folderId)),
+					db.select({ count: count() }).from(jsonFiles).where(eq(jsonFiles.folderId, folderId)),
+					db.select({ count: count() }).from(file3Ds).where(eq(file3Ds.folderId, folderId)),
 				]),
 			catch: (error: unknown) => fromUnknownError('getRelationsCounts', error),
 		});
 
+		const imagesCount = imageCountResult[0]?.count ?? 0;
+		const videosCount = videoCountResult[0]?.count ?? 0;
+		const audiosCount = audioCountResult[0]?.count ?? 0;
+		const documentsCount = documentCountResult[0]?.count ?? 0;
+		const jsonFilesCount = jsonCountResult[0]?.count ?? 0;
+		const file3DsCount = file3DCountResult[0]?.count ?? 0;
+
 		return {
+			audios: audiosCount,
 			children: childrenCountResult[0]?.count ?? 0,
-			images: imageCountResult[0]?.count ?? 0,
-			videos: videoCountResult[0]?.count ?? 0,
+			documents: documentsCount,
+			file3Ds: file3DsCount,
+			images: imagesCount,
+			jsonFiles: jsonFilesCount,
+			totalFiles: imagesCount + videosCount + audiosCount + documentsCount + jsonFilesCount + file3DsCount,
+			videos: videosCount,
 		};
 	});
 
@@ -644,13 +681,17 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('getTree:validation', error),
 				});
 
-				// Batch enrichment: count children, images, videos per folder in 3 queries
+				// Batch enrichment: count children and direct files per folder across all supported file tables
 				const folderIds = validatedFolders.map((f) => f.id);
 
-				const [childrenCounts, imageCounts, videoCounts] =
+				const [childrenCounts, imageCounts, videoCounts, audioCounts, documentCounts, jsonFileCounts, file3DCounts] =
 					folderIds.length > 0
 						? yield* Effect.tryPromise<
 								[
+									Array<{ id: string; count: number }>,
+									Array<{ id: string; count: number }>,
+									Array<{ id: string; count: number }>,
+									Array<{ id: string; count: number }>,
 									Array<{ id: string; count: number }>,
 									Array<{ id: string; count: number }>,
 									Array<{ id: string; count: number }>,
@@ -674,20 +715,55 @@ const FolderServiceLive = Layer.succeed(
 											.from(videos)
 											.where(inArray(videos.folderId, folderIds))
 											.groupBy(videos.folderId),
+										db
+											.select({ id: audios.folderId, count: count() })
+											.from(audios)
+											.where(inArray(audios.folderId, folderIds))
+											.groupBy(audios.folderId),
+										db
+											.select({ id: documents.folderId, count: count() })
+											.from(documents)
+											.where(inArray(documents.folderId, folderIds))
+											.groupBy(documents.folderId),
+										db
+											.select({ id: jsonFiles.folderId, count: count() })
+											.from(jsonFiles)
+											.where(inArray(jsonFiles.folderId, folderIds))
+											.groupBy(jsonFiles.folderId),
+										db
+											.select({ id: file3Ds.folderId, count: count() })
+											.from(file3Ds)
+											.where(inArray(file3Ds.folderId, folderIds))
+											.groupBy(file3Ds.folderId),
 									]),
 								catch: (error: unknown) => fromUnknownError('getTree:counts', error),
 							})
-						: [[], [], []];
+						: [[], [], [], [], [], [], []];
 
 				const childrenMap = new Map(childrenCounts.map((r) => [r.id, r.count]));
 				const imageMap = new Map(imageCounts.map((r) => [r.id, r.count]));
 				const videoMap = new Map(videoCounts.map((r) => [r.id, r.count]));
+				const audioMap = new Map(audioCounts.map((r) => [r.id, r.count]));
+				const documentMap = new Map(documentCounts.map((r) => [r.id, r.count]));
+				const jsonFileMap = new Map(jsonFileCounts.map((r) => [r.id, r.count]));
+				const file3DMap = new Map(file3DCounts.map((r) => [r.id, r.count]));
 
 				return validatedFolders.map((f) => ({
 					...f,
 					_count: {
+						audios: audioMap.get(f.id) ?? 0,
 						children: childrenMap.get(f.id) ?? 0,
+						documents: documentMap.get(f.id) ?? 0,
+						file3Ds: file3DMap.get(f.id) ?? 0,
 						images: imageMap.get(f.id) ?? 0,
+						jsonFiles: jsonFileMap.get(f.id) ?? 0,
+						totalFiles:
+							(imageMap.get(f.id) ?? 0) +
+							(videoMap.get(f.id) ?? 0) +
+							(audioMap.get(f.id) ?? 0) +
+							(documentMap.get(f.id) ?? 0) +
+							(jsonFileMap.get(f.id) ?? 0) +
+							(file3DMap.get(f.id) ?? 0),
 						videos: videoMap.get(f.id) ?? 0,
 					},
 				})) as FolderWithStats[];

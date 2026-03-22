@@ -1,10 +1,10 @@
-import { count, desc, eq, isNull, not, sql, sum } from 'drizzle-orm';
+import { count, desc, eq, isNull, not, sum } from 'drizzle-orm';
 import { existsSync } from 'fs';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
 import { thumbsConfig } from '@/config/thumbs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { db } from '@/lib/drizzle';
+import { db, getDbClient } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import type { ThumbnailResult as LibThumbResult } from '@/lib/image/thumbnail';
 import { generateThumbnail } from '@/lib/image/thumbnail';
@@ -309,10 +309,18 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 
 		// Verificar la conexión a la base de datos antes de continuar
 		try {
+			const client = getDbClient();
+			if (!client) {
+				throw new Error('Cliente de base de datos no disponible.');
+			}
+
 			// Consulta simple para verificar la conexión
-			await db.execute(sql`SELECT 1`);
+			await client.execute('SELECT 1');
 		} catch (dbError) {
-			thumbLogger.error('❌ Error de conexión a la base de datos:', dbError);
+			thumbLogger.error(
+				'❌ Error de conexión a la base de datos:',
+				dbError instanceof Error ? { message: dbError.message, stack: dbError.stack } : dbError
+			);
 			throw new Error('No se pudo conectar a la base de datos. Verifica tu conexión.');
 		}
 
@@ -353,7 +361,10 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 			totalSize,
 		};
 	} catch (error) {
-		thumbLogger.error('❌ Error obteniendo estadísticas:', error);
+		thumbLogger.error(
+			'❌ Error obteniendo estadísticas:',
+			error instanceof Error ? { message: error.message, stack: error.stack } : error
+		);
 
 		if (error instanceof Error) {
 			throw error;

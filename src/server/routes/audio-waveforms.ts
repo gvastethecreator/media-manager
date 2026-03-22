@@ -26,11 +26,12 @@ interface AudioWaveformOptions {
 }
 
 /**
- * 🗂️ Caché en memoria para waveforms generados
+ * 🗂️ Caché en memoria para waveforms generados (con límite de tamaño)
  * Key: `${audioId}:${width}:${height}:${bars}:${color}`
  */
 const waveformCache = new Map<string, { svg: string; timestamp: number }>();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas
+const MAX_WAVEFORM_CACHE_SIZE = 200; // Límite para evitar memory leaks
 
 /**
  * 📊 Interfaz para información de audio

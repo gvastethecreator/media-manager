@@ -18,10 +18,12 @@ export interface ApiResponse<T = unknown> {
 
 export class ApiClient {
 	private readonly baseURL: string;
+	private readonly defaultTimeout: number;
 
-	constructor() {
+	constructor(options?: { timeout?: number }) {
 		// Usar el proxy de Vite en desarrollo y la misma URL base en producción
 		this.baseURL = process.env.NODE_ENV === 'development' ? '' : window.location.origin;
+		this.defaultTimeout = options?.timeout ?? 30_000; // 30s default timeout
 	}
 
 	/**
@@ -88,16 +90,19 @@ export class ApiClient {
 		apiLogger.info(`🌐 ${method} ${endpoint}`, { data });
 
 		try {
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), this.defaultTimeout);
+
 			const config: RequestInit = {
 				method,
 				headers: {
 					'Content-Type': 'application/json',
 					// Fuerza a no usar caché del navegador para evitar UIs desactualizadas tras reindex
 					'Cache-Control': 'no-cache',
-					Pragma: 'no-cache',
 				},
 				// Evita caching del lado del cliente en todos los métodos (especialmente GET)
 				cache: 'no-store',
+				signal: controller.signal,
 			};
 
 			if (data && method !== 'GET') {
@@ -105,6 +110,7 @@ export class ApiClient {
 			}
 
 			const response = await fetch(url, config);
+			clearTimeout(timeoutId);
 
 			if (!response.ok) {
 				let errorText: string;
