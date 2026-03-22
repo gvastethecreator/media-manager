@@ -50,23 +50,30 @@ export async function phase5_indexFiles(
 				const { FileSyncService } = await import('@/lib/filesystem/file-sync.service');
 				const fileSyncService = FileSyncService.getInstance();
 
+				let lastEmitTime = 0;
+
 				// Sincronizar archivos de la carpeta (esto indexa los archivos)
 				const syncResult = await fileSyncService.syncFolderFiles(folder.id, {
 					dryRun: false,
 					// Callback para reportar progreso de archivos individuales
 					onProgress: async (filesProcessed, totalFiles, currentFile) => {
 						if (options.emitEvents !== false) {
-							const fileName = currentFile.split(/[\\/]/).pop() || currentFile;
-							await emitProgress('folder:progress', {
-								isProcessing: true,
-								folderId: folder.id,
-								phase: 'processing',
-								progress: Math.round((filesProcessed / totalFiles) * 100),
-								filesProcessed,
-								totalFiles,
-								message: `   └── [${filesProcessed}/${totalFiles}] ${fileName}`,
-								timestamp: Date.now(),
-							});
+							const now = Date.now();
+							// Emitir progreso máximo cada 200ms para evitar spam SSE en frontend
+							if (now - lastEmitTime >= 200 || filesProcessed === totalFiles || filesProcessed === 0) {
+								lastEmitTime = now;
+								const fileName = currentFile.split(/[\\/]/).pop() || currentFile;
+								await emitProgress('folder:progress', {
+									isProcessing: true,
+									folderId: folder.id,
+									phase: 'processing',
+									progress: Math.round((filesProcessed / totalFiles) * 100),
+									filesProcessed,
+									totalFiles,
+									message: `   └── [${filesProcessed}/${totalFiles}] ${fileName}`,
+									timestamp: now,
+								});
+							}
 						}
 					},
 				});

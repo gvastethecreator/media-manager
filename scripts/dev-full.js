@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import { spawn } from 'child_process';
 
 const processes = [];
+let isCleaningUp = false;
 
 // Función para manejar la salida con colores
 function logWithPrefix(prefix, color, data) {
@@ -23,19 +24,26 @@ function logWithPrefix(prefix, color, data) {
 
 // Función para limpiar procesos al salir
 function cleanup() {
+	if (isCleaningUp) return;
+	isCleaningUp = true;
+
 	console.log(chalk.yellow('\n🛑 Cerrando servidores...'));
 	for (const proc of processes) {
 		if (proc && !proc.killed) {
 			proc.kill('SIGTERM');
 		}
 	}
-	process.exit(0);
 }
 
 // Manejar señales de cierre
-process.on('SIGINT', cleanup);
-process.on('SIGTERM', cleanup);
-process.on('exit', cleanup);
+process.on('SIGINT', () => {
+	cleanup();
+	process.exit(0);
+});
+process.on('SIGTERM', () => {
+	cleanup();
+	process.exit(0);
+});
 
 console.log(chalk.blue('🚀 Iniciando desarrollo completo...'));
 console.log(chalk.gray('   Frontend: http://localhost:5173'));
@@ -79,6 +87,8 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 	const ok = await waitForHealth('http://localhost:4000/health');
 	if (!ok) {
 		console.warn(chalk.yellow('[DEV] Backend no respondió al health check a tiempo, lanzando Vite de todas formas...'));
+	} else {
+		console.log(chalk.green('[DEV] ✅ Backend listo en http://localhost:4000'));
 	}
 
 	// Ejecutar frontend (Vite) una vez que el backend esté arriba (o tras timeout)
@@ -101,6 +111,11 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 	});
 
 	processes.push(viteProcess);
+
+	const viteReady = await waitForHealth('http://localhost:5173', { retries: 80, intervalMs: 250 });
+	if (viteReady) {
+		console.log(chalk.green('[DEV] ✅ Desarrollo completo listo. Frontend: http://localhost:5173 · Backend: http://localhost:4000'));
+	}
 
 	console.log(chalk.yellow('⌨️  Presiona Ctrl+C para detener ambos servidores\n'));
 })();

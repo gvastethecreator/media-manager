@@ -105,7 +105,7 @@ export function CharacterCardHeader({
 					<div className="flex flex-col">
 						<h3 className={cn('truncate font-bold text-lg tracking-tight', 'text-white drop-shadow-md')}>
 							{name}
-							{isFavorite && <Sparkles className="-mt-1 ml-1 inline h-4 w-4 text-yellow-200" />}
+							{isFavorite && <Sparkles className="-mt-1 ml-1 inline h-4 w-4 text-dt-warning-400" />}
 						</h3>
 						<div className="flex items-center gap-1 text-sm text-white/80">
 							{classIcon()}
@@ -172,7 +172,7 @@ export function CharacterCardHeader({
 						const starValue = `${name}-star-${i + 1}`;
 						return (
 							<div
-								className="h-4 w-4 rounded-full bg-yellow-300"
+								className="h-4 w-4 rounded-full bg-dt-warning-400"
 								key={starValue}
 								style={{ boxShadow: '0 0 3px rgba(var(--effect-highlight-rgb), 0.7)' }}
 							/>

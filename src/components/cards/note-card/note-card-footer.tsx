@@ -138,7 +138,7 @@ export function NoteCardFooter({
 						(tcgMode ? (
 							<Star className="h-4 w-4 fill-current text-warning" />
 						) : (
-							<Heart className="h-4 w-4 fill-current text-pink-500" />
+							<Heart className="h-4 w-4 fill-current text-dt-primary-500" />
 						))}
 				</div>
 

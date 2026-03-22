@@ -97,9 +97,9 @@ export const HierarchicalFolderWrapper = memo(function HierarchicalFolderWrapper
 		logger.warn('Carpeta no encontrada para el path solicitado:', hierarchicalPath);
 		return (
 			<div className="flex h-full flex-col items-center justify-center p-8 text-center">
-				<div className="mb-4 rounded-full bg-red-100 p-4 dark:bg-red-900/30">
+				<div className="mb-4 rounded-full bg-dt-danger-100 p-4 dark:bg-dt-danger-900/30">
 					<svg
-						className="h-10 w-10 text-destructive dark:text-red-400"
+						className="h-10 w-10 text-destructive dark:text-dt-danger-400"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"

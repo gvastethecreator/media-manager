@@ -208,41 +208,10 @@ export function useReindexFolder() {
 			queryClient.invalidateQueries({ queryKey: navigationKeys.data() });
 			queryClient.invalidateQueries({ queryKey: navigationKeys.stats() });
 
-			// 🚀 CRÍTICO: Invalidar Zustand stores después del reindexing exitoso
-			// Esto fuerza la recarga de datos en los stores y actualiza el conteo en el frontend
-			if (typeof window !== 'undefined') {
-				// Acceder a los stores desde el cliente solamente
-				import('@/store/entities/image').then((imageModule) => {
-					const store = imageModule.useImageStore.getState();
-					// Forzar refetch de imágenes para actualizar el conteo
-					store.fetchImages({ folderId: data?.id, refresh: true });
-				});
-
-				import('@/store/entities/video').then((videoModule) => {
-					const store = videoModule.useVideoStore.getState();
-					store.fetchVideos();
-				});
-
-				import('@/store/entities/audio').then((audioModule) => {
-					const store = audioModule.useAudioStore.getState();
-					store.fetchAudios();
-				});
-
-				import('@/store/entities/document').then((docModule) => {
-					const store = docModule.useDocumentStore.getState();
-					store.fetchDocuments();
-				});
-
-				import('@/store/entities/json-file/json-file.store').then((jsonModule) => {
-					const store = jsonModule.useJsonFileStore.getState();
-					store.fetchJsonFiles();
-				});
-
-				import('@/store/entities/file-3d').then((file3dModule) => {
-					const store = file3dModule.useFile3DStore.getState();
-					store.fetchFile3Ds();
-				});
-			}
+			// Nota: Hemos eliminado el force fetch a los 6 stores de Zustand aquí.
+			// Reindexar podía bajar cientos de miles de registros de golpe y bloquear el navegador. 
+			// Los componentes y hooks locales de la vista actual son los que deben enterarse 
+			// de la recarga vía react-query o listeners SSE locales.
 		},
 		// onError silenciado para evitar console.*; la UI ya refleja estado/progreso
 	});

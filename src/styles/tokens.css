@@ -94,6 +94,27 @@
 	--canvas-text-dark: oklch(0.25 0.02 240);
 	--canvas-text-light: oklch(0.92 0.01 240);
 
+	/* Overlays, modales y contenido sobre medios */
+	--overlay-backdrop-soft: oklch(0 0 0 / 0.5);
+	--overlay-backdrop-medium: oklch(0 0 0 / 0.6);
+	--overlay-backdrop-strong: oklch(0 0 0 / 0.8);
+	--overlay-backdrop-ultra: oklch(0 0 0 / 0.95);
+	--overlay-control-bg: oklch(0.18 0.01 240 / 0.72);
+	--overlay-control-bg-hover: oklch(0.28 0.01 240 / 0.82);
+	--overlay-control-border: oklch(0.98 0 0 / 0.14);
+	--overlay-foreground: oklch(0.98 0 0);
+	--overlay-foreground-muted: oklch(0.95 0.01 240 / 0.68);
+	--ui-mono-bg: var(--dt-neutral-950);
+	--ui-mono-bg-hover: color-mix(in oklch, var(--dt-neutral-950) 90%, white 10%);
+	--ui-mono-fg: oklch(0.98 0 0);
+	--tcg-highlight-soft: oklch(1 0 0 / 0.1);
+	--tcg-highlight-strong: oklch(1 0 0 / 0.3);
+	--tcg-highlight-subtle: oklch(1 0 0 / 0.05);
+	--tcg-shadow-soft: oklch(0 0 0 / 0.1);
+	--tcg-shadow-medium: oklch(0 0 0 / 0.15);
+	--tcg-shadow-strong: oklch(0 0 0 / 0.3);
+	--tcg-shadow-deep: oklch(0 0 0 / 0.2);
+
 	/* Loading/skeleton */
 	--loading-shimmer-1: oklch(0.92 0 0);
 	--loading-shimmer-2: oklch(0.85 0 0);
@@ -238,6 +259,14 @@ html[data-theme='aurora'] {
 	--canvas-bg-light: oklch(0.25 0.02 240);
 	--canvas-text-dark: oklch(0.92 0.01 240);
 	--canvas-text-light: oklch(0.4 0.02 240);
+	--overlay-control-bg: oklch(0.14 0.01 240 / 0.78);
+	--overlay-control-bg-hover: oklch(0.22 0.01 240 / 0.88);
+	--overlay-control-border: oklch(0.98 0 0 / 0.18);
+	--overlay-foreground: oklch(0.98 0 0);
+	--overlay-foreground-muted: oklch(0.92 0.01 240 / 0.72);
+	--ui-mono-bg: var(--dt-neutral-300);
+	--ui-mono-bg-hover: color-mix(in oklch, var(--dt-neutral-300) 90%, black 10%);
+	--ui-mono-fg: oklch(0.12 0.01 240);
 
 	--loading-shimmer-1: oklch(0.25 0 0);
 	--loading-shimmer-2: oklch(0.3 0 0);
