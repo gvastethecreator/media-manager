@@ -103,11 +103,7 @@ export interface FolderViewConfig {
  * 📁 Propiedades de UI para carpetas
  */
 export interface FolderUIProps {
-	_count?: {
-		children?: number;
-		images?: number;
-		videos?: number;
-	};
+	_count?: FolderCounts;
 }
 
 import { EntityStats } from '../entity.types';
@@ -178,8 +174,13 @@ export interface FolderStatistics extends EntityStats {
  * 📁 Conteos relacionados para carpetas
  */
 export interface FolderCounts {
+	audios?: number;
 	children?: number;
+	documents?: number;
+	file3Ds?: number;
 	images?: number;
+	jsonFiles?: number;
+	totalFiles?: number;
 	videos?: number;
 }
 

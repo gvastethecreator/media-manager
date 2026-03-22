@@ -9,6 +9,7 @@ import { Schema } from '@effect/schema';
 import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
 import { FolderService, FolderServiceLive } from '@/services/folder/folder.service.effect';
 import { FolderReindexService } from '@/services/folder/reindex/folder-reindex.service';
@@ -19,8 +20,21 @@ const router = express.Router();
 const reindexService = FolderReindexService.getInstance();
 
 // Importar servicios de archivos existentes para endpoints de archivos
-let getFolderFiles: any;
-let getFolderFileStats: any;
+type FolderFilesGetter = (opts: {
+	cursor?: string;
+	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
+	folderId: string;
+	includeSubfolders?: boolean;
+	limit?: number;
+	offset?: number;
+	search?: string;
+	sortBy?: 'name' | 'size' | 'createdAt' | 'updatedAt';
+	sortOrder?: 'asc' | 'desc';
+}) => Promise<unknown>;
+type FolderFileStatsGetter = (folderId: string, includeSubfolders: boolean) => Promise<unknown>;
+
+let getFolderFiles: FolderFilesGetter | undefined;
+let getFolderFileStats: FolderFileStatsGetter | undefined;
 
 // Cargar módulos de archivos dinámicamente
 const loadFolderFilesServices = async () => {
@@ -43,7 +57,6 @@ router.get(
 				catch: (err) => new Error(`Failed to load folder files service: ${err}`),
 			});
 
-			console.log('🔍 [DEBUG] /:id/files params:', req.params, 'url:', req.url);
 			const { id: folderId } = req.params;
 			const {
 				includeSubfolders = 'false',
@@ -57,23 +70,25 @@ router.get(
 
 			const parsedLimit = sanitizeLimit(limit, 150, 500);
 			const parsedOffset = sanitizeOffset(offset);
-			const parsedFileTypes = fileTypes
+			const validFileTypes = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'] as const;
+			type ValidFileType = (typeof validFileTypes)[number];
+			const parsedFileTypes: ValidFileType[] = fileTypes
 				? fileTypes
 						.split(',')
-						.filter((type) => ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'].includes(type))
-				: ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'];
+						.filter((type): type is ValidFileType => (validFileTypes as readonly string[]).includes(type))
+				: [...validFileTypes];
 
 			const result = yield* Effect.tryPromise({
 				try: () =>
-					getFolderFiles({
+					getFolderFiles!({
 						folderId,
 						includeSubfolders: includeSubfolders === 'true',
 						limit: parsedLimit,
 						offset: parsedOffset,
 						search,
-						sortBy: sortBy as any,
+						sortBy: (sortBy as 'name' | 'size' | 'createdAt' | 'updatedAt') || 'name',
 						sortOrder: (sortOrder as 'asc' | 'desc') || 'asc',
-						fileTypes: parsedFileTypes as any,
+						fileTypes: parsedFileTypes,
 					}),
 				catch: (err) => {
 					throw new Error(`Failed to fetch folder files: ${err instanceof Error ? err.message : String(err)}`);
@@ -101,7 +116,7 @@ router.get(
 			const { includeSubfolders = 'false' } = req.query as Record<string, string | undefined>;
 
 			const result = yield* Effect.tryPromise({
-				try: () => getFolderFileStats(folderId, includeSubfolders === 'true'),
+				try: () => getFolderFileStats!(folderId, includeSubfolders === 'true'),
 				catch: (err) => {
 					throw new Error(`Failed to fetch folder stats: ${err instanceof Error ? err.message : String(err)}`);
 				},
@@ -313,7 +328,7 @@ router.post(
 			const folderId = req.params.id;
 			const options = req.body || {};
 
-			console.log('🔄 [DEBUG] Reindexando carpeta específica:', { folderId, options });
+			serverLogger.debug('Reindexando carpeta específica', { folderId, options });
 
 			const result = yield* Effect.tryPromise({
 				try: () =>
@@ -356,7 +371,7 @@ router.post(
 
 			// Reindexar la primera carpeta del array (mantener compatibilidad)
 			const folderId = folderIds[0];
-			console.log('🔄 [DEBUG] Reindexando desde endpoint /reindex (legacy):', { folderId });
+			serverLogger.debug('Reindexando desde endpoint /reindex (legacy)', { folderId });
 
 			const result = yield* Effect.tryPromise({
 				try: () =>
@@ -378,19 +393,6 @@ router.post(
 				summary: result.summary,
 			});
 		})
-	)
-);
-
-/**
- * POST /folders/:id/favorite - Toggle favorite status
- */
-router.post(
-	'/:id/favorite',
-	effectHandler((req) =>
-		Effect.gen(function* () {
-			const folderService = yield* FolderService;
-			return yield* folderService.toggleFavorite(req.params.id);
-		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );
 

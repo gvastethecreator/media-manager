@@ -74,8 +74,8 @@ router.get(
 				try: () => listTasks(options),
 				catch: (error) => {
 					logger.error('Error listing tasks:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			return {
@@ -103,8 +103,8 @@ router.get(
 				try: () => getTaskStats(),
 				catch: (error) => {
 					logger.error('Error getting task stats:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			return stats;
@@ -127,7 +127,7 @@ router.get(
 				try: () => getTaskById(id),
 				catch: (error) => {
 					logger.error(`Error getting task ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -152,7 +152,7 @@ router.get(
 				try: () => getSubtasks(id),
 				catch: (error) => {
 					logger.error(`Error getting subtasks for ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -182,8 +182,8 @@ router.post(
 				try: () => createTask(input),
 				catch: (error) => {
 					logger.error('Error creating task:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			res.status(201);
@@ -208,7 +208,7 @@ router.put(
 				try: () => updateTask(id, input),
 				catch: (error) => {
 					logger.error(`Error updating task ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -239,7 +239,7 @@ router.patch(
 				try: () => updateTaskProgress(id, progress),
 				catch: (error) => {
 					logger.error(`Error updating task progress ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -268,7 +268,7 @@ router.delete(
 				try: () => deleteTask(id),
 				catch: (error) => {
 					logger.error(`Error deleting task ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -294,8 +294,8 @@ router.post(
 				try: () => deleteTasks(ids),
 				catch: (error) => {
 					logger.error('Error bulk deleting tasks:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			return { deleted: ids.length };
@@ -318,7 +318,7 @@ router.post(
 				try: () => toggleTaskFavorite(id),
 				catch: (error) => {
 					logger.error(`Error toggling task favorite ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -343,7 +343,7 @@ router.post(
 				try: () => toggleTaskArchive(id),
 				catch: (error) => {
 					logger.error(`Error toggling task archive ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 

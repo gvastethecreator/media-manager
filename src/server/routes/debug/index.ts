@@ -1,7 +1,7 @@
 import { asc } from 'drizzle-orm';
 import express from 'express';
 import os from 'os';
-import { db } from '@/lib/drizzle';
+import { db, getDbClient } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema/index';
 import { getSystemMonitorHelpers } from '@/lib/server/system-monitor';
 import { formatBytes } from '@/lib/utils/format.utils';
@@ -14,14 +14,23 @@ import { FileEntityMapperService } from '@/services/file-entity-mapper/file-enti
 
 const fileEntityMapperService = FileEntityMapperService.getInstance();
 
+function requireDbClient() {
+	const client = getDbClient();
+	if (!client) {
+		throw new Error('Cliente de base de datos no disponible');
+	}
+
+	return client;
+}
+
 router.get('/app-stats', async (_req, res) => {
 	try {
 		// MODO DEBUG TEMPORAL: Análisis de subcarpetas en lugar de app stats
 		serverLogger.debug('🔍 [DEBUG] MODO DEBUG TEMPORAL: Analizando problema de subcarpetas');
 
 		// 1. Test básico de query SQL childrenCount
-		const { sql } = await import('drizzle-orm');
-		const testQuery = await db.execute(sql`
+		const client = requireDbClient();
+		const testQuery = await client.execute(`
 			SELECT 
 				id, name, parentId,
 				(SELECT COUNT(*) FROM Folder WHERE Folder.parentId = Folder.id) as childrenCount
@@ -167,11 +176,10 @@ function formatNetworkInterfaces() {
 // DEBUG Endpoint para investigar subcarpetas
 router.get('/folder-children-test', async (_req, res) => {
 	try {
-		const { db } = await import('@/lib/drizzle');
-		const { sql } = await import('drizzle-orm');
+		const client = requireDbClient();
 
 		// Test directo de la query problemática
-		const testQuery = await db.execute(sql`
+		const testQuery = await client.execute(`
 			SELECT 
 				id, name, parentId,
 				(SELECT COUNT(*) FROM Folder WHERE Folder.parentId = Folder.id) as childrenCount
@@ -330,14 +338,12 @@ router.get('/cleanup-phantom-images', async (_req, res): Promise<void> => {
 	try {
 		serverLogger.debug('🔥 [CLEANUP] Iniciando limpieza de imágenes fantasma...');
 
-		// Importar base de datos
-		const { sql } = await import('drizzle-orm');
-		const { images } = await import('@/lib/drizzle/schema/index');
+		const client = requireDbClient();
 
 		// 1. Contar imágenes cursed-img-*
-		const cursedQuery = await db.execute(sql`
+		const cursedQuery = await client.execute(`
 			SELECT id, name, path 
-			FROM ${images} 
+			FROM Image 
 			WHERE id LIKE 'cursed-img-%' 
 			ORDER BY id
 		`);
@@ -357,12 +363,10 @@ router.get('/cleanup-phantom-images', async (_req, res): Promise<void> => {
 
 		// 2. Eliminar imágenes cursed-img-*
 		serverLogger.debug(`🗑️ Eliminando ${cursedCount} imágenes fantasma...`);
-		const deleteResult = await db.execute(sql`
-			DELETE FROM ${images} WHERE id LIKE 'cursed-img-%'
-		`);
+		await client.execute("DELETE FROM Image WHERE id LIKE 'cursed-img-%'");
 
 		// 3. Verificar estado final
-		const finalCountResult = await db.execute(sql`SELECT COUNT(*) as count FROM ${images}`);
+		const finalCountResult = await client.execute('SELECT COUNT(*) as count FROM Image');
 		const finalCount = finalCountResult.rows[0]?.[0] || 0;
 
 		serverLogger.debug(`✅ Eliminadas: ${cursedCount} imágenes fantasma`);

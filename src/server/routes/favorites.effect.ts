@@ -38,8 +38,8 @@ router.get(
 				try: () => favoriteService.list(filters),
 				catch: (error) => {
 					logger.error('Error al listar favoritos:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			return {
@@ -65,8 +65,8 @@ router.get(
 				try: () => favoriteService.getCountsByType(),
 				catch: (error) => {
 					logger.error('Error al obtener conteos de favoritos:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			return counts;
@@ -95,8 +95,8 @@ router.get(
 				try: () => favoriteService.isFavorite(entityType as FavoriteEntityType, entityId),
 				catch: (error) => {
 					logger.error('Error al verificar favorito:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			return { isFavorite };
@@ -115,7 +115,7 @@ router.get(
 				try: () => favoriteService.getById(id),
 				catch: (error) => {
 					logger.error(`Error al obtener favorito ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -150,7 +150,7 @@ router.post(
 				try: () => favoriteService.toggle(entityType, entityId),
 				catch: (error) => {
 					logger.error(`Error al alternar favorito para ${entityType}:${entityId}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -170,7 +170,7 @@ router.delete(
 				try: () => favoriteService.delete(id),
 				catch: (error) => {
 					logger.error(`Error al eliminar favorito ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 

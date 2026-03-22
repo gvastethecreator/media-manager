@@ -134,7 +134,8 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
 	next();
 };
 
-// Middleware para logging de errores
+// Middleware para logging de errores (Express error handler signature requires 4 params)
+// biome-ignore lint/suspicious/noExplicitAny: Express error middleware requires `any` error type
 export function errorLogger(error: any, req: Request, res: Response, next: NextFunction): void {
 	const { method, url, ip } = req;
 	const rid = res?.locals?.requestId;

@@ -1,6 +1,6 @@
 // Cargar variables de entorno primero
 
-import express from 'express';
+import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
 import path from 'path';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
@@ -94,7 +94,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
 app.use('/uploads', express.static(path.resolve(UPLOADS_DIR)));
 
-app.use(requestLogger as any);
+app.use(requestLogger as RequestHandler);
 
 if (typeof foldersEffectRouter !== 'function' || typeof imagesEffectRouter !== 'function') {
 	logError('❌ Routers críticos no están disponibles');
@@ -163,7 +163,7 @@ app.use((req, res) => {
 	res.status(404).json({ error: 'Endpoint no encontrado', path: req.originalUrl });
 });
 
-app.use(errorLogger as any);
+app.use(errorLogger as ErrorRequestHandler);
 
 app.listen(PORT, '0.0.0.0', () => {
 	logInfo(`🚀 Servidor Express iniciado en puerto ${PORT}`);
