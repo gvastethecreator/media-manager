@@ -8,6 +8,11 @@ import { cn } from '@/lib/utils';
 
 // Legacy menubar kept for backward compatibility.
 
+/**
+ * @deprecated Usa `@/components/ui/menubar`.
+ * Se mantiene temporalmente para compatibilidad retroactiva.
+ */
+
 function MenubarMenu({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Menu>) {
 	return <MenubarPrimitive.Menu {...props} />;
 }

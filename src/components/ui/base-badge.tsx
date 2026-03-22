@@ -17,7 +17,7 @@ export interface BadgeButtonProps extends useRender.ComponentProps<'button'>, Va
 export type BadgeDotProps = React.HTMLAttributes<HTMLSpanElement>;
 
 const badgeVariants = cva(
-	'inline-flex items-center justify-center border border-transparent font-medium focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 [&_svg]:-ms-px [&_svg]:shrink-0',
+	'inline-flex items-center justify-center border border-transparent font-medium transition-[transform,color,box-shadow] duration-dt-fast ease-dt-out focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 [&_svg]:-ms-px [&_svg]:shrink-0',
 	{
 		variants: {
 			variant: {
@@ -43,8 +43,8 @@ const badgeVariants = cva(
 			size: {
 				lg: 'h-7 min-w-7 gap-1.5 rounded-md px-[0.5rem] text-xs [&_svg]:size-3.5',
 				md: 'h-6 min-w-6 gap-1.5 rounded-md px-[0.45rem] text-xs [&_svg]:size-3.5',
-				sm: 'h-5 min-w-5 gap-1 rounded-sm px-[0.325rem] text-[0.6875rem] leading-[0.75rem] [&_svg]:size-3',
-				xs: 'h-4 min-w-4 gap-1 rounded-sm px-[0.25rem] text-[0.625rem] leading-[0.5rem] [&_svg]:size-3',
+				sm: 'h-6 min-w-6 gap-1 rounded-sm px-[0.325rem] text-[0.6875rem] leading-[0.75rem] [&_svg]:size-3',
+				xs: 'h-5 min-w-5 gap-1 rounded-sm px-[0.25rem] text-[0.625rem] leading-[0.5rem] [&_svg]:size-3',
 			},
 			shape: {
 				default: '',
@@ -165,7 +165,7 @@ const badgeVariants = cva(
 );
 
 const badgeButtonVariants = cva(
-	'-me-0.5 inline-flex size-3.5 cursor-pointer items-center justify-center rounded-md p-0 leading-none opacity-60 transition-all hover:opacity-100 [&>svg]:size-3.5 [&>svg]:opacity-100!',
+	'-me-0.5 inline-flex size-3.5 cursor-pointer items-center justify-center rounded-md p-0 leading-none opacity-60 transition-all duration-dt-fast ease-dt-out hover:opacity-100 [&>svg]:size-3.5 [&>svg]:opacity-100!',
 	{
 		variants: {
 			variant: {

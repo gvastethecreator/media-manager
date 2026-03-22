@@ -8,7 +8,7 @@ const inputVariants = cva(
 	`
     flex w-full bg-background border border-input shadow-xs shadow-border/5 transition-[color,box-shadow] text-foreground placeholder:text-muted-foreground/80 
     focus-visible:ring-ring/30  focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px]     
-    disabled:cursor-not-allowed disabled:opacity-60 
+	disabled:cursor-not-allowed disabled:opacity-50 
     [&[readonly]]:bg-muted/80 [&[readonly]]:cursor-not-allowed
     file:h-full [&[type=file]]:py-0 file:border-solid file:border-input file:bg-transparent 
     file:font-medium file:not-italic file:text-foreground file:p-0 file:border-0 file:border-e

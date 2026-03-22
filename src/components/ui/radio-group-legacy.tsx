@@ -8,6 +8,11 @@ import { cn } from '@/lib/utils';
 
 // Legacy radio group kept for backward compatibility.
 
+/**
+ * @deprecated Usa `@/components/ui/radio-group`.
+ * Se mantiene temporalmente para compatibilidad retroactiva.
+ */
+
 const RadioGroup = React.forwardRef<
 	React.ElementRef<typeof RadioGroupPrimitive.Root>,
 	React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
