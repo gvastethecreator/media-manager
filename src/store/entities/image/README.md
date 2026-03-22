@@ -36,28 +36,28 @@ graph TD
 
 ```typescript
 interface ImageCoreSlice {
-  // Estado
-  images: Record<string, ImageExtended>;
-  isLoading: boolean;
-  error: string | null;
+	// Estado
+	images: Record<string, ImageExtended>;
+	isLoading: boolean;
+	error: string | null;
 
-  // Getters
-  getImage: (id: string) => ImageExtended | undefined;
-  getImages: () => ImageExtended[];
-  getImagesByFolder: (folderId: string) => ImageExtended[];
+	// Getters
+	getImage: (id: string) => ImageExtended | undefined;
+	getImages: () => ImageExtended[];
+	getImagesByFolder: (folderId: string) => ImageExtended[];
 
-  // Operaciones síncronas
-  addImage: (image: ImageExtended) => void;
-  addImages: (images: ImageExtended[]) => void;
-  updateImage: (id: string, data: Partial<ImageExtended>) => void;
-  deleteImage: (id: string) => void;
+	// Operaciones síncronas
+	addImage: (image: ImageExtended) => void;
+	addImages: (images: ImageExtended[]) => void;
+	updateImage: (id: string, data: Partial<ImageExtended>) => void;
+	deleteImage: (id: string) => void;
 
-  // Operaciones asíncronas
-  fetchImage: (id: string) => Promise<ImageExtended | undefined>;
-  fetchImages: (options?) => Promise<ImageExtended[]>;
-  createImage: (data: CreateImageData) => Promise<ImageExtended | undefined>;
-  updateImage: (id: string, data: UpdateImageData) => Promise<ImageExtended | undefined>;
-  removeImage: (id: string) => Promise<boolean>;
+	// Operaciones asíncronas
+	fetchImage: (id: string) => Promise<ImageExtended | undefined>;
+	fetchImages: (options?) => Promise<ImageExtended[]>;
+	createImage: (data: CreateImageData) => Promise<ImageExtended | undefined>;
+	updateImage: (id: string, data: UpdateImageData) => Promise<ImageExtended | undefined>;
+	removeImage: (id: string) => Promise<boolean>;
 }
 ```
 
@@ -65,21 +65,21 @@ interface ImageCoreSlice {
 
 ```typescript
 interface ImageUISlice {
-  // Selección
-  selectImage: (id: string | null) => void;
-  toggleImageSelection: (id: string) => void;
-  clearSelection: () => void;
-  isImageSelected: (id: string) => boolean;
+	// Selección
+	selectImage: (id: string | null) => void;
+	toggleImageSelection: (id: string) => void;
+	clearSelection: () => void;
+	isImageSelected: (id: string) => boolean;
 
-  // Visor
-  openViewer: (imageId: string) => void;
-  closeViewer: () => void;
-  nextImage: () => void;
-  previousImage: () => void;
+	// Visor
+	openViewer: (imageId: string) => void;
+	closeViewer: () => void;
+	nextImage: () => void;
+	previousImage: () => void;
 
-  // Vista
-  setViewMode: (viewMode: ImageViewMode) => void;
-  getViewMode: () => ImageViewMode;
+	// Vista
+	setViewMode: (viewMode: ImageViewMode) => void;
+	getViewMode: () => ImageViewMode;
 }
 ```
 
@@ -119,38 +119,44 @@ interface ImageUISlice {
 ```typescript
 // Tipo base de imagen
 interface ImageBase {
-  id: string;
-  name: string;
-  path: string;
-  hash: string;
-  size: number;
-  width: number;
-  height: number;
-  metadata?: string | null;
-  isFavorite: boolean;
-  folderId: string | null;
-  addedAt: Date;
+	id: string;
+	name: string;
+	path: string;
+	hash: string;
+	size: number;
+	width: number;
+	height: number;
+	metadata?: string | null;
+	isFavorite: boolean;
+	folderId: string | null;
+	addedAt: Date;
 }
 
 // Imagen extendida con relaciones
 interface ImageExtended extends ImageBase {
-  tags?: any[];
-  collections?: any[];
-  albums?: any[];
-  characters?: any[];
-  places?: any[];
-  stats?: any;
-  folder?: any;
+	tags?: any[];
+	collections?: any[];
+	albums?: any[];
+	characters?: any[];
+	places?: any[];
+	stats?: any;
+	folder?: any;
 }
 
 // Criterios de ordenamiento
 type ImageSortCriteria =
-  | 'name_asc' | 'name_desc'
-  | 'date_asc' | 'date_desc'
-  | 'size_asc' | 'size_desc'
-  | 'width_asc' | 'width_desc'
-  | 'height_asc' | 'height_desc'
-  | 'favorite_first' | 'favorite_last';
+	| 'name_asc'
+	| 'name_desc'
+	| 'date_asc'
+	| 'date_desc'
+	| 'size_asc'
+	| 'size_desc'
+	| 'width_asc'
+	| 'width_desc'
+	| 'height_asc'
+	| 'height_desc'
+	| 'favorite_first'
+	| 'favorite_last';
 ```
 
 ## 🔄 Flujo de Datos
@@ -181,20 +187,15 @@ const { fetchImages } = useImageStore();
 
 // Cargar imágenes de carpetas específicas
 await fetchImages({
-  folderIds: ['folder-1', 'folder-2'],
-  refresh: true
+	folderIds: ['folder-1', 'folder-2'],
+	refresh: true,
 });
 ```
 
 ### **Gestión de Selección**
 
 ```typescript
-const {
-  selectImage,
-  toggleImageSelection,
-  getSelectedImages,
-  clearSelection
-} = useImageStore();
+const { selectImage, toggleImageSelection, getSelectedImages, clearSelection } = useImageStore();
 
 // Seleccionar imagen
 selectImage('image-id');
@@ -209,12 +210,7 @@ const selected = getSelectedImages();
 ### **Visor de Imágenes**
 
 ```typescript
-const {
-  openViewer,
-  closeViewer,
-  nextImage,
-  previousImage
-} = useImageStore();
+const { openViewer, closeViewer, nextImage, previousImage } = useImageStore();
 
 // Abrir visor
 openViewer('image-id');

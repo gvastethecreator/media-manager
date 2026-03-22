@@ -1,15 +1,15 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "./themes.css";
-@import "../styles/tokens.css";
-@import "../styles/design-tokens.css";
-@import "../styles/card-animations.css";
-@import "../styles/utilities/border-pulse.css";
-@import "../styles/utilities/component-recipes.css";
-@import "../styles/utilities/animations.css";
-@import "../styles/utilities/transitions.css";
-@import "../styles/utilities/typography.css";
-@import "../styles/utilities/theme-system.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import './themes.css';
+@import '../styles/tokens.css';
+@import '../styles/design-tokens.css';
+@import '../styles/card-animations.css';
+@import '../styles/utilities/border-pulse.css';
+@import '../styles/utilities/component-recipes.css';
+@import '../styles/utilities/animations.css';
+@import '../styles/utilities/transitions.css';
+@import '../styles/utilities/typography.css';
+@import '../styles/utilities/theme-system.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -55,8 +55,7 @@
 	--animate-accordion-down: accordion-down 0.2s ease-out;
 	--animate-accordion-up: accordion-up 0.2s ease-out;
 	--animate-shine: shine var(--duration, 3s) infinite linear;
-	--animate-border-beam: border-beam calc(var(--duration, 3) * 1s) infinite
-		linear;
+	--animate-border-beam: border-beam calc(var(--duration, 3) * 1s) infinite linear;
 	--animate-meteor: meteor 5s linear infinite;
 	--animate-shiny-text: shiny-text 8s infinite;
 	--animate-gradient-shift: gradient-shift 3s ease infinite;
@@ -180,7 +179,7 @@
   Definición de valores base para modo claro
 */
 html,
-html[data-theme="light"] {
+html[data-theme='light'] {
 	--font-scale: 1;
 	--radius: 0.625rem;
 
@@ -222,7 +221,7 @@ html[data-theme="light"] {
   Definición de valores para modo oscuro
 */
 html.dark,
-html[data-theme="dark"] {
+html[data-theme='dark'] {
 	--background: oklch(0.145 0 0);
 	--foreground: oklch(0.985 0 0);
 	--card: oklch(0.205 0 0);
@@ -319,7 +318,7 @@ html[data-theme="dark"] {
 		inset: -1px;
 		z-index: -1;
 		pointer-events: none;
-		content: "";
+		content: '';
 		background: radial-gradient(
 			var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
 			var(--glow-color),
@@ -335,7 +334,7 @@ html[data-theme="dark"] {
 		inset: -1px;
 		z-index: -1;
 		pointer-events: none;
-		content: "";
+		content: '';
 		background: radial-gradient(
 			var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
 			var(--glow-color),
@@ -369,23 +368,23 @@ html[data-theme="dark"] {
 	/* Variante para tema oscuro - usa los mismos tokens que son reactivos al tema */
 
 	/* Estado seleccionado */
-	&[data-selected="true"]::before {
+	&[data-selected='true']::before {
 		--glow-color: color-mix(in oklch, var(--primary), transparent 65%);
 		opacity: 1;
 	}
 
-	&[data-selected="true"]::after {
+	&[data-selected='true']::after {
 		--glow-color: color-mix(in oklch, var(--primary), transparent 65%);
 		opacity: 1;
 	}
 
 	/* Estado marcado */
-	&[data-marked="true"]::before {
+	&[data-marked='true']::before {
 		--glow-color: color-mix(in oklch, var(--accent), transparent 65%);
 		opacity: 1;
 	}
 
-	&[data-marked="true"]::after {
+	&[data-marked='true']::after {
 		--glow-color: color-mix(in oklch, var(--accent), transparent 65%);
 		opacity: 1;
 	}
@@ -433,7 +432,7 @@ html[data-theme="dark"] {
 	}
 
 	/* Cuando la tarjeta NO está explotada */
-	[data-exploded="false"] .explodable-card {
+	[data-exploded='false'] .explodable-card {
 		transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateX(0deg);
 		transition: transform 1s 0.5s var(--power);
 
@@ -461,9 +460,9 @@ html[data-theme="dark"] {
 	}
 
 	/* Cuando la tarjeta ESTÁ explotada */
-	[data-exploded="true"] .explodable-card {
-		transform: translate3d(0, 0, 40px) rotateX(calc(var(--x1, -20) * 1deg))
-			rotateY(calc(var(--y1, 35) * 1deg)) rotateX(calc(var(--x2, 30) * 1deg));
+	[data-exploded='true'] .explodable-card {
+		transform: translate3d(0, 0, 40px) rotateX(calc(var(--x1, -20) * 1deg)) rotateY(calc(var(--y1, 35) * 1deg))
+			rotateX(calc(var(--x2, 30) * 1deg));
 		transition: transform 1s var(--power);
 
 		.shadow-layer {
@@ -490,15 +489,14 @@ html[data-theme="dark"] {
 		}
 
 		.exploded-layer {
-			translate: calc(var(--tx, 0.5) * 1rem) calc(var(--ty, -0.5) * 1rem)
-				calc(var(--step, 3) * 1rem);
+			translate: calc(var(--tx, 0.5) * 1rem) calc(var(--ty, -0.5) * 1rem) calc(var(--step, 3) * 1rem);
 			transition: translate 1s 0.5s var(--power);
 		}
 	}
 
 	/* Cuando una capa específica está activa */
-	[data-exploded="true"] .explodable-card {
-		[data-layer-active="true"] {
+	[data-exploded='true'] .explodable-card {
+		[data-layer-active='true'] {
 			z-index: 10;
 
 			&::after {
@@ -506,11 +504,10 @@ html[data-theme="dark"] {
 				inset: -1px;
 				z-index: 100;
 				pointer-events: none;
-				content: "";
+				content: '';
 				border: 2px solid var(--color-primary);
 				border-radius: inherit;
-				box-shadow: 0 0 0 4px
-					color-mix(in oklch, var(--color-primary), transparent 80%);
+				box-shadow: 0 0 0 4px color-mix(in oklch, var(--color-primary), transparent 80%);
 			}
 		}
 	}
@@ -610,7 +607,7 @@ html[data-theme="dark"] {
 	left: 0;
 	width: 0;
 	height: 2px;
-	content: "";
+	content: '';
 	background-color: currentColor;
 	opacity: 0.5;
 	transition: width 0.2s ease;
@@ -633,7 +630,7 @@ html[data-theme="dark"] {
 	z-index: -1;
 	width: 0;
 	height: 100%;
-	content: "";
+	content: '';
 	background-color: currentColor;
 	opacity: 0;
 	transition: all 0.3s ease;
@@ -660,7 +657,7 @@ html[data-theme="dark"] {
 	left: 0;
 	width: 0;
 	height: 1px;
-	content: "";
+	content: '';
 	background-color: currentColor;
 	opacity: 0;
 	transform: translateY(-50%);
@@ -759,7 +756,7 @@ html[data-theme="dark"] {
 	inset: 0;
 	z-index: -1;
 	padding: 2px;
-	content: "";
+	content: '';
 	background: linear-gradient(
 		135deg,
 		transparent 0%,
@@ -786,7 +783,7 @@ html[data-theme="dark"] {
 @media (prefers-reduced-motion) {
 	.card-container,
 	.card-container::before,
-	[class*="animate-"] {
+	[class*='animate-'] {
 		transition: none !important;
 		animation: none !important;
 	}

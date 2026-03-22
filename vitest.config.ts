@@ -33,6 +33,8 @@ export default defineConfig({
 		hookTimeout: 30_000,
 		// Ejecutar tests de archivos secuencialmente para evitar SQLITE_BUSY
 		fileParallelism: false,
+		maxWorkers: 1,
+		minWorkers: 1,
 		// Pool de ejecución
 		pool: 'forks',
 		// Aislamiento para evitar contaminación entre tests

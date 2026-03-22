@@ -77,15 +77,15 @@ graph TB
 
 ```typescript
 interface WildcardState {
-  core: {
-    wildcards: Record<string, WildcardComplete>    // Mapa de wildcards por ID
-    wildcardItems: Record<string, ItemReference[]> // Items asociados
-    isLoading: boolean                             // Estado de carga
-    error: string | null                           // Error actual
-    lastUpdated: Date | null                       // Última actualización
-  }
-  ui: WildcardUIState                              // Estado de interfaz
-  filters: WildcardFiltersState                    // Filtros activos
+	core: {
+		wildcards: Record<string, WildcardComplete>; // Mapa de wildcards por ID
+		wildcardItems: Record<string, ItemReference[]>; // Items asociados
+		isLoading: boolean; // Estado de carga
+		error: string | null; // Error actual
+		lastUpdated: Date | null; // Última actualización
+	};
+	ui: WildcardUIState; // Estado de interfaz
+	filters: WildcardFiltersState; // Filtros activos
 }
 ```
 
@@ -93,15 +93,15 @@ interface WildcardState {
 
 ```typescript
 interface WildcardUIState {
-  selectedIds: string[]                            // IDs seleccionados
-  viewMode: WildcardViewMode                       // Modo de visualización
-  isViewerOpen: boolean                            // Visor abierto
-  currentWildcardId: string | null                 // Wildcard actual
-  displayState: Record<string, WildcardDisplayState> // Estados visuales
-  draggedWildcardId: string | null                 // Wildcard arrastrado
-  dropTargetWildcardId: string | null              // Objetivo de drop
-  highlightedId: string | null                     // Wildcard resaltado
-  expandedIds: string[]                            // IDs expandidos
+	selectedIds: string[]; // IDs seleccionados
+	viewMode: WildcardViewMode; // Modo de visualización
+	isViewerOpen: boolean; // Visor abierto
+	currentWildcardId: string | null; // Wildcard actual
+	displayState: Record<string, WildcardDisplayState>; // Estados visuales
+	draggedWildcardId: string | null; // Wildcard arrastrado
+	dropTargetWildcardId: string | null; // Objetivo de drop
+	highlightedId: string | null; // Wildcard resaltado
+	expandedIds: string[]; // IDs expandidos
 }
 ```
 
@@ -109,13 +109,13 @@ interface WildcardUIState {
 
 ```typescript
 interface WildcardFiltersState {
-  sortBy: WildcardSortCriteria                     // Criterio de ordenamiento
-  searchQuery: string                              // Término de búsqueda
-  filterByCategory: string | null                  // Filtro por categoría
-  filterFavorites: boolean                         // Solo favoritos
-  parentId: string | null                          // Filtro por padre
-  onlyWithChildren: boolean                        // Solo con hijos
-  dateRange: { from: Date | null; to: Date | null } // Rango de fechas
+	sortBy: WildcardSortCriteria; // Criterio de ordenamiento
+	searchQuery: string; // Término de búsqueda
+	filterByCategory: string | null; // Filtro por categoría
+	filterFavorites: boolean; // Solo favoritos
+	parentId: string | null; // Filtro por padre
+	onlyWithChildren: boolean; // Solo con hijos
+	dateRange: { from: Date | null; to: Date | null }; // Rango de fechas
 }
 ```
 
@@ -125,64 +125,64 @@ interface WildcardFiltersState {
 
 ```typescript
 // Cargar wildcards
-await fetchWildcards()
+await fetchWildcards();
 
 // Crear nuevo wildcard
 await createWildcard({
-  name: 'Nuevo Wildcard',
-  shortcut: '__nuevo__',
-  replacement: 'contenido del wildcard',
-  category: 'character'
-})
+	name: 'Nuevo Wildcard',
+	shortcut: '__nuevo__',
+	replacement: 'contenido del wildcard',
+	category: 'character',
+});
 
 // Actualizar wildcard existente
-await updateWildcard(id, { name: 'Nombre actualizado' })
+await updateWildcard(id, { name: 'Nombre actualizado' });
 
 // Eliminar wildcard
-await removeWildcard(id)
+await removeWildcard(id);
 
 // Mover wildcard en jerarquía
-await moveWildcard(id, newParentId)
+await moveWildcard(id, newParentId);
 ```
 
 ### 🌳 Gestión Jerárquica
 
 ```typescript
 // Obtener hijos de un wildcard
-const children = getChildWildcards(parentId)
+const children = getChildWildcards(parentId);
 
 // Obtener jerarquía completa
-const hierarchy = getWildcardHierarchy()
+const hierarchy = getWildcardHierarchy();
 
 // Expandir/colapsar ramas
-expandBranch(wildcardId)
-collapseBranch(wildcardId)
+expandBranch(wildcardId);
+collapseBranch(wildcardId);
 
 // Expandir/colapsar individual
-toggleWildcardExpanded(wildcardId)
+toggleWildcardExpanded(wildcardId);
 ```
 
 ### 🎮 Gestión de UI
 
 ```typescript
 // Selección múltiple
-selectWildcard(id)
-selectMultipleWildcards([id1, id2, id3])
-toggleWildcardSelection(id)
-clearWildcardSelection()
+selectWildcard(id);
+selectMultipleWildcards([id1, id2, id3]);
+toggleWildcardSelection(id);
+clearWildcardSelection();
 
 // Visor de wildcards
-openViewer(wildcardId)
-closeViewer()
-setCurrentWildcard(wildcardId)
+openViewer(wildcardId);
+closeViewer();
+setCurrentWildcard(wildcardId);
 
 // Drag & drop
-setDraggedWildcard(id)
-setDropTargetWildcard(targetId)
+setDraggedWildcard(id);
+setDropTargetWildcard(targetId);
 
 // Estados visuales
-setWildcardDisplayState(id, { isHighlighted: true })
-resetWildcardDisplayState(id)
+setWildcardDisplayState(id, { isHighlighted: true });
+resetWildcardDisplayState(id);
 ```
 
 ### 🔍 Filtros y Búsqueda
@@ -190,21 +190,21 @@ resetWildcardDisplayState(id)
 ```typescript
 // Actualizar filtros
 updateFilters({
-  filterByCategory: 'character',
-  filterFavorites: true
-})
+	filterByCategory: 'character',
+	filterFavorites: true,
+});
 
 // Buscar por texto
-setSearchQuery('pose')
+setSearchQuery('pose');
 
 // Filtrar por jerarquía
 updateFilters({
-  parentId: 'parent-id',
-  onlyWithChildren: true
-})
+	parentId: 'parent-id',
+	onlyWithChildren: true,
+});
 
 // Limpiar filtros
-clearFilters()
+clearFilters();
 ```
 
 ## 🛠️ Utilidades Disponibles
@@ -212,9 +212,9 @@ clearFilters()
 ### 📊 Estadísticas
 
 ```typescript
-import { getWildcardStats } from '@/utils/wildcard'
+import { getWildcardStats } from '@/utils/wildcard';
 
-const stats = getWildcardStats(wildcards)
+const stats = getWildcardStats(wildcards);
 // {
 //   total: 150,
 //   byCategory: { character: 45, style: 30, ... },
@@ -230,47 +230,43 @@ const stats = getWildcardStats(wildcards)
 ### 🔄 Ordenamiento
 
 ```typescript
-import { sortWildcards } from '@/utils/wildcard'
+import { sortWildcards } from '@/utils/wildcard';
 
-const sorted = sortWildcards(wildcards, 'usage:desc')
+const sorted = sortWildcards(wildcards, 'usage:desc');
 ```
 
 ### 🏷️ Agrupamiento
 
 ```typescript
-import { groupWildcards } from '@/utils/wildcard'
+import { groupWildcards } from '@/utils/wildcard';
 
-const byCategory = groupWildcards(wildcards, 'category')
-const byUsage = groupWildcards(wildcards, 'usage')
-const byParent = groupWildcards(wildcards, 'parentId')
+const byCategory = groupWildcards(wildcards, 'category');
+const byUsage = groupWildcards(wildcards, 'usage');
+const byParent = groupWildcards(wildcards, 'parentId');
 ```
 
 ### 🌳 Jerarquía
 
 ```typescript
-import {
-  buildWildcardTree,
-  findWildcardDescendants,
-  findWildcardPath
-} from '@/utils/wildcard'
+import { buildWildcardTree, findWildcardDescendants, findWildcardPath } from '@/utils/wildcard';
 
 // Construir árbol jerárquico
-const tree = buildWildcardTree(wildcards)
+const tree = buildWildcardTree(wildcards);
 
 // Encontrar todos los descendientes
-const descendants = findWildcardDescendants('parent-id', wildcards)
+const descendants = findWildcardDescendants('parent-id', wildcards);
 
 // Encontrar ruta desde la raíz
-const path = findWildcardPath('wildcard-id', wildcards)
+const path = findWildcardPath('wildcard-id', wildcards);
 ```
 
 ### 🎨 Generación Visual
 
 ```typescript
-import { generateWildcardColor, generateWildcardEmoji } from '@/utils/wildcard'
+import { generateWildcardColor, generateWildcardEmoji } from '@/utils/wildcard';
 
-const color = generateWildcardColor('character') // '#3B82F6'
-const emoji = generateWildcardEmoji('style')     // '🎨'
+const color = generateWildcardColor('character'); // '#3B82F6'
+const emoji = generateWildcardEmoji('style'); // '🎨'
 ```
 
 ## 📦 Uso del Store
@@ -417,28 +413,28 @@ El store utiliza persistencia selectiva para:
 ```typescript
 // Crear wildcard padre
 const characterWildcard = await createWildcard({
-  name: 'Personajes',
-  shortcut: '__characters__',
-  replacement: 'personaje, persona',
-  category: 'character'
-})
+	name: 'Personajes',
+	shortcut: '__characters__',
+	replacement: 'personaje, persona',
+	category: 'character',
+});
 
 // Crear wildcards hijos
 await createWildcard({
-  name: 'Guerrero',
-  shortcut: '__warrior__',
-  replacement: 'guerrero, soldado, knight',
-  category: 'character',
-  parentId: characterWildcard.id
-})
+	name: 'Guerrero',
+	shortcut: '__warrior__',
+	replacement: 'guerrero, soldado, knight',
+	category: 'character',
+	parentId: characterWildcard.id,
+});
 
 await createWildcard({
-  name: 'Mago',
-  shortcut: '__wizard__',
-  replacement: 'mago, hechicero, wizard',
-  category: 'character',
-  parentId: characterWildcard.id
-})
+	name: 'Mago',
+	shortcut: '__wizard__',
+	replacement: 'mago, hechicero, wizard',
+	category: 'character',
+	parentId: characterWildcard.id,
+});
 ```
 
 ### 🔍 Búsqueda Avanzada con Jerarquía
@@ -446,18 +442,18 @@ await createWildcard({
 ```typescript
 // Buscar solo wildcards raíz con hijos
 updateFilters({
-  parentId: null,
-  onlyWithChildren: true,
-  filterByCategory: 'character'
-})
+	parentId: null,
+	onlyWithChildren: true,
+	filterByCategory: 'character',
+});
 
 // Buscar wildcards por rango de uso
-const highUsageWildcards = wildcards.filter(w => (w.usage || 0) > 50)
+const highUsageWildcards = wildcards.filter((w) => (w.usage || 0) > 50);
 
 // Buscar en una rama específica
 const branchWildcards = findWildcardDescendants('parent-id', wildcards)
-  .map(id => wildcards[id])
-  .filter(w => w.name.toLowerCase().includes('search'))
+	.map((id) => wildcards[id])
+	.filter((w) => w.name.toLowerCase().includes('search'));
 ```
 
 ### 🎮 Gestión de Estado UI Avanzada
@@ -465,15 +461,15 @@ const branchWildcards = findWildcardDescendants('parent-id', wildcards)
 ```typescript
 // Selección jerárquica (seleccionar rama completa)
 const selectBranch = (wildcardId: string) => {
-  const descendants = findWildcardDescendants(wildcardId, Object.values(wildcards))
-  selectMultipleWildcards([wildcardId, ...descendants])
-}
+	const descendants = findWildcardDescendants(wildcardId, Object.values(wildcards));
+	selectMultipleWildcards([wildcardId, ...descendants]);
+};
 
 // Expansión inteligente (expandir hasta un wildcard específico)
 const expandToWildcard = (wildcardId: string) => {
-  const path = findWildcardPath(wildcardId, Object.values(wildcards))
-  path.forEach(id => expandWildcard(id))
-}
+	const path = findWildcardPath(wildcardId, Object.values(wildcards));
+	path.forEach((id) => expandWildcard(id));
+};
 ```
 
 ---

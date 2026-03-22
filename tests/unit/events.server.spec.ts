@@ -4,17 +4,26 @@ import { emit, emitProgress, getEventStore } from '@/lib/server/events.server';
 const g: any = globalThis as any;
 let originalFetch: any;
 let originalWindow: any;
+let originalWindowFetch: any;
 
 function mockFetch(recorder: { last: { url?: string; init?: RequestInit } }) {
 	originalFetch = g.fetch;
-	g.fetch = (url: any, init?: any) => {
+	originalWindowFetch = g.window?.fetch;
+	const mockedFetch = (url: any, init?: any) => {
 		recorder.last = { url: String(url), init };
 		return Promise.resolve(new Response(null, { status: 200 }));
 	};
+	g.fetch = mockedFetch;
+	if (g.window) {
+		g.window.fetch = mockedFetch;
+	}
 }
 
 function restoreFetch() {
 	g.fetch = originalFetch;
+	if (g.window) {
+		g.window.fetch = originalWindowFetch;
+	}
 }
 
 beforeEach(() => {
@@ -33,6 +42,10 @@ afterEach(() => {
 });
 
 describe('events.server emit (cliente)', () => {
+	beforeEach(() => {
+		g.window = originalWindow ?? {};
+	});
+
 	it('usa fetch POST /api/events con payload', async () => {
 		const recorder: any = { last: {} };
 		mockFetch(recorder);

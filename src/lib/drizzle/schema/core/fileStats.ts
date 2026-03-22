@@ -17,7 +17,9 @@ export const fileStats = sqliteTable(
 		fileId: text('fileId').notNull(),
 		views: integer('views').notNull().default(0),
 		rating: integer('rating').default(0),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

@@ -9,7 +9,8 @@ import path from 'node:path';
 export function detectToolFromFileName(filePath) {
 	const name = path.basename(filePath).toLowerCase();
 	if (name.includes('tsc') || name.includes('typescript')) return 'tsc';
-	if (name.includes('oxlint') || name.includes('oxfmt') || name.includes('vite-plus') || name.includes('vp-')) return 'oxc';
+	if (name.includes('oxlint') || name.includes('oxfmt') || name.includes('vite-plus') || name.includes('vp-'))
+		return 'oxc';
 	if (name.includes('eslint')) return 'eslint';
 	if (name.includes('prettier')) return 'prettier';
 	if (name.includes('playwright')) return 'playwright';

@@ -16,7 +16,9 @@ export const favorites = sqliteTable(
 		id: text('id').primaryKey(),
 		entityType: text('entityType').notNull(), // 'image', 'video', 'album', etc.
 		entityId: text('entityId').notNull(),
-		addedAt: integer('addedAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		addedAt: integer('addedAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 	},
 	(table) => ({
 		entityTypeEntityIdIdx: uniqueIndex('Favorite_entityType_entityId_key').on(table.entityType, table.entityId),

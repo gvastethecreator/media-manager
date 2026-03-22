@@ -5,6 +5,7 @@ Este módulo proporciona funciones para transformar y validar objetos de álbum,
 ## 📋 Descripción general
 
 El transformador de álbumes maneja la conversión entre diferentes formatos de álbum:
+
 - Transformación de objetos de base de datos a objetos de aplicación
 - Validación y normalización de datos
 - Generación de formatos extendidos para interfaces de usuario
@@ -42,41 +43,41 @@ album/
 ```typescript
 // Modelo básico de Álbum
 interface Album {
-    id: string;
-    name: string;
-    description?: string;
-    emoji?: string;
-    color?: string;
-    category?: string;
-    sortBy?: string;
-    filters?: string;
-    isFavorite?: boolean;
-    featuredImage?: string;
-    createdAt: Date;
-    updatedAt: Date;
-    // ... otras propiedades base
+	id: string;
+	name: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	category?: string;
+	sortBy?: string;
+	filters?: string;
+	isFavorite?: boolean;
+	featuredImage?: string;
+	createdAt: Date;
+	updatedAt: Date;
+	// ... otras propiedades base
 }
 
 // Álbum con propiedades extendidas para UI
 interface AlbumExtended extends Album {
-    isSelected?: boolean;
-    isHighlighted?: boolean;
-    isExpanded?: boolean;
-    isEditing?: boolean;
-    displayOrder?: number;
-    // ... propiedades de UI adicionales
+	isSelected?: boolean;
+	isHighlighted?: boolean;
+	isExpanded?: boolean;
+	isEditing?: boolean;
+	displayOrder?: number;
+	// ... propiedades de UI adicionales
 }
 
 // Álbum con estadísticas
 interface AlbumWithStats extends AlbumExtended {
-    imageCount: number;
-    videoCount: number;
-    tagCount: number;
-    groupCount: number;
-    totalSize: number;
-    lastUpdated?: Date;
-    distribution?: Array<{ name: string; count: number; }>;
-    // ... estadísticas adicionales
+	imageCount: number;
+	videoCount: number;
+	tagCount: number;
+	groupCount: number;
+	totalSize: number;
+	lastUpdated?: Date;
+	distribution?: Array<{ name: string; count: number }>;
+	// ... estadísticas adicionales
 }
 ```
 
@@ -147,15 +148,15 @@ import { searchAlbums } from '@/transformers/album';
 
 // Buscar álbumes con filtros
 const result = await searchAlbums({
-  search: 'paisajes',
-  page: 1,
-  pageSize: 10,
-  orderBy: 'createdAt',
-  orderDirection: 'desc',
-  filters: {
-    category: 'estilo',
-    isFavorite: true
-  }
+	search: 'paisajes',
+	page: 1,
+	pageSize: 10,
+	orderBy: 'createdAt',
+	orderDirection: 'desc',
+	filters: {
+		category: 'estilo',
+		isFavorite: true,
+	},
 });
 
 console.log(`Total encontrados: ${result.total}`);
@@ -173,13 +174,13 @@ Ejemplo de captura:
 
 ```typescript
 try {
-  const album = transformAlbum(unknownData);
+	const album = transformAlbum(unknownData);
 } catch (error) {
-  if (error instanceof TransformerError) {
-    console.error(`Error de transformación: ${error.message}`);
-  } else {
-    console.error(`Error inesperado: ${error}`);
-  }
+	if (error instanceof TransformerError) {
+		console.error(`Error de transformación: ${error.message}`);
+	} else {
+		console.error(`Error inesperado: ${error}`);
+	}
 }
 ```
 

@@ -56,9 +56,7 @@
 	--entity-wildcard: oklch(0.7 0.2 350); /* Rosa - wildcards */
 
 	/* Entidades de sistema */
-	--entity-system: oklch(
-		0.55 0.12 240
-	); /* Azul grisáceo - sistema/configuración */
+	--entity-system: oklch(0.55 0.12 240); /* Azul grisáceo - sistema/configuración */
 
 	/* =====================================================
    * COLORES FUNCIONALES
@@ -221,51 +219,21 @@
     * TCG CARD GLOW EFFECTS
     * Efectos de brillo para tarjetas de estilo TCG
     * ===================================================== */
-	--tcg-glow-1: 0 0 20px
-		color-mix(
-			in oklch,
-			var(--glow-color, var(--dt-neutral-300)),
-			transparent 70%
-		);
-	--tcg-glow-2: 0 0 30px
-		color-mix(
-			in oklch,
-			var(--glow-color, var(--dt-success-400)),
-			transparent 60%
-		);
-	--tcg-glow-3: 0 0 40px
-		color-mix(
-			in oklch,
-			var(--glow-color, var(--dt-primary-400)),
-			transparent 50%
-		);
-	--tcg-glow-4: 0 0 50px
-		color-mix(
-			in oklch,
-			var(--glow-color, var(--dt-primary-500)),
-			transparent 40%
-		);
-	--tcg-glow-5: 0 0 60px
-		color-mix(
-			in oklch,
-			var(--glow-color, var(--dt-warning-500)),
-			transparent 30%
-		);
-	--tcg-glow-6: 0 0 80px
-		color-mix(
-			in oklch,
-			var(--glow-color, var(--dt-danger-500)),
-			transparent 20%
-		);
+	--tcg-glow-1: 0 0 20px color-mix(in oklch, var(--glow-color, var(--dt-neutral-300)), transparent 70%);
+	--tcg-glow-2: 0 0 30px color-mix(in oklch, var(--glow-color, var(--dt-success-400)), transparent 60%);
+	--tcg-glow-3: 0 0 40px color-mix(in oklch, var(--glow-color, var(--dt-primary-400)), transparent 50%);
+	--tcg-glow-4: 0 0 50px color-mix(in oklch, var(--glow-color, var(--dt-primary-500)), transparent 40%);
+	--tcg-glow-5: 0 0 60px color-mix(in oklch, var(--glow-color, var(--dt-warning-500)), transparent 30%);
+	--tcg-glow-6: 0 0 80px color-mix(in oklch, var(--glow-color, var(--dt-danger-500)), transparent 20%);
 }
 
 /* Tema oscuro - ajustar opacidades y brillos */
 html.dark,
-html[data-theme="dark"],
-html[data-theme="nocturno"],
-html[data-theme="carbon"],
-html[data-theme="neon"],
-html[data-theme="aurora"] {
+html[data-theme='dark'],
+html[data-theme='nocturno'],
+html[data-theme='carbon'],
+html[data-theme='neon'],
+html[data-theme='aurora'] {
 	--canvas-bg-dark: oklch(0.15 0.02 240);
 	--canvas-bg-light: oklch(0.25 0.02 240);
 	--canvas-text-dark: oklch(0.92 0.01 240);

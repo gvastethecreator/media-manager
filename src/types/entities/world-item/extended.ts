@@ -34,8 +34,10 @@ export interface ParsedWorldItemVisualConfig {
 /**
  * Datos de objeto del mundo con campos parseados
  */
-export interface ParsedWorldItem
-	extends Omit<WorldItemBase, 'stats' | 'attributes' | 'effects' | 'properties' | 'requirements' | 'filters'> {
+export interface ParsedWorldItem extends Omit<
+	WorldItemBase,
+	'stats' | 'attributes' | 'effects' | 'properties' | 'requirements' | 'filters'
+> {
 	attributesArray: string[];
 	effectsArray: WorldItemEffect[];
 	filtersObject: WorldItemFilters;
@@ -48,15 +50,16 @@ export interface ParsedWorldItem
  * Datos completos de objeto del mundo con relaciones y campos parseados
  */
 export interface ParsedWorldItemWithRelations
-	extends Omit<WorldItemRelations, keyof ParsedWorldItem>,
-		ParsedWorldItem {}
+	extends Omit<WorldItemRelations, keyof ParsedWorldItem>, ParsedWorldItem {}
 
 /**
  * Interfaz extendida con campos deserializados para WorldItem
  * Convierte los campos JSON string a sus respectivos objetos/arrays
  */
-export interface WorldItemExtended
-	extends Omit<WorldItemBase, 'stats' | 'attributes' | 'effects' | 'properties' | 'requirements' | 'filters'> {
+export interface WorldItemExtended extends Omit<
+	WorldItemBase,
+	'stats' | 'attributes' | 'effects' | 'properties' | 'requirements' | 'filters'
+> {
 	attributes: string[];
 	conceptsCount?: number;
 	effects: WorldItemEffect[];

@@ -14,8 +14,12 @@ export const queueJobs = sqliteTable('QueueJob', {
 	progress: integer('progress').notNull().default(0),
 	startedAt: integer('startedAt', { mode: 'timestamp' }),
 	finishedAt: integer('finishedAt', { mode: 'timestamp' }),
-	createdAt: integer('createdAt', { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now'))`),
-	updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now'))`), // Drizzle automatically updates this
+	createdAt: integer('createdAt', { mode: 'timestamp' })
+		.notNull()
+		.default(sql`(strftime('%s', 'now'))`),
+	updatedAt: integer('updatedAt', { mode: 'timestamp' })
+		.notNull()
+		.default(sql`(strftime('%s', 'now'))`), // Drizzle automatically updates this
 	priority: integer('priority').notNull().default(0),
 	metadata: text('metadata'),
 	retryAt: integer('retryAt', { mode: 'timestamp' }),

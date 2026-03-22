@@ -123,19 +123,19 @@ import { tagService } from '@/services/index';
 
 // Crear una etiqueta simple
 const newTag = await tagService.createTag({
-  name: 'paisaje',
-  description: 'Fotografías de paisajes naturales',
-  color: '#4CAF50',
-  category: 'SUBJECT'
+	name: 'paisaje',
+	description: 'Fotografías de paisajes naturales',
+	color: '#4CAF50',
+	category: 'SUBJECT',
 });
 
 // Crear una etiqueta con slug personalizado
 const customTag = await tagService.createTag({
-  name: 'Retrato en Blanco y Negro',
-  slug: 'retrato-bw',
-  description: 'Retratos en formato monocromático',
-  color: '#607D8B',
-  category: 'STYLE'
+	name: 'Retrato en Blanco y Negro',
+	slug: 'retrato-bw',
+	description: 'Retratos en formato monocromático',
+	color: '#607D8B',
+	category: 'STYLE',
 });
 ```
 
@@ -146,12 +146,12 @@ import { tagService } from '@/services/index';
 
 // Obtener etiquetas con filtros
 const tags = await tagService.getTags({
-  search: 'paisaje',
-  categories: ['SUBJECT', 'LOCATION'],
-  sortBy: 'usageCount',
-  sortDirection: 'desc',
-  page: 1,
-  limit: 20
+	search: 'paisaje',
+	categories: ['SUBJECT', 'LOCATION'],
+	sortBy: 'usageCount',
+	sortDirection: 'desc',
+	page: 1,
+	limit: 20,
 });
 
 // Obtener etiquetas populares
@@ -165,10 +165,10 @@ import { tagService } from '@/services/index';
 
 // Actualizar propiedades de una etiqueta
 const updatedTag = await tagService.updateTag('tag-id-123', {
-  name: 'Paisaje Natural',
-  description: 'Fotografías de paisajes naturales sin intervención humana',
-  color: '#8BC34A',
-  category: 'SUBJECT'
+	name: 'Paisaje Natural',
+	description: 'Fotografías de paisajes naturales sin intervención humana',
+	color: '#8BC34A',
+	category: 'SUBJECT',
 });
 ```
 
@@ -201,52 +201,52 @@ const relatedTags = await tagService.getRelatedTags('tag-id-123', 5);
 
 ## Relaciones con Otras Entidades
 
-| Entidad        | Tipo de Relación     | Descripción                                          |
-|----------------|----------------------|------------------------------------------------------|
-| **Image**      | Muchos a muchos      | Las imágenes pueden tener múltiples etiquetas        |
-| **Video**      | Muchos a muchos      | Los videos pueden tener múltiples etiquetas          |
-| **Folder**     | Muchos a muchos      | Las carpetas pueden tener múltiples etiquetas        |
-| **Album**      | Muchos a muchos      | Los álbumes pueden tener múltiples etiquetas         |
-| **Collection** | Muchos a muchos      | Las colecciones pueden tener múltiples etiquetas     |
-| **Character**  | Muchos a muchos      | Los personajes pueden tener etiquetas descriptivas   |
-| **Place**      | Muchos a muchos      | Los lugares pueden tener etiquetas descriptivas      |
-| **Tag**        | Auto-referencial     | Las etiquetas pueden tener relaciones jerárquicas    |
-| **Activity**   | Referencial          | Las actividades pueden referenciar etiquetas         |
+| Entidad        | Tipo de Relación | Descripción                                        |
+| -------------- | ---------------- | -------------------------------------------------- |
+| **Image**      | Muchos a muchos  | Las imágenes pueden tener múltiples etiquetas      |
+| **Video**      | Muchos a muchos  | Los videos pueden tener múltiples etiquetas        |
+| **Folder**     | Muchos a muchos  | Las carpetas pueden tener múltiples etiquetas      |
+| **Album**      | Muchos a muchos  | Los álbumes pueden tener múltiples etiquetas       |
+| **Collection** | Muchos a muchos  | Las colecciones pueden tener múltiples etiquetas   |
+| **Character**  | Muchos a muchos  | Los personajes pueden tener etiquetas descriptivas |
+| **Place**      | Muchos a muchos  | Los lugares pueden tener etiquetas descriptivas    |
+| **Tag**        | Auto-referencial | Las etiquetas pueden tener relaciones jerárquicas  |
+| **Activity**   | Referencial      | Las actividades pueden referenciar etiquetas       |
 
 ## Modelo de Datos
 
 ```typescript
 // Modelo básico de Tag
 interface TagBase {
-  id: string;                  // Identificador único
-  name: string;                // Nombre visible de la etiqueta
-  slug: string;                // Versión normalizada para URL y búsqueda
-  description?: string;        // Descripción opcional
-  color?: string;              // Color asociado (hex o nombre)
-  icon?: string;               // Icono representativo (nombre o emoji)
-  category?: TagCategory;      // Categoría (SUBJECT, STYLE, TECHNICAL, etc.)
-  isSystem: boolean;           // Indica si es una etiqueta del sistema
-  parentId?: string;           // ID de la etiqueta padre (si es jerárquica)
-  createdAt: Date;             // Fecha de creación
-  updatedAt: Date;             // Fecha de última actualización
+	id: string; // Identificador único
+	name: string; // Nombre visible de la etiqueta
+	slug: string; // Versión normalizada para URL y búsqueda
+	description?: string; // Descripción opcional
+	color?: string; // Color asociado (hex o nombre)
+	icon?: string; // Icono representativo (nombre o emoji)
+	category?: TagCategory; // Categoría (SUBJECT, STYLE, TECHNICAL, etc.)
+	isSystem: boolean; // Indica si es una etiqueta del sistema
+	parentId?: string; // ID de la etiqueta padre (si es jerárquica)
+	createdAt: Date; // Fecha de creación
+	updatedAt: Date; // Fecha de última actualización
 }
 
 // Extensión con estadísticas
 interface TagWithStats extends TagBase {
-  usageCount: number;          // Número total de usos
-  imageCount: number;          // Cantidad de imágenes con esta etiqueta
-  videoCount: number;          // Cantidad de videos con esta etiqueta
-  folderCount: number;         // Cantidad de carpetas con esta etiqueta
-  albumCount: number;          // Cantidad de álbumes con esta etiqueta
-  lastUsed?: Date;             // Última vez que se usó la etiqueta
+	usageCount: number; // Número total de usos
+	imageCount: number; // Cantidad de imágenes con esta etiqueta
+	videoCount: number; // Cantidad de videos con esta etiqueta
+	folderCount: number; // Cantidad de carpetas con esta etiqueta
+	albumCount: number; // Cantidad de álbumes con esta etiqueta
+	lastUsed?: Date; // Última vez que se usó la etiqueta
 }
 
 // Extensión con relaciones
 interface TagComplete extends TagWithStats {
-  parent?: TagBase;            // Etiqueta padre
-  children: TagBase[];         // Etiquetas hijas
-  relatedTags: TagBase[];      // Etiquetas frecuentemente usadas junto a esta
-  synonyms: string[];          // Términos equivalentes
+	parent?: TagBase; // Etiqueta padre
+	children: TagBase[]; // Etiquetas hijas
+	relatedTags: TagBase[]; // Etiquetas frecuentemente usadas junto a esta
+	synonyms: string[]; // Términos equivalentes
 }
 ```
 
@@ -262,13 +262,13 @@ interface TagComplete extends TagWithStats {
 
 ## Solución de Problemas Comunes
 
-| Problema | Solución |
-|----------|----------|
-| **Etiquetas duplicadas** | Utilice `tagService.mergeTags()` para fusionar etiquetas similares |
-| **Etiquetas huérfanas** | Identifique con `tagService.findUnusedTags()` |
-| **Normalización incorrecta** | Regenere slugs con `tagService.regenerateSlugs()` |
-| **Inconsistencia en contadores** | Recalcule con `tagService.recalculateUsageCounts()` |
-| **Rendimiento en consultas** | Utilice etiquetas precomputadas para las entidades más accedidas |
+| Problema                         | Solución                                                           |
+| -------------------------------- | ------------------------------------------------------------------ |
+| **Etiquetas duplicadas**         | Utilice `tagService.mergeTags()` para fusionar etiquetas similares |
+| **Etiquetas huérfanas**          | Identifique con `tagService.findUnusedTags()`                      |
+| **Normalización incorrecta**     | Regenere slugs con `tagService.regenerateSlugs()`                  |
+| **Inconsistencia en contadores** | Recalcule con `tagService.recalculateUsageCounts()`                |
+| **Rendimiento en consultas**     | Utilice etiquetas precomputadas para las entidades más accedidas   |
 
 ## Roadmap y Mejoras Futuras
 

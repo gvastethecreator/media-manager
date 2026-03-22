@@ -40,7 +40,17 @@ graph TD
 import type { ImageBase, ImageCreateInput } from '@/types/entities/image';
 import { ImageSchema } from '@/types/entities/image/types';
 
-const nueva: ImageCreateInput = { name: 'Foto', path: '/fotos/1.jpg', hash: 'abc', size: 123, width: 800, height: 600, folder: { id: 'f1' }, sortBy: 'name', filters: '' };
+const nueva: ImageCreateInput = {
+	name: 'Foto',
+	path: '/fotos/1.jpg',
+	hash: 'abc',
+	size: 123,
+	width: 800,
+	height: 600,
+	folder: { id: 'f1' },
+	sortBy: 'name',
+	filters: '',
+};
 const validada = ImageSchema.parse(nueva);
 ```
 

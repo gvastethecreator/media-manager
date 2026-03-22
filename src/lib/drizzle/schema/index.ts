@@ -18,25 +18,11 @@
 // =================================================================================
 // CORE DOMAIN EXPORTS
 // =================================================================================
-export {
-	activities,
-	entityAggregates,
-	fileStats,
-	metadatas,
-	profiles,
-	queueJobs,
-	settings,
-	thumbnails,
-} from './core';
+export { activities, entityAggregates, fileStats, metadatas, profiles, queueJobs, settings, thumbnails } from './core';
 // =================================================================================
 // DEV DOMAIN EXPORTS
 // =================================================================================
-export {
-	alertLevelEnum,
-	devFeatures,
-	featureStatusEnum,
-	serverAlerts,
-} from './dev';
+export { alertLevelEnum, devFeatures, featureStatusEnum, serverAlerts } from './dev';
 // =================================================================================
 // FILES/MEDIA DOMAIN EXPORTS
 // =================================================================================
@@ -53,14 +39,7 @@ export {
 // =================================================================================
 // ORGANIZATION DOMAIN EXPORTS
 // =================================================================================
-export {
-	albums,
-	collections,
-	favorites,
-	files,
-	folders,
-	groups,
-} from './organization';
+export { albums, collections, favorites, files, folders, groups } from './organization';
 // =================================================================================
 // RELATIONS DOMAIN EXPORTS
 // =================================================================================
@@ -103,23 +82,11 @@ export {
 // =================================================================================
 // TAXONOMY DOMAIN EXPORTS
 // =================================================================================
-export {
-	notes,
-	prompts,
-	properties,
-	tags,
-	tasks,
-	wildcards,
-} from './taxonomy';
+export { notes, prompts, properties, tags, tasks, wildcards } from './taxonomy';
 // =================================================================================
 // WORLDBUILDING DOMAIN EXPORTS
 // =================================================================================
-export {
-	characters,
-	concepts,
-	places,
-	worldItems,
-} from './worldbuilding';
+export { characters, concepts, places, worldItems } from './worldbuilding';
 
 // =================================================================================
 // SCHEMA OBJECT FOR DRIZZLE KIT

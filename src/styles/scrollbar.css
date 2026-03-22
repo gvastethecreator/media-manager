@@ -28,31 +28,19 @@
 }
 
 *::-webkit-scrollbar-thumb {
-	background-color: color-mix(
-		in srgb,
-		var(--muted-foreground) 30%,
-		transparent
-	);
+	background-color: color-mix(in srgb, var(--muted-foreground) 30%, transparent);
 	border: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
 	border-radius: 4px;
 	transition: background-color 0.2s ease-in-out;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-	background-color: color-mix(
-		in srgb,
-		var(--muted-foreground) 50%,
-		transparent
-	);
+	background-color: color-mix(in srgb, var(--muted-foreground) 50%, transparent);
 	border-color: color-mix(in srgb, var(--border) 50%, transparent);
 }
 
 *::-webkit-scrollbar-thumb:active {
-	background-color: color-mix(
-		in srgb,
-		var(--muted-foreground) 70%,
-		transparent
-	);
+	background-color: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
 	border-color: color-mix(in srgb, var(--border) 70%, transparent);
 }
 
@@ -65,8 +53,7 @@
 
 /* Clase para scrollbars más prominentes */
 .custom-scrollbar-prominent {
-	scrollbar-color: color-mix(in srgb, var(--primary) 60%, transparent)
-		color-mix(in srgb, var(--muted) 40%, transparent);
+	scrollbar-color: color-mix(in srgb, var(--primary) 60%, transparent) color-mix(in srgb, var(--muted) 40%, transparent);
 	scrollbar-width: auto;
 }
 
@@ -114,29 +101,17 @@
 }
 
 .custom-scrollbar-subtle::-webkit-scrollbar-thumb {
-	background-color: color-mix(
-		in srgb,
-		var(--muted-foreground) 20%,
-		transparent
-	);
+	background-color: color-mix(in srgb, var(--muted-foreground) 20%, transparent);
 	border-radius: 3px;
 	transition: background-color 0.2s ease-in-out;
 }
 
 .custom-scrollbar-subtle::-webkit-scrollbar-thumb:hover {
-	background-color: color-mix(
-		in srgb,
-		var(--muted-foreground) 40%,
-		transparent
-	);
+	background-color: color-mix(in srgb, var(--muted-foreground) 40%, transparent);
 }
 
 .custom-scrollbar-subtle::-webkit-scrollbar-thumb:active {
-	background-color: color-mix(
-		in srgb,
-		var(--muted-foreground) 60%,
-		transparent
-	);
+	background-color: color-mix(in srgb, var(--muted-foreground) 60%, transparent);
 }
 
 /* Clase para áreas de contenido principal */
@@ -157,30 +132,18 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-	background-color: color-mix(
-		in srgb,
-		var(--muted-foreground) 40%,
-		transparent
-	);
+	background-color: color-mix(in srgb, var(--muted-foreground) 40%, transparent);
 	border: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
 	border-radius: 4px;
 	transition: background-color 0.2s ease-in-out;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-	background-color: color-mix(
-		in srgb,
-		var(--muted-foreground) 60%,
-		transparent
-	);
+	background-color: color-mix(in srgb, var(--muted-foreground) 60%, transparent);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:active {
-	background-color: color-mix(
-		in srgb,
-		var(--muted-foreground) 80%,
-		transparent
-	);
+	background-color: color-mix(in srgb, var(--muted-foreground) 80%, transparent);
 }
 
 /* === SCROLLBARS PARA ELEMENTOS ESPECÍFICOS === */

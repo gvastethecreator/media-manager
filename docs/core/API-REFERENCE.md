@@ -39,9 +39,9 @@ Verifica el estado del servidor.
 
 ```json
 {
-  "status": "ok",
-  "timestamp": "2025-12-31T10:00:00.000Z",
-  "uptime": 3600
+	"status": "ok",
+	"timestamp": "2025-12-31T10:00:00.000Z",
+	"uptime": 3600
 }
 ```
 
@@ -55,34 +55,34 @@ Lista todas las carpetas indexadas.
 
 **Query Params:**
 
-| Param | Tipo | Descripción |
-|-------|------|-------------|
-| `parentId` | string | Filtrar por carpeta padre |
-| `isRoot` | boolean | Solo carpetas raíz |
-| `depth` | number | Nivel de profundidad |
+| Param      | Tipo    | Descripción               |
+| ---------- | ------- | ------------------------- |
+| `parentId` | string  | Filtrar por carpeta padre |
+| `isRoot`   | boolean | Solo carpetas raíz        |
+| `depth`    | number  | Nivel de profundidad      |
 
 **Respuesta:**
 
 ```json
 {
-  "folders": [
-    {
-      "id": "folder_123",
-      "name": "Mi Carpeta",
-      "path": "/home/user/images",
-      "parentId": null,
-      "depth": 0,
-      "isRoot": true,
-      "isWatched": true,
-      "lastIndexedAt": "2025-12-31T10:00:00.000Z",
-      "_count": {
-        "images": 150,
-        "videos": 20,
-        "subfolders": 5
-      }
-    }
-  ],
-  "total": 10
+	"folders": [
+		{
+			"id": "folder_123",
+			"name": "Mi Carpeta",
+			"path": "/home/user/images",
+			"parentId": null,
+			"depth": 0,
+			"isRoot": true,
+			"isWatched": true,
+			"lastIndexedAt": "2025-12-31T10:00:00.000Z",
+			"_count": {
+				"images": 150,
+				"videos": 20,
+				"subfolders": 5
+			}
+		}
+	],
+	"total": 10
 }
 ```
 
@@ -98,9 +98,9 @@ Crea/registra una nueva carpeta para indexar.
 
 ```json
 {
-  "path": "/home/user/new-folder",
-  "isRoot": true,
-  "isWatched": false
+	"path": "/home/user/new-folder",
+	"isRoot": true,
+	"isWatched": false
 }
 ```
 
@@ -143,48 +143,48 @@ Lista imágenes con filtros y paginación.
 
 **Query Params:**
 
-| Param | Tipo | Descripción |
-|-------|------|-------------|
-| `folderId` | string | Filtrar por carpeta |
-| `page` | number | Página (default: 1) |
-| `pageSize` | number | Elementos por página (default: 50) |
-| `sortBy` | string | Campo de ordenamiento |
-| `sortOrder` | "asc" \| "desc" | Dirección |
-| `search` | string | Búsqueda por nombre |
-| `isFavorite` | boolean | Solo favoritos |
-| `tagIds` | string[] | Filtrar por tags |
+| Param        | Tipo            | Descripción                        |
+| ------------ | --------------- | ---------------------------------- |
+| `folderId`   | string          | Filtrar por carpeta                |
+| `page`       | number          | Página (default: 1)                |
+| `pageSize`   | number          | Elementos por página (default: 50) |
+| `sortBy`     | string          | Campo de ordenamiento              |
+| `sortOrder`  | "asc" \| "desc" | Dirección                          |
+| `search`     | string          | Búsqueda por nombre                |
+| `isFavorite` | boolean         | Solo favoritos                     |
+| `tagIds`     | string[]        | Filtrar por tags                   |
 
 **Respuesta:**
 
 ```json
 {
-  "images": [
-    {
-      "id": "img_123",
-      "name": "imagen.jpg",
-      "path": "/home/user/images/imagen.jpg",
-      "hash": "abc123...",
-      "size": 1024000,
-      "width": 1920,
-      "height": 1080,
-      "thumbnail": "data:image/webp;base64,...",
-      "isFavorite": false,
-      "folderId": "folder_123",
-      "createdAt": "2025-12-31T10:00:00.000Z",
-      "_count": {
-        "tags": 5,
-        "albums": 2
-      }
-    }
-  ],
-  "total": 150,
-  "pagination": {
-    "page": 1,
-    "pageSize": 50,
-    "totalPages": 3,
-    "hasNext": true,
-    "hasPrev": false
-  }
+	"images": [
+		{
+			"id": "img_123",
+			"name": "imagen.jpg",
+			"path": "/home/user/images/imagen.jpg",
+			"hash": "abc123...",
+			"size": 1024000,
+			"width": 1920,
+			"height": 1080,
+			"thumbnail": "data:image/webp;base64,...",
+			"isFavorite": false,
+			"folderId": "folder_123",
+			"createdAt": "2025-12-31T10:00:00.000Z",
+			"_count": {
+				"tags": 5,
+				"albums": 2
+			}
+		}
+	],
+	"total": 150,
+	"pagination": {
+		"page": 1,
+		"pageSize": 50,
+		"totalPages": 3,
+		"hasNext": true,
+		"hasPrev": false
+	}
 }
 ```
 
@@ -204,9 +204,9 @@ Actualiza metadatos de una imagen.
 
 ```json
 {
-  "name": "nuevo-nombre.jpg",
-  "description": "Descripción actualizada",
-  "isFavorite": true
+	"name": "nuevo-nombre.jpg",
+	"description": "Descripción actualizada",
+	"isFavorite": true
 }
 ```
 
@@ -230,7 +230,7 @@ Añade tags a una imagen.
 
 ```json
 {
-  "tagIds": ["tag_1", "tag_2"]
+	"tagIds": ["tag_1", "tag_2"]
 }
 ```
 
@@ -250,7 +250,7 @@ Añade una imagen a álbumes.
 
 ```json
 {
-  "albumIds": ["album_1", "album_2"]
+	"albumIds": ["album_1", "album_2"]
 }
 ```
 
@@ -304,33 +304,33 @@ Lista todos los tags.
 
 **Query Params:**
 
-| Param | Tipo | Descripción |
-|-------|------|-------------|
+| Param      | Tipo   | Descripción           |
+| ---------- | ------ | --------------------- |
 | `category` | string | Filtrar por categoría |
-| `parentId` | string | Tags hijos de |
-| `search` | string | Búsqueda por nombre |
+| `parentId` | string | Tags hijos de         |
+| `search`   | string | Búsqueda por nombre   |
 
 **Respuesta:**
 
 ```json
 {
-  "tags": [
-    {
-      "id": "tag_123",
-      "name": "Paisaje",
-      "description": "Fotografías de paisajes",
-      "color": "#10b981",
-      "emoji": "🏔️",
-      "category": "nature",
-      "parentId": null,
-      "isFavorite": false,
-      "_count": {
-        "images": 45,
-        "videos": 10
-      }
-    }
-  ],
-  "total": 25
+	"tags": [
+		{
+			"id": "tag_123",
+			"name": "Paisaje",
+			"description": "Fotografías de paisajes",
+			"color": "#10b981",
+			"emoji": "🏔️",
+			"category": "nature",
+			"parentId": null,
+			"isFavorite": false,
+			"_count": {
+				"images": 45,
+				"videos": 10
+			}
+		}
+	],
+	"total": 25
 }
 ```
 
@@ -346,11 +346,11 @@ Crea un nuevo tag.
 
 ```json
 {
-  "name": "Nuevo Tag",
-  "description": "Descripción del tag",
-  "color": "#3b82f6",
-  "emoji": "🎨",
-  "category": "art"
+	"name": "Nuevo Tag",
+	"description": "Descripción del tag",
+	"color": "#3b82f6",
+	"emoji": "🎨",
+	"category": "art"
 }
 ```
 
@@ -390,10 +390,10 @@ Crea un nuevo álbum.
 
 ```json
 {
-  "name": "Vacaciones 2025",
-  "description": "Fotos del viaje",
-  "color": "#f59e0b",
-  "emoji": "🏖️"
+	"name": "Vacaciones 2025",
+	"description": "Fotos del viaje",
+	"color": "#f59e0b",
+	"emoji": "🏖️"
 }
 ```
 
@@ -413,7 +413,7 @@ Añade imágenes al álbum.
 
 ```json
 {
-  "imageIds": ["img_1", "img_2", "img_3"]
+	"imageIds": ["img_1", "img_2", "img_3"]
 }
 ```
 
@@ -477,8 +477,8 @@ Añade entidades al grupo.
 
 ```json
 {
-  "entityType": "image",
-  "entityIds": ["img_1", "img_2"]
+	"entityType": "image",
+	"entityIds": ["img_1", "img_2"]
 }
 ```
 
@@ -502,20 +502,20 @@ Crea un personaje.
 
 ```json
 {
-  "name": "Elara",
-  "description": "Elfa maga del bosque",
-  "race": "Elf",
-  "class": "Mage",
-  "level": 15,
-  "alignment": "Neutral Good",
-  "stats": {
-    "strength": 8,
-    "dexterity": 14,
-    "constitution": 10,
-    "intelligence": 18,
-    "wisdom": 16,
-    "charisma": 12
-  }
+	"name": "Elara",
+	"description": "Elfa maga del bosque",
+	"race": "Elf",
+	"class": "Mage",
+	"level": 15,
+	"alignment": "Neutral Good",
+	"stats": {
+		"strength": 8,
+		"dexterity": 14,
+		"constitution": 10,
+		"intelligence": 18,
+		"wisdom": 16,
+		"charisma": 12
+	}
 }
 ```
 
@@ -749,10 +749,10 @@ Lista favoritos del perfil actual.
 
 **Query Params:**
 
-| Param | Tipo | Descripción |
-|-------|------|-------------|
-| `profileId` | string | Perfil específico |
-| `entityType` | string | Tipo de entidad |
+| Param        | Tipo   | Descripción       |
+| ------------ | ------ | ----------------- |
+| `profileId`  | string | Perfil específico |
+| `entityType` | string | Tipo de entidad   |
 
 ### `POST /api/favorites`
 
@@ -762,8 +762,8 @@ Marca una entidad como favorita.
 
 ```json
 {
-  "entityType": "image",
-  "entityId": "img_123"
+	"entityType": "image",
+	"entityId": "img_123"
 }
 ```
 
@@ -815,7 +815,7 @@ Actualiza una configuración.
 
 ```json
 {
-  "value": { "theme": "dark", "language": "es" }
+	"value": { "theme": "dark", "language": "es" }
 }
 ```
 
@@ -829,11 +829,11 @@ Búsqueda global en todas las entidades.
 
 **Query Params:**
 
-| Param | Tipo | Descripción |
-|-------|------|-------------|
-| `q` | string | Término de búsqueda |
-| `types` | string[] | Tipos a buscar |
-| `limit` | number | Límite de resultados |
+| Param   | Tipo     | Descripción          |
+| ------- | -------- | -------------------- |
+| `q`     | string   | Término de búsqueda  |
+| `types` | string[] | Tipos a buscar       |
+| `limit` | number   | Límite de resultados |
 
 **Respuesta:**
 
@@ -867,14 +867,14 @@ Obtiene estadísticas globales del sistema.
 
 ```json
 {
-  "totalImages": 5000,
-  "totalVideos": 500,
-  "totalAudios": 200,
-  "totalDocuments": 100,
-  "totalTags": 150,
-  "totalAlbums": 25,
-  "totalSize": 50000000000,
-  "lastIndexed": "2025-12-31T10:00:00.000Z"
+	"totalImages": 5000,
+	"totalVideos": 500,
+	"totalAudios": 200,
+	"totalDocuments": 100,
+	"totalTags": 150,
+	"totalAlbums": 25,
+	"totalSize": 50000000000,
+	"lastIndexed": "2025-12-31T10:00:00.000Z"
 }
 ```
 
@@ -919,10 +919,10 @@ Descarga múltiples archivos como ZIP.
 
 ```json
 {
-  "items": [
-    { "type": "image", "id": "img_1" },
-    { "type": "image", "id": "img_2" }
-  ]
+	"items": [
+		{ "type": "image", "id": "img_1" },
+		{ "type": "image", "id": "img_2" }
+	]
 }
 ```
 
@@ -966,15 +966,15 @@ Información del sistema.
 
 ```json
 {
-  "version": "0.1.0",
-  "nodeVersion": "22.0.0",
-  "bunVersion": "1.1.0",
-  "platform": "darwin",
-  "arch": "arm64",
-  "memory": {
-    "total": 16000000000,
-    "used": 8000000000
-  }
+	"version": "0.1.0",
+	"nodeVersion": "22.0.0",
+	"bunVersion": "1.1.0",
+	"platform": "darwin",
+	"arch": "arm64",
+	"memory": {
+		"total": 16000000000,
+		"used": 8000000000
+	}
 }
 ```
 
@@ -1006,27 +1006,27 @@ Todos los errores siguen el formato:
 
 ```json
 {
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "La entidad no fue encontrada",
-    "details": {
-      "entityType": "image",
-      "entityId": "img_123"
-    }
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "La entidad no fue encontrada",
+		"details": {
+			"entityType": "image",
+			"entityId": "img_123"
+		}
+	}
 }
 ```
 
 **Códigos de Error:**
 
-| Código | HTTP Status | Descripción |
-|--------|-------------|-------------|
-| `VALIDATION_ERROR` | 400 | Datos de entrada inválidos |
-| `NOT_FOUND` | 404 | Recurso no encontrado |
-| `ALREADY_EXISTS` | 409 | El recurso ya existe |
-| `INTERNAL_ERROR` | 500 | Error interno del servidor |
-| `FILE_NOT_FOUND` | 404 | Archivo físico no encontrado |
-| `PERMISSION_DENIED` | 403 | Sin permisos |
+| Código              | HTTP Status | Descripción                  |
+| ------------------- | ----------- | ---------------------------- |
+| `VALIDATION_ERROR`  | 400         | Datos de entrada inválidos   |
+| `NOT_FOUND`         | 404         | Recurso no encontrado        |
+| `ALREADY_EXISTS`    | 409         | El recurso ya existe         |
+| `INTERNAL_ERROR`    | 500         | Error interno del servidor   |
+| `FILE_NOT_FOUND`    | 404         | Archivo físico no encontrado |
+| `PERMISSION_DENIED` | 403         | Sin permisos                 |
 
 ---
 

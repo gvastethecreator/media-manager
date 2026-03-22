@@ -23,7 +23,9 @@ export const queueJobs = sqliteTable(
 		progress: integer('progress').notNull().default(0),
 		startedAt: integer('startedAt', { mode: 'timestamp_ms' }),
 		finishedAt: integer('finishedAt', { mode: 'timestamp_ms' }),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 		priority: integer('priority').notNull().default(0),
 		metadata: text('metadata'),

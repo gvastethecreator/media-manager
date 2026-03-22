@@ -159,8 +159,8 @@ export function GridView({
 				<button
 					className={cn(
 						'group relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-muted/50',
-						'transition-all duration-200',
-						isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'hover:ring-1 hover:ring-border',
+						'transition-all duration-dt-normal ease-dt-out active:scale-[0.98]',
+						isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'hover:ring-1 hover:ring-border hover:shadow-dt-2 hover:-translate-y-0.5',
 						isActive && 'ring-2 ring-primary/70'
 					)}
 					data-item-id={item.id}
@@ -173,8 +173,8 @@ export function GridView({
 					{/* Thumbnail puro - object-cover para llenar el cuadrado */}
 					<MediaThumbnail className="h-full w-full" item={item} style={{ objectFit: 'cover' }} />
 					{/* Nombre solo en hover */}
-					<div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-						<span className="block truncate font-medium text-white text-xs" title={item.name}>
+					<div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 bg-linear-to-t from-black/80 via-black/40 to-transparent p-2 opacity-0 transition-all duration-dt-normal ease-dt-out group-hover:translate-y-0 group-hover:opacity-100">
+						<span className="block truncate font-medium text-white text-xs drop-shadow-md" title={item.name}>
 							{item.name}
 						</span>
 					</div>

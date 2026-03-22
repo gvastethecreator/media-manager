@@ -17,11 +17,7 @@ export type { ImageBase, ImageStatistics, ImageWithStats } from './base';
 
 // --- Enumeraciones ---
 export { ImageFormat, ImageStatus } from './enums';
-export type {
-	ImageFilters,
-	ImageMetadata,
-	ImageSearchResult,
-} from './types';
+export type { ImageFilters, ImageMetadata, ImageSearchResult } from './types';
 
 // --- Tipos derivados ---
 import type { ImageBase, ImageWithStats } from './base';
@@ -36,12 +32,6 @@ export interface ImageSearchOptions {
 	where?: Record<string, unknown>;
 }
 
-export {
-	IMAGE_SORT_PROPERTY_MAP,
-	ImageSchema,
-	ImageSortCriteria,
-	ImageSortOption,
-	ImageViewMode,
-} from './types';
+export { IMAGE_SORT_PROPERTY_MAP, ImageSchema, ImageSortCriteria, ImageSortOption, ImageViewMode } from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.

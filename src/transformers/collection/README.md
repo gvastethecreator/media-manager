@@ -43,36 +43,36 @@ collection/
 ```typescript
 // Modelo básico de Colección
 interface Collection {
-    id: string;
-    name: string;
-    description?: string;
-    emoji?: string;
-    color?: string;
-    category?: 'PERSONAL' | 'WORK' | 'PROJECT' | 'OTHER';
-    isPublic?: boolean;
-    isPinned?: boolean;
-    isFavorite?: boolean;
-    parentId?: string;
-    // ... otras propiedades base
+	id: string;
+	name: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	category?: 'PERSONAL' | 'WORK' | 'PROJECT' | 'OTHER';
+	isPublic?: boolean;
+	isPinned?: boolean;
+	isFavorite?: boolean;
+	parentId?: string;
+	// ... otras propiedades base
 }
 
 // Colección con propiedades extendidas para UI
 interface CollectionExtended extends Collection {
-    isSelected?: boolean;
-    isHighlighted?: boolean;
-    // ... propiedades de UI adicionales
+	isSelected?: boolean;
+	isHighlighted?: boolean;
+	// ... propiedades de UI adicionales
 }
 
 // Colección con estadísticas
 interface CollectionWithStats extends CollectionExtended {
-    imageCount: number;
-    videoCount: number;
-    albumCount: number;
-    tagCount: number;
-    groupCount: number;
-    totalSize: number;
-    lastUpdated?: Date;
-    // ... estadísticas adicionales
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	tagCount: number;
+	groupCount: number;
+	totalSize: number;
+	lastUpdated?: Date;
+	// ... estadísticas adicionales
 }
 ```
 
@@ -134,15 +134,15 @@ import { searchCollections } from '@/transformers/collection';
 
 // Buscar colecciones con filtros
 const result = await searchCollections({
-  search: 'naturaleza',
-  page: 1,
-  pageSize: 10,
-  orderBy: 'createdAt',
-  orderDirection: 'desc',
-  filters: {
-    category: 'PERSONAL',
-    isPublic: true
-  }
+	search: 'naturaleza',
+	page: 1,
+	pageSize: 10,
+	orderBy: 'createdAt',
+	orderDirection: 'desc',
+	filters: {
+		category: 'PERSONAL',
+		isPublic: true,
+	},
 });
 
 console.log(`Total: ${result.total}, Páginas: ${result.totalPages}`);
@@ -160,13 +160,13 @@ Ejemplo de captura:
 
 ```typescript
 try {
-  const collection = transformCollection(unknownData);
+	const collection = transformCollection(unknownData);
 } catch (error) {
-  if (error instanceof TransformerError) {
-    console.error(`Error de transformación: ${error.message}`);
-  } else {
-    console.error(`Error inesperado: ${error}`);
-  }
+	if (error instanceof TransformerError) {
+		console.error(`Error de transformación: ${error.message}`);
+	} else {
+		console.error(`Error inesperado: ${error}`);
+	}
 }
 ```
 
@@ -227,19 +227,19 @@ graph TD
 
 ```typescript
 interface CollectionWithStats extends CollectionBase {
-  _count?: {
-    images: number;
-    videos: number;
-    albums: number;
-    // ... otros conteos
-  };
-  stats: {
-    totalItems: number;
-    totalImages: number;
-    totalVideos: number;
-    totalEntities: number;
-    lastUpdated: Date;
-  };
+	_count?: {
+		images: number;
+		videos: number;
+		albums: number;
+		// ... otros conteos
+	};
+	stats: {
+		totalItems: number;
+		totalImages: number;
+		totalVideos: number;
+		totalEntities: number;
+		lastUpdated: Date;
+	};
 }
 ```
 

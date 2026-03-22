@@ -21,7 +21,9 @@ export const properties = sqliteTable(
 		category: text('category'),
 		featuredImage: text('featuredImage'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

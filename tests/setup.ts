@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
+import { getDbClient } from '@/lib/drizzle';
 import { afterEach, vi } from 'vitest';
 
 // Asegurar flags de entorno para ejecución de tests unitarios
@@ -8,6 +9,13 @@ import { afterEach, vi } from 'vitest';
 // @ts-expect-error - TS marca NODE_ENV readonly pero asignamos antes de que se "congele"
 process.env.NODE_ENV ??= 'test';
 process.env.DISABLE_FTS5 ??= '1';
+
+const dbClient = getDbClient();
+if (dbClient) {
+	await dbClient.execute('PRAGMA busy_timeout = 5000');
+	await dbClient.execute('PRAGMA journal_mode = WAL');
+	await dbClient.execute('PRAGMA foreign_keys = ON');
+}
 
 // Polyfill sencillo de ResizeObserver para jsdom
 class ResizeObserverMock {

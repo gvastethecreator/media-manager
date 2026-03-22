@@ -41,21 +41,21 @@ Sistema integral para la gestión inteligente de archivos multimedia, diseñado 
 
 ### Organización de Contenido
 
-| Entidad | Descripción |
-|---------|-------------|
-| 🏷️ **Tags** | Etiquetas con colores y emojis personalizables |
-| 📸 **Álbumes** | Colecciones temáticas de archivos |
-| 📁 **Grupos** | Meta-organizadores jerárquicos |
-| 💎 **Colecciones** | Soporte NFT con metadatos blockchain |
+| Entidad            | Descripción                                    |
+| ------------------ | ---------------------------------------------- |
+| 🏷️ **Tags**        | Etiquetas con colores y emojis personalizables |
+| 📸 **Álbumes**     | Colecciones temáticas de archivos              |
+| 📁 **Grupos**      | Meta-organizadores jerárquicos                 |
+| 💎 **Colecciones** | Soporte NFT con metadatos blockchain           |
 
 ### Worldbuilding
 
-| Entidad | Descripción |
-|---------|-------------|
-| 👤 **Characters** | Personajes con stats, backstory, relaciones |
-| 📍 **Places** | Ubicaciones con clima, recursos, historia |
-| 🎯 **World Items** | Objetos con atributos y efectos |
-| 💡 **Concepts** | Sistema de conocimiento interconectado |
+| Entidad            | Descripción                                 |
+| ------------------ | ------------------------------------------- |
+| 👤 **Characters**  | Personajes con stats, backstory, relaciones |
+| 📍 **Places**      | Ubicaciones con clima, recursos, historia   |
+| 🎯 **World Items** | Objetos con atributos y efectos             |
+| 💡 **Concepts**    | Sistema de conocimiento interconectado      |
 
 ### Performance
 
@@ -68,15 +68,15 @@ Sistema integral para la gestión inteligente de archivos multimedia, diseñado 
 
 ## 🛠️ Stack Tecnológico
 
-| Capa | Tecnologías |
-|------|-------------|
+| Capa         | Tecnologías                                                       |
+| ------------ | ----------------------------------------------------------------- |
 | **Frontend** | React 19, TypeScript 5.9, Vite+ (Vite + Rolldown), Tailwind CSS 4 |
-| **Estado** | Zustand 5, TanStack Query 5, Immer |
-| **UI/UX** | Radix UI, GSAP, Lucide Icons |
-| **Backend** | Express 5, Bun Runtime, Effect-TS |
-| **Database** | Drizzle ORM, SQLite (libsql), FTS5 |
-| **Desktop** | Tauri 2 (Rust) |
-| **Testing** | Vitest, Playwright, Testing Library |
+| **Estado**   | Zustand 5, TanStack Query 5, Immer                                |
+| **UI/UX**    | Radix UI, GSAP, Lucide Icons                                      |
+| **Backend**  | Express 5, Bun Runtime, Effect-TS                                 |
+| **Database** | Drizzle ORM, SQLite (libsql), FTS5                                |
+| **Desktop**  | Tauri 2 (Rust)                                                    |
+| **Testing**  | Vitest, Playwright, Testing Library                               |
 
 ---
 
@@ -190,58 +190,58 @@ image-manager/
 
 ### Desarrollo
 
-| Comando | Descripción |
-|---------|-------------|
-| `bun run dev:full` | Frontend + Backend (desarrollo unificado) |
-| `bun run dev:vite` | Solo frontend (puerto 5173) |
-| `bun run dev:server:hot` | Solo backend con HMR (puerto 4000) |
-| `bun run dev:tauri` | Aplicación desktop |
+| Comando                  | Descripción                               |
+| ------------------------ | ----------------------------------------- |
+| `bun run dev:full`       | Frontend + Backend (desarrollo unificado) |
+| `bun run dev:vite`       | Solo frontend (puerto 5173)               |
+| `bun run dev:server:hot` | Solo backend con HMR (puerto 4000)        |
+| `bun run dev:tauri`      | Aplicación desktop                        |
 
 ### Build
 
-| Comando | Descripción |
-|---------|-------------|
-| `bun run build` | Build completo (frontend + backend) |
-| `bun run build:vite` | Build frontend |
-| `bun run build:server` | Build backend |
-| `bun run build:tauri` | Build desktop |
+| Comando                | Descripción                         |
+| ---------------------- | ----------------------------------- |
+| `bun run build`        | Build completo (frontend + backend) |
+| `bun run build:vite`   | Build frontend                      |
+| `bun run build:server` | Build backend                       |
+| `bun run build:tauri`  | Build desktop                       |
 
 ### Testing
 
-| Comando | Descripción |
-|---------|-------------|
-| `bun run test` | Tests unitarios (Vitest) |
-| `bun run test:watch` | Tests en modo watch |
-| `bun run test:ci` | Tests con cobertura |
-| `bun run test:e2e` | Tests E2E (Playwright) |
-| `bun run test:ui` | Playwright UI mode |
+| Comando              | Descripción              |
+| -------------------- | ------------------------ |
+| `bun run test`       | Tests unitarios (Vitest) |
+| `bun run test:watch` | Tests en modo watch      |
+| `bun run test:ci`    | Tests con cobertura      |
+| `bun run test:e2e`   | Tests E2E (Playwright)   |
+| `bun run test:ui`    | Playwright UI mode       |
 
 ### Calidad de Código
 
-| Comando | Descripción |
-|---------|-------------|
-| `bun run check` | Gate operativo: lint + typecheck |
+| Comando              | Descripción                                           |
+| -------------------- | ----------------------------------------------------- |
+| `bun run check`      | Gate operativo: lint + typecheck                      |
 | `bun run check:full` | Auditoría completa con Vite+ (lint + format del repo) |
-| `bun run lint` | Lint con Oxc / Oxlint |
-| `bun run lint:fix` | Lint con auto-fix cuando aplique |
-| `bun run format` | Formatear código |
-| `bun run tsc` | TypeScript check |
+| `bun run lint`       | Lint con Oxc / Oxlint                                 |
+| `bun run lint:fix`   | Lint con auto-fix cuando aplique                      |
+| `bun run format`     | Formatear código                                      |
+| `bun run tsc`        | TypeScript check                                      |
 
 ### Base de Datos
 
-| Comando | Descripción |
-|---------|-------------|
-| `bun run db:studio` | Drizzle Studio (GUI) |
-| `bun run db:check` | Verificar estado de DB |
-| `bun run db:reset` | Reset completo (⚠️ destructivo) |
-| `bun run db:migrate:aggregates` | Migrar entity aggregates |
+| Comando                         | Descripción                     |
+| ------------------------------- | ------------------------------- |
+| `bun run db:studio`             | Drizzle Studio (GUI)            |
+| `bun run db:check`              | Verificar estado de DB          |
+| `bun run db:reset`              | Reset completo (⚠️ destructivo) |
+| `bun run db:migrate:aggregates` | Migrar entity aggregates        |
 
 ### Utilidades
 
-| Comando | Descripción |
-|---------|-------------|
-| `bun run logs:list` | Listar logs |
-| `bun run logs:clean` | Limpiar logs antiguos |
+| Comando                | Descripción                 |
+| ---------------------- | --------------------------- |
+| `bun run logs:list`    | Listar logs                 |
+| `bun run logs:clean`   | Limpiar logs antiguos       |
 | `bun run check:errors` | Verificar errores recientes |
 
 ---
@@ -282,15 +282,15 @@ image-manager/
 
 La documentación completa está disponible en la carpeta [`docs/`](./docs/):
 
-| Documento | Descripción |
-|-----------|-------------|
-| [AUDITORIA-TECNICA-COMPLETA.md](./docs/AUDITORIA-TECNICA-COMPLETA.md) | Informe de auditoría técnica |
-| [core/PRD.md](./docs/core/PRD.md) | Product Requirements Document |
-| [core/ARCHITECTURE.md](./docs/core/ARCHITECTURE.md) | Arquitectura del sistema |
-| [core/API-REFERENCE.md](./docs/core/API-REFERENCE.md) | Referencia de API REST |
-| [core/DATABASE-SCHEMA.md](./docs/core/DATABASE-SCHEMA.md) | Esquema de base de datos |
-| [core/SERVICES-GUIDE.md](./docs/core/SERVICES-GUIDE.md) | Guía de servicios |
-| [core/FRONTEND-GUIDE.md](./docs/core/FRONTEND-GUIDE.md) | Guía de frontend |
+| Documento                                                             | Descripción                   |
+| --------------------------------------------------------------------- | ----------------------------- |
+| [AUDITORIA-TECNICA-COMPLETA.md](./docs/AUDITORIA-TECNICA-COMPLETA.md) | Informe de auditoría técnica  |
+| [core/PRD.md](./docs/core/PRD.md)                                     | Product Requirements Document |
+| [core/ARCHITECTURE.md](./docs/core/ARCHITECTURE.md)                   | Arquitectura del sistema      |
+| [core/API-REFERENCE.md](./docs/core/API-REFERENCE.md)                 | Referencia de API REST        |
+| [core/DATABASE-SCHEMA.md](./docs/core/DATABASE-SCHEMA.md)             | Esquema de base de datos      |
+| [core/SERVICES-GUIDE.md](./docs/core/SERVICES-GUIDE.md)               | Guía de servicios             |
+| [core/FRONTEND-GUIDE.md](./docs/core/FRONTEND-GUIDE.md)               | Guía de frontend              |
 
 ---
 

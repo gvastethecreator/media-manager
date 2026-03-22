@@ -52,13 +52,13 @@ graph TD
 import { TagCard } from '@/components/cards/tag-card';
 
 function TagsList({ tags }) {
-  return (
-    <div className="grid grid-cols-3 gap-4">
-      {tags.map(tag => (
-        <TagCard key={tag.id} tag={tag} />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-3 gap-4">
+			{tags.map((tag) => (
+				<TagCard key={tag.id} tag={tag} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -68,17 +68,13 @@ function TagsList({ tags }) {
 import { TagCard } from '@/components/cards/tag-card';
 
 function TagSelector({ tags, onSelect }) {
-  return (
-    <div className="grid grid-cols-3 gap-4">
-      {tags.map(tag => (
-        <TagCard
-          key={tag.id}
-          tag={tag}
-          onClick={onSelect}
-        />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-3 gap-4">
+			{tags.map((tag) => (
+				<TagCard key={tag.id} tag={tag} onClick={onSelect} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -120,27 +116,22 @@ El componente presenta información de una etiqueta en formato de carta TCG (Tra
 import { TagCard } from '@/components/cards/tag-card';
 
 // Dentro de tu componente
-<TagCard
-  tag={tagWithRelations}
-  onClick={() => handleTagClick(tag.id)}
-  tcgMode={true}
-  compact={false}
-/>
+<TagCard tag={tagWithRelations} onClick={() => handleTagClick(tag.id)} tcgMode={true} compact={false} />;
 ```
 
 ## 🎨 Props
 
-| Prop | Tipo | Descripción |
-|------|------|-------------|
-| `tag` | `TagWithRelations` | Objeto de etiqueta con relaciones y contadores |
-| `onClick` | `() => void` | Función a ejecutar al hacer clic en la tarjeta |
-| `className` | `string` | Clases CSS adicionales |
-| `style` | `React.CSSProperties` | Estilos inline adicionales |
-| `tcgMode` | `boolean` | Activar/desactivar diseño TCG (por defecto: `true`) |
-| `isSelected` | `boolean` | Indica si la tarjeta está seleccionada |
-| `compact` | `boolean` | Versión más compacta de la tarjeta |
-| `disabled` | `boolean` | Deshabilita la interacción |
-| `interactive` | `boolean` | Habilita/deshabilita efectos interactivos (por defecto: `true`) |
+| Prop          | Tipo                  | Descripción                                                     |
+| ------------- | --------------------- | --------------------------------------------------------------- |
+| `tag`         | `TagWithRelations`    | Objeto de etiqueta con relaciones y contadores                  |
+| `onClick`     | `() => void`          | Función a ejecutar al hacer clic en la tarjeta                  |
+| `className`   | `string`              | Clases CSS adicionales                                          |
+| `style`       | `React.CSSProperties` | Estilos inline adicionales                                      |
+| `tcgMode`     | `boolean`             | Activar/desactivar diseño TCG (por defecto: `true`)             |
+| `isSelected`  | `boolean`             | Indica si la tarjeta está seleccionada                          |
+| `compact`     | `boolean`             | Versión más compacta de la tarjeta                              |
+| `disabled`    | `boolean`             | Deshabilita la interacción                                      |
+| `interactive` | `boolean`             | Habilita/deshabilita efectos interactivos (por defecto: `true`) |
 
 ## 🎨 Tipo de Datos
 
@@ -148,33 +139,33 @@ El componente espera un objeto `TagWithRelations` que incluye:
 
 ```typescript
 interface TagWithRelations {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string;
-  description: string | null;
-  shortcut: string | null;
-  category: string;
-  viewMode: string;
-  featuredImage: string | object | null;
-  isFavorite: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  _count?: {
-    images: number;
-    videos: number;
-    albums: number;
-    collections: number;
-    characters: number;
-    places: number;
-    worldItems: number;
-    concepts: number;
-    prompts: number;
-    notes: number;
-    wildcards: number;
-    properties: number;
-    groups: number;
-  }
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string;
+	viewMode: string;
+	featuredImage: string | object | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	_count?: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
 }
 ```
 
@@ -186,7 +177,7 @@ Esta implementación se alinea con el modelo Tag en el esquema Prisma, incluyend
 - Atributos descriptivos (description, category)
 - Configuración visual (featuredImage, isFavorite)
 - Relaciones con otras entidades (albums, collections, characters, etc.)
-- Conteos de relaciones (_count)
+- Conteos de relaciones (\_count)
 
 ## 🎨 Componentes auxiliares
 

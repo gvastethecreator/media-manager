@@ -291,7 +291,10 @@ export async function findQueueJobs(
 		const finalWhere = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
 		// Ejecutar consulta para contar total
-		const [totalResult] = await db.select({ count: sql<number>`count(*)` }).from(queueJobs).where(finalWhere);
+		const [totalResult] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(queueJobs)
+			.where(finalWhere);
 		const total = totalResult.count;
 
 		// Ejecutar consulta para obtener datos
@@ -479,7 +482,11 @@ export async function findRecentQueueJobs(limit = 5): Promise<QueueJobExtended[]
 	try {
 		logger.info('🕒 Buscando trabajos recientes', { limit });
 
-		const queueJobsData = await db.select().from(queueJobs).orderBy(sql`${queueJobs.createdAt} DESC`).limit(limit);
+		const queueJobsData = await db
+			.select()
+			.from(queueJobs)
+			.orderBy(sql`${queueJobs.createdAt} DESC`)
+			.limit(limit);
 
 		logger.info('✅ Trabajos recientes encontrados', { count: queueJobsData.length });
 		return transformQueueJobs(queueJobsData);

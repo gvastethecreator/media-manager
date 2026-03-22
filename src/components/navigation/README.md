@@ -58,11 +58,13 @@ Componente principal que integra todos los elementos de navegación.
 ## Mejoras Recientes
 
 ### NavPanelHeader
+
 - **Diseño Adaptativo**: Reordenamiento vertical de elementos cuando el panel está colapsado.
 - **Avatar Prominente**: En modo colapsado, el avatar del usuario se coloca en la parte superior.
 - **Controles Accesibles**: Botones de control claramente separados en modo colapsado.
 
 ### NavCategoryChildren
+
 - **Cambio de Vistas**: Permite alternar entre vista de lista vertical y vista de cuadrícula.
 - **Contadores de Elementos**: Muestra el número de elementos de cada categoría.
 - **Diseño Optimizado para Etiquetas**: Visualización especializada para etiquetas con códigos de color.

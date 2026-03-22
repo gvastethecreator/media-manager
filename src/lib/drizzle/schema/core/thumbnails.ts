@@ -24,7 +24,9 @@ export const thumbnails = sqliteTable(
 		quality: integer('quality').default(80),
 		fileSize: integer('fileSize').notNull(),
 		isGenerated: integer('isGenerated', { mode: 'boolean' }).notNull().default(true),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

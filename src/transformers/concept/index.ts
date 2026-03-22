@@ -6,11 +6,7 @@
  */
 
 // 🎯 Adaptadores - Para componentes de lista estandarizados
-export {
-	adaptConceptsWithStats,
-	adaptConceptWithStats,
-	defaultConceptStats,
-} from './adapter';
+export { adaptConceptsWithStats, adaptConceptWithStats, defaultConceptStats } from './adapter';
 
 // 🗺️ Mappers - Transformaciones básicas entre tipos
 export {
@@ -36,10 +32,7 @@ export {
 // 📦 Serializers - Manejo de campos complejos JSON
 export { deserializeTags, serializeTags } from './serializers';
 // 🔄 Transformers - Conversiones desde Drizzle
-export {
-	fromDrizzleConcept,
-	fromDrizzleConcepts,
-} from './transformer';
+export { fromDrizzleConcept, fromDrizzleConcepts } from './transformer';
 // 🛡️ Validators - Validaciones con Zod
 export {
 	sanitizeConceptData,

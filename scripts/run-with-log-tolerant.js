@@ -38,7 +38,9 @@ if (!logName || commandArgs.length === 0) {
 	console.error('Uso: node scripts/run-with-log-tolerant.js <nombre-log> <comando-completo>');
 	console.error('');
 	console.error('Este script ejecuta comandos con logging inteligente y tolerancia a exit codes:');
-	console.error('- Linting: oxlint, oxfmt, vp check/lint/fmt, eslint, prettier → tolerante a códigos 1 (issues encontrados)');
+	console.error(
+		'- Linting: oxlint, oxfmt, vp check/lint/fmt, eslint, prettier → tolerante a códigos 1 (issues encontrados)'
+	);
 	console.error('- Testing: playwright, test → tolerante a códigos 1 (tests fallidos)');
 	console.error('- TypeScript: tsc --noEmit → tolerante a códigos 1 (errores de tipo)');
 	console.error('- Build: otros comandos → estricto (solo exit code 0 es éxito)');

@@ -19,23 +19,23 @@ Sistema de gestión de atajos de teclado para el navegador de archivos.
 import { useFileBrowserShortcuts } from '@/lib/keyboard';
 
 function FileBrowser() {
-  const { register, setContext } = useFileBrowserShortcuts();
+	const { register, setContext } = useFileBrowserShortcuts();
 
-  useEffect(() => {
-    // Los shortcuts por defecto ya están registrados
-    setContext('file-browser');
-  }, []);
+	useEffect(() => {
+		// Los shortcuts por defecto ya están registrados
+		setContext('file-browser');
+	}, []);
 
-  // Los shortcuts funcionan automáticamente:
-  // Ctrl+A - Seleccionar todo
-  // Delete - Eliminar seleccionados
-  // F2 - Renombrar
-  // Escape - Cancelar selección
-  // Ctrl+C - Copiar
-  // Ctrl+X - Cortar
-  // Ctrl+V - Pegar
-  // Enter - Abrir seleccionado
-  // Space - Previsualizar
+	// Los shortcuts funcionan automáticamente:
+	// Ctrl+A - Seleccionar todo
+	// Delete - Eliminar seleccionados
+	// F2 - Renombrar
+	// Escape - Cancelar selección
+	// Ctrl+C - Copiar
+	// Ctrl+X - Cortar
+	// Ctrl+V - Pegar
+	// Enter - Abrir seleccionado
+	// Space - Previsualizar
 }
 ```
 
@@ -70,6 +70,7 @@ function ContextMenu({ items }) {
 ## Shortcuts por Defecto
 
 ### File Browser
+
 - `Ctrl+A` - Seleccionar todo
 - `Delete` - Eliminar elementos seleccionados
 - `F2` - Renombrar elemento seleccionado
@@ -80,6 +81,7 @@ function ContextMenu({ items }) {
 - `Space` - Vista previa del elemento seleccionado
 
 ### Context Menu
+
 - `↑` - Navegar hacia arriba
 - `↓` - Navegar hacia abajo
 - `→` - Abrir submenú
@@ -88,6 +90,7 @@ function ContextMenu({ items }) {
 - `Escape` - Cerrar menú
 
 ### Global
+
 - `Escape` - Cancelar selección o cerrar menús
 
 ## API
@@ -96,12 +99,12 @@ function ContextMenu({ items }) {
 
 ```typescript
 class KeyboardShortcutManager {
-  register(shortcut: KeyboardShortcutConfig, handler: ShortcutHandler): void;
-  unregister(shortcut: KeyboardShortcutConfig): void;
-  unregisterByAction(action: string): void;
-  setContext(context: string): void;
-  setEnabled(enabled: boolean): void;
-  getShortcutsForContext(context: string): KeyboardShortcutConfig[];
+	register(shortcut: KeyboardShortcutConfig, handler: ShortcutHandler): void;
+	unregister(shortcut: KeyboardShortcutConfig): void;
+	unregisterByAction(action: string): void;
+	setContext(context: string): void;
+	setEnabled(enabled: boolean): void;
+	getShortcutsForContext(context: string): KeyboardShortcutConfig[];
 }
 ```
 
@@ -125,13 +128,13 @@ useContextMenuNavigation(itemCount: number, options?: ContextMenuNavigationOptio
 
 ```typescript
 interface KeyboardShortcutConfig {
-  key: string;                    // Tecla principal
-  modifiers: string[];           // ['ctrl', 'shift', 'alt', 'meta']
-  action: string;                // Identificador único
-  context?: string;              // Contexto donde aplica
-  description: string;           // Descripción para ayuda
-  preventDefault?: boolean;      // Prevenir comportamiento por defecto
-  stopPropagation?: boolean;     // Detener propagación
+	key: string; // Tecla principal
+	modifiers: string[]; // ['ctrl', 'shift', 'alt', 'meta']
+	action: string; // Identificador único
+	context?: string; // Contexto donde aplica
+	description: string; // Descripción para ayuda
+	preventDefault?: boolean; // Prevenir comportamiento por defecto
+	stopPropagation?: boolean; // Detener propagación
 }
 ```
 
@@ -145,15 +148,19 @@ interface KeyboardShortcutConfig {
 ## Implementación
 
 ### 1. KeyboardShortcutManager
+
 Clase principal que gestiona el registro y ejecución de shortcuts.
 
 ### 2. React Hooks
+
 Hooks para integración fácil con componentes React.
 
 ### 3. Context Menu Navigation
+
 Sistema especializado para navegación por teclado en menús.
 
 ### 4. Default Shortcuts
+
 Shortcuts predefinidos para operaciones comunes.
 
 ## Testing
@@ -163,6 +170,7 @@ bun test src/lib/keyboard/__tests__/
 ```
 
 Los tests verifican:
+
 - Registro y ejecución de shortcuts
 - Filtrado por contexto
 - Habilitación/deshabilitación

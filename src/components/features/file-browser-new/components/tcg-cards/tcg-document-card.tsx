@@ -25,8 +25,10 @@ import { TCGCardBase, type TCGCardBaseProps } from './tcg-card-base';
 // TIPOS
 // ============================================================================
 
-export interface TCGDocumentCardProps
-	extends Omit<TCGCardBaseProps, 'thumbnailContent' | 'footerContent' | 'accentColor'> {
+export interface TCGDocumentCardProps extends Omit<
+	TCGCardBaseProps,
+	'thumbnailContent' | 'footerContent' | 'accentColor'
+> {
 	item: DocumentBrowserItem;
 }
 

@@ -43,7 +43,7 @@ sequenceDiagram
     participant DB
     Client->>API: createNote()
     API->>Transformer: mapCreateNoteDataToPrisma()
-    
+
     DB-->>Transformer: Note
     Transformer-->>API: transformNote()
     API-->>Client: NoteComplete

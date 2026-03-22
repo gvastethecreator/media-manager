@@ -96,8 +96,7 @@ const subtitleColorMap: Record<string, string> = {
  * ===================================================== */
 
 export interface DashboardStatCardProps
-	extends React.HTMLAttributes<HTMLDivElement>,
-		VariantProps<typeof statCardVariants> {
+	extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof statCardVariants> {
 	/** Contenido adicional (badges, trends, etc) */
 	extra?: ReactNode;
 	/** Icono de la tarjeta */

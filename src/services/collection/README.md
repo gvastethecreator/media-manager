@@ -119,13 +119,13 @@ import { collectionService } from '@/services/index';
 
 // Crear una colección
 const newCollection = await collectionService.createCollection({
-  name: 'Lugares Favoritos',
-  description: 'Colección de mis lugares preferidos para visitar',
-  emoji: '🏞️',
-  color: '#3498db',
-  category: 'PERSONAL',
-  isPublic: true,
-  isPinned: true
+	name: 'Lugares Favoritos',
+	description: 'Colección de mis lugares preferidos para visitar',
+	emoji: '🏞️',
+	color: '#3498db',
+	category: 'PERSONAL',
+	isPublic: true,
+	isPinned: true,
 });
 ```
 
@@ -138,9 +138,9 @@ import { collectionService } from '@/services/index';
 const collections = await collectionService.getCollections();
 
 // Trabajar con las estadísticas
-collections.forEach(collection => {
-  console.log(`${collection.name}: ${collection.stats.imageCount} imágenes, ${collection.stats.videoCount} videos`);
-  console.log(`Tamaño total: ${collection.stats.totalSize} bytes`);
+collections.forEach((collection) => {
+	console.log(`${collection.name}: ${collection.stats.imageCount} imágenes, ${collection.stats.videoCount} videos`);
+	console.log(`Tamaño total: ${collection.stats.totalSize} bytes`);
 });
 ```
 
@@ -151,11 +151,11 @@ import { collectionService } from '@/services/index';
 
 // Actualizar propiedades de una colección
 const updatedCollection = await collectionService.updateCollection('collection-id-123', {
-  name: 'Destinos de Viaje',
-  description: 'Actualizada con nuevos destinos para visitar',
-  emoji: '✈️',
-  color: '#e74c3c',
-  isPinned: true
+	name: 'Destinos de Viaje',
+	description: 'Actualizada con nuevos destinos para visitar',
+	emoji: '✈️',
+	color: '#e74c3c',
+	isPinned: true,
 });
 ```
 
@@ -183,69 +183,69 @@ await collectionService.removeImageFromCollection('collection-id-123', 'image-id
 
 ## Diferencias con Otras Entidades Organizativas
 
-| Característica | Collection | Album | Folder | Tag |
-|----------------|------------|-------|--------|-----|
-| **Propósito principal** | Agrupación flexible por tema | Agrupación de imágenes | Organización jerárquica | Clasificación por concepto |
-| **Estructura** | Plana con posible anidación | Plana | Jerárquica | Plana |
-| **Personalización** | Alta (emoji, color, categoría) | Media | Baja | Mínima |
-| **Tipos de contenido** | Múltiples | Principalmente imágenes | Archivos y carpetas | Cualquiera |
-| **Jerarquía** | Opcional | No | Obligatoria | No |
-| **Visualización UI** | Personalizable | Orientada a galería | Estructura de árbol | Lista o nube de etiquetas |
+| Característica          | Collection                     | Album                   | Folder                  | Tag                        |
+| ----------------------- | ------------------------------ | ----------------------- | ----------------------- | -------------------------- |
+| **Propósito principal** | Agrupación flexible por tema   | Agrupación de imágenes  | Organización jerárquica | Clasificación por concepto |
+| **Estructura**          | Plana con posible anidación    | Plana                   | Jerárquica              | Plana                      |
+| **Personalización**     | Alta (emoji, color, categoría) | Media                   | Baja                    | Mínima                     |
+| **Tipos de contenido**  | Múltiples                      | Principalmente imágenes | Archivos y carpetas     | Cualquiera                 |
+| **Jerarquía**           | Opcional                       | No                      | Obligatoria             | No                         |
+| **Visualización UI**    | Personalizable                 | Orientada a galería     | Estructura de árbol     | Lista o nube de etiquetas  |
 
 ## Relaciones con Otras Entidades
 
-| Entidad      | Tipo de Relación   | Descripción                                          |
-|--------------|--------------------|----------------------------------------------------|
-| **Image**    | Muchos a muchos    | Las colecciones pueden contener múltiples imágenes  |
-| **Video**    | Muchos a muchos    | Las colecciones pueden contener múltiples videos    |
-| **Album**    | Muchos a muchos    | Las colecciones pueden contener o referenciar álbumes |
-| **Tag**      | Muchos a muchos    | Las colecciones pueden tener múltiples etiquetas    |
-| **Group**    | Muchos a muchos    | Las colecciones pueden compartirse con grupos       |
-| **User**     | Muchos a uno       | Las colecciones pertenecen a usuarios               |
-| **Activity** | Referencial        | Las actividades pueden referenciar colecciones      |
+| Entidad      | Tipo de Relación | Descripción                                           |
+| ------------ | ---------------- | ----------------------------------------------------- |
+| **Image**    | Muchos a muchos  | Las colecciones pueden contener múltiples imágenes    |
+| **Video**    | Muchos a muchos  | Las colecciones pueden contener múltiples videos      |
+| **Album**    | Muchos a muchos  | Las colecciones pueden contener o referenciar álbumes |
+| **Tag**      | Muchos a muchos  | Las colecciones pueden tener múltiples etiquetas      |
+| **Group**    | Muchos a muchos  | Las colecciones pueden compartirse con grupos         |
+| **User**     | Muchos a uno     | Las colecciones pertenecen a usuarios                 |
+| **Activity** | Referencial      | Las actividades pueden referenciar colecciones        |
 
 ## Modelo de Datos
 
 ```typescript
 // Modelo básico de Collection
 interface CollectionBase {
-  id: string;                  // Identificador único
-  name: string;                // Nombre de la colección
-  description?: string;        // Descripción opcional
-  emoji?: string;              // Emoji representativo
-  color?: string;              // Color asociado (hex o nombre)
-  category?: CollectionCategory; // Categoría (PERSONAL, WORK, PROJECT, OTHER)
-  isPublic: boolean;           // Indica si la colección es pública
-  isPinned: boolean;           // Indica si está fijada en la UI
-  isFavorite: boolean;         // Indica si está marcada como favorita
-  parentId?: string;           // ID de la colección padre (si es anidada)
-  createdAt: Date;             // Fecha de creación
-  updatedAt: Date;             // Fecha de última actualización
+	id: string; // Identificador único
+	name: string; // Nombre de la colección
+	description?: string; // Descripción opcional
+	emoji?: string; // Emoji representativo
+	color?: string; // Color asociado (hex o nombre)
+	category?: CollectionCategory; // Categoría (PERSONAL, WORK, PROJECT, OTHER)
+	isPublic: boolean; // Indica si la colección es pública
+	isPinned: boolean; // Indica si está fijada en la UI
+	isFavorite: boolean; // Indica si está marcada como favorita
+	parentId?: string; // ID de la colección padre (si es anidada)
+	createdAt: Date; // Fecha de creación
+	updatedAt: Date; // Fecha de última actualización
 }
 
 // Extensión con estadísticas
 interface CollectionWithStats extends CollectionBase {
-  stats: {
-    imageCount: number;        // Cantidad de imágenes
-    videoCount: number;        // Cantidad de videos
-    albumCount: number;        // Cantidad de álbumes
-    tagCount: number;          // Cantidad de etiquetas
-    groupCount: number;        // Cantidad de grupos relacionados
-    totalSize: number;         // Tamaño total en bytes
-    lastUpdated?: Date;        // Última actualización de contenido
-  }
+	stats: {
+		imageCount: number; // Cantidad de imágenes
+		videoCount: number; // Cantidad de videos
+		albumCount: number; // Cantidad de álbumes
+		tagCount: number; // Cantidad de etiquetas
+		groupCount: number; // Cantidad de grupos relacionados
+		totalSize: number; // Tamaño total en bytes
+		lastUpdated?: Date; // Última actualización de contenido
+	};
 }
 
 // Extensión completa con relaciones
 interface CollectionComplete extends CollectionWithStats {
-  parent?: CollectionBase;     // Colección padre
-  children: CollectionBase[];  // Colecciones hijas
-  images: Image[];             // Imágenes en la colección
-  videos: Video[];             // Videos en la colección
-  albums: Album[];             // Álbumes en la colección
-  tags: Tag[];                 // Etiquetas de la colección
-  groups: Group[];             // Grupos con acceso a la colección
-  user: User;                  // Usuario propietario
+	parent?: CollectionBase; // Colección padre
+	children: CollectionBase[]; // Colecciones hijas
+	images: Image[]; // Imágenes en la colección
+	videos: Video[]; // Videos en la colección
+	albums: Album[]; // Álbumes en la colección
+	tags: Tag[]; // Etiquetas de la colección
+	groups: Group[]; // Grupos con acceso a la colección
+	user: User; // Usuario propietario
 }
 ```
 
@@ -261,13 +261,13 @@ interface CollectionComplete extends CollectionWithStats {
 
 ## Solución de Problemas Comunes
 
-| Problema | Solución |
-|----------|----------|
-| **Colecciones huérfanas** | Verifique y repare las referencias a colecciones padre eliminadas |
-| **Elementos duplicados** | Utilice la función `collectionService.deduplicateItems()` |
-| **Colecciones sin elementos** | Identifique con `collectionService.findEmptyCollections()` |
-| **Inconsistencia de estadísticas** | Recalcule con `collectionService.refreshStats()` |
-| **Conflictos de nombres** | Implemente validación previa o añada sufijo para diferenciar |
+| Problema                           | Solución                                                          |
+| ---------------------------------- | ----------------------------------------------------------------- |
+| **Colecciones huérfanas**          | Verifique y repare las referencias a colecciones padre eliminadas |
+| **Elementos duplicados**           | Utilice la función `collectionService.deduplicateItems()`         |
+| **Colecciones sin elementos**      | Identifique con `collectionService.findEmptyCollections()`        |
+| **Inconsistencia de estadísticas** | Recalcule con `collectionService.refreshStats()`                  |
+| **Conflictos de nombres**          | Implemente validación previa o añada sufijo para diferenciar      |
 
 ## Roadmap y Mejoras Futuras
 

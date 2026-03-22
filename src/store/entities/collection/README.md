@@ -45,27 +45,27 @@ graph TD
 
 ```typescript
 interface CollectionState {
-  // Datos principales - usando Record para mejor performance
-  collections: Record<string, CollectionExtended>;
+	// Datos principales - usando Record para mejor performance
+	collections: Record<string, CollectionExtended>;
 
-  // Estado UI
-  viewConfig: CollectionViewConfig;
-  selectedCollectionId: string | null;
-  hoveredCollectionId: string | null;
-  expandedCollectionIds: string[];
+	// Estado UI
+	viewConfig: CollectionViewConfig;
+	selectedCollectionId: string | null;
+	hoveredCollectionId: string | null;
+	expandedCollectionIds: string[];
 
-  // Estado de carga y errores
-  isLoading: boolean;
-  error: string | null;
+	// Estado de carga y errores
+	isLoading: boolean;
+	error: string | null;
 
-  // Filtrado y ordenamiento
-  activeFilters: CollectionFilter[];
-  searchTerm: string;
-  defaultSortOption: string;
-  currentSortOption: string;
+	// Filtrado y ordenamiento
+	activeFilters: CollectionFilter[];
+	searchTerm: string;
+	defaultSortOption: string;
+	currentSortOption: string;
 
-  // Agrupamiento
-  groupBy: 'category' | 'rarity' | 'platform' | null;
+	// Agrupamiento
+	groupBy: 'category' | 'rarity' | 'platform' | null;
 }
 ```
 
@@ -73,24 +73,24 @@ interface CollectionState {
 
 ```typescript
 interface CollectionExtended extends CollectionBase {
-  // Estados de UI (no persistidos)
-  isHovered?: boolean;
-  isOpen?: boolean;
-  isLoading?: boolean;
-  hasError?: boolean;
+	// Estados de UI (no persistidos)
+	isHovered?: boolean;
+	isOpen?: boolean;
+	isLoading?: boolean;
+	hasError?: boolean;
 
-  // Datos calculados
-  imageCount?: number;
-  videoCount?: number;
-  tagCount?: number;
-  groupCount?: number;
-  propertyCount?: number;
+	// Datos calculados
+	imageCount?: number;
+	videoCount?: number;
+	tagCount?: number;
+	groupCount?: number;
+	propertyCount?: number;
 
-  // Filtros parseados para UI
-  parsedFilters?: CollectionFilter[];
+	// Filtros parseados para UI
+	parsedFilters?: CollectionFilter[];
 
-  // Propiedad de rareza (derivada de category o metadatos)
-  rarity?: string;
+	// Propiedad de rareza (derivada de category o metadatos)
+	rarity?: string;
 }
 ```
 
@@ -199,15 +199,15 @@ const localCollections = store.getCollections();
 // ✅ CORRECTO - Usar Server Actions
 const store = useCollectionStore();
 const newCollection = await store.createCollectionServer({
-  name: 'Mi Colección',
-  emoji: '🎨',
-  color: '#3B82F6',
-  // ... otros campos
+	name: 'Mi Colección',
+	emoji: '🎨',
+	color: '#3B82F6',
+	// ... otros campos
 });
 
 // ✅ CORRECTO - Actualizar colección
 const updated = await store.updateCollectionServer('collection-id', {
-  name: 'Nuevo Nombre'
+	name: 'Nuevo Nombre',
 });
 ```
 
@@ -250,11 +250,11 @@ El store maneja automáticamente la conversión entre `CollectionComplete` (del 
 ```typescript
 // Conversión automática en fetchCollection
 const extendedCollection: CollectionExtended = {
-  ...serverCollection,
-  imageCount: serverCollection._count?.images || 0,
-  videoCount: serverCollection._count?.videos || 0,
-  tagCount: serverCollection._count?.tags || 0,
-  // ... otros conteos calculados
+	...serverCollection,
+	imageCount: serverCollection._count?.images || 0,
+	videoCount: serverCollection._count?.videos || 0,
+	tagCount: serverCollection._count?.tags || 0,
+	// ... otros conteos calculados
 };
 ```
 

@@ -50,13 +50,13 @@ flowchart TD
 
 ### 📊 **Métricas de Mejora**
 
-| Componente | Antes | Después | Mejora |
-|------------|-------|---------|--------|
-| **FoldersView** | FolderCard directo | EntityCard | ✅ Consistencia |
-| **FolderContentView** | FileBrowser (276 líneas) | EntityCard (190 líneas) | 🚀 31% menos código |
-| **Integración** | Parcial | Completa | ✅ 100% EntityCard |
-| **Efectos TCG** | Solo FolderCard | Ambos componentes | ✅ Consistencia visual |
-| **Rendimiento** | Múltiples transformaciones | Directo | 🚀 Optimizado |
+| Componente            | Antes                      | Después                 | Mejora                 |
+| --------------------- | -------------------------- | ----------------------- | ---------------------- |
+| **FoldersView**       | FolderCard directo         | EntityCard              | ✅ Consistencia        |
+| **FolderContentView** | FileBrowser (276 líneas)   | EntityCard (190 líneas) | 🚀 31% menos código    |
+| **Integración**       | Parcial                    | Completa                | ✅ 100% EntityCard     |
+| **Efectos TCG**       | Solo FolderCard            | Ambos componentes       | ✅ Consistencia visual |
+| **Rendimiento**       | Múltiples transformaciones | Directo                 | 🚀 Optimizado          |
 
 ### 🎨 **Características TCG Implementadas**
 

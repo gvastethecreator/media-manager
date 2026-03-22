@@ -150,9 +150,9 @@ export function ListView({
 			return (
 				<button
 					className={cn(
-						'group flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left',
-						'transition-colors duration-150',
-						'hover:bg-muted/50',
+						'group flex w-full cursor-pointer items-center gap-3 rounded-dt-md px-3 py-2 text-left',
+						'transition-all duration-dt-normal ease-dt-out active:scale-[0.99]',
+						'hover:bg-muted/50 hover:shadow-dt-1',
 						isSelected && 'bg-primary/10 ring-1 ring-primary/40',
 						isActive && 'ring-1 ring-primary/70'
 					)}
