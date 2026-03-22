@@ -7,16 +7,21 @@ import { sanitizeLimit } from '../utils/pagination';
 
 const router = express.Router();
 
+/**
+ * Helper para crear errores tipados en catch de Effect.tryPromise
+ */
+function toError(context: string, error: unknown): Error {
+	serverLogger.error(`${context}:`, error);
+	return new Error(`${context}: ${error instanceof Error ? error.message : String(error)}`);
+}
+
 // GET /stats/general - Obtener estadísticas generales
 router.get(
 	'/general',
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
 			try: () => getStats(),
-			catch: (error) => {
-				serverLogger.error('Error getting general stats:', error);
-				return error;
-			},
+			catch: (error) => toError('Error getting general stats', error),
 		})
 	)
 );
@@ -24,21 +29,12 @@ router.get(
 // GET /stats/system - Obtener estadísticas del sistema (compatibilidad con frontend)
 router.get(
 	'/system',
-	effectHandler((_req, _res) => {
-		serverLogger.debug('🎯 [ROUTER] /stats/system endpoint llamado');
-		serverLogger.debug('🎯 [ROUTER] Llamando a getSystemStats()...');
-		return Effect.tryPromise({
-			try: async () => {
-				const stats = await getSystemStats();
-				serverLogger.debug('🎯 [ROUTER] Resultado de getSystemStats:', stats);
-				return stats;
-			},
-			catch: (error) => {
-				serverLogger.error('🚨 [ROUTER] Error getting system stats:', error);
-				return error;
-			},
-		});
-	})
+	effectHandler((_req, _res) =>
+		Effect.tryPromise({
+			try: () => getSystemStats(),
+			catch: (error) => toError('Error getting system stats', error),
+		})
+	)
 );
 
 // GET /stats/extended - Obtener estadísticas extendidas del sistema
@@ -47,10 +43,7 @@ router.get(
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
 			try: () => getSystemStatsExtended(),
-			catch: (error) => {
-				serverLogger.error('Error getting extended stats:', error);
-				return error;
-			},
+			catch: (error) => toError('Error getting extended stats', error),
 		})
 	)
 );
@@ -65,10 +58,7 @@ router.get(
 				const stats = await getSystemStats();
 				return stats?.recentActivity?.slice(0, sanitizeLimit(limit, 50, 200)) || [];
 			},
-			catch: (error) => {
-				serverLogger.error('Error getting recent activity:', error);
-				return error;
-			},
+			catch: (error) => toError('Error getting recent activity', error),
 		})
 	)
 );
@@ -83,10 +73,7 @@ router.get(
 				const stats = await getSystemStats();
 				return stats?.topTags?.slice(0, sanitizeLimit(limit, 10, 100)) || [];
 			},
-			catch: (error) => {
-				serverLogger.error('Error getting top tags:', error);
-				return error;
-			},
+			catch: (error) => toError('Error getting top tags', error),
 		})
 	)
 );
@@ -104,10 +91,7 @@ router.get(
 				}
 				return stats;
 			},
-			catch: (error) => {
-				serverLogger.error('Error getting folder stats:', error);
-				return error;
-			},
+			catch: (error) => toError('Error getting folder stats', error),
 		})
 	)
 );
@@ -160,10 +144,7 @@ router.get(
 
 				return storage;
 			},
-			catch: (error) => {
-				serverLogger.error('Error getting storage breakdown:', error);
-				return error;
-			},
+			catch: (error) => toError('Error getting storage breakdown', error),
 		})
 	)
 );

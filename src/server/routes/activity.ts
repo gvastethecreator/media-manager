@@ -54,7 +54,7 @@ const createActivity = effectHandler((req, res) =>
 				}),
 			catch: (error) => {
 				serverLogger.error('Error registrando actividad:', error);
-				return error;
+				return new Error(`Error registrando actividad: ${error instanceof Error ? error.message : String(error)}`);
 			},
 		});
 
@@ -88,7 +88,7 @@ const getActivities = effectHandler((req, _res) =>
 			try: () => activityService.list(filters),
 			catch: (error) => {
 				serverLogger.error('Error obteniendo actividades:', error);
-				return error;
+				return new Error(`Error obteniendo actividades: ${error instanceof Error ? error.message : String(error)}`);
 			},
 		});
 
@@ -117,7 +117,7 @@ const getActivityStats = effectHandler((req, _res) =>
 			try: () => activityService.list(filters),
 			catch: (error) => {
 				serverLogger.error('Error obteniendo estadísticas de actividad:', error);
-				return error;
+				return new Error(`Error obteniendo estadísticas: ${error instanceof Error ? error.message : String(error)}`);
 			},
 		});
 
@@ -143,7 +143,7 @@ const getActivityById = effectHandler((req, res) =>
 			try: () => activityService.findById(id),
 			catch: (error) => {
 				serverLogger.error('Error obteniendo actividad:', error);
-				return error;
+				return new Error(`Error obteniendo actividad: ${error instanceof Error ? error.message : String(error)}`);
 			},
 		});
 
@@ -164,7 +164,7 @@ const deleteActivity = effectHandler((req, res) =>
 			try: () => activityService.delete(id),
 			catch: (error) => {
 				serverLogger.error('Error eliminando actividad:', error);
-				return error;
+				return new Error(`Error eliminando actividad: ${error instanceof Error ? error.message : String(error)}`);
 			},
 		});
 

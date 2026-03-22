@@ -22,23 +22,21 @@ import {
 
 const router = express.Router();
 
+/**
+ * Helper para crear un error tipado en catch de Effect.tryPromise
+ */
+function toError(context: string, error: unknown): Error {
+	serverLogger.error(`${context}:`, error);
+	return new Error(`${context}: ${error instanceof Error ? error.message : String(error)}`);
+}
+
 // GET /api/system/navigation - Obtener datos de navegación
 router.get(
 	'/navigation',
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
-			try: async () => {
-				serverLogger.debug('🧭 [SystemRouter] Iniciando obtención de datos de navegación');
-				serverLogger.debug('🔍 [DEBUG] Petición recibida en /api/system/navigation');
-				const navigationData = await getNavigationData();
-				serverLogger.debug('✅ [SystemRouter] Datos de navegación obtenidos exitosamente');
-				serverLogger.debug('📊 [DEBUG] Folders encontradas:', navigationData.folders.length);
-				return navigationData;
-			},
-			catch: (error) => {
-				serverLogger.error('❌ [SystemRouter] Error al obtener datos de navegación:', error);
-				return error;
-			},
+			try: () => getNavigationData(),
+			catch: (error) => toError('Error al obtener datos de navegación', error),
 		})
 	)
 );
@@ -54,28 +52,22 @@ router.get(
 				uptime: process.uptime(),
 				memory: process.memoryUsage(),
 				version: process.version,
+				health: reindexMonitor.getSystemHealth(),
+				operations: reindexMonitor.getOperationsMetrics(),
+				circuitBreakers: circuitBreakerRegistry.getStats(),
 			}),
-			catch: (error) => {
-				serverLogger.error('Error en health check:', error);
-				return error;
-			},
+			catch: (error) => toError('Error en health check', error),
 		})
 	)
 );
 
-// GET /api/system/stats - Obtener estadísticas del sistema corregidas
+// GET /api/system/stats - Obtener estadísticas del sistema
 router.get(
 	'/stats',
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
-			try: async () => {
-				serverLogger.debug('🎯 [SYSTEM] Usando getSystemStats de stats.service.ts');
-				return await getSystemStats();
-			},
-			catch: (error) => {
-				serverLogger.error('Error obteniendo estadísticas del sistema:', error);
-				return error;
-			},
+			try: () => getSystemStats(),
+			catch: (error) => toError('Error obteniendo estadísticas del sistema', error),
 		})
 	)
 );
@@ -86,10 +78,7 @@ router.post(
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
 			try: () => repairSystem(),
-			catch: (error) => {
-				serverLogger.error('Error reparando el sistema:', error);
-				return error;
-			},
+			catch: (error) => toError('Error reparando el sistema', error),
 		})
 	)
 );
@@ -100,10 +89,7 @@ router.post(
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
 			try: () => resetDatabase(),
-			catch: (error) => {
-				serverLogger.error('Error reseteando la base de datos:', error);
-				return error;
-			},
+			catch: (error) => toError('Error reseteando la base de datos', error),
 		})
 	)
 );
@@ -114,10 +100,7 @@ router.get(
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
 			try: () => getSystemVersion(),
-			catch: (error) => {
-				serverLogger.error('Error obteniendo versión del sistema:', error);
-				return error;
-			},
+			catch: (error) => toError('Error obteniendo versión del sistema', error),
 		})
 	)
 );
@@ -128,10 +111,7 @@ router.get(
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
 			try: () => getSystemSettings(),
-			catch: (error) => {
-				serverLogger.error('Error obteniendo configuración del sistema:', error);
-				return error;
-			},
+			catch: (error) => toError('Error obteniendo configuración del sistema', error),
 		})
 	)
 );
@@ -142,10 +122,7 @@ router.put(
 	effectHandler((req, _res) =>
 		Effect.tryPromise({
 			try: () => updateSystemSettings(req.body),
-			catch: (error) => {
-				serverLogger.error('Error actualizando configuración del sistema:', error);
-				return error;
-			},
+			catch: (error) => toError('Error actualizando configuración del sistema', error),
 		})
 	)
 );
@@ -156,10 +133,7 @@ router.post(
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
 			try: () => resetSystemSettings(),
-			catch: (error) => {
-				serverLogger.error('Error reseteando configuración del sistema:', error);
-				return error;
-			},
+			catch: (error) => toError('Error reseteando configuración del sistema', error),
 		})
 	)
 );
@@ -170,10 +144,7 @@ router.get(
 	effectHandler((req, _res) =>
 		Effect.tryPromise({
 			try: () => getProfileSettings(req.params.profileId),
-			catch: (error) => {
-				serverLogger.error(`Error obteniendo configuración del perfil ${req.params.profileId}:`, error);
-				return error;
-			},
+			catch: (error) => toError(`Error obteniendo configuración del perfil ${req.params.profileId}`, error),
 		})
 	)
 );
@@ -184,10 +155,7 @@ router.put(
 	effectHandler((req, _res) =>
 		Effect.tryPromise({
 			try: () => updateProfileSettings(req.params.profileId, req.body),
-			catch: (error) => {
-				serverLogger.error(`Error actualizando configuración del perfil ${req.params.profileId}:`, error);
-				return error;
-			},
+			catch: (error) => toError(`Error actualizando configuración del perfil ${req.params.profileId}`, error),
 		})
 	)
 );
@@ -201,10 +169,7 @@ router.post(
 				await resetProfileSettings(req.params.profileId);
 				return { success: true, message: 'Configuración del perfil reseteada' };
 			},
-			catch: (error) => {
-				serverLogger.error(`Error reseteando configuración del perfil ${req.params.profileId}:`, error);
-				return error;
-			},
+			catch: (error) => toError(`Error reseteando configuración del perfil ${req.params.profileId}`, error),
 		})
 	)
 );
@@ -215,30 +180,7 @@ router.post(
 	effectHandler((_req, _res) =>
 		Effect.tryPromise({
 			try: () => createDefaultSettingsData(),
-			catch: (error) => {
-				serverLogger.error('Error creando configuración por defecto:', error);
-				return error;
-			},
-		})
-	)
-);
-
-// GET /api/system/health - Estado general del sistema de reindexado
-router.get(
-	'/health',
-	effectHandler((_req, _res) =>
-		Effect.tryPromise({
-			try: async () => ({
-				status: 'ok',
-				timestamp: Date.now(),
-				health: reindexMonitor.getSystemHealth(),
-				operations: reindexMonitor.getOperationsMetrics(),
-				circuitBreakers: circuitBreakerRegistry.getStats(),
-			}),
-			catch: (error) => {
-				serverLogger.error('Error obteniendo health del sistema:', error);
-				return error;
-			},
+			catch: (error) => toError('Error creando configuración por defecto', error),
 		})
 	)
 );
@@ -256,10 +198,7 @@ router.post(
 					timestamp: Date.now(),
 				};
 			},
-			catch: (error) => {
-				serverLogger.error('Error reseteando sistema:', error);
-				return error;
-			},
+			catch: (error) => toError('Error reseteando sistema de reindexado', error),
 		})
 	)
 );
@@ -276,26 +215,22 @@ router.post(
 					timestamp: Date.now(),
 				};
 			},
-			catch: (error) => {
-				serverLogger.error('Error cancelando operaciones:', error);
-				return error;
-			},
+			catch: (error) => toError('Error cancelando operaciones', error),
 		})
 	)
 );
 
-// ENDPOINT TEMPORAL PARA DEBUG DE BASE DE DATOS
-router.get(
-	'/dbinfo',
-	effectHandler((_req, _res) =>
-		Effect.tryPromise({
-			try: () => getDatabaseInfo(),
-			catch: (error) => {
-				serverLogger.error('Error obteniendo información de la base de datos:', error);
-				return error;
-			},
-		})
-	)
-);
+// Endpoint de diagnóstico DB (solo en desarrollo)
+if (process.env.NODE_ENV === 'development') {
+	router.get(
+		'/dbinfo',
+		effectHandler((_req, _res) =>
+			Effect.tryPromise({
+				try: () => getDatabaseInfo(),
+				catch: (error) => toError('Error obteniendo información de la base de datos', error),
+			})
+		)
+	);
+}
 
 export default router;
