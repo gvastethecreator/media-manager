@@ -35,8 +35,8 @@ router.get(
 				try: () => profileService.getActiveProfile(),
 				catch: (error) => {
 					logger.error('Error obteniendo perfil activo:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			if (!profile) {
@@ -68,8 +68,8 @@ router.get(
 				try: () => profileService.getProfiles({ search }, { page, limit }),
 				catch: (error) => {
 					logger.error('Error obteniendo perfiles:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			return {
@@ -119,8 +119,8 @@ router.post(
 				try: () => profileService.createProfile(validatedData),
 				catch: (error) => {
 					logger.error('Error creando perfil:', error);
-					return error;
-				},
+					return new Error(error instanceof Error ? error.message : String(error));
+					},
 			});
 
 			res.status(201);
@@ -168,7 +168,7 @@ router.put(
 				try: () => profileService.updateProfile(id, validatedData),
 				catch: (error) => {
 					logger.error(`Error actualizando perfil ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -200,7 +200,7 @@ router.post(
 				try: () => profileService.setActiveProfile(id),
 				catch: (error) => {
 					logger.error(`Error activando perfil ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 
@@ -223,7 +223,7 @@ router.delete(
 				try: () => profileService.delete(id),
 				catch: (error) => {
 					logger.error(`Error eliminando perfil ${id}:`, error);
-					return error;
+					return new Error(error instanceof Error ? error.message : String(error));
 				},
 			});
 

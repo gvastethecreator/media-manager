@@ -87,20 +87,12 @@ export function generateAdvancedImageThumbnail(
 	// 1. URL existente en la entidad
 	// 2. Thumbnail inline (base64)
 	// 3. API unificada (genera si no existe)
-	const sources = [
-		() => (item as any).thumbnailUrl,
-		() => ((item as any).thumbnail ? `data:image/jpeg;base64,${(item as any).thumbnail}` : null),
-		() => buildUnifiedThumbnailUrl('image', item.id, { quality }),
-	];
-
-	for (const source of sources) {
-		const url = source();
-		if (url && typeof url === 'string') {
-			return Promise.resolve(url);
-		}
+	const thumbnailUrl = item.thumbnailUrl;
+	if (thumbnailUrl && typeof thumbnailUrl === 'string') {
+		return Promise.resolve(thumbnailUrl);
 	}
 
-	return Promise.resolve('');
+	return Promise.resolve(buildUnifiedThumbnailUrl('image', item.id, { quality }));
 }
 
 /**
@@ -116,9 +108,10 @@ export function generateAdvancedVideoThumbnail(
 
 	const { timeOffset = 5, quality = ThumbnailQuality.MEDIUM } = options;
 
-	// Para videos, si tenemos el thumbnail inline, usarlo
-	if ((item as any).thumbnail) {
-		return Promise.resolve(`data:image/webp;base64,${(item as any).thumbnail}`);
+	// Para videos, si tenemos thumbnail como Buffer, indicar via API
+	if ('thumbnail' in item && item.thumbnail) {
+		// Video has a thumbnail buffer; use the API to serve it
+		return Promise.resolve(buildUnifiedThumbnailUrl('video', item.id, { quality, time: timeOffset }));
 	}
 
 	// Usar API unificada
@@ -137,8 +130,8 @@ export function generateAudioWaveform(
 	}
 
 	// Si ya tiene waveform generado inline
-	if ((item as any).waveformUrl) {
-		return Promise.resolve((item as any).waveformUrl);
+	if ('waveformUrl' in item && typeof item.waveformUrl === 'string' && item.waveformUrl) {
+		return Promise.resolve(item.waveformUrl);
 	}
 
 	// Usar API unificada
@@ -176,13 +169,13 @@ export function generateJsonPreview(
 		showLineNumbers?: boolean;
 	} = {}
 ): Promise<string> {
-	if ((item as any).entityType !== 'jsonFile') {
+	if (item.entityType !== 'jsonFile') {
 		return Promise.resolve('');
 	}
 
 	// Si ya tiene preview generado inline
-	if ((item as any).previewUrl) {
-		return Promise.resolve((item as any).previewUrl);
+	if ('previewUrl' in item && typeof item.previewUrl === 'string' && item.previewUrl) {
+		return Promise.resolve(item.previewUrl);
 	}
 
 	// Usar API unificada
@@ -209,8 +202,8 @@ export function generate3DModelThumbnail(
 	}
 
 	// Si ya tiene thumbnail generado inline
-	if ((item as any).thumbnailUrl) {
-		return Promise.resolve((item as any).thumbnailUrl);
+	if ('thumbnailUrl' in item && typeof item.thumbnailUrl === 'string' && item.thumbnailUrl) {
+		return Promise.resolve(item.thumbnailUrl);
 	}
 
 	// Usar API unificada
@@ -232,8 +225,8 @@ export function generateFolderPreview(
 	const { maxItems = 4, layout = 'grid' } = options;
 
 	// Si ya tiene preview
-	if ((item as any).previewUrl) {
-		return Promise.resolve((item as any).previewUrl);
+	if ('previewUrl' in item && typeof item.previewUrl === 'string' && item.previewUrl) {
+		return Promise.resolve(item.previewUrl);
 	}
 
 	// Generar preview compuesto via API
@@ -257,8 +250,8 @@ export function generateEntityAvatar(
 	}
 
 	// Si ya tiene avatar personalizado
-	if ((item as any).avatarUrl) {
-		return Promise.resolve((item as any).avatarUrl);
+	if ('avatarUrl' in item && typeof item.avatarUrl === 'string' && item.avatarUrl) {
+		return Promise.resolve(item.avatarUrl);
 	}
 
 	// Generar avatar basado en nombre/ID
@@ -391,10 +384,11 @@ function buildUnifiedThumbnailUrl(entityType: string, entityId: string, options:
 // ===================== CACHÉ =====================
 
 /**
- * 🔄 Cache de thumbnails generados
+ * 🔄 Cache de thumbnails generados (con límite de tamaño)
  */
 const thumbnailCache = new Map<string, { url: string; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+const MAX_CACHE_SIZE = 500; // Límite máximo de entradas para evitar memory leaks
 
 /**
  * 💾 Obtiene thumbnail desde cache o genera uno nuevo
@@ -410,6 +404,15 @@ export async function getCachedThumbnail(item: DisplayableEntity, options: Recor
 	const url = await generateThumbnailByType(item, options);
 
 	if (url) {
+		// Evict oldest entries if cache is full
+		if (thumbnailCache.size >= MAX_CACHE_SIZE) {
+			clearExpiredThumbnailCache();
+			// If still full, remove oldest entry
+			if (thumbnailCache.size >= MAX_CACHE_SIZE) {
+				const oldestKey = thumbnailCache.keys().next().value;
+				if (oldestKey) thumbnailCache.delete(oldestKey);
+			}
+		}
 		thumbnailCache.set(cacheKey, {
 			url,
 			timestamp: Date.now(),

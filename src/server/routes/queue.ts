@@ -38,7 +38,7 @@ queueRouter.get(
 			},
 			catch: (error) => {
 				logger.error('Error en GET /api/queue', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -82,7 +82,7 @@ queueRouter.get(
 			},
 			catch: (error) => {
 				logger.error('Error en GET /api/queue/:id', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -128,7 +128,7 @@ queueRouter.delete(
 			},
 			catch: (error) => {
 				logger.error('Error en DELETE /api/queue/:id', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -142,7 +142,7 @@ queueRouter.post(
 			try: () => cancelQueueJob(req.params.id),
 			catch: (error) => {
 				logger.error('Error en POST /api/queue/:id/cancel', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -156,7 +156,7 @@ queueRouter.post(
 			try: () => retryQueueJob(req.params.id),
 			catch: (error) => {
 				logger.error('Error en POST /api/queue/:id/retry', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -170,7 +170,7 @@ queueRouter.get(
 			try: () => getQueueStats(),
 			catch: (error) => {
 				logger.error('Error en GET /api/queue/stats', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -187,7 +187,7 @@ queueRouter.get(
 			},
 			catch: (error) => {
 				logger.error('Error en GET /api/queue/recent', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -216,7 +216,7 @@ queueRouter.get(
 			},
 			catch: (error) => {
 				logger.error('Error en GET /api/queue/status/:status', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -230,7 +230,7 @@ queueRouter.get(
 			try: () => getQueueStatsByQueue(req.params.queue),
 			catch: (error) => {
 				logger.error('Error en GET /api/queue/stats/:queue', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -247,7 +247,7 @@ queueRouter.get(
 			},
 			catch: (error) => {
 				logger.error('Error en GET /api/queue/count/completed', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -264,7 +264,7 @@ queueRouter.get(
 			},
 			catch: (error) => {
 				logger.error('Error en GET /api/queue/count/failed', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -281,7 +281,7 @@ queueRouter.get(
 			},
 			catch: (error) => {
 				logger.error('Error en GET /api/queue/count/total', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)
@@ -298,7 +298,7 @@ queueRouter.get(
 			},
 			catch: (error) => {
 				logger.error('Error en GET /api/queue/processing-times', { error });
-				return error;
+				return new Error(error instanceof Error ? error.message : String(error));
 			},
 		})
 	)

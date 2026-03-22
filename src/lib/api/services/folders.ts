@@ -88,9 +88,14 @@ const normalizeFolder = (raw: any): FolderWithStats => {
 	}
 	const base = buildBaseFolder(raw);
 	const counts = raw._count || {
-		images: raw.imagesCount ?? 0,
-		videos: raw.videosCount ?? 0,
+		audios: raw.audiosCount ?? 0,
 		children: raw.childrenCount ?? 0,
+		documents: raw.documentsCount ?? 0,
+		file3Ds: raw.file3DsCount ?? 0,
+		images: raw.imagesCount ?? 0,
+		jsonFiles: raw.jsonFilesCount ?? 0,
+		totalFiles: raw.totalFiles ?? 0,
+		videos: raw.videosCount ?? 0,
 	};
 	return {
 		...base,
@@ -138,8 +143,9 @@ export const findFolders = async (filters: FolderFilters): Promise<FoldersRespon
 };
 
 export const getAllFolders = async (): Promise<FolderWithStats[]> => {
-	const response = await apiClient.get<FolderWithStats[]>('/folders/tree');
-	return response;
+	const response = await apiClient.get<any>('/folders/tree');
+	const rawArray = Array.isArray(response) ? response : Array.isArray(response?.data) ? response.data : [];
+	return rawArray.map(normalizeFolder);
 };
 
 export const getFolder = async (id: string): Promise<FolderWithStats> => {
