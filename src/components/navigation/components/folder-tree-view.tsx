@@ -1,10 +1,10 @@
 import { ChevronDown, ChevronRight, Folder } from 'lucide-react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useFolderTree } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
-import { useCategoryStats } from '../hooks/use-category-stats';
-import type { CategoryChild } from '../types';
+import type { FolderWithStats } from '@/types/entities/folder';
 
 interface FolderTreeViewProps {
 	className?: string;
@@ -14,7 +14,7 @@ interface FolderTreeViewProps {
 	selectedFolderId?: string | null;
 }
 
-interface FolderWithChildren extends CategoryChild {
+interface FolderWithChildren extends FolderWithStats {
 	children?: FolderWithChildren[];
 	hasChildren?: boolean;
 }
@@ -22,7 +22,7 @@ interface FolderWithChildren extends CategoryChild {
 /**
  * Construye recursivamente el árbol de carpetas desde datos planos
  */
-function buildFolderTree(folders: CategoryChild[], parentId: string | null = null): FolderWithChildren[] {
+function buildFolderTree(folders: FolderWithStats[], parentId: string | null = null): FolderWithChildren[] {
 	// Filtrar carpetas que pertenecen al nivel actual
 	const currentLevelFolders = folders.filter((folder) => folder.parentId === parentId);
 
@@ -36,6 +36,23 @@ function buildFolderTree(folders: CategoryChild[], parentId: string | null = nul
 			hasChildren: children.length > 0,
 		};
 	});
+}
+
+function collectAncestorIds(folders: FolderWithStats[], folderId: string | null | undefined): string[] {
+	if (!folderId) {
+		return [];
+	}
+
+	const foldersById = new Map(folders.map((folder) => [folder.id, folder]));
+	const ancestors: string[] = [];
+	let currentFolder = foldersById.get(folderId) ?? null;
+
+	while (currentFolder?.parentId) {
+		ancestors.unshift(currentFolder.parentId);
+		currentFolder = foldersById.get(currentFolder.parentId) ?? null;
+	}
+
+	return ancestors;
 }
 
 /**
@@ -61,10 +78,14 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 	const isExpanded = expandedFolders.has(folder.id);
 	const isSelected = selectedFolderId === folder.id;
 	const hasChildren = folder.hasChildren && folder.children && folder.children.length > 0;
+	const fileCount = folder.totalFiles ?? (folder._count?.images ?? 0) + (folder._count?.videos ?? 0);
 
 	const handleClick = useCallback(() => {
+		if (hasChildren && !isExpanded) {
+			onToggleExpanded(folder.id);
+		}
 		onItemClick(folder.id);
-	}, [folder.id, onItemClick]);
+	}, [folder.id, hasChildren, isExpanded, onItemClick, onToggleExpanded]);
 
 	const handleToggleClick = useCallback(
 		(e: React.MouseEvent) => {
@@ -110,15 +131,11 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 						title={folder.name}
 						type="button"
 					>
-						<Folder className="h-3 w-3 text-[color:var(--entity-folder)]" />
+						<Folder className="h-3 w-3 text-(--entity-folder)" />
 						<span className="truncate">{folder.name}</span>
 					</button>
 				</div>
-				{(folder.itemCount || folder._count?.images) && (
-					<span className="ml-2 min-w-3 text-right text-[9px] text-muted-foreground tabular-nums">
-						{folder.itemCount || folder._count?.images || 0}
-					</span>
-				)}
+				<span className="ml-2 min-w-3 text-right text-[9px] text-muted-foreground tabular-nums">{fileCount}</span>
 			</div>
 
 			{hasChildren && isExpanded && (
@@ -148,22 +165,35 @@ const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 	isCollapsed = false,
 	onItemClick,
 }: FolderTreeViewProps) {
-	const { getCategoryItems, isLoadingNavigation, navigationData } = useCategoryStats();
+	const { data: folders = [], isLoading: isLoadingFolders } = useFolderTree();
 
 	const navigate = useNavigate();
 	const { buildHierarchicalPath } = useHierarchicalNavigation();
 	const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
-	// Obtener carpetas desde la API de navegación
-	const folders = useMemo(() => {
-		const folderData = getCategoryItems('folders');
-		return folderData;
-	}, [getCategoryItems]);
-
 	// Construir datos del árbol
 	const treeData = useMemo(() => {
 		return buildFolderTree(folders, parentId);
 	}, [folders, parentId]);
+
+	useEffect(() => {
+		if (!selectedFolderId) {
+			return;
+		}
+
+		const expandedIds = [...collectAncestorIds(folders, selectedFolderId), selectedFolderId];
+		if (expandedIds.length === 0) {
+			return;
+		}
+
+		setExpandedFolders((prev) => {
+			const next = new Set(prev);
+			for (const expandedId of expandedIds) {
+				next.add(expandedId);
+			}
+			return next;
+		});
+	}, [folders, selectedFolderId]);
 
 	// Manejar toggle de expansión
 	const handleToggleExpanded = useCallback((folderId: string) => {
@@ -199,11 +229,11 @@ const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 		[onItemClick, navigate, buildHierarchicalPath]
 	);
 
-	if (isLoadingNavigation && !navigationData) {
+	if (isLoadingFolders && folders.length === 0) {
 		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">Cargando carpetas...</div>;
 	}
 
-	if (treeData.length === 0 && !isLoadingNavigation) {
+	if (treeData.length === 0 && !isLoadingFolders) {
 		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">No hay carpetas</div>;
 	}
 
