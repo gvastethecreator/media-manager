@@ -112,7 +112,9 @@ export function useFolderTree() {
 	return useQuery<FolderWithStats[], Error>({
 		queryKey: folderKeys.tree(),
 		queryFn: () => getAllFolders(),
-		staleTime: 1000 * 120, // 2 minutos
+		refetchOnMount: 'always',
+		refetchOnWindowFocus: true,
+		staleTime: 1000 * 15, // 15 segundos: el árbol puede cambiar tras reindex/refresh de estructura
 	});
 }
 
@@ -209,8 +211,8 @@ export function useReindexFolder() {
 			queryClient.invalidateQueries({ queryKey: navigationKeys.stats() });
 
 			// Nota: Hemos eliminado el force fetch a los 6 stores de Zustand aquí.
-			// Reindexar podía bajar cientos de miles de registros de golpe y bloquear el navegador. 
-			// Los componentes y hooks locales de la vista actual son los que deben enterarse 
+			// Reindexar podía bajar cientos de miles de registros de golpe y bloquear el navegador.
+			// Los componentes y hooks locales de la vista actual son los que deben enterarse
 			// de la recarga vía react-query o listeners SSE locales.
 		},
 		// onError silenciado para evitar console.*; la UI ya refleja estado/progreso
