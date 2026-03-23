@@ -507,6 +507,48 @@ describe('FolderService Effect', () => {
 				expect(treeChild?._count?.documents).toBe(1);
 				expect(treeChild?._count?.totalFiles).toBe(1);
 			});
+
+			it('should count files by nested path even when folderId points to an ancestor folder', async () => {
+				const service = Effect.gen(function* () {
+					return yield* FolderService;
+				});
+
+				const folderService = await runEffect(service);
+				const parent = await runEffect(
+					folderService.create({
+						name: 'Parent Path Count',
+						path: '/parent-path-count',
+						parentId: null,
+					})
+				);
+				const child = await runEffect(
+					folderService.create({
+						name: 'Child Path Count',
+						path: '/parent-path-count/child-path-count',
+						parentId: parent.id,
+					})
+				);
+
+				await db.insert(documents).values({
+					id: 'doc-sidebar-path-prefix-test',
+					name: 'nested.pdf',
+					path: '/parent-path-count/child-path-count/nested.pdf',
+					size: 4321,
+					hash: 'b'.repeat(64),
+					mimeType: 'application/pdf',
+					extension: '.pdf',
+					folderId: parent.id,
+				});
+
+				const result = await runEffect(folderService.getTree());
+				const treeParent = result.find((folder) => folder.id === parent.id);
+				const treeChild = result.find((folder) => folder.id === child.id);
+
+				expect(treeParent?._count?.documents).toBe(1);
+				expect(treeParent?._count?.totalFiles).toBe(1);
+				expect(treeChild?._count?.documents).toBe(1);
+				expect(treeChild?._count?.totalFiles).toBe(1);
+			});
 		});
 
 		describe('getChildren', () => {

@@ -125,6 +125,78 @@ export class FolderService extends Context.Tag('FolderService')<FolderService, F
 
 // ============= Helpers =============
 
+type FolderCountKey = Exclude<keyof FolderCounts, 'children' | 'totalFiles'>;
+
+interface FolderPathEntry {
+	id: string;
+	normalizedPath: string;
+}
+
+type PathColumn =
+	| typeof images.path
+	| typeof videos.path
+	| typeof audios.path
+	| typeof documents.path
+	| typeof jsonFiles.path
+	| typeof file3Ds.path;
+
+function normalizePathForMatching(path: string): string {
+	return path.replaceAll('/', '\\').toLowerCase();
+}
+
+function isFileInsideFolder(filePath: string, folderPath: string): boolean {
+	const normalizedFilePath = normalizePathForMatching(filePath);
+	const normalizedFolderPath = normalizePathForMatching(folderPath);
+
+	if (!normalizedFilePath.startsWith(normalizedFolderPath)) {
+		return false;
+	}
+
+	const nextChar = normalizedFilePath[normalizedFolderPath.length];
+	return nextChar === '\\' || nextChar === '/' || nextChar === undefined;
+}
+
+function createEmptyFileCounts(): Omit<FolderCounts, 'children'> {
+	return {
+		audios: 0,
+		documents: 0,
+		file3Ds: 0,
+		images: 0,
+		jsonFiles: 0,
+		totalFiles: 0,
+		videos: 0,
+	};
+}
+
+function buildRecursivePathWhere(column: PathColumn, folderPaths: string[]) {
+	return or(
+		...folderPaths.flatMap((folderPath) => [like(column, `${folderPath}/%`), like(column, `${folderPath}\\%`)])
+	);
+}
+
+function accumulatePathCounts(
+	folderEntries: FolderPathEntry[],
+	filePaths: string[],
+	countKey: FolderCountKey,
+	countsByFolderId: Map<string, Omit<FolderCounts, 'children'>>
+): void {
+	for (const filePath of filePaths) {
+		for (const folderEntry of folderEntries) {
+			if (!isFileInsideFolder(filePath, folderEntry.normalizedPath)) {
+				continue;
+			}
+
+			const counts = countsByFolderId.get(folderEntry.id);
+			if (!counts) {
+				continue;
+			}
+
+			counts[countKey] += 1;
+			counts.totalFiles += 1;
+		}
+	}
+}
+
 /**
  * Obtiene conteos de relaciones para una carpeta
  */
@@ -681,20 +753,21 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('getTree:validation', error),
 				});
 
-				// Batch enrichment: count children and direct files per folder across all supported file tables
+				// Batch enrichment: count children plus recursive files by physical path for sidebar tree badges
 				const folderIds = validatedFolders.map((f) => f.id);
+				const folderPaths = validatedFolders.map((folder) => folder.path);
 
-				const [childrenCounts, imageCounts, videoCounts, audioCounts, documentCounts, jsonFileCounts, file3DCounts] =
+				const [childrenCounts, imagePaths, videoPaths, audioPaths, documentPaths, jsonFilePaths, file3DPaths] =
 					folderIds.length > 0
 						? yield* Effect.tryPromise<
 								[
 									Array<{ id: string; count: number }>,
-									Array<{ id: string; count: number }>,
-									Array<{ id: string; count: number }>,
-									Array<{ id: string; count: number }>,
-									Array<{ id: string; count: number }>,
-									Array<{ id: string; count: number }>,
-									Array<{ id: string; count: number }>,
+									Array<{ path: string }>,
+									Array<{ path: string }>,
+									Array<{ path: string }>,
+									Array<{ path: string }>,
+									Array<{ path: string }>,
+									Array<{ path: string }>,
 								],
 								FolderError
 							>({
@@ -706,65 +779,85 @@ const FolderServiceLive = Layer.succeed(
 											.where(inArray(folders.parentId, folderIds))
 											.groupBy(folders.parentId),
 										db
-											.select({ id: images.folderId, count: count() })
+											.select({ path: images.path })
 											.from(images)
-											.where(inArray(images.folderId, folderIds))
-											.groupBy(images.folderId),
+											.where(buildRecursivePathWhere(images.path, folderPaths)),
 										db
-											.select({ id: videos.folderId, count: count() })
+											.select({ path: videos.path })
 											.from(videos)
-											.where(inArray(videos.folderId, folderIds))
-											.groupBy(videos.folderId),
+											.where(buildRecursivePathWhere(videos.path, folderPaths)),
 										db
-											.select({ id: audios.folderId, count: count() })
+											.select({ path: audios.path })
 											.from(audios)
-											.where(inArray(audios.folderId, folderIds))
-											.groupBy(audios.folderId),
+											.where(buildRecursivePathWhere(audios.path, folderPaths)),
 										db
-											.select({ id: documents.folderId, count: count() })
+											.select({ path: documents.path })
 											.from(documents)
-											.where(inArray(documents.folderId, folderIds))
-											.groupBy(documents.folderId),
+											.where(buildRecursivePathWhere(documents.path, folderPaths)),
 										db
-											.select({ id: jsonFiles.folderId, count: count() })
+											.select({ path: jsonFiles.path })
 											.from(jsonFiles)
-											.where(inArray(jsonFiles.folderId, folderIds))
-											.groupBy(jsonFiles.folderId),
+											.where(buildRecursivePathWhere(jsonFiles.path, folderPaths)),
 										db
-											.select({ id: file3Ds.folderId, count: count() })
+											.select({ path: file3Ds.path })
 											.from(file3Ds)
-											.where(inArray(file3Ds.folderId, folderIds))
-											.groupBy(file3Ds.folderId),
+											.where(buildRecursivePathWhere(file3Ds.path, folderPaths)),
 									]),
 								catch: (error: unknown) => fromUnknownError('getTree:counts', error),
 							})
 						: [[], [], [], [], [], [], []];
 
 				const childrenMap = new Map(childrenCounts.map((r) => [r.id, r.count]));
-				const imageMap = new Map(imageCounts.map((r) => [r.id, r.count]));
-				const videoMap = new Map(videoCounts.map((r) => [r.id, r.count]));
-				const audioMap = new Map(audioCounts.map((r) => [r.id, r.count]));
-				const documentMap = new Map(documentCounts.map((r) => [r.id, r.count]));
-				const jsonFileMap = new Map(jsonFileCounts.map((r) => [r.id, r.count]));
-				const file3DMap = new Map(file3DCounts.map((r) => [r.id, r.count]));
+				const folderEntries = validatedFolders.map((folder) => ({
+					id: folder.id,
+					normalizedPath: normalizePathForMatching(folder.path),
+				}));
+				const countsByFolderId = new Map(
+					validatedFolders.map((folder) => [folder.id, createEmptyFileCounts()] as const)
+				);
+
+				accumulatePathCounts(
+					folderEntries,
+					imagePaths.map((row) => row.path),
+					'images',
+					countsByFolderId
+				);
+				accumulatePathCounts(
+					folderEntries,
+					videoPaths.map((row) => row.path),
+					'videos',
+					countsByFolderId
+				);
+				accumulatePathCounts(
+					folderEntries,
+					audioPaths.map((row) => row.path),
+					'audios',
+					countsByFolderId
+				);
+				accumulatePathCounts(
+					folderEntries,
+					documentPaths.map((row) => row.path),
+					'documents',
+					countsByFolderId
+				);
+				accumulatePathCounts(
+					folderEntries,
+					jsonFilePaths.map((row) => row.path),
+					'jsonFiles',
+					countsByFolderId
+				);
+				accumulatePathCounts(
+					folderEntries,
+					file3DPaths.map((row) => row.path),
+					'file3Ds',
+					countsByFolderId
+				);
 
 				return validatedFolders.map((f) => ({
 					...f,
 					_count: {
-						audios: audioMap.get(f.id) ?? 0,
+						...(countsByFolderId.get(f.id) ?? createEmptyFileCounts()),
 						children: childrenMap.get(f.id) ?? 0,
-						documents: documentMap.get(f.id) ?? 0,
-						file3Ds: file3DMap.get(f.id) ?? 0,
-						images: imageMap.get(f.id) ?? 0,
-						jsonFiles: jsonFileMap.get(f.id) ?? 0,
-						totalFiles:
-							(imageMap.get(f.id) ?? 0) +
-							(videoMap.get(f.id) ?? 0) +
-							(audioMap.get(f.id) ?? 0) +
-							(documentMap.get(f.id) ?? 0) +
-							(jsonFileMap.get(f.id) ?? 0) +
-							(file3DMap.get(f.id) ?? 0),
-						videos: videoMap.get(f.id) ?? 0,
 					},
 				})) as FolderWithStats[];
 			}),

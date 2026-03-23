@@ -4,13 +4,21 @@
  * @description Servicio unificado para obtener todos los tipos de archivos de una carpeta con paginación optimizada
  */
 
-import { and, count, eq, inArray, like, sql } from 'drizzle-orm';
+import { and, count, eq, like, not, or, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createServiceError, ServiceErrorCode } from '@/lib/utils/errors/service-errors';
 
 const logger = serverLogger.withContext('FolderFilesService');
+
+type FileTable = typeof images | typeof videos | typeof audios | typeof documents | typeof jsonFiles | typeof file3Ds;
+
+interface FolderQueryContext {
+	childFolderPaths: string[];
+	folderId: string;
+	folderPath: string;
+}
 
 // Tipos para el servicio agregado
 export interface FolderFile {
@@ -228,43 +236,61 @@ function mapFile3DToFolderFile(file3d: any): FolderFile {
 /**
  * Obtiene las subcarpetas de una carpeta (para includeSubfolders)
  */
-async function getSubfolderIds(folderId: string): Promise<string[]> {
+async function getFolderQueryContext(folderId: string): Promise<FolderQueryContext | null> {
 	try {
-		// Obtener la carpeta base para conocer su path
 		const [folder] = await db.select({ path: folders.path }).from(folders).where(eq(folders.id, folderId)).limit(1);
 
 		if (!folder) {
-			return [];
+			return null;
 		}
 
-		// Buscar todas las subcarpetas que empiecen con el path de la carpeta base
-		const subfolders = await db
-			.select({ id: folders.id })
-			.from(folders)
-			.where(like(folders.path, `${folder.path}/%`));
+		const childFolders = await db.select({ path: folders.path }).from(folders).where(eq(folders.parentId, folderId));
 
-		return [folderId, ...subfolders.map((sf: { id: string }) => sf.id)];
+		return {
+			folderId,
+			folderPath: folder.path,
+			childFolderPaths: childFolders.map((child: { path: string }) => child.path),
+		};
 	} catch (error) {
-		logger.error('Error getting subfolders:', error);
-		return [folderId]; // Fallback: solo la carpeta original
+		logger.error('Error getting folder query context:', error);
+		return null;
 	}
+}
+
+function buildPathPrefixConditions(table: FileTable, folderPath: string) {
+	const pathVariants = [...new Set([folderPath, folderPath.replaceAll('\\', '/'), folderPath.replaceAll('/', '\\')])];
+
+	return pathVariants.flatMap((variant) => [like(table.path, `${variant}/%`), like(table.path, `${variant}\\%`)]);
 }
 
 /**
  * Construye las condiciones WHERE para las consultas
  */
 function buildWhereConditions(
-	folderIds: string[],
+	context: FolderQueryContext,
+	includeSubfolders: boolean,
 	search?: string,
-	table?: typeof images | typeof videos | typeof audios | typeof documents | typeof jsonFiles | typeof file3Ds
+	table?: FileTable
 ) {
 	const conditions = [];
 
-	// Filtro por carpetas
-	if (table && folderIds.length === 1) {
-		conditions.push(eq(table.folderId, folderIds[0]));
-	} else if (table) {
-		conditions.push(inArray(table.folderId, folderIds));
+	if (table) {
+		const folderPathCondition = or(...buildPathPrefixConditions(table, context.folderPath));
+		if (folderPathCondition) {
+			conditions.push(folderPathCondition);
+		}
+
+		if (!includeSubfolders && context.childFolderPaths.length > 0) {
+			const childFolderConditions = context.childFolderPaths.flatMap((childPath) =>
+				buildPathPrefixConditions(table, childPath)
+			);
+			if (childFolderConditions.length > 0) {
+				const childFoldersOrCondition = or(...childFolderConditions);
+				if (childFoldersOrCondition) {
+					conditions.push(not(childFoldersOrCondition));
+				}
+			}
+		}
 	}
 
 	// Filtro de búsqueda
@@ -293,8 +319,16 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 	} = options;
 
 	try {
-		// 1. Determinar carpetas a incluir
-		const folderIds = includeSubfolders ? await getSubfolderIds(folderId) : [folderId];
+		const folderContext = await getFolderQueryContext(folderId);
+		if (!folderContext) {
+			return {
+				files: [],
+				total: 0,
+				hasMore: false,
+				pagination: { limit, offset, totalPages: 0, currentPage: 1 },
+				performance: { queryTime: Date.now() - startTime, processedRecords: 0 },
+			};
+		}
 
 		// 2. Crear consultas UNION ALL
 		const unionQueries = [];
@@ -312,7 +346,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${images}
-				WHERE ${buildWhereConditions(folderIds, search, images)}
+				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, images)}
 			`);
 		}
 
@@ -328,7 +362,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${videos}
-				WHERE ${buildWhereConditions(folderIds, search, videos)}
+				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, videos)}
 			`);
 		}
 
@@ -343,7 +377,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${audios}
-				WHERE ${buildWhereConditions(folderIds, search, audios)}
+				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, audios)}
 			`);
 		}
 
@@ -358,7 +392,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${documents}
-				WHERE ${buildWhereConditions(folderIds, search, documents)}
+				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, documents)}
 			`);
 		}
 
@@ -373,7 +407,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${jsonFiles}
-				WHERE ${buildWhereConditions(folderIds, search, jsonFiles)}
+				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, jsonFiles)}
 			`);
 		}
 
@@ -388,7 +422,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${file3Ds}
-				WHERE ${buildWhereConditions(folderIds, search, file3Ds)}
+				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, file3Ds)}
 			`);
 		}
 
@@ -435,7 +469,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		const files = rows.map(mapRowToFolderFile);
 
 		// 6. Calcular total (consulta separada optimizada)
-		const totalCount = await getTotalFileCount(folderIds, search, fileTypes);
+		const totalCount = await getTotalFileCount(folderContext, includeSubfolders, search, fileTypes);
 
 		const queryTime = Date.now() - startTime;
 		const totalPages = Math.ceil(totalCount / limit);
@@ -445,7 +479,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		logger.info(`Folder files query completed in ${queryTime}ms`, {
 			folderId,
 			includeSubfolders,
-			folderCount: folderIds.length,
+			folderPath: folderContext.folderPath,
 			resultCount: files.length,
 			totalCount,
 		});
@@ -482,7 +516,8 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
  * Obtiene el total de archivos para paginación (optimizado)
  */
 async function getTotalFileCount(
-	folderIds: string[],
+	context: FolderQueryContext,
+	includeSubfolders: boolean,
 	search?: string,
 	fileTypes: string[] = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d']
 ): Promise<number> {
@@ -495,7 +530,7 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(images)
-					.where(buildWhereConditions(folderIds, search, images))
+					.where(buildWhereConditions(context, includeSubfolders, search, images))
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -505,7 +540,7 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(videos)
-					.where(buildWhereConditions(folderIds, search, videos))
+					.where(buildWhereConditions(context, includeSubfolders, search, videos))
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -515,7 +550,7 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(audios)
-					.where(buildWhereConditions(folderIds, search, audios))
+					.where(buildWhereConditions(context, includeSubfolders, search, audios))
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -525,7 +560,7 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(documents)
-					.where(buildWhereConditions(folderIds, search, documents))
+					.where(buildWhereConditions(context, includeSubfolders, search, documents))
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -535,7 +570,7 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(jsonFiles)
-					.where(buildWhereConditions(folderIds, search, jsonFiles))
+					.where(buildWhereConditions(context, includeSubfolders, search, jsonFiles))
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -545,7 +580,7 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(file3Ds)
-					.where(buildWhereConditions(folderIds, search, file3Ds))
+					.where(buildWhereConditions(context, includeSubfolders, search, file3Ds))
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -566,15 +601,26 @@ async function getTotalFileCount(
  */
 export async function getFolderFileStats(folderId: string, includeSubfolders = false) {
 	try {
-		const folderIds = includeSubfolders ? await getSubfolderIds(folderId) : [folderId];
+		const folderContext = await getFolderQueryContext(folderId);
+		if (!folderContext) {
+			return {
+				images: 0,
+				videos: 0,
+				audios: 0,
+				documents: 0,
+				jsonFiles: 0,
+				file3Ds: 0,
+				total: 0,
+			};
+		}
 
 		const stats = await Promise.all([
-			getTotalFileCount(folderIds, undefined, ['image']),
-			getTotalFileCount(folderIds, undefined, ['video']),
-			getTotalFileCount(folderIds, undefined, ['audio']),
-			getTotalFileCount(folderIds, undefined, ['document']),
-			getTotalFileCount(folderIds, undefined, ['jsonFile']),
-			getTotalFileCount(folderIds, undefined, ['file3d']),
+			getTotalFileCount(folderContext, includeSubfolders, undefined, ['image']),
+			getTotalFileCount(folderContext, includeSubfolders, undefined, ['video']),
+			getTotalFileCount(folderContext, includeSubfolders, undefined, ['audio']),
+			getTotalFileCount(folderContext, includeSubfolders, undefined, ['document']),
+			getTotalFileCount(folderContext, includeSubfolders, undefined, ['jsonFile']),
+			getTotalFileCount(folderContext, includeSubfolders, undefined, ['file3d']),
 		]);
 
 		return {

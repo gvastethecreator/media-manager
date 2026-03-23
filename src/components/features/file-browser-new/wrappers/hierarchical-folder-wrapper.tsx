@@ -77,13 +77,12 @@ export const HierarchicalFolderWrapper = memo(function HierarchicalFolderWrapper
 	const isResolving = isFoldersLoading || folders.length === 0;
 
 	if (isResolving) {
-		logger.info('Resolviendo estructura de carpetas… renderizando vista base para mantener UI disponible');
+		logger.info(
+			'Resolviendo estructura de carpetas… mostrando pantalla de carga para evitar estado de carpeta anterior'
+		);
 		return (
-			<div className="relative h-full" data-testid="hierarchical-wrapper-resolving">
-				<FolderContentView folderId={undefined} />
-				<div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-					<LoadingScreen interactive={false} message="Cargando estructura de carpetas..." />
-				</div>
+			<div className="flex h-full items-center justify-center" data-testid="hierarchical-wrapper-resolving">
+				<LoadingScreen interactive={false} message="Cargando estructura de carpetas..." />
 			</div>
 		);
 	}
