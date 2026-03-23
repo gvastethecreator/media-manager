@@ -122,7 +122,7 @@ export function parseHierarchicalPath(path: string, folders?: FolderWithStats[])
 			if (process.env.NODE_ENV === 'development') {
 				console.debug(`[HierarchicalNav] Carpeta no encontrada en path: ${segment} (padre: ${currentParentId})`);
 			}
-			break;
+			return [];
 		}
 
 		folderIds.push(folder.id);
@@ -198,7 +198,7 @@ export function buildFullBreadcrumbs(folderId: string | null, folders?: FolderWi
 		// Construir path hasta esta carpeta
 		const pathToFolder = ancestors
 			.slice(0, i + 1)
-			.map((f) => encodeURIComponent(f.name.toLowerCase()))
+			.map((f) => encodeURIComponent(toSlug(f.name)))
 			.join('/');
 
 		breadcrumbs.push({
