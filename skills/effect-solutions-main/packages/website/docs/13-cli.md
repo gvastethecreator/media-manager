@@ -1,0 +1,491 @@
+---
+title: Command-Line Interfaces
+description: "Build CLIs with Effect's CLI module: commands, arguments, flags, and service integration"
+order: 13
+group: Ecosystem
+---
+
+# Command-Line Interfaces
+
+Effect's CLI module provides typed argument parsing, automatic help generation, and seamless integration with Effect services. This guide covers the 20% of the API that handles 80% of CLI use cases.
+
+## Installation
+
+```bash
+bun add effect@beta @effect/platform-bun@beta
+```
+
+For Node.js, use `@effect/platform-node@beta` instead.
+
+## Minimal Example
+
+A greeting CLI with a name argument and `--shout` flag:
+
+```typescript
+import { Argument, Command, Flag } from "effect/unstable/cli"
+import { BunServices, BunRuntime } from "@effect/platform-bun"
+import { Console, Effect } from "effect"
+
+const name = Argument.string("name").pipe(Argument.withDefault("World"))
+const shout = Flag.boolean("shout").pipe(Flag.withAlias("s"))
+
+const greet = Command.make("greet", { name, shout }, ({ name, shout }) => {
+  const message = `Hello, ${name}!`
+  return Console.log(shout ? message.toUpperCase() : message)
+})
+
+const cli = Command.run(greet, {
+  name: "greet",
+  version: "1.0.0"
+})
+
+cli(process.argv).pipe(
+  Effect.provide(BunServices.layer),
+  BunRuntime.runMain
+)
+```
+
+Run it:
+
+```bash
+bun run greet.ts              # Hello, World!
+bun run greet.ts Alice        # Hello, Alice!
+bun run greet.ts --shout Bob  # HELLO, BOB!
+bun run greet.ts --help       # Shows usage
+```
+
+Built-in flags (`--help`, `--version`) work automatically.
+
+## Arguments and Options
+
+**Arguments** are positional. **Flags** are named options. Flags must come before arguments: `cmd --flag arg` works, `cmd arg --flag` doesn't.
+
+### Argument Patterns
+
+```typescript
+import { Argument } from "effect/unstable/cli"
+
+// Required text
+Argument.string("file")
+
+// Optional argument
+Argument.string("output").pipe(Argument.optional)
+
+// With default
+Argument.string("format").pipe(Argument.withDefault("json"))
+
+// Repeated (zero or more)
+Argument.string("files").pipe(Argument.variadic())
+
+// At least one
+Argument.string("files").pipe(Argument.atLeast(1))
+```
+
+### Flag Patterns
+
+```typescript
+import { Flag } from "effect/unstable/cli"
+
+// Boolean flag
+Flag.boolean("verbose").pipe(Flag.withAlias("v"))
+
+// Text flag
+Flag.string("output").pipe(Flag.withAlias("o"))
+
+// Optional text
+Flag.string("config").pipe(Flag.optional)
+
+// Choice from fixed values
+Flag.choice("format", ["json", "yaml", "toml"])
+
+// Integer
+Flag.integer("count").pipe(Flag.withDefault(10))
+```
+
+## Subcommands
+
+Most CLIs have multiple commands. Use `Command.withSubcommands`:
+
+```typescript
+import { Argument, Command } from "effect/unstable/cli"
+import { Console } from "effect"
+
+const task = Argument.string("task")
+
+const add = Command.make("add", { task }, ({ task }) =>
+  Console.log(`Adding: ${task}`)
+)
+
+const list = Command.make("list", {}, () =>
+  Console.log("Listing tasks...")
+)
+
+const app = Command.make("tasks").pipe(
+  Command.withSubcommands([add, list])
+)
+```
+
+```bash
+tasks add "Buy milk"   # Adding: Buy milk
+tasks list             # Listing tasks...
+tasks --help           # Shows available subcommands
+```
+
+## Worked Example: Task Manager CLI
+
+Let's build a complete task manager that persists tasks to a JSON file. This combines CLI parsing with services and Schema.
+
+<TerminalDemo />
+
+| Command | Description |
+|---------|-------------|
+| `tasks add <task>` | Add a new task |
+| `tasks list` | List pending tasks |
+| `tasks list --all` | List all tasks including completed |
+| `tasks toggle <id>` | Toggle a task's done status |
+| `tasks clear` | Clear all tasks |
+
+This demo stores tasks in your browser's localStorage. Reload the page and they'll still be there. Use Ctrl+L to clear the screen.
+
+### The Task Schema
+
+```typescript
+import { Array, Option, Schema } from "effect"
+
+const TaskId = Schema.Number.pipe(Schema.brand("TaskId"))
+type TaskId = typeof TaskId.Type
+
+class Task extends Schema.Class("Task")({
+  id: TaskId,
+  text: Schema.NonEmptyString,
+  done: Schema.Boolean
+}) {
+  toggle() {
+    return new Task({ ...this, done: !this.done })
+  }
+}
+
+class TaskList extends Schema.Class("TaskList")({
+  tasks: Schema.Array(Task)
+}) {
+  static Json = Schema.fromJsonString(TaskList)
+  static empty = new TaskList({ tasks: [] })
+
+  get nextId(): TaskId {
+    if (this.tasks.length === 0) return TaskId.makeUnsafe(1)
+    return TaskId.makeUnsafe(Math.max(...this.tasks.map((t) => t.id)) + 1)
+  }
+
+  add(text: string): [TaskList, Task] {
+    const task = new Task({ id: this.nextId, text, done: false })
+    return [new TaskList({ tasks: [...this.tasks, task] }), task]
+  }
+
+  toggle(id: TaskId): [TaskList, Option.Option<Task>] {
+    const index = this.tasks.findIndex((t) => t.id === id)
+    if (index === -1) return [this, Option.none()]
+
+    const updated = this.tasks[index].toggle()
+    const tasks = Array.modify(this.tasks, index, () => updated)
+    return [new TaskList({ tasks }), Option.some(updated)]
+  }
+
+  find(id: TaskId): Option.Option<Task> {
+    return Array.findFirst(this.tasks, (t) => t.id === id)
+  }
+
+  get pending() {
+    return this.tasks.filter((t) => !t.done)
+  }
+
+  get completed() {
+    return this.tasks.filter((t) => t.done)
+  }
+}
+```
+
+### The TaskRepo Service
+
+```typescript
+import { Array, Effect, FileSystem, Layer, Option, Schema, ServiceMap } from "effect"
+// hide-start
+const TaskId = Schema.Number.pipe(Schema.brand("TaskId"))
+type TaskId = typeof TaskId.Type
+
+class Task extends Schema.Class("Task")({
+  id: TaskId,
+  text: Schema.NonEmptyString,
+  done: Schema.Boolean
+}) {
+  toggle() {
+    return new Task({ ...this, done: !this.done })
+  }
+}
+
+class TaskList extends Schema.Class("TaskList")({
+  tasks: Schema.Array(Task)
+}) {
+  static Json = Schema.fromJsonString(TaskList)
+  static empty = new TaskList({ tasks: [] })
+
+  add(text: string): [TaskList, Task] {
+    const task = new Task({ id: this.nextId, text, done: false })
+    return [new TaskList({ tasks: [...this.tasks, task] }), task]
+  }
+
+  toggle(id: TaskId): [TaskList, Option.Option<Task>] {
+    const index = this.tasks.findIndex((t) => t.id === id)
+    if (index === -1) return [this, Option.none()]
+    const updated = this.tasks[index]!.toggle()
+    const tasks = Array.modify(this.tasks, index, () => updated)
+    return [new TaskList({ tasks }), Option.some(updated)]
+  }
+
+  get nextId(): TaskId {
+    if (this.tasks.length === 0) return TaskId.makeUnsafe(1)
+    return TaskId.makeUnsafe(Math.max(...this.tasks.map((t) => t.id)) + 1)
+  }
+}
+
+// hide-end
+
+class TaskRepo extends ServiceMap.Service<
+  TaskRepo,
+  {
+    readonly list: (all?: boolean) => Effect.Effect<ReadonlyArray<Task>>
+    readonly add: (text: string) => Effect.Effect<Task>
+    readonly toggle: (id: TaskId) => Effect.Effect<Option.Option<Task>>
+    readonly clear: () => Effect.Effect<void>
+  }
+>()("TaskRepo") {
+  static layer = Layer.effect(
+    TaskRepo,
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem
+      const path = "tasks.json"
+
+      // Helpers
+      const load = Effect.gen(function* () {
+        const content = yield* fs.readFileString(path)
+        return yield* Schema.decodeEffect(TaskList.Json)(content)
+      }).pipe(Effect.orElseSucceed(() => TaskList.empty))
+
+      const save = (list: TaskList) =>
+        Effect.gen(function* () {
+          const json = yield* Schema.encodeEffect(TaskList.Json)(list)
+          yield* fs.writeFileString(path, json)
+        })
+
+      // Public API
+      const list = Effect.fn("TaskRepo.list")(function* (all?: boolean) {
+        const taskList = yield* load
+        if (all) return taskList.tasks
+        return taskList.tasks.filter((t) => !t.done)
+      })
+
+      const add = Effect.fn("TaskRepo.add")(function* (text: string) {
+        const list = yield* load
+        const [newList, task] = list.add(text)
+        yield* save(newList)
+        return task
+      })
+
+      const toggle = Effect.fn("TaskRepo.toggle")(function* (id: TaskId) {
+        const list = yield* load
+        const [newList, task] = list.toggle(id)
+        yield* save(newList)
+        return task
+      })
+
+      const clear = Effect.fn("TaskRepo.clear")(function* () {
+        yield* save(TaskList.empty)
+      })
+
+      return { list, add, toggle, clear }
+    })
+  )
+}
+```
+
+### The CLI Commands
+
+```typescript
+import { Argument, Command, Flag } from "effect/unstable/cli"
+import { Console, Effect, Option, Schema, ServiceMap } from "effect"
+
+// hide-start
+// Minimal stubs to keep this example self-contained for typechecking
+const TaskId = Schema.Number.pipe(Schema.brand("TaskId"))
+type TaskId = typeof TaskId.Type
+type Task = { id: number; text: string; done: boolean }
+
+class TaskRepo extends ServiceMap.Service<
+  TaskRepo,
+  {
+    readonly add: (text: string) => Effect.Effect<Task>
+    readonly list: (all?: boolean) => Effect.Effect<ReadonlyArray<Task>>
+    readonly toggle: (id: TaskId) => Effect.Effect<Option.Option<Task>>
+    readonly clear: () => Effect.Effect<void>
+  }
+>()("TaskRepo") {}
+// hide-end
+
+// add <task>
+const text = Argument.string("task").pipe(
+  Argument.withDescription("The task description")
+)
+
+const addCommand = Command.make("add", { text }, ({ text }) =>
+  Effect.gen(function* () {
+    const repo = yield* TaskRepo
+    const task = yield* repo.add(text)
+    yield* Console.log(`Added task #${task.id}: ${task.text}`)
+  })
+).pipe(Command.withDescription("Add a new task"))
+
+// list [--all]
+const all = Flag.boolean("all").pipe(
+  Flag.withAlias("a"),
+  Flag.withDescription("Show all tasks including completed")
+)
+
+const listCommand = Command.make("list", { all }, ({ all }) =>
+  Effect.gen(function* () {
+    const repo = yield* TaskRepo
+    const tasks = yield* repo.list(all)
+
+    if (tasks.length === 0) {
+      yield* Console.log("No tasks.")
+      return
+    }
+
+    for (const task of tasks) {
+      const status = task.done ? "[x]" : "[ ]"
+      yield* Console.log(`${status} #${task.id} ${task.text}`)
+    }
+  })
+).pipe(Command.withDescription("List pending tasks"))
+
+// toggle <id>
+const id = Argument.integer("id").pipe(
+  Argument.withSchema(TaskId),
+  Argument.withDescription("The task ID to toggle")
+)
+
+const toggleCommand = Command.make("toggle", { id }, ({ id }) =>
+  Effect.gen(function* () {
+    const repo = yield* TaskRepo
+    const result = yield* repo.toggle(id)
+
+    yield* Option.match(result, {
+      onNone: () => Console.log(`Task #${id} not found`),
+      onSome: (task) => Console.log(`Toggled: ${task.text} (${task.done ? "done" : "pending"})`)
+    })
+  })
+).pipe(Command.withDescription("Toggle a task's done status"))
+
+// clear
+const clearCommand = Command.make("clear", {}, () =>
+  Effect.gen(function* () {
+    const repo = yield* TaskRepo
+    yield* repo.clear()
+    yield* Console.log("Cleared all tasks.")
+  })
+).pipe(Command.withDescription("Clear all tasks"))
+
+const app = Command.make("tasks", {}).pipe(
+  Command.withDescription("A simple task manager"),
+  Command.withSubcommands([addCommand, listCommand, toggleCommand, clearCommand])
+)
+```
+
+### Wiring It Together
+
+```typescript
+import { BunServices, BunRuntime } from "@effect/platform-bun"
+
+const cli = Command.run(app, {
+  name: "tasks",
+  version: "1.0.0"
+})
+
+const mainLayer = Layer.provideMerge(TaskRepo.layer, BunServices.layer)
+
+cli(process.argv).pipe(Effect.provide(mainLayer), BunRuntime.runMain)
+```
+
+### Using the CLI
+
+```bash
+tasks add "Buy milk"
+# Added task #1: Buy milk
+
+tasks add "Walk the dog"
+# Added task #2: Walk the dog
+
+tasks list
+# [ ] #1 Buy milk
+# [ ] #2 Walk the dog
+
+tasks toggle 1
+# Toggled: Buy milk (done)
+
+tasks list
+# [ ] #2 Walk the dog
+
+tasks list --all
+# [x] #1 Buy milk
+# [ ] #2 Walk the dog
+
+tasks toggle 1
+# Toggled: Buy milk (pending)
+
+tasks clear
+# Cleared all tasks.
+```
+
+The tasks persist to `tasks.json`:
+
+```json
+[
+  { "id": 1, "text": "Buy milk", "done": true },
+  { "id": 2, "text": "Walk the dog", "done": false }
+]
+```
+
+## Summary
+
+| Concept | API |
+|---------|-----|
+| Define command | `Command.make(name, config, handler)` |
+| Positional args | `Argument.string`, `Argument.integer`, `Argument.optional`, `Argument.variadic()` |
+| Named flags | `Flag.boolean`, `Flag.string`, `Flag.choice` |
+| Flag alias | `Flag.withAlias("v")` |
+| Descriptions | `Argument.withDescription`, `Flag.withDescription`, `Command.withDescription` |
+| Subcommands | `Command.withSubcommands([...])` |
+| Run CLI | `Command.run(cmd, { name, version })` |
+| Platform layer | `BunServices.layer` or `NodeServices.layer` |
+
+For the full API, see the [Effect CLI documentation](https://effect-ts.github.io/effect/docs/cli).
+
+## Miscellaneous
+
+### Version from package.json
+
+Import your version from `package.json` to keep it in sync with your published package:
+
+```typescript
+import { Command } from "effect/unstable/cli"
+import pkg from "./package.json" with { type: "json" }
+
+// hide-start
+const app = Command.make("tasks")
+// hide-end
+
+const cli = Command.run(app, {
+  name: "tasks",
+  version: pkg.version
+})
+```
+
+Requires `"resolveJsonModule": true` in tsconfig.
