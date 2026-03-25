@@ -183,7 +183,7 @@ export function ThemeProvider({
 	return (
 		<ThemeContext.Provider value={value}>
 			{children}
-			<ThemeDebugger />
+			{import.meta.env.DEV ? <ThemeDebugger /> : null}
 			<ThemeEnforcer />
 		</ThemeContext.Provider>
 	);

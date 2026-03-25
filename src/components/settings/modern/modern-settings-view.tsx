@@ -124,19 +124,21 @@ export function ModernSettingsView() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [currentSection, setCurrentSection] = useState('');
 	const [currentItem, setCurrentItem] = useState('');
+	const defaultSection = 'files';
+	const defaultItem = 'folders';
 
-	const section = searchParams.get('section') || SETTINGS_CATEGORIES[0]?.id;
-	const item = searchParams.get('item') || SETTINGS_CATEGORIES[0]?.items[0]?.id;
+	const section = searchParams.get('section') || defaultSection;
+	const item = searchParams.get('item') || defaultItem;
 
 	// Actualizar URL si no hay parámetros
 	useEffect(() => {
 		if (!(searchParams.has('section') || searchParams.has('item'))) {
 			setSearchParams({
-				section: SETTINGS_CATEGORIES[0]?.id,
-				item: SETTINGS_CATEGORIES[0]?.items[0]?.id,
+				section: defaultSection,
+				item: defaultItem,
 			});
 		}
-	}, [searchParams, setSearchParams]);
+	}, [defaultItem, defaultSection, searchParams, setSearchParams]);
 
 	// Actualizar estado local cuando cambian los params
 	useEffect(() => {
