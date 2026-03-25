@@ -2,23 +2,50 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
 
 export interface SystemStats {
+	averageFileSize?: number;
+	cpuCores?: number;
+	cpuModel?: string;
+	cpuUsage?: number;
 	databaseSize: number;
 	dbSize: number;
+	diskUsage?: {
+		free: number;
+		total: number;
+		used: number;
+		usedPercentage: number;
+	};
 	formattedDatabaseSize: string;
+	hostname?: string;
 	lastBackup?: string;
+	memoryFree?: number;
+	memoryTotal?: number;
+	memoryUsage?: number;
+	memoryUsed?: number;
+	nodeVersion?: string;
+	platform?: string;
 	storageAvailable: number;
 	storageUsed: number;
 	totalAlbums: number;
 	totalAudio: number;
 	totalCharacters: number;
 	totalCollections: number;
+	totalConcepts?: number;
 	totalDocuments: number;
 	totalFile3D: number;
 	totalFolders: number;
 	totalImages: number;
 	totalJsonFiles: number;
+	totalMetadata?: number;
+	totalNotes?: number;
+	totalPlaces?: number;
+	totalPrompts?: number;
+	totalProperties?: number;
 	totalTags: number;
+	totalThumbnails?: number;
 	totalVideos: number;
+	totalWildcards?: number;
+	totalWorldItems?: number;
+	uptime?: number;
 }
 
 export interface SystemVersion {
@@ -83,7 +110,7 @@ export function useSystemSettings() {
 export function useProfileSettings(profileId: string) {
 	return useQuery<Settings | null, Error>({
 		queryKey: systemKeys.profileSettings(profileId),
-		queryFn: () => apiClient.get<Settings | null>(`/system/settings/profile/${profileId}`),
+		queryFn: () => apiClient.get<Settings | null>(`/system/profiles/${profileId}/settings`),
 		enabled: !!profileId,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -104,7 +131,7 @@ export function useUpdateProfileSettings() {
 	const queryClient = useQueryClient();
 
 	return useMutation<Settings, Error, { profileId: string; data: SettingsUpdateInput }>({
-		mutationFn: ({ profileId, data }) => apiClient.put<Settings>(`/system/settings/profile/${profileId}`, data),
+		mutationFn: ({ profileId, data }) => apiClient.put<Settings>(`/system/profiles/${profileId}/settings`, data),
 		onSuccess: (data, { profileId }) => {
 			queryClient.setQueryData(systemKeys.profileSettings(profileId), data);
 		},
@@ -126,7 +153,7 @@ export function useResetProfileSettings() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (profileId) => apiClient.post(`/system/settings/profile/${profileId}/reset`),
+		mutationFn: (profileId) => apiClient.post(`/system/profiles/${profileId}/settings/reset`),
 		onSuccess: (_, profileId) => {
 			queryClient.removeQueries({ queryKey: systemKeys.profileSettings(profileId) });
 		},
@@ -149,7 +176,7 @@ export function useResetDatabase() {
 	const queryClient = useQueryClient();
 
 	return useMutation<SystemResponse, Error, void>({
-		mutationFn: () => apiClient.post<SystemResponse>('/system/reset-database'),
+		mutationFn: () => apiClient.post<SystemResponse>('/system/reset-db'),
 		onSuccess: () => {
 			// Invalidar todo el cache después de reset
 			queryClient.clear();

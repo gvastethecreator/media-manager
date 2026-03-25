@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
 import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
@@ -9,6 +10,7 @@ import type { ViewProps } from '../types';
 const logger = clientLogger.withContext('JsonFilesView');
 
 export function JsonFilesView(_props: ViewProps) {
+	const navigate = useNavigate();
 	const jsonFiles = useJsonFileStore((s) => s.jsonFiles);
 	const loading = useJsonFileStore((s) => s.loading);
 	const error = useJsonFileStore((s) => s.error);
@@ -34,10 +36,13 @@ export function JsonFilesView(_props: ViewProps) {
 		logger.info('Click en JSON', { id: item.id, name: item.name });
 	}, []);
 
-	const handleDoubleClick = useCallback((item: BrowserItem) => {
-		logger.info('Doble click en JSON', { id: item.id, name: item.name });
-		// TODO: Abrir visor JSON específico o mostrar el contenido
-	}, []);
+	const handleDoubleClick = useCallback(
+		(item: BrowserItem) => {
+			logger.info('Doble click en JSON', { id: item.id, name: item.name });
+			navigate(`/json-files/${item.id}`);
+		},
+		[navigate]
+	);
 
 	if (loading && count === 0) {
 		return <LoadingScreen message="Cargando archivos JSON..." />;

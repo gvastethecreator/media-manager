@@ -29,7 +29,7 @@ import { useConcepts, useDeleteConcept } from '@/lib/api/concepts';
 import { useDeleteNote, useNotes } from '@/lib/api/notes';
 import { useDeletePlace, usePlaces } from '@/lib/api/places';
 import { useDeletePrompt, usePrompts } from '@/lib/api/prompts';
-import { useDeleteWildcard, useWildcards } from '@/lib/api/wildcards';
+import { useCreateWildcard, useDeleteWildcard, useUpdateWildcard, useWildcards } from '@/lib/api/wildcards';
 import { useDeleteWorldItem, useWorldItems } from '@/lib/api/world-items';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
@@ -578,6 +578,8 @@ export function WorldbuildingSettingsModern() {
 	const [editingItem, setEditingItem] = useState<AnyEntity | null>(null);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [searchQuery, setSearchQuery] = useState('');
+	const createWildcardMutation = useCreateWildcard();
+	const updateWildcardMutation = useUpdateWildcard();
 
 	const config = ENTITY_CONFIG[activeEntity];
 
@@ -656,16 +658,63 @@ export function WorldbuildingSettingsModern() {
 		const onCancel = () => setShowForm(false);
 
 		switch (activeEntity) {
+			case 'items':
+				return (
+					<Dialog onOpenChange={setShowForm} open={showForm}>
+						<DialogContent className="sm:max-w-150">
+							<DialogHeader>
+								<DialogTitle>{editingItem ? `Editar ${config.singular}` : `Crear ${config.singular}`}</DialogTitle>
+							</DialogHeader>
+							<CreateWorldItemForm
+								isEditing={!!editingItem}
+								onCancel={onCancel}
+								onCreated={handleSuccess}
+								onUpdated={handleSuccess}
+								worldItem={editingItem as any}
+							/>
+						</DialogContent>
+					</Dialog>
+				);
+			case 'notes':
+				return (
+					<Dialog onOpenChange={setShowForm} open={showForm}>
+						<DialogContent className="sm:max-w-150">
+							<DialogHeader>
+								<DialogTitle>{editingItem ? `Editar ${config.singular}` : `Crear ${config.singular}`}</DialogTitle>
+							</DialogHeader>
+							<CreateNoteForm
+								isEditing={!!editingItem}
+								note={editingItem as any}
+								onCancel={onCancel}
+								onSuccess={handleSuccess}
+								onUpdated={handleSuccess}
+							/>
+						</DialogContent>
+					</Dialog>
+				);
 			case 'wildcards':
 				return (
 					<Dialog onOpenChange={setShowForm} open={showForm}>
-						<DialogContent className="sm:max-w-[600px]">
+						<DialogContent className="sm:max-w-150">
 							<DialogHeader>
 								<DialogTitle>{editingItem ? 'Editar Wildcard' : 'Crear Wildcard'}</DialogTitle>
 							</DialogHeader>
 							<CreateWildcardForm
+								parentWildcards={(queries.wildcards.data?.data as WildcardWithStats[] | undefined) || []}
 								onCancel={onCancel}
-								onSubmit={async () => handleSuccess()}
+								onSubmit={async (data) => {
+									if (editingItem) {
+										await updateWildcardMutation.mutateAsync({
+											id: (editingItem as WildcardWithStats).id,
+											data,
+										});
+										handleSuccess();
+										return;
+									}
+
+									await createWildcardMutation.mutateAsync(data);
+									handleSuccess();
+								}}
 								wildcard={editingItem as WildcardWithStats}
 							/>
 						</DialogContent>
@@ -676,7 +725,7 @@ export function WorldbuildingSettingsModern() {
 				const FormComponent = config.CreateForm as any;
 				return (
 					<Dialog onOpenChange={setShowForm} open={showForm}>
-						<DialogContent className="sm:max-w-[600px]">
+						<DialogContent className="sm:max-w-150">
 							<DialogHeader>
 								<DialogTitle>{editingItem ? `Editar ${config.singular}` : `Crear ${config.singular}`}</DialogTitle>
 							</DialogHeader>

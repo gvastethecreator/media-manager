@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCreateAlbum, useDeleteAlbum, useUpdateAlbum } from '@/lib/api/albums';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
@@ -10,11 +11,13 @@ import AlbumsContentView from './albums-content-view';
 const viewLogger = clientLogger.withContext('AlbumsView');
 
 export function AlbumsView(_props: ViewProps) {
+	const navigate = useNavigate();
 	const albumsRecord = useAlbumStore((s) => s.albums);
 	const isLoading = useAlbumStore((s) => s.isLoading);
 	const error = useAlbumStore((s) => s.error);
 	const loadAlbums = useAlbumStore((s) => s.loadAlbums);
 	const getSortedAlbums = useAlbumStore((s) => s.getSortedAlbums);
+	const setCurrentAlbumId = useAlbumStore((s) => s.setCurrentAlbumId);
 	const { mutate: createAlbum } = useCreateAlbum();
 	const { mutate: updateAlbum } = useUpdateAlbum();
 	const { mutate: deleteAlbum } = useDeleteAlbum();
@@ -31,10 +34,14 @@ export function AlbumsView(_props: ViewProps) {
 		}
 	}, [loadAlbums, albumsRecord]);
 
-	const handleAlbumClick = useCallback((album: AlbumWithStats) => {
-		viewLogger.info('🖱️ Click en álbum:', album.name);
-		// TODO: Lógica de navegación o apertura de visor aquí
-	}, []);
+	const handleAlbumClick = useCallback(
+		(album: AlbumWithStats) => {
+			viewLogger.info('🖱️ Click en álbum:', album.name);
+			setCurrentAlbumId(album.id);
+			navigate(`/albums/${album.id}`);
+		},
+		[navigate, setCurrentAlbumId]
+	);
 
 	const handleEditAlbum = useCallback((album: AlbumWithStats) => {
 		setEditingAlbum(album);

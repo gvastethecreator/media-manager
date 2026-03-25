@@ -9,7 +9,7 @@ import { Schema } from '@effect/schema';
 import { and, asc, count, desc, eq, inArray, isNotNull, like, or } from 'drizzle-orm';
 import { Context, Effect, Layer, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
-import { groupTags, images, imageTags, tags, videoTags } from '@/lib/drizzle/schema';
+import { groupTags, images, imageTags, tags, videos, videoTags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import {
@@ -38,6 +38,8 @@ const logger = serverLogger.withContext('TagService.Effect');
  * Interface para el servicio TagService
  */
 export interface TagServiceInterface {
+	readonly addToImage: (imageId: string, tagIds: string[]) => Effect.Effect<{ added: number }, TagError>;
+	readonly addToVideo: (videoId: string, tagIds: string[]) => Effect.Effect<{ added: number }, TagError>;
 	readonly create: (input: TagCreate) => Effect.Effect<TagWithStats, TagError>;
 	readonly delete: (id: string) => Effect.Effect<void, TagError>;
 	readonly getAll: (options?: GetTagsOptions) => Effect.Effect<GetTagsResult, TagError>;
@@ -125,6 +127,98 @@ const calculateTagStatistics = (tag: Tag, counts: TagCounts): TagStatistics => {
  * Implementación del servicio TagService
  */
 const make = (): TagServiceInterface => {
+	const addToImage = (imageId: string, tagIds: string[]): Effect.Effect<{ added: number }, TagError> =>
+		Effect.gen(function* () {
+			const uniqueTagIds = [...new Set(tagIds.filter(Boolean))];
+
+			if (uniqueTagIds.length === 0) {
+				return { added: 0 };
+			}
+
+			const imageResult = yield* Effect.tryPromise<Array<{ id: string }>, TagError>({
+				try: () => db.select({ id: images.id }).from(images).where(eq(images.id, imageId)).limit(1),
+				catch: (error) => fromUnknownError('addToImage.imageLookup', error),
+			});
+
+			if (imageResult.length === 0) {
+				return yield* Effect.fail(
+					new TagValidationError({ field: 'imageId', message: 'La imagen no existe', value: imageId })
+				);
+			}
+
+			yield* Effect.all(
+				uniqueTagIds.map((tagId) => getById(tagId)),
+				{ concurrency: 'unbounded' }
+			);
+
+			const existingRelations = yield* Effect.tryPromise<Array<{ tagId: string }>, TagError>({
+				try: () =>
+					db
+						.select({ tagId: imageTags.B })
+						.from(imageTags)
+						.where(and(eq(imageTags.A, imageId), inArray(imageTags.B, uniqueTagIds))),
+				catch: (error) => fromUnknownError('addToImage.existingRelations', error),
+			});
+
+			const existingTagIds = new Set(existingRelations.map((relation) => relation.tagId));
+			const missingTagIds = uniqueTagIds.filter((tagId) => !existingTagIds.has(tagId));
+
+			if (missingTagIds.length > 0) {
+				yield* Effect.tryPromise({
+					try: () => db.insert(imageTags).values(missingTagIds.map((tagId) => ({ A: imageId, B: tagId }))),
+					catch: (error) => fromUnknownError('addToImage.insert', error),
+				});
+			}
+
+			return { added: missingTagIds.length };
+		});
+
+	const addToVideo = (videoId: string, tagIds: string[]): Effect.Effect<{ added: number }, TagError> =>
+		Effect.gen(function* () {
+			const uniqueTagIds = [...new Set(tagIds.filter(Boolean))];
+
+			if (uniqueTagIds.length === 0) {
+				return { added: 0 };
+			}
+
+			const videoResult = yield* Effect.tryPromise<Array<{ id: string }>, TagError>({
+				try: () => db.select({ id: videos.id }).from(videos).where(eq(videos.id, videoId)).limit(1),
+				catch: (error) => fromUnknownError('addToVideo.videoLookup', error),
+			});
+
+			if (videoResult.length === 0) {
+				return yield* Effect.fail(
+					new TagValidationError({ field: 'videoId', message: 'El video no existe', value: videoId })
+				);
+			}
+
+			yield* Effect.all(
+				uniqueTagIds.map((tagId) => getById(tagId)),
+				{ concurrency: 'unbounded' }
+			);
+
+			const existingRelations = yield* Effect.tryPromise<Array<{ tagId: string }>, TagError>({
+				try: () =>
+					db
+						.select({ tagId: videoTags.B })
+						.from(videoTags)
+						.where(and(eq(videoTags.A, videoId), inArray(videoTags.B, uniqueTagIds))),
+				catch: (error) => fromUnknownError('addToVideo.existingRelations', error),
+			});
+
+			const existingTagIds = new Set(existingRelations.map((relation) => relation.tagId));
+			const missingTagIds = uniqueTagIds.filter((tagId) => !existingTagIds.has(tagId));
+
+			if (missingTagIds.length > 0) {
+				yield* Effect.tryPromise({
+					try: () => db.insert(videoTags).values(missingTagIds.map((tagId) => ({ A: videoId, B: tagId }))),
+					catch: (error) => fromUnknownError('addToVideo.insert', error),
+				});
+			}
+
+			return { added: missingTagIds.length };
+		});
+
 	/**
 	 * Obtiene un tag por su ID
 	 */
@@ -749,6 +843,8 @@ const make = (): TagServiceInterface => {
 
 	// Retornar la implementación del servicio
 	return {
+		addToImage,
+		addToVideo,
 		getById,
 		getByIdWithStats,
 		getAll,

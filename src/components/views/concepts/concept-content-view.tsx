@@ -1,5 +1,6 @@
 import { Lightbulb } from 'lucide-react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
@@ -14,10 +15,29 @@ import type { AnyEntityWithStats } from '@/types/entities';
 const viewLogger = clientLogger.withContext('ConceptContentView');
 
 export const ConceptContentView = memo(function ConceptContentView() {
+	const { id } = useParams<{ id: string }>();
 	const selectedConcept = useConceptStore(selectSelectedConcept);
+	const concepts = useConceptStore((state) => state.concepts);
+	const selectConcept = useConceptStore((state) => state.selectConcept);
+	const loadConcepts = useConceptStore((state) => state.loadConcepts);
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	const conceptId = selectedConcept?.id ?? null;
+	const routedConcept = id ? (concepts.find((concept) => concept.id === id) ?? null) : null;
+	const effectiveConcept = routedConcept ?? selectedConcept;
+	const conceptId = id || effectiveConcept?.id || null;
+
+	useEffect(() => {
+		if (id && routedConcept && routedConcept.id !== selectedConcept?.id) {
+			selectConcept(routedConcept);
+		}
+	}, [id, routedConcept, selectConcept, selectedConcept?.id]);
+
+	useEffect(() => {
+		if (id && !routedConcept) {
+			void loadConcepts();
+		}
+	}, [id, loadConcepts, routedConcept]);
+
 	const { data: images = [], isLoading, error } = useConceptImages(conceptId || '');
 	const browserItems = useMemo(
 		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
@@ -35,8 +55,8 @@ export const ConceptContentView = memo(function ConceptContentView() {
 	);
 
 	const headerTitle = useMemo(
-		() => (selectedConcept?.name ? `Imágenes del concepto: ${selectedConcept.name}` : 'Selecciona un concepto'),
-		[selectedConcept?.name]
+		() => (effectiveConcept?.name ? `Imágenes del concepto: ${effectiveConcept.name}` : 'Selecciona un concepto'),
+		[effectiveConcept?.name]
 	);
 
 	if (!conceptId) {

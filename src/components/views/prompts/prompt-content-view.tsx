@@ -1,5 +1,6 @@
 import { Terminal } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
@@ -14,10 +15,29 @@ import type { AnyEntityWithStats } from '@/types/entities';
 const viewLogger = clientLogger.withContext('PromptContentView');
 
 export function PromptContentView() {
+	const { id } = useParams<{ id: string }>();
 	const selectedPrompt = usePromptStore((state) => state.selectedPrompt);
+	const prompts = usePromptStore((state) => state.prompts);
+	const selectPrompt = usePromptStore((state) => state.selectPrompt);
+	const loadPrompts = usePromptStore((state) => state.loadPrompts);
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	const promptId = selectedPrompt?.id ?? null;
+	const routedPrompt = id ? (prompts.find((prompt) => prompt.id === id) ?? null) : null;
+	const effectivePrompt = routedPrompt ?? selectedPrompt;
+	const promptId = id || effectivePrompt?.id || null;
+
+	useEffect(() => {
+		if (id && routedPrompt && routedPrompt.id !== selectedPrompt?.id) {
+			selectPrompt(routedPrompt);
+		}
+	}, [id, routedPrompt, selectPrompt, selectedPrompt?.id]);
+
+	useEffect(() => {
+		if (id && !routedPrompt) {
+			void loadPrompts();
+		}
+	}, [id, loadPrompts, routedPrompt]);
+
 	const { data: images = [], isLoading, error } = usePromptImages(promptId || '');
 	const browserItems = useMemo(
 		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
@@ -35,8 +55,8 @@ export function PromptContentView() {
 	);
 
 	const headerTitle = useMemo(
-		() => (selectedPrompt?.name ? `Imágenes del prompt: ${selectedPrompt.name}` : 'Selecciona un prompt'),
-		[selectedPrompt?.name]
+		() => (effectivePrompt?.name ? `Imágenes del prompt: ${effectivePrompt.name}` : 'Selecciona un prompt'),
+		[effectivePrompt?.name]
 	);
 
 	if (!promptId) {

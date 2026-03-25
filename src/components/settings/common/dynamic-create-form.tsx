@@ -3,7 +3,7 @@
 // Muestra solo el campo nombre inicialmente y permite agregar campos opcionales uno a uno
 // ⚠️ No usar para carpetas (folders)
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,14 +18,30 @@ export interface FormField<T = unknown> {
 
 export interface DynamicCreateFormProps<T extends Record<string, any> = Record<string, any>> {
 	/**
+	 * Campos que deben mostrarse siempre, incluso si aún no fueron agregados manualmente.
+	 */
+	alwaysVisibleFields?: string[];
+	/**
+	 * Acción opcional para cancelar/cerrar el formulario.
+	 */
+	onCancel?: () => void;
+	/**
 	 * Función de submit (recibe los datos del formulario)
 	 */
 	onSubmit: (data: T & { name: string }) => Promise<void>;
+	/**
+	 * Datos iniciales para edición o para preconfigurar campos visibles.
+	 */
+	initialData?: Partial<T & { name: string }>;
 	/**
 	 * Lista de campos opcionales disponibles para la entidad (ej: emoji, color, categoría...)
 	 * Cada campo debe tener: name, label, render (función que retorna el campo JSX)
 	 */
 	optionalFields: FormField[];
+	/**
+	 * Validación adicional basada en todo el formulario.
+	 */
+	extraValidation?: (data: Partial<T & { name: string }>) => string | null;
 	/**
 	 * Texto del botón principal
 	 */
@@ -37,16 +53,42 @@ export interface DynamicCreateFormProps<T extends Record<string, any> = Record<s
 }
 
 export function DynamicCreateForm<T extends Record<string, any> = Record<string, any>>({
+	alwaysVisibleFields = [],
+	onCancel,
 	optionalFields,
 	onSubmit,
+	initialData,
+	extraValidation,
 	submitLabel = 'Crear',
 	validateName,
 }: DynamicCreateFormProps<T>) {
-	const [formData, setFormData] = useState<Record<string, any>>({ name: '' });
-	const [addedFields, setAddedFields] = useState<string[]>([]);
+	const normalizedInitialData = useMemo(() => ({ name: '', ...(initialData ?? {}) }), [initialData]);
+
+	const initialAddedFields = useMemo(() => {
+		const visibleFields = new Set(alwaysVisibleFields);
+
+		for (const field of optionalFields) {
+			const value = normalizedInitialData[field.name as keyof typeof normalizedInitialData];
+			if (value !== undefined && value !== null && value !== '') {
+				visibleFields.add(field.name);
+			}
+		}
+
+		return [...visibleFields];
+	}, [alwaysVisibleFields, normalizedInitialData, optionalFields]);
+
+	const [formData, setFormData] = useState<Record<string, any>>(normalizedInitialData);
+	const [addedFields, setAddedFields] = useState<string[]>(initialAddedFields);
 	const [selectedField, setSelectedField] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	useEffect(() => {
+		setFormData(normalizedInitialData);
+		setAddedFields(initialAddedFields);
+		setSelectedField('');
+		setError(null);
+	}, [initialAddedFields, normalizedInitialData]);
 
 	// Manejar cambio de nombre
 	const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,15 +115,19 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		const validationError = validateName ? validateName(formData.name) : null;
-		if (!formData.name || validationError) {
+		const extraValidationError = extraValidation ? extraValidation(formData as Partial<T & { name: string }>) : null;
+		if (!formData.name || validationError || extraValidationError) {
 			setError(validationError || 'El nombre es obligatorio');
+			if (extraValidationError) {
+				setError(extraValidationError);
+			}
 			return;
 		}
 		setIsSubmitting(true);
 		try {
 			await onSubmit(formData as T & { name: string });
 			setFormData({ name: '' });
-			setAddedFields([]);
+			setAddedFields(alwaysVisibleFields);
 			setError(null);
 		} catch (err: any) {
 			setError(err.message || 'Error al crear la entidad');
@@ -147,9 +193,16 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 				);
 			})}
 
-			<Button disabled={isSubmitting || !formData.name} type="submit">
-				{isSubmitting ? 'Guardando...' : submitLabel}
-			</Button>
+			<div className="flex justify-end gap-2">
+				{onCancel && (
+					<Button disabled={isSubmitting} onClick={onCancel} type="button" variant="outline">
+						Cancelar
+					</Button>
+				)}
+				<Button disabled={isSubmitting || !formData.name} type="submit">
+					{isSubmitting ? 'Guardando...' : submitLabel}
+				</Button>
+			</div>
 		</form>
 	);
 }

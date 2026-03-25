@@ -11,6 +11,7 @@ import express from 'express';
 import { db } from '@/lib/drizzle';
 import { videos } from '@/lib/drizzle/schema';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { VideoService, VideoServiceLive } from '@/services/video/video.service.effect';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
@@ -268,6 +269,20 @@ router.post('/:id/favorite', async (req, res) => {
 	}).pipe(Effect.provide(VideoServiceLive));
 
 	await runEffectForExpress(effect, res);
+});
+
+/**
+ * POST /videos/:id/tags - Agregar tags a un video
+ */
+router.post('/:id/tags', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const tagService = yield* TagService;
+		const tagIds = Array.isArray(req.body?.tagIds) ? req.body.tagIds : [];
+		const result = yield* tagService.addToVideo(req.params.id, tagIds);
+		return { success: true, added: result.added };
+	}).pipe(Effect.provide(TagServiceLive));
+
+	await runEffectForExpress(effect, res, { successStatus: 201 });
 });
 
 /**

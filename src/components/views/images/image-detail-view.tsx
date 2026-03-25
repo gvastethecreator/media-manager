@@ -19,10 +19,11 @@ export function ImageDetailView() {
 	const navigate = useNavigate();
 	const [image, setImage] = useState<ImageWithStats | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	// Store actions
-	const { getImage, fetchImage } = useImageStore();
+	const { getImage, fetchImage, updateImage } = useImageStore();
 	const { openViewer } = useImageViewer();
 
 	// Cargar la imagen
@@ -75,6 +76,42 @@ export function ImageDetailView() {
 		}
 	};
 
+	const handleDownload = () => {
+		if (!image) {
+			return;
+		}
+
+		const link = document.createElement('a');
+		link.href = `/api/images/${image.id}/content`;
+		link.download = image.name || `image-${image.id}`;
+		link.rel = 'noopener noreferrer';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		viewLogger.info('Descarga iniciada para imagen', { imageId: image.id, imageName: image.name });
+	};
+
+	const handleToggleFavorite = async () => {
+		if (!image || isFavoriteLoading) {
+			return;
+		}
+
+		try {
+			setIsFavoriteLoading(true);
+			const updatedImage = await updateImage(image.id, { isFavorite: !image.isFavorite });
+			if (updatedImage) {
+				setImage(updatedImage);
+			}
+		} catch (err) {
+			viewLogger.error('Error actualizando favorito de imagen', {
+				imageId: image.id,
+				error: err instanceof Error ? err.message : err,
+			});
+		} finally {
+			setIsFavoriteLoading(false);
+		}
+	};
+
 	// Controles del header
 	const headerControls = (
 		<div className="flex items-center gap-2">
@@ -90,30 +127,20 @@ export function ImageDetailView() {
 						Visor
 					</Button>
 
-					<Button
-						className="gap-2"
-						onClick={() => {
-							// TODO: Implementar descarga
-							viewLogger.info('Descarga solicitada para imagen:', image.name);
-						}}
-						size="sm"
-						variant="outline"
-					>
+					<Button className="gap-2" onClick={handleDownload} size="sm" variant="outline">
 						<Download className="h-4 w-4" />
 						Descargar
 					</Button>
 
 					<Button
 						className="gap-2"
-						onClick={() => {
-							// TODO: Implementar favoritos
-							viewLogger.info('Favorito toggleado para imagen:', image.name);
-						}}
+						disabled={isFavoriteLoading}
+						onClick={handleToggleFavorite}
 						size="sm"
-						variant="outline"
+						variant={image.isFavorite ? 'default' : 'outline'}
 					>
-						<Heart className="h-4 w-4" />
-						Favorito
+						<Heart className={`h-4 w-4 ${image.isFavorite ? 'fill-current' : ''}`} />
+						{image.isFavorite ? 'En favoritos' : 'Favorito'}
 					</Button>
 				</>
 			)}

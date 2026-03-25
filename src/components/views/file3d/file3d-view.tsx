@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
 import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
@@ -9,6 +10,7 @@ import type { ViewProps } from '../types';
 const logger = clientLogger.withContext('File3DView');
 
 export default function File3DView(_props: ViewProps) {
+	const navigate = useNavigate();
 	const file3Ds = useFile3DStore((s) => s.file3Ds);
 	const loading = useFile3DStore((s) => s.loading);
 	const error = useFile3DStore((s) => s.error);
@@ -34,10 +36,13 @@ export default function File3DView(_props: ViewProps) {
 		logger.info('Click en 3D', { id: item.id, name: item.name });
 	}, []);
 
-	const handleDoubleClick = useCallback((item: BrowserItem) => {
-		logger.info('Doble click en 3D', { id: item.id, name: item.name });
-		// TODO: Abrir visor 3D específico o mostrar información del modelo
-	}, []);
+	const handleDoubleClick = useCallback(
+		(item: BrowserItem) => {
+			logger.info('Doble click en 3D', { id: item.id, name: item.name });
+			navigate(`/file3d/${item.id}`);
+		},
+		[navigate]
+	);
 
 	if (loading && count === 0) {
 		return <LoadingScreen message="Cargando archivos 3D..." />;

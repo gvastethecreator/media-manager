@@ -1,5 +1,6 @@
 import { Album } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
@@ -14,11 +15,27 @@ import type { AnyEntityWithStats } from '@/types/entities';
 const viewLogger = clientLogger.withContext('AlbumContentView');
 
 export function AlbumContentView() {
+	const { id } = useParams<{ id: string }>();
 	const currentAlbumId = useAlbumStore((state) => state.currentAlbumId);
-	const album = useAlbumStore((state) => (currentAlbumId ? state.albums[currentAlbumId] : null));
+	const setCurrentAlbumId = useAlbumStore((state) => state.setCurrentAlbumId);
+	const loadAlbums = useAlbumStore((state) => state.loadAlbums);
+	const effectiveAlbumId = id || currentAlbumId;
+	const album = useAlbumStore((state) => (effectiveAlbumId ? state.albums[effectiveAlbumId] : null));
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	const { data: images = [], isLoading, error } = useAlbumImages(currentAlbumId || '');
+	useEffect(() => {
+		if (id && id !== currentAlbumId) {
+			setCurrentAlbumId(id);
+		}
+	}, [currentAlbumId, id, setCurrentAlbumId]);
+
+	useEffect(() => {
+		if (effectiveAlbumId && !album) {
+			void loadAlbums();
+		}
+	}, [album, effectiveAlbumId, loadAlbums]);
+
+	const { data: images = [], isLoading, error } = useAlbumImages(effectiveAlbumId || '');
 	const browserItems = useMemo(
 		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
 		[images]
@@ -39,7 +56,7 @@ export function AlbumContentView() {
 		[album?.name]
 	);
 
-	if (!currentAlbumId) {
+	if (!effectiveAlbumId) {
 		return (
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
