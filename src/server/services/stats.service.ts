@@ -27,10 +27,17 @@ import {
 	worldItems,
 } from '@/lib/drizzle/schema/index';
 import { revalidatePath } from '@/lib/server/revalidate';
+import { getRealSystemMetrics } from '@/server/utils/system-metrics';
 import { createStatsError, StatsErrorCode, statsLogger } from './stats';
 
 // Interfaces
 export interface GeneralStats {
+	averageFileSize?: number;
+	cpuCores?: number;
+	cpuModel?: string;
+	cpuUsage?: number;
+	databaseSize?: number;
+	formattedDatabaseSize?: string;
 	diskUsage?: {
 		total: number;
 		used: number;
@@ -38,6 +45,8 @@ export interface GeneralStats {
 		usedPercentage: number;
 	};
 	freeSpace?: number;
+	hostname?: string;
+	lastUpdated?: string;
 	recentActivity: Array<{
 		id: string;
 		type: string;
@@ -82,6 +91,15 @@ export interface GeneralStats {
 	totalWorldItems: number;
 	// Información de espacio
 	usedSpace?: number;
+	memoryFree?: number;
+	memoryTotal?: number;
+	memoryUsage?: number;
+	memoryUsed?: number;
+	nodeVersion?: string;
+	platform?: string;
+	storageAvailable?: number;
+	storageUsed?: number;
+	uptime?: number;
 }
 
 export interface StatsResponse {
@@ -286,18 +304,36 @@ function buildDiskUsage(totalFileSize: number) {
 	} as const;
 }
 
+function formatBytes(bytes: number): string {
+	if (bytes <= 0) {
+		return '0 B';
+	}
+
+	const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+	let value = bytes;
+	let unitIndex = 0;
+
+	while (value >= 1024 && unitIndex < units.length - 1) {
+		value /= 1024;
+		unitIndex++;
+	}
+
+	return `${value >= 10 ? Math.round(value) : Math.round(value * 10) / 10} ${units[unitIndex]}`;
+}
+
 // Funciones exportadas
 export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 	statsLogger.info('📊 Obteniendo estadísticas del sistema CON 22 ENTIDADES');
 
 	try {
 		// Obtener conteos por dominio y tamaños usando helpers (menor complejidad)
-		const [media, org, world, system, sizes] = await Promise.all([
+		const [media, org, world, system, sizes, realMetrics] = await Promise.all([
 			fetchMediaCounts(),
 			fetchOrgCounts(),
 			fetchWorldCounts(),
 			fetchSystemCounts(),
 			fetchSizeSums(),
+			getRealSystemMetrics(),
 		]);
 
 		// Calcular información de disco (aproximada basada en el total de archivos)
@@ -307,6 +343,33 @@ export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 			sizes.totalDocumentSize +
 			sizes.totalJsonSize +
 			sizes.totalFile3DSize;
+
+		const totalTrackedItems =
+			media.images + media.videos + media.audios + media.documents + media.jsonFiles + media.file3Ds;
+
+		const databaseSize =
+			(media.images +
+				media.videos +
+				media.audios +
+				media.documents +
+				media.jsonFiles +
+				media.file3Ds +
+				org.folders +
+				org.albums +
+				org.collections +
+				org.tags +
+				org.favorites +
+				world.characters +
+				world.places +
+				world.worldItems +
+				world.concepts +
+				world.prompts +
+				world.notes +
+				world.properties +
+				world.wildcards +
+				system.thumbnails +
+				system.metadatas) *
+			512;
 
 		const result = {
 			// Archivos multimedia
@@ -344,8 +407,32 @@ export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 
 			// Información de espacio
 			usedSpace: totalFileSize,
-			freeSpace: 0, // TODO: Calcular espacio libre real del disco
-			diskUsage: buildDiskUsage(totalFileSize),
+			freeSpace: realMetrics?.disk?.available ?? 0,
+			storageUsed: realMetrics?.disk?.used ?? totalFileSize,
+			storageAvailable: realMetrics?.disk?.available ?? 0,
+			diskUsage: realMetrics?.disk
+				? {
+						total: realMetrics.disk.total,
+						used: realMetrics.disk.used,
+						free: realMetrics.disk.available,
+						usedPercentage: realMetrics.disk.usagePercentage,
+					}
+				: buildDiskUsage(totalFileSize),
+			databaseSize,
+			formattedDatabaseSize: formatBytes(databaseSize),
+			averageFileSize: totalTrackedItems > 0 ? Math.round(totalFileSize / totalTrackedItems) : 0,
+			cpuUsage: realMetrics?.cpu?.usage ?? 0,
+			cpuCores: realMetrics?.cpu?.cores,
+			cpuModel: realMetrics?.cpu?.model,
+			memoryUsage: realMetrics?.memory?.usagePercentage ?? 0,
+			memoryTotal: realMetrics?.memory?.total ?? 0,
+			memoryUsed: realMetrics?.memory?.used ?? 0,
+			memoryFree: realMetrics?.memory?.free ?? 0,
+			nodeVersion: process.version,
+			platform: realMetrics?.os?.platform ?? process.platform,
+			hostname: realMetrics?.os?.hostname,
+			uptime: realMetrics?.os?.uptime ?? 0,
+			lastUpdated: new Date().toISOString(),
 
 			topTags: [],
 			recentActivity: [],

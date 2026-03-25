@@ -64,6 +64,9 @@ const PromptsView = lazy(() =>
 const PropertiesView = lazy(() =>
 	import('@/components/views/properties/properties-view').then((m) => ({ default: m.PropertiesView }))
 );
+const PropertyContentView = lazy(() =>
+	import('@/components/views/properties/property-content-view').then((m) => ({ default: m.PropertyContentView }))
+);
 const SearchView = lazy(() => import('@/components/views/search/search-view').then((m) => ({ default: m.SearchView })));
 const TagContentView = lazy(() =>
 	import('@/components/views/tags/tag-content-view').then((m) => ({ default: m.TagContentView }))
@@ -344,6 +347,10 @@ export const router = createBrowserRouter([
 			{
 				path: 'properties',
 				element: <PropertiesView className="h-full" />,
+			},
+			{
+				path: 'properties/:id',
+				element: <PropertyContentView />,
 			},
 			{
 				path: 'search',

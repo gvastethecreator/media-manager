@@ -1,5 +1,6 @@
 import { Tag } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
@@ -15,10 +16,28 @@ import type { AnyEntityWithStats } from '@/types/entities';
  * 🏷️ Vista de contenido de etiquetas (refactor a FileBrowser)
  */
 export function TagContentView() {
+	const { id } = useParams<{ id: string }>();
 	const selectedId = useTagStore((state) => state.selectedId);
+	const selectTag = useTagStore((state) => state.selectTag);
+	const loadTags = useTagStore((state) => state.loadTags);
+	const effectiveTagId = id || selectedId;
 	const selectedTag = useSelectedTag();
+	const routedTag = useTagStore((state) => (effectiveTagId ? state.getTagById(effectiveTagId) : null));
+	const effectiveTag = routedTag ?? selectedTag;
 
-	const { data: images = [], isLoading, error, refetch } = useTagImages(selectedId || '');
+	useEffect(() => {
+		if (id && id !== selectedId) {
+			selectTag(id);
+		}
+	}, [id, selectTag, selectedId]);
+
+	useEffect(() => {
+		if (effectiveTagId && !routedTag) {
+			void loadTags();
+		}
+	}, [effectiveTagId, loadTags, routedTag]);
+
+	const { data: images = [], isLoading, error } = useTagImages(effectiveTagId || '');
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 	const browserItems = useMemo(
 		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
@@ -40,7 +59,7 @@ export function TagContentView() {
 		[selectedTag?.name]
 	);
 
-	if (!selectedId) {
+	if (!effectiveTagId) {
 		return (
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
@@ -72,8 +91,8 @@ export function TagContentView() {
 
 	return (
 		<BaseContentView
-			description={selectedTag?._count?.images ? `${selectedTag._count.images} imágenes` : undefined}
-			title={headerTitle}
+			description={effectiveTag?._count?.images ? `${effectiveTag._count.images} imágenes` : undefined}
+			title={effectiveTag?.name ? `Imágenes con etiqueta: ${effectiveTag.name}` : headerTitle}
 		>
 			<FileBrowser
 				className="h-full"

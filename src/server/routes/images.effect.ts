@@ -9,6 +9,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { ImageService, ImageServiceLive } from '@/services/image/image.service.effect';
+import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 
 const router = express.Router();
@@ -196,6 +197,20 @@ router.post('/:id/favorite', async (req, res) => {
 	}).pipe(Effect.provide(ImageServiceLive));
 
 	await runEffectForExpress(effect, res);
+});
+
+/**
+ * POST /images/:id/tags - Agregar tags a una imagen
+ */
+router.post('/:id/tags', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const tagService = yield* TagService;
+		const tagIds = Array.isArray(req.body?.tagIds) ? req.body.tagIds : [];
+		const result = yield* tagService.addToImage(req.params.id, tagIds);
+		return { success: true, added: result.added };
+	}).pipe(Effect.provide(TagServiceLive));
+
+	await runEffectForExpress(effect, res, { successStatus: 201 });
 });
 
 /**

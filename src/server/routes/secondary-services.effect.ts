@@ -66,6 +66,14 @@ groupsEffectRouter.post('/:id/favorite', async (req, res) => {
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res);
 });
+groupsEffectRouter.post('/:id/images/:imageId', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* GroupService;
+		yield* service.addImage(req.params.id, req.params.imageId);
+		return { success: true };
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res, { successStatus: 201 });
+});
 
 // Wildcards
 const wildcardsEffectRouter = express.Router();
@@ -111,6 +119,14 @@ wildcardsEffectRouter.post('/:id/favorite', async (req, res) => {
 		return yield* service.toggleFavorite(req.params.id);
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res);
+});
+wildcardsEffectRouter.post('/:id/images/:imageId', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* WildcardService;
+		yield* service.addImage(req.params.id, req.params.imageId);
+		return { success: true };
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res, { successStatus: 201 });
 });
 
 // Notes
@@ -158,6 +174,14 @@ notesEffectRouter.get('/:id/images', async (req, res) => {
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res);
 });
+notesEffectRouter.post('/:id/images/:imageId', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* NoteService;
+		yield* service.addImage(req.params.id, req.params.imageId);
+		return { success: true };
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 201 });
+});
 
 // Properties
 const propertiesEffectRouter = express.Router();
@@ -197,6 +221,14 @@ propertiesEffectRouter.delete('/:id', async (req, res) => {
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res, { successStatus: 204 });
 });
+propertiesEffectRouter.post('/:id/images/:imageId', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* PropertyService;
+		yield* service.addImage(req.params.id, req.params.imageId);
+		return { success: true };
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res, { successStatus: 201 });
+});
 
 // World Items
 const worldItemsEffectRouter = express.Router();
@@ -235,6 +267,14 @@ worldItemsEffectRouter.delete('/:id', async (req, res) => {
 		return { success: true };
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res, { successStatus: 204 });
+});
+worldItemsEffectRouter.post('/:id/images/:imageId', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* WorldItemService;
+		yield* service.addImage(req.params.id, req.params.imageId);
+		return { success: true };
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res, { successStatus: 201 });
 });
 
 export { groupsEffectRouter, wildcardsEffectRouter, notesEffectRouter, propertiesEffectRouter, worldItemsEffectRouter };

@@ -18,6 +18,14 @@ export async function getJsonFilesFromApi(): Promise<JsonFileWithStats[]> {
 	return (payload?.data as JsonFileWithStats[]) || [];
 }
 
+export async function getJsonFileFromApi(id: string): Promise<JsonFileWithStats> {
+	const response = await fetch(`${API_BASE_PATH}/${id}`);
+	if (!response.ok) {
+		throw new Error('Error al obtener archivo JSON');
+	}
+	return response.json();
+}
+
 export async function createJsonFileInApi(data: JsonFileCreateInput): Promise<JsonFileWithStats> {
 	const response = await fetch(API_BASE_PATH, {
 		method: 'POST',

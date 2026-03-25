@@ -135,6 +135,19 @@ export function CreateConceptForm({
 
 	const optionalFields = [
 		{
+			name: 'content',
+			label: 'Contenido',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					className="w-full resize-none rounded border border-input bg-background p-2 text-foreground text-xs"
+					onChange={(e) => onChange(e.target.value)}
+					placeholder="Contenido del concepto..."
+					rows={4}
+					value={value || ''}
+				/>
+			),
+		},
+		{
 			name: 'emoji',
 			label: 'Emoji',
 			render: ({ value, onChange }: any) => (
@@ -164,6 +177,16 @@ export function CreateConceptForm({
 
 	return (
 		<DynamicCreateForm
+			initialData={{
+				name: concept?.name || '',
+				content: concept?.content || '',
+				description: concept?.description || '',
+				color: concept?.color || DEFAULT_ENTITY_COLOR,
+				emoji: concept?.emoji || '💡',
+				category: concept?.category || 'general',
+				isFavorite: concept?.isFavorite || false,
+			}}
+			onCancel={_onCancel}
 			onSubmit={_onSubmit}
 			optionalFields={optionalFields}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear concepto'}

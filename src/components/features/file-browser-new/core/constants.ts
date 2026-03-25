@@ -36,7 +36,7 @@ export const DEFAULT_SORT_OPTIONS: SortOption[] = [{ field: 'createdAt', directi
 export const DEFAULT_INFINITE_SCROLL: InfiniteScrollOptions = {
 	enabled: true,
 	threshold: 300,
-	autoLoad: false,
+	autoLoad: true,
 	cooldownMs: 300,
 };
 

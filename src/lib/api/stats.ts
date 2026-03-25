@@ -3,6 +3,11 @@ import { apiClient } from './client';
 
 export interface GeneralStats {
 	averageFileSize: number;
+	cpuCores?: number;
+	cpuModel?: string;
+	cpuUsage?: number;
+	databaseSize?: number;
+	formattedDatabaseSize?: string;
 	diskUsage?: {
 		total: number;
 		used: number;
@@ -10,7 +15,15 @@ export interface GeneralStats {
 		usedPercentage: number;
 	};
 	freeSpace?: number;
+	hostname?: string;
+	memoryFree?: number;
+	memoryTotal?: number;
+	memoryUsage?: number;
+	memoryUsed?: number;
+	nodeVersion?: string;
+	platform?: string;
 	// Estadísticas calculadas
+	storageAvailable?: number;
 	storageUsed: number;
 	totalActivities: number;
 	totalAlbums: number;
@@ -35,6 +48,7 @@ export interface GeneralStats {
 	totalWildcards: number;
 	totalWorkflows: number;
 	totalWorldItems: number;
+	uptime?: number;
 	// Información de espacio
 	usedSpace?: number;
 }

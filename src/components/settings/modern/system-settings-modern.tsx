@@ -43,6 +43,43 @@ import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
 
+function formatBytes(bytes: number): string {
+	if (!bytes || bytes <= 0) {
+		return '0 B';
+	}
+
+	const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+	let value = bytes;
+	let unitIndex = 0;
+
+	while (value >= 1024 && unitIndex < units.length - 1) {
+		value /= 1024;
+		unitIndex++;
+	}
+
+	return `${value >= 10 ? Math.round(value) : Math.round(value * 10) / 10} ${units[unitIndex]}`;
+}
+
+function formatUptime(seconds?: number): string {
+	if (!seconds || seconds <= 0) {
+		return 'N/A';
+	}
+
+	const days = Math.floor(seconds / 86_400);
+	const hours = Math.floor((seconds % 86_400) / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+
+	if (days > 0) {
+		return `${days}d ${hours}h ${minutes}m`;
+	}
+
+	if (hours > 0) {
+		return `${hours}h ${minutes}m`;
+	}
+
+	return `${minutes}m`;
+}
+
 export function SystemSettingsModern() {
 	const [autoRefresh, setAutoRefresh] = useState(true);
 	const [logLevel, setLogLevel] = useState('info');
@@ -65,22 +102,58 @@ export function SystemSettingsModern() {
 	const repairSystemMutation = useRepairSystem();
 	const resetDatabaseMutation = useResetDatabase();
 
+	useEffect(() => {
+		if (!autoRefresh) {
+			return;
+		}
+
+		const intervalId = window.setInterval(() => {
+			void refetch();
+		}, 30_000);
+
+		return () => window.clearInterval(intervalId);
+	}, [autoRefresh, refetch]);
+
 	// Helper to extract stats safely
+	const diskTotal = rawStats?.diskUsage?.total || (rawStats?.storageUsed || 0) + (rawStats?.storageAvailable || 0);
+	const diskUsed = rawStats?.diskUsage?.used ?? rawStats?.storageUsed ?? 0;
+	const diskFree = rawStats?.diskUsage?.free ?? rawStats?.storageAvailable ?? 0;
+	const diskUsagePercentage = rawStats?.diskUsage?.usedPercentage ?? (diskTotal > 0 ? (diskUsed / diskTotal) * 100 : 0);
 	const stats = {
-		cpuUsage: 0, // Not provided by current API
-		memoryUsage: 0, // Not provided by current API
+		cpuUsage: rawStats?.cpuUsage || 0,
+		memoryUsage: rawStats?.memoryUsage || 0,
 		dbSize: rawStats?.formattedDatabaseSize || '0 B',
-		dbSizeRaw: rawStats?.databaseSize || 0,
+		dbSizeRaw: rawStats?.databaseSize || rawStats?.dbSize || 0,
 		totalEntities:
 			(rawStats?.totalImages || 0) +
 			(rawStats?.totalVideos || 0) +
 			(rawStats?.totalAudio || 0) +
-			(rawStats?.totalFolders || 0),
-		storageUsed: rawStats?.storageUsed || 0,
-		storageAvailable: rawStats?.storageAvailable || 0,
-		totalTables: 0, // Not provided by API explicitly
-		uptime: 'N/A', // Not provided
+			(rawStats?.totalDocuments || 0) +
+			(rawStats?.totalJsonFiles || 0) +
+			(rawStats?.totalFile3D || 0) +
+			(rawStats?.totalFolders || 0) +
+			(rawStats?.totalAlbums || 0) +
+			(rawStats?.totalCollections || 0) +
+			(rawStats?.totalTags || 0) +
+			(rawStats?.totalCharacters || 0) +
+			(rawStats?.totalPlaces || 0) +
+			(rawStats?.totalConcepts || 0) +
+			(rawStats?.totalPrompts || 0) +
+			(rawStats?.totalNotes || 0) +
+			(rawStats?.totalProperties || 0) +
+			(rawStats?.totalWildcards || 0) +
+			(rawStats?.totalWorldItems || 0),
+		storageUsed: diskUsed,
+		storageAvailable: diskFree,
+		totalTables: rawStats?.totalMetadata || 0,
+		uptime: formatUptime(rawStats?.uptime),
 		version: versionData?.version || '2.4.1',
+		platform: rawStats?.platform || 'N/A',
+		hostname: rawStats?.hostname || 'N/A',
+		nodeVersion: rawStats?.nodeVersion || 'N/A',
+		memoryUsed: formatBytes(rawStats?.memoryUsed || 0),
+		memoryTotal: formatBytes(rawStats?.memoryTotal || 0),
+		cpuModel: rawStats?.cpuModel || 'N/A',
 	};
 
 	const handleRefresh = async () => {
@@ -145,21 +218,13 @@ export function SystemSettingsModern() {
 					<CardContent>
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
-								<span className="font-bold text-3xl text-foreground">
-									{rawStats
-										? Math.round((rawStats.storageUsed / (rawStats.storageUsed + rawStats.storageAvailable || 1)) * 100)
-										: 0}
-									%
-								</span>
+								<span className="font-bold text-3xl text-foreground">{Math.round(diskUsagePercentage)}%</span>
 								<span className="text-muted-foreground text-sm">en uso</span>
 							</div>
-							<Progress
-								className="h-2"
-								value={
-									rawStats ? (rawStats.storageUsed / (rawStats.storageUsed + rawStats.storageAvailable || 1)) * 100 : 0
-								}
-							/>
-							<p className="text-muted-foreground text-xs uppercase tracking-tight">System Drive</p>
+							<Progress className="h-2" value={diskUsagePercentage} />
+							<p className="text-muted-foreground text-xs uppercase tracking-tight">
+								{formatBytes(diskUsed)} usados • {formatBytes(diskFree)} libres
+							</p>
 						</div>
 					</CardContent>
 				</Card>
@@ -366,6 +431,28 @@ export function SystemSettingsModern() {
 					<div className="space-y-4">
 						<SettingsRow label="Versión">
 							<Badge variant="outline">{stats.version}</Badge>
+						</SettingsRow>
+						<SettingsRow label="Sistema operativo">
+							<Badge variant="outline">{stats.platform}</Badge>
+						</SettingsRow>
+						<SettingsRow label="Host">
+							<span className="text-muted-foreground text-sm">{stats.hostname}</span>
+						</SettingsRow>
+						<SettingsRow label="Node/Bun runtime">
+							<span className="text-muted-foreground text-sm">{stats.nodeVersion}</span>
+						</SettingsRow>
+						<SettingsRow label="CPU actual">
+							<span className="text-muted-foreground text-sm">
+								{stats.cpuUsage}% • {stats.cpuModel}
+							</span>
+						</SettingsRow>
+						<SettingsRow label="Memoria">
+							<span className="text-muted-foreground text-sm">
+								{stats.memoryUsed} / {stats.memoryTotal} ({stats.memoryUsage}%)
+							</span>
+						</SettingsRow>
+						<SettingsRow label="Uptime">
+							<span className="text-muted-foreground text-sm">{stats.uptime}</span>
 						</SettingsRow>
 					</div>
 				</SettingsCard>

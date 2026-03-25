@@ -11,6 +11,7 @@ import { devtools } from 'zustand/middleware';
 import {
 	createFile3DInApi,
 	deleteFile3DFromApi,
+	getFile3DFromApi,
 	getFile3DsFromApi,
 	updateFile3DInApi,
 } from '@/lib/api/client/file3d.client';
@@ -33,6 +34,7 @@ export interface File3DState {
 	error: string | null;
 
 	// Acciones de datos
+	fetchFile3D: (id: string) => Promise<File3DWithStats | undefined>;
 	fetchFile3Ds: () => Promise<void>;
 	// Estado de datos
 	file3Ds: File3DWithStats[];
@@ -73,6 +75,24 @@ const useFile3DStoreBase = create<File3DState>()(
 					set({ file3Ds, loading: false });
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
+				}
+			},
+
+			fetchFile3D: async (id: string) => {
+				set({ loading: true, error: null });
+				try {
+					const file3D = await getFile3DFromApi(id);
+					set((state) => ({
+						file3Ds: state.file3Ds.some((item) => item.id === id)
+							? state.file3Ds.map((item) => (item.id === id ? file3D : item))
+							: [...state.file3Ds, file3D],
+						currentFile3D: file3D,
+						loading: false,
+					}));
+					return file3D;
+				} catch (error) {
+					set({ error: (error as Error).message, loading: false });
+					return;
 				}
 			},
 

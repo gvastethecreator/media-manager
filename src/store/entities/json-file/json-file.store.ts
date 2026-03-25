@@ -13,6 +13,7 @@ import { devtools } from 'zustand/middleware';
 import {
 	createJsonFileInApi,
 	deleteJsonFileFromApi,
+	getJsonFileFromApi,
 	getJsonFilesFromApi,
 	updateJsonFileInApi,
 } from '@/lib/api/client/json-file.client';
@@ -35,6 +36,7 @@ export interface JsonFileState {
 	error: string | null;
 
 	// Acciones de datos
+	fetchJsonFile: (id: string) => Promise<JsonFileWithStats | undefined>;
 	fetchJsonFiles: () => Promise<void>;
 	filters: JsonFileFilters;
 
@@ -76,6 +78,24 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 					set({ jsonFiles, loading: false });
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
+				}
+			},
+
+			fetchJsonFile: async (id: string) => {
+				set({ loading: true, error: null });
+				try {
+					const jsonFile = await getJsonFileFromApi(id);
+					set((state) => ({
+						jsonFiles: state.jsonFiles.some((item) => item.id === id)
+							? state.jsonFiles.map((item) => (item.id === id ? jsonFile : item))
+							: [...state.jsonFiles, jsonFile],
+						currentJsonFile: jsonFile,
+						loading: false,
+					}));
+					return jsonFile;
+				} catch (error) {
+					set({ error: (error as Error).message, loading: false });
+					return;
 				}
 			},
 
@@ -160,7 +180,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			},
 
 			getSortedJsonFiles: () => {
-				return get().jsonFiles.sort((a, b) => {
+				return [...get().jsonFiles].sort((a, b) => {
 					// Ordenar por nombre alfabéticamente
 					return a.name.localeCompare(b.name);
 				});

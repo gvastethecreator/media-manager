@@ -1,11 +1,12 @@
 import { Library } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
 import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { BaseContentView } from '@/components/views/base/base-content-view';
-import { useCollectionImages } from '@/lib/api/collections';
+import { useCollection, useCollectionImages } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useCollectionStore } from '@/store/entities/collection';
@@ -14,12 +15,30 @@ import type { AnyEntityWithStats } from '@/types/entities';
 const logger = clientLogger.withContext('CollectionContentView');
 
 export function CollectionContentView() {
-	const { selectedCollectionId, getSelectedCollection, selectCollection, isLoading } = useCollectionStore();
+	const { id } = useParams<{ id: string }>();
+	const { selectedCollectionId, getSelectedCollection, getCollectionById, selectCollection, isLoading } =
+		useCollectionStore();
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
+	const effectiveCollectionId = id || selectedCollectionId;
+	const { data: collectionFromRoute, isLoading: isLoadingCollection } = useCollection(id || '');
 
-	const currentCollection = getSelectedCollection();
+	const currentCollection = effectiveCollectionId
+		? ((id ? collectionFromRoute : undefined) ?? getCollectionById(effectiveCollectionId) ?? getSelectedCollection())
+		: getSelectedCollection();
 
-	const { data: images = [], isLoading: isLoadingImages, error } = useCollectionImages(selectedCollectionId || '');
+	useEffect(() => {
+		if (id && id !== selectedCollectionId) {
+			selectCollection(id);
+		}
+	}, [id, selectCollection, selectedCollectionId]);
+
+	useEffect(() => {
+		if (id && collectionFromRoute && id !== selectedCollectionId) {
+			selectCollection(id);
+		}
+	}, [collectionFromRoute, id, selectCollection, selectedCollectionId]);
+
+	const { data: images = [], isLoading: isLoadingImages, error } = useCollectionImages(effectiveCollectionId || '');
 	const browserItems = useMemo(
 		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
 		[images]
@@ -41,7 +60,7 @@ export function CollectionContentView() {
 		[currentCollection?.name]
 	);
 
-	if (!selectedCollectionId) {
+	if (!effectiveCollectionId) {
 		return (
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
@@ -63,7 +82,7 @@ export function CollectionContentView() {
 		);
 	}
 
-	if ((isLoading || isLoadingImages) && images.length === 0) {
+	if ((isLoading || isLoadingCollection || isLoadingImages) && images.length === 0) {
 		return (
 			<BaseContentView title={headerTitle}>
 				<LoadingScreen />

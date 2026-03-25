@@ -5,6 +5,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { clientLogger } from '@/lib/logger/client-logger';
 
@@ -35,8 +36,13 @@ export function useFavorite(options: UseFavoriteOptions): UseFavoriteResult {
 	const { entityId, entityType, initialIsFavorite = false } = options;
 	const queryClient = useQueryClient();
 	const { toast } = useToast();
+	const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
 
-	const mutation = useMutation({
+	useEffect(() => {
+		setIsFavorite(initialIsFavorite);
+	}, [entityId, initialIsFavorite]);
+
+	const mutation = useMutation<unknown, Error, boolean, { previousState: boolean }>({
 		mutationFn: async (newState: boolean) => {
 			const response = await fetch('/api/favorites/toggle', {
 				method: 'POST',
@@ -54,6 +60,11 @@ export function useFavorite(options: UseFavoriteOptions): UseFavoriteResult {
 
 			return response.json();
 		},
+		onMutate: async (newState) => {
+			const previousState = isFavorite;
+			setIsFavorite(newState);
+			return { previousState };
+		},
 		onSuccess: (_, newState) => {
 			// Invalidar queries relacionadas
 			queryClient.invalidateQueries({ queryKey: ['favorites'] });
@@ -66,7 +77,8 @@ export function useFavorite(options: UseFavoriteOptions): UseFavoriteResult {
 					: 'La imagen ha sido removida de tus favoritos',
 			});
 		},
-		onError: (error) => {
+		onError: (error, _newState, context) => {
+			setIsFavorite(context?.previousState ?? initialIsFavorite);
 			clientLogger.error('Error al toggle favorito:', error);
 			toast({
 				variant: 'destructive',
@@ -77,12 +89,12 @@ export function useFavorite(options: UseFavoriteOptions): UseFavoriteResult {
 	});
 
 	const toggleFavorite = () => {
-		const newState = !initialIsFavorite;
+		const newState = !isFavorite;
 		mutation.mutate(newState);
 	};
 
 	return {
-		isFavorite: initialIsFavorite,
+		isFavorite,
 		toggleFavorite,
 		isLoading: mutation.isPending,
 		error: mutation.error,

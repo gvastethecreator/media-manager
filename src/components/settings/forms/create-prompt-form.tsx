@@ -138,6 +138,19 @@ export function CreatePromptForm({
 
 	const optionalFields = [
 		{
+			name: 'content',
+			label: 'Contenido',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					className="w-full resize-none rounded border border-input bg-background p-2 text-foreground text-xs"
+					onChange={(e) => onChange(e.target.value)}
+					placeholder="Contenido del prompt..."
+					rows={5}
+					value={value || ''}
+				/>
+			),
+		},
+		{
 			name: 'emoji',
 			label: 'Emoji',
 			render: ({ value, onChange }: any) => <EmojiPicker onEmojiSelect={onChange} value={value} />,
@@ -196,19 +209,27 @@ export function CreatePromptForm({
 
 	return (
 		<DynamicCreateForm
-			onSubmit={async (data) => {
-				try {
-					if (isEditing && prompt) {
-						const updated = await updatePromptMutation.mutateAsync({ id: prompt.id, data });
-						onUpdated?.(updated as PromptBase);
-					} else {
-						const created = await createPromptMutation.mutateAsync(data);
-						onCreated?.(created as PromptBase);
-					}
-				} catch (error) {
-					clientLogger.error('Error al procesar el prompt:', error);
+			alwaysVisibleFields={['content']}
+			extraValidation={(data) => {
+				if (!data.content || String(data.content).trim().length === 0) {
+					return 'El contenido es obligatorio';
 				}
+
+				return null;
 			}}
+			initialData={{
+				name: prompt?.name || '',
+				content: prompt?.content || '',
+				description: prompt?.description || '',
+				color: prompt?.color || DEFAULT_ENTITY_COLOR,
+				emoji: prompt?.emoji || '💬',
+				category: prompt?.category,
+				model: prompt?.model,
+				parameters: prompt?.parameters || '{}',
+				isFavorite: prompt?.isFavorite || false,
+			}}
+			onCancel={_onCancel}
+			onSubmit={_onSubmit as any}
 			optionalFields={optionalFields}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear prompt'}
 		/>

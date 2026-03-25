@@ -42,6 +42,7 @@ export interface GetPromptsResult {
 export class PromptService extends Context.Tag('PromptService')<PromptService, PromptServiceInterface>() {}
 
 export interface PromptServiceInterface {
+	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, PromptError>;
 	readonly create: (input: PromptCreateInput) => Effect.Effect<Prompt, PromptError>;
 	readonly delete: (id: string) => Effect.Effect<void, PromptError>;
 	readonly getAll: (options?: GetPromptsOptions) => Effect.Effect<GetPromptsResult, PromptError>;
@@ -256,6 +257,15 @@ const make = (): PromptServiceInterface => {
 			return result.map((r) => r.image);
 		});
 
+	const addImage = (id: string, imageId: string): Effect.Effect<void, PromptError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(imagePrompts).values({ A: imageId, B: id }),
+				catch: (error) => fromUnknownPromptError('addImage', error),
+			});
+		});
+
 	return {
 		getById,
 		getAll,
@@ -264,6 +274,7 @@ const make = (): PromptServiceInterface => {
 		delete: delete_,
 		toggleFavorite,
 		getImages,
+		addImage,
 	};
 };
 

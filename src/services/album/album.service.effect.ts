@@ -194,18 +194,25 @@ const make = (): AlbumServiceInterface => {
 				return yield* Effect.fail(new AlbumNotFound({ albumId: id }));
 			}
 
-			logger.info('✅ Álbum encontrado:', result[0]);
+			const normalizedAlbum = {
+				...result[0],
+				updatedAt: result[0].updatedAt ?? result[0].createdAt,
+				lastImageAddedAt: result[0].lastImageAddedAt ?? null,
+				lastVideoAddedAt: result[0].lastVideoAddedAt ?? null,
+			};
+
+			logger.info('✅ Álbum encontrado:', normalizedAlbum);
 
 			// Validar con Schema (síncrono)
 			const validated = yield* Effect.try({
-				try: () => Schema.decodeUnknownSync(Album)(result[0]),
+				try: () => Schema.decodeUnknownSync(Album)(normalizedAlbum),
 				catch: (error) => {
 					logger.error('❌ Error validando album:', error);
-					logger.error('❌ Datos recibidos de BD:', result[0]);
+					logger.error('❌ Datos recibidos de BD:', normalizedAlbum);
 					return new AlbumValidationError({
 						field: 'album',
 						message: 'Error al validar álbum desde BD',
-						value: result[0],
+						value: normalizedAlbum,
 					});
 				},
 			});

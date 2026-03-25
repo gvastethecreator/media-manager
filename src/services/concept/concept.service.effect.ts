@@ -58,6 +58,7 @@ export interface ConceptRelationCounts {
 export class ConceptService extends Context.Tag('ConceptService')<ConceptService, ConceptServiceInterface>() {}
 
 export interface ConceptServiceInterface {
+	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, ConceptError>;
 	readonly create: (input: ConceptCreateInput) => Effect.Effect<Concept, ConceptError>;
 	readonly delete: (id: string) => Effect.Effect<void, ConceptError>;
 	readonly getAll: (options?: GetConceptsOptions) => Effect.Effect<GetConceptsResult, ConceptError>;
@@ -307,6 +308,15 @@ const make = (): ConceptServiceInterface => {
 			};
 		});
 
+	const addImage = (id: string, imageId: string): Effect.Effect<void, ConceptError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(imageConcepts).values({ A: imageId, B: id }),
+				catch: (error) => fromUnknownConceptError('addImage', error),
+			});
+		});
+
 	return {
 		getById,
 		getAll,
@@ -316,6 +326,7 @@ const make = (): ConceptServiceInterface => {
 		toggleFavorite,
 		getImages,
 		getRelationCounts,
+		addImage,
 	};
 };
 
