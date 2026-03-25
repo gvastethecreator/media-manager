@@ -134,13 +134,13 @@ const DEFAULT_STATE = {
 	enableAnimations: true,
 	animationDuration: 300,
 	pagination: {
-		mode: 'pagination' as PaginationMode,
+		mode: 'infinite' as PaginationMode,
 		pageSize: 200,
 	},
 	infiniteScroll: {
 		enabled: true,
 		threshold: 300, // 300px desde el bottom
-		autoLoad: true, // Por defecto usar botón manual
+		autoLoad: true, // Por defecto usar scroll infinito automático
 		cooldownMs: 300,
 	},
 	views: {
@@ -332,6 +332,26 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 		}),
 		{
 			name: 'view-options-storage',
+			version: 2,
+			migrate: (persisted: any, version) => {
+				if (!persisted || version >= 2) {
+					return persisted;
+				}
+
+				return {
+					...persisted,
+					pagination: {
+						...(persisted.pagination ?? {}),
+						mode: 'infinite' as PaginationMode,
+					},
+					infiniteScroll: {
+						...DEFAULT_STATE.infiniteScroll,
+						...(persisted.infiniteScroll ?? {}),
+						enabled: true,
+						autoLoad: true,
+					},
+				};
+			},
 			// merge para compatibilidad con estados previos persistidos
 			merge: (persisted: any, current: any) => {
 				const merged = { ...current, ...persisted };

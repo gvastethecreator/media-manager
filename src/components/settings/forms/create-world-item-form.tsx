@@ -413,6 +413,18 @@ export function CreateWorldItemForm({
 
 	return (
 		<DynamicCreateForm<WorldItemFormInput>
+			initialData={{
+				name: worldItem?.name || '',
+				description: worldItem?.description || '',
+				color: worldItem?.color || DEFAULT_NEUTRAL_COLOR,
+				emoji: worldItem?.emoji || '📦',
+				type: worldItem?.type || 'none',
+				category: worldItem?.category || 'none',
+				rarity: worldItem?.rarity || 'none',
+				origin: worldItem?.origin || '',
+				isFavorite: worldItem?.isFavorite || false,
+			}}
+			onCancel={onCancel}
 			onSubmit={async (data) => {
 				try {
 					if (isEditing && worldItem) {

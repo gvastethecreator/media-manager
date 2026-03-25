@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
@@ -11,10 +12,12 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useSearchUnified } from '@/lib/api/search';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { ViewProps } from '../types';
 
 export function SearchView(_props: ViewProps) {
+	const navigate = useNavigate();
 	const [filters, setFilters] = useState({
 		query: '',
 		type: 'all' as 'all' | 'image' | 'video' | 'audio' | 'document',
@@ -32,6 +35,7 @@ export function SearchView(_props: ViewProps) {
 	});
 
 	const { openViewer } = useImageViewer();
+	const { setSelectedItems, setVisible } = useDetailsPanel();
 
 	const browserItems = useMemo(() => {
 		if (!searchResponse?.results) return [];
@@ -51,11 +55,55 @@ export function SearchView(_props: ViewProps) {
 				const imageItems = browserItems.map((i: BrowserItem) => i.raw).filter((i: any) => i?.entityType === 'image');
 				const imgIndex = imageItems.findIndex((i: any) => i.id === entity.id);
 				openViewer(imageItems as any, Math.max(0, imgIndex));
-			} else {
-				clientLogger.info('Abrir entidad no-imagen (placeholder)', { id: entity.id });
+				return;
 			}
+
+			const routeByEntityType: Record<string, string> = {
+				album: `/albums/${entity.id}`,
+				collection: `/collections/${entity.id}`,
+				group: `/groups/${entity.id}`,
+				tag: `/tags/${entity.id}`,
+				character: `/characters/${entity.id}`,
+				place: `/places/${entity.id}`,
+				'world-item': `/world-items/${entity.id}`,
+				concept: `/concepts/${entity.id}`,
+				prompt: `/prompts/${entity.id}`,
+				property: `/properties/${entity.id}`,
+				'json-file': `/json-files/${entity.id}`,
+				jsonFile: `/json-files/${entity.id}`,
+				file3d: `/file3d/${entity.id}`,
+				'3d': `/file3d/${entity.id}`,
+			};
+
+			const directRoute = routeByEntityType[entity.entityType];
+			if (directRoute) {
+				navigate(directRoute);
+				return;
+			}
+
+			const sectionByEntityType: Record<string, string> = {
+				video: '/videos',
+				audio: '/audios',
+				document: '/documents',
+				note: '/notes',
+			};
+
+			const sectionRoute = sectionByEntityType[entity.entityType];
+			if (sectionRoute) {
+				setSelectedItems([entity]);
+				setVisible(true);
+				navigate(sectionRoute);
+				return;
+			}
+
+			clientLogger.info('Entidad de búsqueda sin ruta específica; mostrando en panel de detalles', {
+				id: entity.id,
+				entityType: entity.entityType,
+			});
+			setSelectedItems([entity]);
+			setVisible(true);
 		},
-		[browserItems, openViewer]
+		[browserItems, navigate, openViewer, setSelectedItems, setVisible]
 	);
 
 	return (

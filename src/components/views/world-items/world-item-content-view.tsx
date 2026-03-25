@@ -1,5 +1,6 @@
 import { Box } from 'lucide-react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
@@ -11,10 +12,26 @@ import { useWorldItemStore } from '@/store/entities/world-item';
 import type { AnyEntityWithStats } from '@/types/entities';
 
 export const WorldItemContentView = memo(function WorldItemContentView() {
+	const { id } = useParams<{ id: string }>();
 	const selectedId = useWorldItemStore((state) => state.ui.selectedId);
-	const selectedWorldItem = useWorldItemStore((state) => state.getWorldItemById(selectedId || ''));
+	const selectWorldItem = useWorldItemStore((state) => state.selectWorldItem);
+	const loadWorldItems = useWorldItemStore((state) => state.loadWorldItems);
+	const effectiveWorldItemId = id || selectedId;
+	const selectedWorldItem = useWorldItemStore((state) => state.getWorldItemById(effectiveWorldItemId || ''));
 
-	const { data: images = [], isLoading, error } = useWorldItemImages(selectedId || '');
+	useEffect(() => {
+		if (id && id !== selectedId) {
+			selectWorldItem(id);
+		}
+	}, [id, selectWorldItem, selectedId]);
+
+	useEffect(() => {
+		if (effectiveWorldItemId && !selectedWorldItem) {
+			void loadWorldItems();
+		}
+	}, [effectiveWorldItemId, loadWorldItems, selectedWorldItem]);
+
+	const { data: images = [], isLoading, error } = useWorldItemImages(effectiveWorldItemId || '');
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 	const browserItems = useMemo(
 		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
@@ -31,7 +48,7 @@ export const WorldItemContentView = memo(function WorldItemContentView() {
 		[setSelectedItems, setDetailsPanelVisible]
 	);
 
-	if (!selectedId) {
+	if (!effectiveWorldItemId) {
 		return (
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">

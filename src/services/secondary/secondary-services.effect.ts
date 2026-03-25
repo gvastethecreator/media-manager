@@ -8,7 +8,19 @@
 import { desc, eq } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { groups, imageNotes, images, notes, properties, wildcards, worldItems } from '@/lib/drizzle/schema';
+import {
+	groupImages,
+	groups,
+	imageNotes,
+	imageProperties,
+	images,
+	imageWildcards,
+	imageWorldItems,
+	notes,
+	properties,
+	wildcards,
+	worldItems,
+} from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import {
@@ -36,6 +48,7 @@ const logger = serverLogger.withContext('SecondaryServices.Effect');
 export class GroupService extends Context.Tag('GroupService')<GroupService, GroupServiceInterface>() {}
 
 export interface GroupServiceInterface {
+	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, GroupError>;
 	readonly create: (input: any) => Effect.Effect<any, GroupError>;
 	readonly delete: (id: string) => Effect.Effect<void, GroupError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, GroupError>;
@@ -120,7 +133,16 @@ const makeGroupService = (): GroupServiceInterface => {
 			return result[0];
 		});
 
-	return { getAll, getById, create, update, delete: delete_, toggleFavorite };
+	const addImage = (id: string, imageId: string): Effect.Effect<void, GroupError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(groupImages).values({ A: id, B: imageId }),
+				catch: (error) => fromUnknownGroupError('addImage', error),
+			});
+		});
+
+	return { getAll, getById, create, update, delete: delete_, toggleFavorite, addImage };
 };
 
 export const GroupServiceLive = Layer.effect(GroupService, Effect.succeed(makeGroupService()));
@@ -130,6 +152,7 @@ export const GroupServiceLive = Layer.effect(GroupService, Effect.succeed(makeGr
 export class WildcardService extends Context.Tag('WildcardService')<WildcardService, WildcardServiceInterface>() {}
 
 export interface WildcardServiceInterface {
+	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, WildcardError>;
 	readonly create: (input: any) => Effect.Effect<any, WildcardError>;
 	readonly delete: (id: string) => Effect.Effect<void, WildcardError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, WildcardError>;
@@ -214,7 +237,16 @@ const makeWildcardService = (): WildcardServiceInterface => {
 			return result[0];
 		});
 
-	return { getAll, getById, create, update, delete: delete_, toggleFavorite };
+	const addImage = (id: string, imageId: string): Effect.Effect<void, WildcardError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(imageWildcards).values({ A: imageId, B: id }),
+				catch: (error) => fromUnknownWildcardError('addImage', error),
+			});
+		});
+
+	return { getAll, getById, create, update, delete: delete_, toggleFavorite, addImage };
 };
 
 export const WildcardServiceLive = Layer.effect(WildcardService, Effect.succeed(makeWildcardService()));
@@ -224,6 +256,7 @@ export const WildcardServiceLive = Layer.effect(WildcardService, Effect.succeed(
 export class NoteService extends Context.Tag('NoteService')<NoteService, NoteServiceInterface>() {}
 
 export interface NoteServiceInterface {
+	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, NoteError>;
 	readonly create: (input: any) => Effect.Effect<any, NoteError>;
 	readonly delete: (id: string) => Effect.Effect<void, NoteError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, NoteError>;
@@ -295,6 +328,7 @@ const makeNoteService = (): NoteServiceInterface => {
 
 	const getImages = (id: string): Effect.Effect<any[], NoteError> =>
 		Effect.gen(function* () {
+			yield* getById(id);
 			const result = yield* Effect.tryPromise<Array<{ image: typeof images.$inferSelect }>, NoteError>({
 				try: () =>
 					db
@@ -307,7 +341,16 @@ const makeNoteService = (): NoteServiceInterface => {
 			return result.map((r: any) => r.image);
 		});
 
-	return { getAll, getById, create, update, delete: delete_, getImages };
+	const addImage = (id: string, imageId: string): Effect.Effect<void, NoteError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(imageNotes).values({ A: imageId, B: id }),
+				catch: (error) => fromUnknownNoteError('addImage', error),
+			});
+		});
+
+	return { getAll, getById, create, update, delete: delete_, getImages, addImage };
 };
 
 export const NoteServiceLive = Layer.effect(NoteService, Effect.succeed(makeNoteService()));
@@ -317,6 +360,7 @@ export const NoteServiceLive = Layer.effect(NoteService, Effect.succeed(makeNote
 export class PropertyService extends Context.Tag('PropertyService')<PropertyService, PropertyServiceInterface>() {}
 
 export interface PropertyServiceInterface {
+	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, PropertyError>;
 	readonly create: (input: any) => Effect.Effect<any, PropertyError>;
 	readonly delete: (id: string) => Effect.Effect<void, PropertyError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, PropertyError>;
@@ -385,7 +429,16 @@ const makePropertyService = (): PropertyServiceInterface => {
 			catch: (error) => fromUnknownPropertyError('delete', error),
 		});
 
-	return { getAll, getById, create, update, delete: delete_ };
+	const addImage = (id: string, imageId: string): Effect.Effect<void, PropertyError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(imageProperties).values({ A: imageId, B: id }),
+				catch: (error) => fromUnknownPropertyError('addImage', error),
+			});
+		});
+
+	return { getAll, getById, create, update, delete: delete_, addImage };
 };
 
 export const PropertyServiceLive = Layer.effect(PropertyService, Effect.succeed(makePropertyService()));
@@ -395,6 +448,7 @@ export const PropertyServiceLive = Layer.effect(PropertyService, Effect.succeed(
 export class WorldItemService extends Context.Tag('WorldItemService')<WorldItemService, WorldItemServiceInterface>() {}
 
 export interface WorldItemServiceInterface {
+	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, WorldItemError>;
 	readonly create: (input: any) => Effect.Effect<any, WorldItemError>;
 	readonly delete: (id: string) => Effect.Effect<void, WorldItemError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, WorldItemError>;
@@ -463,7 +517,16 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 			catch: (error) => fromUnknownWorldItemError('delete', error),
 		});
 
-	return { getAll, getById, create, update, delete: delete_ };
+	const addImage = (id: string, imageId: string): Effect.Effect<void, WorldItemError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(imageWorldItems).values({ A: imageId, B: id }),
+				catch: (error) => fromUnknownWorldItemError('addImage', error),
+			});
+		});
+
+	return { getAll, getById, create, update, delete: delete_, addImage };
 };
 
 export const WorldItemServiceLive = Layer.effect(WorldItemService, Effect.succeed(makeWorldItemService()));

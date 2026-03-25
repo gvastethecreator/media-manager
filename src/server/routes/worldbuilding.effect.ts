@@ -135,6 +135,18 @@ placesRouter.get(
 	)
 );
 
+placesRouter.post(
+	'/:id/images/:imageId',
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const placeService = yield* PlaceService;
+			yield* placeService.addImage(req.params.id, req.params.imageId);
+			res.status(201);
+			return { success: true };
+		}).pipe(Effect.provide(PlaceServiceLive))
+	)
+);
+
 // ============= Concepts Router =============
 
 const conceptsRouter = express.Router();
@@ -243,6 +255,18 @@ conceptsRouter.post(
 	)
 );
 
+conceptsRouter.post(
+	'/:id/images/:imageId',
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const conceptService = yield* ConceptService;
+			yield* conceptService.addImage(req.params.id, req.params.imageId);
+			res.status(201);
+			return { success: true };
+		}).pipe(Effect.provide(ConceptServiceLive))
+	)
+);
+
 // ============= Prompts Router =============
 
 const promptsRouter = express.Router();
@@ -337,6 +361,18 @@ promptsRouter.post(
 		Effect.gen(function* () {
 			const promptService = yield* PromptService;
 			return yield* promptService.toggleFavorite(req.params.id);
+		}).pipe(Effect.provide(PromptServiceLive))
+	)
+);
+
+promptsRouter.post(
+	'/:id/images/:imageId',
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const promptService = yield* PromptService;
+			yield* promptService.addImage(req.params.id, req.params.imageId);
+			res.status(201);
+			return { success: true };
 		}).pipe(Effect.provide(PromptServiceLive))
 	)
 );
