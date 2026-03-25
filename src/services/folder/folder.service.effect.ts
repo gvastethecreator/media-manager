@@ -168,6 +168,35 @@ function createEmptyFileCounts(): Omit<FolderCounts, 'children'> {
 	};
 }
 
+const normalizeFolderRow = (row: Partial<typeof folders.$inferSelect> | null | undefined) => {
+	if (!row) {
+		return null;
+	}
+
+	const createdAt = row.createdAt ?? new Date();
+
+	return {
+		...row,
+		color: row.color ?? '#3b82f6',
+		createdAt,
+		description: row.description ?? null,
+		emoji: row.emoji ?? '📁',
+		featuredImage: row.featuredImage ?? null,
+		isFavorite: row.isFavorite ?? false,
+		lastIndexed: row.lastIndexed ?? createdAt,
+		parentId: row.parentId ?? null,
+		presetId: row.presetId ?? null,
+		totalFiles: row.totalFiles ?? 0,
+		totalImages: row.totalImages ?? 0,
+		totalSize: row.totalSize ?? 0,
+		totalVideos: row.totalVideos ?? 0,
+		updatedAt: row.updatedAt ?? createdAt,
+	};
+};
+
+const decodeFolderRow = (row: Partial<typeof folders.$inferSelect> | null | undefined) =>
+	Schema.decodeUnknownSync(Folder)(normalizeFolderRow(row));
+
 function buildRecursivePathWhere(column: PathColumn, folderPaths: string[]) {
 	return or(
 		...folderPaths.flatMap((folderPath) => [like(column, `${folderPath}/%`), like(column, `${folderPath}\\%`)])
@@ -471,7 +500,7 @@ const FolderServiceLive = Layer.succeed(
 
 				// Validar con Schema
 				const folder = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(Folder)(result[0]),
+					try: () => decodeFolderRow(result[0]),
 					catch: (error: unknown) => fromUnknownError('getById:validation', error),
 				});
 
@@ -549,7 +578,7 @@ const FolderServiceLive = Layer.succeed(
 
 				// Validar con Schema
 				const validatedFolders = yield* Effect.try({
-					try: () => result.map((f) => Schema.decodeUnknownSync(Folder)(f)),
+					try: () => result.map((f) => decodeFolderRow(f)),
 					catch: (error: unknown) => fromUnknownError('getAll:validation', error),
 				});
 
@@ -604,19 +633,29 @@ const FolderServiceLive = Layer.succeed(
 						await db
 							.insert(folders)
 							.values({
+								createdAt: new Date(),
+								description: validatedInput.description ?? null,
+								emoji: validatedInput.emoji ?? '📁',
+								color: validatedInput.color ?? '#3b82f6',
+								featuredImage: null,
+								lastIndexed: new Date(),
 								name: validatedInput.name,
 								path: validatedInput.path,
 								parentId: validatedInput.parentId ?? null,
+								presetId: validatedInput.presetId ?? null,
 								isFavorite: validatedInput.isFavorite ?? false,
+								totalImages: 0,
+								totalVideos: 0,
 								totalFiles: 0,
 								totalSize: 0,
+								updatedAt: new Date(),
 							})
 							.returning(),
 					catch: (error: unknown) => fromUnknownError('create:insert', error),
 				});
 
 				const createdFolder = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(Folder)(result[0]),
+						try: () => decodeFolderRow(result[0]),
 					catch: (error: unknown) => fromUnknownError('create:validation:result', error),
 				});
 
@@ -684,6 +723,10 @@ const FolderServiceLive = Layer.succeed(
 				if (validatedInput.name !== undefined) updateData.name = validatedInput.name;
 				if (validatedInput.path !== undefined) updateData.path = validatedInput.path;
 				if (validatedInput.parentId !== undefined) updateData.parentId = validatedInput.parentId;
+				if (validatedInput.emoji !== undefined) updateData.emoji = validatedInput.emoji;
+				if (validatedInput.color !== undefined) updateData.color = validatedInput.color;
+				if (validatedInput.description !== undefined) updateData.description = validatedInput.description;
+				if (validatedInput.presetId !== undefined) updateData.presetId = validatedInput.presetId;
 				if (validatedInput.isFavorite !== undefined) updateData.isFavorite = validatedInput.isFavorite;
 
 				const result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
@@ -692,7 +735,7 @@ const FolderServiceLive = Layer.succeed(
 				});
 
 				const updatedFolder = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(Folder)(result[0]),
+					try: () => decodeFolderRow(result[0]),
 					catch: (error: unknown) => fromUnknownError('update:validation:result', error),
 				});
 
@@ -749,7 +792,7 @@ const FolderServiceLive = Layer.succeed(
 
 				// Validar con Schema
 				const validatedFolders = yield* Effect.try({
-					try: () => result.map((f) => Schema.decodeUnknownSync(Folder)(f)),
+					try: () => result.map((f) => decodeFolderRow(f)),
 					catch: (error: unknown) => fromUnknownError('getTree:validation', error),
 				});
 
@@ -878,7 +921,7 @@ const FolderServiceLive = Layer.succeed(
 
 				// Validar con Schema
 				const validatedFolders = yield* Effect.try({
-					try: () => result.map((f) => Schema.decodeUnknownSync(Folder)(f)),
+					try: () => result.map((f) => decodeFolderRow(f)),
 					catch: (error: unknown) => fromUnknownError('getChildren:validation', error),
 				});
 
@@ -922,7 +965,7 @@ const FolderServiceLive = Layer.succeed(
 					if (result.length === 0) break;
 
 					const ancestor = yield* Effect.try({
-						try: () => Schema.decodeUnknownSync(Folder)(result[0]),
+						try: () => decodeFolderRow(result[0]),
 						catch: (error: unknown) => fromUnknownError('getAncestors:validation', error),
 					});
 
@@ -988,7 +1031,7 @@ const FolderServiceLive = Layer.succeed(
 				});
 
 				const movedFolder = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(Folder)(result[0]),
+					try: () => decodeFolderRow(result[0]),
 					catch: (error: unknown) => fromUnknownError('moveTo:validation', error),
 				});
 
@@ -1015,7 +1058,7 @@ const FolderServiceLive = Layer.succeed(
 				}
 
 				const folder = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(Folder)(result[0]),
+					try: () => decodeFolderRow(result[0]),
 					catch: (error: unknown) => fromUnknownError('getByPath:validation', error),
 				});
 
@@ -1055,7 +1098,7 @@ const FolderServiceLive = Layer.succeed(
 				});
 
 				const updatedFolder = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(Folder)(result[0]),
+					try: () => decodeFolderRow(result[0]),
 					catch: (error: unknown) => fromUnknownError('toggleFavorite:validation', error),
 				});
 

@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { spawn } from 'child_process';
 import { copyFileSync, createWriteStream, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { generatePostExecutionSummary } from './logging-utils.js';
+import { cleanOldLogs, generatePostExecutionSummary } from './logging-utils.js';
 
 // Regex extraídos a nivel superior (performance + lint)
 const RE_CANNOT_FIND_MODULE = /Cannot find module/;
@@ -61,7 +61,6 @@ const LINTING_COMMANDS = [
 	'oxfmt',
 	'eslint',
 	'prettier',
-	'tsc --noEmit', // TypeScript check sin emit también puede fallar con errores de tipo
 ];
 
 // Comandos de testing que pueden fallar con tests fallidos (no errores críticos)
@@ -74,6 +73,12 @@ const isTolerantCommand = isLintingCommand || isTestingCommand;
 const logsDir = join(process.cwd(), 'logs');
 if (!existsSync(logsDir)) {
 	mkdirSync(logsDir, { recursive: true });
+}
+
+try {
+	await cleanOldLogs();
+} catch (error) {
+	console.warn(chalk.yellow(`⚠️  No se pudieron rotar logs antiguos: ${error instanceof Error ? error.message : String(error)}`));
 }
 
 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');

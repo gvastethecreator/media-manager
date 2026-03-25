@@ -64,6 +64,11 @@ const createSafeLogger = (context: string) => {
 
 const logger = createSafeLogger('ImageService');
 
+const getFirstRow = async <TRow>(operation: () => Promise<TRow[]>): Promise<TRow | null> => {
+	const rows = await operation();
+	return rows[0] ?? null;
+};
+
 // ============================================================================
 // INTERNAL HELPERS
 // ============================================================================
@@ -77,9 +82,7 @@ const getByIdInternal = (id: string): Effect.Effect<Image, ImageError, never> =>
 
 		const result = yield* Effect.tryPromise({
 			try: async () => {
-				const image = await db.query.images.findFirst({
-					where: eq(images.id, id),
-				});
+				const image = await getFirstRow(() => db.select().from(images).where(eq(images.id, id)).limit(1));
 				if (!image) return null;
 				return Image.make(image);
 			},
@@ -127,50 +130,34 @@ const getRelationsCounts = (
 
 		const counts = yield* Effect.tryPromise({
 			try: async () => {
-				// Note: Many-to-many tables use columns A (imageId) and B (relatedEntityId)
-				const [results] = await db
-					.select({
-						albumCount: count(imageAlbums.B),
-						collectionCount: count(imageCollections.B),
-						tagCount: count(imageTags.B),
-						characterCount: count(imageCharacters.B),
-						placeCount: count(imagePlaces.B),
-						worldItemCount: count(imageWorldItems.B),
-						conceptCount: count(imageConcepts.B),
-						promptCount: count(imagePrompts.B),
-						noteCount: count(imageNotes.B),
-						wildcardCount: count(imageWildcards.B),
-						propertyCount: count(imageProperties.B),
-						groupCount: count(groupImages.B),
-					})
-					.from(images)
-					.leftJoin(imageAlbums, eq(imageAlbums.A, images.id))
-					.leftJoin(imageCollections, eq(imageCollections.A, images.id))
-					.leftJoin(imageTags, eq(imageTags.A, images.id))
-					.leftJoin(imageCharacters, eq(imageCharacters.A, images.id))
-					.leftJoin(imagePlaces, eq(imagePlaces.A, images.id))
-					.leftJoin(imageWorldItems, eq(imageWorldItems.A, images.id))
-					.leftJoin(imageConcepts, eq(imageConcepts.A, images.id))
-					.leftJoin(imagePrompts, eq(imagePrompts.A, images.id))
-					.leftJoin(imageNotes, eq(imageNotes.A, images.id))
-					.leftJoin(imageWildcards, eq(imageWildcards.A, images.id))
-					.leftJoin(imageProperties, eq(imageProperties.A, images.id))
-					.leftJoin(groupImages, eq(groupImages.B, images.id))
-					.where(eq(images.id, imageId));
+				const [albumRows, collectionRows, tagRows, characterRows, placeRows, worldItemRows, conceptRows, promptRows, noteRows, wildcardRows, propertyRows, groupRows] = await Promise.all([
+					db.select({ count: count() }).from(imageAlbums).where(eq(imageAlbums.A, imageId)),
+					db.select({ count: count() }).from(imageCollections).where(eq(imageCollections.A, imageId)),
+					db.select({ count: count() }).from(imageTags).where(eq(imageTags.A, imageId)),
+					db.select({ count: count() }).from(imageCharacters).where(eq(imageCharacters.A, imageId)),
+					db.select({ count: count() }).from(imagePlaces).where(eq(imagePlaces.A, imageId)),
+					db.select({ count: count() }).from(imageWorldItems).where(eq(imageWorldItems.A, imageId)),
+					db.select({ count: count() }).from(imageConcepts).where(eq(imageConcepts.A, imageId)),
+					db.select({ count: count() }).from(imagePrompts).where(eq(imagePrompts.A, imageId)),
+					db.select({ count: count() }).from(imageNotes).where(eq(imageNotes.A, imageId)),
+					db.select({ count: count() }).from(imageWildcards).where(eq(imageWildcards.A, imageId)),
+					db.select({ count: count() }).from(imageProperties).where(eq(imageProperties.A, imageId)),
+					db.select({ count: count() }).from(groupImages).where(eq(groupImages.B, imageId)),
+				]);
 
 				return {
-					albumCount: results.albumCount,
-					collectionCount: results.collectionCount,
-					tagCount: results.tagCount,
-					characterCount: results.characterCount,
-					placeCount: results.placeCount,
-					worldItemCount: results.worldItemCount,
-					conceptCount: results.conceptCount,
-					promptCount: results.promptCount,
-					noteCount: results.noteCount,
-					wildcardCount: results.wildcardCount,
-					propertyCount: results.propertyCount,
-					groupCount: results.groupCount,
+					albumCount: albumRows[0]?.count ?? 0,
+					collectionCount: collectionRows[0]?.count ?? 0,
+					tagCount: tagRows[0]?.count ?? 0,
+					characterCount: characterRows[0]?.count ?? 0,
+					placeCount: placeRows[0]?.count ?? 0,
+					worldItemCount: worldItemRows[0]?.count ?? 0,
+					conceptCount: conceptRows[0]?.count ?? 0,
+					promptCount: promptRows[0]?.count ?? 0,
+					noteCount: noteRows[0]?.count ?? 0,
+					wildcardCount: wildcardRows[0]?.count ?? 0,
+					propertyCount: propertyRows[0]?.count ?? 0,
+					groupCount: groupRows[0]?.count ?? 0,
 				};
 			},
 			catch: (error) =>
@@ -279,9 +266,7 @@ export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError
 		// Check for duplicate hash (UNIQUE constraint)
 		const existing = yield* Effect.tryPromise({
 			try: async () => {
-				return await db.query.images.findFirst({
-					where: eq(images.hash, validated.hash),
-				});
+				return await getFirstRow(() => db.select().from(images).where(eq(images.hash, validated.hash)).limit(1));
 			},
 			catch: (error) =>
 				new ImageDatabaseError({
@@ -779,9 +764,7 @@ export const getByHash = (hash: string): Effect.Effect<Image, ImageError, never>
 
 		const result = yield* Effect.tryPromise({
 			try: async () => {
-				const image = await db.query.images.findFirst({
-					where: eq(images.hash, hash),
-				});
+				const image = await getFirstRow(() => db.select().from(images).where(eq(images.hash, hash)).limit(1));
 				if (!image) return null;
 				return Image.make(image);
 			},
@@ -819,9 +802,9 @@ export const getByPathAndFolder = (path: string, folderId: string): Effect.Effec
 
 		const result = yield* Effect.tryPromise({
 			try: async () => {
-				const image = await db.query.images.findFirst({
-					where: and(eq(images.path, path), eq(images.folderId, folderId)),
-				});
+				const image = await getFirstRow(() =>
+					db.select().from(images).where(and(eq(images.path, path), eq(images.folderId, folderId))).limit(1)
+				);
 				if (!image) return null;
 				return Image.make(image);
 			},
@@ -859,10 +842,7 @@ export const getAllFavorites = (): Effect.Effect<Image[], ImageError, never> =>
 
 		const results = yield* Effect.tryPromise({
 			try: async () => {
-				const favImages = await db.query.images.findMany({
-					where: eq(images.isFavorite, true),
-					orderBy: [desc(images.addedAt)],
-				});
+				const favImages = await db.select().from(images).where(eq(images.isFavorite, true)).orderBy(desc(images.addedAt));
 				return favImages.map((img: typeof images.$inferSelect) => Image.make(img));
 			},
 			catch: (error) =>
@@ -898,12 +878,13 @@ export const getByFolder = (
 
 		const results = yield* Effect.tryPromise({
 			try: async () => {
-				const folderImages = await db.query.images.findMany({
-					where: eq(images.folderId, folderId),
-					orderBy: [desc(images.addedAt)],
-					limit,
-					offset,
-				});
+				const folderImages = await db
+					.select()
+					.from(images)
+					.where(eq(images.folderId, folderId))
+					.orderBy(desc(images.addedAt))
+					.limit(limit)
+					.offset(offset);
 				return folderImages.map((img: typeof images.$inferSelect) => Image.make(img));
 			},
 			catch: (error) =>
@@ -1110,9 +1091,7 @@ export const getThumbnail = (imageId: string): Effect.Effect<Buffer, ImageError,
 
 		// Helper to get image by ID for thumbnail service
 		const getImageById = async (id: string) => {
-			const img = await db.query.images.findFirst({
-				where: eq(images.id, id),
-			});
+			const img = await getFirstRow(() => db.select().from(images).where(eq(images.id, id)).limit(1));
 			return img || null;
 		};
 
@@ -1151,9 +1130,7 @@ export const getOriginalImage = (imageId: string): Effect.Effect<Buffer, ImageEr
 
 		// Helper to get image by ID for thumbnail service
 		const getImageById = async (id: string) => {
-			const img = await db.query.images.findFirst({
-				where: eq(images.id, id),
-			});
+			const img = await getFirstRow(() => db.select().from(images).where(eq(images.id, id)).limit(1));
 			return img || null;
 		};
 
