@@ -36,6 +36,33 @@ type FolderFileStatsGetter = (folderId: string, includeSubfolders: boolean) => P
 let getFolderFiles: FolderFilesGetter | undefined;
 let getFolderFileStats: FolderFileStatsGetter | undefined;
 
+function escapeXml(value: string) {
+	return value
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&apos;');
+}
+
+function formatBytes(bytes: number) {
+	if (!Number.isFinite(bytes) || bytes <= 0) {
+		return '0 B';
+	}
+
+	const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+	let value = bytes;
+	let unitIndex = 0;
+
+	while (value >= 1024 && unitIndex < units.length - 1) {
+		value /= 1024;
+		unitIndex++;
+	}
+
+	const decimals = unitIndex === 0 ? 0 : value >= 10 ? 1 : 2;
+	return `${value.toFixed(decimals)} ${units[unitIndex]}`;
+}
+
 // Cargar módulos de archivos dinámicamente
 const loadFolderFilesServices = async () => {
 	if (!getFolderFiles) {
@@ -183,6 +210,48 @@ router.get(
 			const folderService = yield* FolderService;
 			return yield* folderService.getTree();
 		}).pipe(Effect.provide(FolderServiceLive))
+	)
+);
+
+/**
+ * GET /folders/:id/preview - Obtener preview SVG cacheable de una carpeta
+ */
+router.get(
+	'/:id/preview',
+	effectHandler(
+		(req) =>
+			Effect.gen(function* () {
+				const folderService = yield* FolderService;
+				return yield* folderService.getById(req.params.id);
+			}).pipe(Effect.provide(FolderServiceLive)),
+		{
+			onSuccess: (folder, res) => {
+				const name = escapeXml(folder.name || 'Carpeta');
+				const path = escapeXml(folder.path || '/');
+				const totalFiles = folder.totalFiles ?? folder._count?.totalFiles ?? 0;
+				const totalSize = formatBytes(folder.totalSize ?? 0);
+				const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Preview de carpeta ${name}">
+  <defs>
+    <linearGradient id="folderPreviewBg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="#0b1220" rx="24"/>
+  <rect x="16" y="16" width="608" height="328" fill="url(#folderPreviewBg)" rx="20" stroke="#334155" stroke-opacity="0.6"/>
+  <rect x="52" y="74" width="126" height="90" fill="#f59e0b" fill-opacity="0.22" rx="18"/>
+  <path d="M72 104h46l16 18h134c10 0 18 8 18 18v58c0 10-8 18-18 18H72c-10 0-18-8-18-18v-76c0-10 8-18 18-18Z" fill="#fbbf24"/>
+  <text x="52" y="236" fill="#e2e8f0" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">${name}</text>
+  <text x="52" y="268" fill="#94a3b8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16">${path}</text>
+  <text x="52" y="304" fill="#cbd5e1" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16">${totalFiles} archivos · ${escapeXml(totalSize)}</text>
+</svg>`;
+
+				res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+				res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+				res.status(200).send(svg);
+			},
+		}
 	)
 );
 

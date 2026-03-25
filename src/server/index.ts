@@ -134,6 +134,12 @@ app.use('/api/uploaded-images', uploadedImagesEffectRouter);
 app.use('/api/files', filesEffectRouter);
 app.use('/api/download', downloadEffectRouter);
 app.use('/api/search', searchEffectRouter);
+app.use('/search', (req, res) => {
+	const queryIndex = req.originalUrl.indexOf('?');
+	const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : '';
+	const subPath = req.originalUrl.slice('/search'.length).split('?')[0] || '';
+	res.redirect(307, `/api/search${subPath}${query}`);
+});
 app.use('/api/metadata', metadataEffectRouter);
 app.use('/api/thumbnails', thumbnailsEffectRouter);
 app.use('/api/tasks', tasksEffectRouter);

@@ -1,361 +1,191 @@
 # 🖼️ Image Manager
 
-## Sistema de Gestión Multimedia Inteligente
+Aplicación monolítica para gestión multimedia local con frontend en React 19, backend Express sobre Bun, Drizzle ORM + SQLite y soporte opcional de escritorio vía Tauri 2.
 
 [![React](https://img.shields.io/badge/React-19.2.4-61DAFB?logo=react)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?logo=typescript)](https://www.typescriptlang.org)
-[![Vite+](https://img.shields.io/badge/Vite%2B-0.1.13-646CFF?logo=vite)](https://viteplus.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0.2-3178C6?logo=typescript)](https://www.typescriptlang.org)
+[![Vite%2B](https://img.shields.io/badge/Vite%2B-0.1.14-646CFF?logo=vite)](https://viteplus.dev)
 [![Bun](https://img.shields.io/badge/Bun-1.2+-000000?logo=bun)](https://bun.sh)
 [![Drizzle](https://img.shields.io/badge/Drizzle-ORM-C5F74F)](https://orm.drizzle.team)
-[![Tauri](https://img.shields.io/badge/Tauri-2.9+-FFC131?logo=tauri)](https://tauri.app)
+[![Tauri](https://img.shields.io/badge/Tauri-2.10+-FFC131?logo=tauri)](https://tauri.app)
 
-Sistema integral para la gestión inteligente de archivos multimedia, diseñado para manejar grandes volúmenes de contenido con alto rendimiento en entornos locales.
+## ✨ Qué incluye
 
----
+- Gestión de carpetas y archivos multimedia con metadatos y thumbnails.
+- Soporte para imágenes, video, audio, documentos, JSON y archivos 3D.
+- Organización por tags, álbumes, grupos, colecciones y favoritos.
+- Módulos de worldbuilding: personajes, lugares, conceptos y world items.
+- Reindexación estructurada con progreso y utilidades de mantenimiento.
+- Interfaz React con Zustand, TanStack Query, componentes Radix UI y design tokens propios.
 
-## 📋 Tabla de Contenidos
+## 🧱 Stack real
 
-- [Características](#-características)
-- [Stack Tecnológico](#-stack-tecnológico)
-- [Requisitos](#-requisitos)
-- [Instalación](#-instalación)
-- [Desarrollo](#-desarrollo)
-- [Scripts Disponibles](#-scripts-disponibles)
-- [Arquitectura](#-arquitectura)
-- [Documentación](#-documentación)
-- [Testing](#-testing)
-- [Contribuir](#-contribuir)
+| Capa | Tecnologías |
+| --- | --- |
+| Frontend | React 19, TypeScript 6, React Router 7, Vite+ |
+| Estado | Zustand, Immer, TanStack Query |
+| UI | Tailwind CSS 4, Radix UI, GSAP, Lucide |
+| Backend | Express 5, Bun, Effect |
+| Datos | Drizzle ORM, SQLite / libsql |
+| Desktop | Tauri 2 |
+| Testing | Vitest, Playwright, Testing Library |
 
----
+## 🚀 Puesta en marcha
 
-## ✨ Características
+### Requisitos
 
-### Gestión de Archivos
+- Bun 1.2 o superior.
+- Node.js 20+ como fallback para herramientas auxiliares.
+- FFmpeg opcional para miniaturas avanzadas de video/audio.
 
-- 📂 **Indexación automática** de carpetas con extracción de metadatos
-- 🔍 **Búsqueda avanzada** con filtros múltiples y FTS5
-- 🖼️ **Thumbnails optimizados** generados con Sharp y FFmpeg
-- 📊 **Soporte multi-formato**: imágenes, videos, audio, 3D, documentos
-- ⭐ **Sistema de favoritos** multi-perfil
-- 🗂️ **Organización dual**: física (carpetas) + digital (tags, álbumes)
-
-### Organización de Contenido
-
-| Entidad            | Descripción                                    |
-| ------------------ | ---------------------------------------------- |
-| 🏷️ **Tags**        | Etiquetas con colores y emojis personalizables |
-| 📸 **Álbumes**     | Colecciones temáticas de archivos              |
-| 📁 **Grupos**      | Meta-organizadores jerárquicos                 |
-| 💎 **Colecciones** | Soporte NFT con metadatos blockchain           |
-
-### Worldbuilding
-
-| Entidad            | Descripción                                 |
-| ------------------ | ------------------------------------------- |
-| 👤 **Characters**  | Personajes con stats, backstory, relaciones |
-| 📍 **Places**      | Ubicaciones con clima, recursos, historia   |
-| 🎯 **World Items** | Objetos con atributos y efectos             |
-| 💡 **Concepts**    | Sistema de conocimiento interconectado      |
-
-### Performance
-
-- ⚡ **Virtualización** para listas de 10,000+ elementos
-- 🗄️ **Caching inteligente** con TanStack Query
-- 🚀 **Lazy loading** de rutas (28+ chunks)
-- 🔄 **Reindexación incremental** con progreso en tiempo real
-
----
-
-## 🛠️ Stack Tecnológico
-
-| Capa         | Tecnologías                                                       |
-| ------------ | ----------------------------------------------------------------- |
-| **Frontend** | React 19, TypeScript 5.9, Vite+ (Vite + Rolldown), Tailwind CSS 4 |
-| **Estado**   | Zustand 5, TanStack Query 5, Immer                                |
-| **UI/UX**    | Radix UI, GSAP, Lucide Icons                                      |
-| **Backend**  | Express 5, Bun Runtime, Effect-TS                                 |
-| **Database** | Drizzle ORM, SQLite (libsql), FTS5                                |
-| **Desktop**  | Tauri 2 (Rust)                                                    |
-| **Testing**  | Vitest, Playwright, Testing Library                               |
-
----
-
-## 📋 Requisitos
-
-- [Bun](https://bun.sh) 1.2 o superior
-- [Node.js](https://nodejs.org) 20+ (fallback)
-- SQLite 3+
-- FFmpeg (opcional, para thumbnails de video/audio)
-
----
-
-## 🚀 Instalación
+### Instalación
 
 ```bash
-# Clonar repositorio
 git clone <repository-url>
-cd image-manager
-
-# Instalar dependencias
+cd media-manager
 bun install
-
-# Configurar variables de entorno
-cp .env.example .env.local
-# Editar .env.local con tu configuración
-
-# Inicializar base de datos
-bun run db:push
-
-# Iniciar desarrollo
-bun run dev:full
 ```
 
-### Variables de Entorno
+### Variables de entorno
+
+El proyecto ya usa `.env` para desarrollo local y expone un `.env.example` sincronizado.
+
+Variables principales:
 
 ```env
-# Base de datos
-DATABASE_URL="file:./dev.db"
-
-# Servidor
-API_PORT=4000
 NODE_ENV=development
-CORS_ORIGIN="http://localhost:5173"
-
-# Opcional: Turso (producción)
-TURSO_DATABASE_URL="libsql://..."
-TURSO_AUTH_TOKEN="..."
-
-# Feature flags
-USE_EFFECT_TAGS=true
-USE_EFFECT_IMAGES=true
-USE_EFFECT_VIDEOS=true
-USE_EFFECT_AUDIOS=true
+API_PORT=4000
+PORT=4000
+DATABASE_URL=file:./db.sqlite
+VITE_API_URL=http://localhost:4000/api
+CORS_ORIGIN=http://localhost:5173
+UPLOADS_DIR=public/uploads
+LOG_TO_CONSOLE=true
+LOG_LEVEL=info
+DISABLE_FTS5=0
+SEARCH_FTS_REQUIRE=0
 ```
 
----
+## 💻 Desarrollo diario
 
-## 💻 Desarrollo
+### Comandos principales
 
-### Modos de Desarrollo
+| Comando | Qué hace |
+| --- | --- |
+| `bun run dev:full` | Arranca frontend + backend |
+| `bun run dev:vite` | Arranca sólo el frontend |
+| `bun run dev:server:hot` | Arranca sólo el backend |
+| `bun run dev:tauri` | Abre la app en Tauri |
+| `bun run build` | Build completo |
+| `bun run check` | Lint + typecheck |
+| `bun run test` | Tests unitarios/integración |
+| `bun run test:e2e` | Tests E2E Playwright |
+
+### Puertos por defecto
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:4000`
+- Preview Vite: `http://localhost:4173`
+
+## 🧪 Calidad, logs y debugging
+
+Los scripts de lint, typecheck, tests y build escriben logs en `logs/` usando `scripts/run-with-log.js`.
+
+### Scripts con logging automático
+
+- `bun run lint`
+- `bun run lint:fix`
+- `bun run format`
+- `bun run format:check`
+- `bun run tsc`
+- `bun run check`
+- `bun run build:vite`
+- `bun run build:server`
+- `bun run build:tauri`
+- `bun run test`
+- `bun run test:ci`
+- `bun run test:e2e`
+
+### Utilidades de logs
+
+| Comando | Uso |
+| --- | --- |
+| `bun run logs:list` | Lista logs recientes |
+| `bun run logs:clean` | Limpia logs antiguos |
+| `bun run check:errors` | Resume errores detectados en logs |
+
+Notas operativas:
+
+- Los logs se guardan con timestamp en `logs/`.
+- La rotación básica de logs antiguos se ejecuta automáticamente cuando se usan los scripts con logging.
+- Los resúmenes automáticos se agregan al inicio del log cuando la herramienta detecta errores de lint, tests o TypeScript.
+
+## 🗂️ Estructura del repo
+
+```text
+src/
+├─ components/        # UI, vistas, features y navegación
+├─ server/            # Express, middleware y rutas
+├─ services/          # Lógica de negocio
+├─ transformers/      # Conversión Drizzle -> DTO/ViewModel
+├─ store/             # Zustand stores
+├─ lib/               # Drizzle, logger, effect, utils
+├─ hooks/             # Hooks compartidos
+├─ providers/         # Providers de aplicación
+└─ types/             # Tipos y esquemas
+
+tests/
+├─ unit/
+├─ integration/
+└─ e2e/
+
+docs/
+├─ core/
+├─ guides/
+├─ audits/
+└─ planning/
+```
+
+## 🏗️ Arquitectura resumida
+
+1. **Routes** en `src/server/routes/` validan input y delegan.
+2. **Services** en `src/services/` encapsulan la lógica y el acceso a Drizzle.
+3. **Transformers** enriquecen datos antes de llegar al cliente.
+4. **Stores + Query** coordinan estado de UI y estado servidor.
+5. **Views** consumen componentes compartidos y features complejas como `file-browser-new`.
+
+## 📚 Documentación útil
+
+| Documento | Propósito |
+| --- | --- |
+| [`AGENTS.md`](./AGENTS.md) | Convenciones operativas del repositorio |
+| [`docs/core/ARCHITECTURE.md`](./docs/core/ARCHITECTURE.md) | Arquitectura general |
+| [`docs/core/API-REFERENCE.md`](./docs/core/API-REFERENCE.md) | Endpoints principales |
+| [`docs/core/DATABASE-SCHEMA.md`](./docs/core/DATABASE-SCHEMA.md) | Modelo de datos |
+| [`docs/core/FRONTEND-GUIDE.md`](./docs/core/FRONTEND-GUIDE.md) | Patrones frontend |
+| [`docs/core/SERVICES-GUIDE.md`](./docs/core/SERVICES-GUIDE.md) | Capa de servicios |
+| [`docs/core/LOGGING-SYSTEM-GUIDE.md`](./docs/core/LOGGING-SYSTEM-GUIDE.md) | Logging y request tracing |
+
+## ✅ Flujo recomendado para contribuir
 
 ```bash
-# Desarrollo completo (frontend + backend + HMR)
-bun run dev:full
-
-# Solo frontend (Vite+)
-bun run dev:vite
-
-# Solo backend con HMR
-bun run dev:server:hot
-
-# Aplicación desktop (Tauri)
-bun run dev:tauri
-```
-
-### Estructura del Proyecto
-
-```
-image-manager/
-├── src/
-│   ├── app/                 # Configuración de aplicación
-│   ├── components/          # Componentes React
-│   │   ├── ui/             # Primitivas UI (shadcn/radix)
-│   │   ├── views/          # Vistas por entidad
-│   │   ├── features/       # Features complejas
-│   │   └── cards/          # Tarjetas de entidades
-│   ├── services/           # Capa de negocio (40+ servicios)
-│   ├── transformers/       # DTO/View transformers
-│   ├── store/              # Zustand stores
-│   ├── server/             # Express backend
-│   │   ├── routes/         # API endpoints
-│   │   └── middleware/     # HTTP middleware
-│   ├── lib/                # Utilidades y configuración
-│   │   ├── drizzle/        # ORM schema y migrations
-│   │   ├── utils/          # Utilidades por dominio
-│   │   └── logger/         # Sistema de logging
-│   ├── types/              # TypeScript definitions
-│   └── hooks/              # Custom React hooks
-├── tests/                  # Tests
-│   ├── unit/               # Vitest
-│   ├── e2e/                # Playwright
-│   └── integration/        # Tests de integración
-├── docs/                   # Documentación
-├── scripts/                # Scripts de automatización
-└── drizzle/                # Migrations
-```
-
----
-
-## 📜 Scripts Disponibles
-
-### Desarrollo
-
-| Comando                  | Descripción                               |
-| ------------------------ | ----------------------------------------- |
-| `bun run dev:full`       | Frontend + Backend (desarrollo unificado) |
-| `bun run dev:vite`       | Solo frontend (puerto 5173)               |
-| `bun run dev:server:hot` | Solo backend con HMR (puerto 4000)        |
-| `bun run dev:tauri`      | Aplicación desktop                        |
-
-### Build
-
-| Comando                | Descripción                         |
-| ---------------------- | ----------------------------------- |
-| `bun run build`        | Build completo (frontend + backend) |
-| `bun run build:vite`   | Build frontend                      |
-| `bun run build:server` | Build backend                       |
-| `bun run build:tauri`  | Build desktop                       |
-
-### Testing
-
-| Comando              | Descripción              |
-| -------------------- | ------------------------ |
-| `bun run test`       | Tests unitarios (Vitest) |
-| `bun run test:watch` | Tests en modo watch      |
-| `bun run test:ci`    | Tests con cobertura      |
-| `bun run test:e2e`   | Tests E2E (Playwright)   |
-| `bun run test:ui`    | Playwright UI mode       |
-
-### Calidad de Código
-
-| Comando              | Descripción                                           |
-| -------------------- | ----------------------------------------------------- |
-| `bun run check`      | Gate operativo: lint + typecheck                      |
-| `bun run check:full` | Auditoría completa con Vite+ (lint + format del repo) |
-| `bun run lint`       | Lint con Oxc / Oxlint                                 |
-| `bun run lint:fix`   | Lint con auto-fix cuando aplique                      |
-| `bun run format`     | Formatear código                                      |
-| `bun run tsc`        | TypeScript check                                      |
-
-### Base de Datos
-
-| Comando                         | Descripción                     |
-| ------------------------------- | ------------------------------- |
-| `bun run db:studio`             | Drizzle Studio (GUI)            |
-| `bun run db:check`              | Verificar estado de DB          |
-| `bun run db:reset`              | Reset completo (⚠️ destructivo) |
-| `bun run db:migrate:aggregates` | Migrar entity aggregates        |
-
-### Utilidades
-
-| Comando                | Descripción                 |
-| ---------------------- | --------------------------- |
-| `bun run logs:list`    | Listar logs                 |
-| `bun run logs:clean`   | Limpiar logs antiguos       |
-| `bun run check:errors` | Verificar errores recientes |
-
----
-
-## 🏗️ Arquitectura
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     TAURI (Desktop Shell)                       │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────┐      ┌─────────────────────────────┐  │
-│  │   React Frontend    │◄────►│     Express Backend          │  │
-│  │   (Vite + TS)       │ REST │     (Bun Runtime)           │  │
-│  │                     │ SSE  │                              │  │
-│  │  • Zustand          │      │  • 50+ Route Handlers        │  │
-│  │  • TanStack Query   │      │  • 40+ Services              │  │
-│  │  • React Router     │      │  • Transformers Layer        │  │
-│  └─────────────────────┘      └──────────────┬──────────────┘  │
-│                                              │                  │
-│                               ┌──────────────▼──────────────┐  │
-│                               │    Drizzle ORM + SQLite     │  │
-│                               │    (6 Domain Schemas)        │  │
-│                               └─────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Patrones de Diseño
-
-- **Service Layer**: Cada entidad tiene un servicio dedicado
-- **Transformer Pattern**: Separación entre datos DB y View Models
-- **Effect-TS**: Manejo funcional de errores y efectos
-- **Zustand**: Estado UI con persistencia opcional
-- **TanStack Query**: Server state caching y sincronización
-
----
-
-## 📚 Documentación
-
-La documentación completa está disponible en la carpeta [`docs/`](./docs/):
-
-| Documento                                                             | Descripción                   |
-| --------------------------------------------------------------------- | ----------------------------- |
-| [AUDITORIA-TECNICA-COMPLETA.md](./docs/AUDITORIA-TECNICA-COMPLETA.md) | Informe de auditoría técnica  |
-| [core/PRD.md](./docs/core/PRD.md)                                     | Product Requirements Document |
-| [core/ARCHITECTURE.md](./docs/core/ARCHITECTURE.md)                   | Arquitectura del sistema      |
-| [core/API-REFERENCE.md](./docs/core/API-REFERENCE.md)                 | Referencia de API REST        |
-| [core/DATABASE-SCHEMA.md](./docs/core/DATABASE-SCHEMA.md)             | Esquema de base de datos      |
-| [core/SERVICES-GUIDE.md](./docs/core/SERVICES-GUIDE.md)               | Guía de servicios             |
-| [core/FRONTEND-GUIDE.md](./docs/core/FRONTEND-GUIDE.md)               | Guía de frontend              |
-
----
-
-## 🧪 Testing
-
-### Tests Unitarios (Vitest)
-
-```bash
-# Ejecutar todos los tests
+bun run check
 bun run test
-
-# Modo watch
-bun run test:watch
-
-# Con cobertura
-bun run test:ci
+bun run build
 ```
 
-### Tests E2E (Playwright)
+Si tocas rutas, búsqueda, thumbnails o reindexación, añade además:
 
 ```bash
-# Ejecutar tests E2E
 bun run test:e2e
-
-# Modo UI
-bun run test:ui
-
-# Debug
-bun run test:e2e:debug
 ```
 
-### Configuración
+## 🧹 Higiene del repo
 
-- **Vitest / Vite+ Test**: Entorno jsdom, cobertura mínima 50%
-- **Playwright**: Chrome, timeout 60s, auto-starts dev server
-
----
-
-## 🤝 Contribuir
-
-1. Fork el repositorio
-2. Crea una rama feature (`git checkout -b feature/amazing-feature`)
-3. Commit tus cambios (`git commit -m 'Add amazing feature'`)
-4. Push a la rama (`git push origin feature/amazing-feature`)
-5. Abre un Pull Request
-
-### Guías de Contribución
-
-- Seguir [Conventional Commits](https://www.conventionalcommits.org/)
-- Mantener cobertura de tests > 50%
-- Usar el sistema de logging (no console.log)
-- Tipar todo (evitar `any`)
-- Documentar funciones públicas
-
----
+- `public/uploads/`, `logs/`, resultados de Playwright y archivos SQLite auxiliares están ignorados para evitar ruido y datos sensibles.
+- Mantén los cambios quirúrgicos: sin refactors masivos no solicitados.
+- Evita `console.*` en código productivo del cliente; usa los loggers del proyecto.
 
 ## 📝 Licencia
 
 [MIT](./LICENSE)
-
----
-
-## 🙏 Agradecimientos
-
-- [Drizzle Team](https://orm.drizzle.team/) por el ORM increíble
-- [Effect-TS](https://effect.website/) por el sistema de efectos
-- [Tauri](https://tauri.app/) por el framework desktop
-- [shadcn/ui](https://ui.shadcn.com/) por los componentes base

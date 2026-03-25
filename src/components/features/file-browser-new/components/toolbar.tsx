@@ -25,7 +25,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider-legacy';
+import { Slider } from '@/components/ui/slider';
 import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
 import type { ToolbarProps } from '../types/props.types';
