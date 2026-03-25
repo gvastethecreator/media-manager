@@ -21,51 +21,59 @@ export function FileBrowserStatusBar({
 	const hasPages = pagination && pagination.totalPages > 1;
 	const canPrev = pagination && pagination.page > 0;
 	const canNext = pagination && (pagination.page < pagination.totalPages - 1 || pagination.hasMore);
+	const pageLabel = hasPages ? `${pagination.page + 1}/${pagination.totalPages}` : null;
+	const summaryLabel = `${shownItems.toLocaleString()}/${totalItems.toLocaleString()}`;
+	const selectionLabel = selectedCount > 0 ? `${selectedCount.toLocaleString()} sel.` : null;
 
 	return (
 		<div
 			className={cn(
-				'flex items-center justify-between border-t px-3 py-1.5 text-caption text-muted-foreground',
+				'grid h-[15px] min-h-[15px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-t px-2 font-medium text-[10px] leading-none text-muted-foreground',
 				className
 			)}
 			data-testid="file-browser-status-bar"
 			style={{ backgroundColor: 'color-mix(in oklab, var(--muted), transparent 70%)' }}
 		>
-			{/* Lado izquierdo: conteos */}
-			<div className="flex items-center gap-3">
-				{isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
-				<span>
-					{shownItems.toLocaleString()} de {totalItems.toLocaleString()} elementos
-				</span>
-				{selectedCount > 0 && (
-					<span className="text-primary">
-						• {selectedCount} seleccionado{selectedCount !== 1 ? 's' : ''}
-					</span>
-				)}
+			<div className="flex min-w-0 items-center gap-1 overflow-hidden tabular-nums">
+				{isLoading && <Loader2 className="h-2.5 w-2.5 shrink-0 animate-spin" />}
+				<span className="truncate">{summaryLabel}</span>
+				{selectionLabel && <span className="truncate text-primary">• {selectionLabel}</span>}
 			</div>
 
-			{/* Centro: info de paginación */}
 			{hasPages && (
-				<div className="flex items-center gap-2">
-					<span>
-						Página {(pagination.page + 1).toLocaleString()} de {pagination.totalPages.toLocaleString()}
-					</span>
+				<div className="justify-self-center tabular-nums">
+					<span>Pág. {pageLabel}</span>
 				</div>
 			)}
 
-			{/* Lado derecho: navegación de páginas */}
-			{hasPages && (
-				<div className="flex items-center gap-1">
-					<Button className="h-6 w-6" disabled={!canPrev || isLoading} onClick={onPrevPage} size="icon" variant="ghost">
-						<ChevronLeft className="h-3 w-3" />
-						<span className="sr-only">Página anterior</span>
-					</Button>
-					<Button className="h-6 w-6" disabled={!canNext || isLoading} onClick={onNextPage} size="icon" variant="ghost">
-						<ChevronRight className="h-3 w-3" />
-						<span className="sr-only">Página siguiente</span>
-					</Button>
-				</div>
-			)}
+			<div className="flex min-w-0 items-center justify-end gap-0.5 tabular-nums">
+				{hasPages ? (
+					<>
+						<Button
+							className="h-3.5 w-3.5 rounded-sm p-0 hover:bg-accent/70"
+							disabled={!canPrev || isLoading}
+							onClick={onPrevPage}
+							size="icon"
+							variant="ghost"
+						>
+							<ChevronLeft className="h-2.5 w-2.5" />
+							<span className="sr-only">Página anterior</span>
+						</Button>
+						<Button
+							className="h-3.5 w-3.5 rounded-sm p-0 hover:bg-accent/70"
+							disabled={!canNext || isLoading}
+							onClick={onNextPage}
+							size="icon"
+							variant="ghost"
+						>
+							<ChevronRight className="h-2.5 w-2.5" />
+							<span className="sr-only">Página siguiente</span>
+						</Button>
+					</>
+				) : (
+					<span className="truncate opacity-80">{isLoading ? 'Cargando…' : 'Listo'}</span>
+				)}
+			</div>
 		</div>
 	);
 }

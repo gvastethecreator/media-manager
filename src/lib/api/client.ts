@@ -22,7 +22,9 @@ export class ApiClient {
 
 	constructor(options?: { timeout?: number }) {
 		// Usar el proxy de Vite en desarrollo y la misma URL base en producción
-		this.baseURL = process.env.NODE_ENV === 'development' ? '' : window.location.origin;
+		const browserOrigin =
+			typeof window !== 'undefined' && typeof window.location?.origin === 'string' ? window.location.origin : '';
+		this.baseURL = process.env.NODE_ENV === 'development' ? '' : browserOrigin;
 		this.defaultTimeout = options?.timeout ?? 30_000; // 30s default timeout
 	}
 

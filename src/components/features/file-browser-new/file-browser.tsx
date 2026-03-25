@@ -189,7 +189,7 @@ export function FileBrowser({
 			}
 
 			const fallbackItem =
-				(browser.activeId ? (browser.linearItems.find((it) => it.id === browser.activeId) ?? null) : null) ??
+				(browser.activeId ? browser.linearItems.find((it) => it.id === browser.activeId) : undefined) ??
 				browser.linearItems.find((it) => !it.isSynthetic) ??
 				null;
 
@@ -276,19 +276,17 @@ export function FileBrowser({
 					if (action.startsWith('add-to-')) {
 						const entityType = actionToEntityType(action);
 						if (entityType && payload.targetId) {
-							const mediaIds = payload.selected.map((item) => item.id);
 							await addToEntity({
 								entityType,
 								entityId: payload.targetId,
-								mediaIds,
+								items: payload.selected.map((item) => ({ id: item.id, entityType: item.entityType })),
 							});
 						} else if (entityType === 'favorite') {
 							// Favoritos no requiere targetId
-							const mediaIds = payload.selected.map((item) => item.id);
 							await addToEntity({
 								entityType: 'favorite',
 								entityId: 'favorites', // placeholder, el hook crea favoritos individuales
-								mediaIds,
+								items: payload.selected.map((item) => ({ id: item.id, entityType: item.entityType })),
 							});
 						} else {
 							clientLogger.warn(`Missing targetId for action: ${action}`);

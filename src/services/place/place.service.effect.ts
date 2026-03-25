@@ -42,6 +42,7 @@ export interface GetPlacesResult {
 export class PlaceService extends Context.Tag('PlaceService')<PlaceService, PlaceServiceInterface>() {}
 
 export interface PlaceServiceInterface {
+	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, PlaceError>;
 	readonly create: (input: PlaceCreateInput) => Effect.Effect<Place, PlaceError>;
 	readonly delete: (id: string) => Effect.Effect<void, PlaceError>;
 	readonly getAll: (options?: GetPlacesOptions) => Effect.Effect<GetPlacesResult, PlaceError>;
@@ -258,6 +259,15 @@ const make = (): PlaceServiceInterface => {
 			return result.map((r) => r.image);
 		});
 
+	const addImage = (id: string, imageId: string): Effect.Effect<void, PlaceError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(imagePlaces).values({ A: imageId, B: id }),
+				catch: (error) => fromUnknownError('addImage', error),
+			});
+		});
+
 	return {
 		getById,
 		getAll,
@@ -266,6 +276,7 @@ const make = (): PlaceServiceInterface => {
 		delete: delete_,
 		toggleFavorite,
 		getImages,
+		addImage,
 	};
 };
 

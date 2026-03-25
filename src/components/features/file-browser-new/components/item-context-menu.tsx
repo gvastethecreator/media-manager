@@ -219,7 +219,10 @@ function SubMenu({ children, className }: { children: React.ReactNode; className
 
 	return (
 		<div
-			className={cn('min-w-56 rounded-dt-md border-2 border-border/50 bg-linear-to-b from-popover to-popover/98 p-1 text-popover-foreground shadow-dt-3', className)}
+			className={cn(
+				'min-w-56 rounded-dt-md border-2 border-border/50 bg-linear-to-b from-popover to-popover/98 p-1 text-popover-foreground shadow-dt-3',
+				className
+			)}
 			ref={menuRef}
 		>
 			{children}
@@ -405,6 +408,12 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 
 	const selectedCount = selectedItems.length;
 	const hasSelection = selectedCount > 0;
+	const selectedEntityTypes = [...new Set(selectedItems.map((item) => item.entityType))];
+	const singleEntityType = selectedEntityTypes.length === 1 ? selectedEntityTypes[0] : null;
+	const supportsImageTargets = singleEntityType === 'image';
+	const supportsTagging = singleEntityType === 'image' || singleEntityType === 'video';
+	const supportsFavorites = singleEntityType !== null;
+	const hasAddTargets = supportsImageTargets || supportsTagging || supportsFavorites;
 
 	// Cerrar menú al hacer click fuera o presionar Escape
 	useEffect(() => {
@@ -442,110 +451,122 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 	// Submenú "Agregar a..."
 	const addToSubmenu = (
 		<SubMenu>
-			<EntityMenuItem
-				baseAction="add-to-album"
-				entities={entities.albums}
-				icon={<Album className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="📸 Album"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-collection"
-				entities={entities.collections}
-				icon={<Archive className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="📦 Colección"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-group"
-				entities={entities.groups}
-				icon={<Users className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="👥 Grupo"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-tag"
-				entities={entities.tags}
-				icon={<Tag className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="🏷️ Tag"
-				onSelect={handleSelect}
-			/>
-			<MenuSeparator />
-			<EntityMenuItem
-				baseAction="add-to-world-item"
-				entities={entities.worldItems}
-				icon={<Sparkles className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="✨ World Item"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-characters"
-				entities={entities.characters}
-				icon={<Users className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="👤 Characters"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-concept"
-				entities={entities.concepts}
-				icon={<Hash className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="💡 Concept"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-notes"
-				entities={entities.notes}
-				icon={<Pencil className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="📝 Notes"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-places"
-				entities={entities.places}
-				icon={<MapPin className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="📍 Places"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-prompts"
-				entities={entities.prompts}
-				icon={<Sparkles className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="🎯 Prompts"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-properties"
-				entities={entities.properties}
-				icon={<Hash className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="⚙️ Properties"
-				onSelect={handleSelect}
-			/>
-			<EntityMenuItem
-				baseAction="add-to-wildcards"
-				entities={entities.wildcards}
-				icon={<Wand2 className="h-4 w-4" />}
-				isLoading={isLoading}
-				label="🪄 Wildcards"
-				onSelect={handleSelect}
-			/>
-			<MenuSeparator />
-			<MenuItem
-				action="add-to-favorites"
-				icon={<Heart className="h-4 w-4" />}
-				label="❤️ Favorites"
-				onSelect={handleSelect}
-			/>
+			{supportsImageTargets && (
+				<>
+					<EntityMenuItem
+						baseAction="add-to-album"
+						entities={entities.albums}
+						icon={<Album className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="📸 Album"
+						onSelect={handleSelect}
+					/>
+					<EntityMenuItem
+						baseAction="add-to-collection"
+						entities={entities.collections}
+						icon={<Archive className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="📦 Colección"
+						onSelect={handleSelect}
+					/>
+					<EntityMenuItem
+						baseAction="add-to-group"
+						entities={entities.groups}
+						icon={<Users className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="👥 Grupo"
+						onSelect={handleSelect}
+					/>
+				</>
+			)}
+			{supportsTagging && (
+				<EntityMenuItem
+					baseAction="add-to-tag"
+					entities={entities.tags}
+					icon={<Tag className="h-4 w-4" />}
+					isLoading={isLoading}
+					label="🏷️ Tag"
+					onSelect={handleSelect}
+				/>
+			)}
+			{supportsImageTargets && supportsTagging && <MenuSeparator />}
+			{supportsImageTargets && (
+				<>
+					<EntityMenuItem
+						baseAction="add-to-world-item"
+						entities={entities.worldItems}
+						icon={<Sparkles className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="✨ World Item"
+						onSelect={handleSelect}
+					/>
+					<EntityMenuItem
+						baseAction="add-to-characters"
+						entities={entities.characters}
+						icon={<Users className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="👤 Characters"
+						onSelect={handleSelect}
+					/>
+					<EntityMenuItem
+						baseAction="add-to-concept"
+						entities={entities.concepts}
+						icon={<Hash className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="💡 Concept"
+						onSelect={handleSelect}
+					/>
+					<EntityMenuItem
+						baseAction="add-to-notes"
+						entities={entities.notes}
+						icon={<Pencil className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="📝 Notes"
+						onSelect={handleSelect}
+					/>
+					<EntityMenuItem
+						baseAction="add-to-places"
+						entities={entities.places}
+						icon={<MapPin className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="📍 Places"
+						onSelect={handleSelect}
+					/>
+					<EntityMenuItem
+						baseAction="add-to-prompts"
+						entities={entities.prompts}
+						icon={<Sparkles className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="🎯 Prompts"
+						onSelect={handleSelect}
+					/>
+					<EntityMenuItem
+						baseAction="add-to-properties"
+						entities={entities.properties}
+						icon={<Hash className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="⚙️ Properties"
+						onSelect={handleSelect}
+					/>
+					<EntityMenuItem
+						baseAction="add-to-wildcards"
+						entities={entities.wildcards}
+						icon={<Wand2 className="h-4 w-4" />}
+						isLoading={isLoading}
+						label="🪄 Wildcards"
+						onSelect={handleSelect}
+					/>
+				</>
+			)}
+			{supportsFavorites && (supportsImageTargets || supportsTagging) && <MenuSeparator />}
+			{supportsFavorites && (
+				<MenuItem
+					action="add-to-favorites"
+					icon={<Heart className="h-4 w-4" />}
+					label="❤️ Favorites"
+					onSelect={handleSelect}
+				/>
+			)}
 		</SubMenu>
 	);
 
@@ -583,7 +604,9 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 					<MenuSeparator />
 
 					{/* Submenú Agregar a... */}
-					<MenuItem icon={<Bookmark className="h-4 w-4" />} label="Agregar a..." submenu={addToSubmenu} />
+					{hasAddTargets && (
+						<MenuItem icon={<Bookmark className="h-4 w-4" />} label="Agregar a..." submenu={addToSubmenu} />
+					)}
 
 					<MenuSeparator />
 

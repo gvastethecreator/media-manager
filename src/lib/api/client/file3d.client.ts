@@ -13,6 +13,14 @@ export async function getFile3DsFromApi(): Promise<File3DWithStats[]> {
 	return response.json();
 }
 
+export async function getFile3DFromApi(id: string): Promise<File3DWithStats> {
+	const response = await fetch(`${API_BASE_PATH}/${id}`);
+	if (!response.ok) {
+		throw new Error('Error al obtener archivo 3D');
+	}
+	return response.json();
+}
+
 export async function createFile3DInApi(data: File3DCreateInput): Promise<File3DWithStats> {
 	const response = await fetch(API_BASE_PATH, {
 		method: 'POST',

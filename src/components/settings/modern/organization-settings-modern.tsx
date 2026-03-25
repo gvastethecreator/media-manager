@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAlbums, useDeleteAlbum } from '@/lib/api/albums';
 import { useCollections, useDeleteCollection } from '@/lib/api/collections';
-import { useDeleteGroup, useGroups } from '@/lib/api/groups';
+import { useCreateGroup, useDeleteGroup, useGroups, useUpdateGroup } from '@/lib/api/groups';
 import { toastService } from '@/lib/ui/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { CollectionWithStats } from '@/types/entities/collection';
@@ -323,6 +323,8 @@ export function OrganizationSettingsModern() {
 	const deleteAlbumMutation = useDeleteAlbum();
 	const deleteCollectionMutation = useDeleteCollection();
 	const deleteGroupMutation = useDeleteGroup();
+	const createGroupMutation = useCreateGroup();
+	const updateGroupMutation = useUpdateGroup();
 
 	// Handlers comunes
 	const handleCreate = useCallback(() => {
@@ -397,12 +399,18 @@ export function OrganizationSettingsModern() {
 								group={editingItem as GroupWithStats}
 								isEditing={!!editingItem}
 								onCancel={onCancel}
-								onSubmit={async () => {
+								onSubmit={async (data) => {
 									if (editingItem) {
+										await updateGroupMutation.mutateAsync({
+											id: (editingItem as GroupWithStats).id,
+											data,
+										});
 										handleUpdated();
-									} else {
-										handleCreated();
+										return;
 									}
+
+									await createGroupMutation.mutateAsync(data);
+									handleCreated();
 								}}
 							/>
 						</DialogContent>
