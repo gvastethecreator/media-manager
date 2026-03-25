@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import type { ThemeProviderProps } from '@/lib/contexts/theme-context';
 import { ThemeProvider as NativeThemeProvider, useTheme } from '@/lib/contexts/theme-context';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Definimos los temas personalizados disponibles
 // Cada tema tiene su definición en src/app/themes.css
@@ -30,8 +31,10 @@ function ThemeDebugger() {
 			for (const mutation of mutations) {
 				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
 					const target = mutation.target as HTMLElement;
-					console.log(`Tema cambiado a: ${target.getAttribute('data-theme')}`);
-					console.log(`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`);
+					clientLogger.debug(`Tema cambiado a: ${target.getAttribute('data-theme')}`);
+					clientLogger.debug(
+						`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`
+					);
 				}
 			}
 		});
@@ -77,7 +80,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 	return (
 		<NativeThemeProvider {...props}>
 			{children}
-			<ThemeDebugger />
+			{import.meta.env.DEV ? <ThemeDebugger /> : null}
 			<ThemeEnforcer />
 		</NativeThemeProvider>
 	);

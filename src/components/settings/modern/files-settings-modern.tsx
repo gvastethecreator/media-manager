@@ -258,6 +258,15 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 		[thumbnailStats]
 	);
 
+	const totalFiles = useMemo(
+		() =>
+			folders.reduce(
+				(acc: number, folder: FolderWithStats) => acc + (folder.totalFiles ?? folder.stats?.totalFiles ?? 0),
+				0
+			),
+		[folders]
+	);
+
 	// Handlers
 	const handleCreateFolder = useCallback(() => {
 		setEditingFolder(null);
@@ -369,9 +378,9 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 				</TabsList>
 
 				<div className="mt-6 space-y-6">
-					<TabsContent className="m-0 space-y-6" value="folders">
+					<TabsContent className="m-0 space-y-6" data-testid="folders-settings" value="folders">
 						{/* Stats */}
-						<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-3" data-testid="folders-stats">
 							{folderStats.map((stat) => (
 								<Card
 									className="border-l-4"
@@ -394,6 +403,23 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									</CardContent>
 								</Card>
 							))}
+							<Card className="border-l-4" style={{ borderLeftColor: 'color-mix(in oklch, var(--entity-video) 60%, transparent)' }}>
+								<CardContent className="p-4">
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="font-medium text-muted-foreground text-sm">Archivos</p>
+											<p className="font-bold text-2xl" data-testid="stats-total-files">{totalFiles}</p>
+										</div>
+										<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+											<HardDrive className="h-5 w-5 text-primary" />
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+						</div>
+
+						<div className="sr-only" data-testid="stats-total-folders">
+							{folders.length}
 						</div>
 
 						{/* Toolbar */}
@@ -444,6 +470,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 
 								<Button
 									className="gap-2"
+									data-testid="reindex-all-button"
 									disabled={reindexAllFoldersMutation.isPending}
 									onClick={async () => {
 										try {
