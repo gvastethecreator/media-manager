@@ -5,6 +5,7 @@ import { useTheme } from '@/components/ui/theme-provider';
 
 export function Toaster() {
 	const { resolvedTheme = 'light' } = useTheme();
+	const sonnerTheme = resolvedTheme === 'light' ? 'light' : 'dark';
 
 	return (
 		<SonnerToaster
@@ -19,7 +20,7 @@ export function Toaster() {
 					'--normal-border': 'var(--border)',
 				} as React.CSSProperties
 			}
-			theme={resolvedTheme as 'light' | 'dark'}
+			theme={sonnerTheme}
 		/>
 	);
 }

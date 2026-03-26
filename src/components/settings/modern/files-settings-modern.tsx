@@ -403,12 +403,17 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									</CardContent>
 								</Card>
 							))}
-							<Card className="border-l-4" style={{ borderLeftColor: 'color-mix(in oklch, var(--entity-video) 60%, transparent)' }}>
+							<Card
+								className="border-l-4"
+								style={{ borderLeftColor: 'color-mix(in oklch, var(--entity-video) 60%, transparent)' }}
+							>
 								<CardContent className="p-4">
 									<div className="flex items-center justify-between">
 										<div>
 											<p className="font-medium text-muted-foreground text-sm">Archivos</p>
-											<p className="font-bold text-2xl" data-testid="stats-total-files">{totalFiles}</p>
+											<p className="font-bold text-2xl" data-testid="stats-total-files">
+												{totalFiles}
+											</p>
 										</div>
 										<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
 											<HardDrive className="h-5 w-5 text-primary" />
