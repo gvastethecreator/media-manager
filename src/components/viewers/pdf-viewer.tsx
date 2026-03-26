@@ -48,8 +48,8 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 			<DialogContent className="flex h-[85vh] max-w-[90vw] flex-col overflow-hidden p-0">
 				<DialogHeader className="flex flex-row items-center justify-between border-b bg-muted/30 px-4 py-3">
 					<div className="flex items-center gap-2 truncate">
-						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10">
-							<FileText className="h-4 w-4 text-red-500" />
+						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-(--entity-document)/10">
+							<FileText className="h-4 w-4 text-(--entity-document)" />
 						</div>
 						<DialogTitle className="truncate font-medium text-sm">{file.name}</DialogTitle>
 					</div>

@@ -53,15 +53,7 @@ if (!logName || commandArgs.length === 0) {
 const fullCommand = commandArgs.join(' ');
 
 // Comandos que pueden devolver exit code 1 pero no son errores críticos
-const LINTING_COMMANDS = [
-	'vp check',
-	'vp lint',
-	'vp fmt',
-	'oxlint',
-	'oxfmt',
-	'eslint',
-	'prettier',
-];
+const LINTING_COMMANDS = ['vp check', 'vp lint', 'vp fmt', 'oxlint', 'oxfmt', 'eslint', 'prettier'];
 
 // Comandos de testing que pueden fallar con tests fallidos (no errores críticos)
 const TESTING_COMMANDS = ['playwright', 'test'];
@@ -78,7 +70,9 @@ if (!existsSync(logsDir)) {
 try {
 	await cleanOldLogs();
 } catch (error) {
-	console.warn(chalk.yellow(`⚠️  No se pudieron rotar logs antiguos: ${error instanceof Error ? error.message : String(error)}`));
+	console.warn(
+		chalk.yellow(`⚠️  No se pudieron rotar logs antiguos: ${error instanceof Error ? error.message : String(error)}`)
+	);
 }
 
 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');

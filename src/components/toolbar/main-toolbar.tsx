@@ -78,7 +78,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	};
 
 	return (
-		<div className="flex h-9 min-w-0 items-center justify-between border-2 border-background bg-secondary p-2">
+		<div className="flex h-9 min-w-0 items-center justify-between border-b border-border bg-secondary p-2">
 			{/* Lado izquierdo: Botón colapsar panel izquierdo + breadcrumbs */}
 			<div className="flex min-w-0 items-center gap-2 overflow-hidden">
 				{/* Botón de colapsar panel izquierdo */}

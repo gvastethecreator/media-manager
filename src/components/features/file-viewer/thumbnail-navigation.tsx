@@ -30,7 +30,7 @@ export const ThumbnailNavigation = memo(function ThumbnailNavigationImpl({
 	}, [images, currentIndex]);
 
 	return (
-		<div className="fixed bottom-6 left-1/2 z-[10000] flex w-full max-w-4xl -translate-x-1/2 items-center justify-center px-4">
+		<div className="fixed bottom-6 left-1/2 z-[9998] flex w-full max-w-4xl -translate-x-1/2 items-center justify-center px-4">
 			<motion.div
 				className="scrollbar-hide flex w-full items-center justify-center gap-2 overflow-x-auto rounded-full border border-border/40 bg-background/60 p-2 shadow-xl backdrop-blur-md"
 				layout

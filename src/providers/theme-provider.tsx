@@ -32,9 +32,7 @@ function ThemeDebugger() {
 				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
 					const target = mutation.target as HTMLElement;
 					clientLogger.debug(`Tema cambiado a: ${target.getAttribute('data-theme')}`);
-					clientLogger.debug(
-						`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`
-					);
+					clientLogger.debug(`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`);
 				}
 			}
 		});

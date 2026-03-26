@@ -246,6 +246,30 @@
 	--tcg-glow-4: 0 0 50px color-mix(in oklch, var(--glow-color, var(--dt-primary-500)), transparent 40%);
 	--tcg-glow-5: 0 0 60px color-mix(in oklch, var(--glow-color, var(--dt-warning-500)), transparent 30%);
 	--tcg-glow-6: 0 0 80px color-mix(in oklch, var(--glow-color, var(--dt-danger-500)), transparent 20%);
+
+	/* =====================================================
+    * METADATA CATEGORY COLORS
+    * Colores semánticos para categorías de metadatos AI/técnicos
+    * ===================================================== */
+	--meta-ai-engine: oklch(0.59 0.2 255);
+	--meta-lora: oklch(0.75 0.18 85);
+	--meta-model: oklch(0.72 0.19 45);
+	--meta-param: oklch(0.64 0.17 165);
+	--meta-seed: oklch(0.75 0.18 85);
+	--meta-dimension: oklch(0.59 0.16 240);
+	--meta-workflow-json: oklch(0.75 0.18 85);
+	--meta-workflow: oklch(0.59 0.16 240);
+	--meta-exif: oklch(0.64 0.17 165);
+	--meta-iptc: oklch(0.59 0.2 255);
+	--meta-xmp: oklch(0.59 0.23 293);
+
+	/* JSON type indicators */
+	--meta-json-object: oklch(0.59 0.2 255);
+	--meta-json-array: oklch(0.72 0.19 142);
+	--meta-json-string: oklch(0.8 0.18 95);
+	--meta-json-number: oklch(0.72 0.19 45);
+	--meta-json-boolean: oklch(0.59 0.23 293);
+	--meta-json-null: oklch(0.6 0.02 0);
 }
 
 /* Tema oscuro - ajustar opacidades y brillos */
