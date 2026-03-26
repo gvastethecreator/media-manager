@@ -139,7 +139,10 @@ export const PromptParser: React.FC<PromptParserProps> = ({ prompt, className, o
 					case 'lora':
 						return (
 							<Badge
-								className={cn(badgeBase, 'border-blue-500/20 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20')}
+								className={cn(
+									badgeBase,
+									'border-(--meta-lora)/20 bg-(--meta-lora)/10 text-(--meta-lora) hover:bg-(--meta-lora)/20'
+								)}
 								key={idx}
 								variant="secondary"
 							>
@@ -154,7 +157,7 @@ export const PromptParser: React.FC<PromptParserProps> = ({ prompt, className, o
 							<Badge
 								className={cn(
 									badgeBase,
-									'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'
+									'border-(--meta-param)/20 bg-(--meta-param)/10 text-(--meta-param) hover:bg-(--meta-param)/20'
 								)}
 								key={idx}
 								variant="secondary"
@@ -168,7 +171,10 @@ export const PromptParser: React.FC<PromptParserProps> = ({ prompt, className, o
 					case 'network':
 						return (
 							<Badge
-								className={cn(badgeBase, 'border-amber-500/20 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20')}
+								className={cn(
+									badgeBase,
+									'border-(--meta-model)/20 bg-(--meta-model)/10 text-(--meta-model) hover:bg-(--meta-model)/20'
+								)}
 								key={idx}
 								variant="secondary"
 							>

@@ -200,13 +200,16 @@ const getRelationsCounts = (id: string): Effect.Effect<CollectionCounts, Collect
 
 		const imageCountRows = toRowArray(
 			(yield* Effect.tryPromise({
-			try: async () =>
-				await withSqliteBusyRetry(async () => await db.select({ count: count() }).from(imageCollections).where(eq(imageCollections.B, id))), // B = collectionId
-			catch: (error) =>
-				new CollectionDatabaseError({
-					operation: 'getRelationsCounts:images',
-					originalError: error,
-				}),
+				try: async () =>
+					await withSqliteBusyRetry(
+						async () =>
+							await db.select({ count: count() }).from(imageCollections).where(eq(imageCollections.B, id)).execute()
+					), // B = collectionId
+				catch: (error) =>
+					new CollectionDatabaseError({
+						operation: 'getRelationsCounts:images',
+						originalError: error,
+					}),
 			})) as Array<{ count: number }> | { count: number }
 		);
 		const [imagesCountResult] = imageCountRows;
@@ -247,17 +250,20 @@ const validateParentExists = (
 	Effect.gen(function* () {
 		if (!parentId) return;
 
-		const parent = toRowArray(yield* Effect.tryPromise({
-			try: async () =>
-				await withSqliteBusyRetry(async () =>
-					await db.select({ id: collections.id }).from(collections).where(eq(collections.id, parentId))
-				),
-			catch: (error) =>
-				new CollectionDatabaseError({
-					operation: 'validateParentExists',
-					originalError: error,
-				}),
-		}));
+		const parent = toRowArray(
+			yield* Effect.tryPromise({
+				try: async () =>
+					await withSqliteBusyRetry(
+						async () =>
+							await db.select({ id: collections.id }).from(collections).where(eq(collections.id, parentId)).execute()
+					),
+				catch: (error) =>
+					new CollectionDatabaseError({
+						operation: 'validateParentExists',
+						originalError: error,
+					}),
+			})
+		);
 
 		if (parent.length === 0) {
 			yield* new CollectionNotFound({ collectionId: parentId });
@@ -272,29 +278,38 @@ const checkNameUnique = (
 	excludeId?: string
 ): Effect.Effect<void, CollectionValidationError | CollectionDatabaseError> =>
 	Effect.gen(function* () {
-		const existing = toRowArray(yield* Effect.tryPromise({
-			try: async () => {
-				if (excludeId) {
-					// Check for other collections with same name
-					const result = await withSqliteBusyRetry(async () =>
-						await db
-							.select({ id: collections.id, name: collections.name })
-							.from(collections)
-							.where(and(eq(collections.name, name), ne(collections.id, excludeId)))
+		const existing = toRowArray(
+			yield* Effect.tryPromise({
+				try: async () => {
+					if (excludeId) {
+						// Check for other collections with same name
+						const result = await withSqliteBusyRetry(
+							async () =>
+								await db
+									.select({ id: collections.id, name: collections.name })
+									.from(collections)
+									.where(and(eq(collections.name, name), ne(collections.id, excludeId)))
+									.execute()
+						);
+						return result;
+					}
+					// Check for any collection with same name
+					return await withSqliteBusyRetry(
+						async () =>
+							await db
+								.select({ id: collections.id, name: collections.name })
+								.from(collections)
+								.where(eq(collections.name, name))
+								.execute()
 					);
-					return result;
-				}
-				// Check for any collection with same name
-				return await withSqliteBusyRetry(async () =>
-					await db.select({ id: collections.id, name: collections.name }).from(collections).where(eq(collections.name, name))
-				);
-			},
-			catch: (error) =>
-				new CollectionDatabaseError({
-					operation: 'checkNameUnique',
-					originalError: error,
-				}),
-		}));
+				},
+				catch: (error) =>
+					new CollectionDatabaseError({
+						operation: 'checkNameUnique',
+						originalError: error,
+					}),
+			})
+		);
 
 		if (existing.length > 0) {
 			yield* new CollectionValidationError({
@@ -311,17 +326,19 @@ const getByIdInternal = (id: string): Effect.Effect<Collection, CollectionNotFou
 	Effect.gen(function* () {
 		logger.info('🔍 Obteniendo collection por ID', { id });
 
-		const result = toRowArray(yield* Effect.tryPromise({
-			try: async () =>
-				await withSqliteBusyRetry(async () =>
-					await db.select().from(collections).where(eq(collections.id, id))
-				),
-			catch: (error) =>
-				new CollectionDatabaseError({
-					operation: 'getByIdInternal',
-					originalError: error,
-				}),
-		}));
+		const result = toRowArray(
+			yield* Effect.tryPromise({
+				try: async () =>
+					await withSqliteBusyRetry(
+						async () => await db.select().from(collections).where(eq(collections.id, id)).limit(1).execute()
+					),
+				catch: (error) =>
+					new CollectionDatabaseError({
+						operation: 'getByIdInternal',
+						originalError: error,
+					}),
+			})
+		);
 
 		if (result.length === 0) {
 			logger.warn('❌ Collection no encontrada', { id });
@@ -395,17 +412,17 @@ export const CollectionServiceLive = Layer.succeed(
 				// Get total count
 				const countRows = toRowArray(
 					(yield* Effect.tryPromise({
-					try: async () => {
-						const result = await withSqliteBusyRetry(async () =>
-							await db.select({ count: count() }).from(collections).where(whereClause)
-						);
-						return result;
-					},
-					catch: (error) =>
-						new CollectionDatabaseError({
-							operation: 'getAll:count',
-							originalError: error,
-						}),
+						try: async () => {
+							const result = await withSqliteBusyRetry(
+								async () => await db.select({ count: count() }).from(collections).where(whereClause).execute()
+							);
+							return result;
+						},
+						catch: (error) =>
+							new CollectionDatabaseError({
+								operation: 'getAll:count',
+								originalError: error,
+							}),
 					})) as Array<{ count: number }> | { count: number }
 				);
 				const [countResult] = countRows;
@@ -423,21 +440,23 @@ export const CollectionServiceLive = Layer.succeed(
 
 				const results = toRowArray(
 					(yield* Effect.tryPromise({
-					try: async () =>
-						await withSqliteBusyRetry(async () =>
-							await db
-								.select()
-								.from(collections)
-								.where(whereClause)
-								.orderBy(orderFn(orderColumn))
-								.limit(limit)
-								.offset(offset)
-						),
-					catch: (error) =>
-						new CollectionDatabaseError({
-							operation: 'getAll:query',
-							originalError: error,
-						}),
+						try: async () =>
+							await withSqliteBusyRetry(
+								async () =>
+									await db
+										.select()
+										.from(collections)
+										.where(whereClause)
+										.orderBy(orderFn(orderColumn))
+										.limit(limit)
+										.offset(offset)
+										.execute()
+							),
+						catch: (error) =>
+							new CollectionDatabaseError({
+								operation: 'getAll:query',
+								originalError: error,
+							}),
 					})) as Array<typeof collections.$inferSelect> | typeof collections.$inferSelect
 				);
 
@@ -491,22 +510,24 @@ export const CollectionServiceLive = Layer.succeed(
 				const now = new Date();
 				const createdRows = (yield* Effect.tryPromise({
 					try: async () =>
-						await withSqliteBusyRetry(async () =>
-							await db
-								.insert(collections)
-								.values({
-									id: readableId,
-									name: validated.name,
-									emoji: validated.emoji ?? null,
-									color: validated.color ?? null,
-									description: validated.description ?? null,
-									featuredImage: validated.featuredImage ?? null,
-									isFavorite: validated.isFavorite ?? false,
-									parentId: validated.parentId ?? null,
-									createdAt: now,
-									updatedAt: now,
-								})
-								.returning()
+						await withSqliteBusyRetry(
+							async () =>
+								await db
+									.insert(collections)
+									.values({
+										id: readableId,
+										name: validated.name,
+										emoji: validated.emoji ?? null,
+										color: validated.color ?? null,
+										description: validated.description ?? null,
+										featuredImage: validated.featuredImage ?? null,
+										isFavorite: validated.isFavorite ?? false,
+										parentId: validated.parentId ?? null,
+										createdAt: now,
+										updatedAt: now,
+									})
+									.returning()
+									.execute()
 						),
 					catch: (error) =>
 						new CollectionDatabaseError({
@@ -561,15 +582,17 @@ export const CollectionServiceLive = Layer.succeed(
 				// Update in DB
 				const updatedRows = (yield* Effect.tryPromise({
 					try: async () =>
-						await withSqliteBusyRetry(async () =>
-							await db
-								.update(collections)
-								.set({
-									...validated,
-									updatedAt: new Date(),
-								})
-								.where(eq(collections.id, id))
-								.returning()
+						await withSqliteBusyRetry(
+							async () =>
+								await db
+									.update(collections)
+									.set({
+										...validated,
+										updatedAt: new Date(),
+									})
+									.where(eq(collections.id, id))
+									.returning()
+									.execute()
 						),
 					catch: (error) =>
 						new CollectionDatabaseError({
@@ -616,7 +639,9 @@ export const CollectionServiceLive = Layer.succeed(
 				if (force) {
 					yield* Effect.tryPromise({
 						try: async () =>
-								await withSqliteBusyRetry(async () => await db.delete(imageCollections).where(eq(imageCollections.B, id))),
+							await withSqliteBusyRetry(
+								async () => await db.delete(imageCollections).where(eq(imageCollections.B, id)).execute()
+							),
 						catch: (error) =>
 							new CollectionDatabaseError({
 								operation: 'delete:relations',
@@ -627,7 +652,8 @@ export const CollectionServiceLive = Layer.succeed(
 
 				// Delete from DB
 				yield* Effect.tryPromise({
-					try: async () => await withSqliteBusyRetry(async () => await db.delete(collections).where(eq(collections.id, id))),
+					try: async () =>
+						await withSqliteBusyRetry(async () => await db.delete(collections).where(eq(collections.id, id)).execute()),
 					catch: (error) =>
 						new CollectionDatabaseError({
 							operation: 'delete',
@@ -656,12 +682,14 @@ export const CollectionServiceLive = Layer.succeed(
 					try: async () =>
 						uniqueImageIds.length === 0
 							? []
-							: await withSqliteBusyRetry(async () =>
-									await db
-									.select({ imageId: imageCollections.A })
-									.from(imageCollections)
-									.where(and(eq(imageCollections.B, collectionId), inArray(imageCollections.A, uniqueImageIds)))
-							  ),
+							: await withSqliteBusyRetry(
+									async () =>
+										await db
+											.select({ imageId: imageCollections.A })
+											.from(imageCollections)
+											.where(and(eq(imageCollections.B, collectionId), inArray(imageCollections.A, uniqueImageIds)))
+											.execute()
+								),
 					catch: (error) =>
 						new CollectionDatabaseError({
 							operation: 'addImages:existingRelations',
@@ -675,13 +703,17 @@ export const CollectionServiceLive = Layer.succeed(
 				if (missingImageIds.length > 0) {
 					yield* Effect.tryPromise({
 						try: async () =>
-							await withSqliteBusyRetry(async () =>
-								await db.insert(imageCollections).values(
-									missingImageIds.map((imageId) => ({
-										A: imageId,
-										B: collectionId,
-									}))
-								)
+							await withSqliteBusyRetry(
+								async () =>
+									await db
+										.insert(imageCollections)
+										.values(
+											missingImageIds.map((imageId) => ({
+												A: imageId,
+												B: collectionId,
+											}))
+										)
+										.execute()
 							),
 						catch: (error) =>
 							new CollectionDatabaseError({
@@ -701,10 +733,12 @@ export const CollectionServiceLive = Layer.succeed(
 
 				yield* Effect.tryPromise({
 					try: async () =>
-						await withSqliteBusyRetry(async () =>
-							await db
-								.delete(imageCollections)
-								.where(and(eq(imageCollections.A, imageId), eq(imageCollections.B, collectionId)))
+						await withSqliteBusyRetry(
+							async () =>
+								await db
+									.delete(imageCollections)
+									.where(and(eq(imageCollections.A, imageId), eq(imageCollections.B, collectionId)))
+									.execute()
 						),
 					catch: (error) =>
 						new CollectionDatabaseError({
@@ -723,23 +757,25 @@ export const CollectionServiceLive = Layer.succeed(
 				const { limit = 50, offset = 0 } = options;
 				const results = toRowArray(
 					(yield* Effect.tryPromise({
-					try: async () =>
-						await withSqliteBusyRetry(async () =>
-							await db
-								.select({
-									image: images,
-								})
-								.from(imageCollections)
-								.innerJoin(images, eq(imageCollections.A, images.id))
-								.where(eq(imageCollections.B, collectionId))
-								.limit(limit)
-								.offset(offset)
-						),
-					catch: (error) =>
-						new CollectionDatabaseError({
-							operation: 'getImages',
-							originalError: error,
-						}),
+						try: async () =>
+							await withSqliteBusyRetry(
+								async () =>
+									await db
+										.select({
+											image: images,
+										})
+										.from(imageCollections)
+										.innerJoin(images, eq(imageCollections.A, images.id))
+										.where(eq(imageCollections.B, collectionId))
+										.limit(limit)
+										.offset(offset)
+										.execute()
+							),
+						catch: (error) =>
+							new CollectionDatabaseError({
+								operation: 'getImages',
+								originalError: error,
+							}),
 					})) as Array<{ image: typeof images.$inferSelect }> | { image: typeof images.$inferSelect }
 				);
 
@@ -759,15 +795,17 @@ export const CollectionServiceLive = Layer.succeed(
 
 				const updatedRows = (yield* Effect.tryPromise({
 					try: async () =>
-						await withSqliteBusyRetry(async () =>
-							await db
-								.update(collections)
-								.set({
-									isFavorite: newValue,
-									updatedAt: new Date(),
-								})
-								.where(eq(collections.id, id))
-								.returning()
+						await withSqliteBusyRetry(
+							async () =>
+								await db
+									.update(collections)
+									.set({
+										isFavorite: newValue,
+										updatedAt: new Date(),
+									})
+									.where(eq(collections.id, id))
+									.returning()
+									.execute()
 						),
 					catch: (error) =>
 						new CollectionDatabaseError({
@@ -800,12 +838,14 @@ export const CollectionServiceLive = Layer.succeed(
 				const results = toRowArray(
 					(yield* Effect.tryPromise({
 						try: async () =>
-							await withSqliteBusyRetry(async () =>
-								await db
-								.select()
-								.from(collections)
-								.where(or(like(collections.name, `%${query}%`), like(collections.description, `%${query}%`)))
-								.limit(50)
+							await withSqliteBusyRetry(
+								async () =>
+									await db
+										.select()
+										.from(collections)
+										.where(or(like(collections.name, `%${query}%`), like(collections.description, `%${query}%`)))
+										.limit(50)
+										.execute()
 							),
 						catch: (error) =>
 							new CollectionDatabaseError({
