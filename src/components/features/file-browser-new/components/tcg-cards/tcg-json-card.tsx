@@ -106,9 +106,9 @@ export const TCGJsonCard = memo(function TCGJsonCard({ item, variant, width, ...
 			{/* Validation indicator */}
 			<div className="absolute top-6 left-6 z-10" title={isValid ? 'JSON válido' : 'JSON inválido'}>
 				{isValid ? (
-					<CheckCircle2 className="text-green-500" size={14} />
+					<CheckCircle2 className="text-dt-success-500" size={14} />
 				) : (
-					<XCircle className="text-red-500" size={14} />
+					<XCircle className="text-dt-danger-500" size={14} />
 				)}
 			</div>
 

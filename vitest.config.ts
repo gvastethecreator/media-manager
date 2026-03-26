@@ -34,6 +34,11 @@ export default defineConfig({
 		// Ejecutar tests de archivos secuencialmente para evitar SQLITE_BUSY
 		fileParallelism: false,
 		maxWorkers: 1,
+		maxConcurrency: 1,
+		sequence: {
+			concurrent: false,
+			shuffle: false,
+		},
 		// Pool de ejecución
 		pool: 'forks',
 		// Aislamiento para evitar contaminación entre tests

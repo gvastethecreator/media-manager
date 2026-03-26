@@ -156,7 +156,7 @@ const env: Record<string, string | undefined> =
 		: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 			(((globalThis as any)?.Bun?.env ?? {}) as Record<string, string | undefined>);
 
-const isUnitTest = env.NODE_ENV === 'test' || env.BUN_TEST === '1';
+const isUnitTest = env.NODE_ENV === 'test' || env.BUN_TEST === '1' || env.VITEST === 'true' || env.TEST === 'true';
 
 // Obtener la URL de la base de datos desde las variables de entorno
 // - En servidor/tests (Node/Bun) usa env.DATABASE_URL

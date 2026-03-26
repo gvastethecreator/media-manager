@@ -64,7 +64,7 @@ const createSafeLogger = (context: string) => {
 
 const logger = createSafeLogger('ImageService');
 
-const getFirstRow = async <TRow>(operation: () => Promise<TRow[]>): Promise<TRow | null> => {
+const getFirstRow = async <TRow>(operation: () => PromiseLike<TRow[]>): Promise<TRow | null> => {
 	const rows = await operation();
 	return rows[0] ?? null;
 };
@@ -82,7 +82,9 @@ const getByIdInternal = (id: string): Effect.Effect<Image, ImageError, never> =>
 
 		const result = yield* Effect.tryPromise({
 			try: async () => {
-				const image = await getFirstRow(() => db.select().from(images).where(eq(images.id, id)).limit(1));
+				const image = await getFirstRow<typeof images.$inferSelect>(() =>
+					db.select().from(images).where(eq(images.id, id)).limit(1)
+				);
 				if (!image) return null;
 				return Image.make(image);
 			},
@@ -130,7 +132,20 @@ const getRelationsCounts = (
 
 		const counts = yield* Effect.tryPromise({
 			try: async () => {
-				const [albumRows, collectionRows, tagRows, characterRows, placeRows, worldItemRows, conceptRows, promptRows, noteRows, wildcardRows, propertyRows, groupRows] = await Promise.all([
+				const [
+					albumRows,
+					collectionRows,
+					tagRows,
+					characterRows,
+					placeRows,
+					worldItemRows,
+					conceptRows,
+					promptRows,
+					noteRows,
+					wildcardRows,
+					propertyRows,
+					groupRows,
+				] = await Promise.all([
 					db.select({ count: count() }).from(imageAlbums).where(eq(imageAlbums.A, imageId)),
 					db.select({ count: count() }).from(imageCollections).where(eq(imageCollections.A, imageId)),
 					db.select({ count: count() }).from(imageTags).where(eq(imageTags.A, imageId)),
@@ -266,7 +281,9 @@ export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError
 		// Check for duplicate hash (UNIQUE constraint)
 		const existing = yield* Effect.tryPromise({
 			try: async () => {
-				return await getFirstRow(() => db.select().from(images).where(eq(images.hash, validated.hash)).limit(1));
+				return await getFirstRow<typeof images.$inferSelect>(() =>
+					db.select().from(images).where(eq(images.hash, validated.hash)).limit(1)
+				);
 			},
 			catch: (error) =>
 				new ImageDatabaseError({
@@ -764,7 +781,9 @@ export const getByHash = (hash: string): Effect.Effect<Image, ImageError, never>
 
 		const result = yield* Effect.tryPromise({
 			try: async () => {
-				const image = await getFirstRow(() => db.select().from(images).where(eq(images.hash, hash)).limit(1));
+				const image = await getFirstRow<typeof images.$inferSelect>(() =>
+					db.select().from(images).where(eq(images.hash, hash)).limit(1)
+				);
 				if (!image) return null;
 				return Image.make(image);
 			},
@@ -802,8 +821,12 @@ export const getByPathAndFolder = (path: string, folderId: string): Effect.Effec
 
 		const result = yield* Effect.tryPromise({
 			try: async () => {
-				const image = await getFirstRow(() =>
-					db.select().from(images).where(and(eq(images.path, path), eq(images.folderId, folderId))).limit(1)
+				const image = await getFirstRow<typeof images.$inferSelect>(() =>
+					db
+						.select()
+						.from(images)
+						.where(and(eq(images.path, path), eq(images.folderId, folderId)))
+						.limit(1)
 				);
 				if (!image) return null;
 				return Image.make(image);
@@ -842,7 +865,11 @@ export const getAllFavorites = (): Effect.Effect<Image[], ImageError, never> =>
 
 		const results = yield* Effect.tryPromise({
 			try: async () => {
-				const favImages = await db.select().from(images).where(eq(images.isFavorite, true)).orderBy(desc(images.addedAt));
+				const favImages = await db
+					.select()
+					.from(images)
+					.where(eq(images.isFavorite, true))
+					.orderBy(desc(images.addedAt));
 				return favImages.map((img: typeof images.$inferSelect) => Image.make(img));
 			},
 			catch: (error) =>
@@ -1091,7 +1118,9 @@ export const getThumbnail = (imageId: string): Effect.Effect<Buffer, ImageError,
 
 		// Helper to get image by ID for thumbnail service
 		const getImageById = async (id: string) => {
-			const img = await getFirstRow(() => db.select().from(images).where(eq(images.id, id)).limit(1));
+			const img = await getFirstRow<typeof images.$inferSelect>(() =>
+				db.select().from(images).where(eq(images.id, id)).limit(1)
+			);
 			return img || null;
 		};
 
@@ -1130,7 +1159,9 @@ export const getOriginalImage = (imageId: string): Effect.Effect<Buffer, ImageEr
 
 		// Helper to get image by ID for thumbnail service
 		const getImageById = async (id: string) => {
-			const img = await getFirstRow(() => db.select().from(images).where(eq(images.id, id)).limit(1));
+			const img = await getFirstRow<typeof images.$inferSelect>(() =>
+				db.select().from(images).where(eq(images.id, id)).limit(1)
+			);
 			return img || null;
 		};
 

@@ -133,7 +133,7 @@ export function MultiEntityViewer({ entities, currentIndex, isOpen, onClose, onI
 			{isOpen && (
 				<motion.div
 					animate={{ opacity: 1 }}
-					className="fixed inset-0 z-[9999] bg-background"
+					className="fixed inset-0 z-[9998] bg-background"
 					exit={{ opacity: 0 }}
 					initial={{ opacity: 0 }}
 					transition={{ duration: 0.2 }}

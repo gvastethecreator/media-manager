@@ -655,7 +655,7 @@ const FolderServiceLive = Layer.succeed(
 				});
 
 				const createdFolder = yield* Effect.try({
-						try: () => decodeFolderRow(result[0]),
+					try: () => decodeFolderRow(result[0]),
 					catch: (error: unknown) => fromUnknownError('create:validation:result', error),
 				});
 

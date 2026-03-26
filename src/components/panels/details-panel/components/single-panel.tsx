@@ -189,7 +189,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 		if (has('Engine IA')) {
 			originRows.push({
 				icon: Bot,
-				iconColor: 'text-blue-500',
+				iconColor: 'text-(--meta-ai-engine)',
 				label: 'Engine',
 				value: take('Engine IA') ?? '',
 			});
@@ -200,7 +200,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 			.filter((k) => has(k))
 			.map((k) => ({
 				icon: k.includes('LoRA') ? Zap : Package,
-				iconColor: k.includes('LoRA') ? 'text-amber-500' : 'text-orange-500',
+				iconColor: k.includes('LoRA') ? 'text-(--meta-lora)' : 'text-(--meta-model)',
 				label: k,
 				value: take(k) ?? '',
 				compact: true,
@@ -224,13 +224,13 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 			.filter((k) => has(k))
 			.map((k) => {
 				let icon = Settings;
-				let iconColor = 'text-emerald-500';
+				let iconColor = 'text-(--meta-param)';
 				if (k === 'Seed') {
 					icon = Target;
-					iconColor = 'text-amber-500';
+					iconColor = 'text-(--meta-seed)';
 				} else if (['Ancho', 'Alto', 'Tamaño'].includes(k)) {
 					icon = Monitor;
-					iconColor = 'text-blue-400';
+					iconColor = 'text-(--meta-dimension)';
 				} else if (['Pasos', 'CFG Scale'].includes(k)) {
 					icon = Gauge;
 				}
@@ -280,7 +280,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 			const isJson = typeof v === 'string' && (v.trim().startsWith('{') || v.trim().startsWith('['));
 			workflowRows.push({
 				icon: isJson ? FileJson : GitBranch,
-				iconColor: isJson ? 'text-amber-500' : 'text-blue-400',
+				iconColor: isJson ? 'text-(--meta-workflow-json)' : 'text-(--meta-workflow)',
 				label: k,
 				value: isJson ? <JsonViewer content={v} defaultExpanded={false} maxHeight={200} /> : v,
 				fullWidth: isJson,
@@ -471,8 +471,8 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 							>
 								<AccordionTrigger className="group px-2.5 py-2 transition-colors hover:bg-muted/30 hover:no-underline sm:py-2.5">
 									<div className="flex w-full min-w-0 items-center gap-2 text-left">
-										<div className="shrink-0 rounded-md bg-amber-500/10 p-1 transition-colors group-data-[state=open]:bg-amber-500/20">
-											<Zap className="h-3.5 w-3.5 text-amber-500" />
+										<div className="shrink-0 rounded-md bg-(--meta-lora)/10 p-1 transition-colors group-data-[state=open]:bg-(--meta-lora)/20">
+											<Zap className="h-3.5 w-3.5 text-(--meta-lora)" />
 										</div>
 										<span className="min-w-0 flex-1 truncate font-black text-[9.5px] uppercase tracking-tight">
 											IA & Generación
@@ -503,8 +503,8 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						>
 							<AccordionTrigger className="group px-2.5 py-2 transition-colors hover:bg-muted/30 hover:no-underline sm:py-2.5">
 								<div className="flex w-full min-w-0 items-center gap-2 text-left">
-									<div className="shrink-0 rounded-md bg-blue-500/10 p-1 transition-colors group-data-[state=open]:bg-blue-500/20">
-										<Info className="h-3.5 w-3.5 text-blue-500" />
+									<div className="shrink-0 rounded-md bg-(--meta-iptc)/10 p-1 transition-colors group-data-[state=open]:bg-(--meta-iptc)/20">
+										<Info className="h-3.5 w-3.5 text-(--meta-iptc)" />
 									</div>
 									<span className="min-w-0 flex-1 truncate font-black text-[9.5px] uppercase tracking-tight">
 										Propiedades
@@ -530,8 +530,8 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 							>
 								<AccordionTrigger className="group px-2.5 py-2 transition-colors hover:bg-muted/30 hover:no-underline sm:py-2.5">
 									<div className="flex w-full min-w-0 items-center gap-2 text-left">
-										<div className="shrink-0 rounded-md bg-emerald-500/10 p-1 transition-colors group-data-[state=open]:bg-emerald-500/20">
-											<Camera className="h-3.5 w-3.5 text-emerald-500" />
+										<div className="shrink-0 rounded-md bg-(--meta-exif)/10 p-1 transition-colors group-data-[state=open]:bg-(--meta-exif)/20">
+											<Camera className="h-3.5 w-3.5 text-(--meta-exif)" />
 										</div>
 										<span className="min-w-0 flex-1 truncate font-black text-[9.5px] uppercase tracking-tight">
 											Técnico
@@ -543,9 +543,9 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 										const items = groupedMetadata[cat];
 										if (!items || items.length === 0) return null;
 										const catLabels: Record<string, { label: string; icon: any; color: string }> = {
-											exif: { label: 'Cámara', icon: Camera, color: 'text-emerald-500' },
-											iptc: { label: 'Editorial', icon: Tag, color: 'text-blue-500' },
-											xmp: { label: 'XMP', icon: Hash, color: 'text-purple-500' },
+											exif: { label: 'Cámara', icon: Camera, color: 'text-(--meta-exif)' },
+											iptc: { label: 'Editorial', icon: Tag, color: 'text-(--meta-iptc)' },
+											xmp: { label: 'XMP', icon: Hash, color: 'text-(--meta-xmp)' },
 										};
 										const info = catLabels[cat];
 										return (

@@ -124,7 +124,12 @@ function TreeNode({ name, value, depth = 0, isLast = false, searchTerm = '' }: T
 		return (
 			<div className="flex items-start gap-1 py-0.5 font-mono text-sm" style={{ paddingLeft: `${depth * 16}px` }}>
 				<span className="select-none text-muted-foreground">{isLast ? '└─' : '├─'}</span>
-				<span className={cn('text-dt-primary-600 dark:text-dt-primary-400', isMatch && 'bg-dt-warning-200 dark:bg-dt-warning-900')}>
+				<span
+					className={cn(
+						'text-dt-primary-600 dark:text-dt-primary-400',
+						isMatch && 'bg-dt-warning-200 dark:bg-dt-warning-900'
+					)}
+				>
 					{name}:
 				</span>
 				<span
@@ -411,12 +416,12 @@ function GraphView({ data }: { data: any }) {
 								<div
 									className={cn(
 										'h-3 w-3 rounded-full',
-										node.type === 'object' && 'bg-blue-500',
-										node.type === 'array' && 'bg-green-500',
-										node.type === 'string' && 'bg-yellow-500',
-										node.type === 'number' && 'bg-orange-500',
-										node.type === 'boolean' && 'bg-purple-500',
-										node.type === 'null' && 'bg-gray-400'
+										node.type === 'object' && 'bg-(--meta-json-object)',
+										node.type === 'array' && 'bg-(--meta-json-array)',
+										node.type === 'string' && 'bg-(--meta-json-string)',
+										node.type === 'number' && 'bg-(--meta-json-number)',
+										node.type === 'boolean' && 'bg-(--meta-json-boolean)',
+										node.type === 'null' && 'bg-(--meta-json-null)'
 									)}
 								/>
 								<span className="font-mono text-sm">{node.label}</span>
