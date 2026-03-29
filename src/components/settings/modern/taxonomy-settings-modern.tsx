@@ -19,6 +19,7 @@ import type { TagWithStats } from '@/types/entities/tag';
 import type { CardActions } from '../common/entity-settings-view';
 import { CreatePropertyForm } from '../forms/create-property-form';
 import { CreateTagForm } from '../forms/create-tag-form';
+import { SettingsPageHeader, SettingsStatsGrid } from './settings-card';
 
 // ============================================================================
 // CONFIGURACIONES DE STATS
@@ -317,11 +318,7 @@ export function TaxonomySettingsModern() {
 
 	return (
 		<div className="space-y-6">
-			{/* Header */}
-			<div>
-				<h2 className="font-semibold text-2xl text-foreground">Taxonomía</h2>
-				<p className="mt-1 text-muted-foreground text-sm">Gestiona etiquetas, categorías y propiedades de metadatos</p>
-			</div>
+			<SettingsPageHeader description="Gestiona etiquetas, categorías y propiedades de metadatos" title="Taxonomía" />
 
 			<Tabs onValueChange={(v) => setActiveTab(v as typeof activeTab)} value={activeTab}>
 				<TabsList className="grid w-full grid-cols-2 lg:w-[300px]">
@@ -343,7 +340,7 @@ export function TaxonomySettingsModern() {
 
 				<div className="mt-6 space-y-6">
 					{/* Stats */}
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+					<SettingsStatsGrid className="2xl:grid-cols-3">
 						{currentStats.map((stat) => (
 							<Card
 								className="border-l-4"
@@ -367,11 +364,11 @@ export function TaxonomySettingsModern() {
 								</CardContent>
 							</Card>
 						))}
-					</div>
+					</SettingsStatsGrid>
 
 					{/* Toolbar */}
-					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-						<div className="relative max-w-sm">
+					<div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+						<div className="relative w-full max-w-xl xl:max-w-sm">
 							<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 							<input
 								className="w-full rounded-lg border bg-background px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -381,7 +378,7 @@ export function TaxonomySettingsModern() {
 								value={searchQuery}
 							/>
 						</div>
-						<div className="flex items-center gap-2">
+						<div className="flex flex-wrap items-center gap-2 xl:justify-end">
 							<div className="flex items-center rounded-lg border p-0.5">
 								<Button
 									className="h-8 w-8 p-0"
@@ -436,7 +433,9 @@ export function TaxonomySettingsModern() {
 					) : (
 						<div
 							className={
-								viewMode === 'grid' ? 'grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4' : 'flex flex-col gap-2'
+								viewMode === 'grid'
+									? 'grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
+									: 'flex flex-col gap-2'
 							}
 						>
 							{activeTab === 'tags'

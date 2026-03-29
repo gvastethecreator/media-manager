@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { useCustomThemeStore } from '@/store/entities/themes/custom-theme.store';
 import type { CustomTheme } from '@/types/theme';
 import { BUILT_IN_THEMES } from '@/types/theme';
-import { SettingsCard } from '../modern/settings-card';
+import { SettingsCard, SettingsPageHeader } from '../modern/settings-card';
 import { DeleteThemeConfirm, ThemeEditor } from './theme-editor';
 import { ThemeColorStrip } from './theme-preview';
 
@@ -172,17 +172,14 @@ export function ThemeSettings() {
 
 	return (
 		<div className="space-y-6">
-			{/* Header */}
-			<div>
-				<h2 className="font-semibold text-2xl text-foreground">Temas</h2>
-				<p className="mt-1 text-muted-foreground text-sm">
-					Elige entre los 14 temas predefinidos o crea tus propios temas personalizados.
-				</p>
-			</div>
+			<SettingsPageHeader
+				description="Elige entre los temas predefinidos o crea variaciones propias optimizadas para distintos espacios de trabajo."
+				title="Temas"
+			/>
 
 			{/* Tabs: Built-in / Custom */}
 			<Tabs className="w-full" defaultValue="builtin">
-				<TabsList className="mb-4 grid w-full grid-cols-2">
+				<TabsList className="mb-4 grid w-full max-w-xl grid-cols-2">
 					<TabsTrigger className="gap-2" value="builtin">
 						<Palette className="h-4 w-4" />
 						Temas Predefinidos
@@ -231,7 +228,7 @@ export function ThemeSettings() {
 						<Separator className="my-2" />
 
 						{/* Theme grid */}
-						<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+						<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
 							{BUILT_IN_THEMES.map((t) => {
 								const Icon = t.icon === 'sun' ? Sun : t.icon === 'moon' ? Moon : Monitor;
 								const isSelected = activeTheme === t.id;
@@ -285,7 +282,7 @@ export function ThemeSettings() {
 						title="Temas Personalizados"
 					>
 						{/* Actions bar */}
-						<div className="flex items-center gap-2">
+						<div className="flex flex-wrap items-center gap-2">
 							{/* Create new */}
 							<Dialog onOpenChange={setNewThemeDialogOpen} open={newThemeDialogOpen}>
 								<DialogTrigger asChild>
@@ -309,7 +306,7 @@ export function ThemeSettings() {
 										</div>
 										<div className="flex flex-col gap-2">
 											<Label>Basado en</Label>
-											<div className="grid grid-cols-4 gap-2">
+											<div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-6">
 												{BUILT_IN_THEMES.slice(0, 8).map((t) => (
 													<button
 														className={cn(
@@ -371,10 +368,10 @@ export function ThemeSettings() {
 								</div>
 							</div>
 						) : (
-							<div className="grid gap-3 sm:grid-cols-2">
+							<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
 								{customThemes.map((theme) => (
 									<div
-										className="group flex flex-col gap-3 rounded-lg border border-border/50 bg-card p-3 transition-all hover:border-border/80"
+										className="group flex h-full flex-col gap-3 rounded-lg border border-border/50 bg-card p-3 transition-all hover:border-border/80"
 										key={theme.id}
 									>
 										{/* Theme preview strip */}

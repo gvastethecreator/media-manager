@@ -23,7 +23,7 @@ import { JsonFileSettings } from '../media/json-file-settings';
 import { ScannedImagesSettings } from '../media/scanned-images-settings';
 import { UploadedImagesSettings } from '../media/uploaded-images-settings';
 import { VideosSettings } from '../media/videos-settings';
-import { SettingsCard, SettingsGroup, SettingsRow } from './settings-card';
+import { BentoGrid, SettingsCard, SettingsGroup, SettingsPageHeader, SettingsRow } from './settings-card';
 
 // Tipos de media soportados
 const MEDIA_TYPES = [
@@ -134,16 +134,13 @@ export function MediaSettingsModern() {
 
 	return (
 		<div className="space-y-6">
-			{/* Header */}
-			<div>
-				<h2 className="font-semibold text-2xl text-foreground">Configuración de Media</h2>
-				<p className="mt-1 text-muted-foreground text-sm">
-					Personaliza la visualización y comportamiento de cada tipo de archivo
-				</p>
-			</div>
+			<SettingsPageHeader
+				description="Personaliza la visualización y comportamiento de cada tipo de archivo"
+				title="Configuración de Media"
+			/>
 
 			{/* Media Type Selector */}
-			<div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
 				{mediaTypesWithStats.map((media) => {
 					const Icon = media.icon;
 					const isActive = activeTab === media.id;
@@ -180,68 +177,71 @@ export function MediaSettingsModern() {
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent className="mt-6 space-y-6" value="settings">
-						<SettingsCard
-							color="var(--entity-image)"
-							description="Configura cómo se muestran las imágenes"
-							icon={<Image />}
-							title="Visualización de Imágenes"
-						>
-							<SettingsGroup title="Comportamiento">
-								<SettingsRow description="Rotar según metadata EXIF" label="Rotación automática">
-									<Switch
-										checked={imageSettings.autoRotate}
-										onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, autoRotate: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Cargar versión completa en preview" label="Preview de alta calidad">
-									<Switch
-										checked={imageSettings.highQualityPreview}
-										onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, highQualityPreview: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Mostrar información EXIF en panel" label="Mostrar metadata">
-									<Switch
-										checked={imageSettings.showMetadata}
-										onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, showMetadata: checked }))}
-									/>
-								</SettingsRow>
-							</SettingsGroup>
+					<TabsContent className="mt-6" value="settings">
+						<BentoGrid>
+							<SettingsCard
+								className="lg:col-span-2"
+								color="var(--entity-image)"
+								description="Configura cómo se muestran las imágenes"
+								icon={<Image />}
+								title="Visualización de Imágenes"
+							>
+								<SettingsGroup title="Comportamiento">
+									<SettingsRow description="Rotar según metadata EXIF" label="Rotación automática">
+										<Switch
+											checked={imageSettings.autoRotate}
+											onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, autoRotate: checked }))}
+										/>
+									</SettingsRow>
+									<SettingsRow description="Cargar versión completa en preview" label="Preview de alta calidad">
+										<Switch
+											checked={imageSettings.highQualityPreview}
+											onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, highQualityPreview: checked }))}
+										/>
+									</SettingsRow>
+									<SettingsRow description="Mostrar información EXIF en panel" label="Mostrar metadata">
+										<Switch
+											checked={imageSettings.showMetadata}
+											onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, showMetadata: checked }))}
+										/>
+									</SettingsRow>
+								</SettingsGroup>
 
-							<Separator className="my-4" />
+								<Separator className="my-4" />
 
-							<SettingsGroup title="Zoom por defecto">
-								<div className="space-y-3">
-									<div className="flex items-center justify-between">
-										<Label>Nivel de zoom inicial</Label>
-										<span className="text-muted-foreground text-sm">{imageSettings.defaultZoom}%</span>
+								<SettingsGroup title="Zoom por defecto">
+									<div className="space-y-3">
+										<div className="flex items-center justify-between">
+											<Label>Nivel de zoom inicial</Label>
+											<span className="text-muted-foreground text-sm">{imageSettings.defaultZoom}%</span>
+										</div>
+										<Slider
+											max={200}
+											min={50}
+											onValueChange={([v]) => setImageSettings((s) => ({ ...s, defaultZoom: v }))}
+											step={10}
+											value={[imageSettings.defaultZoom]}
+										/>
 									</div>
-									<Slider
-										max={200}
-										min={50}
-										onValueChange={([v]) => setImageSettings((s) => ({ ...s, defaultZoom: v }))}
-										step={10}
-										value={[imageSettings.defaultZoom]}
-									/>
-								</div>
-							</SettingsGroup>
-						</SettingsCard>
+								</SettingsGroup>
+							</SettingsCard>
 
-						<SettingsCard
-							color="var(--entity-image)"
-							description="Extensiones de archivo reconocidas"
-							icon={<Layers />}
-							title="Formatos Soportados"
-							variant="outlined"
-						>
-							<div className="flex flex-wrap gap-2">
-								{['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.svg', '.avif'].map((ext) => (
-									<Badge key={ext} variant="secondary">
-										{ext}
-									</Badge>
-								))}
-							</div>
-						</SettingsCard>
+							<SettingsCard
+								color="var(--entity-image)"
+								description="Extensiones de archivo reconocidas"
+								icon={<Layers />}
+								title="Formatos Soportados"
+								variant="outlined"
+							>
+								<div className="flex flex-wrap gap-2">
+									{['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.svg', '.avif'].map((ext) => (
+										<Badge key={ext} variant="secondary">
+											{ext}
+										</Badge>
+									))}
+								</div>
+							</SettingsCard>
+						</BentoGrid>
 					</TabsContent>
 
 					<TabsContent className="mt-6" value="library">
@@ -280,82 +280,85 @@ export function MediaSettingsModern() {
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent className="mt-6 space-y-6" value="settings">
-						<SettingsCard
-							color="var(--entity-video)"
-							description="Configura el comportamiento del reproductor"
-							icon={<Film />}
-							title="Reproductor de Video"
-						>
-							<SettingsGroup title="Reproducción">
-								<SettingsRow description="Reproducir automáticamente al abrir" label="Autoplay">
-									<Switch
-										checked={videoSettings.autoplay}
-										onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, autoplay: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Iniciar videos sin sonido" label="Silenciado por defecto">
-									<Switch
-										checked={videoSettings.muted}
-										onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, muted: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Repetir video automáticamente" label="Loop">
-									<Switch
-										checked={videoSettings.loop}
-										onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, loop: checked }))}
-									/>
-								</SettingsRow>
-							</SettingsGroup>
-
-							<Separator className="my-4" />
-
-							<SettingsGroup title="Volumen y Precarga">
-								<SettingsRow description="Nivel inicial de volumen" label="Volumen por defecto">
-									<div className="flex w-48 items-center gap-3">
-										<Volume2 className="h-4 w-4 text-muted-foreground" />
-										<Slider
-											max={100}
-											onValueChange={([v]) => setVideoSettings((s) => ({ ...s, defaultVolume: v }))}
-											step={5}
-											value={[videoSettings.defaultVolume]}
+					<TabsContent className="mt-6" value="settings">
+						<BentoGrid>
+							<SettingsCard
+								className="lg:col-span-2"
+								color="var(--entity-video)"
+								description="Configura el comportamiento del reproductor"
+								icon={<Film />}
+								title="Reproductor de Video"
+							>
+								<SettingsGroup title="Reproducción">
+									<SettingsRow description="Reproducir automáticamente al abrir" label="Autoplay">
+										<Switch
+											checked={videoSettings.autoplay}
+											onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, autoplay: checked }))}
 										/>
-										<span className="w-8 text-sm tabular-nums">{videoSettings.defaultVolume}%</span>
-									</div>
-								</SettingsRow>
-								<SettingsRow description="Cuánto cargar anticipadamente" label="Precarga">
-									<Select
-										onValueChange={(v) => setVideoSettings((s) => ({ ...s, preload: v }))}
-										value={videoSettings.preload}
-									>
-										<SelectTrigger className="w-[160px]">
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="none">Ninguna</SelectItem>
-											<SelectItem value="metadata">Metadata</SelectItem>
-											<SelectItem value="auto">Automática</SelectItem>
-										</SelectContent>
-									</Select>
-								</SettingsRow>
-							</SettingsGroup>
-						</SettingsCard>
+									</SettingsRow>
+									<SettingsRow description="Iniciar videos sin sonido" label="Silenciado por defecto">
+										<Switch
+											checked={videoSettings.muted}
+											onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, muted: checked }))}
+										/>
+									</SettingsRow>
+									<SettingsRow description="Repetir video automáticamente" label="Loop">
+										<Switch
+											checked={videoSettings.loop}
+											onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, loop: checked }))}
+										/>
+									</SettingsRow>
+								</SettingsGroup>
 
-						<SettingsCard
-							color="var(--entity-video)"
-							description="Codecs y contenedores compatibles"
-							icon={<Layers />}
-							title="Formatos Soportados"
-							variant="outlined"
-						>
-							<div className="flex flex-wrap gap-2">
-								{['.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.ogv'].map((ext) => (
-									<Badge key={ext} variant="secondary">
-										{ext}
-									</Badge>
-								))}
-							</div>
-						</SettingsCard>
+								<Separator className="my-4" />
+
+								<SettingsGroup title="Volumen y Precarga">
+									<SettingsRow description="Nivel inicial de volumen" label="Volumen por defecto">
+										<div className="flex w-48 items-center gap-3">
+											<Volume2 className="h-4 w-4 text-muted-foreground" />
+											<Slider
+												max={100}
+												onValueChange={([v]) => setVideoSettings((s) => ({ ...s, defaultVolume: v }))}
+												step={5}
+												value={[videoSettings.defaultVolume]}
+											/>
+											<span className="w-8 text-sm tabular-nums">{videoSettings.defaultVolume}%</span>
+										</div>
+									</SettingsRow>
+									<SettingsRow description="Cuánto cargar anticipadamente" label="Precarga">
+										<Select
+											onValueChange={(v) => setVideoSettings((s) => ({ ...s, preload: v }))}
+											value={videoSettings.preload}
+										>
+											<SelectTrigger className="w-[160px]">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="none">Ninguna</SelectItem>
+												<SelectItem value="metadata">Metadata</SelectItem>
+												<SelectItem value="auto">Automática</SelectItem>
+											</SelectContent>
+										</Select>
+									</SettingsRow>
+								</SettingsGroup>
+							</SettingsCard>
+
+							<SettingsCard
+								color="var(--entity-video)"
+								description="Codecs y contenedores compatibles"
+								icon={<Layers />}
+								title="Formatos Soportados"
+								variant="outlined"
+							>
+								<div className="flex flex-wrap gap-2">
+									{['.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.ogv'].map((ext) => (
+										<Badge key={ext} variant="secondary">
+											{ext}
+										</Badge>
+									))}
+								</div>
+							</SettingsCard>
+						</BentoGrid>
 					</TabsContent>
 
 					<TabsContent className="mt-6" value="library">
@@ -371,55 +374,64 @@ export function MediaSettingsModern() {
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent className="mt-6 space-y-6" value="settings">
-						<SettingsCard
-							color="var(--entity-audio)"
-							description="Configura el comportamiento del reproductor de audio"
-							icon={<Music />}
-							title="Reproductor de Audio"
-						>
-							<SettingsGroup title="Reproducción">
-								<SettingsRow description="Reproducir automáticamente" label="Autoplay">
-									<Switch
-										checked={audioSettings.autoplay}
-										onCheckedChange={(checked) => setAudioSettings((s) => ({ ...s, autoplay: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Mostrar ondas de audio" label="Visualizador">
-									<Switch
-										checked={audioSettings.visualizer}
-										onCheckedChange={(checked) => setAudioSettings((s) => ({ ...s, visualizer: checked }))}
-									/>
-								</SettingsRow>
-							</SettingsGroup>
-
-							<Separator className="my-4" />
-
-							<SettingsGroup title="Volumen">
-								<SettingsRow label="Volumen por defecto">
-									<div className="flex w-48 items-center gap-3">
-										<Volume2 className="h-4 w-4 text-muted-foreground" />
-										<Slider
-											max={100}
-											onValueChange={([v]) => setAudioSettings((s) => ({ ...s, defaultVolume: v }))}
-											step={5}
-											value={[audioSettings.defaultVolume]}
+					<TabsContent className="mt-6" value="settings">
+						<BentoGrid>
+							<SettingsCard
+								className="lg:col-span-2"
+								color="var(--entity-audio)"
+								description="Configura el comportamiento del reproductor de audio"
+								icon={<Music />}
+								title="Reproductor de Audio"
+							>
+								<SettingsGroup title="Reproducción">
+									<SettingsRow description="Reproducir automáticamente" label="Autoplay">
+										<Switch
+											checked={audioSettings.autoplay}
+											onCheckedChange={(checked) => setAudioSettings((s) => ({ ...s, autoplay: checked }))}
 										/>
-										<span className="w-8 text-sm tabular-nums">{audioSettings.defaultVolume}%</span>
-									</div>
-								</SettingsRow>
-							</SettingsGroup>
-						</SettingsCard>
+									</SettingsRow>
+									<SettingsRow description="Mostrar ondas de audio" label="Visualizador">
+										<Switch
+											checked={audioSettings.visualizer}
+											onCheckedChange={(checked) => setAudioSettings((s) => ({ ...s, visualizer: checked }))}
+										/>
+									</SettingsRow>
+								</SettingsGroup>
 
-						<SettingsCard color="var(--entity-audio)" icon={<Layers />} title="Formatos Soportados" variant="outlined">
-							<div className="flex flex-wrap gap-2">
-								{['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac', '.wma'].map((ext) => (
-									<Badge key={ext} variant="secondary">
-										{ext}
-									</Badge>
-								))}
-							</div>
-						</SettingsCard>
+								<Separator className="my-4" />
+
+								<SettingsGroup title="Volumen">
+									<SettingsRow label="Volumen por defecto">
+										<div className="flex w-48 items-center gap-3">
+											<Volume2 className="h-4 w-4 text-muted-foreground" />
+											<Slider
+												max={100}
+												onValueChange={([v]) => setAudioSettings((s) => ({ ...s, defaultVolume: v }))}
+												step={5}
+												value={[audioSettings.defaultVolume]}
+											/>
+											<span className="w-8 text-sm tabular-nums">{audioSettings.defaultVolume}%</span>
+										</div>
+									</SettingsRow>
+								</SettingsGroup>
+							</SettingsCard>
+
+							<SettingsCard
+								className="md:col-span-2 xl:col-span-1"
+								color="var(--entity-audio)"
+								icon={<Layers />}
+								title="Formatos Soportados"
+								variant="outlined"
+							>
+								<div className="flex flex-wrap gap-2">
+									{['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac', '.wma'].map((ext) => (
+										<Badge key={ext} variant="secondary">
+											{ext}
+										</Badge>
+									))}
+								</div>
+							</SettingsCard>
+						</BentoGrid>
 					</TabsContent>
 
 					<TabsContent className="mt-6" value="library">
@@ -435,68 +447,71 @@ export function MediaSettingsModern() {
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent className="mt-6 space-y-6" value="settings">
-						<SettingsCard
-							color="var(--entity-document)"
-							description="Configura el visor de PDF y documentos"
-							icon={<FileText />}
-							title="Visor de Documentos"
-						>
-							<SettingsGroup title="Visualización">
-								<SettingsRow description="Mostrar navegación de páginas" label="Panel lateral">
-									<Switch
-										checked={documentSettings.sidebarOpen}
-										onCheckedChange={(checked) => setDocumentSettings((s) => ({ ...s, sidebarOpen: checked }))}
-									/>
-								</SettingsRow>
-							</SettingsGroup>
-
-							<Separator className="my-4" />
-
-							<SettingsGroup title="Renderizado">
-								<SettingsRow label="Modo de renderizado">
-									<Select
-										onValueChange={(v) => setDocumentSettings((s) => ({ ...s, renderMode: v }))}
-										value={documentSettings.renderMode}
-									>
-										<SelectTrigger className="w-[160px]">
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="canvas">Canvas (rápido)</SelectItem>
-											<SelectItem value="svg">SVG (nítido)</SelectItem>
-										</SelectContent>
-									</Select>
-								</SettingsRow>
-								<SettingsRow label="Zoom por defecto">
-									<div className="flex w-48 items-center gap-3">
-										<Slider
-											max={200}
-											min={50}
-											onValueChange={([v]) => setDocumentSettings((s) => ({ ...s, defaultZoom: v }))}
-											step={10}
-											value={[documentSettings.defaultZoom]}
+					<TabsContent className="mt-6" value="settings">
+						<BentoGrid>
+							<SettingsCard
+								className="lg:col-span-2"
+								color="var(--entity-document)"
+								description="Configura el visor de PDF y documentos"
+								icon={<FileText />}
+								title="Visor de Documentos"
+							>
+								<SettingsGroup title="Visualización">
+									<SettingsRow description="Mostrar navegación de páginas" label="Panel lateral">
+										<Switch
+											checked={documentSettings.sidebarOpen}
+											onCheckedChange={(checked) => setDocumentSettings((s) => ({ ...s, sidebarOpen: checked }))}
 										/>
-										<span className="w-10 text-sm tabular-nums">{documentSettings.defaultZoom}%</span>
-									</div>
-								</SettingsRow>
-							</SettingsGroup>
-						</SettingsCard>
+									</SettingsRow>
+								</SettingsGroup>
 
-						<SettingsCard
-							color="var(--entity-document)"
-							icon={<Layers />}
-							title="Formatos Soportados"
-							variant="outlined"
-						>
-							<div className="flex flex-wrap gap-2">
-								{['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt'].map((ext) => (
-									<Badge key={ext} variant="secondary">
-										{ext}
-									</Badge>
-								))}
-							</div>
-						</SettingsCard>
+								<Separator className="my-4" />
+
+								<SettingsGroup title="Renderizado">
+									<SettingsRow label="Modo de renderizado">
+										<Select
+											onValueChange={(v) => setDocumentSettings((s) => ({ ...s, renderMode: v }))}
+											value={documentSettings.renderMode}
+										>
+											<SelectTrigger className="w-[160px]">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="canvas">Canvas (rápido)</SelectItem>
+												<SelectItem value="svg">SVG (nítido)</SelectItem>
+											</SelectContent>
+										</Select>
+									</SettingsRow>
+									<SettingsRow label="Zoom por defecto">
+										<div className="flex w-48 items-center gap-3">
+											<Slider
+												max={200}
+												min={50}
+												onValueChange={([v]) => setDocumentSettings((s) => ({ ...s, defaultZoom: v }))}
+												step={10}
+												value={[documentSettings.defaultZoom]}
+											/>
+											<span className="w-10 text-sm tabular-nums">{documentSettings.defaultZoom}%</span>
+										</div>
+									</SettingsRow>
+								</SettingsGroup>
+							</SettingsCard>
+
+							<SettingsCard
+								color="var(--entity-document)"
+								icon={<Layers />}
+								title="Formatos Soportados"
+								variant="outlined"
+							>
+								<div className="flex flex-wrap gap-2">
+									{['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt'].map((ext) => (
+										<Badge key={ext} variant="secondary">
+											{ext}
+										</Badge>
+									))}
+								</div>
+							</SettingsCard>
+						</BentoGrid>
 					</TabsContent>
 
 					<TabsContent className="mt-6" value="library">
@@ -512,55 +527,58 @@ export function MediaSettingsModern() {
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent className="mt-6 space-y-6" value="settings">
-						<SettingsCard
-							color="var(--entity-file-3d)"
-							description="Configura el visor de modelos 3D"
-							icon={<Box />}
-							title="Visor 3D"
-						>
-							<SettingsGroup title="Visualización">
-								<SettingsRow description="Rotar modelo al cargar" label="Rotación automática">
-									<Switch
-										checked={settings3D.autoRotate}
-										onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, autoRotate: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Mostrar sombras proyectadas" label="Sombras">
-									<Switch
-										checked={settings3D.shadows}
-										onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, shadows: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Ver modelo en wireframe" label="Malla wireframe">
-									<Switch
-										checked={settings3D.wireframe}
-										onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, wireframe: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Mostrar cuadrícula de referencia" label="Grid">
-									<Switch
-										checked={settings3D.grid}
-										onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, grid: checked }))}
-									/>
-								</SettingsRow>
-							</SettingsGroup>
-						</SettingsCard>
+					<TabsContent className="mt-6" value="settings">
+						<BentoGrid>
+							<SettingsCard
+								className="lg:col-span-2"
+								color="var(--entity-file-3d)"
+								description="Configura el visor de modelos 3D"
+								icon={<Box />}
+								title="Visor 3D"
+							>
+								<SettingsGroup title="Visualización">
+									<SettingsRow description="Rotar modelo al cargar" label="Rotación automática">
+										<Switch
+											checked={settings3D.autoRotate}
+											onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, autoRotate: checked }))}
+										/>
+									</SettingsRow>
+									<SettingsRow description="Mostrar sombras proyectadas" label="Sombras">
+										<Switch
+											checked={settings3D.shadows}
+											onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, shadows: checked }))}
+										/>
+									</SettingsRow>
+									<SettingsRow description="Ver modelo en wireframe" label="Malla wireframe">
+										<Switch
+											checked={settings3D.wireframe}
+											onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, wireframe: checked }))}
+										/>
+									</SettingsRow>
+									<SettingsRow description="Mostrar cuadrícula de referencia" label="Grid">
+										<Switch
+											checked={settings3D.grid}
+											onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, grid: checked }))}
+										/>
+									</SettingsRow>
+								</SettingsGroup>
+							</SettingsCard>
 
-						<SettingsCard
-							color="var(--entity-file-3d)"
-							icon={<Layers />}
-							title="Formatos Soportados"
-							variant="outlined"
-						>
-							<div className="flex flex-wrap gap-2">
-								{['.obj', '.gltf', '.glb', '.fbx', '.stl', '.dae'].map((ext) => (
-									<Badge key={ext} variant="secondary">
-										{ext}
-									</Badge>
-								))}
-							</div>
-						</SettingsCard>
+							<SettingsCard
+								color="var(--entity-file-3d)"
+								icon={<Layers />}
+								title="Formatos Soportados"
+								variant="outlined"
+							>
+								<div className="flex flex-wrap gap-2">
+									{['.obj', '.gltf', '.glb', '.fbx', '.stl', '.dae'].map((ext) => (
+										<Badge key={ext} variant="secondary">
+											{ext}
+										</Badge>
+									))}
+								</div>
+							</SettingsCard>
+						</BentoGrid>
 					</TabsContent>
 
 					<TabsContent className="mt-6" value="library">
@@ -576,50 +594,53 @@ export function MediaSettingsModern() {
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent className="mt-6 space-y-6" value="settings">
-						<SettingsCard
-							color="var(--entity-json)"
-							description="Configura el editor y visualizador de JSON"
-							icon={<FileJson />}
-							title="Editor JSON"
-						>
-							<SettingsGroup title="Editor">
-								<SettingsRow description="Auto-formatear JSON al abrir" label="Formatear al cargar">
-									<Switch
-										checked={jsonSettings.formatOnLoad}
-										onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, formatOnLoad: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Validar contra schema si existe" label="Validar schema">
-									<Switch
-										checked={jsonSettings.validateSchema}
-										onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, validateSchema: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Mostrar números de línea" label="Números de línea">
-									<Switch
-										checked={jsonSettings.lineNumbers}
-										onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, lineNumbers: checked }))}
-									/>
-								</SettingsRow>
-								<SettingsRow description="Permitir fold/unfold de bloques" label="Plegado de código">
-									<Switch
-										checked={jsonSettings.folding}
-										onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, folding: checked }))}
-									/>
-								</SettingsRow>
-							</SettingsGroup>
-						</SettingsCard>
+					<TabsContent className="mt-6" value="settings">
+						<BentoGrid>
+							<SettingsCard
+								className="lg:col-span-2"
+								color="var(--entity-json)"
+								description="Configura el editor y visualizador de JSON"
+								icon={<FileJson />}
+								title="Editor JSON"
+							>
+								<SettingsGroup title="Editor">
+									<SettingsRow description="Auto-formatear JSON al abrir" label="Formatear al cargar">
+										<Switch
+											checked={jsonSettings.formatOnLoad}
+											onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, formatOnLoad: checked }))}
+										/>
+									</SettingsRow>
+									<SettingsRow description="Validar contra schema si existe" label="Validar schema">
+										<Switch
+											checked={jsonSettings.validateSchema}
+											onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, validateSchema: checked }))}
+										/>
+									</SettingsRow>
+									<SettingsRow description="Mostrar números de línea" label="Números de línea">
+										<Switch
+											checked={jsonSettings.lineNumbers}
+											onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, lineNumbers: checked }))}
+										/>
+									</SettingsRow>
+									<SettingsRow description="Permitir fold/unfold de bloques" label="Plegado de código">
+										<Switch
+											checked={jsonSettings.folding}
+											onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, folding: checked }))}
+										/>
+									</SettingsRow>
+								</SettingsGroup>
+							</SettingsCard>
 
-						<SettingsCard color="var(--entity-json)" icon={<Code />} title="Formatos Soportados" variant="outlined">
-							<div className="flex flex-wrap gap-2">
-								{['.json', '.jsonc', '.json5'].map((ext) => (
-									<Badge key={ext} variant="secondary">
-										{ext}
-									</Badge>
-								))}
-							</div>
-						</SettingsCard>
+							<SettingsCard color="var(--entity-json)" icon={<Code />} title="Formatos Soportados" variant="outlined">
+								<div className="flex flex-wrap gap-2">
+									{['.json', '.jsonc', '.json5'].map((ext) => (
+										<Badge key={ext} variant="secondary">
+											{ext}
+										</Badge>
+									))}
+								</div>
+							</SettingsCard>
+						</BentoGrid>
 					</TabsContent>
 
 					<TabsContent className="mt-6" value="library">

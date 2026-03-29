@@ -22,6 +22,7 @@ import type { CardActions } from '../common/entity-settings-view';
 import { CreateAlbumForm } from '../forms/create-album-form';
 import { CreateCollectionForm } from '../forms/create-collection-form';
 import { CreateGroupForm } from '../forms/create-group-form';
+import { SettingsPageHeader, SettingsStatsGrid } from './settings-card';
 
 // ============================================================================
 // CONFIGURACIONES DE STATS
@@ -423,16 +424,13 @@ export function OrganizationSettingsModern() {
 
 	return (
 		<div className="space-y-6">
-			{/* Header */}
-			<div>
-				<h2 className="font-semibold text-2xl text-foreground">Organización</h2>
-				<p className="mt-1 text-muted-foreground text-sm">
-					Gestiona albums, colecciones inteligentes y grupos de organización
-				</p>
-			</div>
+			<SettingsPageHeader
+				description="Gestiona albums, colecciones inteligentes y grupos de organización"
+				title="Organización"
+			/>
 
 			<Tabs onValueChange={(v) => setActiveTab(v as typeof activeTab)} value={activeTab}>
-				<TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+				<TabsList className="grid w-full grid-cols-3 lg:w-[400px] xl:w-[460px]">
 					<TabsTrigger className="gap-2" value="albums">
 						<Album className="h-4 w-4" />
 						Albums
@@ -561,7 +559,7 @@ function EntityList({
 	return (
 		<div className="space-y-6">
 			{/* Stats */}
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+			<SettingsStatsGrid className="2xl:grid-cols-3">
 				{statsData.map((stat: any) => (
 					<Card
 						className="border-l-4"
@@ -585,11 +583,11 @@ function EntityList({
 						</CardContent>
 					</Card>
 				))}
-			</div>
+			</SettingsStatsGrid>
 
 			{/* Toolbar */}
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div className="relative max-w-sm">
+			<div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+				<div className="relative w-full max-w-xl xl:max-w-sm">
 					<input
 						className="w-full rounded-lg border bg-background px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 						onChange={(e) => setSearchQuery(e.target.value)}
@@ -598,7 +596,7 @@ function EntityList({
 						value={searchQuery}
 					/>
 				</div>
-				<div className="flex items-center gap-2">
+				<div className="flex flex-wrap items-center gap-2 xl:justify-end">
 					<div className="flex items-center rounded-lg border p-0.5">
 						<Button
 							className="h-8 w-8 p-0"
@@ -634,7 +632,9 @@ function EntityList({
 			) : (
 				<div
 					className={
-						viewMode === 'grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'flex flex-col gap-2'
+						viewMode === 'grid'
+							? 'grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
+							: 'flex flex-col gap-2'
 					}
 				>
 					{filteredItems.map((item) =>
