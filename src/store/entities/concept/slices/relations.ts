@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand';
+import { apiClient } from '@/lib/api/client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { EntityType } from '@/types/entities/entities';
 import type { ConceptStore } from '../types';
@@ -11,16 +12,18 @@ export interface RelationsSlice {
 	removeConceptFromEntity: (conceptId: string, entityId: string, entityType: EntityType) => Promise<void>;
 }
 
-// Acciones mock para desarrollo (se reemplazarán con server actions)
-const mockRelationsApi = {
-	addConceptToEntity: async (_conceptId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-
-	removeConceptFromEntity: async (_conceptId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-};
+function getConceptRelationEndpoint(conceptId: string, entityId: string, entityType: EntityType): string {
+	switch (entityType) {
+		case EntityType.IMAGE:
+			return `/concepts/${conceptId}/images/${entityId}`;
+		case EntityType.VIDEO:
+			return `/concepts/${conceptId}/videos/${entityId}`;
+		default:
+			throw new Error(
+				`Las relaciones de conceptos sólo están soportadas para imágenes y videos. Tipo recibido: ${entityType}`
+			);
+	}
+}
 
 export const createRelationsSlice: StateCreator<ConceptStore, [], [], RelationsSlice> = (set, get) => ({
 	addConceptToEntity: async (conceptId, entityId, entityType) => {
@@ -31,8 +34,7 @@ export const createRelationsSlice: StateCreator<ConceptStore, [], [], RelationsS
 				entityType,
 			});
 
-			// Llamar a server action para añadir relación
-			await mockRelationsApi.addConceptToEntity(conceptId, entityId, entityType);
+			await apiClient.post(getConceptRelationEndpoint(conceptId, entityId, entityType));
 
 			// Recargar conceptos para actualizar relaciones
 			await get().loadConcepts();
@@ -53,8 +55,7 @@ export const createRelationsSlice: StateCreator<ConceptStore, [], [], RelationsS
 				entityType,
 			});
 
-			// Llamar a server action para eliminar relación
-			await mockRelationsApi.removeConceptFromEntity(conceptId, entityId, entityType);
+			await apiClient.delete(getConceptRelationEndpoint(conceptId, entityId, entityType));
 
 			// Recargar conceptos para actualizar relaciones
 			await get().loadConcepts();

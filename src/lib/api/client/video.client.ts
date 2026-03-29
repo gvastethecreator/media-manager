@@ -69,6 +69,18 @@ export async function createVideoInApi(data: VideoCreateInput): Promise<VideoWit
 	return response.json();
 }
 
+export async function updateVideoInApi(id: string, data: Partial<VideoWithStats>): Promise<VideoWithStats> {
+	const response = await fetch(`${API_BASE_PATH}/${id}`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data),
+	});
+	if (!response.ok) {
+		throw new Error('Error al actualizar video');
+	}
+	return response.json();
+}
+
 export async function deleteVideoFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {

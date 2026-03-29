@@ -42,18 +42,12 @@ interface FavoritesContentViewProps {
 	className?: string;
 	error: Error | null;
 	favorites: FavoriteWithStats[];
-	handleCreateFavorite: () => void;
 	handleFavoriteSelect: (favoriteId: string) => void;
 	handleRetry: () => void;
 	isLoading: boolean;
 	localSearch: string;
-	newFavoriteDescription: string;
-	newFavoriteName: string;
 	selectedFavoriteId: string | null;
-	setNewFavoriteDescription: (description: string) => void;
-	setNewFavoriteName: (name: string) => void;
-	setShowForm: (show: boolean) => void;
-	showForm: boolean;
+	setLocalSearch: (value: string) => void;
 }
 
 const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
@@ -61,15 +55,9 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 	isLoading,
 	error,
 	localSearch,
-	showForm,
-	newFavoriteName,
-	newFavoriteDescription,
 	selectedFavoriteId,
-	setShowForm,
-	setNewFavoriteName,
-	setNewFavoriteDescription,
+	setLocalSearch,
 	handleFavoriteSelect,
-	handleCreateFavorite,
 	handleRetry,
 	className,
 }) => {
@@ -91,38 +79,27 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'flex-1'}>
 			<div className="p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Favoritos</h2>
-
-				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Favorito'}
-				</Button>
-
-				{showForm && (
-					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Favorito</h3>
-						<div className="mb-3 grid gap-2">
-							<Label htmlFor="favoriteName">Nombre</Label>
-							<Input
-								id="favoriteName"
-								onChange={(e) => setNewFavoriteName(e.target.value)}
-								placeholder="Nombre del favorito"
-								value={newFavoriteName}
-							/>
-						</div>
-						<div className="mb-4 grid gap-2">
-							<Label htmlFor="favoriteDescription">Descripción</Label>
-							<Textarea
-								id="favoriteDescription"
-								onChange={(e) => setNewFavoriteDescription(e.target.value)}
-								placeholder="Descripción del favorito (opcional)"
-								value={newFavoriteDescription}
-							/>
-						</div>
-						<Button onClick={handleCreateFavorite}>Guardar Favorito</Button>
+				<div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+					<div>
+						<h2 className="font-bold text-xl">Vista de Favoritos</h2>
+						<p className="text-muted-foreground text-sm">
+							Los favoritos se agregan y se quitan desde las entidades reales de la aplicación.
+						</p>
 					</div>
-				)}
+					<div className="w-full md:max-w-sm">
+						<Label className="sr-only" htmlFor="favoritesSearch">
+							Buscar favoritos
+						</Label>
+						<Input
+							id="favoritesSearch"
+							onChange={(e) => setLocalSearch(e.target.value)}
+							placeholder="Buscar favoritos..."
+							value={localSearch}
+						/>
+					</div>
+				</div>
 
-				{favorites?.length || isLoading || showForm ? (
+				{favorites.length > 0 || isLoading ? (
 					<motion.div
 						animate={{ opacity: 1, y: 0 }}
 						className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
