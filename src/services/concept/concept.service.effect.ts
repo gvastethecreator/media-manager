@@ -4,7 +4,7 @@
  */
 
 import { Schema } from '@effect/schema';
-import { asc, count, desc, eq, like, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { concepts, imageConcepts, images, videoConcepts } from '@/lib/drizzle/schema';
@@ -59,12 +59,15 @@ export class ConceptService extends Context.Tag('ConceptService')<ConceptService
 
 export interface ConceptServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, ConceptError>;
+	readonly addVideo: (id: string, videoId: string) => Effect.Effect<void, ConceptError>;
 	readonly create: (input: ConceptCreateInput) => Effect.Effect<Concept, ConceptError>;
 	readonly delete: (id: string) => Effect.Effect<void, ConceptError>;
 	readonly getAll: (options?: GetConceptsOptions) => Effect.Effect<GetConceptsResult, ConceptError>;
 	readonly getById: (id: string) => Effect.Effect<Concept, ConceptError>;
 	readonly getImages: (id: string) => Effect.Effect<any[], ConceptError>;
 	readonly getRelationCounts: (id: string) => Effect.Effect<ConceptRelationCounts, ConceptError>;
+	readonly removeImage: (id: string, imageId: string) => Effect.Effect<void, ConceptError>;
+	readonly removeVideo: (id: string, videoId: string) => Effect.Effect<void, ConceptError>;
 	readonly toggleFavorite: (id: string) => Effect.Effect<Concept, ConceptError>;
 	readonly update: (id: string, input: ConceptUpdateInput) => Effect.Effect<Concept, ConceptError>;
 }
@@ -317,6 +320,33 @@ const make = (): ConceptServiceInterface => {
 			});
 		});
 
+	const removeImage = (id: string, imageId: string): Effect.Effect<void, ConceptError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.delete(imageConcepts).where(and(eq(imageConcepts.A, imageId), eq(imageConcepts.B, id))),
+				catch: (error) => fromUnknownConceptError('removeImage', error),
+			});
+		});
+
+	const addVideo = (id: string, videoId: string): Effect.Effect<void, ConceptError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(videoConcepts).values({ A: videoId, B: id }),
+				catch: (error) => fromUnknownConceptError('addVideo', error),
+			});
+		});
+
+	const removeVideo = (id: string, videoId: string): Effect.Effect<void, ConceptError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.delete(videoConcepts).where(and(eq(videoConcepts.A, videoId), eq(videoConcepts.B, id))),
+				catch: (error) => fromUnknownConceptError('removeVideo', error),
+			});
+		});
+
 	return {
 		getById,
 		getAll,
@@ -327,6 +357,9 @@ const make = (): ConceptServiceInterface => {
 		getImages,
 		getRelationCounts,
 		addImage,
+		removeImage,
+		addVideo,
+		removeVideo,
 	};
 };
 

@@ -267,6 +267,42 @@ conceptsRouter.post(
 	)
 );
 
+conceptsRouter.delete(
+	'/:id/images/:imageId',
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const conceptService = yield* ConceptService;
+			yield* conceptService.removeImage(req.params.id, req.params.imageId);
+			res.status(204);
+			return { success: true };
+		}).pipe(Effect.provide(ConceptServiceLive))
+	)
+);
+
+conceptsRouter.post(
+	'/:id/videos/:videoId',
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const conceptService = yield* ConceptService;
+			yield* conceptService.addVideo(req.params.id, req.params.videoId);
+			res.status(201);
+			return { success: true };
+		}).pipe(Effect.provide(ConceptServiceLive))
+	)
+);
+
+conceptsRouter.delete(
+	'/:id/videos/:videoId',
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const conceptService = yield* ConceptService;
+			yield* conceptService.removeVideo(req.params.id, req.params.videoId);
+			res.status(204);
+			return { success: true };
+		}).pipe(Effect.provide(ConceptServiceLive))
+	)
+);
+
 // ============= Prompts Router =============
 
 const promptsRouter = express.Router();

@@ -50,34 +50,34 @@ export async function getSystemInfo(): Promise<SystemInfo> {
 		return response.json();
 	} catch (error) {
 		console.warn('❌ Error al obtener información del sistema:', error);
-		// Retornar datos mock en caso de error
+		// Mantener una respuesta segura y neutra cuando la API no está disponible.
 		return {
 			cpu: {
 				usage: 0,
-				cores: 4,
+				cores: 0,
 				model: 'Unknown',
 				loadAvg: [0, 0, 0],
 			},
 			memory: {
-				total: 8_589_934_592, // 8GB
-				free: 4_294_967_296, // 4GB
-				used: 4_294_967_296, // 4GB
-				usedPercent: 50,
+				total: 0,
+				free: 0,
+				used: 0,
+				usedPercent: 0,
 			},
 			uptime: {
-				system: 86_400, // 1 día
+				system: 0,
 			},
 			platform: {
 				type: 'unknown',
 				release: 'unknown',
-				arch: 'x64',
+				arch: 'unknown',
 			},
 			nodejs: {
-				version: 'v18.0.0',
-				pid: 1234,
+				version: 'unknown',
+				pid: 0,
 			},
 			network: {
-				interfaces: ['eth0', 'lo'],
+				interfaces: [],
 			},
 		};
 	}

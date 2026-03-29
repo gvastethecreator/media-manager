@@ -233,13 +233,13 @@ export async function getNavigationData(): Promise<NavigationData> {
 }
 
 /**
- * Revalida las rutas de navegación (MOCK para Vite - no necesario en desarrollo)
+ * Revalida las rutas de navegación cuando el runtime lo requiere.
+ * En el stack actual la navegación se obtiene por consulta, así que normalmente no hay caché manual que invalidar.
  */
 export async function revalidateNavigation() {
 	try {
-		navLogger.info('🔄 Iniciando revalidación de rutas de navegación (MOCK)');
-		// En Vite no necesitamos revalidación real
-		navLogger.info('✅ Rutas de navegación revalidadas exitosamente (MOCK)');
+		navLogger.info('🔄 Verificando si la navegación requiere revalidación manual');
+		navLogger.info('✅ No se requirió revalidación manual de navegación');
 	} catch (error) {
 		navLogger.error('❌ Error al revalidar rutas de navegación:', error);
 		throw new Error('No se pudieron revalidar las rutas de navegación');

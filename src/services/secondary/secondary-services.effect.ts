@@ -5,7 +5,7 @@
  * @created 2025-10-11 - Fase 9 Effect Implementation
  */
 
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import {
@@ -18,6 +18,7 @@ import {
 	imageWorldItems,
 	notes,
 	properties,
+	videoNotes,
 	wildcards,
 	worldItems,
 } from '@/lib/drizzle/schema';
@@ -257,11 +258,14 @@ export class NoteService extends Context.Tag('NoteService')<NoteService, NoteSer
 
 export interface NoteServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, NoteError>;
+	readonly addVideo: (id: string, videoId: string) => Effect.Effect<void, NoteError>;
 	readonly create: (input: any) => Effect.Effect<any, NoteError>;
 	readonly delete: (id: string) => Effect.Effect<void, NoteError>;
 	readonly getAll: (options?: any) => Effect.Effect<any, NoteError>;
 	readonly getById: (id: string) => Effect.Effect<any, NoteError>;
 	readonly getImages: (id: string) => Effect.Effect<any[], NoteError>;
+	readonly removeImage: (id: string, imageId: string) => Effect.Effect<void, NoteError>;
+	readonly removeVideo: (id: string, videoId: string) => Effect.Effect<void, NoteError>;
 	readonly update: (id: string, input: any) => Effect.Effect<any, NoteError>;
 }
 
@@ -350,7 +354,34 @@ const makeNoteService = (): NoteServiceInterface => {
 			});
 		});
 
-	return { getAll, getById, create, update, delete: delete_, getImages, addImage };
+	const removeImage = (id: string, imageId: string): Effect.Effect<void, NoteError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.delete(imageNotes).where(and(eq(imageNotes.A, imageId), eq(imageNotes.B, id))),
+				catch: (error) => fromUnknownNoteError('removeImage', error),
+			});
+		});
+
+	const addVideo = (id: string, videoId: string): Effect.Effect<void, NoteError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.insert(videoNotes).values({ A: videoId, B: id }),
+				catch: (error) => fromUnknownNoteError('addVideo', error),
+			});
+		});
+
+	const removeVideo = (id: string, videoId: string): Effect.Effect<void, NoteError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.delete(videoNotes).where(and(eq(videoNotes.A, videoId), eq(videoNotes.B, id))),
+				catch: (error) => fromUnknownNoteError('removeVideo', error),
+			});
+		});
+
+	return { getAll, getById, create, update, delete: delete_, getImages, addImage, removeImage, addVideo, removeVideo };
 };
 
 export const NoteServiceLive = Layer.effect(NoteService, Effect.succeed(makeNoteService()));

@@ -1,8 +1,7 @@
 import { useCallback, useState } from 'react';
-import { useCreateFavorite, useFavorites } from '@/lib/api/favorites';
+import { useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/lib/ui/toast';
 import { useFavoriteStore } from '@/store/entities/favorite';
 import type { ViewProps } from '../types';
 import FavoritesContentView from './favorites-content-view';
@@ -27,12 +26,8 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		},
 		[selectedIds, selectFavorite, deselectFavorite]
 	);
-	const { mutate: createFavorite } = useCreateFavorite();
 
 	const [localSearch, setLocalSearch] = useState('');
-	const [showForm, setShowForm] = useState(false);
-	const [newFavoriteName, setNewFavoriteName] = useState('');
-	const [newFavoriteDescription, setNewFavoriteDescription] = useState('');
 
 	// Usar React Query hook en lugar de server action
 	const {
@@ -57,25 +52,6 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		[setSelectedFavoriteId]
 	);
 
-	const handleCreateFavorite = useCallback(() => {
-		if (newFavoriteName.trim() === '') {
-			toastService.error('El nombre del favorito no puede estar vacío.');
-			return;
-		}
-
-		// Crear favorito con entity genérica (placeholder funcional)
-		createFavorite({
-			entityId: `manual-${Date.now()}`,
-			entityType: 'collection',
-			notes: `${newFavoriteName}: ${newFavoriteDescription}`,
-			priority: 1,
-		});
-
-		setNewFavoriteName('');
-		setNewFavoriteDescription('');
-		setShowForm(false);
-	}, [newFavoriteName, newFavoriteDescription, createFavorite]);
-
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar favorites');
 		refetch();
@@ -89,18 +65,12 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		<FavoritesContentView
 			error={error}
 			favorites={favorites}
-			handleCreateFavorite={handleCreateFavorite}
 			handleFavoriteSelect={handleFavoriteSelect}
 			handleRetry={handleRetry}
 			isLoading={isLoading}
 			localSearch={localSearch}
-			newFavoriteDescription={newFavoriteDescription}
-			newFavoriteName={newFavoriteName}
 			selectedFavoriteId={selectedFavoriteId}
-			setNewFavoriteDescription={setNewFavoriteDescription}
-			setNewFavoriteName={setNewFavoriteName}
-			setShowForm={setShowForm}
-			showForm={showForm}
+			setLocalSearch={setLocalSearch}
 		/>
 	);
 }

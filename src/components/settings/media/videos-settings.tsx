@@ -11,13 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useVideos } from '@/lib/api/videos';
+import { useDeleteVideo, useUpdateVideo, useVideos } from '@/lib/api/videos';
 import { toastService } from '@/lib/ui/toast';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { VideoWithStats } from '@/types/entities/video';
 
 export function VideosSettings() {
 	const { data, isLoading, error } = useVideos({ limit: 1000 });
+	const updateVideo = useUpdateVideo();
+	const deleteVideo = useDeleteVideo();
 
 	const [search, setSearch] = useState('');
 	const [editing, setEditing] = useState<VideoWithStats | null>(null);
@@ -33,8 +35,7 @@ export function VideosSettings() {
 		try {
 			if (!editing) return;
 			if (!nameInput.trim()) return;
-			// TODO: Implementar useUpdateVideo cuando esté disponible
-			// await updateVideo.mutateAsync({ id: editing.id, data: { name: nameInput.trim() } });
+			await updateVideo.mutateAsync({ id: editing.id, data: { name: nameInput.trim() } });
 			setEditing(null);
 			setNameInput('');
 			toastService.success('Video actualizado');
@@ -44,11 +45,10 @@ export function VideosSettings() {
 		}
 	};
 
-	const handleDelete = async (_id: string) => {
+	const handleDelete = async (id: string) => {
 		try {
-			// TODO: Implementar useDeleteVideo cuando esté disponible
-			// await deleteVideo.mutateAsync(id);
-			toastService.success('Video eliminado (simulado - API no implementada)');
+			await deleteVideo.mutateAsync(id);
+			toastService.success('Video eliminado');
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : 'Error desconocido';
 			toastService.error('Error al eliminar video', { description: msg });

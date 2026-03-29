@@ -25,6 +25,85 @@ import type { DatabaseEntityStats, SystemRuntimeStats } from './system.types';
 // Logger con contexto
 const systemLogger = serverLogger.withContext('SystemStats');
 
+function getDatabaseFileCandidates(): string[] {
+	const databaseUrl = process.env.DATABASE_URL || 'file:./db.sqlite';
+
+	if (!databaseUrl.startsWith('file:')) {
+		return [];
+	}
+
+	const normalizedPath = databaseUrl.slice('file:'.length);
+	const resolvedPath = path.resolve(process.cwd(), normalizedPath);
+
+	return [resolvedPath, `${resolvedPath}-wal`, `${resolvedPath}-shm`];
+}
+
+async function getExistingFileSize(filePath: string): Promise<number> {
+	try {
+		return (await fs.stat(filePath)).size;
+	} catch {
+		return 0;
+	}
+}
+
+async function getDirectorySize(dirPath: string): Promise<number> {
+	try {
+		const entries = await fs.readdir(dirPath, { withFileTypes: true });
+		let totalSize = 0;
+
+		for (const entry of entries) {
+			const entryPath = path.join(dirPath, entry.name);
+			if (entry.isDirectory()) {
+				totalSize += await getDirectorySize(entryPath);
+				continue;
+			}
+
+			if (entry.isFile()) {
+				totalSize += await getExistingFileSize(entryPath);
+			}
+		}
+
+		return totalSize;
+	} catch {
+		return 0;
+	}
+}
+
+async function getDatabaseSize(): Promise<number> {
+	const sizes = await Promise.all(getDatabaseFileCandidates().map((filePath) => getExistingFileSize(filePath)));
+	return sizes.reduce((total, size) => total + size, 0);
+}
+
+async function getDiskMetrics(targetPath: string): Promise<{ available: number; total: number; used: number } | null> {
+	try {
+		const fsStats = await fs.statfs(targetPath);
+		const blockSize = Number(fsStats.bsize);
+		const total = Number(fsStats.blocks) * blockSize;
+		const available = Number(fsStats.bavail) * blockSize;
+		const used = Math.max(total - available, 0);
+
+		if (!Number.isFinite(total) || !Number.isFinite(available)) {
+			return null;
+		}
+
+		return { total, available, used };
+	} catch (error) {
+		systemLogger.warn('⚠️ No se pudo obtener información real de disco', { error, targetPath });
+		return null;
+	}
+}
+
+async function getCacheSize(): Promise<number> {
+	const cacheDirectories = [
+		path.join(process.cwd(), '.vite'),
+		path.join(process.cwd(), 'node_modules', '.vite'),
+		path.join(process.cwd(), '.bun'),
+	];
+
+	const sizes = await Promise.all(cacheDirectories.map((dirPath) => getDirectorySize(dirPath)));
+	return Math.round(sizes.reduce((total, size) => total + size, 0) / (1024 * 1024));
+}
+
 /**
  * Obtiene estadísticas del sistema compatibles con frontend
  * Incluye conteos de entidades y estimaciones de almacenamiento
@@ -63,19 +142,10 @@ export async function getSystemStats(): Promise<DatabaseEntityStats> {
 		const totalCollections = collectionsResult[0]?.count || 0;
 		const totalTags = tagsResult[0]?.count || 0;
 
-		// Calcular tamaño de almacenamiento (estimado)
-		const totalEntities =
-			totalImages +
-			totalVideos +
-			totalAudio +
-			totalFolders +
-			totalAlbums +
-			totalCharacters +
-			totalCollections +
-			totalTags;
-		const storageUsed = totalEntities * 1024 * 100; // Estimación: 100KB por entidad
-		const storageAvailable = 1024 * 1024 * 1024; // 1GB simulado disponible
-		const dbSize = totalEntities * 512; // Estimación: 512 bytes por entidad
+		const dbSize = await getDatabaseSize();
+		const diskMetrics = await getDiskMetrics(process.cwd());
+		const storageUsed = diskMetrics?.used ?? dbSize;
+		const storageAvailable = diskMetrics?.available ?? 0;
 
 		systemLogger.info('✅ Estadísticas del sistema obtenidas');
 
@@ -91,7 +161,7 @@ export async function getSystemStats(): Promise<DatabaseEntityStats> {
 			storageUsed,
 			storageAvailable,
 			dbSize,
-			lastBackup: undefined, // TODO: Implementar sistema de backup
+			lastBackup: undefined,
 		} satisfies DatabaseEntityStats;
 	} catch (error) {
 		systemLogger.error('❌ Error al obtener estadísticas del sistema:', error);
@@ -127,15 +197,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 		const freeMem = os.freemem();
 		const memoryUsage = Math.round(((totalMem - freeMem) / totalMem) * 100);
 
-		// Obtener tamaño de caché (simulado con el directorio de Vite)
-		let cacheSize = 0;
-		try {
-			const viteCachePath = path.join(process.cwd(), '.vite');
-			const cacheStats = await fs.stat(viteCachePath).catch(() => ({ size: 0 }));
-			cacheSize = Math.round(cacheStats.size / (1024 * 1024)); // Convertir a MB
-		} catch (error) {
-			systemLogger.warn('⚠️ Error al obtener tamaño de caché:', error);
-		}
+		const cacheSize = await getCacheSize();
 
 		// Obtener estadísticas reales de la base de datos (8 entidades en paralelo)
 		const [
@@ -170,8 +232,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 		const totalEntities =
 			totalImages + totalCollections + totalTags + totalAlbums + totalNotes + totalFolders + totalVideos + totalAudio;
 
-		// Obtener tamaño de la base de datos (estimado basado en entidades)
-		const dbSize = totalEntities * 0.5; // Estimación: 500 bytes por entidad
+		const dbSize = Math.round((await getDatabaseSize()) / (1024 * 1024));
 
 		systemLogger.info('✅ Estadísticas de runtime del sistema obtenidas');
 

@@ -1,7 +1,7 @@
 /**
  * @file Rutas de API para settings - Versión Effect-TS
  * @module server/routes/settings.effect
- * @description Endpoint de settings expandido con funcionalidad real
+ * @description Endpoint de settings integrado con servicio real
  */
 
 import { Effect } from 'effect';
@@ -9,6 +9,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { settingsService } from '@/services/settings/settings.service';
 
 const router = Router();
 const logger = serverLogger.withContext('SettingsEffect');
@@ -25,25 +26,21 @@ const settingsSchema = z.object({
 // GET /api/settings - Obtener configuración actual
 router.get(
 	'/',
-	effectHandler((_req, _res) => {
-		// TODO: Integrar con servicio de settings real cuando esté disponible
-		// Por ahora retornamos configuración por defecto
-		const defaultSettings = {
-			theme: 'system',
-			language: 'es',
-			notifications: true,
-			autoSave: true,
-			version: '1.0.0',
-			updatedAt: new Date().toISOString(),
-		};
+	effectHandler((_req, _res) =>
+		Effect.gen(function* () {
+			const settings = yield* Effect.tryPromise({
+				try: () => settingsService.getSystemSettings(),
+				catch: (error) => error,
+			});
 
-		logger.debug('Settings retrieved', { settings: defaultSettings });
+			logger.debug('Settings retrieved');
 
-		return Effect.succeed({
-			data: defaultSettings,
-			timestamp: new Date().toISOString(),
-		});
-	})
+			return {
+				data: settings,
+				timestamp: new Date().toISOString(),
+			};
+		})
+	)
 );
 
 // PUT /api/settings - Actualizar configuración
@@ -65,14 +62,15 @@ router.put(
 				};
 			}
 
-			// TODO: Integrar con servicio de settings real cuando esté disponible
-			logger.info('Settings updated', { settings: parsed });
+			const updated = yield* Effect.tryPromise({
+				try: () => settingsService.updateSystemSettings(parsed as Record<string, unknown>),
+				catch: (error) => error,
+			});
+
+			logger.info('Settings updated');
 
 			return {
-				data: {
-					...parsed,
-					updatedAt: new Date().toISOString(),
-				},
+				data: updated,
 				message: 'Configuración actualizada exitosamente',
 				timestamp: new Date().toISOString(),
 			};
@@ -83,25 +81,22 @@ router.put(
 // POST /api/settings/reset - Resetear configuración a valores por defecto
 router.post(
 	'/reset',
-	effectHandler((_req, _res) => {
-		// TODO: Integrar con servicio de settings real cuando esté disponible
-		logger.info('Settings reset to defaults');
+	effectHandler((_req, _res) =>
+		Effect.gen(function* () {
+			const settings = yield* Effect.tryPromise({
+				try: () => settingsService.resetSystemSettings(),
+				catch: (error) => error,
+			});
 
-		const defaultSettings = {
-			theme: 'system',
-			language: 'es',
-			notifications: true,
-			autoSave: true,
-			version: '1.0.0',
-			updatedAt: new Date().toISOString(),
-		};
+			logger.info('Settings reset to defaults');
 
-		return Effect.succeed({
-			data: defaultSettings,
-			message: 'Configuración reseteada a valores por defecto',
-			timestamp: new Date().toISOString(),
-		});
-	})
+			return {
+				data: settings,
+				message: 'Configuración reseteada a valores por defecto',
+				timestamp: new Date().toISOString(),
+			};
+		})
+	)
 );
 
 export default router;
