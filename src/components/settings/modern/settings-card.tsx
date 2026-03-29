@@ -43,19 +43,6 @@ export function SettingsPageHeader({ title, description, actions, className }: S
 	);
 }
 
-export interface BentoGridProps {
-	children: React.ReactNode;
-	className?: string;
-}
-
-export function BentoGrid({ children, className }: BentoGridProps) {
-	return (
-		<div className={cn('grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-max', className)}>
-			{children}
-		</div>
-	);
-}
-
 export interface SettingsStatsGridProps {
 	children: React.ReactNode;
 	className?: string;

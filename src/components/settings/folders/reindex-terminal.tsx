@@ -24,6 +24,7 @@ interface ReindexTerminalProps {
 	isActive?: boolean;
 	/** Callback cuando se recibe un log */
 	onLogReceived?: (log: LogEntry) => void;
+	onProgressChange?: (progress: number) => void;
 	/** Progreso actual (0-100) */
 	progress?: number;
 	/** Si mostrar barra de progreso */
@@ -59,12 +60,18 @@ export function ReindexTerminal({
 	isActive = false,
 	className,
 	onLogReceived,
+	onProgressChange,
 	initialLogs = [],
 	progress = 0,
 	showProgress = true,
 }: ReindexTerminalProps) {
 	const [logs, setLogs] = useState<LogEntry[]>(initialLogs.slice(-MAX_LINES));
 	const [currentProgress, setCurrentProgress] = useState(progress);
+
+	useEffect(() => {
+		if (onProgressChange) onProgressChange(currentProgress);
+	}, [currentProgress, onProgressChange]);
+
 	const [startTime, setStartTime] = useState<Date | null>(null);
 	const [elapsedTime, setElapsedTime] = useState(0);
 	const [activeFolderLogId, setActiveFolderLogId] = useState<string | null>(null); // ID del log de carpeta activa
@@ -549,3 +556,4 @@ export function ReindexTerminal({
 		</div>
 	);
 }
+

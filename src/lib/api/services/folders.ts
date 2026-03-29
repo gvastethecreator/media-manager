@@ -108,6 +108,42 @@ const normalizeFolder = (raw: any): FolderWithStats => {
 	} as FolderWithStats;
 };
 
+const getRecentFolderImagesFromFiles = async (
+	folderId: string,
+	limit: number
+): Promise<
+	Array<{
+		id: string;
+		name: string;
+		thumbnailUrl: string;
+	}>
+> => {
+	const response = await apiClient.get<{
+		files?: Array<{
+			id: string;
+			name: string;
+			thumbnailPath?: string;
+			entityType?: string;
+		}>;
+	}>(
+		`/folders/${encodeURIComponent(folderId)}/files?limit=${limit}&offset=0&sortBy=updatedAt&sortOrder=desc&fileTypes=image,video`
+	);
+
+	const files = Array.isArray(response?.files) ? response.files : [];
+
+	return files
+		.filter(
+			(file): file is { id: string; name: string; thumbnailPath: string; entityType?: string } =>
+				typeof file?.thumbnailPath === 'string' && file.thumbnailPath.length > 0
+		)
+		.map((file) => ({
+			id: file.id,
+			name: file.name,
+			thumbnailUrl: file.thumbnailPath,
+		}))
+		.slice(0, limit);
+};
+
 export const findFolders = async (filters: FolderFilters): Promise<FoldersResponse> => {
 	// Construir query parameters basado en los filtros
 	const queryParams = new URLSearchParams();
@@ -130,11 +166,32 @@ export const findFolders = async (filters: FolderFilters): Promise<FoldersRespon
 		rawArray = response.data;
 	}
 	const normalized = rawArray.map(normalizeFolder);
+	const enriched = await Promise.all(
+		normalized.map(async (folder) => {
+			if (Array.isArray(folder.recentImages) && folder.recentImages.length > 0) {
+				return folder;
+			}
+
+			if ((folder.totalFiles ?? 0) <= 0) {
+				return folder;
+			}
+
+			try {
+				const recentImages = await getRecentFolderImagesFromFiles(folder.id, 4);
+				return {
+					...folder,
+					recentImages,
+				};
+			} catch {
+				return folder;
+			}
+		})
+	);
 	return {
-		data: normalized,
+		data: enriched,
 		pagination: {
-			total: normalized.length,
-			limit: normalized.length,
+			total: enriched.length,
+			limit: enriched.length,
 			offset: 0,
 			hasNext: false,
 			hasPrev: false,
@@ -212,11 +269,7 @@ export const getRecentFolderImages = async (
 		thumbnailUrl: string;
 	}>
 > => {
-	// ✅ Fix: Usar el endpoint /stats que devuelve objetos completos, no solo URLs
-	const statsResponse = await getFolderStats(folderId);
-	return (statsResponse.recentImages || [])
-		.filter((img): img is { id: string; name: string; thumbnailUrl: string } => Boolean(img.thumbnailUrl))
-		.slice(0, limit);
+	return getRecentFolderImagesFromFiles(folderId, limit);
 };
 
 export const getFolderStats = async (

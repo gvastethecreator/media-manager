@@ -25,6 +25,14 @@ export interface TCGFolderCardProps extends Omit<
 
 const ACCENT_COLOR = 'var(--entity-folder, oklch(0.7 0.15 55))'; // Naranja/marrón
 
+const PAPER_TRANSFORMS = [
+	'rotate(-8deg) translate(-22%, -6%)',
+	'rotate(-2deg) translate(-6%, -2%)',
+	'rotate(7deg) translate(14%, -4%)',
+] as const;
+
+const PAPER_POSITIONS = ['18% 28%', '50% 38%', '82% 50%'] as const;
+
 // ============================================================================
 // HELPERS
 // ============================================================================
@@ -58,6 +66,24 @@ function getFolderStats(folder: FolderBrowserItem['data']): FolderStats {
 	};
 }
 
+function normalizePreviewUrl(raw: unknown): string | null {
+	if (typeof raw !== 'string') {
+		return null;
+	}
+
+	const trimmed = raw.trim();
+	if (!trimmed) {
+		return null;
+	}
+
+	if (trimmed.startsWith('data:') || /^(https?:|blob:|file:|\/)/i.test(trimmed)) {
+		return trimmed;
+	}
+
+	const base64 = trimmed.replace(/\s+/g, '');
+	return `data:image/webp;base64,${base64}`;
+}
+
 // ============================================================================
 // COMPONENTE
 // ============================================================================
@@ -72,6 +98,32 @@ export const TCGFolderCard = memo(function TCGFolderCard({
 	const folder = item.data;
 	const isFavorite = folder.isFavorite;
 	const stats = getFolderStats(folder);
+	const accentColor = folder.color || ACCENT_COLOR;
+
+	const previewImages = useMemo(() => {
+		const images = Array.isArray(folder.recentImages)
+			? folder.recentImages
+					.map((image, index) => ({
+						id: image.id ?? `recent-${index}`,
+						url: normalizePreviewUrl(image.thumbnailUrl ?? image.thumbnail),
+					}))
+					.filter((image): image is { id: string; url: string } => image.url !== null)
+			: [];
+
+		if (images.length > 0) {
+			return images.slice(0, PAPER_TRANSFORMS.length);
+		}
+
+		const fallbackUrl = normalizePreviewUrl(item.thumbnailUrl);
+		if (!fallbackUrl) {
+			return [];
+		}
+
+		return PAPER_TRANSFORMS.map((_, index) => ({
+			id: `fallback-${index}`,
+			url: fallbackUrl,
+		}));
+	}, [folder.recentImages, item.thumbnailUrl]);
 
 	// Rareza basada en cantidad de contenido y favorito
 	const rarity = useMemo(() => {
@@ -86,21 +138,89 @@ export const TCGFolderCard = memo(function TCGFolderCard({
 
 	// Thumbnail content (folder visual)
 	const thumbnailContent = (
-		<div className="relative flex h-full w-full flex-col items-center justify-center p-4">
-			{/* Folder icon grande */}
-			<FolderIcon
-				className="text-[color:var(--accent-color)] drop-shadow-lg"
-				size={variant === 'list' ? 32 : 64}
-				strokeWidth={1.5}
+		<div className="relative h-full w-full overflow-hidden p-4">
+			<div className="absolute inset-0 bg-linear-to-br from-black/15 via-transparent to-black/45" />
+
+			<div
+				className="absolute left-[14%] top-[12%] h-[14%] w-[30%] rounded-t-2xl border border-white/12"
+				style={{
+					background:
+						'linear-gradient(180deg, color-mix(in oklch, var(--accent-color) 86%, white 14%) 0%, color-mix(in oklch, var(--accent-color) 72%, white 28%) 100%)',
+					boxShadow: '0 10px 24px color-mix(in oklch, var(--accent-color) 24%, transparent)',
+				}}
 			/>
 
-			{/* Contador total */}
+			<div
+				className="absolute inset-x-[10%] bottom-[14%] top-[22%] rounded-3xl border border-white/12"
+				style={{
+					background:
+						'linear-gradient(180deg, color-mix(in oklch, var(--accent-color) 90%, white 10%) 0%, color-mix(in oklch, var(--accent-color) 72%, black 28%) 100%)',
+					boxShadow:
+						'0 18px 42px color-mix(in oklch, var(--accent-color) 26%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.16)',
+				}}
+			/>
+
+			<div className="absolute inset-x-[15%] bottom-[23%] top-[29%]">
+				{previewImages.length > 0 ? (
+					previewImages.map((preview, index) => (
+						<div
+							className="absolute left-1/2 top-1/2 h-[82%] w-[68%] overflow-hidden rounded-2xl border border-white/16 bg-white shadow-2xl"
+							key={preview.id}
+							style={{
+								transform: `translate(-50%, -50%) ${PAPER_TRANSFORMS[index]}`,
+								zIndex: index + 1,
+							}}
+						>
+							<div
+								className="absolute inset-0 bg-cover bg-center"
+								style={{
+									backgroundImage: `url("${preview.url}")`,
+									backgroundPosition: PAPER_POSITIONS[index],
+								}}
+							/>
+							<div className="absolute inset-0 bg-linear-to-br from-white/28 via-transparent to-black/18" />
+						</div>
+					))
+				) : (
+					<div className="absolute inset-0 flex items-center justify-center rounded-2xl border border-dashed border-white/16 bg-black/15 text-white/78">
+						<FolderIcon size={variant === 'list' ? 28 : 42} strokeWidth={1.6} />
+					</div>
+				)}
+			</div>
+
+			<div
+				className="absolute inset-x-[11%] bottom-[14%] top-[31%] rounded-[1.45rem] border border-white/18 backdrop-blur-[1.5px]"
+				style={{
+					background:
+						'linear-gradient(180deg, color-mix(in oklch, var(--accent-color) 34%, white 66%) 0%, color-mix(in oklch, var(--accent-color) 46%, white 54%) 100%)',
+					opacity: 0.72,
+				}}
+			/>
+
+			<div className="absolute left-[16%] top-[18%] flex items-center gap-2 text-white drop-shadow-md">
+				<FolderIcon size={variant === 'list' ? 16 : 18} strokeWidth={1.7} />
+				<span className="font-semibold text-xs uppercase tracking-[0.22em] text-white/86">Folder</span>
+			</div>
+
 			{stats.total > 0 && (
-				<div className="mt-2 flex items-center gap-1 font-medium text-muted-foreground text-sm">
-					<Files size={14} />
+				<div className="absolute left-[16%] bottom-[18%] flex items-center gap-1 rounded-full border border-white/15 bg-black/35 px-2 py-1 font-medium text-[11px] text-white shadow-lg backdrop-blur-sm">
+					<Files size={12} />
 					<span>{stats.total}</span>
 				</div>
 			)}
+
+			{previewImages.length > 0 && (
+				<div className="absolute right-[16%] bottom-[18%] rounded-full border border-white/15 bg-white/12 px-2 py-1 text-[10px] text-white/88 shadow-lg backdrop-blur-sm">
+					{previewImages.length} preview{previewImages.length > 1 ? 's' : ''}
+				</div>
+			)}
+
+			<div
+				className="absolute inset-x-[10%] bottom-[14%] top-[22%] rounded-3xl"
+				style={{
+					boxShadow: 'inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 -16px 28px rgb(0 0 0 / 0.12)',
+				}}
+			/>
 
 			{/* Favorite */}
 			{isFavorite && (
@@ -223,7 +343,7 @@ export const TCGFolderCard = memo(function TCGFolderCard({
 	return (
 		<TCGCardBase
 			{...props}
-			accentColor={ACCENT_COLOR}
+			accentColor={accentColor}
 			footerContent={footerContent}
 			isActive={isActive}
 			item={item}

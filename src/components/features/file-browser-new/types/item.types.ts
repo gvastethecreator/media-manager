@@ -33,6 +33,13 @@ export interface BrowserItem {
 	parentId?: string | null;
 	/** Ruta del archivo */
 	path?: string;
+	/** Previews recientes (principalmente para folders) */
+	recentImages?: Array<{
+		id?: string;
+		name?: string;
+		thumbnail?: string | null;
+		thumbnailUrl?: string | null;
+	}>;
 	/** Entidad original (para integraciones/handlers que requieren el shape completo) */
 	raw?: Record<string, unknown>;
 	/** Tamaño en bytes (para archivos) */
@@ -165,7 +172,7 @@ export function toBrowserItem(entity: Record<string, unknown>): BrowserItem {
 				thumbnailUrl = `/api/thumbnails/unified/3d/${encodeURIComponent(id)}`;
 				break;
 			case 'folder':
-				thumbnailUrl = `/api/folders/${encodeURIComponent(id)}/preview?max=4&layout=grid`;
+				thumbnailUrl = `/api/folders/${encodeURIComponent(id)}/preview?max=4&layout=grid&v=${encodeURIComponent(String(entity.updatedAt ?? entity.createdAt ?? entity.totalItems ?? '1'))}`;
 				break;
 			default:
 				// No generar URL para tipos desconocidos
@@ -183,6 +190,14 @@ export function toBrowserItem(entity: Record<string, unknown>): BrowserItem {
 		createdAt: entity.createdAt as Date | string | number | undefined,
 		size: entity.size as number | undefined,
 		path: entity.path as string | undefined,
+		recentImages: Array.isArray(entity.recentImages)
+			? (entity.recentImages as Array<{
+					id?: string;
+					name?: string;
+					thumbnail?: string | null;
+					thumbnailUrl?: string | null;
+				}>)
+			: undefined,
 		width,
 		height,
 		parentId: entity.parentId as string | null | undefined,
@@ -373,6 +388,12 @@ export interface FolderBrowserItem extends BrowserItem {
 		color?: string | null;
 		isFavorite?: boolean;
 		rating?: number | null;
+		recentImages?: Array<{
+			id?: string;
+			name?: string;
+			thumbnail?: string | null;
+			thumbnailUrl?: string | null;
+		}>;
 		_count?: {
 			images?: number;
 			videos?: number;
