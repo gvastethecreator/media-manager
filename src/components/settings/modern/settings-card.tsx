@@ -24,6 +24,65 @@ export interface SettingsCardProps {
 	variant?: 'default' | 'outlined' | 'elevated';
 }
 
+export interface SettingsPageHeaderProps {
+	actions?: React.ReactNode;
+	className?: string;
+	description?: string;
+	title: string;
+}
+
+export function SettingsPageHeader({ title, description, actions, className }: SettingsPageHeaderProps) {
+	return (
+		<div className={cn('flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between', className)}>
+			<div className="min-w-0 flex-1">
+				<h2 className="font-semibold text-2xl text-foreground text-pretty">{title}</h2>
+				{description && <p className="mt-1 max-w-3xl text-muted-foreground text-sm text-pretty">{description}</p>}
+			</div>
+			{actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+		</div>
+	);
+}
+
+export interface BentoGridProps {
+	children: React.ReactNode;
+	className?: string;
+}
+
+export function BentoGrid({ children, className }: BentoGridProps) {
+	return (
+		<div className={cn('grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-max', className)}>
+			{children}
+		</div>
+	);
+}
+
+export interface SettingsStatsGridProps {
+	children: React.ReactNode;
+	className?: string;
+}
+
+export function SettingsStatsGrid({ children, className }: SettingsStatsGridProps) {
+	return <div className={cn('grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4', className)}>{children}</div>;
+}
+
+export interface BentoGridProps {
+	children: React.ReactNode;
+	className?: string;
+}
+
+export function BentoGrid({ children, className }: BentoGridProps) {
+	return (
+		<div
+			className={cn(
+				'grid auto-rows-[minmax(120px,auto)] grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+				className
+			)}
+		>
+			{children}
+		</div>
+	);
+}
+
 /**
  * Tarjeta de configuración con icono, título y contenido
  * Variantes: default, outlined, elevated
@@ -39,7 +98,7 @@ export const SettingsCard = React.forwardRef<HTMLDivElement, SettingsCardProps>(
 		return (
 			<div
 				className={cn(
-					'flex flex-col gap-3 rounded-lg p-4 transition-all duration-200',
+					'flex flex-col gap-3 rounded-lg p-4 transition-all duration-200 xl:p-4',
 					'hover:border-border/40',
 					variants[variant],
 					className

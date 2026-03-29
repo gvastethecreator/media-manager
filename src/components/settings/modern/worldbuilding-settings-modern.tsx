@@ -48,6 +48,7 @@ import { CreatePlaceForm } from '../forms/create-place-form';
 import { CreatePromptForm } from '../forms/create-prompt-form';
 import { CreateWildcardForm } from '../forms/create-wildcard-form';
 import { CreateWorldItemForm } from '../forms/create-world-item-form';
+import { SettingsPageHeader, SettingsStatsGrid } from './settings-card';
 
 // ============================================================================
 // CONFIGURACIÓN DE ENTIDADES
@@ -767,16 +768,13 @@ export function WorldbuildingSettingsModern() {
 
 	return (
 		<div className="space-y-6">
-			{/* Header */}
-			<div>
-				<h2 className="font-semibold text-2xl text-foreground">Worldbuilding</h2>
-				<p className="mt-1 text-muted-foreground text-sm">
-					Gestiona personajes, lugares, objetos y elementos de tu universo creativo
-				</p>
-			</div>
+			<SettingsPageHeader
+				description="Gestiona personajes, lugares, objetos y elementos de tu universo creativo"
+				title="Worldbuilding"
+			/>
 
 			{/* Entity Type Selector */}
-			<div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+			<div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-7">
 				{(Object.keys(ENTITY_CONFIG) as EntityType[]).map((type) => {
 					const entityConfig = ENTITY_CONFIG[type];
 					const Icon = entityConfig.icon;
@@ -813,7 +811,7 @@ export function WorldbuildingSettingsModern() {
 			</div>
 
 			{/* Stats */}
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+			<SettingsStatsGrid className="2xl:grid-cols-3">
 				{stats.map((stat) => {
 					const Icon = stat.icon;
 					return (
@@ -839,11 +837,11 @@ export function WorldbuildingSettingsModern() {
 						</Card>
 					);
 				})}
-			</div>
+			</SettingsStatsGrid>
 
 			{/* Toolbar */}
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div className="relative max-w-sm">
+			<div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+				<div className="relative w-full max-w-xl xl:max-w-sm">
 					<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 					<input
 						className="w-full rounded-lg border bg-background px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -853,7 +851,7 @@ export function WorldbuildingSettingsModern() {
 						value={searchQuery}
 					/>
 				</div>
-				<div className="flex items-center gap-2">
+				<div className="flex flex-wrap items-center gap-2 xl:justify-end">
 					<div className="flex items-center rounded-lg border p-0.5">
 						<Button
 							className="h-8 w-8 p-0"
@@ -908,7 +906,9 @@ export function WorldbuildingSettingsModern() {
 			) : (
 				<div
 					className={
-						viewMode === 'grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'flex flex-col gap-2'
+						viewMode === 'grid'
+							? 'grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
+							: 'flex flex-col gap-2'
 					}
 				>
 					{items.map((item) =>
