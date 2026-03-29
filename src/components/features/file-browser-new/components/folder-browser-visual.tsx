@@ -60,6 +60,12 @@ function extractPreviewImages(item: BrowserItem) {
 		return [];
 	}
 
+	const isFolderPreviewFallback = /\/api\/folders\/.+\/preview/i.test(fallback);
+	const totalItems = item.totalItems ?? 0;
+	if (isFolderPreviewFallback && totalItems <= 0) {
+		return [];
+	}
+
 	return [
 		{
 			id: 'folder-preview-fallback',
@@ -163,7 +169,7 @@ export const FolderBrowserVisual = memo(function FolderBrowserVisual({
 					<FolderIcon size={compact ? 11 : 14} strokeWidth={1.8} />
 				)}
 				{!compact && (
-					<span className="max-w-[9.5rem] truncate font-semibold text-[10px] uppercase tracking-[0.16em] text-white/88">
+					<span className="max-w-38 truncate font-semibold text-[10px] uppercase tracking-[0.16em] text-white/88">
 						{item.name}
 					</span>
 				)}

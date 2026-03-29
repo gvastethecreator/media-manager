@@ -126,7 +126,7 @@ const getRecentFolderImagesFromFiles = async (
 			entityType?: string;
 		}>;
 	}>(
-		`/folders/${encodeURIComponent(folderId)}/files?limit=${limit}&offset=0&sortBy=updatedAt&sortOrder=desc&fileTypes=image,video`
+		`/folders/${encodeURIComponent(folderId)}/files?includeSubfolders=true&limit=${limit}&offset=0&sortBy=updatedAt&sortOrder=desc&fileTypes=image,video`
 	);
 
 	const files = Array.isArray(response?.files) ? response.files : [];
@@ -172,12 +172,12 @@ export const findFolders = async (filters: FolderFilters): Promise<FoldersRespon
 				return folder;
 			}
 
-			if ((folder.totalFiles ?? 0) <= 0) {
-				return folder;
-			}
-
 			try {
 				const recentImages = await getRecentFolderImagesFromFiles(folder.id, 4);
+				if (recentImages.length === 0) {
+					return folder;
+				}
+
 				return {
 					...folder,
 					recentImages,
