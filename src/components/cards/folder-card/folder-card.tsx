@@ -87,7 +87,7 @@ export const FolderCard = memo(
 			<div
 				className={cn(
 					'group relative flex h-full flex-col overflow-hidden rounded-md ui-motion-standard',
-					tcgMode ? 'border border-border/40 bg-gradient-to-b from-gray-900 to-black shadow-lg' : 'bg-card shadow',
+					tcgMode ? 'border border-border/40 bg-linear-to-b from-gray-900 to-black shadow-lg' : 'bg-card shadow',
 					interactive && 'cursor-pointer hover:shadow-md',
 					className
 				)}
@@ -121,6 +121,8 @@ export const FolderCard = memo(
 				{/* Sección de imágenes */}
 				<FolderCardImages
 					featuredImage={folderData.featuredImage}
+					folderName={folderData.name}
+					previewUrl={`/api/folders/${encodeURIComponent(folderData.id)}/preview?max=4&layout=grid&v=${encodeURIComponent(String(folderData.updatedAt ?? folderData.lastIndexed ?? folderData.totalFiles ?? '1'))}`}
 					primaryColor={primaryColor}
 					recentImages={folderData.recentImageUrls}
 					secondaryColor={secondaryColor}
