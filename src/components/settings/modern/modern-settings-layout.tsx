@@ -245,7 +245,7 @@ function SettingsSidebar({
 }
 
 /**
- * Layout principal de Settings con sidebar izquierda estilo NavPanel
+ * Layout principal de Settings con sidebar derecho estilo NavPanel
  */
 export function ModernSettingsLayout({
 	categories,
@@ -268,23 +268,11 @@ export function ModernSettingsLayout({
 	);
 
 	return (
-		<div className="flex h-full w-full overflow-hidden bg-background">
-			{/* Sidebar Izquierda - Navegación estilo NavPanel */}
-			<div className="h-full w-72 shrink-0 border-border/30 border-r bg-muted/20">
-				<SettingsSidebar
-					activeCategory={activeSection}
-					activeItem={activeItemId}
-					categories={categories}
-					onNavigate={handleNavigate}
-					onSearch={setSearchTerm}
-					searchTerm={searchTerm}
-				/>
-			</div>
-
+		<div className="flex h-full w-full flex-row overflow-hidden bg-background">
 			{/* Área Principal - Contenido */}
-			<div className="flex h-full flex-1 flex-col overflow-hidden">
+			<div className="flex min-w-0 flex-1 flex-col overflow-hidden border-border/30 border-r">
 				{/* Header Superior con Breadcrumbs - Más compacto */}
-				<div className="flex h-12 shrink-0 items-center justify-between border-border/30 border-b bg-linear-to-b from-background/90 to-transparent px-4 shadow-sm">
+				<div className="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-2 border-border/30 border-b bg-linear-to-b from-background/90 to-transparent px-4 py-2 shadow-sm md:px-5 xl:px-6">
 					<Breadcrumb>
 						<BreadcrumbList>
 							<BreadcrumbItem>
@@ -331,10 +319,26 @@ export function ModernSettingsLayout({
 				{/* Contenido Scrollable */}
 				<div className="flex-1 overflow-hidden">
 					<ScrollArea className="h-full">
-						<div className="p-5">{children}</div>
+						<div className="mx-auto w-full p-4 md:p-5 xl:p-6 2xl:p-7" style={{ maxWidth: '1680px' }}>
+							{children}
+						</div>
 					</ScrollArea>
 				</div>
 			</div>
+
+			{/* Sidebar Derecho - Navegación vertical */}
+			<aside className="w-64 xl:w-72 shrink-0 border-border/30 border-l bg-muted/20">
+				<div className="h-full">
+					<SettingsSidebar
+						activeCategory={activeSection}
+						activeItem={activeItemId}
+						categories={categories}
+						onNavigate={handleNavigate}
+						onSearch={setSearchTerm}
+						searchTerm={searchTerm}
+					/>
+				</div>
+			</aside>
 		</div>
 	);
 }

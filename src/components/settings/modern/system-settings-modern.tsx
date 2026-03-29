@@ -41,7 +41,14 @@ import { Switch } from '@/components/ui/switch';
 import { useRepairSystem, useResetDatabase, useSystemStats, useSystemVersion } from '@/lib/api/system';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
-import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
+import {
+	BentoGrid,
+	SettingsCard,
+	SettingsGroup,
+	SettingsPageHeader,
+	SettingsRow,
+	SettingsStatsGrid,
+} from '../modern/settings-card';
 
 function formatBytes(bytes: number): string {
 	if (!bytes || bytes <= 0) {
@@ -147,7 +154,7 @@ export function SystemSettingsModern() {
 		storageAvailable: diskFree,
 		totalTables: rawStats?.totalMetadata || 0,
 		uptime: formatUptime(rawStats?.uptime),
-		version: versionData?.version || '2.4.1',
+		version: versionData?.version || 'N/A',
 		platform: rawStats?.platform || 'N/A',
 		hostname: rawStats?.hostname || 'N/A',
 		nodeVersion: rawStats?.nodeVersion || 'N/A',
@@ -190,20 +197,19 @@ export function SystemSettingsModern() {
 
 	return (
 		<div className="space-y-6">
-			{/* Header Section */}
-			<div className="flex items-center justify-between">
-				<div>
-					<h2 className="font-semibold text-2xl text-foreground">Configuración del Sistema</h2>
-					<p className="mt-1 text-muted-foreground text-sm">Monitoreo y configuración general del servidor</p>
-				</div>
-				<Button className="gap-2" disabled={isLoading} onClick={handleRefresh} size="sm" variant="outline">
-					<RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
-					Actualizar
-				</Button>
-			</div>
+			<SettingsPageHeader
+				actions={
+					<Button className="gap-2" disabled={isLoading} onClick={handleRefresh} size="sm" variant="outline">
+						<RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
+						Actualizar
+					</Button>
+				}
+				description="Monitoreo y configuración general del servidor"
+				title="Configuración del Sistema"
+			/>
 
 			{/* Stats Overview - 4 Real Data Cards */}
-			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+			<SettingsStatsGrid>
 				{/* Storage Card - Real Data */}
 				<Card
 					className="overflow-hidden border-l bg-card/50"
@@ -308,155 +314,159 @@ export function SystemSettingsModern() {
 						</div>
 					</CardContent>
 				</Card>
-			</div>
+			</SettingsStatsGrid>
 
-			{/* Server Configuration Card */}
-			<div id="system-general">
-				<SettingsCard
-					color="var(--primary)"
-					description="Ajustes de rendimiento y disponibilidad"
-					icon={<Server />}
-					title="Configuración del Servidor"
-					variant="outlined"
-				>
-					<SettingsGroup title="Rendimiento">
-						<SettingsRow
-							description="Actualizar métricas del sistema cada 30 segundos"
-							label="Auto-actualización de estadísticas"
-						>
-							<Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
-						</SettingsRow>
-						<SettingsRow description="Habilitar caché para queries frecuentes" label="Cache de consultas">
-							<Switch defaultChecked />
-						</SettingsRow>
-					</SettingsGroup>
-
-					<Separator className="my-4" />
-
-					<SettingsGroup title="Nivel de Logging">
-						<RadioGroup className="space-y-3" onValueChange={(value) => setLogLevel(value)} value={logLevel}>
-							{['error', 'warn', 'info', 'debug'].map((level) => (
-								<div className="flex items-center justify-between" key={level}>
-									<Label className="cursor-pointer" htmlFor={`log-${level}`}>
-										{level.charAt(0).toUpperCase() + level.slice(1)}
-									</Label>
-									<RadioGroupItem id={`log-${level}`} value={level} />
-								</div>
-							))}
-						</RadioGroup>
-					</SettingsGroup>
-				</SettingsCard>
-			</div>
-
-			{/* Database Configuration Card */}
-			<div id="system-database">
-				<Collapsible defaultOpen>
-					<CollapsibleTrigger asChild>
-						<SettingsCard
-							className="cursor-pointer hover:bg-muted/50"
-							color="var(--entity-collection)"
-							description="Configuración y mantenimiento de Drizzle ORM"
-							icon={<Database />}
-							title="Acciones de Base de Datos"
-						>
-							<ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
-						</SettingsCard>
-					</CollapsibleTrigger>
-					<CollapsibleContent className="space-y-4 pt-4">
-						<SettingsGroup title="Mantenimiento">
-							<SettingsRow description="Verificar integridad y reparar índices" label="Reparar Sistema">
-								<Button disabled={repairSystemMutation.isPending} onClick={handleRepair} size="sm" variant="outline">
-									<Eye className={cn('mr-2 h-4 w-4', repairSystemMutation.isPending && 'animate-spin')} />
-									{repairSystemMutation.isPending ? 'Reparando...' : 'Ejecutar Reparación'}
-								</Button>
+			<BentoGrid>
+				{/* Server Configuration Card */}
+				<div className="h-full md:col-span-2 xl:col-span-2" id="system-general">
+					<SettingsCard
+						className="h-full"
+						color="var(--primary)"
+						description="Ajustes de rendimiento y disponibilidad"
+						icon={<Server />}
+						title="Configuración del Servidor"
+						variant="outlined"
+					>
+						<SettingsGroup title="Rendimiento">
+							<SettingsRow
+								description="Actualizar métricas del sistema cada 30 segundos"
+								label="Auto-actualización de estadísticas"
+							>
+								<Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
 							</SettingsRow>
-							<SettingsRow description="Eliminar todos los datos y reiniciar (Destructivo)" label="Resetear DB">
-								<AlertDialog>
-									<AlertDialogTrigger asChild>
-										<Button size="sm" variant="destructive">
-											<AlertTriangle className="mr-2 h-4 w-4" />
-											Resetear Todo
-										</Button>
-									</AlertDialogTrigger>
-									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
-											<AlertDialogDescription>
-												Esta acción eliminará PERMANENTEMENTE todos los datos de la base de datos.
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-										<AlertDialogFooter>
-											<AlertDialogCancel>Cancelar</AlertDialogCancel>
-											<AlertDialogAction
-												className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-												onClick={handleReset}
-											>
-												Sí, resetear
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialog>
+							<SettingsRow description="Habilitar caché para queries frecuentes" label="Cache de consultas">
+								<Switch defaultChecked />
 							</SettingsRow>
 						</SettingsGroup>
 
-						<Separator />
+						<Separator className="my-4" />
 
-						<div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
-							<div className="flex items-center gap-3">
-								<div
-									className="flex h-10 w-10 items-center justify-center rounded-full"
-									style={{ backgroundColor: 'color-mix(in oklch, var(--dt-success-500) 10%, transparent)' }}
-								>
-									<CheckCircle className="h-5 w-5" style={{ color: 'var(--dt-success-600)' }} />
-								</div>
-								<div className="flex flex-col gap-0.5">
-									<span className="font-medium text-foreground text-sm">Estado: Conectado</span>
-									<span className="text-muted-foreground text-sm">Driver: SQLite-Drizzle</span>
+						<SettingsGroup title="Nivel de Logging">
+							<RadioGroup className="space-y-3" onValueChange={(value) => setLogLevel(value)} value={logLevel}>
+								{['error', 'warn', 'info', 'debug'].map((level) => (
+									<div className="flex items-center justify-between" key={level}>
+										<Label className="cursor-pointer" htmlFor={`log-${level}`}>
+											{level.charAt(0).toUpperCase() + level.slice(1)}
+										</Label>
+										<RadioGroupItem id={`log-${level}`} value={level} />
+									</div>
+								))}
+							</RadioGroup>
+						</SettingsGroup>
+					</SettingsCard>
+				</div>
+
+				{/* Database Configuration Card */}
+				<div className="h-full md:col-span-2 xl:col-span-2" id="system-database">
+					<Collapsible defaultOpen>
+						<CollapsibleTrigger asChild>
+							<SettingsCard
+								className="cursor-pointer hover:bg-muted/50"
+								color="var(--entity-collection)"
+								description="Configuración y mantenimiento de Drizzle ORM"
+								icon={<Database />}
+								title="Acciones de Base de Datos"
+							>
+								<ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
+							</SettingsCard>
+						</CollapsibleTrigger>
+						<CollapsibleContent className="space-y-4 pt-4">
+							<SettingsGroup title="Mantenimiento">
+								<SettingsRow description="Verificar integridad y reparar índices" label="Reparar Sistema">
+									<Button disabled={repairSystemMutation.isPending} onClick={handleRepair} size="sm" variant="outline">
+										<Eye className={cn('mr-2 h-4 w-4', repairSystemMutation.isPending && 'animate-spin')} />
+										{repairSystemMutation.isPending ? 'Reparando...' : 'Ejecutar Reparación'}
+									</Button>
+								</SettingsRow>
+								<SettingsRow description="Eliminar todos los datos y reiniciar (Destructivo)" label="Resetear DB">
+									<AlertDialog>
+										<AlertDialogTrigger asChild>
+											<Button size="sm" variant="destructive">
+												<AlertTriangle className="mr-2 h-4 w-4" />
+												Resetear Todo
+											</Button>
+										</AlertDialogTrigger>
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+												<AlertDialogDescription>
+													Esta acción eliminará PERMANENTEMENTE todos los datos de la base de datos.
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogFooter>
+												<AlertDialogCancel>Cancelar</AlertDialogCancel>
+												<AlertDialogAction
+													className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+													onClick={handleReset}
+												>
+													Sí, resetear
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
+								</SettingsRow>
+							</SettingsGroup>
+
+							<Separator />
+
+							<div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
+								<div className="flex items-center gap-3">
+									<div
+										className="flex h-10 w-10 items-center justify-center rounded-full"
+										style={{ backgroundColor: 'color-mix(in oklch, var(--dt-success-500) 10%, transparent)' }}
+									>
+										<CheckCircle className="h-5 w-5" style={{ color: 'var(--dt-success-600)' }} />
+									</div>
+									<div className="flex flex-col gap-0.5">
+										<span className="font-medium text-foreground text-sm">Estado: Conectado</span>
+										<span className="text-muted-foreground text-sm">Driver: SQLite-Drizzle</span>
+									</div>
 								</div>
 							</div>
-						</div>
-					</CollapsibleContent>
-				</Collapsible>
-			</div>
+						</CollapsibleContent>
+					</Collapsible>
+				</div>
 
-			{/* System Info Card */}
-			<div id="system-storage">
-				<SettingsCard
-					color="var(--entity-system)"
-					description="Detalles técnicos y versión"
-					icon={<Zap />}
-					title="Información del Sistema"
-					variant="outlined"
-				>
-					<div className="space-y-4">
-						<SettingsRow label="Versión">
-							<Badge variant="outline">{stats.version}</Badge>
-						</SettingsRow>
-						<SettingsRow label="Sistema operativo">
-							<Badge variant="outline">{stats.platform}</Badge>
-						</SettingsRow>
-						<SettingsRow label="Host">
-							<span className="text-muted-foreground text-sm">{stats.hostname}</span>
-						</SettingsRow>
-						<SettingsRow label="Node/Bun runtime">
-							<span className="text-muted-foreground text-sm">{stats.nodeVersion}</span>
-						</SettingsRow>
-						<SettingsRow label="CPU actual">
-							<span className="text-muted-foreground text-sm">
-								{stats.cpuUsage}% • {stats.cpuModel}
-							</span>
-						</SettingsRow>
-						<SettingsRow label="Memoria">
-							<span className="text-muted-foreground text-sm">
-								{stats.memoryUsed} / {stats.memoryTotal} ({stats.memoryUsage}%)
-							</span>
-						</SettingsRow>
-						<SettingsRow label="Uptime">
-							<span className="text-muted-foreground text-sm">{stats.uptime}</span>
-						</SettingsRow>
-					</div>
-				</SettingsCard>
-			</div>
+				{/* System Info Card */}
+				<div className="h-full md:col-span-2 xl:col-span-4" id="system-storage">
+					<SettingsCard
+						className="h-full"
+						color="var(--entity-system)"
+						description="Detalles técnicos y versión"
+						icon={<Zap />}
+						title="Información del Sistema"
+						variant="outlined"
+					>
+						<div className="space-y-4">
+							<SettingsRow label="Versión">
+								<Badge variant="outline">{stats.version}</Badge>
+							</SettingsRow>
+							<SettingsRow label="Sistema operativo">
+								<Badge variant="outline">{stats.platform}</Badge>
+							</SettingsRow>
+							<SettingsRow label="Host">
+								<span className="text-muted-foreground text-sm">{stats.hostname}</span>
+							</SettingsRow>
+							<SettingsRow label="Node/Bun runtime">
+								<span className="text-muted-foreground text-sm">{stats.nodeVersion}</span>
+							</SettingsRow>
+							<SettingsRow label="CPU actual">
+								<span className="text-muted-foreground text-sm">
+									{stats.cpuUsage}% • {stats.cpuModel}
+								</span>
+							</SettingsRow>
+							<SettingsRow label="Memoria">
+								<span className="text-muted-foreground text-sm">
+									{stats.memoryUsed} / {stats.memoryTotal} ({stats.memoryUsage}%)
+								</span>
+							</SettingsRow>
+							<SettingsRow label="Uptime">
+								<span className="text-muted-foreground text-sm">{stats.uptime}</span>
+							</SettingsRow>
+						</div>
+					</SettingsCard>
+				</div>
+			</BentoGrid>
 		</div>
 	);
 }

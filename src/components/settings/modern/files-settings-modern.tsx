@@ -54,6 +54,7 @@ import { FolderForm } from '../folders/folders-form';
 import { StructuredReindexConfig } from '../folders/folders-reindex-config';
 import { useReindexConfig } from '../folders/hooks/use-reindex-config';
 import { ReindexTerminal } from '../folders/reindex-terminal';
+import { SettingsPageHeader, SettingsStatsGrid } from './settings-card';
 
 // ============================================================================
 // COMPONENTE DE CARPETA
@@ -339,13 +340,10 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 
 	return (
 		<div className="space-y-6" ref={containerRef}>
-			{/* Header */}
-			<div>
-				<h2 className="font-semibold text-2xl text-foreground">Archivos y Almacenamiento</h2>
-				<p className="mt-1 text-muted-foreground text-sm">
-					Gestiona carpetas, miniaturas y configuración de almacenamiento
-				</p>
-			</div>
+			<SettingsPageHeader
+				description="Gestiona carpetas, miniaturas y configuración de almacenamiento"
+				title="Archivos y Almacenamiento"
+			/>
 
 			{/* Reindex Terminal - Movido a la parte superior - Solo visible cuando hay actividad */}
 			{(reindexFolderMutation.isPending || reindexAllFoldersMutation.isPending) && (
@@ -366,7 +364,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 			)}
 
 			<Tabs onValueChange={setActiveTab} value={activeTab}>
-				<TabsList className="grid w-full grid-cols-2 lg:w-100">
+				<TabsList className="grid w-full grid-cols-2 lg:w-80">
 					<TabsTrigger className="gap-2" value="folders">
 						<Folder className="h-4 w-4" />
 						Carpetas
@@ -380,7 +378,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 				<div className="mt-6 space-y-6">
 					<TabsContent className="m-0 space-y-6" data-testid="folders-settings" value="folders">
 						{/* Stats */}
-						<div className="grid grid-cols-1 gap-4 sm:grid-cols-3" data-testid="folders-stats">
+						<SettingsStatsGrid className="2xl:grid-cols-4" data-testid="folders-stats">
 							{folderStats.map((stat) => (
 								<Card
 									className="border-l-4"
@@ -421,15 +419,15 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									</div>
 								</CardContent>
 							</Card>
-						</div>
+						</SettingsStatsGrid>
 
 						<div className="sr-only" data-testid="stats-total-folders">
 							{folders.length}
 						</div>
 
 						{/* Toolbar */}
-						<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-							<div className="relative max-w-sm">
+						<div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+							<div className="relative w-full max-w-xl xl:max-w-sm">
 								<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 								<input
 									className="w-full rounded-lg border bg-background px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -439,7 +437,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									value={searchQuery}
 								/>
 							</div>
-							<div className="flex items-center gap-2">
+							<div className="flex flex-wrap items-center gap-2 xl:justify-end">
 								<div className="flex items-center rounded-lg border p-0.5">
 									<Button
 										className="h-8 w-8 p-0"
@@ -522,7 +520,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 							<div
 								className={
 									viewMode === 'grid'
-										? 'grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+										? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
 										: 'flex flex-col gap-2'
 								}
 							>
@@ -554,7 +552,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 
 					<TabsContent className="m-0 space-y-6" value="thumbnails">
 						{/* Stats */}
-						<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+						<SettingsStatsGrid className="2xl:grid-cols-3">
 							{thumbnailStatCards.map((stat) => (
 								<Card
 									className="border-l-4"
@@ -578,83 +576,85 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									</CardContent>
 								</Card>
 							))}
-						</div>
+						</SettingsStatsGrid>
 
 						{/* Quality Settings */}
-						<Card>
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2 text-lg">
-									<Image className="h-5 w-5" />
-									Configuración de Miniaturas
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-6">
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="font-medium">Calidad de miniaturas</p>
-										<p className="text-muted-foreground text-sm">Balance entre calidad visual y espacio en disco</p>
+						<div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+							<Card>
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2 text-lg">
+										<Image className="h-5 w-5" />
+										Configuración de Miniaturas
+									</CardTitle>
+								</CardHeader>
+								<CardContent className="space-y-6">
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="font-medium">Calidad de miniaturas</p>
+											<p className="text-muted-foreground text-sm">Balance entre calidad visual y espacio en disco</p>
+										</div>
+										<Select
+											onValueChange={(v) => handleQualityChange(v as ThumbnailQuality)}
+											value={settings?.thumbnailQuality || ThumbnailQuality.MEDIUM}
+										>
+											<SelectTrigger className="w-50">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value={ThumbnailQuality.LOW}>Baja (rápido)</SelectItem>
+												<SelectItem value={ThumbnailQuality.MEDIUM}>Media (recomendado)</SelectItem>
+												<SelectItem value={ThumbnailQuality.HIGH}>Alta (calidad)</SelectItem>
+											</SelectContent>
+										</Select>
 									</div>
-									<Select
-										onValueChange={(v) => handleQualityChange(v as ThumbnailQuality)}
-										value={settings?.thumbnailQuality || ThumbnailQuality.MEDIUM}
-									>
-										<SelectTrigger className="w-50">
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value={ThumbnailQuality.LOW}>Baja (rápido)</SelectItem>
-											<SelectItem value={ThumbnailQuality.MEDIUM}>Media (recomendado)</SelectItem>
-											<SelectItem value={ThumbnailQuality.HIGH}>Alta (calidad)</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
 
-								<Separator />
+									<Separator />
 
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="font-medium">Animación en videos</p>
-										<p className="text-muted-foreground text-sm">Mostrar preview animado al pasar el cursor</p>
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="font-medium">Animación en videos</p>
+											<p className="text-muted-foreground text-sm">Mostrar preview animado al pasar el cursor</p>
+										</div>
+										<Switch
+											checked={settings?.videoThumbnailAnimation ?? true}
+											onCheckedChange={async (checked) => {
+												await updateSettings({ videoThumbnailAnimation: checked });
+											}}
+										/>
 									</div>
-									<Switch
-										checked={settings?.videoThumbnailAnimation ?? true}
-										onCheckedChange={async (checked) => {
-											await updateSettings({ videoThumbnailAnimation: checked });
-										}}
-									/>
-								</div>
-							</CardContent>
-						</Card>
+								</CardContent>
+							</Card>
 
-						{/* Maintenance */}
-						<Card>
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2 text-lg">
-									<Zap className="h-5 w-5" />
-									Mantenimiento
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="flex flex-wrap gap-2">
-									<Button className="gap-2" onClick={handleOptimizeThumbnails} variant="outline">
-										<Zap className="h-4 w-4" />
-										Optimizar
-									</Button>
-									<Button className="gap-2" onClick={handleReprocessThumbnails} variant="outline">
-										<RefreshCw className="h-4 w-4" />
-										Reprocesar todo
-									</Button>
-									<Button
-										className="gap-2 text-destructive hover:text-destructive"
-										onClick={handleCleanThumbnails}
-										variant="outline"
-									>
-										<Trash2 className="h-4 w-4" />
-										Limpiar huérfanas
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
+							{/* Maintenance */}
+							<Card>
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2 text-lg">
+										<Zap className="h-5 w-5" />
+										Mantenimiento
+									</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<div className="flex flex-wrap gap-2">
+										<Button className="gap-2" onClick={handleOptimizeThumbnails} variant="outline">
+											<Zap className="h-4 w-4" />
+											Optimizar
+										</Button>
+										<Button className="gap-2" onClick={handleReprocessThumbnails} variant="outline">
+											<RefreshCw className="h-4 w-4" />
+											Reprocesar todo
+										</Button>
+										<Button
+											className="gap-2 text-destructive hover:text-destructive"
+											onClick={handleCleanThumbnails}
+											variant="outline"
+										>
+											<Trash2 className="h-4 w-4" />
+											Limpiar huérfanas
+										</Button>
+									</div>
+								</CardContent>
+							</Card>
+						</div>
 					</TabsContent>
 				</div>
 			</Tabs>
