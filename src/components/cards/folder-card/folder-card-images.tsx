@@ -1,9 +1,13 @@
 import { memo, useMemo } from 'react';
+import { FolderBrowserVisual } from '@/components/features/file-browser-new/components/folder-browser-visual';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
+import type { BrowserItem } from '@/components/features/file-browser-new/types/item.types';
 
 export interface FolderCardImagesProps {
 	featuredImage?: string | null;
+	folderName?: string;
+	previewUrl?: string | null;
 	primaryColor: string;
 	recentImages?: string[] | null;
 	secondaryColor?: string;
@@ -19,6 +23,8 @@ export interface FolderCardImagesProps {
  */
 export const FolderCardImages = memo(function FolderCardImages({
 	featuredImage,
+	folderName,
+	previewUrl,
 	recentImages = [],
 	primaryColor,
 	secondaryColor = primaryColor,
@@ -38,6 +44,31 @@ export const FolderCardImages = memo(function FolderCardImages({
 	// Helper para decidir si usar <img> o background-image
 	const isDataUrl = (src?: string | null) => (src ? src.startsWith('data:') : false);
 	const isLargeDataUrl = (src?: string | null) => (isDataUrl(src) ? (src?.length || 0) > 200_000 : false);
+
+	const browserFolderPreview = useMemo(
+		() =>
+			({
+				id: `folder-preview-${featuredImage ?? computedStats.displayImages[0] ?? 'empty'}`,
+				name: folderName ?? 'Folder preview',
+				entityType: 'folder',
+				color: primaryColor,
+				thumbnailUrl: featuredImage ?? computedStats.displayImages[0] ?? previewUrl ?? null,
+				totalItems: totalFiles,
+				recentImages: computedStats.displayImages.map((image, index) => ({
+					id: `folder-recent-${index}`,
+					thumbnailUrl: image,
+				})),
+			}) satisfies BrowserItem,
+		[computedStats.displayImages, featuredImage, folderName, previewUrl, primaryColor, totalFiles]
+	);
+
+	if (!tcgMode) {
+		return (
+			<div className="h-40 w-full overflow-hidden bg-muted/30">
+				<FolderBrowserVisual item={browserFolderPreview} />
+			</div>
+		);
+	}
 
 	// Si hay una imagen destacada, la mostramos como principal
 	if (featuredImage) {
@@ -173,7 +204,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 			<div
 				className={cn(
 					'relative flex h-40 w-full items-center justify-center',
-					tcgMode ? 'border-border/40 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
+					tcgMode ? 'border-border/40 border-b bg-linear-to-br from-gray-900 to-gray-800' : 'bg-muted'
 				)}
 				style={
 					tcgMode
@@ -213,7 +244,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 		<div
 			className={cn(
 				'relative flex h-40 w-full items-center justify-center',
-				tcgMode ? 'border-border/40 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
+				tcgMode ? 'border-border/40 border-b bg-linear-to-br from-gray-900 to-gray-800' : 'bg-muted'
 			)}
 			style={
 				tcgMode
