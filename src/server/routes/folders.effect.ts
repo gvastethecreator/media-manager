@@ -358,7 +358,7 @@ router.get(
 						try: async () => {
 							const previewPayload = await getFolderFiles!({
 								folderId: folder.id,
-								includeSubfolders: false,
+								includeSubfolders: true,
 								limit: 4,
 								offset: 0,
 								sortBy: 'updatedAt',
@@ -428,7 +428,7 @@ router.get(
 					try: () =>
 						getFolderFiles!({
 							folderId: req.params.id,
-							includeSubfolders: false,
+							includeSubfolders: true,
 							limit: max,
 							offset: 0,
 							sortBy: 'updatedAt',
