@@ -54,37 +54,37 @@ async function getSystemStats(): Promise<SystemStats> {
 		return response.json();
 	} catch (error) {
 		console.warn('❌ Error al obtener estadísticas del sistema:', error);
-		// Retornar datos mock en caso de error
+		// Mantener una respuesta neutra cuando la API de stats no está disponible.
 		return {
 			cpu: {
 				usage: 0,
-				cores: 4,
+				cores: 0,
 				model: 'Unknown',
 				loadAvg: [0, 0, 0],
 			},
 			memory: {
-				total: 8_589_934_592, // 8GB
-				free: 4_294_967_296, // 4GB
-				used: 4_294_967_296, // 4GB
-				usedPercent: 50,
-				processUsed: 134_217_728, // 128MB
-				processUsedPercent: 2,
+				total: 0,
+				free: 0,
+				used: 0,
+				usedPercent: 0,
+				processUsed: 0,
+				processUsedPercent: 0,
 			},
 			uptime: {
-				system: 86_400, // 1 día
-				process: 3600, // 1 hora
+				system: 0,
+				process: 0,
 			},
 			network: {
-				interfaces: ['eth0', 'lo'],
+				interfaces: [],
 			},
 			platform: {
 				type: 'unknown',
 				release: 'unknown',
-				arch: 'x64',
+				arch: 'unknown',
 			},
 			nodejs: {
-				version: 'v18.0.0',
-				pid: 1234,
+				version: 'unknown',
+				pid: 0,
 			},
 		};
 	}

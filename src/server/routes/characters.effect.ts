@@ -160,9 +160,7 @@ router.get(
 	effectHandler((req) =>
 		Effect.gen(function* () {
 			const characterService = yield* CharacterService;
-			// TODO: implementar getImages en servicio
-			const images = [] as any[];
-			return images;
+			return yield* characterService.getImages(req.params.id);
 		}).pipe(Effect.provide(CharacterServiceLive))
 	)
 );

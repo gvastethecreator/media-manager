@@ -87,10 +87,10 @@ export async function extractC2PAData(buffer: Buffer, filename: string): Promise
 
 		const result: C2PAData = {
 			hasCredentials: true,
-			isValid: false, // Requiere verificación criptográfica real
+			isValid: false,
 			warnings: [
-				'Extracción C2PA detectada pero no completamente implementada',
-				'Se requiere librería c2pa-js o similar para verificación completa',
+				'Se detectaron indicadores C2PA, pero la verificación criptográfica completa no está disponible en este runtime',
+				'Se requiere una librería especializada como c2pa-js o c2pa-node para validar firmas y certificados',
 			],
 		};
 
@@ -121,8 +121,15 @@ export async function extractC2PAData(buffer: Buffer, filename: string): Promise
  */
 export async function verifyC2PASignatures(c2paData: C2PAData): Promise<boolean> {
 	try {
-		// TODO: Implementar verificación criptográfica real
-		logger.info('🔐 Verificación de firmas C2PA no implementada completamente');
+		if (!c2paData.hasCredentials) {
+			return false;
+		}
+
+		if (c2paData.isValid === true) {
+			return true;
+		}
+
+		logger.info('🔐 La verificación criptográfica completa de firmas C2PA no está disponible en este runtime');
 		return false;
 	} catch (error) {
 		logger.warn('Error verificando firmas C2PA', { error });
@@ -279,8 +286,8 @@ export function getC2PAImplementationStatus() {
 	return {
 		status: 'partial',
 		implemented: [
-			'Detección básica de presencia de C2PA',
-			'Extracción de metadatos básicos',
+			'Detección heurística de presencia de C2PA',
+			'Extracción de metadatos básicos disponibles en el buffer',
 			'Soporte para JPEG y PNG',
 		],
 		pending: [
@@ -292,7 +299,7 @@ export function getC2PAImplementationStatus() {
 		notes: [
 			'C2PA es un estándar complejo que requiere librerías especializadas',
 			'La verificación completa necesita validación criptográfica',
-			'Implementación actual es un placeholder funcional',
+			'Actualmente el servicio detecta y resume metadatos presentes, pero no certifica autenticidad por sí solo',
 		],
 	};
 }

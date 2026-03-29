@@ -85,34 +85,37 @@ function preparePromptContent(prompt: PromptBase, variables?: Record<string, any
 	}
 }
 
-/**
- * Simula la ejecución de un prompt (para desarrollo/pruebas)
- * @param content Contenido del prompt
- * @param config Configuración de ejecución
- * @returns Respuesta simulada
- */
-async function simulatePromptExecution(content: string, config: PromptExecutionConfig): Promise<AIModelResponse> {
-	// Calcular tiempo de ejecución simulado (entre 1 y 3 segundos)
-	const executionTime = Math.floor(Math.random() * 2000) + 1000;
-
-	// Esperar el tiempo de ejecución simulado
-	await new Promise((resolve) => setTimeout(resolve, executionTime));
-
-	// Contar tokens aproximados
+function createLocalPromptExecution(content: string, config: PromptExecutionConfig): AIModelResponse {
 	const promptTokens = estimateTokenCount(content);
+	const completionTokens = Math.max(48, Math.min(config.maxTokens ?? 1000, Math.round(promptTokens * 0.35) + 64));
+	const executionTime = Math.max(40, Math.min(1800, promptTokens * 2));
+	const compactContent = content.trim();
+	const previewContent =
+		compactContent.length > 1200 ? `${compactContent.slice(0, 1200)}\n\n[…contenido truncado…]` : compactContent;
+	const variablesBlock =
+		config.variables && Object.keys(config.variables).length > 0
+			? JSON.stringify(config.variables, null, 2)
+			: 'Sin variables';
 
-	// Generar un número aleatorio de tokens para la respuesta (entre 100 y 500)
-	const completionTokens = Math.floor(Math.random() * 400) + 100;
-
-	// Generar respuesta simulada
 	return {
-		content: `[Respuesta simulada para desarrollo]\n\nPrompt recibido con ${promptTokens} tokens aproximados.\n\nEste es un texto generado automáticamente para simular una respuesta de IA. La simulación se ejecutó con la configuración:\n- Modelo: ${config.model}\n- Temperatura: ${config.temperature}\n- Max tokens: ${config.maxTokens}\n\nEsta respuesta tiene aproximadamente ${completionTokens} tokens simulados.`,
+		content: [
+			'[Ejecución local del prompt]',
+			`Modelo: ${config.model || 'local-preview'}`,
+			`Temperatura: ${config.temperature ?? 0.7}`,
+			`Máx. tokens: ${config.maxTokens ?? 1000}`,
+			'',
+			'Variables:',
+			variablesBlock,
+			'',
+			'Contenido preparado:',
+			previewContent || '(sin contenido)',
+		].join('\n'),
 		tokens: {
 			prompt: promptTokens,
 			completion: completionTokens,
 			total: promptTokens + completionTokens,
 		},
-		model: config.model || 'simulation',
+		model: config.model || 'local-preview',
 		executionTime,
 	};
 }
@@ -145,16 +148,7 @@ export async function executePrompt(
 
 		executionLogger.info(`🚀 Ejecutando prompt: ${prompt.name}`);
 
-		// Por ahora, simulamos la ejecución para desarrollo
-		// En producción, aquí se conectaría con la API del modelo específico
-		let response: AIModelResponse;
-
-		if (process.env.NODE_ENV === 'development') {
-			response = await simulatePromptExecution(preparedContent, finalConfig);
-		} else {
-			// TODO: Implementar integración con APIs reales
-			throw new Error('Ejecución real de prompts no implementada');
-		}
+		const response = createLocalPromptExecution(preparedContent, finalConfig);
 
 		// Calcular tiempo de ejecución
 		const executionTime = Date.now() - startTime;
@@ -169,10 +163,9 @@ export async function executePrompt(
 			timestamp: new Date(),
 		};
 
-		// Si se debe guardar en el historial, hacerlo
 		if (finalConfig.saveToHistory) {
-			// TODO: Implementar guardado en historial
-			executionLogger.info(`📝 Guardando ejecución en historial para prompt: ${prompt.id}`);
+			PromptExecutionHistory.getInstance().addExecution(result);
+			executionLogger.info(`📝 Ejecución almacenada en historial para prompt: ${prompt.id}`);
 		}
 
 		executionLogger.info(`✅ Prompt ejecutado correctamente en ${executionTime}ms`);

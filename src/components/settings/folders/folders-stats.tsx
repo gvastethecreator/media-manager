@@ -18,17 +18,17 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 		{ name: 'Others', value: stats.totalOthers, color: FILE_TYPE_COLORS.others },
 	]; // .filter((item) => item.value > 0); // Keep all to maintain the structure like the image
 
-	// Datos simulados para tendencias (en un caso real vendrían del backend)
-	// Usamos datos dummy basados en el total para que la gráfica se vea "viva"
-	const total = stats.totalFiles || 100;
-	const trendData = [
-		{ name: 'Jan', count: Math.floor(total * 0.2) },
-		{ name: 'Feb', count: Math.floor(total * 0.4) },
-		{ name: 'Mar', count: Math.floor(total * 0.35) },
-		{ name: 'Apr', count: Math.floor(total * 0.7) },
-		{ name: 'May', count: Math.floor(total * 0.6) },
-		{ name: 'Jun', count: total },
+	// Serie acumulada derivada de la composición real del folder.
+	const cumulativeSeries = [
+		{ name: 'Images', count: stats.totalImages },
+		{ name: 'Media', count: stats.totalImages + stats.totalVideos + stats.totalAudio },
+		{
+			name: 'Documents',
+			count: stats.totalImages + stats.totalVideos + stats.totalAudio + stats.totalDocuments,
+		},
+		{ name: 'All Files', count: stats.totalFiles },
 	];
+	const trendData = [...cumulativeSeries];
 
 	return (
 		<div className="space-y-6" data-testid="folders-stats-inner">
@@ -83,7 +83,7 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 			{/* Distribution Chart */}
 			<div className="space-y-2">
 				<h4 className="font-semibold text-sm opacity-90">Distribution by Type</h4>
-				<div className="h-[200px] w-full">
+				<div className="h-50 w-full">
 					<ResponsiveContainer height="100%" width="100%">
 						<BarChart data={barData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
 							<CartesianGrid stroke="hsl(var(--border) / 0.5)" strokeDasharray="3 3" vertical={false} />
@@ -113,10 +113,10 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 
 			<Separator className="bg-border/40" />
 
-			{/* Trends Chart */}
+			{/* Cumulative Composition Chart */}
 			<div className="space-y-2">
-				<h4 className="font-semibold text-sm opacity-90">Archive Trends</h4>
-				<div className="h-[200px] w-full rounded-md border border-border/20 bg-gradient-to-b from-primary/5 to-transparent">
+				<h4 className="font-semibold text-sm opacity-90">Cumulative Composition</h4>
+				<div className="h-50 w-full rounded-md border border-border/20 bg-linear-to-b from-primary/5 to-transparent">
 					<ResponsiveContainer height="100%" width="100%">
 						<LineChart data={trendData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
 							<defs>
