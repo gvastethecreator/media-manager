@@ -6,6 +6,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { FolderBrowserVisual } from '../components/folder-browser-visual';
 import { MediaThumbnail } from '../components/media-thumbnail/media-thumbnail';
 import type { BrowserItem } from '../types/item.types';
 import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
@@ -155,12 +156,15 @@ export function GridView({
 		(item: BrowserItem, index: number) => {
 			const isSelected = selectedIds.has(item.id);
 			const isActive = activeId === item.id;
+			const isFolder = item.entityType === 'folder';
 			return (
 				<button
 					className={cn(
 						'group relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-muted/50',
 						'transition-all duration-dt-normal ease-dt-out active:scale-[0.98]',
-						isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'hover:ring-1 hover:ring-border hover:shadow-dt-2 hover:-translate-y-0.5',
+						isSelected
+							? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+							: 'hover:ring-1 hover:ring-border hover:shadow-dt-2 hover:-translate-y-0.5',
 						isActive && 'ring-2 ring-primary/70'
 					)}
 					data-item-id={item.id}
@@ -171,7 +175,11 @@ export function GridView({
 					type="button"
 				>
 					{/* Thumbnail puro - object-cover para llenar el cuadrado */}
-					<MediaThumbnail className="h-full w-full" item={item} style={{ objectFit: 'cover' }} />
+					{isFolder ? (
+						<FolderBrowserVisual isActive={isActive} item={item} />
+					) : (
+						<MediaThumbnail className="h-full w-full" item={item} style={{ objectFit: 'cover' }} />
+					)}
 					{/* Nombre solo en hover */}
 					<div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 bg-linear-to-t from-black/80 via-black/40 to-transparent p-2 opacity-0 transition-all duration-dt-normal ease-dt-out group-hover:translate-y-0 group-hover:opacity-100">
 						<span className="block truncate font-medium text-white text-xs drop-shadow-md" title={item.name}>

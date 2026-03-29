@@ -8,6 +8,7 @@ import { Calendar, HardDrive, Tag } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { formatDate, formatFileSize } from '@/lib/utils/format.utils';
+import { FolderBrowserVisual } from '../components/folder-browser-visual';
 import { MediaThumbnail } from '../components/media-thumbnail/media-thumbnail';
 import type { BrowserItem } from '../types/item.types';
 import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
@@ -141,6 +142,7 @@ export function ListView({
 		(item: BrowserItem, index: number) => {
 			const isSelected = selectedIds.has(item.id);
 			const isActive = activeId === item.id;
+			const isFolder = item.entityType === 'folder';
 			const raw = item.raw as Record<string, unknown> | undefined;
 			const extension = typeof raw?.extension === 'string' ? raw?.extension : undefined;
 			const createdAt = item.createdAt ? formatDate(item.createdAt) : undefined;
@@ -166,7 +168,11 @@ export function ListView({
 				>
 					{/* Thumbnail cuadrado */}
 					<div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
-						<MediaThumbnail className="h-full w-full" item={item} style={{ objectFit: 'cover' }} />
+						{isFolder ? (
+							<FolderBrowserVisual compact isActive={isActive} item={item} />
+						) : (
+							<MediaThumbnail className="h-full w-full" item={item} style={{ objectFit: 'cover' }} />
+						)}
 					</div>
 
 					{/* Nombre - flex-1 para ocupar espacio disponible */}
@@ -179,13 +185,22 @@ export function ListView({
 					{/* Metadatos en fila */}
 					<div className="flex shrink-0 items-center gap-4 text-muted-foreground text-xs">
 						{/* Extensión/Tipo */}
-						<span className="w-12 uppercase opacity-60">{extension ?? item.entityType.slice(0, 4)}</span>
+						<span className="w-12 uppercase opacity-60">
+							{isFolder ? 'DIR' : (extension ?? item.entityType.slice(0, 4))}
+						</span>
 
 						{/* Tamaño */}
-						{item.size != null && (
+						{item.size != null && !isFolder && (
 							<span className="flex w-16 items-center gap-1">
 								<HardDrive className="h-3 w-3 opacity-50" />
 								{formatFileSize(item.size)}
+							</span>
+						)}
+
+						{isFolder && typeof item.totalItems === 'number' && (
+							<span className="flex w-16 items-center gap-1">
+								<HardDrive className="h-3 w-3 opacity-50" />
+								{item.totalItems}
 							</span>
 						)}
 

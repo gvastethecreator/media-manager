@@ -241,7 +241,7 @@ function MediaThumbnailInner({
 				} else if (item.entityType === 'folder') {
 					let folderThumbnail = item.thumbnailUrl;
 					if (!folderThumbnail) {
-						folderThumbnail = `/api/folders/${item.id}/preview?max=4&layout=grid`;
+						folderThumbnail = `/api/folders/${item.id}/preview?max=4&layout=grid&v=${encodeURIComponent(String(item.createdAt ?? item.totalItems ?? '1'))}`;
 					}
 					if (alive) setSrc(folderThumbnail);
 				} else {

@@ -3,6 +3,7 @@ import type { PanelImperativeHandle } from 'react-resizable-panels';
 import { Outlet, useLocation, useParams } from 'react-router-dom';
 import { SkipLinks } from '@/components/a11y/skip-links';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
+import { GlobalReindexTerminal } from '@/components/settings/folders/global-reindex-terminal';
 import { NavPanel } from '@/components/navigation/navigation-panel';
 import { DetailsPanelTransition, NavPanelTransition } from '@/components/panels/panel-transitions';
 import { RightPanel } from '@/components/panels/right-panel';
@@ -317,6 +318,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 
 			{/* FileViewer global - modal overlay */}
 			<FileViewer />
+			<GlobalReindexTerminal />
 		</div>
 	);
 });

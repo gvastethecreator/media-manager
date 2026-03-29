@@ -14,7 +14,7 @@ import {
 	Image,
 	List,
 	Plus,
-	RefreshCw,
+	RefreshCw, Terminal,
 	Search,
 	Settings2,
 	Trash2,
@@ -53,7 +53,8 @@ import type { CardActions } from '../common/entity-settings-view';
 import { FolderForm } from '../folders/folders-form';
 import { StructuredReindexConfig } from '../folders/folders-reindex-config';
 import { useReindexConfig } from '../folders/hooks/use-reindex-config';
-import { ReindexTerminal } from '../folders/reindex-terminal';
+import { useReindexStore } from '@/store/reindex.store';
+
 import { SettingsPageHeader, SettingsStatsGrid } from './settings-card';
 
 // ============================================================================
@@ -285,6 +286,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 			try {
 				// Use advanced config
 				const config = getConfig();
+								useReindexStore.getState().setOpen(true);
 				await reindexFolderMutation.mutateAsync({
 					id: folderId,
 					options: config,
@@ -345,23 +347,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 				title="Archivos y Almacenamiento"
 			/>
 
-			{/* Reindex Terminal - Movido a la parte superior - Solo visible cuando hay actividad */}
-			{(reindexFolderMutation.isPending || reindexAllFoldersMutation.isPending) && (
-				<div className="mt-6 border-border/30 border-b pb-6">
-					<div className="mb-4 flex items-center justify-between">
-						<h3 className="flex items-center gap-2 font-medium text-base">
-							<Zap className="h-4 w-4 text-primary" />
-							Terminal de Procesamiento
-						</h3>
-						<span className="text-muted-foreground text-xs">
-							{reindexingFolderId ? 'Reindexando carpeta...' : 'Reindexando todas las carpetas...'}
-						</span>
-					</div>
-					<Card className="h-75 overflow-hidden border-border/30 bg-muted/50">
-						<ReindexTerminal className="h-full" isActive={true} showProgress={true} />
-					</Card>
-				</div>
-			)}
+			
 
 			<Tabs onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="grid w-full grid-cols-2 lg:w-80">
@@ -471,14 +457,14 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									Agregar Carpeta
 								</Button>
 
-								<Button
-									className="gap-2"
-									data-testid="reindex-all-button"
+								<Button onClick={() => useReindexStore.getState().setOpen(true)} size="icon" title="Ver Terminal" variant="outline"><Terminal className="h-4 w-4" /></Button>
+																<Button className="gap-2" data-testid="reindex-all-button"
 									disabled={reindexAllFoldersMutation.isPending}
 									onClick={async () => {
 										try {
 											const config = getConfig();
-											await reindexAllFoldersMutation.mutateAsync(config);
+											useReindexStore.getState().setOpen(true);
+																		await reindexAllFoldersMutation.mutateAsync(config);
 											toastService.success('Reindexación global iniciada');
 										} catch (err) {
 											toastService.error('Error al iniciar reindexación global');
