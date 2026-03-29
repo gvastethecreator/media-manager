@@ -201,7 +201,7 @@ export const File3DCard = memo(function File3DCard({
 				{/* Contenido principal */}
 				{!compact && (
 					<div className="flex flex-1 flex-col gap-3 p-4">
-						{/* Viewer 3D simulado */}
+						{/* Preview 3D simplificado */}
 						<div className="flex items-center justify-center py-4">
 							<div
 								className="perspective-1000 relative rounded-2xl p-6"

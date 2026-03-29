@@ -9,7 +9,7 @@ import { Schema } from '@effect/schema';
 import { and, asc, count, desc, eq, isNull, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { characters, imageCharacters, imageNotes } from '@/lib/drizzle/schema';
+import { characters, imageCharacters, imageNotes, images } from '@/lib/drizzle/schema';
 import {
 	Character,
 	CharacterCreateInput,
@@ -102,6 +102,7 @@ export interface CharacterServiceInterface {
 	readonly getAll: (options?: GetCharactersOptions) => Effect.Effect<GetCharactersResult, CharacterError>;
 	// CRUD Básico
 	readonly getById: (id: string) => Effect.Effect<Character, CharacterError>;
+	readonly getImages: (characterId: string) => Effect.Effect<Record<string, unknown>[], CharacterError>;
 
 	// Stats Operations
 	readonly getRelationsCounts: (id: string) => Effect.Effect<CharacterCounts, CharacterError>;
@@ -518,6 +519,26 @@ const make = (): CharacterServiceInterface => {
 			catch: (error) => fromUnknownError('removeNote', error),
 		});
 
+	/**
+	 * Obtiene las imágenes asociadas a un character
+	 */
+	const getImages = (characterId: string): Effect.Effect<Record<string, unknown>[], CharacterError> =>
+		Effect.gen(function* () {
+			yield* getById(characterId);
+
+			const result = yield* Effect.tryPromise<Array<{ image: typeof images.$inferSelect }>, CharacterError>({
+				try: () =>
+					db
+						.select({ image: images })
+						.from(imageCharacters)
+						.innerJoin(images, eq(imageCharacters.A, images.id))
+						.where(eq(imageCharacters.B, characterId)),
+				catch: (error) => fromUnknownError('getImages', error),
+			});
+
+			return result.map((row) => row.image);
+		});
+
 	return {
 		getById,
 		getAll,
@@ -527,6 +548,7 @@ const make = (): CharacterServiceInterface => {
 		bulkDelete,
 		toggleFavorite,
 		getRelationsCounts,
+		getImages,
 		addImage,
 		removeImage,
 		addNote,

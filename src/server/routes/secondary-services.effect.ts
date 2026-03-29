@@ -182,6 +182,30 @@ notesEffectRouter.post('/:id/images/:imageId', async (req, res) => {
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 201 });
 });
+notesEffectRouter.delete('/:id/images/:imageId', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* NoteService;
+		yield* service.removeImage(req.params.id, req.params.imageId);
+		return { success: true };
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 204 });
+});
+notesEffectRouter.post('/:id/videos/:videoId', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* NoteService;
+		yield* service.addVideo(req.params.id, req.params.videoId);
+		return { success: true };
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 201 });
+});
+notesEffectRouter.delete('/:id/videos/:videoId', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* NoteService;
+		yield* service.removeVideo(req.params.id, req.params.videoId);
+		return { success: true };
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 204 });
+});
 
 // Properties
 const propertiesEffectRouter = express.Router();

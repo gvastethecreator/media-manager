@@ -4,6 +4,9 @@
  * @description Genera representaciones visuales PNG de waveforms de audio
  */
 
+import { createHash } from 'crypto';
+import fs from 'fs/promises';
+
 /**
  * Configuración para generación de waveform
  */
@@ -54,42 +57,53 @@ export async function generateWaveform(audioPath: string, config: WaveformConfig
 	} = config;
 
 	try {
-		// Intentar usando librería nativa si está disponible
-		return await generateWaveformNative(audioPath, { width, height, waveColor, backgroundColor, samples });
+		return await generateWaveformFromFile(audioPath, { width, height, waveColor, backgroundColor, samples });
 	} catch (error) {
-		console.warn('Generación nativa de waveform falló, usando fallback:', error);
-		// Fallback: Generar waveform sintético
-		return await generateWaveformFallback({ width, height, waveColor, backgroundColor });
+		console.warn('Generación de waveform basada en el archivo falló, usando fallback determinista:', error);
+		return await generateWaveformFallback(audioPath, { width, height, waveColor, backgroundColor, samples });
 	}
 }
 
 /**
- * Genera waveform usando librería nativa (audiowaveform o similar)
+ * Genera un perfil visual determinista a partir del contenido del archivo de audio.
+ * No decodifica amplitudes PCM; usa una muestra estable de bytes como representación de contenido.
  */
-async function generateWaveformNative(
+async function generateWaveformFromFile(
 	audioPath: string,
 	config: Required<Pick<WaveformConfig, 'width' | 'height' | 'waveColor' | 'backgroundColor' | 'samples'>>
 ): Promise<WaveformResult> {
-	// TODO: Implementar usando audiowaveform CLI o librería equivalente
-	// Por ahora lanzar error para trigger del fallback
-	throw new Error('Native waveform generation not yet implemented');
+	const audioBuffer = await fs.readFile(audioPath);
+
+	if (audioBuffer.length === 0) {
+		throw new Error('El archivo de audio está vacío y no se puede generar un perfil visual');
+	}
+
+	const points = generateWaveformDataFromBuffer(audioBuffer, config.samples, config.height);
+	return renderWaveformResult(points, config.width, config.height, config.waveColor, config.backgroundColor);
 }
 
 /**
- * Genera waveform sintético usando SVG como fallback
+ * Genera un fallback determinista basado en la ruta del archivo cuando el audio no se puede leer.
  */
 async function generateWaveformFallback(
-	config: Required<Pick<WaveformConfig, 'width' | 'height' | 'waveColor' | 'backgroundColor'>>
+	audioPath: string,
+	config: Required<Pick<WaveformConfig, 'width' | 'height' | 'waveColor' | 'backgroundColor' | 'samples'>>
 ): Promise<WaveformResult> {
-	const { width, height, waveColor, backgroundColor } = config;
+	const { width, height, waveColor, backgroundColor, samples } = config;
+	const points = generateDeterministicFallbackWaveform(audioPath, samples, height);
 
-	// Generar puntos de waveform sintéticos (simulado)
-	const points = generateSyntheticWaveformData(200, height);
+	return renderWaveformResult(points, width, height, waveColor, backgroundColor);
+}
 
-	// Crear SVG con el waveform
+async function renderWaveformResult(
+	points: number[],
+	width: number,
+	height: number,
+	waveColor: string,
+	backgroundColor: string
+): Promise<WaveformResult> {
 	const svg = createWaveformSVG(points, width, height, waveColor, backgroundColor);
 
-	// Convertir SVG a PNG usando Sharp
 	try {
 		const sharp = (await import('sharp')).default;
 		const buffer = await sharp(Buffer.from(svg)).png({ quality: 90 }).toBuffer();
@@ -114,18 +128,45 @@ async function generateWaveformFallback(
 }
 
 /**
- * Genera datos sintéticos de waveform (para cuando no se puede leer el audio real)
+ * Deriva barras desde una muestra estable del contenido binario del archivo.
  */
-function generateSyntheticWaveformData(samples: number, maxHeight: number): number[] {
+function generateWaveformDataFromBuffer(buffer: Buffer, samples: number, maxHeight: number): number[] {
+	const points: number[] = [];
+	const centerY = maxHeight / 2;
+	const chunkSize = Math.max(Math.floor(buffer.length / samples), 1);
+
+	for (let i = 0; i < samples; i++) {
+		const start = i * chunkSize;
+		const end = Math.min(start + chunkSize, buffer.length);
+
+		if (start >= buffer.length || start === end) {
+			points.push(centerY);
+			continue;
+		}
+
+		let totalDeviation = 0;
+		for (let offset = start; offset < end; offset++) {
+			totalDeviation += Math.abs(buffer[offset] - 128);
+		}
+
+		const averageDeviation = totalDeviation / (end - start);
+		const normalizedAmplitude = Math.min(averageDeviation / 128, 1);
+		const value = centerY - normalizedAmplitude * centerY * 0.85;
+		points.push(value);
+	}
+
+	return points;
+}
+
+function generateDeterministicFallbackWaveform(audioPath: string, samples: number, maxHeight: number): number[] {
+	const digest = createHash('sha256').update(audioPath).digest();
 	const points: number[] = [];
 	const centerY = maxHeight / 2;
 
 	for (let i = 0; i < samples; i++) {
-		// Generar patrón de onda sintético con variación
-		const phase = (i / samples) * Math.PI * 4;
-		const amplitude = Math.sin(phase) * 0.8 + Math.random() * 0.2;
-		const value = centerY + amplitude * (maxHeight / 2) * 0.6;
-		points.push(value);
+		const byte = digest[i % digest.length];
+		const normalizedAmplitude = byte / 255;
+		points.push(centerY - normalizedAmplitude * centerY * 0.75);
 	}
 
 	return points;

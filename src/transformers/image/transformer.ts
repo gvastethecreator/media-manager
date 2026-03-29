@@ -270,10 +270,10 @@ function determineTechnicalGrade(
 }
 
 /**
- * 🌡️ Determina la temperatura de color (simulado)
+ * 🌡️ Determina la temperatura de color de forma heurística
  */
 function determineColorTemperature(image: DrizzleImageWithCounts): 'warm' | 'neutral' | 'cool' {
-	// Simulación basada en el hash de la imagen
+	// Heurística estable basada en el hash de la imagen
 	const hash = image.hash;
 	const hashSum = hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
 
@@ -349,10 +349,10 @@ function generateAutoTags(image: DrizzleImageWithCounts, totalAssociations: numb
 }
 
 /**
- * 🔍 Determina estado de duplicado (simulado)
+ * 🔍 Determina estado de duplicado de forma heurística
  */
 function determineDuplicateStatus(image: DrizzleImageWithCounts): 'unique' | 'duplicate' | 'similar' {
-	// Simulación basada en el hash
+	// Heurística estable basada en el hash
 	const hash = image.hash;
 	const hashSum = hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
 

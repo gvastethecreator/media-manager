@@ -45,25 +45,6 @@ interface AudioInfo {
 }
 
 /**
- * 🎨 Genera datos de waveform simulados (placeholder)
- */
-function generateMockWaveformData(bars: number): number[] {
-	const data: number[] = [];
-
-	for (let i = 0; i < bars; i++) {
-		// Generar una onda simulada con variaciones
-		const baseWave = Math.sin(i * 0.1) * 0.5;
-		const noise = (Math.random() - 0.5) * 0.3;
-		const envelope = Math.exp((-i / bars) * 2); // Decaimiento
-
-		const amplitude = (baseWave + noise) * envelope;
-		data.push(Math.max(-1, Math.min(1, amplitude)));
-	}
-
-	return data;
-}
-
-/**
  * 🎵 Genera SVG de waveform
  */
 function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptions): string {
@@ -196,7 +177,7 @@ function generateAudioInfoSVG(audioInfo: AudioInfo | null, options: AudioWavefor
 }
 
 /**
- * 🏗️ Analiza archivo de audio (simulado por ahora)
+ * 🏗️ Analiza archivo de audio usando metadata disponible
  */
 async function analyzeAudioFile(audioPath: string): Promise<AudioInfo | null> {
 	try {
@@ -208,15 +189,14 @@ async function analyzeAudioFile(audioPath: string): Promise<AudioInfo | null> {
 			return null;
 		}
 
-		// TODO: Implementar análisis real usando librerías como node-ffmpeg
-		// Por ahora, simulamos información básica
-		return {
-			duration: Math.random() * 300 + 30, // 30-330 segundos
-			sampleRate: Math.random() > 0.5 ? 44_100 : 48_000,
-			channels: Math.random() > 0.7 ? 1 : 2,
-			format: extension.slice(1).toUpperCase(),
-			bitRate: Math.floor(Math.random() * 192) + 128, // 128-320 kbps
-		};
+		serverLogger.info(
+			'Análisis de audio solicitado sin metadata precalculada; devolviendo null para evitar datos inventados',
+			{
+				audioPath,
+				extension,
+			}
+		);
+		return null;
 	} catch (error) {
 		serverLogger.error('Error analizando archivo de audio:', error);
 		return null;
@@ -228,13 +208,11 @@ async function analyzeAudioFile(audioPath: string): Promise<AudioInfo | null> {
  */
 async function extractWaveformFromAudio(audioPath: string, samples: number): Promise<number[] | null> {
 	try {
-		// TODO: Implementar extracción real usando:
-		// - node-ffmpeg para decodificar audio
-		// - Web Audio API o librería similar para análisis
-		// Por ahora, retornamos datos simulados
-
-		serverLogger.debug(`Extrayendo waveform de ${audioPath} con ${samples} muestras`);
-		return generateMockWaveformData(samples);
+		serverLogger.info('Waveform solicitado sin extractor real disponible; devolviendo null para usar fallback visual', {
+			audioPath,
+			samples,
+		});
+		return null;
 	} catch (error) {
 		serverLogger.error('Error extrayendo waveform:', error);
 		return null;
@@ -314,10 +292,33 @@ router.get('/:id/info', async (req, res) => {
 	try {
 		const { id } = req.params;
 
-		// TODO: Obtener archivo desde la base de datos
-		const audioPath = `/path/to/audio_${id}.mp3`;
+		// Obtener audio de la base de datos
+		const audioRecords = await db
+			.select({ path: audios.path, metadata: audios.metadata })
+			.from(audios)
+			.where(eq(audios.id, id));
 
-		const audioInfo = await analyzeAudioFile(audioPath);
+		if (audioRecords.length === 0) {
+			res.status(404).json({ error: 'Audio file not found' });
+			return;
+		}
+
+		const audio = audioRecords[0];
+
+		// Intentar extraer info de metadata cacheada
+		if (audio.metadata) {
+			try {
+				const metadata = JSON.parse(audio.metadata);
+				if (metadata.audioInfo) {
+					res.json({ id, ...metadata.audioInfo });
+					return;
+				}
+			} catch {
+				// Metadata inválida, continuar con análisis
+			}
+		}
+
+		const audioInfo = await analyzeAudioFile(audio.path);
 
 		if (!audioInfo) {
 			res.status(404).json({ error: 'Audio file not found or unsupported format' });
@@ -352,8 +353,18 @@ router.get('/:id/waveform/preview', async (req, res) => {
 			showAxis: false,
 		};
 
-		const audioPath = `/path/to/audio_${id}.mp3`;
-		const waveformData = await extractWaveformFromAudio(audioPath, 50);
+		const audioRecords = await db
+			.select({ path: audios.path, metadata: audios.metadata })
+			.from(audios)
+			.where(eq(audios.id, id));
+
+		if (audioRecords.length === 0) {
+			res.status(404).json({ error: 'Audio not found' });
+			return;
+		}
+
+		const audio = audioRecords[0];
+		const waveformData = await extractWaveformFromAudio(audio.path, 50);
 
 		if (waveformData) {
 			const previewSVG = generateWaveformSVG(waveformData, options);

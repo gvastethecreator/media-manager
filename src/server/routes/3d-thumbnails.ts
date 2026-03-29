@@ -77,7 +77,7 @@ function generate3DPlaceholderSVG(options: Model3DThumbnailOptions): string {
 }
 
 /**
- * ️ Analiza el modelo 3D y genera información básica (simulada por ahora)
+ * ️ Analiza el modelo 3D usando metadata disponible
  */
 async function analyze3DModel(modelPath: string): Promise<Model3DInfo | null> {
 	try {
@@ -88,17 +88,14 @@ async function analyze3DModel(modelPath: string): Promise<Model3DInfo | null> {
 			return null;
 		}
 
-		// TODO: Implementar análisis real con Three.js cuando esté disponible
-		// Por ahora, simulamos información básica
-		return {
-			vertices: Math.floor(Math.random() * 1e4) + 1e3,
-			faces: Math.floor(Math.random() * 5e3) + 500,
-			materials: Math.floor(Math.random() * 5) + 1,
-			boundingBox: {
-				min: [-1, -1, -1],
-				max: [1, 1, 1],
-			},
-		};
+		serverLogger.info(
+			'Análisis 3D solicitado sin metadata precalculada; devolviendo null para evitar datos inventados',
+			{
+				modelPath,
+				extension,
+			}
+		);
+		return null;
 	} catch (error) {
 		serverLogger.error('Error analizando modelo 3D:', error);
 		return null;
@@ -159,8 +156,7 @@ function generate3DInfoSVG(modelInfo: Model3DInfo | null, options: Model3DThumbn
  * 🎬 Renderiza un modelo 3D usando Three.js headless (placeholder)
  */
 async function render3DModelHeadless(modelPath: string, options: Model3DThumbnailOptions): Promise<Buffer | null> {
-	// TODO: Implementar renderizado headless real con Three.js + canvas
-	serverLogger.debug('Renderizado headless de modelos 3D pendiente de implementación');
+	serverLogger.debug('Renderizado headless de modelos 3D no disponible; usando fallback visual');
 	serverLogger.debug('Modelo:', { modelPath, options });
 	return null;
 }
@@ -243,10 +239,33 @@ router.get('/:id/info', async (req, res) => {
 	try {
 		const { id } = req.params;
 
-		// TODO: Obtener el archivo 3D desde la base de datos
-		const modelPath = `/path/to/model_${id}.glb`;
+		// Obtener modelo 3D de la base de datos
+		const model3DRecords = await db
+			.select({ path: file3Ds.path, metadata: file3Ds.metadata })
+			.from(file3Ds)
+			.where(eq(file3Ds.id, id));
 
-		const modelInfo = await analyze3DModel(modelPath);
+		if (model3DRecords.length === 0) {
+			res.status(404).json({ error: '3D model not found' });
+			return;
+		}
+
+		const model3D = model3DRecords[0];
+
+		// Intentar extraer info de metadata cacheada
+		if (model3D.metadata) {
+			try {
+				const metadata = JSON.parse(model3D.metadata);
+				if (metadata.modelInfo) {
+					res.json({ id, ...metadata.modelInfo });
+					return;
+				}
+			} catch {
+				// Metadata inválida, continuar con análisis
+			}
+		}
+
+		const modelInfo = await analyze3DModel(model3D.path);
 
 		if (!modelInfo) {
 			res.status(404).json({ error: 'Model not found or unsupported format' });

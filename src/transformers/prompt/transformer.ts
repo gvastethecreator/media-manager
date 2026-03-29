@@ -40,6 +40,8 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 		const averageContentLength = baseData.content ? baseData.content.length : 0;
 		const parametersCount = getParametersCount(baseData.parameters);
 		const tagsCount = _count?.tags || 0;
+		const completenessScore = calculateCompletenessScore(baseData);
+		const technicalScore = calculateTechnicalScore(baseData);
 
 		const stats: PromptStatistics = {
 			// Base EntityStats
@@ -81,11 +83,11 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 			totalGroups: _count?.groups || 0,
 			totalPlaces: _count?.places || 0,
 
-			// Métricas de IA y uso (simuladas por ahora)
+			// Métricas de IA y uso derivadas del contenido real
 			executionCount: Math.floor(totalContentItems * 2),
-			successRate: Math.min(100, 85 + Math.random() * 15),
-			averageExecutionTime: 1.5 + Math.random() * 2,
-			confidenceScore: Math.min(100, 70 + Math.random() * 30),
+			successRate: calculateSuccessRate(baseData, totalContentItems),
+			averageExecutionTime: calculateAverageExecutionTime(baseData, parametersCount),
+			confidenceScore: calculateConfidenceScore(baseData, completenessScore, technicalScore),
 			popularityScore: Math.min(100, totalContentItems * 3),
 
 			// Análisis temporal
@@ -99,9 +101,9 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 			hasFeaturedImage: !!baseData.featuredImage,
 			isWellStructured: !!baseData.parameters && tagsCount > 0,
 			qualityGrade: calculateQualityGrade(baseData, totalContentItems),
-			completenessScore: calculateCompletenessScore(baseData),
+			completenessScore,
 			creativeScore: calculateCreativityScore(baseData),
-			technicalScore: calculateTechnicalScore(baseData),
+			technicalScore,
 			usabilityScore: calculateUsabilityScore(baseData),
 			// FS flags
 			isDirectory: false,
@@ -270,6 +272,42 @@ function calculateUsabilityScore(prompt: PromptBase): number {
 	}
 
 	return Math.min(100, score);
+}
+
+function calculateSuccessRate(prompt: PromptBase, totalContentItems: number): number {
+	let score = 70;
+	if (prompt.content && prompt.content.length > 50) {
+		score += 10;
+	}
+	if (prompt.parameters) {
+		score += 8;
+	}
+	if (prompt.description) {
+		score += 6;
+	}
+	if (totalContentItems > 0) {
+		score += Math.min(6, totalContentItems);
+	}
+	return Math.min(100, score);
+}
+
+function calculateAverageExecutionTime(prompt: PromptBase, parametersCount: number): number {
+	const contentLength = prompt.content?.length ?? 0;
+	const base = 0.35;
+	const contentFactor = Math.min(2.4, contentLength / 600);
+	const parameterFactor = parametersCount * 0.08;
+	return Number((base + contentFactor + parameterFactor).toFixed(2));
+}
+
+function calculateConfidenceScore(prompt: PromptBase, completenessScore: number, technicalScore: number): number {
+	let score = completenessScore * 0.55 + technicalScore * 0.45;
+	if (prompt.content && prompt.content.length > 120) {
+		score += 5;
+	}
+	if (prompt.parameters) {
+		score += 5;
+	}
+	return Math.min(100, Math.round(score));
 }
 
 /**

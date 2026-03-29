@@ -95,8 +95,12 @@ export function useFavoriteImages(id: string) {
 export function useCreateFavorite() {
 	const queryClient = useQueryClient();
 
-	return useMutation<FavoriteWithStats, Error, FavoriteCreateInput>({
-		mutationFn: (data) => apiClient.post<FavoriteWithStats>('/favorites', data),
+	return useMutation<{ id?: string; isFavorite: boolean }, Error, FavoriteCreateInput>({
+		mutationFn: (data) =>
+			apiClient.post<{ id?: string; isFavorite: boolean }>('/favorites/toggle', {
+				entityId: data.entityId,
+				entityType: data.entityType,
+			}),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: favoriteKeys.lists() });
 		},

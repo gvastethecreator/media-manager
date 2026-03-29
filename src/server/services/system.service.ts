@@ -5,7 +5,7 @@ import { count } from 'drizzle-orm';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
-import { db } from '@/lib/drizzle';
+import { db, getDbClient } from '@/lib/drizzle';
 import {
 	albums,
 	audios,
@@ -281,13 +281,110 @@ export async function getNavigationData(): Promise<NavigationData> {
 
 export async function revalidateNavigation() {
 	try {
-		navLogger.info('🔄 Iniciando revalidación de rutas de navegación (MOCK)');
-		// En Vite no necesitamos revalidación real
-		navLogger.info('✅ Rutas de navegación revalidadas exitosamente (MOCK)');
+		navLogger.info('🔄 Verificando si la navegación requiere revalidación manual');
+		// En el runtime actual la navegación se recalcula por consulta, así que no hay caché manual que invalidar.
+		navLogger.info('✅ No se requirió revalidación manual de navegación');
 	} catch (error) {
 		navLogger.error('❌ Error al revalidar rutas de navegación:', error);
 		throw new Error('No se pudieron revalidar las rutas de navegación');
 	}
+}
+
+function getDatabaseFileCandidates(): string[] {
+	const databaseUrl = process.env.DATABASE_URL || 'file:./db.sqlite';
+
+	if (!databaseUrl.startsWith('file:')) {
+		return [];
+	}
+
+	const normalizedPath = databaseUrl.slice('file:'.length);
+	const resolvedPath = path.resolve(process.cwd(), normalizedPath);
+
+	return [resolvedPath, `${resolvedPath}-wal`, `${resolvedPath}-shm`];
+}
+
+async function getExistingFileSize(filePath: string): Promise<number> {
+	try {
+		const fileStats = await fs.stat(filePath);
+		return fileStats.size;
+	} catch {
+		return 0;
+	}
+}
+
+async function getDirectorySize(dirPath: string): Promise<number> {
+	try {
+		const entries = await fs.readdir(dirPath, { withFileTypes: true });
+		let totalSize = 0;
+
+		for (const entry of entries) {
+			const entryPath = path.join(dirPath, entry.name);
+			if (entry.isDirectory()) {
+				totalSize += await getDirectorySize(entryPath);
+				continue;
+			}
+
+			if (entry.isFile()) {
+				totalSize += await getExistingFileSize(entryPath);
+			}
+		}
+
+		return totalSize;
+	} catch {
+		return 0;
+	}
+}
+
+async function getDatabaseSize(): Promise<number> {
+	const dbFiles = getDatabaseFileCandidates();
+	const sizes = await Promise.all(dbFiles.map((filePath) => getExistingFileSize(filePath)));
+	return sizes.reduce((total, size) => total + size, 0);
+}
+
+async function getDiskMetrics(targetPath: string): Promise<{
+	available: number;
+	total: number;
+	used: number;
+} | null> {
+	try {
+		const fsStats = await fs.statfs(targetPath);
+		const blockSize = Number(fsStats.bsize);
+		const total = Number(fsStats.blocks) * blockSize;
+		const available = Number(fsStats.bavail) * blockSize;
+		const used = Math.max(total - available, 0);
+
+		if (!Number.isFinite(total) || !Number.isFinite(available)) {
+			return null;
+		}
+
+		return { total, available, used };
+	} catch (error) {
+		systemLogger.warn('⚠️ No se pudo obtener información real de disco', { error, targetPath });
+		return null;
+	}
+}
+
+async function getCacheSize(): Promise<number> {
+	const cacheDirectories = [
+		path.join(process.cwd(), '.vite'),
+		path.join(process.cwd(), 'node_modules', '.vite'),
+		path.join(process.cwd(), '.bun'),
+	];
+
+	const sizes = await Promise.all(cacheDirectories.map((dirPath) => getDirectorySize(dirPath)));
+	return Math.round(sizes.reduce((total, size) => total + size, 0) / (1024 * 1024));
+}
+
+async function getPackageMetadata(): Promise<{ buildDate: string; version: string }> {
+	const packageJsonPath = path.join(process.cwd(), 'package.json');
+	const packageStats = await fs.stat(packageJsonPath);
+	const packageContent = await fs.readFile(packageJsonPath, 'utf8');
+	const packageJson = JSON.parse(packageContent) as { version?: string };
+
+	return {
+		version: packageJson.version || '0.0.0',
+		buildDate: process.env.BUILD_DATE || packageStats.mtime.toISOString(),
+	};
 }
 
 // Interfaz para estadísticas del sistema en tiempo real
@@ -322,6 +419,7 @@ export interface SystemResponse {
 	data?: unknown;
 	message: string;
 	success: boolean;
+	timestamp: string;
 }
 
 /**
@@ -361,19 +459,10 @@ export async function getSystemStats(): Promise<RuntimeSystemStats> {
 		const totalCollections = collectionsResult[0]?.count || 0;
 		const totalTags = tagsResult[0]?.count || 0;
 
-		// Calcular tamaño de almacenamiento (estimado)
-		const totalEntities =
-			totalImages +
-			totalVideos +
-			totalAudio +
-			totalFolders +
-			totalAlbums +
-			totalCharacters +
-			totalCollections +
-			totalTags;
-		const storageUsed = totalEntities * 1024 * 100; // Estimación: 100KB por entidad
-		const storageAvailable = 1024 * 1024 * 1024; // 1GB simulado disponible
-		const dbSize = totalEntities * 512; // Estimación: 512 bytes por entidad
+		const dbSize = await getDatabaseSize();
+		const diskMetrics = await getDiskMetrics(process.cwd());
+		const storageUsed = diskMetrics?.used ?? dbSize;
+		const storageAvailable = diskMetrics?.available ?? 0;
 
 		systemLogger.info('✅ Estadísticas del sistema obtenidas');
 
@@ -389,7 +478,7 @@ export async function getSystemStats(): Promise<RuntimeSystemStats> {
 			storageUsed,
 			storageAvailable,
 			dbSize,
-			lastBackup: undefined, // TODO: Implementar sistema de backup
+			lastBackup: undefined,
 		} satisfies RuntimeSystemStats;
 	} catch (error) {
 		systemLogger.error('❌ Error al obtener estadísticas del sistema:', error);
@@ -425,15 +514,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 		const freeMem = os.freemem();
 		const memoryUsage = Math.round(((totalMem - freeMem) / totalMem) * 100);
 
-		// Obtener tamaño de caché (simulado con el directorio de Vite)
-		let cacheSize = 0;
-		try {
-			const viteCachePath = path.join(process.cwd(), '.vite');
-			const cacheStats = await fs.stat(viteCachePath).catch(() => ({ size: 0 }));
-			cacheSize = Math.round(cacheStats.size / (1024 * 1024)); // Convertir a MB
-		} catch (error) {
-			systemLogger.warn('⚠️ Error al obtener tamaño de caché:', error);
-		}
+		const cacheSize = await getCacheSize();
 
 		// Obtener estadísticas reales de la base de datos
 		const [
@@ -468,8 +549,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 		const totalEntities =
 			totalImages + totalCollections + totalTags + totalAlbums + totalNotes + totalFolders + totalVideos + totalAudio;
 
-		// Obtener tamaño de la base de datos (estimado basado en entidades)
-		const dbSize = totalEntities * 0.5; // Estimación: 500 bytes por entidad
+		const dbSize = Math.round((await getDatabaseSize()) / (1024 * 1024));
 
 		systemLogger.info('✅ Estadísticas de runtime del sistema obtenidas');
 
@@ -499,29 +579,44 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 export async function repairSystem(): Promise<SystemResponse> {
 	try {
 		systemLogger.info('🔧 Iniciando reparación del sistema');
+		const actions: string[] = [];
 
-		// 1. Limpiar caché de Vite (simulado)
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await fs.mkdir(path.join(process.cwd(), 'logs'), { recursive: true });
+		actions.push('directorio de logs verificado');
 
-		// 2. Verificar integridad de la base de datos (simulado)
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await fs.mkdir(path.join(process.cwd(), 'public', 'uploads'), { recursive: true });
+		actions.push('directorio de uploads verificado');
 
-		// 3. Optimizar índices (simulado)
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		const dbClient = getDbClient();
+		if (dbClient) {
+			const integrityResult = await dbClient.execute('PRAGMA integrity_check');
+			const integrityStatus = String(integrityResult.rows[0]?.[0] ?? 'unknown').toLowerCase();
 
-		// 4. Eliminar archivos temporales (simulado)
-		await new Promise((resolve) => setTimeout(resolve, 500));
+			if (integrityStatus !== 'ok') {
+				throw new Error(`La base de datos reportó un estado de integridad no válido: ${integrityStatus}`);
+			}
+
+			await dbClient.execute('PRAGMA optimize');
+			await dbClient.execute('PRAGMA wal_checkpoint(PASSIVE)');
+			actions.push('integridad SQLite verificada');
+			actions.push('optimizaciones PRAGMA ejecutadas');
+		} else {
+			actions.push('cliente SQL no disponible en este contexto');
+		}
 
 		systemLogger.info('✅ Sistema reparado correctamente');
 		return {
 			success: true,
-			message: 'Sistema reparado correctamente',
+			message: `Sistema verificado y optimizado: ${actions.join(', ')}`,
+			timestamp: new Date().toISOString(),
+			data: { actions },
 		};
 	} catch (error) {
 		systemLogger.error('❌ Error al reparar el sistema:', error);
 		return {
 			success: false,
 			message: error instanceof Error ? error.message : 'Error desconocido en la reparación del sistema',
+			timestamp: new Date().toISOString(),
 		};
 	}
 }
@@ -533,25 +628,19 @@ export async function repairSystem(): Promise<SystemResponse> {
 export async function resetDatabase(): Promise<SystemResponse> {
 	try {
 		systemLogger.warn('⚠️ Iniciando reseteo de base de datos');
-
-		// Esta es una simulación, en producción implementaríamos el borrado real
-		// Aquí se implementaría la lógica para:
-		// 1. Hacer backup de seguridad
-		// 2. Truncar todas las tablas
-		// 3. Restaurar configuraciones mínimas
-
-		await new Promise((resolve) => setTimeout(resolve, 3000));
-
-		systemLogger.info('✅ Base de datos reseteada correctamente');
+		systemLogger.warn('⛔ El reseteo HTTP está deshabilitado para evitar borrados accidentales');
 		return {
-			success: true,
-			message: 'Base de datos reseteada correctamente',
+			success: false,
+			message:
+				'El reseteo completo no está habilitado desde la API HTTP. Usa `bun run db:reset` en un entorno controlado.',
+			timestamp: new Date().toISOString(),
 		};
 	} catch (error) {
 		systemLogger.error('❌ Error al resetear la base de datos:', error);
 		return {
 			success: false,
 			message: error instanceof Error ? error.message : 'Error desconocido al resetear la base de datos',
+			timestamp: new Date().toISOString(),
 		};
 	}
 }
@@ -566,11 +655,11 @@ export async function getSystemVersion(): Promise<{
 }> {
 	try {
 		systemLogger.info('📋 Obteniendo información de versión del sistema');
+		const packageMetadata = await getPackageMetadata();
 
-		// En una implementación real, esto leería del package.json o un archivo de build
 		return {
-			version: '1.0.0',
-			buildDate: new Date().toISOString(),
+			version: packageMetadata.version,
+			buildDate: packageMetadata.buildDate,
 			environment: process.env.NODE_ENV || 'development',
 		};
 	} catch (error) {
