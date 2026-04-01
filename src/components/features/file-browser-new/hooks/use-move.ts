@@ -5,9 +5,12 @@
  */
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { FileEntityType } from '@/services/files/file-actions.service';
 import { moveFile } from '@/services/files/file-actions.service';
+
+const logger = clientLogger.withContext('useMove');
 
 interface MoveOptions {
 	/** Tipo de entidad */
@@ -47,7 +50,7 @@ export function useMove(): MoveResult {
 				queryClient.invalidateQueries({ queryKey: ['files', 'folder'] });
 				queryClient.invalidateQueries({ queryKey: [entityType, 'list'] });
 			} catch (error) {
-				console.error('Error moving file:', error);
+				logger.error('Error moving file:', error);
 				throw error;
 			} finally {
 				setIsMoving(false);
@@ -58,6 +61,3 @@ export function useMove(): MoveResult {
 
 	return { move, isMoving };
 }
-
-// Add missing import
-import { useState } from 'react';

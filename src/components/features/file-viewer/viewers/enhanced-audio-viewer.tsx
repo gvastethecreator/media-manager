@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { WaveformVisualizer } from './waveform-visualizer';
+
+const logger = clientLogger.withContext('EnhancedAudioViewer');
 
 interface EnhancedAudioViewerProps {
 	audioUrl: string;
@@ -111,7 +114,7 @@ export function EnhancedAudioViewer({
 			audio.pause();
 		} else {
 			audio.play().catch((err) => {
-				console.error('Error playing audio:', err);
+				logger.error('Error playing audio:', err);
 			});
 		}
 		setIsPlaying(!isPlaying);

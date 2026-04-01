@@ -1,5 +1,4 @@
 // src/server/services/system.service.ts
-// @ts-nocheck - Temporary suppression for type mismatches
 
 import { count } from 'drizzle-orm';
 import fs from 'fs/promises';
@@ -812,6 +811,12 @@ export async function createDefaultSettingsData(): Promise<Settings> {
 				experimentalFeatures: false,
 			},
 			fileBrowser: fileBrowserConfigSchema.parse({}),
+			version: '1.0.0',
+			lastUpdate: new Date(),
+			system: {
+				platform: 'web',
+				version: '1.0.0',
+			},
 		};
 
 		return defaultSettings;

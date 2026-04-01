@@ -198,9 +198,9 @@ router.get('/:id/preview', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const options: JsonPreviewOptions = {
-			maxLines: Number.parseInt(req.query.maxLines as string, 10) || 20,
-			width: Number.parseInt(req.query.width as string, 10) || 300,
-			height: Number.parseInt(req.query.height as string, 10) || 400,
+			maxLines: Math.min(Number.parseInt(req.query.maxLines as string, 10) || 20, 200),
+			width: Math.min(Number.parseInt(req.query.width as string, 10) || 300, 2000),
+			height: Math.min(Number.parseInt(req.query.height as string, 10) || 400, 2000),
 			theme: (req.query.theme as 'light' | 'dark') || 'light',
 			showLineNumbers: req.query.showLineNumbers === 'true',
 		};
@@ -250,7 +250,7 @@ router.get('/:id/preview', async (req, res) => {
 
 		res.setHeader('Content-Type', 'image/svg+xml');
 		res.setHeader('Cache-Control', 'public, max-age=60');
-		res.send(errorSVG);
+		res.status(404).send(errorSVG);
 	} catch (error) {
 		serverLogger.error('Error generando preview JSON:', error);
 		res.status(500).json({ error: 'Error generating JSON preview' });
