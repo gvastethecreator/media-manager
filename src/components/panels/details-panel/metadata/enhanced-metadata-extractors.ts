@@ -1,4 +1,7 @@
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { EnhancedMetadataResult, MetadataField } from '../types';
+
+const logger = clientLogger.withContext('MetadataExtractors');
 
 /**
  * Extrae metadatos de archivos de video
@@ -280,7 +283,7 @@ export const extractDocumentMetadata = (result: EnhancedMetadataResult, metadata
 export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: MetadataField[]): void => {
 	// Logging de debug para ver qué datos llegan
 	if (import.meta.env?.DEV) {
-		console.debug('[extractAIMetadata] Datos recibidos:', {
+		logger.debug('[extractAIMetadata] Datos recibidos:', {
 			hasOrigin: !!result.metadata?.origin,
 			hasAiMetadata: !!result.metadata?.aiMetadata,
 			aiMetadataKeys: result.metadata?.aiMetadata ? Object.keys(result.metadata.aiMetadata) : [],
@@ -289,7 +292,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 		});
 
 		if (result.metadata?.aiMetadata) {
-			console.debug('[extractAIMetadata] aiMetadata completa:', result.metadata.aiMetadata);
+			logger.debug('[extractAIMetadata] aiMetadata completa:', result.metadata.aiMetadata);
 		}
 	}
 
@@ -321,7 +324,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 
 	if (!result.metadata?.aiMetadata) {
 		if (import.meta.env?.DEV) {
-			console.debug('[extractAIMetadata] No aiMetadata encontrada, terminando early');
+			logger.debug('[extractAIMetadata] No aiMetadata encontrada, terminando early');
 		}
 		return; // no más campos
 	}
@@ -329,7 +332,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 	const ai = result.metadata.aiMetadata;
 
 	if (import.meta.env?.DEV) {
-		console.debug('[extractAIMetadata] Procesando aiMetadata:', ai);
+		logger.debug('[extractAIMetadata] Procesando aiMetadata:', ai);
 	}
 
 	// Los datos AI están estructurados de manera anidada:
@@ -342,7 +345,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 	const combinedData = { ...commonData, ...engineSpecificData };
 
 	if (import.meta.env?.DEV) {
-		console.debug('[extractAIMetadata] Datos combinados:', {
+		logger.debug('[extractAIMetadata] Datos combinados:', {
 			commonKeys: Object.keys(commonData),
 			engineSpecificKeys: Object.keys(engineSpecificData),
 			combinedKeys: Object.keys(combinedData),
@@ -400,8 +403,8 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 	};
 
 	if (import.meta.env?.DEV) {
-		console.debug('[extractAIMetadata] Procesando todos los campos disponibles...');
-		console.debug('[extractAIMetadata] Campos disponibles:', Object.keys(combinedData));
+		logger.debug('[extractAIMetadata] Procesando todos los campos disponibles...');
+		logger.debug('[extractAIMetadata] Campos disponibles:', Object.keys(combinedData));
 	}
 
 	// Procesar todos los campos disponibles en los datos combinados
@@ -415,7 +418,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 		const fieldConfig = fieldDisplayNames[fieldName] || { key: fieldName };
 
 		if (import.meta.env?.DEV) {
-			console.debug(`[extractAIMetadata] Procesando campo ${fieldName}:`, {
+			logger.debug(`[extractAIMetadata] Procesando campo ${fieldName}:`, {
 				value: fieldValue,
 				config: fieldConfig,
 			});
@@ -447,14 +450,14 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 		});
 
 		if (import.meta.env?.DEV) {
-			console.debug(`[extractAIMetadata] Agregado campo ${fieldConfig.key}:`, displayValue);
+			logger.debug(`[extractAIMetadata] Agregado campo ${fieldConfig.key}:`, displayValue);
 		}
 	}
 
 	if (import.meta.env?.DEV) {
 		const aiFields = metadata.filter((m) => m.category === 'ia');
-		console.debug('[extractAIMetadata] Campos AI procesados:', aiFields.length);
-		console.debug(
+		logger.debug('[extractAIMetadata] Campos AI procesados:', aiFields.length);
+		logger.debug(
 			'[extractAIMetadata] Lista de campos:',
 			aiFields.map((m) => m.key)
 		);
@@ -479,7 +482,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 
 	if (import.meta.env?.DEV) {
 		const finalAiFields = metadata.filter((m) => m.category === 'ia');
-		console.debug('[extractAIMetadata] Total final de campos AI:', finalAiFields.length);
+		logger.debug('[extractAIMetadata] Total final de campos AI:', finalAiFields.length);
 	}
 };
 

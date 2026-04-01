@@ -108,6 +108,7 @@ export class DirectionTracker {
 	private readonly config: DirectionConfig;
 	private readonly elementPositions = new Map<string, Point2D>();
 	private viewportCenter: Point2D;
+	private readonly handleResize: (() => void) | null = null;
 
 	constructor(config: Partial<DirectionConfig> = {}) {
 		this.config = { ...DEFAULT_CONFIG, ...config };
@@ -118,12 +119,13 @@ export class DirectionTracker {
 
 		// Actualizar centro del viewport en resize
 		if (typeof window !== 'undefined') {
-			window.addEventListener('resize', () => {
+			this.handleResize = () => {
 				this.viewportCenter = {
 					x: window.innerWidth / 2,
 					y: window.innerHeight / 2,
 				};
-			});
+			};
+			window.addEventListener('resize', this.handleResize);
 		}
 	}
 
@@ -402,6 +404,16 @@ export class DirectionTracker {
 	clear(): void {
 		this.elementPositions.clear();
 	}
+
+	/**
+	 * Destruye el tracker y limpia event listeners
+	 */
+	destroy(): void {
+		this.clear();
+		if (typeof window !== 'undefined' && this.handleResize) {
+			window.removeEventListener('resize', this.handleResize);
+		}
+	}
 }
 
 // ============================================================================
@@ -419,7 +431,7 @@ export function getDirectionTracker(config?: Partial<DirectionConfig>): Directio
 
 export function destroyDirectionTracker(): void {
 	if (globalDirectionTracker) {
-		globalDirectionTracker.clear();
+		globalDirectionTracker.destroy();
 		globalDirectionTracker = null;
 	}
 }

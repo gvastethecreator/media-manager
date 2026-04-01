@@ -116,11 +116,21 @@ export const calculateMultipleFileHashes = (
 		for (const chunk of chunks) {
 			const chunkResults = yield* Effect.all(
 				chunk.map((filePath) =>
-					Effect.map(calculateFileHash(filePath), (hash) => ({
-						path: filePath,
-						hash,
-						size: 0, // TODO: obtener size
-					}))
+					Effect.gen(function* () {
+						const hash = yield* calculateFileHash(filePath);
+						const fileSize = yield* Effect.tryPromise({
+							try: async () => {
+								const s = await stat(filePath);
+								return s.size;
+							},
+							catch: () => new ContentHashError(`Cannot stat file: ${filePath}`, 'STAT_ERROR', filePath),
+						}).pipe(Effect.catchAll(() => Effect.succeed(0)));
+						return {
+							path: filePath,
+							hash,
+							size: fileSize,
+						};
+					})
 				)
 			);
 			results.push(...chunkResults);

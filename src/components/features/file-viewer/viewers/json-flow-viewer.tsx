@@ -16,7 +16,10 @@ import { Check, Code2, Copy, FolderTree } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
+
+const logger = clientLogger.withContext('JsonFlowViewer');
 
 interface JsonFlowViewerProps {
 	className?: string;
@@ -209,7 +212,7 @@ export function JsonFlowViewer({ content, fileName, className }: JsonFlowViewerP
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		} catch (err) {
-			console.error('Error copying to clipboard:', err);
+			logger.error('Error copying to clipboard:', err);
 		}
 	}, [prettyJson]);
 
