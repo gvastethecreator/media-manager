@@ -156,7 +156,7 @@ export const TCGFolderCard = memo(function TCGFolderCard({
 					background:
 						'linear-gradient(180deg, color-mix(in oklch, var(--accent-color) 90%, white 10%) 0%, color-mix(in oklch, var(--accent-color) 72%, black 28%) 100%)',
 					boxShadow:
-						'0 18px 42px color-mix(in oklch, var(--accent-color) 26%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.16)',
+						'0 18px 42px color-mix(in oklch, var(--accent-color) 26%, transparent), inset 0 1px 0 color-mix(in oklch, white 16%, transparent)',
 				}}
 			/>
 
@@ -218,7 +218,8 @@ export const TCGFolderCard = memo(function TCGFolderCard({
 			<div
 				className="absolute inset-x-[10%] bottom-[14%] top-[22%] rounded-3xl"
 				style={{
-					boxShadow: 'inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 -16px 28px rgb(0 0 0 / 0.12)',
+					boxShadow:
+						'inset 0 1px 0 color-mix(in oklch, white 12%, transparent), inset 0 -16px 28px color-mix(in oklch, black 12%, transparent)',
 				}}
 			/>
 

@@ -108,15 +108,15 @@ router.get(
 				const totalDocuments = stats?.totalDocuments || 0;
 				const totalAudio = stats?.totalAudio || 0;
 				const totalJsonFiles = stats?.totalJsonFiles || 0;
-				const totalWorkflows = 0; // stats?.totalWorkflows || 0; // totalWorkflows no está disponible
+				const totalWorkflows = 0;
 				const totalFile3D = stats?.totalFile3D || 0;
 
 				const storage = {
 					images: { count: stats?.totalImages || 0, size: totalSize, percentage: 0 },
-					videos: { count: stats?.totalVideos || 0, size: 0, percentage: 0 }, // TODO: Añadir tamaño de videos
+					videos: { count: stats?.totalVideos || 0, size: stats?.videoSize || 0, percentage: 0 },
 					audio: { count: stats?.totalAudio || 0, size: totalAudio, percentage: 0 },
 					documents: { count: stats?.totalDocuments || 0, size: totalDocuments, percentage: 0 },
-					thumbnails: { count: stats?.totalThumbnails || 0, size: 0, percentage: 0 }, // TODO: Añadir tamaño de thumbnails
+					thumbnails: { count: stats?.totalThumbnails || 0, size: stats?.thumbnailSize || 0, percentage: 0 },
 					other: {
 						count: (stats?.totalJsonFiles || 0) + (stats?.totalFile3D || 0) + totalWorkflows,
 						size: totalJsonFiles + totalFile3D,

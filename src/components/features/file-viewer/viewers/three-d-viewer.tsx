@@ -11,7 +11,10 @@ import { memo, Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
+
+const logger = clientLogger.withContext('ThreeDViewer');
 
 interface ThreeDViewerProps {
 	className?: string;
@@ -111,7 +114,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 
 	// Handlers memoizados para evitar re-renders
 	const handleError = useCallback((err: unknown) => {
-		console.error('Error loading 3D model:', err);
+		logger.error('Error loading 3D model:', err);
 		setError('No se pudo cargar el modelo 3D. El formato puede no ser compatible o el archivo está corrupto.');
 		setIsLoading(false);
 	}, []);

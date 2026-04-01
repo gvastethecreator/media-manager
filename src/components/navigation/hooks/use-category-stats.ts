@@ -1,6 +1,9 @@
 import { useCallback, useMemo } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useNavigationData, useNavigationStats } from '@/lib/api/navigation';
 import type { CategoryChild, NavigationCategory } from '../types';
+
+const logger = clientLogger.withContext('useCategoryStats');
 
 // Tipo que representa cualquier posible item de navegación
 interface NavItem {
@@ -33,8 +36,8 @@ export function useCategoryStats() {
 	const { data: navigationData, isLoading: isLoadingNavigation, error: navError } = useNavigationData();
 	const { data: statsData, isLoading: isLoadingStats, error: statsError } = useNavigationStats();
 
-	if (navError) console.error('[useCategoryStats] Nav Error:', navError);
-	if (statsError) console.error('[useCategoryStats] Stats Error:', statsError);
+	if (navError) logger.error('Nav Error:', navError);
+	if (statsError) logger.error('Stats Error:', statsError);
 
 	const categoryDataMap = useMemo(() => {
 		if (!navigationData) {

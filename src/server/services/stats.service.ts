@@ -1,5 +1,3 @@
-// @ts-nocheck - Temporary suppression for implicit any parameter types and type mismatches
-
 import { randomUUID } from 'crypto';
 import { eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
@@ -89,6 +87,8 @@ export interface GeneralStats {
 	totalViews: number;
 	totalWildcards: number;
 	totalWorldItems: number;
+	videoSize: number;
+	thumbnailSize: number;
 	// Información de espacio
 	usedSpace?: number;
 	memoryFree?: number;
@@ -278,12 +278,22 @@ async function fetchSystemCounts(): Promise<SystemCounts> {
 }
 
 async function fetchSizeSums() {
-	const [totalSizeResult, audioSizeResult, documentSizeResult, jsonSizeResult, file3DSizeResult] = await Promise.all([
+	const [
+		totalSizeResult,
+		audioSizeResult,
+		documentSizeResult,
+		jsonSizeResult,
+		file3DSizeResult,
+		videoSizeResult,
+		thumbnailSizeResult,
+	] = await Promise.all([
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` }).from(folders),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` }).from(audios),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)` }).from(documents),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` }).from(jsonFiles),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` }).from(file3Ds),
+		db.select({ totalSize: sql<number>`COALESCE(SUM(${videos.size}), 0)` }).from(videos),
+		db.select({ totalSize: sql<number>`COALESCE(SUM(${thumbnails.fileSize}), 0)` }).from(thumbnails),
 	]);
 
 	return {
@@ -292,6 +302,8 @@ async function fetchSizeSums() {
 		totalDocumentSize: documentSizeResult[0]?.totalSize || 0,
 		totalJsonSize: jsonSizeResult[0]?.totalSize || 0,
 		totalFile3DSize: file3DSizeResult[0]?.totalSize || 0,
+		totalVideoSize: videoSizeResult[0]?.totalSize || 0,
+		totalThumbnailSize: thumbnailSizeResult[0]?.totalSize || 0,
 	} as const;
 }
 
@@ -404,6 +416,8 @@ export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 			totalDownloads: 0, // TODO: Implementar cuando se agregue sistema de descargas
 			totalSize: totalFileSize,
 			totalActivities: 0, // TODO: Implementar actividades
+			videoSize: sizes.totalVideoSize,
+			thumbnailSize: sizes.totalThumbnailSize,
 
 			// Información de espacio
 			usedSpace: totalFileSize,
@@ -484,7 +498,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta folders completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta folders:', error);
 					throw error;
 				}),
@@ -495,7 +509,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta images completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta images:', error);
 					throw error;
 				}),
@@ -506,7 +520,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta videos completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta videos:', error);
 					throw error;
 				}),
@@ -518,7 +532,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta audios completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta audios:', error);
 					throw error;
 				}),
@@ -530,7 +544,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta documents completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta documents:', error);
 					throw error;
 				}),
@@ -542,7 +556,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta jsonFiles completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta jsonFiles (usando 0 por defecto):', error);
 					return [{ count: 0 }];
 				}),
@@ -553,7 +567,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta file3Ds completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta file3Ds (usando 0 por defecto):', error);
 					return [{ count: 0 }];
 				}),
@@ -564,7 +578,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta totalSize completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.warn('⚠️ Error en consulta totalSize (usando 0 por defecto):', error);
 					return [{ totalSize: 0 }];
 				}),
@@ -579,7 +593,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta thumbnails stats completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.warn('⚠️ Error en consulta thumbnails stats (usando 0 por defecto):', error);
 					return [{ totalThumbnails: 0, thumbnailsCacheSize: 0 }];
 				}),

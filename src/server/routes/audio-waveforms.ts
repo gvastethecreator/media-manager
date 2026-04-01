@@ -226,11 +226,11 @@ router.get('/:id/waveform', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const options: AudioWaveformOptions = {
-			width: Number.parseInt(req.query.width as string, 10) || 300,
-			height: Number.parseInt(req.query.height as string, 10) || 100,
+			width: Math.min(Number.parseInt(req.query.width as string, 10) || 300, 2000),
+			height: Math.min(Number.parseInt(req.query.height as string, 10) || 100, 1000),
 			color: (req.query.color as string) || '#3b82f6',
 			backgroundColor: (req.query.backgroundColor as string) || 'transparent',
-			bars: Number.parseInt(req.query.bars as string, 10) || 50,
+			bars: Math.min(Number.parseInt(req.query.bars as string, 10) || 50, 500),
 			style: (req.query.style as 'bars' | 'curve' | 'filled') || 'bars',
 			showAxis: req.query.showAxis === 'true',
 		};

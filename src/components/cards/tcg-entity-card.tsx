@@ -39,11 +39,17 @@ export interface TCGEntityCardProps {
 }
 
 /**
+ * Extrae _count de una entidad de forma type-safe
+ */
+function getEntityCounts(entity: AnyEntityWithStats): Record<string, number> {
+	return ('_count' in entity && entity._count ? entity._count : {}) as Record<string, number>;
+}
+
+/**
  * Determina la rareza de la carta basada en estadísticas de la entidad
  */
 function determineRarity(entity: AnyEntityWithStats): TCGCardRarity {
-	// @ts-expect-error - Las entidades con stats tienen _count
-	const stats = entity._count || {};
+	const stats = getEntityCounts(entity);
 	const totalRelations = Object.values(stats).reduce(
 		(sum: number, val: unknown) => sum + (typeof val === 'number' ? val : 0),
 		0
@@ -61,8 +67,7 @@ function determineRarity(entity: AnyEntityWithStats): TCGCardRarity {
  * Obtiene el conteo total de relaciones para mostrar
  */
 function getTotalRelations(entity: AnyEntityWithStats): number {
-	// @ts-expect-error
-	const stats = entity._count || {};
+	const stats = getEntityCounts(entity);
 	return Object.values(stats).reduce((sum: number, val: unknown) => sum + (typeof val === 'number' ? val : 0), 0);
 }
 
@@ -131,8 +136,7 @@ export const TCGEntityCard = memo(function TCGEntityCard({
 
 	// Preparar stats para el footer
 	const stats = useMemo(() => {
-		// @ts-expect-error
-		const counts = entity._count || {};
+		const counts = getEntityCounts(entity);
 		const result: { label: string; value: string | number; icon?: React.ReactNode }[] = [];
 
 		// Stat: Relaciones totales

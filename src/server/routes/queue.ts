@@ -32,8 +32,18 @@ queueRouter.get(
 	effectHandler((req, _res) =>
 		Effect.tryPromise({
 			try: () => {
-				const filters = req.query.filters ? JSON.parse(req.query.filters as string) : {};
-				const pagination = req.query.pagination ? JSON.parse(req.query.pagination as string) : {};
+				let filters = {};
+				let pagination = {};
+				try {
+					filters = req.query.filters ? JSON.parse(req.query.filters as string) : {};
+				} catch {
+					throw new Error('Invalid filters JSON');
+				}
+				try {
+					pagination = req.query.pagination ? JSON.parse(req.query.pagination as string) : {};
+				} catch {
+					throw new Error('Invalid pagination JSON');
+				}
 				return findQueueJobs(filters, pagination);
 			},
 			catch: (error) => {

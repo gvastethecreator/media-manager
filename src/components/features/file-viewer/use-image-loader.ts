@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { ImageItem } from './file-viewer.types';
+
+const logger = clientLogger.withContext('ImageLoader');
 
 /**
  * Detecta el tipo de archivo basado en mimeType, type, o extensión
@@ -59,7 +62,7 @@ export function useImageLoader(images: ImageItem[], currentIndex: number, isOpen
 			try {
 				const item = images.find((i) => i.id === imageId);
 				if (!item) {
-					console.warn(`Item no encontrado: ${imageId}`);
+					logger.warn(`Item no encontrado: ${imageId}`);
 					return '';
 				}
 
@@ -88,7 +91,7 @@ export function useImageLoader(images: ImageItem[], currentIndex: number, isOpen
 						return `/api/images/${imageId}/content`;
 				}
 			} catch (error) {
-				console.error(`Error cargando URL para ${imageId}:`, error);
+				logger.error(`Error cargando URL para ${imageId}:`, error);
 				throw error;
 			}
 		},
@@ -134,7 +137,7 @@ export function useImageLoader(images: ImageItem[], currentIndex: number, isOpen
 							const url = loadImageUrl(item.id);
 							if (url) newUrls[item.id] = url;
 						} catch (error) {
-							console.error(`Error cargando URL para ${item.name}:`, error);
+							logger.error(`Error cargando URL para ${item.name}:`, error);
 						}
 					})
 				);
@@ -145,7 +148,7 @@ export function useImageLoader(images: ImageItem[], currentIndex: number, isOpen
 
 				setIsLoading(false);
 			} catch (error) {
-				console.error('Error cargando URLs iniciales:', error);
+				logger.error('Error cargando URLs iniciales:', error);
 				setIsLoading(false);
 			}
 		};
