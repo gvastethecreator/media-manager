@@ -1,56 +1,65 @@
-# 🖼️ Image Manager
+# Image Manager
 
-Aplicación monolítica para gestión multimedia local con frontend en React 19, backend Express sobre Bun, Drizzle ORM + SQLite y soporte opcional de escritorio vía Tauri 2.
+Aplicación monolítica para **gestión multimedia local** con frontend en React 19, backend Express sobre Bun, persistencia con Drizzle ORM + SQLite/libsql y empaquetado opcional de escritorio con Tauri 2.
 
-[![React](https://img.shields.io/badge/React-19.2.4-61DAFB?logo=react)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6.0.2-3178C6?logo=typescript)](https://www.typescriptlang.org)
-[![Vite%2B](https://img.shields.io/badge/Vite%2B-0.1.14-646CFF?logo=vite)](https://viteplus.dev)
-[![Bun](https://img.shields.io/badge/Bun-1.2+-000000?logo=bun)](https://bun.sh)
-[![Drizzle](https://img.shields.io/badge/Drizzle-ORM-C5F74F)](https://orm.drizzle.team)
-[![Tauri](https://img.shields.io/badge/Tauri-2.10+-FFC131?logo=tauri)](https://tauri.app)
+El proyecto está diseñado para trabajar con bibliotecas grandes de archivos y metadatos; no es solo un visor de imágenes. Su objetivo real es indexar, organizar, enriquecer y navegar contenido heterogéneo: imágenes, videos, audio, documentos, JSON, modelos 3D y entidades de worldbuilding.
 
-## ✨ Qué incluye
+## Qué resuelve
 
-- Gestión de carpetas y archivos multimedia con metadatos y thumbnails.
-- Soporte para imágenes, video, audio, documentos, JSON y archivos 3D.
-- Organización por tags, álbumes, grupos, colecciones y favoritos.
-- Módulos de worldbuilding: personajes, lugares, conceptos y world items.
-- Reindexación estructurada con progreso y utilidades de mantenimiento.
-- Interfaz React con Zustand, TanStack Query, componentes Radix UI y design tokens propios.
+- Indexación de carpetas del sistema de archivos sin obligar a mover los archivos.
+- Organización semántica mediante tags, álbumes, colecciones, grupos y favoritos.
+- Gestión de dominios creativos y narrativos: personajes, lugares, conceptos y world items.
+- Generación de thumbnails y extracción de metadatos para varios tipos de media.
+- Búsqueda global, búsqueda FTS/LIKE y vistas de navegación ricas.
+- Operación dual como app web local y como app de escritorio con Tauri.
 
-## 🧱 Stack real
+## Stack real del proyecto
 
-| Capa | Tecnologías |
+| Capa | Tecnologías principales |
 | --- | --- |
 | Frontend | React 19, TypeScript 6, React Router 7, Vite+ |
 | Estado | Zustand, Immer, TanStack Query |
 | UI | Tailwind CSS 4, Radix UI, GSAP, Lucide |
 | Backend | Express 5, Bun, Effect |
-| Datos | Drizzle ORM, SQLite / libsql |
+| Persistencia | Drizzle ORM, SQLite, `@libsql/client` |
+| Procesamiento media | Sharp, exifr, music-metadata, ffprobe-static, mediabunny |
+| Testing | Vitest, Testing Library, Playwright |
 | Desktop | Tauri 2 |
-| Testing | Vitest, Playwright, Testing Library |
+| Tooling | Oxc/Oxlint/Oxfmt, TypeScript, scripts Bun |
 
-## 🚀 Puesta en marcha
+## Modos de ejecución
+
+| Modo | Frontend | Backend | Desktop |
+| --- | --- | --- | --- |
+| Web local | `http://localhost:5173` | `http://localhost:4000` | No |
+| Tauri dev | WebView Tauri | Express embebido/externo | Sí |
+| Build producción | `dist/` | `dist/server/` | Opcional |
+
+## Puesta en marcha
 
 ### Requisitos
 
-- Bun 1.2 o superior.
-- Node.js 20+ como fallback para herramientas auxiliares.
-- FFmpeg opcional para miniaturas avanzadas de video/audio.
+- Bun 1.2+
+- Node.js 20+ como soporte para tooling auxiliar
+- Windows, macOS o Linux
+- FFmpeg opcional para algunos flujos de thumbnails y metadata avanzada
 
 ### Instalación
 
 ```bash
-git clone <repository-url>
-cd media-manager
 bun install
 ```
 
-### Variables de entorno
+### Entorno
 
-El proyecto ya usa `.env` para desarrollo local y expone un `.env.example` sincronizado.
+El proyecto usa variables de entorno para puertos, base de datos y flags operativos.
 
-Variables principales:
+Archivos relevantes:
+
+- `.env` para entorno local
+- `.env.example` como plantilla/base de referencia
+
+Variables clave:
 
 ```env
 NODE_ENV=development
@@ -66,107 +75,118 @@ DISABLE_FTS5=0
 SEARCH_FTS_REQUIRE=0
 ```
 
-## 💻 Desarrollo diario
+## Comandos principales
 
-### Comandos principales
-
-| Comando | Qué hace |
+| Comando | Propósito |
 | --- | --- |
-| `bun run dev:full` | Arranca frontend + backend |
-| `bun run dev:vite` | Arranca sólo el frontend |
-| `bun run dev:server:hot` | Arranca sólo el backend |
+| `bun run dev:full` | Inicia frontend + backend |
+| `bun run dev:vite` | Solo frontend |
+| `bun run dev:server:hot` | Solo backend |
 | `bun run dev:tauri` | Abre la app en Tauri |
 | `bun run build` | Build completo |
 | `bun run check` | Lint + typecheck |
 | `bun run test` | Tests unitarios/integración |
 | `bun run test:e2e` | Tests E2E Playwright |
+| `bun run db:studio` | Exploración visual de DB |
+| `bun run logs:list` | Listado de logs |
 
-### Puertos por defecto
-
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:4000`
-- Preview Vite: `http://localhost:4173`
-
-## 🧪 Calidad, logs y debugging
-
-Los scripts de lint, typecheck, tests y build escriben logs en `logs/` usando `scripts/run-with-log.js`.
-
-### Scripts con logging automático
-
-- `bun run lint`
-- `bun run lint:fix`
-- `bun run format`
-- `bun run format:check`
-- `bun run tsc`
-- `bun run check`
-- `bun run build:vite`
-- `bun run build:server`
-- `bun run build:tauri`
-- `bun run test`
-- `bun run test:ci`
-- `bun run test:e2e`
-
-### Utilidades de logs
-
-| Comando | Uso |
-| --- | --- |
-| `bun run logs:list` | Lista logs recientes |
-| `bun run logs:clean` | Limpia logs antiguos |
-| `bun run check:errors` | Resume errores detectados en logs |
-
-Notas operativas:
-
-- Los logs se guardan con timestamp en `logs/`.
-- La rotación básica de logs antiguos se ejecuta automáticamente cuando se usan los scripts con logging.
-- Los resúmenes automáticos se agregan al inicio del log cuando la herramienta detecta errores de lint, tests o TypeScript.
-
-## 🗂️ Estructura del repo
+## Estructura del repositorio
 
 ```text
-src/
-├─ components/        # UI, vistas, features y navegación
-├─ server/            # Express, middleware y rutas
-├─ services/          # Lógica de negocio
-├─ transformers/      # Conversión Drizzle -> DTO/ViewModel
-├─ store/             # Zustand stores
-├─ lib/               # Drizzle, logger, effect, utils
-├─ hooks/             # Hooks compartidos
-├─ providers/         # Providers de aplicación
-└─ types/             # Tipos y esquemas
-
-tests/
-├─ unit/
-├─ integration/
-└─ e2e/
-
-docs/
-├─ core/
-├─ guides/
-├─ audits/
-└─ planning/
+src/                # Aplicación principal (frontend + backend + servicios)
+src-tauri/          # Shell desktop en Rust/Tauri
+tests/              # Unit, integration y e2e
+scripts/            # Scripts operativos Bun
+docs/               # Documentación técnica, guías y auditorías
+public/             # Assets públicos y uploads
+drizzle/            # Migraciones generadas
+logs/               # Logs de ejecución y métricas
 ```
 
-## 🏗️ Arquitectura resumida
+## Cómo está organizado `src/`
 
-1. **Routes** en `src/server/routes/` validan input y delegan.
-2. **Services** en `src/services/` encapsulan la lógica y el acceso a Drizzle.
-3. **Transformers** enriquecen datos antes de llegar al cliente.
-4. **Stores + Query** coordinan estado de UI y estado servidor.
-5. **Views** consumen componentes compartidos y features complejas como `file-browser-new`.
-
-## 📚 Documentación útil
-
-| Documento | Propósito |
+| Ruta | Responsabilidad |
 | --- | --- |
-| [`AGENTS.md`](./AGENTS.md) | Convenciones operativas del repositorio |
-| [`docs/core/ARCHITECTURE.md`](./docs/core/ARCHITECTURE.md) | Arquitectura general |
-| [`docs/core/API-REFERENCE.md`](./docs/core/API-REFERENCE.md) | Endpoints principales |
-| [`docs/core/DATABASE-SCHEMA.md`](./docs/core/DATABASE-SCHEMA.md) | Modelo de datos |
-| [`docs/core/FRONTEND-GUIDE.md`](./docs/core/FRONTEND-GUIDE.md) | Patrones frontend |
-| [`docs/core/SERVICES-GUIDE.md`](./docs/core/SERVICES-GUIDE.md) | Capa de servicios |
-| [`docs/core/LOGGING-SYSTEM-GUIDE.md`](./docs/core/LOGGING-SYSTEM-GUIDE.md) | Logging y request tracing |
+| `src/components/` | UI, layout, features, vistas y paneles |
+| `src/router.tsx` | Mapa de rutas del cliente |
+| `src/server/` | Servidor Express, middleware y rutas API |
+| `src/services/` | Lógica de negocio y sistemas transversales |
+| `src/transformers/` | Enriquecimiento y serialización de entidades |
+| `src/store/` | Estado global con Zustand |
+| `src/lib/` | Infraestructura compartida (Drizzle, logger, effect, filesystem, contexts) |
+| `src/providers/` | Providers de aplicación y compatibilidad |
+| `src/styles/` | Tokens, globals, animaciones y utilidades de tema |
+| `src/types/` | Tipos del dominio |
 
-## ✅ Flujo recomendado para contribuir
+## Documentación recomendada
+
+### Documentación troncal actualizada
+
+- [`docs/core/PRD.md`](./docs/core/PRD.md): visión de producto, alcance y requerimientos.
+- [`docs/core/ARCHITECTURE.md`](./docs/core/ARCHITECTURE.md): arquitectura completa y flujos.
+- [`docs/core/REPOSITORY-MAP.md`](./docs/core/REPOSITORY-MAP.md): mapa de carpetas y archivos.
+- [`docs/core/DATABASE-SCHEMA.md`](./docs/core/DATABASE-SCHEMA.md): dominios y patrón del esquema Drizzle.
+- [`docs/core/FRONTEND-GUIDE.md`](./docs/core/FRONTEND-GUIDE.md): bootstrap, providers, vistas, stores y UI.
+- [`docs/core/DESIGN-AND-UX.md`](./docs/core/DESIGN-AND-UX.md): shell visual, paneles, temas y criterios UX.
+- [`docs/core/SERVICES-GUIDE.md`](./docs/core/SERVICES-GUIDE.md): servicios, Effect-TS y sistemas transversales.
+- [`docs/core/API-REFERENCE.md`](./docs/core/API-REFERENCE.md): familias de endpoints y convenciones.
+- [`docs/core/IMPLEMENTATION-DETAILS.md`](./docs/core/IMPLEMENTATION-DETAILS.md): implementación de thumbnails, reindex, búsqueda, Tauri y tooling.
+
+### Documentación especializada complementaria
+
+- [`docs/core/LOGGING-SYSTEM-GUIDE.md`](./docs/core/LOGGING-SYSTEM-GUIDE.md)
+- [`docs/core/STYLES-AND-THEMES-GUIDE.md`](./docs/core/STYLES-AND-THEMES-GUIDE.md)
+- [`docs/core/THUMBNAIL-CONFIG.md`](./docs/core/THUMBNAIL-CONFIG.md)
+
+### Convenciones operativas para agentes y colaboradores
+
+- [`AGENTS.md`](./AGENTS.md)
+- [`.github/copilot-instructions.md`](./.github/copilot-instructions.md)
+
+## Características funcionales principales
+
+### Dominios de archivo
+
+- Imágenes
+- Videos
+- Audios
+- Documentos
+- JSON
+- Archivos 3D
+- Imágenes subidas
+
+### Dominios organizativos y creativos
+
+- Carpetas
+- Tags
+- Álbumes
+- Colecciones
+- Grupos
+- Favoritos
+- Profiles
+- Settings
+- Characters
+- Places
+- Concepts
+- World Items
+- Prompts
+- Notes
+- Properties
+- Tasks
+- Wildcards
+
+### Sistemas técnicos relevantes
+
+- Reindexado estructurado e incremental
+- Mapper de archivos físicos a entidades de BD
+- Thumbnailing unificado y previews específicos por tipo
+- Búsqueda global y FTS con fallback
+- Logging estructurado
+- Sistema de cachés y métricas
+- Undo/redo para operaciones de archivos
+- Paneles, file browser y viewer multi-formato
+
+## Flujo de desarrollo recomendado
 
 ```bash
 bun run check
@@ -174,18 +194,23 @@ bun run test
 bun run build
 ```
 
-Si tocas rutas, búsqueda, thumbnails o reindexación, añade además:
+Si tocas rutas, viewers, thumbnails, búsqueda o reindexado, añade además:
 
 ```bash
 bun run test:e2e
 ```
 
-## 🧹 Higiene del repo
+## Notas arquitectónicas importantes
 
-- `public/uploads/`, `logs/`, resultados de Playwright y archivos SQLite auxiliares están ignorados para evitar ruido y datos sensibles.
-- Mantén los cambios quirúrgicos: sin refactors masivos no solicitados.
-- Evita `console.*` en código productivo del cliente; usa los loggers del proyecto.
+- Es un **monolito cliente-servidor**, no un conjunto de microservicios.
+- Conviven capas nuevas en Effect-TS con utilidades y compatibilidad heredada.
+- Hay doble composición de providers (`src/providers/*` y `src/components/ui/*`) por migraciones históricas; esto está documentado en la guía de arquitectura.
+- El árbol `docs/` contiene material actual y también auditorías históricas; usa `docs/core/` como punto de entrada principal.
 
-## 📝 Licencia
+## Estado del proyecto
 
-[MIT](./LICENSE)
+Proyecto en desarrollo activo con una base funcional amplia, una capa documental ya madura y una arquitectura con fuerte orientación a tipado, modularidad y operación local. No es un MVP diminuto; es un sistema bastante ancho, con varias capas de compatibilidad y herramientas de mantenimiento.
+
+## Licencia
+
+Consulta la licencia del repositorio si aplica en tu entorno de distribución.

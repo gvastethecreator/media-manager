@@ -1,364 +1,249 @@
-# Documento de Requerimientos del Producto (PRD)
+# PRD · Image Manager
 
-## Image Manager - Sistema de Gestión Multimedia
+**Versión documental:** 2026-03-31  
+**Estado del producto:** desarrollo activo  
+**Tipo de producto:** aplicación local web/desktop para gestión multimedia avanzada
 
-**Versión:** 0.1.0  
-**Última Actualización:** 30 de enero de 2026  
-**Estado:** En desarrollo activo - Fase de Consolidación
+## 1. Resumen del producto
 
----
+Image Manager es una aplicación local orientada a **catalogar, enriquecer, organizar y navegar colecciones grandes de archivos multimedia** sin exigir moverlos de su ubicación física original. El producto combina un explorador de contenido, un sistema de metadatos enriquecidos y un conjunto amplio de entidades semánticas para organización creativa y worldbuilding.
 
-## 1. Visión General del Producto
+El sistema no se limita a “mostrar carpetas”; su propuesta de valor es unificar:
 
-### 1.1 Propósito
+- organización física del filesystem,
+- organización lógica en base de datos,
+- visualización rica por tipo de archivo,
+- metadatos y relaciones entre entidades,
+- herramientas de mantenimiento como reindexado, thumbnails, cachés y búsqueda.
 
-Image Manager es un sistema integral de gestión multimedia diseñado para organizar, indexar y visualizar grandes volúmenes de archivos multimedia con alto rendimiento en entornos locales.
+## 2. Problema que resuelve
 
-### 1.2 Origen y Motivación
+Los usuarios que trabajan con miles de archivos suelen tener tres problemas simultáneos:
 
-El proyecto nació como solución para organizar imágenes generadas con IA, evolucionando hacia un organizador multimedia completo que:
+1. **La estructura de carpetas no basta** para encontrar o clasificar contenido.
+2. **Los metadatos nativos no son suficientes** para flujos creativos complejos.
+3. **Las bibliotecas grandes degradan la experiencia** si no hay virtualización, previews y búsquedas rápidas.
 
-- Indexa archivos y extrae metadatos automáticamente
-- Permite crear sistemas de organización complejos y personalizables
-- Combina **organización física** (estructura de carpetas) con **organización digital** (base de datos con etiquetas, álbumes, relaciones)
-- Gestiona archivos sin necesidad de moverlos de su ubicación original
+Image Manager responde a esto con un modelo híbrido:
 
-### 1.3 Usuarios Objetivo
+- respeta la ubicación real de los archivos,
+- guarda conocimiento adicional en SQLite,
+- expone vistas y relaciones ricas por entidad,
+- automatiza parte del trabajo pesado mediante indexación y extracción de metadata.
 
-- **Artistas digitales** que trabajan con IA generativa
-- **Fotógrafos y videógrafos** con grandes bibliotecas
-- **Creadores de contenido** que necesitan organización avanzada
-- **Desarrolladores de juegos** (worldbuilding, personajes, assets)
-- **Investigadores** con colecciones de datos visuales
+## 3. Usuarios objetivo
 
----
+### Primarios
 
-## 2. Características Principales
+- Artistas digitales con bibliotecas de referencias o salidas generadas por IA.
+- Creadores audiovisuales con archivos mixtos: imágenes, video, audio y documentos.
+- Usuarios que necesitan clasificar material por campañas, colecciones o temas.
 
-### 2.1 Tipos de Archivos Soportados
+### Secundarios
 
-#### Multimedia Principal
+- Equipos o individuos de worldbuilding: personajes, lugares, conceptos y objetos.
+- Desarrolladores creativos que necesitan relacionar media con entidades narrativas.
+- Usuarios que prefieren una herramienta local, autocontenida y sin dependencia cloud.
 
-| Tipo         | Extensiones Soportadas             |
-| ------------ | ---------------------------------- |
-| **Imágenes** | JPG, PNG, WebP, GIF                |
-| **Videos**   | MP4, WebM, MOV, AVI, MKV           |
-| **Audio**    | WAV, FLAC, MP3, OGG, M4A, AAC, WMA |
+## 4. Objetivos del producto
 
-#### Contenido Especializado
+### Objetivos funcionales
 
-| Tipo                    | Extensiones Soportadas               |
-| ----------------------- | ------------------------------------ |
-| **Modelos 3D**          | OBJ, FBX, GLB (optimizados para web) |
-| **Documentos**          | MD, TXT, CSV                         |
-| **Datos Estructurados** | JSON                                 |
+- Importar e indexar carpetas locales con persistencia estructurada.
+- Gestionar múltiples tipos de archivo desde una sola interfaz.
+- Permitir clasificación transversal mediante tags, álbumes, colecciones y grupos.
+- Facilitar la exploración visual mediante thumbnails, vistas, paneles y viewers especializados.
+- Soportar modelos creativos avanzados como worldbuilding y prompts.
 
-### 2.2 Sistema de Organización
+### Objetivos técnicos
 
-#### 2.2.1 Organizadores Básicos
+- Mantener la aplicación operativa sobre bibliotecas medianas o grandes.
+- Reducir trabajo repetitivo con reindexado incremental y utilidades de caché.
+- Asegurar una base extensible con TypeScript, servicios por dominio y esquema Drizzle segmentado.
+- Permitir ejecución tanto en navegador local como en escritorio vía Tauri.
 
-**🏷️ Tags (Etiquetas)**
+## 5. Alcance funcional
 
-- Etiquetas simples para categorización rápida
-- Sistema de colores y emojis personalizables
-- Relaciones flexibles con todo tipo de contenido
+### 5.1 Tipos de contenido soportados
 
-**📸 Álbumes**
+- Imágenes
+- Videos
+- Audios
+- Documentos
+- JSON
+- Archivos 3D
+- Imágenes subidas
 
-- Agrupaciones temáticas de archivos multimedia
-- Ideal para colecciones temporales o proyectos específicos
-- Metadata enriquecida con descripción y configuración visual
+### 5.2 Entidades organizativas
 
-**📂 Grupos**
+- Carpetas
+- Tags
+- Álbumes
+- Colecciones
+- Grupos
+- Favoritos
+- Profiles
+- Settings
 
-- Meta-organizadores que permiten agrupar cualquier entidad
-- Sistema jerárquico para taxonomías complejas
-- Configuración avanzada de filtros y ordenamiento
+### 5.3 Entidades creativas y de conocimiento
 
-#### 2.2.2 Entidades Dinámicas
+- Characters
+- Places
+- Concepts
+- World Items
+- Prompts
+- Notes
+- Properties
+- Tasks
+- Wildcards
 
-**🔧 Wildcards**
+### 5.4 Capacidades transversales
 
-- Plantillas y variables dinámicas para automatización
-- Sistema jerárquico con relaciones padre-hijo
-- Generación de contenido parametrizable
+- Reindexado total y por carpeta
+- Reindexado incremental por hashes/cambios
+- Búsqueda global y FTS con fallback
+- Extracción de metadatos
+- Generación y consulta de thumbnails
+- Operaciones sobre archivos y descargas
+- Seguimiento de actividad, cola y eventos
 
-**🔍 Properties (Propiedades)**
+## 6. Casos de uso clave
 
-- Descriptores de características específicas (color, forma, estilo)
-- Sistema de metadatos granular para búsquedas avanzadas
+### Caso 1 · Explorar una carpeta con previews
 
-#### 2.2.3 Colecciones NFT
+1. El usuario abre una carpeta indexada.
+2. La app carga archivos y subcarpetas con datos agregados.
+3. Se muestran previews, conteos y accesos a detalles.
+4. El usuario navega sin cargar toda la colección en DOM gracias a virtualización.
 
-**💎 Collections**
+### Caso 2 · Organizar contenido con relaciones
 
-- Organización específica para NFTs y arte digital
-- Metadatos blockchain: contratos, tokens, networks, pricing
-- Integración con plataformas y marketplaces
-- Gestión de ediciones y rareza
+1. El usuario selecciona imágenes o videos.
+2. Les asigna tags, favoritos, álbumes o relaciones narrativas.
+3. La base de datos conserva esa organización sin alterar la ruta física original.
 
-#### 2.2.4 Entidades Abstractas
+### Caso 3 · Reindexar una biblioteca viva
 
-**💡 Concepts (Conceptos)**
+1. Cambian archivos en disco.
+2. El usuario lanza un reindexado.
+3. El sistema detecta contenido nuevo, cambiado o ausente.
+4. Se actualizan hashes, metadatos y thumbnails.
 
-- Ideas y referencias conceptuales
-- Sistema de conocimiento interconectado
-- Base para sistemas de IA y generación automática
+### Caso 4 · Usar el producto como escritorio local
 
-**📝 Notes (Notas)**
+1. El usuario inicia Tauri.
+2. La UI React se ejecuta en WebView.
+3. El backend Express opera como capa de servicios local.
+4. Tauri aporta integración nativa para operaciones del escritorio.
 
-- Sistema de anotaciones con prioridades y estados
-- Markdown compatible para documentación rica
-- Integración con flujos de trabajo
+## 7. Requerimientos funcionales
 
-**🎯 Prompts**
+### Ingesta e indexación
 
-- Plantillas para generación de IA
-- Parametrización avanzada con wildcards
-- Versionado y optimización iterativa
+| ID | Requerimiento |
+| --- | --- |
+| RF-01 | Registrar carpetas raíz y subcarpetas en el índice local |
+| RF-02 | Detectar tipos de archivo soportados y mapearlos a entidades |
+| RF-03 | Permitir reindexado total y por carpeta |
+| RF-04 | Permitir reindexado incremental cuando el flujo lo soporte |
+| RF-05 | Mantener previews y metadatos alineados con el estado físico del archivo |
 
-#### 2.2.5 Worldbuilding
+### Exploración y visualización
 
-**👤 Characters (Personajes)**
+| ID | Requerimiento |
+| --- | --- |
+| RF-06 | Proveer múltiples vistas para navegar entidades y archivos |
+| RF-07 | Mostrar paneles laterales y detalles contextuales |
+| RF-08 | Incluir visores especializados por tipo de contenido |
+| RF-09 | Permitir obtener thumbnail u original cuando aplique |
 
-- Personajes completos con stats, backstory, relaciones
-- Sistema de niveles, clases y alineamientos
-- Perfiles psicológicos y sociales detallados
+### Organización semántica
 
-**📍 Places (Lugares)**
+| ID | Requerimiento |
+| --- | --- |
+| RF-10 | Crear, editar y eliminar tags, álbumes, colecciones y grupos |
+| RF-11 | Relacionar media con entidades de worldbuilding |
+| RF-12 | Marcar favoritos y administrar perfiles/configuraciones |
+| RF-13 | Guardar notas, prompts, wildcards, tasks y propiedades |
 
-- Ubicaciones con clima, gobierno, población
-- Historia, peligros y recursos
-- Integración geográfica y narrativa
+### Búsqueda y consulta
 
-**🎯 World Items (Objetos del Mundo)**
+| ID | Requerimiento |
+| --- | --- |
+| RF-14 | Ejecutar búsqueda global por texto |
+| RF-15 | Ofrecer búsqueda FTS cuando esté disponible |
+| RF-16 | Hacer fallback a búsqueda LIKE cuando FTS no esté disponible |
+| RF-17 | Exponer filtros por carpeta, favoritos y atributos relevantes |
 
-- Objetos con atributos y efectos
-- Sistema de rareza y requisitos
-- Estadísticas y mecánicas de juego
+### Operación del sistema
 
-#### 2.2.6 Gestión Documental
+| ID | Requerimiento |
+| --- | --- |
+| RF-18 | Exponer endpoints de salud, estadísticas, actividad, cola y eventos |
+| RF-19 | Proveer logging estructurado y herramientas de depuración |
+| RF-20 | Permitir operación local web y modo escritorio |
 
-**📄 Documents**
+## 8. Requerimientos no funcionales
 
-- Archivos markdown y texto plano
-- Compatible con Obsidian vaults
-- Sistema de enlaces bidireccionales
+### Rendimiento
 
-**⚙️ Workflows**
+- Virtualizar listas o grids voluminosos.
+- Cargar vistas pesadas mediante lazy loading.
+- Mantener thumbnails, cachés y consultas razonablemente eficientes.
+- Evitar bloqueos prolongados de UI durante reindexado o procesamiento.
 
-- Flujos de trabajo complejos en JSON
-- Automatización de procesos
-- Integración con herramientas externas
+### Calidad y mantenibilidad
 
-### 2.3 Sistema de Favoritos Multi-Perfil
+- TypeScript estricto en frontend y backend.
+- Servicios y rutas segmentados por dominio.
+- Documentación técnica suficiente para mantenimiento.
+- Scripts de build, test, lint y chequeo reproducibles.
 
-- Favoritos personalizados por perfil de usuario
-- Cualquier entidad puede ser marcada como favorita
-- Sincronización inteligente entre perfiles
+### Fiabilidad
 
----
+- Manejo de errores tipado en la capa Effect donde aplica.
+- Logs útiles para reproducir fallos operativos.
+- Compatibilidad con testing unitario, integración y E2E.
 
-## 3. Requerimientos Funcionales
+### Portabilidad
 
-### 3.1 Navegación de Archivos
+- Soporte local multiplataforma.
+- Modo web local.
+- Empaquetado de escritorio con Tauri.
 
-| ID    | Requerimiento                                                                   | Prioridad |
-| ----- | ------------------------------------------------------------------------------- | --------- |
-| RF-01 | El sistema debe permitir navegación por carpetas con estructura jerárquica      | Alta      |
-| RF-02 | El sistema debe soportar múltiples modos de vista (Grid, Lista, Masonry, Cards) | Alta      |
-| RF-03 | El sistema debe implementar virtualización para manejo de +1000 archivos        | Alta      |
-| RF-04 | El sistema debe generar thumbnails optimizados automáticamente                  | Alta      |
-| RF-05 | El sistema debe extraer y mostrar metadatos EXIF/XMP                            | Media     |
+## 9. Restricciones y decisiones de producto
 
-### 3.2 Organización de Contenido
+- La aplicación es **local-first**; no está pensada como SaaS multiusuario.
+- La organización lógica no debe forzar cambios en la organización física.
+- El sistema debe tolerar coexistencia de capas nuevas y heredadas mientras evoluciona.
+- La base de datos es SQLite/libsql, lo que simplifica despliegue local y respaldo.
 
-| ID    | Requerimiento                                                          | Prioridad |
-| ----- | ---------------------------------------------------------------------- | --------- |
-| RF-06 | El sistema debe permitir crear y gestionar tags con colores y emojis   | Alta      |
-| RF-07 | El sistema debe permitir crear álbumes y añadir archivos               | Alta      |
-| RF-08 | El sistema debe soportar relaciones many-to-many entre entidades       | Alta      |
-| RF-09 | El sistema debe calcular estadísticas por entidad (conteos, favoritos) | Media     |
-| RF-10 | El sistema debe permitir búsqueda avanzada con múltiples filtros       | Media     |
+## 10. Riesgos de producto
 
-### 3.3 Visualización
+- Complejidad creciente del dominio por la cantidad de entidades.
+- Documentación histórica parcialmente desalineada si no se mantiene una fuente de verdad clara.
+- Convivencia de providers, servicios y utilidades de distintas épocas del proyecto.
+- Coste operacional de thumbnails, reindexados y viewers pesados cuando la biblioteca escala.
 
-| ID    | Requerimiento                                               | Prioridad |
-| ----- | ----------------------------------------------------------- | --------- |
-| RF-11 | El sistema debe proporcionar un visor de archivos integrado | Alta      |
-| RF-12 | El sistema debe soportar navegación por teclado en el visor | Media     |
-| RF-13 | El sistema debe mostrar panel de detalles contextual        | Media     |
-| RF-14 | El sistema debe soportar zoom y pan en imágenes             | Baja      |
+## 11. Qué no intenta resolver hoy
 
-### 3.4 Gestión de Archivos
+- Sincronización cloud colaborativa en tiempo real.
+- Multiusuario remoto con permisos complejos.
+- Plataforma SaaS centralizada.
+- Orquestación distribuida o microservicios.
 
-| ID    | Requerimiento                                                  | Prioridad |
-| ----- | -------------------------------------------------------------- | --------- |
-| RF-15 | El sistema debe permitir reindexar carpetas                    | Alta      |
-| RF-16 | El sistema debe detectar cambios en sistema de archivos        | Media     |
-| RF-17 | El sistema debe soportar operaciones bulk (selección múltiple) | Media     |
-| RF-18 | El sistema debe integrar menú contextual con operaciones       | Media     |
+## 12. Indicadores de éxito razonables
 
----
+- El usuario puede indexar y volver a encontrar contenido sin depender solo del árbol físico.
+- El producto soporta bibliotecas heterogéneas con navegación fluida.
+- El mantenimiento técnico se apoya en rutas, servicios y documentación comprensibles.
+- Las operaciones críticas del sistema pueden auditarse mediante logs, tests y scripts.
 
-## 4. Requerimientos No Funcionales
+## 13. Documentos relacionados
 
-### 4.1 Rendimiento
-
-| ID     | Requerimiento                                      | Métrica       |
-| ------ | -------------------------------------------------- | ------------- |
-| RNF-01 | El sistema debe mantener 60 FPS con +1000 archivos | 60 FPS mínimo |
-| RNF-02 | Las operaciones de UI deben responder en <100ms    | < 100ms       |
-| RNF-03 | La generación de thumbnails debe ser asíncrona     | Background    |
-| RNF-04 | El sistema debe usar lazy loading para recursos    | On-demand     |
-
-### 4.2 Usabilidad
-
-| ID     | Requerimiento                                                    |
-| ------ | ---------------------------------------------------------------- |
-| RNF-05 | La interfaz debe ser responsive y adaptarse a diferentes tamaños |
-| RNF-06 | El sistema debe soportar temas claro/oscuro                      |
-| RNF-07 | El sistema debe proporcionar feedback visual para operaciones    |
-| RNF-08 | La navegación debe ser consistente en toda la aplicación         |
-
-### 4.3 Mantenibilidad
-
-| ID     | Requerimiento                                       |
-| ------ | --------------------------------------------------- |
-| RNF-09 | El código debe estar tipado con TypeScript estricto |
-| RNF-10 | La arquitectura debe ser modular y extensible       |
-| RNF-11 | El sistema debe tener logging configurable          |
-| RNF-12 | Las APIs deben estar documentadas                   |
-
-### 4.4 Compatibilidad
-
-| ID     | Requerimiento                                                   |
-| ------ | --------------------------------------------------------------- |
-| RNF-13 | El sistema debe funcionar como aplicación web                   |
-| RNF-14 | El sistema debe funcionar como aplicación de escritorio (Tauri) |
-| RNF-15 | El sistema debe soportar Windows, macOS y Linux                 |
-
----
-
-## 5. Stack Tecnológico
-
-### 5.1 Frontend
-
-- **Framework:** React 19.2.3
-- **Bundler:** Vite 7.3.0
-- **Estado:** Zustand 5.0.9
-- **Data Fetching:** TanStack Query 5.90.14
-- **UI Components:** Radix UI + Tailwind CSS 4.1.18
-- **Virtualización:** TanStack Virtual 3.13.13
-- **Animaciones:** GSAP 3.14.x + `motion-shim`
-
-### 5.2 Backend
-
-- **Runtime:** Bun
-- **Framework:** Express 5.2.1
-- **ORM:** Drizzle ORM 0.45.1
-- **Base de Datos:** SQLite (via @libsql/client)
-- **Programación Funcional:** Effect-TS 3.19.13
-
-### 5.3 Desktop
-
-- **Framework:** Tauri 2.9.6
-- **Lenguaje Nativo:** Rust
-
-### 5.4 Procesamiento de Medios
-
-- **Imágenes:** Sharp 0.34.5
-- **Metadatos:** exifr 7.1.3
-- **Audio:** music-metadata 11.10.3
-- **Video:** ffprobe-static 3.1.0, mediabunny 1.27.2
-
-### 5.5 Testing
-
-- **Unit/Integration:** Vitest 4.0.16
-- **E2E:** Playwright 1.57.0
-
-### 5.6 Calidad de Código
-
-- **Linting/Formatting:** Biome 2.3.10
-- **Type Checking:** TypeScript 5.9.3
-
----
-
-## 6. Arquitectura de Alto Nivel
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Frontend (React + Vite)                       │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │Components│  │  Stores  │  │  Hooks   │  │  TanStack Query  │ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │ HTTP/SSE
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Backend (Express + Bun)                       │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │  Routes  │  │ Services │  │Transforms│  │    Effect-TS     │ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Drizzle ORM + SQLite                          │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │ Schemas  │  │Relations │  │  Seeds   │  │   Migrations     │ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Sistema de Archivos Local                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │ Imágenes │  │  Videos  │  │  Audio   │  │   Documentos     │ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 7. Roadmap
-
-### Fase Actual (v0.1.0)
-
-- ✅ Sistema base de navegación de carpetas
-- ✅ Gestión de imágenes y thumbnails
-- ✅ Sistema de tags y álbumes
-- ✅ Visor de archivos integrado
-- ✅ Panel de detalles contextual
-- ✅ Soporte para múltiples tipos de media
-- 🔄 Migración a Effect-TS (96% completo)
-
-### Próximas Fases
-
-- **v0.2.0:** Sistema de búsqueda FTS5 completo
-- **v0.3.0:** Mejoras UX/UI según auditoría
-- **v0.4.0:** Integración Tauri estable
-- **v0.5.0:** Sistema de plugins/extensiones
-
----
-
-## 8. Glosario
-
-| Término           | Definición                                                     |
-| ----------------- | -------------------------------------------------------------- |
-| **Entity**        | Cualquier objeto del dominio (imagen, video, tag, álbum, etc.) |
-| **EntityStats**   | Estadísticas asociadas a una entidad (conteos, favoritos)      |
-| **Folder**        | Carpeta física del sistema de archivos indexada                |
-| **Reindex**       | Proceso de escaneo y actualización de archivos en una carpeta  |
-| **Thumbnail**     | Imagen miniatura generada para preview                         |
-| **Wildcard**      | Variable dinámica para generación de contenido                 |
-| **Worldbuilding** | Módulo para construcción de mundos ficticios                   |
-
----
-
-## 9. Referencias
-
-- [README del Proyecto](../README.md)
-- [Guía de Arquitectura](./ARCHITECTURE.md)
-- [Referencia de API](./API-REFERENCE.md)
-- [Esquema de Base de Datos](./DATABASE-SCHEMA.md)
+- [`./ARCHITECTURE.md`](./ARCHITECTURE.md)
+- [`./REPOSITORY-MAP.md`](./REPOSITORY-MAP.md)
+- [`./DATABASE-SCHEMA.md`](./DATABASE-SCHEMA.md)
+- [`./FRONTEND-GUIDE.md`](./FRONTEND-GUIDE.md)
+- [`./SERVICES-GUIDE.md`](./SERVICES-GUIDE.md)
+- [`./IMPLEMENTATION-DETAILS.md`](./IMPLEMENTATION-DETAILS.md)

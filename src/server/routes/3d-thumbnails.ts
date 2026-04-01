@@ -168,13 +168,13 @@ router.get('/:id/thumbnail', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const options: Model3DThumbnailOptions = {
-			angle: Number.parseInt(req.query.angle as string, 10) || 45,
-			lightIntensity: Number.parseFloat(req.query.lightIntensity as string) || 1.5,
+			angle: Math.min(Number.parseInt(req.query.angle as string, 10) || 45, 360),
+			lightIntensity: Math.min(Number.parseFloat(req.query.lightIntensity as string) || 1.5, 10),
 			backgroundColor: `#${(req.query.backgroundColor as string) || 'ffffff'}`,
-			width: Number.parseInt(req.query.width as string, 10) || 300,
-			height: Number.parseInt(req.query.height as string, 10) || 300,
+			width: Math.min(Number.parseInt(req.query.width as string, 10) || 300, 2000),
+			height: Math.min(Number.parseInt(req.query.height as string, 10) || 300, 2000),
 			wireframe: req.query.wireframe === 'true',
-			cameraDistance: Number.parseFloat(req.query.cameraDistance as string) || 5,
+			cameraDistance: Math.min(Number.parseFloat(req.query.cameraDistance as string) || 5, 100),
 			autoRotate: req.query.autoRotate === 'true',
 		};
 
@@ -216,7 +216,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 
 		res.setHeader('Content-Type', 'image/svg+xml');
 		res.setHeader('Cache-Control', 'public, max-age=60');
-		res.send(errorSVG);
+		res.status(404).send(errorSVG);
 	} catch (error) {
 		serverLogger.error('Error generando thumbnail 3D:', error);
 

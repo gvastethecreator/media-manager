@@ -4,7 +4,6 @@
  * @description Lógica de búsqueda y filtrado complejo de colecciones
  */
 
-// @ts-nocheck - Temporary suppression for Drizzle schema types
 import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections } from '@/lib/drizzle/schema/index';

@@ -2,8 +2,11 @@
 
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 import { useActiveProfile } from '@/lib/api/profiles';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { selectIsDarkMode, useProfileStore } from '@/store/entities/profile/profile-store';
 import { type ProfileBase, ThemeMode } from '@/types/entities/profile';
+
+const logger = clientLogger.withContext('ProfileProvider');
 
 // Contexto para acceso síncrono al perfil
 export interface ProfileContextValue {
@@ -59,7 +62,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 				}
 				setIsInitialized(true);
 			} catch (error) {
-				console.error('Error inicializando perfil:', error);
+				logger.error('Error inicializando perfil:', error);
 			}
 		};
 

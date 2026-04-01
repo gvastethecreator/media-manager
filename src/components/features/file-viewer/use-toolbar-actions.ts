@@ -1,6 +1,9 @@
 import { useCallback } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import type { ImageItem } from './file-viewer.types';
+
+const logger = clientLogger.withContext('ToolbarActions');
 
 /**
  * 🛠️ HOOK: useToolbarActions
@@ -35,7 +38,7 @@ export function useToolbarActions(
 				toastService.success('URL copiada al portapapeles');
 			}
 		} catch (error) {
-			console.error('Error al copiar URL:', error);
+			logger.error('Error al copiar URL:', error);
 			toastService.error('No se pudo copiar la URL');
 		}
 	}, [currentImage, urls, setUrls, loadImageUrl]);
@@ -77,7 +80,7 @@ export function useToolbarActions(
 				toastService.success('Descarga iniciada');
 			}
 		} catch (error) {
-			console.error('Error al descargar imagen:', error);
+			logger.error('Error al descargar imagen:', error);
 			toastService.error('No se pudo descargar la imagen');
 		}
 	}, [currentImage, urls, setUrls, loadImageUrl]);

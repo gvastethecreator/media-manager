@@ -369,7 +369,9 @@ const make = (): ReindexIncrementalServiceInterface => {
 							totalFiles: total,
 							filesProcessed: processed + 1,
 						});
-					} catch (e) {}
+					} catch (_progressError) {
+						// Progress emission is non-critical; log and continue
+					}
 
 					processed++;
 				} catch (error) {
