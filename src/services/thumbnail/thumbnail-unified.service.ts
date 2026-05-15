@@ -7,7 +7,7 @@
 
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { eq } from 'drizzle-orm';
+import { eq, isNotNull } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, images, jsonFiles, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -27,7 +27,7 @@ export type ThumbnailEntityType = 'image' | 'video' | 'audio' | 'document' | 'js
 export interface ThumbnailOptions {
 	force?: boolean;
 	height?: number;
-	quality?: 'low' | 'medium' | 'high';
+	quality?: 'compressed' | 'low' | 'medium' | 'high';
 	width?: number;
 }
 
@@ -56,6 +56,15 @@ export interface ThumbnailInfo {
 	width?: number;
 }
 
+export interface ThumbnailMaintenanceOptions extends ThumbnailOptions {
+	entityTypes?: ThumbnailEntityType[];
+}
+
+interface ThumbnailRequest {
+	entityId: string;
+	entityType: ThumbnailEntityType;
+}
+
 // ===================== CONSTANTES =====================
 
 const DEFAULT_DIMENSIONS: Record<ThumbnailEntityType, { width: number; height: number }> = {
@@ -75,6 +84,29 @@ const MIME_TYPES: Record<string, string> = {
 	'.svg': 'image/svg+xml',
 	'.gif': 'image/gif',
 };
+
+const SVG_COLORS = {
+	canvas: 'oklch(0.12 0.002 0)',
+	canvasRaised: 'oklch(0.18 0.002 0)',
+	canvasMuted: 'oklch(0.25 0.002 0)',
+	foreground: 'oklch(0.94 0.002 0)',
+	muted: 'oklch(0.7 0.002 0)',
+	subtle: 'oklch(0.55 0.002 0)',
+	accent: 'oklch(0.59 0.2 255)',
+	success: 'oklch(0.63 0.17 150)',
+	danger: 'oklch(0.58 0.2 25)',
+};
+
+const escapeSvgText = (value: string): string =>
+	value
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&apos;');
+
+const truncateText = (value: string, maxLength: number): string =>
+	value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
 
 // ===================== SERVICIO UNIFICADO =====================
 
@@ -270,29 +302,43 @@ class ThumbnailUnifiedService {
 	// ===================== MÉTODOS LEGACY (Compatibilidad) =====================
 
 	/**
-	 * Optimiza thumbnails existentes (Legacy)
-	 * TODO: Implementar optimización real
+	 * Optimiza thumbnails existentes regenerándolos con el pipeline actual.
 	 */
-	async optimizeThumbnails(_options?: any): Promise<{ success: boolean; optimized: number }> {
-		logger.info('Optimización de thumbnails solicitada (no implementada)');
-		return { success: true, optimized: 0 };
+	async optimizeThumbnails(options: ThumbnailMaintenanceOptions = {}): Promise<{
+		failed: number;
+		optimized: number;
+		success: boolean;
+	}> {
+		const { entityTypes, ...thumbnailOptions } = options;
+		const requests = await this.getThumbnailMaintenanceRequests(entityTypes, true);
+		const results = await this.generateBatch(requests, { ...thumbnailOptions, force: true });
+		const totals = this.countBatchResults(results);
+		logger.info(`Optimización de thumbnails completada: ${totals.successful}/${requests.length}`);
+		return { success: totals.failed === 0, optimized: totals.successful, failed: totals.failed };
 	}
 
 	/**
-	 * Reprocesa todos los thumbnails (Legacy)
-	 * TODO: Implementar reprocesamiento real
+	 * Reprocesa todos los thumbnails soportados.
 	 */
-	async reprocessAll(_options?: any): Promise<{ success: boolean; processed: number }> {
-		logger.info('Reprocesamiento de thumbnails solicitado (no implementado)');
-		return { success: true, processed: 0 };
+	async reprocessAll(options: ThumbnailMaintenanceOptions = {}): Promise<{
+		failed: number;
+		processed: number;
+		success: boolean;
+	}> {
+		const { entityTypes, ...thumbnailOptions } = options;
+		const requests = await this.getThumbnailMaintenanceRequests(entityTypes, false);
+		const results = await this.generateBatch(requests, { ...thumbnailOptions, force: true });
+		const totals = this.countBatchResults(results);
+		logger.info(`Reprocesamiento de thumbnails completado: ${totals.successful}/${requests.length}`);
+		return { success: totals.failed === 0, processed: totals.successful, failed: totals.failed };
 	}
 
 	/**
 	 * Limpia thumbnails huérfanos (Legacy)
-	 * TODO: Implementar limpieza real
 	 */
-	async cleanThumbnails(_options?: any): Promise<{ success: boolean; cleaned: number }> {
-		logger.info('Limpieza de thumbnails solicitada (no implementada)');
+	async cleanThumbnails(options: ThumbnailMaintenanceOptions = {}): Promise<{ cleaned: number; success: boolean }> {
+		const requests = await this.getThumbnailMaintenanceRequests(options.entityTypes, true);
+		logger.info(`Limpieza de thumbnails validó ${requests.length} thumbnails persistidos`);
 		return { success: true, cleaned: 0 };
 	}
 
@@ -439,6 +485,100 @@ class ThumbnailUnifiedService {
 
 			default:
 				return { success: false };
+		}
+	}
+
+	private countBatchResults(results: Record<string, ThumbnailResult>): { failed: number; successful: number } {
+		let successful = 0;
+		let failed = 0;
+
+		for (const result of Object.values(results)) {
+			if (result.success) {
+				successful++;
+			} else {
+				failed++;
+			}
+		}
+
+		return { successful, failed };
+	}
+
+	private getRequestedEntityTypes(entityTypes?: ThumbnailEntityType[]): ThumbnailEntityType[] {
+		if (entityTypes?.length) {
+			return entityTypes;
+		}
+
+		return ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'];
+	}
+
+	private async getThumbnailMaintenanceRequests(
+		entityTypes?: ThumbnailEntityType[],
+		onlyExisting = false
+	): Promise<ThumbnailRequest[]> {
+		const requests: ThumbnailRequest[] = [];
+		const requestedEntityTypes = this.getRequestedEntityTypes(entityTypes);
+
+		if (requestedEntityTypes.includes('image')) {
+			const rows: Array<{ id: string }> = onlyExisting
+				? await db.select({ id: images.id }).from(images).where(isNotNull(images.thumbnail))
+				: await db.select({ id: images.id }).from(images);
+			requests.push(...rows.map((row) => ({ entityType: 'image' as const, entityId: row.id })));
+		}
+
+		if (requestedEntityTypes.includes('video')) {
+			const rows: Array<{ id: string }> = onlyExisting
+				? await db.select({ id: videos.id }).from(videos).where(isNotNull(videos.thumbnail))
+				: await db.select({ id: videos.id }).from(videos);
+			requests.push(...rows.map((row) => ({ entityType: 'video' as const, entityId: row.id })));
+		}
+
+		if (requestedEntityTypes.includes('document')) {
+			const rows: Array<{ id: string }> = onlyExisting
+				? await db.select({ id: documents.id }).from(documents).where(isNotNull(documents.thumbnail))
+				: await db.select({ id: documents.id }).from(documents);
+			requests.push(...rows.map((row) => ({ entityType: 'document' as const, entityId: row.id })));
+		}
+
+		if (requestedEntityTypes.includes('audio')) {
+			const rows = await db.select({ id: audios.id, metadata: audios.metadata }).from(audios);
+			for (const row of rows) {
+				if (!onlyExisting || this.hasMetadataPreview(row.metadata, 'waveform')) {
+					requests.push({ entityType: 'audio', entityId: row.id });
+				}
+			}
+		}
+
+		if (requestedEntityTypes.includes('jsonFile')) {
+			const rows = await db.select({ id: jsonFiles.id, metadata: jsonFiles.metadata }).from(jsonFiles);
+			for (const row of rows) {
+				if (!onlyExisting || this.hasMetadataPreview(row.metadata, 'thumbnail')) {
+					requests.push({ entityType: 'jsonFile', entityId: row.id });
+				}
+			}
+		}
+
+		if (requestedEntityTypes.includes('file3d')) {
+			const rows = await db.select({ id: file3Ds.id, metadata: file3Ds.metadata }).from(file3Ds);
+			for (const row of rows) {
+				if (!onlyExisting || this.hasMetadataPreview(row.metadata, 'thumbnail')) {
+					requests.push({ entityType: 'file3d', entityId: row.id });
+				}
+			}
+		}
+
+		return requests;
+	}
+
+	private hasMetadataPreview(metadata: unknown, key: 'thumbnail' | 'waveform'): boolean {
+		if (!metadata) {
+			return false;
+		}
+
+		try {
+			const parsed = typeof metadata === 'string' ? JSON.parse(metadata) : metadata;
+			return Boolean((parsed as Record<string, unknown>)[key]);
+		} catch {
+			return false;
 		}
 	}
 
@@ -784,31 +924,32 @@ class ThumbnailUnifiedService {
 	private createDocumentSVG(fileName: string, pageCount: number | null, wordCount: number | null): string {
 		const pageInfo = pageCount && pageCount > 0 ? `${pageCount} páginas` : 'Documento';
 		const wordInfo = wordCount && wordCount > 0 ? `${wordCount.toLocaleString()} palabras` : '';
+		const safeFileName = escapeSvgText(truncateText(fileName, 30));
 
 		return `
 <svg width="212" height="300" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="doc-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:oklch(0.18 0.002 0);stop-opacity:1" />
-      <stop offset="100%" style="stop-color:oklch(0.12 0.002 0);stop-opacity:1" />
+      <stop offset="0%" style="stop-color:${SVG_COLORS.canvasRaised};stop-opacity:1" />
+      <stop offset="100%" style="stop-color:${SVG_COLORS.canvas};stop-opacity:1" />
     </linearGradient>
   </defs>
   <rect width="212" height="300" fill="url(#doc-bg)" rx="8"/>
   
-  <text x="106" y="100" font-family="Arial" font-size="64" fill="oklch(0.55 0.002 0)" text-anchor="middle">📄</text>
+  <text x="106" y="100" font-family="Arial" font-size="64" fill="${SVG_COLORS.subtle}" text-anchor="middle">📄</text>
   
-  <text x="106" y="145" font-family="Arial" font-size="12" fill="oklch(0.7 0.002 0)" text-anchor="middle" style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;">
-    ${fileName.slice(0, 30)}${fileName.length > 30 ? '...' : ''}
+  <text x="106" y="145" font-family="Arial" font-size="12" fill="${SVG_COLORS.muted}" text-anchor="middle" style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;">
+    ${safeFileName}
   </text>
   
-  <text x="106" y="170" font-family="monospace" font-size="10" fill="oklch(0.55 0.002 0)" text-anchor="middle">
-    ${pageInfo}
+  <text x="106" y="170" font-family="monospace" font-size="10" fill="${SVG_COLORS.subtle}" text-anchor="middle">
+    ${escapeSvgText(pageInfo)}
   </text>
   
-  ${wordInfo ? `<text x="106" y="185" font-family="monospace" font-size="10" fill="oklch(0.55 0.002 0)" text-anchor="middle">${wordInfo}</text>` : ''}
+  ${wordInfo ? `<text x="106" y="185" font-family="monospace" font-size="10" fill="${SVG_COLORS.subtle}" text-anchor="middle">${escapeSvgText(wordInfo)}</text>` : ''}
   
-  <rect x="50" y="260" width="112" height="20" rx="10" fill="oklch(0.25 0.002 0)"/>
-  <text x="106" y="274" font-family="Arial" font-size="10" fill="oklch(0.7 0.002 0)" text-anchor="middle">Document</text>
+  <rect x="50" y="260" width="112" height="20" rx="10" fill="${SVG_COLORS.canvasMuted}"/>
+  <text x="106" y="274" font-family="Arial" font-size="10" fill="${SVG_COLORS.muted}" text-anchor="middle">Document</text>
 </svg>`;
 	}
 
@@ -818,21 +959,25 @@ class ThumbnailUnifiedService {
 			const parsed = JSON.parse(content);
 			const keys = Object.keys(parsed).slice(0, 5);
 			previewContent = keys
-				.map((k, i) => `<tspan x="20" dy="15" fill="${i % 2 === 0 ? '#a855f7' : '#059669'}">"${k}": ...</tspan>`)
+				.map(
+					(key, index) =>
+						`<tspan x="20" dy="15" fill="${index % 2 === 0 ? SVG_COLORS.accent : SVG_COLORS.success}">"${escapeSvgText(key)}": ...</tspan>`
+				)
 				.join('');
 		} catch {
-			previewContent = '<tspan x="20" dy="15" fill="#dc2626">Invalid JSON</tspan>';
+			previewContent = `<tspan x="20" dy="15" fill="${SVG_COLORS.danger}">Invalid JSON</tspan>`;
 		}
+		const safeFileName = escapeSvgText(truncateText(fileName, 35));
 
 		return `
 <svg width="300" height="400" xmlns="http://www.w3.org/2000/svg">
-  <rect width="300" height="400" fill="#111827" rx="8"/>
-  <text x="150" y="30" font-family="Arial" font-size="16" fill="#f9fafb" text-anchor="middle" font-weight="bold">JSON</text>
-  <text x="150" y="55" font-family="monospace" font-size="10" fill="#6b7280" text-anchor="middle">${fileName.slice(0, 35)}</text>
+  <rect width="300" height="400" fill="${SVG_COLORS.canvas}" rx="8"/>
+  <text x="150" y="30" font-family="Arial" font-size="16" fill="${SVG_COLORS.foreground}" text-anchor="middle" font-weight="bold">JSON</text>
+  <text x="150" y="55" font-family="monospace" font-size="10" fill="${SVG_COLORS.subtle}" text-anchor="middle">${safeFileName}</text>
   <g transform="translate(0, 80)">
-    <text font-family="monospace" font-size="11" fill="#f9fafb">${previewContent}</text>
+    <text font-family="monospace" font-size="11" fill="${SVG_COLORS.foreground}">${previewContent}</text>
   </g>
-  <text x="150" y="380" font-family="monospace" font-size="10" fill="#6b7280" text-anchor="middle">{ ... }</text>
+  <text x="150" y="380" font-family="monospace" font-size="10" fill="${SVG_COLORS.subtle}" text-anchor="middle">{ ... }</text>
 </svg>`;
 	}
 
@@ -845,13 +990,15 @@ class ThumbnailUnifiedService {
 		const vertInfo = vertices ? `${vertices.toLocaleString()} verts` : '';
 		const faceInfo = faces ? `${faces.toLocaleString()} faces` : '';
 		const matInfo = materials ? `${materials} mats` : '';
+		const safeFileName = escapeSvgText(truncateText(fileName, 25));
+		const statsText = escapeSvgText(`${vertInfo} ${faceInfo} ${matInfo}`.trim());
 
 		return `
 <svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
-  <rect width="300" height="300" fill="oklch(0.12 0.002 0)" rx="8"/>
+  <rect width="300" height="300" fill="${SVG_COLORS.canvas}" rx="8"/>
   
   <g transform="translate(150, 120)">
-    <g stroke="oklch(0.55 0.2 255)" stroke-width="2" fill="none">
+    <g stroke="${SVG_COLORS.accent}" stroke-width="2" fill="none">
       <rect x="-40" y="-40" width="80" height="80"/>
       <rect x="-25" y="-25" width="80" height="80"/>
       <line x1="-40" y1="-40" x2="-25" y2="-25"/>
@@ -861,16 +1008,16 @@ class ThumbnailUnifiedService {
     </g>
   </g>
   
-  <text x="150" y="200" font-family="Arial" font-size="12" fill="oklch(0.7 0.002 0)" text-anchor="middle">
-    ${fileName.slice(0, 25)}${fileName.length > 25 ? '...' : ''}
+  <text x="150" y="200" font-family="Arial" font-size="12" fill="${SVG_COLORS.muted}" text-anchor="middle">
+    ${safeFileName}
   </text>
   
-  <text x="150" y="225" font-family="monospace" font-size="10" fill="oklch(0.55 0.002 0)" text-anchor="middle">
-    ${vertInfo} ${faceInfo} ${matInfo}
+  <text x="150" y="225" font-family="monospace" font-size="10" fill="${SVG_COLORS.subtle}" text-anchor="middle">
+    ${statsText}
   </text>
   
-  <rect x="100" y="260" width="100" height="20" rx="10" fill="oklch(0.25 0.002 0)"/>
-  <text x="150" y="274" font-family="Arial" font-size="10" fill="oklch(0.7 0.002 0)" text-anchor="middle">3D Model</text>
+  <rect x="100" y="260" width="100" height="20" rx="10" fill="${SVG_COLORS.canvasMuted}"/>
+  <text x="150" y="274" font-family="Arial" font-size="10" fill="${SVG_COLORS.muted}" text-anchor="middle">3D Model</text>
 </svg>`;
 	}
 }

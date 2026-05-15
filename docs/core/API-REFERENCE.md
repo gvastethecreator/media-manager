@@ -266,8 +266,10 @@ Base: `/api/download`
 
 Operaciones observadas:
 
-- `POST /`
-- `GET /`
+- `POST /` con body `{ "path": "..." }`
+- `GET /?path=...`
+
+Ambas variantes descargan el binario directamente. El backend devuelve `Content-Type`, `Content-Length`, `Content-Disposition` con nombre codificado y `X-Content-Type-Options: nosniff`.
 
 ## 10. Search
 

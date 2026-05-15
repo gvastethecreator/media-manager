@@ -13,6 +13,17 @@ import { runPromise } from '../runtime/runtime';
 
 const logger = serverLogger.withContext('ExpressAdapter');
 
+function isZodLikeError(error: unknown): error is { issues: unknown[]; message?: string; name?: string } {
+	return Boolean(
+		error &&
+			typeof error === 'object' &&
+			'name' in error &&
+			(error as { name?: string }).name === 'ZodError' &&
+			'issues' in error &&
+			Array.isArray((error as { issues?: unknown }).issues)
+	);
+}
+
 /**
  * Tipo para errores con status HTTP
  */
@@ -26,6 +37,14 @@ export interface HttpError {
  * Mapea errores de Effect a status HTTP
  */
 export const errorToHttpStatus = (error: unknown): HttpError => {
+	if (isZodLikeError(error)) {
+		return {
+			status: 400,
+			message: 'Validation error',
+			details: error.issues,
+		};
+	}
+
 	// 1. Si es un error con _tag (Data.TaggedError)
 	if (error && typeof error === 'object' && '_tag' in error) {
 		const taggedError = error as any;

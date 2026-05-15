@@ -7,6 +7,7 @@
 
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
+import { extname } from 'node:path';
 import { Context, Data, Effect, Layer } from 'effect';
 import express from 'express';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
@@ -18,6 +19,7 @@ import {
 	moveFile,
 	renameFile,
 } from '@/services/file/file.service';
+import { getMimeTypeFromExtension } from '@/services/file-entity-mapper/utils/file-info.utils';
 
 // ==========================================
 // 1. Definir errores tipados
@@ -255,7 +257,7 @@ router.post('/move', async (req, res) => {
  * Query params: path (ruta completa del archivo)
  */
 router.get('/content', async (req, res) => {
-	const filePath = req.query.path as string;
+	const filePath = typeof req.query.path === 'string' ? req.query.path.trim() : '';
 
 	if (!filePath) {
 		res.status(400).json({ error: 'Path query parameter requerido' });
@@ -270,6 +272,12 @@ router.get('/content', async (req, res) => {
 			res.status(404).json({ error: 'No es un archivo válido' });
 			return;
 		}
+
+		res.set({
+			'Content-Type': getMimeTypeFromExtension(extname(filePath)),
+			'Content-Length': fileStat.size.toString(),
+			'X-Content-Type-Options': 'nosniff',
+		});
 
 		// Crear stream de lectura
 		const stream = createReadStream(filePath);

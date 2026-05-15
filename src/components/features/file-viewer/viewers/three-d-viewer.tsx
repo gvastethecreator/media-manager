@@ -1,20 +1,24 @@
 /**
- * @file Visor de archivos 3D con Three.js y React Three Fiber
+ * @file 3D file viewer powered by Three.js and React Three Fiber.
  * @module components/features/file-viewer/viewers/three-d-viewer
- * @description Renderizador de modelos 3D (GLB, GLTF, OBJ, STL)
  */
 
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { Box as BoxIcon, Download, Info, RotateCcw } from 'lucide-react';
-import { memo, Suspense, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
+import { ErrorBoundary } from '@/components/core/error-boundary';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 
 const logger = clientLogger.withContext('ThreeDViewer');
+const SUPPORTED_FORMATS = ['glb', 'gltf', 'obj', 'stl'] as const;
+type Supported3DFormat = (typeof SUPPORTED_FORMATS)[number];
 
 interface ThreeDViewerProps {
 	className?: string;
@@ -22,59 +26,128 @@ interface ThreeDViewerProps {
 	src: string;
 }
 
-// Modelo 3D que carga y renderiza el archivo - MEMOIZADO
-const Model = memo(function Model({ url }: { url: string }) {
-	const { scene } = useGLTF(url);
+interface LoadedModelProps {
+	format: Supported3DFormat;
+	onReady: () => void;
+	url: string;
+}
+
+function isSupportedFormat(value: string): value is Supported3DFormat {
+	return SUPPORTED_FORMATS.includes(value as Supported3DFormat);
+}
+
+function enablePreviewShading(object: THREE.Object3D) {
+	object.traverse((child) => {
+		if (child instanceof THREE.Mesh) {
+			child.castShadow = true;
+			child.receiveShadow = true;
+			if (!child.material) {
+				child.material = new THREE.MeshStandardMaterial({ color: new THREE.Color('white'), roughness: 0.55 });
+			}
+		}
+	});
+}
+
+function normalizeForPreview(source: THREE.Object3D) {
+	const object = source.clone(true);
+	enablePreviewShading(object);
+
+	const box = new THREE.Box3().setFromObject(object);
+	if (box.isEmpty()) {
+		return object;
+	}
+
+	const center = box.getCenter(new THREE.Vector3());
+	const size = box.getSize(new THREE.Vector3());
+	const maxDimension = Math.max(size.x, size.y, size.z);
+
+	object.position.sub(center);
+	if (maxDimension > 0) {
+		object.scale.setScalar(2.4 / maxDimension);
+	}
+
+	return object;
+}
+
+function AutoRotatingObject({ object, onReady }: { object: THREE.Object3D; onReady: () => void }) {
 	const modelRef = useRef<THREE.Group>(null);
 
-	// Auto-rotación suave
+	useEffect(() => {
+		onReady();
+	}, [onReady]);
+
 	useFrame((state) => {
 		if (modelRef.current) {
 			modelRef.current.rotation.y = state.clock.elapsedTime * 0.1;
 		}
 	});
 
-	// Centrar y escalar el modelo (solo una vez)
-	useMemo(() => {
-		scene.traverse((child: any) => {
-			if (child instanceof THREE.Mesh) {
-				child.castShadow = true;
-				child.receiveShadow = true;
-			}
-		});
-	}, [scene]);
+	return (
+		<group ref={modelRef}>
+			<primitive object={object} />
+		</group>
+	);
+}
 
-	return <primitive object={scene} position={[0, 0, 0]} ref={modelRef} scale={1} />;
+function GltfModel({ onReady, url }: Omit<LoadedModelProps, 'format'>) {
+	const { scene } = useGLTF(url);
+	const object = useMemo(() => normalizeForPreview(scene), [scene]);
+	return <AutoRotatingObject object={object} onReady={onReady} />;
+}
+
+function ObjModel({ onReady, url }: Omit<LoadedModelProps, 'format'>) {
+	const model = useLoader(OBJLoader, url);
+	const object = useMemo(() => normalizeForPreview(model), [model]);
+	return <AutoRotatingObject object={object} onReady={onReady} />;
+}
+
+function StlModel({ onReady, url }: Omit<LoadedModelProps, 'format'>) {
+	const geometry = useLoader(STLLoader, url);
+	const object = useMemo(() => {
+		const material = new THREE.MeshStandardMaterial({
+			color: new THREE.Color('white'),
+			metalness: 0.05,
+			roughness: 0.55,
+		});
+		const mesh = new THREE.Mesh(geometry, material);
+		geometry.computeVertexNormals();
+		return normalizeForPreview(mesh);
+	}, [geometry]);
+
+	return <AutoRotatingObject object={object} onReady={onReady} />;
+}
+
+const LoadedModel = memo(function LoadedModel({ format, onReady, url }: LoadedModelProps) {
+	switch (format) {
+		case 'glb':
+		case 'gltf':
+			return <GltfModel onReady={onReady} url={url} />;
+		case 'obj':
+			return <ObjModel onReady={onReady} url={url} />;
+		case 'stl':
+			return <StlModel onReady={onReady} url={url} />;
+	}
 });
 
-// Escena 3D completa - MEMOIZADA
-const Scene = memo(function Scene({ url }: { url: string }) {
+const Scene = memo(function Scene({ format, onReady, url }: LoadedModelProps) {
 	return (
 		<>
-			<PerspectiveCamera fov={50} makeDefault position={[0, 2, 5]} />
-			<ambientLight intensity={0.5} />
-			<directionalLight castShadow intensity={1} position={[10, 10, 5]} />
-			<pointLight intensity={0.5} position={[-10, -10, -10]} />
+			<PerspectiveCamera fov={50} makeDefault position={[0, 1.6, 4.2]} />
+			<ambientLight intensity={0.55} />
+			<directionalLight castShadow intensity={1.1} position={[8, 10, 5]} />
+			<pointLight intensity={0.35} position={[-8, -6, -8]} />
 
 			<Suspense fallback={null}>
-				<Model url={url} />
+				<LoadedModel format={format} onReady={onReady} url={url} />
 				<Environment preset="city" />
-				<ContactShadows blur={2.5} far={4} opacity={0.4} position={[0, -1.5, 0]} scale={10} />
+				<ContactShadows blur={2.5} far={4} opacity={0.35} position={[0, -1.25, 0]} scale={8} />
 			</Suspense>
 
-			<OrbitControls
-				autoRotate={false}
-				enablePan={true}
-				enableRotate={true}
-				enableZoom={true}
-				maxDistance={10}
-				minDistance={2}
-			/>
+			<OrbitControls enablePan enableRotate enableZoom makeDefault maxDistance={12} minDistance={1.2} />
 		</>
 	);
 });
 
-// Placeholder cuando hay error o formato no soportado
 function ErrorPlaceholder({
 	fileName,
 	error,
@@ -90,7 +163,7 @@ function ErrorPlaceholder({
 			<h3 className="mb-2 font-semibold text-lg">{error ? 'Error al cargar modelo' : 'Vista previa limitada'}</h3>
 			<p className="mb-4 max-w-md text-muted-foreground text-sm">
 				{error ||
-					'Algunos formatos 3D requieren software especializado. Descarga el archivo para verlo en una aplicación compatible.'}
+					'Algunos formatos 3D requieren software especializado. Descarga el archivo para verlo en una aplicacion compatible.'}
 			</p>
 			{fileName && <p className="mb-4 text-muted-foreground text-xs">{fileName}</p>}
 			<Button onClick={onDownload} variant="outline">
@@ -105,17 +178,14 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [showInfo, setShowInfo] = useState(false);
-	const hasLoadedRef = useRef(false);
+	const [viewKey, setViewKey] = useState(0);
 
-	// Determinar el formato del archivo - MEMOIZADO
 	const fileExtension = useMemo(() => fileName?.split('.').pop()?.toLowerCase() || '', [fileName]);
-	const supportedFormats = useMemo(() => ['glb', 'gltf', 'obj', 'stl'], []);
-	const isSupported = useMemo(() => supportedFormats.includes(fileExtension), [fileExtension, supportedFormats]);
+	const format = useMemo(() => (isSupportedFormat(fileExtension) ? fileExtension : null), [fileExtension]);
 
-	// Handlers memoizados para evitar re-renders
 	const handleError = useCallback((err: unknown) => {
 		logger.error('Error loading 3D model:', err);
-		setError('No se pudo cargar el modelo 3D. El formato puede no ser compatible o el archivo está corrupto.');
+		setError('No se pudo cargar el modelo 3D. El formato puede no ser compatible o el archivo esta corrupto.');
 		setIsLoading(false);
 	}, []);
 
@@ -127,14 +197,14 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 	}, [src, fileName]);
 
 	const handleReset = useCallback(() => {
-		window.location.reload();
+		setError(null);
+		setShowInfo(false);
+		setIsLoading(true);
+		setViewKey((current) => current + 1);
 	}, []);
 
-	const handleCanvasCreated = useCallback(() => {
-		if (!hasLoadedRef.current) {
-			hasLoadedRef.current = true;
-			setIsLoading(false);
-		}
+	const handleModelReady = useCallback(() => {
+		setIsLoading(false);
 	}, []);
 
 	const toggleInfo = useCallback(() => {
@@ -145,12 +215,11 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 		setShowInfo(false);
 	}, []);
 
-	// Si no es un formato soportado o hay error, mostrar placeholder
-	if (!isSupported || error) {
+	if (!format || error) {
 		return (
 			<Card className={cn('flex h-full items-center justify-center', className)}>
 				<ErrorPlaceholder
-					error={error || (isSupported ? undefined : `Formato .${fileExtension} no soportado para vista previa`)}
+					error={error || (format ? undefined : `Formato .${fileExtension} no soportado para vista previa`)}
 					fileName={fileName}
 					onDownload={handleDownload}
 				/>
@@ -160,20 +229,22 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 
 	return (
 		<Card className={cn('relative h-full overflow-hidden', className)}>
-			{/* Canvas 3D - Solo se renderiza una vez */}
 			<div className="absolute inset-0 bg-gradient-to-b from-background to-muted">
-				<Canvas
-					camera={{ position: [0, 2, 5], fov: 50 }}
-					gl={{ antialias: true, alpha: true }}
-					onCreated={handleCanvasCreated}
-					onError={handleError}
-					shadows
+				<ErrorBoundary
+					fallback={<ErrorPlaceholder error="No se pudo renderizar la vista 3D." fileName={fileName} onDownload={handleDownload} />}
 				>
-					<Scene url={src} />
-				</Canvas>
+					<Canvas
+						camera={{ position: [0, 1.6, 4.2], fov: 50 }}
+						gl={{ antialias: true, alpha: true }}
+						key={viewKey}
+						onError={handleError}
+						shadows
+					>
+						<Scene format={format} onReady={handleModelReady} url={src} />
+					</Canvas>
+				</ErrorBoundary>
 			</div>
 
-			{/* Loading indicator - Solo aparece al inicio */}
 			{isLoading && (
 				<div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80">
 					<div className="flex flex-col items-center gap-2">
@@ -183,25 +254,33 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 				</div>
 			)}
 
-			{/* Controles - Estáticos, no causan re-renders */}
 			<div className="absolute top-4 right-4 left-4 z-10 flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<Button className="bg-background/80 backdrop-blur" onClick={toggleInfo} size="icon" variant="secondary">
+					<Button
+						aria-label="Mostrar informacion del modelo"
+						className="bg-background/80 backdrop-blur"
+						onClick={toggleInfo}
+						size="icon"
+						variant="secondary"
+					>
 						<Info className="h-4 w-4" />
 					</Button>
-					<Button className="bg-background/80 backdrop-blur" onClick={handleReset} size="icon" variant="secondary">
+					<Button
+						aria-label="Reiniciar vista 3D"
+						className="bg-background/80 backdrop-blur"
+						onClick={handleReset}
+						size="icon"
+						variant="secondary"
+					>
 						<RotateCcw className="h-4 w-4" />
 					</Button>
 				</div>
-				<div className="flex items-center gap-2">
-					<Button className="bg-background/80 backdrop-blur" onClick={handleDownload} size="sm" variant="secondary">
-						<Download className="mr-2 h-4 w-4" />
-						Descargar
-					</Button>
-				</div>
+				<Button className="bg-background/80 backdrop-blur" onClick={handleDownload} size="sm" variant="secondary">
+					<Download className="mr-2 h-4 w-4" />
+					Descargar
+				</Button>
 			</div>
 
-			{/* Info panel */}
 			{showInfo && (
 				<div className="absolute right-4 bottom-4 left-4 z-10 rounded-lg bg-background/95 p-4 backdrop-blur">
 					<div className="flex items-start justify-between">
@@ -224,10 +303,9 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 				</div>
 			)}
 
-			{/* Instrucciones flotantes */}
 			{!(showInfo || isLoading) && (
 				<div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-background/80 px-3 py-1.5 text-muted-foreground text-xs backdrop-blur">
-					Arrastrar para rotar · Scroll para zoom
+					Arrastrar para rotar - Scroll para zoom
 				</div>
 			)}
 		</Card>

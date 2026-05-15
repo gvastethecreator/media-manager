@@ -1,19 +1,23 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
-import { HierarchicalFolderWrapper } from '@/components/features/file-browser-new/wrappers/hierarchical-folder-wrapper';
 import { MainLayout } from '@/components/layout/main-layout';
-import ReindexLogsViewer from '@/components/settings/folders/reindex-logs-viewer';
 
 // Settings
 const SettingsContentView = lazy(() =>
 	import('@/components/views/settings/settings-content-view').then((m) => ({ default: m.SettingsContentView }))
 );
 
-// ✅ EAGER LOAD: Solo Dashboard y FolderContentView (rutas más usadas)
-import Dashboard from '@/components/views/dashboard/dashboard';
-import { FolderContentView } from '@/components/views/folders/folder-content-view';
+const Dashboard = lazy(() => import('@/components/views/dashboard/dashboard'));
+const FolderContentView = lazy(() =>
+	import('@/components/views/folders/folder-content-view').then((m) => ({ default: m.FolderContentView }))
+);
+const HierarchicalFolderWrapper = lazy(() =>
+	import('@/components/features/file-browser-new/wrappers/hierarchical-folder-wrapper').then((m) => ({
+		default: m.HierarchicalFolderWrapper,
+	}))
+);
+const ReindexLogsViewer = lazy(() => import('@/components/settings/folders/reindex-logs-viewer'));
 
-// ✅ LAZY LOAD: Todas las demás vistas (optimización de bundle -800KB ~28%)
 const AllImagesView = lazy(() =>
 	import('@/components/views/all-images/all-images-view').then((m) => ({ default: m.AllImagesView }))
 );
@@ -117,20 +121,11 @@ const DocsWrapper = () => (
 		<Outlet />
 	</Suspense>
 );
-// Importar stores para los wrappers
-
-// Wrapper para CharactersView - Ya no necesario, usar vista directa
-
-// Wrappers eliminados - TODO: Re-implementar cuando se necesiten
-// const AlbumContentWrapper = () => ...
-// const CharacterContentWrapper = () => ...
-// etc.
-
 // Componente NotFound simple
 const NotFoundPage = () => {
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-red-50 p-4">
-			<div className="w-full max-w-md rounded-lg border border-red-200 p-6 text-center">
+		<div className="flex min-h-screen items-center justify-center bg-background p-4">
+			<div className="w-full max-w-md rounded-lg border border-destructive/20 bg-card p-6 text-center">
 				<h1 className="mb-4 font-bold text-2xl text-destructive">Página no encontrada</h1>
 				<p className="mb-4 text-destructive">La página que estás buscando no existe o ha sido movida.</p>
 				<a className="font-semibold text-destructive hover:underline" href="/">

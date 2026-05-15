@@ -80,6 +80,7 @@ function MediaThumbnailInner({
 	const abortRef = React.useRef<AbortController | null>(null);
 	const framesRef = React.useRef<string[] | null>(null);
 	const frameIndexRef = React.useRef(0);
+	const timeoutRef = React.useRef<number | null>(null);
 
 	const animateFramesOnce = React.useCallback(
 		(frames: string[]) => {
@@ -93,12 +94,16 @@ function MediaThumbnailInner({
 				if (currentFrame < totalFrames) {
 					setSrc(frames[currentFrame]);
 					currentFrame++;
-					setTimeout(animateOnce, frameInterval);
+					timeoutRef.current = window.setTimeout(animateOnce, frameInterval);
 				} else {
 					setSrc(frames[0]);
 				}
 			};
 
+			if (timeoutRef.current) {
+				window.clearTimeout(timeoutRef.current);
+				timeoutRef.current = null;
+			}
 			animateOnce();
 		},
 		[videoCycleDurationMs]
@@ -347,12 +352,17 @@ function MediaThumbnailInner({
 
 	React.useEffect(() => {
 		setIsLoaded(false);
-	}, []);
+		setHasPlayedInitialAnimation(false);
+		framesRef.current = null;
+		frameIndexRef.current = 0;
+	}, [item.id, item.thumbnailUrl]);
 
 	React.useEffect(() => {
 		return () => {
 			if (rafRef.current) cancelAnimationFrame(rafRef.current);
 			rafRef.current = null;
+			if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+			timeoutRef.current = null;
 			if (abortRef.current) abortRef.current.abort();
 			abortRef.current = null;
 		};
@@ -467,6 +477,17 @@ function MediaThumbnailInner({
 	);
 }
 
+function areStylesEqual(a?: React.CSSProperties, b?: React.CSSProperties) {
+	if (a === b) return true;
+	if (!a || !b) return !a && !b;
+
+	const aKeys = Object.keys(a) as Array<keyof React.CSSProperties>;
+	const bKeys = Object.keys(b) as Array<keyof React.CSSProperties>;
+	if (aKeys.length !== bKeys.length) return false;
+
+	return aKeys.every((key) => Object.is(a[key], b[key]));
+}
+
 export const MediaThumbnail = React.memo(MediaThumbnailInner, (prev, next) => {
 	const a = prev.item;
 	const b = next.item;
@@ -476,13 +497,19 @@ export const MediaThumbnail = React.memo(MediaThumbnailInner, (prev, next) => {
 		(a.thumbnailUrl || '') === (b.thumbnailUrl || '') &&
 		(a.mimeType || '') === (b.mimeType || '') &&
 		(a.name || '') === (b.name || '') &&
+		a.createdAt === b.createdAt &&
+		a.totalItems === b.totalItems &&
+		a.width === b.width &&
+		a.height === b.height &&
 		prev.quality === next.quality &&
 		prev.className === next.className &&
-		JSON.stringify(prev.style) === JSON.stringify(next.style) &&
+		areStylesEqual(prev.style, next.style) &&
 		prev.animateVideoOnHover === next.animateVideoOnHover &&
 		prev.videoFramesCount === next.videoFramesCount &&
 		prev.videoCycleDurationMs === next.videoCycleDurationMs &&
-		prev.preloadMargin === next.preloadMargin
+		prev.preloadMargin === next.preloadMargin &&
+		prev.lockAspectRatio === next.lockAspectRatio &&
+		prev.predictedAspectRatio === next.predictedAspectRatio
 	);
 });
 

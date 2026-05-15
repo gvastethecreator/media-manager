@@ -9,6 +9,41 @@ import { getMimeTypeFromExtension } from '../utils/file-info.utils';
 // Regex para procesamiento de archivos OBJ
 const LINE_SPLIT_REGEX = /\r?\n/;
 
+interface Parsed3DMetadata {
+	faces?: number | null;
+	materials?: number | null;
+	meshes?: number | null;
+	nodes?: number | null;
+	scenes?: number | null;
+	vertices?: number | null;
+}
+
+interface File3DPreviewModel {
+	faces?: number | null;
+	format?: string | null;
+	vertices?: number | null;
+}
+
+const SVG_COLORS = {
+	canvas: 'oklch(0.12 0.002 0)',
+	canvasRaised: 'oklch(0.18 0.002 0)',
+	canvasMuted: 'oklch(0.25 0.002 0)',
+	muted: 'oklch(0.7 0.002 0)',
+	subtle: 'oklch(0.55 0.002 0)',
+	subtler: 'oklch(0.45 0.002 0)',
+};
+
+const escapeSvgText = (value: string): string =>
+	value
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&apos;');
+
+const truncateText = (value: string, maxLength: number): string =>
+	value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
+
 /**
  * Procesador especializado para entidades de tipo FILE3D
  */
@@ -77,7 +112,7 @@ export class File3DProcessor {
 			const { eq } = await import('drizzle-orm');
 
 			let format: string | null = null;
-			let rawInfo: Record<string, any> | null = null;
+			let rawInfo: Parsed3DMetadata | null = null;
 			let version: string | null = null;
 
 			if (ext === '.gltf' || ext === '.glb') {
@@ -105,8 +140,8 @@ export class File3DProcessor {
 				.update(file3Ds)
 				.set({
 					format,
-					vertices: (rawInfo as any)?.vertices ?? null,
-					faces: (rawInfo as any)?.faces ?? null,
+					vertices: rawInfo?.vertices ?? null,
+					faces: rawInfo?.faces ?? null,
 					version,
 					updatedAt: new Date(),
 				})
@@ -120,8 +155,7 @@ export class File3DProcessor {
 
 	/**
 	 * Genera thumbnail visual para modelo 3D
-	 * Por ahora usa placeholder SVG mejorado con información del modelo
-	 * TODO: Implementar renderizado real con three.js headless
+	 * Usa SVG determinista con metadata del modelo para previews rápidas y seguras.
 	 */
 	async generateThumbnail(filePath: string, entityId: string): Promise<{ success: boolean; error?: string }> {
 		const { basename } = await import('node:path');
@@ -183,50 +217,52 @@ export class File3DProcessor {
 	/**
 	 * Crea placeholder SVG mejorado con información del modelo 3D
 	 */
-	private create3DPlaceholderSVG(fileName: string, model: any): string {
+	private create3DPlaceholderSVG(fileName: string, model: File3DPreviewModel | null | undefined): string {
 		const vertices = model?.vertices || '?';
 		const faces = model?.faces || '?';
 		const format = model?.format?.toUpperCase() || 'Unknown';
+		const safeFileName = escapeSvgText(truncateText(fileName, 36));
+		const safeFormat = escapeSvgText(format);
 
 		return `
 			<svg width="320" height="320" xmlns="http://www.w3.org/2000/svg">
 				<defs>
 					<linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-						<stop offset="0%" style="stop-color:oklch(0.18 0.002 0);stop-opacity:1" />
-						<stop offset="100%" style="stop-color:oklch(0.12 0.002 0);stop-opacity:1" />
+						<stop offset="0%" style="stop-color:${SVG_COLORS.canvasRaised};stop-opacity:1" />
+						<stop offset="100%" style="stop-color:${SVG_COLORS.canvas};stop-opacity:1" />
 					</linearGradient>
 				</defs>
 				<rect width="320" height="320" fill="url(#bg)"/>
 				
 				<!-- Icono 3D -->
-				<text x="160" y="120" font-family="Arial" font-size="72" fill="oklch(0.55 0.002 0)" text-anchor="middle">🎨</text>
+				<text x="160" y="120" font-family="Arial" font-size="72" fill="${SVG_COLORS.subtle}" text-anchor="middle">🎨</text>
 				
 				<!-- Nombre del archivo -->
-				<text x="160" y="165" font-family="Arial" font-size="14" fill="oklch(0.7 0.002 0)" text-anchor="middle">${fileName}</text>
+				<text x="160" y="165" font-family="Arial" font-size="14" fill="${SVG_COLORS.muted}" text-anchor="middle">${safeFileName}</text>
 				
 				<!-- Formato -->
-				<text x="160" y="190" font-family="Arial, sans-serif" font-size="12" fill="oklch(0.55 0.002 0)" text-anchor="middle" font-weight="bold">${format}</text>
+				<text x="160" y="190" font-family="Arial, sans-serif" font-size="12" fill="${SVG_COLORS.subtle}" text-anchor="middle" font-weight="bold">${safeFormat}</text>
 				
 				<!-- Stats -->
 				<g transform="translate(160, 220)">
-					<text x="0" y="0" font-family="monospace" font-size="10" fill="oklch(0.45 0.002 0)" text-anchor="middle">
-						Vertices: ${vertices}
+					<text x="0" y="0" font-family="monospace" font-size="10" fill="${SVG_COLORS.subtler}" text-anchor="middle">
+						Vertices: ${escapeSvgText(String(vertices))}
 					</text>
-					<text x="0" y="15" font-family="monospace" font-size="10" fill="oklch(0.45 0.002 0)" text-anchor="middle">
-						Faces: ${faces}
+					<text x="0" y="15" font-family="monospace" font-size="10" fill="${SVG_COLORS.subtler}" text-anchor="middle">
+						Faces: ${escapeSvgText(String(faces))}
 					</text>
 				</g>
 				
 				<!-- Badge de "3D Model" -->
-				<rect x="100" y="270" width="120" height="25" rx="12" fill="oklch(0.25 0.002 0)"/>
-				<text x="160" y="288" font-family="Arial" font-size="12" fill="oklch(0.7 0.002 0)" text-anchor="middle">3D Model</text>
+				<rect x="100" y="270" width="120" height="25" rx="12" fill="${SVG_COLORS.canvasMuted}"/>
+				<text x="160" y="288" font-family="Arial" font-size="12" fill="${SVG_COLORS.muted}" text-anchor="middle">3D Model</text>
 			</svg>
 		`.trim();
 	}
 
 	// ===================== MÉTODOS PRIVADOS =====================
 
-	private async parseGltf(filePath: string): Promise<Record<string, any> | null> {
+	private async parseGltf(filePath: string): Promise<Parsed3DMetadata | null> {
 		try {
 			const txt = await readFile(filePath, 'utf8');
 			const json = JSON.parse(txt);
@@ -241,7 +277,7 @@ export class File3DProcessor {
 		}
 	}
 
-	private async parseObj(filePath: string): Promise<Record<string, any> | null> {
+	private async parseObj(filePath: string): Promise<Parsed3DMetadata | null> {
 		try {
 			const txt = await readFile(filePath, 'utf8');
 			const lines = txt.split(LINE_SPLIT_REGEX);

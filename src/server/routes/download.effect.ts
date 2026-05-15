@@ -43,6 +43,60 @@ export interface DownloadServiceInterface {
 
 export class DownloadService extends Context.Tag('DownloadService')<DownloadService, DownloadServiceInterface>() {}
 
+type DownloadFileResult = {
+	buffer: Buffer;
+	fileInfo: { name: string; mimeType: string; path: string; size: number };
+};
+
+const encodeRFC5987Value = (value: string): string =>
+	encodeURIComponent(value)
+		.replace(/['()]/g, (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)
+		.replace(/\*/g, '%2A');
+
+const createAttachmentHeader = (fileName: string): string => {
+	const fallbackName =
+		fileName
+			.replace(/[^\x20-\x7E]/g, '_')
+			.replace(/["\\;]/g, '_')
+			.trim() || 'download';
+
+	return `attachment; filename="${fallbackName}"; filename*=UTF-8''${encodeRFC5987Value(fileName)}`;
+};
+
+const isTaggedError = (error: unknown, tag: string): boolean =>
+	typeof error === 'object' && error !== null && '_tag' in error && (error as { _tag?: string })._tag === tag;
+
+const getDownloadErrorResponse = (error: unknown): { message: string; status: number } => {
+	if (error instanceof FilePathRequired || isTaggedError(error, 'FilePathRequired')) {
+		return { status: 400, message: 'Se requiere una ruta de archivo' };
+	}
+
+	if (error instanceof FileNotFound || isTaggedError(error, 'FileNotFound')) {
+		return { status: 404, message: 'Archivo no encontrado' };
+	}
+
+	return { status: 500, message: 'Error al procesar la descarga' };
+};
+
+const runDownloadEffect = (filePath: string): Promise<DownloadFileResult> => {
+	const effect = Effect.gen(function* () {
+		const service = yield* DownloadService;
+		return yield* service.downloadFile(filePath);
+	}).pipe(Effect.provide(DownloadServiceLive));
+
+	return Effect.runPromise(effect);
+};
+
+const sendDownloadResponse = (res: express.Response, result: DownloadFileResult): void => {
+	res.set({
+		'Content-Type': result.fileInfo.mimeType,
+		'Content-Disposition': createAttachmentHeader(result.fileInfo.name),
+		'Content-Length': result.fileInfo.size.toString(),
+		'X-Content-Type-Options': 'nosniff',
+	});
+	res.send(result.buffer);
+};
+
 // ==========================================
 // 3. Implementar Live Layer
 // ==========================================
@@ -53,11 +107,11 @@ export const DownloadServiceLive = Layer.succeed(
 		downloadFile: (filePath: string) =>
 			Effect.tryPromise({
 				try: async () => {
-					if (!filePath) {
+					if (!filePath?.trim()) {
 						throw new FilePathRequired({ field: 'path' });
 					}
 
-					const fileInfo = await getFileInfo(filePath);
+					const fileInfo = await getFileInfo(filePath.trim());
 					const buffer = await fs.readFile(fileInfo.path);
 
 					return {
@@ -99,64 +153,34 @@ const downloadLogger = serverLogger.withContext('DownloadAPI');
 router.post('/', async (req, res) => {
 	const filePath = req.body.path as string | undefined;
 
-	if (!filePath) {
-		downloadLogger.error('Descarga fallida: No se proporcionó ruta de archivo');
-		res.status(400).json({ error: 'Se requiere una ruta de archivo' });
-		return;
-	}
-
 	try {
-		const effect = Effect.gen(function* () {
-			const service = yield* DownloadService;
-			return yield* service.downloadFile(filePath);
-		}).pipe(Effect.provide(DownloadServiceLive));
+		const result = await runDownloadEffect(filePath ?? '');
 
-		const { buffer, fileInfo } = await Effect.runPromise(effect);
-
-		res.set({
-			'Content-Type': fileInfo.mimeType,
-			'Content-Disposition': `attachment; filename="${fileInfo.name}"`,
-			'Content-Length': fileInfo.size.toString(),
-		});
-		downloadLogger.info(`Enviando archivo para descarga: ${fileInfo.name} (${fileInfo.mimeType})`);
-		res.send(buffer);
+		downloadLogger.info(`Enviando archivo para descarga: ${result.fileInfo.name} (${result.fileInfo.mimeType})`);
+		sendDownloadResponse(res, result);
 	} catch (error) {
 		downloadLogger.error(`Error en descarga: ${filePath}`, error);
-		res.status(500).json({ error: 'Error al procesar la descarga' });
+		const { status, message } = getDownloadErrorResponse(error);
+		res.status(status).json({ error: message });
 	}
 });
 
 /**
- * GET /api/download - Interfaz de descarga HTML
+ * GET /api/download - Descargar archivo por query string
  */
 router.get('/', async (req, res) => {
 	const filePath = req.query.path as string | undefined;
 
-	if (!filePath) {
-		downloadLogger.error('Descarga fallida: No se proporcionó ruta de archivo');
-		res.status(400).json({ error: 'Se requiere una ruta de archivo' });
-		return;
-	}
+	try {
+		const result = await runDownloadEffect(filePath ?? '');
 
-	res.send(`<!DOCTYPE html>
-<html>
-  <head>
-	<title>Descargando archivo...</title>
-	<style>
-	  body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f5f5f5; color: #333; }
-	  .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-	  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-	</style>
-  </head>
-  <body>
-	<div class="loader"></div>
-	<p>Iniciando descarga...</p>
-	<form id="downloadForm" method="POST" action="/api/download">
-	  <input type="hidden" name="path" value="${filePath}">
-	</form>
-	<script>document.addEventListener('DOMContentLoaded',function(){document.getElementById('downloadForm').submit();});</script>
-  </body>
-</html>`);
+		downloadLogger.info(`Enviando archivo para descarga: ${result.fileInfo.name} (${result.fileInfo.mimeType})`);
+		sendDownloadResponse(res, result);
+	} catch (error) {
+		downloadLogger.error(`Error en descarga: ${filePath}`, error);
+		const { status, message } = getDownloadErrorResponse(error);
+		res.status(status).json({ error: message });
+	}
 });
 
 export default router;
