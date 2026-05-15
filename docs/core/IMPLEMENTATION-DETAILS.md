@@ -60,6 +60,8 @@ Este flujo está orientado a la ejecución “completa” y a la emisión de pro
 
 La implementación Effect-TS compara hashes y tamaños almacenados con el estado actual, intentando evitar trabajo innecesario.
 
+Desde la revisión 2026-05-08, la resolución de subcarpetas usa recorrido iterativo con mapa de hijos. Esto evita recursion innecesaria, reduce trabajo repetido y protege mejor contra estructuras anómalas.
+
 ### Qué hace de verdad
 
 - obtiene carpetas objetivo,
@@ -89,6 +91,8 @@ El proyecto usa varias rutas y servicios especializados, no un único mecanismo 
 - JSON: preview legible,
 - 3D: thumbnail/info especializado,
 - carpetas: preview SVG compuesto con media reciente.
+
+Los SVG generados para documentos, JSON y modelos 3D deben escapar cualquier texto proveniente de nombres de archivo o metadata antes de interpolarlo. El servicio unificado centraliza colores OKLCH en constantes para mantener coherencia visual y evitar hex hardcodeados en previews nuevas.
 
 ### Observación importante
 
@@ -136,6 +140,13 @@ La base de operaciones físicas pasa por:
 
 Este sistema alimenta tanto funciones de mantenimiento como operaciones de UI avanzadas.
 
+### Descarga y contenido binario
+
+- `GET /api/download?path=...` descarga directamente el archivo.
+- `POST /api/download` conserva compatibilidad para clientes que envian `{ "path": "..." }`.
+- Ambos flujos usan el mismo servicio Effect y devuelven `Content-Disposition` seguro, `Content-Length`, `Content-Type` y `X-Content-Type-Options: nosniff`.
+- `/api/files/content` sirve contenido inline con MIME inferido por extensión y `nosniff`.
+
 ## 6. Batch operations, selección y undo/redo
 
 ### Selección
@@ -179,6 +190,8 @@ El browser nuevo vive en `src/components/features/file-browser-new/` y funciona 
 ### File viewer
 
 `src/components/features/file-viewer/` concentra la visualización detallada. El proyecto además tiene viewers y content views específicos dentro de `components/views/*`.
+
+El viewer 3D actual soporta GLB/GLTF, OBJ y STL. Normaliza escala/centro, aplica sombras, usa fallback de material y reinicia la escena con estado local en lugar de recargar la pagina completa.
 
 ## 8. Providers y compatibilidad interna
 
@@ -240,6 +253,8 @@ El código Rust en `src-tauri/src/` complementa funciones desktop. La app no ree
 - `bun run check:errors`
 
 El proyecto está pensado para dejar rastro suficiente durante build, test, runtime y procesos largos.
+
+Los scripts principales `check`, `build`, `test`, `test:e2e`, `deps:outdated`, `deps:update` y `audit` pasan por wrappers de log para dejar evidencia en `logs/`.
 
 ## 11. Testing y entorno de pruebas
 

@@ -1,12 +1,13 @@
 # 🎯 Sistema de Configuración Avanzada de Thumbnails
 
 **Fecha**: 10 de octubre de 2025  
-**Estado**: ✅ Implementado  
-**Versión**: 1.0.0
+**Última revisión**: 2026-05-08  
+**Estado**: 🟡 Parcialmente implementado  
+**Versión**: 1.0.1
 
 ## 📋 Resumen Ejecutivo
 
-Se ha implementado un sistema completo de configuración avanzada para la generación de thumbnails, proporcionando control granular sobre todos los aspectos del proceso de generación, procesamiento y manejo de errores.
+Se ha implementado la capa de configuración avanzada para thumbnails, incluyendo tipos, UI y servicio centralizado. La revisión 2026-05-08 confirma que la integración completa en todos los procesadores todavía es parcial: el servicio existe y expone helpers, pero varios procesadores siguen usando valores internos o fallbacks propios.
 
 ## 🆕 Características Implementadas
 
@@ -209,6 +210,19 @@ graph TD
     H --> I[FileEntityMapperCore]
 ```
 
+## 📝 Estado de Integración
+
+### **Ya disponible**
+
+- Tipo `ThumbnailAdvancedConfig` y defaults validados con Zod.
+- UI de configuración avanzada en settings.
+- `ThumbnailConfigService` con helpers de concurrencia, reintentos, fallback y logging condicional.
+- `ThumbnailUnifiedService` con reprocesamiento y optimización batch para entidades soportadas.
+
+### **Pendiente real**
+
+Los procesadores especializados no consumen toda la configuración avanzada todavía. Por eso las opciones de timeout, fallback y pausa por carga deben tratarse como contrato de configuración disponible, no como comportamiento garantizado de extremo a extremo.
+
 ## 📝 Próximos Pasos
 
 ### **Fase 1: Integración con Procesadores** ⚠️ PENDIENTE
@@ -341,12 +355,12 @@ async generateThumbnail(entity: Video) {
 - ❌ Sin reintentos
 - ❌ Fallbacks no configurables
 
-### **Después**
+### **Objetivo del sistema completo**
 
-- ✅ Concurrencia configurable (1-16)
-- ✅ Timeout por tipo (5-120s)
-- ✅ Reintentos con backoff exponencial
-- ✅ 3 estrategias de fallback
+- 🟡 Concurrencia configurable (1-16) disponible en configuración; pendiente conectar al mapper.
+- 🟡 Timeout por tipo (5-120s) disponible en configuración; pendiente aplicar en procesadores.
+- 🟡 Reintentos con backoff exponencial disponibles como helper; pendiente tracking por intento en metadata.
+- ✅ 3 estrategias de fallback modeladas y validadas.
 
 ## 🔗 Enlaces Relacionados
 

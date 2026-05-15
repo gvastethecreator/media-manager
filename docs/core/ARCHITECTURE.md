@@ -1,7 +1,7 @@
 # Arquitectura del sistema
 
 **Proyecto:** Image Manager  
-**Última revisión:** 2026-03-31  
+**Última revisión:** 2026-05-08  
 **Estilo arquitectónico:** monolito cliente-servidor con opción desktop
 
 ## 1. Vista general
@@ -200,6 +200,8 @@ Mapea archivos físicos a entidades persistidas en tres grandes pasos:
 2. extracción de metadatos,
 3. generación de thumbnail.
 
+El core usa un contrato tipado de processor por entidad (`checkExists`, `createBasicEntity`, `extractMetadata`, `generateThumbnail`) y valida hash antes de consultar duplicados.
+
 ### Reindexado
 
 El backend combina:
@@ -207,6 +209,8 @@ El backend combina:
 - reindexado estructurado por carpeta,
 - reindexado incremental con hashes/cambios,
 - eventos/progreso para feedback de la UI.
+
+El reindex incremental resuelve subcarpetas con un mapa `parentId -> children` y recorrido iterativo para evitar recursion profunda y filtros repetidos sobre el listado completo.
 
 ### Thumbnails
 
@@ -217,6 +221,8 @@ Hay varias rutas especializadas:
 - waveforms de audio,
 - thumbnails 3D,
 - servicio unificado complementario.
+
+Los previews SVG generados por servidor escapan texto de nombres y metadatos antes de interpolarlo, especialmente en documentos, JSON y modelos 3D.
 
 ### Logging
 
@@ -232,6 +238,7 @@ El sistema usa logging estructurado en cliente y servidor, con especial peso en:
 - Rate limiting aplicado sobre `/api/`.
 - Límite alto de payload JSON para operaciones multimedia.
 - Exposición controlada de `/uploads` como estáticos.
+- Descargas con `Content-Disposition` codificado, `nosniff` y flujo binario directo en `GET/POST /api/download`.
 
 ## 10. Testing como parte de la arquitectura
 

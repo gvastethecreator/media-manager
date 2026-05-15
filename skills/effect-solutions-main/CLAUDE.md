@@ -1,6 +1,6 @@
 # Effect Solutions
 
-Effect best practices and patterns for humans and AI agents — https://www.effect.solutions
+Effect best practices and patterns for humans and AI agents; [effect.solutions](https://www.effect.solutions)
 
 > **Living Document**: This is an opinionated collection exploiting Cunningham's Law ("the best way to get the right answer on the internet is not to ask a question; it's to post the wrong answer"). Disagree with a recommendation? Think we should cover something? [Open an issue](https://github.com/kitlangton/effect-solutions/issues/new)
 
@@ -8,11 +8,10 @@ Effect best practices and patterns for humans and AI agents — https://www.effe
 
 - `packages/website/` - Documentation site (Next.js)
 - `packages/cli/` - CLI for local docs access
-- `.github/workflows/` - Automated validation & bots
 
 ## Quick Links
 
-- **Website**: https://www.effect.solutions
+- **Website**: [effect.solutions](https://www.effect.solutions)
 - **CLI**: `bunx effect-solutions@latest list`
 
 ## Local Reference Repos
@@ -38,7 +37,7 @@ The Playwright generator lives at `packages/website/scripts/generate-og.ts` and 
 
 ```bash
 bun scripts/changeset-named.ts "description"  # Create named changeset
-bun release                                    # Version + tag packages, push tags for CI publish
+bun release                                    # Generate assets, version packages, and push release tags
 ```
 
 **Creating changesets:**
@@ -70,7 +69,7 @@ UI components use hard edges; no border radius (use `rounded-none` or omit round
 
 Documentation lives in `packages/website/docs/`. Each file follows this pattern:
 
-```
+```text
 NN-slug.md          # NN = sort order (00-99)
 ```
 
@@ -132,6 +131,7 @@ bunx effect-solutions open-issue    # Leave feedback
 Built with Effect CLI and Schema for validation (from `effect/Schema`). Tests in `packages/cli/src/cli.test.ts` validate all commands.
 
 **Maintenance:** When adding/removing docs, update the topics list in:
+
 - `<!-- effect-solutions:start -->` block at the bottom of this file
 - `packages/website/src/lib/llm-instructions.ts` (the template for agent files)
 
@@ -140,16 +140,19 @@ Run `bun run dev:cli -- list` to see current non-draft topics.
 ## Testing
 
 **Documentation Tests** (`/tests`):
+
 - Use vitest + @effect/vitest for testing doc examples
 - Each non-draft doc should have a corresponding test file
 - Ensures all code examples are real and work correctly
 - Run: `bunx vitest run tests/`
 
 **CLI Tests** (`packages/cli/`):
+
 - Use bun:test for standalone CLI package tests
 - Run: `cd packages/cli && bun test`
 
 **All Tests**:
+
 - Run: `bun run test` (runs doc tests with vitest)
 - Type checking: `bunx tsc --build --force`
 - Doc type checking: `bun run typecheck:docs`
@@ -159,23 +162,22 @@ Run `bun run dev:cli -- list` to see current non-draft topics.
 
 Website deploys automatically via Vercel on push to `main`.
 
-CLI package publishes to npm via changesets workflow:
+CLI releases are prepared locally with changesets:
 
 ```bash
 bun scripts/changeset-named.ts "description"  # Create changeset
-bun release                                    # Version + tag packages, push tags for CI publish
+bun release                                    # Generate assets, version packages, and push release tags
 ```
 
-### Release flow (tag → CI → publish)
+### Release flow (local prep → manual publish)
 
-- Tags (`effect-solutions@*`) are created by `changeset tag` inside `bun release`, which also pushes them.
-- Pushing the tag triggers `.github/workflows/release.yml`, which:
-  - installs deps with Bun
-  - builds multi-arch CLI binaries via the package `prepublishOnly` (darwin arm64/x64, linux x64 baseline, linux arm64)
-  - runs `changeset publish` with provenance using `NPM_TOKEN`
+- `bun release` generates OG images and the CLI manifest.
+- It commits generated artifacts when needed.
+- It runs `changeset version`, creates release tags, and pushes commits and tags.
+- Publish to npm manually when you actually want to ship.
 - The CLI npm package ships a tiny `bin.js` launcher that selects a prebuilt binary for supported platforms; unsupported platforms print a helpful error.
 
-Manual local publish (fallback):
+Manual local publish:
 
 ```bash
 bun run build:cli          # builds manifest + JS + all binaries
@@ -202,8 +204,6 @@ Effect-based CLI using:
 - `effect/Schema` for validation
 - `@effect/platform` for file I/O
 - Embedded JSON docs bundle
-
-
 
 <!-- effect-solutions:start -->
 ## Effect Best Practices

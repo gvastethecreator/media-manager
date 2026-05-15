@@ -1,6 +1,6 @@
 # Effect Solutions
 
-**Effect best practices and patterns** — https://www.effect.solutions
+**Effect best practices and patterns** - [effect.solutions](https://www.effect.solutions)
 
 > **Living Document**: Opinionated collection exploiting Cunningham's Law. Disagree? [Open an issue](https://github.com/kitlangton/effect-solutions/issues/new)
 
@@ -13,6 +13,7 @@ Curated Effect TypeScript patterns for common scenarios — error handling, serv
 **Website**: Browse at [effect.solutions](https://www.effect.solutions)
 
 **CLI**: Access docs offline
+
 ```bash
 bunx effect-solutions list              # List all topics
 bunx effect-solutions show http-clients # Show specific topic
@@ -28,7 +29,8 @@ bunx effect-solutions open-issue        # Leave feedback
 
 ## Quick Examples
 
-**Error handling**
+### Error handling
+
 ```typescript
 import { Effect } from "effect"
 
@@ -39,7 +41,8 @@ Effect.gen(function* () {
 })
 ```
 
-**HTTP client setup**
+### HTTP client setup
+
 ```typescript
 import { Effect, HttpClient } from "effect"
 import { FetchHttpClient } from "@effect/platform"
@@ -65,11 +68,16 @@ See [effect.solutions](https://www.effect.solutions) for full patterns and ratio
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for details and [CLAUDE.md](./CLAUDE.md) for development workflow.
 
-## Releasing (tags auto-publish)
+## Releasing
 
-1. Apply changesets and bump versions: `bun run version` (creates tag `vX.Y.Z`).
-2. Push the tag/commit to GitHub.
-3. The `Release` workflow builds multi-arch CLI binaries and runs `changeset publish` to publish all packages to npm.
+1. Create or update changesets as needed.
+2. Run `bun release` to generate assets, version packages, and push release commits/tags.
+3. Publish manually from `packages/cli` when you actually want to ship.
+
+```bash
+bun run build:cli
+(cd packages/cli && npm publish)
+```
 
 ## Packages
 
