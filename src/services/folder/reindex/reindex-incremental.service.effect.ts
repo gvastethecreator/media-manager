@@ -129,19 +129,33 @@ const make = (): ReindexIncrementalServiceInterface => {
 					catch: (error) => fromUnknownError('get-all-folders', error),
 				});
 
-				const getSubfolders = (parentId: string): string[] => {
-					const subfolders = allFoldersResult.filter((f) => f.parentId === parentId);
-					let ids = [parentId];
-					for (const subfolder of subfolders) {
-						ids = ids.concat(getSubfolders(subfolder.id));
+				const childrenByParentId = new Map<string, string[]>();
+				for (const folder of allFoldersResult) {
+					if (!folder.parentId) {
+						continue;
 					}
-					return ids;
-				};
+
+					const children = childrenByParentId.get(folder.parentId) ?? [];
+					children.push(folder.id);
+					childrenByParentId.set(folder.parentId, children);
+				}
 
 				const allFolderIds = new Set<string>();
 				for (const rootId of folderIds) {
-					// biome-ignore lint/suspicious/useIterableCallbackReturn: map.add returns value intentionally
-					getSubfolders(rootId).forEach((id) => allFolderIds.add(id));
+					const pendingFolderIds = [rootId];
+
+					while (pendingFolderIds.length > 0) {
+						const currentFolderId = pendingFolderIds.pop();
+						if (!currentFolderId || allFolderIds.has(currentFolderId)) {
+							continue;
+						}
+
+						allFolderIds.add(currentFolderId);
+
+						for (const childFolderId of childrenByParentId.get(currentFolderId) ?? []) {
+							pendingFolderIds.push(childFolderId);
+						}
+					}
 				}
 				folderIds = Array.from(allFolderIds);
 			}

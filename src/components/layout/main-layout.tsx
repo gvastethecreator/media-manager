@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PanelImperativeHandle } from 'react-resizable-panels';
 import { Outlet, useLocation, useParams } from 'react-router-dom';
 import { SkipLinks } from '@/components/a11y/skip-links';
@@ -285,7 +285,15 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 							id="main-content"
 							tabIndex={-1}
 						>
-							<Outlet />
+							<Suspense
+								fallback={
+									<div className="flex h-full w-full items-center justify-center bg-background text-muted-foreground">
+										<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+									</div>
+								}
+							>
+								<Outlet />
+							</Suspense>
 						</NavigationTransition>
 					</div>
 				</ResizablePanel>

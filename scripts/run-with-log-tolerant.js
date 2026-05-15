@@ -10,24 +10,30 @@ const RE_CANNOT_FIND_MODULE = /Cannot find module/;
 const RE_CRITICAL_ERRORS = /ENOENT|spawn.*failed|permission denied|command not found|out of memory/i;
 const RE_DEP_ERRORS = /MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i;
 const RE_INFO_TOOL = /(lint\/|test |spec )/;
-const RE_ERR_TOKEN = /(error|✘|failed)/;
+const RE_ERR_TOKEN = /\berror\b|✘|\bfailed\b/i;
 
-function resolveCommandTypeLower(isLint, isTest) {
+function resolveCommandTypeLower(isLint, isTest, isCheck) {
 	if (isLint) {
 		return 'linting';
 	}
 	if (isTest) {
 		return 'testing';
 	}
+	if (isCheck) {
+		return 'type checking';
+	}
 	return 'tolerante';
 }
 
-function resolveCommandTypeHeader(isLint, isTest) {
+function resolveCommandTypeHeader(isLint, isTest, isCheck) {
 	if (isLint) {
 		return 'Linting';
 	}
 	if (isTest) {
 		return 'Testing';
+	}
+	if (isCheck) {
+		return 'TypeScript';
 	}
 	return 'Normal';
 }
@@ -50,24 +56,30 @@ if (!logName || commandArgs.length === 0) {
 // Unir todos los argumentos en un comando completo
 const fullCommand = commandArgs.join(' ');
 
-// Comandos que pueden devolver exit code 1 pero no son errores críticos
-const LINTING_COMMANDS = [
-	'vp check',
-	'vp lint',
-	'vp fmt',
-	'oxlint',
-	'oxfmt',
-	'eslint',
-	'prettier',
-	'tsc --noEmit', // TypeScript check sin emit también puede fallar con errores de tipo
+const LINTING_COMMAND_PATTERNS = [
+	/\bvp\s+(check|lint|fmt)\b/u,
+	/\boxlint\b/u,
+	/\boxfmt\b/u,
+	/\beslint\b/u,
+	/\bprettier\b/u,
 ];
 
-// Comandos de testing que pueden fallar con tests fallidos (no errores críticos)
-const TESTING_COMMANDS = ['playwright', 'test'];
+const TESTING_COMMAND_PATTERNS = [
+	/\bplaywright\b/u,
+	/\bvp\s+test\b/u,
+	/\bbun\s+run\s+test(?::[\w-]+)?\b/u,
+	/\bbunx?\s+vitest\b/u,
+	/\bvitest\b/u,
+];
 
-const isLintingCommand = LINTING_COMMANDS.some((cmd) => fullCommand.includes(cmd));
-const isTestingCommand = TESTING_COMMANDS.some((cmd) => fullCommand.includes(cmd));
-const isTolerantCommand = isLintingCommand || isTestingCommand;
+const CHECKING_COMMAND_PATTERNS = [/\btsc\b/u, /\btsc\s+--noEmit\b/u];
+
+const matchesAnyPattern = (patterns) => patterns.some((pattern) => pattern.test(fullCommand));
+
+const isLintingCommand = matchesAnyPattern(LINTING_COMMAND_PATTERNS);
+const isTestingCommand = matchesAnyPattern(TESTING_COMMAND_PATTERNS);
+const isCheckingCommand = matchesAnyPattern(CHECKING_COMMAND_PATTERNS);
+const isTolerantCommand = isLintingCommand || isTestingCommand || isCheckingCommand;
 
 const logsDir = join(process.cwd(), 'logs');
 if (!existsSync(logsDir)) {
@@ -81,7 +93,7 @@ const logFilePath = join(logsDir, logFileName);
 console.log(chalk.cyan(`🚀 Ejecutando: ${chalk.bold(fullCommand)}`));
 console.log(chalk.gray(`📄 Logs en: ${logFilePath}`));
 if (isTolerantCommand) {
-	const tipo = resolveCommandTypeLower(isLintingCommand, isTestingCommand);
+	const tipo = resolveCommandTypeLower(isLintingCommand, isTestingCommand, isCheckingCommand);
 	console.log(chalk.blue(`🔍 Comando de ${tipo} detectado - tolerando códigos de salida no-cero`));
 }
 console.log(chalk.yellow('📺 Salida en tiempo real:'));
@@ -93,7 +105,7 @@ const logHeader = [
 	`Fecha: ${new Date().toISOString()}`,
 	`Directorio: ${process.cwd()}`,
 	`Modo tolerante: ${isTolerantCommand ? 'SÍ' : 'NO'}`,
-	`Tipo: ${resolveCommandTypeHeader(isLintingCommand, isTestingCommand)}`,
+	`Tipo: ${resolveCommandTypeHeader(isLintingCommand, isTestingCommand, isCheckingCommand)}`,
 	'===============================================',
 	'',
 ].join('\n');
@@ -112,11 +124,18 @@ let hasRealErrors = false;
 
 // Función para determinar el color y emoji según el tipo de línea
 function getLineStyle(line, isError) {
-	const success = line.includes('✓') || line.includes('success') || line.includes('Fixed');
+	const lower = line.toLowerCase();
+	const success =
+		line.includes('✓') ||
+		lower.includes('success') ||
+		lower.includes('fixed') ||
+		lower.includes('comando ejecutado exitosamente') ||
+		lower.includes('no se encontraron errores') ||
+		/found 0 warnings? and 0 errors?/i.test(line);
 	if (success) {
 		return { color: chalk.green, emoji: '✅' };
 	}
-	const warn = line.includes('warning') || line.includes('warn');
+	const warn = /\bwarn(?:ing)?\b/i.test(line) || /found [1-9]\d* warnings?/i.test(line);
 	if (warn) {
 		return { color: chalk.yellow, emoji: '⚠️ ' };
 	}
@@ -124,7 +143,7 @@ function getLineStyle(line, isError) {
 	if (infoTool) {
 		return { color: chalk.cyan, emoji: '🔍' };
 	}
-	const errTok = RE_ERR_TOKEN.test(line);
+	const errTok = RE_ERR_TOKEN.test(line) || /found [1-9]\d* errors?/i.test(line);
 	if (errTok) {
 		const treat = hasRealErrors || !isTolerantCommand;
 		return treat ? { color: chalk.red, emoji: '❌' } : { color: chalk.cyan, emoji: '🔍' };
@@ -192,7 +211,7 @@ child.on('close', (code) => {
 		console.log(chalk.green.bold('✅ Comando ejecutado exitosamente'));
 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
 	} else if (isTolerantCommand && !hasRealErrors) {
-		const tipo = resolveCommandTypeHeader(isLintingCommand, isTestingCommand);
+		const tipo = resolveCommandTypeHeader(isLintingCommand, isTestingCommand, isCheckingCommand);
 		console.log(chalk.yellow.bold(`⚠️  ${tipo} completado con issues encontrados (Exit code: ${code})`));
 		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));

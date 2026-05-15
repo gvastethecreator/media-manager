@@ -15,7 +15,15 @@ function getManualChunkName(id: string) {
 	if (matchesPackage('react') || matchesPackage('react-dom')) return 'react';
 	if (matchesPackage('react-router-dom')) return 'router';
 	if (matchesPackage('@tanstack/react-query')) return 'query';
-	if (matchesPackage('gsap') || matchesPackage('lucide-react')) return 'ui';
+	if (matchesPackage('three') || matchesPackage('@react-three')) return 'three';
+	if (matchesPackage('@monaco-editor') || matchesPackage('monaco-editor')) return 'editor';
+	if (matchesPackage('react-pdf') || matchesPackage('pdfjs-dist')) return 'pdf';
+	if (matchesPackage('recharts')) return 'charts';
+	if (matchesPackage('@xyflow')) return 'flow';
+	if (matchesPackage('@uiw') || matchesPackage('react-markdown') || matchesPackage('remark-gfm')) return 'markdown';
+	if (matchesPackage('@dnd-kit') || matchesPackage('selecto')) return 'interaction';
+	if (matchesPackage('@radix-ui') || matchesPackage('@base-ui-components')) return 'radix-ui';
+	if (matchesPackage('gsap') || matchesPackage('@gsap') || matchesPackage('lucide-react')) return 'ui';
 	if (matchesPackage('zustand') || matchesPackage('lodash') || matchesPackage('date-fns')) return 'vendor';
 	if (matchesPackage('clsx') || matchesPackage('tailwind-merge') || matchesPackage('class-variance-authority'))
 		return 'utils';
@@ -160,6 +168,7 @@ export default defineConfig({
 		force: process.env.NODE_ENV === 'development',
 	},
 	resolve: {
+		tsconfigPaths: true,
 		alias: [
 			{ find: '@', replacement: resolve(import.meta.dirname, 'src') },
 			{ find: '@components', replacement: resolve(import.meta.dirname, 'src/components') },
@@ -219,7 +228,7 @@ export default defineConfig({
 		},
 		settings: {
 			react: {
-				version: '19.2.4',
+				version: '19.2.6',
 			},
 			vitest: {
 				typecheck: false,
@@ -234,8 +243,6 @@ export default defineConfig({
 			'no-control-regex': 'off',
 			'require-yield': 'off',
 			'react/react-in-jsx-scope': 'off',
-			'react/jsx-uses-react': 'off',
-			'react/prop-types': 'off',
 			'react/no-unescaped-entities': 'off',
 			'react-hooks/exhaustive-deps': 'off',
 			'jsx-a11y/alt-text': 'off',
@@ -255,6 +262,10 @@ export default defineConfig({
 			'jest/expect-expect': 'off',
 			'jest/no-conditional-expect': 'off',
 			'jest/require-to-throw-message': 'off',
+			'vitest/expect-expect': 'off',
+			'vitest/no-conditional-expect': 'off',
+			'vitest/require-mock-type-parameters': 'off',
+			'vitest/require-to-throw-message': 'off',
 			'promise/prefer-await-to-then': 'off',
 		},
 	},

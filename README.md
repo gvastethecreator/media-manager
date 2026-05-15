@@ -131,6 +131,7 @@ logs/               # Logs de ejecución y métricas
 - [`docs/core/SERVICES-GUIDE.md`](./docs/core/SERVICES-GUIDE.md): servicios, Effect-TS y sistemas transversales.
 - [`docs/core/API-REFERENCE.md`](./docs/core/API-REFERENCE.md): familias de endpoints y convenciones.
 - [`docs/core/IMPLEMENTATION-DETAILS.md`](./docs/core/IMPLEMENTATION-DETAILS.md): implementación de thumbnails, reindex, búsqueda, Tauri y tooling.
+- [`docs/core/CODEBASE-HEALTH-2026-05-08.md`](./docs/core/CODEBASE-HEALTH-2026-05-08.md): auditoría aplicada, fixes, logs y riesgos residuales.
 
 ### Documentación especializada complementaria
 
@@ -194,6 +195,8 @@ bun run test
 bun run build
 ```
 
+Estos comandos generan logs en `logs/` mediante `scripts/run-with-log.js`, incluyendo resumen automatico de errores para debugging.
+
 Si tocas rutas, viewers, thumbnails, búsqueda o reindexado, añade además:
 
 ```bash
@@ -210,6 +213,8 @@ bun run test:e2e
 ## Estado del proyecto
 
 Proyecto en desarrollo activo con una base funcional amplia, una capa documental ya madura y una arquitectura con fuerte orientación a tipado, modularidad y operación local. No es un MVP diminuto; es un sistema bastante ancho, con varias capas de compatibilidad y herramientas de mantenimiento.
+
+Última revisión integral aplicada: **2026-05-08**. El gate `bun run check` quedó verde con Oxlint 0 warnings/0 errors y TypeScript limpio.
 
 ## Licencia
 

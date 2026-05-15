@@ -33,7 +33,7 @@ export default defineConfig({
 	],
 	settings: {
 		react: {
-			version: '19.2.4',
+			version: '19.2.6',
 		},
 		vitest: {
 			typecheck: false,
@@ -48,8 +48,6 @@ export default defineConfig({
 		'no-control-regex': 'off',
 		'require-yield': 'off',
 		'react/react-in-jsx-scope': 'off',
-		'react/jsx-uses-react': 'off',
-		'react/prop-types': 'off',
 		'react/no-unescaped-entities': 'off',
 		'react-hooks/exhaustive-deps': 'off',
 		'jsx-a11y/alt-text': 'off',
@@ -69,6 +67,10 @@ export default defineConfig({
 		'jest/expect-expect': 'off',
 		'jest/no-conditional-expect': 'off',
 		'jest/require-to-throw-message': 'off',
+		'vitest/expect-expect': 'off',
+		'vitest/no-conditional-expect': 'off',
+		'vitest/require-mock-type-parameters': 'off',
+		'vitest/require-to-throw-message': 'off',
 		'promise/prefer-await-to-then': 'off',
 	},
 });
