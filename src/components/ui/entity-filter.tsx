@@ -375,7 +375,7 @@ export function EntityFilter({
 							</PopoverTrigger>
 							<PopoverContent className="w-auto p-0">
 								<Calendar
-									initialFocus
+									autoFocus
 									mode="single"
 									onSelect={(date) => updateFilterValue(filter.id, date)}
 									selected={filterValues[filter.id] ? new Date(filterValues[filter.id]) : undefined}

@@ -1,8 +1,0 @@
-$ bun scripts/run-with-log.js tsc bunx tsc --noEmit --pretty
-­ƒÜÇ Ejecutando: bunx tsc --noEmit --pretty
-­ƒôä Logs en: D:\DEV\media-manager\logs\tsc_2026-03-29T14-46-56-905Z.log
-­ƒô║ Salida en tiempo real:
-ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
-ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
-Ô£à Comando ejecutado exitosamente
-­ƒôä Log completo guardado en: D:\DEV\media-manager\logs\tsc_2026-03-29T14-46-56-905Z.log

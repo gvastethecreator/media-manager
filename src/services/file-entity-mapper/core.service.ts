@@ -13,6 +13,15 @@ import { VideoProcessor } from './processors/video.processor';
 import { getEntityTypeFromExtension, getFileInfo } from './utils/file-info.utils';
 import { MetricsCollector } from './utils/metrics.utils';
 
+type ProcessorResult = { success: boolean; error?: string };
+
+interface EntityProcessor {
+	checkExists(hash: string): Promise<boolean>;
+	createBasicEntity(fileInfo: Awaited<ReturnType<typeof getFileInfo>>): Promise<string>;
+	extractMetadata?: (filePath: string, entityId: string) => Promise<ProcessorResult>;
+	generateThumbnail?: (filePath: string, entityId: string) => Promise<ProcessorResult>;
+}
+
 /**
  * Servicio core que orquesta el mapeo de archivos físicos a entidades BD
  * Arquitectura de 3 etapas:
@@ -22,7 +31,7 @@ import { MetricsCollector } from './utils/metrics.utils';
  */
 export class FileEntityMapperCore {
 	private static instance: FileEntityMapperCore;
-	private readonly processors: Map<EntityType, any>;
+	private readonly processors: Map<EntityType, EntityProcessor>;
 	private readonly metrics: MetricsCollector;
 	private readonly queue: PQueue;
 	private basicStageChain: Promise<unknown>;
@@ -98,6 +107,10 @@ export class FileEntityMapperCore {
 
 			if (!processor) {
 				throw new Error(`Unsupported entity type: ${entityType}`);
+			}
+
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for entity creation');
 			}
 
 			// Verificar si ya existe
