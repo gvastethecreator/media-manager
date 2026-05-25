@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BaseContentView } from '@/components/views/base/base-content-view';
+import { useFavorite } from '@/hooks/use-favorite';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFile3DStore } from '@/store/entities/file-3d';
 import type { File3DWithStats } from '@/types/entities/file3d';
@@ -25,13 +26,16 @@ export function File3DContentView() {
 	const navigate = useNavigate();
 	const getFile3DById = useFile3DStore((s) => s.getFile3DById);
 	const fetchFile3D = useFile3DStore((s) => s.fetchFile3D);
-	const toggleFavorite = useFile3DStore((s) => s.toggleFavorite);
 	const loading = useFile3DStore((s) => s.loading);
 	const storeError = useFile3DStore((s) => s.error);
 
 	const [file3D, setFile3D] = useState<File3DWithStats | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+	const { isFavorite, isLoading: isFavoriteLoading, toggleFavorite } = useFavorite({
+		entityId: file3D?.id ?? id ?? '',
+		entityType: 'file3d',
+		initialIsFavorite: file3D?.isFavorite ?? false,
+	});
 
 	useEffect(() => {
 		if (!id) {
@@ -108,18 +112,19 @@ export function File3DContentView() {
 							}
 
 							try {
-								setIsFavoriteLoading(true);
-								await toggleFavorite(id);
-								setFile3D((current) => (current ? { ...current, isFavorite: !current.isFavorite } : current));
-							} finally {
-								setIsFavoriteLoading(false);
+								toggleFavorite();
+							} catch (toggleError) {
+								logger.error('Error alternando favorito en archivo 3D', {
+									id,
+									error: toggleError instanceof Error ? toggleError.message : toggleError,
+								});
 							}
 						}}
 						size="sm"
-						variant={file3D.isFavorite ? 'default' : 'outline'}
+						variant={isFavorite ? 'default' : 'outline'}
 					>
-						<Heart className={`h-4 w-4 ${file3D.isFavorite ? 'fill-current' : ''}`} />
-						{file3D.isFavorite ? 'En favoritos' : 'Favorito'}
+						<Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+						{isFavorite ? 'En favoritos' : 'Favorito'}
 					</Button>
 				</>
 			)}

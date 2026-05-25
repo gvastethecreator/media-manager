@@ -6,7 +6,7 @@
  */
 
 import { Schema } from '@effect/schema';
-import { and, asc, count, desc, eq, isNull, like, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, isNull, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { characters, imageCharacters, imageNotes, images } from '@/lib/drizzle/schema';
@@ -18,6 +18,8 @@ import {
 } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	CharacterDatabaseError,
 	type CharacterError,
@@ -240,6 +242,14 @@ const make = (): CharacterServiceInterface => {
 				onlyFavorites,
 			} = options;
 
+			const favoriteEntityIds: string[] | null =
+				onlyFavorites
+					? yield* Effect.tryPromise({
+						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.CHARACTER),
+						catch: (error) => fromUnknownError('getAll.favoriteIds', error),
+					})
+					: null;
+
 			// Construir condiciones WHERE
 			const conditions = [];
 			if (search) {
@@ -252,7 +262,18 @@ const make = (): CharacterServiceInterface => {
 				conditions.push(parentId === null ? isNull(characters.parentId) : eq(characters.parentId, parentId));
 			}
 			if (onlyFavorites) {
-				conditions.push(eq(characters.isFavorite, true));
+				if (favoriteEntityIds === null) {
+					conditions.push(eq(characters.isFavorite, true));
+				} else if (favoriteEntityIds.length === 0) {
+					return {
+						characters: [],
+						total: 0,
+						limit,
+						offset,
+					};
+				} else {
+					conditions.push(inArray(characters.id, favoriteEntityIds));
+				}
 			}
 
 			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -263,21 +284,29 @@ const make = (): CharacterServiceInterface => {
 
 			// Ejecutar queries
 			const [charactersData, totalResult] = yield* Effect.all([
-				Effect.tryPromise({
+				Effect.tryPromise<(typeof characters.$inferSelect)[], CharacterError>({
 					try: async () =>
 						await db.select().from(characters).where(whereClause).orderBy(orderByClause).limit(limit).offset(offset),
 					catch: (error) => fromUnknownError('getAll', error),
 				}),
-				Effect.tryPromise({
+				Effect.tryPromise<Array<{ count: number }>, CharacterError>({
 					try: async () => await db.select({ count: count() }).from(characters).where(whereClause),
 					catch: (error) => fromUnknownError('getCount', error),
 				}),
 			]);
 
 			const total = totalResult[0]?.count ?? 0;
+			const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
+			const normalizedCharacters =
+				favoriteIdSet === null
+					? charactersData
+					: charactersData.map((character) => ({
+						...character,
+						isFavorite: favoriteIdSet.has(character.id),
+					}));
 
 			return {
-				characters: charactersData as CharacterWithStats[],
+				characters: normalizedCharacters as CharacterWithStats[],
 				total,
 				limit,
 				offset,
@@ -301,6 +330,14 @@ const make = (): CharacterServiceInterface => {
 			}
 
 			const readableId = generateReadableId('character', input.name, 1);
+			const requestedIsFavorite = input.isFavorite === true;
+			const useCanonicalFavoriteBridge =
+				requestedIsFavorite
+					? yield* Effect.tryPromise({
+						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.CHARACTER)) !== null,
+						catch: (error) => fromUnknownError('create.favoriteScope', error),
+					})
+					: false;
 
 			const result = yield* Effect.tryPromise({
 				try: async () =>
@@ -315,7 +352,7 @@ const make = (): CharacterServiceInterface => {
 							category: input.category ?? null,
 							featuredImage: input.featuredImage ?? null,
 							filters: input.filters ?? null,
-							isFavorite: input.isFavorite ?? false,
+							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 							metadata: input.metadata ?? null,
 							parentId: (input as any).parentId ?? null,
 							createdAt: new Date(),
@@ -335,6 +372,21 @@ const make = (): CharacterServiceInterface => {
 			}
 
 			const character = result[0];
+
+			if (requestedIsFavorite && useCanonicalFavoriteBridge) {
+				yield* Effect.tryPromise({
+					try: async () => {
+						try {
+							await favoriteService.set(FavoriteEntityType.CHARACTER, character.id, true);
+						} catch (error) {
+							await db.delete(characters).where(eq(characters.id, character.id));
+							throw error;
+						}
+					},
+					catch: (error) => fromUnknownError('create.favoriteBridge', error),
+				});
+			}
+
 			const stats = calculateCharacterStatistics(character as any, {
 				images: 0,
 				videos: 0,
@@ -353,6 +405,7 @@ const make = (): CharacterServiceInterface => {
 
 			return {
 				...(character as any),
+				isFavorite: requestedIsFavorite ? true : character.isFavorite,
 				stats,
 			};
 		});
@@ -380,6 +433,22 @@ const make = (): CharacterServiceInterface => {
 				}
 			}
 
+			const requestedIsFavorite = input.isFavorite;
+			const useCanonicalFavoriteBridge =
+				requestedIsFavorite !== undefined
+					? yield* Effect.tryPromise({
+						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.CHARACTER)) !== null,
+						catch: (error) => fromUnknownError('update.favoriteScope', error),
+					})
+					: false;
+
+			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.CHARACTER, id, requestedIsFavorite),
+					catch: (error) => fromUnknownError('update.favoriteBridge', error),
+				});
+			}
+
 			const result = yield* Effect.tryPromise({
 				try: async () =>
 					await db
@@ -392,7 +461,9 @@ const make = (): CharacterServiceInterface => {
 							...(input.category !== undefined && { category: input.category }),
 							...(input.featuredImage !== undefined && { featuredImage: input.featuredImage }),
 							...(input.filters !== undefined && { filters: input.filters }),
-							...(input.isFavorite !== undefined && { isFavorite: input.isFavorite }),
+							...(input.isFavorite !== undefined && !useCanonicalFavoriteBridge
+								? { isFavorite: input.isFavorite }
+								: {}),
 							...(input.metadata !== undefined && { metadata: input.metadata }),
 							...((input as any).parentId !== undefined && { parentId: (input as any).parentId }),
 							updatedAt: new Date(),
@@ -467,15 +538,33 @@ const make = (): CharacterServiceInterface => {
 	const toggleFavorite = (id: string): Effect.Effect<Character, CharacterError> =>
 		Effect.gen(function* () {
 			const character = yield* getById(id);
-			const result = yield* Effect.tryPromise({
-				try: async () =>
-					await db
-						.update(characters)
-						.set({ isFavorite: !character.isFavorite, updatedAt: new Date() })
-						.where(eq(characters.id, id))
-						.returning(),
-				catch: (error) => fromUnknownError('toggleFavorite', error),
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.CHARACTER),
+				catch: (error) => fromUnknownError('toggleFavorite.scope', error),
 			});
+
+			let result;
+			if (favoriteEntityIds === null) {
+				result = yield* Effect.tryPromise({
+					try: async () =>
+						await db
+							.update(characters)
+							.set({ isFavorite: !character.isFavorite, updatedAt: new Date() })
+							.where(eq(characters.id, id))
+							.returning(),
+					catch: (error) => fromUnknownError('toggleFavorite', error),
+				});
+			} else {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.toggle(FavoriteEntityType.CHARACTER, id),
+					catch: (error) => fromUnknownError('toggleFavorite.favoriteBridge', error),
+				});
+
+				result = yield* Effect.tryPromise({
+					try: async () => await db.select().from(characters).where(eq(characters.id, id)).limit(1),
+					catch: (error) => fromUnknownError('toggleFavorite.refetch', error),
+				});
+			}
 
 			if (result.length === 0) {
 				return yield* Effect.fail(

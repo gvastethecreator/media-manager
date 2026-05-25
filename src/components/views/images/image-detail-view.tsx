@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
+import { useFavorite } from '@/hooks/use-favorite';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
@@ -19,12 +20,16 @@ export function ImageDetailView() {
 	const navigate = useNavigate();
 	const [image, setImage] = useState<ImageWithStats | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	// Store actions
 	const { getImage, fetchImage, updateImage } = useImageStore();
 	const { openViewer } = useImageViewer();
+	const { isFavorite, isLoading: isFavoriteLoading, toggleFavorite } = useFavorite({
+		entityId: image?.id ?? id ?? '',
+		entityType: 'image',
+		initialIsFavorite: image?.isFavorite ?? false,
+	});
 
 	// Cargar la imagen
 	useEffect(() => {
@@ -97,18 +102,12 @@ export function ImageDetailView() {
 		}
 
 		try {
-			setIsFavoriteLoading(true);
-			const updatedImage = await updateImage(image.id, { isFavorite: !image.isFavorite });
-			if (updatedImage) {
-				setImage(updatedImage);
-			}
+			toggleFavorite();
 		} catch (err) {
 			viewLogger.error('Error actualizando favorito de imagen', {
 				imageId: image.id,
 				error: err instanceof Error ? err.message : err,
 			});
-		} finally {
-			setIsFavoriteLoading(false);
 		}
 	};
 
@@ -137,10 +136,10 @@ export function ImageDetailView() {
 						disabled={isFavoriteLoading}
 						onClick={handleToggleFavorite}
 						size="sm"
-						variant={image.isFavorite ? 'default' : 'outline'}
+						variant={isFavorite ? 'default' : 'outline'}
 					>
-						<Heart className={`h-4 w-4 ${image.isFavorite ? 'fill-current' : ''}`} />
-						{image.isFavorite ? 'En favoritos' : 'Favorito'}
+						<Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+						{isFavorite ? 'En favoritos' : 'Favorito'}
 					</Button>
 				</>
 			)}

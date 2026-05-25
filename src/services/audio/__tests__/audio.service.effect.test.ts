@@ -6,8 +6,11 @@
  */
 
 import { Effect } from 'effect';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { audios, folders } from '@/lib/drizzle/schema';
+import { audios, favorites, folders, profiles } from '@/lib/drizzle/schema';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import * as AudioService from '../audio.service.effect';
 
 // ============= Test Helpers =============
@@ -91,13 +94,45 @@ const createTestAudio = async (folderId: string, overrides?: Partial<typeof audi
 	return audio;
 };
 
+let createdActiveProfileId: string | null = null;
+
+const ensureActiveProfile = async () => {
+	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+
+	if (activeProfile) {
+		return activeProfile.id;
+	}
+
+	const profileId = `audio-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+	createdActiveProfileId = profileId;
+
+	await db.insert(profiles).values({
+		id: profileId,
+		name: 'Audio Service Test Profile',
+		emoji: '🎧',
+		color: '#10b981',
+		description: 'Perfil activo para tests de audios',
+		isActive: true,
+		settingsId: null,
+		imageId: null,
+	});
+
+	return profileId;
+};
+
 // ============= Cleanup =============
 
 afterEach(async () => {
+	await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.AUDIO));
 	// Limpiar audios de prueba (todos los registros)
 	await db.delete(audios);
 	// Limpiar folders de prueba (todos los registros)
 	await db.delete(folders);
+
+	if (createdActiveProfileId) {
+		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
+		createdActiveProfileId = null;
+	}
 });
 
 // ============= CRUD Operations Tests =============
@@ -310,12 +345,16 @@ describe('AudioService - CRUD Operations', () => {
 
 		it('debería filtrar por isFavorite', async () => {
 			const folder = await createTestFolder();
+			await ensureActiveProfile();
+			const favoriteAudio = await createTestAudio(folder.id, { isFavorite: false });
 			await createTestAudio(folder.id, { isFavorite: true });
-			await createTestAudio(folder.id, { isFavorite: false });
+
+			await favoriteService.set(FavoriteEntityType.AUDIO, favoriteAudio.id, true);
 
 			const result = await expectSuccess(AudioService.getAll({ isFavorite: true }));
 
 			expect(result.length).toBe(1);
+			expect(result[0].id).toBe(favoriteAudio.id);
 			expect(result[0].isFavorite).toBe(true);
 		});
 
@@ -466,13 +505,18 @@ describe('AudioService - Query Operations', () => {
 	describe('getAllFavorites', () => {
 		it('debería listar solo audios favoritos', async () => {
 			const folder = await createTestFolder();
+			await ensureActiveProfile();
+			const firstFavorite = await createTestAudio(folder.id, { isFavorite: false });
+			const secondFavorite = await createTestAudio(folder.id, { isFavorite: false });
 			await createTestAudio(folder.id, { isFavorite: true });
-			await createTestAudio(folder.id, { isFavorite: true });
-			await createTestAudio(folder.id, { isFavorite: false });
+
+			await favoriteService.set(FavoriteEntityType.AUDIO, firstFavorite.id, true);
+			await favoriteService.set(FavoriteEntityType.AUDIO, secondFavorite.id, true);
 
 			const result = await expectSuccess(AudioService.getAllFavorites({}));
 
 			expect(result.length).toBe(2);
+			expect(result.map((audio) => audio.id).sort()).toEqual([firstFavorite.id, secondFavorite.id].sort());
 			for (const audio of result) {
 				expect(audio.isFavorite).toBe(true);
 			}
@@ -489,12 +533,17 @@ describe('AudioService - Query Operations', () => {
 
 		it('debería soportar paginación en favoritos', async () => {
 			const folder = await createTestFolder();
-			await createTestAudio(folder.id, { isFavorite: true, name: 'fav1.mp3' });
-			await createTestAudio(folder.id, { isFavorite: true, name: 'fav2.mp3' });
+			await ensureActiveProfile();
+			const firstFavorite = await createTestAudio(folder.id, { isFavorite: false, name: 'fav1.mp3' });
+			const secondFavorite = await createTestAudio(folder.id, { isFavorite: false, name: 'fav2.mp3' });
+
+			await favoriteService.set(FavoriteEntityType.AUDIO, firstFavorite.id, true);
+			await favoriteService.set(FavoriteEntityType.AUDIO, secondFavorite.id, true);
 
 			const result = await expectSuccess(AudioService.getAllFavorites({ limit: 1, offset: 0 }));
 
 			expect(result.length).toBe(1);
+			expect(result[0]?.isFavorite).toBe(true);
 		});
 	});
 

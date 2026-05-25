@@ -11,11 +11,60 @@ import express from 'express';
 import { db } from '@/lib/drizzle';
 import { videos } from '@/lib/drizzle/schema';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { VideoService, VideoServiceLive } from '@/services/video/video.service.effect';
-import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
+import { FavoriteEntityType } from '@/types/entities/favorite';
+import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 
 const router = express.Router();
+
+function normalizeSortValue(value: unknown): number | string {
+	if (value instanceof Date) {
+		return value.getTime();
+	}
+
+	if (typeof value === 'number') {
+		return value;
+	}
+
+	if (typeof value === 'string') {
+		return value.toLowerCase();
+	}
+
+	if (typeof value === 'boolean') {
+		return value ? 1 : 0;
+	}
+
+	if (value && typeof value === 'object' && 'getTime' in value && typeof value.getTime === 'function') {
+		return value.getTime();
+	}
+
+	return 0;
+}
+
+function sortEntitiesByField<T extends Record<string, unknown>>(
+	items: T[],
+	sortBy: string,
+	sortOrder: 'asc' | 'desc'
+): T[] {
+	const direction = sortOrder === 'asc' ? 1 : -1;
+
+	return [...items].sort((left, right) => {
+		const leftValue = normalizeSortValue(left[sortBy]);
+		const rightValue = normalizeSortValue(right[sortBy]);
+
+		if (leftValue < rightValue) {
+			return -1 * direction;
+		}
+
+		if (leftValue > rightValue) {
+			return 1 * direction;
+		}
+
+		return 0;
+	});
+}
 
 /**
  * GET /videos - Listar videos con filtros y paginación
@@ -102,13 +151,48 @@ router.get('/favorites', async (req, res) => {
 			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
 		};
 
-		const result = yield* videoService.getAllFavorites(filters);
+		const favoriteCounts = yield* Effect.tryPromise({
+			try: () => favoriteService.getCountsByType(),
+			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		});
 
-		const data = result.map((video) => ({
-			...video,
-			entityType: 'video' as const,
-			thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
-		}));
+		const totalFavorites = favoriteCounts[FavoriteEntityType.VIDEO] ?? 0;
+
+		if (totalFavorites === 0) {
+			return res.json([]);
+		}
+
+		const favoriteResult = yield* Effect.tryPromise({
+			try: () =>
+				favoriteService.list({
+					entityType: FavoriteEntityType.VIDEO,
+					search: filters.search,
+					limit: totalFavorites,
+					offset: 0,
+					sortBy: 'addedAt',
+					sortOrder: 'desc',
+				}),
+			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		});
+
+		const favoriteVideos = yield* Effect.all(
+			favoriteResult.items.map((favorite) =>
+				videoService.getByIdWithStats(favorite.entityId).pipe(
+					Effect.map((video) => ({
+						...video,
+						entityType: 'video' as const,
+						thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
+					})),
+					Effect.catchAll(() => Effect.succeed(null))
+				)
+			)
+		);
+
+		const data = sortEntitiesByField(
+			favoriteVideos.flatMap((video) => (video ? [video] : [])),
+			filters.sortBy,
+			filters.sortOrder
+		).slice(filters.offset, filters.offset + filters.limit);
 
 		return res.json(data);
 	}).pipe(Effect.provide(VideoServiceLive));
@@ -262,7 +346,6 @@ router.post('/:id/favorite', async (req, res) => {
 
 	const effect = Effect.gen(function* () {
 		const videoService = yield* VideoService;
-
 		const video = yield* videoService.toggleFavorite(id);
 
 		return res.json(video);
@@ -290,18 +373,21 @@ router.post('/:id/tags', async (req, res) => {
  */
 router.post('/batch/favorite', async (req, res) => {
 	const effect = Effect.gen(function* () {
-		const videoService = yield* VideoService;
-
 		const { ids, isFavorite } = req.body;
 
 		if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
 			yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
 		}
 
-		const count = yield* videoService.setFavoriteMany(ids, isFavorite);
+		validateBatchSize(ids);
+
+		const count = yield* Effect.tryPromise({
+			try: () => favoriteService.setMany(FavoriteEntityType.VIDEO, ids, isFavorite),
+			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		});
 
 		return { success: true, count, updated: count };
-	}).pipe(Effect.provide(VideoServiceLive));
+	});
 
 	await runEffectForExpress(effect, res);
 });

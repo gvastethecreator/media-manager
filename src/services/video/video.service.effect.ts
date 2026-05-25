@@ -11,7 +11,7 @@
  */
 
 import * as crypto from 'node:crypto';
-import { and, asc, count, desc, eq, gte, inArray, like, lte, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, like, lte, notInArray, or } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import {
@@ -31,6 +31,8 @@ import {
 	videoWorldItems,
 } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { VideoError } from './video-errors.effect';
 import {
 	videoDatabaseError,
@@ -496,6 +498,14 @@ const make = (): VideoServiceInterface => {
 		Effect.gen(function* () {
 			videoServiceLogger.info('Obteniendo lista de videos con filtros:', filters);
 
+			const favoriteEntityIds: string[] | null =
+				filters.isFavorite !== undefined
+					? yield* Effect.tryPromise({
+						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.VIDEO),
+						catch: (error) => toVideoError(error, 'getAll:favoriteIds'),
+					})
+					: null;
+
 			const conditions = [];
 
 			// Construir condiciones WHERE
@@ -503,7 +513,17 @@ const make = (): VideoServiceInterface => {
 				conditions.push(eq(videos.folderId, filters.folderId));
 			}
 			if (filters.isFavorite !== undefined) {
-				conditions.push(eq(videos.isFavorite, filters.isFavorite));
+				if (favoriteEntityIds === null) {
+					conditions.push(eq(videos.isFavorite, filters.isFavorite));
+				} else if (filters.isFavorite) {
+					if (favoriteEntityIds.length === 0) {
+						return [];
+					}
+
+					conditions.push(inArray(videos.id, favoriteEntityIds));
+				} else if (favoriteEntityIds.length > 0) {
+					conditions.push(notInArray(videos.id, favoriteEntityIds));
+				}
 			}
 			if (filters.isHidden !== undefined) {
 				conditions.push(eq(videos.isHidden, filters.isHidden));
@@ -592,6 +612,12 @@ const make = (): VideoServiceInterface => {
 			});
 
 			// Retornar solo el array de videos (simplificado)
+			const usingCanonicalFavoriteFilter = filters.isFavorite !== undefined && favoriteEntityIds !== null;
+
+			if (usingCanonicalFavoriteFilter) {
+				return videoResults.map((video: Video) => ({ ...video, isFavorite: filters.isFavorite }));
+			}
+
 			return videoResults;
 		});
 

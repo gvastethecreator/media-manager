@@ -43,6 +43,16 @@ export async function updateWorldItemInApi(id: string, data: UpdateWorldItemData
 	return response.json();
 }
 
+export async function toggleWorldItemFavoriteInApi(id: string): Promise<WorldItem> {
+	const response = await fetch(`${API_BASE_PATH}/${id}/favorite`, {
+		method: 'POST',
+	});
+	if (!response.ok) {
+		throw new Error('Error al alternar favorito del world item');
+	}
+	return response.json();
+}
+
 export async function deleteWorldItemFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {

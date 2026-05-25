@@ -572,6 +572,7 @@ const make = (): TagServiceInterface => {
 
 			// Generar ID legible basado en el nombre
 			const readableId = generateReadableId('tag', validated.name, 1);
+			const requestedIsFavorite = validated.isFavorite === true;
 
 			// Insertar nuevo tag
 			const newTag = yield* Effect.tryPromise({
@@ -589,7 +590,7 @@ const make = (): TagServiceInterface => {
 							category: validated.category ?? null,
 							shortcut: validated.shortcut ?? null,
 							featuredImage: validated.featuredImage ?? null,
-							isFavorite: validated.isFavorite ?? false,
+							isFavorite: requestedIsFavorite,
 							createdAt: now,
 							updatedAt: now,
 						})
@@ -629,6 +630,7 @@ const make = (): TagServiceInterface => {
 
 			// Verificar que el tag existe
 			yield* getById(validated.id);
+			const requestedIsFavorite = validated.isFavorite;
 
 			// Si se cambia el nombre, verificar conflictos
 			if (validated.name) {
@@ -658,7 +660,7 @@ const make = (): TagServiceInterface => {
 					if (validated.category !== undefined) updateData.category = validated.category;
 					if (validated.shortcut !== undefined) updateData.shortcut = validated.shortcut;
 					if (validated.featuredImage !== undefined) updateData.featuredImage = validated.featuredImage;
-					if (validated.isFavorite !== undefined) updateData.isFavorite = validated.isFavorite;
+					if (requestedIsFavorite !== undefined) updateData.isFavorite = requestedIsFavorite;
 
 					const result = await db.update(tags).set(updateData).where(eq(tags.id, validated.id)).returning();
 
@@ -743,23 +745,18 @@ const make = (): TagServiceInterface => {
 	const toggleFavorite = (id: string): Effect.Effect<Tag, TagError> =>
 		Effect.gen(function* () {
 			logger.info(`⭐ Toggle favorite para tag: ${id}`);
-
 			const tag = yield* getById(id);
-			const newFavoriteStatus = !tag.isFavorite;
 
 			yield* Effect.tryPromise({
 				try: () =>
 					db
 						.update(tags)
-						.set({
-							isFavorite: newFavoriteStatus,
-							updatedAt: new Date(),
-						})
+						.set({ isFavorite: !tag.isFavorite, updatedAt: new Date() })
 						.where(eq(tags.id, id)),
 				catch: (error) => fromUnknownError('toggleFavorite', error),
 			});
 
-			logger.info(`✅ Favorite toggled: ${newFavoriteStatus}`);
+			logger.info(`✅ Favorite local toggled para tag: ${id}`);
 
 			return yield* getById(id);
 		});

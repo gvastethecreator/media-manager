@@ -14,16 +14,29 @@
  */
 
 // --- Tipos Canónicos ---
-export type { FavoriteBase, FavoriteStatistics, FavoriteWithStats } from './base';
+export type { CanonicalFavoriteEntityType, FavoriteBase, FavoriteStatistics, FavoriteWithStats } from './base';
 // --- Enums ---
-export { FavoriteEntityType } from './base';
+export {
+	CANONICAL_FAVORITE_ENTITY_TYPES,
+	FAVORITE_ENTITY_COLORS,
+	FAVORITE_ENTITY_DISPLAY_NAMES,
+	FAVORITE_ENTITY_EMOJIS,
+	FavoriteEntityType,
+	getFavoriteEntityDisplayName,
+	isCanonicalFavoriteEntityType,
+} from './base';
 
 // --- Tipos adicionales ---
 export type {
+	CreateFavoriteData,
+	FavoriteComplete,
 	FavoriteCreateInput,
 	FavoriteExtended,
 	FavoriteFilters,
+	FavoriteStats,
 	FavoriteSearchOptions,
 	FavoriteSearchResult,
+	FavoritesByType,
 	FavoriteUpdateInput,
+	FavoriteWithImage,
 } from './types';

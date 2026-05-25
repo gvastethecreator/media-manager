@@ -67,16 +67,22 @@ function dedupeItems(items: AddToEntityParams['items']) {
 
 function mapFavoriteEntityType(entityType: BrowserItem['entityType']): FavoriteEntityType {
 	switch (entityType) {
+		case 'folder':
+			return FavoriteEntityType.FOLDER;
 		case 'image':
 			return FavoriteEntityType.IMAGE;
 		case 'video':
 			return FavoriteEntityType.VIDEO;
+		case 'audio':
+			return FavoriteEntityType.AUDIO;
 		case 'document':
 			return FavoriteEntityType.DOCUMENT;
-		case 'folder':
-			return FavoriteEntityType.FOLDER;
+		case 'jsonFile':
+			return FavoriteEntityType.JSON_FILE;
+		case 'file3d':
+			return FavoriteEntityType.FILE_3D;
 		default:
-			return FavoriteEntityType.FILE;
+			throw new Error(`Tipo de entidad no soportado para favoritos: ${entityType}`);
 	}
 }
 

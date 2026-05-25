@@ -1,38 +1,28 @@
 /**
  * @file Transformadores para la entidad Favorite
  * @module transformers/favorite/transformer
- * @description 🚨 Migración: Todos los tipos y enums se importan desde '@/types/entities/favorite/types'.
- * No usar ni importar tipos de base.ts o extended.ts (eliminados).
- 
  */
 
 import {
 	FAVORITE_ENTITY_COLORS as ENTITY_COLORS,
 	FAVORITE_ENTITY_DISPLAY_NAMES as ENTITY_DISPLAY_NAMES,
 	FAVORITE_ENTITY_EMOJIS as ENTITY_ICONS,
-	FavoriteComplete,
-	FavoriteEntityType,
-	FavoriteStats,
-	FavoritesByType,
-} from '../../types/entities/favorite/types';
+	type FavoriteBase,
+	type FavoriteComplete,
+	type FavoriteEntityType,
+	type FavoriteExtended,
+	type FavoriteStats,
+	type FavoritesByType,
+} from '@/types/entities/favorite';
+import { toFavoriteWithStats } from './mappers';
 
-// Tipos locales equivalentes a Drizzle
 interface DrizzleFavorite {
-	createdAt: Date;
+	addedAt: Date;
 	entityId: string;
-	entityType: string;
+	entityType: FavoriteEntityType;
 	id: string;
 	profileId: string;
-	updatedAt: Date;
 }
-
-// Tipo extendido local para UI
-type FavoriteExtended = FavoriteComplete & {
-	entityName: string;
-	entityPreview: string;
-	entityIcon: string;
-	entityColor: string;
-};
 
 interface TransformFavoriteOptions {
 	includeEntityDetails?: boolean;
@@ -44,20 +34,14 @@ interface TransformFavoriteOptions {
  */
 export function transformFavorite(favorite: DrizzleFavorite, options: TransformFavoriteOptions = {}): FavoriteComplete {
 	// Valores por defecto para opciones
-	const { includeEntityDetails = false } = options;
+	const { includeEntityDetails: _includeEntityDetails = false } = options;
 
 	return {
 		id: favorite.id,
 		entityId: favorite.entityId,
-		entityType: favorite.entityType as FavoriteEntityType,
-		userId: null, // Valor por defecto
+		entityType: favorite.entityType,
 		profileId: favorite.profileId,
-		addedAt: favorite.createdAt, // Usar createdAt como addedAt
-		notes: null, // Valor por defecto
-		category: null, // Valor por defecto
-		priority: null, // Valor por defecto
-		createdAt: favorite.createdAt,
-		updatedAt: favorite.updatedAt,
+		addedAt: favorite.addedAt,
 	};
 }
 
@@ -80,8 +64,10 @@ export function transformFavoriteToExtended(
 	favorite: FavoriteComplete,
 	entityDetails?: { name?: string; title?: string; preview?: string; thumbnail?: string }
 ): FavoriteExtended {
+	const favoriteWithStats = toFavoriteWithStats(favorite as FavoriteBase);
+
 	// Extraer las propiedades de UI
-	const entityType = favorite.entityType;
+	const entityType = favoriteWithStats.entityType;
 	const entityIcon = ENTITY_ICONS[entityType] || '⭐';
 	const entityColor = ENTITY_COLORS[entityType] || 'var(--dt-primary-500)';
 
@@ -95,7 +81,7 @@ export function transformFavoriteToExtended(
 	}
 
 	return {
-		...favorite,
+		...favoriteWithStats,
 		entityName,
 		entityPreview,
 		entityIcon,
@@ -109,7 +95,7 @@ export function transformFavoriteToExtended(
  */
 export function groupFavoritesByType(favorites: FavoriteComplete[]): FavoritesByType[] {
 	// Crear mapa para agrupar por tipo
-	const groupsMap: Record<string, FavoriteComplete[]> = {};
+	const groupsMap: Partial<Record<FavoriteEntityType, FavoriteComplete[]>> = {};
 
 	// Agrupar los favoritos por tipo
 	for (const favorite of favorites) {
@@ -123,7 +109,7 @@ export function groupFavoritesByType(favorites: FavoriteComplete[]): FavoritesBy
 	}
 
 	// Convertir el mapa a array de grupos
-	return Object.entries(groupsMap).map(([type, items]) => ({
+	return (Object.entries(groupsMap) as [FavoriteEntityType, FavoriteComplete[]][]).map(([type, items]) => ({
 		type,
 		displayName: ENTITY_DISPLAY_NAMES[type] || type,
 		icon: ENTITY_ICONS[type] || '⭐',
@@ -138,17 +124,17 @@ export function groupFavoritesByType(favorites: FavoriteComplete[]): FavoritesBy
  * ✅ MIGRADO A DRIZZLE
  */
 export function calculateFavoriteStats(favorites: FavoriteComplete[], recentLimit = 5): FavoriteStats {
-	// Contar por tipo
-	const byType: Record<string, number> = {};
+	const byType: Partial<Record<FavoriteEntityType, number>> = {};
 
 	for (const favorite of favorites) {
 		const type = favorite.entityType;
-		byType[type] = (byType[type] || 0) + 1;
+		const currentCount = byType[type] ?? 0;
+		byType[type] = currentCount + 1;
 	}
 
 	// Ordenar por fecha para obtener los más recientes
 	const recentlyAdded = [...favorites]
-		.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+		.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime())
 		.slice(0, recentLimit);
 
 	return {

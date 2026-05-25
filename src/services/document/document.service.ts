@@ -8,16 +8,18 @@
 
 import * as crypto from 'crypto';
 // Drizzle imports
-import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, like, lte, notInArray, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { documents } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats/stats.service';
 import { toDocumentWithStats } from '@/transformers/document';
 import type { DocumentCreateInput, DocumentUpdateInput } from '@/transformers/document/validators';
 import type { DocumentWithStats } from '@/types/entities/document';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const documentLogger = serverLogger.withContext('DocumentService');
 
@@ -46,6 +48,42 @@ const createDocumentError = (
 	return createEntityErrorObject('DocumentError', message, code, cause);
 };
 
+const normalizeDocumentFavorite = <TDocument extends { id: string; isFavorite?: boolean | null }>(
+	document: TDocument,
+	favoriteEntityIds: string[] | null
+): TDocument & { isFavorite: boolean } => {
+	if (favoriteEntityIds === null) {
+		return {
+			...document,
+			isFavorite: Boolean(document.isFavorite),
+		};
+	}
+
+	const favoriteEntityIdSet = new Set(favoriteEntityIds);
+	return {
+		...document,
+		isFavorite: favoriteEntityIdSet.has(document.id),
+	};
+};
+
+const normalizeDocumentFavorites = <TDocument extends { id: string; isFavorite?: boolean | null }>(
+	documentRows: TDocument[],
+	favoriteEntityIds: string[] | null
+): Array<TDocument & { isFavorite: boolean }> => {
+	if (favoriteEntityIds === null) {
+		return documentRows.map((document) => ({
+			...document,
+			isFavorite: Boolean(document.isFavorite),
+		}));
+	}
+
+	const favoriteEntityIdSet = new Set(favoriteEntityIds);
+	return documentRows.map((document) => ({
+		...document,
+		isFavorite: favoriteEntityIdSet.has(document.id),
+	}));
+};
+
 /**
  * Obtiene documentos con filtros y paginación
  */
@@ -53,6 +91,24 @@ export async function getDocuments(filters?: any): Promise<any> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		documentLogger.info('📄 Obteniendo documentos con filtros:', filters);
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT);
+		const limit = filters?.limit || 20;
+		const offset = filters?.offset || 0;
+
+		if (filters?.isFavorite === true && favoriteEntityIds !== null && favoriteEntityIds.length === 0) {
+			return {
+				data: [],
+				total: 0,
+				hasMore: false,
+				pagination: {
+					total: 0,
+					limit,
+					offset,
+					hasNext: false,
+					hasPrev: offset > 0,
+				},
+			};
+		}
 
 		const conditions = [];
 
@@ -70,7 +126,13 @@ export async function getDocuments(filters?: any): Promise<any> {
 			);
 		}
 		if (filters?.isFavorite !== undefined) {
-			conditions.push(eq(documents.isFavorite, filters.isFavorite));
+			if (favoriteEntityIds === null) {
+				conditions.push(eq(documents.isFavorite, filters.isFavorite));
+			} else if (filters.isFavorite) {
+				conditions.push(inArray(documents.id, favoriteEntityIds));
+			} else if (favoriteEntityIds.length > 0) {
+				conditions.push(notInArray(documents.id, favoriteEntityIds));
+			}
 		}
 		if (filters?.isArchived !== undefined) {
 			conditions.push(eq(documents.isArchived, filters.isArchived));
@@ -147,8 +209,8 @@ export async function getDocuments(filters?: any): Promise<any> {
 				.from(documents)
 				.where(whereClause)
 				.orderBy(orderByClause)
-				.limit(filters?.limit || 20)
-				.offset(filters?.offset || 0),
+				.limit(limit)
+				.offset(offset),
 
 			db
 				.select({ count: count() })
@@ -158,10 +220,10 @@ export async function getDocuments(filters?: any): Promise<any> {
 		]);
 
 		// Formatear respuesta para compatibilidad
-		const formattedDocuments = documentResults.map((doc: any) => ({
+		const formattedDocuments = normalizeDocumentFavorites(documentResults, favoriteEntityIds).map((doc: any) => ({
 			...doc,
 			entityType: 'document' as const,
-			isFavorite: Boolean(doc.isFavorite),
+			isFavorite: doc.isFavorite,
 			isArchived: Boolean(doc.isArchived),
 			encrypted: Boolean(doc.encrypted),
 		}));
@@ -175,13 +237,13 @@ export async function getDocuments(filters?: any): Promise<any> {
 		return {
 			data: formattedDocuments.map(toDocumentWithStats),
 			total: totalCount,
-			hasMore: (filters.offset || 0) + (filters.limit || 20) < totalCount,
+			hasMore: offset + limit < totalCount,
 			pagination: {
 				total: totalCount,
-				limit: filters.limit || 20,
-				offset: filters.offset || 0,
-				hasNext: (filters.offset || 0) + (filters.limit || 20) < totalCount,
-				hasPrev: (filters.offset || 0) > 0,
+				limit,
+				offset,
+				hasNext: offset + limit < totalCount,
+				hasPrev: offset > 0,
 			},
 		};
 	} catch (error) {
@@ -197,6 +259,7 @@ export async function getDocumentById(id: string): Promise<DocumentWithStats | n
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		documentLogger.info(`🔍 Obteniendo documento por ID: ${id}`);
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT);
 
 		const drizzleDocument = await db
 			.select({
@@ -240,10 +303,7 @@ export async function getDocumentById(id: string): Promise<DocumentWithStats | n
 		const rawDocument = drizzleDocument[0];
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedDocument = {
-			...rawDocument,
-			isFavorite: Boolean(rawDocument.isFavorite),
-		};
+		const transformedDocument = normalizeDocumentFavorite(rawDocument, favoriteEntityIds);
 
 		return toDocumentWithStats(transformedDocument as any);
 	} catch (error) {
@@ -258,12 +318,16 @@ export async function getDocumentById(id: string): Promise<DocumentWithStats | n
 export async function createDocument(data: DocumentCreateInput): Promise<DocumentWithStats> {
 	try {
 		documentLogger.info('📝 Creando documento:', data.name);
+		const documentId = crypto.randomUUID();
+		const requestedIsFavorite = data.isFavorite === true;
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT);
+		const useCanonicalFavoriteBridge = requestedIsFavorite && favoriteEntityIds !== null;
 
 		// **MIGRACIÓN A DRIZZLE**
 		const result = await db
 			.insert(documents)
 			.values({
-				id: crypto.randomUUID(),
+				id: documentId,
 				name: data.name,
 				path: data.path,
 				size: data.size,
@@ -271,7 +335,7 @@ export async function createDocument(data: DocumentCreateInput): Promise<Documen
 				mimeType: data.mimeType,
 				extension: data.extension,
 				folderId: data.folderId,
-				isFavorite: data.isFavorite,
+				isFavorite: useCanonicalFavoriteBridge ? false : Boolean(data.isFavorite),
 				isArchived: data.isArchived,
 				pageCount: data.pageCount || null,
 				wordCount: data.wordCount || null,
@@ -294,7 +358,20 @@ export async function createDocument(data: DocumentCreateInput): Promise<Documen
 			.returning();
 
 		const newDocument = result[0];
-		const documentWithStats = toDocumentWithStats(newDocument);
+
+		if (useCanonicalFavoriteBridge) {
+			try {
+				await favoriteService.set(FavoriteEntityType.DOCUMENT, documentId, true);
+			} catch (error) {
+				await db.delete(documents).where(eq(documents.id, documentId));
+				throw error;
+			}
+		}
+
+		const documentWithStats = await getDocumentById(documentId);
+		if (!documentWithStats) {
+			throw createDocumentError('No se pudo obtener el documento creado', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Emitir eventos
 		await emit({
@@ -317,6 +394,12 @@ export async function createDocument(data: DocumentCreateInput): Promise<Documen
 export async function updateDocument(id: string, data: DocumentUpdateInput): Promise<DocumentWithStats> {
 	try {
 		documentLogger.info('🔄 Actualizando documento:', id);
+		const requestedIsFavorite = typeof data.isFavorite === 'boolean' ? data.isFavorite : undefined;
+		const favoriteEntityIds =
+			requestedIsFavorite === undefined
+				? null
+				: await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT);
+		const useCanonicalFavoriteBridge = favoriteEntityIds !== null && requestedIsFavorite !== undefined;
 
 		// Verificar que el documento existe
 		const exists = await documentExists(id);
@@ -351,7 +434,7 @@ export async function updateDocument(id: string, data: DocumentUpdateInput): Pro
 		if (data.folderId !== undefined) {
 			updateData.folderId = data.folderId;
 		}
-		if (data.isFavorite !== undefined) {
+		if (data.isFavorite !== undefined && !useCanonicalFavoriteBridge) {
 			updateData.isFavorite = Boolean(data.isFavorite);
 		}
 		if (data.isArchived !== undefined) {
@@ -405,13 +488,20 @@ export async function updateDocument(id: string, data: DocumentUpdateInput): Pro
 
 		const result = await db.update(documents).set(updateData).where(eq(documents.id, id)).returning();
 
+		if (useCanonicalFavoriteBridge) {
+			await favoriteService.set(FavoriteEntityType.DOCUMENT, id, requestedIsFavorite);
+		}
+
 		const updatedDocument = result[0];
-		const documentWithStats = toDocumentWithStats(updatedDocument);
+		const documentWithStats = await getDocumentById(id);
+		if (!documentWithStats) {
+			throw createDocumentError('No se pudo obtener el documento actualizado', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Emitir eventos
 		await emit({
 			type: 'files:modified',
-			data: { action: 'update', document: updatedDocument },
+			data: { action: 'update', document: updatedDocument ?? { id, ...updateData } },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
@@ -493,6 +583,7 @@ export async function getDocumentCount(): Promise<number> {
 export async function getDocumentByHash(hash: string): Promise<DocumentWithStats | null> {
 	try {
 		documentLogger.info('🔍 Buscando documento por hash:', hash);
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT);
 
 		// **MIGRACIÓN A DRIZZLE**
 		const result = await db.select().from(documents).where(eq(documents.hash, hash)).limit(1);
@@ -503,11 +594,7 @@ export async function getDocumentByHash(hash: string): Promise<DocumentWithStats
 		}
 
 		const rawDocument = result[0];
-		// Transformar el campo isFavorite de number a boolean
-		const transformedDocument = {
-			...rawDocument,
-			isFavorite: Boolean(rawDocument.isFavorite),
-		};
+		const transformedDocument = normalizeDocumentFavorite(rawDocument, favoriteEntityIds);
 
 		const document = toDocumentWithStats(transformedDocument as any);
 		documentLogger.info('✅ Documento encontrado por hash:', document.name);

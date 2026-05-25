@@ -6,13 +6,15 @@
  */
 
 import { Schema } from '@effect/schema';
-import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, like, or, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema';
 import { Album, AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	AlbumDatabaseError,
 	AlbumError,
@@ -338,11 +340,30 @@ const make = (): AlbumServiceInterface => {
 
 			logger.info('🎞️ Obteniendo álbumes', { options });
 
+			const favoriteEntityIds: string[] | null =
+				onlyFavorites
+					? yield* Effect.tryPromise({
+						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.ALBUM),
+						catch: (error) => fromUnknownError('getAll.favoriteIds', error),
+					})
+					: null;
+
 			// Construir condiciones de filtrado
 			const conditions: any[] = [];
 
 			if (onlyFavorites) {
-				conditions.push(eq(albums.isFavorite, true));
+				if (favoriteEntityIds === null) {
+					conditions.push(eq(albums.isFavorite, true));
+				} else if (favoriteEntityIds.length === 0) {
+					return {
+						albums: [],
+						total: 0,
+						limit,
+						offset,
+					};
+				} else {
+					conditions.push(inArray(albums.id, favoriteEntityIds));
+				}
 			}
 
 			if (search) {
@@ -399,10 +420,19 @@ const make = (): AlbumServiceInterface => {
 				{ concurrency: 'unbounded' }
 			);
 
-			logger.info(`✅ Obtenidos ${albumsWithStats.length} álbumes de ${total} total`);
+			const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
+			const normalizedAlbumsWithStats =
+				favoriteIdSet === null
+					? albumsWithStats
+					: albumsWithStats.map((album) => ({
+						...album,
+						isFavorite: favoriteIdSet.has(album.id),
+					}));
+
+			logger.info(`✅ Obtenidos ${normalizedAlbumsWithStats.length} álbumes de ${total} total`);
 
 			return {
-				albums: albumsWithStats,
+				albums: normalizedAlbumsWithStats,
 				total,
 				limit,
 				offset,
@@ -444,6 +474,14 @@ const make = (): AlbumServiceInterface => {
 
 			// Generar ID legible basado en el nombre
 			const readableId = generateReadableId('album', validated.name, 1);
+			const requestedIsFavorite = validated.isFavorite === true;
+			const useCanonicalFavoriteBridge =
+				requestedIsFavorite
+					? yield* Effect.tryPromise({
+						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.ALBUM)) !== null,
+						catch: (error) => fromUnknownError('create.favoriteScope', error),
+					})
+					: false;
 
 			// Insertar en DB
 			const insertData = {
@@ -454,7 +492,7 @@ const make = (): AlbumServiceInterface => {
 				color: validated.color ?? null,
 				category: validated.category ?? null,
 				featuredImage: validated.featuredImage ?? null,
-				isFavorite: validated.isFavorite ?? false,
+				isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 				filters: validated.filters ?? null,
 				metadata: validated.metadata ?? null,
 			};
@@ -484,6 +522,20 @@ const make = (): AlbumServiceInterface => {
 						message: 'Álbum creado pero no se obtuvo ID',
 					})
 				);
+			}
+
+			if (requestedIsFavorite && useCanonicalFavoriteBridge) {
+				yield* Effect.tryPromise({
+					try: async () => {
+						try {
+							await favoriteService.set(FavoriteEntityType.ALBUM, albumId, true);
+						} catch (error) {
+							await db.delete(albums).where(eq(albums.id, albumId));
+							throw error;
+						}
+					},
+					catch: (error) => fromUnknownError('create.favoriteBridge', error),
+				});
 			}
 
 			// Retornar con stats
@@ -537,6 +589,22 @@ const make = (): AlbumServiceInterface => {
 				}
 			}
 
+			const requestedIsFavorite = validated.isFavorite;
+			const useCanonicalFavoriteBridge =
+				requestedIsFavorite !== undefined
+					? yield* Effect.tryPromise({
+						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.ALBUM)) !== null,
+						catch: (error) => fromUnknownError('update.favoriteScope', error),
+					})
+					: false;
+
+			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.ALBUM, id, requestedIsFavorite),
+					catch: (error) => fromUnknownError('update.favoriteBridge', error),
+				});
+			}
+
 			// Actualizar en DB
 			const updateData: any = {};
 			if (validated.name !== undefined) updateData.name = validated.name;
@@ -545,7 +613,7 @@ const make = (): AlbumServiceInterface => {
 			if (validated.color !== undefined) updateData.color = validated.color;
 			if (validated.category !== undefined) updateData.category = validated.category;
 			if (validated.featuredImage !== undefined) updateData.featuredImage = validated.featuredImage;
-			if (validated.isFavorite !== undefined) updateData.isFavorite = validated.isFavorite;
+			if (validated.isFavorite !== undefined && !useCanonicalFavoriteBridge) updateData.isFavorite = validated.isFavorite;
 			if (validated.filters !== undefined) updateData.filters = validated.filters;
 			if (validated.metadata !== undefined) updateData.metadata = validated.metadata;
 
@@ -635,11 +703,22 @@ const make = (): AlbumServiceInterface => {
 			logger.info(`⭐ Toggle favorito: ${id}`);
 
 			const album = yield* getById(id);
-
-			yield* Effect.tryPromise({
-				try: async () => await db.update(albums).set({ isFavorite: !album.isFavorite }).where(eq(albums.id, id)),
-				catch: (error: unknown) => fromUnknownError('toggleFavorite', error),
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.ALBUM),
+				catch: (error) => fromUnknownError('toggleFavorite.scope', error),
 			});
+
+			if (favoriteEntityIds === null) {
+				yield* Effect.tryPromise({
+					try: async () => await db.update(albums).set({ isFavorite: !album.isFavorite }).where(eq(albums.id, id)),
+					catch: (error: unknown) => fromUnknownError('toggleFavorite', error),
+				});
+			} else {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.toggle(FavoriteEntityType.ALBUM, id),
+					catch: (error: unknown) => fromUnknownError('toggleFavorite.favoriteBridge', error),
+				});
+			}
 
 			logger.info(`✅ Favorito actualizado: ${id}`);
 

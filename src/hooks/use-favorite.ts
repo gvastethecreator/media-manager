@@ -4,10 +4,17 @@
  * @description Hook para toggle de estado favorito de entidades
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useToggleFavoriteMutation } from '@/lib/api/favorites';
+import {
+	getFavoriteEntityDisplayName,
+	isCanonicalFavoriteEntityType,
+	type FavoriteEntityType,
+} from '@/types/entities/favorite';
+
+const favoriteLogger = clientLogger.withContext('useFavorite');
 
 export interface UseFavoriteOptions {
 	/** ID de la entidad */
@@ -25,6 +32,8 @@ export interface UseFavoriteResult {
 	isFavorite: boolean;
 	/** Si está procesando */
 	isLoading: boolean;
+	/** Si la entidad pertenece al perímetro canónico de Favorite */
+	isSupported: boolean;
 	/** Función para toggle de favorito */
 	toggleFavorite: () => void;
 }
@@ -34,69 +43,65 @@ export interface UseFavoriteResult {
  */
 export function useFavorite(options: UseFavoriteOptions): UseFavoriteResult {
 	const { entityId, entityType, initialIsFavorite = false } = options;
-	const queryClient = useQueryClient();
 	const { toast } = useToast();
 	const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
+	const mutation = useToggleFavoriteMutation();
+	const isSupported = isCanonicalFavoriteEntityType(entityType);
 
 	useEffect(() => {
 		setIsFavorite(initialIsFavorite);
 	}, [entityId, initialIsFavorite]);
 
-	const mutation = useMutation<unknown, Error, boolean, { previousState: boolean }>({
-		mutationFn: async (newState: boolean) => {
-			const response = await fetch('/api/favorites/toggle', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					entityId,
-					entityType,
-					isFavorite: newState,
-				}),
-			});
-
-			if (!response.ok) {
-				throw new Error('Error al actualizar favorito');
-			}
-
-			return response.json();
-		},
-		onMutate: async (newState) => {
-			const previousState = isFavorite;
-			setIsFavorite(newState);
-			return { previousState };
-		},
-		onSuccess: (_, newState) => {
-			// Invalidar queries relacionadas
-			queryClient.invalidateQueries({ queryKey: ['favorites'] });
-			queryClient.invalidateQueries({ queryKey: [entityType, entityId] });
-
-			toast({
-				title: newState ? '❤️ Agregado a favoritos' : '💔 Removido de favoritos',
-				description: newState
-					? 'La imagen ha sido agregada a tus favoritos'
-					: 'La imagen ha sido removida de tus favoritos',
-			});
-		},
-		onError: (error, _newState, context) => {
-			setIsFavorite(context?.previousState ?? initialIsFavorite);
-			clientLogger.error('Error al toggle favorito:', error);
-			toast({
-				variant: 'destructive',
-				title: '❌ Error',
-				description: 'No se pudo actualizar el estado de favorito',
-			});
-		},
-	});
-
 	const toggleFavorite = () => {
-		const newState = !isFavorite;
-		mutation.mutate(newState);
+		const entityLabel = getFavoriteEntityDisplayName(entityType as FavoriteEntityType);
+
+		if (!isSupported) {
+			favoriteLogger.warn('Entidad fuera del perímetro canónico de Favorite', { entityId, entityType });
+			toast({
+				title: 'ℹ️ Favorito no disponible',
+				description: `${entityLabel} no usa Favorite canónico en esta migración.`,
+			});
+			return;
+		}
+
+		const previousState = isFavorite;
+		const newState = !previousState;
+
+		setIsFavorite(newState);
+		mutation.mutate(
+			{
+				entityId,
+				entityType,
+			},
+			{
+				onSuccess: (result) => {
+					setIsFavorite(result.isFavorite);
+
+					toast({
+						title: result.isFavorite ? '❤️ Agregado a favoritos' : '💔 Removido de favoritos',
+						description: result.isFavorite
+							? `${entityLabel} agregado a tus favoritos.`
+							: `${entityLabel} removido de tus favoritos.`,
+					});
+				},
+				onError: (error) => {
+					setIsFavorite(previousState);
+					favoriteLogger.error('Error al alternar favorito:', error);
+					toast({
+						variant: 'destructive',
+						title: '❌ Error',
+						description: 'No se pudo actualizar el estado de favorito',
+					});
+				},
+			}
+		);
 	};
 
 	return {
 		isFavorite,
 		toggleFavorite,
 		isLoading: mutation.isPending,
+		isSupported,
 		error: mutation.error,
 	};
 }

@@ -6,11 +6,13 @@
  */
 
 import * as crypto from 'node:crypto';
-import { and, count, desc, eq, gte, inArray, lte, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, lte, notInArray, or, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { audios, folders } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { AudioBase, AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
 import type { AudioError } from './audio-errors.effect';
 import * as AudioErrors from './audio-errors.effect';
@@ -361,11 +363,31 @@ const make = (): AudioServiceInterface => {
 		Effect.gen(function* () {
 			audioServiceLogger.info('Obteniendo lista de audios con filtros:', filters);
 
+			const favoriteEntityIds: string[] | null =
+				filters.isFavorite !== undefined
+					? yield* Effect.tryPromise({
+						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO),
+						catch: (error) => toAudioError(error, 'getAll:favoriteIds'),
+					})
+					: null;
+
 			const conditions = [];
 
 			// Construir condiciones WHERE
 			if (filters.folderId) conditions.push(eq(audios.folderId, filters.folderId));
-			if (filters.isFavorite !== undefined) conditions.push(eq(audios.isFavorite, filters.isFavorite));
+			if (filters.isFavorite !== undefined) {
+				if (favoriteEntityIds === null) {
+					conditions.push(eq(audios.isFavorite, filters.isFavorite));
+				} else if (filters.isFavorite) {
+					if (favoriteEntityIds.length === 0) {
+						return [];
+					}
+
+					conditions.push(inArray(audios.id, favoriteEntityIds));
+				} else if (favoriteEntityIds.length > 0) {
+					conditions.push(notInArray(audios.id, favoriteEntityIds));
+				}
+			}
 			if (filters.isArchived !== undefined) conditions.push(eq(audios.isArchived, filters.isArchived));
 			if (filters.format) conditions.push(eq(audios.format, filters.format));
 			if (filters.genre) conditions.push(eq(audios.genre, filters.genre));
@@ -477,6 +499,12 @@ const make = (): AudioServiceInterface => {
 			});
 
 			// Retornar solo el array de audios (simplificado)
+			const usingCanonicalFavoriteFilter = filters.isFavorite !== undefined && favoriteEntityIds !== null;
+
+			if (usingCanonicalFavoriteFilter) {
+				return audioResults.map((audio: Audio) => ({ ...audio, isFavorite: filters.isFavorite })) as Audio[];
+			}
+
 			return audioResults as Audio[];
 		});
 
