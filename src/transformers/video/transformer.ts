@@ -13,6 +13,7 @@ import { formatFileSize } from '../../lib/utils/format.utils';
 import type { VideoStatistics } from '../../types/entities/video/base';
 import type { VideoComplete, VideoWithStats } from '../../types/entities/video/types';
 import { VideoQuality } from '../../types/entities/video/types';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 
 // Enum para calidad de video (definición local si no existe en types)
 enum VideoQualityLocal {
@@ -95,35 +96,10 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 
 	try {
 		const { _count, ...baseData } = drizzleVideo;
-		const counts = _count || {};
+		const counts = normalizeCounts(_count);
 
 		// 📊 Calcular estadísticas de relaciones
-		const albumsCount = counts.albums || 0;
-		const collectionsCount = counts.collections || 0;
-		const tagsCount = counts.tags || 0;
-		const charactersCount = counts.characters || 0;
-		const placesCount = counts.places || 0;
-		const worldItemsCount = counts.worldItems || 0;
-		const conceptsCount = counts.concepts || 0;
-		const promptsCount = counts.prompts || 0;
-		const notesCount = counts.notes || 0;
-		const wildcardsCount = counts.wildcards || 0;
-		const propertiesCount = counts.properties || 0;
-		const groupsCount = counts.groups || 0;
-
-		const totalRelations =
-			albumsCount +
-			collectionsCount +
-			tagsCount +
-			charactersCount +
-			placesCount +
-			worldItemsCount +
-			conceptsCount +
-			promptsCount +
-			notesCount +
-			wildcardsCount +
-			propertiesCount +
-			groupsCount;
+		const totalRelations = sumCounts(_count, STANDARD_COUNT_KEYS);
 
 		// 🎥 Calcular métricas técnicas de video
 		const durationMinutes = Math.round(((baseData.duration || 0) / 60) * 100) / 100;
@@ -177,18 +153,18 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 		const statistics: VideoStatistics = {
 			...createDefaultEntityStats(),
 			// Conteos de relaciones
-			albumCount: albumsCount,
-			collectionCount: collectionsCount,
-			tagCount: tagsCount,
-			characterCount: charactersCount,
-			placeCount: placesCount,
-			worldItemCount: worldItemsCount,
-			conceptCount: conceptsCount,
-			promptCount: promptsCount,
-			noteCount: notesCount,
-			wildcardCount: wildcardsCount,
-			propertyCount: propertiesCount,
-			groupCount: groupsCount,
+			albumCount: counts.albums,
+			collectionCount: counts.collections,
+			tagCount: counts.tags,
+			characterCount: counts.characters,
+			placeCount: counts.places,
+			worldItemCount: counts.worldItems,
+			conceptCount: counts.concepts,
+			promptCount: counts.prompts,
+			noteCount: counts.notes,
+			wildcardCount: counts.wildcards,
+			propertyCount: counts.properties,
+			groupCount: counts.groups,
 			totalRelations,
 			totalAssociations: totalRelations,
 			totalItems: totalRelations,

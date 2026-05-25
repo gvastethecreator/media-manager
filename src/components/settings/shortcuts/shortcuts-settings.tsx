@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { motion } from '@/components/ui/motion-shim';
-import { useSettings } from '@/lib/contexts';
+import { useSettings } from '@/lib/contexts/settings-context';
 import type { InterfacePreferences } from '@/types/ui/types';
 import { SettingsPageHeader } from '../modern/settings-card';
 

@@ -20,6 +20,7 @@ import type {
 	ImageWithStats,
 } from '../../types/entities/image';
 import type { DrizzleImageWithCounts } from '../../types/entities/image/base';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 
 /**
  * 🔄 Transforma DrizzleImageWithCounts a ImageWithStats
@@ -64,24 +65,7 @@ export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts)
  * 📊 Calcula estadísticas de la imagen
  */
 function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageStatistics {
-	// Valores por defecto si _count no existe (inmutable)
-	const defaultCount = {
-		albums: 0,
-		collections: 0,
-		tags: 0,
-		characters: 0,
-		places: 0,
-		worldItems: 0,
-		concepts: 0,
-		prompts: 0,
-		notes: 0,
-		wildcards: 0,
-		properties: 0,
-		groups: 0,
-	};
-
-	// Usar _count existente o valores por defecto (sin mutar el input)
-	const countData = drizzleImage._count && typeof drizzleImage._count === 'object' ? drizzleImage._count : defaultCount;
+	const counts = normalizeCounts(drizzleImage._count);
 
 	if (!drizzleImage._count || typeof drizzleImage._count !== 'object') {
 		logger.warn('⚠️ Image sin _count válido, usando valores por defecto', {
@@ -90,35 +74,7 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 		});
 	}
 
-	const {
-		albums = 0,
-		collections = 0,
-		tags = 0,
-		characters = 0,
-		places = 0,
-		worldItems = 0,
-		concepts = 0,
-		prompts = 0,
-		notes = 0,
-		wildcards = 0,
-		properties = 0,
-		groups = 0,
-	} = countData;
-
-	// Conteos base
-	const totalAssociations =
-		albums +
-		collections +
-		tags +
-		characters +
-		places +
-		worldItems +
-		concepts +
-		prompts +
-		notes +
-		wildcards +
-		properties +
-		groups;
+	const totalAssociations = sumCounts(drizzleImage._count, STANDARD_COUNT_KEYS);
 
 	// Métricas técnicas con protección para valores nulos
 	const width = drizzleImage.width || 0;
@@ -151,18 +107,18 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 			downloadCount: downloads,
 			likeCount: likes,
 			commentCount: 0,
-			tagCount: tags,
-			albumCount: albums,
-			collectionCount: collections,
-			characterCount: characters,
-			placeCount: places,
-			worldItemCount: worldItems,
-			conceptCount: concepts,
-			promptCount: prompts,
-			noteCount: notes,
-			wildcardCount: wildcards,
-			propertyCount: properties,
-			groupCount: groups,
+			tagCount: counts.tags,
+			albumCount: counts.albums,
+			collectionCount: counts.collections,
+			characterCount: counts.characters,
+			placeCount: counts.places,
+			worldItemCount: counts.worldItems,
+			conceptCount: counts.concepts,
+			promptCount: counts.prompts,
+			noteCount: counts.notes,
+			wildcardCount: counts.wildcards,
+			propertyCount: counts.properties,
+			groupCount: counts.groups,
 		}),
 		aspectRatio,
 	};

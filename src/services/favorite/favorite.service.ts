@@ -1,6 +1,11 @@
 /**
  * @file Servicio para la gestión de favoritos
  * @module services/favorite
+ * @deprecated La verdad canónica está en la tabla `favorites` (junction table scoped a perfil).
+ * `isFavorite` embebido en 20+ entidades es deuda/derivación, no verdad primaria.
+ * El batch bridge Favorite debe eliminar esta dualidad: un solo contrato canónico
+ * de lectura/escritura, `isFavorite` como proyección derivada o eliminado.
+ * Ver ADR-0002 y 04-favorite-bridge.md.
  */
 
 import * as crypto from 'crypto';

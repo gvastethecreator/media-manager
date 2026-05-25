@@ -5,11 +5,9 @@ import React from 'react';
  * @module lib/client
  */
 
-export * from './contexts';
-// Resolver conflicto de exportación duplicada de useSettings
+// Re-exportar utilidades del cliente
 export { useSettings } from './contexts/settings-context';
 export * from './hooks';
-// Re-exportar utilidades del cliente
 export * from './utils';
 
 // Cliente específico para el navegador

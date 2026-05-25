@@ -23,7 +23,6 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '⭐',
 				color: '#f59e0b',
 				featuredImage: null,
-				isFavorite: true,
 			},
 			{
 				id: generateReadableId('album', 'Coleccion Digital', 1),
@@ -32,7 +31,6 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '🎨',
 				color: '#a855f7',
 				featuredImage: null,
-				isFavorite: false,
 			},
 			{
 				id: generateReadableId('album', 'Paisajes Epic', 1),
@@ -41,7 +39,6 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '🏔️',
 				color: '#22c55e',
 				featuredImage: null,
-				isFavorite: true,
 			},
 			{
 				id: generateReadableId('album', 'Retratos Creativos', 1),
@@ -50,7 +47,6 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '📸',
 				color: '#ec4899',
 				featuredImage: null,
-				isFavorite: false,
 			},
 		];
 

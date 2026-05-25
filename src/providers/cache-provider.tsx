@@ -2,6 +2,10 @@
 
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
+/**
+ * @deprecated `@/lib/database/cache` está en zona de deprecación (ver `@/lib/database/`).
+ * Migrar a `@/lib/drizzle` o a un módulo de cache específico cuando se consolide.
+ */
 import {
 	charactersCache,
 	metadataCache,
@@ -11,9 +15,9 @@ import {
 	thumbnailCache,
 	worldItemsCache,
 } from '@/lib/database/cache';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 
-const cacheProviderLogger = serverLogger.withContext('CacheProvider');
+const cacheProviderLogger = clientLogger.withContext('CacheProvider');
 
 export function CacheProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {

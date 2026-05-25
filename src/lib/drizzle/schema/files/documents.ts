@@ -3,6 +3,10 @@
  * DOCUMENTS ENTITY - DRIZZLE ORM
  * =================================================================================
  * Definición de la tabla documents para documentos
+ *
+ * @deprecated Esta tabla duplica 10+ columnas comunes (id, name, path, hash, size,
+ * folderId, createdAt, updatedAt, isFavorite, metadata, etc.). Converger a una tabla
+ * raíz `Asset` según ADR-0004 y 03-media-core-context.md.
  * =================================================================================
  */
 
@@ -28,6 +32,7 @@ export const documents = sqliteTable(
 		thumbnailError: text('thumbnailError'),
 		thumbnailErrorAt: integer('thumbnailErrorAt', { mode: 'timestamp_ms' }),
 		folderId: text('folderId').notNull(),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
 		pageCount: integer('pageCount'),

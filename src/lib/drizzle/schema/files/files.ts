@@ -3,6 +3,10 @@
  * FILES ENTITY - DRIZZLE ORM
  * =================================================================================
  * Definición de la tabla files para archivos genéricos del sistema
+ *
+ * Esta es la tabla proto-Asset destino. Las tablas per-type (images, videos, audios,
+ * documents, jsonFiles, file3Ds) deben converger aquí según ADR-0004 y
+ * 03-media-core-context.md.
  * =================================================================================
  */
 
@@ -22,6 +26,7 @@ export const files = sqliteTable(
 		extension: text('extension').notNull(),
 		fileType: text('fileType').notNull(), // 'image', 'video', 'audio', 'document', etc.
 		folderId: text('folderId').notNull(),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
 		description: text('description'),

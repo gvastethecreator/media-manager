@@ -20,6 +20,7 @@ export const worldItems = sqliteTable(
 		color: text('color').default('#a855f7'),
 		category: text('category'),
 		subtype: text('subtype'),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
 		// Agregados movidos a EntityAggregates tabla genérica
