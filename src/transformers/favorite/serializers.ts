@@ -17,12 +17,10 @@ import type { FavoriteBase, FavoriteWithStats } from '../../types/entities/favor
 export function serializeFavoriteBase(favorite: FavoriteBase) {
 	return {
 		id: favorite.id,
+		profileId: favorite.profileId,
 		entityId: favorite.entityId,
 		entityType: favorite.entityType,
-		userId: favorite.userId,
-		profileId: favorite.profileId,
-		createdAt: favorite.createdAt.toISOString(),
-		updatedAt: favorite.updatedAt.toISOString(),
+		addedAt: favorite.addedAt.toISOString(),
 	};
 }
 
@@ -35,10 +33,12 @@ export function serializeFavoriteBase(favorite: FavoriteBase) {
 export function serializeFavoriteWithStats(favorite: FavoriteWithStats) {
 	return {
 		...serializeFavoriteBase(favorite),
+		entityName: favorite.entityName,
+		entityThumbnail: favorite.entityThumbnail,
 		stats: {
+			daysSinceAdded: favorite.stats.daysSinceAdded,
 			entityTypeName: favorite.stats.entityTypeName,
-			formattedCreatedAt: favorite.stats.formattedCreatedAt,
-			daysSinceFavorited: favorite.stats.daysSinceFavorited,
+			formattedAddedAt: favorite.stats.formattedAddedAt,
 			isRecent: favorite.stats.isRecent,
 			isOld: favorite.stats.isOld,
 		},

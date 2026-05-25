@@ -50,6 +50,16 @@ export async function updateJsonFileInApi(id: string, data: JsonFileUpdateInput)
 	return response.json();
 }
 
+export async function toggleJsonFileFavoriteInApi(id: string): Promise<JsonFileWithStats> {
+	const response = await fetch(`${API_BASE_PATH}/${id}/favorite`, {
+		method: 'POST',
+	});
+	if (!response.ok) {
+		throw new Error('Error al alternar favorito del archivo JSON');
+	}
+	return response.json();
+}
+
 export async function deleteJsonFileFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {

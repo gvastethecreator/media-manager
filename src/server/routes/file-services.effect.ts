@@ -35,8 +35,10 @@ const file3dsEffectRouter = express.Router();
 file3dsEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* File3DService;
+		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
 		const result = yield* service.getAll({
 			limit: Number(req.query.limit) || 50,
+			onlyFavorites,
 			offset: Number(req.query.offset) || 0,
 		});
 		return result.data.map((file3d) => ({
@@ -125,6 +127,13 @@ file3dsEffectRouter.put('/:id', async (req, res) => {
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(File3DServiceLive)), res);
 });
+file3dsEffectRouter.post('/:id/favorite', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* File3DService;
+		return yield* service.toggleFavorite(req.params.id);
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(File3DServiceLive)), res);
+});
 file3dsEffectRouter.delete('/:id', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* File3DService;
@@ -139,8 +148,10 @@ const documentsEffectRouter = express.Router();
 documentsEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* DocumentService;
+		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
 		const result = yield* service.getAll({
 			limit: Number(req.query.limit) || 50,
+			onlyFavorites,
 			offset: Number(req.query.offset) || 0,
 		});
 		return result.data.map((document) => ({
@@ -214,6 +225,13 @@ documentsEffectRouter.put('/:id', async (req, res) => {
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(DocumentServiceLive)), res);
 });
+documentsEffectRouter.post('/:id/favorite', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* DocumentService;
+		return yield* service.toggleFavorite(req.params.id);
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(DocumentServiceLive)), res);
+});
 documentsEffectRouter.delete('/:id', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* DocumentService;
@@ -237,7 +255,8 @@ jsonFilesEffectRouter.get('/', async (req, res) => {
 		const service = yield* JsonFileService;
 		const limit = Number(req.query.limit) || 50;
 		const offset = Number(req.query.offset) || 0;
-		const result = yield* service.getAll({ limit, offset });
+		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
+		const result = yield* service.getAll({ limit, offset, onlyFavorites });
 		const data = result.data.map((jsonFile) => ({
 			...jsonFile,
 			entityType: 'jsonFile' as const,
@@ -334,6 +353,13 @@ jsonFilesEffectRouter.put('/:id', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* JsonFileService;
 		return yield* service.update(req.params.id, req.body);
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(JsonFileServiceLive)), res);
+});
+jsonFilesEffectRouter.post('/:id/favorite', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* JsonFileService;
+		return yield* service.toggleFavorite(req.params.id);
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(JsonFileServiceLive)), res);
 });

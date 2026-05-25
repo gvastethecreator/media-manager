@@ -13,9 +13,11 @@ import { jsonFiles } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats/stats.service';
 import { fromDrizzleJsonFile, fromDrizzleJsonFiles } from '@/transformers/json-file/transformer';
 import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const jsonFileLogger = serverLogger.withContext('JsonFileService');
 
@@ -28,6 +30,42 @@ const createJsonFileError = (
 	return createEntityErrorObject('JsonFileError', message, code, cause);
 };
 
+const normalizeJsonFileFavorite = <TJsonFile extends { id: string; isFavorite?: boolean | null }>(
+	jsonFile: TJsonFile,
+	favoriteEntityIds: string[] | null
+): TJsonFile & { isFavorite: boolean } => {
+	if (favoriteEntityIds === null) {
+		return {
+			...jsonFile,
+			isFavorite: Boolean(jsonFile.isFavorite),
+		};
+	}
+
+	const favoriteEntityIdSet = new Set(favoriteEntityIds);
+	return {
+		...jsonFile,
+		isFavorite: favoriteEntityIdSet.has(jsonFile.id),
+	};
+};
+
+const normalizeJsonFileFavorites = <TJsonFile extends { id: string; isFavorite?: boolean | null }>(
+	jsonFileRows: TJsonFile[],
+	favoriteEntityIds: string[] | null
+): Array<TJsonFile & { isFavorite: boolean }> => {
+	if (favoriteEntityIds === null) {
+		return jsonFileRows.map((jsonFile) => ({
+			...jsonFile,
+			isFavorite: Boolean(jsonFile.isFavorite),
+		}));
+	}
+
+	const favoriteEntityIdSet = new Set(favoriteEntityIds);
+	return jsonFileRows.map((jsonFile) => ({
+		...jsonFile,
+		isFavorite: favoriteEntityIdSet.has(jsonFile.id),
+	}));
+};
+
 // (Eventos específicos no usados actualmente; se emite 'files:modified' y STATS_EVENTS)
 
 /**
@@ -37,6 +75,7 @@ export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		jsonFileLogger.info('🗂️ Obteniendo archivos JSON');
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE);
 
 		const drizzleJsonFiles = await db
 			.select({
@@ -66,10 +105,7 @@ export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
 			.orderBy(asc(jsonFiles.name));
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedJsonFiles = drizzleJsonFiles.map((rawJsonFile: (typeof drizzleJsonFiles)[0]) => ({
-			...rawJsonFile,
-			isFavorite: Boolean(rawJsonFile.isFavorite),
-		}));
+		const transformedJsonFiles = normalizeJsonFileFavorites(drizzleJsonFiles, favoriteEntityIds);
 
 		return fromDrizzleJsonFiles(transformedJsonFiles as any);
 	} catch (error) {
@@ -85,6 +121,7 @@ export async function getJsonFileById(id: string): Promise<JsonFileWithStats | n
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		jsonFileLogger.info(`🔍 Obteniendo archivo JSON por ID: ${id}`);
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE);
 
 		const drizzleJsonFile = await db
 			.select({
@@ -122,10 +159,7 @@ export async function getJsonFileById(id: string): Promise<JsonFileWithStats | n
 		const rawJsonFile = drizzleJsonFile[0];
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedJsonFile = {
-			...rawJsonFile,
-			isFavorite: Boolean(rawJsonFile.isFavorite),
-		};
+		const transformedJsonFile = normalizeJsonFileFavorite(rawJsonFile, favoriteEntityIds);
 
 		return fromDrizzleJsonFile(transformedJsonFile as any);
 	} catch (error) {
@@ -140,12 +174,16 @@ export async function getJsonFileById(id: string): Promise<JsonFileWithStats | n
 export async function createJsonFile(data: JsonFileCreateInput): Promise<JsonFileWithStats> {
 	try {
 		jsonFileLogger.info('🗂️ Creando archivo JSON:', data.name);
+		const jsonFileId = crypto.randomUUID();
+		const requestedIsFavorite = data.isFavorite === true;
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE);
+		const useCanonicalFavoriteBridge = requestedIsFavorite && favoriteEntityIds !== null;
 
 		// **MIGRACIÓN A DRIZZLE**
 		const result = await db
 			.insert(jsonFiles)
 			.values({
-				id: crypto.randomUUID(),
+				id: jsonFileId,
 				name: data.name,
 				path: data.path,
 				size: data.size,
@@ -153,7 +191,7 @@ export async function createJsonFile(data: JsonFileCreateInput): Promise<JsonFil
 				mimeType: data.mimeType,
 				extension: data.extension,
 				folderId: data.folderId,
-				isFavorite: data.isFavorite,
+				isFavorite: useCanonicalFavoriteBridge ? false : Boolean(data.isFavorite),
 				isArchived: data.isArchived,
 				isValid: true,
 				schema: data.schema || null,
@@ -167,7 +205,20 @@ export async function createJsonFile(data: JsonFileCreateInput): Promise<JsonFil
 			.returning();
 
 		const newJsonFile = result[0];
-		const jsonFileWithStats = fromDrizzleJsonFile(newJsonFile);
+
+		if (useCanonicalFavoriteBridge) {
+			try {
+				await favoriteService.set(FavoriteEntityType.JSON_FILE, jsonFileId, true);
+			} catch (error) {
+				await db.delete(jsonFiles).where(eq(jsonFiles.id, jsonFileId));
+				throw error;
+			}
+		}
+
+		const jsonFileWithStats = await getJsonFileById(jsonFileId);
+		if (!jsonFileWithStats) {
+			throw createJsonFileError('No se pudo obtener el archivo JSON creado', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Emitir eventos
 		await emit({
@@ -193,6 +244,12 @@ export async function updateJsonFile(
 ): Promise<JsonFileWithStats> {
 	try {
 		jsonFileLogger.info('🔄 Actualizando archivo JSON:', id);
+		const requestedIsFavorite = typeof data.isFavorite === 'boolean' ? data.isFavorite : undefined;
+		const favoriteEntityIds =
+			requestedIsFavorite === undefined
+				? null
+				: await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE);
+		const useCanonicalFavoriteBridge = favoriteEntityIds !== null && requestedIsFavorite !== undefined;
 
 		// Verificar que el archivo JSON existe
 		const exists = await jsonFileExists(id);
@@ -227,7 +284,7 @@ export async function updateJsonFile(
 		if (data.folderId !== undefined) {
 			updateData.folderId = data.folderId;
 		}
-		if (data.isFavorite !== undefined) {
+		if (data.isFavorite !== undefined && !useCanonicalFavoriteBridge) {
 			updateData.isFavorite = Boolean(data.isFavorite);
 		}
 		if (data.isArchived !== undefined) {
@@ -254,8 +311,15 @@ export async function updateJsonFile(
 
 		const result = await db.update(jsonFiles).set(updateData).where(eq(jsonFiles.id, id)).returning();
 
+		if (useCanonicalFavoriteBridge) {
+			await favoriteService.set(FavoriteEntityType.JSON_FILE, id, requestedIsFavorite);
+		}
+
 		const updatedJsonFile = result[0];
-		const jsonFileWithStats = fromDrizzleJsonFile(updatedJsonFile);
+		const jsonFileWithStats = await getJsonFileById(id);
+		if (!jsonFileWithStats) {
+			throw createJsonFileError('No se pudo obtener el archivo JSON actualizado', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Emitir eventos
 		await emit({
@@ -339,8 +403,11 @@ export async function getJsonFileCount(): Promise<number> {
  */
 export async function getJsonFileByHash(hash: string): Promise<JsonFileWithStats | null> {
 	try {
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE);
 		const result = await db.select().from(jsonFiles).where(eq(jsonFiles.hash, hash)).limit(1);
-		return result[0] ? (fromDrizzleJsonFile(result[0] as any) as JsonFileWithStats) : null;
+		return result[0]
+			? (fromDrizzleJsonFile(normalizeJsonFileFavorite(result[0] as any, favoriteEntityIds) as any) as JsonFileWithStats)
+			: null;
 	} catch (error) {
 		return null;
 	}

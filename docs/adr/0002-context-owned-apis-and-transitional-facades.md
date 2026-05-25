@@ -16,6 +16,7 @@ Las APIs del producto deben converger hacia ownership explícito por contexto y 
 ## Aplicación inicial
 
 - `Favorite` se modela canónicamente como relación transversal.
+- La semántica canónica de `Favorite` debe leerse como relación scoped al actor/perfil que marca el objeto, no como flag global incrustado en la entidad objetivo.
 - La familia canónica de favoritos debe vivir bajo una API de favoritos/relaciones, no como verdad repartida entre `/images/:id/favorite`, `/albums/:id/favorite`, etc.
 - Los endpoints por entidad para favoritos, si continúan durante la transición, deben delegar al contrato canónico y tratarse como compatibilidad temporal.
 

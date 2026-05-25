@@ -15,6 +15,7 @@ import {
 	deleteJsonFileFromApi,
 	getJsonFileFromApi,
 	getJsonFilesFromApi,
+	toggleJsonFileFavoriteInApi,
 	updateJsonFileInApi,
 } from '@/lib/api/client/json-file.client';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
@@ -189,7 +190,17 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			toggleFavorite: async (id: string) => {
 				const jsonFile = get().getJsonFileById(id);
 				if (jsonFile) {
-					await get().updateJsonFile(id, { isFavorite: !jsonFile.isFavorite });
+					set({ loading: true, error: null });
+					try {
+						const updatedJsonFile = await toggleJsonFileFavoriteInApi(id);
+						set((state) => ({
+							jsonFiles: state.jsonFiles.map((item) => (item.id === id ? updatedJsonFile : item)),
+							currentJsonFile: state.currentJsonFile?.id === id ? updatedJsonFile : state.currentJsonFile,
+							loading: false,
+						}));
+					} catch (error) {
+						set({ error: (error as Error).message, loading: false });
+					}
 				}
 			},
 		}),

@@ -111,11 +111,26 @@ También se fija una separación fuerte entre `inspired_by` y `derived_from`. `i
 
 Además, todos los roles de este primer seed deben venir ya con lectura inverse explícita. El seed es lo bastante pequeño como para exigir definiciones completas desde ambos extremos y no dejar inversas implícitas o vagas para más adelante.
 
+La lectura canónica inicial de ese seed queda aterrizada así:
+
+- `references` ↔ `referenced_by`
+- `inspired_by` ↔ `inspires`
+- `derived_from` ↔ `source_for`
+- `variant_of` ↔ `variant_of`
+
 Esa exigencia no queda limitada al primer seed. La dirección acordada es que todo `Relation Role` del vocabulario gobernado declare siempre una lectura forward y una lectura inverse explícitas, aunque en algunos casos ambas terminen siendo equivalentes. La intención es impedir que roles futuros nazcan semánticamente incompletos y que la inverse se improvise después en UI o API.
 
 Además, la identidad contractual del role no debe depender de esas frases humanas. Cada `Relation Role` necesita un identificador portable estable en `snake_case`, separado de sus lecturas forward e inverse, para que el vocabulario pueda evolucionar en presentación sin romper referencias ni compatibilidad.
 
 Ese slug portable se trata además como identidad estable y no como copy editable. Si en algún momento necesita cambiar, el movimiento correcto es una migración explícita y no un rename casual como si fuera sólo una etiqueta visible.
+
+Las lecturas humanas forward e inverse, en cambio, pertenecen a la capa de presentación semántica del vocabulario. Pueden refinarse editorialmente mientras sigan expresando el mismo significado relacional; si el meaning material del role cambia, ya no se trata de copy sino de deprecación, replacement o nuevo role.
+
+Si un `Relation Role` queda deprecated o es desplazado por otro más preciso, las relaciones históricas que ya lo usan siguen siendo legibles como legado. La dirección acordada, sin embargo, es que ese role deje de estar disponible para nuevas altas: el vocabulario gobernado empuja hacia la normalización futura sin romper bruscamente la lectura del pasado.
+
+Cuando esa deprecación tenga un sucesor semánticamente claro, el catálogo puede declarar además un único role de reemplazo explícito. La dirección acordada es evitar tanto la ambigüedad de no saber hacia dónde migrar como el desorden de múltiples sucesores equivalentes compitiendo por la misma normalización.
+
+Si una relación legacy vuelve a guardarse usando un role deprecated que ya declara ese reemplazo explícito equivalente, la representación debe normalizarse por defecto al role vigente. La intención es que la legibilidad del pasado no se convierta en permiso para reescribir eternamente el mismo legado en nuevas escrituras.
 
 Cuando un `Relation Role` declare aplicabilidad restringida por familias o tipos participantes, esa restricción opera como contrato real. Usar el role fuera de ese perímetro se considera inválido y no una simple advertencia documental o de UI.
 
@@ -186,6 +201,21 @@ La dirección acordada para el registro canónico inicial es una forma mínima c
 
 En esta primera definición, el modelo no incorpora todavía un campo libre de explicación, comentario o nota textual por relación. La intención es evitar que `Semantic Relation` se convierta prematuramente en un mini-documento y mantener claro que el significado principal del vínculo vive en los extremos y en el role.
 
+De la misma manera, campos como `createdAt`, `updatedAt` o metadata de auditoría no forman parte de este contrato semántico mínimo. Si existen en storage o API, pertenecen a la capa operativa alrededor del vínculo y no a su identidad lógica ni a su significado de dominio.
+
+### 7.6. La validez del vínculo depende de extremos reales y activos
+
+La creación o reescritura de una `Semantic Relation` exige que ambos extremos existan y sigan siendo participantes válidos dentro del perímetro permitido en ese momento.
+
+Además, en esta primera versión el modelo no introduce un lifecycle semántico rico independiente para la relación. La visibilidad normal del vínculo sigue la superficie activa de sus extremos:
+
+- si uno de los extremos sale de la superficie activa por borrado lógico o tombstone, la relación deja de aparecer en consultas normales;
+- aun así, el vínculo se preserva para historia o restauración mientras siga existiendo como referencia válida en el sistema;
+- si el extremo se restaura y el otro lado continúa siendo válido, la relación recupera por defecto su visibilidad normal;
+- si un extremo se purga físicamente del dominio, las relaciones dependientes dejan de existir como vínculos activos preservables.
+
+La intención es evitar tanto las relaciones huérfanas como una segunda fuente de verdad sobre lifecycle dentro del propio relation model.
+
 ### 8. La unicidad lógica se gobierna aparte
 
 Que exista `relationId` no significa que el sistema pueda guardar el mismo vínculo varias veces.
@@ -214,9 +244,15 @@ La decisión, además, no se queda en convivencia posterior. Si el significado d
 
 Por ser simétrico, `variant_of` también debe obedecer esa normalización canónica de extremos en storage. La UI o la API pueden presentar el vínculo desde cualquiera de los dos lados, pero la persistencia no debe duplicarlo cambiando sólo la orientación.
 
+Más en general, cuando dos roles no puedan coexistir sobre el mismo par de objetos, esa incompatibilidad debe declararse en el propio catálogo de `Relation Role`. La dirección acordada es evitar reglas sueltas dispersas por endpoint, UI o storage y hacer que el vocabulario gobernado cargue también con esas restricciones semánticas entre roles.
+
 Además, `variant_of` y `derived_from` se consideran incompatibles por defecto sobre el mismo par de objetos. La intención es evitar que un mismo vínculo quede modelado simultáneamente como parentesco lateral y como descendencia/transformación fuerte, salvo que una situación excepcional y muy explícita justifique esa coexistencia.
 
+En esta primera versión, sin embargo, esa excepcionalidad no se resuelve con overrides libres por relación individual. La dirección acordada es que, si aparece un caso recurrente que realmente necesite esa coexistencia, la solución pase por ajustar el catálogo o las reglas gobernadas, no por incrustar excepciones opacas dentro de filas sueltas del modelo mínimo.
+
 `derived_from`, en cambio, sí puede cruzar familias distintas cuando la derivación fuerte siga siendo semánticamente clara. La intención es permitir transformaciones o adaptaciones intensas entre objetos no idénticos en tipo, sin obligar a encajarlas artificialmente en `references` o `inspired_by`.
+
+Esa fuerza semántica implica también otra validación: el subgrafo formado por relaciones `derived_from` debe permanecer acíclico. Ni los ciclos directos (`A derived_from B` y `B derived_from A`) ni los ciclos más largos expresan una derivación semántica válida en el modelo objetivo.
 
 Dentro de este primer seed, `references` e `inspired_by` quedan como los roles más ampliamente transversales del perímetro permitido. La intención es que funcionen como puentes semánticos reutilizables entre contextos sin caer en un comodín vacío ni exigir la intensidad específica de `derived_from`.
 
@@ -250,9 +286,10 @@ Si el contrato se rompe:
 - `Property` empezará a competir con el relation model,
 - y las relaciones fundacionales terminarán escondidas dentro de una abstracción demasiado blanda.
 
-## Puntos todavía abiertos
+## Próxima fase de aterrizaje
 
-La entrevista todavía debe cerrar algunos detalles finos, por ejemplo:
+A nivel documental, el contrato base de `Semantic Relation` ya quedó fijado. Lo que resta no es volver a abrir el lenguaje, sino llevarlo a enforcement ejecutable de forma consistente, por ejemplo en:
 
-- shape operativo residual del registro canónico (si más adelante aparecen campos adicionales realmente justificados),
-- y reglas finales de validación derivadas del catálogo de `Relation Role` en API/UI/storage.
+- validaciones de API/UI/storage derivadas del catálogo de `Relation Role`,
+- normalización de roles simétricos y de triples canónicos al persistir,
+- y safeguards operativos que impidan duplicados, roles inválidos o ciclos de `derived_from`.

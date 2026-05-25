@@ -17,6 +17,8 @@ La meta no es sólo reorganizar carpetas ni mover archivos entre módulos. La me
 
 La reorganización física sólo tiene valor si refleja un lenguaje más claro. Por eso el glosario y las decisiones de frontera vienen antes del refactor profundo.
 
+Ese lenguaje además debe separar **identidad contractual portable** de **presentación/copy humana**. Slugs, keys y tokens estables no se gobiernan igual que labels visibles, títulos, summaries, lecturas humanas o hints visuales. Un rename editorial no debe disfrazarse de cambio semántico; si cambia el significado real, corresponde lifecycle explícito (deprecación, replacement o identidad nueva), no maquillaje terminológico.
+
 ### 2. Contextos explícitos, no capas técnicas disfrazadas
 
 La arquitectura objetivo no debe organizarse sólo por `routes`, `services`, `transformers` y `stores`. Cada contexto necesita:

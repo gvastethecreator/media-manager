@@ -10,6 +10,8 @@ La arquitectura objetivo no seguirá ni un extremo de tablas específicas por ca
 
 - Las relaciones semánticas cross-context pueden converger hacia un modelo genérico.
 - Ese modelo puede llevar un `Relation Role` opcional cuando el vínculo necesite significado explícito.
+- Cuando exista `Relation Role`, su identidad contractual vive en un identificador portable estable y no en las frases humanas forward/inverse que use la UI o la documentación.
+- Las lecturas humanas forward/inverse de un `Relation Role` pueden refinarse editorialmente mientras el significado relacional siga siendo el mismo; si cambia materialmente, corresponde deprecación, replacement o un role nuevo.
 - Las relaciones estructurales fuertes no se absorben en la capa genérica.
 - Containment, ownership, specialization y otras estructuras fundacionales mantienen modelado dedicado.
 
@@ -35,3 +37,4 @@ La arquitectura objetivo no seguirá ni un extremo de tablas específicas por ca
 - Se preservan límites y restricciones en relaciones que realmente estructuran el dominio.
 - El diseño de API puede converger en endpoints menos hiper-específicos para vínculos semánticos.
 - La migración debe distinguir cuidadosamente entre relación semántica y relación estructural antes de unificar nada.
+- El catálogo de `Relation Role` necesita gobernanza explícita para distinguir renames editoriales de cambios semánticos reales.

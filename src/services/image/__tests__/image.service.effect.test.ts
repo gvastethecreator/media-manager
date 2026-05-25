@@ -6,8 +6,11 @@
  */
 
 import { Effect } from 'effect';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { albums, folders, imageAlbums, images, imageTags, tags } from '@/lib/drizzle/schema';
+import { albums, favorites, folders, imageAlbums, images, imageTags, profiles, tags } from '@/lib/drizzle/schema';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import * as ImageService from '../image.service.effect';
 
 // ============= Test Helpers =============
@@ -116,16 +119,48 @@ const createTestTag = async () => {
 	return tag;
 };
 
+let createdActiveProfileId: string | null = null;
+
+const ensureActiveProfile = async () => {
+	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+
+	if (activeProfile) {
+		return activeProfile.id;
+	}
+
+	const profileId = `image-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+	createdActiveProfileId = profileId;
+
+	await db.insert(profiles).values({
+		id: profileId,
+		name: 'Image Service Test Profile',
+		emoji: '🖼️',
+		color: '#3b82f6',
+		description: 'Perfil activo para tests de imágenes',
+		isActive: true,
+		settingsId: null,
+		imageId: null,
+	});
+
+	return profileId;
+};
+
 // ============= Cleanup =============
 
 afterEach(async () => {
 	// Clean up test data in correct order (relations first, then entities)
 	await db.delete(imageAlbums);
 	await db.delete(imageTags);
+	await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.IMAGE));
 	await db.delete(images);
 	await db.delete(albums);
 	await db.delete(tags);
 	await db.delete(folders);
+
+	if (createdActiveProfileId) {
+		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
+		createdActiveProfileId = null;
+	}
 });
 
 // ============= CRUD TESTS =============
@@ -539,33 +574,59 @@ describe('ImageService - Query Operations', () => {
 
 		it('should filter by isFavorite', async () => {
 			const folder = await createTestFolder();
-			await createTestImage(folder.id, { isFavorite: true });
+			await ensureActiveProfile();
+			const favoriteImage = await createTestImage(folder.id, { isFavorite: false });
 			await createTestImage(folder.id, { isFavorite: true });
 			await createTestImage(folder.id, { isFavorite: false });
 
+			await favoriteService.set(FavoriteEntityType.IMAGE, favoriteImage.id, true);
+
 			const result = await expectSuccess(ImageService.getAll({ isFavorite: true }));
 
-			expect(result.images.length).toBe(2);
+			expect(result.images.length).toBe(1);
+			expect(result.images[0].id).toBe(favoriteImage.id);
 			expect(result.images.every((img: any) => img.isFavorite === true)).toBe(true);
+		});
+
+		it('should resolve isFavorite=false from canonical favorites instead of stale projection', async () => {
+			const folder = await createTestFolder();
+			await ensureActiveProfile();
+			const canonicalFavorite = await createTestImage(folder.id, { isFavorite: false });
+			const staleProjectedFavorite = await createTestImage(folder.id, { isFavorite: true });
+			const regularImage = await createTestImage(folder.id, { isFavorite: false });
+
+			await favoriteService.set(FavoriteEntityType.IMAGE, canonicalFavorite.id, true);
+
+			const result = await expectSuccess(ImageService.getAll({ isFavorite: false }));
+
+			expect(result.total).toBe(2);
+			expect(result.images.map((img) => img.id).sort()).toEqual([regularImage.id, staleProjectedFavorite.id].sort());
+			expect(result.images.every((img) => img.isFavorite === false)).toBe(true);
 		});
 	});
 
 	describe('getAllFavorites', () => {
 		it('should return only favorite images', async () => {
 			const folder = await createTestFolder();
-			await createTestImage(folder.id, { isFavorite: true });
+			await ensureActiveProfile();
+			const firstFavorite = await createTestImage(folder.id, { isFavorite: false });
+			const secondFavorite = await createTestImage(folder.id, { isFavorite: false });
 			await createTestImage(folder.id, { isFavorite: true });
 			await createTestImage(folder.id, { isFavorite: false });
-			await createTestImage(folder.id, { isFavorite: false });
+
+			await favoriteService.set(FavoriteEntityType.IMAGE, firstFavorite.id, true);
+			await favoriteService.set(FavoriteEntityType.IMAGE, secondFavorite.id, true);
 
 			const result = await expectSuccess(ImageService.getAllFavorites());
 
 			expect(result.length).toBe(2);
+			expect(result.map((img) => img.id).sort()).toEqual([firstFavorite.id, secondFavorite.id].sort());
 			expect(result.every((img) => img.isFavorite === true)).toBe(true);
 		});
 
 		it('should return empty array when no favorites', async () => {
 			const folder = await createTestFolder();
+			await ensureActiveProfile();
 			await createTestImage(folder.id, { isFavorite: false });
 
 			const result = await expectSuccess(ImageService.getAllFavorites());

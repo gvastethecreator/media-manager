@@ -19,7 +19,7 @@
  * - UNIQUE (hash) with index
  */
 
-import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, notInArray, sql } from 'drizzle-orm';
 import { Effect } from 'effect';
 import { db } from '@/lib/drizzle';
 import {
@@ -39,6 +39,8 @@ import {
 } from '@/lib/drizzle/schema';
 import { Image, ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	ImageDatabaseError,
 	type ImageError,
@@ -465,6 +467,17 @@ export const getAll = (options?: {
 		const limit = Math.min(options?.limit ?? 50, 500);
 		const orderBy = options?.orderBy ?? 'createdAt';
 		const orderDirection = options?.orderDirection ?? 'desc';
+		const favoriteEntityIds: string[] | null =
+			options?.isFavorite !== undefined
+				? yield* Effect.tryPromise({
+					try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE),
+					catch: (error) =>
+						new ImageDatabaseError({
+							operation: 'getAll-favorite-ids',
+							originalError: error,
+						}),
+				})
+				: null;
 
 		logger.info('📋 Getting all images', {
 			folderId: options?.folderId,
@@ -484,7 +497,23 @@ export const getAll = (options?: {
 		}
 
 		if (options?.isFavorite !== undefined) {
-			conditions.push(eq(images.isFavorite, options.isFavorite));
+			if (favoriteEntityIds === null) {
+				conditions.push(eq(images.isFavorite, options.isFavorite));
+			} else if (options.isFavorite) {
+				if (favoriteEntityIds.length === 0) {
+					return {
+						images: [],
+						total: 0,
+						limit,
+						offset,
+						hasMore: false,
+					};
+				}
+
+				conditions.push(inArray(images.id, favoriteEntityIds));
+			} else if (favoriteEntityIds.length > 0) {
+				conditions.push(notInArray(images.id, favoriteEntityIds));
+			}
 		}
 
 		if (options?.search) {
@@ -532,7 +561,12 @@ export const getAll = (options?: {
 					.limit(limit)
 					.offset(offset);
 
-				return results.map((r: typeof images.$inferSelect) => Image.make(r));
+				const usingCanonicalFavoriteFilter = options?.isFavorite !== undefined && favoriteEntityIds !== null;
+				const favoriteValue = options?.isFavorite ?? false;
+
+				return results.map((r: typeof images.$inferSelect) =>
+					Image.make(usingCanonicalFavoriteFilter ? { ...r, isFavorite: favoriteValue } : r)
+				);
 			},
 			catch: (error) =>
 				new ImageDatabaseError({
@@ -863,14 +897,32 @@ export const getAllFavorites = (): Effect.Effect<Image[], ImageError, never> =>
 	Effect.gen(function* () {
 		logger.info('⭐ Getting all favorite images');
 
+		const favoriteEntityIds = yield* Effect.tryPromise({
+			try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE),
+			catch: (error) =>
+				new ImageDatabaseError({
+					operation: 'getAllFavorites-favorite-ids',
+					originalError: error,
+				}),
+		});
+
+		if (favoriteEntityIds !== null && favoriteEntityIds.length === 0) {
+			logger.info('✅ Favorite images retrieved', { count: 0 });
+			return [];
+		}
+
 		const results = yield* Effect.tryPromise({
 			try: async () => {
 				const favImages = await db
 					.select()
 					.from(images)
-					.where(eq(images.isFavorite, true))
+					.where(
+						favoriteEntityIds === null ? eq(images.isFavorite, true) : inArray(images.id, favoriteEntityIds)
+					)
 					.orderBy(desc(images.addedAt));
-				return favImages.map((img: typeof images.$inferSelect) => Image.make(img));
+				return favImages.map((img: typeof images.$inferSelect) =>
+					Image.make(favoriteEntityIds === null ? img : { ...img, isFavorite: true })
+				);
 			},
 			catch: (error) =>
 				new ImageDatabaseError({

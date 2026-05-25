@@ -4,12 +4,14 @@
  * @description Lógica de búsqueda y filtrado complejo de colecciones
  */
 
-import { and, asc, desc, eq, like, or } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, like, notInArray, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { fromDrizzleCollection } from '@/transformers/collection/transformer';
 import type { CollectionSearchOptions, CollectionWithStats } from '@/types/entities/collection';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { CollectionServiceError } from './collection-errors';
 
 const logger = serverLogger.withContext('CollectionSearch');
@@ -20,6 +22,9 @@ const logger = serverLogger.withContext('CollectionSearch');
 export const searchCollections = async (options: CollectionSearchOptions): Promise<CollectionWithStats[]> => {
 	try {
 		logger.info('🔍 Buscando colecciones', { options });
+
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION);
+		const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
 
 		// Construir condiciones de filtro
 		const conditions: any[] = [];
@@ -34,7 +39,17 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		}
 
 		if (options.where?.isFavorite !== undefined) {
-			conditions.push(eq(collections.isFavorite, Boolean(options.where.isFavorite)));
+			if (favoriteEntityIds === null) {
+				conditions.push(eq(collections.isFavorite, Boolean(options.where.isFavorite)));
+			} else if (options.where.isFavorite) {
+				if (favoriteEntityIds.length === 0) {
+					return [];
+				}
+
+				conditions.push(inArray(collections.id, favoriteEntityIds));
+			} else if (favoriteEntityIds.length > 0) {
+				conditions.push(notInArray(collections.id, favoriteEntityIds));
+			}
 		}
 
 		// Nota: La tabla collections no tiene campo category, se omite este filtro
@@ -85,7 +100,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 
 		const transformedCollections = drizzleCollections.map((rawCollection: any) => ({
 			...rawCollection,
-			isFavorite: Boolean(rawCollection.isFavorite),
+			isFavorite: favoriteIdSet === null ? Boolean(rawCollection.isFavorite) : favoriteIdSet.has(rawCollection.id),
 			// totalImages: 0, // TODO: get from EntityAggregates
 			// totalVideos: 0, // TODO: get from EntityAggregates
 			// totalSize: 0, // TODO: get from EntityAggregates

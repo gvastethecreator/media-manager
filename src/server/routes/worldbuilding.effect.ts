@@ -15,9 +15,12 @@ import {
 	PromptCreateInput,
 	PromptUpdateInput,
 } from '@/lib/effect/schemas/entities';
+import { listFavoriteEntities } from '@/server/utils/favorite-route';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { ConceptService, ConceptServiceLive } from '@/services/concept/concept.service.effect';
 import { PlaceService, PlaceServiceLive } from '@/services/place/place.service.effect';
 import { PromptService, PromptServiceLive } from '@/services/prompt/prompt.service.effect';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 // ============= Places Router =============
@@ -47,6 +50,30 @@ placesRouter.get(
 				category: category as string | undefined,
 				onlyFavorites: onlyFavorites === 'true' ? true : undefined,
 			};
+
+			if (options.onlyFavorites) {
+				const favoriteResult = yield* listFavoriteEntities({
+					entityType: FavoriteEntityType.PLACE,
+					search: options.search,
+					limit: options.limit,
+					offset: options.offset,
+					sortBy: options.orderBy,
+					sortOrder: options.orderDirection,
+					getEntityById: (entityId: string) => placeService.getById(entityId),
+				});
+
+				return {
+					data: favoriteResult.data,
+					pagination: {
+						total: favoriteResult.total,
+						limit: options.limit,
+						offset: options.offset,
+						hasNext: options.limit + options.offset < favoriteResult.total,
+						hasPrev: options.offset > 0,
+					},
+				};
+			}
+
 			const result = yield* placeService.getAll(options);
 			return {
 				data: result.places,
@@ -174,6 +201,30 @@ conceptsRouter.get(
 				category: category as string | undefined,
 				onlyFavorites: onlyFavorites === 'true' ? true : undefined,
 			};
+
+			if (options.onlyFavorites) {
+				const favoriteResult = yield* listFavoriteEntities({
+					entityType: FavoriteEntityType.CONCEPT,
+					search: options.search,
+					limit: options.limit,
+					offset: options.offset,
+					sortBy: options.orderBy,
+					sortOrder: options.orderDirection,
+					getEntityById: (entityId: string) => conceptService.getById(entityId),
+				});
+
+				return {
+					data: favoriteResult.data,
+					pagination: {
+						total: favoriteResult.total,
+						limit: options.limit,
+						offset: options.offset,
+						hasNext: options.limit + options.offset < favoriteResult.total,
+						hasPrev: options.offset > 0,
+					},
+				};
+			}
+
 			const result = yield* conceptService.getAll(options);
 			return {
 				data: result.concepts,
@@ -330,6 +381,30 @@ promptsRouter.get(
 				category: category as string | undefined,
 				onlyFavorites: onlyFavorites === 'true' ? true : undefined,
 			};
+
+			if (options.onlyFavorites) {
+				const favoriteResult = yield* listFavoriteEntities({
+					entityType: FavoriteEntityType.PROMPT,
+					search: options.search,
+					limit: options.limit,
+					offset: options.offset,
+					sortBy: options.orderBy,
+					sortOrder: options.orderDirection,
+					getEntityById: (entityId: string) => promptService.getById(entityId),
+				});
+
+				return {
+					data: favoriteResult.data,
+					pagination: {
+						total: favoriteResult.total,
+						limit: options.limit,
+						offset: options.offset,
+						hasNext: options.limit + options.offset < favoriteResult.total,
+						hasPrev: options.offset > 0,
+					},
+				};
+			}
+
 			const result = yield* promptService.getAll(options);
 			return {
 				data: result.prompts,

@@ -42,20 +42,28 @@ Eso hace que el árbol físico, las rutas, los servicios y la semántica del pro
 
 - El producto sigue siendo un **monolito**, pero con **fronteras explícitas por contexto**.
 - `Media Core` es el núcleo protegido.
+- `Media Core` ya tiene acordado un root canónico mínimo de `Asset`, con exactamente un `Primary Placement` y placements secundarios sólo explícitos.
 - `Taxonomy` es subdominio compartido, no cuarto contexto principal.
 - `Worldbuilding Context` depende de `Media Core`; no lo reemplaza.
+- `Platform/System Context` ya tiene vocabulario interno explícito para `App Shell`, `Global Provider`, `Operational Profile` y `Platform Process`.
 - La migración se hará por **slices acotados con big bang interno**.
-- `Favorite` se modela canónicamente como **relación transversal**.
+- `Favorite` se modela canónicamente como **relación transversal** scoped al actor o `Operational Profile` activo.
 - `Task` queda fuera del target architecture y entra en zona de deprecación.
+- La identidad portable estable y la presentación humana mutable se gobiernan por separado; un rename editorial no equivale por sí mismo a cambio de identidad.
+- `Semantic Relation` usa un modelo híbrido con `Relation Role` gobernado, slug portable estable y lecturas humanas separadas de la identidad contractual.
+- `PropertyAssignment` ya tiene un contrato portable inicial explícito, con tipos seed gobernados, cardinalidad clara y ausencia semántica normalizada.
+- `Prompt`, `Note` y `Wildcard` ya tienen contrato file-backed inicial con separación explícita entre identidad del artefacto y metadata/copy de presentación.
 
-### Pendiente de seguir definiendo en la entrevista
+### Próxima fase recomendada
 
-Todavía faltan decisiones de contrato y forma interna, por ejemplo:
+La fase fundacional de lenguaje y contratos ya está sustancialmente cerrada. El siguiente trabajo recomendado es bajar estas decisiones a enforcement y convergencia operativa, por ejemplo:
 
-- shape técnico exacto del registro de `Semantic Relation`,
-- shape técnico final de `PropertyAssignment`,
-- reglas exactas de placements/source records del `Media Core`,
-- y detalles de integración entre artefactos textuales file-backed y su indexación.
+- aterrizar las reglas exactas de placements/source records del `Media Core` en contratos ejecutables y migraciones concretas,
+- consolidar físicamente el ownership de `App Shell` y providers globales dentro de `Platform/System`,
+- implementar validaciones de API/UI/storage que hagan cumplir de forma consistente los contratos ya acordados,
+- desmontar la verdad dual de `Favorite` (`Favorite` relacional vs `isFavorite` embebido),
+- cerrar la integración operativa entre artefactos textuales file-backed, indexación y sincronización,
+- y revisar casos reales complejos donde se tocan `Worldbuilding Context`, `Taxonomy` y `Media Core` para detectar contradicciones runtime aún no limpiadas.
 
 ## Regla de uso
 

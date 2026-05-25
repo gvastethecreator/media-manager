@@ -1,39 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { FavoriteWithStats } from '@/types/entities/favorite';
-import type { ImageWithStats } from '@/types/entities/image';
+import { useActiveProfile } from '@/lib/api/profiles';
+import {
+	FavoriteEntityType,
+	isCanonicalFavoriteEntityType,
+	type FavoriteCreateInput,
+	type FavoriteWithStats,
+} from '@/types/entities/favorite';
 import { apiClient } from './client';
 
+export interface FavoriteToggleInput {
+	entityId: string;
+	entityType: FavoriteEntityType | string;
+}
+
+export interface FavoriteToggleResponse {
+	id?: string;
+	isFavorite: boolean;
+}
+
 export interface FavoriteFilters {
-	category?: string;
-	endDate?: Date;
-	entityId?: string;
-	entityType?: string;
+	entityType?: FavoriteEntityType;
 	limit?: number;
 	offset?: number;
-	priority?: number;
 	search?: string;
-	sortBy?: 'addedAt' | 'createdAt' | 'updatedAt' | 'priority' | 'entityType' | 'category';
+	sortBy?: 'addedAt' | 'entityType';
 	sortOrder?: 'asc' | 'desc';
-	startDate?: Date;
-	userId?: string;
-}
-
-export interface FavoriteCreateInput {
-	category?: string | null;
-	entityId: string;
-	entityType: string;
-	notes?: string | null;
-	priority?: number | null;
-	userId?: string | null;
-}
-
-export interface FavoriteUpdateInput {
-	category?: string | null;
-	entityId?: string;
-	entityType?: string;
-	notes?: string | null;
-	priority?: number | null;
-	userId?: string | null;
 }
 
 export interface FavoritesResponse {
@@ -47,20 +38,60 @@ export interface FavoritesResponse {
 	};
 }
 
+function resolveFavoriteScope(profileId?: string | null) {
+	return profileId ?? 'active-profile';
+}
+
+const favoriteEntityTypeAliasMap = {
+	image: FavoriteEntityType.IMAGE,
+	video: FavoriteEntityType.VIDEO,
+	audio: FavoriteEntityType.AUDIO,
+	document: FavoriteEntityType.DOCUMENT,
+	jsonFile: FavoriteEntityType.JSON_FILE,
+	file3d: FavoriteEntityType.FILE_3D,
+	album: FavoriteEntityType.ALBUM,
+	collection: FavoriteEntityType.COLLECTION,
+	folder: FavoriteEntityType.FOLDER,
+	group: FavoriteEntityType.GROUP,
+	character: FavoriteEntityType.CHARACTER,
+	place: FavoriteEntityType.PLACE,
+	worldItem: FavoriteEntityType.WORLD_ITEM,
+	'world-item': FavoriteEntityType.WORLD_ITEM,
+	concept: FavoriteEntityType.CONCEPT,
+	prompt: FavoriteEntityType.PROMPT,
+	note: FavoriteEntityType.NOTE,
+	wildcard: FavoriteEntityType.WILDCARD,
+} as const satisfies Record<string, FavoriteEntityType>;
+
+export function normalizeFavoriteEntityType(entityType: FavoriteEntityType | string): FavoriteEntityType | null {
+	const normalizedEntityType = Object.values(FavoriteEntityType).includes(entityType as FavoriteEntityType)
+		? (entityType as FavoriteEntityType)
+		: (favoriteEntityTypeAliasMap[entityType as keyof typeof favoriteEntityTypeAliasMap] ?? null);
+
+	return normalizedEntityType && isCanonicalFavoriteEntityType(normalizedEntityType) ? normalizedEntityType : null;
+}
+
 // Query keys
 export const favoriteKeys = {
 	all: ['favorites'] as const,
-	lists: () => [...favoriteKeys.all, 'list'] as const,
-	list: (filters: FavoriteFilters) => [...favoriteKeys.lists(), filters] as const,
-	details: () => [...favoriteKeys.all, 'detail'] as const,
-	detail: (id: string) => [...favoriteKeys.details(), id] as const,
-	images: (id: string) => [...favoriteKeys.detail(id), 'images'] as const,
+	scope: (profileId?: string | null) => [...favoriteKeys.all, 'profile', resolveFavoriteScope(profileId)] as const,
+	lists: (profileId?: string | null) => [...favoriteKeys.scope(profileId), 'list'] as const,
+	list: (profileId: string | null | undefined, filters: FavoriteFilters) =>
+		[...favoriteKeys.lists(profileId), filters] as const,
+	checks: (profileId?: string | null) => [...favoriteKeys.scope(profileId), 'check'] as const,
+	check: (profileId: string | null | undefined, entityType: FavoriteEntityType, entityId: string) =>
+		[...favoriteKeys.checks(profileId), entityType, entityId] as const,
+	details: (profileId?: string | null) => [...favoriteKeys.scope(profileId), 'detail'] as const,
+	detail: (profileId: string | null | undefined, id: string) => [...favoriteKeys.details(profileId), id] as const,
 };
 
 // Hooks
 export function useFavorites(filters: FavoriteFilters = {}) {
+	const { data: activeProfile } = useActiveProfile();
+	const profileId = activeProfile?.id;
+
 	return useQuery<FavoritesResponse, Error>({
-		queryKey: favoriteKeys.list(filters),
+		queryKey: favoriteKeys.list(profileId, filters),
 		queryFn: () => {
 			const params = new URLSearchParams();
 			for (const [key, value] of Object.entries(filters)) {
@@ -68,53 +99,69 @@ export function useFavorites(filters: FavoriteFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return apiClient.get<FavoritesResponse>(`/favorites?${params.toString()}`);
+
+			const query = params.toString();
+			return apiClient.get<FavoritesResponse>(query ? `/favorites?${query}` : '/favorites');
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
 }
 
 export function useFavorite(id: string) {
+	const { data: activeProfile } = useActiveProfile();
+	const profileId = activeProfile?.id;
+
 	return useQuery<FavoriteWithStats, Error>({
-		queryKey: favoriteKeys.detail(id),
+		queryKey: favoriteKeys.detail(profileId, id),
 		queryFn: () => apiClient.get<FavoriteWithStats>(`/favorites/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
 }
 
-export function useFavoriteImages(id: string) {
-	return useQuery<ImageWithStats[], Error>({
-		queryKey: favoriteKeys.images(id),
-		queryFn: () => apiClient.get<ImageWithStats[]>(`/favorites/${id}/images`),
-		enabled: !!id,
-		staleTime: 1000 * 30, // 30 segundos
-	});
-}
-
 export function useCreateFavorite() {
 	const queryClient = useQueryClient();
 
-	return useMutation<{ id?: string; isFavorite: boolean }, Error, FavoriteCreateInput>({
+	return useMutation<FavoriteToggleResponse, Error, FavoriteCreateInput>({
 		mutationFn: (data) =>
-			apiClient.post<{ id?: string; isFavorite: boolean }>('/favorites/toggle', {
+			apiClient.post<FavoriteToggleResponse>('/favorites/toggle', {
 				entityId: data.entityId,
 				entityType: data.entityType,
 			}),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.lists() });
+			queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
 		},
 	});
 }
 
-export function useUpdateFavorite() {
+export function useToggleFavoriteMutation() {
 	const queryClient = useQueryClient();
+	const { data: activeProfile } = useActiveProfile();
+	const profileId = activeProfile?.id;
 
-	return useMutation<FavoriteWithStats, Error, { id: string; data: FavoriteUpdateInput }>({
-		mutationFn: ({ id, data }) => apiClient.put<FavoriteWithStats>(`/favorites/${id}`, data),
-		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.lists() });
-			queryClient.setQueryData(favoriteKeys.detail(data.id), data);
+	return useMutation<FavoriteToggleResponse, Error, FavoriteToggleInput>({
+		mutationFn: ({ entityId, entityType }) => {
+			const normalizedEntityType = normalizeFavoriteEntityType(entityType);
+
+			if (!normalizedEntityType) {
+				throw new Error(`Tipo de favorito no soportado: ${entityType}`);
+			}
+
+			return apiClient.post<FavoriteToggleResponse>('/favorites/toggle', {
+				entityId,
+				entityType: normalizedEntityType,
+			});
+		},
+		onSuccess: (result, variables) => {
+			const normalizedEntityType = normalizeFavoriteEntityType(variables.entityType);
+
+			queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
+
+			if (normalizedEntityType) {
+				queryClient.setQueryData(favoriteKeys.check(profileId, normalizedEntityType, variables.entityId), {
+					isFavorite: result.isFavorite,
+				});
+			}
 		},
 	});
 }
@@ -124,34 +171,8 @@ export function useDeleteFavorite() {
 
 	return useMutation<void, Error, string>({
 		mutationFn: (id) => apiClient.delete(`/favorites/${id}`),
-		onSuccess: (_, id) => {
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.lists() });
-			queryClient.removeQueries({ queryKey: favoriteKeys.detail(id) });
-			queryClient.removeQueries({ queryKey: favoriteKeys.images(id) });
-		},
-	});
-}
-
-export function useAddImageToFavorite() {
-	const queryClient = useQueryClient();
-
-	return useMutation<void, Error, { favoriteId: string; imageId: string }>({
-		mutationFn: ({ favoriteId, imageId }) => apiClient.post(`/favorites/${favoriteId}/images/${imageId}`),
-		onSuccess: (_, { favoriteId }) => {
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.images(favoriteId) });
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.detail(favoriteId) });
-		},
-	});
-}
-
-export function useRemoveImageFromFavorite() {
-	const queryClient = useQueryClient();
-
-	return useMutation<void, Error, { favoriteId: string; imageId: string }>({
-		mutationFn: ({ favoriteId, imageId }) => apiClient.delete(`/favorites/${favoriteId}/images/${imageId}`),
-		onSuccess: (_, { favoriteId }) => {
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.images(favoriteId) });
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.detail(favoriteId) });
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
 		},
 	});
 }

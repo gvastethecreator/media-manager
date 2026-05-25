@@ -54,6 +54,47 @@ La arquitectura objetivo no puede dejar `Asset` sólo en las docs mientras la es
 
 ## Cómo tratar el legacy durante la migración
 
+## Regla transversal: rename editorial no equivale a cambio de identidad
+
+En la arquitectura objetivo, hay que separar con disciplina dos clases de cambio que en repositorios maduros suelen mezclarse:
+
+- **identidad portable contractual**, y
+- **presentación/copy humana mutable**.
+
+La identidad contractual vive en identificadores portables estables como slugs, keys o tokens. La presentación vive en labels visibles, títulos, summaries, lecturas humanas, traducciones, hints visuales o metadata editorial equivalente.
+
+### Qué puede cambiar sin migración semántica
+
+Por defecto, estos cambios pertenecen a presentación/editorial y no crean otra cosa por sí mismos:
+
+- renombrar el label visible de un `Tag`,
+- ajustar el título visible de una `Property`,
+- refinar el label visible de un valor permitido,
+- reescribir las lecturas humanas forward/inverse de un `Relation Role`,
+- o editar `title`, `summary`, `category`, `emoji` o `color` de un artefacto file-backed.
+
+Mientras el significado de dominio siga siendo el mismo, esos cambios no deben disparar migraciones semánticas ni crear replacement artificial.
+
+### Qué sí obliga lifecycle explícito
+
+Si cambia materialmente el significado de dominio, ya no estamos ante un retoque editorial. En ese caso corresponde alguna combinación explícita de:
+
+- deprecación,
+- replacement único,
+- migración de datos,
+- o creación de una identidad nueva.
+
+El criterio práctico es simple: si el sistema ya no puede garantizar que el identificador histórico sigue apuntando al mismo concepto, no alcanza con “renombrarlo”.
+
+### Regla de convivencia con legacy
+
+Cuando una identidad queda deprecated:
+
+- puede seguir leyéndose como legado para compatibilidad y migración,
+- no debe aceptarse en nuevas escrituras normales,
+- su identificador histórico queda reservado,
+- y su sucesión semántica no debe quedar ambigua.
+
 ### Se tolera temporalmente
 
 - facades de compatibilidad,

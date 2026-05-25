@@ -327,6 +327,7 @@ export async function createTask(input: TaskCreateInput): Promise<TaskWithStats>
 
 		const id = nanoid();
 		const now = new Date();
+		const requestedIsFavorite = input.isFavorite === true;
 
 		const insertData = {
 			id,
@@ -348,7 +349,7 @@ export async function createTask(input: TaskCreateInput): Promise<TaskWithStats>
 			projectId: input.projectId || null,
 			notes: input.notes || null,
 			featuredImage: input.featuredImage || null,
-			isFavorite: input.isFavorite ?? false,
+			isFavorite: requestedIsFavorite,
 			isArchived: false,
 			createdAt: now,
 			updatedAt: now,
@@ -497,7 +498,20 @@ export async function toggleTaskFavorite(id: string): Promise<TaskWithStats> {
 			throw createTaskError('Task no encontrado', TaskErrorCode.NOT_FOUND);
 		}
 
-		return await updateTask(id, { isFavorite: !existing.isFavorite });
+		await db
+			.update(tasks)
+			.set({ isFavorite: !existing.isFavorite, updatedAt: new Date() })
+			.where(eq(tasks.id, id));
+
+		const updatedTask = await getTaskById(id);
+
+		if (!updatedTask) {
+			throw createTaskError('Error al recuperar el task tras alternar favorito', TaskErrorCode.OPERATION_FAILED);
+		}
+
+		await notifyTaskChange('update', updatedTask);
+
+		return updatedTask;
 	} catch (error) {
 		logger.error('❌ Error al alternar favorito:', error);
 		throw createTaskError('Error al alternar favorito', TaskErrorCode.OPERATION_FAILED, error);

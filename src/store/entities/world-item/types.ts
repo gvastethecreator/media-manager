@@ -77,6 +77,7 @@ export interface WorldItemActions {
 	startEditing: (id: string | null) => void;
 
 	// 🔍 Filtros
+	toggleWorldItemFavorite: (id: string) => Promise<void>;
 	updateFilters: (filters: Partial<WorldItemFilters>) => void;
 	updateWorldItem: (id: string, item: WorldItemUpdateInput) => Promise<void>;
 }

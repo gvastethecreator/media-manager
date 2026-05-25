@@ -37,9 +37,15 @@ La decisión base recién cerrada es simple:
 
 Esto evita que el corazón del modelo nazca preguntándose en cada operación “cuál de los varios archivos físicos equivalentes manda realmente”.
 
+Si más adelante el producto necesita mirrors, copias o materializaciones adicionales bajo la misma identidad, la dirección acordada es modelarlas como placements secundarios explícitos dentro de la misma capa física. El asset sigue teniendo exactamente un `Primary Placement` y cero o más placements secundarios subordinados; la coexistencia de varias materializaciones no reabre la discusión sobre identidad.
+
+Esos placements secundarios no nacen por coincidencia de fingerprint, path u otros heurísticos débiles. Requieren decisión o modelado explícito para evitar que el modelo trate como “misma cosa” dos materializaciones que el producto todavía no decidió unificar bajo una sola identidad.
+
 ### `Asset Identity` no es `path`
 
 Mover un asset no debería matar su identidad.
+
+Del mismo modo, renombrar su título visible, ajustar su copy o cambiar el filename físico no crea otro `Asset` por sí mismo. La identidad contractual del asset vive en su raíz estable; la presentación y el soporte físico pueden cambiar sin colapsar esa identidad.
 
 ### `Content Fingerprint` no es identidad
 
@@ -74,9 +80,25 @@ El fingerprint material puede proyectarse o cachearse hacia la raíz cuando conv
 
 La decisión acordada es mantener esos campos de lifecycle y estado operativo sólo en la medida en que sean verdaderamente transversales; el resto del ruido operativo debe quedarse fuera de la raíz común.
 
+Para esta fase, el shape mínimo acordado del root queda acotado a:
+
+- `assetId`,
+- `assetType`,
+- `title` o nombre visible canónico opcional,
+- `primaryPlacementId`,
+- `status`,
+- `createdAt`,
+- `updatedAt`,
+- `archivedAt` opcional,
+- `deletedAt` opcional.
+
+Por defecto, quedan fuera de esa raíz el `path` físico, la pertenencia a `Folder`, el fingerprint como fuente canónica y cualquier estado o telemetría de colas, thumbnails, reindexado, extracción, transcodificación o sincronización.
+
 También quedó decidido que el `Asset` root puede nacer temprano durante la ingesta, anclando identidad, tipo, placement principal y estado transversal aunque la metadata especializada todavía no esté completa.
 
 En esa misma línea, el nombre o título visible canónico del asset puede ser opcional al inicio. Mientras no exista, la operación puede caer temporalmente al nombre físico sin colapsar ambos conceptos.
+
+Ese fallback operativo no convierte al filename en identidad ni en nombre canónico permanente del asset; sólo evita dejar al objeto sin representación visible mientras la capa editorial todavía no fue completada.
 
 También quedó acordado que el root puede llevar un set pequeño de estados de lifecycle visibles para usuario cuando expresen semántica real del producto (por ejemplo activos o archivados), sin degradarse a un panel de flags técnicos.
 
@@ -93,6 +115,8 @@ Y quedó explícito que flags como `hidden` o `public` no pertenecen a ese lifec
 También quedó decidido que estados de pipeline como `pending`, `processing`, `completed` o `failed` no pertenecen a ese lifecycle visible. Si existen, deben vivir como processing status separado.
 
 Y cuando ocurran transiciones semánticas reales de lifecycle, la raíz del asset puede guardar timestamps explícitos como `archivedAt` o `deletedAt` para no perder trazabilidad mínima.
+
+La frontera de estado transversal queda así: `Asset` conserva sólo lifecycle visible y estado operativo realmente transversal al objeto de producto. En cambio, jobs, retries, progreso, errores de pipeline y demás concerns de infraestructura pertenecen a servicios o capas operativas adyacentes, no al corazón identitario del asset.
 
 En ese mismo marco, `deleted` quedó definido como borrado lógico o tombstone dentro del lifecycle visible del asset. La eliminación física definitiva del registro o del soporte material pertenece a otra operación, no al significado del estado.
 
@@ -183,6 +207,8 @@ Estas relaciones no deberían diluirse en un modelo genérico.
 
 Estas sí pueden convivir mejor con un modelo genérico de relaciones, siempre que el ownership siga claro.
 
+En ese mismo marco, que otro contexto marque un asset como destacado, representativo o preferido no reescribe la identidad del asset ni su placement principal. Esa preferencia vive en la relación o selección del contexto consumidor, no en la definición estructural del núcleo.
+
 ## Batch 1: modelo canónico de `Asset`
 
 Este batch es el corazón técnico del programa.
@@ -195,6 +221,8 @@ Este batch es el corazón técnico del programa.
 - estrategia de ingesta,
 - y consecuencia estructural de `Asset Specialization`.
 
+La ruta acordada para converger sin fabricar un monstruo intermedio es ejecutar el modelo canónico de `Asset` como slice acotado, alineado con el ADR `0003`: raíz común de asset + placement principal + una familia de especialización por vez, usando fachadas transicionales sólo mientras cada slice se cierra completo. La dirección explícita es evitar una megaestructura de convivencia indefinida entre todas las tablas legacy y el modelo canónico nuevo.
+
 ### No debería dejar pendiente
 
 - una doble semántica donde `Asset` exista sólo en docs y las tablas sigan mintiendo sin plan de convergencia,
@@ -204,17 +232,17 @@ Este batch es el corazón técnico del programa.
 
 Con el asset model resuelto, recién ahí conviene limpiar la capa de organizers. Hacerlo al revés dejaría a `Folder`, `Album`, `Collection` y `Group` apoyados sobre una unidad principal todavía ambigua.
 
-## Preguntas aún abiertas dentro del contexto
+## Cierres internos ya acordados para esta fase
 
-Aunque el núcleo ya está bastante definido, siguen vivas algunas preguntas de forma interna:
+Dentro de `Media Core`, la base semántica ya no deja estos puntos abiertos:
 
-- ¿el placement físico vive dentro del `Source File` o como relación separada?
-- ¿cómo modelamos placements secundarios, mirrors o copias adicionales sin erosionar el placement principal canónico?
-- ¿cuál es el shape técnico mínimo de la raíz común de `Asset`?
-- ¿cómo se migra desde tablas por tipo sin fabricar un monstruo intermedio?
-- ¿qué parte del estado operativo transversal debe quedarse en `Asset` y cuál en infraestructura adyacente?
+- en el modelo base, `Source File` y `Primary Placement` no se separan; la separación sólo aparece si el producto necesita placements secundarios explícitos,
+- los placements secundarios viven en la misma capa física como materializaciones adicionales explícitas bajo una sola identidad de asset,
+- la raíz común de `Asset` ya tiene un shape mínimo acotado y no absorbe por defecto concerns de infraestructura,
+- la migración desde tablas por tipo converge por slices acotados del modelo canónico y no mediante una megaestructura intermedia indefinida,
+- y el estado verdaderamente transversal del asset queda separado de jobs, pipelines y telemetría operativa adyacente.
 
-La primera de estas preguntas ya quedó resuelta: en el modelo base no se separan `Source File` y `Primary Placement`; la separación sólo se justifica cuando exista modelado explícito de placements secundarios.
+Quedan abiertas, en cambio, sólo decisiones de ejecución técnica fina y orden de implementación, no la semántica base del contexto.
 
 ## Criterio de salida del slice
 
@@ -223,4 +251,5 @@ La primera de estas preguntas ya quedó resuelta: en el modelo base no se separa
 - `Asset` tenga semántica y consecuencia estructural reales,
 - duplicados e identidad ya no dependan del mismo campo con otro nombre,
 - los organizers dejen de competir entre sí por significado,
+- los títulos visibles y preferencias externas no se confundan con identidad del asset,
 - y los demás contextos puedan referenciar el núcleo sin redefinirlo.

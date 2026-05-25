@@ -40,6 +40,7 @@ La arquitectura objetivo de `Taxonomy` tratará a `Prompt`, `Note` y `Wildcard` 
 - Cuando ese vínculo existe, apunta como máximo a una sola clave canónica próxima.
 - El vocabulario canónico de `Prompt.parameters` es global por defecto y sólo restringe aplicabilidad cuando existe una razón semántica real.
 - Cuando una clave declara aplicabilidad restringida, esa restricción es efectiva y no meramente orientativa.
+- Los labels visibles, ayudas de UI y traducciones asociados a claves o tokens de `Prompt.parameters` pertenecen a presentación; la identidad contractual vive en la key o token portable estable.
 - En `Note`, campos de workflow como `status`, `priority` o `presetId` quedan fuera de la representación portable/authored inicial y pertenecen a la capa operativa del producto.
 - Fuera de ese descarte, `Note` no introduce campos authored específicos propios en la primera versión: usa núcleo compartido más cuerpo Markdown.
 - `Wildcard` usa un único archivo con cabecera mínima gobernada y cuerpo line-based simple.
@@ -49,6 +50,7 @@ La arquitectura objetivo de `Taxonomy` tratará a `Prompt`, `Note` y `Wildcard` 
 - El campo corto canónico compartido para resumen o abstract es `summary`; cualquier `description` legacy queda como alias de adaptación y no como parte del contrato futuro.
 - `category` forma parte del núcleo authored compartido, pero sólo como clasificación liviana y local del artefacto; no reemplaza a `Tag` ni a la clasificación relacional global.
 - `emoji` y `color` pueden vivir en la representación portable sólo como hints authored opcionales de presentación compartidos, no como parte del núcleo semántico mínimo.
+- Cambios en `title`, `summary`, `category`, `emoji` o `color` no alteran por sí mismos la identidad del artefacto mientras su semántica de dominio siga siendo la misma.
 - `featuredImage` queda fuera de la representación portable y de la metadata authored; si el producto necesita media destacada canónica, debe modelarse como relación o selección explícita hacia un `Asset`.
 - `isFavorite` queda fuera de la representación portable y de la metadata authored; sigue perteneciendo a la capa relacional u operativa del producto.
 - La pertenencia canónica a `Tag` sigue viviendo en la capa relacional compartida; cualquier nombre o slug de tag presente en el archivo portable sólo actúa como hint de autoría o importación, no como verdad final.

@@ -13,6 +13,7 @@ import {
 	deleteFile3DFromApi,
 	getFile3DFromApi,
 	getFile3DsFromApi,
+	toggleFile3DFavoriteInApi,
 	updateFile3DInApi,
 } from '@/lib/api/client/file3d.client';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
@@ -179,9 +180,17 @@ const useFile3DStoreBase = create<File3DState>()(
 			toggleFavorite: async (id: string) => {
 				const file3D = get().getFile3DById(id);
 				if (file3D) {
-					await get().updateFile3D(id, {
-						isFavorite: !file3D.isFavorite,
-					});
+					set({ loading: true, error: null });
+					try {
+						const updatedFile3D = await toggleFile3DFavoriteInApi(id);
+						set((state) => ({
+							file3Ds: state.file3Ds.map((item) => (item.id === id ? updatedFile3D : item)),
+							currentFile3D: state.currentFile3D?.id === id ? updatedFile3D : state.currentFile3D,
+							loading: false,
+						}));
+					} catch (error) {
+						set({ error: (error as Error).message, loading: false });
+					}
 				}
 			},
 		}),

@@ -40,6 +40,8 @@ Este batch fija el lenguaje clasificatorio más transversal.
 
 `Tag` es un clasificador global y compartido. No debe fragmentarse en taxonomías separadas por contexto salvo que en el futuro aparezca una necesidad extraordinaria que merezca una decisión explícita.
 
+Un vocabulario cerrado no empuja automáticamente a `Property`. Si el significado central sigue siendo pertenencia clasificatoria —por ejemplo, “este objeto cae dentro de esta clase temática o semántica”—, la dirección acordada es mantenerlo en `Tag` aunque el catálogo sea pequeño, controlado y bien gobernado.
+
 Su perímetro inicial incluye `Assets`, `Organizers`, `Narrative Entities`, `Prompt`, `Note` y `Wildcard`. La intención es que la clasificación transversal también pueda operar sobre artefactos textuales compartidos sin obligarlos a incrustar tags canónicos en su representación portable.
 
 Además, `Tag` no debe depender de su label visible como identidad. Necesita un identificador portable estable que permita renombrar la presentación humana sin romper referencias ni clasificación histórica.
@@ -47,6 +49,8 @@ Además, `Tag` no debe depender de su label visible como identidad. Necesita un 
 Ese identificador portable se expresa como slug estable en minúsculas con formato `snake_case`, manteniendo coherencia con los demás vocabularios gobernados del sistema.
 
 Además, ese slug se trata como identidad estable y no como copy editable. Si alguna vez necesita cambiar, el movimiento correcto es una migración explícita y no un simple rename editorial.
+
+El label visible del tag, en cambio, pertenece a la capa editorial/presentacional. Puede refinarse, traducirse o ajustarse sin migración mientras el significado del tag siga siendo el mismo; si cambia el concepto de fondo, ya no se trata de copy sino de lifecycle de catálogo.
 
 Cuando un `Tag` declare aplicabilidad restringida, esa restricción opera como contrato real. Asignar el tag fuera del perímetro definido se considera inválido y no una simple advertencia de UI o documentación.
 
@@ -62,6 +66,22 @@ La jerarquía ligera de `Tag` tampoco materializa herencia automática en las as
 
 Por la misma razón, dentro de una misma rama jerárquica no se considera válido asignar directamente a la vez un tag descendiente y su ancestro sobre el mismo objeto. La dirección acordada es que esa combinación sea redundante por defecto y que la clasificación directa priorice el nivel más específico.
 
+Cuando un `Tag` cambia de padre, esa operación no invalida por defecto sus asignaciones existentes. La dirección acordada es tratar el reparenting como ajuste de la estructura taxonómica compartida y no como reescritura automática de la clasificación histórica de todos los objetos ya etiquetados.
+
+Si ese reparenting introduce nuevas redundancias entre ancestro y descendiente en asignaciones ya existentes, la dirección acordada no es borrarlas en silencio. El sistema debe detectarlas como casos a normalizar mediante cleanup o migración explícita, preservando trazabilidad y evitando mutaciones opacas sobre la clasificación histórica.
+
+Cuando dos `Tag` terminan representando el mismo concepto y uno absorbe al otro, la dirección acordada no es hacer desaparecer al absorbido como si nunca hubiese existido. Ese tag queda en estado legacy/deprecated para preservar lectura histórica, compatibilidad transitoria y una ruta de migración explícita.
+
+Si la equivalencia semántica es clara, ese tag absorbido puede declarar además como máximo un único tag de reemplazo explícito. La intención es dar una salida ordenada a la convergencia del catálogo sin abrir la puerta a varios sucesores competidores para el mismo legado.
+
+Esa compatibilidad histórica no significa que el tag deprecated siga vigente para nuevas escrituras. La dirección acordada es que pueda seguir leyéndose en asignaciones legacy durante la transición, pero que quede bloqueado para nuevas asignaciones normales una vez absorbido por el catálogo vigente.
+
+Si una asignación legacy vuelve a guardarse usando uno de esos tags deprecated que ya declara replacement equivalente, la representación debe normalizarse por defecto al tag vigente. La intención es que la compatibilidad histórica no se convierta en permiso para seguir escribiendo eternamente el vocabulario absorbido.
+
+Ese lifecycle implica además que el slug histórico del tag absorbido no se recicla. La dirección acordada es mantenerlo reservado para preservar trazabilidad y evitar que una identidad retirada reaparezca más tarde asociada a otro concepto distinto.
+
+Ese mismo lifecycle también implica que un tag deprecated no siga sosteniendo la jerarquía activa como padre válido. Si todavía tiene hijos vigentes, la dirección acordada es exigir reparenting explícito hacia la estructura actual en lugar de dejar que el legado siga organizando el árbol compartido.
+
 #### Rasgos objetivo del catálogo
 
 - catálogo global compartido,
@@ -75,6 +95,14 @@ Por la misma razón, dentro de una misma rama jerárquica no se considera válid
 
 Esa distinción con `Tag` no debe diluirse por comodidad. La dirección acordada es evitar canonizar el mismo concepto semántico a la vez como tag y como property salvo que exista una distinción explícita y fuertemente justificada entre “clasificación” y “faceta tipada”.
 
+La heurística positiva también queda fijada: `Property` se usa cuando el dominio necesita expresar una faceta con valor tipado y gobernado —incluyendo cardinalidad, allowed values, validación o semántica de atributo— y no cuando basta una pertenencia clasificatoria. El hecho de que exista un vocabulario controlado no alcanza, por sí solo, para mover un concepto desde `Tag` a `Property`.
+
+Como contrato de catálogo, `Property` tampoco depende de agrupaciones para definir su identidad. Su slug portable es globalmente único, y cualquier categoría o agrupación opcional funciona sólo como organización liviana de catálogo, no como namespace duro ni como segunda capa de identidad.
+
+En la misma línea, `Property` no deriva en jerarquía o herencia entre properties en esta primera versión. Cada faceta canónica existe como definición plana e independiente; si el dominio necesita otra faceta, la modela como otra property y no como hija, subtipo o extensión implícita de otra.
+
+Igual que en `Tag`, el label visible de una `Property` pertenece a presentación/editorial y no a identidad. Puede ajustarse o localizarse sin migración mientras la faceta portable siga significando lo mismo; si cambia materialmente el concepto, ya no es un simple rename editorial.
+
 #### Rasgos objetivo de la definición
 
 - catálogo global de propiedades,
@@ -83,17 +111,35 @@ Esa distinción con `Tag` no debe diluirse por comodidad. La dirección acordada
 - allowed values opcionales cuando la definición requiera vocabulario controlado,
 - definición separada de sus valores concretos.
 
+Si una `Property` completa deja de ser válida para el catálogo vigente, la dirección acordada no es borrarla como si nunca hubiese existido ni permitir que siga escribiéndose normalmente. Debe permanecer legible como elemento legacy para preservar historia y compatibilidad transitoria, pero quedar bloqueada para nuevas asignaciones normales.
+
+Si además la equivalencia semántica con una sucesora es clara, esa property deprecated puede declarar como máximo una única property de reemplazo explícito. Y si una asignación legacy vuelve a guardarse usando esa property retirada, la representación debe normalizarse por defecto hacia la property vigente en lugar de seguir reescribiendo el vocabulario deprecado.
+
+Esa normalización automática, sin embargo, no aplica a ciegas. La dirección acordada es permitirla sólo cuando la property sucesora conserva compatibilidad semántica base con la anterior y además mantiene tipo de valor y cardinalidad portable compatibles; si no, el cambio deja de ser un replacement seguro y pasa a requerir migración explícita.
+
+Esa compatibilidad exigida incluye también la aplicabilidad. Si el reemplazo cambia materialmente el perímetro de objetos válidos, la transición deja de comportarse como un replacement seguro y debe tratarse como migración explícita.
+
+Además, la identidad estable histórica de una property retirada no se recicla. La dirección acordada es reservar su key o slug portable incluso después de la deprecación, para impedir que una identidad vieja reaparezca más tarde representando otra semántica distinta.
+
 Cuando exista ese vocabulario controlado, cada opción necesita un token estable separado del label visible. La intención es que los assignments apunten a identidad portable real y no a textos humanos que puedan cambiar por razones editoriales.
 
 Esos tokens se expresan como slugs estables en minúsculas con formato `snake_case`, manteniendo coherencia con la representación portable de `enum_token` y con el resto de vocabularios gobernados.
 
 Además, esos tokens se tratan como identidad estable y no como labels editables. Si alguna vez necesitan cambiar, el camino correcto es una migración explícita y no un rename casual que deje assignments históricos colgando de un valor mutado.
 
+Los labels visibles de esos valores permitidos, en cambio, pertenecen a presentación y localización. Pueden refinarse sin migración mientras el token siga representando el mismo significado de dominio.
+
 Por defecto, la unicidad de esos tokens vive dentro del vocabulario controlado de la `Property` que los declara. No se exige una unicidad global entre todas las properties salvo que en el futuro aparezca un registro compartido más fuerte que justifique esa expansión.
 
 El orden de ese vocabulario permitido no se trata como semántica de dominio por defecto. Si la UI o el authoring necesitan mostrar las opciones en cierto orden, ese orden pertenece a presentación, no a la identidad portable de los valores.
 
 Si una `Property` retira uno de esos valores permitidos y ya existen assignments que lo usan, esos casos no se consideran simplemente “vigentes como siempre”. La dirección acordada es tratarlos como legacy/migrables: compatibles para lectura histórica durante la transición, pero fuera del vocabulario actual hasta su normalización.
+
+Esa compatibilidad histórica no significa que el token retirado siga disponible para nuevas escrituras. La dirección acordada es que pueda leerse en assignments legacy, pero no aceptarse en nuevas creaciones ni en regrabados normales una vez que ya salió del vocabulario vigente.
+
+Cuando la equivalencia semántica sea clara, ese valor retirado puede declarar además un único token de reemplazo explícito. La dirección acordada es guiar la migración con un sucesor formal sin abrir la puerta a varios reemplazos competidores para el mismo valor legacy.
+
+Si un assignment legacy vuelve a guardarse usando uno de esos tokens retirados que ya declara replacement equivalente, la representación debe normalizarse por defecto al token vigente. La intención es que la compatibilidad histórica no se convierta en permiso para seguir escribiendo eternamente el mismo legado.
 
 ### Valores de `Property`
 
@@ -124,37 +170,9 @@ El seed mínimo inicial acordado para esos tipos es:
 - `date`
 - `enum_token`
 
-Cuando un parámetro necesita multiplicidad, esa condición se modela como wrapper genérico sobre el tipo base y no como una familia paralela de tipos especiales. La intención es conservar un vocabulario pequeño y composable también en `Prompt.parameters`.
-
 Si el tipo declarado es `enum_token`, el parámetro debe declarar o referenciar explícitamente el vocabulario válido de tokens. La intención es que el contrato del parámetro siga siendo verificable y que la UI no dependa de inferencias o convenciones implícitas para saber qué opciones mostrar.
 
-Además, los tipos primitivos compartidos de `Prompt.parameters` reutilizan por defecto la misma semántica base ya acordada para `PropertyAssignment`. La intención es impedir que `text`, `number`, `date`, `boolean` o `enum_token` empiecen a significar cosas distintas según el rincón del dominio en el que aparezcan.
-
-Cuando una definición de parámetro usa una clave canónica del vocabulario compartido, el tipo base de esa clave no queda libre para redefinición local en cada prompt. La intención es que el vocabulario canónico siga siendo contrato real y no sólo un catálogo de nombres bonitos reutilizables con semánticas incompatibles.
-
-La cardinalidad base sigue la misma regla. Si una clave canónica nace como escalar o como lista, esa forma base queda gobernada por el vocabulario compartido y no se redefine libremente en cada prompt individual.
-
-Dentro del seed inicial, `subject` nace como parámetro escalar de tipo `text`. La intención es cubrir de forma portable y suficientemente amplia el foco principal del prompt sin exigir desde el día 1 un vocabulario cerrado ni una estructura más compleja.
-
-`context` sigue la misma lógica y nace también como parámetro escalar de tipo `text`. La intención es capturar situación, trasfondo o marco de uso sin convertir esa capa inicial en una estructura más rígida de lo necesario.
-
-`tone`, en cambio, nace como parámetro escalar de tipo `enum_token`. La intención es introducir vocabulario compartido en un lugar donde la consistencia semántica suele aportar mucho más valor que el texto libre totalmente abierto.
-
-`style` nace como parámetro multivalue con tipo base `enum_token`. La intención es permitir composición de rasgos o influencias estilísticas sin abandonar el vocabulario controlado ni degradar esta clave a texto libre completamente abierto.
-
-`constraints` nace como parámetro multivalue con tipo base `text`. La intención es capturar varias restricciones independientes sin forzar todavía un catálogo cerrado prematuro, manteniendo al mismo tiempo una forma base explícita y consistente.
-
-Para `tone` y `style`, además, la dirección acordada es apoyarse por defecto en vocabularios compartidos entre prompts. La intención es que esas claves canónicas no se limiten a compartir nombre, sino también un lenguaje reusable y consistente para UI, búsqueda y authoring.
-
-Eso no impide que un prompt concreto estreche ese vocabulario a un subconjunto local cuando necesite acotarlo. Lo que no debe hacer es ampliarlo con tokens fuera del catálogo compartido, porque eso volvería a convertir una clave canónica en un vocabulario privado disfrazado.
-
-Cuando un parámetro es multivalue, la semántica por defecto de esa multiplicidad es colección sin orden y sin duplicados. La intención es evitar ruido y secuencias accidentales, dejando cualquier semántica más fuerte de orden sólo para una decisión posterior explícita.
-
-Los hints de UI —por ejemplo, sugerir `select`, `chips`, `textarea`, `slider` o análogos— no forman parte del contrato semántico base del parámetro. Si existen, pertenecen a metadata opcional de presentación y no deben reescribir tipo, cardinalidad ni identidad del parámetro portable.
-
-Cada parámetro, además, debe declarar explícitamente si es requerido u opcional. La intención es que la obligatoriedad no dependa de defaults, ejemplos, placeholders o convenciones implícitas de una UI concreta, sino del contrato authored portable del prompt.
-
-La presencia de un default no altera por sí sola esa requiredness. La intención es mantener separados dos ejes distintos: la conveniencia de partir de un valor sugerido y la obligación semántica de completar o confirmar el parámetro.
+Esos tokens válidos se expresan como slugs estables en minúsculas con formato `snake_case`, separados de sus labels visibles humanos. La identidad portable vive en el token; la presentación y localización del valor pertenecen a UI o a metadata de presentación y pueden refinarse sin migración mientras el significado siga siendo el mismo.
 
 La intención es cubrir un núcleo reusable y consultable sin inflar el contrato con microtipos prematuros ni empujar vocabularios controlados a texto libre.
 
@@ -202,6 +220,8 @@ La definición de `Property` tampoco se limita a sugerir el tipo: lo gobierna. C
 
 La cardinalidad sigue la misma regla. Si una `Property` es single-value o multivalue, esa decisión forma parte de su contrato y no queda librada a cada assignment individual. Así la faceta mantiene coherencia semántica, de validación y de consumo en UI/API.
 
+Ese contrato tampoco se bifurca localmente según el target. Si una supuesta misma property necesitara cambiar tipo, cardinalidad o vocabulario controlado dependiendo del tipo de objeto al que se aplique, la dirección acordada es modelar properties distintas y no introducir overrides por target dentro de una sola definición canónica.
+
 La aplicabilidad declarada por una `Property` también opera como restricción real. Si la faceta se limita a cierto perímetro de objetos o familias, un `PropertyAssignment` fuera de ese alcance se considera inválido y no una simple advertencia editorial.
 
 Los allowed values siguen la misma lógica. Si una `Property` declara un vocabulario permitido, un `PropertyAssignment` fuera de ese set se considera inválido. La intención es que el vocabulario controlado actúe como contrato real y no como sugerencia blanda de UI.
@@ -244,17 +264,17 @@ En modo file-backed, su formato base es Markdown con metadata authored en frontm
 
 En cambio, campos de workflow como `status`, `priority` o `presetId` no forman parte del contrato portable/authored inicial. Si el producto necesita esos estados, deben vivir en la capa operativa o en un subdominio más claramente orientado a workflow, no dentro del knowledge portable por defecto.
 
-Fuera de eso, `Note` no introduce una capa authored específica propia en la primera versión. El núcleo compartido más el cuerpo Markdown cubren suficientemente su identidad como knowledge object portable.
-
-Ese cuerpo Markdown, además, no debe quedar vacío en el estado canónico del artefacto. Los drafts completamente en blanco pueden existir durante edición, pero una `Note` portable válida debe contener contenido authored real.
-
 Ese contrato inicial puede incluir una capa específica pequeña y gobernada además del núcleo authored compartido. La dirección acordada no es dejar a `Prompt` totalmente plano ni canonizar de golpe todo el shape legacy existente.
 
 Dentro de esa capa mínima, la decisión actual es empezar por `purpose` y `parameters`. Campos como `model` o el resto del shape legacy más granular (`style`, `lighting`, `mood`, `technique`, etc.) quedan fuera del contrato inicial hasta que una necesidad real del producto justifique formalizarlos.
 
 En esa misma capa, `purpose` no actúa como alias de `summary`. `summary` sigue siendo el abstract breve compartido del artefacto, mientras que `purpose` expresa la intención de uso específica del `Prompt`.
 
+Además, `purpose` no se conserva como casillero nominal vacío. En la representación portable canónica debe contener una intención de uso authored real; si el artefacto no tiene esa intención expresada, todavía no está completo como `Prompt` portable bien formado.
+
 `parameters`, además, no debe resolverse como mapa JSON libre sin contrato. La dirección acordada es tratarlo como bloque authored estructurado y gobernado, con shape pequeño y extensible bajo reglas explícitas, en vez de permitir crecimiento arbitrario desde el día 1.
+
+Eso tampoco obliga a que todo `Prompt` tenga parámetros. Si el template no expone variables reales ni necesita contrato paramétrico, `parameters` puede omitirse por completo en lugar de persistirse como bloque vacío meramente ceremonial.
 
 La representación inicial acordada para ese bloque es una colección de entradas tipadas y gobernadas, no un set rígido de campos acoplado a un runtime o herramienta específica. Así `Prompt` conserva portabilidad semántica sin volver a caer en JSON libre.
 
@@ -273,6 +293,8 @@ Eso no significa que todo concepto legacy expulsado del top-level quede prohibid
 El seed mínimo inicial acordado para ese vocabulario es: `subject`, `context`, `tone`, `style` y `constraints`. Ese set actúa como primer lenguaje compartido real y puede crecer más adelante sólo mediante decisiones explícitas.
 
 Esas claves canónicas se tratan como identificadores estables del contrato portable. La UI puede traducir sus etiquetas visibles según idioma o contexto, pero el nombre portable de la clave no cambia con la localización.
+
+Cuando claves como `tone` o `style` se apoyan en vocabularios compartidos, la misma separación se mantiene en sus opciones: la identidad contractual vive en tokens estables y no en labels visibles. La UI puede traducir, reordenar o refinar esos labels, pero el portable sigue apuntando al token compartido.
 
 Semánticamente, ese bloque describe las variables del template de `Prompt`, no los valores canónicos de una ejecución concreta. Si el producto necesita almacenar un prompt ya resuelto con valores, eso pertenece a otra capa u objeto operativo y no al contrato authored portable base.
 
@@ -312,6 +334,10 @@ Mientras una clave siga siendo custom, no alcanza con marcarla como extensión. 
 
 Eso no habilita, sin embargo, un sistema tipado privado por clave custom. La dirección acordada es que también esas extensiones usen el mismo vocabulario de tipos compartido de `Prompt.parameters`, para que la extensibilidad viva en la semántica de la clave y no en romper el contrato base.
 
+Si una de esas claves custom declara tipo `enum_token`, sí puede definir su vocabulario válido de tokens de forma local dentro del propio prompt. La dirección acordada es no exigir que cada enum custom nazca ya como vocabulario compartido global, siempre que el conjunto válido quede explícitamente declarado en el contrato authored.
+
+Incluso en ese caso local, la misma separación se mantiene: cada opción válida necesita un token estable propio y cualquier label visible asociado pertenece a presentación o ayuda authored, no a la identidad portable del valor.
+
 Si además existe una cercanía semántica clara con una clave canónica ya disponible, la extensión puede declarar opcionalmente ese vínculo como puente explícito hacia el vocabulario compartido. Ese puente ayuda a ordenar migraciones y lectura de intención, pero no se vuelve obligatorio en todos los casos.
 
 Cuando ese puente existe, no se dispersa hacia múltiples afinidades simultáneas. La dirección acordada es que una clave custom pueda señalar, como máximo, una sola clave canónica próxima como referencia dominante.
@@ -336,6 +362,10 @@ Si nace inline y luego se externaliza a archivo, sigue siendo el mismo `Prompt` 
 - vinculable a múltiples objetos.
 
 En modo file-backed, su formato base es Markdown con metadata authored en frontmatter.
+
+Fuera de eso, `Note` no introduce una capa authored específica propia en la primera versión. El núcleo compartido más el cuerpo Markdown cubren suficientemente su identidad como knowledge object portable.
+
+Ese cuerpo Markdown, además, no debe quedar vacío en el estado canónico del artefacto. Los drafts completamente en blanco pueden existir durante edición, pero una `Note` portable válida debe contener contenido authored real.
 
 No debe quedar reducido a comentario colgante de una sola cosa.
 
@@ -374,11 +404,15 @@ Las líneas vacías o compuestas sólo por whitespace tampoco se consideran entr
 
 Las entradas válidas, además, se normalizan recortando whitespace exterior antes de persistirse. La intención es evitar falsos distintos puramente editoriales y mantener el vocabulario line-based lo más limpio y reusable posible.
 
+Esa normalización no incluye, por ahora, colapsar diferencias de mayúsculas y minúsculas. La dirección acordada es que en v1 la detección de duplicados respete casing, para no imponer una política lingüística prematura ni borrar matices authored que podrían seguir siendo significativos.
+
 El orden de esas entradas no se trata como semántica portable por defecto. Si un editor o una UI necesita mostrarlas en cierto orden, esa decisión pertenece a authoring o presentación, no al significado base del `Wildcard`.
 
 En esta primera versión, además, cada entrada no lleva un identificador propio separado. La dirección acordada es mantener el artefacto line-based simple y tratar cada línea como texto normalizado, sin introducir todavía una subcapa de identidad interna por opción.
 
 Por la misma razón, una línea representa sólo una entrada textual y no admite en v1 sintaxis inline de comentario o metadata por opción. La intención es que `Wildcard` siga siendo un formato line-based puro y no derive hacia un mini lenguaje antes de demostrar esa necesidad.
+
+Después de aplicar esas normalizaciones, el `Wildcard` debe conservar al menos una entrada válida. Si el cuerpo queda efectivamente vacío, el artefacto no se considera portable válido; los placeholders vacíos quedan reservados para estados transitorios de edición.
 
 También aquí aplica la misma regla: la cabecera usa un set pequeño y gobernado de campos authored, no un espacio top-level arbitrario.
 
@@ -409,6 +443,8 @@ Además, la identidad del artefacto file-backed debe ser estable e independiente
 Esa identidad estable debe viajar con la representación portable del artefacto y no vivir sólo en la DB.
 
 Del mismo modo, el nombre visible canónico del artefacto es authored y no depende obligatoriamente del filename físico, aunque ambos puedan coincidir muchas veces por conveniencia.
+
+En la misma línea, cambios authored en `title`, `summary`, `category`, `emoji` o `color` no crean otro artefacto ni alteran por sí mismos su identidad. La intención es separar con claridad la identidad portable del artefacto de su copy o presentación humana.
 
 Cuando la eliminación se dispara desde la app, la semántica por defecto es borrado lógico/restaurable. El purge físico del archivo canónico pertenece a una operación posterior y explícita.
 

@@ -9,6 +9,7 @@ import {
 	createWorldItemInApi,
 	deleteWorldItemFromApi,
 	getWorldItemsFromApi,
+	toggleWorldItemFavoriteInApi,
 	updateWorldItemInApi,
 } from '@/lib/api/client/world-item.client';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -29,6 +30,7 @@ export interface WorldItemCoreSlice {
 	resetStore: () => void;
 	setError: (error: string | null) => void;
 	setWorldItems: (worldItems: WorldItem[]) => void;
+	toggleWorldItemFavorite: (id: string) => Promise<void>;
 	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
 	worldItems: WorldItem[];
 }
@@ -76,6 +78,19 @@ export const createWorldItemCoreSlice: StateCreator<WorldItemState & WorldItemAc
 		} catch (error) {
 			worldItemLogger.error('❌ Error al actualizar objeto del mundo:', error);
 			toastService.system.error('Error al actualizar objeto del mundo');
+		}
+	},
+	toggleWorldItemFavorite: async (id) => {
+		try {
+			worldItemLogger.info('⭐ Alternando favorito de objeto del mundo:', id);
+			const updatedItem = await toggleWorldItemFavoriteInApi(id);
+			set((state) => ({
+				worldItems: state.worldItems.map((item) => (item.id === id ? (updatedItem as unknown as WorldItem) : item)),
+			}));
+			toastService.system.success('Favorito actualizado');
+		} catch (error) {
+			worldItemLogger.error('❌ Error al alternar favorito de objeto del mundo:', error);
+			toastService.system.error('Error al alternar favorito del objeto del mundo');
 		}
 	},
 	deleteWorldItem: async (id) => {

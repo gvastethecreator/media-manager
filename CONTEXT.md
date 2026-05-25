@@ -64,6 +64,10 @@ _Avoid_: cache, thumbnail, preview, derivado
 El placement o source físico principal y canónico que ancla operativamente a un **Asset** en el modelo base, sin definir por eso su identidad, coincidiendo conceptualmente con `Source File` mientras no exista una necesidad real de separar capas.
 _Avoid_: identidad del asset, mirror equivalente por defecto, copia secundaria implícitamente canónica
 
+**Secondary Placement**:
+Un placement físico adicional, explícito y subordinado al **Primary Placement** de un **Asset**, que representa otra materialización durable de la misma identidad sin nacer por heurísticas automáticas como coincidencia de fingerprint o path.
+_Avoid_: duplicate candidate automático, primary placement alternativo, equivalencia implícita por defecto
+
 **Ingestion Channel**:
 La vía por la que un **Source File** entra al sistema sin convertirse por sí misma en una especie paralela de dominio.
 _Avoid_: tipo de asset separado, dominio paralelo
@@ -105,7 +109,7 @@ Un clasificador semántico global y transversal que etiqueta objetos de dominio 
 _Avoid_: collection, group, album
 
 **Favorite**:
-Un marcador transversal que destaca un objeto de dominio sin convertirlo en un **Organizer** ni en una categoría propia, y cuya verdad canónica debe modelarse como relación transversal.
+Un marcador transversal, scoped al actor o perfil activo, que destaca un objeto de dominio sin convertirlo en un **Organizer** ni en una categoría propia, y cuya verdad canónica debe modelarse como relación transversal.
 _Avoid_: asset, organizer, bucket de contenido
 
 **Group**:
@@ -128,6 +132,22 @@ _Avoid_: segundo núcleo, producto principal
 El contexto que soporta operación del producto mediante settings, observabilidad, colas, thumbnails, reindexado y procesos transversales.
 _Avoid_: lógica de negocio principal, dominio creativo
 
+**App Shell**:
+La composición raíz visible del runtime que ensambla navegación principal, layout base, boundaries globales y capacidades transversales sin apropiarse de la semántica de negocio.
+_Avoid_: feature view, contexto de dominio, provider bundle accidental
+
+**Global Provider**:
+Un mecanismo de composición del runtime que inyecta capacidades transversales como theme, feedback, query, transitions o settings sin convertirse en dueño del significado de **Asset**, **Organizer**, **Narrative Entity** o artefactos de **Taxonomy**.
+_Avoid_: service locator semántico, owner de negocio, módulo feature disfrazado
+
+**Operational Profile**:
+La superficie activa de configuración y preferencias asociada a una instalación, usuario o perfil operativo que scopa experiencia y comportamiento del runtime sin redefinir la identidad de los objetos de dominio.
+_Avoid_: narrative entity, role de negocio, taxonomía local
+
+**Platform Process**:
+Un workflow operativo transversal orquestado por **Platform/System Context** —como reindexado, generación de thumbnails, sincronización, observabilidad o cache operativo— que actúa sobre objetos de dominio sin convertirse en su modelo semántico.
+_Avoid_: lifecycle de asset, feature de negocio principal, identidad del objeto
+
 **Task**:
 Un objeto operativo interno legacy de trabajo o workflow que gestiona estado, prioridad, progreso y asignación sin pertenecer al lenguaje de **Taxonomy** ni al núcleo visible del producto, y que queda fuera de la arquitectura objetivo salvo que reaparezca un caso de uso fuerte.
 _Avoid_: tag, note, narrative entity
@@ -148,6 +168,7 @@ _Avoid_: tag, note, narrative entity
 - El lifecycle visible de un **Asset** debe modelarse como un único `status` canónico y no como flags combinables
 - Flags como `hidden` o `public` no pertenecen al lifecycle canónico de **Asset**
 - Estados de procesamiento como `pending`, `processing`, `completed` o `failed` no forman parte del lifecycle canónico de **Asset**
+- Estado de cola, reindexado, thumbnails, extracción, transcodificación o sincronización no pertenece por defecto a la raíz de **Asset** salvo que el producto lo eleve explícitamente a semántica visible y transversal
 - La raíz común de un **Asset** puede guardar timestamps explícitos de lifecycle como `archivedAt` o `deletedAt` cuando esas transiciones ocurran
 - En el lifecycle visible de **Asset**, `deleted` significa borrado lógico o tombstone, no purge físico definitivo
 - Mientras no exista purge físico, el estado `deleted` de un **Asset** debe ser restaurable
@@ -160,6 +181,7 @@ _Avoid_: tag, note, narrative entity
 - Un **Source File** expresa origen físico o ubicación operativa sin definir la **Asset Identity**
 - El **Content Fingerprint** vive canónicamente en **Source File** o **Primary Placement**, no en la identidad raíz del **Asset**
 - La pertenencia física de un **Asset** a un **Folder** vive en **Primary Placement** o **Source File**, no en la raíz del asset
+- Un **Asset** puede tener exactamente un **Primary Placement** y cero o más **Secondary Placements** explícitos
 - Los placements físicos adicionales de un **Asset** sólo existen si se modelan explícitamente y no como equivalentes por defecto del **Primary Placement**
 - Un placement físico secundario del mismo **Asset** sólo es válido cuando existe una decisión o modelado explícito que una ambas materializaciones bajo la misma identidad
 - Un **Ingestion Channel** introduce **Source Files** al sistema sin redefinir el modelo de **Asset**
@@ -174,20 +196,37 @@ _Avoid_: tag, note, narrative entity
 - Un **Album** presenta y cura **Assets** para consumo visual
 - Una **Collection** agrupa elementos por criterio temático o funcional
 - Un **Tag** clasifica objetos de dominio de forma transversal
+- Un vocabulario cerrado no implica por sí solo una **Property**; si el significado central es pertenencia clasificatoria, sigue perteneciendo a **Tag**
 - El perímetro inicial de **Tag** incluye **Assets**, **Organizers**, **Narrative Entities**, **Prompt**, **Note** y **Wildcard**
 - **Tag** debe tener un identificador portable estable separado de su label visible humano
 - El identificador portable de **Tag** debe expresarse como slug estable en minúsculas con formato `snake_case`
 - El slug portable de **Tag** se trata como identidad estable y sólo debe renombrarse mediante migración explícita
+- El label visible humano de **Tag** pertenece a presentación/editorial y puede cambiar sin migración mientras el significado del tag siga siendo el mismo
 - La `category` opcional de **Tag** actúa como agrupación liviana y no forma parte de la identidad ni del namespace del tag
 - El slug de **Tag** es globalmente único y no puede duplicarse válidamente en categorías distintas
 - La jerarquía ligera de **Tag** admite como máximo un solo padre por tag y no multiparent por defecto
 - La jerarquía de **Tag** prohíbe ciclos de forma absoluta
+- Si dos **Tag** se fusionan semánticamente y uno absorbe al otro, el tag absorbido queda en estado legacy/deprecated en lugar de desaparecer como si nunca hubiese existido
+- Cuando un **Tag** deprecated por fusión tenga sucesor semánticamente claro, puede declarar como máximo un único tag de reemplazo explícito
+- Un **Tag** deprecated sigue siendo legible para historia y compatibilidad transitoria, pero no debe aceptarse en nuevas asignaciones normales
+- Si una asignación legacy usa un **Tag** deprecated con reemplazo explícito equivalente, al guardar debe normalizarse por defecto al tag vigente
+- El slug histórico de un **Tag** deprecated o absorbido queda reservado y no debe reutilizarse para otro tag nuevo con semántica distinta
+- Un **Tag** deprecated o absorbido no debe seguir actuando como padre válido de tags activos; sus hijos requieren reparenting explícito hacia jerarquía vigente
 - Si un **Tag** declara aplicabilidad restringida, asignarlo fuera de ese perímetro es inválido y no una mera advertencia blanda
 - En una jerarquía ligera de **Tag**, asignar un tag hijo no materializa automáticamente la asignación de sus ancestros
 - En una misma rama jerárquica de **Tag**, asignar directamente a la vez un descendiente y su ancestro sobre el mismo objeto es redundante e inválido por defecto
+- Si un **Tag** cambia de padre, sus asignaciones existentes siguen siendo válidas por defecto; el reparenting ajusta la estructura taxonómica y no reescribe automáticamente la clasificación histórica
+- Si un reparenting de **Tag** crea nuevas redundancias ancestro-descendiente en asignaciones existentes, el sistema debe detectarlas para cleanup explícito y no resolverlas mediante borrado silencioso
 - La pertenencia de un objeto a un **Tag** pertenece canónicamente a la capa relacional compartida y no a metadata authored portable incrustada en archivos
 - Un **Favorite** marca un objeto de dominio sin cambiar su identidad ni su tipo
 - La verdad canónica de **Favorite** debe vivir en una relación transversal y no en flags embebidos por entidad
+- El scope contractual de **Favorite** pertenece al actor o perfil que marca el objeto y no al objeto marcado como propiedad global intrínseca
+- El perímetro inicial recomendado de **Favorite** incluye **Assets**, **Organizers**, **Narrative Entities**, **Prompt**, **Note** y **Wildcard**; `Tag`, `Property` y `Task` quedan fuera por ahora
+- La unicidad lógica de **Favorite** debe impedir más de una relación activa equivalente por par `(actor, target)`
+- Las operaciones de marcar o desmarcar **Favorite** deben ser idempotentes y no generar duplicados ni semánticas alternativas según el estado previo
+- **Favorite** no define un lifecycle semántico rico propio en v1; su visibilidad normal sigue la superficie activa del target marcado
+- Si el target de un **Favorite** sale de la superficie activa por borrado lógico o tombstone, el favorito deja de mostrarse en consultas normales pero puede reaparecer si el target se restaura
+- Si el target de un **Favorite** se purga físicamente, la relación `Favorite` deja de existir como vínculo preservable
 - Un **Group** puede reunir **Assets**, **Organizers** y **Narrative Entities** de forma transversal
 - **Taxonomy** sirve como lenguaje compartido para **Media Core** y **Worldbuilding Context**
 - Un **Prompt** puede relacionarse con **Assets** y **Narrative Entities** sin convertirse en una de ellas
@@ -210,6 +249,8 @@ _Avoid_: tag, note, narrative entity
 - El seed inicial de tipos para parámetros de **Prompt** arranca con `text`, `number`, `boolean`, `date` y `enum_token`
 - La multiplicidad de un parámetro de **Prompt** se modela como wrapper genérico sobre el tipo base y no como una familia aparte de tipos especiales
 - Si un parámetro de **Prompt** usa `enum_token`, debe declarar o referenciar explícitamente el vocabulario válido de tokens
+- Cuando un parámetro de **Prompt** usa `enum_token`, sus tokens válidos se expresan como slugs estables en minúsculas con formato `snake_case`, separados de sus labels visibles humanos
+- Los labels visibles de tokens `enum_token` en **Prompt.parameters** pertenecen a presentación/localización y pueden refinarse sin migración mientras el token conserve el mismo significado
 - Los tipos primitivos compartidos de **Prompt.parameters** reutilizan por defecto la misma semántica base acordada para **Property Assignment**, salvo decisión explícita en contra
 - Cuando un parámetro de **Prompt** usa una clave canónica del vocabulario compartido, el tipo base de ese parámetro queda gobernado por la definición canónica y no se redefine libremente por artefacto
 - Cuando un parámetro de **Prompt** usa una clave canónica del vocabulario compartido, la cardinalidad base de ese parámetro también queda gobernada por la definición canónica
@@ -235,12 +276,15 @@ _Avoid_: tag, note, narrative entity
 - Si una clave custom de `parameters` en **Prompt** migra hacia una canónica pero cambia tipo base o cardinalidad, esa normalización requiere migración explícita y no una fusión silenciosa
 - Cuando una clave de `parameters` en **Prompt** sea custom, debe llevar al menos una descripción o intención authored breve que haga explícito su significado local
 - Las claves custom de **Prompt.parameters** usan el mismo vocabulario de tipos compartido y no inventan tipos privados por fuera del contrato general
+- Si una clave custom de **Prompt.parameters** usa `enum_token`, puede declarar su vocabulario válido de tokens localmente en el prompt y no necesita nacer como vocabulario compartido global
 - Cuando una clave de `parameters` en **Prompt** sea custom y exista cercanía semántica con una clave canónica, puede declarar opcionalmente esa relación como puente explícito hacia el vocabulario compartido
 - Cuando una clave custom de `parameters` en **Prompt** declare cercanía con el vocabulario canónico, esa afinidad opcional apunta como máximo a una sola clave canónica próxima
 - El vocabulario canónico de `parameters` en **Prompt** es global por defecto y sólo restringe aplicabilidad cuando existe una razón semántica real
 - Cuando una clave canónica de `parameters` en **Prompt** declara aplicabilidad restringida, esa restricción es real y no meramente orientativa
 - En **Prompt**, `summary` y `purpose` no son sinónimos: `summary` resume el artefacto y `purpose` expresa su intención de uso
+- En **Prompt**, `purpose` pertenece a la capa específica mínima acordada y debe contener intención de uso authored no vacía en la representación portable canónica
 - El cuerpo authored canónico de **Prompt** debe tener contenido no vacío; un template totalmente en blanco no es estado válido del artefacto portable
+- En **Prompt**, `parameters` puede omitirse por completo cuando el template no expone variables reales y no necesita contrato paramétrico
 - Una **Note** puede anotar **Assets**, **Organizers** y **Narrative Entities** sin poseerlos
 - En `Note` file-backed, campos de workflow como `status`, `priority` o `presetId` pertenecen a la capa operativa del producto y no a la representación portable authored por defecto
 - En su contrato file-backed inicial, **Note** no necesita campos authored específicos propios más allá del núcleo compartido y el cuerpo Markdown
@@ -251,9 +295,11 @@ _Avoid_: tag, note, narrative entity
 - En **Wildcard**, entradas duplicadas dentro del cuerpo line-based son inválidas y no contenido portable distinto
 - En **Wildcard**, líneas vacías o compuestas sólo por whitespace no cuentan como entradas válidas y se normalizan fuera del contenido portable
 - En **Wildcard**, las entradas válidas se normalizan recortando whitespace exterior antes de persistirse
+- En `Wildcard` v1, la detección de duplicados respeta mayúsculas y minúsculas; dos entradas no colapsan sólo por diferir en casing
 - El orden de las entradas de **Wildcard** no es semántico por defecto y pertenece a authoring o presentación
 - En `Wildcard` v1, cada entrada line-based no lleva un identificador propio separado y se trata como entrada textual normalizada
 - En `Wildcard` v1, una línea representa sólo una entrada textual y no admite sintaxis inline adicional de comentario o metadata por entrada
+- Un **Wildcard** canónico debe conservar al menos una entrada válida tras la normalización; si el cuerpo queda efectivamente vacío, el artefacto no es válido
 - Los artefactos textuales de **Taxonomy** pueden tener fuente canónica file-backed mientras la app gestiona metadata, indexación y relaciones
 - Cuando un artefacto textual de **Taxonomy** es file-backed, el archivo es la fuente canónica de verdad y la base de datos actúa como índice, metadata y soporte relacional
 - `Wildcard` es file-backed por defecto en la arquitectura objetivo
@@ -269,18 +315,34 @@ _Avoid_: tag, note, narrative entity
 - El modelo inicial de artefactos textuales file-backed de **Taxonomy** no incluye versionado explícito de dominio; sólo aparece si una necesidad fuerte futura lo justifica
 - La identidad estable de un artefacto file-backed de **Taxonomy** debe viajar con su representación portable y no quedar secuestrada sólo en la base de datos
 - En `Prompt`, `Note` y `Wildcard` file-backed, el nombre visible canónico es authored y no depende obligatoriamente del filename físico
+- En artefactos file-backed de **Taxonomy**, cambios en `title`, `summary`, `category`, `emoji` o `color` no alteran la identidad del artefacto mientras su semántica de dominio siga siendo la misma
 - En `Prompt`, `Note` y `Wildcard`, una media destacada canónica del producto debe resolverse como relación o selección explícita hacia un **Asset** y no como metadata authored portable embebida en el archivo
 - Una **Property** describe atributos reutilizables de objetos del dominio
 - Un mismo concepto semántico no debe canonizarse a la vez como **Tag** y como **Property** salvo distinción explícita y fuertemente justificada
+- Una **Property** se usa cuando el dominio necesita expresar una faceta con valor tipado y gobernado, no cuando basta una pertenencia clasificatoria
 - Una **Property** declara un tipo de valor preferente dentro de un set canónico y pequeño
 - Una **Property** es global por defecto dentro de su perímetro permitido y sólo restringe aplicabilidad cuando exista una razón semántica real
+- El slug portable de **Property** es globalmente único y no puede duplicarse válidamente bajo agrupaciones o categorías distintas
+- La agrupación o categoría opcional de **Property** actúa como organización liviana de catálogo y no forma parte de su identidad ni de su namespace
+- **Property** no admite jerarquía ni herencia entre properties en la primera versión; cada faceta canónica existe como definición plana e independiente
 - Una **Property** puede declarar opcionalmente un conjunto controlado de valores permitidos cuando el dominio lo necesite
+- Una **Property** deprecated sigue siendo legible para historia y compatibilidad transitoria, pero no debe aceptarse en nuevas asignaciones normales
+- Cuando una **Property** deprecated tenga sucesora semánticamente clara, puede declarar como máximo una única property de reemplazo explícito
+- Si una **Property Assignment** legacy usa una **Property** deprecated con reemplazo explícito equivalente, al guardar debe normalizarse por defecto a la property vigente
+- La auto-normalización por reemplazo entre **Property** sólo es válida cuando vieja y nueva conservan compatibilidad semántica base, tipo de valor y cardinalidad portable
+- La auto-normalización por reemplazo entre **Property** también exige compatibilidad de aplicabilidad; si el perímetro válido cambia materialmente, la migración debe ser explícita
+- Si una **Property** varía tipo, cardinalidad o vocabulario controlado según el target, esa divergencia requiere properties distintas y no overrides locales del mismo contrato
+- La identidad estable histórica de una **Property** retirada o deprecated —su key o slug portable— queda reservada y no debe reutilizarse para otra property nueva con semántica distinta
 - Cuando una **Property** declara valores permitidos, cada opción de ese vocabulario debe tener un token estable separado del label visible
+- Los labels visibles de los valores permitidos de una **Property** pertenecen a presentación/localización y pueden cambiar sin migración mientras el token conserve el mismo significado
 - Los tokens de valores permitidos de una **Property** deben expresarse como slugs estables en minúsculas con formato `snake_case`
 - Los tokens de valores permitidos de una **Property** se tratan como identidad estable y sólo deben renombrarse mediante migración explícita
 - Los tokens de valores permitidos deben ser únicos dentro del vocabulario de la **Property** que los declara y no globalmente únicos por defecto entre todas las properties
 - El orden de los valores permitidos de una **Property** no es semántico por defecto y pertenece a authoring o presentación
 - Si una **Property** retira un valor permitido ya usado, los assignments existentes con ese token pasan a estado legacy/migrable y no permanecen como plenamente válidos del vocabulario vigente
+- Si un valor permitido de una **Property** fue retirado, ese token puede seguir leyéndose en assignments legacy pero no debe aceptarse en nuevas escrituras ni regrabados normales
+- Cuando un valor permitido deprecated de una **Property** tenga sucesor semánticamente claro, puede declarar como máximo un único token de reemplazo explícito para guiar migraciones
+- Si un **Property Assignment** legacy usa un token deprecated con reemplazo explícito equivalente, al guardar debe normalizarse por defecto al token vigente y no perpetuar la escritura legacy
 - Los valores concretos de **Property** deben vivir en asignaciones explícitas separadas de la definición global
 - Una **Property Assignment** aplica una **Property** a un objeto concreto del dominio
 - **Property Assignment** debe modelarse de forma transversal y no como dialectos separados por entidad o contexto
@@ -320,6 +382,7 @@ _Avoid_: tag, note, narrative entity
 - **Property** debe tener un identificador portable estable separado de su label o título visible humano
 - El identificador portable de **Property** debe expresarse como slug estable en minúsculas con formato `snake_case`
 - El slug portable de **Property** se trata como identidad estable y sólo debe renombrarse mediante migración explícita
+- El label o título visible de **Property** pertenece a presentación/editorial y puede cambiar sin migración mientras la faceta conserve el mismo significado
 - Si el supuesto “valor” de una **Property Assignment** apunta a otro objeto del dominio, debe modelarse como relación explícita y no como property disfrazada
 - Una **Task** pertenece al trabajo operativo del producto y no al vocabulario compartido de **Taxonomy**
 - Los vínculos semánticos transversales entre objetos pueden modelarse mediante relaciones genéricas con **Relation Role** opcional
@@ -329,6 +392,12 @@ _Avoid_: tag, note, narrative entity
 - Una **Semantic Relation** debe tener identidad propia estable y no depender sólo de una clave compuesta entre extremos o rol
 - La unicidad lógica de **Semantic Relation** debe impedir duplicados del mismo triple canónico `(source, target, role)` respetando la dirección del vínculo
 - El shape canónico inicial de **Semantic Relation** debe mantenerse mínimo y no incorpora todavía un campo libre de explicación o nota textual por relación
+- Los timestamps y campos de auditoría de **Semantic Relation** pertenecen a metadata operativa y no forman parte del contrato semántico mínimo ni de la identidad lógica del vínculo
+- La creación o reescritura de una **Semantic Relation** exige que ambos extremos existan y sean participantes válidos dentro del perímetro permitido en ese momento
+- **Semantic Relation** no define en v1 un lifecycle semántico rico propio; su visibilidad normal sigue la superficie activa de sus extremos
+- Si uno de los extremos de una **Semantic Relation** sale de la superficie activa por borrado lógico o tombstone, el vínculo deja de mostrarse en consultas normales pero se preserva para historia o restauración
+- Si ese extremo se restaura y el otro sigue siendo válido, la **Semantic Relation** recupera por defecto su visibilidad normal
+- Si un extremo se purga físicamente del dominio, las **Semantic Relation** dependientes dejan de existir como vínculos activos preservables
 - El perímetro inicial de participantes de **Semantic Relation** incluye **Assets**, **Organizers**, **Narrative Entities**, **Prompt**, **Note** y **Wildcard**
 - **Tag**, **Property**, **Favorite** y **Task** quedan fuera del perímetro inicial de **Semantic Relation**
 - Las relaciones estructurales fuertes como containment, ownership o specialization deben seguir siendo dedicadas
@@ -343,15 +412,23 @@ _Avoid_: tag, note, narrative entity
 - Todos los roles del seed inicial de **Relation Role** deben nacer con lectura inverse explícita además de su lectura forward canónica
 - Todo **Relation Role** del vocabulario gobernado debe declarar lectura forward e inverse explícitas, aunque en algunos casos ambas coincidan
 - **Relation Role** debe tener un identificador portable estable en `snake_case`, separado de sus lecturas humanas forward e inverse
+- Dentro del seed inicial de **Relation Role**, las lecturas canónicas quedan fijadas como `references`/`referenced_by`, `inspired_by`/`inspires`, `derived_from`/`source_for` y `variant_of`/`variant_of`
+- Las lecturas humanas forward e inverse de **Relation Role** pertenecen a presentación semántica y pueden refinarse sin migración mientras no cambie materialmente el significado del role
 - El slug portable de **Relation Role** se trata como identidad estable y sólo debe renombrarse mediante migración explícita
+- Si un **Relation Role** se depreca o reemplaza, las relaciones existentes que lo usan siguen siendo legibles como legacy, pero no deben crearse nuevas relaciones con ese role deprecated
+- Cuando un **Relation Role** deprecated tenga sucesor semánticamente claro, puede declarar como máximo un único role de reemplazo explícito para guiar migraciones
+- Si una **Semantic Relation** legacy usa un **Relation Role** deprecated con reemplazo explícito equivalente, al guardar debe normalizarse por defecto al role vigente y no perpetuar la escritura legacy
 - Si un **Relation Role** declara aplicabilidad restringida por familias o tipos, usarlo fuera de ese perímetro es inválido y no una mera advertencia blanda
 - En el seed inicial de **Relation Role**, la lectura inverse de `derived_from` debe expresar origen fuerte y no una relación blanda o genérica
 - Un mismo par de objetos puede sostener varios **Relation Role** distintos siempre que cada uno aporte semántica realmente diferente
 - Si entre dos objetos ya existe una **Semantic Relation** con `Relation Role` explícito que captura el significado, una relación adicional sin role equivalente no debe coexistir por defecto
 - Si el significado de un vínculo encaja claramente en un **Relation Role** existente y aplicable, crear la **Semantic Relation** sin role es inválido y no sólo desaconsejado
 - `variant_of` debe restringirse a objetos de la misma familia o de familias semánticamente muy cercanas
+- Cuando existan incompatibilidades entre roles sobre el mismo par de objetos, esas restricciones deben declararse en el catálogo de **Relation Role** y no como reglas ad hoc dispersas
 - `variant_of` y `derived_from` son incompatibles por defecto sobre el mismo par de objetos, salvo justificación excepcional explícita
+- En la primera versión de **Semantic Relation**, esas excepciones no se modelan como overrides libres por instancia; si un caso recurrente necesita coexistencia, debe formalizarse ajustando el catálogo o sus reglas
 - `derived_from` puede cruzar familias distintas cuando la derivación fuerte siga siendo semánticamente clara
+- El subgrafo formado por relaciones `derived_from` debe permanecer acíclico; ni ciclos directos ni ciclos largos expresan una derivación semántica válida
 - Dentro del seed inicial de **Relation Role**, `references` e `inspired_by` funcionan como los roles más ampliamente transversales del perímetro permitido
 - Cuando exista, **Relation Role** debe poder expresar una lectura canónica forward y una lectura inverse opcional
 - Cuando no aporte significado real, **Relation Role** debe quedar ausente y no degradarse a un comodín genérico como `related_to`
@@ -362,6 +439,11 @@ _Avoid_: tag, note, narrative entity
 - Una **Narrative Entity** puede referenciar muchos **Assets** sin poseerlos
 - El **Worldbuilding Context** enriquece **Assets** pero no sustituye al **Media Core** como núcleo
 - El **Platform/System Context** soporta a **Media Core** y **Worldbuilding Context** sin definir el dominio principal
+- El **Platform/System Context** posee un único **App Shell** canónico para componer router raíz, layout base, boundaries visibles y capacidades globales
+- Un **App Shell** compone muchos **Global Providers** sin delegarles ownership semántico de negocio
+- Un **Operational Profile** gobierna settings y preferencias operativas sin redefinir la semántica de **Asset**, **Organizer**, **Narrative Entity** o **Taxonomy**
+- Un **Platform Process** puede operar sobre muchos **Assets** u **Organizers** sin poseer su identidad ni su lifecycle canónico
+- Un **Platform Process** puede producir telemetría, progreso, caches o **Derived Artifacts** operativos sin redefinir por ello el modelo del dominio que toca
 
 ## Example dialogue
 
@@ -386,11 +468,17 @@ _Avoid_: tag, note, narrative entity
 - "asset" podía nacer con múltiples placements físicos igualmente canónicos — resuelto: el modelo base usa un **Primary Placement** principal por asset; lo adicional se modela explícitamente después.
 - "source file" y "primary placement" podían abrirse como capas distintas demasiado pronto — resuelto: en el modelo base coinciden conceptualmente; sólo se separan cuando placements adicionales lo justifiquen.
 - "secondary placement" podía aparecer por conveniencia implícita — resuelto: sólo existe por decisión/modelado explícito; nunca por coincidencia automática de fingerprint.
+- "secondary placement" podía quedar como espejo equivalente o heurístico del primary — resuelto: es una materialización física adicional, explícita y subordinada a la misma identidad de asset.
 - "asset specialization" podía quedar múltiple o difusa — resuelto: cada **Asset** tiene exactamente una especialización principal a la vez.
 - "asset type" podía quedar implícito sólo por la tabla especializada — resuelto: la raíz lleva un `assetType` explícito y consistente con su especialización principal.
 - "asset" podía existir sólo al final del pipeline de ingesta — resuelto: la raíz común puede nacer temprano y completarse progresivamente sin esperar toda la metadata especializada.
 - "asset root" podía quedar tan mínima que dispersara el estado transversal — resuelto: puede incluir lifecycle y estado operativo ligero, sin convertirse en bolsa de infraestructura.
 - "asset root" podía dejar implícito su anclaje físico principal — resuelto: puede llevar referencia directa a `primaryPlacementId` sin por eso confundirse con el placement mismo.
+- la raíz de **Asset** podía absorber estado técnico de colas, thumbnails, reindexado o extracción — resuelto: sólo conserva estado verdaderamente transversal y visible; la orquestación técnica vive fuera.
+- "system" podía expandirse como bucket cómodo para cualquier feature mal ubicada — resuelto: **Platform/System Context** se limita a shell, settings operativos, observabilidad, enforcement y procesos transversales.
+- "provider" podía empezar a definir qué significa un objeto del dominio por estar montado en el root — resuelto: **Global Provider** compone capacidades de runtime, no semántica de negocio.
+- "profile" podía confundirse con identidad narrativa o concepto de negocio — resuelto: **Operational Profile** pertenece a plataforma y sólo scopa configuración/experiencia del runtime.
+- reindexado, thumbnails o sync podían leerse como parte de la identidad del asset — resuelto: son **Platform Processes** que operan sobre el dominio sin redefinirlo.
 - "asset lifecycle" podía quedar enterrado como puro estado técnico — resuelto: el root puede llevar pocos estados visibles y semánticos para usuario, no sólo infraestructura interna.
 - "asset lifecycle" podía mezclar visibilidad con estado de vida — resuelto: el set inicial se limita a `active`, `archived` y `deleted`; `hidden`/`public` quedan fuera de lifecycle.
 - "asset lifecycle" podía absorber estados de pipeline como `processing` — resuelto: el lifecycle y el processing status viven separados.
@@ -407,21 +495,40 @@ _Avoid_: tag, note, narrative entity
 - "collection" y "group" podían terminar siendo sinónimos — resuelto: **Collection** organiza por tema o función; **Group** se reserva para clusters heterogéneos y transversales entre tipos de objeto.
 - "favorite" podía leerse como estado embebido o como entidad transversal — resuelto: **Favorite** es un marcador transversal; los `isFavorite` dispersos no son la verdad conceptual.
 - "favorite" podía quedarse con doble verdad técnica — resuelto: la relación transversal es canónica y los flags embebidos sólo pueden existir como deuda temporal o cache transitoria.
+- "favorite" podía interpretarse como propiedad global del objeto en vez de relación del actor que marca — resuelto: su scope contractual pertenece al actor/perfil y no al target como rasgo intrínseco.
+- "favorite" podía comportarse como toggle no idempotente creando duplicados según el estado previo — resuelto: existe como máximo una relación activa por par actor-target y las operaciones de marcar/desmarcar son idempotentes.
+- "favorite" podía quedar sin semántica clara cuando el target salía de la superficie activa — resuelto: su visibilidad sigue al target; puede reaparecer al restaurar y desaparece definitivamente sólo con purge físico.
 - "folder" podía sentirse como organizer libre — resuelto: **Folder** sigue siendo un contenedor físico enriquecido, no una agrupación lógica genérica.
 - "folder" podía abrir la puerta a variantes virtuales bajo el mismo nombre — resuelto: **Folder** se mantiene estrictamente físico y lo virtual vive en otros **Organizers**.
 - "folder membership" podía subir a la raíz de `Asset` — resuelto: la pertenencia física a `Folder` vive en `Source File` / `Primary Placement`, no en la identidad del asset.
 - "tag" podía competir con organizadores ricos — resuelto: **Tag** es clasificación semántica transversal, no contenedor principal.
+- un vocabulario cerrado podía empujar por inercia hacia **Property** aunque sólo expresara clasificación — resuelto: si el significado central es pertenencia clasificatoria, sigue siendo **Tag**.
 - el perímetro de **Tag** podía quedar implícito o demasiado estrecho — resuelto: incluye **Assets**, **Organizers**, **Narrative Entities**, **Prompt**, **Note** y **Wildcard**.
 - **Tag** podía depender del nombre visible como identidad contractual — resuelto: requiere identificador portable estable separado del label humano.
 - El identificador portable de **Tag** podía divergir por casing o estilo de naming — resuelto: usa slugs estables en minúsculas con formato `snake_case`.
 - El slug portable de **Tag** podía tratarse como copy editable sin consecuencias — resuelto: es identidad estable y sólo cambia mediante migración explícita.
+- el label visible de **Tag** podía confundirse con su identidad contractual — resuelto: la identidad vive en el slug; el label es presentación editable mientras no cambie el significado.
 - la `category` de **Tag** podía deslizarse hacia namespace o identidad secundaria — resuelto: es agrupación liviana y no parte de la identidad del tag.
 - el slug de **Tag** podía reabrir namespaces encubiertos repitiéndose entre categorías — resuelto: es globalmente único.
 - la jerarquía ligera de **Tag** podía derivar hacia grafo u ontología permitiendo múltiples padres — resuelto: admite como máximo un solo padre por tag.
 - la jerarquía de **Tag** podía admitir ciclos destructivos para navegación e inferencia — resuelto: los ciclos son absolutamente inválidos.
+- una fusión semántica entre **Tag** podía borrar el tag absorbido como si no hubiera historia ni referencias previas — resuelto: el tag absorbido queda legacy/deprecated.
+- un **Tag** absorbido podía quedar sin sucesor claro o con varios reemplazos ambiguos — resuelto: puede declarar como máximo un reemplazo explícito cuando exista equivalencia clara.
+- un **Tag** deprecated podía seguir entrando en nuevas asignaciones como si continuara vigente — resuelto: permanece legible como legacy, pero queda bloqueado para nuevas escrituras normales.
+- una asignación legacy podía seguir regrabando indefinidamente un **Tag** deprecated aun teniendo replacement explícito equivalente — resuelto: al guardar se normaliza por defecto al tag vigente.
+- el slug histórico de un **Tag** absorbido podía reciclarse para otro concepto posterior — resuelto: queda reservado y no se reutiliza.
+- un **Tag** deprecated podía seguir sosteniendo jerarquía activa como padre de tags vigentes — resuelto: deja de ser padre válido y exige reparenting explícito de sus hijos.
+- una **Property** deprecated podía declarar replacement incompatible y aun así auto-normalizar assignments como si fuera un simple rename — resuelto: la auto-normalización sólo aplica con compatibilidad semántica, de tipo y cardinalidad.
+- la key o slug histórico de una **Property** retirada podía reciclarse para otra semántica posterior — resuelto: queda reservado y no se reutiliza.
+- el catálogo de **Property** podía reabrir namespaces encubiertos mediante categorías o agrupaciones — resuelto: el slug es globalmente único y la agrupación no forma parte de la identidad.
+- **Property** podía derivar hacia jerarquías o herencias internas como si fuera una ontología — resuelto: en v1 cada property es plana e independiente.
+- una misma **Property** podía mutar su contrato por tipo de objeto mediante overrides locales — resuelto: si cambia tipo, cardinalidad o vocabulario según target, deben existir properties distintas.
+- un replacement de **Property** podía parecer seguro aunque cambiara el perímetro de aplicabilidad — resuelto: si cambia materialmente la aplicabilidad, la migración deja de ser auto-normalizable.
 - La aplicabilidad restringida de **Tag** podía operar como sugerencia sin consecuencias reales — resuelto: asignarlo fuera de su perímetro declarado es inválido.
 - la jerarquía ligera de **Tag** podía duplicar clasificación materializando ancestros por asignación de hijos — resuelto: la asignación directa sigue siendo explícita y la expansión jerárquica se resuelve aparte.
 - un objeto podía acumular como asignación directa tanto un tag hijo como su ancestro dentro del mismo ramo — resuelto: esa redundancia es inválida por defecto.
+- reparentar un **Tag** podía implicar que todas sus asignaciones históricas quedaran semánticamente rotas por defecto — resuelto: el reparenting ajusta la jerarquía sin invalidar automáticamente las asignaciones existentes.
+- un reparenting de **Tag** podía crear redundancias nuevas y “arreglarlas” borrando asignaciones en silencio — resuelto: esas redundancias se detectan y requieren cleanup explícito.
 - "tag taxonomy" podía crecer sin límites — resuelto: la estructura de **Tag** es jerárquica de forma ligera, con categoría opcional y sin ontología compleja.
 - "tag" podía separarse por contexto y fracturar el lenguaje compartido — resuelto: **Tag** es global en **Taxonomy** y sólo se acota por categoría o aplicabilidad cuando haga falta.
 - la pertenencia a **Tag** de artefactos textuales podía quedar canónicamente incrustada en el archivo portable — resuelto: la clasificación canónica vive en la capa relacional; cualquier tag escrito en el archivo sólo puede actuar como hint de autoría o importación, no como verdad final.
@@ -451,6 +558,7 @@ _Avoid_: tag, note, narrative entity
 - el seed inicial de tipos de parámetros de **Prompt** podía quedar abstracto sin un primer set concreto — resuelto: arranca con `text`, `number`, `boolean`, `date` y `enum_token`.
 - la multiplicidad de un parámetro de **Prompt** podía inflar el vocabulario de tipos con plurales ad hoc — resuelto: se modela como wrapper genérico sobre el tipo base.
 - un parámetro de **Prompt** con tipo `enum_token` podía dejar implícito su vocabulario válido — resuelto: debe declararlo o referenciarlo explícitamente.
+- los tokens válidos de `enum_token` en **Prompt.parameters** podían mezclarse con labels visibles o naming inestable — resuelto: usan slugs estables en `snake_case` y separan identidad portable de presentación.
 - los tipos primitivos de **Prompt.parameters** podían derivar hacia semánticas distintas pese a compartir nombre con **Property Assignment** — resuelto: reutilizan la misma semántica base por defecto.
 - una clave canónica de **Prompt.parameters** podía mantener nombre compartido pero variar libremente su tipo entre prompts — resuelto: la definición canónica gobierna el tipo base.
 - una clave canónica de **Prompt.parameters** podía variar libremente su cardinalidad entre prompts — resuelto: la definición canónica gobierna también la cardinalidad base.
@@ -476,12 +584,15 @@ _Avoid_: tag, note, narrative entity
 - una clave custom de `parameters` de **Prompt** podía colapsarse silenciosamente con una canónica aunque su shape no coincidiera — resuelto: si cambia tipo base o cardinalidad, la migración debe ser explícita.
 - una clave custom de `parameters` de `Prompt` podía quedar marcada como custom pero semánticamente opaca — resuelto: debe incluir al menos una descripción o intención authored breve.
 - una clave custom de **Prompt.parameters** podía abrir un mini-sistema tipado privado al margen del contrato común — resuelto: usa el mismo vocabulario de tipos compartido.
+- una clave custom de **Prompt.parameters** con `enum_token` podía quedar bloqueada hasta existir un vocabulario global equivalente — resuelto: puede declarar su propio vocabulario local de tokens mientras siga siendo custom.
 - una clave custom de `parameters` de `Prompt` podía quedar desconectada del vocabulario canónico aunque tuviera cercanía evidente — resuelto: puede declarar opcionalmente esa relación como puente explícito hacia la clave canónica próxima.
 - una clave custom de `parameters` de `Prompt` podía quedar repartida entre varias afinidades canónicas a la vez — resuelto: si declara cercanía, apunta como máximo a una sola clave canónica próxima.
 - el vocabulario de `parameters` de `Prompt` podía fragmentarse en catálogos por categoría o familia demasiado pronto — resuelto: es global por defecto y sólo restringe aplicabilidad cuando haga falta.
 - la aplicabilidad de una clave canónica de `parameters` de `Prompt` podía quedar como sugerencia débil — resuelto: cuando se declara restricción explícita, esa restricción es efectiva.
 - `purpose` de `Prompt` podía degradarse a alias redundante de `summary` — resuelto: ambos campos coexisten con semánticas distintas; `summary` resume y `purpose` expresa para qué sirve el prompt.
+- `purpose` de `Prompt` podía quedar como campo nominal pero vacío dentro del portable — resuelto: si existe como parte de la capa específica mínima, expresa intención authored real y no puede quedar vacío.
 - un **Prompt** podía quedar canónicamente vacío en su cuerpo principal — resuelto: el artefacto portable válido requiere contenido authored no vacío.
+- `Prompt` podía exigir `parameters` incluso cuando el template no tenía variables — resuelto: el bloque puede omitirse por completo si no existe contrato paramétrico real.
 - "note" podía quedar secuestrada por worldbuilding — resuelto: **Note** es conocimiento transversal de **Taxonomy** y no una entidad narrativa en sí misma.
 - "note" podía quedar reducida a comentario colgante de una sola entidad — resuelto: **Note** es un artefacto standalone con vínculos opcionales a múltiples objetos.
 - "note" podía quedar atrapada como texto perdido dentro de la UI o de un registro estructurado — resuelto: **Note** es textual por defecto y puede vivir como artefacto standalone reusable.
@@ -499,9 +610,11 @@ _Avoid_: tag, note, narrative entity
 - el cuerpo line-based de **Wildcard** podía admitir líneas duplicadas como si aportaran semántica distinta — resuelto: las entradas duplicadas son inválidas.
 - el cuerpo line-based de **Wildcard** podía tratar líneas vacías o whitespace como pseudo-entradas — resuelto: se normalizan fuera y no cuentan como entradas válidas.
 - las entradas válidas de **Wildcard** podían diferir sólo por whitespace exterior accidental — resuelto: se normalizan recortando esos bordes antes de persistirse.
+- la normalización de **Wildcard** podía empezar a colapsar entradas sólo por mayúsculas/minúsculas — resuelto: en v1 la comparación respeta casing.
 - el orden de las entradas de **Wildcard** podía arrastrar semántica posicional accidental — resuelto: por defecto pertenece sólo a authoring o presentación.
 - **Wildcard** podía inflarse introduciendo identidad separada para cada línea desde la primera versión — resuelto: en v1 cada entrada se trata simplemente como texto normalizado sin ID propio.
 - el cuerpo line-based de **Wildcard** podía empezar a admitir mini-sintaxis inline por entrada — resuelto: en v1 una línea representa sólo una entrada textual.
+- un **Wildcard** podía quedar efectivamente vacío después de normalizar blanks y duplicados — resuelto: debe conservar al menos una entrada válida.
 - "prompt", "note" y "wildcard" podían quedar presos de la base de datos — resuelto: su fuente canónica puede ser file-backed, con la app como capa de metadata, indexación y linking.
 - "file-backed" podía seguir dejando a la DB como verdad real del texto — resuelto: cuando aplica, el archivo manda y la DB indexa, relaciona y soporta búsqueda/metadata.
 - "file-backed" podía mantener una copia completa del texto en DB como segunda verdad silenciosa — resuelto: la DB sólo conserva información operacional o derivada; cualquier materialización textual es cache interna, no verdad canónica editable.
@@ -514,6 +627,7 @@ _Avoid_: tag, note, narrative entity
 - la ruta de un archivo textual podía secuestrar la identidad del artefacto — resuelto: la identidad es estable e independiente del path; mover o renombrar no crea otro objeto de dominio.
 - la identidad estable de un artefacto file-backed podía quedar sólo en la DB — resuelto: debe viajar con la representación portable del propio artefacto.
 - el filename de un artefacto textual podía secuestrar su nombre visible de dominio — resuelto: el nombre visible canónico es authored y no depende obligatoriamente del nombre físico del archivo.
+- cambios editoriales en `title`, `summary`, `category`, `emoji` o `color` de artefactos textuales podían confundirse con cambio de identidad — resuelto: son metadata authored/presentacional y no alteran por sí mismas la identidad del artefacto.
 - la “featured image” de un artefacto textual podía quedar como string authored ambiguo dentro del archivo — resuelto: si el producto necesita media destacada canónica, se modela como relación o selección explícita hacia **Asset**, no como campo portable authored.
 - eliminar un artefacto textual file-backed podía implicar destruir físicamente su archivo por defecto — resuelto: primero hay borrado lógico/restaurable y sólo después, si se decide explícitamente, purge físico.
 - los artefactos textuales file-backed podían arrastrar versionado explícito desde el minuto cero — resuelto: el modelo inicial no lo incluye; sólo aparece si una capacidad real del producto lo exige.
@@ -522,16 +636,21 @@ _Avoid_: tag, note, narrative entity
 - "task" podía quedarse viva por inercia pese a no sostener el target architecture — resuelto: **Task** se considera legacy en deprecación y candidata a eliminación.
 - "property" podía confundirse con tag o campo suelto — resuelto: **Property** es una faceta reusable del dominio, distinta de clasificar (`Tag`) o anotar (`Note`).
 - un mismo concepto semántico podía duplicarse sin freno entre **Tag** y **Property** — resuelto: no debe canonizarse en ambas formas salvo distinción explícita y fuertemente justificada.
+- un vocabulario controlado podía tratarse automáticamente como **Property** aunque sólo clasificara pertenencia — resuelto: **Property** se reserva para facetas con valor tipado y gobernado; la pura clasificación sigue en **Tag**.
 - "property value" podía quedar totalmente libre — resuelto: las **Property** se definen con tipo preferente y sólo usan fallback libre de forma controlada.
 - "property" podía fragmentarse por contexto y perder semántica común — resuelto: **Property** es global en **Taxonomy** y se restringe por aplicabilidad, no por catálogos aislados.
 - "property" podía exigir microconfiguración obligatoria de aplicabilidad en todos los casos — resuelto: la aplicabilidad es global por defecto dentro del perímetro permitido y se restringe sólo cuando haga falta.
 - "property" podía obligar a crear una entidad aparte para cualquier pequeño vocabulario cerrado — resuelto: la definición puede declarar valores permitidos opcionales sin forzar otra entidad por defecto.
 - los valores permitidos de una **Property** podían depender sólo de labels humanos mutables — resuelto: cada opción usa un token estable separado del label visible.
+- un cambio de label visible en **Property** o en sus valores permitidos podía confundirse con una migración de identidad — resuelto: los labels pertenecen a presentación; la identidad la gobiernan slug y tokens estables.
 - los tokens de valores permitidos de una **Property** podían divergir por casing o naming — resuelto: usan slugs estables en minúsculas con formato `snake_case`.
 - los tokens de valores permitidos de una **Property** podían tratarse como labels editables sin consecuencias — resuelto: son identidad estable y sólo cambian mediante migración explícita.
 - los tokens de valores permitidos podían globalizarse prematuramente entre todas las **Property** — resuelto: su unicidad es local al vocabulario de cada property por defecto.
 - el orden de los valores permitidos de una **Property** podía arrastrar semántica posicional accidental — resuelto: por defecto pertenece sólo a authoring o presentación.
 - retirar un valor permitido de una **Property** podía dejar assignments viejos indistinguibles del vocabulario vigente — resuelto: esos valores pasan a estado legacy/migrable.
+- un valor permitido retirado de una **Property** podía seguir reescribiéndose como si continuara vigente — resuelto: permanece legible como legacy, pero queda bloqueado para nuevas escrituras.
+- un valor permitido deprecated de una **Property** podía quedar sin sucesor formal o con varios reemplazos ambiguos — resuelto: puede declarar como máximo un reemplazo explícito cuando exista equivalencia clara.
+- un **Property Assignment** podía seguir regrabando indefinidamente un token deprecated aun teniendo replacement explícito equivalente — resuelto: al guardar se normaliza por defecto al token vigente.
 - "property value" podía terminar escondido en metadata ad hoc — resuelto: los valores de **Property** viven en asignaciones explícitas separadas de la definición.
 - "property" y "property value" podían colapsarse en el mismo registro — resuelto: **Property** es la definición global y **Property Assignment** es la aplicación concreta con unicidad por par objeto-propiedad.
 - "property assignment" podía nacer como joins y tablas distintas por tipo de objeto — resuelto: **Property Assignment** es un modelo transversal único consumido por los objetos permitidos del dominio.
@@ -583,16 +702,24 @@ _Avoid_: tag, note, narrative entity
 - `inspired_by` y `derived_from` podían colapsarse en casi sinónimos — resuelto: `inspired_by` expresa influencia y `derived_from` una descendencia o transformación más fuerte.
 - los roles del seed inicial de **Relation Role** podían nacer sin lectura inverse bien fijada — resuelto: todos arrancan con lectura inverse explícita.
 - la lectura inverse de **Relation Role** podía quedar opcional o improvisada para roles futuros — resuelto: todo role del vocabulario gobernado declara forward e inverse explícitas.
+- el seed inicial de **Relation Role** podía quedarse con inversas explícitas pero sin lecturas concretas aterrizadas — resuelto: `references`/`referenced_by`, `inspired_by`/`inspires`, `derived_from`/`source_for` y `variant_of`/`variant_of`.
 - **Relation Role** podía depender de sus lecturas humanas como identidad contractual — resuelto: usa un identificador portable estable en `snake_case`, separado de esas lecturas.
+- una reescritura editorial de las lecturas forward/inverse de **Relation Role** podía confundirse con cambio de identidad — resuelto: mientras el significado siga siendo el mismo, la identidad permanece en el slug del role.
 - El slug portable de **Relation Role** podía tratarse como copy editable sin consecuencias — resuelto: es identidad estable y sólo cambia mediante migración explícita.
+- un **Relation Role** deprecated podía quedar o roto para lectura histórica o habilitado indefinidamente para nuevas altas — resuelto: el legado sigue siendo legible, pero las nuevas relaciones deben usar el vocabulario vigente.
+- un **Relation Role** deprecated podía quedar sin puente formal hacia su sucesor o con múltiples reemplazos ambiguos — resuelto: puede señalar como máximo un reemplazo explícito cuando exista equivalencia clara.
+- una **Semantic Relation** podía seguir regrabando indefinidamente un role deprecated aun teniendo replacement explícito equivalente — resuelto: al guardar se normaliza por defecto al role vigente.
 - La aplicabilidad restringida de **Relation Role** podía operar como sugerencia sin consecuencias reales — resuelto: usar un role fuera de su perímetro declarado es inválido.
 - la lectura inverse de `derived_from` podía diluirse en una frase demasiado blanda — resuelto: debe expresar origen fuerte.
 - la unicidad por triple de **Semantic Relation** podía interpretarse como prohibición total de varios roles entre el mismo par de objetos — resuelto: pueden coexistir varios roles distintos si cada uno agrega semántica real.
 - una relación semántica sin role podía convivir con otra roleada equivalente sobre el mismo par como redundancia blanda — resuelto: no debe coexistir por defecto cuando el role ya captura el significado del vínculo.
 - una relación semántica sin role podía seguir creándose aunque ya existiera un role claro y aplicable — resuelto: en ese caso, la relación desnuda es inválida.
 - `variant_of` podía quedar demasiado abierto y cruzar familias sin parentesco semántico real — resuelto: se restringe a la misma familia o a familias muy cercanas.
+- las incompatibilidades entre roles podían quedar hardcodeadas como excepciones locales sin contrato de catálogo — resuelto: se declaran en el vocabulario gobernado de `Relation Role`.
 - `variant_of` y `derived_from` podían coexistir libremente sobre el mismo par pese a expresar estructuras distintas — resuelto: son incompatibles por defecto salvo justificación excepcional explícita.
+- las excepciones a incompatibilidades de roles podían colarse como overrides ad hoc por fila en el modelo mínimo — resuelto: en v1 deben elevarse al catálogo o a reglas explícitas, no quedar libres por instancia.
 - `derived_from` podía restringirse demasiado por analogía con `variant_of` — resuelto: puede cruzar familias distintas cuando la derivación fuerte sea semánticamente clara.
+- `derived_from` podía tolerar ciclos semánticamente contradictorios dentro del grafo — resuelto: el subgrafo de derivación debe ser acíclico.
 - `references` e `inspired_by` podían quedar tan restringidos como los roles más específicos del seed — resuelto: operan como los roles más ampliamente transversales del perímetro permitido.
 - "relation role" podía no saber cómo leerse desde el otro extremo — resuelto: el role define lectura forward canónica y puede definir lectura inverse opcional sin duplicar la relación.
 - "relation role" podía degradarse a un comodín vacío como `related_to` — resuelto: si no agrega semántica real, el role queda ausente.
@@ -603,4 +730,10 @@ _Avoid_: tag, note, narrative entity
 - "semantic relation" podía abrirse a cualquier objeto del sistema — resuelto: el perímetro inicial incluye **Assets**, **Organizers**, **Narrative Entities**, **Prompt**, **Note** y **Wildcard**; `Tag`, `Property`, `Favorite` y `Task` quedan fuera por ahora.
 - "semantic relation" podía depender sólo de una clave natural entre extremos y rol — resuelto: la relación tiene identidad propia estable; la unicidad lógica se gobierna aparte.
 - el registro canónico de **Semantic Relation** podía inflarse temprano con texto libre explicativo — resuelto: la forma inicial se mantiene mínima y no incorpora nota libre por relación.
+- los timestamps o campos de auditoría de **Semantic Relation** podían confundirse con parte del contrato semántico base — resuelto: pertenecen a la capa operativa y no al núcleo semántico mínimo.
+- una **Semantic Relation** podía persistirse o reescribirse apuntando a extremos inexistentes o ya fuera de perímetro — resuelto: ambos extremos deben existir y ser participantes válidos al momento de escribir.
+- el lifecycle visible de **Semantic Relation** podía separarse arbitrariamente del estado activo de sus extremos — resuelto: en v1 su visibilidad normal sigue la superficie activa de esos extremos.
+- un vínculo semántico podía desaparecer o seguir visible sin criterio cuando uno de sus extremos se borraba lógicamente — resuelto: se oculta de consultas normales pero se preserva para historia o restauración.
+- la restauración de un extremo podía dejar sus relaciones semánticas en un limbo manual — resuelto: recuperan visibilidad por defecto si el otro extremo sigue siendo válido.
+- el purge físico de un extremo podía dejar relaciones semánticas huérfanas como si siguieran siendo preservables — resuelto: esas relaciones dejan de existir como vínculos activos preservables.
 - "semantic relation" podía duplicarse con distintos ids aunque dijera lo mismo — resuelto: la unicidad lógica impide repetir el mismo triple canónico con la misma dirección.
