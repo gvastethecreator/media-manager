@@ -172,9 +172,31 @@ export function FileProvider({ children }: { children: ReactNode }) {
 
 	const toggleFavorite = useCallback(
 		(fileId: string) => {
-			toggleFavoriteMutate(fileId);
+			const targetFile = files.find((file) => file.id === fileId);
+
+			if (!targetFile) {
+				fileCtxLogger.warn('No se encontró archivo para alternar favorito', { fileId });
+				return;
+			}
+
+			toggleFavoriteMutate(
+				{
+					entityId: fileId,
+					entityType: targetFile.entityType,
+				},
+				{
+					onSuccess: (result) => {
+						setFiles((prev) =>
+							prev.map((file) => (file.id === fileId ? { ...file, isFavorite: result.isFavorite } : file))
+						);
+					},
+					onError: (error) => {
+						fileCtxLogger.error('Error alternando favorito desde FileContext', { fileId, error });
+					},
+				}
+			);
 		},
-		[toggleFavoriteMutate]
+		[files, toggleFavoriteMutate]
 	);
 
 	const { mutate: addToCollectionMutate } = useAddToCollection();

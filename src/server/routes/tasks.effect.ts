@@ -54,6 +54,9 @@ router.get(
 				offset = '0',
 			} = req.query;
 
+			const favoriteFilter = typeof isFavorite === 'string' ? isFavorite === 'true' : undefined;
+			const archivedFilter = typeof isArchived === 'string' ? isArchived === 'true' : undefined;
+
 			const options = {
 				search: search as string,
 				status: status as any,
@@ -62,8 +65,8 @@ router.get(
 				assignedTo: assignedTo as string,
 				parentTaskId: parentTaskId as string,
 				projectId: projectId as string,
-				isFavorite: isFavorite === 'true',
-				isArchived: isArchived === 'true',
+				isFavorite: favoriteFilter,
+				isArchived: archivedFilter,
 				sortBy: sortBy as 'title' | 'createdAt' | 'updatedAt' | 'dueDate' | 'status' | 'priority',
 				sortOrder: sortOrder as 'asc' | 'desc',
 				limit: sanitizeLimit(limit as string),

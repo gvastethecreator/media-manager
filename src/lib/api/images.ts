@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { ImageWithStats } from '@/types/entities/image/base';
 import type { ImageCreateInput, ImageUpdateInput } from '@/types/entities/image/types';
 import { apiClient } from './client';
+import { favoriteKeys } from './favorites';
 
 // Tipos para filtros de imágenes
 export interface ImageFilters {
@@ -113,11 +115,18 @@ export function useDeleteImage() {
 export function useToggleFavorite() {
 	const queryClient = useQueryClient();
 
-	return useMutation<ImageWithStats, Error, { id: string; isFavorite: boolean }>({
-		mutationFn: ({ id, isFavorite }) => apiClient.patch<ImageWithStats>(`/images/${id}`, { isFavorite }),
-		onSuccess: (data) => {
+	return useMutation<{ id?: string; isFavorite: boolean }, Error, { id: string }>({
+		mutationFn: ({ id }) =>
+			apiClient.post<{ id?: string; isFavorite: boolean }>('/favorites/toggle', {
+				entityId: id,
+				entityType: FavoriteEntityType.IMAGE,
+			}),
+		onSuccess: (result, { id }) => {
 			queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
-			queryClient.setQueryData(imageKeys.detail(data.id), data);
+			queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
+			queryClient.setQueryData<ImageWithStats | undefined>(imageKeys.detail(id), (current) =>
+				current ? { ...current, isFavorite: result.isFavorite } : current
+			);
 		},
 	});
 }

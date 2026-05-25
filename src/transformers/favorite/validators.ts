@@ -6,28 +6,26 @@
  */
 
 import { z } from 'zod';
-import { FavoriteEntityType } from '../../types/entities/favorite';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
 /**
  * ⭐ Esquema base para validar favoritos.
  */
 export const favoriteBaseSchema = z.object({
-	id: z.string().uuid('ID debe ser un UUID válido'),
-	entityId: z.string().uuid('ID de entidad debe ser UUID válido'),
+	id: z.string().min(1, 'ID es requerido'),
+	profileId: z.string().min(1, 'profileId es requerido'),
+	entityId: z.string().min(1, 'entityId es requerido'),
 	entityType: z.nativeEnum(FavoriteEntityType),
-	userId: z.string().uuid().nullable(),
-	profileId: z.string().uuid().nullable(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
+	addedAt: z.date(),
 });
 
 /**
  * 📊 Esquema para estadísticas de favoritos.
  */
 export const favoriteStatisticsSchema = z.object({
+	daysSinceAdded: z.number().int().min(0),
 	entityTypeName: z.string(),
-	formattedCreatedAt: z.string(),
-	daysSinceFavorited: z.number().int().min(0),
+	formattedAddedAt: z.string(),
 	isRecent: z.boolean(),
 	isOld: z.boolean(),
 });
@@ -36,6 +34,8 @@ export const favoriteStatisticsSchema = z.object({
  * ⭐ Esquema para favorito con estadísticas.
  */
 export const favoriteWithStatsSchema = favoriteBaseSchema.extend({
+	entityName: z.string(),
+	entityThumbnail: z.string().nullable(),
 	stats: favoriteStatisticsSchema,
 });
 
@@ -44,8 +44,8 @@ export const favoriteWithStatsSchema = favoriteBaseSchema.extend({
  */
 export const favoriteCreateSchema = favoriteBaseSchema.omit({
 	id: true,
-	createdAt: true,
-	updatedAt: true,
+	profileId: true,
+	addedAt: true,
 });
 
 /**
@@ -57,10 +57,9 @@ export const favoriteUpdateSchema = favoriteCreateSchema.partial();
  * 🔍 Esquema para búsqueda de favoritos.
  */
 export const favoriteSearchSchema = z.object({
-	entityIds: z.array(z.string().uuid()).optional(),
+	entityIds: z.array(z.string().min(1)).optional(),
 	entityTypes: z.array(z.nativeEnum(FavoriteEntityType)).optional(),
-	userId: z.string().uuid().optional(),
-	profileId: z.string().uuid().optional(),
+	profileId: z.string().min(1).optional(),
 	dateFrom: z.date().optional(),
 	dateTo: z.date().optional(),
 	isRecent: z.boolean().optional(),

@@ -11,8 +11,11 @@ import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
+import { listFavoriteEntities } from '@/server/utils/favorite-route';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { FolderService, FolderServiceLive } from '@/services/folder/folder.service.effect';
 import { FolderReindexService } from '@/services/folder/reindex/folder-reindex.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -349,6 +352,57 @@ router.get(
 				parentId: parentId === 'null' ? null : (parentId as string | null | undefined),
 				onlyFavorites: onlyFavorites === 'true' ? true : undefined,
 			};
+
+			if (options.onlyFavorites) {
+				const favoriteResult = yield* listFavoriteEntities({
+					entityType: FavoriteEntityType.FOLDER,
+					search: options.search,
+					limit: options.limit,
+					offset: options.offset,
+					sortBy: options.orderBy,
+					sortOrder: options.orderDirection,
+					getEntityById: (entityId: string) => folderService.getById(entityId),
+				});
+
+				const baseUrl = `${req.protocol}://${req.get('host') ?? 'localhost:4000'}`;
+				const foldersWithRecentImages = yield* Effect.all(
+					favoriteResult.data.map((folder) =>
+						Effect.tryPromise({
+							try: async () => {
+								const previewPayload = await getFolderFiles!({
+									folderId: folder.id,
+									includeSubfolders: true,
+									limit: 4,
+									offset: 0,
+									sortBy: 'updatedAt',
+									sortOrder: 'desc',
+									fileTypes: ['image', 'video'],
+								});
+
+								return {
+									...folder,
+									recentImages: extractRecentPreviews(previewPayload, baseUrl, 4),
+								};
+							},
+							catch: () => ({
+								...folder,
+								recentImages: [],
+							}),
+						})
+					)
+				);
+
+				return {
+					data: foldersWithRecentImages,
+					pagination: {
+						total: favoriteResult.total,
+						limit: options.limit,
+						offset: options.offset,
+						hasNext: options.limit + options.offset < favoriteResult.total,
+						hasPrev: options.offset > 0,
+					},
+				};
+			}
 
 			const result = yield* folderService.getAll(options);
 			const baseUrl = `${req.protocol}://${req.get('host') ?? 'localhost:4000'}`;

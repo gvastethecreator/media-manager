@@ -6,8 +6,11 @@
  */
 
 import { Effect } from 'effect';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { folders, videos } from '@/lib/drizzle/schema';
+import { favorites, folders, profiles, videos } from '@/lib/drizzle/schema';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import * as VideoService from '../video.service.effect';
 
 // ============= Test Helpers =============
@@ -86,13 +89,45 @@ const createTestVideo = async (folderId: string, overrides?: Partial<typeof vide
 	return video;
 };
 
+let createdActiveProfileId: string | null = null;
+
+const ensureActiveProfile = async () => {
+	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+
+	if (activeProfile) {
+		return activeProfile.id;
+	}
+
+	const profileId = `video-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+	createdActiveProfileId = profileId;
+
+	await db.insert(profiles).values({
+		id: profileId,
+		name: 'Video Service Test Profile',
+		emoji: '🎬',
+		color: '#8b5cf6',
+		description: 'Perfil activo para tests de videos',
+		isActive: true,
+		settingsId: null,
+		imageId: null,
+	});
+
+	return profileId;
+};
+
 // ============= Cleanup =============
 
 afterEach(async () => {
+	await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.VIDEO));
 	// Limpiar videos de prueba (todos los registros)
 	await db.delete(videos);
 	// Limpiar folders de prueba (todos los registros)
 	await db.delete(folders);
+
+	if (createdActiveProfileId) {
+		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
+		createdActiveProfileId = null;
+	}
 });
 
 // ============= CRUD Operations Tests =============
@@ -308,12 +343,16 @@ describe('VideoService - CRUD Operations', () => {
 
 		it('debería filtrar por isFavorite', async () => {
 			const folder = await createTestFolder();
+			await ensureActiveProfile();
+			const favoriteVideo = await createTestVideo(folder.id, { isFavorite: false });
 			await createTestVideo(folder.id, { isFavorite: true });
-			await createTestVideo(folder.id, { isFavorite: false });
+
+			await favoriteService.set(FavoriteEntityType.VIDEO, favoriteVideo.id, true);
 
 			const result = await expectSuccess(VideoService.getAll({ isFavorite: true }));
 
 			expect(result.length).toBe(1);
+			expect(result[0].id).toBe(favoriteVideo.id);
 			expect(result[0].isFavorite).toBe(true);
 		});
 
@@ -475,13 +514,18 @@ describe('VideoService - Query Operations', () => {
 	describe('getAllFavorites', () => {
 		it('debería listar solo favoritos', async () => {
 			const folder = await createTestFolder();
+			await ensureActiveProfile();
+			const firstFavorite = await createTestVideo(folder.id, { isFavorite: false });
+			const secondFavorite = await createTestVideo(folder.id, { isFavorite: false });
 			await createTestVideo(folder.id, { isFavorite: true });
-			await createTestVideo(folder.id, { isFavorite: true });
-			await createTestVideo(folder.id, { isFavorite: false });
+
+			await favoriteService.set(FavoriteEntityType.VIDEO, firstFavorite.id, true);
+			await favoriteService.set(FavoriteEntityType.VIDEO, secondFavorite.id, true);
 
 			const result = await expectSuccess(VideoService.getAllFavorites());
 
 			expect(result.length).toBe(2);
+			expect(result.map((video) => video.id).sort()).toEqual([firstFavorite.id, secondFavorite.id].sort());
 			for (const video of result) {
 				expect(video.isFavorite).toBe(true);
 			}
@@ -496,13 +540,19 @@ describe('VideoService - Query Operations', () => {
 
 		it('debería soportar paginación en favorites', async () => {
 			const folder = await createTestFolder();
-			await createTestVideo(folder.id, { isFavorite: true });
-			await createTestVideo(folder.id, { isFavorite: true });
-			await createTestVideo(folder.id, { isFavorite: true });
+			await ensureActiveProfile();
+			const firstFavorite = await createTestVideo(folder.id, { isFavorite: false });
+			const secondFavorite = await createTestVideo(folder.id, { isFavorite: false });
+			const thirdFavorite = await createTestVideo(folder.id, { isFavorite: false });
+
+			await favoriteService.set(FavoriteEntityType.VIDEO, firstFavorite.id, true);
+			await favoriteService.set(FavoriteEntityType.VIDEO, secondFavorite.id, true);
+			await favoriteService.set(FavoriteEntityType.VIDEO, thirdFavorite.id, true);
 
 			const result = await expectSuccess(VideoService.getAllFavorites({ limit: 2 }));
 
 			expect(result.length).toBe(2);
+			expect(result.every((video) => video.isFavorite)).toBe(true);
 		});
 	});
 

@@ -4,8 +4,8 @@
  */
 
 import * as crypto from 'crypto';
-import { and, count, desc, eq } from 'drizzle-orm';
-import { db } from '@/lib/drizzle';
+import { and, asc, count, desc, eq, inArray } from 'drizzle-orm';
+import { db, getDbClient } from '@/lib/drizzle';
 import {
 	albums,
 	audios,
@@ -15,13 +15,16 @@ import {
 	documents,
 	favorites,
 	file3Ds,
+	folders,
 	groups,
 	images,
 	jsonFiles,
 	notes,
 	places,
-	prompts,
 	properties,
+	profiles,
+	prompts,
+	tasks,
 	tags,
 	videos,
 	wildcards,
@@ -29,38 +32,53 @@ import {
 } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import { FavoriteEntityType, type FavoriteWithStats } from '@/types/entities/favorite';
+import {
+	CANONICAL_FAVORITE_ENTITY_TYPES,
+	FAVORITE_ENTITY_DISPLAY_NAMES,
+	FavoriteEntityType,
+	isCanonicalFavoriteEntityType,
+	type FavoriteWithStats,
+} from '@/types/entities/favorite';
 
 const favoriteLogger = serverLogger.withContext('FavoriteService');
+const canonicalFavoriteEntityTypes: FavoriteEntityType[] = [...CANONICAL_FAVORITE_ENTITY_TYPES];
+const localFavoriteOnlyEntityTypes = new Set<FavoriteEntityType>([
+	FavoriteEntityType.TAG,
+	FavoriteEntityType.PROPERTY,
+	FavoriteEntityType.TASK,
+]);
 
 // Tipo para el resultado de la consulta de favoritos
 interface FavoriteRecord {
 	addedAt: Date;
 	entityId: string;
-	entityType: string;
+	entityType: FavoriteEntityType;
 	id: string;
+	profileId: string;
 }
 
 // Mapeo de entity type a tabla
-const entityTableMap: Record<string, any> = {
-	image: images,
-	video: videos,
-	album: albums,
-	character: characters,
-	place: places,
-	worldItem: worldItems,
-	concept: concepts,
-	note: notes,
-	prompt: prompts,
-	tag: tags,
-	group: groups,
-	collection: collections,
-	property: properties,
-	wildcard: wildcards,
-	audio: audios,
-	document: documents,
-	file3d: file3Ds,
-	jsonFile: jsonFiles,
+const entityTableMap: Record<FavoriteEntityType, any> = {
+	[FavoriteEntityType.IMAGE]: images,
+	[FavoriteEntityType.VIDEO]: videos,
+	[FavoriteEntityType.AUDIO]: audios,
+	[FavoriteEntityType.DOCUMENT]: documents,
+	[FavoriteEntityType.JSON_FILE]: jsonFiles,
+	[FavoriteEntityType.FILE_3D]: file3Ds,
+	[FavoriteEntityType.ALBUM]: albums,
+	[FavoriteEntityType.COLLECTION]: collections,
+	[FavoriteEntityType.FOLDER]: folders,
+	[FavoriteEntityType.GROUP]: groups,
+	[FavoriteEntityType.TAG]: tags,
+	[FavoriteEntityType.CHARACTER]: characters,
+	[FavoriteEntityType.PLACE]: places,
+	[FavoriteEntityType.WORLD_ITEM]: worldItems,
+	[FavoriteEntityType.CONCEPT]: concepts,
+	[FavoriteEntityType.PROPERTY]: properties,
+	[FavoriteEntityType.PROMPT]: prompts,
+	[FavoriteEntityType.NOTE]: notes,
+	[FavoriteEntityType.TASK]: tasks,
+	[FavoriteEntityType.WILDCARD]: wildcards,
 };
 
 // Constantes para los tipos de eventos
@@ -75,8 +93,10 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 	[EVENTS.FAVORITES_CHANGED]: 'favorites:modified',
 };
 
+let favoriteSchemaReadyPromise: Promise<void> | null = null;
+
 export interface FavoriteFilters {
-	entityType?: string;
+	entityType?: FavoriteEntityType;
 	limit?: number;
 	offset?: number;
 	search?: string;
@@ -90,22 +110,334 @@ export interface FavoriteResult {
 	total: number;
 }
 
+function readPragmaColumnName(row: unknown): string {
+	if (!row || typeof row !== 'object') {
+		return '';
+	}
+
+	const record = row as Record<string, unknown>;
+	return typeof record.name === 'string' ? record.name : '';
+}
+
+async function getActiveProfileIdOrNull(): Promise<string | null> {
+	const activeProfile = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+	return activeProfile[0]?.id ?? null;
+}
+
+async function requireActiveProfileId(): Promise<string> {
+	const profileId = await getActiveProfileIdOrNull();
+
+	if (!profileId) {
+		throw new Error('No hay un perfil activo para resolver favoritos');
+	}
+
+	return profileId;
+}
+
+async function ensureFavoriteProfileScopeSchema(): Promise<void> {
+	if (favoriteSchemaReadyPromise) {
+		return favoriteSchemaReadyPromise;
+	}
+
+	favoriteSchemaReadyPromise = (async () => {
+		const client = getDbClient();
+		if (!client) {
+			return;
+		}
+
+		const columns = await client.execute('PRAGMA table_info("Favorite")');
+		const columnNames = new Set(columns.rows.map(readPragmaColumnName));
+
+		if (!columnNames.has('profileId')) {
+			favoriteLogger.warn('Aplicando compatibilidad runtime para Favorite.profileId en base legado');
+			await client.execute('ALTER TABLE "Favorite" ADD COLUMN "profileId" text');
+		}
+
+		const activeProfileId = await getActiveProfileIdOrNull();
+		if (activeProfileId) {
+			await client.execute({
+				sql: "UPDATE \"Favorite\" SET \"profileId\" = ? WHERE \"profileId\" IS NULL OR \"profileId\" = ''",
+				args: [activeProfileId],
+			});
+		}
+
+		await client.execute('DROP INDEX IF EXISTS "Favorite_entityType_entityId_key"');
+		await client.execute(
+			'CREATE UNIQUE INDEX IF NOT EXISTS "Favorite_profileId_entityType_entityId_key" ON "Favorite" ("profileId", "entityType", "entityId")'
+		);
+		await client.execute('CREATE INDEX IF NOT EXISTS "Favorite_profileId_idx" ON "Favorite" ("profileId")');
+		await client.execute(
+			'CREATE INDEX IF NOT EXISTS "Favorite_profileId_addedAt_idx" ON "Favorite" ("profileId", "addedAt")'
+		);
+	})().catch((error) => {
+		favoriteSchemaReadyPromise = null;
+		throw error;
+	});
+
+	return favoriteSchemaReadyPromise;
+}
+
+function buildFavoriteStats(entityType: FavoriteEntityType, addedAt: Date) {
+	const normalizedAddedAt = new Date(addedAt);
+	const daysSinceAdded = Math.floor((Date.now() - normalizedAddedAt.getTime()) / (1000 * 60 * 60 * 24));
+
+	return {
+		daysSinceAdded,
+		entityTypeName: FAVORITE_ENTITY_DISPLAY_NAMES[entityType] ?? entityType,
+		formattedAddedAt: normalizedAddedAt.toLocaleDateString('es-ES', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+		}),
+		isRecent: daysSinceAdded <= 7,
+		isOld: daysSinceAdded > 30,
+	};
+}
+
+async function getEntityData(
+	entityType: FavoriteEntityType,
+	entityId: string
+): Promise<{ name: string; thumbnail?: string | null } | null> {
+	try {
+		const table = entityTableMap[entityType];
+		if (!table) return null;
+
+		const result = await db.select().from(table).where(eq(table.id, entityId)).limit(1);
+
+		if (result.length === 0) return null;
+
+		const entity = result[0];
+		return {
+			name: entity.name || entity.title || `${entityType} ${entityId.slice(0, 8)}`,
+			thumbnail: entity.thumbnailPath || entity.featuredImage || entity.path || null,
+		};
+	} catch (error) {
+		favoriteLogger.error('Error al obtener datos de entidad:', error);
+		return null;
+	}
+}
+
+async function ensureFavoriteTargetExists(entityType: FavoriteEntityType, entityId: string): Promise<void> {
+	const table = entityTableMap[entityType];
+
+	if (!table) {
+		throw new Error(`Tipo de favorito no soportado: ${entityType}`);
+	}
+
+	const result = await db.select({ id: table.id }).from(table).where(eq(table.id, entityId)).limit(1);
+
+	if (result.length === 0) {
+		throw new Error(`No existe la entidad favorita ${entityType}:${entityId}`);
+	}
+}
+
+async function ensureFavoriteTargetsExist(entityType: FavoriteEntityType, entityIds: string[]): Promise<string[]> {
+	const table = entityTableMap[entityType];
+
+	if (!table) {
+		throw new Error(`Tipo de favorito no soportado: ${entityType}`);
+	}
+
+	const uniqueEntityIds = [...new Set(entityIds.filter((entityId) => entityId.trim().length > 0))];
+
+	if (uniqueEntityIds.length === 0) {
+		return [];
+	}
+
+	const result = await db.select({ id: table.id }).from(table).where(inArray(table.id, uniqueEntityIds));
+	const existingIds = new Set(result.map((row: { id: string }) => row.id));
+	const missingIds = uniqueEntityIds.filter((entityId) => !existingIds.has(entityId));
+
+	if (missingIds.length > 0) {
+		throw new Error(`No existen las entidades favoritas ${entityType}:${missingIds.join(',')}`);
+	}
+
+	return uniqueEntityIds;
+}
+
+async function updateEntityIsFavorite(
+	entityType: FavoriteEntityType,
+	entityId: string,
+	isFavorite: boolean
+): Promise<void> {
+	try {
+		if (localFavoriteOnlyEntityTypes.has(entityType)) {
+			return;
+		}
+
+		const table = entityTableMap[entityType];
+		if (!table) return;
+
+		// Deuda transitoria: algunas vistas siguen leyendo el flag embebido.
+		// Tag, Property y Task ya quedaron fuera del bridge canónico y no deben resincronizarse desde aquí.
+		if ('isFavorite' in table) {
+			await db.update(table).set({ isFavorite }).where(eq(table.id, entityId));
+		}
+	} catch (error) {
+		favoriteLogger.debug('No se pudo actualizar isFavorite derivado en la entidad:', error);
+	}
+}
+
+async function updateEntityIsFavoriteMany(
+	entityType: FavoriteEntityType,
+	entityIds: string[],
+	isFavorite: boolean
+): Promise<void> {
+	try {
+		if (localFavoriteOnlyEntityTypes.has(entityType)) {
+			return;
+		}
+
+		const table = entityTableMap[entityType];
+		const uniqueEntityIds = [...new Set(entityIds.filter((entityId) => entityId.trim().length > 0))];
+
+		if (!table || uniqueEntityIds.length === 0) {
+			return;
+		}
+
+		if ('isFavorite' in table) {
+			await db.update(table).set({ isFavorite }).where(inArray(table.id, uniqueEntityIds));
+		}
+	} catch (error) {
+		favoriteLogger.debug('No se pudo actualizar isFavorite derivado en lote:', error);
+	}
+}
+
+async function getExistingFavoriteRecord(profileId: string, entityType: FavoriteEntityType, entityId: string) {
+	const existing = await db
+		.select({
+			id: favorites.id,
+			entityId: favorites.entityId,
+			entityType: favorites.entityType,
+		})
+		.from(favorites)
+		.where(
+			and(
+				eq(favorites.profileId, profileId),
+				eq(favorites.entityType, entityType),
+				eq(favorites.entityId, entityId)
+			)
+		)
+		.limit(1);
+
+	return existing[0] ?? null;
+}
+
+async function enrichFavorite(favorite: FavoriteRecord): Promise<FavoriteWithStats> {
+	const entityData = await getEntityData(favorite.entityType, favorite.entityId);
+
+	return {
+		...favorite,
+		entityName: entityData?.name || FAVORITE_ENTITY_DISPLAY_NAMES[favorite.entityType] || 'Desconocido',
+		entityThumbnail: entityData?.thumbnail || null,
+		stats: buildFavoriteStats(favorite.entityType, favorite.addedAt),
+	};
+}
+
+function favoriteMatchesSearch(favorite: FavoriteWithStats, rawSearch: string): boolean {
+	const search = rawSearch.trim().toLowerCase();
+	if (!search) {
+		return true;
+	}
+
+	return [favorite.entityName, favorite.entityId, favorite.entityType, favorite.stats.entityTypeName]
+		.filter(Boolean)
+		.some((value) => value.toLowerCase().includes(search));
+}
+
 /**
  * Servicio para gestionar los favoritos
  */
 export const favoriteService = {
 	/**
+	 * Obtener IDs de entidades favoritas para el perfil activo.
+	 * Si no hay perfil activo, retorna null para permitir fallback transicional.
+	 */
+	async getFavoriteEntityIds(entityType: FavoriteEntityType): Promise<string[] | null> {
+		await ensureFavoriteProfileScopeSchema();
+		const profileId = await getActiveProfileIdOrNull();
+
+		if (!profileId) {
+			return null;
+		}
+
+		const result = await db
+			.select({ entityId: favorites.entityId })
+			.from(favorites)
+			.where(and(eq(favorites.profileId, profileId), eq(favorites.entityType, entityType)))
+			.orderBy(desc(favorites.addedAt));
+
+		return result.map((row: { entityId: string }) => row.entityId);
+	},
+
+	/**
+	 * Establecer de forma explícita el estado favorito de una entidad.
+	 */
+	async set(
+		entityType: FavoriteEntityType,
+		entityId: string,
+		isFavorite: boolean
+	): Promise<{ isFavorite: boolean; id?: string }> {
+		try {
+			await ensureFavoriteProfileScopeSchema();
+			const profileId = await requireActiveProfileId();
+			await ensureFavoriteTargetExists(entityType, entityId);
+
+			const existing = await getExistingFavoriteRecord(profileId, entityType, entityId);
+
+			if (isFavorite) {
+				if (existing) {
+					await updateEntityIsFavorite(entityType, entityId, true);
+					return { isFavorite: true, id: existing.id };
+				}
+
+				const created = await favoriteService.toggle(entityType, entityId);
+				return created;
+			}
+
+			if (!existing) {
+				await updateEntityIsFavorite(entityType, entityId, false);
+				return { isFavorite: false };
+			}
+
+			await db.delete(favorites).where(eq(favorites.id, existing.id));
+			await updateEntityIsFavorite(entityType, entityId, false);
+
+			await emit({
+				type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
+				data: { action: 'removed', profileId, entityType, entityId },
+			});
+
+			favoriteLogger.info('Favorito eliminado por set explícito:', { profileId, entityType, entityId });
+			return { isFavorite: false };
+		} catch (error) {
+			favoriteLogger.error('Error al establecer favorito:', error);
+			throw error instanceof Error ? error : new Error('Error al establecer favorito');
+		}
+	},
+
+	/**
 	 * Alternar el estado de favorito de una entidad
 	 */
 	async toggle(entityType: FavoriteEntityType, entityId: string): Promise<{ isFavorite: boolean; id?: string }> {
 		try {
-			favoriteLogger.info('Alternando favorito:', { entityType, entityId });
+			await ensureFavoriteProfileScopeSchema();
+			const profileId = await requireActiveProfileId();
+			await ensureFavoriteTargetExists(entityType, entityId);
+
+			favoriteLogger.info('Alternando favorito:', { profileId, entityType, entityId });
 
 			// Verificar si ya existe
 			const existing = await db
 				.select()
 				.from(favorites)
-				.where(and(eq(favorites.entityType, entityType), eq(favorites.entityId, entityId)))
+				.where(
+					and(
+						eq(favorites.profileId, profileId),
+						eq(favorites.entityType, entityType),
+						eq(favorites.entityId, entityId)
+					)
+				)
 				.limit(1);
 
 			if (existing.length > 0) {
@@ -113,14 +445,14 @@ export const favoriteService = {
 				await db.delete(favorites).where(eq(favorites.id, existing[0].id));
 
 				// También actualizar isFavorite en la entidad si existe el campo
-				await this.updateEntityIsFavorite(entityType, entityId, false);
+				await updateEntityIsFavorite(entityType, entityId, false);
 
 				await emit({
 					type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
-					data: { action: 'removed', entityType, entityId },
+					data: { action: 'removed', profileId, entityType, entityId },
 				});
 
-				favoriteLogger.info('Favorito eliminado:', { entityType, entityId });
+				favoriteLogger.info('Favorito eliminado:', { profileId, entityType, entityId });
 				return { isFavorite: false };
 			}
 
@@ -128,24 +460,105 @@ export const favoriteService = {
 			const id = crypto.randomUUID();
 			await db.insert(favorites).values({
 				id,
+				profileId,
 				entityType,
 				entityId,
 				addedAt: new Date(),
 			});
 
 			// También actualizar isFavorite en la entidad si existe el campo
-			await this.updateEntityIsFavorite(entityType, entityId, true);
+			await updateEntityIsFavorite(entityType, entityId, true);
 
 			await emit({
 				type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
-				data: { action: 'added', entityType, entityId, id },
+				data: { action: 'added', profileId, entityType, entityId, id },
 			});
 
-			favoriteLogger.info('Favorito añadido:', { entityType, entityId, id });
+			favoriteLogger.info('Favorito añadido:', { profileId, entityType, entityId, id });
 			return { isFavorite: true, id };
 		} catch (error) {
 			favoriteLogger.error('Error al alternar favorito:', error);
-			throw new Error('Error al alternar favorito');
+			throw error instanceof Error ? error : new Error('Error al alternar favorito');
+		}
+	},
+
+	/**
+	 * Establecer en lote el estado favorito explícito de varias entidades del mismo tipo.
+	 */
+	async setMany(entityType: FavoriteEntityType, entityIds: string[], isFavorite: boolean): Promise<number> {
+		try {
+			await ensureFavoriteProfileScopeSchema();
+			const profileId = await requireActiveProfileId();
+			const uniqueEntityIds = await ensureFavoriteTargetsExist(entityType, entityIds);
+
+			if (uniqueEntityIds.length === 0) {
+				return 0;
+			}
+
+			const existing = await db
+				.select({
+					id: favorites.id,
+					entityId: favorites.entityId,
+				})
+				.from(favorites)
+				.where(
+					and(
+						eq(favorites.profileId, profileId),
+						eq(favorites.entityType, entityType),
+						inArray(favorites.entityId, uniqueEntityIds)
+					)
+				);
+
+			const existingByEntityId = new Map(
+				existing.map((favorite: { entityId: string; id: string }) => [favorite.entityId, favorite.id])
+			);
+
+			if (isFavorite) {
+				const idsToCreate = uniqueEntityIds.filter((entityId) => !existingByEntityId.has(entityId));
+
+				if (idsToCreate.length > 0) {
+					await db.insert(favorites).values(
+						idsToCreate.map((entityId) => ({
+							id: crypto.randomUUID(),
+							profileId,
+							entityType,
+							entityId,
+							addedAt: new Date(),
+						}))
+					);
+				}
+			} else {
+				const favoriteIdsToDelete = existing.map((favorite: { id: string }) => favorite.id);
+
+				if (favoriteIdsToDelete.length > 0) {
+					await db.delete(favorites).where(inArray(favorites.id, favoriteIdsToDelete));
+				}
+			}
+
+			await updateEntityIsFavoriteMany(entityType, uniqueEntityIds, isFavorite);
+
+			await emit({
+				type: EVENT_TYPE_MAPPING[EVENTS.FAVORITES_CHANGED],
+				data: {
+					action: isFavorite ? 'batch-added' : 'batch-removed',
+					profileId,
+					entityType,
+					entityIds: uniqueEntityIds,
+					count: uniqueEntityIds.length,
+				},
+			});
+
+			favoriteLogger.info('Favoritos actualizados en lote:', {
+				profileId,
+				entityType,
+				isFavorite,
+				count: uniqueEntityIds.length,
+			});
+
+			return uniqueEntityIds.length;
+		} catch (error) {
+			favoriteLogger.error('Error al establecer favoritos en lote:', error);
+			throw error instanceof Error ? error : new Error('Error al establecer favoritos en lote');
 		}
 	},
 
@@ -153,10 +566,15 @@ export const favoriteService = {
 	 * Verificar si una entidad es favorita
 	 */
 	async isFavorite(entityType: FavoriteEntityType, entityId: string): Promise<boolean> {
+		await ensureFavoriteProfileScopeSchema();
+		const profileId = await requireActiveProfileId();
+
 		const result = await db
 			.select({ id: favorites.id })
 			.from(favorites)
-			.where(and(eq(favorites.entityType, entityType), eq(favorites.entityId, entityId)))
+			.where(
+				and(eq(favorites.profileId, profileId), eq(favorites.entityType, entityType), eq(favorites.entityId, entityId))
+			)
 			.limit(1);
 
 		return result.length > 0;
@@ -166,22 +584,53 @@ export const favoriteService = {
 	 * Obtener todos los favoritos con filtros
 	 */
 	async list(filters: FavoriteFilters = {}): Promise<FavoriteResult> {
-		const { entityType, limit = 50, offset = 0, sortOrder = 'desc' } = filters;
+		const { entityType, limit = 50, offset = 0, search, sortBy = 'addedAt', sortOrder = 'desc' } = filters;
 
 		try {
-			const conditions = [];
+			if (entityType && !isCanonicalFavoriteEntityType(entityType)) {
+				return { items: [], total: 0, hasMore: false };
+			}
+
+			await ensureFavoriteProfileScopeSchema();
+			const profileId = await requireActiveProfileId();
+
+			const conditions = [
+				eq(favorites.profileId, profileId),
+				inArray(favorites.entityType, canonicalFavoriteEntityTypes),
+			];
 			if (entityType) {
 				conditions.push(eq(favorites.entityType, entityType));
 			}
 
-			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+			const whereClause = and(...conditions);
+			const orderByClause =
+				sortBy === 'entityType'
+					? sortOrder === 'desc'
+						? desc(favorites.entityType)
+						: asc(favorites.entityType)
+					: sortOrder === 'desc'
+						? desc(favorites.addedAt)
+						: asc(favorites.addedAt);
+
+			if (search?.trim()) {
+				const allItems = await db.select().from(favorites).where(whereClause).orderBy(orderByClause);
+				const enrichedItems = await Promise.all(allItems.map((favorite: FavoriteRecord) => enrichFavorite(favorite)));
+				const filteredItems = enrichedItems.filter((favorite) => favoriteMatchesSearch(favorite, search));
+				const paginatedItems = filteredItems.slice(offset, offset + limit);
+
+				return {
+					items: paginatedItems,
+					total: filteredItems.length,
+					hasMore: offset + limit < filteredItems.length,
+				};
+			}
 
 			const [items, totalResult] = await Promise.all([
 				db
 					.select()
 					.from(favorites)
 					.where(whereClause)
-					.orderBy(sortOrder === 'desc' ? desc(favorites.addedAt) : favorites.addedAt)
+					.orderBy(orderByClause)
 					.limit(limit)
 					.offset(offset),
 				db.select({ count: count() }).from(favorites).where(whereClause),
@@ -190,20 +639,7 @@ export const favoriteService = {
 			const total = totalResult[0]?.count ?? 0;
 
 			// Enriquecer con datos de la entidad
-			const enrichedItems: FavoriteWithStats[] = await Promise.all(
-				items.map(async (fav: FavoriteRecord) => {
-					const entityData = await this.getEntityData(fav.entityType as FavoriteEntityType, fav.entityId);
-					return {
-						...fav,
-						addedAt: fav.addedAt,
-						entityName: entityData?.name || 'Desconocido',
-						entityThumbnail: entityData?.thumbnail || null,
-						stats: {
-							daysSinceAdded: Math.floor((Date.now() - fav.addedAt.getTime()) / (1000 * 60 * 60 * 24)),
-						},
-					};
-				})
-			);
+			const enrichedItems = await Promise.all(items.map((favorite: FavoriteRecord) => enrichFavorite(favorite)));
 
 			return {
 				items: enrichedItems,
@@ -212,7 +648,7 @@ export const favoriteService = {
 			};
 		} catch (error) {
 			favoriteLogger.error('Error al listar favoritos:', error);
-			throw new Error('Error al listar favoritos');
+			throw error instanceof Error ? error : new Error('Error al listar favoritos');
 		}
 	},
 
@@ -221,21 +657,24 @@ export const favoriteService = {
 	 */
 	async getById(id: string): Promise<FavoriteWithStats | null> {
 		try {
-			const result = await db.select().from(favorites).where(eq(favorites.id, id)).limit(1);
+			await ensureFavoriteProfileScopeSchema();
+			const profileId = await requireActiveProfileId();
+
+			const result = await db
+				.select()
+				.from(favorites)
+				.where(
+					and(
+						eq(favorites.id, id),
+						eq(favorites.profileId, profileId),
+						inArray(favorites.entityType, canonicalFavoriteEntityTypes)
+					)
+				)
+				.limit(1);
 
 			if (result.length === 0) return null;
 
-			const fav = result[0];
-			const entityData = await this.getEntityData(fav.entityType as FavoriteEntityType, fav.entityId);
-
-			return {
-				...fav,
-				entityName: entityData?.name || 'Desconocido',
-				entityThumbnail: entityData?.thumbnail || null,
-				stats: {
-					daysSinceAdded: Math.floor((Date.now() - fav.addedAt.getTime()) / (1000 * 60 * 60 * 24)),
-				},
-			};
+			return enrichFavorite(result[0] as FavoriteRecord);
 		} catch (error) {
 			favoriteLogger.error('Error al obtener favorito:', error);
 			return null;
@@ -247,7 +686,14 @@ export const favoriteService = {
 	 */
 	async delete(id: string): Promise<boolean> {
 		try {
-			const existing = await db.select().from(favorites).where(eq(favorites.id, id)).limit(1);
+			await ensureFavoriteProfileScopeSchema();
+			const profileId = await requireActiveProfileId();
+
+			const existing = await db
+				.select()
+				.from(favorites)
+				.where(and(eq(favorites.id, id), eq(favorites.profileId, profileId)))
+				.limit(1);
 
 			if (existing.length === 0) return false;
 
@@ -255,11 +701,16 @@ export const favoriteService = {
 			await db.delete(favorites).where(eq(favorites.id, id));
 
 			// Actualizar isFavorite en la entidad
-			await this.updateEntityIsFavorite(fav.entityType as FavoriteEntityType, fav.entityId, false);
+			await updateEntityIsFavorite(fav.entityType as FavoriteEntityType, fav.entityId, false);
 
 			await emit({
 				type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
-				data: { action: 'removed', entityType: fav.entityType, entityId: fav.entityId },
+				data: {
+					action: 'removed',
+					profileId,
+					entityType: fav.entityType,
+					entityId: fav.entityId,
+				},
 			});
 
 			return true;
@@ -269,61 +720,26 @@ export const favoriteService = {
 		}
 	},
 
-	/**
-	 * Obtener datos básicos de la entidad
-	 */
-	async getEntityData(
-		entityType: FavoriteEntityType,
-		entityId: string
-	): Promise<{ name: string; thumbnail?: string | null } | null> {
-		try {
-			const table = entityTableMap[entityType];
-			if (!table) return null;
+	getEntityData,
 
-			const result = await db.select().from(table).where(eq(table.id, entityId)).limit(1);
-
-			if (result.length === 0) return null;
-
-			const entity = result[0];
-			return {
-				name: entity.name || entity.title || `${entityType} ${entityId.slice(0, 8)}`,
-				thumbnail: entity.thumbnailPath || entity.featuredImage || entity.path || null,
-			};
-		} catch (error) {
-			favoriteLogger.error('Error al obtener datos de entidad:', error);
-			return null;
-		}
-	},
-
-	/**
-	 * Actualizar el campo isFavorite en la entidad si existe
-	 */
-	async updateEntityIsFavorite(entityType: FavoriteEntityType, entityId: string, isFavorite: boolean): Promise<void> {
-		try {
-			const table = entityTableMap[entityType];
-			if (!table) return;
-
-			// Verificar si la tabla tiene el campo isFavorite
-			if ('isFavorite' in table) {
-				await db.update(table).set({ isFavorite }).where(eq(table.id, entityId));
-			}
-		} catch (error) {
-			// Ignorar errores si la tabla no tiene el campo isFavorite
-			favoriteLogger.debug('No se pudo actualizar isFavorite en entidad (campo puede no existir):', error);
-		}
-	},
+	updateEntityIsFavorite,
+	updateEntityIsFavoriteMany,
 
 	/**
 	 * Obtener conteo de favoritos por tipo
 	 */
 	async getCountsByType(): Promise<Record<string, number>> {
 		try {
+			await ensureFavoriteProfileScopeSchema();
+			const profileId = await requireActiveProfileId();
+
 			const results = await db
 				.select({
 					entityType: favorites.entityType,
 					count: count(),
 				})
 				.from(favorites)
+				.where(and(eq(favorites.profileId, profileId), inArray(favorites.entityType, canonicalFavoriteEntityTypes)))
 				.groupBy(favorites.entityType);
 
 			const counts: Record<string, number> = {};

@@ -8,8 +8,10 @@
 import { Effect } from 'effect';
 import express from 'express';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { ImageService, ImageServiceLive } from '@/services/image/image.service.effect';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 
 const router = express.Router();
@@ -88,8 +90,46 @@ router.get('/', async (req, res) => {
 router.get('/favorites', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const imageService = yield* ImageService;
-		const favorites = yield* imageService.getAllFavorites();
-		return { data: favorites };
+
+		const favoriteCounts = yield* Effect.tryPromise({
+			try: () => favoriteService.getCountsByType(),
+			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		});
+
+		const totalFavorites = favoriteCounts[FavoriteEntityType.IMAGE] ?? 0;
+
+		if (totalFavorites === 0) {
+			return { data: [] };
+		}
+
+		const favoriteResult = yield* Effect.tryPromise({
+			try: () =>
+				favoriteService.list({
+					entityType: FavoriteEntityType.IMAGE,
+					limit: totalFavorites,
+					offset: 0,
+					sortBy: 'addedAt',
+					sortOrder: 'desc',
+				}),
+			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		});
+
+		const favoriteImages = yield* Effect.all(
+			favoriteResult.items.map((favorite) =>
+				imageService.getByIdWithStats(favorite.entityId).pipe(
+					Effect.map((image) => ({
+						...image,
+						entityType: 'image' as const,
+						thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+					})),
+					Effect.catchAll(() => Effect.succeed(null))
+				)
+			)
+		);
+
+		return {
+			data: favoriteImages.flatMap((image) => (image ? [image] : [])),
+		};
 	}).pipe(Effect.provide(ImageServiceLive));
 
 	await runEffectForExpress(effect, res);
@@ -192,8 +232,7 @@ router.patch('/:id', async (req, res) => {
 router.post('/:id/favorite', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const imageService = yield* ImageService;
-		const image = yield* imageService.toggleFavorite(req.params.id);
-		return image;
+		return yield* imageService.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(ImageServiceLive));
 
 	await runEffectForExpress(effect, res);
@@ -218,8 +257,6 @@ router.post('/:id/tags', async (req, res) => {
  */
 router.post('/batch/favorite', async (req, res) => {
 	const effect = Effect.gen(function* () {
-		const imageService = yield* ImageService;
-
 		const { ids, isFavorite } = req.body;
 
 		if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
@@ -228,9 +265,12 @@ router.post('/batch/favorite', async (req, res) => {
 
 		validateBatchSize(ids);
 
-		const count = yield* imageService.setFavoriteMany(ids, isFavorite);
+		const count = yield* Effect.tryPromise({
+			try: () => favoriteService.setMany(FavoriteEntityType.IMAGE, ids, isFavorite),
+			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		});
 		return { success: true, count };
-	}).pipe(Effect.provide(ImageServiceLive));
+	});
 
 	await runEffectForExpress(effect, res);
 });

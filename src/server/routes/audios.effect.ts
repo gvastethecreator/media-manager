@@ -12,9 +12,58 @@ import { db } from '@/lib/drizzle/index.js';
 import { audios } from '@/lib/drizzle/schema/index.js';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { AudioService, AudioServiceLive } from '@/services/audio/audio.service.effect';
-import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
+import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 
 const router = express.Router();
+
+function normalizeSortValue(value: unknown): number | string {
+	if (value instanceof Date) {
+		return value.getTime();
+	}
+
+	if (typeof value === 'number') {
+		return value;
+	}
+
+	if (typeof value === 'string') {
+		return value.toLowerCase();
+	}
+
+	if (typeof value === 'boolean') {
+		return value ? 1 : 0;
+	}
+
+	if (value && typeof value === 'object' && 'getTime' in value && typeof value.getTime === 'function') {
+		return value.getTime();
+	}
+
+	return 0;
+}
+
+function sortEntitiesByField<T extends Record<string, unknown>>(
+	items: T[],
+	sortBy: string,
+	sortOrder: 'asc' | 'desc'
+): T[] {
+	const direction = sortOrder === 'asc' ? 1 : -1;
+
+	return [...items].sort((left, right) => {
+		const leftValue = normalizeSortValue(left[sortBy]);
+		const rightValue = normalizeSortValue(right[sortBy]);
+
+		if (leftValue < rightValue) {
+			return -1 * direction;
+		}
+
+		if (leftValue > rightValue) {
+			return 1 * direction;
+		}
+
+		return 0;
+	});
+}
 
 /**
  * GET /audios - Listar audios con filtros y paginación
@@ -96,13 +145,48 @@ router.get('/favorites', async (req, res) => {
 			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
 		};
 
-		const result = yield* audioService.getAllFavorites(filters);
+		const favoriteCounts = yield* Effect.tryPromise({
+			try: () => favoriteService.getCountsByType(),
+			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		});
 
-		const data = result.map((audio) => ({
-			...audio,
-			entityType: 'audio' as const,
-			thumbnailUrl: `/api/audio/${audio.id}/waveform`,
-		}));
+		const totalFavorites = favoriteCounts[FavoriteEntityType.AUDIO] ?? 0;
+
+		if (totalFavorites === 0) {
+			return res.json([]);
+		}
+
+		const favoriteResult = yield* Effect.tryPromise({
+			try: () =>
+				favoriteService.list({
+					entityType: FavoriteEntityType.AUDIO,
+					search: filters.search,
+					limit: totalFavorites,
+					offset: 0,
+					sortBy: 'addedAt',
+					sortOrder: 'desc',
+				}),
+			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		});
+
+		const favoriteAudios = yield* Effect.all(
+			favoriteResult.items.map((favorite) =>
+				audioService.getByIdWithStats(favorite.entityId).pipe(
+					Effect.map((audio) => ({
+						...audio,
+						entityType: 'audio' as const,
+						thumbnailUrl: `/api/audio/${audio.id}/waveform`,
+					})),
+					Effect.catchAll(() => Effect.succeed(null))
+				)
+			)
+		);
+
+		const data = sortEntitiesByField(
+			favoriteAudios.flatMap((audio) => (audio ? [audio] : [])),
+			filters.sortBy,
+			filters.sortOrder
+		).slice(filters.offset, filters.offset + filters.limit);
 
 		return res.json(data);
 	}).pipe(Effect.provide(AudioServiceLive));
@@ -318,7 +402,6 @@ router.post('/:id/favorite', async (req, res) => {
 
 	const effect = Effect.gen(function* () {
 		const audioService = yield* AudioService;
-
 		const audio = yield* audioService.toggleFavorite(id);
 
 		return res.json(audio);
@@ -334,12 +417,19 @@ router.post('/batch/favorite', async (req, res) => {
 	const { ids, isFavorite } = req.body;
 
 	const effect = Effect.gen(function* () {
-		const audioService = yield* AudioService;
+		if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
+			yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
+		}
 
-		const updatedCount = yield* audioService.setFavoriteMany(ids, isFavorite);
+		validateBatchSize(ids);
+
+		const updatedCount = yield* Effect.tryPromise({
+			try: () => favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite),
+			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		});
 
 		return res.json({ updatedCount });
-	}).pipe(Effect.provide(AudioServiceLive));
+	});
 
 	await runEffectForExpress(effect, res);
 });

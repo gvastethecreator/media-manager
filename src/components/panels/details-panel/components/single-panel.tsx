@@ -99,11 +99,13 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 		exportMetadata,
 	} = useEnhancedMetadata(shouldUseInternalHook ? item : undefined);
 
-	const { toggleFavorite, isLoading: isFavoriteLoading } = useFavorite({
+	const { toggleFavorite, isLoading: isFavoriteLoading, isFavorite, isSupported: isCanonicalFavoriteSupported } =
+		useFavorite({
 		entityId: item.id,
 		entityType: item.entityType,
 		initialIsFavorite: 'isFavorite' in item ? item.isFavorite : false,
-	});
+		});
+	const favoriteState = 'isFavorite' in item ? isFavorite : false;
 
 	const [detectedLoras, setDetectedLoras] = React.useState<string[]>([]);
 	const [zoomOpen, setZoomOpen] = React.useState(false);
@@ -350,16 +352,23 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						<Button
 							className={cn(
 								'h-7 w-7 transition-all',
-								'isFavorite' in item && item.isFavorite
-									? 'bg-destructive/10 text-destructive'
-									: 'opacity-40 hover:opacity-100'
+								!isCanonicalFavoriteSupported
+									? 'cursor-not-allowed opacity-20 hover:opacity-20'
+									: favoriteState
+										? 'bg-destructive/10 text-destructive'
+										: 'opacity-40 hover:opacity-100'
 							)}
-							disabled={isFavoriteLoading}
+							disabled={isFavoriteLoading || !isCanonicalFavoriteSupported}
 							onClick={toggleFavorite}
 							size="icon"
+							title={
+								isCanonicalFavoriteSupported
+									? 'Alternar favorito'
+									: 'Esta entidad está fuera del perímetro canónico de Favorite'
+							}
 							variant="ghost"
 						>
-							<Heart className={cn('h-3.5 w-3.5', 'isFavorite' in item && item.isFavorite && 'fill-current')} />
+							<Heart className={cn('h-3.5 w-3.5', favoriteState && 'fill-current')} />
 						</Button>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>

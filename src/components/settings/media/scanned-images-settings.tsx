@@ -60,8 +60,8 @@ export function ScannedImagesSettings() {
 
 	const handleToggleFavorite = async (image: ImageWithStats) => {
 		try {
-			await toggleFavorite.mutateAsync({ id: image.id, isFavorite: !image.isFavorite });
-			toastService.success(image.isFavorite ? 'Quitado de favoritos' : 'Añadido a favoritos');
+			const result = await toggleFavorite.mutateAsync({ id: image.id });
+			toastService.success(result.isFavorite ? 'Añadido a favoritos' : 'Quitado de favoritos');
 		} catch (e) {
 			toastService.error('Error al actualizar favoritos');
 		}

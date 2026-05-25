@@ -13,9 +13,11 @@ import { file3Ds } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats/stats.service';
 import { fromDrizzleFile3D, fromDrizzleFile3Ds } from '@/transformers/file3d/transformer';
 import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const file3dLogger = serverLogger.withContext('File3DService');
 
@@ -28,6 +30,42 @@ const createFile3DError = (
 	return createEntityErrorObject('File3DError', message, code, cause);
 };
 
+const normalizeFile3DFavorite = <TFile3D extends { id: string; isFavorite?: boolean | null }>(
+	file3D: TFile3D,
+	favoriteEntityIds: string[] | null
+): TFile3D & { isFavorite: boolean } => {
+	if (favoriteEntityIds === null) {
+		return {
+			...file3D,
+			isFavorite: Boolean(file3D.isFavorite),
+		};
+	}
+
+	const favoriteEntityIdSet = new Set(favoriteEntityIds);
+	return {
+		...file3D,
+		isFavorite: favoriteEntityIdSet.has(file3D.id),
+	};
+};
+
+const normalizeFile3DFavorites = <TFile3D extends { id: string; isFavorite?: boolean | null }>(
+	file3DRows: TFile3D[],
+	favoriteEntityIds: string[] | null
+): Array<TFile3D & { isFavorite: boolean }> => {
+	if (favoriteEntityIds === null) {
+		return file3DRows.map((file3D) => ({
+			...file3D,
+			isFavorite: Boolean(file3D.isFavorite),
+		}));
+	}
+
+	const favoriteEntityIdSet = new Set(favoriteEntityIds);
+	return file3DRows.map((file3D) => ({
+		...file3D,
+		isFavorite: favoriteEntityIdSet.has(file3D.id),
+	}));
+};
+
 /**
  * Obtiene todos los archivos 3D
  */
@@ -35,6 +73,7 @@ export async function getFile3Ds(): Promise<File3DWithStats[]> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		file3dLogger.info('🧊 Obteniendo archivos 3D');
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D);
 
 		const drizzleFile3Ds = await db
 			.select({
@@ -71,10 +110,7 @@ export async function getFile3Ds(): Promise<File3DWithStats[]> {
 			.orderBy(desc(file3Ds.createdAt));
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedFile3Ds = drizzleFile3Ds.map((rawFile3D: (typeof drizzleFile3Ds)[0]) => ({
-			...rawFile3D,
-			isFavorite: Boolean(rawFile3D.isFavorite),
-		}));
+		const transformedFile3Ds = normalizeFile3DFavorites(drizzleFile3Ds, favoriteEntityIds);
 
 		return fromDrizzleFile3Ds(transformedFile3Ds as any);
 	} catch (error) {
@@ -90,6 +126,7 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		file3dLogger.info(`🔍 Obteniendo archivo 3D por ID: ${id}`);
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D);
 
 		const drizzleFile3D = await db
 			.select({
@@ -133,10 +170,7 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 		const rawFile3D = drizzleFile3D[0];
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedFile3D = {
-			...rawFile3D,
-			isFavorite: Boolean(rawFile3D.isFavorite),
-		};
+		const transformedFile3D = normalizeFile3DFavorite(rawFile3D, favoriteEntityIds);
 
 		return fromDrizzleFile3D(transformedFile3D as any);
 	} catch (error) {
@@ -151,12 +185,16 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 export async function createFile3D(data: File3DCreateInput): Promise<File3DWithStats> {
 	try {
 		file3dLogger.info('📝 Creando archivo 3D:', data.name);
+		const file3DId = crypto.randomUUID();
+		const requestedIsFavorite = data.isFavorite === true;
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D);
+		const useCanonicalFavoriteBridge = requestedIsFavorite && favoriteEntityIds !== null;
 
 		// **MIGRACIÓN A DRIZZLE**
 		const result = await db
 			.insert(file3Ds)
 			.values({
-				id: crypto.randomUUID(),
+				id: file3DId,
 				name: data.name,
 				path: data.path,
 				size: data.size,
@@ -164,7 +202,7 @@ export async function createFile3D(data: File3DCreateInput): Promise<File3DWithS
 				mimeType: data.mimeType,
 				extension: data.extension,
 				folderId: data.folderId,
-				isFavorite: data.isFavorite,
+				isFavorite: useCanonicalFavoriteBridge ? false : Boolean(data.isFavorite),
 				isArchived: data.isArchived,
 				format: data.format || null,
 				version: data.version || null,
@@ -188,7 +226,20 @@ export async function createFile3D(data: File3DCreateInput): Promise<File3DWithS
 			.returning();
 
 		const newFile3D = result[0];
-		const file3DWithStats = fromDrizzleFile3D(newFile3D as any);
+
+		if (useCanonicalFavoriteBridge) {
+			try {
+				await favoriteService.set(FavoriteEntityType.FILE_3D, file3DId, true);
+			} catch (error) {
+				await db.delete(file3Ds).where(eq(file3Ds.id, file3DId));
+				throw error;
+			}
+		}
+
+		const file3DWithStats = await getFile3DById(file3DId);
+		if (!file3DWithStats) {
+			throw createFile3DError('No se pudo obtener el archivo 3D creado', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Emitir eventos
 		await emit({
@@ -211,6 +262,12 @@ export async function createFile3D(data: File3DCreateInput): Promise<File3DWithS
 export async function updateFile3D(id: string, data: File3DUpdateInput): Promise<File3DWithStats> {
 	try {
 		file3dLogger.info('📝 Actualizando archivo 3D:', id);
+		const requestedIsFavorite = typeof data.isFavorite === 'boolean' ? data.isFavorite : undefined;
+		const favoriteEntityIds =
+			requestedIsFavorite === undefined
+				? null
+				: await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D);
+		const useCanonicalFavoriteBridge = favoriteEntityIds !== null && requestedIsFavorite !== undefined;
 
 		// **MIGRACIÓN A DRIZZLE**
 		const updateData: any = {
@@ -239,7 +296,7 @@ export async function updateFile3D(id: string, data: File3DUpdateInput): Promise
 		if (data.folderId !== undefined) {
 			updateData.folderId = data.folderId;
 		}
-		if (data.isFavorite !== undefined) {
+		if (data.isFavorite !== undefined && !useCanonicalFavoriteBridge) {
 			updateData.isFavorite = data.isFavorite;
 		}
 		if (data.isArchived !== undefined) {
@@ -295,6 +352,10 @@ export async function updateFile3D(id: string, data: File3DUpdateInput): Promise
 		}
 
 		await db.update(file3Ds).set(updateData).where(eq(file3Ds.id, id));
+
+		if (useCanonicalFavoriteBridge) {
+			await favoriteService.set(FavoriteEntityType.FILE_3D, id, requestedIsFavorite);
+		}
 
 		// Obtener el archivo 3D actualizado
 		const updatedFile3D = await getFile3DById(id);
@@ -393,6 +454,7 @@ export async function getFile3DCount(): Promise<number> {
 export async function getFile3DByHash(hash: string): Promise<File3DWithStats | null> {
 	try {
 		file3dLogger.info('🔍 Buscando archivo 3D por hash:', hash);
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D);
 
 		// **MIGRACIÓN A DRIZZLE**
 		const result = await db.select().from(file3Ds).where(eq(file3Ds.hash, hash)).limit(1);
@@ -403,11 +465,7 @@ export async function getFile3DByHash(hash: string): Promise<File3DWithStats | n
 		}
 
 		const rawFile3D = result[0];
-		// Transformar el campo isFavorite de number a boolean
-		const transformedFile3D = {
-			...rawFile3D,
-			isFavorite: Boolean(rawFile3D.isFavorite),
-		};
+		const transformedFile3D = normalizeFile3DFavorite(rawFile3D, favoriteEntityIds);
 
 		const file3D = fromDrizzleFile3D(transformedFile3D as any);
 		file3dLogger.info('✅ Archivo 3D encontrado por hash:', file3D.name);

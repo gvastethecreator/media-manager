@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BaseContentView } from '@/components/views/base/base-content-view';
+import { useFavorite } from '@/hooks/use-favorite';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
@@ -25,14 +26,17 @@ export function JsonFileContentView() {
 	const navigate = useNavigate();
 	const getJsonFileById = useJsonFileStore((s) => s.getJsonFileById);
 	const fetchJsonFile = useJsonFileStore((s) => s.fetchJsonFile);
-	const toggleFavorite = useJsonFileStore((s) => s.toggleFavorite);
 	const loading = useJsonFileStore((s) => s.loading);
 	const storeError = useJsonFileStore((s) => s.error);
 
 	const [jsonFile, setJsonFile] = useState<JsonFileWithStats | null>(null);
 	const [content, setContent] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+	const { isFavorite, isLoading: isFavoriteLoading, toggleFavorite } = useFavorite({
+		entityId: jsonFile?.id ?? id ?? '',
+		entityType: 'jsonFile',
+		initialIsFavorite: jsonFile?.isFavorite ?? false,
+	});
 
 	useEffect(() => {
 		if (!id) {
@@ -130,11 +134,12 @@ export function JsonFileContentView() {
 		}
 
 		try {
-			setIsFavoriteLoading(true);
-			await toggleFavorite(id);
-			setJsonFile((current) => (current ? { ...current, isFavorite: !current.isFavorite } : current));
-		} finally {
-			setIsFavoriteLoading(false);
+			toggleFavorite();
+		} catch (toggleError) {
+			logger.error('Error alternando favorito en JSON', {
+				id,
+				error: toggleError instanceof Error ? toggleError.message : toggleError,
+			});
 		}
 	};
 
@@ -159,10 +164,10 @@ export function JsonFileContentView() {
 						disabled={isFavoriteLoading}
 						onClick={handleToggleFavorite}
 						size="sm"
-						variant={jsonFile.isFavorite ? 'default' : 'outline'}
+						variant={isFavorite ? 'default' : 'outline'}
 					>
-						<Heart className={`h-4 w-4 ${jsonFile.isFavorite ? 'fill-current' : ''}`} />
-						{jsonFile.isFavorite ? 'En favoritos' : 'Favorito'}
+						<Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+						{isFavorite ? 'En favoritos' : 'Favorito'}
 					</Button>
 				</>
 			)}

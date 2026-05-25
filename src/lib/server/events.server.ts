@@ -184,7 +184,12 @@ export function getEventSubscribers() {
 }
 
 function isServerRuntime() {
-	return typeof globalThis.window === 'undefined' || globalThis.window == null;
+	const isVitestRuntime =
+		typeof process !== 'undefined' &&
+		typeof process.env === 'object' &&
+		(process.env.VITEST === 'true' || process.env.NODE_ENV === 'test');
+
+	return isVitestRuntime || typeof globalThis.window === 'undefined' || globalThis.window == null;
 }
 
 /**

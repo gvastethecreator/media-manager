@@ -50,6 +50,7 @@ export const worldItemApi = {
 	setWorldItems: (worldItems: any[]) => useWorldItemStore.getState().setWorldItems(worldItems),
 	addWorldItem: (worldItem: any) => useWorldItemStore.getState().addWorldItem(worldItem),
 	updateWorldItem: (id: string, data: any) => useWorldItemStore.getState().updateWorldItem(id, data),
+	toggleWorldItemFavorite: (id: string) => useWorldItemStore.getState().toggleWorldItemFavorite(id),
 	removeWorldItem: (id: string) => useWorldItemStore.getState().deleteWorldItem(id),
 	resetStore: () => useWorldItemStore.getState().resetStore(),
 
