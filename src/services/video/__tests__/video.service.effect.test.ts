@@ -6,7 +6,7 @@
  */
 
 import { Effect } from 'effect';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { favorites, folders, profiles, videos } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -90,12 +90,18 @@ const createTestVideo = async (folderId: string, overrides?: Partial<typeof vide
 };
 
 let createdActiveProfileId: string | null = null;
+let previousActiveProfileIds: string[] = [];
 
 const ensureActiveProfile = async () => {
-	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+	if (createdActiveProfileId) {
+		return createdActiveProfileId;
+	}
 
-	if (activeProfile) {
-		return activeProfile.id;
+	const activeProfiles = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true));
+	previousActiveProfileIds = activeProfiles.map((profile: { id: string }) => profile.id);
+
+	if (previousActiveProfileIds.length > 0) {
+		await db.update(profiles).set({ isActive: false }).where(inArray(profiles.id, previousActiveProfileIds));
 	}
 
 	const profileId = `video-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -128,6 +134,11 @@ afterEach(async () => {
 		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
 		createdActiveProfileId = null;
 	}
+
+	if (previousActiveProfileIds.length > 0) {
+		await db.update(profiles).set({ isActive: true }).where(inArray(profiles.id, previousActiveProfileIds));
+		previousActiveProfileIds = [];
+	}
 });
 
 // ============= CRUD Operations Tests =============
@@ -157,6 +168,28 @@ describe('VideoService - CRUD Operations', () => {
 			expect(result.size).toBe(50_000_000);
 			expect(result.duration).toBe(300);
 			expect(result.isFavorite).toBe(false);
+		});
+
+		it('debería persistir el favorito vía bridge canónico al crear con perfil activo', async () => {
+			const folder = await createTestFolder();
+			await ensureActiveProfile();
+
+			const result = await expectSuccess(
+				VideoService.create({
+					name: 'canonical-video.mp4',
+					path: '/test/canonical-video.mp4',
+					hash: '9'.repeat(64),
+					size: 50_000_000,
+					duration: 300,
+					width: 1280,
+					height: 720,
+					folderId: folder.id,
+					isFavorite: true,
+				})
+			);
+
+			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.VIDEO, result.id)).toBe(true);
 		});
 
 		it('debería fallar con VideoHashConflict si hash ya existe', async () => {
@@ -406,6 +439,17 @@ describe('VideoService - CRUD Operations', () => {
 			expect(result.hash).toBe(video.hash); // no cambió
 		});
 
+		it('debería persistir el favorito vía bridge canónico al actualizar con perfil activo', async () => {
+			const folder = await createTestFolder();
+			const video = await createTestVideo(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+
+			const result = await expectSuccess(VideoService.update(video.id, { isFavorite: true }));
+
+			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.VIDEO, video.id)).toBe(true);
+		});
+
 		it('debería fallar con VideoNotFound si ID no existe', async () => {
 			const nonExistentId = crypto.randomUUID();
 
@@ -629,7 +673,10 @@ describe('VideoService - Toggle Operations', () => {
 
 		it('debería cambiar isFavorite de true a false', async () => {
 			const folder = await createTestFolder();
-			const video = await createTestVideo(folder.id, { isFavorite: true });
+			const video = await createTestVideo(folder.id, { isFavorite: false });
+
+			const favorited = await expectSuccess(VideoService.toggleFavorite(video.id));
+			expect(favorited.isFavorite).toBe(true);
 
 			const result = await expectSuccess(VideoService.toggleFavorite(video.id));
 
@@ -642,6 +689,17 @@ describe('VideoService - Toggle Operations', () => {
 			const error = await expectError(VideoService.toggleFavorite(nonExistentId));
 
 			expect(error._tag).toBe('VideoNotFound');
+		});
+
+		it('debería delegar toggleFavorite al bridge canónico con perfil activo', async () => {
+			const folder = await createTestFolder();
+			const video = await createTestVideo(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+
+			const result = await expectSuccess(VideoService.toggleFavorite(video.id));
+
+			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.VIDEO, video.id)).toBe(true);
 		});
 	});
 
@@ -677,6 +735,19 @@ describe('VideoService - Toggle Operations', () => {
 			const result = await expectSuccess(VideoService.setFavoriteMany([], true));
 
 			expect(result).toBe(0);
+		});
+
+		it('debería persistir favoritos en lote vía bridge canónico con perfil activo', async () => {
+			const folder = await createTestFolder();
+			const video1 = await createTestVideo(folder.id, { isFavorite: false });
+			const video2 = await createTestVideo(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+
+			const result = await expectSuccess(VideoService.setFavoriteMany([video1.id, video2.id], true));
+
+			expect(result).toBe(2);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.VIDEO, video1.id)).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.VIDEO, video2.id)).toBe(true);
 		});
 	});
 });

@@ -37,6 +37,16 @@ export async function updateAudioInApi(id: string, data: AudioUpdateInput): Prom
 	return response.json();
 }
 
+export async function toggleAudioFavoriteInApi(id: string): Promise<AudioWithStats> {
+	const response = await fetch(`${API_BASE_PATH}/${id}/favorite`, {
+		method: 'POST',
+	});
+	if (!response.ok) {
+		throw new Error('Error al alternar favorito del audio');
+	}
+	return response.json();
+}
+
 export async function deleteAudioFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {

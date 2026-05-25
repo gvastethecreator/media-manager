@@ -12,6 +12,7 @@ import {
 	createAudioInApi,
 	deleteAudioFromApi,
 	getAudiosFromApi,
+	toggleAudioFavoriteInApi,
 	updateAudioInApi,
 } from '@/lib/api/client/audio.client';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
@@ -161,9 +162,17 @@ const useAudioStoreBase = create<AudioState>()(
 			toggleFavorite: async (id: string) => {
 				const audio = get().getAudioById(id);
 				if (audio) {
-					await get().updateAudio(id, {
-						isFavorite: !audio.isFavorite,
-					});
+					set({ loading: true, error: null });
+					try {
+						const updatedAudio = await toggleAudioFavoriteInApi(id);
+						set((state) => ({
+							audios: state.audios.map((item) => (item.id === id ? updatedAudio : item)),
+							currentAudio: state.currentAudio?.id === id ? updatedAudio : state.currentAudio,
+							loading: false,
+						}));
+					} catch (error) {
+						set({ error: (error as Error).message, loading: false });
+					}
 				}
 			},
 		}),

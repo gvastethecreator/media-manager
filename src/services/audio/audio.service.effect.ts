@@ -188,6 +188,15 @@ const make = (): AudioServiceInterface => {
 
 			audioServiceLogger.info('Creando nuevo audio:', input.name);
 
+			const requestedIsFavorite = input.isFavorite ?? false;
+			const useCanonicalFavoriteBridge =
+				requestedIsFavorite === true
+					? yield* Effect.tryPromise({
+						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO)) !== null,
+						catch: (error) => toAudioError(error, 'create.favoriteScope'),
+					})
+					: false;
+
 			// Verificar si ya existe un audio con el mismo hash
 			const existing = yield* Effect.tryPromise({
 				try: async () => {
@@ -212,6 +221,7 @@ const make = (): AudioServiceInterface => {
 						.values({
 							id: audioId,
 							...input,
+							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 							createdAt: now,
 							updatedAt: now,
 						})
@@ -222,8 +232,15 @@ const make = (): AudioServiceInterface => {
 				catch: (error) => toAudioError(error, 'create'),
 			});
 
+			if (requestedIsFavorite && useCanonicalFavoriteBridge) {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.AUDIO, newAudio.id, true),
+					catch: (error) => toAudioError(error, 'create.favoriteBridge'),
+				});
+			}
+
 			audioServiceLogger.info('Audio creado exitosamente:', newAudio.id);
-			return newAudio as Audio;
+			return yield* getById(newAudio.id);
 		});
 
 	// -------------------------------------------------------------------------------
@@ -520,29 +537,44 @@ const make = (): AudioServiceInterface => {
 			// Verificar que existe
 			yield* getById(id);
 
+			const requestedIsFavorite = input.isFavorite;
+			const useCanonicalFavoriteBridge =
+				requestedIsFavorite !== undefined
+					? yield* Effect.tryPromise({
+						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO)) !== null,
+						catch: (error) => toAudioError(error, 'update.favoriteScope'),
+					})
+					: false;
+
+			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.AUDIO, id, requestedIsFavorite),
+					catch: (error) => toAudioError(error, 'update.favoriteBridge'),
+				});
+			}
+
+			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+
 			// Actualizar
-			const updated = yield* Effect.tryPromise({
+			yield* Effect.tryPromise({
 				try: async () => {
-					const [result] = await db
+					await db
 						.update(audios)
 						.set({
-							...input,
+							...restInput,
+							...(requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge
+								? { isFavorite: requestedIsFavorite }
+								: {}),
 							updatedAt: new Date(),
 						})
 						.where(eq(audios.id, id))
 						.returning();
-
-					return result;
 				},
 				catch: (error) => toAudioError(error, 'update'),
 			});
 
-			if (!updated) {
-				return yield* Effect.fail(AudioErrors.audioNotFound(id));
-			}
-
 			audioServiceLogger.info('Audio actualizado exitosamente:', id);
-			return updated as Audio;
+			return yield* getById(id);
 		});
 
 	// -------------------------------------------------------------------------------
@@ -764,9 +796,27 @@ const make = (): AudioServiceInterface => {
 
 			// Obtener estado actual
 			const audio = yield* getById(id);
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO),
+				catch: (error) => toAudioError(error, 'toggleFavorite.favoriteScope'),
+			});
+			const currentFavoriteStatus =
+				favoriteEntityIds === null ? audio.isFavorite : favoriteEntityIds.includes(id);
+			const newFavoriteStatus = !currentFavoriteStatus;
 
-			// Invertir isFavorite
-			const updated = yield* update(id, { isFavorite: !audio.isFavorite });
+			if (favoriteEntityIds === null) {
+				const updated = yield* update(id, { isFavorite: newFavoriteStatus });
+
+				audioServiceLogger.info(`Favorite toggled: ${id}, nuevo estado: ${updated.isFavorite}`);
+				return updated;
+			}
+
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.AUDIO, id, newFavoriteStatus),
+				catch: (error) => toAudioError(error, 'toggleFavorite.favoriteBridge'),
+			});
+
+			const updated = yield* getById(id);
 
 			audioServiceLogger.info(`Favorite toggled: ${id}, nuevo estado: ${updated.isFavorite}`);
 			return updated;
@@ -783,17 +833,28 @@ const make = (): AudioServiceInterface => {
 
 			audioServiceLogger.info(`Marcando múltiples audios como favoritos: ${ids.length}, isFavorite=${isFavorite}`);
 
-			const updatedCount = yield* Effect.tryPromise({
-				try: async () => {
-					const result = await db
-						.update(audios)
-						.set({ isFavorite, updatedAt: new Date() })
-						.where(inArray(audios.id, ids));
-					// libsql usa rowsAffected, better-sqlite3 usa changes
-					return (result as any).rowsAffected ?? (result as any).changes ?? 0;
-				},
-				catch: (error) => toAudioError(error, 'setFavoriteMany'),
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO),
+				catch: (error) => toAudioError(error, 'setFavoriteMany.favoriteScope'),
 			});
+
+			const updatedCount =
+				favoriteEntityIds === null
+					? yield* Effect.tryPromise({
+						try: async () => {
+							const result = await db
+								.update(audios)
+								.set({ isFavorite, updatedAt: new Date() })
+								.where(inArray(audios.id, ids));
+							// libsql usa rowsAffected, better-sqlite3 usa changes
+							return (result as any).rowsAffected ?? (result as any).changes ?? 0;
+						},
+						catch: (error) => toAudioError(error, 'setFavoriteMany'),
+					})
+					: yield* Effect.tryPromise({
+						try: () => favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite),
+						catch: (error) => toAudioError(error, 'setFavoriteMany.favoriteBridge'),
+					});
 
 			audioServiceLogger.info('Audios actualizados exitosamente:', updatedCount);
 			return updatedCount;

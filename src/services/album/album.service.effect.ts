@@ -707,15 +707,17 @@ const make = (): AlbumServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.ALBUM),
 				catch: (error) => fromUnknownError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? album.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			if (favoriteEntityIds === null) {
 				yield* Effect.tryPromise({
-					try: async () => await db.update(albums).set({ isFavorite: !album.isFavorite }).where(eq(albums.id, id)),
+					try: async () => await db.update(albums).set({ isFavorite: newFavoriteStatus }).where(eq(albums.id, id)),
 					catch: (error: unknown) => fromUnknownError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.ALBUM, id),
+					try: () => favoriteService.set(FavoriteEntityType.ALBUM, id, newFavoriteStatus),
 					catch: (error: unknown) => fromUnknownError('toggleFavorite.favoriteBridge', error),
 				});
 			}
