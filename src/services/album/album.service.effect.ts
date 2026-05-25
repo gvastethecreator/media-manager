@@ -492,7 +492,6 @@ const make = (): AlbumServiceInterface => {
 				color: validated.color ?? null,
 				category: validated.category ?? null,
 				featuredImage: validated.featuredImage ?? null,
-				isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 				filters: validated.filters ?? null,
 				metadata: validated.metadata ?? null,
 			};
@@ -613,7 +612,6 @@ const make = (): AlbumServiceInterface => {
 			if (validated.color !== undefined) updateData.color = validated.color;
 			if (validated.category !== undefined) updateData.category = validated.category;
 			if (validated.featuredImage !== undefined) updateData.featuredImage = validated.featuredImage;
-			if (validated.isFavorite !== undefined && !useCanonicalFavoriteBridge) updateData.isFavorite = validated.isFavorite;
 			if (validated.filters !== undefined) updateData.filters = validated.filters;
 			if (validated.metadata !== undefined) updateData.metadata = validated.metadata;
 
@@ -710,12 +708,7 @@ const make = (): AlbumServiceInterface => {
 			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? album.isFavorite;
 			const newFavoriteStatus = !currentFavoriteStatus;
 
-			if (favoriteEntityIds === null) {
-				yield* Effect.tryPromise({
-					try: async () => await db.update(albums).set({ isFavorite: newFavoriteStatus }).where(eq(albums.id, id)),
-					catch: (error: unknown) => fromUnknownError('toggleFavorite', error),
-				});
-			} else {
+			if (favoriteEntityIds !== null) {
 				yield* Effect.tryPromise({
 					try: () => favoriteService.set(FavoriteEntityType.ALBUM, id, newFavoriteStatus),
 					catch: (error: unknown) => fromUnknownError('toggleFavorite.favoriteBridge', error),

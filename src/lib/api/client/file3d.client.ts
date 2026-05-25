@@ -1,4 +1,10 @@
 /**
+ * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
+ * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
+ * Ver #1 deepening opportunity en architecture review.
+ */
+
+/**
  * Cliente de API para archivos 3D.
  */
 import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';

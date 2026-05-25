@@ -682,7 +682,6 @@ const FolderServiceLive = Layer.succeed(
 								path: validatedInput.path,
 								parentId: validatedInput.parentId ?? null,
 								presetId: validatedInput.presetId ?? null,
-								isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 								totalImages: 0,
 								totalVideos: 0,
 								totalFiles: 0,
@@ -799,9 +798,6 @@ const FolderServiceLive = Layer.succeed(
 				if (validatedInput.color !== undefined) updateData.color = validatedInput.color;
 				if (validatedInput.description !== undefined) updateData.description = validatedInput.description;
 				if (validatedInput.presetId !== undefined) updateData.presetId = validatedInput.presetId;
-				if (validatedInput.isFavorite !== undefined && !useCanonicalFavoriteBridge) {
-					updateData.isFavorite = validatedInput.isFavorite;
-				}
 
 				const result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
 					try: async () => await db.update(folders).set(updateData).where(eq(folders.id, id)).returning(),
@@ -1168,15 +1164,7 @@ const FolderServiceLive = Layer.succeed(
 				let result: Schema.Schema.Type<typeof Folder>[];
 
 				if (favoriteEntityIds === null) {
-					result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
-						try: async () =>
-							await db
-								.update(folders)
-								.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
-								.where(eq(folders.id, id))
-								.returning(),
-						catch: (error: unknown) => fromUnknownError('toggleFavorite:update', error),
-					});
+					result = existingFolder;
 				} else {
 					yield* Effect.tryPromise({
 						try: () => favoriteService.set(FavoriteEntityType.FOLDER, id, newFavoriteStatus),

@@ -12,6 +12,8 @@ import { db } from '@/lib/drizzle';
 import { groupTags, images, imageTags, tags, videos, videoTags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	fromUnknownError,
 	TagError,
@@ -253,7 +255,12 @@ const make = (): TagServiceInterface => {
 					}),
 			});
 
-			return validated;
+			const favoriteEntityIds = yield* Effect.tryPromise<string[], TagError>({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.TAG),
+				catch: (error) => fromUnknownError('getById.favoriteIds', error),
+			});
+
+			return favoriteService.applyFavoriteProjection(validated, favoriteEntityIds);
 		});
 
 	/**
@@ -271,7 +278,7 @@ const make = (): TagServiceInterface => {
 				try: () =>
 					Promise.all([
 						db.select({ count: count() }).from(imageTags).where(eq(imageTags.B, id)),
-						db.select({ count: count() }).from(videoTags).where(eq(videoTags.A, id)),
+						db.select({ count: count() }).from(videoTags).where(eq(videoTags.B, id)),
 						db.select({ count: count() }).from(groupTags).where(eq(groupTags.B, id)),
 					]),
 				catch: (error: unknown) => fromUnknownError('getRelationsCounts', error),
@@ -348,10 +355,10 @@ const make = (): TagServiceInterface => {
 							.where(inArray(imageTags.B, ids))
 							.groupBy(imageTags.B),
 						db
-							.select({ tagId: videoTags.A, count: count() })
+							.select({ tagId: videoTags.B, count: count() })
 							.from(videoTags)
-							.where(inArray(videoTags.A, ids))
-							.groupBy(videoTags.A),
+							.where(inArray(videoTags.B, ids))
+							.groupBy(videoTags.B),
 						db
 							.select({ tagId: groupTags.B, count: count() })
 							.from(groupTags)
@@ -427,11 +434,26 @@ const make = (): TagServiceInterface => {
 
 			logger.info('🏷️ Obteniendo tags', { options });
 
+			const favoriteEntityIds = yield* Effect.tryPromise<string[], TagError>({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.TAG),
+				catch: (error) => fromUnknownError('getAll.favoriteIds', error),
+			});
+
+			if (onlyFavorites && favoriteEntityIds.length === 0) {
+				return {
+					tags: [],
+					total: 0,
+					limit,
+					offset,
+					hasMore: false,
+				};
+			}
+
 			// Construir condiciones de filtrado
 			const conditions: any[] = [];
 
 			if (onlyFavorites) {
-				conditions.push(eq(tags.isFavorite, true));
+				conditions.push(inArray(tags.id, favoriteEntityIds));
 			}
 
 			if (category) {
@@ -497,7 +519,7 @@ const make = (): TagServiceInterface => {
 			const tagIds = rawTags.map((t) => t.id);
 			const countsMap = yield* getBatchRelationsCounts(tagIds);
 
-			const tagsWithStats: TagWithStats[] = rawTags.map((rawTag) => {
+			const tagsWithStats = rawTags.map((rawTag) => {
 				const tag = Schema.decodeUnknownSync(Tag)(rawTag);
 				const counts = countsMap.get(tag.id) ?? {
 					images: 0,
@@ -530,10 +552,12 @@ const make = (): TagServiceInterface => {
 				};
 			});
 
-			logger.info(`✅ ${tagsWithStats.length} tags obtenidos de ${totalCount} totales`);
+			const projectedTags = favoriteService.applyFavoriteProjectionMany(tagsWithStats, favoriteEntityIds) as TagWithStats[];
+
+			logger.info(`✅ ${projectedTags.length} tags obtenidos de ${totalCount} totales`);
 
 			return {
-				tags: tagsWithStats,
+				tags: projectedTags,
 				total: totalCount,
 				limit,
 				offset,
@@ -572,7 +596,6 @@ const make = (): TagServiceInterface => {
 
 			// Generar ID legible basado en el nombre
 			const readableId = generateReadableId('tag', validated.name, 1);
-			const requestedIsFavorite = validated.isFavorite === true;
 
 			// Insertar nuevo tag
 			const newTag = yield* Effect.tryPromise({
@@ -590,7 +613,6 @@ const make = (): TagServiceInterface => {
 							category: validated.category ?? null,
 							shortcut: validated.shortcut ?? null,
 							featuredImage: validated.featuredImage ?? null,
-							isFavorite: requestedIsFavorite,
 							createdAt: now,
 							updatedAt: now,
 						})
@@ -630,7 +652,6 @@ const make = (): TagServiceInterface => {
 
 			// Verificar que el tag existe
 			yield* getById(validated.id);
-			const requestedIsFavorite = validated.isFavorite;
 
 			// Si se cambia el nombre, verificar conflictos
 			if (validated.name) {
@@ -660,7 +681,6 @@ const make = (): TagServiceInterface => {
 					if (validated.category !== undefined) updateData.category = validated.category;
 					if (validated.shortcut !== undefined) updateData.shortcut = validated.shortcut;
 					if (validated.featuredImage !== undefined) updateData.featuredImage = validated.featuredImage;
-					if (requestedIsFavorite !== undefined) updateData.isFavorite = requestedIsFavorite;
 
 					const result = await db.update(tags).set(updateData).where(eq(tags.id, validated.id)).returning();
 
@@ -745,18 +765,18 @@ const make = (): TagServiceInterface => {
 	const toggleFavorite = (id: string): Effect.Effect<Tag, TagError> =>
 		Effect.gen(function* () {
 			logger.info(`⭐ Toggle favorite para tag: ${id}`);
-			const tag = yield* getById(id);
 
-			yield* Effect.tryPromise({
-				try: () =>
-					db
-						.update(tags)
-						.set({ isFavorite: !tag.isFavorite, updatedAt: new Date() })
-						.where(eq(tags.id, id)),
-				catch: (error) => fromUnknownError('toggleFavorite', error),
+			yield* getById(id);
+
+			const currentFavoriteStatus = yield* Effect.tryPromise<boolean, TagError>({
+				try: () => favoriteService.isFavorite(FavoriteEntityType.TAG, id),
+				catch: (error) => fromUnknownError('toggleFavorite.isFavorite', error),
 			});
 
-			logger.info(`✅ Favorite local toggled para tag: ${id}`);
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.TAG, id, !currentFavoriteStatus),
+				catch: (error) => fromUnknownError('toggleFavorite.favoriteBridge', error),
+			});
 
 			return yield* getById(id);
 		});

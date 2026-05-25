@@ -1,4 +1,10 @@
 /**
+ * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
+ * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
+ * Ver #1 deepening opportunity en architecture review.
+ */
+
+/**
  * @file Cliente de API para carpetas
  * @description Permite obtener imagenes de una carpeta usando la API REST
  */

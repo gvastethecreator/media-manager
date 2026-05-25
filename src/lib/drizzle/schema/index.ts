@@ -44,8 +44,6 @@ export { albums, collections, favorites, files, folders, groups } from './organi
 // RELATIONS DOMAIN EXPORTS
 // =================================================================================
 export {
-	albumTasks,
-	characterTasks,
 	groupAlbums,
 	// Relaciones de grupos
 	groupImages,
@@ -63,7 +61,6 @@ export {
 	imageProperties,
 	// Relaciones de taxonomía
 	imageTags,
-	imageTasks,
 	imageWildcards,
 	imageWorldItems,
 	videoAlbums,
@@ -75,14 +72,13 @@ export {
 	videoPrompts,
 	videoProperties,
 	videoTags,
-	videoTasks,
 	videoWildcards,
 	videoWorldItems,
 } from './relations';
 // =================================================================================
 // TAXONOMY DOMAIN EXPORTS
 // =================================================================================
-export { notes, prompts, properties, tags, tasks, wildcards } from './taxonomy';
+export { notes, prompts, properties, tags, wildcards } from './taxonomy';
 // =================================================================================
 // WORLDBUILDING DOMAIN EXPORTS
 // =================================================================================

@@ -1,9 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { TagWithStats } from '@/types/entities/tag';
+import { createEntityHooks } from './hook-factory';
+import type { EntityListResult } from './hook-factory';
 import { apiClient } from './client';
 
 export interface TagFilters {
+	[key: string]: unknown;
 	category?: string;
 	isFavorite?: boolean;
 	limit?: number;
@@ -35,95 +38,32 @@ export interface TagUpdateInput {
 	totalVideos?: number;
 }
 
-export interface TagsResponse {
-	data: TagWithStats[];
-	pagination: {
-		total: number;
-		limit: number;
-		offset: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	};
-}
+const hooks = createEntityHooks<TagWithStats, TagCreateInput, TagUpdateInput, TagFilters>({
+	entityName: 'tags',
+	baseEndpoint: '/tags',
+	listStaleTime: 60_000,
+	detailStaleTime: 60_000,
+});
 
-// Query keys
 export const tagKeys = {
-	all: ['tags'] as const,
-	lists: () => [...tagKeys.all, 'list'] as const,
-	list: (filters: TagFilters) => [...tagKeys.lists(), filters] as const,
-	details: () => [...tagKeys.all, 'detail'] as const,
-	detail: (id: string) => [...tagKeys.details(), id] as const,
-	images: (id: string) => [...tagKeys.detail(id), 'images'] as const,
+	...hooks.keys,
+	images: (id: string) => [...hooks.keys.detail(id), 'images'] as const,
 };
 
-// Hooks
-export function useTags(filters: TagFilters = {}) {
-	return useQuery<TagsResponse, Error>({
-		queryKey: tagKeys.list(filters),
-		queryFn: () => {
-			const params = new URLSearchParams();
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					params.append(key, String(value));
-				}
-			}
-			return apiClient.get<TagsResponse>(`/tags?${params.toString()}`);
-		},
-		staleTime: 1000 * 60, // 1 minuto
-	});
-}
+export const useTags = hooks.useList;
+export const useTag = hooks.useDetail;
+export const useCreateTag = hooks.useCreate;
+export const useUpdateTag = hooks.useUpdate;
+export const useDeleteTag = hooks.useDelete;
 
-export function useTag(id: string) {
-	return useQuery<TagWithStats, Error>({
-		queryKey: tagKeys.detail(id),
-		queryFn: () => apiClient.get<TagWithStats>(`/tags/${id}`),
-		enabled: !!id,
-		staleTime: 1000 * 60, // 1 minuto
-	});
-}
+export type TagsResponse = EntityListResult<TagWithStats>;
 
 export function useTagImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: tagKeys.images(id),
 		queryFn: () => apiClient.get<ImageWithStats[]>(`/tags/${id}/images`),
 		enabled: !!id,
-		staleTime: 1000 * 30, // 30 segundos
-	});
-}
-
-export function useCreateTag() {
-	const queryClient = useQueryClient();
-
-	return useMutation<TagWithStats, Error, TagCreateInput>({
-		mutationFn: (data) => apiClient.post<TagWithStats>('/tags', data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
-		},
-	});
-}
-
-export function useUpdateTag() {
-	const queryClient = useQueryClient();
-
-	return useMutation<TagWithStats, Error, { id: string; data: TagUpdateInput }>({
-		mutationFn: ({ id, data }) => apiClient.put<TagWithStats>(`/tags/${id}`, data),
-		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
-			queryClient.setQueryData(tagKeys.detail(data.id), data);
-		},
-	});
-}
-
-export function useDeleteTag() {
-	const queryClient = useQueryClient();
-
-	return useMutation<void, Error, string>({
-		mutationFn: (id) => apiClient.delete(`/tags/${id}`),
-		onSuccess: (_, id) => {
-			queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
-			queryClient.removeQueries({ queryKey: tagKeys.detail(id) });
-			queryClient.removeQueries({ queryKey: tagKeys.images(id) });
-		},
+		staleTime: 1000 * 30,
 	});
 }
 

@@ -347,7 +347,6 @@ export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError
 						aiEngine: validated.aiEngine ?? null,
 						aiModel: validated.aiModel ?? null,
 						aiOriginDetected: validated.aiOriginDetected ?? false,
-						isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 						folderId: validated.folderId,
 						noteId: validated.noteId ?? null,
 						createdAt: now,
@@ -681,9 +680,6 @@ export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image
 					.update(images)
 					.set({
 						...validatedFields,
-						...(requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge
-							? { isFavorite: requestedIsFavorite }
-							: {}),
 						updatedAt: now,
 					})
 					.where(eq(images.id, id))
@@ -1064,24 +1060,7 @@ export const toggleFavorite = (id: string): Effect.Effect<Image, ImageError, nev
 			favoriteEntityIds === null ? currentImage.isFavorite : favoriteEntityIds.includes(id);
 		const newFavoriteStatus = !currentFavoriteStatus;
 
-		if (favoriteEntityIds === null) {
-			yield* Effect.tryPromise({
-				try: async () => {
-					await db
-						.update(images)
-						.set({
-							isFavorite: newFavoriteStatus,
-							updatedAt: new Date(),
-						})
-						.where(eq(images.id, id));
-				},
-				catch: (error) =>
-					new ImageDatabaseError({
-						operation: 'toggleFavorite',
-						originalError: error,
-					}),
-			});
-		} else {
+		if (favoriteEntityIds !== null) {
 			yield* Effect.tryPromise({
 				try: () => favoriteService.set(FavoriteEntityType.IMAGE, id, newFavoriteStatus),
 				catch: (error) =>
@@ -1143,25 +1122,7 @@ export const setFavoriteMany = (
 
 		const result =
 			favoriteEntityIds === null
-				? yield* Effect.tryPromise({
-					try: async () => {
-						const updated = await db
-							.update(images)
-							.set({
-								isFavorite,
-								updatedAt: new Date(),
-							})
-							.where(inArray(images.id, ids))
-							.returning({ id: images.id });
-
-						return updated.length;
-					},
-					catch: (error) =>
-						new ImageDatabaseError({
-							operation: 'setFavoriteMany',
-							originalError: error,
-						}),
-				})
+				? ids.length
 				: yield* Effect.tryPromise({
 					try: () => favoriteService.setMany(FavoriteEntityType.IMAGE, ids, isFavorite),
 					catch: (error) =>

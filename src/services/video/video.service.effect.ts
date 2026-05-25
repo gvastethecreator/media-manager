@@ -363,7 +363,6 @@ const make = (): VideoServiceInterface => {
 							thumbnailWidth: null,
 							thumbnailHeight: null,
 							isHidden: input.isHidden ?? false,
-							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 							folderId: input.folderId,
 							createdAt: new Date(),
 							updatedAt: new Date(),
@@ -679,9 +678,6 @@ const make = (): VideoServiceInterface => {
 						.update(videos)
 						.set({
 							...restInput,
-							...(requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge
-								? { isFavorite: requestedIsFavorite }
-								: {}),
 							updatedAt: new Date(),
 						})
 						.where(eq(videos.id, id))
@@ -902,14 +898,12 @@ const make = (): VideoServiceInterface => {
 				favoriteEntityIds === null ? video.isFavorite : favoriteEntityIds.includes(id);
 			const newFavoriteStatus = !currentFavoriteStatus;
 
-			if (favoriteEntityIds === null) {
-				return yield* update(id, { isFavorite: newFavoriteStatus });
+			if (favoriteEntityIds !== null) {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.VIDEO, id, newFavoriteStatus),
+					catch: (error) => toVideoError(error, 'toggleFavorite.favoriteBridge'),
+				});
 			}
-
-			yield* Effect.tryPromise({
-				try: () => favoriteService.set(FavoriteEntityType.VIDEO, id, newFavoriteStatus),
-				catch: (error) => toVideoError(error, 'toggleFavorite.favoriteBridge'),
-			});
 
 			return yield* getById(id);
 		});
@@ -936,17 +930,7 @@ const make = (): VideoServiceInterface => {
 
 			const updatedCount =
 				favoriteEntityIds === null
-					? yield* Effect.tryPromise({
-						try: async () => {
-							const updated = await db
-								.update(videos)
-								.set({ isFavorite, updatedAt: new Date() })
-								.where(inArray(videos.id, ids))
-								.returning({ id: videos.id });
-							return updated.length;
-						},
-						catch: (error) => toVideoError(error, 'setFavoriteMany'),
-					})
+					? ids.length
 					: yield* Effect.tryPromise({
 						try: () => favoriteService.setMany(FavoriteEntityType.VIDEO, ids, isFavorite),
 						catch: (error) => toVideoError(error, 'setFavoriteMany.favoriteBridge'),

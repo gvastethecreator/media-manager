@@ -46,7 +46,6 @@ export class PropertyCreate extends Schema.Class<PropertyCreate>('PropertyCreate
 	shortcut: Schema.optional(Schema.String.pipe(Schema.maxLength(10))),
 	category: Schema.optional(PropertyCategory),
 	featuredImage: Schema.optional(Schema.String),
-	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -61,7 +60,6 @@ export class PropertyUpdate extends Schema.Class<PropertyUpdate>('PropertyUpdate
 	shortcut: Schema.optional(Schema.String.pipe(Schema.maxLength(10))),
 	category: Schema.optional(PropertyCategory),
 	featuredImage: Schema.optional(Schema.String),
-	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
