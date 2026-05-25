@@ -388,7 +388,6 @@ const make = (): DocumentServiceInterface => {
 							mimeType: input.mimeType,
 							extension: input.extension,
 							folderId: input.folderId,
-							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 							isArchived: input.isArchived ?? false,
 							pageCount: input.pageCount ?? null,
 							wordCount: input.wordCount ?? null,
@@ -467,7 +466,6 @@ const make = (): DocumentServiceInterface => {
 			if (input.mimeType !== undefined) updateData.mimeType = input.mimeType;
 			if (input.extension !== undefined) updateData.extension = input.extension;
 			if (input.folderId !== undefined) updateData.folderId = input.folderId;
-			if (input.isFavorite !== undefined && !useCanonicalFavoriteBridge) updateData.isFavorite = Boolean(input.isFavorite);
 			if (input.isArchived !== undefined) updateData.isArchived = Boolean(input.isArchived);
 			if (input.pageCount !== undefined) updateData.pageCount = input.pageCount;
 			if (input.wordCount !== undefined) updateData.wordCount = input.wordCount;

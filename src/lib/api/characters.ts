@@ -1,9 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { CharacterWithStats } from '@/types/entities/character';
 import type { ImageWithStats } from '@/types/entities/image';
+import { createEntityHooks } from './hook-factory';
+import type { EntityListResult } from './hook-factory';
 import { apiClient } from './client';
 
 export interface CharacterFilters {
+	[key: string]: unknown;
 	limit?: number;
 	offset?: number;
 	search?: string;
@@ -59,60 +62,33 @@ export interface CharacterUpdateInput {
 	totalVideos?: number;
 }
 
-export interface CharactersResponse {
-	data: CharacterWithStats[];
-	pagination: {
-		total: number;
-		limit: number;
-		offset: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	};
-}
+const hooks = createEntityHooks<CharacterWithStats, CharacterCreateInput, CharacterUpdateInput, CharacterFilters>({
+	entityName: 'characters',
+	baseEndpoint: '/characters',
+	listStaleTime: 60_000,
+	detailStaleTime: 60_000,
+});
 
-// Query keys
 export const characterKeys = {
-	all: ['characters'] as const,
-	lists: () => [...characterKeys.all, 'list'] as const,
-	list: (filters: CharacterFilters) => [...characterKeys.lists(), filters] as const,
-	details: () => [...characterKeys.all, 'detail'] as const,
-	detail: (id: string) => [...characterKeys.details(), id] as const,
-	images: (id: string) => [...characterKeys.detail(id), 'images'] as const,
-	search: (query: string) => [...characterKeys.all, 'search', query] as const,
+	...hooks.keys,
+	images: (id: string) => [...hooks.keys.detail(id), 'images'] as const,
+	search: (query: string) => [...hooks.keys.all, 'search', query] as const,
 };
 
-// Hooks
-export function useCharacters(filters: CharacterFilters = {}) {
-	return useQuery<CharactersResponse, Error>({
-		queryKey: characterKeys.list(filters),
-		queryFn: () => {
-			const params = new URLSearchParams();
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					params.append(key, String(value));
-				}
-			}
-			return apiClient.get<CharactersResponse>(`/characters?${params.toString()}`);
-		},
-		staleTime: 1000 * 60, // 1 minuto
-	});
-}
+export const useCharacters = hooks.useList;
+export const useCharacter = hooks.useDetail;
+export const useCreateCharacter = hooks.useCreate;
+export const useUpdateCharacter = hooks.useUpdate;
+export const useDeleteCharacter = hooks.useDelete;
 
-export function useCharacter(id: string) {
-	return useQuery<CharacterWithStats, Error>({
-		queryKey: characterKeys.detail(id),
-		queryFn: () => apiClient.get<CharacterWithStats>(`/characters/${id}`),
-		enabled: !!id,
-		staleTime: 1000 * 60, // 1 minuto
-	});
-}
+export type CharactersResponse = EntityListResult<CharacterWithStats>;
 
 export function useCharacterImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: characterKeys.images(id),
 		queryFn: () => apiClient.get<ImageWithStats[]>(`/characters/${id}/images`),
 		enabled: !!id,
-		staleTime: 1000 * 30, // 30 segundos
+		staleTime: 1000 * 30,
 	});
 }
 
@@ -121,43 +97,7 @@ export function useSearchCharacters(query: string) {
 		queryKey: characterKeys.search(query),
 		queryFn: () => apiClient.get<CharacterWithStats[]>(`/characters/search?q=${encodeURIComponent(query)}`),
 		enabled: !!query && query.length >= 2,
-		staleTime: 1000 * 30, // 30 segundos
-	});
-}
-
-export function useCreateCharacter() {
-	const queryClient = useQueryClient();
-
-	return useMutation<CharacterWithStats, Error, CharacterCreateInput>({
-		mutationFn: (data) => apiClient.post<CharacterWithStats>('/characters', data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: characterKeys.lists() });
-		},
-	});
-}
-
-export function useUpdateCharacter() {
-	const queryClient = useQueryClient();
-
-	return useMutation<CharacterWithStats, Error, { id: string; data: CharacterUpdateInput }>({
-		mutationFn: ({ id, data }) => apiClient.put<CharacterWithStats>(`/characters/${id}`, data),
-		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: characterKeys.lists() });
-			queryClient.setQueryData(characterKeys.detail(data.id), data);
-		},
-	});
-}
-
-export function useDeleteCharacter() {
-	const queryClient = useQueryClient();
-
-	return useMutation<void, Error, string>({
-		mutationFn: (id) => apiClient.delete(`/characters/${id}`),
-		onSuccess: (_, id) => {
-			queryClient.invalidateQueries({ queryKey: characterKeys.lists() });
-			queryClient.removeQueries({ queryKey: characterKeys.detail(id) });
-			queryClient.removeQueries({ queryKey: characterKeys.images(id) });
-		},
+		staleTime: 1000 * 30,
 	});
 }
 

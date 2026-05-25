@@ -568,7 +568,6 @@ export const CollectionServiceLive = Layer.succeed(
 										color: validated.color ?? null,
 										description: validated.description ?? null,
 										featuredImage: validated.featuredImage ?? null,
-										isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 										parentId: validated.parentId ?? null,
 										createdAt: now,
 										updatedAt: now,
@@ -685,9 +684,6 @@ export const CollectionServiceLive = Layer.succeed(
 									.update(collections)
 									.set({
 										...validatedFields,
-										...(requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge
-											? { isFavorite: requestedIsFavorite }
-											: {}),
 										updatedAt: new Date(),
 									})
 									.where(eq(collections.id, id))
@@ -904,29 +900,7 @@ export const CollectionServiceLive = Layer.succeed(
 				const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? collection.isFavorite;
 				const newFavoriteStatus = !currentFavoriteStatus;
 
-				if (favoriteEntityIds === null) {
-					const updatedRows = (yield* Effect.tryPromise({
-						try: async () =>
-							await withSqliteBusyRetry(
-								async () =>
-									await db
-										.update(collections)
-										.set({
-											isFavorite: newFavoriteStatus,
-											updatedAt: new Date(),
-										})
-										.where(eq(collections.id, id))
-										.returning()
-										.execute()
-							),
-						catch: (error) =>
-							new CollectionDatabaseError({
-								operation: 'toggleFavorite',
-								originalError: error,
-							}),
-					})) as Array<typeof collections.$inferSelect>;
-					result = updatedRows[0];
-				} else {
+				if (favoriteEntityIds !== null) {
 					yield* Effect.tryPromise({
 						try: () => favoriteService.set(FavoriteEntityType.COLLECTION, id, newFavoriteStatus),
 						catch: (error) =>
@@ -935,10 +909,10 @@ export const CollectionServiceLive = Layer.succeed(
 								originalError: error,
 							}),
 					});
-
-					const refreshed = yield* getByIdInternal(id);
-					result = refreshed;
 				}
+
+				const refreshed = yield* getByIdInternal(id);
+				result = refreshed;
 
 				const updated = yield* Effect.try({
 					try: () => decodeCollectionRow(result),
