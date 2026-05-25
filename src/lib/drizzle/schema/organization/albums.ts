@@ -22,6 +22,7 @@ export const albums = sqliteTable(
 		emoji: text('emoji').default('📔'),
 		color: text('color').default('#f59e0b'),
 		featuredImage: text('featuredImage'),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		// Agregados movidos a EntityAggregates tabla genérica
 		filters: text('filters'),

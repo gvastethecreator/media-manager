@@ -19,7 +19,6 @@ export async function seedDocuments(db: LibSQLDatabase<Record<string, never>>) {
 				mimeType: 'text/markdown',
 				extension: 'md',
 				folderId: 'test-files',
-				isFavorite: false,
 				isArchived: false,
 			},
 			{
@@ -31,7 +30,6 @@ export async function seedDocuments(db: LibSQLDatabase<Record<string, never>>) {
 				mimeType: 'text/plain',
 				extension: 'txt',
 				folderId: 'test-files',
-				isFavorite: false,
 				isArchived: false,
 			},
 		];

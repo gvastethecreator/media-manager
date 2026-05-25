@@ -7,7 +7,7 @@
 
 import { Context, Data, Effect, Layer } from 'effect';
 import express from 'express';
-import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import * as MetadataService from '@/services/metadata/metadata.service';
 
 // ==========================================
@@ -96,43 +96,39 @@ const router = express.Router();
 /**
  * PUT /metadata/:id - Actualizar metadatos por su ID
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', effectHandler((req, res) => {
 	const { id } = req.params;
 	const data = req.body;
 
 	if (!data) {
 		res.status(400).json({ error: 'Los datos de metadata son requeridos' });
-		return;
+		return Effect.succeed(undefined);
 	}
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const service = yield* MetadataServiceTag;
 		return yield* service.updateMetadata(id, data);
 	}).pipe(Effect.provide(MetadataServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * PUT /metadata/bulk-update - Actualizar metadata en lote
  */
-router.put('/bulk-update', async (req, res) => {
+router.put('/bulk-update', effectHandler((req, res) => {
 	const { updates } = req.body;
 
 	if (!(updates && Array.isArray(updates))) {
 		res.status(400).json({
 			error: 'El campo "updates" (un array de objetos con id y data) es requerido',
 		});
-		return;
+		return Effect.succeed(undefined);
 	}
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const service = yield* MetadataServiceTag;
 		return yield* service.updateMultipleMetadata(updates);
 	}).pipe(Effect.provide(MetadataServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 export default router;
 export { router as metadataEffectRouter };

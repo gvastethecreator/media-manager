@@ -19,7 +19,6 @@ export async function seedJsonFiles(db: LibSQLDatabase<Record<string, never>>) {
 				mimeType: 'application/json',
 				extension: 'json',
 				folderId: 'test-files',
-				isFavorite: false,
 				isArchived: false,
 				isValid: true,
 			},

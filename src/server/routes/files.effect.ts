@@ -10,7 +10,7 @@ import { stat } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { Context, Data, Effect, Layer } from 'effect';
 import express from 'express';
-import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	copyFile,
@@ -164,8 +164,8 @@ const logger = serverLogger.withContext('FilesAPI');
 /**
  * GET /api/files/directory/:path - Obtener contenido de un directorio
  */
-router.get('/directory/:path', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/directory/:path', effectHandler((req) =>
+	Effect.gen(function* () {
 		const fileService = yield* FileService;
 		const dirPath = req.params.path;
 
@@ -175,16 +175,14 @@ router.get('/directory/:path', async (req, res) => {
 
 		const decodedPath = decodeURIComponent(dirPath);
 		return yield* fileService.getDirectoryInfo(decodedPath);
-	}).pipe(Effect.provide(FileServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(FileServiceLive))
+));
 
 /**
  * POST /api/files/directory - Crear un nuevo directorio
  */
-router.post('/directory', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/directory', effectHandler((req) =>
+	Effect.gen(function* () {
 		const fileService = yield* FileService;
 		const { path, options } = req.body;
 
@@ -193,16 +191,14 @@ router.post('/directory', async (req, res) => {
 		}
 
 		return yield* fileService.createDirectory(path, options);
-	}).pipe(Effect.provide(FileServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(FileServiceLive))
+));
 
 /**
  * PUT /api/files/rename - Renombrar un archivo
  */
-router.put('/rename', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.put('/rename', effectHandler((req) =>
+	Effect.gen(function* () {
 		const fileService = yield* FileService;
 		const { oldPath, newPath, options } = req.body;
 
@@ -211,16 +207,14 @@ router.put('/rename', async (req, res) => {
 		}
 
 		return yield* fileService.renameFile(oldPath, newPath, options);
-	}).pipe(Effect.provide(FileServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(FileServiceLive))
+));
 
 /**
  * POST /api/files/copy - Copiar un archivo
  */
-router.post('/copy', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/copy', effectHandler((req) =>
+	Effect.gen(function* () {
 		const fileService = yield* FileService;
 		const { sourcePath, destPath, options } = req.body;
 
@@ -229,16 +223,14 @@ router.post('/copy', async (req, res) => {
 		}
 
 		return yield* fileService.copyFile(sourcePath, destPath, options);
-	}).pipe(Effect.provide(FileServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(FileServiceLive))
+));
 
 /**
  * POST /api/files/move - Mover un archivo
  */
-router.post('/move', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/move', effectHandler((req) =>
+	Effect.gen(function* () {
 		const fileService = yield* FileService;
 		const { sourcePath, destPath, options } = req.body;
 
@@ -247,10 +239,8 @@ router.post('/move', async (req, res) => {
 		}
 
 		return yield* fileService.moveFile(sourcePath, destPath, options);
-	}).pipe(Effect.provide(FileServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(FileServiceLive))
+));
 
 /**
  * GET /api/files/content - Servir contenido de archivo por path

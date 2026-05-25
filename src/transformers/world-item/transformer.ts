@@ -4,6 +4,7 @@
  * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos de la aplicación.
  */
 
+import { normalizeCounts, sumCounts } from '../common/counts';
 import type { WorldItemComplete, WorldItemStatistics } from '../../types/entities/world-item';
 
 // Tipos locales equivalentes a Drizzle
@@ -69,6 +70,7 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 
 	const { _count, tags: relationTags, properties: relationProperties, ...baseData } = worldItem;
 
+	const counts = normalizeCounts(_count);
 	const totalRelations =
 		(_count?.images ?? 0) +
 		(_count?.videos ?? 0) +
@@ -79,19 +81,19 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 
 	const statistics: WorldItemStatistics = {
 		// Conteos de relaciones
-		imageCount: _count?.images ?? 0,
-		videoCount: _count?.videos ?? 0,
-		albumCount: _count?.albums ?? 0,
-		collectionCount: _count?.collections ?? 0,
-		tagCount: _count?.tags ?? 0,
-		characterCount: _count?.characters ?? 0,
-		placeCount: _count?.places ?? 0,
-		conceptCount: _count?.concepts ?? 0,
-		promptCount: _count?.prompts ?? 0,
-		noteCount: _count?.notes ?? 0,
-		wildcardCount: _count?.wildcards ?? 0,
-		propertyCount: _count?.properties ?? 0,
-		groupCount: _count?.groups ?? 0,
+		imageCount: counts.images,
+		videoCount: counts.videos,
+		albumCount: counts.albums,
+		collectionCount: counts.collections,
+		tagCount: counts.tags,
+		characterCount: counts.characters,
+		placeCount: counts.places,
+		conceptCount: counts.concepts,
+		promptCount: counts.prompts,
+		noteCount: counts.notes,
+		wildcardCount: counts.wildcards,
+		propertyCount: counts.properties,
+		groupCount: counts.groups,
 
 		// Métricas globales requeridas por EntityStats
 		totalItems: totalRelations,
@@ -147,8 +149,8 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 		shortcut: null,
 
 		// Propiedades requeridas por WorldItemBase
-		totalImages: _count?.images ?? 0,
-		totalVideos: _count?.videos ?? 0,
+		totalImages: counts.images,
+		totalVideos: counts.videos,
 
 		// Convertir value y weight de number a string
 		value: baseData.value?.toString() || null,
@@ -190,21 +192,7 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 		},
 
 		// Conteo de relaciones
-		_count: {
-			images: _count?.images ?? 0,
-			videos: _count?.videos ?? 0,
-			albums: _count?.albums ?? 0,
-			collections: _count?.collections ?? 0,
-			tags: _count?.tags ?? 0,
-			characters: _count?.characters ?? 0,
-			places: _count?.places ?? 0,
-			concepts: _count?.concepts ?? 0,
-			prompts: _count?.prompts ?? 0,
-			notes: _count?.notes ?? 0,
-			wildcards: _count?.wildcards ?? 0,
-			properties: _count?.properties ?? 0,
-			groups: _count?.groups ?? 0,
-		},
+		_count: normalizeCounts(_count),
 	};
 }
 

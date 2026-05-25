@@ -7,6 +7,7 @@
  */
 
 import { WildcardBase, WildcardWithStats } from '../../types/entities/wildcard';
+import { normalizeCounts } from '../common/counts';
 
 /**
  * Serializa WildcardBase para respuestas de API
@@ -43,23 +44,17 @@ export function serializeWildcardWithStats(wildcard: WildcardWithStats): Record<
 					popularity: wildcard.statistics.popularity,
 				}
 			: null,
-		_count: wildcard._count
-			? {
-					tags: wildcard._count.tags || 0,
-					images: wildcard._count.images || 0,
-					characters: wildcard._count.characters || 0,
-					places: wildcard._count.places || 0,
-					notes: wildcard._count.notes || 0,
-					childWildcards: wildcard._count.childWildcards || 0,
-				}
-			: {
-					tags: 0,
-					images: 0,
-					characters: 0,
-					places: 0,
-					notes: 0,
-					childWildcards: 0,
-				},
+		_count: (() => {
+			const nc = normalizeCounts(wildcard._count);
+			return {
+				tags: nc.tags,
+				images: nc.images,
+				characters: nc.characters,
+				places: nc.places,
+				notes: nc.notes,
+				childWildcards: wildcard._count?.childWildcards ?? 0,
+			};
+		})(),
 	};
 }
 

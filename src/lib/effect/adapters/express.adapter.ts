@@ -58,6 +58,7 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 			case 'ImageFileNotFound':
 			case 'VideoFileNotFound':
 			case 'AudioFileNotFound':
+			case 'FileNotFound':
 				return {
 					status: 404,
 					message: taggedError.displayMessage || taggedError.message || 'Resource not found',
@@ -72,6 +73,7 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 			case 'AudioValidationError':
 			case 'FolderValidationError':
 			case 'FolderMaxDepthExceededError':
+			case 'FilePathRequired':
 				return {
 					status: 400,
 					message: taggedError.displayMessage || taggedError.message || 'Validation error',
@@ -116,6 +118,7 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 			case 'AudioUnknownError':
 			case 'FolderDatabaseError':
 			case 'FolderUnknownError':
+			case 'FileReadError':
 				return {
 					status: 500,
 					message: 'Database error occurred',

@@ -18,6 +18,7 @@ export const notes = sqliteTable(
 		content: text('content').notNull().default(''),
 		category: text('category').notNull().default('general'),
 		featuredImage: text('featuredImage'),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
 			.notNull()

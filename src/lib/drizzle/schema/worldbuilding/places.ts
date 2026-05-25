@@ -20,6 +20,7 @@ export const places = sqliteTable(
 		color: text('color').default('#14b8a6'),
 		category: text('category'),
 		filters: text('filters'),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		metadata: text('metadata'),
 		// Agregados movidos a EntityAggregates tabla genérica

@@ -19,7 +19,6 @@ export async function seedImages(db: LibSQLDatabase<Record<string, never>>) {
 				width: 1920,
 				height: 1080,
 				folderId: 'posters',
-				isFavorite: false,
 			},
 			{
 				id: 'img-seed-002',
@@ -30,7 +29,6 @@ export async function seedImages(db: LibSQLDatabase<Record<string, never>>) {
 				width: 800,
 				height: 600,
 				folderId: 'posters',
-				isFavorite: false,
 			},
 			{
 				id: 'img-seed-003',
@@ -41,7 +39,6 @@ export async function seedImages(db: LibSQLDatabase<Record<string, never>>) {
 				width: 500,
 				height: 500,
 				folderId: 'test-files',
-				isFavorite: false,
 			},
 		];
 

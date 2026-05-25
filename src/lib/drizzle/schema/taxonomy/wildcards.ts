@@ -21,6 +21,7 @@ export const wildcards = sqliteTable(
 		category: text('category'),
 		children: text('children'),
 		featuredImage: text('featuredImage'),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		parentId: text('parentId'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })

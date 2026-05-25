@@ -16,7 +16,7 @@ import {
 } from '@/config/thumbnail-generators';
 import { useInViewport, useVideoViewport } from '@/hooks/use-in-viewport';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { useSettings } from '@/lib/contexts';
+import { useSettings } from '@/lib/contexts/settings-context';
 import { cn } from '@/lib/utils';
 import type { MediaItem, MediaThumbnailProps } from './types';
 import './styles.css';

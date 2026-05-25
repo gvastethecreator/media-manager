@@ -11,8 +11,6 @@ import { ErrorBoundary } from './components/core/error-boundary';
 import { InterfaceSynchronizer } from './components/core/interface-synchronizer';
 import { FeedbackProvider } from './components/ui/feedback-provider';
 import { SkipLink } from './components/ui/skip-link';
-import { ThemeProvider } from './components/ui/theme-provider';
-import { Toaster } from './components/ui/toaster';
 import { TooltipProvider } from './components/ui/tooltip';
 import { ReactScanProvider } from './lib/dev/react-scan';
 // import lastLogContent from './logs/last-log.json' with { type: 'json' };
@@ -34,26 +32,23 @@ function EntityCatalogBootstrapper() {
 
 export function App() {
 	return (
-		<ThemeProvider defaultTheme="system" storageKey="theme">
-			<TooltipProvider>
-				<ViewTransitionProvider>
-					<ReactScanProvider>
-						<FeedbackProvider>
-							<InterfaceSynchronizer />
-							<ErrorBoundary>
-								{/* SkipLink para accesibilidad - WCAG 2.4.1 */}
-								<SkipLink targetId="main-content">Saltar al contenido principal</SkipLink>
+		<TooltipProvider>
+			<ViewTransitionProvider>
+				<ReactScanProvider>
+					<FeedbackProvider>
+						<InterfaceSynchronizer />
+						<ErrorBoundary>
+							{/* SkipLink para accesibilidad - WCAG 2.4.1 */}
+							<SkipLink targetId="main-content">Saltar al contenido principal</SkipLink>
 
-								<SSENavigationRefresher />
-								<EntityCatalogBootstrapper />
-								<RouterProvider router={router} />
-								<Toaster />
-							</ErrorBoundary>
-						</FeedbackProvider>
-					</ReactScanProvider>
-				</ViewTransitionProvider>
-			</TooltipProvider>
-		</ThemeProvider>
+						<SSENavigationRefresher />
+						<EntityCatalogBootstrapper />
+						<RouterProvider router={router} />
+						</ErrorBoundary>
+					</FeedbackProvider>
+				</ReactScanProvider>
+			</ViewTransitionProvider>
+		</TooltipProvider>
 	);
 }
 
