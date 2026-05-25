@@ -5,9 +5,10 @@
  * @created 2025-10-11 - Phase 5.3: Collection Test Suite
  */
 
+import { and, eq, inArray } from 'drizzle-orm';
 import { Effect } from 'effect';
 import { db } from '@/lib/drizzle';
-import { collections, folders, imageCollections, images } from '@/lib/drizzle/schema';
+import { collections, favorites, folders, imageCollections, images, profiles } from '@/lib/drizzle/schema';
 import { CollectionService, CollectionServiceLive } from '../collection.service.effect';
 import { CollectionHasContentError, CollectionNotFound, CollectionValidationError } from '../collection-errors.effect';
 
@@ -45,11 +46,33 @@ const withSqliteRetry = async <T>(operation: () => Promise<T>, retries = 20): Pr
 const cleanupTestData = () =>
 	withSqliteRetry(async () => {
 		await wait(50);
+		await db.delete(favorites).where(eq(favorites.entityType, 'collection'));
 		await db.delete(imageCollections);
 		await db.delete(images);
 		await db.delete(collections);
 		await db.delete(folders);
 		await wait(50);
+	});
+
+let previousActiveProfileIds: string[] = [];
+
+const suspendActiveProfiles = () =>
+	withSqliteRetry(async () => {
+		const activeProfiles = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true));
+		previousActiveProfileIds = activeProfiles.map((profile: { id: string }) => profile.id);
+
+		if (previousActiveProfileIds.length > 0) {
+			await db.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
+		}
+	});
+
+const restoreActiveProfiles = () =>
+	withSqliteRetry(async () => {
+		if (previousActiveProfileIds.length > 0) {
+			await db.update(profiles).set({ isActive: true }).where(inArray(profiles.id, previousActiveProfileIds));
+		}
+
+		previousActiveProfileIds = [];
 	});
 
 /**
@@ -172,12 +195,14 @@ const linkImagesToCollection = async (pairs: Array<{ imageId: string; collection
 // ============= Cleanup =============
 
 beforeEach(async () => {
+	await suspendActiveProfiles();
 	await cleanupTestData();
 });
 
 afterEach(async () => {
 	// Clean up test data in correct order (relations first, then entities)
 	await cleanupTestData();
+	await restoreActiveProfiles();
 });
 
 // ============= CRUD TESTS =============

@@ -327,6 +327,8 @@ const make = (): ConceptServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.CONCEPT),
 				catch: (error) => fromUnknownConceptError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? concept.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			let result;
 			if (favoriteEntityIds === null) {
@@ -334,14 +336,14 @@ const make = (): ConceptServiceInterface => {
 					try: () =>
 						db
 							.update(concepts)
-							.set({ isFavorite: !concept.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(concepts.id, id))
 							.returning(),
 					catch: (error) => fromUnknownConceptError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.CONCEPT, id),
+					try: () => favoriteService.set(FavoriteEntityType.CONCEPT, id, newFavoriteStatus),
 					catch: (error) => fromUnknownConceptError('toggleFavorite.favoriteBridge', error),
 				});
 

@@ -6,7 +6,7 @@
  */
 
 import { Effect } from 'effect';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, favorites, folders, profiles } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -95,12 +95,18 @@ const createTestAudio = async (folderId: string, overrides?: Partial<typeof audi
 };
 
 let createdActiveProfileId: string | null = null;
+let previousActiveProfileIds: string[] = [];
 
 const ensureActiveProfile = async () => {
-	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+	if (createdActiveProfileId) {
+		return createdActiveProfileId;
+	}
 
-	if (activeProfile) {
-		return activeProfile.id;
+	const activeProfiles = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true));
+	previousActiveProfileIds = activeProfiles.map((profile: { id: string }) => profile.id);
+
+	if (previousActiveProfileIds.length > 0) {
+		await db.update(profiles).set({ isActive: false }).where(inArray(profiles.id, previousActiveProfileIds));
 	}
 
 	const profileId = `audio-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -132,6 +138,11 @@ afterEach(async () => {
 	if (createdActiveProfileId) {
 		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
 		createdActiveProfileId = null;
+	}
+
+	if (previousActiveProfileIds.length > 0) {
+		await db.update(profiles).set({ isActive: true }).where(inArray(profiles.id, previousActiveProfileIds));
+		previousActiveProfileIds = [];
 	}
 });
 
@@ -187,6 +198,50 @@ describe('AudioService - CRUD Operations', () => {
 			expect(audio.format).toBe(input.format);
 			expect(audio.title).toBe(input.title);
 			expect(audio.artist).toBe(input.artist);
+		});
+
+		it('debería persistir el favorito vía bridge canónico al crear con perfil activo', async () => {
+			const folder = await createTestFolder();
+			const validHash = Date.now().toString().padStart(64, '0');
+			await ensureActiveProfile();
+
+			const audio = await expectSuccess(
+				AudioService.create({
+					name: 'canonical-create.mp3',
+					description: null,
+					path: '/test/canonical-create.mp3',
+					size: 5_000_000,
+					hash: validHash,
+					mimeType: 'audio/mpeg',
+					extension: 'mp3',
+					folderId: folder.id,
+					isFavorite: true,
+					isArchived: false,
+					duration: 180,
+					bitrate: 320_000,
+					sampleRate: 44_100,
+					channels: 2,
+					format: 'mp3',
+					codec: null,
+					title: 'Canonical Song',
+					artist: 'Canonical Artist',
+					album: 'Canonical Album',
+					year: null,
+					genre: 'Canonical Genre',
+					track: null,
+					disc: null,
+					albumArtist: null,
+					composer: null,
+					comment: null,
+					lyrics: null,
+					bpm: null,
+					key: null,
+					mood: null,
+				})
+			);
+
+			expect(audio.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.AUDIO, audio.id)).toBe(true);
 		});
 
 		it('debería fallar si el hash ya existe', async () => {
@@ -391,6 +446,17 @@ describe('AudioService - CRUD Operations', () => {
 			expect(updated.id).toBe(audio.id);
 			expect(updated.title).toBe('Updated Title');
 			expect(updated.artist).toBe('New Artist');
+		});
+
+		it('debería persistir el favorito vía bridge canónico al actualizar con perfil activo', async () => {
+			const folder = await createTestFolder();
+			const audio = await createTestAudio(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+
+			const updated = await expectSuccess(AudioService.update(audio.id, { isFavorite: true }));
+
+			expect(updated.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.AUDIO, audio.id)).toBe(true);
 		});
 
 		it('debería fallar si el audio no existe', async () => {
@@ -618,7 +684,10 @@ describe('AudioService - Toggle Operations', () => {
 
 		it('debería cambiar de true a false', async () => {
 			const folder = await createTestFolder();
-			const audio = await createTestAudio(folder.id, { isFavorite: true });
+			const audio = await createTestAudio(folder.id, { isFavorite: false });
+
+			const favorited = await expectSuccess(AudioService.toggleFavorite(audio.id));
+			expect(favorited.isFavorite).toBe(true);
 
 			const updated = await expectSuccess(AudioService.toggleFavorite(audio.id));
 
@@ -629,6 +698,17 @@ describe('AudioService - Toggle Operations', () => {
 			const error = await expectError(AudioService.toggleFavorite('nonexistent-id'));
 
 			expect(error._tag).toBe('AudioNotFound');
+		});
+
+		it('debería delegar toggleFavorite al bridge canónico con perfil activo', async () => {
+			const folder = await createTestFolder();
+			const audio = await createTestAudio(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+
+			const updated = await expectSuccess(AudioService.toggleFavorite(audio.id));
+
+			expect(updated.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.AUDIO, audio.id)).toBe(true);
 		});
 	});
 
@@ -667,6 +747,19 @@ describe('AudioService - Toggle Operations', () => {
 			const updatedCount = await expectSuccess(AudioService.setFavoriteMany([], true));
 
 			expect(updatedCount).toBe(0);
+		});
+
+		it('debería persistir favoritos en lote vía bridge canónico con perfil activo', async () => {
+			const folder = await createTestFolder();
+			const audio1 = await createTestAudio(folder.id, { isFavorite: false });
+			const audio2 = await createTestAudio(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+
+			const updatedCount = await expectSuccess(AudioService.setFavoriteMany([audio1.id, audio2.id], true));
+
+			expect(updatedCount).toBe(2);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.AUDIO, audio1.id)).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.AUDIO, audio2.id)).toBe(true);
 		});
 	});
 });

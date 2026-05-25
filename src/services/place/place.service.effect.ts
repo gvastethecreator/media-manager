@@ -307,6 +307,8 @@ const make = (): PlaceServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.PLACE),
 				catch: (error) => fromUnknownError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? place.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			let result;
 			if (favoriteEntityIds === null) {
@@ -314,14 +316,14 @@ const make = (): PlaceServiceInterface => {
 					try: () =>
 						db
 							.update(places)
-							.set({ isFavorite: !place.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(places.id, id))
 							.returning(),
 					catch: (error) => fromUnknownError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.PLACE, id),
+					try: () => favoriteService.set(FavoriteEntityType.PLACE, id, newFavoriteStatus),
 					catch: (error) => fromUnknownError('toggleFavorite.favoriteBridge', error),
 				});
 

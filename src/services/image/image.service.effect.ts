@@ -307,6 +307,19 @@ export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError
 			);
 		}
 
+		const requestedIsFavorite = validated.isFavorite ?? false;
+		const useCanonicalFavoriteBridge =
+			requestedIsFavorite === true
+				? yield* Effect.tryPromise({
+					try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE)) !== null,
+					catch: (error) =>
+						new ImageDatabaseError({
+							operation: 'create-favorite-scope',
+							originalError: error,
+						}),
+				})
+				: false;
+
 		// Create image
 		const now = new Date();
 		const [created] = yield* Effect.tryPromise({
@@ -334,7 +347,7 @@ export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError
 						aiEngine: validated.aiEngine ?? null,
 						aiModel: validated.aiModel ?? null,
 						aiOriginDetected: validated.aiOriginDetected ?? false,
-						isFavorite: validated.isFavorite ?? false,
+						isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 						folderId: validated.folderId,
 						noteId: validated.noteId ?? null,
 						createdAt: now,
@@ -356,7 +369,18 @@ export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError
 			hash: created.hash,
 		});
 
-		return Image.make(created);
+		if (requestedIsFavorite && useCanonicalFavoriteBridge) {
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.IMAGE, created.id, true),
+				catch: (error) =>
+					new ImageDatabaseError({
+						operation: 'create-favorite-bridge',
+						originalError: error,
+					}),
+			});
+		}
+
+		return yield* getById(created.id);
 	});
 
 /**
@@ -623,14 +647,43 @@ export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image
 		// Check if image exists
 		yield* getByIdInternal(id);
 
+		const requestedIsFavorite = validated.isFavorite;
+		const useCanonicalFavoriteBridge =
+			requestedIsFavorite !== undefined
+				? yield* Effect.tryPromise({
+					try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE)) !== null,
+					catch: (error) =>
+						new ImageDatabaseError({
+							operation: 'update-favorite-scope',
+							originalError: error,
+						}),
+				})
+				: false;
+
+		if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.IMAGE, id, requestedIsFavorite),
+				catch: (error) =>
+					new ImageDatabaseError({
+						operation: 'update-favorite-bridge',
+						originalError: error,
+					}),
+			});
+		}
+
+		const { isFavorite: _ignoredIsFavorite, ...validatedFields } = validated;
+
 		// Update image
 		const now = new Date();
-		const [updated] = yield* Effect.tryPromise({
+		yield* Effect.tryPromise({
 			try: async () => {
 				return await db
 					.update(images)
 					.set({
-						...validated,
+						...validatedFields,
+						...(requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge
+							? { isFavorite: requestedIsFavorite }
+							: {}),
 						updatedAt: now,
 					})
 					.where(eq(images.id, id))
@@ -645,11 +698,10 @@ export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image
 
 		logger.info('✅ Image updated', {
 			id,
-			name: updated.name,
 			updatedFields: Object.keys(validated),
 		});
 
-		return Image.make(updated);
+		return yield* getById(id);
 	});
 
 /**
@@ -999,36 +1051,54 @@ export const toggleFavorite = (id: string): Effect.Effect<Image, ImageError, nev
 		// Get current image
 		const currentImage = yield* getByIdInternal(id);
 
-		// Toggle favorite
-		const newFavoriteStatus = !currentImage.isFavorite;
-
-		const updated = yield* Effect.tryPromise({
-			try: async () => {
-				const [result] = await db
-					.update(images)
-					.set({
-						isFavorite: newFavoriteStatus,
-						updatedAt: new Date(),
-					})
-					.where(eq(images.id, id))
-					.returning();
-
-				return Image.make(result);
-			},
+		const favoriteEntityIds = yield* Effect.tryPromise({
+			try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE),
 			catch: (error) =>
 				new ImageDatabaseError({
-					operation: 'toggleFavorite',
+					operation: 'toggleFavorite-favorite-scope',
 					originalError: error,
 				}),
 		});
 
+		const currentFavoriteStatus =
+			favoriteEntityIds === null ? currentImage.isFavorite : favoriteEntityIds.includes(id);
+		const newFavoriteStatus = !currentFavoriteStatus;
+
+		if (favoriteEntityIds === null) {
+			yield* Effect.tryPromise({
+				try: async () => {
+					await db
+						.update(images)
+						.set({
+							isFavorite: newFavoriteStatus,
+							updatedAt: new Date(),
+						})
+						.where(eq(images.id, id));
+				},
+				catch: (error) =>
+					new ImageDatabaseError({
+						operation: 'toggleFavorite',
+						originalError: error,
+					}),
+			});
+		} else {
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.IMAGE, id, newFavoriteStatus),
+				catch: (error) =>
+					new ImageDatabaseError({
+						operation: 'toggleFavorite-favorite-bridge',
+						originalError: error,
+					}),
+			});
+		}
+
 		logger.info('✅ Favorite toggled', {
 			id,
-			wasFavorite: currentImage.isFavorite,
+			wasFavorite: currentFavoriteStatus,
 			nowFavorite: newFavoriteStatus,
 		});
 
-		return updated;
+		return yield* getById(id);
 	});
 
 // ============================================================================
@@ -1062,25 +1132,44 @@ export const setFavoriteMany = (
 			isFavorite,
 		});
 
-		const result = yield* Effect.tryPromise({
-			try: async () => {
-				const updated = await db
-					.update(images)
-					.set({
-						isFavorite,
-						updatedAt: new Date(),
-					})
-					.where(inArray(images.id, ids))
-					.returning({ id: images.id });
-
-				return updated.length;
-			},
+		const favoriteEntityIds = yield* Effect.tryPromise({
+			try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE),
 			catch: (error) =>
 				new ImageDatabaseError({
-					operation: 'setFavoriteMany',
+					operation: 'setFavoriteMany-favorite-scope',
 					originalError: error,
 				}),
 		});
+
+		const result =
+			favoriteEntityIds === null
+				? yield* Effect.tryPromise({
+					try: async () => {
+						const updated = await db
+							.update(images)
+							.set({
+								isFavorite,
+								updatedAt: new Date(),
+							})
+							.where(inArray(images.id, ids))
+							.returning({ id: images.id });
+
+						return updated.length;
+					},
+					catch: (error) =>
+						new ImageDatabaseError({
+							operation: 'setFavoriteMany',
+							originalError: error,
+						}),
+				})
+				: yield* Effect.tryPromise({
+					try: () => favoriteService.setMany(FavoriteEntityType.IMAGE, ids, isFavorite),
+					catch: (error) =>
+						new ImageDatabaseError({
+							operation: 'setFavoriteMany-favorite-bridge',
+							originalError: error,
+						}),
+				});
 
 		logger.info('✅ Favorite status updated for multiple images', {
 			requested: ids.length,

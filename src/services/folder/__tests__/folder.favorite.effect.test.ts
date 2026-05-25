@@ -130,4 +130,29 @@ describe('FolderService favorites convergence', () => {
 		expect(toggled.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, folder.id)).toBe(true);
 	});
+
+	it('toggleFavorite can remove the canonical favorite again when a profile is active', async () => {
+		await ensureActiveProfile();
+		const folder = await createFolder('toggle-roundtrip-target');
+
+		const favorited = await expectSuccess(
+			Effect.gen(function* () {
+				const folderService = yield* FolderService;
+				return yield* folderService.toggleFavorite(folder.id);
+			})
+		);
+
+		expect(favorited.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, folder.id)).toBe(true);
+
+		const unfavorited = await expectSuccess(
+			Effect.gen(function* () {
+				const folderService = yield* FolderService;
+				return yield* folderService.toggleFavorite(folder.id);
+			})
+		);
+
+		expect(unfavorited.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, folder.id)).toBe(false);
+	});
 });

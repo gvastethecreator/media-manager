@@ -320,6 +320,15 @@ const make = (): VideoServiceInterface => {
 				return yield* Effect.fail(error as VideoError);
 			}
 
+			const requestedIsFavorite = input.isFavorite ?? false;
+			const useCanonicalFavoriteBridge =
+				requestedIsFavorite === true
+					? yield* Effect.tryPromise({
+						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.VIDEO)) !== null,
+						catch: (error) => toVideoError(error, 'create.favoriteScope'),
+					})
+					: false;
+
 			// Verificar si existe video con mismo hash
 			const existingVideo = yield* Effect.tryPromise({
 				try: async () => {
@@ -354,7 +363,7 @@ const make = (): VideoServiceInterface => {
 							thumbnailWidth: null,
 							thumbnailHeight: null,
 							isHidden: input.isHidden ?? false,
-							isFavorite: input.isFavorite ?? false,
+							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 							folderId: input.folderId,
 							createdAt: new Date(),
 							updatedAt: new Date(),
@@ -369,8 +378,15 @@ const make = (): VideoServiceInterface => {
 				return yield* Effect.fail(videoDatabaseError('create', 'No se pudo crear el video', new Error('Empty result')));
 			}
 
+			if (requestedIsFavorite && useCanonicalFavoriteBridge) {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.VIDEO, result.id, true),
+					catch: (error) => toVideoError(error, 'create.favoriteBridge'),
+				});
+			}
+
 			videoServiceLogger.info('Video creado exitosamente:', result.id);
-			return result;
+			return yield* getById(result.id);
 		});
 
 	// -------------------------------------------------------------------------------
@@ -638,13 +654,34 @@ const make = (): VideoServiceInterface => {
 			// Verificar que el video existe
 			yield* getById(id);
 
+			const requestedIsFavorite = input.isFavorite;
+			const useCanonicalFavoriteBridge =
+				requestedIsFavorite !== undefined
+					? yield* Effect.tryPromise({
+						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.VIDEO)) !== null,
+						catch: (error) => toVideoError(error, 'update.favoriteScope'),
+					})
+					: false;
+
+			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.VIDEO, id, requestedIsFavorite),
+					catch: (error) => toVideoError(error, 'update.favoriteBridge'),
+				});
+			}
+
+			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+
 			// Actualizar video
 			const result = yield* Effect.tryPromise({
 				try: async () => {
 					const updated = await db
 						.update(videos)
 						.set({
-							...input,
+							...restInput,
+							...(requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge
+								? { isFavorite: requestedIsFavorite }
+								: {}),
 							updatedAt: new Date(),
 						})
 						.where(eq(videos.id, id))
@@ -661,7 +698,7 @@ const make = (): VideoServiceInterface => {
 			}
 
 			videoServiceLogger.info('Video actualizado exitosamente:', result.id);
-			return result;
+			return yield* getById(id);
 		});
 
 	// -------------------------------------------------------------------------------
@@ -857,9 +894,24 @@ const make = (): VideoServiceInterface => {
 
 			// Obtener video actual
 			const video = yield* getById(id);
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.VIDEO),
+				catch: (error) => toVideoError(error, 'toggleFavorite.favoriteScope'),
+			});
+			const currentFavoriteStatus =
+				favoriteEntityIds === null ? video.isFavorite : favoriteEntityIds.includes(id);
+			const newFavoriteStatus = !currentFavoriteStatus;
 
-			// Actualizar favorito
-			return yield* update(id, { isFavorite: !video.isFavorite });
+			if (favoriteEntityIds === null) {
+				return yield* update(id, { isFavorite: newFavoriteStatus });
+			}
+
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.VIDEO, id, newFavoriteStatus),
+				catch: (error) => toVideoError(error, 'toggleFavorite.favoriteBridge'),
+			});
+
+			return yield* getById(id);
 		});
 
 	// -------------------------------------------------------------------------------
@@ -877,19 +929,28 @@ const make = (): VideoServiceInterface => {
 				return 0;
 			}
 
-			const result = yield* Effect.tryPromise({
-				try: async () => {
-					const updated = await db
-						.update(videos)
-						.set({ isFavorite, updatedAt: new Date() })
-						.where(inArray(videos.id, ids))
-						.returning({ id: videos.id });
-					return updated;
-				},
-				catch: (error) => toVideoError(error, 'setFavoriteMany'),
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.VIDEO),
+				catch: (error) => toVideoError(error, 'setFavoriteMany.favoriteScope'),
 			});
 
-			const updatedCount = result.length;
+			const updatedCount =
+				favoriteEntityIds === null
+					? yield* Effect.tryPromise({
+						try: async () => {
+							const updated = await db
+								.update(videos)
+								.set({ isFavorite, updatedAt: new Date() })
+								.where(inArray(videos.id, ids))
+								.returning({ id: videos.id });
+							return updated.length;
+						},
+						catch: (error) => toVideoError(error, 'setFavoriteMany'),
+					})
+					: yield* Effect.tryPromise({
+						try: () => favoriteService.setMany(FavoriteEntityType.VIDEO, ids, isFavorite),
+						catch: (error) => toVideoError(error, 'setFavoriteMany.favoriteBridge'),
+					});
 			videoServiceLogger.info('Videos actualizados exitosamente:', updatedCount);
 			return updatedCount;
 		});
