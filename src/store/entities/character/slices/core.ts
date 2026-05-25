@@ -5,6 +5,7 @@
  */
 
 import type { StateCreator } from 'zustand';
+import { toggleCharacterFavoriteInApi } from '@/lib/api/client/character.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterWithStats } from '@/types/entities/character';
@@ -194,26 +195,30 @@ export const createCharacterCoreSlice: StateCreator<
 	},
 
 	// Operaciones especializadas
-	toggleFavorite: (characterId: string) => {
-		set((state) => {
-			const character = state.characters[characterId];
-			if (!character) {
-				logger.warn(`❌ Personaje no encontrado para toggle favorite: ${characterId}`);
-				return state;
-			}
+	toggleFavorite: async (characterId: string) => {
+		const character = get().characters[characterId];
+		if (!character) {
+			logger.warn(`❌ Personaje no encontrado para toggle favorite: ${characterId}`);
+			return;
+		}
 
-			return {
+		set({ isLoading: true, error: null });
+
+		try {
+			const updatedCharacter = await toggleCharacterFavoriteInApi(characterId);
+			set((state) => ({
 				characters: {
 					...state.characters,
-					[characterId]: {
-						...character,
-						isFavorite: !character.isFavorite,
-						updatedAt: new Date(),
-					},
+					[characterId]: updatedCharacter,
 				},
-			};
-		});
-		logger.info(`⭐ Toggle favorite personaje: ${characterId}`);
+				isLoading: false,
+			}));
+			logger.info(`⭐ Toggle favorite personaje sincronizado: ${characterId}`);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error al alternar favorito del personaje';
+			set({ error: errorMessage, isLoading: false });
+			logger.error(`❌ Error al alternar favorito del personaje: ${characterId}`, error);
+		}
 	},
 
 	setFeaturedImage: (characterId: string, imageId: string | null) => {
