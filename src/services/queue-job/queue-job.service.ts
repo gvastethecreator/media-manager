@@ -5,8 +5,8 @@
 
 import * as crypto from 'crypto';
 import { and, eq, gte, lte, sql } from 'drizzle-orm';
-import { db } from '@/lib/database/db';
-import { queueJobs } from '@/lib/database/schema';
+import { db } from '@/lib/drizzle';
+import { queueJobs } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { getPaginationInfo } from '@/lib/utils/pagination';
 import { serializeQueueJobMetadata, transformQueueJob, transformQueueJobs } from '@/transformers/queue-job';

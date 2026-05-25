@@ -18,7 +18,6 @@ export async function seedVideos(db: LibSQLDatabase<Record<string, never>>) {
 				size: 10_240,
 				duration: 60,
 				folderId: 'posters',
-				isFavorite: false,
 			},
 			{
 				id: 'vid-seed-002',
@@ -28,7 +27,6 @@ export async function seedVideos(db: LibSQLDatabase<Record<string, never>>) {
 				size: 20_480,
 				duration: 120,
 				folderId: 'test-files',
-				isFavorite: false,
 			},
 		];
 

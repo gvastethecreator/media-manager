@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { db } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
 import {
 	albums,
 	characters,

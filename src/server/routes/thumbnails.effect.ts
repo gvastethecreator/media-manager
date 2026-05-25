@@ -10,7 +10,7 @@ import { Context, Data, Effect, Layer } from 'effect';
 import express from 'express';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
-import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { thumbnailEventService as baseThumbnailService } from '@/services/thumbnail/thumbnail-events.service';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail/types';
@@ -255,161 +255,139 @@ const router = express.Router();
 /**
  * GET /thumbnails/image/:imageId - Obtener thumbnails de imagen
  */
-router.get('/image/:imageId', async (req, res) => {
-	const { imageId } = req.params;
-	const { quality } = req.query;
+router.get('/image/:imageId', effectHandler((req) =>
+	Effect.gen(function* () {
+		const { imageId } = req.params;
+		const { quality } = req.query;
 
-	const effect = Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.getThumbnail(imageId, (quality as string) || 'medium');
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(ThumbnailServiceLive))
+));
 
 /**
  * GET /thumbnails/stats - Obtener estadísticas de thumbnails
  */
-router.get('/stats', async (_req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/stats', effectHandler((_req) =>
+	Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.getThumbnailStats();
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(ThumbnailServiceLive))
+));
 
 /**
  * POST /thumbnails/generate/:imageId - Generar thumbnails para imagen
  */
-router.post('/generate/:imageId', async (req, res) => {
-	const { imageId } = req.params;
-	const options = req.body || {};
+router.post('/generate/:imageId', effectHandler((req) =>
+	Effect.gen(function* () {
+		const { imageId } = req.params;
+		const options = req.body || {};
 
-	const effect = Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.getThumbnail(imageId, options.quality || 'medium');
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(ThumbnailServiceLive))
+));
 
 /**
  * POST /thumbnails/bulk-generate - Generar thumbnails en lote (OPTIMIZED)
  */
-router.post('/bulk-generate', async (req, res) => {
+router.post('/bulk-generate', effectHandler((req, res) => {
 	const { imageIds, ...options } = req.body;
 
 	if (!(imageIds && Array.isArray(imageIds))) {
 		res.status(400).json({ error: 'imageIds (array) es requerido' });
-		return;
+		return Effect.succeed(undefined);
 	}
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.bulkGenerateThumbnails(imageIds, options);
 	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * POST /thumbnails/batch - Nuevo endpoint optimizado para batch requests
  */
-router.post('/batch', async (req, res) => {
+router.post('/batch', effectHandler((req, res) => {
 	const { requests } = req.body;
 
 	if (!(requests && Array.isArray(requests))) {
 		res.status(400).json({
 			error: 'requests (array) es requerido. Formato: [{imageId, quality}, ...]',
 		});
-		return;
+		return Effect.succeed(undefined);
 	}
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.batchGetThumbnails(requests);
 	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * DELETE /thumbnails/image/:imageId - Eliminar thumbnails de imagen
  */
-router.delete('/image/:imageId', async (req, res) => {
-	const { imageId } = req.params;
+router.delete('/image/:imageId', effectHandler((req) =>
+	Effect.gen(function* () {
+		const { imageId } = req.params;
 
-	const effect = Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.deleteThumbnail(imageId);
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(ThumbnailServiceLive))
+));
 
 /**
  * POST /thumbnails/cleanup - Limpiar thumbnails huérfanos
  */
-router.post('/cleanup', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/cleanup', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.cleanThumbnails(req.body);
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(ThumbnailServiceLive))
+));
 
 /**
  * GET /thumbnails/cleanup - Limpiar thumbnails (alias)
  */
-router.get('/cleanup', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/cleanup', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.cleanThumbnails(req.query as Record<string, unknown>);
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(ThumbnailServiceLive))
+));
 
 /**
  * GET /thumbnails/optimize - Optimizar thumbnails
  */
-router.get('/optimize', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/optimize', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.optimizeThumbnails(req.query as Record<string, unknown>);
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(ThumbnailServiceLive))
+));
 
 /**
  * GET /thumbnails/reprocess - Reprocesar thumbnails
  */
-router.get('/reprocess', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/reprocess', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.reprocessThumbnails(req.query as Record<string, unknown>);
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(ThumbnailServiceLive))
+));
 
 /**
  * GET /thumbnails/last-processed - Obtener thumbnails procesados recientemente
  */
-router.get('/last-processed', async (req, res) => {
-	const { limit = '9' } = req.query;
-	const limitNum = sanitizeLimit(limit, 9, 100);
+router.get('/last-processed', effectHandler((req) =>
+	Effect.gen(function* () {
+		const { limit = '9' } = req.query;
+		const limitNum = sanitizeLimit(limit, 9, 100);
 
-	const effect = Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.getLastProcessed(limitNum);
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(ThumbnailServiceLive))
+));
 
 /**
  * GET /thumbnails/events - Eventos SSE de procesamiento

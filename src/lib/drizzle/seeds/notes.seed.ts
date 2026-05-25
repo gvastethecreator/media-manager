@@ -17,28 +17,24 @@ export async function seedNotes(db: LibSQLDatabase<Record<string, never>>) {
 				title: 'Nota de bienvenida',
 				content: 'Esta es una nota de ejemplo para verificar el sistema.',
 				category: 'general',
-				isFavorite: true,
 			},
 			{
 				id: generateReadableId('note', 'Ideas', 1),
 				title: 'Nota secundaria',
 				content: 'Otra nota para pruebas básicas.',
 				category: 'ideas',
-				isFavorite: false,
 			},
 			{
 				id: generateReadableId('note', 'Lista Tareas', 1),
 				title: 'Lista de Tareas',
 				content: '- Tarea 1: Organizar archivos\n- Tarea 2: Revisar etiquetas\n- Tarea 3: Crear álbumes nuevos',
 				category: 'tareas',
-				isFavorite: true,
 			},
 			{
 				id: generateReadableId('note', 'Referencias Estilo', 1),
 				title: 'Referencias de Estilo',
 				content: 'Estilos artísticos para explorar: Art Nouveau, Cyberpunk, Steampunk, Vaporwave.',
 				category: 'referencias',
-				isFavorite: false,
 			},
 		];
 

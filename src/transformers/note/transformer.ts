@@ -6,6 +6,7 @@
  */
 
 import { createDefaultEntityStats } from '@/lib/utils';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 import type {
 	NoteComplete,
 	NoteCreateInput,
@@ -43,21 +44,7 @@ export function fromDrizzleNoteWithCounts(data: NoteComplete): NoteWithStats {
 		name: data.title, // Alias para title
 		description: data.summary || generateExcerpt(data.content), // Alias para summary o excerpt
 		stats: statistics,
-		_count: {
-			images: data._count?.images || 0,
-			videos: data._count?.videos || 0,
-			albums: data._count?.albums || 0,
-			collections: data._count?.collections || 0,
-			tags: data._count?.tags || 0,
-			characters: data._count?.characters || 0,
-			places: data._count?.places || 0,
-			worldItems: data._count?.worldItems || 0,
-			concepts: data._count?.concepts || 0,
-			prompts: data._count?.prompts || 0,
-			wildcards: data._count?.wildcards || 0,
-			properties: data._count?.properties || 0,
-			groups: data._count?.groups || 0,
-		},
+		_count: normalizeCounts(data._count),
 	};
 }
 
@@ -65,34 +52,22 @@ export function fromDrizzleNoteWithCounts(data: NoteComplete): NoteWithStats {
  * 📊 Calcula estadísticas completas para una nota
  */
 function calculateNoteStatistics(data: NoteComplete): NoteStatistics {
-	const imageCount = data._count?.images || 0;
-	const videoCount = data._count?.videos || 0;
-	const albumCount = data._count?.albums || 0;
-	const collectionCount = data._count?.collections || 0;
-	const tagCount = data._count?.tags || 0;
-	const characterCount = data._count?.characters || 0;
-	const placeCount = data._count?.places || 0;
-	const worldItemCount = data._count?.worldItems || 0;
-	const conceptCount = data._count?.concepts || 0;
-	const promptCount = data._count?.prompts || 0;
-	const wildcardCount = data._count?.wildcards || 0;
-	const propertyCount = data._count?.properties || 0;
-	const groupCount = data._count?.groups || 0;
+	const counts = normalizeCounts(data._count);
+	const imageCount = counts.images;
+	const videoCount = counts.videos;
+	const albumCount = counts.albums;
+	const collectionCount = counts.collections;
+	const tagCount = counts.tags;
+	const characterCount = counts.characters;
+	const placeCount = counts.places;
+	const worldItemCount = counts.worldItems;
+	const conceptCount = counts.concepts;
+	const promptCount = counts.prompts;
+	const wildcardCount = counts.wildcards;
+	const propertyCount = counts.properties;
+	const groupCount = counts.groups;
 
-	const totalItems =
-		imageCount +
-		videoCount +
-		albumCount +
-		collectionCount +
-		tagCount +
-		characterCount +
-		placeCount +
-		worldItemCount +
-		conceptCount +
-		promptCount +
-		wildcardCount +
-		propertyCount +
-		groupCount;
+	const totalItems = sumCounts(data._count, STANDARD_COUNT_KEYS);
 	const totalAssociations = totalItems;
 	const wordCount = calculateWordCount(data.content);
 	const readingTime = Math.ceil(wordCount / 200); // ~200 palabras por minuto

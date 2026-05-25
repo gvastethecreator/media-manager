@@ -10,6 +10,7 @@
 import { createDefaultEntityStats } from '@/lib/utils';
 import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
+import { normalizeCounts } from '../common/counts';
 import { PlaceCreateInput, PlaceStatistics, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
 
@@ -114,6 +115,8 @@ interface DrizzleFindManyArgs {
 export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats {
 	const { _count, ...rest } = place;
 
+	const counts = normalizeCounts(_count);
+
 	// Campos que contribuyen a la puntuación de completitud
 	const completenessFields = [
 		rest.description,
@@ -126,20 +129,15 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 	];
 
 	// Métricas de popularidad basadas en conteos
-	const popularity =
-		(_count?.images ?? 0) +
-		(_count?.notes ?? 0) +
-		(_count?.characters ?? 0) +
-		(_count?.collections ?? 0) +
-		(_count?.tags ?? 0);
+	const popularity = counts.images + counts.notes + counts.characters + counts.collections + counts.tags;
 
 	const statistics: PlaceStatistics = {
 		...createDefaultEntityStats({
-			imageCount: _count?.images ?? 0,
-			noteCount: _count?.notes ?? 0,
-			tagCount: _count?.tags ?? 0,
-			collectionCount: _count?.collections ?? 0,
-			conceptCount: _count?.concepts ?? 0,
+			imageCount: counts.images,
+			noteCount: counts.notes,
+			tagCount: counts.tags,
+			collectionCount: counts.collections,
+			conceptCount: counts.concepts,
 			placeCount: 1,
 			totalItems: popularity,
 			type: 'place',
@@ -163,12 +161,12 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 		metadata: {},
 		region: null,
 		// Conteos individuales para compatibilidad
-		images: _count?.images ?? 0,
-		tags: _count?.tags ?? 0,
-		notesCount: _count?.notes ?? 0,
-		characters: _count?.characters ?? 0,
-		collections: _count?.collections ?? 0,
-		concepts: _count?.concepts ?? 0,
+		images: counts.images,
+		tags: counts.tags,
+		notesCount: counts.notes,
+		characters: counts.characters,
+		collections: counts.collections,
+		concepts: counts.concepts,
 	};
 
 	return result;

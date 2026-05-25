@@ -23,7 +23,6 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 				emoji: '🎨',
 				color: '#f59e0b',
 				category: 'visual',
-				isFavorite: true,
 			},
 			{
 				id: generateReadableId('property', 'Calidad', 1),
@@ -32,7 +31,6 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 				emoji: '⭐',
 				color: '#22c55e',
 				category: 'técnico',
-				isFavorite: false,
 			},
 		];
 

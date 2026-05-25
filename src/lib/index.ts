@@ -7,10 +7,7 @@ export * from './client';
 // Configuración
 export * from './config';
 export * from './constants';
-// Contextos y eventos
-export * from './contexts';
 // Módulos organizados por categoría
-export * from './database';
 export * from './dev';
 export * from './errors';
 export * from './events';

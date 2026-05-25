@@ -19,7 +19,6 @@ export async function seedFile3Ds(db: LibSQLDatabase<Record<string, never>>) {
 				mimeType: 'model/gltf-binary',
 				extension: 'glb',
 				folderId: 'test-files',
-				isFavorite: false,
 				isArchived: false,
 			},
 		];

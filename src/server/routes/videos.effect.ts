@@ -10,67 +10,21 @@ import { Effect } from 'effect';
 import express from 'express';
 import { db } from '@/lib/drizzle';
 import { videos } from '@/lib/drizzle/schema';
-import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { VideoService, VideoServiceLive } from '@/services/video/video.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
+import { sortEntitiesByField } from '../utils/sort';
 
 const router = express.Router();
-
-function normalizeSortValue(value: unknown): number | string {
-	if (value instanceof Date) {
-		return value.getTime();
-	}
-
-	if (typeof value === 'number') {
-		return value;
-	}
-
-	if (typeof value === 'string') {
-		return value.toLowerCase();
-	}
-
-	if (typeof value === 'boolean') {
-		return value ? 1 : 0;
-	}
-
-	if (value && typeof value === 'object' && 'getTime' in value && typeof value.getTime === 'function') {
-		return value.getTime();
-	}
-
-	return 0;
-}
-
-function sortEntitiesByField<T extends Record<string, unknown>>(
-	items: T[],
-	sortBy: string,
-	sortOrder: 'asc' | 'desc'
-): T[] {
-	const direction = sortOrder === 'asc' ? 1 : -1;
-
-	return [...items].sort((left, right) => {
-		const leftValue = normalizeSortValue(left[sortBy]);
-		const rightValue = normalizeSortValue(right[sortBy]);
-
-		if (leftValue < rightValue) {
-			return -1 * direction;
-		}
-
-		if (leftValue > rightValue) {
-			return 1 * direction;
-		}
-
-		return 0;
-	});
-}
 
 /**
  * GET /videos - Listar videos con filtros y paginación
  */
-router.get('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/', effectHandler((req) =>
+	Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const {
@@ -119,7 +73,7 @@ router.get('/', async (req, res) => {
 			thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
 		}));
 
-		return res.json({
+		return {
 			data,
 			pagination: {
 				total: data.length,
@@ -128,17 +82,15 @@ router.get('/', async (req, res) => {
 				hasNext: data.length >= filters.limit,
 				hasPrev: filters.offset > 0,
 			},
-		});
-	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+		};
+	}).pipe(Effect.provide(VideoServiceLive))
+));
 
 /**
  * GET /videos/favorites - Listar solo videos favoritos
  */
-router.get('/favorites', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/favorites', effectHandler((req) =>
+	Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
@@ -159,7 +111,7 @@ router.get('/favorites', async (req, res) => {
 		const totalFavorites = favoriteCounts[FavoriteEntityType.VIDEO] ?? 0;
 
 		if (totalFavorites === 0) {
-			return res.json([]);
+			return [];
 		}
 
 		const favoriteResult = yield* Effect.tryPromise({
@@ -194,58 +146,53 @@ router.get('/favorites', async (req, res) => {
 			filters.sortOrder
 		).slice(filters.offset, filters.offset + filters.limit);
 
-		return res.json(data);
-	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+		return data;
+	}).pipe(Effect.provide(VideoServiceLive))
+));
 
 /**
  * GET /videos/stats/format - Obtener estadísticas por formato
  */
-router.get('/stats/format', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/stats/format', effectHandler((req) =>
+	Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const stats = yield* videoService.getFormatStats();
 
-		return res.json({ stats });
-	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+		return { stats };
+	}).pipe(Effect.provide(VideoServiceLive))
+));
 
 /**
  * GET /videos/by-hash/:hash - Buscar video por hash
  */
-router.get('/by-hash/:hash', async (req, res) => {
+router.get('/by-hash/:hash', effectHandler((req, res) => {
 	const { hash } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const video = yield* videoService.getByHash(hash);
 
 		if (!video) {
-			return res.status(404).json({
+			res.status(404).json({
 				error: 'NOT_FOUND',
 				message: `Video con hash ${hash} no encontrado`,
 			});
+			return;
 		}
 
-		return res.json(video);
+		return video;
 	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * GET /videos/folder/:folderId - Listar videos por folder
  */
-router.get('/folder/:folderId', async (req, res) => {
+router.get('/folder/:folderId', effectHandler((req) => {
 	const { folderId } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
@@ -266,113 +213,101 @@ router.get('/folder/:folderId', async (req, res) => {
 			thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
 		}));
 
-		return res.json(data);
+		return data;
 	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * GET /videos/folder/:folderId/count - Contar videos en un folder
  */
-router.get('/folder/:folderId/count', async (req, res) => {
+router.get('/folder/:folderId/count', effectHandler((req) => {
 	const { folderId } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const count = yield* videoService.countByFolder(folderId);
 
-		return res.json({ count });
+		return { count };
 	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * POST /videos - Crear nuevo video
  */
-router.post('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const video = yield* videoService.create(req.body);
 
-		return res.status(201).json(video);
-	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+		res.status(201);
+		return video;
+	}).pipe(Effect.provide(VideoServiceLive))
+));
 
 /**
  * GET /videos/:id/stats - Obtener video con estadísticas
  */
-router.get('/:id/stats', async (req, res) => {
+router.get('/:id/stats', effectHandler((req) => {
 	const { id } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const video = yield* videoService.getByIdWithStats(id);
 
-		return res.json(video);
+		return video;
 	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * PATCH /videos/:id - Actualizar video
  */
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', effectHandler((req) => {
 	const { id } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const video = yield* videoService.update(id, req.body);
 
-		return res.json(video);
+		return video;
 	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * POST /videos/:id/favorite - Toggle favorito de un video
  */
-router.post('/:id/favorite', async (req, res) => {
+router.post('/:id/favorite', effectHandler((req) => {
 	const { id } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const videoService = yield* VideoService;
 		const video = yield* videoService.toggleFavorite(id);
 
-		return res.json(video);
+		return video;
 	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * POST /videos/:id/tags - Agregar tags a un video
  */
-router.post('/:id/tags', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/:id/tags', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const tagService = yield* TagService;
 		const tagIds = Array.isArray(req.body?.tagIds) ? req.body.tagIds : [];
 		const result = yield* tagService.addToVideo(req.params.id, tagIds);
+		res.status(201);
 		return { success: true, added: result.added };
-	}).pipe(Effect.provide(TagServiceLive));
-
-	await runEffectForExpress(effect, res, { successStatus: 201 });
-});
+	}).pipe(Effect.provide(TagServiceLive))
+));
 
 /**
  * POST /videos/batch/favorite - Establecer favorito para múltiples videos
  */
-router.post('/batch/favorite', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/batch/favorite', effectHandler((req) =>
+	Effect.gen(function* () {
 		const { ids, isFavorite } = req.body;
 
 		if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
@@ -387,34 +322,31 @@ router.post('/batch/favorite', async (req, res) => {
 		});
 
 		return { success: true, count, updated: count };
-	});
-
-	await runEffectForExpress(effect, res);
-});
+	})
+));
 
 /**
  * DELETE /videos/:id - Eliminar video
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', effectHandler((req, res) => {
 	const { id } = req.params;
 	const { force } = req.query;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		yield* videoService.deleteById(id, force === 'true');
 
-		return res.status(204).send();
+		res.status(204);
+		return undefined;
 	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * DELETE /videos/batch - Eliminar múltiples videos
  */
-router.delete('/batch', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.delete('/batch', effectHandler((req) =>
+	Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const { ids, force } = req.body;
@@ -426,10 +358,8 @@ router.delete('/batch', async (req, res) => {
 		const count = yield* videoService.deleteManyByIds(ids, force === true);
 
 		return { success: true, count, deleted: count };
-	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(VideoServiceLive))
+));
 
 /**
  * GET /videos/:id/content - Servir el video original
@@ -483,126 +413,105 @@ router.get('/:id/content', async (req, res) => {
 /**
  * GET /videos/:id/thumbnail - Servir thumbnail de video
  */
-router.get('/:id/thumbnail', async (req, res) => {
-	const { id } = req.params;
-	const timeParam = (req.query.time || req.query.timestamp) as string | undefined;
-	const time = timeParam ? Number.parseFloat(timeParam) : 1;
+router.get('/:id/thumbnail', effectHandler(
+	(req) =>
+		Effect.gen(function* () {
+			const videoService = yield* VideoService;
+			const video = yield* videoService.getById(req.params.id);
+			const timeParam = (req.query.time || req.query.timestamp) as string | undefined;
+			const time = timeParam ? Number.parseFloat(timeParam) : 1;
+			return { video, time };
+		}).pipe(Effect.provide(VideoServiceLive)),
+	{
+		onSuccess: async ({ video, time }, res) => {
+			const id = video.id;
 
-	const effect = Effect.gen(function* () {
-		const videoService = yield* VideoService;
-		const video = yield* videoService.getById(id);
-		return video;
-	}).pipe(Effect.provide(VideoServiceLive));
+			if (!video) {
+				res.status(404).send('Video not found');
+				return;
+			}
 
-	try {
-		const video = await Effect.runPromise(effect);
+			// 1) Intentar desde DB (thumbnail base64)
+			if (video.thumbnail) {
+				try {
+					const buffer = Buffer.from(video.thumbnail, 'base64');
+					res.set({
+						'Content-Type': 'image/jpeg',
+						'Content-Length': buffer.length.toString(),
+						'Cache-Control': 'public, max-age=31536000',
+					});
+					res.send(buffer);
+					return;
+				} catch {
+					// continuar a fallback
+				}
+			}
 
-		if (!video) {
-			res.status(404).send('Video not found');
-			return;
-		}
-
-		// 1) Intentar desde DB (thumbnail base64)
-		if (video.thumbnail) {
+			// Fallback: generar thumbnail estático con FFmpeg
 			try {
-				const buffer = Buffer.from(video.thumbnail, 'base64');
-				const etag = `W/"${buffer.length.toString(16)}-${id}"`;
-				const lastModified = new Date(video.updatedAt || Date.now()).toUTCString();
+				const { generateStaticVideoThumbnailFFmpeg } = await import('@/lib/utils/video/ffmpeg-thumbnails');
+				const timestamp = Number.isFinite(time) ? Math.max(0.05, Math.min(time as number, 36_000)) : 1;
 
-				const ifNoneMatch = req.header('If-None-Match');
-				const ifModifiedSince = req.header('If-Modified-Since');
-				if (ifNoneMatch === etag || (ifModifiedSince && new Date(ifModifiedSince) >= new Date(lastModified))) {
-					res.status(304).end();
+				const thumbnailBuffer = await generateStaticVideoThumbnailFFmpeg(video.path, {
+					time: timestamp,
+					width: 320,
+					height: 240,
+					quality: 'medium',
+				});
+
+				if (thumbnailBuffer) {
+					// Guardar el thumbnail generado en la base de datos para futuras solicitudes
+					try {
+						await db
+							.update(videos)
+							.set({
+								thumbnail: thumbnailBuffer.toString('base64'),
+								thumbnailSize: thumbnailBuffer.length,
+								thumbnailWidth: 320,
+								thumbnailHeight: 240,
+								updatedAt: new Date(),
+							})
+							.where(eq(videos.id, id));
+					} catch (saveError) {
+						console.warn('No se pudo guardar el thumbnail en la base de datos:', saveError);
+					}
+
+					const etag = `W/"${thumbnailBuffer.length.toString(16)}-${id}"`;
+					const lastModified = new Date().toUTCString();
+
+					res.set({
+						'Content-Type': 'image/webp',
+						'Content-Length': thumbnailBuffer.length.toString(),
+						'Cache-Control': 'public, max-age=86400',
+						ETag: etag,
+						'Last-Modified': lastModified,
+						Vary: 'Accept, Accept-Encoding',
+					});
+					res.send(thumbnailBuffer);
 					return;
 				}
-
-				res.set({
-					'Content-Type': 'image/jpeg',
-					'Content-Length': buffer.length.toString(),
-					'Cache-Control': 'public, max-age=31536000',
-					ETag: etag,
-					'Last-Modified': lastModified,
-				});
-				res.send(buffer);
-				return;
-			} catch {
-				// continuar
+			} catch (error) {
+				console.error('Error generating static thumbnail with FFmpeg:', error);
 			}
-		}
 
-		// Fallback: generar thumbnail estático con FFmpeg
-		try {
-			const { generateStaticVideoThumbnailFFmpeg } = await import('@/lib/utils/video/ffmpeg-thumbnails');
-			const timestamp = Number.isFinite(time) ? Math.max(0.05, Math.min(time as number, 36_000)) : 1;
-
-			const thumbnailBuffer = await generateStaticVideoThumbnailFFmpeg(video.path, {
-				time: timestamp,
-				width: 320,
-				height: 240,
-				quality: 'medium',
-			});
-
-			if (thumbnailBuffer) {
-				// Guardar el thumbnail generado en la base de datos para futuras solicitudes
-				try {
-					await db
-						.update(videos)
-						.set({
-							thumbnail: thumbnailBuffer.toString('base64'),
-							thumbnailSize: thumbnailBuffer.length,
-							thumbnailWidth: 320,
-							thumbnailHeight: 240,
-							updatedAt: new Date(),
-						})
-						.where(eq(videos.id, id));
-				} catch (saveError) {
-					// Log pero no fallar si no se puede guardar
-					console.warn('No se pudo guardar el thumbnail en la base de datos:', saveError);
-				}
-
-				const etag = `W/"${thumbnailBuffer.length.toString(16)}-${id}"`;
-				const lastModified = new Date().toUTCString();
-
-				res.set({
-					'Content-Type': 'image/webp',
-					'Content-Length': thumbnailBuffer.length.toString(),
-					'Cache-Control': 'public, max-age=86400',
-					ETag: etag,
-					'Last-Modified': lastModified,
-					Vary: 'Accept, Accept-Encoding',
-				});
-				res.send(thumbnailBuffer);
-				return;
-			}
-		} catch (error) {
-			console.error('Error generating static thumbnail with FFmpeg:', error);
-		}
-
-		res.status(500).send('Unable to generate thumbnail');
-	} catch (error) {
-		const httpError = require('@/lib/effect/adapters/express.adapter').errorToHttpStatus(error);
-		res.status(httpError.status).json({
-			error: httpError.message,
-			...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
-		});
+			res.status(500).send('Unable to generate thumbnail');
+		},
 	}
-});
+));
 
 /**
  * GET /videos/:id - Obtener video por ID (último para evitar conflictos con rutas dinámicas)
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', effectHandler((req) => {
 	const { id } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const videoService = yield* VideoService;
 
 		const video = yield* videoService.getById(id);
 
-		return res.json(video);
+		return video;
 	}).pipe(Effect.provide(VideoServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 export default router;

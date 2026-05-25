@@ -6,6 +6,7 @@
 
 import { serverLogger } from '../../lib/logger/server-logger';
 import { calculateCompleteness } from '../../lib/utils/transformers/calculate-completeness';
+import { normalizeCounts, sumCounts } from '../common/counts';
 import type {
 	DrizzleCreatePromptData,
 	DrizzleOrderBy,
@@ -329,26 +330,27 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 	]);
 
 	// Calcular estadísticas
+	const counts = normalizeCounts(prompt._count);
 	const stats: PromptStatistics = {
 		// Conteos de relaciones base (EntityStats)
-		imageCount: prompt._count?.images || 0,
-		videoCount: prompt._count?.videos || 0,
-		albumCount: prompt._count?.albums || 0,
-		collectionCount: prompt._count?.collections || 0,
+		imageCount: counts.images,
+		videoCount: counts.videos,
+		albumCount: counts.albums,
+		collectionCount: counts.collections,
 		tagCount: prompt._count?.tagEntities || 0,
-		characterCount: prompt._count?.characters || 0,
-		placeCount: prompt._count?.places || 0,
-		worldItemCount: prompt._count?.worldItems || 0,
-		conceptCount: prompt._count?.concepts || 0,
+		characterCount: counts.characters,
+		placeCount: counts.places,
+		worldItemCount: counts.worldItems,
+		conceptCount: counts.concepts,
 		promptCount: 0,
-		noteCount: prompt._count?.notes || 0,
-		wildcardCount: prompt._count?.wildcards || 0,
-		propertyCount: prompt._count?.properties || 0,
-		groupCount: prompt._count?.groups || 0,
+		noteCount: counts.notes,
+		wildcardCount: counts.wildcards,
+		propertyCount: counts.properties,
+		groupCount: counts.groups,
 
 		// Métricas globales
 		totalItems: (prompt._count?.images || 0) + (prompt._count?.videos || 0) + (prompt._count?.albums || 0),
-		totalAssociations: Object.values(prompt._count || {}).reduce((sum, count) => sum + (count || 0), 0),
+		totalAssociations: sumCounts(prompt._count),
 
 		// Timestamps
 		lastUpdated: prompt.updatedAt,
@@ -360,17 +362,17 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 		type: 'prompt',
 
 		// Conteos específicos para compatibilidad con prompt-card
-		totalImages: prompt._count?.images || 0,
-		totalVideos: prompt._count?.videos || 0,
-		totalCollections: prompt._count?.collections || 0,
-		totalAlbums: prompt._count?.albums || 0,
-		totalConcepts: prompt._count?.concepts || 0,
-		totalNotes: prompt._count?.notes || 0,
-		totalCharacters: prompt._count?.characters || 0,
-		totalProperties: prompt._count?.properties || 0,
-		totalWildcards: prompt._count?.wildcards || 0,
-		totalGroups: prompt._count?.groups || 0,
-		totalPlaces: prompt._count?.places || 0,
+		totalImages: counts.images,
+		totalVideos: counts.videos,
+		totalCollections: counts.collections,
+		totalAlbums: counts.albums,
+		totalConcepts: counts.concepts,
+		totalNotes: counts.notes,
+		totalCharacters: counts.characters,
+		totalProperties: counts.properties,
+		totalWildcards: counts.wildcards,
+		totalGroups: counts.groups,
+		totalPlaces: counts.places,
 
 		// Métricas de contenido
 		totalContentItems: 0,

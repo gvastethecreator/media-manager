@@ -5,9 +5,11 @@
 
 import { eq } from 'drizzle-orm';
 import express from 'express';
+import { Effect } from 'effect';
 import { db } from '@/lib/drizzle/index.js';
 import { audios } from '@/lib/drizzle/schema/index.js';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 
 const router = express.Router();
 const logger = serverLogger.withContext('AudioWaveformRoute');
@@ -222,170 +224,167 @@ async function extractWaveformFromAudio(audioPath: string, samples: number): Pro
 /**
  * GET /audio/:id/waveform - Generar waveform de archivo de audio
  */
-router.get('/:id/waveform', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const options: AudioWaveformOptions = {
-			width: Math.min(Number.parseInt(req.query.width as string, 10) || 300, 2000),
-			height: Math.min(Number.parseInt(req.query.height as string, 10) || 100, 1000),
-			color: (req.query.color as string) || '#3b82f6',
-			backgroundColor: (req.query.backgroundColor as string) || 'transparent',
-			bars: Math.min(Number.parseInt(req.query.bars as string, 10) || 50, 500),
-			style: (req.query.style as 'bars' | 'curve' | 'filled') || 'bars',
-			showAxis: req.query.showAxis === 'true',
-		};
+router.get('/:id/waveform', effectHandler(
+	(req) =>
+		Effect.tryPromise({
+			try: async () => {
+				const { id } = req.params;
+				const options: AudioWaveformOptions = {
+					width: Math.min(Number.parseInt(req.query.width as string, 10) || 300, 2000),
+					height: Math.min(Number.parseInt(req.query.height as string, 10) || 100, 1000),
+					color: (req.query.color as string) || '#3b82f6',
+					backgroundColor: (req.query.backgroundColor as string) || 'transparent',
+					bars: Math.min(Number.parseInt(req.query.bars as string, 10) || 50, 500),
+					style: (req.query.style as 'bars' | 'curve' | 'filled') || 'bars',
+					showAxis: req.query.showAxis === 'true',
+				};
 
-		// Obtener audio de la base de datos
-		const audioRecords = await db.select({ metadata: audios.metadata }).from(audios).where(eq(audios.id, id));
+				const audioRecords = await db.select({ metadata: audios.metadata }).from(audios).where(eq(audios.id, id));
 
-		if (audioRecords.length === 0) {
-			res.status(404).json({ error: 'Audio not found' });
-			return;
-		}
+				if (audioRecords.length === 0) {
+					throw Object.assign(new Error('Audio not found'), { _tag: 'FileNotFound' });
+				}
 
-		const audio = audioRecords[0];
-		let metadata: any = null;
+				const audio = audioRecords[0];
+				let metadata: any = null;
 
-		// Parsear metadata si existe
-		if (audio.metadata) {
-			try {
-				metadata = JSON.parse(audio.metadata);
-			} catch (e) {
-				serverLogger.warn(`Error parsing metadata for audio ${id}:`, e);
-			}
-		}
+				if (audio.metadata) {
+					try {
+						metadata = JSON.parse(audio.metadata);
+					} catch (e) {
+						serverLogger.warn(`Error parsing metadata for audio ${id}:`, e);
+					}
+				}
 
-		// Si ya tiene waveform generado en metadata
-		if (metadata?.waveform) {
-			const waveformSvg = metadata.waveform;
+				if (metadata?.waveform) {
+					return { svg: metadata.waveform, status: 200 };
+				}
+
+				const errorSVG = generateAudioInfoSVG(null, options);
+				return { svg: errorSVG, status: 200 };
+			},
+			catch: (error) => new Error(String(error)),
+		}),
+	{
+		onSuccess: (data, res) => {
 			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=3600');
-			res.send(waveformSvg);
-			return;
-		}
-
-		// Fallback: generar placeholder con info básica
-		const errorSVG = generateAudioInfoSVG(null, options);
-
-		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=60');
-		res.send(errorSVG);
-	} catch (error) {
-		serverLogger.error('Error generando waveform:', error);
-
-		// Error fallback
-		const errorSVG = generateAudioInfoSVG(null, {
-			width: 300,
-			height: 100,
-			backgroundColor: '#fee2e2',
-		});
-
-		res.setHeader('Content-Type', 'image/svg+xml');
-		res.status(500).send(errorSVG);
+			res.setHeader('Cache-Control', data.status === 200 ? 'public, max-age=3600' : 'public, max-age=60');
+			res.status(data.status).send(data.svg);
+		},
+		onError: (_error, res) => {
+			serverLogger.error('Error generando waveform:', _error);
+			const errorSVG = generateAudioInfoSVG(null, {
+				width: 300,
+				height: 100,
+				backgroundColor: '#fee2e2',
+			});
+			res.setHeader('Content-Type', 'image/svg+xml');
+			res.status(500).send(errorSVG);
+		},
 	}
-});
+));
 
 /**
  * GET /audio/:id/info - Obtener información del archivo de audio
  */
-router.get('/:id/info', async (req, res) => {
-	try {
-		const { id } = req.params;
+router.get('/:id/info', effectHandler((req) =>
+	Effect.tryPromise({
+		try: async () => {
+			const { id } = req.params;
 
-		// Obtener audio de la base de datos
-		const audioRecords = await db
-			.select({ path: audios.path, metadata: audios.metadata })
-			.from(audios)
-			.where(eq(audios.id, id));
+			const audioRecords = await db
+				.select({ path: audios.path, metadata: audios.metadata })
+				.from(audios)
+				.where(eq(audios.id, id));
 
-		if (audioRecords.length === 0) {
-			res.status(404).json({ error: 'Audio file not found' });
-			return;
-		}
-
-		const audio = audioRecords[0];
-
-		// Intentar extraer info de metadata cacheada
-		if (audio.metadata) {
-			try {
-				const metadata = JSON.parse(audio.metadata);
-				if (metadata.audioInfo) {
-					res.json({ id, ...metadata.audioInfo });
-					return;
-				}
-			} catch {
-				// Metadata inválida, continuar con análisis
+			if (audioRecords.length === 0) {
+				throw Object.assign(new Error('Audio file not found'), { _tag: 'FileNotFound' });
 			}
-		}
 
-		const audioInfo = await analyzeAudioFile(audio.path);
+			const audio = audioRecords[0];
 
-		if (!audioInfo) {
-			res.status(404).json({ error: 'Audio file not found or unsupported format' });
-			return;
-		}
+			if (audio.metadata) {
+				try {
+					const metadata = JSON.parse(audio.metadata);
+					if (metadata.audioInfo) {
+						return { id, ...metadata.audioInfo };
+					}
+				} catch {
+					// Metadata inválida, continuar con análisis
+				}
+			}
 
-		res.json({
-			id,
-			...audioInfo,
-		});
-	} catch (error) {
-		serverLogger.error('Error obteniendo información del audio:', error);
-		res.status(500).json({ error: 'Error analyzing audio file' });
-	}
-});
+			const audioInfo = await analyzeAudioFile(audio.path);
+
+			if (!audioInfo) {
+				throw Object.assign(new Error('Audio file not found or unsupported format'), { _tag: 'FileNotFound' });
+			}
+
+			return {
+				id,
+				...audioInfo,
+			};
+		},
+		catch: (error) => new Error(String(error)),
+	})
+));
 
 /**
  * GET /audio/:id/waveform/preview - Preview rápido del waveform (menos muestras)
  */
-router.get('/:id/waveform/preview', async (req, res) => {
-	try {
-		const { id } = req.params;
+router.get('/:id/waveform/preview', effectHandler(
+	(req) =>
+		Effect.tryPromise({
+			try: async () => {
+				const { id } = req.params;
 
-		// Configuración optimizada para preview rápido
-		const options: AudioWaveformOptions = {
-			width: 150,
-			height: 50,
-			color: '#10b981',
-			backgroundColor: 'transparent',
-			bars: 30,
-			style: 'bars',
-			showAxis: false,
-		};
+				const options: AudioWaveformOptions = {
+					width: 150,
+					height: 50,
+					color: '#10b981',
+					backgroundColor: 'transparent',
+					bars: 30,
+					style: 'bars',
+					showAxis: false,
+				};
 
-		const audioRecords = await db
-			.select({ path: audios.path, metadata: audios.metadata })
-			.from(audios)
-			.where(eq(audios.id, id));
+				const audioRecords = await db
+					.select({ path: audios.path, metadata: audios.metadata })
+					.from(audios)
+					.where(eq(audios.id, id));
 
-		if (audioRecords.length === 0) {
-			res.status(404).json({ error: 'Audio not found' });
-			return;
-		}
+				if (audioRecords.length === 0) {
+					throw Object.assign(new Error('Audio not found'), { _tag: 'FileNotFound' });
+				}
 
-		const audio = audioRecords[0];
-		const waveformData = await extractWaveformFromAudio(audio.path, 50);
+				const audio = audioRecords[0];
+				const waveformData = await extractWaveformFromAudio(audio.path, 50);
 
-		if (waveformData) {
-			const previewSVG = generateWaveformSVG(waveformData, options);
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=7200'); // Cache más largo para previews
-			res.send(previewSVG);
-		} else {
-			// Mini placeholder
-			const miniSVG = `
+				if (waveformData) {
+					const previewSVG = generateWaveformSVG(waveformData, options);
+					return { svg: previewSVG, status: 200 };
+				}
+
+				const miniSVG = `
 <svg width="150" height="50" xmlns="http://www.w3.org/2000/svg">
   <rect width="100%" height="100%" fill="transparent"/>
   <path d="M 10 25 Q 40 15 70 25 Q 100 35 130 25" stroke="var(--dt-success-500)" stroke-width="2" fill="none"/>
 </svg>`;
-
+				return { svg: miniSVG, status: 200 };
+			},
+			catch: (error) => new Error(String(error)),
+		}),
+	{
+		onSuccess: (data, res) => {
 			res.setHeader('Content-Type', 'image/svg+xml');
-			res.send(miniSVG);
-		}
-	} catch (error) {
-		serverLogger.error('Error generando preview de waveform:', error);
-		res.status(500).json({ error: 'Error generating waveform preview' });
+			res.setHeader('Cache-Control', data.status === 200 ? 'public, max-age=7200' : 'public, max-age=60');
+			res.send(data.svg);
+		},
+		onError: (_error, res) => {
+			serverLogger.error('Error generando preview de waveform:', _error);
+			res.status(500).json({ error: 'Error generating waveform preview' });
+		},
 	}
-});
+));
 
 export default router;

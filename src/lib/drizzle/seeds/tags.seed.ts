@@ -23,7 +23,6 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '🎨',
 				color: '#a855f7',
 				category: 'arte',
-				isFavorite: true,
 			},
 			{
 				id: generateReadableId('tag', 'Naturaleza', 1),
@@ -32,7 +31,6 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '🌿',
 				color: '#22c55e',
 				category: 'tematica',
-				isFavorite: false,
 			},
 			{
 				id: generateReadableId('tag', 'Retrato', 1),
@@ -41,7 +39,6 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '👤',
 				color: '#f59e0b',
 				category: 'genero',
-				isFavorite: true,
 			},
 			{
 				id: generateReadableId('tag', 'Cyberpunk', 1),
@@ -50,7 +47,6 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '🤖',
 				color: '#ef4444',
 				category: 'estilo',
-				isFavorite: false,
 			},
 			{
 				id: generateReadableId('tag', 'Fantasia', 1),
@@ -59,7 +55,6 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '🧙',
 				color: '#6366f1',
 				category: 'genero',
-				isFavorite: true,
 			},
 		];
 

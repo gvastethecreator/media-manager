@@ -10,6 +10,7 @@ import express from 'express';
 import fs from 'fs/promises';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { getFileInfo } from '@/services/file/file.service';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 
 // ==========================================
 // 1. Definir errores tipados
@@ -61,30 +62,6 @@ const createAttachmentHeader = (fileName: string): string => {
 			.trim() || 'download';
 
 	return `attachment; filename="${fallbackName}"; filename*=UTF-8''${encodeRFC5987Value(fileName)}`;
-};
-
-const isTaggedError = (error: unknown, tag: string): boolean =>
-	typeof error === 'object' && error !== null && '_tag' in error && (error as { _tag?: string })._tag === tag;
-
-const getDownloadErrorResponse = (error: unknown): { message: string; status: number } => {
-	if (error instanceof FilePathRequired || isTaggedError(error, 'FilePathRequired')) {
-		return { status: 400, message: 'Se requiere una ruta de archivo' };
-	}
-
-	if (error instanceof FileNotFound || isTaggedError(error, 'FileNotFound')) {
-		return { status: 404, message: 'Archivo no encontrado' };
-	}
-
-	return { status: 500, message: 'Error al procesar la descarga' };
-};
-
-const runDownloadEffect = (filePath: string): Promise<DownloadFileResult> => {
-	const effect = Effect.gen(function* () {
-		const service = yield* DownloadService;
-		return yield* service.downloadFile(filePath);
-	}).pipe(Effect.provide(DownloadServiceLive));
-
-	return Effect.runPromise(effect);
 };
 
 const sendDownloadResponse = (res: express.Response, result: DownloadFileResult): void => {
@@ -150,38 +127,40 @@ const downloadLogger = serverLogger.withContext('DownloadAPI');
 /**
  * POST /api/download - Descargar archivo
  */
-router.post('/', async (req, res) => {
-	const filePath = req.body.path as string | undefined;
-
-	try {
-		const result = await runDownloadEffect(filePath ?? '');
-
-		downloadLogger.info(`Enviando archivo para descarga: ${result.fileInfo.name} (${result.fileInfo.mimeType})`);
-		sendDownloadResponse(res, result);
-	} catch (error) {
-		downloadLogger.error(`Error en descarga: ${filePath}`, error);
-		const { status, message } = getDownloadErrorResponse(error);
-		res.status(status).json({ error: message });
+router.post('/', effectHandler(
+	(req) => {
+		const filePath = (req.body.path as string) ?? '';
+		return Effect.gen(function* () {
+			const service = yield* DownloadService;
+			return { result: yield* service.downloadFile(filePath), filePath };
+		}).pipe(Effect.provide(DownloadServiceLive));
+	},
+	{
+		onSuccess: ({ result, filePath }, res) => {
+			downloadLogger.info(`Enviando archivo para descarga: ${result.fileInfo.name} (${result.fileInfo.mimeType})`);
+			sendDownloadResponse(res, result);
+		},
 	}
-});
+));
 
 /**
  * GET /api/download - Descargar archivo por query string
  */
-router.get('/', async (req, res) => {
-	const filePath = req.query.path as string | undefined;
-
-	try {
-		const result = await runDownloadEffect(filePath ?? '');
-
-		downloadLogger.info(`Enviando archivo para descarga: ${result.fileInfo.name} (${result.fileInfo.mimeType})`);
-		sendDownloadResponse(res, result);
-	} catch (error) {
-		downloadLogger.error(`Error en descarga: ${filePath}`, error);
-		const { status, message } = getDownloadErrorResponse(error);
-		res.status(status).json({ error: message });
+router.get('/', effectHandler(
+	(req) => {
+		const filePath = (req.query.path as string) ?? '';
+		return Effect.gen(function* () {
+			const service = yield* DownloadService;
+			return { result: yield* service.downloadFile(filePath), filePath };
+		}).pipe(Effect.provide(DownloadServiceLive));
+	},
+	{
+		onSuccess: ({ result, filePath }, res) => {
+			downloadLogger.info(`Enviando archivo para descarga: ${result.fileInfo.name} (${result.fileInfo.mimeType})`);
+			sendDownloadResponse(res, result);
+		},
 	}
-});
+));
 
 export default router;
 export { router as downloadEffectRouter };

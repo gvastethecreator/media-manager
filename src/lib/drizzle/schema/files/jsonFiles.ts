@@ -3,6 +3,10 @@
  * JSON FILES ENTITY - DRIZZLE ORM
  * =================================================================================
  * Definición de la tabla jsonFiles para archivos JSON
+ *
+ * @deprecated Esta tabla duplica 10+ columnas comunes (id, name, path, hash, size,
+ * folderId, createdAt, updatedAt, isFavorite, metadata, etc.). Converger a una tabla
+ * raíz `Asset` según ADR-0004 y 03-media-core-context.md.
  * =================================================================================
  */
 
@@ -21,6 +25,7 @@ export const jsonFiles = sqliteTable(
 		mimeType: text('mimeType').notNull(),
 		extension: text('extension').notNull(),
 		folderId: text('folderId').notNull(),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
 		content: text('content'),

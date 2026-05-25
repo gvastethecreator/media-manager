@@ -7,7 +7,7 @@
 
 import { Effect } from 'effect';
 import express from 'express';
-import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import {
 	GroupService,
 	GroupServiceLive,
@@ -23,8 +23,8 @@ import {
 
 // Groups
 const groupsEffectRouter = express.Router();
-groupsEffectRouter.get('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+groupsEffectRouter.get('/', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* GroupService;
 		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
 		return yield* service.getAll({
@@ -32,58 +32,55 @@ groupsEffectRouter.get('/', async (req, res) => {
 			offset: Number(req.query.offset) || 0,
 			onlyFavorites,
 		});
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res);
-});
-groupsEffectRouter.get('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(GroupServiceLive))
+));
+groupsEffectRouter.get('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* GroupService;
 		return yield* service.getById(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res);
-});
-groupsEffectRouter.post('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(GroupServiceLive))
+));
+groupsEffectRouter.post('/', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* GroupService;
-		return yield* service.create(req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res, { successStatus: 201 });
-});
-groupsEffectRouter.put('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		const result = yield* service.create(req.body);
+		res.status(201);
+		return result;
+	}).pipe(Effect.provide(GroupServiceLive))
+));
+groupsEffectRouter.put('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* GroupService;
 		return yield* service.update(req.params.id, req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res);
-});
-groupsEffectRouter.delete('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(GroupServiceLive))
+));
+groupsEffectRouter.delete('/:id', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* GroupService;
 		yield* service.delete(req.params.id);
-		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res, { successStatus: 204 });
-});
-groupsEffectRouter.post('/:id/favorite', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		res.status(204);
+		return undefined;
+	}).pipe(Effect.provide(GroupServiceLive))
+));
+groupsEffectRouter.post('/:id/favorite', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* GroupService;
 		return yield* service.toggleFavorite(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res);
-});
-groupsEffectRouter.post('/:id/images/:imageId', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(GroupServiceLive))
+));
+groupsEffectRouter.post('/:id/images/:imageId', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* GroupService;
 		yield* service.addImage(req.params.id, req.params.imageId);
+		res.status(201);
 		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res, { successStatus: 201 });
-});
+	}).pipe(Effect.provide(GroupServiceLive))
+));
 
 // Wildcards
 const wildcardsEffectRouter = express.Router();
-wildcardsEffectRouter.get('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+wildcardsEffectRouter.get('/', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* WildcardService;
 		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
 		return yield* service.getAll({
@@ -91,58 +88,55 @@ wildcardsEffectRouter.get('/', async (req, res) => {
 			offset: Number(req.query.offset) || 0,
 			onlyFavorites,
 		});
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res);
-});
-wildcardsEffectRouter.get('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(WildcardServiceLive))
+));
+wildcardsEffectRouter.get('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* WildcardService;
 		return yield* service.getById(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res);
-});
-wildcardsEffectRouter.post('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(WildcardServiceLive))
+));
+wildcardsEffectRouter.post('/', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* WildcardService;
-		return yield* service.create(req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res, { successStatus: 201 });
-});
-wildcardsEffectRouter.put('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		const result = yield* service.create(req.body);
+		res.status(201);
+		return result;
+	}).pipe(Effect.provide(WildcardServiceLive))
+));
+wildcardsEffectRouter.put('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* WildcardService;
 		return yield* service.update(req.params.id, req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res);
-});
-wildcardsEffectRouter.delete('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(WildcardServiceLive))
+));
+wildcardsEffectRouter.delete('/:id', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* WildcardService;
 		yield* service.delete(req.params.id);
-		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res, { successStatus: 204 });
-});
-wildcardsEffectRouter.post('/:id/favorite', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		res.status(204);
+		return undefined;
+	}).pipe(Effect.provide(WildcardServiceLive))
+));
+wildcardsEffectRouter.post('/:id/favorite', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* WildcardService;
 		return yield* service.toggleFavorite(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res);
-});
-wildcardsEffectRouter.post('/:id/images/:imageId', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(WildcardServiceLive))
+));
+wildcardsEffectRouter.post('/:id/images/:imageId', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* WildcardService;
 		yield* service.addImage(req.params.id, req.params.imageId);
+		res.status(201);
 		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res, { successStatus: 201 });
-});
+	}).pipe(Effect.provide(WildcardServiceLive))
+));
 
 // Notes
 const notesEffectRouter = express.Router();
-notesEffectRouter.get('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+notesEffectRouter.get('/', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
 		return yield* service.getAll({
@@ -150,89 +144,85 @@ notesEffectRouter.get('/', async (req, res) => {
 			offset: Number(req.query.offset) || 0,
 			onlyFavorites,
 		});
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res);
-});
-notesEffectRouter.get('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.get('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		return yield* service.getById(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res);
-});
-notesEffectRouter.post('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.post('/', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
-		return yield* service.create(req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 201 });
-});
-notesEffectRouter.put('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		const result = yield* service.create(req.body);
+		res.status(201);
+		return result;
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.put('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		return yield* service.update(req.params.id, req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res);
-});
-notesEffectRouter.delete('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.delete('/:id', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		yield* service.delete(req.params.id);
-		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 204 });
-});
-notesEffectRouter.post('/:id/favorite', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		res.status(204);
+		return undefined;
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.post('/:id/favorite', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		return yield* service.toggleFavorite(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res);
-});
-notesEffectRouter.get('/:id/images', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.get('/:id/images', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		return yield* service.getImages(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res);
-});
-notesEffectRouter.post('/:id/images/:imageId', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.post('/:id/images/:imageId', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		yield* service.addImage(req.params.id, req.params.imageId);
+		res.status(201);
 		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 201 });
-});
-notesEffectRouter.delete('/:id/images/:imageId', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.delete('/:id/images/:imageId', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		yield* service.removeImage(req.params.id, req.params.imageId);
-		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 204 });
-});
-notesEffectRouter.post('/:id/videos/:videoId', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		res.status(204);
+		return undefined;
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.post('/:id/videos/:videoId', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		yield* service.addVideo(req.params.id, req.params.videoId);
+		res.status(201);
 		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 201 });
-});
-notesEffectRouter.delete('/:id/videos/:videoId', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(NoteServiceLive))
+));
+notesEffectRouter.delete('/:id/videos/:videoId', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* NoteService;
 		yield* service.removeVideo(req.params.id, req.params.videoId);
-		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 204 });
-});
+		res.status(204);
+		return undefined;
+	}).pipe(Effect.provide(NoteServiceLive))
+));
 
 // Properties
 const propertiesEffectRouter = express.Router();
-propertiesEffectRouter.get('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+propertiesEffectRouter.get('/', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* PropertyService;
 		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
 		return yield* service.getAll({
@@ -240,58 +230,55 @@ propertiesEffectRouter.get('/', async (req, res) => {
 			offset: Number(req.query.offset) || 0,
 			onlyFavorites,
 		});
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res);
-});
-propertiesEffectRouter.get('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(PropertyServiceLive))
+));
+propertiesEffectRouter.get('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* PropertyService;
 		return yield* service.getById(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res);
-});
-propertiesEffectRouter.post('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(PropertyServiceLive))
+));
+propertiesEffectRouter.post('/', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* PropertyService;
-		return yield* service.create(req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res, { successStatus: 201 });
-});
-propertiesEffectRouter.put('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		const result = yield* service.create(req.body);
+		res.status(201);
+		return result;
+	}).pipe(Effect.provide(PropertyServiceLive))
+));
+propertiesEffectRouter.put('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* PropertyService;
 		return yield* service.update(req.params.id, req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res);
-});
-propertiesEffectRouter.delete('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(PropertyServiceLive))
+));
+propertiesEffectRouter.delete('/:id', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* PropertyService;
 		yield* service.delete(req.params.id);
-		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res, { successStatus: 204 });
-});
-propertiesEffectRouter.post('/:id/favorite', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		res.status(204);
+		return undefined;
+	}).pipe(Effect.provide(PropertyServiceLive))
+));
+propertiesEffectRouter.post('/:id/favorite', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* PropertyService;
 		return yield* service.toggleFavorite(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res);
-});
-propertiesEffectRouter.post('/:id/images/:imageId', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(PropertyServiceLive))
+));
+propertiesEffectRouter.post('/:id/images/:imageId', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* PropertyService;
 		yield* service.addImage(req.params.id, req.params.imageId);
+		res.status(201);
 		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res, { successStatus: 201 });
-});
+	}).pipe(Effect.provide(PropertyServiceLive))
+));
 
 // World Items
 const worldItemsEffectRouter = express.Router();
-worldItemsEffectRouter.get('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+worldItemsEffectRouter.get('/', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* WorldItemService;
 		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
 		return yield* service.getAll({
@@ -299,52 +286,49 @@ worldItemsEffectRouter.get('/', async (req, res) => {
 			offset: Number(req.query.offset) || 0,
 			onlyFavorites,
 		});
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res);
-});
-worldItemsEffectRouter.get('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(WorldItemServiceLive))
+));
+worldItemsEffectRouter.get('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* WorldItemService;
 		return yield* service.getById(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res);
-});
-worldItemsEffectRouter.post('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(WorldItemServiceLive))
+));
+worldItemsEffectRouter.post('/', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* WorldItemService;
-		return yield* service.create(req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res, { successStatus: 201 });
-});
-worldItemsEffectRouter.put('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		const result = yield* service.create(req.body);
+		res.status(201);
+		return result;
+	}).pipe(Effect.provide(WorldItemServiceLive))
+));
+worldItemsEffectRouter.put('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* WorldItemService;
 		return yield* service.update(req.params.id, req.body);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res);
-});
-worldItemsEffectRouter.delete('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(WorldItemServiceLive))
+));
+worldItemsEffectRouter.delete('/:id', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* WorldItemService;
 		yield* service.delete(req.params.id);
-		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res, { successStatus: 204 });
-});
-worldItemsEffectRouter.post('/:id/favorite', async (req, res) => {
-	const effect = Effect.gen(function* () {
+		res.status(204);
+		return undefined;
+	}).pipe(Effect.provide(WorldItemServiceLive))
+));
+worldItemsEffectRouter.post('/:id/favorite', effectHandler((req) =>
+	Effect.gen(function* () {
 		const service = yield* WorldItemService;
 		return yield* service.toggleFavorite(req.params.id);
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res);
-});
-worldItemsEffectRouter.post('/:id/images/:imageId', async (req, res) => {
-	const effect = Effect.gen(function* () {
+	}).pipe(Effect.provide(WorldItemServiceLive))
+));
+worldItemsEffectRouter.post('/:id/images/:imageId', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const service = yield* WorldItemService;
 		yield* service.addImage(req.params.id, req.params.imageId);
+		res.status(201);
 		return { success: true };
-	});
-	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res, { successStatus: 201 });
-});
+	}).pipe(Effect.provide(WorldItemServiceLive))
+));
 
 export { groupsEffectRouter, wildcardsEffectRouter, notesEffectRouter, propertiesEffectRouter, worldItemsEffectRouter };

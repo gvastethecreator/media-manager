@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { db } from '../src/lib/database/db';
+import { db } from '@/lib/drizzle';
 
 async function applyMigration() {
 	console.log('🔧 Aplicando migración 0001...\n');

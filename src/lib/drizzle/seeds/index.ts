@@ -1,3 +1,12 @@
+/**
+ * @file Seeds para datos de prueba
+ * @module drizzle/seeds
+ * @deprecated Todos los seeds poblaban `isFavorite` como columna embebida en tablas per-type.
+ * Cuando se migre a la tabla canónica `favorites` (ADR-0002), los seeds deben
+ * usar `favorites.seed.ts` como fuente única y eliminar `isFavorite` de los inserts.
+ * Ver ADR-0002 + 04-favorite-bridge.md.
+ */
+
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
 import { seedAlbums } from './albums.seed';

@@ -8,7 +8,7 @@
 import { Schema } from '@effect/schema';
 import { Effect } from 'effect';
 import express from 'express';
-import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { TagCreate, TagUpdate } from '@/services/tag/tag-schemas';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
@@ -18,8 +18,8 @@ const router = express.Router();
 /**
  * GET /tags - Listar tags con filtros
  */
-router.get('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/', effectHandler((req) =>
+	Effect.gen(function* () {
 		const tagService = yield* TagService;
 
 		const { search, limit = '50', offset = '0', sortBy = 'name', sortOrder = 'asc', onlyFavorites } = req.query;
@@ -45,16 +45,14 @@ router.get('/', async (req, res) => {
 				hasPrev: result.offset > 0,
 			},
 		};
-	}).pipe(Effect.provide(TagServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(TagServiceLive))
+));
 
 /**
  * POST /tags - Crear nuevo tag
  */
-router.post('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const tagService = yield* TagService;
 
 		// Validar input
@@ -64,17 +62,16 @@ router.post('/', async (req, res) => {
 		});
 
 		const tag = yield* tagService.create(input);
+		res.status(201);
 		return tag;
-	}).pipe(Effect.provide(TagServiceLive));
-
-	await runEffectForExpress(effect, res, { successStatus: 201 });
-});
+	}).pipe(Effect.provide(TagServiceLive))
+));
 
 /**
  * PUT /tags/:id - Actualizar tag
  */
-router.put('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.put('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const tagService = yield* TagService;
 
 		// Validar input y agregar ID desde params
@@ -89,76 +86,65 @@ router.put('/:id', async (req, res) => {
 
 		const tag = yield* tagService.update(input);
 		return tag;
-	}).pipe(Effect.provide(TagServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(TagServiceLive))
+));
 
 /**
  * DELETE /tags/:id - Eliminar tag
  */
-router.delete('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.delete('/:id', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const tagService = yield* TagService;
 		yield* tagService.delete(req.params.id);
-		return { success: true };
-	}).pipe(Effect.provide(TagServiceLive));
-
-	await runEffectForExpress(effect, res, { successStatus: 204 });
-});
+		res.status(204);
+		return undefined;
+	}).pipe(Effect.provide(TagServiceLive))
+));
 
 /**
  * POST /tags/:id/favorite - Toggle favorite status
  */
-router.post('/:id/favorite', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/:id/favorite', effectHandler((req) =>
+	Effect.gen(function* () {
 		const tagService = yield* TagService;
 		const tag = yield* tagService.toggleFavorite(req.params.id);
 		return tag;
-	}).pipe(Effect.provide(TagServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(TagServiceLive))
+));
 
 /**
  * GET /tags/:id/images - Obtener imágenes asociadas a un tag
  */
-router.get('/:id/images', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/:id/images', effectHandler((req) =>
+	Effect.gen(function* () {
 		const tagService = yield* TagService;
 		const images = yield* tagService.getImages(req.params.id);
 		return images;
-	}).pipe(Effect.provide(TagServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(TagServiceLive))
+));
 
 /**
  * GET /tags/:id/thumbnails - Obtener thumbnails de imágenes asociadas a un tag
  */
-router.get('/:id/thumbnails', async (req, res) => {
-	const limit = Number(req.query.limit) || 6;
-	const effect = Effect.gen(function* () {
+router.get('/:id/thumbnails', effectHandler((req) =>
+	Effect.gen(function* () {
+		const limit = Number(req.query.limit) || 6;
 		const tagService = yield* TagService;
 		const thumbnails = yield* tagService.getThumbnails(req.params.id, limit);
 		return thumbnails;
-	}).pipe(Effect.provide(TagServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(TagServiceLive))
+));
 
 /**
  * GET /tags/:id - Obtener tag por ID
  * IMPORTANTE: Esta ruta debe ir AL FINAL para no interceptar rutas específicas como /:id/favorite
  */
-router.get('/:id', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/:id', effectHandler((req) =>
+	Effect.gen(function* () {
 		const tagService = yield* TagService;
 		const tag = yield* tagService.getByIdWithStats(req.params.id);
 		return tag;
-	}).pipe(Effect.provide(TagServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(TagServiceLive))
+));
 
 export default router;

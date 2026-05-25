@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useProfileContext } from '@/lib/contexts';
+import { useProfileContext } from '@/lib/contexts/settings-context';
 import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { cn } from '@/lib/utils';
 import type { UpdateProfileInput as ProfileUpdate } from '@/services/profile/client';

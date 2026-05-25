@@ -19,7 +19,6 @@ export async function seedAudios(db: LibSQLDatabase<Record<string, never>>) {
 				mimeType: 'audio/wav',
 				extension: 'wav',
 				folderId: 'test-files',
-				isFavorite: false,
 				isArchived: false,
 			},
 			{
@@ -31,7 +30,6 @@ export async function seedAudios(db: LibSQLDatabase<Record<string, never>>) {
 				mimeType: 'audio/mpeg',
 				extension: 'mp3',
 				folderId: 'test-files',
-				isFavorite: false,
 				isArchived: false,
 			},
 		];

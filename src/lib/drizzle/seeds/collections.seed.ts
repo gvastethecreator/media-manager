@@ -23,7 +23,6 @@ export async function seedCollections(db: LibSQLDatabase<Record<string, never>>)
 				emoji: '📚',
 				color: '#3b82f6',
 				featuredImage: null,
-				isFavorite: true,
 				parentId: null,
 			},
 			{
@@ -33,7 +32,6 @@ export async function seedCollections(db: LibSQLDatabase<Record<string, never>>)
 				emoji: '🗃️',
 				color: '#64748b',
 				featuredImage: null,
-				isFavorite: false,
 				parentId: null,
 			},
 			{
@@ -43,7 +41,6 @@ export async function seedCollections(db: LibSQLDatabase<Record<string, never>>)
 				emoji: '🎨',
 				color: '#f59e0b',
 				featuredImage: null,
-				isFavorite: true,
 				parentId: null,
 			},
 			{
@@ -53,7 +50,6 @@ export async function seedCollections(db: LibSQLDatabase<Record<string, never>>)
 				emoji: '🚀',
 				color: '#22c55e',
 				featuredImage: null,
-				isFavorite: false,
 				parentId: null,
 			},
 		];

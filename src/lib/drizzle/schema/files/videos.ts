@@ -3,6 +3,10 @@
  * VIDEOS ENTITY - DRIZZLE ORM
  * =================================================================================
  * Definición de la tabla videos para archivos de video
+ *
+ * @deprecated Esta tabla duplica 10+ columnas comunes (id, name, path, hash, size,
+ * folderId, createdAt, updatedAt, isFavorite, metadata, etc.). Converger a una tabla
+ * raíz `Asset` según ADR-0004 y 03-media-core-context.md.
  * =================================================================================
  */
 
@@ -28,6 +32,7 @@ export const videos = sqliteTable(
 		thumbnailWidth: integer('thumbnailWidth'),
 		thumbnailHeight: integer('thumbnailHeight'),
 
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isHidden: integer('isHidden', { mode: 'boolean' }).notNull().default(false),
 		folderId: text('folderId').notNull(),

@@ -7,7 +7,7 @@
 
 import { Context, Data, Effect, Layer } from 'effect';
 import express from 'express';
-import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	performSearch,
@@ -145,71 +145,64 @@ const logger = serverLogger.withContext('SearchRoute');
 /**
  * GET /search - Búsqueda global (UNIFICADA)
  */
-router.get('/', async (req, res) => {
-	const { q, query, limit = '50', offset = '0', type = 'all' } = req.query;
-	const searchQuery = (q || query) as string;
+router.get('/', effectHandler((req) =>
+	Effect.gen(function* () {
+		const { q, query, limit = '50', offset = '0', type = 'all' } = req.query;
+		const searchQuery = (q || query) as string;
 
-	if (!searchQuery || typeof searchQuery !== 'string') {
-		res.json({ query: '', type: 'all', total: 0, results: [], took: 0, engine: 'like' });
-		return;
-	}
+		if (!searchQuery || typeof searchQuery !== 'string') {
+			return { query: '', type: 'all', total: 0, results: [], took: 0, engine: 'like' };
+		}
 
-	const parsedLimit = Math.min(100, sanitizeLimit(limit));
-	const parsedOffset = Math.max(0, sanitizeOffset(offset));
-	const validTypes = ['all', 'image', 'video', 'audio', 'document'];
-	const searchType = validTypes.includes(type as string)
-		? (type as 'all' | 'image' | 'video' | 'audio' | 'document')
-		: 'all';
+		const parsedLimit = Math.min(100, sanitizeLimit(limit));
+		const parsedOffset = Math.max(0, sanitizeOffset(offset));
+		const validTypes = ['all', 'image', 'video', 'audio', 'document'];
+		const searchType = validTypes.includes(type as string)
+			? (type as 'all' | 'image' | 'video' | 'audio' | 'document')
+			: 'all';
 
-	const effect = Effect.gen(function* () {
 		const searchService = yield* SearchService;
 		return yield* searchService.performSearch(searchQuery, searchType, parsedLimit, parsedOffset);
-	}).pipe(Effect.provide(SearchServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(SearchServiceLive))
+));
 
 /**
  * GET /search/images - Búsqueda específica de imágenes
  */
-router.get('/images', async (req, res) => {
-	const { query, limit = '100' } = req.query;
+router.get('/images', effectHandler((req, res) =>
+	Effect.gen(function* () {
+		const { query, limit = '100' } = req.query;
 
-	if (!query || typeof query !== 'string') {
-		res.status(400).json({ error: 'El parámetro query es requerido' });
-		return;
-	}
+		if (!query || typeof query !== 'string') {
+			res.status(400).json({ error: 'El parámetro query es requerido' });
+			return undefined;
+		}
 
-	const effect = Effect.gen(function* () {
 		const searchService = yield* SearchService;
 		return yield* searchService.searchImages(query, sanitizeLimit(limit, 100, 500));
-	}).pipe(Effect.provide(SearchServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(SearchServiceLive))
+));
 
 /**
  * GET /search/fts - Búsqueda FTS5 sobre File
  */
-router.get('/fts', async (req, res) => {
-	const q = typeof req.query.q === 'string' ? req.query.q : undefined;
-	const limit = sanitizeLimit(req.query.limit, 50);
-	const offset = sanitizeOffset(req.query.offset);
+router.get('/fts', effectHandler((req, res) =>
+	Effect.gen(function* () {
+		const q = typeof req.query.q === 'string' ? req.query.q : undefined;
+		const limit = sanitizeLimit(req.query.limit, 50);
+		const offset = sanitizeOffset(req.query.offset);
 
-	if (!q || q.trim().length === 0) {
-		res.status(400).json({ error: 'El parámetro q es requerido' });
-		return;
-	}
+		if (!q || q.trim().length === 0) {
+			res.status(400).json({ error: 'El parámetro q es requerido' });
+			return undefined;
+		}
 
-	const ftsRequired = process.env.SEARCH_FTS_REQUIRE === '1';
+		const ftsRequired = process.env.SEARCH_FTS_REQUIRE === '1';
 
-	const effect = Effect.gen(function* () {
 		const searchService = yield* SearchService;
 		return yield* searchService.searchFilesFts(q, limit, offset, ftsRequired);
-	}).pipe(Effect.provide(SearchServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+	}).pipe(Effect.provide(SearchServiceLive))
+));
 
 export default router;
 export { router as searchEffectRouter };
