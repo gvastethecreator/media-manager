@@ -64,11 +64,3 @@ export const groupImages = createRelationTable('_GroupToImage', 'groupId', 'imag
 export const groupVideos = createRelationTable('_GroupToVideo', 'groupId', 'videoId');
 export const groupAlbums = createRelationTable('_GroupToAlbum', 'groupId', 'albumId');
 export const groupTags = createRelationTable('_GroupToTag', 'groupId', 'tagId');
-
-// =================================================================================
-// TASK RELATIONS
-// =================================================================================
-export const imageTasks = createRelationTable('_ImageToTask', 'imageId', 'taskId');
-export const videoTasks = createRelationTable('_VideoToTask', 'videoId', 'taskId');
-export const albumTasks = createRelationTable('_AlbumToTask', 'albumId', 'taskId');
-export const characterTasks = createRelationTable('_CharacterToTask', 'characterId', 'taskId');

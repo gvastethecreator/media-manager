@@ -1,4 +1,10 @@
 /**
+ * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
+ * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
+ * Ver #1 deepening opportunity en architecture review.
+ */
+
+/**
  * @file Cliente de API para el servicio de imágenes
  * @module lib/api/client/image.client
  * @description Funciones para interactuar con los endpoints de la API de imágenes desde el cliente.

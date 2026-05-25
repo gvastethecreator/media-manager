@@ -29,7 +29,6 @@ import {
 	properties,
 	profiles,
 	prompts,
-	tasks,
 	tags,
 	videos,
 	wildcards,
@@ -47,11 +46,8 @@ import {
 
 const favoriteLogger = serverLogger.withContext('FavoriteService');
 const canonicalFavoriteEntityTypes: FavoriteEntityType[] = [...CANONICAL_FAVORITE_ENTITY_TYPES];
-const localFavoriteOnlyEntityTypes = new Set<FavoriteEntityType>([
-	FavoriteEntityType.TAG,
-	FavoriteEntityType.PROPERTY,
-	FavoriteEntityType.TASK,
-]);
+
+type FavoriteProjectionCapableEntity = { id: string; isFavorite?: boolean | null };
 
 // Tipo para el resultado de la consulta de favoritos
 interface FavoriteRecord {
@@ -82,7 +78,6 @@ const entityTableMap: Record<FavoriteEntityType, any> = {
 	[FavoriteEntityType.PROPERTY]: properties,
 	[FavoriteEntityType.PROMPT]: prompts,
 	[FavoriteEntityType.NOTE]: notes,
-	[FavoriteEntityType.TASK]: tasks,
 	[FavoriteEntityType.WILDCARD]: wildcards,
 };
 
@@ -115,6 +110,34 @@ export interface FavoriteResult {
 	total: number;
 }
 
+function createFavoriteIdSet(favoriteEntityIds: readonly string[] | ReadonlySet<string>): ReadonlySet<string> {
+	return favoriteEntityIds instanceof Set ? favoriteEntityIds : new Set(favoriteEntityIds);
+}
+
+function applyFavoriteProjection<TEntity extends FavoriteProjectionCapableEntity>(
+	entity: TEntity,
+	favoriteEntityIds: readonly string[] | ReadonlySet<string>
+): TEntity & { isFavorite: boolean } {
+	const favoriteIdSet = createFavoriteIdSet(favoriteEntityIds);
+
+	return {
+		...entity,
+		isFavorite: favoriteIdSet.has(entity.id),
+	};
+}
+
+function applyFavoriteProjectionMany<TEntity extends FavoriteProjectionCapableEntity>(
+	entities: TEntity[],
+	favoriteEntityIds: readonly string[] | ReadonlySet<string>
+): Array<TEntity & { isFavorite: boolean }> {
+	const favoriteIdSet = createFavoriteIdSet(favoriteEntityIds);
+
+	return entities.map((entity) => ({
+		...entity,
+		isFavorite: favoriteIdSet.has(entity.id),
+	}));
+}
+
 function readPragmaColumnName(row: unknown): string {
 	if (!row || typeof row !== 'object') {
 		return '';
@@ -137,6 +160,12 @@ async function requireActiveProfileId(): Promise<string> {
 	}
 
 	return profileId;
+}
+
+function ensureCanonicalFavoriteEntityType(entityType: FavoriteEntityType): void {
+	if (!isCanonicalFavoriteEntityType(entityType)) {
+		throw new Error(`El tipo de favorito ${entityType} no pertenece al perímetro canónico`);
+	}
 }
 
 async function ensureFavoriteProfileScopeSchema(): Promise<void> {
@@ -261,51 +290,23 @@ async function ensureFavoriteTargetsExist(entityType: FavoriteEntityType, entity
 }
 
 async function updateEntityIsFavorite(
-	entityType: FavoriteEntityType,
-	entityId: string,
-	isFavorite: boolean
+	_entityType: FavoriteEntityType,
+	_entityId: string,
+	_isFavorite: boolean
 ): Promise<void> {
-	try {
-		if (localFavoriteOnlyEntityTypes.has(entityType)) {
-			return;
-		}
-
-		const table = entityTableMap[entityType];
-		if (!table) return;
-
-		// Deuda transitoria: algunas vistas siguen leyendo el flag embebido.
-		// Tag, Property y Task ya quedaron fuera del bridge canónico y no deben resincronizarse desde aquí.
-		if ('isFavorite' in table) {
-			await db.update(table).set({ isFavorite }).where(eq(table.id, entityId));
-		}
-	} catch (error) {
-		favoriteLogger.debug('No se pudo actualizar isFavorite derivado en la entidad:', error);
-	}
+	// @deprecated isFavorite embebido: la sincronización dual fue desactivada.
+	// La tabla canónica `favorites` es la única fuente de verdad desde batch bridge Favorite.
+	// El flag `isFavorite` en tablas per-type queda como columna legacy (solo lectura).
+	// Si alguna vista necesita el flag, debe proyectarlo desde la tabla favorites.
 }
 
 async function updateEntityIsFavoriteMany(
-	entityType: FavoriteEntityType,
-	entityIds: string[],
-	isFavorite: boolean
+	_entityType: FavoriteEntityType,
+	_entityIds: string[],
+	_isFavorite: boolean
 ): Promise<void> {
-	try {
-		if (localFavoriteOnlyEntityTypes.has(entityType)) {
-			return;
-		}
-
-		const table = entityTableMap[entityType];
-		const uniqueEntityIds = [...new Set(entityIds.filter((entityId) => entityId.trim().length > 0))];
-
-		if (!table || uniqueEntityIds.length === 0) {
-			return;
-		}
-
-		if ('isFavorite' in table) {
-			await db.update(table).set({ isFavorite }).where(inArray(table.id, uniqueEntityIds));
-		}
-	} catch (error) {
-		favoriteLogger.debug('No se pudo actualizar isFavorite derivado en lote:', error);
-	}
+	// @deprecated isFavorite embebido: la sincronización dual fue desactivada.
+	// Ver updateEntityIsFavorite para el rationale completo.
 }
 
 async function getExistingFavoriteRecord(profileId: string, entityType: FavoriteEntityType, entityId: string) {
@@ -373,6 +374,69 @@ export const favoriteService = {
 			.orderBy(desc(favorites.addedAt));
 
 		return result.map((row: { entityId: string }) => row.entityId);
+	},
+
+	/**
+	 * Obtener IDs favoritos para el perímetro canónico usando un set vacío cuando no hay perfil activo.
+	 * Esto permite proyectar `isFavorite` sin volver a caer al flag embebido.
+	 */
+	async getFavoriteEntityIdsOrEmpty(entityType: FavoriteEntityType): Promise<string[]> {
+		ensureCanonicalFavoriteEntityType(entityType);
+
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(entityType);
+		return favoriteEntityIds ?? [];
+	},
+
+	/**
+	 * Obtener IDs favoritos del perfil activo para un tipo canónico.
+	 * Falla si no existe perfil activo.
+	 */
+	async getFavoriteEntityIdsOrThrow(entityType: FavoriteEntityType): Promise<string[]> {
+		ensureCanonicalFavoriteEntityType(entityType);
+		await ensureFavoriteProfileScopeSchema();
+		const profileId = await requireActiveProfileId();
+
+		const result = await db
+			.select({ entityId: favorites.entityId })
+			.from(favorites)
+			.where(and(eq(favorites.profileId, profileId), eq(favorites.entityType, entityType)))
+			.orderBy(desc(favorites.addedAt));
+
+		return result.map((row: { entityId: string }) => row.entityId);
+	},
+
+	applyFavoriteProjection<TEntity extends FavoriteProjectionCapableEntity>(
+		entity: TEntity,
+		favoriteEntityIds: readonly string[] | ReadonlySet<string>
+	): TEntity & { isFavorite: boolean } {
+		return applyFavoriteProjection(entity, favoriteEntityIds);
+	},
+
+	applyFavoriteProjectionMany<TEntity extends FavoriteProjectionCapableEntity>(
+		entities: TEntity[],
+		favoriteEntityIds: readonly string[] | ReadonlySet<string>
+	): Array<TEntity & { isFavorite: boolean }> {
+		return applyFavoriteProjectionMany(entities, favoriteEntityIds);
+	},
+
+	async projectEntity<TEntity extends FavoriteProjectionCapableEntity>(
+		entityType: FavoriteEntityType,
+		entity: TEntity
+	): Promise<TEntity & { isFavorite: boolean }> {
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIdsOrEmpty(entityType);
+		return applyFavoriteProjection(entity, favoriteEntityIds);
+	},
+
+	async projectEntities<TEntity extends FavoriteProjectionCapableEntity>(
+		entityType: FavoriteEntityType,
+		entities: TEntity[]
+	): Promise<Array<TEntity & { isFavorite: boolean }>> {
+		if (entities.length === 0) {
+			return [];
+		}
+
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIdsOrEmpty(entityType);
+		return applyFavoriteProjectionMany(entities, favoriteEntityIds);
 	},
 
 	/**

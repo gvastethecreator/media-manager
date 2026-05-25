@@ -45,7 +45,6 @@ import settingsEffectRouter from './routes/settings.effect';
 import statsRouter from './routes/stats';
 import systemRouter from './routes/system';
 import tagsEffectRouter from './routes/tags.effect';
-import tasksEffectRouter from './routes/tasks.effect';
 import testCharactersRouter from './routes/test/characters';
 import { thumbnailsEffectRouter } from './routes/thumbnails.effect';
 import { thumbnailsUnifiedRouter } from './routes/thumbnails-unified';
@@ -143,7 +142,6 @@ app.use('/search', (req, res) => {
 });
 app.use('/api/metadata', metadataEffectRouter);
 app.use('/api/thumbnails', thumbnailsEffectRouter);
-app.use('/api/tasks', tasksEffectRouter);
 app.use('/api/favorites', favoritesEffectRouter);
 app.use('/api/documents', documentsEffectRouter);
 app.use('/api/settings', settingsEffectRouter);

@@ -221,7 +221,6 @@ const make = (): AudioServiceInterface => {
 						.values({
 							id: audioId,
 							...input,
-							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 							createdAt: now,
 							updatedAt: now,
 						})
@@ -562,9 +561,6 @@ const make = (): AudioServiceInterface => {
 						.update(audios)
 						.set({
 							...restInput,
-							...(requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge
-								? { isFavorite: requestedIsFavorite }
-								: {}),
 							updatedAt: new Date(),
 						})
 						.where(eq(audios.id, id))
@@ -804,17 +800,12 @@ const make = (): AudioServiceInterface => {
 				favoriteEntityIds === null ? audio.isFavorite : favoriteEntityIds.includes(id);
 			const newFavoriteStatus = !currentFavoriteStatus;
 
-			if (favoriteEntityIds === null) {
-				const updated = yield* update(id, { isFavorite: newFavoriteStatus });
-
-				audioServiceLogger.info(`Favorite toggled: ${id}, nuevo estado: ${updated.isFavorite}`);
-				return updated;
+			if (favoriteEntityIds !== null) {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.AUDIO, id, newFavoriteStatus),
+					catch: (error) => toAudioError(error, 'toggleFavorite.favoriteBridge'),
+				});
 			}
-
-			yield* Effect.tryPromise({
-				try: () => favoriteService.set(FavoriteEntityType.AUDIO, id, newFavoriteStatus),
-				catch: (error) => toAudioError(error, 'toggleFavorite.favoriteBridge'),
-			});
 
 			const updated = yield* getById(id);
 
@@ -840,17 +831,7 @@ const make = (): AudioServiceInterface => {
 
 			const updatedCount =
 				favoriteEntityIds === null
-					? yield* Effect.tryPromise({
-						try: async () => {
-							const result = await db
-								.update(audios)
-								.set({ isFavorite, updatedAt: new Date() })
-								.where(inArray(audios.id, ids));
-							// libsql usa rowsAffected, better-sqlite3 usa changes
-							return (result as any).rowsAffected ?? (result as any).changes ?? 0;
-						},
-						catch: (error) => toAudioError(error, 'setFavoriteMany'),
-					})
+					? ids.length
 					: yield* Effect.tryPromise({
 						try: () => favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite),
 						catch: (error) => toAudioError(error, 'setFavoriteMany.favoriteBridge'),

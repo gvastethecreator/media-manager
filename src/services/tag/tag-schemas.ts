@@ -39,7 +39,6 @@ export class TagCreate extends Schema.Class<TagCreate>('TagCreate')({
 	category: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(50)))),
 	shortcut: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(20)))),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -55,7 +54,6 @@ export class TagUpdate extends Schema.Class<TagUpdate>('TagUpdate')({
 	category: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(50)))),
 	shortcut: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(20)))),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**

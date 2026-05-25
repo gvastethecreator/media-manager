@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
+import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
 import { favorites, profiles, tags } from '@/lib/drizzle/schema';
 import { generateReadableId } from '@/lib/utils/id-generator';
@@ -78,7 +79,7 @@ afterEach(async () => {
 });
 
 describe('TagService favorites convergence', () => {
-	it('create persists favorite state through the local favorite flag', async () => {
+	it('create ignora isFavorite authored y exige la acción dedicada', async () => {
 		await ensureActiveProfile();
 
 		const created = await expectSuccess(
@@ -87,21 +88,21 @@ describe('TagService favorites convergence', () => {
 				return yield* tagService.create({
 					name: `create-canonical-favorite-${Date.now()}`,
 					isFavorite: true,
-				});
+				} as any);
 			})
 		);
 
-		expect(created.isFavorite).toBe(true);
+		expect(created.isFavorite).toBe(false);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.TAG, created.id)).toBe(false);
 	});
 
-	it('uses the embedded favorite flag for onlyFavorites and ignores stale canonical rows', async () => {
+	it('uses canonical favorites for onlyFavorites and ignores stale embedded flags', async () => {
 		await ensureActiveProfile();
-		const localFavorite = await createTestTag('local-favorite', { isFavorite: true });
-		const staleCanonical = await createTestTag('stale-canonical', { isFavorite: false });
+		const canonicalFavorite = await createTestTag('canonical-favorite', { isFavorite: false });
+		const staleEmbedded = await createTestTag('stale-embedded', { isFavorite: true });
 		await createTestTag('regular-tag', { isFavorite: false });
 
-		await favoriteService.set(FavoriteEntityType.TAG, staleCanonical.id, true);
+		await favoriteService.set(FavoriteEntityType.TAG, canonicalFavorite.id, true);
 
 		const result = await expectSuccess(
 			Effect.gen(function* () {
@@ -112,27 +113,12 @@ describe('TagService favorites convergence', () => {
 
 		expect(result.total).toBe(1);
 		expect(result.tags).toHaveLength(1);
-		expect(result.tags[0]?.id).toBe(localFavorite.id);
+		expect(result.tags[0]?.id).toBe(canonicalFavorite.id);
 		expect(result.tags[0]?.isFavorite).toBe(true);
+		expect(result.tags[0]?.id).not.toBe(staleEmbedded.id);
 	});
 
-	it('update persists favorite state through the local favorite flag', async () => {
-		await ensureActiveProfile();
-		const tag = await createTestTag('update-target', { isFavorite: false });
-
-		const updated = await expectSuccess(
-			Effect.gen(function* () {
-				const tagService = yield* TagService;
-				return yield* tagService.update({ id: tag.id, isFavorite: true });
-			})
-		);
-
-		expect(updated.id).toBe(tag.id);
-		expect(updated.isFavorite).toBe(true);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.TAG, tag.id)).toBe(false);
-	});
-
-	it('toggleFavorite alternates the local favorite flag', async () => {
+	it('toggleFavorite delega al bridge canónico', async () => {
 		await ensureActiveProfile();
 		const tag = await createTestTag('toggle-target', { isFavorite: false });
 
@@ -145,6 +131,31 @@ describe('TagService favorites convergence', () => {
 
 		expect(toggled.id).toBe(tag.id);
 		expect(toggled.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.TAG, tag.id)).toBe(true);
+	});
+
+	it('toggleFavorite puede desmarcar el favorito canónico en roundtrip', async () => {
+		await ensureActiveProfile();
+		const tag = await createTestTag('toggle-roundtrip-target', { isFavorite: false });
+
+		const favorited = await expectSuccess(
+			Effect.gen(function* () {
+				const tagService = yield* TagService;
+				return yield* tagService.toggleFavorite(tag.id);
+			})
+		);
+
+		expect(favorited.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.TAG, tag.id)).toBe(true);
+
+		const unfavorited = await expectSuccess(
+			Effect.gen(function* () {
+				const tagService = yield* TagService;
+				return yield* tagService.toggleFavorite(tag.id);
+			})
+		);
+
+		expect(unfavorited.isFavorite).toBe(false);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.TAG, tag.id)).toBe(false);
 	});
 });

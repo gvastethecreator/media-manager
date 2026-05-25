@@ -352,7 +352,6 @@ const make = (): CharacterServiceInterface => {
 							category: input.category ?? null,
 							featuredImage: input.featuredImage ?? null,
 							filters: input.filters ?? null,
-							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 							metadata: input.metadata ?? null,
 							parentId: (input as any).parentId ?? null,
 							createdAt: new Date(),
@@ -461,9 +460,6 @@ const make = (): CharacterServiceInterface => {
 							...(input.category !== undefined && { category: input.category }),
 							...(input.featuredImage !== undefined && { featuredImage: input.featuredImage }),
 							...(input.filters !== undefined && { filters: input.filters }),
-							...(input.isFavorite !== undefined && !useCanonicalFavoriteBridge
-								? { isFavorite: input.isFavorite }
-								: {}),
 							...(input.metadata !== undefined && { metadata: input.metadata }),
 							...((input as any).parentId !== undefined && { parentId: (input as any).parentId }),
 							updatedAt: new Date(),
@@ -546,22 +542,17 @@ const make = (): CharacterServiceInterface => {
 			const newFavoriteStatus = !currentFavoriteStatus;
 
 			let result;
-			if (favoriteEntityIds === null) {
-				result = yield* Effect.tryPromise({
-					try: async () =>
-						await db
-							.update(characters)
-							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
-							.where(eq(characters.id, id))
-							.returning(),
-					catch: (error) => fromUnknownError('toggleFavorite', error),
-				});
-			} else {
+			if (favoriteEntityIds !== null) {
 				yield* Effect.tryPromise({
 					try: () => favoriteService.set(FavoriteEntityType.CHARACTER, id, newFavoriteStatus),
 					catch: (error) => fromUnknownError('toggleFavorite.favoriteBridge', error),
 				});
 
+				result = yield* Effect.tryPromise({
+					try: async () => await db.select().from(characters).where(eq(characters.id, id)).limit(1),
+					catch: (error) => fromUnknownError('toggleFavorite.refetch', error),
+				});
+			} else {
 				result = yield* Effect.tryPromise({
 					try: async () => await db.select().from(characters).where(eq(characters.id, id)).limit(1),
 					catch: (error) => fromUnknownError('toggleFavorite.refetch', error),

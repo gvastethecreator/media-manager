@@ -1,7 +1,11 @@
 /**
+ * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
+ * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
+ * Ver #1 deepening opportunity en architecture review.
+ */
+
+/**
  * Cliente de API para imágenes subidas.
- * Reemplaza el uso directo de servicios en componentes del cliente.
- * ✅ Migración a cliente API - julio 2025
  */
 import type { UploadedImageFilters, UploadedImageResult } from '@/types/uploaded-images';
 

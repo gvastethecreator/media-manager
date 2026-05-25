@@ -138,7 +138,7 @@ describe('DocumentService - CRUD Operations', () => {
 			expect(result.mimeType).toBe(input.mimeType);
 			expect(result.extension).toBe(input.extension);
 			expect(result.folderId).toBe(input.folderId);
-			expect(result.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, result.id)).toBe(false);
 		});
 
 		it('should create document with optional metadata', async () => {
@@ -341,7 +341,7 @@ describe('DocumentService - CRUD Operations', () => {
 
 			expect(result.name).toBe(update.name);
 			expect(result.title).toBe(update.title);
-			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, result.id)).toBe(true);
 		});
 
 		it('should update document metadata', async () => {
@@ -452,7 +452,10 @@ describe('DocumentService - Query Operations', () => {
 
 			expect(result.data.length).toBe(1);
 			expect(result.data[0].id).toBe(favoriteDoc.id);
-			expect(result.data.every((doc: any) => doc.isFavorite === true)).toBe(true);
+			const favResults = await Promise.all(
+				result.data.map((doc: any) => favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, doc.id))
+			);
+			expect(favResults.every(Boolean)).toBe(true);
 		});
 
 		it('should search by name', async () => {

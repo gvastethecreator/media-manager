@@ -27,13 +27,12 @@ export enum FavoriteEntityType {
 	PROPERTY = 'property',
 	PROMPT = 'prompt',
 	NOTE = 'note',
-	TASK = 'task',
 	WILDCARD = 'wildcard',
 }
 
 /**
  * Tipos permitidos por la API canónica de Favorite.
- * `tag`, `property` y `task` permanecen fuera del perímetro inicial documentado.
+ * `task` permanece fuera del perímetro inicial documentado.
  */
 export const CANONICAL_FAVORITE_ENTITY_TYPES = [
 	FavoriteEntityType.IMAGE,
@@ -46,10 +45,12 @@ export const CANONICAL_FAVORITE_ENTITY_TYPES = [
 	FavoriteEntityType.COLLECTION,
 	FavoriteEntityType.FOLDER,
 	FavoriteEntityType.GROUP,
+	FavoriteEntityType.TAG,
 	FavoriteEntityType.CHARACTER,
 	FavoriteEntityType.PLACE,
 	FavoriteEntityType.WORLD_ITEM,
 	FavoriteEntityType.CONCEPT,
+	FavoriteEntityType.PROPERTY,
 	FavoriteEntityType.PROMPT,
 	FavoriteEntityType.NOTE,
 	FavoriteEntityType.WILDCARD,
@@ -123,7 +124,6 @@ export const FAVORITE_ENTITY_EMOJIS: Record<FavoriteEntityType, string> = {
 	[FavoriteEntityType.PROPERTY]: '🔍',
 	[FavoriteEntityType.PROMPT]: '🤖',
 	[FavoriteEntityType.NOTE]: '📝',
-	[FavoriteEntityType.TASK]: '📋',
 	[FavoriteEntityType.WILDCARD]: '🃏',
 };
 
@@ -149,7 +149,6 @@ export const FAVORITE_ENTITY_COLORS: Record<FavoriteEntityType, string> = {
 	[FavoriteEntityType.PROPERTY]: 'var(--entity-property)',
 	[FavoriteEntityType.PROMPT]: 'var(--entity-prompt)',
 	[FavoriteEntityType.NOTE]: 'var(--entity-note)',
-	[FavoriteEntityType.TASK]: 'var(--primary)',
 	[FavoriteEntityType.WILDCARD]: 'var(--entity-wildcard)',
 };
 
@@ -175,7 +174,6 @@ export const FAVORITE_ENTITY_DISPLAY_NAMES: Record<FavoriteEntityType, string> =
 	[FavoriteEntityType.PROPERTY]: 'Propiedad',
 	[FavoriteEntityType.PROMPT]: 'Prompt',
 	[FavoriteEntityType.NOTE]: 'Nota',
-	[FavoriteEntityType.TASK]: 'Tarea',
 	[FavoriteEntityType.WILDCARD]: 'Wildcard',
 };
 

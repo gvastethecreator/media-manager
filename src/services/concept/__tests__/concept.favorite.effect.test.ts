@@ -71,7 +71,6 @@ describe('ConceptService favorites convergence', () => {
 
 		const created = await createConcept('create-canonical-favorite', { isFavorite: true });
 
-		expect(created.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, created.id)).toBe(true);
 	});
 
@@ -94,7 +93,7 @@ describe('ConceptService favorites convergence', () => {
 		expect(result.total).toBe(1);
 		expect(result.concepts).toHaveLength(1);
 		expect(result.concepts[0]?.id).toBe(canonicalFavorite.id);
-		expect(result.concepts[0]?.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, result.concepts[0]!.id)).toBe(true);
 	});
 
 	it('update persists favorite state through the canonical favorite bridge', async () => {
@@ -109,7 +108,6 @@ describe('ConceptService favorites convergence', () => {
 		);
 
 		expect(updated.id).toBe(concept.id);
-		expect(updated.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(true);
 	});
 
@@ -125,7 +123,6 @@ describe('ConceptService favorites convergence', () => {
 		);
 
 		expect(toggled.id).toBe(concept.id);
-		expect(toggled.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(true);
 	});
 
@@ -140,7 +137,6 @@ describe('ConceptService favorites convergence', () => {
 			})
 		);
 
-		expect(favorited.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(true);
 
 		const unfavorited = await expectSuccess(
@@ -150,7 +146,6 @@ describe('ConceptService favorites convergence', () => {
 			})
 		);
 
-		expect(unfavorited.isFavorite).toBe(false);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(false);
 	});
 });

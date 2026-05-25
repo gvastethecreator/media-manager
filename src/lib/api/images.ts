@@ -1,12 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { ImageWithStats } from '@/types/entities/image/base';
 import type { ImageCreateInput, ImageUpdateInput } from '@/types/entities/image/types';
-import { apiClient } from './client';
+import { createEntityHooks } from './hook-factory';
+import type { EntityListResult } from './hook-factory';
 import { favoriteKeys } from './favorites';
+import { apiClient } from './client';
 
-// Tipos para filtros de imágenes
 export interface ImageFilters {
+	[key: string]: unknown;
 	albums?: string[];
 	characters?: string[];
 	folderId?: string;
@@ -25,92 +27,22 @@ export interface ImageFilters {
 	tags?: string[];
 }
 
-export interface ImagesResponse {
-	data: ImageWithStats[];
-	pagination: {
-		total: number;
-		limit: number;
-		offset: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	};
-}
+const hooks = createEntityHooks<ImageWithStats, ImageCreateInput, ImageUpdateInput, ImageFilters>({
+	entityName: 'images',
+	baseEndpoint: '/images',
+	listStaleTime: 30_000,
+	detailStaleTime: 60_000,
+	arrayFilterKeys: ['albums', 'characters', 'tags'],
+});
 
-// Query keys
-export const imageKeys = {
-	all: ['images'] as const,
-	lists: () => [...imageKeys.all, 'list'] as const,
-	list: (filters: ImageFilters) => [...imageKeys.lists(), filters] as const,
-	details: () => [...imageKeys.all, 'detail'] as const,
-	detail: (id: string) => [...imageKeys.details(), id] as const,
-};
+export const imageKeys = hooks.keys;
+export const useImages = hooks.useList;
+export const useImage = hooks.useDetail;
+export const useCreateImage = hooks.useCreate;
+export const useUpdateImage = hooks.useUpdate;
+export const useDeleteImage = hooks.useDelete;
 
-// Hooks
-export function useImages(filters: ImageFilters = {}) {
-	return useQuery<ImagesResponse, Error>({
-		queryKey: imageKeys.list(filters),
-		queryFn: () => {
-			const params = new URLSearchParams();
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					if (Array.isArray(value)) {
-						for (const v of value) {
-							params.append(key, String(v));
-						}
-					} else {
-						params.append(key, String(value));
-					}
-				}
-			}
-			return apiClient.get<ImagesResponse>(`/images?${params.toString()}`);
-		},
-		staleTime: 1000 * 30, // 30 segundos
-	});
-}
-
-export function useImage(id: string) {
-	return useQuery<ImageWithStats, Error>({
-		queryKey: imageKeys.detail(id),
-		queryFn: () => apiClient.get<ImageWithStats>(`/images/${id}`),
-		enabled: !!id,
-		staleTime: 1000 * 60, // 1 minuto
-	});
-}
-
-export function useCreateImage() {
-	const queryClient = useQueryClient();
-
-	return useMutation<ImageWithStats, Error, ImageCreateInput>({
-		mutationFn: (data) => apiClient.post<ImageWithStats>('/images', data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
-		},
-	});
-}
-
-export function useUpdateImage() {
-	const queryClient = useQueryClient();
-
-	return useMutation<ImageWithStats, Error, { id: string; data: ImageUpdateInput }>({
-		mutationFn: ({ id, data }) => apiClient.put<ImageWithStats>(`/images/${id}`, data),
-		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
-			queryClient.setQueryData(imageKeys.detail(data.id), data);
-		},
-	});
-}
-
-export function useDeleteImage() {
-	const queryClient = useQueryClient();
-
-	return useMutation<void, Error, string>({
-		mutationFn: (id) => apiClient.delete(`/images/${id}`),
-		onSuccess: (_, id) => {
-			queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
-			queryClient.removeQueries({ queryKey: imageKeys.detail(id) });
-		},
-	});
-}
+export type ImagesResponse = EntityListResult<ImageWithStats>;
 
 export function useToggleFavorite() {
 	const queryClient = useQueryClient();
