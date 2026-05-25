@@ -96,6 +96,7 @@ export interface CharacterCoreSlice {
 
 	// 🔄 Operaciones de sincronización
 	syncCharacters: (characters: CharacterWithStats[]) => void;
+	toggleFavorite: (id: string) => Promise<void>;
 	updateCharacter: (id: string, updates: Partial<CharacterWithStats>) => void;
 }
 
