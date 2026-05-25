@@ -542,6 +542,8 @@ const make = (): CharacterServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.CHARACTER),
 				catch: (error) => fromUnknownError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? character.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			let result;
 			if (favoriteEntityIds === null) {
@@ -549,14 +551,14 @@ const make = (): CharacterServiceInterface => {
 					try: async () =>
 						await db
 							.update(characters)
-							.set({ isFavorite: !character.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(characters.id, id))
 							.returning(),
 					catch: (error) => fromUnknownError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.CHARACTER, id),
+					try: () => favoriteService.set(FavoriteEntityType.CHARACTER, id, newFavoriteStatus),
 					catch: (error) => fromUnknownError('toggleFavorite.favoriteBridge', error),
 				});
 

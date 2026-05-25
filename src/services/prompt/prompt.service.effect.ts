@@ -305,6 +305,8 @@ const make = (): PromptServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.PROMPT),
 				catch: (error) => fromUnknownPromptError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? prompt.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			let result;
 			if (favoriteEntityIds === null) {
@@ -312,14 +314,14 @@ const make = (): PromptServiceInterface => {
 					try: () =>
 						db
 							.update(prompts)
-							.set({ isFavorite: !prompt.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(prompts.id, id))
 							.returning(),
 					catch: (error) => fromUnknownPromptError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.PROMPT, id),
+					try: () => favoriteService.set(FavoriteEntityType.PROMPT, id, newFavoriteStatus),
 					catch: (error) => fromUnknownPromptError('toggleFavorite.favoriteBridge', error),
 				});
 

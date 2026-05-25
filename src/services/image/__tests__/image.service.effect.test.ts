@@ -6,7 +6,7 @@
  */
 
 import { Effect } from 'effect';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { albums, favorites, folders, imageAlbums, images, imageTags, profiles, tags } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -120,12 +120,18 @@ const createTestTag = async () => {
 };
 
 let createdActiveProfileId: string | null = null;
+let previousActiveProfileIds: string[] = [];
 
 const ensureActiveProfile = async () => {
-	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+	if (createdActiveProfileId) {
+		return createdActiveProfileId;
+	}
 
-	if (activeProfile) {
-		return activeProfile.id;
+	const activeProfiles = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true));
+	previousActiveProfileIds = activeProfiles.map((profile: { id: string }) => profile.id);
+
+	if (previousActiveProfileIds.length > 0) {
+		await db.update(profiles).set({ isActive: false }).where(inArray(profiles.id, previousActiveProfileIds));
 	}
 
 	const profileId = `image-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -161,6 +167,11 @@ afterEach(async () => {
 		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
 		createdActiveProfileId = null;
 	}
+
+	if (previousActiveProfileIds.length > 0) {
+		await db.update(profiles).set({ isActive: true }).where(inArray(profiles.id, previousActiveProfileIds));
+		previousActiveProfileIds = [];
+	}
 });
 
 // ============= CRUD TESTS =============
@@ -192,6 +203,29 @@ describe('ImageService - CRUD Operations', () => {
 			expect(result.height).toBe(input.height);
 			expect(result.folderId).toBe(input.folderId);
 			expect(result.isFavorite).toBe(false);
+		});
+
+		it('should persist favorite state through the canonical favorite bridge when a profile is active', async () => {
+			const folder = await createTestFolder();
+			const timestamp = Date.now().toString();
+			const validHash = timestamp.padStart(64, '0');
+			await ensureActiveProfile();
+
+			const result = await expectSuccess(
+				ImageService.create({
+					name: 'canonical-favorite-create.jpg',
+					path: '/uploads/canonical-favorite-create.jpg',
+					hash: validHash,
+					size: 2_048_000,
+					width: 1920,
+					height: 1080,
+					folderId: folder.id,
+					isFavorite: true,
+				})
+			);
+
+			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, result.id)).toBe(true);
 		});
 
 		it('should create image with optional metadata', async () => {
@@ -351,6 +385,17 @@ describe('ImageService - CRUD Operations', () => {
 			expect(result.name).toBe(update.name);
 			expect(result.description).toBe(update.description);
 			expect(result.isFavorite).toBe(true);
+		});
+
+		it('should persist update favorite state through the canonical favorite bridge when a profile is active', async () => {
+			const folder = await createTestFolder();
+			const image = await createTestImage(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+
+			const result = await expectSuccess(ImageService.update(image.id, { isFavorite: true }));
+
+			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, image.id)).toBe(true);
 		});
 
 		it('should update AI metadata', async () => {
@@ -700,7 +745,10 @@ describe('ImageService - Toggle Operations', () => {
 
 		it('should toggle favorite from true to false', async () => {
 			const folder = await createTestFolder();
-			const image = await createTestImage(folder.id, { isFavorite: true });
+			const image = await createTestImage(folder.id, { isFavorite: false });
+
+			const favorited = await expectSuccess(ImageService.toggleFavorite(image.id));
+			expect(favorited.isFavorite).toBe(true);
 
 			const result = await expectSuccess(ImageService.toggleFavorite(image.id));
 
@@ -711,6 +759,17 @@ describe('ImageService - Toggle Operations', () => {
 			const error = await expectError(ImageService.toggleFavorite('non-existent-id'));
 
 			expect(error._tag).toBe('ImageNotFound');
+		});
+
+		it('should delegate toggleFavorite to the canonical favorite bridge when a profile is active', async () => {
+			const folder = await createTestFolder();
+			const image = await createTestImage(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+
+			const result = await expectSuccess(ImageService.toggleFavorite(image.id));
+
+			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, image.id)).toBe(true);
 		});
 	});
 
@@ -756,6 +815,19 @@ describe('ImageService - Toggle Operations', () => {
 			const error = await expectError(ImageService.setFavoriteMany([], true));
 
 			expect(error._tag).toBe('ImageValidationError');
+		});
+
+		it('should persist batch favorite state through the canonical favorite bridge when a profile is active', async () => {
+			const folder = await createTestFolder();
+			const image1 = await createTestImage(folder.id, { isFavorite: false });
+			const image2 = await createTestImage(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+
+			const result = await expectSuccess(ImageService.setFavoriteMany([image1.id, image2.id], true));
+
+			expect(result.updatedCount).toBe(2);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, image1.id)).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, image2.id)).toBe(true);
 		});
 	});
 });

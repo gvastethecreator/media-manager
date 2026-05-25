@@ -253,6 +253,31 @@ describe('File services favorites convergence', () => {
 			expect(toggled.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, document.id)).toBe(true);
 		});
+
+		it('toggleFavorite can remove the canonical favorite again', async () => {
+			await ensureActiveProfile();
+			const document = await createDocument('document-toggle-roundtrip-target');
+
+			const favorited = await expectDocumentSuccess(
+				Effect.gen(function* () {
+					const service = yield* DocumentService;
+					return yield* service.toggleFavorite(document.id);
+				})
+			);
+
+			expect(favorited.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, document.id)).toBe(true);
+
+			const unfavorited = await expectDocumentSuccess(
+				Effect.gen(function* () {
+					const service = yield* DocumentService;
+					return yield* service.toggleFavorite(document.id);
+				})
+			);
+
+			expect(unfavorited.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, document.id)).toBe(false);
+		});
 	});
 
 	describe('File3DService', () => {
@@ -317,6 +342,31 @@ describe('File services favorites convergence', () => {
 			expect(toggled.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.FILE_3D, file3D.id)).toBe(true);
 		});
+
+		it('toggleFavorite can remove the canonical favorite again', async () => {
+			await ensureActiveProfile();
+			const file3D = await createFile3D('file3d-toggle-roundtrip-target');
+
+			const favorited = await expectFile3DSuccess(
+				Effect.gen(function* () {
+					const service = yield* File3DService;
+					return yield* service.toggleFavorite(file3D.id);
+				})
+			);
+
+			expect(favorited.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.FILE_3D, file3D.id)).toBe(true);
+
+			const unfavorited = await expectFile3DSuccess(
+				Effect.gen(function* () {
+					const service = yield* File3DService;
+					return yield* service.toggleFavorite(file3D.id);
+				})
+			);
+
+			expect(unfavorited.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.FILE_3D, file3D.id)).toBe(false);
+		});
 	});
 
 	describe('JsonFileService', () => {
@@ -380,6 +430,31 @@ describe('File services favorites convergence', () => {
 			expect(toggled.id).toBe(jsonFile.id);
 			expect(toggled.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.JSON_FILE, jsonFile.id)).toBe(true);
+		});
+
+		it('toggleFavorite can remove the canonical favorite again', async () => {
+			await ensureActiveProfile();
+			const jsonFile = await createJsonFile('json-toggle-roundtrip-target');
+
+			const favorited = await expectJsonFileSuccess(
+				Effect.gen(function* () {
+					const service = yield* JsonFileService;
+					return yield* service.toggleFavorite(jsonFile.id);
+				})
+			);
+
+			expect(favorited.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.JSON_FILE, jsonFile.id)).toBe(true);
+
+			const unfavorited = await expectJsonFileSuccess(
+				Effect.gen(function* () {
+					const service = yield* JsonFileService;
+					return yield* service.toggleFavorite(jsonFile.id);
+				})
+			);
+
+			expect(unfavorited.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.JSON_FILE, jsonFile.id)).toBe(false);
 		});
 	});
 });

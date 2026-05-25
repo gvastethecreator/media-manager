@@ -113,4 +113,23 @@ describe('CollectionService favorites convergence', () => {
 		expect(toggled.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, collection.id)).toBe(true);
 	});
+
+	it('toggleFavorite can remove the canonical favorite again when a profile is active', async () => {
+		await ensureActiveProfile();
+		const collection = await createCollection('toggle-roundtrip-target');
+
+		const favorited = await expectSuccess(
+			Effect.flatMap(CollectionService, (service) => service.toggleFavorite(collection.id))
+		);
+
+		expect(favorited.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, collection.id)).toBe(true);
+
+		const unfavorited = await expectSuccess(
+			Effect.flatMap(CollectionService, (service) => service.toggleFavorite(collection.id))
+		);
+
+		expect(unfavorited.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, collection.id)).toBe(false);
+	});
 });

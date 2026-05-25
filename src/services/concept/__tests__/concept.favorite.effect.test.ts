@@ -128,4 +128,29 @@ describe('ConceptService favorites convergence', () => {
 		expect(toggled.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(true);
 	});
+
+	it('toggleFavorite can remove the canonical favorite again', async () => {
+		await ensureActiveProfile();
+		const concept = await createConcept('toggle-roundtrip-target');
+
+		const favorited = await expectSuccess(
+			Effect.gen(function* () {
+				const conceptService = yield* ConceptService;
+				return yield* conceptService.toggleFavorite(concept.id);
+			})
+		);
+
+		expect(favorited.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(true);
+
+		const unfavorited = await expectSuccess(
+			Effect.gen(function* () {
+				const conceptService = yield* ConceptService;
+				return yield* conceptService.toggleFavorite(concept.id);
+			})
+		);
+
+		expect(unfavorited.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(false);
+	});
 });

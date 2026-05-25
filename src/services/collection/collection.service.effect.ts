@@ -901,9 +901,10 @@ export const CollectionServiceLive = Layer.succeed(
 				});
 
 				let result: typeof collections.$inferSelect;
+				const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? collection.isFavorite;
+				const newFavoriteStatus = !currentFavoriteStatus;
 
 				if (favoriteEntityIds === null) {
-					const newValue = !collection.isFavorite;
 					const updatedRows = (yield* Effect.tryPromise({
 						try: async () =>
 							await withSqliteBusyRetry(
@@ -911,7 +912,7 @@ export const CollectionServiceLive = Layer.succeed(
 									await db
 										.update(collections)
 										.set({
-											isFavorite: newValue,
+											isFavorite: newFavoriteStatus,
 											updatedAt: new Date(),
 										})
 										.where(eq(collections.id, id))
@@ -927,7 +928,7 @@ export const CollectionServiceLive = Layer.succeed(
 					result = updatedRows[0];
 				} else {
 					yield* Effect.tryPromise({
-						try: () => favoriteService.toggle(FavoriteEntityType.COLLECTION, id),
+						try: () => favoriteService.set(FavoriteEntityType.COLLECTION, id, newFavoriteStatus),
 						catch: (error) =>
 							new CollectionDatabaseError({
 								operation: 'toggleFavorite:favoriteBridge',

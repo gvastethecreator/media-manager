@@ -222,19 +222,21 @@ const makeFile3DService = (): File3DServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D),
 				catch: (error) => fromUnknownFile3DError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? file3D.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			if (favoriteEntityIds === null) {
 				yield* Effect.tryPromise({
 					try: () =>
 						db
 							.update(file3Ds)
-							.set({ isFavorite: !file3D.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(file3Ds.id, id)),
 					catch: (error) => fromUnknownFile3DError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.FILE_3D, id),
+					try: () => favoriteService.set(FavoriteEntityType.FILE_3D, id, newFavoriteStatus),
 					catch: (error) => fromUnknownFile3DError('toggleFavorite.favoriteBridge', error),
 				});
 			}
@@ -412,19 +414,21 @@ const makeDocumentService = (): DocumentServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT),
 				catch: (error) => fromUnknownDocumentError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? document.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			if (favoriteEntityIds === null) {
 				yield* Effect.tryPromise({
 					try: () =>
 						db
 							.update(documents)
-							.set({ isFavorite: !document.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(documents.id, id)),
 					catch: (error) => fromUnknownDocumentError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.DOCUMENT, id),
+					try: () => favoriteService.set(FavoriteEntityType.DOCUMENT, id, newFavoriteStatus),
 					catch: (error) => fromUnknownDocumentError('toggleFavorite.favoriteBridge', error),
 				});
 			}
@@ -604,19 +608,21 @@ const makeJsonFileService = (): JsonFileServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE),
 				catch: (error) => fromUnknownJsonFileError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? jsonFile.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			if (favoriteEntityIds === null) {
 				yield* Effect.tryPromise({
 					try: () =>
 						db
 							.update(jsonFiles)
-							.set({ isFavorite: !jsonFile.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(jsonFiles.id, id)),
 					catch: (error) => fromUnknownJsonFileError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.JSON_FILE, id),
+					try: () => favoriteService.set(FavoriteEntityType.JSON_FILE, id, newFavoriteStatus),
 					catch: (error) => fromUnknownJsonFileError('toggleFavorite.favoriteBridge', error),
 				});
 			}

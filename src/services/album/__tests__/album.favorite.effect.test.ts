@@ -129,4 +129,29 @@ describe('AlbumService favorites convergence', () => {
 		expect(toggled.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, album.id)).toBe(true);
 	});
+
+	it('toggleFavorite can remove the canonical favorite again when a profile is active', async () => {
+		await ensureActiveProfile();
+		const album = await createAlbum('toggle-roundtrip-target');
+
+		const favorited = await expectSuccess(
+			Effect.gen(function* () {
+				const albumService = yield* AlbumService;
+				return yield* albumService.toggleFavorite(album.id);
+			})
+		);
+
+		expect(favorited.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, album.id)).toBe(true);
+
+		const unfavorited = await expectSuccess(
+			Effect.gen(function* () {
+				const albumService = yield* AlbumService;
+				return yield* albumService.toggleFavorite(album.id);
+			})
+		);
+
+		expect(unfavorited.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, album.id)).toBe(false);
+	});
 });

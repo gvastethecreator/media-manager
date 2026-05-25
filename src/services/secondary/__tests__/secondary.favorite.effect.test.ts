@@ -263,6 +263,31 @@ describe('Secondary services favorites convergence', () => {
 			expect(toggled.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.GROUP, group.id)).toBe(true);
 		});
+
+		it('toggleFavorite can remove the canonical favorite again', async () => {
+			await ensureActiveProfile();
+			const group = await createGroup('group-toggle-roundtrip-target');
+
+			const favorited = await expectGroupSuccess(
+				Effect.gen(function* () {
+					const service = yield* GroupService;
+					return yield* service.toggleFavorite(group.id);
+				})
+			);
+
+			expect(favorited.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.GROUP, group.id)).toBe(true);
+
+			const unfavorited = await expectGroupSuccess(
+				Effect.gen(function* () {
+					const service = yield* GroupService;
+					return yield* service.toggleFavorite(group.id);
+				})
+			);
+
+			expect(unfavorited.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.GROUP, group.id)).toBe(false);
+		});
 	});
 
 	describe('WildcardService', () => {
@@ -327,6 +352,31 @@ describe('Secondary services favorites convergence', () => {
 			expect(toggled.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.WILDCARD, wildcard.id)).toBe(true);
 		});
+
+		it('toggleFavorite can remove the canonical favorite again', async () => {
+			await ensureActiveProfile();
+			const wildcard = await createWildcard('wildcard-toggle-roundtrip-target');
+
+			const favorited = await expectWildcardSuccess(
+				Effect.gen(function* () {
+					const service = yield* WildcardService;
+					return yield* service.toggleFavorite(wildcard.id);
+				})
+			);
+
+			expect(favorited.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.WILDCARD, wildcard.id)).toBe(true);
+
+			const unfavorited = await expectWildcardSuccess(
+				Effect.gen(function* () {
+					const service = yield* WildcardService;
+					return yield* service.toggleFavorite(wildcard.id);
+				})
+			);
+
+			expect(unfavorited.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.WILDCARD, wildcard.id)).toBe(false);
+		});
 	});
 
 	describe('NoteService', () => {
@@ -390,6 +440,31 @@ describe('Secondary services favorites convergence', () => {
 			expect(toggled.id).toBe(note.id);
 			expect(toggled.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.NOTE, note.id)).toBe(true);
+		});
+
+		it('toggleFavorite can remove the canonical favorite again', async () => {
+			await ensureActiveProfile();
+			const note = await createNote('note-toggle-roundtrip-target');
+
+			const favorited = await expectNoteSuccess(
+				Effect.gen(function* () {
+					const service = yield* NoteService;
+					return yield* service.toggleFavorite(note.id);
+				})
+			);
+
+			expect(favorited.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.NOTE, note.id)).toBe(true);
+
+			const unfavorited = await expectNoteSuccess(
+				Effect.gen(function* () {
+					const service = yield* NoteService;
+					return yield* service.toggleFavorite(note.id);
+				})
+			);
+
+			expect(unfavorited.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.NOTE, note.id)).toBe(false);
 		});
 	});
 
@@ -517,6 +592,31 @@ describe('Secondary services favorites convergence', () => {
 			expect(toggled.id).toBe(worldItem.id);
 			expect(toggled.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.WORLD_ITEM, worldItem.id)).toBe(true);
+		});
+
+		it('toggleFavorite can remove the canonical favorite again', async () => {
+			await ensureActiveProfile();
+			const worldItem = await createWorldItem('world-item-toggle-roundtrip-target');
+
+			const favorited = await expectWorldItemSuccess(
+				Effect.gen(function* () {
+					const service = yield* WorldItemService;
+					return yield* service.toggleFavorite(worldItem.id);
+				})
+			);
+
+			expect(favorited.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.WORLD_ITEM, worldItem.id)).toBe(true);
+
+			const unfavorited = await expectWorldItemSuccess(
+				Effect.gen(function* () {
+					const service = yield* WorldItemService;
+					return yield* service.toggleFavorite(worldItem.id);
+				})
+			);
+
+			expect(unfavorited.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.WORLD_ITEM, worldItem.id)).toBe(false);
 		});
 	});
 });

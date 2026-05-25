@@ -1162,13 +1162,12 @@ const FolderServiceLive = Layer.succeed(
 					try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.FOLDER),
 					catch: (error: unknown) => fromUnknownError('toggleFavorite:scope', error),
 				});
+				const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? existingFolder[0].isFavorite;
+				const newFavoriteStatus = !currentFavoriteStatus;
 
 				let result: Schema.Schema.Type<typeof Folder>[];
 
 				if (favoriteEntityIds === null) {
-					// Alternar favorito
-					const newFavoriteStatus = !existingFolder[0].isFavorite;
-
 					result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
 						try: async () =>
 							await db
@@ -1180,7 +1179,7 @@ const FolderServiceLive = Layer.succeed(
 					});
 				} else {
 					yield* Effect.tryPromise({
-						try: () => favoriteService.toggle(FavoriteEntityType.FOLDER, id),
+						try: () => favoriteService.set(FavoriteEntityType.FOLDER, id, newFavoriteStatus),
 						catch: (error: unknown) => fromUnknownError('toggleFavorite:favoriteBridge', error),
 					});
 
