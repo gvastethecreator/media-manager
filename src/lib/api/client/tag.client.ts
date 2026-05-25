@@ -1,6 +1,11 @@
 /**
+ * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
+ * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
+ * Ver #1 deepening opportunity en architecture review.
+ */
+
+/**
  * Cliente de API para etiquetas (tags).
- * Reemplaza el uso directo de tag.service en los stores.
  */
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 import { unwrapArrayResponse } from './pagination';

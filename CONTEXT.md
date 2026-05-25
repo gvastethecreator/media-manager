@@ -221,7 +221,7 @@ _Avoid_: tag, note, narrative entity
 - Un **Favorite** marca un objeto de dominio sin cambiar su identidad ni su tipo
 - La verdad canónica de **Favorite** debe vivir en una relación transversal y no en flags embebidos por entidad
 - El scope contractual de **Favorite** pertenece al actor o perfil que marca el objeto y no al objeto marcado como propiedad global intrínseca
-- El perímetro inicial recomendado de **Favorite** incluye **Assets**, **Organizers**, **Narrative Entities**, **Prompt**, **Note** y **Wildcard**; `Tag`, `Property` y `Task` quedan fuera por ahora
+- El perímetro inicial recomendado de **Favorite** incluye **Assets**, **Organizers**, **Narrative Entities**, **Prompt**, **Note**, **Wildcard**, **Tag** y **Property**; `Task` queda fuera por ahora
 - La unicidad lógica de **Favorite** debe impedir más de una relación activa equivalente por par `(actor, target)`
 - Las operaciones de marcar o desmarcar **Favorite** deben ser idempotentes y no generar duplicados ni semánticas alternativas según el estado previo
 - **Favorite** no define un lifecycle semántico rico propio en v1; su visibilidad normal sigue la superficie activa del target marcado
@@ -496,6 +496,7 @@ _Avoid_: tag, note, narrative entity
 - "favorite" podía leerse como estado embebido o como entidad transversal — resuelto: **Favorite** es un marcador transversal; los `isFavorite` dispersos no son la verdad conceptual.
 - "favorite" podía quedarse con doble verdad técnica — resuelto: la relación transversal es canónica y los flags embebidos sólo pueden existir como deuda temporal o cache transitoria.
 - "favorite" podía interpretarse como propiedad global del objeto en vez de relación del actor que marca — resuelto: su scope contractual pertenece al actor/perfil y no al target como rasgo intrínseco.
+- el perímetro de **Favorite** podía seguir excluyendo a **Tag** y **Property** por arrastre legacy — resuelto: ambas familias entran al bridge canónico; **Task** sigue fuera del perímetro inicial.
 - "favorite" podía comportarse como toggle no idempotente creando duplicados según el estado previo — resuelto: existe como máximo una relación activa por par actor-target y las operaciones de marcar/desmarcar son idempotentes.
 - "favorite" podía quedar sin semántica clara cuando el target salía de la superficie activa — resuelto: su visibilidad sigue al target; puede reaparecer al restaurar y desaparece definitivamente sólo con purge físico.
 - "folder" podía sentirse como organizer libre — resuelto: **Folder** sigue siendo un contenedor físico enriquecido, no una agrupación lógica genérica.

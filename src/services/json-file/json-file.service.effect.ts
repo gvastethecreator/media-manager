@@ -426,7 +426,6 @@ const make = (): JsonFileServiceInterface => {
 							mimeType: input.mimeType,
 							extension: input.extension,
 							folderId: input.folderId,
-							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 							isArchived: input.isArchived ?? false,
 							content: input.content ?? null,
 							schema: input.schema ?? null,
@@ -520,7 +519,6 @@ const make = (): JsonFileServiceInterface => {
 			if (input.mimeType !== undefined) updateData.mimeType = input.mimeType;
 			if (input.extension !== undefined) updateData.extension = input.extension;
 			if (input.folderId !== undefined) updateData.folderId = input.folderId;
-			if (input.isFavorite !== undefined && !useCanonicalFavoriteBridge) updateData.isFavorite = Boolean(input.isFavorite);
 			if (input.isArchived !== undefined) updateData.isArchived = Boolean(input.isArchived);
 			if (input.content !== undefined) updateData.content = input.content;
 			if (input.schema !== undefined) updateData.schema = input.schema;

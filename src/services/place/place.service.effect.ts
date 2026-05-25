@@ -13,6 +13,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
+import { normalizeCounts, sumCounts } from '@/transformers/common/counts';
 import {
 	fromUnknownError,
 	PlaceDatabaseError,
@@ -20,7 +21,7 @@ import {
 	PlaceHasRelationsError,
 	PlaceNameConflict,
 	PlaceNotFound,
-} from '@/services/worldbuilding/worldbuilding-errors.effect';
+} from './place-errors.effect';
 
 const logger = serverLogger.withContext('PlaceService.Effect');
 
@@ -188,7 +189,6 @@ const make = (): PlaceServiceInterface => {
 							category: input.category ?? null,
 							featuredImage: input.featuredImage ?? null,
 							filters: input.filters ?? null,
-							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 							metadata: input.metadata ?? null,
 							parentId: input.parentId ?? null,
 							createdAt: new Date(),
@@ -254,9 +254,6 @@ const make = (): PlaceServiceInterface => {
 							...(input.category !== undefined && { category: input.category }),
 							...(input.featuredImage !== undefined && { featuredImage: input.featuredImage }),
 							...(input.filters !== undefined && { filters: input.filters }),
-							...(input.isFavorite !== undefined && !useCanonicalFavoriteBridge
-								? { isFavorite: input.isFavorite }
-								: {}),
 							...(input.metadata !== undefined && { metadata: input.metadata }),
 							...(input.parentId !== undefined && { parentId: input.parentId }),
 							updatedAt: new Date(),
@@ -311,22 +308,17 @@ const make = (): PlaceServiceInterface => {
 			const newFavoriteStatus = !currentFavoriteStatus;
 
 			let result;
-			if (favoriteEntityIds === null) {
-				result = yield* Effect.tryPromise<(typeof places.$inferSelect)[], PlaceError>({
-					try: () =>
-						db
-							.update(places)
-							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
-							.where(eq(places.id, id))
-							.returning(),
-					catch: (error) => fromUnknownError('toggleFavorite', error),
-				});
-			} else {
+			if (favoriteEntityIds !== null) {
 				yield* Effect.tryPromise({
 					try: () => favoriteService.set(FavoriteEntityType.PLACE, id, newFavoriteStatus),
 					catch: (error) => fromUnknownError('toggleFavorite.favoriteBridge', error),
 				});
 
+				result = yield* Effect.tryPromise<(typeof places.$inferSelect)[], PlaceError>({
+					try: () => db.select().from(places).where(eq(places.id, id)).limit(1),
+					catch: (error) => fromUnknownError('toggleFavorite.refetch', error),
+				});
+			} else {
 				result = yield* Effect.tryPromise<(typeof places.$inferSelect)[], PlaceError>({
 					try: () => db.select().from(places).where(eq(places.id, id)).limit(1),
 					catch: (error) => fromUnknownError('toggleFavorite.refetch', error),
