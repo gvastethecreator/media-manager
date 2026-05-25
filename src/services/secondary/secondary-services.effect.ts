@@ -235,8 +235,11 @@ const makeGroupService = (): GroupServiceInterface => {
 				);
 			}
 
+			const currentFavoriteStatus = favoriteEntityIds.includes(id);
+			const newFavoriteStatus = !currentFavoriteStatus;
+
 			yield* Effect.tryPromise({
-				try: () => favoriteService.toggle(FavoriteEntityType.GROUP, id),
+				try: () => favoriteService.set(FavoriteEntityType.GROUP, id, newFavoriteStatus),
 				catch: (error) => fromUnknownGroupError('toggleFavorite.favoriteBridge', error),
 			});
 
@@ -416,19 +419,21 @@ const makeWildcardService = (): WildcardServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.WILDCARD),
 				catch: (error) => fromUnknownWildcardError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? wildcard.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			if (favoriteEntityIds === null) {
 				yield* Effect.tryPromise({
 					try: () =>
 						db
 							.update(wildcards)
-							.set({ isFavorite: !wildcard.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(wildcards.id, id)),
 					catch: (error) => fromUnknownWildcardError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.WILDCARD, id),
+					try: () => favoriteService.set(FavoriteEntityType.WILDCARD, id, newFavoriteStatus),
 					catch: (error) => fromUnknownWildcardError('toggleFavorite.favoriteBridge', error),
 				});
 			}
@@ -605,19 +610,21 @@ const makeNoteService = (): NoteServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.NOTE),
 				catch: (error) => fromUnknownNoteError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? note.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			if (favoriteEntityIds === null) {
 				yield* Effect.tryPromise({
 					try: () =>
 						db
 							.update(notes)
-							.set({ isFavorite: !note.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(notes.id, id)),
 					catch: (error) => fromUnknownNoteError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.NOTE, id),
+					try: () => favoriteService.set(FavoriteEntityType.NOTE, id, newFavoriteStatus),
 					catch: (error) => fromUnknownNoteError('toggleFavorite.favoriteBridge', error),
 				});
 			}
@@ -980,19 +987,21 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.WORLD_ITEM),
 				catch: (error) => fromUnknownWorldItemError('toggleFavorite.scope', error),
 			});
+			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? worldItem.isFavorite;
+			const newFavoriteStatus = !currentFavoriteStatus;
 
 			if (favoriteEntityIds === null) {
 				yield* Effect.tryPromise({
 					try: () =>
 						db
 							.update(worldItems)
-							.set({ isFavorite: !worldItem.isFavorite, updatedAt: new Date() })
+							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
 							.where(eq(worldItems.id, id)),
 					catch: (error) => fromUnknownWorldItemError('toggleFavorite', error),
 				});
 			} else {
 				yield* Effect.tryPromise({
-					try: () => favoriteService.toggle(FavoriteEntityType.WORLD_ITEM, id),
+					try: () => favoriteService.set(FavoriteEntityType.WORLD_ITEM, id, newFavoriteStatus),
 					catch: (error) => fromUnknownWorldItemError('toggleFavorite.favoriteBridge', error),
 				});
 			}
