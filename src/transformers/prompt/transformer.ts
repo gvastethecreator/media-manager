@@ -5,6 +5,7 @@
  */
 
 import { createDefaultEntityStats } from '@/lib/utils';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
 import type { PromptBase, PromptStatistics, PromptWithStats } from '../../types/entities/prompt/base';
@@ -22,44 +23,33 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 	try {
 		const { _count, ...baseData } = drizzlePrompt;
 
+		const counts = normalizeCounts(_count);
+
 		// Calcular estadísticas según PromptStatistics
-		const totalContentItems =
-			(_count?.images || 0) +
-			(_count?.videos || 0) +
-			(_count?.albums || 0) +
-			(_count?.collections || 0) +
-			(_count?.tags || 0) +
-			(_count?.characters || 0) +
-			(_count?.places || 0) +
-			(_count?.worldItems || 0) +
-			(_count?.concepts || 0) +
-			(_count?.notes || 0) +
-			(_count?.wildcards || 0) +
-			(_count?.properties || 0) +
-			(_count?.groups || 0);
+		const totalContentItems = sumCounts(_count, STANDARD_COUNT_KEYS);
 		const averageContentLength = baseData.content ? baseData.content.length : 0;
 		const parametersCount = getParametersCount(baseData.parameters);
-		const tagsCount = _count?.tags || 0;
+		const tagsCount = counts.tags;
 		const completenessScore = calculateCompletenessScore(baseData);
 		const technicalScore = calculateTechnicalScore(baseData);
 
 		const stats: PromptStatistics = {
 			// Base EntityStats
 			...createDefaultEntityStats({
-				imageCount: _count?.images || 0,
-				videoCount: _count?.videos || 0,
-				albumCount: _count?.albums || 0,
-				collectionCount: _count?.collections || 0,
-				tagCount: _count?.tags || 0,
-				characterCount: _count?.characters || 0,
-				placeCount: _count?.places || 0,
-				worldItemCount: _count?.worldItems || 0,
-				conceptCount: _count?.concepts || 0,
+				imageCount: counts.images,
+				videoCount: counts.videos,
+				albumCount: counts.albums,
+				collectionCount: counts.collections,
+				tagCount: counts.tags,
+				characterCount: counts.characters,
+				placeCount: counts.places,
+				worldItemCount: counts.worldItems,
+				conceptCount: counts.concepts,
 				promptCount: 0,
-				noteCount: _count?.notes || 0,
-				wildcardCount: _count?.wildcards || 0,
-				propertyCount: _count?.properties || 0,
-				groupCount: _count?.groups || 0,
+				noteCount: counts.notes,
+				wildcardCount: counts.wildcards,
+				propertyCount: counts.properties,
+				groupCount: counts.groups,
 				totalItems: totalContentItems,
 				type: 'prompt',
 			}),
@@ -71,17 +61,17 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 			tagsCount,
 
 			// Conteos específicos para compatibilidad
-			totalImages: _count?.images || 0,
-			totalVideos: _count?.videos || 0,
-			totalCollections: _count?.collections || 0,
-			totalAlbums: _count?.albums || 0,
-			totalConcepts: _count?.concepts || 0,
-			totalNotes: _count?.notes || 0,
-			totalCharacters: _count?.characters || 0,
-			totalProperties: _count?.properties || 0,
-			totalWildcards: _count?.wildcards || 0,
-			totalGroups: _count?.groups || 0,
-			totalPlaces: _count?.places || 0,
+			totalImages: counts.images,
+			totalVideos: counts.videos,
+			totalCollections: counts.collections,
+			totalAlbums: counts.albums,
+			totalConcepts: counts.concepts,
+			totalNotes: counts.notes,
+			totalCharacters: counts.characters,
+			totalProperties: counts.properties,
+			totalWildcards: counts.wildcards,
+			totalGroups: counts.groups,
+			totalPlaces: counts.places,
 
 			// Métricas de IA y uso derivadas del contenido real
 			executionCount: Math.floor(totalContentItems * 2),

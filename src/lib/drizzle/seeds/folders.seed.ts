@@ -28,7 +28,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalSize: 0,
 				lastIndexed: null,
 				color: '#6366f1', // indigo
-				isFavorite: false,
 				parentId: null,
 				presetId: null,
 			},
@@ -42,7 +41,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalSize: 0,
 				lastIndexed: null,
 				color: '#22c55e', // green
-				isFavorite: false,
 				parentId: null,
 				presetId: null,
 			},
@@ -56,7 +54,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalSize: 0,
 				lastIndexed: null,
 				color: '#eab308', // yellow
-				isFavorite: true,
 				parentId: null,
 				presetId: null,
 			},
@@ -71,7 +68,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalSize: 0,
 				lastIndexed: null,
 				color: '#eab308', // yellow
-				isFavorite: true,
 				parentId: null,
 				presetId: null,
 			},
@@ -85,7 +81,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalSize: 0,
 				lastIndexed: null,
 				color: '#8b5cf6', // violet
-				isFavorite: true,
 				parentId: null,
 				presetId: null,
 			},
@@ -99,7 +94,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalSize: 0,
 				lastIndexed: null,
 				color: '#22c55e', // green
-				isFavorite: false,
 				parentId: null,
 				presetId: null,
 			},
@@ -113,7 +107,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalSize: 0,
 				lastIndexed: null,
 				color: '#ef4444', // red
-				isFavorite: false,
 				parentId: null,
 				presetId: null,
 			},
@@ -127,7 +120,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalSize: 0,
 				lastIndexed: null,
 				color: '#a855f7', // purple
-				isFavorite: false,
 				parentId: null,
 				presetId: null,
 			},
@@ -141,7 +133,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalSize: 0,
 				lastIndexed: null,
 				color: '#f59e0b', // amber/orange
-				isFavorite: true,
 				parentId: null,
 				presetId: null,
 			},

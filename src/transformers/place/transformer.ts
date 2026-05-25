@@ -7,6 +7,7 @@
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { createDefaultEntityStats } from '../../lib/utils';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 import type { PlaceBase, PlaceStatistics, PlaceWithStats } from '../../types/entities/place';
 
 const logger = serverLogger.withContext('PlaceTransformer');
@@ -22,21 +23,8 @@ export function fromDrizzlePlace(drizzlePlace: any): PlaceWithStats {
 	try {
 		const { _count, ...baseData } = drizzlePlace;
 
-		// Calcular estadísticas según PlaceStatistics
-		const totalRelations =
-			(_count?.images || 0) +
-			(_count?.videos || 0) +
-			(_count?.characters || 0) +
-			(_count?.tags || 0) +
-			(_count?.notes || 0) +
-			(_count?.collections || 0) +
-			(_count?.concepts || 0) +
-			(_count?.albums || 0) +
-			(_count?.worldItems || 0) +
-			(_count?.prompts || 0) +
-			(_count?.wildcards || 0) +
-			(_count?.properties || 0) +
-			(_count?.groups || 0);
+		const counts = normalizeCounts(_count);
+		const totalRelations = sumCounts(_count, STANDARD_COUNT_KEYS);
 
 		const stats: PlaceStatistics = {
 			...createDefaultEntityStats(),
@@ -44,17 +32,17 @@ export function fromDrizzlePlace(drizzlePlace: any): PlaceWithStats {
 			completenessScore: calculateCompletenessScore(baseData), // Puntuación de completitud
 			geoContextLevel: calculateGeoContextLevel(baseData), // Nivel de contexto geográfico
 			popularity: Math.min(100, totalRelations * 2), // Popularidad basada en relaciones
-			imageCount: _count?.images || 0,
-			videoCount: _count?.videos || 0,
-			albumCount: _count?.albums || 0,
-			collectionCount: _count?.collections || 0,
-			noteCount: _count?.notes || 0,
-			conceptCount: _count?.concepts || 0,
-			worldItemCount: _count?.worldItems || 0,
-			promptCount: _count?.prompts || 0,
-			wildcardCount: _count?.wildcards || 0,
-			propertyCount: _count?.properties || 0,
-			groupCount: _count?.groups || 0,
+			imageCount: counts.images,
+			videoCount: counts.videos,
+			albumCount: counts.albums,
+			collectionCount: counts.collections,
+			noteCount: counts.notes,
+			conceptCount: counts.concepts,
+			worldItemCount: counts.worldItems,
+			promptCount: counts.prompts,
+			wildcardCount: counts.wildcards,
+			propertyCount: counts.properties,
+			groupCount: counts.groups,
 			isDirectory: false,
 			isFile: true,
 		} as PlaceStatistics;
@@ -64,23 +52,7 @@ export function fromDrizzlePlace(drizzlePlace: any): PlaceWithStats {
 			entityType: 'place' as const,
 			_stats: stats,
 			stats, // Alias para _stats
-			_count: _count
-				? {
-						images: _count.images || 0,
-						videos: _count.videos || 0,
-						tags: _count.tags || 0,
-						notes: _count.notes || 0,
-						characters: _count.characters || 0,
-						collections: _count.collections || 0,
-						concepts: _count.concepts || 0,
-						albums: _count.albums || 0,
-						worldItems: _count.worldItems || 0,
-						prompts: _count.prompts || 0,
-						wildcards: _count.wildcards || 0,
-						properties: _count.properties || 0,
-						groups: _count.groups || 0,
-					}
-				: undefined,
+			_count: normalizeCounts(_count),
 		};
 	} catch (error) {
 		logger.error('Error transformando lugar desde Drizzle', {

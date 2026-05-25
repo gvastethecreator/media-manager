@@ -20,6 +20,7 @@ export const tags = sqliteTable(
 		color: text('color').default('#22c55e'),
 		category: text('category'),
 		featuredImage: text('featuredImage'),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		parentId: text('parentId'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })

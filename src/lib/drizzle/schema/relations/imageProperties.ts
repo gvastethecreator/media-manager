@@ -3,6 +3,9 @@
  * IMAGE PROPERTIES RELATION - DRIZZLE ORM
  * =================================================================================
  * Definición de la relación many-to-many Image-Property
+ *
+ * @deprecated Esta tabla de unión per-type duplica la lógica de asociación.
+ * Converger a una relación `_AssetToProperty` según ADR-0004 y 03-media-core-context.md.
  * =================================================================================
  */
 

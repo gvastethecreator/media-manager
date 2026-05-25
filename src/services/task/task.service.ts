@@ -2,6 +2,8 @@
  * @file Servicio para la gestión de tareas
  * @module services/task
  * @description Service completo para CRUD de tasks con Drizzle ORM
+ * @deprecated Task en deprecación por ADR target architecture. Patrón legacy pre-Effect.
+ * Si reabre como `Workflow/Projects`, migrar a Effect-TS.
  */
 
 import type { InferSelectModel } from 'drizzle-orm';

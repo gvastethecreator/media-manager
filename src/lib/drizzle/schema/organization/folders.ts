@@ -23,6 +23,7 @@ export const folders = sqliteTable(
 		emoji: text('emoji').default('📁'),
 		color: text('color').default('#3b82f6'),
 		featuredImage: text('featuredImage'),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),

@@ -24,7 +24,6 @@ export async function seedWildcards(db: LibSQLDatabase<Record<string, never>>) {
 				color: '#ef4444',
 				category: 'aleatorio',
 				children: '["elemento1", "elemento2", "elemento3"]',
-				isFavorite: true,
 				parentId: null,
 			},
 			{
@@ -35,7 +34,6 @@ export async function seedWildcards(db: LibSQLDatabase<Record<string, never>>) {
 				color: '#a855f7',
 				category: 'estilo',
 				children: '["realista", "cartoon", "abstracto"]',
-				isFavorite: false,
 				parentId: null,
 			},
 			{
@@ -46,7 +44,6 @@ export async function seedWildcards(db: LibSQLDatabase<Record<string, never>>) {
 				color: '#f59e0b',
 				category: 'color',
 				children: '["rojo intenso", "azul eléctrico", "verde neón", "amarillo brillante"]',
-				isFavorite: true,
 				parentId: null,
 			},
 			{
@@ -57,7 +54,6 @@ export async function seedWildcards(db: LibSQLDatabase<Record<string, never>>) {
 				color: '#22c55e',
 				category: 'ambiente',
 				children: '["bosque mágico", "ciudad futurista", "desierto místico", "océano profundo"]',
-				isFavorite: false,
 				parentId: null,
 			},
 		];

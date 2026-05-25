@@ -197,9 +197,9 @@ describe('Legacy file services favorites convergence', () => {
 
 			const result = await getFile3Ds();
 
-			expect(result.find((item) => item.id === canonicalFavorite.id)?.isFavorite).toBe(true);
-			expect(result.find((item) => item.id === staleProjection.id)?.isFavorite).toBe(false);
-			expect(result.find((item) => item.id === regular.id)?.isFavorite).toBe(false);
+			expect(result.data.find((item: any) => item.id === canonicalFavorite.id)?.isFavorite).toBe(true);
+			expect(result.data.find((item: any) => item.id === staleProjection.id)?.isFavorite).toBe(false);
+			expect(result.data.find((item: any) => item.id === regular.id)?.isFavorite).toBe(false);
 		});
 
 		it('update persists favorite state through the canonical favorite bridge', async () => {
@@ -235,9 +235,9 @@ describe('Legacy file services favorites convergence', () => {
 
 			const result = await getJsonFiles();
 
-			expect(result.find((item) => item.id === canonicalFavorite.id)?.isFavorite).toBe(true);
-			expect(result.find((item) => item.id === staleProjection.id)?.isFavorite).toBe(false);
-			expect(result.find((item) => item.id === regular.id)?.isFavorite).toBe(false);
+			expect(result.data.find((item) => item.id === canonicalFavorite.id)?.isFavorite).toBe(true);
+			expect(result.data.find((item) => item.id === staleProjection.id)?.isFavorite).toBe(false);
+			expect(result.data.find((item) => item.id === regular.id)?.isFavorite).toBe(false);
 		});
 
 		it('update persists favorite state through the canonical favorite bridge', async () => {

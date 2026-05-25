@@ -5,9 +5,11 @@
 
 import { eq } from 'drizzle-orm';
 import express from 'express';
+import { Effect } from 'effect';
 import { db } from '@/lib/drizzle/index.js';
 import { file3Ds } from '@/lib/drizzle/schema/index.js';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 
 const router = express.Router();
 
@@ -164,128 +166,120 @@ async function render3DModelHeadless(modelPath: string, options: Model3DThumbnai
 /**
  * GET /3d/:id/thumbnail - Generar thumbnail de modelo 3D
  */
-router.get('/:id/thumbnail', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const options: Model3DThumbnailOptions = {
-			angle: Math.min(Number.parseInt(req.query.angle as string, 10) || 45, 360),
-			lightIntensity: Math.min(Number.parseFloat(req.query.lightIntensity as string) || 1.5, 10),
-			backgroundColor: `#${(req.query.backgroundColor as string) || 'ffffff'}`,
-			width: Math.min(Number.parseInt(req.query.width as string, 10) || 300, 2000),
-			height: Math.min(Number.parseInt(req.query.height as string, 10) || 300, 2000),
-			wireframe: req.query.wireframe === 'true',
-			cameraDistance: Math.min(Number.parseFloat(req.query.cameraDistance as string) || 5, 100),
-			autoRotate: req.query.autoRotate === 'true',
-		};
+router.get('/:id/thumbnail', effectHandler(
+	(req) =>
+		Effect.tryPromise({
+			try: async () => {
+				const { id } = req.params;
+				const options: Model3DThumbnailOptions = {
+					angle: Math.min(Number.parseInt(req.query.angle as string, 10) || 45, 360),
+					lightIntensity: Math.min(Number.parseFloat(req.query.lightIntensity as string) || 1.5, 10),
+					backgroundColor: `#${(req.query.backgroundColor as string) || 'ffffff'}`,
+					width: Math.min(Number.parseInt(req.query.width as string, 10) || 300, 2000),
+					height: Math.min(Number.parseInt(req.query.height as string, 10) || 300, 2000),
+					wireframe: req.query.wireframe === 'true',
+					cameraDistance: Math.min(Number.parseFloat(req.query.cameraDistance as string) || 5, 100),
+					autoRotate: req.query.autoRotate === 'true',
+				};
 
-		// Obtener modelo 3D de la base de datos
-		const model3DRecords = await db.select({ metadata: file3Ds.metadata }).from(file3Ds).where(eq(file3Ds.id, id));
+				const model3DRecords = await db.select({ metadata: file3Ds.metadata }).from(file3Ds).where(eq(file3Ds.id, id));
 
-		if (model3DRecords.length === 0) {
-			res.status(404).json({ error: '3D model not found' });
-			return;
-		}
+				if (model3DRecords.length === 0) {
+					throw Object.assign(new Error('3D model not found'), { _tag: 'FileNotFound' });
+				}
 
-		const model3D = model3DRecords[0];
-		let metadata: any = null;
+				const model3D = model3DRecords[0];
+				let metadata: any = null;
 
-		// Parsear metadata si existe
-		if (model3D.metadata) {
-			try {
-				metadata = JSON.parse(model3D.metadata);
-			} catch (e) {
-				serverLogger.warn(`Error parsing metadata for 3D model ${id}:`, e);
-			}
-		}
+				if (model3D.metadata) {
+					try {
+						metadata = JSON.parse(model3D.metadata);
+					} catch (e) {
+						serverLogger.warn(`Error parsing metadata for 3D model ${id}:`, e);
+					}
+				}
 
-		// Si ya tiene thumbnail generado en metadata
-		if (metadata?.thumbnail) {
-			const thumbnailSvg = metadata.thumbnail;
+				if (metadata?.thumbnail) {
+					return { svg: metadata.thumbnail, status: 200 };
+				}
+
+				const errorSVG = generate3DPlaceholderSVG({
+					width: options.width,
+					height: options.height,
+					backgroundColor: options.backgroundColor,
+				});
+				return { svg: errorSVG, status: 404 };
+			},
+			catch: (error) => new Error(String(error)),
+		}),
+	{
+		onSuccess: (data, res) => {
 			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=3600');
-			res.send(thumbnailSvg);
-			return;
-		}
-
-		// Fallback: generar placeholder
-		const errorSVG = generate3DPlaceholderSVG({
-			width: options.width,
-			height: options.height,
-			backgroundColor: options.backgroundColor,
-		});
-
-		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=60');
-		res.status(404).send(errorSVG);
-	} catch (error) {
-		serverLogger.error('Error generando thumbnail 3D:', error);
-
-		// Fallback de error: SVG simple
-		const errorSVG = generate3DPlaceholderSVG({
-			width: 300,
-			height: 300,
-			backgroundColor: '#fee2e2',
-		});
-
-		res.setHeader('Content-Type', 'image/svg+xml');
-		res.status(500).send(errorSVG);
+			res.setHeader('Cache-Control', data.status === 200 ? 'public, max-age=3600' : 'public, max-age=60');
+			res.status(data.status).send(data.svg);
+		},
+		onError: (_error, res) => {
+			serverLogger.error('Error generando thumbnail 3D:', _error);
+			const errorSVG = generate3DPlaceholderSVG({
+				width: 300,
+				height: 300,
+				backgroundColor: '#fee2e2',
+			});
+			res.setHeader('Content-Type', 'image/svg+xml');
+			res.status(500).send(errorSVG);
+		},
 	}
-});
+));
 
 /**
  * GET /3d/:id/info - Obtener información del modelo 3D sin renderizar
  */
-router.get('/:id/info', async (req, res) => {
-	try {
-		const { id } = req.params;
+router.get('/:id/info', effectHandler((req) =>
+	Effect.tryPromise({
+		try: async () => {
+			const { id } = req.params;
 
-		// Obtener modelo 3D de la base de datos
-		const model3DRecords = await db
-			.select({ path: file3Ds.path, metadata: file3Ds.metadata })
-			.from(file3Ds)
-			.where(eq(file3Ds.id, id));
+			const model3DRecords = await db
+				.select({ path: file3Ds.path, metadata: file3Ds.metadata })
+				.from(file3Ds)
+				.where(eq(file3Ds.id, id));
 
-		if (model3DRecords.length === 0) {
-			res.status(404).json({ error: '3D model not found' });
-			return;
-		}
-
-		const model3D = model3DRecords[0];
-
-		// Intentar extraer info de metadata cacheada
-		if (model3D.metadata) {
-			try {
-				const metadata = JSON.parse(model3D.metadata);
-				if (metadata.modelInfo) {
-					res.json({ id, ...metadata.modelInfo });
-					return;
-				}
-			} catch {
-				// Metadata inválida, continuar con análisis
+			if (model3DRecords.length === 0) {
+				throw Object.assign(new Error('3D model not found'), { _tag: 'FileNotFound' });
 			}
-		}
 
-		const modelInfo = await analyze3DModel(model3D.path);
+			const model3D = model3DRecords[0];
 
-		if (!modelInfo) {
-			res.status(404).json({ error: 'Model not found or unsupported format' });
-			return;
-		}
+			if (model3D.metadata) {
+				try {
+					const metadata = JSON.parse(model3D.metadata);
+					if (metadata.modelInfo) {
+						return { id, ...metadata.modelInfo };
+					}
+				} catch {
+					// Metadata inválida, continuar con análisis
+				}
+			}
 
-		res.json({
-			id,
-			vertices: modelInfo.vertices,
-			faces: modelInfo.faces,
-			materials: modelInfo.materials,
-			boundingBox: {
-				min: modelInfo.boundingBox.min,
-				max: modelInfo.boundingBox.max,
-			},
-		});
-	} catch (error) {
-		serverLogger.error('Error obteniendo información del modelo 3D:', error);
-		res.status(500).json({ error: 'Error analyzing 3D model' });
-	}
-});
+			const modelInfo = await analyze3DModel(model3D.path);
+
+			if (!modelInfo) {
+				throw Object.assign(new Error('Model not found or unsupported format'), { _tag: 'FileNotFound' });
+			}
+
+			return {
+				id,
+				vertices: modelInfo.vertices,
+				faces: modelInfo.faces,
+				materials: modelInfo.materials,
+				boundingBox: {
+					min: modelInfo.boundingBox.min,
+					max: modelInfo.boundingBox.max,
+				},
+			};
+		},
+		catch: (error) => new Error(String(error)),
+	})
+));
 
 export default router;

@@ -7,6 +7,7 @@
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createDefaultEntityStats } from '@/lib/utils';
+import { normalizeCounts } from '../common/counts';
 import type {
 	WorldItemComplete,
 	WorldItemCreateInput,
@@ -226,6 +227,8 @@ function mapSortByToDrizzle(sortBy?: string): DrizzleWorldItemOrderByInput {
 export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWithStats {
 	const { _count, ...rest } = worldItem;
 
+	const counts = normalizeCounts(_count);
+
 	// Calcular puntuación de rareza
 	const rarityScores: Record<string, number> = {
 		common: 10,
@@ -277,12 +280,12 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 
 	// Calcular popularidad basada en relaciones
 	const totalRelations =
-		(_count?.images || 0) +
-		(_count?.videos || 0) +
-		(_count?.characters || 0) +
-		(_count?.places || 0) +
-		(_count?.notes || 0) +
-		(_count?.concepts || 0);
+		(counts.images) +
+		(counts.videos) +
+		(counts.characters) +
+		(counts.places) +
+		(counts.notes) +
+		(counts.concepts);
 
 	const popularityScore = Math.min(
 		100,
@@ -300,19 +303,19 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 	const statistics: WorldItemStatistics = {
 		...createDefaultEntityStats(),
 		// Conteos de relaciones
-		imageCount: _count?.images || 0,
-		videoCount: _count?.videos || 0,
-		albumCount: _count?.albums || 0,
-		collectionCount: _count?.collections || 0,
-		tagCount: _count?.tags || 0,
-		characterCount: _count?.characters || 0,
-		placeCount: _count?.places || 0,
-		conceptCount: _count?.concepts || 0,
-		promptCount: _count?.prompts || 0,
-		noteCount: _count?.notes || 0,
-		wildcardCount: _count?.wildcards || 0,
-		propertyCount: _count?.properties || 0,
-		groupCount: _count?.groups || 0,
+		imageCount: counts.images,
+		videoCount: counts.videos,
+		albumCount: counts.albums,
+		collectionCount: counts.collections,
+		tagCount: counts.tags,
+		characterCount: counts.characters,
+		placeCount: counts.places,
+		conceptCount: counts.concepts,
+		promptCount: counts.prompts,
+		noteCount: counts.notes,
+		wildcardCount: counts.wildcards,
+		propertyCount: counts.properties,
+		groupCount: counts.groups,
 
 		// Métricas globales requeridas por EntityStats
 		totalItems: totalRelations,
@@ -343,7 +346,7 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		hasEffects: effects.length > 0,
 		hasRequirements: requirements.length > 0,
 		hasStats: statsData.length > 0,
-		mediaRichness: (_count?.images || 0) + (_count?.videos || 0),
+		mediaRichness: (counts.images) + (counts.videos),
 		// Análisis temporal
 		createdThisMonth: daysSinceCreation <= 30,
 		updatedThisWeek: daysSinceLastUpdate <= 7,
@@ -362,6 +365,6 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		entityType: 'world-item' as const,
 		statistics,
 		stats: statistics,
-		_count: _count || {},
+		_count: counts,
 	};
 }

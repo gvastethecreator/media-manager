@@ -1,82 +1,29 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { VideoWithStats } from '@/types/entities/video';
-import { deleteVideoFromApi, updateVideoInApi } from './client/video.client';
-import { apiClient } from './client';
+import type { VideoCreateInput, VideoUpdateInput, VideoWithStats } from '@/types/entities/video';
+import { createEntityHooks } from './hook-factory';
 
 export interface VideoFilters {
+	[key: string]: unknown;
 	limit?: number;
 	offset?: number;
 	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size' | 'duration' | 'width' | 'height';
 	sortOrder?: 'asc' | 'desc';
+	folderId?: string;
+	isFavorite?: boolean;
 }
 
-export interface VideosResponse {
-	data: VideoWithStats[];
-	pagination: {
-		total: number;
-		limit: number;
-		offset: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	};
-}
+const hooks = createEntityHooks<VideoWithStats, VideoCreateInput, Partial<VideoUpdateInput>, VideoFilters>({
+	entityName: 'videos',
+	baseEndpoint: '/videos',
+	listStaleTime: 60_000,
+	detailStaleTime: 60_000,
+});
 
-// Query keys
-export const videoKeys = {
-	all: ['videos'] as const,
-	lists: () => [...videoKeys.all, 'list'] as const,
-	list: (filters: VideoFilters) => [...videoKeys.lists(), filters] as const,
-	details: () => [...videoKeys.all, 'detail'] as const,
-	detail: (id: string) => [...videoKeys.details(), id] as const,
-};
+export const videoKeys = hooks.keys;
+export const useVideos = hooks.useList;
+export const useVideo = hooks.useDetail;
+export const useCreateVideo = hooks.useCreate;
+export const useUpdateVideo = hooks.useUpdate;
+export const useDeleteVideo = hooks.useDelete;
 
-// Hooks
-export function useVideos(filters: VideoFilters = {}) {
-	return useQuery<VideosResponse, Error>({
-		queryKey: videoKeys.list(filters),
-		queryFn: () => {
-			const params = new URLSearchParams();
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					params.append(key, String(value));
-				}
-			}
-			return apiClient.get<VideosResponse>(`/videos?${params.toString()}`);
-		},
-		staleTime: 1000 * 60, // 1 minuto
-	});
-}
-
-export function useVideo(id: string) {
-	return useQuery<VideoWithStats, Error>({
-		queryKey: videoKeys.detail(id),
-		queryFn: () => apiClient.get<VideoWithStats>(`/videos/${id}`),
-		enabled: !!id,
-		staleTime: 1000 * 60, // 1 minuto
-	});
-}
-
-export function useUpdateVideo() {
-	const queryClient = useQueryClient();
-
-	return useMutation<VideoWithStats, Error, { id: string; data: Partial<VideoWithStats> }>({
-		mutationFn: ({ id, data }) => updateVideoInApi(id, data),
-		onSuccess: (video) => {
-			queryClient.invalidateQueries({ queryKey: videoKeys.lists() });
-			queryClient.setQueryData(videoKeys.detail(video.id), video);
-		},
-	});
-}
-
-export function useDeleteVideo() {
-	const queryClient = useQueryClient();
-
-	return useMutation<void, Error, string>({
-		mutationFn: (id) => deleteVideoFromApi(id),
-		onSuccess: (_, id) => {
-			queryClient.invalidateQueries({ queryKey: videoKeys.lists() });
-			queryClient.removeQueries({ queryKey: videoKeys.detail(id) });
-		},
-	});
-}
+export type VideosResponse = Awaited<ReturnType<typeof hooks.useList>>['data'];

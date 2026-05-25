@@ -10,7 +10,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { db } from '@/lib/drizzle/index.js';
 import { audios } from '@/lib/drizzle/schema/index.js';
-import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { AudioService, AudioServiceLive } from '@/services/audio/audio.service.effect';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
@@ -68,8 +68,8 @@ function sortEntitiesByField<T extends Record<string, unknown>>(
 /**
  * GET /audios - Listar audios con filtros y paginación
  */
-router.get('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/', effectHandler((req) =>
+	Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const {
@@ -122,17 +122,15 @@ router.get('/', async (req, res) => {
 			thumbnailUrl: `/api/audio/${audio.id}/waveform`,
 		}));
 
-		return res.json(data);
-	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+		return data;
+	}).pipe(Effect.provide(AudioServiceLive))
+));
 
 /**
  * GET /audios/favorites - Listar solo audios favoritos
  */
-router.get('/favorites', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/favorites', effectHandler((req) =>
+	Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
@@ -153,7 +151,7 @@ router.get('/favorites', async (req, res) => {
 		const totalFavorites = favoriteCounts[FavoriteEntityType.AUDIO] ?? 0;
 
 		if (totalFavorites === 0) {
-			return res.json([]);
+			return [];
 		}
 
 		const favoriteResult = yield* Effect.tryPromise({
@@ -188,58 +186,53 @@ router.get('/favorites', async (req, res) => {
 			filters.sortOrder
 		).slice(filters.offset, filters.offset + filters.limit);
 
-		return res.json(data);
-	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+		return data;
+	}).pipe(Effect.provide(AudioServiceLive))
+));
 
 /**
  * GET /audios/stats/format - Obtener estadísticas por formato
  */
-router.get('/stats/format', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.get('/stats/format', effectHandler((req) =>
+	Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const stats = yield* audioService.getFormatStats();
 
-		return res.json({ stats });
-	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+		return { stats };
+	}).pipe(Effect.provide(AudioServiceLive))
+));
 
 /**
  * GET /audios/by-hash/:hash - Buscar audio por hash
  */
-router.get('/by-hash/:hash', async (req, res) => {
+router.get('/by-hash/:hash', effectHandler((req, res) => {
 	const { hash } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const audio = yield* audioService.getByHash(hash);
 
 		if (!audio) {
-			return res.status(404).json({
+			res.status(404).json({
 				error: 'NOT_FOUND',
 				message: `Audio con hash ${hash} no encontrado`,
 			});
+			return;
 		}
 
-		return res.json(audio);
+		return audio;
 	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * GET /audios/folder/:folderId - Listar audios por folder
  */
-router.get('/folder/:folderId', async (req, res) => {
+router.get('/folder/:folderId', effectHandler((req) => {
 	const { folderId } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
@@ -260,28 +253,24 @@ router.get('/folder/:folderId', async (req, res) => {
 			thumbnailUrl: `/api/audio/${audio.id}/waveform`,
 		}));
 
-		return res.json(data);
+		return data;
 	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * GET /audios/folder/:folderId/count - Contar audios en un folder
  */
-router.get('/folder/:folderId/count', async (req, res) => {
+router.get('/folder/:folderId/count', effectHandler((req) => {
 	const { folderId } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const count = yield* audioService.countByFolder(folderId);
 
-		return res.json({ count });
+		return { count };
 	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * GET /audios/:id/waveform - Obtener waveform de audio
@@ -348,75 +337,68 @@ router.get('/:id/waveform', async (req, res) => {
 /**
  * GET /audios/:id - Obtener un audio por ID
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', effectHandler((req) => {
 	const { id } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const audio = yield* audioService.getById(id);
 
-		return res.json(audio);
+		return audio;
 	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * GET /audios/:id/stats - Obtener audio con estadísticas completas
  */
-router.get('/:id/stats', async (req, res) => {
+router.get('/:id/stats', effectHandler((req) => {
 	const { id } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const audio = yield* audioService.getByIdWithStats(id);
 
-		return res.json(audio);
+		return audio;
 	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * POST /audios - Crear un nuevo audio
  */
-router.post('/', async (req, res) => {
-	const effect = Effect.gen(function* () {
+router.post('/', effectHandler((req, res) =>
+	Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const audio = yield* audioService.create(req.body);
 
-		return res.status(201).json(audio);
-	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+		res.status(201);
+		return audio;
+	}).pipe(Effect.provide(AudioServiceLive))
+));
 
 /**
  * POST /audios/:id/favorite - Toggle estado favorito de un audio
  */
-router.post('/:id/favorite', async (req, res) => {
+router.post('/:id/favorite', effectHandler((req) => {
 	const { id } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const audioService = yield* AudioService;
 		const audio = yield* audioService.toggleFavorite(id);
 
-		return res.json(audio);
+		return audio;
 	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * POST /audios/batch/favorite - Marcar múltiples audios como favoritos/no favoritos
  */
-router.post('/batch/favorite', async (req, res) => {
+router.post('/batch/favorite', effectHandler((req) => {
 	const { ids, isFavorite } = req.body;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
 			yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
 		}
@@ -428,62 +410,55 @@ router.post('/batch/favorite', async (req, res) => {
 			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
 		});
 
-		return res.json({ updatedCount });
+		return { updatedCount };
 	});
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * PATCH /audios/:id - Actualizar un audio
  */
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', effectHandler((req) => {
 	const { id } = req.params;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const audio = yield* audioService.update(id, req.body);
 
-		return res.json(audio);
+		return audio;
 	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * DELETE /audios/:id - Eliminar un audio
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', effectHandler((req, res) => {
 	const { id } = req.params;
 	const { force } = req.query;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		yield* audioService.deleteById(id, force === 'true');
 
-		return res.status(204).send();
+		res.status(204);
+		return undefined;
 	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 /**
  * DELETE /audios/batch - Eliminar múltiples audios
  */
-router.delete('/batch', async (req, res) => {
+router.delete('/batch', effectHandler((req) => {
 	const { ids, force } = req.body;
 
-	const effect = Effect.gen(function* () {
+	return Effect.gen(function* () {
 		const audioService = yield* AudioService;
 
 		const deletedCount = yield* audioService.deleteManyByIds(ids, force === true);
 
-		return res.json({ deletedCount });
+		return { deletedCount };
 	}).pipe(Effect.provide(AudioServiceLive));
-
-	await runEffectForExpress(effect, res);
-});
+}));
 
 export default router;

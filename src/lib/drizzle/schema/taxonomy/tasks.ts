@@ -52,7 +52,7 @@ export const tasks = sqliteTable('Task', {
 	notes: text('notes'),
 	featuredImage: text('featuredImage'), // Imagen destacada opcional
 
-	// Favoritos y visibilidad
+	// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 	isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 	isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
 

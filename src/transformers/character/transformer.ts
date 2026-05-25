@@ -6,6 +6,7 @@
  */
 
 import { createDefaultEntityStats } from '@/lib/utils';
+import { normalizeCounts, sumCounts } from '../common/counts';
 import { serverLogger } from '../../lib/logger/server-logger';
 import type { CharacterAssociationStats, CharacterWithStats } from '../../types/entities/character';
 
@@ -96,38 +97,24 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 		const { _count, ...baseData } = drizzleCharacter;
 
 		// Calcular totales desde los conteos (permitir _count undefined)
-		const totalImages = _count?.images ?? 0;
-		const totalVideos = _count?.videos ?? 0;
-		const totalTags = _count?.tags ?? 0;
-		const totalGroups = _count?.groups ?? 0;
-		const totalProperties = _count?.properties ?? 0;
-		const totalCollections = _count?.collections ?? 0;
-		const totalAlbums = _count?.albums ?? 0;
-		const totalPlaces = _count?.places ?? 0;
-		const totalWorldItems = _count?.worldItems ?? 0;
-		const totalConcepts = _count?.concepts ?? 0;
-		const totalPrompts = _count?.prompts ?? 0;
-		const totalNotes = _count?.notes ?? 0;
-		const totalWildcards = _count?.wildcards ?? 0;
+		const counts = normalizeCounts(_count);
+		const totalImages = counts.images;
+		const totalVideos = counts.videos;
+		const totalTags = counts.tags;
+		const totalGroups = counts.groups;
+		const totalProperties = counts.properties;
+		const totalCollections = counts.collections;
+		const totalAlbums = counts.albums;
+		const totalPlaces = counts.places;
+		const totalWorldItems = counts.worldItems;
+		const totalConcepts = counts.concepts;
+		const totalPrompts = counts.prompts;
+		const totalNotes = counts.notes;
+		const totalWildcards = counts.wildcards;
 		const totalRelatedCharacters = _count?.relatedCharacters ?? 0;
 		const totalRelatedTo = _count?.relatedTo ?? 0;
 
-		const totalAssociations =
-			totalImages +
-			totalVideos +
-			totalTags +
-			totalGroups +
-			totalProperties +
-			totalCollections +
-			totalAlbums +
-			totalPlaces +
-			totalWorldItems +
-			totalConcepts +
-			totalPrompts +
-			totalNotes +
-			totalWildcards +
-			totalRelatedCharacters +
-			totalRelatedTo;
+		const totalAssociations = sumCounts(_count);
 
 		// Calcular power level basado en asociaciones (sin nivel)
 		const powerLevel = calculatePowerLevel(1, totalAssociations);

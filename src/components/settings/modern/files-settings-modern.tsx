@@ -44,7 +44,7 @@ import {
 	useThumbnailStats,
 } from '@/lib/api/thumbnails';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { useSettings } from '@/lib/contexts';
+import { useSettings } from '@/lib/contexts/settings-context';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';

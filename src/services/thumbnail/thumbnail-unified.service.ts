@@ -2,7 +2,13 @@
  * @file Servicio unificado de thumbnails para todas las entidades
  * @module services/thumbnail
  * @description Proporciona generación, recuperación y gestión de thumbnails
- *              para imágenes, videos, audio, documentos, JSON y modelos 3D
+ *              para imágenes, videos, audio, documentos, JSON y modelos 3D.
+ * @deprecated Este módulo es una fachada superficial: un mega-switch que delega
+ * a implementaciones dispersas (`image/image-thumbnail.service.ts`,
+ * `lib/utils/video/ffmpeg-thumbnails.ts`, `lib/utils/audio/waveform-generator.ts`).
+ * Para código nuevo, preferir las implementaciones tipo-específicas directas.
+ * Para un `Platform Process` de thumbnail, refactorizar moviendo las implementaciones
+ * detrás de esta interfaz (hacerla profunda) o eliminar la fachada.
  */
 
 import { existsSync } from 'node:fs';
