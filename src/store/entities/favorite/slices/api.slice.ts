@@ -5,8 +5,9 @@
 
 import { StateCreator } from 'zustand';
 import { apiClient } from '@/lib/api/client';
+import { normalizeFavoriteEntityType } from '@/lib/api/favorites';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { FavoriteEntityType, type FavoriteExtended } from '@/types/entities/favorite';
+import type { FavoriteExtended } from '@/types/entities/favorite';
 import { FavoriteStore } from '..';
 
 // Logger específico para este slice
@@ -47,13 +48,13 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 		try {
 			logger.info('🔄 Cargando favoritos...');
 
-			const response = await apiClient.get<{ data: any[] }>('/favorites');
+			const response = await apiClient.get<{ data: FavoriteExtended[] }>('/favorites');
 
 			// Actualizar el estado con los favoritos obtenidos
 			if (response?.data) {
-				for (const fav of response.data) {
-					get().addFavorite(fav);
-				}
+				get().setFavorites(response.data);
+			} else {
+				get().setFavorites([]);
 			}
 
 			set({
@@ -78,18 +79,18 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 		try {
 			logger.info('➕ Creando favorito:', { entityId, entityType });
 
+			const normalizedEntityType = normalizeFavoriteEntityType(entityType);
+			if (!normalizedEntityType) {
+				throw new Error(`Tipo de favorito no soportado: ${entityType}`);
+			}
+
 			const result = await apiClient.post<{ isFavorite: boolean; id?: string }>('/favorites/toggle', {
 				entityId,
-				entityType,
+				entityType: normalizedEntityType,
 			});
 
-			if (result.isFavorite && result.id) {
-				get().addFavorite({
-					id: result.id,
-					entityId,
-					entityType: entityType as FavoriteEntityType,
-					addedAt: new Date(),
-				} as FavoriteExtended);
+			if (result.isFavorite) {
+				await get().fetchFavorites();
 			}
 
 			set({ isApiLoading: false });
@@ -133,26 +134,17 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 		try {
 			logger.info('🔄 Alternando favorito:', { entityId, entityType });
 
+			const normalizedEntityType = normalizeFavoriteEntityType(entityType);
+			if (!normalizedEntityType) {
+				throw new Error(`Tipo de favorito no soportado: ${entityType}`);
+			}
+
 			const result = await apiClient.post<{ isFavorite: boolean; id?: string }>('/favorites/toggle', {
 				entityId,
-				entityType,
+				entityType: normalizedEntityType,
 			});
 
-			if (result.isFavorite && result.id) {
-				get().addFavorite({
-					id: result.id,
-					entityId,
-					entityType: entityType as FavoriteEntityType,
-					addedAt: new Date(),
-				} as FavoriteExtended);
-			} else {
-				// Buscar y remover el favorito
-				const favorites = get().favorites;
-				const existingFav = favorites.find((f) => f.entityId === entityId && f.entityType === entityType);
-				if (existingFav) {
-					get().removeFavorite(existingFav.id);
-				}
-			}
+			await get().fetchFavorites();
 
 			set({ isApiLoading: false });
 			logger.info('✅ Favorito alternado exitosamente:', { isFavorite: result.isFavorite });

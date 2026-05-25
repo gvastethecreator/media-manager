@@ -161,7 +161,7 @@ export const useWorldItem = (id: string | null) => {
  * @returns Acciones para gestionar objetos del mundo
  */
 export const useWorldItemActions = () => {
-	const { createWorldItem, updateWorldItem, deleteWorldItem, getWorldItemById } = useWorldItemStore();
+	const { createWorldItem, updateWorldItem, deleteWorldItem, toggleWorldItemFavorite } = useWorldItemStore();
 
 	return {
 		// Acciones CRUD
@@ -191,12 +191,9 @@ export const useWorldItemActions = () => {
 		// Acciones comunes
 		toggleFavorite: useCallback(
 			(id: string) => {
-				const item = getWorldItemById(id);
-				if (item) {
-					updateWorldItem(id, { isFavorite: !item.isFavorite });
-				}
+				return toggleWorldItemFavorite(id);
 			},
-			[getWorldItemById, updateWorldItem]
+			[toggleWorldItemFavorite]
 		),
 	};
 };

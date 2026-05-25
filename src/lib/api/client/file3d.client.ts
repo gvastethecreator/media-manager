@@ -45,6 +45,16 @@ export async function updateFile3DInApi(id: string, data: File3DUpdateInput): Pr
 	return response.json();
 }
 
+export async function toggleFile3DFavoriteInApi(id: string): Promise<File3DWithStats> {
+	const response = await fetch(`${API_BASE_PATH}/${id}/favorite`, {
+		method: 'POST',
+	});
+	if (!response.ok) {
+		throw new Error('Error al alternar favorito del archivo 3D');
+	}
+	return response.json();
+}
+
 export async function deleteFile3DFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {

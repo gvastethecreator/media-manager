@@ -26,7 +26,12 @@ const groupsEffectRouter = express.Router();
 groupsEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* GroupService;
-		return yield* service.getAll({ limit: Number(req.query.limit) || 50, offset: Number(req.query.offset) || 0 });
+		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
+		return yield* service.getAll({
+			limit: Number(req.query.limit) || 50,
+			offset: Number(req.query.offset) || 0,
+			onlyFavorites,
+		});
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(GroupServiceLive)), res);
 });
@@ -80,7 +85,12 @@ const wildcardsEffectRouter = express.Router();
 wildcardsEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* WildcardService;
-		return yield* service.getAll({ limit: Number(req.query.limit) || 50, offset: Number(req.query.offset) || 0 });
+		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
+		return yield* service.getAll({
+			limit: Number(req.query.limit) || 50,
+			offset: Number(req.query.offset) || 0,
+			onlyFavorites,
+		});
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(WildcardServiceLive)), res);
 });
@@ -134,7 +144,12 @@ const notesEffectRouter = express.Router();
 notesEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* NoteService;
-		return yield* service.getAll({ limit: Number(req.query.limit) || 50, offset: Number(req.query.offset) || 0 });
+		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
+		return yield* service.getAll({
+			limit: Number(req.query.limit) || 50,
+			offset: Number(req.query.offset) || 0,
+			onlyFavorites,
+		});
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res);
 });
@@ -166,6 +181,13 @@ notesEffectRouter.delete('/:id', async (req, res) => {
 		return { success: true };
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res, { successStatus: 204 });
+});
+notesEffectRouter.post('/:id/favorite', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* NoteService;
+		return yield* service.toggleFavorite(req.params.id);
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(NoteServiceLive)), res);
 });
 notesEffectRouter.get('/:id/images', async (req, res) => {
 	const effect = Effect.gen(function* () {
@@ -212,7 +234,12 @@ const propertiesEffectRouter = express.Router();
 propertiesEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* PropertyService;
-		return yield* service.getAll({ limit: Number(req.query.limit) || 50, offset: Number(req.query.offset) || 0 });
+		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
+		return yield* service.getAll({
+			limit: Number(req.query.limit) || 50,
+			offset: Number(req.query.offset) || 0,
+			onlyFavorites,
+		});
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res);
 });
@@ -245,6 +272,13 @@ propertiesEffectRouter.delete('/:id', async (req, res) => {
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res, { successStatus: 204 });
 });
+propertiesEffectRouter.post('/:id/favorite', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* PropertyService;
+		return yield* service.toggleFavorite(req.params.id);
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(PropertyServiceLive)), res);
+});
 propertiesEffectRouter.post('/:id/images/:imageId', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* PropertyService;
@@ -259,7 +293,12 @@ const worldItemsEffectRouter = express.Router();
 worldItemsEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* WorldItemService;
-		return yield* service.getAll({ limit: Number(req.query.limit) || 50, offset: Number(req.query.offset) || 0 });
+		const onlyFavorites = req.query.onlyFavorites === 'true' || req.query.isFavorite === 'true';
+		return yield* service.getAll({
+			limit: Number(req.query.limit) || 50,
+			offset: Number(req.query.offset) || 0,
+			onlyFavorites,
+		});
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res);
 });
@@ -291,6 +330,13 @@ worldItemsEffectRouter.delete('/:id', async (req, res) => {
 		return { success: true };
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res, { successStatus: 204 });
+});
+worldItemsEffectRouter.post('/:id/favorite', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const service = yield* WorldItemService;
+		return yield* service.toggleFavorite(req.params.id);
+	});
+	await runEffectForExpress(effect.pipe(Effect.provide(WorldItemServiceLive)), res);
 });
 worldItemsEffectRouter.post('/:id/images/:imageId', async (req, res) => {
 	const effect = Effect.gen(function* () {

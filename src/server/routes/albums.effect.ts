@@ -10,7 +10,10 @@ import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { AlbumCreateInput, AlbumUpdateInput } from '@/lib/effect/schemas/entities';
+import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { AlbumService, AlbumServiceLive } from '@/services/album/album.service.effect';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -43,6 +46,29 @@ router.get(
 				category: category as string | undefined,
 				onlyFavorites: onlyFavorites === 'true' ? true : undefined,
 			};
+
+			if (options.onlyFavorites) {
+				const favoriteResult = yield* listFavoriteEntities({
+					entityType: FavoriteEntityType.ALBUM,
+					search: options.search,
+					limit: options.limit,
+					offset: options.offset,
+					sortBy: options.orderBy,
+					sortOrder: options.orderDirection,
+					getEntityById: (entityId: string) => albumService.getByIdWithStats(entityId),
+				});
+
+				return {
+					data: favoriteResult.data,
+					pagination: {
+						total: favoriteResult.total,
+						limit: options.limit,
+						offset: options.offset,
+						hasNext: options.limit + options.offset < favoriteResult.total,
+						hasPrev: options.offset > 0,
+					},
+				};
+			}
 
 			const result = yield* albumService.getAll(options);
 

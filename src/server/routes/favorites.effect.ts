@@ -9,11 +9,25 @@ import { z } from 'zod';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
-import { FavoriteEntityType } from '@/types/entities/favorite';
+import { FavoriteEntityType, isCanonicalFavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = Router();
 const logger = serverLogger.withContext('FavoritesEffect');
+
+const favoriteListQuerySchema = z.object({
+	entityType: z.nativeEnum(FavoriteEntityType).optional(),
+	limit: z.string().optional(),
+	offset: z.string().optional(),
+	search: z.string().optional(),
+	sortBy: z.enum(['addedAt', 'entityType']).optional(),
+	sortOrder: z.enum(['asc', 'desc']).optional(),
+});
+
+const favoriteCheckQuerySchema = z.object({
+	entityType: z.nativeEnum(FavoriteEntityType),
+	entityId: z.string().min(1),
+});
 
 const toggleFavoriteSchema = z.object({
 	entityType: z.nativeEnum(FavoriteEntityType),
@@ -25,13 +39,30 @@ router.get(
 	'/',
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
-			const { entityType, limit = '50', offset = '0', sortOrder = 'desc' } = req.query;
+			const parseResult = yield* Effect.tryPromise({
+				try: () => favoriteListQuerySchema.parseAsync(req.query),
+				catch: (error) => error,
+			});
+
+			if (parseResult instanceof z.ZodError) {
+				res.status(400);
+				return { error: 'Query inválida', details: parseResult.issues };
+			}
+
+				if (parseResult.entityType && !isCanonicalFavoriteEntityType(parseResult.entityType)) {
+					res.status(400);
+					return {
+						error: `El tipo ${parseResult.entityType} está fuera del perímetro canónico de Favorite`,
+					};
+				}
 
 			const filters = {
-				entityType: entityType as string | undefined,
-				limit: sanitizeLimit(limit as string),
-				offset: sanitizeOffset(offset as string),
-				sortOrder: sortOrder as 'asc' | 'desc',
+				entityType: parseResult.entityType,
+				limit: sanitizeLimit(parseResult.limit ?? '50'),
+				offset: sanitizeOffset(parseResult.offset ?? '0'),
+				search: parseResult.search,
+				sortBy: parseResult.sortBy,
+				sortOrder: parseResult.sortOrder ?? 'desc',
 			};
 
 			const result = yield* Effect.tryPromise({
@@ -79,20 +110,25 @@ router.get(
 	'/check',
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
-			const { entityType, entityId } = req.query;
+			const parseResult = yield* Effect.tryPromise({
+				try: () => favoriteCheckQuerySchema.parseAsync(req.query),
+				catch: (error) => error,
+			});
 
-			if (!entityType || typeof entityType !== 'string') {
+			if (parseResult instanceof z.ZodError) {
 				res.status(400);
-				return { error: 'entityType es requerido' };
+				return { error: 'Query inválida', details: parseResult.issues };
 			}
 
-			if (!entityId || typeof entityId !== 'string') {
-				res.status(400);
-				return { error: 'entityId es requerido' };
-			}
+				if (!isCanonicalFavoriteEntityType(parseResult.entityType)) {
+					res.status(400);
+					return {
+						error: `El tipo ${parseResult.entityType} está fuera del perímetro canónico de Favorite`,
+					};
+				}
 
 			const isFavorite = yield* Effect.tryPromise({
-				try: () => favoriteService.isFavorite(entityType as FavoriteEntityType, entityId),
+				try: () => favoriteService.isFavorite(parseResult.entityType, parseResult.entityId),
 				catch: (error) => {
 					logger.error('Error al verificar favorito:', error);
 					return new Error(error instanceof Error ? error.message : String(error));
@@ -145,6 +181,11 @@ router.post(
 			}
 
 			const { entityType, entityId } = parseResult;
+
+				if (!isCanonicalFavoriteEntityType(entityType)) {
+					res.status(400);
+					return { error: `El tipo ${entityType} está fuera del perímetro canónico de Favorite` };
+				}
 
 			const result = yield* Effect.tryPromise({
 				try: () => favoriteService.toggle(entityType, entityId),

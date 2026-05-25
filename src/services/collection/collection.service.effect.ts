@@ -18,6 +18,8 @@ import {
 } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { CollectionError } from './collection-errors.effect';
 import {
 	CollectionDatabaseError,
@@ -395,6 +397,18 @@ export const CollectionServiceLive = Layer.succeed(
 					offset,
 				});
 
+				const favoriteEntityIds: string[] | null =
+					onlyFavorites
+						? yield* Effect.tryPromise({
+							try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION),
+							catch: (error) =>
+								new CollectionDatabaseError({
+									operation: 'getAll:favoriteIds',
+									originalError: error,
+								}),
+						})
+						: null;
+
 				// Build conditions
 				const conditions = [];
 				if (search) {
@@ -404,7 +418,18 @@ export const CollectionServiceLive = Layer.succeed(
 					conditions.push(parentId === null ? isNull(collections.parentId) : eq(collections.parentId, parentId));
 				}
 				if (onlyFavorites) {
-					conditions.push(eq(collections.isFavorite, true));
+					if (favoriteEntityIds === null) {
+						conditions.push(eq(collections.isFavorite, true));
+					} else if (favoriteEntityIds.length === 0) {
+						return {
+							collections: [],
+							total: 0,
+							limit,
+							offset,
+						};
+					} else {
+						conditions.push(inArray(collections.id, favoriteEntityIds));
+					}
 				}
 
 				const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -470,7 +495,16 @@ export const CollectionServiceLive = Layer.succeed(
 						}),
 				});
 
-				const enriched = yield* Effect.forEach(validated, (c) => enrichCollectionWithCounts(c), {
+				const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
+				const normalizedCollections =
+					favoriteIdSet === null
+						? validated
+						: validated.map((collection) => ({
+							...collection,
+							isFavorite: favoriteIdSet.has(collection.id),
+						}));
+
+				const enriched = yield* Effect.forEach(normalizedCollections, (c) => enrichCollectionWithCounts(c), {
 					concurrency: 1,
 				}).pipe(Effect.mapError((error) => error as CollectionError));
 
@@ -505,6 +539,19 @@ export const CollectionServiceLive = Layer.succeed(
 
 				// Generate readable ID
 				const readableId = generateReadableId('collection', validated.name, 1);
+				const requestedIsFavorite = validated.isFavorite === true;
+				const useCanonicalFavoriteBridge =
+					requestedIsFavorite
+						? yield* Effect.tryPromise({
+							try: async () =>
+								(await favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION)) !== null,
+							catch: (error) =>
+								new CollectionDatabaseError({
+									operation: 'create:favoriteScope',
+									originalError: error,
+								}),
+						})
+						: false;
 
 				// Insert to DB
 				const now = new Date();
@@ -521,7 +568,7 @@ export const CollectionServiceLive = Layer.succeed(
 										color: validated.color ?? null,
 										description: validated.description ?? null,
 										featuredImage: validated.featuredImage ?? null,
-										isFavorite: validated.isFavorite ?? false,
+										isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
 										parentId: validated.parentId ?? null,
 										createdAt: now,
 										updatedAt: now,
@@ -549,7 +596,30 @@ export const CollectionServiceLive = Layer.succeed(
 
 				logger.info('✅ Collection creada', { id: created.id, name: created.name });
 
-				return yield* enrichCollectionWithCounts(created);
+				if (requestedIsFavorite && useCanonicalFavoriteBridge) {
+					yield* Effect.tryPromise({
+						try: async () => {
+							try {
+								await favoriteService.set(FavoriteEntityType.COLLECTION, created.id, true);
+							} catch (error) {
+								await withSqliteBusyRetry(async () =>
+									await db.delete(collections).where(eq(collections.id, created.id)).execute()
+								);
+								throw error;
+							}
+						},
+						catch: (error) =>
+							new CollectionDatabaseError({
+								operation: 'create:favoriteBridge',
+								originalError: error,
+							}),
+					});
+				}
+
+				return yield* enrichCollectionWithCounts({
+					...created,
+					isFavorite: requestedIsFavorite ? true : created.isFavorite,
+				});
 			}),
 
 		update: (id, input) =>
@@ -579,6 +649,33 @@ export const CollectionServiceLive = Layer.succeed(
 					yield* validateParentExists(validated.parentId);
 				}
 
+				const requestedIsFavorite = validated.isFavorite;
+				const useCanonicalFavoriteBridge =
+					requestedIsFavorite !== undefined
+						? yield* Effect.tryPromise({
+							try: async () =>
+								(await favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION)) !== null,
+							catch: (error) =>
+								new CollectionDatabaseError({
+									operation: 'update:favoriteScope',
+									originalError: error,
+								}),
+						})
+						: false;
+
+				if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
+					yield* Effect.tryPromise({
+						try: () => favoriteService.set(FavoriteEntityType.COLLECTION, id, requestedIsFavorite),
+						catch: (error) =>
+							new CollectionDatabaseError({
+								operation: 'update:favoriteBridge',
+								originalError: error,
+							}),
+					});
+				}
+
+				const { isFavorite: _ignoredIsFavorite, ...validatedFields } = validated;
+
 				// Update in DB
 				const updatedRows = (yield* Effect.tryPromise({
 					try: async () =>
@@ -587,7 +684,10 @@ export const CollectionServiceLive = Layer.succeed(
 								await db
 									.update(collections)
 									.set({
-										...validated,
+										...validatedFields,
+										...(requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge
+											? { isFavorite: requestedIsFavorite }
+											: {}),
 										updatedAt: new Date(),
 									})
 									.where(eq(collections.id, id))
@@ -791,29 +891,53 @@ export const CollectionServiceLive = Layer.succeed(
 				logger.info('⭐ Toggle favorite collection', { id });
 
 				const collection = yield* getByIdInternal(id);
-				const newValue = !collection.isFavorite;
-
-				const updatedRows = (yield* Effect.tryPromise({
-					try: async () =>
-						await withSqliteBusyRetry(
-							async () =>
-								await db
-									.update(collections)
-									.set({
-										isFavorite: newValue,
-										updatedAt: new Date(),
-									})
-									.where(eq(collections.id, id))
-									.returning()
-									.execute()
-						),
+				const favoriteEntityIds = yield* Effect.tryPromise({
+					try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION),
 					catch: (error) =>
 						new CollectionDatabaseError({
-							operation: 'toggleFavorite',
+							operation: 'toggleFavorite:scope',
 							originalError: error,
 						}),
-				})) as Array<typeof collections.$inferSelect>;
-				const [result] = updatedRows;
+				});
+
+				let result: typeof collections.$inferSelect;
+
+				if (favoriteEntityIds === null) {
+					const newValue = !collection.isFavorite;
+					const updatedRows = (yield* Effect.tryPromise({
+						try: async () =>
+							await withSqliteBusyRetry(
+								async () =>
+									await db
+										.update(collections)
+										.set({
+											isFavorite: newValue,
+											updatedAt: new Date(),
+										})
+										.where(eq(collections.id, id))
+										.returning()
+										.execute()
+							),
+						catch: (error) =>
+							new CollectionDatabaseError({
+								operation: 'toggleFavorite',
+								originalError: error,
+							}),
+					})) as Array<typeof collections.$inferSelect>;
+					result = updatedRows[0];
+				} else {
+					yield* Effect.tryPromise({
+						try: () => favoriteService.toggle(FavoriteEntityType.COLLECTION, id),
+						catch: (error) =>
+							new CollectionDatabaseError({
+								operation: 'toggleFavorite:favoriteBridge',
+								originalError: error,
+							}),
+					});
+
+					const refreshed = yield* getByIdInternal(id);
+					result = refreshed;
+				}
 
 				const updated = yield* Effect.try({
 					try: () => decodeCollectionRow(result),
@@ -824,7 +948,7 @@ export const CollectionServiceLive = Layer.succeed(
 						}),
 				});
 
-				logger.info('✅ Favorite toggled', { id, isFavorite: newValue });
+				logger.info('✅ Favorite toggled', { id, isFavorite: updated.isFavorite });
 
 				return yield* enrichCollectionWithCounts(updated);
 			}),

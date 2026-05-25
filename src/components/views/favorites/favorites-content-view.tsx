@@ -8,11 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Textarea } from '@/components/ui/textarea';
 import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
-import type { FavoriteWithStats } from '@/types/entities/favorite/base';
-import { FAVORITE_ENTITY_COLORS, FAVORITE_ENTITY_EMOJIS } from '@/types/entities/favorite/base';
-import type { FavoriteExtended } from '@/types/entities/favorite/types';
+import type { FavoriteExtended, FavoriteWithStats } from '@/types/entities/favorite';
+import { FAVORITE_ENTITY_COLORS, FAVORITE_ENTITY_EMOJIS } from '@/types/entities/favorite';
 
 /**
  * Transforma un FavoriteWithStats a FavoriteExtended para compatibilidad con FavoriteCard
@@ -23,14 +21,9 @@ function transformToExtended(favorite: FavoriteWithStats): FavoriteExtended {
 
 	return {
 		...favorite,
-		// Propiedades adicionales requeridas por FavoriteExtended
-		addedAt: favorite.createdAt, // Mapear createdAt a addedAt
-		notes: null, // Valor por defecto
-		category: null, // Valor por defecto
-		priority: null, // Valor por defecto
 		// Propiedades de UI
-		entityName: favorite.stats.entityTypeName,
-		entityPreview: '',
+		entityName: favorite.entityName || favorite.stats.entityTypeName,
+		entityPreview: favorite.entityThumbnail || '',
 		entityIcon,
 		entityColor,
 		isSelected: false,

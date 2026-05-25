@@ -6,7 +6,9 @@ import { desc } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import type { CollectionWithStats } from '@/types/entities/collection';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const logger = serverLogger.withContext('CollectionService');
 
@@ -17,11 +19,13 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 	try {
 		logger.info('📚 Obteniendo todas las colecciones');
 
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION);
+		const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
 		const drizzleCollections = await db.select().from(collections).orderBy(desc(collections.createdAt));
 
 		const result = drizzleCollections.map((collection: any) => ({
 			...collection,
-			isFavorite: Boolean(collection.isFavorite),
+			isFavorite: favoriteIdSet === null ? Boolean(collection.isFavorite) : favoriteIdSet.has(collection.id),
 			stats: {
 				imageCount: collection.totalImages || 0,
 				videoCount: collection.totalVideos || 0,
