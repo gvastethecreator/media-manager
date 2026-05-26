@@ -98,7 +98,6 @@ export function mapCreateWildcardData(input: WildcardCreateInput): WildcardCreat
 			category: input.category ?? null,
 			shortcut: input.shortcut ?? null,
 			featuredImage: input.featuredImage ?? null,
-			isFavorite: input.isFavorite ?? false,
 			parentId: input.parentId ?? null,
 		};
 	} catch (error) {

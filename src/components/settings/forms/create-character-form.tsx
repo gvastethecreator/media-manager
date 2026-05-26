@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -50,7 +49,6 @@ const createCharacterSchema = z.object({
 	class: z.nativeEnum(CharacterClass).optional(),
 	race: z.nativeEnum(CharacterRace).optional(),
 	level: z.number().min(1).max(100).optional(),
-	isFavorite: z.boolean(),
 });
 
 type FormValues = z.infer<typeof createCharacterSchema>;
@@ -90,7 +88,6 @@ export function CreateCharacterForm({
 			class: undefined,
 			race: undefined,
 			level: undefined,
-			isFavorite: false,
 		},
 	});
 
@@ -104,7 +101,6 @@ export function CreateCharacterForm({
 				emoji: character.emoji || '👤',
 				backstory: character.background || '',
 				category: character.category as CharacterCategory | undefined,
-				isFavorite: character.isFavorite,
 			});
 		}
 	}, [form, isEditing, character]);
@@ -183,8 +179,6 @@ export function CreateCharacterForm({
 				category: data.category || null,
 				emoji: data.emoji || '👤',
 				color: data.color || DEFAULT_ENTITY_COLOR,
-
-				isFavorite: data.isFavorite,
 				totalImages: 0,
 				totalVideos: 0,
 				age: null,
@@ -206,7 +200,6 @@ export function CreateCharacterForm({
 				const updateData: CharacterUpdateInput = {
 					...characterData,
 					background: data.backstory || null,
-					isFavorite: data.isFavorite,
 				};
 				const updated = await updateCharacterMutation.mutateAsync({ id: character.id, data: updateData });
 				onUpdated?.(updated);
@@ -352,21 +345,6 @@ export function CreateCharacterForm({
 								/>
 							</FormControl>
 							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-							<FormControl>
-								<Checkbox checked={field.value} onCheckedChange={field.onChange} />
-							</FormControl>
-							<div className="space-y-1 leading-none">
-								<FormLabel>Marcar como favorito</FormLabel>
-							</div>
 						</FormItem>
 					)}
 				/>

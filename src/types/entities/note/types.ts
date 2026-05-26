@@ -56,7 +56,6 @@ export interface NoteCreateInput {
 	featuredImage?: string | null;
 	groups?: string[];
 	images?: string[];
-	isFavorite?: boolean;
 	places?: string[];
 	presetId?: string | null;
 	priority?: number;
@@ -86,7 +85,6 @@ export interface NoteUpdateInput {
 	featuredImage?: string | null;
 	groups?: string[];
 	images?: string[];
-	isFavorite?: boolean;
 	places?: string[];
 	presetId?: string | null;
 	priority?: number;

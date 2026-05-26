@@ -62,7 +62,7 @@ export interface WorldItemCounts {
 
 // --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---
 
-export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt' | 'isFavorite'> {}
 
 export type WorldItemUpdateInput = Partial<WorldItemCreateInput>;
 

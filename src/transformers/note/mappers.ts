@@ -21,7 +21,6 @@ const logger = serverLogger.withContext('NoteMappers');
 interface DrizzleCreateNoteData {
 	category: string;
 	content: string;
-	isFavorite: boolean;
 	priority: number;
 	status: string;
 	title: string;
@@ -82,7 +81,6 @@ export function mapCreateNoteDataToDrizzle(data: NoteCreateInput): DrizzleCreate
 			category: rest.category ?? 'general',
 			priority: rest.priority ?? 0,
 			status: rest.status ?? 'draft',
-			isFavorite: rest.isFavorite ?? false,
 		};
 
 		// Las relaciones se manejan por separado en Drizzle con junction tables

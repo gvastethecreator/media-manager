@@ -78,6 +78,7 @@ export const GroupSchema = z.object({
  */
 export const CreateGroupSchema = GroupSchema.omit({
 	id: true,
+	isFavorite: true,
 	createdAt: true,
 	updatedAt: true,
 }).extend({
@@ -89,6 +90,7 @@ export const CreateGroupSchema = GroupSchema.omit({
  */
 export const UpdateGroupSchema = GroupSchema.partial().omit({
 	id: true,
+	isFavorite: true,
 	createdAt: true,
 	updatedAt: true,
 });

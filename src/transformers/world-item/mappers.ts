@@ -28,7 +28,6 @@ interface DrizzleWorldItemCreateInput {
 	effects: string;
 	featuredImage?: string | null;
 	filters: string;
-	isFavorite?: boolean;
 	name: string;
 	properties: string;
 	rarity: string;
@@ -91,7 +90,6 @@ export function mapCreateWorldItemDataToDrizzle(input: WorldItemCreateInput): Dr
 			properties: typeof input.properties === 'string' ? input.properties : JSON.stringify(input.properties || {}),
 			filters: '{}', // Campo adicional para Drizzle
 			tags: '[]', // Campo adicional para Drizzle
-			isFavorite: input.isFavorite,
 		};
 
 		return drizzleData;
@@ -147,9 +145,6 @@ export function mapUpdateWorldItemDataToDrizzle(input: WorldItemUpdateInput): Dr
 		if (input.properties !== undefined) {
 			drizzleData.properties =
 				typeof input.properties === 'string' ? input.properties : JSON.stringify(input.properties);
-		}
-		if (input.isFavorite !== undefined) {
-			drizzleData.isFavorite = input.isFavorite;
 		}
 
 		return drizzleData;

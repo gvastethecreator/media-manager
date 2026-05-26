@@ -9,7 +9,6 @@ import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { useCreateWorldItem, useUpdateWorldItem } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
@@ -28,7 +27,6 @@ const worldItemSchema = z.object({
 	category: z.string().optional(),
 	rarity: z.string().optional(),
 	origin: z.string().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 type WorldItemForm = z.infer<typeof worldItemSchema>;
@@ -36,7 +34,7 @@ type WorldItemForm = z.infer<typeof worldItemSchema>;
 // Tipo específico para el input de creación del formulario
 type WorldItemFormInput = Pick<
 	WorldItemCreateInput,
-	'name' | 'description' | 'color' | 'emoji' | 'type' | 'category' | 'rarity' | 'origin' | 'isFavorite'
+	'name' | 'description' | 'color' | 'emoji' | 'type' | 'category' | 'rarity' | 'origin'
 > & {
 	// Campos opcionales con valores por defecto
 
@@ -92,7 +90,6 @@ export function CreateWorldItemForm({
 			category: 'none',
 			rarity: 'none',
 			origin: '',
-			isFavorite: false,
 		},
 	});
 
@@ -179,7 +176,7 @@ export function CreateWorldItemForm({
 						groups: [],
 					},
 
-					isFavorite: data.isFavorite ?? false,
+					isFavorite: worldItem?.isFavorite ?? false,
 					totalImages: 0,
 					totalVideos: 0,
 					type: data.type ?? null,
@@ -234,7 +231,6 @@ export function CreateWorldItemForm({
 				category: worldItem.category || 'none',
 				rarity: worldItem.rarity || 'none',
 				origin: worldItem.origin || '',
-				isFavorite: worldItem.isFavorite,
 			});
 		}
 	}, [worldItem, isEditing, form]);
@@ -264,8 +260,6 @@ export function CreateWorldItemForm({
 					emoji: data.emoji || null,
 					color: data.color || null,
 					category: data.category || null,
-
-					isFavorite: data.isFavorite ?? false,
 					totalImages: 0,
 					totalVideos: 0,
 					type: data.type || null,
@@ -404,11 +398,6 @@ export function CreateWorldItemForm({
 				/>
 			),
 		},
-		{
-			name: 'isFavorite',
-			label: 'Favorito',
-			render: ({ value, onChange }: any) => <Switch checked={!!value} onCheckedChange={onChange} />,
-		},
 	];
 
 	return (
@@ -422,7 +411,6 @@ export function CreateWorldItemForm({
 				category: worldItem?.category || 'none',
 				rarity: worldItem?.rarity || 'none',
 				origin: worldItem?.origin || '',
-				isFavorite: worldItem?.isFavorite || false,
 			}}
 			onCancel={onCancel}
 			onSubmit={async (data) => {

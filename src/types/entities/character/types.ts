@@ -104,8 +104,6 @@ export interface CharacterCreateInput {
 	featuredImage?: string | null;
 	gender?: string | null;
 	goals?: string | null;
-
-	isFavorite?: boolean;
 	// Additional properties
 	level?: number;
 	name: string;

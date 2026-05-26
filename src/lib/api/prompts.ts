@@ -52,7 +52,6 @@ export interface PromptCreateInput {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	inspiration?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	lighting?: string | null;
 	mood?: string | null;
@@ -76,7 +75,6 @@ export interface PromptUpdateInput {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	inspiration?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	lighting?: string | null;
 	mood?: string | null;

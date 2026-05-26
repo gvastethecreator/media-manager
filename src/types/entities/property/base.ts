@@ -147,7 +147,6 @@ export interface PropertyCreateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	name: string;
 	shortcut?: string | null;
 	value?: string | number;
@@ -162,7 +161,6 @@ export interface PropertyUpdateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	name?: string;
 	shortcut?: string | null;
 	value?: string | number;

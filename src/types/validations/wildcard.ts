@@ -13,7 +13,6 @@ export const createWildcardSchema = z.object({
 	children: z.array(z.string()).default([]),
 	parentId: z.string().nullable().optional(),
 	featuredImage: z.string().optional(),
-	isFavorite: z.boolean().default(false),
 });
 
 /**

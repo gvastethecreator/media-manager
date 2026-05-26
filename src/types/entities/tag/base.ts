@@ -134,7 +134,6 @@ export interface TagCreateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	name: string;
 	shortcut?: string | null;
 }
@@ -148,7 +147,6 @@ export interface TagUpdateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	name?: string;
 	shortcut?: string | null;
 }

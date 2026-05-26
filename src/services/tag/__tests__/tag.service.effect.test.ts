@@ -68,7 +68,6 @@ describe('TagService - CRUD Operations', () => {
 							color: '#3b82f6',
 							description: 'Science fiction content',
 							category: 'genre',
-							isFavorite: false,
 						} as any);
 					})
 				)

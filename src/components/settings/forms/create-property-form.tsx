@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateProperty, useUpdateProperty } from '@/lib/api/properties';
@@ -90,7 +89,6 @@ export function CreatePropertyForm({
 		description?: string | null;
 		emoji?: string | null;
 		featuredImage?: string | null;
-		isFavorite?: boolean;
 		name: string;
 		shortcut?: string | null;
 	}) => {
@@ -126,7 +124,6 @@ export function CreatePropertyForm({
 				description: property?.description ?? '',
 				shortcut: property?.shortcut ?? '',
 				featuredImage: property?.featuredImage ?? undefined,
-				isFavorite: property?.isFavorite ?? false,
 			}}
 			onCancel={onCancel}
 			onSubmit={handleSubmit}

@@ -9,7 +9,6 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -43,7 +42,6 @@ const placeFormSchema = z
 		history: z.string().default('').catch(''),
 		lore: z.string().default('').catch(''),
 		shortcut: z.string().default('').catch(''),
-		isFavorite: z.boolean().default(false),
 		featuredImage: z.string().default('').catch(''),
 	})
 	.strict();
@@ -99,7 +97,6 @@ export function CreatePlaceForm({
 				history: place.history ?? '',
 				lore: place.lore ?? '',
 				shortcut: place.shortcut ?? '',
-				isFavorite: !!place.isFavorite,
 				featuredImage: place.featuredImage ?? '',
 			});
 		}
@@ -125,7 +122,6 @@ export function CreatePlaceForm({
 					history: normalize(values.history),
 					lore: normalize(values.lore),
 					shortcut: normalize(values.shortcut),
-					isFavorite: !!values.isFavorite,
 					featuredImage: normalize(values.featuredImage),
 				};
 				result = await updatePlaceMutation.mutateAsync({ id: place.id, data: updateData });
@@ -146,7 +142,6 @@ export function CreatePlaceForm({
 					lore: normalize(values.lore),
 					shortcut: normalize(values.shortcut),
 					featuredImage: normalize(values.featuredImage),
-					isFavorite: !!values.isFavorite,
 
 					totalImages: 0,
 					totalVideos: 0,
@@ -438,22 +433,6 @@ export function CreatePlaceForm({
 						)}
 					/>
 
-					{/* Favorito */}
-					<FormField
-						control={form.control}
-						name="isFavorite"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-								<div className="space-y-0.5">
-									<FormLabel className="text-base">Marcar como favorito</FormLabel>
-									<FormDescription>Los lugares favoritos aparecen primero en las búsquedas.</FormDescription>
-								</div>
-								<FormControl>
-									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
-								</FormControl>
-							</FormItem>
-						)}
-					/>
 				</div>
 				<div className="flex justify-end gap-2">
 					{onCancel && (

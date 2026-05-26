@@ -66,8 +66,6 @@ interface DrizzleCreatePlaceData {
 	geography?: string | null;
 	government?: string | null;
 	history?: string | null;
-
-	isFavorite?: boolean;
 	landmarks?: string | null;
 	location?: string | null;
 	name: string;

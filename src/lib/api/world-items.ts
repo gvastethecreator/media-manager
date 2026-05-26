@@ -47,7 +47,6 @@ export interface WorldItemCreateInput {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	history?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	materials?: string | null;
 	name: string;
@@ -71,7 +70,6 @@ export interface WorldItemUpdateInput {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	history?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	materials?: string | null;
 	name?: string;

@@ -70,7 +70,13 @@ const make = (): PromptServiceInterface => {
 			const validated = yield* Schema.decodeUnknown(Prompt)(result[0]).pipe(
 				Effect.mapError((error) => fromUnknownPromptError('decode', error))
 			);
-			return validated as Prompt;
+
+			const favoriteEntityIds = yield* Effect.tryPromise<string[], PromptError>({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.PROMPT),
+				catch: (error) => fromUnknownPromptError('getById.favoriteIds', error),
+			});
+
+			return favoriteService.applyFavoriteProjection(validated, favoriteEntityIds);
 		});
 
 	const getAll = (options: GetPromptsOptions = {}): Effect.Effect<GetPromptsResult, PromptError> =>
@@ -85,30 +91,25 @@ const make = (): PromptServiceInterface => {
 				onlyFavorites,
 			} = options;
 
-			const favoriteEntityIds: string[] | null =
-				onlyFavorites
-					? yield* Effect.tryPromise({
-						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.PROMPT),
-						catch: (error) => fromUnknownPromptError('getAll.favoriteIds', error),
-					})
-					: null;
+			const favoriteEntityIds = yield* Effect.tryPromise<string[], PromptError>({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.PROMPT),
+				catch: (error) => fromUnknownPromptError('getAll.favoriteIds', error),
+			});
 
 			const conditions = [];
 			if (search) conditions.push(like(prompts.name, `%${search}%`));
 			if (category) conditions.push(eq(prompts.category, category));
 			if (onlyFavorites) {
-				if (favoriteEntityIds === null) {
-					conditions.push(eq(prompts.isFavorite, true));
-				} else if (favoriteEntityIds.length === 0) {
+				if (favoriteEntityIds.length === 0) {
 					return {
 						prompts: [],
 						total: 0,
 						limit,
 						offset,
 					};
-				} else {
-					conditions.push(inArray(prompts.id, favoriteEntityIds));
 				}
+
+				conditions.push(inArray(prompts.id, favoriteEntityIds));
 			}
 
 			const whereClause = conditions.length > 0 ? sql`${sql.join(conditions, sql` AND `)}` : undefined;
@@ -137,17 +138,10 @@ const make = (): PromptServiceInterface => {
 				}),
 			]);
 
-			const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
-			const normalizedPrompts =
-				favoriteIdSet === null
-					? data
-					: data.map((prompt) => ({
-						...prompt,
-						isFavorite: favoriteIdSet.has(prompt.id),
-					}));
+			const normalizedPrompts = favoriteService.applyFavoriteProjectionMany(data, favoriteEntityIds) as PromptWithStats[];
 
 			return {
-				prompts: normalizedPrompts as PromptWithStats[],
+				prompts: normalizedPrompts,
 				total: totalResult[0]?.count ?? 0,
 				limit,
 				offset,
@@ -156,24 +150,18 @@ const make = (): PromptServiceInterface => {
 
 	const create = (input: PromptCreateInput): Effect.Effect<Prompt, PromptError> =>
 		Effect.gen(function* () {
+			const restInput = input;
+
 			const existing = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
-				try: () => db.select().from(prompts).where(eq(prompts.name, input.name)).limit(1),
+				try: () => db.select().from(prompts).where(eq(prompts.name, restInput.name)).limit(1),
 				catch: (error) => fromUnknownPromptError('checkDuplicate', error),
 			});
 
 			if (existing.length > 0) {
-				return yield* Effect.fail(new PromptNameConflict({ name: input.name }));
+				return yield* Effect.fail(new PromptNameConflict({ name: restInput.name }));
 			}
 
-			const readableId = generateReadableId('prompt', input.name, 1);
-			const requestedIsFavorite = input.isFavorite === true;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite
-					? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.PROMPT)) !== null,
-						catch: (error) => fromUnknownPromptError('create.favoriteScope', error),
-					})
-					: false;
+			const readableId = generateReadableId('prompt', restInput.name, 1);
 
 			const result = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
 				try: () =>
@@ -181,15 +169,15 @@ const make = (): PromptServiceInterface => {
 						.insert(prompts)
 						.values({
 							id: readableId,
-							name: input.name,
-							description: input.description ?? null,
-							emoji: input.emoji ?? null,
-							color: input.color ?? null,
-							category: input.category ?? null,
-							featuredImage: input.featuredImage ?? null,
-							filters: input.filters ?? null,
-							isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
-							metadata: input.metadata ?? null,
+							name: restInput.name,
+							description: restInput.description ?? null,
+							emoji: restInput.emoji ?? null,
+							color: restInput.color ?? null,
+							category: restInput.category ?? null,
+							featuredImage: restInput.featuredImage ?? null,
+							filters: restInput.filters ?? null,
+							isFavorite: false,
+							metadata: restInput.metadata ?? null,
 							createdAt: new Date(),
 							updatedAt: new Date(),
 						})
@@ -201,62 +189,27 @@ const make = (): PromptServiceInterface => {
 				return yield* Effect.fail(new PromptDatabaseError({ operation: 'create', message: 'No row returned' }));
 			}
 
-			if (requestedIsFavorite && useCanonicalFavoriteBridge) {
-				yield* Effect.tryPromise({
-					try: async () => {
-						try {
-							await favoriteService.set(FavoriteEntityType.PROMPT, result[0].id, true);
-						} catch (error) {
-							await db.delete(prompts).where(eq(prompts.id, result[0].id));
-							throw error;
-						}
-					},
-					catch: (error) => fromUnknownPromptError('create.favoriteBridge', error),
-				});
-			}
-
-			return {
-				...result[0],
-				isFavorite: requestedIsFavorite ? true : result[0].isFavorite,
-			} as Prompt;
+			return yield* getById(readableId);
 		});
 
 	const update = (id: string, input: PromptUpdateInput): Effect.Effect<Prompt, PromptError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
-
-			const requestedIsFavorite = input.isFavorite;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite !== undefined
-					? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.PROMPT)) !== null,
-						catch: (error) => fromUnknownPromptError('update.favoriteScope', error),
-					})
-					: false;
-
-			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.PROMPT, id, requestedIsFavorite),
-					catch: (error) => fromUnknownPromptError('update.favoriteBridge', error),
-				});
-			}
+			const restInput = input;
 
 			const result = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
 				try: () =>
 					db
 						.update(prompts)
 						.set({
-							...(input.name !== undefined && { name: input.name }),
-							...(input.description !== undefined && { description: input.description }),
-							...(input.emoji !== undefined && { emoji: input.emoji }),
-							...(input.color !== undefined && { color: input.color }),
-							...(input.category !== undefined && { category: input.category }),
-							...(input.featuredImage !== undefined && { featuredImage: input.featuredImage }),
-							...(input.filters !== undefined && { filters: input.filters }),
-							...(input.isFavorite !== undefined && !useCanonicalFavoriteBridge
-								? { isFavorite: input.isFavorite }
-								: {}),
-							...(input.metadata !== undefined && { metadata: input.metadata }),
+							...(restInput.name !== undefined && { name: restInput.name }),
+							...(restInput.description !== undefined && { description: restInput.description }),
+							...(restInput.emoji !== undefined && { emoji: restInput.emoji }),
+							...(restInput.color !== undefined && { color: restInput.color }),
+							...(restInput.category !== undefined && { category: restInput.category }),
+							...(restInput.featuredImage !== undefined && { featuredImage: restInput.featuredImage }),
+							...(restInput.filters !== undefined && { filters: restInput.filters }),
+							...(restInput.metadata !== undefined && { metadata: restInput.metadata }),
 							updatedAt: new Date(),
 						})
 						.where(eq(prompts.id, id))
@@ -268,7 +221,7 @@ const make = (): PromptServiceInterface => {
 				return yield* Effect.fail(new PromptDatabaseError({ operation: 'update', message: 'No row returned' }));
 			}
 
-			return result[0] as Prompt;
+			return yield* getById(id);
 		});
 
 	const delete_ = (id: string): Effect.Effect<void, PromptError> =>
@@ -300,41 +253,20 @@ const make = (): PromptServiceInterface => {
 
 	const toggleFavorite = (id: string): Effect.Effect<Prompt, PromptError> =>
 		Effect.gen(function* () {
-			const prompt = yield* getById(id);
-			const favoriteEntityIds = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.PROMPT),
-				catch: (error) => fromUnknownPromptError('toggleFavorite.scope', error),
+			yield* getById(id);
+
+			const currentFavoriteStatus = yield* Effect.tryPromise<boolean, PromptError>({
+				try: () => favoriteService.isFavorite(FavoriteEntityType.PROMPT, id),
+				catch: (error) => fromUnknownPromptError('toggleFavorite.isFavorite', error),
 			});
-			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? prompt.isFavorite;
 			const newFavoriteStatus = !currentFavoriteStatus;
 
-			let result;
-			if (favoriteEntityIds === null) {
-				result = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
-					try: () =>
-						db
-							.update(prompts)
-							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
-							.where(eq(prompts.id, id))
-							.returning(),
-					catch: (error) => fromUnknownPromptError('toggleFavorite', error),
-				});
-			} else {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.PROMPT, id, newFavoriteStatus),
-					catch: (error) => fromUnknownPromptError('toggleFavorite.favoriteBridge', error),
-				});
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.PROMPT, id, newFavoriteStatus),
+				catch: (error) => fromUnknownPromptError('toggleFavorite.set', error),
+			});
 
-				result = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
-					try: () => db.select().from(prompts).where(eq(prompts.id, id)).limit(1),
-					catch: (error) => fromUnknownPromptError('toggleFavorite.refetch', error),
-				});
-			}
-
-			if (result.length === 0) {
-				return yield* Effect.fail(new PromptDatabaseError({ operation: 'toggleFavorite', message: 'No row returned' }));
-			}
-			return result[0] as Prompt;
+			return yield* getById(id);
 		});
 
 	const getImages = (id: string): Effect.Effect<any[], PromptError> =>

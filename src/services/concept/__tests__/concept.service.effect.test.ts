@@ -70,7 +70,6 @@ describe('ConceptService - CRUD Operations', () => {
 							color: '#8b5cf6',
 							description: 'Particles remain connected',
 							category: 'physics',
-							isFavorite: false,
 						});
 					})
 				)

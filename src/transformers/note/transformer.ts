@@ -310,7 +310,6 @@ export function toDrizzleNoteCreate(input: NoteCreateInput) {
 		color: input.color,
 		emoji: input.emoji,
 		featuredImage: input.featuredImage,
-		isFavorite: input.isFavorite,
 		presetId: input.presetId,
 		// Relaciones se manejan por separado
 	};
@@ -345,9 +344,6 @@ export function toDrizzleNoteUpdate(input: NoteUpdateInput) {
 	}
 	if (input.featuredImage !== undefined) {
 		updateData.featuredImage = input.featuredImage;
-	}
-	if (input.isFavorite !== undefined) {
-		updateData.isFavorite = input.isFavorite;
 	}
 	if (input.presetId !== undefined) {
 		updateData.presetId = input.presetId;

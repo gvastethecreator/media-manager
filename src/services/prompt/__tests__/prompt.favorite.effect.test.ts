@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
+import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
 import { favorites, profiles, prompts } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -44,13 +45,12 @@ const ensureActiveProfile = async () => {
 	return profileId;
 };
 
-const createPrompt = async (name: string, input?: { isFavorite?: boolean }) =>
+const createPrompt = async (name: string) =>
 	expectSuccess(
 		Effect.gen(function* () {
 			const promptService = yield* PromptService;
 			return yield* promptService.create({
 				name: `${name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-				isFavorite: input?.isFavorite,
 			});
 		})
 	);
@@ -66,13 +66,13 @@ afterEach(async () => {
 });
 
 describe('PromptService favorites convergence', () => {
-	it('create persists favorite state through the canonical favorite bridge', async () => {
+	it('create inicia fuera de favoritos y exige la acción dedicada', async () => {
 		await ensureActiveProfile();
 
-		const created = await createPrompt('create-canonical-favorite', { isFavorite: true });
+		const created = await createPrompt('create-canonical-favorite');
 
-		expect(created.isFavorite).toBe(true);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.PROMPT, created.id)).toBe(true);
+		expect(created.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.PROMPT, created.id)).toBe(false);
 	});
 
 	it('uses canonical favorites for onlyFavorites and ignores stale projection', async () => {
@@ -97,20 +97,21 @@ describe('PromptService favorites convergence', () => {
 		expect(result.prompts[0]?.isFavorite).toBe(true);
 	});
 
-	it('update persists favorite state through the canonical favorite bridge', async () => {
+	it('update no cambia el favorito canónico sin la acción dedicada', async () => {
 		await ensureActiveProfile();
 		const prompt = await createPrompt('update-target');
 
 		const updated = await expectSuccess(
 			Effect.gen(function* () {
 				const promptService = yield* PromptService;
-				return yield* promptService.update(prompt.id, { isFavorite: true });
+				return yield* promptService.update(prompt.id, { description: 'updated description' });
 			})
 		);
 
 		expect(updated.id).toBe(prompt.id);
-		expect(updated.isFavorite).toBe(true);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.PROMPT, prompt.id)).toBe(true);
+		expect(updated.description).toBe('updated description');
+		expect(updated.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.PROMPT, prompt.id)).toBe(false);
 	});
 
 	it('toggleFavorite delegates to the canonical favorite bridge', async () => {

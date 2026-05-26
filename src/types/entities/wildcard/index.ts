@@ -59,7 +59,6 @@ export interface CreateWildcardData {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	id: string;
-	isFavorite?: boolean;
 	name: string;
 	parentId?: string | null;
 	shortcut?: string | null;
@@ -72,7 +71,6 @@ export interface UpdateWildcardData {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	name?: string;
 	parentId?: string | null;
 	shortcut?: string | null;
@@ -80,7 +78,6 @@ export interface UpdateWildcardData {
 
 export interface WildcardBulkUpdateData {
 	category?: string | null;
-	isFavorite?: boolean;
 	parentId?: string | null;
 }
 

@@ -26,8 +26,6 @@ interface DrizzleCharacterCreateInput {
 	featuredImage?: string | null;
 	gender?: string | null;
 	id?: string;
-
-	isFavorite?: boolean;
 	name: string;
 	notes?: string | null;
 	occupation?: string | null;
@@ -51,8 +49,6 @@ interface DrizzleCharacterUpdateInput {
 	equipment?: string | null;
 	featuredImage?: string | null;
 	gender?: string | null;
-
-	isFavorite?: boolean;
 	name?: string;
 	notes?: string | null;
 	occupation?: string | null;

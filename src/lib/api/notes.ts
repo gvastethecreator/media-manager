@@ -19,7 +19,6 @@ export interface NoteCreateInput {
 	category?: string | null;
 	content?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	presetId?: string | null;
 	priority?: number;
 	status?: string | null;
@@ -30,7 +29,6 @@ export interface NoteUpdateInput {
 	category?: string | null;
 	content?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	presetId?: string | null;
 	priority?: number;
 	status?: string | null;
