@@ -24,7 +24,6 @@ export interface CharacterCreateInput {
 	equipment?: string | null;
 	featuredImage?: string | null;
 	gender?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	name: string;
 	notes?: string | null;
@@ -48,7 +47,6 @@ export interface CharacterUpdateInput {
 	equipment?: string | null;
 	featuredImage?: string | null;
 	gender?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	name?: string;
 	notes?: string | null;

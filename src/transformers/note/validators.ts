@@ -16,7 +16,6 @@ export const NoteCreateSchema = z.object({
 		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/)
 		.optional(),
-	isFavorite: z.boolean().default(false),
 	isPinned: z.boolean().default(false),
 	isArchived: z.boolean().default(false),
 	tags: z.array(z.string()).optional(),
@@ -32,7 +31,6 @@ export const NoteUpdateSchema = z.object({
 		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/)
 		.optional(),
-	isFavorite: z.boolean().optional(),
 	isPinned: z.boolean().optional(),
 	isArchived: z.boolean().optional(),
 	tags: z.array(z.string()).optional(),

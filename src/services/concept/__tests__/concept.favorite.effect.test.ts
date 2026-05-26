@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
+import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
 import { concepts, favorites, profiles } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -44,13 +45,12 @@ const ensureActiveProfile = async () => {
 	return profileId;
 };
 
-const createConcept = async (name: string, input?: { isFavorite?: boolean }) =>
+const createConcept = async (name: string) =>
 	expectSuccess(
 		Effect.gen(function* () {
 			const conceptService = yield* ConceptService;
 			return yield* conceptService.create({
 				name: `${name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-				isFavorite: input?.isFavorite,
 			});
 		})
 	);
@@ -66,12 +66,13 @@ afterEach(async () => {
 });
 
 describe('ConceptService favorites convergence', () => {
-	it('create persists favorite state through the canonical favorite bridge', async () => {
+	it('create inicia fuera de favoritos y exige la acción dedicada', async () => {
 		await ensureActiveProfile();
 
-		const created = await createConcept('create-canonical-favorite', { isFavorite: true });
+		const created = await createConcept('create-canonical-favorite');
 
-		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, created.id)).toBe(true);
+		expect(created.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, created.id)).toBe(false);
 	});
 
 	it('uses canonical favorites for onlyFavorites and ignores stale projection', async () => {
@@ -96,19 +97,21 @@ describe('ConceptService favorites convergence', () => {
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, result.concepts[0]!.id)).toBe(true);
 	});
 
-	it('update persists favorite state through the canonical favorite bridge', async () => {
+	it('update no cambia el favorito canónico sin la acción dedicada', async () => {
 		await ensureActiveProfile();
 		const concept = await createConcept('update-target');
 
 		const updated = await expectSuccess(
 			Effect.gen(function* () {
 				const conceptService = yield* ConceptService;
-				return yield* conceptService.update(concept.id, { isFavorite: true });
+				return yield* conceptService.update(concept.id, { description: 'updated description' });
 			})
 		);
 
 		expect(updated.id).toBe(concept.id);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(true);
+		expect(updated.description).toBe('updated description');
+		expect(updated.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(false);
 	});
 
 	it('toggleFavorite delegates to the canonical favorite bridge', async () => {
@@ -123,6 +126,7 @@ describe('ConceptService favorites convergence', () => {
 		);
 
 		expect(toggled.id).toBe(concept.id);
+		expect(toggled.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(true);
 	});
 
@@ -137,6 +141,7 @@ describe('ConceptService favorites convergence', () => {
 			})
 		);
 
+		expect(favorited.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(true);
 
 		const unfavorited = await expectSuccess(
@@ -146,6 +151,7 @@ describe('ConceptService favorites convergence', () => {
 			})
 		);
 
+		expect(unfavorited.isFavorite).toBe(false);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, concept.id)).toBe(false);
 	});
 });

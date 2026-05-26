@@ -151,8 +151,6 @@ export interface PromptCreateInput {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	inspiration?: string | null;
-
-	isFavorite?: boolean;
 	lighting?: string | null;
 	mood?: string | null;
 	name: string;
@@ -176,8 +174,6 @@ export interface PromptUpdateInput {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	inspiration?: string | null;
-
-	isFavorite?: boolean;
 	lighting?: string | null;
 	mood?: string | null;
 	name?: string;

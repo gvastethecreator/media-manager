@@ -34,12 +34,8 @@ export function toDrizzleNote(
 			NoteSchema.parse(note);
 		}
 
-		const { isFavorite, ...otherProps } = note as Record<string, any>;
+		const { isFavorite: _ignoredIsFavorite, ...otherProps } = note as Record<string, any>;
 		const drizzleData: Record<string, any> = { ...otherProps };
-
-		if (isFavorite !== undefined) {
-			drizzleData.isFavorite = isFavorite;
-		}
 
 		return drizzleData;
 	} catch (error) {

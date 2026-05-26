@@ -392,7 +392,6 @@ export class CharacterCreateInput extends Schema.Class<CharacterCreateInput>('Ch
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 }) {}
@@ -408,7 +407,6 @@ export class CharacterUpdateInput extends Schema.Class<CharacterUpdateInput>('Ch
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 }) {}
@@ -453,7 +451,6 @@ export class PlaceCreateInput extends Schema.Class<PlaceCreateInput>('PlaceCreat
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 }) {}
@@ -469,7 +466,6 @@ export class PlaceUpdateInput extends Schema.Class<PlaceUpdateInput>('PlaceUpdat
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 }) {}
@@ -514,7 +510,6 @@ export class ConceptCreateInput extends Schema.Class<ConceptCreateInput>('Concep
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 }) {}
@@ -530,7 +525,6 @@ export class ConceptUpdateInput extends Schema.Class<ConceptUpdateInput>('Concep
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 }) {}
@@ -574,7 +568,6 @@ export class PromptCreateInput extends Schema.Class<PromptCreateInput>('PromptCr
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 }) {}
 
@@ -589,7 +582,6 @@ export class PromptUpdateInput extends Schema.Class<PromptUpdateInput>('PromptUp
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 }) {}
 

@@ -76,7 +76,6 @@ export const createCharacterSchema = z.object({
 	psychologicalProfile: z.string().max(1000).nullable().optional(),
 	socialProfile: z.string().max(1000).nullable().optional(),
 	featuredImage: z.string().uuid().nullable().optional(),
-	isFavorite: z.boolean().optional(),
 	category: z.nativeEnum(CharacterCategory).nullable().optional(),
 	presetId: z.string().uuid().nullable().optional(),
 });

@@ -72,7 +72,6 @@ describe('CharacterService - CRUD Operations', () => {
 							color: '#6366f1',
 							description: 'A wise wizard',
 							category: 'wizard',
-							isFavorite: false,
 						});
 					})
 				)

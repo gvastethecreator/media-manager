@@ -17,7 +17,6 @@ export interface GroupCreateInput {
 	emoji?: string;
 	featuredImage?: string;
 	filters?: any;
-	isFavorite?: boolean;
 	name: string;
 	shortcut?: string;
 	sortBy?: string;
@@ -30,7 +29,6 @@ export interface GroupUpdateInput {
 	emoji?: string;
 	featuredImage?: string;
 	filters?: any;
-	isFavorite?: boolean;
 	name?: string;
 	shortcut?: string;
 	sortBy?: string;

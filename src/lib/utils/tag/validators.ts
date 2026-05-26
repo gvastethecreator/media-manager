@@ -31,7 +31,6 @@ export const createTagSchema = z.object({
 	category: z.nativeEnum(TagCategory).nullable().optional(),
 	rarity: z.nativeEnum(TagRarity).nullable().optional(),
 	texture: z.string().nullable().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 /**
@@ -58,7 +57,6 @@ export const updateTagSchema = z.object({
 	description: z.string().max(500, 'La descripción no puede exceder 500 caracteres').nullable().optional(),
 	shortcut: z.string().max(20, 'El atajo no puede exceder 20 caracteres').nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().optional(),
 	category: z.nativeEnum(TagCategory).nullable().optional(),
 	rarity: z.nativeEnum(TagRarity).nullable().optional(),
 	texture: z.string().nullable().optional(),

@@ -44,6 +44,7 @@ export const CreatePromptSchema = PromptSchema.omit({
 	id: true,
 	createdAt: true,
 	updatedAt: true,
+	isFavorite: true,
 });
 
 /**

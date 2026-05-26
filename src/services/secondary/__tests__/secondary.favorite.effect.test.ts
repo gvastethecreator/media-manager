@@ -109,7 +109,7 @@ const ensureActiveProfile = async () => {
 	return profileId;
 };
 
-const createGroup = async (name: string, input?: { isFavorite?: boolean }) => {
+const createGroup = async (name: string) => {
 	const unique = buildUniqueLabel(name);
 
 	return expectGroupSuccess(
@@ -118,13 +118,12 @@ const createGroup = async (name: string, input?: { isFavorite?: boolean }) => {
 			return yield* service.create({
 				name: unique,
 				description: 'Test group',
-				isFavorite: input?.isFavorite,
 			});
 		})
 	);
 };
 
-const createWildcard = async (name: string, input?: { isFavorite?: boolean }) => {
+const createWildcard = async (name: string) => {
 	const unique = buildUniqueLabel(name);
 
 	return expectWildcardSuccess(
@@ -133,13 +132,12 @@ const createWildcard = async (name: string, input?: { isFavorite?: boolean }) =>
 			return yield* service.create({
 				name: unique,
 				description: 'Test wildcard',
-				isFavorite: input?.isFavorite,
 			});
 		})
 	);
 };
 
-const createNote = async (title: string, input?: { isFavorite?: boolean }) => {
+const createNote = async (title: string) => {
 	const unique = buildUniqueLabel(title);
 
 	return expectNoteSuccess(
@@ -149,13 +147,12 @@ const createNote = async (title: string, input?: { isFavorite?: boolean }) => {
 				title: unique,
 				content: 'Test note content',
 				category: 'test',
-				isFavorite: input?.isFavorite,
 			});
 		})
 	);
 };
 
-const createProperty = async (name: string, input?: { isFavorite?: boolean }) => {
+const createProperty = async (name: string) => {
 	const unique = buildUniqueLabel(name);
 
 	return expectPropertySuccess(
@@ -164,13 +161,12 @@ const createProperty = async (name: string, input?: { isFavorite?: boolean }) =>
 			return yield* service.create({
 				name: unique,
 				description: 'Test property',
-				isFavorite: input?.isFavorite,
 			});
 		})
 	);
 };
 
-const createWorldItem = async (name: string, input?: { isFavorite?: boolean }) => {
+const createWorldItem = async (name: string) => {
 	const unique = buildUniqueLabel(name);
 
 	return expectWorldItemSuccess(
@@ -179,7 +175,6 @@ const createWorldItem = async (name: string, input?: { isFavorite?: boolean }) =
 			return yield* service.create({
 				name: unique,
 				description: 'Test world item',
-				isFavorite: input?.isFavorite,
 			});
 		})
 	);
@@ -205,10 +200,10 @@ afterEach(async () => {
 
 describe('Secondary services favorites convergence', () => {
 	describe('GroupService', () => {
-		it('create ignora isFavorite authored y exige la acción dedicada', async () => {
+		it('create deja el grupo sin marcar hasta usar la acción dedicada', async () => {
 			await ensureActiveProfile();
 
-			const created = await createGroup('group-create-canonical-favorite', { isFavorite: true });
+			const created = await createGroup('group-create-canonical-favorite');
 
 			expect(created.isFavorite).toBe(false);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.GROUP, created.id)).toBe(false);
@@ -233,14 +228,14 @@ describe('Secondary services favorites convergence', () => {
 			expect(result.data[0]?.isFavorite).toBe(true);
 		});
 
-		it('update ignora isFavorite authored', async () => {
+		it('update no altera el favorito canónico', async () => {
 			await ensureActiveProfile();
 			const group = await createGroup('group-update-target');
 
 			const updated = await expectGroupSuccess(
 				Effect.gen(function* () {
 					const service = yield* GroupService;
-					return yield* service.update(group.id, { description: 'Updated group', isFavorite: true });
+					return yield* service.update(group.id, { description: 'Updated group' });
 				})
 			);
 
@@ -292,10 +287,10 @@ describe('Secondary services favorites convergence', () => {
 	});
 
 	describe('WildcardService', () => {
-		it('create ignora isFavorite authored y exige la acción dedicada', async () => {
+		it('create deja el wildcard sin marcar hasta usar la acción dedicada', async () => {
 			await ensureActiveProfile();
 
-			const created = await createWildcard('wildcard-create-canonical-favorite', { isFavorite: true });
+			const created = await createWildcard('wildcard-create-canonical-favorite');
 
 			expect(created.isFavorite).toBe(false);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.WILDCARD, created.id)).toBe(false);
@@ -322,14 +317,14 @@ describe('Secondary services favorites convergence', () => {
 			expect(result.data[0]?.isFavorite).toBe(true);
 		});
 
-		it('update ignora isFavorite authored', async () => {
+		it('update no altera el favorito canónico', async () => {
 			await ensureActiveProfile();
 			const wildcard = await createWildcard('wildcard-update-target');
 
 			const updated = await expectWildcardSuccess(
 				Effect.gen(function* () {
 					const service = yield* WildcardService;
-					return yield* service.update(wildcard.id, { description: 'Updated wildcard', isFavorite: true });
+					return yield* service.update(wildcard.id, { description: 'Updated wildcard' });
 				})
 			);
 
@@ -381,10 +376,10 @@ describe('Secondary services favorites convergence', () => {
 	});
 
 	describe('NoteService', () => {
-		it('create ignora isFavorite authored y exige la acción dedicada', async () => {
+		it('create deja la nota sin marcar hasta usar la acción dedicada', async () => {
 			await ensureActiveProfile();
 
-			const created = await createNote('note-create-canonical-favorite', { isFavorite: true });
+			const created = await createNote('note-create-canonical-favorite');
 
 			expect(created.isFavorite).toBe(false);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.NOTE, created.id)).toBe(false);
@@ -411,14 +406,14 @@ describe('Secondary services favorites convergence', () => {
 			expect(result.data[0]?.isFavorite).toBe(true);
 		});
 
-		it('update ignora isFavorite authored', async () => {
+		it('update no altera el favorito canónico', async () => {
 			await ensureActiveProfile();
 			const note = await createNote('note-update-target');
 
 			const updated = await expectNoteSuccess(
 				Effect.gen(function* () {
 					const service = yield* NoteService;
-					return yield* service.update(note.id, { content: 'Updated note content', isFavorite: true });
+					return yield* service.update(note.id, { content: 'Updated note content' });
 				})
 			);
 
@@ -470,10 +465,10 @@ describe('Secondary services favorites convergence', () => {
 	});
 
 	describe('PropertyService', () => {
-		it('create ignora isFavorite authored y exige la acción dedicada', async () => {
+		it('create deja la propiedad sin marcar hasta usar la acción dedicada', async () => {
 			await ensureActiveProfile();
 
-			const created = await createProperty('property-create-canonical-favorite', { isFavorite: true });
+			const created = await createProperty('property-create-canonical-favorite');
 
 			expect(created.isFavorite).toBe(false);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.PROPERTY, created.id)).toBe(false);
@@ -501,14 +496,14 @@ describe('Secondary services favorites convergence', () => {
 			expect(result.data[0]?.id).not.toBe(staleEmbedded.id);
 		});
 
-		it('update ignora isFavorite authored', async () => {
+		it('update no altera el favorito canónico', async () => {
 			await ensureActiveProfile();
 			const property = await createProperty('property-update-target');
 
 			const updated = await expectPropertySuccess(
 				Effect.gen(function* () {
 					const service = yield* PropertyService;
-					return yield* service.update(property.id, { description: 'Updated property', isFavorite: true });
+					return yield* service.update(property.id, { description: 'Updated property' });
 				})
 			);
 
@@ -560,10 +555,10 @@ describe('Secondary services favorites convergence', () => {
 	});
 
 	describe('WorldItemService', () => {
-		it('create ignora isFavorite authored y exige la acción dedicada', async () => {
+		it('create deja el world item sin marcar hasta usar la acción dedicada', async () => {
 			await ensureActiveProfile();
 
-			const created = await createWorldItem('world-item-create-canonical-favorite', { isFavorite: true });
+			const created = await createWorldItem('world-item-create-canonical-favorite');
 
 			expect(created.isFavorite).toBe(false);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.WORLD_ITEM, created.id)).toBe(false);
@@ -590,14 +585,14 @@ describe('Secondary services favorites convergence', () => {
 			expect(result.data[0]?.isFavorite).toBe(true);
 		});
 
-		it('update ignora isFavorite authored', async () => {
+		it('update no altera el favorito canónico', async () => {
 			await ensureActiveProfile();
 			const worldItem = await createWorldItem('world-item-update-target');
 
 			const updated = await expectWorldItemSuccess(
 				Effect.gen(function* () {
 					const service = yield* WorldItemService;
-					return yield* service.update(worldItem.id, { description: 'Updated world item', isFavorite: true });
+					return yield* service.update(worldItem.id, { description: 'Updated world item' });
 				})
 			);
 

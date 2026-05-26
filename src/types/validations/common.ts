@@ -43,7 +43,6 @@ export const groupCreateSchema = z.object({
 	description: z.string().optional(),
 	emoji: z.string().optional(),
 	color: z.string().optional(),
-	isFavorite: z.boolean().optional().default(false),
 });
 
 /**
@@ -58,7 +57,6 @@ export const noteCreateSchema = z.object({
 	status: z.string().optional(),
 	color: z.string().optional(),
 	emoji: z.string().optional(),
-	isFavorite: z.boolean().optional().default(false),
 });
 
 /**
@@ -73,7 +71,6 @@ export const placeCreateSchema = z.object({
 	type: z.string().optional(),
 	location: z.string().optional(),
 	region: z.string().optional(),
-	isFavorite: z.boolean().optional().default(false),
 });
 
 /**
@@ -85,7 +82,6 @@ export const promptCreateSchema = z.object({
 	description: z.string().optional(),
 	category: z.string().optional(),
 	tags: z.array(z.string()).optional(),
-	isFavorite: z.boolean().optional().default(false),
 });
 
 /**
@@ -97,7 +93,6 @@ export const tagCreateSchema = z.object({
 	emoji: z.string().optional(),
 	color: z.string().optional(),
 	category: z.string().optional(),
-	isFavorite: z.boolean().optional().default(false),
 });
 
 // Tipos inferidos

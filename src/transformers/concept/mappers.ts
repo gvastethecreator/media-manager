@@ -27,8 +27,6 @@ interface DrizzleConceptCreateInput {
 	examples?: string | null;
 	featuredImage?: string | null;
 	id?: string;
-
-	isFavorite?: boolean;
 	name: string;
 	notes?: string | null;
 	parentId?: string | null;
@@ -48,8 +46,6 @@ interface DrizzleConceptUpdateInput {
 	emoji?: string | null;
 	examples?: string | null;
 	featuredImage?: string | null;
-
-	isFavorite?: boolean;
 	name?: string;
 	notes?: string | null;
 	parentId?: string | null;
@@ -124,8 +120,6 @@ export function toCreateDataDrizzle(input: ConceptCreateInput): DrizzleConceptCr
 		emoji: input.emoji || '💡',
 		color: input.color || 'var(--dt-primary-500)',
 		category: input.category || 'general',
-
-		isFavorite: input.isFavorite,
 		totalImages: input.totalImages || 0,
 		totalVideos: input.totalVideos || 0,
 		type: input.type || null,
