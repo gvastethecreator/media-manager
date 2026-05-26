@@ -10,10 +10,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { CollectionCreateInput, CollectionUpdateInput } from '@/lib/effect/schemas/entities';
-import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { CollectionService, CollectionServiceLive } from '@/services/collection/collection.service.effect';
-import { favoriteService } from '@/services/favorite/favorite.service';
-import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -46,29 +43,6 @@ router.get(
 				parentId: parentId === 'null' ? null : (parentId as string | null | undefined),
 				onlyFavorites: onlyFavorites === 'true' ? true : undefined,
 			};
-
-			if (options.onlyFavorites) {
-				const favoriteResult = yield* listFavoriteEntities({
-					entityType: FavoriteEntityType.COLLECTION,
-					search: options.search,
-					limit: options.limit,
-					offset: options.offset,
-					sortBy: options.orderBy,
-					sortOrder: options.orderDirection,
-					getEntityById: (entityId: string) => collectionService.getById(entityId),
-				});
-
-				return {
-					data: favoriteResult.data,
-					pagination: {
-						total: favoriteResult.total,
-						limit: options.limit,
-						offset: options.offset,
-						hasNext: options.limit + options.offset < favoriteResult.total,
-						hasPrev: options.offset > 0,
-					},
-				};
-			}
 
 			const result = yield* collectionService.getAll(options);
 

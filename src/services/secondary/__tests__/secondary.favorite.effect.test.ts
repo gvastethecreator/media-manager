@@ -17,6 +17,7 @@ import {
 	WorldItemServiceLive,
 } from '@/services/secondary/secondary-services.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
+import { NoteCategory } from '@/types/entities/note';
 
 const runGroupEffect = <A, E>(effect: Effect.Effect<A, E, GroupService>) =>
 	Effect.runPromise(Effect.either(effect.pipe(Effect.provide(GroupServiceLive))));
@@ -146,7 +147,7 @@ const createNote = async (title: string) => {
 			return yield* service.create({
 				title: unique,
 				content: 'Test note content',
-				category: 'test',
+				category: NoteCategory.GENERAL,
 			});
 		})
 	);

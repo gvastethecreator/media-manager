@@ -32,7 +32,6 @@ export const collectionCreateSchema = z.object({
 	description: z.string().optional(),
 	emoji: z.string().optional(),
 	color: z.string().optional(),
-	isFavorite: z.boolean().optional().default(false),
 });
 
 /**

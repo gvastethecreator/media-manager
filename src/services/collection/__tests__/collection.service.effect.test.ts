@@ -7,9 +7,16 @@
 
 import { and, eq, inArray } from 'drizzle-orm';
 import { Effect } from 'effect';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
 import { collections, favorites, folders, imageCollections, images, profiles } from '@/lib/drizzle/schema';
-import { CollectionService, CollectionServiceLive } from '../collection.service.effect';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
+import {
+	type CollectionServiceInterface,
+	CollectionService,
+	CollectionServiceLive,
+} from '../collection.service.effect';
 import { CollectionHasContentError, CollectionNotFound, CollectionValidationError } from '../collection-errors.effect';
 
 // ============= Test Helpers =============
@@ -55,6 +62,7 @@ const cleanupTestData = () =>
 	});
 
 let previousActiveProfileIds: string[] = [];
+let createdActiveProfileId: string | null = null;
 
 const suspendActiveProfiles = () =>
 	withSqliteRetry(async () => {
@@ -73,6 +81,31 @@ const restoreActiveProfiles = () =>
 		}
 
 		previousActiveProfileIds = [];
+	});
+
+const ensureActiveProfile = () =>
+	withSqliteRetry(async () => {
+		const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+
+		if (activeProfile) {
+			return activeProfile.id;
+		}
+
+		const profileId = `collection-service-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+		createdActiveProfileId = profileId;
+
+		await db.insert(profiles).values({
+			id: profileId,
+			name: 'Collection Service Active Profile',
+			emoji: '📚',
+			color: '#3b82f6',
+			description: 'Perfil activo para tests canónicos de Collection',
+			isActive: true,
+			settingsId: null,
+			imageId: null,
+		});
+
+		return profileId;
 	});
 
 /**
@@ -202,6 +235,13 @@ beforeEach(async () => {
 afterEach(async () => {
 	// Clean up test data in correct order (relations first, then entities)
 	await cleanupTestData();
+
+	const profileIdToDelete = createdActiveProfileId;
+	if (profileIdToDelete) {
+		await withSqliteRetry(() => db.delete(profiles).where(eq(profiles.id, profileIdToDelete)));
+		createdActiveProfileId = null;
+	}
+
 	await restoreActiveProfiles();
 });
 
@@ -282,15 +322,18 @@ describe('CollectionService - CRUD Operations', () => {
 			expect(error).toBeInstanceOf(CollectionNotFound);
 		});
 
-		it('should create favorite collection', async () => {
-			const input = {
+		it('should ignore legacy authored favorite input', async () => {
+			await ensureActiveProfile();
+
+			const legacyInput: Parameters<CollectionServiceInterface['create']>[0] & { isFavorite: boolean } = {
 				name: 'Favorite Collection',
 				isFavorite: true,
 			};
 
-			const result = await runEffect(Effect.flatMap(CollectionService, (service) => service.create(input)));
+			const result = await runEffect(Effect.flatMap(CollectionService, (service) => service.create(legacyInput)));
 
-			expect(result.isFavorite).toBe(true);
+			expect(result.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, result.id)).toBe(false);
 		});
 	});
 
@@ -423,7 +466,7 @@ describe('CollectionService - CRUD Operations', () => {
 			expect(result.collections.every((c) => c.parentId === null)).toBe(true);
 		});
 
-		it('should filter favorites only', async () => {
+		it('should return empty favorites when no active profile exists', async () => {
 			await createTestCollection({ name: 'Favorite 1', isFavorite: true });
 			await createTestCollection({ name: 'Regular', isFavorite: false });
 			await createTestCollection({ name: 'Favorite 2', isFavorite: true });
@@ -432,8 +475,8 @@ describe('CollectionService - CRUD Operations', () => {
 				Effect.flatMap(CollectionService, (service) => service.getAll({ onlyFavorites: true }))
 			);
 
-			expect(result.collections).toHaveLength(2);
-			expect(result.collections.every((c) => c.isFavorite === true)).toBe(true);
+			expect(result.collections).toHaveLength(0);
+			expect(result.total).toBe(0);
 		});
 
 		it('should order by name ascending', async () => {
@@ -741,29 +784,28 @@ describe('CollectionService - Relation Operations', () => {
 describe('CollectionService - Stats Operations', () => {
 	describe('toggleFavorite', () => {
 		it('should toggle favorite from false to true', async () => {
-			const collection = await createTestCollection({
-				name: 'Test Collection',
-				isFavorite: false,
-			});
+			await ensureActiveProfile();
+			const collection = await createTestCollection({ name: 'Test Collection' });
 
 			const result = await runEffect(
 				Effect.flatMap(CollectionService, (service) => service.toggleFavorite(collection.id))
 			);
 
 			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, collection.id)).toBe(true);
 		});
 
 		it('should toggle favorite from true to false', async () => {
-			const collection = await createTestCollection({
-				name: 'Test Collection',
-				isFavorite: true,
-			});
+			await ensureActiveProfile();
+			const collection = await createTestCollection({ name: 'Test Collection' });
+			await favoriteService.set(FavoriteEntityType.COLLECTION, collection.id, true);
 
 			const result = await runEffect(
 				Effect.flatMap(CollectionService, (service) => service.toggleFavorite(collection.id))
 			);
 
 			expect(result.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, collection.id)).toBe(false);
 		});
 
 		it('should fail when collection not found', async () => {

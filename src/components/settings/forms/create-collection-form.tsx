@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -47,7 +46,6 @@ const createCollectionSchema = z.object({
 	url: z.string().url({ message: 'La URL debe ser válida' }).optional().or(z.literal('')),
 	alternativeUrl: z.string().url({ message: 'La URL alternativa debe ser válida' }).optional().or(z.literal('')),
 	price: z.number().nonnegative().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof createCollectionSchema>;
@@ -87,7 +85,6 @@ export function CreateCollectionForm({
 			url: '',
 			alternativeUrl: '',
 			price: undefined,
-			isFavorite: false,
 		},
 	});
 
@@ -104,7 +101,6 @@ export function CreateCollectionForm({
 				url: collection.url || '',
 				alternativeUrl: collection.alternativeUrl || '',
 				price: collection.price || undefined,
-				isFavorite: collection.isFavorite,
 			});
 		}
 	}, [form, isEditing, collection]);
@@ -202,7 +198,6 @@ export function CreateCollectionForm({
 					color: data.color || undefined,
 					emoji: data.emoji || undefined,
 					description: data.description || undefined,
-					isFavorite: data.isFavorite,
 				};
 				const updated = await updateCollectionMutation.mutateAsync({
 					id: collection.id,
@@ -220,8 +215,6 @@ export function CreateCollectionForm({
 					color: data.color || undefined,
 					emoji: data.emoji || undefined,
 					description: data.description || undefined,
-
-					isFavorite: data.isFavorite,
 				} as CreateCollectionInput);
 				onCreated?.(created);
 				form.reset();
@@ -379,21 +372,6 @@ export function CreateCollectionForm({
 								/>
 							</FormControl>
 							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-							<FormControl>
-								<Checkbox checked={field.value} onCheckedChange={field.onChange} />
-							</FormControl>
-							<div className="space-y-1 leading-none">
-								<FormLabel>Marcar como favorito</FormLabel>
-							</div>
 						</FormItem>
 					)}
 				/>
