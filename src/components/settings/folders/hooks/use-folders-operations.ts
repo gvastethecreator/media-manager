@@ -28,10 +28,6 @@ const normalizeInput = (p: string): { input: FolderCreateInput; name: string } =
 		emoji: null,
 		color: null,
 		featuredImage: null,
-		isFavorite: false,
-		totalFiles: 0,
-		totalSize: 0,
-		lastIndexed: null,
 		parentId: null,
 		presetId: null,
 	};
