@@ -393,7 +393,6 @@ export function toDrizzleImageCreate(input: ImageCreateInput): any {
 		width: input.width,
 		height: input.height,
 		metadata: input.metadata,
-		isFavorite: input.isFavorite ?? false,
 		folderId: input.folderId,
 		addedAt: new Date(),
 		tags: input.tags ? JSON.stringify(input.tags) : null,
@@ -412,9 +411,6 @@ export function toDrizzleImageUpdate(input: ImageUpdateInput): any {
 	}
 	if (input.description !== undefined) {
 		updateData.description = input.description;
-	}
-	if (input.isFavorite !== undefined) {
-		updateData.isFavorite = input.isFavorite;
 	}
 	if (input.folderId !== undefined) {
 		updateData.folderId = input.folderId;

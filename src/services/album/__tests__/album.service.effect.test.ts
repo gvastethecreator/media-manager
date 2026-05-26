@@ -6,8 +6,11 @@
 
 import { eq } from 'drizzle-orm';
 import { Effect, Exit } from 'effect';
+import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
-import { albums, imageAlbums } from '@/lib/drizzle/schema';
+import { albums, favorites, imageAlbums, profiles } from '@/lib/drizzle/schema';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { AlbumService, AlbumServiceLive, type GetAlbumsOptions } from '../album.service.effect';
 import { AlbumNameConflict, AlbumNotFound } from '../album-errors.effect';
 
@@ -21,6 +24,32 @@ const runEffectExpectFailure = <A, E>(effect: Effect.Effect<A, E, AlbumService>)
 	return Effect.runPromiseExit(Effect.provide(effect, AlbumServiceLive));
 };
 
+let createdActiveProfileId: string | null = null;
+
+const ensureActiveProfile = async () => {
+	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+
+	if (activeProfile) {
+		return activeProfile.id;
+	}
+
+	const profileId = `album-service-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+	createdActiveProfileId = profileId;
+
+	await db.insert(profiles).values({
+		id: profileId,
+		name: 'Album Service Effect Test Profile',
+		emoji: '📸',
+		color: '#f59e0b',
+		description: 'Perfil activo para tests de AlbumService',
+		isActive: true,
+		settingsId: null,
+		imageId: null,
+	});
+
+	return profileId;
+};
+
 describe('AlbumService Effect', () => {
 	// Track created albums for cleanup
 	const createdAlbumIds: string[] = [];
@@ -29,12 +58,17 @@ describe('AlbumService Effect', () => {
 	afterEach(async () => {
 		// Limpiar TODOS los albums creados durante los tests
 		try {
+			await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.ALBUM));
 			// Primero borrar relaciones
 			if (createdAlbumIds.length > 0) {
 				await db.delete(imageAlbums);
 			}
 			// Luego borrar todos los albums de test
 			await db.delete(albums);
+			if (createdActiveProfileId) {
+				await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
+				createdActiveProfileId = null;
+			}
 			// Clear array
 			createdAlbumIds.length = 0;
 		} catch (error) {
@@ -57,7 +91,6 @@ describe('AlbumService Effect', () => {
 					emoji: '📷',
 					color: '#FF5733',
 					category: 'test',
-					isFavorite: false,
 				};
 
 				const result = await runEffect(albumService.create(createInput));
@@ -355,17 +388,25 @@ describe('AlbumService Effect', () => {
 				});
 
 				const albumService = await runEffect(service);
+				await ensureActiveProfile();
 
-				const favorite = await runEffect(albumService.create({ name: 'Favorite', isFavorite: true }));
-				const normal = await runEffect(albumService.create({ name: 'Normal', isFavorite: false }));
+				const favorite = await runEffect(albumService.create({ name: 'Favorite' }));
+				const normal = await runEffect(albumService.create({ name: 'Normal' }));
+				const staleProjected = await runEffect(albumService.create({ name: 'Stale Projected' }));
+
+				await favoriteService.set(FavoriteEntityType.ALBUM, favorite.id, true);
+				await db.update(albums).set({ isFavorite: true }).where(eq(albums.id, staleProjected.id));
 
 				const result = await runEffect(albumService.getAll({ onlyFavorites: true }));
 
+				expect(result.albums).toHaveLength(1);
+				expect(result.albums[0]?.id).toBe(favorite.id);
 				expect(result.albums.every((a) => a.isFavorite)).toBe(true);
 
 				// Cleanup
 				await db.delete(albums).where(eq(albums.id, favorite.id));
 				await db.delete(albums).where(eq(albums.id, normal.id));
+				await db.delete(albums).where(eq(albums.id, staleProjected.id));
 			});
 
 			it('should respect limit and offset', async () => {
@@ -395,8 +436,9 @@ describe('AlbumService Effect', () => {
 				});
 
 				const albumService = await runEffect(service);
+				await ensureActiveProfile();
 
-				const created = await runEffect(albumService.create({ name: 'Toggle Test', isFavorite: false }));
+				const created = await runEffect(albumService.create({ name: 'Toggle Test' }));
 
 				// Toggle to true
 				const toggled1 = await runEffect(albumService.toggleFavorite(created.id));

@@ -75,7 +75,6 @@ export interface ImageCreateInput {
 	groups?: string[];
 	hash: string;
 	height: number;
-	isFavorite?: boolean;
 	metadata?: string | null;
 	name: string;
 	notes?: string[];
@@ -102,7 +101,6 @@ export interface ImageUpdateInput {
 	description?: string | null;
 	folderId?: string | null;
 	groups?: string[];
-	isFavorite?: boolean;
 	metadata?: string | null;
 	name?: string;
 	notes?: string[];

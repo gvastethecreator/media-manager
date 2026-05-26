@@ -95,6 +95,9 @@ export const UpdateGroupSchema = GroupSchema.partial().omit({
 	updatedAt: true,
 });
 
+export type CreateGroupInput = z.input<typeof CreateGroupSchema>;
+export type UpdateGroupInput = z.input<typeof UpdateGroupSchema>;
+
 /**
  * Esquema para relaciones de un grupo
  */

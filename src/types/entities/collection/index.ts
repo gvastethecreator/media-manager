@@ -35,10 +35,14 @@ export type {
 
 // --- Tipos de compatibilidad e interfaces ---
 import type { CollectionBase, CollectionWithStats } from './base';
+import type {
+	CreateCollectionInput as CollectionCreateShape,
+	UpdateCollectionInput as CollectionUpdateShape,
+} from './types';
 
 export type CollectionComplete = CollectionWithStats;
-export type CollectionCreateInput = Partial<CollectionBase>;
-export type CollectionUpdateInput = Partial<Omit<CollectionBase, 'id' | 'createdAt' | 'updatedAt'>>;
+export type CollectionCreateInput = CollectionCreateShape;
+export type CollectionUpdateInput = CollectionUpdateShape;
 export interface CollectionSearchOptions {
 	orderBy?: Record<string, 'asc' | 'desc'>;
 	skip?: number;

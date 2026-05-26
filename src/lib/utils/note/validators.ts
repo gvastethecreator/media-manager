@@ -56,6 +56,6 @@ export const noteFiltersSchema = z.object({
 /**
  * Tipos inferidos desde los esquemas Zod
  */
-export type CreateNoteInput = z.infer<typeof createNoteSchema>;
-export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
-export type NoteFiltersInput = z.infer<typeof noteFiltersSchema>;
+export type CreateNoteInput = z.input<typeof createNoteSchema>;
+export type UpdateNoteInput = z.input<typeof updateNoteSchema>;
+export type NoteFiltersInput = z.input<typeof noteFiltersSchema>;

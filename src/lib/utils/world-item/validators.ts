@@ -107,3 +107,7 @@ export const worldItemFiltersSchema = z.object({
 	hasConcepts: z.boolean().optional(),
 	hasPrompts: z.boolean().optional(),
 });
+
+export type CreateWorldItemInput = z.infer<typeof createWorldItemSchema>;
+export type UpdateWorldItemInput = z.infer<typeof updateWorldItemSchema>;
+export type WorldItemFiltersInput = z.infer<typeof worldItemFiltersSchema>;

@@ -71,6 +71,31 @@ const getFirstRow = async <TRow>(operation: () => PromiseLike<TRow[]>): Promise<
 	return rows[0] ?? null;
 };
 
+const stripLegacyFavoriteInput = <TInput>(input: TInput): TInput => {
+	if (!input || typeof input !== 'object' || Array.isArray(input)) {
+		return input;
+	}
+
+	const { isFavorite: _legacyIsFavorite, ...rest } = input as Record<string, unknown>;
+	return rest as TInput;
+};
+
+const getImageFavoriteIds = (): Effect.Effect<string[], ImageError, never> =>
+	Effect.tryPromise({
+		try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.IMAGE),
+		catch: (error) =>
+			new ImageDatabaseError({
+				operation: 'getImageFavoriteIds',
+				originalError: error,
+			}),
+	});
+
+const projectImage = (image: Image, favoriteEntityIds: readonly string[]): Image =>
+	Image.make(favoriteService.applyFavoriteProjection(image, favoriteEntityIds));
+
+const projectImages = (images: Image[], favoriteEntityIds: readonly string[]): Image[] =>
+	images.map((image) => projectImage(image, favoriteEntityIds));
+
 // ============================================================================
 // INTERNAL HELPERS
 // ============================================================================
@@ -268,15 +293,16 @@ const checkRelations = (
 export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError, never> =>
 	Effect.gen(function* () {
 		logger.info('➕ Creating image', { name: input.name, hash: input.hash });
+		const sanitizedInput = stripLegacyFavoriteInput(input);
 
 		// Validate input
 		const validated = yield* Effect.try({
-			try: () => ImageCreateInput.make(input),
+			try: () => ImageCreateInput.make(sanitizedInput),
 			catch: (error) =>
 				new ImageValidationError({
 					field: 'input',
 					message: String(error),
-					value: input,
+					value: sanitizedInput,
 				}),
 		});
 
@@ -306,19 +332,6 @@ export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError
 				})
 			);
 		}
-
-		const requestedIsFavorite = validated.isFavorite ?? false;
-		const useCanonicalFavoriteBridge =
-			requestedIsFavorite === true
-				? yield* Effect.tryPromise({
-					try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE)) !== null,
-					catch: (error) =>
-						new ImageDatabaseError({
-							operation: 'create-favorite-scope',
-							originalError: error,
-						}),
-				})
-				: false;
 
 		// Create image
 		const now = new Date();
@@ -368,17 +381,6 @@ export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError
 			hash: created.hash,
 		});
 
-		if (requestedIsFavorite && useCanonicalFavoriteBridge) {
-			yield* Effect.tryPromise({
-				try: () => favoriteService.set(FavoriteEntityType.IMAGE, created.id, true),
-				catch: (error) =>
-					new ImageDatabaseError({
-						operation: 'create-favorite-bridge',
-						originalError: error,
-					}),
-			});
-		}
-
 		return yield* getById(created.id);
 	});
 
@@ -393,10 +395,11 @@ export const getById = (id: string): Effect.Effect<Image, ImageError, never> =>
 	Effect.gen(function* () {
 		logger.info('🔍 Getting image by ID', { id });
 
-		const image = yield* getByIdInternal(id);
+		const [image, favoriteEntityIds] = yield* Effect.all([getByIdInternal(id), getImageFavoriteIds()]);
+		const projectedImage = projectImage(image, favoriteEntityIds);
 
-		logger.info('✅ Image retrieved', { id, name: image.name });
-		return image;
+		logger.info('✅ Image retrieved', { id, name: projectedImage.name });
+		return projectedImage;
 	});
 
 /**
@@ -410,7 +413,7 @@ export const getByIdWithStats = (id: string): Effect.Effect<ImageWithStats, Imag
 	Effect.gen(function* () {
 		logger.info('🔍 Getting image by ID with stats', { id });
 
-		const [image, stats] = yield* Effect.all([getByIdInternal(id), getRelationsCounts(id)]);
+		const [image, stats] = yield* Effect.all([getById(id), getRelationsCounts(id)]);
 
 		const imageWithStats = ImageWithStats.make({
 			...image,
@@ -490,17 +493,7 @@ export const getAll = (options?: {
 		const limit = Math.min(options?.limit ?? 50, 500);
 		const orderBy = options?.orderBy ?? 'createdAt';
 		const orderDirection = options?.orderDirection ?? 'desc';
-		const favoriteEntityIds: string[] | null =
-			options?.isFavorite !== undefined
-				? yield* Effect.tryPromise({
-					try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE),
-					catch: (error) =>
-						new ImageDatabaseError({
-							operation: 'getAll-favorite-ids',
-							originalError: error,
-						}),
-				})
-				: null;
+		const favoriteEntityIds = yield* getImageFavoriteIds();
 
 		logger.info('📋 Getting all images', {
 			folderId: options?.folderId,
@@ -520,9 +513,7 @@ export const getAll = (options?: {
 		}
 
 		if (options?.isFavorite !== undefined) {
-			if (favoriteEntityIds === null) {
-				conditions.push(eq(images.isFavorite, options.isFavorite));
-			} else if (options.isFavorite) {
+			if (options.isFavorite) {
 				if (favoriteEntityIds.length === 0) {
 					return {
 						images: [],
@@ -584,11 +575,9 @@ export const getAll = (options?: {
 					.limit(limit)
 					.offset(offset);
 
-				const usingCanonicalFavoriteFilter = options?.isFavorite !== undefined && favoriteEntityIds !== null;
-				const favoriteValue = options?.isFavorite ?? false;
-
-				return results.map((r: typeof images.$inferSelect) =>
-					Image.make(usingCanonicalFavoriteFilter ? { ...r, isFavorite: favoriteValue } : r)
+				return projectImages(
+					results.map((r: typeof images.$inferSelect) => Image.make(r)),
+					favoriteEntityIds
 				);
 			},
 			catch: (error) =>
@@ -631,46 +620,21 @@ export const getAll = (options?: {
 export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image, ImageError, never> =>
 	Effect.gen(function* () {
 		logger.info('📝 Updating image', { id, updates: Object.keys(input) });
+		const sanitizedInput = stripLegacyFavoriteInput(input);
 
 		// Validate input
 		const validated = yield* Effect.try({
-			try: () => ImageUpdateInput.make(input),
+			try: () => ImageUpdateInput.make(sanitizedInput),
 			catch: (error) =>
 				new ImageValidationError({
 					field: 'input',
 					message: String(error),
-					value: input,
+					value: sanitizedInput,
 				}),
 		});
 
 		// Check if image exists
 		yield* getByIdInternal(id);
-
-		const requestedIsFavorite = validated.isFavorite;
-		const useCanonicalFavoriteBridge =
-			requestedIsFavorite !== undefined
-				? yield* Effect.tryPromise({
-					try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE)) !== null,
-					catch: (error) =>
-						new ImageDatabaseError({
-							operation: 'update-favorite-scope',
-							originalError: error,
-						}),
-				})
-				: false;
-
-		if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-			yield* Effect.tryPromise({
-				try: () => favoriteService.set(FavoriteEntityType.IMAGE, id, requestedIsFavorite),
-				catch: (error) =>
-					new ImageDatabaseError({
-						operation: 'update-favorite-bridge',
-						originalError: error,
-					}),
-			});
-		}
-
-		const { isFavorite: _ignoredIsFavorite, ...validatedFields } = validated;
 
 		// Update image
 		const now = new Date();
@@ -679,7 +643,7 @@ export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image
 				return await db
 					.update(images)
 					.set({
-						...validatedFields,
+						...validated,
 						updatedAt: now,
 					})
 					.where(eq(images.id, id))
@@ -861,7 +825,8 @@ export const getByHash = (hash: string): Effect.Effect<Image, ImageError, never>
 	Effect.gen(function* () {
 		logger.info('🔍 Getting image by hash', { hash });
 
-		const result = yield* Effect.tryPromise({
+		const [result, favoriteEntityIds] = yield* Effect.all([
+			Effect.tryPromise({
 			try: async () => {
 				const image = await getFirstRow<typeof images.$inferSelect>(() =>
 					db.select().from(images).where(eq(images.hash, hash)).limit(1)
@@ -874,20 +839,24 @@ export const getByHash = (hash: string): Effect.Effect<Image, ImageError, never>
 					operation: 'getByHash',
 					originalError: error,
 				}),
-		});
+			}),
+			getImageFavoriteIds(),
+		]);
 
 		if (!result) {
 			logger.warn('❌ Image not found by hash', { hash });
 			return yield* Effect.fail(new ImageNotFound({ imageId: `hash:${hash}` }));
 		}
 
+		const projectedImage = projectImage(result, favoriteEntityIds);
+
 		logger.info('✅ Image found by hash', {
 			hash,
-			id: result.id,
-			name: result.name,
+			id: projectedImage.id,
+			name: projectedImage.name,
 		});
 
-		return result;
+		return projectedImage;
 	});
 
 /**
@@ -901,7 +870,8 @@ export const getByPathAndFolder = (path: string, folderId: string): Effect.Effec
 	Effect.gen(function* () {
 		logger.info('🔍 Getting image by path and folder', { path, folderId });
 
-		const result = yield* Effect.tryPromise({
+		const [result, favoriteEntityIds] = yield* Effect.all([
+			Effect.tryPromise({
 			try: async () => {
 				const image = await getFirstRow<typeof images.$inferSelect>(() =>
 					db
@@ -918,21 +888,25 @@ export const getByPathAndFolder = (path: string, folderId: string): Effect.Effec
 					operation: 'getByPathAndFolder',
 					originalError: error,
 				}),
-		});
+			}),
+			getImageFavoriteIds(),
+		]);
 
 		if (!result) {
 			logger.warn('❌ Image not found by path/folder', { path, folderId });
 			return yield* Effect.fail(new ImageNotFound({ imageId: `path:${path}` }));
 		}
 
+		const projectedImage = projectImage(result, favoriteEntityIds);
+
 		logger.info('✅ Image found by path/folder', {
 			path,
 			folderId,
-			id: result.id,
-			name: result.name,
+			id: projectedImage.id,
+			name: projectedImage.name,
 		});
 
-		return result;
+		return projectedImage;
 	});
 
 /**
@@ -945,16 +919,9 @@ export const getAllFavorites = (): Effect.Effect<Image[], ImageError, never> =>
 	Effect.gen(function* () {
 		logger.info('⭐ Getting all favorite images');
 
-		const favoriteEntityIds = yield* Effect.tryPromise({
-			try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE),
-			catch: (error) =>
-				new ImageDatabaseError({
-					operation: 'getAllFavorites-favorite-ids',
-					originalError: error,
-				}),
-		});
+		const favoriteEntityIds = yield* getImageFavoriteIds();
 
-		if (favoriteEntityIds !== null && favoriteEntityIds.length === 0) {
+		if (favoriteEntityIds.length === 0) {
 			logger.info('✅ Favorite images retrieved', { count: 0 });
 			return [];
 		}
@@ -964,13 +931,9 @@ export const getAllFavorites = (): Effect.Effect<Image[], ImageError, never> =>
 				const favImages = await db
 					.select()
 					.from(images)
-					.where(
-						favoriteEntityIds === null ? eq(images.isFavorite, true) : inArray(images.id, favoriteEntityIds)
-					)
+					.where(inArray(images.id, favoriteEntityIds))
 					.orderBy(desc(images.addedAt));
-				return favImages.map((img: typeof images.$inferSelect) =>
-					Image.make(favoriteEntityIds === null ? img : { ...img, isFavorite: true })
-				);
+				return favImages.map((img: typeof images.$inferSelect) => projectImage(Image.make(img), favoriteEntityIds));
 			},
 			catch: (error) =>
 				new ImageDatabaseError({
@@ -1003,7 +966,8 @@ export const getByFolder = (
 			offset,
 		});
 
-		const results = yield* Effect.tryPromise({
+		const [results, favoriteEntityIds] = yield* Effect.all([
+			Effect.tryPromise({
 			try: async () => {
 				const folderImages = await db
 					.select()
@@ -1019,14 +983,18 @@ export const getByFolder = (
 					operation: 'getByFolder',
 					originalError: error,
 				}),
-		});
+			}),
+			getImageFavoriteIds(),
+		]);
+
+		const projectedResults = projectImages(results, favoriteEntityIds);
 
 		logger.info('✅ Folder images retrieved', {
 			folderId,
-			count: results.length,
+			count: projectedResults.length,
 		});
 
-		return results;
+		return projectedResults;
 	});
 
 // ============================================================================
@@ -1044,32 +1012,27 @@ export const toggleFavorite = (id: string): Effect.Effect<Image, ImageError, nev
 	Effect.gen(function* () {
 		logger.info('⭐ Toggling favorite for image', { id });
 
-		// Get current image
-		const currentImage = yield* getByIdInternal(id);
+		// Check exists
+		yield* getByIdInternal(id);
 
-		const favoriteEntityIds = yield* Effect.tryPromise({
-			try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE),
+		const currentFavoriteStatus = yield* Effect.tryPromise({
+			try: () => favoriteService.isFavorite(FavoriteEntityType.IMAGE, id),
 			catch: (error) =>
 				new ImageDatabaseError({
-					operation: 'toggleFavorite-favorite-scope',
+					operation: 'toggleFavorite-isFavorite',
 					originalError: error,
 				}),
 		});
-
-		const currentFavoriteStatus =
-			favoriteEntityIds === null ? currentImage.isFavorite : favoriteEntityIds.includes(id);
 		const newFavoriteStatus = !currentFavoriteStatus;
 
-		if (favoriteEntityIds !== null) {
-			yield* Effect.tryPromise({
-				try: () => favoriteService.set(FavoriteEntityType.IMAGE, id, newFavoriteStatus),
-				catch: (error) =>
-					new ImageDatabaseError({
-						operation: 'toggleFavorite-favorite-bridge',
-						originalError: error,
-					}),
-			});
-		}
+		yield* Effect.tryPromise({
+			try: () => favoriteService.set(FavoriteEntityType.IMAGE, id, newFavoriteStatus),
+			catch: (error) =>
+				new ImageDatabaseError({
+					operation: 'toggleFavorite-set',
+					originalError: error,
+				}),
+		});
 
 		logger.info('✅ Favorite toggled', {
 			id,
@@ -1111,26 +1074,14 @@ export const setFavoriteMany = (
 			isFavorite,
 		});
 
-		const favoriteEntityIds = yield* Effect.tryPromise({
-			try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE),
+		const result = yield* Effect.tryPromise({
+			try: () => favoriteService.setMany(FavoriteEntityType.IMAGE, ids, isFavorite),
 			catch: (error) =>
 				new ImageDatabaseError({
-					operation: 'setFavoriteMany-favorite-scope',
+					operation: 'setFavoriteMany-setMany',
 					originalError: error,
 				}),
 		});
-
-		const result =
-			favoriteEntityIds === null
-				? ids.length
-				: yield* Effect.tryPromise({
-					try: () => favoriteService.setMany(FavoriteEntityType.IMAGE, ids, isFavorite),
-					catch: (error) =>
-						new ImageDatabaseError({
-							operation: 'setFavoriteMany-favorite-bridge',
-							originalError: error,
-						}),
-				});
 
 		logger.info('✅ Favorite status updated for multiple images', {
 			requested: ids.length,

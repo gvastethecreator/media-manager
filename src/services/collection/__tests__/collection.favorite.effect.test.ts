@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
+import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
 import { collections, favorites, imageCollections, profiles } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -38,12 +39,11 @@ const ensureActiveProfile = async () => {
 	return profileId;
 };
 
-const createCollection = async (name: string, input?: { isFavorite?: boolean }) =>
+const createCollection = async (name: string) =>
 	expectSuccess(
 		Effect.flatMap(CollectionService, (service) =>
 			service.create({
 				name: `${name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-				isFavorite: input?.isFavorite,
 			})
 		)
 	);
@@ -60,13 +60,13 @@ afterEach(async () => {
 });
 
 describe('CollectionService favorites convergence', () => {
-	it('create persists favorite state through the canonical favorite bridge when a profile is active', async () => {
+	it('create starts unfavorited even when a profile is active', async () => {
 		await ensureActiveProfile();
 
-		const created = await createCollection('create-canonical-favorite', { isFavorite: true });
+		const created = await createCollection('create-canonical-favorite');
 
-		expect(created.isFavorite).toBe(true);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, created.id)).toBe(true);
+		expect(created.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, created.id)).toBe(false);
 	});
 
 	it('uses canonical favorites for onlyFavorites and ignores stale projection', async () => {
@@ -88,12 +88,17 @@ describe('CollectionService favorites convergence', () => {
 		expect(result.collections[0]?.isFavorite).toBe(true);
 	});
 
-	it('update persists favorite state through the canonical favorite bridge when a profile is active', async () => {
+	it('update preserves canonical favorite state without authored isFavorite', async () => {
 		await ensureActiveProfile();
 		const collection = await createCollection('update-target');
+		await favoriteService.set(FavoriteEntityType.COLLECTION, collection.id, true);
 
 		const updated = await expectSuccess(
-			Effect.flatMap(CollectionService, (service) => service.update(collection.id, { isFavorite: true }))
+			Effect.flatMap(CollectionService, (service) =>
+				service.update(collection.id, {
+					name: `${collection.name}-renamed`,
+				})
+			)
 		);
 
 		expect(updated.id).toBe(collection.id);

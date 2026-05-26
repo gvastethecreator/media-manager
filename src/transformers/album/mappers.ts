@@ -57,8 +57,6 @@ interface DrizzleCreateAlbumData {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	filters?: string | null;
-
-	isFavorite?: boolean;
 	lastImageAddedAt?: Date | null;
 	lastVideoAddedAt?: Date | null;
 	metadata?: string | null;
@@ -101,8 +99,6 @@ export function mapCreateAlbumDataToDrizzle(data: AlbumCreateInput): DrizzleCrea
 		emoji: data.emoji ?? null,
 		color: data.color ?? null,
 		featuredImage: data.featuredImage ?? null,
-
-		isFavorite: data.isFavorite ?? false,
 		totalImages: 0,
 		totalVideos: 0,
 		totalSize: 0,

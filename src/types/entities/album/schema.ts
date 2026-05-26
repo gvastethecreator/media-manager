@@ -16,7 +16,6 @@ export const CreateAlbumSchema = z.object({
 	sortBy: z.string().default('name'),
 	filters: z.string().default('[]'),
 	featuredImage: z.string().optional(),
-	isFavorite: z.boolean().default(false),
 });
 
 export const UpdateAlbumSchema = z.object({
@@ -29,5 +28,4 @@ export const UpdateAlbumSchema = z.object({
 	sortBy: z.string().optional(),
 	filters: z.string().optional(),
 	featuredImage: z.string().optional(),
-	isFavorite: z.boolean().optional(),
 });

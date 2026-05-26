@@ -7,6 +7,7 @@
 
 import { Effect } from 'effect';
 import { eq, inArray } from 'drizzle-orm';
+import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
 import { albums, favorites, folders, imageAlbums, images, imageTags, profiles, tags } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -211,21 +212,23 @@ describe('ImageService - CRUD Operations', () => {
 			const validHash = timestamp.padStart(64, '0');
 			await ensureActiveProfile();
 
+			const legacyInput: Parameters<typeof ImageService.create>[0] & { isFavorite: boolean } = {
+				name: 'canonical-favorite-create.jpg',
+				path: '/uploads/canonical-favorite-create.jpg',
+				hash: validHash,
+				size: 2_048_000,
+				width: 1920,
+				height: 1080,
+				folderId: folder.id,
+				isFavorite: true,
+			};
+
 			const result = await expectSuccess(
-				ImageService.create({
-					name: 'canonical-favorite-create.jpg',
-					path: '/uploads/canonical-favorite-create.jpg',
-					hash: validHash,
-					size: 2_048_000,
-					width: 1920,
-					height: 1080,
-					folderId: folder.id,
-					isFavorite: true,
-				})
+				ImageService.create(legacyInput)
 			);
 
-			expect(result.isFavorite).toBe(true);
-			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, result.id)).toBe(true);
+			expect(result.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, result.id)).toBe(false);
 		});
 
 		it('should create image with optional metadata', async () => {
@@ -325,6 +328,15 @@ describe('ImageService - CRUD Operations', () => {
 			expect(result.path).toBe(image.path);
 		});
 
+		it('should project canonical favorite state instead of stale embedded flag', async () => {
+			const folder = await createTestFolder();
+			const image = await createTestImage(folder.id, { isFavorite: true });
+
+			const result = await expectSuccess(ImageService.getById(image.id));
+
+			expect(result.isFavorite).toBe(false);
+		});
+
 		it('should fail when image does not exist', async () => {
 			const error = await expectError(ImageService.getById('non-existent-id'));
 
@@ -376,7 +388,6 @@ describe('ImageService - CRUD Operations', () => {
 			const update = {
 				name: 'updated-name.jpg',
 				description: 'Updated description',
-				isFavorite: true,
 			};
 
 			const result = await expectSuccess(ImageService.update(image.id, update));
@@ -384,15 +395,21 @@ describe('ImageService - CRUD Operations', () => {
 			expect(result.id).toBe(image.id);
 			expect(result.name).toBe(update.name);
 			expect(result.description).toBe(update.description);
-			expect(result.isFavorite).toBe(true);
+			expect(result.isFavorite).toBe(false);
 		});
 
 		it('should persist update favorite state through the canonical favorite bridge when a profile is active', async () => {
 			const folder = await createTestFolder();
 			const image = await createTestImage(folder.id, { isFavorite: false });
 			await ensureActiveProfile();
+			await favoriteService.set(FavoriteEntityType.IMAGE, image.id, true);
 
-			const result = await expectSuccess(ImageService.update(image.id, { isFavorite: true }));
+			const legacyUpdate: Parameters<typeof ImageService.update>[1] & { isFavorite: boolean; name: string } = {
+				name: 'keep-favorite-via-canonical.jpg',
+				isFavorite: false,
+			};
+
+			const result = await expectSuccess(ImageService.update(image.id, legacyUpdate));
 
 			expect(result.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, image.id)).toBe(true);
@@ -633,6 +650,17 @@ describe('ImageService - Query Operations', () => {
 			expect(result.images.every((img: any) => img.isFavorite === true)).toBe(true);
 		});
 
+		it('should return all images as isFavorite=false when no active profile exists', async () => {
+			const folder = await createTestFolder();
+			await createTestImage(folder.id, { isFavorite: true });
+			await createTestImage(folder.id, { isFavorite: false });
+
+			const result = await expectSuccess(ImageService.getAll({ isFavorite: false }));
+
+			expect(result.total).toBe(2);
+			expect(result.images.every((img) => img.isFavorite === false)).toBe(true);
+		});
+
 		it('should resolve isFavorite=false from canonical favorites instead of stale projection', async () => {
 			const folder = await createTestFolder();
 			await ensureActiveProfile();
@@ -671,8 +699,7 @@ describe('ImageService - Query Operations', () => {
 
 		it('should return empty array when no favorites', async () => {
 			const folder = await createTestFolder();
-			await ensureActiveProfile();
-			await createTestImage(folder.id, { isFavorite: false });
+			await createTestImage(folder.id, { isFavorite: true });
 
 			const result = await expectSuccess(ImageService.getAllFavorites());
 
@@ -737,6 +764,7 @@ describe('ImageService - Toggle Operations', () => {
 		it('should toggle favorite from false to true', async () => {
 			const folder = await createTestFolder();
 			const image = await createTestImage(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
 
 			const result = await expectSuccess(ImageService.toggleFavorite(image.id));
 
@@ -746,6 +774,7 @@ describe('ImageService - Toggle Operations', () => {
 		it('should toggle favorite from true to false', async () => {
 			const folder = await createTestFolder();
 			const image = await createTestImage(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
 
 			const favorited = await expectSuccess(ImageService.toggleFavorite(image.id));
 			expect(favorited.isFavorite).toBe(true);
@@ -779,6 +808,7 @@ describe('ImageService - Toggle Operations', () => {
 			const image1 = await createTestImage(folder.id, { isFavorite: false });
 			const image2 = await createTestImage(folder.id, { isFavorite: false });
 			const image3 = await createTestImage(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
 
 			const result = await expectSuccess(ImageService.setFavoriteMany([image1.id, image2.id, image3.id], true));
 
@@ -798,6 +828,7 @@ describe('ImageService - Toggle Operations', () => {
 			const folder = await createTestFolder();
 			const image1 = await createTestImage(folder.id, { isFavorite: true });
 			const image2 = await createTestImage(folder.id, { isFavorite: true });
+			await ensureActiveProfile();
 
 			const result = await expectSuccess(ImageService.setFavoriteMany([image1.id, image2.id], false));
 
