@@ -227,7 +227,6 @@ export class FolderCreateInput extends Schema.Class<FolderCreateInput>('FolderCr
 	description: Schema.optional(Schema.NullOr(Schema.String)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 	presetId: Schema.optional(Schema.NullOr(ID)),
-	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -241,7 +240,6 @@ export class FolderUpdateInput extends Schema.Class<FolderUpdateInput>('FolderUp
 	description: Schema.optional(Schema.NullOr(Schema.String)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 	presetId: Schema.optional(Schema.NullOr(ID)),
-	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 // ============= Image Entity =============

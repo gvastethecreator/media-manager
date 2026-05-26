@@ -36,7 +36,6 @@ export interface FolderCreateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	name: string;
 	parentId?: string | null;
 	path: string;
@@ -48,7 +47,6 @@ export interface FolderUpdateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	name?: string;
 	parentId?: string | null;
 	path?: string;

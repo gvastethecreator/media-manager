@@ -26,7 +26,6 @@ interface DrizzleFolderCreateInput {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	id?: string;
-	isFavorite?: boolean;
 	lastIndexed?: Date | null;
 	name: string;
 	parentId?: string | null;
@@ -42,7 +41,6 @@ interface DrizzleFolderUpdateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	lastIndexed?: Date | null;
 	name?: string;
 	parentId?: string | null;
@@ -107,7 +105,6 @@ export async function mapCreateFolderDataToDrizzle(data: FolderCreateInput): Pro
 			color: data.color ?? null,
 			parentId: data.parentId ?? null,
 			presetId: data.presetId ?? null,
-			isFavorite: data.isFavorite ?? false,
 			featuredImage: data.featuredImage ?? null,
 			totalFiles: 0,
 			totalSize: 0,
