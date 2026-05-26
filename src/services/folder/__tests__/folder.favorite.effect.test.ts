@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
+import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
 import { favorites, folders, profiles } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -48,11 +49,18 @@ const createFolder = async (name: string, input?: { isFavorite?: boolean }) =>
 	expectSuccess(
 		Effect.gen(function* () {
 			const folderService = yield* FolderService;
-			return yield* folderService.create({
+			const payload: Record<string, unknown> = {
 				name: `${name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
 				path: `/${name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
 				parentId: null,
-				isFavorite: input?.isFavorite,
+			};
+
+			if (input?.isFavorite !== undefined) {
+				payload.isFavorite = input.isFavorite;
+			}
+
+			return yield* folderService.create({
+				...(payload as any),
 			});
 		})
 	);
@@ -68,13 +76,30 @@ afterEach(async () => {
 });
 
 describe('FolderService favorites convergence', () => {
-	it('create persists favorite state through the canonical favorite bridge when a profile is active', async () => {
+	it('create ignores legacy authored isFavorite even when a profile is active', async () => {
 		await ensureActiveProfile();
 
 		const created = await createFolder('create-canonical-favorite', { isFavorite: true });
 
-		expect(created.isFavorite).toBe(true);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, created.id)).toBe(true);
+		expect(created.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, created.id)).toBe(false);
+	});
+
+	it('getById uses canonical favorites and ignores stale embedded projection', async () => {
+		await ensureActiveProfile();
+		const folder = await createFolder('stale-by-id');
+
+		await db.update(folders).set({ isFavorite: true }).where(eq(folders.id, folder.id));
+
+		const result = await expectSuccess(
+			Effect.gen(function* () {
+				const folderService = yield* FolderService;
+				return yield* folderService.getById(folder.id);
+			})
+		);
+
+		expect(result.id).toBe(folder.id);
+		expect(result.isFavorite).toBe(false);
 	});
 
 	it('uses canonical favorites for onlyFavorites and ignores stale projection', async () => {
@@ -99,14 +124,15 @@ describe('FolderService favorites convergence', () => {
 		expect(result.folders[0]?.isFavorite).toBe(true);
 	});
 
-	it('update persists favorite state through the canonical favorite bridge when a profile is active', async () => {
+	it('update ignores legacy authored isFavorite and preserves canonical favorite state', async () => {
 		await ensureActiveProfile();
 		const folder = await createFolder('update-target');
+		await favoriteService.set(FavoriteEntityType.FOLDER, folder.id, true);
 
 		const updated = await expectSuccess(
 			Effect.gen(function* () {
 				const folderService = yield* FolderService;
-				return yield* folderService.update(folder.id, { isFavorite: true });
+				return yield* folderService.update(folder.id, { isFavorite: false } as any);
 			})
 		);
 
