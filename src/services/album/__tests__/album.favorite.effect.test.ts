@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
+import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
 import { albums, favorites, imageAlbums, profiles } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -48,9 +49,12 @@ const createAlbum = async (name: string, input?: { isFavorite?: boolean }) =>
 	expectSuccess(
 		Effect.gen(function* () {
 			const albumService = yield* AlbumService;
-			return yield* albumService.create({
+			const legacyInput: { name: string; isFavorite?: boolean } = {
 				name: `${name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
 				isFavorite: input?.isFavorite,
+			};
+			return yield* albumService.create({
+				...legacyInput,
 			});
 		})
 	);
@@ -67,13 +71,28 @@ afterEach(async () => {
 });
 
 describe('AlbumService favorites convergence', () => {
-	it('create persists favorite state through the canonical favorite bridge when a profile is active', async () => {
+	it('create ignores legacy authored favorite input even when a profile is active', async () => {
 		await ensureActiveProfile();
 
 		const created = await createAlbum('create-canonical-favorite', { isFavorite: true });
 
-		expect(created.isFavorite).toBe(true);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, created.id)).toBe(true);
+		expect(created.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, created.id)).toBe(false);
+	});
+
+	it('getByIdWithStats projects canonical favorite state instead of stale embedded flag', async () => {
+		const staleProjection = await createAlbum('stale-projection');
+
+		await db.update(albums).set({ isFavorite: true }).where(eq(albums.id, staleProjection.id));
+
+		const album = await expectSuccess(
+			Effect.gen(function* () {
+				const albumService = yield* AlbumService;
+				return yield* albumService.getByIdWithStats(staleProjection.id);
+			})
+		);
+
+		expect(album.isFavorite).toBe(false);
 	});
 
 	it('uses canonical favorites for onlyFavorites and ignores stale projection', async () => {
@@ -98,18 +117,25 @@ describe('AlbumService favorites convergence', () => {
 		expect(result.albums[0]?.isFavorite).toBe(true);
 	});
 
-	it('update persists favorite state through the canonical favorite bridge when a profile is active', async () => {
+	it('update ignores legacy authored favorite input and preserves canonical state', async () => {
 		await ensureActiveProfile();
 		const album = await createAlbum('update-target');
+		await favoriteService.set(FavoriteEntityType.ALBUM, album.id, true);
+
+		const legacyUpdate: { name: string; isFavorite: boolean } = {
+			name: 'update-target-canonical-preserved',
+			isFavorite: false,
+		};
 
 		const updated = await expectSuccess(
 			Effect.gen(function* () {
 				const albumService = yield* AlbumService;
-				return yield* albumService.update(album.id, { isFavorite: true });
+				return yield* albumService.update(album.id, legacyUpdate);
 			})
 		);
 
 		expect(updated.id).toBe(album.id);
+		expect(updated.name).toBe(legacyUpdate.name);
 		expect(updated.isFavorite).toBe(true);
 		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, album.id)).toBe(true);
 	});

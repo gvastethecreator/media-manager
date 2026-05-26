@@ -8,6 +8,8 @@
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
+import type { CreateNoteInput as NoteCreateInput, UpdateNoteInput as NoteUpdateInput } from '@/lib/utils/note/validators';
+import type { CreateWorldItemInput, UpdateWorldItemInput } from '@/lib/utils/world-item/validators';
 import {
 	groupImages,
 	groups,
@@ -26,6 +28,9 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
+import type { CreateGroupInput as GroupCreateInput, UpdateGroupInput as GroupUpdateInput } from '@/types/entities/group/schema';
+import type { PropertyCreateInput, PropertyUpdateInput } from '@/types/entities/property/base';
+import type { WildcardCreateInput, WildcardUpdateInput } from '@/types/entities/wildcard/base';
 import {
 	fromUnknownGroupError,
 	fromUnknownNoteError,
@@ -46,7 +51,30 @@ import {
 
 const logger = serverLogger.withContext('SecondaryServices.Effect');
 
+type SecondaryListOptions = {
+	limit?: number;
+	offset?: number;
+	onlyFavorites?: boolean;
+};
+
+type SecondaryListResult<TEntity> = {
+	data: TEntity[];
+	total: number;
+};
+
 type FavoriteCapableEntity = { id: string; isFavorite?: boolean | null };
+type GroupRecord = (typeof groups.$inferSelect) & { isFavorite: boolean };
+type WildcardRecord = (typeof wildcards.$inferSelect) & { isFavorite: boolean };
+type NoteRecord = (typeof notes.$inferSelect) & { isFavorite: boolean };
+type PropertyRecord = (typeof properties.$inferSelect) & { isFavorite: boolean };
+type WorldItemRecord = (typeof worldItems.$inferSelect) & { isFavorite: boolean };
+type NoteImageRecord = typeof images.$inferSelect;
+type NoteUpdatePayload = Omit<NoteUpdateInput, 'id'>;
+
+function stripLegacyFavoriteInput<TInput extends object>(input: TInput): Omit<TInput, 'isFavorite'> {
+	const { isFavorite: _ignoredIsFavorite, ...restInput } = input as TInput & { isFavorite?: unknown };
+	return restInput;
+}
 
 function normalizeFavoriteEntity<TEntity extends FavoriteCapableEntity>(
 	entity: TEntity,
@@ -68,16 +96,16 @@ export class GroupService extends Context.Tag('GroupService')<GroupService, Grou
 
 export interface GroupServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, GroupError>;
-	readonly create: (input: any) => Effect.Effect<any, GroupError>;
+	readonly create: (input: GroupCreateInput) => Effect.Effect<GroupRecord, GroupError>;
 	readonly delete: (id: string) => Effect.Effect<void, GroupError>;
-	readonly getAll: (options?: any) => Effect.Effect<any, GroupError>;
-	readonly getById: (id: string) => Effect.Effect<any, GroupError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<any, GroupError>;
-	readonly update: (id: string, input: any) => Effect.Effect<any, GroupError>;
+	readonly getAll: (options?: SecondaryListOptions) => Effect.Effect<SecondaryListResult<GroupRecord>, GroupError>;
+	readonly getById: (id: string) => Effect.Effect<GroupRecord, GroupError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<GroupRecord, GroupError>;
+	readonly update: (id: string, input: GroupUpdateInput) => Effect.Effect<GroupRecord, GroupError>;
 }
 
 const makeGroupService = (): GroupServiceInterface => {
-	const getAll = (options: any = {}): Effect.Effect<any, GroupError> =>
+	const getAll = (options: SecondaryListOptions = {}): Effect.Effect<SecondaryListResult<GroupRecord>, GroupError> =>
 		Effect.gen(function* () {
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], GroupError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.GROUP),
@@ -103,27 +131,28 @@ const makeGroupService = (): GroupServiceInterface => {
 			return { data: normalizeFavoriteEntities(result, favoriteEntityIds), total: result.length };
 		});
 
-	const getById = (id: string): Effect.Effect<any, GroupError> =>
+	const getById = (id: string): Effect.Effect<GroupRecord, GroupError> =>
 		Effect.gen(function* () {
 			const result = yield* Effect.tryPromise<(typeof groups.$inferSelect)[], GroupError>({
 				try: () => db.select().from(groups).where(eq(groups.id, id)).limit(1),
 				catch: (error) => fromUnknownGroupError('getById', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new GroupNotFound({ groupId: id }));
+			const entity = result[0];
+			if (!entity) return yield* Effect.fail(new GroupNotFound({ groupId: id }));
 
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], GroupError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.GROUP),
 				catch: (error) => fromUnknownGroupError('getById.favoriteIds', error),
 			});
 
-			return normalizeFavoriteEntity(result[0], favoriteEntityIds);
+			return normalizeFavoriteEntity(entity, favoriteEntityIds);
 		});
 
-	const create = (input: any): Effect.Effect<any, GroupError> =>
+	const create = (input: GroupCreateInput): Effect.Effect<GroupRecord, GroupError> =>
 		Effect.gen(function* () {
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 			const readableId = generateReadableId('group', input.name || 'grupo', 1);
-			const result = yield* Effect.tryPromise<(typeof groups.$inferSelect)[], GroupError>({
+			yield* Effect.tryPromise<(typeof groups.$inferSelect)[], GroupError>({
 				try: () =>
 					db
 						.insert(groups)
@@ -135,10 +164,10 @@ const makeGroupService = (): GroupServiceInterface => {
 			return yield* getById(readableId);
 		});
 
-	const update = (id: string, input: any): Effect.Effect<any, GroupError> =>
+	const update = (id: string, input: GroupUpdateInput): Effect.Effect<GroupRecord, GroupError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 
 			const result = yield* Effect.tryPromise<(typeof groups.$inferSelect)[], GroupError>({
 				try: () =>
@@ -161,7 +190,7 @@ const makeGroupService = (): GroupServiceInterface => {
 			catch: (error) => fromUnknownGroupError('delete', error),
 		});
 
-	const toggleFavorite = (id: string): Effect.Effect<any, GroupError> =>
+	const toggleFavorite = (id: string): Effect.Effect<GroupRecord, GroupError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
 			const currentFavoriteStatus = yield* Effect.tryPromise<boolean, GroupError>({
@@ -198,16 +227,16 @@ export class WildcardService extends Context.Tag('WildcardService')<WildcardServ
 
 export interface WildcardServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, WildcardError>;
-	readonly create: (input: any) => Effect.Effect<any, WildcardError>;
+	readonly create: (input: WildcardCreateInput) => Effect.Effect<WildcardRecord, WildcardError>;
 	readonly delete: (id: string) => Effect.Effect<void, WildcardError>;
-	readonly getAll: (options?: any) => Effect.Effect<any, WildcardError>;
-	readonly getById: (id: string) => Effect.Effect<any, WildcardError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<any, WildcardError>;
-	readonly update: (id: string, input: any) => Effect.Effect<any, WildcardError>;
+	readonly getAll: (options?: SecondaryListOptions) => Effect.Effect<SecondaryListResult<WildcardRecord>, WildcardError>;
+	readonly getById: (id: string) => Effect.Effect<WildcardRecord, WildcardError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<WildcardRecord, WildcardError>;
+	readonly update: (id: string, input: WildcardUpdateInput) => Effect.Effect<WildcardRecord, WildcardError>;
 }
 
 const makeWildcardService = (): WildcardServiceInterface => {
-	const getAll = (options: any = {}): Effect.Effect<any, WildcardError> =>
+	const getAll = (options: SecondaryListOptions = {}): Effect.Effect<SecondaryListResult<WildcardRecord>, WildcardError> =>
 		Effect.gen(function* () {
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], WildcardError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.WILDCARD),
@@ -233,27 +262,28 @@ const makeWildcardService = (): WildcardServiceInterface => {
 			return { data: normalizeFavoriteEntities(result, favoriteEntityIds), total: result.length };
 		});
 
-	const getById = (id: string): Effect.Effect<any, WildcardError> =>
+	const getById = (id: string): Effect.Effect<WildcardRecord, WildcardError> =>
 		Effect.gen(function* () {
 			const result = yield* Effect.tryPromise<(typeof wildcards.$inferSelect)[], WildcardError>({
 				try: () => db.select().from(wildcards).where(eq(wildcards.id, id)).limit(1),
 				catch: (error) => fromUnknownWildcardError('getById', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new WildcardNotFound({ wildcardId: id }));
+			const entity = result[0];
+			if (!entity) return yield* Effect.fail(new WildcardNotFound({ wildcardId: id }));
 
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], WildcardError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.WILDCARD),
 				catch: (error) => fromUnknownWildcardError('getById.favoriteIds', error),
 			});
 
-			return normalizeFavoriteEntity(result[0], favoriteEntityIds);
+			return normalizeFavoriteEntity(entity, favoriteEntityIds);
 		});
 
-	const create = (input: any): Effect.Effect<any, WildcardError> =>
+	const create = (input: WildcardCreateInput): Effect.Effect<WildcardRecord, WildcardError> =>
 		Effect.gen(function* () {
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 			const readableId = generateReadableId('wildcard', input.name || 'wildcard', 1);
-			const result = yield* Effect.tryPromise<(typeof wildcards.$inferSelect)[], WildcardError>({
+			yield* Effect.tryPromise<(typeof wildcards.$inferSelect)[], WildcardError>({
 				try: () =>
 					db
 						.insert(wildcards)
@@ -271,10 +301,10 @@ const makeWildcardService = (): WildcardServiceInterface => {
 			return yield* getById(readableId);
 		});
 
-	const update = (id: string, input: any): Effect.Effect<any, WildcardError> =>
+	const update = (id: string, input: WildcardUpdateInput): Effect.Effect<WildcardRecord, WildcardError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 
 			const result = yield* Effect.tryPromise<(typeof wildcards.$inferSelect)[], WildcardError>({
 				try: () =>
@@ -300,7 +330,7 @@ const makeWildcardService = (): WildcardServiceInterface => {
 			catch: (error) => fromUnknownWildcardError('delete', error),
 		});
 
-	const toggleFavorite = (id: string): Effect.Effect<any, WildcardError> =>
+	const toggleFavorite = (id: string): Effect.Effect<WildcardRecord, WildcardError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
 			const currentFavoriteStatus = yield* Effect.tryPromise<boolean, WildcardError>({
@@ -338,19 +368,19 @@ export class NoteService extends Context.Tag('NoteService')<NoteService, NoteSer
 export interface NoteServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, NoteError>;
 	readonly addVideo: (id: string, videoId: string) => Effect.Effect<void, NoteError>;
-	readonly create: (input: any) => Effect.Effect<any, NoteError>;
+	readonly create: (input: NoteCreateInput) => Effect.Effect<NoteRecord, NoteError>;
 	readonly delete: (id: string) => Effect.Effect<void, NoteError>;
-	readonly getAll: (options?: any) => Effect.Effect<any, NoteError>;
-	readonly getById: (id: string) => Effect.Effect<any, NoteError>;
-	readonly getImages: (id: string) => Effect.Effect<any[], NoteError>;
+	readonly getAll: (options?: SecondaryListOptions) => Effect.Effect<SecondaryListResult<NoteRecord>, NoteError>;
+	readonly getById: (id: string) => Effect.Effect<NoteRecord, NoteError>;
+	readonly getImages: (id: string) => Effect.Effect<NoteImageRecord[], NoteError>;
 	readonly removeImage: (id: string, imageId: string) => Effect.Effect<void, NoteError>;
 	readonly removeVideo: (id: string, videoId: string) => Effect.Effect<void, NoteError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<any, NoteError>;
-	readonly update: (id: string, input: any) => Effect.Effect<any, NoteError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<NoteRecord, NoteError>;
+	readonly update: (id: string, input: NoteUpdatePayload) => Effect.Effect<NoteRecord, NoteError>;
 }
 
 const makeNoteService = (): NoteServiceInterface => {
-	const getAll = (options: any = {}): Effect.Effect<any, NoteError> =>
+	const getAll = (options: SecondaryListOptions = {}): Effect.Effect<SecondaryListResult<NoteRecord>, NoteError> =>
 		Effect.gen(function* () {
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], NoteError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.NOTE),
@@ -376,27 +406,28 @@ const makeNoteService = (): NoteServiceInterface => {
 			return { data: normalizeFavoriteEntities(result, favoriteEntityIds), total: result.length };
 		});
 
-	const getById = (id: string): Effect.Effect<any, NoteError> =>
+	const getById = (id: string): Effect.Effect<NoteRecord, NoteError> =>
 		Effect.gen(function* () {
 			const result = yield* Effect.tryPromise<(typeof notes.$inferSelect)[], NoteError>({
 				try: () => db.select().from(notes).where(eq(notes.id, id)).limit(1),
 				catch: (error) => fromUnknownNoteError('getById', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new NoteNotFound({ noteId: id }));
+			const entity = result[0];
+			if (!entity) return yield* Effect.fail(new NoteNotFound({ noteId: id }));
 
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], NoteError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.NOTE),
 				catch: (error) => fromUnknownNoteError('getById.favoriteIds', error),
 			});
 
-			return normalizeFavoriteEntity(result[0], favoriteEntityIds);
+			return normalizeFavoriteEntity(entity, favoriteEntityIds);
 		});
 
-	const create = (input: any): Effect.Effect<any, NoteError> =>
+	const create = (input: NoteCreateInput): Effect.Effect<NoteRecord, NoteError> =>
 		Effect.gen(function* () {
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 			const readableId = generateReadableId('note', input.title || 'nota', 1);
-			const result = yield* Effect.tryPromise<(typeof notes.$inferSelect)[], NoteError>({
+			yield* Effect.tryPromise<(typeof notes.$inferSelect)[], NoteError>({
 				try: () =>
 					db
 						.insert(notes)
@@ -414,10 +445,10 @@ const makeNoteService = (): NoteServiceInterface => {
 			return yield* getById(readableId);
 		});
 
-	const update = (id: string, input: any): Effect.Effect<any, NoteError> =>
+	const update = (id: string, input: NoteUpdatePayload): Effect.Effect<NoteRecord, NoteError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 
 			const result = yield* Effect.tryPromise<(typeof notes.$inferSelect)[], NoteError>({
 				try: () =>
@@ -435,7 +466,7 @@ const makeNoteService = (): NoteServiceInterface => {
 			return yield* getById(id);
 		});
 
-	const toggleFavorite = (id: string): Effect.Effect<any, NoteError> =>
+	const toggleFavorite = (id: string): Effect.Effect<NoteRecord, NoteError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
 			const currentFavoriteStatus = yield* Effect.tryPromise<boolean, NoteError>({
@@ -460,7 +491,7 @@ const makeNoteService = (): NoteServiceInterface => {
 			catch: (error) => fromUnknownNoteError('delete', error),
 		});
 
-	const getImages = (id: string): Effect.Effect<any[], NoteError> =>
+	const getImages = (id: string): Effect.Effect<NoteImageRecord[], NoteError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
 			const result = yield* Effect.tryPromise<Array<{ image: typeof images.$inferSelect }>, NoteError>({
@@ -472,7 +503,7 @@ const makeNoteService = (): NoteServiceInterface => {
 						.where(eq(imageNotes.B, id)),
 				catch: (error) => fromUnknownNoteError('getImages', error),
 			});
-			return result.map((r: any) => r.image);
+			return result.map((record) => record.image);
 		});
 
 	const addImage = (id: string, imageId: string): Effect.Effect<void, NoteError> =>
@@ -534,16 +565,16 @@ export class PropertyService extends Context.Tag('PropertyService')<PropertyServ
 
 export interface PropertyServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, PropertyError>;
-	readonly create: (input: any) => Effect.Effect<any, PropertyError>;
+	readonly create: (input: PropertyCreateInput) => Effect.Effect<PropertyRecord, PropertyError>;
 	readonly delete: (id: string) => Effect.Effect<void, PropertyError>;
-	readonly getAll: (options?: any) => Effect.Effect<any, PropertyError>;
-	readonly getById: (id: string) => Effect.Effect<any, PropertyError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<any, PropertyError>;
-	readonly update: (id: string, input: any) => Effect.Effect<any, PropertyError>;
+	readonly getAll: (options?: SecondaryListOptions) => Effect.Effect<SecondaryListResult<PropertyRecord>, PropertyError>;
+	readonly getById: (id: string) => Effect.Effect<PropertyRecord, PropertyError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<PropertyRecord, PropertyError>;
+	readonly update: (id: string, input: PropertyUpdateInput) => Effect.Effect<PropertyRecord, PropertyError>;
 }
 
 const makePropertyService = (): PropertyServiceInterface => {
-	const getAll = (options: any = {}): Effect.Effect<any, PropertyError> =>
+	const getAll = (options: SecondaryListOptions = {}): Effect.Effect<SecondaryListResult<PropertyRecord>, PropertyError> =>
 		Effect.gen(function* () {
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], PropertyError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.PROPERTY),
@@ -569,27 +600,28 @@ const makePropertyService = (): PropertyServiceInterface => {
 			return { data: normalizeFavoriteEntities(result, favoriteEntityIds), total: result.length };
 		});
 
-	const getById = (id: string): Effect.Effect<any, PropertyError> =>
+	const getById = (id: string): Effect.Effect<PropertyRecord, PropertyError> =>
 		Effect.gen(function* () {
 			const result = yield* Effect.tryPromise<(typeof properties.$inferSelect)[], PropertyError>({
 				try: () => db.select().from(properties).where(eq(properties.id, id)).limit(1),
 				catch: (error) => fromUnknownPropertyError('getById', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new PropertyNotFound({ propertyId: id }));
+			const entity = result[0];
+			if (!entity) return yield* Effect.fail(new PropertyNotFound({ propertyId: id }));
 
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], PropertyError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.PROPERTY),
 				catch: (error) => fromUnknownPropertyError('getById.favoriteIds', error),
 			});
 
-			return normalizeFavoriteEntity(result[0], favoriteEntityIds);
+			return normalizeFavoriteEntity(entity, favoriteEntityIds);
 		});
 
-	const create = (input: any): Effect.Effect<any, PropertyError> =>
+	const create = (input: PropertyCreateInput): Effect.Effect<PropertyRecord, PropertyError> =>
 		Effect.gen(function* () {
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 			const readableId = generateReadableId('property', input.name || 'propiedad', 1);
-			const result = yield* Effect.tryPromise<(typeof properties.$inferSelect)[], PropertyError>({
+			yield* Effect.tryPromise<(typeof properties.$inferSelect)[], PropertyError>({
 				try: () =>
 					db
 						.insert(properties)
@@ -607,10 +639,10 @@ const makePropertyService = (): PropertyServiceInterface => {
 			return yield* getById(readableId);
 		});
 
-	const update = (id: string, input: any): Effect.Effect<any, PropertyError> =>
+	const update = (id: string, input: PropertyUpdateInput): Effect.Effect<PropertyRecord, PropertyError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 
 			const result = yield* Effect.tryPromise<(typeof properties.$inferSelect)[], PropertyError>({
 				try: () =>
@@ -628,7 +660,7 @@ const makePropertyService = (): PropertyServiceInterface => {
 			return yield* getById(id);
 		});
 
-	const toggleFavorite = (id: string): Effect.Effect<any, PropertyError> =>
+	const toggleFavorite = (id: string): Effect.Effect<PropertyRecord, PropertyError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
 
@@ -673,16 +705,16 @@ export class WorldItemService extends Context.Tag('WorldItemService')<WorldItemS
 
 export interface WorldItemServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, WorldItemError>;
-	readonly create: (input: any) => Effect.Effect<any, WorldItemError>;
+	readonly create: (input: CreateWorldItemInput) => Effect.Effect<WorldItemRecord, WorldItemError>;
 	readonly delete: (id: string) => Effect.Effect<void, WorldItemError>;
-	readonly getAll: (options?: any) => Effect.Effect<any, WorldItemError>;
-	readonly getById: (id: string) => Effect.Effect<any, WorldItemError>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<any, WorldItemError>;
-	readonly update: (id: string, input: any) => Effect.Effect<any, WorldItemError>;
+	readonly getAll: (options?: SecondaryListOptions) => Effect.Effect<SecondaryListResult<WorldItemRecord>, WorldItemError>;
+	readonly getById: (id: string) => Effect.Effect<WorldItemRecord, WorldItemError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<WorldItemRecord, WorldItemError>;
+	readonly update: (id: string, input: UpdateWorldItemInput) => Effect.Effect<WorldItemRecord, WorldItemError>;
 }
 
 const makeWorldItemService = (): WorldItemServiceInterface => {
-	const getAll = (options: any = {}): Effect.Effect<any, WorldItemError> =>
+	const getAll = (options: SecondaryListOptions = {}): Effect.Effect<SecondaryListResult<WorldItemRecord>, WorldItemError> =>
 		Effect.gen(function* () {
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], WorldItemError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.WORLD_ITEM),
@@ -708,27 +740,28 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 			return { data: normalizeFavoriteEntities(result, favoriteEntityIds), total: result.length };
 		});
 
-	const getById = (id: string): Effect.Effect<any, WorldItemError> =>
+	const getById = (id: string): Effect.Effect<WorldItemRecord, WorldItemError> =>
 		Effect.gen(function* () {
 			const result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
 				try: () => db.select().from(worldItems).where(eq(worldItems.id, id)).limit(1),
 				catch: (error) => fromUnknownWorldItemError('getById', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new WorldItemNotFound({ worldItemId: id }));
+			const entity = result[0];
+			if (!entity) return yield* Effect.fail(new WorldItemNotFound({ worldItemId: id }));
 
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], WorldItemError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.WORLD_ITEM),
 				catch: (error) => fromUnknownWorldItemError('getById.favoriteIds', error),
 			});
 
-			return normalizeFavoriteEntity(result[0], favoriteEntityIds);
+			return normalizeFavoriteEntity(entity, favoriteEntityIds);
 		});
 
-	const create = (input: any): Effect.Effect<any, WorldItemError> =>
+	const create = (input: CreateWorldItemInput): Effect.Effect<WorldItemRecord, WorldItemError> =>
 		Effect.gen(function* () {
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 			const readableId = generateReadableId('world-item', input.name || 'item', 1);
-			const result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
+			yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
 				try: () =>
 					db
 						.insert(worldItems)
@@ -746,10 +779,10 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 			return yield* getById(readableId);
 		});
 
-	const update = (id: string, input: any): Effect.Effect<any, WorldItemError> =>
+	const update = (id: string, input: UpdateWorldItemInput): Effect.Effect<WorldItemRecord, WorldItemError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const restInput = stripLegacyFavoriteInput(input);
 
 			const result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
 				try: () =>
@@ -767,7 +800,7 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 			return yield* getById(id);
 		});
 
-	const toggleFavorite = (id: string): Effect.Effect<any, WorldItemError> =>
+	const toggleFavorite = (id: string): Effect.Effect<WorldItemRecord, WorldItemError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
 			const currentFavoriteStatus = yield* Effect.tryPromise<boolean, WorldItemError>({

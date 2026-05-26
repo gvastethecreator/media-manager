@@ -1,0 +1,1920 @@
+$ bun scripts/run-with-log.js test vp test --run src/services/image/__tests__/image.service.effect.test.ts
+ÔØî Error al limpiar logs antiguos: 288 | 				// Calcular diferencia en d├¡as
+289 | 				const diffDays = (now - stats.mtimeMs) / (1000 * 60 * 60 * 24);
+290 | 
+291 | 				if (diffDays > days) {
+292 | 					// Eliminar archivo si es m├ís antiguo que el l├¡mite
+293 | 					await rm(filePath);
+                 ^
+EFAULT: bad address in system call argument, rm 'D:\DEV\media-manager\logs\reindex'
+    path: "D:\\DEV\\media-manager\\logs\\reindex",
+ syscall: "rm",
+   errno: -14,
+    code: "EFAULT"
+
+      at async <anonymous> (D:\DEV\media-manager\scripts\logging-utils.js:293:12)
+      at async cleanOldLogs (D:\DEV\media-manager\scripts\logging-utils.js:283:17)
+
+­ƒÜÇ Ejecutando: vp test --run src/services/image/__tests__/image.service.effect.test.ts
+­ƒôä Logs en: D:\DEV\media-manager\logs\test_2026-05-26T00-45-41-475Z.log
+­ƒöì Comando de testing detectado - tolerando c├│digos de salida no-cero
+­ƒô║ Salida en tiempo real:
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+­ƒöì [33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+­ƒôï [1m[7m[34m RUN [39m[27m[22m [90mD:/DEV/media-manager[39m
+Ô£à [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create an image successfully
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.035Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô×ò Creating image
+­ƒôï {
+­ƒôï   "name": "test-photo.jpg",
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348033"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create an image successfully
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.051Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image created
+­ƒôï {
+­ƒôï   "id": "5041cadb-e344-4729-a071-887f3a40a81f",
+­ƒôï   "name": "test-photo.jpg",
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348033"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.051Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "5041cadb-e344-4729-a071-887f3a40a81f"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.052Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "5041cadb-e344-4729-a071-887f3a40a81f"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create an image successfully
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.056Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "5041cadb-e344-4729-a071-887f3a40a81f",
+­ƒôï   "name": "test-photo.jpg"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create an image successfully
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.059Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "5041cadb-e344-4729-a071-887f3a40a81f",
+­ƒôï   "name": "test-photo.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould persist favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.083Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô×ò Creating image
+­ƒôï {
+­ƒôï   "name": "canonical-favorite-create.jpg",
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348077"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould persist favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.088Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image created
+­ƒôï {
+­ƒôï   "id": "8eca94a7-1a3c-42b9-a1c7-8f4eeb9aec5d",
+­ƒôï   "name": "canonical-favorite-create.jpg",
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348077"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.089Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "8eca94a7-1a3c-42b9-a1c7-8f4eeb9aec5d"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.089Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "8eca94a7-1a3c-42b9-a1c7-8f4eeb9aec5d"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould persist favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.091Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "8eca94a7-1a3c-42b9-a1c7-8f4eeb9aec5d",
+­ƒôï   "name": "canonical-favorite-create.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould persist favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.093Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "8eca94a7-1a3c-42b9-a1c7-8f4eeb9aec5d",
+­ƒôï   "name": "canonical-favorite-create.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create image with optional metadata
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.111Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô×ò Creating image
+­ƒôï {
+­ƒôï   "name": "photo-with-metadata.jpg",
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348110"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create image with optional metadata
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.118Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image created
+­ƒôï {
+­ƒôï   "id": "57109d03-5d64-4ff8-860a-9e5257fac83d",
+­ƒôï   "name": "photo-with-metadata.jpg",
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348110"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.118Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "57109d03-5d64-4ff8-860a-9e5257fac83d"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.118Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "57109d03-5d64-4ff8-860a-9e5257fac83d"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create image with optional metadata
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.122Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "57109d03-5d64-4ff8-860a-9e5257fac83d",
+­ƒôï   "name": "photo-with-metadata.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create image with optional metadata
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.123Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "57109d03-5d64-4ff8-860a-9e5257fac83d",
+­ƒôï   "name": "photo-with-metadata.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail with invalid hash length
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.140Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô×ò Creating image
+­ƒôï {
+­ƒôï   "name": "invalid-hash.jpg",
+­ƒôï   "hash": "short"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail with dimensions exceeding limit
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.162Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô×ò Creating image
+­ƒôï {
+­ƒôï   "name": "huge-image.jpg",
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348161"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail with size exceeding 100GB limit
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.178Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô×ò Creating image
+­ƒôï {
+­ƒôï   "name": "too-large.jpg",
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348178"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould retrieve an image by ID
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.201Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "2443a98f-b1fe-4130-af77-05486a39ce61"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.201Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "2443a98f-b1fe-4130-af77-05486a39ce61"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould retrieve an image by ID
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.204Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "2443a98f-b1fe-4130-af77-05486a39ce61",
+­ƒôï   "name": "test-image-1779756348195.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould retrieve an image by ID
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.207Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "2443a98f-b1fe-4130-af77-05486a39ce61",
+­ƒôï   "name": "test-image-1779756348195.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould project canonical favorite state instead of stale embedded flag
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.229Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "ae1e6b98-0534-459f-ae77-80a3899eeef7"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.229Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "ae1e6b98-0534-459f-ae77-80a3899eeef7"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould project canonical favorite state instead of stale embedded flag
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.231Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "ae1e6b98-0534-459f-ae77-80a3899eeef7",
+­ƒôï   "name": "test-image-1779756348223.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould project canonical favorite state instead of stale embedded flag
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.232Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "ae1e6b98-0534-459f-ae77-80a3899eeef7",
+­ƒôï   "name": "test-image-1779756348223.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould fail when image does not exist
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.244Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "non-existent-id"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.245Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "non-existent-id"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould fail when image does not exist
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.247Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "non-existent-id"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetByIdWithStats[2m > [22m[2mshould retrieve image with relation stats
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.297Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID with stats
+­ƒôï {
+­ƒôï   "id": "f2933466-2265-495c-bfd3-d47111e0d986"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.297Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "f2933466-2265-495c-bfd3-d47111e0d986"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.297Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "f2933466-2265-495c-bfd3-d47111e0d986"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetByIdWithStats[2m > [22m[2mshould retrieve image with relation stats
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.301Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "f2933466-2265-495c-bfd3-d47111e0d986",
+­ƒôï   "name": "test-image-1779756348265.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetByIdWithStats[2m > [22m[2mshould retrieve image with relation stats
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.303Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "f2933466-2265-495c-bfd3-d47111e0d986",
+­ƒôï   "name": "test-image-1779756348265.jpg"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.303Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "f2933466-2265-495c-bfd3-d47111e0d986"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetByIdWithStats[2m > [22m[2mshould retrieve image with relation stats
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.312Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "f2933466-2265-495c-bfd3-d47111e0d986",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 1,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 1,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.313Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image with stats retrieved
+­ƒôï {
+­ƒôï   "id": "f2933466-2265-495c-bfd3-d47111e0d986",
+­ƒôï   "name": "test-image-1779756348265.jpg",
+­ƒôï   "totalRelations": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetByIdWithStats[2m > [22m[2mshould return zero stats for image without relations
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.332Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID with stats
+­ƒôï {
+­ƒôï   "id": "fc4bea5b-3e31-4862-a575-7cfcde4055cf"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.333Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "fc4bea5b-3e31-4862-a575-7cfcde4055cf"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.333Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "fc4bea5b-3e31-4862-a575-7cfcde4055cf"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetByIdWithStats[2m > [22m[2mshould return zero stats for image without relations
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.335Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "fc4bea5b-3e31-4862-a575-7cfcde4055cf",
+­ƒôï   "name": "test-image-1779756348327.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetByIdWithStats[2m > [22m[2mshould return zero stats for image without relations
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.336Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "fc4bea5b-3e31-4862-a575-7cfcde4055cf",
+­ƒôï   "name": "test-image-1779756348327.jpg"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.336Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "fc4bea5b-3e31-4862-a575-7cfcde4055cf"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mgetByIdWithStats[2m > [22m[2mshould return zero stats for image without relations
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.340Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "fc4bea5b-3e31-4862-a575-7cfcde4055cf",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 0,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 0,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.340Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image with stats retrieved
+­ƒôï {
+­ƒôï   "id": "fc4bea5b-3e31-4862-a575-7cfcde4055cf",
+­ƒôï   "name": "test-image-1779756348327.jpg",
+­ƒôï   "totalRelations": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update image fields
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.358Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôØ Updating image
+­ƒôï {
+­ƒôï   "id": "1e6a55fb-d84c-4bbf-bd61-e27b06eeace1",
+­ƒôï   "updates": [
+­ƒôï     "name",
+­ƒôï     "description"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.359Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "1e6a55fb-d84c-4bbf-bd61-e27b06eeace1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update image fields
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.362Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "1e6a55fb-d84c-4bbf-bd61-e27b06eeace1",
+­ƒôï   "name": "test-image-1779756348354.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update image fields
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.366Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image updated
+­ƒôï {
+­ƒôï   "id": "1e6a55fb-d84c-4bbf-bd61-e27b06eeace1",
+­ƒôï   "updatedFields": [
+­ƒôï     "name",
+­ƒôï     "description"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.366Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "1e6a55fb-d84c-4bbf-bd61-e27b06eeace1"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.366Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "1e6a55fb-d84c-4bbf-bd61-e27b06eeace1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update image fields
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.368Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "1e6a55fb-d84c-4bbf-bd61-e27b06eeace1",
+­ƒôï   "name": "updated-name.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update image fields
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.370Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "1e6a55fb-d84c-4bbf-bd61-e27b06eeace1",
+­ƒôï   "name": "updated-name.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould persist update favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.395Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756348390-9e34a8c956d118",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "04bb4762-7020-4690-94de-46ba11186a5f"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould persist update favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.399Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould persist update favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.400Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756348390-9e34a8c956d118",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "04bb4762-7020-4690-94de-46ba11186a5f",
+­ƒôï   "id": "e6a92269-4dfa-4211-9ae0-1617a6b9c74e"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould persist update favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.400Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôØ Updating image
+­ƒôï {
+­ƒôï   "id": "04bb4762-7020-4690-94de-46ba11186a5f",
+­ƒôï   "updates": [
+­ƒôï     "name",
+­ƒôï     "isFavorite"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.401Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "04bb4762-7020-4690-94de-46ba11186a5f"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould persist update favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.403Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "04bb4762-7020-4690-94de-46ba11186a5f",
+­ƒôï   "name": "test-image-1779756348384.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould persist update favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.406Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image updated
+­ƒôï {
+­ƒôï   "id": "04bb4762-7020-4690-94de-46ba11186a5f",
+­ƒôï   "updatedFields": [
+­ƒôï     "name"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.406Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "04bb4762-7020-4690-94de-46ba11186a5f"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.406Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "04bb4762-7020-4690-94de-46ba11186a5f"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould persist update favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.409Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "04bb4762-7020-4690-94de-46ba11186a5f",
+­ƒôï   "name": "keep-favorite-via-canonical.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould persist update favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.412Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "04bb4762-7020-4690-94de-46ba11186a5f",
+­ƒôï   "name": "keep-favorite-via-canonical.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update AI metadata
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.437Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôØ Updating image
+­ƒôï {
+­ƒôï   "id": "4cc0aca4-5073-40c7-ba2b-e16ceff331ff",
+­ƒôï   "updates": [
+­ƒôï     "aiEngine",
+­ƒôï     "aiModel",
+­ƒôï     "aiOriginDetected"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.437Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "4cc0aca4-5073-40c7-ba2b-e16ceff331ff"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update AI metadata
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.439Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "4cc0aca4-5073-40c7-ba2b-e16ceff331ff",
+­ƒôï   "name": "test-image-1779756348431.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update AI metadata
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.443Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image updated
+­ƒôï {
+­ƒôï   "id": "4cc0aca4-5073-40c7-ba2b-e16ceff331ff",
+­ƒôï   "updatedFields": [
+­ƒôï     "aiEngine",
+­ƒôï     "aiModel",
+­ƒôï     "aiOriginDetected"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.443Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "4cc0aca4-5073-40c7-ba2b-e16ceff331ff"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.443Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "4cc0aca4-5073-40c7-ba2b-e16ceff331ff"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update AI metadata
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.445Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "4cc0aca4-5073-40c7-ba2b-e16ceff331ff",
+­ƒôï   "name": "test-image-1779756348431.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update AI metadata
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.446Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "4cc0aca4-5073-40c7-ba2b-e16ceff331ff",
+­ƒôï   "name": "test-image-1779756348431.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould fail when updating non-existent image
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.458Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôØ Updating image
+­ƒôï {
+­ƒôï   "id": "non-existent-id",
+­ƒôï   "updates": [
+­ƒôï     "name"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.458Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "non-existent-id"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould fail when updating non-existent image
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.460Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "non-existent-id"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image without relations
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.476Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒùæ´©Å Deleting image
+­ƒôï {
+­ƒôï   "id": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84",
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.476Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image without relations
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.478Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84",
+­ƒôï   "name": "test-image-1779756348473.jpg"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.479Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒöù Checking relations
+­ƒôï {
+­ƒôï   "imageId": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.479Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image without relations
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.482Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 0,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 0,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.483Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relations checked
+­ƒôï {
+­ƒôï   "imageId": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84",
+­ƒôï   "hasRelations": false,
+­ƒôï   "totalRelations": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image without relations
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.485Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image deleted
+­ƒôï {
+­ƒôï   "id": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84",
+­ƒôï   "force": false,
+­ƒôï   "hadRelations": false
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image without relations
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.486Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.486Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image without relations
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.488Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "f95c93ef-ee26-4a96-86ae-3c5a7a84ce84"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould fail to delete image with relations (without force)
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.509Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒùæ´©Å Deleting image
+­ƒôï {
+­ƒôï   "id": "09b3d6d7-3cf9-494d-b6b0-e243c49d1625",
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.509Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "09b3d6d7-3cf9-494d-b6b0-e243c49d1625"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould fail to delete image with relations (without force)
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.512Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "09b3d6d7-3cf9-494d-b6b0-e243c49d1625",
+­ƒôï   "name": "test-image-1779756348502.jpg"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.512Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒöù Checking relations
+­ƒôï {
+­ƒôï   "imageId": "09b3d6d7-3cf9-494d-b6b0-e243c49d1625"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.512Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "09b3d6d7-3cf9-494d-b6b0-e243c49d1625"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould fail to delete image with relations (without force)
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.515Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image has relations, cannot delete without force[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "09b3d6d7-3cf9-494d-b6b0-e243c49d1625",
+­ƒöì   "relationCounts": {
+­ƒöì     "albums": 1,
+­ƒöì     "collections": 0,
+­ƒöì     "tags": 0,
+­ƒöì     "characters": 0,
+­ƒöì     "places": 0,
+­ƒöì     "worldItems": 0,
+­ƒöì     "concepts": 0,
+­ƒöì     "prompts": 0,
+­ƒöì     "notes": 0,
+­ƒöì     "wildcards": 0,
+­ƒöì     "properties": 0,
+­ƒöì     "groups": 0
+­ƒöì   }
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould fail to delete image with relations (without force)
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.515Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "09b3d6d7-3cf9-494d-b6b0-e243c49d1625",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 1,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 0,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.515Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relations checked
+­ƒôï {
+­ƒôï   "imageId": "09b3d6d7-3cf9-494d-b6b0-e243c49d1625",
+­ƒôï   "hasRelations": true,
+­ƒôï   "totalRelations": 1
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image with relations when force=true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.540Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒùæ´©Å Deleting image
+­ƒôï {
+­ƒôï   "id": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053",
+­ƒôï   "force": true
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.540Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image with relations when force=true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.542Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053",
+­ƒôï   "name": "test-image-1779756348531.jpg"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.542Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒöù Checking relations
+­ƒôï {
+­ƒôï   "imageId": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.542Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image with relations when force=true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.545Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 1,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 0,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.546Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relations checked
+­ƒôï {
+­ƒôï   "imageId": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053",
+­ƒôï   "hasRelations": true,
+­ƒôï   "totalRelations": 1
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image with relations when force=true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.548Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image deleted
+­ƒôï {
+­ƒôï   "id": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053",
+­ƒôï   "force": true,
+­ƒôï   "hadRelations": true
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image with relations when force=true
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.551Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould delete image with relations when force=true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.549Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.549Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "3ba8978e-cbbd-4bf1-b84f-f319a18d0053"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould fail when deleting non-existent image
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.562Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒùæ´©Å Deleting image
+­ƒôï {
+­ƒôï   "id": "non-existent-id",
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.562Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "non-existent-id"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteById[2m > [22m[2mshould fail when deleting non-existent image
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.564Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "non-existent-id"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.593Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒùæ´©Å Batch deleting images
+­ƒôï {
+­ƒôï   "count": 3,
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.593Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒöù Checking relations
+­ƒôï {
+­ƒôï   "imageId": "d888c537-3a81-446c-a421-914af2851d00"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.594Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "d888c537-3a81-446c-a421-914af2851d00"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.600Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "d888c537-3a81-446c-a421-914af2851d00",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 0,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 0,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.600Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relations checked
+­ƒôï {
+­ƒôï   "imageId": "d888c537-3a81-446c-a421-914af2851d00",
+­ƒôï   "hasRelations": false,
+­ƒôï   "totalRelations": 0
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.600Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒöù Checking relations
+­ƒôï {
+­ƒôï   "imageId": "54eb7aec-5166-47fe-b551-5b608f6d473d"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.600Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "54eb7aec-5166-47fe-b551-5b608f6d473d"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.604Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "54eb7aec-5166-47fe-b551-5b608f6d473d",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 0,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 0,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.605Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relations checked
+­ƒôï {
+­ƒôï   "imageId": "54eb7aec-5166-47fe-b551-5b608f6d473d",
+­ƒôï   "hasRelations": false,
+­ƒôï   "totalRelations": 0
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.605Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒöù Checking relations
+­ƒôï {
+­ƒôï   "imageId": "637833f1-39a9-46a3-83d7-9c02118cde80"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.605Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "637833f1-39a9-46a3-83d7-9c02118cde80"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.609Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "637833f1-39a9-46a3-83d7-9c02118cde80",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 0,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 0,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.609Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relations checked
+­ƒôï {
+­ƒôï   "imageId": "637833f1-39a9-46a3-83d7-9c02118cde80",
+­ƒôï   "hasRelations": false,
+­ƒôï   "totalRelations": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.614Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Batch deletion complete
+­ƒôï {
+­ƒôï   "requested": 3,
+­ƒôï   "deleted": 3
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.617Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "d888c537-3a81-446c-a421-914af2851d00"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.614Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "d888c537-3a81-446c-a421-914af2851d00"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.614Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "d888c537-3a81-446c-a421-914af2851d00"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.617Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "54eb7aec-5166-47fe-b551-5b608f6d473d"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.618Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "54eb7aec-5166-47fe-b551-5b608f6d473d"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.621Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "54eb7aec-5166-47fe-b551-5b608f6d473d"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.622Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "637833f1-39a9-46a3-83d7-9c02118cde80"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.622Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "637833f1-39a9-46a3-83d7-9c02118cde80"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.624Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "637833f1-39a9-46a3-83d7-9c02118cde80"
+­ƒöì }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould fail with empty IDs array
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.639Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî No IDs provided for batch deletion[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould fail if any image has relations (without force)
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.689Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒùæ´©Å Batch deleting images
+­ƒôï {
+­ƒôï   "count": 2,
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.689Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒöù Checking relations
+­ƒôï {
+­ƒôï   "imageId": "7f508882-7de4-4a77-a01e-4d3b140f90b5"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.691Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "7f508882-7de4-4a77-a01e-4d3b140f90b5"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould fail if any image has relations (without force)
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.697Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "7f508882-7de4-4a77-a01e-4d3b140f90b5",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 0,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 0,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.698Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relations checked
+­ƒôï {
+­ƒôï   "imageId": "7f508882-7de4-4a77-a01e-4d3b140f90b5",
+­ƒôï   "hasRelations": false,
+­ƒôï   "totalRelations": 0
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.698Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒöù Checking relations
+­ƒôï {
+­ƒôï   "imageId": "abcbb109-44d8-4b1e-826d-51f871935228"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.698Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Computing relation counts
+­ƒôï {
+­ƒôï   "imageId": "abcbb109-44d8-4b1e-826d-51f871935228"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould fail if any image has relations (without force)
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.703Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Images have relations, cannot delete without force[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "count": 1,
+­ƒöì   "firstImage": "abcbb109-44d8-4b1e-826d-51f871935228",
+­ƒöì   "relationCounts": {
+­ƒöì     "albums": 1,
+­ƒöì     "collections": 0,
+­ƒöì     "tags": 0,
+­ƒöì     "characters": 0,
+­ƒöì     "places": 0,
+­ƒöì     "worldItems": 0,
+­ƒöì     "concepts": 0,
+­ƒöì     "prompts": 0,
+­ƒöì     "notes": 0,
+­ƒöì     "wildcards": 0,
+­ƒöì     "properties": 0,
+­ƒöì     "groups": 0
+­ƒöì   }
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould fail if any image has relations (without force)
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.703Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relation counts computed
+­ƒôï {
+­ƒôï   "imageId": "abcbb109-44d8-4b1e-826d-51f871935228",
+­ƒôï   "counts": {
+­ƒôï     "albumCount": 1,
+­ƒôï     "collectionCount": 0,
+­ƒôï     "tagCount": 0,
+­ƒôï     "characterCount": 0,
+­ƒôï     "placeCount": 0,
+­ƒôï     "worldItemCount": 0,
+­ƒôï     "conceptCount": 0,
+­ƒôï     "promptCount": 0,
+­ƒôï     "noteCount": 0,
+­ƒôï     "wildcardCount": 0,
+­ƒôï     "propertyCount": 0,
+­ƒôï     "groupCount": 0
+­ƒôï   }
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:48.703Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Relations checked
+­ƒôï {
+­ƒôï   "imageId": "abcbb109-44d8-4b1e-826d-51f871935228",
+­ƒôï   "hasRelations": true,
+­ƒôï   "totalRelations": 1
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images with relations when force=true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.760Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒùæ´©Å Batch deleting images
+­ƒôï {
+­ƒôï   "count": 2,
+­ƒôï   "force": true
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - CRUD Operations[2m > [22m[2mdeleteManyByIds[2m > [22m[2mshould delete multiple images with relations when force=true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.765Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Batch deletion complete
+­ƒôï {
+­ƒôï   "requested": 2,
+­ƒôï   "deleted": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByHash[2m > [22m[2mshould find image by hash
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.798Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by hash
+­ƒôï {
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348785"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByHash[2m > [22m[2mshould find image by hash
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.802Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found by hash
+­ƒôï {
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000001779756348785",
+­ƒôï   "id": "93819daf-55ab-42f1-8e7e-5df5058a9c53",
+­ƒôï   "name": "test-image-1779756348785.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByHash[2m > [22m[2mshould fail when hash not found
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.822Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by hash
+­ƒôï {
+­ƒôï   "hash": "0000000000000000000000000000000000000000000000000000000000000001"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByHash[2m > [22m[2mshould fail when hash not found
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.831Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found by hash[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "hash": "0000000000000000000000000000000000000000000000000000000000000001"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByPathAndFolder[2m > [22m[2mshould find image by path and folder
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.872Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by path and folder
+­ƒôï {
+­ƒôï   "path": "/unique/path/image.jpg",
+­ƒôï   "folderId": "ab9b4428-2985-4a84-92e4-c3801e66b548"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByPathAndFolder[2m > [22m[2mshould find image by path and folder
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.879Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found by path/folder
+­ƒôï {
+­ƒôï   "path": "/unique/path/image.jpg",
+­ƒôï   "folderId": "ab9b4428-2985-4a84-92e4-c3801e66b548",
+­ƒôï   "id": "1605fcc0-3a71-480b-b322-f28d000269e4",
+­ƒôï   "name": "test-image-1779756348865.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByPathAndFolder[2m > [22m[2mshould fail when path/folder combination not found
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.897Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by path and folder
+­ƒôï {
+­ƒôï   "path": "/non-existent.jpg",
+­ƒôï   "folderId": "3bd9d33b-11e3-434c-9f6f-56c92b0bce82"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByPathAndFolder[2m > [22m[2mshould fail when path/folder combination not found
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:48.903Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found by path/folder[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "path": "/non-existent.jpg",
+­ƒöì   "folderId": "3bd9d33b-11e3-434c-9f6f-56c92b0bce82"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould list all images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.944Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôï Getting all images
+­ƒôï {
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50,
+­ƒôï   "orderBy": "createdAt",
+­ƒôï   "orderDirection": "desc"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould list all images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:48.950Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Images retrieved
+­ƒôï {
+­ƒôï   "total": 3,
+­ƒôï   "returned": 3,
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould paginate results
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.023Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôï Getting all images
+­ƒôï {
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 2,
+­ƒôï   "orderBy": "createdAt",
+­ƒôï   "orderDirection": "desc"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould paginate results
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.026Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Images retrieved
+­ƒôï {
+­ƒôï   "total": 5,
+­ƒôï   "returned": 2,
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould paginate results
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.029Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôï Getting all images
+­ƒôï {
+­ƒôï   "offset": 2,
+­ƒôï   "limit": 2,
+­ƒôï   "orderBy": "createdAt",
+­ƒôï   "orderDirection": "desc"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould paginate results
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.033Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Images retrieved
+­ƒôï {
+­ƒôï   "total": 5,
+­ƒôï   "returned": 2,
+­ƒôï   "offset": 2,
+­ƒôï   "limit": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould paginate results
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.035Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôï Getting all images
+­ƒôï {
+­ƒôï   "offset": 4,
+­ƒôï   "limit": 2,
+­ƒôï   "orderBy": "createdAt",
+­ƒôï   "orderDirection": "desc"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould paginate results
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.037Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Images retrieved
+­ƒôï {
+­ƒôï   "total": 5,
+­ƒôï   "returned": 1,
+­ƒôï   "offset": 4,
+­ƒôï   "limit": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter by folderId
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.113Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôï Getting all images
+­ƒôï {
+­ƒôï   "folderId": "30da2fd4-3020-4f25-87a4-da6a0ab2b51e",
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50,
+­ƒôï   "orderBy": "createdAt",
+­ƒôï   "orderDirection": "desc"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter by folderId
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.118Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Images retrieved
+­ƒôï {
+­ƒôï   "total": 2,
+­ƒôï   "returned": 2,
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter by isFavorite
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.173Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349143-c6c0ff3c560208",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "7ab46717-ef27-4042-8446-a25f90ce7100"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter by isFavorite
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.177Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter by isFavorite
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.177Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349143-c6c0ff3c560208",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "7ab46717-ef27-4042-8446-a25f90ce7100",
+­ƒôï   "id": "0b08b636-7560-4dc7-bff3-127300664b63"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter by isFavorite
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.179Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôï Getting all images
+­ƒôï {
+­ƒôï   "isFavorite": true,
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50,
+­ƒôï   "orderBy": "createdAt",
+­ƒôï   "orderDirection": "desc"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter by isFavorite
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.182Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Images retrieved
+­ƒôï {
+­ƒôï   "total": 1,
+­ƒôï   "returned": 1,
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould return all images as isFavorite=false when no active profile exists
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.215Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôï Getting all images
+­ƒôï {
+­ƒôï   "isFavorite": false,
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50,
+­ƒôï   "orderBy": "createdAt",
+­ƒôï   "orderDirection": "desc"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould return all images as isFavorite=false when no active profile exists
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.218Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Images retrieved
+­ƒôï {
+­ƒôï   "total": 2,
+­ƒôï   "returned": 2,
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould resolve isFavorite=false from canonical favorites instead of stale projection
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.261Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349236-bfbf8b3033ee68",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "79887a3e-8f2d-4f2d-8e11-ff497876711a"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould resolve isFavorite=false from canonical favorites instead of stale projection
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.266Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould resolve isFavorite=false from canonical favorites instead of stale projection
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.267Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349236-bfbf8b3033ee68",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "79887a3e-8f2d-4f2d-8e11-ff497876711a",
+­ƒôï   "id": "ab50f979-64b6-49be-852a-dbc647316f6a"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould resolve isFavorite=false from canonical favorites instead of stale projection
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.271Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôï Getting all images
+­ƒôï {
+­ƒôï   "isFavorite": false,
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50,
+­ƒôï   "orderBy": "createdAt",
+­ƒôï   "orderDirection": "desc"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAll[2m > [22m[2mshould resolve isFavorite=false from canonical favorites instead of stale projection
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.275Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Images retrieved
+­ƒôï {
+­ƒôï   "total": 2,
+­ƒôï   "returned": 2,
+­ƒôï   "offset": 0,
+­ƒôï   "limit": 50
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return only favorite images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.334Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349307-3cf7d3d24a6dc",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "60d56f54-a642-4b09-ba67-ffa788dcd419"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return only favorite images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.337Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return only favorite images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.338Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349307-3cf7d3d24a6dc",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "60d56f54-a642-4b09-ba67-ffa788dcd419",
+­ƒôï   "id": "b8c08781-1e1c-483e-958e-d11a86fd62ff"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return only favorite images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.340Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349307-3cf7d3d24a6dc",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "d282e3eb-9787-45e0-a974-eca3cdc0d000"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return only favorite images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.343Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return only favorite images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.343Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349307-3cf7d3d24a6dc",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "d282e3eb-9787-45e0-a974-eca3cdc0d000",
+­ƒôï   "id": "d499e3d0-880b-48fc-b549-48022d10a1bf"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return only favorite images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.344Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Getting all favorite images
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return only favorite images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.348Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Favorite images retrieved
+­ƒôï {
+­ƒôï   "count": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return empty array when no favorites
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.378Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Getting all favorite images
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetAllFavorites[2m > [22m[2mshould return empty array when no favorites
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.381Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Favorite images retrieved
+­ƒôï {
+­ƒôï   "count": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByFolder[2m > [22m[2mshould return images from specific folder
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.415Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôü Getting images by folder
+­ƒôï {
+­ƒôï   "folderId": "6ab7f182-f5b7-4a74-95c8-4323dc75ed1d",
+­ƒôï   "limit": 100,
+­ƒôï   "offset": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByFolder[2m > [22m[2mshould return images from specific folder
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.420Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Folder images retrieved
+­ƒôï {
+­ƒôï   "folderId": "6ab7f182-f5b7-4a74-95c8-4323dc75ed1d",
+­ƒôï   "count": 3
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByFolder[2m > [22m[2mshould paginate folder images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.446Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒôü Getting images by folder
+­ƒôï {
+­ƒôï   "folderId": "58ed6f61-4048-42d8-8030-0fa871cd311f",
+­ƒôï   "limit": 2,
+­ƒôï   "offset": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mgetByFolder[2m > [22m[2mshould paginate folder images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.449Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Folder images retrieved
+­ƒôï {
+­ƒôï   "folderId": "58ed6f61-4048-42d8-8030-0fa871cd311f",
+­ƒôï   "count": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mcountByFolder[2m > [22m[2mshould count images in folder
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.475Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Counting images by folder
+­ƒôï {
+­ƒôï   "folderId": "48189eef-bbc1-4883-821c-63495302248a"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mcountByFolder[2m > [22m[2mshould count images in folder
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.476Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Image count retrieved
+­ƒôï {
+­ƒôï   "folderId": "48189eef-bbc1-4883-821c-63495302248a",
+­ƒôï   "count": 3
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mcountByFolder[2m > [22m[2mshould return zero for empty folder
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.490Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m ­ƒôè Counting images by folder
+­ƒôï {
+­ƒôï   "folderId": "66f042a5-1249-423b-93e3-1b97a95c92e4"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Query Operations[2m > [22m[2mcountByFolder[2m > [22m[2mshould return zero for empty folder
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.491Z][0m ­ƒöì [34m[1mDEBUG[0m [1m[ImageService][0m Ô£à Image count retrieved
+­ƒôï {
+­ƒôï   "folderId": "66f042a5-1249-423b-93e3-1b97a95c92e4",
+­ƒôï   "count": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.514Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Toggling favorite for image
+­ƒôï {
+­ƒôï   "id": "599ee643-9370-4705-8b0d-5b6ba83bd6d5"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.514Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "599ee643-9370-4705-8b0d-5b6ba83bd6d5"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.516Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "599ee643-9370-4705-8b0d-5b6ba83bd6d5",
+­ƒôï   "name": "test-image-1779756349506.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.517Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349512-9788eeac66886",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "599ee643-9370-4705-8b0d-5b6ba83bd6d5"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.521Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.521Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349512-9788eeac66886",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "599ee643-9370-4705-8b0d-5b6ba83bd6d5",
+­ƒôï   "id": "5106d4ac-38b9-472c-87ac-2f05a88f5527"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.521Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Favorite toggled
+­ƒôï {
+­ƒôï   "id": "599ee643-9370-4705-8b0d-5b6ba83bd6d5",
+­ƒôï   "wasFavorite": false,
+­ƒôï   "nowFavorite": true
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.521Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "599ee643-9370-4705-8b0d-5b6ba83bd6d5"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.521Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "599ee643-9370-4705-8b0d-5b6ba83bd6d5"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.523Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "599ee643-9370-4705-8b0d-5b6ba83bd6d5",
+­ƒôï   "name": "test-image-1779756349506.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.524Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "599ee643-9370-4705-8b0d-5b6ba83bd6d5",
+­ƒôï   "name": "test-image-1779756349506.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.554Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Toggling favorite for image
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.555Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.556Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189",
+­ƒôï   "name": "test-image-1779756349547.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.559Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349552-205bb3dae01a9",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.561Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.561Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349552-205bb3dae01a9",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "7a2897e6-759c-4a47-9826-1c749d86d189",
+­ƒôï   "id": "e93fd106-f210-44ae-bbe7-4268abcb2568"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.561Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Favorite toggled
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189",
+­ƒôï   "wasFavorite": false,
+­ƒôï   "nowFavorite": true
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.561Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.562Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.563Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189",
+­ƒôï   "name": "test-image-1779756349547.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.564Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189",
+­ƒôï   "name": "test-image-1779756349547.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.564Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Toggling favorite for image
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.565Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.566Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189",
+­ƒôï   "name": "test-image-1779756349547.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.570Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.570Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349552-205bb3dae01a9",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.570Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Favorite toggled
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189",
+­ƒôï   "wasFavorite": true,
+­ƒôï   "nowFavorite": false
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.570Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.571Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.572Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189",
+­ƒôï   "name": "test-image-1779756349547.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.573Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "7a2897e6-759c-4a47-9826-1c749d86d189",
+­ƒôï   "name": "test-image-1779756349547.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould fail when image does not exist
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.587Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Toggling favorite for image
+­ƒôï {
+­ƒôï   "id": "non-existent-id"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.587Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "non-existent-id"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould fail when image does not exist
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T00:45:49.589Z][0m [33m[1mWARN[0m [1m[ImageService][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Image not found[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì {
+­ƒöì   "id": "non-existent-id"
+­ƒöì }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould delegate toggleFavorite to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.612Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Toggling favorite for image
+­ƒôï {
+­ƒôï   "id": "249e9e33-402a-4744-8655-bf277600278a"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.612Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "249e9e33-402a-4744-8655-bf277600278a"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould delegate toggleFavorite to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.614Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "249e9e33-402a-4744-8655-bf277600278a",
+­ƒôï   "name": "test-image-1779756349604.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould delegate toggleFavorite to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.616Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349610-201a37967891",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "249e9e33-402a-4744-8655-bf277600278a"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould delegate toggleFavorite to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.619Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould delegate toggleFavorite to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.621Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349610-201a37967891",
+­ƒôï   "entityType": "image",
+­ƒôï   "entityId": "249e9e33-402a-4744-8655-bf277600278a",
+­ƒôï   "id": "12d431e7-9e30-4764-8437-ddc619f488e7"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould delegate toggleFavorite to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.621Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Favorite toggled
+­ƒôï {
+­ƒôï   "id": "249e9e33-402a-4744-8655-bf277600278a",
+­ƒôï   "wasFavorite": false,
+­ƒôï   "nowFavorite": true
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.621Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "249e9e33-402a-4744-8655-bf277600278a"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.622Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "249e9e33-402a-4744-8655-bf277600278a"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould delegate toggleFavorite to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.624Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "249e9e33-402a-4744-8655-bf277600278a",
+­ƒôï   "name": "test-image-1779756349604.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould delegate toggleFavorite to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.625Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "249e9e33-402a-4744-8655-bf277600278a",
+­ƒôï   "name": "test-image-1779756349604.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.658Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Setting favorite for multiple images
+­ƒôï {
+­ƒôï   "count": 3,
+­ƒôï   "isFavorite": true
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.663Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityIds",
+­ƒôï     "count"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.663Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favoritos actualizados en lote:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349656-791bd702b4af3",
+­ƒôï   "entityType": "image",
+­ƒôï   "isFavorite": true,
+­ƒôï   "count": 3
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.663Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Favorite status updated for multiple images
+­ƒôï {
+­ƒôï   "requested": 3,
+­ƒôï   "updated": 3
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.664Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "bb837dd6-58cd-4dc2-9383-f0b8fcecf0e4"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.664Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "bb837dd6-58cd-4dc2-9383-f0b8fcecf0e4"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.666Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "bb837dd6-58cd-4dc2-9383-f0b8fcecf0e4",
+­ƒôï   "name": "test-image-1779756349644.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.667Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "bb837dd6-58cd-4dc2-9383-f0b8fcecf0e4",
+­ƒôï   "name": "test-image-1779756349644.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.667Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "7fe213dc-426c-4177-a391-6bccdf3a4759"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.667Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "7fe213dc-426c-4177-a391-6bccdf3a4759"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.669Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "7fe213dc-426c-4177-a391-6bccdf3a4759",
+­ƒôï   "name": "test-image-1779756349647.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.670Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "7fe213dc-426c-4177-a391-6bccdf3a4759",
+­ƒôï   "name": "test-image-1779756349647.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.671Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "597b3f13-9a18-4447-87ad-5f3a63c56a94"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.671Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "597b3f13-9a18-4447-87ad-5f3a63c56a94"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.672Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "597b3f13-9a18-4447-87ad-5f3a63c56a94",
+­ƒôï   "name": "test-image-1779756349650.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=true for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.673Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "597b3f13-9a18-4447-87ad-5f3a63c56a94",
+­ƒôï   "name": "test-image-1779756349650.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.705Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Setting favorite for multiple images
+­ƒôï {
+­ƒôï   "count": 2,
+­ƒôï   "isFavorite": false
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.706Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityIds",
+­ƒôï     "count"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.707Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favoritos actualizados en lote:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349703-92d33618189e2",
+­ƒôï   "entityType": "image",
+­ƒôï   "isFavorite": false,
+­ƒôï   "count": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.707Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Favorite status updated for multiple images
+­ƒôï {
+­ƒôï   "requested": 2,
+­ƒôï   "updated": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.707Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "2ea4774f-8ebf-4252-bfd0-efdb21895edd"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.707Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "2ea4774f-8ebf-4252-bfd0-efdb21895edd"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.708Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "2ea4774f-8ebf-4252-bfd0-efdb21895edd",
+­ƒôï   "name": "test-image-1779756349692.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.709Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "2ea4774f-8ebf-4252-bfd0-efdb21895edd",
+­ƒôï   "name": "test-image-1779756349692.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.709Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID
+­ƒôï {
+­ƒôï   "id": "ab656243-9427-43e0-a001-059cd10ec3b2"
+­ƒôï }
+­ƒôï [2m[2026-05-26T00:45:49.709Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m ­ƒöì Getting image by ID (internal)
+­ƒôï {
+­ƒôï   "id": "ab656243-9427-43e0-a001-059cd10ec3b2"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.711Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image found (internal)
+­ƒôï {
+­ƒôï   "id": "ab656243-9427-43e0-a001-059cd10ec3b2",
+­ƒôï   "name": "test-image-1779756349696.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould set favorite=false for multiple images
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.712Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Image retrieved
+­ƒôï {
+­ƒôï   "id": "ab656243-9427-43e0-a001-059cd10ec3b2",
+­ƒôï   "name": "test-image-1779756349696.jpg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould persist batch favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.752Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô¡É Setting favorite for multiple images
+­ƒôï {
+­ƒôï   "count": 2,
+­ƒôï   "isFavorite": true
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould persist batch favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.755Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityIds",
+­ƒôï     "count"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould persist batch favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.755Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favoritos actualizados en lote:
+­ƒôï {
+­ƒôï   "profileId": "image-test-profile-1779756349750-a5a54f1c1921c8",
+­ƒôï   "entityType": "image",
+­ƒôï   "isFavorite": true,
+­ƒôï   "count": 2
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/image/__tests__/image.service.effect.test.ts[2m > [22m[2mImageService - Toggle Operations[2m > [22m[2msetFavoriteMany[2m > [22m[2mshould persist batch favorite state through the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T00:45:49.755Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[ImageService][0m Ô£à Favorite status updated for multiple images
+­ƒôï {
+­ƒôï   "requested": 2,
+­ƒôï   "updated": 2
+­ƒôï }
+Ô£à  [32mÔ£ô[39m src/services/image/__tests__/image.service.effect.test.ts [2m([22m[2m47 tests[22m[2m)[22m[33m 1752[2mms[22m[39m
+­ƒôï [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+­ƒôï [2m      Tests [22m [1m[32m47 passed[39m[22m[90m (47)[39m
+­ƒôï [2m   Start at [22m 21:45:42
+­ƒôï [2m   Duration [22m 7.00s[2m (transform 1.20s, setup 2.25s, import 1.33s, tests 1.75s, environment 1.42s)[22m
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+Ô£à Comando ejecutado exitosamente
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+­ƒôè RESUMEN AUTOM├üTICO DE ERRORES
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+
+Ô£à No se encontraron errores de sintaxis o linting
+­ƒôä Log completo guardado en: D:\DEV\media-manager\logs\test_2026-05-26T00-45-41-475Z.log

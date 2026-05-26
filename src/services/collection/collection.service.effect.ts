@@ -113,6 +113,33 @@ const toRowArray = <TRow>(value: TRow | TRow[] | null | undefined): TRow[] => {
 	return value == null ? [] : [value];
 };
 
+const stripLegacyFavoriteInput = <TInput>(input: TInput): TInput => {
+	if (!input || typeof input !== 'object' || Array.isArray(input)) {
+		return input;
+	}
+
+	const { isFavorite: _legacyIsFavorite, ...rest } = input as Record<string, unknown>;
+	return rest as TInput;
+};
+
+const getCollectionFavoriteIds = (): Effect.Effect<string[], CollectionDatabaseError> =>
+	Effect.tryPromise({
+		try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.COLLECTION),
+		catch: (error) =>
+			new CollectionDatabaseError({
+				operation: 'getCollectionFavoriteIds',
+				originalError: error,
+			}),
+	});
+
+const applyCollectionFavoriteProjection = (collection: Collection, favoriteEntityIds: readonly string[]): Collection =>
+	favoriteService.applyFavoriteProjection(collection, favoriteEntityIds);
+
+const applyCollectionFavoriteProjectionMany = (
+	collections: Collection[],
+	favoriteEntityIds: readonly string[]
+): Collection[] => favoriteService.applyFavoriteProjectionMany(collections, favoriteEntityIds);
+
 /**
  * Opciones para obtener colecciones
  */
@@ -374,7 +401,8 @@ export const CollectionServiceLive = Layer.succeed(
 		getById: (id: string) =>
 			Effect.gen(function* () {
 				const collection = yield* getByIdInternal(id);
-				return yield* enrichCollectionWithCounts(collection);
+				const favoriteEntityIds = yield* getCollectionFavoriteIds();
+				return yield* enrichCollectionWithCounts(applyCollectionFavoriteProjection(collection, favoriteEntityIds));
 			}),
 
 		getAll: (options: GetCollectionsOptions = {}) =>
@@ -397,17 +425,7 @@ export const CollectionServiceLive = Layer.succeed(
 					offset,
 				});
 
-				const favoriteEntityIds: string[] | null =
-					onlyFavorites
-						? yield* Effect.tryPromise({
-							try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION),
-							catch: (error) =>
-								new CollectionDatabaseError({
-									operation: 'getAll:favoriteIds',
-									originalError: error,
-								}),
-						})
-						: null;
+				const favoriteEntityIds = yield* getCollectionFavoriteIds();
 
 				// Build conditions
 				const conditions = [];
@@ -418,9 +436,7 @@ export const CollectionServiceLive = Layer.succeed(
 					conditions.push(parentId === null ? isNull(collections.parentId) : eq(collections.parentId, parentId));
 				}
 				if (onlyFavorites) {
-					if (favoriteEntityIds === null) {
-						conditions.push(eq(collections.isFavorite, true));
-					} else if (favoriteEntityIds.length === 0) {
+					if (favoriteEntityIds.length === 0) {
 						return {
 							collections: [],
 							total: 0,
@@ -495,14 +511,7 @@ export const CollectionServiceLive = Layer.succeed(
 						}),
 				});
 
-				const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
-				const normalizedCollections =
-					favoriteIdSet === null
-						? validated
-						: validated.map((collection) => ({
-							...collection,
-							isFavorite: favoriteIdSet.has(collection.id),
-						}));
+				const normalizedCollections = applyCollectionFavoriteProjectionMany(validated, favoriteEntityIds);
 
 				const enriched = yield* Effect.forEach(normalizedCollections, (c) => enrichCollectionWithCounts(c), {
 					concurrency: 1,
@@ -520,10 +529,11 @@ export const CollectionServiceLive = Layer.succeed(
 		create: (input) =>
 			Effect.gen(function* () {
 				logger.info('➕ Creando collection', { name: input.name });
+				const sanitizedInput = stripLegacyFavoriteInput(input);
 
 				// Validate input
 				const validated = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(CollectionCreateInput)(input),
+					try: () => Schema.decodeUnknownSync(CollectionCreateInput)(sanitizedInput),
 					catch: (error) =>
 						new CollectionValidationError({
 							field: 'input',
@@ -539,19 +549,6 @@ export const CollectionServiceLive = Layer.succeed(
 
 				// Generate readable ID
 				const readableId = generateReadableId('collection', validated.name, 1);
-				const requestedIsFavorite = validated.isFavorite === true;
-				const useCanonicalFavoriteBridge =
-					requestedIsFavorite
-						? yield* Effect.tryPromise({
-							try: async () =>
-								(await favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION)) !== null,
-							catch: (error) =>
-								new CollectionDatabaseError({
-									operation: 'create:favoriteScope',
-									originalError: error,
-								}),
-						})
-						: false;
 
 				// Insert to DB
 				const now = new Date();
@@ -595,42 +592,21 @@ export const CollectionServiceLive = Layer.succeed(
 
 				logger.info('✅ Collection creada', { id: created.id, name: created.name });
 
-				if (requestedIsFavorite && useCanonicalFavoriteBridge) {
-					yield* Effect.tryPromise({
-						try: async () => {
-							try {
-								await favoriteService.set(FavoriteEntityType.COLLECTION, created.id, true);
-							} catch (error) {
-								await withSqliteBusyRetry(async () =>
-									await db.delete(collections).where(eq(collections.id, created.id)).execute()
-								);
-								throw error;
-							}
-						},
-						catch: (error) =>
-							new CollectionDatabaseError({
-								operation: 'create:favoriteBridge',
-								originalError: error,
-							}),
-					});
-				}
-
-				return yield* enrichCollectionWithCounts({
-					...created,
-					isFavorite: requestedIsFavorite ? true : created.isFavorite,
-				});
+				const favoriteEntityIds = yield* getCollectionFavoriteIds();
+				return yield* enrichCollectionWithCounts(applyCollectionFavoriteProjection(created, favoriteEntityIds));
 			}),
 
 		update: (id, input) =>
 			Effect.gen(function* () {
 				logger.info('🔧 Actualizando collection', { id });
+				const sanitizedInput = stripLegacyFavoriteInput(input);
 
 				// Check exists
 				const existing = yield* getByIdInternal(id);
 
 				// Validate input
 				const validated = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(CollectionUpdateInput)(input),
+					try: () => Schema.decodeUnknownSync(CollectionUpdateInput)(sanitizedInput),
 					catch: (error) =>
 						new CollectionValidationError({
 							field: 'input',
@@ -648,33 +624,6 @@ export const CollectionServiceLive = Layer.succeed(
 					yield* validateParentExists(validated.parentId);
 				}
 
-				const requestedIsFavorite = validated.isFavorite;
-				const useCanonicalFavoriteBridge =
-					requestedIsFavorite !== undefined
-						? yield* Effect.tryPromise({
-							try: async () =>
-								(await favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION)) !== null,
-							catch: (error) =>
-								new CollectionDatabaseError({
-									operation: 'update:favoriteScope',
-									originalError: error,
-								}),
-						})
-						: false;
-
-				if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-					yield* Effect.tryPromise({
-						try: () => favoriteService.set(FavoriteEntityType.COLLECTION, id, requestedIsFavorite),
-						catch: (error) =>
-							new CollectionDatabaseError({
-								operation: 'update:favoriteBridge',
-								originalError: error,
-							}),
-					});
-				}
-
-				const { isFavorite: _ignoredIsFavorite, ...validatedFields } = validated;
-
 				// Update in DB
 				const updatedRows = (yield* Effect.tryPromise({
 					try: async () =>
@@ -683,7 +632,7 @@ export const CollectionServiceLive = Layer.succeed(
 								await db
 									.update(collections)
 									.set({
-										...validatedFields,
+										...validated,
 										updatedAt: new Date(),
 									})
 									.where(eq(collections.id, id))
@@ -710,7 +659,8 @@ export const CollectionServiceLive = Layer.succeed(
 
 				logger.info('✅ Collection actualizada', { id, name: updated.name });
 
-				return yield* enrichCollectionWithCounts(updated);
+				const favoriteEntityIds = yield* getCollectionFavoriteIds();
+				return yield* enrichCollectionWithCounts(applyCollectionFavoriteProjection(updated, favoriteEntityIds));
 			}),
 
 		delete: (id, force = false) =>
@@ -886,42 +836,29 @@ export const CollectionServiceLive = Layer.succeed(
 			Effect.gen(function* () {
 				logger.info('⭐ Toggle favorite collection', { id });
 
-				const collection = yield* getByIdInternal(id);
-				const favoriteEntityIds = yield* Effect.tryPromise({
-					try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION),
+				yield* getByIdInternal(id);
+				const currentFavoriteStatus = yield* Effect.tryPromise({
+					try: () => favoriteService.isFavorite(FavoriteEntityType.COLLECTION, id),
 					catch: (error) =>
 						new CollectionDatabaseError({
-							operation: 'toggleFavorite:scope',
+							operation: 'toggleFavorite:isFavorite',
 							originalError: error,
 						}),
 				});
-
-				let result: typeof collections.$inferSelect;
-				const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? collection.isFavorite;
 				const newFavoriteStatus = !currentFavoriteStatus;
 
-				if (favoriteEntityIds !== null) {
-					yield* Effect.tryPromise({
-						try: () => favoriteService.set(FavoriteEntityType.COLLECTION, id, newFavoriteStatus),
-						catch: (error) =>
-							new CollectionDatabaseError({
-								operation: 'toggleFavorite:favoriteBridge',
-								originalError: error,
-							}),
-					});
-				}
-
-				const refreshed = yield* getByIdInternal(id);
-				result = refreshed;
-
-				const updated = yield* Effect.try({
-					try: () => decodeCollectionRow(result),
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.COLLECTION, id, newFavoriteStatus),
 					catch: (error) =>
 						new CollectionDatabaseError({
-							operation: 'toggleFavorite:validation',
+							operation: 'toggleFavorite:set',
 							originalError: error,
 						}),
 				});
+
+				const refreshed = yield* getByIdInternal(id);
+				const favoriteEntityIds = yield* getCollectionFavoriteIds();
+				const updated = applyCollectionFavoriteProjection(refreshed, favoriteEntityIds);
 
 				logger.info('✅ Favorite toggled', { id, isFavorite: updated.isFavorite });
 
@@ -963,7 +900,10 @@ export const CollectionServiceLive = Layer.succeed(
 						}),
 				});
 
-				const enriched = yield* Effect.forEach(validated, (c) => enrichCollectionWithCounts(c), {
+				const favoriteEntityIds = yield* getCollectionFavoriteIds();
+				const normalizedCollections = applyCollectionFavoriteProjectionMany(validated, favoriteEntityIds);
+
+				const enriched = yield* Effect.forEach(normalizedCollections, (c) => enrichCollectionWithCounts(c), {
 					concurrency: 1,
 				}).pipe(Effect.mapError((error) => error as CollectionError));
 

@@ -16,7 +16,7 @@ EFAULT: bad address in system call argument, rm 'D:\DEV\media-manager\logs\reind
       at async cleanOldLogs (D:\DEV\media-manager\scripts\logging-utils.js:283:17)
 
 ­ƒÜÇ Ejecutando: bunx tsc --noEmit --pretty
-­ƒôä Logs en: D:\DEV\media-manager\logs\tsc_2026-05-26T00-21-23-922Z.log
+­ƒôä Logs en: D:\DEV\media-manager\logs\tsc_2026-05-26T00-22-48-212Z.log
 ­ƒô║ Salida en tiempo real:
 ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 ­ƒôï [96msrc/services/queue-job/queue-job.service.ts[0m:[93m420[0m:[93m45[0m - [91merror[0m[90m TS7006: [0mParameter 'sum' implicitly has an 'any' type.
@@ -28,37 +28,22 @@ EFAULT: bad address in system call argument, rm 'D:\DEV\media-manager\logs\reind
 ­ƒôï [96msrc/services/queue-job/queue-job.service.ts[0m:[93m682[0m:[93m13[0m - [91merror[0m[90m TS7006: [0mParameter 'time' implicitly has an 'any' type.
 ­ƒôï [7m682[0m    .filter((time) => time > 0);
 ­ƒôï [7m   [0m [91m            ~~~~[0m
-­ƒôï [96msrc/services/secondary/__tests__/secondary.favorite.effect.test.ts[0m:[93m147[0m:[93m33[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ title: string; content: string; category: NoteCategory.GENERAL; }' is not assignable to parameter of type '{ title: string; content: string; category: NoteCategory; priority: NotePriority; status: NoteStatus; tags?: string | string[] | undefined; featuredImage?: string | ... 1 more ... | undefined; }'.
-­ƒôï   Type '{ title: string; content: string; category: NoteCategory.GENERAL; }' is missing the following properties from type '{ title: string; content: string; category: NoteCategory; priority: NotePriority; status: NoteStatus; tags?: string | string[] | undefined; featuredImage?: string | ... 1 more ... | undefined; }': priority, status
-­ƒôï [7m147[0m    return yield* service.create({
-­ƒôï [7m   [0m [91m                                ~[0m
-­ƒôï [7m148[0m     title: unique,
-­ƒôï [7m   [0m [91m~~~~~~~~~~~~~~~~~~[0m
-­ƒôï [7m...[0m 
-­ƒôï [7m150[0m     category: NoteCategory.GENERAL,
-­ƒôï [7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
-­ƒôï [7m151[0m    });
-­ƒôï [7m   [0m [91m~~~~[0m
-ÔØî Found 4 errors in 2 files.
-­ƒôï Errors  Files
-­ƒôï      3  src/services/queue-job/queue-job.service.ts[90m:420[0m
-­ƒôï      1  src/services/secondary/__tests__/secondary.favorite.effect.test.ts[90m:147[0m
+ÔØî Found 3 errors in the same file, starting at: src/services/queue-job/queue-job.service.ts[90m:420[0m
 ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 ÔØî Error al ejecutar comando (Exit code: 2)
-­ƒôä Detalles del error en: D:\DEV\media-manager\logs\tsc_2026-05-26T00-21-23-922Z_error.log
+­ƒôä Detalles del error en: D:\DEV\media-manager\logs\tsc_2026-05-26T00-22-48-212Z_error.log
 
 ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 ­ƒôè RESUMEN AUTOM├üTICO DE ERRORES
 ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 
 ==========================================================
-Resumen (tsc) -> errores: 5, warnings: 0
+Resumen (tsc) -> errores: 4, warnings: 0
 Primeros errores:
   - src/services/queue-job/queue-job.service.ts:420:45 - error TS7006: Parameter 'sum' implicitly has an 'any' type.
   - src/services/queue-job/queue-job.service.ts:420:50 - error TS7006: Parameter 'job' implicitly has an 'any' type.
   - src/services/queue-job/queue-job.service.ts:682:13 - error TS7006: Parameter 'time' implicitly has an 'any' type.
-  - src/services/secondary/__tests__/secondary.favorite.effect.test.ts:147:33 - error TS2345: Argument of type '{ title: string; content: string; category: NoteCategory.GENERAL; }' is not assignable to parameter of type '{ title: string; content: string; category: NoteCategory; priority: NotePriority; status: NoteStatus; tags?: string | string[] | undefined; featuredImage?: string | ... 1 more ... | undefined; }'.
-  - Found 4 errors in 2 files.
+  - Found 3 errors in the same file, starting at: src/services/queue-job/queue-job.service.ts:420
 ==========================================================
 
-Ô£à Resumen agregado al principio del archivo: D:\DEV\media-manager\logs\tsc_2026-05-26T00-21-23-922Z_error.log
+Ô£à Resumen agregado al principio del archivo: D:\DEV\media-manager\logs\tsc_2026-05-26T00-22-48-212Z_error.log

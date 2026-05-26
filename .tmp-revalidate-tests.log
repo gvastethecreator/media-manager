@@ -1,14 +1,14 @@
 bun test v1.3.14 (0d9b296a)
 
 src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
-(pass) Secondary services favorites convergence > GroupService > create deja el grupo sin marcar hasta usar la acci├│n dedicada [68.91ms]
-[2m[2026-05-26T00:02:43.354Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > GroupService > create deja el grupo sin marcar hasta usar la acci├│n dedicada [75.01ms]
+[2m[2026-05-26T00:21:52.992Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "group",
-  "entityId": "grp-tmplvfsp6dc65-group-canonical--01"
+  "entityId": "grp-tmplw4frg36a2-group-canonical--01"
 }
-[2m[2026-05-26T00:02:43.357Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:52.998Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -19,22 +19,22 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.357Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:52.998Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "group",
-  "entityId": "grp-tmplvfsp6dc65-group-canonical--01",
-  "id": "c0fd9e47-5a26-4dd2-8d11-41911c99a104"
+  "entityId": "grp-tmplw4frg36a2-group-canonical--01",
+  "id": "3d370bd5-c18c-4cf3-9b9d-bc3f1dfd9226"
 }
-(pass) Secondary services favorites convergence > GroupService > uses canonical favorites for onlyFavorites [34.16ms]
-(pass) Secondary services favorites convergence > GroupService > update no altera el favorito can├│nico [25.64ms]
-[2m[2026-05-26T00:02:43.407Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > GroupService > uses canonical favorites for onlyFavorites [54.47ms]
+(pass) Secondary services favorites convergence > GroupService > update no altera el favorito can├│nico [45.71ms]
+[2m[2026-05-26T00:21:53.084Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "group",
-  "entityId": "grp-tmplvfsqu7cde-group-toggle-tar-01"
+  "entityId": "grp-tmplw4fu86c32-group-toggle-tar-01"
 }
-[2m[2026-05-26T00:02:43.410Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.089Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -45,21 +45,21 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.410Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.089Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "group",
-  "entityId": "grp-tmplvfsqu7cde-group-toggle-tar-01",
-  "id": "67dcadb2-2572-43a4-b188-1e8b47139352"
+  "entityId": "grp-tmplw4fu86c32-group-toggle-tar-01",
+  "id": "17215f53-4e3a-4fc7-ae48-eaa7a234819c"
 }
-(pass) Secondary services favorites convergence > GroupService > toggleFavorite delegates to the canonical favorite bridge [23.56ms]
-[2m[2026-05-26T00:02:43.428Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > GroupService > toggleFavorite delegates to the canonical favorite bridge [43.51ms]
+[2m[2026-05-26T00:21:53.127Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "group",
-  "entityId": "grp-tmplvfsrh7fa3-group-toggle-rou-01"
+  "entityId": "grp-tmplw4fvf0ba4-group-toggle-rou-01"
 }
-[2m[2026-05-26T00:02:43.431Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.132Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -70,14 +70,14 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.431Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.132Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "group",
-  "entityId": "grp-tmplvfsrh7fa3-group-toggle-rou-01",
-  "id": "ae7235b0-1e07-45a6-8879-782765e0f0eb"
+  "entityId": "grp-tmplw4fvf0ba4-group-toggle-rou-01",
+  "id": "7edd1196-eaa7-4878-b85b-95b39263c14f"
 }
-[2m[2026-05-26T00:02:43.438Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.146Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -87,21 +87,21 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "entityId"
   ]
 }
-[2m[2026-05-26T00:02:43.438Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
+[2m[2026-05-26T00:21:53.146Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "group",
-  "entityId": "grp-tmplvfsrh7fa3-group-toggle-rou-01"
+  "entityId": "grp-tmplw4fvf0ba4-group-toggle-rou-01"
 }
-(pass) Secondary services favorites convergence > GroupService > toggleFavorite can remove the canonical favorite again [27.15ms]
-(pass) Secondary services favorites convergence > WildcardService > create deja el wildcard sin marcar hasta usar la acci├│n dedicada [15.46ms]
-[2m[2026-05-26T00:02:43.479Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > GroupService > toggleFavorite can remove the canonical favorite again [52.71ms]
+(pass) Secondary services favorites convergence > WildcardService > create deja el wildcard sin marcar hasta usar la acci├│n dedicada [29.65ms]
+[2m[2026-05-26T00:21:53.236Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "wildcard",
-  "entityId": "wild-tmplvfsspef53-wildcard-canonic-01"
+  "entityId": "wild-tmplw4fxracd5-wildcard-canonic-01"
 }
-[2m[2026-05-26T00:02:43.481Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.241Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -112,22 +112,22 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.482Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.241Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "wildcard",
-  "entityId": "wild-tmplvfsspef53-wildcard-canonic-01",
-  "id": "87de4bf9-69ef-4fcf-bd31-6090863f735d"
+  "entityId": "wild-tmplw4fxracd5-wildcard-canonic-01",
+  "id": "cbb5bd11-3efe-4d03-9fc5-7f72908eb717"
 }
-(pass) Secondary services favorites convergence > WildcardService > uses canonical favorites for onlyFavorites and ignores stale projection [32.62ms]
-(pass) Secondary services favorites convergence > WildcardService > update no altera el favorito can├│nico [34.79ms]
-[2m[2026-05-26T00:02:43.550Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > WildcardService > uses canonical favorites for onlyFavorites and ignores stale projection [71.27ms]
+(pass) Secondary services favorites convergence > WildcardService > update no altera el favorito can├│nico [35.69ms]
+[2m[2026-05-26T00:21:53.316Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "wildcard",
-  "entityId": "wild-tmplvfsukfeb2-wildcard-toggle--01"
+  "entityId": "wild-tmplw4g0p281d-wildcard-toggle--01"
 }
-[2m[2026-05-26T00:02:43.557Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.327Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -138,21 +138,21 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.557Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.328Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "wildcard",
-  "entityId": "wild-tmplvfsukfeb2-wildcard-toggle--01",
-  "id": "6e9091fd-191b-47b3-ae60-8c3e19b845a6"
+  "entityId": "wild-tmplw4g0p281d-wildcard-toggle--01",
+  "id": "40872665-e797-4d65-8194-871cf884b988"
 }
-(pass) Secondary services favorites convergence > WildcardService > toggleFavorite delegates to the canonical favorite bridge [41.18ms]
-[2m[2026-05-26T00:02:43.586Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > WildcardService > toggleFavorite delegates to the canonical favorite bridge [56.93ms]
+[2m[2026-05-26T00:21:53.373Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "wildcard",
-  "entityId": "wild-tmplvfsvqad7d-wildcard-toggle--01"
+  "entityId": "wild-tmplw4g2a222d-wildcard-toggle--01"
 }
-[2m[2026-05-26T00:02:43.588Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.377Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -163,14 +163,14 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.588Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.377Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "wildcard",
-  "entityId": "wild-tmplvfsvqad7d-wildcard-toggle--01",
-  "id": "417c12d1-54e9-48ad-8da1-605d500e8bbe"
+  "entityId": "wild-tmplw4g2a222d-wildcard-toggle--01",
+  "id": "cba928b8-f1c8-4137-833c-f4d4c5a73ebf"
 }
-[2m[2026-05-26T00:02:43.598Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.387Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -180,21 +180,21 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "entityId"
   ]
 }
-[2m[2026-05-26T00:02:43.599Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
+[2m[2026-05-26T00:21:53.387Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "wildcard",
-  "entityId": "wild-tmplvfsvqad7d-wildcard-toggle--01"
+  "entityId": "wild-tmplw4g2a222d-wildcard-toggle--01"
 }
-(pass) Secondary services favorites convergence > WildcardService > toggleFavorite can remove the canonical favorite again [40.50ms]
-(pass) Secondary services favorites convergence > NoteService > create deja la nota sin marcar hasta usar la acci├│n dedicada [22.64ms]
-[2m[2026-05-26T00:02:43.658Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > WildcardService > toggleFavorite can remove the canonical favorite again [46.73ms]
+(pass) Secondary services favorites convergence > NoteService > create deja la nota sin marcar hasta usar la acci├│n dedicada [28.77ms]
+[2m[2026-05-26T00:21:53.461Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "note",
-  "entityId": "note-tmplvfsxh82a9-note-canonical-f-01"
+  "entityId": "note-tmplw4g4ec402-note-canonical-f-01"
 }
-[2m[2026-05-26T00:02:43.660Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.466Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -205,22 +205,22 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.660Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.466Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "note",
-  "entityId": "note-tmplvfsxh82a9-note-canonical-f-01",
-  "id": "21f34adf-5960-4b1c-9782-39e22f52110e"
+  "entityId": "note-tmplw4g4ec402-note-canonical-f-01",
+  "id": "f7237693-3faf-4891-a1a9-f56746dc7923"
 }
-(pass) Secondary services favorites convergence > NoteService > uses canonical favorites for onlyFavorites and ignores stale projection [46.99ms]
-(pass) Secondary services favorites convergence > NoteService > update no altera el favorito can├│nico [19.35ms]
-[2m[2026-05-26T00:02:43.710Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > NoteService > uses canonical favorites for onlyFavorites and ignores stale projection [54.48ms]
+(pass) Secondary services favorites convergence > NoteService > update no altera el favorito can├│nico [34.29ms]
+[2m[2026-05-26T00:21:53.536Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "note",
-  "entityId": "note-tmplvfsza2c55-note-toggle-targ-01"
+  "entityId": "note-tmplw4g6vd87f-note-toggle-targ-01"
 }
-[2m[2026-05-26T00:02:43.713Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.541Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -231,21 +231,21 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.713Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.541Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "note",
-  "entityId": "note-tmplvfsza2c55-note-toggle-targ-01",
-  "id": "0d10385d-13fa-48e4-9eef-91d229fe7f59"
+  "entityId": "note-tmplw4g6vd87f-note-toggle-targ-01",
+  "id": "9cea2a44-64e5-4b0c-afaf-8eed4863bb32"
 }
-(pass) Secondary services favorites convergence > NoteService > toggleFavorite delegates to the canonical favorite bridge [21.39ms]
-[2m[2026-05-26T00:02:43.734Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > NoteService > toggleFavorite delegates to the canonical favorite bridge [41.81ms]
+[2m[2026-05-26T00:21:53.580Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "note",
-  "entityId": "note-tmplvfszwbe17-note-toggle-roun-01"
+  "entityId": "note-tmplw4g818fdc-note-toggle-roun-01"
 }
-[2m[2026-05-26T00:02:43.736Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.584Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -256,14 +256,14 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.736Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.584Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "note",
-  "entityId": "note-tmplvfszwbe17-note-toggle-roun-01",
-  "id": "84d8c93b-d92d-4da4-a570-5b3b7ecdc529"
+  "entityId": "note-tmplw4g818fdc-note-toggle-roun-01",
+  "id": "7a995698-e144-44e3-977a-cda40fcf271f"
 }
-[2m[2026-05-26T00:02:43.744Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.595Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -273,21 +273,21 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "entityId"
   ]
 }
-[2m[2026-05-26T00:02:43.744Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
+[2m[2026-05-26T00:21:53.595Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "note",
-  "entityId": "note-tmplvfszwbe17-note-toggle-roun-01"
+  "entityId": "note-tmplw4g818fdc-note-toggle-roun-01"
 }
-(pass) Secondary services favorites convergence > NoteService > toggleFavorite can remove the canonical favorite again [29.29ms]
-(pass) Secondary services favorites convergence > PropertyService > create deja la propiedad sin marcar hasta usar la acci├│n dedicada [13.83ms]
-[2m[2026-05-26T00:02:43.781Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > NoteService > toggleFavorite can remove the canonical favorite again [51.07ms]
+(pass) Secondary services favorites convergence > PropertyService > create deja la propiedad sin marcar hasta usar la acci├│n dedicada [28.45ms]
+[2m[2026-05-26T00:21:53.674Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "property",
-  "entityId": "prop-tmplvft130ab3-property-canonic-01"
+  "entityId": "prop-tmplw4ga8f71f-property-canonic-01"
 }
-[2m[2026-05-26T00:02:43.783Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.679Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -298,22 +298,22 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.783Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.679Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "property",
-  "entityId": "prop-tmplvft130ab3-property-canonic-01",
-  "id": "d088627c-a926-4fe4-b1ca-ff55d5b2fecd"
+  "entityId": "prop-tmplw4ga8f71f-property-canonic-01",
+  "id": "b85b5f0a-267b-43c2-a5cc-08bc666c4d7b"
 }
-(pass) Secondary services favorites convergence > PropertyService > uses canonical favorites for onlyFavorites and ignores stale embedded flags [28.97ms]
-(pass) Secondary services favorites convergence > PropertyService > update no altera el favorito can├│nico [14.53ms]
-[2m[2026-05-26T00:02:43.817Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > PropertyService > uses canonical favorites for onlyFavorites and ignores stale embedded flags [57.38ms]
+(pass) Secondary services favorites convergence > PropertyService > update no altera el favorito can├│nico [32.04ms]
+[2m[2026-05-26T00:21:53.750Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "property",
-  "entityId": "prop-tmplvft2bfb74-property-toggle--01"
+  "entityId": "prop-tmplw4gcq0cb4-property-toggle--01"
 }
-[2m[2026-05-26T00:02:43.819Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.754Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -324,21 +324,21 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.819Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.754Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "property",
-  "entityId": "prop-tmplvft2bfb74-property-toggle--01",
-  "id": "37774bd6-e3be-4f37-a0f7-b593e741c340"
+  "entityId": "prop-tmplw4gcq0cb4-property-toggle--01",
+  "id": "3ac0793f-c9e8-4050-91c3-1c7956040434"
 }
-(pass) Secondary services favorites convergence > PropertyService > toggleFavorite delega al bridge can├│nico [19.20ms]
-[2m[2026-05-26T00:02:43.837Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > PropertyService > toggleFavorite delega al bridge can├│nico [37.64ms]
+[2m[2026-05-26T00:21:53.784Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "property",
-  "entityId": "prop-tmplvft2u259b-property-toggle--01"
+  "entityId": "prop-tmplw4gdra1fc-property-toggle--01"
 }
-[2m[2026-05-26T00:02:43.839Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.787Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -349,14 +349,14 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.839Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.788Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "property",
-  "entityId": "prop-tmplvft2u259b-property-toggle--01",
-  "id": "27f6fbf4-9090-4dd5-8bce-d3482e0cebc3"
+  "entityId": "prop-tmplw4gdra1fc-property-toggle--01",
+  "id": "4de5bfcf-de69-41a9-aa76-ac8dacbea196"
 }
-[2m[2026-05-26T00:02:43.846Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.798Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -366,21 +366,21 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "entityId"
   ]
 }
-[2m[2026-05-26T00:02:43.846Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
+[2m[2026-05-26T00:21:53.798Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "property",
-  "entityId": "prop-tmplvft2u259b-property-toggle--01"
+  "entityId": "prop-tmplw4gdra1fc-property-toggle--01"
 }
-(pass) Secondary services favorites convergence > PropertyService > toggleFavorite puede desmarcar el favorito can├│nico en roundtrip [25.10ms]
-(pass) Secondary services favorites convergence > WorldItemService > create deja el world item sin marcar hasta usar la acci├│n dedicada [15.05ms]
-[2m[2026-05-26T00:02:43.885Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > PropertyService > toggleFavorite puede desmarcar el favorito can├│nico en roundtrip [40.04ms]
+(pass) Secondary services favorites convergence > WorldItemService > create deja el world item sin marcar hasta usar la acci├│n dedicada [19.67ms]
+[2m[2026-05-26T00:21:53.856Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "worldItem",
-  "entityId": "item-tmplvft3zae45-world-item-canon-01"
+  "entityId": "item-tmplw4gffe20d-world-item-canon-01"
 }
-[2m[2026-05-26T00:02:43.887Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.858Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -391,22 +391,22 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.887Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.858Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "worldItem",
-  "entityId": "item-tmplvft3zae45-world-item-canon-01",
-  "id": "3363e8c2-d04f-4b36-924e-ec1313d61c6c"
+  "entityId": "item-tmplw4gffe20d-world-item-canon-01",
+  "id": "4f2d9559-a5d7-4d39-a75c-5dad0c6a08d1"
 }
-(pass) Secondary services favorites convergence > WorldItemService > uses canonical favorites for onlyFavorites and ignores stale projection [29.78ms]
-(pass) Secondary services favorites convergence > WorldItemService > update no altera el favorito can├│nico [19.94ms]
-[2m[2026-05-26T00:02:43.928Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > WorldItemService > uses canonical favorites for onlyFavorites and ignores stale projection [37.20ms]
+(pass) Secondary services favorites convergence > WorldItemService > update no altera el favorito can├│nico [45.28ms]
+[2m[2026-05-26T00:21:53.928Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "worldItem",
-  "entityId": "item-tmplvft5c7343-world-item-toggl-01"
+  "entityId": "item-tmplw4ghp7138-world-item-toggl-01"
 }
-[2m[2026-05-26T00:02:43.931Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.932Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -417,21 +417,21 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.931Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.932Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "worldItem",
-  "entityId": "item-tmplvft5c7343-world-item-toggl-01",
-  "id": "8530a1c5-9c84-4de0-be1a-35d95b85e039"
+  "entityId": "item-tmplw4ghp7138-world-item-toggl-01",
+  "id": "99684aad-576f-421f-ace1-44fc5b08b681"
 }
-(pass) Secondary services favorites convergence > WorldItemService > toggleFavorite delegates to the canonical favorite bridge [22.62ms]
-[2m[2026-05-26T00:02:43.951Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+(pass) Secondary services favorites convergence > WorldItemService > toggleFavorite delegates to the canonical favorite bridge [37.52ms]
+[2m[2026-05-26T00:21:53.967Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "worldItem",
-  "entityId": "item-tmplvft5z96b1-world-item-toggl-01"
+  "entityId": "item-tmplw4girb699-world-item-toggl-01"
 }
-[2m[2026-05-26T00:02:43.953Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.972Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -442,14 +442,14 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:43.953Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:53.973Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "worldItem",
-  "entityId": "item-tmplvft5z96b1-world-item-toggl-01",
-  "id": "9b2000f5-8e67-4540-8fe3-300079cf818d"
+  "entityId": "item-tmplw4girb699-world-item-toggl-01",
+  "id": "35499330-771a-4a97-8833-2d249e7e7662"
 }
-[2m[2026-05-26T00:02:43.959Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:53.982Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -459,35 +459,35 @@ src\services\secondary\__tests__\secondary.favorite.effect.test.ts:
     "entityId"
   ]
 }
-[2m[2026-05-26T00:02:43.959Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
+[2m[2026-05-26T00:21:53.982Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "worldItem",
-  "entityId": "item-tmplvft5z96b1-world-item-toggl-01"
+  "entityId": "item-tmplw4girb699-world-item-toggl-01"
 }
-(pass) Secondary services favorites convergence > WorldItemService > toggleFavorite can remove the canonical favorite again [39.79ms]
+(pass) Secondary services favorites convergence > WorldItemService > toggleFavorite can remove the canonical favorite again [61.51ms]
 
 src\services\tag\__tests__\tag.favorite.effect.test.ts:
-[2m[2026-05-26T00:02:44.094Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
+[2m[2026-05-26T00:21:54.088Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
 {
-  "name": "create-canonical-favorite-1779753764094"
+  "name": "create-canonical-favorite-1779754914087"
 }
-[2m[2026-05-26T00:02:44.100Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag creado exitosamente: create-canonical-favorite-1779753764094
+[2m[2026-05-26T00:21:54.098Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag creado exitosamente: create-canonical-favorite-1779754914087
 {
   "id": "tag-create-canonical-favorite-1779-01"
 }
-[2m[2026-05-26T00:02:44.101Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-create-canonical-favorite-1779-01
-[2m[2026-05-26T00:02:44.102Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: create-canonical-favorite-1779753764094
-[2m[2026-05-26T00:02:44.105Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-create-canonical-favorite-1779-01
-[2m[2026-05-26T00:02:44.106Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
-(pass) TagService favorites convergence > create deja el tag sin marcar hasta usar la acci├│n dedicada [17.92ms]
-[2m[2026-05-26T00:02:44.118Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+[2m[2026-05-26T00:21:54.099Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-create-canonical-favorite-1779-01
+[2m[2026-05-26T00:21:54.100Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: create-canonical-favorite-1779754914087
+[2m[2026-05-26T00:21:54.103Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-create-canonical-favorite-1779-01
+[2m[2026-05-26T00:21:54.104Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
+(pass) TagService favorites convergence > create deja el tag sin marcar hasta usar la acci├│n dedicada [23.07ms]
+[2m[2026-05-26T00:21:54.124Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "tag",
-  "entityId": "tag-canonical-favorite-17797537641-01"
+  "entityId": "tag-canonical-favorite-17797549141-01"
 }
-[2m[2026-05-26T00:02:44.121Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:54.128Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -498,14 +498,14 @@ src\services\tag\__tests__\tag.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:44.121Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:54.128Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "tag",
-  "entityId": "tag-canonical-favorite-17797537641-01",
-  "id": "3a1484a0-6576-4c92-b43d-c3d963df83ab"
+  "entityId": "tag-canonical-favorite-17797549141-01",
+  "id": "b36cd6d5-605b-4cfd-870e-c0ffba66ad0e"
 }
-[2m[2026-05-26T00:02:44.122Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
+[2m[2026-05-26T00:21:54.131Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
 {
   "options": {
     "onlyFavorites": true,
@@ -513,18 +513,18 @@ src\services\tag\__tests__\tag.favorite.effect.test.ts:
     "offset": 0
   }
 }
-[2m[2026-05-26T00:02:44.127Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 1 tags obtenidos de 1 totales
-(pass) TagService favorites convergence > uses canonical favorites for onlyFavorites and ignores stale embedded flags [20.79ms]
-[2m[2026-05-26T00:02:44.137Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô¡É Toggle favorite para tag: tag-toggle-target-1779753764132-e1-01
-[2m[2026-05-26T00:02:44.137Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-target-1779753764132-e1-01
-[2m[2026-05-26T00:02:44.138Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-target-1779753764132-e11d839980fff
-[2m[2026-05-26T00:02:44.141Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+[2m[2026-05-26T00:21:54.135Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 1 tags obtenidos de 1 totales
+(pass) TagService favorites convergence > uses canonical favorites for onlyFavorites and ignores stale embedded flags [35.13ms]
+[2m[2026-05-26T00:21:54.149Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô¡É Toggle favorite para tag: tag-toggle-target-1779754914144-e3-01
+[2m[2026-05-26T00:21:54.149Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-target-1779754914144-e3-01
+[2m[2026-05-26T00:21:54.150Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-target-1779754914144-e39b2eaabe2b1
+[2m[2026-05-26T00:21:54.152Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "tag",
-  "entityId": "tag-toggle-target-1779753764132-e1-01"
+  "entityId": "tag-toggle-target-1779754914144-e3-01"
 }
-[2m[2026-05-26T00:02:44.143Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:54.157Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -535,26 +535,26 @@ src\services\tag\__tests__\tag.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:44.144Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:54.157Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "tag",
-  "entityId": "tag-toggle-target-1779753764132-e1-01",
-  "id": "0b803c69-7d74-4198-95fa-7557a4a71519"
+  "entityId": "tag-toggle-target-1779754914144-e3-01",
+  "id": "289f3777-cff5-4877-9cdf-2de22c10a5c7"
 }
-[2m[2026-05-26T00:02:44.144Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-target-1779753764132-e1-01
-[2m[2026-05-26T00:02:44.145Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-target-1779753764132-e11d839980fff
-(pass) TagService favorites convergence > toggleFavorite delega al bridge can├│nico [19.74ms]
-[2m[2026-05-26T00:02:44.157Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô¡É Toggle favorite para tag: tag-toggle-roundtrip-target-177975-01
-[2m[2026-05-26T00:02:44.157Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-roundtrip-target-177975-01
-[2m[2026-05-26T00:02:44.158Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-roundtrip-target-1779753764152-f8cc48e772f1e
-[2m[2026-05-26T00:02:44.161Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+[2m[2026-05-26T00:21:54.157Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-target-1779754914144-e3-01
+[2m[2026-05-26T00:21:54.158Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-target-1779754914144-e39b2eaabe2b1
+(pass) TagService favorites convergence > toggleFavorite delega al bridge can├│nico [24.57ms]
+[2m[2026-05-26T00:21:54.174Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô¡É Toggle favorite para tag: tag-toggle-roundtrip-target-177975-01
+[2m[2026-05-26T00:21:54.174Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-roundtrip-target-177975-01
+[2m[2026-05-26T00:21:54.174Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-roundtrip-target-1779754914169-4f6c38e780bd48
+[2m[2026-05-26T00:21:54.177Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "tag",
   "entityId": "tag-toggle-roundtrip-target-177975-01"
 }
-[2m[2026-05-26T00:02:44.163Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:54.182Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -565,19 +565,19 @@ src\services\tag\__tests__\tag.favorite.effect.test.ts:
     "id"
   ]
 }
-[2m[2026-05-26T00:02:44.164Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+[2m[2026-05-26T00:21:54.182Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "tag",
   "entityId": "tag-toggle-roundtrip-target-177975-01",
-  "id": "356ada61-e4fe-4fff-a9cb-f46cae5a3670"
+  "id": "7d5fcdb5-9c82-4c00-9881-1d81d4f9d3c8"
 }
-[2m[2026-05-26T00:02:44.164Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-roundtrip-target-177975-01
-[2m[2026-05-26T00:02:44.165Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-roundtrip-target-1779753764152-f8cc48e772f1e
-[2m[2026-05-26T00:02:44.168Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô¡É Toggle favorite para tag: tag-toggle-roundtrip-target-177975-01
-[2m[2026-05-26T00:02:44.168Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-roundtrip-target-177975-01
-[2m[2026-05-26T00:02:44.169Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-roundtrip-target-1779753764152-f8cc48e772f1e
-[2m[2026-05-26T00:02:44.174Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+[2m[2026-05-26T00:21:54.182Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-roundtrip-target-177975-01
+[2m[2026-05-26T00:21:54.183Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-roundtrip-target-1779754914169-4f6c38e780bd48
+[2m[2026-05-26T00:21:54.185Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô¡É Toggle favorite para tag: tag-toggle-roundtrip-target-177975-01
+[2m[2026-05-26T00:21:54.185Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-roundtrip-target-177975-01
+[2m[2026-05-26T00:21:54.185Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-roundtrip-target-1779754914169-4f6c38e780bd48
+[2m[2026-05-26T00:21:54.192Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
 {
   "type": "favorites:modified",
   "dataKeys": [
@@ -587,56 +587,56 @@ src\services\tag\__tests__\tag.favorite.effect.test.ts:
     "entityId"
   ]
 }
-[2m[2026-05-26T00:02:44.174Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
+[2m[2026-05-26T00:21:54.192Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
 {
   "profileId": "88888888-8888-4888-a888-888888888881",
   "entityType": "tag",
   "entityId": "tag-toggle-roundtrip-target-177975-01"
 }
-[2m[2026-05-26T00:02:44.174Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-roundtrip-target-177975-01
-[2m[2026-05-26T00:02:44.176Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-roundtrip-target-1779753764152-f8cc48e772f1e
-(pass) TagService favorites convergence > toggleFavorite puede desmarcar el favorito can├│nico en roundtrip [28.94ms]
+[2m[2026-05-26T00:21:54.192Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-toggle-roundtrip-target-177975-01
+[2m[2026-05-26T00:21:54.193Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: toggle-roundtrip-target-1779754914169-4f6c38e780bd48
+(pass) TagService favorites convergence > toggleFavorite puede desmarcar el favorito can├│nico en roundtrip [30.33ms]
 
 src\services\tag\__tests__\tag.service.effect.test.ts:
-[2m[2026-05-26T00:02:44.198Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
+[2m[2026-05-26T00:21:54.219Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
 {
   "name": "fantasy"
 }
-[2m[2026-05-26T00:02:44.205Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag creado exitosamente: fantasy
+[2m[2026-05-26T00:21:54.228Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag creado exitosamente: fantasy
 {
   "id": "tag-fantasy-01"
 }
-[2m[2026-05-26T00:02:44.205Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-fantasy-01
-[2m[2026-05-26T00:02:44.207Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: fantasy
-[2m[2026-05-26T00:02:44.209Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-fantasy-01
-[2m[2026-05-26T00:02:44.210Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
-(pass) TagService - CRUD Operations > create > should create a tag successfully [20.40ms]
-[2m[2026-05-26T00:02:44.218Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
+[2m[2026-05-26T00:21:54.228Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-fantasy-01
+[2m[2026-05-26T00:21:54.229Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: fantasy
+[2m[2026-05-26T00:21:54.231Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-fantasy-01
+[2m[2026-05-26T00:21:54.232Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
+(pass) TagService - CRUD Operations > create > should create a tag successfully [37.14ms]
+[2m[2026-05-26T00:21:54.258Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
 {
   "name": "scifi"
 }
-[2m[2026-05-26T00:02:44.221Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag creado exitosamente: scifi
+[2m[2026-05-26T00:21:54.269Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag creado exitosamente: scifi
 {
   "id": "tag-scifi-01"
 }
-[2m[2026-05-26T00:02:44.221Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-scifi-01
-[2m[2026-05-26T00:02:44.222Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: scifi
-[2m[2026-05-26T00:02:44.223Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-scifi-01
-[2m[2026-05-26T00:02:44.223Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
-(pass) TagService - CRUD Operations > create > should create tag with optional fields [11.79ms]
-[2m[2026-05-26T00:02:44.230Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
+[2m[2026-05-26T00:21:54.270Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-scifi-01
+[2m[2026-05-26T00:21:54.271Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: scifi
+[2m[2026-05-26T00:21:54.272Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-scifi-01
+[2m[2026-05-26T00:21:54.273Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
+(pass) TagService - CRUD Operations > create > should create tag with optional fields [38.42ms]
+[2m[2026-05-26T00:21:54.295Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
 {
   "name": "drama"
 }
-[2m[2026-05-26T00:02:44.233Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag creado exitosamente: drama
+[2m[2026-05-26T00:21:54.303Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag creado exitosamente: drama
 {
   "id": "tag-drama-01"
 }
-[2m[2026-05-26T00:02:44.233Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-drama-01
-[2m[2026-05-26T00:02:44.234Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: drama
-[2m[2026-05-26T00:02:44.235Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-drama-01
-[2m[2026-05-26T00:02:44.236Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
-[2m[2026-05-26T00:02:44.237Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
+[2m[2026-05-26T00:21:54.303Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-drama-01
+[2m[2026-05-26T00:21:54.304Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: drama
+[2m[2026-05-26T00:21:54.307Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-drama-01
+[2m[2026-05-26T00:21:54.308Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
+[2m[2026-05-26T00:21:54.310Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôØ Creando nuevo tag
 {
   "name": "drama"
 }
@@ -644,135 +644,135 @@ src\services\tag\__tests__\tag.service.effect.test.ts:
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
 Ôöé ÔÜá´©Å Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
-[2026-05-26T00:02:44.241Z] WARN [TagService.Effect] 
+[2026-05-26T00:21:54.313Z] WARN [TagService.Effect] 
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
 Ôöé Conflicto de nombre: drama Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
 
-(pass) TagService - CRUD Operations > create > should fail with duplicate name [27.50ms]
-[2m[2026-05-26T00:02:44.260Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-f9a4185f-3666-414e-b6cf-920adf011c14
-[2m[2026-05-26T00:02:44.261Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: horror
-(pass) TagService - CRUD Operations > getById > should retrieve a tag by ID [13.21ms]
-[2m[2026-05-26T00:02:44.272Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: non-existent-id
+(pass) TagService - CRUD Operations > create > should fail with duplicate name [42.14ms]
+[2m[2026-05-26T00:21:54.342Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-aa475d7a-1ed7-4951-ac0b-6fd85351dd12
+[2m[2026-05-26T00:21:54.344Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: horror
+(pass) TagService - CRUD Operations > getById > should retrieve a tag by ID [27.14ms]
+[2m[2026-05-26T00:21:54.364Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: non-existent-id
 
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
 Ôöé ÔÜá´©Å Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
-[2026-05-26T00:02:44.274Z] WARN [TagService.Effect] 
+[2026-05-26T00:21:54.366Z] WARN [TagService.Effect] 
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
 Ôöé Tag no encontrado: non-existent-id Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
 
-(pass) TagService - CRUD Operations > getById > should fail when tag does not exist [10.74ms]
-[2m[2026-05-26T00:02:44.286Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
+(pass) TagService - CRUD Operations > getById > should fail when tag does not exist [25.54ms]
+[2m[2026-05-26T00:21:54.411Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
 {
   "options": {}
 }
-[2m[2026-05-26T00:02:44.292Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 3 tags obtenidos de 3 totales
-(pass) TagService - CRUD Operations > getAll > should list all tags [19.06ms]
-[2m[2026-05-26T00:02:44.311Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
+[2m[2026-05-26T00:21:54.420Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 3 tags obtenidos de 3 totales
+(pass) TagService - CRUD Operations > getAll > should list all tags [51.82ms]
+[2m[2026-05-26T00:21:54.472Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
 {
   "options": {
     "limit": 2,
     "offset": 0
   }
 }
-[2m[2026-05-26T00:02:44.316Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 2 tags obtenidos de 5 totales
-[2m[2026-05-26T00:02:44.318Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
+[2m[2026-05-26T00:21:54.479Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 2 tags obtenidos de 5 totales
+[2m[2026-05-26T00:21:54.480Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
 {
   "options": {
     "limit": 2,
     "offset": 4
   }
 }
-[2m[2026-05-26T00:02:44.322Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 1 tags obtenidos de 5 totales
-(pass) TagService - CRUD Operations > getAll > should paginate results [29.33ms]
-[2m[2026-05-26T00:02:44.336Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
+[2m[2026-05-26T00:21:54.485Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 1 tags obtenidos de 5 totales
+(pass) TagService - CRUD Operations > getAll > should paginate results [63.64ms]
+[2m[2026-05-26T00:21:54.521Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
 {
   "options": {
     "search": "med"
   }
 }
-[2m[2026-05-26T00:02:44.341Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 2 tags obtenidos de 2 totales
-(pass) TagService - CRUD Operations > getAll > should search by name [18.82ms]
-[2m[2026-05-26T00:02:44.353Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
+[2m[2026-05-26T00:21:54.525Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 2 tags obtenidos de 2 totales
+(pass) TagService - CRUD Operations > getAll > should search by name [38.93ms]
+[2m[2026-05-26T00:21:54.555Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
 {
   "options": {
     "category": "color"
   }
 }
-[2m[2026-05-26T00:02:44.358Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 2 tags obtenidos de 2 totales
-(pass) TagService - CRUD Operations > getAll > should filter by category [16.04ms]
-[2m[2026-05-26T00:02:44.371Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
+[2m[2026-05-26T00:21:54.560Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 2 tags obtenidos de 2 totales
+(pass) TagService - CRUD Operations > getAll > should filter by category [41.78ms]
+[2m[2026-05-26T00:21:54.600Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
 {
   "options": {
     "orderBy": "name",
     "orderDirection": "asc"
   }
 }
-[2m[2026-05-26T00:02:44.375Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 3 tags obtenidos de 3 totales
-(pass) TagService - CRUD Operations > getAll > should sort by name ascending [16.73ms]
-[2m[2026-05-26T00:02:44.386Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
+[2m[2026-05-26T00:21:54.606Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 3 tags obtenidos de 3 totales
+(pass) TagService - CRUD Operations > getAll > should sort by name ascending [40.87ms]
+[2m[2026-05-26T00:21:54.639Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒÅÀ´©Å Obteniendo tags
 {
   "options": {
     "orderBy": "name",
     "orderDirection": "desc"
   }
 }
-[2m[2026-05-26T00:02:44.389Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 3 tags obtenidos de 3 totales
-(pass) TagService - CRUD Operations > getAll > should sort by name descending [14.87ms]
-[2m[2026-05-26T00:02:44.400Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöä Actualizando tag: tag-5805d14f-e9f9-44d5-b68e-03e1260ef04b
-[2m[2026-05-26T00:02:44.401Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-5805d14f-e9f9-44d5-b68e-03e1260ef04b
-[2m[2026-05-26T00:02:44.402Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: oldtag
-[2m[2026-05-26T00:02:44.408Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag actualizado: newtag
-[2m[2026-05-26T00:02:44.408Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-5805d14f-e9f9-44d5-b68e-03e1260ef04b
-[2m[2026-05-26T00:02:44.409Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: newtag
-[2m[2026-05-26T00:02:44.410Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-5805d14f-e9f9-44d5-b68e-03e1260ef04b
-[2m[2026-05-26T00:02:44.410Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
-(pass) TagService - CRUD Operations > update > should update tag fields [21.31ms]
-[2m[2026-05-26T00:02:44.418Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöä Actualizando tag: non-existent-id
-[2m[2026-05-26T00:02:44.418Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: non-existent-id
+[2m[2026-05-26T00:21:54.644Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à 3 tags obtenidos de 3 totales
+(pass) TagService - CRUD Operations > getAll > should sort by name descending [33.80ms]
+[2m[2026-05-26T00:21:54.664Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöä Actualizando tag: tag-9c015b7e-c732-4618-bf82-19f5ff1f6474
+[2m[2026-05-26T00:21:54.665Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-9c015b7e-c732-4618-bf82-19f5ff1f6474
+[2m[2026-05-26T00:21:54.666Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: oldtag
+[2m[2026-05-26T00:21:54.673Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag actualizado: newtag
+[2m[2026-05-26T00:21:54.673Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-9c015b7e-c732-4618-bf82-19f5ff1f6474
+[2m[2026-05-26T00:21:54.673Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: newtag
+[2m[2026-05-26T00:21:54.674Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-9c015b7e-c732-4618-bf82-19f5ff1f6474
+[2m[2026-05-26T00:21:54.674Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
+(pass) TagService - CRUD Operations > update > should update tag fields [29.20ms]
+[2m[2026-05-26T00:21:54.689Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöä Actualizando tag: non-existent-id
+[2m[2026-05-26T00:21:54.690Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: non-existent-id
 
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
 Ôöé ÔÜá´©Å Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
-[2026-05-26T00:02:44.419Z] WARN [TagService.Effect] 
+[2026-05-26T00:21:54.690Z] WARN [TagService.Effect] 
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
 Ôöé Tag no encontrado: non-existent-id Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
 
-(pass) TagService - CRUD Operations > update > should fail when updating non-existent tag [8.40ms]
-[2m[2026-05-26T00:02:44.428Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒùæ´©Å Eliminando tag: tag-0fbfd9f8-41ba-4829-8035-0d3a7be9a4bc
-[2m[2026-05-26T00:02:44.428Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-0fbfd9f8-41ba-4829-8035-0d3a7be9a4bc
-[2m[2026-05-26T00:02:44.429Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: test-tag-1779753764425
-[2m[2026-05-26T00:02:44.430Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-0fbfd9f8-41ba-4829-8035-0d3a7be9a4bc
-[2m[2026-05-26T00:02:44.431Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
-[2m[2026-05-26T00:02:44.433Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag tag-0fbfd9f8-41ba-4829-8035-0d3a7be9a4bc eliminado exitosamente
-[2m[2026-05-26T00:02:44.434Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-0fbfd9f8-41ba-4829-8035-0d3a7be9a4bc
+(pass) TagService - CRUD Operations > update > should fail when updating non-existent tag [16.64ms]
+[2m[2026-05-26T00:21:54.710Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒùæ´©Å Eliminando tag: tag-7ce69131-cea5-4bf6-b0f1-cee6c3ab4a46
+[2m[2026-05-26T00:21:54.710Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-7ce69131-cea5-4bf6-b0f1-cee6c3ab4a46
+[2m[2026-05-26T00:21:54.711Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag encontrado: test-tag-1779754914705
+[2m[2026-05-26T00:21:54.711Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒôè Obteniendo conteos para tag: tag-7ce69131-cea5-4bf6-b0f1-cee6c3ab4a46
+[2m[2026-05-26T00:21:54.712Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Conteos obtenidos: 0 im├ígenes, 0 videos, 0 grupos
+[2m[2026-05-26T00:21:54.716Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m Ô£à Tag tag-7ce69131-cea5-4bf6-b0f1-cee6c3ab4a46 eliminado exitosamente
+[2m[2026-05-26T00:21:54.717Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: tag-7ce69131-cea5-4bf6-b0f1-cee6c3ab4a46
 
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
 Ôöé ÔÜá´©Å Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
-[2026-05-26T00:02:44.434Z] WARN [TagService.Effect] 
+[2026-05-26T00:21:54.718Z] WARN [TagService.Effect] 
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
-Ôöé Tag no encontrado: tag-0fbfd9f8-41ba-4829-8035-0d3a7be9a4bc Ôöé
+Ôöé Tag no encontrado: tag-7ce69131-cea5-4bf6-b0f1-cee6c3ab4a46 Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
 
-(pass) TagService - CRUD Operations > delete > should delete a tag [13.98ms]
-[2m[2026-05-26T00:02:44.441Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒùæ´©Å Eliminando tag: non-existent-id
-[2m[2026-05-26T00:02:44.441Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: non-existent-id
+(pass) TagService - CRUD Operations > delete > should delete a tag [29.18ms]
+[2m[2026-05-26T00:21:54.735Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒùæ´©Å Eliminando tag: non-existent-id
+[2m[2026-05-26T00:21:54.735Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[TagService.Effect][0m ­ƒöì Buscando tag: non-existent-id
 
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
 Ôöé ÔÜá´©Å Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
-[2026-05-26T00:02:44.442Z] WARN [TagService.Effect] 
+[2026-05-26T00:21:54.735Z] WARN [TagService.Effect] 
 ÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
 Ôöé Tag no encontrado: non-existent-id Ôöé
 ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ
 
-(pass) TagService - CRUD Operations > delete > should fail when deleting non-existent tag [8.58ms]
+(pass) TagService - CRUD Operations > delete > should fail when deleting non-existent tag [16.01ms]
 
  44 pass
  0 fail
  122 expect() calls
-Ran 44 tests across 3 files. [1.83s]
+Ran 44 tests across 3 files. [2.84s]
