@@ -69,7 +69,6 @@ describe('PlaceService - CRUD Operations', () => {
 							color: '#ef4444',
 							description: 'Dark land of Sauron',
 							category: 'kingdom',
-							isFavorite: false,
 						});
 					})
 				)

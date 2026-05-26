@@ -65,7 +65,6 @@ export const createWorldItemSchema = z.object({
 	sortBy: z.string().nullable().optional(),
 	filters: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().optional(),
 	category: z.nativeEnum(WorldItemCategory).nullable().optional(),
 });
 
@@ -89,7 +88,6 @@ export const updateWorldItemSchema = z.object({
 	sortBy: z.string().nullable().optional(),
 	filters: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().optional(),
 	category: z.nativeEnum(WorldItemCategory).nullable().optional(),
 });
 

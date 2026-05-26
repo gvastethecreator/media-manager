@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -20,7 +19,6 @@ const groupFormSchema = z.object({
 	description: z.string().optional(),
 	category: z.string().optional(),
 	filters: z.string().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 type FormData = z.infer<typeof groupFormSchema>;
@@ -46,7 +44,6 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 			description: group?.description ?? '',
 			category: group?.category ?? '',
 			filters: group?.filters ?? '',
-			isFavorite: group?.isFavorite ?? false,
 		},
 	});
 
@@ -62,7 +59,6 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 			description: data.description,
 			category: data.category,
 			filters: data.filters,
-			isFavorite: data.isFavorite,
 		};
 
 		await onSubmit(submitData);
@@ -142,21 +138,6 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 								<Input placeholder="Categoría del grupo" {...field} />
 							</FormControl>
 							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-							<FormControl>
-								<Checkbox checked={field.value} onCheckedChange={field.onChange} />
-							</FormControl>
-							<div className="space-y-1 leading-none">
-								<FormLabel>Marcar como favorito</FormLabel>
-							</div>
 						</FormItem>
 					)}
 				/>

@@ -18,7 +18,6 @@ export interface GroupCreateInput {
 	emoji?: string | null;
 	filters?: string | null;
 	isActive?: boolean;
-	isFavorite?: boolean;
 	name: string;
 }
 
@@ -29,7 +28,6 @@ export interface GroupUpdateInput {
 	emoji?: string | null;
 	filters?: string | null;
 	isActive?: boolean;
-	isFavorite?: boolean;
 	name?: string;
 }
 

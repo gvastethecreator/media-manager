@@ -44,7 +44,6 @@ export interface ConceptCreateInput {
 	emoji?: string | null;
 	examples?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	name: string;
 	notes?: string | null;
@@ -64,7 +63,6 @@ export interface ConceptUpdateInput {
 	emoji?: string | null;
 	examples?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	name?: string;
 	notes?: string | null;

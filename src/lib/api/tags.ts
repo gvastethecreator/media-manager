@@ -21,7 +21,6 @@ export interface TagCreateInput {
 	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	isFavorite?: boolean;
 	name: string;
 	totalImages?: number;
 	totalVideos?: number;
@@ -32,7 +31,6 @@ export interface TagUpdateInput {
 	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	isFavorite?: boolean;
 	name?: string;
 	totalImages?: number;
 	totalVideos?: number;

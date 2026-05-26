@@ -4,7 +4,6 @@ import { type SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -26,7 +25,6 @@ const formSchema = z.object({
 	category: z.string().nullable().optional(),
 	parentId: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean(),
 	children: z.array(z.object({ value: z.string() })),
 });
 
@@ -51,7 +49,6 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 			category: wildcard?.category || null,
 			children: wildcard?.children ? JSON.parse(wildcard.children).map((c: string) => ({ value: c })) : [],
 			featuredImage: wildcard?.featuredImage || null,
-			isFavorite: wildcard?.isFavorite ?? false,
 			parentId: wildcard?.parentId || null,
 		},
 	});
@@ -253,18 +250,6 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 									<FormControl>
 										<ImagePicker onChange={field.onChange} value={field.value} />
 									</FormControl>
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="isFavorite"
-							render={({ field }) => (
-								<FormItem className="flex items-center gap-2">
-									<FormControl>
-										<Checkbox checked={field.value} onCheckedChange={field.onChange} />
-									</FormControl>
-									<FormLabel>Marcar como favorito</FormLabel>
 								</FormItem>
 							)}
 						/>

@@ -24,7 +24,6 @@ const conceptSchema = z.object({
 	color: z.string().min(1, 'El color es requerido'),
 	emoji: z.string().min(1, 'El emoji es requerido'),
 	category: z.string().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 type ConceptForm = z.infer<typeof conceptSchema>;
@@ -62,7 +61,6 @@ export function CreateConceptForm({
 			color: DEFAULT_ENTITY_COLOR,
 			emoji: '💡',
 			category: 'general',
-			isFavorite: false,
 		},
 	});
 
@@ -86,7 +84,6 @@ export function CreateConceptForm({
 				color: (concept as ConceptBase).color || DEFAULT_ENTITY_COLOR,
 				emoji: (concept as ConceptBase).emoji || '💡',
 				category: (concept as ConceptBase).category || 'general',
-				isFavorite: (concept as ConceptBase).isFavorite,
 			});
 		}
 	}, [concept, isEditing, form]);
@@ -184,7 +181,6 @@ export function CreateConceptForm({
 				color: concept?.color || DEFAULT_ENTITY_COLOR,
 				emoji: concept?.emoji || '💡',
 				category: concept?.category || 'general',
-				isFavorite: concept?.isFavorite || false,
 			}}
 			onCancel={_onCancel}
 			onSubmit={_onSubmit}

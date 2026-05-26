@@ -79,7 +79,7 @@ afterEach(async () => {
 });
 
 describe('TagService favorites convergence', () => {
-	it('create ignora isFavorite authored y exige la acción dedicada', async () => {
+	it('create deja el tag sin marcar hasta usar la acción dedicada', async () => {
 		await ensureActiveProfile();
 
 		const created = await expectSuccess(
@@ -87,7 +87,6 @@ describe('TagService favorites convergence', () => {
 				const tagService = yield* TagService;
 				return yield* tagService.create({
 					name: `create-canonical-favorite-${Date.now()}`,
-					isFavorite: true,
 				} as any);
 			})
 		);

@@ -99,8 +99,6 @@ export interface PromptCreateInput {
 	featuredImage?: string | null;
 	groups?: (string | { id: string })[];
 	inspiration?: string | null;
-
-	isFavorite?: boolean;
 	lighting?: string | null;
 	mood?: string | null;
 	name: string;
@@ -132,8 +130,6 @@ export interface PromptUpdateInput {
 	featuredImage?: string | null;
 	groups?: (string | { id: string })[];
 	inspiration?: string | null;
-
-	isFavorite?: boolean;
 	lighting?: string | null;
 	mood?: string | null;
 	name?: string;
@@ -282,8 +278,6 @@ export interface DrizzleCreatePromptData {
 	featuredImage?: string | null;
 	id?: string;
 	inspiration?: string | null;
-
-	isFavorite?: boolean;
 	lighting?: string | null;
 	mood?: string | null;
 	name: string;
@@ -308,8 +302,6 @@ export interface DrizzleUpdatePromptData {
 	emoji?: string | null;
 	featuredImage?: string | null;
 	inspiration?: string | null;
-
-	isFavorite?: boolean;
 	lighting?: string | null;
 	mood?: string | null;
 	name?: string;

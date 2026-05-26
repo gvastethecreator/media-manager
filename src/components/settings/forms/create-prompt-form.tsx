@@ -32,7 +32,6 @@ const promptSchema = z.object({
 	category: z.nativeEnum(PromptCategory).optional(),
 	model: z.nativeEnum(PromptModel).optional(),
 	parameters: z.string().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 type PromptForm = z.infer<typeof promptSchema>;
@@ -72,7 +71,6 @@ export function CreatePromptForm({
 			category: undefined,
 			model: undefined,
 			parameters: '{}',
-			isFavorite: false,
 		},
 	});
 
@@ -97,7 +95,6 @@ export function CreatePromptForm({
 				emoji: prompt.emoji || '💬',
 				category: prompt.category as PromptCategory | undefined,
 				parameters: prompt.parameters || '{}',
-				isFavorite: prompt.isFavorite,
 			});
 		}
 	}, [prompt, isEditing, form]);
@@ -226,7 +223,6 @@ export function CreatePromptForm({
 				category: prompt?.category,
 				model: prompt?.model,
 				parameters: prompt?.parameters || '{}',
-				isFavorite: prompt?.isFavorite || false,
 			}}
 			onCancel={_onCancel}
 			onSubmit={_onSubmit as any}

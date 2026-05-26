@@ -98,6 +98,7 @@ export const createCharacterSchema = characterBaseSchema.omit({
 	id: true,
 	createdAt: true,
 	updatedAt: true,
+	isFavorite: true,
 });
 
 /**

@@ -62,7 +62,6 @@ export interface PlaceCreateInput {
 	geography?: string | null;
 	government?: string | null;
 	history?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	landmarks?: string | null;
 	location?: string | null;
@@ -89,7 +88,6 @@ export interface PlaceUpdateInput {
 	geography?: string | null;
 	government?: string | null;
 	history?: string | null;
-	isFavorite?: boolean;
 	isPublic?: boolean;
 	landmarks?: string | null;
 	location?: string | null;

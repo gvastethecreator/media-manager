@@ -42,8 +42,6 @@ export interface ConceptCreateInput {
 	groupIds?: string[];
 	// Relaciones por ID (para compatibilidad)
 	imageIds?: string[];
-
-	isFavorite?: boolean;
 	name: string;
 	noteIds?: string[];
 	notes?: string | null;

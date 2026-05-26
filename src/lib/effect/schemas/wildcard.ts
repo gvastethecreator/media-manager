@@ -41,7 +41,6 @@ export class WildcardCreate extends Schema.Class<WildcardCreate>('WildcardCreate
 	children: Schema.optional(Schema.Array(Schema.String)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 	featuredImage: Schema.optional(Schema.String),
-	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -58,7 +57,6 @@ export class WildcardUpdate extends Schema.Class<WildcardUpdate>('WildcardUpdate
 	children: Schema.optional(Schema.Array(Schema.String)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 	featuredImage: Schema.optional(Schema.String),
-	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**

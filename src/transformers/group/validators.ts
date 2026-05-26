@@ -20,7 +20,6 @@ export function validateGroupCreate(data: unknown): GroupCreateInput {
 			.string()
 			.regex(/^#[0-9A-Fa-f]{6}$/)
 			.optional(),
-		isFavorite: z.boolean().default(false),
 	});
 
 	return schema.parse(data);
@@ -38,7 +37,6 @@ export function validateGroupUpdate(data: unknown): GroupUpdateInput {
 			.string()
 			.regex(/^#[0-9A-Fa-f]{6}$/)
 			.optional(),
-		isFavorite: z.boolean().optional(),
 	});
 
 	return schema.parse(data);

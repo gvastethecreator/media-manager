@@ -190,7 +190,13 @@ const make = (): CharacterServiceInterface => {
 			const validated = yield* Schema.decodeUnknown(Character)(result[0]).pipe(
 				Effect.mapError((error) => fromUnknownError('decode', error))
 			);
-			return validated as Character;
+
+			const favoriteEntityIds = yield* Effect.tryPromise<string[], CharacterError>({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.CHARACTER),
+				catch: (error) => fromUnknownError('getById.favoriteIds', error),
+			});
+
+			return favoriteService.applyFavoriteProjection(validated, favoriteEntityIds);
 		});
 
 	/**
@@ -242,13 +248,10 @@ const make = (): CharacterServiceInterface => {
 				onlyFavorites,
 			} = options;
 
-			const favoriteEntityIds: string[] | null =
-				onlyFavorites
-					? yield* Effect.tryPromise({
-						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.CHARACTER),
-						catch: (error) => fromUnknownError('getAll.favoriteIds', error),
-					})
-					: null;
+			const favoriteEntityIds = yield* Effect.tryPromise<string[], CharacterError>({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.CHARACTER),
+				catch: (error) => fromUnknownError('getAll.favoriteIds', error),
+			});
 
 			// Construir condiciones WHERE
 			const conditions = [];
@@ -262,18 +265,16 @@ const make = (): CharacterServiceInterface => {
 				conditions.push(parentId === null ? isNull(characters.parentId) : eq(characters.parentId, parentId));
 			}
 			if (onlyFavorites) {
-				if (favoriteEntityIds === null) {
-					conditions.push(eq(characters.isFavorite, true));
-				} else if (favoriteEntityIds.length === 0) {
+				if (favoriteEntityIds.length === 0) {
 					return {
 						characters: [],
 						total: 0,
 						limit,
 						offset,
 					};
-				} else {
-					conditions.push(inArray(characters.id, favoriteEntityIds));
 				}
+
+				conditions.push(inArray(characters.id, favoriteEntityIds));
 			}
 
 			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -296,17 +297,13 @@ const make = (): CharacterServiceInterface => {
 			]);
 
 			const total = totalResult[0]?.count ?? 0;
-			const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
-			const normalizedCharacters =
-				favoriteIdSet === null
-					? charactersData
-					: charactersData.map((character) => ({
-						...character,
-						isFavorite: favoriteIdSet.has(character.id),
-					}));
+			const normalizedCharacters = favoriteService.applyFavoriteProjectionMany(
+				charactersData,
+				favoriteEntityIds
+			) as CharacterWithStats[];
 
 			return {
-				characters: normalizedCharacters as CharacterWithStats[],
+				characters: normalizedCharacters,
 				total,
 				limit,
 				offset,
@@ -318,26 +315,20 @@ const make = (): CharacterServiceInterface => {
 	 */
 	const create = (input: CharacterCreateInput): Effect.Effect<CharacterWithStats, CharacterError> =>
 		Effect.gen(function* () {
+			const restInput = input;
+
 			// Validar duplicado
 			const existing = yield* Effect.tryPromise({
 				try: async () =>
-					await db.select({ id: characters.id }).from(characters).where(eq(characters.name, input.name)).limit(1),
+					await db.select({ id: characters.id }).from(characters).where(eq(characters.name, restInput.name)).limit(1),
 				catch: (error) => fromUnknownError('checkDuplicate', error),
 			});
 
 			if (existing.length > 0) {
-				return yield* Effect.fail(new CharacterNameConflict({ name: input.name }));
+				return yield* Effect.fail(new CharacterNameConflict({ name: restInput.name }));
 			}
 
-			const readableId = generateReadableId('character', input.name, 1);
-			const requestedIsFavorite = input.isFavorite === true;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite
-					? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.CHARACTER)) !== null,
-						catch: (error) => fromUnknownError('create.favoriteScope', error),
-					})
-					: false;
+			const readableId = generateReadableId('character', restInput.name, 1);
 
 			const result = yield* Effect.tryPromise({
 				try: async () =>
@@ -345,15 +336,15 @@ const make = (): CharacterServiceInterface => {
 						.insert(characters)
 						.values({
 							id: readableId,
-							name: input.name,
-							description: input.description ?? null,
-							emoji: input.emoji ?? null,
-							color: input.color ?? null,
-							category: input.category ?? null,
-							featuredImage: input.featuredImage ?? null,
-							filters: input.filters ?? null,
-							metadata: input.metadata ?? null,
-							parentId: (input as any).parentId ?? null,
+							name: restInput.name,
+							description: restInput.description ?? null,
+							emoji: restInput.emoji ?? null,
+							color: restInput.color ?? null,
+							category: restInput.category ?? null,
+							featuredImage: restInput.featuredImage ?? null,
+							filters: restInput.filters ?? null,
+							metadata: restInput.metadata ?? null,
+							parentId: restInput.parentId ?? null,
 							createdAt: new Date(),
 							updatedAt: new Date(),
 						})
@@ -370,23 +361,9 @@ const make = (): CharacterServiceInterface => {
 				);
 			}
 
-			const character = result[0];
+			const created = yield* getById(readableId);
 
-			if (requestedIsFavorite && useCanonicalFavoriteBridge) {
-				yield* Effect.tryPromise({
-					try: async () => {
-						try {
-							await favoriteService.set(FavoriteEntityType.CHARACTER, character.id, true);
-						} catch (error) {
-							await db.delete(characters).where(eq(characters.id, character.id));
-							throw error;
-						}
-					},
-					catch: (error) => fromUnknownError('create.favoriteBridge', error),
-				});
-			}
-
-			const stats = calculateCharacterStatistics(character as any, {
+			const stats = calculateCharacterStatistics(created, {
 				images: 0,
 				videos: 0,
 				notes: 0,
@@ -403,8 +380,7 @@ const make = (): CharacterServiceInterface => {
 			});
 
 			return {
-				...(character as any),
-				isFavorite: requestedIsFavorite ? true : character.isFavorite,
+				...(created as any),
 				stats,
 			};
 		});
@@ -415,37 +391,22 @@ const make = (): CharacterServiceInterface => {
 	const update = (id: string, input: CharacterUpdateInput): Effect.Effect<CharacterWithStats, CharacterError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
+			const restInput = input;
 
-			if (input.name !== undefined) {
+			if (restInput.name !== undefined) {
 				const existing = yield* Effect.tryPromise({
 					try: async () =>
 						await db
 							.select({ id: characters.id })
 							.from(characters)
-							.where(and(eq(characters.name, input.name!), sql`${characters.id} != ${id}`))
+							.where(and(eq(characters.name, restInput.name!), sql`${characters.id} != ${id}`))
 							.limit(1),
 					catch: (error) => fromUnknownError('checkDuplicate', error),
 				});
 
 				if (existing.length > 0) {
-					return yield* Effect.fail(new CharacterNameConflict({ name: input.name! }));
+					return yield* Effect.fail(new CharacterNameConflict({ name: restInput.name! }));
 				}
-			}
-
-			const requestedIsFavorite = input.isFavorite;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite !== undefined
-					? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.CHARACTER)) !== null,
-						catch: (error) => fromUnknownError('update.favoriteScope', error),
-					})
-					: false;
-
-			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.CHARACTER, id, requestedIsFavorite),
-					catch: (error) => fromUnknownError('update.favoriteBridge', error),
-				});
 			}
 
 			const result = yield* Effect.tryPromise({
@@ -453,15 +414,15 @@ const make = (): CharacterServiceInterface => {
 					await db
 						.update(characters)
 						.set({
-							...(input.name !== undefined && { name: input.name }),
-							...(input.description !== undefined && { description: input.description }),
-							...(input.emoji !== undefined && { emoji: input.emoji }),
-							...(input.color !== undefined && { color: input.color }),
-							...(input.category !== undefined && { category: input.category }),
-							...(input.featuredImage !== undefined && { featuredImage: input.featuredImage }),
-							...(input.filters !== undefined && { filters: input.filters }),
-							...(input.metadata !== undefined && { metadata: input.metadata }),
-							...((input as any).parentId !== undefined && { parentId: (input as any).parentId }),
+							...(restInput.name !== undefined && { name: restInput.name }),
+							...(restInput.description !== undefined && { description: restInput.description }),
+							...(restInput.emoji !== undefined && { emoji: restInput.emoji }),
+							...(restInput.color !== undefined && { color: restInput.color }),
+							...(restInput.category !== undefined && { category: restInput.category }),
+							...(restInput.featuredImage !== undefined && { featuredImage: restInput.featuredImage }),
+							...(restInput.filters !== undefined && { filters: restInput.filters }),
+							...(restInput.metadata !== undefined && { metadata: restInput.metadata }),
+							...(restInput.parentId !== undefined && { parentId: restInput.parentId }),
 							updatedAt: new Date(),
 						})
 						.where(eq(characters.id, id))
@@ -474,9 +435,11 @@ const make = (): CharacterServiceInterface => {
 			}
 
 			const counts = yield* getRelationsCounts(id);
+			const updatedCharacter = yield* getById(id);
+
 			return {
-				...(result[0] as any),
-				stats: calculateCharacterStatistics(result[0] as any, counts),
+				...(updatedCharacter as any),
+				stats: calculateCharacterStatistics(updatedCharacter, counts),
 			};
 		});
 
@@ -533,38 +496,20 @@ const make = (): CharacterServiceInterface => {
 	 */
 	const toggleFavorite = (id: string): Effect.Effect<Character, CharacterError> =>
 		Effect.gen(function* () {
-			const character = yield* getById(id);
-			const favoriteEntityIds = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.CHARACTER),
-				catch: (error) => fromUnknownError('toggleFavorite.scope', error),
+			yield* getById(id);
+
+			const currentFavoriteStatus = yield* Effect.tryPromise<boolean, CharacterError>({
+				try: () => favoriteService.isFavorite(FavoriteEntityType.CHARACTER, id),
+				catch: (error) => fromUnknownError('toggleFavorite.isFavorite', error),
 			});
-			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? character.isFavorite;
 			const newFavoriteStatus = !currentFavoriteStatus;
 
-			let result;
-			if (favoriteEntityIds !== null) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.CHARACTER, id, newFavoriteStatus),
-					catch: (error) => fromUnknownError('toggleFavorite.favoriteBridge', error),
-				});
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.CHARACTER, id, newFavoriteStatus),
+				catch: (error) => fromUnknownError('toggleFavorite.set', error),
+			});
 
-				result = yield* Effect.tryPromise({
-					try: async () => await db.select().from(characters).where(eq(characters.id, id)).limit(1),
-					catch: (error) => fromUnknownError('toggleFavorite.refetch', error),
-				});
-			} else {
-				result = yield* Effect.tryPromise({
-					try: async () => await db.select().from(characters).where(eq(characters.id, id)).limit(1),
-					catch: (error) => fromUnknownError('toggleFavorite.refetch', error),
-				});
-			}
-
-			if (result.length === 0) {
-				return yield* Effect.fail(
-					new CharacterDatabaseError({ operation: 'toggleFavorite', message: 'No row returned' })
-				);
-			}
-			return result[0] as any;
+			return yield* getById(id);
 		});
 
 	/**

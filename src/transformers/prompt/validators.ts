@@ -13,8 +13,6 @@ export const PromptCreateSchema = z.object({
 	category: z.string().max(100).optional(),
 	tags: z.array(z.string()).default([]),
 	parameters: z.any().default({}),
-
-	isFavorite: z.boolean().default(false),
 });
 
 export const PromptUpdateSchema = z.object({
@@ -24,8 +22,6 @@ export const PromptUpdateSchema = z.object({
 	category: z.string().max(100).optional(),
 	tags: z.array(z.string()).optional(),
 	parameters: z.any().optional(),
-
-	isFavorite: z.boolean().optional(),
 });
 
 export const PromptSchema = z.object({
