@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CollectionWithStats } from '@/types/entities/collection';
+import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import type { ImageWithStats } from '@/types/entities/image';
 import { createEntityHooks } from './hook-factory';
 import type { EntityListResult } from './hook-factory';
@@ -8,42 +8,12 @@ import { apiClient } from './client';
 export interface CollectionFilters {
 	[key: string]: unknown;
 	limit?: number;
+	onlyFavorites?: boolean;
 	offset?: number;
+	parentId?: string | null;
 	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
-}
-
-export interface CollectionCreateInput {
-	color?: string | null;
-	description?: string | null;
-	emoji?: string | null;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	isPublic?: boolean;
-	lastImageAddedAt?: Date | null;
-	lastVideoAddedAt?: Date | null;
-	name: string;
-	parentId?: string | null;
-	totalImages?: number;
-	totalSize?: number;
-	totalVideos?: number;
-}
-
-export interface CollectionUpdateInput {
-	color?: string | null;
-	description?: string | null;
-	emoji?: string | null;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	isPublic?: boolean;
-	lastImageAddedAt?: Date | null;
-	lastVideoAddedAt?: Date | null;
-	name?: string;
-	parentId?: string | null;
-	totalImages?: number;
-	totalSize?: number;
-	totalVideos?: number;
 }
 
 const hooks = createEntityHooks<CollectionWithStats, CollectionCreateInput, CollectionUpdateInput, CollectionFilters>({

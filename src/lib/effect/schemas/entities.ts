@@ -84,7 +84,6 @@ export class AlbumCreateInput extends Schema.Class<AlbumCreateInput>('AlbumCreat
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 }) {}
 
@@ -99,7 +98,6 @@ export class AlbumUpdateInput extends Schema.Class<AlbumUpdateInput>('AlbumUpdat
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
 }) {}
 
@@ -156,7 +154,6 @@ export class CollectionCreateInput extends Schema.Class<CollectionCreateInput>('
 	color: Schema.optional(Schema.NullOr(Schema.String)),
 	description: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	parentId: Schema.optional(Schema.NullOr(Schema.String)),
 }) {}
 
@@ -169,7 +166,6 @@ export class CollectionUpdateInput extends Schema.Class<CollectionUpdateInput>('
 	color: Schema.optional(Schema.NullOr(Schema.String)),
 	description: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
-	isFavorite: Schema.optional(Schema.Boolean),
 	parentId: Schema.optional(Schema.NullOr(Schema.String)),
 }) {}
 
@@ -313,7 +309,6 @@ export class ImageCreateInput extends Schema.Class<ImageCreateInput>('ImageCreat
 	aiEngine: Schema.optional(Schema.NullOr(Schema.String)),
 	aiModel: Schema.optional(Schema.NullOr(Schema.String)),
 	aiOriginDetected: Schema.optional(Schema.Boolean),
-	isFavorite: Schema.optional(Schema.Boolean),
 	folderId: Schema.String.annotations({
 		description: 'Required folder reference',
 	}),
@@ -336,7 +331,6 @@ export class ImageUpdateInput extends Schema.Class<ImageUpdateInput>('ImageUpdat
 	aiEngine: Schema.optional(Schema.NullOr(Schema.String)),
 	aiModel: Schema.optional(Schema.NullOr(Schema.String)),
 	aiOriginDetected: Schema.optional(Schema.Boolean),
-	isFavorite: Schema.optional(Schema.Boolean),
 	folderId: Schema.optional(Schema.String),
 	noteId: Schema.optional(Schema.NullOr(Schema.String)),
 }) {}

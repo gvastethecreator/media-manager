@@ -19,7 +19,6 @@ export interface CreateAlbumData {
 	description?: string | null;
 	emoji?: string | null;
 	folderId?: string | null;
-	isFavorite?: boolean;
 	metadata?: unknown;
 	name: string;
 	tags?: readonly string[];
@@ -60,7 +59,6 @@ export const CreateAlbumDataSchema = Schema.Struct({
 	emoji: Schema.NullOr(Schema.String),
 	color: Schema.NullOr(Schema.String),
 	coverImage: Schema.NullOr(Schema.String),
-	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.NullOr(Schema.Unknown),
 	folderId: Schema.NullOr(Schema.String),
 	tags: Schema.optional(Schema.Array(Schema.String)),
@@ -77,7 +75,6 @@ export const DrizzleCreateAlbumDataSchema = Schema.Struct({
 	emoji: Schema.NullOr(Schema.String),
 	color: Schema.NullOr(Schema.String),
 	coverImage: Schema.NullOr(Schema.String),
-	isFavorite: Schema.Boolean,
 	totalImages: Schema.Number,
 	totalVideos: Schema.Number,
 	totalSize: Schema.Number,
@@ -117,7 +114,6 @@ function mapCreateAlbumDataToDrizzlePure(data: CreateAlbumData): {
 	emoji: string | null;
 	color: string | null;
 	coverImage: string | null;
-	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;
 	totalSize: number;
@@ -130,7 +126,6 @@ function mapCreateAlbumDataToDrizzlePure(data: CreateAlbumData): {
 		emoji: data.emoji ?? null,
 		color: data.color ?? null,
 		coverImage: data.coverImage ?? null,
-		isFavorite: data.isFavorite ?? false,
 		totalImages: 0,
 		totalVideos: 0,
 		totalSize: 0,

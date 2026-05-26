@@ -3,6 +3,7 @@
  * @module types/entities/collection/types
  */
 
+import type { CollectionEdition } from './base';
 import { CollectionSortOption } from './enums';
 
 export interface CollectionBase {
@@ -51,25 +52,39 @@ export interface CollectionWithStats extends CollectionBase {
 }
 
 export interface CreateCollectionInput {
+	alternativeUrl?: string | null;
+	category?: string | null;
 	color?: string | null;
 	description?: string | null;
+	editions?: CollectionEdition[] | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-
-	isFavorite?: boolean;
 	name: string;
+	network?: string | null;
 	parentId?: string | null;
+	platform?: string | null;
+	price?: number | null;
+	sourceImage?: string | null;
+	tokenId?: string | null;
+	url?: string | null;
 }
 
 export interface UpdateCollectionInput {
+	alternativeUrl?: string | null;
+	category?: string | null;
 	color?: string | null;
 	description?: string | null;
+	editions?: CollectionEdition[] | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-
-	isFavorite?: boolean;
 	name?: string;
+	network?: string | null;
 	parentId?: string | null;
+	platform?: string | null;
+	price?: number | null;
+	sourceImage?: string | null;
+	tokenId?: string | null;
+	url?: string | null;
 }
 
 export interface CollectionFilter {

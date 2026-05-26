@@ -21,10 +21,11 @@ export type { ImageFilters, ImageMetadata, ImageSearchResult } from './types';
 
 // --- Tipos derivados ---
 import type { ImageBase, ImageWithStats } from './base';
+import type { ImageCreateInput as ImageCreateShape, ImageUpdateInput as ImageUpdateShape } from './types';
 export type Image = ImageWithStats;
 export type ImageComplete = ImageWithStats;
-export type ImageCreateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
-export type ImageUpdateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
+export type ImageCreateInput = ImageCreateShape;
+export type ImageUpdateInput = ImageUpdateShape;
 export interface ImageSearchOptions {
 	orderBy?: Record<string, 'asc' | 'desc'>;
 	skip?: number;

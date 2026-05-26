@@ -8,6 +8,8 @@
 import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { createNoteSchema, updateNoteSchema } from '@/lib/utils/note/validators';
+import { createWorldItemSchema, updateWorldItemSchema } from '@/lib/utils/world-item/validators';
 import {
 	GroupService,
 	GroupServiceLive,
@@ -20,6 +22,17 @@ import {
 	WorldItemService,
 	WorldItemServiceLive,
 } from '@/services/secondary/secondary-services.effect';
+import { CreateGroupSchema, UpdateGroupSchema } from '@/types/entities/group/schema';
+import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
+import { CreateWildcardSchema, UpdateWildcardSchema } from '@/types/entities/wildcard/schema';
+
+const parseBody = <T>(label: string, parser: () => T): Effect.Effect<T, Error> =>
+	Effect.try({
+		try: parser,
+		catch: (error) => new Error(`Validation failed (${label}): ${String(error)}`),
+	});
+
+const noteUpdateBodySchema = updateNoteSchema.omit({ id: true });
 
 // Groups
 const groupsEffectRouter = express.Router();
@@ -43,7 +56,8 @@ groupsEffectRouter.get('/:id', effectHandler((req) =>
 groupsEffectRouter.post('/', effectHandler((req, res) =>
 	Effect.gen(function* () {
 		const service = yield* GroupService;
-		const result = yield* service.create(req.body);
+		const input = yield* parseBody('GroupCreate', () => CreateGroupSchema.parse(req.body));
+		const result = yield* service.create(input);
 		res.status(201);
 		return result;
 	}).pipe(Effect.provide(GroupServiceLive))
@@ -51,7 +65,8 @@ groupsEffectRouter.post('/', effectHandler((req, res) =>
 groupsEffectRouter.put('/:id', effectHandler((req) =>
 	Effect.gen(function* () {
 		const service = yield* GroupService;
-		return yield* service.update(req.params.id, req.body);
+		const input = yield* parseBody('GroupUpdate', () => UpdateGroupSchema.parse(req.body));
+		return yield* service.update(req.params.id, input);
 	}).pipe(Effect.provide(GroupServiceLive))
 ));
 groupsEffectRouter.delete('/:id', effectHandler((req, res) =>
@@ -99,7 +114,8 @@ wildcardsEffectRouter.get('/:id', effectHandler((req) =>
 wildcardsEffectRouter.post('/', effectHandler((req, res) =>
 	Effect.gen(function* () {
 		const service = yield* WildcardService;
-		const result = yield* service.create(req.body);
+		const input = yield* parseBody('WildcardCreate', () => CreateWildcardSchema.parse(req.body));
+		const result = yield* service.create(input);
 		res.status(201);
 		return result;
 	}).pipe(Effect.provide(WildcardServiceLive))
@@ -107,7 +123,8 @@ wildcardsEffectRouter.post('/', effectHandler((req, res) =>
 wildcardsEffectRouter.put('/:id', effectHandler((req) =>
 	Effect.gen(function* () {
 		const service = yield* WildcardService;
-		return yield* service.update(req.params.id, req.body);
+		const input = yield* parseBody('WildcardUpdate', () => UpdateWildcardSchema.parse(req.body));
+		return yield* service.update(req.params.id, input);
 	}).pipe(Effect.provide(WildcardServiceLive))
 ));
 wildcardsEffectRouter.delete('/:id', effectHandler((req, res) =>
@@ -155,7 +172,8 @@ notesEffectRouter.get('/:id', effectHandler((req) =>
 notesEffectRouter.post('/', effectHandler((req, res) =>
 	Effect.gen(function* () {
 		const service = yield* NoteService;
-		const result = yield* service.create(req.body);
+		const input = yield* parseBody('NoteCreate', () => createNoteSchema.parse(req.body));
+		const result = yield* service.create(input);
 		res.status(201);
 		return result;
 	}).pipe(Effect.provide(NoteServiceLive))
@@ -163,7 +181,8 @@ notesEffectRouter.post('/', effectHandler((req, res) =>
 notesEffectRouter.put('/:id', effectHandler((req) =>
 	Effect.gen(function* () {
 		const service = yield* NoteService;
-		return yield* service.update(req.params.id, req.body);
+		const input = yield* parseBody('NoteUpdate', () => noteUpdateBodySchema.parse(req.body));
+		return yield* service.update(req.params.id, input);
 	}).pipe(Effect.provide(NoteServiceLive))
 ));
 notesEffectRouter.delete('/:id', effectHandler((req, res) =>
@@ -241,7 +260,8 @@ propertiesEffectRouter.get('/:id', effectHandler((req) =>
 propertiesEffectRouter.post('/', effectHandler((req, res) =>
 	Effect.gen(function* () {
 		const service = yield* PropertyService;
-		const result = yield* service.create(req.body);
+		const input = yield* parseBody('PropertyCreate', () => CreatePropertySchema.parse(req.body));
+		const result = yield* service.create(input);
 		res.status(201);
 		return result;
 	}).pipe(Effect.provide(PropertyServiceLive))
@@ -249,7 +269,8 @@ propertiesEffectRouter.post('/', effectHandler((req, res) =>
 propertiesEffectRouter.put('/:id', effectHandler((req) =>
 	Effect.gen(function* () {
 		const service = yield* PropertyService;
-		return yield* service.update(req.params.id, req.body);
+		const input = yield* parseBody('PropertyUpdate', () => UpdatePropertySchema.parse(req.body));
+		return yield* service.update(req.params.id, input);
 	}).pipe(Effect.provide(PropertyServiceLive))
 ));
 propertiesEffectRouter.delete('/:id', effectHandler((req, res) =>
@@ -297,7 +318,8 @@ worldItemsEffectRouter.get('/:id', effectHandler((req) =>
 worldItemsEffectRouter.post('/', effectHandler((req, res) =>
 	Effect.gen(function* () {
 		const service = yield* WorldItemService;
-		const result = yield* service.create(req.body);
+		const input = yield* parseBody('WorldItemCreate', () => createWorldItemSchema.parse(req.body));
+		const result = yield* service.create(input);
 		res.status(201);
 		return result;
 	}).pipe(Effect.provide(WorldItemServiceLive))
@@ -305,7 +327,8 @@ worldItemsEffectRouter.post('/', effectHandler((req, res) =>
 worldItemsEffectRouter.put('/:id', effectHandler((req) =>
 	Effect.gen(function* () {
 		const service = yield* WorldItemService;
-		return yield* service.update(req.params.id, req.body);
+		const input = yield* parseBody('WorldItemUpdate', () => updateWorldItemSchema.parse(req.body));
+		return yield* service.update(req.params.id, input);
 	}).pipe(Effect.provide(WorldItemServiceLive))
 ));
 worldItemsEffectRouter.delete('/:id', effectHandler((req, res) =>

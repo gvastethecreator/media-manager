@@ -23,7 +23,6 @@ export const CreateImageSchema = z.object({
 	thumbnailError: z.string().nullable().optional(),
 	thumbnailErrorAt: z.date().nullable().optional(),
 	thumbnailOptimizedAt: z.date().nullable().optional(),
-	isFavorite: z.boolean().default(false).optional(),
 	folderId: z.string().uuid('El ID de carpeta debe ser un UUID válido'),
 	noteId: z.string().uuid().nullable().optional(),
 	addedAt: z.date().optional(),
