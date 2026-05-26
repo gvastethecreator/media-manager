@@ -1,0 +1,1587 @@
+$ bun scripts/run-with-log.js test vp test --run src/services/folder/__tests__/folder.favorite.effect.test.ts src/services/folder/__tests__/folder.service.effect.test.ts
+ÔØî Error al limpiar logs antiguos: 288 | 				// Calcular diferencia en d├¡as
+289 | 				const diffDays = (now - stats.mtimeMs) / (1000 * 60 * 60 * 24);
+290 | 
+291 | 				if (diffDays > days) {
+292 | 					// Eliminar archivo si es m├ís antiguo que el l├¡mite
+293 | 					await rm(filePath);
+                 ^
+EFAULT: bad address in system call argument, rm 'D:\DEV\media-manager\logs\reindex'
+    path: "D:\\DEV\\media-manager\\logs\\reindex",
+ syscall: "rm",
+   errno: -14,
+    code: "EFAULT"
+
+      at async <anonymous> (D:\DEV\media-manager\scripts\logging-utils.js:293:12)
+      at async cleanOldLogs (D:\DEV\media-manager\scripts\logging-utils.js:283:17)
+
+­ƒÜÇ Ejecutando: vp test --run src/services/folder/__tests__/folder.favorite.effect.test.ts src/services/folder/__tests__/folder.service.effect.test.ts
+­ƒôä Logs en: D:\DEV\media-manager\logs\test_2026-05-26T01-20-34-594Z.log
+­ƒöì Comando de testing detectado - tolerando c├│digos de salida no-cero
+­ƒô║ Salida en tiempo real:
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+­ƒöì [33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+­ƒôï [1m[7m[34m RUN [39m[27m[22m [90mD:/DEV/media-manager[39m
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create a root folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.559Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Test Folder",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create a root folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.587Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-6KKp7LrH",
+­ƒôï   "name": "Test Folder"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create a subfolder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.607Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create a subfolder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.616Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-oLrPr5jJ",
+­ƒôï   "name": "Parent"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create a subfolder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.619Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child",
+­ƒôï   "parentId": "fld-oLrPr5jJ"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould create a subfolder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.627Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-5Zy3ny-B",
+­ƒôï   "name": "Child"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail when creating folder with duplicate path
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.638Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "First",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail when creating folder with duplicate path
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.646Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-bS2LFVrg",
+­ƒôï   "name": "First"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail when creating folder with duplicate path
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.651Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Second",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail when creating folder with duplicate name in same parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.664Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail when creating folder with duplicate name in same parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.672Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-wQkckFyK",
+­ƒôï   "name": "Parent"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail when creating folder with duplicate name in same parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.678Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "DuplicateName",
+­ƒôï   "parentId": "fld-wQkckFyK"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail when creating folder with duplicate name in same parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.685Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-bBRbsa-S",
+­ƒôï   "name": "DuplicateName"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail when creating folder with duplicate name in same parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.690Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "DuplicateName",
+­ƒôï   "parentId": "fld-wQkckFyK"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mcreate[2m > [22m[2mshould fail when creating folder with non-existent parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.700Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Orphan",
+­ƒôï   "parentId": "non-existent-id"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould get a folder by id successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.713Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Test Folder",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould get a folder by id successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.720Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-22xigfs7",
+­ƒôï   "name": "Test Folder"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould get a folder by id successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.724Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöì Obteniendo carpeta por ID: fld-22xigfs7
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould get a folder by id successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.728Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta encontrada:
+­ƒôï {
+­ƒôï   "id": "fld-22xigfs7",
+­ƒôï   "name": "Test Folder"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould fail when folder does not exist
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.738Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöì Obteniendo carpeta por ID: non-existent-id
+­ƒöì [90mstderr[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetById[2m > [22m[2mshould fail when folder does not exist
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T01:20:41.740Z][0m [33m[1mWARN[0m [1m[FolderService.Effect][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Carpeta no encontrada: non-existent-id[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould get all folders with pagination
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.750Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Folder 1",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould get all folders with pagination
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.759Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-d2mzDYX2",
+­ƒôï   "name": "Folder 1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould get all folders with pagination
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.764Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Folder 2",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould get all folders with pagination
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.771Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-HrdT63_W",
+­ƒôï   "name": "Folder 2"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould get all folders with pagination
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.776Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Folder 3",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould get all folders with pagination
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.783Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-bqQNXTC2",
+­ƒôï   "name": "Folder 3"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould get all folders with pagination
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.787Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒôï Obteniendo carpetas:
+­ƒôï {
+­ƒôï   "onlyFavorites": false,
+­ƒôï   "limit": 10,
+­ƒôï   "offset": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould get all folders with pagination
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.792Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpetas obtenidas: 3/3
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by search term
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.810Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Photos",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by search term
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.817Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-MkXs7OBO",
+­ƒôï   "name": "Photos"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by search term
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.822Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Videos",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by search term
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.830Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-7gDNUxLe",
+­ƒôï   "name": "Videos"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by search term
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.834Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Documents",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by search term
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.841Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-_Vehzjwf",
+­ƒôï   "name": "Documents"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by search term
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.844Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒôï Obteniendo carpetas:
+­ƒôï {
+­ƒôï   "search": "Photos",
+­ƒôï   "onlyFavorites": false,
+­ƒôï   "limit": 50,
+­ƒôï   "offset": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by search term
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.848Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpetas obtenidas: 1/1
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.860Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.868Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-W-MnnE1G",
+­ƒôï   "name": "Parent"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.872Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child 1",
+­ƒôï   "parentId": "fld-W-MnnE1G"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.882Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-h6xwv6fr",
+­ƒôï   "name": "Child 1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.886Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child 2",
+­ƒôï   "parentId": "fld-W-MnnE1G"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.897Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-p5hyEYrB",
+­ƒôï   "name": "Child 2"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.902Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Root",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.909Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-DjU4Wyam",
+­ƒôï   "name": "Root"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.914Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒôï Obteniendo carpetas:
+­ƒôï {
+­ƒôï   "onlyFavorites": false,
+­ƒôï   "parentId": "fld-W-MnnE1G",
+­ƒôï   "limit": 50,
+­ƒôï   "offset": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter folders by parentId
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.919Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpetas obtenidas: 2/2
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.934Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Favorite",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.944Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-rZjL4Ewu",
+­ƒôï   "name": "Favorite"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.950Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Stale",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.956Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-woOc7fhn",
+­ƒôï   "name": "Stale"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.962Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Normal",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.968Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-O1O9iWcZ",
+­ƒôï   "name": "Normal"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.976Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-rZjL4Ewu"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.981Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.982Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-rZjL4Ewu",
+­ƒôï   "id": "91b01e27-6a34-4b71-b2a2-b5d5daafff49"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.983Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒôï Obteniendo carpetas:
+­ƒôï {
+­ƒôï   "onlyFavorites": true,
+­ƒôï   "limit": 50,
+­ƒôï   "offset": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mgetAll[2m > [22m[2mshould filter favorites only
+­ƒôï [22m[39m[2m[2026-05-26T01:20:41.989Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpetas obtenidas: 1/1
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.005Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Original",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.012Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-C7PgJpU1",
+­ƒôï   "name": "Original"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.017Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöº Actualizando carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-C7PgJpU1",
+­ƒôï   "updates": {
+­ƒôï     "name": "Updated"
+­ƒôï   }
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould update folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.024Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta actualizada:
+­ƒôï {
+­ƒôï   "id": "fld-C7PgJpU1",
+­ƒôï   "name": "Updated"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould fail when updating to duplicate path
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.035Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "First",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould fail when updating to duplicate path
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.042Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-jqg1a8VV",
+­ƒôï   "name": "First"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould fail when updating to duplicate path
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.046Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Second",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould fail when updating to duplicate path
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.053Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-tVkRq1r_",
+­ƒôï   "name": "Second"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould fail when updating to duplicate path
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.058Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöº Actualizando carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-tVkRq1r_",
+­ƒôï   "updates": {
+­ƒôï     "path": "/first"
+­ƒôï   }
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mupdate[2m > [22m[2mshould fail when updating non-existent folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.068Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöº Actualizando carpeta:
+­ƒôï {
+­ƒôï   "id": "non-existent",
+­ƒôï   "updates": {
+­ƒôï     "name": "New Name"
+­ƒôï   }
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete empty folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.080Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "ToDelete",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete empty folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.089Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-V5b3USLB",
+­ƒôï   "name": "ToDelete"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete empty folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.093Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminando carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-V5b3USLB",
+­ƒôï   "force": false
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete empty folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.097Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta eliminada:
+­ƒôï {
+­ƒôï   "id": "fld-V5b3USLB"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete empty folder successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.098Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöì Obteniendo carpeta por ID: fld-V5b3USLB
+Ô£à [90mstderr[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete empty folder successfully
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T01:20:42.100Z][0m [33m[1mWARN[0m [1m[FolderService.Effect][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Carpeta no encontrada: fld-V5b3USLB[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould fail when deleting folder with children without force
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.107Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould fail when deleting folder with children without force
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.115Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-R5XJpeNK",
+­ƒôï   "name": "Parent"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould fail when deleting folder with children without force
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.118Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child",
+­ƒôï   "parentId": "fld-R5XJpeNK"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould fail when deleting folder with children without force
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.124Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-kN-8b3Bx",
+­ƒôï   "name": "Child"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould fail when deleting folder with children without force
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.128Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminando carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-R5XJpeNK",
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete folder with children when force is true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.141Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete folder with children when force is true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.150Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-r6exfrmV",
+­ƒôï   "name": "Parent"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete folder with children when force is true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.154Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child",
+­ƒôï   "parentId": "fld-r6exfrmV"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete folder with children when force is true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.185Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-LxUTV-vq",
+­ƒôï   "name": "Child"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete folder with children when force is true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.189Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminando carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-r6exfrmV",
+­ƒôï   "force": true
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete folder with children when force is true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.193Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta eliminada:
+­ƒôï {
+­ƒôï   "id": "fld-r6exfrmV"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete folder with children when force is true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.195Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöì Obteniendo carpeta por ID: fld-r6exfrmV
+­ƒöì [90mstderr[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould delete folder with children when force is true
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T01:20:42.196Z][0m [33m[1mWARN[0m [1m[FolderService.Effect][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Carpeta no encontrada: fld-r6exfrmV[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mdelete[2m > [22m[2mshould fail when deleting non-existent folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.203Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminando carpeta:
+­ƒôï {
+­ƒôï   "id": "non-existent",
+­ƒôï   "force": false
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould delete multiple folders successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.211Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Folder 1",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould delete multiple folders successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.217Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-VkPhdb0S",
+­ƒôï   "name": "Folder 1"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould delete multiple folders successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.221Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Folder 2",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould delete multiple folders successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.225Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-0kexQSt6",
+­ƒôï   "name": "Folder 2"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould delete multiple folders successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.230Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminaci├│n masiva:
+­ƒôï {
+­ƒôï   "count": 2,
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [2m[2026-05-26T01:20:42.230Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminando carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-VkPhdb0S",
+­ƒôï   "force": false
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould delete multiple folders successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.235Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta eliminada:
+­ƒôï {
+­ƒôï   "id": "fld-VkPhdb0S"
+­ƒôï }
+­ƒôï [2m[2026-05-26T01:20:42.236Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminando carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-0kexQSt6",
+­ƒôï   "force": false
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould delete multiple folders successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.239Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta eliminada:
+­ƒôï {
+­ƒôï   "id": "fld-0kexQSt6"
+­ƒôï }
+­ƒôï [2m[2026-05-26T01:20:42.239Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Eliminaci├│n masiva completada:
+­ƒôï {
+Ô£à   "successful": 2,
+­ƒöì   "failed": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould handle partial failures in bulk delete
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.248Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Folder 1",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould handle partial failures in bulk delete
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.254Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-4qBJ6vFO",
+­ƒôï   "name": "Folder 1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould handle partial failures in bulk delete
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.258Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminaci├│n masiva:
+­ƒôï {
+­ƒôï   "count": 2,
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [2m[2026-05-26T01:20:42.258Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminando carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-4qBJ6vFO",
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould handle partial failures in bulk delete
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.263Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta eliminada:
+­ƒôï {
+­ƒôï   "id": "fld-4qBJ6vFO"
+­ƒôï }
+­ƒôï [2m[2026-05-26T01:20:42.263Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒùæ´©Å Eliminando carpeta:
+­ƒôï {
+­ƒôï   "id": "non-existent",
+­ƒôï   "force": false
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mCRUD Operations[2m > [22m[2mbulkDelete[2m > [22m[2mshould handle partial failures in bulk delete
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.264Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Eliminaci├│n masiva completada:
+­ƒôï {
+Ô£à   "successful": 1,
+­ƒöì   "failed": 1
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetTree[2m > [22m[2mshould include non-image file counts for sidebar tree badges
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.271Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Docs Child",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetTree[2m > [22m[2mshould include non-image file counts for sidebar tree badges
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.278Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-c5UJKPyR",
+­ƒôï   "name": "Docs Child"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetTree[2m > [22m[2mshould include non-image file counts for sidebar tree badges
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.284Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒî│ Obteniendo ├írbol completo de carpetas
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetTree[2m > [22m[2mshould count files by nested path even when folderId points to an ancestor folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.295Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent Path Count",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetTree[2m > [22m[2mshould count files by nested path even when folderId points to an ancestor folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.300Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-oZjoTkZF",
+­ƒôï   "name": "Parent Path Count"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetTree[2m > [22m[2mshould count files by nested path even when folderId points to an ancestor folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.305Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child Path Count",
+­ƒôï   "parentId": "fld-oZjoTkZF"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetTree[2m > [22m[2mshould count files by nested path even when folderId points to an ancestor folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.314Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-ZXrQRw6j",
+­ƒôï   "name": "Child Path Count"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetTree[2m > [22m[2mshould count files by nested path even when folderId points to an ancestor folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.320Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒî│ Obteniendo ├írbol completo de carpetas
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get root folders when parentId is null
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.337Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Root 1",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get root folders when parentId is null
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.343Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-bVr6XT8J",
+­ƒôï   "name": "Root 1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get root folders when parentId is null
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.346Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Root 2",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get root folders when parentId is null
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.352Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-e8WuhI9g",
+­ƒôï   "name": "Root 2"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get root folders when parentId is null
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.357Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒæÂ Obteniendo hijos de:
+­ƒôï {
+­ƒôï   "parentId": "ROOT"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get root folders when parentId is null
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.359Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Hijos obtenidos: 2
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get children of a specific folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.371Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get children of a specific folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.379Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-Pl5x0mGr",
+­ƒôï   "name": "Parent"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get children of a specific folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.384Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child 1",
+­ƒôï   "parentId": "fld-Pl5x0mGr"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get children of a specific folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.392Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-VoLAgDsN",
+­ƒôï   "name": "Child 1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get children of a specific folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.395Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child 2",
+­ƒôï   "parentId": "fld-Pl5x0mGr"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get children of a specific folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.400Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-EUo-gi0m",
+­ƒôï   "name": "Child 2"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get children of a specific folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.403Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒæÂ Obteniendo hijos de:
+­ƒôï {
+­ƒôï   "parentId": "fld-Pl5x0mGr"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetChildren[2m > [22m[2mshould get children of a specific folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.405Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Hijos obtenidos: 2
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.416Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Root",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.423Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-TCu1C97i",
+­ƒôï   "name": "Root"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.426Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Level1",
+­ƒôï   "parentId": "fld-TCu1C97i"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.435Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-QsQpXOmK",
+­ƒôï   "name": "Level1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.438Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Level2",
+­ƒôï   "parentId": "fld-QsQpXOmK"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.445Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-CCAZtaMM",
+­ƒôï   "name": "Level2"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.449Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Level3",
+­ƒôï   "parentId": "fld-CCAZtaMM"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.456Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-EMKlL1hY",
+­ƒôï   "name": "Level3"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.460Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒî│ Obteniendo ancestros de: fld-EMKlL1hY
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould get ancestors of a nested folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.473Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Ancestros obtenidos: 3
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould return empty ancestors for root folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.482Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Root",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould return empty ancestors for root folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.491Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-CtcVDV-i",
+­ƒôï   "name": "Root"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould return empty ancestors for root folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.494Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒî│ Obteniendo ancestros de: fld-CtcVDV-i
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould return empty ancestors for root folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.496Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Ancestros obtenidos: 0
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetAncestors[2m > [22m[2mshould fail for non-existent folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.503Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒî│ Obteniendo ancestros de: non-existent
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to new parent successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.512Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent1",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to new parent successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.516Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-CvMo3N_1",
+­ƒôï   "name": "Parent1"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to new parent successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.518Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent2",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to new parent successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.524Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-dlCTV8iZ",
+­ƒôï   "name": "Parent2"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to new parent successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.527Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child",
+­ƒôï   "parentId": "fld-CvMo3N_1"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to new parent successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.531Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-g39lH-rS",
+­ƒôï   "name": "Child"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to new parent successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.535Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒÜÜ Moviendo carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-g39lH-rS",
+­ƒôï   "newParentId": "fld-dlCTV8iZ"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to new parent successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.541Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta movida:
+­ƒôï {
+­ƒôï   "id": "fld-g39lH-rS",
+­ƒôï   "newParentId": "fld-dlCTV8iZ"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to root
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.548Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to root
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.552Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-qdOjwEm1",
+­ƒôï   "name": "Parent"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to root
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.556Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child",
+­ƒôï   "parentId": "fld-qdOjwEm1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to root
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.561Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-6ry7X4eW",
+­ƒôï   "name": "Child"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to root
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.563Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒÜÜ Moviendo carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-6ry7X4eW",
+­ƒôï   "newParentId": "ROOT"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould move folder to root
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.568Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta movida:
+­ƒôï {
+­ƒôï   "id": "fld-6ry7X4eW",
+­ƒôï   "newParentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when creating circular reference
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.578Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when creating circular reference
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.584Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-1KNyWALH",
+­ƒôï   "name": "Parent"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when creating circular reference
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.587Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child",
+­ƒôï   "parentId": "fld-1KNyWALH"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when creating circular reference
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.593Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-0Ql7Ir5e",
+­ƒôï   "name": "Child"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when creating circular reference
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.595Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒÜÜ Moviendo carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-1KNyWALH",
+­ƒôï   "newParentId": "fld-0Ql7Ir5e"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when moving to itself
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.604Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Folder",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when moving to itself
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.609Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-o07CxDk8",
+­ƒôï   "name": "Folder"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when moving to itself
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.612Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒÜÜ Moviendo carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-o07CxDk8",
+­ƒôï   "newParentId": "fld-o07CxDk8"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.619Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L0",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.622Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-qtj4eCQc",
+­ƒôï   "name": "L0"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.624Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L1",
+­ƒôï   "parentId": "fld-qtj4eCQc"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.630Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-rDlfdThK",
+­ƒôï   "name": "L1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.632Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L2",
+­ƒôï   "parentId": "fld-rDlfdThK"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.638Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-XfYP-DZM",
+­ƒôï   "name": "L2"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.643Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L3",
+­ƒôï   "parentId": "fld-XfYP-DZM"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.649Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-fgfb0jwe",
+­ƒôï   "name": "L3"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.651Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L4",
+­ƒôï   "parentId": "fld-fgfb0jwe"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.657Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-xorgDLE-",
+­ƒôï   "name": "L4"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.659Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L5",
+­ƒôï   "parentId": "fld-xorgDLE-"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.667Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-JRVF9qDb",
+­ƒôï   "name": "L5"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.671Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L6",
+­ƒôï   "parentId": "fld-JRVF9qDb"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.679Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-B20m7FXI",
+­ƒôï   "name": "L6"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.682Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L7",
+­ƒôï   "parentId": "fld-B20m7FXI"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.691Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-3LiAuwg_",
+­ƒôï   "name": "L7"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.695Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L8",
+­ƒôï   "parentId": "fld-3LiAuwg_"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.703Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-v9HjRyUg",
+­ƒôï   "name": "L8"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.706Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L9",
+­ƒôï   "parentId": "fld-v9HjRyUg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.715Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-bdw1Vf9i",
+­ƒôï   "name": "L9"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.718Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L10",
+­ƒôï   "parentId": "fld-bdw1Vf9i"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.727Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-lFSKj40J",
+­ƒôï   "name": "L10"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when exceeding max depth
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.732Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "L11",
+­ƒôï   "parentId": "fld-lFSKj40J"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when name conflicts in new parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.747Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent1",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when name conflicts in new parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.755Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-BvR-Fgdp",
+­ƒôï   "name": "Parent1"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when name conflicts in new parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.759Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Parent2",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when name conflicts in new parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.764Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-y1lAspxk",
+­ƒôï   "name": "Parent2"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when name conflicts in new parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.767Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child",
+­ƒôï   "parentId": "fld-BvR-Fgdp"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when name conflicts in new parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.774Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-rrKIc8Hz",
+­ƒôï   "name": "Child"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when name conflicts in new parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.778Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Child",
+­ƒôï   "parentId": "fld-y1lAspxk"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when name conflicts in new parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.784Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-gAWLJd-r",
+­ƒôï   "name": "Child"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mmoveTo[2m > [22m[2mshould fail when name conflicts in new parent
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.788Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒÜÜ Moviendo carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-rrKIc8Hz",
+­ƒôï   "newParentId": "fld-y1lAspxk"
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetByPath[2m > [22m[2mshould get folder by path successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.799Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Test",
+­ƒôï   "parentId": null
+­ƒôï }
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetByPath[2m > [22m[2mshould get folder by path successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.805Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-oDHr-z4-",
+­ƒôï   "name": "Test"
+­ƒôï }
+­ƒöì [90mstderr[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetByPath[2m > [22m[2mshould fail when path does not exist
+­ƒöì [22m[39m
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ
+­ƒöì Ôöé ÔÜá´©Å Ôöé
+­ƒöì ÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+­ƒöì [2m[2026-05-26T01:20:42.823Z][0m [33m[1mWARN[0m [1m[FolderService.Effect][0m 
+­ƒöì [33mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÉ[0m
+­ƒöì [33mÔöé [0mÔØî Carpeta no encontrada por path: /non-existent-path[33m Ôöé[0m
+­ƒöì [33mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÿ[0m
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetByPath[2m > [22m[2mshould get folder by path successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.810Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöì Obteniendo carpeta por path: /unique-path
+Ô£à [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetByPath[2m > [22m[2mshould get folder by path successfully
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.813Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta encontrada por path:
+­ƒôï {
+­ƒôï   "id": "fld-oDHr-z4-",
+­ƒôï   "path": "/unique-path"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mHierarchical Operations[2m > [22m[2mgetByPath[2m > [22m[2mshould fail when path does not exist
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.822Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöì Obteniendo carpeta por path: /non-existent-path
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.833Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Test",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.839Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-UGghO4lW",
+­ƒôï   "name": "Test"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.843Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô¡É Alternando favorito: fld-UGghO4lW
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.851Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-UGghO4lW"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.855Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.855Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-UGghO4lW",
+­ƒôï   "id": "e3ec67b0-f1e0-4bb6-a057-c6e30e734de7"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from false to true
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.858Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Favorito alternado:
+­ƒôï {
+­ƒôï   "id": "fld-UGghO4lW",
+­ƒôï   "isFavorite": true
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.871Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "Test",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.877Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-ozZgf_O-",
+­ƒôï   "name": "Test"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.880Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-ozZgf_O-"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.883Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.883Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-ozZgf_O-",
+­ƒôï   "id": "1f679ed6-5e65-4f14-b86c-2df4a9b65d1b"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.885Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô¡É Alternando favorito: fld-ozZgf_O-
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.890Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.890Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-ozZgf_O-"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould toggle favorite from true to false
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.892Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Favorito alternado:
+­ƒôï {
+­ƒôï   "id": "fld-ozZgf_O-",
+­ƒôï   "isFavorite": false
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.service.effect.test.ts[2m > [22m[2mFolderService Effect[2m > [22m[2mStats & Favorites[2m > [22m[2mtoggleFavorite[2m > [22m[2mshould fail for non-existent folder
+­ƒôï [22m[39m[2m[2026-05-26T01:20:42.901Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô¡É Alternando favorito: non-existent
+Ô£à  [32mÔ£ô[39m src/services/folder/__tests__/folder.service.effect.test.ts [2m([22m[2m38 tests[22m[2m)[22m[33m 1365[2mms[22m[39m
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mcreate ignores legacy authored isFavorite even when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.103Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "create-canonical-favorite-1779758448102-7b254d8486653",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mcreate ignores legacy authored isFavorite even when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.127Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-TbXcawzz",
+­ƒôï   "name": "create-canonical-favorite-1779758448102-7b254d8486653"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mgetById uses canonical favorites and ignores stale embedded projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.146Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "stale-by-id-1779758448146-ae67f80ed93778",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mgetById uses canonical favorites and ignores stale embedded projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.154Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-NuYfteuc",
+­ƒôï   "name": "stale-by-id-1779758448146-ae67f80ed93778"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mgetById uses canonical favorites and ignores stale embedded projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.164Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöì Obteniendo carpeta por ID: fld-NuYfteuc
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mgetById uses canonical favorites and ignores stale embedded projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.168Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta encontrada:
+­ƒôï {
+­ƒôï   "id": "fld-NuYfteuc",
+­ƒôï   "name": "stale-by-id-1779758448146-ae67f80ed93778"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.179Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "canonical-favorite-1779758448179-09b1fbcf4b4178",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.188Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-JUenOZ1B",
+­ƒôï   "name": "canonical-favorite-1779758448179-09b1fbcf4b4178"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.193Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "stale-projection-1779758448193-1c2031f8500c88",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.200Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-WNvpbOp_",
+­ƒôï   "name": "stale-projection-1779758448193-1c2031f8500c88"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.205Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "regular-folder-1779758448205-cdbab3ada6edb",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.214Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-kskxtKMk",
+­ƒôï   "name": "regular-folder-1779758448205-cdbab3ada6edb"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.221Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-JUenOZ1B"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.226Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.226Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-JUenOZ1B",
+­ƒôï   "id": "f49040a2-d119-4524-ab6f-b5f0b9c64033"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.228Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒôï Obteniendo carpetas:
+­ƒôï {
+­ƒôï   "onlyFavorites": true,
+­ƒôï   "limit": 50,
+­ƒôï   "offset": 0
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2muses canonical favorites for onlyFavorites and ignores stale projection
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.231Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpetas obtenidas: 1/1
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mupdate ignores legacy authored isFavorite and preserves canonical favorite state
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.245Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "update-target-1779758448245-0c56d62cbdd5b8",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mupdate ignores legacy authored isFavorite and preserves canonical favorite state
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.249Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-ULmv-ZFg",
+­ƒôï   "name": "update-target-1779758448245-0c56d62cbdd5b8"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mupdate ignores legacy authored isFavorite and preserves canonical favorite state
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.253Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-ULmv-ZFg"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mupdate ignores legacy authored isFavorite and preserves canonical favorite state
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.259Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mupdate ignores legacy authored isFavorite and preserves canonical favorite state
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.259Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-ULmv-ZFg",
+­ƒôï   "id": "493b8238-b26c-4344-a499-a489e744f2a4"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mupdate ignores legacy authored isFavorite and preserves canonical favorite state
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.261Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m ­ƒöº Actualizando carpeta:
+­ƒôï {
+­ƒôï   "id": "fld-ULmv-ZFg",
+­ƒôï   "updates": {
+­ƒôï     "isFavorite": false
+­ƒôï   }
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mupdate ignores legacy authored isFavorite and preserves canonical favorite state
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.267Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta actualizada:
+­ƒôï {
+­ƒôï   "id": "fld-ULmv-ZFg",
+­ƒôï   "name": "update-target-1779758448245-0c56d62cbdd5b8"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite delegates to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.276Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "toggle-target-1779758448276-59baf0d383d118",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite delegates to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.282Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-3MCRD7iB",
+­ƒôï   "name": "toggle-target-1779758448276-59baf0d383d118"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite delegates to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.285Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô¡É Alternando favorito: fld-3MCRD7iB
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite delegates to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.287Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-3MCRD7iB"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite delegates to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.290Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite delegates to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.290Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-3MCRD7iB",
+­ƒôï   "id": "44515b5d-77cd-4266-a9f5-0b9cce55872e"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite delegates to the canonical favorite bridge when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.292Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Favorito alternado:
+­ƒôï {
+­ƒôï   "id": "fld-3MCRD7iB",
+­ƒôï   "isFavorite": true
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.300Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô×ò Creando carpeta:
+­ƒôï {
+­ƒôï   "name": "toggle-roundtrip-target-1779758448300-91f612f81737d",
+­ƒôï   "parentId": null
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.304Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Carpeta creada:
+­ƒôï {
+­ƒôï   "id": "fld-TDUHZfRU",
+­ƒôï   "name": "toggle-roundtrip-target-1779758448300-91f612f81737d"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.305Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô¡É Alternando favorito: fld-TDUHZfRU
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.308Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Alternando favorito:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-TDUHZfRU"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.311Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId",
+­ƒôï     "id"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.311Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito a├▒adido:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-TDUHZfRU",
+­ƒôï   "id": "3f3d7944-0ad8-4b0e-b532-f5294d3ad6cd"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.313Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Favorito alternado:
+­ƒôï {
+­ƒôï   "id": "fld-TDUHZfRU",
+­ƒôï   "isFavorite": true
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.317Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô¡É Alternando favorito: fld-TDUHZfRU
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.322Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[Events][0m ­ƒÜÇ Emitiendo evento (servidor directo):
+­ƒôï {
+­ƒôï   "type": "favorites:modified",
+­ƒôï   "dataKeys": [
+­ƒôï     "action",
+­ƒôï     "profileId",
+­ƒôï     "entityType",
+­ƒôï     "entityId"
+­ƒôï   ]
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.322Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FavoriteService][0m Favorito eliminado por set expl├¡cito:
+­ƒôï {
+­ƒôï   "profileId": "88888888-8888-4888-a888-888888888881",
+­ƒôï   "entityType": "folder",
+­ƒôï   "entityId": "fld-TDUHZfRU"
+­ƒôï }
+­ƒôï [90mstdout[2m | src/services/folder/__tests__/folder.favorite.effect.test.ts[2m > [22m[2mFolderService favorites convergence[2m > [22m[2mtoggleFavorite can remove the canonical favorite again when a profile is active
+­ƒôï [22m[39m[2m[2026-05-26T01:20:48.325Z][0m Ôä╣´©Å [32m[1mINFO[0m [1m[FolderService.Effect][0m Ô£à Favorito alternado:
+­ƒôï {
+­ƒôï   "id": "fld-TDUHZfRU",
+­ƒôï   "isFavorite": false
+­ƒôï }
+Ô£à  [32mÔ£ô[39m src/services/folder/__tests__/folder.favorite.effect.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 250[2mms[22m[39m
+­ƒôï [2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+­ƒôï [2m      Tests [22m [1m[32m44 passed[39m[22m[90m (44)[39m
+­ƒôï [2m   Start at [22m 22:20:35
+­ƒôï [2m   Duration [22m 12.58s[2m (transform 1.17s, setup 4.46s, import 2.33s, tests 1.61s, environment 3.40s)[22m
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+Ô£à Comando ejecutado exitosamente
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+­ƒôè RESUMEN AUTOM├üTICO DE ERRORES
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+
+Ô£à No se encontraron errores de sintaxis o linting
+­ƒôä Log completo guardado en: D:\DEV\media-manager\logs\test_2026-05-26T01-20-34-594Z.log

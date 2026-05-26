@@ -170,6 +170,29 @@ function createEmptyFileCounts(): Omit<FolderCounts, 'children'> {
 	};
 }
 
+const stripLegacyFavoriteInput = <TInput>(input: TInput): TInput => {
+	if (!input || typeof input !== 'object' || Array.isArray(input)) {
+		return input;
+	}
+
+	const { isFavorite: _legacyIsFavorite, ...rest } = input as Record<string, unknown>;
+	return rest as TInput;
+};
+
+const getFolderFavoriteIds = (): Effect.Effect<string[], FolderError> =>
+	Effect.tryPromise({
+		try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.FOLDER),
+		catch: (error: unknown) => fromUnknownError('favorite.getIds', error),
+	});
+
+const projectFolderFavoriteState = <TFolder extends { id: string; isFavorite: boolean }>(
+	folder: TFolder,
+	favoriteEntityIds: readonly string[]
+): TFolder => ({
+	...folder,
+	isFavorite: favoriteEntityIds.includes(folder.id),
+});
+
 const normalizeFolderRow = (row: Partial<typeof folders.$inferSelect> | null | undefined) => {
 	if (!row) {
 		return null;
@@ -196,8 +219,14 @@ const normalizeFolderRow = (row: Partial<typeof folders.$inferSelect> | null | u
 	};
 };
 
-const decodeFolderRow = (row: Partial<typeof folders.$inferSelect> | null | undefined) =>
-	Schema.decodeUnknownSync(Folder)(normalizeFolderRow(row));
+const decodeFolderRow = (
+	row: Partial<typeof folders.$inferSelect> | null | undefined,
+	favoriteEntityIds?: readonly string[]
+) => {
+	const normalizedRow = normalizeFolderRow(row);
+	const projectedRow = favoriteEntityIds ? projectFolderFavoriteState(normalizedRow as never, favoriteEntityIds) : normalizedRow;
+	return Schema.decodeUnknownSync(Folder)(projectedRow);
+};
 
 function buildRecursivePathWhere(column: PathColumn, folderPaths: string[]) {
 	return or(
@@ -500,9 +529,11 @@ const FolderServiceLive = Layer.succeed(
 					return yield* Effect.fail(new FolderNotFound({ folderId: id }));
 				}
 
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
+
 				// Validar con Schema
 				const folder = yield* Effect.try({
-					try: () => decodeFolderRow(result[0]),
+					try: () => decodeFolderRow(result[0], favoriteEntityIds),
 					catch: (error: unknown) => fromUnknownError('getById:validation', error),
 				});
 
@@ -529,13 +560,7 @@ const FolderServiceLive = Layer.succeed(
 
 				logger.info('📋 Obteniendo carpetas:', { search, onlyFavorites, parentId, limit, offset });
 
-				const favoriteEntityIds: string[] | null =
-					onlyFavorites
-						? yield* Effect.tryPromise({
-							try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.FOLDER),
-							catch: (error: unknown) => fromUnknownError('getAll:favoriteIds', error),
-						})
-						: null;
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
 
 				// Construir condiciones WHERE
 				const conditions: any[] = [];
@@ -545,9 +570,7 @@ const FolderServiceLive = Layer.succeed(
 				}
 
 				if (onlyFavorites) {
-					if (favoriteEntityIds === null) {
-						conditions.push(eq(folders.isFavorite, true));
-					} else if (favoriteEntityIds.length === 0) {
+					if (favoriteEntityIds.length === 0) {
 						return {
 							folders: [],
 							total: 0,
@@ -599,23 +622,14 @@ const FolderServiceLive = Layer.succeed(
 
 				// Validar con Schema
 				const validatedFolders = yield* Effect.try({
-					try: () => result.map((f) => decodeFolderRow(f)),
+					try: () => result.map((f) => decodeFolderRow(f, favoriteEntityIds)),
 					catch: (error: unknown) => fromUnknownError('getAll:validation', error),
 				});
 
 				logger.info(`✅ Carpetas obtenidas: ${validatedFolders.length}/${total}`);
 
-				const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
-				const normalizedFolders =
-					favoriteIdSet === null
-						? validatedFolders
-						: validatedFolders.map((folder) => ({
-							...folder,
-							isFavorite: favoriteIdSet.has(folder.id),
-						}));
-
 				// Enriquecer con conteos
-				const enrichedFolders = yield* Effect.all(normalizedFolders.map(enrichFolderWithCounts));
+				const enrichedFolders = yield* Effect.all(validatedFolders.map(enrichFolderWithCounts));
 
 				return {
 					folders: enrichedFolders,
@@ -631,10 +645,11 @@ const FolderServiceLive = Layer.succeed(
 		create: (input: Schema.Schema.Type<typeof FolderCreateInput>) =>
 			Effect.gen(function* () {
 				logger.info('➕ Creando carpeta:', { name: input.name, parentId: input.parentId });
+				const sanitizedInput = stripLegacyFavoriteInput(input);
 
 				// Validar input
 				const validatedInput = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(FolderCreateInput)(input),
+					try: () => Schema.decodeUnknownSync(FolderCreateInput)(sanitizedInput),
 					catch: (error: unknown) => fromUnknownError('create:validation', error),
 				});
 
@@ -658,15 +673,6 @@ const FolderServiceLive = Layer.succeed(
 				}
 
 				// Crear carpeta
-				const requestedIsFavorite = validatedInput.isFavorite === true;
-				const useCanonicalFavoriteBridge =
-					requestedIsFavorite
-						? yield* Effect.tryPromise({
-							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FOLDER)) !== null,
-							catch: (error: unknown) => fromUnknownError('create:favoriteScope', error),
-						})
-						: false;
-
 				const result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
 					try: async () =>
 						await db
@@ -692,31 +698,16 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('create:insert', error),
 				});
 
+						const favoriteEntityIds = yield* getFolderFavoriteIds();
+
 				const createdFolder = yield* Effect.try({
-					try: () => decodeFolderRow(result[0]),
+							try: () => decodeFolderRow(result[0], favoriteEntityIds),
 					catch: (error: unknown) => fromUnknownError('create:validation:result', error),
 				});
 
 				logger.info('✅ Carpeta creada:', { id: createdFolder.id, name: createdFolder.name });
 
-				if (requestedIsFavorite && useCanonicalFavoriteBridge) {
-					yield* Effect.tryPromise({
-						try: async () => {
-							try {
-								await favoriteService.set(FavoriteEntityType.FOLDER, createdFolder.id, true);
-							} catch (error) {
-								await db.delete(folders).where(eq(folders.id, createdFolder.id));
-								throw error;
-							}
-						},
-						catch: (error: unknown) => fromUnknownError('create:favoriteBridge', error),
-					});
-				}
-
-				return yield* enrichFolderWithCounts({
-					...createdFolder,
-					isFavorite: requestedIsFavorite ? true : createdFolder.isFavorite,
-				});
+						return yield* enrichFolderWithCounts(createdFolder);
 			}),
 
 		/**
@@ -725,6 +716,7 @@ const FolderServiceLive = Layer.succeed(
 		update: (id: string, input: Schema.Schema.Type<typeof FolderUpdateInput>) =>
 			Effect.gen(function* () {
 				logger.info('🔧 Actualizando carpeta:', { id, updates: input });
+				const sanitizedInput = stripLegacyFavoriteInput(input);
 
 				// Verificar que existe
 				const existingFolder = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
@@ -738,7 +730,7 @@ const FolderServiceLive = Layer.succeed(
 
 				// Validar input
 				const validatedInput = yield* Effect.try({
-					try: () => Schema.decodeUnknownSync(FolderUpdateInput)(input),
+					try: () => Schema.decodeUnknownSync(FolderUpdateInput)(sanitizedInput),
 					catch: (error: unknown) => fromUnknownError('update:validation', error),
 				});
 
@@ -770,22 +762,6 @@ const FolderServiceLive = Layer.succeed(
 					}
 				}
 
-				const requestedIsFavorite = validatedInput.isFavorite;
-				const useCanonicalFavoriteBridge =
-					requestedIsFavorite !== undefined
-						? yield* Effect.tryPromise({
-							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FOLDER)) !== null,
-							catch: (error: unknown) => fromUnknownError('update:favoriteScope', error),
-						})
-						: false;
-
-				if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-					yield* Effect.tryPromise({
-						try: () => favoriteService.set(FavoriteEntityType.FOLDER, id, requestedIsFavorite),
-						catch: (error: unknown) => fromUnknownError('update:favoriteBridge', error),
-					});
-				}
-
 				// Actualizar carpeta
 				const updateData: any = {
 					updatedAt: new Date(),
@@ -804,8 +780,10 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('update:update', error),
 				});
 
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
+
 				const updatedFolder = yield* Effect.try({
-					try: () => decodeFolderRow(result[0]),
+					try: () => decodeFolderRow(result[0], favoriteEntityIds),
 					catch: (error: unknown) => fromUnknownError('update:validation:result', error),
 				});
 
@@ -860,9 +838,11 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('getTree', error),
 				});
 
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
+
 				// Validar con Schema
 				const validatedFolders = yield* Effect.try({
-					try: () => result.map((f) => decodeFolderRow(f)),
+					try: () => result.map((f) => decodeFolderRow(f, favoriteEntityIds)),
 					catch: (error: unknown) => fromUnknownError('getTree:validation', error),
 				});
 
@@ -989,9 +969,11 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('getChildren', error),
 				});
 
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
+
 				// Validar con Schema
 				const validatedFolders = yield* Effect.try({
-					try: () => result.map((f) => decodeFolderRow(f)),
+					try: () => result.map((f) => decodeFolderRow(f, favoriteEntityIds)),
 					catch: (error: unknown) => fromUnknownError('getChildren:validation', error),
 				});
 
@@ -1018,6 +1000,8 @@ const FolderServiceLive = Layer.succeed(
 					return yield* Effect.fail(new FolderNotFound({ folderId: id }));
 				}
 
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
+
 				const ancestors: FolderWithStats[] = [];
 				let currentId: string | null = folderResult[0].parentId;
 
@@ -1035,7 +1019,7 @@ const FolderServiceLive = Layer.succeed(
 					if (result.length === 0) break;
 
 					const ancestor = yield* Effect.try({
-						try: () => decodeFolderRow(result[0]),
+						try: () => decodeFolderRow(result[0], favoriteEntityIds),
 						catch: (error: unknown) => fromUnknownError('getAncestors:validation', error),
 					});
 
@@ -1100,8 +1084,10 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('moveTo:update', error),
 				});
 
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
+
 				const movedFolder = yield* Effect.try({
-					try: () => decodeFolderRow(result[0]),
+					try: () => decodeFolderRow(result[0], favoriteEntityIds),
 					catch: (error: unknown) => fromUnknownError('moveTo:validation', error),
 				});
 
@@ -1127,8 +1113,10 @@ const FolderServiceLive = Layer.succeed(
 					return yield* Effect.fail(new FolderNotFound({ folderId: path }));
 				}
 
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
+
 				const folder = yield* Effect.try({
-					try: () => decodeFolderRow(result[0]),
+					try: () => decodeFolderRow(result[0], favoriteEntityIds),
 					catch: (error: unknown) => fromUnknownError('getByPath:validation', error),
 				});
 
@@ -1154,31 +1142,26 @@ const FolderServiceLive = Layer.succeed(
 					return yield* Effect.fail(new FolderNotFound({ folderId: id }));
 				}
 
-				const favoriteEntityIds = yield* Effect.tryPromise({
-					try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.FOLDER),
-					catch: (error: unknown) => fromUnknownError('toggleFavorite:scope', error),
+				const currentFavoriteStatus = yield* Effect.tryPromise({
+					try: () => favoriteService.isFavorite(FavoriteEntityType.FOLDER, id),
+					catch: (error: unknown) => fromUnknownError('toggleFavorite:isFavorite', error),
 				});
-				const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? existingFolder[0].isFavorite;
 				const newFavoriteStatus = !currentFavoriteStatus;
 
-				let result: Schema.Schema.Type<typeof Folder>[];
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.FOLDER, id, newFavoriteStatus),
+					catch: (error: unknown) => fromUnknownError('toggleFavorite:set', error),
+				});
 
-				if (favoriteEntityIds === null) {
-					result = existingFolder;
-				} else {
-					yield* Effect.tryPromise({
-						try: () => favoriteService.set(FavoriteEntityType.FOLDER, id, newFavoriteStatus),
-						catch: (error: unknown) => fromUnknownError('toggleFavorite:favoriteBridge', error),
-					});
+				const result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
+					try: async () => await db.select().from(folders).where(eq(folders.id, id)),
+					catch: (error: unknown) => fromUnknownError('toggleFavorite:refetch', error),
+				});
 
-					result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
-						try: async () => await db.select().from(folders).where(eq(folders.id, id)),
-						catch: (error: unknown) => fromUnknownError('toggleFavorite:refetch', error),
-					});
-				}
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
 
 				const updatedFolder = yield* Effect.try({
-					try: () => decodeFolderRow(result[0]),
+					try: () => decodeFolderRow(result[0], favoriteEntityIds),
 					catch: (error: unknown) => fromUnknownError('toggleFavorite:validation', error),
 				});
 

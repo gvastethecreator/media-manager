@@ -52,7 +52,6 @@ export const CreateFolderSchema = z.object({
 		.optional()
 		.nullable(),
 	featuredImage: z.string().url('La imagen destacada debe ser una URL válida').optional().nullable(),
-	isFavorite: z.boolean().default(false).optional(),
 	parentId: z.string().uuid('El ID del padre debe ser un UUID válido').optional().nullable(),
 	presetId: z.string().uuid('El ID del preset debe ser un UUID válido').optional().nullable(),
 });
@@ -81,7 +80,6 @@ export const UpdateFolderSchema = z.object({
 		.nullable()
 		.optional(),
 	featuredImage: z.string().url('La imagen destacada debe ser una URL válida').nullable().optional(),
-	isFavorite: z.boolean().optional(),
 	parentId: z.string().uuid('El ID del padre debe ser un UUID válido').nullable().optional(),
 	presetId: z.string().uuid('El ID del preset debe ser un UUID válido').nullable().optional(),
 });

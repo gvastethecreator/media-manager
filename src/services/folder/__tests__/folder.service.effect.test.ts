@@ -4,9 +4,13 @@
  * @created 2025-10-11 - Fase 4 Effect Implementation
  */
 
+import { eq } from 'drizzle-orm';
 import { Effect, Exit } from 'effect';
+import { afterEach, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
-import { documents, folders } from '@/lib/drizzle/schema';
+import { documents, favorites, folders, profiles } from '@/lib/drizzle/schema';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { FolderService, FolderServiceLive } from '../folder.service.effect';
 import {
 	FolderCircularReferenceError,
@@ -27,13 +31,45 @@ const runEffectExpectFailure = <A, E>(effect: Effect.Effect<A, E, FolderService>
 	return Effect.runPromiseExit(Effect.provide(effect, FolderServiceLive));
 };
 
+let createdActiveProfileId: string | null = null;
+
+const ensureActiveProfile = async () => {
+	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+
+	if (activeProfile) {
+		return activeProfile.id;
+	}
+
+	const profileId = `folder-service-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+	createdActiveProfileId = profileId;
+
+	await db.insert(profiles).values({
+		id: profileId,
+		name: 'Folder Service Test Profile',
+		emoji: '📁',
+		color: '#3b82f6',
+		description: 'Perfil activo para tests de carpetas',
+		isActive: true,
+		settingsId: null,
+		imageId: null,
+	});
+
+	return profileId;
+};
+
 describe('FolderService Effect', () => {
 	// Cleanup después de cada test
 	afterEach(async () => {
 		try {
+			await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.FOLDER));
 			await db.delete(documents);
 			// Borrar TODAS las carpetas de test
 			await db.delete(folders);
+
+			if (createdActiveProfileId) {
+				await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
+				createdActiveProfileId = null;
+			}
 		} catch (error) {
 			console.error('[Test Cleanup] Error cleaning folders:', error);
 		}
@@ -52,7 +88,6 @@ describe('FolderService Effect', () => {
 					name: 'Test Folder',
 					path: '/test-folder',
 					parentId: null,
-					isFavorite: false,
 				};
 
 				const result = await runEffect(folderService.create(createInput));
@@ -294,13 +329,23 @@ describe('FolderService Effect', () => {
 				});
 
 				const folderService = await runEffect(service);
+				await ensureActiveProfile();
 
-				await runEffect(folderService.create({ name: 'Favorite', path: '/fav', parentId: null, isFavorite: true }));
-				await runEffect(folderService.create({ name: 'Normal', path: '/normal', parentId: null, isFavorite: false }));
+				const favoriteFolder = await runEffect(
+					folderService.create({ name: 'Favorite', path: '/fav', parentId: null })
+				);
+				const staleProjection = await runEffect(
+					folderService.create({ name: 'Stale', path: '/stale', parentId: null })
+				);
+				await runEffect(folderService.create({ name: 'Normal', path: '/normal', parentId: null }));
+
+				await db.update(folders).set({ isFavorite: true }).where(eq(folders.id, staleProjection.id));
+				await favoriteService.set(FavoriteEntityType.FOLDER, favoriteFolder.id, true);
 
 				const result = await runEffect(folderService.getAll({ onlyFavorites: true }));
 
 				expect(result.folders.length).toBe(1);
+				expect(result.folders[0].id).toBe(favoriteFolder.id);
 				expect(result.folders[0].isFavorite).toBe(true);
 			});
 		});
@@ -828,13 +873,13 @@ describe('FolderService Effect', () => {
 				});
 
 				const folderService = await runEffect(service);
+				await ensureActiveProfile();
 
 				const created = await runEffect(
 					folderService.create({
 						name: 'Test',
 						path: '/test',
 						parentId: null,
-						isFavorite: false,
 					})
 				);
 
@@ -844,6 +889,7 @@ describe('FolderService Effect', () => {
 
 				expect(toggled.id).toBe(created.id);
 				expect(toggled.isFavorite).toBe(true);
+				expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, created.id)).toBe(true);
 			});
 
 			it('should toggle favorite from true to false', async () => {
@@ -852,22 +898,25 @@ describe('FolderService Effect', () => {
 				});
 
 				const folderService = await runEffect(service);
+				await ensureActiveProfile();
 
 				const created = await runEffect(
 					folderService.create({
 						name: 'Test',
 						path: '/test',
 						parentId: null,
-						isFavorite: true,
 					})
 				);
 
-				expect(created.isFavorite).toBe(true);
+				await favoriteService.set(FavoriteEntityType.FOLDER, created.id, true);
+
+				expect(created.isFavorite).toBe(false);
 
 				const toggled = await runEffect(folderService.toggleFavorite(created.id));
 
 				expect(toggled.id).toBe(created.id);
 				expect(toggled.isFavorite).toBe(false);
+				expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, created.id)).toBe(false);
 			});
 
 			it('should fail for non-existent folder', async () => {

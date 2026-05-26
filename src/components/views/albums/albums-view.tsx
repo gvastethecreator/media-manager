@@ -75,7 +75,6 @@ export function AlbumsView(_props: ViewProps) {
 				description: albumDescription,
 				emoji: '📸',
 				color: DEFAULT_ENTITY_COLOR,
-				isFavorite: false,
 				filters: '[]',
 				sortBy: 'name',
 				featuredImage: undefined,
