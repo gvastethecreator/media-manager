@@ -66,7 +66,6 @@ export function ConceptsView({ className }: { className?: string }) {
 				color: DEFAULT_ENTITY_COLOR,
 				category: 'general',
 				content: newConceptDescription || '',
-				isFavorite: false,
 
 				totalImages: 0,
 				totalVideos: 0,

@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -26,7 +25,6 @@ const noteSchema = z.object({
 	emoji: z.string().optional(),
 	category: z.nativeEnum(NoteCategory).optional(),
 	tags: z.array(z.string()),
-	isFavorite: z.boolean(),
 });
 
 // El tipo del formulario se infiere del esquema
@@ -55,7 +53,6 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 			emoji: '📝',
 			category: NoteCategory.GENERAL,
 			tags: [],
-			isFavorite: false,
 		},
 	});
 
@@ -70,7 +67,6 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 				emoji: note.emoji || '📝',
 				category: note.category as NoteCategory,
 				tags: Array.isArray(note.tags) ? note.tags : [],
-				isFavorite: note.isFavorite,
 			});
 		}
 	}, [note, isEditing, form]);
@@ -196,21 +192,6 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 								<Textarea placeholder="Escribe tu nota aquí..." rows={4} {...field} />
 							</FormControl>
 							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-							<FormControl>
-								<Checkbox checked={field.value} onCheckedChange={field.onChange} />
-							</FormControl>
-							<div className="space-y-1 leading-none">
-								<FormLabel>Marcar como favorito</FormLabel>
-							</div>
 						</FormItem>
 					)}
 				/>

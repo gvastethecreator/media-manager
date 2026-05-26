@@ -134,7 +134,7 @@ export interface PlacesResponse {
  *
  * Tipo para la creación de un nuevo lugar.
  */
-export type PlaceCreateInput = Omit<PlaceBase, 'id' | 'createdAt' | 'updatedAt'>;
+export type PlaceCreateInput = Omit<PlaceBase, 'id' | 'createdAt' | 'updatedAt' | 'isFavorite'>;
 
 /**
  * PLACE UPDATE INPUT

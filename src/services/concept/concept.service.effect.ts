@@ -91,7 +91,13 @@ const make = (): ConceptServiceInterface => {
 			const validated = yield* Schema.decodeUnknown(Concept)(result[0]).pipe(
 				Effect.mapError((error) => fromUnknownConceptError('decode', error))
 			);
-			return validated as Concept;
+
+			const favoriteEntityIds = yield* Effect.tryPromise<string[], ConceptError>({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.CONCEPT),
+				catch: (error) => fromUnknownConceptError('getById.favoriteIds', error),
+			});
+
+			return favoriteService.applyFavoriteProjection(validated, favoriteEntityIds);
 		});
 
 	const getAll = (options: GetConceptsOptions = {}): Effect.Effect<GetConceptsResult, ConceptError> =>
@@ -106,30 +112,25 @@ const make = (): ConceptServiceInterface => {
 				onlyFavorites,
 			} = options;
 
-			const favoriteEntityIds: string[] | null =
-				onlyFavorites
-					? yield* Effect.tryPromise({
-						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.CONCEPT),
-						catch: (error) => fromUnknownConceptError('getAll.favoriteIds', error),
-					})
-					: null;
+			const favoriteEntityIds = yield* Effect.tryPromise<string[], ConceptError>({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.CONCEPT),
+				catch: (error) => fromUnknownConceptError('getAll.favoriteIds', error),
+			});
 
 			const conditions = [];
 			if (search) conditions.push(like(concepts.name, `%${search}%`));
 			if (category) conditions.push(eq(concepts.category, category));
 			if (onlyFavorites) {
-				if (favoriteEntityIds === null) {
-					conditions.push(eq(concepts.isFavorite, true));
-				} else if (favoriteEntityIds.length === 0) {
+				if (favoriteEntityIds.length === 0) {
 					return {
 						concepts: [],
 						total: 0,
 						limit,
 						offset,
 					};
-				} else {
-					conditions.push(inArray(concepts.id, favoriteEntityIds));
 				}
+
+				conditions.push(inArray(concepts.id, favoriteEntityIds));
 			}
 
 			const whereClause = conditions.length > 0 ? sql`${sql.join(conditions, sql` AND `)}` : undefined;
@@ -158,17 +159,10 @@ const make = (): ConceptServiceInterface => {
 				}),
 			]);
 
-			const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
-			const normalizedConcepts =
-				favoriteIdSet === null
-					? data
-					: data.map((concept) => ({
-						...concept,
-						isFavorite: favoriteIdSet.has(concept.id),
-					}));
+			const normalizedConcepts = favoriteService.applyFavoriteProjectionMany(data, favoriteEntityIds) as ConceptWithStats[];
 
 			return {
-				concepts: normalizedConcepts as ConceptWithStats[],
+				concepts: normalizedConcepts,
 				total: totalResult[0]?.count ?? 0,
 				limit,
 				offset,
@@ -177,24 +171,18 @@ const make = (): ConceptServiceInterface => {
 
 	const create = (input: ConceptCreateInput): Effect.Effect<Concept, ConceptError> =>
 		Effect.gen(function* () {
+			const restInput = input;
+
 			const existing = yield* Effect.tryPromise<(typeof concepts.$inferSelect)[], ConceptError>({
-				try: () => db.select().from(concepts).where(eq(concepts.name, input.name)).limit(1),
+				try: () => db.select().from(concepts).where(eq(concepts.name, restInput.name)).limit(1),
 				catch: (error) => fromUnknownConceptError('checkDuplicate', error),
 			});
 
 			if (existing.length > 0) {
-				return yield* Effect.fail(new ConceptNameConflict({ name: input.name }));
+				return yield* Effect.fail(new ConceptNameConflict({ name: restInput.name }));
 			}
 
-			const readableId = generateReadableId('concept', input.name, 1);
-			const requestedIsFavorite = input.isFavorite === true;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite
-					? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.CONCEPT)) !== null,
-						catch: (error) => fromUnknownConceptError('create.favoriteScope', error),
-					})
-					: false;
+			const readableId = generateReadableId('concept', restInput.name, 1);
 
 			const result = yield* Effect.tryPromise<(typeof concepts.$inferSelect)[], ConceptError>({
 				try: () =>
@@ -202,15 +190,15 @@ const make = (): ConceptServiceInterface => {
 						.insert(concepts)
 						.values({
 							id: readableId,
-							name: input.name,
-							description: input.description ?? null,
-							emoji: input.emoji ?? null,
-							color: input.color ?? null,
-							category: input.category ?? null,
-							featuredImage: input.featuredImage ?? null,
-							filters: input.filters ?? null,
-							metadata: input.metadata ?? null,
-							parentId: input.parentId ?? null,
+							name: restInput.name,
+							description: restInput.description ?? null,
+							emoji: restInput.emoji ?? null,
+							color: restInput.color ?? null,
+							category: restInput.category ?? null,
+							featuredImage: restInput.featuredImage ?? null,
+							filters: restInput.filters ?? null,
+							metadata: restInput.metadata ?? null,
+							parentId: restInput.parentId ?? null,
 							createdAt: new Date(),
 							updatedAt: new Date(),
 						})
@@ -222,60 +210,28 @@ const make = (): ConceptServiceInterface => {
 				return yield* Effect.fail(new ConceptDatabaseError({ operation: 'create', message: 'No row returned' }));
 			}
 
-			if (requestedIsFavorite && useCanonicalFavoriteBridge) {
-				yield* Effect.tryPromise({
-					try: async () => {
-						try {
-							await favoriteService.set(FavoriteEntityType.CONCEPT, result[0].id, true);
-						} catch (error) {
-							await db.delete(concepts).where(eq(concepts.id, result[0].id));
-							throw error;
-						}
-					},
-					catch: (error) => fromUnknownConceptError('create.favoriteBridge', error),
-				});
-			}
-
-			return {
-				...result[0],
-				isFavorite: requestedIsFavorite ? true : result[0].isFavorite,
-			} as Concept;
+			return yield* getById(readableId);
 		});
 
 	const update = (id: string, input: ConceptUpdateInput): Effect.Effect<Concept, ConceptError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
-
-			const requestedIsFavorite = input.isFavorite;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite !== undefined
-					? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.CONCEPT)) !== null,
-						catch: (error) => fromUnknownConceptError('update.favoriteScope', error),
-					})
-					: false;
-
-			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.CONCEPT, id, requestedIsFavorite),
-					catch: (error) => fromUnknownConceptError('update.favoriteBridge', error),
-				});
-			}
+			const restInput = input;
 
 			const result = yield* Effect.tryPromise<(typeof concepts.$inferSelect)[], ConceptError>({
 				try: () =>
 					db
 						.update(concepts)
 						.set({
-							...(input.name !== undefined && { name: input.name }),
-							...(input.description !== undefined && { description: input.description }),
-							...(input.emoji !== undefined && { emoji: input.emoji }),
-							...(input.color !== undefined && { color: input.color }),
-							...(input.category !== undefined && { category: input.category }),
-							...(input.featuredImage !== undefined && { featuredImage: input.featuredImage }),
-							...(input.filters !== undefined && { filters: input.filters }),
-							...(input.metadata !== undefined && { metadata: input.metadata }),
-							...(input.parentId !== undefined && { parentId: input.parentId }),
+							...(restInput.name !== undefined && { name: restInput.name }),
+							...(restInput.description !== undefined && { description: restInput.description }),
+							...(restInput.emoji !== undefined && { emoji: restInput.emoji }),
+							...(restInput.color !== undefined && { color: restInput.color }),
+							...(restInput.category !== undefined && { category: restInput.category }),
+							...(restInput.featuredImage !== undefined && { featuredImage: restInput.featuredImage }),
+							...(restInput.filters !== undefined && { filters: restInput.filters }),
+							...(restInput.metadata !== undefined && { metadata: restInput.metadata }),
+							...(restInput.parentId !== undefined && { parentId: restInput.parentId }),
 							updatedAt: new Date(),
 						})
 						.where(eq(concepts.id, id))
@@ -287,7 +243,7 @@ const make = (): ConceptServiceInterface => {
 				return yield* Effect.fail(new ConceptDatabaseError({ operation: 'update', message: 'No row returned' }));
 			}
 
-			return result[0] as Concept;
+			return yield* getById(id);
 		});
 
 	const delete_ = (id: string): Effect.Effect<void, ConceptError> =>
@@ -319,38 +275,20 @@ const make = (): ConceptServiceInterface => {
 
 	const toggleFavorite = (id: string): Effect.Effect<Concept, ConceptError> =>
 		Effect.gen(function* () {
-			const concept = yield* getById(id);
-			const favoriteEntityIds = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.CONCEPT),
-				catch: (error) => fromUnknownConceptError('toggleFavorite.scope', error),
+			yield* getById(id);
+
+			const currentFavoriteStatus = yield* Effect.tryPromise<boolean, ConceptError>({
+				try: () => favoriteService.isFavorite(FavoriteEntityType.CONCEPT, id),
+				catch: (error) => fromUnknownConceptError('toggleFavorite.isFavorite', error),
 			});
-			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? concept.isFavorite;
 			const newFavoriteStatus = !currentFavoriteStatus;
 
-			let result;
-			if (favoriteEntityIds !== null) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.CONCEPT, id, newFavoriteStatus),
-					catch: (error) => fromUnknownConceptError('toggleFavorite.favoriteBridge', error),
-				});
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.CONCEPT, id, newFavoriteStatus),
+				catch: (error) => fromUnknownConceptError('toggleFavorite.set', error),
+			});
 
-				result = yield* Effect.tryPromise<(typeof concepts.$inferSelect)[], ConceptError>({
-					try: () => db.select().from(concepts).where(eq(concepts.id, id)).limit(1),
-					catch: (error) => fromUnknownConceptError('toggleFavorite.refetch', error),
-				});
-			} else {
-				result = yield* Effect.tryPromise<(typeof concepts.$inferSelect)[], ConceptError>({
-					try: () => db.select().from(concepts).where(eq(concepts.id, id)).limit(1),
-					catch: (error) => fromUnknownConceptError('toggleFavorite.refetch', error),
-				});
-			}
-
-			if (result.length === 0) {
-				return yield* Effect.fail(
-					new ConceptDatabaseError({ operation: 'toggleFavorite', message: 'No row returned' })
-				);
-			}
-			return result[0] as Concept;
+			return yield* getById(id);
 		});
 
 	const getImages = (id: string): Effect.Effect<any[], ConceptError> =>

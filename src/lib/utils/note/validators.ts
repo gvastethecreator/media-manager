@@ -19,7 +19,6 @@ export const createNoteSchema = z.object({
 	status: z.nativeEnum(NoteStatus).optional().default(NoteStatus.ACTIVE),
 	tags: z.union([z.string(), z.array(z.string())]).optional(),
 	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().optional().default(false),
 });
 
 /**
@@ -34,7 +33,6 @@ export const updateNoteSchema = z.object({
 	status: z.nativeEnum(NoteStatus).optional(),
 	tags: z.union([z.string(), z.array(z.string())]).optional(),
 	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 /**

@@ -79,7 +79,6 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 				priority: 1,
 				status: null,
 				featuredImage: null,
-				isFavorite: false,
 				presetId: null,
 			});
 		}

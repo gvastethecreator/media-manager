@@ -78,6 +78,7 @@ export const WildcardSchema = z.object({
  */
 export const CreateWildcardSchema = WildcardSchema.omit({
 	id: true,
+	isFavorite: true,
 	createdAt: true,
 	updatedAt: true,
 }).extend({
@@ -89,6 +90,7 @@ export const CreateWildcardSchema = WildcardSchema.omit({
  */
 export const UpdateWildcardSchema = WildcardSchema.partial().omit({
 	id: true,
+	isFavorite: true,
 	createdAt: true,
 	updatedAt: true,
 });
