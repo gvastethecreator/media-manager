@@ -8,11 +8,13 @@
 import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { ImageService, ImageServiceLive } from '@/services/image/image.service.effect';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
+import { sendEffectHttpError } from '../utils/content-delivery';
 import { getMimeTypeFromPath } from '../utils/mime';
 
 const router = express.Router();
@@ -89,45 +91,33 @@ router.get('/', effectHandler((req) =>
 router.get('/favorites', effectHandler((req) =>
 	Effect.gen(function* () {
 		const imageService = yield* ImageService;
+		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
 
-		const favoriteCounts = yield* Effect.tryPromise({
-			try: () => favoriteService.getCountsByType(),
-			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		const filters = {
+			search: search as string | undefined,
+			limit: sanitizeLimit(limit as string),
+			offset: sanitizeOffset(offset as string),
+			sortBy: (sortBy as 'name' | 'size' | 'createdAt' | 'updatedAt') || 'createdAt',
+			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
+		};
+
+		const favoriteResult = yield* listFavoriteEntities({
+			entityType: FavoriteEntityType.IMAGE,
+			search: filters.search,
+			limit: filters.limit,
+			offset: filters.offset,
+			sortBy: filters.sortBy,
+			sortOrder: filters.sortOrder,
+			getEntityById: (entityId: string) => imageService.getByIdWithStats(entityId),
+			mapEntity: (image) => ({
+				...image,
+				entityType: 'image' as const,
+				thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+			}),
 		});
-
-		const totalFavorites = favoriteCounts[FavoriteEntityType.IMAGE] ?? 0;
-
-		if (totalFavorites === 0) {
-			return { data: [] };
-		}
-
-		const favoriteResult = yield* Effect.tryPromise({
-			try: () =>
-				favoriteService.list({
-					entityType: FavoriteEntityType.IMAGE,
-					limit: totalFavorites,
-					offset: 0,
-					sortBy: 'addedAt',
-					sortOrder: 'desc',
-				}),
-			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
-		});
-
-		const favoriteImages = yield* Effect.all(
-			favoriteResult.items.map((favorite) =>
-				imageService.getByIdWithStats(favorite.entityId).pipe(
-					Effect.map((image) => ({
-						...image,
-						entityType: 'image' as const,
-						thumbnailUrl: `/api/images/${image.id}/thumbnail`,
-					})),
-					Effect.catchAll(() => Effect.succeed(null))
-				)
-			)
-		);
 
 		return {
-			data: favoriteImages.flatMap((image) => (image ? [image] : [])),
+			data: favoriteResult.data,
 		};
 	}).pipe(Effect.provide(ImageServiceLive))
 ));
@@ -319,11 +309,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 		res.set('Content-Type', 'image/webp');
 		res.send(buffer);
 	} catch (error) {
-		const httpError = require('@/lib/effect/adapters/express.adapter').errorToHttpStatus(error);
-		res.status(httpError.status).json({
-			error: httpError.message,
-			...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
-		});
+		sendEffectHttpError(res, error);
 	}
 });
 

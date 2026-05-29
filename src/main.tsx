@@ -1,7 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
-import { AppProvider } from './providers/app-provider';
+import { AppShell } from '@/platform/app-shell/app-shell';
 
 import './app/globals.css';
 import './styles/globals.css';
@@ -22,10 +21,6 @@ const root = createRoot(container);
 
 root.render(
 	<StrictMode>
-		<AppProvider>
-			<div className="root">
-				<App />
-			</div>
-		</AppProvider>
+		<AppShell />
 	</StrictMode>
 );
