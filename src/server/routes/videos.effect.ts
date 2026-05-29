@@ -5,18 +5,20 @@
  * @created 2025-01-10 - Phase 6.2 VideoService Effect Implementation
  */
 
+import { existsSync } from 'node:fs';
 import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
 import express from 'express';
 import { db } from '@/lib/drizzle';
 import { videos } from '@/lib/drizzle/schema';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { VideoService, VideoServiceLive } from '@/services/video/video.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
+import { sendEffectHttpError } from '../utils/content-delivery';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
-import { sortEntitiesByField } from '../utils/sort';
 
 const router = express.Router();
 
@@ -103,50 +105,22 @@ router.get('/favorites', effectHandler((req) =>
 			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
 		};
 
-		const favoriteCounts = yield* Effect.tryPromise({
-			try: () => favoriteService.getCountsByType(),
-			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+		const favoriteResult = yield* listFavoriteEntities({
+			entityType: FavoriteEntityType.VIDEO,
+			search: filters.search,
+			limit: filters.limit,
+			offset: filters.offset,
+			sortBy: filters.sortBy,
+			sortOrder: filters.sortOrder,
+			getEntityById: (entityId: string) => videoService.getByIdWithStats(entityId),
+			mapEntity: (video) => ({
+				...video,
+				entityType: 'video' as const,
+				thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
+			}),
 		});
 
-		const totalFavorites = favoriteCounts[FavoriteEntityType.VIDEO] ?? 0;
-
-		if (totalFavorites === 0) {
-			return [];
-		}
-
-		const favoriteResult = yield* Effect.tryPromise({
-			try: () =>
-				favoriteService.list({
-					entityType: FavoriteEntityType.VIDEO,
-					search: filters.search,
-					limit: totalFavorites,
-					offset: 0,
-					sortBy: 'addedAt',
-					sortOrder: 'desc',
-				}),
-			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
-		});
-
-		const favoriteVideos = yield* Effect.all(
-			favoriteResult.items.map((favorite) =>
-				videoService.getByIdWithStats(favorite.entityId).pipe(
-					Effect.map((video) => ({
-						...video,
-						entityType: 'video' as const,
-						thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
-					})),
-					Effect.catchAll(() => Effect.succeed(null))
-				)
-			)
-		);
-
-		const data = sortEntitiesByField(
-			favoriteVideos.flatMap((video) => (video ? [video] : [])),
-			filters.sortBy,
-			filters.sortOrder
-		).slice(filters.offset, filters.offset + filters.limit);
-
-		return data;
+		return favoriteResult.data;
 	}).pipe(Effect.provide(VideoServiceLive))
 ));
 
@@ -381,8 +355,7 @@ router.get('/:id/content', async (req, res) => {
 			return;
 		}
 
-		const fs = require('fs');
-		if (!fs.existsSync(video.path)) {
+		if (!existsSync(video.path)) {
 			res.status(404).send('Video file not found');
 			return;
 		}
@@ -402,11 +375,7 @@ router.get('/:id/content', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		const httpError = require('@/lib/effect/adapters/express.adapter').errorToHttpStatus(error);
-		res.status(httpError.status).json({
-			error: httpError.message,
-			...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
-		});
+		sendEffectHttpError(res, error);
 	}
 });
 
