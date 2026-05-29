@@ -18,6 +18,7 @@ import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { VideoService, VideoServiceLive } from '@/services/video/video.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sendEffectHttpError } from '../utils/content-delivery';
+import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 
 const router = express.Router();
@@ -262,10 +263,11 @@ router.patch('/:id', effectHandler((req) => {
 /**
  * POST /videos/:id/favorite - Toggle favorito de un video
  */
-router.post('/:id/favorite', effectHandler((req) => {
+router.post('/:id/favorite', effectHandler((req, res) => {
 	const { id } = req.params;
 
 	return Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.VIDEO);
 		const videoService = yield* VideoService;
 		const video = yield* videoService.toggleFavorite(id);
 

@@ -18,6 +18,7 @@ import { FolderReindexService } from '@/services/folder/reindex/folder-reindex.s
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 import { buildFolderPreviewSvg, escapeXml, extractRecentPreviews, formatBytes, sanitizePreviewCount, normalizePreviewFiles } from '../utils/folder-preview-svg';
+import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 
 const router = express.Router();
 
@@ -414,8 +415,9 @@ router.get(
  */
 router.post(
 	'/:id/favorite',
-	effectHandler((req) =>
+	effectHandler((req, res) =>
 		Effect.gen(function* () {
+			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.FOLDER);
 			const folderService = yield* FolderService;
 			return yield* folderService.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(FolderServiceLive))

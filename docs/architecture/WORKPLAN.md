@@ -34,7 +34,11 @@ Source index: `docs/architecture/architecture-review-2026-05-29.md`
 - ✅ `src/server/routes/images.effect.ts` migrado a `listFavoriteEntities`.
 - ✅ `src/server/routes/videos.effect.ts` migrado a `listFavoriteEntities`.
 - ✅ Shape de response de `/images/favorites` y `/videos/favorites` convergido a `{ data, pagination }`.
-- ⏳ Pendiente: plan de retiro de `/:id/favorite` por entidad.
+- ✅ Señalización de deprecación aplicada a la matriz de facades `/:id/favorite`:
+	- `albums`, `audios`, `characters`, `collections`, `concepts`, `folders`, `images`, `places`, `prompts`, `tags`
+	- `file-services.effect.ts` (`file3ds`, `documents`, `jsonFiles`)
+	- `secondary-services.effect.ts` (`groups`, `wildcards`, `notes`, `properties`, `worldItems`)
+- ⏳ Pendiente: migración de consumidores al endpoint canónico `/api/favorites/toggle` y posterior retiro de rutas facade.
 - 📋 Matriz inicial de facades `/:id/favorite` detectadas (retirement backlog):
 	- `albums.effect.ts`
 	- `audios.effect.ts`
@@ -218,3 +222,4 @@ Source index: `docs/architecture/architecture-review-2026-05-29.md`
 - 2026-05-29: avances de implementación en recomendaciones 1, 2 y 3 reflejados.
 - 2026-05-29: avances de implementación en recomendaciones 4, 5 y 6 reflejados.
 - 2026-05-29: convergido contrato de favoritos (images/videos), migrados callers operativos a `FileSystemSync` seam y añadida matriz inicial de facades `/:id/favorite`.
+- 2026-05-29: iniciado y ampliado retirement de facades `/:id/favorite` con helper común de deprecación y headers HTTP de transición sobre la matriz principal de rutas.
