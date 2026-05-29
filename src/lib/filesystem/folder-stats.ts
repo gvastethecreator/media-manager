@@ -293,9 +293,15 @@ export async function updateFolderStats(
 	// 4) Sincronización opcional de archivos (solo si se pide)
 	if (_enableSync) {
 		try {
-			const { FileSyncService } = await import('@/lib/filesystem/file-sync.service');
-			const svc = FileSyncService.getInstance();
-			await svc.syncFolderFiles(folderId, { dryRun: false });
+			const { getFileSystemSyncAdapter } = await import('@/lib/filesystem/sync-adapter');
+			const sync = getFileSystemSyncAdapter();
+
+			const newFiles = await sync.detectNewFiles(folderId);
+			for (const file of newFiles) {
+				await sync.syncFile(file.path, folderId);
+			}
+
+			await sync.cleanOrphanRecords(folderId);
 		} catch {
 			// continuar aunque la sync falle; se registrará en servicios
 		}

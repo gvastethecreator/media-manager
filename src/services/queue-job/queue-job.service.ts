@@ -417,7 +417,7 @@ export async function getQueueStats(): Promise<QueueStats> {
 				);
 
 			if (completedJobs.length > 0) {
-				const totalTime = completedJobs.reduce((sum, job) => {
+				const totalTime = completedJobs.reduce((sum: number, job: (typeof completedJobs)[0]) => {
 					if (job.startedAt && job.finishedAt) {
 						return sum + (job.finishedAt.getTime() - job.startedAt.getTime());
 					}
@@ -679,7 +679,7 @@ export async function findProcessingTimes(since: Date): Promise<number[]> {
 				}
 				return 0;
 			})
-			.filter((time) => time > 0);
+			.filter((time: number) => time > 0);
 	} catch (error) {
 		logger.error('❌ Error al buscar tiempos de procesamiento:', error);
 		throw new QueueJobServiceError('Error al buscar tiempos de procesamiento', 'FIND_PROCESSING_TIMES_FAILED', error);
