@@ -47,41 +47,47 @@ export async function phase5_indexFiles(
 					});
 				}
 
-				const { FileSyncService } = await import('@/lib/filesystem/file-sync.service');
-				const fileSyncService = FileSyncService.getInstance();
+				const { getFileSystemSyncAdapter } = await import('@/lib/filesystem/sync-adapter');
+				const sync = getFileSystemSyncAdapter();
 
 				let lastEmitTime = 0;
+				let folderProcessed = 0;
+				let folderSuccessful = 0;
 
-				// Sincronizar archivos de la carpeta (esto indexa los archivos)
-				const syncResult = await fileSyncService.syncFolderFiles(folder.id, {
-					dryRun: false,
-					// Callback para reportar progreso de archivos individuales
-					onProgress: async (filesProcessed, totalFiles, currentFile) => {
-						if (options.emitEvents !== false) {
-							const now = Date.now();
-							// Emitir progreso máximo cada 200ms para evitar spam SSE en frontend
-							if (now - lastEmitTime >= 200 || filesProcessed === totalFiles || filesProcessed === 0) {
-								lastEmitTime = now;
-								const fileName = currentFile.split(/[\\/]/).pop() || currentFile;
-								await emitProgress('folder:progress', {
-									isProcessing: true,
-									folderId: folder.id,
-									phase: 'processing',
-									progress: Math.round((filesProcessed / totalFiles) * 100),
-									filesProcessed,
-									totalFiles,
-									message: `   └── [${filesProcessed}/${totalFiles}] ${fileName}`,
-									timestamp: now,
-								});
-							}
+				const newFiles = await sync.detectNewFiles(folder.id);
+				const totalFiles = newFiles.length;
+
+				for (let index = 0; index < newFiles.length; index++) {
+					const currentFile = newFiles[index];
+					const result = await sync.syncFile(currentFile.path, folder.id);
+					folderProcessed++;
+					if (result.action !== 'skipped') {
+						folderSuccessful++;
+					}
+
+					if (options.emitEvents !== false) {
+						const now = Date.now();
+						if (now - lastEmitTime >= 200 || index + 1 === totalFiles || index === 0) {
+							lastEmitTime = now;
+							const fileName = currentFile.path.split(/[\\/]/).pop() || currentFile.path;
+							await emitProgress('folder:progress', {
+								isProcessing: true,
+								folderId: folder.id,
+								phase: 'processing',
+								progress: totalFiles > 0 ? Math.round(((index + 1) / totalFiles) * 100) : 100,
+								filesProcessed: index + 1,
+								totalFiles,
+								message: `   └── [${index + 1}/${totalFiles}] ${fileName}`,
+								timestamp: now,
+							});
 						}
-					},
-				});
+					}
+				}
 
-				processed += syncResult.stats.totalChecked;
-				successful +=
-					syncResult.stats.newFilesFound + syncResult.stats.totalChecked - syncResult.stats.filesRemoved || 0;
-				errors.push(...(syncResult.errors || []));
+				const removedCount = await sync.cleanOrphanRecords(folder.id);
+
+				processed += folderProcessed;
+				successful += Math.max(0, folderSuccessful - removedCount);
 
 				// Recalcular y persistir estadísticas de carpeta
 				try {
@@ -93,7 +99,7 @@ export async function phase5_indexFiles(
 				}
 
 				logger.debug(
-					`✅ Carpeta indexada: ${folder.name} (${syncResult.stats.totalChecked} archivos verificados, ${syncResult.stats.newFilesFound} nuevos)`
+					`✅ Carpeta indexada: ${folder.name} (${folderProcessed} archivos procesados, ${removedCount} huérfanos limpiados)`
 				);
 			} catch (error) {
 				const errorMsg = `Error indexando carpeta ${folder.path}: ${error instanceof Error ? error.message : 'Error desconocido'}`;

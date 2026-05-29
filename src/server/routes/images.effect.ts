@@ -118,6 +118,13 @@ router.get('/favorites', effectHandler((req) =>
 
 		return {
 			data: favoriteResult.data,
+			pagination: {
+				total: favoriteResult.total,
+				limit: filters.limit,
+				offset: filters.offset,
+				hasNext: filters.offset + filters.limit < favoriteResult.total,
+				hasPrev: filters.offset > 0,
+			},
 		};
 	}).pipe(Effect.provide(ImageServiceLive))
 ));
