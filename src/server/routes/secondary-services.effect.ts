@@ -22,9 +22,11 @@ import {
 	WorldItemService,
 	WorldItemServiceLive,
 } from '@/services/secondary/secondary-services.effect';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { CreateGroupSchema, UpdateGroupSchema } from '@/types/entities/group/schema';
 import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
 import { CreateWildcardSchema, UpdateWildcardSchema } from '@/types/entities/wildcard/schema';
+import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 
 const parseBody = <T>(label: string, parser: () => T): Effect.Effect<T, Error> =>
 	Effect.try({
@@ -77,8 +79,9 @@ groupsEffectRouter.delete('/:id', effectHandler((req, res) =>
 		return undefined;
 	}).pipe(Effect.provide(GroupServiceLive))
 ));
-groupsEffectRouter.post('/:id/favorite', effectHandler((req) =>
+groupsEffectRouter.post('/:id/favorite', effectHandler((req, res) =>
 	Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.GROUP);
 		const service = yield* GroupService;
 		return yield* service.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(GroupServiceLive))
@@ -135,8 +138,9 @@ wildcardsEffectRouter.delete('/:id', effectHandler((req, res) =>
 		return undefined;
 	}).pipe(Effect.provide(WildcardServiceLive))
 ));
-wildcardsEffectRouter.post('/:id/favorite', effectHandler((req) =>
+wildcardsEffectRouter.post('/:id/favorite', effectHandler((req, res) =>
 	Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.WILDCARD);
 		const service = yield* WildcardService;
 		return yield* service.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(WildcardServiceLive))
@@ -193,8 +197,9 @@ notesEffectRouter.delete('/:id', effectHandler((req, res) =>
 		return undefined;
 	}).pipe(Effect.provide(NoteServiceLive))
 ));
-notesEffectRouter.post('/:id/favorite', effectHandler((req) =>
+notesEffectRouter.post('/:id/favorite', effectHandler((req, res) =>
 	Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.NOTE);
 		const service = yield* NoteService;
 		return yield* service.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(NoteServiceLive))
@@ -281,8 +286,9 @@ propertiesEffectRouter.delete('/:id', effectHandler((req, res) =>
 		return undefined;
 	}).pipe(Effect.provide(PropertyServiceLive))
 ));
-propertiesEffectRouter.post('/:id/favorite', effectHandler((req) =>
+propertiesEffectRouter.post('/:id/favorite', effectHandler((req, res) =>
 	Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.PROPERTY);
 		const service = yield* PropertyService;
 		return yield* service.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(PropertyServiceLive))
@@ -339,8 +345,9 @@ worldItemsEffectRouter.delete('/:id', effectHandler((req, res) =>
 		return undefined;
 	}).pipe(Effect.provide(WorldItemServiceLive))
 ));
-worldItemsEffectRouter.post('/:id/favorite', effectHandler((req) =>
+worldItemsEffectRouter.post('/:id/favorite', effectHandler((req, res) =>
 	Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.WORLD_ITEM);
 		const service = yield* WorldItemService;
 		return yield* service.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(WorldItemServiceLive))

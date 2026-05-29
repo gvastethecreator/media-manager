@@ -11,6 +11,8 @@ import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { CollectionCreateInput, CollectionUpdateInput } from '@/lib/effect/schemas/entities';
 import { CollectionService, CollectionServiceLive } from '@/services/collection/collection.service.effect';
+import { FavoriteEntityType } from '@/types/entities/favorite';
+import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -123,8 +125,9 @@ router.delete(
  */
 router.post(
 	'/:id/favorite',
-	effectHandler((req) =>
+	effectHandler((req, res) =>
 		Effect.gen(function* () {
+			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.COLLECTION);
 			const collectionService = yield* CollectionService;
 			return yield* collectionService.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(CollectionServiceLive))
