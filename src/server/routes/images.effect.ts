@@ -15,6 +15,7 @@ import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 import { sendEffectHttpError } from '../utils/content-delivery';
+import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { getMimeTypeFromPath } from '../utils/mime';
 
 const router = express.Router();
@@ -212,8 +213,9 @@ router.patch('/:id', effectHandler((req) =>
 /**
  * POST /images/:id/favorite - Toggle favorite status
  */
-router.post('/:id/favorite', effectHandler((req) =>
+router.post('/:id/favorite', effectHandler((req, res) =>
 	Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.IMAGE);
 		const imageService = yield* ImageService;
 		return yield* imageService.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(ImageServiceLive))
