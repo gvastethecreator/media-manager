@@ -29,6 +29,8 @@ import {
 	UploadedImagesService,
 	UploadedImagesServiceLive,
 } from '@/services/file/file-services.effect';
+import { FavoriteEntityType } from '@/types/entities/favorite';
+import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 
 // File3D
 const file3dsEffectRouter = express.Router();
@@ -125,8 +127,9 @@ file3dsEffectRouter.put('/:id', effectHandler((req) =>
 		return yield* service.update(req.params.id, req.body);
 	}).pipe(Effect.provide(File3DServiceLive))
 ));
-file3dsEffectRouter.post('/:id/favorite', effectHandler((req) =>
+file3dsEffectRouter.post('/:id/favorite', effectHandler((req, res) =>
 	Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.FILE_3D);
 		const service = yield* File3DService;
 		return yield* service.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(File3DServiceLive))
@@ -220,8 +223,9 @@ documentsEffectRouter.put('/:id', effectHandler((req) =>
 		return yield* service.update(req.params.id, req.body);
 	}).pipe(Effect.provide(DocumentServiceLive))
 ));
-documentsEffectRouter.post('/:id/favorite', effectHandler((req) =>
+documentsEffectRouter.post('/:id/favorite', effectHandler((req, res) =>
 	Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.DOCUMENT);
 		const service = yield* DocumentService;
 		return yield* service.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(DocumentServiceLive))
@@ -347,8 +351,9 @@ jsonFilesEffectRouter.put('/:id', effectHandler((req) =>
 		return yield* service.update(req.params.id, req.body);
 	}).pipe(Effect.provide(JsonFileServiceLive))
 ));
-jsonFilesEffectRouter.post('/:id/favorite', effectHandler((req) =>
+jsonFilesEffectRouter.post('/:id/favorite', effectHandler((req, res) =>
 	Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.JSON_FILE);
 		const service = yield* JsonFileService;
 		return yield* service.toggleFavorite(req.params.id);
 	}).pipe(Effect.provide(JsonFileServiceLive))

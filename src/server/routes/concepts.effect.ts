@@ -12,6 +12,7 @@ import { ConceptCreateInput, ConceptUpdateInput } from '@/lib/effect/schemas/ent
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { ConceptService, ConceptServiceLive } from '@/services/concept/concept.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
+import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -136,8 +137,9 @@ router.delete(
 
 router.post(
 	'/:id/favorite',
-	effectHandler((req) =>
+	effectHandler((req, res) =>
 		Effect.gen(function* () {
+			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.CONCEPT);
 			const conceptService = yield* ConceptService;
 			return yield* conceptService.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(ConceptServiceLive))

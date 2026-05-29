@@ -14,6 +14,7 @@ import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { AudioService, AudioServiceLive } from '@/services/audio/audio.service.effect';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
+import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 
 const router = express.Router();
@@ -381,10 +382,11 @@ router.post('/', effectHandler((req, res) =>
 /**
  * POST /audios/:id/favorite - Toggle estado favorito de un audio
  */
-router.post('/:id/favorite', effectHandler((req) => {
+router.post('/:id/favorite', effectHandler((req, res) => {
 	const { id } = req.params;
 
 	return Effect.gen(function* () {
+		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.AUDIO);
 		const audioService = yield* AudioService;
 		const audio = yield* audioService.toggleFavorite(id);
 
