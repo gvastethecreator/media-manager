@@ -33,7 +33,20 @@ Source index: `docs/architecture/architecture-review-2026-05-29.md`
 
 - ✅ `src/server/routes/images.effect.ts` migrado a `listFavoriteEntities`.
 - ✅ `src/server/routes/videos.effect.ts` migrado a `listFavoriteEntities`.
-- ⏳ Pendiente: converger shape de response de favoritos y plan de retiro de `/:id/favorite` por entidad.
+- ✅ Shape de response de `/images/favorites` y `/videos/favorites` convergido a `{ data, pagination }`.
+- ⏳ Pendiente: plan de retiro de `/:id/favorite` por entidad.
+- 📋 Matriz inicial de facades `/:id/favorite` detectadas (retirement backlog):
+	- `albums.effect.ts`
+	- `audios.effect.ts`
+	- `characters.effect.ts`
+	- `collections.effect.ts`
+	- `concepts.effect.ts`
+	- `folders.effect.ts`
+	- `images.effect.ts`
+	- `places.effect.ts`
+	- `prompts.effect.ts`
+	- `file-services.effect.ts` (`file3ds`, `documents`, `jsonFiles`)
+	- `secondary-services.effect.ts` (`groups`, `wildcards`, `notes`)
 
 ---
 
@@ -104,7 +117,10 @@ Source index: `docs/architecture/architecture-review-2026-05-29.md`
 - ✅ Adapter producción: `src/lib/filesystem/adapters/fs-db-filesystem-sync.adapter.ts`.
 - ✅ Adapter in-memory: `src/lib/filesystem/adapters/in-memory-filesystem-sync.adapter.ts`.
 - ✅ Punto de acceso seam: `src/lib/filesystem/sync-adapter.ts`.
-- ⏳ Pendiente: migrar callers operativos para depender del seam en vez de implementación directa.
+- ✅ Migrados callers operativos clave a seam:
+	- `src/lib/filesystem/folder-stats.ts`
+	- `src/services/folder/reindex/reindex-phases/phase5-indexing.ts`
+- ⏳ Pendiente: seguir consolidando dependencias directas restantes en servicios de sync legacy.
 
 ---
 
@@ -201,3 +217,4 @@ Source index: `docs/architecture/architecture-review-2026-05-29.md`
 - 2026-05-29: workplan inicial creado desde recomendaciones aceptadas.
 - 2026-05-29: avances de implementación en recomendaciones 1, 2 y 3 reflejados.
 - 2026-05-29: avances de implementación en recomendaciones 4, 5 y 6 reflejados.
+- 2026-05-29: convergido contrato de favoritos (images/videos), migrados callers operativos a `FileSystemSync` seam y añadida matriz inicial de facades `/:id/favorite`.
