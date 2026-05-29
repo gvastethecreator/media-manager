@@ -4,3 +4,4 @@ export * from './folder-cache';
 export * from './folder-scanner';
 export * from './folder-stats';
 export * from './path-utils';
+export * from './sync-adapter';
