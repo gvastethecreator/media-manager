@@ -247,3 +247,49 @@ describe('destructive maintenance contract', () => {
 		expect(thumbnailRoutes).toMatch(/router\.post\(\s*['"]\/reprocess['"]/);
 	});
 });
+
+describe('production bootstrap contract', () => {
+	it('construye el frontend con entorno de producción explícito', async () => {
+		const packageJson = JSON.parse(await readFile(resolve(workspacePath, 'package.json'), 'utf8')) as {
+			scripts: Record<string, string>;
+		};
+		const buildRunner = await readFile(resolve(workspacePath, 'scripts/build-vite.ts'), 'utf8');
+		const viteConfig = await readFile(resolve(workspacePath, 'vite.config.ts'), 'utf8');
+		const errorBoundary = await readFile(resolve(workspacePath, 'src/components/core/error-boundary.tsx'), 'utf8');
+
+		expect(packageJson.scripts['build:vite']).toContain('scripts/build-vite.ts');
+		expect(buildRunner).toContain("NODE_ENV: 'production'");
+		expect(viteConfig).toContain('nodeEnvironment = process.env.NODE_ENV ??');
+		expect(viteConfig).toContain("'process.env.NODE_ENV': JSON.stringify(nodeEnvironment)");
+		expect(viteConfig).toContain("'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion)");
+		expect(errorBoundary).not.toContain("from '../../../package.json'");
+	});
+
+	it('mantiene un solo contexto de tema y protege también el árbol de providers', async () => {
+		const retiredThemeFiles = [
+			resolve(workspacePath, 'src/hooks/use-theme.ts'),
+			resolve(workspacePath, 'src/lib/contexts/theme-context.tsx'),
+		];
+		const consumers = [
+			'src/components/theme-sync.tsx',
+			'src/components/ui/sonner.tsx',
+			'src/components/cards/world-item-card/world-item-card-content.tsx',
+			'src/components/settings/themes/theme-settings.tsx',
+			'src/components/settings/modern/appearance-settings-modern.tsx',
+		];
+		const consumerSources = await Promise.all(
+			consumers.map((consumer) => readFile(resolve(workspacePath, consumer), 'utf8'))
+		);
+		const appShell = await readFile(resolve(workspacePath, 'src/platform/app-shell/app-shell.tsx'), 'utf8');
+
+		for (const retiredThemeFile of retiredThemeFiles) {
+			expect(existsSync(retiredThemeFile)).toBe(false);
+		}
+		for (const source of consumerSources) {
+			expect(source).not.toContain('@/hooks/use-theme');
+			expect(source).not.toContain('@/lib/contexts/theme-context');
+			expect(source).toContain('@/components/ui/theme-provider');
+		}
+		expect(appShell.indexOf('<GlobalErrorHandler>')).toBeLessThan(appShell.indexOf('<AppProvider>'));
+	});
+});

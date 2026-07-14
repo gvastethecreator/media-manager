@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTheme } from '@/components/ui/theme-provider';
 import { useSettings } from '@/lib/contexts/settings-context';
-import { useTheme } from '@/lib/contexts/theme-context';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 /**

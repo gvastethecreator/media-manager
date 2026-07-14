@@ -5,6 +5,9 @@ import svgr from 'vite-plugin-svgr';
 import { resolveLocalServiceHost } from './src/config/local-runtime-security.ts';
 
 const emptyModule = resolve(import.meta.dirname, 'src/config/empty.ts');
+const isViteBuildCommand = process.argv.some((argument) => argument === 'build');
+const nodeEnvironment = process.env.NODE_ENV ?? (isViteBuildCommand ? 'production' : 'development');
+const appVersion = process.env.npm_package_version ?? '0.1.0';
 const viteHost = resolveLocalServiceHost({
 	allowExternalBind: process.env.ALLOW_EXTERNAL_BIND === '1',
 	host: process.env.VITE_HOST,
@@ -136,10 +139,11 @@ export default defineConfig({
 	},
 	define: {
 		// Definir variables de entorno para el cliente
-		'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+		'process.env.NODE_ENV': JSON.stringify(nodeEnvironment),
+		'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion),
 		// Optimizaci?n: definir variables en tiempo de build
-		__DEV__: process.env.NODE_ENV !== 'production',
-		__PROD__: process.env.NODE_ENV === 'production',
+		__DEV__: nodeEnvironment !== 'production',
+		__PROD__: nodeEnvironment === 'production',
 	},
 	optimizeDeps: {
 		// Optimizaci?n de dependencias para Bun
@@ -170,7 +174,7 @@ export default defineConfig({
 			'tailwind-merge',
 		],
 		// Forzar re-optimizaci?n en desarrollo
-		force: process.env.NODE_ENV === 'development',
+		force: nodeEnvironment === 'development',
 	},
 	resolve: {
 		tsconfigPaths: true,
@@ -305,6 +309,6 @@ export default defineConfig({
 		'*': 'vp check --fix',
 	},
 	// Optimizaci?n de logs
-	logLevel: process.env.NODE_ENV === 'development' ? 'info' : 'warn',
+	logLevel: nodeEnvironment === 'development' ? 'info' : 'warn',
 	clearScreen: false,
 });
