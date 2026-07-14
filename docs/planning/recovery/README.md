@@ -196,9 +196,11 @@ Checkpoints ya implementados y verificados:
 2. `SEC-001`: Express/Vite sólo loopback por defecto.
 3. `SEC-005` parcial: rutas debug/test ausentes de production.
 4. `SAFE-003` parcial: inventario, snapshot consistente, manifest, hash y restore; falta retención automática.
+5. `SAFE-004`/`SEC-005` parcial: reset DB bloqueado y retirado de HTTP/UI; log cleanup fuera de HTTP; mutaciones de
+   thumbnails sólo por POST.
 
-El siguiente camino crítico es retirar mantenimiento destructivo de HTTP (`SAFE-004`/`SEC-005`) y añadir sesión local
-autenticada (`SEC-002`) antes de abrir roots filesystem (`SEC-003`/`SEC-004`).
+El siguiente camino crítico es añadir sesión local autenticada (`SEC-002`) antes de abrir roots filesystem
+(`SEC-003`/`SEC-004`), mientras Wave 1 prepara migraciones reproducibles para un reset exclusivamente descartable.
 
 ## Definition of Done del programa
 

@@ -97,9 +97,11 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 
 ### SAFE-004 — Separar comandos destructivos
 
-- [ ] Renombrar/resetear scripts para que `reset` requiera confirmación y path explícito.
-- [ ] Bloquear reset sobre DB no marcada como disposable en CI/noninteractive.
-- [ ] Separar cleanup funcional de mantenimiento destructivo.
+- [x] Bloquear por completo el `db:reset` legacy que borraba DB y migraciones sin confirmación/path explícito.
+- [x] Retirar reset de base de datos de API, cliente y UI.
+- [ ] Reintroducir reset sólo para DB marcada como disposable, después del baseline reproducible de Wave 1.
+- [x] Retirar cleanup de logs de HTTP; conservar `logs:clean` como operación CLI explícita.
+- [x] Eliminar aliases GET mutantes de thumbnails y alinear las acciones de producto a POST.
 - [ ] Añadir dry-run a cleanup de phantoms/cursed y reporte de IDs/counts.
 
 **Proof:** invocación accidental sobre DB real aborta; dry-run no cambia conteos.
@@ -150,8 +152,9 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 
 - [x] Route registry separa catálogo production y development.
 - [x] No montar `/api/debug`, `/api/debug-entity-types` ni `/api/test-characters` en producción.
-- [ ] Retirar de producción cleaners y mantenimiento destructivo todavía expuestos por routers funcionales.
-- [ ] Mover maintenance destructivo a CLI/runbook con dry-run.
+- [x] Retirar reset DB, cleanup de logs y aliases GET mutantes de routers funcionales.
+- [x] Bloquear reset legacy y mantener limpieza de logs como CLI explícita.
+- [ ] Añadir dry-run al cleanup de phantoms/cursed antes de exponer cualquier reemplazo operativo.
 - [x] Smoke enumera rutas prohibidas en producción y falla si aparece alguna.
 
 **Proof:** snapshot del route registry por environment.

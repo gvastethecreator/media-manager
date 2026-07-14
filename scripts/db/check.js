@@ -139,7 +139,7 @@ function checkDatabase() {
 	log('🔍 Verificación completada', colors.blue);
 	log('\n📝 Resumen:', colors.magenta);
 	log('- Si la base de datos existe y tiene tamaño, está correctamente configurada', colors.magenta);
-	log('- Para resetear la base de datos: bun run db:reset', colors.magenta);
+	log('- Para respaldar la base de datos: bun run db:backup -- --output <directorio externo>', colors.magenta);
 	log('- Para abrir Drizzle Studio: bun run db:studio', colors.magenta);
 }
 

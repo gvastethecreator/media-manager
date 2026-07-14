@@ -132,7 +132,7 @@ bun run tsc           # Type check
 
 ```bash
 bun run db:studio        # Abre Drizzle Studio (GUI)
-bun run db:reset         # ⚠️ Destructivo: resetea DB
+bun run db:reset         # Bloqueado hasta disponer de migraciones/restore reproducibles
 bun run db:check         # Verifica estado
 ```
 

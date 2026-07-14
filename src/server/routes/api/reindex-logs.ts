@@ -96,26 +96,6 @@ reindexLogsRouter.get('/summary', async (req, res) => {
 });
 
 /**
- * POST /api/reindex-logs/cleanup - Limpia logs antiguos
- */
-reindexLogsRouter.post('/cleanup', (_req, res) => {
-	try {
-		reindexFileLogger.cleanupOldLogs();
-
-		res.json({
-			success: true,
-			message: 'Limpieza de logs completada',
-		});
-	} catch (error) {
-		serverLogger.error('Error en limpieza de logs de reindexado:', error);
-		res.status(500).json({
-			success: false,
-			error: 'Error en limpieza de logs',
-		});
-	}
-});
-
-/**
  * GET /api/reindex-logs/recent - Logs combinados recientes (errores y warnings)
  */
 reindexLogsRouter.get('/recent', (req, res) => {

@@ -39,6 +39,12 @@ bun run db:backup:verify -- --backup D:\Backups\media-manager\media-manager-back
 La verificación vuelve a calcular tamaño y SHA-256, abre la base, ejecuta `quick_check`, copia a un directorio temporal
 y compara el schema y todos los conteos del manifest. No reemplaza la base activa.
 
+## Reset deshabilitado
+
+`bun run db:reset` devuelve exit code 2 sin tocar archivos. El flujo anterior eliminaba `db.sqlite` y el historial de
+migraciones; no se reactivará hasta que Wave 1 disponga de schema reproducible, marcador de DB descartable y restore
+obligatorio. La API y la UI tampoco publican reset de base de datos.
+
 ## Contrato del CLI
 
 - `--help` y `--version` escriben en stdout y devuelven 0.
