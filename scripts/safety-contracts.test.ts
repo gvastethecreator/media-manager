@@ -4,6 +4,11 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import {
+	isLoopbackHost,
+	resolveLocalServiceHost,
+	shouldEnableDevelopmentRoutes,
+} from '../src/config/local-runtime-security';
 import { runIsolatedCommand } from './run-tests-isolated';
 import {
 	assertIsolatedTestDatabase,
@@ -183,5 +188,38 @@ describe('isolated test runner', () => {
 
 		expect(exitCode).toBe(9);
 		expect(existsSync(result.databasePath)).toBe(false);
+	});
+});
+
+describe('local runtime network policy', () => {
+	it('usa loopback como bind por defecto', () => {
+		expect(resolveLocalServiceHost({ serviceName: 'test service' })).toBe('127.0.0.1');
+	});
+
+	it('acepta hosts loopback conocidos', () => {
+		expect(isLoopbackHost('localhost')).toBe(true);
+		expect(isLoopbackHost('127.0.0.1')).toBe(true);
+		expect(isLoopbackHost('::1')).toBe(true);
+	});
+
+	it('rechaza wildcard y hosts externos sin opt-in', () => {
+		expect(() => resolveLocalServiceHost({ host: '0.0.0.0', serviceName: 'test service' })).toThrow(
+			'bloqueó bind externo'
+		);
+		expect(() => resolveLocalServiceHost({ host: '192.168.1.50', serviceName: 'test service' })).toThrow(
+			'bloqueó bind externo'
+		);
+	});
+
+	it('permite bind externo sólo con opt-in explícito', () => {
+		expect(resolveLocalServiceHost({ allowExternalBind: true, host: '0.0.0.0', serviceName: 'test service' })).toBe(
+			'0.0.0.0'
+		);
+	});
+
+	it('habilita rutas de desarrollo sólo con ambiente y flag', () => {
+		expect(shouldEnableDevelopmentRoutes({ NODE_ENV: 'production', ENABLE_DEBUG_ROUTES: '1' })).toBe(false);
+		expect(shouldEnableDevelopmentRoutes({ NODE_ENV: 'development' })).toBe(false);
+		expect(shouldEnableDevelopmentRoutes({ NODE_ENV: 'development', ENABLE_DEBUG_ROUTES: '1' })).toBe(true);
 	});
 });
