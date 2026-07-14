@@ -1,4 +1,5 @@
 import type { Express } from 'express';
+import { shouldEnableDevelopmentRoutes } from '@/config/local-runtime-security';
 import threeDThumbnailsRouter from './routes/3d-thumbnails';
 import activityRouter from './routes/activity';
 import albumsEffectRouter from './routes/albums.effect';
@@ -47,7 +48,7 @@ import { thumbnailsEffectRouter } from './routes/thumbnails.effect';
 import { thumbnailsUnifiedRouter } from './routes/thumbnails-unified';
 import videosEffectRouter from './routes/videos.effect';
 
-export function registerRoutes(app: Express): void {
+export function registerRoutes(app: Express, environment: Record<string, string | undefined> = process.env): void {
 	app.use('/api/folders', foldersEffectRouter);
 	app.use('/api/images', imagesEffectRouter);
 	app.use('/api/tags', tagsEffectRouter);
@@ -91,12 +92,14 @@ export function registerRoutes(app: Express): void {
 	app.use('/api/events', eventsEffectRouter);
 
 	// Otros routers legacy (pendientes de migrar)
-	app.use('/api/test-characters', testCharactersRouter);
 	app.use('/api/json', jsonThumbnailsRouter);
 	app.use('/api/audio-waveforms', audioWaveformsRouter);
 	app.use('/api/3d', threeDThumbnailsRouter);
-	app.use('/api/debug', debugRouter);
-	app.use('/api/debug-entity-types', debugEntityTypesRouter);
+	if (shouldEnableDevelopmentRoutes(environment)) {
+		app.use('/api/test-characters', testCharactersRouter);
+		app.use('/api/debug', debugRouter);
+		app.use('/api/debug-entity-types', debugEntityTypesRouter);
+	}
 	app.use('/api/queue', queueRouter);
 	app.use('/api/system', systemRouter);
 	app.use('/api/reindex-logs', reindexLogsRouter);

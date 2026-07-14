@@ -105,10 +105,10 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 
 ### SEC-001 — Loopback por defecto
 
-- [ ] Express escucha `127.0.0.1`; override externo requiere flag explícito y warning crítico.
-- [ ] Vite dev usa loopback salvo caso documentado.
-- [ ] Health no revela datos sensibles.
-- [ ] Tests prueban host por defecto y config inválida.
+- [x] Express escucha `127.0.0.1`; override externo requiere flag explícito y warning crítico.
+- [x] Vite dev usa loopback salvo caso documentado.
+- [x] Health público se limita a estado, timestamp y uptime.
+- [x] Tests prueban host por defecto y config inválida.
 
 **Proof:** `Get-NetTCPConnection` muestra sólo loopback.
 
@@ -145,10 +145,11 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 
 ### SEC-005 — Rutas debug/test sólo en desarrollo explícito
 
-- [ ] Route registry separa catálogo production y development.
-- [ ] No montar `/api/debug`, `/api/debug-entity-types`, `/api/test-characters` ni cleaners en producción.
+- [x] Route registry separa catálogo production y development.
+- [x] No montar `/api/debug`, `/api/debug-entity-types` ni `/api/test-characters` en producción.
+- [ ] Retirar de producción cleaners y mantenimiento destructivo todavía expuestos por routers funcionales.
 - [ ] Mover maintenance destructivo a CLI/runbook con dry-run.
-- [ ] Smoke enumera rutas de producción y falla si aparece una prohibida.
+- [x] Smoke enumera rutas prohibidas en producción y falla si aparece alguna.
 
 **Proof:** snapshot del route registry por environment.
 
@@ -176,7 +177,7 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 - [ ] Test aislado limpia sus artefactos y propaga código de salida.
 - [ ] Suite completa verde o fallas restantes aprobadas/bloqueadas con gate rojo.
 - [ ] Backup/restore comprobado.
-- [ ] Servidores sólo loopback.
+- [x] Servidores sólo loopback por defecto.
 - [ ] API requiere sesión y root policy.
-- [ ] Rutas debug/test ausentes en production.
+- [x] Rutas debug/test ausentes en production.
 - [ ] Ningún P0 de la auditoría permanece sin mitigación verificable.
