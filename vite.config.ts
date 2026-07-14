@@ -2,8 +2,14 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { defineConfig } from 'vite-plus';
 import svgr from 'vite-plugin-svgr';
+import { resolveLocalServiceHost } from './src/config/local-runtime-security.ts';
 
 const emptyModule = resolve(import.meta.dirname, 'src/config/empty.ts');
+const viteHost = resolveLocalServiceHost({
+	allowExternalBind: process.env.ALLOW_EXTERNAL_BIND === '1',
+	host: process.env.VITE_HOST,
+	serviceName: 'Vite dev server',
+});
 function getManualChunkName(id: string) {
 	if (!id.includes('node_modules')) {
 		return undefined;
@@ -69,20 +75,18 @@ export default defineConfig({
 	],
 	server: {
 		port: 5173,
-		host: true,
+		host: viteHost,
 		// Optimizaci?n HMR para Bun
 		hmr: {
 			port: 5175,
 			// Mejorar compatibilidad con Bun
 			clientPort: 5175,
-			host: 'localhost',
+			host: viteHost,
 		},
 		// Configuraci?n adicional para mejorar compatibilidad con Bun
 		middlewareMode: false,
 		fs: {
-			strict: false,
-			// Permitir acceso a archivos fuera del workspace
-			allow: ['..', '../..'],
+			strict: true,
 		},
 		// Optimizaci?n de proxy para mejor rendimiento
 		proxy: {
@@ -102,6 +106,7 @@ export default defineConfig({
 		},
 	},
 	preview: {
+		host: viteHost,
 		port: 4173,
 	},
 	build: {
