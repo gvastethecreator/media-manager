@@ -30,7 +30,7 @@ export function ThemeToggle() {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
 				{themes.map((t) => (
-					<DropdownMenuItem key={t} onClick={() => setTheme(t as any)}>
+					<DropdownMenuItem key={t} onClick={() => setTheme(t)}>
 						{t.charAt(0).toUpperCase() + t.slice(1)}
 						{theme === t && <span className="ml-2 text-primary text-xs">(actual)</span>}
 					</DropdownMenuItem>

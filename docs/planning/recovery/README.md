@@ -198,6 +198,8 @@ Checkpoints ya implementados y verificados:
 4. `SAFE-003` parcial: inventario, snapshot consistente, manifest, hash y restore; falta retención automática.
 5. `SAFE-004`/`SEC-005` parcial: reset DB bloqueado y retirado de HTTP/UI; log cleanup fuera de HTTP; mutaciones de
    thumbnails sólo por POST.
+6. `BOOT-001` y `RUN-002` parcial: un solo contexto de tema, boundary exterior, build production explícito, root visible
+   en Chromium y tooling de desarrollo ausente de `dist`.
 
 El siguiente camino crítico es añadir sesión local autenticada (`SEC-002`) antes de abrir roots filesystem
 (`SEC-003`/`SEC-004`), mientras Wave 1 prepara migraciones reproducibles para un reset exclusivamente descartable.

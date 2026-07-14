@@ -15,31 +15,31 @@ Requiere Waves 0 y 1 verdes.
 
 ### RUN-002 — Build de producción genuino
 
-- [ ] Scripts establecen `NODE_ENV=production` de forma cross-platform.
-- [ ] `import.meta.env.DEV`, `__DEV__` y source maps responden al modo real.
-- [ ] React Grab/React Scan/dev routes no aparecen en dist.
+- [x] Scripts establecen `NODE_ENV=production` de forma cross-platform.
+- [x] `import.meta.env.DEV`, `__DEV__` y source maps responden al modo real.
+- [x] React Grab/React Scan/dev routes no aparecen en dist.
 - [ ] Build metadata incluye versión/commit/schema compatible.
 
 ## Paquete 2B — Bootstrap y App Shell
 
 ### BOOT-001 — Unificar theme context
 
-- [ ] Elegir una sola implementación de `ThemeProvider/useTheme`.
-- [ ] Migrar ThemeSync, Toaster, settings y navegación.
-- [ ] Eliminar contexto duplicado y tests que permitan importarlo.
-- [ ] Persistencia de theme con fallback para valores inválidos.
+- [x] Elegir una sola implementación de `ThemeProvider/useTheme`.
+- [x] Migrar ThemeSync, Toaster, settings y navegación.
+- [x] Eliminar contexto duplicado y tests que permitan importarlo.
+- [x] Persistencia de theme con fallback para valores inválidos.
 
 ### BOOT-002 — Boundary exterior de bootstrap
 
-- [ ] Boundary antes de providers con fallback legible.
+- [x] Boundary antes de providers con fallback legible.
 - [ ] Capturar errores de config, DB/API health y provider composition.
 - [ ] Acciones: reintentar, abrir logs/support bundle, arrancar modo seguro cuando sea válido.
-- [ ] No dejar root vacío ni loop de reload.
+- [x] No dejar root vacío ni loop de reload.
 
 ### BOOT-003 — Orden y ownership de providers
 
 - [ ] Documentar grafo mínimo: config → theme/settings → query/cache → files → app/router.
-- [ ] Evitar providers que consumen un contexto aún no montado.
+- [x] Evitar providers que consumen un contexto aún no montado.
 - [ ] Side effects de bootstrap idempotentes bajo React StrictMode.
 - [ ] Tests de composición y un único `AppShell` canónico.
 
@@ -114,8 +114,17 @@ Requiere Waves 0 y 1 verdes.
 ## Wave 2 exit gate
 
 - [ ] `build` + `start` abre UI desde artefactos de producción.
-- [ ] No hay tooling de desarrollo en dist.
+- [x] No hay tooling de desarrollo en dist.
 - [ ] Cero error de consola en dashboard smoke.
 - [ ] Bootstrap failures muestran recovery UI.
 - [ ] Shutdown limpia jobs, DB y puerto.
 - [ ] Same-origin API/session/root policy funciona de punta a punta.
+
+## Evidencia del checkpoint BOOT-001/RUN-002
+
+- `scripts/build-vite.ts` fuerza `NODE_ENV=production`; `vite.config.ts` conserva fallback correcto para invocación directa.
+- 25 contratos de tooling/seguridad y 2 pruebas de `ThemeProvider` verdes.
+- `bun run tsc`, lint focalizado y build Vite+ de producción verdes.
+- Inspección de `dist/assets/*.js`: sin `react-grab` ni `react-scan`; `package.json` ya no se incrusta en el cliente.
+- Smoke Chromium a `1440x900`: HTTP 200, root visible, tema `light`, sin fallback, sin `pageerror` y sin overflow horizontal.
+- El preview estático devuelve 502 en API porque Express no forma parte de ese proceso; el smoke full-stack hermético continúa pendiente en `E2E-001`.

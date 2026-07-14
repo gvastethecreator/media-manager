@@ -1,6 +1,5 @@
 import React from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
-import packageJson from '../../../package.json' with { type: 'json' };
 import { GlobalErrorFallback } from './global-error-handler';
 
 interface ErrorBoundaryProps {
@@ -25,7 +24,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 	}
 
 	componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-		if (process.env.NODE_ENV !== 'production') {
+		if (import.meta.env.DEV) {
 			clientLogger.error('Error capturado por ErrorBoundary:', { error, errorInfo });
 		}
 	}
@@ -59,14 +58,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 				const stack = this.state.error.stack || '';
 				const affectedFiles = this.getAffectedFiles(stack);
 				const envInfo = {
-					version: packageJson.version,
+					version: import.meta.env.VITE_APP_VERSION || 'desconocida',
 					branch: (import.meta as any).env?.VITE_GIT_BRANCH || 'desconocida',
 					date: new Date().toLocaleString(),
 					path: window.location.pathname,
 				};
 
 				// In production, just show the generic fallback.
-				if (process.env.NODE_ENV === 'production') {
+				if (import.meta.env.PROD) {
 					return <GlobalErrorFallback error={this.state.error} resetError={this.handleReload} />;
 				}
 
