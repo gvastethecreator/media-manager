@@ -190,15 +190,15 @@ Actualizar en cada checkpoint:
 
 ## Orden inmediato aprobado
 
-El primer paquete activo es:
+Checkpoints ya implementados y verificados:
 
-1. `GATE-001`: los wrappers preservan el exit code real.
-2. `SAFE-001`: tests rechazan la DB de aplicación.
-3. `SAFE-002`: runner crea una copia descartable y limpia siempre.
-4. `GATE-002`: package scripts usan el runner seguro.
-5. Pruebas de contrato del guard, propagación y cleanup.
+1. `GATE-001`, `SAFE-001`, `SAFE-002`, `GATE-002`: gates honestos y tests aislados.
+2. `SEC-001`: Express/Vite sólo loopback por defecto.
+3. `SEC-005` parcial: rutas debug/test ausentes de production.
+4. `SAFE-003` parcial: inventario, snapshot consistente, manifest, hash y restore; falta retención automática.
 
-Después se continúa con `SEC-001` y el resto de [Wave 0](./00-safety-and-gates.md).
+El siguiente camino crítico es retirar mantenimiento destructivo de HTTP (`SAFE-004`/`SEC-005`) y añadir sesión local
+autenticada (`SEC-002`) antes de abrir roots filesystem (`SEC-003`/`SEC-004`).
 
 ## Definition of Done del programa
 

@@ -84,13 +84,16 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 
 ### SAFE-003 — Inventario y backup verificable
 
-- [ ] Comando read-only que informa ruta, tamaño, schema version, table counts y WAL mode.
-- [ ] Backup consistente con API SQLite/libSQL, no `Copy-Item` sobre DB activa.
-- [ ] Hash del backup y manifest sin contenido personal.
-- [ ] Restore a directorio temporal con conteos comparados.
-- [ ] Retention configurable y prohibición de escribir backups dentro del bundle/Git.
+- [x] Comando read-only que informa ruta, tamaño, schema version, table counts y WAL mode.
+- [x] Backup consistente mediante `VACUUM INTO`, no `Copy-Item` sobre DB activa.
+- [x] Hash del backup y manifest sin contenido personal.
+- [x] Restore a directorio temporal con schema y conteos comparados.
+- [x] Prohibir destinos de backup dentro del workspace/Git, incluso tras resolver symlinks/junctions.
+- [ ] Retention configurable y segura, limitada a artefactos reconocidos por manifest.
 
 **Proof:** restore abre, queries smoke pasan y original permanece intacta.
+
+**Runbook:** [Inventario y backup seguro](../../guides/DATABASE-BACKUP.md).
 
 ### SAFE-004 — Separar comandos destructivos
 
