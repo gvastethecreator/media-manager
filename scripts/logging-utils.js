@@ -203,7 +203,7 @@ export function listRecentLogs(limit = 10) {
 /**
  * Genera el resumen de errores al final de la ejecución y lo agrega al principio del log
  */
-export function generatePostExecutionSummary(logFile, command) {
+export function generatePostExecutionSummary(logFile, command, exitCode = null) {
 	console.log(`\n${'═'.repeat(60)}`);
 	console.log('📊 RESUMEN AUTOMÁTICO DE ERRORES');
 	console.log('═'.repeat(60));
@@ -241,7 +241,11 @@ export function generatePostExecutionSummary(logFile, command) {
 
 		return summary.stats;
 	}
-	console.log('\n✅ No se encontraron errores de sintaxis o linting');
+	if (exitCode !== null && exitCode !== 0) {
+		console.log(`\n❌ El comando finalizó con exit code ${exitCode}; el parser no clasificó detalles adicionales.`);
+		return null;
+	}
+	console.log('\n✅ No se encontraron errores categorizados en el log');
 	return null;
 }
 
