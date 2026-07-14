@@ -621,30 +621,6 @@ export async function repairSystem(): Promise<SystemResponse> {
 }
 
 /**
- * Resetea la base de datos (elimina todos los datos)
- * ¡PRECAUCIÓN! Esta acción es irreversible
- */
-export async function resetDatabase(): Promise<SystemResponse> {
-	try {
-		systemLogger.warn('⚠️ Iniciando reseteo de base de datos');
-		systemLogger.warn('⛔ El reseteo HTTP está deshabilitado para evitar borrados accidentales');
-		return {
-			success: false,
-			message:
-				'El reseteo completo no está habilitado desde la API HTTP. Usa `bun run db:reset` en un entorno controlado.',
-			timestamp: new Date().toISOString(),
-		};
-	} catch (error) {
-		systemLogger.error('❌ Error al resetear la base de datos:', error);
-		return {
-			success: false,
-			message: error instanceof Error ? error.message : 'Error desconocido al resetear la base de datos',
-			timestamp: new Date().toISOString(),
-		};
-	}
-}
-
-/**
  * Obtiene información sobre la versión del sistema
  */
 export async function getSystemVersion(): Promise<{

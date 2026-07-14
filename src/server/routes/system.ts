@@ -13,7 +13,6 @@ import {
 	getSystemSettings,
 	getSystemVersion,
 	repairSystem,
-	resetDatabase,
 	resetProfileSettings,
 	resetSystemSettings,
 	updateProfileSettings,
@@ -79,17 +78,6 @@ router.post(
 		Effect.tryPromise({
 			try: () => repairSystem(),
 			catch: (error) => toError('Error reparando el sistema', error),
-		})
-	)
-);
-
-// POST /api/system/reset-db - Resetear la base de datos
-router.post(
-	'/reset-db',
-	effectHandler((_req, _res) =>
-		Effect.tryPromise({
-			try: () => resetDatabase(),
-			catch: (error) => toError('Error reseteando la base de datos', error),
 		})
 	)
 );

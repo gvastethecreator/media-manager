@@ -181,14 +181,3 @@ export function useDeleteThumbnails() {
 		},
 	});
 }
-
-export function useCleanupThumbnails() {
-	const queryClient = useQueryClient();
-
-	return useMutation<{ cleaned: number; freed: number }, Error, void>({
-		mutationFn: () => apiClient.post<{ cleaned: number; freed: number }>('/thumbnails/cleanup'),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: thumbnailKeys.all });
-		},
-	});
-}

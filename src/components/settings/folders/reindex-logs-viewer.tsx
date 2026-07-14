@@ -5,10 +5,9 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, Clock, FileText, RefreshCw, Trash2, XCircle } from 'lucide-react';
+import { AlertTriangle, Clock, FileText, RefreshCw, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { JsonViewer } from '@/components/panels/details-panel/components/json-viewer';
-import { clientLogger } from '@/lib/logger/client-logger';
 import type { ReindexLogEntry } from '@/lib/logger/reindex-file-logger';
 
 interface LogStats {
@@ -151,18 +150,6 @@ export default function ReindexLogsViewer() {
 		refetchInterval: 60_000, // Actualizar cada minuto
 	});
 
-	// Limpiar logs antiguos
-	const handleCleanupLogs = async () => {
-		try {
-			const response = await fetch('/api/reindex-logs/cleanup', { method: 'POST' });
-			if (!response.ok) throw new Error('Error en limpieza de logs');
-			// Refetch statistics after cleanup
-			await statsQuery.refetch();
-		} catch (error) {
-			clientLogger.error('Error limpiando logs:', error);
-		}
-	};
-
 	const currentQuery = {
 		recent: recentQuery,
 		errors: errorsQuery,
@@ -180,14 +167,6 @@ export default function ReindexLogsViewer() {
 						<h2 className="font-semibold text-foreground text-xl">Logs de Sistema de Reindexado</h2>
 					</div>
 					<div className="flex items-center gap-2">
-						<button
-							className="flex items-center gap-1 rounded-md bg-destructive/10 px-3 py-1.5 text-destructive text-sm transition-colors hover:bg-destructive/20"
-							onClick={handleCleanupLogs}
-							type="button"
-						>
-							<Trash2 className="h-4 w-4" />
-							Limpiar Antiguos
-						</button>
 						<button
 							className="flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 text-primary text-sm transition-colors hover:bg-primary/20"
 							disabled={currentQuery.isFetching}
