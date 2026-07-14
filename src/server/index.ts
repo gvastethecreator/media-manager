@@ -2,6 +2,7 @@
 
 import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
 import path from 'path';
+import { isLoopbackHost, resolveLocalServiceHost } from '@/config/local-runtime-security';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, requestLogger } from './middleware/logging';
@@ -16,6 +17,11 @@ app.use((req, res, next) => {
 });
 
 const PORT = Number.parseInt(process.env.API_PORT || process.env.PORT || '4000', 10);
+const HOST = resolveLocalServiceHost({
+	allowExternalBind: process.env.ALLOW_EXTERNAL_BIND === '1',
+	host: process.env.API_HOST,
+	serviceName: 'Express API',
+});
 
 // Security headers
 import helmet from 'helmet';
@@ -60,8 +66,11 @@ app.use((req, res) => {
 
 app.use(errorLogger as ErrorRequestHandler);
 
-app.listen(PORT, '0.0.0.0', () => {
-	logInfo(`🚀 Servidor Express iniciado en puerto ${PORT}`);
+app.listen(PORT, HOST, () => {
+	logInfo(`🚀 Servidor Express iniciado en http://${HOST}:${PORT}`);
+	if (!isLoopbackHost(HOST)) {
+		logError(`⚠️ API expuesta fuera de loopback en ${HOST}; ALLOW_EXTERNAL_BIND está activo.`);
+	}
 	reindexMonitor.start();
 	initializeFileLogging();
 });
