@@ -1,5 +1,9 @@
 # WORKPLAN — Architecture Deepening Batch (2026-05-29)
 
+> Este batch histórico queda subordinado al programa de recuperación vigente:
+> [`docs/planning/recovery/README.md`](../planning/recovery/README.md). Sus recomendaciones continúan como trabajo de
+> arquitectura, pero no deben adelantarse a los gates de datos, seguridad y runtime de Waves 0–2.
+
 Source index: `docs/architecture/architecture-review-2026-05-29.md`
 
 ## Recommendation 1 — Favorite Listing/Projection seam (HTTP)
