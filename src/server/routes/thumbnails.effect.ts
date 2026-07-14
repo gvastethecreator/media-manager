@@ -337,9 +337,9 @@ router.delete('/image/:imageId', effectHandler((req) =>
 ));
 
 /**
- * POST /thumbnails/cleanup - Limpiar thumbnails huérfanos
+ * POST /thumbnails/clean - Limpiar thumbnails huérfanos
  */
-router.post('/cleanup', effectHandler((req) =>
+router.post('/clean', effectHandler((req) =>
 	Effect.gen(function* () {
 		const service = yield* ThumbnailService;
 		return yield* service.cleanThumbnails(req.body);
@@ -347,32 +347,22 @@ router.post('/cleanup', effectHandler((req) =>
 ));
 
 /**
- * GET /thumbnails/cleanup - Limpiar thumbnails (alias)
+ * POST /thumbnails/optimize - Optimizar thumbnails
  */
-router.get('/cleanup', effectHandler((req) =>
+router.post('/optimize', effectHandler((req) =>
 	Effect.gen(function* () {
 		const service = yield* ThumbnailService;
-		return yield* service.cleanThumbnails(req.query as Record<string, unknown>);
+		return yield* service.optimizeThumbnails(req.body);
 	}).pipe(Effect.provide(ThumbnailServiceLive))
 ));
 
 /**
- * GET /thumbnails/optimize - Optimizar thumbnails
+ * POST /thumbnails/reprocess - Reprocesar thumbnails
  */
-router.get('/optimize', effectHandler((req) =>
+router.post('/reprocess', effectHandler((req) =>
 	Effect.gen(function* () {
 		const service = yield* ThumbnailService;
-		return yield* service.optimizeThumbnails(req.query as Record<string, unknown>);
-	}).pipe(Effect.provide(ThumbnailServiceLive))
-));
-
-/**
- * GET /thumbnails/reprocess - Reprocesar thumbnails
- */
-router.get('/reprocess', effectHandler((req) =>
-	Effect.gen(function* () {
-		const service = yield* ThumbnailService;
-		return yield* service.reprocessThumbnails(req.query as Record<string, unknown>);
+		return yield* service.reprocessThumbnails(req.body);
 	}).pipe(Effect.provide(ThumbnailServiceLive))
 ));
 

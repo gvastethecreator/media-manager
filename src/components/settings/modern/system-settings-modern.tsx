@@ -4,31 +4,9 @@
  * @description Vista de configuración del sistema con diseño mejorado y datos reales
  */
 
-import {
-	AlertTriangle,
-	CheckCircle,
-	ChevronDown,
-	Database,
-	Eye,
-	HardDrive,
-	RefreshCw,
-	Server,
-	Users,
-	Zap,
-} from 'lucide-react';
+import { CheckCircle, ChevronDown, Database, Eye, HardDrive, RefreshCw, Server, Users, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,7 +16,7 @@ import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { useRepairSystem, useResetDatabase, useSystemStats, useSystemVersion } from '@/lib/api/system';
+import { useRepairSystem, useSystemStats, useSystemVersion } from '@/lib/api/system';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import {
@@ -107,7 +85,6 @@ export function SystemSettingsModern() {
 	const { data: rawStats, isLoading, refetch } = useSystemStats();
 	const { data: versionData } = useSystemVersion();
 	const repairSystemMutation = useRepairSystem();
-	const resetDatabaseMutation = useResetDatabase();
 
 	useEffect(() => {
 		if (!autoRefresh) {
@@ -178,20 +155,6 @@ export function SystemSettingsModern() {
 			}
 		} catch (error) {
 			toastService.error('Error al reparar el sistema');
-		}
-	};
-
-	const handleReset = async () => {
-		try {
-			const result = await resetDatabaseMutation.mutateAsync();
-			if (result.success) {
-				toastService.success(result.message);
-				refetch();
-			} else {
-				toastService.error(result.message);
-			}
-		} catch (error) {
-			toastService.error('Error crítico al resetear base de datos');
 		}
 	};
 
@@ -377,33 +340,6 @@ export function SystemSettingsModern() {
 										<Eye className={cn('mr-2 h-4 w-4', repairSystemMutation.isPending && 'animate-spin')} />
 										{repairSystemMutation.isPending ? 'Reparando...' : 'Ejecutar Reparación'}
 									</Button>
-								</SettingsRow>
-								<SettingsRow description="Eliminar todos los datos y reiniciar (Destructivo)" label="Resetear DB">
-									<AlertDialog>
-										<AlertDialogTrigger asChild>
-											<Button size="sm" variant="destructive">
-												<AlertTriangle className="mr-2 h-4 w-4" />
-												Resetear Todo
-											</Button>
-										</AlertDialogTrigger>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
-												<AlertDialogDescription>
-													Esta acción eliminará PERMANENTEMENTE todos los datos de la base de datos.
-												</AlertDialogDescription>
-											</AlertDialogHeader>
-											<AlertDialogFooter>
-												<AlertDialogCancel>Cancelar</AlertDialogCancel>
-												<AlertDialogAction
-													className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-													onClick={handleReset}
-												>
-													Sí, resetear
-												</AlertDialogAction>
-											</AlertDialogFooter>
-										</AlertDialogContent>
-									</AlertDialog>
 								</SettingsRow>
 							</SettingsGroup>
 
