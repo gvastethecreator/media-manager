@@ -11,7 +11,7 @@
 		"dev:server:hot": "bun scripts/dev-server-hot.js",
 		"dev:tauri": "bun scripts/tauri-dev.js",
 		"build": "bun scripts/run-with-log.js build \"bun run build:vite && bun run build:server\"",
-		"build:vite": "bun scripts/run-with-log.js build-vite vp build",
+		"build:vite": "bun scripts/run-with-log.js build-vite bun scripts/build-vite.ts",
 		"build:server": "bun scripts/run-with-log.js build-server bun build src/server/index.ts --outdir dist/server --target bun",
 		"build:tauri": "bun scripts/run-with-log.js build-tauri bun scripts/tauri-build.js",
 		"preview": "vp preview",
