@@ -49,6 +49,7 @@ tsc_output.txt
 *.tsbuildinfo
 
 # project
+/.scratch/
 .image-cache
 .thumbnail-cache
 /bin/

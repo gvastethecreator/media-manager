@@ -21,7 +21,7 @@ function resolveCommandTypeLower(isLint, isTest, isCheck) {
 	if (isCheck) {
 		return 'type checking';
 	}
-	return 'tolerante';
+	return 'normal';
 }
 
 function resolveCommandTypeHeader(isLint, isTest, isCheck) {
@@ -42,7 +42,7 @@ const [, , logName, ...commandArgs] = process.argv;
 if (!logName || commandArgs.length === 0) {
 	console.error('Uso: bun scripts/run-with-log.js <nombre-log> <comando-completo>');
 	console.error('');
-	console.error('🚀 Script Universal de Logging con Tolerancia Inteligente');
+	console.error('🚀 Script Universal de Logging');
 	console.error('');
 	console.error('Detección automática de tipos de comando:');
 	console.error('  📏 Linting: oxlint, oxfmt, vp check/lint/fmt, eslint, prettier');
@@ -50,8 +50,8 @@ if (!logName || commandArgs.length === 0) {
 	console.error('  📝 TypeScript: tsc --noEmit');
 	console.error('  🏗️  Build: otros comandos (modo estricto)');
 	console.error('');
-	console.error('Los comandos de linting/testing toleran exit code 1 (issues encontrados)');
-	console.error('Los comandos de build requieren exit code 0 (éxito completo)');
+	console.error('Todos los comandos preservan su exit code por defecto.');
+	console.error('RUN_WITH_LOG_TOLERANT=1 habilita tolerancia explícita sólo para exploración local.');
 	process.exit(1);
 }
 
@@ -81,7 +81,7 @@ const matchesAnyPattern = (patterns) => patterns.some((pattern) => pattern.test(
 const isLintingCommand = matchesAnyPattern(LINTING_COMMAND_PATTERNS);
 const isTestingCommand = matchesAnyPattern(TESTING_COMMAND_PATTERNS);
 const isCheckingCommand = matchesAnyPattern(CHECKING_COMMAND_PATTERNS);
-const isTolerantCommand = isLintingCommand || isTestingCommand;
+const isTolerantCommand = process.env.RUN_WITH_LOG_TOLERANT === '1';
 
 const logsDir = join(process.cwd(), 'logs');
 if (!existsSync(logsDir)) {
@@ -104,7 +104,7 @@ console.log(chalk.cyan(`🚀 Ejecutando: ${chalk.bold(fullCommand)}`));
 console.log(chalk.gray(`📄 Logs en: ${logFilePath}`));
 if (isTolerantCommand) {
 	const tipo = resolveCommandTypeLower(isLintingCommand, isTestingCommand, isCheckingCommand);
-	console.log(chalk.blue(`🔍 Comando de ${tipo} detectado - tolerando códigos de salida no-cero`));
+	console.log(chalk.yellow(`⚠️  Modo tolerante explícito para ${tipo}; no usar como gate de CI/release`));
 }
 console.log(chalk.yellow('📺 Salida en tiempo real:'));
 console.log(chalk.gray('═'.repeat(50)));
@@ -151,7 +151,9 @@ function isToolInfo(line) {
 	return line.includes('lint/') || line.includes('test ') || line.includes('spec ');
 }
 function isErrorToken(line) {
-	return /\berror\b/i.test(line) || line.includes('✘') || /\bfailed\b/i.test(line) || /found [1-9]\d* errors?/i.test(line);
+	return (
+		/\berror\b/i.test(line) || line.includes('✘') || /\bfailed\b/i.test(line) || /found [1-9]\d* errors?/i.test(line)
+	);
 }
 function getLineStyle(line, isError) {
 	if (isSuccessLine(line)) {
@@ -218,17 +220,18 @@ child.on('error', (error) => {
 	const errorMsg = `❌ Error al iniciar el proceso: ${error.message}`;
 	console.error(chalk.red.bold(errorMsg));
 	logStream.write(`\n--- ERROR DE SPAWN ---\n${error.stack}`);
-	process.exit(1);
+	logStream.end();
+	process.exitCode = 1;
 });
 
 function logTolerantOutcome(exitCode) {
 	const tipo = resolveCommandTypeHeader(isLintingCommand, isTestingCommand, isCheckingCommand);
 	console.log(chalk.yellow.bold(`⚠️  ${tipo} completado con issues encontrados (Exit code: ${exitCode})`));
 	console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
-	generatePostExecutionSummary(logFilePath, fullCommand);
+	generatePostExecutionSummary(logFilePath, fullCommand, exitCode);
 	console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
-	console.log(chalk.green('✅ Script completado exitosamente'));
-	process.exit(0);
+	console.log(chalk.yellow('⚠️  Script tolerado explícitamente; el comando hijo reportó issues'));
+	process.exitCode = 0;
 }
 
 child.on('close', (code) => {
@@ -241,7 +244,7 @@ child.on('close', (code) => {
 
 		// Generar resumen automático de errores si es una herramienta de linting/checking
 		if (isLintingCommand || isTestingCommand || isCheckingCommand) {
-			generatePostExecutionSummary(logFilePath, fullCommand);
+			generatePostExecutionSummary(logFilePath, fullCommand, 0);
 		}
 
 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
@@ -256,7 +259,7 @@ child.on('close', (code) => {
 
 			// Generar resumen automático de errores incluso en caso de error
 			if (isLintingCommand || isTestingCommand || isCheckingCommand) {
-				generatePostExecutionSummary(errorFilePath, fullCommand);
+				generatePostExecutionSummary(errorFilePath, fullCommand, code ?? 1);
 			}
 		} catch (copyError) {
 			console.error(chalk.red.bold(`Error al copiar el archivo de log: ${copyError.message}`));
@@ -264,6 +267,6 @@ child.on('close', (code) => {
 		if (missingDep) {
 			console.log(chalk.yellow('🛈 Parece que faltan dependencias. Ejecuta "bun install" e intenta de nuevo.'));
 		}
-		process.exit(code);
+		process.exitCode = code ?? 1;
 	}
 });

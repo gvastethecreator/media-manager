@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
+import { assertIsolatedTestDatabase } from './safety/test-database-guard';
 
 // Asegurar flags de entorno para ejecución de tests unitarios
 // - Fuerza detección de "test" en módulos compartidos (p.ej. Drizzle)
@@ -8,6 +9,8 @@ import { afterEach, vi } from 'vitest';
 // @ts-expect-error - TS marca NODE_ENV readonly pero asignamos antes de que se "congele"
 process.env.NODE_ENV ??= 'test';
 process.env.DISABLE_FTS5 ??= '1';
+
+assertIsolatedTestDatabase();
 
 const { getDbClient } = await import('@/lib/drizzle');
 const dbClient = getDbClient();
