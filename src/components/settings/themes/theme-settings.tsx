@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme, type Theme } from '@/components/ui/theme-provider';
 import { cn } from '@/lib/utils';
 import { useCustomThemeStore } from '@/store/entities/themes/custom-theme.store';
 import type { CustomTheme } from '@/types/theme';
@@ -51,7 +51,7 @@ export function ThemeSettings() {
 	// Handlers
 	const handleSelectBuiltIn = useCallback(
 		(themeId: string) => {
-			setTheme(themeId as 'light' | 'dark' | 'system');
+			setTheme(themeId as Theme);
 		},
 		[setTheme]
 	);

@@ -1,4 +1,5 @@
 import App from '@/App';
+import { GlobalErrorHandler } from '@/components/core/global-error-handler';
 import { AppProvider } from '@/providers/app-provider';
 
 /**
@@ -6,10 +7,12 @@ import { AppProvider } from '@/providers/app-provider';
  */
 export function AppShell() {
 	return (
-		<AppProvider>
-			<div className="root">
-				<App />
-			</div>
-		</AppProvider>
+		<GlobalErrorHandler>
+			<AppProvider>
+				<div className="root">
+					<App />
+				</div>
+			</AppProvider>
+		</GlobalErrorHandler>
 	);
 }

@@ -15,7 +15,7 @@ export function GlobalErrorFallback({ error, resetError }: { error: Error; reset
 	}, [error]);
 
 	return (
-		<div className="flex min-h-[50vh] flex-col items-center justify-center p-6">
+		<div className="flex min-h-[50vh] flex-col items-center justify-center p-6" role="alert">
 			<div className="w-full max-w-md rounded-lg border border-destructive/30 bg-card p-6 shadow-lg">
 				<div className="flex flex-col items-center text-center">
 					<AlertCircle className="mb-4 h-12 w-12 text-destructive" />
@@ -23,9 +23,11 @@ export function GlobalErrorFallback({ error, resetError }: { error: Error; reset
 					<p className="mb-4 text-muted-foreground">
 						Lo sentimos, algo salió mal. Estamos trabajando para solucionarlo.
 					</p>
-					<div className="mb-4 max-h-32 w-full overflow-auto rounded bg-muted/50 p-3">
-						<p className="font-mono text-destructive/80 text-xs">{error.message || 'Error desconocido'}</p>
-					</div>
+					{import.meta.env.DEV ? (
+						<div className="mb-4 max-h-32 w-full overflow-auto rounded bg-muted/50 p-3">
+							<p className="font-mono text-destructive/80 text-xs">{error.message || 'Error desconocido'}</p>
+						</div>
+					) : null}
 					<Button className="flex items-center" onClick={resetError} variant="primary">
 						<RefreshCw className="mr-2 h-4 w-4" />
 						Reintentar
@@ -41,12 +43,5 @@ export function GlobalErrorFallback({ error, resetError }: { error: Error; reset
  * 🛡️ Captura errores no manejados y muestra un fallback amigable
  */
 export function GlobalErrorHandler({ children }: { children: React.ReactNode }) {
-	const [key, setKey] = React.useState(0);
-
-	// Función para reiniciar el estado del ErrorBoundary
-	const handleReset = React.useCallback(() => {
-		setKey((prev) => prev + 1);
-	}, []);
-
-	return <ErrorBoundary key={key}>{children}</ErrorBoundary>;
+	return <ErrorBoundary>{children}</ErrorBoundary>;
 }

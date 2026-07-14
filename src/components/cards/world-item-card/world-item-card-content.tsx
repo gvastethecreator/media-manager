@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import React, { useMemo } from 'react';
-import { useTheme } from '@/lib/contexts/theme-context';
+import { useTheme } from '@/components/ui/theme-provider';
 import { cn } from '@/lib/utils';
 import type {
 	WorldItemEffect,
@@ -36,8 +36,8 @@ export function WorldItemCardContent({
 	rarity,
 	primaryColor = 'var(--dt-primary-500)',
 }: WorldItemCardContentProps) {
-	const { theme } = useTheme();
-	const isDark = theme === 'dark';
+	const { resolvedTheme } = useTheme();
+	const isDark = resolvedTheme === 'dark';
 
 	// Generar un ID de renderizado único
 	const renderKey = React.useMemo(() => nanoid(), []);
