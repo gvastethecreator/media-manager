@@ -172,18 +172,6 @@ export function useRepairSystem() {
 	});
 }
 
-export function useResetDatabase() {
-	const queryClient = useQueryClient();
-
-	return useMutation<SystemResponse, Error, void>({
-		mutationFn: () => apiClient.post<SystemResponse>('/system/reset-db'),
-		onSuccess: () => {
-			// Invalidar todo el cache después de reset
-			queryClient.clear();
-		},
-	});
-}
-
 export function useInitServer() {
 	return useMutation<SystemResponse, Error, void>({
 		mutationFn: () => apiClient.post<SystemResponse>('/system/init'),

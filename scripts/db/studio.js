@@ -32,7 +32,7 @@ const dbPath = path.join(rootDir, 'dev.db');
 
 if (!fs.existsSync(dbPath)) {
 	log('⚠️ La base de datos no existe. Debes ejecutar primero:', colors.yellow);
-	log('   bun run db:reset', colors.yellow);
+	log('   db:reset está bloqueado hasta disponer de migraciones reproducibles', colors.yellow);
 	process.exit(1);
 }
 

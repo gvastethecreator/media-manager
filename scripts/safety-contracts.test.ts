@@ -223,3 +223,27 @@ describe('local runtime network policy', () => {
 		expect(shouldEnableDevelopmentRoutes({ NODE_ENV: 'development', ENABLE_DEBUG_ROUTES: '1' })).toBe(true);
 	});
 });
+
+describe('destructive maintenance contract', () => {
+	it('bloquea el reset legacy antes de ejecutar comandos o tocar archivos', async () => {
+		const cwd = await createTemporaryDirectory();
+		const resetScript = resolve(workspacePath, 'scripts', 'db', 'reset.js');
+		const result = await runProcess([process.execPath, resetScript], cwd);
+
+		expect(result.exitCode).toBe(2);
+		expect(result.stderr).toContain('deshabilitado');
+	});
+
+	it('no publica reset, cleanup de logs ni mutaciones thumbnail por GET', async () => {
+		const systemRoutes = await readFile(resolve(workspacePath, 'src/server/routes/system.ts'), 'utf8');
+		const reindexLogRoutes = await readFile(resolve(workspacePath, 'src/server/routes/api/reindex-logs.ts'), 'utf8');
+		const thumbnailRoutes = await readFile(resolve(workspacePath, 'src/server/routes/thumbnails.effect.ts'), 'utf8');
+
+		expect(systemRoutes).not.toContain("'/reset-db'");
+		expect(reindexLogRoutes).not.toMatch(/\.post\(\s*['"]\/cleanup['"]/);
+		expect(thumbnailRoutes).not.toMatch(/router\.get\(\s*['"]\/(?:cleanup|optimize|reprocess)['"]/);
+		expect(thumbnailRoutes).toMatch(/router\.post\(\s*['"]\/clean['"]/);
+		expect(thumbnailRoutes).toMatch(/router\.post\(\s*['"]\/optimize['"]/);
+		expect(thumbnailRoutes).toMatch(/router\.post\(\s*['"]\/reprocess['"]/);
+	});
+});
