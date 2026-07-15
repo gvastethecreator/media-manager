@@ -6,6 +6,7 @@ import { isLoopbackHost, resolveLocalServiceHost } from '@/config/local-runtime-
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, requestLogger } from './middleware/logging';
+import { createLocalApiSessionMiddleware, resolveLocalApiSessionOptions } from './middleware/local-api-session';
 import { registerRoutes } from './route-registry';
 
 const app = express();
@@ -22,6 +23,7 @@ const HOST = resolveLocalServiceHost({
 	host: process.env.API_HOST,
 	serviceName: 'Express API',
 });
+const localApiSession = createLocalApiSessionMiddleware(resolveLocalApiSessionOptions());
 
 // Security headers
 import helmet from 'helmet';
@@ -44,6 +46,13 @@ const apiLimiter = rateLimit({
 	skip: () => process.env.NODE_ENV === 'development',
 	message: { error: 'Too many requests, please try again later.' },
 });
+app.use(requestLogger as RequestHandler);
+
+app.get('/health', (_req, res) => {
+	res.json({ status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() });
+});
+
+app.use(['/api', '/uploads'], localApiSession);
 app.use('/api/', apiLimiter);
 
 app.use(express.json({ limit: '50mb' }));
@@ -51,12 +60,6 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
 app.use('/uploads', express.static(path.resolve(UPLOADS_DIR)));
-
-app.use(requestLogger as RequestHandler);
-
-app.get('/health', (_req, res) => {
-	res.json({ status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() });
-});
 
 registerRoutes(app);
 

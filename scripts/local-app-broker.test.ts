@@ -1,0 +1,218 @@
+import { expect, it } from 'bun:test';
+import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { createServer as createNodeServer, type Server } from 'node:http';
+import { createConnection, type AddressInfo } from 'node:net';
+import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
+import express from 'express';
+import {
+	createLocalAppBrokerHandler,
+	type LocalAppBrokerServer,
+	type LocalAppUpstreamAbortState,
+	startLocalAppBroker,
+} from '../src/runtime/local-app-broker';
+import { createProductionRuntimeConfig } from '../src/runtime/production-runtime-config';
+import {
+	createLocalApiSessionMiddleware,
+	generateLocalSessionToken,
+	LOCAL_REQUEST_MARKER_HEADER,
+} from '../src/server/middleware/local-api-session';
+
+async function listen(server: Server, port = 0): Promise<number> {
+	await new Promise<void>((done, reject) => {
+		server.once('error', reject);
+		server.listen(port, '127.0.0.1', () => done());
+	});
+	return (server.address() as AddressInfo).port;
+}
+
+async function close(server: Server | undefined): Promise<void> {
+	if (!server?.listening) return;
+	server.closeAllConnections();
+	await new Promise<void>((done) => server.close(() => done()));
+}
+
+async function reservePort(): Promise<number> {
+	const reservation = createNodeServer();
+	const port = await listen(reservation);
+	await close(reservation);
+	return port;
+}
+
+it('sirve la SPA y media a través de un broker que conserva el bearer fuera del navegador', async () => {
+	const clientRoot = await mkdtemp(resolve(tmpdir(), 'media-manager-production-broker-'));
+	await mkdir(resolve(clientRoot, 'assets'));
+	await writeFile(resolve(clientRoot, 'index.html'), '<main>production broker</main>', 'utf8');
+	await writeFile(resolve(clientRoot, 'assets/app-12345678.js'), 'window.__BROKER_SMOKE__ = true;', 'utf8');
+	const brokerPort = await reservePort();
+	const browserOrigin = `http://127.0.0.1:${brokerPort}`;
+	const token = generateLocalSessionToken();
+	const backendApp = express();
+	let observedAuthorization = '';
+	let longSseClosed = false;
+	let longSseStarted = false;
+	let upstreamAbortState: LocalAppUpstreamAbortState | undefined;
+	backendApp.use((req, _res, next) => {
+		observedAuthorization = req.get('authorization') ?? '';
+		next();
+	});
+	const backendServer = createNodeServer(backendApp);
+	let brokerServer: LocalAppBrokerServer | undefined;
+
+	try {
+		const backendPort = await listen(backendServer);
+		backendApp.use(
+			['/api', '/uploads'],
+			createLocalApiSessionMiddleware({
+				allowedHosts: [`127.0.0.1:${backendPort}`],
+				allowedOrigins: [browserOrigin],
+				token,
+			})
+		);
+		backendApp.use(express.json());
+		backendApp.post('/api/probe', (req, res) =>
+			res.json({ body: req.body, marker: req.get(LOCAL_REQUEST_MARKER_HEADER) })
+		);
+		backendApp.get('/api/events', (_req, res) => {
+			res.setHeader('Content-Type', 'text/event-stream');
+			res.end('data: {"ok":true}\n\n');
+		});
+		backendApp.get('/api/events/long', (req, res) => {
+			longSseStarted = true;
+			res.setHeader('Content-Type', 'text/event-stream');
+			res.flushHeaders();
+			res.write('data: {"started":true}\n\n');
+			const cleanup = () => {
+				longSseClosed = true;
+				clearInterval(heartbeat);
+			};
+			const heartbeat = setInterval(() => {
+				if (res.destroyed) {
+					cleanup();
+					return;
+				}
+				res.write(': heartbeat\n\n');
+			}, 20);
+			req.socket.on('close', cleanup);
+			res.on('close', cleanup);
+		});
+		backendApp.get('/uploads/probe.jpg', (_req, res) => res.type('image/jpeg').send('image'));
+
+		brokerServer = startLocalAppBroker({
+			backendOrigin: `http://127.0.0.1:${backendPort}`,
+			clientRoot,
+			onUpstreamAbort: (state) => {
+				upstreamAbortState = state;
+			},
+			publicPort: brokerPort,
+			sessionToken: token,
+		});
+
+		const directResponse = await fetch(`http://127.0.0.1:${backendPort}/api/probe`, {
+			headers: { 'Content-Type': 'application/json', Host: `127.0.0.1:${backendPort}`, Origin: browserOrigin },
+			method: 'POST',
+			body: '{}',
+		});
+		expect(directResponse.status).toBe(403);
+
+		const apiResponse = await fetch(`${browserOrigin}/api/probe`, {
+			headers: { 'Content-Type': 'application/json', Origin: browserOrigin, 'Sec-Fetch-Site': 'same-origin' },
+			method: 'POST',
+			body: JSON.stringify({ ok: true }),
+		});
+		const apiBody = await apiResponse.json();
+		expect(apiResponse.status).toBe(200);
+		expect(apiBody).toEqual({ body: { ok: true }, marker: '1' });
+		expect(observedAuthorization).toBe(`Bearer ${token}`);
+		expect(JSON.stringify(apiBody)).not.toContain(token);
+
+		const [uploadResponse, eventsResponse, indexResponse, fallbackResponse, hostileResponse, missingContextResponse] =
+			await Promise.all([
+				fetch(`${browserOrigin}/uploads/probe.jpg`, { headers: { Origin: browserOrigin } }),
+				fetch(`${browserOrigin}/api/events`, { headers: { Origin: browserOrigin } }),
+				fetch(`${browserOrigin}/`),
+				fetch(`${browserOrigin}/library/asset-1`, { headers: { Accept: 'text/html' } }),
+				fetch(`${browserOrigin}/api/probe`, { headers: { Origin: 'https://attacker.test' } }),
+				fetch(`${browserOrigin}/api/probe`),
+			]);
+
+		expect(uploadResponse.status).toBe(200);
+		expect(await eventsResponse.text()).toContain('data:');
+		expect(await indexResponse.text()).toContain('production broker');
+		expect(await fallbackResponse.text()).toContain('production broker');
+		expect(hostileResponse.status).toBe(403);
+		expect(missingContextResponse.status).toBe(403);
+		await Promise.all([uploadResponse.arrayBuffer(), hostileResponse.text(), missingContextResponse.text()]);
+
+		longSseClosed = false;
+		upstreamAbortState = undefined;
+		await new Promise<void>((done, reject) => {
+			const deadline = setTimeout(() => reject(new Error('SSE downstream did not receive the first event')), 5000);
+			const socket = createConnection({ host: '127.0.0.1', port: brokerPort }, () => {
+				socket.write(
+					`GET /api/events/long HTTP/1.1\r\nHost: 127.0.0.1:${brokerPort}\r\nOrigin: ${browserOrigin}\r\nConnection: close\r\n\r\n`
+				);
+			});
+			socket.once('error', (error) => {
+				if ((error as NodeJS.ErrnoException).code !== 'ECONNRESET') {
+					clearTimeout(deadline);
+					reject(error);
+				}
+			});
+			socket.once('data', () => {
+				clearTimeout(deadline);
+				socket.resetAndDestroy();
+				done();
+			});
+		});
+		expect(longSseStarted).toBe(true);
+		const abortDeadline = Date.now() + 5000;
+		while ((!upstreamAbortState || !longSseClosed) && Date.now() < abortDeadline) {
+			await new Promise((done) => setTimeout(done, 25));
+		}
+		expect(upstreamAbortState).toEqual({
+			requestDestroyed: true,
+			requestSocketDestroyed: true,
+			responseDestroyed: true,
+			responseSocketDestroyed: true,
+		});
+		expect(longSseClosed).toBe(true);
+	} finally {
+		await brokerServer?.stop(true);
+		await close(backendServer);
+		await rm(clientRoot, { force: true, recursive: true });
+	}
+});
+
+it('fuerza target, Host y origins coherentes para el runtime de producción', () => {
+	const config = createProductionRuntimeConfig({
+		MEDIA_MANAGER_APP_PORT: '4000',
+		MEDIA_MANAGER_INTERNAL_API_PORT: '4001',
+		MEDIA_MANAGER_SESSION_ALLOWED_HOSTS: '127.0.0.1:4000',
+	});
+
+	expect(config.runtimeEnvironment.MEDIA_MANAGER_API_TARGET).toBe('http://127.0.0.1:4001');
+	expect(config.runtimeEnvironment.MEDIA_MANAGER_SESSION_ALLOWED_HOSTS).toBe('127.0.0.1:4001');
+	expect(config.runtimeEnvironment.MEDIA_MANAGER_SESSION_ALLOWED_ORIGINS).toBe(
+		'http://127.0.0.1:4000,http://localhost:4000'
+	);
+});
+
+it('rechaza targets no loopback y secretos débiles', () => {
+	expect(() =>
+		createLocalAppBrokerHandler({
+			backendOrigin: 'https://example.com',
+			clientRoot: '.',
+			publicPort: 4000,
+			sessionToken: 'a'.repeat(32),
+		})
+	).toThrow('backend HTTP loopback');
+	expect(() =>
+		createLocalAppBrokerHandler({
+			backendOrigin: 'http://127.0.0.1:4001',
+			clientRoot: '.',
+			publicPort: 4000,
+			sessionToken: 'weak',
+		})
+	).toThrow('secreto de sesión local válido');
+});

@@ -8,6 +8,7 @@
 import { spawn } from 'child_process';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { createLocalSessionEnvironment } from './local-session-environment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,16 +17,15 @@ const rootDir = join(__dirname, '..');
 console.log('🚀 Iniciando desarrollo de Tauri...\n');
 
 // Configurar variables de entorno para desarrollo de Tauri
-const tauriEnv = {
+const tauriEnv = createLocalSessionEnvironment({
 	...process.env,
 	NODE_ENV: 'development',
 	DATABASE_URL: 'file:./db.sqlite',
 	API_PORT: '4000',
 	PORT: '4000',
 	CORS_ORIGIN: 'http://localhost:5173',
-	VITE_API_URL: 'http://localhost:4000/api',
 	TAURI_ENV: 'dev',
-};
+});
 
 console.log('🔧 Variables de entorno configuradas:');
 console.log('- DATABASE_URL:', tauriEnv.DATABASE_URL);

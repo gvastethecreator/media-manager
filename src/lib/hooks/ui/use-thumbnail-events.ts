@@ -8,8 +8,6 @@ import type { ThumbnailError } from '@/types/thumbnails';
 const RETRY_INTERVAL = 5000;
 const HEARTBEAT_TIMEOUT = 30_000;
 const MAX_RECONNECT_ATTEMPTS = 5;
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
 interface EventSourceMessage {
 	data: string;
 	type?: string;
@@ -40,8 +38,7 @@ export function useThumbnailEvents() {
 			}
 
 			try {
-				const url = new URL('/api/thumbnails/events', BASE_URL);
-				eventSource = new EventSourcePolyfill(url.toString(), {
+				eventSource = new EventSourcePolyfill('/api/thumbnails/events', {
 					heartbeatTimeout: HEARTBEAT_TIMEOUT,
 					withCredentials: true,
 					headers: {

@@ -7,8 +7,10 @@
 
 import chalk from 'chalk';
 import { spawn } from 'child_process';
+import { createLocalSessionEnvironment } from './local-session-environment.js';
 
 const processes = [];
+const localSessionEnvironment = createLocalSessionEnvironment();
 let isCleaningUp = false;
 
 // Función para manejar la salida con colores
@@ -47,7 +49,7 @@ process.on('SIGTERM', () => {
 
 console.log(chalk.blue('🚀 Iniciando desarrollo completo...'));
 console.log(chalk.gray('   Frontend: http://localhost:5173'));
-console.log(chalk.gray('   Backend:  http://localhost:4000\n'));
+console.log(chalk.gray(`   Backend:  ${localSessionEnvironment.MEDIA_MANAGER_API_TARGET}\n`));
 // Utilidad: esperar a que el backend esté listo antes de lanzar Vite
 async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 	for (let i = 0; i < retries; i++) {
@@ -68,6 +70,7 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 		stdio: 'pipe',
 		shell: true,
 		cwd: process.cwd(),
+		env: localSessionEnvironment,
 	});
 
 	serverProcess.stdout.on('data', (data) => {
@@ -84,11 +87,12 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 
 	processes.push(serverProcess);
 
-	const ok = await waitForHealth('http://localhost:4000/health');
+	const backendUrl = localSessionEnvironment.MEDIA_MANAGER_API_TARGET;
+	const ok = await waitForHealth(`${backendUrl}/health`);
 	if (!ok) {
 		console.warn(chalk.yellow('[DEV] Backend no respondió al health check a tiempo, lanzando Vite de todas formas...'));
 	} else {
-		console.log(chalk.green('[DEV] ✅ Backend listo en http://localhost:4000'));
+		console.log(chalk.green(`[DEV] ✅ Backend listo en ${backendUrl}`));
 	}
 
 	// Ejecutar frontend (Vite) una vez que el backend esté arriba (o tras timeout)
@@ -96,6 +100,7 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 		stdio: 'pipe',
 		shell: true,
 		cwd: process.cwd(),
+		env: localSessionEnvironment,
 	});
 
 	viteProcess.stdout.on('data', (data) => {
@@ -114,7 +119,9 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 
 	const viteReady = await waitForHealth('http://localhost:5173', { retries: 80, intervalMs: 250 });
 	if (viteReady) {
-		console.log(chalk.green('[DEV] ✅ Desarrollo completo listo. Frontend: http://localhost:5173 · Backend: http://localhost:4000'));
+		console.log(
+			chalk.green(`[DEV] ✅ Desarrollo completo listo. Frontend: http://localhost:5173 · Backend: ${backendUrl}`)
+		);
 	}
 
 	console.log(chalk.yellow('⌨️  Presiona Ctrl+C para detener ambos servidores\n'));

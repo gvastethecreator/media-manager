@@ -11,6 +11,7 @@ import chokidar from 'chokidar';
 import { existsSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { createLocalSessionEnvironment } from './local-session-environment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,16 +50,29 @@ const defaultEnv = loadEnvFile(join(rootDir, '.env'));
 const tauriEnv = loadEnvFile(join(rootDir, '.env.tauri'));
 
 // Combinar variables de entorno (prioridad: tauri > default > process.env)
-const serverEnv = {
+const configuredServerEnv = {
 	...process.env,
 	...defaultEnv,
 	...tauriEnv,
+};
+const inheritedSupervisorSession =
+	process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR === '1' && process.env.MEDIA_MANAGER_SESSION_TOKEN
+		? process.env
+		: createLocalSessionEnvironment(configuredServerEnv);
+const serverEnv = {
+	...configuredServerEnv,
+	MEDIA_MANAGER_API_TARGET: inheritedSupervisorSession.MEDIA_MANAGER_API_TARGET,
+	MEDIA_MANAGER_TRUSTED_SUPERVISOR: inheritedSupervisorSession.MEDIA_MANAGER_TRUSTED_SUPERVISOR,
+	MEDIA_MANAGER_SESSION_TOKEN: inheritedSupervisorSession.MEDIA_MANAGER_SESSION_TOKEN,
+	MEDIA_MANAGER_SESSION_ALLOWED_HOSTS: inheritedSupervisorSession.MEDIA_MANAGER_SESSION_ALLOWED_HOSTS,
+	MEDIA_MANAGER_SESSION_ALLOWED_ORIGINS: inheritedSupervisorSession.MEDIA_MANAGER_SESSION_ALLOWED_ORIGINS,
 };
 
 console.log(chalk.blue('🔧 Variables de entorno cargadas:'));
 console.log(`- DATABASE_URL: ${serverEnv.DATABASE_URL || 'undefined'}`);
 console.log(`- API_PORT: ${serverEnv.API_PORT || serverEnv.PORT || 'undefined'}`);
 console.log(`- NODE_ENV: ${serverEnv.NODE_ENV || 'undefined'}`);
+console.log('- API session: isolated standalone session (use dev:full for a connected UI)');
 console.log();
 
 const SERVER_SRC = 'src/server/index.ts';
