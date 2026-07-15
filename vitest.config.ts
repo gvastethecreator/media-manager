@@ -1,6 +1,8 @@
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
+const testMaxWorkers = Math.max(1, Number.parseInt(process.env.VITEST_MAX_WORKERS ?? '4', 10) || 4);
+
 export default defineConfig({
 	plugins: [tsconfigPaths()],
 	test: {
@@ -31,9 +33,9 @@ export default defineConfig({
 		// Timeouts
 		testTimeout: 30_000,
 		hookTimeout: 30_000,
-		// Ejecutar tests de archivos secuencialmente para evitar SQLITE_BUSY
-		fileParallelism: false,
-		maxWorkers: 1,
+		// Cada archivo recibe su propia copia migrada de SQLite dentro del worker desde tests/setup.ts.
+		fileParallelism: true,
+		maxWorkers: testMaxWorkers,
 		maxConcurrency: 1,
 		sequence: {
 			concurrent: false,

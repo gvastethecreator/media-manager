@@ -158,21 +158,19 @@ const env: Record<string, string | undefined> =
 
 const isUnitTest = env.NODE_ENV === 'test' || env.BUN_TEST === '1' || env.VITEST === 'true' || env.TEST === 'true';
 
-// Obtener la URL de la base de datos desde las variables de entorno
-// - En servidor/tests (Node/Bun) usa env.DATABASE_URL
-// - En cliente (browser) usa un fallback que normalmente no se ejecutará (proxy)
-const databaseUrl =
-	typeof window === 'undefined' || isBun || isUnitTest ? env.DATABASE_URL || 'file:./db.sqlite' : 'file:./db.sqlite';
+// Detectar entorno de servidor/test.
+// Nota: en unit tests con jsdom existe `window`, así que no podemos depender solo de eso.
+const isServerOrTest = typeof window === 'undefined' || isBun || isUnitTest;
+const databaseUrl = isServerOrTest ? env.DATABASE_URL : undefined;
 
 let client: ReturnType<typeof createClient> | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- instancia dinámica mock o drizzle
 let dbInstance: any;
 
-// Detectar entorno de servidor/test.
-// Nota: en unit tests con jsdom existe `window`, así que no podemos depender solo de eso.
-const isServerOrTest = typeof window === 'undefined' || isBun || isUnitTest;
-
 if (isServerOrTest) {
+	if (!databaseUrl) {
+		throw new Error('DATABASE_URL es obligatorio en servidor/tests; no existe fallback a db.sqlite.');
+	}
 	client = createClient({
 		url: databaseUrl,
 	});

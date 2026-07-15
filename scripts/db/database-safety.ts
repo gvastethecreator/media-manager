@@ -5,6 +5,7 @@ import { copyFile, mkdir, mkdtemp, readFile, realpath, rename, rm, stat, writeFi
 import { basename, isAbsolute, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { setTimeout as delay } from 'node:timers/promises';
 
 export type DatabaseInventory = {
 	byteSize: number;
@@ -46,6 +47,29 @@ type SchemaEntry = {
 	sql: string | null;
 	type: string;
 };
+
+const WINDOWS_FILE_RELEASE_ATTEMPTS = 40;
+const WINDOWS_FILE_RELEASE_DELAY_MS = 100;
+
+function isRetryableFileReleaseError(error: unknown): boolean {
+	const code = (error as NodeJS.ErrnoException).code;
+	return code === 'EBUSY' || code === 'EPERM';
+}
+
+async function retryFileRelease<T>(operation: () => Promise<T>): Promise<T> {
+	for (let attempt = 1; ; attempt += 1) {
+		try {
+			return await operation();
+		} catch (error) {
+			if (!isRetryableFileReleaseError(error) || attempt >= WINDOWS_FILE_RELEASE_ATTEMPTS) throw error;
+			await delay(WINDOWS_FILE_RELEASE_DELAY_MS);
+		}
+	}
+}
+
+async function removeFileAfterRelease(filePath: string): Promise<void> {
+	await retryFileRelease(() => rm(filePath, { force: true }));
+}
 
 function readFirstValue(row: unknown): unknown {
 	if (!row || typeof row !== 'object') {
@@ -163,8 +187,28 @@ export async function inventoryDatabase(databasePath: string, now = new Date()):
 			userVersion: toSafeNumber(readFirstValue(database.query('PRAGMA user_version').get()), 'user_version'),
 		};
 	} finally {
+		database.clearQueryCache();
 		database.close();
 	}
+}
+
+async function inventoryDatabaseInChild(databasePath: string): Promise<DatabaseInventory> {
+	const inventoryFixture = resolve(import.meta.dir, 'fixtures', 'inventory-database-child.ts');
+	const child = Bun.spawn([process.execPath, inventoryFixture, databasePath], {
+		cwd: process.cwd(),
+		env: process.env,
+		stderr: 'pipe',
+		stdout: 'pipe',
+	});
+	const [exitCode, stdout, stderr] = await Promise.all([
+		child.exited,
+		new Response(child.stdout).text(),
+		new Response(child.stderr).text(),
+	]);
+	if (exitCode !== 0) {
+		throw new Error(`El inventario SQLite aislado falló: ${stderr.trim() || `exit ${exitCode}`}`);
+	}
+	return JSON.parse(stdout) as DatabaseInventory;
 }
 
 async function verifyRestorableCopy(backupPath: string, expectedInventory: DatabaseInventory): Promise<void> {
@@ -172,10 +216,15 @@ async function verifyRestorableCopy(backupPath: string, expectedInventory: Datab
 	const restoredPath = join(restoreDirectory, 'restored.sqlite');
 	try {
 		await copyFile(backupPath, restoredPath);
-		const restoredInventory = await inventoryDatabase(restoredPath);
+		const restoredInventory = await inventoryDatabaseInChild(restoredPath);
 		assertInventoryMatches(expectedInventory, restoredInventory);
 	} finally {
-		await rm(restoreDirectory, { force: true, recursive: true });
+		await rm(restoreDirectory, {
+			force: true,
+			maxRetries: 40,
+			recursive: true,
+			retryDelay: 250,
+		});
 	}
 }
 
@@ -225,6 +274,7 @@ export async function createVerifiedBackup({
 		try {
 			source.run('VACUUM INTO ?', stagingBackupPath);
 		} finally {
+			source.clearQueryCache();
 			source.close();
 		}
 
@@ -247,12 +297,12 @@ export async function createVerifiedBackup({
 			encoding: 'utf8',
 			flag: 'wx',
 		});
-		await rename(stagingBackupPath, backupPath);
-		await rename(stagingManifestPath, manifestPath);
+		await retryFileRelease(() => rename(stagingBackupPath, backupPath));
+		await retryFileRelease(() => rename(stagingManifestPath, manifestPath));
 		return { backupPath, manifest, manifestPath };
 	} catch (error) {
 		for (const artifactPath of [stagingBackupPath, stagingManifestPath, backupPath, manifestPath]) {
-			await rm(artifactPath, { force: true });
+			await removeFileAfterRelease(artifactPath);
 		}
 		throw error;
 	}
@@ -275,7 +325,7 @@ export async function verifyExistingBackup({
 	if (sha256 !== parsedManifest.sha256) {
 		throw new Error('El SHA-256 del backup no coincide con el manifest.');
 	}
-	const inventory = await inventoryDatabase(backupPath);
+	const inventory = await inventoryDatabaseInChild(backupPath);
 	assertInventoryMatches(parsedManifest.inventory, inventory);
 	await verifyRestorableCopy(backupPath, parsedManifest.inventory);
 	return parsedManifest;

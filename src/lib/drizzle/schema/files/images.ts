@@ -56,6 +56,7 @@ export const images = sqliteTable(
 		pathFolderUniqueIdx: uniqueIndex('Image_path_folderId_key').on(table.path, table.folderId),
 		folderIdIdx: index('Image_folderId_idx').on(table.folderId),
 		hashIdx: index('Image_hash_idx').on(table.hash),
+		folderHashIdx: index('Image_folderId_hash_idx').on(table.folderId, table.hash),
 		createdAtIdx: index('Image_createdAt_idx').on(table.createdAt),
 		updatedAtIdx: index('Image_updatedAt_idx').on(table.updatedAt),
 		isFavoriteIdx: index('Image_isFavorite_idx').on(table.isFavorite),

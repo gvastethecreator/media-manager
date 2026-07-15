@@ -1,0 +1,1243 @@
+{
+	"formatVersion": 1,
+	"fingerprint": "6bad1218c9687b8f2c1a5f01756ec087a07e73fb0fd8bdcc2d614bf8c521b33d",
+	"generatedFrom": "src/lib/drizzle/migrations",
+	"objects": [
+		{
+			"name": "Activity_action_idx",
+			"sqlHash": "a8aba4ddd6ca4011b8fd3b96d03ce12bf1051433d4ae42794e7bc83a2f67bacd",
+			"tableName": "Activity",
+			"type": "index"
+		},
+		{
+			"name": "Activity_createdAt_idx",
+			"sqlHash": "98299118d2e0677bb030807936411ed107a9cb45c400299b3530cd86512a83c3",
+			"tableName": "Activity",
+			"type": "index"
+		},
+		{
+			"name": "Activity_entityId_idx",
+			"sqlHash": "15e338a590e0d625d3f81becf68f5dca31cd8626f58d996f9d35a126747ea125",
+			"tableName": "Activity",
+			"type": "index"
+		},
+		{
+			"name": "Activity_entityType_idx",
+			"sqlHash": "6fac9c3bb971d731384611ffe3c545a3516998b2b81118dbad9f2633b581a607",
+			"tableName": "Activity",
+			"type": "index"
+		},
+		{
+			"name": "Activity_type_idx",
+			"sqlHash": "2402d7cd9ac412e9187104c15471d52f8503b173a95125836e3b83991d8bb5a9",
+			"tableName": "Activity",
+			"type": "index"
+		},
+		{
+			"name": "Activity_userId_idx",
+			"sqlHash": "38f2ad684977c3d2ffa13803385848df8fd64ff6c776791e80a388c36c08223d",
+			"tableName": "Activity",
+			"type": "index"
+		},
+		{
+			"name": "Album_name_key",
+			"sqlHash": "1041fba93ea99583c6337b6d50303dc9cb31cfdc0cdc87f2b2dfaab776eaa31e",
+			"tableName": "Album",
+			"type": "index"
+		},
+		{
+			"name": "Audio_createdAt_idx",
+			"sqlHash": "e5d11f4384b418b292bf584d0cffe268a75eea094b1cce4e73152221721a36a8",
+			"tableName": "Audio",
+			"type": "index"
+		},
+		{
+			"name": "Audio_folderId_hash_idx",
+			"sqlHash": "16f4a4c6ba4c3b0f700185c7ee9a5148dd15ffaa928b39bbd86b44834c2b71e7",
+			"tableName": "Audio",
+			"type": "index"
+		},
+		{
+			"name": "Audio_folderId_idx",
+			"sqlHash": "ac5e45f84d3ee8338201419fe0f89b2167134f41f2a597023f0e6100134672d0",
+			"tableName": "Audio",
+			"type": "index"
+		},
+		{
+			"name": "Audio_hash_idx",
+			"sqlHash": "3ffff93f95b24a2e67d608afd8254e13dac61ea05412a28c0a5a3fa730f7b84e",
+			"tableName": "Audio",
+			"type": "index"
+		},
+		{
+			"name": "Audio_path_key",
+			"sqlHash": "08cb98ad38df8c1c968cbe25a231c1292c9799cc5152ac988c5753ddd2df471d",
+			"tableName": "Audio",
+			"type": "index"
+		},
+		{
+			"name": "Audio_updatedAt_idx",
+			"sqlHash": "a5c685678e8676f232e06708ba9e9a076e0994ec076ec46a86f93ea912403513",
+			"tableName": "Audio",
+			"type": "index"
+		},
+		{
+			"name": "Character_name_key",
+			"sqlHash": "5ef070549f273703ead248a8d72b5a2ea6839bc6a5cd0d84784227604566973e",
+			"tableName": "Character",
+			"type": "index"
+		},
+		{
+			"name": "Collection_name_key",
+			"sqlHash": "a76277a64d8f1c8bc14f69d9f2de8731eaee9179edfbbb397b150e2b8fca9f2d",
+			"tableName": "Collection",
+			"type": "index"
+		},
+		{
+			"name": "Concept_name_key",
+			"sqlHash": "ba0cf946daac4fb3e061094aca81a5e0df1ef7332064106766a82b45d3505d85",
+			"tableName": "Concept",
+			"type": "index"
+		},
+		{
+			"name": "Document_createdAt_idx",
+			"sqlHash": "37b4d4684bcee4267830ba52d65704a9a4d765590b4f75ca816d505e9ff0d51c",
+			"tableName": "Document",
+			"type": "index"
+		},
+		{
+			"name": "Document_folderId_hash_idx",
+			"sqlHash": "8cea04a876978f742223a4a8b7f30769d215e49085b42a1c677b9b3e8c8fc4af",
+			"tableName": "Document",
+			"type": "index"
+		},
+		{
+			"name": "Document_folderId_idx",
+			"sqlHash": "6d984c1c19d819491295812236a30577d720a8d818c420a3bd854d093c6d66ed",
+			"tableName": "Document",
+			"type": "index"
+		},
+		{
+			"name": "Document_hash_idx",
+			"sqlHash": "b0f419a267908f68b9ab3bc33669972ee790340aea0b44822d533eabaee60e5b",
+			"tableName": "Document",
+			"type": "index"
+		},
+		{
+			"name": "Document_path_key",
+			"sqlHash": "31ba25efdd5ca870024e37846df3ae96a723d70845f7b307ffae4a448f4a8182",
+			"tableName": "Document",
+			"type": "index"
+		},
+		{
+			"name": "Document_updatedAt_idx",
+			"sqlHash": "a99c9b8e6269806f46819e899d4429eea73fdf724975d0bc11abf885ab2ec7fb",
+			"tableName": "Document",
+			"type": "index"
+		},
+		{
+			"name": "EntityAggregates_lastIndexed_idx",
+			"sqlHash": "7e521a8374a6b6edf94503c658a4adc5019e39014245bbbd029001503ce95fe3",
+			"tableName": "EntityAggregates",
+			"type": "index"
+		},
+		{
+			"name": "Favorite_addedAt_idx",
+			"sqlHash": "e47ea6482223b582b8befd690b7b33074aa386d9f7efb532a5ddb5339cc704d9",
+			"tableName": "Favorite",
+			"type": "index"
+		},
+		{
+			"name": "Favorite_entityType_idx",
+			"sqlHash": "1f5aa0cedcc4af2380cfb63490f53f8d721853e52821e9155ea0190cf19ce3e5",
+			"tableName": "Favorite",
+			"type": "index"
+		},
+		{
+			"name": "Favorite_profileId_addedAt_idx",
+			"sqlHash": "c292783382117efa3a1f28858744dad7359e340f5778b960e6e89d2684a228ce",
+			"tableName": "Favorite",
+			"type": "index"
+		},
+		{
+			"name": "Favorite_profileId_entityType_entityId_key",
+			"sqlHash": "f5b9db444ce420a1c016dceb0a83c0b4807a7838181151c05d802f24a8e0ef6b",
+			"tableName": "Favorite",
+			"type": "index"
+		},
+		{
+			"name": "Favorite_profileId_idx",
+			"sqlHash": "8fac5215f6fec6f75ac45722cbfbeb797cef683979f1137d3a2100da4a86501c",
+			"tableName": "Favorite",
+			"type": "index"
+		},
+		{
+			"name": "File3D_createdAt_idx",
+			"sqlHash": "bc6f19c11d3236e226cd42e70f634e6484511cc5ad3a4760b1bee3c442ad6e7f",
+			"tableName": "File3D",
+			"type": "index"
+		},
+		{
+			"name": "File3D_folderId_hash_idx",
+			"sqlHash": "70e8f49dc3b3dc30977fb82998540b31412b36fd7314b8c769fb309f1603bd45",
+			"tableName": "File3D",
+			"type": "index"
+		},
+		{
+			"name": "File3D_folderId_idx",
+			"sqlHash": "5e63971fff89a819516835eb2eac004139d191e9ff61ec425732d63c58b8e02e",
+			"tableName": "File3D",
+			"type": "index"
+		},
+		{
+			"name": "File3D_hash_idx",
+			"sqlHash": "a5deb370523e87daa155b097b183935b4aff6a2fea8b339451d31741f78d707f",
+			"tableName": "File3D",
+			"type": "index"
+		},
+		{
+			"name": "File3D_path_key",
+			"sqlHash": "b1350a5bcfa2020f4004e8fb4554f531eb59b3584db7daa4066982ab529998c0",
+			"tableName": "File3D",
+			"type": "index"
+		},
+		{
+			"name": "File3D_updatedAt_idx",
+			"sqlHash": "f80a8be7a3aeff822952b24a8c1bae19e558b34f89510b8c863a149ccc43b664",
+			"tableName": "File3D",
+			"type": "index"
+		},
+		{
+			"name": "FileStats_fileId_key",
+			"sqlHash": "c7244dbc8bb48ecd370c4fdaec0bd0cf257accc18287692259201a1f7f8a9581",
+			"tableName": "FileStats",
+			"type": "index"
+		},
+		{
+			"name": "FileStats_rating_idx",
+			"sqlHash": "e3d728dfabb18143a34fb441993c170e6c50747f8c2b9497684c682f30e86a58",
+			"tableName": "FileStats",
+			"type": "index"
+		},
+		{
+			"name": "File_createdAt_idx",
+			"sqlHash": "ae73aac3174ddb7e4eddc05381230e4a17e316631e9ffb46a719c255b6eed0c5",
+			"tableName": "File",
+			"type": "index"
+		},
+		{
+			"name": "File_fileType_idx",
+			"sqlHash": "1b1bda540104ec0b4da5e66422b33a45b08f26d222039e8ba80ba2ee28bb5d83",
+			"tableName": "File",
+			"type": "index"
+		},
+		{
+			"name": "File_folderId_hash_idx",
+			"sqlHash": "a42b67b3c2a1e26d844d63d65b86b454e1f953b00f18377bc1c6a040f83d2c08",
+			"tableName": "File",
+			"type": "index"
+		},
+		{
+			"name": "File_folderId_idx",
+			"sqlHash": "919e6559fd724c1e492418b465abe5380244c2adfdf339581b57e530fc556246",
+			"tableName": "File",
+			"type": "index"
+		},
+		{
+			"name": "File_hash_idx",
+			"sqlHash": "42e88f608eab3dd6d6b4d082d0448f84e83380d38d45a9e20e8434f5fb8a4e0a",
+			"tableName": "File",
+			"type": "index"
+		},
+		{
+			"name": "File_isFavorite_idx",
+			"sqlHash": "19e7bf9c5822b5ce6f11de78b56611b89ed4ff866dfe79181e5ec7d2d02328bf",
+			"tableName": "File",
+			"type": "index"
+		},
+		{
+			"name": "File_path_key",
+			"sqlHash": "76e6e31cf094b58bf07ded413866f9b682168c2aff34a111a266932eeb845866",
+			"tableName": "File",
+			"type": "index"
+		},
+		{
+			"name": "File_processingStatus_idx",
+			"sqlHash": "e17eff5d595f5bfd13301ee84fa7ce1cfeed2e4dbafcb05bf13ee77416564e4a",
+			"tableName": "File",
+			"type": "index"
+		},
+		{
+			"name": "File_updatedAt_idx",
+			"sqlHash": "984f06a53a8b22fe1f78e28f8d88c2cae117a0d9441ac22a4044cf77525b516f",
+			"tableName": "File",
+			"type": "index"
+		},
+		{
+			"name": "Folder_createdAt_idx",
+			"sqlHash": "4da7e6baa84182ea130ddb987ab47539c3b91f183cb46585ef58f186cd22e1ba",
+			"tableName": "Folder",
+			"type": "index"
+		},
+		{
+			"name": "Folder_lastIndexed_idx",
+			"sqlHash": "023fd3d775d7baca8dee4354247e96675888748f79626b5f508e0fbc0e2731d7",
+			"tableName": "Folder",
+			"type": "index"
+		},
+		{
+			"name": "Folder_parentId_idx",
+			"sqlHash": "1e6a64b8166318e6a45afc39cd819c183adde92f3ee35ef4a146a52cbf592d03",
+			"tableName": "Folder",
+			"type": "index"
+		},
+		{
+			"name": "Folder_path_key",
+			"sqlHash": "abd1f38438f82dd3fcf3a3c0c637e3bd4ffdafb54a41396a49880475205b6dd0",
+			"tableName": "Folder",
+			"type": "index"
+		},
+		{
+			"name": "Group_name_key",
+			"sqlHash": "25ce3c7d9188e26243faed379995da933511ee44c5d4206b474c94685627e914",
+			"tableName": "Group",
+			"type": "index"
+		},
+		{
+			"name": "Image_aiEngine_idx",
+			"sqlHash": "434394b65f3ff14057036a6869f7cd95c2b9d5ea3807f2b35d71dde49ed6fd92",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "Image_aiOriginDetected_idx",
+			"sqlHash": "7e77d3f5d6b98b2904c9681c58a375f2179e41c73dddcbc92b88f25039aae587",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "Image_createdAt_idx",
+			"sqlHash": "10587cd2ac9a070c9f5fd293bd572e0149bc79136cc53a37191fe07d9ad20e78",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "Image_folderId_hash_idx",
+			"sqlHash": "f2077c4f7b4d47892db27f15bb37970cea4734b96625dc0508ab9816abff4f25",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "Image_folderId_idx",
+			"sqlHash": "be50499a7cc302d9dd6c0115c9014e25de8f97aef072d339854f37d17fc476e9",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "Image_hash_idx",
+			"sqlHash": "9c3ed089595269c95ad1676d4d741e9377e1f689d6d0734187015d11de4350f5",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "Image_isFavorite_idx",
+			"sqlHash": "698860b15ac2d671ce6521c6a5d8fefde411fc051439936d734b7b0feb335a0b",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "Image_path_folderId_key",
+			"sqlHash": "cac64e62e19e95f8d723b483b89565b4e0294eb9de25b791827896e2bc102c5a",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "Image_updatedAt_idx",
+			"sqlHash": "da192465f8e9342f012af1babc1b652d613d3678aa70f0210b20e04766e549a0",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "JsonFile_createdAt_idx",
+			"sqlHash": "f6db8e3dfa62a1212f1e84048aec2411f82dc0fda3d88c7209156c30dbefc9e6",
+			"tableName": "JsonFile",
+			"type": "index"
+		},
+		{
+			"name": "JsonFile_folderId_hash_idx",
+			"sqlHash": "7c4d170bc694077fe845575b00401ffdc4c35be4e2a16f890af931408e1dfc17",
+			"tableName": "JsonFile",
+			"type": "index"
+		},
+		{
+			"name": "JsonFile_folderId_idx",
+			"sqlHash": "bda6cc07d2ece99bc5f17b09b9434649db133271f7315d29b5affd0cef48a6d5",
+			"tableName": "JsonFile",
+			"type": "index"
+		},
+		{
+			"name": "JsonFile_hash_idx",
+			"sqlHash": "4a90d5458e11e0923ce987f5949590c90b0c051f88823ecd5a787d15edd1fa4f",
+			"tableName": "JsonFile",
+			"type": "index"
+		},
+		{
+			"name": "JsonFile_path_key",
+			"sqlHash": "ce8befd7cd21db459ec89848d41b8332c94c0e973a27db258351a6bc14579db3",
+			"tableName": "JsonFile",
+			"type": "index"
+		},
+		{
+			"name": "JsonFile_updatedAt_idx",
+			"sqlHash": "57ead6e7efe8a7ffbf9e6dee82473e0e38b0a707e5831f9535fbaa2eeaa2781e",
+			"tableName": "JsonFile",
+			"type": "index"
+		},
+		{
+			"name": "Metadata_entityType_entityId_idx",
+			"sqlHash": "8c347d6a77fdfcfc749d7bdbb845b3b0e58a90c4c56effa2a9ea6ee9c83d29bb",
+			"tableName": "Metadata",
+			"type": "index"
+		},
+		{
+			"name": "Metadata_key_idx",
+			"sqlHash": "85c350245e6ac31e1e6779af435e76545d4674ea1019d5669c3e286825246d53",
+			"tableName": "Metadata",
+			"type": "index"
+		},
+		{
+			"name": "Note_title_key",
+			"sqlHash": "0171ec1baf960983e3637993c1d1bd36fec45c2e800f7f491d46c7633489c3e8",
+			"tableName": "Note",
+			"type": "index"
+		},
+		{
+			"name": "Place_name_key",
+			"sqlHash": "3b8b70ccb66743e6b06c970bbaa84cce598b270fef7fb091857a71c4bd1a32a3",
+			"tableName": "Place",
+			"type": "index"
+		},
+		{
+			"name": "Prompt_name_key",
+			"sqlHash": "06db890c074477ab19d97411e44bf44c83c019433d1c511cd288c638488b863e",
+			"tableName": "Prompt",
+			"type": "index"
+		},
+		{
+			"name": "Property_name_key",
+			"sqlHash": "2b78d39ac149fa6316854f2a21e617229ca481b1826bf4722166bb0b03522417",
+			"tableName": "Property",
+			"type": "index"
+		},
+		{
+			"name": "QueueJob_priority_status_createdAt_idx",
+			"sqlHash": "861230ca76a53f28e52459ac733a1bd29549caec2a2d4246e53417a1b9232092",
+			"tableName": "QueueJob",
+			"type": "index"
+		},
+		{
+			"name": "QueueJob_queue_status_idx",
+			"sqlHash": "590ffc96127ac7ba82533deea6d5c1fe99336bafed2e1846b640c7cacd862b9a",
+			"tableName": "QueueJob",
+			"type": "index"
+		},
+		{
+			"name": "QueueJob_retryAt_idx",
+			"sqlHash": "efdd0bc41410cec4b66c002df31670eb7c826c527b1e2e80e590af7e035d2104",
+			"tableName": "QueueJob",
+			"type": "index"
+		},
+		{
+			"name": "QueueJob_status_createdAt_idx",
+			"sqlHash": "bb524b71b99e4c34ac543ac8da839912ae6ecece7e56a78ad790300219f527e9",
+			"tableName": "QueueJob",
+			"type": "index"
+		},
+		{
+			"name": "Settings_profileId_key",
+			"sqlHash": "4851ee54b6cb0ab3e0271371292002ea051ef18e15f063f54b94b71b4cb45b0f",
+			"tableName": "Settings",
+			"type": "index"
+		},
+		{
+			"name": "Tag_name_key",
+			"sqlHash": "8feeec4f012be3815a6d7e6fb90157975d304c33c146bdf7a50d1544d24e1685",
+			"tableName": "Tag",
+			"type": "index"
+		},
+		{
+			"name": "Thumbnail_entityType_entityId_size_key",
+			"sqlHash": "3de0b3b935f2eb9aea1f8e671d3a9c78d2da423d8c7aea80e32295e13fb755ca",
+			"tableName": "Thumbnail",
+			"type": "index"
+		},
+		{
+			"name": "Thumbnail_path_key",
+			"sqlHash": "060474316d90e607c689d1cb3db76d596b666c74d6f3eb53fdbddab65f003aa8",
+			"tableName": "Thumbnail",
+			"type": "index"
+		},
+		{
+			"name": "UploadedImage_category_idx",
+			"sqlHash": "9e0c1d9812bb7494931e62de7b7b01962eb9e19d728313c73fcc6f7b378a583b",
+			"tableName": "UploadedImage",
+			"type": "index"
+		},
+		{
+			"name": "UploadedImage_hash_idx",
+			"sqlHash": "9125ee8cc82651578bbe424b732080c5f3838ab50be9f36414a5849f129d58fc",
+			"tableName": "UploadedImage",
+			"type": "index"
+		},
+		{
+			"name": "UploadedImage_imageId_idx",
+			"sqlHash": "aeadb4acb3f5e086fdb6401ad0e48fcd284940a8c051cff6608ffc703606d5e3",
+			"tableName": "UploadedImage",
+			"type": "index"
+		},
+		{
+			"name": "UploadedImage_path_key",
+			"sqlHash": "33d26f78c631199ddb237e54697cd8425b0759149ae813602f0f8d00893efc2c",
+			"tableName": "UploadedImage",
+			"type": "index"
+		},
+		{
+			"name": "UploadedImage_type_idx",
+			"sqlHash": "6b57d8acbb5efb99e62ead8ae34dfcce22ab40c2998c7fcb0fae8a63a0c85b72",
+			"tableName": "UploadedImage",
+			"type": "index"
+		},
+		{
+			"name": "Video_createdAt_idx",
+			"sqlHash": "1a83d3d91c3ad296f69d207c17207e753e83e3babdcaa8ccac5ad920520795cb",
+			"tableName": "Video",
+			"type": "index"
+		},
+		{
+			"name": "Video_folderId_hash_idx",
+			"sqlHash": "3b9aa604629d204ff349a0fb48954be2505586443d1d458fce51c2f72c7af9ad",
+			"tableName": "Video",
+			"type": "index"
+		},
+		{
+			"name": "Video_folderId_idx",
+			"sqlHash": "ef0a54299e5d3b03065038332cf7cb8fa472a3d8af8504155edb7080065500d6",
+			"tableName": "Video",
+			"type": "index"
+		},
+		{
+			"name": "Video_hash_idx",
+			"sqlHash": "417e43e17f6e48717c25add17bf7dfbd66d3a0df95344cea8e43a6e4841b89e5",
+			"tableName": "Video",
+			"type": "index"
+		},
+		{
+			"name": "Video_path_key",
+			"sqlHash": "75dae1380712dba87ae93c466dc69a6b21d148bd10d06103f5d99b004d9bc1f8",
+			"tableName": "Video",
+			"type": "index"
+		},
+		{
+			"name": "Video_updatedAt_idx",
+			"sqlHash": "92dacd540e3c95277f2860f04ff35c1da924f10022b14f1c985de0a3666b7810",
+			"tableName": "Video",
+			"type": "index"
+		},
+		{
+			"name": "Wildcard_name_key",
+			"sqlHash": "8b1b49e80e886de597623c09cd682b58a37417f2cf93c020026f536f8e035c8e",
+			"tableName": "Wildcard",
+			"type": "index"
+		},
+		{
+			"name": "WorldItem_name_key",
+			"sqlHash": "e5e563ffdeec2cbf76aa2c781412bcb715a0c41a3920773ca45bc6c9c9fa81a8",
+			"tableName": "WorldItem",
+			"type": "index"
+		},
+		{
+			"name": "_GroupToAlbum_AB_unique",
+			"sqlHash": "b3ce883895f7049b1da99e3d70f83d9eac1e2c3e3e7a31fd17b61f45c636d80a",
+			"tableName": "_GroupToAlbum",
+			"type": "index"
+		},
+		{
+			"name": "_GroupToAlbum_B_index",
+			"sqlHash": "8dc49fc3f198604fee5473cec65b193eb792f00638b59e888cf82bd8438e97f3",
+			"tableName": "_GroupToAlbum",
+			"type": "index"
+		},
+		{
+			"name": "_GroupToImage_AB_unique",
+			"sqlHash": "1d333e5343c4bf92e3e9350de7c371c6f5080481a01f90555870f1ee739f096b",
+			"tableName": "_GroupToImage",
+			"type": "index"
+		},
+		{
+			"name": "_GroupToImage_B_index",
+			"sqlHash": "214f5c0453f673c7100c71d43bb83daae3782a1c68eb121b5de9b88550cc0f43",
+			"tableName": "_GroupToImage",
+			"type": "index"
+		},
+		{
+			"name": "_GroupToTag_AB_unique",
+			"sqlHash": "f4ca0c23548ca6d5602538cfb77480172e5304a1ad6944108480954a152723d0",
+			"tableName": "_GroupToTag",
+			"type": "index"
+		},
+		{
+			"name": "_GroupToTag_B_index",
+			"sqlHash": "d6bb6aad9de937c71b95a3769803daa7716cbe748868e15c6f5d83b6834ef07f",
+			"tableName": "_GroupToTag",
+			"type": "index"
+		},
+		{
+			"name": "_GroupToVideo_AB_unique",
+			"sqlHash": "43c7689c7ffc8f96225cd61a0d169d491bad942e2067dc6636cf21fc0846200f",
+			"tableName": "_GroupToVideo",
+			"type": "index"
+		},
+		{
+			"name": "_GroupToVideo_B_index",
+			"sqlHash": "4c45bbc0e3db4b0e761c814c6c3a51368eb6ef1b90ef00c8f285b7e59bb37e22",
+			"tableName": "_GroupToVideo",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToAlbum_AB_unique",
+			"sqlHash": "d3ccbed3bb53345c34e599cfb191af950034dbfc69b8ed5fe2ff0e0da587d353",
+			"tableName": "_ImageToAlbum",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToAlbum_B_index",
+			"sqlHash": "0531ed6c4676d78200d5f28be49635f3d2d62b7a482a284780f6dff56bf8ee33",
+			"tableName": "_ImageToAlbum",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToCharacter_AB_unique",
+			"sqlHash": "9cc85b69607c898b736da5913d6e17a9e984b71dc01173a0544d8e3c39c9627e",
+			"tableName": "_ImageToCharacter",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToCharacter_B_index",
+			"sqlHash": "c4e626ca14dabab8c5a7a87783ba5964d712c63c1f2f4a6ef94fd2f8f2d87a31",
+			"tableName": "_ImageToCharacter",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToCollection_AB_unique",
+			"sqlHash": "b12c3fb93a64bca4e337be203c2150f993b85521c4d20922371035d8c8c75f40",
+			"tableName": "_ImageToCollection",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToCollection_B_index",
+			"sqlHash": "a5e55bfd953ebe5b78c9146d58938e9c7d167fcf2b672cb65b8054509867fd9a",
+			"tableName": "_ImageToCollection",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToConcept_AB_unique",
+			"sqlHash": "4db49a1838022b998476c1ad5e995f3f961d6a710cd41d190d86e46a4f9ee86c",
+			"tableName": "_ImageToConcept",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToConcept_B_index",
+			"sqlHash": "cffd86aea1faecd0fd908808432b6c13121fa60290491f811db9112516970037",
+			"tableName": "_ImageToConcept",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToNote_AB_unique",
+			"sqlHash": "2ae6902ecc7b88c57e93351964e84434572e02e13704f04dd624c66c11814ff9",
+			"tableName": "_ImageToNote",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToNote_B_index",
+			"sqlHash": "fe0e307e7c3642ab7d181cef5f51ef5c9df76184b9862018fc514f489045356d",
+			"tableName": "_ImageToNote",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToPlace_AB_unique",
+			"sqlHash": "49ebe8273cc03b37b17ce0046ffa9834ea19e26e57f059e08d5d08697c6080ee",
+			"tableName": "_ImageToPlace",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToPlace_B_index",
+			"sqlHash": "f8ba90b20b03e603d8a88bf3a90865264a7286f8a7828917e9c87c2b481b16dc",
+			"tableName": "_ImageToPlace",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToPrompt_AB_unique",
+			"sqlHash": "4494f7068943d418c7fbcd12959e2f928952e6118433494fad1d04888f12343b",
+			"tableName": "_ImageToPrompt",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToPrompt_B_index",
+			"sqlHash": "6a1f0367c02f263c295b7d86304949d918486f4efeb064c4fa703d5f06212853",
+			"tableName": "_ImageToPrompt",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToProperty_AB_unique",
+			"sqlHash": "4e1fc2284cad0eb4fefe7f2add7c1d9fed7169c4f68f6bc33bfbc7884d81bf4f",
+			"tableName": "_ImageToProperty",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToProperty_B_index",
+			"sqlHash": "b335aa73eba3e7255834e438dccdce079cf98565f8c2ae884256a862f41040a1",
+			"tableName": "_ImageToProperty",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToTag_AB_unique",
+			"sqlHash": "89e2433116be7e4536651de552a90cc9dabc8114185d1b6bf78bc1b98842d331",
+			"tableName": "_ImageToTag",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToTag_B_index",
+			"sqlHash": "3d6dd49021082b15b20614090e09e9a5bb68df656bdc16b456ca642e86d6946b",
+			"tableName": "_ImageToTag",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToWildcard_AB_unique",
+			"sqlHash": "6a052ba3828c0225019d65791789b47abc7272ac7b58f84d4daad89681010c02",
+			"tableName": "_ImageToWildcard",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToWildcard_B_index",
+			"sqlHash": "b8a6e9a74d59c50f2003496f313dd9e479f4cc9e3c5870934aa7185bf89010d6",
+			"tableName": "_ImageToWildcard",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToWorldItem_AB_unique",
+			"sqlHash": "d021e5be48750c473f6736b752462b49b3ba22315457145b5190fadf1dd2f0fd",
+			"tableName": "_ImageToWorldItem",
+			"type": "index"
+		},
+		{
+			"name": "_ImageToWorldItem_B_index",
+			"sqlHash": "ea0d89f6338faf38c4e76be3b6dffb3ea9102f704c6e3b3528638ac3f55accaf",
+			"tableName": "_ImageToWorldItem",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToAlbum_AB_unique",
+			"sqlHash": "58e0e467fa6790bd88f094262a36e5b8294f17b91a02b6b8a1f0d922ed1fcb79",
+			"tableName": "_VideoToAlbum",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToAlbum_B_index",
+			"sqlHash": "cabdbe2e63a6039f914419775da0eb3fa6d9ae61232294bd395022543dcb3a15",
+			"tableName": "_VideoToAlbum",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToCharacter_AB_unique",
+			"sqlHash": "1cbb60a5d32e61d5af1f33db7758afad1056bd0aee68be7eb306a0024341d618",
+			"tableName": "_VideoToCharacter",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToCharacter_B_index",
+			"sqlHash": "cfeefc5998edf3bc7cc5a692209ceb6c39cfb937bd4f0ed39aeb02ec01dce778",
+			"tableName": "_VideoToCharacter",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToCollection_AB_unique",
+			"sqlHash": "0fd489c8fba4a0f33d4620424d00fd951adebbcc106edaedab39e32b47da9d1c",
+			"tableName": "_VideoToCollection",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToCollection_B_index",
+			"sqlHash": "61cb4cc14587be8cb240a71bb5e2e6e7747f22e94ccceeb69c73fccb7a907a96",
+			"tableName": "_VideoToCollection",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToConcept_AB_unique",
+			"sqlHash": "0e26a8dc1e182a9c7399c34d7087d8521941e71035ff9dec32448ebcc2afb92e",
+			"tableName": "_VideoToConcept",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToConcept_B_index",
+			"sqlHash": "c185e34d763fe74c8597d4c7939987fe0f6b9cb193c15d8632998fdb579b8c9c",
+			"tableName": "_VideoToConcept",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToNote_AB_unique",
+			"sqlHash": "26b1a13f4496460a2c69fb8a9f3d59447873fb9bf56b7b0e1e0364efe52f7b2d",
+			"tableName": "_VideoToNote",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToNote_B_index",
+			"sqlHash": "cf88a90acd9e9b926b20a3075b058bdf116e7dccdfbb8e58b928b558b38dca25",
+			"tableName": "_VideoToNote",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToPlace_AB_unique",
+			"sqlHash": "2e6dbc5bee3fc7c39178fb50cae2ef1f7a3bab5dec4e3f6904cd93416451b2c7",
+			"tableName": "_VideoToPlace",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToPlace_B_index",
+			"sqlHash": "4b13c14e03bc83d8995b8a0f9d19b446eb04e9a0e689dc2821090c8314e9b70c",
+			"tableName": "_VideoToPlace",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToPrompt_AB_unique",
+			"sqlHash": "86fce3a2e70b5305d38aaf21ea8157accfc2dfaa98e83e08219a57d9a315acb4",
+			"tableName": "_VideoToPrompt",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToPrompt_B_index",
+			"sqlHash": "f92d56429ccf8cf3fe4c57ca9f74e07e73de160497ef1a4d323bfdc02e0194e2",
+			"tableName": "_VideoToPrompt",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToProperty_AB_unique",
+			"sqlHash": "d99092c911b38e2ea17b3619f9f18a2d717b9f93c24e40a733138c2e9693f3ea",
+			"tableName": "_VideoToProperty",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToProperty_B_index",
+			"sqlHash": "24b27b7b104d15da8e63890d20e8dee77b074df18bf10f69b86161ad611558e1",
+			"tableName": "_VideoToProperty",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToTag_AB_unique",
+			"sqlHash": "26ad04c741e58e99b66816cabd917fa5e599e33a8878a469365687d27dd10b5b",
+			"tableName": "_VideoToTag",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToTag_B_index",
+			"sqlHash": "cc81986c558037de24a155be1d8c04817f38f2484641fca2108afe82603a9942",
+			"tableName": "_VideoToTag",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToWildcard_AB_unique",
+			"sqlHash": "e27884119b34887ce7865951f74abe2cd04fdf438986171458b9619166a56f8b",
+			"tableName": "_VideoToWildcard",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToWildcard_B_index",
+			"sqlHash": "6d48603326a48c201bbadaaa203edcb70aaffebdd4b5d49ca62221bb56b0a772",
+			"tableName": "_VideoToWildcard",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToWorldItem_AB_unique",
+			"sqlHash": "b76fbdf0f66ccef31de8189630bf515d768a5f37c82ddeef3ce78eef85ea4d32",
+			"tableName": "_VideoToWorldItem",
+			"type": "index"
+		},
+		{
+			"name": "_VideoToWorldItem_B_index",
+			"sqlHash": "9557caabfc41edfbd0df91d1fb9c92871505450121901b1398f9f8f9b5a65250",
+			"tableName": "_VideoToWorldItem",
+			"type": "index"
+		},
+		{
+			"name": "alert_level_idx",
+			"sqlHash": "b9b3729551cf8e3615533499d400a6e5f8579a0b32dc3fff84eb67ea54f98870",
+			"tableName": "server_alerts",
+			"type": "index"
+		},
+		{
+			"name": "alert_resolved_idx",
+			"sqlHash": "e91a4db0e9bfd2be398f8ee0dc5f370c4f331a97af2567a7cc625718a6e0e8e4",
+			"tableName": "server_alerts",
+			"type": "index"
+		},
+		{
+			"name": "alert_service_idx",
+			"sqlHash": "3c64e314cc9e6246b3ce6b02551f14e0b44928fe5d5b477c72f73617c1b81856",
+			"tableName": "server_alerts",
+			"type": "index"
+		},
+		{
+			"name": "feature_status_idx",
+			"sqlHash": "580b59f8a7db24f2fbd6a4b4bf92d7c1c90fb05173a830bd4d3f06a8c0d7fe71",
+			"tableName": "dev_features",
+			"type": "index"
+		},
+		{
+			"name": "Activity",
+			"sqlHash": "5715634efcac9e5f7ed4a055bde981d9494a6e4875d9ffc2492a63d5b7c978ab",
+			"tableName": "Activity",
+			"type": "table"
+		},
+		{
+			"name": "Album",
+			"sqlHash": "3e8ea5c1d79acca2ce79e7fc1d280c6396b642cc7f0a950742bb06ec991fe33c",
+			"tableName": "Album",
+			"type": "table"
+		},
+		{
+			"name": "Audio",
+			"sqlHash": "fc9f15fa3460a47ed93ea88d7dd61e00e1dabd11898b4e9a2f0481a7e0397914",
+			"tableName": "Audio",
+			"type": "table"
+		},
+		{
+			"name": "Character",
+			"sqlHash": "f5257fafa2c11d3b2cc60884eaabda24909b680a33db29e9fb25ce5f4df3b0c1",
+			"tableName": "Character",
+			"type": "table"
+		},
+		{
+			"name": "Collection",
+			"sqlHash": "5f38666c0eaf12219acc9c68a032c5d2d4945ac9080181cdca19d77a07154781",
+			"tableName": "Collection",
+			"type": "table"
+		},
+		{
+			"name": "Concept",
+			"sqlHash": "dc562cf6430f15e3add0acacd3e68d6f717d31cc01ca4fe06c054ade9a6b090b",
+			"tableName": "Concept",
+			"type": "table"
+		},
+		{
+			"name": "Document",
+			"sqlHash": "2ac197656440350e2e07dba0caaae76b9eed79882406697538c2a3c10081adf7",
+			"tableName": "Document",
+			"type": "table"
+		},
+		{
+			"name": "EntityAggregates",
+			"sqlHash": "61a40ee17f71632b78dbe9e9fcfe19f4cae5aa5556f8f2a44d644c46d9fa761f",
+			"tableName": "EntityAggregates",
+			"type": "table"
+		},
+		{
+			"name": "Favorite",
+			"sqlHash": "95d36111081c72b93a2bbe67c158368dc89933b74530af106e7c169f8298d0ce",
+			"tableName": "Favorite",
+			"type": "table"
+		},
+		{
+			"name": "File",
+			"sqlHash": "24fcd5160ddc0328facf0d1ec0453d8ac8eef6a472c793db525df1d38f54f478",
+			"tableName": "File",
+			"type": "table"
+		},
+		{
+			"name": "File3D",
+			"sqlHash": "38b3117e13e4abb2a598abfb1902bb00974a72fef701c022b3e090fff94e532e",
+			"tableName": "File3D",
+			"type": "table"
+		},
+		{
+			"name": "FileStats",
+			"sqlHash": "35b0ef041b8b450d2a467aa453f2ab9e0010a85505100e851c079f04eaa15cba",
+			"tableName": "FileStats",
+			"type": "table"
+		},
+		{
+			"name": "Folder",
+			"sqlHash": "3508e5dcc651fb4fce029f7fb2f51358f10f3b63447f5614e63a8c4e30a1e102",
+			"tableName": "Folder",
+			"type": "table"
+		},
+		{
+			"name": "Group",
+			"sqlHash": "03ae9155906caa5512e74a61f78c86ffe6e86246f86588e590439d219ddb1001",
+			"tableName": "Group",
+			"type": "table"
+		},
+		{
+			"name": "Image",
+			"sqlHash": "163545c0a41a122267dc253baf5553258414140cf6ec384486f641c16be85e53",
+			"tableName": "Image",
+			"type": "table"
+		},
+		{
+			"name": "JsonFile",
+			"sqlHash": "27323330bcd0a75c259bbb9ce75730ddea7efafaa9e5d9fabc95e096f6eb1824",
+			"tableName": "JsonFile",
+			"type": "table"
+		},
+		{
+			"name": "Metadata",
+			"sqlHash": "f9b2e4b6d72125a30e6518ce3efddacba4e5699f0b75c9fcba8560230551fd81",
+			"tableName": "Metadata",
+			"type": "table"
+		},
+		{
+			"name": "Note",
+			"sqlHash": "d5bd1ed8d5e2a8545ca8ec5bd973d538bd9465181f3353dd313299726ce73c20",
+			"tableName": "Note",
+			"type": "table"
+		},
+		{
+			"name": "Place",
+			"sqlHash": "3b132c761dc9d3a2bb03273b1fc275ea690effe2ccad28f368cf150543ad1379",
+			"tableName": "Place",
+			"type": "table"
+		},
+		{
+			"name": "Profile",
+			"sqlHash": "a3fb8401a7d12ecdf1c75a01ce0d3cf699337ee9b07bb90590d8c37293f3efb5",
+			"tableName": "Profile",
+			"type": "table"
+		},
+		{
+			"name": "Prompt",
+			"sqlHash": "12ba44bc129f64d70914aab7654aef42634c863038f0deff78c63a182e4e711d",
+			"tableName": "Prompt",
+			"type": "table"
+		},
+		{
+			"name": "Property",
+			"sqlHash": "af3484aa7ad1c47c1c62655a9526dc5100ddd41828ac77cbf792ed4cb69a4a63",
+			"tableName": "Property",
+			"type": "table"
+		},
+		{
+			"name": "QueueJob",
+			"sqlHash": "f77739224944b5b5b46a47c9b47c367c458f624fed06c6515b9e08bdab09a6a3",
+			"tableName": "QueueJob",
+			"type": "table"
+		},
+		{
+			"name": "Settings",
+			"sqlHash": "90f8af999f21aed3deab832098643b6d0e0fd530a6cf1021af55a7490a68285f",
+			"tableName": "Settings",
+			"type": "table"
+		},
+		{
+			"name": "Tag",
+			"sqlHash": "09e21305b3479930488d3eccb9d51d85c83cc634f431612e3163d17338423e78",
+			"tableName": "Tag",
+			"type": "table"
+		},
+		{
+			"name": "Thumbnail",
+			"sqlHash": "b909ad5d3d2db0b12f3dbd16f85a46b3db8f001d9c13a0e28c8faa666052f59e",
+			"tableName": "Thumbnail",
+			"type": "table"
+		},
+		{
+			"name": "UploadedImage",
+			"sqlHash": "06405ac5e3538d78f1ded5837190f16b62d782de224dbc1e31a022d5353e5e8e",
+			"tableName": "UploadedImage",
+			"type": "table"
+		},
+		{
+			"name": "Video",
+			"sqlHash": "d8f97ee5a7b252adf65a89f5ae1e6ee2b375a2f2e7a641eea04346235b7cb3cf",
+			"tableName": "Video",
+			"type": "table"
+		},
+		{
+			"name": "Wildcard",
+			"sqlHash": "80d4551df2cf3e13d44f95b333c3161e0937d1ee922c8fcb5e83715786df7cf3",
+			"tableName": "Wildcard",
+			"type": "table"
+		},
+		{
+			"name": "WorldItem",
+			"sqlHash": "8d35d7dfbd23aa0d1e596af7042718e2321dc9b924dd0fa98ae617b8e3b93f1c",
+			"tableName": "WorldItem",
+			"type": "table"
+		},
+		{
+			"name": "_GroupToAlbum",
+			"sqlHash": "608212fbcc6e35900ca6b87b942ed1c4bc3ad3cce442fd86b31fc45fee111591",
+			"tableName": "_GroupToAlbum",
+			"type": "table"
+		},
+		{
+			"name": "_GroupToImage",
+			"sqlHash": "f9ba410d20047356cd9c661bcf8a5eb2f6525bbe5ec3df3ad0308070d845d29d",
+			"tableName": "_GroupToImage",
+			"type": "table"
+		},
+		{
+			"name": "_GroupToTag",
+			"sqlHash": "c8f4ee572b55348955fb1c5e3d2755bccb4cb323fb880095339e45ca8dc47bbc",
+			"tableName": "_GroupToTag",
+			"type": "table"
+		},
+		{
+			"name": "_GroupToVideo",
+			"sqlHash": "5c01abee62a6fd219f755c1ddd9ed156e2b15f21efc6aed7e881786f2670164e",
+			"tableName": "_GroupToVideo",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToAlbum",
+			"sqlHash": "9e064095d4c9d40ca5771a197348c6edbf684f5c2b914ca2f653747483aae88a",
+			"tableName": "_ImageToAlbum",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToCharacter",
+			"sqlHash": "29d959f112c1b630b392902cdf3fa5acb4d47064bd948c249fb4648e2878a014",
+			"tableName": "_ImageToCharacter",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToCollection",
+			"sqlHash": "68b1dd0b080f5c61729d297260946f06f32a208a0a1ab194234808be7bc9507a",
+			"tableName": "_ImageToCollection",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToConcept",
+			"sqlHash": "e4dd98b699c67f58c1ca8d79e9c0b39770acaf0204bbb94a3ba27c2fb99baf01",
+			"tableName": "_ImageToConcept",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToNote",
+			"sqlHash": "bacc82a8db18904cacf067ef5fc938852f4e6531575923c4d109fb9f367ebb86",
+			"tableName": "_ImageToNote",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToPlace",
+			"sqlHash": "a661e261ca13c50328cba36604603010dd18c7f635f3708d2d93a8d11a3b5463",
+			"tableName": "_ImageToPlace",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToPrompt",
+			"sqlHash": "c05f2a9d0fa909d017be3d0dea12be7da5c2da2277b6b2bc681cb46c37951cb9",
+			"tableName": "_ImageToPrompt",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToProperty",
+			"sqlHash": "787e88d6f25e2da44a7db044dfaf5e77954d8bdc7f8d36419d1fe6227ec3c03d",
+			"tableName": "_ImageToProperty",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToTag",
+			"sqlHash": "0cae10817fbf1441d40103e37c925fe8a1cb619342311cfe91da3aeb03dcdf38",
+			"tableName": "_ImageToTag",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToWildcard",
+			"sqlHash": "f4deae5130e70847aac9260f51da5e0ea74cba2f22bc7921fe3db90026b9f1cc",
+			"tableName": "_ImageToWildcard",
+			"type": "table"
+		},
+		{
+			"name": "_ImageToWorldItem",
+			"sqlHash": "01c5eba56bd3dc2a0f23860d3671d8c93419afd6827890e998cc463be738f6df",
+			"tableName": "_ImageToWorldItem",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToAlbum",
+			"sqlHash": "a11789815df36abc85e68627e0b20643348c0510613474467ad74f0506a0bebe",
+			"tableName": "_VideoToAlbum",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToCharacter",
+			"sqlHash": "7801841bdce75b920722f711c091c30c683c2737d3e7274412d4fb6ea0a516cb",
+			"tableName": "_VideoToCharacter",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToCollection",
+			"sqlHash": "7517e44168bc143277d18c0eb906df482db88bcf347e2aa143bec6d94d2001b7",
+			"tableName": "_VideoToCollection",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToConcept",
+			"sqlHash": "868bd4e47be3f71198a261229f00f7c5302ffe4e65e23bf2f79385b774ecf238",
+			"tableName": "_VideoToConcept",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToNote",
+			"sqlHash": "eb4a3bcfeb79ecb06ee21ad5e48a6e95595738340f6db5364f5713f0cc739639",
+			"tableName": "_VideoToNote",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToPlace",
+			"sqlHash": "d34cf94a94299585068ebcf2d9c53824abba68b10089daf2a9618edde848c9c1",
+			"tableName": "_VideoToPlace",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToPrompt",
+			"sqlHash": "61feb089b2fd16f8933438245aa1f52e319014f64abdc0cb698587c6e30adddc",
+			"tableName": "_VideoToPrompt",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToProperty",
+			"sqlHash": "b8f1b516bfcf563d6e0e4bc81a2c1f5ca5807a66fb7fb9e8d816fb70c4db6d2f",
+			"tableName": "_VideoToProperty",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToTag",
+			"sqlHash": "7d3aa377a9a3cf6153d16c9fd5dd15f8616a529b9a6fe868022babd5d56abe18",
+			"tableName": "_VideoToTag",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToWildcard",
+			"sqlHash": "97ba2ad556751a73ab6a7b8f0fa75992d356af243d648c31ee4071698b6d74a6",
+			"tableName": "_VideoToWildcard",
+			"type": "table"
+		},
+		{
+			"name": "_VideoToWorldItem",
+			"sqlHash": "8cfe0d6017cc9fdc58fb6034feca3fb7e03a9b864aabfe27d6c0261b3b341b5c",
+			"tableName": "_VideoToWorldItem",
+			"type": "table"
+		},
+		{
+			"name": "dev_features",
+			"sqlHash": "e5549edaba067070c02a2fbaadf184ac8f1732f5c50be5fefdac5ecfdf44113e",
+			"tableName": "dev_features",
+			"type": "table"
+		},
+		{
+			"name": "server_alerts",
+			"sqlHash": "75594bc9a5850d2b989cf8ab317ada88c89005fe8bb4d83a45c7e1e55489b846",
+			"tableName": "server_alerts",
+			"type": "table"
+		}
+	]
+}

@@ -45,6 +45,7 @@ export const videos = sqliteTable(
 		pathUniqueIdx: uniqueIndex('Video_path_key').on(table.path),
 		folderIdIdx: index('Video_folderId_idx').on(table.folderId),
 		hashIdx: index('Video_hash_idx').on(table.hash),
+		folderHashIdx: index('Video_folderId_hash_idx').on(table.folderId, table.hash),
 		createdAtIdx: index('Video_createdAt_idx').on(table.createdAt),
 		updatedAtIdx: index('Video_updatedAt_idx').on(table.updatedAt),
 		// Constraints de validación

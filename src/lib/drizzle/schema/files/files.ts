@@ -46,6 +46,7 @@ export const files = sqliteTable(
 		pathIdx: uniqueIndex('File_path_key').on(table.path),
 		folderId_idx: index('File_folderId_idx').on(table.folderId),
 		hash_idx: index('File_hash_idx').on(table.hash),
+		folderHashIdx: index('File_folderId_hash_idx').on(table.folderId, table.hash),
 		fileType_idx: index('File_fileType_idx').on(table.fileType),
 		createdAt_idx: index('File_createdAt_idx').on(table.createdAt),
 		updatedAt_idx: index('File_updatedAt_idx').on(table.updatedAt),
