@@ -4,9 +4,7 @@ import {
 	Camera,
 	Copy,
 	Download,
-	ExternalLink,
 	FileJson,
-	FolderOpen,
 	Fullscreen,
 	Gauge,
 	GitBranch,
@@ -99,12 +97,16 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 		exportMetadata,
 	} = useEnhancedMetadata(shouldUseInternalHook ? item : undefined);
 
-	const { toggleFavorite, isLoading: isFavoriteLoading, isFavorite, isSupported: isCanonicalFavoriteSupported } =
-		useFavorite({
+	const {
+		toggleFavorite,
+		isLoading: isFavoriteLoading,
+		isFavorite,
+		isSupported: isCanonicalFavoriteSupported,
+	} = useFavorite({
 		entityId: item.id,
 		entityType: item.entityType,
 		initialIsFavorite: 'isFavorite' in item ? item.isFavorite : false,
-		});
+	});
 	const favoriteState = 'isFavorite' in item ? isFavorite : false;
 
 	const [detectedLoras, setDetectedLoras] = React.useState<string[]>([]);
@@ -135,11 +137,9 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 
 	const itemName = 'name' in item ? (item.name as string) : 'Sin nombre';
 	const itemExtension = useMemo(() => {
-		if ('path' in item && typeof item.path === 'string') {
-			return item.path.split('.').pop()?.toUpperCase() || '';
-		}
-		return '';
-	}, [item]);
+		if ('extension' in item && typeof item.extension === 'string') return item.extension.toUpperCase();
+		return itemName.includes('.') ? itemName.split('.').pop()?.toUpperCase() || '' : '';
+	}, [item, itemName]);
 
 	const handleCopyImage = React.useCallback(async () => {
 		if (!mainImageUrl) return;
@@ -147,21 +147,15 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 			const response = await fetch(mainImageUrl);
 			const blob = await response.blob();
 			await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-		} catch (err) {
-			const itemPath = 'path' in item ? (item.path as string) : '';
-			await copyToClipboard(itemPath || mainImageUrl || itemName);
+		} catch {
+			await copyToClipboard(mainImageUrl || itemName);
 		}
-	}, [mainImageUrl, item, itemName]);
+	}, [mainImageUrl, itemName]);
 
 	const handleDownload = React.useCallback(() => {
 		if (!mainImageUrl) return;
 		downloadFile(mainImageUrl, itemName);
 	}, [mainImageUrl, itemName]);
-
-	const handleOpenInFolder = React.useCallback(() => {
-		const itemPath = 'path' in item ? (item.path as string) : null;
-		if (itemPath) copyToClipboard(itemPath);
-	}, [item]);
 
 	const groupedMetadata = useMemo(() => {
 		return detailedMetadata.reduce(
@@ -344,7 +338,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 								)}
 							</div>
 							<p className="mt-1 w-full overflow-hidden truncate break-all font-mono text-[9px] text-muted-foreground opacity-50">
-								{'path' in item ? (item.path as string) : `ID: ${item.id}`}
+								ID: {item.id}
 							</p>
 						</div>
 					</div>
@@ -380,9 +374,6 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 								<DropdownMenuLabel className="font-black text-[10px] uppercase tracking-[0.1em] opacity-40">
 									Acciones
 								</DropdownMenuLabel>
-								<DropdownMenuItem className="font-medium text-xs" onClick={handleOpenInFolder}>
-									<FolderOpen className="mr-2 h-3.5 w-3.5 opacity-60" /> Abrir Carpeta
-								</DropdownMenuItem>
 								<DropdownMenuItem className="font-medium text-xs" onClick={handleCopyImage}>
 									<Copy className="mr-2 h-3.5 w-3.5 opacity-60" /> Copiar Imagen
 								</DropdownMenuItem>
@@ -579,18 +570,6 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 				</div>
 			</div>
 
-			<footer className="w-full min-w-0 shrink-0 overflow-hidden border-t bg-background/95 px-3 py-2.5 backdrop-blur">
-				<div className="flex w-full min-w-0 items-center gap-2">
-					<Button
-						className="h-7 min-w-0 flex-1 border-border/40 px-1 font-black text-[8px] uppercase tracking-tighter hover:bg-muted/50"
-						disabled={!('path' in item && item.path)}
-						onClick={handleOpenInFolder}
-						variant="outline"
-					>
-						<ExternalLink className="mr-1 h-3 w-3 shrink-0 opacity-60" /> <span className="truncate">ABRIR</span>
-					</Button>
-				</div>
-			</footer>
 			<ImageZoomDialog
 				imageUrl={mainImageUrl || ''}
 				isOpen={zoomOpen}

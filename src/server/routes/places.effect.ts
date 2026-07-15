@@ -9,6 +9,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { PlaceCreateInput, PlaceUpdateInput } from '@/lib/effect/schemas/entities';
+import { authorizeMediaAssetParam, filterAuthorizedMediaEntities } from '@/server/security/authorized-root-request';
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { PlaceService, PlaceServiceLive } from '@/services/place/place.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
@@ -142,7 +143,11 @@ router.get(
 		Effect.gen(function* () {
 			const placeService = yield* PlaceService;
 			const images = yield* placeService.getImages(req.params.id);
-			return images.map((img: any) => ({
+			const authorizedImages = yield* Effect.tryPromise({
+				try: () => filterAuthorizedMediaEntities(req, images, 'image', ['read', 'index']),
+				catch: (error) => error,
+			});
+			return authorizedImages.map((img: any) => ({
 				id: img.id,
 				name: img.name,
 				thumbnailUrl: `/api/thumbnails/${img.id}`,
@@ -155,6 +160,7 @@ router.get(
 
 router.post(
 	'/:id/images/:imageId',
+	authorizeMediaAssetParam({ assetType: 'image', idParam: 'imageId', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const placeService = yield* PlaceService;

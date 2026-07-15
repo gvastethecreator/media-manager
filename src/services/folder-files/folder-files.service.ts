@@ -457,7 +457,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 
 		const finalQuery = sql`
 			SELECT * FROM (${combinedQuery})
-			ORDER BY ${sortColumn} ${sortOrder === 'desc' ? sql`DESC` : sql`ASC`}
+			ORDER BY ${sortColumn} ${sortOrder === 'desc' ? sql`DESC` : sql`ASC`}, id ASC, entityType ASC
 			LIMIT ${limit} OFFSET ${offset}
 		`;
 
@@ -479,7 +479,6 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		logger.info(`Folder files query completed in ${queryTime}ms`, {
 			folderId,
 			includeSubfolders,
-			folderPath: folderContext.folderPath,
 			resultCount: files.length,
 			totalCount,
 		});

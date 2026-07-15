@@ -9,6 +9,7 @@ import { Effect } from 'effect';
 import type { NextFunction, Request, Response } from 'express';
 import type { RequestHandler } from 'express-serve-static-core';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { sanitizePublicPayload } from '@/server/security/sanitize-public-payload';
 import { runPromise } from '../runtime/runtime';
 
 const logger = serverLogger.withContext('ExpressAdapter');
@@ -16,11 +17,11 @@ const logger = serverLogger.withContext('ExpressAdapter');
 function isZodLikeError(error: unknown): error is { issues: unknown[]; message?: string; name?: string } {
 	return Boolean(
 		error &&
-			typeof error === 'object' &&
-			'name' in error &&
-			(error as { name?: string }).name === 'ZodError' &&
-			'issues' in error &&
-			Array.isArray((error as { issues?: unknown }).issues)
+		typeof error === 'object' &&
+		'name' in error &&
+		(error as { name?: string }).name === 'ZodError' &&
+		'issues' in error &&
+		Array.isArray((error as { issues?: unknown }).issues)
 	);
 }
 
@@ -43,6 +44,17 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 			message: 'Validation error',
 			details: error.issues,
 		};
+	}
+
+	if (error && typeof error === 'object' && 'status' in error) {
+		const status = (error as { status?: unknown }).status;
+		if (typeof status === 'number' && Number.isInteger(status) && status >= 400 && status <= 599) {
+			return {
+				status,
+				message: error instanceof Error ? error.message : 'Request failed',
+				details: error,
+			};
+		}
 	}
 
 	// 1. Si es un error con _tag (Data.TaggedError)
@@ -148,7 +160,7 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 
 		return {
 			status: 500,
-			message: error.message,
+			message: 'Internal server error',
 			details: { name: error.name, stack: error.stack },
 		};
 	}
@@ -208,18 +220,19 @@ export const effectHandler = <A, E>(
 				// Comportamiento por defecto: mapear a HTTP status
 				const httpError = errorToHttpStatus(error);
 
-				logger.error(`Error en handler: ${httpError.message}`, {
+				logger.error('Effect handler failed', {
 					status: httpError.status,
-					path: req.path,
 					method: req.method,
 					error: httpError.details,
 				});
 
 				if (!res.headersSent) {
-					res.status(httpError.status).json({
-						error: httpError.message,
-						...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
-					});
+					res.status(httpError.status).json(
+						sanitizePublicPayload({
+							error: httpError.message,
+							...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
+						})
+					);
 				}
 			}
 		}
@@ -278,16 +291,18 @@ export const runEffectForExpress = async <A, E>(
 	} catch (error) {
 		const httpError = errorToHttpStatus(error);
 
-		logger.error(`Effect execution failed: ${httpError.message}`, {
+		logger.error('Effect execution failed', {
 			status: httpError.status,
 			error: httpError.details,
 		});
 
 		if (!res.headersSent) {
-			res.status(httpError.status).json({
-				error: httpError.message,
-				...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
-			});
+			res.status(httpError.status).json(
+				sanitizePublicPayload({
+					error: httpError.message,
+					...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
+				})
+			);
 		}
 	}
 };

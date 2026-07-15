@@ -3,7 +3,7 @@
  * @module file-browser-new/components/move-dialog
  */
 
-import { FolderIcon, Home, Loader2 } from 'lucide-react';
+import { FolderIcon, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -63,20 +63,6 @@ export function MoveDialog({ isOpen, items, onConfirm, onCancel, isLoading = fal
 							</div>
 						) : folders && folders.length > 0 ? (
 							<div className="divide-y">
-								{/* Opción: Raíz */}
-								<button
-									className={cn(
-										'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted',
-										selectedFolderId === 'root' && 'bg-primary/10 hover:bg-primary/10'
-									)}
-									onClick={() => setSelectedFolderId('root')}
-									type="button"
-								>
-									<Home className="h-4 w-4 text-muted-foreground" />
-									<span className="flex-1">Raíz</span>
-									{selectedFolderId === 'root' && <div className="h-2 w-2 rounded-full bg-primary" />}
-								</button>
-
 								{/* Carpetas */}
 								{folders.map((folder: FolderWithStats) => (
 									<button
@@ -90,9 +76,6 @@ export function MoveDialog({ isOpen, items, onConfirm, onCancel, isLoading = fal
 									>
 										<FolderIcon className="h-4 w-4 text-yellow-500" />
 										<span className="flex-1 truncate">{folder.name}</span>
-										{folder.path && (
-											<span className="max-w-[150px] truncate text-muted-foreground text-xs">{folder.path}</span>
-										)}
 										{selectedFolderId === folder.id && <div className="h-2 w-2 rounded-full bg-primary" />}
 									</button>
 								))}

@@ -12,19 +12,108 @@ import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
+import {
+	authorizeFolderPathById,
+	authorizeMediaPathInput,
+	filterAuthorizedMixedMediaEntities,
+	getAuthorizedRootRegistry,
+} from '@/server/security/authorized-root-request';
+import { RootAuthorizationError } from '@/server/security/authorized-roots';
+import { sanitizeJsonResponses } from '@/server/security/sanitize-public-payload';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FolderService, FolderServiceLive } from '@/services/folder/folder.service.effect';
 import { FolderReindexService } from '@/services/folder/reindex/folder-reindex.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
-import { buildFolderPreviewSvg, escapeXml, extractRecentPreviews, formatBytes, sanitizePreviewCount, normalizePreviewFiles } from '../utils/folder-preview-svg';
+import {
+	buildFolderPreviewSvg,
+	escapeXml,
+	extractRecentPreviews,
+	formatBytes,
+	sanitizePreviewCount,
+	normalizePreviewFiles,
+} from '../utils/folder-preview-svg';
 import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 
 const router = express.Router();
+router.use(sanitizeJsonResponses);
 
 const reindexService = FolderReindexService.getInstance();
 
+type FolderRecord = Record<string, unknown> & { children?: FolderRecord[]; id?: string; path?: string };
+
+async function toPublicFolder(
+	request: { app: { locals: Record<string, unknown> } },
+	folder: FolderRecord
+): Promise<Record<string, unknown> | null> {
+	if (typeof folder.path !== 'string') return null;
+	try {
+		const authorized = await getAuthorizedRootRegistry(request).authorizeAbsolutePath(folder.path, 'read');
+		const { path: _path, children, ...safeFolder } = folder;
+		const publicChildren = children
+			? (await Promise.all(children.map((child) => toPublicFolder(request, child)))).filter(
+					(child): child is Record<string, unknown> => child !== null
+				)
+			: undefined;
+		return {
+			...safeFolder,
+			...(publicChildren ? { children: publicChildren } : {}),
+			relativePath: authorized.relativePath,
+			rootId: authorized.rootId,
+		};
+	} catch (error) {
+		if (error instanceof RootAuthorizationError) return null;
+		throw error;
+	}
+}
+
+async function toPublicFolders(
+	request: { app: { locals: Record<string, unknown> } },
+	folders: FolderRecord[]
+): Promise<Record<string, unknown>[]> {
+	return (await Promise.all(folders.map((folder) => toPublicFolder(request, folder)))).filter(
+		(folder): folder is Record<string, unknown> => folder !== null
+	);
+}
+
+function sanitizeFolderFilesPayload(payload: unknown): unknown {
+	if (!(payload && typeof payload === 'object' && !Array.isArray(payload))) return payload;
+	const record = payload as Record<string, unknown>;
+	if (!Array.isArray(record.files)) return payload;
+	return {
+		...record,
+		files: record.files.map((file) => {
+			if (!(file && typeof file === 'object' && !Array.isArray(file))) return file;
+			const { path: _path, ...safeFile } = file as Record<string, unknown>;
+			return safeFile;
+		}),
+	};
+}
+
 // Importar servicios de archivos existentes para endpoints de archivos
+interface FolderFileRecord {
+	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
+	id: string;
+	path: string;
+}
+
+interface FolderFilesResult {
+	files: FolderFileRecord[];
+	hasMore: boolean;
+	pagination: { currentPage: number; limit: number; offset: number; totalPages: number };
+	performance: { processedRecords: number; queryTime: number };
+	total: number;
+}
+
+interface FolderFileCounts {
+	audios: number;
+	documents: number;
+	file3Ds: number;
+	images: number;
+	jsonFiles: number;
+	videos: number;
+}
+
 type FolderFilesGetter = (opts: {
 	cursor?: string;
 	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
@@ -35,26 +124,72 @@ type FolderFilesGetter = (opts: {
 	search?: string;
 	sortBy?: 'name' | 'size' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
-}) => Promise<unknown>;
-type FolderFileStatsGetter = (folderId: string, includeSubfolders: boolean) => Promise<unknown>;
+}) => Promise<FolderFilesResult>;
 
 let getFolderFiles: FolderFilesGetter | undefined;
-let getFolderFileStats: FolderFileStatsGetter | undefined;
 
 // Cargar módulos de archivos dinámicamente
 const loadFolderFilesServices = async () => {
 	if (!getFolderFiles) {
 		const module = await import('@/services/folder-files/folder-files.service');
 		getFolderFiles = module.getFolderFiles;
-		getFolderFileStats = module.getFolderFileStats;
 	}
 };
+
+async function getAuthorizedFolderFiles(
+	request: { app: { locals: Record<string, unknown> } },
+	options: Parameters<FolderFilesGetter>[0],
+	page: { limit: number; offset: number }
+): Promise<{ counts: FolderFileCounts; result: FolderFilesResult }> {
+	const startedAt = Date.now();
+	const authorizedFiles: FolderFileRecord[] = [];
+	let processedRecords = 0;
+	let rawOffset = 0;
+	const chunkSize = 500;
+
+	while (true) {
+		const chunk = await getFolderFiles!({ ...options, limit: chunkSize, offset: rawOffset });
+		processedRecords += chunk.files.length;
+		const authorizedChunk = await filterAuthorizedMixedMediaEntities(request, chunk.files, ['read', 'index']);
+		authorizedFiles.push(...authorizedChunk);
+		rawOffset += chunk.files.length;
+		if (chunk.files.length === 0 || rawOffset >= chunk.total) break;
+	}
+
+	const files = authorizedFiles.slice(page.offset, page.offset + page.limit);
+	const total = authorizedFiles.length;
+	const counts: FolderFileCounts = { images: 0, videos: 0, audios: 0, documents: 0, jsonFiles: 0, file3Ds: 0 };
+	for (const file of authorizedFiles) {
+		if (file.entityType === 'image') counts.images += 1;
+		else if (file.entityType === 'video') counts.videos += 1;
+		else if (file.entityType === 'audio') counts.audios += 1;
+		else if (file.entityType === 'document') counts.documents += 1;
+		else if (file.entityType === 'jsonFile') counts.jsonFiles += 1;
+		else counts.file3Ds += 1;
+	}
+	return {
+		counts,
+		result: {
+			files,
+			hasMore: page.offset + page.limit < total,
+			pagination: {
+				currentPage: Math.floor(page.offset / page.limit) + 1,
+				limit: page.limit,
+				offset: page.offset,
+				totalPages: Math.ceil(total / page.limit),
+			},
+			performance: { processedRecords, queryTime: Date.now() - startedAt },
+			total,
+		},
+	};
+}
 
 /**
  * GET /folders/:id/files - Obtener archivos de una carpeta
  */
 router.get(
 	'/:id/files',
+	authorizeFolderPathById('read'),
 	effectHandler((req) =>
 		Effect.gen(function* () {
 			yield* Effect.tryPromise({
@@ -85,22 +220,24 @@ router.get(
 
 			const result = yield* Effect.tryPromise({
 				try: () =>
-					getFolderFiles!({
-						folderId,
-						includeSubfolders: includeSubfolders === 'true',
-						limit: parsedLimit,
-						offset: parsedOffset,
-						search,
-						sortBy: (sortBy as 'name' | 'size' | 'createdAt' | 'updatedAt') || 'name',
-						sortOrder: (sortOrder as 'asc' | 'desc') || 'asc',
-						fileTypes: parsedFileTypes,
-					}),
+					getAuthorizedFolderFiles(
+						req,
+						{
+							folderId,
+							includeSubfolders: includeSubfolders === 'true',
+							search,
+							sortBy: (sortBy as 'name' | 'size' | 'createdAt' | 'updatedAt') || 'name',
+							sortOrder: (sortOrder as 'asc' | 'desc') || 'asc',
+							fileTypes: parsedFileTypes,
+						},
+						{ limit: parsedLimit, offset: parsedOffset }
+					),
 				catch: (err) => {
 					throw new Error(`Failed to fetch folder files: ${err instanceof Error ? err.message : String(err)}`);
 				},
 			});
 
-			return result;
+			return sanitizeFolderFilesPayload(result.result);
 		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );
@@ -110,6 +247,7 @@ router.get(
  */
 router.get(
 	'/:id/files/stats',
+	authorizeFolderPathById('read'),
 	effectHandler((req) =>
 		Effect.gen(function* () {
 			yield* Effect.tryPromise({
@@ -121,13 +259,18 @@ router.get(
 			const { includeSubfolders = 'false' } = req.query as Record<string, string | undefined>;
 
 			const result = yield* Effect.tryPromise({
-				try: () => getFolderFileStats!(folderId, includeSubfolders === 'true'),
+				try: () =>
+					getAuthorizedFolderFiles(
+						req,
+						{ folderId, includeSubfolders: includeSubfolders === 'true' },
+						{ limit: 1, offset: 0 }
+					),
 				catch: (err) => {
 					throw new Error(`Failed to fetch folder stats: ${err instanceof Error ? err.message : String(err)}`);
 				},
 			});
 
-			return result;
+			return { ...result.counts, total: result.result.total };
 		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );
@@ -204,14 +347,18 @@ router.get(
 						})
 					)
 				);
+				const publicFolders = yield* Effect.tryPromise({
+					try: () => toPublicFolders(req, foldersWithRecentImages as unknown as FolderRecord[]),
+					catch: (error) => new Error(`Failed to authorize folders: ${String(error)}`),
+				});
 
 				return {
-					data: foldersWithRecentImages,
+					data: publicFolders,
 					pagination: {
-						total: favoriteResult.total,
+						total: publicFolders.length,
 						limit: options.limit,
 						offset: options.offset,
-						hasNext: options.limit + options.offset < favoriteResult.total,
+						hasNext: publicFolders.length >= options.limit,
 						hasPrev: options.offset > 0,
 					},
 				};
@@ -245,14 +392,18 @@ router.get(
 					})
 				)
 			);
+			const publicFolders = yield* Effect.tryPromise({
+				try: () => toPublicFolders(req, foldersWithRecentImages as unknown as FolderRecord[]),
+				catch: (error) => new Error(`Failed to authorize folders: ${String(error)}`),
+			});
 
 			return {
-				data: foldersWithRecentImages,
+				data: publicFolders,
 				pagination: {
-					total: result.total,
+					total: publicFolders.length,
 					limit: result.limit,
 					offset: result.offset,
-					hasNext: result.limit + result.offset < result.total,
+					hasNext: publicFolders.length >= result.limit,
 					hasPrev: result.offset > 0,
 				},
 			};
@@ -266,10 +417,14 @@ router.get(
  */
 router.get(
 	'/tree',
-	effectHandler(() =>
+	effectHandler((req) =>
 		Effect.gen(function* () {
 			const folderService = yield* FolderService;
-			return yield* folderService.getTree();
+			const folders = yield* folderService.getTree();
+			return yield* Effect.tryPromise({
+				try: () => toPublicFolders(req, folders as unknown as FolderRecord[]),
+				catch: (error) => new Error(`Failed to authorize folder tree: ${String(error)}`),
+			});
 		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );
@@ -279,6 +434,7 @@ router.get(
  */
 router.get(
 	'/:id/preview',
+	authorizeFolderPathById('read'),
 	effectHandler(
 		(req) =>
 			Effect.gen(function* () {
@@ -313,7 +469,10 @@ router.get(
 		{
 			onSuccess: ({ folder, previewFiles }, res) => {
 				const name = escapeXml(folder.name || 'Carpeta');
-				const path = escapeXml(folder.path || '/');
+				const authorizedReference = res.locals.authorizedRootReference as
+					| { relativePath: string; rootId: string }
+					| undefined;
+				const path = escapeXml(authorizedReference?.relativePath || '/');
 				const totalFiles = folder.totalFiles ?? folder._count?.totalFiles ?? 0;
 				const totalSize = formatBytes(folder.totalSize ?? 0);
 				const svg = buildFolderPreviewSvg({
@@ -338,14 +497,38 @@ router.get(
 );
 
 /**
+ * GET /folders/root - Obtener carpetas raíz
+ */
+router.get(
+	'/root',
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const folderService = yield* FolderService;
+			const folders = yield* folderService.getChildren(null);
+			return yield* Effect.tryPromise({
+				try: () => toPublicFolders(req, folders as unknown as FolderRecord[]),
+				catch: (error) => new Error(`Failed to authorize root folders: ${String(error)}`),
+			});
+		}).pipe(Effect.provide(FolderServiceLive))
+	)
+);
+
+/**
  * GET /folders/:id - Obtener carpeta por ID
  */
 router.get(
 	'/:id',
+	authorizeFolderPathById('read'),
 	effectHandler((req) =>
 		Effect.gen(function* () {
 			const folderService = yield* FolderService;
-			return yield* folderService.getById(req.params.id);
+			const folder = yield* folderService.getById(req.params.id);
+			const publicFolder = yield* Effect.tryPromise({
+				try: () => toPublicFolder(req, folder as unknown as FolderRecord),
+				catch: (error) => new Error(`Failed to authorize folder: ${String(error)}`),
+			});
+			if (!publicFolder) return yield* Effect.fail(new Error('Folder no autorizado'));
+			return publicFolder;
 		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );
@@ -355,13 +538,19 @@ router.get(
  */
 router.post(
 	'/',
+	authorizeMediaPathInput({ expected: 'directory', required: true }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const folderService = yield* FolderService;
 			const input = yield* Schema.decodeUnknown(FolderCreateInput)(req.body);
 			const folder = yield* folderService.create(input);
 			res.status(201);
-			return folder;
+			const publicFolder = yield* Effect.tryPromise({
+				try: () => toPublicFolder(req, folder as unknown as FolderRecord),
+				catch: (error) => new Error(`Failed to authorize created folder: ${String(error)}`),
+			});
+			if (!publicFolder) return yield* Effect.fail(new Error('Folder creado fuera de roots autorizados'));
+			return publicFolder;
 		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );
@@ -371,11 +560,20 @@ router.post(
  */
 router.put(
 	'/:id',
+	authorizeFolderPathById('index'),
+	authorizeFolderPathById('write'),
+	authorizeMediaPathInput({ expected: 'directory', permissions: ['read', 'index', 'write'], required: false }),
 	effectHandler((req) =>
 		Effect.gen(function* () {
 			const folderService = yield* FolderService;
 			const input = yield* Schema.decodeUnknown(FolderUpdateInput)(req.body);
-			return yield* folderService.update(req.params.id, input);
+			const folder = yield* folderService.update(req.params.id, input);
+			const publicFolder = yield* Effect.tryPromise({
+				try: () => toPublicFolder(req, folder as unknown as FolderRecord),
+				catch: (error) => new Error(`Failed to authorize updated folder: ${String(error)}`),
+			});
+			if (!publicFolder) return yield* Effect.fail(new Error('Folder no autorizado'));
+			return publicFolder;
 		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );
@@ -385,6 +583,7 @@ router.put(
  */
 router.delete(
 	'/:id',
+	authorizeFolderPathById('delete'),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const folderService = yield* FolderService;
@@ -402,10 +601,15 @@ router.delete(
  */
 router.get(
 	'/:id/ancestors',
+	authorizeFolderPathById('read'),
 	effectHandler((req) =>
 		Effect.gen(function* () {
 			const folderService = yield* FolderService;
-			return yield* folderService.getAncestors(req.params.id);
+			const folders = yield* folderService.getAncestors(req.params.id);
+			return yield* Effect.tryPromise({
+				try: () => toPublicFolders(req, folders as unknown as FolderRecord[]),
+				catch: (error) => new Error(`Failed to authorize folder ancestors: ${String(error)}`),
+			});
 		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );
@@ -415,24 +619,18 @@ router.get(
  */
 router.post(
 	'/:id/favorite',
+	authorizeFolderPathById('read'),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.FOLDER);
 			const folderService = yield* FolderService;
-			return yield* folderService.toggleFavorite(req.params.id);
-		}).pipe(Effect.provide(FolderServiceLive))
-	)
-);
-
-/**
- * GET /folders/root - Obtener carpetas raíz
- */
-router.get(
-	'/root',
-	effectHandler(() =>
-		Effect.gen(function* () {
-			const folderService = yield* FolderService;
-			return yield* folderService.getChildren(null);
+			const folder = yield* folderService.toggleFavorite(req.params.id);
+			const publicFolder = yield* Effect.tryPromise({
+				try: () => toPublicFolder(req, folder as unknown as FolderRecord),
+				catch: (error) => new Error(`Failed to authorize favorite folder: ${String(error)}`),
+			});
+			if (!publicFolder) return yield* Effect.fail(new Error('Folder no autorizado'));
+			return publicFolder;
 		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );
@@ -440,41 +638,20 @@ router.get(
 /**
  * POST /folders/reindex-all - Reindexar todas las carpetas
  */
-router.post(
-	'/reindex-all',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			const options = req.body || {};
-
-			const result = yield* Effect.tryPromise({
-				try: () =>
-					reindexService.executeStructuredReindex({
-						emitEvents: true,
-						includeSubfolders: true,
-						skipThumbnails: options.skipThumbnails,
-						skipMetadata: options.skipMetadata,
-						concurrency: 3,
-					}),
-				catch: (error) => new Error(`Reindex failed: ${error instanceof Error ? error.message : 'Unknown error'}`),
-			});
-
-			res.json({
-				processed: result.summary.foldersProcessed,
-				errors: Object.values(result.phases)
-					.flatMap((phase) => phase.errors)
-					.filter(Boolean),
-			});
-
-			return result;
-		})
-	)
-);
+router.post('/reindex-all', (_req, res) => {
+	res.status(410).json({
+		code: 'AUTHORIZED_ROOTS_REQUIRED',
+		message: 'El reindex global fue retirado; reindexa folders autorizados por ID.',
+		retryable: false,
+	});
+});
 
 /**
  * POST /folders/:id/reindex - Reindexar una carpeta específica con flujo estructurado
  */
 router.post(
 	'/:id/reindex',
+	authorizeFolderPathById('index'),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const folderId = req.params.id;
@@ -512,40 +689,12 @@ router.post(
  * POST /folders/reindex - Iniciar reindexado de carpetas
  * @deprecated Usar /folders/:id/reindex o /folders/reindex-all
  */
-router.post(
-	'/reindex',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			const { folderIds } = req.body;
-			if (!Array.isArray(folderIds) || folderIds.length === 0) {
-				return yield* Effect.fail(new Error('folderIds must be a non-empty array'));
-			}
-
-			// Reindexar la primera carpeta del array (mantener compatibilidad)
-			const folderId = folderIds[0];
-			serverLogger.debug('Reindexando desde endpoint /reindex (legacy)', { folderId });
-
-			const result = yield* Effect.tryPromise({
-				try: () =>
-					reindexService.executeStructuredReindex({
-						folderId,
-						emitEvents: true,
-						includeSubfolders: true,
-						concurrency: 3,
-					}),
-				catch: (error) => new Error(`Reindex failed: ${error instanceof Error ? error.message : 'Unknown error'}`),
-			});
-
-			res.json({
-				success: result.success,
-				folderId,
-				folderIds,
-				message: 'Reindex completed',
-				phases: result.phases,
-				summary: result.summary,
-			});
-		})
-	)
-);
+router.post('/reindex', (_req, res) => {
+	res.status(410).json({
+		code: 'LEGACY_REINDEX_RETIRED',
+		message: 'Usa /folders/:id/reindex con un folder autorizado.',
+		retryable: false,
+	});
+});
 
 export default router;

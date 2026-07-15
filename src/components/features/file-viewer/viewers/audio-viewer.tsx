@@ -56,7 +56,7 @@ function MetadataPanel({
 			<div className="grid grid-cols-2 gap-4 text-sm">
 				<div>
 					<span className="font-medium">Formato:</span>
-					<span className="ml-2 text-muted-foreground">{audio.path?.split('.').pop()?.toUpperCase() || 'Audio'}</span>
+					<span className="ml-2 text-muted-foreground">{audio.extension?.toUpperCase() || 'Audio'}</span>
 				</div>
 				{audio.stats?.sampleRate && (
 					<div>
@@ -90,7 +90,8 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 	const [error, setError] = useState<string | null>(null);
 
 	// Audio source URL
-	const audioSrc = audio.path || `/api/audio/${audio.id}/stream`;
+	const audioSrc = `/api/files/content?assetType=audio&assetId=${encodeURIComponent(audio.id)}`;
+	const downloadUrl = `/api/download?assetType=audio&assetId=${encodeURIComponent(audio.id)}`;
 
 	useEffect(() => {
 		const audioElement = audioRef.current;
@@ -184,7 +185,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 
 	const handleDownload = () => {
 		const link = document.createElement('a');
-		link.href = audioSrc;
+		link.href = downloadUrl;
 		link.download = audio.name || 'audio';
 		document.body.appendChild(link);
 		link.click();

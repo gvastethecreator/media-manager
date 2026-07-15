@@ -19,7 +19,6 @@ export interface ImageItem {
 		mimeType?: string;
 		isLocal?: boolean;
 	};
-	path: string;
 	size: number;
 	src?: string;
 	thumbnail: string | null;

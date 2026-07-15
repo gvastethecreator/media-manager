@@ -305,39 +305,25 @@ const make = (): AlbumServiceInterface => {
 			const { limit = 50, offset = 0 } = options;
 			const safeLimit = Math.max(0, limit);
 			const safeOffset = Math.max(0, offset);
-
-			const album = yield* Effect.tryPromise({
-				try: async () =>
-					await db.query.albums.findFirst({
-						where: eq(albums.id, id),
-						with: {
-							images: {
-								with: {
-									folder: true,
-									tags: { columns: { id: true } },
-									albums: { columns: { id: true } },
-									collections: { columns: { id: true } },
-									characters: { columns: { id: true } },
-									places: { columns: { id: true } },
-									worldItems: { columns: { id: true } },
-									notes: { columns: { id: true } },
-								},
-							},
-						},
-					}),
-				catch: (error: unknown) => fromUnknownError('getImages', error),
-			});
-
-			if (!album) {
-				return yield* Effect.fail(new AlbumNotFound({ albumId: id }));
-			}
-
-			const images = album.images ?? [];
+			yield* getById(id);
 			if (safeLimit === 0) {
 				return [];
 			}
 
-			return images.slice(safeOffset, safeOffset + safeLimit);
+			return yield* Effect.tryPromise({
+				try: async () => {
+					const rows = await db
+						.select({ image: images })
+						.from(imageAlbums)
+						.innerJoin(images, eq(imageAlbums.A, images.id))
+						.where(eq(imageAlbums.B, id))
+						.orderBy(desc(images.updatedAt), asc(images.id))
+						.limit(safeLimit)
+						.offset(safeOffset);
+					return rows.map((row: { image: typeof images.$inferSelect }) => row.image);
+				},
+				catch: (error: unknown) => fromUnknownError('getImages', error),
+			});
 		});
 
 	/**

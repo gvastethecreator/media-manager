@@ -39,8 +39,9 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 
 	// Document source URL
-	const documentSrc = documentEntity.path || `/api/documents/${documentEntity.id}/view`;
-	const fileExtension = documentEntity.path?.split('.').pop()?.toLowerCase() || '';
+	const documentSrc = `/api/files/content?assetType=document&assetId=${encodeURIComponent(documentEntity.id)}`;
+	const downloadUrl = `/api/download?assetType=document&assetId=${encodeURIComponent(documentEntity.id)}`;
+	const fileExtension = documentEntity.extension?.toLowerCase() || '';
 	const isPDF = fileExtension === 'pdf';
 	const isTextFile = ['txt', 'md', 'json', 'xml', 'csv'].includes(fileExtension);
 	const isOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExtension);
@@ -78,7 +79,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 
 	const handleDownload = () => {
 		const link = document.createElement('a');
-		link.href = documentSrc;
+		link.href = downloadUrl;
 		link.download = documentEntity.name || 'document';
 		document.body.appendChild(link);
 		link.click();

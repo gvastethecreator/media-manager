@@ -1,53 +1,21 @@
-/**
- * @file Express Routes para Download usando Effect
- * @module server/routes/download.effect
- * @description Rutas REST para descargas de archivos implementadas con Effect-TS
- * @created 2026-02-02 - Migración completa desde download.ts
- */
+/** Download routes backed by authorized root or asset references. */
 
-import { Context, Data, Effect, Layer } from 'effect';
+import { createReadStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
+import { basename, extname } from 'node:path';
 import express from 'express';
-import fs from 'fs/promises';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { getFileInfo } from '@/services/file/file.service';
-import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { getMimeTypeFromExtension } from '@/services/file-entity-mapper/utils/file-info.utils';
+import {
+	getAuthorizedRootRegistry,
+	parseAuthorizedPathQuery,
+	parseAuthorizedPathReference,
+	sendRootAuthorizationError,
+} from '@/server/security/authorized-root-request';
+import { parseMediaAssetReference, resolveMediaAssetReference } from '@/server/security/media-asset-reference';
 
-// ==========================================
-// 1. Definir errores tipados
-// ==========================================
-
-export class FilePathRequired extends Data.TaggedError('FilePathRequired')<{
-	readonly field: string;
-}> {}
-
-export class FileNotFound extends Data.TaggedError('FileNotFound')<{
-	readonly path: string;
-}> {}
-
-export class FileReadError extends Data.TaggedError('FileReadError')<{
-	readonly path: string;
-	readonly message: string;
-}> {}
-
-// ==========================================
-// 2. Crear servicio Effect
-// ==========================================
-
-export interface DownloadServiceInterface {
-	readonly downloadFile: (
-		filePath: string
-	) => Effect.Effect<
-		{ buffer: Buffer; fileInfo: { name: string; mimeType: string; path: string; size: number } },
-		FilePathRequired | FileNotFound | FileReadError
-	>;
-}
-
-export class DownloadService extends Context.Tag('DownloadService')<DownloadService, DownloadServiceInterface>() {}
-
-type DownloadFileResult = {
-	buffer: Buffer;
-	fileInfo: { name: string; mimeType: string; path: string; size: number };
-};
+const router = express.Router();
+const logger = serverLogger.withContext('DownloadAPI');
 
 const encodeRFC5987Value = (value: string): string =>
 	encodeURIComponent(value)
@@ -60,107 +28,77 @@ const createAttachmentHeader = (fileName: string): string => {
 			.replace(/[^\x20-\x7E]/g, '_')
 			.replace(/["\\;]/g, '_')
 			.trim() || 'download';
-
 	return `attachment; filename="${fallbackName}"; filename*=UTF-8''${encodeRFC5987Value(fileName)}`;
 };
 
-const sendDownloadResponse = (res: express.Response, result: DownloadFileResult): void => {
-	res.set({
-		'Content-Type': result.fileInfo.mimeType,
-		'Content-Disposition': createAttachmentHeader(result.fileInfo.name),
-		'Content-Length': result.fileInfo.size.toString(),
-		'X-Content-Type-Options': 'nosniff',
+interface DownloadRequest {
+	app: { locals: Record<string, unknown> };
+	body?: { asset?: unknown; source?: unknown };
+	method: string;
+	query: Record<string, unknown>;
+}
+
+async function resolveDownloadPath(request: DownloadRequest) {
+	const registry = getAuthorizedRootRegistry(request);
+	if (request.method === 'POST') {
+		if (request.body?.asset !== undefined) {
+			return resolveMediaAssetReference(registry, parseMediaAssetReference(request.body.asset), 'export');
+		}
+		return registry.resolve(parseAuthorizedPathReference(request.body?.source), 'export');
+	}
+	if (request.query.assetId !== undefined || request.query.assetType !== undefined) {
+		return resolveMediaAssetReference(
+			registry,
+			parseMediaAssetReference({ assetId: request.query.assetId, assetType: request.query.assetType }),
+			'export'
+		);
+	}
+	return registry.resolve(parseAuthorizedPathQuery(request), 'export');
+}
+
+function sendDownloadError(response: express.Response, error: unknown): void {
+	if (sendRootAuthorizationError(response, error)) return;
+	const code = (error as NodeJS.ErrnoException | undefined)?.code;
+	logger.error('Authorized download failed', { code: code ?? 'DOWNLOAD_FAILED' });
+	response.status(code === 'ENOENT' ? 404 : 500).json({
+		code: code === 'ENOENT' ? 'FILE_NOT_FOUND' : 'DOWNLOAD_FAILED',
+		message: code === 'ENOENT' ? 'El recurso solicitado no existe.' : 'No se pudo descargar el recurso.',
+		retryable: false,
 	});
-	res.send(result.buffer);
-};
+}
 
-// ==========================================
-// 3. Implementar Live Layer
-// ==========================================
-
-export const DownloadServiceLive = Layer.succeed(
-	DownloadService,
-	DownloadService.of({
-		downloadFile: (filePath: string) =>
-			Effect.tryPromise({
-				try: async () => {
-					if (!filePath?.trim()) {
-						throw new FilePathRequired({ field: 'path' });
-					}
-
-					const fileInfo = await getFileInfo(filePath.trim());
-					const buffer = await fs.readFile(fileInfo.path);
-
-					return {
-						buffer,
-						fileInfo: {
-							name: fileInfo.name,
-							mimeType: fileInfo.mimeType,
-							path: fileInfo.path,
-							size: fileInfo.size,
-						},
-					};
-				},
-				catch: (error) => {
-					if (error instanceof FilePathRequired) {
-						return error;
-					}
-					if (error instanceof Error && error.message.includes('No se pudo obtener')) {
-						return new FileNotFound({ path: filePath });
-					}
-					return new FileReadError({
-						path: filePath,
-						message: error instanceof Error ? error.message : 'Error al leer archivo',
-					});
-				},
-			}),
-	})
-);
-
-// ==========================================
-// 4. Crear Router Express
-// ==========================================
-
-const router = express.Router();
-const downloadLogger = serverLogger.withContext('DownloadAPI');
-
-/**
- * POST /api/download - Descargar archivo
- */
-router.post('/', effectHandler(
-	(req) => {
-		const filePath = (req.body.path as string) ?? '';
-		return Effect.gen(function* () {
-			const service = yield* DownloadService;
-			return { result: yield* service.downloadFile(filePath), filePath };
-		}).pipe(Effect.provide(DownloadServiceLive));
-	},
-	{
-		onSuccess: ({ result, filePath }, res) => {
-			downloadLogger.info(`Enviando archivo para descarga: ${result.fileInfo.name} (${result.fileInfo.mimeType})`);
-			sendDownloadResponse(res, result);
-		},
+async function downloadHandler(request: DownloadRequest, response: express.Response): Promise<void> {
+	try {
+		const resolved = await resolveDownloadPath(request);
+		const fileStat = await stat(resolved.absolutePath);
+		if (!fileStat.isFile()) {
+			response.status(404).json({ code: 'FILE_NOT_FOUND', message: 'El recurso no es un archivo.', retryable: false });
+			return;
+		}
+		const fileName = basename(resolved.absolutePath);
+		response.set({
+			'Content-Disposition': createAttachmentHeader(fileName),
+			'Content-Length': fileStat.size.toString(),
+			'Content-Type': getMimeTypeFromExtension(extname(resolved.absolutePath)),
+			'X-Content-Type-Options': 'nosniff',
+		});
+		const stream = createReadStream(resolved.absolutePath);
+		response.on('close', () => stream.destroy());
+		stream.on('error', (error) => {
+			logger.error('Authorized download stream failed', {
+				code: (error as NodeJS.ErrnoException).code ?? 'STREAM_ERROR',
+			});
+			if (!response.headersSent) sendDownloadError(response, error);
+			else response.destroy();
+		});
+		stream.pipe(response);
+	} catch (error) {
+		sendDownloadError(response, error);
 	}
-));
+}
 
-/**
- * GET /api/download - Descargar archivo por query string
- */
-router.get('/', effectHandler(
-	(req) => {
-		const filePath = (req.query.path as string) ?? '';
-		return Effect.gen(function* () {
-			const service = yield* DownloadService;
-			return { result: yield* service.downloadFile(filePath), filePath };
-		}).pipe(Effect.provide(DownloadServiceLive));
-	},
-	{
-		onSuccess: ({ result, filePath }, res) => {
-			downloadLogger.info(`Enviando archivo para descarga: ${result.fileInfo.name} (${result.fileInfo.mimeType})`);
-			sendDownloadResponse(res, result);
-		},
-	}
-));
+router.post('/', downloadHandler);
+router.get('/', downloadHandler);
 
 export default router;
 export { router as downloadEffectRouter };

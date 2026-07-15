@@ -6,7 +6,7 @@
  */
 
 import * as crypto from 'node:crypto';
-import { and, count, desc, eq, gte, inArray, lte, notInArray, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, lte, notInArray, or, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { audios, folders } from '@/lib/drizzle/schema';
@@ -192,9 +192,9 @@ const make = (): AudioServiceInterface => {
 			const useCanonicalFavoriteBridge =
 				requestedIsFavorite === true
 					? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO)) !== null,
-						catch: (error) => toAudioError(error, 'create.favoriteScope'),
-					})
+							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO)) !== null,
+							catch: (error) => toAudioError(error, 'create.favoriteScope'),
+						})
 					: false;
 
 			// Verificar si ya existe un audio con el mismo hash
@@ -382,9 +382,9 @@ const make = (): AudioServiceInterface => {
 			const favoriteEntityIds: string[] | null =
 				filters.isFavorite !== undefined
 					? yield* Effect.tryPromise({
-						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO),
-						catch: (error) => toAudioError(error, 'getAll:favoriteIds'),
-					})
+							try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO),
+							catch: (error) => toAudioError(error, 'getAll:favoriteIds'),
+						})
 					: null;
 
 			const conditions = [];
@@ -507,7 +507,7 @@ const make = (): AudioServiceInterface => {
 					}
 
 					return await query
-						.orderBy(orderByClause)
+						.orderBy(orderByClause, asc(audios.id))
 						.limit(filters.limit || 20)
 						.offset(filters.offset || 0);
 				},
@@ -540,9 +540,9 @@ const make = (): AudioServiceInterface => {
 			const useCanonicalFavoriteBridge =
 				requestedIsFavorite !== undefined
 					? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO)) !== null,
-						catch: (error) => toAudioError(error, 'update.favoriteScope'),
-					})
+							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO)) !== null,
+							catch: (error) => toAudioError(error, 'update.favoriteScope'),
+						})
 					: false;
 
 			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
@@ -796,8 +796,7 @@ const make = (): AudioServiceInterface => {
 				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO),
 				catch: (error) => toAudioError(error, 'toggleFavorite.favoriteScope'),
 			});
-			const currentFavoriteStatus =
-				favoriteEntityIds === null ? audio.isFavorite : favoriteEntityIds.includes(id);
+			const currentFavoriteStatus = favoriteEntityIds === null ? audio.isFavorite : favoriteEntityIds.includes(id);
 			const newFavoriteStatus = !currentFavoriteStatus;
 
 			if (favoriteEntityIds !== null) {
@@ -833,9 +832,9 @@ const make = (): AudioServiceInterface => {
 				favoriteEntityIds === null
 					? ids.length
 					: yield* Effect.tryPromise({
-						try: () => favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite),
-						catch: (error) => toAudioError(error, 'setFavoriteMany.favoriteBridge'),
-					});
+							try: () => favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite),
+							catch: (error) => toAudioError(error, 'setFavoriteMany.favoriteBridge'),
+						});
 
 			audioServiceLogger.info('Audios actualizados exitosamente:', updatedCount);
 			return updatedCount;

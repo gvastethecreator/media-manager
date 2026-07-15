@@ -6,15 +6,16 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { BrowserEntityType, BrowserItem } from '../types/item.types';
 
 const API_BASE = '/api';
 
 interface DeleteInput {
-	itemIds: string[];
+	items: BrowserItem[];
 }
 
 interface DeleteResult {
-	deleteItems: (itemIds: string[]) => Promise<void>;
+	deleteItems: (items: BrowserItem[]) => Promise<void>;
 	error: Error | null;
 	isLoading: boolean;
 	isSuccess: boolean;
@@ -28,32 +29,58 @@ export function useDelete(): DeleteResult {
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation<void, Error, DeleteInput>({
-		mutationFn: async ({ itemIds }) => {
-			const response = await fetch(`${API_BASE}/files`, {
-				method: 'DELETE',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ ids: itemIds }),
-			});
+		mutationFn: async ({ items }) => {
+			const grouped = new Map<BrowserEntityType, BrowserItem[]>();
+			for (const item of items) {
+				grouped.set(item.entityType, [...(grouped.get(item.entityType) ?? []), item]);
+			}
+			for (const [entityType, group] of grouped) {
+				let requests: Array<Promise<Response>>;
+				if (entityType === 'image' || entityType === 'video' || entityType === 'audio') {
+					const route = entityType === 'image' ? 'images' : entityType === 'video' ? 'videos' : 'audios';
+					requests = [
+						fetch(`${API_BASE}/${route}/batch`, {
+							method: 'DELETE',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ ids: group.map((item) => item.id) }),
+						}),
+					];
+				} else {
+					const route =
+						entityType === 'document'
+							? 'documents'
+							: entityType === 'jsonFile'
+								? 'json-files'
+								: entityType === 'file3d'
+									? 'file3ds'
+									: entityType === 'folder'
+										? 'folders'
+										: null;
+					if (!route) throw new Error(`Tipo no compatible para eliminar: ${entityType}`);
+					requests = group.map((item) =>
+						fetch(`${API_BASE}/${route}/${encodeURIComponent(item.id)}`, { method: 'DELETE' })
+					);
+				}
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				throw new Error(errorData.message || `Error al eliminar: ${response.statusText}`);
+				const responses = await Promise.all(requests);
+				const failed = responses.find((response) => !response.ok);
+				if (failed) {
+					const errorData = await failed.json().catch(() => ({}));
+					throw new Error(errorData.message || errorData.error || `Error al eliminar: ${failed.statusText}`);
+				}
 			}
 		},
-		onSuccess: () => {
-			// Invalidar queries relevantes para que se actualicen los datos
-			queryClient.invalidateQueries({ queryKey: ['files'] });
-			queryClient.invalidateQueries({ queryKey: ['folder-files'] });
-			queryClient.invalidateQueries({ queryKey: ['favorites'] });
-			queryClient.invalidateQueries({ queryKey: ['albums'] });
-			queryClient.invalidateQueries({ queryKey: ['collections'] });
+		onSettled: async () => {
+			await Promise.all(
+				['files', 'folder-files', 'favorites', 'albums', 'collections'].map((key) =>
+					queryClient.invalidateQueries({ queryKey: [key] })
+				)
+			);
 		},
 	});
 
-	const deleteItems = async (itemIds: string[]): Promise<void> => {
-		await mutation.mutateAsync({ itemIds });
+	const deleteItems = async (items: BrowserItem[]): Promise<void> => {
+		await mutation.mutateAsync({ items });
 	};
 
 	return {

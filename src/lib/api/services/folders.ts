@@ -66,7 +66,7 @@ const buildBaseFolder = (raw: any) => ({
 	id: raw.id,
 	name: raw.name || '',
 	description: raw.description ?? null,
-	path: raw.path || '',
+	path: raw.relativePath || '',
 	emoji: raw.emoji ?? null,
 	color: raw.color ?? null,
 	featuredImage: raw.featuredImage ?? null,
@@ -341,68 +341,4 @@ export const getFolderStats = async (
 	};
 
 	return normalized;
-};
-
-export const getRootFolderId = async (): Promise<string> => {
-	const response = await apiClient.get<{ id: string }>('/folders/root-id');
-	return response.id;
-};
-
-export const getFolderPath = async (folderId: string): Promise<string> => {
-	const response = await apiClient.get<{ path: string }>(`/folders/${folderId}/path`);
-	return response.path;
-};
-
-export const getFolderName = async (folderId: string): Promise<string> => {
-	const response = await apiClient.get<{ name: string }>(`/folders/${folderId}/name`);
-	return response.name;
-};
-
-export const getFolderIdByPath = async (folderPath: string): Promise<string> => {
-	const response = await apiClient.get<{ id: string }>(`/folders/by-path?path=${encodeURIComponent(folderPath)}`);
-	return response.id;
-};
-
-export const getParentFolderId = async (folderId: string): Promise<string | null> => {
-	const response = await apiClient.get<{ parentFolderId: string | null }>(`/folders/${folderId}/parent-id`);
-	return response.parentFolderId;
-};
-
-/**
- * Valida si una carpeta ya existe en la ruta especificada
- * @param folderPath - Ruta de la carpeta a validar
- * @returns Promise<boolean> - true si la carpeta ya existe, false si no existe
- */
-export const validateFolderExists = async (folderPath: string): Promise<boolean> => {
-	try {
-		// Hacer la petición directamente para evitar logs de error innecesarios
-		const response = await fetch(`/api/folders/by-path?path=${encodeURIComponent(folderPath)}`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		});
-
-		// Si la respuesta es 200, la carpeta existe
-		if (response.ok) {
-			return true;
-		}
-
-		// Si es 404, la carpeta no existe (esto es esperado)
-		if (response.status === 404) {
-			return false;
-		}
-
-		// Para otros errores, lanzar excepción
-		const errorText = await response.text();
-		throw new Error(`Error validando carpeta: ${response.status} - ${errorText}`);
-	} catch (error) {
-		// Si es un error de red u otro tipo, asumir que la carpeta no existe
-		if (error instanceof TypeError && error.message.includes('fetch')) {
-			return false;
-		}
-
-		// Re-lanzar otros errores
-		throw error;
-	}
 };

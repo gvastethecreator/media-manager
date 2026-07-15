@@ -6,23 +6,18 @@ import {
 	useReindexFolder,
 	useUpdateFolder,
 } from '@/lib/api/folders';
-import { validateFolderExists } from '@/lib/api/services/folders';
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
+import type { FolderCreateInput } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import type { FolderCreateInput } from '@/types/entities/folder';
-
-// Regex precompiladas a nivel superior
-const RE_BACKSLASH = /\\/g;
-const RE_MULTI_SLASH = /\/+/g;
 
 const operationsLogger = clientLogger.withContext('FoldersOperations');
 
 // Normalización pura (estable a nivel de módulo)
-const normalizeInput = (p: string): { input: FolderCreateInput; name: string } => {
-	const normalizedPath = p.trim().replace(RE_BACKSLASH, '/').replace(RE_MULTI_SLASH, '/');
-	const folderName = normalizedPath.split('/').filter(Boolean).pop() || normalizedPath;
+const normalizeInput = (source: AuthorizedPathReference): { input: FolderCreateInput; name: string } => {
+	const normalizedSource = { relativePath: source.relativePath.trim(), rootId: source.rootId };
+	const folderName = normalizedSource.relativePath.split('/').filter(Boolean).pop() || normalizedSource.rootId;
 	const input: FolderCreateInput = {
-		path: normalizedPath,
 		name: folderName,
 		description: null,
 		emoji: null,
@@ -30,16 +25,17 @@ const normalizeInput = (p: string): { input: FolderCreateInput; name: string } =
 		featuredImage: null,
 		parentId: null,
 		presetId: null,
+		source: normalizedSource,
 	};
 	return { input, name: folderName };
 };
 
 // Mapeo de error para alta de carpeta (puro)
-const mapAddFolderError = (folderPath: string, error: unknown): string => {
+const mapAddFolderError = (error: unknown): string => {
 	if (error instanceof Error) {
 		const msg = error.message || 'Error desconocido';
 		if (msg.includes('409') || msg.includes('Ya existe una carpeta')) {
-			return `Ya existe una carpeta con la ruta: ${folderPath.trim()}`;
+			return 'La carpeta seleccionada ya está registrada';
 		}
 		return msg;
 	}
@@ -106,27 +102,11 @@ export function useFoldersOperations({
 	const reindexAllFoldersMutation = useReindexAllFolders();
 
 	// Helpers locales (estables)
-	const ensureNonEmptyPath = useCallback(
-		(p: string): boolean => {
-			if (!p?.trim()) {
-				const msg = 'La ruta de la carpeta no puede estar vacía';
-				operationsLogger.error('❌ Ruta de carpeta vacía');
-				onError(msg);
-				toastService.error(msg);
-				return false;
-			}
-			return true;
-		},
-		[onError]
-	);
-
-	const ensureNotExists = useCallback(
-		async (p: string): Promise<boolean> => {
-			operationsLogger.info('🔍 Validando si la carpeta ya existe:', { path: p });
-			const exists = await validateFolderExists(p.trim());
-			if (exists) {
-				const msg = `Ya existe una carpeta con la ruta: ${p.trim()}`;
-				operationsLogger.warn('⚠️ Carpeta duplicada detectada:', { path: p.trim() });
+	const ensureRootSelected = useCallback(
+		(source: AuthorizedPathReference): boolean => {
+			if (!source.rootId?.trim()) {
+				const msg = 'Selecciona un media root autorizado';
+				operationsLogger.error('❌ Media root no seleccionado');
 				onError(msg);
 				toastService.error(msg);
 				return false;
@@ -152,23 +132,20 @@ export function useFoldersOperations({
 
 	// Añadir carpeta
 	const getAddFolderInput = useCallback(
-		async (folderPath: string): Promise<null | { input: FolderCreateInput; name: string }> => {
-			if (!ensureNonEmptyPath(folderPath)) {
+		(source: AuthorizedPathReference): null | { input: FolderCreateInput; name: string } => {
+			if (!ensureRootSelected(source)) {
 				return null;
 			}
-			if (!(await ensureNotExists(folderPath))) {
-				return null;
-			}
-			return normalizeInput(folderPath);
+			return normalizeInput(source);
 		},
-		[ensureNonEmptyPath, ensureNotExists]
+		[ensureRootSelected]
 	);
 
 	const handleAddFolder = useCallback(
-		async (folderPath: string) => {
+		async (source: AuthorizedPathReference) => {
 			try {
-				operationsLogger.info('➕ Agregando carpeta:', { path: folderPath });
-				const inputData = await getAddFolderInput(folderPath);
+				operationsLogger.info('➕ Agregando carpeta autorizada', { rootId: source.rootId });
+				const inputData = getAddFolderInput(source);
 				if (!inputData) {
 					return;
 				}
@@ -186,7 +163,7 @@ export function useFoldersOperations({
 				await startAutoIndexing(result.id, name);
 			} catch (error) {
 				operationsLogger.error('❌ Error al agregar carpeta:', error);
-				const errorMessage = mapAddFolderError(folderPath, error);
+				const errorMessage = mapAddFolderError(error);
 				onError(errorMessage);
 				toastService.error(errorMessage);
 			}

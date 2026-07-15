@@ -813,6 +813,7 @@ export const CollectionServiceLive = Layer.succeed(
 										.from(imageCollections)
 										.innerJoin(images, eq(imageCollections.A, images.id))
 										.where(eq(imageCollections.B, collectionId))
+										.orderBy(desc(images.updatedAt), asc(images.id))
 										.limit(limit)
 										.offset(offset)
 										.execute()

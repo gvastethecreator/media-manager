@@ -32,7 +32,11 @@ export function JsonFileContentView() {
 	const [jsonFile, setJsonFile] = useState<JsonFileWithStats | null>(null);
 	const [content, setContent] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const { isFavorite, isLoading: isFavoriteLoading, toggleFavorite } = useFavorite({
+	const {
+		isFavorite,
+		isLoading: isFavoriteLoading,
+		toggleFavorite,
+	} = useFavorite({
 		entityId: jsonFile?.id ?? id ?? '',
 		entityType: 'jsonFile',
 		initialIsFavorite: jsonFile?.isFavorite ?? false,
@@ -73,7 +77,9 @@ export function JsonFileContentView() {
 					return;
 				}
 
-				const response = await fetch(`/api/files/content?path=${encodeURIComponent(currentJsonFile.path)}`);
+				const response = await fetch(
+					`/api/files/content?assetType=json&assetId=${encodeURIComponent(currentJsonFile.id)}`
+				);
 				if (!response.ok) {
 					throw new Error('No se pudo cargar el contenido del archivo JSON');
 				}
@@ -112,7 +118,7 @@ export function JsonFileContentView() {
 		}
 
 		const link = document.createElement('a');
-		link.href = `/api/files/content?path=${encodeURIComponent(jsonFile.path)}`;
+		link.href = `/api/download?assetType=json&assetId=${encodeURIComponent(jsonFile.id)}`;
 		link.download = jsonFile.name;
 		link.rel = 'noopener noreferrer';
 		document.body.appendChild(link);
@@ -120,12 +126,12 @@ export function JsonFileContentView() {
 		document.body.removeChild(link);
 	};
 
-	const handleCopyPath = async () => {
+	const handleCopyReference = async () => {
 		if (!jsonFile) {
 			return;
 		}
 
-		await navigator.clipboard.writeText(jsonFile.path);
+		await navigator.clipboard.writeText(`json:${jsonFile.id}`);
 	};
 
 	const handleToggleFavorite = async () => {
@@ -151,9 +157,9 @@ export function JsonFileContentView() {
 			</Button>
 			{jsonFile && (
 				<>
-					<Button className="gap-2" onClick={handleCopyPath} size="sm" variant="outline">
+					<Button className="gap-2" onClick={handleCopyReference} size="sm" variant="outline">
 						<Copy className="h-4 w-4" />
-						Copiar ruta
+						Copiar referencia
 					</Button>
 					<Button className="gap-2" onClick={handleDownload} size="sm" variant="outline">
 						<Download className="h-4 w-4" />
