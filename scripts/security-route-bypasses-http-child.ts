@@ -27,9 +27,11 @@ database.exec(`
 		isActive INTEGER NOT NULL, createdAt INTEGER, updatedAt INTEGER, settingsId TEXT, imageId TEXT
 	);
 	CREATE TABLE Favorite (
-		id TEXT PRIMARY KEY, profileId TEXT NOT NULL, entityType TEXT NOT NULL,
+		id TEXT PRIMARY KEY NOT NULL, profileId TEXT NOT NULL, entityType TEXT NOT NULL,
 		entityId TEXT NOT NULL, addedAt INTEGER NOT NULL
 	);
+	CREATE UNIQUE INDEX Favorite_profileId_entityType_entityId_key
+		ON Favorite (profileId, entityType, entityId);
 	CREATE TABLE Folder (id TEXT PRIMARY KEY, name TEXT NOT NULL, path TEXT NOT NULL, parentId TEXT);
 	CREATE TABLE Image (
 		id TEXT PRIMARY KEY, name TEXT NOT NULL, description TEXT, path TEXT NOT NULL, hash TEXT NOT NULL,

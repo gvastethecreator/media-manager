@@ -93,7 +93,7 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 	[EVENTS.FAVORITES_CHANGED]: 'favorites:modified',
 };
 
-let favoriteSchemaReadyPromise: Promise<void> | null = null;
+let favoriteSchemaValidatedPromise: Promise<void> | null = null;
 
 export interface FavoriteFilters {
 	entityType?: FavoriteEntityType;
@@ -138,13 +138,59 @@ function applyFavoriteProjectionMany<TEntity extends FavoriteProjectionCapableEn
 	}));
 }
 
-function readPragmaColumnName(row: unknown): string {
+function readPragmaField(row: unknown, field: string): unknown {
 	if (!row || typeof row !== 'object') {
-		return '';
+		return undefined;
 	}
 
 	const record = row as Record<string, unknown>;
-	return typeof record.name === 'string' ? record.name : '';
+	return record[field];
+}
+
+const FAVORITE_COLUMN_CONTRACT = [
+	{ name: 'id', notNull: 1, primaryKey: 1, type: 'TEXT' },
+	{ name: 'profileId', notNull: 1, primaryKey: 0, type: 'TEXT' },
+	{ name: 'entityType', notNull: 1, primaryKey: 0, type: 'TEXT' },
+	{ name: 'entityId', notNull: 1, primaryKey: 0, type: 'TEXT' },
+	{ name: 'addedAt', notNull: 1, primaryKey: 0, type: 'INTEGER' },
+] as const;
+
+const FAVORITE_UNIQUE_INDEX = 'Favorite_profileId_entityType_entityId_key';
+const FAVORITE_UNIQUE_COLUMNS = ['profileId', 'entityType', 'entityId'] as const;
+
+function hasCanonicalFavoriteColumns(rows: readonly unknown[]): boolean {
+	if (rows.length !== FAVORITE_COLUMN_CONTRACT.length) return false;
+	return FAVORITE_COLUMN_CONTRACT.every((expected, index) => {
+		const row = rows[index];
+		return (
+			readPragmaField(row, 'name') === expected.name &&
+			String(readPragmaField(row, 'type')).toUpperCase() === expected.type &&
+			Number(readPragmaField(row, 'notnull')) === expected.notNull &&
+			Number(readPragmaField(row, 'pk')) === expected.primaryKey
+		);
+	});
+}
+
+function hasCanonicalFavoriteUniqueIndex(indexRow: unknown, indexInfoRows: readonly unknown[]): boolean {
+	if (
+		Number(readPragmaField(indexRow, 'unique')) !== 1 ||
+		Number(readPragmaField(indexRow, 'partial')) !== 0 ||
+		readPragmaField(indexRow, 'origin') !== 'c'
+	) {
+		return false;
+	}
+
+	const keyColumns = indexInfoRows
+		.filter((row) => Number(readPragmaField(row, 'key')) === 1)
+		.toSorted((left, right) => Number(readPragmaField(left, 'seqno')) - Number(readPragmaField(right, 'seqno')));
+	if (keyColumns.length !== FAVORITE_UNIQUE_COLUMNS.length) return false;
+
+	return FAVORITE_UNIQUE_COLUMNS.every(
+		(expectedName, index) =>
+			readPragmaField(keyColumns[index], 'name') === expectedName &&
+			Number(readPragmaField(keyColumns[index], 'desc')) === 0 &&
+			readPragmaField(keyColumns[index], 'coll') === 'BINARY'
+	);
 }
 
 async function getActiveProfileIdOrNull(): Promise<string | null> {
@@ -168,47 +214,35 @@ function ensureCanonicalFavoriteEntityType(entityType: FavoriteEntityType): void
 	}
 }
 
-async function ensureFavoriteProfileScopeSchema(): Promise<void> {
-	if (favoriteSchemaReadyPromise) {
-		return favoriteSchemaReadyPromise;
+async function validateFavoriteProfileScopeSchema(): Promise<void> {
+	if (favoriteSchemaValidatedPromise) {
+		return favoriteSchemaValidatedPromise;
 	}
 
-	favoriteSchemaReadyPromise = (async () => {
+	favoriteSchemaValidatedPromise = (async () => {
 		const client = getDbClient();
-		if (!client) {
-			return;
-		}
+		if (!client) return;
 
 		const columns = await client.execute('PRAGMA table_info("Favorite")');
-		const columnNames = new Set(columns.rows.map(readPragmaColumnName));
-
-		if (!columnNames.has('profileId')) {
-			favoriteLogger.warn('Aplicando compatibilidad runtime para Favorite.profileId en base legado');
-			await client.execute('ALTER TABLE "Favorite" ADD COLUMN "profileId" text');
+		const indexes = await client.execute('PRAGMA index_list("Favorite")');
+		const profileEntityIndex = indexes.rows.find((row) => readPragmaField(row, 'name') === FAVORITE_UNIQUE_INDEX);
+		const profileEntityIndexInfo = profileEntityIndex
+			? await client.execute(`PRAGMA index_xinfo("${FAVORITE_UNIQUE_INDEX}")`)
+			: { rows: [] };
+		if (
+			!hasCanonicalFavoriteColumns(columns.rows) ||
+			!hasCanonicalFavoriteUniqueIndex(profileEntityIndex, profileEntityIndexInfo.rows)
+		) {
+			throw new Error(
+				'El schema Favorite no es canónico. Ejecuta db:check y db:adopt-legacy sobre un backup antes de iniciar la aplicación.'
+			);
 		}
-
-		const activeProfileId = await getActiveProfileIdOrNull();
-		if (activeProfileId) {
-			await client.execute({
-				sql: "UPDATE \"Favorite\" SET \"profileId\" = ? WHERE \"profileId\" IS NULL OR \"profileId\" = ''",
-				args: [activeProfileId],
-			});
-		}
-
-		await client.execute('DROP INDEX IF EXISTS "Favorite_entityType_entityId_key"');
-		await client.execute(
-			'CREATE UNIQUE INDEX IF NOT EXISTS "Favorite_profileId_entityType_entityId_key" ON "Favorite" ("profileId", "entityType", "entityId")'
-		);
-		await client.execute('CREATE INDEX IF NOT EXISTS "Favorite_profileId_idx" ON "Favorite" ("profileId")');
-		await client.execute(
-			'CREATE INDEX IF NOT EXISTS "Favorite_profileId_addedAt_idx" ON "Favorite" ("profileId", "addedAt")'
-		);
 	})().catch((error) => {
-		favoriteSchemaReadyPromise = null;
+		favoriteSchemaValidatedPromise = null;
 		throw error;
 	});
 
-	return favoriteSchemaReadyPromise;
+	return favoriteSchemaValidatedPromise;
 }
 
 function buildFavoriteStats(entityType: FavoriteEntityType, addedAt: Date) {
@@ -318,11 +352,7 @@ async function getExistingFavoriteRecord(profileId: string, entityType: Favorite
 		})
 		.from(favorites)
 		.where(
-			and(
-				eq(favorites.profileId, profileId),
-				eq(favorites.entityType, entityType),
-				eq(favorites.entityId, entityId)
-			)
+			and(eq(favorites.profileId, profileId), eq(favorites.entityType, entityType), eq(favorites.entityId, entityId))
 		)
 		.limit(1);
 
@@ -360,7 +390,7 @@ export const favoriteService = {
 	 * Si no hay perfil activo, retorna null para permitir fallback transicional.
 	 */
 	async getFavoriteEntityIds(entityType: FavoriteEntityType): Promise<string[] | null> {
-		await ensureFavoriteProfileScopeSchema();
+		await validateFavoriteProfileScopeSchema();
 		const profileId = await getActiveProfileIdOrNull();
 
 		if (!profileId) {
@@ -393,7 +423,7 @@ export const favoriteService = {
 	 */
 	async getFavoriteEntityIdsOrThrow(entityType: FavoriteEntityType): Promise<string[]> {
 		ensureCanonicalFavoriteEntityType(entityType);
-		await ensureFavoriteProfileScopeSchema();
+		await validateFavoriteProfileScopeSchema();
 		const profileId = await requireActiveProfileId();
 
 		const result = await db
@@ -439,6 +469,27 @@ export const favoriteService = {
 		return applyFavoriteProjectionMany(entities, favoriteEntityIds);
 	},
 
+	async projectEntityWithLegacyFallback<TEntity extends FavoriteProjectionCapableEntity>(
+		entityType: FavoriteEntityType,
+		entity: TEntity
+	): Promise<TEntity & { isFavorite: boolean }> {
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(entityType);
+		return favoriteEntityIds === null
+			? { ...entity, isFavorite: Boolean(entity.isFavorite) }
+			: applyFavoriteProjection(entity, favoriteEntityIds);
+	},
+
+	async projectEntitiesWithLegacyFallback<TEntity extends FavoriteProjectionCapableEntity>(
+		entityType: FavoriteEntityType,
+		entities: TEntity[]
+	): Promise<Array<TEntity & { isFavorite: boolean }>> {
+		if (entities.length === 0) return [];
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(entityType);
+		return favoriteEntityIds === null
+			? entities.map((entity) => ({ ...entity, isFavorite: Boolean(entity.isFavorite) }))
+			: applyFavoriteProjectionMany(entities, favoriteEntityIds);
+	},
+
 	/**
 	 * Establecer de forma explícita el estado favorito de una entidad.
 	 */
@@ -448,7 +499,7 @@ export const favoriteService = {
 		isFavorite: boolean
 	): Promise<{ isFavorite: boolean; id?: string }> {
 		try {
-			await ensureFavoriteProfileScopeSchema();
+			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 			await ensureFavoriteTargetExists(entityType, entityId);
 
@@ -490,7 +541,7 @@ export const favoriteService = {
 	 */
 	async toggle(entityType: FavoriteEntityType, entityId: string): Promise<{ isFavorite: boolean; id?: string }> {
 		try {
-			await ensureFavoriteProfileScopeSchema();
+			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 			await ensureFavoriteTargetExists(entityType, entityId);
 
@@ -556,7 +607,7 @@ export const favoriteService = {
 	 */
 	async setMany(entityType: FavoriteEntityType, entityIds: string[], isFavorite: boolean): Promise<number> {
 		try {
-			await ensureFavoriteProfileScopeSchema();
+			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 			const uniqueEntityIds = await ensureFavoriteTargetsExist(entityType, entityIds);
 
@@ -635,7 +686,7 @@ export const favoriteService = {
 	 * Verificar si una entidad es favorita
 	 */
 	async isFavorite(entityType: FavoriteEntityType, entityId: string): Promise<boolean> {
-		await ensureFavoriteProfileScopeSchema();
+		await validateFavoriteProfileScopeSchema();
 		const profileId = await requireActiveProfileId();
 
 		const result = await db
@@ -660,7 +711,7 @@ export const favoriteService = {
 				return { items: [], total: 0, hasMore: false };
 			}
 
-			await ensureFavoriteProfileScopeSchema();
+			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 
 			const conditions = [
@@ -695,13 +746,7 @@ export const favoriteService = {
 			}
 
 			const [items, totalResult] = await Promise.all([
-				db
-					.select()
-					.from(favorites)
-					.where(whereClause)
-					.orderBy(orderByClause)
-					.limit(limit)
-					.offset(offset),
+				db.select().from(favorites).where(whereClause).orderBy(orderByClause).limit(limit).offset(offset),
 				db.select({ count: count() }).from(favorites).where(whereClause),
 			]);
 
@@ -726,7 +771,7 @@ export const favoriteService = {
 	 */
 	async getById(id: string): Promise<FavoriteWithStats | null> {
 		try {
-			await ensureFavoriteProfileScopeSchema();
+			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 
 			const result = await db
@@ -755,7 +800,7 @@ export const favoriteService = {
 	 */
 	async delete(id: string): Promise<boolean> {
 		try {
-			await ensureFavoriteProfileScopeSchema();
+			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 
 			const existing = await db
@@ -799,7 +844,7 @@ export const favoriteService = {
 	 */
 	async getCountsByType(): Promise<Record<string, number>> {
 		try {
-			await ensureFavoriteProfileScopeSchema();
+			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 
 			const results = await db
