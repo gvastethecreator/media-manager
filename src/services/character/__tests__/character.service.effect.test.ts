@@ -6,15 +6,12 @@
 import { Effect, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
 import { characters, imageCharacters, imageNotes } from '@/lib/drizzle/schema';
-import { favoriteService } from '@/services/favorite/favorite.service';
-import { FavoriteEntityType } from '@/types/entities/favorite';
 import { expectError, expectSuccess, generateTestId } from '../../../../tests/factories/test-helpers';
 import { CharacterService, CharacterServiceLive } from '../character.service.effect';
 
 // ============= Helpers =============
 
-const run = <A, E>(effect: Effect.Effect<A, E, CharacterService>) =>
-	pipe(effect, Effect.provide(CharacterServiceLive));
+const run = <A, E>(effect: Effect.Effect<A, E, CharacterService>) => pipe(effect, Effect.provide(CharacterServiceLive));
 
 const createTestCharacter = async (overrides?: Record<string, unknown>) => {
 	const id = generateTestId('char');
@@ -58,7 +55,7 @@ describe('CharacterService - CRUD Operations', () => {
 			expect(result.name).toBe('Aragorn');
 			expect(result.emoji).toBeNull();
 			expect(result.color).toBeNull();
-			expect(await favoriteService.isFavorite(FavoriteEntityType.CHARACTER, result.id)).toBe(false);
+			expect(result.isFavorite).toBe(false);
 		});
 
 		it('should create character with optional fields', async () => {
