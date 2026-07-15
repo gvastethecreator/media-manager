@@ -8,7 +8,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 
 // --- Constantes ---
 const HEALTH_CHECK_INTERVAL = 900_000; // 15 minutos (900s)
-const DEFAULT_API_URL = 'http://localhost:4000/api';
 const TAURI_COMMANDS = {
 	CHECK_HEALTH: 'check_backend_health',
 	GET_APP_DATA_DIR: 'get_app_data_dir',
@@ -126,11 +125,5 @@ export function useTauriContext() {
  * Utilidad para obtener la URL base de la API según el contexto
  */
 export function getApiBaseUrl(): string {
-	// En desarrollo, usar localhost directo
-	if (process.env.NODE_ENV === 'development') {
-		return DEFAULT_API_URL;
-	}
-
-	// En producción, usar la variable de entorno o fallback
-	return process.env.VITE_API_URL || DEFAULT_API_URL;
+	return '/api';
 }
