@@ -114,6 +114,14 @@ export interface EventData<T = unknown> {
 	worldItemId?: string;
 }
 
+export type EventTransport = 'auto' | 'direct' | 'http';
+export type ResolvedEventTransport = Exclude<EventTransport, 'auto'>;
+
+export type EventRuntime = {
+	hasWindow: boolean;
+	isTest: boolean;
+};
+
 // Store para eventos en memoria (compartido con el endpoint)
 const eventStore = new Map<string, EventData[]>();
 const eventSubscribers = new Set<(event: EventData) => void>();
@@ -185,13 +193,20 @@ export function getEventSubscribers() {
 	return eventSubscribers;
 }
 
-function isServerRuntime() {
-	const isVitestRuntime =
+function detectEventRuntime(): EventRuntime {
+	const isTest =
 		typeof process !== 'undefined' &&
 		typeof process.env === 'object' &&
 		(process.env.VITEST === 'true' || process.env.NODE_ENV === 'test');
+	return { hasWindow: typeof globalThis.window !== 'undefined' && globalThis.window != null, isTest };
+}
 
-	return isVitestRuntime || typeof globalThis.window === 'undefined' || globalThis.window == null;
+export function resolveEventTransport(
+	transport: EventTransport,
+	runtime: EventRuntime = detectEventRuntime()
+): ResolvedEventTransport {
+	if (transport !== 'auto') return transport;
+	return runtime.isTest || !runtime.hasWindow ? 'direct' : 'http';
 }
 
 /**
@@ -230,12 +245,11 @@ function emitDirect(event: EventData) {
 /**
  * Emite un evento (versión híbrida - directo en servidor, HTTP en cliente)
  */
-export async function emit(event: EventData) {
+export async function emit(event: EventData, transport: EventTransport = 'auto') {
 	try {
-		// Detectar si estamos en el servidor (Node.js) o cliente (navegador)
-		const isServer = isServerRuntime();
+		const resolvedTransport = resolveEventTransport(transport);
 
-		if (isServer) {
+		if (resolvedTransport === 'direct') {
 			// En el servidor, emitir directamente
 			emitDirect(event);
 		} else {
@@ -260,7 +274,7 @@ export async function emit(event: EventData) {
 /**
  * Emite un evento de progreso (versión cliente)
  */
-export async function emitProgress(type: EventType, data: ProcessStatus) {
+export async function emitProgress(type: EventType, data: ProcessStatus, transport: EventTransport = 'auto') {
 	// Asegurarse de que timestamp esté presente
 	const dataWithTimestamp = {
 		...data,
@@ -268,8 +282,11 @@ export async function emitProgress(type: EventType, data: ProcessStatus) {
 	};
 
 	// Emitir el evento
-	await emit({
-		type,
-		data: dataWithTimestamp,
-	});
+	await emit(
+		{
+			type,
+			data: dataWithTimestamp,
+		},
+		transport
+	);
 }
