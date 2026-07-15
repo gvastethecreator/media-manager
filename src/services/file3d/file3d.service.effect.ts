@@ -13,6 +13,12 @@ import { db } from '@/lib/drizzle';
 import { file3Ds } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import {
+	deleteFavoriteRecordsForEntities,
+	emitCommittedFavoriteChange,
+	setFavoriteForActiveProfile,
+} from '@/services/favorite/favorite-write-transaction';
+import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
 import { normalizeCounts, sumCounts } from '@/transformers/common/counts';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import { FavoriteEntityType } from '@/types/entities/favorite';
@@ -193,12 +199,13 @@ const make = (): File3DServiceInterface => {
 			});
 
 			if (!result) {
-				return yield* Effect.fail(
-					new File3DNotFound({ id, message: `Archivo 3D con ID ${id} no encontrado` })
-				);
+				return yield* Effect.fail(new File3DNotFound({ id, message: `Archivo 3D con ID ${id} no encontrado` }));
 			}
 
-			return result as File3DRow;
+			return yield* Effect.tryPromise({
+				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.FILE_3D, result as File3DRow),
+				catch: (error) => toFile3DError('getById:favoriteProjection', error),
+			});
 		});
 
 	const getByHash = (hash: string): Effect.Effect<File3DRow | null, File3DError> =>
@@ -213,7 +220,11 @@ const make = (): File3DServiceInterface => {
 				catch: (error) => toFile3DError('getByHash', error),
 			});
 
-			return (result as File3DRow) ?? null;
+			if (!result) return null;
+			return yield* Effect.tryPromise({
+				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.FILE_3D, result as File3DRow),
+				catch: (error) => toFile3DError('getByHash:favoriteProjection', error),
+			});
 		});
 
 	const getByPathAndFolder = (path: string, folderId: string): Effect.Effect<File3DRow | null, File3DError> =>
@@ -232,7 +243,11 @@ const make = (): File3DServiceInterface => {
 				catch: (error) => toFile3DError('getByPathAndFolder', error),
 			});
 
-			return (result as File3DRow) ?? null;
+			if (!result) return null;
+			return yield* Effect.tryPromise({
+				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.FILE_3D, result as File3DRow),
+				catch: (error) => toFile3DError('getByPathAndFolder:favoriteProjection', error),
+			});
 		});
 
 	const getAll = (filters: File3DFilters = {}): Effect.Effect<PaginatedResult<File3DRow>, File3DError> =>
@@ -242,13 +257,10 @@ const make = (): File3DServiceInterface => {
 			const limit = filters.limit || 20;
 			const offset = filters.offset || 0;
 
-			const favoriteEntityIds: string[] | null =
-				filters.isFavorite !== undefined
-					? yield* Effect.tryPromise({
-						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D),
-						catch: (error) => toFile3DError('getAll:favoriteIds', error),
-					})
-					: null;
+			const favoriteEntityIds: string[] | null = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D),
+				catch: (error) => toFile3DError('getAll:favoriteIds', error),
+			});
 
 			if (filters.isFavorite === true && favoriteEntityIds !== null && favoriteEntityIds.length === 0) {
 				return { data: [], total: 0, limit, offset };
@@ -260,12 +272,7 @@ const make = (): File3DServiceInterface => {
 				conditions.push(eq(file3Ds.folderId, filters.folderId));
 			}
 			if (filters.search) {
-				conditions.push(
-					or(
-						like(file3Ds.name, `%${filters.search}%`),
-						like(file3Ds.format, `%${filters.search}%`)
-					)
-				);
+				conditions.push(or(like(file3Ds.name, `%${filters.search}%`), like(file3Ds.format, `%${filters.search}%`)));
 			}
 			if (filters.isFavorite !== undefined) {
 				if (favoriteEntityIds === null) {
@@ -317,17 +324,8 @@ const make = (): File3DServiceInterface => {
 			const [rows, totalResult] = yield* Effect.tryPromise({
 				try: () =>
 					Promise.all([
-						db
-							.select()
-							.from(file3Ds)
-							.where(whereClause)
-							.orderBy(orderByClause)
-							.limit(limit)
-							.offset(offset),
-						db
-							.select({ count: count() })
-							.from(file3Ds)
-							.where(whereClause),
+						db.select().from(file3Ds).where(whereClause).orderBy(orderByClause).limit(limit).offset(offset),
+						db.select({ count: count() }).from(file3Ds).where(whereClause),
 					]),
 				catch: (error) => toFile3DError('getAll', error),
 			});
@@ -335,7 +333,10 @@ const make = (): File3DServiceInterface => {
 			const total = totalResult[0]?.count ?? 0;
 
 			return {
-				data: rows as File3DRow[],
+				data:
+					favoriteEntityIds === null
+						? (rows as File3DRow[])
+						: favoriteService.applyFavoriteProjectionMany(rows as File3DRow[], favoriteEntityIds),
 				total,
 				limit,
 				offset,
@@ -356,10 +357,9 @@ const make = (): File3DServiceInterface => {
 			const useCanonicalFavoriteBridge =
 				requestedIsFavorite === true
 					? yield* Effect.tryPromise({
-						try: async () =>
-							(await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D)) !== null,
-						catch: (error) => toFile3DError('create:favoriteScope', error),
-					})
+							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D)) !== null,
+							catch: (error) => toFile3DError('create:favoriteScope', error),
+						})
 					: false;
 
 			const existing = yield* Effect.tryPromise({
@@ -380,41 +380,54 @@ const make = (): File3DServiceInterface => {
 				);
 			}
 
+			let committedFavoriteProfileId: string | null = null;
 			const result = yield* Effect.tryPromise({
 				try: async () => {
-					const inserted = await db
-						.insert(file3Ds)
-						.values({
-							id: crypto.randomUUID(),
-							name: input.name,
-							path: input.path,
-							size: input.size,
-							hash: input.hash,
-							mimeType: input.mimeType,
-							extension: input.extension,
-							folderId: input.folderId,
-							isArchived: input.isArchived ?? false,
-							format: input.format ?? null,
-							version: input.version ?? null,
-							vertices: input.vertices ?? null,
-							faces: input.faces ?? null,
-							triangles: input.triangles ?? null,
-							materials: input.materials ?? null,
-							textures: input.textures ?? null,
-							animations: input.animations ?? null,
-							bones: input.bones ?? null,
-							scenes: input.scenes ?? null,
-							cameras: input.cameras ?? null,
-							lights: input.lights ?? null,
-							hasUV: input.hasUV ?? false,
-							hasNormals: input.hasNormals ?? false,
-							hasColors: input.hasColors ?? false,
-							boundingBox: input.boundingBox ?? null,
-							createdAt: new Date(),
-							updatedAt: new Date(),
-						})
-						.returning();
-					return inserted[0];
+					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const inserted = await transaction
+							.insert(file3Ds)
+							.values({
+								id: crypto.randomUUID(),
+								name: input.name,
+								path: input.path,
+								size: input.size,
+								hash: input.hash,
+								mimeType: input.mimeType,
+								extension: input.extension,
+								folderId: input.folderId,
+								isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
+								isArchived: input.isArchived ?? false,
+								format: input.format ?? null,
+								version: input.version ?? null,
+								vertices: input.vertices ?? null,
+								faces: input.faces ?? null,
+								triangles: input.triangles ?? null,
+								materials: input.materials ?? null,
+								textures: input.textures ?? null,
+								animations: input.animations ?? null,
+								bones: input.bones ?? null,
+								scenes: input.scenes ?? null,
+								cameras: input.cameras ?? null,
+								lights: input.lights ?? null,
+								hasUV: input.hasUV ?? false,
+								hasNormals: input.hasNormals ?? false,
+								hasColors: input.hasColors ?? false,
+								boundingBox: input.boundingBox ?? null,
+								createdAt: new Date(),
+								updatedAt: new Date(),
+							})
+							.returning();
+						const created = inserted[0];
+						if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
+							committedFavoriteProfileId = await setFavoriteForActiveProfile(
+								transaction,
+								FavoriteEntityType.FILE_3D,
+								created.id,
+								true
+							);
+						}
+						return created;
+					});
 				},
 				catch: (error) => toFile3DError('create:insert', error),
 			});
@@ -428,15 +441,14 @@ const make = (): File3DServiceInterface => {
 				);
 			}
 
-			if (requestedIsFavorite && useCanonicalFavoriteBridge) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.FILE_3D, result.id, true),
-					catch: (error) => toFile3DError('create:favoriteBridge', error),
-				});
+			if (committedFavoriteProfileId) {
+				yield* Effect.promise(() =>
+					emitCommittedFavoriteChange(committedFavoriteProfileId!, FavoriteEntityType.FILE_3D, result.id, true)
+				);
 			}
 
 			file3dLogger.info('File3D creado exitosamente:', result.id);
-			return result as File3DRow;
+			return yield* getById(result.id);
 		});
 
 	const update = (id: string, input: UpdateFile3DInput): Effect.Effect<File3DRow, File3DError> =>
@@ -445,25 +457,19 @@ const make = (): File3DServiceInterface => {
 
 			yield* getById(id);
 
-			const requestedIsFavorite =
-				typeof input.isFavorite === 'boolean' ? input.isFavorite : undefined;
+			const requestedIsFavorite = typeof input.isFavorite === 'boolean' ? input.isFavorite : undefined;
 			const useCanonicalFavoriteBridge =
 				requestedIsFavorite !== undefined
 					? yield* Effect.tryPromise({
-						try: async () =>
-							(await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D)) !== null,
-						catch: (error) => toFile3DError('update:favoriteScope', error),
-					})
+							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D)) !== null,
+							catch: (error) => toFile3DError('update:favoriteScope', error),
+						})
 					: false;
 
-			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.FILE_3D, id, requestedIsFavorite),
-					catch: (error) => toFile3DError('update:favoriteBridge', error),
-				});
-			}
-
 			const updateData: Record<string, unknown> = { updatedAt: new Date() };
+			if (requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge) {
+				updateData.isFavorite = requestedIsFavorite;
+			}
 
 			if (input.name !== undefined) updateData.name = input.name;
 			if (input.path !== undefined) updateData.path = input.path;
@@ -490,14 +496,22 @@ const make = (): File3DServiceInterface => {
 			if (input.hasColors !== undefined) updateData.hasColors = Boolean(input.hasColors);
 			if (input.boundingBox !== undefined) updateData.boundingBox = input.boundingBox;
 
+			let committedFavoriteProfileId: string | null = null;
 			const result = yield* Effect.tryPromise({
 				try: async () => {
-					const updated = await db
-						.update(file3Ds)
-						.set(updateData)
-						.where(eq(file3Ds.id, id))
-						.returning();
-					return updated[0];
+					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const updated = await transaction.update(file3Ds).set(updateData).where(eq(file3Ds.id, id)).returning();
+						const entity = updated[0];
+						if (entity && requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
+							committedFavoriteProfileId = await setFavoriteForActiveProfile(
+								transaction,
+								FavoriteEntityType.FILE_3D,
+								id,
+								requestedIsFavorite
+							);
+						}
+						return entity;
+					});
 				},
 				catch: (error) => toFile3DError('update', error),
 			});
@@ -510,9 +524,14 @@ const make = (): File3DServiceInterface => {
 					})
 				);
 			}
+			if (committedFavoriteProfileId && requestedIsFavorite !== undefined) {
+				yield* Effect.promise(() =>
+					emitCommittedFavoriteChange(committedFavoriteProfileId!, FavoriteEntityType.FILE_3D, id, requestedIsFavorite)
+				);
+			}
 
 			file3dLogger.info('File3D actualizado exitosamente:', result.id);
-			return result as File3DRow;
+			return yield* getById(result.id);
 		});
 
 	const deleteFile3D = (id: string): Effect.Effect<void, File3DError> =>
@@ -522,7 +541,11 @@ const make = (): File3DServiceInterface => {
 			yield* getById(id);
 
 			yield* Effect.tryPromise({
-				try: () => db.delete(file3Ds).where(eq(file3Ds.id, id)),
+				try: () =>
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.FILE_3D, [id]);
+						await transaction.delete(file3Ds).where(eq(file3Ds.id, id));
+					}),
 				catch: (error) => toFile3DError('delete', error),
 			});
 
@@ -556,19 +579,14 @@ export const getById = (id: string): Effect.Effect<File3DRow, File3DError> => ma
 
 export const getByHash = (hash: string): Effect.Effect<File3DRow | null, File3DError> => make().getByHash(hash);
 
-export const getByPathAndFolder = (
-	path: string,
-	folderId: string
-): Effect.Effect<File3DRow | null, File3DError> => make().getByPathAndFolder(path, folderId);
+export const getByPathAndFolder = (path: string, folderId: string): Effect.Effect<File3DRow | null, File3DError> =>
+	make().getByPathAndFolder(path, folderId);
 
-export const getAll = (
-	filters?: File3DFilters
-): Effect.Effect<PaginatedResult<File3DRow>, File3DError> => make().getAll(filters);
+export const getAll = (filters?: File3DFilters): Effect.Effect<PaginatedResult<File3DRow>, File3DError> =>
+	make().getAll(filters);
 
-export const update = (
-	id: string,
-	input: UpdateFile3DInput
-): Effect.Effect<File3DRow, File3DError> => make().update(id, input);
+export const update = (id: string, input: UpdateFile3DInput): Effect.Effect<File3DRow, File3DError> =>
+	make().update(id, input);
 
 const f3dDelete = (id: string): Effect.Effect<void, File3DError> => make().delete(id);
 export { f3dDelete as delete };
