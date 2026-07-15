@@ -178,7 +178,7 @@ export async function generateThumbnail(
 ): Promise<ThumbnailResult> {
 	try {
 		// 🟡 Logging de diagnóstico: primero existencia, luego permisos
-		thumbLogger.info('🔍 Verificando acceso al archivo para thumbnail:', filePath);
+		thumbLogger.info('🔍 Verificando acceso al archivo para thumbnail');
 
 		// Protección contra rutas inválidas (ej. base64 pasado como path)
 		if (filePath.length > 1024) {
@@ -191,33 +191,28 @@ export async function generateThumbnail(
 		try {
 			exists = existsSync(filePath);
 		} catch (e) {
-			thumbLogger.error(
-				`❌ Error verificando existencia de archivo (posible ruta inválida): ${filePath.substring(0, 100)}...`,
-				e
-			);
-			throw new Error(`Error verificando archivo: ${e instanceof Error ? e.message : 'Unknown error'}`);
+			thumbLogger.error('❌ Error verificando existencia de archivo (posible ruta inválida)', {
+				kind: e instanceof Error ? e.name : 'UnknownError',
+			});
+			throw new Error('No se pudo verificar el archivo fuente.');
 		}
 
 		thumbLogger.info('🟡 existsSync:', exists);
 		if (!exists) {
-			thumbLogger.error(`Archivo no encontrado: ${filePath}`);
-			throw new Error(`Archivo no encontrado: ${filePath}`);
+			thumbLogger.error('Archivo fuente no encontrado');
+			throw new Error('Archivo fuente no encontrado.');
 		}
 		try {
 			await fs.access(filePath, fs.constants.R_OK);
-			thumbLogger.info('🟢 Permiso de lectura OK para:', filePath);
+			thumbLogger.info('🟢 Permiso de lectura OK');
 		} catch (permError: any) {
 			const code = permError?.code;
 			if (code === 'EACCES' || code === 'EPERM') {
-				thumbLogger.error('🔴 Permiso denegado al leer:', { path: filePath, code, message: permError.message });
-				throw new Error(`Permiso denegado: ${filePath}`);
+				thumbLogger.error('🔴 Permiso denegado al leer:', { code });
+				throw new Error('Permiso denegado al leer el archivo fuente.');
 			}
 			// Otros errores inesperados de access
-			thumbLogger.error('🔴 Error comprobando acceso de lectura:', {
-				path: filePath,
-				code,
-				message: permError instanceof Error ? permError.message : String(permError),
-			});
+			thumbLogger.error('🔴 Error comprobando acceso de lectura:', { code });
 			throw permError;
 		}
 		thumbLogger.info('🟡 Usuario proceso:', process.env.USERNAME || process.env.USER || 'N/A');
@@ -242,7 +237,6 @@ export async function generateThumbnail(
 		const cached = await getFromCache(cacheKey, finalOptions.quality as ThumbnailQuality);
 		if (cached) {
 			thumbLogger.debug('Thumbnail recuperado de caché:', {
-				path: filePath,
 				dimensions: `${cached.width}x${cached.height}`,
 				size: formatBytes(cached.size),
 			});
@@ -250,7 +244,6 @@ export async function generateThumbnail(
 		}
 
 		thumbLogger.debug('Generando thumbnail:', {
-			path: filePath,
 			options: finalOptions,
 			config,
 		});
@@ -267,7 +260,7 @@ export async function generateThumbnail(
 		// Obtener metadata
 		const metadata = await image.metadata();
 		if (!(metadata.width && metadata.height)) {
-			thumbLogger.error('No se pudieron obtener las dimensiones de la imagen', { filePath });
+			thumbLogger.error('No se pudieron obtener las dimensiones de la imagen');
 			throw new Error('No se pudieron obtener las dimensiones de la imagen');
 		}
 

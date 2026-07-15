@@ -9,6 +9,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { PromptCreateInput, PromptUpdateInput } from '@/lib/effect/schemas/entities';
+import { authorizeMediaAssetParam } from '@/server/security/authorized-root-request';
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { PromptService, PromptServiceLive } from '@/services/prompt/prompt.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
@@ -138,6 +139,7 @@ router.post(
 
 router.post(
 	'/:id/images/:imageId',
+	authorizeMediaAssetParam({ assetType: 'image', idParam: 'imageId', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const promptService = yield* PromptService;

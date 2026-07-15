@@ -123,13 +123,7 @@ export const useSystemIntegration = (_options: SystemIntegrationOptions = {}): U
 			}
 
 			// For local files, show a message to the user
-			toastService.info(`To open in explorer: ${path}`, {
-				duration: 5000,
-				action: {
-					label: 'Copy Path',
-					onClick: () => navigator.clipboard?.writeText(path),
-				},
-			});
+			toastService.info('Abrir rutas locales requiere la integración segura de Tauri.', { duration: 5000 });
 
 			return false;
 		} catch (error) {
@@ -161,16 +155,8 @@ export const useSystemIntegration = (_options: SystemIntegrationOptions = {}): U
 				return true;
 			}
 
-			// For local files, create a download link
-			const link = document.createElement('a');
-			link.href = path;
-			link.target = '_blank';
-			link.rel = 'noopener noreferrer';
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-
-			return true;
+			toastService.info('Abrir archivos locales requiere la integración segura de Tauri.');
+			return false;
 		} catch (error) {
 			logger.error('Failed to open with default app:', error);
 			return false;
@@ -264,7 +250,6 @@ export const useSystemIntegration = (_options: SystemIntegrationOptions = {}): U
 				const clipboardData = items.map((item) => ({
 					id: item.id,
 					name: item.name,
-					path: 'path' in item ? item.path : '',
 					type: item.entityType,
 				}));
 

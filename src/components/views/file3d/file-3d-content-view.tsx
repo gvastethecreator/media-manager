@@ -31,7 +31,11 @@ export function File3DContentView() {
 
 	const [file3D, setFile3D] = useState<File3DWithStats | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const { isFavorite, isLoading: isFavoriteLoading, toggleFavorite } = useFavorite({
+	const {
+		isFavorite,
+		isLoading: isFavoriteLoading,
+		toggleFavorite,
+	} = useFavorite({
 		entityId: file3D?.id ?? id ?? '',
 		entityType: 'file3d',
 		initialIsFavorite: file3D?.isFavorite ?? false,
@@ -79,12 +83,12 @@ export function File3DContentView() {
 	}, [fetchFile3D, getFile3DById, id]);
 
 	const contentUrl = useMemo(() => {
-		if (!file3D?.path) {
+		if (!file3D?.id) {
 			return null;
 		}
 
-		return `/api/files/content?path=${encodeURIComponent(file3D.path)}`;
-	}, [file3D?.path]);
+		return `/api/files/content?assetType=file3d&assetId=${encodeURIComponent(file3D.id)}`;
+	}, [file3D?.id]);
 
 	const headerControls = (
 		<>
@@ -240,11 +244,6 @@ export function File3DContentView() {
 								</div>
 							</Card>
 						</div>
-
-						<Card className="p-4">
-							<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Ruta</p>
-							<p className="break-all font-mono text-xs text-muted-foreground">{file3D.path}</p>
-						</Card>
 					</div>
 				</ScrollArea>
 			</div>

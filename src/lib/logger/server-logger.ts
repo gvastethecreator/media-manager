@@ -17,6 +17,7 @@ import {
 	type LogType,
 } from './console-formatter';
 import { type LogLevel, loggerConfig } from './logger.config';
+import { sanitizeSensitiveOutput, sanitizeSensitiveText } from '@/lib/security/sanitize-sensitive-output';
 
 // Colores ANSI para la consola del servidor
 const SERVER_COLORS = {
@@ -144,7 +145,8 @@ export class ServerLogger {
 		startTime?: number
 	): string {
 		// Agregar información adicional al mensaje
-		let enhancedMessage = message;
+		let enhancedMessage = sanitizeSensitiveText(message);
+		const sanitizedContext = sanitizeSensitiveOutput(context);
 
 		// Agregar ID de solicitud si está habilitado y disponible
 		if (this.showRequestId && requestId) {
@@ -164,7 +166,7 @@ export class ServerLogger {
 		}
 
 		// Usar el formateador de consola para el mensaje final
-		return formatConsoleMessage(level, enhancedMessage, context, this.timestamp, this.context);
+		return formatConsoleMessage(level, enhancedMessage, sanitizedContext, this.timestamp, this.context);
 	}
 
 	withContext(context: string): ServerLogger {
@@ -251,13 +253,13 @@ export class ServerLogger {
 	// Métodos para agrupar logs
 	group(label: string): void {
 		if (loggerConfig.enableConsole) {
-			console.group(`${CONSOLE_COLORS.bright}${label}${CONSOLE_COLORS.reset}`);
+			console.group(`${CONSOLE_COLORS.bright}${sanitizeSensitiveText(label)}${CONSOLE_COLORS.reset}`);
 		}
 	}
 
 	groupCollapsed(label: string): void {
 		if (loggerConfig.enableConsole) {
-			console.groupCollapsed(`${CONSOLE_COLORS.bright}${label}${CONSOLE_COLORS.reset}`);
+			console.groupCollapsed(`${CONSOLE_COLORS.bright}${sanitizeSensitiveText(label)}${CONSOLE_COLORS.reset}`);
 		}
 	}
 

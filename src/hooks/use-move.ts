@@ -6,11 +6,20 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
+import type { MediaAssetReference } from '@/lib/api/authorized-roots';
+import { apiClient } from '@/lib/api/client';
+import {
+	addFileMutationResult,
+	type FileMutationItemResult,
+	type FileMutationSummary,
+	PartialFileMutationError,
+	pendingFileMutationDescription,
+} from '@/lib/api/file-mutation-result';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface MoveFilesOptions {
-	/** IDs de los archivos a mover */
-	fileIds: string[];
+	/** Assets autorizables a mover */
+	assets: MediaAssetReference[];
 	/** ID de la carpeta destino */
 	targetFolderId: string;
 }
@@ -35,65 +44,86 @@ export function useMove(): UseMoveResult {
 	const queryClient = useQueryClient();
 	const { toast } = useToast();
 
-	const mutation = useMutation({
+	const mutation = useMutation<FileMutationSummary, Error, MoveFilesOptions>({
 		mutationFn: async (options: MoveFilesOptions) => {
-			const { fileIds, targetFolderId } = options;
+			const { assets, targetFolderId } = options;
+			if (assets.length === 0) throw new Error('No hay archivos compatibles para mover');
+			const summary: FileMutationSummary = {
+				applied: 0,
+				cleanupPending: 0,
+				recoveryPending: 0,
+				total: assets.length,
+			};
 
-			const response = await fetch('/api/files/move', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ fileIds, targetFolderId }),
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({ error: 'Error al mover archivos' }));
-				throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+			try {
+				for (const asset of assets) {
+					const response = await apiClient.post<{
+						data: { moved: FileMutationItemResult[] };
+						success: true;
+					}>('/files/assets/move', { assets: [asset], targetFolderId });
+					const moved = response.data.moved[0];
+					if (!moved) throw new Error('El servidor no confirmó el asset movido.');
+					addFileMutationResult(summary, moved);
+				}
+			} catch (error) {
+				throw new PartialFileMutationError(
+					error instanceof Error ? error.message : 'No se pudieron mover todos los archivos.',
+					summary,
+					error
+				);
 			}
-
-			return response.json();
+			return summary;
 		},
-		onSuccess: async (_, variables) => {
-			const { fileIds, targetFolderId } = variables;
-
-			// Invalidar queries relacionadas
-			queryClient.invalidateQueries({ queryKey: ['folder-files'] });
-			queryClient.invalidateQueries({ queryKey: ['files'] });
-			queryClient.invalidateQueries({ queryKey: ['folders'] });
-			queryClient.invalidateQueries({ queryKey: ['images'] });
-			queryClient.invalidateQueries({ queryKey: ['videos'] });
-			queryClient.invalidateQueries({ queryKey: ['audios'] });
-			queryClient.invalidateQueries({ queryKey: ['documents'] });
-			queryClient.invalidateQueries({ queryKey: ['all-images'] });
-			queryClient.invalidateQueries({ queryKey: ['stats'] });
+		onSuccess: async (summary, variables) => {
+			const { assets, targetFolderId } = variables;
+			let reindexed = true;
 
 			// Reindexar archivos en la carpeta destino
 			try {
-				await fetch(`/api/folders/${targetFolderId}/reindex`, {
-					method: 'POST',
-				});
+				await apiClient.post(`/folders/${encodeURIComponent(targetFolderId)}/reindex`);
 			} catch (error) {
+				reindexed = false;
 				clientLogger.warn('Error reindexing folder after move:', error);
 				// No bloquear el éxito de la operación si la reindexación falla
 			}
 
-			toast({
-				title: '✅ Archivos movidos',
-				description: `${fileIds.length} archivo${fileIds.length > 1 ? 's' : ''} movido${fileIds.length > 1 ? 's' : ''} exitosamente y reindexados`,
-			});
+			const reconciliation = pendingFileMutationDescription(summary);
+			toast(
+				reconciliation
+					? { title: '⚠️ Movimiento aplicado con tareas pendientes', description: reconciliation }
+					: {
+							title: '✅ Archivos movidos',
+							description: reindexed
+								? `${assets.length} archivo${assets.length > 1 ? 's' : ''} movido${assets.length > 1 ? 's' : ''} y reindexado${assets.length > 1 ? 's' : ''}`
+								: `${assets.length} archivo${assets.length > 1 ? 's' : ''} movido${assets.length > 1 ? 's' : ''}; la reindexación quedó pendiente`,
+						}
+			);
 		},
 		onError: (error) => {
 			clientLogger.error('Error moving files:', error);
 
+			const partial = error instanceof PartialFileMutationError ? error.summary : null;
 			toast({
 				variant: 'destructive',
-				title: '❌ Error al mover',
-				description: error instanceof Error ? error.message : 'Error desconocido',
+				title: partial?.applied ? '⚠️ Movimiento parcialmente aplicado' : '❌ Error al mover',
+				description: partial?.applied
+					? `${partial.applied} de ${partial.total} archivos fueron movidos antes del fallo. Revisa el destino antes de reintentar.`
+					: error.message,
 			});
+		},
+		onSettled: async () => {
+			await Promise.all(
+				['folder-files', 'files', 'folders', 'images', 'videos', 'audios', 'documents', 'all-images', 'stats'].map(
+					(key) => queryClient.invalidateQueries({ queryKey: [key] })
+				)
+			);
 		},
 	});
 
 	return {
-		moveFiles: mutation.mutateAsync,
+		moveFiles: async (options) => {
+			await mutation.mutateAsync(options);
+		},
 		isLoading: mutation.isPending,
 		error: mutation.error,
 		isSuccess: mutation.isSuccess,

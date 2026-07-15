@@ -5,6 +5,10 @@
 
 import type { VideoBase } from '@/types/entities/video';
 
+function toSafeErrorContext(error: unknown): { errorKind: string } {
+	return { errorKind: error instanceof Error ? error.name : 'UnknownError' };
+}
+
 /**
  * Genera una URL para la miniatura de un video
  * @param video Objeto de video o ID
@@ -65,7 +69,7 @@ export async function generateAnimatedVideoThumbnail(
 		}
 		console.warn('⚠️ Mediabunny retornó null para thumbnail animado, intentando FFmpeg...');
 	} catch (error) {
-		console.warn('Mediabunny falló para thumbnail animado, intentando con FFmpeg:', error);
+		console.warn('Mediabunny falló para thumbnail animado, intentando con FFmpeg.', toSafeErrorContext(error));
 	}
 
 	// Estrategia 2: Fallback a FFmpeg (se activa si mediabunny retorna null O lanza error)
@@ -93,7 +97,7 @@ export async function generateAnimatedVideoThumbnail(
 		}
 		return ffmpegResult;
 	} catch (error) {
-		console.error('❌ Error con fallback FFmpeg para thumbnail animado:', error);
+		console.error('❌ Error con fallback FFmpeg para thumbnail animado.', toSafeErrorContext(error));
 		return null;
 	}
 }
@@ -133,27 +137,27 @@ async function generateAnimatedVideoThumbnailMediabunny(
 		// Obtener track de video
 		const videoTrack = await input.getPrimaryVideoTrack();
 		if (!videoTrack) {
-			console.warn(`No se encontró track de video: ${videoPath}`);
+			console.warn('No se encontró track de video.');
 			return null;
 		}
 
 		// Verificar codec (siguiendo ejemplo oficial)
 		if (videoTrack.codec === null) {
-			console.warn(`Codec de video no soportado: ${videoPath}`);
+			console.warn('Codec de video no soportado.');
 			return null;
 		}
 
 		// Verificar que se puede decodificar
 		const canDecode = await videoTrack.canDecode();
 		if (!canDecode) {
-			console.warn(`Track de video no se puede decodificar: ${videoPath}`);
+			console.warn('El track de video no se puede decodificar.');
 			return null;
 		}
 
 		// Obtener duración del video
 		const totalDuration = await videoTrack.computeDuration();
 		if (totalDuration <= 0) {
-			console.warn(`Duración inválida para el video: ${videoPath}`);
+			console.warn('Duración inválida para el video.');
 			return null;
 		}
 
@@ -219,7 +223,7 @@ async function generateAnimatedVideoThumbnailMediabunny(
 					frameBuffers.push(frameBuffer);
 				}
 			} catch (error) {
-				console.warn('Error convirtiendo canvas a buffer:', error);
+				console.warn('Error convirtiendo canvas a buffer.', toSafeErrorContext(error));
 			}
 		}
 
@@ -261,7 +265,7 @@ async function generateAnimatedVideoThumbnailMediabunny(
 
 			return animatedWebp;
 		} catch (sharpError) {
-			console.warn('Error creando WebP animado, usando primer frame:', sharpError);
+			console.warn('Error creando WebP animado, usando primer frame.', toSafeErrorContext(sharpError));
 			// Fallback: usar solo el primer frame como imagen estática
 			const staticWebp = await sharp
 				.default(frameBuffers[0])
@@ -274,7 +278,7 @@ async function generateAnimatedVideoThumbnailMediabunny(
 			return staticWebp;
 		}
 	} catch (error) {
-		console.error('Error generando thumbnail con mediabunny:', error);
+		console.error('Error generando thumbnail con mediabunny.', toSafeErrorContext(error));
 		return null;
 	}
 }
@@ -306,7 +310,7 @@ export async function generateStaticVideoThumbnail(
 		}
 		console.warn('⚠️ Mediabunny retornó null para thumbnail estático, intentando FFmpeg...');
 	} catch (error) {
-		console.warn('Mediabunny falló para thumbnail estático, intentando con FFmpeg:', error);
+		console.warn('Mediabunny falló para thumbnail estático, intentando con FFmpeg.', toSafeErrorContext(error));
 	}
 
 	// Estrategia 2: Fallback a FFmpeg (se activa si mediabunny retorna null O lanza error)
@@ -327,7 +331,7 @@ export async function generateStaticVideoThumbnail(
 		}
 		return ffmpegResult;
 	} catch (error) {
-		console.error('❌ Error con fallback FFmpeg para thumbnail estático:', error);
+		console.error('❌ Error con fallback FFmpeg para thumbnail estático.', toSafeErrorContext(error));
 		return null;
 	}
 }
@@ -367,29 +371,27 @@ async function generateStaticVideoThumbnailMediabunny(
 		// Obtener track de video
 		const videoTrack = await input.getPrimaryVideoTrack();
 		if (!videoTrack) {
-			console.warn(`No se encontró track de video: ${videoPath}`);
+			console.warn('No se encontró track de video.');
 			return null;
 		}
 
 		// Verificar codec (siguiendo ejemplo oficial)
 		if (videoTrack.codec === null) {
-			console.warn(`Codec de video no soportado: ${videoPath}`);
+			console.warn('Codec de video no soportado.');
 			return null;
 		}
 
 		// Verificar que se puede decodificar
 		const canDecode = await videoTrack.canDecode();
 		if (!canDecode) {
-			console.warn(
-				`Track de video no se puede decodificar (posiblemente falta WebCodecs API en Node.js): ${videoPath}`
-			);
+			console.warn('El track de video no se puede decodificar; posiblemente falta WebCodecs API en Node.js.');
 			return null;
 		}
 
 		// Obtener duración del video
 		const totalDuration = await videoTrack.computeDuration();
 		if (totalDuration <= 0) {
-			console.warn(`Duración inválida para el video: ${videoPath}`);
+			console.warn('Duración inválida para el video.');
 			return null;
 		}
 
@@ -460,11 +462,11 @@ async function generateStaticVideoThumbnailMediabunny(
 			console.warn('No se pudo generar buffer del canvas');
 			return null;
 		} catch (error) {
-			console.error('Error convirtiendo canvas a buffer:', error);
+			console.error('Error convirtiendo canvas a buffer.', toSafeErrorContext(error));
 			return null;
 		}
 	} catch (error) {
-		console.error('Error generando thumbnail estático con mediabunny:', error);
+		console.error('Error generando thumbnail estático con mediabunny.', toSafeErrorContext(error));
 		return null;
 	}
 }

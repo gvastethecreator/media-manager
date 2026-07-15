@@ -3,14 +3,16 @@
  * @module utils/video/ffmpeg-thumbnails
  */
 
-import { exec } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { readFile, unlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
+import { serverLogger } from '@/lib/logger/server-logger';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+const logger = serverLogger.withContext('FFmpegThumbnails');
 
 /**
  * Genera un thumbnail estático usando FFmpeg
@@ -31,12 +33,12 @@ export async function generateStaticVideoThumbnailFFmpeg(
 
 	// Protección contra rutas corruptas
 	if (videoPath.length > 1024) {
-		console.error(`Ruta de video demasiado larga (${videoPath.length} chars). Posible data corrupta.`);
+		logger.error('Ruta de video demasiado larga. Posible data corrupta.', { length: videoPath.length });
 		return null;
 	}
 
 	if (!existsSync(videoPath)) {
-		console.warn(`Archivo de video no existe: ${videoPath}`);
+		logger.warn('El archivo de video solicitado no existe.');
 		return null;
 	}
 
@@ -50,13 +52,12 @@ export async function generateStaticVideoThumbnailFFmpeg(
 		// Construir comando FFmpeg
 		const qualityValue = quality === 'high' ? 90 : quality === 'low' ? 50 : 75;
 
-		const ffmpegCmd = [
-			`"${ffmpegPath}"`,
+		const ffmpegArgs = [
 			'-y', // Sobrescribir archivo de salida
 			'-ss',
-			'1', // Timestamp fijo a 1s (más seguro para videos cortos)
+			time.toString(),
 			'-i',
-			`"${videoPath}"`, // Archivo de entrada
+			videoPath,
 			'-vframes',
 			'1', // Solo un frame
 			'-vf',
@@ -67,21 +68,19 @@ export async function generateStaticVideoThumbnailFFmpeg(
 			qualityValue.toString(), // Calidad
 			'-f',
 			'webp', // Formato WebP
-			`"${tempOutputPath}"`, // Archivo de salida
-		].join(' ');
-
-		console.log(`🎬 Ejecutando: ${ffmpegCmd}`);
+			tempOutputPath,
+		];
 
 		// Ejecutar FFmpeg
-		const { stdout, stderr } = await execAsync(ffmpegCmd);
+		const { stderr } = await execFileAsync(ffmpegPath, ffmpegArgs);
 
 		if (stderr?.includes('error')) {
-			console.warn(`FFmpeg warning/error: ${stderr}`);
+			logger.warn('FFmpeg informó advertencias durante la generación.', { stderrBytes: stderr.length });
 		}
 
 		// Verificar que se generó el archivo
 		if (!existsSync(tempOutputPath)) {
-			console.warn(`No se generó el archivo thumbnail: ${tempOutputPath}`);
+			logger.warn('FFmpeg no generó el thumbnail esperado.');
 			return null;
 		}
 
@@ -93,10 +92,12 @@ export async function generateStaticVideoThumbnailFFmpeg(
 			// Ignorar errores de limpieza
 		});
 
-		console.log(`✅ Thumbnail generado con FFmpeg: ${thumbnailBuffer.length} bytes`);
+		logger.info('Thumbnail generado con FFmpeg.', { bytes: thumbnailBuffer.length });
 		return thumbnailBuffer;
 	} catch (error) {
-		console.error('Error generando thumbnail con FFmpeg:', error);
+		logger.error('Error generando thumbnail con FFmpeg.', {
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
+		});
 
 		// Limpiar archivo temporal en caso de error
 		try {
@@ -133,7 +134,7 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 	const { time = 1, duration = 1.5, frames = 4, width = 320, height = 240, quality = 'medium' } = options;
 
 	if (!existsSync(videoPath)) {
-		console.warn(`Archivo de video no existe: ${videoPath}`);
+		logger.warn('El archivo de video solicitado no existe.');
 		return null;
 	}
 
@@ -148,13 +149,12 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 		const fps = Math.round(frames / duration);
 
 		// Construir comando FFmpeg para GIF (más confiable que WebP animado)
-		const ffmpegCmd = [
-			`"${ffmpegPath}"`,
+		const ffmpegArgs = [
 			'-y', // Sobrescribir archivo de salida
 			'-ss',
 			time.toString(), // Timestamp de inicio
 			'-i',
-			`"${videoPath}"`, // Archivo de entrada
+			videoPath,
 			'-t',
 			duration.toString(), // Duración a extraer
 			'-vf',
@@ -168,21 +168,19 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 			'0', // Loop infinito
 			'-f',
 			'gif', // Formato GIF
-			`"${tempOutputPath}"`, // Archivo de salida
-		].join(' ');
-
-		console.log(`🎬 Ejecutando: ${ffmpegCmd}`);
+			tempOutputPath,
+		];
 
 		// Ejecutar FFmpeg
-		const { stdout, stderr } = await execAsync(ffmpegCmd, { timeout: 30_000 }); // 30s timeout
+		const { stderr } = await execFileAsync(ffmpegPath, ffmpegArgs, { timeout: 30_000 });
 
 		if (stderr?.includes('error')) {
-			console.warn(`FFmpeg warning/error: ${stderr}`);
+			logger.warn('FFmpeg informó advertencias durante la generación animada.', { stderrBytes: stderr.length });
 		}
 
 		// Verificar que se generó el archivo
 		if (!existsSync(tempOutputPath)) {
-			console.warn(`No se generó el archivo thumbnail animado: ${tempOutputPath}`);
+			logger.warn('FFmpeg no generó el thumbnail animado esperado.');
 			return null;
 		}
 
@@ -194,10 +192,12 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 			// Ignorar errores de limpieza
 		});
 
-		console.log(`✅ Thumbnail animado generado con FFmpeg: ${thumbnailBuffer.length} bytes`);
+		logger.info('Thumbnail animado generado con FFmpeg.', { bytes: thumbnailBuffer.length });
 		return thumbnailBuffer;
 	} catch (error) {
-		console.error('Error generando thumbnail animado con FFmpeg:', error);
+		logger.error('Error generando thumbnail animado con FFmpeg.', {
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
+		});
 
 		// Limpiar archivo temporal en caso de error
 		try {
@@ -232,7 +232,8 @@ export async function isFFmpegAvailable(checkLocal = true): Promise<boolean> {
 		}
 
 		// Verificar en PATH del sistema
-		const { stdout } = await execAsync('ffmpeg -version');
+		const ffmpegPath = await getFFmpegPath();
+		const { stdout } = await execFileAsync(ffmpegPath, ['-version']);
 		return stdout.includes('ffmpeg version');
 	} catch {
 		return false;
@@ -252,9 +253,15 @@ export async function getVideoInfo(videoPath: string): Promise<{
 } | null> {
 	try {
 		const ffprobePath = await getFFmpegPath('ffprobe');
-		const { stdout } = await execAsync(
-			`"${ffprobePath}" -v quiet -print_format json -show_format -show_streams "${videoPath}"`
-		);
+		const { stdout } = await execFileAsync(ffprobePath, [
+			'-v',
+			'quiet',
+			'-print_format',
+			'json',
+			'-show_format',
+			'-show_streams',
+			videoPath,
+		]);
 		const data = JSON.parse(stdout);
 
 		const videoStream = data.streams?.find((stream: any) => stream.codec_type === 'video');
@@ -269,7 +276,9 @@ export async function getVideoInfo(videoPath: string): Promise<{
 			codec: videoStream.codec_name || 'unknown',
 		};
 	} catch (error) {
-		console.error('Error obteniendo info del video:', error);
+		logger.error('Error obteniendo información del video.', {
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
+		});
 		return null;
 	}
 }
@@ -328,31 +337,30 @@ export async function generateAudioWaveformImageFFmpeg(
 		// split_channels: 0 (mezclado) o 1 (separado). Usamos 0 por defecto.
 		const filter = `showwavespic=s=${width}x${height}:colors=${waveColor}:split_channels=0`;
 
-		const ffmpegCmd = [
-			`"${ffmpegPath}"`,
+		const ffmpegArgs = [
 			'-y',
 			'-i',
-			`"${audioPath}"`,
+			audioPath,
 			'-lv', // Log verbose
 			'-filter_complex',
-			`"${filter}"`,
+			filter,
 			'-frames:v',
 			'1',
 			'-f',
 			'image2', // Formato imagen
-			`"${tempOutputPath}"`,
-		].join(' ');
+			tempOutputPath,
+		];
 
-		console.log(`🎵 Generando waveform: ${ffmpegCmd}`);
-
-		const { stdout, stderr } = await execAsync(ffmpegCmd);
+		const { stderr } = await execFileAsync(ffmpegPath, ffmpegArgs);
 
 		if (stderr?.includes('error')) {
-			// console.warn(`FFmpeg warning/error: ${stderr}`);
+			logger.warn('FFmpeg informó advertencias durante la generación de waveform.', {
+				stderrBytes: stderr.length,
+			});
 		}
 
 		if (!existsSync(tempOutputPath)) {
-			console.warn(`No se generó el waveform: ${tempOutputPath}`);
+			logger.warn('FFmpeg no generó el waveform esperado.');
 			return null;
 		}
 
@@ -361,7 +369,9 @@ export async function generateAudioWaveformImageFFmpeg(
 
 		return buffer;
 	} catch (error) {
-		console.error('Error generando waveform con FFmpeg:', error);
+		logger.error('Error generando waveform con FFmpeg.', {
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
+		});
 		try {
 			if (existsSync(tempOutputPath)) await unlink(tempOutputPath);
 		} catch {}

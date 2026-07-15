@@ -220,9 +220,17 @@ describe('local API session middleware', () => {
 			readFile(resolve(WORKSPACE_PATH, 'src/lib/image/image-loader.ts'), 'utf8'),
 		]);
 
-		expect(server.indexOf("app.get('/health'")).toBeLessThan(server.indexOf("app.use(['/api', '/uploads']"));
-		expect(server.indexOf("app.use(['/api', '/uploads']")).toBeLessThan(server.indexOf('express.json'));
-		expect(server.indexOf("app.use(['/api', '/uploads']")).toBeLessThan(server.indexOf('registerRoutes(app)'));
+		const healthIndex = server.search(/app\.get\(["']\/health["']/);
+		const sessionGateIndex = server.search(/app\.use\(\[["']\/api["'],\s*["']\/uploads["']\]/);
+		const parserIndex = server.indexOf('express.json');
+		const routesIndex = server.indexOf('registerRoutes(app)');
+		for (const index of [healthIndex, sessionGateIndex, parserIndex, routesIndex])
+			expect(index).toBeGreaterThanOrEqual(0);
+		expect(healthIndex).toBeLessThan(sessionGateIndex);
+		expect(sessionGateIndex).toBeLessThan(parserIndex);
+		expect(sessionGateIndex).toBeLessThan(routesIndex);
+		expect(server).toMatch(/app\.use\(["']\/api["'],\s*sanitizeJsonResponses\)/);
+		expect(server).toMatch(/code:\s*["']INTERNAL_SERVER_ERROR["']/);
 		expect(vite).toContain("proxyRequest.setHeader('Authorization'");
 		expect(vite).toContain("proxyRequest.setHeader('X-Local-App-Request', '1')");
 		expect(vite).toContain('target: localApiTarget');

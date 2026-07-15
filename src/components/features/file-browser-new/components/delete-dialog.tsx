@@ -75,7 +75,6 @@ export function DeleteDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 							)}
 							<div className="min-w-0 flex-1">
 								<p className="truncate font-medium">{firstItem.name}</p>
-								{firstItem.path && <p className="truncate text-muted-foreground text-xs">{firstItem.path}</p>}
 							</div>
 						</div>
 					</div>

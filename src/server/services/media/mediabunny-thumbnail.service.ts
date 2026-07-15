@@ -31,14 +31,14 @@ export async function generateVideoThumbnail(
 		// Obtener track de video principal
 		const videoTrack = await input.getPrimaryVideoTrack();
 		if (!videoTrack) {
-			logger.warn('No se encontró track de video', { filePath });
+			logger.warn('No se encontró track de video');
 			return null;
 		}
 
 		// Verificar que el track se puede decodificar
 		const canDecode = await videoTrack.canDecode();
 		if (!canDecode) {
-			logger.warn('Track de video no se puede decodificar', { filePath });
+			logger.warn('Track de video no se puede decodificar');
 			return null;
 		}
 
@@ -55,7 +55,7 @@ export async function generateVideoThumbnail(
 		// Generar thumbnail en el timestamp especificado
 		const result = await sink.getCanvas(safeTimestamp);
 		if (!result) {
-			logger.warn('No se pudo generar canvas para el timestamp', { filePath, safeTimestamp });
+			logger.warn('No se pudo generar canvas para el timestamp', { safeTimestamp });
 			return null;
 		}
 
@@ -97,7 +97,6 @@ export async function generateVideoThumbnail(
 		}
 
 		logger.info('✅ Thumbnail generado exitosamente', {
-			filePath,
 			timestamp: safeTimestamp,
 			dimensions: `${width}x${height}`,
 			bufferSize: jpegBuffer?.length || 0,
@@ -106,9 +105,8 @@ export async function generateVideoThumbnail(
 		return jpegBuffer;
 	} catch (error) {
 		logger.error('Error generando thumbnail con mediabunny', {
-			filePath,
 			timestampSeconds,
-			error,
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
 		});
 		return null;
 	}
@@ -193,7 +191,9 @@ export async function generateMultipleThumbnails(
 
 		return thumbnails;
 	} catch (error) {
-		logger.error('Error generando múltiples thumbnails', { filePath, error });
+		logger.error('Error generando múltiples thumbnails', {
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
+		});
 		return [];
 	}
 }

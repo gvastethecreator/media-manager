@@ -5,11 +5,23 @@ import path from 'path';
 import { isLoopbackHost, resolveLocalServiceHost } from '@/config/local-runtime-security';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
-import { errorLogger, logError, logInfo, requestLogger } from './middleware/logging';
+import { errorLogger, logError, logInfo, logWarning, requestLogger } from './middleware/logging';
 import { createLocalApiSessionMiddleware, resolveLocalApiSessionOptions } from './middleware/local-api-session';
 import { registerRoutes } from './route-registry';
+import { createAuthorizedRootRegistryFromEnvironment } from './security/authorized-roots';
+import { reconcilePendingFileMutations } from './security/file-mutation-recovery';
+import { sanitizeJsonResponses } from './security/sanitize-public-payload';
 
 const app = express();
+app.locals.authorizedRootRegistry = await createAuthorizedRootRegistryFromEnvironment();
+const mutationRecovery = await reconcilePendingFileMutations(app.locals.authorizedRootRegistry);
+if (mutationRecovery.manual > 0) {
+	logError(`La recuperación de archivos requiere revisión manual: ${mutationRecovery.manual} operación(es).`);
+} else if (mutationRecovery.completed > 0 || mutationRecovery.pending > 0) {
+	logWarning(
+		`Recuperación de archivos: ${mutationRecovery.completed} reconciliada(s), ${mutationRecovery.pending} pendiente(s).`
+	);
+}
 
 // Configuración para manejar headers grandes (error 431)
 app.use((req, res, next) => {
@@ -54,6 +66,7 @@ app.get('/health', (_req, res) => {
 
 app.use(['/api', '/uploads'], localApiSession);
 app.use('/api/', apiLimiter);
+app.use('/api', sanitizeJsonResponses);
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -64,10 +77,21 @@ app.use('/uploads', express.static(path.resolve(UPLOADS_DIR)));
 registerRoutes(app);
 
 app.use((req, res) => {
-	res.status(404).json({ error: 'Endpoint no encontrado', path: req.originalUrl });
+	res.status(404).json({ code: 'ENDPOINT_NOT_FOUND', error: 'Endpoint no encontrado' });
 });
 
 app.use(errorLogger as ErrorRequestHandler);
+app.use(((error, _req, res, next) => {
+	if (res.headersSent) {
+		next(error);
+		return;
+	}
+	res.status(500).json({
+		code: 'INTERNAL_SERVER_ERROR',
+		message: 'Ocurrió un error interno.',
+		retryable: false,
+	});
+}) as ErrorRequestHandler);
 
 app.listen(PORT, HOST, () => {
 	logInfo(`🚀 Servidor Express iniciado en http://${HOST}:${PORT}`);

@@ -1,22 +1,35 @@
 /**
- * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
- * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
- * Ver #1 deepening opportunity en architecture review.
- */
-
-/**
  * Cliente de API para operaciones de archivos.
  */
-import type { DirectoryReadResult } from '@/types/entities/file/types';
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
+import { apiClient } from '@/lib/api/client';
 
-const API_BASE_PATH = '/api/files';
+export interface AuthorizedDirectoryItem {
+	createdAt: Date | string;
+	extension: string;
+	id: string;
+	isDirectory?: boolean;
+	isHidden?: boolean;
+	mimeType: string;
+	modifiedAt?: Date | string;
+	name: string;
+	relativePath: string;
+	rootId: string;
+	size: number;
+	type: string;
+	updatedAt: Date | string;
+}
 
-export async function getDirectoryInfoFromApi(dirPath: string): Promise<DirectoryReadResult> {
-	const encoded = encodeURIComponent(dirPath);
-	const response = await fetch(`${API_BASE_PATH}/directory/${encoded}`);
-	if (!response.ok) {
-		throw new Error('Error al leer el directorio');
-	}
-	const { data } = await response.json();
-	return data as DirectoryReadResult;
+export interface AuthorizedDirectoryReadResult extends AuthorizedPathReference {
+	items: AuthorizedDirectoryItem[];
+	total: number;
+}
+
+export async function getDirectoryInfoFromApi(
+	reference: AuthorizedPathReference
+): Promise<AuthorizedDirectoryReadResult> {
+	const response = await apiClient.get<{ data: AuthorizedDirectoryReadResult }>('/files/directory', {
+		params: { path: reference.relativePath, rootId: reference.rootId },
+	});
+	return response.data;
 }

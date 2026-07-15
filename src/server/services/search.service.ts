@@ -1,6 +1,6 @@
 // Usar servicio de imágenes en lugar de server action
 
-import { desc, ilike, like, or, sql } from 'drizzle-orm';
+import { asc, desc, ilike, like, or, sql } from 'drizzle-orm';
 import { Effect } from 'effect';
 import { db, getDbClient } from '@/lib/drizzle';
 import { isFts5Enabled } from '@/lib/drizzle/fts5';
@@ -12,10 +12,10 @@ import type { FileItem } from '@/types/files';
 
 const log = serverLogger.withContext('SearchService');
 
-export async function searchImages(query: string, limit = 100): Promise<FileItem[]> {
+export async function searchImages(query: string, limit = 100, offset = 0): Promise<FileItem[]> {
 	try {
 		log.debug('🔎 Buscando imágenes', { query });
-		const result = await Effect.runPromise(getAll({ search: query, limit, offset: 0 }));
+		const result = await Effect.runPromise(getAll({ search: query, limit, offset }));
 		const items = result.images.map((img: any) => convertServerImageToFileItem(img as unknown as ServerImage));
 		return items;
 	} catch (error) {
@@ -102,7 +102,7 @@ async function searchImagesUnified(query: string, limit: number, offset: number)
 		.select()
 		.from(images)
 		.where(or(ilike(images.name, `%${query}%`), ilike(images.path, `%${query}%`)))
-		.orderBy(desc(images.createdAt))
+		.orderBy(desc(images.createdAt), asc(images.id))
 		.limit(limit)
 		.offset(offset);
 }
@@ -112,7 +112,7 @@ async function searchVideosUnified(query: string, limit: number, offset: number)
 		.select()
 		.from(videos)
 		.where(or(ilike(videos.name, `%${query}%`), ilike(videos.path, `%${query}%`)))
-		.orderBy(desc(videos.createdAt))
+		.orderBy(desc(videos.createdAt), asc(videos.id))
 		.limit(limit)
 		.offset(offset);
 }
@@ -122,7 +122,7 @@ async function searchAudiosUnified(query: string, limit: number, offset: number)
 		.select()
 		.from(audios)
 		.where(or(ilike(audios.name, `%${query}%`), ilike(audios.path, `%${query}%`)))
-		.orderBy(desc(audios.createdAt))
+		.orderBy(desc(audios.createdAt), asc(audios.id))
 		.limit(limit)
 		.offset(offset);
 }
@@ -132,7 +132,7 @@ async function searchDocumentsUnified(query: string, limit: number, offset: numb
 		.select()
 		.from(documents)
 		.where(or(ilike(documents.name, `%${query}%`), ilike(documents.path, `%${query}%`)))
-		.orderBy(desc(documents.createdAt))
+		.orderBy(desc(documents.createdAt), asc(documents.id))
 		.limit(limit)
 		.offset(offset);
 }

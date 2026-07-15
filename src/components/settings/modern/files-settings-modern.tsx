@@ -14,7 +14,8 @@ import {
 	Image,
 	List,
 	Plus,
-	RefreshCw, Terminal,
+	RefreshCw,
+	Terminal,
 	Search,
 	Settings2,
 	Trash2,
@@ -286,7 +287,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 			try {
 				// Use advanced config
 				const config = getConfig();
-								useReindexStore.getState().setOpen(true);
+				useReindexStore.getState().setOpen(true);
 				await reindexFolderMutation.mutateAsync({
 					id: folderId,
 					options: config,
@@ -346,8 +347,6 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 				description="Gestiona carpetas, miniaturas y configuración de almacenamiento"
 				title="Archivos y Almacenamiento"
 			/>
-
-			
 
 			<Tabs onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="grid w-full grid-cols-2 lg:w-80">
@@ -457,14 +456,23 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									Agregar Carpeta
 								</Button>
 
-								<Button onClick={() => useReindexStore.getState().setOpen(true)} size="icon" title="Ver Terminal" variant="outline"><Terminal className="h-4 w-4" /></Button>
-																<Button className="gap-2" data-testid="reindex-all-button"
+								<Button
+									onClick={() => useReindexStore.getState().setOpen(true)}
+									size="icon"
+									title="Ver Terminal"
+									variant="outline"
+								>
+									<Terminal className="h-4 w-4" />
+								</Button>
+								<Button
+									className="gap-2"
+									data-testid="reindex-all-button"
 									disabled={reindexAllFoldersMutation.isPending}
 									onClick={async () => {
 										try {
 											const config = getConfig();
 											useReindexStore.getState().setOpen(true);
-																		await reindexAllFoldersMutation.mutateAsync(config);
+											await reindexAllFoldersMutation.mutateAsync(config);
 											toastService.success('Reindexación global iniciada');
 										} catch (err) {
 											toastService.error('Error al iniciar reindexación global');
@@ -654,9 +662,10 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 					<FolderForm
 						isLoading={createFolderMutation.isPending}
 						isProcessing={createFolderMutation.isPending}
-						onAddFolder={async (path: string) => {
+						onAddFolder={async (source) => {
 							try {
-								await createFolderMutation.mutateAsync({ name: path.split(/[\\/]/).pop() || 'Nueva Carpeta', path });
+								const name = source.relativePath.split('/').filter(Boolean).pop() || source.rootId;
+								await createFolderMutation.mutateAsync({ name, source });
 								toastService.success('Carpeta agregada correctamente');
 								setShowFolderForm(false);
 							} catch (error) {

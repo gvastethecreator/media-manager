@@ -45,7 +45,6 @@ export default function AudioView(_props: ViewProps) {
 				id: audio.id,
 				name: audio.name,
 				type: 'audio' as const,
-				path: (audio as any).path,
 				size: (audio as any).size || 0,
 				duration: (audio as any).duration,
 				thumbnail: (audio as any).thumbnail || `/api/audio/${audio.id}/waveform`,

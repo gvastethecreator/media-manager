@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useMove } from '@/hooks/use-move';
+import { toMediaAssetType } from '@/lib/api/authorized-roots';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
@@ -228,13 +229,12 @@ export function FileBrowser({
 					}
 					break;
 				case 'copy':
-					// Copiar path al clipboard
+					// No exponer rutas locales: copiar únicamente nombres visibles.
 					if (payload.selected.length > 0) {
-						const paths = payload.selected.map((i) => i.path || i.name).join('\n');
-						await navigator.clipboard.writeText(paths);
+						await navigator.clipboard.writeText(payload.selected.map((item) => item.name).join('\n'));
 						toast({
 							title: '📋 Copiado',
-							description: `${payload.selected.length} ruta${payload.selected.length > 1 ? 's' : ''} copiada${payload.selected.length > 1 ? 's' : ''} al portapapeles`,
+							description: `${payload.selected.length} nombre${payload.selected.length > 1 ? 's' : ''} copiado${payload.selected.length > 1 ? 's' : ''} al portapapeles`,
 						});
 					}
 					break;
@@ -244,14 +244,24 @@ export function FileBrowser({
 					}
 					break;
 				case 'download':
-					// Descargar archivo(s) usando thumbnailUrl o construyendo URL desde path
+					// Descargar originales mediante referencias opacas de asset.
 					for (const item of payload.selected) {
-						const downloadUrl = item.thumbnailUrl || (item.path ? `/api/files/${encodeURIComponent(item.path)}` : null);
-						if (downloadUrl) {
+						const assetType = toMediaAssetType(item.entityType);
+						if (!assetType) continue;
+						const response = await fetch('/api/download', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ asset: { assetId: item.id, assetType } }),
+						});
+						if (!response.ok) throw new Error(`No se pudo descargar ${item.name}`);
+						const url = URL.createObjectURL(await response.blob());
+						try {
 							const link = document.createElement('a');
-							link.href = downloadUrl;
+							link.href = url;
 							link.download = item.name;
 							link.click();
+						} finally {
+							URL.revokeObjectURL(url);
 						}
 					}
 					if (payload.selected.length > 0) {
@@ -581,13 +591,16 @@ export function FileBrowser({
 				onCancel={() => setRenameModal({ isOpen: false, items: [] })}
 				onConfirm={async (newNames) => {
 					if (newNames.length === 1) {
-						await renameItem(newNames[0].id, newNames[0].newName);
+						const item = renameModal.items.find((candidate) => candidate.id === newNames[0].id);
+						if (!item) throw new Error('No se encontró el asset a renombrar');
+						await renameItem(item, newNames[0].newName);
 					} else {
-						const items = newNames.map((n) => {
-							const item = renameModal.items.find((i) => i.id === n.id);
-							return { id: n.id, currentName: item?.name || '' };
+						const renames = newNames.map((rename) => {
+							const item = renameModal.items.find((candidate) => candidate.id === rename.id);
+							if (!item) throw new Error('No se encontró un asset a renombrar');
+							return { item, newName: rename.newName };
 						});
-						await renameBatch(items, newNames[0].newName); // Usar el patrón del primer nombre
+						await renameBatch(renames);
 					}
 					setRenameModal({ isOpen: false, items: [] });
 				}}
@@ -600,8 +613,7 @@ export function FileBrowser({
 				items={deleteModal.items}
 				onCancel={() => setDeleteModal({ isOpen: false, items: [] })}
 				onConfirm={async () => {
-					const ids = deleteModal.items.map((i) => i.id);
-					await deleteItems(ids);
+					await deleteItems(deleteModal.items);
 					setDeleteModal({ isOpen: false, items: [] });
 				}}
 			/>
@@ -613,8 +625,12 @@ export function FileBrowser({
 				items={moveModal.items}
 				onCancel={() => setMoveModal({ isOpen: false, items: [] })}
 				onConfirm={async (targetFolderId) => {
-					const fileIds = moveModal.items.map((i) => i.id);
-					await moveFiles({ fileIds, targetFolderId });
+					const assets = moveModal.items.map((item) => {
+						const assetType = toMediaAssetType(item.entityType);
+						if (!assetType) throw new Error(`No se puede mover el tipo ${item.entityType}`);
+						return { assetId: item.id, assetType };
+					});
+					await moveFiles({ assets, targetFolderId });
 					setMoveModal({ isOpen: false, items: [] });
 				}}
 			/>

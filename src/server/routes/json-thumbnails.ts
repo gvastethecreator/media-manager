@@ -10,6 +10,7 @@ import { db } from '@/lib/drizzle/index.js';
 import { jsonFiles } from '@/lib/drizzle/schema/index.js';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { authorizeMediaAssetParam } from '@/server/security/authorized-root-request';
 
 const router = express.Router();
 
@@ -196,44 +197,50 @@ function generateJsonPreviewSVG(jsonContent: string, options: JsonPreviewOptions
 /**
  * GET /json/:id/preview - Generar preview de archivo JSON
  */
-router.get('/:id/preview', effectHandler(
-	(req) =>
-		Effect.tryPromise({
-			try: async () => {
-				const { id } = req.params;
-				const options: JsonPreviewOptions = {
-					maxLines: Math.min(Number.parseInt(req.query.maxLines as string, 10) || 20, 200),
-					width: Math.min(Number.parseInt(req.query.width as string, 10) || 300, 2000),
-					height: Math.min(Number.parseInt(req.query.height as string, 10) || 400, 2000),
-					theme: (req.query.theme as 'light' | 'dark') || 'light',
-					showLineNumbers: req.query.showLineNumbers === 'true',
-				};
+router.get(
+	'/:id/preview',
+	authorizeMediaAssetParam({ assetType: 'json', permissions: ['read', 'index'] }),
+	effectHandler(
+		(req) =>
+			Effect.tryPromise({
+				try: async () => {
+					const { id } = req.params;
+					const options: JsonPreviewOptions = {
+						maxLines: Math.min(Number.parseInt(req.query.maxLines as string, 10) || 20, 200),
+						width: Math.min(Number.parseInt(req.query.width as string, 10) || 300, 2000),
+						height: Math.min(Number.parseInt(req.query.height as string, 10) || 400, 2000),
+						theme: (req.query.theme as 'light' | 'dark') || 'light',
+						showLineNumbers: req.query.showLineNumbers === 'true',
+					};
 
-				const jsonRecords = await db.select({ metadata: jsonFiles.metadata }).from(jsonFiles).where(eq(jsonFiles.id, id));
+					const jsonRecords = await db
+						.select({ metadata: jsonFiles.metadata })
+						.from(jsonFiles)
+						.where(eq(jsonFiles.id, id));
 
-				if (jsonRecords.length === 0) {
-					throw Object.assign(new Error('JSON file not found'), { _tag: 'FileNotFound' });
-				}
-
-				const jsonFile = jsonRecords[0];
-				let metadata: any = null;
-
-				if (jsonFile.metadata) {
-					try {
-						metadata = JSON.parse(jsonFile.metadata);
-					} catch (e) {
-						serverLogger.warn(`Error parsing metadata for JSON file ${id}:`, e);
+					if (jsonRecords.length === 0) {
+						throw Object.assign(new Error('JSON file not found'), { _tag: 'FileNotFound' });
 					}
-				}
 
-				if (metadata?.thumbnail) {
-					return { svg: metadata.thumbnail, status: 200 };
-				}
+					const jsonFile = jsonRecords[0];
+					let metadata: any = null;
 
-				const themeColors = options.theme === 'dark' ? THEMES.dark : THEMES.light;
-				const svgWidth = options.width ?? 300;
-				const svgHeight = options.height ?? 400;
-				const errorSVG = `
+					if (jsonFile.metadata) {
+						try {
+							metadata = JSON.parse(jsonFile.metadata);
+						} catch (e) {
+							serverLogger.warn(`Error parsing metadata for JSON file ${id}:`, e);
+						}
+					}
+
+					if (metadata?.thumbnail) {
+						return { svg: metadata.thumbnail, status: 200 };
+					}
+
+					const themeColors = options.theme === 'dark' ? THEMES.dark : THEMES.light;
+					const svgWidth = options.width ?? 300;
+					const svgHeight = options.height ?? 400;
+					const errorSVG = `
 <svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">
   <rect width="100%" height="100%" fill="${themeColors.background}"/>
   <g transform="translate(${svgWidth / 2},${svgHeight / 2})">
@@ -242,22 +249,22 @@ router.get('/:id/preview', effectHandler(
     </text>
   </g>
 </svg>`;
-				return { svg: errorSVG, status: 404 };
+					return { svg: errorSVG, status: 404 };
+				},
+				catch: (error) => new Error(String(error)),
+			}),
+		{
+			onSuccess: (data, res) => {
+				res.setHeader('Content-Type', 'image/svg+xml');
+				res.setHeader('Cache-Control', data.status === 200 ? 'public, max-age=3600' : 'public, max-age=60');
+				res.status(data.status).send(data.svg);
 			},
-			catch: (error) => new Error(String(error)),
-		}),
-	{
-		onSuccess: (data, res) => {
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', data.status === 200 ? 'public, max-age=3600' : 'public, max-age=60');
-			res.status(data.status).send(data.svg);
-		},
-		onError: (_error, res) => {
-			serverLogger.error('Error generando preview JSON:', _error);
-			const svgWidth = 300;
-			const svgHeight = 400;
-			const themeColors = THEMES.light;
-			const errorSVG = `
+			onError: (_error, res) => {
+				serverLogger.error('Error generando preview JSON:', _error);
+				const svgWidth = 300;
+				const svgHeight = 400;
+				const themeColors = THEMES.light;
+				const errorSVG = `
 <svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">
   <rect width="100%" height="100%" fill="${themeColors.background}"/>
   <g transform="translate(${svgWidth / 2},${svgHeight / 2})">
@@ -266,11 +273,12 @@ router.get('/:id/preview', effectHandler(
     </text>
   </g>
 </svg>`;
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=60');
-			res.status(500).send(errorSVG);
-		},
-	}
-));
+				res.setHeader('Content-Type', 'image/svg+xml');
+				res.setHeader('Cache-Control', 'public, max-age=60');
+				res.status(500).send(errorSVG);
+			},
+		}
+	)
+);
 
 export default router;

@@ -6,19 +6,25 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
+import { apiClient } from '@/lib/api/client';
+import { toMediaAssetType } from '@/lib/api/authorized-roots';
+import {
+	addFileMutationResult,
+	type FileMutationItemResult,
+	type FileMutationSummary,
+	PartialFileMutationError,
+	pendingFileMutationDescription,
+} from '@/lib/api/file-mutation-result';
 import { clientLogger } from '@/lib/logger/client-logger';
-
-const API_BASE = '/api';
+import type { BrowserItem } from '../types/item.types';
 
 interface RenameSingleInput {
-	itemId: string;
+	item: BrowserItem;
 	newName: string;
 }
 
 interface RenameBatchInput {
-	items: Array<{ id: string; currentName: string }>;
-	pattern: string;
-	startNumber?: number;
+	renames: Array<{ item: BrowserItem; newName: string }>;
 }
 
 interface RenameResult {
@@ -31,13 +37,9 @@ interface RenameResult {
 	/** Progreso del renombrado en batch (0-100) */
 	progress: number;
 	/** Renombrar múltiples archivos con patrón */
-	renameBatch: (
-		items: Array<{ id: string; currentName: string }>,
-		pattern: string,
-		startNumber?: number
-	) => Promise<void>;
+	renameBatch: (renames: Array<{ item: BrowserItem; newName: string }>) => Promise<void>;
 	/** Renombrar un solo archivo */
-	renameItem: (itemId: string, newName: string) => Promise<void>;
+	renameItem: (item: BrowserItem, newName: string) => Promise<void>;
 	/** Resetear estado */
 	reset: () => void;
 }
@@ -88,65 +90,47 @@ export function useRename(): RenameResult {
 	const queryClient = useQueryClient();
 	const { toast } = useToast();
 
-	const mutation = useMutation<void, Error, RenameSingleInput | RenameBatchInput>({
+	const mutation = useMutation<FileMutationSummary, Error, RenameSingleInput | RenameBatchInput>({
 		mutationFn: async (input) => {
+			const operations = 'renames' in input ? input.renames : [{ item: input.item, newName: input.newName }];
+			const summary: FileMutationSummary = {
+				applied: 0,
+				cleanupPending: 0,
+				recoveryPending: 0,
+				total: operations.length,
+			};
 			// Verificar si es batch o single
-			if ('items' in input) {
-				// Renombrado en batch
-				const { items, pattern, startNumber = 1 } = input;
-				const errors: string[] = [];
-
-				for (let i = 0; i < items.length; i++) {
-					const item = items[i];
-					const newName = generateNameFromPattern(pattern, i, startNumber, item.currentName);
-
-					try {
-						const response = await fetch(`${API_BASE}/files/${item.id}/rename`, {
-							method: 'PUT',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({ name: newName }),
-						});
-
-						if (!response.ok) {
-							const errorData = await response.json().catch(() => ({}));
-							errors.push(`${item.currentName}: ${errorData.message || response.statusText}`);
-						}
-					} catch (error) {
-						errors.push(`${item.currentName}: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-					}
+			try {
+				for (const rename of operations) {
+					const assetType = toMediaAssetType(rename.item.entityType);
+					if (!assetType) throw new Error(`No se puede renombrar el tipo ${rename.item.entityType}`);
+					const response = await apiClient.put<{
+						data: { renamed: FileMutationItemResult[] };
+						success: true;
+					}>('/files/assets/rename', {
+						renames: [{ asset: { assetId: rename.item.id, assetType }, newName: rename.newName }],
+					});
+					const renamed = response.data.renamed[0];
+					if (!renamed) throw new Error('El servidor no confirmó el asset renombrado.');
+					addFileMutationResult(summary, renamed);
 				}
-
-				if (errors.length > 0) {
-					throw new Error(`Errores en ${errors.length} de ${items.length} archivos:\n${errors.join('\n')}`);
-				}
-			} else {
-				// Renombrado individual
-				const { itemId, newName } = input;
-				const response = await fetch(`${API_BASE}/files/${itemId}/rename`, {
-					method: 'PUT',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ name: newName }),
-				});
-
-				if (!response.ok) {
-					const errorData = await response.json().catch(() => ({}));
-					throw new Error(errorData.message || `Error al renombrar: ${response.statusText}`);
-				}
+			} catch (error) {
+				throw new PartialFileMutationError(
+					error instanceof Error ? error.message : 'No se pudieron renombrar todos los archivos.',
+					summary,
+					error
+				);
 			}
+			return summary;
 		},
-		onSuccess: (_, input) => {
-			// Invalidar todas las queries relevantes
-			queryClient.invalidateQueries({ queryKey: ['files'] });
-			queryClient.invalidateQueries({ queryKey: ['folder-files'] });
-			queryClient.invalidateQueries({ queryKey: ['images'] });
-			queryClient.invalidateQueries({ queryKey: ['videos'] });
-			queryClient.invalidateQueries({ queryKey: ['audios'] });
-			queryClient.invalidateQueries({ queryKey: ['documents'] });
-			queryClient.invalidateQueries({ queryKey: ['all-images'] });
-			queryClient.invalidateQueries({ queryKey: ['favorites'] });
-
-			if ('items' in input) {
-				const count = input.items.length;
+		onSuccess: (summary, input) => {
+			const reconciliation = pendingFileMutationDescription(summary);
+			if (reconciliation) {
+				toast({ title: '⚠️ Renombrado aplicado con tareas pendientes', description: reconciliation });
+				return;
+			}
+			if ('renames' in input) {
+				const count = input.renames.length;
 				toast({
 					title: '✅ Archivos renombrados',
 					description: `${count} archivo${count > 1 ? 's' : ''} renombrado${count > 1 ? 's' : ''} exitosamente`,
@@ -160,8 +144,15 @@ export function useRename(): RenameResult {
 		},
 		onError: (error, input) => {
 			clientLogger.error('Error renaming files:', error);
+			const partial = error instanceof PartialFileMutationError ? error.summary : null;
 
-			if ('items' in input) {
+			if (partial?.applied) {
+				toast({
+					variant: 'destructive',
+					title: '⚠️ Renombrado parcialmente aplicado',
+					description: `${partial.applied} de ${partial.total} archivos fueron renombrados antes del fallo. Revisa la lista antes de reintentar.`,
+				});
+			} else if ('renames' in input) {
 				toast({
 					variant: 'destructive',
 					title: '❌ Error al renombrar',
@@ -175,18 +166,21 @@ export function useRename(): RenameResult {
 				});
 			}
 		},
+		onSettled: async () => {
+			await Promise.all(
+				['files', 'folder-files', 'images', 'videos', 'audios', 'documents', 'all-images', 'favorites'].map((key) =>
+					queryClient.invalidateQueries({ queryKey: [key] })
+				)
+			);
+		},
 	});
 
-	const renameItem = async (itemId: string, newName: string): Promise<void> => {
-		await mutation.mutateAsync({ itemId, newName });
+	const renameItem = async (item: BrowserItem, newName: string): Promise<void> => {
+		await mutation.mutateAsync({ item, newName });
 	};
 
-	const renameBatch = async (
-		items: Array<{ id: string; currentName: string }>,
-		pattern: string,
-		startNumber?: number
-	): Promise<void> => {
-		await mutation.mutateAsync({ items, pattern, startNumber });
+	const renameBatch = async (renames: Array<{ item: BrowserItem; newName: string }>): Promise<void> => {
+		await mutation.mutateAsync({ renames });
 	};
 
 	return {

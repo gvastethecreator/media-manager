@@ -30,7 +30,7 @@
 		"test:watch": "bun scripts/run-with-log.js test-watch bun scripts/run-tests-isolated.ts",
 		"test:unit": "bun scripts/run-with-log.js test-unit bun scripts/run-tests-isolated.ts --run",
 		"test:ci": "bun scripts/run-with-log.js test-unit bun scripts/run-tests-isolated.ts --run --coverage",
-		"test:tooling": "bun test --timeout 120000 scripts/safety-contracts.test.ts scripts/local-session-security.test.ts scripts/local-app-broker.test.ts scripts/db/database-safety.test.ts",
+		"test:tooling": "bun test --timeout 120000 scripts/safety-contracts.test.ts scripts/local-session-security.test.ts scripts/local-app-broker.test.ts scripts/authorized-roots.test.ts scripts/authorized-file-mutation.test.ts scripts/authorized-files-routes.test.ts scripts/output-redaction-security.test.ts scripts/db/database-safety.test.ts",
 		"test:e2e": "bun scripts/run-with-log.js test-e2e bunx playwright test",
 		"test:ui": "bun scripts/run-with-log.js test-e2e bunx playwright test --ui",
 		"test:e2e:debug": "bun scripts/run-with-log.js test-e2e-debug bunx playwright test --debug",

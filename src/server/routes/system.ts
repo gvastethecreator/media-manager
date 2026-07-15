@@ -3,6 +3,9 @@ import express from 'express';
 import { getDatabaseInfo } from '@/lib/drizzle';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { filterAuthorizedMediaEntities, getAuthorizedRootRegistry } from '@/server/security/authorized-root-request';
+import { countAuthorizedMediaAssets } from '@/server/security/media-asset-reference';
+import { RootAuthorizationError } from '@/server/security/authorized-roots';
 import { circuitBreakerRegistry } from '@/lib/system/circuit-breaker';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { getSystemStats } from '../services/stats.service';
@@ -32,9 +35,41 @@ function toError(context: string, error: unknown): Error {
 // GET /api/system/navigation - Obtener datos de navegación
 router.get(
 	'/navigation',
-	effectHandler((_req, _res) =>
+	effectHandler((req) =>
 		Effect.tryPromise({
-			try: () => getNavigationData(),
+			try: async () => {
+				const data = await getNavigationData();
+				const registry = getAuthorizedRootRegistry(req);
+				const [folders, audios, documents, jsonFiles, file3ds, videos, totalImages] = await Promise.all([
+					Promise.all(
+						data.folders.map(async (folder) => {
+							try {
+								const authorized = await registry.authorizeAbsolutePath(folder.path, 'read');
+								return { ...folder, path: authorized.relativePath, rootId: authorized.rootId };
+							} catch (error) {
+								if (error instanceof RootAuthorizationError) return null;
+								throw error;
+							}
+						})
+					).then((items) => items.filter((folder) => folder !== null)),
+					filterAuthorizedMediaEntities(req, data.audios, 'audio', ['read', 'index']),
+					filterAuthorizedMediaEntities(req, data.documents, 'document', ['read', 'index']),
+					filterAuthorizedMediaEntities(req, data.jsonFiles, 'json', ['read', 'index']),
+					filterAuthorizedMediaEntities(req, data.file3ds, 'file3d', ['read', 'index']),
+					filterAuthorizedMediaEntities(req, data.videos, 'video', ['read', 'index']),
+					countAuthorizedMediaAssets(registry, 'image', 'index'),
+				]);
+				return {
+					...data,
+					audios,
+					documents,
+					file3ds,
+					folders,
+					jsonFiles,
+					videos,
+					stats: { ...data.stats, totalFolders: folders.length, totalImages },
+				};
+			},
 			catch: (error) => toError('Error al obtener datos de navegación', error),
 		})
 	)
@@ -61,15 +96,13 @@ router.get(
 );
 
 // GET /api/system/stats - Obtener estadísticas del sistema
-router.get(
-	'/stats',
-	effectHandler((_req, _res) =>
-		Effect.tryPromise({
-			try: () => getSystemStats(),
-			catch: (error) => toError('Error obteniendo estadísticas del sistema', error),
-		})
-	)
-);
+router.get('/stats', (_req, res) => {
+	res.status(410).json({
+		code: 'AUTHORIZED_SCOPE_REQUIRED',
+		message: 'Las estadísticas globales fueron retiradas hasta disponer de agregados por media root.',
+		retryable: false,
+	});
+});
 
 // POST /api/system/repair - Reparar el sistema
 router.post(

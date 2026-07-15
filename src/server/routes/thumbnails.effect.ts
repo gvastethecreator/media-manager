@@ -12,6 +12,9 @@ import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { authorizeMediaAssetParam, getAuthorizedRootRegistry } from '@/server/security/authorized-root-request';
+import { parseMediaAssetReference, resolveMediaAssetReference } from '@/server/security/media-asset-reference';
+import { sanitizePublicPayload } from '@/server/security/sanitize-public-payload';
 import { thumbnailEventService as baseThumbnailService } from '@/services/thumbnail/thumbnail-events.service';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail/types';
 import {
@@ -225,15 +228,14 @@ export const ThumbnailServiceLive = Layer.succeed(
 			Effect.tryPromise({
 				try: async () => {
 					const recentThumbnails = await db.query.images.findMany({
-						columns: { id: true, path: true, updatedAt: true },
+						columns: { id: true, updatedAt: true },
 						where: and(isNotNull(images.thumbnailWidth), isNotNull(images.thumbnailHeight)),
 						orderBy: desc(images.updatedAt),
 						limit,
 					});
 
-					return recentThumbnails.map((img: { id: string; path: string; updatedAt: Date }) => ({
+					return recentThumbnails.map((img: { id: string; updatedAt: Date }) => ({
 						id: img.id,
-						path: img.path,
 						processedAt: img.updatedAt.toISOString(),
 					}));
 				},
@@ -252,132 +254,189 @@ export const ThumbnailServiceLive = Layer.succeed(
 
 const router = express.Router();
 
+async function authorizeImageIds(request: express.Request, imageIds: unknown[]): Promise<void> {
+	const registry = getAuthorizedRootRegistry(request);
+	await Promise.all(
+		imageIds.map(async (imageId) => {
+			const reference = parseMediaAssetReference({ assetId: imageId, assetType: 'image' });
+			await resolveMediaAssetReference(registry, reference, 'read');
+			await resolveMediaAssetReference(registry, reference, 'index');
+		})
+	);
+}
+
 /**
  * GET /thumbnails/image/:imageId - Obtener thumbnails de imagen
  */
-router.get('/image/:imageId', effectHandler((req) =>
-	Effect.gen(function* () {
-		const { imageId } = req.params;
-		const { quality } = req.query;
+router.get(
+	'/image/:imageId',
+	authorizeMediaAssetParam({
+		assetType: 'image',
+		idParam: 'imageId',
+		permissions: ['read', 'index'],
+	}),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const { imageId } = req.params;
+			const { quality } = req.query;
 
-		const service = yield* ThumbnailService;
-		return yield* service.getThumbnail(imageId, (quality as string) || 'medium');
-	}).pipe(Effect.provide(ThumbnailServiceLive))
-));
+			const service = yield* ThumbnailService;
+			return yield* service.getThumbnail(imageId, (quality as string) || 'medium');
+		}).pipe(Effect.provide(ThumbnailServiceLive))
+	)
+);
 
 /**
  * GET /thumbnails/stats - Obtener estadísticas de thumbnails
  */
-router.get('/stats', effectHandler((_req) =>
-	Effect.gen(function* () {
-		const service = yield* ThumbnailService;
-		return yield* service.getThumbnailStats();
-	}).pipe(Effect.provide(ThumbnailServiceLive))
-));
+router.get(
+	'/stats',
+	effectHandler((_req) =>
+		Effect.gen(function* () {
+			const service = yield* ThumbnailService;
+			return yield* service.getThumbnailStats();
+		}).pipe(Effect.provide(ThumbnailServiceLive))
+	)
+);
 
 /**
  * POST /thumbnails/generate/:imageId - Generar thumbnails para imagen
  */
-router.post('/generate/:imageId', effectHandler((req) =>
-	Effect.gen(function* () {
-		const { imageId } = req.params;
-		const options = req.body || {};
+router.post(
+	'/generate/:imageId',
+	authorizeMediaAssetParam({
+		assetType: 'image',
+		idParam: 'imageId',
+		permissions: ['read', 'index'],
+	}),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const { imageId } = req.params;
+			const options = req.body || {};
 
-		const service = yield* ThumbnailService;
-		return yield* service.getThumbnail(imageId, options.quality || 'medium');
-	}).pipe(Effect.provide(ThumbnailServiceLive))
-));
+			const service = yield* ThumbnailService;
+			return yield* service.getThumbnail(imageId, options.quality || 'medium');
+		}).pipe(Effect.provide(ThumbnailServiceLive))
+	)
+);
 
 /**
  * POST /thumbnails/bulk-generate - Generar thumbnails en lote (OPTIMIZED)
  */
-router.post('/bulk-generate', effectHandler((req, res) => {
-	const { imageIds, ...options } = req.body;
+router.post(
+	'/bulk-generate',
+	effectHandler((req, res) => {
+		const { imageIds, ...options } = req.body;
 
-	if (!(imageIds && Array.isArray(imageIds))) {
-		res.status(400).json({ error: 'imageIds (array) es requerido' });
-		return Effect.succeed(undefined);
-	}
+		if (!(imageIds && Array.isArray(imageIds))) {
+			res.status(400).json({ error: 'imageIds (array) es requerido' });
+			return Effect.succeed(undefined);
+		}
 
-	return Effect.gen(function* () {
-		const service = yield* ThumbnailService;
-		return yield* service.bulkGenerateThumbnails(imageIds, options);
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-}));
+		return Effect.gen(function* () {
+			yield* Effect.promise(() => authorizeImageIds(req, imageIds));
+			const service = yield* ThumbnailService;
+			return yield* service.bulkGenerateThumbnails(imageIds, options);
+		}).pipe(Effect.provide(ThumbnailServiceLive));
+	})
+);
 
 /**
  * POST /thumbnails/batch - Nuevo endpoint optimizado para batch requests
  */
-router.post('/batch', effectHandler((req, res) => {
-	const { requests } = req.body;
+router.post(
+	'/batch',
+	effectHandler((req, res) => {
+		const { requests } = req.body;
 
-	if (!(requests && Array.isArray(requests))) {
-		res.status(400).json({
-			error: 'requests (array) es requerido. Formato: [{imageId, quality}, ...]',
-		});
-		return Effect.succeed(undefined);
-	}
+		if (!(requests && Array.isArray(requests))) {
+			res.status(400).json({
+				error: 'requests (array) es requerido. Formato: [{imageId, quality}, ...]',
+			});
+			return Effect.succeed(undefined);
+		}
 
-	return Effect.gen(function* () {
-		const service = yield* ThumbnailService;
-		return yield* service.batchGetThumbnails(requests);
-	}).pipe(Effect.provide(ThumbnailServiceLive));
-}));
+		return Effect.gen(function* () {
+			yield* Effect.promise(() =>
+				authorizeImageIds(
+					req,
+					requests.map((request: { imageId: unknown }) => request.imageId)
+				)
+			);
+			const service = yield* ThumbnailService;
+			return yield* service.batchGetThumbnails(requests);
+		}).pipe(Effect.provide(ThumbnailServiceLive));
+	})
+);
 
 /**
  * DELETE /thumbnails/image/:imageId - Eliminar thumbnails de imagen
  */
-router.delete('/image/:imageId', effectHandler((req) =>
-	Effect.gen(function* () {
-		const { imageId } = req.params;
+router.delete(
+	'/image/:imageId',
+	authorizeMediaAssetParam({
+		assetType: 'image',
+		idParam: 'imageId',
+		permissions: ['read', 'index'],
+	}),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const { imageId } = req.params;
 
-		const service = yield* ThumbnailService;
-		return yield* service.deleteThumbnail(imageId);
-	}).pipe(Effect.provide(ThumbnailServiceLive))
-));
+			const service = yield* ThumbnailService;
+			return yield* service.deleteThumbnail(imageId);
+		}).pipe(Effect.provide(ThumbnailServiceLive))
+	)
+);
 
 /**
  * POST /thumbnails/clean - Limpiar thumbnails huérfanos
  */
-router.post('/clean', effectHandler((req) =>
-	Effect.gen(function* () {
-		const service = yield* ThumbnailService;
-		return yield* service.cleanThumbnails(req.body);
-	}).pipe(Effect.provide(ThumbnailServiceLive))
-));
+router.post('/clean', (_req, res) => {
+	res.status(410).json({
+		code: 'ROOT_SCOPED_OPERATION_REQUIRED',
+		message: 'La limpieza global no está disponible hasta que pueda limitarse a un media root autorizado.',
+		retryable: false,
+	});
+});
 
 /**
  * POST /thumbnails/optimize - Optimizar thumbnails
  */
-router.post('/optimize', effectHandler((req) =>
-	Effect.gen(function* () {
-		const service = yield* ThumbnailService;
-		return yield* service.optimizeThumbnails(req.body);
-	}).pipe(Effect.provide(ThumbnailServiceLive))
-));
+router.post('/optimize', (_req, res) => {
+	res.status(410).json({
+		code: 'ROOT_SCOPED_OPERATION_REQUIRED',
+		message: 'La optimización global no está disponible hasta que pueda limitarse a un media root autorizado.',
+		retryable: false,
+	});
+});
 
 /**
  * POST /thumbnails/reprocess - Reprocesar thumbnails
  */
-router.post('/reprocess', effectHandler((req) =>
-	Effect.gen(function* () {
-		const service = yield* ThumbnailService;
-		return yield* service.reprocessThumbnails(req.body);
-	}).pipe(Effect.provide(ThumbnailServiceLive))
-));
+router.post('/reprocess', (_req, res) => {
+	res.status(410).json({
+		code: 'ROOT_SCOPED_OPERATION_REQUIRED',
+		message: 'El reprocesado global no está disponible hasta que pueda limitarse a un media root autorizado.',
+		retryable: false,
+	});
+});
 
 /**
  * GET /thumbnails/last-processed - Obtener thumbnails procesados recientemente
  */
-router.get('/last-processed', effectHandler((req) =>
-	Effect.gen(function* () {
-		const { limit = '9' } = req.query;
-		const limitNum = sanitizeLimit(limit, 9, 100);
+router.get(
+	'/last-processed',
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const { limit = '9' } = req.query;
+			const limitNum = sanitizeLimit(limit, 9, 100);
 
-		const service = yield* ThumbnailService;
-		return yield* service.getLastProcessed(limitNum);
-	}).pipe(Effect.provide(ThumbnailServiceLive))
-));
+			const service = yield* ThumbnailService;
+			return yield* service.getLastProcessed(limitNum);
+		}).pipe(Effect.provide(ThumbnailServiceLive))
+	)
+);
 
 /**
  * GET /thumbnails/events - Eventos SSE de procesamiento
@@ -390,11 +449,10 @@ router.get('/events', async (req, res) => {
 			'Cache-Control': 'no-cache, no-transform',
 			Connection: 'keep-alive',
 			'X-Accel-Buffering': 'no',
-			'Access-Control-Allow-Origin': '*',
 		});
 
 		const send = (event: string, data: Record<string, unknown> | string) => {
-			const formatted = typeof data === 'string' ? data : JSON.stringify(data);
+			const formatted = JSON.stringify(sanitizePublicPayload(typeof data === 'string' ? { message: data } : data));
 			res.write(`event: ${event}\ndata: ${formatted}\n\n`);
 		};
 
@@ -405,7 +463,7 @@ router.get('/events', async (req, res) => {
 		const progressHandler = (status: ProcessStatus) => send('progress', status as unknown as Record<string, unknown>);
 		const errorHandler = (error: ThumbnailError | Error | string | unknown) => {
 			if (error instanceof Error) {
-				send('error', { message: error.message, stack: error.stack });
+				send('error', { message: error.message });
 			} else if (typeof error === 'string') {
 				send('error', { message: error });
 			} else {

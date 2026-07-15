@@ -4,49 +4,6 @@
  */
 
 /**
- * Convierte una ruta local de sistema de archivos a una URL
- * @param path Ruta de archivo en el sistema de archivos
- * @returns URL formateada para acceso web
- */
-export function pathToUrl(path: string): string {
-	if (!path) {
-		return '';
-	}
-
-	// Normalizar separadores de ruta a formato web
-	const normalizedPath = path.replace(/\\/g, '/');
-
-	// Si la ruta ya es una URL, devolverla tal cual
-	if (normalizedPath.startsWith('http://') || normalizedPath.startsWith('https://')) {
-		return normalizedPath;
-	}
-
-	// Eliminar rutas relativas al principio si existen
-	const cleanPath = normalizedPath
-		.replace(/^\.\//, '') // Eliminar ./ al principio
-		.replace(/^\//, ''); // Eliminar / al principio si existe
-
-	// Convertir rutas locales de archivos a URLs relativas
-	// Para rutas que apuntan a archivos en el sistema de archivos local
-	if (cleanPath.startsWith('public/')) {
-		return `/${cleanPath.substring(7)}`; // Eliminar 'public/' y añadir /
-	}
-
-	// Si la ruta parece ser una ruta de archivo local pero no está en public
-	if (cleanPath.includes('/') && !cleanPath.startsWith('/')) {
-		return `/api/files/${encodeURIComponent(cleanPath)}`;
-	}
-
-	// Si la ruta ya parece una ruta web (comienza con /)
-	if (cleanPath.startsWith('/')) {
-		return cleanPath;
-	}
-
-	// En caso contrario, asumir que es un ID de archivo
-	return `/api/files/${cleanPath}`;
-}
-
-/**
  * Verifica si un string es una URL válida
  * @param url String a verificar
  * @returns true si es una URL válida, false en caso contrario

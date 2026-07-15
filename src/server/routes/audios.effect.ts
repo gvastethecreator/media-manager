@@ -11,272 +11,279 @@ import express from 'express';
 import { db } from '@/lib/drizzle/index.js';
 import { audios } from '@/lib/drizzle/schema/index.js';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
-import { AudioService, AudioServiceLive } from '@/services/audio/audio.service.effect';
+import { serverLogger } from '@/lib/logger/server-logger';
+import {
+	authorizeMediaAssetBodyIds,
+	authorizeMediaAssetParam,
+	authorizeMediaPathInput,
+	assertAuthorizedMediaEntity,
+	filterAuthorizedMediaEntities,
+	authorizeFolderPathById,
+	getAuthorizedRootRegistry,
+} from '@/server/security/authorized-root-request';
+import { countAuthorizedMediaAssetsByFolder } from '@/server/security/media-asset-reference';
+import { sanitizeJsonResponses } from '@/server/security/sanitize-public-payload';
+import {
+	type Audio,
+	AudioService,
+	type AudioServiceInterface,
+	AudioServiceLive,
+} from '@/services/audio/audio.service.effect';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 
 const router = express.Router();
+router.use(sanitizeJsonResponses);
+const logger = serverLogger.withContext('AudiosRoutes');
+const skipBatchFavoriteAlias: express.RequestHandler = (req, _res, next) => {
+	if (req.params.id === 'batch') next('route');
+	else next();
+};
 
-function normalizeSortValue(value: unknown): number | string {
-	if (value instanceof Date) {
-		return value.getTime();
-	}
+type AudioListOptions = Parameters<AudioServiceInterface['getAll']>[0];
 
-	if (typeof value === 'number') {
-		return value;
-	}
-
-	if (typeof value === 'string') {
-		return value.toLowerCase();
-	}
-
-	if (typeof value === 'boolean') {
-		return value ? 1 : 0;
-	}
-
-	if (value && typeof value === 'object' && 'getTime' in value && typeof value.getTime === 'function') {
-		return value.getTime();
-	}
-
-	return 0;
-}
-
-function sortEntitiesByField<T extends Record<string, unknown>>(
-	items: T[],
-	sortBy: string,
-	sortOrder: 'asc' | 'desc'
-): T[] {
-	const direction = sortOrder === 'asc' ? 1 : -1;
-
-	return [...items].sort((left, right) => {
-		const leftValue = normalizeSortValue(left[sortBy]);
-		const rightValue = normalizeSortValue(right[sortBy]);
-
-		if (leftValue < rightValue) {
-			return -1 * direction;
+function listAuthorizedAudios(
+	request: { app: { locals: Record<string, unknown> } },
+	service: AudioServiceInterface,
+	options: AudioListOptions,
+	page: { limit: number; offset: number }
+) {
+	return Effect.gen(function* () {
+		const authorized: Audio[] = [];
+		let rawOffset = 0;
+		const chunkSize = 500;
+		while (true) {
+			const chunk = yield* service.getAll({ ...options, limit: chunkSize, offset: rawOffset });
+			authorized.push(
+				...(yield* Effect.promise(() => filterAuthorizedMediaEntities(request, chunk, 'audio', ['read', 'index'])))
+			);
+			rawOffset += chunk.length;
+			if (chunk.length < chunkSize) break;
 		}
-
-		if (leftValue > rightValue) {
-			return 1 * direction;
-		}
-
-		return 0;
+		return {
+			hasNext: page.offset + page.limit < authorized.length,
+			items: authorized.slice(page.offset, page.offset + page.limit),
+			total: authorized.length,
+		};
 	});
 }
 
 /**
  * GET /audios - Listar audios con filtros y paginación
  */
-router.get('/', effectHandler((req) =>
-	Effect.gen(function* () {
-		const audioService = yield* AudioService;
+router.get(
+	'/',
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const audioService = yield* AudioService;
 
-		const {
-			search,
-			limit = '50',
-			offset = '0',
-			sortBy = 'createdAt',
-			sortOrder = 'desc',
-			folderId,
-			isFavorite,
-			isArchived,
-			format,
-			genre,
-			artist,
-			album,
-			minDuration,
-			maxDuration,
-			minSize,
-			maxSize,
-			minBitrate,
-			maxBitrate,
-		} = req.query;
+			const {
+				search,
+				limit = '50',
+				offset = '0',
+				sortBy = 'createdAt',
+				sortOrder = 'desc',
+				folderId,
+				isFavorite,
+				isArchived,
+				format,
+				genre,
+				artist,
+				album,
+				minDuration,
+				maxDuration,
+				minSize,
+				maxSize,
+				minBitrate,
+				maxBitrate,
+			} = req.query;
 
-		const filters = {
-			search: search as string | undefined,
-			limit: sanitizeLimit(limit as string),
-			offset: sanitizeOffset(offset as string),
-			sortBy: (sortBy as 'name' | 'size' | 'duration' | 'bitrate' | 'createdAt' | 'updatedAt') || 'createdAt',
-			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
-			folderId: folderId as string | undefined,
-			isFavorite: isFavorite === 'true' ? true : isFavorite === 'false' ? false : undefined,
-			isArchived: isArchived === 'true' ? true : isArchived === 'false' ? false : undefined,
-			format: format as string | undefined,
-			genre: genre as string | undefined,
-			artist: artist as string | undefined,
-			album: album as string | undefined,
-			minDuration: minDuration ? Number.parseInt(minDuration as string, 10) : undefined,
-			maxDuration: maxDuration ? Number.parseInt(maxDuration as string, 10) : undefined,
-			minSize: minSize ? Number.parseInt(minSize as string, 10) : undefined,
-			maxSize: maxSize ? Number.parseInt(maxSize as string, 10) : undefined,
-			minBitrate: minBitrate ? Number.parseInt(minBitrate as string, 10) : undefined,
-			maxBitrate: maxBitrate ? Number.parseInt(maxBitrate as string, 10) : undefined,
-		};
+			const filters = {
+				search: search as string | undefined,
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
+				sortBy: (sortBy as 'name' | 'size' | 'duration' | 'bitrate' | 'createdAt' | 'updatedAt') || 'createdAt',
+				sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
+				folderId: folderId as string | undefined,
+				isFavorite: isFavorite === 'true' ? true : isFavorite === 'false' ? false : undefined,
+				isArchived: isArchived === 'true' ? true : isArchived === 'false' ? false : undefined,
+				format: format as string | undefined,
+				genre: genre as string | undefined,
+				artist: artist as string | undefined,
+				album: album as string | undefined,
+				minDuration: minDuration ? Number.parseInt(minDuration as string, 10) : undefined,
+				maxDuration: maxDuration ? Number.parseInt(maxDuration as string, 10) : undefined,
+				minSize: minSize ? Number.parseInt(minSize as string, 10) : undefined,
+				maxSize: maxSize ? Number.parseInt(maxSize as string, 10) : undefined,
+				minBitrate: minBitrate ? Number.parseInt(minBitrate as string, 10) : undefined,
+				maxBitrate: maxBitrate ? Number.parseInt(maxBitrate as string, 10) : undefined,
+			};
 
-		const result = yield* audioService.getAll(filters);
+			const result = yield* listAuthorizedAudios(req, audioService, filters, {
+				limit: filters.limit,
+				offset: filters.offset,
+			});
 
-		const data = result.map((audio) => ({
-			...audio,
-			entityType: 'audio' as const,
-			thumbnailUrl: `/api/audio/${audio.id}/waveform`,
-		}));
+			const data = result.items.map((audio) => ({
+				...audio,
+				entityType: 'audio' as const,
+				thumbnailUrl: `/api/audio/${audio.id}/waveform`,
+			}));
 
-		return data;
-	}).pipe(Effect.provide(AudioServiceLive))
-));
+			return data;
+		}).pipe(Effect.provide(AudioServiceLive))
+	)
+);
 
 /**
  * GET /audios/favorites - Listar solo audios favoritos
  */
-router.get('/favorites', effectHandler((req) =>
-	Effect.gen(function* () {
-		const audioService = yield* AudioService;
+router.get(
+	'/favorites',
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const audioService = yield* AudioService;
 
-		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
+			const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
 
-		const filters = {
-			search: search as string | undefined,
-			limit: sanitizeLimit(limit as string),
-			offset: sanitizeOffset(offset as string),
-			sortBy: (sortBy as 'name' | 'size' | 'duration' | 'bitrate' | 'createdAt' | 'updatedAt') || 'createdAt',
-			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
-		};
+			const filters = {
+				search: search as string | undefined,
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
+				sortBy: (sortBy as 'name' | 'size' | 'duration' | 'bitrate' | 'createdAt' | 'updatedAt') || 'createdAt',
+				sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
+			};
 
-		const favoriteCounts = yield* Effect.tryPromise({
-			try: () => favoriteService.getCountsByType(),
-			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
-		});
-
-		const totalFavorites = favoriteCounts[FavoriteEntityType.AUDIO] ?? 0;
-
-		if (totalFavorites === 0) {
-			return [];
-		}
-
-		const favoriteResult = yield* Effect.tryPromise({
-			try: () =>
-				favoriteService.list({
-					entityType: FavoriteEntityType.AUDIO,
+			const result = yield* listAuthorizedAudios(
+				req,
+				audioService,
+				{
+					isFavorite: true,
 					search: filters.search,
-					limit: totalFavorites,
-					offset: 0,
-					sortBy: 'addedAt',
-					sortOrder: 'desc',
-				}),
-			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
-		});
+					sortBy: filters.sortBy,
+					sortOrder: filters.sortOrder,
+				},
+				{
+					limit: filters.limit,
+					offset: filters.offset,
+				}
+			);
 
-		const favoriteAudios = yield* Effect.all(
-			favoriteResult.items.map((favorite) =>
-				audioService.getByIdWithStats(favorite.entityId).pipe(
-					Effect.map((audio) => ({
-						...audio,
-						entityType: 'audio' as const,
-						thumbnailUrl: `/api/audio/${audio.id}/waveform`,
-					})),
-					Effect.catchAll(() => Effect.succeed(null))
-				)
-			)
-		);
-
-		const data = sortEntitiesByField(
-			favoriteAudios.flatMap((audio) => (audio ? [audio] : [])),
-			filters.sortBy,
-			filters.sortOrder
-		).slice(filters.offset, filters.offset + filters.limit);
-
-		return data;
-	}).pipe(Effect.provide(AudioServiceLive))
-));
+			return result.items.map((audio) => ({
+				...audio,
+				entityType: 'audio' as const,
+				thumbnailUrl: `/api/audio/${audio.id}/waveform`,
+			}));
+		}).pipe(Effect.provide(AudioServiceLive))
+	)
+);
 
 /**
  * GET /audios/stats/format - Obtener estadísticas por formato
  */
-router.get('/stats/format', effectHandler((req) =>
-	Effect.gen(function* () {
-		const audioService = yield* AudioService;
-
-		const stats = yield* audioService.getFormatStats();
-
-		return { stats };
-	}).pipe(Effect.provide(AudioServiceLive))
-));
+router.get('/stats/format', (_req, res) => {
+	res.status(410).json({
+		code: 'AUTHORIZED_SCOPE_REQUIRED',
+		message: 'Las estadísticas globales fueron retiradas hasta disponer de agregados por media root.',
+		retryable: false,
+	});
+});
 
 /**
  * GET /audios/by-hash/:hash - Buscar audio por hash
  */
-router.get('/by-hash/:hash', effectHandler((req, res) => {
-	const { hash } = req.params;
+router.get(
+	'/by-hash/:hash',
+	effectHandler((req, res) => {
+		const { hash } = req.params;
 
-	return Effect.gen(function* () {
-		const audioService = yield* AudioService;
+		return Effect.gen(function* () {
+			const audioService = yield* AudioService;
 
-		const audio = yield* audioService.getByHash(hash);
+			const audio = yield* audioService.getByHash(hash);
 
-		if (!audio) {
-			res.status(404).json({
-				error: 'NOT_FOUND',
-				message: `Audio con hash ${hash} no encontrado`,
-			});
-			return;
-		}
+			if (!audio) {
+				res.status(404).json({
+					error: 'NOT_FOUND',
+					message: `Audio con hash ${hash} no encontrado`,
+				});
+				return;
+			}
+			yield* Effect.promise(() => assertAuthorizedMediaEntity(req, audio, 'audio', ['read', 'index']));
 
-		return audio;
-	}).pipe(Effect.provide(AudioServiceLive));
-}));
+			return audio;
+		}).pipe(Effect.provide(AudioServiceLive));
+	})
+);
 
 /**
  * GET /audios/folder/:folderId - Listar audios por folder
  */
-router.get('/folder/:folderId', effectHandler((req) => {
-	const { folderId } = req.params;
+router.get(
+	'/folder/:folderId',
+	authorizeFolderPathById('index'),
+	effectHandler((req) => {
+		const { folderId } = req.params;
 
-	return Effect.gen(function* () {
-		const audioService = yield* AudioService;
+		return Effect.gen(function* () {
+			const audioService = yield* AudioService;
 
-		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
+			const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
 
-		const filters = {
-			search: search as string | undefined,
-			limit: sanitizeLimit(limit as string),
-			offset: sanitizeOffset(offset as string),
-			sortBy: (sortBy as 'name' | 'size' | 'duration' | 'bitrate' | 'createdAt' | 'updatedAt') || 'createdAt',
-			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
-		};
+			const filters = {
+				search: search as string | undefined,
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
+				sortBy: (sortBy as 'name' | 'size' | 'duration' | 'bitrate' | 'createdAt' | 'updatedAt') || 'createdAt',
+				sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
+			};
 
-		const result = yield* audioService.getByFolder(folderId, filters);
+			const result = yield* listAuthorizedAudios(
+				req,
+				audioService,
+				{ ...filters, folderId },
+				{
+					limit: filters.limit,
+					offset: filters.offset,
+				}
+			);
 
-		const data = result.map((audio) => ({
-			...audio,
-			entityType: 'audio' as const,
-			thumbnailUrl: `/api/audio/${audio.id}/waveform`,
-		}));
+			const data = result.items.map((audio) => ({
+				...audio,
+				entityType: 'audio' as const,
+				thumbnailUrl: `/api/audio/${audio.id}/waveform`,
+			}));
 
-		return data;
-	}).pipe(Effect.provide(AudioServiceLive));
-}));
+			return data;
+		}).pipe(Effect.provide(AudioServiceLive));
+	})
+);
 
 /**
  * GET /audios/folder/:folderId/count - Contar audios en un folder
  */
-router.get('/folder/:folderId/count', effectHandler((req) => {
-	const { folderId } = req.params;
+router.get(
+	'/folder/:folderId/count',
+	authorizeFolderPathById('index'),
+	effectHandler((req) => {
+		const { folderId } = req.params;
 
-	return Effect.gen(function* () {
-		const audioService = yield* AudioService;
+		return Effect.gen(function* () {
+			const count = yield* Effect.promise(() =>
+				countAuthorizedMediaAssetsByFolder(getAuthorizedRootRegistry(req), 'audio', folderId, 'index')
+			);
 
-		const count = yield* audioService.countByFolder(folderId);
-
-		return { count };
-	}).pipe(Effect.provide(AudioServiceLive));
-}));
+			return { count };
+		}).pipe(Effect.provide(AudioServiceLive));
+	})
+);
 
 /**
  * GET /audios/:id/waveform - Obtener waveform de audio
  */
-router.get('/:id/waveform', async (req, res) => {
+router.get('/:id/waveform', authorizeMediaAssetParam({ assetType: 'audio' }), async (req, res) => {
 	try {
 		const { id } = req.params;
 		const options: any = {
@@ -302,7 +309,7 @@ router.get('/:id/waveform', async (req, res) => {
 			try {
 				metadata = JSON.parse(audio.metadata);
 			} catch (e) {
-				console.warn(`Error parsing metadata for audio ${id}:`, e);
+				logger.warn('No se pudo interpretar metadata de audio', { assetId: id, error: e });
 			}
 		}
 
@@ -330,7 +337,7 @@ router.get('/:id/waveform', async (req, res) => {
 		res.setHeader('Cache-Control', 'public, max-age=60');
 		res.send(errorSVG);
 	} catch (error) {
-		console.error('Error generando waveform:', error);
+		logger.error('No se pudo generar el waveform', { error });
 		res.status(500).json({ error: 'Error generating waveform' });
 	}
 });
@@ -338,129 +345,163 @@ router.get('/:id/waveform', async (req, res) => {
 /**
  * GET /audios/:id - Obtener un audio por ID
  */
-router.get('/:id', effectHandler((req) => {
-	const { id } = req.params;
+router.get(
+	'/:id',
+	authorizeMediaAssetParam({ assetType: 'audio', permissions: ['read', 'index'] }),
+	effectHandler((req) => {
+		const { id } = req.params;
 
-	return Effect.gen(function* () {
-		const audioService = yield* AudioService;
+		return Effect.gen(function* () {
+			const audioService = yield* AudioService;
 
-		const audio = yield* audioService.getById(id);
+			const audio = yield* audioService.getById(id);
 
-		return audio;
-	}).pipe(Effect.provide(AudioServiceLive));
-}));
+			return audio;
+		}).pipe(Effect.provide(AudioServiceLive));
+	})
+);
 
 /**
  * GET /audios/:id/stats - Obtener audio con estadísticas completas
  */
-router.get('/:id/stats', effectHandler((req) => {
-	const { id } = req.params;
+router.get(
+	'/:id/stats',
+	authorizeMediaAssetParam({ assetType: 'audio', permissions: ['read', 'index'] }),
+	effectHandler((req) => {
+		const { id } = req.params;
 
-	return Effect.gen(function* () {
-		const audioService = yield* AudioService;
+		return Effect.gen(function* () {
+			const audioService = yield* AudioService;
 
-		const audio = yield* audioService.getByIdWithStats(id);
+			const audio = yield* audioService.getByIdWithStats(id);
 
-		return audio;
-	}).pipe(Effect.provide(AudioServiceLive));
-}));
+			return audio;
+		}).pipe(Effect.provide(AudioServiceLive));
+	})
+);
 
 /**
  * POST /audios - Crear un nuevo audio
  */
-router.post('/', effectHandler((req, res) =>
-	Effect.gen(function* () {
-		const audioService = yield* AudioService;
+router.post(
+	'/',
+	authorizeMediaPathInput({ expected: 'file', required: true }),
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const audioService = yield* AudioService;
 
-		const audio = yield* audioService.create(req.body);
+			const audio = yield* audioService.create(req.body);
 
-		res.status(201);
-		return audio;
-	}).pipe(Effect.provide(AudioServiceLive))
-));
+			res.status(201);
+			return audio;
+		}).pipe(Effect.provide(AudioServiceLive))
+	)
+);
 
 /**
  * POST /audios/:id/favorite - Toggle estado favorito de un audio
  */
-router.post('/:id/favorite', effectHandler((req, res) => {
-	const { id } = req.params;
+router.post(
+	'/:id/favorite',
+	skipBatchFavoriteAlias,
+	authorizeMediaAssetParam({ assetType: 'audio', permissions: ['read', 'write'] }),
+	effectHandler((req, res) => {
+		const { id } = req.params;
 
-	return Effect.gen(function* () {
-		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.AUDIO);
-		const audioService = yield* AudioService;
-		const audio = yield* audioService.toggleFavorite(id);
+		return Effect.gen(function* () {
+			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.AUDIO);
+			const audioService = yield* AudioService;
+			const audio = yield* audioService.toggleFavorite(id);
 
-		return audio;
-	}).pipe(Effect.provide(AudioServiceLive));
-}));
+			return audio;
+		}).pipe(Effect.provide(AudioServiceLive));
+	})
+);
 
 /**
  * POST /audios/batch/favorite - Marcar múltiples audios como favoritos/no favoritos
  */
-router.post('/batch/favorite', effectHandler((req) => {
-	const { ids, isFavorite } = req.body;
+router.post(
+	'/batch/favorite',
+	authorizeMediaAssetBodyIds({ assetType: 'audio', permissions: ['read', 'write'] }),
+	effectHandler((req) => {
+		const { ids, isFavorite } = req.body;
 
-	return Effect.gen(function* () {
-		if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
-			yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
-		}
+		return Effect.gen(function* () {
+			if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
+				yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
+			}
 
-		validateBatchSize(ids);
+			validateBatchSize(ids);
 
-		const updatedCount = yield* Effect.tryPromise({
-			try: () => favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite),
-			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+			const updatedCount = yield* Effect.tryPromise({
+				try: () => favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite),
+				catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+			});
+
+			return { updatedCount };
 		});
-
-		return { updatedCount };
-	});
-}));
+	})
+);
 
 /**
  * PATCH /audios/:id - Actualizar un audio
  */
-router.patch('/:id', effectHandler((req) => {
-	const { id } = req.params;
+router.patch(
+	'/:id',
+	authorizeMediaAssetParam({ assetType: 'audio', permissions: ['read', 'write'] }),
+	authorizeMediaPathInput({ expected: 'file', permissions: ['read', 'index', 'write'], required: false }),
+	effectHandler((req) => {
+		const { id } = req.params;
 
-	return Effect.gen(function* () {
-		const audioService = yield* AudioService;
+		return Effect.gen(function* () {
+			const audioService = yield* AudioService;
 
-		const audio = yield* audioService.update(id, req.body);
+			const audio = yield* audioService.update(id, req.body);
 
-		return audio;
-	}).pipe(Effect.provide(AudioServiceLive));
-}));
-
-/**
- * DELETE /audios/:id - Eliminar un audio
- */
-router.delete('/:id', effectHandler((req, res) => {
-	const { id } = req.params;
-	const { force } = req.query;
-
-	return Effect.gen(function* () {
-		const audioService = yield* AudioService;
-
-		yield* audioService.deleteById(id, force === 'true');
-
-		res.status(204);
-		return undefined;
-	}).pipe(Effect.provide(AudioServiceLive));
-}));
+			return audio;
+		}).pipe(Effect.provide(AudioServiceLive));
+	})
+);
 
 /**
  * DELETE /audios/batch - Eliminar múltiples audios
  */
-router.delete('/batch', effectHandler((req) => {
-	const { ids, force } = req.body;
+router.delete(
+	'/batch',
+	authorizeMediaAssetBodyIds({ assetType: 'audio', permissions: ['delete'] }),
+	effectHandler((req) => {
+		const { ids, force } = req.body;
 
-	return Effect.gen(function* () {
-		const audioService = yield* AudioService;
+		return Effect.gen(function* () {
+			const audioService = yield* AudioService;
 
-		const deletedCount = yield* audioService.deleteManyByIds(ids, force === true);
+			const deletedCount = yield* audioService.deleteManyByIds(ids, force === true);
 
-		return { deletedCount };
-	}).pipe(Effect.provide(AudioServiceLive));
-}));
+			return { deletedCount };
+		}).pipe(Effect.provide(AudioServiceLive));
+	})
+);
+
+/**
+ * DELETE /audios/:id - Eliminar un audio
+ */
+router.delete(
+	'/:id',
+	authorizeMediaAssetParam({ assetType: 'audio', permissions: ['delete'] }),
+	effectHandler((req, res) => {
+		const { id } = req.params;
+		const { force } = req.query;
+
+		return Effect.gen(function* () {
+			const audioService = yield* AudioService;
+
+			yield* audioService.deleteById(id, force === 'true');
+
+			res.status(204);
+			return undefined;
+		}).pipe(Effect.provide(AudioServiceLive));
+	})
+);
 
 export default router;

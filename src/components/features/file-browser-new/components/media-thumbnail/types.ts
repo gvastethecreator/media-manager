@@ -21,7 +21,6 @@ export interface MediaItem {
 	name: string;
 	// Campos específicos para folders
 	parentId?: string | null;
-	path?: string;
 	size?: number;
 	thumbnailUrl?: string | null;
 	totalItems?: number;

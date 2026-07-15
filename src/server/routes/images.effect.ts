@@ -5,12 +5,27 @@
  * @created 2025-10-11 - Phase 6.1 ImageService Effect Implementation
  */
 
+import { readFile } from 'node:fs/promises';
 import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
-import { listFavoriteEntities } from '@/server/utils/favorite-route';
+import {
+	authorizeMediaAssetBodyIds,
+	authorizeMediaAssetParam,
+	authorizeMediaPathInput,
+	assertAuthorizedMediaEntity,
+	filterAuthorizedMediaEntities,
+	authorizeFolderPathById,
+	getAuthorizedRootRegistry,
+	sendRootAuthorizationError,
+} from '@/server/security/authorized-root-request';
+import {
+	countAuthorizedMediaAssetsByFolder,
+	resolveMediaAssetReference,
+} from '@/server/security/media-asset-reference';
+import { sanitizeJsonResponses } from '@/server/security/sanitize-public-payload';
 import { favoriteService } from '@/services/favorite/favorite.service';
-import { ImageService, ImageServiceLive } from '@/services/image/image.service.effect';
+import { ImageService, type ImageServiceInterface, ImageServiceLive } from '@/services/image/image.service.effect';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
@@ -19,368 +34,455 @@ import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-dep
 import { getMimeTypeFromPath } from '../utils/mime';
 
 const router = express.Router();
+router.use(sanitizeJsonResponses);
+const skipBatchFavoriteAlias: express.RequestHandler = (req, _res, next) => {
+	if (req.params.id === 'batch') next('route');
+	else next();
+};
+
+type ImageListOptions = NonNullable<Parameters<ImageServiceInterface['getAll']>[0]>;
+
+function listAuthorizedImages(
+	request: { app: { locals: Record<string, unknown> } },
+	service: ImageServiceInterface,
+	options: ImageListOptions,
+	page: { limit: number; offset: number }
+) {
+	return Effect.gen(function* () {
+		const authorized = [];
+		let rawOffset = 0;
+		while (true) {
+			const chunk = yield* service.getAll({ ...options, limit: 500, offset: rawOffset });
+			authorized.push(
+				...(yield* Effect.promise(() =>
+					filterAuthorizedMediaEntities(request, chunk.images, 'image', ['read', 'index'])
+				))
+			);
+			rawOffset += chunk.images.length;
+			if (!chunk.hasMore || chunk.images.length === 0) break;
+		}
+		return {
+			hasNext: page.offset + page.limit < authorized.length,
+			items: authorized.slice(page.offset, page.offset + page.limit),
+			total: authorized.length,
+		};
+	});
+}
+
+async function sendAuthorizedOriginal(
+	req: { app: { locals: Record<string, unknown> }; params: Record<string, string> },
+	res: express.Response
+): Promise<void> {
+	try {
+		const resolved = await resolveMediaAssetReference(
+			getAuthorizedRootRegistry(req),
+			{ assetId: req.params.id, assetType: 'image' },
+			'read'
+		);
+		const buffer = await readFile(resolved.absolutePath);
+		res.set({
+			'Cache-Control': 'public, max-age=31536000',
+			'Content-Length': buffer.length.toString(),
+			'Content-Type': getMimeTypeFromPath(resolved.absolutePath),
+			'X-Content-Type-Options': 'nosniff',
+		});
+		res.send(buffer);
+	} catch (error) {
+		if (!sendRootAuthorizationError(res, error)) sendEffectHttpError(res, error);
+	}
+}
 
 /**
  * GET /images - Listar imágenes con filtros y paginación
  */
-router.get('/', effectHandler((req) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
+router.get(
+	'/',
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
 
-		const {
-			search,
-			limit = '50',
-			offset = '0',
-			sortBy = 'createdAt',
-			sortOrder = 'desc',
-			folderId,
-			isFavorite,
-			minWidth,
-			maxWidth,
-			minHeight,
-			maxHeight,
-			minSize,
-			maxSize,
-			aiEngine,
-			aiModel,
-			aiOriginDetected,
-		} = req.query;
+			const {
+				search,
+				limit = '50',
+				offset = '0',
+				sortBy = 'createdAt',
+				sortOrder = 'desc',
+				folderId,
+				isFavorite,
+				minWidth,
+				maxWidth,
+				minHeight,
+				maxHeight,
+				minSize,
+				maxSize,
+				aiEngine,
+				aiModel,
+				aiOriginDetected,
+			} = req.query;
 
-		const options = {
-			search: search as string | undefined,
-			limit: sanitizeLimit(limit as string),
-			offset: sanitizeOffset(offset as string),
-			orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt' | 'size' | 'width' | 'height') || 'createdAt',
-			orderDirection: (sortOrder as 'asc' | 'desc') || 'desc',
-			folderId: folderId as string | undefined,
-			isFavorite: isFavorite === 'true' ? true : isFavorite === 'false' ? false : undefined,
-			minWidth: minWidth ? Number.parseInt(minWidth as string, 10) : undefined,
-			maxWidth: maxWidth ? Number.parseInt(maxWidth as string, 10) : undefined,
-			minHeight: minHeight ? Number.parseInt(minHeight as string, 10) : undefined,
-			maxHeight: maxHeight ? Number.parseInt(maxHeight as string, 10) : undefined,
-			minSize: minSize ? Number.parseInt(minSize as string, 10) : undefined,
-			maxSize: maxSize ? Number.parseInt(maxSize as string, 10) : undefined,
-			aiEngine: aiEngine as string | undefined,
-			aiModel: aiModel as string | undefined,
-			aiOriginDetected: aiOriginDetected === 'true' ? true : aiOriginDetected === 'false' ? false : undefined,
-		};
+			const options = {
+				search: search as string | undefined,
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
+				orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt' | 'size' | 'width' | 'height') || 'createdAt',
+				orderDirection: (sortOrder as 'asc' | 'desc') || 'desc',
+				folderId: folderId as string | undefined,
+				isFavorite: isFavorite === 'true' ? true : isFavorite === 'false' ? false : undefined,
+				minWidth: minWidth ? Number.parseInt(minWidth as string, 10) : undefined,
+				maxWidth: maxWidth ? Number.parseInt(maxWidth as string, 10) : undefined,
+				minHeight: minHeight ? Number.parseInt(minHeight as string, 10) : undefined,
+				maxHeight: maxHeight ? Number.parseInt(maxHeight as string, 10) : undefined,
+				minSize: minSize ? Number.parseInt(minSize as string, 10) : undefined,
+				maxSize: maxSize ? Number.parseInt(maxSize as string, 10) : undefined,
+				aiEngine: aiEngine as string | undefined,
+				aiModel: aiModel as string | undefined,
+				aiOriginDetected: aiOriginDetected === 'true' ? true : aiOriginDetected === 'false' ? false : undefined,
+			};
 
-		const result = yield* imageService.getAll(options);
+			const result = yield* listAuthorizedImages(req, imageService, options, {
+				limit: options.limit,
+				offset: options.offset,
+			});
 
-		const data = result.images.map((image) => ({
-			...image,
-			entityType: 'image' as const,
-			thumbnailUrl: `/api/images/${image.id}/thumbnail`,
-		}));
+			const data = result.items.map((image) => ({
+				...image,
+				entityType: 'image' as const,
+				thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+			}));
 
-		return {
-			data,
-			pagination: {
-				total: result.total,
-				limit: result.limit,
-				offset: result.offset,
-				hasNext: result.hasMore,
-				hasPrev: result.offset > 0,
-			},
-		};
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+			return {
+				data,
+				pagination: {
+					total: result.total,
+					limit: options.limit,
+					offset: options.offset,
+					hasNext: result.hasNext,
+					hasPrev: options.offset > 0,
+				},
+			};
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * GET /images/favorites - Listar solo imágenes favoritas
  */
-router.get('/favorites', effectHandler((req) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
-		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
+router.get(
+	'/favorites',
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
+			const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
 
-		const filters = {
-			search: search as string | undefined,
-			limit: sanitizeLimit(limit as string),
-			offset: sanitizeOffset(offset as string),
-			sortBy: (sortBy as 'name' | 'size' | 'createdAt' | 'updatedAt') || 'createdAt',
-			sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
-		};
+			const filters = {
+				search: search as string | undefined,
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
+				sortBy: (sortBy as 'name' | 'size' | 'createdAt' | 'updatedAt') || 'createdAt',
+				sortOrder: (sortOrder as 'asc' | 'desc') || 'desc',
+			};
 
-		const favoriteResult = yield* listFavoriteEntities({
-			entityType: FavoriteEntityType.IMAGE,
-			search: filters.search,
-			limit: filters.limit,
-			offset: filters.offset,
-			sortBy: filters.sortBy,
-			sortOrder: filters.sortOrder,
-			getEntityById: (entityId: string) => imageService.getByIdWithStats(entityId),
-			mapEntity: (image) => ({
+			const favoriteResult = yield* listAuthorizedImages(
+				req,
+				imageService,
+				{
+					isFavorite: true,
+					orderBy: filters.sortBy,
+					orderDirection: filters.sortOrder,
+					search: filters.search,
+				},
+				{
+					limit: filters.limit,
+					offset: filters.offset,
+				}
+			);
+
+			const data = favoriteResult.items.map((image) => ({
 				...image,
 				entityType: 'image' as const,
 				thumbnailUrl: `/api/images/${image.id}/thumbnail`,
-			}),
-		});
-
-		return {
-			data: favoriteResult.data,
-			pagination: {
-				total: favoriteResult.total,
-				limit: filters.limit,
-				offset: filters.offset,
-				hasNext: filters.offset + filters.limit < favoriteResult.total,
-				hasPrev: filters.offset > 0,
-			},
-		};
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+			}));
+			return {
+				data,
+				pagination: {
+					total: favoriteResult.total,
+					limit: filters.limit,
+					offset: filters.offset,
+					hasNext: favoriteResult.hasNext,
+					hasPrev: filters.offset > 0,
+				},
+			};
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * GET /images/by-hash/:hash - Buscar imagen por hash SHA-256
  */
-router.get('/by-hash/:hash', effectHandler((req) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
-		const image = yield* imageService.getByHash(req.params.hash);
-		return image;
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+router.get(
+	'/by-hash/:hash',
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
+			const image = yield* imageService.getByHash(req.params.hash);
+			if (image) yield* Effect.promise(() => assertAuthorizedMediaEntity(req, image, 'image', ['read', 'index']));
+			return image;
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * GET /images/folder/:folderId - Listar imágenes de una carpeta
  */
-router.get('/folder/:folderId', effectHandler((req) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
+router.get(
+	'/folder/:folderId',
+	authorizeFolderPathById('index'),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
 
-		const { limit, offset } = req.query;
+			const { limit, offset } = req.query;
 
-		const options = {
-			limit: sanitizeLimit(limit as string),
-			offset: sanitizeOffset(offset as string),
-		};
+			const options = {
+				limit: sanitizeLimit(limit as string),
+				offset: sanitizeOffset(offset as string),
+			};
 
-		const images = yield* imageService.getByFolder(req.params.folderId, options);
+			const result = yield* listAuthorizedImages(req, imageService, { folderId: req.params.folderId }, options);
 
-		return { data: images };
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+			return { data: result.items, pagination: { ...options, total: result.total, hasNext: result.hasNext } };
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * GET /images/folder/:folderId/count - Contar imágenes en una carpeta
  */
-router.get('/folder/:folderId/count', effectHandler((req) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
-		const count = yield* imageService.countByFolder(req.params.folderId);
-		return { count };
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+router.get(
+	'/folder/:folderId/count',
+	authorizeFolderPathById('index'),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const count = yield* Effect.promise(() =>
+				countAuthorizedMediaAssetsByFolder(getAuthorizedRootRegistry(req), 'image', req.params.folderId, 'index')
+			);
+			return { count };
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * POST /images - Crear nueva imagen
  */
-router.post('/', effectHandler((req, res) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
+router.post(
+	'/',
+	authorizeMediaPathInput({ expected: 'file', required: true }),
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
 
-		// El servicio validará el input internamente con ImageCreateInput.make()
-		const image = yield* imageService.create(req.body);
-		res.status(201);
-		return image;
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+			// El servicio validará el input internamente con ImageCreateInput.make()
+			const image = yield* imageService.create(req.body);
+			res.status(201);
+			return image;
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * GET /images/:id/stats - Obtener imagen con estadísticas completas
  */
-router.get('/:id/stats', effectHandler((req) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
-		const imageWithStats = yield* imageService.getByIdWithStats(req.params.id);
-		return imageWithStats;
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+router.get(
+	'/:id/stats',
+	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'index'] }),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
+			const imageWithStats = yield* imageService.getByIdWithStats(req.params.id);
+			return imageWithStats;
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * PATCH /images/:id - Actualizar campos de una imagen
  */
-router.patch('/:id', effectHandler((req) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
+router.patch(
+	'/:id',
+	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'write'] }),
+	authorizeMediaPathInput({ expected: 'file', permissions: ['read', 'index', 'write'], required: false }),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
 
-		// El servicio validará el input internamente con ImageUpdateInput.make()
-		const image = yield* imageService.update(req.params.id, req.body);
-		return image;
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+			// El servicio validará el input internamente con ImageUpdateInput.make()
+			const image = yield* imageService.update(req.params.id, req.body);
+			return image;
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * POST /images/:id/favorite - Toggle favorite status
  */
-router.post('/:id/favorite', effectHandler((req, res) =>
-	Effect.gen(function* () {
-		markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.IMAGE);
-		const imageService = yield* ImageService;
-		return yield* imageService.toggleFavorite(req.params.id);
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+router.post(
+	'/:id/favorite',
+	skipBatchFavoriteAlias,
+	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'write'] }),
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.IMAGE);
+			const imageService = yield* ImageService;
+			return yield* imageService.toggleFavorite(req.params.id);
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * POST /images/:id/tags - Agregar tags a una imagen
  */
-router.post('/:id/tags', effectHandler((req, res) =>
-	Effect.gen(function* () {
-		const tagService = yield* TagService;
-		const tagIds = Array.isArray(req.body?.tagIds) ? req.body.tagIds : [];
-		const result = yield* tagService.addToImage(req.params.id, tagIds);
-		res.status(201);
-		return { success: true, added: result.added };
-	}).pipe(Effect.provide(TagServiceLive))
-));
+router.post(
+	'/:id/tags',
+	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'write'] }),
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const tagService = yield* TagService;
+			const tagIds = Array.isArray(req.body?.tagIds) ? req.body.tagIds : [];
+			const result = yield* tagService.addToImage(req.params.id, tagIds);
+			res.status(201);
+			return { success: true, added: result.added };
+		}).pipe(Effect.provide(TagServiceLive))
+	)
+);
 
 /**
  * POST /images/batch/favorite - Actualizar favorito en lote
  */
-router.post('/batch/favorite', effectHandler((req) =>
-	Effect.gen(function* () {
-		const { ids, isFavorite } = req.body;
+router.post(
+	'/batch/favorite',
+	authorizeMediaAssetBodyIds({ assetType: 'image', permissions: ['read', 'write'] }),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const { ids, isFavorite } = req.body;
 
-		if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
-			yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
-		}
+			if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
+				yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
+			}
 
-		validateBatchSize(ids);
+			validateBatchSize(ids);
 
-		const count = yield* Effect.tryPromise({
-			try: () => favoriteService.setMany(FavoriteEntityType.IMAGE, ids, isFavorite),
-			catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
-		});
-		return { success: true, count };
-	})
-));
-
-/**
- * DELETE /images/:id - Eliminar imagen
- */
-router.delete('/:id', effectHandler((req, res) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
-
-		const force = req.query.force === 'true';
-
-		yield* imageService.deleteById(req.params.id, { force });
-		res.status(204);
-		return undefined;
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+			const count = yield* Effect.tryPromise({
+				try: () => favoriteService.setMany(FavoriteEntityType.IMAGE, ids, isFavorite),
+				catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
+			});
+			return { success: true, count };
+		})
+	)
+);
 
 /**
  * DELETE /images/batch - Eliminar múltiples imágenes
  */
-router.delete('/batch', effectHandler((req, res) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
+router.delete(
+	'/batch',
+	authorizeMediaAssetBodyIds({ assetType: 'image', permissions: ['delete'] }),
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
 
-		const { ids } = req.body;
-		const force = req.query.force === 'true';
+			const { ids } = req.body;
+			const force = req.query.force === 'true';
 
-		if (!Array.isArray(ids)) {
-			yield* Effect.fail(new Error('Invalid request: ids must be array'));
-		}
+			validateBatchSize(ids);
 
-		validateBatchSize(ids);
+			yield* imageService.deleteManyByIds(ids, { force });
+			res.status(204);
+			return undefined;
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
-		const count = yield* imageService.deleteManyByIds(ids, { force });
-		res.status(204);
-		return undefined;
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+/**
+ * DELETE /images/:id - Eliminar imagen
+ */
+router.delete(
+	'/:id',
+	authorizeMediaAssetParam({ assetType: 'image', permissions: ['delete'] }),
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
+
+			const force = req.query.force === 'true';
+
+			yield* imageService.deleteById(req.params.id, { force });
+			res.status(204);
+			return undefined;
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * POST /images/:id/thumbnail/generate - Generar thumbnail manualmente
  */
-router.post('/:id/thumbnail/generate', effectHandler((req) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
-		yield* imageService.generateThumbnail(req.params.id);
-		return { success: true, message: 'Thumbnail generated' };
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+router.post(
+	'/:id/thumbnail/generate',
+	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'index'] }),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
+			yield* imageService.generateThumbnail(req.params.id);
+			return { success: true, message: 'Thumbnail generated' };
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 /**
  * GET /images/:id/thumbnail - Obtener thumbnail (genera si no existe)
  */
-router.get('/:id/thumbnail', async (req, res) => {
-	const effect = Effect.gen(function* () {
-		const imageService = yield* ImageService;
-		const buffer = yield* imageService.getThumbnail(req.params.id);
-		return buffer;
-	}).pipe(Effect.provide(ImageServiceLive));
+router.get(
+	'/:id/thumbnail',
+	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'index'] }),
+	async (req, res) => {
+		const effect = Effect.gen(function* () {
+			const imageService = yield* ImageService;
+			const buffer = yield* imageService.getThumbnail(req.params.id);
+			return buffer;
+		}).pipe(Effect.provide(ImageServiceLive));
 
-	try {
-		const buffer = await Effect.runPromise(effect);
-		res.set('Content-Type', 'image/webp');
-		res.send(buffer);
-	} catch (error) {
-		sendEffectHttpError(res, error);
+		try {
+			const buffer = await Effect.runPromise(effect);
+			res.set('Content-Type', 'image/webp');
+			res.send(buffer);
+		} catch (error) {
+			sendEffectHttpError(res, error);
+		}
 	}
-});
+);
 
 /**
  * GET /images/:id/content - Obtener imagen original (Alias de /original para compatibilidad)
  */
-router.get('/:id/content', effectHandler(
-	(req, res) =>
-		Effect.gen(function* () {
-			const imageService = yield* ImageService;
-			const image = yield* imageService.getById(req.params.id);
-			const buffer = yield* imageService.getOriginalImage(req.params.id);
-			return { buffer, image };
-		}).pipe(Effect.provide(ImageServiceLive)),
-	{
-		onSuccess: ({ buffer, image }, res) => {
-			const mimeType = getMimeTypeFromPath(image?.path ?? 'default.jpg');
-			res.set({
-				'Content-Type': mimeType,
-				'Content-Length': buffer.length.toString(),
-				'Cache-Control': 'public, max-age=31536000',
-			});
-			res.send(buffer);
-		},
-	}
-));
+router.get('/:id/content', sendAuthorizedOriginal);
 
 /**
  * GET /images/:id/original - Obtener imagen original
  */
-router.get('/:id/original', effectHandler(
-	(req, res) =>
-		Effect.gen(function* () {
-			const imageService = yield* ImageService;
-			const image = yield* imageService.getById(req.params.id);
-			const buffer = yield* imageService.getOriginalImage(req.params.id);
-			return { buffer, path: image?.path };
-		}).pipe(Effect.provide(ImageServiceLive)),
-	{
-		onSuccess: (result, res) => {
-			const mimeType = getMimeTypeFromPath(result.path ?? 'default.jpg');
-			res.set({
-				'Content-Type': mimeType,
-				'Content-Length': result.buffer.length.toString(),
-				'Cache-Control': 'public, max-age=31536000',
-				'X-Content-Type-Options': 'nosniff',
-			});
-			res.send(result.buffer);
-		},
-	}
-));
+router.get('/:id/original', sendAuthorizedOriginal);
 
 /**
  * GET /images/:id - Obtener imagen por ID (sin stats)
  * IMPORTANTE: Esta ruta debe ir AL FINAL para no interceptar rutas específicas
  */
-router.get('/:id', effectHandler((req) =>
-	Effect.gen(function* () {
-		const imageService = yield* ImageService;
-		const image = yield* imageService.getById(req.params.id);
-		return image;
-	}).pipe(Effect.provide(ImageServiceLive))
-));
+router.get(
+	'/:id',
+	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'index'] }),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
+			const image = yield* imageService.getById(req.params.id);
+			return image;
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
 
 export default router;

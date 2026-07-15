@@ -6,7 +6,6 @@
 
 import { useCallback, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface OpenInExplorerOptions {
 	/** Ruta del archivo o carpeta a abrir */
@@ -40,60 +39,20 @@ export function useOpenInExplorer(): UseOpenInExplorerResult {
 
 	// Verificar si estamos en un entorno donde esta función puede funcionar
 	// (Electron, Tauri, o backend con capacidades de sistema)
-	const isAvailable = true; // Siempre intentar, el backend decidirá
+	const isAvailable = false;
 
 	const openInExplorer = useCallback(
-		async (options: OpenInExplorerOptions): Promise<boolean> => {
-			const { path, select = false } = options;
-
+		async (_options: OpenInExplorerOptions): Promise<boolean> => {
 			setIsLoading(true);
-			setError(null);
-
-			try {
-				// Llamar al backend para abrir en explorador
-				const response = await fetch('/api/files/open-in-explorer', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ path, select }),
-				});
-
-				if (!response.ok) {
-					const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
-					throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
-				}
-
-				toast({
-					title: '📂 Abriendo explorador',
-					description: `Abriendo: ${path.split('/').pop() || path}`,
-				});
-
-				setIsLoading(false);
-				return true;
-			} catch (err) {
-				const error = err instanceof Error ? err : new Error('Error al abrir explorador');
-				setError(error);
-
-				clientLogger.error('Error opening in explorer:', error);
-
-				// Fallback: copiar la ruta al clipboard
-				try {
-					await navigator.clipboard.writeText(path);
-					toast({
-						variant: 'default',
-						title: '📋 Ruta copiada',
-						description: 'La ruta ha sido copiada al portapapeles (función de sistema no disponible)',
-					});
-				} catch {
-					toast({
-						variant: 'destructive',
-						title: '❌ Error',
-						description: 'No se pudo abrir el explorador. La función puede no estar disponible en este entorno.',
-					});
-				}
-
-				setIsLoading(false);
-				return false;
-			}
+			const unavailableError = new Error('Abrir en el explorador requiere la integración segura de Tauri.');
+			setError(unavailableError);
+			toast({
+				variant: 'destructive',
+				title: 'Función no disponible',
+				description: unavailableError.message,
+			});
+			setIsLoading(false);
+			return false;
 		},
 		[toast]
 	);

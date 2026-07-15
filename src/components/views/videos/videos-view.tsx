@@ -45,7 +45,6 @@ export default function VideosView(_props: ViewProps) {
 				id: video.id,
 				name: video.name,
 				type: 'video' as const,
-				path: (video as any).path,
 				size: (video as any).size || 0,
 				width: (video as any).width,
 				height: (video as any).height,

@@ -50,7 +50,6 @@ export function MixedContentView(_props: MixedContentViewProps = {}) {
 				id: entity.id,
 				name: entity.name,
 				type: (entity as any).type || (entity as any).entityType || 'file',
-				path: (entity as any).path || '',
 				size: (entity as any).size || 0,
 				url: (entity as any).url,
 				thumbnail: (entity as any).thumbnail,

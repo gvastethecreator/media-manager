@@ -6,7 +6,7 @@
  */
 
 import * as crypto from 'node:crypto';
-import { desc, eq, inArray } from 'drizzle-orm';
+import { asc, desc, eq, inArray } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { documents, file3Ds, jsonFiles, uploadedImages } from '@/lib/drizzle/schema';
@@ -102,7 +102,10 @@ const makeFile3DService = (): File3DServiceInterface => {
 								: query.where(inArray(file3Ds.id, favoriteEntityIds));
 					}
 
-					return query.orderBy(desc(file3Ds.createdAt)).limit(options.limit || 50).offset(options.offset || 0);
+					return query
+						.orderBy(desc(file3Ds.createdAt), asc(file3Ds.id))
+						.limit(options.limit || 50)
+						.offset(options.offset || 0);
 				},
 				catch: (error) => fromUnknownFile3DError('getAll', error),
 			});
@@ -130,13 +133,12 @@ const makeFile3DService = (): File3DServiceInterface => {
 			const id = crypto.randomUUID();
 			const { isFavorite: requestedIsFavoriteValue, ...restInput } = input;
 			const requestedIsFavorite = requestedIsFavoriteValue === true;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite
-					? yield* Effect.tryPromise<boolean, File3DError>({
+			const useCanonicalFavoriteBridge = requestedIsFavorite
+				? yield* Effect.tryPromise<boolean, File3DError>({
 						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D)) !== null,
 						catch: (error) => fromUnknownFile3DError('create.favoriteScope', error),
 					})
-					: false;
+				: false;
 
 			const result = yield* Effect.tryPromise<File3DRow[], File3DError>({
 				try: () =>
@@ -175,14 +177,13 @@ const makeFile3DService = (): File3DServiceInterface => {
 			yield* getById(id);
 
 			const { isFavorite: requestedIsFavoriteValue, ...restInput } = input;
-			const requestedIsFavorite =
-				typeof requestedIsFavoriteValue === 'boolean' ? requestedIsFavoriteValue : undefined;
+			const requestedIsFavorite = typeof requestedIsFavoriteValue === 'boolean' ? requestedIsFavoriteValue : undefined;
 			const useCanonicalFavoriteBridge =
 				requestedIsFavorite !== undefined
 					? yield* Effect.tryPromise<boolean, File3DError>({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D)) !== null,
-						catch: (error) => fromUnknownFile3DError('update.favoriteScope', error),
-					})
+							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.FILE_3D)) !== null,
+							catch: (error) => fromUnknownFile3DError('update.favoriteScope', error),
+						})
 					: false;
 
 			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
@@ -228,10 +229,7 @@ const makeFile3DService = (): File3DServiceInterface => {
 			if (favoriteEntityIds === null) {
 				yield* Effect.tryPromise({
 					try: () =>
-						db
-							.update(file3Ds)
-							.set({ isFavorite: newFavoriteStatus, updatedAt: new Date() })
-							.where(eq(file3Ds.id, id)),
+						db.update(file3Ds).set({ isFavorite: newFavoriteStatus, updatedAt: new Date() }).where(eq(file3Ds.id, id)),
 					catch: (error) => fromUnknownFile3DError('toggleFavorite', error),
 				});
 			} else {
@@ -294,7 +292,10 @@ const makeDocumentService = (): DocumentServiceInterface => {
 								: query.where(inArray(documents.id, favoriteEntityIds));
 					}
 
-					return query.orderBy(desc(documents.createdAt)).limit(options.limit || 50).offset(options.offset || 0);
+					return query
+						.orderBy(desc(documents.createdAt), asc(documents.id))
+						.limit(options.limit || 50)
+						.offset(options.offset || 0);
 				},
 				catch: (error) => fromUnknownDocumentError('getAll', error),
 			});
@@ -322,13 +323,12 @@ const makeDocumentService = (): DocumentServiceInterface => {
 			const id = crypto.randomUUID();
 			const { isFavorite: requestedIsFavoriteValue, ...restInput } = input;
 			const requestedIsFavorite = requestedIsFavoriteValue === true;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite
-					? yield* Effect.tryPromise<boolean, DocumentError>({
+			const useCanonicalFavoriteBridge = requestedIsFavorite
+				? yield* Effect.tryPromise<boolean, DocumentError>({
 						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT)) !== null,
 						catch: (error) => fromUnknownDocumentError('create.favoriteScope', error),
 					})
-					: false;
+				: false;
 
 			const result = yield* Effect.tryPromise<DocumentRow[], DocumentError>({
 				try: () =>
@@ -367,14 +367,13 @@ const makeDocumentService = (): DocumentServiceInterface => {
 			yield* getById(id);
 
 			const { isFavorite: requestedIsFavoriteValue, ...restInput } = input;
-			const requestedIsFavorite =
-				typeof requestedIsFavoriteValue === 'boolean' ? requestedIsFavoriteValue : undefined;
+			const requestedIsFavorite = typeof requestedIsFavoriteValue === 'boolean' ? requestedIsFavoriteValue : undefined;
 			const useCanonicalFavoriteBridge =
 				requestedIsFavorite !== undefined
 					? yield* Effect.tryPromise<boolean, DocumentError>({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT)) !== null,
-						catch: (error) => fromUnknownDocumentError('update.favoriteScope', error),
-					})
+							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT)) !== null,
+							catch: (error) => fromUnknownDocumentError('update.favoriteScope', error),
+						})
 					: false;
 
 			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
@@ -488,7 +487,10 @@ const makeJsonFileService = (): JsonFileServiceInterface => {
 								: query.where(inArray(jsonFiles.id, favoriteEntityIds));
 					}
 
-					return query.orderBy(desc(jsonFiles.createdAt)).limit(options.limit || 50).offset(options.offset || 0);
+					return query
+						.orderBy(desc(jsonFiles.createdAt), asc(jsonFiles.id))
+						.limit(options.limit || 50)
+						.offset(options.offset || 0);
 				},
 				catch: (error) => fromUnknownJsonFileError('getAll', error),
 			});
@@ -516,13 +518,12 @@ const makeJsonFileService = (): JsonFileServiceInterface => {
 			const id = crypto.randomUUID();
 			const { isFavorite: requestedIsFavoriteValue, ...restInput } = input;
 			const requestedIsFavorite = requestedIsFavoriteValue === true;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite
-					? yield* Effect.tryPromise<boolean, JsonFileError>({
+			const useCanonicalFavoriteBridge = requestedIsFavorite
+				? yield* Effect.tryPromise<boolean, JsonFileError>({
 						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE)) !== null,
 						catch: (error) => fromUnknownJsonFileError('create.favoriteScope', error),
 					})
-					: false;
+				: false;
 
 			const result = yield* Effect.tryPromise<JsonFileRow[], JsonFileError>({
 				try: () =>
@@ -561,14 +562,13 @@ const makeJsonFileService = (): JsonFileServiceInterface => {
 			yield* getById(id);
 
 			const { isFavorite: requestedIsFavoriteValue, ...restInput } = input;
-			const requestedIsFavorite =
-				typeof requestedIsFavoriteValue === 'boolean' ? requestedIsFavoriteValue : undefined;
+			const requestedIsFavorite = typeof requestedIsFavoriteValue === 'boolean' ? requestedIsFavoriteValue : undefined;
 			const useCanonicalFavoriteBridge =
 				requestedIsFavorite !== undefined
 					? yield* Effect.tryPromise<boolean, JsonFileError>({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE)) !== null,
-						catch: (error) => fromUnknownJsonFileError('update.favoriteScope', error),
-					})
+							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE)) !== null,
+							catch: (error) => fromUnknownJsonFileError('update.favoriteScope', error),
+						})
 					: false;
 
 			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {

@@ -10,6 +10,11 @@ import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { CollectionCreateInput, CollectionUpdateInput } from '@/lib/effect/schemas/entities';
+import {
+	authorizeMediaAssetBodyIds,
+	authorizeMediaAssetParam,
+	filterAuthorizedMediaEntities,
+} from '@/server/security/authorized-root-request';
 import { CollectionService, CollectionServiceLive } from '@/services/collection/collection.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
@@ -142,9 +147,27 @@ router.get(
 	effectHandler((req) =>
 		Effect.gen(function* () {
 			const collectionService = yield* CollectionService;
-			const limit = Number(req.query.limit) || 50;
-			const offset = Number(req.query.offset) || 0;
-			return yield* collectionService.getImages(req.params.id, { limit, offset });
+			const limit = sanitizeLimit(String(req.query.limit ?? '50'));
+			const offset = sanitizeOffset(String(req.query.offset ?? '0'));
+			const authorizedImages: any[] = [];
+			const rawChunkSize = 100;
+			let rawOffset = 0;
+
+			while (authorizedImages.length < offset + limit) {
+				const rawImages = yield* collectionService.getImages(req.params.id, {
+					limit: rawChunkSize,
+					offset: rawOffset,
+				});
+				const authorizedChunk = yield* Effect.tryPromise({
+					try: () => filterAuthorizedMediaEntities(req, rawImages, 'image', ['read', 'index']),
+					catch: (error) => error,
+				});
+				authorizedImages.push(...authorizedChunk);
+				rawOffset += rawImages.length;
+				if (rawImages.length < rawChunkSize) break;
+			}
+
+			return authorizedImages.slice(offset, offset + limit);
 		}).pipe(Effect.provide(CollectionServiceLive))
 	)
 );
@@ -154,6 +177,7 @@ router.get(
  */
 router.post(
 	'/:id/images',
+	authorizeMediaAssetBodyIds({ assetType: 'image', bodyField: 'imageIds', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const collectionService = yield* CollectionService;
@@ -173,6 +197,7 @@ router.post(
  */
 router.delete(
 	'/:id/images/:imageId',
+	authorizeMediaAssetParam({ assetType: 'image', idParam: 'imageId', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const collectionService = yield* CollectionService;
