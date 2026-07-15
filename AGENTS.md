@@ -99,8 +99,9 @@ bun run db:check
 # Reset database (destructive!)
 bun run db:reset
 
-# Migrate entity aggregates
-bun run db:migrate:aggregates
+# Apply the canonical versioned migrations to an explicit database
+bun run db:migrate -- --database C:/path/to/media-manager.sqlite
+bun run db:schema:export -- --database C:/path/to/media-manager.sqlite --output C:/path/to/schema.sql
 
 # Cleanup operations
 bun run db:cleanup-phantoms
@@ -596,7 +597,7 @@ describe('useVideo', () => {
 
 - Environment: `jsdom`
 - Globals enabled (no need to import describe/it/expect)
-- File parallelism: `false` (to avoid SQLITE_BUSY)
+- File parallelism: `true`; cada archivo clona un template migrado dentro de su worker SQLite
 - Pool: `forks`
 - Isolate: `true`
 
@@ -1519,7 +1520,7 @@ src/components/views/<entity>/
 
 ### ⚠️ Known Issues
 
-1. **SQLite_BUSY errors** - File parallelism disabled in Vitest (`fileParallelism: false`)
+1. **SQLite_BUSY errors** - Los tests usan una base descartable por archivo/worker; no compartir `DATABASE_URL`
 2. **Header size limits** - Server configured to accept large headers (32KB max)
 3. **Bun compatibility** - Some Node.js modules don't work with Bun, use Bun-compatible alternatives
 

@@ -5,6 +5,8 @@ import { defineConfig } from 'vite-plus';
 import svgr from 'vite-plugin-svgr';
 import { resolveLocalServiceHost } from './src/config/local-runtime-security.ts';
 
+const testMaxWorkers = Math.max(1, Number.parseInt(process.env.VITEST_MAX_WORKERS ?? '4', 10) || 4);
+
 const emptyModule = resolve(import.meta.dirname, 'src/config/empty.ts');
 const isViteBuildCommand = process.argv.some((argument) => argument === 'build');
 const nodeEnvironment = process.env.NODE_ENV ?? (isViteBuildCommand ? 'production' : 'development');
@@ -235,8 +237,8 @@ export default defineConfig({
 		},
 		testTimeout: 30_000,
 		hookTimeout: 30_000,
-		fileParallelism: false,
-		maxWorkers: 1,
+		fileParallelism: true,
+		maxWorkers: testMaxWorkers,
 		pool: 'forks',
 		isolate: true,
 		reporters: ['default'],

@@ -59,6 +59,7 @@ export const documents = sqliteTable(
 		pathIdx: uniqueIndex('Document_path_key').on(table.path),
 		folderId_idx: index('Document_folderId_idx').on(table.folderId),
 		hash_idx: index('Document_hash_idx').on(table.hash),
+		folderHashIdx: index('Document_folderId_hash_idx').on(table.folderId, table.hash),
 		createdAt_idx: index('Document_createdAt_idx').on(table.createdAt),
 		updatedAt_idx: index('Document_updatedAt_idx').on(table.updatedAt),
 	})

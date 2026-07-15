@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 import { assertIsolatedTestDatabase } from './safety/test-database-guard';
+import { prepareWorkerTestDatabase } from './safety/prepare-worker-database';
 
 // Asegurar flags de entorno para ejecución de tests unitarios
 // - Fuerza detección de "test" en módulos compartidos (p.ej. Drizzle)
@@ -10,6 +11,7 @@ import { assertIsolatedTestDatabase } from './safety/test-database-guard';
 process.env.NODE_ENV ??= 'test';
 process.env.DISABLE_FTS5 ??= '1';
 
+await prepareWorkerTestDatabase();
 assertIsolatedTestDatabase();
 
 const { getDbClient } = await import('@/lib/drizzle');
