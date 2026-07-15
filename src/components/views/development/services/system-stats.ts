@@ -193,7 +193,7 @@ export async function getSystemMetrics(): Promise<{
 	queueSize: number;
 }> {
 	try {
-		const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/system/stats`);
+		const response = await fetch('/api/system/stats');
 		if (!response.ok) throw new Error('Failed to fetch system stats');
 		const data = await response.json();
 

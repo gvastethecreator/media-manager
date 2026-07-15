@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"identifier": "com.imagemanager.app",
 	"build": {
-		"frontendDist": "../dist",
+		"frontendDist": "../dist/client",
 		"devUrl": "http://localhost:5173",
 		"beforeDevCommand": "bun run dev:vite",
 		"beforeBuildCommand": "bun run build:vite"
