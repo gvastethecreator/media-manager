@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import type { ProxyOptions } from 'vite';
 import { defineConfig } from 'vite-plus';
 import svgr from 'vite-plugin-svgr';
 import { resolveLocalServiceHost } from './src/config/local-runtime-security.ts';
@@ -13,6 +14,25 @@ const viteHost = resolveLocalServiceHost({
 	host: process.env.VITE_HOST,
 	serviceName: 'Vite dev server',
 });
+const localSessionToken = process.env.MEDIA_MANAGER_SESSION_TOKEN;
+const localApiTarget = process.env.MEDIA_MANAGER_API_TARGET || 'http://127.0.0.1:4000';
+const configureLocalSessionProxy: ProxyOptions['configure'] = (proxy) => {
+	if (!localSessionToken) {
+		throw new Error('Vite local API proxy requires a supervisor-provided MEDIA_MANAGER_SESSION_TOKEN.');
+	}
+	proxy.on('proxyReq', (proxyRequest) => {
+		proxyRequest.setHeader('Authorization', `Bearer ${localSessionToken}`);
+		proxyRequest.setHeader('X-Local-App-Request', '1');
+	});
+};
+const localSessionProxy: ProxyOptions = {
+	target: localApiTarget,
+	changeOrigin: true,
+	secure: false,
+	timeout: 30_000,
+	proxyTimeout: 30_000,
+	configure: configureLocalSessionProxy,
+};
 function getManualChunkName(id: string) {
 	if (!id.includes('node_modules')) {
 		return undefined;
@@ -93,14 +113,8 @@ export default defineConfig({
 		},
 		// Optimizaci?n de proxy para mejor rendimiento
 		proxy: {
-			'/api': {
-				target: 'http://127.0.0.1:4000',
-				changeOrigin: true,
-				secure: false,
-				// Optimizaciones de proxy
-				timeout: 30_000,
-				proxyTimeout: 30_000,
-			},
+			'/api': localSessionProxy,
+			'/uploads': localSessionProxy,
 		},
 		// Optimizaci?n de watch para Bun
 		watch: {
@@ -113,6 +127,7 @@ export default defineConfig({
 		port: 4173,
 	},
 	build: {
+		outDir: 'dist/client',
 		// Optimizaciones de build para Bun
 		target: 'esnext',
 		sourcemap: true,

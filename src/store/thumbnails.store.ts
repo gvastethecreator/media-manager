@@ -48,8 +48,7 @@ const initialProcessStatus: ProcessStatus = {
 	progress: 0,
 };
 
-const _BASE_URL = import.meta.env.VITE_API_URL || '';
-const THUMBNAILS_BASE_URL = _BASE_URL ? `${_BASE_URL}/api/thumbnails` : '/api/thumbnails';
+const THUMBNAILS_BASE_URL = '/api/thumbnails';
 
 export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 	isLoading: true,

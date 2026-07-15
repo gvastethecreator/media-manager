@@ -15,8 +15,8 @@ export const getAppConfig = () => {
 	return {
 		isDesktop,
 		isBrowser: !isDesktop,
-		// URL base para APIs - en desktop usamos el servidor embebido
-		apiBaseUrl: isDesktop ? 'http://localhost:4000/api' : '/api',
+		// El broker local mantiene la sesión fuera del bundle de React.
+		apiBaseUrl: '/api',
 		// Configuración de CORS
 		corsEnabled: !isDesktop,
 		// Configuración de rutas

@@ -6,15 +6,27 @@
  */
 
 const { spawn } = require('child_process');
+const { randomBytes } = require('node:crypto');
 
 let frontendReadyLogged = false;
 
 // Configurar variables de entorno para manejar headers grandes
 // Aumentamos a 128KB para asegurar que cookies grandes no bloqueen la carga
 process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --max-http-header-size=131072`;
+if (process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR !== '1' || !process.env.MEDIA_MANAGER_SESSION_TOKEN) {
+	const apiHost = process.env.API_HOST?.trim() || '127.0.0.1';
+	const apiPort = process.env.API_PORT?.trim() || process.env.PORT?.trim() || '4000';
+	const vitePort = process.env.VITE_PORT?.trim() || '5173';
+	process.env.MEDIA_MANAGER_API_TARGET = `http://${apiHost}:${apiPort}`;
+	process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR = '1';
+	process.env.MEDIA_MANAGER_SESSION_TOKEN = randomBytes(32).toString('base64url');
+	process.env.MEDIA_MANAGER_SESSION_ALLOWED_HOSTS = `${apiHost}:${apiPort}`;
+	process.env.MEDIA_MANAGER_SESSION_ALLOWED_ORIGINS = `http://127.0.0.1:${vitePort},http://localhost:${vitePort},http://${apiHost}:${apiPort}`;
+}
 
 console.log('🚀 Iniciando Vite+ con soporte para headers grandes (128KB)...');
 console.log('🔧 NODE_OPTIONS:', process.env.NODE_OPTIONS);
+console.log('🔒 API session: isolated standalone session (use dev:full for a connected backend)');
 
 async function waitForFrontend(url, { retries = 80, intervalMs = 250 } = {}) {
 	for (let i = 0; i < retries; i++) {

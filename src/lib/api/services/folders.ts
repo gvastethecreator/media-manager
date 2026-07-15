@@ -376,15 +376,12 @@ export const getParentFolderId = async (folderId: string): Promise<string | null
 export const validateFolderExists = async (folderPath: string): Promise<boolean> => {
 	try {
 		// Hacer la petición directamente para evitar logs de error innecesarios
-		const response = await fetch(
-			`${process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : window.location.origin}/api/folders/by-path?path=${encodeURIComponent(folderPath)}`,
-			{
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			}
-		);
+		const response = await fetch(`/api/folders/by-path?path=${encodeURIComponent(folderPath)}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
 
 		// Si la respuesta es 200, la carpeta existe
 		if (response.ok) {
