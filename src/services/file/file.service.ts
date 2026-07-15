@@ -7,7 +7,7 @@
 // Tipos corregidos para FileBase
 
 import { Effect, Schedule } from 'effect';
-import type { Dirent } from 'fs';
+import { constants, type Dirent } from 'fs';
 import fs, { stat } from 'fs/promises';
 import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -85,7 +85,7 @@ function validateAndSanitizePath(filePath: string): string {
  */
 export async function getFileInfo(filePath: string): Promise<FileInfo> {
 	try {
-		logger.info('📊 Obteniendo información del archivo:', filePath);
+		logger.info('📊 Obteniendo información de archivo autorizado');
 
 		// Validar y sanitizar la ruta
 		const normalizedPath = validateAndSanitizePath(filePath);
@@ -105,7 +105,9 @@ export async function getFileInfo(filePath: string): Promise<FileInfo> {
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
 		}
-		logger.error('❌ Error al obtener información del archivo:', error);
+		logger.error('❌ Error al obtener información del archivo', {
+			code: (error as NodeJS.ErrnoException).code ?? 'FILE_INFO_FAILED',
+		});
 		throw createFileError('No se pudo obtener información del archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -130,7 +132,7 @@ async function readFileAsBuffer(filePath: string): Promise<{
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
 		}
-		logger.error('❌ Error al leer archivo:', error);
+		logger.error('❌ Error al leer archivo', { code: (error as NodeJS.ErrnoException).code ?? 'FILE_READ_FAILED' });
 		throw createFileError('No se pudo leer el archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -142,7 +144,7 @@ async function readFileAsBuffer(filePath: string): Promise<{
  */
 export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadResult> {
 	try {
-		logger.info('📁 Obteniendo contenido del directorio:', dirPath);
+		logger.info('📁 Obteniendo contenido de directorio autorizado');
 
 		// Validar y sanitizar la ruta
 		const normalizedPath = validateAndSanitizePath(dirPath);
@@ -203,17 +205,16 @@ export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadRe
 		// Usar transformer para serializar el resultado
 		const result = serializeDirectoryContents(normalizedPath, processedItems);
 
-		logger.info('✅ Contenido del directorio obtenido:', {
-			path: normalizedPath,
-			itemCount: processedItems.length,
-		});
+		logger.info('✅ Contenido del directorio obtenido', { itemCount: processedItems.length });
 
 		return result;
 	} catch (error) {
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
 		}
-		logger.error('❌ Error al obtener contenido del directorio:', error);
+		logger.error('❌ Error al obtener contenido del directorio', {
+			code: (error as NodeJS.ErrnoException).code ?? 'DIRECTORY_READ_FAILED',
+		});
 		throw createFileError('No se pudo obtener el contenido del directorio', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -225,7 +226,7 @@ export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadRe
  * - Timeout por item para evitar bloqueos
  */
 export async function getDirectoryInfoConcurrent(dirPath: string): Promise<DirectoryReadResult> {
-	logger.info('📁 (Effect) Obteniendo contenido del directorio con concurrencia:', dirPath);
+	logger.info('📁 (Effect) Obteniendo contenido de directorio autorizado con concurrencia');
 
 	// Validación básica y listado
 	const normalizedPath = validateAndSanitizePath(dirPath);
@@ -242,7 +243,7 @@ export async function getDirectoryInfoConcurrent(dirPath: string): Promise<Direc
 
 		const eff = Effect.tryPromise({
 			try: () => stat(itemPath),
-			catch: (err) => createFileError(`stat falló para ${itemPath}`, FileErrorCode.OPERATION_FAILED, err),
+			catch: (err) => createFileError('stat falló para un item autorizado', FileErrorCode.OPERATION_FAILED, err),
 		}).pipe(
 			Effect.map((itemStats) => {
 				const fileBase: FileBase = {
@@ -273,8 +274,8 @@ export async function getDirectoryInfoConcurrent(dirPath: string): Promise<Direc
 			// reintentos con backoff corto (3 intentos)
 			Effect.retry(Schedule.addDelay(Schedule.recurs(2), () => '150 millis')),
 			// Catch errors to avoid failing the whole batch
-			Effect.catchAll((error) => {
-				logger.warn(`⚠️ Omitiendo archivo ${item.name.substring(0, 50)}... por error:`, error);
+			Effect.catchAll(() => {
+				logger.warn('⚠️ Omitiendo un item por error de stat');
 				return Effect.succeed(null);
 			})
 		);
@@ -289,13 +290,12 @@ export async function getDirectoryInfoConcurrent(dirPath: string): Promise<Direc
 		const results = await Effect.runPromise(effectAll);
 		const processedItems = results.filter((item): item is FileBase => item !== null);
 		const result = serializeDirectoryContents(normalizedPath, processedItems);
-		logger.info('✅ (Effect) Contenido del directorio obtenido:', {
-			path: normalizedPath,
-			itemCount: processedItems.length,
-		});
+		logger.info('✅ (Effect) Contenido del directorio obtenido', { itemCount: processedItems.length });
 		return result;
 	} catch (error) {
-		logger.error('❌ (Effect) Error al obtener contenido del directorio:', error);
+		logger.error('❌ (Effect) Error al obtener contenido del directorio', {
+			code: (error as NodeJS.ErrnoException).code ?? 'DIRECTORY_READ_FAILED',
+		});
 		if (error instanceof Error && (error as any).name === 'FileError') {
 			throw error;
 		}
@@ -311,7 +311,7 @@ export async function getDirectoryInfoConcurrent(dirPath: string): Promise<Direc
  */
 export async function createDirectory(dirPath: string, options?: FileOperationOptions): Promise<FileOperationResult> {
 	try {
-		logger.info('📁 Creando directorio:', dirPath);
+		logger.info('📁 Creando directorio autorizado');
 
 		// Validar y sanitizar la ruta
 		const normalizedPath = validateAndSanitizePath(dirPath);
@@ -328,7 +328,9 @@ export async function createDirectory(dirPath: string, options?: FileOperationOp
 		logger.info('✅ Directorio creado');
 		return serializeFileOperationResult(true, normalizedPath, 'create');
 	} catch (error) {
-		logger.error('❌ Error al crear directorio:', error);
+		logger.error('❌ Error al crear directorio', {
+			code: (error as NodeJS.ErrnoException).code ?? 'DIRECTORY_CREATE_FAILED',
+		});
 		throw createFileError('No se pudo crear el directorio', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -340,7 +342,7 @@ export async function createDirectory(dirPath: string, options?: FileOperationOp
  */
 export async function deleteFile(filePath: string): Promise<FileOperationResult> {
 	try {
-		logger.info('🗑️ Eliminando archivo:', filePath);
+		logger.info('🗑️ Eliminando archivo autorizado');
 
 		// Validar y sanitizar la ruta
 		const normalizedPath = validateAndSanitizePath(filePath);
@@ -366,7 +368,9 @@ export async function deleteFile(filePath: string): Promise<FileOperationResult>
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
 		}
-		logger.error('❌ Error al eliminar archivo:', error);
+		logger.error('❌ Error al eliminar archivo', {
+			code: (error as NodeJS.ErrnoException).code ?? 'FILE_DELETE_FAILED',
+		});
 		throw createFileError('No se pudo eliminar el archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -379,7 +383,7 @@ export async function deleteFile(filePath: string): Promise<FileOperationResult>
  */
 export async function getFileAsDataUrl(filePath: string): Promise<DataUrlResponse> {
 	try {
-		logger.info('📄 Obteniendo archivo como URL de datos:', filePath);
+		logger.info('📄 Obteniendo archivo autorizado como URL de datos');
 
 		// Leer el archivo como buffer
 		const { buffer, fileInfo } = await readFileAsBuffer(filePath);
@@ -401,7 +405,9 @@ export async function getFileAsDataUrl(filePath: string): Promise<DataUrlRespons
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
 		}
-		logger.error('❌ Error al obtener archivo como URL de datos:', error);
+		logger.error('❌ Error al obtener archivo como URL de datos', {
+			code: (error as NodeJS.ErrnoException).code ?? 'DATA_URL_FAILED',
+		});
 		throw createFileError('No se pudo obtener el archivo como URL de datos', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -419,7 +425,7 @@ export async function renameFile(
 	options?: FileOperationOptions
 ): Promise<FileOperationResult> {
 	try {
-		logger.info('📝 Renombrando archivo:', { from: oldPath, to: newPath });
+		logger.info('📝 Renombrando archivo autorizado');
 
 		// Validar rutas
 		const normalizedOldPath = validateAndSanitizePath(oldPath);
@@ -432,13 +438,10 @@ export async function renameFile(
 		if (!options?.overwrite) {
 			try {
 				await stat(normalizedNewPath);
-				throw createFileError('El archivo destino ya existe', FileErrorCode.ALREADY_EXISTS);
 			} catch (error: any) {
-				// Si el archivo no existe, está bien (es lo que queremos)
-				if (error.code !== 'ENOENT' && error.name !== 'FileError') {
-					throw error;
-				}
+				if (error.code !== 'ENOENT') throw error;
 			}
+			throw createFileError('El archivo destino ya existe', FileErrorCode.ALREADY_EXISTS);
 		}
 
 		// Renombrar/mover el archivo
@@ -456,7 +459,9 @@ export async function renameFile(
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
 		}
-		logger.error('❌ Error al renombrar archivo:', error);
+		logger.error('❌ Error al renombrar archivo', {
+			code: (error as NodeJS.ErrnoException).code ?? 'FILE_RENAME_FAILED',
+		});
 		throw createFileError('No se pudo renombrar el archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -474,7 +479,7 @@ export async function copyFile(
 	options?: FileOperationOptions
 ): Promise<FileCopyMoveResult> {
 	try {
-		logger.info('📋 Copiando archivo:', { from: sourcePath, to: destPath });
+		logger.info('📋 Copiando archivo autorizado');
 
 		// Validar rutas
 		const normalizedSourcePath = validateAndSanitizePath(sourcePath);
@@ -490,16 +495,14 @@ export async function copyFile(
 		if (!options?.overwrite) {
 			try {
 				await stat(normalizedDestPath);
-				throw createFileError('El archivo destino ya existe', FileErrorCode.ALREADY_EXISTS);
 			} catch (error: any) {
-				if (error.code !== 'ENOENT' && error.name !== 'FileError') {
-					throw error;
-				}
+				if (error.code !== 'ENOENT') throw error;
 			}
+			throw createFileError('El archivo destino ya existe', FileErrorCode.ALREADY_EXISTS);
 		}
 
-		// Copiar el archivo
-		await fs.copyFile(normalizedSourcePath, normalizedDestPath);
+		// COPYFILE_EXCL closes the race between the advisory existence check and the write.
+		await fs.copyFile(normalizedSourcePath, normalizedDestPath, options?.overwrite ? 0 : constants.COPYFILE_EXCL);
 
 		// Emitir evento
 		await emit({
@@ -526,7 +529,9 @@ export async function copyFile(
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
 		}
-		logger.error('❌ Error al copiar archivo:', error);
+		logger.error('❌ Error al copiar archivo', {
+			code: (error as NodeJS.ErrnoException).code ?? 'FILE_COPY_FAILED',
+		});
 		throw createFileError('No se pudo copiar el archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -544,7 +549,7 @@ export async function moveFile(
 	options?: FileOperationOptions
 ): Promise<FileCopyMoveResult> {
 	try {
-		logger.info('🚚 Moviendo archivo:', { from: sourcePath, to: destPath });
+		logger.info('🚚 Moviendo archivo autorizado');
 
 		// Primero copiar el archivo
 		const copyResult = await copyFile(sourcePath, destPath, options);
@@ -567,7 +572,9 @@ export async function moveFile(
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
 		}
-		logger.error('❌ Error al mover archivo:', error);
+		logger.error('❌ Error al mover archivo', {
+			code: (error as NodeJS.ErrnoException).code ?? 'FILE_MOVE_FAILED',
+		});
 		throw createFileError('No se pudo mover el archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }

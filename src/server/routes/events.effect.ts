@@ -10,7 +10,8 @@ import { z } from 'zod';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { EventData, EventType } from '@/lib/server/events.server';
-import { getEventStore, getEventSubscribers } from '@/lib/server/events.server';
+import { getEventStore, getEventSubscribers, sanitizeEventForStore } from '@/lib/server/events.server';
+import { sanitizePublicPayload } from '@/server/security/sanitize-public-payload';
 
 const router = express.Router();
 const logger = serverLogger.withContext('EventsEffect');
@@ -52,15 +53,15 @@ router.post(
 			}
 
 			// Crear evento con type cast para EventType
-			const event: EventData = {
+			const event = sanitizeEventForStore({
 				...parsed,
 				type: parsed.type as EventType,
-			};
+			});
 
 			logger.info('📢 Evento recibido:', {
 				type: event.type,
 				id: event.id,
-				data: event.data,
+				dataKeys: event.data && typeof event.data === 'object' ? Object.keys(event.data) : [],
 			});
 
 			// Almacenar evento (para debugging)
@@ -190,11 +191,10 @@ router.get('/stream', async (req, res) => {
 			'Cache-Control': 'no-cache, no-transform',
 			Connection: 'keep-alive',
 			'X-Accel-Buffering': 'no',
-			'Access-Control-Allow-Origin': '*',
 		});
 
 		const send = (event: string, data: Record<string, unknown> | string) => {
-			const formatted = typeof data === 'string' ? data : JSON.stringify(data);
+			const formatted = JSON.stringify(sanitizePublicPayload(typeof data === 'string' ? { message: data } : data));
 			res.write(`event: ${event}\ndata: ${formatted}\n\n`);
 		};
 

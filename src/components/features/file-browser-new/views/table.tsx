@@ -56,7 +56,6 @@ function toMediaItem(item: BrowserItem): MediaItem {
 		mimeType: item.mimeType,
 		createdAt: item.createdAt,
 		size: item.size,
-		path: item.path,
 		width: item.width,
 		height: item.height,
 		parentId: item.parentId,

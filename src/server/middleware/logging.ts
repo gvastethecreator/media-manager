@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { serverLogger } from '../../lib/logger/server-logger';
+import { sanitizeSensitiveText } from '../../lib/security/sanitize-sensitive-output';
 
 /**
  * Interfaz para el logger contextual por-request
@@ -54,20 +55,25 @@ function getStatusColor(status: number): string {
 }
 
 function writeLog(message: string, level: 'info' | 'warn' | 'error' = 'info') {
+	const safeMessage = sanitizeSensitiveText(message);
 	const timestamp = new Date().toISOString();
-	const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+	const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${safeMessage}`;
 
 	if (LOG_TO_CONSOLE) {
 		const colorCode = level === 'error' ? colors.red : level === 'warn' ? colors.yellow : colors.cyan;
-		const consoleMessage = `${colorCode}🔍 [HTTP-LOG] ${colors.reset}${message}`;
-		console.log(consoleMessage);
+		const consoleMessage = `${colorCode}🔍 [HTTP-LOG] ${colors.reset}${safeMessage}`;
+		process.stdout.write(`${consoleMessage}\n`);
 	}
 
 	if (LOG_TO_FILE && logFile) {
 		try {
 			fs.appendFileSync(logFile, `${logMessage}\n`);
 		} catch (error) {
-			console.error('❌ Error escribiendo log a archivo:', error);
+			const errorCode =
+				typeof (error as NodeJS.ErrnoException | undefined)?.code === 'string'
+					? (error as NodeJS.ErrnoException).code
+					: 'LOG_WRITE_FAILED';
+			process.stderr.write(`No se pudo escribir el log (${errorCode}).\n`);
 		}
 	}
 }
@@ -78,7 +84,8 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
 	const timestamp = new Date().toISOString();
 	const ip = req.ip || req.connection.remoteAddress || 'unknown';
 	const method = req.method;
-	const url = req.originalUrl || req.url;
+	// Query values can contain private filesystem references. Log only the route path.
+	const url = req.path;
 
 	const incomingId = req.get?.('x-request-id') || undefined;
 	const requestId = incomingId || randomUUID();
@@ -137,16 +144,15 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
 // Middleware para logging de errores (Express error handler signature requires 4 params)
 // biome-ignore lint/suspicious/noExplicitAny: Express error middleware requires `any` error type
 export function errorLogger(error: any, req: Request, res: Response, next: NextFunction): void {
-	const { method, url, ip } = req;
+	const { method, ip } = req;
+	const url = req.path;
 	const rid = res?.locals?.requestId;
 	const ridSuffix = rid ? ` - rid: ${rid}` : '';
-	const errorMessage = `💥 ERROR - ${method} ${url} - IP: ${ip}${ridSuffix} - Error: ${error.message || error}`;
+	const errorKind = error instanceof Error ? error.name : 'UnknownError';
+	const errorCode = typeof error?.code === 'string' ? error.code : 'UNHANDLED_ERROR';
+	const errorMessage = `💥 ERROR - ${method} ${url} - IP: ${ip}${ridSuffix} - ${errorKind} (${errorCode})`;
 
 	writeLog(errorMessage, 'error');
-
-	if (error.stack) {
-		writeLog(`📚 STACK TRACE: ${error.stack}`, 'error');
-	}
 
 	next(error);
 }

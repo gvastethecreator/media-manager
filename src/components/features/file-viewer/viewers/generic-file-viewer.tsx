@@ -21,6 +21,7 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { toMediaAssetType } from '@/lib/api/authorized-roots';
 import { toastService } from '@/lib/ui/toast';
 import { formatFileSize } from '@/lib/utils';
 import type { FileWithStats } from '@/types/entities/file/base';
@@ -110,9 +111,13 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 	const [showContent, setShowContent] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const fileExtension = file.path?.split('.').pop()?.toLowerCase() || '';
+	const fileExtension = file.extension?.toLowerCase() || file.name?.split('.').pop()?.toLowerCase() || '';
 	const fileName = file.name || 'Archivo sin nombre';
 	const fileSize = file.size || 0;
+	const assetType = toMediaAssetType((file as unknown as { entityType?: unknown }).entityType ?? file.type);
+	const contentUrl = assetType
+		? `/api/files/content?assetType=${assetType}&assetId=${encodeURIComponent(file.id)}`
+		: null;
 
 	// Determine file category and icon
 	const getFileCategory = () => {
@@ -135,7 +140,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 	const canPreview = isTextFile && fileSize < 1024 * 1024; // Only preview files smaller than 1MB
 
 	const loadFileContent = async () => {
-		if (!(canPreview && file.path)) {
+		if (!(canPreview && contentUrl)) {
 			return;
 		}
 
@@ -143,7 +148,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 		setError(null);
 
 		try {
-			const response = await fetch(`/api/files/${file.id}/content`);
+			const response = await fetch(contentUrl);
 			if (!response.ok) {
 				throw new Error('Error al cargar el contenido del archivo');
 			}
@@ -151,19 +156,6 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 			setFileContent(content);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Error desconocido');
-			// Fallback: try to read as text if it's a small file
-			if (fileSize < 10_000) {
-				try {
-					const fallbackResponse = await fetch(file.path);
-					if (fallbackResponse.ok) {
-						const fallbackContent = await fallbackResponse.text();
-						setFileContent(fallbackContent);
-						setError(null);
-					}
-				} catch {
-					setError('No se pudo cargar el contenido del archivo');
-				}
-			}
 		} finally {
 			setIsLoadingContent(false);
 		}
@@ -178,8 +170,12 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 
 	const handleDownload = async () => {
 		try {
-			const href = file.path || `/api/files/${file.id}/download`;
-			const resp = await fetch(href);
+			if (!assetType) throw new Error('Tipo de asset no compatible');
+			const resp = await fetch('/api/download', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ asset: { assetId: file.id, assetType } }),
+			});
 			if (!resp.ok) throw new Error('No se pudo iniciar la descarga');
 			const blob = await resp.blob();
 			const url = URL.createObjectURL(blob);
@@ -197,8 +193,8 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 	};
 
 	const handleOpenExternal = () => {
-		if (file.path) {
-			window.open(file.path, '_blank');
+		if (contentUrl) {
+			window.open(contentUrl, '_blank', 'noopener,noreferrer');
 		}
 	};
 
@@ -364,12 +360,6 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 								<span className="font-medium">Modificado:</span>
 								<span className="ml-2 text-muted-foreground">{new Date(file.updatedAt).toLocaleDateString()}</span>
 							</div>
-							{file.path && (
-								<div className="md:col-span-2">
-									<span className="font-medium">Ruta:</span>
-									<span className="ml-2 break-all font-mono text-muted-foreground text-sm">{file.path}</span>
-								</div>
-							)}
 							{file.description && (
 								<div className="md:col-span-2">
 									<span className="font-medium">Descripción:</span>

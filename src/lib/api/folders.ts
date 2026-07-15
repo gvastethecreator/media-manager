@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { navigationKeys } from '@/lib/api/navigation';
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { FolderStatsResponse } from '@/types/folders';
 import {
@@ -8,13 +9,8 @@ import {
 	findFolders,
 	getAllFolders,
 	getFolder,
-	getFolderIdByPath,
-	getFolderName,
-	getFolderPath,
 	getFolderStats,
-	getParentFolderId,
 	getRecentFolderImages,
-	getRootFolderId,
 	moveFolder,
 	reindexAllFolders,
 	reindexFolder,
@@ -38,8 +34,8 @@ export interface FolderCreateInput {
 	featuredImage?: string | null;
 	name: string;
 	parentId?: string | null;
-	path: string;
 	presetId?: string | null;
+	source: AuthorizedPathReference;
 }
 
 export interface FolderUpdateInput {
@@ -49,8 +45,8 @@ export interface FolderUpdateInput {
 	featuredImage?: string | null;
 	name?: string;
 	parentId?: string | null;
-	path?: string;
 	presetId?: string | null;
+	source?: AuthorizedPathReference;
 }
 
 export interface FoldersResponse {
@@ -269,49 +265,5 @@ export function useFolderStats(folderId: string, options?: { staleTime?: number;
 		enabled: !!folderId && (options?.enabled ?? true),
 		staleTime: options?.staleTime,
 		gcTime: options?.gcTime,
-	});
-}
-
-// Hook para obtener el ID de la carpeta raíz
-export function useRootFolderId() {
-	return useQuery<string, Error>({
-		queryKey: [...folderKeys.all, 'root-id'],
-		queryFn: () => getRootFolderId(),
-	});
-}
-
-// Hook para obtener la ruta de una carpeta por su ID
-export function useFolderPath(folderId: string) {
-	return useQuery<string, Error>({
-		queryKey: [...folderKeys.detail(folderId), 'path'],
-		queryFn: () => getFolderPath(folderId),
-		enabled: !!folderId,
-	});
-}
-
-// Hook para obtener el nombre de una carpeta por su ID
-export function useFolderName(folderId: string) {
-	return useQuery<string, Error>({
-		queryKey: [...folderKeys.detail(folderId), 'name'],
-		queryFn: () => getFolderName(folderId),
-		enabled: !!folderId,
-	});
-}
-
-// Hook para obtener el ID de una carpeta por su ruta
-export function useFolderIdByPath(folderPath: string) {
-	return useQuery<string, Error>({
-		queryKey: [...folderKeys.all, 'by-path', folderPath],
-		queryFn: () => getFolderIdByPath(folderPath),
-		enabled: !!folderPath,
-	});
-}
-
-// Hook para obtener el ID de la carpeta padre
-export function useParentFolderId(folderId: string) {
-	return useQuery<string | null, Error>({
-		queryKey: [...folderKeys.detail(folderId), 'parent-id'],
-		queryFn: () => getParentFolderId(folderId),
-		enabled: !!folderId,
 	});
 }

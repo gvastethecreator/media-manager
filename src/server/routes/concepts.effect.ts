@@ -9,6 +9,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { ConceptCreateInput, ConceptUpdateInput } from '@/lib/effect/schemas/entities';
+import { authorizeMediaAssetParam } from '@/server/security/authorized-root-request';
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { ConceptService, ConceptServiceLive } from '@/services/concept/concept.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
@@ -148,6 +149,7 @@ router.post(
 
 router.post(
 	'/:id/images/:imageId',
+	authorizeMediaAssetParam({ assetType: 'image', idParam: 'imageId', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const conceptService = yield* ConceptService;
@@ -160,6 +162,7 @@ router.post(
 
 router.delete(
 	'/:id/images/:imageId',
+	authorizeMediaAssetParam({ assetType: 'image', idParam: 'imageId', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const conceptService = yield* ConceptService;
@@ -172,6 +175,7 @@ router.delete(
 
 router.post(
 	'/:id/videos/:videoId',
+	authorizeMediaAssetParam({ assetType: 'video', idParam: 'videoId', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const conceptService = yield* ConceptService;
@@ -184,6 +188,7 @@ router.post(
 
 router.delete(
 	'/:id/videos/:videoId',
+	authorizeMediaAssetParam({ assetType: 'video', idParam: 'videoId', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const conceptService = yield* ConceptService;

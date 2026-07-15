@@ -229,7 +229,6 @@ export function AllFilesView(_: ViewProps) {
 						id: video.id,
 						name: video.name,
 						type: 'video' as const,
-						path: video.path,
 						size: video.size || 0,
 						width: video.width,
 						height: video.height,

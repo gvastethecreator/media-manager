@@ -26,6 +26,8 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNe
 	const [currentTime, setCurrentTime] = useState(0);
 	const [duration, setDuration] = useState(0);
 	const [error, setError] = useState<string | null>(null);
+	const videoSrc = `/api/videos/${encodeURIComponent(video.id)}/content`;
+	const downloadUrl = `/api/download?assetType=video&assetId=${encodeURIComponent(video.id)}`;
 
 	const handlePlayPause = () => {
 		const vid = videoRef.current;
@@ -101,7 +103,7 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNe
 	};
 
 	const handleDownload = () => {
-		window.open(video.path, '_blank');
+		window.open(downloadUrl, '_blank', 'noopener,noreferrer');
 	};
 
 	const formatTime = (sec: number) => {
@@ -146,7 +148,7 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNe
 				onTimeUpdate={handleTimeUpdate}
 				poster={video.thumbnail || undefined}
 				ref={videoRef}
-				src={video.path}
+				src={videoSrc}
 			>
 				Sorry, your browser does not support embedded videos.
 			</video>

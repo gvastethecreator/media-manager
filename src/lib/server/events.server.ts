@@ -1,4 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
+import { sanitizePublicPayload } from '@/server/security/sanitize-public-payload';
 import type { ProcessStatus } from '@/types/folders';
 
 // Mapa de rutas a revalidar por tipo de evento (conservado para compatibilidad)
@@ -127,6 +128,7 @@ function truncateString(value: string, max = 256): string {
 }
 
 function sanitizeObject(input: unknown, depth = 0): unknown {
+	input = sanitizePublicPayload(input);
 	if (depth > 3) return '[depth-limit]';
 	if (input == null) return input;
 	if (typeof input === 'string') return truncateString(input, 256);
@@ -150,7 +152,7 @@ function sanitizeObject(input: unknown, depth = 0): unknown {
 	return out;
 }
 
-function sanitizeEventForStore(event: EventData): EventData {
+export function sanitizeEventForStore(event: EventData): EventData {
 	const data = sanitizeObject(event.data);
 	return { ...event, data };
 }
@@ -164,7 +166,7 @@ function eventLogPreview(event: EventData): Record<string, unknown> {
 		const keys = Object.keys(event.data as Record<string, unknown>);
 		preview.dataKeys = keys.slice(0, 10);
 	} else if (typeof event.data === 'string') {
-		preview.data = truncateString(event.data, 128);
+		preview.data = '[string-data]';
 	}
 	return preview;
 }
@@ -218,7 +220,7 @@ function emitDirect(event: EventData) {
 	// Notificar a suscriptores
 	for (const subscriber of eventSubscribers) {
 		try {
-			subscriber(event);
+			subscriber(sanitized);
 		} catch (error) {
 			logger.error('Error notificando suscriptor:', error);
 		}
