@@ -6,15 +6,12 @@
 import { Effect, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
 import { imagePlaces, places } from '@/lib/drizzle/schema';
-import { favoriteService } from '@/services/favorite/favorite.service';
-import { FavoriteEntityType } from '@/types/entities/favorite';
 import { expectError, expectSuccess, generateTestId } from '../../../../tests/factories/test-helpers';
 import { PlaceService, PlaceServiceLive } from '../place.service.effect';
 
 // ============= Helpers =============
 
-const run = <A, E>(effect: Effect.Effect<A, E, PlaceService>) =>
-	pipe(effect, Effect.provide(PlaceServiceLive));
+const run = <A, E>(effect: Effect.Effect<A, E, PlaceService>) => pipe(effect, Effect.provide(PlaceServiceLive));
 
 const createTestPlace = async (overrides?: Record<string, unknown>) => {
 	const id = generateTestId('place');
@@ -55,7 +52,7 @@ describe('PlaceService - CRUD Operations', () => {
 			);
 
 			expect(result.name).toBe('Rivendell');
-			expect(await favoriteService.isFavorite(FavoriteEntityType.PLACE, result.id)).toBe(false);
+			expect(result.isFavorite).toBe(false);
 		});
 
 		it('should create place with optional fields', async () => {

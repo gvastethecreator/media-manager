@@ -138,7 +138,7 @@ describe('DocumentService - CRUD Operations', () => {
 			expect(result.mimeType).toBe(input.mimeType);
 			expect(result.extension).toBe(input.extension);
 			expect(result.folderId).toBe(input.folderId);
-			expect(await favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, result.id)).toBe(false);
+			expect(result.isFavorite).toBe(false);
 		});
 
 		it('should create document with optional metadata', async () => {
@@ -341,7 +341,7 @@ describe('DocumentService - CRUD Operations', () => {
 
 			expect(result.name).toBe(update.name);
 			expect(result.title).toBe(update.title);
-			expect(await favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, result.id)).toBe(true);
+			expect(result.isFavorite).toBe(true);
 		});
 
 		it('should update document metadata', async () => {
@@ -499,7 +499,9 @@ describe('DocumentService - Query Operations', () => {
 		it('should filter by mimeType', async () => {
 			const folder = await createTestFolder();
 			await createTestDocument(folder.id, { mimeType: 'application/pdf' });
-			await createTestDocument(folder.id, { mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+			await createTestDocument(folder.id, {
+				mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			});
 			await createTestDocument(folder.id, { mimeType: 'application/pdf' });
 
 			const result = await expectSuccess(DocumentService.getAll({ mimeType: 'application/pdf' }));

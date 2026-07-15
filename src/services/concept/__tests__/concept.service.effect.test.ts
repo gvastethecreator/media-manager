@@ -6,15 +6,12 @@
 import { Effect, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
 import { concepts, imageConcepts, videoConcepts } from '@/lib/drizzle/schema';
-import { favoriteService } from '@/services/favorite/favorite.service';
-import { FavoriteEntityType } from '@/types/entities/favorite';
 import { expectError, expectSuccess, generateTestId } from '../../../../tests/factories/test-helpers';
 import { ConceptService, ConceptServiceLive } from '../concept.service.effect';
 
 // ============= Helpers =============
 
-const run = <A, E>(effect: Effect.Effect<A, E, ConceptService>) =>
-	pipe(effect, Effect.provide(ConceptServiceLive));
+const run = <A, E>(effect: Effect.Effect<A, E, ConceptService>) => pipe(effect, Effect.provide(ConceptServiceLive));
 
 const createTestConcept = async (overrides?: Record<string, unknown>) => {
 	const id = generateTestId('concept');
@@ -56,7 +53,7 @@ describe('ConceptService - CRUD Operations', () => {
 			);
 
 			expect(result.name).toBe('The Force');
-			expect(await favoriteService.isFavorite(FavoriteEntityType.CONCEPT, result.id)).toBe(false);
+			expect(result.isFavorite).toBe(false);
 		});
 
 		it('should create concept with optional fields', async () => {
