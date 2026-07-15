@@ -310,7 +310,6 @@ export function useFileBrowser({
 						id: it.id,
 						name: it.name,
 						type: it.entityType as 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d',
-						path: it.path || '',
 						size: it.size ?? 0,
 						width: it.width ?? null,
 						height: it.height ?? null,

@@ -4,7 +4,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ViewType } from '@/components/views/types';
 import { useDebouncedViewMode } from '@/hooks/use-debounced-view-mode';
-import { useFolder, useFolderName } from '@/lib/api/folders';
+import { useFolder } from '@/lib/api/folders';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { ViewBreadcrumbs } from '../navigation/breadcrumbs';
 
@@ -50,7 +50,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 
 	// Obtener información de la carpeta solo cuando aplique (enabled internamente por folderId)
 	const { data: folderData } = useFolder(folderId);
-	useFolderName(folderId);
 
 	// Crear versión debounced del setViewMode para mejorar performance
 	const { setViewMode: setViewModeDebounced } = useDebouncedViewMode();

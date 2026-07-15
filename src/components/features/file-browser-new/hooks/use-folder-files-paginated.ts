@@ -20,7 +20,6 @@ export interface FolderFile {
 	id: string;
 	metadata?: Record<string, any>;
 	name: string;
-	path: string;
 	size: number;
 	stats?: {
 		views?: number;
@@ -36,7 +35,8 @@ export interface FolderFilesResponse {
 	folder?: {
 		id: string;
 		name: string;
-		path: string;
+		relativePath?: string;
+		rootId?: string;
 	};
 	hasMore: boolean;
 	pagination: {
@@ -59,7 +59,8 @@ export interface FolderStatsResponse {
 	folder?: {
 		id: string;
 		name: string;
-		path: string;
+		relativePath?: string;
+		rootId?: string;
 	};
 	images: number;
 	jsonFiles: number;
@@ -172,7 +173,6 @@ function folderFileToMediaItem(file: FolderFile): MediaItem {
 	return {
 		id: file.id,
 		name: file.name,
-		path: file.path,
 		size: file.size,
 		entityType,
 		createdAt: new Date(file.createdAt),

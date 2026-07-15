@@ -32,7 +32,6 @@ export interface BrowserItem {
 	/** ID del padre (para folders) */
 	parentId?: string | null;
 	/** Ruta del archivo */
-	path?: string;
 	/** Previews recientes (principalmente para folders) */
 	recentImages?: Array<{
 		id?: string;
@@ -189,7 +188,6 @@ export function toBrowserItem(entity: Record<string, unknown>): BrowserItem {
 		mimeType: entity.mimeType as string | null | undefined,
 		createdAt: entity.createdAt as Date | string | number | undefined,
 		size: entity.size as number | undefined,
-		path: entity.path as string | undefined,
 		recentImages: Array.isArray(entity.recentImages)
 			? (entity.recentImages as Array<{
 					id?: string;

@@ -10,6 +10,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { CharacterCreateInput, CharacterUpdateInput } from '@/lib/effect/schemas/entities';
+import { authorizeMediaAssetParam, filterAuthorizedMediaEntities } from '@/server/security/authorized-root-request';
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { CharacterService, CharacterServiceLive } from '@/services/character/character.service.effect';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -188,7 +189,11 @@ router.get(
 	effectHandler((req) =>
 		Effect.gen(function* () {
 			const characterService = yield* CharacterService;
-			return yield* characterService.getImages(req.params.id);
+			const images = yield* characterService.getImages(req.params.id);
+			return yield* Effect.tryPromise({
+				try: () => filterAuthorizedMediaEntities(req, images, 'image', ['read', 'index']),
+				catch: (error) => error,
+			});
 		}).pipe(Effect.provide(CharacterServiceLive))
 	)
 );
@@ -198,6 +203,7 @@ router.get(
  */
 router.post(
 	'/:id/images/:imageId',
+	authorizeMediaAssetParam({ assetType: 'image', idParam: 'imageId', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const characterService = yield* CharacterService;
@@ -213,6 +219,7 @@ router.post(
  */
 router.delete(
 	'/:id/images/:imageId',
+	authorizeMediaAssetParam({ assetType: 'image', idParam: 'imageId', permissions: ['read', 'index'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const characterService = yield* CharacterService;

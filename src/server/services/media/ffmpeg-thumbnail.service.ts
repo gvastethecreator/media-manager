@@ -40,10 +40,8 @@ export async function generateFFmpegThumbnail(
 
 	try {
 		logger.info('🎬 Iniciando generación FFmpeg', {
-			videoPath,
 			timestamp: timestampSeconds,
 			dimensions: `${width}x${height}`,
-			outputPath: tempPath,
 		});
 
 		// Verificar que FFmpeg esté disponible
@@ -69,10 +67,7 @@ export async function generateFFmpegThumbnail(
 			tempPath,
 		];
 
-		logger.info('📝 Comando FFmpeg:', {
-			command: 'ffmpeg',
-			args: ffmpegArgs.join(' '),
-		});
+		logger.info('📝 Comando FFmpeg preparado', { command: 'ffmpeg', argumentCount: ffmpegArgs.length });
 
 		// Ejecutar FFmpeg
 		const success = await executeFFmpeg(ffmpegArgs);
@@ -84,14 +79,13 @@ export async function generateFFmpegThumbnail(
 
 		// Verificar que el archivo se generó
 		if (!existsSync(tempPath)) {
-			logger.error('❌ El archivo thumbnail no se generó', { expectedPath: tempPath });
+			logger.error('❌ El archivo thumbnail no se generó');
 			return null;
 		}
 
 		// Leer el archivo generado
 		const thumbnailBuffer = await readFile(tempPath);
 		logger.info('✅ Thumbnail FFmpeg generado exitosamente', {
-			videoPath,
 			outputSize: `${Math.round(thumbnailBuffer.length / 1024)} KB`,
 		});
 
@@ -162,10 +156,10 @@ function executeFFmpeg(args: string[]): Promise<boolean> {
 			stdio: 'pipe',
 		});
 
-		let stderr = '';
+		let stderrBytes = 0;
 
 		ffmpeg.stderr.on('data', (data) => {
-			stderr += data.toString();
+			stderrBytes += Buffer.byteLength(data);
 		});
 
 		ffmpeg.on('close', (code) => {
@@ -175,7 +169,7 @@ function executeFFmpeg(args: string[]): Promise<boolean> {
 			} else {
 				logger.error('❌ FFmpeg falló', {
 					exitCode: code,
-					stderr: stderr.slice(-500), // Últimos 500 caracteres del error
+					stderrBytes,
 				});
 				resolve(false);
 			}

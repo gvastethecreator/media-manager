@@ -111,7 +111,7 @@ export async function getThumbnail(
 		// Validar que la ruta del archivo exista
 		// Protección contra rutas corruptas o demasiado largas (ej. base64 en lugar de path)
 		if (!image.path || image.path.length > 1024) {
-			const error = `Ruta de archivo inválida o demasiado larga: ${image.path ? `${image.path.substring(0, 50)}...` : 'null'}`;
+			const error = 'La ubicación del archivo es inválida o demasiado larga.';
 			thumbLogger.error(`❌ ${error}`);
 			return {
 				thumbnailUrl: '',
@@ -120,7 +120,7 @@ export async function getThumbnail(
 		}
 
 		if (!existsSync(image.path)) {
-			const error = `Archivo no encontrado en ruta: ${image.path}`;
+			const error = 'El archivo fuente no existe o ya no está disponible.';
 			// Registrar el error en la base de datos
 			await db
 				.update(images)
@@ -138,7 +138,6 @@ export async function getThumbnail(
 		// Si el proveedor es disco o no hay thumbnail en DB, generar/servir desde disco
 		thumbLogger.info(`🔄 Generando/servidor thumbnail (provider=${thumbsConfig.provider}):`, {
 			id,
-			path: image.path,
 		});
 
 		try {
@@ -221,7 +220,7 @@ export async function getThumbnail(
 			};
 		} catch (genError) {
 			// Registrar el error en la imagen
-			const errorMessage = genError instanceof Error ? genError.message : 'Error desconocido';
+			const errorMessage = 'No se pudo generar el thumbnail.';
 			await db
 				.update(images)
 				.set({
@@ -229,15 +228,21 @@ export async function getThumbnail(
 				})
 				.where(eq(images.id, id));
 
-			thumbLogger.error('❌ Error generando thumbnail:', genError);
+			thumbLogger.error('❌ Error generando thumbnail:', {
+				id,
+				kind: genError instanceof Error ? genError.name : 'UnknownError',
+			});
 			return {
 				thumbnailUrl: '',
 				error: errorMessage,
 			};
 		}
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-		thumbLogger.error('❌ Error obteniendo thumbnail:', { error: errorMessage, id });
+		const errorMessage = 'No se pudo obtener el thumbnail.';
+		thumbLogger.error('❌ Error obteniendo thumbnail:', {
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
+			id,
+		});
 		return {
 			thumbnailUrl: '',
 			error: errorMessage,

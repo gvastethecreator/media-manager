@@ -46,12 +46,12 @@ export interface DatabaseEntityStats {
  */
 export interface NavigationData {
 	albums: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	audios: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
+	audios: Array<{ id: string; name: string; path?: string; duration?: number; itemCount?: number }>;
 	characters: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
 	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
 	concepts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	documents: Array<{ id: string; name: string; type?: string; itemCount?: number }>;
-	file3ds: Array<{ id: string; name: string; format?: string; itemCount?: number }>;
+	documents: Array<{ id: string; name: string; path?: string; type?: string; itemCount?: number }>;
+	file3ds: Array<{ id: string; name: string; path?: string; format?: string; itemCount?: number }>;
 	folders: Array<{
 		id: string;
 		name: string;
@@ -61,14 +61,14 @@ export interface NavigationData {
 		_count?: { images: number; videos: number };
 	}>;
 	groups: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	jsonFiles: Array<{ id: string; name: string; size?: number; itemCount?: number }>;
+	jsonFiles: Array<{ id: string; name: string; path?: string; size?: number; itemCount?: number }>;
 	notes: Array<{ id: string; title: string; content?: string; itemCount?: number }>;
 	places: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
 	prompts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
 	properties: Array<{ id: string; name: string; value?: string; itemCount?: number }>;
 	stats: NavigationStats;
 	tags: Array<{ id: string; name: string; count?: number }>;
-	videos: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
+	videos: Array<{ id: string; name: string; path?: string; duration?: number; itemCount?: number }>;
 	wildcards: Array<{ id: string; name: string; pattern?: string; itemCount?: number }>;
 	worldItems: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
 }

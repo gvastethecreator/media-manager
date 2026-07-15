@@ -73,19 +73,11 @@ export function useImageLoader(images: ImageItem[], currentIndex: number, isOpen
 					case 'video':
 						return `/api/videos/${imageId}/content`;
 					case 'audio':
-						// Si tiene path, usar endpoint de archivos genérico
-						if (item.path) {
-							return `/api/files/content?path=${encodeURIComponent(item.path)}`;
-						}
-						return `/api/audio/${imageId}/content`;
+						return `/api/files/content?assetType=audio&assetId=${encodeURIComponent(imageId)}`;
 					case 'document':
 					case 'json':
 					case 'file3d':
-						// Usar endpoint de archivos genérico con path
-						if (item.path) {
-							return `/api/files/content?path=${encodeURIComponent(item.path)}`;
-						}
-						return `/api/files/${imageId}/content`;
+						return `/api/files/content?assetType=${fileType}&assetId=${encodeURIComponent(imageId)}`;
 					default:
 						// Usar el endpoint de contenido completo para imágenes
 						return `/api/images/${imageId}/content`;

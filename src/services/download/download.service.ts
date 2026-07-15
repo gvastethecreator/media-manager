@@ -16,7 +16,6 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import { getFileAsDataUrl } from '@/services/file/file.service';
 import { progressTrackingService } from '@/services/progress/progress-tracking.service';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { FileItem } from '@/types/files';
@@ -103,7 +102,6 @@ class EnhancedDownloadService {
 	 */
 	async downloadFile(item: FileItem | AnyEntityWithStats, options: DownloadOptions = {}): Promise<DownloadResult> {
 		const startTime = Date.now();
-		const itemPath = 'path' in item ? item.path : 'filePath' in item ? (item as any).filePath : '';
 		const itemName =
 			'name' in item
 				? item.name
@@ -138,14 +136,14 @@ class EnhancedDownloadService {
 			switch (options.format) {
 				case 'zip':
 					// For ZIP format, we'll compress the file
-					blob = await this.downloadAsZip(itemPath, filename, abortController.signal);
+					blob = await this.downloadAsZip(item, filename, abortController.signal);
 					filename = filename.replace(/\.[^/.]+$/, '.zip');
 					break;
 
 				case 'pdf':
 					// For PDF format (images only)
 					if (this.isImageFile(itemName)) {
-						blob = await this.downloadAsPdf(itemPath, filename, abortController.signal);
+						blob = await this.downloadAsPdf(item, filename, abortController.signal);
 						filename = filename.replace(/\.[^/.]+$/, '.pdf');
 					} else {
 						throw new Error('PDF format only supported for image files');
@@ -154,7 +152,7 @@ class EnhancedDownloadService {
 
 				default:
 					// Original format
-					blob = await this.downloadOriginal(itemPath, options, abortController.signal);
+					blob = await this.downloadOriginal(item, options, abortController.signal);
 			}
 
 			// Update progress
@@ -340,33 +338,34 @@ class EnhancedDownloadService {
 	/**
 	 * Download file in original format
 	 */
-	private async downloadOriginal(filePath: string, _options: DownloadOptions, signal: AbortSignal): Promise<Blob> {
-		// Try to get file as data URL first (for images)
-		try {
-			const { dataUrl } = await getFileAsDataUrl(filePath);
-			const response = await fetch(dataUrl, { signal });
-			return await response.blob();
-		} catch {
-			// Fallback to direct file access
-			const response = await fetch(`/api/files/download?path=${encodeURIComponent(filePath)}`, {
-				signal,
-			});
-
-			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-			}
-
-			return await response.blob();
+	private async downloadOriginal(
+		item: FileItem | AnyEntityWithStats,
+		_options: DownloadOptions,
+		signal: AbortSignal
+	): Promise<Blob> {
+		const response = await fetch('/api/download', {
+			body: JSON.stringify(this.toAuthorizedDownloadBody(item)),
+			headers: { 'Content-Type': 'application/json' },
+			method: 'POST',
+			signal,
+		});
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 		}
+		return response.blob();
 	}
 
 	/**
 	 * Download file as ZIP
 	 */
-	private async downloadAsZip(filePath: string, _filename: string, signal: AbortSignal): Promise<Blob> {
+	private async downloadAsZip(
+		item: FileItem | AnyEntityWithStats,
+		_filename: string,
+		signal: AbortSignal
+	): Promise<Blob> {
 		// For now, we'll use a simple approach
 		// In a real implementation, you'd use a library like JSZip
-		const originalBlob = await this.downloadOriginal(filePath, {}, signal);
+		const originalBlob = await this.downloadOriginal(item, {}, signal);
 
 		// TODO: Implement actual ZIP compression using JSZip
 		// For now, return original blob (this would need JSZip library)
@@ -376,10 +375,14 @@ class EnhancedDownloadService {
 	/**
 	 * Download image as PDF
 	 */
-	private async downloadAsPdf(filePath: string, _filename: string, signal: AbortSignal): Promise<Blob> {
+	private async downloadAsPdf(
+		item: FileItem | AnyEntityWithStats,
+		_filename: string,
+		signal: AbortSignal
+	): Promise<Blob> {
 		// For now, return original blob
 		// In a real implementation, you'd convert image to PDF
-		const originalBlob = await this.downloadOriginal(filePath, {}, signal);
+		const originalBlob = await this.downloadOriginal(item, {}, signal);
 
 		// TODO: Implement PDF conversion using jsPDF or similar
 		return originalBlob;
@@ -402,10 +405,9 @@ class EnhancedDownloadService {
 
 			for (const item of items) {
 				try {
-					const itemPath = 'path' in item ? (item as any).path : item.name;
 					const itemName = item.name;
 
-					const blob = await this.downloadOriginal(itemPath, {}, new AbortController().signal);
+					const blob = await this.downloadOriginal(item, {}, new AbortController().signal);
 					files.push({ name: itemName, data: blob });
 					totalSize += blob.size;
 				} catch (error) {
@@ -455,6 +457,26 @@ class EnhancedDownloadService {
 		const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'];
 		const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
 		return imageExtensions.includes(extension);
+	}
+
+	private toAuthorizedDownloadBody(item: FileItem | AnyEntityWithStats): {
+		asset?: { assetId: string; assetType: string };
+		source?: { relativePath: string; rootId: string };
+	} {
+		const candidate = item as unknown as Record<string, unknown>;
+		if (typeof candidate.rootId === 'string' && typeof candidate.relativePath === 'string') {
+			return { source: { relativePath: candidate.relativePath, rootId: candidate.rootId } };
+		}
+		const rawType = candidate.entityType ?? candidate.type;
+		const assetType = rawType === 'jsonFile' || rawType === 'jsonfile' ? 'json' : rawType;
+		if (
+			typeof candidate.id === 'string' &&
+			typeof assetType === 'string' &&
+			['image', 'video', 'audio', 'document', 'json', 'file3d'].includes(assetType)
+		) {
+			return { asset: { assetId: candidate.id, assetType } };
+		}
+		throw new Error('El elemento no contiene una referencia de descarga autorizable.');
 	}
 
 	/**

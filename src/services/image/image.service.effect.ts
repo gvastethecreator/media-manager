@@ -19,7 +19,7 @@
  * - UNIQUE (hash) with index
  */
 
-import { and, count, desc, eq, inArray, notInArray, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, notInArray, sql } from 'drizzle-orm';
 import { Effect } from 'effect';
 import { db } from '@/lib/drizzle';
 import {
@@ -571,7 +571,7 @@ export const getAll = (options?: {
 					.select()
 					.from(images)
 					.where(whereClause)
-					.orderBy(orderByClause)
+					.orderBy(orderByClause, asc(images.id))
 					.limit(limit)
 					.offset(offset);
 
@@ -827,18 +827,18 @@ export const getByHash = (hash: string): Effect.Effect<Image, ImageError, never>
 
 		const [result, favoriteEntityIds] = yield* Effect.all([
 			Effect.tryPromise({
-			try: async () => {
-				const image = await getFirstRow<typeof images.$inferSelect>(() =>
-					db.select().from(images).where(eq(images.hash, hash)).limit(1)
-				);
-				if (!image) return null;
-				return Image.make(image);
-			},
-			catch: (error) =>
-				new ImageDatabaseError({
-					operation: 'getByHash',
-					originalError: error,
-				}),
+				try: async () => {
+					const image = await getFirstRow<typeof images.$inferSelect>(() =>
+						db.select().from(images).where(eq(images.hash, hash)).limit(1)
+					);
+					if (!image) return null;
+					return Image.make(image);
+				},
+				catch: (error) =>
+					new ImageDatabaseError({
+						operation: 'getByHash',
+						originalError: error,
+					}),
 			}),
 			getImageFavoriteIds(),
 		]);
@@ -872,22 +872,22 @@ export const getByPathAndFolder = (path: string, folderId: string): Effect.Effec
 
 		const [result, favoriteEntityIds] = yield* Effect.all([
 			Effect.tryPromise({
-			try: async () => {
-				const image = await getFirstRow<typeof images.$inferSelect>(() =>
-					db
-						.select()
-						.from(images)
-						.where(and(eq(images.path, path), eq(images.folderId, folderId)))
-						.limit(1)
-				);
-				if (!image) return null;
-				return Image.make(image);
-			},
-			catch: (error) =>
-				new ImageDatabaseError({
-					operation: 'getByPathAndFolder',
-					originalError: error,
-				}),
+				try: async () => {
+					const image = await getFirstRow<typeof images.$inferSelect>(() =>
+						db
+							.select()
+							.from(images)
+							.where(and(eq(images.path, path), eq(images.folderId, folderId)))
+							.limit(1)
+					);
+					if (!image) return null;
+					return Image.make(image);
+				},
+				catch: (error) =>
+					new ImageDatabaseError({
+						operation: 'getByPathAndFolder',
+						originalError: error,
+					}),
 			}),
 			getImageFavoriteIds(),
 		]);
@@ -968,21 +968,21 @@ export const getByFolder = (
 
 		const [results, favoriteEntityIds] = yield* Effect.all([
 			Effect.tryPromise({
-			try: async () => {
-				const folderImages = await db
-					.select()
-					.from(images)
-					.where(eq(images.folderId, folderId))
-					.orderBy(desc(images.addedAt))
-					.limit(limit)
-					.offset(offset);
-				return folderImages.map((img: typeof images.$inferSelect) => Image.make(img));
-			},
-			catch: (error) =>
-				new ImageDatabaseError({
-					operation: 'getByFolder',
-					originalError: error,
-				}),
+				try: async () => {
+					const folderImages = await db
+						.select()
+						.from(images)
+						.where(eq(images.folderId, folderId))
+						.orderBy(desc(images.addedAt))
+						.limit(limit)
+						.offset(offset);
+					return folderImages.map((img: typeof images.$inferSelect) => Image.make(img));
+				},
+				catch: (error) =>
+					new ImageDatabaseError({
+						operation: 'getByFolder',
+						originalError: error,
+					}),
 			}),
 			getImageFavoriteIds(),
 		]);
