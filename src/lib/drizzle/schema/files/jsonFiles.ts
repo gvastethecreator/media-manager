@@ -69,6 +69,7 @@ export const jsonFiles = sqliteTable(
 		pathIdx: uniqueIndex('JsonFile_path_key').on(table.path),
 		folderId_idx: index('JsonFile_folderId_idx').on(table.folderId),
 		hash_idx: index('JsonFile_hash_idx').on(table.hash),
+		folderHashIdx: index('JsonFile_folderId_hash_idx').on(table.folderId, table.hash),
 		createdAt_idx: index('JsonFile_createdAt_idx').on(table.createdAt),
 		updatedAt_idx: index('JsonFile_updatedAt_idx').on(table.updatedAt),
 	})

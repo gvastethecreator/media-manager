@@ -41,6 +41,7 @@ export const folders = sqliteTable(
 		pathUniqueIdx: uniqueIndex('Folder_path_key').on(table.path),
 		lastIndexedIdx: index('Folder_lastIndexed_idx').on(table.lastIndexed),
 		createdAtIdx: index('Folder_createdAt_idx').on(table.createdAt),
+		parentIdIdx: index('Folder_parentId_idx').on(table.parentId),
 		// Constraints de validación
 		pathLengthCheck: check('Folder_path_length_check', sql`length(path) BETWEEN 1 AND 1000`),
 		nameCheck: check('Folder_name_length_check', sql`length(name) BETWEEN 1 AND 255`),

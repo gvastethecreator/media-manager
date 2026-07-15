@@ -33,7 +33,7 @@
 		"resources": {
 			"../dist/server/index.js": "server/index.js",
 			"../dist/server/wrapper.js": "server/wrapper.js",
-			"../dist/server/db.sqlite": "server/db.sqlite"
+			"../src/lib/drizzle/migrations/": "server/migrations/"
 		}
 	}
 }

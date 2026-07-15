@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'bun:test';
+import { Database } from 'bun:sqlite';
 import { existsSync } from 'node:fs';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -10,11 +11,14 @@ import {
 	shouldEnableDevelopmentRoutes,
 } from '../src/config/local-runtime-security';
 import { runIsolatedCommand } from './run-tests-isolated';
+import { migrateDatabase } from './db/migrations';
+import { seedDeterministicTestFixture } from './db/test-fixture';
 import {
 	assertIsolatedTestDatabase,
 	TEST_DATABASE_MARKER,
 	TEST_DATABASE_OWNER,
 } from '../tests/safety/test-database-guard';
+import { prepareWorkerTestDatabase } from '../tests/safety/prepare-worker-database';
 
 const temporaryDirectories: string[] = [];
 const workspacePath = resolve(import.meta.dir, '..');
@@ -145,49 +149,102 @@ describe('test database guard', () => {
 describe('isolated test runner', () => {
 	const childFixturePath = resolve(workspacePath, 'scripts', 'fixtures', 'isolated-test-child.ts');
 
-	it('muta sólo la copia, valida el guard y limpia el run directory', async () => {
+	it('crea desde migraciones, valida el guard y limpia el run directory', async () => {
 		const sandbox = await createTemporaryDirectory();
-		const sourceDatabasePath = join(sandbox, 'source.sqlite');
 		const testRootPath = join(sandbox, 'test-runs');
 		const resultPath = join(sandbox, 'child-result.json');
-		await writeFile(sourceDatabasePath, 'original', 'utf8');
 
 		const exitCode = await runIsolatedCommand({
 			command: [process.execPath, childFixturePath, resultPath, '0'],
 			cwd: workspacePath,
-			sourceDatabasePath,
 			testRootPath,
 		});
 		const result = JSON.parse(await readFile(resultPath, 'utf8')) as {
 			databasePath: string;
 			markerEnabled: boolean;
+			migrationCount: number;
+			profileCount: number;
 			testRoot: string;
 		};
 
 		expect(exitCode).toBe(0);
 		expect(result.markerEnabled).toBe(true);
-		expect(await readFile(sourceDatabasePath, 'utf8')).toBe('original');
+		expect(result.migrationCount).toBeGreaterThan(0);
+		expect(result.profileCount).toBe(1);
 		expect(existsSync(result.databasePath)).toBe(false);
 		expect(existsSync(dirname(result.databasePath))).toBe(false);
 	});
 
 	it('propaga el exit code del child y limpia después de un fallo', async () => {
 		const sandbox = await createTemporaryDirectory();
-		const sourceDatabasePath = join(sandbox, 'source.sqlite');
 		const testRootPath = join(sandbox, 'test-runs');
 		const resultPath = join(sandbox, 'child-result.json');
-		await writeFile(sourceDatabasePath, 'original', 'utf8');
 
 		const exitCode = await runIsolatedCommand({
 			command: [process.execPath, childFixturePath, resultPath, '9'],
 			cwd: workspacePath,
-			sourceDatabasePath,
 			testRootPath,
 		});
 		const result = JSON.parse(await readFile(resultPath, 'utf8')) as { databasePath: string };
 
 		expect(exitCode).toBe(9);
 		expect(existsSync(result.databasePath)).toBe(false);
+	});
+
+	it('clona una DB independiente por archivo y worker y mantiene el guard de propiedad', async () => {
+		const sandbox = await createTemporaryDirectory();
+		const testRootPath = join(sandbox, 'worker-runs');
+		await mkdir(testRootPath, { recursive: true });
+		const templatePath = join(testRootPath, 'template.sqlite');
+		const migrationResult = await migrateDatabase({ databasePath: templatePath });
+		seedDeterministicTestFixture(templatePath);
+
+		const firstEnvironment = {
+			DATABASE_URL: pathToFileURL(templatePath).href,
+			MEDIA_MANAGER_TEST_DB: '1',
+			MEDIA_MANAGER_TEST_DB_ROOT: testRootPath,
+			MEDIA_MANAGER_TEST_DB_TEMPLATE: templatePath,
+			MEDIA_MANAGER_TEST_SCHEMA_VERSION: migrationResult.applied.at(-1) ?? 'current',
+			VITEST_WORKER_ID: '101',
+		} as NodeJS.ProcessEnv;
+		const sameWorkerSecondFileEnvironment = { ...firstEnvironment };
+		const secondEnvironment = { ...firstEnvironment, VITEST_WORKER_ID: '202' };
+		const firstPath = await prepareWorkerTestDatabase(firstEnvironment, 'file-a');
+		const sameWorkerSecondPath = await prepareWorkerTestDatabase(sameWorkerSecondFileEnvironment, 'file-b');
+		const secondPath = await prepareWorkerTestDatabase(secondEnvironment, 'file-a');
+
+		expect(firstPath).not.toBe(secondPath);
+		expect(firstPath).not.toBe(sameWorkerSecondPath);
+		expect(assertIsolatedTestDatabase(firstEnvironment, workspacePath)).toBe(firstPath);
+		expect(assertIsolatedTestDatabase(sameWorkerSecondFileEnvironment, workspacePath)).toBe(sameWorkerSecondPath);
+		expect(assertIsolatedTestDatabase(secondEnvironment, workspacePath)).toBe(secondPath);
+		const firstDatabase = new Database(firstPath!);
+		firstDatabase.exec('CREATE TABLE worker_isolation_proof (id TEXT PRIMARY KEY)');
+		firstDatabase.close();
+		const sameWorkerSecondDatabase = new Database(sameWorkerSecondPath!, { readonly: true });
+		const leakedToSameWorkerFile = sameWorkerSecondDatabase
+			.query("SELECT 1 FROM sqlite_schema WHERE type = 'table' AND name = 'worker_isolation_proof'")
+			.get();
+		sameWorkerSecondDatabase.close();
+		const secondDatabase = new Database(secondPath!, { readonly: true });
+		const leakedToOtherWorker = secondDatabase
+			.query("SELECT 1 FROM sqlite_schema WHERE type = 'table' AND name = 'worker_isolation_proof'")
+			.get();
+		secondDatabase.close();
+		expect(leakedToSameWorkerFile).toBeNull();
+		expect(leakedToOtherWorker).toBeNull();
+	});
+
+	it('ejecuta también los tests de tooling dentro de una DB descartable', async () => {
+		const packageJson = JSON.parse(await readFile(resolve(workspacePath, 'package.json'), 'utf8')) as {
+			scripts: Record<string, string>;
+		};
+		const toolingRunner = await readFile(resolve(workspacePath, 'scripts/run-tooling-tests-isolated.ts'), 'utf8');
+
+		expect(packageJson.scripts['test:tooling']).toBe('bun scripts/run-tooling-tests-isolated.ts');
+		expect(toolingRunner).toContain("import { runIsolatedCommand } from './run-tests-isolated'");
+		expect(toolingRunner).not.toMatch(/DATABASE_URL\s*:/);
+		expect(toolingRunner).toContain("process.execPath, 'test'");
 	});
 });
 
@@ -263,6 +320,26 @@ describe('production bootstrap contract', () => {
 		expect(viteConfig).toContain("'process.env.NODE_ENV': JSON.stringify(nodeEnvironment)");
 		expect(viteConfig).toContain("'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion)");
 		expect(errorBoundary).not.toContain("from '../../../package.json'");
+	});
+
+	it('empaqueta migraciones versionadas y nunca la DB del workspace en Tauri', async () => {
+		const tauriConfig = await readFile(resolve(workspacePath, 'src-tauri/tauri.conf.json'), 'utf8');
+		const tauriBuild = await readFile(resolve(workspacePath, 'scripts/tauri-build.js'), 'utf8');
+
+		expect(tauriConfig).toContain('../src/lib/drizzle/migrations/');
+		expect(tauriConfig).not.toContain('dist/server/db.sqlite');
+		expect(tauriBuild).toContain("'0000_baseline.sql'");
+		expect(tauriBuild).toContain('MEDIA_MANAGER_DATABASE_PATH');
+		expect(tauriBuild).not.toContain('cpSync(dbSourcePath');
+	});
+
+	it('exige DATABASE_URL y mantiene las lecturas de Favorite libres de DDL runtime', async () => {
+		const drizzleSource = await readFile(resolve(workspacePath, 'src/lib/drizzle/index.ts'), 'utf8');
+		const favoriteSource = await readFile(resolve(workspacePath, 'src/services/favorite/favorite.service.ts'), 'utf8');
+
+		expect(drizzleSource).toContain('DATABASE_URL es obligatorio en servidor/tests');
+		expect(drizzleSource).not.toMatch(/env\.DATABASE_URL\s*\|\|\s*['"]file:\.\/db\.sqlite/);
+		expect(favoriteSource).not.toMatch(/(?:ALTER TABLE|DROP INDEX|CREATE (?:UNIQUE )?INDEX|UPDATE "Favorite")/);
 	});
 
 	it('mantiene un solo contexto de tema y protege también el árbol de providers', async () => {

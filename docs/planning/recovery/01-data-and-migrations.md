@@ -7,46 +7,46 @@ Wave 0 debe estar verde; ninguna tarea escribe sobre la DB original sin backup y
 
 ### DB-001 — Elegir una sola ubicación de migraciones
 
-- [ ] Adoptar `src/lib/drizzle/migrations/` o `drizzle/migrations/`, no ambas.
-- [ ] Quitar ignore de la ruta elegida y versionar SQL, journal y snapshots necesarios.
-- [ ] Configurar Drizzle, scripts, Tauri y CI contra esa ruta.
-- [ ] Eliminar/copiar con historia explícita la migración huérfana `0002_add_reindex_indexes.sql`.
-- [ ] Validar nombres y orden monotónico.
+- [x] Adoptar `src/lib/drizzle/migrations/` o `drizzle/migrations/`, no ambas.
+- [x] Quitar ignore de la ruta elegida y versionar SQL, journal y snapshots necesarios.
+- [x] Configurar Drizzle, scripts, Tauri y CI contra esa ruta.
+- [x] Eliminar/copiar con historia explícita la migración huérfana `0002_add_reindex_indexes.sql`.
+- [x] Validar nombres y orden monotónico.
 
 ### DB-002 — Capturar baseline real
 
-- [ ] Exportar DDL de una copia representativa sin datos personales.
-- [ ] Comparar 69 tablas reales contra 41 tablas Drizzle y clasificar: vigente, legacy, FTS/internal, huérfana.
-- [ ] Documentar columnas, indexes, triggers y virtual tables que Drizzle no modela.
-- [ ] Crear baseline que reproduce una instalación nueva.
-- [ ] Crear schema fingerprint estable y gate de drift.
+- [x] Exportar DDL de una copia representativa sin datos personales.
+- [x] Comparar 69 tablas reales contra 41 tablas Drizzle y clasificar: vigente, legacy, FTS/internal, huérfana.
+- [x] Documentar columnas, indexes, triggers y virtual tables que Drizzle no modela.
+- [x] Crear baseline que reproduce una instalación nueva.
+- [x] Crear schema fingerprint estable y gate de drift.
 
 **Proof:** DB vacía creada desde cero coincide con fingerprint esperado.
 
 ### DB-003 — Runner de migraciones productivo
 
-- [ ] Implementar `db:migrate`, `db:status`, `db:check` y `db:plan`.
-- [ ] Lock para evitar dos migraciones concurrentes.
-- [ ] Registro de versión/checksum y rechazo de migraciones modificadas.
-- [ ] Transacción por migración cuando SQLite lo permita.
-- [ ] Errores con rollback y código no-cero.
+- [x] Implementar `db:migrate`, `db:status`, `db:check` y `db:plan`.
+- [x] Lock para evitar dos migraciones concurrentes.
+- [x] Registro de versión/checksum y rechazo de migraciones modificadas.
+- [x] Transacción por migración cuando SQLite lo permita.
+- [x] Errores con rollback y código no-cero.
 
 ### DB-004 — Reemplazar copia de DB en tests
 
-- [ ] Crear DB temporal desde baseline/migraciones.
-- [ ] Seeds pequeños deterministas por suite.
-- [ ] Fixtures por dominio; no depender del contenido de usuario.
-- [ ] Reducir setup de 215 s y environment de 304 s observados.
-- [ ] Mantener guard contra DB real incluso después de migrar.
+- [x] Crear DB temporal desde baseline/migraciones.
+- [x] Seeds pequeños deterministas por suite.
+- [x] Fixtures por dominio; no depender del contenido de usuario.
+- [x] Reducir setup de 215 s y environment de 304 s observados.
+- [x] Mantener guard contra DB real incluso después de migrar.
 
 ## Paquete 1B — Integridad referencial
 
 ### DB-005 — Inventario de relaciones y huérfanos
 
-- [ ] Generar catálogo de relaciones esperadas desde schema/servicios.
-- [ ] Queries read-only para huérfanos por junction/FK conceptual.
-- [ ] Clasificar repair automático, cuarentena o decisión manual.
-- [ ] Guardar sólo conteos/IDs técnicos en reportes; no contenido personal.
+- [x] Generar catálogo de relaciones esperadas desde schema/servicios.
+- [x] Queries read-only para huérfanos por junction/FK conceptual.
+- [x] Clasificar repair automático, cuarentena o decisión manual.
+- [x] Guardar sólo conteos/IDs técnicos en reportes; no contenido personal.
 
 ### DB-006 — Introducir foreign keys por dominio
 
@@ -114,9 +114,9 @@ Wave 0 debe estar verde; ninguna tarea escribe sobre la DB original sin backup y
 
 ## Wave 1 exit gate
 
-- [ ] Checkout limpio crea DB desde migraciones versionadas.
-- [ ] Tests ya no copian `db.sqlite`; usan seeds deterministas.
-- [ ] Schema fingerprint y migration checksum verdes.
-- [ ] `integrity_check` y `foreign_key_check` verdes sobre fixture y copia representativa.
+- [x] Checkout limpio crea DB desde migraciones versionadas.
+- [x] Tests ya no copian `db.sqlite`; usan seeds deterministas.
+- [x] Schema fingerprint y migration checksum verdes.
+- [x] `integrity_check` y `foreign_key_check` verdes sobre fixture y copia representativa.
 - [ ] Backup/restore/upgrade/corte de proceso ensayados.
 - [ ] Ningún script destructivo opera sin marker, dry-run/confirmación y backup aplicable.
