@@ -6,8 +6,8 @@ import { copyFile, mkdir, realpath, rm, stat } from 'node:fs/promises';
 import { dirname, isAbsolute, relative, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { inventoryDatabase, verifyExistingBackup } from './database-safety';
-import { checkDatabase, loadMigrations, MIGRATION_TABLE } from './migrations';
-import { compareSchema, loadSchemaContract, type SchemaDriftReport } from './schema-fingerprint';
+import { checkDatabase, loadMigrations, migrateDatabase, MIGRATION_TABLE } from './migrations';
+import { compareSchema, createSchemaContract, type SchemaDriftReport } from './schema-fingerprint';
 
 const ADDITIVE_INDEXES = new Set([
 	'Audio_folderId_hash_idx',
@@ -30,6 +30,35 @@ const FAVORITE_INDEXES = new Set([
 
 const ALLOWED_CHANGED = new Set(['table:Favorite', ...[...FAVORITE_INDEXES].map((name) => `index:${name}`)]);
 const ALLOWED_MISSING = new Set([...ADDITIVE_INDEXES, ...FAVORITE_INDEXES].map((name) => `index:${name}`));
+
+const OWNED_BRIDGE_REPAIRS = [
+	['_ImageToAlbum', 'Image', 'Album'],
+	['_VideoToAlbum', 'Video', 'Album'],
+	['_ImageToCollection', 'Image', 'Collection'],
+	['_VideoToCollection', 'Video', 'Collection'],
+	['_ImageToTag', 'Image', 'Tag'],
+	['_VideoToTag', 'Video', 'Tag'],
+	['_ImageToProperty', 'Image', 'Property'],
+	['_VideoToProperty', 'Video', 'Property'],
+	['_ImageToWildcard', 'Image', 'Wildcard'],
+	['_VideoToWildcard', 'Video', 'Wildcard'],
+	['_ImageToCharacter', 'Image', 'Character'],
+	['_VideoToCharacter', 'Video', 'Character'],
+	['_ImageToPlace', 'Image', 'Place'],
+	['_VideoToPlace', 'Video', 'Place'],
+	['_ImageToWorldItem', 'Image', 'WorldItem'],
+	['_VideoToWorldItem', 'Video', 'WorldItem'],
+	['_ImageToConcept', 'Image', 'Concept'],
+	['_VideoToConcept', 'Video', 'Concept'],
+	['_ImageToPrompt', 'Image', 'Prompt'],
+	['_VideoToPrompt', 'Video', 'Prompt'],
+	['_ImageToNote', 'Image', 'Note'],
+	['_VideoToNote', 'Video', 'Note'],
+	['_GroupToImage', 'Group', 'Image'],
+	['_GroupToVideo', 'Group', 'Video'],
+	['_GroupToAlbum', 'Group', 'Album'],
+	['_GroupToTag', 'Group', 'Tag'],
+] as const;
 
 export type LegacyAdoptionOptions = {
 	backupPath: string;
@@ -96,7 +125,13 @@ function assertFavoriteRowsAreAdoptable(database: Database): number {
 	);
 	const duplicateGroups = firstNumber(
 		database,
-		'SELECT count(*) FROM (SELECT 1 FROM "Favorite" GROUP BY "profileId", "entityType", "entityId" HAVING count(*) > 1)'
+		`SELECT count(*) FROM (
+			SELECT 1 FROM "Favorite"
+			GROUP BY "profileId",
+				CASE lower("entityType") WHEN 'jsonfile' THEN 'jsonFile' WHEN 'worlditem' THEN 'worldItem' ELSE lower("entityType") END,
+				"entityId"
+			HAVING count(*) > 1
+		)`
 	);
 	if (nullProfiles > 0 || missingProfiles > 0 || duplicateGroups > 0) {
 		throw new Error(
@@ -173,16 +208,50 @@ function recordBaseline(database: Database, migration: Awaited<ReturnType<typeof
 	database.exec(`PRAGMA user_version = ${migration.version + 1}`);
 }
 
-function assertCountsPreserved(sourceCounts: Record<string, number>, outputCounts: Record<string, number>): void {
-	for (const [tableName, expectedCount] of Object.entries(sourceCounts)) {
+function createBaselineContract(baseline: Awaited<ReturnType<typeof loadMigrations>>[number]) {
+	const database = new Database(':memory:', { strict: true });
+	try {
+		for (const statement of baseline.statements) database.exec(statement);
+		return createSchemaContract(database, baseline.name);
+	} finally {
+		database.clearQueryCache();
+		database.close();
+	}
+}
+
+function expectedCountsAfterOwnedBridgeRepair(
+	database: Database,
+	sourceCounts: Record<string, number>
+): Record<string, number> {
+	const expectedCounts = { ...sourceCounts };
+	for (const [bridgeTable, leftTable, rightTable] of OWNED_BRIDGE_REPAIRS) {
+		if (!(bridgeTable in sourceCounts)) continue;
+		expectedCounts[bridgeTable] = firstNumber(
+			database,
+			`SELECT count(*)
+			 FROM ${quoteIdentifier(bridgeTable)} bridge
+			 INNER JOIN ${quoteIdentifier(leftTable)} left_owner ON left_owner."id" = bridge."A"
+			 INNER JOIN ${quoteIdentifier(rightTable)} right_owner ON right_owner."id" = bridge."B"`
+		);
+	}
+	return expectedCounts;
+}
+
+function assertCountsPreserved(expectedCounts: Record<string, number>, outputCounts: Record<string, number>): void {
+	for (const [tableName, expectedCount] of Object.entries(expectedCounts)) {
 		if (outputCounts[tableName] !== expectedCount) {
-			throw new Error(`El conteo de ${tableName} cambió durante la adopción.`);
+			throw new Error(
+				`El conteo de ${tableName} no coincide con la reconciliación permitida: esperado=${expectedCount}, actual=${outputCounts[tableName]}.`
+			);
 		}
 	}
-	const outputOnly = Object.keys(outputCounts).filter(
-		(tableName) => !(tableName in sourceCounts) && tableName !== MIGRATION_TABLE
+	const outputOnlyWithRows = Object.keys(outputCounts).filter(
+		(tableName) =>
+			!(tableName in expectedCounts) && tableName !== MIGRATION_TABLE && Number(outputCounts[tableName] ?? 0) !== 0
 	);
-	if (outputOnly.length > 0) throw new Error('La adopción produjo tablas de dominio inesperadas.');
+	if (outputOnlyWithRows.length > 0) {
+		throw new Error('La adopción produjo filas en tablas de dominio que no existían en el backup.');
+	}
 }
 
 async function assertOutputLocation(outputPath: string, backupPath: string, workspaceRoot: string): Promise<void> {
@@ -214,21 +283,22 @@ export async function adoptLegacyBackup({
 		const baseline = migrations[0];
 		if (!baseline || baseline.version !== 0)
 			throw new Error('La historia canónica no comienza con baseline versión 0.');
-		const contract = await loadSchemaContract();
+		const baselineContract = createBaselineContract(baseline);
 		database = new Database(resolvedOutputPath, { strict: true });
 		if (database.query("SELECT 1 FROM sqlite_schema WHERE type = 'table' AND name = ?").get(MIGRATION_TABLE)) {
 			throw new Error('La copia ya contiene historial de migraciones; usa db:migrate en lugar de adopción.');
 		}
 
-		const driftBefore = compareSchema(database, contract);
+		const driftBefore = compareSchema(database, baselineContract);
 		assertAdoptableDrift(driftBefore);
 		const favoriteRowsPreserved = assertFavoriteRowsAreAdoptable(database);
+		const expectedOutputCounts = expectedCountsAfterOwnedBridgeRepair(database, sourceManifest.inventory.tableCounts);
 		database.exec('PRAGMA busy_timeout = 5000');
 		database.exec('BEGIN IMMEDIATE');
 		try {
 			reconcileIndexes(database, baseline.statements, driftBefore);
 			recordBaseline(database, baseline);
-			const driftAfter = compareSchema(database, contract);
+			const driftAfter = compareSchema(database, baselineContract);
 			const unknownAfter = driftAfter.extra.filter((entry) => entry.classification === 'unknown');
 			if (driftAfter.missing.length > 0 || driftAfter.changed.length > 0 || unknownAfter.length > 0) {
 				throw new Error('La adopción no produjo el contrato canónico exacto.');
@@ -247,6 +317,7 @@ export async function adoptLegacyBackup({
 		database.clearQueryCache();
 		database.close();
 		database = null;
+		await migrateDatabase({ allowExistingPending: true, databasePath: resolvedOutputPath });
 
 		const [check, outputInventory, verifiedSourceAgain] = await Promise.all([
 			checkDatabase({ databasePath: resolvedOutputPath }),
@@ -254,7 +325,7 @@ export async function adoptLegacyBackup({
 			verifyExistingBackup({ backupPath: resolvedBackupPath, manifestPath }),
 		]);
 		if (!check.healthy) throw new Error('La copia adoptada no supera db:check.');
-		assertCountsPreserved(sourceManifest.inventory.tableCounts, outputInventory.tableCounts);
+		assertCountsPreserved(expectedOutputCounts, outputInventory.tableCounts);
 		if (verifiedSourceAgain.sha256 !== sourceManifest.sha256)
 			throw new Error('El backup fuente cambió durante la adopción.');
 

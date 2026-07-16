@@ -37,7 +37,7 @@ describe('representative schema export', () => {
 
 		const ddl = await exportDatabaseSchema(databasePath);
 
-		expect(ddl).toContain('CREATE TABLE `Profile`');
+		expect(ddl).toMatch(/CREATE TABLE ["`]Profile["`]/);
 		expect(ddl).toContain('CREATE TABLE "Task"');
 		expect(ddl).not.toContain('private-row-value');
 		expect(ddl).not.toContain(databasePath);

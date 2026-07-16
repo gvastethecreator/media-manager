@@ -1,8 +1,8 @@
 import { Database } from 'bun:sqlite';
 import { createHash, randomUUID } from 'node:crypto';
-import { createReadStream } from 'node:fs';
-import { copyFile, mkdir, mkdtemp, readFile, realpath, rename, rm, stat, writeFile } from 'node:fs/promises';
-import { basename, isAbsolute, join, relative, resolve } from 'node:path';
+import { constants, createReadStream } from 'node:fs';
+import { copyFile, link, mkdir, mkdtemp, readFile, realpath, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -21,25 +21,41 @@ export type DatabaseInventory = {
 };
 
 export type BackupManifest = {
+	appVersion: string;
 	backupFile: string;
 	byteSize: number;
 	createdAt: string;
-	formatVersion: 1;
+	formatVersion: 2;
 	inventory: DatabaseInventory;
+	rootReferences: string[];
 	restoreVerified: true;
+	schemaVersion: number;
 	sha256: string;
 };
 
+type LegacyBackupManifest = Omit<
+	BackupManifest,
+	'appVersion' | 'formatVersion' | 'rootReferences' | 'schemaVersion'
+> & {
+	formatVersion: 1;
+};
+
 type CreateBackupOptions = {
+	appVersion?: string;
 	databasePath: string;
 	now?: Date;
 	outputDirectory: string;
+	rootReferences?: string[];
 	workspaceRoot: string;
 };
 
 type VerifyBackupOptions = {
 	backupPath: string;
 	manifestPath?: string;
+};
+
+type RestoreBackupOptions = VerifyBackupOptions & {
+	outputPath: string;
 };
 
 type SchemaEntry = {
@@ -107,13 +123,13 @@ function assertInventoryMatches(expected: DatabaseInventory, actual: DatabaseInv
 	}
 }
 
-function assertBackupManifest(value: unknown): asserts value is BackupManifest {
+function assertBackupManifest(value: unknown): asserts value is BackupManifest | LegacyBackupManifest {
 	if (!value || typeof value !== 'object') {
 		throw new Error('El manifest no es un objeto JSON válido.');
 	}
 	const manifest = value as Partial<BackupManifest>;
 	if (
-		manifest.formatVersion !== 1 ||
+		(manifest.formatVersion !== 1 && manifest.formatVersion !== 2) ||
 		manifest.restoreVerified !== true ||
 		typeof manifest.backupFile !== 'string' ||
 		typeof manifest.sha256 !== 'string' ||
@@ -121,6 +137,15 @@ function assertBackupManifest(value: unknown): asserts value is BackupManifest {
 		!manifest.inventory
 	) {
 		throw new Error('El manifest no cumple el contrato de backup v1.');
+	}
+	if (
+		manifest.formatVersion === 2 &&
+		(typeof manifest.appVersion !== 'string' ||
+			typeof manifest.schemaVersion !== 'number' ||
+			!Array.isArray(manifest.rootReferences) ||
+			!manifest.rootReferences.every((rootId) => typeof rootId === 'string'))
+	) {
+		throw new Error('El manifest no cumple el contrato de backup v2.');
 	}
 }
 
@@ -192,9 +217,9 @@ export async function inventoryDatabase(databasePath: string, now = new Date()):
 	}
 }
 
-async function inventoryDatabaseInChild(databasePath: string): Promise<DatabaseInventory> {
+async function inventoryDatabaseInChild(databasePath: string, now?: Date): Promise<DatabaseInventory> {
 	const inventoryFixture = resolve(import.meta.dir, 'fixtures', 'inventory-database-child.ts');
-	const child = Bun.spawn([process.execPath, inventoryFixture, databasePath], {
+	const child = Bun.spawn([process.execPath, inventoryFixture, databasePath, ...(now ? [now.toISOString()] : [])], {
 		cwd: process.cwd(),
 		env: process.env,
 		stderr: 'pipe',
@@ -209,6 +234,20 @@ async function inventoryDatabaseInChild(databasePath: string): Promise<DatabaseI
 		throw new Error(`El inventario SQLite aislado falló: ${stderr.trim() || `exit ${exitCode}`}`);
 	}
 	return JSON.parse(stdout) as DatabaseInventory;
+}
+
+async function vacuumDatabaseIntoInChild(sourcePath: string, outputPath: string): Promise<void> {
+	const vacuumFixture = resolve(import.meta.dir, 'fixtures', 'vacuum-database-child.ts');
+	const child = Bun.spawn([process.execPath, vacuumFixture, sourcePath, outputPath], {
+		cwd: process.cwd(),
+		env: process.env,
+		stderr: 'pipe',
+		stdout: 'ignore',
+	});
+	const [exitCode, stderr] = await Promise.all([child.exited, new Response(child.stderr).text()]);
+	if (exitCode !== 0) {
+		throw new Error(`El snapshot SQLite aislado falló: ${stderr.trim() || `exit ${exitCode}`}`);
+	}
 }
 
 async function verifyRestorableCopy(backupPath: string, expectedInventory: DatabaseInventory): Promise<void> {
@@ -229,9 +268,11 @@ async function verifyRestorableCopy(backupPath: string, expectedInventory: Datab
 }
 
 export async function createVerifiedBackup({
+	appVersion = 'unknown',
 	databasePath,
 	now = new Date(),
 	outputDirectory,
+	rootReferences = [],
 	workspaceRoot,
 }: CreateBackupOptions): Promise<{ backupPath: string; manifest: BackupManifest; manifestPath: string }> {
 	const resolvedDatabasePath = resolve(databasePath);
@@ -270,27 +311,23 @@ export async function createVerifiedBackup({
 	}
 
 	try {
-		const source = new Database(resolvedDatabasePath, { readonly: true });
-		try {
-			source.run('VACUUM INTO ?', stagingBackupPath);
-		} finally {
-			source.clearQueryCache();
-			source.close();
-		}
-
-		const inventory = await inventoryDatabase(stagingBackupPath, now);
+		await vacuumDatabaseIntoInChild(resolvedDatabasePath, stagingBackupPath);
+		const inventory = await inventoryDatabaseInChild(stagingBackupPath, now);
 		if (inventory.quickCheck !== 'ok') {
 			throw new Error(`El backup no supera PRAGMA quick_check: ${inventory.quickCheck}`);
 		}
 		const sha256 = await calculateSha256(stagingBackupPath);
 		await verifyRestorableCopy(stagingBackupPath, inventory);
 		const manifest: BackupManifest = {
+			appVersion,
 			backupFile: basename(backupPath),
 			byteSize: inventory.byteSize,
 			createdAt: now.toISOString(),
-			formatVersion: 1,
+			formatVersion: 2,
 			inventory: { ...inventory, fileName: basename(backupPath) },
+			rootReferences: [...new Set(rootReferences)].sort(),
 			restoreVerified: true,
+			schemaVersion: inventory.userVersion,
 			sha256,
 		};
 		await writeFile(stagingManifestPath, `${JSON.stringify(manifest, null, 2)}\n`, {
@@ -311,7 +348,7 @@ export async function createVerifiedBackup({
 export async function verifyExistingBackup({
 	backupPath,
 	manifestPath = `${backupPath}.manifest.json`,
-}: VerifyBackupOptions): Promise<BackupManifest> {
+}: VerifyBackupOptions): Promise<BackupManifest | LegacyBackupManifest> {
 	const parsedManifest = JSON.parse(await readFile(manifestPath, 'utf8')) as unknown;
 	assertBackupManifest(parsedManifest);
 	if (basename(backupPath) !== parsedManifest.backupFile) {
@@ -329,4 +366,36 @@ export async function verifyExistingBackup({
 	assertInventoryMatches(parsedManifest.inventory, inventory);
 	await verifyRestorableCopy(backupPath, parsedManifest.inventory);
 	return parsedManifest;
+}
+
+export async function restoreVerifiedBackup({
+	backupPath,
+	manifestPath = `${backupPath}.manifest.json`,
+	outputPath,
+}: RestoreBackupOptions): Promise<{
+	manifest: BackupManifest | LegacyBackupManifest;
+	outputPath: string;
+}> {
+	const resolvedBackupPath = resolve(backupPath);
+	const resolvedOutputPath = resolve(outputPath);
+	if (resolvedBackupPath === resolvedOutputPath) {
+		throw new Error('El destino de restore no puede ser el mismo archivo de backup.');
+	}
+	if (await stat(resolvedOutputPath).catch(() => null)) {
+		throw new Error(`El destino de restore ya existe y no será sobrescrito: ${resolvedOutputPath}`);
+	}
+	const manifest = await verifyExistingBackup({ backupPath: resolvedBackupPath, manifestPath: resolve(manifestPath) });
+	await mkdir(dirname(resolvedOutputPath), { recursive: true });
+	const stagingPath = `${resolvedOutputPath}.partial-${randomUUID().slice(0, 8)}`;
+	try {
+		await copyFile(resolvedBackupPath, stagingPath, constants.COPYFILE_EXCL);
+		const restoredInventory = await inventoryDatabaseInChild(stagingPath);
+		assertInventoryMatches(manifest.inventory, restoredInventory);
+		await link(stagingPath, resolvedOutputPath);
+		await removeFileAfterRelease(stagingPath);
+		return { manifest, outputPath: resolvedOutputPath };
+	} catch (error) {
+		await removeFileAfterRelease(stagingPath);
+		throw error;
+	}
 }

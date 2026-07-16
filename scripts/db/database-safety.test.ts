@@ -5,7 +5,13 @@ import { appendFile, mkdir, mkdtemp, readFile, readdir, rm, symlink } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { createVerifiedBackup, inventoryDatabase, resolveDatabasePath, verifyExistingBackup } from './database-safety';
+import {
+	createVerifiedBackup,
+	inventoryDatabase,
+	resolveDatabasePath,
+	restoreVerifiedBackup,
+	verifyExistingBackup,
+} from './database-safety';
 
 const temporaryDirectories: string[] = [];
 
@@ -75,12 +81,18 @@ describe('verified database backup', () => {
 		const { databasePath, root, workspaceRoot } = await createFixture();
 		const outputDirectory = join(root, 'backups');
 		const result = await createVerifiedBackup({
+			appVersion: '0.1.0-test',
 			databasePath,
 			now: new Date('2026-07-14T12:00:00.000Z'),
 			outputDirectory,
+			rootReferences: ['secondary', 'primary', 'primary'],
 			workspaceRoot,
 		});
 
+		expect(result.manifest.formatVersion).toBe(2);
+		expect(result.manifest.appVersion).toBe('0.1.0-test');
+		expect(result.manifest.schemaVersion).toBe(7);
+		expect(result.manifest.rootReferences).toEqual(['primary', 'secondary']);
 		expect(result.manifest.inventory.tableCounts).toEqual({ assets: 1 });
 		expect(result.manifest.restoreVerified).toBe(true);
 		expect(result.manifest.sha256).toHaveLength(64);
@@ -94,6 +106,24 @@ describe('verified database backup', () => {
 		source.run('INSERT INTO assets(label) VALUES (?)', 'later-change');
 		source.close();
 		expect((await inventoryDatabase(result.backupPath)).tableCounts.assets).toBe(1);
+	});
+
+	it('restaura a un path nuevo, verifica la copia y nunca sobrescribe', async () => {
+		const { databasePath, root, workspaceRoot } = await createFixture();
+		const result = await createVerifiedBackup({
+			databasePath,
+			outputDirectory: join(root, 'backups'),
+			workspaceRoot,
+		});
+		const outputPath = join(root, 'restored', 'media-manager.sqlite');
+
+		await expect(restoreVerifiedBackup({ backupPath: result.backupPath, outputPath })).resolves.toMatchObject({
+			outputPath,
+		});
+		expect((await inventoryDatabase(outputPath)).tableCounts).toEqual({ assets: 1 });
+		await expect(restoreVerifiedBackup({ backupPath: result.backupPath, outputPath })).rejects.toThrow(
+			'ya existe y no será sobrescrito'
+		);
 	});
 
 	it('rechaza backups dentro del workspace', async () => {
