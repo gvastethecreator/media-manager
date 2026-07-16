@@ -39,11 +39,11 @@ bun run db:backup:verify -- --backup D:\Backups\media-manager\media-manager-back
 La verificación vuelve a calcular tamaño y SHA-256, abre la base, ejecuta `quick_check`, copia a un directorio temporal
 y compara el schema y todos los conteos del manifest. No reemplaza la base activa.
 
-## Reset deshabilitado
+## Reset exclusivamente descartable
 
-`bun run db:reset` devuelve exit code 2 sin tocar archivos. El flujo anterior eliminaba `db.sqlite` y el historial de
-migraciones; no se reactivará hasta que Wave 1 disponga de schema reproducible, marcador de DB descartable y restore
-obligatorio. La API y la UI tampoco publican reset de base de datos.
+`bun run db:reset` es dry-run por defecto y sólo opera bajo `.scratch` o el temp del sistema después de marcar el archivo
+con `db:mark-disposable` y confirmar `RESET-DISPOSABLE`. `db.sqlite`, paths externos o archivos sin marker fallan cerrado.
+La API y la UI no publican reset de base de datos.
 
 ## Contrato del CLI
 
@@ -51,7 +51,8 @@ obligatorio. La API y la UI tampoco publican reset de base de datos.
 - `--json` produce datos estructurados en stdout; los errores van a stderr.
 - Uso inválido devuelve 2; fallo operativo o de integridad devuelve 1.
 - Sólo se admiten rutas SQLite locales; URLs remotas, query strings y fragments se rechazan.
-- No hay retención automática todavía: conservar o eliminar backups sigue siendo una decisión manual.
+- `db:backup:prune` ofrece retención explícita, dry-run por defecto. Verifica todo el conjunto antes de borrar y exige
+  `PRUNE-VERIFIED-BACKUPS` para aplicar el plan.
 
 > No se creó ningún backup de la biblioteca real durante el desarrollo de esta herramienta. Las pruebas usan bases
 > temporales descartables.

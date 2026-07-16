@@ -195,8 +195,8 @@ Checkpoints ya implementados y verificados:
 1. `GATE-001`, `SAFE-001`, `SAFE-002`, `GATE-002`: gates honestos y tests aislados.
 2. `SEC-001`: Express/Vite sólo loopback por defecto.
 3. `SEC-005` parcial: rutas debug/test ausentes de production.
-4. `SAFE-003` parcial: inventario, snapshot consistente, manifest, hash y restore; falta retención automática.
-5. `SAFE-004`/`SEC-005` parcial: reset DB bloqueado y retirado de HTTP/UI; log cleanup fuera de HTTP; mutaciones de
+4. `SAFE-003`: inventario, snapshot consistente, manifest, hash, restore y retención verificada fail-closed.
+5. `SAFE-004`/`SEC-005`: reset DB limitado a targets descartables marcados y retirado de HTTP/UI; log cleanup fuera de HTTP; mutaciones de
    thumbnails sólo por POST.
 6. `BOOT-001` y `RUN-002` parcial: un solo contexto de tema, boundary exterior, build production explícito, root visible
    en Chromium y tooling de desarrollo ausente de `dist`.

@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createVerifiedBackup, inventoryDatabase, verifyExistingBackup } from './database-safety';
 import { adoptLegacyBackup } from './legacy-adoption';
-import { checkDatabase, migrateDatabase, MIGRATION_TABLE } from './migrations';
+import { checkDatabase, loadMigrations, MIGRATION_TABLE } from './migrations';
 import { seedDeterministicTestFixture, TEST_PROFILE_ID } from './test-fixture';
 
 const ADDITIVE_INDEXES = [
@@ -25,6 +25,7 @@ const temporaryDirectories: string[] = [];
 type LegacyFixtureOptions = {
 	addUnknownTable?: boolean;
 	favoriteProfileId?: null | string;
+	includeOwnedBridgeOrphan?: boolean;
 };
 
 async function createLegacyBackup(options: LegacyFixtureOptions = {}): Promise<{
@@ -40,14 +41,20 @@ async function createLegacyBackup(options: LegacyFixtureOptions = {}): Promise<{
 	const artifactRoot = join(root, 'artifacts');
 	await Promise.all([mkdir(workspaceRoot), mkdir(artifactRoot)]);
 	const databasePath = join(workspaceRoot, 'legacy.sqlite');
-	await migrateDatabase({ databasePath });
+	const [baseline] = await loadMigrations();
+	const baselineDatabase = new Database(databasePath, { create: true, strict: true });
+	try {
+		for (const statement of baseline.statements) baselineDatabase.exec(statement);
+	} finally {
+		baselineDatabase.clearQueryCache();
+		baselineDatabase.close();
+	}
 	seedDeterministicTestFixture(databasePath);
 
 	const database = new Database(databasePath, { strict: true });
 	try {
 		database.exec('PRAGMA foreign_keys = OFF');
 		for (const indexName of ADDITIVE_INDEXES) database.exec(`DROP INDEX "${indexName}"`);
-		database.exec(`DROP TABLE ${MIGRATION_TABLE}`);
 		database.exec('PRAGMA user_version = 0');
 		database.exec(`
 			DROP INDEX "Favorite_profileId_entityType_entityId_key";
@@ -82,6 +89,9 @@ async function createLegacyBackup(options: LegacyFixtureOptions = {}): Promise<{
 				'legacy-image',
 				1_700_000_000_000
 			);
+		if (options.includeOwnedBridgeOrphan !== false) {
+			database.exec("INSERT INTO _ImageToWorldItem(A, B) VALUES ('missing-image', 'missing-world-item')");
+		}
 	} finally {
 		database.clearQueryCache();
 		database.close();
@@ -104,7 +114,7 @@ async function createLegacyBackup(options: LegacyFixtureOptions = {}): Promise<{
 
 afterEach(async () => {
 	for (const directory of temporaryDirectories.splice(0)) {
-		await rm(directory, { force: true, maxRetries: 20, recursive: true, retryDelay: 100 });
+		await rm(directory, { force: true, maxRetries: 100, recursive: true, retryDelay: 100 });
 	}
 });
 
@@ -127,7 +137,12 @@ describe('legacy SQLite adoption', () => {
 		expect(report.favoriteRowsPreserved).toBe(1);
 		expect(check.healthy).toBe(true);
 		expect(check.schema.extra).toContainEqual({ classification: 'legacy', name: 'Task', type: 'table' });
-		expect(outputInventory.tableCounts).toEqual({ ...fixture.sourceCounts, [MIGRATION_TABLE]: 1 });
+		for (const [tableName, count] of Object.entries(fixture.sourceCounts)) {
+			expect(outputInventory.tableCounts[tableName]).toBe(tableName === '_ImageToWorldItem' ? count - 1 : count);
+		}
+		expect(outputInventory.tableCounts[MIGRATION_TABLE]).toBe(4);
+		expect(outputInventory.tableCounts._AlbumToPlace).toBe(0);
+		expect(outputInventory.tableCounts._CharacterToPlace).toBe(0);
 		expect(sourceManifestAfter.sha256).toBe(sourceManifest.sha256);
 	});
 

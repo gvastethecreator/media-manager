@@ -50,67 +50,67 @@ Wave 0 debe estar verde; ninguna tarea escribe sobre la DB original sin backup y
 
 ### DB-006 — Introducir foreign keys por dominio
 
-- [ ] Activar `PRAGMA foreign_keys=ON` en todas las conexiones y tests.
-- [ ] Añadir `.references()` y políticas `ON DELETE/UPDATE` explícitas.
-- [ ] Orden: profiles/settings → folders/files/assets → organization → taxonomy → worldbuilding → junctions.
-- [ ] Migrar/reconstruir tablas SQLite con backup y reconciliación.
-- [ ] Añadir `foreign_key_check` a CI y startup diagnostic.
+- [x] Activar `PRAGMA foreign_keys=ON` en todas las conexiones y tests.
+- [x] Añadir `.references()` y políticas `ON DELETE/UPDATE` explícitas.
+- [x] Orden: profiles/settings → folders/files/assets → organization → taxonomy → worldbuilding → junctions.
+- [x] Migrar/reconstruir tablas SQLite con backup y reconciliación.
+- [x] Añadir `foreign_key_check` a CI y startup diagnostic.
 
 ### DB-007 — Constraints e invariantes
 
-- [ ] Unicidad de paths/identity según root y source.
-- [ ] Checks para enums/status, tamaños no negativos y rangos.
-- [ ] Unicidad/canonicalización de favorites por profile/type/entity.
-- [ ] Primary placement único por asset.
-- [ ] Junctions sin duplicados y con índices en ambas direcciones.
+- [x] Unicidad de paths/identity según root y source.
+- [x] Checks para enums/status, tamaños no negativos y rangos.
+- [x] Unicidad/canonicalización de favorites por profile/type/entity.
+- [x] Primary placement único por asset (modelo actual: un `folderId` escalar por tabla media; Asset convergente sigue en Wave 2).
+- [x] Junctions sin duplicados y con índices en ambas direcciones.
 
 ### DB-008 — Timestamps y tipos
 
-- [ ] Inventariar `CURRENT_TIMESTAMP` en columnas `integer(timestamp_ms)`.
-- [ ] Elegir epoch ms como contrato y migrar defaults/datos.
-- [ ] Normalizar timezone/serialización en DTOs.
-- [ ] Tests de roundtrip y orden temporal.
+- [x] Inventariar `CURRENT_TIMESTAMP` en columnas `integer(timestamp_ms)`.
+- [x] Elegir epoch ms como contrato y migrar defaults/datos.
+- [x] Normalizar timezone/serialización en DTOs.
+- [x] Tests de roundtrip y orden temporal.
 
 ## Paquete 1C — Atomicidad y recuperación
 
 ### DB-009 — Fronteras transaccionales
 
-- [ ] Mapear operaciones que escriben más de una tabla/FS+DB.
-- [ ] Añadir transacciones a favorites, relations, ingest, move/delete, reindex y cleanup.
-- [ ] Para FS+DB usar intent log/outbox o compensación; SQLite no puede transaccionar el filesystem.
-- [ ] Idempotency keys para jobs reintentables.
-- [ ] Tests de falla inyectada en cada paso.
+- [x] Mapear operaciones que escriben más de una tabla/FS+DB.
+- [x] Añadir transacciones a favorites, relations, ingest, move/delete, reindex y cleanup.
+- [x] Para FS+DB usar intent log/outbox o compensación; SQLite no puede transaccionar el filesystem.
+- [x] Idempotency keys para jobs reintentables.
+- [x] Tests de falla inyectada en cada paso.
 
 ### DB-010 — Backup, restore y upgrade
 
-- [ ] Backup consistente antes de cada upgrade.
-- [ ] Manifest con app/schema version, hash y roots referenciados.
-- [ ] Restore a path nuevo; nunca sobrescribir sin confirmación.
-- [ ] Retention y limpieza segura.
-- [ ] Simular corte de proceso durante migración y recuperar.
+- [x] Backup consistente antes de cada upgrade.
+- [x] Manifest con app/schema version, hash y roots referenciados.
+- [x] Restore a path nuevo; nunca sobrescribir sin confirmación.
+- [x] Retention y limpieza segura.
+- [x] Simular corte de proceso durante migración y recuperar.
 
 ### DB-011 — WAL, concurrencia y lifecycle
 
-- [ ] Definir WAL mode, busy timeout y pool/connections soportadas.
-- [ ] Evitar writers paralelos no coordinados durante indexación.
-- [ ] Checkpoint WAL en shutdown/backup cuando corresponda.
-- [ ] Métricas de lock contention y `SQLITE_BUSY`.
+- [x] Definir WAL mode, busy timeout y pool/connections soportadas.
+- [x] Evitar writers paralelos no coordinados durante indexación.
+- [x] Checkpoint WAL en shutdown/backup cuando corresponda.
+- [x] Métricas de lock contention y `SQLITE_BUSY`.
 
 ## Paquete 1D — Retiro de herramientas peligrosas
 
 ### DB-012 — Sustituir `db:reset` como workflow normal
 
-- [ ] `db:reset` sólo para disposable DB marcada.
-- [ ] Onboarding usa migrate/seed, no push `--force`.
-- [ ] Studio apunta a una DB seleccionada explícitamente.
-- [ ] Cleanup scripts comparten guard, dry-run, backup y audit log.
+- [x] `db:reset` sólo para disposable DB marcada.
+- [x] Onboarding usa migrate/seed, no push `--force`.
+- [x] Studio apunta a una DB seleccionada explícitamente.
+- [x] Cleanup scripts comparten guard, dry-run, backup y audit log.
 
 ### DB-013 — Corregir diagnóstico
 
-- [ ] `db:check` resuelve `DATABASE_URL` real.
-- [ ] Verifica apertura, version, migration drift, integrity, FK, WAL y espacio libre.
-- [ ] Distingue warning de error y devuelve códigos apropiados.
-- [ ] Modo JSON estable para CI/support bundles.
+- [x] `db:check` resuelve `DATABASE_URL` real.
+- [x] Verifica apertura, version, migration drift, integrity, FK, WAL y espacio libre.
+- [x] Distingue warning de error y devuelve códigos apropiados.
+- [x] Modo JSON estable para CI/support bundles.
 
 ## Wave 1 exit gate
 
@@ -118,5 +118,8 @@ Wave 0 debe estar verde; ninguna tarea escribe sobre la DB original sin backup y
 - [x] Tests ya no copian `db.sqlite`; usan seeds deterministas.
 - [x] Schema fingerprint y migration checksum verdes.
 - [x] `integrity_check` y `foreign_key_check` verdes sobre fixture y copia representativa.
-- [ ] Backup/restore/upgrade/corte de proceso ensayados.
-- [ ] Ningún script destructivo opera sin marker, dry-run/confirmación y backup aplicable.
+- [x] Backup/restore/upgrade/corte de proceso ensayados.
+- [x] Ningún script destructivo opera sin marker, dry-run/confirmación y backup aplicable.
+
+**Proof:** `docs/database/RECOVERY-AND-UPGRADE.md`, `docs/database/TRANSACTION-BOUNDARIES.md`, tooling DB, pruebas
+focalizadas de atomicidad y upgrade representativo 2→3 sin diferencias de conteo salvo la fila de historial.

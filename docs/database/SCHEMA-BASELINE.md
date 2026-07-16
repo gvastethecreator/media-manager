@@ -39,9 +39,26 @@ No se modificó `db.sqlite`. La comparación y adopción se ejecutaron sobre art
 - drift permitido sin borrado: Task/junctions legacy y FTS5;
 - resultado adoptado: 70 tablas, incluida `__media_manager_migrations`, `integrity_check = ok`, 0 violaciones FK,
   baseline aplicado y 0 objetos administrados faltantes, cambiados o desconocidos;
-- conteos de todas las tablas fuente preservados exactamente.
+- conteos de dominio preservados; sólo se eliminan filas de bridges sin ambos owners, con delta calculado antes de migrar.
 
 La copia adoptada es evidencia de compatibilidad, no un reemplazo automático de la base del usuario.
+
+## Migraciones de integridad posteriores al baseline
+
+- `0001_relational_integrity.sql` reconstruye las tablas afectadas con políticas FK explícitas, checks y defaults epoch-ms.
+  La directiva del runner desactiva FKs sólo fuera de la transacción de rebuild, las reactiva y ejecuta
+  `foreign_key_check` antes de aceptar el resultado. Sólo elimina junctions cuyos dos extremos técnicos ya no existen;
+  no repara por inferencia Metadata ni EntityAggregates polimórficos.
+- `0002_queue_idempotency.sql` añade `QueueJob.idempotencyKey` y la unicidad `(queue,idempotencyKey)` sin inventar keys
+  para filas históricas.
+- `0003_epoch_ms_normalization.sql` convierte texto/segundos/reales heredados en todos los campos `timestamp_ms` y aborta
+  si queda cualquier valor no nulo que no sea un entero epoch-ms.
+
+El rehearsal final de Wave 1 partió de la copia adoptada en versión 1, creó backup+manifest v2, aplicó hasta la versión 4
+en outputs nuevos y terminó con `integrity_check=ok`, 0 violaciones FK y 0 drift administrado. Las diferencias fueron
+exactamente las diseñadas: el link huérfano `_ImageToWorldItem` pasó de 1 a 0, se crearon vacías `_AlbumToPlace` y
+`_CharacterToPlace`, y `__media_manager_migrations` pasó de 1 a 4. Todos los demás conteos se preservaron. Los 2 Metadata
+y 17 EntityAggregates polimórficos conocidos siguen preservados y clasificados para reconciliación manual.
 
 ## Objetos fuera de Drizzle
 
@@ -63,11 +80,17 @@ bun run db:migrate -- --database C:/tmp/media-manager-new.sqlite
 bun run db:adopt-legacy -- --backup C:/backup/media-manager.sqlite --manifest C:/backup/media-manager.sqlite.manifest.json --output C:/rehearsal/media-manager-adopted.sqlite
 bun run db:check -- --database C:/tmp/media-manager-new.sqlite
 bun run db:orphans -- --database C:/tmp/media-manager-copy.sqlite
+bun run db:upgrade -- --database C:/tmp/media-manager-copy.sqlite --backup-dir D:/Backups/MediaManager --output C:/tmp/media-manager-next.sqlite --root-id library --json
 bun run db:schema:export -- --database C:/tmp/media-manager-copy.sqlite --output docs/database/representative-schema.sql
 bun run db:schema:check
 ```
 
-Una base no vacía sin historial es rechazada por el runner normal. `db:adopt-legacy` es una ruta separada y fail-closed:
+`db:migrate` sólo inicializa una base nueva o comprueba una base ya actual; su preflight readonly exige que
+`user_version` coincida exactamente con la cantidad de migraciones registradas y, si ya está current, valida el schema
+antes de activar WAL. Una base existente con migraciones pendientes debe usar `db:upgrade`, que conserva origen y backup
+y publica un output separado. Una base no vacía sin historial es rechazada por el runner normal. `db:adopt-legacy` es una
+ruta separada y fail-closed:
 exige un backup con manifest válido, crea un output nuevo fuera del workspace, rechaza objetos desconocidos, favoritos
-sin perfil/duplicados y cualquier pérdida de conteos. Sólo reconstruye el DDL histórico conocido de `Favorite`, crea los
-ocho índices aditivos y registra el baseline dentro de `BEGIN IMMEDIATE`. Nunca sobrescribe el backup ni el output.
+sin perfil/duplicados y cualquier delta no explicado. Sólo reconstruye el DDL histórico conocido de `Favorite`, crea los
+ocho índices aditivos, calcula el conteo esperado tras quitar bridges sin owners y registra el baseline dentro de
+`BEGIN IMMEDIATE`. Nunca sobrescribe el backup ni el output.
