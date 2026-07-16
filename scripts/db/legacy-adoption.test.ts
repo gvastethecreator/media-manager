@@ -5,7 +5,7 @@ import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createVerifiedBackup, inventoryDatabase, verifyExistingBackup } from './database-safety';
-import { adoptLegacyBackup } from './legacy-adoption';
+import type { LegacyAdoptionReport } from './legacy-adoption';
 import { checkDatabase, loadMigrations, MIGRATION_TABLE } from './migrations';
 import { seedDeterministicTestFixture, TEST_PROFILE_ID } from './test-fixture';
 
@@ -21,6 +21,35 @@ const ADDITIVE_INDEXES = [
 ];
 
 const temporaryDirectories: string[] = [];
+
+async function runAdoptionInChild(fixture: {
+	backupPath: string;
+	manifestPath: string;
+	outputPath: string;
+	workspaceRoot: string;
+}): Promise<{ exitCode: number; report?: LegacyAdoptionReport; stderr: string }> {
+	const child = Bun.spawn(
+		[
+			process.execPath,
+			join(import.meta.dir, 'fixtures', 'adopt-legacy-child.ts'),
+			fixture.backupPath,
+			fixture.manifestPath,
+			fixture.outputPath,
+			fixture.workspaceRoot,
+		],
+		{ stderr: 'pipe', stdout: 'pipe' }
+	);
+	const [exitCode, stdout, stderr] = await Promise.all([
+		child.exited,
+		new Response(child.stdout).text(),
+		new Response(child.stderr).text(),
+	]);
+	return {
+		exitCode,
+		report: exitCode === 0 ? (JSON.parse(stdout) as LegacyAdoptionReport) : undefined,
+		stderr,
+	};
+}
 
 type LegacyFixtureOptions = {
 	addUnknownTable?: boolean;
@@ -126,7 +155,9 @@ describe('legacy SQLite adoption', () => {
 			manifestPath: fixture.manifestPath,
 		});
 
-		const report = await adoptLegacyBackup(fixture);
+		const adoption = await runAdoptionInChild(fixture);
+		expect(adoption.exitCode).toBe(0);
+		const report = adoption.report as LegacyAdoptionReport;
 		const [check, outputInventory, sourceManifestAfter] = await Promise.all([
 			checkDatabase({ databasePath: fixture.outputPath }),
 			inventoryDatabase(fixture.outputPath),
@@ -140,26 +171,33 @@ describe('legacy SQLite adoption', () => {
 		for (const [tableName, count] of Object.entries(fixture.sourceCounts)) {
 			expect(outputInventory.tableCounts[tableName]).toBe(tableName === '_ImageToWorldItem' ? count - 1 : count);
 		}
-		expect(outputInventory.tableCounts[MIGRATION_TABLE]).toBe(4);
+		expect(outputInventory.tableCounts[MIGRATION_TABLE]).toBe((await loadMigrations()).length);
 		expect(outputInventory.tableCounts._AlbumToPlace).toBe(0);
 		expect(outputInventory.tableCounts._CharacterToPlace).toBe(0);
+		expect(outputInventory.tableCounts.Asset).toBe(0);
+		expect(outputInventory.tableCounts.MediaRoot).toBe(0);
+		expect(outputInventory.tableCounts.SourceFile).toBe(0);
 		expect(sourceManifestAfter.sha256).toBe(sourceManifest.sha256);
-	});
+	}, 60_000);
 
 	it('rejects unknown schema drift and removes the incomplete output', async () => {
 		const fixture = await createLegacyBackup({ addUnknownTable: true });
 
-		await expect(adoptLegacyBackup(fixture)).rejects.toThrow('Drift fuera del perfil de adopción seguro');
+		const adoption = await runAdoptionInChild(fixture);
+		expect(adoption.exitCode).not.toBe(0);
+		expect(adoption.stderr).toContain('Drift fuera del perfil de adopción seguro');
 		expect(existsSync(fixture.outputPath)).toBe(false);
 		await expect(
 			verifyExistingBackup({ backupPath: fixture.backupPath, manifestPath: fixture.manifestPath })
 		).resolves.toBeTruthy();
-	});
+	}, 60_000);
 
 	it('rejects unreconciled Favorite ownership and removes the incomplete output', async () => {
 		const fixture = await createLegacyBackup({ favoriteProfileId: null });
 
-		await expect(adoptLegacyBackup(fixture)).rejects.toThrow('Favorite requiere reconciliación antes de adoptar');
+		const adoption = await runAdoptionInChild(fixture);
+		expect(adoption.exitCode).not.toBe(0);
+		expect(adoption.stderr).toContain('Favorite requiere reconciliación antes de adoptar');
 		expect(existsSync(fixture.outputPath)).toBe(false);
-	});
+	}, 60_000);
 });

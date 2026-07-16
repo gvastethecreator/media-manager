@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { Database } from 'bun:sqlite';
-import { mkdtemp, rm, stat } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { migrateDatabase } from './migrations';
 import { hasIntegrityFailures, inspectOrphans, RELATION_CATALOG } from './orphan-inventory';
 
@@ -15,6 +15,26 @@ afterEach(async () => {
 });
 
 describe('read-only orphan inventory', () => {
+	it('keeps the exact executable catalog cardinality synchronized with its documentation', async () => {
+		const direct = RELATION_CATALOG.filter((relation) => relation.kind === 'direct');
+		const composite = RELATION_CATALOG.filter((relation) => relation.kind === 'composite');
+		const polymorphic = RELATION_CATALOG.filter((relation) => relation.kind === 'polymorphic');
+		const junctionEndpoints = direct.filter(
+			(relation) => relation.childTable.startsWith('_') && ['A', 'B'].includes(relation.childColumn)
+		);
+		const junctions = new Set(junctionEndpoints.map((relation) => relation.childTable));
+		const expectedMarker = `<!-- relation-catalog-counts: total=${RELATION_CATALOG.length} direct=${direct.length} composite=${composite.length} polymorphic=${polymorphic.length} junctions=${junctions.size} endpoints=${junctionEndpoints.length} -->`;
+		const documentation = await readFile(resolve(import.meta.dir, '../../docs/database/RELATION-INVENTORY.md'), 'utf8');
+
+		expect(RELATION_CATALOG).toHaveLength(89);
+		expect(direct).toHaveLength(83);
+		expect(composite).toHaveLength(1);
+		expect(polymorphic).toHaveLength(5);
+		expect(junctions.size).toBe(28);
+		expect(junctionEndpoints).toHaveLength(56);
+		expect(documentation).toContain(expectedMarker);
+	});
+
 	it('catalogs conceptual relations and reports only counts plus technical ids', async () => {
 		const directory = await mkdtemp(join(tmpdir(), 'media-manager-orphans-'));
 		temporaryDirectories.push(directory);
@@ -36,7 +56,7 @@ describe('read-only orphan inventory', () => {
 		const after = await stat(databasePath);
 		const serialized = JSON.stringify(findings);
 
-		expect(RELATION_CATALOG.length).toBeGreaterThan(70);
+		expect(RELATION_CATALOG).toHaveLength(89);
 		expect(findings.map((finding) => finding.name)).toContain('_ImageToTag.A->Image.id');
 		expect(findings.map((finding) => finding.name)).toContain('_ImageToTag.B->Tag.id');
 		expect(findings.map((finding) => finding.name)).toContain('Favorite.entityId->entityType target');
@@ -77,14 +97,79 @@ describe('read-only orphan inventory', () => {
 			'UploadedImage.imageId->Image.id',
 			'Image.noteId->Note.id',
 			'Profile.settingsId->Settings.id',
+			'SourceFile.assetId->Asset.id',
+			'SourceFile.rootId->MediaRoot.id',
+			'SourceFile.folderId->Folder.id',
+			'Asset.primarySourceFileId->SourceFile.id',
+			'Asset.(id,primarySourceFileId)->SourceFile.(assetId,id)',
 			'Collection.parentId->Collection.id',
 			'Favorite.entityId->entityType target',
 			'Thumbnail.entityId->entityType target',
 			'Metadata.entityId->entityType target',
 			'EntityAggregates.entityId->entityType target',
+			'_AlbumToPlace.A->Album.id',
+			'_AlbumToPlace.B->Place.id',
+			'_CharacterToPlace.A->Character.id',
+			'_CharacterToPlace.B->Place.id',
 		]) {
 			expect(names.has(expected)).toBe(true);
 		}
+	});
+
+	it('finds corrupt canonical Album/Character place bridges when foreign keys were disabled', async () => {
+		const directory = await mkdtemp(join(tmpdir(), 'media-manager-canonical-bridges-'));
+		temporaryDirectories.push(directory);
+		const databasePath = join(directory, 'canonical-bridges.sqlite');
+		await migrateDatabase({ databasePath });
+		const database = new Database(databasePath);
+		database.exec('PRAGMA foreign_keys = OFF');
+		database.exec(`
+			INSERT INTO _AlbumToPlace(A, B) VALUES ('missing-album', 'missing-place');
+			INSERT INTO _CharacterToPlace(A, B) VALUES ('missing-character', 'missing-place');
+		`);
+		database.clearQueryCache();
+		database.close();
+
+		const findings = inspectOrphans(databasePath);
+		const names = new Set(findings.map((finding) => finding.name));
+		for (const expected of [
+			'_AlbumToPlace.A->Album.id',
+			'_AlbumToPlace.B->Place.id',
+			'_CharacterToPlace.A->Character.id',
+			'_CharacterToPlace.B->Place.id',
+		]) {
+			expect(names.has(expected)).toBe(true);
+		}
+	});
+
+	it('detects canonical source ownership corruption even when foreign keys were disabled', async () => {
+		const directory = await mkdtemp(join(tmpdir(), 'media-manager-source-ownership-'));
+		temporaryDirectories.push(directory);
+		const databasePath = join(directory, 'source-ownership.sqlite');
+		await migrateDatabase({ databasePath });
+		const database = new Database(databasePath);
+		database.exec('PRAGMA foreign_keys = OFF');
+		database.exec(`
+			INSERT INTO MediaRoot(id, label) VALUES ('root-library', 'Library');
+			INSERT INTO Asset(id, assetType, primarySourceFileId) VALUES ('asset-one', 'image', 'source-two');
+			INSERT INTO Asset(id, assetType, primarySourceFileId) VALUES ('asset-two', 'image', 'source-one');
+			INSERT INTO SourceFile(id, assetId, rootId, relativePath, contentHash, byteSize, availability)
+			VALUES ('source-one', 'asset-one', 'root-library', 'one.png', '${'a'.repeat(64)}', 1, 'available');
+			INSERT INTO SourceFile(id, assetId, rootId, relativePath, contentHash, byteSize, availability)
+			VALUES ('source-two', 'asset-two', 'root-library', 'two.png', '${'b'.repeat(64)}', 1, 'available');
+		`);
+		database.clearQueryCache();
+		database.close();
+
+		const findings = inspectOrphans(databasePath);
+		const ownership = findings.find(
+			(finding) => finding.name === 'Asset.(id,primarySourceFileId)->SourceFile.(assetId,id)'
+		);
+
+		expect(ownership?.status).toBe('orphaned');
+		expect(ownership?.count).toBe(2);
+		expect(ownership?.technicalIds).toHaveLength(2);
+		expect(findings.some((finding) => finding.name === 'Asset.primarySourceFileId->SourceFile.id')).toBe(false);
 	});
 
 	it('finds Image.noteId orphans but ignores route-valid general activities', async () => {

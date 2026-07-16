@@ -7,7 +7,6 @@ import { resolveDatabasePath } from './database-safety';
 export type OrphanPolicy = 'auto-delete-link' | 'manual-reconcile' | 'quarantine';
 
 type RelationBase = {
-	childColumn: string;
 	childTable: string;
 	idColumn?: string;
 	name: string;
@@ -15,19 +14,28 @@ type RelationBase = {
 };
 
 export type DirectRelationContract = RelationBase & {
+	childColumn: string;
 	kind: 'direct';
 	parentColumn?: string;
 	parentTable: string;
 };
 
+export type CompositeRelationContract = RelationBase & {
+	childColumns: readonly string[];
+	kind: 'composite';
+	parentColumns: readonly string[];
+	parentTable: string;
+};
+
 export type PolymorphicRelationContract = RelationBase & {
+	childColumn: string;
 	discriminatorColumn: string;
 	ignoredDiscriminators?: readonly string[];
 	kind: 'polymorphic';
 	targets: Readonly<Record<string, string>>;
 };
 
-export type RelationContract = DirectRelationContract | PolymorphicRelationContract;
+export type RelationContract = DirectRelationContract | CompositeRelationContract | PolymorphicRelationContract;
 
 export type OrphanFinding = {
 	count: number;
@@ -39,6 +47,8 @@ export type OrphanFinding = {
 };
 
 const junctions: Array<[string, string, string]> = [
+	['_AlbumToPlace', 'Album', 'Place'],
+	['_CharacterToPlace', 'Character', 'Place'],
 	['_GroupToAlbum', 'Group', 'Album'],
 	['_GroupToImage', 'Group', 'Image'],
 	['_GroupToTag', 'Group', 'Tag'],
@@ -155,6 +165,24 @@ const polymorphic = (
 	targets,
 });
 
+const composite = (
+	childTable: string,
+	childColumns: readonly string[],
+	parentTable: string,
+	parentColumns: readonly string[],
+	policy: OrphanPolicy,
+	idColumn = 'id'
+): CompositeRelationContract => ({
+	kind: 'composite',
+	childColumns,
+	childTable,
+	idColumn,
+	name: `${childTable}.(${childColumns.join(',')})->${parentTable}.(${parentColumns.join(',')})`,
+	parentColumns,
+	parentTable,
+	policy,
+});
+
 export const RELATION_CATALOG: RelationContract[] = [
 	...junctions.flatMap(([childTable, leftTable, rightTable]) => [
 		direct(childTable, 'A', leftTable, 'auto-delete-link', 'rowid'),
@@ -168,6 +196,17 @@ export const RELATION_CATALOG: RelationContract[] = [
 	direct('UploadedImage', 'imageId', 'Image', 'manual-reconcile'),
 	direct('FileStats', 'fileId', 'Image', 'manual-reconcile'),
 	direct('Image', 'noteId', 'Note', 'manual-reconcile'),
+	direct('SourceFile', 'assetId', 'Asset', 'manual-reconcile'),
+	direct('SourceFile', 'rootId', 'MediaRoot', 'manual-reconcile'),
+	direct('SourceFile', 'folderId', 'Folder', 'manual-reconcile'),
+	direct('Asset', 'primarySourceFileId', 'SourceFile', 'manual-reconcile'),
+	composite(
+		'Asset',
+		['id', 'primarySourceFileId'],
+		'SourceFile',
+		['assetId', 'id'],
+		'manual-reconcile'
+	),
 	direct('Favorite', 'profileId', 'Profile', 'quarantine'),
 	polymorphic('Favorite', 'entityType', 'entityId', canonicalEntityTargets, 'quarantine'),
 	polymorphic('Thumbnail', 'entityType', 'entityId', mediaEntityTargets, 'auto-delete-link'),
@@ -245,6 +284,70 @@ function inspectDirectRelation(
 			: 'CAST(child.rowid AS TEXT)';
 	const where = `child.${childColumn} IS NOT NULL AND parent.${parentColumn} IS NULL`;
 	const join = `LEFT JOIN ${parentTable} parent ON child.${childColumn} = parent.${parentColumn}`;
+	const countStatement = database.prepare(`SELECT count(*) AS count FROM ${childTable} child ${join} WHERE ${where}`);
+	const sampleStatement = database.prepare(
+		`SELECT ${technicalSource} AS technicalSource FROM ${childTable} child ${join}
+		 WHERE ${where} ORDER BY technicalSource LIMIT ?`
+	);
+	try {
+		const count = Number((countStatement.get() as { count: number }).count);
+		if (count === 0) return null;
+		const samples = sampleStatement.all(sampleLimit) as Array<{ technicalSource: string }>;
+		return {
+			count,
+			name: relation.name,
+			policy: relation.policy,
+			status: 'orphaned',
+			technicalIds: samples.map((row) => technicalHash(relation.name, row.technicalSource)),
+		};
+	} finally {
+		countStatement.finalize();
+		sampleStatement.finalize();
+	}
+}
+
+function validateCompositeContract(database: Database, relation: CompositeRelationContract): string | null {
+	if (!tableExists(database, relation.childTable)) return `missing-child-table:${relation.childTable}`;
+	if (!tableExists(database, relation.parentTable)) return `missing-parent-table:${relation.parentTable}`;
+	if (relation.childColumns.length === 0 || relation.childColumns.length !== relation.parentColumns.length) {
+		return 'invalid-composite-arity';
+	}
+	for (const [table, column] of [
+		...relation.childColumns.map((column) => [relation.childTable, column] as const),
+		...relation.parentColumns.map((column) => [relation.parentTable, column] as const),
+		[relation.childTable, relation.idColumn ?? 'rowid'] as const,
+	]) {
+		if (column !== 'rowid' && !columnExists(database, table, column)) return `missing-column:${table}.${column}`;
+	}
+	return null;
+}
+
+function inspectCompositeRelation(
+	database: Database,
+	relation: CompositeRelationContract,
+	sampleLimit: number
+): OrphanFinding | null {
+	const invalidReason = validateCompositeContract(database, relation);
+	if (invalidReason) return uninspectable(relation, invalidReason);
+
+	const childTable = quoteIdentifier(relation.childTable);
+	const parentTable = quoteIdentifier(relation.parentTable);
+	const technicalSource =
+		relation.idColumn && relation.idColumn !== 'rowid'
+			? `CAST(child.${quoteIdentifier(relation.idColumn)} AS TEXT)`
+			: 'CAST(child.rowid AS TEXT)';
+	const populated = relation.childColumns
+		.map((column) => `child.${quoteIdentifier(column)} IS NOT NULL`)
+		.join(' AND ');
+	const joinCondition = relation.childColumns
+		.map(
+			(childColumn, index) =>
+				`child.${quoteIdentifier(childColumn)} = parent.${quoteIdentifier(relation.parentColumns[index])}`
+		)
+		.join(' AND ');
+	const missingParent = `parent.${quoteIdentifier(relation.parentColumns[0])} IS NULL`;
+	const join = `LEFT JOIN ${parentTable} parent ON ${joinCondition}`;
+	const where = `${populated} AND ${missingParent}`;
 	const countStatement = database.prepare(`SELECT count(*) AS count FROM ${childTable} child ${join} WHERE ${where}`);
 	const sampleStatement = database.prepare(
 		`SELECT ${technicalSource} AS technicalSource FROM ${childTable} child ${join}
@@ -354,9 +457,14 @@ function inspectPolymorphicRelation(
 }
 
 function inspectRelation(database: Database, relation: RelationContract, sampleLimit: number): OrphanFinding | null {
-	return relation.kind === 'direct'
-		? inspectDirectRelation(database, relation, sampleLimit)
-		: inspectPolymorphicRelation(database, relation, sampleLimit);
+	switch (relation.kind) {
+		case 'direct':
+			return inspectDirectRelation(database, relation, sampleLimit);
+		case 'composite':
+			return inspectCompositeRelation(database, relation, sampleLimit);
+		case 'polymorphic':
+			return inspectPolymorphicRelation(database, relation, sampleLimit);
+	}
 }
 
 export function inspectOrphans(databasePath: string, sampleLimit = 50): OrphanFinding[] {

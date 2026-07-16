@@ -6,6 +6,7 @@ import {
 	activities,
 	albumPlaces,
 	albums,
+	assets,
 	audios,
 	characters,
 	characterPlaces,
@@ -36,6 +37,7 @@ import {
 	imageWildcards,
 	imageWorldItems,
 	jsonFiles,
+	mediaRoots,
 	metadatas,
 	notes,
 	places,
@@ -44,6 +46,7 @@ import {
 	properties,
 	queueJobs,
 	settings,
+	sourceFiles,
 	tags,
 	thumbnails,
 	uploadedImages,
@@ -88,6 +91,10 @@ const schema = {
 	fileStats,
 	thumbnails,
 	entityAggregates,
+	// Media Core
+	assets,
+	mediaRoots,
+	sourceFiles,
 	// Media
 	folders,
 	images,
@@ -363,6 +370,12 @@ export type Favorite = typeof schema.favorites.$inferSelect;
 export type NewFavorite = typeof schema.favorites.$inferInsert;
 export type File = typeof schema.files.$inferSelect;
 export type NewFile = typeof schema.files.$inferInsert;
+export type Asset = typeof schema.assets.$inferSelect;
+export type NewAsset = typeof schema.assets.$inferInsert;
+export type MediaRoot = typeof schema.mediaRoots.$inferSelect;
+export type NewMediaRoot = typeof schema.mediaRoots.$inferInsert;
+export type SourceFile = typeof schema.sourceFiles.$inferSelect;
+export type NewSourceFile = typeof schema.sourceFiles.$inferInsert;
 
 /**
  * Función para cerrar la conexión a la base de datos
