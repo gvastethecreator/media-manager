@@ -85,7 +85,11 @@ const restoreActiveProfiles = () =>
 
 const ensureActiveProfile = () =>
 	withSqliteRetry(async () => {
-		const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+		const [activeProfile] = await db
+			.select({ id: profiles.id })
+			.from(profiles)
+			.where(eq(profiles.isActive, true))
+			.limit(1);
 
 		if (activeProfile) {
 			return activeProfile.id;
@@ -714,6 +718,20 @@ describe('CollectionService - Relation Operations', () => {
 			);
 
 			expect(result.added).toBe(0);
+		});
+
+		it('should roll back the complete batch when one image id is invalid', async () => {
+			const collection = await createTestCollection({ name: 'Atomic Collection' });
+			const image = await createTestImage();
+
+			await runEffectExpectFailure(
+				Effect.flatMap(CollectionService, (service) =>
+					service.addImages(collection.id, [image.id, 'missing-image-collection-atomic'])
+				)
+			);
+
+			const relations = await db.select().from(imageCollections).where(eq(imageCollections.B, collection.id));
+			expect(relations).toEqual([]);
 		});
 
 		it('should fail when collection not found', async () => {

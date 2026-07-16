@@ -2,8 +2,8 @@
 
 import { Database } from 'bun:sqlite';
 import { createHash } from 'node:crypto';
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { open, readdir, readFile, rm, stat, statfs } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
 import { resolveDatabasePath } from './database-safety';
 import { compareSchema, loadSchemaContract, type SchemaDriftReport } from './schema-fingerprint';
 
@@ -12,6 +12,7 @@ export const MIGRATION_TABLE = '__media_manager_migrations';
 
 export type MigrationFile = {
 	checksum: string;
+	foreignKeysOff: boolean;
 	name: string;
 	path: string;
 	statements: string[];
@@ -29,6 +30,18 @@ export type MigrationStatus = {
 };
 
 export type DatabaseCheck = {
+	diagnostics: {
+		availableBytes: number;
+		databaseBytes: number;
+		foreignKeysEnabled: boolean;
+		freelistCount: number;
+		journalMode: string;
+		pageCount: number;
+		pageSize: number;
+		sqliteVersion: string;
+	};
+	errors: string[];
+	expectedUserVersion: number;
 	foreignKeyViolations: number;
 	healthy: boolean;
 	integrity: string;
@@ -36,6 +49,8 @@ export type DatabaseCheck = {
 	schema: SchemaDriftReport;
 	unknownMigrations: string[];
 	userVersion: number;
+	status: 'error' | 'ok' | 'warning';
+	warnings: string[];
 };
 
 type AppliedMigration = {
@@ -49,12 +64,15 @@ type DrizzleJournal = {
 };
 
 type MigrationOptions = {
+	allowExistingPending?: boolean;
 	busyTimeoutMs?: number;
 	databasePath: string;
 	migrationsDirectory?: string;
+	validateSchema?: boolean;
 };
 
 const MIGRATION_FILE_PATTERN = /^(\d{4})_([a-z0-9][a-z0-9_-]*)\.sql$/;
+const FOREIGN_KEYS_OFF_DIRECTIVE = /^--\s*media-manager:\s*foreign-keys-off\s*$/im;
 
 function checksumSql(sql: string): string {
 	return createHash('sha256').update(sql).digest('hex');
@@ -124,6 +142,56 @@ function validateMigrationHistory(database: Database, migrations: MigrationFile[
 	}
 }
 
+function validateVersionMatchesHistory(database: Database): AppliedMigration[] {
+	const applied = readAppliedMigrations(database);
+	const userVersion = readPragmaNumber(database, 'user_version');
+	if (userVersion !== applied.length) {
+		throw new Error(
+			`user_version no coincide con la historia aplicada: actual=${userVersion}, esperado=${applied.length}.`
+		);
+	}
+	return applied;
+}
+
+function validateMigrationPreconditions(
+	database: Database,
+	migrations: MigrationFile[],
+	allowExistingPending: boolean
+): AppliedMigration[] {
+	validateMigrationHistory(database, migrations);
+	const applied = validateVersionMatchesHistory(database);
+	if (!allowExistingPending && applied.length < migrations.length && countApplicationObjects(database) > 0) {
+		throw new Error(
+			'db:migrate no actualiza bases existentes in-place. Usa db:upgrade para crear backup y publicar una copia nueva.'
+		);
+	}
+	return applied;
+}
+
+async function preflightExistingDatabase(
+	databasePath: string,
+	migrations: MigrationFile[],
+	allowExistingPending: boolean,
+	busyTimeoutMs: number,
+	migrationsDirectory: string,
+	validateSchema: boolean
+): Promise<void> {
+	const target = await stat(databasePath).catch(() => null);
+	if (!target || target.size === 0) return;
+	const database = new Database(databasePath, { readonly: true, strict: true });
+	try {
+		// Connection-local only: this must not change the database rejected by preflight.
+		database.exec(`PRAGMA busy_timeout = ${Math.max(0, Math.trunc(busyTimeoutMs))}`);
+		const applied = validateMigrationPreconditions(database, migrations, allowExistingPending);
+		if (validateSchema && applied.length === migrations.length) {
+			await validateCanonicalSchema(database, migrationsDirectory);
+		}
+	} finally {
+		database.clearQueryCache();
+		database.close();
+	}
+}
+
 async function validateCanonicalSchema(database: Database, migrationsDirectory: string): Promise<void> {
 	if (resolve(migrationsDirectory) !== resolve(MIGRATIONS_DIRECTORY)) return;
 	const schema = compareSchema(database, await loadSchemaContract());
@@ -140,6 +208,25 @@ function rollbackQuietly(database: Database): void {
 		database.exec('ROLLBACK');
 	} catch {
 		// The failed statement may already have ended the transaction.
+	}
+}
+
+function readPragmaNumber(database: Database, pragma: string): number {
+	const row = database.query(`PRAGMA ${pragma}`).get() as Record<string, unknown> | null;
+	const value = Number(row ? Object.values(row)[0] : Number.NaN);
+	if (!Number.isFinite(value)) throw new Error(`SQLite no devolvió un valor numérico para PRAGMA ${pragma}.`);
+	return value;
+}
+
+function readFirstValue(row: Record<string, unknown> | null): unknown {
+	return row ? Object.values(row)[0] : undefined;
+}
+
+function setForeignKeys(database: Database, enabled: boolean): void {
+	database.exec(`PRAGMA foreign_keys = ${enabled ? 'ON' : 'OFF'}`);
+	const actual = readPragmaNumber(database, 'foreign_keys') === 1;
+	if (actual !== enabled) {
+		throw new Error(`SQLite no pudo ${enabled ? 'activar' : 'desactivar'} foreign_keys fuera de la transacción.`);
 	}
 }
 
@@ -165,7 +252,14 @@ export async function loadMigrations(migrationsDirectory = MIGRATIONS_DIRECTORY)
 			.map((statement) => statement.trim())
 			.filter(Boolean);
 		if (statements.length === 0) throw new Error(`Migración vacía: ${name}`);
-		migrations.push({ checksum: checksumSql(sql), name, path, statements, version });
+		migrations.push({
+			checksum: checksumSql(sql),
+			foreignKeysOff: FOREIGN_KEYS_OFF_DIRECTIVE.test(sql),
+			name,
+			path,
+			statements,
+			version,
+		});
 		previousVersion = version;
 	}
 	if (migrations.length === 0) throw new Error(`No hay migraciones SQL en ${migrationsDirectory}`);
@@ -222,22 +316,45 @@ export async function inspectMigrationStatus({
 }
 
 export async function migrateDatabase({
+	allowExistingPending = false,
 	busyTimeoutMs = 5_000,
 	databasePath,
 	migrationsDirectory = MIGRATIONS_DIRECTORY,
+	validateSchema = true,
 }: MigrationOptions): Promise<{ applied: string[]; skipped: string[] }> {
 	const migrations = await loadMigrations(migrationsDirectory);
+	await preflightExistingDatabase(
+		databasePath,
+		migrations,
+		allowExistingPending,
+		busyTimeoutMs,
+		migrationsDirectory,
+		validateSchema
+	);
 	const database = new Database(databasePath, { create: true, strict: true });
 	const applied: string[] = [];
 	const skipped: string[] = [];
 	try {
 		database.exec(`PRAGMA busy_timeout = ${Math.max(0, Math.trunc(busyTimeoutMs))}`);
+		const appliedBeforeMigration = validateMigrationPreconditions(database, migrations, allowExistingPending);
+		if (validateSchema && appliedBeforeMigration.length === migrations.length) {
+			await validateCanonicalSchema(database, migrationsDirectory);
+		}
+		const journalMode = String(
+			readFirstValue(database.query('PRAGMA journal_mode = WAL').get() as Record<string, unknown> | null) ?? ''
+		).toLowerCase();
+		if (journalMode !== 'wal')
+			throw new Error(`SQLite no pudo activar WAL para la migración; devolvió ${journalMode}.`);
+		database.exec('PRAGMA synchronous = NORMAL');
+		setForeignKeys(database, true);
 
 		for (const migration of migrations) {
 			const startedAt = performance.now();
+			if (migration.foreignKeysOff) setForeignKeys(database, false);
 			database.exec('BEGIN IMMEDIATE');
 			try {
 				validateMigrationHistory(database, migrations);
+				validateVersionMatchesHistory(database);
 				ensureMigrationTable(database);
 				const existing = database
 					.query(`SELECT version, name, checksum FROM ${MIGRATION_TABLE} WHERE version = ?`)
@@ -247,10 +364,17 @@ export async function migrateDatabase({
 						throw new Error(`Migración aplicada fue modificada: ${migration.name}`);
 					}
 					database.exec('COMMIT');
+					if (migration.foreignKeysOff) setForeignKeys(database, true);
 					skipped.push(migration.name);
 					continue;
 				}
 				for (const statement of migration.statements) database.exec(statement);
+				const foreignKeyViolations = database.query('PRAGMA foreign_key_check').all();
+				if (foreignKeyViolations.length > 0) {
+					throw new Error(
+						`La migración ${migration.name} dejaría ${foreignKeyViolations.length} violación(es) de claves foráneas.`
+					);
+				}
 				const durationMs = Math.max(0, Math.round(performance.now() - startedAt));
 				database
 					.query(
@@ -260,13 +384,21 @@ export async function migrateDatabase({
 					.run(migration.version, migration.name, migration.checksum, new Date().toISOString(), durationMs);
 				database.exec(`PRAGMA user_version = ${migration.version + 1}`);
 				database.exec('COMMIT');
+				if (migration.foreignKeysOff) setForeignKeys(database, true);
 				applied.push(migration.name);
 			} catch (error) {
 				rollbackQuietly(database);
+				if (migration.foreignKeysOff) setForeignKeys(database, true);
 				throw error;
 			}
 		}
-		await validateCanonicalSchema(database, migrationsDirectory);
+		const userVersion = readPragmaNumber(database, 'user_version');
+		if (userVersion !== migrations.length) {
+			throw new Error(
+				`user_version no coincide con la historia aplicada: actual=${userVersion}, esperado=${migrations.length}.`
+			);
+		}
+		if (validateSchema) await validateCanonicalSchema(database, migrationsDirectory);
 		return { applied, skipped };
 	} finally {
 		database.clearQueryCache();
@@ -281,30 +413,66 @@ export async function checkDatabase({
 	const status = await inspectMigrationStatus({ databasePath, migrationsDirectory });
 	const database = new Database(databasePath, { readonly: true, strict: true });
 	try {
+		database.exec('PRAGMA foreign_keys = ON');
 		const integrityRow = database.query('PRAGMA integrity_check').get() as Record<string, unknown>;
 		const integrity = String(Object.values(integrityRow)[0] ?? 'unknown');
 		const foreignKeyViolations = database.query('PRAGMA foreign_key_check').all().length;
 		const userVersionRow = database.query('PRAGMA user_version').get() as Record<string, unknown>;
 		const userVersion = Number(Object.values(userVersionRow)[0] ?? 0);
+		const expectedUserVersion = status.migrations.length;
 		const schema = compareSchema(database, await loadSchemaContract());
 		const migrationFailure = status.migrations.some((entry) => entry.state !== 'applied');
 		const schemaFailure =
 			schema.missing.length > 0 ||
 			schema.changed.length > 0 ||
 			schema.extra.some((entry) => entry.classification === 'unknown');
+		const [databaseStats, filesystemStats] = await Promise.all([stat(databasePath), statfs(dirname(databasePath))]);
+		const journalMode = String(readFirstValue(database.query('PRAGMA journal_mode').get() as Record<string, unknown>));
+		const foreignKeysEnabled = readPragmaNumber(database, 'foreign_keys') === 1;
+		const diagnostics = {
+			availableBytes: Number(filesystemStats.bavail) * Number(filesystemStats.bsize),
+			databaseBytes: databaseStats.size,
+			foreignKeysEnabled,
+			freelistCount: readPragmaNumber(database, 'freelist_count'),
+			journalMode,
+			pageCount: readPragmaNumber(database, 'page_count'),
+			pageSize: readPragmaNumber(database, 'page_size'),
+			sqliteVersion: String(
+				readFirstValue(database.query('SELECT sqlite_version() AS version').get() as Record<string, unknown>) ??
+					'unknown'
+			),
+		};
+		const errors: string[] = [];
+		if (integrity !== 'ok') errors.push(`integrity_check=${integrity}`);
+		if (foreignKeyViolations > 0) errors.push(`foreign_key_violations=${foreignKeyViolations}`);
+		if (!foreignKeysEnabled) errors.push('foreign_keys=off');
+		if (migrationFailure) errors.push('migration_history_not_current');
+		if (status.unknownMigrations.length > 0) errors.push('unknown_migrations');
+		if (schemaFailure) errors.push('schema_drift');
+		if (userVersion !== expectedUserVersion) {
+			errors.push(`user_version_mismatch=${userVersion}:${expectedUserVersion}`);
+		}
+		const warnings: string[] = [];
+		if (journalMode.toLowerCase() !== 'wal') warnings.push(`journal_mode=${journalMode}`);
+		const legacyObjects = schema.extra.filter((entry) => entry.classification === 'legacy').length;
+		if (legacyObjects > 0) warnings.push(`legacy_schema_objects=${legacyObjects}`);
+		if (diagnostics.availableBytes < Math.max(diagnostics.databaseBytes * 2, 1_073_741_824)) {
+			warnings.push('low_free_space_for_safe_upgrade');
+		}
+		const healthStatus: DatabaseCheck['status'] = errors.length > 0 ? 'error' : warnings.length > 0 ? 'warning' : 'ok';
 		return {
+			diagnostics,
+			errors,
+			expectedUserVersion,
 			foreignKeyViolations,
-			healthy:
-				integrity === 'ok' &&
-				foreignKeyViolations === 0 &&
-				!migrationFailure &&
-				status.unknownMigrations.length === 0 &&
-				!schemaFailure,
+			healthy: errors.length === 0,
 			integrity,
 			migrations: status.migrations,
 			schema,
 			unknownMigrations: status.unknownMigrations,
 			userVersion,
+			status: healthStatus,
+			warnings,
 		};
 	} finally {
 		database.clearQueryCache();
@@ -321,10 +489,73 @@ function parseCli(arguments_: string[]): { command: string; databasePath: string
 	return { command, databasePath: resolveDatabasePath(databaseInput), json: options.includes('--json') };
 }
 
+async function claimFreshDatabaseInitialization(databasePath: string): Promise<{
+	release: () => Promise<void>;
+}> {
+	const markerPath = `${databasePath}.migration-initializing`;
+	const target = await stat(databasePath).catch(() => null);
+	let ownsMarker = false;
+	let waitsForOwner = false;
+	if (!target || target.size === 0) {
+		try {
+			const marker = await open(markerPath, 'wx');
+			try {
+				await marker.writeFile(JSON.stringify({ createdAt: new Date().toISOString(), processId: process.pid }), 'utf8');
+			} finally {
+				await marker.close();
+			}
+			ownsMarker = true;
+		} catch (error) {
+			if (!(error instanceof Error && 'code' in error && error.code === 'EEXIST')) throw error;
+			waitsForOwner = true;
+		}
+	}
+	if (!ownsMarker && !waitsForOwner && (await stat(markerPath).catch(() => null))) {
+		// The owner may have created the SQLite file between our target stat and marker check.
+		// Wait for it, but never inherit its permission to apply pending migrations.
+		waitsForOwner = true;
+	}
+	if (waitsForOwner) {
+		const waitDeadline = Date.now() + 30_000;
+		while (true) {
+			const markerStats = await stat(markerPath).catch(() => null);
+			if (!markerStats) break;
+			if (Date.now() - markerStats.mtimeMs > 5 * 60 * 1000) {
+				throw new Error(
+					`Marcador de inicialización SQLite vencido: ${markerPath}. Revísalo antes de volver a intentar.`
+				);
+			}
+			if (Date.now() >= waitDeadline) {
+				throw new Error('Otra inicialización SQLite no terminó dentro de 30 segundos.');
+			}
+			await new Promise((resolveWait) => setTimeout(resolveWait, 50));
+		}
+	}
+	return {
+		release: async () => {
+			if (ownsMarker) await rm(markerPath, { force: true });
+		},
+	};
+}
+
+export async function migrateDatabaseFromCli(
+	databasePath: string,
+	afterClaim?: () => Promise<void>
+): Promise<{ applied: string[]; skipped: string[] }> {
+	const initialization = await claimFreshDatabaseInitialization(databasePath);
+	try {
+		await afterClaim?.();
+		// Marker ownership serializes fresh initialization; it never grants in-place upgrade authority.
+		return await migrateDatabase({ databasePath });
+	} finally {
+		await initialization.release();
+	}
+}
+
 async function runCli(): Promise<void> {
 	const { command, databasePath, json } = parseCli(process.argv.slice(2));
 	if (command === 'migrate') {
-		const result = await migrateDatabase({ databasePath });
+		const result = await migrateDatabaseFromCli(databasePath);
 		console.log(
 			json ? JSON.stringify(result) : `Aplicadas: ${result.applied.length}; existentes: ${result.skipped.length}`
 		);

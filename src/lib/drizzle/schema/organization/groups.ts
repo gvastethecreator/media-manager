@@ -18,7 +18,9 @@ export const groups = sqliteTable(
 		description: text('description'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

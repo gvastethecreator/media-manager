@@ -28,6 +28,7 @@ export interface QueueJobBase {
 	error?: string | null;
 	finishedAt?: Date | null;
 	id: string;
+	idempotencyKey?: string | null;
 	maxAttempts: number;
 	metadata?: string | null;
 	priority: number;
@@ -55,6 +56,7 @@ export interface QueueJobMetadata {
  */
 export interface QueueJobCreateInput {
 	data: string;
+	idempotencyKey?: string;
 	maxAttempts?: number;
 	metadata?: QueueJobMetadata;
 	priority?: number;

@@ -68,7 +68,7 @@ export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 					color: sql`excluded.color`,
 					description: sql`excluded.description`,
 					isActive: sql`excluded.isActive`,
-					updatedAt: sql`(CURRENT_TIMESTAMP)`,
+					updatedAt: sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`,
 					settingsId: sql`excluded.settingsId`,
 					imageId: sql`excluded.imageId`,
 				},

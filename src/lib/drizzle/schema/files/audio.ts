@@ -11,7 +11,8 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { folders } from '../organization/folders';
 
 // Modelo para archivos de audio
 export const audios = sqliteTable(
@@ -24,7 +25,9 @@ export const audios = sqliteTable(
 		hash: text('hash').notNull(),
 		mimeType: text('mimeType').notNull(),
 		extension: text('extension').notNull(),
-		folderId: text('folderId').notNull(),
+		folderId: text('folderId')
+			.notNull()
+			.references(() => folders.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
 		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
@@ -51,7 +54,9 @@ export const audios = sqliteTable(
 		metadata: text('metadata'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
@@ -61,5 +66,13 @@ export const audios = sqliteTable(
 		folderHashIdx: index('Audio_folderId_hash_idx').on(table.folderId, table.hash),
 		createdAt_idx: index('Audio_createdAt_idx').on(table.createdAt),
 		updatedAt_idx: index('Audio_updatedAt_idx').on(table.updatedAt),
+		sizeCheck: check('Audio_size_check', sql`size >= 0 AND size <= 107374182400`),
+		durationCheck: check('Audio_duration_check', sql`duration IS NULL OR duration >= 0`),
+		hashFormatCheck: check('Audio_hash_format_check', sql`length(hash) = 64`),
+		pathLengthCheck: check('Audio_path_length_check', sql`length(path) BETWEEN 1 AND 1000`),
+		numericMetadataCheck: check(
+			'Audio_numeric_metadata_check',
+			sql`(bitrate IS NULL OR bitrate >= 0) AND (sampleRate IS NULL OR sampleRate >= 0) AND (channels IS NULL OR channels >= 0) AND (track IS NULL OR track >= 0) AND (disc IS NULL OR disc >= 0) AND (bpm IS NULL OR bpm >= 0)`
+		),
 	})
 );

@@ -1,7 +1,8 @@
 # Inventario de relaciones conceptuales
 
-Hasta que las foreign keys se introduzcan dominio por dominio, `scripts/db/orphan-inventory.ts` mantiene el catálogo
-ejecutable de 80 relaciones que hoy dependen de convención:
+`scripts/db/orphan-inventory.ts` mantiene un catálogo ejecutable de 80 relaciones. Desde `0001_relational_integrity`,
+las relaciones directas soportadas por SQLite también tienen FK físicas; el catálogo sigue siendo necesario para las
+referencias polimórficas, compatibilidad legacy y diagnóstico antes/después de upgrades:
 
 - 52 extremos de 26 junctions de Group/Image/Video hacia organización, taxonomía y worldbuilding;
 - placements `folderId` de siete tablas de archivos hacia `Folder`;
@@ -21,16 +22,18 @@ Las políticas iniciales son deliberadamente conservadoras:
 - `quarantine`: settings/favorites sin perfil no se reasignan por inferencia.
 - `manual-reconcile`: archivos sin folder y jerarquías rotas necesitan una decisión de placement.
 
-La herramienta de este checkpoint no repara nada. Su salida es la entrada del paquete DB-006, donde cada familia obtendrá
-FK y política `ON DELETE/UPDATE` explícita después de reconciliar una copia representativa.
+La herramienta no repara nada. La migración versionada sólo borra links huérfanos de junctions marcados
+`auto-delete-link`; las filas polimórficas/manuales permanecen visibles para una decisión posterior. Cada FK física usa
+una política `ON DELETE/UPDATE` explícita y `db:check` ejecuta `foreign_key_check`.
 
 ## Resultado sobre la copia representativa adoptada
 
-El inventario detectó y preservó cuatro findings:
+El inventario inicial detectó cuatro findings:
 
 - una fila de `_ImageToWorldItem` tiene roto el extremo Image y también el extremo WorldItem;
 - 2 filas de `Metadata` no resuelven su target polimórfico;
 - 17 filas de `EntityAggregates` no resuelven su target polimórfico.
 
-No se aplicó limpieza automática. El junction puede entrar en la futura reparación idempotente `auto-delete-link`; los
-metadatos y agregados requieren reconciliación manual o cuarentena antes de introducir FKs.
+Durante `0001`, el único link `_ImageToWorldItem` inválido se eliminó de forma idempotente porque ambos extremos habían
+desaparecido. El rehearsal posterior a `0002` conserva exactamente dos findings polimórficos: 2 filas de Metadata y 17
+de EntityAggregates. No se inventó un target ni se eliminó contenido manual.

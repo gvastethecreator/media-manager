@@ -6,9 +6,11 @@ import { favoriteService } from '../favorite.service';
 describe('Favorite schema contract', () => {
 	beforeEach(async () => {
 		const client = getDbClient();
-		expect(client).not.toBeNull();
-		await client!.execute('DROP TABLE IF EXISTS "Favorite"');
-		await client!.execute(`
+		if (!client) {
+			throw new Error('Expected an initialized test database client.');
+		}
+		await client.execute('DROP TABLE IF EXISTS "Favorite"');
+		await client.execute(`
 			CREATE TABLE "Favorite" (
 				"id" text PRIMARY KEY NOT NULL,
 				"profileId" text NOT NULL,
@@ -17,7 +19,7 @@ describe('Favorite schema contract', () => {
 				"addedAt" integer DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 			)
 		`);
-		await client!.execute(`
+		await client.execute(`
 			CREATE UNIQUE INDEX "Favorite_profileId_entityType_entityId_key"
 			ON "Favorite" ("profileId", "entityType", "entityId")
 		`);

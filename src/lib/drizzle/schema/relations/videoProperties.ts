@@ -10,13 +10,19 @@
  */
 
 import { index, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { videos } from '../files/videos';
+import { properties } from '../taxonomy/properties';
 
 // Relación Video-Property
 export const videoProperties = sqliteTable(
 	'_VideoToProperty',
 	{
-		A: text('A').notNull(), // videoId
-		B: text('B').notNull(), // propertyId
+		A: text('A')
+			.notNull()
+			.references(() => videos.id, { onDelete: 'cascade', onUpdate: 'cascade' }), // videoId
+		B: text('B')
+			.notNull()
+			.references(() => properties.id, { onDelete: 'cascade', onUpdate: 'cascade' }), // propertyId
 	},
 	(table) => ({
 		AB_unique: uniqueIndex('_VideoToProperty_AB_unique').on(table.A, table.B),
