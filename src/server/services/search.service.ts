@@ -7,7 +7,7 @@ import { isFts5Enabled } from '@/lib/drizzle/fts5';
 import { audios, documents, files, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image/converter.service';
-import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
+import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
 import { getAll } from '@/services/image/image.service.effect';
 import type { FileItem } from '@/types/files';
 
@@ -102,7 +102,12 @@ async function searchImagesUnified(query: string, limit: number, offset: number)
 	return db
 		.select()
 		.from(images)
-		.where(and(or(like(images.name, `%${query}%`), like(images.path, `%${query}%`)), visibleImageLifecycleCondition()))
+		.where(
+			and(
+				or(like(images.name, `%${query}%`), like(images.path, `%${query}%`)),
+				visibleAssetLifecycleCondition(images.assetId)
+			)
+		)
 		.orderBy(desc(images.createdAt), asc(images.id))
 		.limit(limit)
 		.offset(offset);
@@ -112,7 +117,12 @@ async function searchVideosUnified(query: string, limit: number, offset: number)
 	return db
 		.select()
 		.from(videos)
-		.where(or(like(videos.name, `%${query}%`), like(videos.path, `%${query}%`)))
+		.where(
+			and(
+				or(like(videos.name, `%${query}%`), like(videos.path, `%${query}%`)),
+				visibleAssetLifecycleCondition(videos.assetId)
+			)
+		)
 		.orderBy(desc(videos.createdAt), asc(videos.id))
 		.limit(limit)
 		.offset(offset);
@@ -122,7 +132,12 @@ async function searchAudiosUnified(query: string, limit: number, offset: number)
 	return db
 		.select()
 		.from(audios)
-		.where(or(like(audios.name, `%${query}%`), like(audios.path, `%${query}%`)))
+		.where(
+			and(
+				or(like(audios.name, `%${query}%`), like(audios.path, `%${query}%`)),
+				visibleAssetLifecycleCondition(audios.assetId)
+			)
+		)
 		.orderBy(desc(audios.createdAt), asc(audios.id))
 		.limit(limit)
 		.offset(offset);
@@ -132,7 +147,12 @@ async function searchDocumentsUnified(query: string, limit: number, offset: numb
 	return db
 		.select()
 		.from(documents)
-		.where(or(like(documents.name, `%${query}%`), like(documents.path, `%${query}%`)))
+		.where(
+			and(
+				or(like(documents.name, `%${query}%`), like(documents.path, `%${query}%`)),
+				visibleAssetLifecycleCondition(documents.assetId)
+			)
+		)
 		.orderBy(desc(documents.createdAt), asc(documents.id))
 		.limit(limit)
 		.offset(offset);
