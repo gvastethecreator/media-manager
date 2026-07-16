@@ -347,6 +347,7 @@ export async function adoptLegacyBackup({
 			rollbackQuietly(database);
 			database.clearQueryCache();
 			database.close();
+			database = null;
 		}
 		await rm(resolvedOutputPath, { force: true, maxRetries: 20, retryDelay: 100 });
 		throw error;
