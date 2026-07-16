@@ -10,13 +10,19 @@
  */
 
 import { index, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { videos } from '../files/videos';
+import { albums } from '../organization/albums';
 
 // Relación Video-Album
 export const videoAlbums = sqliteTable(
 	'_VideoToAlbum',
 	{
-		A: text('A').notNull(), // videoId
-		B: text('B').notNull(), // albumId
+		A: text('A')
+			.notNull()
+			.references(() => videos.id, { onDelete: 'cascade', onUpdate: 'cascade' }), // videoId
+		B: text('B')
+			.notNull()
+			.references(() => albums.id, { onDelete: 'cascade', onUpdate: 'cascade' }), // albumId
 	},
 	(table) => ({
 		AB_unique: uniqueIndex('_VideoToAlbum_AB_unique').on(table.A, table.B),

@@ -7,7 +7,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { type AnySQLiteColumn, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 // Modelo para los prompts
 export const prompts = sqliteTable(
@@ -28,13 +28,19 @@ export const prompts = sqliteTable(
 		type: text('type'),
 		notes: text('notes'),
 		featuredImage: text('featuredImage'),
-		parentId: text('parentId'),
+		parentId: text('parentId').references((): AnySQLiteColumn => prompts.id, {
+			onDelete: 'set null',
+			onUpdate: 'cascade',
+		}),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
 		nameIdx: uniqueIndex('Prompt_name_key').on(table.name),
+		parentIdIdx: index('Prompt_parentId_idx').on(table.parentId),
 	})
 );

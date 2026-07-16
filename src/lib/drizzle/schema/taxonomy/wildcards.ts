@@ -7,7 +7,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { type AnySQLiteColumn, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 // Modelo para los comodines
 export const wildcards = sqliteTable(
@@ -23,13 +23,19 @@ export const wildcards = sqliteTable(
 		featuredImage: text('featuredImage'),
 		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		parentId: text('parentId'),
+		parentId: text('parentId').references((): AnySQLiteColumn => wildcards.id, {
+			onDelete: 'set null',
+			onUpdate: 'cascade',
+		}),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
 		nameIdx: uniqueIndex('Wildcard_name_key').on(table.name),
+		parentIdIdx: index('Wildcard_parentId_idx').on(table.parentId),
 	})
 );

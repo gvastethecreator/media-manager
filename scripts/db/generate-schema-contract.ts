@@ -11,7 +11,7 @@ const directory = await mkdtemp(join(tmpdir(), 'media-manager-schema-contract-')
 const databasePath = join(directory, 'contract.sqlite');
 
 try {
-	await migrateDatabase({ databasePath });
+	await migrateDatabase({ databasePath, validateSchema: false });
 	const database = new Database(databasePath, { readonly: true, strict: true });
 	const contract = createSchemaContract(database);
 	database.clearQueryCache();

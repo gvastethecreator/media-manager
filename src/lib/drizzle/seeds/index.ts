@@ -9,6 +9,7 @@
 
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
+import { requireDatabaseUrl } from '../database-url';
 import { seedAlbums } from './albums.seed';
 import { seedAudios } from './audios.seed';
 import { seedCharacters } from './characters.seed';
@@ -50,7 +51,7 @@ export const seedLogger = {
  */
 export async function runSeeds() {
 	const client = createClient({
-		url: process.env.DATABASE_URL || 'file:./db.sqlite',
+		url: requireDatabaseUrl(),
 	});
 
 	const db = drizzle(client);

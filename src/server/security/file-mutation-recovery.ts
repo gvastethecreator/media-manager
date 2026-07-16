@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { chmod, lstat, mkdir, open, readFile, unlink } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { requireDatabaseUrl } from '@/lib/drizzle/database-url';
 import { getMediaAssetLocation, parseMediaAssetReference, type MediaAssetReference } from './media-asset-reference';
 import type { AuthorizedPathReference, AuthorizedRootRegistry } from './authorized-roots';
 
@@ -47,7 +48,7 @@ export interface FileMutationRecoveryHandle {
 let journalWriteQueue: Promise<void> = Promise.resolve();
 
 function databaseDirectory(environment: Record<string, string | undefined>): string {
-	const databaseUrl = environment.DATABASE_URL || 'file:./db.sqlite';
+	const databaseUrl = requireDatabaseUrl(environment);
 	if (databaseUrl.startsWith('file:')) {
 		try {
 			return dirname(fileURLToPath(databaseUrl));

@@ -22,6 +22,12 @@ interface EntityProcessor {
 	generateThumbnail?: (filePath: string, entityId: string) => Promise<ProcessorResult>;
 }
 
+export function resolveFileEntityMapperConcurrency(rawValue = process.env.MEDIA_MANAGER_INGEST_CONCURRENCY): number {
+	if (!rawValue) return 1;
+	const parsed = Number.parseInt(rawValue, 10);
+	return Number.isFinite(parsed) ? Math.min(4, Math.max(1, parsed)) : 1;
+}
+
 /**
  * Servicio core que orquesta el mapeo de archivos físicos a entidades BD
  * Arquitectura de 3 etapas:
@@ -46,7 +52,10 @@ export class FileEntityMapperCore {
 		this.processors.set('jsonFile' as EntityType, new JsonProcessor());
 
 		this.metrics = new MetricsCollector();
-		this.queue = new PQueue({ concurrency: 4 });
+		// SQLite sólo admite un escritor. El valor seguro es 1; un operador puede
+		// optar explícitamente por hasta 4 pipelines cuando el almacenamiento local
+		// y las métricas de SQLITE_BUSY demuestren que hay margen.
+		this.queue = new PQueue({ concurrency: resolveFileEntityMapperConcurrency() });
 		this.basicStageChain = Promise.resolve();
 	}
 

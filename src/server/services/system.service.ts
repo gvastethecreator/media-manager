@@ -5,6 +5,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import { db, getDbClient } from '@/lib/drizzle';
+import { requireDatabaseUrl, resolveLocalDatabaseFilePath } from '@/lib/drizzle/database-url';
 import {
 	albums,
 	audios,
@@ -290,14 +291,8 @@ export async function revalidateNavigation() {
 }
 
 function getDatabaseFileCandidates(): string[] {
-	const databaseUrl = process.env.DATABASE_URL || 'file:./db.sqlite';
-
-	if (!databaseUrl.startsWith('file:')) {
-		return [];
-	}
-
-	const normalizedPath = databaseUrl.slice('file:'.length);
-	const resolvedPath = path.resolve(process.cwd(), normalizedPath);
+	const resolvedPath = resolveLocalDatabaseFilePath(requireDatabaseUrl());
+	if (!resolvedPath) return [];
 
 	return [resolvedPath, `${resolvedPath}-wal`, `${resolvedPath}-shm`];
 }

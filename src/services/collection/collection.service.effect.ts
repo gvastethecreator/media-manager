@@ -724,53 +724,27 @@ export const CollectionServiceLive = Layer.succeed(
 
 				const uniqueImageIds = [...new Set(imageIds)];
 
-				const existingRelations = (yield* Effect.tryPromise({
-					try: async () =>
-						uniqueImageIds.length === 0
-							? []
-							: await withSqliteBusyRetry(
-									async () =>
-										await db
-											.select({ imageId: imageCollections.A })
-											.from(imageCollections)
-											.where(and(eq(imageCollections.B, collectionId), inArray(imageCollections.A, uniqueImageIds)))
-											.execute()
-								),
+				if (uniqueImageIds.length === 0) return { added: 0 };
+
+				// El INSERT múltiple es una frontera atómica y evita la carrera read-then-write.
+				const inserted = (yield* Effect.tryPromise({
+					try: () =>
+						withSqliteBusyRetry(() =>
+							db
+								.insert(imageCollections)
+								.values(uniqueImageIds.map((imageId) => ({ A: imageId, B: collectionId })))
+								.onConflictDoNothing()
+								.returning({ imageId: imageCollections.A })
+						),
 					catch: (error) =>
 						new CollectionDatabaseError({
-							operation: 'addImages:existingRelations',
+							operation: 'addImages:atomicInsert',
 							originalError: error,
 						}),
 				})) as Array<{ imageId: string }>;
 
-				const existingImageIds = new Set(existingRelations.map((relation: { imageId: string }) => relation.imageId));
-				const missingImageIds = uniqueImageIds.filter((imageId) => !existingImageIds.has(imageId));
-
-				if (missingImageIds.length > 0) {
-					yield* Effect.tryPromise({
-						try: async () =>
-							await withSqliteBusyRetry(
-								async () =>
-									await db
-										.insert(imageCollections)
-										.values(
-											missingImageIds.map((imageId) => ({
-												A: imageId,
-												B: collectionId,
-											}))
-										)
-										.execute()
-							),
-						catch: (error) =>
-							new CollectionDatabaseError({
-								operation: 'addImages:insert',
-								originalError: error,
-							}),
-					});
-				}
-
-				logger.info('✅ Imágenes agregadas', { added: missingImageIds.length });
-				return { added: missingImageIds.length };
+				logger.info('✅ Imágenes agregadas atómicamente', { added: inserted.length });
+				return { added: inserted.length };
 			}),
 
 		removeImage: (collectionId, imageId) =>

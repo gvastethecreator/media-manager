@@ -12,6 +12,8 @@
 
 import { sql } from 'drizzle-orm';
 import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { folders } from '../organization/folders';
+import { notes } from '../taxonomy/notes';
 
 // Modelo para las imágenes
 export const images = sqliteTable(
@@ -42,15 +44,21 @@ export const images = sqliteTable(
 		aiOriginDetected: integer('aiOriginDetected', { mode: 'boolean' }).default(false),
 		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		folderId: text('folderId').notNull(),
-		noteId: text('noteId'),
+		folderId: text('folderId')
+			.notNull()
+			.references(() => folders.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+		noteId: text('noteId').references(() => notes.id, { onDelete: 'set null', onUpdate: 'cascade' }),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 		addedAt: integer('addedAt', { mode: 'timestamp_ms' })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 	},
 	(table) => ({
 		pathFolderUniqueIdx: uniqueIndex('Image_path_folderId_key').on(table.path, table.folderId),
