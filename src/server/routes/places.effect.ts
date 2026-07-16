@@ -13,7 +13,6 @@ import { authorizeMediaAssetParam, filterAuthorizedMediaEntities } from '@/serve
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { PlaceService, PlaceServiceLive } from '@/services/place/place.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -122,17 +121,6 @@ router.delete(
 			yield* placeService.delete(req.params.id);
 			res.status(204);
 			return { success: true };
-		}).pipe(Effect.provide(PlaceServiceLive))
-	)
-);
-
-router.post(
-	'/:id/favorite',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.PLACE);
-			const placeService = yield* PlaceService;
-			return yield* placeService.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(PlaceServiceLive))
 	)
 );

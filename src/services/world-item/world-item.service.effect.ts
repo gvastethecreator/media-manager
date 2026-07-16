@@ -10,12 +10,17 @@ import { imageWorldItems, images, videoWorldItems, worldItems } from '@/lib/driz
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import {
+	deleteFavoriteRecordsForEntities,
+	emitCommittedFavoriteChange,
+	setFavoriteForActiveProfile,
+} from '@/services/favorite/favorite-write-transaction';
+import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
 import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { normalizeCounts, sumCounts } from '@/transformers/common/counts';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	fromUnknownWorldItemError,
-	WorldItemDatabaseError,
 	type WorldItemError,
 	WorldItemHasRelationsError,
 	WorldItemNameConflict,
@@ -73,7 +78,10 @@ const make = (): WorldItemServiceInterface => {
 				return yield* Effect.fail(new WorldItemNotFound({ worldItemId: id }));
 			}
 
-			return result[0] as Record<string, unknown>;
+			return yield* Effect.tryPromise({
+				try: () => favoriteService.projectEntity(FavoriteEntityType.WORLD_ITEM, result[0]),
+				catch: (error) => fromUnknownWorldItemError('getById.favoriteProjection', error),
+			});
 		});
 
 	const getAll = (options: GetWorldItemsOptions = {}): Effect.Effect<GetWorldItemsResult, WorldItemError> =>
@@ -88,29 +96,24 @@ const make = (): WorldItemServiceInterface => {
 				onlyFavorites,
 			} = options;
 
-			const favoriteEntityIds: string[] | null = onlyFavorites
-				? yield* Effect.tryPromise({
-						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.WORLD_ITEM),
-						catch: (error) => fromUnknownWorldItemError('getAll.favoriteIds', error),
-					})
-				: null;
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.WORLD_ITEM),
+				catch: (error) => fromUnknownWorldItemError('getAll.favoriteIds', error),
+			});
 
 			const conditions = [];
 			if (search) conditions.push(like(worldItems.name, `%${search}%`));
 			if (category) conditions.push(eq(worldItems.category, category));
 			if (onlyFavorites) {
-				if (favoriteEntityIds === null) {
-					conditions.push(eq(worldItems.isFavorite, true));
-				} else if (favoriteEntityIds.length === 0) {
+				if (favoriteEntityIds.length === 0) {
 					return {
 						worldItems: [],
 						total: 0,
 						limit,
 						offset,
 					};
-				} else {
-					conditions.push(inArray(worldItems.id, favoriteEntityIds));
 				}
+				conditions.push(inArray(worldItems.id, favoriteEntityIds));
 			}
 
 			const whereClause = conditions.length > 0 ? sql`${sql.join(conditions, sql` AND `)}` : undefined;
@@ -139,14 +142,11 @@ const make = (): WorldItemServiceInterface => {
 				}),
 			]);
 
-			const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
-			const normalizedWorldItems =
-				favoriteIdSet === null
-					? data
-					: data.map((item) => ({
-							...item,
-							isFavorite: favoriteIdSet.has(item.id),
-						}));
+			const favoriteIdSet = new Set(favoriteEntityIds);
+			const normalizedWorldItems = data.map((item) => ({
+				...item,
+				isFavorite: favoriteIdSet.has(item.id),
+			}));
 
 			return {
 				worldItems: normalizedWorldItems as Record<string, unknown>[],
@@ -170,59 +170,54 @@ const make = (): WorldItemServiceInterface => {
 
 			const readableId = generateReadableId('world-item', name, 1);
 			const requestedIsFavorite = input.isFavorite === true;
-			const useCanonicalFavoriteBridge = requestedIsFavorite
-				? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.WORLD_ITEM)) !== null,
-						catch: (error) => fromUnknownWorldItemError('create.favoriteScope', error),
-					})
-				: false;
 
-			const result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
+			const committed = yield* Effect.tryPromise<
+				{ entity: typeof worldItems.$inferSelect; favoriteProfileId: string | null },
+				WorldItemError
+			>({
 				try: () =>
-					db
-						.insert(worldItems)
-						.values({
-							id: readableId,
-							name,
-							description: (input.description as string) ?? null,
-							emoji: (input.emoji as string) ?? null,
-							color: (input.color as string) ?? null,
-							category: (input.category as string) ?? null,
-							subtype: (input.subtype as string) ?? null,
-							featuredImage: (input.featuredImage as string) ?? null,
-							filters: (input.filters as string) ?? null,
-							isArchived: (input.isArchived as boolean) ?? false,
-							metadata: (input.metadata as string) ?? null,
-							parentId: (input.parentId as string) ?? null,
-							createdAt: new Date(),
-							updatedAt: new Date(),
-						})
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.insert(worldItems)
+							.values({
+								id: readableId,
+								name,
+								description: (input.description as string) ?? null,
+								emoji: (input.emoji as string) ?? null,
+								color: (input.color as string) ?? null,
+								category: (input.category as string) ?? null,
+								subtype: (input.subtype as string) ?? null,
+								featuredImage: (input.featuredImage as string) ?? null,
+								filters: (input.filters as string) ?? null,
+								isArchived: (input.isArchived as boolean) ?? false,
+								parentId: (input.parentId as string) ?? null,
+								createdAt: new Date(),
+								updatedAt: new Date(),
+							})
+							.returning();
+						if (!result[0]) throw new Error('No row returned');
+						const favoriteProfileId = requestedIsFavorite
+							? await setFavoriteForActiveProfile(transaction, FavoriteEntityType.WORLD_ITEM, result[0].id, true)
+							: null;
+						return { entity: result[0], favoriteProfileId };
+					}),
 				catch: (error) => fromUnknownWorldItemError('create', error),
 			});
 
-			if (result.length === 0) {
-				return yield* Effect.fail(new WorldItemDatabaseError({ operation: 'create', message: 'No row returned' }));
-			}
-
-			if (requestedIsFavorite && useCanonicalFavoriteBridge) {
+			if (committed.favoriteProfileId) {
 				yield* Effect.tryPromise({
-					try: async () => {
-						try {
-							await favoriteService.set(FavoriteEntityType.WORLD_ITEM, result[0].id, true);
-						} catch (error) {
-							await db.delete(worldItems).where(eq(worldItems.id, result[0].id));
-							throw error;
-						}
-					},
-					catch: (error) => fromUnknownWorldItemError('create.favoriteBridge', error),
+					try: () =>
+						emitCommittedFavoriteChange(
+							committed.favoriteProfileId!,
+							FavoriteEntityType.WORLD_ITEM,
+							committed.entity.id,
+							true
+						),
+					catch: (error) => fromUnknownWorldItemError('create.favoriteEvent', error),
 				});
 			}
 
-			return {
-				...result[0],
-				isFavorite: requestedIsFavorite ? true : result[0].isFavorite,
-			} as Record<string, unknown>;
+			return { ...committed.entity, isFavorite: requestedIsFavorite } as Record<string, unknown>;
 		});
 
 	const update = (id: string, input: Record<string, unknown>): Effect.Effect<Record<string, unknown>, WorldItemError> =>
@@ -230,49 +225,61 @@ const make = (): WorldItemServiceInterface => {
 			yield* getById(id);
 
 			const requestedIsFavorite = input.isFavorite as boolean | undefined;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite !== undefined
-					? yield* Effect.tryPromise({
-							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.WORLD_ITEM)) !== null,
-							catch: (error) => fromUnknownWorldItemError('update.favoriteScope', error),
-						})
-					: false;
-
-			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.WORLD_ITEM, id, requestedIsFavorite),
-					catch: (error) => fromUnknownWorldItemError('update.favoriteBridge', error),
-				});
-			}
-
-			const result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
+			const committed = yield* Effect.tryPromise<
+				{ entity: typeof worldItems.$inferSelect; favoriteProfileId: string | null },
+				WorldItemError
+			>({
 				try: () =>
-					db
-						.update(worldItems)
-						.set({
-							...(input.name !== undefined && { name: input.name as string }),
-							...(input.description !== undefined && { description: input.description as string }),
-							...(input.emoji !== undefined && { emoji: input.emoji as string }),
-							...(input.color !== undefined && { color: input.color as string }),
-							...(input.category !== undefined && { category: input.category as string }),
-							...(input.subtype !== undefined && { subtype: input.subtype as string }),
-							...(input.featuredImage !== undefined && { featuredImage: input.featuredImage as string }),
-							...(input.filters !== undefined && { filters: input.filters as string }),
-							...(input.isArchived !== undefined && { isArchived: input.isArchived as boolean }),
-							...(input.metadata !== undefined && { metadata: input.metadata as string }),
-							...(input.parentId !== undefined && { parentId: input.parentId as string }),
-							updatedAt: new Date(),
-						})
-						.where(eq(worldItems.id, id))
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.update(worldItems)
+							.set({
+								...(input.name !== undefined && { name: input.name as string }),
+								...(input.description !== undefined && { description: input.description as string }),
+								...(input.emoji !== undefined && { emoji: input.emoji as string }),
+								...(input.color !== undefined && { color: input.color as string }),
+								...(input.category !== undefined && { category: input.category as string }),
+								...(input.subtype !== undefined && { subtype: input.subtype as string }),
+								...(input.featuredImage !== undefined && { featuredImage: input.featuredImage as string }),
+								...(input.filters !== undefined && { filters: input.filters as string }),
+								...(input.isArchived !== undefined && { isArchived: input.isArchived as boolean }),
+								...(input.parentId !== undefined && { parentId: input.parentId as string }),
+								updatedAt: new Date(),
+							})
+							.where(eq(worldItems.id, id))
+							.returning();
+						if (!result[0]) throw new Error('No row returned');
+						const favoriteProfileId =
+							requestedIsFavorite === undefined
+								? null
+								: await setFavoriteForActiveProfile(
+										transaction,
+										FavoriteEntityType.WORLD_ITEM,
+										id,
+										requestedIsFavorite
+									);
+						return { entity: result[0], favoriteProfileId };
+					}),
 				catch: (error) => fromUnknownWorldItemError('update', error),
 			});
 
-			if (result.length === 0) {
-				return yield* Effect.fail(new WorldItemDatabaseError({ operation: 'update', message: 'No row returned' }));
+			if (committed.favoriteProfileId && requestedIsFavorite !== undefined) {
+				yield* Effect.tryPromise({
+					try: () =>
+						emitCommittedFavoriteChange(
+							committed.favoriteProfileId!,
+							FavoriteEntityType.WORLD_ITEM,
+							id,
+							requestedIsFavorite
+						),
+					catch: (error) => fromUnknownWorldItemError('update.favoriteEvent', error),
+				});
 			}
 
-			return result[0] as Record<string, unknown>;
+			return yield* Effect.tryPromise({
+				try: () => favoriteService.projectEntity(FavoriteEntityType.WORLD_ITEM, committed.entity),
+				catch: (error) => fromUnknownWorldItemError('update.favoriteProjection', error),
+			});
 		});
 
 	const delete_ = (id: string): Effect.Effect<void, WorldItemError> =>
@@ -305,7 +312,11 @@ const make = (): WorldItemServiceInterface => {
 			}
 
 			const result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
-				try: () => db.delete(worldItems).where(eq(worldItems.id, id)).returning(),
+				try: () =>
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.WORLD_ITEM, [id]);
+						return transaction.delete(worldItems).where(eq(worldItems.id, id)).returning();
+					}),
 				catch: (error) => fromUnknownWorldItemError('delete', error),
 			});
 
@@ -316,38 +327,20 @@ const make = (): WorldItemServiceInterface => {
 
 	const toggleFavorite = (id: string): Effect.Effect<Record<string, unknown>, WorldItemError> =>
 		Effect.gen(function* () {
-			const item = yield* getById(id);
+			yield* getById(id);
 			const favoriteEntityIds = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.WORLD_ITEM),
+				try: () => favoriteService.getFavoriteEntityIdsOrThrow(FavoriteEntityType.WORLD_ITEM),
 				catch: (error) => fromUnknownWorldItemError('toggleFavorite.scope', error),
 			});
-			const currentFavoriteStatus = favoriteEntityIds?.includes(id) ?? Boolean((item as any).isFavorite);
+			const currentFavoriteStatus = favoriteEntityIds.includes(id);
 			const newFavoriteStatus = !currentFavoriteStatus;
 
-			let result;
-			if (favoriteEntityIds !== null) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.WORLD_ITEM, id, newFavoriteStatus),
-					catch: (error) => fromUnknownWorldItemError('toggleFavorite.favoriteBridge', error),
-				});
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.WORLD_ITEM, id, newFavoriteStatus),
+				catch: (error) => fromUnknownWorldItemError('toggleFavorite.favorite', error),
+			});
 
-				result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
-					try: () => db.select().from(worldItems).where(eq(worldItems.id, id)).limit(1),
-					catch: (error) => fromUnknownWorldItemError('toggleFavorite.refetch', error),
-				});
-			} else {
-				result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
-					try: () => db.select().from(worldItems).where(eq(worldItems.id, id)).limit(1),
-					catch: (error) => fromUnknownWorldItemError('toggleFavorite.refetch', error),
-				});
-			}
-
-			if (result.length === 0) {
-				return yield* Effect.fail(
-					new WorldItemDatabaseError({ operation: 'toggleFavorite', message: 'No row returned' })
-				);
-			}
-			return result[0] as Record<string, unknown>;
+			return yield* getById(id);
 		});
 
 	const getImages = (id: string): Effect.Effect<any[], WorldItemError> =>

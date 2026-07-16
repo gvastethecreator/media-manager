@@ -22,7 +22,11 @@ const expectSuccess = async <A, E>(effect: Effect.Effect<A, E, FolderService>) =
 let createdActiveProfileId: string | null = null;
 
 const ensureActiveProfile = async () => {
-	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+	const [activeProfile] = await db
+		.select({ id: profiles.id })
+		.from(profiles)
+		.where(eq(profiles.isActive, true))
+		.limit(1);
 
 	if (activeProfile) {
 		return activeProfile.id;
@@ -76,13 +80,13 @@ afterEach(async () => {
 });
 
 describe('FolderService favorites convergence', () => {
-	it('create ignores legacy authored isFavorite even when a profile is active', async () => {
+	it('create writes authored isFavorite to the canonical Favorite table', async () => {
 		await ensureActiveProfile();
 
 		const created = await createFolder('create-canonical-favorite', { isFavorite: true });
 
-		expect(created.isFavorite).toBe(false);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, created.id)).toBe(false);
+		expect(created.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, created.id)).toBe(true);
 	});
 
 	it('getById uses canonical favorites and ignores stale embedded projection', async () => {
@@ -124,7 +128,7 @@ describe('FolderService favorites convergence', () => {
 		expect(result.folders[0]?.isFavorite).toBe(true);
 	});
 
-	it('update ignores legacy authored isFavorite and preserves canonical favorite state', async () => {
+	it('update writes authored isFavorite to the canonical Favorite table', async () => {
 		await ensureActiveProfile();
 		const folder = await createFolder('update-target');
 		await favoriteService.set(FavoriteEntityType.FOLDER, folder.id, true);
@@ -137,8 +141,8 @@ describe('FolderService favorites convergence', () => {
 		);
 
 		expect(updated.id).toBe(folder.id);
-		expect(updated.isFavorite).toBe(true);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, folder.id)).toBe(true);
+		expect(updated.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.FOLDER, folder.id)).toBe(false);
 	});
 
 	it('toggleFavorite delegates to the canonical favorite bridge when a profile is active', async () => {

@@ -8,7 +8,10 @@
  * Cliente de API para archivos 3D.
  */
 import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
+import { apiClient } from '@/lib/api/client';
 import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
+import { FavoriteEntityType } from '@/types/entities/favorite';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 
 export type PublicFile3DCreateInput = Omit<File3DCreateInput, 'path'> & {
 	source: AuthorizedPathReference;
@@ -61,13 +64,9 @@ export async function updateFile3DInApi(id: string, data: PublicFile3DUpdateInpu
 }
 
 export async function toggleFile3DFavoriteInApi(id: string): Promise<File3DWithStats> {
-	const response = await fetch(`${API_BASE_PATH}/${id}/favorite`, {
-		method: 'POST',
-	});
-	if (!response.ok) {
-		throw new Error('Error al alternar favorito del archivo 3D');
-	}
-	return response.json();
+	await apiClient.post('/favorites/toggle', { entityId: id, entityType: FavoriteEntityType.FILE_3D });
+	await invalidateFavoriteQueries();
+	return getFile3DFromApi(id);
 }
 
 export async function deleteFile3DFromApi(id: string): Promise<void> {

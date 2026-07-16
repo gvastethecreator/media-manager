@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { NoteWithStats } from '@/types/entities/note';
 import { apiClient } from './client';
+import { invalidateFavoriteQueries } from './favorite-cache';
 
 export interface NoteFilters {
 	category?: string;
@@ -19,6 +20,7 @@ export interface NoteCreateInput {
 	category?: string | null;
 	content?: string | null;
 	featuredImage?: string | null;
+	isFavorite?: boolean;
 	presetId?: string | null;
 	priority?: number;
 	status?: string | null;
@@ -29,6 +31,7 @@ export interface NoteUpdateInput {
 	category?: string | null;
 	content?: string | null;
 	featuredImage?: string | null;
+	isFavorite?: boolean;
 	presetId?: string | null;
 	priority?: number;
 	status?: string | null;
@@ -98,6 +101,7 @@ export function useCreateNote() {
 		mutationFn: (data) => apiClient.post<NoteWithStats>('/notes', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 		},
 	});
 }
@@ -109,6 +113,7 @@ export function useUpdateNote() {
 		mutationFn: ({ id, data }) => apiClient.put<NoteWithStats>(`/notes/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.setQueryData(noteKeys.detail(data.id), data);
 		},
 	});
@@ -121,6 +126,7 @@ export function useDeleteNote() {
 		mutationFn: (id) => apiClient.delete(`/notes/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.removeQueries({ queryKey: noteKeys.detail(id) });
 			queryClient.removeQueries({ queryKey: noteKeys.images(id) });
 		},

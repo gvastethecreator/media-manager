@@ -20,7 +20,6 @@ import { AlbumService, AlbumServiceLive } from '@/services/album/album.service.e
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 
 const router = express.Router();
 
@@ -146,20 +145,6 @@ router.delete(
 			yield* albumService.delete(req.params.id);
 			res.status(204);
 			return { success: true };
-		}).pipe(Effect.provide(AlbumServiceLive))
-	)
-);
-
-/**
- * POST /albums/:id/favorite - Toggle favorite status
- */
-router.post(
-	'/:id/favorite',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.ALBUM);
-			const albumService = yield* AlbumService;
-			return yield* albumService.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(AlbumServiceLive))
 	)
 );

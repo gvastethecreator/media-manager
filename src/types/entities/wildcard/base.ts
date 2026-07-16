@@ -153,6 +153,7 @@ export interface WildcardCreateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
+	isFavorite?: boolean;
 	name: string;
 	parentId?: string | null;
 	shortcut?: string | null;
@@ -170,6 +171,7 @@ export interface WildcardUpdateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
+	isFavorite?: boolean;
 	name?: string;
 	parentId?: string | null;
 	shortcut?: string | null;

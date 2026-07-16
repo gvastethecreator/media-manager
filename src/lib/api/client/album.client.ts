@@ -9,6 +9,7 @@
  */
 import type { AlbumCreateInput, AlbumUpdateInput } from '@/lib/api/albums';
 import type { AlbumWithStats } from '@/types/entities/album';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 
 const API_BASE_PATH = '/api/albums';
 
@@ -40,6 +41,7 @@ export async function createAlbumInApi(data: AlbumCreateInput): Promise<AlbumWit
 	if (!response.ok) {
 		throw new Error('Error al crear álbum');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -52,6 +54,7 @@ export async function updateAlbumInApi(id: string, data: AlbumUpdateInput): Prom
 	if (!response.ok) {
 		throw new Error('Error al actualizar álbum');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -60,4 +63,5 @@ export async function deleteAlbumFromApi(id: string): Promise<void> {
 	if (!response.ok) {
 		throw new Error('Error al eliminar álbum');
 	}
+	await invalidateFavoriteQueries();
 }

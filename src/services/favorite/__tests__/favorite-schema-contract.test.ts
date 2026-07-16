@@ -50,7 +50,7 @@ describe('Favorite schema contract', () => {
 			`SELECT sql FROM sqlite_schema WHERE type = 'table' AND name = 'Favorite'`
 		);
 
-		await expect(favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE)).rejects.toThrow(
+		await expect(favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.IMAGE)).rejects.toThrow(
 			'El schema Favorite no es canónico'
 		);
 
@@ -74,7 +74,7 @@ describe('Favorite schema contract', () => {
 		`);
 		const indexBefore = await client!.execute('PRAGMA index_xinfo("Favorite_profileId_entityType_entityId_key")');
 
-		await expect(favoriteService.getFavoriteEntityIds(FavoriteEntityType.IMAGE)).rejects.toThrow(
+		await expect(favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.IMAGE)).rejects.toThrow(
 			'El schema Favorite no es canónico'
 		);
 

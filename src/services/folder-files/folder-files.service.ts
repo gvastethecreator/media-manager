@@ -9,7 +9,9 @@ import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createServiceError, ServiceErrorCode } from '@/lib/utils/errors/service-errors';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const logger = serverLogger.withContext('FolderFilesService');
 
@@ -96,7 +98,7 @@ function mapImageToFolderFile(image: any): FolderFile {
 		},
 		stats: {
 			views: image.views || 0,
-			isFavorite: image.isFavorite,
+			isFavorite: false,
 		},
 	};
 }
@@ -125,7 +127,7 @@ function mapVideoToFolderFile(video: any): FolderFile {
 		},
 		stats: {
 			views: video.views || 0,
-			isFavorite: video.isFavorite,
+			isFavorite: false,
 		},
 	};
 }
@@ -152,7 +154,7 @@ function mapAudioToFolderFile(audio: any): FolderFile {
 		},
 		stats: {
 			views: audio.views || 0,
-			isFavorite: audio.isFavorite,
+			isFavorite: false,
 		},
 	};
 }
@@ -178,7 +180,7 @@ function mapDocumentToFolderFile(doc: any): FolderFile {
 		},
 		stats: {
 			views: doc.views || 0,
-			isFavorite: doc.isFavorite,
+			isFavorite: false,
 		},
 	};
 }
@@ -203,7 +205,7 @@ function mapJsonToFolderFile(json: any): FolderFile {
 		},
 		stats: {
 			views: json.views || 0,
-			isFavorite: json.isFavorite,
+			isFavorite: false,
 		},
 	};
 }
@@ -229,7 +231,7 @@ function mapFile3DToFolderFile(file3d: any): FolderFile {
 		},
 		stats: {
 			views: file3d.views || 0,
-			isFavorite: file3d.isFavorite,
+			isFavorite: false,
 		},
 	};
 }
@@ -344,7 +346,6 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					NULL as extension,
 					NULL as thumbnail,
 					json_remove(metadata, '$.thumbnail') as metadata,
-					isFavorite,
 					0 as views
 				FROM ${images}
 				WHERE ${and(
@@ -363,7 +364,6 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					NULL as extension,
 					NULL as thumbnail,
 					metadata,
-					isFavorite,
 					0 as views
 				FROM ${videos}
 				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, videos), visibleAssetLifecycleCondition(videos.assetId))}
@@ -378,7 +378,6 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					extension,
 					NULL as thumbnail,
 					NULL as metadata,
-					isFavorite,
 					0 as views
 				FROM ${audios}
 				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, audios), visibleAssetLifecycleCondition(audios.assetId))}
@@ -393,7 +392,6 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					extension,
 					NULL as thumbnail,
 					NULL as metadata,
-					isFavorite,
 					0 as views
 				FROM ${documents}
 				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, documents), visibleAssetLifecycleCondition(documents.assetId))}
@@ -408,7 +406,6 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					extension,
 					NULL as thumbnail,
 					NULL as metadata,
-					isFavorite,
 					0 as views
 				FROM ${jsonFiles}
 				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, jsonFiles), visibleAssetLifecycleCondition(jsonFiles.assetId))}
@@ -423,7 +420,6 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					extension,
 					NULL as thumbnail,
 					NULL as metadata,
-					isFavorite,
 					0 as views
 				FROM ${file3Ds}
 				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, file3Ds), visibleAssetLifecycleCondition(file3Ds.assetId))}
@@ -470,7 +466,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		const rows = result.rows;
 
 		// Mapear resultados
-		const files = rows.map(mapRowToFolderFile);
+		const files = await projectCanonicalFolderFileFavorites(rows.map(mapRowToFolderFile));
 
 		// 6. Calcular total (consulta separada optimizada)
 		const totalCount = await getTotalFileCount(folderContext, includeSubfolders, search, fileTypes);
@@ -793,9 +789,38 @@ function mapRowToFolderFile(row: any): FolderFile {
 		metadata: cleanMetadata,
 		stats: {
 			views: Number(row.views || 0),
-			isFavorite: Boolean(row.isFavorite),
+			isFavorite: false,
 		},
 	};
+}
+
+const favoriteTypeByFolderFileType: Record<FolderFile['entityType'], FavoriteEntityType> = {
+	image: FavoriteEntityType.IMAGE,
+	video: FavoriteEntityType.VIDEO,
+	audio: FavoriteEntityType.AUDIO,
+	document: FavoriteEntityType.DOCUMENT,
+	jsonFile: FavoriteEntityType.JSON_FILE,
+	file3d: FavoriteEntityType.FILE_3D,
+};
+
+async function projectCanonicalFolderFileFavorites(files: FolderFile[]): Promise<FolderFile[]> {
+	const entityTypes = [...new Set(files.map((file) => favoriteTypeByFolderFileType[file.entityType]))];
+	const favoriteIdsByType = new Map(
+		await Promise.all(
+			entityTypes.map(
+				async (entityType) =>
+					[entityType, new Set(await favoriteService.getFavoriteEntityIdsOrEmpty(entityType))] as const
+			)
+		)
+	);
+
+	return files.map((file) => ({
+		...file,
+		stats: {
+			...file.stats,
+			isFavorite: favoriteIdsByType.get(favoriteTypeByFolderFileType[file.entityType])?.has(file.id) ?? false,
+		},
+	}));
 }
 
 function getExtensionFromPath(path: string): string {

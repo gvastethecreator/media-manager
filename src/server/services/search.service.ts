@@ -7,8 +7,10 @@ import { isFts5Enabled } from '@/lib/drizzle/fts5';
 import { audios, documents, files, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image/converter.service';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
 import { getAll } from '@/services/image/image.service.effect';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { FileItem } from '@/types/files';
 
 const log = serverLogger.withContext('SearchService');
@@ -99,7 +101,7 @@ export interface SearchResponse {
 }
 
 async function searchImagesUnified(query: string, limit: number, offset: number) {
-	return db
+	const rows = await db
 		.select()
 		.from(images)
 		.where(
@@ -111,10 +113,11 @@ async function searchImagesUnified(query: string, limit: number, offset: number)
 		.orderBy(desc(images.createdAt), asc(images.id))
 		.limit(limit)
 		.offset(offset);
+	return favoriteService.projectEntities(FavoriteEntityType.IMAGE, rows);
 }
 
 async function searchVideosUnified(query: string, limit: number, offset: number) {
-	return db
+	const rows = await db
 		.select()
 		.from(videos)
 		.where(
@@ -126,10 +129,11 @@ async function searchVideosUnified(query: string, limit: number, offset: number)
 		.orderBy(desc(videos.createdAt), asc(videos.id))
 		.limit(limit)
 		.offset(offset);
+	return favoriteService.projectEntities(FavoriteEntityType.VIDEO, rows);
 }
 
 async function searchAudiosUnified(query: string, limit: number, offset: number) {
-	return db
+	const rows = await db
 		.select()
 		.from(audios)
 		.where(
@@ -141,10 +145,11 @@ async function searchAudiosUnified(query: string, limit: number, offset: number)
 		.orderBy(desc(audios.createdAt), asc(audios.id))
 		.limit(limit)
 		.offset(offset);
+	return favoriteService.projectEntities(FavoriteEntityType.AUDIO, rows);
 }
 
 async function searchDocumentsUnified(query: string, limit: number, offset: number) {
-	return db
+	const rows = await db
 		.select()
 		.from(documents)
 		.where(
@@ -156,6 +161,7 @@ async function searchDocumentsUnified(query: string, limit: number, offset: numb
 		.orderBy(desc(documents.createdAt), asc(documents.id))
 		.limit(limit)
 		.offset(offset);
+	return favoriteService.projectEntities(FavoriteEntityType.DOCUMENT, rows);
 }
 
 export async function performSearch(

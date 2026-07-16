@@ -11,9 +11,7 @@ import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { filterAuthorizedMediaEntities } from '@/server/security/authorized-root-request';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
-import { FavoriteEntityType } from '@/types/entities/favorite';
 import { TagCreate, TagUpdate } from '@/services/tag/tag-schemas';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -117,21 +115,6 @@ router.delete(
 );
 
 /**
- * POST /tags/:id/favorite - Toggle favorite status
- */
-router.post(
-	'/:id/favorite',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.TAG);
-			const tagService = yield* TagService;
-			const tag = yield* tagService.toggleFavorite(req.params.id);
-			return tag;
-		}).pipe(Effect.provide(TagServiceLive))
-	)
-);
-
-/**
  * GET /tags/:id/images - Obtener imágenes asociadas a un tag
  */
 router.get(
@@ -176,7 +159,7 @@ router.get(
 
 /**
  * GET /tags/:id - Obtener tag por ID
- * IMPORTANTE: Esta ruta debe ir AL FINAL para no interceptar rutas específicas como /:id/favorite
+ * IMPORTANTE: Esta ruta debe ir AL FINAL para no interceptar rutas específicas con parámetros adicionales.
  */
 router.get(
 	'/:id',

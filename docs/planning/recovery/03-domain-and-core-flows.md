@@ -46,12 +46,18 @@ los dos checkpoints runtime reales definidos en el ledger.
 
 ### FAV-001 — Favoritos canónicos por perfil
 
-- [ ] Tabla/constraint única profile + entity/asset identity.
-- [ ] List/toggle/set/unset comparten servicio y semántica idempotente.
-- [ ] DTO `isFavorite` se hidrata desde fuente canónica.
-- [ ] Corregir consumidores actuales y sus 24 fallas.
-- [ ] Retirar facades `/:id/favorite` tras telemetría/migración de clientes.
-- [ ] Eliminar proyecciones legacy como autoridad.
+- [x] Tabla/constraint única profile + entity/asset identity.
+- [x] List/toggle/set/unset comparten servicio y semántica idempotente.
+- [x] DTO `isFavorite` se hidrata desde fuente canónica.
+- [x] Corregir consumidores actuales y sus 24 fallas.
+- [x] Retirar facades `/:id/favorite` tras telemetría/migración de clientes.
+- [x] Eliminar proyecciones legacy como autoridad.
+
+Checkpoint aceptado 2026-07-16: `Favorite(profileId, entityType, entityId)` es la única autoridad; create/update y
+delete físico mantienen entidad y favorito en una sola transacción; stats, search, folder stream y caches consumen el
+contrato canónico; las facades antiguas responden 410 desde el registro central. Evidencia: revisión independiente
+`ACCEPT`, 152 tests focales, 247 tests media, 709 tests de aplicación y 181 tests tooling con 1.212 assertions. Las
+columnas embebidas permanecen sólo como compatibilidad de schema durante expand-contract.
 
 ### REL-001 — Relaciones híbridas
 

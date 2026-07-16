@@ -8,7 +8,9 @@ import { and, eq, inArray, like } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { FolderFile } from './folder-files.service';
 
 const logger = serverLogger.withContext('FolderFilesStream');
@@ -243,31 +245,38 @@ async function fetchFilesBatch(
 	try {
 		let table: any;
 		let entityType: FolderFile['entityType'];
+		let favoriteEntityType: FavoriteEntityType;
 
 		switch (fileType) {
 			case 'image':
 				table = images;
 				entityType = 'image';
+				favoriteEntityType = FavoriteEntityType.IMAGE;
 				break;
 			case 'video':
 				table = videos;
 				entityType = 'video';
+				favoriteEntityType = FavoriteEntityType.VIDEO;
 				break;
 			case 'audio':
 				table = audios;
 				entityType = 'audio';
+				favoriteEntityType = FavoriteEntityType.AUDIO;
 				break;
 			case 'document':
 				table = documents;
 				entityType = 'document';
+				favoriteEntityType = FavoriteEntityType.DOCUMENT;
 				break;
 			case 'jsonFile':
 				table = jsonFiles;
 				entityType = 'jsonFile';
+				favoriteEntityType = FavoriteEntityType.JSON_FILE;
 				break;
 			case 'file3d':
 				table = file3Ds;
 				entityType = 'file3d';
+				favoriteEntityType = FavoriteEntityType.FILE_3D;
 				break;
 			default:
 				return [];
@@ -292,6 +301,7 @@ async function fetchFilesBatch(
 			.where(and(...conditions))
 			.limit(limit)
 			.offset(offset);
+		const favoriteEntityIds = new Set(await favoriteService.getFavoriteEntityIdsOrEmpty(favoriteEntityType));
 
 		// Mapear a FolderFile
 		// Generar URL de API para thumbnail (NO usar item.thumbnailPath que puede contener base64)
@@ -314,12 +324,12 @@ async function fetchFilesBatch(
 			metadata: extractMetadata(item, entityType),
 			stats: {
 				views: item.views || 0,
-				isFavorite: item.isFavorite,
+				isFavorite: favoriteEntityIds.has(item.id),
 			},
 		}));
 	} catch (error) {
 		logger.error(`Error fetching ${fileType} batch:`, error);
-		return [];
+		throw error;
 	}
 }
 

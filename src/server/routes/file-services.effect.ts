@@ -32,8 +32,6 @@ import { UploadedImagesService, UploadedImagesServiceLive } from '@/services/fil
 import { DocumentService, DocumentServiceLive } from '@/services/document/document.service.effect';
 import { File3DService, File3DServiceLive } from '@/services/file3d/file3d.service.effect';
 import { JsonFileService, JsonFileServiceLive } from '@/services/json-file/json-file.service.effect';
-import { FavoriteEntityType } from '@/types/entities/favorite';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const logger = serverLogger.withContext('FileServicesRoutes');
@@ -217,17 +215,6 @@ file3dsEffectRouter.put(
 		}).pipe(Effect.provide(File3DServiceLive))
 	)
 );
-file3dsEffectRouter.post(
-	'/:id/favorite',
-	authorizeMediaAssetParam({ assetType: 'file3d', permissions: ['read', 'write'] }),
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.FILE_3D);
-			const service = yield* File3DService;
-			return yield* service.toggleFavorite(req.params.id);
-		}).pipe(Effect.provide(File3DServiceLive))
-	)
-);
 file3dsEffectRouter.delete(
 	'/:id',
 	authorizeMediaAssetParam({ allowMissing: true, assetType: 'file3d', permissions: ['delete'] }),
@@ -356,17 +343,6 @@ documentsEffectRouter.put(
 		Effect.gen(function* () {
 			const service = yield* DocumentService;
 			return yield* service.update(req.params.id, req.body);
-		}).pipe(Effect.provide(DocumentServiceLive))
-	)
-);
-documentsEffectRouter.post(
-	'/:id/favorite',
-	authorizeMediaAssetParam({ assetType: 'document', permissions: ['read', 'write'] }),
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.DOCUMENT);
-			const service = yield* DocumentService;
-			return yield* service.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(DocumentServiceLive))
 	)
 );
@@ -534,17 +510,6 @@ jsonFilesEffectRouter.put(
 		Effect.gen(function* () {
 			const service = yield* JsonFileService;
 			return yield* service.update(req.params.id, req.body);
-		}).pipe(Effect.provide(JsonFileServiceLive))
-	)
-);
-jsonFilesEffectRouter.post(
-	'/:id/favorite',
-	authorizeMediaAssetParam({ assetType: 'json', permissions: ['read', 'write'] }),
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.JSON_FILE);
-			const service = yield* JsonFileService;
-			return yield* service.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(JsonFileServiceLive))
 	)
 );

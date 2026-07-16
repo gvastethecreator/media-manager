@@ -4,6 +4,7 @@ import { runIsolatedCommand } from './run-tests-isolated';
 
 const toolingTestFiles = [
 	'scripts/safety-contracts.test.ts',
+	'scripts/favorite-public-cutover.test.ts',
 	'scripts/local-session-security.test.ts',
 	'scripts/local-app-broker.test.ts',
 	'scripts/authorized-roots.test.ts',
