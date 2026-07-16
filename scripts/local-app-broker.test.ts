@@ -7,11 +7,13 @@ import { resolve } from 'node:path';
 import express from 'express';
 import {
 	createLocalAppBrokerHandler,
+	isServerSentEventRequest,
 	type LocalAppBrokerServer,
 	type LocalAppUpstreamAbortState,
 	startLocalAppBroker,
 } from '../src/runtime/local-app-broker';
 import { createProductionRuntimeConfig } from '../src/runtime/production-runtime-config';
+import { createRuntimeHealthController } from '../src/runtime/runtime-health';
 import {
 	createLocalApiSessionMiddleware,
 	generateLocalSessionToken,
@@ -47,8 +49,10 @@ it('sirve la SPA y media a través de un broker que conserva el bearer fuera del
 	const brokerPort = await reservePort();
 	const browserOrigin = `http://127.0.0.1:${brokerPort}`;
 	const token = generateLocalSessionToken();
+	const runtimeHealth = createRuntimeHealthController(() => new Date('2026-07-15T00:00:00.000Z'));
 	const backendApp = express();
 	let observedAuthorization = '';
+	let backendHealthStatus: 'degraded' | 'ready' = 'ready';
 	let longSseClosed = false;
 	let longSseStarted = false;
 	let upstreamAbortState: LocalAppUpstreamAbortState | undefined;
@@ -61,6 +65,9 @@ it('sirve la SPA y media a través de un broker que conserva el bearer fuera del
 
 	try {
 		const backendPort = await listen(backendServer);
+		backendApp.get('/health', (_req, res) => {
+			res.status(backendHealthStatus === 'ready' ? 200 : 503).json({ status: backendHealthStatus });
+		});
 		backendApp.use(
 			['/api', '/uploads'],
 			createLocalApiSessionMiddleware({
@@ -105,8 +112,30 @@ it('sirve la SPA y media a través de un broker que conserva el bearer fuera del
 				upstreamAbortState = state;
 			},
 			publicPort: brokerPort,
+			runtimeHealth: () => runtimeHealth.getSnapshot(),
 			sessionToken: token,
 		});
+		const startingHealth = await fetch(`${browserOrigin}/health`);
+		expect(startingHealth.status).toBe(503);
+		expect(await startingHealth.json()).toEqual({
+			changedAt: '2026-07-15T00:00:00.000Z',
+			status: 'starting',
+		});
+		runtimeHealth.transition('ready');
+		const readyHealth = await fetch(`${browserOrigin}/health`);
+		expect(readyHealth.status).toBe(200);
+		expect(await readyHealth.json()).toEqual({
+			changedAt: '2026-07-15T00:00:00.000Z',
+			status: 'ready',
+		});
+		backendHealthStatus = 'degraded';
+		const degradedHealth = await fetch(`${browserOrigin}/health`);
+		expect(degradedHealth.status).toBe(503);
+		expect(await degradedHealth.json()).toMatchObject({ status: 'degraded' });
+		backendHealthStatus = 'ready';
+		const recoveredHealth = await fetch(`${browserOrigin}/health`);
+		expect(recoveredHealth.status).toBe(200);
+		expect(await recoveredHealth.json()).toMatchObject({ status: 'ready' });
 
 		const directResponse = await fetch(`http://127.0.0.1:${backendPort}/api/probe`, {
 			headers: { 'Content-Type': 'application/json', Host: `127.0.0.1:${backendPort}`, Origin: browserOrigin },
@@ -215,4 +244,34 @@ it('rechaza targets no loopback y secretos débiles', () => {
 			sessionToken: 'weak',
 		})
 	).toThrow('secreto de sesión local válido');
+});
+
+it('rechaza de forma inmediata un puerto público ocupado', async () => {
+	const occupiedServer = createNodeServer();
+	const occupiedPort = await listen(occupiedServer);
+
+	try {
+		expect(() =>
+			startLocalAppBroker({
+				backendOrigin: 'http://127.0.0.1:4001',
+				clientRoot: '.',
+				publicPort: occupiedPort,
+				sessionToken: 'a'.repeat(32),
+			})
+		).toThrow();
+	} finally {
+		await close(occupiedServer);
+	}
+});
+
+it('identifica únicamente solicitudes SSE para desactivar su timeout de inactividad', () => {
+	expect(
+		isServerSentEventRequest(new Request('http://127.0.0.1/api/events', { headers: { Accept: 'text/event-stream' } }))
+	).toBe(true);
+	expect(isServerSentEventRequest(new Request('http://127.0.0.1/api/events'))).toBe(false);
+	expect(
+		isServerSentEventRequest(
+			new Request('http://127.0.0.1/api/events', { headers: { Accept: 'text/event-stream' }, method: 'POST' })
+		)
+	).toBe(false);
 });

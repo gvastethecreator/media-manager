@@ -3,6 +3,7 @@ import { stat } from 'node:fs/promises';
 import { type ClientRequest, type IncomingMessage, request as createHttpRequest } from 'node:http';
 import { extname, resolve, sep } from 'node:path';
 import { Readable } from 'node:stream';
+import type { RuntimeHealthSnapshot } from './runtime-health';
 
 const HOP_BY_HOP_HEADERS = new Set([
 	'connection',
@@ -36,6 +37,7 @@ export interface LocalAppBrokerOptions {
 	clientRoot: string;
 	onUpstreamAbort?: (state: LocalAppUpstreamAbortState) => void;
 	publicPort: number;
+	runtimeHealth?: () => RuntimeHealthSnapshot;
 	sessionToken: string;
 }
 
@@ -53,7 +55,7 @@ export interface LocalAppBrokerServer {
 interface BunRuntime {
 	file(path: string): Blob;
 	serve(options: {
-		fetch: (request: Request) => Promise<Response>;
+		fetch: (request: Request, server: { timeout(request: Request, seconds: number): void }) => Promise<Response>;
 		hostname: string;
 		port: number;
 	}): LocalAppBrokerServer;
@@ -63,6 +65,12 @@ function getBunRuntime(): BunRuntime {
 	const runtime = (globalThis as typeof globalThis & { Bun?: BunRuntime }).Bun;
 	if (!runtime) throw new Error('El broker local requiere Bun.');
 	return runtime;
+}
+
+export function isServerSentEventRequest(request: Request): boolean {
+	return (
+		request.method === 'GET' && (request.headers.get('accept')?.toLowerCase().includes('text/event-stream') ?? false)
+	);
 }
 
 function jsonResponse(status: number, code: string, message: string): Response {
@@ -301,12 +309,62 @@ export function createLocalAppBrokerHandler(options: LocalAppBrokerOptions): (re
 		throw new Error('El broker requiere un secreto de sesión local válido.');
 	}
 	const clientRoot = resolve(options.clientRoot);
+	let publishedHealth = options.runtimeHealth?.() ?? {
+		changedAt: new Date().toISOString(),
+		status: 'ready' as const,
+	};
+
+	const resolvePublicHealth = async (): Promise<RuntimeHealthSnapshot> => {
+		const supervisorHealth = options.runtimeHealth?.() ?? publishedHealth;
+		if (supervisorHealth.status !== 'ready') {
+			publishedHealth = supervisorHealth;
+			return { ...publishedHealth };
+		}
+
+		let backendReady = false;
+		try {
+			const response = await fetch(new URL('/health', backend), {
+				headers: { Accept: 'application/json' },
+				signal: AbortSignal.timeout(1_000),
+			});
+			const payload = (await response.json()) as { status?: unknown };
+			backendReady = response.ok && payload.status === 'ready';
+		} catch {
+			backendReady = false;
+		}
+
+		const status: RuntimeHealthSnapshot['status'] = backendReady ? 'ready' : 'degraded';
+		if (publishedHealth.status !== status) {
+			publishedHealth = {
+				changedAt:
+					publishedHealth.status === 'starting' && status === 'ready'
+						? supervisorHealth.changedAt
+						: new Date().toISOString(),
+				status,
+			};
+		}
+		return { ...publishedHealth };
+	};
 
 	return async (request: Request): Promise<Response> => {
 		if (!hasAllowedHost(request, options.publicPort)) {
 			return jsonResponse(403, 'LOCAL_BROKER_HOST_FORBIDDEN', 'Host local no autorizado.');
 		}
 		const requestPath = new URL(request.url).pathname;
+		if (requestPath === '/health') {
+			if (!['GET', 'HEAD'].includes(request.method)) {
+				return jsonResponse(405, 'METHOD_NOT_ALLOWED', 'Método no permitido.');
+			}
+			const snapshot = await resolvePublicHealth();
+			return new Response(request.method === 'HEAD' ? null : JSON.stringify(snapshot), {
+				headers: {
+					'Cache-Control': 'no-store',
+					'Content-Type': 'application/json; charset=utf-8',
+					'X-Content-Type-Options': 'nosniff',
+				},
+				status: snapshot.status === 'ready' ? 200 : 503,
+			});
+		}
 		if (requestPath === '/api' || requestPath.startsWith('/api/') || requestPath.startsWith('/uploads/')) {
 			if (!hasAllowedBrowserContext(request)) {
 				return jsonResponse(403, 'LOCAL_BROKER_ORIGIN_FORBIDDEN', 'Origen local no autorizado.');
@@ -321,10 +379,14 @@ export function createLocalAppBrokerHandler(options: LocalAppBrokerOptions): (re
 	};
 }
 
-export function startLocalAppBroker(options: LocalAppBrokerOptions, hostname = '127.0.0.1'): LocalAppBrokerServer {
+export function startLocalAppBroker(options: LocalAppBrokerOptions): LocalAppBrokerServer {
+	const handler = createLocalAppBrokerHandler(options);
 	return getBunRuntime().serve({
-		fetch: createLocalAppBrokerHandler(options),
-		hostname,
+		fetch: (request, server) => {
+			if (isServerSentEventRequest(request)) server.timeout(request, 0);
+			return handler(request);
+		},
+		hostname: '127.0.0.1',
 		port: options.publicPort,
 	});
 }

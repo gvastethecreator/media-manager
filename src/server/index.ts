@@ -3,7 +3,13 @@
 import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
 import path from 'path';
 import { isLoopbackHost, resolveLocalServiceHost } from '@/config/local-runtime-security';
-import { closeDatabaseGracefully, ensureDatabaseReady, recordDatabaseError } from '@/lib/drizzle';
+import {
+	checkDatabaseConnection,
+	closeDatabaseGracefully,
+	ensureDatabaseReady,
+	recordDatabaseError,
+} from '@/lib/drizzle';
+import type { RuntimeHealthStatus } from '@/runtime/runtime-health';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, logWarning, requestLogger } from './middleware/logging';
@@ -14,6 +20,7 @@ import { reconcilePendingFileMutations } from './security/file-mutation-recovery
 import { sanitizeJsonResponses } from './security/sanitize-public-payload';
 
 const app = express();
+let runtimeHealthStatus: RuntimeHealthStatus = 'starting';
 await ensureDatabaseReady();
 app.locals.authorizedRootRegistry = await createAuthorizedRootRegistryFromEnvironment();
 const mutationRecovery = await reconcilePendingFileMutations(app.locals.authorizedRootRegistry);
@@ -62,8 +69,14 @@ const apiLimiter = rateLimit({
 });
 app.use(requestLogger as RequestHandler);
 
-app.get('/health', (_req, res) => {
-	res.json({ status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() });
+app.get('/health', async (_req, res) => {
+	let status = runtimeHealthStatus;
+	if (status === 'ready' && !(await checkDatabaseConnection())) status = 'degraded';
+	res.status(status === 'ready' ? 200 : 503).json({
+		status,
+		timestamp: new Date().toISOString(),
+		uptime: process.uptime(),
+	});
 });
 
 app.use(['/api', '/uploads'], localApiSession);
@@ -97,6 +110,7 @@ app.use(((error, _req, res, next) => {
 }) as ErrorRequestHandler);
 
 const server = app.listen(PORT, HOST, () => {
+	runtimeHealthStatus = 'ready';
 	logInfo(`🚀 Servidor Express iniciado en http://${HOST}:${PORT}`);
 	if (!isLoopbackHost(HOST)) {
 		logError(`⚠️ API expuesta fuera de loopback en ${HOST}; ALLOW_EXTERNAL_BIND está activo.`);
@@ -105,10 +119,21 @@ const server = app.listen(PORT, HOST, () => {
 	initializeFileLogging();
 });
 
+server.once('error', (error) => {
+	runtimeHealthStatus = 'degraded';
+	logError(
+		`El servidor no pudo escuchar en ${HOST}:${PORT}: ${error instanceof Error ? error.message : String(error)}`
+	);
+	if (!server.listening) {
+		void closeDatabaseGracefully().finally(() => process.exit(1));
+	}
+});
+
 let shuttingDown = false;
 async function shutdown(signal: NodeJS.Signals): Promise<void> {
 	if (shuttingDown) return;
 	shuttingDown = true;
+	runtimeHealthStatus = 'stopping';
 	logInfo(`Cierre ordenado iniciado por ${signal}.`);
 	reindexMonitor.stop();
 	const forcedExit = setTimeout(() => {
