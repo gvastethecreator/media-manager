@@ -47,19 +47,19 @@ Requiere Waves 0 y 1 verdes.
 
 ### RUN-003 — Componer SPA + API
 
-- [ ] Express sirve assets versionados y fallback SPA después de `/api`.
-- [ ] Cache immutable para hashed assets; no-cache para HTML/config.
-- [ ] API y UI comparten origen/token.
-- [ ] `/uploads` deja de ser escape global y respeta roots/content policy.
-- [ ] Script `start` ejecuta artefactos construidos, no Vite preview.
+- [x] El broker local sirve assets versionados y fallback SPA; `/api` y `/uploads` se proxifican al backend interno.
+- [x] Cache immutable para hashed assets; no-cache para HTML/config.
+- [x] API y UI comparten origen; el token permanece fuera de React y lo inyecta el broker.
+- [x] `/uploads` deja de ser escape global y respeta sesión/content policy.
+- [x] Script `start` ejecuta artefactos construidos, no Vite preview.
 
 ### RUN-004 — Process lifecycle
 
-- [ ] Startup ordenado: config → logging → DB/migrations → routes → listen → monitors.
-- [ ] Health `starting/ready/degraded/stopping`.
-- [ ] SIGINT/SIGTERM: detener jobs, SSE, timers, server y DB.
-- [ ] No dejar puertos/processes huérfanos.
-- [ ] Detectar puerto ocupado y dar error accionable o elegirlo mediante launcher.
+- [x] Startup ordenado: broker starting → config → DB/migrations → routes → listen → monitors → ready.
+- [x] Health `starting/ready/degraded/stopping`, derivado del backend vivo con timeout.
+- [x] SIGINT/SIGTERM: cerrar broker/SSE, detener monitors/server y checkpoint/cierre de DB con límite temporal.
+- [x] No dejar puertos/processes huérfanos.
+- [x] Detectar puerto ocupado y dar error accionable; el smoke usa puertos dinámicos.
 
 ### RUN-005 — Observabilidad operativa
 
@@ -97,11 +97,11 @@ Requiere Waves 0 y 1 verdes.
 
 ### E2E-001 — Preview smoke hermético
 
-- [ ] Puerto dinámico y `reuseExistingServer: false` en CI.
-- [ ] DB fixture migrada y media root temporal.
-- [ ] Arrancar artefactos de producción.
-- [ ] Exigir root visible, heading/main, health/API y cero `pageerror`.
-- [ ] Captura/trace sólo en failure; teardown prueba puertos libres.
+- [x] Puerto dinámico y `reuseExistingServer: false`.
+- [x] DB fixture migrada y media root temporal con cleanup desde el primer paso fallable.
+- [x] Arrancar artefactos de producción.
+- [x] Exigir root visible, heading/main, health/API y cero `pageerror`/console errors.
+- [x] Captura/trace sólo en failure; teardown prueba puertos libres y puerto interno ocupado.
 
 ### E2E-002 — Bootstrap failure states
 
@@ -113,12 +113,12 @@ Requiere Waves 0 y 1 verdes.
 
 ## Wave 2 exit gate
 
-- [ ] `build` + `start` abre UI desde artefactos de producción.
+- [x] `build` + `start` abre UI desde artefactos de producción.
 - [x] No hay tooling de desarrollo en dist.
-- [ ] Cero error de consola en dashboard smoke.
+- [x] Cero error de consola en dashboard smoke.
 - [ ] Bootstrap failures muestran recovery UI.
-- [ ] Shutdown limpia jobs, DB y puerto.
-- [ ] Same-origin API/session/root policy funciona de punta a punta.
+- [x] Shutdown limpia conexiones, monitors, DB y puertos.
+- [x] Same-origin API/session/root policy funciona de punta a punta.
 
 ## Evidencia del checkpoint BOOT-001/RUN-002
 
@@ -127,4 +127,18 @@ Requiere Waves 0 y 1 verdes.
 - `bun run tsc`, lint focalizado y build Vite+ de producción verdes.
 - Inspección de `dist/assets/*.js`: sin `react-grab` ni `react-scan`; `package.json` ya no se incrusta en el cliente.
 - Smoke Chromium a `1440x900`: HTTP 200, root visible, tema `light`, sin fallback, sin `pageerror` y sin overflow horizontal.
-- El preview estático devuelve 502 en API porque Express no forma parte de ese proceso; el smoke full-stack hermético continúa pendiente en `E2E-001`.
+- El preview estático aislado devolvía 502 porque Express no formaba parte de ese proceso; el broker full-stack descrito a
+  continuación reemplazó esa superficie y cerró `E2E-001`.
+
+## Evidencia del checkpoint RUN-003/RUN-004/E2E-001
+
+- `scripts/start-production.ts` es el owner único del broker público y backend interno; ambos escuchan sólo en loopback.
+- `/health` público refleja startup, degradación/recuperación real del backend y shutdown sin exponer el bearer.
+- `playwright.production.config.ts` + `scripts/run-production-smoke.ts` migran una DB temporal, registran un root temporal,
+  reservan puertos dinámicos, ejecutan `dist` y eliminan el entorno aun si falla la inicialización.
+- Chromium a `1440x900`: landmark `main`, heading Dashboard, API same-origin, cache/fallback correctos, sin overflow,
+  `pageerror` ni console errors. Captura observada en el plan durable local.
+- El teardown libera ambos puertos; una segunda ejecución con el puerto backend ocupado exige salida no-cero,
+  diagnóstico accionable y retiro del broker dentro de un deadline.
+- Broker focal: 5 tests / 31 assertions. Tooling aislado: 123 tests / 622 assertions. TSC, lint y build verdes.
+- Revisión adversarial Sol/xhigh: `ACCEPT`, sin P0/P1/P2 después de reparar health vivo, cleanup temprano y deadlines.
