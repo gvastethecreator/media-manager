@@ -1,7 +1,13 @@
 import { parseArgs } from 'node:util';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { createVerifiedBackup, inventoryDatabase, resolveDatabasePath, verifyExistingBackup } from './database-safety';
+import {
+	createVerifiedBackup,
+	inventoryDatabase,
+	resolveDatabasePath,
+	restoreVerifiedBackup,
+	verifyExistingBackup,
+} from './database-safety';
 
 const HELP = `media-manager-db — inventario y backup verificable de SQLite
 
@@ -9,12 +15,14 @@ Uso:
   bun run db:inventory -- --database <ruta|file:url> [--json]
   bun run db:backup -- --database <ruta|file:url> --output <directorio-externo> [--json]
   bun run db:backup:verify -- --backup <archivo.sqlite> [--manifest <archivo.json>] [--json]
+  bun run db:restore -- --backup <archivo.sqlite> --output <nueva.sqlite> [--manifest <archivo.json>] [--json]
 
 Opciones:
   --database <valor>   Base SQLite local. Alternativa: DATABASE_URL.
   --output <directorio> Directorio de destino; debe quedar fuera del workspace/Git.
   --backup <archivo>   Backup a verificar.
   --manifest <archivo> Manifest; por defecto <backup>.manifest.json.
+  --root-id <id>       ID opaco de media root referenciado; repetible.
   --json               Salida JSON estable por stdout.
   -h, --help           Mostrar esta ayuda.
   --version            Mostrar versión del proyecto.
@@ -32,6 +40,7 @@ type CliValues = {
 	json?: boolean;
 	manifest?: string;
 	output?: string;
+	'root-id'?: string[];
 	version?: boolean;
 };
 
@@ -90,6 +99,7 @@ export async function runCli(args = process.argv.slice(2)): Promise<void> {
 			json: { type: 'boolean' },
 			manifest: { type: 'string' },
 			output: { type: 'string' },
+			'root-id': { multiple: true, type: 'string' },
 			version: { type: 'boolean' },
 		},
 		strict: true,
@@ -97,7 +107,7 @@ export async function runCli(args = process.argv.slice(2)): Promise<void> {
 	const options = values as CliValues;
 	const command = positionals[0];
 	if (!command || positionals.length !== 1) {
-		throw new UsageError('Indica exactamente un subcomando: inventory, backup o verify. Usa --help.');
+		throw new UsageError('Indica exactamente un subcomando: inventory, backup, verify o restore. Usa --help.');
 	}
 
 	if (command === 'inventory') {
@@ -110,8 +120,10 @@ export async function runCli(args = process.argv.slice(2)): Promise<void> {
 		const databasePath = resolveDatabasePath(required(options.database ?? process.env.DATABASE_URL, '--database'));
 		reportProgress('Creando snapshot y verificando restore temporal…');
 		const result = await createVerifiedBackup({
+			appVersion: await getVersion(),
 			databasePath,
 			outputDirectory: required(options.output, '--output'),
+			rootReferences: options['root-id'],
 			workspaceRoot: process.cwd(),
 		});
 		if (options.json) {
@@ -121,6 +133,17 @@ export async function runCli(args = process.argv.slice(2)): Promise<void> {
 			console.log(`Manifest: ${result.manifestPath}`);
 			console.log(`SHA-256: ${result.manifest.sha256}`);
 		}
+		return;
+	}
+	if (command === 'restore') {
+		const backupPath = resolve(required(options.backup, '--backup'));
+		const result = await restoreVerifiedBackup({
+			backupPath,
+			manifestPath: options.manifest ? resolve(options.manifest) : undefined,
+			outputPath: required(options.output, '--output'),
+		});
+		if (options.json) console.log(JSON.stringify({ ...result, restored: true }, null, 2));
+		else console.log(`Restore verificado creado sin sobrescritura: ${result.outputPath}`);
 		return;
 	}
 	if (command === 'verify') {
