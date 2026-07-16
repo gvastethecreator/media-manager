@@ -5,10 +5,10 @@
  * @created 2025-01-10 - Phase 6.3: Audio Service Migration
  */
 
-import * as crypto from 'node:crypto';
 import { and, asc, count, desc, eq, gte, inArray, lte, notInArray, or, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
+import { isPathInsideDirectory } from '@/lib/filesystem/path-containment';
 import { audios, folders } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -18,8 +18,25 @@ import {
 	setFavoriteForActiveProfile,
 } from '@/services/favorite/favorite-write-transaction';
 import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
+import {
+	assertCanonicalMediaCreateCommand,
+	createCanonicalMedia,
+	projectCanonicalMediaRow,
+	projectCanonicalMediaRows,
+	restoreCanonicalAsset,
+	tombstoneCanonicalAsset,
+	tombstoneCanonicalAssets,
+	updateCanonicalMediaProjection,
+	visibleAssetLifecycleCondition,
+} from '@/services/media-core/canonical-media-persistence';
 import { FavoriteEntityType } from '@/types/entities/favorite';
-import type { AudioBase, AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
+import type {
+	AudioBase,
+	AudioCreateInput,
+	AudioUpdateInput,
+	AudioWithStats,
+	CanonicalAudioProjection,
+} from '@/types/entities/audio';
 import type { AudioError } from './audio-errors.effect';
 import * as AudioErrors from './audio-errors.effect';
 
@@ -32,13 +49,14 @@ const audioServiceLogger = serverLogger.withContext('AudioService.Effect');
 /**
  * Audio con folder incluido (LEFT JOIN)
  */
-export type Audio = AudioBase & {
-	folder?: {
-		id: string;
-		name: string;
-		path: string;
-	} | null;
-};
+export type Audio = AudioBase &
+	CanonicalAudioProjection & {
+		folder?: {
+			id: string;
+			name: string;
+			path: string;
+		} | null;
+	};
 
 /**
  * Filtros para consultas de audio
@@ -62,6 +80,16 @@ export interface AudioFilters {
 	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size' | 'duration' | 'bitrate';
 	sortOrder?: 'asc' | 'desc';
+}
+
+export function resolveAudioListOrder(filters: Pick<AudioFilters, 'sortBy' | 'sortOrder'>): {
+	sortColumn: NonNullable<AudioFilters['sortBy']>;
+	sortDirection: NonNullable<AudioFilters['sortOrder']>;
+} {
+	return {
+		sortColumn: filters.sortBy ?? 'createdAt',
+		sortDirection: filters.sortOrder ?? 'desc',
+	};
 }
 
 /**
@@ -99,9 +127,11 @@ export interface AudioServiceInterface {
 
 	// Queries especializadas
 	readonly getByHash: (hash: string) => Effect.Effect<Audio | null, AudioError>;
+	readonly getByHashCandidates: (hash: string) => Effect.Effect<Audio[], AudioError>;
 	readonly getById: (id: string) => Effect.Effect<Audio, AudioError>;
 	readonly getByIdWithStats: (id: string) => Effect.Effect<AudioWithStats, AudioError>;
 	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Audio | null, AudioError>;
+	readonly restoreById: (id: string) => Effect.Effect<Audio, AudioError>;
 
 	// Operaciones específicas de audio
 	readonly getFormatStats: () => Effect.Effect<AudioFormatStats[], AudioError>;
@@ -162,9 +192,9 @@ function validateAudioInput(
 		}
 
 		// Validar hash (debe tener 64 caracteres para SHA-256)
-		if (input.hash !== undefined && input.hash.length !== 64) {
+		if (input.hash !== undefined && !/^[0-9a-f]{64}$/.test(input.hash)) {
 			return yield* Effect.fail(
-				AudioErrors.audioValidationError('hash', input.hash, 'Hash must be 64 characters long')
+				AudioErrors.audioValidationError('hash', input.hash, 'Hash must be a lowercase SHA-256 value')
 			);
 		}
 
@@ -191,11 +221,24 @@ const make = (): AudioServiceInterface => {
 	const create = (input: AudioCreateInput): Effect.Effect<Audio, AudioError> =>
 		Effect.gen(function* () {
 			yield* validateAudioInput(input, 'create');
+			try {
+				assertCanonicalMediaCreateCommand({
+					assetType: 'audio',
+					folderId: input.folderId,
+					hash: input.hash,
+					name: input.name,
+					path: input.path,
+					size: input.size,
+					source: input.source,
+				});
+			} catch (error) {
+				return yield* Effect.fail(AudioErrors.audioValidationError('source', input.source, String(error)));
+			}
 
 			audioServiceLogger.info('Creando nuevo audio:', input.name);
 
 			const requestedIsFavorite = input.isFavorite ?? false;
-			const { isFavorite: _requestedIsFavorite, ...persistenceInput } = input;
+			const { isFavorite: _requestedIsFavorite, source: _source, ...persistenceInput } = input;
 			const useCanonicalFavoriteBridge =
 				requestedIsFavorite === true
 					? yield* Effect.tryPromise({
@@ -204,47 +247,43 @@ const make = (): AudioServiceInterface => {
 						})
 					: false;
 
-			// Verificar si ya existe un audio con el mismo hash
-			const existing = yield* Effect.tryPromise({
-				try: async () => {
-					const rows = await db.select({ id: audios.id }).from(audios).where(eq(audios.hash, input.hash)).limit(1);
-					return rows[0] || null;
-				},
-				catch: (error) => toAudioError(error, 'create.checkHash'),
-			});
-
-			if (existing) {
-				return yield* Effect.fail(AudioErrors.audioHashConflict(input.hash, existing.id));
-			}
-
 			// Crear el audio y su favorito canónico como una sola unidad de escritura.
 			let committedFavoriteProfileId: string | null = null;
 			const newAudio = yield* Effect.tryPromise({
-				try: async () => {
-					const audioId = crypto.randomUUID();
-					const now = new Date();
-					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
-						const [created] = await transaction
-							.insert(audios)
-							.values({
-								id: audioId,
-								...persistenceInput,
-								isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
-								createdAt: now,
-								updatedAt: now,
-							})
-							.returning();
-						if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
-							committedFavoriteProfileId = await setFavoriteForActiveProfile(
-								transaction,
-								FavoriteEntityType.AUDIO,
-								created.id,
-								true
-							);
+				try: () =>
+					createCanonicalMedia(
+						{
+							assetType: 'audio',
+							folderId: input.folderId,
+							hash: input.hash,
+							name: input.name,
+							path: input.path,
+							size: input.size,
+							source: input.source,
+						},
+						async ({ assetId, now, transaction }) => {
+							const [created] = await transaction
+								.insert(audios)
+								.values({
+									id: assetId,
+									assetId,
+									...persistenceInput,
+									isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
+									createdAt: now,
+									updatedAt: now,
+								})
+								.returning();
+							if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
+								committedFavoriteProfileId = await setFavoriteForActiveProfile(
+									transaction,
+									FavoriteEntityType.AUDIO,
+									created.id,
+									true
+								);
+							}
+							return created;
 						}
-						return created;
-					});
-				},
+					),
 				catch: (error) => toAudioError(error, 'create'),
 			});
 
@@ -269,6 +308,7 @@ const make = (): AudioServiceInterface => {
 				try: async () => {
 					const rows = await db
 						.select({
+							assetId: audios.assetId,
 							id: audios.id,
 							name: audios.name,
 							path: audios.path,
@@ -299,6 +339,7 @@ const make = (): AudioServiceInterface => {
 							bpm: audios.bpm,
 							key: audios.key,
 							mood: audios.mood,
+							description: sql<string | null>`NULL`,
 							createdAt: audios.createdAt,
 							updatedAt: audios.updatedAt,
 							folder: {
@@ -317,12 +358,19 @@ const make = (): AudioServiceInterface => {
 				catch: (error) => toAudioError(error, 'getById'),
 			});
 
-			if (!audio) {
+			const projected = audio
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(audio, 'audio'),
+						catch: (error) => toAudioError(error, 'getById.canonicalProjection'),
+					})
+				: null;
+
+			if (!projected) {
 				return yield* Effect.fail(AudioErrors.audioNotFound(id));
 			}
 
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.AUDIO, audio as Audio),
+				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.AUDIO, projected as Audio),
 				catch: (error) => toAudioError(error, 'getById.favoriteProjection'),
 			});
 		});
@@ -403,7 +451,7 @@ const make = (): AudioServiceInterface => {
 				catch: (error) => toAudioError(error, 'getAll:favoriteIds'),
 			});
 
-			const conditions = [];
+			const conditions = [visibleAssetLifecycleCondition(audios.assetId)];
 
 			// Construir condiciones WHERE
 			if (filters.folderId) conditions.push(eq(audios.folderId, filters.folderId));
@@ -445,8 +493,7 @@ const make = (): AudioServiceInterface => {
 			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 			// Construir ORDER BY
-			const sortColumn = filters.sortBy || 'createdAt';
-			const sortDirection = filters.sortOrder || 'desc';
+			const { sortColumn, sortDirection } = resolveAudioListOrder(filters);
 
 			const orderByClause =
 				sortColumn === 'name'
@@ -477,6 +524,7 @@ const make = (): AudioServiceInterface => {
 				try: async () => {
 					const query = db
 						.select({
+							assetId: audios.assetId,
 							id: audios.id,
 							name: audios.name,
 							path: audios.path,
@@ -507,6 +555,7 @@ const make = (): AudioServiceInterface => {
 							bpm: audios.bpm,
 							key: audios.key,
 							mood: audios.mood,
+							description: sql<string | null>`NULL`,
 							createdAt: audios.createdAt,
 							updatedAt: audios.updatedAt,
 							folder: {
@@ -522,18 +571,24 @@ const make = (): AudioServiceInterface => {
 						query.where(whereClause);
 					}
 
+					const tieBreakOrder = sortDirection === 'desc' ? desc(audios.id) : asc(audios.id);
 					return await query
-						.orderBy(orderByClause, asc(audios.id))
+						.orderBy(orderByClause, tieBreakOrder)
 						.limit(filters.limit || 20)
 						.offset(filters.offset || 0);
 				},
 				catch: (error) => toAudioError(error, 'getAll'),
 			});
 
+			const projectedResults = yield* Effect.tryPromise<AudiosListResult, AudioError>({
+				try: async () => (await projectCanonicalMediaRows(audioResults, 'audio')) as AudiosListResult,
+				catch: (error) => toAudioError(error, 'getAll.canonicalProjection'),
+			});
+
 			return (
 				favoriteEntityIds === null
-					? audioResults
-					: favoriteService.applyFavoriteProjectionMany(audioResults as Audio[], favoriteEntityIds)
+					? projectedResults
+					: favoriteService.applyFavoriteProjectionMany(projectedResults, favoriteEntityIds)
 			) as Audio[];
 		});
 
@@ -546,8 +601,32 @@ const make = (): AudioServiceInterface => {
 
 			audioServiceLogger.info('Actualizando audio:', id);
 
-			// Verificar que existe
-			yield* getById(id);
+			// Verificar que existe y exigir una source autorizada para mover una fila enlazada.
+			const current = yield* getById(id);
+			if (current.assetId && (input.path !== undefined || input.folderId !== undefined) && !input.source) {
+				return yield* Effect.fail(
+					AudioErrors.audioValidationError(
+						'source',
+						input.source,
+						'Mover un Audio canónico requiere una source autorizada'
+					)
+				);
+			}
+			if (current.assetId && input.source) {
+				try {
+					assertCanonicalMediaCreateCommand({
+						assetType: 'audio',
+						folderId: input.folderId ?? current.folderId,
+						hash: input.hash ?? current.hash,
+						name: input.name ?? current.name,
+						path: input.path ?? current.path,
+						size: input.size ?? current.size,
+						source: input.source,
+					});
+				} catch (error) {
+					return yield* Effect.fail(AudioErrors.audioValidationError('source', input.source, String(error)));
+				}
+			}
 
 			const requestedIsFavorite = input.isFavorite;
 			const useCanonicalFavoriteBridge =
@@ -558,13 +637,25 @@ const make = (): AudioServiceInterface => {
 						})
 					: false;
 
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const { isFavorite: _ignoredIsFavorite, source, ...restInput } = input;
 
 			// Actualizar entidad y favorito dentro de la misma transacción.
 			let committedFavoriteProfileId: string | null = null;
 			yield* Effect.tryPromise({
 				try: async () => {
 					await db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						if (current.assetId && source) {
+							const targetFolderId = input.folderId ?? current.folderId;
+							const targetPath = input.path ?? current.path;
+							const [targetFolder] = await transaction
+								.select({ path: folders.path })
+								.from(folders)
+								.where(eq(folders.id, targetFolderId))
+								.limit(1);
+							if (!targetFolder || !isPathInsideDirectory(targetFolder.path, targetPath)) {
+								throw new Error('La ubicación física no pertenece al Folder declarado.');
+							}
+						}
 						await transaction
 							.update(audios)
 							.set({
@@ -575,6 +666,19 @@ const make = (): AudioServiceInterface => {
 								updatedAt: new Date(),
 							})
 							.where(eq(audios.id, id));
+						if (current.assetId) {
+							await updateCanonicalMediaProjection(
+								{
+									assetId: current.assetId,
+									folderId: input.folderId,
+									hash: input.hash,
+									name: input.name,
+									size: input.size,
+									source,
+								},
+								transaction as typeof db
+							);
+						}
 						if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
 							committedFavoriteProfileId = await setFavoriteForActiveProfile(
 								transaction,
@@ -604,8 +708,18 @@ const make = (): AudioServiceInterface => {
 		Effect.gen(function* () {
 			audioServiceLogger.info('Eliminando audio:', id, force ? '[FORCE]' : '');
 
-			// Verificar que existe
-			yield* getById(id);
+			const [current] = yield* Effect.tryPromise<Array<{ assetId: string | null }>, AudioError>({
+				try: () => db.select({ assetId: audios.assetId }).from(audios).where(eq(audios.id, id)).limit(1),
+				catch: (error) => toAudioError(error, 'deleteById.lookup'),
+			});
+			if (!current) return yield* Effect.fail(AudioErrors.audioNotFound(id));
+			if (current.assetId) {
+				yield* Effect.tryPromise({
+					try: () => tombstoneCanonicalAsset(current.assetId!),
+					catch: (error) => toAudioError(error, 'deleteById.tombstone'),
+				});
+				return;
+			}
 
 			// TODO: Si force=false, verificar relaciones primero
 			// Por ahora solo eliminamos directamente
@@ -636,15 +750,22 @@ const make = (): AudioServiceInterface => {
 
 			// TODO: Si force=false, verificar relaciones primero
 
+			const targets = yield* Effect.tryPromise<Array<{ assetId: string | null; id: string }>, AudioError>({
+				try: () => db.select({ assetId: audios.assetId, id: audios.id }).from(audios).where(inArray(audios.id, ids)),
+				catch: (error) => toAudioError(error, 'deleteManyByIds.lookup'),
+			});
+			const canonicalIds = targets.flatMap((target) => (target.assetId ? [target.assetId] : []));
+			const legacyIds = targets.flatMap((target) => (target.assetId ? [] : [target.id]));
+
 			const deletedCount = yield* Effect.tryPromise({
 				try: async () => {
 					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
-						await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.AUDIO, ids);
-						const deleted = await transaction
-							.delete(audios)
-							.where(inArray(audios.id, ids))
-							.returning({ id: audios.id });
-						return deleted.length;
+						await tombstoneCanonicalAssets(canonicalIds, transaction as typeof db);
+						if (legacyIds.length > 0) {
+							await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.AUDIO, legacyIds);
+							await transaction.delete(audios).where(inArray(audios.id, legacyIds));
+						}
+						return targets.length;
 					});
 				},
 				catch: (error) => toAudioError(error, 'deleteManyByIds'),
@@ -654,17 +775,32 @@ const make = (): AudioServiceInterface => {
 			return deletedCount;
 		});
 
+	const restoreById = (id: string): Effect.Effect<Audio, AudioError> =>
+		Effect.gen(function* () {
+			const [current] = yield* Effect.tryPromise<Array<{ assetId: string | null }>, AudioError>({
+				try: () => db.select({ assetId: audios.assetId }).from(audios).where(eq(audios.id, id)).limit(1),
+				catch: (error) => toAudioError(error, 'restoreById.lookup'),
+			});
+			if (!current?.assetId) return yield* Effect.fail(AudioErrors.audioNotFound(id));
+			yield* Effect.tryPromise({
+				try: () => restoreCanonicalAsset(current.assetId!),
+				catch: (error) => toAudioError(error, 'restoreById'),
+			});
+			return yield* getById(id);
+		});
+
 	// -------------------------------------------------------------------------------
 	// GET BY HASH
 	// -------------------------------------------------------------------------------
-	const getByHash = (hash: string): Effect.Effect<Audio | null, AudioError> =>
+	const getByHashCandidates = (hash: string): Effect.Effect<Audio[], AudioError> =>
 		Effect.gen(function* () {
-			audioServiceLogger.info('Buscando audio por hash:', hash);
+			audioServiceLogger.info('Buscando candidatos de audio por hash:', hash);
 
 			const audio = yield* Effect.tryPromise({
 				try: async () => {
 					const rows = await db
 						.select({
+							assetId: audios.assetId,
 							id: audios.id,
 							name: audios.name,
 							path: audios.path,
@@ -695,6 +831,7 @@ const make = (): AudioServiceInterface => {
 							bpm: audios.bpm,
 							key: audios.key,
 							mood: audios.mood,
+							description: sql<string | null>`NULL`,
 							createdAt: audios.createdAt,
 							updatedAt: audios.updatedAt,
 							folder: {
@@ -705,20 +842,31 @@ const make = (): AudioServiceInterface => {
 						})
 						.from(audios)
 						.leftJoin(folders, eq(audios.folderId, folders.id))
-						.where(eq(audios.hash, hash))
-						.limit(1);
+						.where(and(eq(audios.hash, hash), visibleAssetLifecycleCondition(audios.assetId)))
+						.orderBy(asc(audios.createdAt), asc(audios.id));
 
-					return rows[0] || null;
+					return rows;
 				},
-				catch: (error) => toAudioError(error, 'getByHash'),
+				catch: (error) => toAudioError(error, 'getByHashCandidates'),
 			});
 
-			if (!audio) return null;
+			const projected = yield* Effect.tryPromise({
+				try: () => projectCanonicalMediaRows(audio, 'audio'),
+				catch: (error) => toAudioError(error, 'getByHashCandidates.canonicalProjection'),
+			});
+			if (projected.length === 0) return [];
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.AUDIO, audio as Audio),
-				catch: (error) => toAudioError(error, 'getByHash.favoriteProjection'),
+				try: () =>
+					Promise.all(
+						projected.map((candidate) =>
+							favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.AUDIO, candidate as Audio)
+						)
+					),
+				catch: (error) => toAudioError(error, 'getByHashCandidates.favoriteProjection'),
 			});
 		});
+	const getByHash = (hash: string): Effect.Effect<Audio | null, AudioError> =>
+		getByHashCandidates(hash).pipe(Effect.map((candidates) => candidates[0] ?? null));
 
 	// -------------------------------------------------------------------------------
 	// GET BY PATH AND FOLDER
@@ -731,6 +879,7 @@ const make = (): AudioServiceInterface => {
 				try: async () => {
 					const rows = await db
 						.select({
+							assetId: audios.assetId,
 							id: audios.id,
 							name: audios.name,
 							path: audios.path,
@@ -761,6 +910,7 @@ const make = (): AudioServiceInterface => {
 							bpm: audios.bpm,
 							key: audios.key,
 							mood: audios.mood,
+							description: sql<string | null>`NULL`,
 							createdAt: audios.createdAt,
 							updatedAt: audios.updatedAt,
 							folder: {
@@ -771,7 +921,9 @@ const make = (): AudioServiceInterface => {
 						})
 						.from(audios)
 						.leftJoin(folders, eq(audios.folderId, folders.id))
-						.where(and(eq(audios.path, path), eq(audios.folderId, folderId)))
+						.where(
+							and(eq(audios.path, path), eq(audios.folderId, folderId), visibleAssetLifecycleCondition(audios.assetId))
+						)
 						.limit(1);
 
 					return rows[0] || null;
@@ -779,9 +931,15 @@ const make = (): AudioServiceInterface => {
 				catch: (error) => toAudioError(error, 'getByPathAndFolder'),
 			});
 
-			if (!audio) return null;
+			const projected = audio
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(audio, 'audio'),
+						catch: (error) => toAudioError(error, 'getByPathAndFolder.canonicalProjection'),
+					})
+				: null;
+			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.AUDIO, audio as Audio),
+				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.AUDIO, projected as Audio),
 				catch: (error) => toAudioError(error, 'getByPathAndFolder.favoriteProjection'),
 			});
 		});
@@ -814,7 +972,10 @@ const make = (): AudioServiceInterface => {
 
 			const result = yield* Effect.tryPromise({
 				try: async () => {
-					const rows = await db.select({ count: count() }).from(audios).where(eq(audios.folderId, folderId));
+					const rows = await db
+						.select({ count: count() })
+						.from(audios)
+						.where(and(eq(audios.folderId, folderId), visibleAssetLifecycleCondition(audios.assetId)));
 					return rows[0]?.count || 0;
 				},
 				catch: (error) => toAudioError(error, 'countByFolder'),
@@ -883,7 +1044,7 @@ const make = (): AudioServiceInterface => {
 					const updated = await db
 						.update(audios)
 						.set({ isFavorite, updatedAt: new Date() })
-						.where(inArray(audios.id, ids))
+						.where(and(inArray(audios.id, ids), visibleAssetLifecycleCondition(audios.assetId)))
 						.returning({ id: audios.id });
 					return updated.length;
 				},
@@ -914,7 +1075,8 @@ const make = (): AudioServiceInterface => {
 							bitrate: audios.bitrate,
 							sampleRate: audios.sampleRate,
 						})
-						.from(audios);
+						.from(audios)
+						.where(visibleAssetLifecycleCondition(audios.assetId));
 					return rows;
 				},
 				catch: (error) => toAudioError(error, 'getFormatStats'),
@@ -971,7 +1133,9 @@ const make = (): AudioServiceInterface => {
 		update,
 		deleteById,
 		deleteManyByIds,
+		restoreById,
 		getByHash,
+		getByHashCandidates,
 		getByPathAndFolder,
 		getAllFavorites,
 		getByFolder,
@@ -1032,6 +1196,9 @@ export const deleteById = (id: string, force = false): Effect.Effect<void, Audio
  */
 export const deleteManyByIds = (ids: string[], force = false): Effect.Effect<number, AudioError> =>
 	make().deleteManyByIds(ids, force);
+
+/** Restaurar un Audio canónico desde su tombstone. */
+export const restoreById = (id: string): Effect.Effect<Audio, AudioError> => make().restoreById(id);
 
 /**
  * Obtener audio por hash

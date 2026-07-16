@@ -1,25 +1,21 @@
 import { Effect } from 'effect';
+import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { create, getByHash } from '@/services/audio/audio.service.effect';
+import { create } from '@/services/audio/audio.service.effect';
 import type { AudioCreateInput } from '@/types/entities/audio';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
+import { isCanonicalSourceIndexed } from '../utils/canonical-source.utils';
 
 /**
  * Procesador especializado para entidades de tipo AUDIO
  */
 export class AudioProcessor {
 	/**
-	 * Verifica si un archivo de audio ya existe por hash
+	 * Verifica si la ubicación canónica ya fue indexada.
 	 */
 	async checkExists(fileInfo: FileInfo): Promise<boolean> {
-		if (!fileInfo.hash) return false;
-		try {
-			const existing = await Effect.runPromise(getByHash(fileInfo.hash));
-			return !!existing;
-		} catch {
-			return false;
-		}
+		return isCanonicalSourceIndexed(fileInfo);
 	}
 
 	/**
@@ -28,6 +24,9 @@ export class AudioProcessor {
 	async createBasicEntity(fileInfo: FileInfo): Promise<string> {
 		if (!fileInfo.hash) {
 			throw new Error('File hash is required for audio creation');
+		}
+		if (!fileInfo.source) {
+			throw new Error('An authorized canonical source is required for audio creation');
 		}
 
 		const audioData: AudioCreateInput = {
@@ -61,6 +60,7 @@ export class AudioProcessor {
 			bpm: null,
 			key: null,
 			mood: null,
+			source: extendAuthorizedPathInput(fileInfo.source, { fileModifiedAt: fileInfo.lastModified }),
 		};
 
 		const audio = await Effect.runPromise(create(audioData));

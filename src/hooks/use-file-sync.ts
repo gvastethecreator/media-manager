@@ -29,7 +29,7 @@ export interface FileSyncStatus {
 		id: string;
 		path: string;
 		name: string;
-		type: 'image' | 'video' | 'audio' | 'document' | 'file3d';
+		type: 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d';
 	}>;
 	/** Estadísticas de la última sincronización */
 	stats?: {
@@ -145,6 +145,7 @@ export function useFileSync(folderId?: string, options: UseFileSyncOptions = {})
 				queryClient.invalidateQueries({ queryKey: ['videos', 'folder', folderId] });
 				queryClient.invalidateQueries({ queryKey: ['audios', 'folder', folderId] });
 				queryClient.invalidateQueries({ queryKey: ['documents', 'folder', folderId] });
+				queryClient.invalidateQueries({ queryKey: ['json-files'] });
 				queryClient.invalidateQueries({ queryKey: ['file3ds', 'folder', folderId] });
 				queryClient.invalidateQueries({ queryKey: ['folders'] });
 			}
@@ -342,6 +343,7 @@ export function useGlobalFileSync(options?: UseFileSyncOptions) {
 			queryClient.invalidateQueries({ queryKey: ['videos'] });
 			queryClient.invalidateQueries({ queryKey: ['audios'] });
 			queryClient.invalidateQueries({ queryKey: ['documents'] });
+			queryClient.invalidateQueries({ queryKey: ['json-files'] });
 			queryClient.invalidateQueries({ queryKey: ['file3ds'] });
 			queryClient.invalidateQueries({ queryKey: ['folders'] });
 

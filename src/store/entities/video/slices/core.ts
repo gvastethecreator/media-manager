@@ -8,10 +8,16 @@
 import type { StateCreator } from 'zustand';
 // Refactor 2025-07: se reemplazan servicios por cliente API
 // Refactor 2025-07: se reemplazan servicios por cliente API
-import { createVideoInApi, deleteVideoFromApi, findVideosInApi, getVideoFromApi } from '@/lib/api/client/video.client';
+import {
+	createVideoInApi,
+	deleteVideoFromApi,
+	findVideosInApi,
+	getVideoFromApi,
+	type PublicVideoCreateInput,
+} from '@/lib/api/client/video.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import type { VideoCreateInput, VideoFilters, VideoWithStats } from '@/types/entities/video';
+import type { VideoFilters, VideoWithStats } from '@/types/entities/video';
 import type { VideoStore } from '..';
 
 export interface VideoCoreState {
@@ -45,7 +51,7 @@ export interface VideoCoreSlice extends VideoCoreState {
 	// ⚡ Operaciones síncronas optimizadas
 	addVideo: (video: VideoWithStats) => void;
 	addVideos: (videos: VideoWithStats[]) => void;
-	createVideo: (data: VideoCreateInput) => Promise<VideoWithStats | undefined>;
+	createVideo: (data: PublicVideoCreateInput) => Promise<VideoWithStats | undefined>;
 	deleteVideo: (id: string) => void;
 
 	// 🌐 Acciones asíncronas

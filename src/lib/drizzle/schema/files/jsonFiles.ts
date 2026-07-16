@@ -78,6 +78,7 @@ export const jsonFiles = sqliteTable(
 		folderId_idx: index('JsonFile_folderId_idx').on(table.folderId),
 		hash_idx: index('JsonFile_hash_idx').on(table.hash),
 		folderHashIdx: index('JsonFile_folderId_hash_idx').on(table.folderId, table.hash),
+		folderCreatedAtIdx: index('JsonFile_folderId_createdAt_idx').on(table.folderId, table.createdAt, table.id),
 		createdAt_idx: index('JsonFile_createdAt_idx').on(table.createdAt),
 		updatedAt_idx: index('JsonFile_updatedAt_idx').on(table.updatedAt),
 		sizeCheck: check('JsonFile_size_check', sql`size >= 0 AND size <= 107374182400`),

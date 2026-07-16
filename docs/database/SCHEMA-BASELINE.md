@@ -61,6 +61,12 @@ La copia adoptada es evidencia de compatibilidad, no un reemplazo automático de
 - `0005_image_asset_link.sql` reconstruye sólo `Image` para añadir el enlace expand-contract `assetId`. Copia toda fila
   legacy con `assetId = NULL`, conserva sus junctions, exige unicidad y `Image.id = Image.assetId` cuando se enlaza, y no
   crea Asset/Source por inferencia. El backfill de datos es un comando copy-only separado y requiere roots explícitos.
+- `0006_media_specialization_asset_links.sql` aplica el mismo enlace nullable, único y de identidad exacta a `Video`,
+  `Audio`, `Document`, `JsonFile` y `File3D`, preservando sus filas y metadata específicas. El backfill multi-familia es
+  copy-only, detecta colisiones globales de ID y requiere roots explícitos.
+- `0007_media_folder_created_indexes.sql` añade índices `(folderId, createdAt, id)` a esas cinco especializaciones. El
+  gate ejecutable reproduce el orden estable real —incluido el desempate por `id` en la misma dirección— y demuestra
+  lookup canónico por `assetId` y listados lifecycle-aware sin sort temporal.
 
 Drizzle Kit no puede serializar `DEFERRABLE` para SQLite. Por eso el snapshot tipado no declara las dos FKs cíclicas y
 la migración SQL versionada las añade como extensión explícita. Esto no queda confiado a una nota: el runner valida el
@@ -105,6 +111,8 @@ bun run db:orphans -- --database C:/tmp/media-manager-copy.sqlite
 bun run db:upgrade -- --database C:/tmp/media-manager-copy.sqlite --backup-dir D:/Backups/MediaManager --output C:/tmp/media-manager-next.sqlite --root-id library --json
 bun run db:image:backfill -- --database C:/tmp/media-manager-copy.sqlite --backup-dir D:/Backups/MediaManager --output C:/tmp/media-manager-image-canonical.sqlite --roots D:/private/media-roots.json --json
 bun run db:image:reconcile -- --database C:/tmp/media-manager-image-canonical.sqlite --roots D:/private/media-roots.json
+bun run db:media:backfill -- --database C:/tmp/media-manager-copy.sqlite --backup-dir D:/Backups/MediaManager --output C:/tmp/media-manager-media-canonical.sqlite --roots D:/private/media-roots.json --json
+bun run db:media:reconcile -- --database C:/tmp/media-manager-media-canonical.sqlite --roots D:/private/media-roots.json
 bun run db:schema:export -- --database C:/tmp/media-manager-copy.sqlite --output docs/database/representative-schema.sql
 bun run db:schema:check
 ```
@@ -121,6 +129,6 @@ ocho índices aditivos, calcula el conteo esperado tras quitar bridges sin owner
 
 `media-roots.json` contiene paths físicos y por eso debe permanecer fuera del repositorio. El backfill usa exactamente el
 validator runtime de roots/referencias antes de crear backup/output y vuelve a validar cada path derivado. Sin roots,
-`db:image:reconcile` sólo informa consistencia estructural con `pathVerification = not_verified`; con roots existentes
+los reconciliadores sólo informan consistencia estructural con `pathVerification = not_verified`; con roots existentes
 puede afirmar `dataConsistent` y `pathVerification = verified`. Esas señales no autorizan retiro: el CLI no posee un
 `retirement gate` porque aún faltan checkpoints runtime persistidos y evidencia de uso.

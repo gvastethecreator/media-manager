@@ -1,4 +1,5 @@
-import type { VideoCreateInput, VideoUpdateInput, VideoWithStats } from '@/types/entities/video';
+import type { PublicVideoCreateInput, PublicVideoUpdateInput } from '@/lib/api/client/video.client';
+import type { VideoWithStats } from '@/types/entities/video';
 import { createEntityHooks } from './hook-factory';
 
 export interface VideoFilters {
@@ -12,9 +13,10 @@ export interface VideoFilters {
 	isFavorite?: boolean;
 }
 
-const hooks = createEntityHooks<VideoWithStats, VideoCreateInput, Partial<VideoUpdateInput>, VideoFilters>({
+const hooks = createEntityHooks<VideoWithStats, PublicVideoCreateInput, PublicVideoUpdateInput, VideoFilters>({
 	entityName: 'videos',
 	baseEndpoint: '/videos',
+	updateMethod: 'patch',
 	listStaleTime: 60_000,
 	detailStaleTime: 60_000,
 });

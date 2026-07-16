@@ -13,6 +13,8 @@ export interface HookFactoryConfig<TEntity, TCreateInput, TUpdateInput, TFilters
 	entityName: string;
 	/** Endpoint base (ej: '/images', '/videos') */
 	baseEndpoint: string;
+	/** Método HTTP expuesto por el router para actualizar. Default: PUT. */
+	updateMethod?: 'patch' | 'put';
 	/** staleTime para queries de lista (ms). Default: 30_000 */
 	listStaleTime?: number;
 	/** staleTime para queries de detalle (ms). Default: 60_000 */
@@ -37,10 +39,20 @@ export interface EntityListResult<TEntity> {
 export interface EntityHooks<TEntity, TCreateInput, TUpdateInput, TFilters extends Record<string, unknown>> {
 	keys: {
 		all: readonly [string];
-		lists: () => readonly [...readonly [string], 'list'];
-		list: (filters: TFilters) => readonly [...ReturnType<EntityHooks<TEntity, TCreateInput, TUpdateInput, TFilters>['keys']['lists']>, TFilters];
-		details: () => readonly [...readonly [string], 'detail'];
-		detail: (id: string) => readonly [...ReturnType<EntityHooks<TEntity, TCreateInput, TUpdateInput, TFilters>['keys']['details']>, string];
+		lists: () => readonly [...(readonly [string]), 'list'];
+		list: (
+			filters: TFilters
+		) => readonly [
+			...ReturnType<EntityHooks<TEntity, TCreateInput, TUpdateInput, TFilters>['keys']['lists']>,
+			TFilters,
+		];
+		details: () => readonly [...(readonly [string]), 'detail'];
+		detail: (
+			id: string
+		) => readonly [
+			...ReturnType<EntityHooks<TEntity, TCreateInput, TUpdateInput, TFilters>['keys']['details']>,
+			string,
+		];
 	};
 	useList: (filters?: TFilters) => ReturnType<typeof useQuery<EntityListResult<TEntity>, Error>>;
 	useDetail: (id: string | undefined) => ReturnType<typeof useQuery<TEntity, Error>>;
@@ -49,10 +61,15 @@ export interface EntityHooks<TEntity, TCreateInput, TUpdateInput, TFilters exten
 	useDelete: () => ReturnType<typeof useMutation<void, Error, string>>;
 }
 
-export function createEntityHooks<TEntity extends { id: string }, TCreateInput, TUpdateInput, TFilters extends Record<string, unknown>>(
+export function createEntityHooks<
+	TEntity extends { id: string },
+	TCreateInput,
+	TUpdateInput,
+	TFilters extends Record<string, unknown>,
+>(
 	config: HookFactoryConfig<TEntity, TCreateInput, TUpdateInput, TFilters>
 ): EntityHooks<TEntity, TCreateInput, TUpdateInput, TFilters> {
-	const { entityName, baseEndpoint, arrayFilterKeys = [], relatedQueryKeys = [] } = config;
+	const { entityName, baseEndpoint, arrayFilterKeys = [], relatedQueryKeys = [], updateMethod = 'put' } = config;
 	const listStaleTime = config.listStaleTime ?? 30_000;
 	const detailStaleTime = config.detailStaleTime ?? 60_000;
 
@@ -116,7 +133,7 @@ export function createEntityHooks<TEntity extends { id: string }, TCreateInput, 
 
 	function useUpdate() {
 		return useMutation<TEntity, Error, { id: string; data: TUpdateInput }>({
-			mutationFn: ({ id, data }) => apiClient.put<TEntity>(`${baseEndpoint}/${id}`, data),
+			mutationFn: ({ id, data }) => apiClient[updateMethod]<TEntity>(`${baseEndpoint}/${id}`, data),
 			onSuccess: (updated) => {
 				queryClient().invalidateQueries({ queryKey: keys.lists() });
 				queryClient().setQueryData(keys.detail(updated.id), updated);

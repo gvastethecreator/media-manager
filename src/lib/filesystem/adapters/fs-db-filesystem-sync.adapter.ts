@@ -3,18 +3,27 @@ import { checkFileSyncStatus, syncFolderFiles } from '@/lib/filesystem/file-sync
 import type { FileSystemSync, SyncFileResult } from '@/lib/filesystem/sync-interface';
 import type { FileInfo } from '@/types/file-entity-mapper';
 
+async function withConfiguredRoots() {
+	const { getConfiguredMediaRootRegistry } = await import('@/server/security/configured-media-source');
+	return { authorizedRootRegistry: await getConfiguredMediaRootRegistry() };
+}
+
 /**
  * Adapter de producción para el seam FileSystemSync.
  * Usa filesystem + DB existentes y delega creación de entidades al mapper.
  */
 export class FsDbFileSystemSyncAdapter implements FileSystemSync {
 	async syncFile(filePath: string, folderId: string): Promise<SyncFileResult> {
-		const status = await checkFileSyncStatus(folderId);
+		const status = await checkFileSyncStatus(folderId, await withConfiguredRoots());
 		const normalizedPath = filePath.replace(/\\/g, '/').toLowerCase();
 
-		const isDeleted = status.removedFiles.some((file) => file.path.replace(/\\/g, '/').toLowerCase() === normalizedPath);
+		const isDeleted = status.removedFiles.some(
+			(file) => file.path.replace(/\\/g, '/').toLowerCase() === normalizedPath
+		);
 		if (isDeleted) {
-			const removed = status.removedFiles.find((file) => file.path.replace(/\\/g, '/').toLowerCase() === normalizedPath);
+			const removed = status.removedFiles.find(
+				(file) => file.path.replace(/\\/g, '/').toLowerCase() === normalizedPath
+			);
 			return {
 				fileId: removed?.id ?? '',
 				entityType: removed?.type ?? 'unknown',
@@ -60,12 +69,12 @@ export class FsDbFileSystemSyncAdapter implements FileSystemSync {
 	}
 
 	async detectDeletedFiles(folderId: string): Promise<string[]> {
-		const status = await checkFileSyncStatus(folderId);
+		const status = await checkFileSyncStatus(folderId, await withConfiguredRoots());
 		return status.removedFiles.map((file) => file.path);
 	}
 
 	async detectNewFiles(folderId: string): Promise<FileInfo[]> {
-		const status = await checkFileSyncStatus(folderId);
+		const status = await checkFileSyncStatus(folderId, await withConfiguredRoots());
 		const now = new Date();
 
 		return status.newFiles.map((file) => ({
@@ -79,7 +88,7 @@ export class FsDbFileSystemSyncAdapter implements FileSystemSync {
 	}
 
 	async cleanOrphanRecords(folderId: string): Promise<number> {
-		const result = await syncFolderFiles(folderId, { dryRun: false });
+		const result = await syncFolderFiles(folderId, { ...(await withConfiguredRoots()), dryRun: false });
 		return result.removedFiles.length;
 	}
 }

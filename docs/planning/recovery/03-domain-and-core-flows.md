@@ -33,10 +33,16 @@ Requiere runtime y persistencia estables; se ejecuta por vertical slice, nunca c
 
 ### MODEL-004 — Expandir a video/audio/document/json/file3d
 
-- [ ] Repetir migration + reconcile + consumer cutover por tipo.
-- [ ] Conservar metadata específica sin contaminar Asset.
-- [ ] Validar thumbnails/viewers y formatos ausentes/corruptos.
-- [ ] Medir performance de joins y ajustar índices.
+- [x] Repetir migration + reconcile + consumer cutover por tipo.
+- [x] Conservar metadata específica sin contaminar Asset.
+- [x] Validar thumbnails/viewers y formatos ausentes/corruptos.
+- [x] Medir performance de joins y ajustar índices.
+
+Checkpoint aceptado 2026-07-16: las cinco familias usan Asset/SourceFile y lifecycle común; create/update públicos son
+source-only; reindex por Folder, viewers, derivados, stats y hash lookup aplican autorización canónica; backfill/reconcile
+es copy-only y verifica archivos reales. Evidencia: 18 tests focales, 176 tooling únicos, 666 app tests, TSC/lint/schema/
+build/diff verdes, DB real inmutable y revisión independiente `ACCEPT`. El retiro de columnas legacy sigue bloqueado por
+los dos checkpoints runtime reales definidos en el ledger.
 
 ### FAV-001 — Favoritos canónicos por perfil
 

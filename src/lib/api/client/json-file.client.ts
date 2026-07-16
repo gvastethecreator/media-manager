@@ -8,7 +8,16 @@
  * Cliente de API para archivos JSON.
  * Reemplaza llamadas directas a servicios del servidor.
  */
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
 import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
+
+export type PublicJsonFileCreateInput = Omit<JsonFileCreateInput, 'path'> & {
+	source: AuthorizedPathReference;
+};
+
+export type PublicJsonFileUpdateInput = Omit<JsonFileUpdateInput, 'path'> & {
+	source?: AuthorizedPathReference;
+};
 
 const API_BASE_PATH = '/api/json-files';
 
@@ -32,7 +41,7 @@ export async function getJsonFileFromApi(id: string): Promise<JsonFileWithStats>
 	return response.json();
 }
 
-export async function createJsonFileInApi(data: JsonFileCreateInput): Promise<JsonFileWithStats> {
+export async function createJsonFileInApi(data: PublicJsonFileCreateInput): Promise<JsonFileWithStats> {
 	const response = await fetch(API_BASE_PATH, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -44,7 +53,7 @@ export async function createJsonFileInApi(data: JsonFileCreateInput): Promise<Js
 	return response.json();
 }
 
-export async function updateJsonFileInApi(id: string, data: JsonFileUpdateInput): Promise<JsonFileWithStats> {
+export async function updateJsonFileInApi(id: string, data: PublicJsonFileUpdateInput): Promise<JsonFileWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },

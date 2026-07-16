@@ -15,8 +15,8 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	authorizeMediaAssetBodyIds,
 	authorizeMediaAssetParam,
+	authorizeMediaPlacementInput,
 	authorizeMediaPathInput,
-	assertAuthorizedMediaEntity,
 	filterAuthorizedMediaEntities,
 	authorizeFolderPathById,
 	getAuthorizedRootRegistry,
@@ -202,7 +202,10 @@ router.get(
 		return Effect.gen(function* () {
 			const audioService = yield* AudioService;
 
-			const audio = yield* audioService.getByHash(hash);
+			const candidates = yield* audioService.getByHashCandidates(hash);
+			const [audio] = yield* Effect.promise(() =>
+				filterAuthorizedMediaEntities(req, candidates, 'audio', ['read', 'index'])
+			);
 
 			if (!audio) {
 				res.status(404).json({
@@ -211,8 +214,6 @@ router.get(
 				});
 				return;
 			}
-			yield* Effect.promise(() => assertAuthorizedMediaEntity(req, audio, 'audio', ['read', 'index']));
-
 			return audio;
 		}).pipe(Effect.provide(AudioServiceLive));
 	})
@@ -386,6 +387,7 @@ router.get(
 router.post(
 	'/',
 	authorizeMediaPathInput({ expected: 'file', required: true }),
+	authorizeMediaPlacementInput(),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const audioService = yield* AudioService;
@@ -469,7 +471,7 @@ router.patch(
  */
 router.delete(
 	'/batch',
-	authorizeMediaAssetBodyIds({ assetType: 'audio', permissions: ['delete'] }),
+	authorizeMediaAssetBodyIds({ allowMissing: true, assetType: 'audio', permissions: ['delete'] }),
 	effectHandler((req) => {
 		const { ids, force } = req.body;
 
@@ -488,7 +490,7 @@ router.delete(
  */
 router.delete(
 	'/:id',
-	authorizeMediaAssetParam({ assetType: 'audio', permissions: ['delete'] }),
+	authorizeMediaAssetParam({ allowMissing: true, assetType: 'audio', permissions: ['delete'] }),
 	effectHandler((req, res) => {
 		const { id } = req.params;
 		const { force } = req.query;
@@ -502,6 +504,23 @@ router.delete(
 			return undefined;
 		}).pipe(Effect.provide(AudioServiceLive));
 	})
+);
+
+/** POST /audios/:id/restore - Restaurar un tombstone canónico. */
+router.post(
+	'/:id/restore',
+	authorizeMediaAssetParam({
+		allowDeleted: true,
+		allowMissing: true,
+		assetType: 'audio',
+		permissions: ['read', 'write'],
+	}),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const audioService = yield* AudioService;
+			return yield* audioService.restoreById(req.params.id);
+		}).pipe(Effect.provide(AudioServiceLive))
+	)
 );
 
 export default router;

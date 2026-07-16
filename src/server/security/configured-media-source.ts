@@ -9,7 +9,7 @@ import {
 let cachedConfig: string | undefined;
 let cachedRegistry: Promise<AuthorizedRootRegistry> | undefined;
 
-async function getConfiguredRegistry(): Promise<AuthorizedRootRegistry> {
+export async function getConfiguredMediaRootRegistry(): Promise<AuthorizedRootRegistry> {
 	const currentConfig = process.env[ROOT_GRANTS_ENV];
 	if (!cachedRegistry || cachedConfig !== currentConfig) {
 		cachedConfig = currentConfig;
@@ -23,7 +23,7 @@ async function getConfiguredRegistry(): Promise<AuthorizedRootRegistry> {
  * It never guesses a root from folder rows or path prefixes stored in the database.
  */
 export async function resolveConfiguredMediaSource(absolutePath: string): Promise<ImageCanonicalSourceInput> {
-	const registry = await getConfiguredRegistry();
+	const registry = await getConfiguredMediaRootRegistry();
 	let resolved = await registry.authorizeAbsolutePath(absolutePath, 'read');
 	resolved = await registry.authorizeAbsolutePath(absolutePath, 'index');
 	return createAuthorizedPathInput(resolved);

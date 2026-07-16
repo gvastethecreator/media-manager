@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import { Database } from 'bun:sqlite';
 import { link, mkdir, readFile, rm, stat } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -29,6 +30,22 @@ export type UpgradeResult = {
 	manifestPath: string;
 	outputPath: string;
 };
+
+async function removeDatabaseArtifacts(databasePath: string): Promise<void> {
+	for (const path of [databasePath, `${databasePath}-shm`, `${databasePath}-wal`, `${databasePath}-journal`]) {
+		await rm(path, { force: true, maxRetries: 40, retryDelay: 100 });
+	}
+}
+
+function checkpointDatabase(databasePath: string): void {
+	const database = new Database(databasePath, { strict: true });
+	try {
+		database.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+	} finally {
+		database.clearQueryCache();
+		database.close();
+	}
+}
 
 export async function upgradeDatabase({
 	appVersion,
@@ -61,10 +78,11 @@ export async function upgradeDatabase({
 		await migrateDatabase({ allowExistingPending: true, databasePath: stagingPath, migrationsDirectory });
 		const check = await checkDatabase({ databasePath: stagingPath, migrationsDirectory });
 		if (!check.healthy) throw new Error('La copia actualizada no superó db:check; la base origen permanece intacta.');
+		checkpointDatabase(stagingPath);
 
 		// Hard-link publication is atomic and fails if the final path appeared concurrently.
 		await link(stagingPath, resolvedOutput);
-		await rm(stagingPath, { force: true, maxRetries: 40, retryDelay: 100 });
+		await removeDatabaseArtifacts(stagingPath);
 		return {
 			backupPath: backup.backupPath,
 			check,
@@ -73,7 +91,7 @@ export async function upgradeDatabase({
 			outputPath: resolvedOutput,
 		};
 	} catch (error) {
-		await rm(stagingPath, { force: true, maxRetries: 40, retryDelay: 100 });
+		await removeDatabaseArtifacts(stagingPath);
 		throw error;
 	}
 }
