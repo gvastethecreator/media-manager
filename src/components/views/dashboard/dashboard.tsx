@@ -28,7 +28,6 @@ import {
 } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useFolderStats } from '@/components/settings/folders/hooks/use-folder-stats';
 import { Badge } from '@/components/ui/badge';
 import { DashboardStatCard, type DashboardStatCardProps, DashboardStatGrid } from '@/components/ui/dashboard-stat-card';
 import Silk from '@/components/ui/silk-background';
@@ -36,8 +35,7 @@ import { useAlbums } from '@/lib/api/albums';
 import { useAudios } from '@/lib/api/audio';
 import { useCollections } from '@/lib/api/collections';
 import { useImages } from '@/lib/api/images';
-import { useGeneralStats, useRecentActivity, useSystemStatsExtended, useTopTags } from '@/lib/api/stats';
-import { useSystemStats } from '@/lib/api/system';
+import { useNavigationData } from '@/lib/api/navigation';
 import { useVideos } from '@/lib/api/videos';
 import { cn } from '@/lib/utils';
 
@@ -154,12 +152,7 @@ const QuickStatItem = memo(function QuickStatItem({
 });
 
 export const Dashboard = memo(function Dashboard() {
-	const { data: systemStats, isLoading: systemLoading } = useSystemStats();
-	const { data: extendedStats, isLoading: extendedLoading } = useSystemStatsExtended();
-	const { data: generalStats, isLoading: generalLoading } = useGeneralStats();
-	const { data: folderStats, isLoading: folderLoading } = useFolderStats();
-	const { data: recentActivity, isLoading: activityLoading } = useRecentActivity({ limit: 5 });
-	const { data: topTags, isLoading: tagsLoading } = useTopTags(5);
+	const { data: navigationData, isLoading: navigationLoading } = useNavigationData();
 	const { data: recentImages, isLoading: imagesLoading } = useImages({
 		limit: 4,
 		sortBy: 'createdAt',
@@ -182,46 +175,48 @@ export const Dashboard = memo(function Dashboard() {
 		sortOrder: 'desc',
 	});
 
-	const isLoading = systemLoading || extendedLoading || generalLoading || folderLoading;
+	const isLoading = navigationLoading;
 
 	const combinedStats = useMemo(
 		() => ({
-			totalImages: systemStats?.totalImages || generalStats?.totalImages || extendedStats?.totalImages || 0,
-			totalVideos: systemStats?.totalVideos || generalStats?.totalVideos || extendedStats?.totalVideos || 0,
-			totalAudio: systemStats?.totalAudio || generalStats?.totalAudio || extendedStats?.totalAudio || 0,
-			totalDocuments: generalStats?.totalDocuments || extendedStats?.totalDocuments || 0,
-			totalJsonFiles: generalStats?.totalJsonFiles || extendedStats?.totalJsonFiles || 0,
-			totalFile3D: generalStats?.totalFile3D || extendedStats?.totalFile3D || 0,
-			totalWorkflows: generalStats?.totalWorkflows || extendedStats?.totalWorkflows || 0,
-			totalFolders: systemStats?.totalFolders || folderStats?.totalFolders || generalStats?.totalFolders || 0,
-			totalAlbums: systemStats?.totalAlbums || generalStats?.totalAlbums || extendedStats?.totalAlbums || 0,
-			totalCollections:
-				systemStats?.totalCollections || generalStats?.totalCollections || extendedStats?.totalCollections || 0,
-			totalTags: systemStats?.totalTags || generalStats?.totalTags || extendedStats?.totalTags || 0,
-			totalFavorites: generalStats?.totalFavorites || extendedStats?.totalFavorites || 0,
-			totalCharacters:
-				systemStats?.totalCharacters || generalStats?.totalCharacters || extendedStats?.totalCharacters || 0,
-			totalPlaces: generalStats?.totalPlaces || extendedStats?.totalPlaces || 0,
-			totalConcepts: generalStats?.totalConcepts || extendedStats?.totalConcepts || 0,
-			totalNotes: generalStats?.totalNotes || extendedStats?.totalNotes || 0,
-			totalWorldItems: generalStats?.totalWorldItems || extendedStats?.totalWorldItems || 0,
-			totalPrompts: generalStats?.totalPrompts || extendedStats?.totalPrompts || 0,
-			totalProperties: generalStats?.totalProperties || extendedStats?.totalProperties || 0,
-			totalWildcards: generalStats?.totalWildcards || extendedStats?.totalWildcards || 0,
-			totalThumbnails: generalStats?.totalThumbnails || extendedStats?.totalThumbnails || 0,
-			totalMetadata: generalStats?.totalMetadata || extendedStats?.totalMetadata || 0,
-			totalActivities: generalStats?.totalActivities || extendedStats?.totalActivities || 0,
-			storageUsed:
-				generalStats?.usedSpace ||
-				systemStats?.storageUsed ||
-				extendedStats?.storageUsed ||
-				folderStats?.totalSize ||
-				0,
-			storageAvailable: generalStats?.freeSpace || systemStats?.storageAvailable || 1_000_000_000,
-			averageFileSize: generalStats?.averageFileSize || extendedStats?.averageFileSize || 0,
-			dbSize: systemStats?.dbSize || 0,
+			totalImages: navigationData?.stats.totalImages ?? 0,
+			totalVideos: navigationData?.videos.length ?? 0,
+			totalAudio: navigationData?.audios.length ?? 0,
+			totalDocuments: navigationData?.documents.length ?? 0,
+			totalJsonFiles: navigationData?.jsonFiles.length ?? 0,
+			totalFile3D: navigationData?.file3ds.length ?? 0,
+			totalWorkflows: navigationData?.workflows?.length ?? 0,
+			totalFolders: navigationData?.folders.length ?? 0,
+			totalAlbums: navigationData?.albums.length ?? 0,
+			totalCollections: navigationData?.collections.length ?? 0,
+			totalTags: navigationData?.tags.length ?? 0,
+			totalFavorites: navigationData?.stats.totalFavorites ?? 0,
+			totalCharacters: navigationData?.characters.length ?? 0,
+			totalPlaces: navigationData?.places.length ?? 0,
+			totalConcepts: navigationData?.concepts.length ?? 0,
+			totalNotes: navigationData?.notes.length ?? 0,
+			totalWorldItems: navigationData?.worldItems.length ?? 0,
+			totalPrompts: navigationData?.prompts.length ?? 0,
+			totalProperties: navigationData?.properties.length ?? 0,
+			totalWildcards: navigationData?.wildcards.length ?? 0,
+			totalThumbnails: 0,
+			totalMetadata: 0,
+			totalActivities: navigationData?.stats.totalActivities ?? 0,
+			storageUsed: navigationData?.stats.totalSize ?? 0,
+			storageAvailable: 0,
+			averageFileSize: 0,
+			dbSize: 0,
 		}),
-		[systemStats, extendedStats, generalStats, folderStats]
+		[navigationData]
+	);
+	const topTags = useMemo(
+		() =>
+			(navigationData?.tags ?? [])
+				.filter((tag) => (tag.count ?? 0) > 0)
+				.sort((left, right) => (right.count ?? 0) - (left.count ?? 0))
+				.slice(0, 5)
+				.map((tag) => ({ ...tag, imageCount: tag.count ?? 0 })),
+		[navigationData]
 	);
 
 	const totalMediaFiles = combinedStats.totalImages + combinedStats.totalVideos + combinedStats.totalAudio;
@@ -711,36 +706,10 @@ export const Dashboard = memo(function Dashboard() {
 									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">Últimas acciones</p>
 								</div>
 							</div>
-							{activityLoading ? (
-								<div className="space-y-2">
-									{Array.from({ length: 3 }).map((_, i) => (
-										<div className="h-8 animate-pulse rounded-dt-xs bg-border/10" key={i} />
-									))}
-								</div>
-							) : recentActivity && recentActivity.length > 0 ? (
-								<div className="space-y-1.5">
-									{recentActivity.slice(0, 4).map((activity, i) => (
-										<div
-											className="flex items-center gap-2 rounded-dt-xs border border-border/10 bg-background/5 p-1.5 transition-colors hover:bg-background/10"
-											key={activity.id || i}
-										>
-											<div className="flex h-5 w-5 items-center justify-center rounded-full border border-primary/25 bg-primary/15">
-												<span className="font-bold text-[9px] text-primary/80">
-													{activity.entityType?.[0]?.toUpperCase()}
-												</span>
-											</div>
-											<div className="min-w-0 flex-1">
-												<p className="truncate font-medium text-[10px] text-foreground/80">{activity.entityName}</p>
-											</div>
-										</div>
-									))}
-								</div>
-							) : (
-								<div className="flex flex-col items-center justify-center py-4 text-center">
-									<Activity className="mb-1 h-5 w-5 opacity-10" />
-									<p className="text-[10px] text-muted-foreground/60">Sin actividad reciente</p>
-								</div>
-							)}
+							<div className="flex flex-col items-center justify-center py-4 text-center">
+								<Activity className="mb-1 h-5 w-5 opacity-10" />
+								<p className="text-[10px] text-muted-foreground/60">Sin actividad autorizada</p>
+							</div>
 						</div>
 
 						<div className="rounded-dt-sm border border-border/40 bg-card/90 p-4 shadow-dt-1">
@@ -753,13 +722,7 @@ export const Dashboard = memo(function Dashboard() {
 									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">Más utilizados</p>
 								</div>
 							</div>
-							{tagsLoading ? (
-								<div className="space-y-2">
-									{Array.from({ length: 4 }).map((_, i) => (
-										<div className="h-8 animate-pulse rounded-dt-xs bg-border/10" key={i} />
-									))}
-								</div>
-							) : topTags && topTags.length > 0 ? (
+							{topTags.length > 0 ? (
 								<div className="space-y-1.5">
 									{topTags.slice(0, 5).map((tag) => (
 										<div
@@ -767,7 +730,6 @@ export const Dashboard = memo(function Dashboard() {
 											key={tag.id}
 										>
 											<div className="flex min-w-0 items-center gap-1.5">
-												{tag.emoji && <span className="text-xs">{tag.emoji}</span>}
 												<span className="truncate font-medium text-[10px] text-foreground/80">{tag.name}</span>
 											</div>
 											<Badge
