@@ -281,6 +281,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 						{/* Contenido principal - id para SkipLink WCAG 2.4.1 */}
 						<NavigationTransition
 							aria-label="Contenido principal"
+							as="main"
 							className="min-h-0 min-w-0 flex-1 overflow-hidden bg-background outline-none focus:outline-none"
 							id="main-content"
 							tabIndex={-1}

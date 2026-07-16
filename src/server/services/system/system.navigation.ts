@@ -229,6 +229,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 				duration: v.duration || 0,
 				itemCount: 0,
 			})),
+			workflows: [],
 			stats: basicStats,
 		};
 	} catch (error) {
