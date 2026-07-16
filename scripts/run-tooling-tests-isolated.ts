@@ -15,6 +15,10 @@ const toolingTestFiles = [
 	'scripts/db/legacy-adoption.test.ts',
 	'scripts/db/migrations.test.ts',
 	'scripts/db/orphan-inventory.test.ts',
+	'scripts/db/relational-integrity.test.ts',
+	'scripts/db/upgrade.test.ts',
+	'scripts/db/reset.test.ts',
+	'scripts/db/backup-retention.test.ts',
 ];
 
 const exitCode = await runIsolatedCommand({
