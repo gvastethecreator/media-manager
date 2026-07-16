@@ -17,9 +17,11 @@ import {
 	getJsonFilesFromApi,
 	toggleJsonFileFavoriteInApi,
 	updateJsonFileInApi,
+	type PublicJsonFileCreateInput,
+	type PublicJsonFileUpdateInput,
 } from '@/lib/api/client/json-file.client';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
+import type { JsonFileWithStats } from '@/types/entities/json-file';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type JsonFileFilters = Record<string, any>;
@@ -30,7 +32,7 @@ export type JsonFileFilters = Record<string, any>;
 export interface JsonFileState {
 	clearFilters: () => void;
 	clearSelection: () => void;
-	createJsonFile: (data: JsonFileCreateInput) => Promise<JsonFileWithStats | undefined>;
+	createJsonFile: (data: PublicJsonFileCreateInput) => Promise<JsonFileWithStats | undefined>;
 	currentJsonFile: JsonFileWithStats | null;
 	deleteJsonFile: (id: string) => Promise<void>;
 	deselectJsonFile: (jsonFileId: string) => void;
@@ -57,7 +59,7 @@ export interface JsonFileState {
 	// Acciones de filtrado
 	setFilters: (filters: Partial<JsonFileFilters>) => void;
 	toggleFavorite: (id: string) => Promise<void>;
-	updateJsonFile: (id: string, data: JsonFileUpdateInput) => Promise<JsonFileWithStats | undefined>;
+	updateJsonFile: (id: string, data: PublicJsonFileUpdateInput) => Promise<JsonFileWithStats | undefined>;
 }
 
 const useJsonFileStoreBase = create<JsonFileState>()(
@@ -100,7 +102,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 				}
 			},
 
-			createJsonFile: async (data: JsonFileCreateInput) => {
+			createJsonFile: async (data: PublicJsonFileCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newJsonFile = await createJsonFileInApi(data);
@@ -115,7 +117,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 				}
 			},
 
-			updateJsonFile: async (id: string, data: JsonFileUpdateInput) => {
+			updateJsonFile: async (id: string, data: PublicJsonFileUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedJsonFile = await updateJsonFileInApi(id, data);

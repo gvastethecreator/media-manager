@@ -1,30 +1,25 @@
 import { Effect } from 'effect';
 import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
-	type CreateVideoInput,
-	create as createVideo,
-	getByHash as getVideoByHash,
-} from '@/services/video/video.service.effect';
+import { type CreateVideoInput, create as createVideo } from '@/services/video/video.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
+import { isCanonicalSourceIndexed } from '../utils/canonical-source.utils';
 
 const videoLogger = serverLogger.withContext('VideoProcessor');
+
+export function formatVideoDurationSeconds(duration: number | null | undefined): number {
+	return typeof duration === 'number' && Number.isFinite(duration) && duration > 0 ? Math.round(duration) : 0;
+}
 
 /**
  * Procesador especializado para entidades de tipo VIDEO
  */
 export class VideoProcessor {
 	/**
-	 * Verifica si un video ya existe por hash
+	 * Verifica si la ubicación canónica ya fue indexada.
 	 */
 	async checkExists(fileInfo: FileInfo): Promise<boolean> {
-		if (!fileInfo.hash) return false;
-		try {
-			const existing = await Effect.runPromise(getVideoByHash(fileInfo.hash));
-			return !!existing;
-		} catch {
-			return false;
-		}
+		return isCanonicalSourceIndexed(fileInfo);
 	}
 
 	/**
@@ -81,7 +76,7 @@ export class VideoProcessor {
 			await db
 				.update(videos)
 				.set({
-					duration: probe.duration ? Math.round(probe.duration * 1000) : 0,
+					duration: probe.duration ? Math.round(probe.duration) : 0,
 					width: probe.width ?? null,
 					height: probe.height ?? null,
 					metadata: JSON.stringify(enhancedMetadata),
@@ -301,7 +296,7 @@ export class VideoProcessor {
 			where: eq(videos.id, entityId),
 		});
 
-		const duration = video?.duration ? Math.round(video.duration / 1000) : 0;
+		const duration = formatVideoDurationSeconds(video?.duration);
 		const resolution = video?.width && video?.height ? `${video.width}x${video.height}` : 'Unknown';
 
 		// Generar SVG placeholder

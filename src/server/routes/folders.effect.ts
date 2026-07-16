@@ -664,6 +664,17 @@ router.post('/reindex-all', (_req, res) => {
 router.post(
 	'/:id/reindex',
 	authorizeFolderPathById('index'),
+	(req, res, next) => {
+		if (req.body?.skipThumbnails === true || req.body?.skipMetadata === true) {
+			res.status(400).json({
+				code: 'UNSUPPORTED_REINDEX_OPTION',
+				message: 'El reindex canónico procesa la ingesta completa y no admite omitir metadata ni derivados.',
+				retryable: false,
+			});
+			return;
+		}
+		next();
+	},
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const folderId = req.params.id;
@@ -673,14 +684,15 @@ router.post(
 
 			const result = yield* Effect.tryPromise({
 				try: () =>
-					reindexService.executeStructuredReindex({
-						folderId,
-						emitEvents: true,
-						includeSubfolders: options.includeSubfolders ?? true,
-						skipThumbnails: options.skipThumbnails,
-						skipMetadata: options.skipMetadata,
-						concurrency: 3,
-					}),
+					reindexService.executeStructuredReindex(
+						{
+							folderId,
+							emitEvents: true,
+							includeSubfolders: options.includeSubfolders ?? true,
+							concurrency: 3,
+						},
+						{ authorizedRootRegistry: getAuthorizedRootRegistry(req) }
+					),
 				catch: (error) => new Error(`Reindex failed: ${error instanceof Error ? error.message : 'Unknown error'}`),
 			});
 

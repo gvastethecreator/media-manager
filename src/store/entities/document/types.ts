@@ -5,7 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
-import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';
+import type { PublicDocumentCreateInput, PublicDocumentUpdateInput } from '@/lib/api/client/document.client';
+import type { DocumentWithStats } from '@/types/entities/document';
 
 // --- Estado del Slice ---
 
@@ -23,11 +24,11 @@ export type DocumentFilterState = Record<string, never>;
 // --- Acciones del Slice ---
 
 export interface DocumentCoreActions {
-	createDocument: (data: DocumentCreateInput) => Promise<void>;
+	createDocument: (data: PublicDocumentCreateInput) => Promise<void>;
 	deleteDocument: (id: string) => Promise<void>;
 	fetchDocuments: () => Promise<void>; // Alias para loadDocuments
 	loadDocuments: () => Promise<void>;
-	updateDocument: (id: string, data: DocumentUpdateInput) => Promise<void>;
+	updateDocument: (id: string, data: PublicDocumentUpdateInput) => Promise<void>;
 }
 
 export type DocumentUIActions = Record<string, never>;

@@ -216,6 +216,7 @@ export interface VideoServiceInterface {
 
 	// Queries especializadas
 	readonly getByHash: (hash: string) => Effect.Effect<Video | null, VideoError>;
+	readonly getByHashCandidates: (hash: string) => Effect.Effect<Video[], VideoError>;
 	readonly getById: (id: string) => Effect.Effect<Video, VideoError>;
 	readonly getByIdWithStats: (id: string) => Effect.Effect<VideoWithStats, VideoError>;
 	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Video | null, VideoError>;
@@ -370,19 +371,6 @@ const make = (): VideoServiceInterface => {
 							catch: (error) => toVideoError(error, 'create.favoriteScope'),
 						})
 					: false;
-
-			// Verificar si existe video con mismo hash
-			const existingVideo = yield* Effect.tryPromise({
-				try: async () => {
-					const rows = await db.select({ id: videos.id }).from(videos).where(eq(videos.hash, input.hash)).limit(1);
-					return rows[0] || null;
-				},
-				catch: (error) => toVideoError(error, 'create:checkHash'),
-			});
-
-			if (existingVideo) {
-				return yield* Effect.fail(videoHashConflict(input.hash, existingVideo.id));
-			}
 
 			// Crear Asset, SourceFile, Video y favorito canónico como una sola unidad de escritura.
 			let committedFavoriteProfileId: string | null = null;
@@ -651,6 +639,7 @@ const make = (): VideoServiceInterface => {
 			// Determinar orden
 			const sortBy = (filters.sortBy as keyof typeof videos.$inferSelect) || 'name';
 			const orderByClause = filters.sortOrder === 'desc' ? desc(videos[sortBy] as any) : asc(videos[sortBy] as any);
+			const tieBreakOrder = filters.sortOrder === 'desc' ? desc(videos.id) : asc(videos.id);
 
 			// Ejecutar consultas en paralelo
 			const [videoResults, totalCount] = yield* Effect.tryPromise({
@@ -687,7 +676,7 @@ const make = (): VideoServiceInterface => {
 							.from(videos)
 							.leftJoin(folders, eq(videos.folderId, folders.id))
 							.where(whereClause)
-							.orderBy(orderByClause, asc(videos.id))
+							.orderBy(orderByClause, tieBreakOrder)
 							.limit(filters.limit || 20)
 							.offset(filters.offset || 0),
 
@@ -935,9 +924,9 @@ const make = (): VideoServiceInterface => {
 	// -------------------------------------------------------------------------------
 	// GET BY HASH
 	// -------------------------------------------------------------------------------
-	const getByHash = (hash: string): Effect.Effect<Video | null, VideoError> =>
+	const getByHashCandidates = (hash: string): Effect.Effect<Video[], VideoError> =>
 		Effect.gen(function* () {
-			videoServiceLogger.info('Buscando video por hash:', hash);
+			videoServiceLogger.info('Buscando candidatos de video por hash:', hash);
 
 			const result = yield* Effect.tryPromise({
 				try: async () => {
@@ -972,24 +961,29 @@ const make = (): VideoServiceInterface => {
 						.from(videos)
 						.leftJoin(folders, eq(videos.folderId, folders.id))
 						.where(and(eq(videos.hash, hash), visibleAssetLifecycleCondition(videos.assetId)))
-						.limit(1);
-					return rows[0] || null;
+						.orderBy(asc(videos.createdAt), asc(videos.id));
+					return rows;
 				},
-				catch: (error) => toVideoError(error, 'getByHash'),
+				catch: (error) => toVideoError(error, 'getByHashCandidates'),
 			});
 
-			const projected = result
-				? yield* Effect.tryPromise({
-						try: () => projectCanonicalMediaRow(result, 'video'),
-						catch: (error) => toVideoError(error, 'getByHash.canonicalProjection'),
-					})
-				: null;
-			if (!projected) return null;
-			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.VIDEO, projected),
-				catch: (error) => toVideoError(error, 'getByHash.favoriteProjection'),
+			const projected = yield* Effect.tryPromise({
+				try: () => projectCanonicalMediaRows(result, 'video'),
+				catch: (error) => toVideoError(error, 'getByHashCandidates.canonicalProjection'),
+			});
+			if (projected.length === 0) return [];
+			return yield* Effect.tryPromise<Video[], VideoError>({
+				try: () =>
+					Promise.all(
+						projected.map((candidate) =>
+							favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.VIDEO, candidate as Video)
+						)
+					) as Promise<Video[]>,
+				catch: (error) => toVideoError(error, 'getByHashCandidates.favoriteProjection'),
 			});
 		});
+	const getByHash = (hash: string): Effect.Effect<Video | null, VideoError> =>
+		getByHashCandidates(hash).pipe(Effect.map((candidates) => candidates[0] ?? null));
 
 	// -------------------------------------------------------------------------------
 	// GET BY PATH AND FOLDER
@@ -1315,6 +1309,7 @@ const make = (): VideoServiceInterface => {
 		deleteManyByIds,
 		restoreById,
 		getByHash,
+		getByHashCandidates,
 		getByPathAndFolder,
 		getAllFavorites,
 		getByFolder,

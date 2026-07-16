@@ -6,8 +6,11 @@
 
 import { Effect } from 'effect';
 import { eq, inArray } from 'drizzle-orm';
+import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
 import { db } from '@/lib/drizzle';
-import { file3Ds, favorites, folders, profiles } from '@/lib/drizzle/schema';
+import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
+import { assets, file3Ds, favorites, folders, mediaRoots, profiles } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { expectError, expectSuccess, generateTestId } from '../../../../tests/factories/test-helpers';
@@ -17,12 +20,13 @@ import * as File3DService from '../file3d.service.effect';
 
 const createTestFolder = async () => {
 	const now = new Date();
+	const rootId = `root-file3d-${crypto.randomUUID()}`;
 	const [folder] = await db
 		.insert(folders)
 		.values({
 			id: crypto.randomUUID(),
 			name: `test-folder-${Date.now()}`,
-			path: `/test/folder-${Date.now()}`,
+			path: resolve(tmpdir(), `media-manager-file3d-${crypto.randomUUID()}`),
 			depth: 0,
 			parentId: null,
 			isFavorite: false,
@@ -31,7 +35,20 @@ const createTestFolder = async () => {
 			updatedAt: now,
 		})
 		.returning();
-	return folder;
+	await db.insert(mediaRoots).values({ id: rootId, label: 'File3D service test root' });
+	return { ...folder, rootId };
+};
+
+const withCanonicalSource = <T extends { name: string }>(
+	folder: Awaited<ReturnType<typeof createTestFolder>>,
+	input: T
+) => {
+	const path = resolve(folder.path, input.name);
+	return {
+		...input,
+		path,
+		source: createAuthorizedPathInput({ absolutePath: path, relativePath: input.name, rootId: folder.rootId }),
+	};
 };
 
 const createTestFile3D = async (folderId: string, overrides?: Partial<typeof file3Ds.$inferInsert>) => {
@@ -97,7 +114,9 @@ const ensureActiveProfile = async () => {
 afterEach(async () => {
 	await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.FILE_3D));
 	await db.delete(file3Ds);
+	await db.delete(assets);
 	await db.delete(folders);
+	await db.delete(mediaRoots);
 
 	if (createdActiveProfileId) {
 		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
@@ -129,10 +148,10 @@ describe('File3DService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const result = await expectSuccess(File3DService.create(input));
+			const result = await expectSuccess(File3DService.create(withCanonicalSource(folder, input)));
 
 			expect(result.name).toBe(input.name);
-			expect(result.path).toBe(input.path);
+			expect(result.path).toBe(resolve(folder.path, input.name));
 			expect(result.hash).toBe(input.hash);
 			expect(result.size).toBe(input.size);
 			expect(result.mimeType).toBe(input.mimeType);
@@ -172,7 +191,7 @@ describe('File3DService - CRUD Operations', () => {
 				boundingBox: JSON.stringify({ min: [-1, -1, -1], max: [1, 1, 1] }),
 			};
 
-			const result = await expectSuccess(File3DService.create(input));
+			const result = await expectSuccess(File3DService.create(withCanonicalSource(folder, input)));
 
 			expect(result.format).toBe(input.format);
 			expect(result.version).toBe(input.version);
@@ -196,16 +215,18 @@ describe('File3DService - CRUD Operations', () => {
 			await ensureActiveProfile();
 
 			const result = await expectSuccess(
-				File3DService.create({
-					name: 'favorite-model.glb',
-					path: '/models/favorite.glb',
-					hash: validHash,
-					size: 1_000_000,
-					mimeType: 'model/gltf-binary',
-					extension: 'glb',
-					folderId: folder.id,
-					isFavorite: true,
-				})
+				File3DService.create(
+					withCanonicalSource(folder, {
+						name: 'favorite-model.glb',
+						path: '/models/favorite.glb',
+						hash: validHash,
+						size: 1_000_000,
+						mimeType: 'model/gltf-binary',
+						extension: 'glb',
+						folderId: folder.id,
+						isFavorite: true,
+					})
+				)
 			);
 
 			expect(await favoriteService.isFavorite(FavoriteEntityType.FILE_3D, result.id)).toBe(true);
@@ -226,7 +247,7 @@ describe('File3DService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(File3DService.create(input));
+			const error = await expectError(File3DService.create(input as any));
 			expect(error._tag).toBe('File3DValidationError');
 		});
 
@@ -245,7 +266,7 @@ describe('File3DService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(File3DService.create(input));
+			const error = await expectError(File3DService.create(input as any));
 			expect(error._tag).toBe('File3DValidationError');
 		});
 
@@ -264,7 +285,7 @@ describe('File3DService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(File3DService.create(input));
+			const error = await expectError(File3DService.create(input as any));
 			expect(error._tag).toBe('File3DValidationError');
 		});
 	});
@@ -550,41 +571,43 @@ describe('File3DService - Query Operations', () => {
 	});
 });
 
-// ============= HASH CONFLICT TESTS =============
+// ============= CONTENT DUPLICATE TESTS =============
 
-describe('File3DService - Hash Conflict', () => {
-	it('should reject duplicate hash creation', async () => {
+describe('File3DService - duplicate content', () => {
+	it('creates distinct Assets for distinct locations with the same hash', async () => {
 		const folder = await createTestFolder();
 		const timestamp = Date.now().toString();
 		const validHash = timestamp.padStart(64, '0');
 
-		await expectSuccess(
-			File3DService.create({
-				name: 'first.glb',
-				path: '/models/first.glb',
-				hash: validHash,
-				size: 1024,
-				mimeType: 'model/gltf-binary',
-				extension: 'glb',
-				folderId: folder.id,
-			})
+		const first = await expectSuccess(
+			File3DService.create(
+				withCanonicalSource(folder, {
+					name: 'first.glb',
+					path: '/models/first.glb',
+					hash: validHash,
+					size: 1024,
+					mimeType: 'model/gltf-binary',
+					extension: 'glb',
+					folderId: folder.id,
+				})
+			)
 		);
 
-		const error = await expectError(
-			File3DService.create({
-				name: 'second.glb',
-				path: '/models/second.glb',
-				hash: validHash,
-				size: 2048,
-				mimeType: 'model/gltf-binary',
-				extension: 'glb',
-				folderId: folder.id,
-			})
+		const second = await expectSuccess(
+			File3DService.create(
+				withCanonicalSource(folder, {
+					name: 'second.glb',
+					path: '/models/second.glb',
+					hash: validHash,
+					size: 2048,
+					mimeType: 'model/gltf-binary',
+					extension: 'glb',
+					folderId: folder.id,
+				})
+			)
 		);
 
-		expect(error._tag).toBe('File3DHashConflict');
-		if (error._tag === 'File3DHashConflict') {
-			expect(error.hash).toBe(validHash);
-		}
+		expect(second.id).not.toBe(first.id);
+		expect(second.hash).toBe(first.hash);
 	});
 });

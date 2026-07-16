@@ -249,6 +249,8 @@ export function authorizeMediaAssetBodyIds(options: {
 }
 
 interface MediaEntityPath {
+	assetId?: unknown;
+	canonicalState?: unknown;
 	entityType?: unknown;
 	id?: unknown;
 	path?: unknown;
@@ -277,8 +279,14 @@ async function authorizeMediaEntity(
 	permissions: RootPermission[]
 ): Promise<void> {
 	const registry = getAuthorizedRootRegistry(request);
-	if (assetType === 'image') {
-		const reference = parseMediaAssetReference({ assetId: entity.id, assetType });
+	const canonicalAssetId =
+		typeof entity.assetId === 'string'
+			? entity.assetId
+			: entity.canonicalState === 'canonical' || entity.canonicalState === 'diverged' || assetType === 'image'
+				? entity.id
+				: null;
+	if (typeof canonicalAssetId === 'string') {
+		const reference = parseMediaAssetReference({ assetId: canonicalAssetId, assetType });
 		for (const permission of permissions) await resolveMediaAssetReference(registry, reference, permission);
 		return;
 	}

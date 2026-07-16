@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { apiClient } from './client';
 
@@ -22,7 +23,7 @@ export interface JsonFileCreateInput {
 	keyCount?: number | null;
 	mimeType: string;
 	name: string;
-	path: string;
+	source: AuthorizedPathReference;
 	schema?: string | null;
 	size: number;
 	validationErrors?: string | null;
@@ -40,7 +41,7 @@ export interface JsonFileUpdateInput {
 	keyCount?: number | null;
 	mimeType?: string;
 	name?: string;
-	path?: string;
+	source?: AuthorizedPathReference;
 	schema?: string | null;
 	size?: number;
 	validationErrors?: string | null;

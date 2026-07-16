@@ -50,6 +50,13 @@
       "when": 1784209577414,
       "tag": "0006_media_specialization_asset_links",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1784219530961,
+      "tag": "0007_media_folder_created_indexes",
+      "breakpoints": true
     }
   ]
 }

@@ -5,6 +5,7 @@
  */
 
 import type { EntityStats } from '../entity.types';
+import type { CanonicalMediaSourceInput, CanonicalMediaState } from '@/services/media-core/canonical-media-persistence';
 
 /**
  * 🎵 Tipo base de Audio directamente desde el schema de Drizzle.
@@ -103,10 +104,20 @@ export interface AudioWithStats extends AudioBase {
  * 🆕 Tipo para crear un nuevo Audio
  * Omite campos autogenerados (id, timestamps)
  */
-export type AudioCreateInput = Omit<AudioBase, 'id' | 'createdAt' | 'updatedAt'>;
+export type AudioCreateInput = Omit<AudioBase, 'id' | 'createdAt' | 'updatedAt'> & {
+	source: CanonicalMediaSourceInput;
+};
 
 /**
  * ✏️ Tipo para actualizar un Audio existente
  * Todos los campos son opcionales excepto id
  */
 export type AudioUpdateInput = Partial<AudioCreateInput>;
+
+/** Expand-contract projection exposed while legacy Audio rows remain readable. */
+export interface CanonicalAudioProjection {
+	assetId: string | null;
+	canonicalDivergences: string[];
+	canonicalState: CanonicalMediaState;
+	legacyId: string;
+}

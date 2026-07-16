@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';
+import type { PublicDocumentCreateInput, PublicDocumentUpdateInput } from '@/lib/api/client/document.client';
+import type { DocumentWithStats } from '@/types/entities/document';
 import { apiClient } from './client';
 
 export const documentKeys = {
@@ -29,7 +30,7 @@ export function useDocumentById(id: string) {
 
 export function useCreateDocument() {
 	const qc = useQueryClient();
-	return useMutation<DocumentWithStats, Error, DocumentCreateInput>({
+	return useMutation<DocumentWithStats, Error, PublicDocumentCreateInput>({
 		mutationFn: (data) => apiClient.post<DocumentWithStats>('/documents', data),
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: documentKeys.lists() });
@@ -39,7 +40,7 @@ export function useCreateDocument() {
 
 export function useUpdateDocument() {
 	const qc = useQueryClient();
-	return useMutation<DocumentWithStats, Error, { id: string; data: DocumentUpdateInput }>({
+	return useMutation<DocumentWithStats, Error, { id: string; data: PublicDocumentUpdateInput }>({
 		mutationFn: ({ id, data }) => apiClient.put<DocumentWithStats>(`/documents/${id}`, data),
 		onSuccess: (data) => {
 			qc.invalidateQueries({ queryKey: documentKeys.lists() });

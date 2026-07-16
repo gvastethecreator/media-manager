@@ -15,9 +15,11 @@ import {
 	getFile3DsFromApi,
 	toggleFile3DFavoriteInApi,
 	updateFile3DInApi,
+	type PublicFile3DCreateInput,
+	type PublicFile3DUpdateInput,
 } from '@/lib/api/client/file3d.client';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
+import type { File3DWithStats } from '@/types/entities/file3d';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type File3DFilters = Record<string, any>;
@@ -28,7 +30,7 @@ export type File3DFilters = Record<string, any>;
 export interface File3DState {
 	clearFilters: () => void;
 	clearSelection: () => void;
-	createFile3D: (data: File3DCreateInput) => Promise<File3DWithStats | undefined>;
+	createFile3D: (data: PublicFile3DCreateInput) => Promise<File3DWithStats | undefined>;
 	currentFile3D: File3DWithStats | null;
 	deleteFile3D: (id: string) => Promise<void>;
 	deselectFile3D: (file3DId: string) => void;
@@ -54,7 +56,7 @@ export interface File3DState {
 	// Acciones de filtrado
 	setFilters: (filters: Partial<File3DFilters>) => void;
 	toggleFavorite: (id: string) => Promise<void>;
-	updateFile3D: (id: string, data: File3DUpdateInput) => Promise<File3DWithStats | undefined>;
+	updateFile3D: (id: string, data: PublicFile3DUpdateInput) => Promise<File3DWithStats | undefined>;
 }
 
 const useFile3DStoreBase = create<File3DState>()(
@@ -97,7 +99,7 @@ const useFile3DStoreBase = create<File3DState>()(
 				}
 			},
 
-			createFile3D: async (data: File3DCreateInput) => {
+			createFile3D: async (data: PublicFile3DCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newFile3D = await createFile3DInApi(data);
@@ -112,7 +114,7 @@ const useFile3DStoreBase = create<File3DState>()(
 				}
 			},
 
-			updateFile3D: async (id: string, data: File3DUpdateInput) => {
+			updateFile3D: async (id: string, data: PublicFile3DUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedFile3D = await updateFile3DInApi(id, data);

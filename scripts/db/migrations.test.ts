@@ -100,6 +100,7 @@ describe('versioned SQLite migrations', () => {
 			'0004_canonical_asset_source.sql',
 			'0005_image_asset_link.sql',
 			'0006_media_specialization_asset_links.sql',
+			'0007_media_folder_created_indexes.sql',
 		]);
 
 		const first = await migrateDatabase({ databasePath });

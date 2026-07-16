@@ -31,6 +31,7 @@ import {
 	tags,
 } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { createAuthorizedRootRegistry } from '@/server/security/authorized-roots';
 import { AlbumService, AlbumServiceLive } from '@/services/album/album.service.effect';
 import { CollectionService, CollectionServiceLive } from '@/services/collection/collection.service.effect';
 import {
@@ -745,10 +746,10 @@ describe('ImageService - CRUD Operations', () => {
 			await db
 				.insert(folders)
 				.values({ id: secondaryFolderId, name: 'Available secondary folder', path: `${directory}-secondary` });
-			const source = await createTestCanonicalSource(
-				'uploads/missing-file.jpg',
-				resolve(directory, 'missing-file.jpg')
-			);
+			const source = await createTestCanonicalSource('missing-file.jpg', resolve(directory, 'missing-file.jpg'));
+			const authorizedRootRegistry = await createAuthorizedRootRegistry([
+				{ id: source.rootId, path: directory, permissions: ['index', 'read'] },
+			]);
 			const image = await expectSuccess(
 				ImageService.create({
 					folderId,
@@ -774,7 +775,7 @@ describe('ImageService - CRUD Operations', () => {
 				rootId: source.rootId,
 			});
 
-			await FileSyncService.getInstance().syncFolderFiles(folderId);
+			await FileSyncService.getInstance().syncFolderFiles(folderId, { authorizedRootRegistry });
 
 			expect(await db.select().from(images).where(eq(images.id, image.id))).toHaveLength(1);
 			expect(await db.select().from(assets).where(eq(assets.id, image.id))).toHaveLength(1);
@@ -788,7 +789,7 @@ describe('ImageService - CRUD Operations', () => {
 			]);
 
 			await writeFile(resolve(directory, 'missing-file.jpg'), 'restored image');
-			await FileSyncService.getInstance().syncFolderFiles(folderId);
+			await FileSyncService.getInstance().syncFolderFiles(folderId, { authorizedRootRegistry });
 			expect(await db.select().from(sourceFiles).where(eq(sourceFiles.id, asset.primarySourceFileId))).toEqual([
 				expect.objectContaining({ availability: 'available' }),
 			]);

@@ -6,8 +6,11 @@
 
 import { Effect } from 'effect';
 import { eq, inArray } from 'drizzle-orm';
+import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
 import { db } from '@/lib/drizzle';
-import { documents, favorites, folders, profiles } from '@/lib/drizzle/schema';
+import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
+import { assets, documents, favorites, folders, mediaRoots, profiles } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { expectError, expectSuccess, generateTestId } from '../../../../tests/factories/test-helpers';
@@ -15,14 +18,14 @@ import * as DocumentService from '../document.service.effect';
 
 // ============= Test Helpers =============
 
-const createTestFolder = async () => {
+const createTestFolder = async (path = resolve(tmpdir(), `media-manager-document-${crypto.randomUUID()}`)) => {
 	const now = new Date();
 	const [folder] = await db
 		.insert(folders)
 		.values({
 			id: crypto.randomUUID(),
 			name: `test-folder-${Date.now()}`,
-			path: `/test/folder-${Date.now()}`,
+			path,
 			depth: 0,
 			parentId: null,
 			isFavorite: false,
@@ -32,6 +35,17 @@ const createTestFolder = async () => {
 		})
 		.returning();
 	return folder;
+};
+
+const withCanonicalSource = async <T extends { name: string }>(folder: typeof folders.$inferSelect, input: T) => {
+	const rootId = `root-document-${crypto.randomUUID()}`;
+	const path = resolve(folder.path, input.name);
+	await db.insert(mediaRoots).values({ id: rootId, label: 'Document service test root' });
+	return {
+		...input,
+		path,
+		source: createAuthorizedPathInput({ absolutePath: path, relativePath: input.name, rootId }),
+	};
 };
 
 const createTestDocument = async (folderId: string, overrides?: Partial<typeof documents.$inferInsert>) => {
@@ -97,7 +111,9 @@ const ensureActiveProfile = async () => {
 afterEach(async () => {
 	await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.DOCUMENT));
 	await db.delete(documents);
+	await db.delete(assets);
 	await db.delete(folders);
+	await db.delete(mediaRoots);
 
 	if (createdActiveProfileId) {
 		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
@@ -119,15 +135,14 @@ describe('DocumentService - CRUD Operations', () => {
 			const timestamp = Date.now().toString();
 			const validHash = timestamp.padStart(64, '0');
 
-			const input = {
+			const input = await withCanonicalSource(folder, {
 				name: 'test-report.pdf',
-				path: '/uploads/test-report.pdf',
 				hash: validHash,
 				size: 2_048_000,
 				mimeType: 'application/pdf',
 				extension: 'pdf',
 				folderId: folder.id,
-			};
+			});
 
 			const result = await expectSuccess(DocumentService.create(input));
 
@@ -146,9 +161,8 @@ describe('DocumentService - CRUD Operations', () => {
 			const timestamp = Date.now().toString();
 			const validHash = timestamp.padStart(64, '0');
 
-			const input = {
+			const input = await withCanonicalSource(folder, {
 				name: 'whitepaper.pdf',
-				path: '/docs/whitepaper.pdf',
 				hash: validHash,
 				size: 5_000_000,
 				mimeType: 'application/pdf',
@@ -162,7 +176,7 @@ describe('DocumentService - CRUD Operations', () => {
 				wordCount: 15_000,
 				content: 'Sample content of the whitepaper...',
 				summary: 'A summary of the document',
-			};
+			});
 
 			const result = await expectSuccess(DocumentService.create(input));
 
@@ -183,16 +197,17 @@ describe('DocumentService - CRUD Operations', () => {
 			await ensureActiveProfile();
 
 			const result = await expectSuccess(
-				DocumentService.create({
-					name: 'favorite-doc.pdf',
-					path: '/uploads/favorite-doc.pdf',
-					hash: validHash,
-					size: 1_000_000,
-					mimeType: 'application/pdf',
-					extension: 'pdf',
-					folderId: folder.id,
-					isFavorite: true,
-				})
+				DocumentService.create(
+					await withCanonicalSource(folder, {
+						name: 'favorite-doc.pdf',
+						hash: validHash,
+						size: 1_000_000,
+						mimeType: 'application/pdf',
+						extension: 'pdf',
+						folderId: folder.id,
+						isFavorite: true,
+					})
+				)
 			);
 
 			expect(await favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, result.id)).toBe(true);
@@ -213,7 +228,7 @@ describe('DocumentService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(DocumentService.create(input));
+			const error = await expectError(DocumentService.create(input as any));
 			expect(error._tag).toBe('DocumentValidationError');
 		});
 
@@ -232,7 +247,7 @@ describe('DocumentService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(DocumentService.create(input));
+			const error = await expectError(DocumentService.create(input as any));
 			expect(error._tag).toBe('DocumentValidationError');
 		});
 
@@ -251,7 +266,7 @@ describe('DocumentService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(DocumentService.create(input));
+			const error = await expectError(DocumentService.create(input as any));
 			expect(error._tag).toBe('DocumentValidationError');
 		});
 	});
@@ -524,41 +539,41 @@ describe('DocumentService - Query Operations', () => {
 	});
 });
 
-// ============= HASH CONFLICT TESTS =============
+// ============= CONTENT DUPLICATE TESTS =============
 
-describe('DocumentService - Hash Conflict', () => {
-	it('should reject duplicate hash creation', async () => {
+describe('DocumentService - duplicate content', () => {
+	it('creates distinct Assets for distinct locations with the same hash', async () => {
 		const folder = await createTestFolder();
 		const timestamp = Date.now().toString();
 		const validHash = timestamp.padStart(64, '0');
 
-		await expectSuccess(
-			DocumentService.create({
-				name: 'first.pdf',
-				path: '/uploads/first.pdf',
-				hash: validHash,
-				size: 1024,
-				mimeType: 'application/pdf',
-				extension: 'pdf',
-				folderId: folder.id,
-			})
+		const first = await expectSuccess(
+			DocumentService.create(
+				await withCanonicalSource(folder, {
+					name: 'first.pdf',
+					hash: validHash,
+					size: 1024,
+					mimeType: 'application/pdf',
+					extension: 'pdf',
+					folderId: folder.id,
+				})
+			)
 		);
 
-		const error = await expectError(
-			DocumentService.create({
-				name: 'second.pdf',
-				path: '/uploads/second.pdf',
-				hash: validHash,
-				size: 2048,
-				mimeType: 'application/pdf',
-				extension: 'pdf',
-				folderId: folder.id,
-			})
+		const second = await expectSuccess(
+			DocumentService.create(
+				await withCanonicalSource(folder, {
+					name: 'second.pdf',
+					hash: validHash,
+					size: 2048,
+					mimeType: 'application/pdf',
+					extension: 'pdf',
+					folderId: folder.id,
+				})
+			)
 		);
 
-		expect(error._tag).toBe('DocumentHashConflict');
-		if (error._tag === 'DocumentHashConflict') {
-			expect(error.hash).toBe(validHash);
-		}
+		expect(second.id).not.toBe(first.id);
+		expect(second.hash).toBe(first.hash);
 	});
 });

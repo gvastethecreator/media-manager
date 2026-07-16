@@ -5,6 +5,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import type { AuthorizedRootRegistry } from '@/server/security/authorized-roots';
 import { recomputeAndPersistFolderAggregates } from './folder-stats.aggregates';
 import type { ProcessOptions, ProgressEmitter, SimpleStats } from './folder-stats.types';
 import { computeOverallProgress, mapWithConcurrency, safeEmitProgress } from './folder-stats.utils';
@@ -19,6 +20,37 @@ export type {
 	SimpleStats,
 } from './folder-stats.types';
 export { computeOverallProgress, mapWithConcurrency, safeEmitProgress } from './folder-stats.utils';
+
+export async function syncExistingFolderFilesBeforeReindex(
+	folderIds: string[],
+	authorizedRootRegistry?: AuthorizedRootRegistry
+): Promise<void> {
+	if (folderIds.length === 0) return;
+
+	const [{ syncMultipleFolders }, { getConfiguredMediaRootRegistry }] = await Promise.all([
+		import('@/lib/filesystem/file-sync.service'),
+		import('@/server/security/configured-media-source'),
+	]);
+	const registry = authorizedRootRegistry ?? (await getConfiguredMediaRootRegistry());
+	const results = await syncMultipleFolders(folderIds, {
+		authorizedRootRegistry: registry,
+		dryRun: false,
+	});
+	const failures = Object.entries(results).flatMap(([folderId, result]) =>
+		result.errors.map((error) => ({ error, folderId }))
+	);
+	if (failures.length > 0) {
+		throw new Error(
+			`No se pudo reconciliar el catálogo antes de reindexar: ${failures
+				.map(({ error, folderId }) => `${folderId}: ${error}`)
+				.join(' | ')}`
+		);
+	}
+}
+
+export interface ReindexAllDependencies {
+	afterFolderAuthorization?: (folderId: string) => Promise<void>;
+}
 
 export async function processFilesWithProgress(
 	filePaths: string[],
@@ -486,7 +518,8 @@ export async function updateAllFolderStats(): Promise<void> {
 // Reindexación global en 3 pasadas: 1) index de TODOS los archivos de TODAS las carpetas,
 // 2) thumbnails de TODOS, 3) metadata de TODOS. No por carpeta.
 export async function reindexAllFoldersThreePasses(
-	options: { concurrency?: number; microPauseMs?: number; includeHidden?: boolean } = {}
+	options: { concurrency?: number; microPauseMs?: number; includeHidden?: boolean } = {},
+	dependencies: ReindexAllDependencies = {}
 ): Promise<{
 	totalItems: number;
 	processed: number;
@@ -494,55 +527,29 @@ export async function reindexAllFoldersThreePasses(
 	failed: number;
 	errors: Array<{ file: string; error: string }>;
 }> {
-	const { emit, emitProgress } = await import('@/lib/server/events.server');
+	const { emitProgress } = await import('@/lib/server/events.server');
 	const { db } = await import('@/lib/drizzle');
 	const { folders } = await import('@/lib/drizzle/schema/index');
-	const { eq } = await import('drizzle-orm');
-	const { folderExists, scanFolder } = await import('@/lib/filesystem/folder-scanner');
+	const { scanFolder } = await import('@/lib/filesystem/folder-scanner');
+	const { getConfiguredMediaRootRegistry } = await import('@/server/security/configured-media-source');
 	const { FileEntityMapperService } = await import('@/services/file-entity-mapper/file-entity-mapper.service');
 
 	const concurrency = Math.max(1, options.concurrency ?? 4);
 	const microPauseMs = options.microPauseMs ?? 6;
 	const includeHidden = options.includeHidden ?? false;
 
-	// 0) Sincronizar estructura de carpetas primero
-	try {
-		const { syncFoldersWithFileSystem } = await import('@/lib/filesystem/folder-sync');
-		await syncFoldersWithFileSystem({ dryRun: false, forceSync: true });
-	} catch (e) {
-		serverLogger.warn('reindexAll: fallo syncFoldersWithFileSystem; continúo', { err: e });
-	}
+	const allFolders: Array<{ id: string; name: string; path: string }> = await db
+		.select({ id: folders.id, path: folders.path, name: folders.name })
+		.from(folders);
 
-	const allFolders = await db.select({ id: folders.id, path: folders.path, name: folders.name }).from(folders);
-
-	// 1) Depurar carpetas inexistentes físicamente
-	const stillExisting: { id: string; path: string; name: string }[] = [];
-	for (const f of allFolders) {
-		try {
-			if (await folderExists(f.path)) {
-				stillExisting.push(f);
-			} else {
-				serverLogger.warn('reindexAll: carpeta inexistente en FS; eliminando de DB', { id: f.id, path: f.path });
-				await db.delete(folders).where(eq(folders.id, f.id));
-				try {
-					await emit({ type: 'directory:deleted', data: { folderId: f.id, path: f.path, timestamp: Date.now() } });
-				} catch {}
-			}
-		} catch (e) {
-			serverLogger.warn('reindexAll: error verificando carpeta', { id: f.id, path: f.path, err: e });
-		}
-	}
-
-	// 1.b) Purga de archivos huérfanos en BD antes de procesar (evita file_not_found en thumbnails)
-	try {
-		const { syncMultipleFolders } = await import('@/lib/filesystem/file-sync.service');
-		const folderIds = stillExisting.map((f) => f.id);
-		if (folderIds.length > 0) {
-			await syncMultipleFolders(folderIds, { dryRun: false, forceSync: true });
-		}
-	} catch (e) {
-		serverLogger.warn('reindexAll: fallo sincronizando archivos por carpeta; continúo', { err: e });
-	}
+	// 1) Autorizar y reconciliar todas las carpetas catalogadas antes de filtrar o tocar estructura.
+	// Un root offline no implica que el catálogo deba borrarse y nunca puede convertirse en un reindex vacío exitoso.
+	const authorizedRootRegistry = await getConfiguredMediaRootRegistry();
+	await syncExistingFolderFilesBeforeReindex(
+		allFolders.map((folder) => folder.id),
+		authorizedRootRegistry
+	);
+	const stillExisting = allFolders;
 
 	// 2) Escanear TODAS las carpetas (RECURSIVO para incluir archivos en subcarpetas)
 	interface Item {
@@ -552,10 +559,15 @@ export async function reindexAllFoldersThreePasses(
 	const items: Item[] = [];
 	for (const f of stillExisting) {
 		try {
-			const scan = await scanFolder(f.path, { recursive: true, includeHidden, limit: 0 });
+			let authorizedFolder = await authorizedRootRegistry.authorizeAbsolutePath(f.path, 'read');
+			authorizedFolder = await authorizedRootRegistry.authorizeAbsolutePath(f.path, 'index');
+			await dependencies.afterFolderAuthorization?.(f.id);
+			const scan = await scanFolder(authorizedFolder.absolutePath, { recursive: true, includeHidden, limit: 0 });
+			if (scan.error) throw new Error(scan.error);
 			for (const file of scan.files) items.push({ filePath: file.path, folderId: f.id });
 		} catch (e) {
-			serverLogger.warn('reindexAll: fallo escaneando carpeta; continúo', { id: f.id, path: f.path, err: e });
+			serverLogger.warn('reindexAll: Folder no disponible durante el escaneo autorizado', { err: e, id: f.id });
+			throw new Error(`El Folder ${f.id} dejó de estar disponible durante el reindex.`);
 		}
 	}
 

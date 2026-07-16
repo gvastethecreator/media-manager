@@ -7,9 +7,17 @@
 
 import { Effect } from 'effect';
 import { eq, inArray } from 'drizzle-orm';
+import { resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { db } from '@/lib/drizzle';
-import { audios, favorites, folders, profiles } from '@/lib/drizzle/schema';
+import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
+import { assets, audios, favorites, folders, mediaRoots, profiles, sourceFiles } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { getFolderFileStats, getFolderFiles } from '@/services/folder-files/folder-files.service';
+import { streamFolderFiles } from '@/services/folder-files/folder-files-stream.service';
+import { performSearch } from '@/server/services/search.service';
+import { fetchMediaCounts } from '@/server/services/stats/stats.queries';
+import { getNavigationData } from '@/server/services/system/system.navigation';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import * as AudioService from '../audio.service.effect';
 
@@ -44,14 +52,14 @@ const expectError = async <A, E>(effect: Effect.Effect<A, E, never>) => {
 
 // ============= Test Data Helpers =============
 
-const createTestFolder = async () => {
+const createTestFolder = async (path = resolve(tmpdir(), `media-manager-audio-${crypto.randomUUID()}`)) => {
 	const now = new Date();
 	const [folder] = await db
 		.insert(folders)
 		.values({
 			id: crypto.randomUUID(),
 			name: `test-folder-${Date.now()}`,
-			path: `/test/folder-${Date.now()}`,
+			path,
 			depth: 0,
 			parentId: null,
 			isFavorite: false,
@@ -62,6 +70,55 @@ const createTestFolder = async () => {
 		.returning();
 	return folder;
 };
+
+const withCanonicalSource = async <T extends { name: string }>(folder: typeof folders.$inferSelect, input: T) => {
+	const rootId = `root-audio-${crypto.randomUUID()}`;
+	const path = resolve(folder.path, input.name);
+	await db.insert(mediaRoots).values({ id: rootId, label: 'Audio service test root' });
+	return {
+		...input,
+		path,
+		source: createAuthorizedPathInput({ absolutePath: path, relativePath: input.name, rootId }),
+	};
+};
+
+const createCanonicalAudio = async (folder: typeof folders.$inferSelect, overrides: Record<string, unknown> = {}) =>
+	expectSuccess(
+		AudioService.create(
+			await withCanonicalSource(folder, {
+				album: null,
+				albumArtist: null,
+				artist: null,
+				bitrate: 320_000,
+				bpm: null,
+				channels: 2,
+				codec: null,
+				comment: null,
+				composer: null,
+				description: null,
+				disc: null,
+				duration: 180,
+				extension: 'mp3',
+				folderId: folder.id,
+				format: 'mp3',
+				genre: null,
+				hash: crypto.randomUUID().replaceAll('-', '').padEnd(64, '0'),
+				isArchived: false,
+				isFavorite: false,
+				key: null,
+				lyrics: null,
+				mimeType: 'audio/mpeg',
+				mood: null,
+				name: `canonical-${crypto.randomUUID()}.mp3`,
+				sampleRate: 44_100,
+				size: 5_000_000,
+				title: null,
+				track: null,
+				year: null,
+				...overrides,
+			})
+		)
+	);
 
 const createTestAudio = async (folderId: string, overrides?: Partial<typeof audios.$inferInsert>) => {
 	const now = new Date();
@@ -132,8 +189,10 @@ afterEach(async () => {
 	await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.AUDIO));
 	// Limpiar audios de prueba (todos los registros)
 	await db.delete(audios);
+	await db.delete(assets);
 	// Limpiar folders de prueba (todos los registros)
 	await db.delete(folders);
+	await db.delete(mediaRoots);
 
 	if (createdActiveProfileId) {
 		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
@@ -154,7 +213,7 @@ describe('AudioService - CRUD Operations', () => {
 			const folder = await createTestFolder();
 			const validHash = Date.now().toString().padStart(64, '0');
 
-			const input = {
+			const input = await withCanonicalSource(folder, {
 				name: 'test-audio.mp3',
 				description: null,
 				path: '/test/audio.mp3',
@@ -185,7 +244,7 @@ describe('AudioService - CRUD Operations', () => {
 				bpm: null,
 				key: null,
 				mood: null,
-			};
+			});
 
 			const audio = await expectSuccess(AudioService.create(input));
 
@@ -206,65 +265,54 @@ describe('AudioService - CRUD Operations', () => {
 			await ensureActiveProfile();
 
 			const audio = await expectSuccess(
-				AudioService.create({
-					name: 'canonical-create.mp3',
-					description: null,
-					path: '/test/canonical-create.mp3',
-					size: 5_000_000,
-					hash: validHash,
-					mimeType: 'audio/mpeg',
-					extension: 'mp3',
-					folderId: folder.id,
-					isFavorite: true,
-					isArchived: false,
-					duration: 180,
-					bitrate: 320_000,
-					sampleRate: 44_100,
-					channels: 2,
-					format: 'mp3',
-					codec: null,
-					title: 'Canonical Song',
-					artist: 'Canonical Artist',
-					album: 'Canonical Album',
-					year: null,
-					genre: 'Canonical Genre',
-					track: null,
-					disc: null,
-					albumArtist: null,
-					composer: null,
-					comment: null,
-					lyrics: null,
-					bpm: null,
-					key: null,
-					mood: null,
-				})
+				AudioService.create(
+					await withCanonicalSource(folder, {
+						name: 'canonical-create.mp3',
+						description: null,
+						path: '/test/canonical-create.mp3',
+						size: 5_000_000,
+						hash: validHash,
+						mimeType: 'audio/mpeg',
+						extension: 'mp3',
+						folderId: folder.id,
+						isFavorite: true,
+						isArchived: false,
+						duration: 180,
+						bitrate: 320_000,
+						sampleRate: 44_100,
+						channels: 2,
+						format: 'mp3',
+						codec: null,
+						title: 'Canonical Song',
+						artist: 'Canonical Artist',
+						album: 'Canonical Album',
+						year: null,
+						genre: 'Canonical Genre',
+						track: null,
+						disc: null,
+						albumArtist: null,
+						composer: null,
+						comment: null,
+						lyrics: null,
+						bpm: null,
+						key: null,
+						mood: null,
+					})
+				)
 			);
 
 			expect(audio.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.AUDIO, audio.id)).toBe(true);
 		});
 
-		it('debería fallar si el hash ya existe', async () => {
+		it('debería crear dos Assets para ubicaciones distintas con el mismo hash', async () => {
 			const folder = await createTestFolder();
-			const audio = await createTestAudio(folder.id);
+			const hash = '1'.repeat(64);
+			const first = await createCanonicalAudio(folder, { hash, name: 'first-location.mp3' });
+			const second = await createCanonicalAudio(folder, { hash, name: 'second-location.mp3' });
 
-			const input = {
-				name: 'duplicate.mp3',
-				path: '/test/duplicate.mp3',
-				size: 3_000_000,
-				hash: audio.hash,
-				mimeType: 'audio/mpeg',
-				extension: 'mp3',
-				folderId: folder.id,
-			};
-
-			const error = await expectError(AudioService.create(input as any));
-
-			expect(error._tag).toBe('AudioHashConflict');
-			if (error._tag === 'AudioHashConflict') {
-				expect(error.hash).toBe(audio.hash);
-				expect(error.existingId).toBe(audio.id);
-			}
+			expect(second.id).not.toBe(first.id);
+			expect(second.hash).toBe(first.hash);
 		});
 
 		it('debería fallar si el size excede 10GB', async () => {
@@ -487,6 +535,47 @@ describe('AudioService - CRUD Operations', () => {
 
 			const error = await expectError(AudioService.getById(audio.id));
 			expect(error._tag).toBe('AudioNotFound');
+		});
+
+		it('debería ocultar y restaurar un Audio canónico en todas las proyecciones públicas', async () => {
+			const folder = await createTestFolder();
+			const audio = await createCanonicalAudio(folder, {
+				name: 'restorable-audio.mp3',
+				size: 42_000,
+				title: 'Restorable Audio',
+			});
+
+			await expectSuccess(AudioService.deleteById(audio.id));
+			expect((await expectError(AudioService.getById(audio.id)))._tag).toBe('AudioNotFound');
+			expect(await db.select().from(audios).where(eq(audios.id, audio.id))).toHaveLength(1);
+			expect(await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, audio.id))).toHaveLength(1);
+			expect((await db.select().from(assets).where(eq(assets.id, audio.id)))[0]).toEqual(
+				expect.objectContaining({ status: 'deleted', statusBeforeDeletion: 'active' })
+			);
+			expect(await getFolderFiles({ fileTypes: ['audio'], folderId: folder.id })).toEqual(
+				expect.objectContaining({ files: [], total: 0 })
+			);
+			expect(await getFolderFileStats(folder.id)).toEqual(
+				expect.objectContaining({ audios: 0, total: 0, totalSize: 0 })
+			);
+			const deletedStreamChunks = [];
+			for await (const chunk of streamFolderFiles({ fileTypes: ['audio'], folderId: folder.id })) {
+				deletedStreamChunks.push(chunk);
+			}
+			expect(deletedStreamChunks.flatMap((chunk) => chunk.data ?? [])).toEqual([]);
+			expect((await performSearch('restorable-audio', 'audio')).results).toEqual([]);
+			expect((await fetchMediaCounts()).audios).toBe(0);
+			expect((await getNavigationData()).audios).toEqual([]);
+
+			const restored = await expectSuccess(AudioService.restoreById(audio.id));
+			expect(restored).toEqual(expect.objectContaining({ canonicalState: 'canonical', id: audio.id }));
+			expect((await getFolderFiles({ fileTypes: ['audio'], folderId: folder.id })).total).toBe(1);
+			expect(await getFolderFileStats(folder.id)).toEqual(
+				expect.objectContaining({ audios: 1, total: 1, totalSize: 42_000 })
+			);
+			expect((await performSearch('restorable-audio', 'audio')).results).toHaveLength(1);
+			expect((await fetchMediaCounts()).audios).toBe(1);
+			expect((await getNavigationData()).audios).toHaveLength(1);
 		});
 
 		it('debería fallar si el audio no existe', async () => {

@@ -7,7 +7,16 @@
 /**
  * Cliente de API para audios.
  */
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
 import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
+
+export type PublicAudioCreateInput = Omit<AudioCreateInput, 'path' | 'source'> & {
+	source: AuthorizedPathReference;
+};
+
+export type PublicAudioUpdateInput = Omit<AudioUpdateInput, 'path' | 'source'> & {
+	source?: AuthorizedPathReference;
+};
 
 const API_BASE_PATH = '/api/audio';
 
@@ -19,7 +28,7 @@ export async function getAudiosFromApi(): Promise<AudioWithStats[]> {
 	return response.json();
 }
 
-export async function createAudioInApi(data: AudioCreateInput): Promise<AudioWithStats> {
+export async function createAudioInApi(data: PublicAudioCreateInput): Promise<AudioWithStats> {
 	const response = await fetch(API_BASE_PATH, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -31,9 +40,9 @@ export async function createAudioInApi(data: AudioCreateInput): Promise<AudioWit
 	return response.json();
 }
 
-export async function updateAudioInApi(id: string, data: AudioUpdateInput): Promise<AudioWithStats> {
+export async function updateAudioInApi(id: string, data: PublicAudioUpdateInput): Promise<AudioWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, {
-		method: 'PUT',
+		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data),
 	});

@@ -79,6 +79,9 @@ describe('canonical Video HTTP lifecycle', () => {
 		expect(await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, response.body.id))).toEqual([
 			expect.objectContaining({ relativePath: 'clip.mp4', rootId }),
 		]);
+		const updated = await request(app).patch(`/api/videos/${response.body.id}`).send({ name: 'renamed.mp4' });
+		expect(updated.status, JSON.stringify(updated.body)).toBe(200);
+		expect(updated.body.name).toBe('renamed.mp4');
 		expect((await request(app).get(`/api/videos/${response.body.id}/content`)).status).toBe(200);
 		await db
 			.update(videos)

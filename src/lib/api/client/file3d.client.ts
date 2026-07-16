@@ -7,7 +7,16 @@
 /**
  * Cliente de API para archivos 3D.
  */
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
 import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
+
+export type PublicFile3DCreateInput = Omit<File3DCreateInput, 'path'> & {
+	source: AuthorizedPathReference;
+};
+
+export type PublicFile3DUpdateInput = Omit<File3DUpdateInput, 'path'> & {
+	source?: AuthorizedPathReference;
+};
 
 const API_BASE_PATH = '/api/file3ds';
 
@@ -27,7 +36,7 @@ export async function getFile3DFromApi(id: string): Promise<File3DWithStats> {
 	return response.json();
 }
 
-export async function createFile3DInApi(data: File3DCreateInput): Promise<File3DWithStats> {
+export async function createFile3DInApi(data: PublicFile3DCreateInput): Promise<File3DWithStats> {
 	const response = await fetch(API_BASE_PATH, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -39,7 +48,7 @@ export async function createFile3DInApi(data: File3DCreateInput): Promise<File3D
 	return response.json();
 }
 
-export async function updateFile3DInApi(id: string, data: File3DUpdateInput): Promise<File3DWithStats> {
+export async function updateFile3DInApi(id: string, data: PublicFile3DUpdateInput): Promise<File3DWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
