@@ -11,6 +11,7 @@ import { resolve } from 'node:path';
 import { db } from '@/lib/drizzle';
 import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { assets, file3Ds, favorites, folders, mediaRoots, profiles } from '@/lib/drizzle/schema';
+import { getEventStore } from '@/lib/server/events.server';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { expectError, expectSuccess, generateTestId } from '../../../../tests/factories/test-helpers';
@@ -364,18 +365,24 @@ describe('File3DService - CRUD Operations', () => {
 		it('should update file3d fields', async () => {
 			const folder = await createTestFolder();
 			const file3d = await createTestFile3D(folder.id);
+			await ensureActiveProfile();
 
 			const update = {
 				name: 'updated-model.glb',
 				format: 'OBJ',
 				isFavorite: true,
 			};
+			const eventCountBefore = getEventStore().get('favorites:modified')?.length ?? 0;
 
 			const result = await expectSuccess(File3DService.update(file3d.id, update));
+			const eventCountAfterChange = getEventStore().get('favorites:modified')?.length ?? 0;
+			await expectSuccess(File3DService.update(file3d.id, { isFavorite: true }));
 
 			expect(result.name).toBe(update.name);
 			expect(result.format).toBe(update.format);
 			expect(result.isFavorite).toBe(true);
+			expect(eventCountAfterChange - eventCountBefore).toBe(1);
+			expect(getEventStore().get('favorites:modified')?.length ?? 0).toBe(eventCountAfterChange);
 		});
 
 		it('should update geometry metadata', async () => {

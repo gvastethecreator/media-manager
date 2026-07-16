@@ -5,6 +5,12 @@ import { assets, folders, images, sourceFiles } from '@/lib/drizzle/schema';
 import { isPathInsideDirectory } from '@/lib/filesystem/path-containment';
 import { getAuthorizedPathProof } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
+import {
+	setFavoriteStateForActiveProfile,
+	type FavoriteWriteResult,
+	type FavoriteWriteTransaction,
+} from '@/services/favorite/favorite-write-transaction';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const logger = serverLogger.withContext('ImageCanonicalPersistence');
 const SHA256_HEX = /^[0-9a-f]{64}$/;
@@ -32,6 +38,7 @@ export interface ImageCreateCommand {
 	folderId: string;
 	hash: string;
 	height: number;
+	isFavorite?: boolean;
 	metadata?: string | null;
 	name: string;
 	noteId?: string | null;
@@ -44,6 +51,11 @@ export interface ImageCreateCommand {
 	thumbnailSize?: number | null;
 	thumbnailWidth?: number | null;
 	width: number;
+}
+
+export interface CanonicalImageCreateResult {
+	entity: typeof images.$inferSelect;
+	favoriteWrite: FavoriteWriteResult | null;
 }
 
 export interface ImageFingerprintUpdate {
@@ -218,14 +230,14 @@ export async function projectCanonicalImage(
 	return projected ?? null;
 }
 
-export async function createCanonicalImage(command: ImageCreateCommand): Promise<typeof images.$inferSelect> {
+export async function createCanonicalImage(command: ImageCreateCommand): Promise<CanonicalImageCreateResult> {
 	assertCanonicalImageCreateCommand(command);
 	const assetId = crypto.randomUUID();
 	const sourceFileId = crypto.randomUUID();
 	const now = new Date();
 	const extension = extname(command.source.relativePath).slice(1).toLowerCase() || null;
 
-	return db.transaction(async (transaction: typeof db) => {
+	return db.transaction(async (transaction: FavoriteWriteTransaction) => {
 		const [folder] = await transaction
 			.select({ path: folders.path })
 			.from(folders)
@@ -293,7 +305,12 @@ export async function createCanonicalImage(command: ImageCreateCommand): Promise
 				addedAt: now,
 			})
 			.returning();
-		return created;
+		if (!created) throw new Error('Image no devolvió la fila creada.');
+		const favoriteWrite =
+			command.isFavorite === undefined
+				? null
+				: await setFavoriteStateForActiveProfile(transaction, FavoriteEntityType.IMAGE, created.id, command.isFavorite);
+		return { entity: created, favoriteWrite };
 	});
 }
 

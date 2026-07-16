@@ -286,7 +286,7 @@ describe('ImageService - CRUD Operations', () => {
 			);
 		});
 
-		it('should persist favorite state through the canonical favorite bridge when a profile is active', async () => {
+		it('should persist authored create favorite state through the canonical Favorite table', async () => {
 			const folder = await createTestFolder('/uploads');
 			const timestamp = Date.now().toString();
 			const validHash = timestamp.padStart(64, '0');
@@ -307,8 +307,8 @@ describe('ImageService - CRUD Operations', () => {
 
 			const result = await expectSuccess(ImageService.create(legacyInput));
 
-			expect(result.isFavorite).toBe(false);
-			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, result.id)).toBe(false);
+			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, result.id)).toBe(true);
 		});
 
 		it('should create image with optional metadata', async () => {
@@ -923,7 +923,7 @@ describe('ImageService - CRUD Operations', () => {
 			]);
 		});
 
-		it('should persist update favorite state through the canonical favorite bridge when a profile is active', async () => {
+		it('should persist authored update favorite state through the canonical Favorite table', async () => {
 			const folder = await createTestFolder('/uploads');
 			const image = await createTestImage(folder.id, { isFavorite: false });
 			await ensureActiveProfile();
@@ -936,8 +936,8 @@ describe('ImageService - CRUD Operations', () => {
 
 			const result = await expectSuccess(ImageService.update(image.id, legacyUpdate));
 
-			expect(result.isFavorite).toBe(true);
-			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, image.id)).toBe(true);
+			expect(result.isFavorite).toBe(false);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, image.id)).toBe(false);
 		});
 
 		it('should update AI metadata', async () => {

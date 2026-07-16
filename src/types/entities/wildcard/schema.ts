@@ -83,17 +83,20 @@ export const CreateWildcardSchema = WildcardSchema.omit({
 	updatedAt: true,
 }).extend({
 	name: z.string().min(1, 'El nombre es obligatorio'),
+	isFavorite: z.boolean().optional(),
 });
 
 /**
  * Esquema para actualizar un comodín
  */
-export const UpdateWildcardSchema = WildcardSchema.partial().omit({
-	id: true,
-	isFavorite: true,
-	createdAt: true,
-	updatedAt: true,
-});
+export const UpdateWildcardSchema = WildcardSchema.partial()
+	.omit({
+		id: true,
+		isFavorite: true,
+		createdAt: true,
+		updatedAt: true,
+	})
+	.extend({ isFavorite: z.boolean().optional() });
 
 /**
  * Esquema para relaciones de un comodín

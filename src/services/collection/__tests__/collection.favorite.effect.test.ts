@@ -16,7 +16,11 @@ const expectSuccess = <A, E>(effect: Effect.Effect<A, E, CollectionService>) =>
 let createdActiveProfileId: string | null = null;
 
 const ensureActiveProfile = async () => {
-	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+	const [activeProfile] = await db
+		.select({ id: profiles.id })
+		.from(profiles)
+		.where(eq(profiles.isActive, true))
+		.limit(1);
 
 	if (activeProfile) {
 		return activeProfile.id;
@@ -39,11 +43,12 @@ const ensureActiveProfile = async () => {
 	return profileId;
 };
 
-const createCollection = async (name: string) =>
+const createCollection = async (name: string, isFavorite?: boolean) =>
 	expectSuccess(
 		Effect.flatMap(CollectionService, (service) =>
 			service.create({
 				name: `${name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+				isFavorite,
 			})
 		)
 	);
@@ -60,13 +65,13 @@ afterEach(async () => {
 });
 
 describe('CollectionService favorites convergence', () => {
-	it('create starts unfavorited even when a profile is active', async () => {
+	it('create writes authored isFavorite to the canonical Favorite table', async () => {
 		await ensureActiveProfile();
 
-		const created = await createCollection('create-canonical-favorite');
+		const created = await createCollection('create-canonical-favorite', true);
 
-		expect(created.isFavorite).toBe(false);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, created.id)).toBe(false);
+		expect(created.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, created.id)).toBe(true);
 	});
 
 	it('uses canonical favorites for onlyFavorites and ignores stale projection', async () => {
@@ -88,7 +93,7 @@ describe('CollectionService favorites convergence', () => {
 		expect(result.collections[0]?.isFavorite).toBe(true);
 	});
 
-	it('update preserves canonical favorite state without authored isFavorite', async () => {
+	it('update writes authored isFavorite to the canonical Favorite table', async () => {
 		await ensureActiveProfile();
 		const collection = await createCollection('update-target');
 		await favoriteService.set(FavoriteEntityType.COLLECTION, collection.id, true);
@@ -97,13 +102,14 @@ describe('CollectionService favorites convergence', () => {
 			Effect.flatMap(CollectionService, (service) =>
 				service.update(collection.id, {
 					name: `${collection.name}-renamed`,
+					isFavorite: false,
 				})
 			)
 		);
 
 		expect(updated.id).toBe(collection.id);
-		expect(updated.isFavorite).toBe(true);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, collection.id)).toBe(true);
+		expect(updated.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, collection.id)).toBe(false);
 	});
 
 	it('toggleFavorite delegates to the canonical favorite bridge when a profile is active', async () => {

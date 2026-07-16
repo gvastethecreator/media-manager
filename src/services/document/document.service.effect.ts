@@ -17,6 +17,7 @@ import {
 	deleteFavoriteRecordsForEntities,
 	emitCommittedFavoriteChange,
 	setFavoriteForActiveProfile,
+	setFavoriteStateForActiveProfile,
 } from '@/services/favorite/favorite-write-transaction';
 import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
 import {
@@ -228,8 +229,7 @@ const make = (): DocumentServiceInterface => {
 			}
 
 			return yield* Effect.tryPromise({
-				try: () =>
-					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.DOCUMENT, projected as DocumentRow),
+				try: () => favoriteService.projectEntity(FavoriteEntityType.DOCUMENT, projected as DocumentRow),
 				catch: (error) => toDocumentError('getById:favoriteProjection', error),
 			});
 		});
@@ -258,8 +258,7 @@ const make = (): DocumentServiceInterface => {
 				: null;
 			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () =>
-					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.DOCUMENT, projected as DocumentRow),
+				try: () => favoriteService.projectEntity(FavoriteEntityType.DOCUMENT, projected as DocumentRow),
 				catch: (error) => toDocumentError('getByHash:favoriteProjection', error),
 			});
 		});
@@ -294,8 +293,7 @@ const make = (): DocumentServiceInterface => {
 				: null;
 			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () =>
-					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.DOCUMENT, projected as DocumentRow),
+				try: () => favoriteService.projectEntity(FavoriteEntityType.DOCUMENT, projected as DocumentRow),
 				catch: (error) => toDocumentError('getByPathAndFolder:favoriteProjection', error),
 			});
 		});
@@ -307,12 +305,12 @@ const make = (): DocumentServiceInterface => {
 			const limit = filters.limit || 20;
 			const offset = filters.offset || 0;
 
-			const favoriteEntityIds: string[] | null = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT),
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.DOCUMENT),
 				catch: (error) => toDocumentError('getAll:favoriteIds', error),
 			});
 
-			if (filters.isFavorite === true && favoriteEntityIds !== null && favoriteEntityIds.length === 0) {
+			if (filters.isFavorite === true && favoriteEntityIds.length === 0) {
 				return { data: [], total: 0, limit, offset };
 			}
 
@@ -331,9 +329,7 @@ const make = (): DocumentServiceInterface => {
 				);
 			}
 			if (filters.isFavorite !== undefined) {
-				if (favoriteEntityIds === null) {
-					conditions.push(eq(documents.isFavorite, filters.isFavorite));
-				} else if (filters.isFavorite) {
+				if (filters.isFavorite) {
 					conditions.push(inArray(documents.id, favoriteEntityIds));
 				} else if (favoriteEntityIds.length > 0) {
 					conditions.push(notInArray(documents.id, favoriteEntityIds));
@@ -396,10 +392,7 @@ const make = (): DocumentServiceInterface => {
 			});
 
 			return {
-				data:
-					favoriteEntityIds === null
-						? projectedRows
-						: favoriteService.applyFavoriteProjectionMany(projectedRows, favoriteEntityIds),
+				data: favoriteService.applyFavoriteProjectionMany(projectedRows, favoriteEntityIds),
 				total,
 				limit,
 				offset,
@@ -426,13 +419,6 @@ const make = (): DocumentServiceInterface => {
 			}
 
 			const requestedIsFavorite = input.isFavorite === true;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite === true
-					? yield* Effect.tryPromise({
-							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT)) !== null,
-							catch: (error) => toDocumentError('create:favoriteScope', error),
-						})
-					: false;
 
 			let committedFavoriteProfileId: string | null = null;
 			const result = yield* Effect.tryPromise({
@@ -460,7 +446,7 @@ const make = (): DocumentServiceInterface => {
 									mimeType: input.mimeType,
 									extension: input.extension,
 									folderId: input.folderId,
-									isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
+									isFavorite: false,
 									isArchived: input.isArchived ?? false,
 									pageCount: input.pageCount ?? null,
 									wordCount: input.wordCount ?? null,
@@ -482,7 +468,7 @@ const make = (): DocumentServiceInterface => {
 								})
 								.returning();
 							const created = inserted[0];
-							if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
+							if (created && requestedIsFavorite) {
 								committedFavoriteProfileId = await setFavoriteForActiveProfile(
 									transaction,
 									FavoriteEntityType.DOCUMENT,
@@ -557,18 +543,8 @@ const make = (): DocumentServiceInterface => {
 			}
 
 			const requestedIsFavorite = typeof input.isFavorite === 'boolean' ? input.isFavorite : undefined;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite !== undefined
-					? yield* Effect.tryPromise({
-							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT)) !== null,
-							catch: (error) => toDocumentError('update:favoriteScope', error),
-						})
-					: false;
 
 			const updateData: Record<string, unknown> = { updatedAt: new Date() };
-			if (requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge) {
-				updateData.isFavorite = requestedIsFavorite;
-			}
 
 			if (input.name !== undefined) updateData.name = input.name;
 			if (input.path !== undefined) updateData.path = input.path;
@@ -594,8 +570,7 @@ const make = (): DocumentServiceInterface => {
 			if (input.content !== undefined) updateData.content = input.content;
 			if (input.summary !== undefined) updateData.summary = input.summary;
 
-			let committedFavoriteProfileId: string | null = null;
-			const result = yield* Effect.tryPromise({
+			const committed = yield* Effect.tryPromise({
 				try: async () => {
 					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
 						if (current.assetId && input.source) {
@@ -625,21 +600,22 @@ const make = (): DocumentServiceInterface => {
 								transaction as typeof db
 							);
 						}
-						if (entity && requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-							committedFavoriteProfileId = await setFavoriteForActiveProfile(
-								transaction,
-								FavoriteEntityType.DOCUMENT,
-								id,
-								requestedIsFavorite
-							);
-						}
-						return entity;
+						const favoriteWrite =
+							entity && requestedIsFavorite !== undefined
+								? await setFavoriteStateForActiveProfile(
+										transaction,
+										FavoriteEntityType.DOCUMENT,
+										id,
+										requestedIsFavorite
+									)
+								: null;
+						return { entity, favoriteWrite };
 					});
 				},
 				catch: (error) => toDocumentError('update', error),
 			});
 
-			if (!result) {
+			if (!committed.entity) {
 				return yield* Effect.fail(
 					new DocumentDatabaseError({
 						operation: 'update',
@@ -647,14 +623,19 @@ const make = (): DocumentServiceInterface => {
 					})
 				);
 			}
-			if (committedFavoriteProfileId && requestedIsFavorite !== undefined) {
+			if (committed.favoriteWrite?.changed && requestedIsFavorite !== undefined) {
 				yield* Effect.promise(() =>
-					emitCommittedFavoriteChange(committedFavoriteProfileId!, FavoriteEntityType.DOCUMENT, id, requestedIsFavorite)
+					emitCommittedFavoriteChange(
+						committed.favoriteWrite!.profileId,
+						FavoriteEntityType.DOCUMENT,
+						id,
+						requestedIsFavorite
+					)
 				);
 			}
 
-			documentLogger.info('Documento actualizado exitosamente:', result.id);
-			return yield* getById(result.id);
+			documentLogger.info('Documento actualizado exitosamente:', committed.entity.id);
+			return yield* getById(committed.entity.id);
 		});
 
 	const deleteDocument = (id: string): Effect.Effect<void, DocumentError> =>
@@ -706,23 +687,16 @@ const make = (): DocumentServiceInterface => {
 
 	const toggleFavorite = (id: string): Effect.Effect<DocumentRow, DocumentError> =>
 		Effect.gen(function* () {
-			const document = yield* getById(id);
+			yield* getById(id);
 			const favoriteEntityIds = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT),
+				try: () => favoriteService.getFavoriteEntityIdsOrThrow(FavoriteEntityType.DOCUMENT),
 				catch: (error) => toDocumentError('toggleFavorite.scope', error),
 			});
-			const next = !(favoriteEntityIds?.includes(id) ?? document.isFavorite);
-			if (favoriteEntityIds === null) {
-				yield* Effect.tryPromise({
-					try: () => db.update(documents).set({ isFavorite: next, updatedAt: new Date() }).where(eq(documents.id, id)),
-					catch: (error) => toDocumentError('toggleFavorite.legacy', error),
-				});
-			} else {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.DOCUMENT, id, next),
-					catch: (error) => toDocumentError('toggleFavorite.canonical', error),
-				});
-			}
+			const next = !favoriteEntityIds.includes(id);
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.DOCUMENT, id, next),
+				catch: (error) => toDocumentError('toggleFavorite.canonical', error),
+			});
 			return yield* getById(id);
 		});
 

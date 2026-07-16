@@ -13,6 +13,12 @@ import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '
 import { Folder, FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import {
+	deleteFavoriteRecordsForEntities,
+	emitCommittedFavoriteChange,
+	setFavoriteStateForActiveProfile,
+} from '@/services/favorite/favorite-write-transaction';
+import type { FavoriteWriteTransaction, FavoriteWriteResult } from '@/services/favorite/favorite-write-transaction';
 import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
@@ -213,7 +219,7 @@ const normalizeFolderRow = (row: Partial<typeof folders.$inferSelect> | null | u
 		description: row.description ?? null,
 		emoji: row.emoji ?? '📁',
 		featuredImage: row.featuredImage ?? null,
-		isFavorite: row.isFavorite ?? false,
+		isFavorite: false,
 		lastIndexed: row.lastIndexed ?? createdAt,
 		parentId: row.parentId ?? null,
 		presetId: row.presetId ?? null,
@@ -545,11 +551,13 @@ const deleteFolderInternal = (id: string, force = false): Effect.Effect<void, Fo
 			}
 		}
 
-		// Eliminar carpeta
+		// Favorite is polymorphic and has no target FK, so both deletes must commit together.
 		yield* Effect.tryPromise<void, FolderError>({
-			try: async () => {
-				await db.delete(folders).where(eq(folders.id, id));
-			},
+			try: () =>
+				db.transaction(async (transaction: FavoriteWriteTransaction) => {
+					await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.FOLDER, [id]);
+					await transaction.delete(folders).where(eq(folders.id, id));
+				}),
 			catch: (error: unknown) => fromUnknownError('delete:delete', error),
 		});
 
@@ -698,6 +706,7 @@ const FolderServiceLive = Layer.succeed(
 		create: (input: Schema.Schema.Type<typeof FolderCreateInput>) =>
 			Effect.gen(function* () {
 				logger.info('➕ Creando carpeta:', { name: input.name, parentId: input.parentId });
+				const requestedIsFavorite = input.isFavorite;
 				const sanitizedInput = stripLegacyFavoriteInput(input);
 
 				// Validar input
@@ -726,30 +735,46 @@ const FolderServiceLive = Layer.succeed(
 				}
 
 				// Crear carpeta
-				const result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
+				const committed = yield* Effect.tryPromise<
+					{ result: Schema.Schema.Type<typeof Folder>[]; favoriteWrite: FavoriteWriteResult | null },
+					FolderError
+				>({
 					try: async () =>
-						await db
-							.insert(folders)
-							.values({
-								createdAt: new Date(),
-								description: validatedInput.description ?? null,
-								emoji: validatedInput.emoji ?? '📁',
-								color: validatedInput.color ?? '#3b82f6',
-								featuredImage: null,
-								lastIndexed: new Date(),
-								name: validatedInput.name,
-								path: validatedInput.path,
-								parentId: validatedInput.parentId ?? null,
-								presetId: validatedInput.presetId ?? null,
-								totalImages: 0,
-								totalVideos: 0,
-								totalFiles: 0,
-								totalSize: 0,
-								updatedAt: new Date(),
-							})
-							.returning(),
+						await db.transaction(async (transaction: FavoriteWriteTransaction) => {
+							const result = await transaction
+								.insert(folders)
+								.values({
+									createdAt: new Date(),
+									description: validatedInput.description ?? null,
+									emoji: validatedInput.emoji ?? '📁',
+									color: validatedInput.color ?? '#3b82f6',
+									featuredImage: null,
+									lastIndexed: new Date(),
+									name: validatedInput.name,
+									path: validatedInput.path,
+									parentId: validatedInput.parentId ?? null,
+									presetId: validatedInput.presetId ?? null,
+									totalImages: 0,
+									totalVideos: 0,
+									totalFiles: 0,
+									totalSize: 0,
+									updatedAt: new Date(),
+								})
+								.returning();
+							const favoriteWrite =
+								requestedIsFavorite === undefined || !result[0]
+									? null
+									: await setFavoriteStateForActiveProfile(
+											transaction,
+											FavoriteEntityType.FOLDER,
+											result[0].id,
+											requestedIsFavorite
+										);
+							return { result, favoriteWrite };
+						}),
 					catch: (error: unknown) => fromUnknownError('create:insert', error),
 				});
+				const { result, favoriteWrite } = committed;
 
 				const favoriteEntityIds = yield* getFolderFavoriteIds();
 
@@ -760,6 +785,19 @@ const FolderServiceLive = Layer.succeed(
 
 				logger.info('✅ Carpeta creada:', { id: createdFolder.id, name: createdFolder.name });
 
+				if (favoriteWrite?.changed && requestedIsFavorite !== undefined) {
+					yield* Effect.tryPromise({
+						try: () =>
+							emitCommittedFavoriteChange(
+								favoriteWrite.profileId,
+								FavoriteEntityType.FOLDER,
+								createdFolder.id,
+								requestedIsFavorite
+							),
+						catch: (error: unknown) => fromUnknownError('create:favoriteEvent', error),
+					});
+				}
+
 				return yield* enrichFolderWithCounts(createdFolder);
 			}),
 
@@ -769,6 +807,7 @@ const FolderServiceLive = Layer.succeed(
 		update: (id: string, input: Schema.Schema.Type<typeof FolderUpdateInput>) =>
 			Effect.gen(function* () {
 				logger.info('🔧 Actualizando carpeta:', { id, updates: input });
+				const requestedIsFavorite = input.isFavorite;
 				const sanitizedInput = stripLegacyFavoriteInput(input);
 
 				// Verificar que existe
@@ -828,10 +867,27 @@ const FolderServiceLive = Layer.succeed(
 				if (validatedInput.description !== undefined) updateData.description = validatedInput.description;
 				if (validatedInput.presetId !== undefined) updateData.presetId = validatedInput.presetId;
 
-				const result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
-					try: async () => await db.update(folders).set(updateData).where(eq(folders.id, id)).returning(),
+				const committed = yield* Effect.tryPromise<
+					{ result: Schema.Schema.Type<typeof Folder>[]; favoriteWrite: FavoriteWriteResult | null },
+					FolderError
+				>({
+					try: () =>
+						db.transaction(async (transaction: FavoriteWriteTransaction) => {
+							const result = await transaction.update(folders).set(updateData).where(eq(folders.id, id)).returning();
+							const favoriteWrite =
+								requestedIsFavorite === undefined
+									? null
+									: await setFavoriteStateForActiveProfile(
+											transaction,
+											FavoriteEntityType.FOLDER,
+											id,
+											requestedIsFavorite
+										);
+							return { result, favoriteWrite };
+						}),
 					catch: (error: unknown) => fromUnknownError('update:update', error),
 				});
+				const { result, favoriteWrite } = committed;
 
 				const favoriteEntityIds = yield* getFolderFavoriteIds();
 
@@ -841,6 +897,14 @@ const FolderServiceLive = Layer.succeed(
 				});
 
 				logger.info('✅ Carpeta actualizada:', { id: updatedFolder.id, name: updatedFolder.name });
+
+				if (favoriteWrite?.changed && requestedIsFavorite !== undefined) {
+					yield* Effect.tryPromise({
+						try: () =>
+							emitCommittedFavoriteChange(favoriteWrite.profileId, FavoriteEntityType.FOLDER, id, requestedIsFavorite),
+						catch: (error: unknown) => fromUnknownError('update:favoriteEvent', error),
+					});
+				}
 
 				return yield* enrichFolderWithCounts(updatedFolder);
 			}),

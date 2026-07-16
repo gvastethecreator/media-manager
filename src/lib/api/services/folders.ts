@@ -1,6 +1,8 @@
 import type { FolderCreateInput, FolderFilters, FoldersResponse, FolderUpdateInput } from '@/lib/api/folders';
 import type { FolderWithStats } from '@/types/entities/folder';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { apiClient } from '../client';
+import { invalidateFavoriteQueries } from '../favorite-cache';
 
 // Helper: generar objeto stats mínimo (solo campos definidos en FolderStatistics)
 const buildMinimalStats = (): FolderWithStats['stats'] => {
@@ -216,16 +218,19 @@ export const getFolder = async (id: string): Promise<FolderWithStats> => {
 
 export const createFolder = async (data: FolderCreateInput): Promise<FolderWithStats> => {
 	const response = await apiClient.post<FolderWithStats>('/folders', data);
+	await invalidateFavoriteQueries();
 	return response;
 };
 
 export const updateFolder = async (id: string, data: FolderUpdateInput): Promise<FolderWithStats> => {
 	const response = await apiClient.put<FolderWithStats>(`/folders/${id}`, data);
+	await invalidateFavoriteQueries();
 	return response;
 };
 
 export const deleteFolder = async (id: string): Promise<void> => {
 	await apiClient.delete(`/folders/${id}`);
+	await invalidateFavoriteQueries();
 };
 
 export const moveFolder = async (folderId: string, newParentId: string | null): Promise<FolderWithStats> => {
@@ -234,8 +239,9 @@ export const moveFolder = async (folderId: string, newParentId: string | null): 
 };
 
 export const toggleFolderFavorite = async (id: string): Promise<FolderWithStats> => {
-	const response = await apiClient.post<FolderWithStats>(`/folders/${id}/toggle-favorite`);
-	return response;
+	await apiClient.post('/favorites/toggle', { entityId: id, entityType: FavoriteEntityType.FOLDER });
+	await invalidateFavoriteQueries();
+	return getFolder(id);
 };
 
 export const reindexFolder = async (

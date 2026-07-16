@@ -9,6 +9,8 @@ import { db } from '@/lib/drizzle';
 import { fileStats, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { ImageWithStats } from '@/types/entities/image/types';
 import { SERVICE_NAME } from './image-utils';
 
@@ -17,10 +19,10 @@ const lookupLogger = serverLogger.withContext(`${SERVICE_NAME}:Lookup`);
 /**
  * Construye objeto ImageWithStats desde un registro raw de la base de datos
  */
-export function buildImageWithStats(image: typeof images.$inferSelect): ImageWithStats {
+export function buildImageWithStats(image: typeof images.$inferSelect, isFavorite = false): ImageWithStats {
 	return {
 		...image,
-		isFavorite: Boolean(image.isFavorite),
+		isFavorite,
 		updatedAt: image.updatedAt ?? image.createdAt,
 		// Campos opcionales de ImageWithStats
 		statistics: {
@@ -61,7 +63,8 @@ export async function getImageByHash(hash: string): Promise<ImageWithStats | nul
 		}
 
 		lookupLogger.info('✅ Imagen encontrada por hash:', result[0].name);
-		return buildImageWithStats(result[0]);
+		const isFavorite = await favoriteService.isFavorite(FavoriteEntityType.IMAGE, result[0].id);
+		return buildImageWithStats(result[0], isFavorite);
 	} catch (error) {
 		lookupLogger.error('❌ Error al buscar imagen por hash:', error);
 		throw toServiceError(error, {
@@ -103,7 +106,8 @@ export async function getImageByPathAndFolder(path: string, folderId: string): P
 		const stats = statsResult[0] || { views: 0 };
 
 		// Construir ImageWithStats con stats actualizadas
-		const imageWithStats = buildImageWithStats(image);
+		const isFavorite = await favoriteService.isFavorite(FavoriteEntityType.IMAGE, image.id);
+		const imageWithStats = buildImageWithStats(image, isFavorite);
 		if (imageWithStats.statistics) {
 			imageWithStats.statistics.views = (stats as any).views ?? 0;
 		}

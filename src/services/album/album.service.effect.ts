@@ -14,6 +14,12 @@ import { Album, AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/lib
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import {
+	deleteFavoriteRecordsForEntities,
+	emitCommittedFavoriteChange,
+	setFavoriteStateForActiveProfile,
+} from '@/services/favorite/favorite-write-transaction';
+import type { FavoriteWriteTransaction, FavoriteWriteResult } from '@/services/favorite/favorite-write-transaction';
 import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
@@ -461,6 +467,7 @@ const make = (): AlbumServiceInterface => {
 	const create = (input: Schema.Schema.Type<typeof AlbumCreateInput>): Effect.Effect<AlbumWithStats, AlbumError> =>
 		Effect.gen(function* () {
 			logger.info('➕ Creando álbum', { name: input.name });
+			const requestedIsFavorite = input.isFavorite;
 			const sanitizedInput = stripLegacyFavoriteInput(input);
 
 			// Validar entrada con schema (síncrono)
@@ -502,13 +509,35 @@ const make = (): AlbumServiceInterface => {
 				category: validated.category ?? null,
 				featuredImage: validated.featuredImage ?? null,
 				filters: validated.filters ?? null,
-				metadata: validated.metadata ?? null,
+				metadata:
+					validated.metadata == null
+						? null
+						: typeof validated.metadata === 'string'
+							? validated.metadata
+							: JSON.stringify(validated.metadata),
 			};
 
-			const newAlbum = yield* Effect.tryPromise<(typeof albums.$inferInsert)[], AlbumError>({
-				try: async () => await db.insert(albums).values(insertData).returning(),
+			const committed = yield* Effect.tryPromise<
+				{ newAlbum: (typeof albums.$inferSelect)[]; favoriteWrite: FavoriteWriteResult | null },
+				AlbumError
+			>({
+				try: () =>
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const newAlbum = await transaction.insert(albums).values(insertData).returning();
+						const favoriteWrite =
+							requestedIsFavorite === undefined || !newAlbum[0]
+								? null
+								: await setFavoriteStateForActiveProfile(
+										transaction,
+										FavoriteEntityType.ALBUM,
+										newAlbum[0].id,
+										requestedIsFavorite
+									);
+						return { newAlbum, favoriteWrite };
+					}),
 				catch: (error: unknown) => fromUnknownError('create.insert', error),
 			});
+			const { newAlbum, favoriteWrite } = committed;
 
 			if (newAlbum.length === 0) {
 				return yield* Effect.fail(
@@ -532,6 +561,19 @@ const make = (): AlbumServiceInterface => {
 				);
 			}
 
+			if (favoriteWrite?.changed && requestedIsFavorite !== undefined) {
+				yield* Effect.tryPromise({
+					try: () =>
+						emitCommittedFavoriteChange(
+							favoriteWrite.profileId,
+							FavoriteEntityType.ALBUM,
+							albumId,
+							requestedIsFavorite
+						),
+					catch: (error: unknown) => fromUnknownError('create.favoriteEvent', error),
+				});
+			}
+
 			// Retornar con stats
 			return yield* getByIdWithStats(albumId);
 		});
@@ -545,6 +587,7 @@ const make = (): AlbumServiceInterface => {
 	): Effect.Effect<AlbumWithStats, AlbumError> =>
 		Effect.gen(function* () {
 			logger.info(`📝 Actualizando álbum: ${id}`, { input });
+			const requestedIsFavorite = input.isFavorite;
 			const sanitizedInput = stripLegacyFavoriteInput(input);
 
 			// Verificar que existe
@@ -597,10 +640,24 @@ const make = (): AlbumServiceInterface => {
 
 			updateData.updatedAt = new Date();
 
-			yield* Effect.tryPromise({
-				try: async () => await db.update(albums).set(updateData).where(eq(albums.id, id)),
+			const favoriteWrite = yield* Effect.tryPromise<FavoriteWriteResult | null, AlbumError>({
+				try: () =>
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						await transaction.update(albums).set(updateData).where(eq(albums.id, id));
+						return requestedIsFavorite === undefined
+							? null
+							: setFavoriteStateForActiveProfile(transaction, FavoriteEntityType.ALBUM, id, requestedIsFavorite);
+					}),
 				catch: (error: unknown) => fromUnknownError('update', error),
 			});
+
+			if (favoriteWrite?.changed && requestedIsFavorite !== undefined) {
+				yield* Effect.tryPromise({
+					try: () =>
+						emitCommittedFavoriteChange(favoriteWrite.profileId, FavoriteEntityType.ALBUM, id, requestedIsFavorite),
+					catch: (error: unknown) => fromUnknownError('update.favoriteEvent', error),
+				});
+			}
 
 			logger.info(`✅ Álbum actualizado: ${id}`);
 
@@ -634,9 +691,13 @@ const make = (): AlbumServiceInterface => {
 				);
 			}
 
-			// Eliminar
+			// Favorite is polymorphic and has no target FK, so both deletes must commit together.
 			yield* Effect.tryPromise({
-				try: async () => await db.delete(albums).where(eq(albums.id, id)),
+				try: () =>
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.ALBUM, [id]);
+						await transaction.delete(albums).where(eq(albums.id, id));
+					}),
 				catch: (error: unknown) => fromUnknownError('delete', error),
 			});
 
@@ -657,7 +718,8 @@ const make = (): AlbumServiceInterface => {
 						Effect.map((result) => ({ id, result }))
 					)
 				),
-				{ concurrency: 5 } // Limitar concurrencia
+				// SQLite admite un único writer; serializar evita SQLITE_BUSY entre transacciones hermanas.
+				{ concurrency: 1 }
 			);
 
 			const failed: string[] = [];

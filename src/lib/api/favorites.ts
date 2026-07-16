@@ -7,6 +7,7 @@ import {
 	type FavoriteWithStats,
 } from '@/types/entities/favorite';
 import { apiClient } from './client';
+import { FAVORITE_QUERY_KEY, invalidateFavoriteQueries } from './favorite-cache';
 
 export interface FavoriteToggleInput {
 	entityId: string;
@@ -73,7 +74,7 @@ export function normalizeFavoriteEntityType(entityType: FavoriteEntityType | str
 
 // Query keys
 export const favoriteKeys = {
-	all: ['favorites'] as const,
+	all: FAVORITE_QUERY_KEY,
 	scope: (profileId?: string | null) => [...favoriteKeys.all, 'profile', resolveFavoriteScope(profileId)] as const,
 	lists: (profileId?: string | null) => [...favoriteKeys.scope(profileId), 'list'] as const,
 	list: (profileId: string | null | undefined, filters: FavoriteFilters) =>
@@ -124,12 +125,13 @@ export function useCreateFavorite() {
 
 	return useMutation<FavoriteToggleResponse, Error, FavoriteCreateInput>({
 		mutationFn: (data) =>
-			apiClient.post<FavoriteToggleResponse>('/favorites/toggle', {
+			apiClient.put<FavoriteToggleResponse>('/favorites/state', {
 				entityId: data.entityId,
 				entityType: data.entityType,
+				isFavorite: true,
 			}),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
+			return invalidateFavoriteQueries(queryClient);
 		},
 	});
 }
@@ -155,7 +157,7 @@ export function useToggleFavoriteMutation() {
 		onSuccess: (result, variables) => {
 			const normalizedEntityType = normalizeFavoriteEntityType(variables.entityType);
 
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
+			void invalidateFavoriteQueries(queryClient);
 
 			if (normalizedEntityType) {
 				queryClient.setQueryData(favoriteKeys.check(profileId, normalizedEntityType, variables.entityId), {
@@ -172,7 +174,7 @@ export function useDeleteFavorite() {
 	return useMutation<void, Error, string>({
 		mutationFn: (id) => apiClient.delete(`/favorites/${id}`),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
+			return invalidateFavoriteQueries(queryClient);
 		},
 	});
 }

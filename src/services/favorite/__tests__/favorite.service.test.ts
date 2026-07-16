@@ -1,7 +1,21 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { db } from '@/lib/drizzle';
-import { albums, favorites, folders, images, notes, profiles, properties, tags } from '@/lib/drizzle/schema';
+import {
+	albums,
+	favorites,
+	folders,
+	imageAlbums,
+	images,
+	notes,
+	profiles,
+	properties,
+	tags,
+} from '@/lib/drizzle/schema';
+import { performSearch } from '@/server/services/search.service';
+import { getFolderFiles } from '@/services/folder-files/folder-files.service';
+import { getImageByHash } from '@/services/image/image-lookup.service';
+import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { favoriteService } from '../favorite.service';
 
@@ -22,17 +36,18 @@ describe('favoriteService', () => {
 
 	afterEach(async () => {
 		try {
-				if (createdTagIds.length > 0) {
-					await db.delete(tags).where(inArray(tags.id, createdTagIds));
-					createdTagIds.length = 0;
-				}
+			if (createdTagIds.length > 0) {
+				await db.delete(tags).where(inArray(tags.id, createdTagIds));
+				createdTagIds.length = 0;
+			}
 
-				if (createdPropertyIds.length > 0) {
-					await db.delete(properties).where(inArray(properties.id, createdPropertyIds));
-					createdPropertyIds.length = 0;
-				}
+			if (createdPropertyIds.length > 0) {
+				await db.delete(properties).where(inArray(properties.id, createdPropertyIds));
+				createdPropertyIds.length = 0;
+			}
 
 			if (createdImageIds.length > 0) {
+				await db.delete(imageAlbums).where(inArray(imageAlbums.A, createdImageIds));
 				await db.delete(images).where(inArray(images.id, createdImageIds));
 				createdImageIds.length = 0;
 			}
@@ -222,10 +237,9 @@ describe('favoriteService', () => {
 			.where(and(eq(favorites.entityType, FavoriteEntityType.IMAGE), eq(favorites.entityId, entityId)));
 
 		expect(relations).toHaveLength(2);
-		expect(relations.map((relation: { profileId: string }) => relation.profileId).sort()).toEqual([
-			profileA,
-			profileB,
-		].sort());
+		expect(relations.map((relation: { profileId: string }) => relation.profileId).sort()).toEqual(
+			[profileA, profileB].sort()
+		);
 	});
 
 	it('aísla getById, list y counts por perfil activo', async () => {
@@ -327,6 +341,20 @@ describe('favoriteService', () => {
 		expect(relationsAfterUnset).toHaveLength(0);
 	});
 
+	it('serializa toggles concurrentes del mismo perfil y target', async () => {
+		await createProfile('concurrent-toggle', true);
+		const entityId = await createImage('concurrent-toggle-image');
+
+		const results = await Promise.all([
+			favoriteService.toggle(FavoriteEntityType.IMAGE, entityId),
+			favoriteService.toggle(FavoriteEntityType.IMAGE, entityId),
+		]);
+
+		expect(results.map((result) => result.isFavorite).sort()).toEqual([false, true]);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, entityId)).toBe(false);
+		expect(await db.select().from(favorites).where(eq(favorites.entityId, entityId))).toHaveLength(0);
+	});
+
 	it('setMany aplica estado explícito en lote para el perfil activo', async () => {
 		await createProfile('batch-set', true);
 		const imageA = await createImage('batch-set-a');
@@ -364,9 +392,9 @@ describe('favoriteService', () => {
 		await favoriteService.toggle(FavoriteEntityType.PROPERTY, propertyId);
 
 		const listResult = await favoriteService.list({ sortBy: 'entityType', sortOrder: 'asc' });
-		expect(listResult.items.some((favorite) => favorite.entityType === FavoriteEntityType.TAG && favorite.entityId === tagId)).toBe(
-			true
-		);
+		expect(
+			listResult.items.some((favorite) => favorite.entityType === FavoriteEntityType.TAG && favorite.entityId === tagId)
+		).toBe(true);
 		expect(
 			listResult.items.some(
 				(favorite) => favorite.entityType === FavoriteEntityType.PROPERTY && favorite.entityId === propertyId
@@ -376,5 +404,92 @@ describe('favoriteService', () => {
 		const countsByType = await favoriteService.getCountsByType();
 		expect(countsByType.tag).toBe(1);
 		expect(countsByType.property).toBe(1);
+	});
+
+	it('proyecta false sin perfil activo y rechaza escrituras sin usar el flag embebido', async () => {
+		await createProfile('no-active-profile', true);
+		const entityId = await createImage('legacy-flag-is-not-authority');
+		await db.update(images).set({ isFavorite: true }).where(eq(images.id, entityId));
+		await db.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
+
+		const [legacyEntity] = await db.select().from(images).where(eq(images.id, entityId)).limit(1);
+		expect(legacyEntity.isFavorite).toBe(true);
+		expect(await favoriteService.projectEntity(FavoriteEntityType.IMAGE, legacyEntity)).toMatchObject({
+			id: entityId,
+			isFavorite: false,
+		});
+		expect(await favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.IMAGE)).toEqual([]);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.IMAGE, entityId)).toBe(false);
+		expect(await favoriteService.list()).toEqual({ items: [], total: 0, hasMore: false });
+		expect(await favoriteService.getCountsByType()).toEqual({});
+
+		await expect(favoriteService.set(FavoriteEntityType.IMAGE, entityId, true)).rejects.toThrow(
+			'No hay un perfil activo'
+		);
+		await expect(favoriteService.toggle(FavoriteEntityType.IMAGE, entityId)).rejects.toThrow('No hay un perfil activo');
+		await expect(favoriteService.setMany(FavoriteEntityType.IMAGE, [entityId], true)).rejects.toThrow(
+			'No hay un perfil activo'
+		);
+
+		const [unchangedEntity] = await db.select().from(images).where(eq(images.id, entityId)).limit(1);
+		expect(unchangedEntity.isFavorite).toBe(true);
+		expect(await db.select().from(favorites).where(eq(favorites.entityId, entityId))).toHaveLength(0);
+	});
+
+	it('hidrata lookup, búsqueda global y archivos de carpeta desde Favorite canónico', async () => {
+		await createProfile('canonical-read-surfaces', true);
+		const entityId = await createImage('canonical-read-surfaces-image');
+		const [createdImage] = await db.select().from(images).where(eq(images.id, entityId)).limit(1);
+		const [folder] = await db.select().from(folders).where(eq(folders.id, createdImage.folderId)).limit(1);
+		await db
+			.update(images)
+			.set({ isFavorite: true, path: `${folder.path}/${entityId}.png` })
+			.where(eq(images.id, entityId));
+		const [image] = await db.select().from(images).where(eq(images.id, entityId)).limit(1);
+
+		const assertFavoriteState = async (expected: boolean) => {
+			const folderFiles = await getFolderFiles({ fileTypes: ['image'], folderId: image.folderId });
+			expect(folderFiles.files.find((file) => file.id === entityId)?.stats?.isFavorite).toBe(expected);
+			expect((await getImageByHash(image.hash))?.isFavorite).toBe(expected);
+			const search = await performSearch(image.name, 'image');
+			expect(search.results.find((result) => result.data.id === entityId)?.data.isFavorite).toBe(expected);
+		};
+
+		await assertFavoriteState(false);
+		await favoriteService.set(FavoriteEntityType.IMAGE, entityId, true);
+		await assertFavoriteState(true);
+	});
+
+	it('calcula favoritos de álbum desde Favorite y no desde flags embebidos', async () => {
+		await createProfile('canonical-album-stats', true);
+		const entityId = await createImage('canonical-album-stats-image');
+		const albumId = await createAlbum('canonical-album-stats-album');
+		await db.insert(imageAlbums).values({ A: entityId, B: albumId });
+		await db.update(images).set({ isFavorite: true }).where(eq(images.id, entityId));
+
+		const statsService = OptimizedStatsService.getInstance();
+		expect((await statsService.getBatchAlbumStats([albumId]))[albumId]?.favoritesCount).toBe(0);
+
+		await favoriteService.set(FavoriteEntityType.IMAGE, entityId, true);
+		expect((await statsService.getBatchAlbumStats([albumId]))[albumId]?.favoritesCount).toBe(1);
+	});
+
+	it('falla cerrado cuando existen múltiples perfiles activos', async () => {
+		const profileA = await createProfile('duplicate-active-a');
+		const profileB = await createProfile('duplicate-active-b');
+		await db
+			.update(profiles)
+			.set({ isActive: true })
+			.where(inArray(profiles.id, [profileA, profileB]));
+
+		await expect(favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.IMAGE)).rejects.toThrow(
+			'Se esperaba como máximo un perfil activo'
+		);
+		await expect(favoriteService.resolveActiveProfileIdOrNull()).rejects.toThrow(
+			'Se esperaba como máximo un perfil activo'
+		);
+		await expect(favoriteService.list()).rejects.toThrow('Se esperaba como máximo un perfil activo');
+		await expect(favoriteService.getById('favorite-id')).rejects.toThrow('Se esperaba como máximo un perfil activo');
+		await expect(favoriteService.getCountsByType()).rejects.toThrow('Se esperaba como máximo un perfil activo');
 	});
 });

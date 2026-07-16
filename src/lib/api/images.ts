@@ -4,7 +4,7 @@ import type { ImageWithStats } from '@/types/entities/image/base';
 import type { ImageCreateInput, ImageUpdateInput } from '@/types/entities/image/types';
 import { createEntityHooks } from './hook-factory';
 import type { EntityListResult } from './hook-factory';
-import { favoriteKeys } from './favorites';
+import { invalidateFavoriteQueries } from './favorite-cache';
 import { apiClient } from './client';
 
 export interface ImageFilters {
@@ -55,7 +55,7 @@ export function useToggleFavorite() {
 			}),
 		onSuccess: (result, { id }) => {
 			queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
-			queryClient.invalidateQueries({ queryKey: favoriteKeys.all });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.setQueryData<ImageWithStats | undefined>(imageKeys.detail(id), (current) =>
 				current ? { ...current, isFavorite: result.isFavorite } : current
 			);

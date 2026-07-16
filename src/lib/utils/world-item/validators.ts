@@ -66,6 +66,7 @@ export const createWorldItemSchema = z.object({
 	filters: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
 	category: z.nativeEnum(WorldItemCategory).nullable().optional(),
+	isFavorite: z.boolean().optional(),
 });
 
 // Esquema para validar datos al actualizar un objeto
@@ -89,6 +90,7 @@ export const updateWorldItemSchema = z.object({
 	filters: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
 	category: z.nativeEnum(WorldItemCategory).nullable().optional(),
+	isFavorite: z.boolean().optional(),
 });
 
 // Esquema para filtros de búsqueda

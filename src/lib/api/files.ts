@@ -5,6 +5,7 @@ import {
 	type FavoriteToggleResponse,
 	normalizeFavoriteEntityType,
 } from '@/lib/api/favorites';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 
 const API_BASE = '/api';
 
@@ -28,7 +29,7 @@ export const useToggleFavorite = () => {
 		onSuccess: () => {
 			// Invalidar queries relevantes para que se actualicen los datos
 			queryClient.invalidateQueries({ queryKey: ['files'] });
-			queryClient.invalidateQueries({ queryKey: ['favorites'] });
+			void invalidateFavoriteQueries(queryClient);
 		},
 	});
 };

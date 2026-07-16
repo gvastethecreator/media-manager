@@ -27,7 +27,6 @@ import {
 	resolveMediaAssetReference,
 } from '@/server/security/media-asset-reference';
 import { sanitizeJsonResponses } from '@/server/security/sanitize-public-payload';
-import { favoriteService } from '@/services/favorite/favorite.service';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import {
 	type Video,
@@ -35,19 +34,12 @@ import {
 	type VideoServiceInterface,
 	VideoServiceLive,
 } from '@/services/video/video.service.effect';
-import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sendEffectHttpError } from '../utils/content-delivery';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
-import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
 router.use(sanitizeJsonResponses);
 const logger = serverLogger.withContext('VideosRoutes');
-const skipBatchFavoriteAlias: express.RequestHandler = (req, _res, next) => {
-	if (req.params.id === 'batch') next('route');
-	else next();
-};
-
 type VideoListOptions = Parameters<VideoServiceInterface['getAll']>[0];
 
 function listAuthorizedVideos(
@@ -361,26 +353,6 @@ router.patch(
 );
 
 /**
- * POST /videos/:id/favorite - Toggle favorito de un video
- */
-router.post(
-	'/:id/favorite',
-	skipBatchFavoriteAlias,
-	authorizeMediaAssetParam({ assetType: 'video', permissions: ['read', 'write'] }),
-	effectHandler((req, res) => {
-		const { id } = req.params;
-
-		return Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.VIDEO);
-			const videoService = yield* VideoService;
-			const video = yield* videoService.toggleFavorite(id);
-
-			return video;
-		}).pipe(Effect.provide(VideoServiceLive));
-	})
-);
-
-/**
  * POST /videos/:id/tags - Agregar tags a un video
  */
 router.post(
@@ -394,32 +366,6 @@ router.post(
 			res.status(201);
 			return { success: true, added: result.added };
 		}).pipe(Effect.provide(TagServiceLive))
-	)
-);
-
-/**
- * POST /videos/batch/favorite - Establecer favorito para múltiples videos
- */
-router.post(
-	'/batch/favorite',
-	authorizeMediaAssetBodyIds({ assetType: 'video', permissions: ['read', 'write'] }),
-	effectHandler((req) =>
-		Effect.gen(function* () {
-			const { ids, isFavorite } = req.body;
-
-			if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
-				yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
-			}
-
-			validateBatchSize(ids);
-
-			const count = yield* Effect.tryPromise({
-				try: () => favoriteService.setMany(FavoriteEntityType.VIDEO, ids, isFavorite),
-				catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
-			});
-
-			return { success: true, count, updated: count };
-		})
 	)
 );
 

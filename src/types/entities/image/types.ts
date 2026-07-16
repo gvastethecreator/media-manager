@@ -73,6 +73,7 @@ export interface ImageCreateInput {
 	description?: string | null;
 	folderId: string;
 	groups?: string[];
+	isFavorite?: boolean;
 	hash: string;
 	height: number;
 	metadata?: string | null;
@@ -103,6 +104,7 @@ export interface ImageUpdateInput {
 	concepts?: string[];
 	description?: string | null;
 	groups?: string[];
+	isFavorite?: boolean;
 	metadata?: string | null;
 	name?: string;
 	notes?: string[];

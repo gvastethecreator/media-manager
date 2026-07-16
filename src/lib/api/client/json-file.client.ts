@@ -9,7 +9,10 @@
  * Reemplaza llamadas directas a servicios del servidor.
  */
 import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
+import { apiClient } from '@/lib/api/client';
 import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
+import { FavoriteEntityType } from '@/types/entities/favorite';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 
 export type PublicJsonFileCreateInput = Omit<JsonFileCreateInput, 'path'> & {
 	source: AuthorizedPathReference;
@@ -66,13 +69,9 @@ export async function updateJsonFileInApi(id: string, data: PublicJsonFileUpdate
 }
 
 export async function toggleJsonFileFavoriteInApi(id: string): Promise<JsonFileWithStats> {
-	const response = await fetch(`${API_BASE_PATH}/${id}/favorite`, {
-		method: 'POST',
-	});
-	if (!response.ok) {
-		throw new Error('Error al alternar favorito del archivo JSON');
-	}
-	return response.json();
+	await apiClient.post('/favorites/toggle', { entityId: id, entityType: FavoriteEntityType.JSON_FILE });
+	await invalidateFavoriteQueries();
+	return getJsonFileFromApi(id);
 }
 
 export async function deleteJsonFileFromApi(id: string): Promise<void> {

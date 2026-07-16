@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { apiClient } from './client';
+import { invalidateFavoriteQueries } from './favorite-cache';
 
 export interface WildcardFilters {
 	limit?: number;
@@ -65,6 +67,7 @@ export function useCreateWildcard() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.roots() });
+			void invalidateFavoriteQueries(queryClient);
 		},
 	});
 }
@@ -77,6 +80,7 @@ export function useUpdateWildcard() {
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.roots() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.setQueryData(wildcardKeys.detail(data.id), data);
 		},
 	});
@@ -90,6 +94,7 @@ export function useDeleteWildcard() {
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.roots() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.removeQueries({ queryKey: wildcardKeys.detail(id) });
 		},
 	});
@@ -107,8 +112,12 @@ export function useToggleWildcardFavorite() {
 	const queryClient = useQueryClient();
 
 	return useMutation<WildcardWithStats, Error, string>({
-		mutationFn: (id) => apiClient.patch<WildcardWithStats>(`/wildcards/${id}/favorite`),
+		mutationFn: async (id) => {
+			await apiClient.post('/favorites/toggle', { entityId: id, entityType: FavoriteEntityType.WILDCARD });
+			return apiClient.get<WildcardWithStats>(`/wildcards/${id}`);
+		},
 		onSuccess: (data) => {
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.roots() });
 			queryClient.setQueryData(wildcardKeys.detail(data.id), data);

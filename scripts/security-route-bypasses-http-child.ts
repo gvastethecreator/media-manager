@@ -218,6 +218,7 @@ const [
 	favoriteCheck,
 	favoriteGet,
 	favoriteToggle,
+	favoriteSetState,
 	favoriteDelete,
 	imagePage,
 	tagImages,
@@ -238,11 +239,31 @@ const [
 	request(app).get('/api/favorites/check').query({ entityType: 'image', entityId: 'outside-first' }),
 	request(app).get('/api/favorites/favorite-outside'),
 	request(app).post('/api/favorites/toggle').send({ entityType: 'image', entityId: 'outside-first' }),
+	request(app).put('/api/favorites/state').send({ entityType: 'image', entityId: 'outside-first', isFavorite: false }),
 	request(app).delete('/api/favorites/favorite-outside'),
 	request(app).get('/api/images').query({ limit: 1, offset: 0, sortBy: 'createdAt', sortOrder: 'desc' }),
 	request(app).get('/api/tags/tag-1/images'),
 	request(app).get('/api/tags/tag-1/thumbnails').query({ limit: 1 }),
 ]);
+
+const favoriteStateAdd = await request(app)
+	.put('/api/favorites/state')
+	.send({ entityType: 'image', entityId: 'inside-second', isFavorite: true });
+const favoriteStateAddAgain = await request(app)
+	.put('/api/favorites/state')
+	.send({ entityType: 'image', entityId: 'inside-second', isFavorite: true });
+const favoriteStateCheckAdded = await request(app)
+	.get('/api/favorites/check')
+	.query({ entityType: 'image', entityId: 'inside-second' });
+const favoriteStateRemove = await request(app)
+	.put('/api/favorites/state')
+	.send({ entityType: 'image', entityId: 'inside-second', isFavorite: false });
+const favoriteStateCheckRemoved = await request(app)
+	.get('/api/favorites/check')
+	.query({ entityType: 'image', entityId: 'inside-second' });
+const favoriteStateInvalid = await request(app)
+	.put('/api/favorites/state')
+	.send({ entityType: 'image', entityId: 'inside-second' });
 
 const verification = new Database(databasePath, { readonly: true });
 const favoriteStillExists = Boolean(verification.query('SELECT id FROM Favorite WHERE id = ?').get('favorite-outside'));
@@ -262,6 +283,19 @@ const result = {
 	favoriteGetStatus: favoriteGet.status,
 	favoriteList: favorites.body,
 	favoriteStillExists,
+	favoriteStateAddBody: favoriteStateAdd.body,
+	favoriteStateAddStatus: favoriteStateAdd.status,
+	favoriteStateAddAgainBody: favoriteStateAddAgain.body,
+	favoriteStateAddAgainStatus: favoriteStateAddAgain.status,
+	favoriteStateCheckAddedBody: favoriteStateCheckAdded.body,
+	favoriteStateCheckAddedStatus: favoriteStateCheckAdded.status,
+	favoriteStateCheckRemovedBody: favoriteStateCheckRemoved.body,
+	favoriteStateCheckRemovedStatus: favoriteStateCheckRemoved.status,
+	favoriteStateRemoveBody: favoriteStateRemove.body,
+	favoriteStateRemoveStatus: favoriteStateRemove.status,
+	favoriteStateInvalidBody: favoriteStateInvalid.body,
+	favoriteStateInvalidStatus: favoriteStateInvalid.status,
+	favoriteSetStateStatus: favoriteSetState.status,
 	favoriteToggleStatus: favoriteToggle.status,
 	folderFiles: folderFiles.body,
 	folderStats: folderStats.body,

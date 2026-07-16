@@ -13,6 +13,7 @@ import { db } from '@/lib/drizzle';
 import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { FileSyncService } from '@/lib/filesystem/file-sync.service';
 import { assets, favorites, folders, jsonFiles, mediaRoots, profiles, sourceFiles } from '@/lib/drizzle/schema';
+import { getEventStore } from '@/lib/server/events.server';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { createAuthorizedRootRegistry } from '@/server/security/authorized-roots';
 import { FavoriteEntityType } from '@/types/entities/favorite';
@@ -396,18 +397,24 @@ describe('JsonFileService - CRUD Operations', () => {
 		it('should update json file fields', async () => {
 			const folder = await createTestFolder();
 			const jsonFile = await createTestJsonFile(folder.id);
+			await ensureActiveProfile();
 
 			const update = {
 				name: 'updated-config.json',
 				description: 'Updated description',
 				isFavorite: true,
 			};
+			const eventCountBefore = getEventStore().get('favorites:modified')?.length ?? 0;
 
 			const result = await expectSuccess(JsonFileService.update(jsonFile.id, update));
+			const eventCountAfterChange = getEventStore().get('favorites:modified')?.length ?? 0;
+			await expectSuccess(JsonFileService.update(jsonFile.id, { isFavorite: true }));
 
 			expect(result.name).toBe(update.name);
 			expect(result.description).toBe(update.description);
 			expect(result.isFavorite).toBe(true);
+			expect(eventCountAfterChange - eventCountBefore).toBe(1);
+			expect(getEventStore().get('favorites:modified')?.length ?? 0).toBe(eventCountAfterChange);
 		});
 
 		it('should update content analysis metadata', async () => {

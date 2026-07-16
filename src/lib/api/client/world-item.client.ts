@@ -12,6 +12,9 @@ import type {
 	WorldItemUpdateInput as UpdateWorldItemData,
 	WorldItemWithStats as WorldItem,
 } from '@/types/entities/world-item/types';
+import { apiClient } from '@/lib/api/client';
+import { FavoriteEntityType } from '@/types/entities/favorite';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/world-items';
@@ -34,6 +37,7 @@ export async function createWorldItemInApi(data: CreateWorldItemData): Promise<W
 	if (!response.ok) {
 		throw new Error('Error al crear world item');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -46,17 +50,14 @@ export async function updateWorldItemInApi(id: string, data: UpdateWorldItemData
 	if (!response.ok) {
 		throw new Error('Error al actualizar world item');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
 export async function toggleWorldItemFavoriteInApi(id: string): Promise<WorldItem> {
-	const response = await fetch(`${API_BASE_PATH}/${id}/favorite`, {
-		method: 'POST',
-	});
-	if (!response.ok) {
-		throw new Error('Error al alternar favorito del world item');
-	}
-	return response.json();
+	await apiClient.post('/favorites/toggle', { entityId: id, entityType: FavoriteEntityType.WORLD_ITEM });
+	await invalidateFavoriteQueries();
+	return apiClient.get<WorldItem>(`/world-items/${id}`);
 }
 
 export async function deleteWorldItemFromApi(id: string): Promise<void> {
@@ -64,4 +65,5 @@ export async function deleteWorldItemFromApi(id: string): Promise<void> {
 	if (!response.ok) {
 		throw new Error('Error al eliminar world item');
 	}
+	await invalidateFavoriteQueries();
 }

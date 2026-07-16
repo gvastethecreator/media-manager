@@ -1,11 +1,8 @@
 /**
  * @file Servicio para la gestión de favoritos
  * @module services/favorite
- * @deprecated La verdad canónica está en la tabla `favorites` (junction table scoped a perfil).
- * `isFavorite` embebido en 20+ entidades es deuda/derivación, no verdad primaria.
- * El batch bridge Favorite debe eliminar esta dualidad: un solo contrato canónico
- * de lectura/escritura, `isFavorite` como proyección derivada o eliminado.
- * Ver ADR-0002 y 04-favorite-bridge.md.
+ * La verdad canónica está en la tabla `favorites` (junction table scoped a perfil).
+ * `isFavorite` embebido en entidades es una columna de compatibilidad de schema y nunca se lee ni escribe aquí.
  */
 
 import * as crypto from 'crypto';
@@ -94,6 +91,7 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 };
 
 let favoriteSchemaValidatedPromise: Promise<void> | null = null;
+const favoriteMutationTails = new Map<string, Promise<void>>();
 
 export interface FavoriteFilters {
 	entityType?: FavoriteEntityType;
@@ -194,8 +192,15 @@ function hasCanonicalFavoriteUniqueIndex(indexRow: unknown, indexInfoRows: reado
 }
 
 async function getActiveProfileIdOrNull(): Promise<string | null> {
-	const activeProfile = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
-	return activeProfile[0]?.id ?? null;
+	const activeProfiles = await db
+		.select({ id: profiles.id })
+		.from(profiles)
+		.where(eq(profiles.isActive, true))
+		.limit(2);
+	if (activeProfiles.length > 1) {
+		throw new Error(`Se esperaba como máximo un perfil activo y se encontraron ${activeProfiles.length}`);
+	}
+	return activeProfiles[0]?.id ?? null;
 }
 
 async function requireActiveProfileId(): Promise<string> {
@@ -323,26 +328,6 @@ async function ensureFavoriteTargetsExist(entityType: FavoriteEntityType, entity
 	return uniqueEntityIds;
 }
 
-async function updateEntityIsFavorite(
-	_entityType: FavoriteEntityType,
-	_entityId: string,
-	_isFavorite: boolean
-): Promise<void> {
-	// @deprecated isFavorite embebido: la sincronización dual fue desactivada.
-	// La tabla canónica `favorites` es la única fuente de verdad desde batch bridge Favorite.
-	// El flag `isFavorite` en tablas per-type queda como columna legacy (solo lectura).
-	// Si alguna vista necesita el flag, debe proyectarlo desde la tabla favorites.
-}
-
-async function updateEntityIsFavoriteMany(
-	_entityType: FavoriteEntityType,
-	_entityIds: string[],
-	_isFavorite: boolean
-): Promise<void> {
-	// @deprecated isFavorite embebido: la sincronización dual fue desactivada.
-	// Ver updateEntityIsFavorite para el rationale completo.
-}
-
 async function getExistingFavoriteRecord(profileId: string, entityType: FavoriteEntityType, entityId: string) {
 	const existing = await db
 		.select({
@@ -357,6 +342,24 @@ async function getExistingFavoriteRecord(profileId: string, entityType: Favorite
 		.limit(1);
 
 	return existing[0] ?? null;
+}
+
+async function withFavoriteMutationLock<TResult>(key: string, operation: () => Promise<TResult>): Promise<TResult> {
+	const previous = favoriteMutationTails.get(key) ?? Promise.resolve();
+	let release!: () => void;
+	const gate = new Promise<void>((resolve) => {
+		release = resolve;
+	});
+	const tail = previous.then(() => gate);
+	favoriteMutationTails.set(key, tail);
+
+	await previous;
+	try {
+		return await operation();
+	} finally {
+		release();
+		if (favoriteMutationTails.get(key) === tail) favoriteMutationTails.delete(key);
+	}
 }
 
 async function enrichFavorite(favorite: FavoriteRecord): Promise<FavoriteWithStats> {
@@ -386,16 +389,23 @@ function favoriteMatchesSearch(favorite: FavoriteWithStats, rawSearch: string): 
  */
 export const favoriteService = {
 	/**
-	 * Obtener IDs de entidades favoritas para el perfil activo.
-	 * Si no hay perfil activo, retorna null para permitir fallback transicional.
+	 * Resuelve el perfil activo después de validar el contrato canónico y su unicidad.
+	 * Permite que agregados SQL unan Favorite sin volver a implementar el scope de perfil.
 	 */
-	async getFavoriteEntityIds(entityType: FavoriteEntityType): Promise<string[] | null> {
+	async resolveActiveProfileIdOrNull(): Promise<string | null> {
+		await validateFavoriteProfileScopeSchema();
+		return getActiveProfileIdOrNull();
+	},
+
+	/**
+	 * Obtener IDs favoritos para el perímetro canónico usando un set vacío cuando no hay perfil activo.
+	 * Las columnas `isFavorite` embebidas no participan en la proyección.
+	 */
+	async getFavoriteEntityIdsOrEmpty(entityType: FavoriteEntityType): Promise<string[]> {
+		ensureCanonicalFavoriteEntityType(entityType);
 		await validateFavoriteProfileScopeSchema();
 		const profileId = await getActiveProfileIdOrNull();
-
-		if (!profileId) {
-			return null;
-		}
+		if (!profileId) return [];
 
 		const result = await db
 			.select({ entityId: favorites.entityId })
@@ -404,17 +414,6 @@ export const favoriteService = {
 			.orderBy(desc(favorites.addedAt));
 
 		return result.map((row: { entityId: string }) => row.entityId);
-	},
-
-	/**
-	 * Obtener IDs favoritos para el perímetro canónico usando un set vacío cuando no hay perfil activo.
-	 * Esto permite proyectar `isFavorite` sin volver a caer al flag embebido.
-	 */
-	async getFavoriteEntityIdsOrEmpty(entityType: FavoriteEntityType): Promise<string[]> {
-		ensureCanonicalFavoriteEntityType(entityType);
-
-		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(entityType);
-		return favoriteEntityIds ?? [];
 	},
 
 	/**
@@ -469,27 +468,6 @@ export const favoriteService = {
 		return applyFavoriteProjectionMany(entities, favoriteEntityIds);
 	},
 
-	async projectEntityWithLegacyFallback<TEntity extends FavoriteProjectionCapableEntity>(
-		entityType: FavoriteEntityType,
-		entity: TEntity
-	): Promise<TEntity & { isFavorite: boolean }> {
-		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(entityType);
-		return favoriteEntityIds === null
-			? { ...entity, isFavorite: Boolean(entity.isFavorite) }
-			: applyFavoriteProjection(entity, favoriteEntityIds);
-	},
-
-	async projectEntitiesWithLegacyFallback<TEntity extends FavoriteProjectionCapableEntity>(
-		entityType: FavoriteEntityType,
-		entities: TEntity[]
-	): Promise<Array<TEntity & { isFavorite: boolean }>> {
-		if (entities.length === 0) return [];
-		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(entityType);
-		return favoriteEntityIds === null
-			? entities.map((entity) => ({ ...entity, isFavorite: Boolean(entity.isFavorite) }))
-			: applyFavoriteProjectionMany(entities, favoriteEntityIds);
-	},
-
 	/**
 	 * Establecer de forma explícita el estado favorito de una entidad.
 	 */
@@ -499,37 +477,47 @@ export const favoriteService = {
 		isFavorite: boolean
 	): Promise<{ isFavorite: boolean; id?: string }> {
 		try {
+			ensureCanonicalFavoriteEntityType(entityType);
 			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 			await ensureFavoriteTargetExists(entityType, entityId);
 
-			const existing = await getExistingFavoriteRecord(profileId, entityType, entityId);
+			return await withFavoriteMutationLock(`${profileId}:${entityType}:${entityId}`, async () => {
+				const existing = await getExistingFavoriteRecord(profileId, entityType, entityId);
 
-			if (isFavorite) {
-				if (existing) {
-					await updateEntityIsFavorite(entityType, entityId, true);
-					return { isFavorite: true, id: existing.id };
+				if (isFavorite) {
+					if (existing) return { isFavorite: true, id: existing.id };
+
+					const id = crypto.randomUUID();
+					const inserted = await db
+						.insert(favorites)
+						.values({ id, profileId, entityType, entityId, addedAt: new Date() })
+						.onConflictDoNothing()
+						.returning({ id: favorites.id });
+					const persisted = inserted[0] ?? (await getExistingFavoriteRecord(profileId, entityType, entityId));
+					if (!persisted) throw new Error(`No se pudo persistir el favorito ${entityType}:${entityId}`);
+
+					if (inserted[0]) {
+						await emit({
+							type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
+							data: { action: 'added', profileId, entityType, entityId, id: persisted.id },
+						});
+					}
+					return { isFavorite: true, id: persisted.id };
 				}
 
-				const created = await favoriteService.toggle(entityType, entityId);
-				return created;
-			}
+				if (!existing) return { isFavorite: false };
 
-			if (!existing) {
-				await updateEntityIsFavorite(entityType, entityId, false);
+				const deleted = await db.delete(favorites).where(eq(favorites.id, existing.id)).returning({ id: favorites.id });
+				if (!deleted[0]) return { isFavorite: false };
+
+				await emit({
+					type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
+					data: { action: 'removed', profileId, entityType, entityId },
+				});
+				favoriteLogger.info('Favorito eliminado por set explícito:', { profileId, entityType, entityId });
 				return { isFavorite: false };
-			}
-
-			await db.delete(favorites).where(eq(favorites.id, existing.id));
-			await updateEntityIsFavorite(entityType, entityId, false);
-
-			await emit({
-				type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
-				data: { action: 'removed', profileId, entityType, entityId },
 			});
-
-			favoriteLogger.info('Favorito eliminado por set explícito:', { profileId, entityType, entityId });
-			return { isFavorite: false };
 		} catch (error) {
 			favoriteLogger.error('Error al establecer favorito:', error);
 			throw error instanceof Error ? error : new Error('Error al establecer favorito');
@@ -541,61 +529,50 @@ export const favoriteService = {
 	 */
 	async toggle(entityType: FavoriteEntityType, entityId: string): Promise<{ isFavorite: boolean; id?: string }> {
 		try {
+			ensureCanonicalFavoriteEntityType(entityType);
 			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 			await ensureFavoriteTargetExists(entityType, entityId);
 
-			favoriteLogger.info('Alternando favorito:', { profileId, entityType, entityId });
+			return await withFavoriteMutationLock(`${profileId}:${entityType}:${entityId}`, async () => {
+				favoriteLogger.info('Alternando favorito:', { profileId, entityType, entityId });
+				const existing = await getExistingFavoriteRecord(profileId, entityType, entityId);
 
-			// Verificar si ya existe
-			const existing = await db
-				.select()
-				.from(favorites)
-				.where(
-					and(
-						eq(favorites.profileId, profileId),
-						eq(favorites.entityType, entityType),
-						eq(favorites.entityId, entityId)
-					)
-				)
-				.limit(1);
+				if (existing) {
+					await db.delete(favorites).where(eq(favorites.id, existing.id));
+					await emit({
+						type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
+						data: { action: 'removed', profileId, entityType, entityId },
+					});
+					favoriteLogger.info('Favorito eliminado:', { profileId, entityType, entityId });
+					return { isFavorite: false };
+				}
 
-			if (existing.length > 0) {
-				// Eliminar favorito existente
-				await db.delete(favorites).where(eq(favorites.id, existing[0].id));
+				const id = crypto.randomUUID();
+				const inserted = await db
+					.insert(favorites)
+					.values({ id, profileId, entityType, entityId, addedAt: new Date() })
+					.onConflictDoNothing()
+					.returning({ id: favorites.id });
 
-				// También actualizar isFavorite en la entidad si existe el campo
-				await updateEntityIsFavorite(entityType, entityId, false);
+				if (!inserted[0]) {
+					const racedExisting = await getExistingFavoriteRecord(profileId, entityType, entityId);
+					if (!racedExisting) throw new Error(`No se pudo alternar el favorito ${entityType}:${entityId}`);
+					await db.delete(favorites).where(eq(favorites.id, racedExisting.id));
+					await emit({
+						type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
+						data: { action: 'removed', profileId, entityType, entityId },
+					});
+					return { isFavorite: false };
+				}
 
 				await emit({
 					type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
-					data: { action: 'removed', profileId, entityType, entityId },
+					data: { action: 'added', profileId, entityType, entityId, id },
 				});
-
-				favoriteLogger.info('Favorito eliminado:', { profileId, entityType, entityId });
-				return { isFavorite: false };
-			}
-
-			// Crear nuevo favorito
-			const id = crypto.randomUUID();
-			await db.insert(favorites).values({
-				id,
-				profileId,
-				entityType,
-				entityId,
-				addedAt: new Date(),
+				favoriteLogger.info('Favorito añadido:', { profileId, entityType, entityId, id });
+				return { isFavorite: true, id };
 			});
-
-			// También actualizar isFavorite en la entidad si existe el campo
-			await updateEntityIsFavorite(entityType, entityId, true);
-
-			await emit({
-				type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
-				data: { action: 'added', profileId, entityType, entityId, id },
-			});
-
-			favoriteLogger.info('Favorito añadido:', { profileId, entityType, entityId, id });
-			return { isFavorite: true, id };
 		} catch (error) {
 			favoriteLogger.error('Error al alternar favorito:', error);
 			throw error instanceof Error ? error : new Error('Error al alternar favorito');
@@ -607,6 +584,7 @@ export const favoriteService = {
 	 */
 	async setMany(entityType: FavoriteEntityType, entityIds: string[], isFavorite: boolean): Promise<number> {
 		try {
+			ensureCanonicalFavoriteEntityType(entityType);
 			await validateFavoriteProfileScopeSchema();
 			const profileId = await requireActiveProfileId();
 			const uniqueEntityIds = await ensureFavoriteTargetsExist(entityType, entityIds);
@@ -633,46 +611,57 @@ export const favoriteService = {
 				existing.map((favorite: { entityId: string; id: string }) => [favorite.entityId, favorite.id])
 			);
 
+			let changedEntityIds: string[] = [];
 			if (isFavorite) {
 				const idsToCreate = uniqueEntityIds.filter((entityId) => !existingByEntityId.has(entityId));
 
 				if (idsToCreate.length > 0) {
-					await db.insert(favorites).values(
-						idsToCreate.map((entityId) => ({
-							id: crypto.randomUUID(),
-							profileId,
-							entityType,
-							entityId,
-							addedAt: new Date(),
-						}))
-					);
+					const inserted = await db
+						.insert(favorites)
+						.values(
+							idsToCreate.map((entityId) => ({
+								id: crypto.randomUUID(),
+								profileId,
+								entityType,
+								entityId,
+								addedAt: new Date(),
+							}))
+						)
+						.onConflictDoNothing()
+						.returning({ entityId: favorites.entityId });
+					changedEntityIds = inserted.map((favorite: { entityId: string }) => favorite.entityId);
 				}
 			} else {
 				const favoriteIdsToDelete = existing.map((favorite: { id: string }) => favorite.id);
 
 				if (favoriteIdsToDelete.length > 0) {
-					await db.delete(favorites).where(inArray(favorites.id, favoriteIdsToDelete));
+					const deleted = await db
+						.delete(favorites)
+						.where(inArray(favorites.id, favoriteIdsToDelete))
+						.returning({ entityId: favorites.entityId });
+					changedEntityIds = deleted.map((favorite: { entityId: string }) => favorite.entityId);
 				}
 			}
 
-			await updateEntityIsFavoriteMany(entityType, uniqueEntityIds, isFavorite);
-
-			await emit({
-				type: EVENT_TYPE_MAPPING[EVENTS.FAVORITES_CHANGED],
-				data: {
-					action: isFavorite ? 'batch-added' : 'batch-removed',
-					profileId,
-					entityType,
-					entityIds: uniqueEntityIds,
-					count: uniqueEntityIds.length,
-				},
-			});
+			if (changedEntityIds.length > 0) {
+				await emit({
+					type: EVENT_TYPE_MAPPING[EVENTS.FAVORITES_CHANGED],
+					data: {
+						action: isFavorite ? 'batch-added' : 'batch-removed',
+						profileId,
+						entityType,
+						entityIds: changedEntityIds,
+						count: changedEntityIds.length,
+					},
+				});
+			}
 
 			favoriteLogger.info('Favoritos actualizados en lote:', {
 				profileId,
 				entityType,
 				isFavorite,
-				count: uniqueEntityIds.length,
+				requestedCount: uniqueEntityIds.length,
+				changedCount: changedEntityIds.length,
 			});
 
 			return uniqueEntityIds.length;
@@ -686,8 +675,10 @@ export const favoriteService = {
 	 * Verificar si una entidad es favorita
 	 */
 	async isFavorite(entityType: FavoriteEntityType, entityId: string): Promise<boolean> {
+		ensureCanonicalFavoriteEntityType(entityType);
 		await validateFavoriteProfileScopeSchema();
-		const profileId = await requireActiveProfileId();
+		const profileId = await getActiveProfileIdOrNull();
+		if (!profileId) return false;
 
 		const result = await db
 			.select({ id: favorites.id })
@@ -712,7 +703,8 @@ export const favoriteService = {
 			}
 
 			await validateFavoriteProfileScopeSchema();
-			const profileId = await requireActiveProfileId();
+			const profileId = await getActiveProfileIdOrNull();
+			if (!profileId) return { items: [], total: 0, hasMore: false };
 
 			const conditions = [
 				eq(favorites.profileId, profileId),
@@ -770,29 +762,25 @@ export const favoriteService = {
 	 * Obtener un favorito por ID
 	 */
 	async getById(id: string): Promise<FavoriteWithStats | null> {
-		try {
-			await validateFavoriteProfileScopeSchema();
-			const profileId = await requireActiveProfileId();
+		await validateFavoriteProfileScopeSchema();
+		const profileId = await getActiveProfileIdOrNull();
+		if (!profileId) return null;
 
-			const result = await db
-				.select()
-				.from(favorites)
-				.where(
-					and(
-						eq(favorites.id, id),
-						eq(favorites.profileId, profileId),
-						inArray(favorites.entityType, canonicalFavoriteEntityTypes)
-					)
+		const result = await db
+			.select()
+			.from(favorites)
+			.where(
+				and(
+					eq(favorites.id, id),
+					eq(favorites.profileId, profileId),
+					inArray(favorites.entityType, canonicalFavoriteEntityTypes)
 				)
-				.limit(1);
+			)
+			.limit(1);
 
-			if (result.length === 0) return null;
+		if (result.length === 0) return null;
 
-			return enrichFavorite(result[0] as FavoriteRecord);
-		} catch (error) {
-			favoriteLogger.error('Error al obtener favorito:', error);
-			return null;
-		}
+		return enrichFavorite(result[0] as FavoriteRecord);
 	},
 
 	/**
@@ -814,9 +802,6 @@ export const favoriteService = {
 			const fav = existing[0];
 			await db.delete(favorites).where(eq(favorites.id, id));
 
-			// Actualizar isFavorite en la entidad
-			await updateEntityIsFavorite(fav.entityType as FavoriteEntityType, fav.entityId, false);
-
 			await emit({
 				type: EVENT_TYPE_MAPPING[EVENTS.FAVORITE_TOGGLED],
 				data: {
@@ -830,41 +815,34 @@ export const favoriteService = {
 			return true;
 		} catch (error) {
 			favoriteLogger.error('Error al eliminar favorito:', error);
-			return false;
+			throw error instanceof Error ? error : new Error('Error al eliminar favorito');
 		}
 	},
 
 	getEntityData,
 
-	updateEntityIsFavorite,
-	updateEntityIsFavoriteMany,
-
 	/**
 	 * Obtener conteo de favoritos por tipo
 	 */
 	async getCountsByType(): Promise<Record<string, number>> {
-		try {
-			await validateFavoriteProfileScopeSchema();
-			const profileId = await requireActiveProfileId();
+		await validateFavoriteProfileScopeSchema();
+		const profileId = await getActiveProfileIdOrNull();
+		if (!profileId) return {};
 
-			const results = await db
-				.select({
-					entityType: favorites.entityType,
-					count: count(),
-				})
-				.from(favorites)
-				.where(and(eq(favorites.profileId, profileId), inArray(favorites.entityType, canonicalFavoriteEntityTypes)))
-				.groupBy(favorites.entityType);
+		const results = await db
+			.select({
+				entityType: favorites.entityType,
+				count: count(),
+			})
+			.from(favorites)
+			.where(and(eq(favorites.profileId, profileId), inArray(favorites.entityType, canonicalFavoriteEntityTypes)))
+			.groupBy(favorites.entityType);
 
-			const counts: Record<string, number> = {};
-			for (const row of results) {
-				counts[row.entityType] = row.count;
-			}
-			return counts;
-		} catch (error) {
-			favoriteLogger.error('Error al obtener conteos de favoritos:', error);
-			return {};
+		const counts: Record<string, number> = {};
+		for (const row of results) {
+			counts[row.entityType] = row.count;
 		}
+		return counts;
 	},
 };
 

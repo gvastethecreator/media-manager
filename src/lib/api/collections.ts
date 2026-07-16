@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import type { ImageWithStats } from '@/types/entities/image';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import { createEntityHooks } from './hook-factory';
 import type { EntityListResult } from './hook-factory';
 import { apiClient } from './client';
+import { invalidateFavoriteQueries } from './favorite-cache';
 
 export interface CollectionFilters {
 	[key: string]: unknown;
@@ -74,10 +76,11 @@ export function useToggleCollectionFavorite() {
 
 	return useMutation<CollectionWithStats, Error, string>({
 		mutationFn: async (id: string) => {
-			const response = await apiClient.post<CollectionWithStats>(`/collections/${id}/favorite`, {});
-			return response;
+			await apiClient.post('/favorites/toggle', { entityId: id, entityType: FavoriteEntityType.COLLECTION });
+			return apiClient.get<CollectionWithStats>(`/collections/${id}`);
 		},
 		onSuccess: (data) => {
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
 			queryClient.setQueryData(collectionKeys.detail(data.id), data);
 		},

@@ -11,6 +11,7 @@ import { resolve } from 'node:path';
 import { db } from '@/lib/drizzle';
 import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { assets, documents, favorites, folders, mediaRoots, profiles } from '@/lib/drizzle/schema';
+import { getEventStore } from '@/lib/server/events.server';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { expectError, expectSuccess, generateTestId } from '../../../../tests/factories/test-helpers';
@@ -345,18 +346,24 @@ describe('DocumentService - CRUD Operations', () => {
 		it('should update document fields', async () => {
 			const folder = await createTestFolder();
 			const document = await createTestDocument(folder.id);
+			await ensureActiveProfile();
 
 			const update = {
 				name: 'updated-doc.pdf',
 				title: 'Updated Title',
 				isFavorite: true,
 			};
+			const eventCountBefore = getEventStore().get('favorites:modified')?.length ?? 0;
 
 			const result = await expectSuccess(DocumentService.update(document.id, update));
+			const eventCountAfterChange = getEventStore().get('favorites:modified')?.length ?? 0;
+			await expectSuccess(DocumentService.update(document.id, { isFavorite: true }));
 
 			expect(result.name).toBe(update.name);
 			expect(result.title).toBe(update.title);
 			expect(result.isFavorite).toBe(true);
+			expect(eventCountAfterChange - eventCountBefore).toBe(1);
+			expect(getEventStore().get('favorites:modified')?.length ?? 0).toBe(eventCountAfterChange);
 		});
 
 		it('should update document metadata', async () => {

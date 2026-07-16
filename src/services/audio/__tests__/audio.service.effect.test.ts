@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os';
 import { db } from '@/lib/drizzle';
 import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { assets, audios, favorites, folders, mediaRoots, profiles, sourceFiles } from '@/lib/drizzle/schema';
+import { getEventStore } from '@/lib/server/events.server';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { getFolderFileStats, getFolderFiles } from '@/services/folder-files/folder-files.service';
 import { streamFolderFiles } from '@/services/folder-files/folder-files-stream.service';
@@ -500,11 +501,16 @@ describe('AudioService - CRUD Operations', () => {
 			const folder = await createTestFolder();
 			const audio = await createTestAudio(folder.id, { isFavorite: false });
 			await ensureActiveProfile();
+			const eventCountBefore = getEventStore().get('favorites:modified')?.length ?? 0;
 
 			const updated = await expectSuccess(AudioService.update(audio.id, { isFavorite: true }));
+			const eventCountAfterChange = getEventStore().get('favorites:modified')?.length ?? 0;
+			await expectSuccess(AudioService.update(audio.id, { isFavorite: true }));
 
 			expect(updated.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.AUDIO, audio.id)).toBe(true);
+			expect(eventCountAfterChange - eventCountBefore).toBe(1);
+			expect(getEventStore().get('favorites:modified')?.length ?? 0).toBe(eventCountAfterChange);
 		});
 
 		it('debería fallar si el audio no existe', async () => {
@@ -765,6 +771,7 @@ describe('AudioService - Toggle Operations', () => {
 		it('debería cambiar de false a true', async () => {
 			const folder = await createTestFolder();
 			const audio = await createTestAudio(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
 
 			const updated = await expectSuccess(AudioService.toggleFavorite(audio.id));
 
@@ -774,6 +781,7 @@ describe('AudioService - Toggle Operations', () => {
 		it('debería cambiar de true a false', async () => {
 			const folder = await createTestFolder();
 			const audio = await createTestAudio(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
 
 			const favorited = await expectSuccess(AudioService.toggleFavorite(audio.id));
 			expect(favorited.isFavorite).toBe(true);
@@ -806,6 +814,7 @@ describe('AudioService - Toggle Operations', () => {
 			const folder = await createTestFolder();
 			const audio1 = await createTestAudio(folder.id, { isFavorite: false });
 			const audio2 = await createTestAudio(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
 
 			const updatedCount = await expectSuccess(AudioService.setFavoriteMany([audio1.id, audio2.id], true));
 
@@ -819,8 +828,10 @@ describe('AudioService - Toggle Operations', () => {
 
 		it('debería desmarcar múltiples audios como favoritos', async () => {
 			const folder = await createTestFolder();
-			const audio1 = await createTestAudio(folder.id, { isFavorite: true });
-			const audio2 = await createTestAudio(folder.id, { isFavorite: true });
+			const audio1 = await createTestAudio(folder.id, { isFavorite: false });
+			const audio2 = await createTestAudio(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+			await expectSuccess(AudioService.setFavoriteMany([audio1.id, audio2.id], true));
 
 			const updatedCount = await expectSuccess(AudioService.setFavoriteMany([audio1.id, audio2.id], false));
 

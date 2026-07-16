@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 import { navigationKeys } from '@/lib/api/navigation';
 import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
 import type { FolderWithStats } from '@/types/entities/folder';
@@ -32,6 +33,7 @@ export interface FolderCreateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
+	isFavorite?: boolean;
 	name: string;
 	parentId?: string | null;
 	presetId?: string | null;
@@ -43,6 +45,7 @@ export interface FolderUpdateInput {
 	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
+	isFavorite?: boolean;
 	name?: string;
 	parentId?: string | null;
 	presetId?: string | null;
@@ -145,6 +148,7 @@ export function useDeleteFolder() {
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.removeQueries({ queryKey: folderKeys.detail(id) });
 		},
 	});

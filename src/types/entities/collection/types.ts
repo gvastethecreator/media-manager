@@ -59,6 +59,7 @@ export interface CreateCollectionInput {
 	editions?: CollectionEdition[] | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
+	isFavorite?: boolean;
 	name: string;
 	network?: string | null;
 	parentId?: string | null;
@@ -77,6 +78,7 @@ export interface UpdateCollectionInput {
 	editions?: CollectionEdition[] | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
+	isFavorite?: boolean;
 	name?: string;
 	network?: string | null;
 	parentId?: string | null;

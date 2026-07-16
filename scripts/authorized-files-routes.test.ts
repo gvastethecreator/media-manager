@@ -103,8 +103,21 @@ describe('authorized filesystem HTTP contract', () => {
 			expect(result.favoriteCheckStatus).toBe(403);
 			expect(result.favoriteGetStatus).toBe(403);
 			expect(result.favoriteToggleStatus).toBe(403);
+			expect(result.favoriteSetStateStatus).toBe(403);
 			expect(result.favoriteDeleteStatus).toBe(403);
 			expect(result.favoriteStillExists).toBe(true);
+			expect(result.favoriteStateAddStatus).toBe(200);
+			expect(result.favoriteStateAddBody).toMatchObject({ isFavorite: true });
+			expect(result.favoriteStateAddAgainStatus).toBe(200);
+			expect(result.favoriteStateAddAgainBody).toEqual(result.favoriteStateAddBody);
+			expect(result.favoriteStateCheckAddedStatus).toBe(200);
+			expect(result.favoriteStateCheckAddedBody).toEqual({ isFavorite: true });
+			expect(result.favoriteStateRemoveStatus).toBe(200);
+			expect(result.favoriteStateRemoveBody).toEqual({ isFavorite: false });
+			expect(result.favoriteStateCheckRemovedStatus).toBe(200);
+			expect(result.favoriteStateCheckRemovedBody).toEqual({ isFavorite: false });
+			expect(result.favoriteStateInvalidStatus).toBe(400);
+			expect(result.favoriteStateInvalidBody).toMatchObject({ error: 'Datos inválidos' });
 			expect(result.imagePage.data.map((item: { id: string }) => item.id)).toEqual(['inside-second']);
 			expect(result.imagePage.pagination).toMatchObject({ hasNext: false, limit: 1, offset: 0, total: 1 });
 		} finally {
