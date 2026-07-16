@@ -1,6 +1,6 @@
 {
 	"formatVersion": 1,
-	"fingerprint": "a0a27fd18cc26670227dd2bbad3bd3ce4854949677e722ca23b6b8f55fdac14a",
+	"fingerprint": "1a132e3f495217ce8a90c50f389784e14fdd4c5e8dfc7c5f434d40dd449f1e63",
 	"generatedFrom": "src/lib/drizzle/migrations",
 	"objects": [
 		{
@@ -43,6 +43,24 @@
 			"name": "Album_name_key",
 			"sqlHash": "1041fba93ea99583c6337b6d50303dc9cb31cfdc0cdc87f2b2dfaab776eaa31e",
 			"tableName": "Album",
+			"type": "index"
+		},
+		{
+			"name": "Asset_assetType_idx",
+			"sqlHash": "4b5bdd3bef994795b4cd85e3ff56e28c3a747ffbfcce084f6693bcb3d1b9ca71",
+			"tableName": "Asset",
+			"type": "index"
+		},
+		{
+			"name": "Asset_primarySourceFileId_key",
+			"sqlHash": "8e8e8f1523b3b34285aa6dcb1a3a5bc9db0d3348cb52002804a835c827b664e8",
+			"tableName": "Asset",
+			"type": "index"
+		},
+		{
+			"name": "Asset_status_idx",
+			"sqlHash": "e335c427f1af9f7ba35b2b9b5a8e31a072891f81c769621cb11a40db0d23c48e",
+			"tableName": "Asset",
 			"type": "index"
 		},
 		{
@@ -412,6 +430,12 @@
 			"type": "index"
 		},
 		{
+			"name": "MediaRoot_status_idx",
+			"sqlHash": "20e99f1d464f1f4040934dff0561697fbe7b755e701702f5be2e8110097a0708",
+			"tableName": "MediaRoot",
+			"type": "index"
+		},
+		{
 			"name": "Metadata_entityType_entityId_idx",
 			"sqlHash": "8c347d6a77fdfcfc749d7bdbb845b3b0e58a90c4c56effa2a9ea6ee9c83d29bb",
 			"tableName": "Metadata",
@@ -493,6 +517,54 @@
 			"name": "Settings_profileId_key",
 			"sqlHash": "4851ee54b6cb0ab3e0271371292002ea051ef18e15f063f54b94b71b4cb45b0f",
 			"tableName": "Settings",
+			"type": "index"
+		},
+		{
+			"name": "SourceFile_assetId_id_key",
+			"sqlHash": "87ba1bcaaf51f2bdcbe56044fe168b5ff20761f5ec171cb53fe39411d57835b7",
+			"tableName": "SourceFile",
+			"type": "index"
+		},
+		{
+			"name": "SourceFile_assetId_idx",
+			"sqlHash": "3db58db944d89df7d90928eaa7964498ccdaef15c1a97502916d8f48fab291f9",
+			"tableName": "SourceFile",
+			"type": "index"
+		},
+		{
+			"name": "SourceFile_availability_idx",
+			"sqlHash": "e0ef0df66ddc4cb36cc1b2875c9ffc3404b6d8df901e704a12440cf1271206ec",
+			"tableName": "SourceFile",
+			"type": "index"
+		},
+		{
+			"name": "SourceFile_contentHash_idx",
+			"sqlHash": "7dbb0114ef5da44bef4adc36409e8e23ce0f3cbb666eebac40fba404af023aaa",
+			"tableName": "SourceFile",
+			"type": "index"
+		},
+		{
+			"name": "SourceFile_folderId_idx",
+			"sqlHash": "b934d47fcd242bece0000e0e6f527ba7297614981e08a861b96f48421471284a",
+			"tableName": "SourceFile",
+			"type": "index"
+		},
+		{
+			"name": "SourceFile_rootId_fileIdentity_idx",
+			"sqlHash": "532d53ede7c3327c6f3fb6320d4e92f953db8c4215a30529c2cb27e4642ce2b6",
+			"tableName": "SourceFile",
+			"type": "index"
+		},
+		{
+			"name": "SourceFile_rootId_idx",
+			"sqlHash": "3bc088e6dcf4798d955f8eaf8ad62189d48911cc4a5acd7780b09f524be7b8db",
+			"tableName": "SourceFile",
+			"type": "index"
+		},
+		{
+			"name": "SourceFile_rootId_relativePath_key",
+			"sqlHash": "8d2495e495dafa17a8cc4ca7746b064bb9bbd6de3ac7cb602a26bf4282cde77b",
+			"tableName": "SourceFile",
 			"type": "index"
 		},
 		{
@@ -982,6 +1054,12 @@
 			"type": "table"
 		},
 		{
+			"name": "Asset",
+			"sqlHash": "6b4146a284f428e2d9c5d9142b4c5dc486434688a32b753dadba7f4c59827e91",
+			"tableName": "Asset",
+			"type": "table"
+		},
+		{
 			"name": "Audio",
 			"sqlHash": "ff3ee833b1ff0defd48edb3d3dbf8e0956d4b59d85b92ea14a85685de6df7c9b",
 			"tableName": "Audio",
@@ -1066,6 +1144,12 @@
 			"type": "table"
 		},
 		{
+			"name": "MediaRoot",
+			"sqlHash": "35eb26cad5cee78bfd9770257aca24350b07192e90039837bff01bd3cc184f5d",
+			"tableName": "MediaRoot",
+			"type": "table"
+		},
+		{
 			"name": "Metadata",
 			"sqlHash": "38d61f68a01dd8be40a69af6de44c0e1ee47db1935270c602e77f8492b4846d3",
 			"tableName": "Metadata",
@@ -1111,6 +1195,12 @@
 			"name": "Settings",
 			"sqlHash": "4c20d41ca6e4ebfb0d9e335645c4af7746f41b45d613f0fe803affb8fbe6864b",
 			"tableName": "Settings",
+			"type": "table"
+		},
+		{
+			"name": "SourceFile",
+			"sqlHash": "a3df4040a0627aecdfe47bfba8512c29446d14bdd6788e3af651039e9f051fd1",
+			"tableName": "SourceFile",
 			"type": "table"
 		},
 		{

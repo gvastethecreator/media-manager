@@ -4,7 +4,7 @@ import { copyFile, mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { verifyExistingBackup, type DatabaseInventory } from './database-safety';
-import { MIGRATIONS_DIRECTORY } from './migrations';
+import { loadMigrations, MIGRATIONS_DIRECTORY } from './migrations';
 import type { UpgradeResult } from './upgrade';
 
 const temporaryDirectories: string[] = [];
@@ -132,7 +132,7 @@ describe('safe database upgrade', () => {
 		const sourceAfter = await inventoryInChild(sourcePath);
 		expect(sourceAfter.schemaHash).toBe(before.schemaHash);
 		expect(sourceAfter.userVersion).toBe(1);
-		expect(result.check.migrations).toHaveLength(4);
+		expect(result.check.migrations).toHaveLength((await loadMigrations()).length);
 		expect(await inspectUpgradedProfileInChild(outputPath)).toEqual({ type: 'integer' });
 	});
 
