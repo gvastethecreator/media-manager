@@ -46,24 +46,50 @@ export class QueueJobServiceError extends Error {
 export async function createQueueJob(data: CreateQueueJobInput): Promise<QueueJobExtended> {
 	try {
 		logger.info('📋 Creando nuevo trabajo en cola:', { queue: data.queue });
+		const serializedData = JSON.stringify(data.data);
+		const serializedMetadata = data.metadata ? serializeQueueJobMetadata(data.metadata) : null;
 
-		const [queueJob] = await db
+		const [createdQueueJob] = await db
 			.insert(queueJobs)
 			.values({
 				id: crypto.randomUUID(), // Generate UUID for id
 				queue: data.queue,
-				data: JSON.stringify(data.data), // Store data as JSON string
+				idempotencyKey: data.idempotencyKey,
+				data: serializedData, // Store data as JSON string
 				maxAttempts: data.maxAttempts,
 				priority: data.priority,
-				metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : null,
+				metadata: serializedMetadata,
 				status: QueueJobStatus.PENDING,
+				updatedAt: new Date(),
 			})
+			.onConflictDoNothing({ target: [queueJobs.queue, queueJobs.idempotencyKey] })
 			.returning();
+		let queueJob = createdQueueJob;
+		if (!queueJob && data.idempotencyKey) {
+			[queueJob] = await db
+				.select()
+				.from(queueJobs)
+				.where(and(eq(queueJobs.queue, data.queue), eq(queueJobs.idempotencyKey, data.idempotencyKey)))
+				.limit(1);
+			if (!queueJob) {
+				throw new QueueJobServiceError('No se pudo resolver el trabajo idempotente existente', 'IDEMPOTENCY_RACE');
+			}
+			const payloadMatches =
+				queueJob.data === serializedData &&
+				queueJob.metadata === serializedMetadata &&
+				queueJob.maxAttempts === (data.maxAttempts ?? 3) &&
+				queueJob.priority === (data.priority ?? 0);
+			if (!payloadMatches) {
+				throw new QueueJobServiceError('La idempotency key ya existe con un payload diferente', 'IDEMPOTENCY_CONFLICT');
+			}
+		}
+		if (!queueJob) throw new QueueJobServiceError('No se creó el trabajo en cola', 'CREATE_EMPTY');
 
 		logger.info('✅ Trabajo en cola creado:', { id: queueJob.id, queue: queueJob.queue });
 		return transformQueueJob(queueJob);
 	} catch (error) {
 		logger.error('❌ Error al crear trabajo en cola:', error);
+		if (error instanceof QueueJobServiceError) throw error;
 		throw new QueueJobServiceError('No se pudo crear el trabajo en cola', 'CREATE_FAILED', error);
 	}
 }
@@ -94,7 +120,7 @@ export async function updateQueueJob(id: string, data: UpdateQueueJobInput): Pro
 				metadata: data.metadata
 					? serializeQueueJobMetadata(typeof data.metadata === 'string' ? JSON.parse(data.metadata) : data.metadata)
 					: null,
-				updatedAt: sql`(strftime('%s', 'now'))`,
+				updatedAt: new Date(),
 			})
 			.where(eq(queueJobs.id, id))
 			.returning();
@@ -186,8 +212,8 @@ export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
 			.update(queueJobs)
 			.set({
 				status: QueueJobStatus.CANCELLED,
-				finishedAt: sql`(strftime('%s', 'now'))`,
-				updatedAt: sql`(strftime('%s', 'now'))`,
+				finishedAt: new Date(),
+				updatedAt: new Date(),
 			})
 			.where(eq(queueJobs.id, id))
 			.returning();
@@ -231,8 +257,8 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
 				status: QueueJobStatus.RETRYING,
 				progress: 0,
 				error: null,
-				retryAt: sql`(strftime('%s', 'now'))`,
-				updatedAt: sql`(strftime('%s', 'now'))`,
+				retryAt: new Date(),
+				updatedAt: new Date(),
 			})
 			.where(eq(queueJobs.id, id))
 			.returning();

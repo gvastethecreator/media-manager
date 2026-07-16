@@ -7,7 +7,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { type AnySQLiteColumn, check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { generateUniqueId } from '@/lib/utils/id-generator';
 
 // Modelo para las carpetas
@@ -29,12 +29,19 @@ export const folders = sqliteTable(
 		totalVideos: integer('totalVideos').notNull().default(0),
 		totalFiles: integer('totalFiles').notNull().default(0),
 		totalSize: integer('totalSize').notNull().default(0),
-		lastIndexed: integer('lastIndexed', { mode: 'timestamp_ms' }).default(sql`(CURRENT_TIMESTAMP)`),
+		lastIndexed: integer('lastIndexed', { mode: 'timestamp_ms' }).default(
+			sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+		),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
-		parentId: text('parentId'),
+		parentId: text('parentId').references((): AnySQLiteColumn => folders.id, {
+			onDelete: 'set null',
+			onUpdate: 'cascade',
+		}),
 		presetId: text('presetId'),
 	},
 	(table) => ({

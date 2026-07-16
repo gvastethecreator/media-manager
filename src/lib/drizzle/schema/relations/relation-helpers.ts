@@ -6,21 +6,21 @@
  * =================================================================================
  */
 
-import { index, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { type AnySQLiteColumn, index, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 /**
  * Crea una tabla de relación many-to-many estándar
  * @param tableName - Nombre de la tabla (ej: '_ImageToTag')
- * @param entityAName - Nombre de la entidad A (para comentarios)
- * @param entityBName - Nombre de la entidad B (para comentarios)
+ * @param entityA - Columna primaria de la entidad A
+ * @param entityB - Columna primaria de la entidad B
  * @returns Definición de tabla Drizzle
  */
-export function createRelationTable(tableName: string, entityAName: string, entityBName: string) {
+export function createRelationTable(tableName: string, entityA: () => AnySQLiteColumn, entityB: () => AnySQLiteColumn) {
 	return sqliteTable(
 		tableName,
 		{
-			A: text('A').notNull(), // ID de entidad A
-			B: text('B').notNull(), // ID de entidad B
+			A: text('A').notNull().references(entityA, { onDelete: 'cascade', onUpdate: 'cascade' }),
+			B: text('B').notNull().references(entityB, { onDelete: 'cascade', onUpdate: 'cascade' }),
 		},
 		(table) => ({
 			AB_unique: uniqueIndex(`${tableName}_AB_unique`).on(table.A, table.B),

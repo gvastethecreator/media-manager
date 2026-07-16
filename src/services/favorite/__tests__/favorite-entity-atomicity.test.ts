@@ -1,13 +1,13 @@
-import { eq, inArray, sql } from 'drizzle-orm';
-import { Effect } from 'effect';
-import { db } from '@/lib/drizzle';
-import { audios, documents, favorites, file3Ds, folders, jsonFiles, profiles, videos } from '@/lib/drizzle/schema';
-import * as AudioService from '@/services/audio/audio.service.effect';
-import * as DocumentService from '@/services/document/document.service.effect';
-import * as File3DService from '@/services/file3d/file3d.service.effect';
-import * as JsonFileService from '@/services/json-file/json-file.service.effect';
-import * as VideoService from '@/services/video/video.service.effect';
-import { FavoriteEntityType } from '@/types/entities/favorite';
+import { eq, inArray, sql } from "drizzle-orm";
+import { Effect } from "effect";
+import { db } from "@/lib/drizzle";
+import { audios, documents, favorites, file3Ds, folders, jsonFiles, profiles, videos } from "@/lib/drizzle/schema";
+import * as AudioService from "@/services/audio/audio.service.effect";
+import * as DocumentService from "@/services/document/document.service.effect";
+import * as File3DService from "@/services/file3d/file3d.service.effect";
+import * as JsonFileService from "@/services/json-file/json-file.service.effect";
+import * as VideoService from "@/services/video/video.service.effect";
+import { FavoriteEntityType } from "@/types/entities/favorite";
 
 type EntityProjection = {
 	hash: string;
@@ -34,15 +34,15 @@ interface FavoriteEntityAdapter {
 
 const adapters: FavoriteEntityAdapter[] = [
 	{
-		label: 'audio',
+		label: "audio",
 		entityType: FavoriteEntityType.AUDIO,
 		createInput: (folderId, suffix, isFavorite) => ({
 			name: `atomic-${suffix}.mp3`,
 			path: `/atomic/${suffix}.mp3`,
 			hash: suffix.repeat(2),
 			size: 1024,
-			mimeType: 'audio/mpeg',
-			extension: 'mp3',
+			mimeType: "audio/mpeg",
+			extension: "mp3",
 			folderId,
 			isFavorite,
 			isArchived: false,
@@ -50,7 +50,7 @@ const adapters: FavoriteEntityAdapter[] = [
 			bitrate: 128_000,
 			sampleRate: 44_100,
 			channels: 2,
-			format: 'mp3',
+			format: "mp3",
 		}),
 		create: (input) => AudioService.create(input as Parameters<typeof AudioService.create>[0]),
 		update: AudioService.update,
@@ -61,7 +61,7 @@ const adapters: FavoriteEntityAdapter[] = [
 		cleanup: (ids) => db.delete(audios).where(inArray(audios.id, ids)),
 	},
 	{
-		label: 'video',
+		label: "video",
 		entityType: FavoriteEntityType.VIDEO,
 		createInput: (folderId, suffix, isFavorite) => ({
 			name: `atomic-${suffix}.mp4`,
@@ -83,15 +83,15 @@ const adapters: FavoriteEntityAdapter[] = [
 		cleanup: (ids) => db.delete(videos).where(inArray(videos.id, ids)),
 	},
 	{
-		label: 'document',
+		label: "document",
 		entityType: FavoriteEntityType.DOCUMENT,
 		createInput: (folderId, suffix, isFavorite) => ({
 			name: `atomic-${suffix}.pdf`,
 			path: `/atomic/${suffix}.pdf`,
 			hash: suffix.repeat(2),
 			size: 4096,
-			mimeType: 'application/pdf',
-			extension: 'pdf',
+			mimeType: "application/pdf",
+			extension: "pdf",
 			folderId,
 			isFavorite,
 		}),
@@ -104,15 +104,15 @@ const adapters: FavoriteEntityAdapter[] = [
 		cleanup: (ids) => db.delete(documents).where(inArray(documents.id, ids)),
 	},
 	{
-		label: 'file3d',
+		label: "file3d",
 		entityType: FavoriteEntityType.FILE_3D,
 		createInput: (folderId, suffix, isFavorite) => ({
 			name: `atomic-${suffix}.glb`,
 			path: `/atomic/${suffix}.glb`,
 			hash: suffix.repeat(2),
 			size: 8192,
-			mimeType: 'model/gltf-binary',
-			extension: 'glb',
+			mimeType: "model/gltf-binary",
+			extension: "glb",
 			folderId,
 			isFavorite,
 		}),
@@ -125,15 +125,15 @@ const adapters: FavoriteEntityAdapter[] = [
 		cleanup: (ids) => db.delete(file3Ds).where(inArray(file3Ds.id, ids)),
 	},
 	{
-		label: 'jsonFile',
+		label: "jsonFile",
 		entityType: FavoriteEntityType.JSON_FILE,
 		createInput: (folderId, suffix, isFavorite) => ({
 			name: `atomic-${suffix}.json`,
 			path: `/atomic/${suffix}.json`,
 			hash: suffix.repeat(2),
 			size: 512,
-			mimeType: 'application/json',
-			extension: 'json',
+			mimeType: "application/json",
+			extension: "json",
 			folderId,
 			isFavorite,
 		}),
@@ -149,22 +149,22 @@ const adapters: FavoriteEntityAdapter[] = [
 
 const profileId = `favorite-atomicity-profile-${crypto.randomUUID()}`;
 const createdEntities: Array<{ adapter: FavoriteEntityAdapter; id: string }> = [];
-let folderId = '';
+let folderId = "";
 let previousActiveProfileIds: string[] = [];
 
-const uniqueSuffix = () => crypto.randomUUID().replaceAll('-', '');
+const uniqueSuffix = () => crypto.randomUUID().replaceAll("-", "");
 const runEither = <T>(operation: EntityOperation<T>) => Effect.runPromise(Effect.either(operation));
 
 const expectSuccess = async <T>(operation: EntityOperation<T>): Promise<T> => {
 	const result = await runEither(operation);
-	expect(result._tag).toBe('Right');
-	if (result._tag === 'Left') throw new Error(`Expected success: ${String(result.left)}`);
+	expect(result._tag).toBe("Right");
+	if (result._tag === "Left") throw new Error(`Expected success: ${String(result.left)}`);
 	return result.right;
 };
 
 const expectFailure = async <T>(operation: EntityOperation<T>): Promise<void> => {
 	const result = await runEither(operation);
-	expect(result._tag).toBe('Left');
+	expect(result._tag).toBe("Left");
 };
 
 const createEntity = async (adapter: FavoriteEntityAdapter, isFavorite = false) => {
@@ -174,12 +174,12 @@ const createEntity = async (adapter: FavoriteEntityAdapter, isFavorite = false) 
 	return entity;
 };
 
-const installFavoriteFailureTrigger = async (operation: 'DELETE' | 'INSERT') => {
+const installFavoriteFailureTrigger = async (operation: "DELETE" | "INSERT") => {
 	const triggerName = `test_fail_favorite_${operation.toLowerCase()}`;
 	await db.run(
 		sql.raw(
-			`CREATE TRIGGER "${triggerName}" BEFORE ${operation} ON "Favorite" BEGIN SELECT RAISE(ABORT, 'injected favorite ${operation.toLowerCase()} failure'); END`
-		)
+			`CREATE TRIGGER "${triggerName}" BEFORE ${operation} ON "Favorite" BEGIN SELECT RAISE(ABORT, 'injected favorite ${operation.toLowerCase()} failure'); END`,
+		),
 	);
 };
 
@@ -197,10 +197,10 @@ beforeAll(async () => {
 
 	await db.insert(profiles).values({
 		id: profileId,
-		name: 'Favorite Atomicity Test Profile',
-		emoji: 'T',
-		color: 'test-token',
-		description: 'Perfil temporal aislado para probar transacciones de favoritos.',
+		name: "Favorite Atomicity Test Profile",
+		emoji: "T",
+		color: "#3b82f6",
+		description: "Perfil temporal aislado para probar transacciones de favoritos.",
 		isActive: true,
 		settingsId: null,
 		imageId: null,
@@ -209,7 +209,7 @@ beforeAll(async () => {
 	folderId = crypto.randomUUID();
 	await db.insert(folders).values({
 		id: folderId,
-		name: 'favorite-atomicity-folder',
+		name: "favorite-atomicity-folder",
 		path: `/tests/favorite-atomicity-${folderId}`,
 		depth: 0,
 		parentId: null,
@@ -240,19 +240,19 @@ afterAll(async () => {
 	}
 });
 
-describe.each(adapters)('$label favorite transaction contract', (adapter) => {
-	it('rolls back create when the canonical favorite insert fails', async () => {
+describe.each(adapters)("$label favorite transaction contract", (adapter) => {
+	it("rolls back create when the canonical favorite insert fails", async () => {
 		const input = adapter.createInput(folderId, uniqueSuffix(), true);
-		await installFavoriteFailureTrigger('INSERT');
+		await installFavoriteFailureTrigger("INSERT");
 
 		await expectFailure(adapter.create(input));
 		const projected = await expectSuccess(adapter.getByHash(input.hash as string));
 		expect(projected).toBeNull();
 	});
 
-	it('rolls back entity updates when the canonical favorite insert fails', async () => {
+	it("rolls back entity updates when the canonical favorite insert fails", async () => {
 		const entity = await createEntity(adapter);
-		await installFavoriteFailureTrigger('INSERT');
+		await installFavoriteFailureTrigger("INSERT");
 
 		await expectFailure(adapter.update(entity.id, { name: `${entity.name}-must-rollback`, isFavorite: true }));
 		const persisted = await expectSuccess(adapter.getById(entity.id));
@@ -260,7 +260,7 @@ describe.each(adapters)('$label favorite transaction contract', (adapter) => {
 		expect(persisted.isFavorite).toBe(false);
 	});
 
-	it('removes canonical favorite records together with the entity', async () => {
+	it("removes canonical favorite records together with the entity", async () => {
 		const entity = await createEntity(adapter, true);
 		const beforeDelete = await db.select({ id: favorites.id }).from(favorites).where(eq(favorites.entityId, entity.id));
 		expect(beforeDelete).toHaveLength(1);
@@ -271,9 +271,9 @@ describe.each(adapters)('$label favorite transaction contract', (adapter) => {
 		await expectFailure(adapter.getById(entity.id));
 	});
 
-	it('rolls back entity deletion when canonical favorite cleanup fails', async () => {
+	it("rolls back entity deletion when canonical favorite cleanup fails", async () => {
 		const entity = await createEntity(adapter, true);
-		await installFavoriteFailureTrigger('DELETE');
+		await installFavoriteFailureTrigger("DELETE");
 
 		await expectFailure(adapter.remove(entity.id));
 		const persisted = await expectSuccess(adapter.getById(entity.id));
@@ -282,7 +282,7 @@ describe.each(adapters)('$label favorite transaction contract', (adapter) => {
 		expect(favoriteRows).toHaveLength(1);
 	});
 
-	it('projects canonical favorite state through hash and path lookups', async () => {
+	it("projects canonical favorite state through hash and path lookups", async () => {
 		const entity = await createEntity(adapter);
 		await db.insert(favorites).values({
 			id: crypto.randomUUID(),

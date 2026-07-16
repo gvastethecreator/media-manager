@@ -778,21 +778,31 @@ const make = (): AlbumServiceInterface => {
 	const addImages = (albumId: string, imageIds: string[]): Effect.Effect<{ added: number }, AlbumError> =>
 		Effect.gen(function* () {
 			logger.info(`🖼️ Agregando ${imageIds.length} imágenes al álbum ${albumId}`);
+			const uniqueImageIds = [...new Set(imageIds)];
+			if (uniqueImageIds.length === 0) return { added: 0 };
 
-			const results = yield* Effect.all(
-				imageIds.map((imageId) =>
-					addImage(albumId, imageId).pipe(
-						Effect.either,
-						Effect.map((result) => ({ imageId, result }))
-					)
-				),
-				{ concurrency: 10 }
-			);
+			// Una sola sentencia mantiene el lote atómico: una FK inválida revierte todo.
+			yield* getById(albumId);
+			const inserted = (yield* Effect.tryPromise({
+				try: () =>
+					db
+						.insert(imageAlbums)
+						.values(uniqueImageIds.map((imageId) => ({ A: imageId, B: albumId })))
+						.onConflictDoNothing()
+						.returning({ imageId: imageAlbums.A }),
+				catch: (error: unknown) =>
+					new AlbumRelationError({
+						albumId,
+						relationType: 'image',
+						relationId: uniqueImageIds.join(','),
+						operation: 'add',
+						message: 'El lote completo fue rechazado; ninguna relación fue agregada',
+						cause: error,
+					}),
+			})) as Array<{ imageId: string }>;
+			const added = inserted.length;
 
-			const added = results.filter((r) => r.result._tag === 'Right').length;
-			const failed = results.filter((r) => r.result._tag === 'Left').length;
-
-			logger.info(`✅ Imágenes agregadas: ${added} exitosas, ${failed} fallidas`);
+			logger.info(`✅ Imágenes agregadas atómicamente: ${added}`);
 
 			return { added };
 		});
@@ -803,20 +813,27 @@ const make = (): AlbumServiceInterface => {
 	const removeImages = (albumId: string, imageIds: string[]): Effect.Effect<{ removed: number }, AlbumError> =>
 		Effect.gen(function* () {
 			logger.info(`🖼️ Removiendo ${imageIds.length} imágenes del álbum ${albumId}`);
+			const uniqueImageIds = [...new Set(imageIds)];
+			if (uniqueImageIds.length === 0) return { removed: 0 };
+			const deleted = (yield* Effect.tryPromise({
+				try: () =>
+					db
+						.delete(imageAlbums)
+						.where(and(eq(imageAlbums.B, albumId), inArray(imageAlbums.A, uniqueImageIds)))
+						.returning({ imageId: imageAlbums.A }),
+				catch: (error: unknown) =>
+					new AlbumRelationError({
+						albumId,
+						relationType: 'image',
+						relationId: uniqueImageIds.join(','),
+						operation: 'remove',
+						message: 'Error al remover el lote de relaciones',
+						cause: error,
+					}),
+			})) as Array<{ imageId: string }>;
+			const removed = deleted.length;
 
-			const results = yield* Effect.all(
-				imageIds.map((imageId) =>
-					removeImage(albumId, imageId).pipe(
-						Effect.either,
-						Effect.map((result) => ({ imageId, result }))
-					)
-				),
-				{ concurrency: 10 }
-			);
-
-			const removed = results.filter((r) => r.result._tag === 'Right').length;
-
-			logger.info(`✅ Imágenes removidas: ${removed}`);
+			logger.info(`✅ Imágenes removidas atómicamente: ${removed}`);
 
 			return { removed };
 		});

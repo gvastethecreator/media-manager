@@ -17,6 +17,7 @@ interface DrizzleQueueJob {
 	error?: string | null;
 	finishedAt?: Date | null;
 	id: string;
+	idempotencyKey?: string | null;
 	maxAttempts: number;
 	metadata?: string | null; // JSON
 	priority: number;

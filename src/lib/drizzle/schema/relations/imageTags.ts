@@ -10,13 +10,19 @@
  */
 
 import { index, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { images } from '../files/images';
+import { tags } from '../organization/tags';
 
 // Relación Image-Tag
 export const imageTags = sqliteTable(
 	'_ImageToTag',
 	{
-		A: text('A').notNull(), // imageId
-		B: text('B').notNull(), // tagId
+		A: text('A')
+			.notNull()
+			.references(() => images.id, { onDelete: 'cascade', onUpdate: 'cascade' }), // imageId
+		B: text('B')
+			.notNull()
+			.references(() => tags.id, { onDelete: 'cascade', onUpdate: 'cascade' }), // tagId
 	},
 	(table) => ({
 		AB_unique: uniqueIndex('_ImageToTag_AB_unique').on(table.A, table.B),

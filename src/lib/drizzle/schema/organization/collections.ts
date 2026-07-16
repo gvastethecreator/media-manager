@@ -7,7 +7,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { type AnySQLiteColumn, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 // Modelo para las colecciones
 export const collections = sqliteTable(
@@ -24,13 +24,19 @@ export const collections = sqliteTable(
 		// Agregados movidos a EntityAggregates tabla genérica
 		lastImageAddedAt: integer('lastImageAddedAt', { mode: 'timestamp_ms' }),
 		lastVideoAddedAt: integer('lastVideoAddedAt', { mode: 'timestamp_ms' }),
-		parentId: text('parentId'),
+		parentId: text('parentId').references((): AnySQLiteColumn => collections.id, {
+			onDelete: 'set null',
+			onUpdate: 'cascade',
+		}),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
 		nameIdx: uniqueIndex('Collection_name_key').on(table.name),
+		parentIdIdx: index('Collection_parentId_idx').on(table.parentId),
 	})
 );

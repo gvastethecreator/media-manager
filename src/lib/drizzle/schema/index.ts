@@ -44,6 +44,8 @@ export { albums, collections, favorites, files, folders, groups } from './organi
 // RELATIONS DOMAIN EXPORTS
 // =================================================================================
 export {
+	albumPlaces,
+	characterPlaces,
 	groupAlbums,
 	// Relaciones de grupos
 	groupImages,
