@@ -7,7 +7,16 @@
 /**
  * Cliente de API para documentos.
  */
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
 import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';
+
+export type PublicDocumentCreateInput = Omit<DocumentCreateInput, 'path'> & {
+	source: AuthorizedPathReference;
+};
+
+export type PublicDocumentUpdateInput = Omit<DocumentUpdateInput, 'path'> & {
+	source?: AuthorizedPathReference;
+};
 
 const API_BASE_PATH = '/api/documents';
 
@@ -19,7 +28,7 @@ export async function getDocumentsFromApi(): Promise<DocumentWithStats[]> {
 	return response.json();
 }
 
-export async function createDocumentInApi(data: DocumentCreateInput): Promise<DocumentWithStats> {
+export async function createDocumentInApi(data: PublicDocumentCreateInput): Promise<DocumentWithStats> {
 	const response = await fetch(API_BASE_PATH, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -31,7 +40,7 @@ export async function createDocumentInApi(data: DocumentCreateInput): Promise<Do
 	return response.json();
 }
 
-export async function updateDocumentInApi(id: string, data: DocumentUpdateInput): Promise<DocumentWithStats> {
+export async function updateDocumentInApi(id: string, data: PublicDocumentUpdateInput): Promise<DocumentWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },

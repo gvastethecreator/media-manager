@@ -14,7 +14,6 @@ import {
 	authorizeMediaAssetParam,
 	authorizeMediaPathInput,
 	authorizeMediaPlacementInput,
-	assertAuthorizedMediaEntity,
 	filterAuthorizedMediaEntities,
 	authorizeFolderPathById,
 	getAuthorizedRootRegistry,
@@ -249,11 +248,17 @@ router.get(
  */
 router.get(
 	'/by-hash/:hash',
-	effectHandler((req) =>
+	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const imageService = yield* ImageService;
-			const image = yield* imageService.getByHash(req.params.hash);
-			if (image) yield* Effect.promise(() => assertAuthorizedMediaEntity(req, image, 'image', ['read', 'index']));
+			const candidates = yield* imageService.getByHashCandidates(req.params.hash);
+			const [image] = yield* Effect.promise(() =>
+				filterAuthorizedMediaEntities(req, candidates, 'image', ['read', 'index'])
+			);
+			if (!image) {
+				res.status(404).json({ error: 'NOT_FOUND', message: 'Imagen no encontrada' });
+				return;
+			}
 			return image;
 		}).pipe(Effect.provide(ImageServiceLive))
 	)

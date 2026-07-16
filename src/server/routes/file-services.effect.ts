@@ -15,6 +15,7 @@ import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	authorizeMediaAssetParam,
+	authorizeMediaPlacementInput,
 	authorizeMediaPathInput,
 	filterAuthorizedMediaEntities,
 } from '@/server/security/authorized-root-request';
@@ -27,21 +28,49 @@ import {
 	getUploadedImages,
 	uploadImages,
 } from '@/server/services/uploaded-images.api.service';
-import {
-	DocumentService,
-	DocumentServiceLive,
-	File3DService,
-	File3DServiceLive,
-	JsonFileService,
-	JsonFileServiceLive,
-	UploadedImagesService,
-	UploadedImagesServiceLive,
-} from '@/services/file/file-services.effect';
+import { UploadedImagesService, UploadedImagesServiceLive } from '@/services/file/file-services.effect';
+import { DocumentService, DocumentServiceLive } from '@/services/document/document.service.effect';
+import { File3DService, File3DServiceLive } from '@/services/file3d/file3d.service.effect';
+import { JsonFileService, JsonFileServiceLive } from '@/services/json-file/json-file.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const logger = serverLogger.withContext('FileServicesRoutes');
+
+type PersistedSvgThumbnail = { data?: unknown; format?: unknown } | string;
+
+function isSvgDocument(value: string): boolean {
+	const normalized = value.trim();
+	return /^<svg(?:\s|>)/i.test(normalized) && /<\/svg>$/i.test(normalized);
+}
+
+function decodePersistedSvgThumbnail(
+	thumbnail: PersistedSvgThumbnail | null | undefined,
+	encoding: 'auto' | 'base64' = 'auto'
+): string | null {
+	if (!thumbnail) return null;
+	if (typeof thumbnail === 'object') {
+		if (String(thumbnail.format).toLowerCase() !== 'svg' || typeof thumbnail.data !== 'string') return null;
+		return decodePersistedSvgThumbnail(thumbnail.data, 'base64');
+	}
+
+	if (encoding === 'auto' && isSvgDocument(thumbnail)) return thumbnail.trim();
+	try {
+		const decoded = Buffer.from(thumbnail, 'base64').toString('utf8').trim();
+		return isSvgDocument(decoded) ? decoded : null;
+	} catch {
+		return null;
+	}
+}
+
+function sendSvg(res: express.Response, svg: string, maxAgeSeconds: number): void {
+	res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+	res.setHeader('Cache-Control', `public, max-age=${maxAgeSeconds}`);
+	res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+	res.setHeader('X-Content-Type-Options', 'nosniff');
+	res.send(svg);
+}
 
 function listAuthorizedFileRows<T extends { id?: unknown; path?: unknown }, E>(
 	request: { app: { locals: Record<string, unknown> } },
@@ -87,7 +116,7 @@ file3dsEffectRouter.get(
 			const result = yield* listAuthorizedFileRows(
 				req,
 				'file3d',
-				(offset, limit) => service.getAll({ limit, offset, onlyFavorites }),
+				(offset, limit) => service.getAll({ isFavorite: onlyFavorites || undefined, limit, offset }),
 				page
 			);
 			return result.items.map((file3d) => ({
@@ -129,11 +158,12 @@ file3dsEffectRouter.get('/:id/thumbnail', authorizeMediaAssetParam({ assetType: 
 
 		// Si ya tiene thumbnail generado en metadata
 		if (metadata?.thumbnail) {
-			const thumbnailSvg = metadata.thumbnail;
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=3600');
-			res.send(thumbnailSvg);
-			return;
+			const thumbnailSvg = decodePersistedSvgThumbnail(metadata.thumbnail);
+			if (thumbnailSvg) {
+				sendSvg(res, thumbnailSvg, 3600);
+				return;
+			}
+			logger.warn('Thumbnail SVG 3D persistido inválido; se usa fallback', { assetId: id });
 		}
 
 		// Fallback: generar placeholder
@@ -147,9 +177,7 @@ file3dsEffectRouter.get('/:id/thumbnail', authorizeMediaAssetParam({ assetType: 
   </g>
 </svg>`;
 
-		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=60');
-		res.send(errorSVG);
+		sendSvg(res, errorSVG, 60);
 	} catch (error) {
 		logger.error('No se pudo generar el thumbnail 3D', { error });
 		res.status(500).json({ error: 'Error generating 3D thumbnail' });
@@ -168,6 +196,7 @@ file3dsEffectRouter.get(
 file3dsEffectRouter.post(
 	'/',
 	authorizeMediaPathInput({ expected: 'file', required: true }),
+	authorizeMediaPlacementInput(),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const service = yield* File3DService;
@@ -201,13 +230,28 @@ file3dsEffectRouter.post(
 );
 file3dsEffectRouter.delete(
 	'/:id',
-	authorizeMediaAssetParam({ assetType: 'file3d', permissions: ['delete'] }),
+	authorizeMediaAssetParam({ allowMissing: true, assetType: 'file3d', permissions: ['delete'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const service = yield* File3DService;
 			yield* service.delete(req.params.id);
 			res.status(204);
 			return undefined;
+		}).pipe(Effect.provide(File3DServiceLive))
+	)
+);
+file3dsEffectRouter.post(
+	'/:id/restore',
+	authorizeMediaAssetParam({
+		allowDeleted: true,
+		allowMissing: true,
+		assetType: 'file3d',
+		permissions: ['read', 'write'],
+	}),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const service = yield* File3DService;
+			return yield* service.restoreById(req.params.id);
 		}).pipe(Effect.provide(File3DServiceLive))
 	)
 );
@@ -228,7 +272,7 @@ documentsEffectRouter.get(
 			const result = yield* listAuthorizedFileRows(
 				req,
 				'document',
-				(offset, limit) => service.getAll({ limit, offset, onlyFavorites }),
+				(offset, limit) => service.getAll({ isFavorite: onlyFavorites || undefined, limit, offset }),
 				page
 			);
 			return result.items.map((document) => ({
@@ -250,16 +294,18 @@ documentsEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
 		// Obtener thumbnail de la tabla metadatas
 		const thumbnailId = `${id}-thumbnail`;
 		const metadataRecords = await db
-			.select({ value: metadatas.value })
+			.select({ type: metadatas.type, value: metadatas.value })
 			.from(metadatas)
 			.where(eq(metadatas.id, thumbnailId));
 
 		if (metadataRecords.length > 0) {
-			const thumbnailSvg = metadataRecords[0].value;
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=3600');
-			res.send(thumbnailSvg);
-			return;
+			const record = metadataRecords[0];
+			const thumbnailSvg = decodePersistedSvgThumbnail(record.value, record.type === 'base64' ? 'base64' : 'auto');
+			if (thumbnailSvg) {
+				sendSvg(res, thumbnailSvg, 3600);
+				return;
+			}
+			logger.warn('Preview SVG de documento persistido inválido; se usa fallback', { assetId: id });
 		}
 
 		// Fallback: generar placeholder
@@ -273,9 +319,7 @@ documentsEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
   </g>
 </svg>`;
 
-		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=60');
-		res.send(errorSVG);
+		sendSvg(res, errorSVG, 60);
 	} catch (error) {
 		logger.error('No se pudo generar el preview de documento', { error });
 		res.status(500).json({ error: 'Error generating document preview' });
@@ -294,6 +338,7 @@ documentsEffectRouter.get(
 documentsEffectRouter.post(
 	'/',
 	authorizeMediaPathInput({ expected: 'file', required: true }),
+	authorizeMediaPlacementInput(),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const service = yield* DocumentService;
@@ -327,13 +372,28 @@ documentsEffectRouter.post(
 );
 documentsEffectRouter.delete(
 	'/:id',
-	authorizeMediaAssetParam({ assetType: 'document', permissions: ['delete'] }),
+	authorizeMediaAssetParam({ allowMissing: true, assetType: 'document', permissions: ['delete'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const service = yield* DocumentService;
 			yield* service.delete(req.params.id);
 			res.status(204);
 			return undefined;
+		}).pipe(Effect.provide(DocumentServiceLive))
+	)
+);
+documentsEffectRouter.post(
+	'/:id/restore',
+	authorizeMediaAssetParam({
+		allowDeleted: true,
+		allowMissing: true,
+		assetType: 'document',
+		permissions: ['read', 'write'],
+	}),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const service = yield* DocumentService;
+			return yield* service.restoreById(req.params.id);
 		}).pipe(Effect.provide(DocumentServiceLive))
 	)
 );
@@ -362,7 +422,8 @@ jsonFilesEffectRouter.get(
 			const result = yield* listAuthorizedFileRows(
 				req,
 				'json',
-				(rawOffset, chunkLimit) => service.getAll({ limit: chunkLimit, offset: rawOffset, onlyFavorites }),
+				(rawOffset, chunkLimit) =>
+					service.getAll({ isFavorite: onlyFavorites || undefined, limit: chunkLimit, offset: rawOffset }),
 				{ limit, offset }
 			);
 			const data = result.items.map((jsonFile) => ({
@@ -417,11 +478,12 @@ jsonFilesEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
 
 		// Si ya tiene thumbnail generado en metadata
 		if (metadata?.thumbnail) {
-			const thumbnailSvg = metadata.thumbnail;
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=3600');
-			res.send(thumbnailSvg);
-			return;
+			const thumbnailSvg = decodePersistedSvgThumbnail(metadata.thumbnail);
+			if (thumbnailSvg) {
+				sendSvg(res, thumbnailSvg, 3600);
+				return;
+			}
+			logger.warn('Preview SVG JSON persistido inválido; se usa fallback', { assetId: id });
 		}
 
 		// Fallback: generar placeholder
@@ -435,9 +497,7 @@ jsonFilesEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
   </g>
 </svg>`;
 
-		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=60');
-		res.send(errorSVG);
+		sendSvg(res, errorSVG, 60);
 	} catch (error) {
 		logger.error('No se pudo generar el preview JSON', { error });
 		res.status(500).json({ error: 'Error generating JSON preview' });
@@ -456,6 +516,7 @@ jsonFilesEffectRouter.get(
 jsonFilesEffectRouter.post(
 	'/',
 	authorizeMediaPathInput({ expected: 'file', required: true }),
+	authorizeMediaPlacementInput(),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const service = yield* JsonFileService;
@@ -489,13 +550,28 @@ jsonFilesEffectRouter.post(
 );
 jsonFilesEffectRouter.delete(
 	'/:id',
-	authorizeMediaAssetParam({ assetType: 'json', permissions: ['delete'] }),
+	authorizeMediaAssetParam({ allowMissing: true, assetType: 'json', permissions: ['delete'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const service = yield* JsonFileService;
 			yield* service.delete(req.params.id);
 			res.status(204);
 			return undefined;
+		}).pipe(Effect.provide(JsonFileServiceLive))
+	)
+);
+jsonFilesEffectRouter.post(
+	'/:id/restore',
+	authorizeMediaAssetParam({
+		allowDeleted: true,
+		allowMissing: true,
+		assetType: 'json',
+		permissions: ['read', 'write'],
+	}),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const service = yield* JsonFileService;
+			return yield* service.restoreById(req.params.id);
 		}).pipe(Effect.provide(JsonFileServiceLive))
 	)
 );

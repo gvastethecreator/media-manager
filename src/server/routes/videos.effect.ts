@@ -17,7 +17,6 @@ import {
 	authorizeMediaAssetParam,
 	authorizeMediaPlacementInput,
 	authorizeMediaPathInput,
-	assertAuthorizedMediaEntity,
 	filterAuthorizedMediaEntities,
 	authorizeFolderPathById,
 	getAuthorizedRootRegistry,
@@ -224,7 +223,10 @@ router.get(
 		return Effect.gen(function* () {
 			const videoService = yield* VideoService;
 
-			const video = yield* videoService.getByHash(hash);
+			const candidates = yield* videoService.getByHashCandidates(hash);
+			const [video] = yield* Effect.promise(() =>
+				filterAuthorizedMediaEntities(req, candidates, 'video', ['read', 'index'])
+			);
 
 			if (!video) {
 				res.status(404).json({
@@ -233,8 +235,6 @@ router.get(
 				});
 				return;
 			}
-			yield* Effect.promise(() => assertAuthorizedMediaEntity(req, video, 'video', ['read', 'index']));
-
 			return video;
 		}).pipe(Effect.provide(VideoServiceLive));
 	})

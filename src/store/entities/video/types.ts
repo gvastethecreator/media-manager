@@ -5,14 +5,8 @@
  * Última refactorización: 2025-01-27
  */
 
-import type {
-	VideoCreateInput,
-	VideoPlayState,
-	VideoSortCriteria,
-	VideoUpdateInput,
-	VideoViewMode,
-	VideoWithStats,
-} from '@/types/entities/video';
+import type { PublicVideoCreateInput, PublicVideoUpdateInput } from '@/lib/api/client/video.client';
+import type { VideoPlayState, VideoSortCriteria, VideoViewMode, VideoWithStats } from '@/types/entities/video';
 
 /**
  * 🎬 Estado principal del store de videos
@@ -139,7 +133,7 @@ export interface VideoActions {
 	clearSelection: () => void;
 
 	// 📝 Gestión de videos
-	createVideo: (video: VideoCreateInput) => Promise<void>;
+	createVideo: (video: PublicVideoCreateInput) => Promise<void>;
 	deleteVideo: (id: string) => Promise<void>;
 	loadVideoById: (id: string) => Promise<VideoWithStats | undefined>;
 	// 📥 Carga de datos
@@ -166,7 +160,7 @@ export interface VideoActions {
 
 	// 🔍 Filtros
 	updateFilters: (filters: Partial<VideoFiltersState>) => void;
-	updateVideo: (id: string, video: VideoUpdateInput) => Promise<void>;
+	updateVideo: (id: string, video: PublicVideoUpdateInput) => Promise<void>;
 }
 
 /**

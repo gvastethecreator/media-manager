@@ -6,23 +6,30 @@
 
 import { Effect } from 'effect';
 import { eq, inArray } from 'drizzle-orm';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
 import { db } from '@/lib/drizzle';
-import { favorites, folders, jsonFiles, profiles } from '@/lib/drizzle/schema';
+import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
+import { FileSyncService } from '@/lib/filesystem/file-sync.service';
+import { assets, favorites, folders, jsonFiles, mediaRoots, profiles, sourceFiles } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { createAuthorizedRootRegistry } from '@/server/security/authorized-roots';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { expectError, expectSuccess, generateTestId } from '../../../../tests/factories/test-helpers';
 import * as JsonFileService from '../json-file.service.effect';
 
 // ============= Test Helpers =============
 
-const createTestFolder = async () => {
+const createTestFolder = async (folderPath = resolve(tmpdir(), `media-manager-json-${crypto.randomUUID()}`)) => {
 	const now = new Date();
+	const rootId = `root-json-${crypto.randomUUID()}`;
 	const [folder] = await db
 		.insert(folders)
 		.values({
 			id: crypto.randomUUID(),
 			name: `test-folder-${Date.now()}`,
-			path: `/test/folder-${Date.now()}`,
+			path: folderPath,
 			depth: 0,
 			parentId: null,
 			isFavorite: false,
@@ -31,7 +38,20 @@ const createTestFolder = async () => {
 			updatedAt: now,
 		})
 		.returning();
-	return folder;
+	await db.insert(mediaRoots).values({ id: rootId, label: 'JSON service test root' });
+	return { ...folder, rootId };
+};
+
+const withCanonicalSource = <T extends { name: string }>(
+	folder: Awaited<ReturnType<typeof createTestFolder>>,
+	input: T
+) => {
+	const path = resolve(folder.path, input.name);
+	return {
+		...input,
+		path,
+		source: createAuthorizedPathInput({ absolutePath: path, relativePath: input.name, rootId: folder.rootId }),
+	};
 };
 
 const createTestJsonFile = async (folderId: string, overrides?: Partial<typeof jsonFiles.$inferInsert>) => {
@@ -62,6 +82,7 @@ const createTestJsonFile = async (folderId: string, overrides?: Partial<typeof j
 
 let createdActiveProfileId: string | null = null;
 let previousActiveProfileIds: string[] = [];
+const temporaryDirectories: string[] = [];
 
 const ensureActiveProfile = async () => {
 	if (createdActiveProfileId) {
@@ -97,7 +118,9 @@ const ensureActiveProfile = async () => {
 afterEach(async () => {
 	await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.JSON_FILE));
 	await db.delete(jsonFiles);
+	await db.delete(assets);
 	await db.delete(folders);
+	await db.delete(mediaRoots);
 
 	if (createdActiveProfileId) {
 		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
@@ -107,6 +130,10 @@ afterEach(async () => {
 	if (previousActiveProfileIds.length > 0) {
 		await db.update(profiles).set({ isActive: true }).where(inArray(profiles.id, previousActiveProfileIds));
 		previousActiveProfileIds = [];
+	}
+
+	for (const directory of temporaryDirectories.splice(0)) {
+		await rm(directory, { force: true, maxRetries: 40, recursive: true, retryDelay: 100 });
 	}
 });
 
@@ -129,10 +156,10 @@ describe('JsonFileService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const result = await expectSuccess(JsonFileService.create(input));
+			const result = await expectSuccess(JsonFileService.create(withCanonicalSource(folder, input)));
 
 			expect(result.name).toBe(input.name);
-			expect(result.path).toBe(input.path);
+			expect(result.path).toBe(resolve(folder.path, input.name));
 			expect(result.hash).toBe(input.hash);
 			expect(result.size).toBe(input.size);
 			expect(result.mimeType).toBe(input.mimeType);
@@ -170,7 +197,7 @@ describe('JsonFileService - CRUD Operations', () => {
 				prettyPrinted: true,
 			};
 
-			const result = await expectSuccess(JsonFileService.create(input));
+			const result = await expectSuccess(JsonFileService.create(withCanonicalSource(folder, input)));
 
 			expect(result.content).toBe(input.content);
 			expect(result.schema).toBe(input.schema);
@@ -204,7 +231,7 @@ describe('JsonFileService - CRUD Operations', () => {
 				tags: 'settings,app',
 			};
 
-			const result = await expectSuccess(JsonFileService.create(input));
+			const result = await expectSuccess(JsonFileService.create(withCanonicalSource(folder, input)));
 
 			expect(result.description).toBe(input.description);
 			expect(result.emoji).toBe(input.emoji);
@@ -220,16 +247,18 @@ describe('JsonFileService - CRUD Operations', () => {
 			await ensureActiveProfile();
 
 			const result = await expectSuccess(
-				JsonFileService.create({
-					name: 'favorite-config.json',
-					path: '/config/favorite.json',
-					hash: validHash,
-					size: 512,
-					mimeType: 'application/json',
-					extension: 'json',
-					folderId: folder.id,
-					isFavorite: true,
-				})
+				JsonFileService.create(
+					withCanonicalSource(folder, {
+						name: 'favorite-config.json',
+						path: '/config/favorite.json',
+						hash: validHash,
+						size: 512,
+						mimeType: 'application/json',
+						extension: 'json',
+						folderId: folder.id,
+						isFavorite: true,
+					})
+				)
 			);
 
 			expect(await favoriteService.isFavorite(FavoriteEntityType.JSON_FILE, result.id)).toBe(true);
@@ -250,7 +279,7 @@ describe('JsonFileService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(JsonFileService.create(input));
+			const error = await expectError(JsonFileService.create(input as any));
 			expect(error._tag).toBe('JsonFileValidationError');
 		});
 
@@ -269,7 +298,7 @@ describe('JsonFileService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(JsonFileService.create(input));
+			const error = await expectError(JsonFileService.create(input as any));
 			expect(error._tag).toBe('JsonFileValidationError');
 		});
 
@@ -288,7 +317,7 @@ describe('JsonFileService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(JsonFileService.create(input));
+			const error = await expectError(JsonFileService.create(input as any));
 			expect(error._tag).toBe('JsonFileValidationError');
 		});
 	});
@@ -613,41 +642,139 @@ describe('JsonFileService - Query Operations', () => {
 	});
 });
 
-// ============= HASH CONFLICT TESTS =============
+// ============= CONTENT DUPLICATE TESTS =============
 
-describe('JsonFileService - Hash Conflict', () => {
-	it('should reject duplicate hash creation', async () => {
+describe('JsonFileService - duplicate content', () => {
+	it('creates distinct Assets for distinct locations with the same hash', async () => {
 		const folder = await createTestFolder();
 		const timestamp = Date.now().toString();
 		const validHash = timestamp.padStart(64, '0');
 
-		await expectSuccess(
-			JsonFileService.create({
-				name: 'first.json',
-				path: '/config/first.json',
-				hash: validHash,
-				size: 1024,
-				mimeType: 'application/json',
-				extension: 'json',
-				folderId: folder.id,
-			})
+		const first = await expectSuccess(
+			JsonFileService.create(
+				withCanonicalSource(folder, {
+					name: 'first.json',
+					path: '/config/first.json',
+					hash: validHash,
+					size: 1024,
+					mimeType: 'application/json',
+					extension: 'json',
+					folderId: folder.id,
+				})
+			)
 		);
 
-		const error = await expectError(
-			JsonFileService.create({
-				name: 'second.json',
-				path: '/config/second.json',
-				hash: validHash,
-				size: 2048,
-				mimeType: 'application/json',
-				extension: 'json',
-				folderId: folder.id,
-			})
+		const second = await expectSuccess(
+			JsonFileService.create(
+				withCanonicalSource(folder, {
+					name: 'second.json',
+					path: '/config/second.json',
+					hash: validHash,
+					size: 2048,
+					mimeType: 'application/json',
+					extension: 'json',
+					folderId: folder.id,
+				})
+			)
 		);
 
-		expect(error._tag).toBe('JsonFileHashConflict');
-		if (error._tag === 'JsonFileHashConflict') {
-			expect(error.hash).toBe(validHash);
-		}
+		expect(second.id).not.toBe(first.id);
+		expect(second.hash).toBe(first.hash);
+	});
+});
+
+describe('JsonFileService - canonical filesystem lifecycle', () => {
+	it('marks a missing source and restores it without deleting the JSON identity', async () => {
+		const directory = await mkdtemp(resolve(tmpdir(), 'media-manager-json-sync-'));
+		temporaryDirectories.push(directory);
+		const rootPath = resolve(directory, 'library');
+		await mkdir(rootPath);
+		const jsonPath = resolve(rootPath, 'observed.json');
+		await writeFile(jsonPath, '{}');
+		const rootId = `root-json-sync-${crypto.randomUUID()}`;
+		const authorizedRootRegistry = await createAuthorizedRootRegistry([
+			{ id: rootId, path: rootPath, permissions: ['index', 'read'] },
+		]);
+		await db.insert(mediaRoots).values({ id: rootId, label: 'JSON sync root' });
+		const folder = await createTestFolder();
+		await db.update(folders).set({ path: rootPath }).where(eq(folders.id, folder.id));
+		const created = await expectSuccess(
+			JsonFileService.create({
+				extension: 'json',
+				folderId: folder.id,
+				hash: '7'.repeat(64),
+				mimeType: 'application/json',
+				name: 'observed.json',
+				path: jsonPath,
+				size: 2,
+				source: createAuthorizedPathInput({ absolutePath: jsonPath, relativePath: 'observed.json', rootId }),
+			})
+		);
+		await db
+			.update(jsonFiles)
+			.set({ path: resolve(directory, 'stale-legacy-path.json') })
+			.where(eq(jsonFiles.id, created.id));
+
+		await rm(jsonPath);
+		await FileSyncService.getInstance().syncFolderFiles(folder.id, {
+			authorizedRootRegistry,
+			entityTypes: ['json'],
+		});
+		expect(await db.select().from(jsonFiles).where(eq(jsonFiles.id, created.id))).toHaveLength(1);
+		expect((await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, created.id)))[0]).toEqual(
+			expect.objectContaining({ availability: 'missing' })
+		);
+
+		await writeFile(jsonPath, '{}');
+		await FileSyncService.getInstance().syncFolderFiles(folder.id, {
+			authorizedRootRegistry,
+			entityTypes: ['json'],
+		});
+		expect((await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, created.id)))[0]).toEqual(
+			expect.objectContaining({ availability: 'available' })
+		);
+	});
+
+	it('fails closed when SourceFile resolves outside its declared Folder', async () => {
+		const directory = await mkdtemp(resolve(tmpdir(), 'media-manager-json-folder-conflict-'));
+		temporaryDirectories.push(directory);
+		const rootPath = resolve(directory, 'library');
+		const folderPath = resolve(rootPath, 'declared');
+		const insidePath = resolve(folderPath, 'inside.json');
+		const outsidePath = resolve(rootPath, 'other', 'outside.json');
+		await mkdir(folderPath, { recursive: true });
+		await mkdir(resolve(rootPath, 'other'));
+		await writeFile(insidePath, '{}');
+		await writeFile(outsidePath, '{}');
+		const rootId = `root-json-conflict-${crypto.randomUUID()}`;
+		const authorizedRootRegistry = await createAuthorizedRootRegistry([
+			{ id: rootId, path: rootPath, permissions: ['index', 'read'] },
+		]);
+		await db.insert(mediaRoots).values({ id: rootId, label: 'JSON conflict root' });
+		const folder = await createTestFolder(folderPath);
+		const created = await expectSuccess(
+			JsonFileService.create({
+				extension: 'json',
+				folderId: folder.id,
+				hash: '8'.repeat(64),
+				mimeType: 'application/json',
+				name: 'inside.json',
+				path: insidePath,
+				size: 2,
+				source: createAuthorizedPathInput({
+					absolutePath: insidePath,
+					relativePath: 'declared/inside.json',
+					rootId,
+				}),
+			})
+		);
+		await db.update(sourceFiles).set({ relativePath: 'other/outside.json' }).where(eq(sourceFiles.assetId, created.id));
+
+		await expect(
+			FileSyncService.getInstance().syncFolderFiles(folder.id, {
+				authorizedRootRegistry,
+				entityTypes: ['json'],
+			})
+		).rejects.toThrow('fuera del Folder autorizado');
 	});
 });

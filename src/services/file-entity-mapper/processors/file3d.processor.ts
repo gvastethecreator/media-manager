@@ -1,10 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
+import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createFile3D, getFile3DByHash } from '@/services/file3d/file3d.service';
-import type { File3DCreateInput } from '@/types/entities/file3d';
+import { createFile3D } from '@/services/file3d/file3d.service';
+import type { CreateFile3DInput } from '@/services/file3d/file3d.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
+import { isCanonicalSourceIndexed } from '../utils/canonical-source.utils';
 
 // Regex para procesamiento de archivos OBJ
 const LINE_SPLIT_REGEX = /\r?\n/;
@@ -49,16 +51,10 @@ const truncateText = (value: string, maxLength: number): string =>
  */
 export class File3DProcessor {
 	/**
-	 * Verifica si un archivo 3D ya existe por hash
+	 * Verifica si la ubicación canónica ya fue indexada.
 	 */
 	async checkExists(fileInfo: FileInfo): Promise<boolean> {
-		if (!fileInfo.hash) return false;
-		try {
-			const existing = await getFile3DByHash(fileInfo.hash);
-			return !!existing;
-		} catch {
-			return false;
-		}
+		return isCanonicalSourceIndexed(fileInfo);
 	}
 
 	/**
@@ -68,8 +64,11 @@ export class File3DProcessor {
 		if (!fileInfo.hash) {
 			throw new Error('File hash is required for file3d creation');
 		}
+		if (!fileInfo.source) {
+			throw new Error('An authorized canonical source is required for file3d creation');
+		}
 
-		const file3dData: File3DCreateInput = {
+		const file3dData: CreateFile3DInput = {
 			name: fileInfo.name,
 			path: fileInfo.path,
 			hash: fileInfo.hash,
@@ -91,10 +90,11 @@ export class File3DProcessor {
 			scenes: null,
 			cameras: null,
 			lights: null,
-			hasUV: null,
-			hasNormals: null,
-			hasColors: null,
+			hasUV: false,
+			hasNormals: false,
+			hasColors: false,
 			boundingBox: null,
+			source: extendAuthorizedPathInput(fileInfo.source, { fileModifiedAt: fileInfo.lastModified }),
 		};
 
 		const file3d = await createFile3D(file3dData);

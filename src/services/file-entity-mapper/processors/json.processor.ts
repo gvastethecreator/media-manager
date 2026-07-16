@@ -1,10 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
+import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createJsonFile, getJsonFileByHash } from '@/services/json-file/json-file.service';
-import type { JsonFileCreateInput } from '@/types/entities/json-file';
+import { createJsonFile } from '@/services/json-file/json-file.service';
+import type { CreateJsonFileInput } from '@/services/json-file/json-file.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
+import { isCanonicalSourceIndexed } from '../utils/canonical-source.utils';
 
 const jsonLogger = serverLogger.withContext('JsonProcessor');
 
@@ -13,16 +15,10 @@ const jsonLogger = serverLogger.withContext('JsonProcessor');
  */
 export class JsonProcessor {
 	/**
-	 * Verifica si un archivo JSON ya existe por hash
+	 * Verifica si la ubicación canónica ya fue indexada.
 	 */
 	async checkExists(fileInfo: FileInfo): Promise<boolean> {
-		if (!fileInfo.hash) return false;
-		try {
-			const existing = await getJsonFileByHash(fileInfo.hash);
-			return !!existing;
-		} catch {
-			return false;
-		}
+		return isCanonicalSourceIndexed(fileInfo);
 	}
 
 	/**
@@ -32,8 +28,11 @@ export class JsonProcessor {
 		if (!fileInfo.hash) {
 			throw new Error('File hash is required for json creation');
 		}
+		if (!fileInfo.source) {
+			throw new Error('An authorized canonical source is required for json creation');
+		}
 
-		const jsonData: JsonFileCreateInput = {
+		const jsonData: CreateJsonFileInput = {
 			name: fileInfo.name,
 			path: fileInfo.path,
 			size: fileInfo.size,
@@ -49,9 +48,10 @@ export class JsonProcessor {
 			validationErrors: null as any,
 			keyCount: null as any,
 			depth: null as any,
+			source: extendAuthorizedPathInput(fileInfo.source, { fileModifiedAt: fileInfo.lastModified }),
 		};
 
-		const json = await createJsonFile(jsonData as any);
+		const json = await createJsonFile(jsonData);
 		return json.id as string;
 	}
 

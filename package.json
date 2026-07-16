@@ -56,6 +56,8 @@
 		"db:upgrade": "bun scripts/db/upgrade.ts",
 		"db:image:backfill": "bun scripts/db/image-asset-backfill.ts",
 		"db:image:reconcile": "bun scripts/db/image-asset-reconcile.ts",
+		"db:media:backfill": "bun scripts/db/media-specialization-asset-backfill.ts",
+		"db:media:reconcile": "bun scripts/db/media-specialization-asset-reconcile.ts",
 		"db:mark-disposable": "bun scripts/db/reset.ts mark",
 		"db:reset": "bun scripts/db/reset.ts reset",
 		"db:generate-video-thumbnails": "bun scripts/run-with-log.js db-thumbnails bun scripts/generate-video-thumbnails.ts",

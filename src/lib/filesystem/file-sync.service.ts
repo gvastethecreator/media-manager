@@ -5,14 +5,47 @@
  */
 
 import { stat } from 'node:fs/promises';
+import { isAbsolute, relative } from 'node:path';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { assets, audios, documents, file3Ds, folders, images, sourceFiles, videos } from '@/lib/drizzle/schema/index';
+import {
+	assets,
+	audios,
+	documents,
+	file3Ds,
+	folders,
+	images,
+	jsonFiles,
+	sourceFiles,
+	videos,
+} from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import type { AuthorizedRootRegistry, ResolvedAuthorizedPath } from '@/server/security/authorized-roots';
+import { isPathInsideDirectory } from './path-containment';
 import { scanFolder } from './folder-scanner';
 import { normalizePath } from './path-utils';
 
 const syncLogger = serverLogger.withContext('FileSync');
+
+type SyncEntityType = 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d';
+
+interface ResolvedEntityFile {
+	assetId: string | null;
+	id: string;
+	name: string;
+	path: string;
+}
+
+interface CanonicalSyncSource {
+	assetId: string;
+	assetType: string;
+	folderId: string | null;
+	relativePath: string;
+	rootId: string;
+	sourceAssetId: string;
+}
+
+type ResolvedEntityFiles = Map<SyncEntityType, ResolvedEntityFile[]>;
 
 /**
  * Resultado de la sincronización de archivos
@@ -31,7 +64,7 @@ export interface FileSyncResult {
 		id: string;
 		path: string;
 		name: string;
-		type: 'image' | 'video' | 'audio' | 'document' | 'file3d';
+		type: 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d';
 	}>;
 	/** Estadísticas del proceso */
 	stats: {
@@ -48,18 +81,28 @@ export interface FileSyncResult {
  * Opciones para la sincronización de archivos
  */
 export interface FileSyncOptions {
+	/** Registro de raíces que autoriza toda lectura y resolución física. */
+	authorizedRootRegistry?: AuthorizedRootRegistry;
 	/** Solo simular, no hacer cambios reales */
 	dryRun?: boolean;
 	/** Tipos de entidades a sincronizar */
-	entityTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'file3d'>;
+	entityTypes?: SyncEntityType[];
 	/** Forzar sincronización incluso si hay errores */
 	forceSync?: boolean;
 	/** Incluir archivos ocultos */
 	includeHidden?: boolean;
+	/** Incluir archivos de subcarpetas. Los reindexados estructurados sincronizan cada Folder por separado. */
+	recursive?: boolean;
+	/** Profundidad máxima cuando recursive está habilitado. */
+	maxDepth?: number;
 	/** Verificar solo archivos modificados desde esta fecha */
 	modifiedSince?: Date;
 	/** Callback para reportar progreso de archivos individuales */
 	onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void>;
+}
+
+export interface FileSyncDependencies {
+	afterFolderAuthorization?: (folderId: string) => Promise<void>;
 }
 
 /**
@@ -80,15 +123,22 @@ export class FileSyncService {
 	/**
 	 * Sincroniza archivos de una carpeta específica con el sistema de archivos
 	 */
-	async syncFolderFiles(folderId: string, options: FileSyncOptions = {}): Promise<FileSyncResult> {
+	async syncFolderFiles(
+		folderId: string,
+		options: FileSyncOptions = {},
+		dependencies: FileSyncDependencies = {}
+	): Promise<FileSyncResult> {
 		const startTime = new Date();
-		syncLogger.info('🔄 Iniciando sincronización de archivos para carpeta:', { folderId, options });
+		syncLogger.info('🔄 Iniciando sincronización de archivos para carpeta:', { folderId });
 
 		const {
 			dryRun = false,
 			includeHidden = false,
-			entityTypes = ['image', 'video', 'audio', 'document', 'file3d'],
+			entityTypes = ['image', 'video', 'audio', 'document', 'json', 'file3d'],
 			forceSync = false,
+			authorizedRootRegistry,
+			recursive = true,
+			maxDepth = 99,
 		} = options;
 
 		const result: FileSyncResult = {
@@ -106,6 +156,10 @@ export class FileSyncService {
 		};
 
 		try {
+			if (!authorizedRootRegistry) {
+				throw new Error('La sincronización requiere un registro explícito de media roots autorizados.');
+			}
+
 			// Obtener la carpeta para acceder a su ruta
 			const folder = await db.query.folders.findFirst({
 				where: eq(folders.id, folderId),
@@ -116,30 +170,53 @@ export class FileSyncService {
 				throw new Error(`Carpeta con ID ${folderId} no encontrada`);
 			}
 
-			syncLogger.info(`📂 Sincronizando carpeta: ${folder.name} (${folder.path})`);
+			let authorizedFolder = await authorizedRootRegistry.authorizeAbsolutePath(folder.path, 'read');
+			authorizedFolder = await authorizedRootRegistry.authorizeAbsolutePath(folder.path, 'index');
+			syncLogger.info('📂 Sincronizando carpeta autorizada', {
+				folderId,
+				rootId: authorizedFolder.rootId,
+				relativePath: authorizedFolder.relativePath,
+			});
+			await dependencies.afterFolderAuthorization?.(folderId);
+			authorizedFolder = await authorizedRootRegistry.authorizeAbsolutePath(folder.path, 'read');
+			authorizedFolder = await authorizedRootRegistry.authorizeAbsolutePath(folder.path, 'index');
 
 			// 1. Obtener archivos actuales del sistema de archivos
-			const scanResult = await scanFolder(folder.path, {
-				recursive: true,
+			const scanResult = await scanFolder(authorizedFolder.absolutePath, {
+				recursive,
 				includeHidden,
 				limit: 0, // No folder item limit
-				maxDepth: 99, // Allow deep recursive scanning
+				maxDepth,
 			});
+			if (scanResult.error) {
+				throw new Error(`No se pudo escanear el Folder autorizado ${folderId}.`);
+			}
 
 			const filesystemPaths = new Set(scanResult.files.map((file) => normalizePath(file.path)));
 			syncLogger.info(`💾 Archivos en sistema: ${filesystemPaths.size}`);
+			const entityFiles = new Map(
+				await Promise.all(
+					entityTypes.map(
+						async (entityType) =>
+							[
+								entityType,
+								await this.getEntityFiles(folderId, entityType, authorizedRootRegistry, authorizedFolder),
+							] as const
+					)
+				)
+			) as ResolvedEntityFiles;
 
 			// 2. Verificar archivos en la base de datos vs sistema de archivos
-			const removedFiles = await this.identifyRemovedFiles(folderId, filesystemPaths, entityTypes);
+			const removedFiles = await this.identifyRemovedFiles(filesystemPaths, entityTypes, entityFiles);
 			result.removedFiles = removedFiles;
 
 			// 3. Identificar nuevos archivos
-			const newFiles = await this.identifyNewFiles(folderId, scanResult.files, entityTypes);
+			const newFiles = await this.identifyNewFiles(scanResult.files, entityTypes, entityFiles);
 			result.newFiles = newFiles;
 
 			// 4. Ejecutar cambios si no es dry run
 			if (!dryRun) {
-				await this.restoreObservedCanonicalMedia(folderId, filesystemPaths, entityTypes);
+				await this.restoreObservedCanonicalMedia(folderId, filesystemPaths, entityTypes, entityFiles);
 				await this.executeFileSyncChanges(result, folderId, options.onProgress);
 			}
 
@@ -179,44 +256,32 @@ export class FileSyncService {
 	 * Identifica archivos que deben ser eliminados de la BD (ya no existen en el sistema)
 	 */
 	private async identifyRemovedFiles(
-		folderId: string,
 		filesystemPaths: Set<string>,
-		entityTypes: Array<'image' | 'video' | 'audio' | 'document' | 'file3d'>
+		entityTypes: SyncEntityType[],
+		entityFiles: ResolvedEntityFiles
 	): Promise<FileSyncResult['removedFiles']> {
 		const removedFiles: FileSyncResult['removedFiles'] = [];
 
-		// Procesar todos los tipos de entidad en paralelo
 		const typePromises = entityTypes.map(async (entityType) => {
-			try {
-				const dbFiles = await this.getEntityFiles(folderId, entityType);
-
-				// Verificar cada archivo en paralelo
-				const filePromises = dbFiles.map(async (dbFile) => {
-					const normalizedPath = normalizePath(dbFile.path);
-
-					// Si el archivo no existe en el sistema de archivos, verificar físicamente
-					if (!filesystemPaths.has(normalizedPath)) {
-						const physicallyExists = await this.checkFileExists(dbFile.path);
-
-						if (!physicallyExists) {
-							return {
-								id: dbFile.id,
-								path: dbFile.path,
-								name: dbFile.name,
-								type: entityType as FileSyncResult['removedFiles'][0]['type'],
-							};
-						}
+			const dbFiles = entityFiles.get(entityType) ?? [];
+			const filePromises = dbFiles.map(async (dbFile) => {
+				const normalizedPath = normalizePath(dbFile.path);
+				if (!filesystemPaths.has(normalizedPath)) {
+					const physicallyExists = await this.checkFileExists(dbFile.path);
+					if (!physicallyExists) {
+						return {
+							id: dbFile.id,
+							path: dbFile.path,
+							name: dbFile.name,
+							type: entityType,
+						};
 					}
-					return null;
-				});
+				}
+				return null;
+			});
 
-				const results = await Promise.all(filePromises);
-				return results.filter((result): result is NonNullable<typeof result> => result !== null);
-			} catch (error) {
-				const errorMsg = `Error verificando archivos ${entityType}: ${error instanceof Error ? error.message : String(error)}`;
-				syncLogger.error(errorMsg);
-				return [];
-			}
+			const results = await Promise.all(filePromises);
+			return results.filter((result): result is NonNullable<typeof result> => result !== null);
 		});
 
 		const allResults = await Promise.all(typePromises);
@@ -235,26 +300,18 @@ export class FileSyncService {
 	 * Identifica archivos nuevos en el sistema de archivos que no están en la BD
 	 */
 	private async identifyNewFiles(
-		folderId: string,
 		filesystemFiles: Array<{ path: string; name: string; extension: string }>,
-		entityTypes: Array<'image' | 'video' | 'audio' | 'document' | 'file3d'>
+		entityTypes: SyncEntityType[],
+		entityFiles: ResolvedEntityFiles
 	): Promise<FileSyncResult['newFiles']> {
 		const newFiles: FileSyncResult['newFiles'] = [];
 
 		// Obtener todas las rutas de archivos en la BD para esta carpeta en paralelo
 		const allDbPaths = new Set<string>();
 
-		const typePromises = entityTypes.map(async (entityType) => {
-			try {
-				const dbFiles = await this.getEntityFiles(folderId, entityType);
-				return dbFiles.map((file) => normalizePath(file.path));
-			} catch (error) {
-				syncLogger.warn(`Error obteniendo archivos ${entityType}:`, error);
-				return [];
-			}
-		});
-
-		const allTypePaths = await Promise.all(typePromises);
+		const allTypePaths = entityTypes.map((entityType) =>
+			(entityFiles.get(entityType) ?? []).map((file) => normalizePath(file.path))
+		);
 
 		for (const typePaths of allTypePaths) {
 			for (const path of typePaths) {
@@ -284,42 +341,125 @@ export class FileSyncService {
 	 */
 	private async getEntityFiles(
 		folderId: string,
-		entityType: 'image' | 'video' | 'audio' | 'document' | 'file3d'
-	): Promise<Array<{ id: string; path: string; name: string }>> {
+		entityType: SyncEntityType,
+		registry: AuthorizedRootRegistry,
+		authorizedFolder: ResolvedAuthorizedPath
+	): Promise<ResolvedEntityFile[]> {
+		let legacyRows: Array<{ assetId: string | null; id: string; path: string; name: string }>;
 		switch (entityType) {
 			case 'image':
-				return await db
-					.select({ id: images.id, path: images.path, name: images.name })
+				legacyRows = await db
+					.select({ assetId: images.assetId, id: images.id, path: images.path, name: images.name })
 					.from(images)
 					.where(eq(images.folderId, folderId));
+				break;
 
 			case 'video':
-				return await db
-					.select({ id: videos.id, path: videos.path, name: videos.name })
+				legacyRows = await db
+					.select({ assetId: videos.assetId, id: videos.id, path: videos.path, name: videos.name })
 					.from(videos)
 					.where(eq(videos.folderId, folderId));
+				break;
 
 			case 'audio':
-				return await db
-					.select({ id: audios.id, path: audios.path, name: audios.name })
+				legacyRows = await db
+					.select({ assetId: audios.assetId, id: audios.id, path: audios.path, name: audios.name })
 					.from(audios)
 					.where(eq(audios.folderId, folderId));
+				break;
 
 			case 'document':
-				return await db
-					.select({ id: documents.id, path: documents.path, name: documents.name })
+				legacyRows = await db
+					.select({ assetId: documents.assetId, id: documents.id, path: documents.path, name: documents.name })
 					.from(documents)
 					.where(eq(documents.folderId, folderId));
+				break;
+
+			case 'json':
+				legacyRows = await db
+					.select({ assetId: jsonFiles.assetId, id: jsonFiles.id, path: jsonFiles.path, name: jsonFiles.name })
+					.from(jsonFiles)
+					.where(eq(jsonFiles.folderId, folderId));
+				break;
 
 			case 'file3d':
-				return await db
-					.select({ id: file3Ds.id, path: file3Ds.path, name: file3Ds.name })
+				legacyRows = await db
+					.select({ assetId: file3Ds.assetId, id: file3Ds.id, path: file3Ds.path, name: file3Ds.name })
 					.from(file3Ds)
 					.where(eq(file3Ds.folderId, folderId));
-
-			default:
-				return [];
+				break;
 		}
+
+		const canonicalAssetIds = legacyRows.flatMap((row) => (row.assetId ? [row.assetId] : []));
+		const canonicalSources: CanonicalSyncSource[] =
+			canonicalAssetIds.length === 0
+				? []
+				: await db
+						.select({
+							assetId: assets.id,
+							assetType: assets.assetType,
+							folderId: sourceFiles.folderId,
+							relativePath: sourceFiles.relativePath,
+							rootId: sourceFiles.rootId,
+							sourceAssetId: sourceFiles.assetId,
+						})
+						.from(assets)
+						.innerJoin(sourceFiles, eq(sourceFiles.id, assets.primarySourceFileId))
+						.where(inArray(assets.id, canonicalAssetIds));
+		const sourceByAssetId = new Map(canonicalSources.map((source) => [source.assetId, source]));
+
+		return Promise.all(
+			legacyRows.map(async (row) => {
+				if (!row.assetId) {
+					const legacyRelativePath = relative(authorizedFolder.absolutePath, row.path);
+					if (
+						legacyRelativePath === '..' ||
+						legacyRelativePath.startsWith(`..\\`) ||
+						legacyRelativePath.startsWith('../') ||
+						isAbsolute(legacyRelativePath)
+					) {
+						throw new Error(`La proyección legacy ${entityType}:${row.id} queda fuera del Folder autorizado.`);
+					}
+					const relativePath = [authorizedFolder.relativePath, legacyRelativePath.replaceAll('\\', '/')]
+						.filter(Boolean)
+						.join('/');
+					const resolved = await this.resolveSyncReference(registry, {
+						relativePath,
+						rootId: authorizedFolder.rootId,
+					});
+					return { ...row, path: resolved.absolutePath };
+				}
+
+				if (row.assetId !== row.id) {
+					throw new Error(`Identidad canónica inválida para ${entityType}:${row.id}.`);
+				}
+				const source = sourceByAssetId.get(row.assetId);
+				if (
+					!source ||
+					source.assetType !== entityType ||
+					source.sourceAssetId !== row.assetId ||
+					source.folderId !== folderId
+				) {
+					throw new Error(`SourceFile primario inconsistente para ${entityType}:${row.id}.`);
+				}
+				const resolved = await this.resolveSyncReference(registry, {
+					relativePath: source.relativePath,
+					rootId: source.rootId,
+				});
+				if (!isPathInsideDirectory(authorizedFolder.absolutePath, resolved.absolutePath)) {
+					throw new Error(`SourceFile primario fuera del Folder autorizado para ${entityType}:${row.id}.`);
+				}
+				return { ...row, path: resolved.absolutePath };
+			})
+		);
+	}
+
+	private async resolveSyncReference(
+		registry: AuthorizedRootRegistry,
+		reference: { relativePath: string; rootId: string }
+	): Promise<ResolvedAuthorizedPath> {
+		await registry.resolve(reference, 'read', 'create');
+		return registry.resolve(reference, 'index', 'create');
 	}
 
 	/**
@@ -334,47 +474,13 @@ export class FileSyncService {
 		}
 	}
 
-	private async getCanonicalEntityLocations(
-		folderId: string,
-		entityType: 'image' | 'video' | 'audio' | 'document' | 'file3d'
-	): Promise<Array<{ assetId: string | null; path: string }>> {
-		switch (entityType) {
-			case 'image':
-				return db
-					.select({ assetId: images.assetId, path: images.path })
-					.from(images)
-					.where(eq(images.folderId, folderId));
-			case 'video':
-				return db
-					.select({ assetId: videos.assetId, path: videos.path })
-					.from(videos)
-					.where(eq(videos.folderId, folderId));
-			case 'audio':
-				return db
-					.select({ assetId: audios.assetId, path: audios.path })
-					.from(audios)
-					.where(eq(audios.folderId, folderId));
-			case 'document':
-				return db
-					.select({ assetId: documents.assetId, path: documents.path })
-					.from(documents)
-					.where(eq(documents.folderId, folderId));
-			case 'file3d':
-				return db
-					.select({ assetId: file3Ds.assetId, path: file3Ds.path })
-					.from(file3Ds)
-					.where(eq(file3Ds.folderId, folderId));
-		}
-	}
-
 	private async restoreObservedCanonicalMedia(
 		folderId: string,
 		filesystemPaths: Set<string>,
-		entityTypes: Array<'image' | 'video' | 'audio' | 'document' | 'file3d'>
+		entityTypes: SyncEntityType[],
+		entityFiles: ResolvedEntityFiles
 	): Promise<void> {
-		const rows = (
-			await Promise.all(entityTypes.map((entityType) => this.getCanonicalEntityLocations(folderId, entityType)))
-		).flat();
+		const rows = entityTypes.flatMap((entityType) => entityFiles.get(entityType) ?? []);
 		const assetIds = rows.flatMap((row) =>
 			row.assetId && filesystemPaths.has(normalizePath(row.path)) ? [row.assetId] : []
 		);
@@ -501,7 +607,7 @@ export class FileSyncService {
 	 * Elimina archivos de la BD por tipo de entidad
 	 */
 	private async deleteEntityFiles(
-		entityType: 'image' | 'video' | 'audio' | 'document' | 'file3d',
+		entityType: 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d',
 		fileIds: string[]
 	): Promise<void> {
 		if (fileIds.length === 0) {
@@ -533,6 +639,12 @@ export class FileSyncService {
 					.select({ assetId: documents.assetId, id: documents.id })
 					.from(documents)
 					.where(inArray(documents.id, fileIds));
+				break;
+			case 'json':
+				rows = await db
+					.select({ assetId: jsonFiles.assetId, id: jsonFiles.id })
+					.from(jsonFiles)
+					.where(inArray(jsonFiles.id, fileIds));
 				break;
 			case 'file3d':
 				rows = await db
@@ -574,6 +686,9 @@ export class FileSyncService {
 				break;
 			case 'document':
 				await db.delete(documents).where(inArray(documents.id, legacyIds));
+				break;
+			case 'json':
+				await db.delete(jsonFiles).where(inArray(jsonFiles.id, legacyIds));
 				break;
 			case 'file3d':
 				await db.delete(file3Ds).where(inArray(file3Ds.id, legacyIds));

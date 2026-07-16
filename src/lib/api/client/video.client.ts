@@ -7,7 +7,16 @@
 /**
  * Cliente de API para videos.
  */
-import type { VideoCreateInput, VideoFilters, VideoWithStats } from '@/types/entities/video';
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
+import type { VideoCreateInput, VideoFilters, VideoUpdateInput, VideoWithStats } from '@/types/entities/video';
+
+export type PublicVideoCreateInput = Omit<VideoCreateInput, 'path'> & {
+	source: AuthorizedPathReference;
+};
+
+export type PublicVideoUpdateInput = Omit<VideoUpdateInput, 'path'> & {
+	source?: AuthorizedPathReference;
+};
 
 const API_BASE_PATH = '/api/videos';
 
@@ -62,7 +71,7 @@ export async function findVideosInApi(options: FindVideosOptions = {}): Promise<
 	return (payload?.data as VideoWithStats[]) || [];
 }
 
-export async function createVideoInApi(data: VideoCreateInput): Promise<VideoWithStats> {
+export async function createVideoInApi(data: PublicVideoCreateInput): Promise<VideoWithStats> {
 	const response = await fetch(API_BASE_PATH, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -74,9 +83,9 @@ export async function createVideoInApi(data: VideoCreateInput): Promise<VideoWit
 	return response.json();
 }
 
-export async function updateVideoInApi(id: string, data: Partial<VideoWithStats>): Promise<VideoWithStats> {
+export async function updateVideoInApi(id: string, data: PublicVideoUpdateInput): Promise<VideoWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, {
-		method: 'PUT',
+		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data),
 	});

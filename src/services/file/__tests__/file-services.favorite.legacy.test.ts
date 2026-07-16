@@ -1,16 +1,18 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/lib/drizzle";
-import { documents, favorites, file3Ds, folders, jsonFiles, profiles } from "@/lib/drizzle/schema";
-import { createDocument, getDocuments, updateDocument } from "@/services/document/document.service";
-import { favoriteService } from "@/services/favorite/favorite.service";
-import { createFile3D, getFile3Ds, updateFile3D } from "@/services/file3d/file3d.service";
-import { createJsonFile, getJsonFiles, updateJsonFile } from "@/services/json-file/json-file.service";
-import { FavoriteEntityType } from "@/types/entities/favorite";
+import { eq } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
+import { assets, documents, favorites, file3Ds, folders, jsonFiles, mediaRoots, profiles } from '@/lib/drizzle/schema';
+import { createDocument, getDocuments, updateDocument } from '@/services/document/document.service';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { createFile3D, getFile3Ds, updateFile3D } from '@/services/file3d/file3d.service';
+import { createJsonFile, getJsonFiles, updateJsonFile } from '@/services/json-file/json-file.service';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
 let createdActiveProfileId: string | null = null;
 const testFolderId = `file-favorites-legacy-folder-${crypto.randomUUID()}`;
+const testRootId = `file-favorites-root-${crypto.randomUUID()}`;
 
-const createTestHash = () => crypto.randomUUID().replaceAll("-", "").repeat(2);
+const createTestHash = () => crypto.randomUUID().replaceAll('-', '').repeat(2);
 
 const buildUniqueLabel = (label: string) => {
 	const token = `${Date.now().toString(36)}-${Math.random().toString(16).slice(2)}`;
@@ -33,10 +35,10 @@ const ensureActiveProfile = async () => {
 
 	await db.insert(profiles).values({
 		id: profileId,
-		name: "Legacy File Favorites Test Profile",
-		emoji: "📁",
-		color: "#3b82f6",
-		description: "Perfil activo para tests legacy de favoritos en servicios de archivos",
+		name: 'Legacy File Favorites Test Profile',
+		emoji: '📁',
+		color: '#3b82f6',
+		description: 'Perfil activo para tests legacy de favoritos en servicios de archivos',
 		isActive: true,
 		settingsId: null,
 		imageId: null,
@@ -53,16 +55,16 @@ const createLegacyDocument = async (label: string, input?: { isFavorite?: boolea
 		path: `C:/tests/${unique}.pdf`,
 		size: 1024,
 		hash: createTestHash(),
-		mimeType: "application/pdf",
-		extension: "pdf",
+		mimeType: 'application/pdf',
+		extension: 'pdf',
 		folderId: testFolderId,
 		isFavorite: input?.isFavorite ?? false,
 		isArchived: false,
 		pageCount: 1,
 		wordCount: 10,
-		language: "es",
+		language: 'es',
 		title: unique,
-		author: "Copilot",
+		author: 'Copilot',
 		subject: null,
 		keywords: null,
 		creator: null,
@@ -71,8 +73,13 @@ const createLegacyDocument = async (label: string, input?: { isFavorite?: boolea
 		modificationDate: null,
 		encrypted: false,
 		version: null,
-		content: "hola mundo",
+		content: 'hola mundo',
 		summary: null,
+		source: createAuthorizedPathInput({
+			absolutePath: `C:/tests/${unique}.pdf`,
+			relativePath: `${unique}.pdf`,
+			rootId: testRootId,
+		}),
 	});
 };
 
@@ -84,13 +91,13 @@ const createLegacyFile3D = async (label: string, input?: { isFavorite?: boolean 
 		path: `C:/tests/${unique}.glb`,
 		size: 2048,
 		hash: createTestHash(),
-		mimeType: "model/gltf-binary",
-		extension: "glb",
+		mimeType: 'model/gltf-binary',
+		extension: 'glb',
 		folderId: testFolderId,
 		isFavorite: input?.isFavorite ?? false,
 		isArchived: false,
-		format: "glb",
-		version: "2.0",
+		format: 'glb',
+		version: '2.0',
 		vertices: 12,
 		faces: 6,
 		triangles: 12,
@@ -105,6 +112,11 @@ const createLegacyFile3D = async (label: string, input?: { isFavorite?: boolean 
 		hasNormals: true,
 		hasColors: false,
 		boundingBox: null,
+		source: createAuthorizedPathInput({
+			absolutePath: `C:/tests/${unique}.glb`,
+			relativePath: `${unique}.glb`,
+			rootId: testRootId,
+		}),
 	});
 };
 
@@ -116,8 +128,8 @@ const createLegacyJsonFile = async (label: string, input?: { isFavorite?: boolea
 		path: `C:/tests/${unique}.json`,
 		size: 512,
 		hash: createTestHash(),
-		mimeType: "application/json",
-		extension: "json",
+		mimeType: 'application/json',
+		extension: 'json',
 		folderId: testFolderId,
 		isFavorite: input?.isFavorite ?? false,
 		isArchived: false,
@@ -127,14 +139,20 @@ const createLegacyJsonFile = async (label: string, input?: { isFavorite?: boolea
 		validationErrors: null,
 		keyCount: 1,
 		depth: 1,
+		source: createAuthorizedPathInput({
+			absolutePath: `C:/tests/${unique}.json`,
+			relativePath: `${unique}.json`,
+			rootId: testRootId,
+		}),
 	});
 };
 
 beforeAll(async () => {
+	await db.insert(mediaRoots).values({ id: testRootId, label: 'Legacy file favorite test root' });
 	await db.insert(folders).values({
 		id: testFolderId,
-		name: "file-favorites-legacy-tests",
-		path: `/tests/${testFolderId}`,
+		name: 'file-favorites-legacy-tests',
+		path: 'C:/tests',
 		depth: 0,
 		parentId: null,
 		isFavorite: false,
@@ -149,6 +167,7 @@ afterEach(async () => {
 	await db.delete(documents);
 	await db.delete(file3Ds);
 	await db.delete(jsonFiles);
+	await db.delete(assets);
 
 	if (createdActiveProfileId) {
 		await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
@@ -158,24 +177,25 @@ afterEach(async () => {
 
 afterAll(async () => {
 	await db.delete(folders).where(eq(folders.id, testFolderId));
+	await db.delete(mediaRoots).where(eq(mediaRoots.id, testRootId));
 });
 
-describe("Legacy file services favorites convergence", () => {
-	describe("document.service", () => {
-		it("create persists favorite state through the canonical favorite bridge", async () => {
+describe('Legacy file services favorites convergence', () => {
+	describe('document.service', () => {
+		it('create persists favorite state through the canonical favorite bridge', async () => {
 			await ensureActiveProfile();
 
-			const created = await createLegacyDocument("document-create-canonical-favorite", { isFavorite: true });
+			const created = await createLegacyDocument('document-create-canonical-favorite', { isFavorite: true });
 
 			expect(created.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.DOCUMENT, created.id)).toBe(true);
 		});
 
-		it("uses canonical favorites for filtered lists and ignores stale projection", async () => {
+		it('uses canonical favorites for filtered lists and ignores stale projection', async () => {
 			await ensureActiveProfile();
-			const canonicalFavorite = await createLegacyDocument("document-canonical-favorite");
-			const staleProjection = await createLegacyDocument("document-stale-projection");
-			await createLegacyDocument("document-regular");
+			const canonicalFavorite = await createLegacyDocument('document-canonical-favorite');
+			const staleProjection = await createLegacyDocument('document-stale-projection');
+			await createLegacyDocument('document-regular');
 
 			await db.update(documents).set({ isFavorite: true }).where(eq(documents.id, staleProjection.id));
 			await favoriteService.set(FavoriteEntityType.DOCUMENT, canonicalFavorite.id, true);
@@ -187,9 +207,9 @@ describe("Legacy file services favorites convergence", () => {
 			expect(result.data[0]?.isFavorite).toBe(true);
 		});
 
-		it("update persists favorite state through the canonical favorite bridge", async () => {
+		it('update persists favorite state through the canonical favorite bridge', async () => {
 			await ensureActiveProfile();
-			const document = await createLegacyDocument("document-update-target");
+			const document = await createLegacyDocument('document-update-target');
 
 			const updated = await updateDocument(document.id, { isFavorite: true });
 
@@ -199,21 +219,21 @@ describe("Legacy file services favorites convergence", () => {
 		});
 	});
 
-	describe("file3d.service", () => {
-		it("create persists favorite state through the canonical favorite bridge", async () => {
+	describe('file3d.service', () => {
+		it('create persists favorite state through the canonical favorite bridge', async () => {
 			await ensureActiveProfile();
 
-			const created = await createLegacyFile3D("file3d-create-canonical-favorite", { isFavorite: true });
+			const created = await createLegacyFile3D('file3d-create-canonical-favorite', { isFavorite: true });
 
 			expect(created.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.FILE_3D, created.id)).toBe(true);
 		});
 
-		it("normalizes favorite state from canonical favorites and ignores stale projection", async () => {
+		it('normalizes favorite state from canonical favorites and ignores stale projection', async () => {
 			await ensureActiveProfile();
-			const canonicalFavorite = await createLegacyFile3D("file3d-canonical-favorite");
-			const staleProjection = await createLegacyFile3D("file3d-stale-projection");
-			const regular = await createLegacyFile3D("file3d-regular");
+			const canonicalFavorite = await createLegacyFile3D('file3d-canonical-favorite');
+			const staleProjection = await createLegacyFile3D('file3d-stale-projection');
+			const regular = await createLegacyFile3D('file3d-regular');
 
 			await db.update(file3Ds).set({ isFavorite: true }).where(eq(file3Ds.id, staleProjection.id));
 			await favoriteService.set(FavoriteEntityType.FILE_3D, canonicalFavorite.id, true);
@@ -225,9 +245,9 @@ describe("Legacy file services favorites convergence", () => {
 			expect(result.data.find((item: any) => item.id === regular.id)?.isFavorite).toBe(false);
 		});
 
-		it("update persists favorite state through the canonical favorite bridge", async () => {
+		it('update persists favorite state through the canonical favorite bridge', async () => {
 			await ensureActiveProfile();
-			const file3D = await createLegacyFile3D("file3d-update-target");
+			const file3D = await createLegacyFile3D('file3d-update-target');
 
 			const updated = await updateFile3D(file3D.id, { isFavorite: true });
 
@@ -237,21 +257,21 @@ describe("Legacy file services favorites convergence", () => {
 		});
 	});
 
-	describe("json-file.service", () => {
-		it("create persists favorite state through the canonical favorite bridge", async () => {
+	describe('json-file.service', () => {
+		it('create persists favorite state through the canonical favorite bridge', async () => {
 			await ensureActiveProfile();
 
-			const created = await createLegacyJsonFile("json-create-canonical-favorite", { isFavorite: true });
+			const created = await createLegacyJsonFile('json-create-canonical-favorite', { isFavorite: true });
 
 			expect(created.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.JSON_FILE, created.id)).toBe(true);
 		});
 
-		it("normalizes favorite state from canonical favorites and ignores stale projection", async () => {
+		it('normalizes favorite state from canonical favorites and ignores stale projection', async () => {
 			await ensureActiveProfile();
-			const canonicalFavorite = await createLegacyJsonFile("json-canonical-favorite");
-			const staleProjection = await createLegacyJsonFile("json-stale-projection");
-			const regular = await createLegacyJsonFile("json-regular");
+			const canonicalFavorite = await createLegacyJsonFile('json-canonical-favorite');
+			const staleProjection = await createLegacyJsonFile('json-stale-projection');
+			const regular = await createLegacyJsonFile('json-regular');
 
 			await db.update(jsonFiles).set({ isFavorite: true }).where(eq(jsonFiles.id, staleProjection.id));
 			await favoriteService.set(FavoriteEntityType.JSON_FILE, canonicalFavorite.id, true);
@@ -263,9 +283,9 @@ describe("Legacy file services favorites convergence", () => {
 			expect(result.data.find((item) => item.id === regular.id)?.isFavorite).toBe(false);
 		});
 
-		it("update persists favorite state through the canonical favorite bridge", async () => {
+		it('update persists favorite state through the canonical favorite bridge', async () => {
 			await ensureActiveProfile();
-			const jsonFile = await createLegacyJsonFile("json-update-target");
+			const jsonFile = await createLegacyJsonFile('json-update-target');
 
 			const updated = await updateJsonFile(jsonFile.id, { isFavorite: true });
 

@@ -876,11 +876,11 @@ export const deleteManyByIds = (
  * - ImageNotFound: No image with given hash exists
  * - ImageDatabaseError: Database operation failed
  */
-export const getByHash = (hash: string): Effect.Effect<Image, ImageError, never> =>
+export const getByHashCandidates = (hash: string): Effect.Effect<Image[], ImageError, never> =>
 	Effect.gen(function* () {
-		logger.info('🔍 Getting image by hash', { hash });
+		logger.info('🔍 Getting image candidates by hash', { hash });
 
-		const [result, favoriteEntityIds] = yield* Effect.all([
+		const [results, favoriteEntityIds] = yield* Effect.all([
 			Effect.tryPromise({
 				try: async () => {
 					const candidates = await db
@@ -888,32 +888,26 @@ export const getByHash = (hash: string): Effect.Effect<Image, ImageError, never>
 						.from(images)
 						.where(eq(images.hash, hash))
 						.orderBy(asc(images.createdAt), asc(images.id));
-					const [image] = await projectCanonicalImages(candidates);
-					return image ? Image.make(image) : null;
+					return (await projectCanonicalImages(candidates)).map((image) => Image.make(image));
 				},
 				catch: (error) =>
 					new ImageDatabaseError({
-						operation: 'getByHash',
+						operation: 'getByHashCandidates',
 						originalError: error,
 					}),
 			}),
 			getImageFavoriteIds(),
 		]);
 
-		if (!result) {
-			logger.warn('❌ Image not found by hash', { hash });
-			return yield* Effect.fail(new ImageNotFound({ imageId: `hash:${hash}` }));
-		}
+		return projectImages(results, favoriteEntityIds);
+	});
 
-		const projectedImage = projectImage(result, favoriteEntityIds);
-
-		logger.info('✅ Image found by hash', {
-			hash,
-			id: projectedImage.id,
-			name: projectedImage.name,
-		});
-
-		return projectedImage;
+export const getByHash = (hash: string): Effect.Effect<Image, ImageError, never> =>
+	Effect.gen(function* () {
+		const candidates = yield* getByHashCandidates(hash);
+		const result = candidates[0];
+		if (!result) return yield* Effect.fail(new ImageNotFound({ imageId: `hash:${hash}` }));
+		return result;
 	});
 
 /**
@@ -1354,6 +1348,7 @@ export interface ImageServiceInterface {
 		options?: { limit?: number; offset?: number }
 	) => Effect.Effect<Image[], ImageError, never>;
 	readonly getByHash: (hash: string) => Effect.Effect<Image, ImageError, never>;
+	readonly getByHashCandidates: (hash: string) => Effect.Effect<Image[], ImageError, never>;
 	readonly getById: (id: string) => Effect.Effect<Image, ImageError, never>;
 	readonly getByIdWithStats: (id: string) => Effect.Effect<ImageWithStats, ImageError, never>;
 	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Image, ImageError, never>;
@@ -1386,6 +1381,7 @@ const make = (): ImageServiceInterface => ({
 	deleteManyByIds,
 	restoreById,
 	getByHash,
+	getByHashCandidates,
 	getByPathAndFolder,
 	getAllFavorites,
 	getByFolder,

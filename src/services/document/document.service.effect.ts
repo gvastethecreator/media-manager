@@ -6,11 +6,11 @@
  * =================================================================================
  */
 
-import * as crypto from 'node:crypto';
 import { and, asc, count, desc, eq, gte, inArray, like, lte, notInArray, or } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { documents } from '@/lib/drizzle/schema';
+import { isPathInsideDirectory } from '@/lib/filesystem/path-containment';
+import { documents, folders } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import {
@@ -19,13 +19,22 @@ import {
 	setFavoriteForActiveProfile,
 } from '@/services/favorite/favorite-write-transaction';
 import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
-import { normalizeCounts, sumCounts } from '@/transformers/common/counts';
-import type { DocumentWithStats } from '@/types/entities/document';
+import {
+	assertCanonicalMediaCreateCommand,
+	createCanonicalMedia,
+	projectCanonicalMediaRow,
+	projectCanonicalMediaRows,
+	restoreCanonicalAsset,
+	tombstoneCanonicalAsset,
+	updateCanonicalMediaProjection,
+	visibleAssetLifecycleCondition,
+	type CanonicalMediaSourceInput,
+	type CanonicalMediaState,
+} from '@/services/media-core/canonical-media-persistence';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	DocumentDatabaseError,
 	DocumentError,
-	DocumentHashConflict,
 	DocumentNotFound,
 	DocumentValidationError,
 } from './document-errors.effect';
@@ -62,6 +71,7 @@ export interface CreateDocumentInput {
 	version?: string | null;
 	content?: string | null;
 	summary?: string | null;
+	source: CanonicalMediaSourceInput;
 }
 
 export type UpdateDocumentInput = Partial<CreateDocumentInput>;
@@ -82,6 +92,7 @@ export interface DocumentFilters {
 }
 
 export interface DocumentRow {
+	assetId: string | null;
 	id: string;
 	name: string;
 	path: string;
@@ -109,6 +120,9 @@ export interface DocumentRow {
 	summary: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+	canonicalDivergences: string[];
+	canonicalState: CanonicalMediaState;
+	legacyId: string;
 }
 
 export interface PaginatedResult<T> {
@@ -128,7 +142,10 @@ export interface DocumentServiceInterface {
 	readonly getAll: (filters?: DocumentFilters) => Effect.Effect<PaginatedResult<DocumentRow>, DocumentError>;
 	readonly getByHash: (hash: string) => Effect.Effect<DocumentRow | null, DocumentError>;
 	readonly getById: (id: string) => Effect.Effect<DocumentRow, DocumentError>;
+	readonly getImages: (id: string) => Effect.Effect<unknown[], DocumentError>;
 	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<DocumentRow | null, DocumentError>;
+	readonly restoreById: (id: string) => Effect.Effect<DocumentRow, DocumentError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<DocumentRow, DocumentError>;
 	readonly update: (id: string, input: UpdateDocumentInput) => Effect.Effect<DocumentRow, DocumentError>;
 }
 
@@ -156,8 +173,12 @@ function validateCreateInput(input: CreateDocumentInput): void {
 	if (!input.path || input.path.trim().length === 0) {
 		throw new DocumentValidationError({ field: 'path', value: input.path, reason: 'El path es requerido' });
 	}
-	if (!input.hash || input.hash.trim().length === 0) {
-		throw new DocumentValidationError({ field: 'hash', value: input.hash, reason: 'El hash es requerido' });
+	if (!/^[0-9a-f]{64}$/.test(input.hash)) {
+		throw new DocumentValidationError({
+			field: 'hash',
+			value: input.hash,
+			reason: 'El hash debe ser SHA-256 lowercase',
+		});
 	}
 	if (input.size < 0) {
 		throw new DocumentValidationError({ field: 'size', value: input.size, reason: 'El size no puede ser negativo' });
@@ -195,12 +216,20 @@ const make = (): DocumentServiceInterface => {
 				catch: (error) => toDocumentError('getById', error),
 			});
 
-			if (!result) {
+			const projected = result
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(result, 'document'),
+						catch: (error) => toDocumentError('getById:canonicalProjection', error),
+					})
+				: null;
+
+			if (!projected) {
 				return yield* Effect.fail(new DocumentNotFound({ id, message: `Documento con ID ${id} no encontrado` }));
 			}
 
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.DOCUMENT, result as DocumentRow),
+				try: () =>
+					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.DOCUMENT, projected as DocumentRow),
 				catch: (error) => toDocumentError('getById:favoriteProjection', error),
 			});
 		});
@@ -211,15 +240,26 @@ const make = (): DocumentServiceInterface => {
 
 			const result = yield* Effect.tryPromise({
 				try: async () => {
-					const rows = await db.select().from(documents).where(eq(documents.hash, hash)).limit(1);
+					const rows = await db
+						.select()
+						.from(documents)
+						.where(and(eq(documents.hash, hash), visibleAssetLifecycleCondition(documents.assetId)))
+						.limit(1);
 					return rows[0] || null;
 				},
 				catch: (error) => toDocumentError('getByHash', error),
 			});
 
-			if (!result) return null;
+			const projected = result
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(result, 'document'),
+						catch: (error) => toDocumentError('getByHash:canonicalProjection', error),
+					})
+				: null;
+			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.DOCUMENT, result as DocumentRow),
+				try: () =>
+					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.DOCUMENT, projected as DocumentRow),
 				catch: (error) => toDocumentError('getByHash:favoriteProjection', error),
 			});
 		});
@@ -233,16 +273,29 @@ const make = (): DocumentServiceInterface => {
 					const rows = await db
 						.select()
 						.from(documents)
-						.where(and(eq(documents.path, path), eq(documents.folderId, folderId)))
+						.where(
+							and(
+								eq(documents.path, path),
+								eq(documents.folderId, folderId),
+								visibleAssetLifecycleCondition(documents.assetId)
+							)
+						)
 						.limit(1);
 					return rows[0] || null;
 				},
 				catch: (error) => toDocumentError('getByPathAndFolder', error),
 			});
 
-			if (!result) return null;
+			const projected = result
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(result, 'document'),
+						catch: (error) => toDocumentError('getByPathAndFolder:canonicalProjection', error),
+					})
+				: null;
+			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.DOCUMENT, result as DocumentRow),
+				try: () =>
+					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.DOCUMENT, projected as DocumentRow),
 				catch: (error) => toDocumentError('getByPathAndFolder:favoriteProjection', error),
 			});
 		});
@@ -263,7 +316,7 @@ const make = (): DocumentServiceInterface => {
 				return { data: [], total: 0, limit, offset };
 			}
 
-			const conditions: any[] = [];
+			const conditions: any[] = [visibleAssetLifecycleCondition(documents.assetId)];
 
 			if (filters.folderId) {
 				conditions.push(eq(documents.folderId, filters.folderId));
@@ -324,19 +377,29 @@ const make = (): DocumentServiceInterface => {
 			const [rows, totalResult] = yield* Effect.tryPromise({
 				try: () =>
 					Promise.all([
-						db.select().from(documents).where(whereClause).orderBy(orderByClause).limit(limit).offset(offset),
+						db
+							.select()
+							.from(documents)
+							.where(whereClause)
+							.orderBy(orderByClause, orderFn(documents.id))
+							.limit(limit)
+							.offset(offset),
 						db.select({ count: count() }).from(documents).where(whereClause),
 					]),
 				catch: (error) => toDocumentError('getAll', error),
 			});
 
 			const total = totalResult[0]?.count ?? 0;
+			const projectedRows = yield* Effect.tryPromise<PaginatedResult<DocumentRow>['data'], DocumentError>({
+				try: async () => (await projectCanonicalMediaRows(rows, 'document')) as DocumentRow[],
+				catch: (error) => toDocumentError('getAll:canonicalProjection', error),
+			});
 
 			return {
 				data:
 					favoriteEntityIds === null
-						? (rows as DocumentRow[])
-						: favoriteService.applyFavoriteProjectionMany(rows as DocumentRow[], favoriteEntityIds),
+						? projectedRows
+						: favoriteService.applyFavoriteProjectionMany(projectedRows, favoriteEntityIds),
 				total,
 				limit,
 				offset,
@@ -349,6 +412,15 @@ const make = (): DocumentServiceInterface => {
 
 			try {
 				validateCreateInput(input);
+				assertCanonicalMediaCreateCommand({
+					assetType: 'document',
+					folderId: input.folderId,
+					hash: input.hash,
+					name: input.name,
+					path: input.path,
+					size: input.size,
+					source: input.source,
+				});
 			} catch (error) {
 				return yield* Effect.fail(error as DocumentError);
 			}
@@ -362,76 +434,65 @@ const make = (): DocumentServiceInterface => {
 						})
 					: false;
 
-			const existing = yield* Effect.tryPromise({
-				try: async () => {
-					const rows = await db
-						.select({ id: documents.id })
-						.from(documents)
-						.where(eq(documents.hash, input.hash))
-						.limit(1);
-					return rows[0] || null;
-				},
-				catch: (error) => toDocumentError('create:checkHash', error),
-			});
-
-			if (existing) {
-				return yield* Effect.fail(
-					new DocumentHashConflict({
-						hash: input.hash,
-						existingId: existing.id,
-						message: `Ya existe un documento con hash ${input.hash} (id: ${existing.id})`,
-					})
-				);
-			}
-
 			let committedFavoriteProfileId: string | null = null;
 			const result = yield* Effect.tryPromise({
-				try: async () => {
-					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
-						const inserted = await transaction
-							.insert(documents)
-							.values({
-								id: crypto.randomUUID(),
-								name: input.name,
-								path: input.path,
-								size: input.size,
-								hash: input.hash,
-								mimeType: input.mimeType,
-								extension: input.extension,
-								folderId: input.folderId,
-								isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
-								isArchived: input.isArchived ?? false,
-								pageCount: input.pageCount ?? null,
-								wordCount: input.wordCount ?? null,
-								language: input.language ?? null,
-								title: input.title ?? null,
-								author: input.author ?? null,
-								subject: input.subject ?? null,
-								keywords: input.keywords ?? null,
-								creator: input.creator ?? null,
-								producer: input.producer ?? null,
-								creationDate: input.creationDate ?? null,
-								modificationDate: input.modificationDate ?? null,
-								encrypted: input.encrypted ?? false,
-								version: input.version ?? null,
-								content: input.content ?? null,
-								summary: input.summary ?? null,
-								createdAt: new Date(),
-								updatedAt: new Date(),
-							})
-							.returning();
-						const created = inserted[0];
-						if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
-							committedFavoriteProfileId = await setFavoriteForActiveProfile(
-								transaction,
-								FavoriteEntityType.DOCUMENT,
-								created.id,
-								true
-							);
+				try: () =>
+					createCanonicalMedia(
+						{
+							assetType: 'document',
+							folderId: input.folderId,
+							hash: input.hash,
+							name: input.name,
+							path: input.path,
+							size: input.size,
+							source: input.source,
+						},
+						async ({ assetId, now, transaction }) => {
+							const inserted = await transaction
+								.insert(documents)
+								.values({
+									id: assetId,
+									assetId,
+									name: input.name,
+									path: input.path,
+									size: input.size,
+									hash: input.hash,
+									mimeType: input.mimeType,
+									extension: input.extension,
+									folderId: input.folderId,
+									isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
+									isArchived: input.isArchived ?? false,
+									pageCount: input.pageCount ?? null,
+									wordCount: input.wordCount ?? null,
+									language: input.language ?? null,
+									title: input.title ?? null,
+									author: input.author ?? null,
+									subject: input.subject ?? null,
+									keywords: input.keywords ?? null,
+									creator: input.creator ?? null,
+									producer: input.producer ?? null,
+									creationDate: input.creationDate ?? null,
+									modificationDate: input.modificationDate ?? null,
+									encrypted: input.encrypted ?? false,
+									version: input.version ?? null,
+									content: input.content ?? null,
+									summary: input.summary ?? null,
+									createdAt: now,
+									updatedAt: now,
+								})
+								.returning();
+							const created = inserted[0];
+							if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
+								committedFavoriteProfileId = await setFavoriteForActiveProfile(
+									transaction,
+									FavoriteEntityType.DOCUMENT,
+									created.id,
+									true
+								);
+							}
+							return created;
 						}
-						return created;
-					});
-				},
+					),
 				catch: (error) => toDocumentError('create:insert', error),
 			});
 
@@ -458,7 +519,42 @@ const make = (): DocumentServiceInterface => {
 		Effect.gen(function* () {
 			documentLogger.info('Actualizando documento:', id);
 
-			yield* getById(id);
+			const current = yield* getById(id);
+			if (input.hash !== undefined && !/^[0-9a-f]{64}$/.test(input.hash)) {
+				return yield* Effect.fail(
+					new DocumentValidationError({
+						field: 'hash',
+						value: input.hash,
+						reason: 'El hash debe ser SHA-256 lowercase',
+					})
+				);
+			}
+			if (current.assetId && (input.path !== undefined || input.folderId !== undefined) && !input.source) {
+				return yield* Effect.fail(
+					new DocumentValidationError({
+						field: 'source',
+						value: input.source,
+						reason: 'Mover un Document canónico requiere una source autorizada',
+					})
+				);
+			}
+			if (current.assetId && input.source) {
+				try {
+					assertCanonicalMediaCreateCommand({
+						assetType: 'document',
+						folderId: input.folderId ?? current.folderId,
+						hash: input.hash ?? current.hash,
+						name: input.name ?? current.name,
+						path: input.path ?? current.path,
+						size: input.size ?? current.size,
+						source: input.source,
+					});
+				} catch (error) {
+					return yield* Effect.fail(
+						new DocumentValidationError({ field: 'source', value: input.source, reason: String(error) })
+					);
+				}
+			}
 
 			const requestedIsFavorite = typeof input.isFavorite === 'boolean' ? input.isFavorite : undefined;
 			const useCanonicalFavoriteBridge =
@@ -502,8 +598,33 @@ const make = (): DocumentServiceInterface => {
 			const result = yield* Effect.tryPromise({
 				try: async () => {
 					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						if (current.assetId && input.source) {
+							const targetFolderId = input.folderId ?? current.folderId;
+							const targetPath = input.path ?? current.path;
+							const [targetFolder] = await transaction
+								.select({ path: folders.path })
+								.from(folders)
+								.where(eq(folders.id, targetFolderId))
+								.limit(1);
+							if (!targetFolder || !isPathInsideDirectory(targetFolder.path, targetPath)) {
+								throw new Error('La ubicación física no pertenece al Folder declarado.');
+							}
+						}
 						const updated = await transaction.update(documents).set(updateData).where(eq(documents.id, id)).returning();
 						const entity = updated[0];
+						if (entity && current.assetId) {
+							await updateCanonicalMediaProjection(
+								{
+									assetId: current.assetId,
+									folderId: input.folderId,
+									hash: input.hash,
+									name: input.name,
+									size: input.size,
+									source: input.source,
+								},
+								transaction as typeof db
+							);
+						}
 						if (entity && requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
 							committedFavoriteProfileId = await setFavoriteForActiveProfile(
 								transaction,
@@ -540,7 +661,20 @@ const make = (): DocumentServiceInterface => {
 		Effect.gen(function* () {
 			documentLogger.info('Eliminando documento:', id);
 
-			yield* getById(id);
+			const [current] = yield* Effect.tryPromise<Array<{ assetId: string | null }>, DocumentError>({
+				try: () => db.select({ assetId: documents.assetId }).from(documents).where(eq(documents.id, id)).limit(1),
+				catch: (error) => toDocumentError('delete:lookup', error),
+			});
+			if (!current) {
+				return yield* Effect.fail(new DocumentNotFound({ id, message: `Documento con ID ${id} no encontrado` }));
+			}
+			if (current.assetId) {
+				yield* Effect.tryPromise({
+					try: () => tombstoneCanonicalAsset(current.assetId!),
+					catch: (error) => toDocumentError('delete:tombstone', error),
+				});
+				return;
+			}
 
 			yield* Effect.tryPromise({
 				try: () =>
@@ -554,6 +688,46 @@ const make = (): DocumentServiceInterface => {
 			documentLogger.info('Documento eliminado exitosamente:', id);
 		});
 
+	const restoreById = (id: string): Effect.Effect<DocumentRow, DocumentError> =>
+		Effect.gen(function* () {
+			const [current] = yield* Effect.tryPromise<Array<{ assetId: string | null }>, DocumentError>({
+				try: () => db.select({ assetId: documents.assetId }).from(documents).where(eq(documents.id, id)).limit(1),
+				catch: (error) => toDocumentError('restoreById:lookup', error),
+			});
+			if (!current?.assetId) {
+				return yield* Effect.fail(new DocumentNotFound({ id, message: `Documento canónico ${id} no encontrado` }));
+			}
+			yield* Effect.tryPromise({
+				try: () => restoreCanonicalAsset(current.assetId!),
+				catch: (error) => toDocumentError('restoreById', error),
+			});
+			return yield* getById(id);
+		});
+
+	const toggleFavorite = (id: string): Effect.Effect<DocumentRow, DocumentError> =>
+		Effect.gen(function* () {
+			const document = yield* getById(id);
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.DOCUMENT),
+				catch: (error) => toDocumentError('toggleFavorite.scope', error),
+			});
+			const next = !(favoriteEntityIds?.includes(id) ?? document.isFavorite);
+			if (favoriteEntityIds === null) {
+				yield* Effect.tryPromise({
+					try: () => db.update(documents).set({ isFavorite: next, updatedAt: new Date() }).where(eq(documents.id, id)),
+					catch: (error) => toDocumentError('toggleFavorite.legacy', error),
+				});
+			} else {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.DOCUMENT, id, next),
+					catch: (error) => toDocumentError('toggleFavorite.canonical', error),
+				});
+			}
+			return yield* getById(id);
+		});
+
+	const getImages = (_id: string): Effect.Effect<unknown[], DocumentError> => Effect.succeed([]);
+
 	return {
 		getById,
 		getByHash,
@@ -562,6 +736,9 @@ const make = (): DocumentServiceInterface => {
 		create,
 		update,
 		delete: deleteDocument,
+		restoreById,
+		toggleFavorite,
+		getImages,
 	};
 };
 
@@ -592,3 +769,5 @@ export const update = (id: string, input: UpdateDocumentInput): Effect.Effect<Do
 
 const docDelete = (id: string): Effect.Effect<void, DocumentError> => make().delete(id);
 export { docDelete as delete };
+
+export const restoreById = (id: string): Effect.Effect<DocumentRow, DocumentError> => make().restoreById(id);

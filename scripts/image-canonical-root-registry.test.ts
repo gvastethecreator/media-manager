@@ -43,18 +43,19 @@ async function createFixture(): Promise<{ imagePath: string; rootPath: string; v
 }
 
 describe('canonical Image root integration', () => {
-	it('requires trusted roots only for the Image slice and derives its opaque source without guessing', async () => {
+	it('requires trusted roots for every recognized media family and derives opaque sources without guessing', async () => {
 		const fixture = await createFixture();
 		process.env[ROOT_GRANTS_ENV] = '';
 		resetConfiguredMediaSourceCache();
 
-		const videoInfo = await getFileInfo(fixture.videoPath, 'folder-video');
-		expect(videoInfo.source).toBeUndefined();
-		await expect(getFileInfo(fixture.imagePath, 'folder-image')).rejects.toMatchObject<Partial<RootAuthorizationError>>(
-			{
+		for (const [path, folderId] of [
+			[fixture.imagePath, 'folder-image'],
+			[fixture.videoPath, 'folder-video'],
+		] as const) {
+			await expect(getFileInfo(path, folderId)).rejects.toMatchObject<Partial<RootAuthorizationError>>({
 				code: 'ROOT_PATH_OUTSIDE',
-			}
-		);
+			});
+		}
 
 		process.env[ROOT_GRANTS_ENV] = JSON.stringify([
 			{ id: 'library', label: 'Library', path: fixture.rootPath, permissions: ['read', 'index'] },
@@ -66,6 +67,10 @@ describe('canonical Image root integration', () => {
 		});
 		expect((await getFileInfo(fixture.imagePath, 'folder-image')).source).toEqual({
 			relativePath: 'photo.jpg',
+			rootId: 'library',
+		});
+		expect((await getFileInfo(fixture.videoPath, 'folder-video')).source).toEqual({
+			relativePath: 'movie.mp4',
 			rootId: 'library',
 		});
 	});

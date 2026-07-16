@@ -1,10 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
+import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createDocument, getDocumentByHash } from '@/services/document/document.service';
-import type { DocumentCreateInput } from '@/transformers/document/validators';
+import { createDocument } from '@/services/document/document.service';
+import type { CreateDocumentInput } from '@/services/document/document.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
+import { isCanonicalSourceIndexed } from '../utils/canonical-source.utils';
 
 // Regex reutilizables para procesamiento de documentos
 const WORD_SPLIT_REGEX = /\s+/g;
@@ -14,16 +16,10 @@ const WORD_SPLIT_REGEX = /\s+/g;
  */
 export class DocumentProcessor {
 	/**
-	 * Verifica si un documento ya existe por hash
+	 * Verifica si la ubicación canónica ya fue indexada.
 	 */
 	async checkExists(fileInfo: FileInfo): Promise<boolean> {
-		if (!fileInfo.hash) return false;
-		try {
-			const existing = await getDocumentByHash(fileInfo.hash);
-			return !!existing;
-		} catch {
-			return false;
-		}
+		return isCanonicalSourceIndexed(fileInfo);
 	}
 
 	/**
@@ -33,8 +29,11 @@ export class DocumentProcessor {
 		if (!fileInfo.hash) {
 			throw new Error('File hash is required for document creation');
 		}
+		if (!fileInfo.source) {
+			throw new Error('An authorized canonical source is required for document creation');
+		}
 
-		const documentData: DocumentCreateInput = {
+		const documentData: CreateDocumentInput = {
 			name: fileInfo.name,
 			path: fileInfo.path,
 			hash: fileInfo.hash,
@@ -55,10 +54,11 @@ export class DocumentProcessor {
 			producer: null,
 			creationDate: null,
 			modificationDate: null,
-			encrypted: null,
+			encrypted: false,
 			version: null,
 			content: null,
 			summary: null,
+			source: extendAuthorizedPathInput(fileInfo.source, { fileModifiedAt: fileInfo.lastModified }),
 		};
 
 		const document = await createDocument(documentData);

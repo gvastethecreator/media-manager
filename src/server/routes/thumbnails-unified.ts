@@ -5,15 +5,29 @@
  *              de imágenes, videos, audio, documentos, JSON y modelos 3D
  */
 
-import { and, count, eq, isNotNull } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import express from 'express';
 import { Effect } from 'effect';
 import { db } from '@/lib/drizzle';
-import { audios, documents, file3Ds, images, jsonFiles, metadatas, videos } from '@/lib/drizzle/schema';
+import {
+	assets,
+	audios,
+	documents,
+	file3Ds,
+	images,
+	jsonFiles,
+	metadatas,
+	sourceFiles,
+	videos,
+} from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
-import { authorizeMediaAssetParam, getAuthorizedRootRegistry } from '@/server/security/authorized-root-request';
+import {
+	authorizeMediaAssetParam,
+	getAuthorizedRootRegistry,
+	sendRootAuthorizationError,
+} from '@/server/security/authorized-root-request';
 import {
 	type MediaAssetType,
 	parseMediaAssetReference,
@@ -354,71 +368,196 @@ router.get(
  */
 router.get(
 	'/stats',
-	effectHandler((_req) =>
+	(req, res, next) => {
+		try {
+			getAuthorizedRootRegistry(req);
+			next();
+		} catch (error) {
+			if (!sendRootAuthorizationError(res, error)) next(error);
+		}
+	},
+	effectHandler((req) =>
 		Effect.tryPromise({
 			try: async () => {
-				const [imageStats, videoStats, audioStats, documentStats, jsonStats, file3dStats] = await Promise.all([
+				const registry = getAuthorizedRootRegistry(req);
+				const [imageRows, videoRows, audioRows, documentRows, jsonRows, file3dRows] = await Promise.all([
 					db
-						.select({ count: count() })
+						.select({
+							assetId: images.assetId,
+							id: images.id,
+							path: images.path,
+							relativePath: sourceFiles.relativePath,
+							rootId: sourceFiles.rootId,
+							sourceAssetId: sourceFiles.assetId,
+							withDerived: sql<number>`CASE WHEN ${images.thumbnail} IS NOT NULL THEN 1 ELSE 0 END`,
+						})
 						.from(images)
-						.where(and(isNotNull(images.thumbnail), visibleAssetLifecycleCondition(images.assetId))),
+						.leftJoin(assets, eq(images.assetId, assets.id))
+						.leftJoin(sourceFiles, eq(assets.primarySourceFileId, sourceFiles.id))
+						.where(visibleAssetLifecycleCondition(images.assetId)),
 					db
-						.select({ count: count() })
+						.select({
+							assetId: videos.assetId,
+							id: videos.id,
+							path: videos.path,
+							relativePath: sourceFiles.relativePath,
+							rootId: sourceFiles.rootId,
+							sourceAssetId: sourceFiles.assetId,
+							withDerived: sql<number>`CASE WHEN ${videos.thumbnail} IS NOT NULL THEN 1 ELSE 0 END`,
+						})
 						.from(videos)
-						.where(and(isNotNull(videos.thumbnail), visibleAssetLifecycleCondition(videos.assetId))),
-					db.select({ count: count() }).from(audios).where(visibleAssetLifecycleCondition(audios.assetId)),
+						.leftJoin(assets, eq(videos.assetId, assets.id))
+						.leftJoin(sourceFiles, eq(assets.primarySourceFileId, sourceFiles.id))
+						.where(visibleAssetLifecycleCondition(videos.assetId)),
 					db
-						.select({ count: count() })
-						.from(metadatas)
-						.where(and(eq(metadatas.entityType, 'document'), eq(metadatas.key, 'thumbnail'))),
-					db.select({ count: count() }).from(jsonFiles).where(visibleAssetLifecycleCondition(jsonFiles.assetId)),
-					db.select({ count: count() }).from(file3Ds).where(visibleAssetLifecycleCondition(file3Ds.assetId)),
+						.select({
+							assetId: audios.assetId,
+							id: audios.id,
+							path: audios.path,
+							relativePath: sourceFiles.relativePath,
+							rootId: sourceFiles.rootId,
+							sourceAssetId: sourceFiles.assetId,
+							withDerived: sql<number>`CASE WHEN json_valid(${audios.metadata}) THEN
+								json_type(${audios.metadata}, '$.waveform') IS NOT NULL OR
+								json_type(${audios.metadata}, '$.waveformBase64') IS NOT NULL
+							ELSE 0 END`,
+						})
+						.from(audios)
+						.leftJoin(assets, eq(audios.assetId, assets.id))
+						.leftJoin(sourceFiles, eq(assets.primarySourceFileId, sourceFiles.id))
+						.where(visibleAssetLifecycleCondition(audios.assetId)),
+					db
+						.select({
+							assetId: documents.assetId,
+							id: documents.id,
+							path: documents.path,
+							relativePath: sourceFiles.relativePath,
+							rootId: sourceFiles.rootId,
+							sourceAssetId: sourceFiles.assetId,
+							withDerived: sql<number>`CASE WHEN ${documents.thumbnail} IS NOT NULL OR EXISTS (
+								SELECT 1 FROM ${metadatas}
+								WHERE ${metadatas.entityId} = ${documents.id}
+									AND ${metadatas.entityType} = 'document'
+									AND ${metadatas.key} = 'thumbnail'
+									AND ${metadatas.value} IS NOT NULL
+							) THEN 1 ELSE 0 END`,
+						})
+						.from(documents)
+						.leftJoin(assets, eq(documents.assetId, assets.id))
+						.leftJoin(sourceFiles, eq(assets.primarySourceFileId, sourceFiles.id))
+						.where(visibleAssetLifecycleCondition(documents.assetId)),
+					db
+						.select({
+							assetId: jsonFiles.assetId,
+							id: jsonFiles.id,
+							path: jsonFiles.path,
+							relativePath: sourceFiles.relativePath,
+							rootId: sourceFiles.rootId,
+							sourceAssetId: sourceFiles.assetId,
+							withDerived: sql<number>`0`,
+						})
+						.from(jsonFiles)
+						.leftJoin(assets, eq(jsonFiles.assetId, assets.id))
+						.leftJoin(sourceFiles, eq(assets.primarySourceFileId, sourceFiles.id))
+						.where(visibleAssetLifecycleCondition(jsonFiles.assetId)),
+					db
+						.select({
+							assetId: file3Ds.assetId,
+							id: file3Ds.id,
+							path: file3Ds.path,
+							relativePath: sourceFiles.relativePath,
+							rootId: sourceFiles.rootId,
+							sourceAssetId: sourceFiles.assetId,
+							withDerived: sql<number>`0`,
+						})
+						.from(file3Ds)
+						.leftJoin(assets, eq(file3Ds.assetId, assets.id))
+						.leftJoin(sourceFiles, eq(assets.primarySourceFileId, sourceFiles.id))
+						.where(visibleAssetLifecycleCondition(file3Ds.assetId)),
 				]);
-
-				const [totalImages, totalVideos, totalAudios, totalDocuments, totalJsonFiles, totalFile3Ds] = await Promise.all(
+				const scopeRows = async <
+					TRow extends {
+						assetId: string | null;
+						path: string;
+						relativePath: string | null;
+						rootId: string | null;
+						sourceAssetId: string | null;
+						withDerived: number;
+					},
+				>(
+					rows: readonly TRow[]
+				): Promise<TRow[]> => {
+					const scoped: TRow[] = [];
+					for (const row of rows) {
+						if (row.assetId) {
+							if (row.sourceAssetId !== row.assetId || !row.rootId || !row.relativePath) continue;
+							try {
+								const reference = { relativePath: row.relativePath, rootId: row.rootId };
+								await registry.resolve(reference, 'read');
+								await registry.resolve(reference, 'index');
+								scoped.push(row);
+							} catch {
+								// El rootId persistido no basta: la ubicación canónica debe seguir
+								// resolviendo bajo el root y los permisos actuales de la solicitud.
+							}
+							continue;
+						}
+						try {
+							await registry.authorizeAbsolutePath(row.path, 'read');
+							await registry.authorizeAbsolutePath(row.path, 'index');
+							scoped.push(row);
+						} catch {
+							// Legacy rows outside the request scope are intentionally invisible.
+						}
+					}
+					return scoped;
+				};
+				const [scopedImages, scopedVideos, scopedAudios, scopedDocuments, scopedJson, scopedFile3d] = await Promise.all(
 					[
-						db.select({ count: count() }).from(images).where(visibleAssetLifecycleCondition(images.assetId)),
-						db.select({ count: count() }).from(videos).where(visibleAssetLifecycleCondition(videos.assetId)),
-						db.select({ count: count() }).from(audios).where(visibleAssetLifecycleCondition(audios.assetId)),
-						db.select({ count: count() }).from(documents).where(visibleAssetLifecycleCondition(documents.assetId)),
-						db.select({ count: count() }).from(jsonFiles).where(visibleAssetLifecycleCondition(jsonFiles.assetId)),
-						db.select({ count: count() }).from(file3Ds).where(visibleAssetLifecycleCondition(file3Ds.assetId)),
+						scopeRows(imageRows),
+						scopeRows(videoRows),
+						scopeRows(audioRows),
+						scopeRows(documentRows),
+						scopeRows(jsonRows),
+						scopeRows(file3dRows),
 					]
 				);
+				const derivedCount = (rows: ReadonlyArray<{ withDerived: number }>) =>
+					rows.reduce((total, row) => total + (Number(row.withDerived) ? 1 : 0), 0);
 
 				return {
 					byType: {
 						image: {
-							total: Number(totalImages[0]?.count || 0),
-							withThumbnail: Number(imageStats[0]?.count || 0),
+							total: scopedImages.length,
+							withThumbnail: derivedCount(scopedImages),
 						},
 						video: {
-							total: Number(totalVideos[0]?.count || 0),
-							withThumbnail: Number(videoStats[0]?.count || 0),
+							total: scopedVideos.length,
+							withThumbnail: derivedCount(scopedVideos),
 						},
 						audio: {
-							total: Number(totalAudios[0]?.count || 0),
-							withWaveform: Number(audioStats[0]?.count || 0),
+							total: scopedAudios.length,
+							withWaveform: derivedCount(scopedAudios),
 						},
 						document: {
-							total: Number(totalDocuments[0]?.count || 0),
-							withThumbnail: Number(documentStats[0]?.count || 0),
+							total: scopedDocuments.length,
+							withThumbnail: derivedCount(scopedDocuments),
 						},
 						jsonFile: {
-							total: Number(totalJsonFiles[0]?.count || 0),
+							total: scopedJson.length,
 						},
 						file3d: {
-							total: Number(totalFile3Ds[0]?.count || 0),
+							total: scopedFile3d.length,
 						},
 					},
 					totals: {
 						entities:
-							Number(totalImages[0]?.count || 0) +
-							Number(totalVideos[0]?.count || 0) +
-							Number(totalAudios[0]?.count || 0) +
-							Number(totalDocuments[0]?.count || 0) +
-							Number(totalJsonFiles[0]?.count || 0) +
-							Number(totalFile3Ds[0]?.count || 0),
+							scopedImages.length +
+							scopedVideos.length +
+							scopedAudios.length +
+							scopedDocuments.length +
+							scopedJson.length +
+							scopedFile3d.length,
 					},
 				};
 			},
