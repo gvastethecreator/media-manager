@@ -6,10 +6,7 @@ import { open, readdir, readFile, rm, stat, statfs } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { resolveDatabasePath } from './database-safety';
 import { compareSchema, loadSchemaContract, type SchemaDriftReport } from './schema-fingerprint';
-import {
-	assertCanonicalSchemaInvariants,
-	collectCanonicalSchemaInvariantErrors,
-} from './canonical-schema-invariants';
+import { assertCanonicalSchemaInvariants, collectCanonicalSchemaInvariantErrors } from './canonical-schema-invariants';
 
 export const MIGRATIONS_DIRECTORY = resolve(import.meta.dir, '../../src/lib/drizzle/migrations');
 export const MIGRATION_TABLE = '__media_manager_migrations';
@@ -187,7 +184,7 @@ async function preflightExistingDatabase(
 		// Connection-local only: this must not change the database rejected by preflight.
 		database.exec(`PRAGMA busy_timeout = ${Math.max(0, Math.trunc(busyTimeoutMs))}`);
 		const applied = validateMigrationPreconditions(database, migrations, allowExistingPending);
-		if (applied.length === migrations.length) assertCanonicalSchemaInvariants(database);
+		assertCanonicalSchemaInvariants(database);
 		if (validateSchema && applied.length === migrations.length) {
 			await validateCanonicalSchema(database, migrationsDirectory);
 		}
@@ -199,7 +196,18 @@ async function preflightExistingDatabase(
 
 async function validateCanonicalSchema(database: Database, migrationsDirectory: string): Promise<void> {
 	assertCanonicalSchemaInvariants(database);
-	if (resolve(migrationsDirectory) !== resolve(MIGRATIONS_DIRECTORY)) return;
+	if (resolve(migrationsDirectory) !== resolve(MIGRATIONS_DIRECTORY)) {
+		const [candidate, canonical] = await Promise.all([
+			loadMigrations(migrationsDirectory),
+			loadMigrations(MIGRATIONS_DIRECTORY),
+		]);
+		if (
+			candidate.length !== canonical.length ||
+			candidate.some((migration, index) => migration.name !== canonical[index]?.name)
+		) {
+			return;
+		}
+	}
 	const schema = compareSchema(database, await loadSchemaContract());
 	const unknown = schema.extra.filter((entry) => entry.classification === 'unknown');
 	if (schema.missing.length > 0 || schema.changed.length > 0 || unknown.length > 0) {
@@ -343,6 +351,7 @@ export async function migrateDatabase({
 	try {
 		database.exec(`PRAGMA busy_timeout = ${Math.max(0, Math.trunc(busyTimeoutMs))}`);
 		const appliedBeforeMigration = validateMigrationPreconditions(database, migrations, allowExistingPending);
+		assertCanonicalSchemaInvariants(database);
 		if (validateSchema && appliedBeforeMigration.length === migrations.length) {
 			await validateCanonicalSchema(database, migrationsDirectory);
 		}
@@ -381,7 +390,13 @@ export async function migrateDatabase({
 						`La migración ${migration.name} dejaría ${foreignKeyViolations.length} violación(es) de claves foráneas.`
 					);
 				}
-				if (migration.version === migrations.length - 1) assertCanonicalSchemaInvariants(database);
+				// Once a canonical table appears, validate its non-Drizzle invariants before
+				// committing that migration. Waiting for the final migration can otherwise
+				// persist a corrupt earlier migration and only roll back the later one.
+				assertCanonicalSchemaInvariants(database);
+				if (validateSchema && migration.version === migrations.length - 1) {
+					await validateCanonicalSchema(database, migrationsDirectory);
+				}
 				const durationMs = Math.max(0, Math.round(performance.now() - startedAt));
 				database
 					.query(

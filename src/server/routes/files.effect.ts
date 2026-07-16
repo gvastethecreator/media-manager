@@ -180,12 +180,16 @@ router.post('/assets/move', async (request, response) => {
 					updateMediaAssetLocation(asset, originalLocation.path, {
 						folderId: targetFolderId,
 						path: destinationAbsolutePath,
+						source: destination,
 					}),
 				destination,
 				prepareRecovery: prepareFileMutationRecovery,
 				registry,
 				rollbackCommit: (destinationAbsolutePath) =>
-					updateMediaAssetLocation(asset, destinationAbsolutePath, originalLocation),
+					updateMediaAssetLocation(asset, destinationAbsolutePath, {
+						...originalLocation,
+						source: originalLocation.source,
+					}),
 				source,
 			});
 			if (relocation.cleanupPending) {
@@ -244,12 +248,16 @@ router.put('/assets/rename', async (request, response) => {
 					updateMediaAssetLocation(asset, originalLocation.path, {
 						name: rawRename.newName.trim(),
 						path: destinationAbsolutePath,
+						source: destination,
 					}),
 				destination,
 				prepareRecovery: prepareFileMutationRecovery,
 				registry,
 				rollbackCommit: (destinationAbsolutePath) =>
-					updateMediaAssetLocation(asset, destinationAbsolutePath, originalLocation),
+					updateMediaAssetLocation(asset, destinationAbsolutePath, {
+						...originalLocation,
+						source: originalLocation.source,
+					}),
 				source,
 			});
 			if (relocation.cleanupPending) {

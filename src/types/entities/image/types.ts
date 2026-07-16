@@ -78,11 +78,14 @@ export interface ImageCreateInput {
 	metadata?: string | null;
 	name: string;
 	notes?: string[];
-	path: string;
 	places?: string[];
 	prompts?: string[];
 	properties?: string[];
 	size: number;
+	source: {
+		relativePath: string;
+		rootId: string;
+	};
 	tags?: string[];
 	width: number;
 	wildcards?: string[];
@@ -99,7 +102,6 @@ export interface ImageUpdateInput {
 	collections?: string[];
 	concepts?: string[];
 	description?: string | null;
-	folderId?: string | null;
 	groups?: string[];
 	metadata?: string | null;
 	name?: string;

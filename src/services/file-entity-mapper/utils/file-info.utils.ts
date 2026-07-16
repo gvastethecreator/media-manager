@@ -72,8 +72,14 @@ export function getMimeTypeFromExtension(extension: string): string {
  * Extrae información básica de un archivo
  */
 export async function getFileInfo(filePath: string, folderId: string): Promise<FileInfo> {
-	const stats = await stat(filePath);
 	const extension = extname(filePath).toLowerCase();
+	const sourcePromise =
+		getEntityTypeFromExtension(extension) === ('image' as EntityType)
+			? import('@/server/security/configured-media-source').then(({ resolveConfiguredMediaSource }) =>
+					resolveConfiguredMediaSource(filePath)
+				)
+			: Promise.resolve(undefined);
+	const [stats, source] = await Promise.all([stat(filePath), sourcePromise]);
 	const name = basename(filePath, extension);
 	const hash = await calculateFileHash(filePath);
 	return {
@@ -84,5 +90,6 @@ export async function getFileInfo(filePath: string, folderId: string): Promise<F
 		hash,
 		lastModified: stats.mtime,
 		folderId,
+		source,
 	};
 }

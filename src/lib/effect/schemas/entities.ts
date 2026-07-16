@@ -250,6 +250,10 @@ export class FolderUpdateInput extends Schema.Class<FolderUpdateInput>('FolderUp
  */
 export class Image extends Schema.Class<Image>('Image')({
 	id: Schema.String,
+	assetId: Schema.NullOr(Schema.String),
+	legacyId: Schema.String,
+	canonicalState: Schema.Literal('canonical', 'legacy_only', 'diverged'),
+	canonicalDivergences: Schema.Array(Schema.String),
 	name: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(255)),
 	description: Schema.NullOr(Schema.String),
 	path: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(1000)),
@@ -329,7 +333,6 @@ export class ImageUpdateInput extends Schema.Class<ImageUpdateInput>('ImageUpdat
 	aiEngine: Schema.optional(Schema.NullOr(Schema.String)),
 	aiModel: Schema.optional(Schema.NullOr(Schema.String)),
 	aiOriginDetected: Schema.optional(Schema.Boolean),
-	folderId: Schema.optional(Schema.String),
 	noteId: Schema.optional(Schema.NullOr(Schema.String)),
 }) {}
 

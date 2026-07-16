@@ -4,7 +4,7 @@
  */
 
 import { Schema } from '@effect/schema';
-import { asc, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { imagePlaces, images, places } from '@/lib/drizzle/schema';
@@ -12,6 +12,7 @@ import { Place, PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/lib
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { normalizeCounts, sumCounts } from '@/transformers/common/counts';
 import {
@@ -280,7 +281,7 @@ const make = (): PlaceServiceInterface => {
 						.select({ image: images })
 						.from(imagePlaces)
 						.innerJoin(images, eq(imagePlaces.A, images.id))
-						.where(eq(imagePlaces.B, id)),
+						.where(and(eq(imagePlaces.B, id), visibleImageLifecycleCondition())),
 				catch: (error) => fromUnknownError('getImages', error),
 			});
 			return result.map((r) => r.image);

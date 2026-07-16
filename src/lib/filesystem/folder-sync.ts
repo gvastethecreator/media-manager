@@ -32,6 +32,7 @@ import {
 	imageWorldItems,
 	jsonFiles,
 	metadatas,
+	sourceFiles,
 	thumbnails,
 	uploadedImages,
 	videoAlbums,
@@ -363,7 +364,42 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 	try {
 		// 1. Eliminar contenidos y relaciones de carpetas que ya no existen
 		if (result.removed.length > 0) {
-			const folderIds = result.removed.map((f) => f.id);
+			const observedFolderIds = result.removed.map((folder) => folder.id);
+			const removedFolderRows: Array<{ id: string; parentId: string | null }> = await db
+				.select({ id: folders.id, parentId: folders.parentId })
+				.from(folders)
+				.where(inArray(folders.id, observedFolderIds));
+			const canonicalSources: Array<{ folderId: string | null; id: string }> = await db
+				.select({ folderId: sourceFiles.folderId, id: sourceFiles.id })
+				.from(sourceFiles)
+				.where(inArray(sourceFiles.folderId, observedFolderIds));
+			const protectedFolderIds = new Set(
+				canonicalSources.flatMap((source) => (source.folderId ? [source.folderId] : []))
+			);
+			const removedParentById = new Map(removedFolderRows.map((folder) => [folder.id, folder.parentId]));
+			for (const sourceFolderId of [...protectedFolderIds]) {
+				let ancestorId = removedParentById.get(sourceFolderId) ?? null;
+				while (ancestorId && !protectedFolderIds.has(ancestorId)) {
+					protectedFolderIds.add(ancestorId);
+					ancestorId = removedParentById.get(ancestorId) ?? null;
+				}
+			}
+			if (canonicalSources.length > 0) {
+				await db
+					.update(sourceFiles)
+					.set({ availability: 'missing', observedAt: new Date(), updatedAt: new Date() })
+					.where(
+						inArray(
+							sourceFiles.id,
+							canonicalSources.map((source) => source.id)
+						)
+					);
+				syncLogger.warn('Se preservaron carpetas y placements canónicos ausentes', {
+					canonicalSources: canonicalSources.length,
+					folders: protectedFolderIds.size,
+				});
+			}
+			const folderIds = observedFolderIds.filter((folderId) => !protectedFolderIds.has(folderId));
 
 			syncLogger.info(`🗑️ Limpieza en cascada para ${folderIds.length} carpetas eliminadas`);
 
@@ -537,7 +573,11 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 				}
 			});
 
-			syncLogger.info(`✅ Limpieza en cascada completada y carpetas eliminadas: ${result.removed.length}`);
+			if (folderIds.length > 0) {
+				syncLogger.info(`✅ Limpieza en cascada completada y carpetas eliminadas: ${folderIds.length}`);
+			} else {
+				syncLogger.info('✅ No hubo limpieza destructiva: todas las carpetas ausentes contienen placements canónicos');
+			}
 		}
 
 		// 2. Agregar nuevas carpetas
@@ -671,6 +711,7 @@ export async function syncSpecificFolder(folderId: string, options: FolderSyncOp
 		.select({
 			id: folders.id,
 			name: folders.name,
+			parentId: folders.parentId,
 			path: folders.path,
 		})
 		.from(folders)
@@ -684,19 +725,37 @@ export async function syncSpecificFolder(folderId: string, options: FolderSyncOp
 	// Verificar si la carpeta aún existe en el sistema de archivos
 	const folderPath = folder[0].path;
 	if (!(await folderExists(folderPath))) {
-		// La carpeta no existe, marcarla para eliminación
-		return {
+		const allFolders: Array<{ id: string; name: string; parentId: string | null; path: string }> = await db
+			.select({ id: folders.id, name: folders.name, parentId: folders.parentId, path: folders.path })
+			.from(folders);
+		const removedFolderIds = new Set([folderId]);
+		let expanded = true;
+		while (expanded) {
+			expanded = false;
+			for (const candidate of allFolders) {
+				if (candidate.parentId && removedFolderIds.has(candidate.parentId) && !removedFolderIds.has(candidate.id)) {
+					removedFolderIds.add(candidate.id);
+					expanded = true;
+				}
+			}
+		}
+		const removed = allFolders
+			.filter((candidate) => removedFolderIds.has(candidate.id))
+			.map(({ id, name, path }) => ({ id, name, path }));
+		const result: FolderSyncResult = {
 			added: [],
-			removed: [{ id: folder[0].id, path: folder[0].path, name: folder[0].name }],
+			removed,
 			updated: [],
 			errors: [],
 			stats: {
-				totalProcessed: 1,
+				totalProcessed: removed.length,
 				duration: 0,
 				startTime: new Date(),
 				endTime: new Date(),
 			},
 		};
+		if (!options.dryRun) await executeSyncChanges(result);
+		return result;
 	}
 
 	// Si existe, realizar sincronización completa desde esta carpeta

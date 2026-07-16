@@ -16,10 +16,10 @@ export class VideoProcessor {
 	/**
 	 * Verifica si un video ya existe por hash
 	 */
-	async checkExists(hash: string): Promise<boolean> {
-		if (!hash) return false;
+	async checkExists(fileInfo: FileInfo): Promise<boolean> {
+		if (!fileInfo.hash) return false;
 		try {
-			const existing = await Effect.runPromise(getVideoByHash(hash));
+			const existing = await Effect.runPromise(getVideoByHash(fileInfo.hash));
 			return !!existing;
 		} catch {
 			return false;

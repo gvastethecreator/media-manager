@@ -47,6 +47,7 @@ export type RootAuthorizationErrorCode =
 	| 'ROOT_PATH_INVALID'
 	| 'ROOT_PATH_NOT_FOUND'
 	| 'ROOT_PATH_OUTSIDE'
+	| 'ROOT_PATH_CONFLICT'
 	| 'ROOT_PERMISSION_DENIED';
 
 export class RootAuthorizationError extends Error {
@@ -124,6 +125,13 @@ function normalizeRelativePath(input: unknown): string {
 		}
 	}
 	return segments.join('/');
+}
+
+export function validateAuthorizedPathReference(reference: AuthorizedPathReference): AuthorizedPathReference {
+	if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(reference.rootId)) {
+		throw new RootAuthorizationError('ROOT_PATH_INVALID', 'El rootId de la referencia no es válido.', 400);
+	}
+	return { relativePath: normalizeRelativePath(reference.relativePath), rootId: reference.rootId };
 }
 
 function parseGrant(value: unknown, index: number): AuthorizedRootGrantInput {
@@ -237,7 +245,7 @@ export class AuthorizedRootRegistry {
 		if (!grant.permissions.has(permission)) {
 			throw new RootAuthorizationError('ROOT_PERMISSION_DENIED', 'El media root no concede esta operación.', 403);
 		}
-		const relativePath = normalizeRelativePath(reference.relativePath);
+		const { relativePath } = validateAuthorizedPathReference(reference);
 		const candidate = resolve(grant.realPath, ...relativePath.split('/').filter(Boolean));
 		if (!isContained(grant.realPath, candidate)) {
 			throw new RootAuthorizationError('ROOT_PATH_OUTSIDE', 'La ruta resuelve fuera del media root.', 403);

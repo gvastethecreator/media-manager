@@ -13,6 +13,7 @@ import type { RuntimeHealthStatus } from '@/runtime/runtime-health';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, logWarning, requestLogger } from './middleware/logging';
+import { syncCanonicalMediaRoots } from '@/services/media-core/media-root-registry.service';
 import { createLocalApiSessionMiddleware, resolveLocalApiSessionOptions } from './middleware/local-api-session';
 import { registerRoutes } from './route-registry';
 import { createAuthorizedRootRegistryFromEnvironment } from './security/authorized-roots';
@@ -23,6 +24,7 @@ const app = express();
 let runtimeHealthStatus: RuntimeHealthStatus = 'starting';
 await ensureDatabaseReady();
 app.locals.authorizedRootRegistry = await createAuthorizedRootRegistryFromEnvironment();
+await syncCanonicalMediaRoots(app.locals.authorizedRootRegistry);
 const mutationRecovery = await reconcilePendingFileMutations(app.locals.authorizedRootRegistry);
 if (mutationRecovery.manual > 0) {
 	logError(`La recuperación de archivos requiere revisión manual: ${mutationRecovery.manual} operación(es).`);

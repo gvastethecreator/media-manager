@@ -1,6 +1,6 @@
 {
 	"formatVersion": 1,
-	"fingerprint": "1a132e3f495217ce8a90c50f389784e14fdd4c5e8dfc7c5f434d40dd449f1e63",
+	"fingerprint": "37b1c8f643e9cd2d3bf900cc6869ab72d52afef40c096bbb6295411f710e5978",
 	"generatedFrom": "src/lib/drizzle/migrations",
 	"objects": [
 		{
@@ -348,6 +348,12 @@
 		{
 			"name": "Image_aiOriginDetected_idx",
 			"sqlHash": "7e77d3f5d6b98b2904c9681c58a375f2179e41c73dddcbc92b88f25039aae587",
+			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "Image_assetId_key",
+			"sqlHash": "dacecda2c6eaeb7c0b66279124c468825d05b10930e6b2bd14f30d19a5e2005d",
 			"tableName": "Image",
 			"type": "index"
 		},
@@ -1133,7 +1139,7 @@
 		},
 		{
 			"name": "Image",
-			"sqlHash": "e0a2b79513635901f5a74b63b7940bf07757d6fcb475df334a31bd1f32976fee",
+			"sqlHash": "8468b90f3e55c7ff2009441d1bb48c21d563cba1f0f379e3b5f9def7f9bb43ad",
 			"tableName": "Image",
 			"type": "table"
 		},

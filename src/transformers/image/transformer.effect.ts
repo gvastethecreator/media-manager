@@ -23,6 +23,10 @@ export class ImageTransformError extends Schema.TaggedError<ImageTransformError>
  */
 export const ImageRawSchema = Schema.Struct({
 	id: Schema.String,
+	assetId: Schema.optional(Schema.NullOr(Schema.String)),
+	legacyId: Schema.optional(Schema.String),
+	canonicalState: Schema.optional(Schema.Literal('canonical', 'legacy_only', 'diverged')),
+	canonicalDivergences: Schema.optional(Schema.Array(Schema.String)),
 	name: Schema.String,
 	description: Schema.NullOr(Schema.String),
 	path: Schema.String,
@@ -71,6 +75,13 @@ export const ImageRawSchema = Schema.Struct({
 
 export type ImageRaw = Schema.Schema.Type<typeof ImageRawSchema>;
 
+type ImageTransformInput = Omit<ImageBase, 'assetId' | 'canonicalDivergences' | 'canonicalState' | 'legacyId'> &
+	Partial<Pick<ImageBase, 'assetId' | 'canonicalState' | 'legacyId'>> & {
+		canonicalDivergences?: readonly string[];
+		_count?: any;
+		folder?: any;
+	};
+
 /**
  * Schema para ImageSummary (vista reducida)
  */
@@ -103,7 +114,7 @@ function computeAspectRatio(width: number, height: number): number {
 /**
  * Completa campos default de una imagen (función pura)
  */
-function mapImageToCompletePure(image: ImageBase & { _count?: any; folder?: any }): ImageWithStats {
+function mapImageToCompletePure(image: ImageTransformInput): ImageWithStats {
 	const stats: ImageStatistics = {
 		...createDefaultEntityStats({ type: 'image' }),
 		imageCount: 1,
@@ -136,6 +147,11 @@ function mapImageToCompletePure(image: ImageBase & { _count?: any; folder?: any 
 
 	return {
 		...image,
+		id: image.assetId ?? image.id,
+		assetId: image.assetId ?? null,
+		legacyId: image.legacyId ?? image.id,
+		canonicalState: image.canonicalState ?? (image.assetId ? 'canonical' : 'legacy_only'),
+		canonicalDivergences: [...(image.canonicalDivergences ?? [])],
 		entityType: 'image' as const,
 		stats,
 		thumbnailUrl: image.thumbnail || '',
@@ -174,7 +190,7 @@ function mapToImageSummaryPure(image: ImageBase): ImageSummaryType {
  * ```
  */
 export const transformImageToWithStats = (
-	image: ImageBase & { _count?: any; folder?: any }
+	image: ImageTransformInput
 ): Effect.Effect<ImageWithStats, ImageTransformError> =>
 	Effect.gen(function* () {
 		try {
@@ -198,7 +214,7 @@ export const transformImageToWithStats = (
  * ```
  */
 export const transformImagesToWithStats = (
-	images: Array<ImageBase & { _count?: any; folder?: any }>
+	images: ImageTransformInput[]
 ): Effect.Effect<ImageWithStats[], ImageTransformError> =>
 	Effect.all(images.map(transformImageToWithStats), { concurrency: 'unbounded' });
 

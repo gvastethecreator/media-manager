@@ -5,13 +5,14 @@
  *              de imágenes, videos, audio, documentos, JSON y modelos 3D
  */
 
-import { and, eq } from 'drizzle-orm';
+import { and, count, eq, isNotNull } from 'drizzle-orm';
 import express from 'express';
 import { Effect } from 'effect';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, images, jsonFiles, metadatas, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { authorizeMediaAssetParam, getAuthorizedRootRegistry } from '@/server/security/authorized-root-request';
 import {
 	type MediaAssetType,
@@ -358,30 +359,27 @@ router.get(
 			try: async () => {
 				const [imageStats, videoStats, audioStats, documentStats, jsonStats, file3dStats] = await Promise.all([
 					db
-						.select({ count: db.fn.count() })
+						.select({ count: count() })
 						.from(images)
-						.where(and(eq(db.sql`length(${images.thumbnail})`, images.thumbnail))),
+						.where(and(isNotNull(images.thumbnail), visibleImageLifecycleCondition())),
+					db.select({ count: count() }).from(videos).where(isNotNull(videos.thumbnail)),
+					db.select({ count: count() }).from(audios),
 					db
-						.select({ count: db.fn.count() })
-						.from(videos)
-						.where(and(eq(videos.thumbnail, videos.thumbnail))),
-					db.select({ count: db.fn.count() }).from(audios),
-					db
-						.select({ count: db.fn.count() })
+						.select({ count: count() })
 						.from(metadatas)
 						.where(and(eq(metadatas.entityType, 'document'), eq(metadatas.key, 'thumbnail'))),
-					db.select({ count: db.fn.count() }).from(jsonFiles),
-					db.select({ count: db.fn.count() }).from(file3Ds),
+					db.select({ count: count() }).from(jsonFiles),
+					db.select({ count: count() }).from(file3Ds),
 				]);
 
 				const [totalImages, totalVideos, totalAudios, totalDocuments, totalJsonFiles, totalFile3Ds] = await Promise.all(
 					[
-						db.select({ count: db.fn.count() }).from(images),
-						db.select({ count: db.fn.count() }).from(videos),
-						db.select({ count: db.fn.count() }).from(audios),
-						db.select({ count: db.fn.count() }).from(documents),
-						db.select({ count: db.fn.count() }).from(jsonFiles),
-						db.select({ count: db.fn.count() }).from(file3Ds),
+						db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
+						db.select({ count: count() }).from(videos),
+						db.select({ count: count() }).from(audios),
+						db.select({ count: count() }).from(documents),
+						db.select({ count: count() }).from(jsonFiles),
+						db.select({ count: count() }).from(file3Ds),
 					]
 				);
 

@@ -1,5 +1,7 @@
 import type { NextFunction, Response } from 'express';
 import { stat } from 'node:fs/promises';
+import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
+import { isPathInsideDirectory } from '@/lib/filesystem/path-containment';
 import { type MediaAssetType, parseMediaAssetReference, resolveMediaAssetReference } from './media-asset-reference';
 import {
 	AuthorizedRootRegistry,
@@ -87,7 +89,38 @@ export function authorizeMediaPathInput(options: {
 				throw new RootAuthorizationError('ROOT_PATH_INVALID', 'La referencia source tiene un tipo inválido.', 400);
 			}
 			const { absolutePath: _absolutePath, filePath: _filePath, path: _path, source: _source, ...safeBody } = body;
-			request.body = { ...safeBody, path: resolved.absolutePath };
+			request.body = {
+				...safeBody,
+				path: resolved.absolutePath,
+				source: createAuthorizedPathInput(resolved),
+			};
+			next();
+		} catch (error) {
+			if (!sendRootAuthorizationError(response, error)) next(error);
+		}
+	};
+}
+
+/** Ensures a sanitized media source is physically contained by its declared Folder. */
+export function authorizeMediaPlacementInput() {
+	return async (
+		request: { app: { locals: Record<string, unknown> }; body?: Record<string, unknown> },
+		response: Response,
+		next: NextFunction
+	): Promise<void> => {
+		try {
+			const body = request.body ?? {};
+			if (typeof body.folderId !== 'string' || typeof body.path !== 'string') {
+				throw new RootAuthorizationError('ROOT_PATH_INVALID', 'Se requiere un Folder y una source autorizada.', 400);
+			}
+			const folder = await resolveAuthorizedFolderById(request, body.folderId, 'index');
+			if (!isPathInsideDirectory(folder.absolutePath, body.path)) {
+				throw new RootAuthorizationError(
+					'ROOT_PATH_CONFLICT',
+					'La source no pertenece físicamente al Folder declarado.',
+					409
+				);
+			}
 			next();
 		} catch (error) {
 			if (!sendRootAuthorizationError(response, error)) next(error);
@@ -120,7 +153,7 @@ export function authorizeFolderPathById(permission: 'delete' | 'index' | 'read' 
 		next: NextFunction
 	): Promise<void> => {
 		try {
-			const folderId = request.params.id;
+			const folderId = request.params.folderId ?? request.params.id;
 			const authorized = await resolveAuthorizedFolderById(request, folderId, permission);
 			response.locals.authorizedRootReference = {
 				relativePath: authorized.relativePath,
@@ -134,6 +167,7 @@ export function authorizeFolderPathById(permission: 'delete' | 'index' | 'read' 
 }
 
 export function authorizeMediaAssetParam(options: {
+	allowMissing?: boolean;
 	assetType: MediaAssetType | ((request: { params: Record<string, string> }) => unknown);
 	idParam?: string;
 	permissions?: RootPermission[];
@@ -153,9 +187,13 @@ export function authorizeMediaAssetParam(options: {
 				assetType,
 			});
 			const registry = getAuthorizedRootRegistry(request);
-			let resolved = await resolveMediaAssetReference(registry, reference, options.permissions?.[0] ?? 'read');
+			let resolved = await resolveMediaAssetReference(registry, reference, options.permissions?.[0] ?? 'read', {
+				allowMissing: options.allowMissing,
+			});
 			for (const permission of options.permissions?.slice(1) ?? []) {
-				resolved = await resolveMediaAssetReference(registry, reference, permission);
+				resolved = await resolveMediaAssetReference(registry, reference, permission, {
+					allowMissing: options.allowMissing,
+				});
 			}
 			response.locals.authorizedAssetPath = resolved.absolutePath;
 			response.locals.authorizedAssetReference = {
@@ -170,6 +208,7 @@ export function authorizeMediaAssetParam(options: {
 }
 
 export function authorizeMediaAssetBodyIds(options: {
+	allowMissing?: boolean;
 	assetType: MediaAssetType;
 	bodyField?: string;
 	permissions?: RootPermission[];
@@ -193,7 +232,9 @@ export function authorizeMediaAssetBodyIds(options: {
 				ids.map(async (assetId) => {
 					const reference = parseMediaAssetReference({ assetId, assetType: options.assetType });
 					for (const permission of options.permissions ?? ['read']) {
-						await resolveMediaAssetReference(registry, reference, permission);
+						await resolveMediaAssetReference(registry, reference, permission, {
+							allowMissing: options.allowMissing,
+						});
 					}
 				})
 			);
@@ -233,6 +274,11 @@ async function authorizeMediaEntity(
 	permissions: RootPermission[]
 ): Promise<void> {
 	const registry = getAuthorizedRootRegistry(request);
+	if (assetType === 'image') {
+		const reference = parseMediaAssetReference({ assetId: entity.id, assetType });
+		for (const permission of permissions) await resolveMediaAssetReference(registry, reference, permission);
+		return;
+	}
 	if (typeof entity.path === 'string') {
 		for (const permission of permissions) await registry.authorizeAbsolutePath(entity.path, permission);
 		return;

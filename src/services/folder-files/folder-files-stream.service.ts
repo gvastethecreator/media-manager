@@ -8,6 +8,7 @@ import { and, eq, inArray, like } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import type { FolderFile } from './folder-files.service';
 
 const logger = serverLogger.withContext('FolderFilesStream');
@@ -215,6 +216,7 @@ async function countFiles(table: any, folderIds: string[], search?: string): Pro
 		if (search?.trim()) {
 			conditions.push(like(table.name, `%${search.trim()}%`));
 		}
+		if (table === images) conditions.push(visibleImageLifecycleCondition());
 
 		const result = await db
 			.select({ count: db.$count() })
@@ -282,6 +284,7 @@ async function fetchFilesBatch(
 		if (search?.trim()) {
 			conditions.push(like(table.name, `%${search.trim()}%`));
 		}
+		if (table === images) conditions.push(visibleImageLifecycleCondition());
 
 		const results = await db
 			.select()

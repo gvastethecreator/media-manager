@@ -37,6 +37,11 @@ export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts)
 
 		const imageWithStats: ImageWithStats = {
 			...drizzleImage,
+			id: drizzleImage.assetId ?? drizzleImage.id,
+			assetId: drizzleImage.assetId ?? null,
+			legacyId: drizzleImage.id,
+			canonicalState: drizzleImage.assetId ? 'canonical' : 'legacy_only',
+			canonicalDivergences: [],
 			entityType: 'image' as const,
 			stats: statistics,
 			thumbnailUrl,
@@ -383,7 +388,7 @@ function parseImageMetadata(metadataString: string | null | undefined): ImageMet
 /**
  * 🔄 Convierte ImageCreateInput a datos de creación para Drizzle
  */
-export function toDrizzleImageCreate(input: ImageCreateInput): any {
+export function toDrizzleImageCreate(input: ImageCreateInput & { path: string }): any {
 	return {
 		name: input.name,
 		description: input.description,
@@ -411,9 +416,6 @@ export function toDrizzleImageUpdate(input: ImageUpdateInput): any {
 	}
 	if (input.description !== undefined) {
 		updateData.description = input.description;
-	}
-	if (input.folderId !== undefined) {
-		updateData.folderId = input.folderId;
 	}
 	if (input.metadata !== undefined) {
 		updateData.metadata = input.metadata;

@@ -3,18 +3,19 @@
  * @description Compatible con Vite + React - ✅ MIGRADO A DRIZZLE
  */
 
-import { count, gte, sum } from 'drizzle-orm';
+import { and, count, gte, sum } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections, folders, images, tags } from '@/lib/drizzle/schema/index';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { formatBytes } from '@/lib/utils/format.utils';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 
 /**
  * Obtiene el total de archivos indexados en la base de datos
  */
 export async function getIndexedFilesCount(): Promise<number> {
 	try {
-		const [result] = await db.select({ count: count() }).from(images);
+		const [result] = await db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition());
 
 		return result.count;
 	} catch (error) {
@@ -31,7 +32,10 @@ export async function getTotalSpaceUsed(): Promise<{
 	formatted: string;
 }> {
 	try {
-		const [result] = await db.select({ totalSize: sum(images.size) }).from(images);
+		const [result] = await db
+			.select({ totalSize: sum(images.size) })
+			.from(images)
+			.where(visibleImageLifecycleCondition());
 
 		const totalBytes = Number(result.totalSize) || 0;
 
@@ -106,7 +110,7 @@ export async function getFilesHistoricalData(): Promise<
 		const files = await db
 			.select({ createdAt: images.createdAt })
 			.from(images)
-			.where(gte(images.createdAt, sevenDaysAgo));
+			.where(and(gte(images.createdAt, sevenDaysAgo), visibleImageLifecycleCondition()));
 
 		// Agrupar por día
 		const groupedByDay = files.reduce(

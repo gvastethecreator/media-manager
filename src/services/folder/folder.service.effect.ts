@@ -13,6 +13,7 @@ import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '
 import { Folder, FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	FolderCircularReferenceError,
@@ -134,6 +135,11 @@ interface FolderPathEntry {
 	normalizedPath: string;
 }
 
+interface FolderRelationStats {
+	counts: FolderCounts;
+	totalSize: number;
+}
+
 type PathColumn =
 	| typeof images.path
 	| typeof videos.path
@@ -224,7 +230,9 @@ const decodeFolderRow = (
 	favoriteEntityIds?: readonly string[]
 ) => {
 	const normalizedRow = normalizeFolderRow(row);
-	const projectedRow = favoriteEntityIds ? projectFolderFavoriteState(normalizedRow as never, favoriteEntityIds) : normalizedRow;
+	const projectedRow = favoriteEntityIds
+		? projectFolderFavoriteState(normalizedRow as never, favoriteEntityIds)
+		: normalizedRow;
 	return Schema.decodeUnknownSync(Folder)(projectedRow);
 };
 
@@ -257,10 +265,23 @@ function accumulatePathCounts(
 	}
 }
 
+function accumulatePathSizes(
+	folderEntries: FolderPathEntry[],
+	files: Array<{ path: string; size: number }>,
+	sizesByFolderId: Map<string, number>
+): void {
+	for (const file of files) {
+		for (const folderEntry of folderEntries) {
+			if (!isFileInsideFolder(file.path, folderEntry.normalizedPath)) continue;
+			sizesByFolderId.set(folderEntry.id, (sizesByFolderId.get(folderEntry.id) ?? 0) + Number(file.size || 0));
+		}
+	}
+}
+
 /**
  * Obtiene conteos de relaciones para una carpeta
  */
-const getRelationsCounts = (folderId: string): Effect.Effect<FolderCounts, FolderError> =>
+const getRelationsStats = (folderId: string): Effect.Effect<FolderRelationStats, FolderError> =>
 	Effect.gen(function* () {
 		const [
 			childrenCountResult,
@@ -273,26 +294,44 @@ const getRelationsCounts = (folderId: string): Effect.Effect<FolderCounts, Folde
 		] = yield* Effect.tryPromise<
 			[
 				Array<{ count: number }>,
-				Array<{ count: number }>,
-				Array<{ count: number }>,
-				Array<{ count: number }>,
-				Array<{ count: number }>,
-				Array<{ count: number }>,
-				Array<{ count: number }>,
+				Array<{ count: number; totalSize: number }>,
+				Array<{ count: number; totalSize: number }>,
+				Array<{ count: number; totalSize: number }>,
+				Array<{ count: number; totalSize: number }>,
+				Array<{ count: number; totalSize: number }>,
+				Array<{ count: number; totalSize: number }>,
 			],
 			FolderError
 		>({
 			try: () =>
 				Promise.all([
 					db.select({ count: count() }).from(folders).where(eq(folders.parentId, folderId)),
-					db.select({ count: count() }).from(images).where(eq(images.folderId, folderId)),
-					db.select({ count: count() }).from(videos).where(eq(videos.folderId, folderId)),
-					db.select({ count: count() }).from(audios).where(eq(audios.folderId, folderId)),
-					db.select({ count: count() }).from(documents).where(eq(documents.folderId, folderId)),
-					db.select({ count: count() }).from(jsonFiles).where(eq(jsonFiles.folderId, folderId)),
-					db.select({ count: count() }).from(file3Ds).where(eq(file3Ds.folderId, folderId)),
+					db
+						.select({ count: count(), totalSize: sql<number>`COALESCE(SUM(${images.size}), 0)` })
+						.from(images)
+						.where(and(eq(images.folderId, folderId), visibleImageLifecycleCondition())),
+					db
+						.select({ count: count(), totalSize: sql<number>`COALESCE(SUM(${videos.size}), 0)` })
+						.from(videos)
+						.where(eq(videos.folderId, folderId)),
+					db
+						.select({ count: count(), totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` })
+						.from(audios)
+						.where(eq(audios.folderId, folderId)),
+					db
+						.select({ count: count(), totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)` })
+						.from(documents)
+						.where(eq(documents.folderId, folderId)),
+					db
+						.select({ count: count(), totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` })
+						.from(jsonFiles)
+						.where(eq(jsonFiles.folderId, folderId)),
+					db
+						.select({ count: count(), totalSize: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` })
+						.from(file3Ds)
+						.where(eq(file3Ds.folderId, folderId)),
 				]),
-			catch: (error: unknown) => fromUnknownError('getRelationsCounts', error),
+			catch: (error: unknown) => fromUnknownError('getRelationsStats', error),
 		});
 
 		const imagesCount = imageCountResult[0]?.count ?? 0;
@@ -302,7 +341,7 @@ const getRelationsCounts = (folderId: string): Effect.Effect<FolderCounts, Folde
 		const jsonFilesCount = jsonCountResult[0]?.count ?? 0;
 		const file3DsCount = file3DCountResult[0]?.count ?? 0;
 
-		return {
+		const counts = {
 			audios: audiosCount,
 			children: childrenCountResult[0]?.count ?? 0,
 			documents: documentsCount,
@@ -312,6 +351,16 @@ const getRelationsCounts = (folderId: string): Effect.Effect<FolderCounts, Folde
 			totalFiles: imagesCount + videosCount + audiosCount + documentsCount + jsonFilesCount + file3DsCount,
 			videos: videosCount,
 		};
+		const totalSize = [
+			imageCountResult,
+			videoCountResult,
+			audioCountResult,
+			documentCountResult,
+			jsonCountResult,
+			file3DCountResult,
+		].reduce((sum, result) => sum + Number(result[0]?.totalSize ?? 0), 0);
+
+		return { counts, totalSize };
 	});
 
 /**
@@ -321,10 +370,14 @@ const enrichFolderWithCounts = (
 	folder: Schema.Schema.Type<typeof Folder>
 ): Effect.Effect<FolderWithStats, FolderError> =>
 	Effect.gen(function* () {
-		const counts = yield* getRelationsCounts(folder.id);
+		const { counts, totalSize } = yield* getRelationsStats(folder.id);
 
 		return {
 			...folder,
+			totalFiles: counts.totalFiles,
+			totalImages: counts.images,
+			totalSize,
+			totalVideos: counts.videos,
 			_count: counts,
 		} as FolderWithStats;
 	});
@@ -698,16 +751,16 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('create:insert', error),
 				});
 
-						const favoriteEntityIds = yield* getFolderFavoriteIds();
+				const favoriteEntityIds = yield* getFolderFavoriteIds();
 
 				const createdFolder = yield* Effect.try({
-							try: () => decodeFolderRow(result[0], favoriteEntityIds),
+					try: () => decodeFolderRow(result[0], favoriteEntityIds),
 					catch: (error: unknown) => fromUnknownError('create:validation:result', error),
 				});
 
 				logger.info('✅ Carpeta creada:', { id: createdFolder.id, name: createdFolder.name });
 
-						return yield* enrichFolderWithCounts(createdFolder);
+				return yield* enrichFolderWithCounts(createdFolder);
 			}),
 
 		/**
@@ -855,12 +908,12 @@ const FolderServiceLive = Layer.succeed(
 						? yield* Effect.tryPromise<
 								[
 									Array<{ id: string; count: number }>,
-									Array<{ path: string }>,
-									Array<{ path: string }>,
-									Array<{ path: string }>,
-									Array<{ path: string }>,
-									Array<{ path: string }>,
-									Array<{ path: string }>,
+									Array<{ path: string; size: number }>,
+									Array<{ path: string; size: number }>,
+									Array<{ path: string; size: number }>,
+									Array<{ path: string; size: number }>,
+									Array<{ path: string; size: number }>,
+									Array<{ path: string; size: number }>,
 								],
 								FolderError
 							>({
@@ -872,27 +925,27 @@ const FolderServiceLive = Layer.succeed(
 											.where(inArray(folders.parentId, folderIds))
 											.groupBy(folders.parentId),
 										db
-											.select({ path: images.path })
+											.select({ path: images.path, size: images.size })
 											.from(images)
-											.where(buildRecursivePathWhere(images.path, folderPaths)),
+											.where(and(buildRecursivePathWhere(images.path, folderPaths), visibleImageLifecycleCondition())),
 										db
-											.select({ path: videos.path })
+											.select({ path: videos.path, size: videos.size })
 											.from(videos)
 											.where(buildRecursivePathWhere(videos.path, folderPaths)),
 										db
-											.select({ path: audios.path })
+											.select({ path: audios.path, size: audios.size })
 											.from(audios)
 											.where(buildRecursivePathWhere(audios.path, folderPaths)),
 										db
-											.select({ path: documents.path })
+											.select({ path: documents.path, size: documents.size })
 											.from(documents)
 											.where(buildRecursivePathWhere(documents.path, folderPaths)),
 										db
-											.select({ path: jsonFiles.path })
+											.select({ path: jsonFiles.path, size: jsonFiles.size })
 											.from(jsonFiles)
 											.where(buildRecursivePathWhere(jsonFiles.path, folderPaths)),
 										db
-											.select({ path: file3Ds.path })
+											.select({ path: file3Ds.path, size: file3Ds.size })
 											.from(file3Ds)
 											.where(buildRecursivePathWhere(file3Ds.path, folderPaths)),
 									]),
@@ -908,6 +961,7 @@ const FolderServiceLive = Layer.succeed(
 				const countsByFolderId = new Map(
 					validatedFolders.map((folder) => [folder.id, createEmptyFileCounts()] as const)
 				);
+				const sizesByFolderId = new Map(validatedFolders.map((folder) => [folder.id, 0] as const));
 
 				accumulatePathCounts(
 					folderEntries,
@@ -945,14 +999,24 @@ const FolderServiceLive = Layer.succeed(
 					'file3Ds',
 					countsByFolderId
 				);
+				for (const fileRows of [imagePaths, videoPaths, audioPaths, documentPaths, jsonFilePaths, file3DPaths]) {
+					accumulatePathSizes(folderEntries, fileRows, sizesByFolderId);
+				}
 
-				return validatedFolders.map((f) => ({
-					...f,
-					_count: {
-						...(countsByFolderId.get(f.id) ?? createEmptyFileCounts()),
-						children: childrenMap.get(f.id) ?? 0,
-					},
-				})) as FolderWithStats[];
+				return validatedFolders.map((f) => {
+					const fileCounts = countsByFolderId.get(f.id) ?? createEmptyFileCounts();
+					return {
+						...f,
+						totalFiles: fileCounts.totalFiles,
+						totalImages: fileCounts.images,
+						totalSize: sizesByFolderId.get(f.id) ?? 0,
+						totalVideos: fileCounts.videos,
+						_count: {
+							...fileCounts,
+							children: childrenMap.get(f.id) ?? 0,
+						},
+					};
+				}) as FolderWithStats[];
 			}),
 
 		/**
