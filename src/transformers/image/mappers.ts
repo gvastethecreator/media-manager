@@ -11,7 +11,11 @@ import type { ImageBase, ImageStatistics, ImageWithStats } from '@/types/entitie
  */
 export function mapImageToComplete(image: Partial<ImageBase>): ImageWithStats {
 	return {
-		id: image.id ?? '',
+		id: image.assetId ?? image.id ?? '',
+		assetId: image.assetId ?? null,
+		legacyId: image.legacyId ?? image.id ?? '',
+		canonicalState: image.canonicalState ?? (image.assetId ? 'canonical' : 'legacy_only'),
+		canonicalDivergences: image.canonicalDivergences ?? [],
 		name: image.name ?? '',
 		description: image.description ?? null,
 		path: image.path ?? '',

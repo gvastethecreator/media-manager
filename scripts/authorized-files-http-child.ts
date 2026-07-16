@@ -22,6 +22,7 @@ fixtureDatabase.exec(`
 	CREATE TABLE Folder (id TEXT PRIMARY KEY, name TEXT NOT NULL, path TEXT NOT NULL);
 	CREATE TABLE Image (
 		id TEXT PRIMARY KEY,
+		assetId TEXT,
 		name TEXT NOT NULL,
 		path TEXT NOT NULL,
 		folderId TEXT NOT NULL,

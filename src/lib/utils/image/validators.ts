@@ -65,7 +65,10 @@ export const imageMetadataSchema = z.object({
  */
 export const createImageSchema = z.object({
 	name: z.string().min(1, 'El nombre es requerido'),
-	path: z.string().min(1, 'La ruta es requerida'),
+	source: z.object({
+		rootId: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/),
+		relativePath: z.string().min(1).max(2048),
+	}),
 	folderId: z.string().min(1, 'El ID de la carpeta es requerido'),
 	hash: z.string().min(1, 'El hash es requerido'),
 	size: z.number().int().positive('El tamaño debe ser un número positivo'),

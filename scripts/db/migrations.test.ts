@@ -96,6 +96,7 @@ describe('versioned SQLite migrations', () => {
 			'0002_queue_idempotency.sql',
 			'0003_epoch_ms_normalization.sql',
 			'0004_canonical_asset_source.sql',
+			'0005_image_asset_link.sql',
 		]);
 
 		const first = await migrateDatabase({ databasePath });
@@ -124,14 +125,111 @@ describe('versioned SQLite migrations', () => {
 		expect(check.diagnostics.availableBytes).toBeGreaterThan(check.diagnostics.databaseBytes);
 	});
 
+	it('preserves legacy Image rows and junctions while expanding 0004 to 0005', async () => {
+		const directory = await createTemporaryDirectory();
+		const migrationDirectory = join(directory, 'migrations-image-expand');
+		const databasePath = join(directory, 'image-expand.sqlite');
+		await mkdir(migrationDirectory);
+		const tags = [
+			'0000_baseline',
+			'0001_relational_integrity',
+			'0002_queue_idempotency',
+			'0003_epoch_ms_normalization',
+			'0004_canonical_asset_source',
+		];
+		for (const tag of tags) {
+			await copyFile(join(MIGRATIONS_DIRECTORY, `${tag}.sql`), join(migrationDirectory, `${tag}.sql`));
+		}
+		await writeJournal(migrationDirectory, tags);
+		await migrateDatabase({ databasePath, migrationsDirectory: migrationDirectory, validateSchema: false });
+
+		const legacy = new Database(databasePath);
+		const now = Date.now();
+		legacy
+			.query('INSERT INTO Folder (id, name, path, createdAt) VALUES (?, ?, ?, ?)')
+			.run('folder-image-expand', 'Image expand', '/image-expand', now);
+		legacy
+			.query(
+				'INSERT INTO Image (id, name, path, hash, size, width, height, folderId, createdAt, addedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+			)
+			.run(
+				'legacy-image-expand',
+				'legacy.png',
+				'/image-expand/legacy.png',
+				'a'.repeat(64),
+				42,
+				1,
+				1,
+				'folder-image-expand',
+				now,
+				now
+			);
+		legacy
+			.query('INSERT INTO Album (id, name, createdAt) VALUES (?, ?, ?)')
+			.run('album-image-expand', 'Image expand', now);
+		legacy.query('INSERT INTO _ImageToAlbum (A, B) VALUES (?, ?)').run('legacy-image-expand', 'album-image-expand');
+		legacy.clearQueryCache();
+		legacy.close();
+
+		const imageLinkTag = '0005_image_asset_link';
+		await copyFile(join(MIGRATIONS_DIRECTORY, `${imageLinkTag}.sql`), join(migrationDirectory, `${imageLinkTag}.sql`));
+		await writeJournal(migrationDirectory, [...tags, imageLinkTag]);
+		await migrateDatabase({
+			allowExistingPending: true,
+			databasePath,
+			migrationsDirectory: migrationDirectory,
+			validateSchema: false,
+		});
+
+		const verification = new Database(databasePath, { readonly: true });
+		expect(verification.query('SELECT id, assetId, path FROM Image').all()).toEqual([
+			{ assetId: null, id: 'legacy-image-expand', path: '/image-expand/legacy.png' },
+		]);
+		expect(verification.query('SELECT A, B FROM _ImageToAlbum').all()).toEqual([
+			{ A: 'legacy-image-expand', B: 'album-image-expand' },
+		]);
+		expect(verification.query('PRAGMA foreign_key_check').all()).toEqual([]);
+		expect(verification.query('PRAGMA user_version').get()).toEqual({ user_version: 6 });
+		verification.clearQueryCache();
+		verification.close();
+	});
+
+	it('rolls back the final Image link migration when its schema drifts from the canonical contract', async () => {
+		const directory = await createTemporaryDirectory();
+		const migrationDirectory = join(directory, 'migrations-image-drift');
+		const databasePath = join(directory, 'image-drift.sqlite');
+		await cp(MIGRATIONS_DIRECTORY, migrationDirectory, { recursive: true });
+		const migrationPath = join(migrationDirectory, '0005_image_asset_link.sql');
+		const canonicalSql = await readFile(migrationPath, 'utf8');
+		const driftedSql = canonicalSql.replace(
+			'CONSTRAINT "Image_asset_identity_check" CHECK(assetId IS NULL OR (typeof(assetId) = \'text\' AND assetId = id)),',
+			'CONSTRAINT "Image_asset_identity_check" CHECK(assetId IS NULL),'
+		);
+		expect(driftedSql).not.toBe(canonicalSql);
+		await writeFile(migrationPath, driftedSql);
+
+		await expect(migrateDatabase({ databasePath, migrationsDirectory: migrationDirectory })).rejects.toThrow(
+			'contrato canónico'
+		);
+
+		const verification = new Database(databasePath, { readonly: true });
+		expect(verification.query('PRAGMA user_version').get()).toEqual({ user_version: 5 });
+		expect(
+			(verification.query('PRAGMA table_info(Image)').all() as Array<{ name: string }>).some(
+				(column) => column.name === 'assetId'
+			)
+		).toBe(false);
+		expect(verification.query('SELECT count(*) AS count FROM __media_manager_migrations').get()).toEqual({ count: 5 });
+		verification.clearQueryCache();
+		verification.close();
+	});
+
 	it('reports a missing database as a pending plan without creating it', async () => {
 		const directory = await createTemporaryDirectory();
 		const databasePath = join(directory, 'missing.sqlite');
 		const status = await inspectMigrationStatus({ databasePath });
 
-		expect(status.migrations.map((entry) => entry.state)).toEqual(
-			(await loadMigrations()).map(() => 'pending')
-		);
+		expect(status.migrations.map((entry) => entry.state)).toEqual((await loadMigrations()).map(() => 'pending'));
 		expect(await Bun.file(databasePath).exists()).toBe(false);
 	});
 

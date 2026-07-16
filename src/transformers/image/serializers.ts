@@ -23,7 +23,11 @@ export function fromDrizzleImage(data: Partial<ImageBase>): ImageWithStats {
 		throw new Error('El campo folderId es obligatorio en ImageWithStats');
 	}
 	return {
-		id: data.id,
+		id: data.assetId ?? data.id,
+		assetId: data.assetId ?? null,
+		legacyId: data.legacyId ?? data.id,
+		canonicalState: data.canonicalState ?? (data.assetId ? 'canonical' : 'legacy_only'),
+		canonicalDivergences: data.canonicalDivergences ?? [],
 		name: data.name ?? '',
 		description: data.description ?? null,
 		path: data.path ?? '',

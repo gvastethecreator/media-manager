@@ -97,6 +97,9 @@ interface RelatedWildcard {
 
 export interface ServerImage {
 	albums?: RelatedAlbum[];
+	assetId?: string | null;
+	canonicalDivergences?: string[];
+	canonicalState?: 'canonical' | 'legacy_only' | 'diverged';
 	characters?: RelatedCharacter[];
 	collections?: RelatedCollection[];
 	concepts?: RelatedConcept[];
@@ -105,6 +108,7 @@ export interface ServerImage {
 	groups?: RelatedGroup[];
 	height: number | null;
 	id: string;
+	legacyId?: string;
 
 	isFavorite: boolean;
 	metadata: string | null;
@@ -137,7 +141,11 @@ export const convertServerImageToFileItem = (image: ServerImage): ImageWithStats
 
 		// Crear ImageWithStats compatible
 		const imageWithStats = {
-			id: image.id,
+			id: image.assetId ?? image.id,
+			assetId: image.assetId ?? null,
+			legacyId: image.legacyId ?? image.id,
+			canonicalState: image.canonicalState ?? (image.assetId ? 'canonical' : 'legacy_only'),
+			canonicalDivergences: image.canonicalDivergences ?? [],
 			name: image.name,
 			description: null,
 			path: image.path,

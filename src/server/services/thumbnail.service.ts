@@ -1,4 +1,4 @@
-import { count, desc, eq, isNull, not, sum } from 'drizzle-orm';
+import { and, count, desc, eq, isNull, not, sum } from 'drizzle-orm';
 import { existsSync } from 'fs';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
@@ -9,6 +9,7 @@ import { images } from '@/lib/drizzle/schema/index';
 import type { ThumbnailResult as LibThumbResult } from '@/lib/image/thumbnail';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { thumbnailUnifiedService as baseThumbnailService } from '@/services/thumbnail/thumbnail-unified.service';
 import type { ThumbnailStats } from '@/types/stats';
 import type { LastProcessedThumbnail, ProcessOptions } from '@/types/thumbnails';
@@ -285,7 +286,7 @@ export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcess
 		thumbLogger.info('🔄 Obteniendo últimas miniaturas procesadas:', { limit });
 
 		const imagesData = await db.query.images.findMany({
-			where: not(isNull(images.thumbnail)),
+			where: and(not(isNull(images.thumbnail)), visibleImageLifecycleCondition()),
 			orderBy: desc(images.updatedAt),
 			limit,
 			columns: {
@@ -330,14 +331,17 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 		}
 
 		const [totalFilesResult, withThumbnailResult, pendingResult, errorsData, totalSizeResult] = await Promise.all([
-			db.select({ count: count() }).from(images),
+			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
 			db
 				.select({ count: count() })
 				.from(images)
-				.where(not(isNull(images.thumbnail))),
-			db.select({ count: count() }).from(images).where(isNull(images.thumbnail)),
+				.where(and(not(isNull(images.thumbnail)), visibleImageLifecycleCondition())),
+			db
+				.select({ count: count() })
+				.from(images)
+				.where(and(isNull(images.thumbnail), visibleImageLifecycleCondition())),
 			db.query.images.findMany({
-				where: not(isNull(images.thumbnailError)),
+				where: and(not(isNull(images.thumbnailError)), visibleImageLifecycleCondition()),
 				columns: {
 					id: true,
 					path: true,
@@ -348,7 +352,7 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 			db
 				.select({ totalSize: sum(images.thumbnailSize) })
 				.from(images)
-				.where(not(isNull(images.thumbnailSize))),
+				.where(and(not(isNull(images.thumbnailSize)), visibleImageLifecycleCondition())),
 		]);
 
 		const totalFiles = totalFilesResult[0].count;

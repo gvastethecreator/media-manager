@@ -71,8 +71,8 @@ const buildBaseFolder = (raw: any) => ({
 	color: raw.color ?? null,
 	featuredImage: raw.featuredImage ?? null,
 	isFavorite: Boolean(raw.isFavorite),
-	// Si el backend no trae los agregados en top-level, tomar de stats o _count.totalFiles cuando existan
-	totalFiles: (raw.totalFiles ?? raw.stats?.totalFiles ?? raw._count?.totalFiles ?? raw._count?.images ?? 0) as number,
+	// Los conteos enriquecidos respetan el lifecycle; los agregados persistidos pueden incluir tombstones físicos.
+	totalFiles: (raw._count?.totalFiles ?? raw.stats?.totalFiles ?? raw.totalFiles ?? raw._count?.images ?? 0) as number,
 	totalSize: (raw.totalSize ?? raw.stats?.totalSize ?? 0) as number,
 	lastIndexed: raw.lastIndexed ? new Date(raw.lastIndexed) : null,
 	parentId: raw.parentId ?? null,

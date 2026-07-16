@@ -16,13 +16,14 @@
  * - path: CHECK length(path) BETWEEN 1 AND 1000
  * - folderId: NOT NULL (requires folder existence)
  * - UNIQUE (path, folderId)
- * - UNIQUE (hash) with index
+ * - hash is indexed but intentionally non-unique: identical content at distinct locations is a duplicate candidate
  */
 
-import { and, asc, count, desc, eq, inArray, notInArray, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, notInArray, or, sql } from 'drizzle-orm';
 import { Effect } from 'effect';
 import { db } from '@/lib/drizzle';
 import {
+	assets,
 	groupImages,
 	imageAlbums,
 	imageCharacters,
@@ -44,12 +45,19 @@ import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	ImageDatabaseError,
 	type ImageError,
-	ImageHashConflict,
 	ImageHasRelationsError,
 	ImageNotFound,
 	ImageThumbnailError,
 	ImageValidationError,
 } from './image-errors.effect';
+import {
+	assertCanonicalImageCreateCommand,
+	createCanonicalImage,
+	type ImageCreateCommand,
+	projectCanonicalImage,
+	projectCanonicalImages,
+} from './image-canonical-persistence';
+import { visibleImageLifecycleCondition } from './image-lifecycle-query';
 import { thumbnailService } from './image-thumbnail.service';
 
 // Helper para crear un logger seguro que funcione en tests y producción
@@ -113,7 +121,8 @@ const getByIdInternal = (id: string): Effect.Effect<Image, ImageError, never> =>
 					db.select().from(images).where(eq(images.id, id)).limit(1)
 				);
 				if (!image) return null;
-				return Image.make(image);
+				const projected = await projectCanonicalImage(image);
+				return projected ? Image.make(projected) : null;
 			},
 			catch: (error) =>
 				new ImageDatabaseError({
@@ -282,92 +291,41 @@ const checkRelations = (
  *
  * VALIDATIONS:
  * - Input schema validation (ImageCreateInput)
- * - Duplicate hash check (UNIQUE constraint)
+ * - Trusted canonical source validation (rootId + relativePath)
  * - Folder existence check (folderId NOT NULL)
  *
  * ERROR CASES:
  * - ImageValidationError: Invalid input data
- * - ImageHashConflict: Image with same hash already exists
  * - ImageDatabaseError: Database operation failed
  */
-export const create = (input: ImageCreateInput): Effect.Effect<Image, ImageError, never> =>
+export const create = (input: ImageCreateCommand): Effect.Effect<Image, ImageError, never> =>
 	Effect.gen(function* () {
 		logger.info('➕ Creating image', { name: input.name, hash: input.hash });
 		const sanitizedInput = stripLegacyFavoriteInput(input);
+		const { source, ...legacyImageInput } = sanitizedInput;
 
 		// Validate input
 		const validated = yield* Effect.try({
-			try: () => ImageCreateInput.make(sanitizedInput),
+			try: () => ImageCreateInput.make(legacyImageInput),
 			catch: (error) =>
 				new ImageValidationError({
 					field: 'input',
 					message: String(error),
-					value: sanitizedInput,
+					value: legacyImageInput,
 				}),
 		});
-
-		// Check for duplicate hash (UNIQUE constraint)
-		const existing = yield* Effect.tryPromise({
-			try: async () => {
-				return await getFirstRow<typeof images.$inferSelect>(() =>
-					db.select().from(images).where(eq(images.hash, validated.hash)).limit(1)
-				);
-			},
+		yield* Effect.try({
+			try: () => assertCanonicalImageCreateCommand({ hash: validated.hash, path: validated.path, source }),
 			catch: (error) =>
-				new ImageDatabaseError({
-					operation: 'create-check-duplicate',
-					originalError: error,
+				new ImageValidationError({
+					field: 'source',
+					message: error instanceof Error ? error.message : String(error),
+					value: source,
 				}),
 		});
 
-		if (existing) {
-			logger.warn('❌ Image with hash already exists', {
-				hash: validated.hash,
-				existingId: existing.id,
-			});
-			return yield* Effect.fail(
-				new ImageHashConflict({
-					hash: validated.hash,
-					existingImageId: existing.id,
-				})
-			);
-		}
-
-		// Create image
-		const now = new Date();
-		const [created] = yield* Effect.tryPromise({
-			try: async () => {
-				return await db
-					.insert(images)
-					.values({
-						id: crypto.randomUUID(),
-						name: validated.name,
-						description: validated.description ?? null,
-						path: validated.path,
-						hash: validated.hash,
-						size: validated.size,
-						width: validated.width,
-						height: validated.height,
-						metadata: validated.metadata ?? null,
-						thumbnail: validated.thumbnail ?? null,
-						thumbnailSize: validated.thumbnailSize ?? null,
-						thumbnailWidth: validated.thumbnailWidth ?? null,
-						thumbnailHeight: validated.thumbnailHeight ?? null,
-						thumbnailMimeType: validated.thumbnailMimeType ?? null,
-						thumbnailError: null,
-						thumbnailErrorAt: null,
-						thumbnailOptimizedAt: null,
-						aiEngine: validated.aiEngine ?? null,
-						aiModel: validated.aiModel ?? null,
-						aiOriginDetected: validated.aiOriginDetected ?? false,
-						folderId: validated.folderId,
-						noteId: validated.noteId ?? null,
-						createdAt: now,
-						updatedAt: now,
-						addedAt: now,
-					})
-					.returning();
-			},
+		const created = yield* Effect.tryPromise({
+			try: () => createCanonicalImage({ ...validated, source }),
 			catch: (error) =>
 				new ImageDatabaseError({
 					operation: 'create',
@@ -506,7 +464,7 @@ export const getAll = (options?: {
 		});
 
 		// Build WHERE conditions
-		const conditions = [];
+		const conditions = [visibleImageLifecycleCondition()];
 
 		if (options?.folderId) {
 			conditions.push(eq(images.folderId, options.folderId));
@@ -535,7 +493,7 @@ export const getAll = (options?: {
 			conditions.push(sql`lower(${images.name}) LIKE lower(${searchPattern})`);
 		}
 
-		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+		const whereClause = and(...conditions);
 
 		// Get total count
 		const [{ count: total }] = yield* Effect.tryPromise({
@@ -576,7 +534,7 @@ export const getAll = (options?: {
 					.offset(offset);
 
 				return projectImages(
-					results.map((r: typeof images.$inferSelect) => Image.make(r)),
+					(await projectCanonicalImages(results)).map((row) => Image.make(row)),
 					favoriteEntityIds
 				);
 			},
@@ -610,7 +568,8 @@ export const getAll = (options?: {
  * - Input schema validation (ImageUpdateInput)
  * - Image existence check
  *
- * NOTE: Cannot update hash (immutable), path, or size/dimensions (file system properties)
+ * NOTE: Cannot update hash, path, folder placement, source, or size/dimensions. Placement changes use the
+ * authorized asset move/rename operation so Image and SourceFile remain atomic.
  *
  * ERROR CASES:
  * - ImageNotFound: Image with given ID does not exist
@@ -634,20 +593,31 @@ export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image
 		});
 
 		// Check if image exists
-		yield* getByIdInternal(id);
+		const current = yield* getByIdInternal(id);
 
 		// Update image
 		const now = new Date();
 		yield* Effect.tryPromise({
 			try: async () => {
-				return await db
-					.update(images)
-					.set({
-						...validated,
-						updatedAt: now,
-					})
-					.where(eq(images.id, id))
-					.returning();
+				return db.transaction(async (transaction: typeof db) => {
+					const updated = await transaction
+						.update(images)
+						.set({
+							...validated,
+							updatedAt: now,
+						})
+						.where(eq(images.id, id))
+						.returning();
+					if (current.assetId) {
+						if (validated.name !== undefined) {
+							await transaction
+								.update(assets)
+								.set({ title: validated.name, updatedAt: now })
+								.where(eq(assets.id, current.assetId));
+						}
+					}
+					return updated;
+				});
 			},
 			catch: (error) =>
 				new ImageDatabaseError({
@@ -669,11 +639,11 @@ export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image
  *
  * VALIDATIONS:
  * - Image existence check
- * - Relations check (prevents cascade deletion unless force=true)
+ * - Legacy-only rows keep the historic relation guard.
  *
  * BEHAVIOR:
- * - force=false (default): Fails if image has relations (ImageHasRelationsError)
- * - force=true: Deletes image and ALL relations (cascade)
+ * - Canonical rows transition Asset to the restorable `deleted` tombstone and preserve specialization/source/relations.
+ * - Legacy-only rows are physically deleted; force=false fails if they have relations.
  *
  * ERROR CASES:
  * - ImageNotFound: Image with given ID does not exist
@@ -690,9 +660,33 @@ export const deleteById = (
 		logger.info('🗑️ Deleting image', { id, force });
 
 		// Check if image exists
-		yield* getByIdInternal(id);
+		const current = yield* getByIdInternal(id);
 
-		// Check relations
+		if (current.assetId) {
+			yield* Effect.tryPromise({
+				try: async () => {
+					const [asset] = await db
+						.select({ status: assets.status })
+						.from(assets)
+						.where(eq(assets.id, current.assetId!))
+						.limit(1);
+					if (!(asset && (asset.status === 'active' || asset.status === 'archived'))) {
+						throw new Error('El Asset canónico no tiene un lifecycle borrable.');
+					}
+					const now = new Date();
+					const transitioned = await db
+						.update(assets)
+						.set({ deletedAt: now, status: 'deleted', statusBeforeDeletion: asset.status, updatedAt: now })
+						.where(and(eq(assets.id, current.assetId!), eq(assets.status, asset.status)))
+						.returning({ id: assets.id });
+					if (transitioned.length !== 1) throw new Error('El lifecycle de Asset cambió durante el tombstone.');
+				},
+				catch: (error) => new ImageDatabaseError({ operation: 'delete-tombstone', originalError: error }),
+			});
+			logger.info('✅ Image moved to canonical tombstone', { id });
+			return { success: true };
+		}
+
 		const relationsCheck = yield* checkRelations(id);
 
 		if (relationsCheck.hasRelations && !force) {
@@ -709,11 +703,9 @@ export const deleteById = (
 			);
 		}
 
-		// Delete image (cascade if force=true)
+		// Legacy-only compatibility path. Canonical rows never reach physical deletion here.
 		yield* Effect.tryPromise({
-			try: async () => {
-				await db.delete(images).where(eq(images.id, id));
-			},
+			try: () => db.delete(images).where(eq(images.id, id)),
 			catch: (error) =>
 				new ImageDatabaseError({
 					operation: 'delete',
@@ -723,6 +715,39 @@ export const deleteById = (
 
 		logger.info('✅ Image deleted', { id, force, hadRelations: relationsCheck.hasRelations });
 		return { success: true };
+	});
+
+export const restoreById = (id: string): Effect.Effect<Image, ImageError, never> =>
+	Effect.gen(function* () {
+		yield* Effect.tryPromise({
+			try: async () => {
+				const [row] = await db
+					.select({ assetId: images.assetId, status: assets.status, statusBeforeDeletion: assets.statusBeforeDeletion })
+					.from(images)
+					.leftJoin(assets, eq(assets.id, images.assetId))
+					.where(eq(images.id, id))
+					.limit(1);
+				if (!(row?.assetId && row.status === 'deleted'))
+					throw new Error('Image no es un tombstone canónico restaurable.');
+				if (!(row.statusBeforeDeletion === 'active' || row.statusBeforeDeletion === 'archived')) {
+					throw new Error('Image no conserva un estado previo restaurable.');
+				}
+				const now = new Date();
+				const restored = await db
+					.update(assets)
+					.set({
+						deletedAt: null,
+						status: row.statusBeforeDeletion,
+						statusBeforeDeletion: null,
+						updatedAt: now,
+					})
+					.where(and(eq(assets.id, row.assetId), eq(assets.status, 'deleted')))
+					.returning({ id: assets.id });
+				if (restored.length !== 1) throw new Error('El lifecycle de Asset cambió durante la restauración.');
+			},
+			catch: (error) => new ImageDatabaseError({ operation: 'restore', originalError: error }),
+		});
+		return yield* getByIdInternal(id);
 	});
 
 /**
@@ -764,12 +789,18 @@ export const deleteManyByIds = (
 			force,
 		});
 
-		// Check relations for all images if not force
+		const targets = yield* Effect.tryPromise<Array<{ assetId: string | null; id: string }>, ImageDatabaseError>({
+			try: () => db.select({ assetId: images.assetId, id: images.id }).from(images).where(inArray(images.id, ids)),
+			catch: (error) => new ImageDatabaseError({ operation: 'deleteMany-targets', originalError: error }),
+		});
+		const legacyIds = targets.flatMap(({ assetId, id }) => (assetId ? [] : [id]));
+
+		// Relation guards only apply to the legacy physical-delete compatibility path.
 		if (!force) {
-			const relationsChecks = yield* Effect.all(ids.map(checkRelations));
+			const relationsChecks = yield* Effect.all(legacyIds.map(checkRelations));
 
 			const imagesWithRelations = relationsChecks
-				.map((check, index) => ({ id: ids[index], check }))
+				.map((check, index) => ({ id: legacyIds[index], check }))
 				.filter((item) => item.check.hasRelations);
 
 			if (imagesWithRelations.length > 0) {
@@ -789,11 +820,35 @@ export const deleteManyByIds = (
 			}
 		}
 
-		// Delete all images
-		const result = yield* Effect.tryPromise({
+		// Canonical rows become tombstones; only legacy-only rows are physically deleted.
+		const result = yield* Effect.tryPromise<number, ImageDatabaseError>({
 			try: async () => {
-				const deleted = await db.delete(images).where(inArray(images.id, ids)).returning({ id: images.id });
-				return deleted.length;
+				return db.transaction(async (transaction: typeof db) => {
+					let transitioned = 0;
+					const canonicalIds = targets.flatMap(({ assetId }) => (assetId ? [assetId] : []));
+					if (canonicalIds.length > 0) {
+						const canonicalAssets = await transaction
+							.select({ id: assets.id, status: assets.status })
+							.from(assets)
+							.where(inArray(assets.id, canonicalIds));
+						const now = new Date();
+						for (const asset of canonicalAssets) {
+							if (!(asset.status === 'active' || asset.status === 'archived')) continue;
+							const updated = await transaction
+								.update(assets)
+								.set({ deletedAt: now, status: 'deleted', statusBeforeDeletion: asset.status, updatedAt: now })
+								.where(and(eq(assets.id, asset.id), eq(assets.status, asset.status)))
+								.returning({ id: assets.id });
+							if (updated.length !== 1) throw new Error(`Asset ${asset.id} cambió durante el batch tombstone.`);
+							transitioned += 1;
+						}
+					}
+					const deleted =
+						legacyIds.length > 0
+							? await transaction.delete(images).where(inArray(images.id, legacyIds)).returning({ id: images.id })
+							: [];
+					return transitioned + deleted.length;
+				});
 			},
 			catch: (error) =>
 				new ImageDatabaseError({
@@ -815,7 +870,7 @@ export const deleteManyByIds = (
 // ============================================================================
 
 /**
- * Get image by hash (for duplicate detection)
+ * Get the first deterministic image candidate by content hash.
  *
  * ERROR CASES:
  * - ImageNotFound: No image with given hash exists
@@ -828,11 +883,13 @@ export const getByHash = (hash: string): Effect.Effect<Image, ImageError, never>
 		const [result, favoriteEntityIds] = yield* Effect.all([
 			Effect.tryPromise({
 				try: async () => {
-					const image = await getFirstRow<typeof images.$inferSelect>(() =>
-						db.select().from(images).where(eq(images.hash, hash)).limit(1)
-					);
-					if (!image) return null;
-					return Image.make(image);
+					const candidates = await db
+						.select()
+						.from(images)
+						.where(eq(images.hash, hash))
+						.orderBy(asc(images.createdAt), asc(images.id));
+					const [image] = await projectCanonicalImages(candidates);
+					return image ? Image.make(image) : null;
 				},
 				catch: (error) =>
 					new ImageDatabaseError({
@@ -881,7 +938,8 @@ export const getByPathAndFolder = (path: string, folderId: string): Effect.Effec
 							.limit(1)
 					);
 					if (!image) return null;
-					return Image.make(image);
+					const projected = await projectCanonicalImage(image);
+					return projected ? Image.make(projected) : null;
 				},
 				catch: (error) =>
 					new ImageDatabaseError({
@@ -931,9 +989,11 @@ export const getAllFavorites = (): Effect.Effect<Image[], ImageError, never> =>
 				const favImages = await db
 					.select()
 					.from(images)
-					.where(inArray(images.id, favoriteEntityIds))
+					.where(and(inArray(images.id, favoriteEntityIds), visibleImageLifecycleCondition()))
 					.orderBy(desc(images.addedAt));
-				return favImages.map((img: typeof images.$inferSelect) => projectImage(Image.make(img), favoriteEntityIds));
+				return (await projectCanonicalImages(favImages)).map((image) =>
+					projectImage(Image.make(image), favoriteEntityIds)
+				);
 			},
 			catch: (error) =>
 				new ImageDatabaseError({
@@ -972,11 +1032,11 @@ export const getByFolder = (
 					const folderImages = await db
 						.select()
 						.from(images)
-						.where(eq(images.folderId, folderId))
+						.where(and(eq(images.folderId, folderId), visibleImageLifecycleCondition()))
 						.orderBy(desc(images.addedAt))
 						.limit(limit)
 						.offset(offset);
-					return folderImages.map((img: typeof images.$inferSelect) => Image.make(img));
+					return (await projectCanonicalImages(folderImages)).map((image) => Image.make(image));
 				},
 				catch: (error) =>
 					new ImageDatabaseError({
@@ -1106,7 +1166,7 @@ export const countByFolder = (folderId: string): Effect.Effect<number, ImageErro
 				const [{ count: total }] = await db
 					.select({ count: count() })
 					.from(images)
-					.where(eq(images.folderId, folderId));
+					.where(and(eq(images.folderId, folderId), visibleImageLifecycleCondition()));
 
 				return total;
 			},
@@ -1250,7 +1310,7 @@ import { Context, Layer } from 'effect';
  */
 export interface ImageServiceInterface {
 	readonly countByFolder: (folderId: string) => Effect.Effect<number, ImageError, never>;
-	readonly create: (input: typeof ImageCreateInput.Type) => Effect.Effect<Image, ImageError, never>;
+	readonly create: (input: ImageCreateCommand) => Effect.Effect<Image, ImageError, never>;
 	readonly deleteById: (
 		id: string,
 		options?: { force?: boolean }
@@ -1298,6 +1358,7 @@ export interface ImageServiceInterface {
 	readonly getByIdWithStats: (id: string) => Effect.Effect<ImageWithStats, ImageError, never>;
 	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Image, ImageError, never>;
 	readonly getOriginalImage: (imageId: string) => Effect.Effect<Buffer, ImageError, never>;
+	readonly restoreById: (id: string) => Effect.Effect<Image, ImageError, never>;
 	readonly getThumbnail: (imageId: string) => Effect.Effect<Buffer, ImageError, never>;
 	readonly setFavoriteMany: (
 		ids: string[],
@@ -1323,6 +1384,7 @@ const make = (): ImageServiceInterface => ({
 	update,
 	deleteById,
 	deleteManyByIds,
+	restoreById,
 	getByHash,
 	getByPathAndFolder,
 	getAllFavorites,

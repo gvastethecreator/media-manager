@@ -12,6 +12,7 @@ import { Concept, ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } fro
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { normalizeCounts, sumCounts } from '@/transformers/common/counts';
 import {
@@ -159,7 +160,10 @@ const make = (): ConceptServiceInterface => {
 				}),
 			]);
 
-			const normalizedConcepts = favoriteService.applyFavoriteProjectionMany(data, favoriteEntityIds) as ConceptWithStats[];
+			const normalizedConcepts = favoriteService.applyFavoriteProjectionMany(
+				data,
+				favoriteEntityIds
+			) as ConceptWithStats[];
 
 			return {
 				concepts: normalizedConcepts,
@@ -300,7 +304,7 @@ const make = (): ConceptServiceInterface => {
 						.select({ image: images })
 						.from(imageConcepts)
 						.innerJoin(images, eq(imageConcepts.A, images.id))
-						.where(eq(imageConcepts.B, id)),
+						.where(and(eq(imageConcepts.B, id), visibleImageLifecycleCondition())),
 				catch: (error) => fromUnknownConceptError('getImages', error),
 			});
 			return result.map((r) => r.image);
@@ -310,7 +314,12 @@ const make = (): ConceptServiceInterface => {
 		Effect.gen(function* () {
 			const [imageCount, videoCount] = yield* Effect.all([
 				Effect.tryPromise({
-					try: () => db.select({ count: count() }).from(imageConcepts).where(eq(imageConcepts.B, id)),
+					try: () =>
+						db
+							.select({ count: count() })
+							.from(imageConcepts)
+							.innerJoin(images, eq(imageConcepts.A, images.id))
+							.where(and(eq(imageConcepts.B, id), visibleImageLifecycleCondition())),
 					catch: (error) => fromUnknownConceptError('getRelationCounts.images', error),
 				}),
 				Effect.tryPromise({

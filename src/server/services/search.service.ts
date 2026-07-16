@@ -1,12 +1,13 @@
 // Usar servicio de imágenes en lugar de server action
 
-import { asc, desc, ilike, like, or, sql } from 'drizzle-orm';
+import { and, asc, desc, like, or, sql } from 'drizzle-orm';
 import { Effect } from 'effect';
 import { db, getDbClient } from '@/lib/drizzle';
 import { isFts5Enabled } from '@/lib/drizzle/fts5';
 import { audios, documents, files, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image/converter.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { getAll } from '@/services/image/image.service.effect';
 import type { FileItem } from '@/types/files';
 
@@ -101,7 +102,7 @@ async function searchImagesUnified(query: string, limit: number, offset: number)
 	return db
 		.select()
 		.from(images)
-		.where(or(ilike(images.name, `%${query}%`), ilike(images.path, `%${query}%`)))
+		.where(and(or(like(images.name, `%${query}%`), like(images.path, `%${query}%`)), visibleImageLifecycleCondition()))
 		.orderBy(desc(images.createdAt), asc(images.id))
 		.limit(limit)
 		.offset(offset);
@@ -111,7 +112,7 @@ async function searchVideosUnified(query: string, limit: number, offset: number)
 	return db
 		.select()
 		.from(videos)
-		.where(or(ilike(videos.name, `%${query}%`), ilike(videos.path, `%${query}%`)))
+		.where(or(like(videos.name, `%${query}%`), like(videos.path, `%${query}%`)))
 		.orderBy(desc(videos.createdAt), asc(videos.id))
 		.limit(limit)
 		.offset(offset);
@@ -121,7 +122,7 @@ async function searchAudiosUnified(query: string, limit: number, offset: number)
 	return db
 		.select()
 		.from(audios)
-		.where(or(ilike(audios.name, `%${query}%`), ilike(audios.path, `%${query}%`)))
+		.where(or(like(audios.name, `%${query}%`), like(audios.path, `%${query}%`)))
 		.orderBy(desc(audios.createdAt), asc(audios.id))
 		.limit(limit)
 		.offset(offset);
@@ -131,7 +132,7 @@ async function searchDocumentsUnified(query: string, limit: number, offset: numb
 	return db
 		.select()
 		.from(documents)
-		.where(or(ilike(documents.name, `%${query}%`), ilike(documents.path, `%${query}%`)))
+		.where(or(like(documents.name, `%${query}%`), like(documents.path, `%${query}%`)))
 		.orderBy(desc(documents.createdAt), asc(documents.id))
 		.limit(limit)
 		.offset(offset);

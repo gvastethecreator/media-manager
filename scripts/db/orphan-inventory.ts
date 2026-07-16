@@ -196,17 +196,12 @@ export const RELATION_CATALOG: RelationContract[] = [
 	direct('UploadedImage', 'imageId', 'Image', 'manual-reconcile'),
 	direct('FileStats', 'fileId', 'Image', 'manual-reconcile'),
 	direct('Image', 'noteId', 'Note', 'manual-reconcile'),
+	direct('Image', 'assetId', 'Asset', 'manual-reconcile'),
 	direct('SourceFile', 'assetId', 'Asset', 'manual-reconcile'),
 	direct('SourceFile', 'rootId', 'MediaRoot', 'manual-reconcile'),
 	direct('SourceFile', 'folderId', 'Folder', 'manual-reconcile'),
 	direct('Asset', 'primarySourceFileId', 'SourceFile', 'manual-reconcile'),
-	composite(
-		'Asset',
-		['id', 'primarySourceFileId'],
-		'SourceFile',
-		['assetId', 'id'],
-		'manual-reconcile'
-	),
+	composite('Asset', ['id', 'primarySourceFileId'], 'SourceFile', ['assetId', 'id'], 'manual-reconcile'),
 	direct('Favorite', 'profileId', 'Profile', 'quarantine'),
 	polymorphic('Favorite', 'entityType', 'entityId', canonicalEntityTargets, 'quarantine'),
 	polymorphic('Thumbnail', 'entityType', 'entityId', mediaEntityTargets, 'auto-delete-link'),
@@ -336,9 +331,7 @@ function inspectCompositeRelation(
 		relation.idColumn && relation.idColumn !== 'rowid'
 			? `CAST(child.${quoteIdentifier(relation.idColumn)} AS TEXT)`
 			: 'CAST(child.rowid AS TEXT)';
-	const populated = relation.childColumns
-		.map((column) => `child.${quoteIdentifier(column)} IS NOT NULL`)
-		.join(' AND ');
+	const populated = relation.childColumns.map((column) => `child.${quoteIdentifier(column)} IS NOT NULL`).join(' AND ');
 	const joinCondition = relation.childColumns
 		.map(
 			(childColumn, index) =>

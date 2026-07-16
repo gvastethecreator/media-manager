@@ -1,6 +1,6 @@
 /**
  * Esquemas Zod para entidad Image (API server)
- * Mantiene compatibilidad con rutas actuales.
+ * El contrato público usa referencias opacas; el servidor resuelve el path absoluto internamente.
  */
 import { z } from 'zod';
 import { isValidFolderId } from '@/lib/utils/folder-id-generator';
@@ -9,7 +9,10 @@ import { isValidFolderId } from '@/lib/utils/folder-id-generator';
 export const CreateImageSchema = z.object({
 	name: z.string().min(1, 'El nombre es requerido').max(255),
 	description: z.string().max(1000).nullable().optional(),
-	path: z.string().min(1, 'La ruta es requerida').max(500),
+	source: z.object({
+		rootId: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/),
+		relativePath: z.string().min(1).max(2048),
+	}),
 	hash: z.string().min(1, 'El hash es requerido'),
 	size: z.number().int().positive('El tamaño debe ser positivo'),
 	width: z.number().int().positive('El ancho debe ser positivo'),
@@ -31,7 +34,7 @@ export const CreateImageSchema = z.object({
 // Schema de validación para actualizar imagen
 export const UpdateImageSchema = CreateImageSchema.partial()
 	.omit({
-		path: true,
+		source: true,
 		hash: true,
 		size: true,
 		width: true,

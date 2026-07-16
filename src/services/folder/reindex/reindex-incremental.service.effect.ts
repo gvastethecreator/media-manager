@@ -11,6 +11,7 @@ import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emitProgress } from '@/lib/server/events.server';
+import { updateCanonicalImageFingerprint } from '@/services/image/image-canonical-persistence';
 import type { ChangedFile, IncrementalReindexOptions, IncrementalReindexStats } from './reindex-incremental-types';
 
 const logger = serverLogger.withContext('ReindexIncrementalService');
@@ -355,10 +356,10 @@ const make = (): ReindexIncrementalServiceInterface => {
 					if (changedFile.entityType === 'image') {
 						yield* Effect.tryPromise({
 							try: () =>
-								db
-									.update(images)
-									.set({ hash: changedFile.currentHash, updatedAt: new Date() })
-									.where(eq(images.id, changedFile.id)),
+								updateCanonicalImageFingerprint(changedFile.id, {
+									hash: changedFile.currentHash,
+									size: changedFile.currentSize,
+								}),
 							catch: (error) => fromUnknownError('update-image-hash', error),
 						});
 					} else if (changedFile.entityType === 'video') {

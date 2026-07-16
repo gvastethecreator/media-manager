@@ -1,5 +1,11 @@
-import { and, eq } from 'drizzle-orm';
-import type { AuthorizedRootRegistry, ResolvedAuthorizedPath, RootPermission } from './authorized-roots';
+import { and, eq, isNull, ne, or } from 'drizzle-orm';
+import { resolve as resolvePath } from 'node:path';
+import type {
+	AuthorizedPathReference,
+	AuthorizedRootRegistry,
+	ResolvedAuthorizedPath,
+	RootPermission,
+} from './authorized-roots';
 import { RootAuthorizationError } from './authorized-roots';
 
 export const MEDIA_ASSET_TYPES = ['image', 'video', 'audio', 'document', 'json', 'file3d'] as const;
@@ -116,8 +122,93 @@ async function findAssetPath(reference: MediaAssetReference): Promise<string | n
 export async function resolveMediaAssetReference(
 	registry: AuthorizedRootRegistry,
 	reference: MediaAssetReference,
-	permission: RootPermission
+	permission: RootPermission,
+	options: { allowDeleted?: boolean; allowMissing?: boolean } = {}
 ): Promise<ResolvedAuthorizedPath> {
+	if (reference.assetType === 'image') {
+		const [{ db }, { assets, images, sourceFiles }] = await Promise.all([
+			import('@/lib/drizzle'),
+			import('@/lib/drizzle/schema'),
+		]);
+		const [image] = await db
+			.select({
+				assetId: images.assetId,
+				path: images.path,
+			})
+			.from(images)
+			.where(eq(images.id, reference.assetId))
+			.limit(1);
+		if (!image) throw new RootAuthorizationError('ROOT_PATH_NOT_FOUND', 'Asset no encontrado.', 404);
+		if (!image.assetId) return registry.authorizeAbsolutePath(image.path, permission);
+
+		const [contract] = await db
+			.select({
+				assetId: assets.id,
+				assetStatus: assets.status,
+				assetType: assets.assetType,
+				byteSize: sourceFiles.byteSize,
+				contentHash: sourceFiles.contentHash,
+				imageFolderId: images.folderId,
+				imageHash: images.hash,
+				imageName: images.name,
+				imagePath: images.path,
+				imageSize: images.size,
+				primarySourceFileId: assets.primarySourceFileId,
+				relativePath: sourceFiles.relativePath,
+				rootId: sourceFiles.rootId,
+				sourceAssetId: sourceFiles.assetId,
+				sourceFolderId: sourceFiles.folderId,
+				sourceId: sourceFiles.id,
+				title: assets.title,
+			})
+			.from(images)
+			.leftJoin(assets, eq(assets.id, images.assetId))
+			.leftJoin(sourceFiles, eq(sourceFiles.id, assets.primarySourceFileId))
+			.where(eq(images.id, reference.assetId))
+			.limit(1);
+		if (contract?.assetStatus === 'deleted' && !options.allowDeleted) {
+			throw new RootAuthorizationError('ROOT_PATH_NOT_FOUND', 'Asset no encontrado.', 404);
+		}
+		if (
+			!contract ||
+			contract.assetId !== image.assetId ||
+			contract.assetType !== 'image' ||
+			contract.title !== contract.imageName ||
+			contract.sourceId !== contract.primarySourceFileId ||
+			contract.sourceAssetId !== contract.assetId ||
+			contract.contentHash !== contract.imageHash ||
+			contract.byteSize !== contract.imageSize ||
+			contract.sourceFolderId !== contract.imageFolderId ||
+			!contract.rootId ||
+			!contract.relativePath
+		) {
+			throw new RootAuthorizationError('ROOT_PATH_CONFLICT', 'La identidad canónica de la imagen está divergida.', 409);
+		}
+		const canonical = await registry.resolve(
+			{ relativePath: contract.relativePath, rootId: contract.rootId },
+			permission,
+			options.allowMissing ? 'create' : 'existing'
+		);
+		let legacyAbsolutePath: string;
+		try {
+			legacyAbsolutePath = (await registry.authorizeAbsolutePath(contract.imagePath, permission)).absolutePath;
+		} catch (error) {
+			if (!(options.allowMissing && error instanceof RootAuthorizationError && error.code === 'ROOT_PATH_NOT_FOUND')) {
+				throw error;
+			}
+			legacyAbsolutePath = resolvePath(contract.imagePath);
+		}
+		const normalizeAbsolutePath = (value: string) =>
+			process.platform === 'win32' ? resolvePath(value).toLocaleLowerCase('en-US') : resolvePath(value);
+		if (normalizeAbsolutePath(canonical.absolutePath) !== normalizeAbsolutePath(legacyAbsolutePath)) {
+			throw new RootAuthorizationError(
+				'ROOT_PATH_CONFLICT',
+				'La ubicación canónica y la ubicación legacy de la imagen divergen.',
+				409
+			);
+		}
+		return canonical;
+	}
 	const assetPath = await findAssetPath(reference);
 	if (!assetPath) throw new RootAuthorizationError('ROOT_PATH_NOT_FOUND', 'Asset no encontrado.', 404);
 	return registry.authorizeAbsolutePath(assetPath, permission);
@@ -126,21 +217,55 @@ export async function resolveMediaAssetReference(
 export async function updateMediaAssetLocation(
 	reference: MediaAssetReference,
 	expectedPath: string,
-	changes: { folderId?: string; name?: string; path: string }
+	changes: { folderId?: string; name?: string; path: string; source?: AuthorizedPathReference }
 ): Promise<void> {
-	const values = { ...changes, updatedAt: new Date() };
+	const { source: _source, ...legacyChanges } = changes;
+	const values = { ...legacyChanges, updatedAt: new Date() };
 	switch (reference.assetType) {
 		case 'image': {
-			const [{ db }, { images }] = await Promise.all([
+			const [{ db }, { assets, images, sourceFiles }] = await Promise.all([
 				import('@/lib/drizzle'),
-				import('@/lib/drizzle/schema/files/images'),
+				import('@/lib/drizzle/schema'),
 			]);
-			const updated = await db
-				.update(images)
-				.set(values)
-				.where(and(eq(images.id, reference.assetId), eq(images.path, expectedPath)))
-				.returning({ id: images.id });
-			if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+			await db.transaction(async (transaction: typeof db) => {
+				const [current] = await transaction
+					.select({ assetId: images.assetId })
+					.from(images)
+					.where(and(eq(images.id, reference.assetId), eq(images.path, expectedPath)))
+					.limit(1);
+				if (!current) throw new MediaAssetLocationConflictError();
+				const updated = await transaction
+					.update(images)
+					.set(values)
+					.where(and(eq(images.id, reference.assetId), eq(images.path, expectedPath)))
+					.returning({ id: images.id });
+				if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+				if (!current.assetId) return;
+				if (!changes.source) throw new MediaAssetLocationConflictError();
+				const [asset] = await transaction
+					.select({ primarySourceFileId: assets.primarySourceFileId })
+					.from(assets)
+					.where(eq(assets.id, current.assetId))
+					.limit(1);
+				if (!asset) throw new MediaAssetLocationConflictError();
+				const sourceUpdated = await transaction
+					.update(sourceFiles)
+					.set({
+						folderId: changes.folderId,
+						relativePath: changes.source.relativePath,
+						rootId: changes.source.rootId,
+						updatedAt: new Date(),
+					})
+					.where(eq(sourceFiles.id, asset.primarySourceFileId))
+					.returning({ id: sourceFiles.id });
+				if (sourceUpdated.length !== 1) throw new MediaAssetLocationConflictError();
+				if (changes.name !== undefined) {
+					await transaction
+						.update(assets)
+						.set({ title: changes.name, updatedAt: new Date() })
+						.where(eq(assets.id, current.assetId));
+				}
+			});
 			return;
 		}
 		case 'video': {
@@ -215,21 +340,38 @@ export interface MediaAssetLocation {
 	folderId: string;
 	name: string;
 	path: string;
+	source?: AuthorizedPathReference;
 }
 
 export async function getMediaAssetLocation(reference: MediaAssetReference): Promise<MediaAssetLocation> {
 	switch (reference.assetType) {
 		case 'image': {
-			const [{ db }, { images }] = await Promise.all([
+			const [{ db }, { assets, images, sourceFiles }] = await Promise.all([
 				import('@/lib/drizzle'),
-				import('@/lib/drizzle/schema/files/images'),
+				import('@/lib/drizzle/schema'),
 			]);
 			const [record] = await db
-				.select({ folderId: images.folderId, name: images.name, path: images.path })
+				.select({ assetId: images.assetId, folderId: images.folderId, name: images.name, path: images.path })
 				.from(images)
 				.where(eq(images.id, reference.assetId))
 				.limit(1);
-			if (record) return record;
+			if (record?.assetId) {
+				const [asset] = await db
+					.select({ primarySourceFileId: assets.primarySourceFileId })
+					.from(assets)
+					.where(eq(assets.id, record.assetId))
+					.limit(1);
+				const [source] = asset
+					? await db
+							.select({ relativePath: sourceFiles.relativePath, rootId: sourceFiles.rootId })
+							.from(sourceFiles)
+							.where(eq(sourceFiles.id, asset.primarySourceFileId))
+							.limit(1)
+					: [];
+				if (!source) throw new MediaAssetLocationConflictError();
+				return { folderId: record.folderId, name: record.name, path: record.path, source };
+			}
+			if (record) return { folderId: record.folderId, name: record.name, path: record.path };
 			break;
 		}
 		case 'video': {
@@ -381,6 +523,26 @@ async function countAuthorizedMediaAssetPaths(
 	permission: RootPermission,
 	folderId?: string
 ): Promise<number> {
+	if (assetType === 'image') {
+		const [{ db }, { assets, images }] = await Promise.all([import('@/lib/drizzle'), import('@/lib/drizzle/schema')]);
+		const lifecycleCondition = or(isNull(images.assetId), isNull(assets.id), ne(assets.status, 'deleted'));
+		const query = db.select({ id: images.id }).from(images).leftJoin(assets, eq(assets.id, images.assetId));
+		const rows = folderId
+			? await query.where(and(eq(images.folderId, folderId), lifecycleCondition))
+			: await query.where(lifecycleCondition);
+		const decisions = await Promise.all(
+			rows.map(async ({ id }: { id: string }) => {
+				try {
+					await resolveMediaAssetReference(registry, { assetId: id, assetType: 'image' }, permission);
+					return true;
+				} catch (error) {
+					if (error instanceof RootAuthorizationError) return false;
+					throw error;
+				}
+			})
+		);
+		return decisions.filter(Boolean).length;
+	}
 	const paths = await findAssetPaths(assetType, folderId);
 	const decisions = await Promise.all(
 		paths.map(async (path) => {

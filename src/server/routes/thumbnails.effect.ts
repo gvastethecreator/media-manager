@@ -16,6 +16,7 @@ import { authorizeMediaAssetParam, getAuthorizedRootRegistry } from '@/server/se
 import { parseMediaAssetReference, resolveMediaAssetReference } from '@/server/security/media-asset-reference';
 import { sanitizePublicPayload } from '@/server/security/sanitize-public-payload';
 import { thumbnailEventService as baseThumbnailService } from '@/services/thumbnail/thumbnail-events.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail/types';
 import {
 	bulkGenerateThumbnails,
@@ -229,7 +230,11 @@ export const ThumbnailServiceLive = Layer.succeed(
 				try: async () => {
 					const recentThumbnails = await db.query.images.findMany({
 						columns: { id: true, updatedAt: true },
-						where: and(isNotNull(images.thumbnailWidth), isNotNull(images.thumbnailHeight)),
+						where: and(
+							isNotNull(images.thumbnailWidth),
+							isNotNull(images.thumbnailHeight),
+							visibleImageLifecycleCondition()
+						),
 						orderBy: desc(images.updatedAt),
 						limit,
 					});

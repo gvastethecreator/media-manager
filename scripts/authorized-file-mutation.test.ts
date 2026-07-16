@@ -1,13 +1,17 @@
 import { describe, expect, it } from 'bun:test';
-import { mkdir, mkdtemp, readFile, rename, rm, symlink, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readFile, rename, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
+import { eq } from 'drizzle-orm';
+import { db } from '../src/lib/drizzle';
+import { assets, folders, images, mediaRoots, sourceFiles } from '../src/lib/drizzle/schema';
 import {
 	AuthorizedFileMutationError,
 	commitAuthorizedFileRelocation,
 } from '../src/server/security/authorized-file-mutation';
 import {
 	prepareFileMutationRecovery,
+	reconcilePendingFileMutations,
 	type FileMutationRecoveryPrepareInput,
 	type FileMutationRecoveryTransition,
 } from '../src/server/security/file-mutation-recovery';
@@ -80,6 +84,82 @@ describe('authorized file relocation', () => {
 		} finally {
 			await rm(container, { force: true, recursive: true });
 		}
+	});
+
+	it('requires canonical and legacy Image locations to agree before startup recovery can unlink anything', async () => {
+		await withFixture(async ({ primary, registry }) => {
+			const assetId = crypto.randomUUID();
+			const folderId = crypto.randomUUID();
+			const sourceFileId = crypto.randomUUID();
+			const destinationPath = resolve(primary, 'target/moved.txt');
+			const journalPath = resolve(primary, 'recovery.jsonl');
+			await writeFile(destinationPath, 'source-content', 'utf8');
+			const now = new Date();
+			await db.transaction(async (transaction: typeof db) => {
+				await transaction.insert(mediaRoots).values({ id: 'primary', label: 'Recovery primary' });
+				await transaction.insert(folders).values({ id: folderId, name: 'Recovery folder', path: primary });
+				await transaction.insert(sourceFiles).values({
+					assetId,
+					availability: 'available',
+					byteSize: 14,
+					contentHash: 'a'.repeat(64),
+					folderId,
+					id: sourceFileId,
+					observedAt: now,
+					relativePath: 'source.txt',
+					rootId: 'primary',
+				});
+				await transaction.insert(assets).values({
+					assetType: 'image',
+					id: assetId,
+					primarySourceFileId: sourceFileId,
+					title: 'source.txt',
+				});
+				await transaction.insert(images).values({
+					assetId,
+					folderId,
+					hash: 'a'.repeat(64),
+					height: 1,
+					id: assetId,
+					name: 'source.txt',
+					path: destinationPath,
+					size: 14,
+					width: 1,
+				});
+			});
+			try {
+				const sourceStats = await lstat(resolve(primary, 'source.txt'), { bigint: true });
+				const destinationStats = await lstat(destinationPath, { bigint: true });
+				const recovery = await prepareFileMutationRecovery(
+					{
+						asset: { assetId, assetType: 'image' },
+						destination: { relativePath: 'target/moved.txt', rootId: 'primary' },
+						source: { relativePath: 'source.txt', rootId: 'primary' },
+					},
+					{ DATABASE_URL: process.env.DATABASE_URL, MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL: journalPath }
+				);
+				await recovery.transition({
+					destinationIdentity: { dev: destinationStats.dev.toString(), ino: destinationStats.ino.toString() },
+					reasonCode: 'TEST_DATABASE_COMMITTED',
+					sourceIdentity: { dev: sourceStats.dev.toString(), ino: sourceStats.ino.toString() },
+					state: 'database_committed',
+				});
+
+				const result = await reconcilePendingFileMutations(registry, {
+					DATABASE_URL: process.env.DATABASE_URL,
+					MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL: journalPath,
+				});
+
+				expect(result).toEqual({ completed: 0, manual: 1, pending: 0 });
+				expect(await readFile(resolve(primary, 'source.txt'), 'utf8')).toBe('source-content');
+				expect(await readFile(destinationPath, 'utf8')).toBe('source-content');
+			} finally {
+				await db.delete(images).where(eq(images.id, assetId));
+				await db.delete(assets).where(eq(assets.id, assetId));
+				await db.delete(folders).where(eq(folders.id, folderId));
+				await db.delete(mediaRoots).where(eq(mediaRoots.id, 'primary'));
+			}
+		});
 	});
 
 	it('commits the database before deleting the only source pathname', async () => {

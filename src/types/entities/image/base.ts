@@ -11,7 +11,10 @@ import type { TagWithStats } from '../tag';
  * 🖼️ Modelo base de Image, basado en el esquema de Drizzle.
  */
 export interface ImageBase {
+	assetId: string | null;
 	addedAt: Date;
+	canonicalDivergences: string[];
+	canonicalState: 'canonical' | 'legacy_only' | 'diverged';
 	createdAt: Date;
 	description: string | null;
 	folderId: string;
@@ -19,6 +22,7 @@ export interface ImageBase {
 	height: number;
 	id: string;
 	isFavorite: boolean;
+	legacyId: string;
 	metadata: string | null;
 	name: string;
 	noteId: string | null;
@@ -81,7 +85,10 @@ export interface ImageWithStats extends ImageBase {
 	type?: string;
 }
 
-export interface DrizzleImageWithCounts extends ImageBase {
+export interface DrizzleImageWithCounts extends Omit<
+	ImageBase,
+	'canonicalDivergences' | 'canonicalState' | 'legacyId'
+> {
 	_count?: {
 		albums?: number;
 		collections?: number;

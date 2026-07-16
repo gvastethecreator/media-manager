@@ -9,6 +9,7 @@ import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createServiceError, ServiceErrorCode } from '@/lib/utils/errors/service-errors';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 
 const logger = serverLogger.withContext('FolderFilesService');
 
@@ -346,7 +347,10 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${images}
-				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, images)}
+				WHERE ${and(
+					buildWhereConditions(folderContext, includeSubfolders, search, images),
+					visibleImageLifecycleCondition()
+				)}
 			`);
 		}
 
@@ -529,7 +533,9 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(images)
-					.where(buildWhereConditions(context, includeSubfolders, search, images))
+					.where(
+						and(buildWhereConditions(context, includeSubfolders, search, images), visibleImageLifecycleCondition())
+					)
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -595,6 +601,57 @@ async function getTotalFileCount(
 	}
 }
 
+async function getTotalFileSize(context: FolderQueryContext, includeSubfolders: boolean): Promise<number> {
+	try {
+		const sumSize = <TResult extends Array<{ totalSize: number }>>(query: PromiseLike<TResult>) =>
+			query.then((result) => Number(result[0]?.totalSize ?? 0));
+		const sizes = await Promise.all([
+			sumSize(
+				db
+					.select({ totalSize: sql<number>`COALESCE(SUM(${images.size}), 0)` })
+					.from(images)
+					.where(
+						and(buildWhereConditions(context, includeSubfolders, undefined, images), visibleImageLifecycleCondition())
+					)
+			),
+			sumSize(
+				db
+					.select({ totalSize: sql<number>`COALESCE(SUM(${videos.size}), 0)` })
+					.from(videos)
+					.where(buildWhereConditions(context, includeSubfolders, undefined, videos))
+			),
+			sumSize(
+				db
+					.select({ totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` })
+					.from(audios)
+					.where(buildWhereConditions(context, includeSubfolders, undefined, audios))
+			),
+			sumSize(
+				db
+					.select({ totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)` })
+					.from(documents)
+					.where(buildWhereConditions(context, includeSubfolders, undefined, documents))
+			),
+			sumSize(
+				db
+					.select({ totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` })
+					.from(jsonFiles)
+					.where(buildWhereConditions(context, includeSubfolders, undefined, jsonFiles))
+			),
+			sumSize(
+				db
+					.select({ totalSize: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` })
+					.from(file3Ds)
+					.where(buildWhereConditions(context, includeSubfolders, undefined, file3Ds))
+			),
+		]);
+		return sizes.reduce((total, size) => total + size, 0);
+	} catch (error) {
+		logger.error('Error getting total file size:', error);
+		return 0;
+	}
+}
+
 /**
  * Obtiene estadísticas rápidas de una carpeta
  */
@@ -610,16 +667,20 @@ export async function getFolderFileStats(folderId: string, includeSubfolders = f
 				jsonFiles: 0,
 				file3Ds: 0,
 				total: 0,
+				totalSize: 0,
 			};
 		}
 
-		const stats = await Promise.all([
-			getTotalFileCount(folderContext, includeSubfolders, undefined, ['image']),
-			getTotalFileCount(folderContext, includeSubfolders, undefined, ['video']),
-			getTotalFileCount(folderContext, includeSubfolders, undefined, ['audio']),
-			getTotalFileCount(folderContext, includeSubfolders, undefined, ['document']),
-			getTotalFileCount(folderContext, includeSubfolders, undefined, ['jsonFile']),
-			getTotalFileCount(folderContext, includeSubfolders, undefined, ['file3d']),
+		const [stats, totalSize] = await Promise.all([
+			Promise.all([
+				getTotalFileCount(folderContext, includeSubfolders, undefined, ['image']),
+				getTotalFileCount(folderContext, includeSubfolders, undefined, ['video']),
+				getTotalFileCount(folderContext, includeSubfolders, undefined, ['audio']),
+				getTotalFileCount(folderContext, includeSubfolders, undefined, ['document']),
+				getTotalFileCount(folderContext, includeSubfolders, undefined, ['jsonFile']),
+				getTotalFileCount(folderContext, includeSubfolders, undefined, ['file3d']),
+			]),
+			getTotalFileSize(folderContext, includeSubfolders),
 		]);
 
 		return {
@@ -630,6 +691,7 @@ export async function getFolderFileStats(folderId: string, includeSubfolders = f
 			jsonFiles: stats[4],
 			file3Ds: stats[5],
 			total: stats.reduce((sum, count) => sum + count, 0),
+			totalSize,
 		};
 	} catch (error) {
 		logger.error('Error getting folder file stats:', error);
@@ -641,6 +703,7 @@ export async function getFolderFileStats(folderId: string, includeSubfolders = f
 			jsonFiles: 0,
 			file3Ds: 0,
 			total: 0,
+			totalSize: 0,
 		};
 	}
 }

@@ -16,10 +16,10 @@ export class DocumentProcessor {
 	/**
 	 * Verifica si un documento ya existe por hash
 	 */
-	async checkExists(hash: string): Promise<boolean> {
-		if (!hash) return false;
+	async checkExists(fileInfo: FileInfo): Promise<boolean> {
+		if (!fileInfo.hash) return false;
 		try {
-			const existing = await getDocumentByHash(hash);
+			const existing = await getDocumentByHash(fileInfo.hash);
 			return !!existing;
 		} catch {
 			return false;

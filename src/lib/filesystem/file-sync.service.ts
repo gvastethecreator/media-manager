@@ -7,7 +7,7 @@
 import { stat } from 'node:fs/promises';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { audios, documents, file3Ds, folders, images, videos } from '@/lib/drizzle/schema/index';
+import { assets, audios, documents, file3Ds, folders, images, sourceFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { scanFolder } from './folder-scanner';
 import { normalizePath } from './path-utils';
@@ -139,6 +139,9 @@ export class FileSyncService {
 
 			// 4. Ejecutar cambios si no es dry run
 			if (!dryRun) {
+				if (entityTypes.includes('image')) {
+					await this.restoreObservedCanonicalImages(folderId, filesystemPaths);
+				}
 				await this.executeFileSyncChanges(result, folderId, options.onProgress);
 			}
 
@@ -333,6 +336,33 @@ export class FileSyncService {
 		}
 	}
 
+	private async restoreObservedCanonicalImages(folderId: string, filesystemPaths: Set<string>): Promise<void> {
+		const canonicalImages: Array<{ assetId: string | null; path: string }> = await db
+			.select({ assetId: images.assetId, path: images.path })
+			.from(images)
+			.where(eq(images.folderId, folderId));
+		const assetIds = canonicalImages.flatMap((image) =>
+			image.assetId && filesystemPaths.has(normalizePath(image.path)) ? [image.assetId] : []
+		);
+		if (assetIds.length === 0) return;
+
+		const observedPrimarySources: Array<{ assetId: string; folderId: string | null; id: string }> = await db
+			.select({ assetId: sourceFiles.assetId, folderId: sourceFiles.folderId, id: sourceFiles.id })
+			.from(assets)
+			.innerJoin(sourceFiles, eq(sourceFiles.id, assets.primarySourceFileId))
+			.where(inArray(assets.id, assetIds));
+		const sourceIds = observedPrimarySources.flatMap((source) =>
+			source.folderId === folderId && assetIds.includes(source.assetId) ? [source.id] : []
+		);
+		if (sourceIds.length === 0) return;
+
+		const now = new Date();
+		await db
+			.update(sourceFiles)
+			.set({ availability: 'available', observedAt: now, updatedAt: now })
+			.where(inArray(sourceFiles.id, sourceIds));
+	}
+
 	/**
 	 * Ejecuta los cambios de sincronización (eliminar archivos que ya no existen)
 	 */
@@ -404,7 +434,7 @@ export class FileSyncService {
 	}
 
 	private async removeDeletedFiles(result: FileSyncResult): Promise<void> {
-		syncLogger.info(`🗑️ Eliminando ${result.removedFiles.length} archivos de la BD`);
+		syncLogger.info(`🔄 Reconciliando ${result.removedFiles.length} archivos ausentes con la BD`);
 
 		// Agrupar por tipo de entidad para eliminar en lotes
 		const filesByType = result.removedFiles.reduce(
@@ -422,7 +452,7 @@ export class FileSyncService {
 		const deletePromises = Object.entries(filesByType).map(async ([entityType, fileIds]) => {
 			try {
 				await this.deleteEntityFiles(entityType as any, fileIds);
-				syncLogger.info(`✅ Eliminados ${fileIds.length} archivos de tipo ${entityType}`);
+				syncLogger.info(`✅ Reconciliados ${fileIds.length} archivos ausentes de tipo ${entityType}`);
 			} catch (error) {
 				const errorMsg = `Error eliminando archivos ${entityType}: ${error instanceof Error ? error.message : String(error)}`;
 				syncLogger.error(errorMsg);
@@ -445,9 +475,31 @@ export class FileSyncService {
 		}
 
 		switch (entityType) {
-			case 'image':
-				await db.delete(images).where(inArray(images.id, fileIds));
+			case 'image': {
+				const rows: Array<{ assetId: string | null; id: string }> = await db
+					.select({ assetId: images.assetId, id: images.id })
+					.from(images)
+					.where(inArray(images.id, fileIds));
+				const canonicalAssetIds = rows.flatMap((row) => (row.assetId ? [row.assetId] : []));
+				if (canonicalAssetIds.length > 0) {
+					const primarySources: Array<{ id: string }> = await db
+						.select({ id: assets.primarySourceFileId })
+						.from(assets)
+						.where(inArray(assets.id, canonicalAssetIds));
+					await db
+						.update(sourceFiles)
+						.set({ availability: 'missing', observedAt: new Date(), updatedAt: new Date() })
+						.where(
+							inArray(
+								sourceFiles.id,
+								primarySources.map((source) => source.id)
+							)
+						);
+				}
+				const legacyIds = rows.flatMap((row) => (row.assetId ? [] : [row.id]));
+				if (legacyIds.length > 0) await db.delete(images).where(inArray(images.id, legacyIds));
 				break;
+			}
 			case 'video':
 				await db.delete(videos).where(inArray(videos.id, fileIds));
 				break;

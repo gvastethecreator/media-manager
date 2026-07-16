@@ -8,7 +8,10 @@
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import type { CreateNoteInput as NoteCreateInput, UpdateNoteInput as NoteUpdateInput } from '@/lib/utils/note/validators';
+import type {
+	CreateNoteInput as NoteCreateInput,
+	UpdateNoteInput as NoteUpdateInput,
+} from '@/lib/utils/note/validators';
 import type { CreateWorldItemInput, UpdateWorldItemInput } from '@/lib/utils/world-item/validators';
 import {
 	groupImages,
@@ -27,8 +30,12 @@ import {
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
-import type { CreateGroupInput as GroupCreateInput, UpdateGroupInput as GroupUpdateInput } from '@/types/entities/group/schema';
+import type {
+	CreateGroupInput as GroupCreateInput,
+	UpdateGroupInput as GroupUpdateInput,
+} from '@/types/entities/group/schema';
 import type { PropertyCreateInput, PropertyUpdateInput } from '@/types/entities/property/base';
 import type { WildcardCreateInput, WildcardUpdateInput } from '@/types/entities/wildcard/base';
 import {
@@ -63,11 +70,11 @@ type SecondaryListResult<TEntity> = {
 };
 
 type FavoriteCapableEntity = { id: string; isFavorite?: boolean | null };
-type GroupRecord = (typeof groups.$inferSelect) & { isFavorite: boolean };
-type WildcardRecord = (typeof wildcards.$inferSelect) & { isFavorite: boolean };
-type NoteRecord = (typeof notes.$inferSelect) & { isFavorite: boolean };
-type PropertyRecord = (typeof properties.$inferSelect) & { isFavorite: boolean };
-type WorldItemRecord = (typeof worldItems.$inferSelect) & { isFavorite: boolean };
+type GroupRecord = typeof groups.$inferSelect & { isFavorite: boolean };
+type WildcardRecord = typeof wildcards.$inferSelect & { isFavorite: boolean };
+type NoteRecord = typeof notes.$inferSelect & { isFavorite: boolean };
+type PropertyRecord = typeof properties.$inferSelect & { isFavorite: boolean };
+type WorldItemRecord = typeof worldItems.$inferSelect & { isFavorite: boolean };
 type NoteImageRecord = typeof images.$inferSelect;
 type NoteUpdatePayload = Omit<NoteUpdateInput, 'id'>;
 
@@ -124,7 +131,10 @@ const makeGroupService = (): GroupServiceInterface => {
 						query = query.where(inArray(groups.id, favoriteEntityIds));
 					}
 
-					return query.orderBy(desc(groups.createdAt)).limit(options.limit || 50).offset(options.offset || 0);
+					return query
+						.orderBy(desc(groups.createdAt))
+						.limit(options.limit || 50)
+						.offset(options.offset || 0);
 				},
 				catch: (error) => fromUnknownGroupError('getAll', error),
 			});
@@ -229,14 +239,18 @@ export interface WildcardServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, WildcardError>;
 	readonly create: (input: WildcardCreateInput) => Effect.Effect<WildcardRecord, WildcardError>;
 	readonly delete: (id: string) => Effect.Effect<void, WildcardError>;
-	readonly getAll: (options?: SecondaryListOptions) => Effect.Effect<SecondaryListResult<WildcardRecord>, WildcardError>;
+	readonly getAll: (
+		options?: SecondaryListOptions
+	) => Effect.Effect<SecondaryListResult<WildcardRecord>, WildcardError>;
 	readonly getById: (id: string) => Effect.Effect<WildcardRecord, WildcardError>;
 	readonly toggleFavorite: (id: string) => Effect.Effect<WildcardRecord, WildcardError>;
 	readonly update: (id: string, input: WildcardUpdateInput) => Effect.Effect<WildcardRecord, WildcardError>;
 }
 
 const makeWildcardService = (): WildcardServiceInterface => {
-	const getAll = (options: SecondaryListOptions = {}): Effect.Effect<SecondaryListResult<WildcardRecord>, WildcardError> =>
+	const getAll = (
+		options: SecondaryListOptions = {}
+	): Effect.Effect<SecondaryListResult<WildcardRecord>, WildcardError> =>
 		Effect.gen(function* () {
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], WildcardError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.WILDCARD),
@@ -255,7 +269,10 @@ const makeWildcardService = (): WildcardServiceInterface => {
 						query = query.where(inArray(wildcards.id, favoriteEntityIds));
 					}
 
-					return query.orderBy(desc(wildcards.createdAt)).limit(options.limit || 50).offset(options.offset || 0);
+					return query
+						.orderBy(desc(wildcards.createdAt))
+						.limit(options.limit || 50)
+						.offset(options.offset || 0);
 				},
 				catch: (error) => fromUnknownWildcardError('getAll', error),
 			});
@@ -399,7 +416,10 @@ const makeNoteService = (): NoteServiceInterface => {
 						query = query.where(inArray(notes.id, favoriteEntityIds));
 					}
 
-					return query.orderBy(desc(notes.createdAt)).limit(options.limit || 50).offset(options.offset || 0);
+					return query
+						.orderBy(desc(notes.createdAt))
+						.limit(options.limit || 50)
+						.offset(options.offset || 0);
 				},
 				catch: (error) => fromUnknownNoteError('getAll', error),
 			});
@@ -500,7 +520,7 @@ const makeNoteService = (): NoteServiceInterface => {
 						.select({ image: images })
 						.from(imageNotes)
 						.innerJoin(images, eq(imageNotes.A, images.id))
-						.where(eq(imageNotes.B, id)),
+						.where(and(eq(imageNotes.B, id), visibleImageLifecycleCondition())),
 				catch: (error) => fromUnknownNoteError('getImages', error),
 			});
 			return result.map((record) => record.image);
@@ -567,14 +587,18 @@ export interface PropertyServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, PropertyError>;
 	readonly create: (input: PropertyCreateInput) => Effect.Effect<PropertyRecord, PropertyError>;
 	readonly delete: (id: string) => Effect.Effect<void, PropertyError>;
-	readonly getAll: (options?: SecondaryListOptions) => Effect.Effect<SecondaryListResult<PropertyRecord>, PropertyError>;
+	readonly getAll: (
+		options?: SecondaryListOptions
+	) => Effect.Effect<SecondaryListResult<PropertyRecord>, PropertyError>;
 	readonly getById: (id: string) => Effect.Effect<PropertyRecord, PropertyError>;
 	readonly toggleFavorite: (id: string) => Effect.Effect<PropertyRecord, PropertyError>;
 	readonly update: (id: string, input: PropertyUpdateInput) => Effect.Effect<PropertyRecord, PropertyError>;
 }
 
 const makePropertyService = (): PropertyServiceInterface => {
-	const getAll = (options: SecondaryListOptions = {}): Effect.Effect<SecondaryListResult<PropertyRecord>, PropertyError> =>
+	const getAll = (
+		options: SecondaryListOptions = {}
+	): Effect.Effect<SecondaryListResult<PropertyRecord>, PropertyError> =>
 		Effect.gen(function* () {
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], PropertyError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.PROPERTY),
@@ -593,7 +617,10 @@ const makePropertyService = (): PropertyServiceInterface => {
 						query = query.where(inArray(properties.id, favoriteEntityIds));
 					}
 
-					return query.orderBy(desc(properties.createdAt)).limit(options.limit || 50).offset(options.offset || 0);
+					return query
+						.orderBy(desc(properties.createdAt))
+						.limit(options.limit || 50)
+						.offset(options.offset || 0);
 				},
 				catch: (error) => fromUnknownPropertyError('getAll', error),
 			});
@@ -707,14 +734,18 @@ export interface WorldItemServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, WorldItemError>;
 	readonly create: (input: CreateWorldItemInput) => Effect.Effect<WorldItemRecord, WorldItemError>;
 	readonly delete: (id: string) => Effect.Effect<void, WorldItemError>;
-	readonly getAll: (options?: SecondaryListOptions) => Effect.Effect<SecondaryListResult<WorldItemRecord>, WorldItemError>;
+	readonly getAll: (
+		options?: SecondaryListOptions
+	) => Effect.Effect<SecondaryListResult<WorldItemRecord>, WorldItemError>;
 	readonly getById: (id: string) => Effect.Effect<WorldItemRecord, WorldItemError>;
 	readonly toggleFavorite: (id: string) => Effect.Effect<WorldItemRecord, WorldItemError>;
 	readonly update: (id: string, input: UpdateWorldItemInput) => Effect.Effect<WorldItemRecord, WorldItemError>;
 }
 
 const makeWorldItemService = (): WorldItemServiceInterface => {
-	const getAll = (options: SecondaryListOptions = {}): Effect.Effect<SecondaryListResult<WorldItemRecord>, WorldItemError> =>
+	const getAll = (
+		options: SecondaryListOptions = {}
+	): Effect.Effect<SecondaryListResult<WorldItemRecord>, WorldItemError> =>
 		Effect.gen(function* () {
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], WorldItemError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.WORLD_ITEM),
@@ -733,7 +764,10 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 						query = query.where(inArray(worldItems.id, favoriteEntityIds));
 					}
 
-					return query.orderBy(desc(worldItems.createdAt)).limit(options.limit || 50).offset(options.offset || 0);
+					return query
+						.orderBy(desc(worldItems.createdAt))
+						.limit(options.limit || 50)
+						.offset(options.offset || 0);
 				},
 				catch: (error) => fromUnknownWorldItemError('getAll', error),
 			});

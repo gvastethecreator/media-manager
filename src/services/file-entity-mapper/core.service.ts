@@ -16,7 +16,7 @@ import { MetricsCollector } from './utils/metrics.utils';
 type ProcessorResult = { success: boolean; error?: string };
 
 interface EntityProcessor {
-	checkExists(hash: string): Promise<boolean>;
+	checkExists(fileInfo: Awaited<ReturnType<typeof getFileInfo>>): Promise<boolean>;
 	createBasicEntity(fileInfo: Awaited<ReturnType<typeof getFileInfo>>): Promise<string>;
 	extractMetadata?: (filePath: string, entityId: string) => Promise<ProcessorResult>;
 	generateThumbnail?: (filePath: string, entityId: string) => Promise<ProcessorResult>;
@@ -123,7 +123,7 @@ export class FileEntityMapperCore {
 			}
 
 			// Verificar si ya existe
-			const exists = await processor.checkExists(fileInfo.hash);
+			const exists = await processor.checkExists(fileInfo);
 			if (exists) {
 				return { success: true, entityType, error: 'Entity already exists' };
 			}
