@@ -7,19 +7,20 @@ Requiere runtime y persistencia estables; se ejecuta por vertical slice, nunca c
 
 ### MODEL-001 — Vocabulario e invariantes
 
-- [ ] Confirmar definitions de Asset, Source File, Placement, Primary Placement, Folder, Album y Collection.
-- [ ] Resolver identidad: hash, source path, duplicate content, rename/move y múltiples roots.
-- [ ] Definir qué sobrevive si desaparece un archivo fuente.
-- [ ] Definir ownership de metadata derivada vs authored.
-- [ ] Publicar ADR complementario sólo para decisiones no cubiertas por 0004/0006.
+- [x] Confirmar definitions de Asset, Source File, Placement, Primary Placement, Folder, Album y Collection.
+- [x] Resolver identidad: hash, source path, duplicate content, rename/move y múltiples roots.
+- [x] Definir qué sobrevive si desaparece un archivo fuente.
+- [x] Definir ownership de metadata derivada vs authored.
+- [x] Publicar ADR complementario sólo para decisiones no cubiertas por 0004/0006. No hizo falta: 0004/0006 cubren la decisión y el detalle ejecutable quedó en el contexto.
 
 ### MODEL-002 — Schema mínimo de Asset
 
-- [ ] `Asset` estable, agnóstico al tipo, con lifecycle/status.
-- [ ] `SourceFile` con root + relative path, identity, stat/hash y disponibilidad.
-- [ ] `Placement` con organización y flag/constraint de primary placement.
-- [ ] Extensiones media-specific referencian Asset, no duplican identidad común.
-- [ ] Índices para lookup por source/hash/type/status/placement.
+- [x] `Asset` estable, agnóstico al tipo, con lifecycle/status.
+- [x] `SourceFile` con root + relative path, identity, stat/hash y disponibilidad.
+- [x] `Placement` se materializa como `SourceFile`: organización en `folderId` y primary authority única en
+      `Asset.primarySourceFileId`, sin booleano duplicado.
+- [x] El schema común no replica metadata media-specific; la conexión de entidades legacy se hace por vertical slice.
+- [x] Índices para lookup por source/hash/type/status/placement, incluida unicidad locacional `NOCASE`.
 
 ### MODEL-003 — Primera vertical slice
 

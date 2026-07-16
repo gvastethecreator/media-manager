@@ -37,6 +37,10 @@ export {
 	videos,
 } from './files';
 // =================================================================================
+// MEDIA CORE DOMAIN EXPORTS
+// =================================================================================
+export { assets, mediaRoots, sourceFiles } from './media-core';
+// =================================================================================
 // ORGANIZATION DOMAIN EXPORTS
 // =================================================================================
 export { albums, collections, favorites, files, folders, groups } from './organization';

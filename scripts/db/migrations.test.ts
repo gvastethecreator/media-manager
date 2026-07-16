@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'bun:test';
 import { Database } from 'bun:sqlite';
 import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
-import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
@@ -89,25 +89,23 @@ describe('versioned SQLite migrations', () => {
 	it('creates the current schema from empty and is idempotent', async () => {
 		const directory = await createTemporaryDirectory();
 		const databasePath = join(directory, 'fresh.sqlite');
+		const migrationNames = (await loadMigrations()).map((migration) => migration.name);
+		expect(migrationNames).toEqual([
+			'0000_baseline.sql',
+			'0001_relational_integrity.sql',
+			'0002_queue_idempotency.sql',
+			'0003_epoch_ms_normalization.sql',
+			'0004_canonical_asset_source.sql',
+		]);
 
 		const first = await migrateDatabase({ databasePath });
 		const second = await migrateDatabase({ databasePath });
 		const check = await checkDatabase({ databasePath });
 
-		expect(first.applied).toEqual([
-			'0000_baseline.sql',
-			'0001_relational_integrity.sql',
-			'0002_queue_idempotency.sql',
-			'0003_epoch_ms_normalization.sql',
-		]);
+		expect(first.applied).toEqual(migrationNames);
 		expect(second).toEqual({
 			applied: [],
-			skipped: [
-				'0000_baseline.sql',
-				'0001_relational_integrity.sql',
-				'0002_queue_idempotency.sql',
-				'0003_epoch_ms_normalization.sql',
-			],
+			skipped: migrationNames,
 		});
 		expect(check.healthy).toBe(true);
 		expect(check.status).toBe('ok');
@@ -131,8 +129,58 @@ describe('versioned SQLite migrations', () => {
 		const databasePath = join(directory, 'missing.sqlite');
 		const status = await inspectMigrationStatus({ databasePath });
 
-		expect(status.migrations.map((entry) => entry.state)).toEqual(['pending', 'pending', 'pending', 'pending']);
+		expect(status.migrations.map((entry) => entry.state)).toEqual(
+			(await loadMigrations()).map(() => 'pending')
+		);
 		expect(await Bun.file(databasePath).exists()).toBe(false);
+	});
+
+	it('rejects a generated media-core migration that loses the deferred cyclic ownership contract', async () => {
+		const directory = await createTemporaryDirectory();
+		const canonicalMigrationPath = join(MIGRATIONS_DIRECTORY, '0004_canonical_asset_source.sql');
+		const canonicalSql = await readFile(canonicalMigrationPath, 'utf8');
+		for (const mutation of [
+			{
+				clause:
+					'FOREIGN KEY (`id`,`primarySourceFileId`) REFERENCES `SourceFile`(`assetId`,`id`) ON UPDATE cascade ON DELETE restrict DEFERRABLE INITIALLY DEFERRED',
+				expectedError: 'asset_primary_source_fk_not_deferred_or_owned',
+				label: 'asset',
+			},
+			{
+				clause:
+					'FOREIGN KEY (`assetId`) REFERENCES `Asset`(`id`) ON UPDATE cascade ON DELETE cascade DEFERRABLE INITIALLY DEFERRED',
+				expectedError: 'source_file_asset_fk_not_deferred',
+				label: 'source',
+			},
+			{
+				clause:
+					'FOREIGN KEY (`id`,`primarySourceFileId`) REFERENCES `SourceFile`(`assetId`,`id`) ON UPDATE cascade ON DELETE restrict DEFERRABLE INITIALLY DEFERRED',
+				commentEcho: true,
+				expectedError: 'asset_primary_source_fk_not_deferred_or_owned',
+				label: 'asset-comment-echo',
+			},
+		]) {
+			const migrationDirectory = join(directory, `migrations-${mutation.label}`);
+			const databasePath = join(directory, `immediate-media-core-${mutation.label}.sqlite`);
+			await cp(MIGRATIONS_DIRECTORY, migrationDirectory, { recursive: true });
+			const migrationPath = join(migrationDirectory, '0004_canonical_asset_source.sql');
+			const immediateClause = `${mutation.clause.replace(' DEFERRABLE INITIALLY DEFERRED', '')}${
+				mutation.commentEcho ? ` /* ${mutation.clause} */` : ''
+			}`;
+			const immediateSql = canonicalSql.replace(mutation.clause, immediateClause);
+			expect(immediateSql).not.toBe(canonicalSql);
+			await writeFile(migrationPath, immediateSql);
+
+			await expect(
+				migrateDatabase({ databasePath, migrationsDirectory: migrationDirectory, validateSchema: false })
+			).rejects.toThrow(mutation.expectedError);
+
+			const database = new Database(databasePath, { readonly: true });
+			expect(database.query("SELECT 1 FROM sqlite_schema WHERE type = 'table' AND name = 'Asset'").get()).toBeNull();
+			expect(database.query('PRAGMA user_version').get()).toEqual({ user_version: 4 });
+			database.clearQueryCache();
+			database.close();
+		}
 	});
 
 	it('rejects an applied migration whose checksum changed', async () => {
@@ -379,25 +427,30 @@ describe('versioned SQLite migrations', () => {
 		database.close();
 
 		const check = await checkDatabase({ databasePath });
+		const expectedVersion = (await loadMigrations()).length;
 		expect(check.healthy).toBe(false);
 		expect(check.status).toBe('error');
-		expect(check.expectedUserVersion).toBe(4);
-		expect(check.errors).toContain('user_version_mismatch=999:4');
+		expect(check.expectedUserVersion).toBe(expectedVersion);
+		expect(check.errors).toContain(`user_version_mismatch=999:${expectedVersion}`);
 	});
 
 	it('rejects a future user_version before an allowed pending migration can normalize it', async () => {
 		const directory = await createTemporaryDirectory();
 		const databasePath = join(directory, 'pending-impossible-version.sqlite');
 		await migrateDatabase({ databasePath });
+		const expectedVersion = (await loadMigrations()).length;
+		const pendingVersion = expectedVersion - 1;
 		const database = new Database(databasePath);
-		database.exec(`DELETE FROM ${MIGRATION_TABLE} WHERE version = 3; PRAGMA user_version = 999;`);
+		database.exec(`DELETE FROM ${MIGRATION_TABLE} WHERE version = ${pendingVersion}; PRAGMA user_version = 999;`);
 		database.close();
 
 		await expect(migrateDatabase({ allowExistingPending: true, databasePath })).rejects.toThrow(
-			'user_version no coincide con la historia aplicada: actual=999, esperado=3'
+			`user_version no coincide con la historia aplicada: actual=999, esperado=${pendingVersion}`
 		);
 		const unchanged = new Database(databasePath, { readonly: true });
-		expect(unchanged.query(`SELECT count(*) AS count FROM ${MIGRATION_TABLE}`).get()).toEqual({ count: 3 });
+		expect(unchanged.query(`SELECT count(*) AS count FROM ${MIGRATION_TABLE}`).get()).toEqual({
+			count: pendingVersion,
+		});
 		expect(unchanged.query('PRAGMA user_version').get()).toEqual({ user_version: 999 });
 		unchanged.close();
 	});
@@ -435,11 +488,12 @@ describe('versioned SQLite migrations', () => {
 			run([process.execPath, migrationScript, 'migrate', '--database', databasePath, '--json'])
 		);
 		const results = await Promise.all(commands);
+		const migrationCount = (await loadMigrations()).length;
 
 		expect(results.map((result) => result.exitCode)).toEqual([0, 0, 0, 0]);
 		const payloads = results.map((result) => JSON.parse(result.stdout) as { applied: string[]; skipped: string[] });
-		expect(payloads.reduce((total, payload) => total + payload.applied.length, 0)).toBe(4);
-		expect(payloads.reduce((total, payload) => total + payload.skipped.length, 0)).toBe(12);
+		expect(payloads.reduce((total, payload) => total + payload.applied.length, 0)).toBe(migrationCount);
+		expect(payloads.reduce((total, payload) => total + payload.skipped.length, 0)).toBe(migrationCount * 3);
 	});
 
 	it('does not grant in-place migration authority when a pending database appears after marker claim', async () => {
@@ -447,8 +501,11 @@ describe('versioned SQLite migrations', () => {
 		const pendingSourcePath = join(directory, 'pending-source.sqlite');
 		const claimedTargetPath = join(directory, 'claimed-target.sqlite');
 		await migrateDatabase({ databasePath: pendingSourcePath });
+		const pendingVersion = (await loadMigrations()).length - 1;
 		const pendingSource = new Database(pendingSourcePath);
-		pendingSource.exec(`DELETE FROM ${MIGRATION_TABLE} WHERE version = 3; PRAGMA user_version = 3;`);
+		pendingSource.exec(
+			`DELETE FROM ${MIGRATION_TABLE} WHERE version = ${pendingVersion}; PRAGMA user_version = ${pendingVersion};`
+		);
 		pendingSource.close();
 
 		await expect(
@@ -457,8 +514,10 @@ describe('versioned SQLite migrations', () => {
 			})
 		).rejects.toThrow('db:upgrade');
 		const unchanged = new Database(claimedTargetPath, { readonly: true });
-		expect(unchanged.query(`SELECT count(*) AS count FROM ${MIGRATION_TABLE}`).get()).toEqual({ count: 3 });
-		expect(unchanged.query('PRAGMA user_version').get()).toEqual({ user_version: 3 });
+		expect(unchanged.query(`SELECT count(*) AS count FROM ${MIGRATION_TABLE}`).get()).toEqual({
+			count: pendingVersion,
+		});
+		expect(unchanged.query('PRAGMA user_version').get()).toEqual({ user_version: pendingVersion });
 		unchanged.close();
 		expect(await Bun.file(`${claimedTargetPath}.migration-initializing`).exists()).toBe(false);
 	});
@@ -475,8 +534,11 @@ describe('versioned SQLite migrations', () => {
 		const directory = await createTemporaryDirectory();
 		const databasePath = join(directory, 'existing-pending.sqlite');
 		await migrateDatabase({ databasePath });
+		const pendingVersion = (await loadMigrations()).length - 1;
 		const database = new Database(databasePath);
-		database.exec(`DELETE FROM ${MIGRATION_TABLE} WHERE version = 3; PRAGMA user_version = 3;`);
+		database.exec(
+			`DELETE FROM ${MIGRATION_TABLE} WHERE version = ${pendingVersion}; PRAGMA user_version = ${pendingVersion};`
+		);
 		database.query('PRAGMA wal_checkpoint(TRUNCATE)').get();
 		database.query('PRAGMA journal_mode = DELETE').get();
 		database.close();
@@ -490,8 +552,10 @@ describe('versioned SQLite migrations', () => {
 		expect(await Bun.file(`${databasePath}-wal`).exists()).toBe(false);
 		expect(await Bun.file(`${databasePath}-shm`).exists()).toBe(false);
 		const unchanged = new Database(databasePath, { readonly: true });
-		expect(unchanged.query(`SELECT count(*) AS count FROM ${MIGRATION_TABLE}`).get()).toEqual({ count: 3 });
-		expect(unchanged.query('PRAGMA user_version').get()).toEqual({ user_version: 3 });
+		expect(unchanged.query(`SELECT count(*) AS count FROM ${MIGRATION_TABLE}`).get()).toEqual({
+			count: pendingVersion,
+		});
+		expect(unchanged.query('PRAGMA user_version').get()).toEqual({ user_version: pendingVersion });
 		expect(unchanged.query('PRAGMA journal_mode').get()).toEqual({ journal_mode: 'delete' });
 		unchanged.close();
 	});

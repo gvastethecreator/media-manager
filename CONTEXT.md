@@ -60,6 +60,14 @@ _Avoid_: dominio totalmente separado, entity sin base común
 Un archivo durable que actúa como origen físico canónico de un **Asset** sin confundirse con la identidad del objeto de producto y que, en el modelo base, coincide conceptualmente con su **Primary Placement**.
 _Avoid_: cache, thumbnail, preview, derivado
 
+**Media Root**:
+Un perímetro físico estable de biblioteca que permite identificar y volver a vincular **Source Files** mediante una referencia opaca y rutas relativas, sin convertir su path absoluto actual en identidad de los assets.
+_Avoid_: folder, path absoluto como identidad, permiso implícito
+
+**Source Availability**:
+El estado observable de acceso al soporte físico de un **Source File**, separado del lifecycle de su **Asset** y capaz de expresar disponibilidad, ausencia, root offline o acceso denegado sin borrar el objeto de producto.
+_Avoid_: asset status, processing status, existencia del asset
+
 **Primary Placement**:
 El placement o source físico principal y canónico que ancla operativamente a un **Asset** en el modelo base, sin definir por eso su identidad, coincidiendo conceptualmente con `Source File` mientras no exista una necesidad real de separar capas.
 _Avoid_: identidad del asset, mirror equivalente por defecto, copia secundaria implícitamente canónica
@@ -178,8 +186,18 @@ _Avoid_: tag, note, narrative entity
 - Un **Asset** se origina en un **Source File** durable
 - Un **Asset** tiene un **Primary Placement** o source principal canónico en el modelo base
 - En el modelo base, **Source File** y **Primary Placement** pertenecen a la misma capa conceptual y estructural
+- Un **Media Root** conserva una identidad estable aunque su base física necesite aprobación o re-vinculación posterior
+- La ubicación canónica de un **Source File** se expresa como **Media Root** más ruta relativa, no como path absoluto de identidad
+- La ruta relativa canónica usa `/`, no admite absolutos, prefijos de drive, traversal, NUL ni tipos SQLite no textuales;
+  la identidad locacional es case-insensitive para no crear aliases incompatibles con Windows
 - Un **Source File** expresa origen físico o ubicación operativa sin definir la **Asset Identity**
+- **Source Availability** no cambia por sí sola el lifecycle del **Asset**
+- Si un **Source File** desaparece o su root queda offline, el **Asset**, su metadata authored y sus relaciones sobreviven; el source queda preservado como no disponible hasta reconciliación o purge explícito
+- La metadata authored pertenece al **Asset** o a su especialización y no se sobrescribe durante reindexado
+- La metadata derivada pertenece al fingerprint/observación del **Source File**, es reconstruible y debe invalidarse cuando cambia su contenido material
 - El **Content Fingerprint** vive canónicamente en **Source File** o **Primary Placement**, no en la identidad raíz del **Asset**
+- El **Content Fingerprint** persistente es SHA-256 hexadecimal lowercase y el tamaño persistente es un entero de bytes;
+  SQLite no puede aceptar BLOB/REAL por afinidad implícita en estos campos
 - La pertenencia física de un **Asset** a un **Folder** vive en **Primary Placement** o **Source File**, no en la raíz del asset
 - Un **Asset** puede tener exactamente un **Primary Placement** y cero o más **Secondary Placements** explícitos
 - Los placements físicos adicionales de un **Asset** sólo existen si se modelan explícitamente y no como equivalentes por defecto del **Primary Placement**

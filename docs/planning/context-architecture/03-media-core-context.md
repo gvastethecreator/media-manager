@@ -41,6 +41,32 @@ Si más adelante el producto necesita mirrors, copias o materializaciones adicio
 
 Esos placements secundarios no nacen por coincidencia de fingerprint, path u otros heurísticos débiles. Requieren decisión o modelado explícito para evitar que el modelo trate como “misma cosa” dos materializaciones que el producto todavía no decidió unificar bajo una sola identidad.
 
+En persistencia, `SourceFile` es también el placement: no existe una cuarta capa `Placement` separada en esta fase.
+`Asset.primarySourceFileId` selecciona el único primario y cualquier otro `SourceFile` del mismo asset es secundario por
+exclusión. No se persiste un booleano `isPrimary` duplicado.
+
+La ubicación se expresa mediante `MediaRoot` + `relativePath`. `MediaRoot` aporta identidad estable y re-vinculable al
+perímetro físico; el registry confiable del runtime sigue siendo quien autoriza y resuelve esa identidad hacia un path
+absoluto actual.
+
+`relativePath` es portable y usa `/`: no admite absolutos, prefijos de drive, traversal ni NUL. La clave locacional por
+root usa `NOCASE` para impedir aliases de casing incompatibles con Windows. IDs, paths, estados, hashes, tamaños y
+timestamps validan además su storage class SQLite; la afinidad declarada no se considera validación suficiente. SHA-256
+se persiste en hexadecimal lowercase.
+
+Las dos FKs del ciclo Asset/primary Source File son `DEFERRABLE INITIALLY DEFERRED`. Drizzle no puede representar esa
+opción en SQLite: el schema tipado omite deliberadamente el ciclo, la migración SQL versionada lo añade y el runner hace
+rollback si el DDL final pierde cualquiera de las dos cláusulas.
+
+### Ausencia del source y ownership de metadata
+
+Que el source esté disponible, ausente, offline o inaccesible no cambia por sí mismo el lifecycle del asset. Si el archivo
+desaparece temporalmente, el asset, su metadata authored y sus relaciones sobreviven; el `SourceFile` conserva la última
+observación y un estado de disponibilidad que permite reconciliarlo.
+
+La metadata authored pertenece al asset o a su especialización. La metadata derivada pertenece a la observación material
+del source, puede reconstruirse y se invalida cuando cambia su fingerprint. Reindexar nunca debe sobrescribir autoría.
+
 ### `Asset Identity` no es `path`
 
 Mover un asset no debería matar su identidad.
@@ -91,6 +117,9 @@ Para esta fase, el shape mínimo acordado del root queda acotado a:
 - `updatedAt`,
 - `archivedAt` opcional,
 - `deletedAt` opcional.
+
+El schema ejecutable complementa ese shape con `statusBeforeDeletion` para restaurar de forma determinista un asset que
+estaba archivado antes del tombstone; no es un segundo lifecycle, sino memoria de la transición.
 
 Por defecto, quedan fuera de esa raíz el `path` físico, la pertenencia a `Folder`, el fingerprint como fuente canónica y cualquier estado o telemetría de colas, thumbnails, reindexado, extracción, transcodificación o sincronización.
 

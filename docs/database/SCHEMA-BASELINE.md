@@ -14,18 +14,20 @@ generado por `scripts/db/export-schema.ts`, que falla cerrado si encuentra objet
 
 `drizzle/migrations/` dejó de ser una segunda fuente. Su migración de índices fue absorbida en el schema: los índices
 simples necesarios se conservaron y los compuestos `folderId + hash`, junto con `Folder.parentId`, ahora son declarativos.
-El plan SQL de `Asset` que estaba ignorado no se adoptó: creaba un modelo que el código vigente todavía no usa y dejaba
-la migración de datos comentada.
+El plan SQL histórico de `Asset` que estaba ignorado no se adoptó: creaba un modelo incompleto y dejaba la migración de
+datos comentada. Fue reemplazado posteriormente por el modelo mínimo versionado `Asset + MediaRoot + SourceFile`, con
+invariantes y compatibilidad verificadas sobre bases descartables.
 
 ## Inventario reproducible
 
-El baseline generado actualmente contiene 58 tablas Drizzle, incluidos los junctions, y sus índices declarados. El gate
+El contrato vigente contiene 63 tablas administradas, incluidos los junctions, y sus índices declarados. El gate
 normaliza el DDL de `sqlite_schema`, calcula SHA-256 por objeto y un fingerprint del conjunto completo. Un objeto esperado
 ausente o modificado y cualquier objeto extra no clasificado hacen fallar `db:check`.
 
-La copia representativa verificada de la base histórica contiene 69 tablas. El baseline canónico contiene 58 tablas
-Drizzle; la diferencia está explicada por extensiones FTS5, tablas legacy de Task y tablas operativas locales. Esa
-diferencia no autoriza a adivinar ni a borrar tablas. La clasificación aplicada sobre el backup fue:
+La copia representativa verificada de la base histórica contiene 69 tablas. El baseline inicial contenía 58 tablas;
+las migraciones posteriores añadieron dos bridges canónicos y las tres tablas del media core. La copia histórica también
+contiene extensiones FTS5, tablas legacy de Task y tablas operativas locales. Por eso los conteos no son una equivalencia
+directa y no autorizan a adivinar ni a borrar tablas. La clasificación aplicada sobre el backup fue:
 
 - `managed`: objeto presente en el contrato versionado;
 - `extension`: `sqlite_*`, historial del runner o tablas auxiliares de FTS5;
@@ -53,12 +55,24 @@ La copia adoptada es evidencia de compatibilidad, no un reemplazo automático de
   para filas históricas.
 - `0003_epoch_ms_normalization.sql` convierte texto/segundos/reales heredados en todos los campos `timestamp_ms` y aborta
   si queda cualquier valor no nulo que no sea un entero epoch-ms.
+- `0004_canonical_asset_source.sql` crea `Asset`, `MediaRoot` y `SourceFile` sin migrar ni borrar filas legacy. Impone
+  lifecycle singular, primary source perteneciente al mismo asset, root + relative path, disponibilidad y fingerprints;
+  las dos FKs cíclicas son diferidas para que el par Asset/SourceFile nazca atómicamente.
+
+Drizzle Kit no puede serializar `DEFERRABLE` para SQLite. Por eso el snapshot tipado no declara las dos FKs cíclicas y
+la migración SQL versionada las añade como extensión explícita. Esto no queda confiado a una nota: el runner valida el
+DDL final dentro de la misma transacción y hace rollback si cualquiera deja de ser `DEFERRABLE INITIALLY DEFERRED`;
+también exige que la clave locacional conserve `COLLATE NOCASE`.
 
 El rehearsal final de Wave 1 partió de la copia adoptada en versión 1, creó backup+manifest v2, aplicó hasta la versión 4
 en outputs nuevos y terminó con `integrity_check=ok`, 0 violaciones FK y 0 drift administrado. Las diferencias fueron
 exactamente las diseñadas: el link huérfano `_ImageToWorldItem` pasó de 1 a 0, se crearon vacías `_AlbumToPlace` y
 `_CharacterToPlace`, y `__media_manager_migrations` pasó de 1 a 4. Todos los demás conteos se preservaron. Los 2 Metadata
 y 17 EntityAggregates polimórficos conocidos siguen preservados y clasificados para reconciliación manual.
+
+El checkpoint de MODEL-002 repitió adopción y upgrade con la historia completa hasta versión 5. Las tres tablas nuevas
+nacieron vacías, los conteos legacy se preservaron salvo el link huérfano previamente catalogado y los contratos de
+migración, schema e integridad referencial terminaron verdes. La base real no participó de este rehearsal.
 
 ## Objetos fuera de Drizzle
 

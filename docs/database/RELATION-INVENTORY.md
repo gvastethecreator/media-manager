@@ -1,13 +1,17 @@
 # Inventario de relaciones conceptuales
 
-`scripts/db/orphan-inventory.ts` mantiene un catálogo ejecutable de 80 relaciones. Desde `0001_relational_integrity`,
+`scripts/db/orphan-inventory.ts` mantiene un catálogo ejecutable de 89 relaciones. Desde `0001_relational_integrity`,
 las relaciones directas soportadas por SQLite también tienen FK físicas; el catálogo sigue siendo necesario para las
 referencias polimórficas, compatibilidad legacy y diagnóstico antes/después de upgrades:
 
-- 52 extremos de 26 junctions de Group/Image/Video hacia organización, taxonomía y worldbuilding;
+<!-- relation-catalog-counts: total=89 direct=83 composite=1 polymorphic=5 junctions=28 endpoints=56 -->
+
+- 56 extremos de 28 junctions de Group/Image/Video/Album/Character hacia organización, taxonomía y worldbuilding;
 - placements `folderId` de siete tablas de archivos hacia `Folder`;
 - nueve jerarquías `parentId` de Character/Collection/Concept/Folder/Place/Prompt/Tag/Wildcard/WorldItem;
-- siete referencias directas adicionales de Settings/Profile/UploadedImage/FileStats/Favorite e `Image.noteId`;
+- once referencias directas adicionales: siete de Settings/Profile/UploadedImage/FileStats/Favorite e `Image.noteId`,
+  más cuatro de `Asset`/`SourceFile`/`MediaRoot`;
+- una relación compuesta que exige que el primary Source File pertenezca al mismo Asset;
 - cinco referencias polimórficas de Favorite/Thumbnail/Metadata/Activity/EntityAggregates.
 
 El inventario abre SQLite en modo read-only y entrega únicamente `count`, `technicalIds`, nombre del contrato y política.

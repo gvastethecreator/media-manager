@@ -6,6 +6,10 @@ import { open, readdir, readFile, rm, stat, statfs } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { resolveDatabasePath } from './database-safety';
 import { compareSchema, loadSchemaContract, type SchemaDriftReport } from './schema-fingerprint';
+import {
+	assertCanonicalSchemaInvariants,
+	collectCanonicalSchemaInvariantErrors,
+} from './canonical-schema-invariants';
 
 export const MIGRATIONS_DIRECTORY = resolve(import.meta.dir, '../../src/lib/drizzle/migrations');
 export const MIGRATION_TABLE = '__media_manager_migrations';
@@ -183,6 +187,7 @@ async function preflightExistingDatabase(
 		// Connection-local only: this must not change the database rejected by preflight.
 		database.exec(`PRAGMA busy_timeout = ${Math.max(0, Math.trunc(busyTimeoutMs))}`);
 		const applied = validateMigrationPreconditions(database, migrations, allowExistingPending);
+		if (applied.length === migrations.length) assertCanonicalSchemaInvariants(database);
 		if (validateSchema && applied.length === migrations.length) {
 			await validateCanonicalSchema(database, migrationsDirectory);
 		}
@@ -193,6 +198,7 @@ async function preflightExistingDatabase(
 }
 
 async function validateCanonicalSchema(database: Database, migrationsDirectory: string): Promise<void> {
+	assertCanonicalSchemaInvariants(database);
 	if (resolve(migrationsDirectory) !== resolve(MIGRATIONS_DIRECTORY)) return;
 	const schema = compareSchema(database, await loadSchemaContract());
 	const unknown = schema.extra.filter((entry) => entry.classification === 'unknown');
@@ -375,6 +381,7 @@ export async function migrateDatabase({
 						`La migración ${migration.name} dejaría ${foreignKeyViolations.length} violación(es) de claves foráneas.`
 					);
 				}
+				if (migration.version === migrations.length - 1) assertCanonicalSchemaInvariants(database);
 				const durationMs = Math.max(0, Math.round(performance.now() - startedAt));
 				database
 					.query(
@@ -398,6 +405,7 @@ export async function migrateDatabase({
 				`user_version no coincide con la historia aplicada: actual=${userVersion}, esperado=${migrations.length}.`
 			);
 		}
+		assertCanonicalSchemaInvariants(database);
 		if (validateSchema) await validateCanonicalSchema(database, migrationsDirectory);
 		return { applied, skipped };
 	} finally {
@@ -421,6 +429,7 @@ export async function checkDatabase({
 		const userVersion = Number(Object.values(userVersionRow)[0] ?? 0);
 		const expectedUserVersion = status.migrations.length;
 		const schema = compareSchema(database, await loadSchemaContract());
+		const canonicalInvariantErrors = collectCanonicalSchemaInvariantErrors(database);
 		const migrationFailure = status.migrations.some((entry) => entry.state !== 'applied');
 		const schemaFailure =
 			schema.missing.length > 0 ||
@@ -449,6 +458,7 @@ export async function checkDatabase({
 		if (migrationFailure) errors.push('migration_history_not_current');
 		if (status.unknownMigrations.length > 0) errors.push('unknown_migrations');
 		if (schemaFailure) errors.push('schema_drift');
+		for (const invariantError of canonicalInvariantErrors) errors.push(`canonical_invariant=${invariantError}`);
 		if (userVersion !== expectedUserVersion) {
 			errors.push(`user_version_mismatch=${userVersion}:${expectedUserVersion}`);
 		}
