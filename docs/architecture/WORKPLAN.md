@@ -8,7 +8,7 @@ Source index: `docs/architecture/architecture-review-2026-05-29.md`
 
 ## Recommendation 1 — Favorite Listing/Projection seam (HTTP)
 
-**Status**: In progress
+**Status**: Complete
 
 **Dependency notes**:
 
@@ -38,23 +38,12 @@ Source index: `docs/architecture/architecture-review-2026-05-29.md`
 - ✅ `src/server/routes/images.effect.ts` migrado a `listFavoriteEntities`.
 - ✅ `src/server/routes/videos.effect.ts` migrado a `listFavoriteEntities`.
 - ✅ Shape de response de `/images/favorites` y `/videos/favorites` convergido a `{ data, pagination }`.
-- ✅ Señalización de deprecación aplicada a la matriz de facades `/:id/favorite`:
-	- `albums`, `audios`, `characters`, `collections`, `concepts`, `folders`, `images`, `places`, `prompts`, `tags`
-	- `file-services.effect.ts` (`file3ds`, `documents`, `jsonFiles`)
-	- `secondary-services.effect.ts` (`groups`, `wildcards`, `notes`, `properties`, `worldItems`)
-- ⏳ Pendiente: migración de consumidores al endpoint canónico `/api/favorites/toggle` y posterior retiro de rutas facade.
-- 📋 Matriz inicial de facades `/:id/favorite` detectadas (retirement backlog):
-	- `albums.effect.ts`
-	- `audios.effect.ts`
-	- `characters.effect.ts`
-	- `collections.effect.ts`
-	- `concepts.effect.ts`
-	- `folders.effect.ts`
-	- `images.effect.ts`
-	- `places.effect.ts`
-	- `prompts.effect.ts`
-	- `file-services.effect.ts` (`file3ds`, `documents`, `jsonFiles`)
-	- `secondary-services.effect.ts` (`groups`, `wildcards`, `notes`)
+- ✅ Todos los consumidores públicos mutan mediante `/api/favorites/toggle` o `/api/favorites/state`.
+- ✅ `Favorite(profileId, entityType, entityId)` es la autoridad única de lectura y escritura por perfil activo.
+- ✅ Create/update/delete físico sincronizan Favorite en la misma transacción para todas las familias públicas.
+- ✅ Stats, search, folder stream, DTOs y cache invalidation usan la proyección canónica sin fallback embebido.
+- ✅ Las facades `/:id/favorite` fueron eliminadas de sus routers; el registro central conserva tombstones 410 medibles.
+- ✅ Revisión independiente final `ACCEPT`; suites focales, aplicación y tooling verdes en el checkpoint FAV-001.
 
 ---
 
@@ -126,8 +115,8 @@ Source index: `docs/architecture/architecture-review-2026-05-29.md`
 - ✅ Adapter in-memory: `src/lib/filesystem/adapters/in-memory-filesystem-sync.adapter.ts`.
 - ✅ Punto de acceso seam: `src/lib/filesystem/sync-adapter.ts`.
 - ✅ Migrados callers operativos clave a seam:
-	- `src/lib/filesystem/folder-stats.ts`
-	- `src/services/folder/reindex/reindex-phases/phase5-indexing.ts`
+  - `src/lib/filesystem/folder-stats.ts`
+  - `src/services/folder/reindex/reindex-phases/phase5-indexing.ts`
 - ⏳ Pendiente: seguir consolidando dependencias directas restantes en servicios de sync legacy.
 
 ---
@@ -227,3 +216,4 @@ Source index: `docs/architecture/architecture-review-2026-05-29.md`
 - 2026-05-29: avances de implementación en recomendaciones 4, 5 y 6 reflejados.
 - 2026-05-29: convergido contrato de favoritos (images/videos), migrados callers operativos a `FileSystemSync` seam y añadida matriz inicial de facades `/:id/favorite`.
 - 2026-05-29: iniciado y ampliado retirement de facades `/:id/favorite` con helper común de deprecación y headers HTTP de transición sobre la matriz principal de rutas.
+- 2026-07-16: cerrado FAV-001; autoridad por perfil, transacciones de lifecycle, proyecciones y caches canónicos; facades retiradas con tombstones 410 y revisión independiente `ACCEPT`.

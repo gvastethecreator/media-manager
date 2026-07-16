@@ -13,7 +13,6 @@ import { authorizeMediaAssetParam } from '@/server/security/authorized-root-requ
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { ConceptService, ConceptServiceLive } from '@/services/concept/concept.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -132,17 +131,6 @@ router.delete(
 			yield* conceptService.delete(req.params.id);
 			res.status(204);
 			return { success: true };
-		}).pipe(Effect.provide(ConceptServiceLive))
-	)
-);
-
-router.post(
-	'/:id/favorite',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.CONCEPT);
-			const conceptService = yield* ConceptService;
-			return yield* conceptService.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(ConceptServiceLive))
 	)
 );

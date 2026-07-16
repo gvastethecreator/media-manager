@@ -13,7 +13,6 @@ import { authorizeMediaAssetParam } from '@/server/security/authorized-root-requ
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { PromptService, PromptServiceLive } from '@/services/prompt/prompt.service.effect';
 import { FavoriteEntityType } from '@/types/entities/favorite';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -122,17 +121,6 @@ router.delete(
 			yield* promptService.delete(req.params.id);
 			res.status(204);
 			return { success: true };
-		}).pipe(Effect.provide(PromptServiceLive))
-	)
-);
-
-router.post(
-	'/:id/favorite',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.PROMPT);
-			const promptService = yield* PromptService;
-			return yield* promptService.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(PromptServiceLive))
 	)
 );

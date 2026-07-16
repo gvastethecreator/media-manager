@@ -17,6 +17,7 @@ import {
 	deleteFavoriteRecordsForEntities,
 	emitCommittedFavoriteChange,
 	setFavoriteForActiveProfile,
+	setFavoriteStateForActiveProfile,
 } from '@/services/favorite/favorite-write-transaction';
 import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
 import {
@@ -259,8 +260,7 @@ const make = (): JsonFileServiceInterface => {
 			}
 
 			return yield* Effect.tryPromise({
-				try: () =>
-					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.JSON_FILE, projected as JsonFileRow),
+				try: () => favoriteService.projectEntity(FavoriteEntityType.JSON_FILE, projected as JsonFileRow),
 				catch: (error) => toJsonFileError('getById:favoriteProjection', error),
 			});
 		});
@@ -289,8 +289,7 @@ const make = (): JsonFileServiceInterface => {
 				: null;
 			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () =>
-					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.JSON_FILE, projected as JsonFileRow),
+				try: () => favoriteService.projectEntity(FavoriteEntityType.JSON_FILE, projected as JsonFileRow),
 				catch: (error) => toJsonFileError('getByHash:favoriteProjection', error),
 			});
 		});
@@ -325,8 +324,7 @@ const make = (): JsonFileServiceInterface => {
 				: null;
 			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () =>
-					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.JSON_FILE, projected as JsonFileRow),
+				try: () => favoriteService.projectEntity(FavoriteEntityType.JSON_FILE, projected as JsonFileRow),
 				catch: (error) => toJsonFileError('getByPathAndFolder:favoriteProjection', error),
 			});
 		});
@@ -338,12 +336,12 @@ const make = (): JsonFileServiceInterface => {
 			const limit = filters.limit || 20;
 			const offset = filters.offset || 0;
 
-			const favoriteEntityIds: string[] | null = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE),
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.JSON_FILE),
 				catch: (error) => toJsonFileError('getAll:favoriteIds', error),
 			});
 
-			if (filters.isFavorite === true && favoriteEntityIds !== null && favoriteEntityIds.length === 0) {
+			if (filters.isFavorite === true && favoriteEntityIds.length === 0) {
 				return { data: [], total: 0, limit, offset };
 			}
 
@@ -362,9 +360,7 @@ const make = (): JsonFileServiceInterface => {
 				);
 			}
 			if (filters.isFavorite !== undefined) {
-				if (favoriteEntityIds === null) {
-					conditions.push(eq(jsonFiles.isFavorite, filters.isFavorite));
-				} else if (filters.isFavorite) {
+				if (filters.isFavorite) {
 					conditions.push(inArray(jsonFiles.id, favoriteEntityIds));
 				} else if (favoriteEntityIds.length > 0) {
 					conditions.push(notInArray(jsonFiles.id, favoriteEntityIds));
@@ -433,10 +429,7 @@ const make = (): JsonFileServiceInterface => {
 			});
 
 			return {
-				data:
-					favoriteEntityIds === null
-						? projectedRows
-						: favoriteService.applyFavoriteProjectionMany(projectedRows, favoriteEntityIds),
+				data: favoriteService.applyFavoriteProjectionMany(projectedRows, favoriteEntityIds),
 				total,
 				limit,
 				offset,
@@ -463,13 +456,6 @@ const make = (): JsonFileServiceInterface => {
 			}
 
 			const requestedIsFavorite = input.isFavorite === true;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite === true
-					? yield* Effect.tryPromise({
-							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE)) !== null,
-							catch: (error) => toJsonFileError('create:favoriteScope', error),
-						})
-					: false;
 
 			let committedFavoriteProfileId: string | null = null;
 			const result = yield* Effect.tryPromise({
@@ -497,7 +483,7 @@ const make = (): JsonFileServiceInterface => {
 									mimeType: input.mimeType,
 									extension: input.extension,
 									folderId: input.folderId,
-									isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
+									isFavorite: false,
 									isArchived: input.isArchived ?? false,
 									content: input.content ?? null,
 									schema: input.schema ?? null,
@@ -534,7 +520,7 @@ const make = (): JsonFileServiceInterface => {
 								})
 								.returning();
 							const created = inserted[0];
-							if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
+							if (created && requestedIsFavorite) {
 								committedFavoriteProfileId = await setFavoriteForActiveProfile(
 									transaction,
 									FavoriteEntityType.JSON_FILE,
@@ -609,18 +595,8 @@ const make = (): JsonFileServiceInterface => {
 			}
 
 			const requestedIsFavorite = typeof input.isFavorite === 'boolean' ? input.isFavorite : undefined;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite !== undefined
-					? yield* Effect.tryPromise({
-							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE)) !== null,
-							catch: (error) => toJsonFileError('update:favoriteScope', error),
-						})
-					: false;
 
 			const updateData: Record<string, unknown> = { updatedAt: new Date() };
-			if (requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge) {
-				updateData.isFavorite = requestedIsFavorite;
-			}
 
 			if (input.name !== undefined) updateData.name = input.name;
 			if (input.path !== undefined) updateData.path = input.path;
@@ -661,8 +637,7 @@ const make = (): JsonFileServiceInterface => {
 			if (input.prettyPrinted !== undefined) updateData.prettyPrinted = Boolean(input.prettyPrinted);
 			if (input.parsedContent !== undefined) updateData.parsedContent = input.parsedContent;
 
-			let committedFavoriteProfileId: string | null = null;
-			const result = yield* Effect.tryPromise({
+			const committed = yield* Effect.tryPromise({
 				try: async () => {
 					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
 						if (current.assetId && input.source) {
@@ -692,21 +667,22 @@ const make = (): JsonFileServiceInterface => {
 								transaction as typeof db
 							);
 						}
-						if (entity && requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-							committedFavoriteProfileId = await setFavoriteForActiveProfile(
-								transaction,
-								FavoriteEntityType.JSON_FILE,
-								id,
-								requestedIsFavorite
-							);
-						}
-						return entity;
+						const favoriteWrite =
+							entity && requestedIsFavorite !== undefined
+								? await setFavoriteStateForActiveProfile(
+										transaction,
+										FavoriteEntityType.JSON_FILE,
+										id,
+										requestedIsFavorite
+									)
+								: null;
+						return { entity, favoriteWrite };
 					});
 				},
 				catch: (error) => toJsonFileError('update', error),
 			});
 
-			if (!result) {
+			if (!committed.entity) {
 				return yield* Effect.fail(
 					new JsonFileDatabaseError({
 						operation: 'update',
@@ -714,10 +690,10 @@ const make = (): JsonFileServiceInterface => {
 					})
 				);
 			}
-			if (committedFavoriteProfileId && requestedIsFavorite !== undefined) {
+			if (committed.favoriteWrite?.changed && requestedIsFavorite !== undefined) {
 				yield* Effect.promise(() =>
 					emitCommittedFavoriteChange(
-						committedFavoriteProfileId!,
+						committed.favoriteWrite!.profileId,
 						FavoriteEntityType.JSON_FILE,
 						id,
 						requestedIsFavorite
@@ -725,8 +701,8 @@ const make = (): JsonFileServiceInterface => {
 				);
 			}
 
-			jsonFileLogger.info('JsonFile actualizado exitosamente:', result.id);
-			return yield* getById(result.id);
+			jsonFileLogger.info('JsonFile actualizado exitosamente:', committed.entity.id);
+			return yield* getById(committed.entity.id);
 		});
 
 	const deleteJsonFile = (id: string): Effect.Effect<void, JsonFileError> =>
@@ -778,23 +754,16 @@ const make = (): JsonFileServiceInterface => {
 
 	const toggleFavorite = (id: string): Effect.Effect<JsonFileRow, JsonFileError> =>
 		Effect.gen(function* () {
-			const entity = yield* getById(id);
+			yield* getById(id);
 			const favoriteIds = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE),
+				try: () => favoriteService.getFavoriteEntityIdsOrThrow(FavoriteEntityType.JSON_FILE),
 				catch: (error) => toJsonFileError('toggleFavorite.scope', error),
 			});
-			const next = !(favoriteIds?.includes(id) ?? entity.isFavorite);
-			if (favoriteIds === null) {
-				yield* Effect.tryPromise({
-					try: () => db.update(jsonFiles).set({ isFavorite: next, updatedAt: new Date() }).where(eq(jsonFiles.id, id)),
-					catch: (error) => toJsonFileError('toggleFavorite.legacy', error),
-				});
-			} else {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.JSON_FILE, id, next),
-					catch: (error) => toJsonFileError('toggleFavorite.canonical', error),
-				});
-			}
+			const next = !favoriteIds.includes(id);
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.JSON_FILE, id, next),
+				catch: (error) => toJsonFileError('toggleFavorite.canonical', error),
+			});
 			return yield* getById(id);
 		});
 

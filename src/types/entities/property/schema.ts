@@ -89,6 +89,7 @@ export const CreatePropertySchema = z.object({
 	shortcut: z.string().nullable().optional(),
 	category: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
+	isFavorite: z.boolean().optional(),
 });
 
 /**
@@ -102,4 +103,5 @@ export const UpdatePropertySchema = z.object({
 	shortcut: z.string().nullable().optional(),
 	category: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
+	isFavorite: z.boolean().optional(),
 });

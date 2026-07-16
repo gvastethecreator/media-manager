@@ -12,6 +12,7 @@
 
 import type { ImageWithStats } from '@/types/entities/image/base';
 import type { ImageUpdateInput } from '@/types/entities/image/types';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 
 const API_BASE_PATH = '/api/images';
 
@@ -142,6 +143,7 @@ export async function updateImageInApi(id: string, data: ImageUpdateInput): Prom
 		throw new Error(errorData.error || 'Error al actualizar la imagen');
 	}
 
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 

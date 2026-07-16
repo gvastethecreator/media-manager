@@ -1,5 +1,6 @@
 import type { Express } from 'express';
 import { shouldEnableDevelopmentRoutes } from '@/config/local-runtime-security';
+import { retireFavoriteToggleFacades } from '@/server/utils/favorite-facade-deprecation';
 import threeDThumbnailsRouter from './routes/3d-thumbnails';
 import activityRouter from './routes/activity';
 import albumsEffectRouter from './routes/albums.effect';
@@ -49,6 +50,7 @@ import { thumbnailsUnifiedRouter } from './routes/thumbnails-unified';
 import videosEffectRouter from './routes/videos.effect';
 
 export function registerRoutes(app: Express, environment: Record<string, string | undefined> = process.env): void {
+	app.use('/', retireFavoriteToggleFacades);
 	app.use('/api/folders', foldersEffectRouter);
 	app.use('/api/images', imagesEffectRouter);
 	app.use('/api/tags', tagsEffectRouter);

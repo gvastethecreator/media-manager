@@ -19,6 +19,12 @@ import {
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import {
+	deleteFavoriteRecordsForEntities,
+	emitCommittedFavoriteChange,
+	setFavoriteStateForActiveProfile,
+} from '@/services/favorite/favorite-write-transaction';
+import type { FavoriteWriteTransaction, FavoriteWriteResult } from '@/services/favorite/favorite-write-transaction';
 import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { CollectionError } from './collection-errors.effect';
@@ -95,7 +101,7 @@ const normalizeCollectionRow = (row: Partial<typeof collections.$inferSelect> | 
 		description: row.description ?? null,
 		emoji: row.emoji ?? null,
 		featuredImage: row.featuredImage ?? null,
-		isFavorite: row.isFavorite ?? false,
+		isFavorite: false,
 		lastImageAddedAt: row.lastImageAddedAt ?? null,
 		lastVideoAddedAt: row.lastVideoAddedAt ?? null,
 		parentId: row.parentId ?? null,
@@ -535,6 +541,7 @@ export const CollectionServiceLive = Layer.succeed(
 		create: (input) =>
 			Effect.gen(function* () {
 				logger.info('➕ Creando collection', { name: input.name });
+				const requestedIsFavorite = input.isFavorite;
 				const sanitizedInput = stripLegacyFavoriteInput(input);
 
 				// Validate input
@@ -558,32 +565,48 @@ export const CollectionServiceLive = Layer.succeed(
 
 				// Insert to DB
 				const now = new Date();
-				const createdRows = (yield* Effect.tryPromise({
+				const committed = yield* Effect.tryPromise<
+					{ createdRows: Array<typeof collections.$inferSelect>; favoriteWrite: FavoriteWriteResult | null },
+					CollectionDatabaseError
+				>({
 					try: async () =>
 						await withSqliteBusyRetry(
 							async () =>
-								await db
-									.insert(collections)
-									.values({
-										id: readableId,
-										name: validated.name,
-										emoji: validated.emoji ?? null,
-										color: validated.color ?? null,
-										description: validated.description ?? null,
-										featuredImage: validated.featuredImage ?? null,
-										parentId: validated.parentId ?? null,
-										createdAt: now,
-										updatedAt: now,
-									})
-									.returning()
-									.execute()
+								await db.transaction(async (transaction: FavoriteWriteTransaction) => {
+									const createdRows = await transaction
+										.insert(collections)
+										.values({
+											id: readableId,
+											name: validated.name,
+											emoji: validated.emoji ?? null,
+											color: validated.color ?? null,
+											description: validated.description ?? null,
+											featuredImage: validated.featuredImage ?? null,
+											parentId: validated.parentId ?? null,
+											createdAt: now,
+											updatedAt: now,
+										})
+										.returning()
+										.execute();
+									const favoriteWrite =
+										requestedIsFavorite === undefined || !createdRows[0]
+											? null
+											: await setFavoriteStateForActiveProfile(
+													transaction,
+													FavoriteEntityType.COLLECTION,
+													createdRows[0].id,
+													requestedIsFavorite
+												);
+									return { createdRows, favoriteWrite };
+								})
 						),
 					catch: (error) =>
 						new CollectionDatabaseError({
 							operation: 'create',
 							originalError: error,
 						}),
-				})) as Array<typeof collections.$inferSelect>;
+				});
+				const { createdRows, favoriteWrite } = committed;
 				const [result] = createdRows;
 
 				// Validate returned data
@@ -598,6 +621,19 @@ export const CollectionServiceLive = Layer.succeed(
 
 				logger.info('✅ Collection creada', { id: created.id, name: created.name });
 
+				if (favoriteWrite?.changed && requestedIsFavorite !== undefined) {
+					yield* Effect.tryPromise({
+						try: () =>
+							emitCommittedFavoriteChange(
+								favoriteWrite.profileId,
+								FavoriteEntityType.COLLECTION,
+								created.id,
+								requestedIsFavorite
+							),
+						catch: (error) => new CollectionDatabaseError({ operation: 'create.favoriteEvent', originalError: error }),
+					});
+				}
+
 				const favoriteEntityIds = yield* getCollectionFavoriteIds();
 				return yield* enrichCollectionWithCounts(applyCollectionFavoriteProjection(created, favoriteEntityIds));
 			}),
@@ -605,6 +641,7 @@ export const CollectionServiceLive = Layer.succeed(
 		update: (id, input) =>
 			Effect.gen(function* () {
 				logger.info('🔧 Actualizando collection', { id });
+				const requestedIsFavorite = input.isFavorite;
 				const sanitizedInput = stripLegacyFavoriteInput(input);
 
 				// Check exists
@@ -631,26 +668,42 @@ export const CollectionServiceLive = Layer.succeed(
 				}
 
 				// Update in DB
-				const updatedRows = (yield* Effect.tryPromise({
+				const committed = yield* Effect.tryPromise<
+					{ updatedRows: Array<typeof collections.$inferSelect>; favoriteWrite: FavoriteWriteResult | null },
+					CollectionDatabaseError
+				>({
 					try: async () =>
 						await withSqliteBusyRetry(
 							async () =>
-								await db
-									.update(collections)
-									.set({
-										...validated,
-										updatedAt: new Date(),
-									})
-									.where(eq(collections.id, id))
-									.returning()
-									.execute()
+								await db.transaction(async (transaction: FavoriteWriteTransaction) => {
+									const updatedRows = await transaction
+										.update(collections)
+										.set({
+											...validated,
+											updatedAt: new Date(),
+										})
+										.where(eq(collections.id, id))
+										.returning()
+										.execute();
+									const favoriteWrite =
+										requestedIsFavorite === undefined
+											? null
+											: await setFavoriteStateForActiveProfile(
+													transaction,
+													FavoriteEntityType.COLLECTION,
+													id,
+													requestedIsFavorite
+												);
+									return { updatedRows, favoriteWrite };
+								})
 						),
 					catch: (error) =>
 						new CollectionDatabaseError({
 							operation: 'update',
 							originalError: error,
 						}),
-				})) as Array<typeof collections.$inferSelect>;
+				});
+				const { updatedRows, favoriteWrite } = committed;
 				const [result] = updatedRows;
 
 				// Validate returned data
@@ -664,6 +717,19 @@ export const CollectionServiceLive = Layer.succeed(
 				});
 
 				logger.info('✅ Collection actualizada', { id, name: updated.name });
+
+				if (favoriteWrite?.changed && requestedIsFavorite !== undefined) {
+					yield* Effect.tryPromise({
+						try: () =>
+							emitCommittedFavoriteChange(
+								favoriteWrite.profileId,
+								FavoriteEntityType.COLLECTION,
+								id,
+								requestedIsFavorite
+							),
+						catch: (error) => new CollectionDatabaseError({ operation: 'update.favoriteEvent', originalError: error }),
+					});
+				}
 
 				const favoriteEntityIds = yield* getCollectionFavoriteIds();
 				return yield* enrichCollectionWithCounts(applyCollectionFavoriteProjection(updated, favoriteEntityIds));
@@ -695,24 +761,18 @@ export const CollectionServiceLive = Layer.succeed(
 					}
 				}
 
-				if (force) {
-					yield* Effect.tryPromise({
-						try: async () =>
-							await withSqliteBusyRetry(
-								async () => await db.delete(imageCollections).where(eq(imageCollections.B, id)).execute()
-							),
-						catch: (error) =>
-							new CollectionDatabaseError({
-								operation: 'delete:relations',
-								originalError: error,
-							}),
-					});
-				}
-
-				// Delete from DB
+				// Relations, canonical Favorite rows, and the entity form one commit boundary.
 				yield* Effect.tryPromise({
-					try: async () =>
-						await withSqliteBusyRetry(async () => await db.delete(collections).where(eq(collections.id, id)).execute()),
+					try: () =>
+						withSqliteBusyRetry(() =>
+							db.transaction(async (transaction: FavoriteWriteTransaction) => {
+								if (force) {
+									await transaction.delete(imageCollections).where(eq(imageCollections.B, id));
+								}
+								await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.COLLECTION, [id]);
+								await transaction.delete(collections).where(eq(collections.id, id));
+							})
+						),
 					catch: (error) =>
 						new CollectionDatabaseError({
 							operation: 'delete',

@@ -8,6 +8,7 @@
  * Cliente de API para colecciones.
  */
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/collections';
@@ -38,6 +39,7 @@ export async function createCollectionInApi(data: CollectionCreateInput): Promis
 	if (!response.ok) {
 		throw new Error('Error al crear colección');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -50,6 +52,7 @@ export async function updateCollectionInApi(id: string, data: CollectionUpdateIn
 	if (!response.ok) {
 		throw new Error('Error al actualizar colección');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -58,4 +61,5 @@ export async function deleteCollectionFromApi(id: string): Promise<void> {
 	if (!response.ok) {
 		throw new Error('Error al eliminar colección');
 	}
+	await invalidateFavoriteQueries();
 }

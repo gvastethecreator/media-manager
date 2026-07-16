@@ -16,6 +16,7 @@ import {
 	deleteFavoriteRecordsForEntities,
 	emitCommittedFavoriteChange,
 	setFavoriteForActiveProfile,
+	setFavoriteStateForActiveProfile,
 } from '@/services/favorite/favorite-write-transaction';
 import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
 import {
@@ -239,13 +240,6 @@ const make = (): AudioServiceInterface => {
 
 			const requestedIsFavorite = input.isFavorite ?? false;
 			const { isFavorite: _requestedIsFavorite, source: _source, ...persistenceInput } = input;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite === true
-					? yield* Effect.tryPromise({
-							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO)) !== null,
-							catch: (error) => toAudioError(error, 'create.favoriteScope'),
-						})
-					: false;
 
 			// Crear el audio y su favorito canónico como una sola unidad de escritura.
 			let committedFavoriteProfileId: string | null = null;
@@ -268,12 +262,12 @@ const make = (): AudioServiceInterface => {
 									id: assetId,
 									assetId,
 									...persistenceInput,
-									isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
+									isFavorite: false,
 									createdAt: now,
 									updatedAt: now,
 								})
 								.returning();
-							if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
+							if (created && requestedIsFavorite) {
 								committedFavoriteProfileId = await setFavoriteForActiveProfile(
 									transaction,
 									FavoriteEntityType.AUDIO,
@@ -370,7 +364,7 @@ const make = (): AudioServiceInterface => {
 			}
 
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.AUDIO, projected as Audio),
+				try: () => favoriteService.projectEntity(FavoriteEntityType.AUDIO, projected as Audio),
 				catch: (error) => toAudioError(error, 'getById.favoriteProjection'),
 			});
 		});
@@ -446,8 +440,8 @@ const make = (): AudioServiceInterface => {
 		Effect.gen(function* () {
 			audioServiceLogger.info('Obteniendo lista de audios con filtros:', filters);
 
-			const favoriteEntityIds: string[] | null = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO),
+			const favoriteEntityIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.AUDIO),
 				catch: (error) => toAudioError(error, 'getAll:favoriteIds'),
 			});
 
@@ -456,9 +450,7 @@ const make = (): AudioServiceInterface => {
 			// Construir condiciones WHERE
 			if (filters.folderId) conditions.push(eq(audios.folderId, filters.folderId));
 			if (filters.isFavorite !== undefined) {
-				if (favoriteEntityIds === null) {
-					conditions.push(eq(audios.isFavorite, filters.isFavorite));
-				} else if (filters.isFavorite) {
+				if (filters.isFavorite) {
 					if (favoriteEntityIds.length === 0) {
 						return [];
 					}
@@ -585,11 +577,7 @@ const make = (): AudioServiceInterface => {
 				catch: (error) => toAudioError(error, 'getAll.canonicalProjection'),
 			});
 
-			return (
-				favoriteEntityIds === null
-					? projectedResults
-					: favoriteService.applyFavoriteProjectionMany(projectedResults, favoriteEntityIds)
-			) as Audio[];
+			return favoriteService.applyFavoriteProjectionMany(projectedResults, favoriteEntityIds) as Audio[];
 		});
 
 	// -------------------------------------------------------------------------------
@@ -629,21 +617,13 @@ const make = (): AudioServiceInterface => {
 			}
 
 			const requestedIsFavorite = input.isFavorite;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite !== undefined
-					? yield* Effect.tryPromise({
-							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO)) !== null,
-							catch: (error) => toAudioError(error, 'update.favoriteScope'),
-						})
-					: false;
 
 			const { isFavorite: _ignoredIsFavorite, source, ...restInput } = input;
 
 			// Actualizar entidad y favorito dentro de la misma transacción.
-			let committedFavoriteProfileId: string | null = null;
-			yield* Effect.tryPromise({
+			const favoriteWrite = yield* Effect.tryPromise({
 				try: async () => {
-					await db.transaction(async (transaction: FavoriteWriteTransaction) => {
+					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
 						if (current.assetId && source) {
 							const targetFolderId = input.folderId ?? current.folderId;
 							const targetPath = input.path ?? current.path;
@@ -660,9 +640,6 @@ const make = (): AudioServiceInterface => {
 							.update(audios)
 							.set({
 								...restInput,
-								...(requestedIsFavorite !== undefined && !useCanonicalFavoriteBridge
-									? { isFavorite: requestedIsFavorite }
-									: {}),
 								updatedAt: new Date(),
 							})
 							.where(eq(audios.id, id));
@@ -679,21 +656,17 @@ const make = (): AudioServiceInterface => {
 								transaction as typeof db
 							);
 						}
-						if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
-							committedFavoriteProfileId = await setFavoriteForActiveProfile(
-								transaction,
-								FavoriteEntityType.AUDIO,
-								id,
-								requestedIsFavorite
-							);
+						if (requestedIsFavorite !== undefined) {
+							return setFavoriteStateForActiveProfile(transaction, FavoriteEntityType.AUDIO, id, requestedIsFavorite);
 						}
+						return null;
 					});
 				},
 				catch: (error) => toAudioError(error, 'update'),
 			});
-			if (committedFavoriteProfileId && requestedIsFavorite !== undefined) {
+			if (favoriteWrite?.changed && requestedIsFavorite !== undefined) {
 				yield* Effect.promise(() =>
-					emitCommittedFavoriteChange(committedFavoriteProfileId!, FavoriteEntityType.AUDIO, id, requestedIsFavorite)
+					emitCommittedFavoriteChange(favoriteWrite.profileId, FavoriteEntityType.AUDIO, id, requestedIsFavorite)
 				);
 			}
 
@@ -858,9 +831,7 @@ const make = (): AudioServiceInterface => {
 			return yield* Effect.tryPromise({
 				try: () =>
 					Promise.all(
-						projected.map((candidate) =>
-							favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.AUDIO, candidate as Audio)
-						)
+						projected.map((candidate) => favoriteService.projectEntity(FavoriteEntityType.AUDIO, candidate as Audio))
 					),
 				catch: (error) => toAudioError(error, 'getByHashCandidates.favoriteProjection'),
 			});
@@ -939,7 +910,7 @@ const make = (): AudioServiceInterface => {
 				: null;
 			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.AUDIO, projected as Audio),
+				try: () => favoriteService.projectEntity(FavoriteEntityType.AUDIO, projected as Audio),
 				catch: (error) => toAudioError(error, 'getByPathAndFolder.favoriteProjection'),
 			});
 		});
@@ -992,26 +963,18 @@ const make = (): AudioServiceInterface => {
 			audioServiceLogger.info('Toggling favorite para audio:', id);
 
 			// Obtener estado actual
-			const audio = yield* getById(id);
+			yield* getById(id);
 			const favoriteEntityIds = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO),
+				try: () => favoriteService.getFavoriteEntityIdsOrThrow(FavoriteEntityType.AUDIO),
 				catch: (error) => toAudioError(error, 'toggleFavorite.favoriteScope'),
 			});
-			const currentFavoriteStatus = favoriteEntityIds === null ? audio.isFavorite : favoriteEntityIds.includes(id);
+			const currentFavoriteStatus = favoriteEntityIds.includes(id);
 			const newFavoriteStatus = !currentFavoriteStatus;
 
-			if (favoriteEntityIds !== null) {
-				yield* Effect.tryPromise({
-					try: () => favoriteService.set(FavoriteEntityType.AUDIO, id, newFavoriteStatus),
-					catch: (error) => toAudioError(error, 'toggleFavorite.favoriteBridge'),
-				});
-			} else {
-				yield* Effect.tryPromise({
-					try: () =>
-						db.update(audios).set({ isFavorite: newFavoriteStatus, updatedAt: new Date() }).where(eq(audios.id, id)),
-					catch: (error) => toAudioError(error, 'toggleFavorite.legacyFallback'),
-				});
-			}
+			yield* Effect.tryPromise({
+				try: () => favoriteService.set(FavoriteEntityType.AUDIO, id, newFavoriteStatus),
+				catch: (error) => toAudioError(error, 'toggleFavorite.favorite'),
+			});
 
 			const updated = yield* getById(id);
 
@@ -1030,29 +993,9 @@ const make = (): AudioServiceInterface => {
 
 			audioServiceLogger.info(`Marcando múltiples audios como favoritos: ${ids.length}, isFavorite=${isFavorite}`);
 
-			const favoriteEntityIds = yield* Effect.tryPromise({
-				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.AUDIO),
-				catch: (error) => toAudioError(error, 'setFavoriteMany.favoriteScope'),
-			});
-
 			const updatedCount = yield* Effect.tryPromise({
-				try: async () => {
-					if (favoriteEntityIds !== null) {
-						return favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite);
-					}
-
-					const updated = await db
-						.update(audios)
-						.set({ isFavorite, updatedAt: new Date() })
-						.where(and(inArray(audios.id, ids), visibleAssetLifecycleCondition(audios.assetId)))
-						.returning({ id: audios.id });
-					return updated.length;
-				},
-				catch: (error) =>
-					toAudioError(
-						error,
-						favoriteEntityIds === null ? 'setFavoriteMany.legacyFallback' : 'setFavoriteMany.favoriteBridge'
-					),
+				try: () => favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite),
+				catch: (error) => toAudioError(error, 'setFavoriteMany.favorite'),
 			});
 
 			audioServiceLogger.info('Audios actualizados exitosamente:', updatedCount);

@@ -6,6 +6,7 @@
 import { StateCreator } from 'zustand';
 import { apiClient } from '@/lib/api/client';
 import { normalizeFavoriteEntityType } from '@/lib/api/favorites';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { FavoriteExtended } from '@/types/entities/favorite';
 import { FavoriteStore } from '..';
@@ -84,10 +85,12 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 				throw new Error(`Tipo de favorito no soportado: ${entityType}`);
 			}
 
-			const result = await apiClient.post<{ isFavorite: boolean; id?: string }>('/favorites/toggle', {
+			const result = await apiClient.put<{ isFavorite: boolean; id?: string }>('/favorites/state', {
 				entityId,
 				entityType: normalizedEntityType,
+				isFavorite: true,
 			});
+			await invalidateFavoriteQueries();
 
 			if (result.isFavorite) {
 				await get().fetchFavorites();
@@ -112,6 +115,7 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 			logger.info('🗑️ Eliminando favorito:', id);
 
 			await apiClient.delete(`/favorites/${id}`);
+			await invalidateFavoriteQueries();
 
 			// Eliminar del estado local
 			get().removeFavorite(id);
@@ -143,6 +147,7 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 				entityId,
 				entityType: normalizedEntityType,
 			});
+			await invalidateFavoriteQueries();
 
 			await get().fetchFavorites();
 

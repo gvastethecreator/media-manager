@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 import { apiClient } from './client';
+import { invalidateFavoriteQueries } from './favorite-cache';
 
 export interface WorldItemFilters {
 	featuredImage?: string;
@@ -48,6 +49,7 @@ export interface WorldItemCreateInput {
 	featuredImage?: string | null;
 	history?: string | null;
 	isPublic?: boolean;
+	isFavorite?: boolean;
 	materials?: string | null;
 	name: string;
 	notes?: string | null;
@@ -71,6 +73,7 @@ export interface WorldItemUpdateInput {
 	featuredImage?: string | null;
 	history?: string | null;
 	isPublic?: boolean;
+	isFavorite?: boolean;
 	materials?: string | null;
 	name?: string;
 	notes?: string | null;
@@ -149,6 +152,7 @@ export function useCreateWorldItem() {
 		mutationFn: (data) => apiClient.post<WorldItemWithStats>('/world-items', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: worldItemKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 		},
 	});
 }
@@ -160,6 +164,7 @@ export function useUpdateWorldItem() {
 		mutationFn: ({ id, data }) => apiClient.put<WorldItemWithStats>(`/world-items/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: worldItemKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.setQueryData(worldItemKeys.detail(data.id), data);
 		},
 	});
@@ -172,6 +177,7 @@ export function useDeleteWorldItem() {
 		mutationFn: (id) => apiClient.delete(`/world-items/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: worldItemKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.removeQueries({ queryKey: worldItemKeys.detail(id) });
 			queryClient.removeQueries({ queryKey: worldItemKeys.images(id) });
 		},

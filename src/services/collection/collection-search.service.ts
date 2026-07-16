@@ -4,7 +4,7 @@
  * @description Lógica de búsqueda y filtrado complejo de colecciones
  */
 
-import { and, asc, desc, eq, inArray, like, notInArray, or } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, like, notInArray, or, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -23,8 +23,8 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 	try {
 		logger.info('🔍 Buscando colecciones', { options });
 
-		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION);
-		const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.COLLECTION);
+		const favoriteIdSet = new Set(favoriteEntityIds);
 
 		// Construir condiciones de filtro
 		const conditions: any[] = [];
@@ -39,9 +39,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		}
 
 		if (options.where?.isFavorite !== undefined) {
-			if (favoriteEntityIds === null) {
-				conditions.push(eq(collections.isFavorite, Boolean(options.where.isFavorite)));
-			} else if (options.where.isFavorite) {
+			if (options.where.isFavorite) {
 				if (favoriteEntityIds.length === 0) {
 					return [];
 				}
@@ -63,7 +61,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 				emoji: collections.emoji,
 				color: collections.color,
 				featuredImage: collections.featuredImage,
-				isFavorite: collections.isFavorite,
+				isFavorite: sql<boolean>`false`,
 				// totalImages: moved to EntityAggregates
 				// totalVideos: moved to EntityAggregates
 				// totalSize: moved to EntityAggregates
@@ -100,7 +98,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 
 		const transformedCollections = drizzleCollections.map((rawCollection: any) => ({
 			...rawCollection,
-			isFavorite: favoriteIdSet === null ? Boolean(rawCollection.isFavorite) : favoriteIdSet.has(rawCollection.id),
+			isFavorite: favoriteIdSet.has(rawCollection.id),
 			// totalImages: 0, // TODO: get from EntityAggregates
 			// totalVideos: 0, // TODO: get from EntityAggregates
 			// totalSize: 0, // TODO: get from EntityAggregates
