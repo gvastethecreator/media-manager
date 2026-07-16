@@ -5,7 +5,7 @@ import { defineConfig } from 'vite-plus';
 import svgr from 'vite-plugin-svgr';
 import { resolveLocalServiceHost } from './src/config/local-runtime-security.ts';
 
-const testMaxWorkers = Math.max(1, Number.parseInt(process.env.VITEST_MAX_WORKERS ?? '4', 10) || 4);
+const testMaxWorkers = Math.max(1, Number.parseInt(process.env.VITEST_MAX_WORKERS ?? '2', 10) || 2);
 
 const emptyModule = resolve(import.meta.dirname, 'src/config/empty.ts');
 const isViteBuildCommand = process.argv.some((argument) => argument === 'build');
