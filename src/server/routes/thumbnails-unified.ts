@@ -12,7 +12,7 @@ import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, images, jsonFiles, metadatas, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
-import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
+import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
 import { authorizeMediaAssetParam, getAuthorizedRootRegistry } from '@/server/security/authorized-root-request';
 import {
 	type MediaAssetType,
@@ -361,25 +361,28 @@ router.get(
 					db
 						.select({ count: count() })
 						.from(images)
-						.where(and(isNotNull(images.thumbnail), visibleImageLifecycleCondition())),
-					db.select({ count: count() }).from(videos).where(isNotNull(videos.thumbnail)),
-					db.select({ count: count() }).from(audios),
+						.where(and(isNotNull(images.thumbnail), visibleAssetLifecycleCondition(images.assetId))),
+					db
+						.select({ count: count() })
+						.from(videos)
+						.where(and(isNotNull(videos.thumbnail), visibleAssetLifecycleCondition(videos.assetId))),
+					db.select({ count: count() }).from(audios).where(visibleAssetLifecycleCondition(audios.assetId)),
 					db
 						.select({ count: count() })
 						.from(metadatas)
 						.where(and(eq(metadatas.entityType, 'document'), eq(metadatas.key, 'thumbnail'))),
-					db.select({ count: count() }).from(jsonFiles),
-					db.select({ count: count() }).from(file3Ds),
+					db.select({ count: count() }).from(jsonFiles).where(visibleAssetLifecycleCondition(jsonFiles.assetId)),
+					db.select({ count: count() }).from(file3Ds).where(visibleAssetLifecycleCondition(file3Ds.assetId)),
 				]);
 
 				const [totalImages, totalVideos, totalAudios, totalDocuments, totalJsonFiles, totalFile3Ds] = await Promise.all(
 					[
-						db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
-						db.select({ count: count() }).from(videos),
-						db.select({ count: count() }).from(audios),
-						db.select({ count: count() }).from(documents),
-						db.select({ count: count() }).from(jsonFiles),
-						db.select({ count: count() }).from(file3Ds),
+						db.select({ count: count() }).from(images).where(visibleAssetLifecycleCondition(images.assetId)),
+						db.select({ count: count() }).from(videos).where(visibleAssetLifecycleCondition(videos.assetId)),
+						db.select({ count: count() }).from(audios).where(visibleAssetLifecycleCondition(audios.assetId)),
+						db.select({ count: count() }).from(documents).where(visibleAssetLifecycleCondition(documents.assetId)),
+						db.select({ count: count() }).from(jsonFiles).where(visibleAssetLifecycleCondition(jsonFiles.assetId)),
+						db.select({ count: count() }).from(file3Ds).where(visibleAssetLifecycleCondition(file3Ds.assetId)),
 					]
 				);
 

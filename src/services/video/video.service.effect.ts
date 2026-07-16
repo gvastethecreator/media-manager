@@ -10,11 +10,12 @@
  * =================================================================================
  */
 
-import * as crypto from 'node:crypto';
 import { and, asc, count, desc, eq, gte, inArray, like, lte, notInArray, or } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
+import { isPathInsideDirectory } from '@/lib/filesystem/path-containment';
 import {
+	assets,
 	folders,
 	groupVideos,
 	videoAlbums,
@@ -29,6 +30,7 @@ import {
 	videoTags,
 	videoWildcards,
 	videoWorldItems,
+	sourceFiles,
 } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -38,6 +40,19 @@ import {
 	setFavoriteForActiveProfile,
 } from '@/services/favorite/favorite-write-transaction';
 import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
+import {
+	assertCanonicalMediaCreateCommand,
+	createCanonicalMedia,
+	projectCanonicalMediaRow,
+	projectCanonicalMediaRows,
+	restoreCanonicalAsset,
+	tombstoneCanonicalAsset,
+	tombstoneCanonicalAssets,
+	updateCanonicalAssetTitle,
+	visibleAssetLifecycleCondition,
+	type CanonicalMediaSourceInput,
+	type CanonicalMediaState,
+} from '@/services/media-core/canonical-media-persistence';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { VideoError } from './video-errors.effect';
 import {
@@ -69,6 +84,7 @@ export interface CreateVideoInput {
 	name: string;
 	path: string;
 	size: number;
+	source: CanonicalMediaSourceInput;
 	width?: number | null;
 }
 
@@ -85,6 +101,7 @@ export interface UpdateVideoInput {
 	name?: string;
 	path?: string;
 	size?: number;
+	source?: CanonicalMediaSourceInput;
 	width?: number | null;
 }
 
@@ -114,6 +131,9 @@ export interface VideoFilters {
  * Video básico (sin relaciones)
  */
 export interface Video {
+	assetId: string | null;
+	canonicalDivergences: string[];
+	canonicalState: CanonicalMediaState;
 	createdAt: Date;
 	description: string | null;
 	duration: number;
@@ -128,6 +148,7 @@ export interface Video {
 	id: string;
 	isFavorite: boolean;
 	isHidden: boolean;
+	legacyId: string;
 	metadata: string | null;
 	name: string;
 	path: string;
@@ -198,6 +219,7 @@ export interface VideoServiceInterface {
 	readonly getById: (id: string) => Effect.Effect<Video, VideoError>;
 	readonly getByIdWithStats: (id: string) => Effect.Effect<VideoWithStats, VideoError>;
 	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Video | null, VideoError>;
+	readonly restoreById: (id: string) => Effect.Effect<Video, VideoError>;
 
 	// Operaciones específicas de video
 	readonly getFormatStats: () => Effect.Effect<VideoFormatStats[], VideoError>;
@@ -322,8 +344,22 @@ const make = (): VideoServiceInterface => {
 			// Validar input
 			try {
 				validateVideoInput(input);
+				if (!input.source) throw videoValidationError('source', input.source, 'La source autorizada es requerida');
+				assertCanonicalMediaCreateCommand({
+					assetType: 'video',
+					folderId: input.folderId,
+					hash: input.hash,
+					name: input.name,
+					path: input.path,
+					size: input.size,
+					source: input.source,
+				});
 			} catch (error) {
-				return yield* Effect.fail(error as VideoError);
+				return yield* Effect.fail(
+					error && typeof error === 'object' && '_tag' in error
+						? (error as VideoError)
+						: videoValidationError('source', input.source, String(error))
+				);
 			}
 
 			const requestedIsFavorite = input.isFavorite ?? false;
@@ -348,47 +384,58 @@ const make = (): VideoServiceInterface => {
 				return yield* Effect.fail(videoHashConflict(input.hash, existingVideo.id));
 			}
 
-			// Crear video y favorito canónico como una sola unidad de escritura.
+			// Crear Asset, SourceFile, Video y favorito canónico como una sola unidad de escritura.
 			let committedFavoriteProfileId: string | null = null;
 			const result = yield* Effect.tryPromise({
-				try: async () => {
-					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
-						const inserted = await transaction
-							.insert(videos)
-							.values({
-								id: crypto.randomUUID(),
-								name: input.name,
-								description: input.description ?? null,
-								path: input.path,
-								size: input.size,
-								hash: input.hash,
-								duration: input.duration,
-								width: input.width ?? null,
-								height: input.height ?? null,
-								metadata: null,
-								thumbnail: null,
-								thumbnailSize: null,
-								thumbnailWidth: null,
-								thumbnailHeight: null,
-								isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
-								isHidden: input.isHidden ?? false,
-								folderId: input.folderId,
-								createdAt: new Date(),
-								updatedAt: new Date(),
-							})
-							.returning();
-						const created = inserted[0];
-						if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
-							committedFavoriteProfileId = await setFavoriteForActiveProfile(
-								transaction,
-								FavoriteEntityType.VIDEO,
-								created.id,
-								true
-							);
+				try: () =>
+					createCanonicalMedia(
+						{
+							assetType: 'video',
+							folderId: input.folderId,
+							hash: input.hash,
+							name: input.name,
+							path: input.path,
+							size: input.size,
+							source: input.source,
+						},
+						async ({ assetId, now, transaction }) => {
+							const inserted = await transaction
+								.insert(videos)
+								.values({
+									id: assetId,
+									assetId,
+									name: input.name,
+									description: input.description ?? null,
+									path: input.path,
+									size: input.size,
+									hash: input.hash,
+									duration: input.duration,
+									width: input.width ?? null,
+									height: input.height ?? null,
+									metadata: null,
+									thumbnail: null,
+									thumbnailSize: null,
+									thumbnailWidth: null,
+									thumbnailHeight: null,
+									isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
+									isHidden: input.isHidden ?? false,
+									folderId: input.folderId,
+									createdAt: now,
+									updatedAt: now,
+								})
+								.returning();
+							const created = inserted[0];
+							if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
+								committedFavoriteProfileId = await setFavoriteForActiveProfile(
+									transaction,
+									FavoriteEntityType.VIDEO,
+									created.id,
+									true
+								);
+							}
+							return created;
 						}
-						return created;
-					});
-				},
+					),
 				catch: (error) => toVideoError(error, 'create:insert'),
 			});
 
@@ -417,6 +464,7 @@ const make = (): VideoServiceInterface => {
 				try: async () => {
 					const rows = await db
 						.select({
+							assetId: videos.assetId,
 							id: videos.id,
 							name: videos.name,
 							description: videos.description,
@@ -451,12 +499,19 @@ const make = (): VideoServiceInterface => {
 				catch: (error) => toVideoError(error, 'getById'),
 			});
 
-			if (!result) {
+			const projected = result
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(result, 'video'),
+						catch: (error) => toVideoError(error, 'getById.canonicalProjection'),
+					})
+				: null;
+
+			if (!projected) {
 				return yield* Effect.fail(videoNotFound(id, `Video con ID ${id} no encontrado`));
 			}
 
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.VIDEO, result),
+				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.VIDEO, projected),
 				catch: (error) => toVideoError(error, 'getById.favoriteProjection'),
 			});
 		});
@@ -539,7 +594,7 @@ const make = (): VideoServiceInterface => {
 				catch: (error) => toVideoError(error, 'getAll:favoriteIds'),
 			});
 
-			const conditions = [];
+			const conditions = [visibleAssetLifecycleCondition(videos.assetId)];
 
 			// Construir condiciones WHERE
 			if (filters.folderId) {
@@ -603,6 +658,7 @@ const make = (): VideoServiceInterface => {
 					Promise.all([
 						db
 							.select({
+								assetId: videos.assetId,
 								id: videos.id,
 								name: videos.name,
 								description: videos.description,
@@ -644,9 +700,13 @@ const make = (): VideoServiceInterface => {
 				catch: (error) => toVideoError(error, 'getAll'),
 			});
 
+			const projectedResults = yield* Effect.tryPromise<VideosListResult, VideoError>({
+				try: async () => (await projectCanonicalMediaRows(videoResults, 'video')) as VideosListResult,
+				catch: (error) => toVideoError(error, 'getAll.canonicalProjection'),
+			});
 			return favoriteEntityIds === null
-				? videoResults
-				: favoriteService.applyFavoriteProjectionMany(videoResults, favoriteEntityIds);
+				? projectedResults
+				: favoriteService.applyFavoriteProjectionMany(projectedResults, favoriteEntityIds);
 		});
 
 	// -------------------------------------------------------------------------------
@@ -664,7 +724,27 @@ const make = (): VideoServiceInterface => {
 			}
 
 			// Verificar que el video existe
-			yield* getById(id);
+			const current = yield* getById(id);
+			if (current.assetId && (input.path !== undefined || input.folderId !== undefined) && !input.source) {
+				return yield* Effect.fail(
+					videoValidationError('source', input.source, 'Mover un Video canónico requiere una source autorizada')
+				);
+			}
+			if (current.assetId && input.source) {
+				try {
+					assertCanonicalMediaCreateCommand({
+						assetType: 'video',
+						folderId: input.folderId ?? current.folderId,
+						hash: current.hash,
+						name: input.name ?? current.name,
+						path: input.path ?? current.path,
+						size: input.size ?? current.size,
+						source: input.source,
+					});
+				} catch (error) {
+					return yield* Effect.fail(videoValidationError('source', input.source, String(error)));
+				}
+			}
 
 			const requestedIsFavorite = input.isFavorite;
 			const useCanonicalFavoriteBridge =
@@ -675,13 +755,25 @@ const make = (): VideoServiceInterface => {
 						})
 					: false;
 
-			const { isFavorite: _ignoredIsFavorite, ...restInput } = input;
+			const { isFavorite: _ignoredIsFavorite, source, ...restInput } = input;
 
 			// Actualizar video y favorito dentro de la misma transacción.
 			let committedFavoriteProfileId: string | null = null;
 			const result = yield* Effect.tryPromise({
 				try: async () => {
 					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						if (current.assetId && source) {
+							const targetFolderId = input.folderId ?? current.folderId;
+							const targetPath = input.path ?? current.path;
+							const [targetFolder] = await transaction
+								.select({ path: folders.path })
+								.from(folders)
+								.where(eq(folders.id, targetFolderId))
+								.limit(1);
+							if (!targetFolder || !isPathInsideDirectory(targetFolder.path, targetPath)) {
+								throw new Error('La ubicación física no pertenece al Folder declarado.');
+							}
+						}
 						const updated = await transaction
 							.update(videos)
 							.set({
@@ -694,6 +786,32 @@ const make = (): VideoServiceInterface => {
 							.where(eq(videos.id, id))
 							.returning();
 						const entity = updated[0];
+						if (entity && current.assetId) {
+							if (input.name !== undefined) {
+								await updateCanonicalAssetTitle(current.assetId, input.name, transaction as typeof db);
+							}
+							if (source || input.size !== undefined || input.folderId !== undefined) {
+								const [asset] = await transaction
+									.select({ primarySourceFileId: assets.primarySourceFileId })
+									.from(assets)
+									.where(eq(assets.id, current.assetId))
+									.limit(1);
+								if (!asset) throw new Error('Asset canónico de Video no encontrado.');
+								const sourceUpdated = await transaction
+									.update(sourceFiles)
+									.set({
+										...(input.size !== undefined ? { byteSize: input.size } : {}),
+										...(input.folderId !== undefined ? { folderId: input.folderId } : {}),
+										...(source ? { relativePath: source.relativePath, rootId: source.rootId } : {}),
+										availability: 'available',
+										observedAt: new Date(),
+										updatedAt: new Date(),
+									})
+									.where(and(eq(sourceFiles.id, asset.primarySourceFileId), eq(sourceFiles.assetId, current.assetId)))
+									.returning({ id: sourceFiles.id });
+								if (sourceUpdated.length !== 1) throw new Error('SourceFile canónico de Video no encontrado.');
+							}
+						}
 						if (entity && requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
 							committedFavoriteProfileId = await setFavoriteForActiveProfile(
 								transaction,
@@ -730,8 +848,19 @@ const make = (): VideoServiceInterface => {
 		Effect.gen(function* () {
 			videoServiceLogger.info('Eliminando video:', id, force ? '[FORCE]' : '');
 
-			// Verificar que el video existe
-			yield* getById(id);
+			const [current] = yield* Effect.tryPromise<Array<{ assetId: string | null }>, VideoError>({
+				try: () => db.select({ assetId: videos.assetId }).from(videos).where(eq(videos.id, id)).limit(1),
+				catch: (error) => toVideoError(error, 'deleteById:lookup'),
+			});
+			if (!current) return yield* Effect.fail(videoNotFound(id, `Video con ID ${id} no encontrado`));
+			if (current.assetId) {
+				yield* Effect.tryPromise({
+					try: () => tombstoneCanonicalAsset(current.assetId!),
+					catch: (error) => toVideoError(error, 'deleteById:tombstone'),
+				});
+				videoServiceLogger.info('Video movido a tombstone canónico:', id);
+				return;
+			}
 
 			// TODO: Verificar relaciones cuando estén implementadas
 			// Si no es force y tiene relaciones, fallar con VideoHasRelationsError
@@ -762,20 +891,45 @@ const make = (): VideoServiceInterface => {
 
 			// TODO: Verificar relaciones cuando estén implementadas
 
-			// Eliminar videos
-			const deletedRows = yield* Effect.tryPromise({
+			const targets = yield* Effect.tryPromise<Array<{ assetId: string | null; id: string }>, VideoError>({
+				try: () => db.select({ assetId: videos.assetId, id: videos.id }).from(videos).where(inArray(videos.id, ids)),
+				catch: (error) => toVideoError(error, 'deleteManyByIds:lookup'),
+			});
+			const canonicalIds = targets.flatMap((target) => (target.assetId ? [target.assetId] : []));
+			const legacyIds = targets.flatMap((target) => (target.assetId ? [] : [target.id]));
+
+			const deletedCount = yield* Effect.tryPromise({
 				try: async () => {
 					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
-						await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.VIDEO, ids);
-						return transaction.delete(videos).where(inArray(videos.id, ids)).returning({ id: videos.id });
+						await tombstoneCanonicalAssets(canonicalIds, transaction as typeof db);
+						if (legacyIds.length > 0) {
+							await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.VIDEO, legacyIds);
+							await transaction.delete(videos).where(inArray(videos.id, legacyIds));
+						}
+						return targets.length;
 					});
 				},
 				catch: (error) => toVideoError(error, 'deleteManyByIds'),
 			});
 
-			const deletedCount = deletedRows.length;
 			videoServiceLogger.info('Videos eliminados exitosamente:', deletedCount);
 			return deletedCount;
+		});
+
+	const restoreById = (id: string): Effect.Effect<Video, VideoError> =>
+		Effect.gen(function* () {
+			const [current] = yield* Effect.tryPromise<Array<{ assetId: string | null }>, VideoError>({
+				try: () => db.select({ assetId: videos.assetId }).from(videos).where(eq(videos.id, id)).limit(1),
+				catch: (error) => toVideoError(error, 'restoreById:lookup'),
+			});
+			if (!current?.assetId) {
+				return yield* Effect.fail(videoNotFound(id, `Video canónico con ID ${id} no encontrado`));
+			}
+			yield* Effect.tryPromise({
+				try: () => restoreCanonicalAsset(current.assetId!),
+				catch: (error) => toVideoError(error, 'restoreById'),
+			});
+			return yield* getById(id);
 		});
 
 	// -------------------------------------------------------------------------------
@@ -789,6 +943,7 @@ const make = (): VideoServiceInterface => {
 				try: async () => {
 					const rows = await db
 						.select({
+							assetId: videos.assetId,
 							id: videos.id,
 							name: videos.name,
 							description: videos.description,
@@ -816,16 +971,22 @@ const make = (): VideoServiceInterface => {
 						})
 						.from(videos)
 						.leftJoin(folders, eq(videos.folderId, folders.id))
-						.where(eq(videos.hash, hash))
+						.where(and(eq(videos.hash, hash), visibleAssetLifecycleCondition(videos.assetId)))
 						.limit(1);
 					return rows[0] || null;
 				},
 				catch: (error) => toVideoError(error, 'getByHash'),
 			});
 
-			if (!result) return null;
+			const projected = result
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(result, 'video'),
+						catch: (error) => toVideoError(error, 'getByHash.canonicalProjection'),
+					})
+				: null;
+			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.VIDEO, result),
+				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.VIDEO, projected),
 				catch: (error) => toVideoError(error, 'getByHash.favoriteProjection'),
 			});
 		});
@@ -841,6 +1002,7 @@ const make = (): VideoServiceInterface => {
 				try: async () => {
 					const rows = await db
 						.select({
+							assetId: videos.assetId,
 							id: videos.id,
 							name: videos.name,
 							description: videos.description,
@@ -868,16 +1030,24 @@ const make = (): VideoServiceInterface => {
 						})
 						.from(videos)
 						.leftJoin(folders, eq(videos.folderId, folders.id))
-						.where(and(eq(videos.path, path), eq(videos.folderId, folderId)))
+						.where(
+							and(eq(videos.path, path), eq(videos.folderId, folderId), visibleAssetLifecycleCondition(videos.assetId))
+						)
 						.limit(1);
 					return rows[0] || null;
 				},
 				catch: (error) => toVideoError(error, 'getByPathAndFolder'),
 			});
 
-			if (!result) return null;
+			const projected = result
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(result, 'video'),
+						catch: (error) => toVideoError(error, 'getByPathAndFolder.canonicalProjection'),
+					})
+				: null;
+			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.VIDEO, result),
+				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.VIDEO, projected),
 				catch: (error) => toVideoError(error, 'getByPathAndFolder.favoriteProjection'),
 			});
 		});
@@ -912,7 +1082,10 @@ const make = (): VideoServiceInterface => {
 
 			const result = yield* Effect.tryPromise({
 				try: async () => {
-					const rows = await db.select({ count: count() }).from(videos).where(eq(videos.folderId, folderId));
+					const rows = await db
+						.select({ count: count() })
+						.from(videos)
+						.where(and(eq(videos.folderId, folderId), visibleAssetLifecycleCondition(videos.assetId)));
 					return (rows[0]?.count as number) || 0;
 				},
 				catch: (error) => toVideoError(error, 'countByFolder'),
@@ -982,7 +1155,7 @@ const make = (): VideoServiceInterface => {
 					const updated = await db
 						.update(videos)
 						.set({ isFavorite, updatedAt: new Date() })
-						.where(inArray(videos.id, ids))
+						.where(and(inArray(videos.id, ids), visibleAssetLifecycleCondition(videos.assetId)))
 						.returning({ id: videos.id });
 					return updated.length;
 				},
@@ -1012,7 +1185,8 @@ const make = (): VideoServiceInterface => {
 							width: videos.width,
 							height: videos.height,
 						})
-						.from(videos);
+						.from(videos)
+						.where(visibleAssetLifecycleCondition(videos.assetId));
 					return rows;
 				},
 				catch: (error) => toVideoError(error, 'getFormatStats'),
@@ -1139,6 +1313,7 @@ const make = (): VideoServiceInterface => {
 		update,
 		deleteById,
 		deleteManyByIds,
+		restoreById,
 		getByHash,
 		getByPathAndFolder,
 		getAllFavorites,
@@ -1201,6 +1376,9 @@ export const deleteById = (id: string, force = false): Effect.Effect<void, Video
  */
 export const deleteManyByIds = (ids: string[], force = false): Effect.Effect<number, VideoError> =>
 	make().deleteManyByIds(ids, force);
+
+/** Restaurar un Video canónico desde su tombstone. */
+export const restoreById = (id: string): Effect.Effect<Video, VideoError> => make().restoreById(id);
 
 /**
  * Obtener video por hash

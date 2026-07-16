@@ -9,7 +9,7 @@ import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createServiceError, ServiceErrorCode } from '@/lib/utils/errors/service-errors';
-import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
+import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
 
 const logger = serverLogger.withContext('FolderFilesService');
 
@@ -349,7 +349,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 				FROM ${images}
 				WHERE ${and(
 					buildWhereConditions(folderContext, includeSubfolders, search, images),
-					visibleImageLifecycleCondition()
+					visibleAssetLifecycleCondition(images.assetId)
 				)}
 			`);
 		}
@@ -366,7 +366,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${videos}
-				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, videos)}
+				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, videos), visibleAssetLifecycleCondition(videos.assetId))}
 			`);
 		}
 
@@ -381,7 +381,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${audios}
-				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, audios)}
+				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, audios), visibleAssetLifecycleCondition(audios.assetId))}
 			`);
 		}
 
@@ -396,7 +396,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${documents}
-				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, documents)}
+				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, documents), visibleAssetLifecycleCondition(documents.assetId))}
 			`);
 		}
 
@@ -411,7 +411,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${jsonFiles}
-				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, jsonFiles)}
+				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, jsonFiles), visibleAssetLifecycleCondition(jsonFiles.assetId))}
 			`);
 		}
 
@@ -426,7 +426,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					isFavorite,
 					0 as views
 				FROM ${file3Ds}
-				WHERE ${buildWhereConditions(folderContext, includeSubfolders, search, file3Ds)}
+				WHERE ${and(buildWhereConditions(folderContext, includeSubfolders, search, file3Ds), visibleAssetLifecycleCondition(file3Ds.assetId))}
 			`);
 		}
 
@@ -534,7 +534,10 @@ async function getTotalFileCount(
 					.select({ count: count() })
 					.from(images)
 					.where(
-						and(buildWhereConditions(context, includeSubfolders, search, images), visibleImageLifecycleCondition())
+						and(
+							buildWhereConditions(context, includeSubfolders, search, images),
+							visibleAssetLifecycleCondition(images.assetId)
+						)
 					)
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
@@ -545,7 +548,12 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(videos)
-					.where(buildWhereConditions(context, includeSubfolders, search, videos))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, search, videos),
+							visibleAssetLifecycleCondition(videos.assetId)
+						)
+					)
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -555,7 +563,12 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(audios)
-					.where(buildWhereConditions(context, includeSubfolders, search, audios))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, search, audios),
+							visibleAssetLifecycleCondition(audios.assetId)
+						)
+					)
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -565,7 +578,12 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(documents)
-					.where(buildWhereConditions(context, includeSubfolders, search, documents))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, search, documents),
+							visibleAssetLifecycleCondition(documents.assetId)
+						)
+					)
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -575,7 +593,12 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(jsonFiles)
-					.where(buildWhereConditions(context, includeSubfolders, search, jsonFiles))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, search, jsonFiles),
+							visibleAssetLifecycleCondition(jsonFiles.assetId)
+						)
+					)
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -585,7 +608,12 @@ async function getTotalFileCount(
 				db
 					.select({ count: count() })
 					.from(file3Ds)
-					.where(buildWhereConditions(context, includeSubfolders, search, file3Ds))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, search, file3Ds),
+							visibleAssetLifecycleCondition(file3Ds.assetId)
+						)
+					)
 					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
 			);
 		}
@@ -611,38 +639,66 @@ async function getTotalFileSize(context: FolderQueryContext, includeSubfolders: 
 					.select({ totalSize: sql<number>`COALESCE(SUM(${images.size}), 0)` })
 					.from(images)
 					.where(
-						and(buildWhereConditions(context, includeSubfolders, undefined, images), visibleImageLifecycleCondition())
+						and(
+							buildWhereConditions(context, includeSubfolders, undefined, images),
+							visibleAssetLifecycleCondition(images.assetId)
+						)
 					)
 			),
 			sumSize(
 				db
 					.select({ totalSize: sql<number>`COALESCE(SUM(${videos.size}), 0)` })
 					.from(videos)
-					.where(buildWhereConditions(context, includeSubfolders, undefined, videos))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, undefined, videos),
+							visibleAssetLifecycleCondition(videos.assetId)
+						)
+					)
 			),
 			sumSize(
 				db
 					.select({ totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` })
 					.from(audios)
-					.where(buildWhereConditions(context, includeSubfolders, undefined, audios))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, undefined, audios),
+							visibleAssetLifecycleCondition(audios.assetId)
+						)
+					)
 			),
 			sumSize(
 				db
 					.select({ totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)` })
 					.from(documents)
-					.where(buildWhereConditions(context, includeSubfolders, undefined, documents))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, undefined, documents),
+							visibleAssetLifecycleCondition(documents.assetId)
+						)
+					)
 			),
 			sumSize(
 				db
 					.select({ totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` })
 					.from(jsonFiles)
-					.where(buildWhereConditions(context, includeSubfolders, undefined, jsonFiles))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, undefined, jsonFiles),
+							visibleAssetLifecycleCondition(jsonFiles.assetId)
+						)
+					)
 			),
 			sumSize(
 				db
 					.select({ totalSize: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` })
 					.from(file3Ds)
-					.where(buildWhereConditions(context, includeSubfolders, undefined, file3Ds))
+					.where(
+						and(
+							buildWhereConditions(context, includeSubfolders, undefined, file3Ds),
+							visibleAssetLifecycleCondition(file3Ds.assetId)
+						)
+					)
 			),
 		]);
 		return sizes.reduce((total, size) => total + size, 0);

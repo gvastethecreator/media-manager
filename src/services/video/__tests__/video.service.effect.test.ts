@@ -7,9 +7,19 @@
 
 import { Effect } from 'effect';
 import { eq, inArray } from 'drizzle-orm';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { resolve } from 'node:path';
 import { db } from '@/lib/drizzle';
-import { favorites, folders, profiles, videos } from '@/lib/drizzle/schema';
+import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
+import { FileSyncService } from '@/lib/filesystem/file-sync.service';
+import { assets, favorites, folders, mediaRoots, profiles, sourceFiles, videos } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { getFolderFileStats, getFolderFiles } from '@/services/folder-files/folder-files.service';
+import { streamFolderFiles } from '@/services/folder-files/folder-files-stream.service';
+import { performSearch } from '@/server/services/search.service';
+import { fetchMediaCounts } from '@/server/services/stats/stats.queries';
+import { getNavigationData } from '@/server/services/system/system.navigation';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import * as VideoService from '../video.service.effect';
 
@@ -44,14 +54,14 @@ const expectError = async <A, E>(effect: Effect.Effect<A, E, never>) => {
 
 // ============= Test Data Helpers =============
 
-const createTestFolder = async () => {
+const createTestFolder = async (path = `/test/folder-${Date.now()}-${crypto.randomUUID()}`) => {
 	const now = new Date();
 	const [folder] = await db
 		.insert(folders)
 		.values({
 			id: crypto.randomUUID(),
 			name: `test-folder-${Date.now()}`,
-			path: `/test/folder-${Date.now()}`,
+			path,
 			depth: 0,
 			parentId: null,
 			isFavorite: false,
@@ -89,8 +99,24 @@ const createTestVideo = async (folderId: string, overrides?: Partial<typeof vide
 	return video;
 };
 
+const withCanonicalSource = async <T extends { name: string; path: string }>(
+	folder: typeof folders.$inferSelect,
+	input: T
+) => {
+	const rootId = `root-video-${crypto.randomUUID()}`;
+	const path = resolve(folder.path, input.name);
+	const relativePath = `videos/${crypto.randomUUID()}-${input.name}`;
+	await db.insert(mediaRoots).values({ id: rootId, label: 'Video service test root' });
+	return {
+		...input,
+		path,
+		source: createAuthorizedPathInput({ absolutePath: path, relativePath, rootId }),
+	};
+};
+
 let createdActiveProfileId: string | null = null;
 let previousActiveProfileIds: string[] = [];
+const temporaryDirectories: string[] = [];
 
 const ensureActiveProfile = async () => {
 	if (createdActiveProfileId) {
@@ -127,6 +153,8 @@ afterEach(async () => {
 	await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.VIDEO));
 	// Limpiar videos de prueba (todos los registros)
 	await db.delete(videos);
+	await db.delete(assets);
+	await db.delete(mediaRoots);
 	// Limpiar folders de prueba (todos los registros)
 	await db.delete(folders);
 
@@ -138,6 +166,9 @@ afterEach(async () => {
 	if (previousActiveProfileIds.length > 0) {
 		await db.update(profiles).set({ isActive: true }).where(inArray(profiles.id, previousActiveProfileIds));
 		previousActiveProfileIds = [];
+	}
+	for (const directory of temporaryDirectories.splice(0)) {
+		await rm(directory, { force: true, maxRetries: 40, recursive: true, retryDelay: 100 });
 	}
 });
 
@@ -159,7 +190,7 @@ describe('VideoService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const result = await expectSuccess(VideoService.create(input));
+			const result = await expectSuccess(VideoService.create(await withCanonicalSource(folder, input)));
 
 			expect(result).toBeDefined();
 			expect(result.id).toBeDefined();
@@ -168,6 +199,12 @@ describe('VideoService - CRUD Operations', () => {
 			expect(result.size).toBe(50_000_000);
 			expect(result.duration).toBe(300);
 			expect(result.isFavorite).toBe(false);
+			expect(result.assetId).toBe(result.id);
+			expect(result.canonicalState).toBe('canonical');
+			const [asset] = await db.select().from(assets).where(eq(assets.id, result.id));
+			const [source] = await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, result.id));
+			expect(asset).toEqual(expect.objectContaining({ assetType: 'video', id: result.id, status: 'active' }));
+			expect(source).toEqual(expect.objectContaining({ assetId: result.id, availability: 'available' }));
 		});
 
 		it('debería persistir el favorito vía bridge canónico al crear con perfil activo', async () => {
@@ -175,17 +212,19 @@ describe('VideoService - CRUD Operations', () => {
 			await ensureActiveProfile();
 
 			const result = await expectSuccess(
-				VideoService.create({
-					name: 'canonical-video.mp4',
-					path: '/test/canonical-video.mp4',
-					hash: '9'.repeat(64),
-					size: 50_000_000,
-					duration: 300,
-					width: 1280,
-					height: 720,
-					folderId: folder.id,
-					isFavorite: true,
-				})
+				VideoService.create(
+					await withCanonicalSource(folder, {
+						name: 'canonical-video.mp4',
+						path: '/test/canonical-video.mp4',
+						hash: '9'.repeat(64),
+						size: 50_000_000,
+						duration: 300,
+						width: 1280,
+						height: 720,
+						folderId: folder.id,
+						isFavorite: true,
+					})
+				)
 			);
 
 			expect(result.isFavorite).toBe(true);
@@ -207,7 +246,7 @@ describe('VideoService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(VideoService.create(input));
+			const error = await expectError(VideoService.create(await withCanonicalSource(folder, input)));
 
 			expect(error._tag).toBe('VideoHashConflict');
 			if (error._tag === 'VideoHashConflict') {
@@ -230,7 +269,7 @@ describe('VideoService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(VideoService.create(input));
+			const error = await expectError(VideoService.create(await withCanonicalSource(folder, input)));
 
 			expect(error._tag).toBe('VideoValidationError');
 			if (error._tag === 'VideoValidationError') {
@@ -252,7 +291,7 @@ describe('VideoService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(VideoService.create(input));
+			const error = await expectError(VideoService.create(await withCanonicalSource(folder, input)));
 
 			expect(error._tag).toBe('VideoValidationError');
 			if (error._tag === 'VideoValidationError') {
@@ -274,7 +313,7 @@ describe('VideoService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(VideoService.create(input));
+			const error = await expectError(VideoService.create(await withCanonicalSource(folder, input)));
 
 			expect(error._tag).toBe('VideoValidationError');
 			if (error._tag === 'VideoValidationError') {
@@ -294,6 +333,11 @@ describe('VideoService - CRUD Operations', () => {
 				width: 1920,
 				height: 1080,
 				folderId: folder.id,
+				source: createAuthorizedPathInput({
+					absolutePath: resolve(folder.path, 'no-path.mp4'),
+					relativePath: 'videos/no-path.mp4',
+					rootId: 'root-never-used',
+				}),
 			};
 
 			const error = await expectError(VideoService.create(input));
@@ -302,6 +346,23 @@ describe('VideoService - CRUD Operations', () => {
 			if (error._tag === 'VideoValidationError') {
 				expect(error.field).toBe('path');
 			}
+		});
+
+		it('debería rechazar una source JSON sin prueba runtime de autorización', async () => {
+			const folder = await createTestFolder();
+			const error = await expectError(
+				VideoService.create({
+					name: 'forged.mp4',
+					path: resolve(folder.path, 'forged.mp4'),
+					hash: '7'.repeat(64),
+					size: 1,
+					duration: 1,
+					folderId: folder.id,
+					source: { relativePath: 'videos/forged.mp4', rootId: 'forged-root' },
+				})
+			);
+			expect(error._tag).toBe('VideoValidationError');
+			if (error._tag === 'VideoValidationError') expect(error.field).toBe('source');
 		});
 	});
 
@@ -489,6 +550,98 @@ describe('VideoService - CRUD Operations', () => {
 			const error = await expectError(VideoService.deleteById(nonExistentId, false));
 
 			expect(error._tag).toBe('VideoNotFound');
+		});
+
+		it('debería tombstonear y restaurar un Video canónico sin perder source ni metadata', async () => {
+			const rootPath = await mkdtemp(resolve(tmpdir(), 'media-manager-video-lifecycle-'));
+			temporaryDirectories.push(rootPath);
+			const folder = await createTestFolder(rootPath);
+			const input = await withCanonicalSource(folder, {
+				name: 'restorable.mp4',
+				path: '/ignored/restorable.mp4',
+				hash: '8'.repeat(64),
+				size: 42_000,
+				duration: 12,
+				width: 640,
+				height: 360,
+				folderId: folder.id,
+			});
+			const created = await expectSuccess(VideoService.create(input));
+
+			await expectSuccess(VideoService.deleteById(created.id));
+			expect((await expectError(VideoService.getById(created.id)))._tag).toBe('VideoNotFound');
+			expect(await expectSuccess(VideoService.getAll({ limit: 20, offset: 0 }))).toEqual([]);
+			expect(await db.select().from(videos).where(eq(videos.id, created.id))).toHaveLength(1);
+			expect(await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, created.id))).toHaveLength(1);
+			expect((await db.select().from(assets).where(eq(assets.id, created.id)))[0]).toEqual(
+				expect.objectContaining({ status: 'deleted', statusBeforeDeletion: 'active' })
+			);
+			expect(await getFolderFiles({ fileTypes: ['video'], folderId: folder.id })).toEqual(
+				expect.objectContaining({ files: [], total: 0 })
+			);
+			expect(await getFolderFileStats(folder.id)).toEqual(
+				expect.objectContaining({ total: 0, totalSize: 0, videos: 0 })
+			);
+			const deletedStreamChunks = [];
+			for await (const chunk of streamFolderFiles({ fileTypes: ['video'], folderId: folder.id })) {
+				deletedStreamChunks.push(chunk);
+			}
+			expect(deletedStreamChunks.find((chunk) => chunk.type === 'metadata')?.metadata?.totalEstimate).toBe(0);
+			expect(deletedStreamChunks.flatMap((chunk) => chunk.data ?? [])).toEqual([]);
+			expect((await performSearch('restorable', 'video')).results).toEqual([]);
+			expect((await fetchMediaCounts()).videos).toBe(0);
+			const navigationWhileDeleted = await getNavigationData();
+			expect(navigationWhileDeleted.videos).toEqual([]);
+			expect(navigationWhileDeleted.folders.find((entry) => entry.id === folder.id)?.itemCount).toBe(0);
+
+			const restored = await expectSuccess(VideoService.restoreById(created.id));
+			expect(restored).toEqual(expect.objectContaining({ canonicalState: 'canonical', id: created.id }));
+			expect((await db.select().from(assets).where(eq(assets.id, created.id)))[0]).toEqual(
+				expect.objectContaining({ status: 'active', statusBeforeDeletion: null })
+			);
+			expect((await getFolderFiles({ fileTypes: ['video'], folderId: folder.id })).total).toBe(1);
+			expect(await getFolderFileStats(folder.id)).toEqual(
+				expect.objectContaining({ total: 1, totalSize: 42_000, videos: 1 })
+			);
+			expect((await performSearch('restorable', 'video')).results).toHaveLength(1);
+			expect((await fetchMediaCounts()).videos).toBe(1);
+			expect((await getNavigationData()).videos).toHaveLength(1);
+		});
+
+		it('debería marcar la source ausente y recuperarla sin borrar el Video canónico', async () => {
+			const directory = await mkdtemp(resolve(tmpdir(), 'media-manager-video-sync-'));
+			temporaryDirectories.push(directory);
+			const rootPath = resolve(directory, 'library');
+			await mkdir(rootPath);
+			const videoPath = resolve(rootPath, 'observed.mp4');
+			await writeFile(videoPath, 'video');
+			const rootId = `root-video-${crypto.randomUUID()}`;
+			await db.insert(mediaRoots).values({ id: rootId, label: 'Video sync root' });
+			const folder = await createTestFolder(rootPath);
+			const created = await expectSuccess(
+				VideoService.create({
+					name: 'observed.mp4',
+					path: videoPath,
+					hash: '6'.repeat(64),
+					size: 5,
+					duration: 1,
+					folderId: folder.id,
+					source: createAuthorizedPathInput({ absolutePath: videoPath, relativePath: 'observed.mp4', rootId }),
+				})
+			);
+
+			await rm(videoPath);
+			await FileSyncService.getInstance().syncFolderFiles(folder.id, { entityTypes: ['video'] });
+			expect(await db.select().from(videos).where(eq(videos.id, created.id))).toHaveLength(1);
+			expect((await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, created.id)))[0]).toEqual(
+				expect.objectContaining({ availability: 'missing' })
+			);
+
+			await writeFile(videoPath, 'video');
+			await FileSyncService.getInstance().syncFolderFiles(folder.id, { entityTypes: ['video'] });
+			expect((await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, created.id)))[0]).toEqual(
+				expect.objectContaining({ availability: 'available' })
+			);
 		});
 
 		// TODO: Test force=true cuando se implemente relaciones check

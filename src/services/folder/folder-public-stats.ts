@@ -1,7 +1,7 @@
 import { and, count, inArray, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, images, jsonFiles, videos } from '@/lib/drizzle/schema';
-import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
+import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
 
 export interface PublicFolderFileTotals {
 	totalFiles: number;
@@ -25,17 +25,17 @@ export async function getPublicFolderFileTotals(
 		db
 			.select({ count: count(), folderId: images.folderId, totalSize: sql<number>`COALESCE(SUM(${images.size}), 0)` })
 			.from(images)
-			.where(and(inArray(images.folderId, [...folderIds]), visibleImageLifecycleCondition()))
+			.where(and(inArray(images.folderId, [...folderIds]), visibleAssetLifecycleCondition(images.assetId)))
 			.groupBy(images.folderId),
 		db
 			.select({ count: count(), folderId: videos.folderId, totalSize: sql<number>`COALESCE(SUM(${videos.size}), 0)` })
 			.from(videos)
-			.where(inArray(videos.folderId, [...folderIds]))
+			.where(and(inArray(videos.folderId, [...folderIds]), visibleAssetLifecycleCondition(videos.assetId)))
 			.groupBy(videos.folderId),
 		db
 			.select({ count: count(), folderId: audios.folderId, totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` })
 			.from(audios)
-			.where(inArray(audios.folderId, [...folderIds]))
+			.where(and(inArray(audios.folderId, [...folderIds]), visibleAssetLifecycleCondition(audios.assetId)))
 			.groupBy(audios.folderId),
 		db
 			.select({
@@ -44,7 +44,7 @@ export async function getPublicFolderFileTotals(
 				totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)`,
 			})
 			.from(documents)
-			.where(inArray(documents.folderId, [...folderIds]))
+			.where(and(inArray(documents.folderId, [...folderIds]), visibleAssetLifecycleCondition(documents.assetId)))
 			.groupBy(documents.folderId),
 		db
 			.select({
@@ -53,7 +53,7 @@ export async function getPublicFolderFileTotals(
 				totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)`,
 			})
 			.from(jsonFiles)
-			.where(inArray(jsonFiles.folderId, [...folderIds]))
+			.where(and(inArray(jsonFiles.folderId, [...folderIds]), visibleAssetLifecycleCondition(jsonFiles.assetId)))
 			.groupBy(jsonFiles.folderId),
 		db
 			.select({
@@ -62,7 +62,7 @@ export async function getPublicFolderFileTotals(
 				totalSize: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)`,
 			})
 			.from(file3Ds)
-			.where(inArray(file3Ds.folderId, [...folderIds]))
+			.where(and(inArray(file3Ds.folderId, [...folderIds]), visibleAssetLifecycleCondition(file3Ds.assetId)))
 			.groupBy(file3Ds.folderId),
 	]);
 

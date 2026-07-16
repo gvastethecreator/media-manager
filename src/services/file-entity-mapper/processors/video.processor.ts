@@ -1,4 +1,5 @@
 import { Effect } from 'effect';
+import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	type CreateVideoInput,
@@ -33,6 +34,9 @@ export class VideoProcessor {
 		if (!fileInfo.hash) {
 			throw new Error('File hash is required for video creation');
 		}
+		if (!fileInfo.source) {
+			throw new Error('An authorized canonical source is required for video creation');
+		}
 
 		const videoData: CreateVideoInput = {
 			name: fileInfo.name,
@@ -42,6 +46,7 @@ export class VideoProcessor {
 			folderId: fileInfo.folderId,
 			duration: 0,
 			isFavorite: false,
+			source: extendAuthorizedPathInput(fileInfo.source, { fileModifiedAt: fileInfo.lastModified }),
 		};
 
 		const video = await Effect.runPromise(createVideo(videoData));

@@ -139,9 +139,7 @@ export class FileSyncService {
 
 			// 4. Ejecutar cambios si no es dry run
 			if (!dryRun) {
-				if (entityTypes.includes('image')) {
-					await this.restoreObservedCanonicalImages(folderId, filesystemPaths);
-				}
+				await this.restoreObservedCanonicalMedia(folderId, filesystemPaths, entityTypes);
 				await this.executeFileSyncChanges(result, folderId, options.onProgress);
 			}
 
@@ -336,13 +334,49 @@ export class FileSyncService {
 		}
 	}
 
-	private async restoreObservedCanonicalImages(folderId: string, filesystemPaths: Set<string>): Promise<void> {
-		const canonicalImages: Array<{ assetId: string | null; path: string }> = await db
-			.select({ assetId: images.assetId, path: images.path })
-			.from(images)
-			.where(eq(images.folderId, folderId));
-		const assetIds = canonicalImages.flatMap((image) =>
-			image.assetId && filesystemPaths.has(normalizePath(image.path)) ? [image.assetId] : []
+	private async getCanonicalEntityLocations(
+		folderId: string,
+		entityType: 'image' | 'video' | 'audio' | 'document' | 'file3d'
+	): Promise<Array<{ assetId: string | null; path: string }>> {
+		switch (entityType) {
+			case 'image':
+				return db
+					.select({ assetId: images.assetId, path: images.path })
+					.from(images)
+					.where(eq(images.folderId, folderId));
+			case 'video':
+				return db
+					.select({ assetId: videos.assetId, path: videos.path })
+					.from(videos)
+					.where(eq(videos.folderId, folderId));
+			case 'audio':
+				return db
+					.select({ assetId: audios.assetId, path: audios.path })
+					.from(audios)
+					.where(eq(audios.folderId, folderId));
+			case 'document':
+				return db
+					.select({ assetId: documents.assetId, path: documents.path })
+					.from(documents)
+					.where(eq(documents.folderId, folderId));
+			case 'file3d':
+				return db
+					.select({ assetId: file3Ds.assetId, path: file3Ds.path })
+					.from(file3Ds)
+					.where(eq(file3Ds.folderId, folderId));
+		}
+	}
+
+	private async restoreObservedCanonicalMedia(
+		folderId: string,
+		filesystemPaths: Set<string>,
+		entityTypes: Array<'image' | 'video' | 'audio' | 'document' | 'file3d'>
+	): Promise<void> {
+		const rows = (
+			await Promise.all(entityTypes.map((entityType) => this.getCanonicalEntityLocations(folderId, entityType)))
+		).flat();
+		const assetIds = rows.flatMap((row) =>
+			row.assetId && filesystemPaths.has(normalizePath(row.path)) ? [row.assetId] : []
 		);
 		if (assetIds.length === 0) return;
 
@@ -474,43 +508,75 @@ export class FileSyncService {
 			return;
 		}
 
+		let rows: Array<{ assetId: string | null; id: string }>;
 		switch (entityType) {
-			case 'image': {
-				const rows: Array<{ assetId: string | null; id: string }> = await db
+			case 'image':
+				rows = await db
 					.select({ assetId: images.assetId, id: images.id })
 					.from(images)
 					.where(inArray(images.id, fileIds));
-				const canonicalAssetIds = rows.flatMap((row) => (row.assetId ? [row.assetId] : []));
-				if (canonicalAssetIds.length > 0) {
-					const primarySources: Array<{ id: string }> = await db
-						.select({ id: assets.primarySourceFileId })
-						.from(assets)
-						.where(inArray(assets.id, canonicalAssetIds));
-					await db
-						.update(sourceFiles)
-						.set({ availability: 'missing', observedAt: new Date(), updatedAt: new Date() })
-						.where(
-							inArray(
-								sourceFiles.id,
-								primarySources.map((source) => source.id)
-							)
-						);
-				}
-				const legacyIds = rows.flatMap((row) => (row.assetId ? [] : [row.id]));
-				if (legacyIds.length > 0) await db.delete(images).where(inArray(images.id, legacyIds));
+				break;
+			case 'video':
+				rows = await db
+					.select({ assetId: videos.assetId, id: videos.id })
+					.from(videos)
+					.where(inArray(videos.id, fileIds));
+				break;
+			case 'audio':
+				rows = await db
+					.select({ assetId: audios.assetId, id: audios.id })
+					.from(audios)
+					.where(inArray(audios.id, fileIds));
+				break;
+			case 'document':
+				rows = await db
+					.select({ assetId: documents.assetId, id: documents.id })
+					.from(documents)
+					.where(inArray(documents.id, fileIds));
+				break;
+			case 'file3d':
+				rows = await db
+					.select({ assetId: file3Ds.assetId, id: file3Ds.id })
+					.from(file3Ds)
+					.where(inArray(file3Ds.id, fileIds));
+				break;
+		}
+
+		const canonicalAssetIds = rows.flatMap((row) => (row.assetId ? [row.assetId] : []));
+		if (canonicalAssetIds.length > 0) {
+			const primarySources: Array<{ id: string }> = await db
+				.select({ id: assets.primarySourceFileId })
+				.from(assets)
+				.where(inArray(assets.id, canonicalAssetIds));
+			await db
+				.update(sourceFiles)
+				.set({ availability: 'missing', observedAt: new Date(), updatedAt: new Date() })
+				.where(
+					inArray(
+						sourceFiles.id,
+						primarySources.map((source) => source.id)
+					)
+				);
+		}
+		const legacyIds = rows.flatMap((row) => (row.assetId ? [] : [row.id]));
+		if (legacyIds.length === 0) return;
+
+		switch (entityType) {
+			case 'image': {
+				await db.delete(images).where(inArray(images.id, legacyIds));
 				break;
 			}
 			case 'video':
-				await db.delete(videos).where(inArray(videos.id, fileIds));
+				await db.delete(videos).where(inArray(videos.id, legacyIds));
 				break;
 			case 'audio':
-				await db.delete(audios).where(inArray(audios.id, fileIds));
+				await db.delete(audios).where(inArray(audios.id, legacyIds));
 				break;
 			case 'document':
-				await db.delete(documents).where(inArray(documents.id, fileIds));
+				await db.delete(documents).where(inArray(documents.id, legacyIds));
 				break;
 			case 'file3d':
-				await db.delete(file3Ds).where(inArray(file3Ds.id, fileIds));
+				await db.delete(file3Ds).where(inArray(file3Ds.id, legacyIds));
 				break;
 			default:
 				throw new Error(`Tipo de entidad no soportado: ${entityType}`);
