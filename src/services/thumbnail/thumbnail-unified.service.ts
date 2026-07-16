@@ -13,10 +13,11 @@
 
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { eq, isNotNull } from 'drizzle-orm';
+import { and, eq, isNotNull } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, images, jsonFiles, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { generateAndSaveWaveform } from '@/lib/utils/audio/waveform-generator';
 import { generateStaticVideoThumbnailFFmpeg } from '@/lib/utils/video/ffmpeg-thumbnails';
 
@@ -526,8 +527,11 @@ class ThumbnailUnifiedService {
 
 		if (requestedEntityTypes.includes('image')) {
 			const rows: Array<{ id: string }> = onlyExisting
-				? await db.select({ id: images.id }).from(images).where(isNotNull(images.thumbnail))
-				: await db.select({ id: images.id }).from(images);
+				? await db
+						.select({ id: images.id })
+						.from(images)
+						.where(and(isNotNull(images.thumbnail), visibleImageLifecycleCondition()))
+				: await db.select({ id: images.id }).from(images).where(visibleImageLifecycleCondition());
 			requests.push(...rows.map((row) => ({ entityType: 'image' as const, entityId: row.id })));
 		}
 

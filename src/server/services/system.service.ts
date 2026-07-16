@@ -28,6 +28,8 @@ import {
 	worldItems,
 } from '@/lib/drizzle/schema/index';
 import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
+import { getPublicFolderFileTotals } from '@/services/folder/folder-public-stats';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { createSystemError } from '@/lib/errors/system';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { settingsService } from '@/services/settings/settings.service';
@@ -137,9 +139,10 @@ export async function getNavigationData(): Promise<NavigationData> {
 
 		// Obtener conteos de imágenes y videos
 		const [imageCount, videoCount] = await Promise.all([
-			db.select({ count: count() }).from(images),
+			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
 			db.select({ count: count() }).from(videos),
 		]);
+		const publicFolderTotals = await getPublicFolderFileTotals(foldersData.map((folder: { id: string }) => folder.id));
 
 		// Obtener estadísticas actualizadas
 		const basicStats = {
@@ -167,7 +170,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 				id: f.id,
 				name: f.name,
 				path: f.path,
-				itemCount: f.totalFiles || 0,
+				itemCount: publicFolderTotals.get(f.id)?.totalFiles ?? 0,
 				parentId: f.parentId || null,
 			})),
 			collections: collectionsData.map((c: any) => ({
@@ -434,7 +437,7 @@ export async function getSystemStats(): Promise<RuntimeSystemStats> {
 			collectionsResult,
 			tagsResult,
 		] = await Promise.all([
-			db.select({ count: count() }).from(images),
+			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
 			db.select({ count: count() }).from(videos),
 			db.select({ count: count() }).from(audios),
 			db.select({ count: count() }).from(folders),
@@ -521,7 +524,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 			videosResult,
 			audiosResult,
 		] = await Promise.all([
-			db.select({ count: count() }).from(images),
+			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
 			db.select({ count: count() }).from(collections),
 			db.select({ count: count() }).from(tags),
 			db.select({ count: count() }).from(albums),

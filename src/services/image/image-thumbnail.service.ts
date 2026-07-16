@@ -4,12 +4,13 @@
  * @description Gestión completa de thumbnails: generación, compresión, caché y estadísticas
  */
 
-import { count, desc, eq, isNotNull, sum } from 'drizzle-orm';
+import { and, count, desc, eq, isNotNull, sum } from 'drizzle-orm';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { visibleImageLifecycleCondition } from './image-lifecycle-query';
 import {
 	createEntityNotFoundError,
 	createFileNotFoundError,
@@ -343,20 +344,23 @@ class ThumbnailService {
 	 */
 	async getThumbnailProcessingStats(): Promise<ThumbnailStats> {
 		try {
-			const totalImages = await db.select({ count: count() }).from(images);
+			const totalImages = await db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition());
 			const processedImages = await db
 				.select({ count: count() })
 				.from(images)
-				.where(isNotNull(images.thumbnailOptimizedAt));
-			const erroredImages = await db.select({ count: count() }).from(images).where(isNotNull(images.thumbnailError));
+				.where(and(isNotNull(images.thumbnailOptimizedAt), visibleImageLifecycleCondition()));
+			const erroredImages = await db
+				.select({ count: count() })
+				.from(images)
+				.where(and(isNotNull(images.thumbnailError), visibleImageLifecycleCondition()));
 			const totalThumbnailSize = await db
 				.select({ sum: sum(images.thumbnailSize) })
 				.from(images)
-				.where(isNotNull(images.thumbnailSize));
+				.where(and(isNotNull(images.thumbnailSize), visibleImageLifecycleCondition()));
 			const lastProcessedImage = await db
 				.select({ date: images.thumbnailOptimizedAt })
 				.from(images)
-				.where(isNotNull(images.thumbnailOptimizedAt))
+				.where(and(isNotNull(images.thumbnailOptimizedAt), visibleImageLifecycleCondition()))
 				.orderBy(desc(images.thumbnailOptimizedAt))
 				.limit(1);
 

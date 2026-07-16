@@ -36,6 +36,10 @@ describe('Drizzle schema vs tipos: Image', () => {
 		// Crear un objeto dummy del tipo ImageBase (con valores triviales)
 		const _: ImageBase = {
 			id: '',
+			assetId: null,
+			legacyId: '',
+			canonicalState: 'legacy_only',
+			canonicalDivergences: [],
 			name: '',
 			description: null,
 			path: '',

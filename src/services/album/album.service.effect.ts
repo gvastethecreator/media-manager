@@ -14,6 +14,7 @@ import { Album, AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/lib
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	AlbumDatabaseError,
@@ -268,7 +269,12 @@ const make = (): AlbumServiceInterface => {
 
 			// Contar imágenes
 			const imageCountResult = yield* Effect.tryPromise<Array<{ count: number }>, AlbumError>({
-				try: async () => await db.select({ count: count() }).from(imageAlbums).where(eq(imageAlbums.B, id)),
+				try: async () =>
+					await db
+						.select({ count: count() })
+						.from(imageAlbums)
+						.innerJoin(images, eq(imageAlbums.A, images.id))
+						.where(and(eq(imageAlbums.B, id), visibleImageLifecycleCondition())),
 				catch: (error: unknown) => fromUnknownError('getRelationsCounts', error),
 			});
 
@@ -316,7 +322,7 @@ const make = (): AlbumServiceInterface => {
 						.select({ image: images })
 						.from(imageAlbums)
 						.innerJoin(images, eq(imageAlbums.A, images.id))
-						.where(eq(imageAlbums.B, id))
+						.where(and(eq(imageAlbums.B, id), visibleImageLifecycleCondition()))
 						.orderBy(desc(images.updatedAt), asc(images.id))
 						.limit(safeLimit)
 						.offset(safeOffset);
@@ -611,9 +617,13 @@ const make = (): AlbumServiceInterface => {
 			// Verificar que existe
 			yield* getById(id);
 
-			// Verificar relaciones
-			const counts = yield* getRelationsCounts(id);
-			const totalRelations = counts.images + counts.videos;
+			// Destructive guards use stored relations, not the lifecycle-filtered public count.
+			// A relation to a tombstoned Image must survive so restore can reveal it again.
+			const storedImageRelations = yield* Effect.tryPromise<Array<{ count: number }>, AlbumError>({
+				try: () => db.select({ count: count() }).from(imageAlbums).where(eq(imageAlbums.B, id)),
+				catch: (error: unknown) => fromUnknownError('delete:stored-relations', error),
+			});
+			const totalRelations = storedImageRelations[0]?.count ?? 0;
 
 			if (totalRelations > 0) {
 				return yield* Effect.fail(

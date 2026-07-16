@@ -12,10 +12,10 @@ export class AudioProcessor {
 	/**
 	 * Verifica si un archivo de audio ya existe por hash
 	 */
-	async checkExists(hash: string): Promise<boolean> {
-		if (!hash) return false;
+	async checkExists(fileInfo: FileInfo): Promise<boolean> {
+		if (!fileInfo.hash) return false;
 		try {
-			const existing = await Effect.runPromise(getByHash(hash));
+			const existing = await Effect.runPromise(getByHash(fileInfo.hash));
 			return !!existing;
 		} catch {
 			return false;

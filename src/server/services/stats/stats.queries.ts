@@ -28,6 +28,7 @@ import {
 	wildcards,
 	worldItems,
 } from '@/lib/drizzle/schema/index';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import type { MediaCounts, OrgCounts, SizeSums, SystemCounts, WorldCounts } from './stats.types';
 
 /**
@@ -35,7 +36,10 @@ import type { MediaCounts, OrgCounts, SizeSums, SystemCounts, WorldCounts } from
  */
 export async function fetchMediaCounts(): Promise<MediaCounts> {
 	const [imagesCount, videosCount, audiosCount, documentsCount, jsonFilesCount, file3DsCount] = await Promise.all([
-		db.select({ count: sql<number>`count(*)` }).from(images),
+		db
+			.select({ count: sql<number>`count(*)` })
+			.from(images)
+			.where(visibleImageLifecycleCondition()),
 		db.select({ count: sql<number>`count(*)` }).from(videos),
 		db.select({ count: sql<number>`count(*)` }).from(audios),
 		db.select({ count: sql<number>`count(*)` }).from(documents),

@@ -10,6 +10,7 @@ import { Context, Data, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { updateCanonicalImageFingerprint } from '@/services/image/image-canonical-persistence';
 import { emit } from '@/lib/server/events.server';
 
 const logger = serverLogger.withContext('FileChangeDetector');
@@ -207,18 +208,7 @@ const make = (): FileChangeDetectorServiceInterface => {
 				switch (entityType) {
 					case 'image':
 						yield* Effect.tryPromise({
-							try: () =>
-								db
-									.update(images)
-									.set({
-										hash: hashResult.hash,
-										size: hashResult.size,
-										updatedAt: new Date(),
-										// TODO: Disparar regeneración de thumbnail y metadata
-										thumbnailError: null,
-										thumbnailErrorAt: null,
-									})
-									.where(eq(images.id, fileId)),
+							try: () => updateCanonicalImageFingerprint(fileId, { hash: hashResult.hash, size: hashResult.size }),
 							catch: (error) => fromUnknownError('update-image', error),
 						});
 						break;

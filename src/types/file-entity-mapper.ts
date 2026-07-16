@@ -18,6 +18,10 @@ export interface FileInfo {
 	name: string;
 	path: string;
 	size: number;
+	source?: {
+		relativePath: string;
+		rootId: string;
+	};
 }
 
 export interface EntityCreationResult {

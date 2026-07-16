@@ -19,6 +19,7 @@ import {
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	CharacterDatabaseError,
@@ -206,7 +207,12 @@ const make = (): CharacterServiceInterface => {
 		Effect.gen(function* () {
 			const [imageCount, noteCount] = yield* Effect.all([
 				Effect.tryPromise({
-					try: () => db.select({ count: count() }).from(imageCharacters).where(eq(imageCharacters.B, id)),
+					try: () =>
+						db
+							.select({ count: count() })
+							.from(imageCharacters)
+							.innerJoin(images, eq(imageCharacters.A, images.id))
+							.where(and(eq(imageCharacters.B, id), visibleImageLifecycleCondition())),
 					catch: (error) => fromUnknownError('getImagesCount', error),
 				}),
 				Effect.tryPromise({
@@ -449,14 +455,19 @@ const make = (): CharacterServiceInterface => {
 	const delete_ = (id: string): Effect.Effect<void, CharacterError> =>
 		Effect.gen(function* () {
 			const counts = yield* getRelationsCounts(id);
-			const totalRelations = counts.images + counts.notes;
+			const storedImageRelations = yield* Effect.tryPromise<Array<{ count: number }>, CharacterError>({
+				try: () => db.select({ count: count() }).from(imageCharacters).where(eq(imageCharacters.B, id)),
+				catch: (error) => fromUnknownError('delete.storedImageRelations', error),
+			});
+			const storedImages = storedImageRelations[0]?.count ?? 0;
+			const totalRelations = storedImages + counts.notes;
 
 			if (totalRelations > 0) {
 				return yield* Effect.fail(
 					new CharacterHasRelationsError({
 						characterId: id,
 						relationCount: totalRelations,
-						relations: counts.images > 0 ? ['images'] : ['notes'],
+						relations: storedImages > 0 ? ['images'] : ['notes'],
 					})
 				);
 			}
@@ -559,7 +570,7 @@ const make = (): CharacterServiceInterface => {
 						.select({ image: images })
 						.from(imageCharacters)
 						.innerJoin(images, eq(imageCharacters.A, images.id))
-						.where(eq(imageCharacters.B, characterId)),
+						.where(and(eq(imageCharacters.B, characterId), visibleImageLifecycleCondition())),
 				catch: (error) => fromUnknownError('getImages', error),
 			});
 

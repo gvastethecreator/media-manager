@@ -1,9 +1,13 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
+import { and, eq, sql } from 'drizzle-orm';
 import { Effect } from 'effect';
+import { db } from '@/lib/drizzle';
+import { sourceFiles } from '@/lib/drizzle/schema';
 import { ImageCreateInput } from '@/lib/effect/schemas/entities';
+import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { create as createImage, getByHash as getImageByHash } from '@/services/image/image.service.effect';
+import { create as createImage } from '@/services/image/image.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
 
 const imageLogger = serverLogger.withContext('ImageProcessor');
@@ -13,16 +17,21 @@ const imageLogger = serverLogger.withContext('ImageProcessor');
  */
 export class ImageProcessor {
 	/**
-	 * Verifica si una imagen ya existe por hash
+	 * Verifica si la misma ubicación ya fue indexada. El hash sólo marca candidatos duplicados.
 	 */
-	async checkExists(hash: string): Promise<boolean> {
-		if (!hash) return false;
-		try {
-			const existing = await Effect.runPromise(getImageByHash(hash));
-			return !!existing;
-		} catch {
-			return false;
-		}
+	async checkExists(fileInfo: FileInfo): Promise<boolean> {
+		if (!fileInfo.source) return false;
+		const [existing] = await db
+			.select({ assetId: sourceFiles.assetId })
+			.from(sourceFiles)
+			.where(
+				and(
+					eq(sourceFiles.rootId, fileInfo.source.rootId),
+					sql`${sourceFiles.relativePath} COLLATE NOCASE = ${fileInfo.source.relativePath}`
+				)
+			)
+			.limit(1);
+		return Boolean(existing);
 	}
 
 	/**
@@ -31,6 +40,9 @@ export class ImageProcessor {
 	async createBasicEntity(fileInfo: FileInfo): Promise<string> {
 		if (!fileInfo.hash) {
 			throw new Error('File hash is required for image creation');
+		}
+		if (!fileInfo.source) {
+			throw new Error('An authorized canonical source is required for image creation');
 		}
 
 		let width = 1;
@@ -55,7 +67,12 @@ export class ImageProcessor {
 			folderId: fileInfo.folderId,
 		};
 
-		const image = await Effect.runPromise(createImage(imageData));
+		const image = await Effect.runPromise(
+			createImage({
+				...imageData,
+				source: extendAuthorizedPathInput(fileInfo.source, { fileModifiedAt: fileInfo.lastModified }),
+			})
+		);
 		return image.id;
 	}
 

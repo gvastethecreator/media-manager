@@ -15,10 +15,10 @@ export class JsonProcessor {
 	/**
 	 * Verifica si un archivo JSON ya existe por hash
 	 */
-	async checkExists(hash: string): Promise<boolean> {
-		if (!hash) return false;
+	async checkExists(fileInfo: FileInfo): Promise<boolean> {
+		if (!fileInfo.hash) return false;
 		try {
-			const existing = await getJsonFileByHash(hash);
+			const existing = await getJsonFileByHash(fileInfo.hash);
 			return !!existing;
 		} catch {
 			return false;

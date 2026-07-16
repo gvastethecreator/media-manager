@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
+import { eq, inArray } from 'drizzle-orm';
 import express from 'express';
 import request from 'supertest';
 import { sanitizeEventForStore } from '../src/lib/server/events.server';
@@ -41,7 +42,7 @@ async function withApp(
 	app.locals.authorizedRootRegistry = registry;
 	app.use(express.json());
 	app.post('/api/probe/file', authorizeMediaPathInput({ expected: 'file', required: true }), (req, res) => {
-		res.json({ authorized: typeof req.body.path === 'string', sourceRemoved: req.body.source === undefined });
+		res.json({ authorized: typeof req.body.path === 'string', source: req.body.source });
 	});
 	app.patch('/api/probe/file', authorizeMediaPathInput({ expected: 'file', required: false }), (req, res) => {
 		res.json({ keys: Object.keys(req.body).sort() });
@@ -252,7 +253,7 @@ describe('authorized filesystem HTTP contract', () => {
 		});
 	});
 
-	it('convierte source opaco a path sólo dentro del servidor y rechaza path legacy', async () => {
+	it('conserva source opaco para persistencia canónica, resuelve path sólo en servidor y rechaza path legacy', async () => {
 		await withApp(async ({ app, primary }) => {
 			const authorized = await request(app)
 				.post('/api/probe/file')
@@ -262,7 +263,10 @@ describe('authorized filesystem HTTP contract', () => {
 				.send({ path: resolve(primary, 'inside.txt') });
 			const metadataOnlyUpdate = await request(app).patch('/api/probe/file').send({ description: 'safe update' });
 			expect(authorized.status).toBe(200);
-			expect(authorized.body).toEqual({ authorized: true, sourceRemoved: true });
+			expect(authorized.body).toEqual({
+				authorized: true,
+				source: { relativePath: 'inside.txt', rootId: 'primary' },
+			});
 			expect(JSON.stringify(authorized.body)).not.toContain(primary);
 			expect(legacy.status).toBe(400);
 			expect(metadataOnlyUpdate.body).toEqual({ keys: ['description'] });
@@ -300,17 +304,54 @@ describe('authorized filesystem HTTP contract', () => {
 
 	it('filtra listados legacy por path autorizado y falla cerrado para lecturas directas', async () => {
 		await withApp(async ({ app, outside, primary, registry }) => {
-			const requestContext = { app: { locals: app.locals } };
-			const entities = [
-				{ id: 'inside', path: resolve(primary, 'inside.txt') },
-				{ id: 'outside', path: resolve(outside, 'secret.txt') },
-			];
-			const filtered = await filterAuthorizedMediaEntities(requestContext, entities, 'image', ['read', 'index']);
-			expect(filtered.map((entity) => entity.id)).toEqual(['inside']);
-			await expect(
-				assertAuthorizedMediaEntity(requestContext, entities[1], 'image', ['read', 'index'])
-			).rejects.toMatchObject({ code: 'ROOT_PATH_OUTSIDE', status: 403 });
-			expect(registry.list()).toHaveLength(2);
+			const [{ db }, { folders, images }] = await Promise.all([
+				import('../src/lib/drizzle'),
+				import('../src/lib/drizzle/schema'),
+			]);
+			const suffix = crypto.randomUUID();
+			const folderId = `legacy-auth-folder-${suffix}`;
+			const insideId = `legacy-auth-inside-${suffix}`;
+			const outsideId = `legacy-auth-outside-${suffix}`;
+			await db.insert(folders).values({ id: folderId, name: 'Legacy authorization fixture', path: primary });
+			await db.insert(images).values([
+				{
+					folderId,
+					hash: '1'.repeat(64),
+					height: 1,
+					id: insideId,
+					name: 'inside.txt',
+					path: resolve(primary, 'inside.txt'),
+					size: 6,
+					width: 1,
+				},
+				{
+					folderId,
+					hash: '2'.repeat(64),
+					height: 1,
+					id: outsideId,
+					name: 'secret.txt',
+					path: resolve(outside, 'secret.txt'),
+					size: 7,
+					width: 1,
+				},
+			]);
+
+			try {
+				const requestContext = { app: { locals: app.locals } };
+				const entities = [
+					{ id: insideId, path: resolve(primary, 'attacker-controlled.txt') },
+					{ id: outsideId, path: resolve(primary, 'inside.txt') },
+				];
+				const filtered = await filterAuthorizedMediaEntities(requestContext, entities, 'image', ['read', 'index']);
+				expect(filtered.map((entity) => entity.id)).toEqual([insideId]);
+				await expect(
+					assertAuthorizedMediaEntity(requestContext, entities[1], 'image', ['read', 'index'])
+				).rejects.toMatchObject({ code: 'ROOT_PATH_OUTSIDE', status: 403 });
+				expect(registry.list()).toHaveLength(2);
+			} finally {
+				await db.delete(images).where(inArray(images.id, [insideId, outsideId]));
+				await db.delete(folders).where(eq(folders.id, folderId));
+			}
 		});
 	});
 });
