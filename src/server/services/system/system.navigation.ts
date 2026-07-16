@@ -28,7 +28,7 @@ import {
 } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { getPublicFolderFileTotals } from '@/services/folder/folder-public-stats';
-import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
+import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
 import type { NavigationData } from './system.types';
 
 // Logger con contexto
@@ -78,11 +78,11 @@ export async function getNavigationData(): Promise<NavigationData> {
 			db.select().from(groups),
 			db.select().from(properties),
 			db.select().from(wildcards),
-			db.select().from(audios),
-			db.select().from(documents),
-			db.select().from(jsonFiles),
-			db.select().from(file3Ds),
-			db.select().from(videos),
+			db.select().from(audios).where(visibleAssetLifecycleCondition(audios.assetId)),
+			db.select().from(documents).where(visibleAssetLifecycleCondition(documents.assetId)),
+			db.select().from(jsonFiles).where(visibleAssetLifecycleCondition(jsonFiles.assetId)),
+			db.select().from(file3Ds).where(visibleAssetLifecycleCondition(file3Ds.assetId)),
+			db.select().from(videos).where(visibleAssetLifecycleCondition(videos.assetId)),
 		]);
 
 		navLogger.info(`📁 Encontradas ${foldersData.length} carpetas`);
@@ -91,8 +91,8 @@ export async function getNavigationData(): Promise<NavigationData> {
 
 		// Obtener conteos de imágenes y videos
 		const [imageCount, videoCount] = await Promise.all([
-			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
-			db.select({ count: count() }).from(videos),
+			db.select({ count: count() }).from(images).where(visibleAssetLifecycleCondition(images.assetId)),
+			db.select({ count: count() }).from(videos).where(visibleAssetLifecycleCondition(videos.assetId)),
 		]);
 		const publicFolderTotals = await getPublicFolderFileTotals(foldersData.map((folder: { id: string }) => folder.id));
 

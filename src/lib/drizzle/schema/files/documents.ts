@@ -12,6 +12,7 @@
 
 import { sql } from 'drizzle-orm';
 import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { assets } from '../media-core/assets';
 import { folders } from '../organization/folders';
 
 // Modelo para documentos
@@ -19,6 +20,7 @@ export const documents = sqliteTable(
 	'Document',
 	{
 		id: text('id').primaryKey(),
+		assetId: text('assetId').references(() => assets.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
 		name: text('name').notNull(),
 		path: text('path').notNull(),
 		size: integer('size').notNull(),
@@ -61,6 +63,7 @@ export const documents = sqliteTable(
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
+		assetIdKey: uniqueIndex('Document_assetId_key').on(table.assetId),
 		pathIdx: uniqueIndex('Document_path_key').on(table.path),
 		folderId_idx: index('Document_folderId_idx').on(table.folderId),
 		hash_idx: index('Document_hash_idx').on(table.hash),
@@ -69,6 +72,10 @@ export const documents = sqliteTable(
 		updatedAt_idx: index('Document_updatedAt_idx').on(table.updatedAt),
 		sizeCheck: check('Document_size_check', sql`size >= 0 AND size <= 107374182400`),
 		hashFormatCheck: check('Document_hash_format_check', sql`length(hash) = 64`),
+		assetIdentityCheck: check(
+			'Document_asset_identity_check',
+			sql`assetId IS NULL OR (typeof(assetId) = 'text' AND assetId = id)`
+		),
 		pathLengthCheck: check('Document_path_length_check', sql`length(path) BETWEEN 1 AND 1000`),
 		pageCountCheck: check('Document_page_count_check', sql`pageCount IS NULL OR pageCount >= 0`),
 		wordCountCheck: check('Document_word_count_check', sql`wordCount IS NULL OR wordCount >= 0`),

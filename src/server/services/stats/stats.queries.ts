@@ -28,7 +28,7 @@ import {
 	wildcards,
 	worldItems,
 } from '@/lib/drizzle/schema/index';
-import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
+import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
 import type { MediaCounts, OrgCounts, SizeSums, SystemCounts, WorldCounts } from './stats.types';
 
 /**
@@ -39,12 +39,27 @@ export async function fetchMediaCounts(): Promise<MediaCounts> {
 		db
 			.select({ count: sql<number>`count(*)` })
 			.from(images)
-			.where(visibleImageLifecycleCondition()),
-		db.select({ count: sql<number>`count(*)` }).from(videos),
-		db.select({ count: sql<number>`count(*)` }).from(audios),
-		db.select({ count: sql<number>`count(*)` }).from(documents),
-		db.select({ count: sql<number>`count(*)` }).from(jsonFiles),
-		db.select({ count: sql<number>`count(*)` }).from(file3Ds),
+			.where(visibleAssetLifecycleCondition(images.assetId)),
+		db
+			.select({ count: sql<number>`count(*)` })
+			.from(videos)
+			.where(visibleAssetLifecycleCondition(videos.assetId)),
+		db
+			.select({ count: sql<number>`count(*)` })
+			.from(audios)
+			.where(visibleAssetLifecycleCondition(audios.assetId)),
+		db
+			.select({ count: sql<number>`count(*)` })
+			.from(documents)
+			.where(visibleAssetLifecycleCondition(documents.assetId)),
+		db
+			.select({ count: sql<number>`count(*)` })
+			.from(jsonFiles)
+			.where(visibleAssetLifecycleCondition(jsonFiles.assetId)),
+		db
+			.select({ count: sql<number>`count(*)` })
+			.from(file3Ds)
+			.where(visibleAssetLifecycleCondition(file3Ds.assetId)),
 	]);
 	return {
 		images: imagesCount[0]?.count || 0,
@@ -131,10 +146,22 @@ export async function fetchSystemCounts(): Promise<SystemCounts> {
  */
 export async function fetchSizeSums(): Promise<SizeSums> {
 	const [audiosSize, documentsSize, jsonFilesSize, file3DsSize] = await Promise.all([
-		db.select({ totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` }).from(audios),
-		db.select({ totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)` }).from(documents),
-		db.select({ totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` }).from(jsonFiles),
-		db.select({ totalSize: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` }).from(file3Ds),
+		db
+			.select({ totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` })
+			.from(audios)
+			.where(visibleAssetLifecycleCondition(audios.assetId)),
+		db
+			.select({ totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)` })
+			.from(documents)
+			.where(visibleAssetLifecycleCondition(documents.assetId)),
+		db
+			.select({ totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` })
+			.from(jsonFiles)
+			.where(visibleAssetLifecycleCondition(jsonFiles.assetId)),
+		db
+			.select({ totalSize: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` })
+			.from(file3Ds)
+			.where(visibleAssetLifecycleCondition(file3Ds.assetId)),
 	]);
 	return {
 		totalFoldersSize: 0, // folders no tiene size

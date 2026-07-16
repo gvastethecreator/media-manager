@@ -167,6 +167,7 @@ export function authorizeFolderPathById(permission: 'delete' | 'index' | 'read' 
 }
 
 export function authorizeMediaAssetParam(options: {
+	allowDeleted?: boolean;
 	allowMissing?: boolean;
 	assetType: MediaAssetType | ((request: { params: Record<string, string> }) => unknown);
 	idParam?: string;
@@ -188,10 +189,12 @@ export function authorizeMediaAssetParam(options: {
 			});
 			const registry = getAuthorizedRootRegistry(request);
 			let resolved = await resolveMediaAssetReference(registry, reference, options.permissions?.[0] ?? 'read', {
+				allowDeleted: options.allowDeleted,
 				allowMissing: options.allowMissing,
 			});
 			for (const permission of options.permissions?.slice(1) ?? []) {
 				resolved = await resolveMediaAssetReference(registry, reference, permission, {
+					allowDeleted: options.allowDeleted,
 					allowMissing: options.allowMissing,
 				});
 			}

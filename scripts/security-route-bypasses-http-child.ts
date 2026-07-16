@@ -43,23 +43,23 @@ database.exec(`
 		createdAt INTEGER NOT NULL, updatedAt INTEGER, addedAt INTEGER NOT NULL
 	);
 	CREATE TABLE Video (
-		id TEXT PRIMARY KEY, name TEXT, path TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
+		id TEXT PRIMARY KEY, assetId TEXT, name TEXT, path TEXT, hash TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
 		folderId TEXT, metadata TEXT, isFavorite INTEGER
 	);
 	CREATE TABLE Audio (
-		id TEXT PRIMARY KEY, name TEXT, path TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
+		id TEXT PRIMARY KEY, assetId TEXT, name TEXT, path TEXT, hash TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
 		folderId TEXT, extension TEXT, isFavorite INTEGER
 	);
 	CREATE TABLE Document (
-		id TEXT PRIMARY KEY, name TEXT, path TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
+		id TEXT PRIMARY KEY, assetId TEXT, name TEXT, path TEXT, hash TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
 		folderId TEXT, extension TEXT, isFavorite INTEGER
 	);
 	CREATE TABLE JsonFile (
-		id TEXT PRIMARY KEY, name TEXT, path TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
+		id TEXT PRIMARY KEY, assetId TEXT, name TEXT, path TEXT, hash TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
 		folderId TEXT, extension TEXT, isFavorite INTEGER, metadata TEXT
 	);
 	CREATE TABLE File3D (
-		id TEXT PRIMARY KEY, name TEXT, path TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
+		id TEXT PRIMARY KEY, assetId TEXT, name TEXT, path TEXT, hash TEXT, size INTEGER, createdAt INTEGER, updatedAt INTEGER,
 		folderId TEXT, extension TEXT, isFavorite INTEGER
 	);
 	CREATE TABLE Album (

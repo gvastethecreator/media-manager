@@ -1,6 +1,6 @@
 {
 	"formatVersion": 1,
-	"fingerprint": "37b1c8f643e9cd2d3bf900cc6869ab72d52afef40c096bbb6295411f710e5978",
+	"fingerprint": "b25dcfd5fdc8172179b4b10fa240921f48a88c00302e44c73d90b575d17971e4",
 	"generatedFrom": "src/lib/drizzle/migrations",
 	"objects": [
 		{
@@ -61,6 +61,12 @@
 			"name": "Asset_status_idx",
 			"sqlHash": "e335c427f1af9f7ba35b2b9b5a8e31a072891f81c769621cb11a40db0d23c48e",
 			"tableName": "Asset",
+			"type": "index"
+		},
+		{
+			"name": "Audio_assetId_key",
+			"sqlHash": "adcfd2ac34ad59f4b7b6c954551121eee512372cff7a4aa80130dd3612a3e791",
+			"tableName": "Audio",
 			"type": "index"
 		},
 		{
@@ -136,6 +142,12 @@
 			"type": "index"
 		},
 		{
+			"name": "Document_assetId_key",
+			"sqlHash": "9e2c224f41301eaa4a47c21851a79ad8e749e13822607aaea6d52c877bb7b39a",
+			"tableName": "Document",
+			"type": "index"
+		},
+		{
 			"name": "Document_createdAt_idx",
 			"sqlHash": "37b4d4684bcee4267830ba52d65704a9a4d765590b4f75ca816d505e9ff0d51c",
 			"tableName": "Document",
@@ -205,6 +217,12 @@
 			"name": "Favorite_profileId_idx",
 			"sqlHash": "8fac5215f6fec6f75ac45722cbfbeb797cef683979f1137d3a2100da4a86501c",
 			"tableName": "Favorite",
+			"type": "index"
+		},
+		{
+			"name": "File3D_assetId_key",
+			"sqlHash": "99b9cae536c579c5c78d6bbf7c90e7e94de02cc3c60b60478722870b311d2bc3",
+			"tableName": "File3D",
 			"type": "index"
 		},
 		{
@@ -397,6 +415,12 @@
 			"name": "Image_updatedAt_idx",
 			"sqlHash": "da192465f8e9342f012af1babc1b652d613d3678aa70f0210b20e04766e549a0",
 			"tableName": "Image",
+			"type": "index"
+		},
+		{
+			"name": "JsonFile_assetId_key",
+			"sqlHash": "93b0c3deba05f5f6d383e74d7b907739910165e515586860522e46842198bd00",
+			"tableName": "JsonFile",
 			"type": "index"
 		},
 		{
@@ -625,6 +649,12 @@
 			"name": "UploadedImage_type_idx",
 			"sqlHash": "6b57d8acbb5efb99e62ead8ae34dfcce22ab40c2998c7fcb0fae8a63a0c85b72",
 			"tableName": "UploadedImage",
+			"type": "index"
+		},
+		{
+			"name": "Video_assetId_key",
+			"sqlHash": "08fc8cca1b04141da3b4550860ce19e8b937c08d1fc2764ff8cd2d7f14c00f77",
+			"tableName": "Video",
 			"type": "index"
 		},
 		{
@@ -1067,7 +1097,7 @@
 		},
 		{
 			"name": "Audio",
-			"sqlHash": "ff3ee833b1ff0defd48edb3d3dbf8e0956d4b59d85b92ea14a85685de6df7c9b",
+			"sqlHash": "2e8399f2dc20bced25176e0435ed8a65eb50a6dae85073893a2bb02564089bc1",
 			"tableName": "Audio",
 			"type": "table"
 		},
@@ -1091,7 +1121,7 @@
 		},
 		{
 			"name": "Document",
-			"sqlHash": "7016b2ba3a9b94478399c7358984451fce2d0d63e23d66360025aa75953021c5",
+			"sqlHash": "d7b49987447376a81dd06116c33fa70f1fc0cad34cdef18731adbc6749152684",
 			"tableName": "Document",
 			"type": "table"
 		},
@@ -1115,7 +1145,7 @@
 		},
 		{
 			"name": "File3D",
-			"sqlHash": "1a53569337e791331b22d1cc7869fb919c554a432d367f14ce3093bc8d40f7a9",
+			"sqlHash": "9d5965890d07db2798306dbe4c46c6621ae98335da4e47ff4fa219a132827823",
 			"tableName": "File3D",
 			"type": "table"
 		},
@@ -1145,7 +1175,7 @@
 		},
 		{
 			"name": "JsonFile",
-			"sqlHash": "60316669c3b0745998cb0f2860acbfd3132be2883432aac06ed15a648e4d9b11",
+			"sqlHash": "0114fed322c0716a5369ba4062ce9bef2bf23fe6800ae03ee0cd844fd2d90a4e",
 			"tableName": "JsonFile",
 			"type": "table"
 		},
@@ -1229,7 +1259,7 @@
 		},
 		{
 			"name": "Video",
-			"sqlHash": "da6585c2f19a106fbdbba28513368cd382f4b7be6146d7b3b77b77170d33b430",
+			"sqlHash": "ce0075de216f88dce23ae757920c03a66531b117caf0edb18a8f1c6680251d8c",
 			"tableName": "Video",
 			"type": "table"
 		},

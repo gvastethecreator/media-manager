@@ -15,6 +15,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	authorizeMediaAssetBodyIds,
 	authorizeMediaAssetParam,
+	authorizeMediaPlacementInput,
 	authorizeMediaPathInput,
 	assertAuthorizedMediaEntity,
 	filterAuthorizedMediaEntities,
@@ -307,6 +308,7 @@ router.get(
 router.post(
 	'/',
 	authorizeMediaPathInput({ expected: 'file', required: true }),
+	authorizeMediaPlacementInput(),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const videoService = yield* VideoService;
@@ -445,7 +447,7 @@ router.delete(
  */
 router.delete(
 	'/:id',
-	authorizeMediaAssetParam({ assetType: 'video', permissions: ['delete'] }),
+	authorizeMediaAssetParam({ allowMissing: true, assetType: 'video', permissions: ['delete'] }),
 	effectHandler((req, res) => {
 		const { id } = req.params;
 		const { force } = req.query;
@@ -459,6 +461,23 @@ router.delete(
 			return undefined;
 		}).pipe(Effect.provide(VideoServiceLive));
 	})
+);
+
+/** POST /videos/:id/restore - Restaurar un tombstone canónico. */
+router.post(
+	'/:id/restore',
+	authorizeMediaAssetParam({
+		allowDeleted: true,
+		allowMissing: true,
+		assetType: 'video',
+		permissions: ['read', 'write'],
+	}),
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const videoService = yield* VideoService;
+			return yield* videoService.restoreById(req.params.id);
+		}).pipe(Effect.provide(VideoServiceLive))
+	)
 );
 
 /**
