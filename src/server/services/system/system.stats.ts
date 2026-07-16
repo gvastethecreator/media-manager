@@ -20,7 +20,7 @@ import {
 } from '@/lib/drizzle/schema/index';
 import { createSystemError } from '@/lib/errors/system';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
+import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
 import type { DatabaseEntityStats, SystemRuntimeStats } from './system.types';
 import { requireDatabaseUrl, resolveLocalDatabaseFilePath } from '@/lib/drizzle/database-url';
 
@@ -119,9 +119,9 @@ export async function getSystemStats(): Promise<DatabaseEntityStats> {
 			collectionsResult,
 			tagsResult,
 		] = await Promise.all([
-			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
-			db.select({ count: count() }).from(videos),
-			db.select({ count: count() }).from(audios),
+			db.select({ count: count() }).from(images).where(visibleAssetLifecycleCondition(images.assetId)),
+			db.select({ count: count() }).from(videos).where(visibleAssetLifecycleCondition(videos.assetId)),
+			db.select({ count: count() }).from(audios).where(visibleAssetLifecycleCondition(audios.assetId)),
 			db.select({ count: count() }).from(folders),
 			db.select({ count: count() }).from(albums),
 			db.select({ count: count() }).from(characters),
@@ -206,14 +206,14 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 			videosResult,
 			audiosResult,
 		] = await Promise.all([
-			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
+			db.select({ count: count() }).from(images).where(visibleAssetLifecycleCondition(images.assetId)),
 			db.select({ count: count() }).from(collections),
 			db.select({ count: count() }).from(tags),
 			db.select({ count: count() }).from(albums),
 			db.select({ count: count() }).from(notes),
 			db.select({ count: count() }).from(folders),
-			db.select({ count: count() }).from(videos),
-			db.select({ count: count() }).from(audios),
+			db.select({ count: count() }).from(videos).where(visibleAssetLifecycleCondition(videos.assetId)),
+			db.select({ count: count() }).from(audios).where(visibleAssetLifecycleCondition(audios.assetId)),
 		]);
 
 		const totalImages = imagesResult[0]?.count || 0;

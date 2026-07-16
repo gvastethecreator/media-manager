@@ -82,7 +82,9 @@ async function run(
 }
 
 afterEach(async () => {
-	for (const directory of temporaryDirectories.splice(0)) await rm(directory, { force: true, recursive: true });
+	for (const directory of temporaryDirectories.splice(0)) {
+		await rm(directory, { force: true, maxRetries: 40, recursive: true, retryDelay: 100 });
+	}
 });
 
 describe('versioned SQLite migrations', () => {
@@ -97,6 +99,7 @@ describe('versioned SQLite migrations', () => {
 			'0003_epoch_ms_normalization.sql',
 			'0004_canonical_asset_source.sql',
 			'0005_image_asset_link.sql',
+			'0006_media_specialization_asset_links.sql',
 		]);
 
 		const first = await migrateDatabase({ databasePath });
@@ -194,6 +197,79 @@ describe('versioned SQLite migrations', () => {
 		verification.close();
 	});
 
+	it('preserves remaining legacy media rows and Video junctions while expanding 0005 to 0006', async () => {
+		const directory = await createTemporaryDirectory();
+		const migrationDirectory = join(directory, 'migrations-specialization-expand');
+		const databasePath = join(directory, 'specialization-expand.sqlite');
+		await mkdir(migrationDirectory);
+		const tags = [
+			'0000_baseline',
+			'0001_relational_integrity',
+			'0002_queue_idempotency',
+			'0003_epoch_ms_normalization',
+			'0004_canonical_asset_source',
+			'0005_image_asset_link',
+		];
+		for (const tag of tags) {
+			await copyFile(join(MIGRATIONS_DIRECTORY, `${tag}.sql`), join(migrationDirectory, `${tag}.sql`));
+		}
+		await writeJournal(migrationDirectory, tags);
+		await migrateDatabase({ databasePath, migrationsDirectory: migrationDirectory, validateSchema: false });
+
+		const legacy = new Database(databasePath);
+		const now = Date.now();
+		legacy
+			.query('INSERT INTO Folder (id, name, path, createdAt) VALUES (?, ?, ?, ?)')
+			.run('folder-specialization-expand', 'Specialization expand', '/specialization-expand', now);
+		legacy.exec(`
+			INSERT INTO Video(id, name, path, hash, size, duration, folderId, createdAt)
+			VALUES ('legacy-video-expand', 'legacy.mp4', '/specialization-expand/legacy.mp4', '${'a'.repeat(64)}', 42, 1, 'folder-specialization-expand', ${now});
+			INSERT INTO Audio(id, name, path, size, hash, mimeType, extension, folderId, createdAt)
+			VALUES ('legacy-audio-expand', 'legacy.mp3', '/specialization-expand/legacy.mp3', 42, '${'b'.repeat(64)}', 'audio/mpeg', 'mp3', 'folder-specialization-expand', ${now});
+			INSERT INTO Document(id, name, path, size, hash, mimeType, extension, folderId, createdAt)
+			VALUES ('legacy-document-expand', 'legacy.pdf', '/specialization-expand/legacy.pdf', 42, '${'c'.repeat(64)}', 'application/pdf', 'pdf', 'folder-specialization-expand', ${now});
+			INSERT INTO JsonFile(id, name, path, size, hash, mimeType, extension, folderId, createdAt)
+			VALUES ('legacy-json-expand', 'legacy.json', '/specialization-expand/legacy.json', 42, '${'d'.repeat(64)}', 'application/json', 'json', 'folder-specialization-expand', ${now});
+			INSERT INTO File3D(id, name, path, size, hash, mimeType, extension, folderId, createdAt)
+			VALUES ('legacy-file3d-expand', 'legacy.glb', '/specialization-expand/legacy.glb', 42, '${'e'.repeat(64)}', 'model/gltf-binary', 'glb', 'folder-specialization-expand', ${now});
+			INSERT INTO Album(id, name, createdAt) VALUES ('album-video-expand', 'Video expand', ${now});
+			INSERT INTO _VideoToAlbum(A, B) VALUES ('legacy-video-expand', 'album-video-expand');
+		`);
+		legacy.clearQueryCache();
+		legacy.close();
+
+		const specializationLinkTag = '0006_media_specialization_asset_links';
+		await copyFile(
+			join(MIGRATIONS_DIRECTORY, `${specializationLinkTag}.sql`),
+			join(migrationDirectory, `${specializationLinkTag}.sql`)
+		);
+		await writeJournal(migrationDirectory, [...tags, specializationLinkTag]);
+		await migrateDatabase({
+			allowExistingPending: true,
+			databasePath,
+			migrationsDirectory: migrationDirectory,
+			validateSchema: false,
+		});
+
+		const verification = new Database(databasePath, { readonly: true });
+		for (const [table, id] of [
+			['Video', 'legacy-video-expand'],
+			['Audio', 'legacy-audio-expand'],
+			['Document', 'legacy-document-expand'],
+			['JsonFile', 'legacy-json-expand'],
+			['File3D', 'legacy-file3d-expand'],
+		] as const) {
+			expect(verification.query(`SELECT id, assetId FROM ${table}`).all()).toEqual([{ assetId: null, id }]);
+		}
+		expect(verification.query('SELECT A, B FROM _VideoToAlbum').all()).toEqual([
+			{ A: 'legacy-video-expand', B: 'album-video-expand' },
+		]);
+		expect(verification.query('PRAGMA foreign_key_check').all()).toEqual([]);
+		expect(verification.query('PRAGMA user_version').get()).toEqual({ user_version: 7 });
+		verification.clearQueryCache();
+		verification.close();
+	});
+
 	it('rolls back the final Image link migration when its schema drifts from the canonical contract', async () => {
 		const directory = await createTemporaryDirectory();
 		const migrationDirectory = join(directory, 'migrations-image-drift');
@@ -209,7 +285,7 @@ describe('versioned SQLite migrations', () => {
 		await writeFile(migrationPath, driftedSql);
 
 		await expect(migrateDatabase({ databasePath, migrationsDirectory: migrationDirectory })).rejects.toThrow(
-			'contrato canónico'
+			'image_asset_identity_check_missing'
 		);
 
 		const verification = new Database(databasePath, { readonly: true });

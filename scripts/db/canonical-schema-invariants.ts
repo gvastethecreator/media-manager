@@ -1,11 +1,12 @@
 import type { Database } from 'bun:sqlite';
 
 const MEDIA_CORE_TABLES = ['Asset', 'MediaRoot', 'SourceFile'] as const;
+const ASSET_SPECIALIZATION_TABLES = ['Image', 'Video', 'Audio', 'Document', 'JsonFile', 'File3D'] as const;
 
 function schemaSql(database: Database, objectType: 'index' | 'table', name: string): string | null {
-	const row = database
-		.query('SELECT sql FROM sqlite_schema WHERE type = ? AND name = ?')
-		.get(objectType, name) as { sql: string | null } | null;
+	const row = database.query('SELECT sql FROM sqlite_schema WHERE type = ? AND name = ?').get(objectType, name) as {
+		sql: string | null;
+	} | null;
 	return row?.sql ?? null;
 }
 
@@ -96,6 +97,25 @@ export function collectCanonicalSchemaInvariantErrors(database: Database): strin
 	const locationIndex = schemaSql(database, 'index', 'SourceFile_rootId_relativePath_key');
 	if (!locationIndex || !compactSql(locationIndex).includes('(rootid,relativepathcollatenocase)')) {
 		errors.push('source_file_location_key_not_nocase');
+	}
+
+	for (const tableName of ASSET_SPECIALIZATION_TABLES) {
+		const specializationSql = compactSql(schemaSql(database, 'table', tableName) ?? '');
+		if (!specializationSql.includes('assetidtext')) continue;
+		const identityClause = `constraint${tableName.toLowerCase()}_asset_identity_checkcheck(assetidisnullor(typeof(assetid)=''andassetid=id))`;
+		if (!specializationSql.includes(identityClause)) {
+			errors.push(`${tableName.toLowerCase()}_asset_identity_check_missing`);
+		}
+		if (!specializationSql.includes('foreignkey(assetid)referencesasset(id)onupdatecascadeondeleterestrict')) {
+			errors.push(`${tableName.toLowerCase()}_asset_fk_missing`);
+		}
+		const assetIdIndex = schemaSql(database, 'index', `${tableName}_assetId_key`);
+		if (
+			!assetIdIndex ||
+			!compactSql(assetIdIndex).startsWith(`createuniqueindex${tableName.toLowerCase()}_assetid_key`)
+		) {
+			errors.push(`${tableName.toLowerCase()}_asset_unique_index_missing`);
+		}
 	}
 	return errors;
 }

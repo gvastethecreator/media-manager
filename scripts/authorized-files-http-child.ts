@@ -25,6 +25,8 @@ fixtureDatabase.exec(`
 		assetId TEXT,
 		name TEXT NOT NULL,
 		path TEXT NOT NULL,
+		hash TEXT,
+		size INTEGER,
 		folderId TEXT NOT NULL,
 		updatedAt INTEGER
 	);
