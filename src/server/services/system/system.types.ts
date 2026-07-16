@@ -70,6 +70,7 @@ export interface NavigationData {
 	tags: Array<{ id: string; name: string; count?: number }>;
 	videos: Array<{ id: string; name: string; path?: string; duration?: number; itemCount?: number }>;
 	wildcards: Array<{ id: string; name: string; pattern?: string; itemCount?: number }>;
+	workflows: Array<{ id: string; name: string; status?: string }>;
 	worldItems: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
 }
 
