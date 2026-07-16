@@ -135,7 +135,6 @@ export class ${entityPascal} extends Schema.Class<${entityPascal}>('${entityPasc
 	description: Schema.NullOr(Schema.String),
 	emoji: Schema.String,
 	color: Schema.String,
-	isFavorite: Schema.Boolean,
 	createdAt: Schema.DateTimeUtc,
 	updatedAt: Schema.DateTimeUtc,
 }) {}
@@ -159,7 +158,6 @@ export class ${entityPascal}Update extends Schema.Class<${entityPascal}Update>('
 	description: Schema.optional(Schema.NullOr(Schema.String)),
 	emoji: Schema.optional(Schema.String),
 	color: Schema.optional(Schema.String),
-	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -183,7 +181,6 @@ export interface ${entityPascal}WithStats extends Schema.Schema.Type<typeof ${en
  */
 export interface Get${entityPascal}sOptions {
 	search?: string;
-	onlyFavorites?: boolean;
 	limit?: number;
 	offset?: number;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt';
@@ -250,7 +247,6 @@ export interface ${entityPascal}ServiceInterface {
 		input: Schema.Schema.Type<typeof ${entityPascal}Update>
 	) => Effect.Effect<${entityPascal}WithStats, ${entityPascal}Error>;
 	readonly delete: (id: string) => Effect.Effect<void, ${entityPascal}Error>;
-	readonly toggleFavorite: (id: string) => Effect.Effect<${entityPascal}WithStats, ${entityPascal}Error>;
 }
 
 /**
@@ -327,14 +323,13 @@ const getAllImpl = (options?: Get${entityPascal}sOptions): Effect.Effect<Get${en
 	Effect.gen(function* () {
 		const {
 			search,
-			onlyFavorites = false,
 			limit = 50,
 			offset = 0,
 			orderBy = 'createdAt',
 			orderDirection = 'desc',
 		} = options ?? {};
 
-		logger.info('📋 Obteniendo ${entityName}s:', { search, onlyFavorites, limit, offset });
+		logger.info('📋 Obteniendo ${entityName}s:', { search, limit, offset });
 
 		// Construir filtros
 		const filters = [];
@@ -346,10 +341,6 @@ const getAllImpl = (options?: Get${entityPascal}sOptions): Effect.Effect<Get${en
 					like(${toCamelCase(entityName)}s.description, \`%\${search}%\`)
 				)
 			);
-		}
-
-		if (onlyFavorites) {
-			filters.push(eq(${toCamelCase(entityName)}s.isFavorite, true));
 		}
 
 		const whereClause = filters.length > 0 ? and(...filters) : undefined;
@@ -553,59 +544,6 @@ const deleteImpl = (id: string): Effect.Effect<void, ${entityPascal}Error> =>
 		logger.info(\`✅ ${entityPascal} eliminado: \${id}\`);
 	});
 
-/**
- * Cambia el estado de favorito de un ${entityName}
- */
-const toggleFavoriteImpl = (id: string): Effect.Effect<${entityPascal}WithStats, ${entityPascal}Error> =>
-	Effect.gen(function* () {
-		logger.info(\`⭐ Toggling favorite para ${entityName}: \${id}\`);
-
-		// Obtener estado actual
-		const current = yield* Effect.tryPromise({
-			try: async () => {
-				return await db.query.${toCamelCase(entityName)}s.findFirst({
-					where: eq(${toCamelCase(entityName)}s.id, id),
-				});
-			},
-			catch: (error) => fromUnknownError('toggleFavorite:get', error),
-		});
-
-		if (!current) {
-			return yield* Effect.fail(new ${entityPascal}NotFound({ ${toCamelCase(entityName)}Id: id }));
-		}
-
-		// Toggle
-		const updated = yield* Effect.tryPromise({
-			try: async () => {
-				const result = await db
-					.update(${toCamelCase(entityName)}s)
-					.set({
-						isFavorite: !current.isFavorite,
-						updatedAt: new Date(),
-					})
-					.where(eq(${toCamelCase(entityName)}s.id, id))
-					.returning();
-				return result[0];
-			},
-			catch: (error) => fromUnknownError('toggleFavorite', error),
-		});
-
-		if (!updated) {
-			return yield* Effect.fail(
-				new ${entityPascal}DatabaseError({
-					operation: 'toggleFavorite',
-					message: 'No result returned from update',
-				})
-			);
-		}
-
-		const ${toCamelCase(entityName)} = yield* Schema.decode(${entityPascal})(updated);
-		const withStats = yield* enrichWithStats(${toCamelCase(entityName)});
-
-		logger.info(\`✅ Favorite toggled: \${withStats.isFavorite}\`);
-		return withStats;
-	});
-
 // ============= Layer =============
 
 export const ${entityPascal}ServiceLive = Layer.succeed(${entityPascal}Service, {
@@ -614,7 +552,6 @@ export const ${entityPascal}ServiceLive = Layer.succeed(${entityPascal}Service, 
 	create: createImpl,
 	update: updateImpl,
 	delete: deleteImpl,
-	toggleFavorite: toggleFavoriteImpl,
 });
 `;
 
@@ -646,7 +583,6 @@ describe('${entityPascal}Service.Effect', () => {
 					description: 'Test description',
 					emoji: '📦',
 					color: '#3b82f6',
-					isFavorite: false,
 					createdAt: new Date(),
 					updatedAt: new Date(),
 				})
@@ -693,14 +629,12 @@ describe('${entityPascal}Service.Effect', () => {
 					description: 'Desc 1',
 					emoji: '📦',
 					color: '#3b82f6',
-					isFavorite: false,
 				},
 				{
 					name: '${entityPascal} 2',
 					description: 'Desc 2',
 					emoji: '📦',
 					color: '#3b82f6',
-					isFavorite: true,
 				},
 			]);
 
@@ -715,38 +649,10 @@ describe('${entityPascal}Service.Effect', () => {
 			expect(result.total).toBe(2);
 		});
 
-		it('should filter by favorites', async () => {
-			// Insertar varios ${entityName}s
-			await db.insert(${toCamelCase(entityName)}s).values([
-				{
-					name: '${entityPascal} 1',
-					emoji: '📦',
-					color: '#3b82f6',
-					isFavorite: false,
-				},
-				{
-					name: '${entityPascal} 2',
-					emoji: '📦',
-					color: '#3b82f6',
-					isFavorite: true,
-				},
-			]);
-
-			const program = Effect.gen(function* () {
-				const service = yield* ${entityPascal}Service;
-				return yield* service.getAll({ onlyFavorites: true });
-			});
-
-			const result = await Effect.runPromise(program.pipe(Effect.provide(${entityPascal}ServiceLive)));
-
-			expect(result.${toCamelCase(entityName)}s.length).toBe(1);
-			expect(result.${toCamelCase(entityName)}s[0].name).toBe('${entityPascal} 2');
-		});
-
 		it('should search by name', async () => {
 			await db.insert(${toCamelCase(entityName)}s).values([
-				{ name: 'Alpha', emoji: '📦', color: '#3b82f6', isFavorite: false },
-				{ name: 'Beta', emoji: '📦', color: '#3b82f6', isFavorite: false },
+				{ name: 'Alpha', emoji: '📦', color: '#3b82f6' },
+				{ name: 'Beta', emoji: '📦', color: '#3b82f6' },
 			]);
 
 			const program = Effect.gen(function* () {
@@ -788,7 +694,6 @@ describe('${entityPascal}Service.Effect', () => {
 				name: 'Existing',
 				emoji: '📦',
 				color: '#3b82f6',
-				isFavorite: false,
 			});
 
 			const program = Effect.gen(function* () {
@@ -819,7 +724,6 @@ describe('${entityPascal}Service.Effect', () => {
 					name: 'Original Name',
 					emoji: '📦',
 					color: '#3b82f6',
-					isFavorite: false,
 				})
 				.returning();
 
@@ -866,7 +770,6 @@ describe('${entityPascal}Service.Effect', () => {
 					name: 'To Delete',
 					emoji: '📦',
 					color: '#3b82f6',
-					isFavorite: false,
 				})
 				.returning();
 
@@ -904,53 +807,6 @@ describe('${entityPascal}Service.Effect', () => {
 		});
 	});
 
-	describe('toggleFavorite', () => {
-		it('should toggle favorite to true', async () => {
-			const inserted = await db
-				.insert(${toCamelCase(entityName)}s)
-				.values({
-					name: 'Test',
-					emoji: '📦',
-					color: '#3b82f6',
-					isFavorite: false,
-				})
-				.returning();
-
-			const testId = inserted[0].id;
-
-			const program = Effect.gen(function* () {
-				const service = yield* ${entityPascal}Service;
-				return yield* service.toggleFavorite(testId);
-			});
-
-			const result = await Effect.runPromise(program.pipe(Effect.provide(${entityPascal}ServiceLive)));
-
-			expect(result.isFavorite).toBe(true);
-		});
-
-		it('should toggle favorite to false', async () => {
-			const inserted = await db
-				.insert(${toCamelCase(entityName)}s)
-				.values({
-					name: 'Test',
-					emoji: '📦',
-					color: '#3b82f6',
-					isFavorite: true,
-				})
-				.returning();
-
-			const testId = inserted[0].id;
-
-			const program = Effect.gen(function* () {
-				const service = yield* ${entityPascal}Service;
-				return yield* service.toggleFavorite(testId);
-			});
-
-			const result = await Effect.runPromise(program.pipe(Effect.provide(${entityPascal}ServiceLive)));
-
-			expect(result.isFavorite).toBe(false);
-		});
-	});
 });
 `;
 
@@ -967,13 +823,12 @@ const router = Router();
 
 // GET /${entityName}s
 router.get('/', async (req, res) => {
-	const { search, onlyFavorites, limit, offset, orderBy, orderDirection } = req.query;
+	const { search, limit, offset, orderBy, orderDirection } = req.query;
 
 	const program = Effect.gen(function* () {
 		const service = yield* ${entityPascal}Service;
 		return yield* service.getAll({
 			search: search as string | undefined,
-			onlyFavorites: onlyFavorites === 'true',
 			limit: limit ? Number(limit) : undefined,
 			offset: offset ? Number(offset) : undefined,
 			orderBy: orderBy as any,
@@ -1121,35 +976,6 @@ router.delete('/:id', async (req, res) => {
 	}
 
 	res.status(204).send();
-});
-
-// POST /${entityName}s/:id/favorite
-router.post('/:id/favorite', async (req, res) => {
-	const { id } = req.params;
-
-	const program = Effect.gen(function* () {
-		const service = yield* ${entityPascal}Service;
-		return yield* service.toggleFavorite(id);
-	});
-
-	const result = await Effect.runPromise(
-		program.pipe(Effect.provide(${entityPascal}ServiceLive), Effect.either)
-	);
-
-	if (Either.isLeft(result)) {
-		const error = result.left;
-
-		if (error._tag === '${entityPascal}NotFound') {
-			res.status(404).json({ error: error.message });
-			return;
-		}
-
-		console.error('Error toggling favorite:', error);
-		res.status(500).json({ error: 'Internal server error' });
-		return;
-	}
-
-	res.json(result.right);
 });
 
 export default router;

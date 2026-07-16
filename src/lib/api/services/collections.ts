@@ -6,6 +6,7 @@
 
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import { apiClient } from '../client';
+import { invalidateFavoriteQueries } from '../favorite-cache';
 
 export const collectionsApi = {
 	/**
@@ -25,15 +26,19 @@ export const collectionsApi = {
 	/**
 	 * Crea una nueva colección
 	 */
-	create: (data: CollectionCreateInput): Promise<CollectionWithStats> => {
-		return apiClient.post<CollectionWithStats>('/api/collections', data);
+	create: async (data: CollectionCreateInput): Promise<CollectionWithStats> => {
+		const result = await apiClient.post<CollectionWithStats>('/api/collections', data);
+		await invalidateFavoriteQueries();
+		return result;
 	},
 
 	/**
 	 * Actualiza una colección existente
 	 */
-	update: (id: string, data: CollectionUpdateInput): Promise<CollectionWithStats> => {
-		return apiClient.put<CollectionWithStats>(`/api/collections/${id}`, data);
+	update: async (id: string, data: CollectionUpdateInput): Promise<CollectionWithStats> => {
+		const result = await apiClient.put<CollectionWithStats>(`/api/collections/${id}`, data);
+		await invalidateFavoriteQueries();
+		return result;
 	},
 
 	/**

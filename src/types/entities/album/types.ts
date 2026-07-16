@@ -40,7 +40,9 @@ export interface AlbumWithStats extends AlbumBase, EntityWithStats {
 	stats: AlbumStatistics;
 }
 
-export type AlbumCreateInput = Omit<AlbumBase, 'id' | 'createdAt' | 'updatedAt' | 'isFavorite'>;
+export type AlbumCreateInput = Omit<AlbumBase, 'id' | 'createdAt' | 'updatedAt' | 'isFavorite'> & {
+	isFavorite?: boolean;
+};
 export type AlbumUpdateInput = Partial<AlbumCreateInput>;
 
 export interface AlbumFilters {

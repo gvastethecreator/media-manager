@@ -16,7 +16,6 @@ import { CharacterService, CharacterServiceLive } from '@/services/character/cha
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 
 const router = express.Router();
 
@@ -163,20 +162,6 @@ router.post(
 			}
 
 			return yield* characterService.bulkDelete(ids);
-		}).pipe(Effect.provide(CharacterServiceLive))
-	)
-);
-
-/**
- * POST /characters/:id/favorite - Toggle favorite status
- */
-router.post(
-	'/:id/favorite',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.CHARACTER);
-			const characterService = yield* CharacterService;
-			return yield* characterService.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(CharacterServiceLive))
 	)
 );

@@ -85,6 +85,7 @@ export class AlbumCreateInput extends Schema.Class<AlbumCreateInput>('AlbumCreat
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -99,6 +100,7 @@ export class AlbumUpdateInput extends Schema.Class<AlbumUpdateInput>('AlbumUpdat
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -155,6 +157,7 @@ export class CollectionCreateInput extends Schema.Class<CollectionCreateInput>('
 	description: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	parentId: Schema.optional(Schema.NullOr(Schema.String)),
+	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -167,6 +170,7 @@ export class CollectionUpdateInput extends Schema.Class<CollectionUpdateInput>('
 	description: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	parentId: Schema.optional(Schema.NullOr(Schema.String)),
+	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -227,6 +231,7 @@ export class FolderCreateInput extends Schema.Class<FolderCreateInput>('FolderCr
 	description: Schema.optional(Schema.NullOr(Schema.String)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 	presetId: Schema.optional(Schema.NullOr(ID)),
+	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -240,6 +245,7 @@ export class FolderUpdateInput extends Schema.Class<FolderUpdateInput>('FolderUp
 	description: Schema.optional(Schema.NullOr(Schema.String)),
 	parentId: Schema.optional(Schema.NullOr(ID)),
 	presetId: Schema.optional(Schema.NullOr(ID)),
+	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 // ============= Image Entity =============
@@ -315,6 +321,7 @@ export class ImageCreateInput extends Schema.Class<ImageCreateInput>('ImageCreat
 		description: 'Required folder reference',
 	}),
 	noteId: Schema.optional(Schema.NullOr(Schema.String)),
+	isFavorite: Schema.optional(Schema.Boolean),
 }) {}
 
 /**
@@ -329,6 +336,7 @@ export class ImageUpdateInput extends Schema.Class<ImageUpdateInput>('ImageUpdat
 	thumbnailWidth: Schema.optional(Schema.NullOr(Schema.Number.pipe(Schema.int(), Schema.positive()))),
 	thumbnailHeight: Schema.optional(Schema.NullOr(Schema.Number.pipe(Schema.int(), Schema.positive()))),
 	thumbnailMimeType: Schema.optional(Schema.NullOr(Schema.String)),
+	isFavorite: Schema.optional(Schema.Boolean),
 	thumbnailError: Schema.optional(Schema.NullOr(Schema.String)),
 	aiEngine: Schema.optional(Schema.NullOr(Schema.String)),
 	aiModel: Schema.optional(Schema.NullOr(Schema.String)),

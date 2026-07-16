@@ -19,13 +19,13 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 	try {
 		logger.info('📚 Obteniendo todas las colecciones');
 
-		const favoriteEntityIds = await favoriteService.getFavoriteEntityIds(FavoriteEntityType.COLLECTION);
-		const favoriteIdSet = favoriteEntityIds ? new Set(favoriteEntityIds) : null;
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.COLLECTION);
+		const favoriteIdSet = new Set(favoriteEntityIds);
 		const drizzleCollections = await db.select().from(collections).orderBy(desc(collections.createdAt));
 
 		const result = drizzleCollections.map((collection: any) => ({
 			...collection,
-			isFavorite: favoriteIdSet === null ? Boolean(collection.isFavorite) : favoriteIdSet.has(collection.id),
+			isFavorite: favoriteIdSet.has(collection.id),
 			stats: {
 				imageCount: collection.totalImages || 0,
 				videoCount: collection.totalVideos || 0,

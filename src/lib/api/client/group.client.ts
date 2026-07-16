@@ -8,6 +8,7 @@
  * Cliente de API para grupos.
  */
 import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/groups';
@@ -30,6 +31,7 @@ export async function createGroupInApi(data: GroupCreateInput): Promise<GroupWit
 	if (!response.ok) {
 		throw new Error('Error al crear grupo');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -42,6 +44,7 @@ export async function updateGroupInApi(id: string, data: GroupUpdateInput): Prom
 	if (!response.ok) {
 		throw new Error('Error al actualizar grupo');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -50,4 +53,5 @@ export async function deleteGroupFromApi(id: string): Promise<void> {
 	if (!response.ok) {
 		throw new Error('Error al eliminar grupo');
 	}
+	await invalidateFavoriteQueries();
 }

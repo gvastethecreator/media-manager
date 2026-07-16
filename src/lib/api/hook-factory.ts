@@ -7,6 +7,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
+import { invalidateFavoriteQueries } from './favorite-cache';
 
 export interface HookFactoryConfig<TEntity, TCreateInput, TUpdateInput, TFilters extends Record<string, unknown>> {
 	/** Nombre de la entidad para query keys (ej: 'images', 'videos') */
@@ -123,6 +124,7 @@ export function createEntityHooks<
 			mutationFn: (data) => apiClient.post<TEntity>(baseEndpoint, data),
 			onSuccess: (newEntity) => {
 				queryClient().invalidateQueries({ queryKey: keys.lists() });
+				void invalidateFavoriteQueries(queryClient());
 				queryClient().setQueryData(keys.detail(newEntity.id), newEntity);
 				for (const relatedKey of relatedQueryKeys) {
 					queryClient().invalidateQueries({ queryKey: relatedKey() });
@@ -136,6 +138,7 @@ export function createEntityHooks<
 			mutationFn: ({ id, data }) => apiClient[updateMethod]<TEntity>(`${baseEndpoint}/${id}`, data),
 			onSuccess: (updated) => {
 				queryClient().invalidateQueries({ queryKey: keys.lists() });
+				void invalidateFavoriteQueries(queryClient());
 				queryClient().setQueryData(keys.detail(updated.id), updated);
 				for (const relatedKey of relatedQueryKeys) {
 					queryClient().invalidateQueries({ queryKey: relatedKey() });
@@ -149,6 +152,7 @@ export function createEntityHooks<
 			mutationFn: (id) => apiClient.delete<void>(`${baseEndpoint}/${id}`),
 			onSuccess: (_data, id) => {
 				queryClient().invalidateQueries({ queryKey: keys.lists() });
+				void invalidateFavoriteQueries(queryClient());
 				queryClient().removeQueries({ queryKey: keys.detail(id) });
 				for (const relatedKey of relatedQueryKeys) {
 					queryClient().invalidateQueries({ queryKey: relatedKey() });

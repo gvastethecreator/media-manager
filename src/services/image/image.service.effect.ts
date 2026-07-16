@@ -41,6 +41,11 @@ import {
 import { Image, ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import {
+	emitCommittedFavoriteChange,
+	setFavoriteStateForActiveProfile,
+} from '@/services/favorite/favorite-write-transaction';
+import type { FavoriteWriteTransaction, FavoriteWriteResult } from '@/services/favorite/favorite-write-transaction';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	ImageDatabaseError,
@@ -301,6 +306,7 @@ const checkRelations = (
 export const create = (input: ImageCreateCommand): Effect.Effect<Image, ImageError, never> =>
 	Effect.gen(function* () {
 		logger.info('➕ Creating image', { name: input.name, hash: input.hash });
+		const requestedIsFavorite = input.isFavorite;
 		const sanitizedInput = stripLegacyFavoriteInput(input);
 		const { source, ...legacyImageInput } = sanitizedInput;
 
@@ -325,7 +331,7 @@ export const create = (input: ImageCreateCommand): Effect.Effect<Image, ImageErr
 		});
 
 		const created = yield* Effect.tryPromise({
-			try: () => createCanonicalImage({ ...validated, source }),
+			try: () => createCanonicalImage({ ...validated, source, isFavorite: requestedIsFavorite }),
 			catch: (error) =>
 				new ImageDatabaseError({
 					operation: 'create',
@@ -333,13 +339,26 @@ export const create = (input: ImageCreateCommand): Effect.Effect<Image, ImageErr
 				}),
 		});
 
+		if (created.favoriteWrite?.changed && requestedIsFavorite !== undefined) {
+			yield* Effect.tryPromise({
+				try: () =>
+					emitCommittedFavoriteChange(
+						created.favoriteWrite!.profileId,
+						FavoriteEntityType.IMAGE,
+						created.entity.id,
+						requestedIsFavorite
+					),
+				catch: (error) => new ImageDatabaseError({ operation: 'create.favoriteEvent', originalError: error }),
+			});
+		}
+
 		logger.info('✅ Image created', {
-			id: created.id,
-			name: created.name,
-			hash: created.hash,
+			id: created.entity.id,
+			name: created.entity.name,
+			hash: created.entity.hash,
 		});
 
-		return yield* getById(created.id);
+		return yield* getById(created.entity.id);
 	});
 
 /**
@@ -579,6 +598,7 @@ export const getAll = (options?: {
 export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image, ImageError, never> =>
 	Effect.gen(function* () {
 		logger.info('📝 Updating image', { id, updates: Object.keys(input) });
+		const requestedIsFavorite = input.isFavorite;
 		const sanitizedInput = stripLegacyFavoriteInput(input);
 
 		// Validate input
@@ -597,9 +617,9 @@ export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image
 
 		// Update image
 		const now = new Date();
-		yield* Effect.tryPromise({
+		const favoriteWrite = yield* Effect.tryPromise<FavoriteWriteResult | null, ImageError>({
 			try: async () => {
-				return db.transaction(async (transaction: typeof db) => {
+				return db.transaction(async (transaction: FavoriteWriteTransaction) => {
 					const updated = await transaction
 						.update(images)
 						.set({
@@ -616,7 +636,10 @@ export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image
 								.where(eq(assets.id, current.assetId));
 						}
 					}
-					return updated;
+					if (updated.length === 0) throw new Error('Image no devolvió la fila actualizada.');
+					return requestedIsFavorite === undefined
+						? null
+						: setFavoriteStateForActiveProfile(transaction, FavoriteEntityType.IMAGE, id, requestedIsFavorite);
 				});
 			},
 			catch: (error) =>
@@ -625,6 +648,14 @@ export const update = (id: string, input: ImageUpdateInput): Effect.Effect<Image
 					originalError: error,
 				}),
 		});
+
+		if (favoriteWrite?.changed && requestedIsFavorite !== undefined) {
+			yield* Effect.tryPromise({
+				try: () =>
+					emitCommittedFavoriteChange(favoriteWrite.profileId, FavoriteEntityType.IMAGE, id, requestedIsFavorite),
+				catch: (error) => new ImageDatabaseError({ operation: 'update.favoriteEvent', originalError: error }),
+			});
+		}
 
 		logger.info('✅ Image updated', {
 			id,

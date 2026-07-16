@@ -7,12 +7,26 @@ import type { FavoriteEntityType } from '@/types/entities/favorite';
 
 export type FavoriteWriteTransaction = LibSQLTransaction<Record<string, never>, Record<string, never>>;
 
+export interface FavoriteWriteResult {
+	changed: boolean;
+	profileId: string;
+}
+
 export async function setFavoriteForActiveProfile(
 	transaction: FavoriteWriteTransaction,
 	entityType: FavoriteEntityType,
 	entityId: string,
 	isFavorite: boolean
 ): Promise<string> {
+	return (await setFavoriteStateForActiveProfile(transaction, entityType, entityId, isFavorite)).profileId;
+}
+
+export async function setFavoriteStateForActiveProfile(
+	transaction: FavoriteWriteTransaction,
+	entityType: FavoriteEntityType,
+	entityId: string,
+	isFavorite: boolean
+): Promise<FavoriteWriteResult> {
 	const activeProfiles = await transaction
 		.select({ id: profiles.id })
 		.from(profiles)
@@ -43,7 +57,7 @@ export async function setFavoriteForActiveProfile(
 		await transaction.delete(favorites).where(eq(favorites.id, existing[0].id));
 	}
 
-	return profileId;
+	return { profileId, changed: isFavorite ? existing.length === 0 : existing.length > 0 };
 }
 
 export async function deleteFavoriteRecordsForEntities(

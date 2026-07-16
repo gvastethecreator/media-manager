@@ -8,7 +8,10 @@
  * Cliente de API para audios.
  */
 import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
+import { apiClient } from '@/lib/api/client';
 import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
+import { FavoriteEntityType } from '@/types/entities/favorite';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 
 export type PublicAudioCreateInput = Omit<AudioCreateInput, 'path' | 'source'> & {
 	source: AuthorizedPathReference;
@@ -53,13 +56,9 @@ export async function updateAudioInApi(id: string, data: PublicAudioUpdateInput)
 }
 
 export async function toggleAudioFavoriteInApi(id: string): Promise<AudioWithStats> {
-	const response = await fetch(`${API_BASE_PATH}/${id}/favorite`, {
-		method: 'POST',
-	});
-	if (!response.ok) {
-		throw new Error('Error al alternar favorito del audio');
-	}
-	return response.json();
+	await apiClient.post('/favorites/toggle', { entityId: id, entityType: FavoriteEntityType.AUDIO });
+	await invalidateFavoriteQueries();
+	return apiClient.get<AudioWithStats>(`/audio/${id}`);
 }
 
 export async function deleteAudioFromApi(id: string): Promise<void> {

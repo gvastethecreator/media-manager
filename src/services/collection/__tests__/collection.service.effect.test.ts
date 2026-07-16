@@ -326,7 +326,7 @@ describe('CollectionService - CRUD Operations', () => {
 			expect(error).toBeInstanceOf(CollectionNotFound);
 		});
 
-		it('should ignore legacy authored favorite input', async () => {
+		it('should persist authored favorite input through the canonical Favorite table', async () => {
 			await ensureActiveProfile();
 
 			const legacyInput: Parameters<CollectionServiceInterface['create']>[0] & { isFavorite: boolean } = {
@@ -336,8 +336,8 @@ describe('CollectionService - CRUD Operations', () => {
 
 			const result = await runEffect(Effect.flatMap(CollectionService, (service) => service.create(legacyInput)));
 
-			expect(result.isFavorite).toBe(false);
-			expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, result.id)).toBe(false);
+			expect(result.isFavorite).toBe(true);
+			expect(await favoriteService.isFavorite(FavoriteEntityType.COLLECTION, result.id)).toBe(true);
 		});
 	});
 

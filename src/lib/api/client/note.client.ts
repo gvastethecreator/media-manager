@@ -8,6 +8,7 @@
  * Cliente de API para notas.
  */
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/notes';
@@ -30,6 +31,7 @@ export async function createNoteInApi(data: NoteCreateInput): Promise<NoteWithSt
 	if (!response.ok) {
 		throw new Error('Error al crear nota');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -42,6 +44,7 @@ export async function updateNoteInApi(id: string, data: NoteUpdateInput): Promis
 	if (!response.ok) {
 		throw new Error('Error al actualizar nota');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -50,4 +53,5 @@ export async function deleteNoteFromApi(id: string): Promise<void> {
 	if (!response.ok) {
 		throw new Error('Error al eliminar nota');
 	}
+	await invalidateFavoriteQueries();
 }

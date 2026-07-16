@@ -29,19 +29,11 @@ import {
 	type AudioServiceInterface,
 	AudioServiceLive,
 } from '@/services/audio/audio.service.effect';
-import { favoriteService } from '@/services/favorite/favorite.service';
-import { FavoriteEntityType } from '@/types/entities/favorite';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
-import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
+import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
 router.use(sanitizeJsonResponses);
 const logger = serverLogger.withContext('AudiosRoutes');
-const skipBatchFavoriteAlias: express.RequestHandler = (req, _res, next) => {
-	if (req.params.id === 'batch') next('route');
-	else next();
-};
-
 type AudioListOptions = Parameters<AudioServiceInterface['getAll']>[0];
 
 function listAuthorizedAudios(
@@ -398,52 +390,6 @@ router.post(
 			return audio;
 		}).pipe(Effect.provide(AudioServiceLive))
 	)
-);
-
-/**
- * POST /audios/:id/favorite - Toggle estado favorito de un audio
- */
-router.post(
-	'/:id/favorite',
-	skipBatchFavoriteAlias,
-	authorizeMediaAssetParam({ assetType: 'audio', permissions: ['read', 'write'] }),
-	effectHandler((req, res) => {
-		const { id } = req.params;
-
-		return Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.AUDIO);
-			const audioService = yield* AudioService;
-			const audio = yield* audioService.toggleFavorite(id);
-
-			return audio;
-		}).pipe(Effect.provide(AudioServiceLive));
-	})
-);
-
-/**
- * POST /audios/batch/favorite - Marcar múltiples audios como favoritos/no favoritos
- */
-router.post(
-	'/batch/favorite',
-	authorizeMediaAssetBodyIds({ assetType: 'audio', permissions: ['read', 'write'] }),
-	effectHandler((req) => {
-		const { ids, isFavorite } = req.body;
-
-		return Effect.gen(function* () {
-			if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
-				yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
-			}
-
-			validateBatchSize(ids);
-
-			const updatedCount = yield* Effect.tryPromise({
-				try: () => favoriteService.setMany(FavoriteEntityType.AUDIO, ids, isFavorite),
-				catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
-			});
-
-			return { updatedCount };
-		});
-	})
 );
 
 /**

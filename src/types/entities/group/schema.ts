@@ -83,17 +83,20 @@ export const CreateGroupSchema = GroupSchema.omit({
 	updatedAt: true,
 }).extend({
 	name: z.string().min(1, 'El nombre es obligatorio'),
+	isFavorite: z.boolean().optional(),
 });
 
 /**
  * Esquema para actualizar un grupo
  */
-export const UpdateGroupSchema = GroupSchema.partial().omit({
-	id: true,
-	isFavorite: true,
-	createdAt: true,
-	updatedAt: true,
-});
+export const UpdateGroupSchema = GroupSchema.partial()
+	.omit({
+		id: true,
+		isFavorite: true,
+		createdAt: true,
+		updatedAt: true,
+	})
+	.extend({ isFavorite: z.boolean().optional() });
 
 export type CreateGroupInput = z.input<typeof CreateGroupSchema>;
 export type UpdateGroupInput = z.input<typeof UpdateGroupSchema>;

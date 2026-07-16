@@ -33,7 +33,6 @@ import {
 	sanitizePreviewCount,
 	normalizePreviewFiles,
 } from '../utils/folder-preview-svg';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 
 const router = express.Router();
 router.use(sanitizeJsonResponses);
@@ -622,27 +621,6 @@ router.get(
 				try: () => toPublicFolders(req, folders as unknown as FolderRecord[]),
 				catch: (error) => new Error(`Failed to authorize folder ancestors: ${String(error)}`),
 			});
-		}).pipe(Effect.provide(FolderServiceLive))
-	)
-);
-
-/**
- * POST /folders/:id/favorite - Toggle favorite status
- */
-router.post(
-	'/:id/favorite',
-	authorizeFolderPathById('read'),
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.FOLDER);
-			const folderService = yield* FolderService;
-			const folder = yield* folderService.toggleFavorite(req.params.id);
-			const publicFolder = yield* Effect.tryPromise({
-				try: () => toPublicFolder(req, folder as unknown as FolderRecord),
-				catch: (error) => new Error(`Failed to authorize favorite folder: ${String(error)}`),
-			});
-			if (!publicFolder) return yield* Effect.fail(new Error('Folder no autorizado'));
-			return publicFolder;
 		}).pipe(Effect.provide(FolderServiceLive))
 	)
 );

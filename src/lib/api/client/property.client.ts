@@ -8,6 +8,7 @@
  * Cliente de API para propiedades.
  */
 import type { PropertyCreateInput, PropertyUpdateInput, PropertyWithStats } from '@/types/entities/property';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/properties';
@@ -30,6 +31,7 @@ export async function createPropertyInApi(data: PropertyCreateInput): Promise<Pr
 	if (!response.ok) {
 		throw new Error('Error al crear propiedad');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -42,6 +44,7 @@ export async function updatePropertyInApi(id: string, data: PropertyUpdateInput)
 	if (!response.ok) {
 		throw new Error('Error al actualizar propiedad');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -50,4 +53,5 @@ export async function deletePropertyFromApi(id: string): Promise<void> {
 	if (!response.ok) {
 		throw new Error('Error al eliminar propiedad');
 	}
+	await invalidateFavoriteQueries();
 }

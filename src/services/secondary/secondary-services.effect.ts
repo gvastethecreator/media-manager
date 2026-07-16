@@ -30,6 +30,12 @@ import {
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import {
+	deleteFavoriteRecordsForEntities,
+	emitCommittedFavoriteChange,
+	setFavoriteStateForActiveProfile,
+} from '@/services/favorite/favorite-write-transaction';
+import type { FavoriteWriteTransaction, FavoriteWriteResult } from '@/services/favorite/favorite-write-transaction';
 import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import type {
@@ -81,6 +87,21 @@ type NoteUpdatePayload = Omit<NoteUpdateInput, 'id'>;
 function stripLegacyFavoriteInput<TInput extends object>(input: TInput): Omit<TInput, 'isFavorite'> {
 	const { isFavorite: _ignoredIsFavorite, ...restInput } = input as TInput & { isFavorite?: unknown };
 	return restInput;
+}
+
+function readRequestedFavoriteState(input: object): boolean | undefined {
+	const value = (input as { isFavorite?: unknown }).isFavorite;
+	return typeof value === 'boolean' ? value : undefined;
+}
+
+async function emitSecondaryFavoriteChange(
+	favoriteWrite: FavoriteWriteResult | null,
+	entityType: FavoriteEntityType,
+	entityId: string,
+	isFavorite: boolean | undefined
+): Promise<void> {
+	if (!favoriteWrite?.changed || isFavorite === undefined) return;
+	await emitCommittedFavoriteChange(favoriteWrite.profileId, entityType, entityId, isFavorite);
 }
 
 function normalizeFavoriteEntity<TEntity extends FavoriteCapableEntity>(
@@ -160,15 +181,32 @@ const makeGroupService = (): GroupServiceInterface => {
 
 	const create = (input: GroupCreateInput): Effect.Effect<GroupRecord, GroupError> =>
 		Effect.gen(function* () {
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
 			const readableId = generateReadableId('group', input.name || 'grupo', 1);
-			yield* Effect.tryPromise<(typeof groups.$inferSelect)[], GroupError>({
+			const favoriteWrite = yield* Effect.tryPromise<FavoriteWriteResult | null, GroupError>({
 				try: () =>
-					db
-						.insert(groups)
-						.values({ id: readableId, ...restInput, createdAt: new Date(), updatedAt: new Date() })
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.insert(groups)
+							.values({ id: readableId, ...restInput, createdAt: new Date(), updatedAt: new Date() })
+							.returning();
+						if (!result[0]) throw new Error('Group no devolvió la fila creada.');
+						return requestedIsFavorite === undefined
+							? null
+							: setFavoriteStateForActiveProfile(
+									transaction,
+									FavoriteEntityType.GROUP,
+									readableId,
+									requestedIsFavorite
+								);
+					}),
 				catch: (error) => fromUnknownGroupError('create', error),
+			});
+			yield* Effect.tryPromise({
+				try: () =>
+					emitSecondaryFavoriteChange(favoriteWrite, FavoriteEntityType.GROUP, readableId, requestedIsFavorite),
+				catch: (error) => fromUnknownGroupError('create.favoriteEvent', error),
 			});
 
 			return yield* getById(readableId);
@@ -177,26 +215,49 @@ const makeGroupService = (): GroupServiceInterface => {
 	const update = (id: string, input: GroupUpdateInput): Effect.Effect<GroupRecord, GroupError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
 
-			const result = yield* Effect.tryPromise<(typeof groups.$inferSelect)[], GroupError>({
+			const committed = yield* Effect.tryPromise<
+				{ result: (typeof groups.$inferSelect)[]; favoriteWrite: FavoriteWriteResult | null },
+				GroupError
+			>({
 				try: () =>
-					db
-						.update(groups)
-						.set({ ...restInput, updatedAt: new Date() })
-						.where(eq(groups.id, id))
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.update(groups)
+							.set({ ...restInput, updatedAt: new Date() })
+							.where(eq(groups.id, id))
+							.returning();
+						const favoriteWrite =
+							requestedIsFavorite === undefined
+								? null
+								: await setFavoriteStateForActiveProfile(
+										transaction,
+										FavoriteEntityType.GROUP,
+										id,
+										requestedIsFavorite
+									);
+						return { result, favoriteWrite };
+					}),
 				catch: (error) => fromUnknownGroupError('update', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new GroupNotFound({ groupId: id }));
+			if (committed.result.length === 0) return yield* Effect.fail(new GroupNotFound({ groupId: id }));
+			yield* Effect.tryPromise({
+				try: () =>
+					emitSecondaryFavoriteChange(committed.favoriteWrite, FavoriteEntityType.GROUP, id, requestedIsFavorite),
+				catch: (error) => fromUnknownGroupError('update.favoriteEvent', error),
+			});
 			return yield* getById(id);
 		});
 
 	const delete_ = (id: string): Effect.Effect<void, GroupError> =>
 		Effect.tryPromise({
-			try: async () => {
-				await db.delete(groups).where(eq(groups.id, id));
-			},
+			try: () =>
+				db.transaction(async (transaction: FavoriteWriteTransaction) => {
+					await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.GROUP, [id]);
+					await transaction.delete(groups).where(eq(groups.id, id));
+				}),
 			catch: (error) => fromUnknownGroupError('delete', error),
 		});
 
@@ -298,21 +359,38 @@ const makeWildcardService = (): WildcardServiceInterface => {
 
 	const create = (input: WildcardCreateInput): Effect.Effect<WildcardRecord, WildcardError> =>
 		Effect.gen(function* () {
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
 			const readableId = generateReadableId('wildcard', input.name || 'wildcard', 1);
-			yield* Effect.tryPromise<(typeof wildcards.$inferSelect)[], WildcardError>({
+			const favoriteWrite = yield* Effect.tryPromise<FavoriteWriteResult | null, WildcardError>({
 				try: () =>
-					db
-						.insert(wildcards)
-						.values({
-							id: readableId,
-							...restInput,
-							isFavorite: false,
-							createdAt: new Date(),
-							updatedAt: new Date(),
-						})
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.insert(wildcards)
+							.values({
+								id: readableId,
+								...restInput,
+								isFavorite: false,
+								createdAt: new Date(),
+								updatedAt: new Date(),
+							})
+							.returning();
+						if (!result[0]) throw new Error('Wildcard no devolvió la fila creada.');
+						return requestedIsFavorite === undefined
+							? null
+							: setFavoriteStateForActiveProfile(
+									transaction,
+									FavoriteEntityType.WILDCARD,
+									readableId,
+									requestedIsFavorite
+								);
+					}),
 				catch: (error) => fromUnknownWildcardError('create', error),
+			});
+			yield* Effect.tryPromise({
+				try: () =>
+					emitSecondaryFavoriteChange(favoriteWrite, FavoriteEntityType.WILDCARD, readableId, requestedIsFavorite),
+				catch: (error) => fromUnknownWildcardError('create.favoriteEvent', error),
 			});
 
 			return yield* getById(readableId);
@@ -321,29 +399,52 @@ const makeWildcardService = (): WildcardServiceInterface => {
 	const update = (id: string, input: WildcardUpdateInput): Effect.Effect<WildcardRecord, WildcardError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
 
-			const result = yield* Effect.tryPromise<(typeof wildcards.$inferSelect)[], WildcardError>({
+			const committed = yield* Effect.tryPromise<
+				{ result: (typeof wildcards.$inferSelect)[]; favoriteWrite: FavoriteWriteResult | null },
+				WildcardError
+			>({
 				try: () =>
-					db
-						.update(wildcards)
-						.set({
-							...restInput,
-							updatedAt: new Date(),
-						})
-						.where(eq(wildcards.id, id))
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.update(wildcards)
+							.set({
+								...restInput,
+								updatedAt: new Date(),
+							})
+							.where(eq(wildcards.id, id))
+							.returning();
+						const favoriteWrite =
+							requestedIsFavorite === undefined
+								? null
+								: await setFavoriteStateForActiveProfile(
+										transaction,
+										FavoriteEntityType.WILDCARD,
+										id,
+										requestedIsFavorite
+									);
+						return { result, favoriteWrite };
+					}),
 				catch: (error) => fromUnknownWildcardError('update', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new WildcardNotFound({ wildcardId: id }));
+			if (committed.result.length === 0) return yield* Effect.fail(new WildcardNotFound({ wildcardId: id }));
+			yield* Effect.tryPromise({
+				try: () =>
+					emitSecondaryFavoriteChange(committed.favoriteWrite, FavoriteEntityType.WILDCARD, id, requestedIsFavorite),
+				catch: (error) => fromUnknownWildcardError('update.favoriteEvent', error),
+			});
 			return yield* getById(id);
 		});
 
 	const delete_ = (id: string): Effect.Effect<void, WildcardError> =>
 		Effect.tryPromise({
-			try: async () => {
-				await db.delete(wildcards).where(eq(wildcards.id, id));
-			},
+			try: () =>
+				db.transaction(async (transaction: FavoriteWriteTransaction) => {
+					await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.WILDCARD, [id]);
+					await transaction.delete(wildcards).where(eq(wildcards.id, id));
+				}),
 			catch: (error) => fromUnknownWildcardError('delete', error),
 		});
 
@@ -445,21 +546,32 @@ const makeNoteService = (): NoteServiceInterface => {
 
 	const create = (input: NoteCreateInput): Effect.Effect<NoteRecord, NoteError> =>
 		Effect.gen(function* () {
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
 			const readableId = generateReadableId('note', input.title || 'nota', 1);
-			yield* Effect.tryPromise<(typeof notes.$inferSelect)[], NoteError>({
+			const favoriteWrite = yield* Effect.tryPromise<FavoriteWriteResult | null, NoteError>({
 				try: () =>
-					db
-						.insert(notes)
-						.values({
-							id: readableId,
-							...restInput,
-							isFavorite: false,
-							createdAt: new Date(),
-							updatedAt: new Date(),
-						})
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.insert(notes)
+							.values({
+								id: readableId,
+								...restInput,
+								isFavorite: false,
+								createdAt: new Date(),
+								updatedAt: new Date(),
+							})
+							.returning();
+						if (!result[0]) throw new Error('Note no devolvió la fila creada.');
+						return requestedIsFavorite === undefined
+							? null
+							: setFavoriteStateForActiveProfile(transaction, FavoriteEntityType.NOTE, readableId, requestedIsFavorite);
+					}),
 				catch: (error) => fromUnknownNoteError('create', error),
+			});
+			yield* Effect.tryPromise({
+				try: () => emitSecondaryFavoriteChange(favoriteWrite, FavoriteEntityType.NOTE, readableId, requestedIsFavorite),
+				catch: (error) => fromUnknownNoteError('create.favoriteEvent', error),
 			});
 
 			return yield* getById(readableId);
@@ -468,21 +580,37 @@ const makeNoteService = (): NoteServiceInterface => {
 	const update = (id: string, input: NoteUpdatePayload): Effect.Effect<NoteRecord, NoteError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
 
-			const result = yield* Effect.tryPromise<(typeof notes.$inferSelect)[], NoteError>({
+			const committed = yield* Effect.tryPromise<
+				{ result: (typeof notes.$inferSelect)[]; favoriteWrite: FavoriteWriteResult | null },
+				NoteError
+			>({
 				try: () =>
-					db
-						.update(notes)
-						.set({
-							...restInput,
-							updatedAt: new Date(),
-						})
-						.where(eq(notes.id, id))
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.update(notes)
+							.set({
+								...restInput,
+								updatedAt: new Date(),
+							})
+							.where(eq(notes.id, id))
+							.returning();
+						const favoriteWrite =
+							requestedIsFavorite === undefined
+								? null
+								: await setFavoriteStateForActiveProfile(transaction, FavoriteEntityType.NOTE, id, requestedIsFavorite);
+						return { result, favoriteWrite };
+					}),
 				catch: (error) => fromUnknownNoteError('update', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new NoteNotFound({ noteId: id }));
+			if (committed.result.length === 0) return yield* Effect.fail(new NoteNotFound({ noteId: id }));
+			yield* Effect.tryPromise({
+				try: () =>
+					emitSecondaryFavoriteChange(committed.favoriteWrite, FavoriteEntityType.NOTE, id, requestedIsFavorite),
+				catch: (error) => fromUnknownNoteError('update.favoriteEvent', error),
+			});
 			return yield* getById(id);
 		});
 
@@ -505,9 +633,11 @@ const makeNoteService = (): NoteServiceInterface => {
 
 	const delete_ = (id: string): Effect.Effect<void, NoteError> =>
 		Effect.tryPromise({
-			try: async () => {
-				await db.delete(notes).where(eq(notes.id, id));
-			},
+			try: () =>
+				db.transaction(async (transaction: FavoriteWriteTransaction) => {
+					await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.NOTE, [id]);
+					await transaction.delete(notes).where(eq(notes.id, id));
+				}),
 			catch: (error) => fromUnknownNoteError('delete', error),
 		});
 
@@ -646,21 +776,38 @@ const makePropertyService = (): PropertyServiceInterface => {
 
 	const create = (input: PropertyCreateInput): Effect.Effect<PropertyRecord, PropertyError> =>
 		Effect.gen(function* () {
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
 			const readableId = generateReadableId('property', input.name || 'propiedad', 1);
-			yield* Effect.tryPromise<(typeof properties.$inferSelect)[], PropertyError>({
+			const favoriteWrite = yield* Effect.tryPromise<FavoriteWriteResult | null, PropertyError>({
 				try: () =>
-					db
-						.insert(properties)
-						.values({
-							id: readableId,
-							...restInput,
-							isFavorite: false,
-							createdAt: new Date(),
-							updatedAt: new Date(),
-						})
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.insert(properties)
+							.values({
+								id: readableId,
+								...restInput,
+								isFavorite: false,
+								createdAt: new Date(),
+								updatedAt: new Date(),
+							})
+							.returning();
+						if (!result[0]) throw new Error('Property no devolvió la fila creada.');
+						return requestedIsFavorite === undefined
+							? null
+							: setFavoriteStateForActiveProfile(
+									transaction,
+									FavoriteEntityType.PROPERTY,
+									readableId,
+									requestedIsFavorite
+								);
+					}),
 				catch: (error) => fromUnknownPropertyError('create', error),
+			});
+			yield* Effect.tryPromise({
+				try: () =>
+					emitSecondaryFavoriteChange(favoriteWrite, FavoriteEntityType.PROPERTY, readableId, requestedIsFavorite),
+				catch: (error) => fromUnknownPropertyError('create.favoriteEvent', error),
 			});
 
 			return yield* getById(readableId);
@@ -669,21 +816,42 @@ const makePropertyService = (): PropertyServiceInterface => {
 	const update = (id: string, input: PropertyUpdateInput): Effect.Effect<PropertyRecord, PropertyError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
 
-			const result = yield* Effect.tryPromise<(typeof properties.$inferSelect)[], PropertyError>({
+			const committed = yield* Effect.tryPromise<
+				{ result: (typeof properties.$inferSelect)[]; favoriteWrite: FavoriteWriteResult | null },
+				PropertyError
+			>({
 				try: () =>
-					db
-						.update(properties)
-						.set({
-							...restInput,
-							updatedAt: new Date(),
-						})
-						.where(eq(properties.id, id))
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.update(properties)
+							.set({
+								...restInput,
+								updatedAt: new Date(),
+							})
+							.where(eq(properties.id, id))
+							.returning();
+						const favoriteWrite =
+							requestedIsFavorite === undefined
+								? null
+								: await setFavoriteStateForActiveProfile(
+										transaction,
+										FavoriteEntityType.PROPERTY,
+										id,
+										requestedIsFavorite
+									);
+						return { result, favoriteWrite };
+					}),
 				catch: (error) => fromUnknownPropertyError('update', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new PropertyNotFound({ propertyId: id }));
+			if (committed.result.length === 0) return yield* Effect.fail(new PropertyNotFound({ propertyId: id }));
+			yield* Effect.tryPromise({
+				try: () =>
+					emitSecondaryFavoriteChange(committed.favoriteWrite, FavoriteEntityType.PROPERTY, id, requestedIsFavorite),
+				catch: (error) => fromUnknownPropertyError('update.favoriteEvent', error),
+			});
 			return yield* getById(id);
 		});
 
@@ -706,9 +874,11 @@ const makePropertyService = (): PropertyServiceInterface => {
 
 	const delete_ = (id: string): Effect.Effect<void, PropertyError> =>
 		Effect.tryPromise({
-			try: async () => {
-				await db.delete(properties).where(eq(properties.id, id));
-			},
+			try: () =>
+				db.transaction(async (transaction: FavoriteWriteTransaction) => {
+					await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.PROPERTY, [id]);
+					await transaction.delete(properties).where(eq(properties.id, id));
+				}),
 			catch: (error) => fromUnknownPropertyError('delete', error),
 		});
 
@@ -793,21 +963,42 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 
 	const create = (input: CreateWorldItemInput): Effect.Effect<WorldItemRecord, WorldItemError> =>
 		Effect.gen(function* () {
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
+			const worldItemInput = {
+				...restInput,
+				rarity: restInput.rarity == null ? restInput.rarity : String(restInput.rarity),
+			};
 			const readableId = generateReadableId('world-item', input.name || 'item', 1);
-			yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
+			const favoriteWrite = yield* Effect.tryPromise<FavoriteWriteResult | null, WorldItemError>({
 				try: () =>
-					db
-						.insert(worldItems)
-						.values({
-							id: readableId,
-							...restInput,
-							isFavorite: false,
-							createdAt: new Date(),
-							updatedAt: new Date(),
-						})
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.insert(worldItems)
+							.values({
+								id: readableId,
+								...worldItemInput,
+								isFavorite: false,
+								createdAt: new Date(),
+								updatedAt: new Date(),
+							})
+							.returning();
+						if (!result[0]) throw new Error('WorldItem no devolvió la fila creada.');
+						return requestedIsFavorite === undefined
+							? null
+							: setFavoriteStateForActiveProfile(
+									transaction,
+									FavoriteEntityType.WORLD_ITEM,
+									readableId,
+									requestedIsFavorite
+								);
+					}),
 				catch: (error) => fromUnknownWorldItemError('create', error),
+			});
+			yield* Effect.tryPromise({
+				try: () =>
+					emitSecondaryFavoriteChange(favoriteWrite, FavoriteEntityType.WORLD_ITEM, readableId, requestedIsFavorite),
+				catch: (error) => fromUnknownWorldItemError('create.favoriteEvent', error),
 			});
 
 			return yield* getById(readableId);
@@ -816,21 +1007,46 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 	const update = (id: string, input: UpdateWorldItemInput): Effect.Effect<WorldItemRecord, WorldItemError> =>
 		Effect.gen(function* () {
 			yield* getById(id);
+			const requestedIsFavorite = readRequestedFavoriteState(input);
 			const restInput = stripLegacyFavoriteInput(input);
+			const worldItemInput = {
+				...restInput,
+				rarity: restInput.rarity == null ? restInput.rarity : String(restInput.rarity),
+			};
 
-			const result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
+			const committed = yield* Effect.tryPromise<
+				{ result: (typeof worldItems.$inferSelect)[]; favoriteWrite: FavoriteWriteResult | null },
+				WorldItemError
+			>({
 				try: () =>
-					db
-						.update(worldItems)
-						.set({
-							...restInput,
-							updatedAt: new Date(),
-						})
-						.where(eq(worldItems.id, id))
-						.returning(),
+					db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						const result = await transaction
+							.update(worldItems)
+							.set({
+								...worldItemInput,
+								updatedAt: new Date(),
+							})
+							.where(eq(worldItems.id, id))
+							.returning();
+						const favoriteWrite =
+							requestedIsFavorite === undefined
+								? null
+								: await setFavoriteStateForActiveProfile(
+										transaction,
+										FavoriteEntityType.WORLD_ITEM,
+										id,
+										requestedIsFavorite
+									);
+						return { result, favoriteWrite };
+					}),
 				catch: (error) => fromUnknownWorldItemError('update', error),
 			});
-			if (result.length === 0) return yield* Effect.fail(new WorldItemNotFound({ worldItemId: id }));
+			if (committed.result.length === 0) return yield* Effect.fail(new WorldItemNotFound({ worldItemId: id }));
+			yield* Effect.tryPromise({
+				try: () =>
+					emitSecondaryFavoriteChange(committed.favoriteWrite, FavoriteEntityType.WORLD_ITEM, id, requestedIsFavorite),
+				catch: (error) => fromUnknownWorldItemError('update.favoriteEvent', error),
+			});
 			return yield* getById(id);
 		});
 
@@ -853,9 +1069,11 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 
 	const delete_ = (id: string): Effect.Effect<void, WorldItemError> =>
 		Effect.tryPromise({
-			try: async () => {
-				await db.delete(worldItems).where(eq(worldItems.id, id));
-			},
+			try: () =>
+				db.transaction(async (transaction: FavoriteWriteTransaction) => {
+					await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.WORLD_ITEM, [id]);
+					await transaction.delete(worldItems).where(eq(worldItems.id, id));
+				}),
 			catch: (error) => fromUnknownWorldItemError('delete', error),
 		});
 

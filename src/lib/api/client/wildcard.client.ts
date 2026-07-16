@@ -8,6 +8,7 @@
  * Cliente de API para wildcards.
  */
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/wildcards';
@@ -41,6 +42,7 @@ export async function createWildcardInApi(data: WildcardCreateInput): Promise<Wi
 	if (!response.ok) {
 		throw new Error('Error al crear wildcard');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -53,6 +55,7 @@ export async function updateWildcardInApi(id: string, data: WildcardUpdateInput)
 	if (!response.ok) {
 		throw new Error('Error al actualizar wildcard');
 	}
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -61,6 +64,7 @@ export async function deleteWildcardFromApi(id: string): Promise<void> {
 	if (!response.ok) {
 		throw new Error('Error al eliminar wildcard');
 	}
+	await invalidateFavoriteQueries();
 }
 
 export async function moveWildcardInApi(id: string, newParentId: string | null): Promise<void> {

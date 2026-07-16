@@ -22,7 +22,11 @@ const expectSuccess = async <A, E>(effect: Effect.Effect<A, E, AlbumService>) =>
 let createdActiveProfileId: string | null = null;
 
 const ensureActiveProfile = async () => {
-	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+	const [activeProfile] = await db
+		.select({ id: profiles.id })
+		.from(profiles)
+		.where(eq(profiles.isActive, true))
+		.limit(1);
 
 	if (activeProfile) {
 		return activeProfile.id;
@@ -71,13 +75,13 @@ afterEach(async () => {
 });
 
 describe('AlbumService favorites convergence', () => {
-	it('create ignores legacy authored favorite input even when a profile is active', async () => {
+	it('create writes authored favorite input to the canonical Favorite table', async () => {
 		await ensureActiveProfile();
 
 		const created = await createAlbum('create-canonical-favorite', { isFavorite: true });
 
-		expect(created.isFavorite).toBe(false);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, created.id)).toBe(false);
+		expect(created.isFavorite).toBe(true);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, created.id)).toBe(true);
 	});
 
 	it('getByIdWithStats projects canonical favorite state instead of stale embedded flag', async () => {
@@ -117,7 +121,7 @@ describe('AlbumService favorites convergence', () => {
 		expect(result.albums[0]?.isFavorite).toBe(true);
 	});
 
-	it('update ignores legacy authored favorite input and preserves canonical state', async () => {
+	it('update writes authored favorite input to the canonical Favorite table', async () => {
 		await ensureActiveProfile();
 		const album = await createAlbum('update-target');
 		await favoriteService.set(FavoriteEntityType.ALBUM, album.id, true);
@@ -136,8 +140,8 @@ describe('AlbumService favorites convergence', () => {
 
 		expect(updated.id).toBe(album.id);
 		expect(updated.name).toBe(legacyUpdate.name);
-		expect(updated.isFavorite).toBe(true);
-		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, album.id)).toBe(true);
+		expect(updated.isFavorite).toBe(false);
+		expect(await favoriteService.isFavorite(FavoriteEntityType.ALBUM, album.id)).toBe(false);
 	});
 
 	it('toggleFavorite delegates to the canonical favorite bridge when a profile is active', async () => {

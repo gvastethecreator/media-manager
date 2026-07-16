@@ -16,8 +16,6 @@ import {
 	filterAuthorizedMediaEntities,
 } from '@/server/security/authorized-root-request';
 import { CollectionService, CollectionServiceLive } from '@/services/collection/collection.service.effect';
-import { FavoriteEntityType } from '@/types/entities/favorite';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
@@ -121,20 +119,6 @@ router.delete(
 			yield* collectionService.delete(req.params.id);
 			res.status(204);
 			return { success: true };
-		}).pipe(Effect.provide(CollectionServiceLive))
-	)
-);
-
-/**
- * POST /collections/:id/favorite - Toggle favorite status
- */
-router.post(
-	'/:id/favorite',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.COLLECTION);
-			const collectionService = yield* CollectionService;
-			return yield* collectionService.toggleFavorite(req.params.id);
 		}).pipe(Effect.provide(CollectionServiceLive))
 	)
 );

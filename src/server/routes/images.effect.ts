@@ -24,13 +24,10 @@ import {
 	resolveMediaAssetReference,
 } from '@/server/security/media-asset-reference';
 import { sanitizeJsonResponses } from '@/server/security/sanitize-public-payload';
-import { favoriteService } from '@/services/favorite/favorite.service';
 import { ImageService, type ImageServiceInterface, ImageServiceLive } from '@/services/image/image.service.effect';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
-import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset, validateBatchSize } from '../utils/pagination';
 import { sendEffectHttpError } from '../utils/content-delivery';
-import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-deprecation';
 import { getMimeTypeFromPath } from '../utils/mime';
 
 const router = express.Router();
@@ -62,11 +59,6 @@ const authorizeImageRestore: express.RequestHandler = async (req, res, next) => 
 	}
 };
 router.use(sanitizeJsonResponses);
-const skipBatchFavoriteAlias: express.RequestHandler = (req, _res, next) => {
-	if (req.params.id === 'batch') next('route');
-	else next();
-};
-
 type ImageListOptions = NonNullable<Parameters<ImageServiceInterface['getAll']>[0]>;
 
 function listAuthorizedImages(
@@ -357,22 +349,6 @@ router.patch(
 );
 
 /**
- * POST /images/:id/favorite - Toggle favorite status
- */
-router.post(
-	'/:id/favorite',
-	skipBatchFavoriteAlias,
-	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'write'] }),
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			markFavoriteToggleFacadeDeprecated(res, FavoriteEntityType.IMAGE);
-			const imageService = yield* ImageService;
-			return yield* imageService.toggleFavorite(req.params.id);
-		}).pipe(Effect.provide(ImageServiceLive))
-	)
-);
-
-/**
  * POST /images/:id/tags - Agregar tags a una imagen
  */
 router.post(
@@ -386,31 +362,6 @@ router.post(
 			res.status(201);
 			return { success: true, added: result.added };
 		}).pipe(Effect.provide(TagServiceLive))
-	)
-);
-
-/**
- * POST /images/batch/favorite - Actualizar favorito en lote
- */
-router.post(
-	'/batch/favorite',
-	authorizeMediaAssetBodyIds({ assetType: 'image', permissions: ['read', 'write'] }),
-	effectHandler((req) =>
-		Effect.gen(function* () {
-			const { ids, isFavorite } = req.body;
-
-			if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
-				yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
-			}
-
-			validateBatchSize(ids);
-
-			const count = yield* Effect.tryPromise({
-				try: () => favoriteService.setMany(FavoriteEntityType.IMAGE, ids, isFavorite),
-				catch: (error) => new Error(error instanceof Error ? error.message : String(error)),
-			});
-			return { success: true, count };
-		})
 	)
 );
 

@@ -14,6 +14,7 @@ import { db } from '@/lib/drizzle';
 import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { FileSyncService } from '@/lib/filesystem/file-sync.service';
 import { assets, favorites, folders, mediaRoots, profiles, sourceFiles, videos } from '@/lib/drizzle/schema';
+import { getEventStore } from '@/lib/server/events.server';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { createAuthorizedRootRegistry } from '@/server/security/authorized-roots';
 import { getFolderFileStats, getFolderFiles } from '@/services/folder-files/folder-files.service';
@@ -507,11 +508,16 @@ describe('VideoService - CRUD Operations', () => {
 			const folder = await createTestFolder();
 			const video = await createTestVideo(folder.id, { isFavorite: false });
 			await ensureActiveProfile();
+			const eventCountBefore = getEventStore().get('favorites:modified')?.length ?? 0;
 
 			const result = await expectSuccess(VideoService.update(video.id, { isFavorite: true }));
+			const eventCountAfterChange = getEventStore().get('favorites:modified')?.length ?? 0;
+			await expectSuccess(VideoService.update(video.id, { isFavorite: true }));
 
 			expect(result.isFavorite).toBe(true);
 			expect(await favoriteService.isFavorite(FavoriteEntityType.VIDEO, video.id)).toBe(true);
+			expect(eventCountAfterChange - eventCountBefore).toBe(1);
+			expect(getEventStore().get('favorites:modified')?.length ?? 0).toBe(eventCountAfterChange);
 		});
 
 		it('debería fallar con VideoNotFound si ID no existe', async () => {
@@ -830,6 +836,7 @@ describe('VideoService - Toggle Operations', () => {
 		it('debería cambiar isFavorite de false a true', async () => {
 			const folder = await createTestFolder();
 			const video = await createTestVideo(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
 
 			const result = await expectSuccess(VideoService.toggleFavorite(video.id));
 
@@ -839,6 +846,7 @@ describe('VideoService - Toggle Operations', () => {
 		it('debería cambiar isFavorite de true a false', async () => {
 			const folder = await createTestFolder();
 			const video = await createTestVideo(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
 
 			const favorited = await expectSuccess(VideoService.toggleFavorite(video.id));
 			expect(favorited.isFavorite).toBe(true);
@@ -873,6 +881,7 @@ describe('VideoService - Toggle Operations', () => {
 			const folder = await createTestFolder();
 			const video1 = await createTestVideo(folder.id, { isFavorite: false });
 			const video2 = await createTestVideo(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
 
 			const result = await expectSuccess(VideoService.setFavoriteMany([video1.id, video2.id], true));
 
@@ -881,8 +890,10 @@ describe('VideoService - Toggle Operations', () => {
 
 		it('debería desmarcar múltiples videos como favoritos', async () => {
 			const folder = await createTestFolder();
-			const video1 = await createTestVideo(folder.id, { isFavorite: true });
-			const video2 = await createTestVideo(folder.id, { isFavorite: true });
+			const video1 = await createTestVideo(folder.id, { isFavorite: false });
+			const video2 = await createTestVideo(folder.id, { isFavorite: false });
+			await ensureActiveProfile();
+			await expectSuccess(VideoService.setFavoriteMany([video1.id, video2.id], true));
 
 			const result = await expectSuccess(VideoService.setFavoriteMany([video1.id, video2.id], false));
 
