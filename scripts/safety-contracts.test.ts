@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { Database } from 'bun:sqlite';
 import { existsSync } from 'node:fs';
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -282,13 +282,14 @@ describe('local runtime network policy', () => {
 });
 
 describe('destructive maintenance contract', () => {
-	it('bloquea el reset legacy antes de ejecutar comandos o tocar archivos', async () => {
+	it('mantiene reset fail-closed sin target disposable explícito', async () => {
 		const cwd = await createTemporaryDirectory();
-		const resetScript = resolve(workspacePath, 'scripts', 'db', 'reset.js');
+		const resetScript = resolve(workspacePath, 'scripts', 'db', 'reset.ts');
 		const result = await runProcess([process.execPath, resetScript], cwd);
 
 		expect(result.exitCode).toBe(2);
-		expect(result.stderr).toContain('deshabilitado');
+		expect(result.stderr).toContain('Uso: db:reset');
+		expect(await readdir(cwd)).toEqual([]);
 	});
 
 	it('no publica reset, cleanup de logs ni mutaciones thumbnail por GET', async () => {
@@ -340,6 +341,26 @@ describe('production bootstrap contract', () => {
 		expect(drizzleSource).toContain('DATABASE_URL es obligatorio en servidor/tests');
 		expect(drizzleSource).not.toMatch(/env\.DATABASE_URL\s*\|\|\s*['"]file:\.\/db\.sqlite/);
 		expect(favoriteSource).not.toMatch(/(?:ALTER TABLE|DROP INDEX|CREATE (?:UNIQUE )?INDEX|UPDATE "Favorite")/);
+	});
+
+	it('elimina todos los fallbacks silenciosos a la DB real del workspace', async () => {
+		const sourceFiles = [
+			'src/config/env.ts',
+			'src/lib/drizzle/index.ts',
+			'src/lib/drizzle/seeds/index.ts',
+			'src/server/security/file-mutation-recovery.ts',
+			'src/server/services/system.service.ts',
+			'src/server/services/system/system.stats.ts',
+			'scripts/tauri-dev.js',
+		];
+		const sources = await Promise.all(sourceFiles.map((file) => readFile(resolve(workspacePath, file), 'utf8')));
+		for (const source of sources) expect(source).not.toMatch(/DATABASE_URL\s*\|\|\s*['"]file:\.\/db\.sqlite/);
+		const tauriDevSource = sources.at(-1)!;
+		const tauriDevDatabaseSource = await readFile(resolve(workspacePath, 'scripts/tauri-dev-database.js'), 'utf8');
+		expect(tauriDevSource).not.toContain('process.env.DATABASE_URL');
+		expect(tauriDevDatabaseSource).toContain('MEDIA_MANAGER_TAURI_DEV_DATABASE');
+		expect(tauriDevDatabaseSource).toContain('debe permanecer dentro del data dir de desarrollo dedicado');
+		expect(tauriDevDatabaseSource).toContain('isSymbolicLink()');
 	});
 
 	it('mantiene un solo contexto de tema y protege también el árbol de providers', async () => {
