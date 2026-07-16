@@ -1,6 +1,6 @@
 {
 	"formatVersion": 1,
-	"fingerprint": "b25dcfd5fdc8172179b4b10fa240921f48a88c00302e44c73d90b575d17971e4",
+	"fingerprint": "eac079d6d9722c6e2901105a13b8ce2ef84f907a4f9536f0748e27133cc82baf",
 	"generatedFrom": "src/lib/drizzle/migrations",
 	"objects": [
 		{
@@ -72,6 +72,12 @@
 		{
 			"name": "Audio_createdAt_idx",
 			"sqlHash": "e5d11f4384b418b292bf584d0cffe268a75eea094b1cce4e73152221721a36a8",
+			"tableName": "Audio",
+			"type": "index"
+		},
+		{
+			"name": "Audio_folderId_createdAt_idx",
+			"sqlHash": "7548fb0d66049552d5986dd49fc52790c290da888deb70c74373022e7e1de5ea",
 			"tableName": "Audio",
 			"type": "index"
 		},
@@ -154,6 +160,12 @@
 			"type": "index"
 		},
 		{
+			"name": "Document_folderId_createdAt_idx",
+			"sqlHash": "084e9a8c9075973efefcf7f0d3bb53e97c2f5fafdccf4ae1f251771f63e250ea",
+			"tableName": "Document",
+			"type": "index"
+		},
+		{
 			"name": "Document_folderId_hash_idx",
 			"sqlHash": "8cea04a876978f742223a4a8b7f30769d215e49085b42a1c677b9b3e8c8fc4af",
 			"tableName": "Document",
@@ -228,6 +240,12 @@
 		{
 			"name": "File3D_createdAt_idx",
 			"sqlHash": "bc6f19c11d3236e226cd42e70f634e6484511cc5ad3a4760b1bee3c442ad6e7f",
+			"tableName": "File3D",
+			"type": "index"
+		},
+		{
+			"name": "File3D_folderId_createdAt_idx",
+			"sqlHash": "8ba73c7cb8bb0c6f8065320efe9e0ef1f10143a92de4526746765909bf78648b",
 			"tableName": "File3D",
 			"type": "index"
 		},
@@ -426,6 +444,12 @@
 		{
 			"name": "JsonFile_createdAt_idx",
 			"sqlHash": "f6db8e3dfa62a1212f1e84048aec2411f82dc0fda3d88c7209156c30dbefc9e6",
+			"tableName": "JsonFile",
+			"type": "index"
+		},
+		{
+			"name": "JsonFile_folderId_createdAt_idx",
+			"sqlHash": "3d79394e66ceaa184cb1e2f48e0fe1da942a08e387dfc1d72a74f15378ebf4fb",
 			"tableName": "JsonFile",
 			"type": "index"
 		},
@@ -660,6 +684,12 @@
 		{
 			"name": "Video_createdAt_idx",
 			"sqlHash": "1a83d3d91c3ad296f69d207c17207e753e83e3babdcaa8ccac5ad920520795cb",
+			"tableName": "Video",
+			"type": "index"
+		},
+		{
+			"name": "Video_folderId_createdAt_idx",
+			"sqlHash": "6344d8930807b8e3f2e67b049272d629dad2f010044feec26cce010e6579685b",
 			"tableName": "Video",
 			"type": "index"
 		},

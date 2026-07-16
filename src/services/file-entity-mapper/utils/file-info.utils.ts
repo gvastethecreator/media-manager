@@ -73,8 +73,9 @@ export function getMimeTypeFromExtension(extension: string): string {
  */
 export async function getFileInfo(filePath: string, folderId: string): Promise<FileInfo> {
 	const extension = extname(filePath).toLowerCase();
+	const entityType = getEntityTypeFromExtension(extension);
 	const sourcePromise =
-		getEntityTypeFromExtension(extension) === ('image' as EntityType)
+		entityType !== ('unknown' as EntityType)
 			? import('@/server/security/configured-media-source').then(({ resolveConfiguredMediaSource }) =>
 					resolveConfiguredMediaSource(filePath)
 				)

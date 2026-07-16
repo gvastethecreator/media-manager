@@ -6,11 +6,11 @@
  * =================================================================================
  */
 
-import * as crypto from 'node:crypto';
 import { and, asc, count, desc, eq, gte, inArray, like, lte, notInArray, or } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { jsonFiles } from '@/lib/drizzle/schema';
+import { isPathInsideDirectory } from '@/lib/filesystem/path-containment';
+import { folders, jsonFiles } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import {
@@ -19,13 +19,22 @@ import {
 	setFavoriteForActiveProfile,
 } from '@/services/favorite/favorite-write-transaction';
 import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
-import { normalizeCounts, sumCounts } from '@/transformers/common/counts';
-import type { JsonFileWithStats } from '@/types/entities/json-file/base';
+import {
+	assertCanonicalMediaCreateCommand,
+	createCanonicalMedia,
+	projectCanonicalMediaRow,
+	projectCanonicalMediaRows,
+	restoreCanonicalAsset,
+	tombstoneCanonicalAsset,
+	updateCanonicalMediaProjection,
+	visibleAssetLifecycleCondition,
+	type CanonicalMediaSourceInput,
+	type CanonicalMediaState,
+} from '@/services/media-core/canonical-media-persistence';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	JsonFileDatabaseError,
 	JsonFileError,
-	JsonFileHashConflict,
 	JsonFileNotFound,
 	JsonFileValidationError,
 } from './json-file-errors.effect';
@@ -77,6 +86,7 @@ export interface CreateJsonFileInput {
 	minified?: boolean;
 	prettyPrinted?: boolean;
 	parsedContent?: string | null;
+	source: CanonicalMediaSourceInput;
 }
 
 export type UpdateJsonFileInput = Partial<CreateJsonFileInput>;
@@ -99,6 +109,7 @@ export interface JsonFileFilters {
 }
 
 export interface JsonFileRow {
+	assetId: string | null;
 	id: string;
 	name: string;
 	path: string;
@@ -141,6 +152,9 @@ export interface JsonFileRow {
 	parsedContent: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+	canonicalDivergences: string[];
+	canonicalState: CanonicalMediaState;
+	legacyId: string;
 }
 
 export interface PaginatedResult<T> {
@@ -160,8 +174,11 @@ export interface JsonFileServiceInterface {
 	readonly getAll: (filters?: JsonFileFilters) => Effect.Effect<PaginatedResult<JsonFileRow>, JsonFileError>;
 	readonly getByHash: (hash: string) => Effect.Effect<JsonFileRow | null, JsonFileError>;
 	readonly getById: (id: string) => Effect.Effect<JsonFileRow, JsonFileError>;
+	readonly getImages: (id: string) => Effect.Effect<unknown[], JsonFileError>;
 	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<JsonFileRow | null, JsonFileError>;
 	readonly update: (id: string, input: UpdateJsonFileInput) => Effect.Effect<JsonFileRow, JsonFileError>;
+	readonly restoreById: (id: string) => Effect.Effect<JsonFileRow, JsonFileError>;
+	readonly toggleFavorite: (id: string) => Effect.Effect<JsonFileRow, JsonFileError>;
 }
 
 export class JsonFileService extends Context.Tag('JsonFileService')<JsonFileService, JsonFileServiceInterface>() {}
@@ -188,8 +205,12 @@ function validateCreateInput(input: CreateJsonFileInput): void {
 	if (!input.path || input.path.trim().length === 0) {
 		throw new JsonFileValidationError({ field: 'path', value: input.path, reason: 'El path es requerido' });
 	}
-	if (!input.hash || input.hash.trim().length === 0) {
-		throw new JsonFileValidationError({ field: 'hash', value: input.hash, reason: 'El hash es requerido' });
+	if (!/^[0-9a-f]{64}$/.test(input.hash)) {
+		throw new JsonFileValidationError({
+			field: 'hash',
+			value: input.hash,
+			reason: 'El hash debe ser SHA-256 lowercase',
+		});
 	}
 	if (input.size < 0) {
 		throw new JsonFileValidationError({ field: 'size', value: input.size, reason: 'El size no puede ser negativo' });
@@ -227,12 +248,19 @@ const make = (): JsonFileServiceInterface => {
 				catch: (error) => toJsonFileError('getById', error),
 			});
 
-			if (!result) {
+			const projected = result
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(result, 'json'),
+						catch: (error) => toJsonFileError('getById:canonicalProjection', error),
+					})
+				: null;
+			if (!projected) {
 				return yield* Effect.fail(new JsonFileNotFound({ id, message: `Archivo JSON con ID ${id} no encontrado` }));
 			}
 
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.JSON_FILE, result as JsonFileRow),
+				try: () =>
+					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.JSON_FILE, projected as JsonFileRow),
 				catch: (error) => toJsonFileError('getById:favoriteProjection', error),
 			});
 		});
@@ -243,15 +271,26 @@ const make = (): JsonFileServiceInterface => {
 
 			const result = yield* Effect.tryPromise({
 				try: async () => {
-					const rows = await db.select().from(jsonFiles).where(eq(jsonFiles.hash, hash)).limit(1);
+					const rows = await db
+						.select()
+						.from(jsonFiles)
+						.where(and(eq(jsonFiles.hash, hash), visibleAssetLifecycleCondition(jsonFiles.assetId)))
+						.limit(1);
 					return rows[0] || null;
 				},
 				catch: (error) => toJsonFileError('getByHash', error),
 			});
 
-			if (!result) return null;
+			const projected = result
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(result, 'json'),
+						catch: (error) => toJsonFileError('getByHash:canonicalProjection', error),
+					})
+				: null;
+			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.JSON_FILE, result as JsonFileRow),
+				try: () =>
+					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.JSON_FILE, projected as JsonFileRow),
 				catch: (error) => toJsonFileError('getByHash:favoriteProjection', error),
 			});
 		});
@@ -265,16 +304,29 @@ const make = (): JsonFileServiceInterface => {
 					const rows = await db
 						.select()
 						.from(jsonFiles)
-						.where(and(eq(jsonFiles.path, path), eq(jsonFiles.folderId, folderId)))
+						.where(
+							and(
+								eq(jsonFiles.path, path),
+								eq(jsonFiles.folderId, folderId),
+								visibleAssetLifecycleCondition(jsonFiles.assetId)
+							)
+						)
 						.limit(1);
 					return rows[0] || null;
 				},
 				catch: (error) => toJsonFileError('getByPathAndFolder', error),
 			});
 
-			if (!result) return null;
+			const projected = result
+				? yield* Effect.tryPromise({
+						try: () => projectCanonicalMediaRow(result, 'json'),
+						catch: (error) => toJsonFileError('getByPathAndFolder:canonicalProjection', error),
+					})
+				: null;
+			if (!projected) return null;
 			return yield* Effect.tryPromise({
-				try: () => favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.JSON_FILE, result as JsonFileRow),
+				try: () =>
+					favoriteService.projectEntityWithLegacyFallback(FavoriteEntityType.JSON_FILE, projected as JsonFileRow),
 				catch: (error) => toJsonFileError('getByPathAndFolder:favoriteProjection', error),
 			});
 		});
@@ -295,7 +347,7 @@ const make = (): JsonFileServiceInterface => {
 				return { data: [], total: 0, limit, offset };
 			}
 
-			const conditions: any[] = [];
+			const conditions: any[] = [visibleAssetLifecycleCondition(jsonFiles.assetId)];
 
 			if (filters.folderId) {
 				conditions.push(eq(jsonFiles.folderId, filters.folderId));
@@ -362,19 +414,29 @@ const make = (): JsonFileServiceInterface => {
 			const [rows, totalResult] = yield* Effect.tryPromise({
 				try: () =>
 					Promise.all([
-						db.select().from(jsonFiles).where(whereClause).orderBy(orderByClause).limit(limit).offset(offset),
+						db
+							.select()
+							.from(jsonFiles)
+							.where(whereClause)
+							.orderBy(orderByClause, orderFn(jsonFiles.id))
+							.limit(limit)
+							.offset(offset),
 						db.select({ count: count() }).from(jsonFiles).where(whereClause),
 					]),
 				catch: (error) => toJsonFileError('getAll', error),
 			});
 
 			const total = totalResult[0]?.count ?? 0;
+			const projectedRows = yield* Effect.tryPromise<JsonFileRow[], JsonFileError>({
+				try: async () => (await projectCanonicalMediaRows(rows, 'json')) as JsonFileRow[],
+				catch: (error) => toJsonFileError('getAll:canonicalProjection', error),
+			});
 
 			return {
 				data:
 					favoriteEntityIds === null
-						? (rows as JsonFileRow[])
-						: favoriteService.applyFavoriteProjectionMany(rows as JsonFileRow[], favoriteEntityIds),
+						? projectedRows
+						: favoriteService.applyFavoriteProjectionMany(projectedRows, favoriteEntityIds),
 				total,
 				limit,
 				offset,
@@ -387,6 +449,15 @@ const make = (): JsonFileServiceInterface => {
 
 			try {
 				validateCreateInput(input);
+				assertCanonicalMediaCreateCommand({
+					assetType: 'json',
+					folderId: input.folderId,
+					hash: input.hash,
+					name: input.name,
+					path: input.path,
+					size: input.size,
+					source: input.source,
+				});
 			} catch (error) {
 				return yield* Effect.fail(error as JsonFileError);
 			}
@@ -400,91 +471,80 @@ const make = (): JsonFileServiceInterface => {
 						})
 					: false;
 
-			const existing = yield* Effect.tryPromise({
-				try: async () => {
-					const rows = await db
-						.select({ id: jsonFiles.id })
-						.from(jsonFiles)
-						.where(eq(jsonFiles.hash, input.hash))
-						.limit(1);
-					return rows[0] || null;
-				},
-				catch: (error) => toJsonFileError('create:checkHash', error),
-			});
-
-			if (existing) {
-				return yield* Effect.fail(
-					new JsonFileHashConflict({
-						hash: input.hash,
-						existingId: existing.id,
-						message: `Ya existe un archivo JSON con hash ${input.hash} (id: ${existing.id})`,
-					})
-				);
-			}
-
 			let committedFavoriteProfileId: string | null = null;
 			const result = yield* Effect.tryPromise({
-				try: async () => {
-					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
-						const inserted = await transaction
-							.insert(jsonFiles)
-							.values({
-								id: crypto.randomUUID(),
-								name: input.name,
-								path: input.path,
-								size: input.size,
-								hash: input.hash,
-								mimeType: input.mimeType,
-								extension: input.extension,
-								folderId: input.folderId,
-								isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
-								isArchived: input.isArchived ?? false,
-								content: input.content ?? null,
-								schema: input.schema ?? null,
-								isValid: input.isValid ?? true,
-								validationErrors: input.validationErrors ?? null,
-								keyCount: input.keyCount ?? 0,
-								depth: input.depth ?? 0,
-								description: input.description ?? null,
-								emoji: input.emoji ?? null,
-								color: input.color ?? null,
-								shortcut: input.shortcut ?? null,
-								category: input.category ?? null,
-								filePath: input.filePath ?? null,
-								fileName: input.fileName ?? null,
-								fileSize: input.fileSize ?? null,
-								tags: input.tags ?? null,
-								metadata: input.metadata ?? null,
-								sortBy: input.sortBy ?? null,
-								filters: input.filters ?? null,
-								featuredImage: input.featuredImage ?? null,
-								validJson: input.validJson ?? false,
-								schemaVersion: input.schemaVersion ?? null,
-								keys: input.keys ?? null,
-								values: input.values ?? null,
-								hasArrays: input.hasArrays ?? false,
-								hasObjects: input.hasObjects ?? false,
-								encoding: input.encoding ?? null,
-								compressed: input.compressed ?? false,
-								minified: input.minified ?? false,
-								prettyPrinted: input.prettyPrinted ?? false,
-								parsedContent: input.parsedContent ?? null,
-								createdAt: new Date(),
-								updatedAt: new Date(),
-							})
-							.returning();
-						const created = inserted[0];
-						if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
-							committedFavoriteProfileId = await setFavoriteForActiveProfile(
-								transaction,
-								FavoriteEntityType.JSON_FILE,
-								created.id,
-								true
-							);
+				try: () =>
+					createCanonicalMedia(
+						{
+							assetType: 'json',
+							folderId: input.folderId,
+							hash: input.hash,
+							name: input.name,
+							path: input.path,
+							size: input.size,
+							source: input.source,
+						},
+						async ({ assetId, now, transaction }) => {
+							const inserted = await transaction
+								.insert(jsonFiles)
+								.values({
+									id: assetId,
+									assetId,
+									name: input.name,
+									path: input.path,
+									size: input.size,
+									hash: input.hash,
+									mimeType: input.mimeType,
+									extension: input.extension,
+									folderId: input.folderId,
+									isFavorite: requestedIsFavorite && !useCanonicalFavoriteBridge,
+									isArchived: input.isArchived ?? false,
+									content: input.content ?? null,
+									schema: input.schema ?? null,
+									isValid: input.isValid ?? true,
+									validationErrors: input.validationErrors ?? null,
+									keyCount: input.keyCount ?? 0,
+									depth: input.depth ?? 0,
+									description: input.description ?? null,
+									emoji: input.emoji ?? null,
+									color: input.color ?? null,
+									shortcut: input.shortcut ?? null,
+									category: input.category ?? null,
+									filePath: input.filePath ?? null,
+									fileName: input.fileName ?? null,
+									fileSize: input.fileSize ?? null,
+									tags: input.tags ?? null,
+									metadata: input.metadata ?? null,
+									sortBy: input.sortBy ?? null,
+									filters: input.filters ?? null,
+									featuredImage: input.featuredImage ?? null,
+									validJson: input.validJson ?? false,
+									schemaVersion: input.schemaVersion ?? null,
+									keys: input.keys ?? null,
+									values: input.values ?? null,
+									hasArrays: input.hasArrays ?? false,
+									hasObjects: input.hasObjects ?? false,
+									encoding: input.encoding ?? null,
+									compressed: input.compressed ?? false,
+									minified: input.minified ?? false,
+									prettyPrinted: input.prettyPrinted ?? false,
+									parsedContent: input.parsedContent ?? null,
+									createdAt: now,
+									updatedAt: now,
+								})
+								.returning();
+							const created = inserted[0];
+							if (created && requestedIsFavorite && useCanonicalFavoriteBridge) {
+								committedFavoriteProfileId = await setFavoriteForActiveProfile(
+									transaction,
+									FavoriteEntityType.JSON_FILE,
+									created.id,
+									true
+								);
+							}
+							return created;
 						}
-						return created;
-					});
-				},
+					),
 				catch: (error) => toJsonFileError('create:insert', error),
 			});
 
@@ -511,7 +571,42 @@ const make = (): JsonFileServiceInterface => {
 		Effect.gen(function* () {
 			jsonFileLogger.info('Actualizando jsonFile:', id);
 
-			yield* getById(id);
+			const current = yield* getById(id);
+			if (input.hash !== undefined && !/^[0-9a-f]{64}$/.test(input.hash)) {
+				return yield* Effect.fail(
+					new JsonFileValidationError({
+						field: 'hash',
+						value: input.hash,
+						reason: 'El hash debe ser SHA-256 lowercase',
+					})
+				);
+			}
+			if (current.assetId && (input.path !== undefined || input.folderId !== undefined) && !input.source) {
+				return yield* Effect.fail(
+					new JsonFileValidationError({
+						field: 'source',
+						value: input.source,
+						reason: 'Mover un JsonFile canónico requiere una source autorizada',
+					})
+				);
+			}
+			if (current.assetId && input.source) {
+				try {
+					assertCanonicalMediaCreateCommand({
+						assetType: 'json',
+						folderId: input.folderId ?? current.folderId,
+						hash: input.hash ?? current.hash,
+						name: input.name ?? current.name,
+						path: input.path ?? current.path,
+						size: input.size ?? current.size,
+						source: input.source,
+					});
+				} catch (error) {
+					return yield* Effect.fail(
+						new JsonFileValidationError({ field: 'source', value: input.source, reason: String(error) })
+					);
+				}
+			}
 
 			const requestedIsFavorite = typeof input.isFavorite === 'boolean' ? input.isFavorite : undefined;
 			const useCanonicalFavoriteBridge =
@@ -570,8 +665,33 @@ const make = (): JsonFileServiceInterface => {
 			const result = yield* Effect.tryPromise({
 				try: async () => {
 					return db.transaction(async (transaction: FavoriteWriteTransaction) => {
+						if (current.assetId && input.source) {
+							const targetFolderId = input.folderId ?? current.folderId;
+							const targetPath = input.path ?? current.path;
+							const [targetFolder] = await transaction
+								.select({ path: folders.path })
+								.from(folders)
+								.where(eq(folders.id, targetFolderId))
+								.limit(1);
+							if (!targetFolder || !isPathInsideDirectory(targetFolder.path, targetPath)) {
+								throw new Error('La ubicación física no pertenece al Folder declarado.');
+							}
+						}
 						const updated = await transaction.update(jsonFiles).set(updateData).where(eq(jsonFiles.id, id)).returning();
 						const entity = updated[0];
+						if (entity && current.assetId) {
+							await updateCanonicalMediaProjection(
+								{
+									assetId: current.assetId,
+									folderId: input.folderId,
+									hash: input.hash,
+									name: input.name,
+									size: input.size,
+									source: input.source,
+								},
+								transaction as typeof db
+							);
+						}
 						if (entity && requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
 							committedFavoriteProfileId = await setFavoriteForActiveProfile(
 								transaction,
@@ -613,7 +733,20 @@ const make = (): JsonFileServiceInterface => {
 		Effect.gen(function* () {
 			jsonFileLogger.info('Eliminando jsonFile:', id);
 
-			yield* getById(id);
+			const [current] = yield* Effect.tryPromise<Array<{ assetId: string | null }>, JsonFileError>({
+				try: () => db.select({ assetId: jsonFiles.assetId }).from(jsonFiles).where(eq(jsonFiles.id, id)).limit(1),
+				catch: (error) => toJsonFileError('delete:lookup', error),
+			});
+			if (!current) {
+				return yield* Effect.fail(new JsonFileNotFound({ id, message: `Archivo JSON con ID ${id} no encontrado` }));
+			}
+			if (current.assetId) {
+				yield* Effect.tryPromise({
+					try: () => tombstoneCanonicalAsset(current.assetId!),
+					catch: (error) => toJsonFileError('delete:tombstone', error),
+				});
+				return;
+			}
 
 			yield* Effect.tryPromise({
 				try: () =>
@@ -627,6 +760,46 @@ const make = (): JsonFileServiceInterface => {
 			jsonFileLogger.info('JsonFile eliminado exitosamente:', id);
 		});
 
+	const restoreById = (id: string): Effect.Effect<JsonFileRow, JsonFileError> =>
+		Effect.gen(function* () {
+			const [current] = yield* Effect.tryPromise<Array<{ assetId: string | null }>, JsonFileError>({
+				try: () => db.select({ assetId: jsonFiles.assetId }).from(jsonFiles).where(eq(jsonFiles.id, id)).limit(1),
+				catch: (error) => toJsonFileError('restoreById:lookup', error),
+			});
+			if (!current?.assetId) {
+				return yield* Effect.fail(new JsonFileNotFound({ id, message: `Archivo JSON canónico ${id} no encontrado` }));
+			}
+			yield* Effect.tryPromise({
+				try: () => restoreCanonicalAsset(current.assetId!),
+				catch: (error) => toJsonFileError('restoreById', error),
+			});
+			return yield* getById(id);
+		});
+
+	const toggleFavorite = (id: string): Effect.Effect<JsonFileRow, JsonFileError> =>
+		Effect.gen(function* () {
+			const entity = yield* getById(id);
+			const favoriteIds = yield* Effect.tryPromise({
+				try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.JSON_FILE),
+				catch: (error) => toJsonFileError('toggleFavorite.scope', error),
+			});
+			const next = !(favoriteIds?.includes(id) ?? entity.isFavorite);
+			if (favoriteIds === null) {
+				yield* Effect.tryPromise({
+					try: () => db.update(jsonFiles).set({ isFavorite: next, updatedAt: new Date() }).where(eq(jsonFiles.id, id)),
+					catch: (error) => toJsonFileError('toggleFavorite.legacy', error),
+				});
+			} else {
+				yield* Effect.tryPromise({
+					try: () => favoriteService.set(FavoriteEntityType.JSON_FILE, id, next),
+					catch: (error) => toJsonFileError('toggleFavorite.canonical', error),
+				});
+			}
+			return yield* getById(id);
+		});
+
+	const getImages = (_id: string): Effect.Effect<unknown[], JsonFileError> => Effect.succeed([]);
+
 	return {
 		getById,
 		getByHash,
@@ -635,6 +808,9 @@ const make = (): JsonFileServiceInterface => {
 		create,
 		update,
 		delete: deleteJsonFile,
+		restoreById,
+		toggleFavorite,
+		getImages,
 	};
 };
 
@@ -665,3 +841,5 @@ export const update = (id: string, input: UpdateJsonFileInput): Effect.Effect<Js
 
 const jfDelete = (id: string): Effect.Effect<void, JsonFileError> => make().delete(id);
 export { jfDelete as delete };
+
+export const restoreById = (id: string): Effect.Effect<JsonFileRow, JsonFileError> => make().restoreById(id);

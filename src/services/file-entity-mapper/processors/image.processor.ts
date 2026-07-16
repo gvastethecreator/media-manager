@@ -1,14 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
-import { and, eq, sql } from 'drizzle-orm';
 import { Effect } from 'effect';
-import { db } from '@/lib/drizzle';
-import { sourceFiles } from '@/lib/drizzle/schema';
 import { ImageCreateInput } from '@/lib/effect/schemas/entities';
 import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { create as createImage } from '@/services/image/image.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
+import { isCanonicalSourceIndexed } from '../utils/canonical-source.utils';
 
 const imageLogger = serverLogger.withContext('ImageProcessor');
 
@@ -20,18 +18,7 @@ export class ImageProcessor {
 	 * Verifica si la misma ubicación ya fue indexada. El hash sólo marca candidatos duplicados.
 	 */
 	async checkExists(fileInfo: FileInfo): Promise<boolean> {
-		if (!fileInfo.source) return false;
-		const [existing] = await db
-			.select({ assetId: sourceFiles.assetId })
-			.from(sourceFiles)
-			.where(
-				and(
-					eq(sourceFiles.rootId, fileInfo.source.rootId),
-					sql`${sourceFiles.relativePath} COLLATE NOCASE = ${fileInfo.source.relativePath}`
-				)
-			)
-			.limit(1);
-		return Boolean(existing);
+		return isCanonicalSourceIndexed(fileInfo);
 	}
 
 	/**

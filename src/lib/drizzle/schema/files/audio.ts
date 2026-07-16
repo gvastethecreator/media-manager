@@ -67,6 +67,7 @@ export const audios = sqliteTable(
 		folderId_idx: index('Audio_folderId_idx').on(table.folderId),
 		hash_idx: index('Audio_hash_idx').on(table.hash),
 		folderHashIdx: index('Audio_folderId_hash_idx').on(table.folderId, table.hash),
+		folderCreatedAtIdx: index('Audio_folderId_createdAt_idx').on(table.folderId, table.createdAt, table.id),
 		createdAt_idx: index('Audio_createdAt_idx').on(table.createdAt),
 		updatedAt_idx: index('Audio_updatedAt_idx').on(table.updatedAt),
 		sizeCheck: check('Audio_size_check', sql`size >= 0 AND size <= 107374182400`),

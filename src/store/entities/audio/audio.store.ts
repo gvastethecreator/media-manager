@@ -9,6 +9,8 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 // Migrado a cliente de API
 import {
+	type PublicAudioCreateInput,
+	type PublicAudioUpdateInput,
 	createAudioInApi,
 	deleteAudioFromApi,
 	getAudiosFromApi,
@@ -16,7 +18,7 @@ import {
 	updateAudioInApi,
 } from '@/lib/api/client/audio.client';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
+import type { AudioWithStats } from '@/types/entities/audio';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type AudioFilters = Record<string, any>;
@@ -29,7 +31,7 @@ export interface AudioState {
 	audios: AudioWithStats[];
 	clearFilters: () => void;
 	clearSelection: () => void;
-	createAudio: (data: AudioCreateInput) => Promise<AudioWithStats | undefined>;
+	createAudio: (data: PublicAudioCreateInput) => Promise<AudioWithStats | undefined>;
 	currentAudio: AudioWithStats | null;
 	deleteAudio: (id: string) => Promise<void>;
 	deselectAudio: (audioId: string) => void;
@@ -53,7 +55,7 @@ export interface AudioState {
 	// Acciones de filtrado
 	setFilters: (filters: Partial<AudioFilters>) => void;
 	toggleFavorite: (id: string) => Promise<void>;
-	updateAudio: (id: string, data: AudioUpdateInput) => Promise<AudioWithStats | undefined>;
+	updateAudio: (id: string, data: PublicAudioUpdateInput) => Promise<AudioWithStats | undefined>;
 }
 
 const useAudioStoreBase = create<AudioState>()(
@@ -79,7 +81,7 @@ const useAudioStoreBase = create<AudioState>()(
 				}
 			},
 
-			createAudio: async (data: AudioCreateInput) => {
+			createAudio: async (data: PublicAudioCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newAudio = await createAudioInApi(data);
@@ -94,7 +96,7 @@ const useAudioStoreBase = create<AudioState>()(
 				}
 			},
 
-			updateAudio: async (id: string, data: AudioUpdateInput) => {
+			updateAudio: async (id: string, data: PublicAudioUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedAudio = await updateAudioInApi(id, data);

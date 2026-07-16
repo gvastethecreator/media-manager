@@ -358,3 +358,54 @@ export async function updateCanonicalAssetTitle(
 		.returning({ id: assets.id });
 	if (updated.length !== 1) throw new Error('El Asset canónico no existe.');
 }
+
+export interface CanonicalMediaUpdate {
+	assetId: string;
+	folderId?: string;
+	hash?: string;
+	name?: string;
+	size?: number;
+	source?: CanonicalMediaSourceInput;
+}
+
+/**
+ * Keeps the common Asset/primary SourceFile projection synchronized with a specialization update.
+ * Callers remain responsible for validating the complete authorized command and Folder containment.
+ */
+export async function updateCanonicalMediaProjection(
+	input: CanonicalMediaUpdate,
+	transaction: typeof db = db
+): Promise<void> {
+	if (input.name !== undefined) await updateCanonicalAssetTitle(input.assetId, input.name, transaction);
+	if (!(input.source || input.size !== undefined || input.folderId !== undefined || input.hash !== undefined)) return;
+	const [asset] = await transaction
+		.select({ primarySourceFileId: assets.primarySourceFileId })
+		.from(assets)
+		.where(eq(assets.id, input.assetId))
+		.limit(1);
+	if (!asset) throw new Error('Asset canónico no encontrado.');
+	const updated = await transaction
+		.update(sourceFiles)
+		.set({
+			...(input.hash !== undefined ? { contentHash: input.hash } : {}),
+			...(input.size !== undefined ? { byteSize: input.size } : {}),
+			...(input.folderId !== undefined ? { folderId: input.folderId } : {}),
+			...(input.source
+				? {
+						...(input.source.fileCreatedAt !== undefined ? { fileCreatedAt: input.source.fileCreatedAt } : {}),
+						...(input.source.fileIdentity !== undefined ? { fileIdentity: input.source.fileIdentity } : {}),
+						...(input.source.fileModifiedAt !== undefined ? { fileModifiedAt: input.source.fileModifiedAt } : {}),
+						...(input.source.mimeType !== undefined ? { mimeType: input.source.mimeType } : {}),
+						extension: extname(input.source.relativePath).slice(1).toLowerCase() || null,
+						relativePath: input.source.relativePath,
+						rootId: input.source.rootId,
+					}
+				: {}),
+			availability: 'available',
+			observedAt: new Date(),
+			updatedAt: new Date(),
+		})
+		.where(and(eq(sourceFiles.id, asset.primarySourceFileId), eq(sourceFiles.assetId, input.assetId)))
+		.returning({ id: sourceFiles.id });
+	if (updated.length !== 1) throw new Error('SourceFile primario canónico no encontrado.');
+}

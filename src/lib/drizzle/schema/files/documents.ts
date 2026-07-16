@@ -68,6 +68,7 @@ export const documents = sqliteTable(
 		folderId_idx: index('Document_folderId_idx').on(table.folderId),
 		hash_idx: index('Document_hash_idx').on(table.hash),
 		folderHashIdx: index('Document_folderId_hash_idx').on(table.folderId, table.hash),
+		folderCreatedAtIdx: index('Document_folderId_createdAt_idx').on(table.folderId, table.createdAt, table.id),
 		createdAt_idx: index('Document_createdAt_idx').on(table.createdAt),
 		updatedAt_idx: index('Document_updatedAt_idx').on(table.updatedAt),
 		sizeCheck: check('Document_size_check', sql`size >= 0 AND size <= 107374182400`),

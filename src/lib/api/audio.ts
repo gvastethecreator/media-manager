@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
+import type { PublicAudioCreateInput, PublicAudioUpdateInput } from '@/lib/api/client/audio.client';
+import type { AudioWithStats } from '@/types/entities/audio';
 import { apiClient } from './client';
 
 export const audioKeys = {
@@ -20,7 +21,7 @@ export function useAudios() {
 
 export function useCreateAudio() {
 	const qc = useQueryClient();
-	return useMutation<AudioWithStats, Error, AudioCreateInput>({
+	return useMutation<AudioWithStats, Error, PublicAudioCreateInput>({
 		mutationFn: (data) => apiClient.post<AudioWithStats>('/audio', data),
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: audioKeys.lists() });
@@ -30,8 +31,8 @@ export function useCreateAudio() {
 
 export function useUpdateAudio() {
 	const qc = useQueryClient();
-	return useMutation<AudioWithStats, Error, { id: string; data: AudioUpdateInput }>({
-		mutationFn: ({ id, data }) => apiClient.put<AudioWithStats>(`/audio/${id}`, data),
+	return useMutation<AudioWithStats, Error, { id: string; data: PublicAudioUpdateInput }>({
+		mutationFn: ({ id, data }) => apiClient.patch<AudioWithStats>(`/audio/${id}`, data),
 		onSuccess: (data) => {
 			qc.invalidateQueries({ queryKey: audioKeys.lists() });
 			qc.setQueryData(audioKeys.detail(data.id), data);

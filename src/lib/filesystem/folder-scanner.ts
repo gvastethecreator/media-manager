@@ -326,7 +326,7 @@ async function scanDirectory(
 		}
 	} catch (error) {
 		scannerLogger.error('Error escaneando subdirectorio:', { path: currentPath, error });
-		// Continuar con otros directorios en caso de error
+		throw error;
 	}
 }
 
@@ -513,6 +513,7 @@ async function processFileEntry(
 		}
 	} catch (error) {
 		scannerLogger.warn('⚠️ Error procesando archivo:', { path: fullPath, error });
+		throw error;
 	}
 }
 
@@ -557,5 +558,6 @@ async function processDirectoryEntry(
 		}
 	} catch (error) {
 		scannerLogger.warn('⚠️ Error procesando directorio:', { path: fullPath, error });
+		throw error;
 	}
 }

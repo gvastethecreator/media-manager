@@ -15,6 +15,7 @@ import { createAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proo
 import { FileSyncService } from '@/lib/filesystem/file-sync.service';
 import { assets, favorites, folders, mediaRoots, profiles, sourceFiles, videos } from '@/lib/drizzle/schema';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { createAuthorizedRootRegistry } from '@/server/security/authorized-roots';
 import { getFolderFileStats, getFolderFiles } from '@/services/folder-files/folder-files.service';
 import { streamFolderFiles } from '@/services/folder-files/folder-files-stream.service';
 import { performSearch } from '@/server/services/search.service';
@@ -231,28 +232,30 @@ describe('VideoService - CRUD Operations', () => {
 			expect(await favoriteService.isFavorite(FavoriteEntityType.VIDEO, result.id)).toBe(true);
 		});
 
-		it('debería fallar con VideoHashConflict si hash ya existe', async () => {
+		it('debería crear dos Assets para ubicaciones distintas con el mismo hash', async () => {
 			const folder = await createTestFolder();
-			const existingVideo = await createTestVideo(folder.id);
-
-			const input = {
-				name: 'duplicate.mp4',
-				path: '/test/duplicate.mp4',
-				hash: existingVideo.hash,
+			const hash = '2'.repeat(64);
+			const common = {
+				hash,
 				size: 10_000_000,
 				duration: 120,
 				width: 1920,
 				height: 1080,
 				folderId: folder.id,
 			};
+			const first = await expectSuccess(
+				VideoService.create(
+					await withCanonicalSource(folder, { ...common, name: 'first-location.mp4', path: '/ignored/first.mp4' })
+				)
+			);
+			const second = await expectSuccess(
+				VideoService.create(
+					await withCanonicalSource(folder, { ...common, name: 'second-location.mp4', path: '/ignored/second.mp4' })
+				)
+			);
 
-			const error = await expectError(VideoService.create(await withCanonicalSource(folder, input)));
-
-			expect(error._tag).toBe('VideoHashConflict');
-			if (error._tag === 'VideoHashConflict') {
-				expect(error.hash).toBe(existingVideo.hash);
-				expect(error.existingId).toBe(existingVideo.id);
-			}
+			expect(second.id).not.toBe(first.id);
+			expect(second.hash).toBe(first.hash);
 		});
 
 		it('debería fallar con VideoValidationError si size > 100GB', async () => {
@@ -616,6 +619,9 @@ describe('VideoService - CRUD Operations', () => {
 			const videoPath = resolve(rootPath, 'observed.mp4');
 			await writeFile(videoPath, 'video');
 			const rootId = `root-video-${crypto.randomUUID()}`;
+			const authorizedRootRegistry = await createAuthorizedRootRegistry([
+				{ id: rootId, path: rootPath, permissions: ['index', 'read'] },
+			]);
 			await db.insert(mediaRoots).values({ id: rootId, label: 'Video sync root' });
 			const folder = await createTestFolder(rootPath);
 			const created = await expectSuccess(
@@ -631,14 +637,20 @@ describe('VideoService - CRUD Operations', () => {
 			);
 
 			await rm(videoPath);
-			await FileSyncService.getInstance().syncFolderFiles(folder.id, { entityTypes: ['video'] });
+			await FileSyncService.getInstance().syncFolderFiles(folder.id, {
+				authorizedRootRegistry,
+				entityTypes: ['video'],
+			});
 			expect(await db.select().from(videos).where(eq(videos.id, created.id))).toHaveLength(1);
 			expect((await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, created.id)))[0]).toEqual(
 				expect.objectContaining({ availability: 'missing' })
 			);
 
 			await writeFile(videoPath, 'video');
-			await FileSyncService.getInstance().syncFolderFiles(folder.id, { entityTypes: ['video'] });
+			await FileSyncService.getInstance().syncFolderFiles(folder.id, {
+				authorizedRootRegistry,
+				entityTypes: ['video'],
+			});
 			expect((await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, created.id)))[0]).toEqual(
 				expect.objectContaining({ availability: 'available' })
 			);

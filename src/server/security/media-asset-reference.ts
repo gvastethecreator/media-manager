@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import { resolve as resolvePath } from 'node:path';
+import { extname, resolve as resolvePath } from 'node:path';
 import type {
 	AuthorizedPathReference,
 	AuthorizedRootRegistry,
@@ -277,6 +277,7 @@ async function updateCanonicalLocationContract(
 		.update(sourceFiles)
 		.set({
 			...(changes.folderId !== undefined ? { folderId: changes.folderId } : {}),
+			extension: extname(changes.source.relativePath).slice(1).toLowerCase() || null,
 			relativePath: changes.source.relativePath,
 			rootId: changes.source.rootId,
 			updatedAt: new Date(),
@@ -299,6 +300,9 @@ export async function updateMediaAssetLocation(
 	expectedPath: string,
 	changes: { folderId?: string; name?: string; path: string; source?: AuthorizedPathReference }
 ): Promise<void> {
+	if (extname(expectedPath).toLowerCase() !== extname(changes.path).toLowerCase()) {
+		throw new MediaAssetLocationConflictError();
+	}
 	const { source: _source, ...legacyChanges } = changes;
 	const values = { ...legacyChanges, updatedAt: new Date() };
 	switch (reference.assetType) {
@@ -331,6 +335,7 @@ export async function updateMediaAssetLocation(
 				const sourceUpdated = await transaction
 					.update(sourceFiles)
 					.set({
+						extension: extname(changes.source.relativePath).slice(1).toLowerCase() || null,
 						folderId: changes.folderId,
 						relativePath: changes.source.relativePath,
 						rootId: changes.source.rootId,
@@ -375,12 +380,21 @@ export async function updateMediaAssetLocation(
 				import('@/lib/drizzle'),
 				import('@/lib/drizzle/schema/files/audio'),
 			]);
-			const updated = await db
-				.update(audios)
-				.set(values)
-				.where(and(eq(audios.id, reference.assetId), eq(audios.path, expectedPath)))
-				.returning({ id: audios.id });
-			if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+			await db.transaction(async (transaction: typeof db) => {
+				const [current] = await transaction
+					.select({ assetId: audios.assetId })
+					.from(audios)
+					.where(and(eq(audios.id, reference.assetId), eq(audios.path, expectedPath)))
+					.limit(1);
+				if (!current) throw new MediaAssetLocationConflictError();
+				const updated = await transaction
+					.update(audios)
+					.set(values)
+					.where(and(eq(audios.id, reference.assetId), eq(audios.path, expectedPath)))
+					.returning({ id: audios.id });
+				if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+				if (current.assetId) await updateCanonicalLocationContract(transaction, current.assetId, changes);
+			});
 			return;
 		}
 		case 'document': {
@@ -388,12 +402,21 @@ export async function updateMediaAssetLocation(
 				import('@/lib/drizzle'),
 				import('@/lib/drizzle/schema/files/documents'),
 			]);
-			const updated = await db
-				.update(documents)
-				.set(values)
-				.where(and(eq(documents.id, reference.assetId), eq(documents.path, expectedPath)))
-				.returning({ id: documents.id });
-			if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+			await db.transaction(async (transaction: typeof db) => {
+				const [current] = await transaction
+					.select({ assetId: documents.assetId })
+					.from(documents)
+					.where(and(eq(documents.id, reference.assetId), eq(documents.path, expectedPath)))
+					.limit(1);
+				if (!current) throw new MediaAssetLocationConflictError();
+				const updated = await transaction
+					.update(documents)
+					.set(values)
+					.where(and(eq(documents.id, reference.assetId), eq(documents.path, expectedPath)))
+					.returning({ id: documents.id });
+				if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+				if (current.assetId) await updateCanonicalLocationContract(transaction, current.assetId, changes);
+			});
 			return;
 		}
 		case 'json': {
@@ -401,12 +424,21 @@ export async function updateMediaAssetLocation(
 				import('@/lib/drizzle'),
 				import('@/lib/drizzle/schema/files/jsonFiles'),
 			]);
-			const updated = await db
-				.update(jsonFiles)
-				.set(values)
-				.where(and(eq(jsonFiles.id, reference.assetId), eq(jsonFiles.path, expectedPath)))
-				.returning({ id: jsonFiles.id });
-			if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+			await db.transaction(async (transaction: typeof db) => {
+				const [current] = await transaction
+					.select({ assetId: jsonFiles.assetId })
+					.from(jsonFiles)
+					.where(and(eq(jsonFiles.id, reference.assetId), eq(jsonFiles.path, expectedPath)))
+					.limit(1);
+				if (!current) throw new MediaAssetLocationConflictError();
+				const updated = await transaction
+					.update(jsonFiles)
+					.set(values)
+					.where(and(eq(jsonFiles.id, reference.assetId), eq(jsonFiles.path, expectedPath)))
+					.returning({ id: jsonFiles.id });
+				if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+				if (current.assetId) await updateCanonicalLocationContract(transaction, current.assetId, changes);
+			});
 			return;
 		}
 		case 'file3d': {
@@ -414,12 +446,21 @@ export async function updateMediaAssetLocation(
 				import('@/lib/drizzle'),
 				import('@/lib/drizzle/schema/files/file3Ds'),
 			]);
-			const updated = await db
-				.update(file3Ds)
-				.set(values)
-				.where(and(eq(file3Ds.id, reference.assetId), eq(file3Ds.path, expectedPath)))
-				.returning({ id: file3Ds.id });
-			if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+			await db.transaction(async (transaction: typeof db) => {
+				const [current] = await transaction
+					.select({ assetId: file3Ds.assetId })
+					.from(file3Ds)
+					.where(and(eq(file3Ds.id, reference.assetId), eq(file3Ds.path, expectedPath)))
+					.limit(1);
+				if (!current) throw new MediaAssetLocationConflictError();
+				const updated = await transaction
+					.update(file3Ds)
+					.set(values)
+					.where(and(eq(file3Ds.id, reference.assetId), eq(file3Ds.path, expectedPath)))
+					.returning({ id: file3Ds.id });
+				if (updated.length !== 1) throw new MediaAssetLocationConflictError();
+				if (current.assetId) await updateCanonicalLocationContract(transaction, current.assetId, changes);
+			});
 			return;
 		}
 	}
