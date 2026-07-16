@@ -26,6 +26,7 @@ import {
 } from '@/lib/drizzle/schema/index';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { getRealSystemMetrics } from '@/server/utils/system-metrics';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { createStatsError, StatsErrorCode, statsLogger } from './stats';
 
 // Interfaces
@@ -176,7 +177,10 @@ interface MediaCounts {
 
 async function fetchMediaCounts(): Promise<MediaCounts> {
 	const [imagesCount, videosCount, audiosCount, documentsCount, jsonFilesCount, file3DsCount] = await Promise.all([
-		db.select({ count: sql<number>`count(*)` }).from(images),
+		db
+			.select({ count: sql<number>`count(*)` })
+			.from(images)
+			.where(visibleImageLifecycleCondition()),
 		db.select({ count: sql<number>`count(*)` }).from(videos),
 		db.select({ count: sql<number>`count(*)` }).from(audios),
 		db.select({ count: sql<number>`count(*)` }).from(documents),
@@ -279,7 +283,7 @@ async function fetchSystemCounts(): Promise<SystemCounts> {
 
 async function fetchSizeSums() {
 	const [
-		totalSizeResult,
+		imageSizeResult,
 		audioSizeResult,
 		documentSizeResult,
 		jsonSizeResult,
@@ -287,7 +291,10 @@ async function fetchSizeSums() {
 		videoSizeResult,
 		thumbnailSizeResult,
 	] = await Promise.all([
-		db.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` }).from(folders),
+		db
+			.select({ totalSize: sql<number>`COALESCE(SUM(${images.size}), 0)` })
+			.from(images)
+			.where(visibleImageLifecycleCondition()),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` }).from(audios),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)` }).from(documents),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` }).from(jsonFiles),
@@ -297,7 +304,7 @@ async function fetchSizeSums() {
 	]);
 
 	return {
-		totalFoldersSize: totalSizeResult[0]?.totalSize || 0,
+		totalImageSize: imageSizeResult[0]?.totalSize || 0,
 		totalAudioSize: audioSizeResult[0]?.totalSize || 0,
 		totalDocumentSize: documentSizeResult[0]?.totalSize || 0,
 		totalJsonSize: jsonSizeResult[0]?.totalSize || 0,
@@ -350,7 +357,8 @@ export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 
 		// Calcular información de disco (aproximada basada en el total de archivos)
 		const totalFileSize =
-			sizes.totalFoldersSize +
+			sizes.totalImageSize +
+			sizes.totalVideoSize +
 			sizes.totalAudioSize +
 			sizes.totalDocumentSize +
 			sizes.totalJsonSize +
@@ -505,6 +513,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 			db
 				.select({ count: sql<number>`count(*)` })
 				.from(images)
+				.where(visibleImageLifecycleCondition())
 				.then((rows: Array<{ count: number }>) => {
 					statsLogger.info('✅ Consulta images completada:', rows);
 					return rows;
@@ -572,8 +581,9 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					return [{ count: 0 }];
 				}),
 			db
-				.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` })
-				.from(folders)
+				.select({ totalSize: sql<number>`COALESCE(SUM(${images.size}), 0)` })
+				.from(images)
+				.where(visibleImageLifecycleCondition())
 				.then((rows: Array<{ totalSize: number }>) => {
 					statsLogger.info('✅ Consulta totalSize completada:', rows);
 					return rows;
@@ -589,6 +599,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					thumbnailsCacheSize: sql<number>`COALESCE(SUM(${images.thumbnailSize}), 0)`,
 				})
 				.from(images)
+				.where(visibleImageLifecycleCondition())
 				.then((rows: Array<{ totalThumbnails: number; thumbnailsCacheSize: number }>) => {
 					statsLogger.info('✅ Consulta thumbnails stats completada:', rows);
 					return rows;

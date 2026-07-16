@@ -126,13 +126,20 @@ type FolderFilesGetter = (opts: {
 	sortOrder?: 'asc' | 'desc';
 }) => Promise<FolderFilesResult>;
 
+type FolderFileStatsGetter = (
+	folderId: string,
+	includeSubfolders?: boolean
+) => Promise<FolderFileCounts & { total: number; totalSize: number }>;
+
 let getFolderFiles: FolderFilesGetter | undefined;
+let getFolderFileStats: FolderFileStatsGetter | undefined;
 
 // Cargar módulos de archivos dinámicamente
 const loadFolderFilesServices = async () => {
 	if (!getFolderFiles) {
 		const module = await import('@/services/folder-files/folder-files.service');
 		getFolderFiles = module.getFolderFiles;
+		getFolderFileStats = module.getFolderFileStats;
 	}
 };
 
@@ -460,21 +467,26 @@ router.get(
 						}),
 					catch: (err) => new Error(`Failed to fetch folder preview files: ${String(err)}`),
 				});
+				const previewStats = yield* Effect.tryPromise({
+					try: () => getFolderFileStats!(req.params.id, true),
+					catch: (err) => new Error(`Failed to fetch folder preview stats: ${String(err)}`),
+				});
 
 				return {
 					folder,
 					previewFiles: normalizePreviewFiles(previewFilesResult, baseUrl, max),
+					previewStats,
 				};
 			}).pipe(Effect.provide(FolderServiceLive)),
 		{
-			onSuccess: ({ folder, previewFiles }, res) => {
+			onSuccess: ({ folder, previewFiles, previewStats }, res) => {
 				const name = escapeXml(folder.name || 'Carpeta');
 				const authorizedReference = res.locals.authorizedRootReference as
 					| { relativePath: string; rootId: string }
 					| undefined;
 				const path = escapeXml(authorizedReference?.relativePath || '/');
-				const totalFiles = folder.totalFiles ?? folder._count?.totalFiles ?? 0;
-				const totalSize = formatBytes(folder.totalSize ?? 0);
+				const totalFiles = previewStats.total;
+				const totalSize = formatBytes(previewStats.totalSize);
 				const svg = buildFolderPreviewSvg({
 					previewFiles,
 					name,

@@ -12,6 +12,7 @@
 
 import { sql } from 'drizzle-orm';
 import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { assets } from '../media-core/assets';
 import { folders } from '../organization/folders';
 import { notes } from '../taxonomy/notes';
 
@@ -20,6 +21,9 @@ export const images = sqliteTable(
 	'Image',
 	{
 		id: text('id').primaryKey(),
+		// Expand-contract link. Legacy rows remain NULL until the explicit copy-only backfill.
+		// Canonical Image rows deliberately reuse Asset Identity so existing typed junctions keep working.
+		assetId: text('assetId').references(() => assets.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
 		name: text('name').notNull(),
 		description: text('description'),
 		path: text('path').notNull(),
@@ -61,6 +65,7 @@ export const images = sqliteTable(
 			),
 	},
 	(table) => ({
+		assetIdKey: uniqueIndex('Image_assetId_key').on(table.assetId),
 		pathFolderUniqueIdx: uniqueIndex('Image_path_folderId_key').on(table.path, table.folderId),
 		folderIdIdx: index('Image_folderId_idx').on(table.folderId),
 		hashIdx: index('Image_hash_idx').on(table.hash),
@@ -77,6 +82,10 @@ export const images = sqliteTable(
 			sql`width > 0 AND width <= 32768 AND height > 0 AND height <= 32768`
 		),
 		hashFormatCheck: check('Image_hash_format_check', sql`length(hash) = 64`), // SHA-256
+		assetIdentityCheck: check(
+			'Image_asset_identity_check',
+			sql`assetId IS NULL OR (typeof(assetId) = 'text' AND assetId = id)`
+		),
 		pathLengthCheck: check('Image_path_length_check', sql`length(path) BETWEEN 1 AND 1000`),
 	})
 );

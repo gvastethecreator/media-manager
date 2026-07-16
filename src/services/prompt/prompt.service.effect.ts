@@ -4,7 +4,7 @@
  */
 
 import { Schema } from '@effect/schema';
-import { asc, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { imagePrompts, images, prompts } from '@/lib/drizzle/schema';
@@ -12,6 +12,7 @@ import { Prompt, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	fromUnknownPromptError,
@@ -138,7 +139,10 @@ const make = (): PromptServiceInterface => {
 				}),
 			]);
 
-			const normalizedPrompts = favoriteService.applyFavoriteProjectionMany(data, favoriteEntityIds) as PromptWithStats[];
+			const normalizedPrompts = favoriteService.applyFavoriteProjectionMany(
+				data,
+				favoriteEntityIds
+			) as PromptWithStats[];
 
 			return {
 				prompts: normalizedPrompts,
@@ -278,7 +282,7 @@ const make = (): PromptServiceInterface => {
 						.select({ image: images })
 						.from(imagePrompts)
 						.innerJoin(images, eq(imagePrompts.A, images.id))
-						.where(eq(imagePrompts.B, id)),
+						.where(and(eq(imagePrompts.B, id), visibleImageLifecycleCondition())),
 				catch: (error) => fromUnknownPromptError('getImages', error),
 			});
 			return result.map((r) => r.image);

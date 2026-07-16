@@ -33,8 +33,9 @@ database.exec(`
 	CREATE UNIQUE INDEX Favorite_profileId_entityType_entityId_key
 		ON Favorite (profileId, entityType, entityId);
 	CREATE TABLE Folder (id TEXT PRIMARY KEY, name TEXT NOT NULL, path TEXT NOT NULL, parentId TEXT);
+	CREATE TABLE Asset (id TEXT PRIMARY KEY, status TEXT NOT NULL);
 	CREATE TABLE Image (
-		id TEXT PRIMARY KEY, name TEXT NOT NULL, description TEXT, path TEXT NOT NULL, hash TEXT NOT NULL,
+		id TEXT PRIMARY KEY, assetId TEXT, name TEXT NOT NULL, description TEXT, path TEXT NOT NULL, hash TEXT NOT NULL,
 		size INTEGER NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL, metadata TEXT, thumbnail TEXT,
 		thumbnailSize INTEGER, thumbnailWidth INTEGER, thumbnailHeight INTEGER, thumbnailMimeType TEXT,
 		thumbnailError TEXT, thumbnailErrorAt INTEGER, thumbnailOptimizedAt INTEGER, aiEngine TEXT, aiModel TEXT,

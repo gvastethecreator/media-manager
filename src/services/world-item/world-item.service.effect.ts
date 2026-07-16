@@ -3,13 +3,14 @@
  * @module services/world-item/world-item.service.effect
  */
 
-import { asc, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { imageWorldItems, images, videoWorldItems, worldItems } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { normalizeCounts, sumCounts } from '@/transformers/common/counts';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
@@ -53,7 +54,10 @@ export interface WorldItemServiceInterface {
 	readonly removeImage: (id: string, imageId: string) => Effect.Effect<void, WorldItemError>;
 	readonly removeVideo: (id: string, videoId: string) => Effect.Effect<void, WorldItemError>;
 	readonly toggleFavorite: (id: string) => Effect.Effect<Record<string, unknown>, WorldItemError>;
-	readonly update: (id: string, input: Record<string, unknown>) => Effect.Effect<Record<string, unknown>, WorldItemError>;
+	readonly update: (
+		id: string,
+		input: Record<string, unknown>
+	) => Effect.Effect<Record<string, unknown>, WorldItemError>;
 }
 
 const make = (): WorldItemServiceInterface => {
@@ -84,13 +88,12 @@ const make = (): WorldItemServiceInterface => {
 				onlyFavorites,
 			} = options;
 
-			const favoriteEntityIds: string[] | null =
-				onlyFavorites
-					? yield* Effect.tryPromise({
+			const favoriteEntityIds: string[] | null = onlyFavorites
+				? yield* Effect.tryPromise({
 						try: () => favoriteService.getFavoriteEntityIds(FavoriteEntityType.WORLD_ITEM),
 						catch: (error) => fromUnknownWorldItemError('getAll.favoriteIds', error),
 					})
-					: null;
+				: null;
 
 			const conditions = [];
 			if (search) conditions.push(like(worldItems.name, `%${search}%`));
@@ -141,9 +144,9 @@ const make = (): WorldItemServiceInterface => {
 				favoriteIdSet === null
 					? data
 					: data.map((item) => ({
-						...item,
-						isFavorite: favoriteIdSet.has(item.id),
-					}));
+							...item,
+							isFavorite: favoriteIdSet.has(item.id),
+						}));
 
 			return {
 				worldItems: normalizedWorldItems as Record<string, unknown>[],
@@ -167,13 +170,12 @@ const make = (): WorldItemServiceInterface => {
 
 			const readableId = generateReadableId('world-item', name, 1);
 			const requestedIsFavorite = input.isFavorite === true;
-			const useCanonicalFavoriteBridge =
-				requestedIsFavorite
-					? yield* Effect.tryPromise({
+			const useCanonicalFavoriteBridge = requestedIsFavorite
+				? yield* Effect.tryPromise({
 						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.WORLD_ITEM)) !== null,
 						catch: (error) => fromUnknownWorldItemError('create.favoriteScope', error),
 					})
-					: false;
+				: false;
 
 			const result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
 				try: () =>
@@ -231,9 +233,9 @@ const make = (): WorldItemServiceInterface => {
 			const useCanonicalFavoriteBridge =
 				requestedIsFavorite !== undefined
 					? yield* Effect.tryPromise({
-						try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.WORLD_ITEM)) !== null,
-						catch: (error) => fromUnknownWorldItemError('update.favoriteScope', error),
-					})
+							try: async () => (await favoriteService.getFavoriteEntityIds(FavoriteEntityType.WORLD_ITEM)) !== null,
+							catch: (error) => fromUnknownWorldItemError('update.favoriteScope', error),
+						})
 					: false;
 
 			if (requestedIsFavorite !== undefined && useCanonicalFavoriteBridge) {
@@ -357,7 +359,7 @@ const make = (): WorldItemServiceInterface => {
 						.select({ image: images })
 						.from(imageWorldItems)
 						.innerJoin(images, eq(imageWorldItems.A, images.id))
-						.where(eq(imageWorldItems.B, id)),
+						.where(and(eq(imageWorldItems.B, id), visibleImageLifecycleCondition())),
 				catch: (error) => fromUnknownWorldItemError('getImages', error),
 			});
 			return result.map((r) => r.image);
@@ -376,9 +378,8 @@ const make = (): WorldItemServiceInterface => {
 		Effect.gen(function* () {
 			yield* getById(id);
 			yield* Effect.tryPromise({
-				try: () => db.delete(imageWorldItems).where(
-					sql`${imageWorldItems.A} = ${imageId} AND ${imageWorldItems.B} = ${id}`
-				),
+				try: () =>
+					db.delete(imageWorldItems).where(sql`${imageWorldItems.A} = ${imageId} AND ${imageWorldItems.B} = ${id}`),
 				catch: (error) => fromUnknownWorldItemError('removeImage', error),
 			});
 		});
@@ -396,9 +397,8 @@ const make = (): WorldItemServiceInterface => {
 		Effect.gen(function* () {
 			yield* getById(id);
 			yield* Effect.tryPromise({
-				try: () => db.delete(videoWorldItems).where(
-					sql`${videoWorldItems.A} = ${videoId} AND ${videoWorldItems.B} = ${id}`
-				),
+				try: () =>
+					db.delete(videoWorldItems).where(sql`${videoWorldItems.A} = ${videoId} AND ${videoWorldItems.B} = ${id}`),
 				catch: (error) => fromUnknownWorldItemError('removeVideo', error),
 			});
 		});

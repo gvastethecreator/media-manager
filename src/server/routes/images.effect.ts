@@ -13,6 +13,7 @@ import {
 	authorizeMediaAssetBodyIds,
 	authorizeMediaAssetParam,
 	authorizeMediaPathInput,
+	authorizeMediaPlacementInput,
 	assertAuthorizedMediaEntity,
 	filterAuthorizedMediaEntities,
 	authorizeFolderPathById,
@@ -34,6 +35,33 @@ import { markFavoriteToggleFacadeDeprecated } from '../utils/favorite-facade-dep
 import { getMimeTypeFromPath } from '../utils/mime';
 
 const router = express.Router();
+
+const rejectImagePlacementMutation: express.RequestHandler = (req, res, next) => {
+	const body = req.body;
+	if (body && typeof body === 'object' && ('folderId' in body || 'path' in body || 'source' in body)) {
+		res.status(410).json({
+			code: 'DOMAIN_OPERATION_REQUIRED',
+			message: 'La ubicación de una imagen sólo cambia mediante la operación autorizada de move/rename por asset.',
+			retryable: false,
+		});
+		return;
+	}
+	next();
+};
+const authorizeImageRestore: express.RequestHandler = async (req, res, next) => {
+	try {
+		const registry = getAuthorizedRootRegistry(req);
+		for (const permission of ['read', 'write'] as const) {
+			await resolveMediaAssetReference(registry, { assetId: req.params.id, assetType: 'image' }, permission, {
+				allowDeleted: true,
+				allowMissing: true,
+			});
+		}
+		next();
+	} catch (error) {
+		if (!sendRootAuthorizationError(res, error)) next(error);
+	}
+};
 router.use(sanitizeJsonResponses);
 const skipBatchFavoriteAlias: express.RequestHandler = (req, _res, next) => {
 	if (req.params.id === 'batch') next('route');
@@ -277,6 +305,7 @@ router.get(
 router.post(
 	'/',
 	authorizeMediaPathInput({ expected: 'file', required: true }),
+	authorizeMediaPlacementInput(),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const imageService = yield* ImageService;
@@ -310,7 +339,7 @@ router.get(
 router.patch(
 	'/:id',
 	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'write'] }),
-	authorizeMediaPathInput({ expected: 'file', permissions: ['read', 'index', 'write'], required: false }),
+	rejectImagePlacementMutation,
 	effectHandler((req) =>
 		Effect.gen(function* () {
 			const imageService = yield* ImageService;
@@ -385,7 +414,7 @@ router.post(
  */
 router.delete(
 	'/batch',
-	authorizeMediaAssetBodyIds({ assetType: 'image', permissions: ['delete'] }),
+	authorizeMediaAssetBodyIds({ allowMissing: true, assetType: 'image', permissions: ['delete'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const imageService = yield* ImageService;
@@ -403,11 +432,25 @@ router.delete(
 );
 
 /**
+ * POST /images/:id/restore - Restaurar un tombstone canónico
+ */
+router.post(
+	'/:id/restore',
+	authorizeImageRestore,
+	effectHandler((req) =>
+		Effect.gen(function* () {
+			const imageService = yield* ImageService;
+			return yield* imageService.restoreById(req.params.id);
+		}).pipe(Effect.provide(ImageServiceLive))
+	)
+);
+
+/**
  * DELETE /images/:id - Eliminar imagen
  */
 router.delete(
 	'/:id',
-	authorizeMediaAssetParam({ assetType: 'image', permissions: ['delete'] }),
+	authorizeMediaAssetParam({ allowMissing: true, assetType: 'image', permissions: ['delete'] }),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const imageService = yield* ImageService;

@@ -58,6 +58,33 @@ Las dos FKs del ciclo Asset/primary Source File son `DEFERRABLE INITIALLY DEFERR
 opción en SQLite: el schema tipado omite deliberadamente el ciclo, la migración SQL versionada lo añade y el runner hace
 rollback si el DDL final pierde cualquiera de las dos cláusulas.
 
+### Primer corte expand-contract: `Image`
+
+`Image` es la primera especialización conectada al media core. La migración `0005_image_asset_link.sql` añade un
+`Image.assetId` nullable y único. Las filas históricas quedan con `NULL`; una fila canónica exige por constraint que
+`Image.id = Image.assetId = Asset.id`. Esta identidad exacta permite conservar temporalmente los junctions tipados que
+todavía apuntan a `Image.id` sin publicar un segundo ID ni reescribir relaciones durante el primer checkpoint.
+
+Un alta nueva de Image crea `SourceFile`, `Asset` e `Image` dentro de una sola transacción diferida. `SourceFile` recibe la
+referencia opaca `rootId + relativePath`; el path absoluto legacy sólo se mantiene como proyección de compatibilidad. El
+runtime resuelve el source mediante el registry confiable y compara identidad, tipo, título, hash, tamaño, folder y path
+legacy antes de servir o mutar el archivo. Una discrepancia devuelve conflicto explícito: no existe fallback silencioso a
+la columna más conveniente.
+
+Move y rename actualizan `Image`, `SourceFile` y, cuando corresponde, `Asset.title` en una sola transacción de base dentro
+del journal filesystem existente. El mapper sólo deriva el source de Image a través de grants configurados con permisos
+`read + index`; nunca inventa un root desde `Folder.path` ni desde un prefijo común. Los demás tipos media conservan su
+flujo legacy hasta su propio corte MODEL-004 y no quedan bloqueados por esta exigencia anticipadamente.
+
+Contenido duplicado no se fusiona: dos locations autorizadas con el mismo SHA-256 producen dos Assets. La unicidad física
+sigue siendo `rootId + relativePath`, mientras el hash identifica candidatos duplicados.
+
+El backfill de Image es una operación offline copy-only: valida un mapping explícito de roots, crea primero un backup
+externo verificado, migra una salida nueva, preflighta todas las filas, copia Asset/Source y enlaza Image en una única
+transacción. La reconciliación sólo puede abrir el gate de retiro si recibió esos roots y verificó también la equivalencia
+de paths. El contrato y las condiciones de retiro están en
+[`IMAGE-RETIREMENT-LEDGER.md`](../recovery/IMAGE-RETIREMENT-LEDGER.md); ninguna columna legacy se retira en este corte.
+
 ### Ausencia del source y ownership de metadata
 
 Que el source esté disponible, ausente, offline o inaccesible no cambia por sí mismo el lifecycle del asset. Si el archivo

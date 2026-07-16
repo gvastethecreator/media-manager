@@ -58,6 +58,9 @@ La copia adoptada es evidencia de compatibilidad, no un reemplazo automático de
 - `0004_canonical_asset_source.sql` crea `Asset`, `MediaRoot` y `SourceFile` sin migrar ni borrar filas legacy. Impone
   lifecycle singular, primary source perteneciente al mismo asset, root + relative path, disponibilidad y fingerprints;
   las dos FKs cíclicas son diferidas para que el par Asset/SourceFile nazca atómicamente.
+- `0005_image_asset_link.sql` reconstruye sólo `Image` para añadir el enlace expand-contract `assetId`. Copia toda fila
+  legacy con `assetId = NULL`, conserva sus junctions, exige unicidad y `Image.id = Image.assetId` cuando se enlaza, y no
+  crea Asset/Source por inferencia. El backfill de datos es un comando copy-only separado y requiere roots explícitos.
 
 Drizzle Kit no puede serializar `DEFERRABLE` para SQLite. Por eso el snapshot tipado no declara las dos FKs cíclicas y
 la migración SQL versionada las añade como extensión explícita. Esto no queda confiado a una nota: el runner valida el
@@ -73,6 +76,11 @@ y 17 EntityAggregates polimórficos conocidos siguen preservados y clasificados 
 El checkpoint de MODEL-002 repitió adopción y upgrade con la historia completa hasta versión 5. Las tres tablas nuevas
 nacieron vacías, los conteos legacy se preservaron salvo el link huérfano previamente catalogado y los contratos de
 migración, schema e integridad referencial terminaron verdes. La base real no participó de este rehearsal.
+
+MODEL-003 amplió una fixture legacy equivalente de versión 5 a 6 y probó que la fila Image, su ID/path y el junction
+`_ImageToAlbum` permanecen exactos con `foreign_key_check = 0`. El CLI de backfill se ejecuta sobre una base descartable:
+la fuente queda byte-idéntica, el backup externo se verifica y sólo se publica una salida reconciliada. Sin un mapping de
+roots suministrado por el operador, la base real no se backfillea ni se usa para inferir ownership físico.
 
 ## Objetos fuera de Drizzle
 
@@ -95,6 +103,8 @@ bun run db:adopt-legacy -- --backup C:/backup/media-manager.sqlite --manifest C:
 bun run db:check -- --database C:/tmp/media-manager-new.sqlite
 bun run db:orphans -- --database C:/tmp/media-manager-copy.sqlite
 bun run db:upgrade -- --database C:/tmp/media-manager-copy.sqlite --backup-dir D:/Backups/MediaManager --output C:/tmp/media-manager-next.sqlite --root-id library --json
+bun run db:image:backfill -- --database C:/tmp/media-manager-copy.sqlite --backup-dir D:/Backups/MediaManager --output C:/tmp/media-manager-image-canonical.sqlite --roots D:/private/media-roots.json --json
+bun run db:image:reconcile -- --database C:/tmp/media-manager-image-canonical.sqlite --roots D:/private/media-roots.json
 bun run db:schema:export -- --database C:/tmp/media-manager-copy.sqlite --output docs/database/representative-schema.sql
 bun run db:schema:check
 ```
@@ -108,3 +118,9 @@ exige un backup con manifest válido, crea un output nuevo fuera del workspace, 
 sin perfil/duplicados y cualquier delta no explicado. Sólo reconstruye el DDL histórico conocido de `Favorite`, crea los
 ocho índices aditivos, calcula el conteo esperado tras quitar bridges sin owners y registra el baseline dentro de
 `BEGIN IMMEDIATE`. Nunca sobrescribe el backup ni el output.
+
+`media-roots.json` contiene paths físicos y por eso debe permanecer fuera del repositorio. El backfill usa exactamente el
+validator runtime de roots/referencias antes de crear backup/output y vuelve a validar cada path derivado. Sin roots,
+`db:image:reconcile` sólo informa consistencia estructural con `pathVerification = not_verified`; con roots existentes
+puede afirmar `dataConsistent` y `pathVerification = verified`. Esas señales no autorizan retiro: el CLI no posee un
+`retirement gate` porque aún faltan checkpoints runtime persistidos y evidencia de uso.

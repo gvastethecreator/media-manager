@@ -19,6 +19,7 @@ import {
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { CollectionError } from './collection-errors.effect';
 import {
@@ -232,7 +233,12 @@ const getRelationsCounts = (id: string): Effect.Effect<CollectionCounts, Collect
 				try: async () =>
 					await withSqliteBusyRetry(
 						async () =>
-							await db.select({ count: count() }).from(imageCollections).where(eq(imageCollections.B, id)).execute()
+							await db
+								.select({ count: count() })
+								.from(imageCollections)
+								.innerJoin(images, eq(imageCollections.A, images.id))
+								.where(and(eq(imageCollections.B, id), visibleImageLifecycleCondition()))
+								.execute()
 					), // B = collectionId
 				catch: (error) =>
 					new CollectionDatabaseError({
@@ -672,12 +678,19 @@ export const CollectionServiceLive = Layer.succeed(
 
 				// Check for content unless force
 				if (!force) {
-					const counts = yield* getRelationsCounts(id);
-					if (counts.images > 0 || counts.videos > 0) {
+					const storedImageCounts = toRowArray(
+						(yield* Effect.tryPromise({
+							try: () => db.select({ count: count() }).from(imageCollections).where(eq(imageCollections.B, id)),
+							catch: (error) =>
+								new CollectionDatabaseError({ operation: 'delete:stored-relations', originalError: error }),
+						})) as Array<{ count: number }> | { count: number }
+					);
+					const storedImages = storedImageCounts[0]?.count ?? 0;
+					if (storedImages > 0) {
 						yield* new CollectionHasContentError({
 							collectionId: id,
-							imagesCount: counts.images,
-							videosCount: counts.videos,
+							imagesCount: storedImages,
+							videosCount: 0,
 						});
 					}
 				}
@@ -786,7 +799,7 @@ export const CollectionServiceLive = Layer.succeed(
 										})
 										.from(imageCollections)
 										.innerJoin(images, eq(imageCollections.A, images.id))
-										.where(eq(imageCollections.B, collectionId))
+										.where(and(eq(imageCollections.B, collectionId), visibleImageLifecycleCondition()))
 										.orderBy(desc(images.updatedAt), asc(images.id))
 										.limit(limit)
 										.offset(offset)

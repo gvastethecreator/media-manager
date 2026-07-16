@@ -26,8 +26,8 @@ describe('read-only orphan inventory', () => {
 		const expectedMarker = `<!-- relation-catalog-counts: total=${RELATION_CATALOG.length} direct=${direct.length} composite=${composite.length} polymorphic=${polymorphic.length} junctions=${junctions.size} endpoints=${junctionEndpoints.length} -->`;
 		const documentation = await readFile(resolve(import.meta.dir, '../../docs/database/RELATION-INVENTORY.md'), 'utf8');
 
-		expect(RELATION_CATALOG).toHaveLength(89);
-		expect(direct).toHaveLength(83);
+		expect(RELATION_CATALOG).toHaveLength(90);
+		expect(direct).toHaveLength(84);
 		expect(composite).toHaveLength(1);
 		expect(polymorphic).toHaveLength(5);
 		expect(junctions.size).toBe(28);
@@ -56,7 +56,7 @@ describe('read-only orphan inventory', () => {
 		const after = await stat(databasePath);
 		const serialized = JSON.stringify(findings);
 
-		expect(RELATION_CATALOG).toHaveLength(89);
+		expect(RELATION_CATALOG).toHaveLength(90);
 		expect(findings.map((finding) => finding.name)).toContain('_ImageToTag.A->Image.id');
 		expect(findings.map((finding) => finding.name)).toContain('_ImageToTag.B->Tag.id');
 		expect(findings.map((finding) => finding.name)).toContain('Favorite.entityId->entityType target');
@@ -96,6 +96,7 @@ describe('read-only orphan inventory', () => {
 			'FileStats.fileId->Image.id',
 			'UploadedImage.imageId->Image.id',
 			'Image.noteId->Note.id',
+			'Image.assetId->Asset.id',
 			'Profile.settingsId->Settings.id',
 			'SourceFile.assetId->Asset.id',
 			'SourceFile.rootId->MediaRoot.id',

@@ -13,6 +13,7 @@ import { groupTags, images, imageTags, tags, videos, videoTags } from '@/lib/dri
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateReadableId } from '@/lib/utils/id-generator';
 import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	fromUnknownError,
@@ -277,7 +278,11 @@ const make = (): TagServiceInterface => {
 			>({
 				try: () =>
 					Promise.all([
-						db.select({ count: count() }).from(imageTags).where(eq(imageTags.B, id)),
+						db
+							.select({ count: count() })
+							.from(imageTags)
+							.innerJoin(images, eq(imageTags.A, images.id))
+							.where(and(eq(imageTags.B, id), visibleImageLifecycleCondition())),
 						db.select({ count: count() }).from(videoTags).where(eq(videoTags.B, id)),
 						db.select({ count: count() }).from(groupTags).where(eq(groupTags.B, id)),
 					]),
@@ -352,7 +357,8 @@ const make = (): TagServiceInterface => {
 						db
 							.select({ tagId: imageTags.B, count: count() })
 							.from(imageTags)
-							.where(inArray(imageTags.B, ids))
+							.innerJoin(images, eq(imageTags.A, images.id))
+							.where(and(inArray(imageTags.B, ids), visibleImageLifecycleCondition()))
 							.groupBy(imageTags.B),
 						db
 							.select({ tagId: videoTags.B, count: count() })
@@ -552,7 +558,10 @@ const make = (): TagServiceInterface => {
 				};
 			});
 
-			const projectedTags = favoriteService.applyFavoriteProjectionMany(tagsWithStats, favoriteEntityIds) as TagWithStats[];
+			const projectedTags = favoriteService.applyFavoriteProjectionMany(
+				tagsWithStats,
+				favoriteEntityIds
+			) as TagWithStats[];
 
 			logger.info(`✅ ${projectedTags.length} tags obtenidos de ${totalCount} totales`);
 
@@ -715,8 +724,12 @@ const make = (): TagServiceInterface => {
 
 			// Verificar si tiene relaciones (opcional: podríamos permitir eliminación en cascada)
 			const counts = yield* getRelationsCounts(id);
+			const storedImageRelations = yield* Effect.tryPromise<Array<{ count: number }>, TagError>({
+				try: () => db.select({ count: count() }).from(imageTags).where(eq(imageTags.B, id)),
+				catch: (error) => fromUnknownError('delete.storedImageRelations', error),
+			});
 			const totalRelations =
-				counts.images +
+				(storedImageRelations[0]?.count ?? 0) +
 				counts.videos +
 				counts.albums +
 				counts.collections +
@@ -807,7 +820,7 @@ const make = (): TagServiceInterface => {
 						})
 						.from(images)
 						.innerJoin(imageTags, eq(imageTags.A, images.id))
-						.where(eq(imageTags.B, id))
+						.where(and(eq(imageTags.B, id), visibleImageLifecycleCondition()))
 						.orderBy(desc(images.updatedAt));
 				},
 				catch: (error) => fromUnknownError('getImages', error),
@@ -840,7 +853,7 @@ const make = (): TagServiceInterface => {
 						})
 						.from(images)
 						.innerJoin(imageTags, eq(imageTags.A, images.id))
-						.where(and(eq(imageTags.B, id), isNotNull(images.thumbnail)))
+						.where(and(eq(imageTags.B, id), isNotNull(images.thumbnail), visibleImageLifecycleCondition()))
 						.orderBy(desc(images.updatedAt))
 						.limit(limit);
 				},

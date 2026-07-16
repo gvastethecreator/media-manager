@@ -24,11 +24,11 @@ Requiere runtime y persistencia estables; se ejecuta por vertical slice, nunca c
 
 ### MODEL-003 — Primera vertical slice
 
-- [ ] Elegir imagen como primer tipo por cobertura existente.
-- [ ] Migrar copia representativa: crear Asset/Source/Placement sin borrar legacy.
-- [ ] Dual-read controlado con comparación; evitar dual-write indefinido.
-- [ ] API/DTO/UI de imagen usa IDs canónicos.
-- [ ] Reconciliación reporta divergencias y bloquea retiro si quedan.
+- [x] Elegir imagen como primer tipo por cobertura existente.
+- [x] Migrar copia representativa: crear Asset/Source/Placement sin borrar legacy.
+- [x] Dual-read controlado con comparación; evitar dual-write indefinido.
+- [x] API/DTO/UI de imagen usa IDs canónicos.
+- [x] Reconciliación reporta divergencias y no emite señal de retiro.
 - [ ] Retirar columnas/paths legacy sólo tras dos checkpoints verdes.
 
 ### MODEL-004 — Expandir a video/audio/document/json/file3d

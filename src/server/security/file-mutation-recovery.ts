@@ -205,8 +205,20 @@ export async function reconcilePendingFileMutations(
 		}
 		try {
 			const location = await getMediaAssetLocation(record.asset);
-			const databasePath = await registry.authorizeAbsolutePath(location.path, 'read');
-			const databaseReference = { rootId: databasePath.rootId, relativePath: databasePath.relativePath };
+			let databaseReference: AuthorizedPathReference;
+			if (location.source) {
+				const [canonicalPath, legacyPath] = await Promise.all([
+					registry.resolve(location.source, 'read'),
+					registry.authorizeAbsolutePath(location.path, 'read'),
+				]);
+				if (canonicalPath.absolutePath !== legacyPath.absolutePath) {
+					throw new Error('RECOVERY_CANONICAL_LEGACY_LOCATION_DIVERGED');
+				}
+				databaseReference = location.source;
+			} else {
+				const databasePath = await registry.authorizeAbsolutePath(location.path, 'read');
+				databaseReference = { rootId: databasePath.rootId, relativePath: databasePath.relativePath };
+			}
 			const sourcePath = await registry.resolve(record.source, 'delete', 'create');
 			const destinationPath = await registry.resolve(record.destination, 'delete', 'create');
 
