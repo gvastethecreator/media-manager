@@ -24,7 +24,7 @@ describe('read-only orphan inventory', () => {
 		database.query('INSERT INTO _ImageToTag (A, B) VALUES (?, ?)').run('missing-image', 'missing-tag');
 		database
 			.query('INSERT INTO Profile (id, name, emoji, color, isActive, createdAt) VALUES (?, ?, ?, ?, ?, ?)')
-			.run('profile-for-orphan-test', 'Test', 'T', 'token', 0, Date.now());
+			.run('profile-for-orphan-test', 'Test', 'T', '#000000', 0, Date.now());
 		database
 			.query('INSERT INTO Favorite (id, profileId, entityType, entityId, addedAt) VALUES (?, ?, ?, ?, ?)')
 			.run('favorite-orphan-row', 'profile-for-orphan-test', 'image', 'raw-missing-image-id', Date.now());

@@ -7,7 +7,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { type AnySQLiteColumn, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 // Modelo para los personajes
 export const characters = sqliteTable(
@@ -35,13 +35,19 @@ export const characters = sqliteTable(
 		equipment: text('equipment'),
 		notes: text('notes'),
 		featuredImage: text('featuredImage'),
-		parentId: text('parentId'),
+		parentId: text('parentId').references((): AnySQLiteColumn => characters.id, {
+			onDelete: 'set null',
+			onUpdate: 'cascade',
+		}),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
 		nameIdx: uniqueIndex('Character_name_key').on(table.name),
+		parentIdIdx: index('Character_parentId_idx').on(table.parentId),
 	})
 );

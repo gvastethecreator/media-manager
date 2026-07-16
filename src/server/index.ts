@@ -3,6 +3,7 @@
 import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
 import path from 'path';
 import { isLoopbackHost, resolveLocalServiceHost } from '@/config/local-runtime-security';
+import { closeDatabaseGracefully, ensureDatabaseReady, recordDatabaseError } from '@/lib/drizzle';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, logWarning, requestLogger } from './middleware/logging';
@@ -13,6 +14,7 @@ import { reconcilePendingFileMutations } from './security/file-mutation-recovery
 import { sanitizeJsonResponses } from './security/sanitize-public-payload';
 
 const app = express();
+await ensureDatabaseReady();
 app.locals.authorizedRootRegistry = await createAuthorizedRootRegistryFromEnvironment();
 const mutationRecovery = await reconcilePendingFileMutations(app.locals.authorizedRootRegistry);
 if (mutationRecovery.manual > 0) {
@@ -82,6 +84,7 @@ app.use((req, res) => {
 
 app.use(errorLogger as ErrorRequestHandler);
 app.use(((error, _req, res, next) => {
+	recordDatabaseError(error);
 	if (res.headersSent) {
 		next(error);
 		return;
@@ -93,7 +96,7 @@ app.use(((error, _req, res, next) => {
 	});
 }) as ErrorRequestHandler);
 
-app.listen(PORT, HOST, () => {
+const server = app.listen(PORT, HOST, () => {
 	logInfo(`🚀 Servidor Express iniciado en http://${HOST}:${PORT}`);
 	if (!isLoopbackHost(HOST)) {
 		logError(`⚠️ API expuesta fuera de loopback en ${HOST}; ALLOW_EXTERNAL_BIND está activo.`);
@@ -101,5 +104,32 @@ app.listen(PORT, HOST, () => {
 	reindexMonitor.start();
 	initializeFileLogging();
 });
+
+let shuttingDown = false;
+async function shutdown(signal: NodeJS.Signals): Promise<void> {
+	if (shuttingDown) return;
+	shuttingDown = true;
+	logInfo(`Cierre ordenado iniciado por ${signal}.`);
+	reindexMonitor.stop();
+	const forcedExit = setTimeout(() => {
+		logError('El cierre ordenado excedió 10 segundos; finalizando el proceso.');
+		process.exit(1);
+	}, 10_000);
+	forcedExit.unref();
+	server.close(async (serverError) => {
+		try {
+			if (serverError) throw serverError;
+			await closeDatabaseGracefully();
+			clearTimeout(forcedExit);
+			process.exit(0);
+		} catch (error) {
+			logError(`Cierre ordenado falló: ${error instanceof Error ? error.message : String(error)}`);
+			process.exit(1);
+		}
+	});
+}
+
+process.once('SIGINT', () => void shutdown('SIGINT'));
+process.once('SIGTERM', () => void shutdown('SIGTERM'));
 
 export default app;

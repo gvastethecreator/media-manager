@@ -1,11 +1,14 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
+import { configureSqliteConnection, type SqliteConnectionStatus } from './connection-policy';
 import { ensureFts5Ready } from './fts5';
 import {
 	activities,
+	albumPlaces,
 	albums,
 	audios,
 	characters,
+	characterPlaces,
 	collections,
 	concepts,
 	documents,
@@ -111,6 +114,8 @@ const schema = {
 	prompts,
 	notes,
 	// Relations
+	albumPlaces,
+	characterPlaces,
 	imageAlbums,
 	videoAlbums,
 	imageCollections,
@@ -164,6 +169,13 @@ const isServerOrTest = typeof window === 'undefined' || isBun || isUnitTest;
 const databaseUrl = isServerOrTest ? env.DATABASE_URL : undefined;
 
 let client: ReturnType<typeof createClient> | null = null;
+let databaseReady: Promise<SqliteConnectionStatus | null> = Promise.resolve(null);
+const databaseLifecycleMetrics = {
+	busyErrors: 0,
+	checkpointBusy: 0,
+	checkpointedFrames: 0,
+	lastCheckpointAt: null as string | null,
+};
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- instancia dinámica mock o drizzle
 let dbInstance: any;
 
@@ -174,6 +186,7 @@ if (isServerOrTest) {
 	client = createClient({
 		url: databaseUrl,
 	});
+	databaseReady = configureSqliteConnection(client, databaseUrl, env);
 	// Evitar logs masivos de consultas (base64 de thumbnails) => logger desactivado por defecto.
 	// Si se requiere, activar con DRIZZLE_LOG=1 explícitamente.
 	const enableDrizzleLogger = env.DRIZZLE_LOG === '1';
@@ -185,11 +198,13 @@ if (isServerOrTest) {
 	// Lanzar inicialización FTS5 sin bloquear; ignorar promesa
 	// En tests no queremos inicializaciones pesadas o side-effects (FTS5 no es requerida para unit tests)
 	if (!isUnitTest) {
-		ensureFts5Ready().catch((e) => {
-			if (env.NODE_ENV === 'development') {
-				console.warn('FTS5 init error', e);
-			}
-		});
+		databaseReady
+			.then(() => ensureFts5Ready())
+			.catch((e) => {
+				if (env.NODE_ENV === 'development') {
+					console.warn('FTS5 init error', e);
+				}
+			});
 	}
 } else {
 	dbInstance = {
@@ -284,6 +299,14 @@ export function getDbClient() {
 	return client;
 }
 
+/**
+ * Barrera de arranque: ninguna ruta ni tarea en segundo plano debe usar SQLite
+ * antes de que la conexión confirme foreign_keys, timeout y journal mode.
+ */
+export async function ensureDatabaseReady(): Promise<SqliteConnectionStatus | null> {
+	return databaseReady;
+}
+
 // Exportar solo el schema (relaciones ya incluidas donde se definen)
 export { schema };
 
@@ -351,6 +374,50 @@ export function closeDatabase() {
 	}
 }
 
+function sqliteErrorCode(error: unknown): string | number | undefined {
+	if (!(error && typeof error === 'object')) return undefined;
+	const candidate = error as { code?: string | number; rawCode?: string | number };
+	return candidate.code ?? candidate.rawCode;
+}
+
+export function recordDatabaseError(error: unknown): void {
+	const code = sqliteErrorCode(error);
+	if (code === 'SQLITE_BUSY' || code === 5) databaseLifecycleMetrics.busyErrors += 1;
+}
+
+export function getDatabaseLifecycleMetrics() {
+	return { ...databaseLifecycleMetrics };
+}
+
+export async function checkpointDatabase(mode: 'PASSIVE' | 'TRUNCATE' = 'PASSIVE'): Promise<{
+	busy: number;
+	checkpointedFrames: number;
+	logFrames: number;
+}> {
+	if (!client) return { busy: 0, checkpointedFrames: 0, logFrames: 0 };
+	await ensureDatabaseReady();
+	try {
+		const result = await client.execute(`PRAGMA wal_checkpoint(${mode})`);
+		const busy = Number(result.rows[0]?.[0] ?? 0);
+		const logFrames = Number(result.rows[0]?.[1] ?? 0);
+		const checkpointedFrames = Number(result.rows[0]?.[2] ?? 0);
+		databaseLifecycleMetrics.checkpointBusy += busy;
+		databaseLifecycleMetrics.checkpointedFrames += checkpointedFrames;
+		databaseLifecycleMetrics.lastCheckpointAt = new Date().toISOString();
+		return { busy, checkpointedFrames, logFrames };
+	} catch (error) {
+		recordDatabaseError(error);
+		throw error;
+	}
+}
+
+export async function closeDatabaseGracefully(): Promise<void> {
+	if (!client) return;
+	await checkpointDatabase('TRUNCATE');
+	client.close();
+	client = null;
+}
+
 /**
  * Función para verificar la conectividad de la base de datos
  * Útil para health checks
@@ -360,6 +427,7 @@ export async function checkDatabaseConnection(): Promise<boolean> {
 		return false; // No hay cliente en el lado del cliente
 	}
 	try {
+		await ensureDatabaseReady();
 		const result = await client.execute('SELECT 1 as test');
 		return result.rows.length > 0 && result.rows[0][0] === 1;
 	} catch (error) {
@@ -377,6 +445,7 @@ export async function getDatabaseInfo() {
 		return null; // No hay cliente en el lado del cliente
 	}
 	try {
+		const connection = await ensureDatabaseReady();
 		const tablesResult = await client.execute(
 			"SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
 		);
@@ -388,6 +457,7 @@ export async function getDatabaseInfo() {
 		const tables = tablesResult.rows.map((row) => row[0] as string);
 
 		return {
+			connection,
 			tables: tables.length,
 			tableNames: tables,
 			version: versionResult.rows[0]?.[0] || 0,

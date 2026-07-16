@@ -9,8 +9,6 @@
 export { applyFileFilters, applyFileFiltersAndSort, applySortToFiles } from './filters';
 // --- Transformadores principales ---
 export { groupFilesByType, toFileWithStats, toFileWithStatsList } from './mappers';
-// --- Schema de Drizzle ---
-export { type FileInsert, type FileSchema, filesTable, fileTypeEnum } from './schema';
 // --- Serializadores ---
 export {
 	serializeDirectoryStructure,

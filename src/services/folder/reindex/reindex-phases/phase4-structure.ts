@@ -3,7 +3,9 @@
  * @description Crea las subcarpetas encontradas en el sistema de archivos
  */
 
+import { dirname, resolve } from 'node:path';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { normalizeFolderName } from '@/lib/utils/folder-id-generator';
 import type { ReindexAnalysisResult, ReindexOptions, ReindexPhaseResult } from '../folder-reindex-types';
 
 const logger = serverLogger.withContext('ReindexPhase4');
@@ -36,24 +38,41 @@ export async function phase4_buildSubfolderStructure(
 
 		const { db } = await import('@/lib/drizzle');
 		const { folders } = await import('@/lib/drizzle/schema/index');
-		const { generateFolderIdFromName } = await import('@/lib/utils/folder-id-generator');
 
 		// Crear subcarpetas ordenadas por profundidad (padres primero)
-		const sortedSubfolders = analysisResult.newSubfolders.sort((a, b) => {
+		const sortedSubfolders = [...analysisResult.newSubfolders].sort((a, b) => {
 			const depthA = a.path.split(/[\\/]/).length;
 			const depthB = b.path.split(/[\\/]/).length;
 			return depthA - depthB;
 		});
 
-		for (const subfolder of sortedSubfolders) {
-			try {
-				const folderId = await generateFolderIdFromName(subfolder.name);
+		await db.transaction(async (transaction: typeof db) => {
+			const existingFolders = await transaction.select({ id: folders.id }).from(folders);
+			const reservedIds = new Set(existingFolders.map((folder: { id: string }) => folder.id));
+			const newFolderIdsByPath = new Map<string, string>();
+			const allocateId = (name: string): string => {
+				const base = normalizeFolderName(name);
+				for (let suffix = 1; suffix <= 100; suffix++) {
+					const candidate = suffix === 1 ? base : `${base}-${suffix}`;
+					if (!reservedIds.has(candidate)) {
+						reservedIds.add(candidate);
+						return candidate;
+					}
+				}
+				const fallback = crypto.randomUUID();
+				reservedIds.add(fallback);
+				return fallback;
+			};
 
-				await db.insert(folders).values({
+			for (const subfolder of sortedSubfolders) {
+				const folderId = allocateId(subfolder.name);
+				const parentPath = resolve(dirname(subfolder.path)).toLowerCase();
+				const parentId = newFolderIdsByPath.get(parentPath) ?? subfolder.parentId;
+				await transaction.insert(folders).values({
 					id: folderId,
 					name: subfolder.name,
 					path: subfolder.path,
-					parentId: subfolder.parentId,
+					parentId,
 					totalFiles: 0,
 					totalSize: 0,
 					lastIndexed: new Date(),
@@ -66,15 +85,11 @@ export async function phase4_buildSubfolderStructure(
 					createdAt: new Date(),
 					updatedAt: new Date(),
 				});
-
-				processed++;
+				newFolderIdsByPath.set(resolve(subfolder.path).toLowerCase(), folderId);
 				logger.debug(`✅ Subcarpeta creada: ${subfolder.path}`);
-			} catch (error) {
-				const errorMsg = `Error creando subcarpeta ${subfolder.path}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
-				errors.push(errorMsg);
-				logger.error(errorMsg);
 			}
-		}
+		});
+		processed = sortedSubfolders.length;
 
 		logger.info('✅ Construcción de estructura completada', {
 			procesadas: processed,
@@ -82,9 +97,9 @@ export async function phase4_buildSubfolderStructure(
 		});
 
 		return {
-			success: errors.length === 0,
+			success: true,
 			processed,
-			failed: errors.length,
+			failed: 0,
 			errors,
 			duration: Date.now() - startTime,
 		};

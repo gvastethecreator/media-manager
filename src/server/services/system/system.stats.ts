@@ -21,19 +21,14 @@ import {
 import { createSystemError } from '@/lib/errors/system';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { DatabaseEntityStats, SystemRuntimeStats } from './system.types';
+import { requireDatabaseUrl, resolveLocalDatabaseFilePath } from '@/lib/drizzle/database-url';
 
 // Logger con contexto
 const systemLogger = serverLogger.withContext('SystemStats');
 
 function getDatabaseFileCandidates(): string[] {
-	const databaseUrl = process.env.DATABASE_URL || 'file:./db.sqlite';
-
-	if (!databaseUrl.startsWith('file:')) {
-		return [];
-	}
-
-	const normalizedPath = databaseUrl.slice('file:'.length);
-	const resolvedPath = path.resolve(process.cwd(), normalizedPath);
+	const resolvedPath = resolveLocalDatabaseFilePath(requireDatabaseUrl());
+	if (!resolvedPath) return [];
 
 	return [resolvedPath, `${resolvedPath}-wal`, `${resolvedPath}-shm`];
 }
