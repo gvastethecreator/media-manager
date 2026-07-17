@@ -1,23 +1,29 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
-import { type SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ColorPicker } from '@/components/ui/color-picker';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { ImagePicker } from '@/components/ui/image-picker';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
-import type { WildcardBase } from '@/types/entities/wildcard/base';
-import { CreateWildcardSchema } from '@/types/entities/wildcard/schema';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { type SubmitHandler, useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ColorPicker } from "@/components/ui/color-picker";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { ImagePicker } from "@/components/ui/image-picker";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { clientLogger } from "@/lib/logger/client-logger";
+import { useAuthorizedRoots } from "@/lib/api/authorized-roots";
+import { getTaxonomyArtifactOrNull, type TaxonomyArtifactDocument } from "@/lib/api/taxonomy-artifacts";
+import type { WildcardCreateMutationInput } from "@/lib/api/wildcards";
+import { DEFAULT_ENTITY_COLOR } from "@/lib/styles/color-tokens";
+import type { WildcardBase } from "@/types/entities/wildcard/base";
+import { CreateWildcardSchema } from "@/types/entities/wildcard/schema";
 
 // Esquema Zod adaptado para el formulario
 const formSchema = z.object({
-	name: z.string().min(1, 'El nombre es obligatorio'),
+	name: z.string().min(1, "El nombre es obligatorio"),
 	emoji: z.string(),
 	color: z.string(),
 	description: z.string().nullable().optional(),
@@ -32,17 +38,72 @@ type FormData = z.infer<typeof formSchema>;
 
 interface CreateWildcardFormProps {
 	onCancel: () => void;
-	onSubmit: (data: z.infer<typeof CreateWildcardSchema>) => Promise<void> | void;
+	onSubmit: (data: WildcardCreateMutationInput) => Promise<void> | void;
 	parentWildcards?: WildcardBase[];
 	wildcard?: WildcardBase;
 }
 
 export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, onCancel }: CreateWildcardFormProps) {
+	const { data: authorizedRoots = [], isLoading: rootsLoading } = useAuthorizedRoots();
+	const writableRoots = useMemo(
+		() =>
+			authorizedRoots.filter(
+				(root) =>
+					root.permissions.includes("read") &&
+					root.permissions.includes("write") &&
+					root.permissions.includes("delete") &&
+					root.permissions.includes("index"),
+			),
+		[authorizedRoots],
+	);
+	const [existingArtifact, setExistingArtifact] = useState<TaxonomyArtifactDocument | null>(null);
+	const [artifactChecked, setArtifactChecked] = useState(!wildcard);
+	const [artifactRootId, setArtifactRootId] = useState("");
+	const [backingError, setBackingError] = useState<string | null>(null);
+	const [artifactLookupLoading, setArtifactLookupLoading] = useState(Boolean(wildcard));
+	const [artifactLookupFailed, setArtifactLookupFailed] = useState(false);
+
+	useEffect(() => {
+		let cancelled = false;
+		if (!wildcard?.id) {
+			setArtifactLookupLoading(false);
+			setArtifactLookupFailed(false);
+			return;
+		}
+		setArtifactLookupLoading(true);
+		setArtifactLookupFailed(false);
+		setBackingError(null);
+		void getTaxonomyArtifactOrNull("wildcard", wildcard.id)
+			.then((artifact) => {
+				if (cancelled) return;
+				setExistingArtifact(artifact);
+				if (artifact) {
+					setArtifactChecked(true);
+					setArtifactRootId(artifact.rootId);
+				}
+				setArtifactLookupLoading(false);
+			})
+			.catch((error) => {
+				if (!cancelled) {
+					setArtifactLookupLoading(false);
+					setArtifactLookupFailed(true);
+					setBackingError(error instanceof Error ? error.message : "No se pudo consultar el backing.");
+				}
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [wildcard?.id]);
+
+	useEffect(() => {
+		if (!artifactRootId && writableRoots[0]) setArtifactRootId(writableRoots[0].id);
+	}, [artifactRootId, writableRoots]);
+
 	const form = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			name: wildcard?.name || '',
-			emoji: wildcard?.emoji || '🎭',
+			name: wildcard?.name || "",
+			emoji: wildcard?.emoji || "🎭",
 			color: wildcard?.color || DEFAULT_ENTITY_COLOR,
 			description: wildcard?.description || null,
 			shortcut: wildcard?.shortcut || null,
@@ -55,23 +116,48 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 
 	const { fields, append, remove } = useFieldArray({
 		control: form.control,
-		name: 'children',
+		name: "children",
 	});
 
 	const handleSubmit: SubmitHandler<FormData> = (data) => {
+		setBackingError(null);
+		if (artifactLookupLoading || artifactLookupFailed) {
+			setBackingError("No se verificó el backing canónico. Cierra y vuelve a abrir el editor antes de guardar.");
+			return;
+		}
+		const values = data.children.map((child) => child.value.trim()).filter(Boolean);
+		if (artifactChecked && !artifactRootId) {
+			setBackingError("Selecciona una raíz con permisos de lectura, escritura, borrado e indexación.");
+			return;
+		}
+		if (artifactChecked && values.length === 0) {
+			setBackingError("Un Wildcard file-backed necesita al menos un valor.");
+			return;
+		}
 		// Convertir los datos del formulario al formato esperado
 		const wildcardData = {
 			...data,
-			children: JSON.stringify(data.children.map((c) => c.value).filter(Boolean)),
+			children: JSON.stringify(values),
 		};
 
 		// Validar con el esquema original antes de enviar
 		const result = CreateWildcardSchema.safeParse(wildcardData);
 
 		if (result.success) {
-			onSubmit(result.data);
+			onSubmit({
+				...result.data,
+				...(artifactChecked
+					? {
+							fileBacking: {
+								body: values.join("\n"),
+								expectedHash: existingArtifact?.contentHash,
+								rootId: artifactRootId,
+							},
+						}
+					: {}),
+			});
 		} else {
-			clientLogger.error('Error de validación final:', result.error.flatten());
+			clientLogger.error("Error de validación final:", result.error.flatten());
 		}
 	};
 
@@ -81,7 +167,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 		<>
 			<CardHeader className="px-6 pb-4">
 				<div className="flex items-center justify-between">
-					<CardTitle className="font-bold text-xl">{wildcard ? 'Editar' : 'Nuevo'} Comodín</CardTitle>
+					<CardTitle className="font-bold text-xl">{wildcard ? "Editar" : "Nuevo"} Comodín</CardTitle>
 					<Button onClick={onCancel} size="icon" title="Cerrar" variant="ghost">
 						<XIcon className="h-4 w-4" />
 					</Button>
@@ -91,6 +177,47 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 			<Form {...form}>
 				<form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
 					<CardContent className="space-y-4 px-6">
+						<div className="space-y-3 rounded-dt-md border bg-muted/30 p-3">
+							<div className="flex items-start gap-3">
+								<Checkbox
+									checked={artifactChecked}
+									disabled={artifactLookupLoading || Boolean(existingArtifact)}
+									id="wildcardFileBacked"
+									onCheckedChange={(checked) => setArtifactChecked(checked === true)}
+								/>
+								<div className="space-y-1">
+									<Label htmlFor="wildcardFileBacked">Archivo canónico</Label>
+									<p className="text-muted-foreground text-xs">
+										Recomendado: guarda los valores en Markdown portable y usa SQLite sólo como índice derivado.
+									</p>
+									{artifactLookupLoading && (
+										<p className="text-muted-foreground text-xs">Verificando backing canónico…</p>
+									)}
+								</div>
+							</div>
+							{artifactChecked && (
+								<div className="space-y-2">
+									<Label>Biblioteca canónica</Label>
+									<Select
+										disabled={Boolean(existingArtifact) || rootsLoading}
+										onValueChange={setArtifactRootId}
+										value={artifactRootId || undefined}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder={rootsLoading ? "Cargando raíces…" : "Selecciona una raíz"} />
+										</SelectTrigger>
+										<SelectContent>
+											{writableRoots.map((root) => (
+												<SelectItem key={root.id} value={root.id}>
+													{root.label}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+							)}
+							{backingError && <p className="text-destructive text-sm">{backingError}</p>}
+						</div>
 						<FormField
 							control={form.control}
 							name="name"
@@ -140,7 +267,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Descripción</FormLabel>
 									<FormControl>
-										<Input {...field} placeholder="Descripción del comodín" value={field.value || ''} />
+										<Input {...field} placeholder="Descripción del comodín" value={field.value || ""} />
 									</FormControl>
 								</FormItem>
 							)}
@@ -153,7 +280,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Atajo</FormLabel>
 									<FormControl>
-										<Input {...field} placeholder="Atajo de teclado (opcional)" value={field.value || ''} />
+										<Input {...field} placeholder="Atajo de teclado (opcional)" value={field.value || ""} />
 									</FormControl>
 								</FormItem>
 							)}
@@ -190,8 +317,8 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Comodín padre</FormLabel>
 									<Select
-										onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
-										value={field.value || 'none'}
+										onValueChange={(value) => field.onChange(value === "none" ? null : value)}
+										value={field.value || "none"}
 									>
 										<FormControl>
 											<SelectTrigger>
@@ -235,7 +362,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								</div>
 							))}
 
-							<Button className="mt-2" onClick={() => append({ value: '' })} size="sm" type="button" variant="outline">
+							<Button className="mt-2" onClick={() => append({ value: "" })} size="sm" type="button" variant="outline">
 								<PlusIcon className="mr-2 h-4 w-4" />
 								Añadir valor
 							</Button>
@@ -258,7 +385,9 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 						<Button onClick={onCancel} type="button" variant="outline">
 							Cancelar
 						</Button>
-						<Button type="submit">{wildcard ? 'Guardar cambios' : 'Crear comodín'}</Button>
+						<Button disabled={artifactLookupLoading || artifactLookupFailed} type="submit">
+							{wildcard ? "Guardar cambios" : "Crear comodín"}
+						</Button>
 					</CardFooter>
 				</form>
 			</Form>

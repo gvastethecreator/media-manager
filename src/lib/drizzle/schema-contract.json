@@ -1,6 +1,6 @@
 {
 	"formatVersion": 1,
-	"fingerprint": "eac079d6d9722c6e2901105a13b8ce2ef84f907a4f9536f0748e27133cc82baf",
+	"fingerprint": "8e8290f898a9f9fc2d858c9592ac7f126ed92741f8a47f5b492629774ce88b43",
 	"generatedFrom": "src/lib/drizzle/migrations",
 	"objects": [
 		{
@@ -631,6 +631,30 @@
 			"name": "Tag_parentId_idx",
 			"sqlHash": "536a89f166eb1c5166f69bbdc98a6c861971b87c38271385d82459cb4b6872af",
 			"tableName": "Tag",
+			"type": "index"
+		},
+		{
+			"name": "TaxonomyArtifact_entityType_title_idx",
+			"sqlHash": "a4b3ca903a755a294e203de2c5cda9395ebe084b1f21984372aa2184622deded",
+			"tableName": "TaxonomyArtifact",
+			"type": "index"
+		},
+		{
+			"name": "TaxonomyArtifact_rootId_idx",
+			"sqlHash": "02e5ce432784a52dba4c9737d30963dc879467e0418052ce3a575aee911e856b",
+			"tableName": "TaxonomyArtifact",
+			"type": "index"
+		},
+		{
+			"name": "TaxonomyArtifact_rootId_relativePath_key",
+			"sqlHash": "c51eac7e9f1be623927df6b34d78ef7db1cace7bcfd40037f3643b8d6b2428b5",
+			"tableName": "TaxonomyArtifact",
+			"type": "index"
+		},
+		{
+			"name": "TaxonomyArtifact_syncStatus_idx",
+			"sqlHash": "becd2fe7d3dcb82f43173d14b381a182cfb0f05db208e21fec899f809ee21333",
+			"tableName": "TaxonomyArtifact",
 			"type": "index"
 		},
 		{
@@ -1276,6 +1300,12 @@
 			"type": "table"
 		},
 		{
+			"name": "TaxonomyArtifact",
+			"sqlHash": "993c49634310111406d46ea7620c8958fba5cbf6fe1f7d39626e439663b792b1",
+			"tableName": "TaxonomyArtifact",
+			"type": "table"
+		},
+		{
 			"name": "Thumbnail",
 			"sqlHash": "0b62998aead4e0230b1f5d18d34aa70423f7e427d613d3b6a0bd98dde5631c44",
 			"tableName": "Thumbnail",
@@ -1295,7 +1325,7 @@
 		},
 		{
 			"name": "Wildcard",
-			"sqlHash": "f7dd1b44c08a0ac95a1cf69237e8302a0f9ea39b22cbd0c400f0669ba016912f",
+			"sqlHash": "d3b991d13a0401a5bbcf5fc025e3818283f4777bbff52715573e74b4a845cd98",
 			"tableName": "Wildcard",
 			"type": "table"
 		},
