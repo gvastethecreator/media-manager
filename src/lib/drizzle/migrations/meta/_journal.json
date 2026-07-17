@@ -57,6 +57,20 @@
       "when": 1784219530961,
       "tag": "0007_media_folder_created_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1784244677973,
+      "tag": "0008_taxonomy_artifact_projection",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1784247859709,
+      "tag": "0009_wildcard_shortcut_projection",
+      "breakpoints": true
     }
   ]
 }

@@ -18,11 +18,11 @@
 // =================================================================================
 // CORE DOMAIN EXPORTS
 // =================================================================================
-export { activities, entityAggregates, fileStats, metadatas, profiles, queueJobs, settings, thumbnails } from './core';
+export { activities, entityAggregates, fileStats, metadatas, profiles, queueJobs, settings, thumbnails } from "./core";
 // =================================================================================
 // DEV DOMAIN EXPORTS
 // =================================================================================
-export { alertLevelEnum, devFeatures, featureStatusEnum, serverAlerts } from './dev';
+export { alertLevelEnum, devFeatures, featureStatusEnum, serverAlerts } from "./dev";
 // =================================================================================
 // FILES/MEDIA DOMAIN EXPORTS
 // =================================================================================
@@ -35,15 +35,15 @@ export {
 	jsonFiles,
 	uploadedImages,
 	videos,
-} from './files';
+} from "./files";
 // =================================================================================
 // MEDIA CORE DOMAIN EXPORTS
 // =================================================================================
-export { assets, mediaRoots, sourceFiles } from './media-core';
+export { assets, mediaRoots, sourceFiles } from "./media-core";
 // =================================================================================
 // ORGANIZATION DOMAIN EXPORTS
 // =================================================================================
-export { albums, collections, favorites, files, folders, groups } from './organization';
+export { albums, collections, favorites, files, folders, groups } from "./organization";
 // =================================================================================
 // RELATIONS DOMAIN EXPORTS
 // =================================================================================
@@ -80,15 +80,15 @@ export {
 	videoTags,
 	videoWildcards,
 	videoWorldItems,
-} from './relations';
+} from "./relations";
 // =================================================================================
 // TAXONOMY DOMAIN EXPORTS
 // =================================================================================
-export { notes, prompts, properties, tags, wildcards } from './taxonomy';
+export { notes, prompts, properties, tags, taxonomyArtifacts, wildcards } from "./taxonomy";
 // =================================================================================
 // WORLDBUILDING DOMAIN EXPORTS
 // =================================================================================
-export { characters, concepts, places, worldItems } from './worldbuilding';
+export { characters, concepts, places, worldItems } from "./worldbuilding";
 
 // =================================================================================
 // SCHEMA OBJECT FOR DRIZZLE KIT
