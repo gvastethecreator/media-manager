@@ -61,19 +61,33 @@ columnas embebidas permanecen sólo como compatibilidad de schema durante expand
 
 ### REL-001 — Relaciones híbridas
 
-- [ ] Catálogo de relaciones tipadas y reglas por contexto.
-- [ ] Junctions fuertes para relaciones críticas/consultadas.
-- [ ] Modelo flexible sólo donde el dominio lo requiere.
-- [ ] Constraints, cascades y queries inversas.
-- [ ] Migración/reconciliación de junctions existentes.
+- [x] Catálogo de relaciones tipadas y reglas por contexto.
+- [x] Junctions fuertes para relaciones críticas/consultadas.
+- [x] Modelo flexible sólo donde el dominio lo requiere.
+- [x] Constraints, cascades y queries inversas.
+- [x] Migración/reconciliación de junctions existentes.
+
+Checkpoint aceptado 2026-07-17: `STRONG_RELATION_CATALOG` inventaría las 28 junctions authored con endpoints tipados,
+contexto y política; `FLEXIBLE_RELATION_CATALOG` limita el target polimórfico a seis proyecciones operativas
+explícitas. El inventario de orphans consume el catálogo ejecutable en vez de duplicar listas. Las migraciones
+versionadas mantienen dos FKs `CASCADE/CASCADE`, unicidad `(A,B)` e índice inverso `B`; tests sobre una SQLite creada
+desde cero prueban que catálogo y schema no divergen. Contrato humano: `docs/domain/RELATION-CATALOG.md`.
 
 ### TAX-001 — Taxonomía file-backed
 
-- [ ] Delimitar texto file-backed vs metadata DB.
-- [ ] Atomic write, encoding, conflict/version y rename/delete.
-- [ ] Index/search derivado reconstruible.
-- [ ] Recovery si archivo y DB divergen.
-- [ ] Tests en roots temporales y compatibilidad Windows.
+- [x] Delimitar texto file-backed vs metadata DB.
+- [x] Atomic write, encoding, conflict/version y rename/delete.
+- [x] Index/search derivado reconstruible.
+- [x] Recovery si archivo y DB divergen.
+- [x] Tests en roots temporales y compatibilidad Windows.
+
+Checkpoint aceptado 2026-07-17: Markdown/frontmatter gobernado es autoridad authored; `TaxonomyArtifact` sólo guarda
+binding, hash, sync e índice. Escritura temporal same-directory + fsync + rename, UTF-8 estricto, SHA-256 optimista,
+quarantine de deletes y compensación DB/archivo cubren el lifecycle. El rebuild acotado adopta writes interrumpidos,
+recupera renames por identidad y resuelve quarantines según entidad/binding. Wildcard nuevo usa backing canónico por
+defecto en UI, mientras Prompt/Note pueden externalizarse; los writes inline de bindings existentes responden 409.
+Evidencia: tests de primitivas/manager/API/migración/cliente, TypeScript/lint/build verdes y prueba browser real sobre
+SQLite/root descartables con archivo final verificado. Contrato: `docs/domain/TAXONOMY-ARTIFACTS.md`.
 
 ## Wave 4 — Flujos de producto
 
