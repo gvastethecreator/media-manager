@@ -13,6 +13,7 @@ import {
 	AuthorizedFileMutationError,
 	commitAuthorizedFileRelocation,
 } from '@/server/security/authorized-file-mutation';
+import { setAuthorizedFileDeliveryHeaders } from '@/server/security/authorized-asset-cache';
 import {
 	getAuthorizedRootRegistry,
 	parseAuthorizedPathQuery,
@@ -335,8 +336,11 @@ router.get('/content', async (request, response) => {
 		response.set({
 			'Content-Length': fileStat.size.toString(),
 			'Content-Type': getMimeTypeFromExtension(extname(resolved.absolutePath)),
-			'X-Content-Type-Options': 'nosniff',
 		});
+		if (setAuthorizedFileDeliveryHeaders(request, response, fileStat)) {
+			response.status(304).end();
+			return;
+		}
 		const stream = createReadStream(resolved.absolutePath);
 		response.on('close', () => stream.destroy());
 		stream.on('error', (error) => {
