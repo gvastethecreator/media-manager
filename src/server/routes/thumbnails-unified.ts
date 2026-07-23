@@ -50,11 +50,11 @@ async function authorizeThumbnailAsset(
 	request: express.Request,
 	entityType: ThumbnailEntityType,
 	entityId: unknown
-): Promise<void> {
+): Promise<string> {
 	const reference = parseMediaAssetReference({ assetId: entityId, assetType: toMediaAssetType(entityType) });
 	const registry = getAuthorizedRootRegistry(request);
 	await resolveMediaAssetReference(registry, reference, 'read');
-	await resolveMediaAssetReference(registry, reference, 'index');
+	return (await resolveMediaAssetReference(registry, reference, 'index')).absolutePath;
 }
 
 // ===================== ENDPOINTS INDIVIDUALES =====================
@@ -87,12 +87,16 @@ router.get(
 	'/image/:id',
 	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'index'] }),
 	effectHandler(
-		(req) =>
+		(req, res) =>
 			Effect.tryPromise({
 				try: async () => {
 					const { id } = req.params;
 					const options = parseOptions(req.query);
-					return { result: await thumbnailUnifiedService.getThumbnail('image', id, options), entityType: 'image', id };
+					return {
+						result: await thumbnailUnifiedService.getThumbnail('image', id, options, res.locals.authorizedAssetPath),
+						entityType: 'image',
+						id,
+					};
 				},
 				catch: (error) => new Error(String(error)),
 			}),
@@ -111,12 +115,16 @@ router.get(
 	'/video/:id',
 	authorizeMediaAssetParam({ assetType: 'video', permissions: ['read', 'index'] }),
 	effectHandler(
-		(req) =>
+		(req, res) =>
 			Effect.tryPromise({
 				try: async () => {
 					const { id } = req.params;
 					const options = parseOptions(req.query);
-					return { result: await thumbnailUnifiedService.getThumbnail('video', id, options), entityType: 'video', id };
+					return {
+						result: await thumbnailUnifiedService.getThumbnail('video', id, options, res.locals.authorizedAssetPath),
+						entityType: 'video',
+						id,
+					};
 				},
 				catch: (error) => new Error(String(error)),
 			}),
@@ -135,12 +143,16 @@ router.get(
 	'/audio/:id',
 	authorizeMediaAssetParam({ assetType: 'audio', permissions: ['read', 'index'] }),
 	effectHandler(
-		(req) =>
+		(req, res) =>
 			Effect.tryPromise({
 				try: async () => {
 					const { id } = req.params;
 					const options = parseOptions(req.query);
-					return { result: await thumbnailUnifiedService.getThumbnail('audio', id, options), entityType: 'audio', id };
+					return {
+						result: await thumbnailUnifiedService.getThumbnail('audio', id, options, res.locals.authorizedAssetPath),
+						entityType: 'audio',
+						id,
+					};
 				},
 				catch: (error) => new Error(String(error)),
 			}),
@@ -159,13 +171,13 @@ router.get(
 	'/document/:id',
 	authorizeMediaAssetParam({ assetType: 'document', permissions: ['read', 'index'] }),
 	effectHandler(
-		(req) =>
+		(req, res) =>
 			Effect.tryPromise({
 				try: async () => {
 					const { id } = req.params;
 					const options = parseOptions(req.query);
 					return {
-						result: await thumbnailUnifiedService.getThumbnail('document', id, options),
+						result: await thumbnailUnifiedService.getThumbnail('document', id, options, res.locals.authorizedAssetPath),
 						entityType: 'document',
 						id,
 					};
@@ -187,13 +199,13 @@ router.get(
 	'/json/:id',
 	authorizeMediaAssetParam({ assetType: 'json', permissions: ['read', 'index'] }),
 	effectHandler(
-		(req) =>
+		(req, res) =>
 			Effect.tryPromise({
 				try: async () => {
 					const { id } = req.params;
 					const options = parseOptions(req.query);
 					return {
-						result: await thumbnailUnifiedService.getThumbnail('jsonFile', id, options),
+						result: await thumbnailUnifiedService.getThumbnail('jsonFile', id, options, res.locals.authorizedAssetPath),
 						entityType: 'jsonFile',
 						id,
 					};
@@ -215,13 +227,13 @@ router.get(
 	'/3d/:id',
 	authorizeMediaAssetParam({ assetType: 'file3d', permissions: ['read', 'index'] }),
 	effectHandler(
-		(req) =>
+		(req, res) =>
 			Effect.tryPromise({
 				try: async () => {
 					const { id } = req.params;
 					const options = parseOptions(req.query);
 					return {
-						result: await thumbnailUnifiedService.getThumbnail('file3d', id, options),
+						result: await thumbnailUnifiedService.getThumbnail('file3d', id, options, res.locals.authorizedAssetPath),
 						entityType: 'file3d',
 						id,
 					};
@@ -256,13 +268,18 @@ router.post(
 				if (!isValidEntityType(entityType)) {
 					throw Object.assign(new Error(`Invalid entity type: ${entityType}`), { _tag: 'ValidationError' });
 				}
-				await authorizeThumbnailAsset(req, entityType, entityId);
+				const authorizedSourcePath = await authorizeThumbnailAsset(req, entityType, entityId);
 
 				logger.info(`Generating thumbnail: ${entityType}/${entityId}`);
-				const result = await thumbnailUnifiedService.getThumbnail(entityType, entityId, {
-					...options,
-					force: true,
-				});
+				const result = await thumbnailUnifiedService.getThumbnail(
+					entityType,
+					entityId,
+					{
+						...options,
+						force: true,
+					},
+					authorizedSourcePath
+				);
 
 				if (result.success) {
 					return {
@@ -309,14 +326,14 @@ router.post(
 						{ _tag: 'ValidationError' }
 					);
 				}
-				await Promise.all(
+				const authorizedSourcePaths = await Promise.all(
 					requests.map((request: { entityId: unknown; entityType: ThumbnailEntityType }) =>
 						authorizeThumbnailAsset(req, request.entityType, request.entityId)
 					)
 				);
 
 				logger.info(`Batch generating ${requests.length} thumbnails`);
-				const results = await thumbnailUnifiedService.generateBatch(requests, options);
+				const results = await thumbnailUnifiedService.generateBatch(requests, options, authorizedSourcePaths);
 
 				const summary = {
 					total: requests.length,

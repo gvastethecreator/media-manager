@@ -13,6 +13,7 @@ import { metadatas } from '@/lib/drizzle/schema/core/metadatas.js';
 import { file3Ds, jsonFiles } from '@/lib/drizzle/schema/index.js';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
 import {
 	authorizeMediaAssetParam,
 	authorizeMediaPlacementInput,
@@ -54,11 +55,10 @@ function decodePersistedSvgThumbnail(
 	}
 }
 
-function sendSvg(res: express.Response, svg: string, maxAgeSeconds: number): void {
+function sendSvg(res: express.Response, svg: string, cacheMode: 'no-store' | 'revalidate'): void {
 	res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
-	res.setHeader('Cache-Control', `public, max-age=${maxAgeSeconds}`);
 	res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
-	res.setHeader('X-Content-Type-Options', 'nosniff');
+	setAuthorizedAssetCacheHeaders(res, cacheMode);
 	res.send(svg);
 }
 
@@ -150,7 +150,7 @@ file3dsEffectRouter.get('/:id/thumbnail', authorizeMediaAssetParam({ assetType: 
 		if (metadata?.thumbnail) {
 			const thumbnailSvg = decodePersistedSvgThumbnail(metadata.thumbnail);
 			if (thumbnailSvg) {
-				sendSvg(res, thumbnailSvg, 3600);
+				sendSvg(res, thumbnailSvg, 'revalidate');
 				return;
 			}
 			logger.warn('Thumbnail SVG 3D persistido inválido; se usa fallback', { assetId: id });
@@ -167,7 +167,7 @@ file3dsEffectRouter.get('/:id/thumbnail', authorizeMediaAssetParam({ assetType: 
   </g>
 </svg>`;
 
-		sendSvg(res, errorSVG, 60);
+		sendSvg(res, errorSVG, 'no-store');
 	} catch (error) {
 		logger.error('No se pudo generar el thumbnail 3D', { error });
 		res.status(500).json({ error: 'Error generating 3D thumbnail' });
@@ -281,7 +281,7 @@ documentsEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
 			const record = metadataRecords[0];
 			const thumbnailSvg = decodePersistedSvgThumbnail(record.value, record.type === 'base64' ? 'base64' : 'auto');
 			if (thumbnailSvg) {
-				sendSvg(res, thumbnailSvg, 3600);
+				sendSvg(res, thumbnailSvg, 'revalidate');
 				return;
 			}
 			logger.warn('Preview SVG de documento persistido inválido; se usa fallback', { assetId: id });
@@ -298,7 +298,7 @@ documentsEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
   </g>
 </svg>`;
 
-		sendSvg(res, errorSVG, 60);
+		sendSvg(res, errorSVG, 'no-store');
 	} catch (error) {
 		logger.error('No se pudo generar el preview de documento', { error });
 		res.status(500).json({ error: 'Error generating document preview' });
@@ -448,7 +448,7 @@ jsonFilesEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
 		if (metadata?.thumbnail) {
 			const thumbnailSvg = decodePersistedSvgThumbnail(metadata.thumbnail);
 			if (thumbnailSvg) {
-				sendSvg(res, thumbnailSvg, 3600);
+				sendSvg(res, thumbnailSvg, 'revalidate');
 				return;
 			}
 			logger.warn('Preview SVG JSON persistido inválido; se usa fallback', { assetId: id });
@@ -465,7 +465,7 @@ jsonFilesEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
   </g>
 </svg>`;
 
-		sendSvg(res, errorSVG, 60);
+		sendSvg(res, errorSVG, 'no-store');
 	} catch (error) {
 		logger.error('No se pudo generar el preview JSON', { error });
 		res.status(500).json({ error: 'Error generating JSON preview' });
