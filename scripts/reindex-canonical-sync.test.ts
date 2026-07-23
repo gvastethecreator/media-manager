@@ -10,6 +10,7 @@ import { db } from '../src/lib/drizzle';
 import { createAuthorizedPathInput } from '../src/lib/filesystem/authorized-path-proof';
 import { fileSyncService } from '../src/lib/filesystem/file-sync.service';
 import { assets, folders, jsonFiles, mediaRoots, sourceFiles } from '../src/lib/drizzle/schema';
+import { getEventSubscribers, type EventData } from '../src/lib/server/events.server';
 import foldersRouter from '../src/server/routes/folders.effect';
 import { createAuthorizedRootRegistry } from '../src/server/security/authorized-roots';
 import { create as createJsonFile } from '../src/services/json-file/json-file.service.effect';
@@ -71,13 +72,36 @@ describe('canonical public Folder reindex', () => {
 		app.use('/api/folders', foldersRouter);
 
 		await rm(filePath);
-		const response = await request(app).post(`/api/folders/${folderId}/reindex`).send({ includeSubfolders: false });
+		const emittedEvents: EventData[] = [];
+		const captureEvent = (event: EventData) => emittedEvents.push(event);
+		const eventSubscribers = getEventSubscribers();
+		eventSubscribers.add(captureEvent);
+		const response = await (async () => {
+			try {
+				return await request(app).post(`/api/folders/${folderId}/reindex`).send({ includeSubfolders: false });
+			} finally {
+				eventSubscribers.delete(captureEvent);
+			}
+		})();
 		expect(response.status, response.text).toBe(200);
 		expect(response.body).toEqual(
 			expect.objectContaining({ folderId, success: true, summary: expect.objectContaining({ foldersProcessed: 1 }) })
 		);
 		expect(response.body.summary).not.toHaveProperty('metadataExtracted');
 		expect(response.body.summary).not.toHaveProperty('thumbnailsGenerated');
+		expect(emittedEvents).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					data: expect.objectContaining({ folderId, phase: 'starting', progress: 0 }),
+					type: 'folder:progress',
+				}),
+				expect.objectContaining({
+					data: expect.objectContaining({ folderId, phase: 'completed', progress: 100 }),
+					type: 'folder:progress',
+				}),
+			])
+		);
+		expect(emittedEvents.some((event) => event.type.startsWith('folder:reindexAll:'))).toBe(false);
 		const unsupported = await request(app).post(`/api/folders/${folderId}/reindex`).send({ skipMetadata: true });
 		expect(unsupported.status).toBe(400);
 		expect(unsupported.body.code).toBe('UNSUPPORTED_REINDEX_OPTION');
