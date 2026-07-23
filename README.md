@@ -184,7 +184,7 @@ logs/               # Logs de ejecución y métricas
 - Búsqueda global y FTS con fallback
 - Logging estructurado
 - Sistema de cachés y métricas
-- Undo/redo para operaciones de archivos
+- Reubicación autorizada de archivos con recuperación parcial explícita
 - Paneles, file browser y viewer multi-formato
 
 ## Flujo de desarrollo recomendado
@@ -214,7 +214,7 @@ bun run test:e2e
 
 Proyecto en desarrollo activo con una base funcional amplia, una capa documental ya madura y una arquitectura con fuerte orientación a tipado, modularidad y operación local. No es un MVP diminuto; es un sistema bastante ancho, con varias capas de compatibilidad y herramientas de mantenimiento.
 
-Última revisión integral aplicada: **2026-05-08**. El gate `bun run check` quedó verde con Oxlint 0 warnings/0 errors y TypeScript limpio.
+Última revisión integral aplicada: **2026-07-23**. El gate `bun run check` quedó verde con Oxlint 0 warnings/0 errors y TypeScript limpio. El shell Tauri cuenta con un gate de compilación Windows y una CSP explícita, pero aún no constituye un instalable autónomo: falta empaquetar y supervisar el backend con sus dependencias nativas, probarlo fuera del checkout y definir firma e instalador.
 
 ## Licencia
 
