@@ -30,6 +30,7 @@ export function GlobalReindexTerminal() {
 					</div>
 					<div className="flex items-center gap-1">
 						<Button
+							aria-label={isMinimized ? 'Expandir terminal de reindexado' : 'Minimizar terminal de reindexado'}
 							variant="ghost"
 							size="icon"
 							className="h-6 w-6 rounded-sm opacity-70 hover:opacity-100"
@@ -38,6 +39,7 @@ export function GlobalReindexTerminal() {
 							{isMinimized ? <Maximize2 className="h-3.5 w-3.5" /> : <Minimize2 className="h-3.5 w-3.5" />}
 						</Button>
 						<Button
+							aria-label="Cerrar terminal de reindexado"
 							variant="ghost"
 							size="icon"
 							className="h-6 w-6 rounded-sm opacity-70 hover:bg-destructive hover:text-destructive-foreground hover:opacity-100"
