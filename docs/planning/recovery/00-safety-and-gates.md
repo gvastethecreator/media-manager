@@ -19,9 +19,10 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 - [x] Añadir prueba de proceso: comando hijo 0 → wrapper 0; hijo 1 → wrapper 1; señal → no-cero.
 - [ ] Confirmar que `bun run test:ci` y `bun run check:full` fallan cuando su herramienta falla.
 
-**Estado 2026-07-23:** `bun run check:full` propaga el fallo del formateador correctamente, pero queda bloqueado antes de
-lint y TypeScript por tabulaciones existentes en `.github/workflows/quality.yml` (línea 17). Falta comprobar el mismo
-contrato para `test:ci` y corregir el workflow en un cambio dedicado.
+**Estado 2026-07-23:** `bun run check:full` propaga el fallo del formateador correctamente. Tras corregir las
+tabulaciones de `.github/workflows/quality.yml`, el gate llega al inventario global y detecta 445 archivos fuera de
+formato. Falta comprobar el mismo contrato para `test:ci` y abordar el formateo en paquetes revisables, sin un
+autoarreglo masivo sobre trabajo ajeno.
 
 **Archivos:** `scripts/run-with-log.js`, package scripts, tests del runner.
 
