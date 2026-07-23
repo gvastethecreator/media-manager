@@ -84,6 +84,26 @@ function FileTypeIcon({ type, className }: { type: ReturnType<typeof detectFileT
 }
 
 function ImageRendererBase({ item, contentUrl, onError, onLoad, transformStyle, className }: FileContentRendererProps) {
+	const [hasError, setHasError] = useState(false);
+
+	useEffect(() => {
+		setHasError(false);
+	}, [contentUrl]);
+
+	if (hasError) {
+		return (
+			<div
+				className={cn('flex h-full w-full items-center justify-center p-6 text-center', className)}
+				data-no-drag
+				role="alert"
+			>
+				<p className="max-w-md text-destructive text-sm">
+					No se pudo cargar esta imagen. Comprueba que el archivo siga disponible.
+				</p>
+			</div>
+		);
+	}
+
 	return (
 		<div
 			className={cn('pointer-events-none relative flex h-full w-full items-center justify-center', className)}
@@ -92,7 +112,10 @@ function ImageRendererBase({ item, contentUrl, onError, onLoad, transformStyle, 
 			<img
 				alt={item.name || 'sin nombre'}
 				className="pointer-events-none max-h-full max-w-full object-contain"
-				onError={onError}
+				onError={() => {
+					setHasError(true);
+					onError?.();
+				}}
 				onLoad={onLoad}
 				src={contentUrl}
 			/>
