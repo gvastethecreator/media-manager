@@ -284,6 +284,45 @@ describe('authorized file relocation', () => {
 		});
 	});
 
+	it('abandons its staged destination when the source changes before the database commit', async () => {
+		await withFixture(async ({ primary, registry }) => {
+			const sourcePath = resolve(primary, 'source.txt');
+			const destination = { relativePath: 'target/moved.txt', rootId: 'primary' } as const;
+			let sourceReplaced = false;
+			let commitCalled = false;
+
+			await expect(
+				commitAuthorizedFileRelocation({
+					asset: TEST_ASSET,
+					commit: async () => {
+						commitCalled = true;
+					},
+					destination,
+					prepareRecovery: async () => ({
+						id: 'source-replacement-before-commit',
+						transition: async (transition) => {
+							if (transition.state === 'destination_staged' && !sourceReplaced) {
+								sourceReplaced = true;
+								await rm(sourcePath);
+								await writeFile(sourcePath, 'replacement-content', 'utf8');
+							}
+						},
+					}),
+					registry,
+					rollbackCommit: async () => undefined,
+					source: { relativePath: 'source.txt', rootId: 'primary' },
+				})
+			).rejects.toMatchObject<Partial<AuthorizedFileMutationError>>({
+				code: 'FILE_MUTATION_FAILED',
+				status: 409,
+			});
+
+			expect(commitCalled).toBe(false);
+			expect(await readFile(sourcePath, 'utf8')).toBe('replacement-content');
+			await expect(readFile(resolve(primary, 'target/moved.txt'), 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
+		});
+	});
+
 	it('detects a destination parent swapped for a junction after commit and journals recovery', async () => {
 		await withFixture(async ({ outside, primary, registry }) => {
 			const targetPath = resolve(primary, 'target');
