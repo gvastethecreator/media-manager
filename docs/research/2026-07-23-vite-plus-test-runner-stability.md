@@ -33,6 +33,10 @@ suite completa, y cuál es el cambio seguro antes de modificar el pool?
   ubicar la configuración en el bloque `test` de `vite.config.ts`, no en un `vitest.config.ts` separado.
 - [Vitest Config](https://vitest.dev/config/): una configuración `vitest.config.*` separada tiene prioridad y hace que
   Vitest ignore la configuración de Vite.
+- [Migración de Vite+](https://viteplus.dev/guide/migrate): la migración actual reescribe imports ordinarios de
+  `vitest` a `vite-plus/test*` y retira la dependencia directa de `vitest` cuando no se requiere de forma explícita.
+- [Reglas de migración](https://viteplus.dev/guide/migrate-rules): los paquetes `@vitest/*` se alinean con la versión
+  de Vitest que Vite+ empaqueta; las versiones de la etiqueta de Vite+ y del runtime Vitest no son comparables entre sí.
 
 ## Decisión
 
@@ -44,6 +48,14 @@ reproducción determinista: el cambio reduce una fuente de divergencia y sigue l
 Si la suite completa continúa con `ENOENT`, el siguiente paso es documentar un repro mínimo para el upstream y contener
 el gate con un pool serial en CI sólo después de comparar al menos tres ejecuciones completas. No aumentar timeouts ni
 reintentos para ocultar el problema.
+
+## Cobertura y migración pendiente
+
+`bun run test:ci` pasó el 2026-07-23 con 808/808 tests y coverage de statements de 55,86% (8186/14652), por encima del
+threshold de 50%. El warning que imprime `vitest@0.1.20` junto a `@vitest/coverage-v8@4.1.5` es engañoso en este árbol:
+el package local `@voidzero-dev/vite-plus-test@0.1.20` declara `bundledVersions.vitest = 4.1.5` y su peer de coverage
+exige 4.1.5. La migración oficial actual usa `vite-plus/test*`; hay 61 imports heredados que deben cambiarse antes de
+retirar el alias directo sin romper las pruebas concurrentes.
 
 ## Validación posterior
 
