@@ -59,7 +59,6 @@ El árbol de componentes es amplio y está segmentado por intención.
 | Carpeta | Uso principal |
 | --- | --- |
 | `a11y/` | accesibilidad |
-| `batch-operations/` | UI de operaciones en lote |
 | `cards/` | tarjetas reutilizables |
 | `common/` | bloques compartidos |
 | `core/` | componentes estructurales base |
@@ -181,8 +180,6 @@ Es la capa de negocio y sistemas transversales.
 - `metadata/`
 - `stats/`
 - `toast/`
-- `undo-redo/`
-- `clipboard/`
 - `drag-selection/`
 - `queue-job/`
 

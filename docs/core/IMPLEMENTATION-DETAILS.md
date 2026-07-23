@@ -147,7 +147,7 @@ Este sistema alimenta tanto funciones de mantenimiento como operaciones de UI av
 - Ambos flujos usan el mismo servicio Effect y devuelven `Content-Disposition` seguro, `Content-Length`, `Content-Type` y `X-Content-Type-Options: nosniff`.
 - `/api/files/content` sirve contenido inline con MIME inferido por extensión y `nosniff`.
 
-## 6. Batch operations, selección y undo/redo
+## 6. Selección y operaciones autorizadas
 
 ### Selección
 
@@ -156,21 +156,11 @@ Se apoya en Zustand y stores como:
 - `selection.store.ts`
 - `unified-file-manager.store.ts`
 
-### Undo/redo
+### Operaciones de archivos
 
-Existe una implementación concreta en:
-
-- `src/services/undo-redo/undo-redo-manager.ts`
-
-Esta pieza:
-
-- mantiene historial,
-- soporta `execute`, `undo` y `redo`,
-- modela acciones como copiar, mover, eliminar o renombrar,
-- usa un `EventEmitter` compatible con navegador,
-- emite cambios de estado y notificaciones.
-
-No es un placeholder vacío; es una implementación real, aunque con límites lógicos en acciones como borrado irreversible.
+Las mutaciones de archivos parten de una referencia de asset autorizada. La reubicación mantiene journal y
+compensación por asset; el cliente informa el subconjunto confirmado si una serie se corta. No hay una cola local de
+rutas físicas ni controles de undo/redo hasta que el servidor aporte una semántica durable para ellos.
 
 ## 7. Frontend: navegación y viewer
 

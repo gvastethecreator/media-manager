@@ -163,19 +163,6 @@ Responsabilidad:
 - coordinación con endpoints y previews,
 - configuración específica en `thumbnail-config/`.
 
-### Undo/Redo
-
-Ubicación:
-
-- `src/services/undo-redo/undo-redo-manager.ts`
-
-Responsabilidad:
-
-- historial,
-- `execute` / `undo` / `redo`,
-- eventos de estado,
-- acciones sobre archivos.
-
 ### Progress tracking
 
 Ubicación:
@@ -185,7 +172,7 @@ Ubicación:
 Responsabilidad:
 
 - seguimiento de procesos largos,
-- soporte para UI y operaciones de lote.
+- soporte para UI y operaciones largas del servidor.
 
 ## 7. Relación con rutas y frontend
 
