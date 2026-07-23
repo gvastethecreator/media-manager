@@ -589,20 +589,24 @@ export function FileBrowser({
 				isOpen={renameModal.isOpen}
 				items={renameModal.items}
 				onCancel={() => setRenameModal({ isOpen: false, items: [] })}
-				onConfirm={async (newNames) => {
-					if (newNames.length === 1) {
-						const item = renameModal.items.find((candidate) => candidate.id === newNames[0].id);
-						if (!item) throw new Error('No se encontró el asset a renombrar');
-						await renameItem(item, newNames[0].newName);
-					} else {
-						const renames = newNames.map((rename) => {
-							const item = renameModal.items.find((candidate) => candidate.id === rename.id);
-							if (!item) throw new Error('No se encontró un asset a renombrar');
-							return { item, newName: rename.newName };
-						});
-						await renameBatch(renames);
-					}
-					setRenameModal({ isOpen: false, items: [] });
+				onConfirm={(newNames) => {
+					void (async () => {
+						if (newNames.length === 1) {
+							const item = renameModal.items.find((candidate) => candidate.id === newNames[0].id);
+							if (!item) throw new Error('No se encontró el asset a renombrar');
+							await renameItem(item, newNames[0].newName);
+						} else {
+							const renames = newNames.map((rename) => {
+								const item = renameModal.items.find((candidate) => candidate.id === rename.id);
+								if (!item) throw new Error('No se encontró un asset a renombrar');
+								return { item, newName: rename.newName };
+							});
+							await renameBatch(renames);
+						}
+						setRenameModal({ isOpen: false, items: [] });
+					})().catch((error) => {
+						clientLogger.error('File browser rename failed:', error);
+					});
 				}}
 			/>
 
@@ -612,9 +616,14 @@ export function FileBrowser({
 				isOpen={deleteModal.isOpen}
 				items={deleteModal.items}
 				onCancel={() => setDeleteModal({ isOpen: false, items: [] })}
-				onConfirm={async () => {
-					await deleteItems(deleteModal.items);
-					setDeleteModal({ isOpen: false, items: [] });
+				onConfirm={() => {
+					void deleteItems(deleteModal.items)
+						.then(() => {
+							setDeleteModal({ isOpen: false, items: [] });
+						})
+						.catch((error) => {
+							clientLogger.error('File browser delete failed:', error);
+						});
 				}}
 			/>
 
@@ -624,14 +633,18 @@ export function FileBrowser({
 				isOpen={moveModal.isOpen}
 				items={moveModal.items}
 				onCancel={() => setMoveModal({ isOpen: false, items: [] })}
-				onConfirm={async (targetFolderId) => {
-					const assets = moveModal.items.map((item) => {
-						const assetType = toMediaAssetType(item.entityType);
-						if (!assetType) throw new Error(`No se puede mover el tipo ${item.entityType}`);
-						return { assetId: item.id, assetType };
+				onConfirm={(targetFolderId) => {
+					void (async () => {
+						const assets = moveModal.items.map((item) => {
+							const assetType = toMediaAssetType(item.entityType);
+							if (!assetType) throw new Error(`No se puede mover el tipo ${item.entityType}`);
+							return { assetId: item.id, assetType };
+						});
+						await moveFiles({ assets, targetFolderId });
+						setMoveModal({ isOpen: false, items: [] });
+					})().catch((error) => {
+						clientLogger.error('File browser move failed:', error);
 					});
-					await moveFiles({ assets, targetFolderId });
-					setMoveModal({ isOpen: false, items: [] });
 				}}
 			/>
 		</section>
