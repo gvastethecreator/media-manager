@@ -10,6 +10,7 @@ import { db } from '@/lib/drizzle/index.js';
 import { audios } from '@/lib/drizzle/schema/index.js';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
 import { authorizeMediaAssetParam } from '@/server/security/authorized-root-request';
 
 const router = express.Router();
@@ -269,7 +270,8 @@ router.get(
 		{
 			onSuccess: (data, res) => {
 				res.setHeader('Content-Type', 'image/svg+xml');
-				res.setHeader('Cache-Control', data.status === 200 ? 'public, max-age=3600' : 'public, max-age=60');
+				res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+				setAuthorizedAssetCacheHeaders(res, data.status === 200 ? 'revalidate' : 'no-store');
 				res.status(data.status).send(data.svg);
 			},
 			onError: (_error, res) => {
@@ -280,6 +282,8 @@ router.get(
 					backgroundColor: '#fee2e2',
 				});
 				res.setHeader('Content-Type', 'image/svg+xml');
+				res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+				setAuthorizedAssetCacheHeaders(res, 'no-store');
 				res.status(500).send(errorSVG);
 			},
 		}
@@ -384,7 +388,8 @@ router.get(
 		{
 			onSuccess: (data, res) => {
 				res.setHeader('Content-Type', 'image/svg+xml');
-				res.setHeader('Cache-Control', data.status === 200 ? 'public, max-age=7200' : 'public, max-age=60');
+				res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+				setAuthorizedAssetCacheHeaders(res, data.status === 200 ? 'revalidate' : 'no-store');
 				res.send(data.svg);
 			},
 			onError: (_error, res) => {
