@@ -111,24 +111,9 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 		[sortedImages, openViewer]
 	);
 
-	// Función para manejar el upload de archivos
-	const handleFileUpload = useCallback(
-		async (_files: File[]) => {
-			// Esto debería ser manejado por el content view, pero aquí se recargan las imágenes
-			loadImages({ refresh: true });
-		},
-		[loadImages]
-	);
-
-	const handleFileSelect = useCallback((_event: React.ChangeEvent<HTMLInputElement>) => {
-		// Esto debería ser manejado por el content view
-	}, []);
-
 	return (
 		<AllImagesContentView
 			error={error}
-			handleFileSelect={handleFileSelect}
-			handleFileUpload={handleFileUpload}
 			handleImageClick={handleImageClick}
 			handleImageDoubleClick={handleImageDoubleClick}
 			images={sortedImages}

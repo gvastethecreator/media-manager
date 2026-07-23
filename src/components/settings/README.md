@@ -78,8 +78,8 @@ src/components/settings/
 ├── system/                            # Configuración del sistema
 │   ├── system-settings.tsx
 │   └── ...
-└── uploaded-images/                   # Configuración de imágenes subidas
-    ├── uploaded-images-settings.tsx
+└── media/                             # Configuración de media
+    ├── uploaded-images-settings.tsx     # Orienta al explorador autorizado
     └── ...
 ```
 
@@ -100,7 +100,7 @@ graph TD
     B --> C9[Concepts Settings]
     B --> C10[Prompts Settings]
     B --> C11[Notes Settings]
-    B --> C12[Uploaded Images Settings]
+    B --> C12[Authorized Media Browser]
     B --> C13[Thumbnails Settings]
     B --> C14[Folders Settings]
     B --> C15[Shortcuts Settings]
@@ -117,9 +117,7 @@ graph TD
     C4 --> F1[Tags List]
     C4 --> F2[Tag Form]
 
-    C12 --> G1[Images Stats]
-    C12 --> G2[Upload Interface]
-    C12 --> G3[Storage Options]
+    C12 --> G1[Media Root Workflow]
 ```
 
 ## Componentes Principales
