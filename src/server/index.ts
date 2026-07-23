@@ -1,6 +1,7 @@
 // Cargar variables de entorno primero
 
 import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
+import { createServer } from 'node:http';
 import path from 'path';
 import { isLoopbackHost, resolveLocalServiceHost } from '@/config/local-runtime-security';
 import {
@@ -10,9 +11,17 @@ import {
 	recordDatabaseError,
 } from '@/lib/drizzle';
 import type { RuntimeHealthStatus } from '@/runtime/runtime-health';
+import {
+	API_HTTP_SERVER_OPTIONS,
+	API_JSON_BODY_LIMIT,
+	API_URLENCODED_BODY_LIMIT,
+	MAX_REQUEST_BODY_BYTES,
+} from '@/runtime/http-limits';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, logWarning, requestLogger } from './middleware/logging';
+import { publicErrorHandler } from './middleware/public-error-handler';
+import { limitRequestBody } from './middleware/request-body-limit';
 import { syncCanonicalMediaRoots } from '@/services/media-core/media-root-registry.service';
 import { createLocalApiSessionMiddleware, resolveLocalApiSessionOptions } from './middleware/local-api-session';
 import { registerRoutes } from './route-registry';
@@ -34,12 +43,6 @@ if (mutationRecovery.manual > 0) {
 		`Recuperación de archivos: ${mutationRecovery.completed} reconciliada(s), ${mutationRecovery.pending} pendiente(s).`
 	);
 }
-
-// Configuración para manejar headers grandes (error 431)
-app.use((req, res, next) => {
-	res.setHeader('X-Max-Header-Size', '32768'); // 32KB
-	next();
-});
 
 const PORT = Number.parseInt(process.env.API_PORT || process.env.PORT || '4000', 10);
 const HOST = resolveLocalServiceHost({
@@ -87,8 +90,9 @@ app.use(['/api', '/uploads'], localApiSession);
 app.use('/api/', apiLimiter);
 app.use('/api', sanitizeJsonResponses);
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(limitRequestBody(MAX_REQUEST_BODY_BYTES));
+app.use(express.json({ limit: API_JSON_BODY_LIMIT }));
+app.use(express.urlencoded({ extended: true, limit: API_URLENCODED_BODY_LIMIT }));
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
 app.use('/uploads', express.static(path.resolve(UPLOADS_DIR)));
@@ -100,20 +104,13 @@ app.use((req, res) => {
 });
 
 app.use(errorLogger as ErrorRequestHandler);
-app.use(((error, _req, res, next) => {
+app.use(((error, req, res, next) => {
 	recordDatabaseError(error);
-	if (res.headersSent) {
-		next(error);
-		return;
-	}
-	res.status(500).json({
-		code: 'INTERNAL_SERVER_ERROR',
-		message: 'Ocurrió un error interno.',
-		retryable: false,
-	});
+	publicErrorHandler(error, req, res, next);
 }) as ErrorRequestHandler);
 
-const server = app.listen(PORT, HOST, () => {
+const server = createServer(API_HTTP_SERVER_OPTIONS, app);
+server.listen(PORT, HOST, () => {
 	runtimeHealthStatus = 'ready';
 	logInfo(`🚀 Servidor Express iniciado en http://${HOST}:${PORT}`);
 	if (!isLoopbackHost(HOST)) {
