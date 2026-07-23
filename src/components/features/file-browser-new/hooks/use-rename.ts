@@ -96,6 +96,7 @@ export function useRename(): RenameResult {
 			const summary: FileMutationSummary = {
 				applied: 0,
 				cleanupPending: 0,
+				reconciliationPending: 0,
 				recoveryPending: 0,
 				total: operations.length,
 			};

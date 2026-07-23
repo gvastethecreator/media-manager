@@ -51,6 +51,7 @@ export function useMove(): UseMoveResult {
 			const summary: FileMutationSummary = {
 				applied: 0,
 				cleanupPending: 0,
+				reconciliationPending: 0,
 				recoveryPending: 0,
 				total: assets.length,
 			};

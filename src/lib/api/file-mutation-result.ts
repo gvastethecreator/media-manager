@@ -6,6 +6,7 @@ export interface FileMutationItemResult {
 export interface FileMutationSummary {
 	applied: number;
 	cleanupPending: number;
+	reconciliationPending: number;
 	recoveryPending: number;
 	total: number;
 }
@@ -24,10 +25,23 @@ export function addFileMutationResult(summary: FileMutationSummary, item: FileMu
 	summary.applied += 1;
 	if (item.cleanupPending) summary.cleanupPending += 1;
 	if (item.recoveryPending) summary.recoveryPending += 1;
+	if (item.cleanupPending || item.recoveryPending) summary.reconciliationPending += 1;
 }
 
 export function pendingFileMutationDescription(summary: FileMutationSummary): string | null {
-	const pending = summary.cleanupPending + summary.recoveryPending;
-	if (pending === 0) return null;
-	return `${pending} operación${pending === 1 ? '' : 'es'} quedó${pending === 1 ? '' : 'aron'} pendiente${pending === 1 ? '' : 's'} de reconciliación automática.`;
+	if (summary.reconciliationPending === 0) return null;
+	const details: string[] = [];
+	if (summary.cleanupPending > 0) {
+		details.push(
+			summary.cleanupPending === 1
+				? '1 copia de origen sigue pendiente de retirar.'
+				: `${summary.cleanupPending} copias de origen siguen pendientes de retirar.`
+		);
+	}
+	if (summary.recoveryPending > 0) {
+		details.push(
+			`El registro de recuperación de ${summary.recoveryPending} ${summary.recoveryPending === 1 ? 'operación' : 'operaciones'} requiere verificación al reiniciar.`
+		);
+	}
+	return `${summary.reconciliationPending} ${summary.reconciliationPending === 1 ? 'operación queda pendiente' : 'operaciones quedan pendientes'} de reconciliación. ${details.join(' ')}`;
 }
