@@ -117,19 +117,19 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 	);
 
 	return (
-		<div className={cn('flex flex-col', className)}>
+		<div className={cn('flex w-full min-w-0 flex-col', className)}>
 			<div
 				className={cn(
-					'flex w-full cursor-pointer items-center justify-between rounded px-2 py-0.5 text-xs hover:bg-secondary/30',
+					'flex min-w-0 w-full cursor-pointer items-center justify-between rounded px-2 py-0.5 text-xs hover:bg-secondary/30',
 					isSelected && 'bg-secondary/50'
 				)}
 				style={{ paddingLeft: `${0.5 + level * 0.75}rem` }}
 			>
-				<div className="flex flex-1 items-center gap-1">
+				<div className="flex w-0 min-w-0 flex-1 items-center gap-1">
 					{hasChildren && (
 						<button
 							aria-label={isExpanded ? 'Contraer carpeta' : 'Expandir carpeta'}
-							className="flex h-4 w-4 items-center justify-center rounded-sm hover:bg-secondary/70"
+							className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm hover:bg-secondary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 							onClick={handleToggleClick}
 							type="button"
 						>
@@ -140,7 +140,7 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 
 					<button
 						aria-label={`Abrir carpeta ${folder.name}`}
-						className="flex flex-1 items-center gap-1 text-left"
+						className="flex w-0 min-w-0 flex-1 items-center gap-1 overflow-hidden text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
 						onClick={handleClick}
 						onKeyDown={(e) => {
 							if (e.key === 'Enter' || e.key === ' ') {
@@ -152,8 +152,8 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 						title={folder.name}
 						type="button"
 					>
-						<Folder className="h-3 w-3 text-(--entity-folder)" />
-						<span className="truncate">{folder.name}</span>
+						<Folder className="h-3 w-3 shrink-0 text-(--entity-folder)" />
+						<span className="min-w-0 flex-1 truncate">{folder.name}</span>
 					</button>
 				</div>
 				<span className="ml-2 min-w-3 text-right text-[9px] text-muted-foreground tabular-nums">{fileCount}</span>
@@ -263,7 +263,7 @@ const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 	}
 
 	return (
-		<div className={cn('flex flex-col gap-0', className)}>
+		<div className={cn('flex w-full min-w-0 flex-col gap-0', className)}>
 			{treeData.map((folder) => (
 				<FolderTreeItem
 					className={className}
