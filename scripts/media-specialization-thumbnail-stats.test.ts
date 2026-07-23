@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'bun:test';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { eq, inArray } from 'drizzle-orm';
@@ -52,17 +52,21 @@ const insertCanonical = async (input: {
 	contents?: string;
 	path: string;
 	rootId: string;
+	sourceSize?: number;
 	type: 'audio' | 'document' | 'json' | 'video';
+	writeSource?: boolean;
 }) => {
 	const id = crypto.randomUUID();
 	ids.push(id);
 	const sourceId = `source-${id}`;
-	await writeFile(input.path, input.contents || '12345678');
+	const sourceContents = input.contents || '12345678';
+	if (input.writeSource !== false) await writeFile(input.path, sourceContents);
+	const sourceSize = input.sourceSize || Buffer.byteLength(sourceContents);
 	await db.transaction(async (transaction: typeof db) => {
 		await transaction.insert(sourceFiles).values({
 			assetId: id,
 			availability: 'available',
-			byteSize: 8,
+			byteSize: sourceSize,
 			contentHash: 'a'.repeat(64),
 			folderId: input.folderId,
 			id: sourceId,
@@ -79,7 +83,7 @@ const insertCanonical = async (input: {
 				id,
 				name: id,
 				path: input.path,
-				size: 8,
+				size: sourceSize,
 				thumbnail: input.metadata,
 			});
 			return;
@@ -95,7 +99,7 @@ const insertCanonical = async (input: {
 				mimeType: 'application/json',
 				name: id,
 				path: input.path,
-				size: 8,
+				size: sourceSize,
 			});
 			return;
 		}
@@ -108,7 +112,7 @@ const insertCanonical = async (input: {
 			mimeType: input.type === 'audio' ? 'audio/mpeg' : 'application/pdf',
 			name: id,
 			path: input.path,
-			size: 8,
+			size: sourceSize,
 		};
 		if (input.type === 'audio') await transaction.insert(audios).values({ ...common, metadata: input.metadata });
 		else await transaction.insert(documents).values({ ...common, thumbnail: input.metadata });
@@ -250,6 +254,16 @@ describe('media specialization thumbnail stats', () => {
 		expect(documentFallback.headers['x-content-type-options']).toBe('nosniff');
 		expect(documentFallback.headers['content-security-policy']).toContain("default-src 'none'");
 
+		const resizedDocument = await thumbnailUnifiedService.getThumbnail('document', metadataDocumentId, {
+			force: true,
+			height: 150,
+			width: 106,
+		});
+		expect(resizedDocument).toEqual(
+			expect.objectContaining({ generated: true, height: 150, success: true, width: 106 })
+		);
+		expect(resizedDocument.data?.toString('utf8')).toContain('<svg width="106" height="150" viewBox="0 0 212 300"');
+
 		const missingSourceHandoff = await thumbnailUnifiedService.getThumbnail('jsonFile', jsonId, { force: true });
 		expect(missingSourceHandoff).toEqual(expect.objectContaining({ success: false }));
 		const canonicalJsonThumbnail = await thumbnailUnifiedService.getThumbnail(
@@ -293,5 +307,109 @@ describe('media specialization thumbnail stats', () => {
 		const deleted = await request(app).get('/api/thumbnails/unified/stats');
 		expect(deleted.body.byType.audio).toEqual({ total: 1, withWaveform: 0 });
 		expect(deleted.body.byType.document).toEqual({ total: 0, withThumbnail: 0 });
+	});
+
+	it('genera thumbnails de video y audio desde las fuentes canónicas y conserva las dimensiones solicitadas', async () => {
+		const directory = await mkdtemp(resolve(tmpdir(), 'media-manager-thumbnail-generation-'));
+		temporaryDirectories.push(directory);
+		const allowedPath = resolve(directory, 'allowed');
+		await mkdir(allowedPath);
+		const rootId = `thumbnail-generation-root-${crypto.randomUUID()}`;
+		const folderId = `thumbnail-generation-folder-${crypto.randomUUID()}`;
+		rootIds.push(rootId);
+		folderIds.push(folderId);
+		const registry = await createAuthorizedRootRegistry([
+			{ id: rootId, label: 'Thumbnail generation root', path: allowedPath, permissions: ['read', 'index'] },
+		]);
+		await syncCanonicalMediaRoots(registry);
+		await db.insert(folders).values({ id: folderId, name: 'Thumbnail generation', path: allowedPath });
+
+		const videoPath = resolve(allowedPath, 'fixture.mp4');
+		const audioPath = resolve(allowedPath, 'fixture.wav');
+		await Promise.all([
+			copyFile(resolve(process.cwd(), 'test-files', 'test-video.mp4'), videoPath),
+			copyFile(resolve(process.cwd(), 'test-files', 'test-audio.wav'), audioPath),
+		]);
+		const [videoStats, audioStats] = await Promise.all([stat(videoPath), stat(audioPath)]);
+		const videoId = await insertCanonical({
+			folderId,
+			path: videoPath,
+			rootId,
+			sourceSize: videoStats.size,
+			type: 'video',
+			writeSource: false,
+		});
+		const audioId = await insertCanonical({
+			folderId,
+			path: audioPath,
+			rootId,
+			sourceSize: audioStats.size,
+			type: 'audio',
+			writeSource: false,
+		});
+		const stalePath = resolve(directory, 'stale-source');
+		await writeFile(stalePath, 'stale');
+		await Promise.all([
+			db.update(videos).set({ path: stalePath }).where(eq(videos.id, videoId)),
+			db.update(audios).set({ path: stalePath }).where(eq(audios.id, audioId)),
+		]);
+
+		const videoResult = await thumbnailUnifiedService.getThumbnail(
+			'video',
+			videoId,
+			{ force: true, height: 90, width: 160 },
+			videoPath
+		);
+		expect(videoResult).toEqual(
+			expect.objectContaining({ generated: true, height: 90, mimeType: 'image/webp', success: true, width: 160 })
+		);
+		const sharp = (await import('sharp')).default;
+		expect(await sharp(videoResult.data).metadata()).toEqual(expect.objectContaining({ height: 90, width: 160 }));
+		expect(
+			await db.query.videos.findFirst({
+				where: eq(videos.id, videoId),
+				columns: { thumbnail: true, thumbnailHeight: true, thumbnailWidth: true },
+			})
+		).toEqual(expect.objectContaining({ thumbnailHeight: 90, thumbnailWidth: 160 }));
+
+		const audioResult = await thumbnailUnifiedService.getThumbnail(
+			'audio',
+			audioId,
+			{ force: true, height: 120, width: 400 },
+			audioPath
+		);
+		expect(audioResult).toEqual(
+			expect.objectContaining({ generated: true, height: 120, mimeType: 'image/png', success: true, width: 400 })
+		);
+		expect(await sharp(audioResult.data).metadata()).toEqual(expect.objectContaining({ height: 120, width: 400 }));
+		const generatedAudio = await db.query.audios.findFirst({
+			where: eq(audios.id, audioId),
+			columns: { metadata: true },
+		});
+		expect(JSON.parse(generatedAudio?.metadata || '{}')).toEqual(
+			expect.objectContaining({ waveform: expect.objectContaining({ height: 120, width: 400 }) })
+		);
+		await Promise.all([
+			db.update(videos).set({ path: videoPath }).where(eq(videos.id, videoId)),
+			db.update(audios).set({ path: audioPath }).where(eq(audios.id, audioId)),
+		]);
+
+		const app = express();
+		app.locals.authorizedRootRegistry = registry;
+		app.use(express.json());
+		app.use('/api/thumbnails/unified', thumbnailsUnifiedRouter);
+		const clampedVideo = await request(app).get(
+			`/api/thumbnails/unified/video/${videoId}?force=true&height=-1&width=999999`
+		);
+		expect(clampedVideo.status, clampedVideo.text).toBe(200);
+		expect(await sharp(clampedVideo.body).metadata()).toEqual(expect.objectContaining({ height: 180, width: 2000 }));
+
+		const clampedAudio = await request(app)
+			.post('/api/thumbnails/unified/generate')
+			.send({ entityId: audioId, entityType: 'audio', options: { height: 0, width: 999999 } });
+		expect(clampedAudio.status, JSON.stringify(clampedAudio.body)).toBe(200);
+		expect(clampedAudio.body).toEqual(
+			expect.objectContaining({ generated: true, height: 200, success: true, width: 2000 })
+		);
 	});
 });
