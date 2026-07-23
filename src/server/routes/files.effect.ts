@@ -26,7 +26,7 @@ import {
 	resolveMediaAssetReference,
 	updateMediaAssetLocation,
 } from '@/server/security/media-asset-reference';
-import { prepareFileMutationRecovery } from '@/server/security/file-mutation-recovery';
+import { prepareFileMutationRecovery, reconcilePendingFileMutations } from '@/server/security/file-mutation-recovery';
 import { type AuthorizedPathReference, RootAuthorizationError } from '@/server/security/authorized-roots';
 
 const router = express.Router();
@@ -152,6 +152,18 @@ router.get('/recovery-status', (request, response) => {
 		data: { recovery: startupFileMutationRecovery(request.app.locals.startupFileMutationRecovery) },
 		success: true,
 	});
+});
+
+router.post('/recovery/reconcile', async (request, response) => {
+	try {
+		const recovery = startupFileMutationRecovery(
+			await reconcilePendingFileMutations(getAuthorizedRootRegistry(request), process.env, { includeManual: true })
+		);
+		request.app.locals.startupFileMutationRecovery = recovery;
+		response.json({ data: { recovery }, success: true });
+	} catch (error) {
+		safeOperationError(response, error);
+	}
 });
 
 router.get('/directory', async (request, response) => {

@@ -194,6 +194,27 @@ describe('authorized filesystem HTTP contract', () => {
 		});
 	});
 
+	it('vuelve a evaluar la recuperación sin publicar el journal ni rutas locales', async () => {
+		await withApp(async ({ app, primary }) => {
+			const previousJournalPath = process.env.MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL;
+			process.env.MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL = resolve(primary, 'recovery.jsonl');
+			try {
+				const response = await request(app).post('/api/files/recovery/reconcile');
+
+				expect(response.status).toBe(200);
+				expect(response.body).toEqual({
+					data: { recovery: { completed: 0, manual: 0, pending: 0, state: 'clean' } },
+					success: true,
+				});
+				expect(JSON.stringify(response.body)).not.toContain(primary);
+				expect(JSON.stringify(response.body)).not.toContain('recovery.jsonl');
+			} finally {
+				if (previousJournalPath === undefined) delete process.env.MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL;
+				else process.env.MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL = previousJournalPath;
+			}
+		});
+	});
+
 	it('sirve contenido y downloads sólo mediante referencias autorizadas', async () => {
 		await withApp(async ({ app, primary }) => {
 			const content = await request(app).get('/api/files/content').query({ rootId: 'primary', path: 'inside.txt' });

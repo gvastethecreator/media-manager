@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { FileBrowserStatusBar } from './status-bar';
 
 describe('FileBrowserStatusBar startup recovery state', () => {
@@ -30,5 +30,22 @@ describe('FileBrowserStatusBar startup recovery state', () => {
 		expect(alert).toHaveTextContent('Rec. sin estado');
 		expect(alert).toHaveAttribute('title', 'No se pudo comprobar el estado de recuperación al iniciar.');
 		expect(screen.queryByText('Listo')).not.toBeInTheDocument();
+	});
+
+	it('abre la revisión sólo cuando se proporciona una acción explícita', () => {
+		const onReviewRecovery = vi.fn();
+		render(
+			<FileBrowserStatusBar
+				onReviewRecovery={onReviewRecovery}
+				selectedCount={0}
+				shownItems={3}
+				startupRecovery={{ completed: 0, manual: 1, pending: 0, state: 'manual_review_required' }}
+				totalItems={3}
+			/>
+		);
+
+		const review = screen.getByRole('button', { name: /requiere revisión manual/i });
+		fireEvent.click(review);
+		expect(onReviewRecovery).toHaveBeenCalledTimes(1);
 	});
 });

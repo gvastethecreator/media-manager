@@ -191,15 +191,21 @@ export interface FileMutationReconciliationResult {
 	pending: number;
 }
 
+export interface FileMutationReconciliationOptions {
+	/** Un usuario confirmó que se vuelva a evaluar un registro que quedó en revisión manual. */
+	includeManual?: boolean;
+}
+
 export async function reconcilePendingFileMutations(
 	registry: AuthorizedRootRegistry,
-	environment: Record<string, string | undefined> = process.env
+	environment: Record<string, string | undefined> = process.env,
+	options: FileMutationReconciliationOptions = {}
 ): Promise<FileMutationReconciliationResult> {
 	const records = await readLatestRecoveryRecords(environment);
 	const result: FileMutationReconciliationResult = { completed: 0, manual: 0, pending: 0 };
 	for (const record of records.values()) {
 		if (record.state === 'completed') continue;
-		if (record.state === 'manual_recovery_required') {
+		if (record.state === 'manual_recovery_required' && !options.includeManual) {
 			result.manual += 1;
 			continue;
 		}
