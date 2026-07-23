@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 // import { useAutoFolderIndexing } from '@/hooks/use-auto-folder-indexing'; // Deshabilitado temporalmente
+import { toFileViewerItem } from '@/components/features/file-viewer/file-viewer-item';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
-import { useImageViewer } from '@/store/image-viewer.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
-import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { ImageWithStats } from '@/types/entities/image';
 import { isImageWithStats } from '@/types/entity-guards';
 import type { ViewProps } from '../types';
@@ -59,8 +58,7 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 		}
 	}, [imageCount, isLoading, loadImages]); // Dependencias necesarias
 
-	const navigate = useNavigate();
-	const { openViewer } = useImageViewer();
+	const { openViewer } = useFileViewerStore();
 
 	const handleImageClick = useCallback((item: AnyEntityWithStats) => {
 		// Verificar que sea una imagen usando type guard
@@ -84,12 +82,11 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 				viewLogger.info('🖱️ Doble click en imagen:', image.name);
 
 				// Abrir visor de imágenes
-				const imageEntities = (sortedImages || []).filter((img: AnyEntityWithStats) =>
-					isImageWithStats(img)
-				) as EntityWithStats[];
-
-				const currentIndex = imageEntities.findIndex((img: EntityWithStats) => img.id === image.id);
-				openViewer(imageEntities, currentIndex);
+				const imageItems = sortedImages.map((item) =>
+					toFileViewerItem(item as unknown as Record<string, unknown>, 'image')
+				);
+				const currentIndex = imageItems.findIndex((item) => item.id === image.id);
+				openViewer(imageItems, Math.max(0, currentIndex));
 			} else {
 				viewLogger.warn('⚠️ Item con doble click no es una imagen:', item);
 			}

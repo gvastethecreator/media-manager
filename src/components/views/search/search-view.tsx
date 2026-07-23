@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { toFileViewerItem } from '@/components/features/file-viewer/file-viewer-item';
 import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { useSearchUnified } from '@/lib/api/search';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useImageViewer } from '@/store/image-viewer.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { ViewProps } from '../types';
 
 export function SearchView(_props: ViewProps) {
@@ -34,7 +35,7 @@ export function SearchView(_props: ViewProps) {
 		limit: 100,
 	});
 
-	const { openViewer } = useImageViewer();
+	const { openViewer } = useFileViewerStore();
 	const { setSelectedItems, setVisible } = useDetailsPanel();
 
 	const browserItems = useMemo(() => {
@@ -52,9 +53,12 @@ export function SearchView(_props: ViewProps) {
 			if (!entity) return;
 
 			if (entity.entityType === 'image') {
-				const imageItems = browserItems.map((i: BrowserItem) => i.raw).filter((i: any) => i?.entityType === 'image');
+				const imageItems = browserItems
+					.map((i: BrowserItem) => i.raw)
+					.filter((i: any) => i?.entityType === 'image')
+					.map((image: Record<string, unknown>) => toFileViewerItem(image, 'image'));
 				const imgIndex = imageItems.findIndex((i: any) => i.id === entity.id);
-				openViewer(imageItems as any, Math.max(0, imgIndex));
+				openViewer(imageItems, Math.max(0, imgIndex));
 				return;
 			}
 
