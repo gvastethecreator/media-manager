@@ -177,6 +177,23 @@ describe('authorized filesystem HTTP contract', () => {
 		});
 	});
 
+	it('expone sólo el resumen seguro de la recuperación de inicio', async () => {
+		await withApp(async ({ app, primary }) => {
+			app.locals.startupFileMutationRecovery = { completed: 2, manual: 1, pending: 3 };
+			const response = await request(app).get('/api/files/recovery-status');
+
+			expect(response.status).toBe(200);
+			expect(response.body).toEqual({
+				data: {
+					recovery: { completed: 2, manual: 1, pending: 3, state: 'manual_review_required' },
+				},
+				success: true,
+			});
+			expect(JSON.stringify(response.body)).not.toContain(primary);
+			expect(JSON.stringify(response.body)).not.toContain('asset-');
+		});
+	});
+
 	it('sirve contenido y downloads sólo mediante referencias autorizadas', async () => {
 		await withApp(async ({ app, primary }) => {
 			const content = await request(app).get('/api/files/content').query({ rootId: 'primary', path: 'inside.txt' });
