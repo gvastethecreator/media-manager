@@ -1,11 +1,8 @@
-import { AlertTriangle, FolderSync, FolderUp } from 'lucide-react';
+import { FolderUp } from 'lucide-react';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
 import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { motion } from '@/components/ui/motion-shim';
-import { Progress } from '@/components/ui/progress';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { ImageWithStats } from '@/types/entities/image';
 
@@ -14,81 +11,16 @@ interface AllImagesContentViewProps {
 	handleImageClick: (item: AnyEntityWithStats) => void;
 	handleImageDoubleClick: (item: AnyEntityWithStats) => void;
 	images: ImageWithStats[];
-	indexingStatus: {
-		indexedFolders: number;
-		totalFolders: number;
-		currentFolder: string | null;
-		errors: Array<{ folderId: string; message: string }>;
-	};
-	isIndexing: boolean;
 	isLoading: boolean;
-	progress: number;
-	startIndexing: () => void;
 }
 
 const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 	images,
 	isLoading,
 	error,
-	indexingStatus,
-	isIndexing,
-	progress,
-	startIndexing,
 	handleImageClick,
 	handleImageDoubleClick,
 }) => {
-	// Renderizar barra de estado de indexación
-	const renderIndexingStatus = () => {
-		if (!indexingStatus || (!isIndexing && indexingStatus.indexedFolders === 0)) {
-			return null;
-		}
-
-		return (
-			<motion.div
-				animate={{ opacity: 1, y: 0 }}
-				className="mb-4 rounded-lg border-ui-info-border bg-ui-info p-3"
-				initial={{ opacity: 0, y: -20 }}
-			>
-				<div className="mb-2 flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<FolderSync className={`h-4 w-4 text-primary ${isIndexing ? 'animate-spin' : ''}`} />
-						<span className="font-medium text-blue-900 text-sm dark:text-blue-100">
-							{isIndexing ? 'Indexando carpetas...' : 'Indexación completada'}
-						</span>
-					</div>
-					{!isIndexing && (
-						<Button className="h-7 text-xs" onClick={startIndexing} size="sm" variant="outline">
-							Reindexar
-						</Button>
-					)}
-				</div>
-
-				{isIndexing && (
-					<>
-						<Progress className="mb-2 h-2" value={progress * 100} />
-						<div className="flex items-center justify-between text-primary text-xs dark:text-blue-300">
-							<span>
-								{indexingStatus?.indexedFolders || 0} de {indexingStatus?.totalFolders || 0} carpetas
-							</span>
-							{indexingStatus?.currentFolder && (
-								<span className="max-w-40 truncate">Procesando: {indexingStatus.currentFolder}</span>
-							)}
-						</div>
-					</>
-				)}
-
-				{indexingStatus?.errors && indexingStatus.errors.length > 0 && (
-					<div className="mt-2 flex items-center gap-2">
-						<AlertTriangle className="h-4 w-4 text-warning" />
-						<Badge className="border-ui-warning-border text-ui-warning-text" variant="outline">
-							{indexingStatus.errors.length} errores
-						</Badge>
-					</div>
-				)}
-			</motion.div>
-		);
-	};
-
 	if (error) {
 		return (
 			<div className="flex h-full items-center justify-center">
@@ -104,9 +36,6 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 	// El FileBrowser maneja el estado vacío internamente
 	return (
 		<div className="h-full">
-			{/* Barra de estado de indexación */}
-			{renderIndexingStatus()}
-
 			{/* Toolbar con controles superiores */}
 			<div className="flex items-center justify-between gap-3 border-border border-b bg-background/40 px-3 py-2 backdrop-blur-sm">
 				<div className="flex min-w-0 items-center gap-3">
@@ -118,15 +47,11 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
-					{isIndexing && (
-						<Badge className="animate-pulse" variant="secondary">
-							<FolderSync className="mr-1 h-3 w-3 animate-spin" />
-							Indexando
-						</Badge>
-					)}
-					<Button onClick={startIndexing} variant="outline">
-						<FolderSync className="mr-2 h-4 w-4" />
-						Reindexar
+					<Button asChild variant="outline">
+						<a href="/files">
+							<FolderUp aria-hidden="true" className="mr-2 h-4 w-4" />
+							Gestionar reindexado
+						</a>
 					</Button>
 				</div>
 			</div>
@@ -154,11 +79,6 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 						<span>
 							Mostrando {images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'}
 						</span>
-						{indexingStatus?.indexedFolders && indexingStatus.indexedFolders > 0 && (
-							<span className="text-success dark:text-green-400">
-								✅ {indexingStatus.indexedFolders} carpetas indexadas automáticamente
-							</span>
-						)}
 					</div>
 				</div>
 			)}
