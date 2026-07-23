@@ -137,7 +137,8 @@ class ThumbnailUnifiedService {
 	async getThumbnail(
 		entityType: ThumbnailEntityType,
 		entityId: string,
-		options: ThumbnailOptions = {}
+		options: ThumbnailOptions = {},
+		authorizedSourcePath?: string
 	): Promise<ThumbnailResult> {
 		try {
 			logger.debug(`Obteniendo thumbnail: ${entityType}/${entityId}`);
@@ -152,7 +153,7 @@ class ThumbnailUnifiedService {
 
 			// Generar nuevo thumbnail
 			logger.info(`Generando thumbnail: ${entityType}/${entityId}`);
-			return await this.generateThumbnail(entityType, entityId, options);
+			return await this.generateThumbnail(entityType, entityId, options, authorizedSourcePath);
 		} catch (error) {
 			logger.error(`Error obteniendo thumbnail ${entityType}/${entityId}:`, error);
 			return {
@@ -288,7 +289,8 @@ class ThumbnailUnifiedService {
 	 */
 	async generateBatch(
 		requests: Array<{ entityType: ThumbnailEntityType; entityId: string }>,
-		options: ThumbnailOptions = {}
+		options: ThumbnailOptions = {},
+		authorizedSourcePaths?: Array<string | undefined>
 	): Promise<Record<string, ThumbnailResult>> {
 		const results: Record<string, ThumbnailResult> = {};
 
@@ -296,9 +298,9 @@ class ThumbnailUnifiedService {
 		const batchSize = 5;
 		for (let i = 0; i < requests.length; i += batchSize) {
 			const batch = requests.slice(i, i + batchSize);
-			const batchPromises = batch.map(async ({ entityType, entityId }) => {
+			const batchPromises = batch.map(async ({ entityType, entityId }, batchIndex) => {
 				const key = `${entityType}:${entityId}`;
-				results[key] = await this.getThumbnail(entityType, entityId, options);
+				results[key] = await this.getThumbnail(entityType, entityId, options, authorizedSourcePaths?.[i + batchIndex]);
 			});
 			await Promise.all(batchPromises);
 		}
@@ -411,10 +413,11 @@ class ThumbnailUnifiedService {
 				if (audio?.metadata) {
 					const metadata = JSON.parse(audio.metadata as string);
 					if (metadata?.waveform?.data) {
+						const format = String(metadata.waveform.format || 'png').toLowerCase();
 						return {
 							success: true,
 							data: Buffer.from(metadata.waveform.data, 'base64'),
-							mimeType: 'image/svg+xml',
+							mimeType: format === 'svg' ? 'image/svg+xml' : 'image/png',
 							width: metadata.waveform.width || DEFAULT_DIMENSIONS.audio.width,
 							height: metadata.waveform.height || DEFAULT_DIMENSIONS.audio.height,
 						};
@@ -598,19 +601,20 @@ class ThumbnailUnifiedService {
 	private async generateThumbnail(
 		entityType: ThumbnailEntityType,
 		entityId: string,
-		options: ThumbnailOptions
+		options: ThumbnailOptions,
+		authorizedSourcePath?: string
 	): Promise<ThumbnailResult> {
 		switch (entityType) {
 			case 'image':
 				return this.generateImageThumbnail(entityId, options);
 			case 'video':
-				return this.generateVideoThumbnail(entityId, options);
+				return this.generateVideoThumbnail(entityId, options, authorizedSourcePath);
 			case 'audio':
-				return this.generateAudioThumbnail(entityId, options);
+				return this.generateAudioThumbnail(entityId, options, authorizedSourcePath);
 			case 'document':
 				return this.generateDocumentThumbnail(entityId, options);
 			case 'jsonFile':
-				return this.generateJsonThumbnail(entityId, options);
+				return this.generateJsonThumbnail(entityId, options, authorizedSourcePath);
 			case 'file3d':
 				return this.generate3DThumbnail(entityId, options);
 			default:
@@ -660,19 +664,23 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail para video usando FFmpeg
 	 */
-	private async generateVideoThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
+	private async generateVideoThumbnail(
+		entityId: string,
+		options: ThumbnailOptions,
+		authorizedSourcePath?: string
+	): Promise<ThumbnailResult> {
 		try {
 			const video = await db.query.videos.findFirst({
 				where: eq(videos.id, entityId),
-				columns: { path: true },
+				columns: { id: true },
 			});
 
-			if (!(video?.path && existsSync(video.path))) {
+			if (!(video && authorizedSourcePath && existsSync(authorizedSourcePath))) {
 				return { success: false, error: 'Video file not found' };
 			}
 
 			const dims = DEFAULT_DIMENSIONS.video;
-			const thumbnailBuffer = await generateStaticVideoThumbnailFFmpeg(video.path, {
+			const thumbnailBuffer = await generateStaticVideoThumbnailFFmpeg(authorizedSourcePath, {
 				quality: options.quality || 'medium',
 				width: options.width || dims.width,
 				height: options.height || dims.height,
@@ -715,19 +723,23 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail (waveform) para audio
 	 */
-	private async generateAudioThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
+	private async generateAudioThumbnail(
+		entityId: string,
+		options: ThumbnailOptions,
+		authorizedSourcePath?: string
+	): Promise<ThumbnailResult> {
 		try {
 			const audio = await db.query.audios.findFirst({
 				where: eq(audios.id, entityId),
-				columns: { path: true, name: true },
+				columns: { id: true },
 			});
 
-			if (!(audio?.path && existsSync(audio.path))) {
+			if (!(audio && authorizedSourcePath && existsSync(authorizedSourcePath))) {
 				return { success: false, error: 'Audio file not found' };
 			}
 
 			// Generar waveform
-			await generateAndSaveWaveform(audio.path, entityId, {
+			await generateAndSaveWaveform(authorizedSourcePath, entityId, {
 				width: options.width || DEFAULT_DIMENSIONS.audio.width,
 				height: options.height || DEFAULT_DIMENSIONS.audio.height,
 				waveColor: 'oklch(0.59 0.2 255)',
@@ -744,10 +756,11 @@ class ThumbnailUnifiedService {
 			if (updated?.metadata) {
 				const metadata = JSON.parse(updated.metadata as string);
 				if (metadata?.waveform?.data) {
+					const format = String(metadata.waveform.format || 'png').toLowerCase();
 					return {
 						success: true,
 						data: Buffer.from(metadata.waveform.data, 'base64'),
-						mimeType: 'image/svg+xml',
+						mimeType: format === 'svg' ? 'image/svg+xml' : 'image/png',
 						width: metadata.waveform.width || DEFAULT_DIMENSIONS.audio.width,
 						height: metadata.waveform.height || DEFAULT_DIMENSIONS.audio.height,
 						generated: true,
@@ -814,19 +827,23 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail para archivo JSON
 	 */
-	private async generateJsonThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
+	private async generateJsonThumbnail(
+		entityId: string,
+		options: ThumbnailOptions,
+		authorizedSourcePath?: string
+	): Promise<ThumbnailResult> {
 		try {
 			const jsonFile = await db.query.jsonFiles.findFirst({
 				where: eq(jsonFiles.id, entityId),
-				columns: { path: true, name: true },
+				columns: { id: true, name: true },
 			});
 
-			if (!(jsonFile?.path && existsSync(jsonFile.path))) {
+			if (!(jsonFile && authorizedSourcePath && existsSync(authorizedSourcePath))) {
 				return { success: false, error: 'JSON file not found' };
 			}
 
 			// Leer contenido
-			const content = await readFile(jsonFile.path, 'utf-8');
+			const content = await readFile(authorizedSourcePath, 'utf-8');
 			const svg = this.createJsonPreviewSVG(content, jsonFile.name);
 
 			// Guardar en metadata

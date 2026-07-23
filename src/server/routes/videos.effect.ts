@@ -12,6 +12,7 @@ import { db } from '@/lib/drizzle';
 import { videos } from '@/lib/drizzle/schema';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
 import {
 	authorizeMediaAssetBodyIds,
 	authorizeMediaAssetParam,
@@ -489,8 +490,8 @@ router.get(
 						res.set({
 							'Content-Type': 'image/jpeg',
 							'Content-Length': buffer.length.toString(),
-							'Cache-Control': 'public, max-age=31536000',
 						});
+						setAuthorizedAssetCacheHeaders(res, 'revalidate');
 						res.send(buffer);
 						return;
 					} catch {
@@ -533,11 +534,11 @@ router.get(
 						res.set({
 							'Content-Type': 'image/webp',
 							'Content-Length': thumbnailBuffer.length.toString(),
-							'Cache-Control': 'public, max-age=86400',
 							ETag: etag,
 							'Last-Modified': lastModified,
 							Vary: 'Accept, Accept-Encoding',
 						});
+						setAuthorizedAssetCacheHeaders(res, 'revalidate');
 						res.send(thumbnailBuffer);
 						return;
 					}

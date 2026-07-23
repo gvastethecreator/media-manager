@@ -10,6 +10,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
 import { FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import {
@@ -494,13 +495,9 @@ router.get(
 					totalSize: escapeXml(totalSize),
 				});
 
-				res.setHeader(
-					'Cache-Control',
-					process.env.NODE_ENV === 'development'
-						? 'no-store, max-age=0'
-						: 'public, max-age=3600, stale-while-revalidate=86400'
-				);
 				res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+				res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+				setAuthorizedAssetCacheHeaders(res, 'revalidate');
 				res.status(200).send(svg);
 			},
 		}
