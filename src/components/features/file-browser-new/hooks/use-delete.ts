@@ -59,6 +59,7 @@ export async function deleteBrowserItems(items: BrowserItem[]): Promise<FileMuta
 	const summary: FileMutationSummary = {
 		applied: 0,
 		cleanupPending: 0,
+		reconciliationPending: 0,
 		recoveryPending: 0,
 		total: items.length,
 	};
