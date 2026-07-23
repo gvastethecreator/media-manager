@@ -29,20 +29,19 @@ const updateProfileSchema = createProfileSchema.partial();
 // GET /api/profiles/active - Obtener perfil activo
 router.get(
 	'/active',
-	effectHandler((_req, res) =>
+	effectHandler((_req, _res) =>
 		Effect.gen(function* () {
 			const profile = yield* Effect.tryPromise({
 				try: () => profileService.getActiveProfile(),
 				catch: (error) => {
 					logger.error('Error obteniendo perfil activo:', error);
 					return new Error(error instanceof Error ? error.message : String(error));
-					},
+				},
 			});
 
 			if (!profile) {
-				res.status(404);
 				return {
-					error: 'No se encontró un perfil activo',
+					data: null,
 					timestamp: new Date().toISOString(),
 				};
 			}
@@ -69,7 +68,7 @@ router.get(
 				catch: (error) => {
 					logger.error('Error obteniendo perfiles:', error);
 					return new Error(error instanceof Error ? error.message : String(error));
-					},
+				},
 			});
 
 			return {
@@ -120,7 +119,7 @@ router.post(
 				catch: (error) => {
 					logger.error('Error creando perfil:', error);
 					return new Error(error instanceof Error ? error.message : String(error));
-					},
+				},
 			});
 
 			res.status(201);
