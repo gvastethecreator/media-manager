@@ -81,9 +81,9 @@ function applyResize(pipeline: sharp.Sharp, metadata: sharp.Metadata, options: I
 	let targetWidth = options.width;
 	let targetHeight = options.height;
 
-	if (aspectRatio > 1 && targetWidth) {
+	if (!(targetWidth && targetHeight) && aspectRatio > 1 && targetWidth) {
 		targetHeight = Math.round(targetWidth / aspectRatio);
-	} else if (targetHeight) {
+	} else if (!(targetWidth && targetHeight) && targetHeight) {
 		targetWidth = Math.round(targetHeight * aspectRatio);
 	}
 

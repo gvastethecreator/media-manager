@@ -57,7 +57,11 @@ class ThumbnailService {
 	 * @param imageId - ID de la imagen
 	 * @throws ServiceError si falla la generación
 	 */
-	async generateThumbnail(imageId: string, authorizedSourcePath?: string): Promise<void> {
+	async generateThumbnail(
+		imageId: string,
+		authorizedSourcePath?: string,
+		dimensions?: Pick<ImageProcessingOptions, 'height' | 'width'>
+	): Promise<void> {
 		// Logging defensivo para diagnosticar posibles caídas en reindex masivo
 		const startHr = process.hrtime.bigint();
 		const memBefore = process.memoryUsage();
@@ -121,7 +125,8 @@ class ThumbnailService {
 			}
 
 			// Procesar la imagen para crear el thumbnail (primero en WebP)
-			let { buffer, metadata } = await processImage(sourcePath, THUMBNAIL_CONFIG);
+			const thumbnailConfig = { ...THUMBNAIL_CONFIG, ...dimensions };
+			let { buffer, metadata } = await processImage(sourcePath, thumbnailConfig);
 
 			// Si el resultado supera el tope, recomprimir con ajustes más fuertes
 			let mime = 'image/webp';
@@ -141,8 +146,8 @@ class ThumbnailService {
 				} catch {
 					// Intento 2: JPEG como fallback
 					const jpegRetry = await sharp(sourcePath)
-						.resize(THUMBNAIL_CONFIG.width, THUMBNAIL_CONFIG.height, {
-							fit: THUMBNAIL_CONFIG.fit || 'cover',
+						.resize(thumbnailConfig.width, thumbnailConfig.height, {
+							fit: thumbnailConfig.fit || 'cover',
 							withoutEnlargement: true,
 						})
 						.jpeg({ quality: 75, progressive: true, mozjpeg: true })
@@ -160,8 +165,8 @@ class ThumbnailService {
 					.set({
 						thumbnail: buffer.toString('base64'), // Convertir Buffer a string base64
 						thumbnailSize: buffer.length,
-						thumbnailWidth: metadata.width ?? THUMBNAIL_CONFIG.width,
-						thumbnailHeight: metadata.height ?? THUMBNAIL_CONFIG.height,
+						thumbnailWidth: metadata.width ?? thumbnailConfig.width,
+						thumbnailHeight: metadata.height ?? thumbnailConfig.height,
 						thumbnailMimeType: mime,
 						thumbnailError: null,
 						thumbnailErrorAt: null,
