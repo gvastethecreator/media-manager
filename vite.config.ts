@@ -46,13 +46,8 @@ function getManualChunkName(id: string) {
 	if (matchesPackage('react') || matchesPackage('react-dom')) return 'react';
 	if (matchesPackage('react-router-dom')) return 'router';
 	if (matchesPackage('@tanstack/react-query')) return 'query';
-	if (matchesPackage('three') || matchesPackage('@react-three')) return 'three';
-	if (matchesPackage('@monaco-editor') || matchesPackage('monaco-editor')) return 'editor';
-	if (matchesPackage('react-pdf') || matchesPackage('pdfjs-dist')) return 'pdf';
-	if (matchesPackage('recharts')) return 'charts';
-	if (matchesPackage('@xyflow')) return 'flow';
-	if (matchesPackage('@uiw') || matchesPackage('react-markdown') || matchesPackage('remark-gfm')) return 'markdown';
-	if (matchesPackage('@dnd-kit') || matchesPackage('selecto')) return 'interaction';
+	// Los renderizadores pesados deben quedar junto a sus rutas o visores diferidos.
+	// Forzarlos a un chunk global hace que Vite los precargue desde index.html.
 	if (matchesPackage('@radix-ui') || matchesPackage('@base-ui-components')) return 'radix-ui';
 	if (matchesPackage('gsap') || matchesPackage('@gsap') || matchesPackage('lucide-react')) return 'ui';
 	if (matchesPackage('zustand') || matchesPackage('lodash') || matchesPackage('date-fns')) return 'vendor';
