@@ -43,7 +43,7 @@ interface BreadcrumbConfig {
 const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> & Record<string, BreadcrumbConfig> = {
 	'': { label: 'Inicio', path: '/' },
 	settings: { label: 'Ajustes', path: '/settings' },
-	'all-images': { label: 'Galería', path: '/gallery' },
+	'all-images': { label: 'Galería', path: '/all-images' },
 	files: { label: 'Archivos', path: '/files' },
 	favorites: { label: 'Favoritos', path: '/favorites' },
 	search: { label: 'Búsqueda', path: '/search' },
@@ -83,8 +83,9 @@ const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> & Record<string, Bre
 	'audio-content': { label: 'Audios', path: '/audios', contentPath: '/audios' },
 	'json-files': { label: 'Archivos JSON', path: '/json-files' },
 	'json-file-content': { label: 'Archivos JSON', path: '/json-files', contentPath: '/json-files' },
-	'file-3ds': { label: 'Archivos 3D', path: '/file-3ds' },
-	'file-3d-content': { label: 'Archivos 3D', path: '/file-3ds', contentPath: '/file-3ds' },
+	file3d: { label: 'Archivos 3D', path: '/file3d' },
+	'file-3ds': { label: 'Archivos 3D', path: '/file3d' },
+	'file-3d-content': { label: 'Archivos 3D', path: '/file3d', contentPath: '/file3d' },
 	mixed: { label: 'Mixto', path: '/' },
 };
 
