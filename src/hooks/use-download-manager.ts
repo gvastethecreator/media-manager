@@ -89,13 +89,19 @@ export function useDownloadManager(options: UseDownloadManagerOptions = {}): Use
 				let result: DownloadResult | BatchDownloadResult;
 
 				if (downloadItem.files.length === 1) {
-					// Descarga de un único archivo: pasar el FileItem completo para cumplir tipos
 					const file = downloadItem.files[0];
-					result = await enhancedDownloadService.downloadFile(file, downloadItem.options);
+					result = await enhancedDownloadService.downloadFile(file, {
+						...downloadItem.options,
+						operationId: downloadItem.id,
+					});
 				} else {
-					// Descarga múltiple: pasar los FileItem completos
-					result = await enhancedDownloadService.downloadMultipleFiles(downloadItem.files, downloadItem.options);
+					result = await enhancedDownloadService.downloadMultipleFiles(downloadItem.files, {
+						...downloadItem.options,
+						operationId: downloadItem.id,
+					});
 				}
+				if (!result.success)
+					throw new Error('error' in result && result.error ? result.error : 'La descarga no se completó.');
 
 				// Update queue with success
 				setQueue((prev) =>
@@ -111,9 +117,10 @@ export function useDownloadManager(options: UseDownloadManagerOptions = {}): Use
 
 				// Update queue with error
 				setQueue((prev) =>
-					prev.map((item) =>
-						item.id === downloadItem.id ? { ...item, status: 'failed' as const, error: errorMessage } : item
-					)
+					prev.map((item) => {
+						if (item.id !== downloadItem.id || item.status === 'cancelled') return item;
+						return { ...item, status: 'failed' as const, error: errorMessage };
+					})
 				);
 
 				if (showNotifications) {
