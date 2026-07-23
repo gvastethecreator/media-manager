@@ -165,6 +165,10 @@ export const router = createBrowserRouter([
 				element: <AllFilesView className="h-full" />,
 			},
 			{
+				path: 'files',
+				element: <AllFilesView className="h-full" />,
+			},
+			{
 				path: 'all-images',
 				element: <AllImagesView className="h-full" />,
 			},
