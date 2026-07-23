@@ -262,6 +262,13 @@ export async function commitAuthorizedFileRelocation(options: {
 	if (!staged) throw mutationFailed(new Error('Destination staging did not produce an identity.'));
 
 	try {
+		const currentSourceIdentity = await readFileIdentity(transfer.source.absolutePath);
+		if (
+			currentSourceIdentity.dev !== staged.sourceIdentity.dev ||
+			currentSourceIdentity.ino !== staged.sourceIdentity.ino
+		) {
+			throw new AuthorizedFileMutationError('FILE_MUTATION_FAILED', 'El origen cambió durante la operación.', 409);
+		}
 		const revalidatedDestination = await registry.resolve(destination, 'write', 'existing');
 		if (!sameAbsolutePath(revalidatedDestination.absolutePath, transfer.destination.absolutePath)) {
 			throw new AuthorizedFileMutationError('FILE_MUTATION_FAILED', 'El destino cambió durante la operación.', 409);
