@@ -33,6 +33,24 @@ const CONTENT_TYPES: Record<string, string> = {
 	'.woff2': 'font/woff2',
 };
 
+export const CLIENT_CONTENT_SECURITY_POLICY = [
+	"default-src 'self'",
+	"base-uri 'none'",
+	"connect-src 'self'",
+	"font-src 'self' data:",
+	"form-action 'self'",
+	"frame-ancestors 'none'",
+	"frame-src 'self' blob:",
+	"img-src 'self' blob: data:",
+	"media-src 'self' blob:",
+	"object-src 'none'",
+	"script-src 'self'",
+	"style-src 'self' 'unsafe-inline'",
+	"worker-src 'self' blob:",
+].join('; ');
+
+const CLIENT_PERMISSIONS_POLICY = 'camera=(), geolocation=(), microphone=(), payment=(), usb=()';
+
 export interface LocalAppBrokerOptions {
 	backendOrigin: string;
 	clientRoot: string;
@@ -283,14 +301,20 @@ async function serveClient(request: Request, clientRoot: string): Promise<Respon
 	if (!filePath) return jsonResponse(404, 'CLIENT_ASSET_NOT_FOUND', 'Recurso no encontrado.');
 	const fileStat = await stat(filePath);
 	const immutable = /-[A-Za-z0-9_-]{8,}\.[^.]+$/.test(filePath);
-	const headers = {
+	const contentType = CONTENT_TYPES[extname(filePath).toLowerCase()] ?? 'application/octet-stream';
+	const headers = new Headers({
 		'Cache-Control': immutable ? 'public, max-age=31536000, immutable' : 'no-cache',
 		'Content-Length': fileStat.size.toString(),
-		'Content-Type': CONTENT_TYPES[extname(filePath).toLowerCase()] ?? 'application/octet-stream',
-		'Cross-Origin-Opener-Policy': 'same-origin',
+		'Content-Type': contentType,
+		'Cross-Origin-Resource-Policy': 'same-origin',
 		'Referrer-Policy': 'no-referrer',
 		'X-Content-Type-Options': 'nosniff',
-	};
+	});
+	if (contentType === 'text/html; charset=utf-8') {
+		headers.set('Content-Security-Policy', CLIENT_CONTENT_SECURITY_POLICY);
+		headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+		headers.set('Permissions-Policy', CLIENT_PERMISSIONS_POLICY);
+	}
 	return new Response(request.method === 'HEAD' ? null : getBunRuntime().file(filePath), { headers });
 }
 

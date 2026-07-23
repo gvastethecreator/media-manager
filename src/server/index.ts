@@ -54,7 +54,8 @@ import helmet from 'helmet';
 
 app.use(
 	helmet({
-		contentSecurityPolicy: false, // Deshabilitado para SPA (Vite inyecta scripts inline)
+		// El broker local aplica CSP al documento HTML. El backend también sirve contenido para iframes y no debe bloquearlo.
+		contentSecurityPolicy: false,
 		crossOriginEmbedderPolicy: false, // Permite cargar recursos cross-origin (thumbnails, etc.)
 	})
 );

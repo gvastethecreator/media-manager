@@ -148,7 +148,9 @@ test('renderiza un PDF desde su fuente autorizada y descarga por la ruta protegi
 		(response) => response.request().method() === 'GET' && new URL(response.url()).pathname.endsWith('/content')
 	);
 	await documentItem.dblclick();
-	expect((await contentResponse).status()).toBe(200);
+	const documentContentResponse = await contentResponse;
+	expect(documentContentResponse.status()).toBe(200);
+	expect(documentContentResponse.headers()['content-security-policy']).toBeUndefined();
 	const dialog = page.getByRole('dialog');
 	await expect(dialog).toBeVisible();
 	await expect(dialog.getByText('Página 1 de 1')).toBeVisible();
