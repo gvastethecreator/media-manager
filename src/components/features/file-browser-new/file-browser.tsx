@@ -5,10 +5,19 @@
 
 // TODO: Evaluar una estrategia de layout animation nativa con GSAP si vuelve a ser necesaria.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useMove } from '@/hooks/use-move';
 import { toMediaAssetType } from '@/lib/api/authorized-roots';
-import { useStartupFileMutationRecovery } from '@/lib/api/file-mutation-recovery';
+import { useRetryFileMutationRecovery, useStartupFileMutationRecovery } from '@/lib/api/file-mutation-recovery';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
@@ -63,11 +72,42 @@ export function FileBrowser({
 	// const layoutRef = useRef<ReturnType<typeof createLayout> | null>(null);
 	const layoutRef = useRef<{ destroy: () => void } | null>(null);
 	const { toast } = useToast();
+	const [isRecoveryDialogOpen, setIsRecoveryDialogOpen] = useState(false);
 
 	const { renameItem, renameBatch, isLoading: isRenaming } = useRename();
 	const { deleteItems, isLoading: isDeleting } = useDelete();
 	const { moveFiles, isLoading: isMoving } = useMove();
 	const { data: startupRecovery, isError: startupRecoveryUnavailable } = useStartupFileMutationRecovery();
+	const retryRecovery = useRetryFileMutationRecovery();
+
+	const handleRecoveryRetry = useCallback(async () => {
+		try {
+			const recovery = await retryRecovery.mutateAsync();
+			if (recovery.manual > 0) {
+				toast({
+					description: `${recovery.manual} operación${recovery.manual === 1 ? '' : 'es'} aún requiere revisión.`,
+					title: 'La revisión no pudo completar todas las operaciones',
+					variant: 'destructive',
+				});
+				return;
+			}
+			setIsRecoveryDialogOpen(false);
+			toast({
+				description:
+					recovery.completed > 0
+						? `${recovery.completed} operación${recovery.completed === 1 ? '' : 'es'} reconciliada${recovery.completed === 1 ? '' : 's'}.`
+						: 'No quedaron operaciones pendientes.',
+				title: 'Revisión de recuperación terminada',
+			});
+		} catch (error) {
+			clientLogger.error('File mutation recovery retry failed:', error);
+			toast({
+				description: 'No se pudo volver a revisar la recuperación. El estado se mantiene para una nueva revisión.',
+				title: 'No se pudo revisar la recuperación',
+				variant: 'destructive',
+			});
+		}
+	}, [retryRecovery, toast]);
 
 	// Estado del menú contextual
 	const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -570,13 +610,39 @@ export function FileBrowser({
 				isLoading={browser.isLoading || browser.isLoadingMore}
 				onNextPage={() => runLayoutUpdate(() => browser.nextPage(), { duration: 250 })}
 				onPrevPage={() => runLayoutUpdate(() => browser.prevPage(), { duration: 250 })}
+				onReviewRecovery={() => setIsRecoveryDialogOpen(true)}
 				pagination={browser.pagination}
+				recoveryRepairing={retryRecovery.isPending}
 				selectedCount={browser.selectedIds.length}
 				shownItems={browser.shownCount}
 				startupRecovery={startupRecovery}
 				startupRecoveryUnavailable={startupRecoveryUnavailable}
 				totalItems={browser.realItemCount}
 			/>
+
+			<Dialog onOpenChange={setIsRecoveryDialogOpen} open={isRecoveryDialogOpen}>
+				<DialogContent className="sm:max-w-[500px]">
+					<DialogHeader>
+						<DialogTitle>Revisión de recuperación</DialogTitle>
+						<DialogDescription>
+							La revisión vuelve a comprobar las operaciones incompletas. Sólo elimina una copia temporal cuando su
+							identidad y su ubicación autorizada siguen coincidiendo con el registro de recuperación.
+						</DialogDescription>
+					</DialogHeader>
+					<p className="text-muted-foreground text-sm">
+						Si no puede confirmar una operación, la mantiene marcada para revisión. No muestra rutas locales ni IDs de
+						assets.
+					</p>
+					<DialogFooter className="flex-row">
+						<Button disabled={retryRecovery.isPending} onClick={() => setIsRecoveryDialogOpen(false)} variant="outline">
+							Cancelar
+						</Button>
+						<Button disabled={retryRecovery.isPending} onClick={() => void handleRecoveryRetry()} variant="destructive">
+							{retryRecovery.isPending ? 'Revisando...' : 'Reintentar reparación'}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			{/* Context Menu */}
 			<ItemContextMenu

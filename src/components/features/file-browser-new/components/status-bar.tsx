@@ -16,6 +16,8 @@ export function FileBrowserStatusBar({
 	pagination,
 	onPrevPage,
 	onNextPage,
+	onReviewRecovery,
+	recoveryRepairing = false,
 	startupRecovery,
 	startupRecoveryUnavailable = false,
 	className,
@@ -67,21 +69,36 @@ export function FileBrowserStatusBar({
 			)}
 
 			<div className="flex min-w-0 items-center justify-end gap-0.5 tabular-nums">
-				{recoveryLabel && (
-					<span
-						aria-live="polite"
-						className={cn(
-							'mr-1 truncate',
-							(startupRecoveryUnavailable || startupRecovery?.state === 'manual_review_required') && 'text-destructive',
-							startupRecovery?.state === 'pending' && 'text-primary'
-						)}
-						aria-label={recoveryTitle}
-						data-testid="file-browser-startup-recovery"
-						title={recoveryTitle}
-					>
-						{recoveryLabel}
-					</span>
-				)}
+				{recoveryLabel &&
+					(startupRecovery?.state === 'manual_review_required' && onReviewRecovery ? (
+						<Button
+							aria-label={recoveryTitle}
+							aria-live="polite"
+							className="mr-1 h-3.5 min-h-0 rounded-sm px-0.5 text-[10px] leading-none text-destructive hover:bg-destructive/10"
+							data-testid="file-browser-startup-recovery"
+							disabled={recoveryRepairing}
+							onClick={onReviewRecovery}
+							title={recoveryTitle}
+							variant="ghost"
+						>
+							{recoveryRepairing ? 'Revisando…' : recoveryLabel}
+						</Button>
+					) : (
+						<span
+							aria-live="polite"
+							className={cn(
+								'mr-1 truncate',
+								(startupRecoveryUnavailable || startupRecovery?.state === 'manual_review_required') &&
+									'text-destructive',
+								startupRecovery?.state === 'pending' && 'text-primary'
+							)}
+							aria-label={recoveryTitle}
+							data-testid="file-browser-startup-recovery"
+							title={recoveryTitle}
+						>
+							{recoveryLabel}
+						</span>
+					))}
 				{hasPages ? (
 					<>
 						<Button

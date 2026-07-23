@@ -153,6 +153,23 @@ describe('authorized file relocation', () => {
 				expect(result).toEqual({ completed: 0, manual: 1, pending: 0 });
 				expect(await readFile(resolve(primary, 'source.txt'), 'utf8')).toBe('source-content');
 				expect(await readFile(destinationPath, 'utf8')).toBe('source-content');
+
+				await db
+					.update(images)
+					.set({ path: resolve(primary, 'source.txt') })
+					.where(eq(images.id, assetId));
+				const retried = await reconcilePendingFileMutations(
+					registry,
+					{
+						DATABASE_URL: process.env.DATABASE_URL,
+						MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL: journalPath,
+					},
+					{ includeManual: true }
+				);
+
+				expect(retried).toEqual({ completed: 1, manual: 0, pending: 0 });
+				expect(await readFile(resolve(primary, 'source.txt'), 'utf8')).toBe('source-content');
+				await expect(readFile(destinationPath, 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
 			} finally {
 				await db.delete(images).where(eq(images.id, assetId));
 				await db.delete(assets).where(eq(assets.id, assetId));
