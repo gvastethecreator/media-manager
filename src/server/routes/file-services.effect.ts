@@ -10,7 +10,7 @@ import { Effect } from 'effect';
 import express from 'express';
 import { db } from '@/lib/drizzle/index.js';
 import { metadatas } from '@/lib/drizzle/schema/core/metadatas.js';
-import { file3Ds, jsonFiles } from '@/lib/drizzle/schema/index.js';
+import { documents, file3Ds, jsonFiles } from '@/lib/drizzle/schema/index.js';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
@@ -60,6 +60,44 @@ function sendSvg(res: express.Response, svg: string, cacheMode: 'no-store' | 're
 	res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
 	setAuthorizedAssetCacheHeaders(res, cacheMode);
 	res.send(svg);
+}
+
+function getSafeContentType(value: string | null): string {
+	return value && /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(value)
+		? value
+		: 'application/octet-stream';
+}
+
+async function sendDocumentSource(
+	request: { params: Record<string, string> },
+	response: express.Response,
+	next: express.NextFunction,
+	disposition: 'attachment' | 'inline'
+): Promise<void> {
+	try {
+		const [document] = await db
+			.select({ mimeType: documents.mimeType, name: documents.name })
+			.from(documents)
+			.where(eq(documents.id, request.params.id))
+			.limit(1);
+		if (!document) {
+			response.status(404).json({ error: 'Document not found' });
+			return;
+		}
+		const sourcePath = response.locals.authorizedAssetPath;
+		if (typeof sourcePath !== 'string') {
+			next(new Error('Authorized document source is unavailable.'));
+			return;
+		}
+		setAuthorizedAssetCacheHeaders(response, 'revalidate');
+		response.type(getSafeContentType(document.mimeType));
+		if (disposition === 'attachment') response.attachment(document.name);
+		response.sendFile(sourcePath, (error) => {
+			if (error) next(error);
+		});
+	} catch (error) {
+		next(error);
+	}
 }
 
 function listAuthorizedFileRows<T extends { id?: unknown; path?: unknown }, E>(
@@ -304,6 +342,16 @@ documentsEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
 		res.status(500).json({ error: 'Error generating document preview' });
 	}
 });
+documentsEffectRouter.get(
+	'/:id/content',
+	authorizeMediaAssetParam({ assetType: 'document', permissions: ['read', 'index'] }),
+	async (req, res, next) => sendDocumentSource(req, res, next, 'inline')
+);
+documentsEffectRouter.get(
+	'/:id/download',
+	authorizeMediaAssetParam({ assetType: 'document', permissions: ['read', 'index'] }),
+	async (req, res, next) => sendDocumentSource(req, res, next, 'attachment')
+);
 documentsEffectRouter.get(
 	'/:id',
 	authorizeMediaAssetParam({ assetType: 'document', permissions: ['read', 'index'] }),

@@ -253,6 +253,24 @@ describe('media specialization thumbnail stats', () => {
 		expect(documentFallback.headers.vary).toContain('Cookie');
 		expect(documentFallback.headers['x-content-type-options']).toBe('nosniff');
 		expect(documentFallback.headers['content-security-policy']).toContain("default-src 'none'");
+		const documentContent = await request(app).get(`/api/documents/${documentId}/content`);
+		expect(documentContent.status, documentContent.text).toBe(200);
+		expect(documentContent.headers['content-type']).toContain('application/pdf');
+		expect(documentContent.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+		expect(documentContent.headers.vary).toContain('Cookie');
+		expect(documentContent.headers['x-content-type-options']).toBe('nosniff');
+		expect(documentContent.headers.etag).toBeDefined();
+		expect(
+			(
+				await request(app)
+					.get(`/api/documents/${documentId}/content`)
+					.set('If-None-Match', documentContent.headers.etag)
+			).status
+		).toBe(304);
+		const documentDownload = await request(app).get(`/api/documents/${documentId}/download`);
+		expect(documentDownload.status, documentDownload.text).toBe(200);
+		expect(documentDownload.headers['content-disposition']).toContain('attachment');
+		expect(documentDownload.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
 
 		const resizedDocument = await thumbnailUnifiedService.getThumbnail('document', metadataDocumentId, {
 			force: true,

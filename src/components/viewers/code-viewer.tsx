@@ -19,7 +19,10 @@ interface CodeViewerProps {
 
 export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 	const [code, setCode] = useState('');
-	const [loading, setLoading] = useState(false);
+	// Start in the loading state. Mounting Monaco with an empty model and immediately
+	// unmounting it while the source request starts leaves its loader with a cancelled
+	// work item in Chromium.
+	const [loading, setLoading] = useState(true);
 	const [copied, setCopied] = useState(false);
 	const [language, setLanguage] = useState('plaintext');
 
@@ -53,7 +56,7 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 		(open: boolean) => {
 			if (!open) {
 				setCode('');
-				setLoading(false);
+				setLoading(true);
 			}
 			onOpenChange(open);
 		},
@@ -86,7 +89,7 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 	return (
 		<Dialog onOpenChange={handleClose} open={isOpen}>
 			<DialogContent className="flex h-[85vh] max-w-[90vw] flex-col overflow-hidden p-0">
-				<DialogHeader className="flex flex-row items-center justify-between border-b bg-muted/30 px-4 py-3">
+				<DialogHeader className="flex flex-row items-center justify-between border-b bg-muted/30 px-4 py-3 pr-14">
 					<div className="flex items-center gap-2 truncate">
 						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-(--entity-json)/10">
 							<FileJson className="h-4 w-4 text-(--entity-json)" />
