@@ -153,7 +153,7 @@ function generateDocumentThumbnail(item: AnyEntityWithStats): Promise<string> {
 		return Promise.resolve('');
 	}
 
-	return Promise.resolve(`/api/documents/${item.id}/thumbnail`);
+	return Promise.resolve(`/api/thumbnails/unified/document/${item.id}`);
 }
 
 /**
