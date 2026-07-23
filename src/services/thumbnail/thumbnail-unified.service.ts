@@ -650,7 +650,8 @@ class ThumbnailUnifiedService {
 	): Promise<ThumbnailResult> {
 		try {
 			const { thumbnailService } = await import('@/services/image/image-thumbnail.service');
-			await thumbnailService.generateThumbnail(entityId, authorizedSourcePath);
+			const dims = resolveThumbnailDimensions('image', options);
+			await thumbnailService.generateThumbnail(entityId, authorizedSourcePath, dims);
 
 			// Obtener el thumbnail generado
 			const image = await db.query.images.findFirst({
