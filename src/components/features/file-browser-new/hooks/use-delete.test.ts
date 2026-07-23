@@ -22,12 +22,12 @@ describe('deleteBrowserItems', () => {
 
 		expect(fetchMock).toHaveBeenNthCalledWith(
 			1,
-			'/api/images/batch',
+			new URL('/api/images/batch', window.location.origin).toString(),
 			expect.objectContaining({ body: JSON.stringify({ ids: ['image-1', 'image-2'] }), method: 'DELETE' })
 		);
 		expect(fetchMock).toHaveBeenNthCalledWith(
 			2,
-			'/api/documents/document-1',
+			new URL('/api/documents/document-1', window.location.origin).toString(),
 			expect.objectContaining({ method: 'DELETE' })
 		);
 		expect(result).toMatchObject({ applied: 3, total: 3 });
@@ -58,12 +58,12 @@ describe('deleteBrowserItems', () => {
 		});
 		expect(fetchMock).toHaveBeenNthCalledWith(
 			1,
-			'/api/documents/document-1',
+			new URL('/api/documents/document-1', window.location.origin).toString(),
 			expect.objectContaining({ method: 'DELETE' })
 		);
 		expect(fetchMock).toHaveBeenNthCalledWith(
 			2,
-			'/api/documents/document-2',
+			new URL('/api/documents/document-2', window.location.origin).toString(),
 			expect.objectContaining({ method: 'DELETE' })
 		);
 		expect(fetchMock).toHaveBeenCalledTimes(2);

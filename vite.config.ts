@@ -10,6 +10,7 @@ const testMaxWorkers = Math.max(1, Number.parseInt(process.env.VITEST_MAX_WORKER
 const emptyModule = resolve(import.meta.dirname, 'src/config/empty.ts');
 const isViteBuildCommand = process.argv.some((argument) => argument === 'build');
 const nodeEnvironment = process.env.NODE_ENV ?? (isViteBuildCommand ? 'production' : 'development');
+const isTestEnvironment = process.env.NODE_ENV === 'test';
 const appVersion = process.env.npm_package_version ?? '0.1.0';
 const viteHost = resolveLocalServiceHost({
 	allowExternalBind: process.env.ALLOW_EXTERNAL_BIND === '1',
@@ -17,6 +18,7 @@ const viteHost = resolveLocalServiceHost({
 	serviceName: 'Vite dev server',
 });
 const localSessionToken = process.env.MEDIA_MANAGER_SESSION_TOKEN;
+const shouldUseLocalSessionProxy = !isTestEnvironment || Boolean(localSessionToken);
 const localApiTarget = process.env.MEDIA_MANAGER_API_TARGET || 'http://127.0.0.1:4000';
 const configureLocalSessionProxy: ProxyOptions['configure'] = (proxy) => {
 	if (!localSessionToken) {
@@ -109,10 +111,12 @@ export default defineConfig({
 			strict: true,
 		},
 		// Optimizaci?n de proxy para mejor rendimiento
-		proxy: {
-			'/api': localSessionProxy,
-			'/uploads': localSessionProxy,
-		},
+		proxy: shouldUseLocalSessionProxy
+			? {
+				'/api': localSessionProxy,
+				'/uploads': localSessionProxy,
+			}
+			: undefined,
 		// Optimizaci?n de watch para Bun
 		watch: {
 			usePolling: false,
@@ -193,13 +197,17 @@ export default defineConfig({
 		alias: [
 			{ find: '@', replacement: resolve(import.meta.dirname, 'src') },
 			{ find: '@components', replacement: resolve(import.meta.dirname, 'src/components') },
-			// Alias para m?dulos de Node.js que no deben incluirse en el bundle del cliente
-			{ find: 'fs/promises', replacement: emptyModule },
-			{ find: 'fs', replacement: emptyModule },
-			{ find: 'path', replacement: emptyModule },
-			{ find: 'crypto', replacement: emptyModule },
-			{ find: 'sharp', replacement: emptyModule },
-			{ find: 'http', replacement: emptyModule },
+			// El runner ejecuta servicios de Node. Los aliases vacíos son sólo para el bundle del browser.
+			...(isTestEnvironment
+				? []
+				: [
+					{ find: 'fs/promises', replacement: emptyModule },
+					{ find: 'fs', replacement: emptyModule },
+					{ find: 'path', replacement: emptyModule },
+					{ find: 'crypto', replacement: emptyModule },
+					{ find: 'sharp', replacement: emptyModule },
+					{ find: 'http', replacement: emptyModule },
+				]),
 		],
 		// Optimizaci?n de resoluci?n de m?dulos
 		mainFields: ['browser', 'module', 'main'],
@@ -234,6 +242,11 @@ export default defineConfig({
 		hookTimeout: 30_000,
 		fileParallelism: true,
 		maxWorkers: testMaxWorkers,
+		maxConcurrency: 1,
+		sequence: {
+			concurrent: false,
+			shuffle: false,
+		},
 		pool: 'forks',
 		isolate: true,
 		reporters: ['default'],
