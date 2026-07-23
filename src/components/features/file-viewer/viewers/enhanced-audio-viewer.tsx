@@ -11,6 +11,10 @@ import { WaveformVisualizer } from './waveform-visualizer';
 
 const logger = clientLogger.withContext('EnhancedAudioViewer');
 
+function getKnownDuration(value: number | undefined): number | null {
+	return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
+}
+
 interface EnhancedAudioViewerProps {
 	audioUrl: string;
 	className?: string;
@@ -40,10 +44,12 @@ export function EnhancedAudioViewer({
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [isMuted, setIsMuted] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
-	const [duration, setDuration] = useState(metadata?.duration || 0);
+	const knownDuration = getKnownDuration(metadata?.duration);
+	const [duration, setDuration] = useState<number | null>(knownDuration);
 	const [volume, setVolume] = useState(1);
 	const [progress, setProgress] = useState(0);
 	const [isLoading, setIsLoading] = useState(true);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	// Título a mostrar
 	const displayTitle = useMemo(() => {
@@ -57,16 +63,27 @@ export function EnhancedAudioViewer({
 
 	// Formatear tiempo
 	const formatTime = useCallback((seconds: number) => {
-		if (!seconds || Number.isNaN(seconds)) return '0:00';
+		if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
 		const mins = Math.floor(seconds / 60);
 		const secs = Math.floor(seconds % 60);
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	}, []);
 
+	const formatDuration = useCallback(
+		(seconds: number | null) => (seconds === null ? '—' : formatTime(seconds)),
+		[formatTime]
+	);
+
 	// Event listeners del audio
 	useEffect(() => {
 		const audio = audioRef.current;
 		if (!audio) return;
+		setErrorMessage(null);
+		setIsLoading(true);
+		setIsPlaying(false);
+		setCurrentTime(0);
+		setProgress(0);
+		setDuration(knownDuration);
 
 		const handleTimeUpdate = () => {
 			setCurrentTime(audio.currentTime);
@@ -76,7 +93,7 @@ export function EnhancedAudioViewer({
 		};
 
 		const handleLoadedMetadata = () => {
-			if (audio.duration && !Number.isNaN(audio.duration)) {
+			if (Number.isFinite(audio.duration) && audio.duration >= 0) {
 				setDuration(audio.duration);
 			}
 			setIsLoading(false);
@@ -92,18 +109,43 @@ export function EnhancedAudioViewer({
 			setIsLoading(false);
 		};
 
+		const handlePlay = () => {
+			setIsPlaying(true);
+		};
+
+		const handlePause = () => {
+			setIsPlaying(false);
+		};
+
+		const handleError = () => {
+			const mediaError = audio.error;
+			logger.error('No se pudo cargar el audio', {
+				code: mediaError?.code,
+				url: audioUrl,
+			});
+			setErrorMessage('No se pudo cargar este audio. Comprueba que el archivo siga disponible.');
+			setIsLoading(false);
+			setIsPlaying(false);
+		};
+
 		audio.addEventListener('timeupdate', handleTimeUpdate);
 		audio.addEventListener('loadedmetadata', handleLoadedMetadata);
 		audio.addEventListener('ended', handleEnded);
 		audio.addEventListener('canplay', handleCanPlay);
+		audio.addEventListener('play', handlePlay);
+		audio.addEventListener('pause', handlePause);
+		audio.addEventListener('error', handleError);
 
 		return () => {
 			audio.removeEventListener('timeupdate', handleTimeUpdate);
 			audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
 			audio.removeEventListener('ended', handleEnded);
 			audio.removeEventListener('canplay', handleCanPlay);
+			audio.removeEventListener('play', handlePlay);
+			audio.removeEventListener('pause', handlePause);
+			audio.removeEventListener('error', handleError);
 		};
-	}, []);
+	}, [audioUrl, knownDuration]);
 
 	// Toggle play/pause
 	const togglePlay = useCallback(() => {
@@ -113,12 +155,12 @@ export function EnhancedAudioViewer({
 		if (isPlaying) {
 			audio.pause();
 		} else {
-			audio.play().catch((err) => {
-				logger.error('Error playing audio:', err);
+			void audio.play().catch((error) => {
+				logger.error('No se pudo reproducir el audio', { error, url: audioUrl });
+				setErrorMessage('No se pudo reproducir este audio. Intenta descargarlo o vuelve a abrirlo.');
 			});
 		}
-		setIsPlaying(!isPlaying);
-	}, [isPlaying, isLoading]);
+	}, [audioUrl, isPlaying, isLoading]);
 
 	// Toggle mute
 	const toggleMute = useCallback(() => {
@@ -133,7 +175,7 @@ export function EnhancedAudioViewer({
 	const handleSeek = useCallback(
 		(value: number[]) => {
 			const audio = audioRef.current;
-			if (!(audio && duration)) return;
+			if (!(audio && duration && duration > 0)) return;
 
 			const newTime = (value[0] / 100) * duration;
 			audio.currentTime = newTime;
@@ -147,7 +189,7 @@ export function EnhancedAudioViewer({
 	const handleWaveformSeek = useCallback(
 		(percent: number) => {
 			const audio = audioRef.current;
-			if (!(audio && duration)) return;
+			if (!(audio && duration && duration > 0)) return;
 
 			const newTime = (percent / 100) * duration;
 			audio.currentTime = newTime;
@@ -176,16 +218,21 @@ export function EnhancedAudioViewer({
 	}, [audioUrl, fileName]);
 
 	return (
-		<Card className={cn('flex h-full flex-col overflow-hidden bg-gradient-to-b from-background to-muted', className)}>
+		<Card
+			className={cn(
+				'flex h-full min-h-0 flex-col overflow-hidden bg-gradient-to-b from-background to-muted',
+				className
+			)}
+		>
 			{/* Audio element oculto */}
 			<audio preload="metadata" ref={audioRef} src={audioUrl}>
 				<track default kind="captions" label="Subtítulos" src="" srcLang="es" />
 			</audio>
 
 			{/* Header con Cover Art */}
-			<div className="flex items-start gap-6 border-b p-6">
+			<div className="flex shrink-0 items-start gap-4 border-b p-4">
 				{/* Cover Art o Icono */}
-				<div className="relative h-48 w-48 flex-shrink-0 overflow-hidden rounded-lg bg-muted shadow-2xl">
+				<div className="relative h-40 w-40 flex-shrink-0 overflow-hidden rounded-lg bg-muted shadow-2xl">
 					{coverArtUrl ? (
 						<img
 							alt="Cover Art"
@@ -198,7 +245,7 @@ export function EnhancedAudioViewer({
 						/>
 					) : (
 						<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-orange-400 to-orange-600">
-							<Music2 className="h-24 w-24 text-white" />
+							<Music2 className="h-20 w-20 text-white" />
 						</div>
 					)}
 
@@ -212,8 +259,8 @@ export function EnhancedAudioViewer({
 
 				{/* Info del Audio */}
 				<div className="min-w-0 flex-1">
-					<h1 className="mb-1 truncate font-bold text-2xl">{displayTitle}</h1>
-					<p className="mb-4 text-lg text-muted-foreground">{displayArtist}</p>
+					<h1 className="mb-1 truncate font-bold text-xl">{displayTitle}</h1>
+					<p className="mb-3 text-muted-foreground">{displayArtist}</p>
 
 					{/* Metadata Grid */}
 					<div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
@@ -263,46 +310,74 @@ export function EnhancedAudioViewer({
 				</div>
 
 				{/* Botón Download */}
-				<Button onClick={handleDownload} size="icon" variant="outline">
+				<Button aria-label="Descargar audio" onClick={handleDownload} size="icon" variant="outline">
 					<Download className="h-4 w-4" />
 				</Button>
 			</div>
 
 			{/* Waveform Visualizer */}
-			<div className="flex-1 px-6 py-4">
-				<WaveformVisualizer
-					audioUrl={audioUrl}
-					height={120}
-					isPlaying={isPlaying}
-					onPositionClick={handleWaveformSeek}
-					progress={progress}
-					progressColor="hsl(var(--primary))"
-					waveColor="hsl(var(--muted-foreground))"
-				/>
+			<div className="min-h-0 flex-1 px-4 py-3">
+				{errorMessage && (
+					<div
+						className="mb-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive text-sm"
+						role="alert"
+					>
+						{errorMessage}
+					</div>
+				)}
+				{errorMessage ? (
+					<div className="flex h-full min-h-0 items-center justify-center rounded-lg bg-muted px-3 text-center text-muted-foreground text-sm">
+						Visualización no disponible
+					</div>
+				) : (
+					<WaveformVisualizer
+						audioUrl={audioUrl}
+						height={96}
+						isPlaying={isPlaying}
+						onPositionClick={handleWaveformSeek}
+						progress={progress}
+						progressColor="hsl(var(--primary))"
+						waveColor="hsl(var(--muted-foreground))"
+					/>
+				)}
 			</div>
 
 			{/* Controles */}
-			<div className="flex items-center justify-between border-t bg-muted/50 px-6 py-4">
+			<div className="flex shrink-0 items-center justify-between border-t bg-muted/50 px-4 py-3">
 				{/* Tiempo */}
-				<div className="w-20 text-muted-foreground text-sm">
-					{formatTime(currentTime)} / {formatTime(duration)}
+				<div className="w-20 whitespace-nowrap text-muted-foreground text-sm">
+					{formatTime(currentTime)} / {formatDuration(duration)}
 				</div>
 
 				{/* Controles principales */}
 				<div className="flex items-center gap-4">
 					{/* Play/Pause */}
-					<Button className="h-14 w-14 rounded-full" disabled={isLoading} onClick={togglePlay} size="lg">
+					<Button
+						aria-label={isPlaying ? 'Pausar audio' : 'Reproducir audio'}
+						className="h-14 w-14 rounded-full"
+						disabled={isLoading || Boolean(errorMessage)}
+						onClick={togglePlay}
+						size="lg"
+					>
 						{isPlaying ? <Pause className="h-6 w-6" /> : <Play className="ml-1 h-6 w-6" />}
 					</Button>
 				</div>
 
 				{/* Volumen */}
-				<div className="flex w-48 items-center gap-2">
-					<Button onClick={toggleMute} size="icon" variant="ghost">
+				<div className="flex w-40 items-center gap-2">
+					<Button
+						aria-label={isMuted ? 'Activar sonido' : 'Silenciar audio'}
+						disabled={Boolean(errorMessage)}
+						onClick={toggleMute}
+						size="icon"
+						variant="ghost"
+					>
 						{isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
 					</Button>
 					<Slider
+						aria-label="Volumen"
 						className="flex-1"
+						disabled={Boolean(errorMessage)}
 						max={100}
 						onValueChange={handleVolumeChange}
 						step={1}
@@ -312,10 +387,11 @@ export function EnhancedAudioViewer({
 			</div>
 
 			{/* Barra de progreso */}
-			<div className="px-6 pb-6">
+			<div className="shrink-0 px-4 pb-3">
 				<Slider
+					aria-label="Posición de reproducción"
 					className="w-full"
-					disabled={isLoading || !duration}
+					disabled={isLoading || Boolean(errorMessage) || !duration}
 					max={100}
 					onValueChange={handleSeek}
 					step={0.1}

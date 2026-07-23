@@ -178,6 +178,10 @@ export const router = createBrowserRouter([
 				path: 'audios',
 				element: <AudioView className="h-full" />,
 			},
+			{
+				path: 'audio',
+				element: <AudioView className="h-full" />,
+			},
 			// Organización
 			{
 				path: 'favorites',

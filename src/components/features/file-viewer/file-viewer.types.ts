@@ -6,6 +6,7 @@
 
 export interface ImageItem {
 	alt?: string;
+	duration?: number | null;
 	height: number | null;
 	id: string;
 	metadata: string | null;
