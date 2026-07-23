@@ -606,7 +606,7 @@ class ThumbnailUnifiedService {
 	): Promise<ThumbnailResult> {
 		switch (entityType) {
 			case 'image':
-				return this.generateImageThumbnail(entityId, options);
+				return this.generateImageThumbnail(entityId, options, authorizedSourcePath);
 			case 'video':
 				return this.generateVideoThumbnail(entityId, options, authorizedSourcePath);
 			case 'audio':
@@ -625,10 +625,14 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail para imagen
 	 */
-	private async generateImageThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
+	private async generateImageThumbnail(
+		entityId: string,
+		options: ThumbnailOptions,
+		authorizedSourcePath?: string
+	): Promise<ThumbnailResult> {
 		try {
 			const { thumbnailService } = await import('@/services/image/image-thumbnail.service');
-			await thumbnailService.generateThumbnail(entityId);
+			await thumbnailService.generateThumbnail(entityId, authorizedSourcePath);
 
 			// Obtener el thumbnail generado
 			const image = await db.query.images.findFirst({
