@@ -40,20 +40,6 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 		return images.slice().sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 	}, [imagesRecord]); // Solo depende del record de imágenes
 
-	// Valores por defecto (auto-indexing deshabilitado)
-	const status = {
-		isIndexing: false,
-		indexedFolders: 0,
-		totalFolders: 0,
-		currentFolder: null,
-		errors: [],
-	};
-	const isIndexing = false;
-	const progress = 0;
-	const startIndexing = () => {
-		viewLogger.info('Auto-indexing está temporalmente deshabilitado');
-	};
-
 	// Flag para controlar si ya se intentó cargar las imágenes
 	const hasTriedToLoad = useRef(false);
 
@@ -117,11 +103,7 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 			handleImageClick={handleImageClick}
 			handleImageDoubleClick={handleImageDoubleClick}
 			images={sortedImages}
-			indexingStatus={status}
-			isIndexing={isIndexing}
 			isLoading={isLoading}
-			progress={progress}
-			startIndexing={startIndexing}
 		/>
 	);
 };
