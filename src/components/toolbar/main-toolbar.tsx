@@ -41,7 +41,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 }) {
 	const location = useLocation();
 	const params = useParams<{ id: string }>();
-	const currentView = location.pathname.split('/')[1] || 'gallery';
+	const currentView = location.pathname.split('/')[1] || '';
 
 	// ⚠️ Importante: el param `id` existe en múltiples rutas (/folders/:id, /characters/:id, ...).
 	// Solo debemos tratarlo como folderId cuando realmente estemos en una ruta de folders.
