@@ -130,13 +130,13 @@ La base de operaciones físicas pasa por:
 
 ### Capacidades relevantes
 
-- leer contenido de directorios,
-- crear directorios,
-- renombrar,
-- copiar,
-- mover,
+- resolver el contenido de directorios autorizados,
 - consultar contenido de archivos,
-- descargar recursos.
+- descargar recursos,
+- reubicar assets autorizados de forma individual,
+- informar el subconjunto confirmado cuando una serie de movimientos se interrumpe.
+
+No hay un ejecutor local para copiar, renombrar, borrar o mover rutas crudas, ni controles de undo/redo basados en rutas. Esas capacidades requieren un contrato durable del servidor antes de volver a exponerse.
 
 Este sistema alimenta tanto funciones de mantenimiento como operaciones de UI avanzadas.
 
@@ -219,6 +219,8 @@ La composición de providers refleja una arquitectura en transición.
 - bundling de recursos del backend compilado,
 - ventana principal y opciones de seguridad,
 - assets de iconos.
+
+El shell cuenta con una CSP explícita y sólo conserva comandos nativos para health y el directorio de datos. A fecha de 2026-07-23 no es un paquete desktop autónomo: los recursos actuales no inician un backend empaquetado ni resuelven sus dependencias nativas. El gate de CI Windows valida la compilación Rust; la instalación limpia, el sidecar, la firma y el ciclo de vida siguen pendientes.
 
 ### Puente nativo
 

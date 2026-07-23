@@ -23,7 +23,26 @@
 			}
 		],
 		"security": {
-			"csp": null
+			"csp": {
+				"default-src": "'self' customprotocol: asset:",
+				"connect-src": "'self' ipc: http://127.0.0.1:* http://localhost:*",
+				"font-src": "'self' data:",
+				"img-src": "'self' asset: http://asset.localhost blob: data: http://127.0.0.1:* http://localhost:*",
+				"media-src": "'self' asset: blob: data: http://127.0.0.1:* http://localhost:*",
+				"script-src": "'self' 'wasm-unsafe-eval'",
+				"style-src": "'self' 'unsafe-inline'",
+				"worker-src": "'self' blob:"
+			},
+			"devCsp": {
+				"default-src": "'self' data: blob: asset:",
+				"connect-src": "'self' ipc: http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:*",
+				"font-src": "'self' data:",
+				"img-src": "'self' asset: http://asset.localhost blob: data: http://127.0.0.1:* http://localhost:*",
+				"media-src": "'self' asset: blob: data: http://127.0.0.1:* http://localhost:*",
+				"script-src": "'self' 'unsafe-eval' 'wasm-unsafe-eval'",
+				"style-src": "'self' 'unsafe-inline'",
+				"worker-src": "'self' blob:"
+			}
 		}
 	},
 	"bundle": {
@@ -32,7 +51,6 @@
 		"icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
 		"resources": {
 			"../dist/server/index.js": "server/index.js",
-			"../dist/server/wrapper.js": "server/wrapper.js",
 			"../src/lib/drizzle/migrations/": "server/migrations/"
 		}
 	}
