@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
 
 export type StartupFileMutationRecoveryState = 'clean' | 'pending' | 'resolved' | 'manual_review_required';
@@ -29,5 +29,19 @@ export function useStartupFileMutationRecovery() {
 		refetchOnWindowFocus: false,
 		retry: 1,
 		staleTime: 30_000,
+	});
+}
+
+export function useRetryFileMutationRecovery() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async () => {
+			const response = await apiClient.post<StartupFileMutationRecoveryResponse>('/files/recovery/reconcile');
+			return response.data.recovery;
+		},
+		onSuccess: (recovery) => {
+			queryClient.setQueryData(fileMutationRecoveryKeys.startup, recovery);
+		},
 	});
 }
