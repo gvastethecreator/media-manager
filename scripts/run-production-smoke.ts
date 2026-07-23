@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { migrateDatabase } from './db/migrations';
+import { prepareFileMutationRecovery } from '../src/server/security/file-mutation-recovery';
 
 async function reservePort(): Promise<number> {
 	const server = createServer();
@@ -126,6 +127,18 @@ try {
 		]),
 		UPLOADS_DIR: uploadsRoot,
 	};
+	const recovery = await prepareFileMutationRecovery(
+		{
+			asset: { assetId: 'production-smoke-interrupted-asset', assetType: 'image' },
+			destination: { relativePath: 'recovery-target.txt', rootId: 'smoke-root' },
+			source: { relativePath: 'recovery-source.txt', rootId: 'smoke-root' },
+		},
+		environment
+	);
+	await recovery.transition({
+		reasonCode: 'PRODUCTION_SMOKE_SIMULATED_PROCESS_INTERRUPTION',
+		state: 'manual_recovery_required',
+	});
 
 	const child = Bun.spawn(['bunx', 'playwright', 'test', '--config', 'playwright.production.config.ts'], {
 		cwd: workspaceRoot,

@@ -2,7 +2,7 @@ import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 
-test('muestra la recuperación de inicio pendiente sin marcar el explorador como listo', async ({ page }) => {
+test('muestra la recuperación durable de inicio sin marcar el explorador como listo', async ({ page }) => {
 	const pageErrors: string[] = [];
 	const consoleErrors: string[] = [];
 	const serverErrors: string[] = [];
@@ -13,30 +13,27 @@ test('muestra la recuperación de inicio pendiente sin marcar el explorador como
 	page.on('response', (response) => {
 		if (response.status() >= 500) serverErrors.push(`${response.status()} ${response.url()}`);
 	});
-
-	await page.route('**/api/files/recovery-status', (route) =>
-		route.fulfill({
-			body: JSON.stringify({
-				data: { recovery: { completed: 0, manual: 1, pending: 2, state: 'manual_review_required' } },
-				success: true,
-			}),
-			contentType: 'application/json',
-			status: 200,
-		})
+	const recoveryResponse = page.waitForResponse(
+		(response) => new URL(response.url()).pathname === '/api/files/recovery-status'
 	);
-
 	await page.goto('/all-files', { waitUntil: 'domcontentloaded' });
+	const response = await recoveryResponse;
+	expect(response.status()).toBe(200);
+	expect(await response.json()).toEqual({
+		data: { recovery: { completed: 0, manual: 1, pending: 0, state: 'manual_review_required' } },
+		success: true,
+	});
 	const statusBar = page.getByTestId('file-browser-status-bar');
 	const recovery = page.getByTestId('file-browser-startup-recovery');
 	await expect(statusBar).toBeVisible();
 	await expect(recovery).toHaveText('Rec. 1 revisión');
 	await expect(recovery).toHaveAttribute(
 		'title',
-		'La recuperación de inicio requiere revisión manual para 1 operación. Además, 2 operaciones siguen pendientes de reconciliación.'
+		'La recuperación de inicio requiere revisión manual para 1 operación.'
 	);
 	await expect(recovery).toHaveAttribute(
 		'aria-label',
-		'La recuperación de inicio requiere revisión manual para 1 operación. Además, 2 operaciones siguen pendientes de reconciliación.'
+		'La recuperación de inicio requiere revisión manual para 1 operación.'
 	);
 	await expect(statusBar.getByText('Listo')).toHaveCount(0);
 
