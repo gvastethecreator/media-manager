@@ -96,7 +96,6 @@ function applyLatestStatus(
 	}
 }
 
-import { useReindexAllFolders } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import type { FolderWithStats } from '@/types/entities/folder';
@@ -442,15 +441,6 @@ export function useFolders() {
 		},
 		onLoadData: loadFolders,
 		onError: (err) => setError(err.toString()),
-		onReindexAllStart: () => {
-			setGlobalReindexStatus((prev) => ({
-				...prev,
-				isProcessing: true,
-				progress: 0,
-				processedFolders: 0,
-				startTime: Date.now(),
-			}));
-		},
 	});
 
 	// Polling removido - la reindexación es síncrona
@@ -459,82 +449,18 @@ export function useFolders() {
 	//	onComplete: handleProcessComplete,
 	// });
 
-	// Hook para reindexación global - debe estar en el nivel superior
-	const reindexAllFoldersMutation = useReindexAllFolders();
-
-	// Función para reiniciar todas las carpetas
-	const reindexAll = useCallback(
-		async (options?: { useStructuredFlow?: boolean; skipThumbnails?: boolean; skipMetadata?: boolean }) => {
-			// 🔧 FIX: Evitar bucle infinito si ya está procesando
-			if (globalReindexStatus.isProcessing) {
-				folderLogger.warn('⚠️ Reindexación global ya en progreso, omitiendo');
-				return;
-			}
-
-			folderLogger.info('🔄 Iniciando reindexación global', { options });
-
-			try {
-				setGlobalReindexStatus((prev) => ({
-					...prev,
-					isProcessing: true,
-					progress: 0,
-					processedFolders: 0,
-					errors: [],
-					startTime: Date.now(),
-				}));
-
-				// Resetear estructuras de tracking
-				setProgressByFolder({});
-				setReindexOrder([]);
-
-				// 🔧 FIX: Usar await para asegurar que no se llame múltiples veces
-				const result = await reindexAllFoldersMutation.mutateAsync(options);
-
-				folderLogger.info('✅ Reindexación global completada:', result);
-
-				if (result.errors.length > 0) {
-					toastService.error(`Reindexación completada con ${result.errors.length} errores`);
-				} else {
-					toastService.success(`Reindexación completada correctamente. ${result.processed} carpetas procesadas`);
-				}
-
-				// Recargar datos solo después de que termine completamente
-				await Promise.all([loadFolders(), loadStats()]);
-			} catch (reindexError) {
-				folderLogger.error('❌ Error en reindexación global:', reindexError);
-				toastService.error('Error en la reindexación global');
-			} finally {
-				// 🔧 FIX: Asegurar que siempre se limpie el estado
-				setGlobalReindexStatus((prev) => ({
-					...prev,
-					isProcessing: false,
-					progress: 100, // Asegurar que llegue al 100%
-					endTime: Date.now(),
-				}));
-			}
-		},
-		[reindexAllFoldersMutation, loadFolders, loadStats, globalReindexStatus.isProcessing]
-	);
-
 	// Función para manejar el reindex de una carpeta específica
 	const reindexFolder = useCallback(
-		async (
-			folderId: string,
-			options?: {
-				useStructuredFlow?: boolean;
-				skipThumbnails?: boolean;
-				skipMetadata?: boolean;
-			}
-		) => {
+		async (folderId: string) => {
 			if (!folderId || folderId === 'undefined' || typeof folderId !== 'string') {
 				folderLogger.error('[useFolders] ❌ Error: Invalid folderId provided to reindexFolder:', folderId);
 				return;
 			}
 
-			folderLogger.info(`🔄 Iniciando reindex de carpeta: ${folderId}`, { options });
+			folderLogger.info('🔄 Iniciando reindex de carpeta', { folderId });
 
 			try {
-				await foldersOperations.handleReindexFolder(folderId, options);
+				await foldersOperations.handleReindexFolder(folderId);
 			} catch (err1) {
 				folderLogger.error(`❌ Error en reindex de carpeta ${folderId}:`, err1);
 				handleProcessError({
@@ -608,13 +534,11 @@ export function useFolders() {
 
 		// Acciones principales
 		reindexFolder,
-		reindexAll,
 		selectFolder,
 
 		// Operaciones desde foldersOperations
 		handleAddFolder: foldersOperations.handleAddFolder,
 		handleReindexFolder: foldersOperations.handleReindexFolder,
-		handleReindexAll: foldersOperations.handleReindexAll,
 		handleClearCache: foldersOperations.handleClearCache,
 		handleFolderClick,
 

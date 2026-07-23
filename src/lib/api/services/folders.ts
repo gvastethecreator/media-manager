@@ -244,24 +244,16 @@ export const toggleFolderFavorite = async (id: string): Promise<FolderWithStats>
 	return getFolder(id);
 };
 
-export const reindexFolder = async (
-	id: string,
-	options?: {
-		useStructuredFlow?: boolean;
-		skipThumbnails?: boolean;
-		skipMetadata?: boolean;
-	}
-): Promise<FolderWithStats> => {
-	const response = await apiClient.post<FolderWithStats>(`/folders/${id}/reindex`, options);
-	return response;
-};
+export interface ReindexFolderResponse {
+	folderId: string;
+	phases: unknown;
+	success: boolean;
+	summary: unknown;
+	totalDuration: number;
+}
 
-export const reindexAllFolders = async (options?: {
-	useStructuredFlow?: boolean;
-	skipThumbnails?: boolean;
-	skipMetadata?: boolean;
-}): Promise<{ processed: number; errors: string[] }> => {
-	const response = await apiClient.post<{ processed: number; errors: string[] }>('/folders/reindex-all', options);
+export const reindexFolder = async (id: string): Promise<ReindexFolderResponse> => {
+	const response = await apiClient.post<ReindexFolderResponse>(`/folders/${id}/reindex`);
 	return response;
 };
 
