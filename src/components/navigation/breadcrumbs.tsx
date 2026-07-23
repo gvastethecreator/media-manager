@@ -44,7 +44,6 @@ const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> & Record<string, Bre
 	'': { label: 'Inicio', path: '/' },
 	settings: { label: 'Ajustes', path: '/settings' },
 	'all-images': { label: 'Galería', path: '/gallery' },
-	'uploaded-images': { label: 'Imágenes Subidas', path: '/uploaded-images' },
 	files: { label: 'Archivos', path: '/files' },
 	favorites: { label: 'Favoritos', path: '/favorites' },
 	search: { label: 'Búsqueda', path: '/search' },

@@ -33,7 +33,6 @@ export type ViewType =
 	| '' // Ruta raíz (dashboard)
 	| 'settings'
 	| 'all-images'
-	| 'uploaded-images'
 	| 'files'
 	| 'favorites'
 	| 'search'

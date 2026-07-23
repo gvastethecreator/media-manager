@@ -177,10 +177,10 @@ export const SETTINGS_CATEGORIES: SettingsCategory[] = [
 			},
 			{
 				id: 'uploaded-images',
-				label: 'Imágenes Subidas',
+				label: 'Cargas directas retiradas',
 				icon: <UploadCloud className="h-4 w-4" />,
 				color: 'var(--entity-image)',
-				description: 'Gestión de imágenes subidas',
+				description: 'Usa un media root autorizado y reindexa la carpeta',
 			},
 		],
 	},
