@@ -4,7 +4,7 @@
  */
 
 import { FileIcon, FolderIcon, Info } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -47,14 +47,14 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 	const [startNumber, setStartNumber] = useState(1);
 	const [batchError, setBatchError] = useState<string | null>(null);
 
-	// Resetear estado al abrir
-	useState(() => {
-		if (isOpen) {
-			setSingleName(firstItem?.name || '');
-			setSingleError(null);
-			setBatchError(null);
-		}
-	});
+	useEffect(() => {
+		if (!isOpen) return;
+		setSingleName(firstItem?.name ?? '');
+		setSingleError(null);
+		setPattern('imagen_{n:3}.jpg');
+		setStartNumber(1);
+		setBatchError(null);
+	}, [firstItem?.id, firstItem?.name, isOpen]);
 
 	// Preview de nombres en batch
 	const batchPreview = useMemo(() => {

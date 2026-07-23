@@ -4,7 +4,7 @@
  */
 
 import { FolderIcon, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -42,6 +42,10 @@ export function MoveDialog({ isOpen, items, onConfirm, onCancel, isLoading = fal
 	const folders = foldersResponse?.data;
 
 	const itemCount = items.length;
+
+	useEffect(() => {
+		if (isOpen) setSelectedFolderId(null);
+	}, [isOpen]);
 
 	return (
 		<Dialog onOpenChange={(open) => !open && onCancel()} open={isOpen}>
