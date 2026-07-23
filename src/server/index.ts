@@ -26,6 +26,7 @@ await ensureDatabaseReady();
 app.locals.authorizedRootRegistry = await createAuthorizedRootRegistryFromEnvironment();
 await syncCanonicalMediaRoots(app.locals.authorizedRootRegistry);
 const mutationRecovery = await reconcilePendingFileMutations(app.locals.authorizedRootRegistry);
+app.locals.startupFileMutationRecovery = mutationRecovery;
 if (mutationRecovery.manual > 0) {
 	logError(`La recuperación de archivos requiere revisión manual: ${mutationRecovery.manual} operación(es).`);
 } else if (mutationRecovery.completed > 0 || mutationRecovery.pending > 0) {

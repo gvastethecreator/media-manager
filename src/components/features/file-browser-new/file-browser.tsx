@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useMove } from '@/hooks/use-move';
 import { toMediaAssetType } from '@/lib/api/authorized-roots';
+import { useStartupFileMutationRecovery } from '@/lib/api/file-mutation-recovery';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
@@ -66,6 +67,7 @@ export function FileBrowser({
 	const { renameItem, renameBatch, isLoading: isRenaming } = useRename();
 	const { deleteItems, isLoading: isDeleting } = useDelete();
 	const { moveFiles, isLoading: isMoving } = useMove();
+	const { data: startupRecovery, isError: startupRecoveryUnavailable } = useStartupFileMutationRecovery();
 
 	// Estado del menú contextual
 	const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -571,6 +573,8 @@ export function FileBrowser({
 				pagination={browser.pagination}
 				selectedCount={browser.selectedIds.length}
 				shownItems={browser.shownCount}
+				startupRecovery={startupRecovery}
+				startupRecoveryUnavailable={startupRecoveryUnavailable}
 				totalItems={browser.realItemCount}
 			/>
 

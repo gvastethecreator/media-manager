@@ -1,0 +1,62 @@
+import { mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { expect, test } from '@playwright/test';
+
+test('muestra la recuperación de inicio pendiente sin marcar el explorador como listo', async ({ page }) => {
+	const pageErrors: string[] = [];
+	const consoleErrors: string[] = [];
+	const serverErrors: string[] = [];
+	page.on('pageerror', (error) => pageErrors.push(error.message));
+	page.on('console', (message) => {
+		if (message.type() === 'error') consoleErrors.push(message.text());
+	});
+	page.on('response', (response) => {
+		if (response.status() >= 500) serverErrors.push(`${response.status()} ${response.url()}`);
+	});
+
+	await page.route('**/api/files/recovery-status', (route) =>
+		route.fulfill({
+			body: JSON.stringify({
+				data: { recovery: { completed: 0, manual: 1, pending: 2, state: 'manual_review_required' } },
+				success: true,
+			}),
+			contentType: 'application/json',
+			status: 200,
+		})
+	);
+
+	await page.goto('/all-files', { waitUntil: 'domcontentloaded' });
+	const statusBar = page.getByTestId('file-browser-status-bar');
+	const recovery = page.getByTestId('file-browser-startup-recovery');
+	await expect(statusBar).toBeVisible();
+	await expect(recovery).toHaveText('Rec. 1 revisión');
+	await expect(recovery).toHaveAttribute(
+		'title',
+		'La recuperación de inicio requiere revisión manual para 1 operación. Además, 2 operaciones siguen pendientes de reconciliación.'
+	);
+	await expect(recovery).toHaveAttribute(
+		'aria-label',
+		'La recuperación de inicio requiere revisión manual para 1 operación. Además, 2 operaciones siguen pendientes de reconciliación.'
+	);
+	await expect(statusBar.getByText('Listo')).toHaveCount(0);
+
+	const evidenceDirectory = resolve(
+		process.cwd(),
+		'.scratch',
+		'planning',
+		'2026-07-14-complete-recovery',
+		'artifacts',
+		'file-mutation-recovery'
+	);
+	await mkdir(evidenceDirectory, { recursive: true });
+	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'manual-review-desktop.png') });
+
+	await page.setViewportSize({ height: 768, width: 1024 });
+	expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
+	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'manual-review-compact.png') });
+
+	await page.waitForTimeout(500);
+	expect(pageErrors).toEqual([]);
+	expect(consoleErrors).toEqual([]);
+	expect(serverErrors).toEqual([]);
+});
