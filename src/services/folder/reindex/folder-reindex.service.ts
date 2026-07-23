@@ -59,7 +59,8 @@ export class FolderReindexService {
 		}
 		const startTime = Date.now();
 		this.logger.info('Iniciando reindex canónico', { folderId: options.folderId });
-		if (options.emitEvents !== false) await this.emitProgress('starting', 0, 'Iniciando reindex canónico...');
+		if (options.emitEvents !== false)
+			await this.emitProgress(options.folderId, 'starting', 0, 'Iniciando reindex canónico...');
 
 		try {
 			const result = await executeCanonicalFolderReindex(options, context);
@@ -87,6 +88,7 @@ export class FolderReindexService {
 			const totalDuration = Date.now() - startTime;
 			if (options.emitEvents !== false) {
 				await this.emitProgress(
+					options.folderId,
 					success ? 'completed' : 'error',
 					success ? 100 : 0,
 					success ? 'Reindex canónico completado' : 'El reindex canónico terminó con errores'
@@ -106,16 +108,22 @@ export class FolderReindexService {
 				error: error instanceof Error ? error.message : String(error),
 				folderId: options.folderId,
 			});
-			if (options.emitEvents !== false) await this.emitProgress('error', 0, 'El reindex canónico falló');
+			if (options.emitEvents !== false)
+				await this.emitProgress(options.folderId, 'error', 0, 'El reindex canónico falló');
 			throw error;
 		}
 	}
 
-	private async emitProgress(phaseName: string, progress: number, message: string): Promise<void> {
+	private async emitProgress(
+		folderId: string | undefined,
+		phaseName: string,
+		progress: number,
+		message: string
+	): Promise<void> {
 		try {
-			await emitProgress('folder:reindexAll:progress', {
+			await emitProgress('folder:progress', {
 				filesProcessed: 0,
-				folderId: undefined,
+				folderId,
 				isProcessing: progress < 100,
 				message,
 				phase: phaseName,
