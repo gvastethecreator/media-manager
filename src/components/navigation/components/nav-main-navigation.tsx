@@ -23,31 +23,36 @@ import {
 	Users,
 	Video,
 } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ViewType } from '@/components/views/types';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
-import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
-import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
+import type { CategoryChild } from '../types';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import { NavCategoryChildren } from './nav-category-children';
 
 interface NavMainNavigationProps {
-	currentView: string;
 	isCollapsed?: boolean;
-	onNavigate?: (id: ViewType) => void;
+}
+
+function getCategoryPath(categoryId: string): string {
+	if (categoryId === 'all-files') return '/files';
+	if (categoryId === 'file-3ds') return '/file3d';
+	return `/${categoryId}`;
+}
+
+function getCategoryItemPath(categoryId: string, item: CategoryChild): string {
+	if (item.path?.startsWith('/')) return item.path;
+	return `/${categoryId}/${encodeURIComponent(item.id)}`;
 }
 
 const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
-	currentView,
-	onNavigate,
 	isCollapsed = false,
 }: NavMainNavigationProps) {
 	const { stats, getCategoryItemCount, getCategoryItems } = useCategoryStats();
 	const { navigateWithTransition } = useSeamlessNavigation();
-	const { buildHierarchicalPath } = useHierarchicalNavigation();
 
 	// Nueva estructura file-centric con contadores y colores únicos
 	const NAVIGATION_CATEGORIES = useMemo(
@@ -252,10 +257,13 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 	);
 
 	const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+	const hasInitializedCategories = useRef(false);
 
-	// Inicializar categorías expandidas cuando NAVIGATION_CATEGORIES esté disponible
+	// La carga de estadísticas no debe cerrar secciones que el usuario ya abrió.
 	useEffect(() => {
+		if (hasInitializedCategories.current) return;
 		setExpandedCategories(new Set(NAVIGATION_CATEGORIES.map((c) => c.id)));
+		hasInitializedCategories.current = true;
 	}, [NAVIGATION_CATEGORIES]);
 
 	// Toggle función para expandir/contraer categorías
@@ -275,46 +283,6 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 	const innerContainerClasses = useMemo(() => cn('rounded-md p-0.5 shadow-sm', isCollapsed && 'p-0.5'), [isCollapsed]);
 	const flexContainerClasses = useMemo(() => cn('flex flex-col gap-1'), []);
 
-	const handleChildClick = useCallback(
-		(childId: string) => {
-			// Navegar al item hijo específico
-			clientLogger.debug('Navegando a item hijo:', childId);
-
-			// Para carpetas, navegar a la vista específica de la carpeta
-			if (childId?.match(/^folder_/)) {
-				// Extraer el ID real de la carpeta (remover prefijo si existe)
-				const folderId = childId.replace('folder_', '');
-
-				// Usar navegación jerárquica
-				const hierarchicalPath = buildHierarchicalPath(folderId);
-
-				// Navegar usando path jerárquico
-				if (hierarchicalPath) {
-					navigateWithTransition(`/folders/${hierarchicalPath}`);
-				} else {
-					// Fallback para carpeta raíz o error
-					navigateWithTransition('/folders');
-				}
-			} else {
-				// Para otras entidades, navegar a su vista específica
-				// Por ejemplo: notas, propiedades, etc.
-				navigateWithTransition(`/${childId}`);
-			}
-		},
-		[navigateWithTransition, buildHierarchicalPath]
-	);
-
-	const handleNavigate = useCallback(
-		(id: ViewType) => {
-			if (onNavigate) {
-				onNavigate(id);
-			} else {
-				navigateWithTransition(id === '' ? '/' : `/${id}`);
-			}
-		},
-		[onNavigate, navigateWithTransition]
-	);
-
 	return (
 		<ScrollArea className={containerClasses}>
 			<div className={innerContainerClasses}>
@@ -323,14 +291,15 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						<div className="mb-1" key={category.id}>
 							<button
 								aria-expanded={expandedCategories.has(category.id)}
+								aria-label={`${expandedCategories.has(category.id) ? 'Contraer' : 'Expandir'} ${category.label}`}
 								className={cn(
-									'mb-0.5 flex items-center gap-1 transition-all duration-300',
+									'mb-0.5 flex items-center gap-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
 									isCollapsed ? 'justify-center px-1 py-1' : ''
 								)}
 								onClick={() => {
 									// Para carpetas, navegar a la vista principal además de expandir/contraer
 									if (category.id === 'folders') {
-										handleNavigate('folders' as ViewType);
+										navigateWithTransition('/folders');
 									}
 									toggleCategory(category.id);
 								}}
@@ -370,14 +339,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 									{/* TreeView directo para carpetas */}
 									{category.showTreeView && (
 										<div className="mt-1 min-w-0 overflow-hidden">
-											<NavCategoryChildren
-												categoryId={category.id}
-												currentView={currentView}
-												isCollapsed={isCollapsed}
-												items={[]}
-												onItemClick={handleChildClick}
-												selectedChildId={null}
-											/>
+											<NavCategoryChildren categoryId={category.id} isCollapsed={isCollapsed} items={[]} />
 										</div>
 									)}
 									{/* Categorías normales */}
@@ -385,36 +347,31 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 										<div className="flex min-w-0 flex-col gap-0.5 overflow-hidden">
 											{(category.children || []).map((child, _idx) => (
 												<div className="flex min-w-0 flex-col" key={child.id}>
-													<div
-														className={cn(
-															'flex w-full min-w-0 items-center justify-between rounded px-2 py-1 text-xs transition-all duration-300',
-															'transition-colors hover:bg-secondary/50',
-															currentView === child.id && 'bg-secondary font-bold',
-															isCollapsed ? 'justify-center px-1' : ''
-														)}
-													>
-														<div
-															className={cn('flex min-w-0 flex-1 items-center', isCollapsed ? 'justify-center' : '')}
+													<div className="flex w-full min-w-0 items-center justify-between rounded text-xs">
+														<NavLink
+															className={({ isActive }) =>
+																cn(
+																	'flex min-w-0 flex-1 items-center rounded px-2 py-1 transition-colors hover:bg-secondary/50',
+																	'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+																	isActive && 'bg-secondary font-bold',
+																	isCollapsed && 'justify-center px-1'
+																)
+															}
+															to={getCategoryPath(child.id)}
 														>
-															<button
-																className="flex w-full min-w-0 items-center"
-																onClick={() => handleNavigate(child.id as ViewType)}
-																type="button"
-															>
-																<child.icon className="h-3 w-3 shrink-0" style={{ color: child.color }} />
-																{!isCollapsed && <span className="ml-2 truncate">{child.label}</span>}
-															</button>
-														</div>
+															<child.icon className="h-3 w-3 shrink-0" style={{ color: child.color }} />
+															{!isCollapsed && <span className="ml-2 truncate">{child.label}</span>}
+															{child.count !== undefined && (
+																<span
+																	className="min-w-[18px] text-right text-[10px] text-muted-foreground tabular-nums"
+																	data-testid={`nav-count-${child.id}`}
+																>
+																	{child.count}
+																</span>
+															)}
+														</NavLink>
 														{!isCollapsed && (
 															<div className="flex shrink-0 items-center gap-1">
-																{child.count !== undefined && (
-																	<span
-																		className="min-w-[18px] text-right text-[10px] text-muted-foreground tabular-nums"
-																		data-testid={`nav-count-${child.id}`}
-																	>
-																		{child.count}
-																	</span>
-																)}
 																{child.hasChildren && (
 																	<button
 																		aria-expanded={expandedCategories.has(child.id)}
@@ -440,11 +397,9 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 														<div className="mt-1 ml-4 border-border/50 border-l pl-2">
 															<NavCategoryChildren
 																categoryId={child.id}
-																currentView={currentView}
+																getItemHref={(item) => getCategoryItemPath(child.id, item)}
 																isCollapsed={isCollapsed}
 																items={getCategoryItems(child.id as any)}
-																onItemClick={handleChildClick}
-																selectedChildId={null}
 															/>
 														</div>
 													)}

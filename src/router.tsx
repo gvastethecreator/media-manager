@@ -58,6 +58,9 @@ const MixedContentView = lazy(() => import('@/components/views/mixed/mixed-conte
 const NotesView = lazy(() =>
 	import('@/components/views/notes/notes-view').then((module) => ({ default: module.NotesView }))
 );
+const NoteContentView = lazy(() =>
+	import('@/components/views/notes/note-content-view').then((module) => ({ default: module.NoteContentView }))
+);
 const PlaceContentView = lazy(() =>
 	import('@/components/views/places/place-content-view').then((m) => ({ default: m.PlaceContentView }))
 );
@@ -318,6 +321,10 @@ export const router = createBrowserRouter([
 			{
 				path: 'notes',
 				element: <NotesView className="h-full" />,
+			},
+			{
+				path: 'notes/:id',
+				element: <NoteContentView />,
 			},
 			{
 				path: 'documents',
