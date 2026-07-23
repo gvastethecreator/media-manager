@@ -1,7 +1,7 @@
 /**
  * @file Express Routes para servicios de archivos usando Effect
  * @module server/routes/file-services.effect
- * @description Rutas REST para File3D, Document, JsonFile, UploadedImages
+ * @description Rutas REST para File3D, Document, JsonFile y retiro seguro de UploadedImages
  * @created 2025-10-11 - Fase 10 Effect Implementation
  */
 
@@ -21,14 +21,6 @@ import {
 } from '@/server/security/authorized-root-request';
 import type { MediaAssetType } from '@/server/security/media-asset-reference';
 import { sanitizeJsonResponses } from '@/server/security/sanitize-public-payload';
-import {
-	deleteUploadedImage,
-	getUploadedImage,
-	getUploadedImageStats,
-	getUploadedImages,
-	uploadImages,
-} from '@/server/services/uploaded-images.api.service';
-import { UploadedImagesService, UploadedImagesServiceLive } from '@/services/file/file-services.effect';
 import { DocumentService, DocumentServiceLive } from '@/services/document/document.service.effect';
 import { File3DService, File3DServiceLive } from '@/services/file3d/file3d.service.effect';
 import { JsonFileService, JsonFileServiceLive } from '@/services/json-file/json-file.service.effect';
@@ -551,133 +543,15 @@ jsonFilesEffectRouter.get(
 	)
 );
 
-// UploadedImages
+// Cargas directas heredadas
 const uploadedImagesEffectRouter = express.Router();
-uploadedImagesEffectRouter.get(
-	'/stats',
-	effectHandler((_req) =>
-		Effect.gen(function* () {
-			const result = yield* Effect.tryPromise({
-				try: () => getUploadedImageStats(),
-				catch: (error) => error,
-			});
-			if (!result.success) {
-				return { error: result.error };
-			}
-			return result.stats;
-		})
-	)
-);
-
-uploadedImagesEffectRouter.get(
-	'/',
-	effectHandler((req) =>
-		Effect.gen(function* () {
-			const result = yield* Effect.tryPromise({
-				try: () =>
-					getUploadedImages({
-						pageSize: req.query.limit ? Number.parseInt(req.query.limit as string, 10) : undefined,
-						page: req.query.offset
-							? Math.floor(
-									Number.parseInt(req.query.offset as string, 10) /
-										(Number.parseInt((req.query.limit as string) || '20', 10) || 20)
-								) + 1
-							: undefined,
-						category: req.query.category as string,
-						search: req.query.searchTerm as string,
-						sortBy: req.query.orderBy as any,
-						sortOrder: req.query.orderDir as any,
-					}),
-				catch: (error) => error,
-			});
-			if (!result.success) {
-				return { error: result.error };
-			}
-			return {
-				data: result.items,
-				pagination: {
-					total: result.total,
-					limit: result.pageSize,
-					offset: result.page ? (result.page - 1) * result.pageSize : 0,
-					hasNext: result.page ? result.page * result.pageSize < result.total : false,
-					hasPrev: result.page ? result.page > 1 : false,
-				},
-				stats: result.stats,
-			};
-		})
-	)
-);
-
-uploadedImagesEffectRouter.get(
-	'/:id',
-	effectHandler((req) =>
-		Effect.gen(function* () {
-			const result = yield* Effect.tryPromise({
-				try: () => getUploadedImage(req.params.id),
-				catch: (error) => error,
-			});
-			if (!result.success) {
-				return { error: result.error };
-			}
-			return result.item;
-		})
-	)
-);
-
-uploadedImagesEffectRouter.post(
-	'/upload',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			const result = yield* Effect.tryPromise({
-				try: () => uploadImages(req.body),
-				catch: (error) => error,
-			});
-			res.status(201);
-			if (!result.success) {
-				return { error: result.error };
-			}
-			return result.items;
-		})
-	)
-);
-
-uploadedImagesEffectRouter.post(
-	'/',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			const service = yield* UploadedImagesService;
-			const result = yield* service.create(req.body);
-			res.status(201);
-			return result;
-		}).pipe(Effect.provide(UploadedImagesServiceLive))
-	)
-);
-
-uploadedImagesEffectRouter.put(
-	'/:id',
-	effectHandler((req) =>
-		Effect.gen(function* () {
-			const service = yield* UploadedImagesService;
-			return yield* service.update(req.params.id, req.body);
-		}).pipe(Effect.provide(UploadedImagesServiceLive))
-	)
-);
-
-uploadedImagesEffectRouter.delete(
-	'/:id',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			const result = yield* Effect.tryPromise({
-				try: () => deleteUploadedImage(req.params.id),
-				catch: (error) => error,
-			});
-			res.status(204);
-			if (!result.success) {
-				return { error: result.error };
-			}
-			return { success: true };
-		})
-	)
-);
+uploadedImagesEffectRouter.use(sanitizeJsonResponses);
+uploadedImagesEffectRouter.use((_request, response) => {
+	response.status(410).json({
+		code: 'AUTHORIZED_ROOT_INGEST_REQUIRED',
+		message: 'Las cargas directas fueron retiradas. Añade archivos a un media root autorizado y reindexa la carpeta.',
+		retryable: false,
+	});
+});
 
 export { file3dsEffectRouter, documentsEffectRouter, jsonFilesEffectRouter, uploadedImagesEffectRouter };
