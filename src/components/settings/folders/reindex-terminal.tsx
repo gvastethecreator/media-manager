@@ -1,5 +1,6 @@
 import { AlertCircle, Check, Info, Terminal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { animate } from '@/lib/animation';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 
@@ -111,9 +112,8 @@ export function ReindexTerminal({
 	};
 
 	// Animación para nuevas líneas con GSAP
-	const animateNewLog = useCallback(async (element: HTMLElement) => {
-		const animationLib = await import('@/lib/animation');
-		await animationLib.animate({
+	const animateNewLog = useCallback((element: HTMLElement) => {
+		return animate({
 			targets: element,
 			translateX: [-20, 0],
 			opacity: [0, 1],
@@ -556,4 +556,3 @@ export function ReindexTerminal({
 		</div>
 	);
 }
-
