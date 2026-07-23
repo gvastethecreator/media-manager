@@ -13,8 +13,8 @@ import {
 	getFolderStats,
 	getRecentFolderImages,
 	moveFolder,
-	reindexAllFolders,
 	reindexFolder,
+	type ReindexFolderResponse,
 	toggleFolderFavorite,
 	updateFolder,
 } from './services/folders';
@@ -181,26 +181,15 @@ export function useToggleFolderFavorite() {
 export function useReindexFolder() {
 	const queryClient = useQueryClient();
 
-	return useMutation<
-		FolderWithStats,
-		Error,
-		{
-			id: string;
-			options?: {
-				useStructuredFlow?: boolean;
-				skipThumbnails?: boolean;
-				skipMetadata?: boolean;
-			};
-		}
-	>({
-		mutationFn: ({ id, options }) => reindexFolder(id, options),
+	return useMutation<ReindexFolderResponse, Error, { id: string }>({
+		mutationFn: ({ id }) => reindexFolder(id),
 		retry: false, // ✅ Deshabilitar retry automático para evitar loops infinitos
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
 			// Actualizar la caché del detalle afectado directamente (evita invalidación global de details)
-			if (data?.id) {
-				queryClient.setQueryData(folderKeys.detail(data.id), data);
+			if (data?.folderId) {
+				queryClient.invalidateQueries({ queryKey: folderKeys.detail(data.folderId) });
 			}
 			// Refrescar estadísticas asociadas
 			queryClient.invalidateQueries({ queryKey: ['folder-stats'] });
@@ -212,34 +201,6 @@ export function useReindexFolder() {
 			// Reindexar podía bajar cientos de miles de registros de golpe y bloquear el navegador.
 			// Los componentes y hooks locales de la vista actual son los que deben enterarse
 			// de la recarga vía react-query o listeners SSE locales.
-		},
-		// onError silenciado para evitar console.*; la UI ya refleja estado/progreso
-	});
-}
-
-export function useReindexAllFolders() {
-	const queryClient = useQueryClient();
-
-	return useMutation<
-		{ processed: number; errors: string[] },
-		Error,
-		| {
-				useStructuredFlow?: boolean;
-				skipThumbnails?: boolean;
-				skipMetadata?: boolean;
-		  }
-		| undefined
-	>({
-		mutationFn: (options) => reindexAllFolders(options),
-		retry: false, // ✅ Deshabilitar retry automático para evitar loops infinitos en ERR_EMPTY_RESPONSE
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
-			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
-			// Refrescar métricas globales
-			queryClient.invalidateQueries({ queryKey: ['folder-stats'] });
-			// ✅ Refrescar datos y estadísticas del panel de navegación
-			queryClient.invalidateQueries({ queryKey: navigationKeys.data() });
-			queryClient.invalidateQueries({ queryKey: navigationKeys.stats() });
 		},
 		// onError silenciado para evitar console.*; la UI ya refleja estado/progreso
 	});
