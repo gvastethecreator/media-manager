@@ -169,3 +169,42 @@ test('renderiza un PDF desde su fuente autorizada y descarga por la ruta protegi
 	expect(consoleErrors).toEqual([]);
 	expect(serverErrors).toEqual([]);
 });
+
+test('informa un PDF corrupto sin romper el diálogo del visor', async ({ page, request }, testInfo) => {
+	const mediaRoot = process.env.MEDIA_MANAGER_SMOKE_ROOT_PATH;
+	if (!mediaRoot) throw new Error('MEDIA_MANAGER_SMOKE_ROOT_PATH es obligatorio para el smoke de documentos.');
+	const fixtureDirectory = 'broken-pdf-viewer-browser';
+	const fileName = 'Documento PDF corrupto.pdf';
+	const content = 'Este archivo no contiene un PDF válido.';
+	const relativePath = `${fixtureDirectory}/${fileName}`;
+	await mkdir(resolve(mediaRoot, fixtureDirectory), { recursive: true });
+	await writeFile(resolve(mediaRoot, fixtureDirectory, fileName), content, 'utf8');
+	const folder = await apiJson<EntityResponse>(request, '/api/folders', {
+		name: 'PDF corrupto de visor',
+		source: { relativePath: fixtureDirectory, rootId: 'smoke-root' },
+	});
+	await apiJson<EntityResponse>(request, '/api/documents', {
+		extension: 'pdf',
+		folderId: folder.id,
+		hash: createHash('sha256').update(content).digest('hex'),
+		mimeType: 'application/pdf',
+		name: fileName,
+		size: Buffer.byteLength(content),
+		source: { relativePath, rootId: 'smoke-root' },
+	});
+
+	await page.goto('/documents', { waitUntil: 'domcontentloaded' });
+	const documentItem = page.getByText(fileName, { exact: true }).first();
+	await expect(documentItem).toBeVisible();
+	await documentItem.dblclick();
+	const dialog = page.getByRole('dialog');
+	await expect(dialog).toBeVisible();
+	await expect(dialog.getByRole('alert')).toContainText('Comprueba que el archivo no esté dañado o protegido.');
+	await expect(dialog.getByRole('button', { name: 'Reintentar' })).toBeVisible();
+	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('pdf-viewer-error-desktop.png') });
+	await page.setViewportSize({ height: 768, width: 1024 });
+	expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
+	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('pdf-viewer-error-compact.png') });
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
+});

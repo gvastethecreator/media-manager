@@ -6,14 +6,19 @@ import { PdfViewer } from './pdf-viewer';
 vi.mock('react-pdf', () => ({
 	Document: ({
 		children,
+		onLoadError,
 		onLoadSuccess,
 	}: {
 		children: ReactNode;
+		onLoadError: () => void;
 		onLoadSuccess: (document: { numPages: number }) => void;
 	}) => (
 		<div data-testid="pdf-document">
 			<button onClick={() => onLoadSuccess({ numPages: 2 })} type="button">
 				Completar carga
+			</button>
+			<button onClick={onLoadError} type="button">
+				Forzar error
 			</button>
 			{children}
 		</div>
@@ -43,5 +48,23 @@ describe('PdfViewer', () => {
 
 		await waitFor(() => expect(screen.getByText('Página 1 de 2')).toBeInTheDocument());
 		expect(screen.queryByText('Cargando...')).not.toBeInTheDocument();
+	});
+
+	it('explica un PDF inválido y permite reintentar sin cerrar el diálogo', () => {
+		render(
+			<PdfViewer
+				file={{ id: 'document-1', name: 'broken.pdf', url: '/api/documents/document-1/content' }}
+				isOpen
+				onOpenChange={vi.fn()}
+			/>
+		);
+
+		fireEvent.click(screen.getByRole('button', { name: 'Forzar error' }));
+		expect(screen.getByRole('alert')).toHaveTextContent(
+			'No se pudo cargar el PDF. Comprueba que el archivo no esté dañado o protegido.'
+		);
+		fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+		expect(screen.getByTestId('pdf-document')).toBeInTheDocument();
+		expect(screen.getByText('Cargando...')).toBeInTheDocument();
 	});
 });
