@@ -90,18 +90,20 @@ bun run tsc
 ### Database Operations
 
 ```bash
-# Open Drizzle Studio (database GUI)
-bun run db:studio
+# Drizzle Studio requiere una DB explícita y local
+bun run db:studio -- --database .scratch/dev.sqlite
 
-# Check database status
-bun run db:check
+# Inspeccionar una DB explícita sin modificarla
+bun run db:check -- --database C:/path/to/media-manager.sqlite
 
-# Reset database (destructive!)
-bun run db:reset
-
-# Apply the canonical versioned migrations to an explicit database
+# Aplicar migraciones versionadas a una DB explícita
 bun run db:migrate -- --database C:/path/to/media-manager.sqlite
 bun run db:schema:export -- --database C:/path/to/media-manager.sqlite --output C:/path/to/schema.sql
+
+# Reset sólo para una DB descartable marcada; el primer comando marca y el segundo hace dry-run
+bun run db:mark-disposable -- --database .scratch/dev.sqlite --confirm MARK-DISPOSABLE
+bun run db:reset -- --database .scratch/dev.sqlite
+bun run db:reset -- --database .scratch/dev.sqlite --confirm RESET-DISPOSABLE
 
 # Cleanup operations
 bun run db:cleanup-phantoms
@@ -1660,11 +1662,11 @@ USE_EFFECT_FOLDERS=false
 # Generate migration
 bunx drizzle-kit generate
 
-# Apply migration
-bunx drizzle-kit push
+# Aplicar migraciones versionadas a una DB explícita
+bun run db:migrate -- --database .scratch/dev.sqlite
 
-# Open studio
-bun run db:studio
+# Open studio with an explicit local DB
+bun run db:studio -- --database .scratch/dev.sqlite
 ```
 
 ### Fix Type Errors
@@ -1725,9 +1727,9 @@ bun run dev:full
 
 ### Tests Failing
 
-1. Check `fileParallelism: false` in `vitest.config.ts` (to avoid SQLITE_BUSY)
-2. Clear test cache: `rm -rf node_modules/.vitest`
-3. Run `bun run tsc` to check for type errors
+1. Ejecutar `bun run test`; el wrapper crea una SQLite descartable por worker desde las migraciones versionadas.
+2. Mantener `fileParallelism: true`; el aislamiento por worker evita compartir el writer de SQLite.
+3. Ejecutar `bun run tsc` para ver errores de tipos.
 
 ### Build Errors
 
@@ -1737,9 +1739,10 @@ bun run dev:full
 
 ### Database Issues
 
-1. Reset database: `bun run db:reset` (destructive!)
-2. Check migrations: `bunx drizzle-kit push`
-3. Inspect with studio: `bun run db:studio`
+1. Inspeccionar primero: `bun run db:check -- --database <path-explícito>`.
+2. Aplicar sólo migraciones versionadas: `bun run db:migrate -- --database <path-explícito>`.
+3. Usar Studio sólo con `bun run db:studio -- --database <path-explícito>`.
+4. Resetear sólo una DB bajo `.scratch` o temp, marcada y con la confirmación exacta mostrada arriba.
 
 ---
 
