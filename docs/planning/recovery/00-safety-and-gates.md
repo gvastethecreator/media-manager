@@ -67,13 +67,17 @@ autoarreglo masivo sobre trabajo ajeno.
 
 ### GATE-003 — Alinear toolchain de tests
 
-- [ ] Identificar por qué Vite+ carga `vitest@0.1.20` con coverage 4.1.5.
-- [ ] Elegir una sola familia/versión soportada.
-- [ ] Eliminar dependencias duplicadas y regenerar lock de forma controlada.
-- [ ] Confirmar reportes coverage text/json/lcov y thresholds.
+- [x] Identificar por qué Vite+ carga `vitest@0.1.20` con coverage 4.1.5.
+- [x] Elegir una sola familia/versión soportada: Vite+ 0.1.20 empaqueta Vitest 4.1.5 y `@vitest/coverage-v8` 4.1.5.
+- [ ] Migrar los imports heredados de `vitest` a `vite-plus/test`, retirar los aliases legacy y regenerar lock de forma
+      controlada. Hay 61 archivos con imports heredados; coordinar los que están en cambios concurrentes.
+- [x] Confirmar reportes coverage text/json/html y threshold de statements al 50%.
 - [ ] Registrar baseline real por módulo crítico; no subir threshold hasta corregir suite.
 
-**Proof:** no aparece warning de versiones mixtas; coverage termina y su failure rompe el gate.
+**Proof 2026-07-23:** `bun run test:ci` pasó: 808/808 tests, coverage de statements 55,86% (8186/14652), branches
+46,21%, functions 55,20% y lines 56,24%; el threshold actual de 50% se cumplió. El warning de versiones mixtas
+persiste por los aliases legacy de `vitest`, aunque el package local declara `bundledVersions.vitest = 4.1.5` y su peer
+de coverage exige precisamente 4.1.5. No declarar el gate completamente verde hasta retirar esa compatibilidad.
 
 ### GATE-004 — Corregir fallas actuales antes de nueva funcionalidad
 
