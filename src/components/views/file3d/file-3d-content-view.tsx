@@ -221,15 +221,15 @@ export function File3DContentView() {
 							</Card>
 							<Card className="p-4">
 								<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Vértices</p>
-								<p className="font-semibold text-lg">{file3D.vertices ?? file3D.stats.vertexCount ?? 0}</p>
+								<p className="font-semibold text-lg">{file3D.vertices ?? file3D.stats?.vertexCount ?? 0}</p>
 							</Card>
 							<Card className="p-4">
 								<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Caras</p>
-								<p className="font-semibold text-lg">{file3D.faces ?? file3D.stats.polygonCount ?? 0}</p>
+								<p className="font-semibold text-lg">{file3D.faces ?? file3D.stats?.polygonCount ?? 0}</p>
 							</Card>
 							<Card className="p-4">
 								<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Materiales</p>
-								<p className="font-semibold text-lg">{file3D.materials ?? file3D.stats.materialCount ?? 0}</p>
+								<p className="font-semibold text-lg">{file3D.materials ?? file3D.stats?.materialCount ?? 0}</p>
 							</Card>
 							<Card className="p-4">
 								<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Atributos</p>
