@@ -134,13 +134,13 @@ describe('canonical Image HTTP create', () => {
 		expect(unavailableThumbnail.headers['x-content-type-options']).toBe('nosniff');
 		const sharp = (await import('sharp')).default;
 		const canonicalImage = await sharp({
-			create: { background: { b: 0, g: 0, r: 255 }, channels: 3, height: 2, width: 2 },
+			create: { background: { b: 0, g: 0, r: 255 }, channels: 3, height: 360, width: 640 },
 		})
 			.png()
 			.toBuffer();
 		const outsideImagePath = resolve(directory, 'outside-authorized-root.png');
 		const outsideImage = await sharp({
-			create: { background: { b: 255, g: 0, r: 0 }, channels: 3, height: 2, width: 2 },
+			create: { background: { b: 255, g: 0, r: 0 }, channels: 3, height: 360, width: 640 },
 		})
 			.png()
 			.toBuffer();
@@ -159,6 +159,17 @@ describe('canonical Image HTTP create', () => {
 			.update(images)
 			.set({ path: resolve(rootPath, 'photo.jpg') })
 			.where(eq(images.id, response.body.id));
+		const sizedThumbnail = await request(app).get(
+			`/api/thumbnails/unified/image/${response.body.id}?force=true&height=90&width=160`
+		);
+		expect(sizedThumbnail.status, sizedThumbnail.text).toBe(200);
+		expect(await sharp(sizedThumbnail.body).metadata()).toEqual(expect.objectContaining({ height: 90, width: 160 }));
+		expect(
+			await db
+				.select({ thumbnailHeight: images.thumbnailHeight, thumbnailWidth: images.thumbnailWidth })
+				.from(images)
+				.where(eq(images.id, response.body.id))
+		).toEqual([expect.objectContaining({ thumbnailHeight: 90, thumbnailWidth: 160 })]);
 		await db
 			.update(images)
 			.set({ thumbnail: 'thumbnail-data', thumbnailHeight: 1, thumbnailSize: 14, thumbnailWidth: 1 })
