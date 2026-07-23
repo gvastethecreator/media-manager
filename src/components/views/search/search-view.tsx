@@ -40,7 +40,12 @@ export function SearchView(_props: ViewProps) {
 
 	const browserItems = useMemo(() => {
 		if (!searchResponse?.results) return [];
-		return searchResponse.results.map((item: any) => toBrowserItem(item.data as unknown as Record<string, unknown>));
+		return searchResponse.results.map((item: any) =>
+			toBrowserItem({
+				...(item.data as Record<string, unknown>),
+				entityType: item.type,
+			})
+		);
 	}, [searchResponse]);
 
 	const handleItemSelect = useCallback((item: any) => {
