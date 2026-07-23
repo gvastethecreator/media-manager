@@ -91,6 +91,8 @@ export interface ProgressOptions {
 	description?: string;
 	/** Metadata */
 	metadata?: Record<string, any>;
+	/** Called when the user cancels the operation from progress UI. */
+	onCancel?: () => void;
 	/** Priority level */
 	priority?: number;
 	/** Show toast notifications */
@@ -106,6 +108,7 @@ export type ProgressCallback = (operation: ProgressOperation) => void;
  * Manages progress tracking for long-running file operations
  */
 class ProgressTrackingService extends TypedEventEmitter {
+	private readonly cancelCallbacks = new Map<string, () => void>();
 	private readonly operations = new Map<string, ProgressOperation>();
 	private readonly callbacks = new Map<string, ProgressCallback[]>();
 	private readonly toastIds = new Map<string, string | number>();
@@ -120,7 +123,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 	/**
 	 * Start tracking a new operation
 	 */
-	startOperation(type: OperationType, totalItems: number, options: ProgressOptions = {}): ProgressInfo {
+	startOperation(type: OperationType, totalItems: number, options: ProgressOptions = {}): string {
 		const operationId = this.generateOperationId();
 		const now = Date.now();
 
@@ -174,6 +177,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 
 		this.operations.set(operationId, operation);
 		this.callbacks.set(operationId, []);
+		if (options.onCancel) this.cancelCallbacks.set(operationId, options.onCancel);
 
 		// Show initial toast if enabled
 		if (options.showToast !== false) {
@@ -191,7 +195,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 		}
 
 		this.emit('operationStarted', operation);
-		return progressInfo;
+		return operationId;
 	}
 
 	/**
@@ -359,9 +363,10 @@ class ProgressTrackingService extends TypedEventEmitter {
 	 */
 	cancelOperation(operationId: string): void {
 		const operation = this.operations.get(operationId);
-		if (!operation) {
+		if (!operation || operation.status === 'cancelled') {
 			return;
 		}
+		this.cancelCallbacks.get(operationId)?.();
 
 		const cancelledOperation: ProgressOperation = {
 			...operation,
@@ -453,6 +458,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 	 * Clean up operation data
 	 */
 	private cleanupOperation(operationId: string): void {
+		this.cancelCallbacks.delete(operationId);
 		this.operations.delete(operationId);
 		this.callbacks.delete(operationId);
 
