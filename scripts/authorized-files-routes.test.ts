@@ -224,8 +224,32 @@ describe('authorized filesystem HTTP contract', () => {
 				.query({ path: resolve(primary, 'inside.txt') });
 			expect(content.status).toBe(200);
 			expect(content.text).toBe('inside');
+			expect(content.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+			expect(content.headers.vary).toContain('Cookie');
+			expect(content.headers['x-content-type-options']).toBe('nosniff');
+			expect(content.headers.etag).toBeDefined();
+			expect(
+				(
+					await request(app)
+						.get('/api/files/content')
+						.query({ rootId: 'primary', path: 'inside.txt' })
+						.set('If-None-Match', content.headers.etag)
+				).status
+			).toBe(304);
 			expect(download.status).toBe(200);
 			expect(download.headers['content-disposition']).toContain('inside.txt');
+			expect(download.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+			expect(download.headers.vary).toContain('Cookie');
+			expect(download.headers['x-content-type-options']).toBe('nosniff');
+			expect(download.headers.etag).toBeDefined();
+			expect(
+				(
+					await request(app)
+						.get('/api/download')
+						.query({ rootId: 'primary', path: 'inside.txt' })
+						.set('If-None-Match', download.headers.etag)
+				).status
+			).toBe(304);
 			expect(legacyAbsolute.status).toBe(400);
 			expect(JSON.stringify(legacyAbsolute.body)).not.toContain(primary);
 		});

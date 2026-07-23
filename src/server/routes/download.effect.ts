@@ -12,6 +12,7 @@ import {
 	parseAuthorizedPathReference,
 	sendRootAuthorizationError,
 } from '@/server/security/authorized-root-request';
+import { setAuthorizedFileDeliveryHeaders } from '@/server/security/authorized-asset-cache';
 import { parseMediaAssetReference, resolveMediaAssetReference } from '@/server/security/media-asset-reference';
 
 const router = express.Router();
@@ -34,6 +35,7 @@ const createAttachmentHeader = (fileName: string): string => {
 interface DownloadRequest {
 	app: { locals: Record<string, unknown> };
 	body?: { asset?: unknown; source?: unknown };
+	fresh: boolean;
 	method: string;
 	query: Record<string, unknown>;
 }
@@ -80,8 +82,11 @@ async function downloadHandler(request: DownloadRequest, response: express.Respo
 			'Content-Disposition': createAttachmentHeader(fileName),
 			'Content-Length': fileStat.size.toString(),
 			'Content-Type': getMimeTypeFromExtension(extname(resolved.absolutePath)),
-			'X-Content-Type-Options': 'nosniff',
 		});
+		if (setAuthorizedFileDeliveryHeaders(request, response, fileStat)) {
+			response.status(304).end();
+			return;
+		}
 		const stream = createReadStream(resolved.absolutePath);
 		response.on('close', () => stream.destroy());
 		stream.on('error', (error) => {
