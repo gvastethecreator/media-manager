@@ -18,6 +18,7 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 	const [pageNumber, setPageNumber] = useState(1);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [renderAttempt, setRenderAttempt] = useState(0);
 
 	const onDocumentLoadSuccess = ({ numPages: nextNumPages }: { numPages: number }) => {
 		setNumPages(nextNumPages);
@@ -27,11 +28,19 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 
 	const onDocumentLoadError = () => {
 		setLoading(false);
-		setError('No se pudo cargar el PDF');
+		setError('No se pudo cargar el PDF.');
 		toastService.error('Error al cargar el documento PDF');
 	};
 
 	const changePage = (offset: number) => setPageNumber((prev) => Math.max(1, Math.min(numPages, prev + offset)));
+
+	const retryLoad = () => {
+		setError(null);
+		setLoading(true);
+		setNumPages(0);
+		setPageNumber(1);
+		setRenderAttempt((attempt) => attempt + 1);
+	};
 
 	const handleClose = (open: boolean) => {
 		if (!open) {
@@ -67,9 +76,21 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 						</div>
 					)}
 					{error ? (
-						<p className="text-destructive text-sm">{error}</p>
+						<div className="flex flex-col items-center gap-3 px-4 text-center" role="alert">
+							<p className="text-destructive text-sm">
+								{error} Comprueba que el archivo no esté dañado o protegido.
+							</p>
+							<Button onClick={retryLoad} size="sm" variant="outline">
+								Reintentar
+							</Button>
+						</div>
 					) : (
-						<Document file={file.url} onLoadError={onDocumentLoadError} onLoadSuccess={onDocumentLoadSuccess}>
+						<Document
+							file={file.url}
+							key={renderAttempt}
+							onLoadError={onDocumentLoadError}
+							onLoadSuccess={onDocumentLoadSuccess}
+						>
 							<Page className="shadow-lg" pageNumber={pageNumber} />
 						</Document>
 					)}
