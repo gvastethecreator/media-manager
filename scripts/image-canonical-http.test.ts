@@ -115,10 +115,27 @@ describe('canonical Image HTTP create', () => {
 		expect(await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, response.body.id))).toEqual([
 			expect.objectContaining({ relativePath: 'photo.jpg', rootId }),
 		]);
+		const unavailableThumbnail = await request(app).get(`/api/thumbnails/unified/image/${response.body.id}`);
+		expect(unavailableThumbnail.status).toBe(404);
+		expect(unavailableThumbnail.headers['content-type']).toContain('image/svg+xml');
+		expect(unavailableThumbnail.headers['cache-control']).toBe('private, no-store');
+		expect(unavailableThumbnail.headers.vary).toContain('Cookie');
+		expect(unavailableThumbnail.headers['x-content-type-options']).toBe('nosniff');
 		await db
 			.update(images)
 			.set({ thumbnail: 'thumbnail-data', thumbnailHeight: 1, thumbnailSize: 14, thumbnailWidth: 1 })
 			.where(eq(images.id, response.body.id));
+		const thumbnail = await request(app).get(`/api/thumbnails/unified/image/${response.body.id}`);
+		expect(thumbnail.status, thumbnail.text).toBe(200);
+		expect(thumbnail.headers['content-type']).toContain('image/webp');
+		expect(thumbnail.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+		expect(thumbnail.headers.vary).toContain('Cookie');
+		expect(thumbnail.headers['x-content-type-options']).toBe('nosniff');
+		expect(thumbnail.headers.etag).toBeDefined();
+		const revalidatedThumbnail = await request(app)
+			.get(`/api/thumbnails/unified/image/${response.body.id}`)
+			.set('If-None-Match', thumbnail.headers.etag);
+		expect(revalidatedThumbnail.status).toBe(304);
 		const placementMutation = await request(app)
 			.patch(`/api/images/${response.body.id}`)
 			.send({ folderId: crypto.randomUUID() });

@@ -75,9 +75,6 @@ export function useThumbnail(
 	});
 
 	const abortControllerRef = useRef<AbortController | null>(null);
-	const retriesRef = useRef(0);
-	const maxRetries = 2;
-	const generateThumbnailRef = useRef<() => Promise<void>>(async () => {});
 	const currentUrlRef = useRef<string | null>(null);
 
 	const fetchThumbnail = useCallback(async () => {
@@ -125,20 +122,13 @@ export function useThumbnail(
 					error: null,
 					exists: true,
 				});
-				retriesRef.current = 0;
 			} else if (response.status === 404) {
-				// No existe thumbnail, intentar generar
-				if (retriesRef.current < maxRetries) {
-					retriesRef.current++;
-					await generateThumbnailRef.current?.();
-				} else {
-					setState({
-						url: null,
-						loading: false,
-						error: 'Thumbnail not found',
-						exists: false,
-					});
-				}
+				setState({
+					url: null,
+					loading: false,
+					error: 'Miniatura no disponible',
+					exists: false,
+				});
 			} else {
 				throw new Error(`HTTP ${response.status}`);
 			}
@@ -177,8 +167,8 @@ export function useThumbnail(
 				// Volver a intentar obtener el thumbnail
 				await fetchThumbnail();
 			} else {
-				const error = await response.json();
-				throw new Error(error.error || 'Generation failed');
+				const error = await response.json().catch(() => null);
+				throw new Error(typeof error?.error === 'string' ? error.error : `Generation failed (HTTP ${response.status})`);
 			}
 		} catch (error) {
 			clientLogger.warn('Error generating thumbnail:', error);
@@ -191,11 +181,7 @@ export function useThumbnail(
 		}
 	}, [entityType, entityId, options, fetchThumbnail]);
 
-	// Store reference to allow fetchThumbnail to call generateThumbnail
-	generateThumbnailRef.current = generateThumbnail;
-
 	const refresh = useCallback(() => {
-		retriesRef.current = 0;
 		fetchThumbnail();
 	}, [fetchThumbnail]);
 
