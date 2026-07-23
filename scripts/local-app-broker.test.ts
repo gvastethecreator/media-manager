@@ -169,7 +169,17 @@ it('sirve la SPA y media a través de un broker que conserva el bearer fuera del
 		expect(uploadResponse.status).toBe(200);
 		expect(await eventsResponse.text()).toContain('data:');
 		expect(await indexResponse.text()).toContain('production broker');
+		const clientCsp = indexResponse.headers.get('content-security-policy') ?? '';
+		expect(clientCsp).toContain("default-src 'self'");
+		expect(clientCsp).toContain("script-src 'self'");
+		expect(clientCsp).toContain("worker-src 'self' blob:");
+		expect(clientCsp).toContain("frame-ancestors 'none'");
+		expect(clientCsp).toContain("object-src 'none'");
+		expect(clientCsp).not.toContain("script-src 'self' 'unsafe-inline'");
+		expect(indexResponse.headers.get('permissions-policy')).toContain('camera=()');
+		expect(indexResponse.headers.get('cross-origin-resource-policy')).toBe('same-origin');
 		expect(await fallbackResponse.text()).toContain('production broker');
+		expect(fallbackResponse.headers.get('content-security-policy')).toBe(clientCsp);
 		expect(hostileResponse.status).toBe(403);
 		expect(missingContextResponse.status).toBe(403);
 		await Promise.all([uploadResponse.arrayBuffer(), hostileResponse.text(), missingContextResponse.text()]);
@@ -177,6 +187,7 @@ it('sirve la SPA y media a través de un broker que conserva el bearer fuera del
 		const workerResponse = await fetch(`${browserOrigin}/assets/worker-12345678.mjs`);
 		expect(workerResponse.status).toBe(200);
 		expect(workerResponse.headers.get('content-type')).toBe('text/javascript; charset=utf-8');
+		expect(workerResponse.headers.get('content-security-policy')).toBeNull();
 		expect(await workerResponse.text()).toBe('export default null;');
 
 		longSseClosed = false;
