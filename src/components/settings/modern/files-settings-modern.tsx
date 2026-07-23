@@ -7,7 +7,6 @@
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import {
-	AlertCircle,
 	Folder,
 	Grid3X3,
 	HardDrive,
@@ -39,13 +38,6 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCreateFolder, useDeleteFolder, useFolders, useReindexFolder } from '@/lib/api/folders';
-import {
-	useCleanThumbnails,
-	useLastProcessedThumbnails,
-	useOptimizeThumbnails,
-	useReprocessThumbnails,
-	useThumbnailStats,
-} from '@/lib/api/thumbnails';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts/settings-context';
 import { toastService } from '@/lib/ui/toast';
@@ -186,21 +178,13 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 
 	// Hooks de datos
 	const foldersQuery = useFolders({ search: searchQuery });
-	const thumbnailStatsQuery = useThumbnailStats();
-	const _lastProcessedQuery = useLastProcessedThumbnails(9);
 
 	// Mutations
 	const createFolderMutation = useCreateFolder();
 	const deleteFolderMutation = useDeleteFolder();
 	const reindexFolderMutation = useReindexFolder();
-	const optimizeMutation = useOptimizeThumbnails();
-	const reprocessMutation = useReprocessThumbnails();
-	const cleanMutation = useCleanThumbnails();
 
 	const folders = foldersQuery.data?.data || [];
-	const thumbnailStats = thumbnailStatsQuery.data as unknown as
-		| { total: number; pending: number; errors: number; totalSize?: number }
-		| undefined;
 
 	const containerRef = useRef<HTMLDivElement>(null);
 
@@ -243,33 +227,6 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 		[folders]
 	);
 
-	const thumbnailStatCards = useMemo(
-		() => [
-			{
-				label: 'Total Miniaturas',
-				value: thumbnailStats?.total || 0,
-				icon: <Image className="h-5 w-5" />,
-				color: 'var(--entity-image)',
-				subtitle: thumbnailStats?.totalSize ? formatBytes(thumbnailStats.totalSize) : '0 B',
-			},
-			{
-				label: 'Pendientes',
-				value: thumbnailStats?.pending || 0,
-				icon: <AlertCircle className="h-5 w-5" />,
-				color: 'var(--warning)',
-				subtitle: 'Por generar',
-			},
-			{
-				label: 'Errores',
-				value: thumbnailStats?.errors || 0,
-				icon: <AlertCircle className="h-5 w-5" />,
-				color: 'var(--destructive)',
-				subtitle: thumbnailStats?.errors ? 'Requieren atención' : 'Todo correcto',
-			},
-		],
-		[thumbnailStats]
-	);
-
 	const totalFiles = useMemo(
 		() =>
 			folders.reduce(
@@ -305,33 +262,6 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 		},
 		[reindexFolderMutation]
 	);
-
-	const handleOptimizeThumbnails = useCallback(async () => {
-		try {
-			await optimizeMutation.mutateAsync({});
-			toastService.success('Miniaturas optimizadas');
-		} catch (err) {
-			toastService.error('Error al optimizar miniaturas');
-		}
-	}, [optimizeMutation]);
-
-	const handleReprocessThumbnails = useCallback(async () => {
-		try {
-			await reprocessMutation.mutateAsync({});
-			toastService.success('Reprocesando miniaturas');
-		} catch (err) {
-			toastService.error('Error al reprocesar miniaturas');
-		}
-	}, [reprocessMutation]);
-
-	const handleCleanThumbnails = useCallback(async () => {
-		try {
-			await cleanMutation.mutateAsync({});
-			toastService.success('Miniaturas huérfanas eliminadas');
-		} catch (err) {
-			toastService.error('Error al limpiar miniaturas');
-		}
-	}, [cleanMutation]);
 
 	const handleQualityChange = useCallback(
 		async (quality: ThumbnailQuality) => {
@@ -566,110 +496,69 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 					</TabsContent>
 
 					<TabsContent className="m-0 space-y-6" value="thumbnails">
-						{/* Stats */}
-						<SettingsStatsGrid className="2xl:grid-cols-3">
-							{thumbnailStatCards.map((stat) => (
-								<Card
-									className="border-l-4"
-									key={stat.label}
-									style={{ borderLeftColor: `color-mix(in oklch, ${stat.color} 60%, transparent)` }}
-								>
-									<CardContent className="p-4">
-										<div className="flex items-center justify-between">
-											<div>
-												<p className="font-medium text-muted-foreground text-sm">{stat.label}</p>
-												<p className="font-bold text-2xl">{stat.value}</p>
-												{stat.subtitle && <p className="text-muted-foreground text-sm">{stat.subtitle}</p>}
-											</div>
-											<div
-												className="flex h-10 w-10 items-center justify-center rounded-lg"
-												style={{ backgroundColor: `color-mix(in oklch, ${stat.color} 12%, transparent)` }}
-											>
-												<div style={{ color: stat.color }}>{stat.icon}</div>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
-							))}
-						</SettingsStatsGrid>
+						<Card className="border-l-4" style={{ borderLeftColor: 'var(--entity-image)' }}>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2 text-lg">
+									<Image className="h-5 w-5" />
+									Procesamiento por carpeta
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+								<p className="max-w-2xl text-muted-foreground text-sm">
+									Las miniaturas se generan durante el reindexado de cada carpeta autorizada. Las estadísticas y el
+									mantenimiento se consultan dentro de esa biblioteca.
+								</p>
+								<Button className="shrink-0" onClick={() => setActiveTab('folders')} variant="outline">
+									<Folder className="mr-2 h-4 w-4" />
+									Ver carpetas autorizadas
+								</Button>
+							</CardContent>
+						</Card>
 
-						{/* Quality Settings */}
-						<div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-							<Card>
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2 text-lg">
-										<Image className="h-5 w-5" />
-										Configuración de Miniaturas
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="space-y-6">
-									<div className="flex items-center justify-between">
-										<div>
-											<p className="font-medium">Calidad de miniaturas</p>
-											<p className="text-muted-foreground text-sm">Balance entre calidad visual y espacio en disco</p>
-										</div>
-										<Select
-											onValueChange={(v) => handleQualityChange(v as ThumbnailQuality)}
-											value={settings?.thumbnailQuality || ThumbnailQuality.MEDIUM}
-										>
-											<SelectTrigger className="w-50">
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value={ThumbnailQuality.LOW}>Baja (rápido)</SelectItem>
-												<SelectItem value={ThumbnailQuality.MEDIUM}>Media (recomendado)</SelectItem>
-												<SelectItem value={ThumbnailQuality.HIGH}>Alta (calidad)</SelectItem>
-											</SelectContent>
-										</Select>
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2 text-lg">
+									<Image className="h-5 w-5" />
+									Configuración de Miniaturas
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-6">
+								<div className="flex items-center justify-between">
+									<div>
+										<p className="font-medium">Calidad de miniaturas</p>
+										<p className="text-muted-foreground text-sm">Balance entre calidad visual y espacio en disco</p>
 									</div>
+									<Select
+										onValueChange={(v) => handleQualityChange(v as ThumbnailQuality)}
+										value={settings?.thumbnailQuality || ThumbnailQuality.MEDIUM}
+									>
+										<SelectTrigger className="w-50">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value={ThumbnailQuality.LOW}>Baja (rápido)</SelectItem>
+											<SelectItem value={ThumbnailQuality.MEDIUM}>Media (recomendado)</SelectItem>
+											<SelectItem value={ThumbnailQuality.HIGH}>Alta (calidad)</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
 
-									<Separator />
+								<Separator />
 
-									<div className="flex items-center justify-between">
-										<div>
-											<p className="font-medium">Animación en videos</p>
-											<p className="text-muted-foreground text-sm">Mostrar preview animado al pasar el cursor</p>
-										</div>
-										<Switch
-											checked={settings?.videoThumbnailAnimation ?? true}
-											onCheckedChange={async (checked) => {
-												await updateSettings({ videoThumbnailAnimation: checked });
-											}}
-										/>
+								<div className="flex items-center justify-between">
+									<div>
+										<p className="font-medium">Animación en videos</p>
+										<p className="text-muted-foreground text-sm">Mostrar preview animado al pasar el cursor</p>
 									</div>
-								</CardContent>
-							</Card>
-
-							{/* Maintenance */}
-							<Card>
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2 text-lg">
-										<Zap className="h-5 w-5" />
-										Mantenimiento
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<div className="flex flex-wrap gap-2">
-										<Button className="gap-2" onClick={handleOptimizeThumbnails} variant="outline">
-											<Zap className="h-4 w-4" />
-											Optimizar
-										</Button>
-										<Button className="gap-2" onClick={handleReprocessThumbnails} variant="outline">
-											<RefreshCw className="h-4 w-4" />
-											Reprocesar todo
-										</Button>
-										<Button
-											className="gap-2 text-destructive hover:text-destructive"
-											onClick={handleCleanThumbnails}
-											variant="outline"
-										>
-											<Trash2 className="h-4 w-4" />
-											Limpiar huérfanas
-										</Button>
-									</div>
-								</CardContent>
-							</Card>
-						</div>
+									<Switch
+										checked={settings?.videoThumbnailAnimation ?? true}
+										onCheckedChange={async (checked) => {
+											await updateSettings({ videoThumbnailAnimation: checked });
+										}}
+									/>
+								</div>
+							</CardContent>
+						</Card>
 					</TabsContent>
 				</div>
 			</Tabs>

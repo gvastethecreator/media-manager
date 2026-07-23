@@ -1,18 +1,15 @@
-import { and, count, desc, eq, isNull, not, sum } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { existsSync } from 'fs';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
 import { thumbsConfig } from '@/config/thumbs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { db, getDbClient } from '@/lib/drizzle';
+import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import type { ThumbnailResult as LibThumbResult } from '@/lib/image/thumbnail';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
-import { thumbnailUnifiedService as baseThumbnailService } from '@/services/thumbnail/thumbnail-unified.service';
-import type { ThumbnailStats } from '@/types/stats';
-import type { LastProcessedThumbnail, ProcessOptions } from '@/types/thumbnails';
+import type { ProcessOptions } from '@/types/thumbnails';
 
 const thumbLogger = serverLogger.withContext('ThumbnailService');
 
@@ -248,137 +245,6 @@ export async function getThumbnail(
 			thumbnailUrl: '',
 			error: errorMessage,
 		};
-	}
-}
-
-export async function optimizeThumbnails(options?: ProcessOptions) {
-	try {
-		thumbLogger.info('🔄 Iniciando optimización de thumbnails');
-		return await baseThumbnailService.optimizeThumbnails(options);
-	} catch (error) {
-		thumbLogger.error('❌ Error optimizando thumbnails:', error);
-		throw error;
-	}
-}
-
-export async function reprocessThumbnails(options?: ProcessOptions) {
-	try {
-		thumbLogger.info('🔄 Iniciando reprocesamiento de thumbnails');
-		return await baseThumbnailService.reprocessAll(options);
-	} catch (error) {
-		thumbLogger.error('❌ Error reprocesando thumbnails:', error);
-		throw error;
-	}
-}
-
-export async function cleanThumbnails(options?: ProcessOptions) {
-	try {
-		thumbLogger.info('🔄 Iniciando limpieza de thumbnails');
-		return await baseThumbnailService.cleanThumbnails(options);
-	} catch (error) {
-		thumbLogger.error('❌ Error limpiando thumbnails:', error);
-		throw error;
-	}
-}
-
-export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcessedThumbnail[]> {
-	try {
-		thumbLogger.info('🔄 Obteniendo últimas miniaturas procesadas:', { limit });
-
-		const imagesData = await db.query.images.findMany({
-			where: and(not(isNull(images.thumbnail)), visibleImageLifecycleCondition()),
-			orderBy: desc(images.updatedAt),
-			limit,
-			columns: {
-				id: true,
-				path: true,
-				updatedAt: true,
-				thumbnailSize: true,
-			},
-		});
-
-		return imagesData.map((image: any) => ({
-			id: image.id,
-			path: image.path,
-			processedAt: image.updatedAt,
-			status: 'success' as const,
-		}));
-	} catch (error) {
-		thumbLogger.error('❌ Error obteniendo últimas miniaturas:', error);
-		throw error;
-	}
-}
-
-export async function getThumbnailStats(): Promise<ThumbnailStats> {
-	try {
-		thumbLogger.info('🔄 Obteniendo estadísticas de thumbnails');
-
-		// Verificar la conexión a la base de datos antes de continuar
-		try {
-			const client = getDbClient();
-			if (!client) {
-				throw new Error('Cliente de base de datos no disponible.');
-			}
-
-			// Consulta simple para verificar la conexión
-			await client.execute('SELECT 1');
-		} catch (dbError) {
-			thumbLogger.error(
-				'❌ Error de conexión a la base de datos:',
-				dbError instanceof Error ? { message: dbError.message, stack: dbError.stack } : dbError
-			);
-			throw new Error('No se pudo conectar a la base de datos. Verifica tu conexión.');
-		}
-
-		const [totalFilesResult, withThumbnailResult, pendingResult, errorsData, totalSizeResult] = await Promise.all([
-			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
-			db
-				.select({ count: count() })
-				.from(images)
-				.where(and(not(isNull(images.thumbnail)), visibleImageLifecycleCondition())),
-			db
-				.select({ count: count() })
-				.from(images)
-				.where(and(isNull(images.thumbnail), visibleImageLifecycleCondition())),
-			db.query.images.findMany({
-				where: and(not(isNull(images.thumbnailError)), visibleImageLifecycleCondition()),
-				columns: {
-					id: true,
-					path: true,
-					thumbnailError: true,
-					updatedAt: true,
-				},
-			}),
-			db
-				.select({ totalSize: sum(images.thumbnailSize) })
-				.from(images)
-				.where(and(not(isNull(images.thumbnailSize)), visibleImageLifecycleCondition())),
-		]);
-
-		const totalFiles = totalFilesResult[0].count;
-		const withThumbnail = withThumbnailResult[0].count;
-		const pending = pendingResult[0].count;
-		const errors = errorsData;
-		const totalSize = totalSizeResult[0].totalSize || 0;
-
-		return {
-			total: totalFiles,
-			processed: withThumbnail,
-			pending,
-			errors: errors.length,
-			totalFiles,
-			totalSize,
-		};
-	} catch (error) {
-		thumbLogger.error(
-			'❌ Error obteniendo estadísticas:',
-			error instanceof Error ? { message: error.message, stack: error.stack } : error
-		);
-
-		if (error instanceof Error) {
-			throw error;
-		}
-		throw new Error('Error al obtener estadísticas de miniaturas. Por favor, intenta más tarde.');
 	}
 }
 
