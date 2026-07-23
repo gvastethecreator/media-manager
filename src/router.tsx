@@ -328,6 +328,10 @@ export const router = createBrowserRouter([
 				element: <File3DView className="h-full" />,
 			},
 			{
+				path: 'file-3ds',
+				element: <File3DView className="h-full" />,
+			},
+			{
 				path: 'file3d/:id',
 				element: <File3DDetailView />,
 			},

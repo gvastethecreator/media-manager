@@ -76,6 +76,7 @@ export type ViewType =
 	| 'audio-content'
 	| 'json-files'
 	| 'json-file-content'
+	| 'file3d'
 	| 'file-3ds'
 	| 'file-3d-content'
 	| 'mixed';
