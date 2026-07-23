@@ -964,66 +964,17 @@ const MainLive = Layer.provide(VideoServiceLive, DatabaseLive.pipe(Layer.provide
 
 ---
 
-## 🔄 Batch Operations & Event-Driven Architecture
+## 🔄 Operaciones de archivos autorizadas
 
-### Batch Operations Pattern
+No existe un ejecutor local de lotes. No aceptes rutas físicas desde el cliente ni anuncies pausa, cancelación o undo
+si no controlan una mutación de servidor.
 
-The project has a comprehensive batch operations system for handling multiple file operations:
+Para mover medios, usa `POST /api/files/assets/move` con una referencia de asset y un `targetFolderId`. Cada asset se
+resuelve contra una root autorizada y su reubicación usa journal y compensación. El cliente procesa los assets en orden,
+se detiene ante el primer error y muestra el subconjunto confirmado; si hubo cambios, solicita el reindexado del destino.
 
-**Key Files**:
-
-- `src/services/file/batch-operations.service.ts` - Core batch service
-- `src/components/batch-operations/` - UI components
-
-**Service Pattern**:
-
-```typescript
-// EventEmitter-based pattern for browser compatibility
-class EventEmitter {
-	private readonly events = new Map<string, Set<BatchListener<any>>>();
-
-	on<TEvent extends BatchEvents['type']>(event, listener): this;
-	emit<TEvent>(event, payload): boolean;
-	removeListener(event, listener): this;
-}
-
-// Batch operation types
-type BatchOperationType = 'copy' | 'move' | 'delete' | 'reindex' | 'tag';
-type BatchOperationStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
-
-interface BatchOperation {
-	id: string;
-	type: BatchOperationType;
-	items: AnyEntityWithStats[];
-	status: BatchOperationStatus;
-	progress: number;
-	total: number;
-	startedAt: Date;
-	completedAt?: Date;
-	error?: string;
-}
-```
-
-**Usage Pattern**:
-
-```typescript
-// 1. Start operation
-const operationId = batchFileOperationsService.startOperation({
-	type: 'move',
-	items: selectedEntities,
-	destination: folderId,
-});
-
-// 2. Listen for progress updates
-batchFileOperationsService.on('operationProgress', (operation) => {
-	console.log(`${operation.progress}/${operation.total} completed`);
-});
-
-// 3. Pause/Resume/Cancel
-batchFileOperationsService.pauseOperation(operationId);
-batchFileOperationsService.resumeOperation(operationId);
-batchFileOperationsService.cancelOperation(operationId);
-```
+Un futuro lote debe nacer en el servidor y definir de forma explícita su semántica de cancelación, recuperación y
+resultado parcial antes de exponer controles en la interfaz.
 
 ### Progress Tracking
 
@@ -1274,71 +1225,11 @@ const stats = await mapper.processFiles(['/path/to/image1.jpg', '/path/to/video.
 
 ---
 
-## 🔄 Undo/Redo System
+## 🔄 Undo y redo
 
-### Pattern Overview
-
-The undo/redo system allows users to revert file operations like copy, move, delete, and rename.
-
-**Service**: `src/services/undo-redo/undo-redo-manager.ts`
-
-**Key Features**:
-
-- Action history with branching support
-- EventEmitter for state change notifications
-- Automatic cleanup of old actions
-- Browser-compatible implementation
-
-**Undoable Action Pattern**:
-
-```typescript
-export interface UndoableAction {
-	id: string;
-	type: UndoActionType;
-	timestamp: number;
-	description: string;
-	execute: () => Promise<void>;
-	undo: () => Promise<void>;
-	canUndo: () => boolean;
-	originalData?: any;
-	targetData?: any;
-}
-
-export type UndoActionType =
-	| 'copy'
-	| 'move'
-	| 'delete'
-	| 'rename'
-	| 'create-folder'
-	| 'paste'
-	| 'duplicate'
-	| 'add-to-collection'
-	| 'remove-from-collection'
-	| 'add-tag'
-	| 'remove-tag';
-```
-
-**Usage**:
-
-```typescript
-import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
-
-// Create and execute action
-const moveAction = undoRedoManager.createMoveAction(items, targetPath);
-await undoRedoManager.execute(moveAction);
-
-// Undo last action
-await undoRedoManager.undo();
-
-// Redo next action
-await undoRedoManager.redo();
-
-// Listen to state changes
-undoRedoManager.on('stateChanged', (state) => {
-	console.log('Can undo:', state.canUndo);
-	console.log('Can redo:', state.canRedo);
-});
-```
+No hay undo/redo de filesystem. El anterior historial local no podía garantizar que la base, el journal y los bytes
+seguían en el mismo estado, por lo que se retiró. No presentes estos controles hasta que exista una operación de servidor
+con compensación durable y una prueba de recuperación.
 
 ---
 

@@ -37,6 +37,37 @@ export interface UseMoveResult {
 	reset: () => void;
 }
 
+export async function moveAuthorizedAssets(options: MoveFilesOptions): Promise<FileMutationSummary> {
+	const { assets, targetFolderId } = options;
+	if (assets.length === 0) throw new Error('No hay archivos compatibles para mover');
+	const summary: FileMutationSummary = {
+		applied: 0,
+		cleanupPending: 0,
+		reconciliationPending: 0,
+		recoveryPending: 0,
+		total: assets.length,
+	};
+
+	try {
+		for (const asset of assets) {
+			const response = await apiClient.post<{
+				data: { moved: FileMutationItemResult[] };
+				success: true;
+			}>('/files/assets/move', { assets: [asset], targetFolderId });
+			const moved = response.data.moved[0];
+			if (!moved) throw new Error('El servidor no confirmó el asset movido.');
+			addFileMutationResult(summary, moved);
+		}
+	} catch (error) {
+		throw new PartialFileMutationError(
+			error instanceof Error ? error.message : 'No se pudieron mover todos los archivos.',
+			summary,
+			error
+		);
+	}
+	return summary;
+}
+
 /**
  * Hook para mover archivos entre carpetas
  */
@@ -45,36 +76,7 @@ export function useMove(): UseMoveResult {
 	const { toast } = useToast();
 
 	const mutation = useMutation<FileMutationSummary, Error, MoveFilesOptions>({
-		mutationFn: async (options: MoveFilesOptions) => {
-			const { assets, targetFolderId } = options;
-			if (assets.length === 0) throw new Error('No hay archivos compatibles para mover');
-			const summary: FileMutationSummary = {
-				applied: 0,
-				cleanupPending: 0,
-				reconciliationPending: 0,
-				recoveryPending: 0,
-				total: assets.length,
-			};
-
-			try {
-				for (const asset of assets) {
-					const response = await apiClient.post<{
-						data: { moved: FileMutationItemResult[] };
-						success: true;
-					}>('/files/assets/move', { assets: [asset], targetFolderId });
-					const moved = response.data.moved[0];
-					if (!moved) throw new Error('El servidor no confirmó el asset movido.');
-					addFileMutationResult(summary, moved);
-				}
-			} catch (error) {
-				throw new PartialFileMutationError(
-					error instanceof Error ? error.message : 'No se pudieron mover todos los archivos.',
-					summary,
-					error
-				);
-			}
-			return summary;
-		},
+		mutationFn: moveAuthorizedAssets,
 		onSuccess: async (summary, variables) => {
 			const { assets, targetFolderId } = variables;
 			let reindexed = true;
@@ -100,15 +102,31 @@ export function useMove(): UseMoveResult {
 						}
 			);
 		},
-		onError: (error) => {
+		onError: async (error, variables) => {
 			clientLogger.error('Error moving files:', error);
 
 			const partial = error instanceof PartialFileMutationError ? error.summary : null;
+			let reindexPending = false;
+			if (partial?.applied) {
+				try {
+					await apiClient.post(`/folders/${encodeURIComponent(variables.targetFolderId)}/reindex`);
+				} catch (reindexError) {
+					reindexPending = true;
+					clientLogger.warn('Error reindexing folder after partial move:', reindexError);
+				}
+			}
+			const reconciliation = partial ? pendingFileMutationDescription(partial) : null;
 			toast({
 				variant: 'destructive',
 				title: partial?.applied ? '⚠️ Movimiento parcialmente aplicado' : '❌ Error al mover',
 				description: partial?.applied
-					? `${partial.applied} de ${partial.total} archivos fueron movidos antes del fallo. Revisa el destino antes de reintentar.`
+					? [
+							`${partial.applied} de ${partial.total} archivos fueron movidos antes del fallo. Revisa el destino antes de reintentar.`,
+							reconciliation,
+							reindexPending ? 'La reindexación del destino quedó pendiente.' : null,
+						]
+							.filter(Boolean)
+							.join(' ')
 					: error.message,
 			});
 		},
