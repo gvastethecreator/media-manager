@@ -1,8 +1,7 @@
-import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PanelImperativeHandle } from 'react-resizable-panels';
 import { Outlet, useLocation, useParams } from 'react-router-dom';
 import { SkipLinks } from '@/components/a11y/skip-links';
-import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { GlobalReindexTerminal } from '@/components/settings/folders/global-reindex-terminal';
 import { NavPanel } from '@/components/navigation/navigation-panel';
 import { DetailsPanelTransition, NavPanelTransition } from '@/components/panels/panel-transitions';
@@ -17,7 +16,24 @@ import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFolderStore } from '@/store/entities/folder';
 import { useImageStore } from '@/store/entities/image';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useUIStore } from '@/store/ui.store';
+
+const LazyFileViewer = lazy(() =>
+	import('@/components/features/file-viewer/file-viewer').then((module) => ({ default: module.FileViewer }))
+);
+
+const DeferredFileViewer = memo(function DeferredFileViewer() {
+	const isOpen = useFileViewerStore((state) => state.isOpen);
+
+	if (!isOpen) return null;
+
+	return (
+		<Suspense fallback={null}>
+			<LazyFileViewer />
+		</Suspense>
+	);
+});
 
 const MainLayoutComponent = memo(function MainLayoutImpl() {
 	const location = useLocation();
@@ -325,8 +341,8 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 				)}
 			</ResizablePanelGroup>
 
-			{/* FileViewer global - modal overlay */}
-			<FileViewer />
+			{/* Se carga recién al abrirlo para no arrastrar renderizadores pesados al arranque. */}
+			<DeferredFileViewer />
 			<GlobalReindexTerminal />
 		</div>
 	);
