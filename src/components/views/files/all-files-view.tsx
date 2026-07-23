@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { toFileViewerItem } from '@/components/features/file-viewer/file-viewer-item';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
 import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -10,7 +11,6 @@ import { useFile3DStore } from '@/store/entities/file-3d';
 import { useImageStore } from '@/store/entities/image';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import { useVideoStore } from '@/store/entities/video';
-import { useImageViewer } from '@/store/image-viewer.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { isImageWithStats, isVideoWithStats } from '@/types/entity-guards';
@@ -168,7 +168,6 @@ export function AllFilesView(_: ViewProps) {
 		fetchFile3Ds,
 	]);
 
-	const { openViewer: openImageViewer } = useImageViewer();
 	const { openViewer: openFileViewer } = useFileViewerStore();
 
 	const handleFileClick = useCallback(
@@ -211,12 +210,14 @@ export function AllFilesView(_: ViewProps) {
 			viewLogger.info('🔍 Debug - isImageWithStats:', isImageWithStats(entity));
 			viewLogger.info('🔍 Debug - isVideoWithStats:', isVideoWithStats(entity));
 
-			// Manejar imágenes con el image viewer
+			// Las imágenes usan el visor global igual que el resto de media.
 			if (isImageWithStats(entity)) {
-				viewLogger.info('📸 Abriendo imagen en image viewer');
-				const imageEntities = allFiles.filter((item) => isImageWithStats(item));
-				const currentIndex = imageEntities.findIndex((img) => img.id === entity.id);
-				openImageViewer(imageEntities, currentIndex);
+				viewLogger.info('📸 Abriendo imagen en file viewer');
+				const imageItems = allFiles
+					.filter((item) => isImageWithStats(item))
+					.map((image) => toFileViewerItem(image as unknown as Record<string, unknown>, 'image'));
+				const currentIndex = imageItems.findIndex((item) => item.id === entity.id);
+				openFileViewer(imageItems, Math.max(0, currentIndex));
 				return;
 			}
 
@@ -246,7 +247,7 @@ export function AllFilesView(_: ViewProps) {
 			viewLogger.info('📁 Tipo de archivo no soportado, navegando');
 			handleFileClick(file);
 		},
-		[allFiles, openImageViewer, openFileViewer, handleFileClick]
+		[allFiles, openFileViewer, handleFileClick]
 	);
 
 	if (isLoading && allFiles.length === 0) {

@@ -1,12 +1,13 @@
 import { ArrowLeft, Download, Heart, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toFileViewerItem } from '@/components/features/file-viewer/file-viewer-item';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { useFavorite } from '@/hooks/use-favorite';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
-import { useImageViewer } from '@/store/image-viewer.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { ImageWithStats } from '@/types/entities/image';
 
 const viewLogger = clientLogger.withContext('ImageDetailView');
@@ -24,8 +25,12 @@ export function ImageDetailView() {
 
 	// Store actions
 	const { getImage, fetchImage, updateImage } = useImageStore();
-	const { openViewer } = useImageViewer();
-	const { isFavorite, isLoading: isFavoriteLoading, toggleFavorite } = useFavorite({
+	const { openViewer } = useFileViewerStore();
+	const {
+		isFavorite,
+		isLoading: isFavoriteLoading,
+		toggleFavorite,
+	} = useFavorite({
 		entityId: image?.id ?? id ?? '',
 		entityType: 'image',
 		initialIsFavorite: image?.isFavorite ?? false,
@@ -76,8 +81,7 @@ export function ImageDetailView() {
 	// Abrir en visor de imágenes
 	const handleOpenViewer = () => {
 		if (image) {
-			// Pasar la imagen como EntityWithStats
-			openViewer([image], 0);
+			openViewer([toFileViewerItem(image as unknown as Record<string, unknown>, 'image')], 0);
 		}
 	};
 
