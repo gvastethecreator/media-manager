@@ -257,7 +257,7 @@ export function MediaSettingsModern() {
 									className="rounded-none border-transparent border-b-2 px-0 py-2 data-[state=active]:border-primary data-[state=active]:shadow-none"
 									value="uploaded"
 								>
-									Imágenes Subidas
+									Cargas directas retiradas
 								</TabsTrigger>
 							</TabsList>
 							<div className="mt-6">

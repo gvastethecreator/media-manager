@@ -1,7 +1,7 @@
 /**
  * @file File Services Errors implementado con Effect
  * @module services/file/file-services-errors.effect
- * @description Errores para File3D, Document, JsonFile, UploadedImages
+ * @description Errores para File3D, Document y JsonFile
  * @created 2025-10-11 - Fase 10 Effect Implementation
  */
 
@@ -105,39 +105,3 @@ export const fromUnknownJsonFileError = (operation: string, error: unknown): Jso
 };
 
 export type JsonFileError = JsonFileNotFound | JsonFileValidationError | JsonFileDatabaseError;
-
-// ============= UploadedImages Errors =============
-
-export class UploadedImagesErrorNotFound extends Data.TaggedError('UploadedImagesErrorNotFound')<{
-	readonly imageId: string;
-}> {
-	readonly displayMessage = `UploadedImage not found: ${this.imageId}`;
-}
-
-export class UploadedImagesErrorValidationError extends Data.TaggedError('UploadedImagesErrorValidationError')<{
-	readonly field: string;
-	readonly message: string;
-}> {
-	readonly displayMessage = `UploadedImage validation failed: ${this.message}`;
-}
-
-export class UploadedImagesErrorDatabaseError extends Data.TaggedError('UploadedImagesErrorDatabaseError')<{
-	readonly operation: string;
-	readonly message: string;
-}> {
-	readonly displayMessage = `Database error: ${this.message}`;
-}
-
-export const fromUnknownUploadedImagesError = (operation: string, error: unknown): UploadedImagesError => {
-	if (error instanceof Error) {
-		const msg = error.message.toLowerCase();
-		if (msg.includes('not found')) return new UploadedImagesErrorNotFound({ imageId: 'unknown' });
-		return new UploadedImagesErrorDatabaseError({ operation, message: error.message });
-	}
-	return new UploadedImagesErrorDatabaseError({ operation, message: String(error) });
-};
-
-export type UploadedImagesError =
-	| UploadedImagesErrorNotFound
-	| UploadedImagesErrorValidationError
-	| UploadedImagesErrorDatabaseError;
