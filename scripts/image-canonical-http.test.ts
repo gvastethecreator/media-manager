@@ -13,6 +13,7 @@ import thumbnailsRouter from '../src/server/routes/thumbnails.effect';
 import thumbnailsUnifiedRouter from '../src/server/routes/thumbnails-unified';
 import { createAuthorizedRootRegistry } from '../src/server/security/authorized-roots';
 import { syncCanonicalMediaRoots } from '../src/services/media-core/media-root-registry.service';
+import { thumbnailService } from '../src/services/image/image-thumbnail.service';
 
 const temporaryDirectories: string[] = [];
 const createdFolderIds: string[] = [];
@@ -131,6 +132,33 @@ describe('canonical Image HTTP create', () => {
 		expect(unavailableThumbnail.headers['cache-control']).toBe('private, no-store');
 		expect(unavailableThumbnail.headers.vary).toContain('Cookie');
 		expect(unavailableThumbnail.headers['x-content-type-options']).toBe('nosniff');
+		const sharp = (await import('sharp')).default;
+		const canonicalImage = await sharp({
+			create: { background: { b: 0, g: 0, r: 255 }, channels: 3, height: 2, width: 2 },
+		})
+			.png()
+			.toBuffer();
+		const outsideImagePath = resolve(directory, 'outside-authorized-root.png');
+		const outsideImage = await sharp({
+			create: { background: { b: 255, g: 0, r: 0 }, channels: 3, height: 2, width: 2 },
+		})
+			.png()
+			.toBuffer();
+		await writeFile(resolve(rootPath, 'photo.jpg'), canonicalImage);
+		await writeFile(outsideImagePath, outsideImage);
+		await db.update(images).set({ path: outsideImagePath }).where(eq(images.id, response.body.id));
+		await thumbnailService.generateThumbnail(response.body.id, resolve(rootPath, 'photo.jpg'));
+		const [canonicalThumbnail] = await db
+			.select({ thumbnail: images.thumbnail })
+			.from(images)
+			.where(eq(images.id, response.body.id));
+		const rawCanonicalThumbnail = await sharp(Buffer.from(canonicalThumbnail.thumbnail!, 'base64')).raw().toBuffer();
+		expect(rawCanonicalThumbnail[0]).toBeGreaterThan(200);
+		expect(rawCanonicalThumbnail[2]).toBeLessThan(40);
+		await db
+			.update(images)
+			.set({ path: resolve(rootPath, 'photo.jpg') })
+			.where(eq(images.id, response.body.id));
 		await db
 			.update(images)
 			.set({ thumbnail: 'thumbnail-data', thumbnailHeight: 1, thumbnailSize: 14, thumbnailWidth: 1 })
