@@ -65,13 +65,17 @@ async function authorizeThumbnailAsset(
 function sendThumbnailResult(result: any, res: express.Response, entityType: string, id: string): void {
 	if (result.success && result.data) {
 		res.setHeader('Content-Type', result.mimeType || 'image/webp');
-		res.setHeader('Cache-Control', 'public, max-age=31536000');
+		res.setHeader('Cache-Control', 'private, max-age=0, must-revalidate');
+		res.setHeader('Vary', 'Cookie');
+		res.setHeader('X-Content-Type-Options', 'nosniff');
 		res.setHeader('X-Thumbnail-Generated', result.generated ? 'true' : 'false');
-		res.end(result.data);
+		res.send(result.data);
 	} else {
 		const placeholder = generatePlaceholderSVG(entityType, id);
 		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=60');
+		res.setHeader('Cache-Control', 'private, no-store');
+		res.setHeader('Vary', 'Cookie');
+		res.setHeader('X-Content-Type-Options', 'nosniff');
 		res.status(404).send(placeholder);
 	}
 }
