@@ -1,5 +1,6 @@
 import { Files, Folder, FolderOpen, Image as ImageIcon } from 'lucide-react';
 import { memo, useMemo } from 'react';
+import { normalizeSafePreviewImageUrl } from '@/lib/media/preview-url';
 import { cn } from '@/lib/utils';
 import type { BrowserItem } from '../types/item.types';
 
@@ -23,30 +24,13 @@ const PREVIEW_TRANSFORMS = {
 	],
 } as const;
 
-function normalizePreviewUrl(raw: unknown): string | null {
-	if (typeof raw !== 'string') {
-		return null;
-	}
-
-	const trimmed = raw.trim();
-	if (!trimmed) {
-		return null;
-	}
-
-	if (trimmed.startsWith('data:') || /^(https?:|blob:|file:|\/)/i.test(trimmed)) {
-		return trimmed;
-	}
-
-	return `data:image/webp;base64,${trimmed.replace(/\s+/g, '')}`;
-}
-
 function extractPreviewImages(item: BrowserItem) {
 	const raw = item.raw as { recentImages?: BrowserItem['recentImages'] } | undefined;
 	const candidates = item.recentImages ?? raw?.recentImages ?? [];
 	const previews = candidates
 		.map((image, index) => ({
 			id: image?.id ?? `folder-preview-${index}`,
-			url: normalizePreviewUrl(image?.thumbnailUrl ?? image?.thumbnail),
+			url: normalizeSafePreviewImageUrl(image?.thumbnailUrl ?? image?.thumbnail),
 		}))
 		.filter((image): image is { id: string; url: string } => image.url !== null)
 		.slice(0, PREVIEW_TRANSFORMS.default.length);
@@ -55,7 +39,7 @@ function extractPreviewImages(item: BrowserItem) {
 		return previews;
 	}
 
-	const fallback = normalizePreviewUrl(item.thumbnailUrl);
+	const fallback = normalizeSafePreviewImageUrl(item.thumbnailUrl);
 	if (!fallback) {
 		return [];
 	}

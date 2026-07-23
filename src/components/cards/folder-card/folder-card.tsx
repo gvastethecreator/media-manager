@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { normalizeSafePreviewImageUrl } from '@/lib/media/preview-url';
 import { cn } from '@/lib/utils';
 import type { FolderWithStats } from '@/types/entities/folder';
 import { FolderCardContent } from './folder-card-content';
@@ -41,21 +42,12 @@ export const FolderCard = memo(
 				},
 				totalFiles: folder.stats?.totalItems ?? folder.totalFiles ?? 0,
 				totalSize: folder.stats?.totalSize ?? folder.totalSize ?? 0,
-				// Normalizamos thumbnails: aceptar `thumbnailUrl` (que puede venir con base64 crudo)
-				// o `thumbnail` y convertir a data URL si es necesario
+				featuredImage: normalizeSafePreviewImageUrl(folder.featuredImage),
+				// Sólo se cargan previews locales autorizados o datos ráster; los enlaces heredados quedan fuera del browser.
 				recentImageUrls: (folder.recentImages || [])
-					.map((img: any) => {
-						const raw: unknown = img?.thumbnailUrl ?? img?.thumbnail ?? null;
-						if (typeof raw !== 'string' || raw.length === 0) return null;
-						const trimmed = raw.trim();
-						// Si ya es data URL, devolver tal cual
-						if (trimmed.startsWith('data:')) return trimmed;
-						// Si parece una URL/route (http(s), blob:, file:, /), dejarla como está
-						if (/^(https?:|blob:|file:|\/)/i.test(trimmed)) return trimmed;
-						// Caso contrario, asumimos base64 crudo (posible con saltos de línea) → data URL webp
-						const base64 = trimmed.replace(/\s+/g, '');
-						return `data:image/webp;base64,${base64}`;
-					})
+					.map((image: { thumbnail?: unknown; thumbnailUrl?: unknown }) =>
+						normalizeSafePreviewImageUrl(image.thumbnailUrl ?? image.thumbnail)
+					)
 					.filter(Boolean) as string[],
 				childrenCount: folder.stats?.folderCount ?? 0,
 				lastIndexed: folder.lastIndexed ?? null,
