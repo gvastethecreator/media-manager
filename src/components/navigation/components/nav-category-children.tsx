@@ -1,33 +1,27 @@
 import { memo } from 'react';
-import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import type { ViewMode } from '@/store/ui.store';
 import type { CategoryChild } from '../types';
 import { FolderTreeView } from './folder-tree-view';
 
 interface NavCategoryChildrenProps {
 	categoryId: string;
-	currentView: string;
+	getItemHref?: (item: CategoryChild) => string;
 	isCollapsed: boolean;
 	items: CategoryChild[];
-	onItemClick: (id: string) => void;
-	onToggleViewMode?: (mode: ViewMode) => void;
-	selectedChildId: string | null;
 }
 
 const NavCategoryChildrenComponent = memo(function NavCategoryChildrenImpl({
 	categoryId,
+	getItemHref,
 	isCollapsed,
-	selectedChildId,
-	currentView: _currentView,
 	items,
-	onItemClick,
 }: NavCategoryChildrenProps) {
 	// Para la categoría de carpetas, usar FolderTreeView
 	if (categoryId === 'folders') {
 		return (
-			<div className="px-1">
-				<FolderTreeView className="text-[11px]" isCollapsed={isCollapsed} selectedFolderId={selectedChildId} />
+			<div className="min-w-0 px-1">
+				<FolderTreeView className="text-[11px]" isCollapsed={isCollapsed} selectedFolderId={null} />
 			</div>
 		);
 	}
@@ -40,14 +34,13 @@ const NavCategoryChildrenComponent = memo(function NavCategoryChildrenImpl({
 	return (
 		<div className="flex flex-col gap-0">
 			{items.map((item) => (
-				<Button
+				<Link
 					className={cn(
 						'flex w-full items-center justify-between rounded px-2 py-0.5 text-xs hover:bg-secondary/30',
-						selectedChildId === item.id && 'bg-secondary/50'
+						'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1'
 					)}
 					key={item.id}
-					onClick={() => onItemClick(item.id)}
-					variant="ghost"
+					to={getItemHref?.(item) ?? `/${categoryId}/${encodeURIComponent(item.id)}`}
 				>
 					<span className="flex items-center">
 						{item.emoji && <span className="mr-1">{item.emoji}</span>}
@@ -58,7 +51,7 @@ const NavCategoryChildrenComponent = memo(function NavCategoryChildrenImpl({
 							{item.itemCount || item._count?.images || 0}
 						</span>
 					)}
-				</Button>
+				</Link>
 			))}
 		</div>
 	);
