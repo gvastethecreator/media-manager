@@ -426,10 +426,10 @@ router.delete(
 router.post(
 	'/:id/thumbnail/generate',
 	authorizeMediaAssetParam({ assetType: 'image', permissions: ['read', 'index'] }),
-	effectHandler((req) =>
+	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const imageService = yield* ImageService;
-			yield* imageService.generateThumbnail(req.params.id);
+			yield* imageService.generateThumbnail(req.params.id, res.locals.authorizedAssetPath);
 			return { success: true, message: 'Thumbnail generated' };
 		}).pipe(Effect.provide(ImageServiceLive))
 	)
@@ -444,7 +444,7 @@ router.get(
 	async (req, res) => {
 		const effect = Effect.gen(function* () {
 			const imageService = yield* ImageService;
-			const buffer = yield* imageService.getThumbnail(req.params.id);
+			const buffer = yield* imageService.getThumbnail(req.params.id, res.locals.authorizedAssetPath);
 			return buffer;
 		}).pipe(Effect.provide(ImageServiceLive));
 

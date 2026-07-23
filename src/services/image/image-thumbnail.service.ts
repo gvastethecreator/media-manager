@@ -57,7 +57,7 @@ class ThumbnailService {
 	 * @param imageId - ID de la imagen
 	 * @throws ServiceError si falla la generación
 	 */
-	async generateThumbnail(imageId: string): Promise<void> {
+	async generateThumbnail(imageId: string, authorizedSourcePath?: string): Promise<void> {
 		// Logging defensivo para diagnosticar posibles caídas en reindex masivo
 		const startHr = process.hrtime.bigint();
 		const memBefore = process.memoryUsage();
@@ -76,50 +76,52 @@ class ThumbnailService {
 				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
 			}
 
+			const sourcePath = authorizedSourcePath || image.path;
+
 			// Protección contra rutas corruptas o demasiado largas
-			if (!image.path || image.path.length > 1024) {
-				const errorMsg = `Ruta de archivo inválida o demasiado larga: ${image.path ? `${image.path.substring(0, 50)}...` : 'null'}`;
+			if (!sourcePath || sourcePath.length > 1024) {
+				const errorMsg = `Ruta de archivo inválida o demasiado larga: ${sourcePath ? `${sourcePath.substring(0, 50)}...` : 'null'}`;
 				thumbnailLogger.error(`[thumbnail] ❌ ${errorMsg}`);
-				throw createFileNotFoundError(image.path || 'unknown', { imageId, error: errorMsg }, SERVICE_NAME);
+				throw createFileNotFoundError(sourcePath || 'unknown', { imageId, error: errorMsg }, SERVICE_NAME);
 			}
 
 			// Verificar existencia y permisos del archivo
 			try {
-				await fs.access(image.path, fs.constants.R_OK);
+				await fs.access(sourcePath, fs.constants.R_OK);
 			} catch (permError: any) {
 				const code = permError?.code;
 				if (code === 'ENOENT' || code === 'ENOTDIR') {
-					thumbnailLogger.error('[thumbnail] Archivo no encontrado:', { path: image.path, code });
-					throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
+					thumbnailLogger.error('[thumbnail] Archivo no encontrado:', { path: sourcePath, code });
+					throw createFileNotFoundError(sourcePath, { imageId }, SERVICE_NAME);
 				}
 				if (code === 'EACCES' || code === 'EPERM') {
 					thumbnailLogger.error('[thumbnail] Permiso denegado al leer:', {
-						path: image.path,
+						path: sourcePath,
 						code,
 						message: permError.message,
 					});
 					throw toServiceError(permError, {
 						code: ServiceErrorCode.FILE_ACCESS_DENIED,
-						message: `Permiso denegado: ${image.path}`,
+						message: `Permiso denegado: ${sourcePath}`,
 						serviceName: SERVICE_NAME,
-						context: { imageId, path: image.path },
+						context: { imageId, path: sourcePath },
 					});
 				}
 				thumbnailLogger.error('[thumbnail] Error comprobando acceso:', {
-					path: image.path,
+					path: sourcePath,
 					code,
 					message: permError instanceof Error ? permError.message : String(permError),
 				});
 				throw toServiceError(permError, {
 					code: ServiceErrorCode.FILE_READ_ERROR,
-					message: `No se pudo acceder al archivo: ${image.path}`,
+					message: `No se pudo acceder al archivo: ${sourcePath}`,
 					serviceName: SERVICE_NAME,
-					context: { imageId, path: image.path },
+					context: { imageId, path: sourcePath },
 				});
 			}
 
 			// Procesar la imagen para crear el thumbnail (primero en WebP)
-			let { buffer, metadata } = await processImage(image.path, THUMBNAIL_CONFIG);
+			let { buffer, metadata } = await processImage(sourcePath, THUMBNAIL_CONFIG);
 
 			// Si el resultado supera el tope, recomprimir con ajustes más fuertes
 			let mime = 'image/webp';
@@ -138,7 +140,7 @@ class ThumbnailService {
 					mime = 'image/webp';
 				} catch {
 					// Intento 2: JPEG como fallback
-					const jpegRetry = await sharp(image.path)
+					const jpegRetry = await sharp(sourcePath)
 						.resize(THUMBNAIL_CONFIG.width, THUMBNAIL_CONFIG.height, {
 							fit: THUMBNAIL_CONFIG.fit || 'cover',
 							withoutEnlargement: true,
@@ -256,7 +258,11 @@ class ThumbnailService {
 	 * @returns Buffer del thumbnail
 	 * @throws ServiceError si no se puede obtener el thumbnail
 	 */
-	async getThumbnail(imageId: string, getImage: (id: string) => Promise<ImageWithStats | null>): Promise<Buffer> {
+	async getThumbnail(
+		imageId: string,
+		getImage: (id: string) => Promise<ImageWithStats | null>,
+		authorizedSourcePath?: string
+	): Promise<Buffer> {
 		try {
 			const image = await getImage(imageId);
 			if (!image) {
@@ -272,7 +278,7 @@ class ThumbnailService {
 					return buf;
 				} catch (_e) {
 					// Thumbnail corrupto o no válido: regenerar
-					await this.generateThumbnail(imageId);
+					await this.generateThumbnail(imageId, authorizedSourcePath);
 					const refreshed = await getImage(imageId);
 					if (refreshed?.thumbnail) {
 						return Buffer.from(refreshed.thumbnail, 'base64');
@@ -285,7 +291,7 @@ class ThumbnailService {
 				}
 			}
 
-			await this.generateThumbnail(imageId);
+			await this.generateThumbnail(imageId, authorizedSourcePath);
 			const updatedImage = await getImage(imageId);
 			if (!updatedImage?.thumbnail) {
 				throw createFileNotFoundError(

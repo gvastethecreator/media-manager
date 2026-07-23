@@ -1218,7 +1218,10 @@ export const countByFolder = (folderId: string): Effect.Effect<number, ImageErro
  * - ImageThumbnailError: Thumbnail generation failed
  * - ImageDatabaseError: Database operation failed
  */
-export const generateThumbnail = (imageId: string): Effect.Effect<void, ImageError, never> =>
+export const generateThumbnail = (
+	imageId: string,
+	authorizedSourcePath?: string
+): Effect.Effect<void, ImageError, never> =>
 	Effect.gen(function* () {
 		logger.info('🖼️ Generating thumbnail', { imageId });
 
@@ -1228,7 +1231,7 @@ export const generateThumbnail = (imageId: string): Effect.Effect<void, ImageErr
 		// Generate thumbnail using legacy service
 		yield* Effect.tryPromise({
 			try: async () => {
-				await thumbnailService.generateThumbnail(imageId);
+				await thumbnailService.generateThumbnail(imageId, authorizedSourcePath);
 			},
 			catch: (error) =>
 				new ImageThumbnailError({
@@ -1250,7 +1253,10 @@ export const generateThumbnail = (imageId: string): Effect.Effect<void, ImageErr
  * - ImageThumbnailError: Thumbnail retrieval/generation failed
  * - ImageDatabaseError: Database operation failed
  */
-export const getThumbnail = (imageId: string): Effect.Effect<Buffer, ImageError, never> =>
+export const getThumbnail = (
+	imageId: string,
+	authorizedSourcePath?: string
+): Effect.Effect<Buffer, ImageError, never> =>
 	Effect.gen(function* () {
 		logger.debug('📥 Getting thumbnail', { imageId });
 
@@ -1264,7 +1270,7 @@ export const getThumbnail = (imageId: string): Effect.Effect<Buffer, ImageError,
 
 		const buffer = yield* Effect.tryPromise({
 			try: async () => {
-				return await thumbnailService.getThumbnail(imageId, getImageById as any);
+				return await thumbnailService.getThumbnail(imageId, getImageById as any, authorizedSourcePath);
 			},
 			catch: (error) =>
 				new ImageThumbnailError({
@@ -1344,7 +1350,10 @@ export interface ImageServiceInterface {
 		ids: string[],
 		options?: { force?: boolean }
 	) => Effect.Effect<{ deletedCount: number }, ImageError, never>;
-	readonly generateThumbnail: (imageId: string) => Effect.Effect<void, ImageError, never>;
+	readonly generateThumbnail: (
+		imageId: string,
+		authorizedSourcePath?: string
+	) => Effect.Effect<void, ImageError, never>;
 	readonly getAll: (options?: {
 		limit?: number;
 		offset?: number;
@@ -1385,7 +1394,7 @@ export interface ImageServiceInterface {
 	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Image, ImageError, never>;
 	readonly getOriginalImage: (imageId: string) => Effect.Effect<Buffer, ImageError, never>;
 	readonly restoreById: (id: string) => Effect.Effect<Image, ImageError, never>;
-	readonly getThumbnail: (imageId: string) => Effect.Effect<Buffer, ImageError, never>;
+	readonly getThumbnail: (imageId: string, authorizedSourcePath?: string) => Effect.Effect<Buffer, ImageError, never>;
 	readonly setFavoriteMany: (
 		ids: string[],
 		isFavorite: boolean
