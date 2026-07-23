@@ -166,6 +166,10 @@ Esta wave bloquea todo cambio de schema, dominio o release.
       worker y el visor PDF.
 - [x] Retirar 50 MB global: JSON limitado a 4 MiB, URL-encoded a 64 KiB y respuestas 413 seguras para cuerpos
       excesivos. El broker aplica el mismo techo y el listener limita cabeceras y tiempos.
+- [x] Restringir previews de carpeta a thumbnails locales con rutas exactas y data URLs ráster. El SVG de fallback
+      vuelve a autorizar cada activo, cuenta sólo activos autorizados, valida el formato desde sus bytes y limita la
+      media inline a 512 KiB por thumbnail y 1 MiB total. No emite rutas anidadas; Chromium verificó la tarjeta con
+      un thumbnail autorizado en un root temporal.
 - [ ] Definir excepciones por ruta sólo si un flujo futuro demuestra que 4 MiB no basta.
 - [ ] Rate limits diferenciados o concurrency limits para operaciones costosas.
 - [ ] Timeouts/abort para downloads, scans y metadata.

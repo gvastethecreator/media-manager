@@ -23,12 +23,12 @@ import { RootAuthorizationError } from '@/server/security/authorized-roots';
 import { sanitizeJsonResponses } from '@/server/security/sanitize-public-payload';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FolderService, FolderServiceLive } from '@/services/folder/folder.service.effect';
+import { embedFolderPreviewMedia } from '@/services/folder/folder-preview-media.service';
 import { FolderReindexService } from '@/services/folder/reindex/folder-reindex.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 import {
 	buildFolderPreviewSvg,
-	escapeXml,
 	extractRecentPreviews,
 	formatBytes,
 	sanitizePreviewCount,
@@ -95,6 +95,7 @@ interface FolderFileRecord {
 	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
 	id: string;
 	path: string;
+	size?: number;
 }
 
 interface FolderFilesResult {
@@ -126,20 +127,13 @@ type FolderFilesGetter = (opts: {
 	sortOrder?: 'asc' | 'desc';
 }) => Promise<FolderFilesResult>;
 
-type FolderFileStatsGetter = (
-	folderId: string,
-	includeSubfolders?: boolean
-) => Promise<FolderFileCounts & { total: number; totalSize: number }>;
-
 let getFolderFiles: FolderFilesGetter | undefined;
-let getFolderFileStats: FolderFileStatsGetter | undefined;
 
 // Cargar módulos de archivos dinámicamente
 const loadFolderFilesServices = async () => {
 	if (!getFolderFiles) {
 		const module = await import('@/services/folder-files/folder-files.service');
 		getFolderFiles = module.getFolderFiles;
-		getFolderFileStats = module.getFolderFileStats;
 	}
 };
 
@@ -147,11 +141,12 @@ async function getAuthorizedFolderFiles(
 	request: { app: { locals: Record<string, unknown> } },
 	options: Parameters<FolderFilesGetter>[0],
 	page: { limit: number; offset: number }
-): Promise<{ counts: FolderFileCounts; result: FolderFilesResult }> {
+): Promise<{ counts: FolderFileCounts; result: FolderFilesResult; totalSize: number }> {
 	const startedAt = Date.now();
 	const authorizedFiles: FolderFileRecord[] = [];
 	let processedRecords = 0;
 	let rawOffset = 0;
+	let totalSize = 0;
 	const chunkSize = 500;
 
 	while (true) {
@@ -159,6 +154,10 @@ async function getAuthorizedFolderFiles(
 		processedRecords += chunk.files.length;
 		const authorizedChunk = await filterAuthorizedMixedMediaEntities(request, chunk.files, ['read', 'index']);
 		authorizedFiles.push(...authorizedChunk);
+		for (const file of authorizedChunk) {
+			const size = file.size;
+			if (typeof size === 'number' && Number.isFinite(size) && size > 0) totalSize += size;
+		}
 		rawOffset += chunk.files.length;
 		if (chunk.files.length === 0 || rawOffset >= chunk.total) break;
 	}
@@ -188,7 +187,46 @@ async function getAuthorizedFolderFiles(
 			performance: { processedRecords, queryTime: Date.now() - startedAt },
 			total,
 		},
+		totalSize,
 	};
+}
+
+async function getAuthorizedFolderPreviewData(
+	request: { app: { locals: Record<string, unknown> } },
+	folderId: string,
+	max: number
+): Promise<{ previewFiles: FolderFileRecord[]; total: number; totalSize: number }> {
+	const previewFiles: FolderFileRecord[] = [];
+	let rawOffset = 0;
+	let total = 0;
+	let totalSize = 0;
+	const chunkSize = 500;
+
+	while (true) {
+		const chunk = await getFolderFiles!({
+			folderId,
+			includeSubfolders: true,
+			limit: chunkSize,
+			offset: rawOffset,
+			sortBy: 'updatedAt',
+			sortOrder: 'desc',
+		});
+		const authorizedChunk = await filterAuthorizedMixedMediaEntities(request, chunk.files, ['read', 'index']);
+
+		for (const file of authorizedChunk) {
+			total += 1;
+			const size = file.size;
+			if (typeof size === 'number' && Number.isFinite(size) && size > 0) totalSize += size;
+			if (previewFiles.length < max && (file.entityType === 'image' || file.entityType === 'video')) {
+				previewFiles.push(file);
+			}
+		}
+
+		rawOffset += chunk.files.length;
+		if (chunk.files.length === 0 || rawOffset >= chunk.total) break;
+	}
+
+	return { previewFiles, total, totalSize };
 }
 
 /**
@@ -327,7 +365,6 @@ router.get(
 					getEntityById: (entityId: string) => folderService.getById(entityId),
 				});
 
-				const baseUrl = `${req.protocol}://${req.get('host') ?? 'localhost:4000'}`;
 				const foldersWithRecentImages = yield* Effect.all(
 					favoriteResult.data.map((folder) =>
 						Effect.tryPromise({
@@ -344,7 +381,10 @@ router.get(
 
 								return {
 									...folder,
-									recentImages: extractRecentPreviews(previewPayload, baseUrl, 4),
+									recentImages: extractRecentPreviews(
+										{ files: await filterAuthorizedMixedMediaEntities(req, previewPayload.files, ['read', 'index']) },
+										4
+									),
 								};
 							},
 							catch: () => ({
@@ -372,7 +412,6 @@ router.get(
 			}
 
 			const result = yield* folderService.getAll(options);
-			const baseUrl = `${req.protocol}://${req.get('host') ?? 'localhost:4000'}`;
 			const foldersWithRecentImages = yield* Effect.all(
 				result.folders.map((folder) =>
 					Effect.tryPromise({
@@ -389,7 +428,10 @@ router.get(
 
 							return {
 								...folder,
-								recentImages: extractRecentPreviews(previewPayload, baseUrl, 4),
+								recentImages: extractRecentPreviews(
+									{ files: await filterAuthorizedMixedMediaEntities(req, previewPayload.files, ['read', 'index']) },
+									4
+								),
 							};
 						},
 						catch: () => ({
@@ -452,39 +494,32 @@ router.get(
 
 				const folderService = yield* FolderService;
 				const folder = yield* folderService.getById(req.params.id);
-				const baseUrl = `${req.protocol}://${req.get('host') ?? 'localhost:4000'}`;
 				const max = sanitizePreviewCount(req.query.max);
-				const previewFilesResult = yield* Effect.tryPromise({
+				const previewData = yield* Effect.tryPromise({
 					try: () =>
-						getFolderFiles!({
-							folderId: req.params.id,
-							includeSubfolders: true,
-							limit: max,
-							offset: 0,
-							sortBy: 'updatedAt',
-							sortOrder: 'desc',
-							fileTypes: ['image', 'video'],
-						}),
-					catch: (err) => new Error(`Failed to fetch folder preview files: ${String(err)}`),
+						getAuthorizedFolderPreviewData(req, req.params.id, max),
+					catch: (err) => new Error(`Failed to fetch authorized folder preview data: ${String(err)}`),
 				});
-				const previewStats = yield* Effect.tryPromise({
-					try: () => getFolderFileStats!(req.params.id, true),
-					catch: (err) => new Error(`Failed to fetch folder preview stats: ${String(err)}`),
+
+				const previewFiles = normalizePreviewFiles({ files: previewData.previewFiles }, max);
+				const embeddedPreviewFiles = yield* Effect.tryPromise({
+					try: () => embedFolderPreviewMedia(previewFiles),
+					catch: (err) => new Error(`Failed to embed folder preview media: ${String(err)}`),
 				});
 
 				return {
 					folder,
-					previewFiles: normalizePreviewFiles(previewFilesResult, baseUrl, max),
-					previewStats,
+					previewFiles: embeddedPreviewFiles,
+					previewStats: { total: previewData.total, totalSize: previewData.totalSize },
 				};
 			}).pipe(Effect.provide(FolderServiceLive)),
 		{
 			onSuccess: ({ folder, previewFiles, previewStats }, res) => {
-				const name = escapeXml(folder.name || 'Carpeta');
+				const name = folder.name || 'Carpeta';
 				const authorizedReference = res.locals.authorizedRootReference as
 					| { relativePath: string; rootId: string }
 					| undefined;
-				const path = escapeXml(authorizedReference?.relativePath || '/');
+				const path = authorizedReference?.relativePath || '/';
 				const totalFiles = previewStats.total;
 				const totalSize = formatBytes(previewStats.totalSize);
 				const svg = buildFolderPreviewSvg({
@@ -492,11 +527,11 @@ router.get(
 					name,
 					path,
 					totalFiles,
-					totalSize: escapeXml(totalSize),
+					totalSize,
 				});
 
 				res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
-				res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+				res.setHeader('Content-Security-Policy', "default-src 'none'; img-src data:; style-src 'unsafe-inline'");
 				setAuthorizedAssetCacheHeaders(res, 'revalidate');
 				res.status(200).send(svg);
 			},
