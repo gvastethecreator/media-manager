@@ -5,29 +5,16 @@
  * @created 2026-02-02 - Migración desde thumbnails.ts
  */
 
-import { and, desc, isNotNull } from 'drizzle-orm';
 import { Context, Data, Effect, Layer } from 'effect';
 import express from 'express';
-import { db } from '@/lib/drizzle';
-import { images } from '@/lib/drizzle/schema/index';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { authorizeMediaAssetParam, getAuthorizedRootRegistry } from '@/server/security/authorized-root-request';
 import { parseMediaAssetReference, resolveMediaAssetReference } from '@/server/security/media-asset-reference';
 import { sanitizePublicPayload } from '@/server/security/sanitize-public-payload';
 import { thumbnailEventService as baseThumbnailService } from '@/services/thumbnail/thumbnail-events.service';
-import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail/types';
-import {
-	bulkGenerateThumbnails,
-	cleanThumbnails,
-	deleteThumbnail,
-	getThumbnail,
-	getThumbnailStats,
-	optimizeThumbnails,
-	reprocessThumbnails,
-} from '../services/thumbnail.service';
-import { sanitizeLimit } from '../utils/pagination';
+import { bulkGenerateThumbnails, deleteThumbnail, getThumbnail } from '../services/thumbnail.service';
 
 // ==========================================
 // 1. Definir errores tipados
@@ -59,16 +46,11 @@ export interface ThumbnailServiceInterface {
 		imageIds: string[],
 		options: Record<string, unknown>
 	) => Effect.Effect<unknown, BatchSizeExceeded | ThumbnailGenerationFailed>;
-	readonly cleanThumbnails: (options: Record<string, unknown>) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
 	readonly deleteThumbnail: (imageId: string) => Effect.Effect<unknown, ThumbnailNotFound | ThumbnailGenerationFailed>;
-	readonly getLastProcessed: (limit: number) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
 	readonly getThumbnail: (
 		imageId: string,
 		quality: string
 	) => Effect.Effect<unknown, ThumbnailNotFound | ThumbnailGenerationFailed>;
-	readonly getThumbnailStats: () => Effect.Effect<unknown, ThumbnailGenerationFailed>;
-	readonly optimizeThumbnails: (options: Record<string, unknown>) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
-	readonly reprocessThumbnails: (options: Record<string, unknown>) => Effect.Effect<unknown, ThumbnailGenerationFailed>;
 }
 
 export class ThumbnailService extends Context.Tag('ThumbnailService')<ThumbnailService, ThumbnailServiceInterface>() {}
@@ -89,18 +71,6 @@ export const ThumbnailServiceLive = Layer.succeed(
 				catch: (error) =>
 					new ThumbnailGenerationFailed({
 						imageId,
-						message: error instanceof Error ? error.message : 'Error desconocido',
-					}),
-			}),
-
-		getThumbnailStats: () =>
-			Effect.tryPromise({
-				try: async () => {
-					return await getThumbnailStats();
-				},
-				catch: (error) =>
-					new ThumbnailGenerationFailed({
-						imageId: 'stats',
 						message: error instanceof Error ? error.message : 'Error desconocido',
 					}),
 			}),
@@ -188,68 +158,6 @@ export const ThumbnailServiceLive = Layer.succeed(
 						message: error instanceof Error ? error.message : 'Error desconocido',
 					}),
 			}),
-
-		cleanThumbnails: (options: Record<string, unknown>) =>
-			Effect.tryPromise({
-				try: async () => {
-					return await cleanThumbnails(options);
-				},
-				catch: (error) =>
-					new ThumbnailGenerationFailed({
-						imageId: 'cleanup',
-						message: error instanceof Error ? error.message : 'Error desconocido',
-					}),
-			}),
-
-		optimizeThumbnails: (options: Record<string, unknown>) =>
-			Effect.tryPromise({
-				try: async () => {
-					return await optimizeThumbnails(options);
-				},
-				catch: (error) =>
-					new ThumbnailGenerationFailed({
-						imageId: 'optimize',
-						message: error instanceof Error ? error.message : 'Error desconocido',
-					}),
-			}),
-
-		reprocessThumbnails: (options: Record<string, unknown>) =>
-			Effect.tryPromise({
-				try: async () => {
-					return await reprocessThumbnails(options);
-				},
-				catch: (error) =>
-					new ThumbnailGenerationFailed({
-						imageId: 'reprocess',
-						message: error instanceof Error ? error.message : 'Error desconocido',
-					}),
-			}),
-
-		getLastProcessed: (limit: number) =>
-			Effect.tryPromise({
-				try: async () => {
-					const recentThumbnails = await db.query.images.findMany({
-						columns: { id: true, updatedAt: true },
-						where: and(
-							isNotNull(images.thumbnailWidth),
-							isNotNull(images.thumbnailHeight),
-							visibleImageLifecycleCondition()
-						),
-						orderBy: desc(images.updatedAt),
-						limit,
-					});
-
-					return recentThumbnails.map((img: { id: string; updatedAt: Date }) => ({
-						id: img.id,
-						processedAt: img.updatedAt.toISOString(),
-					}));
-				},
-				catch: (error) =>
-					new ThumbnailGenerationFailed({
-						imageId: 'last-processed',
-						message: error instanceof Error ? error.message : 'Error desconocido',
-					}),
-			}),
 	})
 );
 
@@ -294,13 +202,10 @@ router.get(
 /**
  * GET /thumbnails/stats - Obtener estadísticas de thumbnails
  */
-router.get(
-	'/stats',
-	effectHandler((_req) =>
-		Effect.gen(function* () {
-			const service = yield* ThumbnailService;
-			return yield* service.getThumbnailStats();
-		}).pipe(Effect.provide(ThumbnailServiceLive))
+router.get('/stats', (_req, res) =>
+	sendRootScopedOperationRequired(
+		res,
+		'Las estadísticas globales no están disponibles hasta que pueda limitarse a un media root autorizado.'
 	)
 );
 
@@ -398,50 +303,49 @@ router.delete(
  * POST /thumbnails/clean - Limpiar thumbnails huérfanos
  */
 router.post('/clean', (_req, res) => {
-	res.status(410).json({
-		code: 'ROOT_SCOPED_OPERATION_REQUIRED',
-		message: 'La limpieza global no está disponible hasta que pueda limitarse a un media root autorizado.',
-		retryable: false,
-	});
+	sendRootScopedOperationRequired(
+		res,
+		'La limpieza global no está disponible hasta que pueda limitarse a un media root autorizado.'
+	);
 });
 
 /**
  * POST /thumbnails/optimize - Optimizar thumbnails
  */
 router.post('/optimize', (_req, res) => {
-	res.status(410).json({
-		code: 'ROOT_SCOPED_OPERATION_REQUIRED',
-		message: 'La optimización global no está disponible hasta que pueda limitarse a un media root autorizado.',
-		retryable: false,
-	});
+	sendRootScopedOperationRequired(
+		res,
+		'La optimización global no está disponible hasta que pueda limitarse a un media root autorizado.'
+	);
 });
 
 /**
  * POST /thumbnails/reprocess - Reprocesar thumbnails
  */
 router.post('/reprocess', (_req, res) => {
-	res.status(410).json({
-		code: 'ROOT_SCOPED_OPERATION_REQUIRED',
-		message: 'El reprocesado global no está disponible hasta que pueda limitarse a un media root autorizado.',
-		retryable: false,
-	});
+	sendRootScopedOperationRequired(
+		res,
+		'El reprocesado global no está disponible hasta que pueda limitarse a un media root autorizado.'
+	);
 });
 
 /**
  * GET /thumbnails/last-processed - Obtener thumbnails procesados recientemente
  */
-router.get(
-	'/last-processed',
-	effectHandler((req) =>
-		Effect.gen(function* () {
-			const { limit = '9' } = req.query;
-			const limitNum = sanitizeLimit(limit, 9, 100);
-
-			const service = yield* ThumbnailService;
-			return yield* service.getLastProcessed(limitNum);
-		}).pipe(Effect.provide(ThumbnailServiceLive))
+router.get('/last-processed', (_req, res) =>
+	sendRootScopedOperationRequired(
+		res,
+		'El historial global no está disponible hasta que pueda limitarse a un media root autorizado.'
 	)
 );
+
+function sendRootScopedOperationRequired(res: express.Response, message: string): void {
+	res.status(410).json({
+		code: 'ROOT_SCOPED_OPERATION_REQUIRED',
+		message,
+		retryable: false,
+	});
+}
 
 /**
  * GET /thumbnails/events - Eventos SSE de procesamiento
