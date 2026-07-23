@@ -12,6 +12,7 @@ import {
 	Grid3X3,
 	HardDrive,
 	Image,
+	Info,
 	List,
 	Plus,
 	RefreshCw,
@@ -25,18 +26,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-	useCreateFolder,
-	useDeleteFolder,
-	useFolders,
-	useReindexAllFolders,
-	useReindexFolder,
-} from '@/lib/api/folders';
+import { useCreateFolder, useDeleteFolder, useFolders, useReindexFolder } from '@/lib/api/folders';
 import {
 	useCleanThumbnails,
 	useLastProcessedThumbnails,
@@ -52,8 +54,6 @@ import { formatBytes } from '@/lib/utils/format.utils';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { CardActions } from '../common/entity-settings-view';
 import { FolderForm } from '../folders/folders-form';
-import { StructuredReindexConfig } from '../folders/folders-reindex-config';
-import { useReindexConfig } from '../folders/hooks/use-reindex-config';
 import { useReindexStore } from '@/store/reindex.store';
 
 import { SettingsPageHeader, SettingsStatsGrid } from './settings-card';
@@ -83,13 +83,35 @@ function FolderCard({
 						<Folder className="h-6 w-6 text-primary" />
 					</div>
 					<div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-						<Button className="h-8 w-8" onClick={actions.onEdit} size="icon" variant="ghost">
+						<Button
+							aria-label={`Editar ${folder.name}`}
+							className="h-8 w-8"
+							onClick={actions.onEdit}
+							size="icon"
+							title={`Editar ${folder.name}`}
+							variant="ghost"
+						>
 							<Settings2 className="h-4 w-4" />
 						</Button>
-						<Button className="h-8 w-8" disabled={isReindexing} onClick={onReindex} size="icon" variant="ghost">
+						<Button
+							aria-label={`Reindexar ${folder.name}`}
+							className="h-8 w-8"
+							disabled={isReindexing}
+							onClick={onReindex}
+							size="icon"
+							title={`Reindexar ${folder.name}`}
+							variant="ghost"
+						>
 							{isReindexing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
 						</Button>
-						<Button className="h-8 w-8 text-destructive" onClick={actions.onDelete} size="icon" variant="ghost">
+						<Button
+							aria-label={`Eliminar ${folder.name}`}
+							className="h-8 w-8 text-destructive"
+							onClick={actions.onDelete}
+							size="icon"
+							title={`Eliminar ${folder.name}`}
+							variant="ghost"
+						>
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					</div>
@@ -132,7 +154,7 @@ function FolderCard({
 					<RefreshCw className={cn('h-3 w-3', isReindexing && 'animate-spin')} />
 					{isReindexing ? 'Reindexando...' : 'Reindexar'}
 				</Button>
-				<Button onClick={actions.onDelete} size="sm" variant="ghost">
+				<Button aria-label={`Eliminar ${folder.name}`} onClick={actions.onDelete} size="sm" variant="ghost">
 					<Trash2 className="h-4 w-4" />
 				</Button>
 			</div>
@@ -156,23 +178,11 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [searchQuery, setSearchQuery] = useState('');
 	const [showFolderForm, setShowFolderForm] = useState(false);
+	const [showReindexInfo, setShowReindexInfo] = useState(false);
 	const [editingFolder, setEditingFolder] = useState<FolderWithStats | null>(null);
 	const [reindexingFolderId, setReindexingFolderId] = useState<string | null>(null);
 
 	const { settings, updateSettings } = useSettings();
-
-	// Advanced Reindex Config Hook
-	const {
-		showAdvancedConfig,
-		useStructuredFlow,
-		skipThumbnails,
-		skipMetadata,
-		setShowAdvancedConfig,
-		setUseStructuredFlow,
-		setSkipThumbnails,
-		setSkipMetadata,
-		getConfig,
-	} = useReindexConfig();
 
 	// Hooks de datos
 	const foldersQuery = useFolders({ search: searchQuery });
@@ -183,7 +193,6 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 	const createFolderMutation = useCreateFolder();
 	const deleteFolderMutation = useDeleteFolder();
 	const reindexFolderMutation = useReindexFolder();
-	const reindexAllFoldersMutation = useReindexAllFolders();
 	const optimizeMutation = useOptimizeThumbnails();
 	const reprocessMutation = useReprocessThumbnails();
 	const cleanMutation = useCleanThumbnails();
@@ -285,13 +294,8 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 		async (folderId: string) => {
 			setReindexingFolderId(folderId);
 			try {
-				// Use advanced config
-				const config = getConfig();
 				useReindexStore.getState().setOpen(true);
-				await reindexFolderMutation.mutateAsync({
-					id: folderId,
-					options: config,
-				});
+				await reindexFolderMutation.mutateAsync({ id: folderId });
 				toastService.success('Carpeta reindexada correctamente');
 			} catch (err) {
 				toastService.error('Error al reindexar carpeta');
@@ -299,7 +303,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 				setReindexingFolderId(null);
 			}
 		},
-		[reindexFolderMutation, getConfig]
+		[reindexFolderMutation]
 	);
 
 	const handleOptimizeThumbnails = useCallback(async () => {
@@ -425,6 +429,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 							<div className="flex flex-wrap items-center gap-2 xl:justify-end">
 								<div className="flex items-center rounded-lg border p-0.5">
 									<Button
+										aria-label="Usar vista de cuadrícula"
 										className="h-8 w-8 p-0"
 										onClick={() => setViewMode('grid')}
 										size="sm"
@@ -433,6 +438,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 										<Grid3X3 className="h-4 w-4" />
 									</Button>
 									<Button
+										aria-label="Usar vista de lista"
 										className="h-8 w-8 p-0"
 										onClick={() => setViewMode('list')}
 										size="sm"
@@ -442,14 +448,40 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									</Button>
 								</div>
 
-								<Button
-									onClick={() => setShowAdvancedConfig(true)}
-									size="icon"
-									title="Configuración Avanzada de Reindexado"
-									variant="outline"
-								>
-									<Settings2 className="h-4 w-4" />
-								</Button>
+								<Dialog onOpenChange={setShowReindexInfo} open={showReindexInfo}>
+									<DialogTrigger asChild>
+										<Button size="sm" variant="outline">
+											<Info className="mr-2 h-4 w-4" />
+											Proceso de reindexado
+										</Button>
+									</DialogTrigger>
+									<DialogContent className="sm:max-w-150">
+										<DialogHeader>
+											<DialogTitle>Proceso de reindexado</DialogTitle>
+											<DialogDescription>
+												Cada reindexación se ejecuta sobre una carpeta autorizada y completa todas las fases necesarias.
+											</DialogDescription>
+										</DialogHeader>
+										<ol className="grid gap-2 text-sm sm:grid-cols-2" id="canonical-reindex-phases">
+											<li className="rounded-dt-sm border border-border/50 bg-muted/30 p-3">
+												1. Analiza y verifica archivos.
+											</li>
+											<li className="rounded-dt-sm border border-border/50 bg-muted/30 p-3">
+												2. Sincroniza estructura e índice.
+											</li>
+											<li className="rounded-dt-sm border border-border/50 bg-muted/30 p-3">
+												3. Genera miniaturas necesarias.
+											</li>
+											<li className="rounded-dt-sm border border-border/50 bg-muted/30 p-3">
+												4. Extrae metadata y valida el resultado.
+											</li>
+										</ol>
+										<p className="text-muted-foreground text-sm">
+											Usa Reindexar en la carpeta que quieras actualizar. No hay un atajo global porque cada ejecución
+											requiere autorización de su carpeta.
+										</p>
+									</DialogContent>
+								</Dialog>
 
 								<Button className="gap-2" onClick={handleCreateFolder}>
 									<Plus className="h-4 w-4" />
@@ -457,6 +489,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 								</Button>
 
 								<Button
+									aria-label="Abrir terminal de reindexado"
 									onClick={() => useReindexStore.getState().setOpen(true)}
 									size="icon"
 									title="Ver Terminal"
@@ -464,25 +497,13 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 								>
 									<Terminal className="h-4 w-4" />
 								</Button>
-								<Button
-									className="gap-2"
-									data-testid="reindex-all-button"
-									disabled={reindexAllFoldersMutation.isPending}
-									onClick={async () => {
-										try {
-											const config = getConfig();
-											useReindexStore.getState().setOpen(true);
-											await reindexAllFoldersMutation.mutateAsync(config);
-											toastService.success('Reindexación global iniciada');
-										} catch (err) {
-											toastService.error('Error al iniciar reindexación global');
-										}
-									}}
-									variant="default"
+								<p
+									className="flex items-center gap-2 px-2 text-muted-foreground text-sm"
+									data-testid="reindex-all-guidance"
 								>
-									<RefreshCw className={cn('h-4 w-4', reindexAllFoldersMutation.isPending && 'animate-spin')} />
-									{reindexAllFoldersMutation.isPending ? 'Reindexando...' : 'Reindexar Todo'}
-								</Button>
+									<RefreshCw aria-hidden="true" className="h-4 w-4" />
+									Reindexa cada carpeta desde su acción.
+								</p>
 							</div>
 						</div>
 
@@ -675,18 +696,6 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 					/>
 				</DialogContent>
 			</Dialog>
-
-			{/* Advanced Reindex Config Dialog */}
-			<StructuredReindexConfig
-				isOpen={showAdvancedConfig}
-				onSkipMetadataChange={setSkipMetadata}
-				onSkipThumbnailsChange={setSkipThumbnails}
-				onToggle={() => setShowAdvancedConfig(!showAdvancedConfig)}
-				onUseStructuredFlowChange={setUseStructuredFlow}
-				skipMetadata={skipMetadata}
-				skipThumbnails={skipThumbnails}
-				useStructuredFlow={useStructuredFlow}
-			/>
 		</div>
 	);
 }
