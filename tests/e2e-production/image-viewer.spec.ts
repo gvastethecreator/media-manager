@@ -94,6 +94,11 @@ async function openImageViewer(
 	return { contentResponse: await contentResponse, dialog };
 }
 
+async function expectGlobalImageViewer(dialog: Locator, image: EntityResponse) {
+	await expect(dialog).toBeVisible();
+	await expectImageReady(dialog.locator(`img[src*="/api/images/${image.id}/content"]`));
+}
+
 test('abre una imagen desde la biblioteca en el visor global y conserva la entrega autorizada', async ({
 	page,
 	request,
@@ -107,12 +112,91 @@ test('abre una imagen desde la biblioteca en el visor global y conserva la entre
 
 	expect(contentResponse.status()).toBe(200);
 	const displayedImage = dialog.locator(`img[src*="/api/images/${image.id}/content"]`);
-	await expectImageReady(displayedImage);
+	await expectGlobalImageViewer(dialog, image);
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('image-viewer-desktop.png') });
 	await page.setViewportSize({ height: 768, width: 1024 });
 	expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
 	await expectImageReady(displayedImage);
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('image-viewer-compact.png') });
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
+	expect(runtime.pageErrors).toEqual([]);
+	expect(runtime.clientErrors).toEqual([]);
+	expect(runtime.consoleErrors).toEqual([]);
+	expect(runtime.serverErrors).toEqual([]);
+});
+
+test('abre el visor global desde el detalle de una imagen', async ({ page, request }, testInfo) => {
+	const mediaRoot = process.env.MEDIA_MANAGER_SMOKE_ROOT_PATH;
+	if (!mediaRoot) throw new Error('MEDIA_MANAGER_SMOKE_ROOT_PATH es obligatorio para el smoke del visor de imágenes.');
+	const runtime = trackRuntimeProblems(page);
+	const fileName = 'imagen-desde-detalle.png';
+	const { image } = await createImageFixture(request, mediaRoot, fileName);
+
+	await page.goto(`/images/${image.id}`, { waitUntil: 'domcontentloaded' });
+	await expectImageReady(page.getByRole('img', { name: fileName }));
+	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('image-detail-preview.png') });
+	const openViewerButton = page.getByRole('button', { exact: true, name: 'Visor' });
+	await expect(openViewerButton).toBeVisible();
+	await openViewerButton.click();
+	const dialog = page.getByRole('dialog');
+	await expectGlobalImageViewer(dialog, image);
+	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('image-viewer-detail.png') });
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
+	expect(runtime.pageErrors).toEqual([]);
+	expect(runtime.clientErrors).toEqual([]);
+	expect(runtime.consoleErrors).toEqual([]);
+	expect(runtime.serverErrors).toEqual([]);
+});
+
+test('abre el visor global desde un resultado de búsqueda de imagen', async ({ page, request }, testInfo) => {
+	const mediaRoot = process.env.MEDIA_MANAGER_SMOKE_ROOT_PATH;
+	if (!mediaRoot) throw new Error('MEDIA_MANAGER_SMOKE_ROOT_PATH es obligatorio para el smoke del visor de imágenes.');
+	const runtime = trackRuntimeProblems(page);
+	const fileName = 'imagen-desde-búsqueda.png';
+	const { image } = await createImageFixture(request, mediaRoot, fileName);
+
+	await page.goto('/search', { waitUntil: 'domcontentloaded' });
+	await page.getByPlaceholder('Buscar imágenes, videos, audios, documentos...').fill(fileName);
+	const item = page.locator(`[data-item-id="${image.id}"]`);
+	await expect(item).toBeVisible({ timeout: 30_000 });
+	const contentResponse = page.waitForResponse(
+		(response) =>
+			response.request().method() === 'GET' && new URL(response.url()).pathname === `/api/images/${image.id}/content`
+	);
+	await item.dblclick();
+	expect((await contentResponse).status()).toBe(200);
+	const dialog = page.getByRole('dialog');
+	await expectGlobalImageViewer(dialog, image);
+	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('image-viewer-search.png') });
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
+	expect(runtime.pageErrors).toEqual([]);
+	expect(runtime.clientErrors).toEqual([]);
+	expect(runtime.consoleErrors).toEqual([]);
+	expect(runtime.serverErrors).toEqual([]);
+});
+
+test('abre el visor global desde la vista de archivos', async ({ page, request }, testInfo) => {
+	const mediaRoot = process.env.MEDIA_MANAGER_SMOKE_ROOT_PATH;
+	if (!mediaRoot) throw new Error('MEDIA_MANAGER_SMOKE_ROOT_PATH es obligatorio para el smoke del visor de imágenes.');
+	const runtime = trackRuntimeProblems(page);
+	const fileName = 'imagen-desde-archivos.png';
+	const { image } = await createImageFixture(request, mediaRoot, fileName);
+
+	await page.goto('/files', { waitUntil: 'domcontentloaded' });
+	const item = page.locator(`[data-item-id="${image.id}"]`);
+	await expect(item).toBeVisible({ timeout: 30_000 });
+	const contentResponse = page.waitForResponse(
+		(response) =>
+			response.request().method() === 'GET' && new URL(response.url()).pathname === `/api/images/${image.id}/content`
+	);
+	await item.dblclick();
+	expect((await contentResponse).status()).toBe(200);
+	const dialog = page.getByRole('dialog');
+	await expectGlobalImageViewer(dialog, image);
+	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('image-viewer-files.png') });
 	await page.keyboard.press('Escape');
 	await expect(dialog).toBeHidden();
 	expect(runtime.pageErrors).toEqual([]);
@@ -146,7 +230,12 @@ test('informa una fuente de imagen ausente sin dejar un visor vacío', async ({ 
 	await expect(dialog).toBeHidden();
 	expect(runtime.pageErrors).toEqual([]);
 	expect(runtime.clientErrors).not.toEqual([]);
-	expect(runtime.clientErrors.every((message) => message.includes(`/api/images/${image.id}/content`))).toBe(true);
+	const expectedMissingImageEndpoints = [`/api/images/${image.id}/thumbnail`, `/api/images/${image.id}/content`];
+	expect(
+		runtime.clientErrors.every((message) =>
+			expectedMissingImageEndpoints.some((endpoint) => message.includes(endpoint))
+		)
+	).toBe(true);
 	expect(runtime.consoleErrors.every((message) => message.includes('Failed to load resource'))).toBe(true);
 	expect(runtime.serverErrors).toEqual([]);
 });
