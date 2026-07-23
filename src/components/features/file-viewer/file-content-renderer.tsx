@@ -122,9 +122,15 @@ function VideoRendererBase({ item, contentUrl, onError, onLoad, transformStyle, 
 }
 
 function AudioRendererBase({ item, contentUrl, className }: FileContentRendererProps) {
+	const duration = typeof item.duration === 'number' && Number.isFinite(item.duration) ? item.duration : undefined;
+
 	return (
 		<div className={cn('relative h-full w-full', className)} data-no-drag>
-			<EnhancedAudioViewer audioUrl={contentUrl} fileName={item.name} />
+			<EnhancedAudioViewer
+				audioUrl={contentUrl}
+				fileName={item.name}
+				metadata={duration === undefined ? null : { duration }}
+			/>
 		</div>
 	);
 }

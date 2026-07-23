@@ -189,6 +189,34 @@ export function WaveformVisualizer({
 		onPositionClick(Math.max(0, Math.min(100, percent)));
 	};
 
+	const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
+		if (!onPositionClick) return;
+		const step = event.shiftKey ? 10 : 5;
+		let nextProgress: number | null = null;
+
+		switch (event.key) {
+			case 'ArrowLeft':
+			case 'ArrowDown':
+				nextProgress = progress - step;
+				break;
+			case 'ArrowRight':
+			case 'ArrowUp':
+				nextProgress = progress + step;
+				break;
+			case 'Home':
+				nextProgress = 0;
+				break;
+			case 'End':
+				nextProgress = 100;
+				break;
+			default:
+				return;
+		}
+
+		event.preventDefault();
+		onPositionClick(Math.max(0, Math.min(100, nextProgress)));
+	};
+
 	if (isLoading) {
 		return (
 			<div className={cn('flex items-center justify-center rounded-lg bg-muted', className)} style={{ height }}>
@@ -210,10 +238,17 @@ export function WaveformVisualizer({
 
 	return (
 		<canvas
+			aria-label="Forma de onda y posición de reproducción"
+			aria-valuemax={100}
+			aria-valuemin={0}
+			aria-valuenow={Math.round(progress)}
 			className={cn('w-full cursor-pointer rounded-lg bg-muted/50 transition-colors hover:bg-muted', className)}
 			onClick={handleClick}
+			onKeyDown={handleKeyDown}
 			ref={canvasRef}
+			role="slider"
 			style={{ height }}
+			tabIndex={0}
 			title="Clic para saltar a esa posición"
 		/>
 	);
