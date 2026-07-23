@@ -87,8 +87,10 @@ aislamiento suficiente.
 
 ### PERF-001 — Eliminar payload estático huérfano
 
-- [ ] Confirmar consumidores y licencia/provenance de 3.054 PNG.
-- [ ] Si no se usan, quitar del build y considerar limpieza Git/LFS separada.
+- [x] Confirmar consumidores y licencia/provenance de 3.054 PNG: no queda caller de runtime; los formularios usan
+  `emoji-picker-react` y Unicode.
+- [x] Si no se usan, quitar del build y considerar limpieza Git/LFS separada: `public/emojis` ya no existe ni está
+  versionado, y `dist/client/emojis` no aparece tras un build de producción.
 - [ ] Si se usan, catálogo on-demand/cache fuera del bundle.
 - [ ] Budget de `public` y dist en CI.
 
@@ -101,11 +103,19 @@ aislamiento suficiente.
 
 ### PERF-003 — Bundle y carga UI
 
-- [ ] Analizar main/settings/three/CSS top chunks.
-- [ ] Split por ruta/capability; Three/viewers sólo al abrir.
-- [ ] Evitar imports dinámicos anulados por imports estáticos.
+- [x] Analizar main/settings/three/CSS top chunks: la política de chunks convertía Three, PDF, Monaco y React Flow
+  en preloads de `index.html`, aunque sus rutas eran diferidas.
+- [x] Split por ruta/capability; Three/viewers sólo al abrir: el visor global se importa al abrirlo y sus
+  renderizadores siguen la misma frontera.
+- [x] Evitar imports dinámicos anulados por imports estáticos: la política manual conserva sólo dependencias base;
+  el HTML inicial ya no precarga Three, PDF, editor ni diagramas.
 - [ ] Tree-shake icon packs/editors/dev tools.
 - [ ] Budgets iniciales basados en baseline mejorado y reducción incremental.
+
+Evidencia de 2026-07-23: `bun run build:vite` pasó; el artefacto resultante no contiene
+`dist/client/emojis`, ni enlaces iniciales a los cuatro renderizadores pesados. El smoke de producción del visor de
+imágenes pasó con la carga diferida. Queda pendiente medir arranque y red con un runtime de producción trazable, y
+definir budgets que se puedan exigir en CI.
 
 ### PERF-004 — Colecciones grandes
 
