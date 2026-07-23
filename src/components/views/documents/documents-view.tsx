@@ -101,8 +101,7 @@ export default function DocumentsView(_props: ViewProps) {
 						file={{
 							id: selectedDocument.id,
 							name: selectedDocument.name,
-							content: selectedDocument.content,
-							url: selectedDocument.url || `/api/documents/${selectedDocument.id}/content`,
+							url: `/api/documents/${selectedDocument.id}/content`,
 						}}
 						isOpen={codeViewerOpen}
 						onOpenChange={setCodeViewerOpen}
@@ -112,7 +111,7 @@ export default function DocumentsView(_props: ViewProps) {
 							id: selectedDocument.id,
 							name: selectedDocument.name,
 							downloadUrl: `/api/documents/${selectedDocument.id}/download`,
-							url: selectedDocument.url || `/api/documents/${selectedDocument.id}/content`,
+							url: `/api/documents/${selectedDocument.id}/content`,
 						}}
 						isOpen={pdfViewerOpen}
 						onOpenChange={setPdfViewerOpen}

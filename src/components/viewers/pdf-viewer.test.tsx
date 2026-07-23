@@ -34,6 +34,11 @@ describe('PdfViewer', () => {
 
 		expect(screen.getByText('Cargando...')).toBeInTheDocument();
 		expect(screen.getByTestId('pdf-document')).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: 'Descargar' })).toHaveAttribute(
+			'href',
+			'/api/documents/document-1/content'
+		);
+		expect(screen.getByRole('link', { name: 'Descargar' })).toHaveAttribute('download', 'example.pdf');
 		fireEvent.click(screen.getByRole('button', { name: 'Completar carga' }));
 
 		await waitFor(() => expect(screen.getByText('Página 1 de 2')).toBeInTheDocument());
