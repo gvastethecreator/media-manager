@@ -53,13 +53,10 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 						</div>
 						<DialogTitle className="truncate font-medium text-sm">{file.name}</DialogTitle>
 					</div>
-					<Button
-						className="h-7 gap-1.5 text-xs"
-						onClick={() => window.open(file.downloadUrl || file.url, '_blank')}
-						size="sm"
-						variant="outline"
-					>
-						<Download className="h-3.5 w-3.5" /> Descargar
+					<Button asChild className="h-7 gap-1.5 text-xs" size="sm" variant="outline">
+						<a download={file.name} href={file.downloadUrl || file.url}>
+							<Download className="h-3.5 w-3.5" /> Descargar
+						</a>
 					</Button>
 				</DialogHeader>
 				<div className="relative flex flex-1 flex-col items-center justify-center overflow-auto bg-neutral-900">

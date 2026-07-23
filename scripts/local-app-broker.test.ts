@@ -46,6 +46,7 @@ it('sirve la SPA y media a través de un broker que conserva el bearer fuera del
 	await mkdir(resolve(clientRoot, 'assets'));
 	await writeFile(resolve(clientRoot, 'index.html'), '<main>production broker</main>', 'utf8');
 	await writeFile(resolve(clientRoot, 'assets/app-12345678.js'), 'window.__BROKER_SMOKE__ = true;', 'utf8');
+	await writeFile(resolve(clientRoot, 'assets/worker-12345678.mjs'), 'export default null;', 'utf8');
 	const brokerPort = await reservePort();
 	const browserOrigin = `http://127.0.0.1:${brokerPort}`;
 	const token = generateLocalSessionToken();
@@ -172,6 +173,11 @@ it('sirve la SPA y media a través de un broker que conserva el bearer fuera del
 		expect(hostileResponse.status).toBe(403);
 		expect(missingContextResponse.status).toBe(403);
 		await Promise.all([uploadResponse.arrayBuffer(), hostileResponse.text(), missingContextResponse.text()]);
+
+		const workerResponse = await fetch(`${browserOrigin}/assets/worker-12345678.mjs`);
+		expect(workerResponse.status).toBe(200);
+		expect(workerResponse.headers.get('content-type')).toBe('text/javascript; charset=utf-8');
+		expect(await workerResponse.text()).toBe('export default null;');
 
 		longSseClosed = false;
 		upstreamAbortState = undefined;
