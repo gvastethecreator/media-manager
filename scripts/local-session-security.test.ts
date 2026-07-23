@@ -209,7 +209,8 @@ describe('local API session middleware', () => {
 	});
 
 	it('monta el gate antes de parsers y rutas y mantiene el token fuera de React', async () => {
-		const [server, vite, devFull, devServer, devVite, tauriDev, thumbnailEvents, imageLoader] = await Promise.all([
+		const [server, vite, devFull, devServer, devVite, tauriDev, thumbnailEvents, imageLoader, publicErrorHandler] =
+			await Promise.all([
 			readFile(resolve(WORKSPACE_PATH, 'src/server/index.ts'), 'utf8'),
 			readFile(resolve(WORKSPACE_PATH, 'vite.config.ts'), 'utf8'),
 			readFile(resolve(WORKSPACE_PATH, 'scripts/dev-full.js'), 'utf8'),
@@ -218,6 +219,7 @@ describe('local API session middleware', () => {
 			readFile(resolve(WORKSPACE_PATH, 'scripts/tauri-dev.js'), 'utf8'),
 			readFile(resolve(WORKSPACE_PATH, 'src/lib/hooks/ui/use-thumbnail-events.ts'), 'utf8'),
 			readFile(resolve(WORKSPACE_PATH, 'src/lib/image/image-loader.ts'), 'utf8'),
+			readFile(resolve(WORKSPACE_PATH, 'src/server/middleware/public-error-handler.ts'), 'utf8'),
 		]);
 
 		const healthIndex = server.search(/app\.get\(["']\/health["']/);
@@ -230,7 +232,9 @@ describe('local API session middleware', () => {
 		expect(sessionGateIndex).toBeLessThan(parserIndex);
 		expect(sessionGateIndex).toBeLessThan(routesIndex);
 		expect(server).toMatch(/app\.use\(["']\/api["'],\s*sanitizeJsonResponses\)/);
-		expect(server).toMatch(/code:\s*["']INTERNAL_SERVER_ERROR["']/);
+		expect(server).toContain("import { publicErrorHandler } from './middleware/public-error-handler';");
+		expect(server).toContain('publicErrorHandler(error, req, res, next)');
+		expect(publicErrorHandler).toMatch(/code:\s*["']INTERNAL_SERVER_ERROR["']/);
 		expect(vite).toContain("proxyRequest.setHeader('Authorization'");
 		expect(vite).toContain("proxyRequest.setHeader('X-Local-App-Request', '1')");
 		expect(vite).toContain('target: localApiTarget');
