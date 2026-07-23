@@ -161,7 +161,9 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 
 ### SEC-006 — Headers, límites y errores
 
-- [ ] CSP de producción explícita; retirar justificación incorrecta de inline Vite.
+- [x] CSP de producción explícita desde el broker que sirve el HTML; scripts inline bloqueados y el backend no impone
+      una política global sobre contenido autorizado. Pruebas HTTP del broker y smoke de producción cubren el header, el
+      worker y el visor PDF.
 - [ ] Body limits por endpoint; 50 MB global sólo donde sea necesario.
 - [ ] Rate limits diferenciados o concurrency limits para operaciones costosas.
 - [ ] Timeouts/abort para downloads, scans y metadata.
