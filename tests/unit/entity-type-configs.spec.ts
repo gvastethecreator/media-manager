@@ -31,6 +31,11 @@ describe('entity-type-configs', () => {
 		expect(url).toBe('/t.jpg');
 	});
 
+	it('thumbnail generator de DOCUMENT usa la ruta unificada existente', async () => {
+		const url = await generateEntityThumbnail({ ...baseEntity, entityType: 'document' } as any);
+		expect(url).toBe('/api/thumbnails/unified/document/1');
+	});
+
 	it('detecta tipos por extensión', () => {
 		expect(detectEntityTypeFromExtension('foto.JPG')).toBe(EntityStatsType.IMAGE);
 		expect(detectEntityTypeFromExtension('video.mp4')).toBe(EntityStatsType.VIDEO);
