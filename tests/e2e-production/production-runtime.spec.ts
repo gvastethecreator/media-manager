@@ -10,6 +10,13 @@ test('arranca artefactos, renderiza la SPA y cierra el runtime same-origin sin e
 
 	const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
 	expect(response?.status()).toBe(200);
+	const contentSecurityPolicy = response?.headers()['content-security-policy'] ?? '';
+	expect(contentSecurityPolicy).toContain("default-src 'self'");
+	expect(contentSecurityPolicy).toContain("script-src 'self'");
+	expect(contentSecurityPolicy).toContain("worker-src 'self' blob:");
+	expect(contentSecurityPolicy).toContain("frame-ancestors 'none'");
+	expect(contentSecurityPolicy).toContain("object-src 'none'");
+	expect(contentSecurityPolicy).not.toContain("script-src 'self' 'unsafe-inline'");
 	await expect(page.locator('#root')).toBeVisible();
 	const main = page.locator('main#main-content');
 	await expect(main).toBeVisible();
@@ -38,6 +45,7 @@ test('arranca artefactos, renderiza la SPA y cierra el runtime same-origin sin e
 	});
 	expect(fallbackResponse.status()).toBe(200);
 	expect(fallbackResponse.headers()['content-type']).toContain('text/html');
+	expect(fallbackResponse.headers()['content-security-policy']).toBe(contentSecurityPolicy);
 
 	await page.waitForTimeout(1_000);
 	const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
