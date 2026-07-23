@@ -135,10 +135,14 @@ export interface StatusBarProps {
 	onPrevPage?: () => void;
 	/** Handler de refresh */
 	onRefresh?: () => void;
+	/** Abre la revisión explícita de la recuperación pendiente */
+	onReviewRecovery?: () => void;
 	/** Estado de paginación */
 	pagination?: PaginationState;
 	/** Resultado seguro de la reconciliación al iniciar */
 	startupRecovery?: StartupFileMutationRecovery;
+	/** La reconciliación manual está en curso */
+	recoveryRepairing?: boolean;
 	/** No se pudo consultar el estado de reconciliación al iniciar */
 	startupRecoveryUnavailable?: boolean;
 	/** Items seleccionados */

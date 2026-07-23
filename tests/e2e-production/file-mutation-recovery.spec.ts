@@ -48,6 +48,16 @@ test('muestra la recuperación durable de inicio sin marcar el explorador como l
 	await mkdir(evidenceDirectory, { recursive: true });
 	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'manual-review-desktop.png') });
 
+	await recovery.click();
+	const reviewDialog = page.getByRole('dialog', { name: 'Revisión de recuperación' });
+	await expect(reviewDialog).toBeVisible();
+	await expect(reviewDialog).toContainText('Sólo elimina una copia temporal');
+	await expect(reviewDialog.getByRole('button', { name: 'Reintentar reparación' })).toBeVisible();
+
+	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'manual-review-dialog.png') });
+	await reviewDialog.getByRole('button', { name: 'Cancelar' }).click();
+	await expect(reviewDialog).toHaveCount(0);
+
 	await page.setViewportSize({ height: 768, width: 1024 });
 	expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
 	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'manual-review-compact.png') });
