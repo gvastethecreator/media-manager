@@ -83,6 +83,24 @@ const DEFAULT_DIMENSIONS: Record<ThumbnailEntityType, { width: number; height: n
 	file3d: { width: 300, height: 300 },
 };
 
+export const MAX_THUMBNAIL_DIMENSION = 2000;
+
+function resolveThumbnailDimension(value: number | undefined, fallback: number): number {
+	if (!(Number.isFinite(value) && value && value > 0)) return fallback;
+	return Math.min(Math.floor(value), MAX_THUMBNAIL_DIMENSION);
+}
+
+function resolveThumbnailDimensions(
+	entityType: ThumbnailEntityType,
+	options: ThumbnailOptions
+): { height: number; width: number } {
+	const defaults = DEFAULT_DIMENSIONS[entityType];
+	return {
+		width: resolveThumbnailDimension(options.width, defaults.width),
+		height: resolveThumbnailDimension(options.height, defaults.height),
+	};
+}
+
 const MIME_TYPES: Record<string, string> = {
 	'.png': 'image/png',
 	'.jpg': 'image/jpeg',
@@ -683,11 +701,11 @@ class ThumbnailUnifiedService {
 				return { success: false, error: 'Video file not found' };
 			}
 
-			const dims = DEFAULT_DIMENSIONS.video;
+			const dims = resolveThumbnailDimensions('video', options);
 			const thumbnailBuffer = await generateStaticVideoThumbnailFFmpeg(authorizedSourcePath, {
 				quality: options.quality || 'medium',
-				width: options.width || dims.width,
-				height: options.height || dims.height,
+				width: dims.width,
+				height: dims.height,
 				time: 2,
 			});
 
@@ -743,9 +761,10 @@ class ThumbnailUnifiedService {
 			}
 
 			// Generar waveform
+			const dims = resolveThumbnailDimensions('audio', options);
 			await generateAndSaveWaveform(authorizedSourcePath, entityId, {
-				width: options.width || DEFAULT_DIMENSIONS.audio.width,
-				height: options.height || DEFAULT_DIMENSIONS.audio.height,
+				width: dims.width,
+				height: dims.height,
 				waveColor: 'oklch(0.59 0.2 255)',
 				backgroundColor: 'oklch(0.18 0.002 0)',
 				samples: 200,
@@ -795,8 +814,9 @@ class ThumbnailUnifiedService {
 				return { success: false, error: 'Document not found' };
 			}
 
+			const dims = resolveThumbnailDimensions('document', options);
 			// Generar SVG placeholder
-			const svg = this.createDocumentSVG(document.name, document.pageCount, document.wordCount);
+			const svg = this.createDocumentSVG(document.name, document.pageCount, document.wordCount, dims);
 			const svgBase64 = Buffer.from(svg).toString('base64');
 
 			// Guardar en tabla documents
@@ -805,8 +825,8 @@ class ThumbnailUnifiedService {
 				.set({
 					thumbnail: svgBase64,
 					thumbnailSize: svgBase64.length,
-					thumbnailWidth: DEFAULT_DIMENSIONS.document.width,
-					thumbnailHeight: DEFAULT_DIMENSIONS.document.height,
+					thumbnailWidth: dims.width,
+					thumbnailHeight: dims.height,
 					thumbnailMimeType: 'image/svg+xml',
 					updatedAt: new Date(),
 				})
@@ -816,8 +836,8 @@ class ThumbnailUnifiedService {
 				success: true,
 				data: Buffer.from(svg),
 				mimeType: 'image/svg+xml',
-				width: DEFAULT_DIMENSIONS.document.width,
-				height: DEFAULT_DIMENSIONS.document.height,
+				width: dims.width,
+				height: dims.height,
 				generated: true,
 			};
 		} catch (error) {
@@ -848,7 +868,8 @@ class ThumbnailUnifiedService {
 
 			// Leer contenido
 			const content = await readFile(authorizedSourcePath, 'utf-8');
-			const svg = this.createJsonPreviewSVG(content, jsonFile.name);
+			const dims = resolveThumbnailDimensions('jsonFile', options);
+			const svg = this.createJsonPreviewSVG(content, jsonFile.name, dims);
 
 			// Guardar en metadata
 			const existing = await db.query.jsonFiles.findFirst({
@@ -865,8 +886,8 @@ class ThumbnailUnifiedService {
 						...existingMetadata,
 						thumbnail: {
 							data: Buffer.from(svg).toString('base64'),
-							width: DEFAULT_DIMENSIONS.jsonFile.width,
-							height: DEFAULT_DIMENSIONS.jsonFile.height,
+							width: dims.width,
+							height: dims.height,
 							format: 'svg',
 							isPlaceholder: true,
 							generatedAt: new Date().toISOString(),
@@ -880,8 +901,8 @@ class ThumbnailUnifiedService {
 				success: true,
 				data: Buffer.from(svg),
 				mimeType: 'image/svg+xml',
-				width: DEFAULT_DIMENSIONS.jsonFile.width,
-				height: DEFAULT_DIMENSIONS.jsonFile.height,
+				width: dims.width,
+				height: dims.height,
 				generated: true,
 			};
 		} catch (error) {
@@ -906,7 +927,8 @@ class ThumbnailUnifiedService {
 				return { success: false, error: '3D model not found' };
 			}
 
-			const svg = this.create3DModelSVG(file3d.name, file3d.vertices, file3d.faces, file3d.materials);
+			const dims = resolveThumbnailDimensions('file3d', options);
+			const svg = this.create3DModelSVG(file3d.name, file3d.vertices, file3d.faces, file3d.materials, dims);
 
 			// Guardar en metadata
 			const existing = await db.query.file3Ds.findFirst({
@@ -923,8 +945,8 @@ class ThumbnailUnifiedService {
 						...existingMetadata,
 						thumbnail: {
 							data: Buffer.from(svg).toString('base64'),
-							width: DEFAULT_DIMENSIONS.file3d.width,
-							height: DEFAULT_DIMENSIONS.file3d.height,
+							width: dims.width,
+							height: dims.height,
 							format: 'svg',
 							isPlaceholder: true,
 							generatedAt: new Date().toISOString(),
@@ -938,8 +960,8 @@ class ThumbnailUnifiedService {
 				success: true,
 				data: Buffer.from(svg),
 				mimeType: 'image/svg+xml',
-				width: DEFAULT_DIMENSIONS.file3d.width,
-				height: DEFAULT_DIMENSIONS.file3d.height,
+				width: dims.width,
+				height: dims.height,
 				generated: true,
 			};
 		} catch (error) {
@@ -952,13 +974,18 @@ class ThumbnailUnifiedService {
 
 	// ===================== SVG GENERATORS =====================
 
-	private createDocumentSVG(fileName: string, pageCount: number | null, wordCount: number | null): string {
+	private createDocumentSVG(
+		fileName: string,
+		pageCount: number | null,
+		wordCount: number | null,
+		dimensions: { height: number; width: number }
+	): string {
 		const pageInfo = pageCount && pageCount > 0 ? `${pageCount} páginas` : 'Documento';
 		const wordInfo = wordCount && wordCount > 0 ? `${wordCount.toLocaleString()} palabras` : '';
 		const safeFileName = escapeSvgText(truncateText(fileName, 30));
 
 		return `
-<svg width="212" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="${dimensions.width}" height="${dimensions.height}" viewBox="0 0 212 300" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="doc-bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:${SVG_COLORS.canvasRaised};stop-opacity:1" />
@@ -984,7 +1011,11 @@ class ThumbnailUnifiedService {
 </svg>`;
 	}
 
-	private createJsonPreviewSVG(content: string, fileName: string): string {
+	private createJsonPreviewSVG(
+		content: string,
+		fileName: string,
+		dimensions: { height: number; width: number }
+	): string {
 		let previewContent = '';
 		try {
 			const parsed = JSON.parse(content);
@@ -1001,7 +1032,7 @@ class ThumbnailUnifiedService {
 		const safeFileName = escapeSvgText(truncateText(fileName, 35));
 
 		return `
-<svg width="300" height="400" xmlns="http://www.w3.org/2000/svg">
+<svg width="${dimensions.width}" height="${dimensions.height}" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
   <rect width="300" height="400" fill="${SVG_COLORS.canvas}" rx="8"/>
   <text x="150" y="30" font-family="Arial" font-size="16" fill="${SVG_COLORS.foreground}" text-anchor="middle" font-weight="bold">JSON</text>
   <text x="150" y="55" font-family="monospace" font-size="10" fill="${SVG_COLORS.subtle}" text-anchor="middle">${safeFileName}</text>
@@ -1016,7 +1047,8 @@ class ThumbnailUnifiedService {
 		fileName: string,
 		vertices: number | null,
 		faces: number | null,
-		materials: number | null
+		materials: number | null,
+		dimensions: { height: number; width: number }
 	): string {
 		const vertInfo = vertices ? `${vertices.toLocaleString()} verts` : '';
 		const faceInfo = faces ? `${faces.toLocaleString()} faces` : '';
@@ -1025,7 +1057,7 @@ class ThumbnailUnifiedService {
 		const statsText = escapeSvgText(`${vertInfo} ${faceInfo} ${matInfo}`.trim());
 
 		return `
-<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="${dimensions.width}" height="${dimensions.height}" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
   <rect width="300" height="300" fill="${SVG_COLORS.canvas}" rx="8"/>
   
   <g transform="translate(150, 120)">

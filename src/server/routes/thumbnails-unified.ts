@@ -36,6 +36,7 @@ import {
 import {
 	type ThumbnailEntityType,
 	type ThumbnailOptions,
+	MAX_THUMBNAIL_DIMENSION,
 	thumbnailUnifiedService,
 } from '@/services/thumbnail/thumbnail-unified.service';
 
@@ -259,7 +260,8 @@ router.post(
 	effectHandler((req) =>
 		Effect.tryPromise({
 			try: async () => {
-				const { entityType, entityId, options = {} } = req.body;
+				const { entityType, entityId } = req.body;
+				const options = parseOptions(req.body.options);
 
 				if (!(entityType && entityId)) {
 					throw Object.assign(new Error('entityType and entityId are required'), { _tag: 'ValidationError' });
@@ -589,12 +591,24 @@ router.get(
 
 // ===================== HELPER FUNCTIONS =====================
 
-function parseOptions(query: any): ThumbnailOptions {
+function parseThumbnailDimension(value: unknown): number | undefined {
+	if (!(typeof value === 'number' || typeof value === 'string')) return undefined;
+	const parsed = Number.parseInt(String(value), 10);
+	if (!(Number.isFinite(parsed) && parsed > 0)) return undefined;
+	return Math.min(parsed, MAX_THUMBNAIL_DIMENSION);
+}
+
+function parseThumbnailQuality(value: unknown): ThumbnailOptions['quality'] {
+	if (value === 'low' || value === 'medium' || value === 'high') return value;
+	return 'medium';
+}
+
+function parseOptions(query: Record<string, unknown> | undefined): ThumbnailOptions {
 	return {
-		width: query.width ? Number.parseInt(query.width, 10) : undefined,
-		height: query.height ? Number.parseInt(query.height, 10) : undefined,
-		quality: ['low', 'medium', 'high'].includes(query.quality) ? query.quality : 'medium',
-		force: query.force === 'true',
+		width: parseThumbnailDimension(query?.width),
+		height: parseThumbnailDimension(query?.height),
+		quality: parseThumbnailQuality(query?.quality),
+		force: query?.force === 'true' || query?.force === true,
 	};
 }
 
