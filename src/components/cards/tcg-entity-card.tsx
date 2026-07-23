@@ -112,7 +112,7 @@ export const TCGEntityCard = memo(function TCGEntityCard({
 			case EntityStatsType.AUDIO:
 				return `/api/audio/${entity.id}/waveform?width=${size_param}`;
 			case EntityStatsType.DOCUMENT:
-				return `/api/documents/${entity.id}/thumbnail?width=${size_param}`;
+				return `/api/thumbnails/unified/document/${entity.id}?width=${size_param}`;
 			case EntityStatsType.FOLDER:
 				return `/api/folders/${entity.id}/preview?width=${size_param}`;
 			default:
