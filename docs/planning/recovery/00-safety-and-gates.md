@@ -164,10 +164,14 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 - [x] CSP de producción explícita desde el broker que sirve el HTML; scripts inline bloqueados y el backend no impone
       una política global sobre contenido autorizado. Pruebas HTTP del broker y smoke de producción cubren el header, el
       worker y el visor PDF.
-- [ ] Body limits por endpoint; 50 MB global sólo donde sea necesario.
+- [x] Retirar 50 MB global: JSON limitado a 4 MiB, URL-encoded a 64 KiB y respuestas 413 seguras para cuerpos
+      excesivos. El broker aplica el mismo techo y el listener limita cabeceras y tiempos.
+- [ ] Definir excepciones por ruta sólo si un flujo futuro demuestra que 4 MiB no basta.
 - [ ] Rate limits diferenciados o concurrency limits para operaciones costosas.
 - [ ] Timeouts/abort para downloads, scans y metadata.
-- [ ] Errores no incluyen stack/path en producción; correlation ID para logs.
+- [x] Errores de límite no incluyen stack/path y devuelven request ID para correlación con logs.
+- [ ] Añadir la prueba dedicada de límites a la lista por defecto de `test:tooling` cuando termine el cambio concurrente
+      de ese runner; el modo aislado seleccionado ya la ejecuta.
 
 ## Orden de commits recomendado
 
