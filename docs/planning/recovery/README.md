@@ -166,10 +166,15 @@ ownership.
 - Roots permitidos y tratamiento de symlinks/UNC/network shares.
 - Si export ZIP/PDF se implementa o se retira de UI.
 - Qué corpus/volúmenes representan 1k, 10k y 100k assets.
-- Licencia y destino de `public/emojis`.
 - Plataformas desktop soportadas en el primer release.
 
 Las tareas preparatorias pueden avanzar sin estas decisiones; ninguna implementación irreversible debe asumirlas.
+
+## Decisiones resueltas durante el saneamiento
+
+- `public/emojis` se retira: 3.054 PNG ocupaban 2.057.115.825 bytes y Vite los copiaba completos al build, sin un caller
+  de runtime. Los formularios usan el picker Unicode canónico basado en `emoji-picker-react`. El cambio no toca contenido
+  ni bases del usuario y conserva rollback por Git.
 
 ## Indicadores de programa
 
