@@ -317,6 +317,8 @@ describe('production bootstrap contract', () => {
 
 		expect(packageJson.scripts['build:vite']).toContain('scripts/build-vite.ts');
 		expect(buildRunner).toContain("NODE_ENV: 'production'");
+		expect(buildRunner).toContain("resolve(process.cwd(), 'dist', 'emojis')");
+		expect(buildRunner).toContain('await rm(legacyBuildOutput, { force: true, recursive: true })');
 		expect(viteConfig).toContain('nodeEnvironment = process.env.NODE_ENV ??');
 		expect(viteConfig).toContain("'process.env.NODE_ENV': JSON.stringify(nodeEnvironment)");
 		expect(viteConfig).toContain("'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion)");
