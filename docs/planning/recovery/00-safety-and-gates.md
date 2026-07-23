@@ -19,6 +19,10 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 - [x] Añadir prueba de proceso: comando hijo 0 → wrapper 0; hijo 1 → wrapper 1; señal → no-cero.
 - [ ] Confirmar que `bun run test:ci` y `bun run check:full` fallan cuando su herramienta falla.
 
+**Estado 2026-07-23:** `bun run check:full` propaga el fallo del formateador correctamente, pero queda bloqueado antes de
+lint y TypeScript por tabulaciones existentes en `.github/workflows/quality.yml` (línea 17). Falta comprobar el mismo
+contrato para `test:ci` y corregir el workflow en un cambio dedicado.
+
 **Archivos:** `scripts/run-with-log.js`, package scripts, tests del runner.
 
 **Proof:** invocar el wrapper con comandos triviales controlados y registrar `$LASTEXITCODE`.
@@ -72,13 +76,14 @@ Esta wave bloquea todo cambio de schema, dominio o release.
 
 ### GATE-004 — Corregir fallas actuales antes de nueva funcionalidad
 
-- [ ] Repro focalizado de favorites en audio/video/document/file3d/json.
-- [ ] Definir fuente canónica y expectativa de proyección en cada service.
-- [ ] Corregir 24 fallas de favorites sin reactivar columnas legacy como autoridad.
-- [ ] Corregir dos fallas de `events.server.spec.ts`.
-- [ ] Ejecutar archivos focalizados; después suite completa una sola vez.
+- [x] Repro focalizado de favorites en audio/video/document/file3d/json.
+- [x] Definir fuente canónica y expectativa de proyección en cada service.
+- [x] Corregir fallas de favorites sin reactivar columnas legacy como autoridad.
+- [x] Corregir fallas de `events.server.spec.ts`.
+- [x] Ejecutar archivos focalizados y dos suites completas aisladas.
 
-**Proof:** 612/612 o conteo actualizado verde; exit 0 genuino.
+**Proof:** 808/808 tests pasaron dos veces el 2026-07-23 con exit 0 genuino. Cada corrida creó y eliminó 87 DBs SQLite
+aisladas; duraron 374 s y 346 s. La evidencia aplica al checkout y host actuales.
 
 ## Paquete 0B — Backup y protección operativa
 

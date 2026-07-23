@@ -9,8 +9,7 @@ Este documento sirve como **guía de orientación del árbol del proyecto**. Su 
 | `README.md` | entrada general del proyecto |
 | `AGENTS.md` | reglas operativas y convenciones del repo |
 | `package.json` | scripts, dependencias y tooling |
-| `vite.config.ts` | build del frontend y configuración Vite+ |
-| `vitest.config.ts` | tests unitarios/integración |
+| `vite.config.ts` | build, desarrollo y tests unitarios/integración mediante Vite+ |
 | `playwright.config.ts` | tests E2E |
 | `drizzle.config.ts` | configuración de migraciones/schema |
 | `tailwind.config.ts` | integración visual y tokens |
