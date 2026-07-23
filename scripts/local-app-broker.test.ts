@@ -14,6 +14,7 @@ import {
 } from '../src/runtime/local-app-broker';
 import { createProductionRuntimeConfig } from '../src/runtime/production-runtime-config';
 import { createRuntimeHealthController } from '../src/runtime/runtime-health';
+import { MAX_REQUEST_BODY_BYTES } from '../src/runtime/http-limits';
 import {
 	createLocalApiSessionMiddleware,
 	generateLocalSessionToken,
@@ -155,6 +156,12 @@ it('sirve la SPA y media a través de un broker que conserva el bearer fuera del
 		expect(apiBody).toEqual({ body: { ok: true }, marker: '1' });
 		expect(observedAuthorization).toBe(`Bearer ${token}`);
 		expect(JSON.stringify(apiBody)).not.toContain(token);
+		const oversizedResponse = await fetch(`${browserOrigin}/api/probe`, {
+			headers: { 'Content-Type': 'application/json', Origin: browserOrigin, 'Sec-Fetch-Site': 'same-origin' },
+			method: 'POST',
+			body: JSON.stringify({ payload: 'x'.repeat(MAX_REQUEST_BODY_BYTES) }),
+		});
+		expect(oversizedResponse.status).toBe(413);
 
 		const [uploadResponse, eventsResponse, indexResponse, fallbackResponse, hostileResponse, missingContextResponse] =
 			await Promise.all([

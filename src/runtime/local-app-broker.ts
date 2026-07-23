@@ -3,6 +3,7 @@ import { stat } from 'node:fs/promises';
 import { type ClientRequest, type IncomingMessage, request as createHttpRequest } from 'node:http';
 import { extname, resolve, sep } from 'node:path';
 import { Readable } from 'node:stream';
+import { BROKER_IDLE_TIMEOUT_SECONDS, MAX_BROKER_REQUEST_BODY_BYTES, MAX_REQUEST_BODY_BYTES } from './http-limits';
 import type { RuntimeHealthSnapshot } from './runtime-health';
 
 const HOP_BY_HOP_HEADERS = new Set([
@@ -76,6 +77,8 @@ interface BunRuntime {
 	serve(options: {
 		fetch: (request: Request, server: { timeout(request: Request, seconds: number): void }) => Promise<Response>;
 		hostname: string;
+		idleTimeout?: number;
+		maxRequestBodySize?: number;
 		port: number;
 	}): LocalAppBrokerServer;
 }
@@ -122,6 +125,13 @@ function hasAllowedBrowserContext(request: Request): boolean {
 		return false;
 	}
 	return hasExactOrigin || fetchSite === 'same-origin';
+}
+
+function hasExcessiveContentLength(request: Request): boolean {
+	const rawLength = request.headers.get('content-length');
+	if (rawLength === null) return false;
+	const length = Number(rawLength);
+	return Number.isSafeInteger(length) && length > MAX_REQUEST_BODY_BYTES;
 }
 
 function createProxyHeaders(request: Request, backend: URL, sessionToken: string): Headers {
@@ -394,6 +404,9 @@ export function createLocalAppBrokerHandler(options: LocalAppBrokerOptions): (re
 			if (!hasAllowedBrowserContext(request)) {
 				return jsonResponse(403, 'LOCAL_BROKER_ORIGIN_FORBIDDEN', 'Origen local no autorizado.');
 			}
+			if (hasExcessiveContentLength(request)) {
+				return jsonResponse(413, 'PAYLOAD_TOO_LARGE', 'El cuerpo de la solicitud supera el límite permitido.');
+			}
 			return proxyRequest(request, backend, options.sessionToken, options.onUpstreamAbort);
 		}
 		try {
@@ -412,6 +425,8 @@ export function startLocalAppBroker(options: LocalAppBrokerOptions): LocalAppBro
 			return handler(request);
 		},
 		hostname: '127.0.0.1',
+		idleTimeout: BROKER_IDLE_TIMEOUT_SECONDS,
+		maxRequestBodySize: MAX_BROKER_REQUEST_BODY_BYTES,
 		port: options.publicPort,
 	});
 }
