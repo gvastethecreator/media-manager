@@ -131,9 +131,11 @@ bun run tsc           # Type check
 ### Database
 
 ```bash
-bun run db:studio        # Abre Drizzle Studio (GUI)
-bun run db:reset         # Bloqueado hasta disponer de migraciones/restore reproducibles
-bun run db:check         # Verifica estado
+bun run db:studio -- --database .scratch/dev.sqlite  # GUI local con DB explícita
+bun run db:check -- --database .scratch/dev.sqlite   # Verifica estado sin mutar
+bun run db:migrate -- --database .scratch/dev.sqlite # Aplica migraciones versionadas
+bun run db:mark-disposable -- --database .scratch/dev.sqlite --confirm MARK-DISPOSABLE
+bun run db:reset -- --database .scratch/dev.sqlite   # Dry-run; exige confirmación para borrar
 ```
 
 ### Logs & Debugging
@@ -388,9 +390,9 @@ const images = await db
 ### Migrations
 
 ```bash
-bunx drizzle-kit generate    # Genera migration
-bunx drizzle-kit push        # Aplica migration
-bun run db:studio            # GUI para inspeccionar DB
+bunx drizzle-kit generate                              # Genera una migración revisable
+bun run db:migrate -- --database .scratch/dev.sqlite   # Aplica migraciones versionadas
+bun run db:studio -- --database .scratch/dev.sqlite    # GUI para inspeccionar una DB explícita
 ```
 
 ---
@@ -400,7 +402,7 @@ bun run db:studio            # GUI para inspeccionar DB
 ### Unit Tests (Vitest)
 
 - Ubicación: `src/**/*.{test,spec}.ts` o `tests/unit/`
-- Config: `jsdom` environment, `fileParallelism: false` (SQLite)
+- Config: `jsdom`; `fileParallelism: true` con una copia migrada de SQLite por worker.
 - Globals enabled (no importar describe/it/expect)
 
 ```typescript
@@ -452,7 +454,7 @@ test('should display images grid', async ({ page }) => {
 4. ❌ Mega-stores Zustand
 5. ❌ `console.log` en código de producción del navegador (usar logger)
 6. ❌ Colores hardcodeados (usar CSS tokens: `--dt-primary-500`)
-7. ❌ Tests sin `fileParallelism: false` (causa SQLITE_BUSY)
+7. ❌ Ejecutar Vitest directo contra `db.sqlite`; usar `bun run test` para crear DBs descartables por worker.
 8. ❌ Ignorar tipos TypeScript (usar refinements en lugar de `!` o `as`)
 
 ---
@@ -543,7 +545,7 @@ TODO:
 
 ### `SQLITE_BUSY` en tests
 
-- ✅ Solución: `fileParallelism: false` en `vitest.config.ts`
+- ✅ Usar `bun run test`; su wrapper crea una SQLite descartable por worker y conserva `fileParallelism: true`.
 
 ### Port 4000 en uso
 
