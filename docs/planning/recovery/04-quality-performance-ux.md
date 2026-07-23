@@ -109,6 +109,8 @@ aislamiento suficiente.
       renderizadores siguen la misma frontera.
 - [x] Evitar imports dinámicos anulados por imports estáticos: la política manual conserva sólo dependencias base;
       el HTML inicial ya no precarga Three, PDF, editor ni diagramas.
+- [x] El visor de texto dejó de montar Monaco en producción: usa un bloque nativo de sólo lectura, con copia, descarga y
+      recuperación visible si falla la fuente autorizada.
 - [ ] Tree-shake icon packs/editors/dev tools.
 - [ ] Budgets iniciales basados en baseline mejorado y reducción incremental.
 
@@ -116,6 +118,9 @@ Evidencia de 2026-07-23: `bun run build:vite` pasó; el artefacto resultante no 
 `dist/client/emojis`, ni enlaces iniciales a los cuatro renderizadores pesados. El smoke de producción del visor de
 imágenes pasó con la carga diferida. Queda pendiente medir arranque y red con un runtime de producción trazable, y
 definir budgets que se puedan exigir en CI.
+
+Evidencia adicional de 2026-07-23: el smoke hermético de `document-viewer.spec.ts` pasó en Chromium para texto, PDF
+válido y PDF corrupto. El visor de texto recupera un error de fuente sin quedar bloqueado en una carga de editor.
 
 ### PERF-004 — Colecciones grandes
 
