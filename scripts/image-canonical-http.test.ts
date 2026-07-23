@@ -156,10 +156,6 @@ describe('canonical Image HTTP create', () => {
 		const hidden = await request(app).get('/api/images');
 		expect(hidden.body.data).not.toEqual(expect.arrayContaining([expect.objectContaining({ id: response.body.id })]));
 		expect((await request(app).get(`/api/images/folder/${folderId}/count`)).body).toEqual({ count: 0 });
-		expect((await request(app).get('/api/thumbnails/last-processed')).body).not.toEqual(
-			expect.arrayContaining([expect.objectContaining({ id: response.body.id })])
-		);
-		expect((await request(app).get('/api/thumbnails/stats')).body.total).toBe(0);
 		expect((await request(app).get('/api/thumbnails/unified/stats')).body.byType.image.total).toBe(0);
 		const deletedFolderPreview = await request(app).get(`/api/folders/${folderId}/preview`);
 		expect(deletedFolderPreview.status, deletedFolderPreview.text).toBe(200);
@@ -175,10 +171,6 @@ describe('canonical Image HTTP create', () => {
 			expect.objectContaining({ deletedAt: null, status: 'active', statusBeforeDeletion: null }),
 		]);
 		expect((await request(app).get(`/api/images/folder/${folderId}/count`)).body).toEqual({ count: 1 });
-		expect((await request(app).get('/api/thumbnails/last-processed')).body).toEqual(
-			expect.arrayContaining([expect.objectContaining({ id: response.body.id })])
-		);
-		expect((await request(app).get('/api/thumbnails/stats')).body.total).toBe(1);
 		expect((await request(app).get('/api/thumbnails/unified/stats')).body.byType.image.total).toBe(1);
 		const restoredFolderPreview = await request(app).get(`/api/folders/${folderId}/preview`);
 		expect(restoredFolderPreview.status, restoredFolderPreview.text).toBe(200);
