@@ -32,6 +32,29 @@ import { type AuthorizedPathReference, RootAuthorizationError } from '@/server/s
 const router = express.Router();
 const logger = serverLogger.withContext('FilesAPI');
 
+type StartupFileMutationRecoveryState = 'clean' | 'pending' | 'resolved' | 'manual_review_required';
+
+interface StartupFileMutationRecovery {
+	completed: number;
+	manual: number;
+	pending: number;
+	state: StartupFileMutationRecoveryState;
+}
+
+function recoveryCount(value: unknown): number {
+	return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : 0;
+}
+
+function startupFileMutationRecovery(value: unknown): StartupFileMutationRecovery {
+	const candidate = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+	const completed = recoveryCount(candidate.completed);
+	const manual = recoveryCount(candidate.manual);
+	const pending = recoveryCount(candidate.pending);
+	const state: StartupFileMutationRecoveryState =
+		manual > 0 ? 'manual_review_required' : pending > 0 ? 'pending' : completed > 0 ? 'resolved' : 'clean';
+	return { completed, manual, pending, state };
+}
+
 function safeOperationError(response: express.Response, error: unknown): void {
 	if (sendRootAuthorizationError(response, error)) return;
 	if (error instanceof AuthorizedFileMutationError) {
@@ -122,6 +145,13 @@ router.get('/roots', (request, response) => {
 	} catch (error) {
 		safeOperationError(response, error);
 	}
+});
+
+router.get('/recovery-status', (request, response) => {
+	response.json({
+		data: { recovery: startupFileMutationRecovery(request.app.locals.startupFileMutationRecovery) },
+		success: true,
+	});
 });
 
 router.get('/directory', async (request, response) => {

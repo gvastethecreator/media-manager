@@ -16,6 +16,8 @@ export function FileBrowserStatusBar({
 	pagination,
 	onPrevPage,
 	onNextPage,
+	startupRecovery,
+	startupRecoveryUnavailable = false,
 	className,
 }: StatusBarProps) {
 	const hasPages = pagination && pagination.totalPages > 1;
@@ -24,6 +26,24 @@ export function FileBrowserStatusBar({
 	const pageLabel = hasPages ? `${pagination.page + 1}/${pagination.totalPages}` : null;
 	const summaryLabel = `${shownItems.toLocaleString()}/${totalItems.toLocaleString()}`;
 	const selectionLabel = selectedCount > 0 ? `${selectedCount.toLocaleString()} sel.` : null;
+	const recoveryLabel = startupRecoveryUnavailable
+		? 'Rec. sin estado'
+		: startupRecovery?.state === 'manual_review_required'
+			? `Rec. ${startupRecovery.manual} revisión`
+			: startupRecovery?.state === 'pending'
+				? `Rec. ${startupRecovery.pending} pendiente${startupRecovery.pending === 1 ? '' : 's'}`
+				: startupRecovery?.state === 'resolved'
+					? `Rec. ${startupRecovery.completed} resuelta${startupRecovery.completed === 1 ? '' : 's'}`
+					: null;
+	const recoveryTitle = startupRecoveryUnavailable
+		? 'No se pudo comprobar el estado de recuperación al iniciar.'
+		: startupRecovery?.state === 'manual_review_required'
+			? `La recuperación de inicio requiere revisión manual para ${startupRecovery.manual} ${startupRecovery.manual === 1 ? 'operación' : 'operaciones'}.${startupRecovery.pending > 0 ? ` Además, ${startupRecovery.pending} ${startupRecovery.pending === 1 ? 'operación sigue pendiente' : 'operaciones siguen pendientes'} de reconciliación.` : ''}`
+			: startupRecovery?.state === 'pending'
+				? `${startupRecovery.pending} ${startupRecovery.pending === 1 ? 'operación sigue pendiente' : 'operaciones siguen pendientes'} de reconciliación.`
+				: startupRecovery?.state === 'resolved'
+					? `${startupRecovery.completed} ${startupRecovery.completed === 1 ? 'operación se reconcilió' : 'operaciones se reconciliaron'} al iniciar.`
+					: undefined;
 
 	return (
 		<div
@@ -47,6 +67,21 @@ export function FileBrowserStatusBar({
 			)}
 
 			<div className="flex min-w-0 items-center justify-end gap-0.5 tabular-nums">
+				{recoveryLabel && (
+					<span
+						aria-live="polite"
+						className={cn(
+							'mr-1 truncate',
+							(startupRecoveryUnavailable || startupRecovery?.state === 'manual_review_required') && 'text-destructive',
+							startupRecovery?.state === 'pending' && 'text-primary'
+						)}
+						aria-label={recoveryTitle}
+						data-testid="file-browser-startup-recovery"
+						title={recoveryTitle}
+					>
+						{recoveryLabel}
+					</span>
+				)}
 				{hasPages ? (
 					<>
 						<Button
@@ -70,8 +105,10 @@ export function FileBrowserStatusBar({
 							<span className="sr-only">Página siguiente</span>
 						</Button>
 					</>
+				) : isLoading ? (
+					<span className="truncate opacity-80">Cargando…</span>
 				) : (
-					<span className="truncate opacity-80">{isLoading ? 'Cargando…' : 'Listo'}</span>
+					!recoveryLabel && <span className="truncate opacity-80">Listo</span>
 				)}
 			</div>
 		</div>

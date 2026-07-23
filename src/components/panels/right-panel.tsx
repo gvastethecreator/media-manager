@@ -2,7 +2,6 @@ import { lazy, memo as reactMemo, Suspense, useEffect, useMemo, useState } from 
 import { useLocation } from 'react-router-dom';
 import { DetailsPanel } from '@/components/panels/details-panel/details-panel';
 import { FolderStatsDisplay } from '@/components/panels/stats-panel/folder-stats-display';
-import { SystemStatsDisplay } from '@/components/panels/stats-panel/system-stats-display';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
@@ -47,11 +46,14 @@ const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
 		);
 	}
 
-	// Si no hay folderId, mostrar estadísticas del sistema
+	// Los agregados globales no pertenecen a ningún media root autorizado. No iniciar una consulta que el servidor debe rechazar.
 	return (
-		<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
-			<SystemStatsDisplay />
-		</Suspense>
+		<div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
+			<p className="heading-sm">Estadísticas por biblioteca</p>
+			<p className="caption text-muted-foreground">
+				Selecciona una carpeta o biblioteca para consultar métricas dentro de un scope autorizado.
+			</p>
+		</div>
 	);
 });
 

@@ -5,6 +5,7 @@
 
 import type { BrowserItem, BrowserItemGroup } from './item.types';
 import type { PaginationState, ViewConfig, ViewMode } from './view.types';
+import type { StartupFileMutationRecovery } from '@/lib/api/file-mutation-recovery';
 
 /**
  * Modificadores de click
@@ -136,6 +137,10 @@ export interface StatusBarProps {
 	onRefresh?: () => void;
 	/** Estado de paginación */
 	pagination?: PaginationState;
+	/** Resultado seguro de la reconciliación al iniciar */
+	startupRecovery?: StartupFileMutationRecovery;
+	/** No se pudo consultar el estado de reconciliación al iniciar */
+	startupRecoveryUnavailable?: boolean;
 	/** Items seleccionados */
 	selectedCount: number;
 	/** Items mostrados actualmente */
