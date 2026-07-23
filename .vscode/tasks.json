@@ -195,7 +195,8 @@
     {
       "label": "🗃️ DB: Studio",
       "type": "shell",
-      "command": "bun run db:studio",
+      "command": "bun run db:studio -- --database \"${input:mediaManagerDatabasePath}\"",
+      "detail": "Abre Studio sólo en la base elegida.",
       "group": "build",
       "isBackground": true,
       "problemMatcher": []
@@ -203,16 +204,22 @@
     {
       "label": "🗃️ DB: Check",
       "type": "shell",
-      "command": "bun run db:check",
+      "command": "bun run db:check -- --database \"${input:mediaManagerDatabasePath}\"",
+      "detail": "Comprueba una base explícita sin cambiarla.",
       "group": "build",
       "problemMatcher": []
     },
     {
-      "label": "🗃️ DB: Reset",
+      "label": "⚠️ DB: Reset disposable (dry-run)",
       "type": "shell",
-      "command": "bun run db:reset",
-      "group": "build",
-      "problemMatcher": []
+      "command": "bun run db:reset -- --database \"${input:mediaManagerDisposableDatabasePath}\"",
+      "detail": "No borra. Requiere una DB marcada bajo .scratch o temp.",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated"
+      }
     },
     {
       "label": "🔍 Logs: List",
@@ -249,6 +256,20 @@
       "group": "test",
       "isBackground": true,
       "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "mediaManagerDatabasePath",
+      "type": "promptString",
+      "description": "Ruta de la base para Studio o Check",
+      "default": "${workspaceFolder}/.scratch/dev.sqlite"
+    },
+    {
+      "id": "mediaManagerDisposableDatabasePath",
+      "type": "promptString",
+      "description": "Ruta descartable bajo .scratch o temp para el dry-run de reset",
+      "default": "${workspaceFolder}/.scratch/dev.sqlite"
     }
   ]
 }
