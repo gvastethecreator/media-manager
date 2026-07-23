@@ -1,26 +1,16 @@
-import { AlertTriangle, FolderSync, Upload } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { AlertTriangle, FolderSync, FolderUp } from 'lucide-react';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
 import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
-
-import { useToast } from '@/components/ui/use-toast';
-import { clientLogger } from '@/lib/logger/client-logger';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { ImageWithStats } from '@/types/entities/image';
 
 interface AllImagesContentViewProps {
 	error: string | null;
-	handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
-	handleFileUpload: (files: File[]) => Promise<void>;
 	handleImageClick: (item: AnyEntityWithStats) => void;
 	handleImageDoubleClick: (item: AnyEntityWithStats) => void;
 	images: ImageWithStats[];
@@ -46,83 +36,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 	startIndexing,
 	handleImageClick,
 	handleImageDoubleClick,
-	handleFileUpload,
-	handleFileSelect,
 }) => {
-	const { toast } = useToast();
-
-	// Estados para el upload de imágenes
-	const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-	const [uploadFiles, setUploadFiles] = useState<File[]>([]);
-	const [uploadProgress, setUploadProgress] = useState(0);
-	const [isUploading, setIsUploading] = useState(false);
-
-	// Función para manejar el upload de archivos
-	const handleFileUploadInternal = useCallback(
-		async (files: File[]) => {
-			setIsUploading(true);
-			setUploadProgress(0);
-
-			try {
-				const formData = new FormData();
-				for (const file of files) {
-					formData.append('images', file);
-				}
-
-				const response = await fetch('/api/images/upload', {
-					method: 'POST',
-					body: formData,
-				});
-
-				if (!response.ok) {
-					throw new Error('Error al subir las imágenes');
-				}
-
-				const result = await response.json();
-
-				toast({
-					title: '✅ Imágenes subidas exitosamente',
-					description: `${result.uploaded} imágenes agregadas`,
-				});
-
-				handleFileUpload(files); // Call the prop function to trigger data reload
-			} catch (error) {
-				clientLogger.error('Error al subir imágenes:', error);
-				toast({
-					title: '❌ Error al subir imágenes',
-					description: error instanceof Error ? error.message : 'Error desconocido',
-					variant: 'destructive',
-				});
-			} finally {
-				setIsUploading(false);
-				setUploadProgress(0);
-				setUploadFiles([]);
-				setIsUploadDialogOpen(false);
-			}
-		},
-		[toast, handleFileUpload]
-	);
-
-	const handleFileSelectInternal = useCallback(
-		(event: React.ChangeEvent<HTMLInputElement>) => {
-			if (event.target.files) {
-				const files = Array.from(event.target.files);
-				const imageFiles = files.filter((file) => file.type.startsWith('image/'));
-
-				if (imageFiles.length !== files.length) {
-					toast({
-						title: '⚠️ Algunos archivos no son imágenes',
-						description: 'Solo se procesarán los archivos de imagen válidos',
-					});
-				}
-
-				setUploadFiles(imageFiles);
-				handleFileSelect(event); // Call the prop function
-			}
-		},
-		[toast, handleFileSelect]
-	);
-
 	// Renderizar barra de estado de indexación
 	const renderIndexingStatus = () => {
 		if (!indexingStatus || (!isIndexing && indexingStatus.indexedFolders === 0)) {
@@ -249,77 +163,12 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 				</div>
 			)}
 
-			{/* Dialog para upload de imágenes */}
-			<Dialog onOpenChange={setIsUploadDialogOpen} open={isUploadDialogOpen}>
-				<DialogTrigger asChild>
-					<Button className="fixed right-4 bottom-4 z-50" onClick={() => setIsUploadDialogOpen(true)} variant="primary">
-						<Upload className="mr-2 h-4 w-4" />
-						Subir Imágenes
-					</Button>
-				</DialogTrigger>
-				<DialogContent className="sm:max-w-106">
-					<DialogHeader>
-						<DialogTitle>Subir Imágenes</DialogTitle>
-					</DialogHeader>
-
-					<div className="grid gap-4 py-2">
-						{/* Instrucciones */}
-						<Card>
-							<CardHeader>
-								<CardTitle className="font-semibold text-base">Instrucciones</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<p className="text-muted-foreground text-sm">
-									1. Selecciona las imágenes que deseas subir desde tu dispositivo.
-								</p>
-								<p className="text-muted-foreground text-sm">
-									2. Asegúrate de que las imágenes cumplan con los requisitos de tamaño y formato.
-								</p>
-								<p className="text-muted-foreground text-sm">
-									3. Haz clic en "Subir Imágenes" para iniciar el proceso de carga.
-								</p>
-							</CardContent>
-						</Card>
-
-						{/* Selector de archivos */}
-						<div>
-							<Label className="block font-medium text-sm" htmlFor="image-upload">
-								Seleccionar Imágenes
-							</Label>
-							<Input
-								accept="image/*"
-								className="mt-1"
-								id="image-upload"
-								multiple
-								onChange={handleFileSelectInternal}
-								type="file"
-							/>
-						</div>
-
-						{/* Progreso de carga */}
-						{isUploading && (
-							<div className="flex flex-col gap-2">
-								<Progress className="h-2" value={uploadProgress} />
-								<span className="text-muted-foreground text-xs">Cargando... {uploadProgress}%</span>
-							</div>
-						)}
-
-						{/* Botones de acción */}
-						<div className="flex justify-end gap-2">
-							<Button className="h-9" onClick={() => setIsUploadDialogOpen(false)} variant="outline">
-								Cancelar
-							</Button>
-							<Button
-								className="h-9"
-								disabled={isUploading || !uploadFiles || uploadFiles.length === 0}
-								onClick={() => handleFileUploadInternal(uploadFiles)}
-							>
-								{isUploading ? 'Subiendo...' : 'Subir Imágenes'}
-							</Button>
-						</div>
-					</div>
-				</DialogContent>
-			</Dialog>
+			<Button asChild className="fixed right-4 bottom-4 z-50" variant="primary">
+				<a href="/files">
+					<FolderUp aria-hidden="true" className="mr-2 h-4 w-4" />
+					Abrir explorador de archivos
+				</a>
+			</Button>
 		</div>
 	);
 };
