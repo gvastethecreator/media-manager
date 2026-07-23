@@ -12,6 +12,7 @@ import { db } from '@/lib/drizzle/index.js';
 import { audios } from '@/lib/drizzle/schema/index.js';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
 import {
 	authorizeMediaAssetBodyIds,
 	authorizeMediaAssetParam,
@@ -307,11 +308,20 @@ router.get('/:id/waveform', authorizeMediaAssetParam({ assetType: 'audio' }), as
 		}
 
 		// Si ya tiene waveform generado en metadata
-		if (metadata?.waveform) {
-			const waveformSvg = metadata.waveform;
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=3600');
-			res.send(waveformSvg);
+		if (metadata?.waveform?.data && typeof metadata.waveform.data === 'string') {
+			const format = String(metadata.waveform.format || 'png').toLowerCase();
+			const waveform = Buffer.from(metadata.waveform.data, 'base64');
+			res.setHeader('Content-Type', format === 'svg' ? 'image/svg+xml' : 'image/png');
+			setAuthorizedAssetCacheHeaders(res, 'revalidate');
+			res.send(waveform);
+			return;
+		}
+
+		if (typeof metadata?.waveform === 'string') {
+			res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+			res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+			setAuthorizedAssetCacheHeaders(res, 'revalidate');
+			res.send(metadata.waveform);
 			return;
 		}
 
@@ -327,7 +337,8 @@ router.get('/:id/waveform', authorizeMediaAssetParam({ assetType: 'audio' }), as
 </svg>`;
 
 		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=60');
+		res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+		setAuthorizedAssetCacheHeaders(res, 'no-store');
 		res.send(errorSVG);
 	} catch (error) {
 		logger.error('No se pudo generar el waveform', { error });

@@ -115,6 +115,16 @@ describe('canonical Image HTTP create', () => {
 		expect(await db.select().from(sourceFiles).where(eq(sourceFiles.assetId, response.body.id))).toEqual([
 			expect.objectContaining({ relativePath: 'photo.jpg', rootId }),
 		]);
+		const original = await request(app).get(`/api/images/${response.body.id}/content`);
+		expect(original.status, original.text).toBe(200);
+		expect(original.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+		expect(original.headers.vary).toContain('Cookie');
+		expect(original.headers['x-content-type-options']).toBe('nosniff');
+		expect(original.headers.etag).toBeDefined();
+		expect(
+			(await request(app).get(`/api/images/${response.body.id}/content`).set('If-None-Match', original.headers.etag))
+				.status
+		).toBe(304);
 		const unavailableThumbnail = await request(app).get(`/api/thumbnails/unified/image/${response.body.id}`);
 		expect(unavailableThumbnail.status).toBe(404);
 		expect(unavailableThumbnail.headers['content-type']).toContain('image/svg+xml');
@@ -179,6 +189,10 @@ describe('canonical Image HTTP create', () => {
 		const deletedFolderPreviewSvg = Buffer.isBuffer(deletedFolderPreview.body)
 			? deletedFolderPreview.body.toString('utf8')
 			: String(deletedFolderPreview.text ?? deletedFolderPreview.body);
+		expect(deletedFolderPreview.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+		expect(deletedFolderPreview.headers.vary).toContain('Cookie');
+		expect(deletedFolderPreview.headers['x-content-type-options']).toBe('nosniff');
+		expect(deletedFolderPreview.headers['content-security-policy']).toContain("default-src 'none'");
 		expect(deletedFolderPreviewSvg).toContain('font-size="42" font-weight="700">0</text>');
 		expect(deletedFolderPreviewSvg).toContain('font-size="15">0 B</text>');
 		const restored = await request(app).post(`/api/images/${response.body.id}/restore`);

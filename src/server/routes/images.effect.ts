@@ -9,6 +9,7 @@ import { readFile } from 'node:fs/promises';
 import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
 import {
 	authorizeMediaAssetBodyIds,
 	authorizeMediaAssetParam,
@@ -100,11 +101,10 @@ async function sendAuthorizedOriginal(
 		);
 		const buffer = await readFile(resolved.absolutePath);
 		res.set({
-			'Cache-Control': 'public, max-age=31536000',
 			'Content-Length': buffer.length.toString(),
 			'Content-Type': getMimeTypeFromPath(resolved.absolutePath),
-			'X-Content-Type-Options': 'nosniff',
 		});
+		setAuthorizedAssetCacheHeaders(res, 'revalidate');
 		res.send(buffer);
 	} catch (error) {
 		if (!sendRootAuthorizationError(res, error)) sendEffectHttpError(res, error);
@@ -451,6 +451,7 @@ router.get(
 		try {
 			const buffer = await Effect.runPromise(effect);
 			res.set('Content-Type', 'image/webp');
+			setAuthorizedAssetCacheHeaders(res, 'revalidate');
 			res.send(buffer);
 		} catch (error) {
 			sendEffectHttpError(res, error);
