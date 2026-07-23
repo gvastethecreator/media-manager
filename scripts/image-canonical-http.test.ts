@@ -193,6 +193,10 @@ describe('canonical Image HTTP create', () => {
 		expect(await db.select().from(images).where(eq(images.id, response.body.id))).toEqual([
 			expect.objectContaining({ folderId }),
 		]);
+		await db
+			.update(images)
+			.set({ thumbnail: canonicalThumbnail.thumbnail, thumbnailMimeType: 'image/webp' })
+			.where(eq(images.id, response.body.id));
 
 		const rejected = await request(app)
 			.post('/api/images')
@@ -249,6 +253,9 @@ describe('canonical Image HTTP create', () => {
 			: String(restoredFolderPreview.text ?? restoredFolderPreview.body);
 		expect(restoredFolderPreviewSvg).toContain('font-size="42" font-weight="700">1</text>');
 		expect(restoredFolderPreviewSvg).toContain('font-size="15">5 B</text>');
+		expect(restoredFolderPreviewSvg).toContain('href="data:image/webp;base64,');
+		expect(restoredFolderPreviewSvg).not.toContain('href="/api/');
+		expect(restoredFolderPreview.headers['content-security-policy']).toContain('img-src data:');
 
 		const unauthorizedRootId = `root-${crypto.randomUUID()}`;
 		createdRootIds.push(unauthorizedRootId);
@@ -259,6 +266,19 @@ describe('canonical Image HTTP create', () => {
 		expect(unauthorizedList.body.data).not.toEqual(
 			expect.arrayContaining([expect.objectContaining({ id: response.body.id })])
 		);
+		const unauthorizedFolders = await request(app).get('/api/folders');
+		expect(unauthorizedFolders.status).toBe(200);
+		expect(unauthorizedFolders.body.data).toEqual(
+			expect.arrayContaining([expect.objectContaining({ id: folderId, recentImages: [] })])
+		);
+		const unauthorizedFolderPreview = await request(app).get(`/api/folders/${folderId}/preview`);
+		expect(unauthorizedFolderPreview.status, unauthorizedFolderPreview.text).toBe(200);
+		const unauthorizedFolderPreviewSvg = Buffer.isBuffer(unauthorizedFolderPreview.body)
+			? unauthorizedFolderPreview.body.toString('utf8')
+			: String(unauthorizedFolderPreview.text ?? unauthorizedFolderPreview.body);
+		expect(unauthorizedFolderPreviewSvg).toContain('font-size="42" font-weight="700">0</text>');
+		expect(unauthorizedFolderPreviewSvg).toContain('font-size="15">0 B</text>');
+		expect(unauthorizedFolderPreviewSvg).not.toContain('href="data:image/');
 
 		await db.update(sourceFiles).set({ rootId }).where(eq(sourceFiles.assetId, response.body.id));
 		await rm(resolve(rootPath, 'photo.jpg'));
