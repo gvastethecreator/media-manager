@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { devtools, persist as zustandPersist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { createSelectors } from '@/lib/utils/store-selectors.utils';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
 import { settingsClient } from '@/services/settings/settings.client';
 import type { Settings, SettingsUpdate } from '@/types/settings';
 
