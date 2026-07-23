@@ -1,10 +1,8 @@
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 const testMaxWorkers = Math.max(1, Number.parseInt(process.env.VITEST_MAX_WORKERS ?? '2', 10) || 2);
 
 export default defineConfig({
-	plugins: [tsconfigPaths()],
 	test: {
 		// Entorno jsdom para tests de componentes React
 		environment: 'jsdom',
@@ -52,6 +50,7 @@ export default defineConfig({
 	},
 	// Resolver alias de paths igual que en tsconfig
 	resolve: {
+		tsconfigPaths: true,
 		alias: {
 			'@': '/src',
 		},
