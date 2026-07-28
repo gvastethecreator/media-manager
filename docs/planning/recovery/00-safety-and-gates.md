@@ -141,24 +141,27 @@ Metadata, proxy real de API/uploads/SSE y bearer fuera del navegador.
 
 ### SEC-003 — Registry de roots autorizados
 
-- [ ] Modelo explícito de media root con ID, realpath y permisos permitidos.
-- [ ] Toda ruta API se expresa como root ID + path relativo o asset ID; no absolute path arbitrario.
-- [ ] Canonicalizar `.`/`..`, separadores, case Windows y prefijos extendidos.
-- [ ] Rechazar UNC/device paths por defecto; decisión explícita si se soportan network shares.
-- [ ] Resolver symlinks/junctions y verificar containment después de resolución.
-- [ ] Separar permisos read/index/write/delete/export.
+- [x] Modelo explícito de media root con ID opaco, realpath interno y permisos permitidos.
+- [x] Toda ruta pública usa root ID + path relativo o asset ID; no acepta absolute path arbitrario.
+- [x] Canonicalizar `.`/`..`, separadores, case Windows y prefijos extendidos.
+- [x] Rechazar UNC/device paths y roots de red por defecto.
+- [x] Resolver symlinks/junctions y verificar containment después de resolución.
+- [x] Separar permisos read/index/write/delete/export.
 
-**Proof:** matriz adversarial de traversal, absolute, UNC, symlink/junction, case y encoded separators.
+**Proof 2026-07-27:** `authorized-roots`, `authorized-files-routes`, `image-canonical-root-registry`,
+`media-hash-authorization` y `authorized-file-mutation` pasaron 35/35. La matriz cubre traversal, absolutos, UNC/device,
+separadores codificados, roots solapados, symlink/junction, permisos y opt-in bilateral cross-root.
 
 ### SEC-004 — Migrar endpoints de lectura/mutación
 
-- [ ] `/files/directory`, `/files/content`, `/download` usan root/asset policy.
-- [ ] rename/copy/move/create validan source y destination.
-- [ ] Operaciones cross-root requieren permiso explícito.
-- [ ] Respuestas no filtran rutas absolutas salvo UI local que lo necesite.
-- [ ] Logging redacta paths sensibles según nivel.
+- [x] `/files/directory`, `/files/content` y downloads usan root/asset policy.
+- [x] Move canónico valida source y destination; rename/copy/create crudos permanecen retirados.
+- [x] Operaciones cross-root requieren permiso explícito en ambos roots.
+- [x] Respuestas y eventos no filtran rutas físicas.
+- [x] Logging central y logs persistidos redactan paths, secretos, IDs y hashes.
 
-**Proof:** tests HTTP contra roots temporales; no acceso fuera de fixture.
+**Proof 2026-07-27:** los 35 tests de roots/endpoints/mutación anteriores y `output-redaction-security` 8/8 pasaron
+contra fixtures temporales. Incluyen escape por junction, colisiones sin mutación, rollback, journal opaco y redacción.
 
 ### SEC-005 — Rutas debug/test sólo en desarrollo explícito
 
