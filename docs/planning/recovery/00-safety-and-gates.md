@@ -99,9 +99,11 @@ aisladas; duraron 374 s y 346 s. La evidencia aplica al checkout y host actuales
 - [x] Hash del backup y manifest sin contenido personal.
 - [x] Restore a directorio temporal con schema y conteos comparados.
 - [x] Prohibir destinos de backup dentro del workspace/Git, incluso tras resolver symlinks/junctions.
-- [ ] Retention configurable y segura, limitada a artefactos reconocidos por manifest.
+- [x] Retention configurable y segura, limitada a artefactos reconocidos por manifest.
 
-**Proof:** restore abre, queries smoke pasan y original permanece intacta.
+**Proof:** restore abre, queries smoke pasan y original permanece intacta. El 2026-07-27,
+`bun test scripts/db/backup-retention.test.ts` pasó 2/2: dry-run por defecto, confirmación literal, auditoría y fallo
+cerrado antes de borrar si el backup retenido está corrupto.
 
 **Runbook:** [Inventario y backup seguro](../../guides/DATABASE-BACKUP.md).
 
