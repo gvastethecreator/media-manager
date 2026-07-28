@@ -111,13 +111,15 @@ cerrado antes de borrar si el backup retenido está corrupto.
 
 - [x] Bloquear por completo el `db:reset` legacy que borraba DB y migraciones sin confirmación/path explícito.
 - [x] Retirar reset de base de datos de API, cliente y UI.
-- [ ] Reintroducir reset sólo para DB marcada como disposable, después del baseline reproducible de Wave 1.
+- [x] Reintroducir reset sólo para DB marcada como disposable, después del baseline reproducible de Wave 1.
 - [x] Retirar cleanup de logs de HTTP; conservar `logs:clean` como operación CLI explícita.
 - [x] Eliminar aliases GET mutantes de thumbnails y alinear las acciones de producto a POST.
 - [x] Retirar el cleanup HTTP destructivo de phantoms/cursed; no existe reemplazo operativo hasta definir un inventario
       read-only y una confirmación CLI.
 
-**Proof:** invocación accidental sobre DB real aborta; dry-run no cambia conteos.
+**Proof:** invocación accidental sobre DB real aborta; dry-run no cambia conteos. El 2026-07-27,
+`bun test scripts/db/reset.test.ts` pasó 3/3: marker obligatorio, rechazo de `db.sqlite`, recreación desde migraciones y
+Studio explícito/loopback.
 
 ## Paquete 0C — Cerrar API filesystem
 
