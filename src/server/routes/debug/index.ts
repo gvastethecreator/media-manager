@@ -333,63 +333,6 @@ router.get('/test-hot-reload', async (_req, res) => {
 	}
 });
 
-// CLEANUP ENDPOINT - Eliminar imágenes fantasma cursed-img-*
-router.get('/cleanup-phantom-images', async (_req, res): Promise<void> => {
-	try {
-		serverLogger.debug('🔥 [CLEANUP] Iniciando limpieza de imágenes fantasma...');
-
-		const client = requireDbClient();
-
-		// 1. Contar imágenes cursed-img-*
-		const cursedQuery = await client.execute(`
-			SELECT id, name, path 
-			FROM Image 
-			WHERE id LIKE 'cursed-img-%' 
-			ORDER BY id
-		`);
-
-		const cursedCount = cursedQuery.rows.length;
-		serverLogger.debug(`📊 Imágenes cursed-img-* encontradas: ${cursedCount}`);
-
-		if (cursedCount === 0) {
-			res.json({
-				success: true,
-				message: 'No se encontraron imágenes fantasma cursed-img-*',
-				deleted: 0,
-				timestamp: new Date().toISOString(),
-			});
-			return;
-		}
-
-		// 2. Eliminar imágenes cursed-img-*
-		serverLogger.debug(`🗑️ Eliminando ${cursedCount} imágenes fantasma...`);
-		await client.execute("DELETE FROM Image WHERE id LIKE 'cursed-img-%'");
-
-		// 3. Verificar estado final
-		const finalCountResult = await client.execute('SELECT COUNT(*) as count FROM Image');
-		const finalCount = finalCountResult.rows[0]?.[0] || 0;
-
-		serverLogger.debug(`✅ Eliminadas: ${cursedCount} imágenes fantasma`);
-		serverLogger.debug(`📊 Imágenes restantes en BD: ${finalCount}`);
-
-		res.json({
-			success: true,
-			message: '¡Limpieza completada con éxito!',
-			deleted: cursedCount,
-			remaining: finalCount,
-			timestamp: new Date().toISOString(),
-			note: 'Los errores ServiceError file_not_found deberían desaparecer ahora.',
-		});
-	} catch (error) {
-		serverLogger.error('❌ Error en cleanup de imágenes fantasma:', error);
-		res.status(500).json({
-			success: false,
-			error: 'Error durante la limpieza',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
 /**
  * Endpoint de diagnóstico para validar mapeo de tipos de entidad
  * POST /api/debug/test-entity-types

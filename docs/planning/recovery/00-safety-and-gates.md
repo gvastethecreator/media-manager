@@ -114,7 +114,8 @@ cerrado antes de borrar si el backup retenido está corrupto.
 - [ ] Reintroducir reset sólo para DB marcada como disposable, después del baseline reproducible de Wave 1.
 - [x] Retirar cleanup de logs de HTTP; conservar `logs:clean` como operación CLI explícita.
 - [x] Eliminar aliases GET mutantes de thumbnails y alinear las acciones de producto a POST.
-- [ ] Añadir dry-run a cleanup de phantoms/cursed y reporte de IDs/counts.
+- [x] Retirar el cleanup HTTP destructivo de phantoms/cursed; no existe reemplazo operativo hasta definir un inventario
+      read-only y una confirmación CLI.
 
 **Proof:** invocación accidental sobre DB real aborta; dry-run no cambia conteos.
 
@@ -171,7 +172,11 @@ contra fixtures temporales. Incluyen escape por junction, colisiones sin mutaci�
 - [x] No montar `/api/debug`, `/api/debug-entity-types` ni `/api/test-characters` en producción.
 - [x] Retirar reset DB, cleanup de logs y aliases GET mutantes de routers funcionales.
 - [x] Bloquear reset legacy y mantener limpieza de logs como CLI explícita.
-- [ ] Añadir dry-run al cleanup de phantoms/cursed antes de exponer cualquier reemplazo operativo.
+- [x] Mantener retirado el cleanup de phantoms/cursed; cualquier reemplazo futuro debe empezar por dry-run CLI.
+
+**Proof 2026-07-27:** `bun test scripts/debug-route-safety.test.ts` pasó y bloquea el endpoint GET destructivo y su
+`DELETE FROM Image` heredado.
+
 - [x] Smoke enumera rutas prohibidas en producción y falla si aparece alguna.
 
 **Proof:** snapshot del route registry por environment.
