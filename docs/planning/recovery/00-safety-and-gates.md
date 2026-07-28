@@ -129,13 +129,15 @@ aisladas; duraron 374 s y 346 s. La evidencia aplica al checkout y host actuales
 
 ### SEC-002 — Sesión local autenticada
 
-- [ ] Generar token efímero por arranque mediante CSPRNG.
-- [ ] Entregar token al frontend mediante launcher seguro, no log/URL persistente.
-- [ ] Middleware obligatorio para `/api`, excepto health mínimo si se necesita.
-- [ ] Rechazar origins/hosts inesperados y aplicar protección CSRF apropiada al modelo local.
-- [ ] Rotar token al reiniciar; no guardarlo en Git/localStorage permanente.
+- [x] Generar token efímero por arranque mediante CSPRNG.
+- [x] Mantener el token dentro del launcher/broker; no exponerlo en bundle, URL ni storage del browser.
+- [x] Middleware obligatorio para `/api` y `/uploads`; health mínimo permanece público.
+- [x] Rechazar token, origin, host, Fetch Metadata o marker local inválidos.
+- [x] Rotar token al reiniciar; no guardarlo en Git/localStorage permanente.
 
-**Proof:** requests sin token, con token incorrecto y desde origin no permitido → 401/403.
+**Proof 2026-07-27:** `bun scripts/run-tooling-tests-isolated.ts scripts/local-session-security.test.ts
+scripts/local-app-broker.test.ts` pasó 19/19. Cubre secretos independientes, rotación, 401/403, Host/Origin/Fetch
+Metadata, proxy real de API/uploads/SSE y bearer fuera del navegador.
 
 ### SEC-003 — Registry de roots autorizados
 
