@@ -6351,19 +6351,12 @@
 			"indexes": {
 				"TaxonomyArtifactDeletionLedger_nonce_key": {
 					"name": "TaxonomyArtifactDeletionLedger_nonce_key",
-					"columns": [
-						"nonce"
-					],
+					"columns": ["nonce"],
 					"isUnique": true
 				},
 				"TaxonomyArtifactDeletionLedger_root_path_entity_idx": {
 					"name": "TaxonomyArtifactDeletionLedger_root_path_entity_idx",
-					"columns": [
-						"rootId",
-						"relativePath",
-						"entityType",
-						"entityId"
-					],
+					"columns": ["rootId", "relativePath", "entityType", "entityId"],
 					"isUnique": false
 				}
 			},
@@ -6372,26 +6365,15 @@
 					"name": "TaxonomyArtifactDeletionLedger_rootId_MediaRoot_id_fk",
 					"tableFrom": "TaxonomyArtifactDeletionLedger",
 					"tableTo": "MediaRoot",
-					"columnsFrom": [
-						"rootId"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["rootId"],
+					"columnsTo": ["id"],
 					"onDelete": "cascade",
 					"onUpdate": "cascade"
 				}
 			},
 			"compositePrimaryKeys": {
 				"TaxonomyArtifactDeletionLedger_pk": {
-					"columns": [
-						"rootId",
-						"relativePath",
-						"entityType",
-						"entityId",
-						"contentHash",
-						"nonce"
-					],
+					"columns": ["rootId", "relativePath", "entityType", "entityId", "contentHash", "nonce"],
 					"name": "TaxonomyArtifactDeletionLedger_pk"
 				}
 			},

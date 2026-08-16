@@ -8,10 +8,7 @@ const SAFE_PREVIEW_VERSION = /^[A-Za-z0-9._:-]{1,128}$/;
 const MAX_INLINE_PREVIEW_DATA_LENGTH = 1_000_000;
 
 function normalizeLocalPreviewPath(value: string): string | null {
-	if (
-		!value.startsWith('/api/') ||
-		/[\x00-\x1F\x7F\\\s"'`(){};]/.test(value)
-	) {
+	if (!value.startsWith('/api/') || /[\x00-\x1F\x7F\\\s"'`(){};]/.test(value)) {
 		return null;
 	}
 
@@ -64,11 +61,7 @@ export function isSafeLocalMediaThumbnailPath(value: unknown): value is string {
 }
 
 export function isSafeInlineRasterPreviewDataUrl(value: unknown): value is string {
-	return (
-		typeof value === 'string' &&
-		value.length <= MAX_INLINE_PREVIEW_DATA_LENGTH &&
-		RASTER_DATA_URL.test(value)
-	);
+	return typeof value === 'string' && value.length <= MAX_INLINE_PREVIEW_DATA_LENGTH && RASTER_DATA_URL.test(value);
 }
 
 /**

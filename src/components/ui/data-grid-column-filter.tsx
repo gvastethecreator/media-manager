@@ -26,7 +26,11 @@ interface DataGridColumnFilterProps<TData extends RowData, TValue> {
 	title?: string;
 }
 
-function DataGridColumnFilter<TData extends RowData, TValue>({ column, title, options }: DataGridColumnFilterProps<TData, TValue>) {
+function DataGridColumnFilter<TData extends RowData, TValue>({
+	column,
+	title,
+	options,
+}: DataGridColumnFilterProps<TData, TValue>) {
 	const facets = column?.getFacetedUniqueValues();
 	const selectedValues = new Set(column?.getFilterValue() as string[]);
 

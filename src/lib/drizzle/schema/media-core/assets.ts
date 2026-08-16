@@ -161,7 +161,7 @@ export const sourceFiles = sqliteTable(
 			sql`length(contentHash) = 64 AND contentHash = lower(contentHash)
 				AND contentHash NOT GLOB '*[^0-9a-f]*'`
 		),
-			extensionCheck: check(
+		extensionCheck: check(
 			'SourceFile_extension_check',
 			sql`extension IS NULL OR (
 				length(extension) BETWEEN 1 AND 32 AND extension = lower(extension) AND extension NOT LIKE '.%'
@@ -171,10 +171,7 @@ export const sourceFiles = sqliteTable(
 			'SourceFile_file_identity_check',
 			sql`fileIdentity IS NULL OR length(fileIdentity) BETWEEN 1 AND 512`
 		),
-		mimeTypeCheck: check(
-			'SourceFile_mime_type_check',
-			sql`mimeType IS NULL OR length(mimeType) BETWEEN 3 AND 255`
-		),
+		mimeTypeCheck: check('SourceFile_mime_type_check', sql`mimeType IS NULL OR length(mimeType) BETWEEN 3 AND 255`),
 		relativePathCheck: check(
 			'SourceFile_relative_path_check',
 			sql`length(relativePath) BETWEEN 1 AND 2048

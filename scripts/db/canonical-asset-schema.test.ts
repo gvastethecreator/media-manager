@@ -142,15 +142,13 @@ describe('canonical Asset persistence', () => {
 					"UPDATE Asset SET status = 'deleted', statusBeforeDeletion = 'archived', deletedAt = ?, updatedAt = ? WHERE id = 'asset-image-1'"
 				)
 				.run(now + 1, now + 1);
-			expect(() =>
-				database.exec(
-					"UPDATE Asset SET archivedAt = NULL WHERE id = 'asset-image-1'"
-				)
-			).toThrow();
-			expect(database.query("SELECT status, statusBeforeDeletion FROM Asset WHERE id = 'asset-image-1'").get()).toEqual({
-				status: 'deleted',
-				statusBeforeDeletion: 'archived',
-			});
+			expect(() => database.exec("UPDATE Asset SET archivedAt = NULL WHERE id = 'asset-image-1'")).toThrow();
+			expect(database.query("SELECT status, statusBeforeDeletion FROM Asset WHERE id = 'asset-image-1'").get()).toEqual(
+				{
+					status: 'deleted',
+					statusBeforeDeletion: 'archived',
+				}
+			);
 			database.exec(
 				"UPDATE Asset SET status = 'archived', statusBeforeDeletion = NULL, deletedAt = NULL WHERE id = 'asset-image-1'"
 			);
@@ -251,7 +249,9 @@ describe('canonical Asset persistence', () => {
 			`);
 
 			expect(database.query('SELECT count(*) AS count FROM Asset').get()).toEqual({ count: 2 });
-			expect(database.query('SELECT count(*) AS count FROM SourceFile WHERE contentHash = ?').get(duplicateHash)).toEqual({
+			expect(
+				database.query('SELECT count(*) AS count FROM SourceFile WHERE contentHash = ?').get(duplicateHash)
+			).toEqual({
 				count: 2,
 			});
 			expect(database.query("SELECT id FROM Asset WHERE primarySourceFileId = 'source-one'").get()).toEqual({

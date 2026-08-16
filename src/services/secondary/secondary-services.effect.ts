@@ -480,8 +480,7 @@ const makeWildcardService = (): WildcardServiceInterface => {
 	const deleteFileBacked = (
 		id: string,
 		beforeDelete?: (transaction: FavoriteWriteTransaction) => Promise<void>
-	): Effect.Effect<void, WildcardError> =>
-		deleteEntity(id, true, beforeDelete);
+	): Effect.Effect<void, WildcardError> => deleteEntity(id, true, beforeDelete);
 
 	const toggleFavorite = (id: string): Effect.Effect<WildcardRecord, WildcardError> =>
 		Effect.gen(function* () {
@@ -703,8 +702,7 @@ const makeNoteService = (): NoteServiceInterface => {
 	const deleteFileBacked = (
 		id: string,
 		beforeDelete?: (transaction: FavoriteWriteTransaction) => Promise<void>
-	): Effect.Effect<void, NoteError> =>
-		deleteEntity(id, true, beforeDelete);
+	): Effect.Effect<void, NoteError> => deleteEntity(id, true, beforeDelete);
 
 	const getImages = (id: string): Effect.Effect<NoteImageRecord[], NoteError> =>
 		Effect.gen(function* () {

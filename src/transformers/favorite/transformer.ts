@@ -133,9 +133,7 @@ export function calculateFavoriteStats(favorites: FavoriteComplete[], recentLimi
 	}
 
 	// Ordenar por fecha para obtener los más recientes
-	const recentlyAdded = [...favorites]
-		.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime())
-		.slice(0, recentLimit);
+	const recentlyAdded = [...favorites].sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime()).slice(0, recentLimit);
 
 	return {
 		totalCount: favorites.length,

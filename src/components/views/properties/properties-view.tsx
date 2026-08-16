@@ -125,28 +125,28 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 										<p className="text-muted-foreground text-sm">{property.value}</p>
 										<div className="mt-2 flex gap-2">
 											<Button onClick={() => handleEditProperty(property)} size="sm" variant="outline">
-											<Edit className="mr-1 h-4 w-4" /> Edit
+												<Edit className="mr-1 h-4 w-4" /> Edit
 											</Button>
 											<AlertDialog>
 												<AlertDialogTrigger asChild>
 													<Button size="sm" variant="destructive">
-												<Trash2 className="mr-1 h-4 w-4" /> Delete
+														<Trash2 className="mr-1 h-4 w-4" /> Delete
 													</Button>
 												</AlertDialogTrigger>
 												<AlertDialogContent>
 													<AlertDialogHeader>
-												<AlertDialogTitle>Delete this property?</AlertDialogTitle>
+														<AlertDialogTitle>Delete this property?</AlertDialogTitle>
 														<AlertDialogDescription>
-													This will permanently delete the property "{property.name}".
+															This will permanently delete the property "{property.name}".
 														</AlertDialogDescription>
 													</AlertDialogHeader>
 													<AlertDialogFooter>
-												<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogCancel>Cancel</AlertDialogCancel>
 														<AlertDialogAction
 															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 															onClick={() => handleDeleteProperty(property.id)}
 														>
-													Delete
+															Delete
 														</AlertDialogAction>
 													</AlertDialogFooter>
 												</AlertDialogContent>

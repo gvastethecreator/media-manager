@@ -433,7 +433,7 @@ export function EntityList({
 						{/* Selector de ordenación */}
 						<Select onValueChange={setSelectedSort} value={selectedSort}>
 							<SelectTrigger className="w-[140px]">
-							<SelectValue placeholder="Sort by" />
+								<SelectValue placeholder="Sort by" />
 							</SelectTrigger>
 							<SelectContent>
 								{sortOptions.map((option) => (

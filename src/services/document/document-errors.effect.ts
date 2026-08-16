@@ -29,8 +29,4 @@ export class DocumentHashConflict extends Data.TaggedError('DocumentHashConflict
 	readonly message?: string;
 }> {}
 
-export type DocumentError =
-	| DocumentNotFound
-	| DocumentDatabaseError
-	| DocumentValidationError
-	| DocumentHashConflict;
+export type DocumentError = DocumentNotFound | DocumentDatabaseError | DocumentValidationError | DocumentHashConflict;

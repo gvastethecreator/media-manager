@@ -114,9 +114,9 @@ export default defineConfig({
 		// Optimizaci?n de proxy para mejor rendimiento
 		proxy: shouldUseLocalSessionProxy
 			? {
-				'/api': localSessionProxy,
-				'/uploads': localSessionProxy,
-			}
+					'/api': localSessionProxy,
+					'/uploads': localSessionProxy,
+				}
 			: undefined,
 		// Optimizaci?n de watch para Bun
 		watch: {
@@ -202,13 +202,13 @@ export default defineConfig({
 			...(isTestEnvironment
 				? []
 				: [
-					{ find: 'fs/promises', replacement: emptyModule },
-					{ find: 'fs', replacement: emptyModule },
-					{ find: 'path', replacement: emptyModule },
-					{ find: 'crypto', replacement: emptyModule },
-					{ find: 'sharp', replacement: emptyModule },
-					{ find: 'http', replacement: emptyModule },
-				]),
+						{ find: 'fs/promises', replacement: emptyModule },
+						{ find: 'fs', replacement: emptyModule },
+						{ find: 'path', replacement: emptyModule },
+						{ find: 'crypto', replacement: emptyModule },
+						{ find: 'sharp', replacement: emptyModule },
+						{ find: 'http', replacement: emptyModule },
+					]),
 		],
 		// Optimizaci?n de resoluci?n de m?dulos
 		mainFields: ['browser', 'module', 'main'],

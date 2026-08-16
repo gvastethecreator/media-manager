@@ -39,7 +39,15 @@ import type {
 	LegacyRow,
 } from '@tanstack/react-table/legacy';
 
-export { flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel };
+export {
+	flexRender,
+	getCoreRowModel,
+	getFacetedRowModel,
+	getFacetedUniqueValues,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+};
 export const useReactTable = useLegacyTable;
 
 export type { ColumnFiltersState, RowData, SortingState, TableFeatures } from '@tanstack/table-core';
@@ -47,12 +55,24 @@ export type VisibilityState = ColumnVisibilityState;
 
 // Keep the feature-first generic shape accepted by the v9 core types while
 // binding every component to the legacy feature set at runtime.
-export type Table<_TFeatures extends TableFeatures = LegacyFeatures, TData extends RowData = RowData> = LegacyReactTable<TData>;
-export type Column<_TFeatures extends TableFeatures, TData extends RowData, TValue = unknown> = LegacyColumn<TData, TValue>;
-export type ColumnDef<_TFeatures extends TableFeatures, TData extends RowData, TValue = unknown> = LegacyColumnDef<TData, TValue>;
+export type Table<
+	_TFeatures extends TableFeatures = LegacyFeatures,
+	TData extends RowData = RowData,
+> = LegacyReactTable<TData>;
+export type Column<_TFeatures extends TableFeatures, TData extends RowData, TValue = unknown> = LegacyColumn<
+	TData,
+	TValue
+>;
+export type ColumnDef<_TFeatures extends TableFeatures, TData extends RowData, TValue = unknown> = LegacyColumnDef<
+	TData,
+	TValue
+>;
 export type Row<_TFeatures extends TableFeatures, TData extends RowData> = LegacyRow<TData>;
 export type Cell<_TFeatures extends TableFeatures, TData extends RowData, TValue = unknown> = LegacyCell<TData, TValue>;
-export type Header<_TFeatures extends TableFeatures, TData extends RowData, TValue = unknown> = LegacyHeader<TData, TValue>;
+export type Header<_TFeatures extends TableFeatures, TData extends RowData, TValue = unknown> = LegacyHeader<
+	TData,
+	TValue
+>;
 export type HeaderGroup<_TFeatures extends TableFeatures, TData extends RowData> = LegacyHeaderGroup<TData>;
 
 // These imports are intentionally kept as type-only aliases for consumers

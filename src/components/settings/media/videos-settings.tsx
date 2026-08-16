@@ -108,7 +108,7 @@ export function VideosSettings() {
 													setNameInput(video.name);
 												}}
 												size="icon"
-											title="Edit"
+												title="Edit"
 												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
@@ -117,7 +117,7 @@ export function VideosSettings() {
 												className="h-8 w-8 hover:text-destructive"
 												onClick={() => handleDelete(video.id)}
 												size="icon"
-											title="Delete"
+												title="Delete"
 												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />

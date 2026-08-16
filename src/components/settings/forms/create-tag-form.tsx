@@ -168,7 +168,7 @@ export function CreateTagForm({
 							<Select defaultValue={field.value || undefined} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-									<SelectValue placeholder="Select a category" />
+										<SelectValue placeholder="Select a category" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>

@@ -337,7 +337,7 @@ export function ThemeSettings() {
 								<DialogTrigger asChild>
 									<Button className="gap-2" size="sm" variant="ghost">
 										<Upload className="h-4 w-4" />
-									Import
+										Import
 									</Button>
 								</DialogTrigger>
 								<DialogContent>
@@ -345,9 +345,7 @@ export function ThemeSettings() {
 										<DialogTitle>Import Theme</DialogTitle>
 									</DialogHeader>
 									<div className="flex flex-col gap-4 py-4">
-										<p className="text-muted-foreground text-sm">
-											Select a previously exported theme JSON file.
-										</p>
+										<p className="text-muted-foreground text-sm">Select a previously exported theme JSON file.</p>
 										<Input accept=".json" onChange={handleImport} type="file" />
 									</div>
 								</DialogContent>
@@ -385,8 +383,7 @@ export function ThemeSettings() {
 													<p className="truncate text-muted-foreground text-xs">{theme.description}</p>
 												)}
 												<p className="mt-1 text-[10px] text-muted-foreground">
-												{theme.isDark ? 'Dark' : 'Light'} • Updated{' '}
-													{new Date(theme.updatedAt).toLocaleDateString()}
+													{theme.isDark ? 'Dark' : 'Light'} • Updated {new Date(theme.updatedAt).toLocaleDateString()}
 												</p>
 											</div>
 

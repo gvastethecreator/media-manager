@@ -3,7 +3,7 @@
  * @module components/features/file-viewer/viewers/three-d-viewer
  */
 
-import { ContactShadows, Environment, OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
+import { ContactShadows, OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { Box as BoxIcon, Download, Info, RotateCcw } from 'lucide-react';
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -133,13 +133,13 @@ const Scene = memo(function Scene({ format, onReady, url }: LoadedModelProps) {
 	return (
 		<>
 			<PerspectiveCamera fov={50} makeDefault position={[0, 1.6, 4.2]} />
-			<ambientLight intensity={0.55} />
-			<directionalLight castShadow intensity={1.1} position={[8, 10, 5]} />
-			<pointLight intensity={0.35} position={[-8, -6, -8]} />
+			<ambientLight intensity={0.65} />
+			<directionalLight castShadow intensity={1.2} position={[8, 10, 5]} />
+			<pointLight intensity={0.4} position={[-8, -6, -8]} />
+			<hemisphereLight groundColor="#444444" intensity={0.35} />
 
 			<Suspense fallback={null}>
 				<LoadedModel format={format} onReady={onReady} url={url} />
-				<Environment preset="city" />
 				<ContactShadows blur={2.5} far={4} opacity={0.35} position={[0, -1.25, 0]} scale={8} />
 			</Suspense>
 
@@ -231,7 +231,9 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 		<Card className={cn('relative h-full overflow-hidden', className)}>
 			<div className="absolute inset-0 bg-gradient-to-b from-background to-muted">
 				<ErrorBoundary
-					fallback={<ErrorPlaceholder error="Could not render the 3D view." fileName={fileName} onDownload={handleDownload} />}
+					fallback={
+						<ErrorPlaceholder error="Could not render the 3D view." fileName={fileName} onDownload={handleDownload} />
+					}
 				>
 					<Canvas
 						camera={{ position: [0, 1.6, 4.2], fov: 50 }}

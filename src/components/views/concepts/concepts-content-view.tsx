@@ -104,11 +104,7 @@ const ConceptsContentView: React.FC<ConceptsContentViewProps> = ({
 				{/* Lista de conceptos */}
 				{filteredConcepts.length === 0 && !isLoading && !showForm ? (
 					<EmptyState
-						description={
-							searchTerm
-								? `No concepts match "${searchTerm}"`
-								: 'No concepts are available'
-						}
+						description={searchTerm ? `No concepts match "${searchTerm}"` : 'No concepts are available'}
 						icon={Lightbulb}
 						title="No concepts yet"
 					/>

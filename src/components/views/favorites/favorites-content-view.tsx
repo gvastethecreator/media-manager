@@ -75,9 +75,7 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 				<div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 					<div>
 						<h2 className="font-bold text-xl">Favorites</h2>
-						<p className="text-muted-foreground text-sm">
-							Add or remove favorites from each item in the application.
-						</p>
+						<p className="text-muted-foreground text-sm">Add or remove favorites from each item in the application.</p>
 					</div>
 					<div className="w-full md:max-w-sm">
 						<Label className="sr-only" htmlFor="favoritesSearch">

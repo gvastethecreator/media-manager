@@ -238,7 +238,10 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 			</div>
 
 			{/* Carousel Fijo - Zona Inferior */}
-			<div className="absolute right-0 bottom-0 left-0 flex shrink-0 items-center justify-center pb-4" style={{ height: 100, zIndex: 100 }}>
+			<div
+				className="absolute right-0 bottom-0 left-0 flex shrink-0 items-center justify-center pb-4"
+				style={{ height: 100, zIndex: 100 }}
+			>
 				<ThumbnailNavigation currentIndex={currentIndex} images={images} onSelectImage={handleSelectImage} />
 			</div>
 

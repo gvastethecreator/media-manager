@@ -41,9 +41,9 @@ export function App() {
 							{/* SkipLink para accesibilidad - WCAG 2.4.1 */}
 							<SkipLink targetId="main-content">Skip to main content</SkipLink>
 
-						<SSENavigationRefresher />
-						<EntityCatalogBootstrapper />
-						<RouterProvider router={router} />
+							<SSENavigationRefresher />
+							<EntityCatalogBootstrapper />
+							<RouterProvider router={router} />
 						</ErrorBoundary>
 					</FeedbackProvider>
 				</ReactScanProvider>

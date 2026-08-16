@@ -166,9 +166,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
 								<Label className="font-medium text-sm">Mostrar metadatos</Label>
-								<p className="text-muted-foreground text-xs">
-									Show extra details such as dates, sizes, and tags
-								</p>
+								<p className="text-muted-foreground text-xs">Show extra details such as dates, sizes, and tags</p>
 							</div>
 							<Switch checked={showMetadata} onCheckedChange={(v) => updateConfig({ showMetadata: v })} />
 						</div>
@@ -177,9 +175,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
 								<Label className="font-medium text-sm">Automatic preview</Label>
-								<p className="text-muted-foreground text-xs">
-									Show a preview when you hover over a card
-								</p>
+								<p className="text-muted-foreground text-xs">Show a preview when you hover over a card</p>
 							</div>
 							<Switch checked={showPreview} onCheckedChange={(v) => updateConfig({ showPreview: v })} />
 						</div>

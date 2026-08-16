@@ -29,8 +29,4 @@ export class JsonFileHashConflict extends Data.TaggedError('JsonFileHashConflict
 	readonly message?: string;
 }> {}
 
-export type JsonFileError =
-	| JsonFileNotFound
-	| JsonFileDatabaseError
-	| JsonFileValidationError
-	| JsonFileHashConflict;
+export type JsonFileError = JsonFileNotFound | JsonFileDatabaseError | JsonFileValidationError | JsonFileHashConflict;

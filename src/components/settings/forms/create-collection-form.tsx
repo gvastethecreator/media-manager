@@ -302,7 +302,7 @@ export function CreateCollectionForm({
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-									<SelectValue placeholder="Select category" />
+										<SelectValue placeholder="Select category" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -327,7 +327,7 @@ export function CreateCollectionForm({
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-									<SelectValue placeholder="Select platform" />
+										<SelectValue placeholder="Select platform" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>

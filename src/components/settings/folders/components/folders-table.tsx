@@ -413,7 +413,7 @@ export function FoldersTable({
 															{folder.isFavorite && <Star className="h-3 w-3 fill-warning text-warning" />}
 															{folder._isOrphan && (
 																<Badge className="text-[11px]" variant="destructive">
-															Orphaned
+																	Orphaned
 																</Badge>
 															)}
 														</div>
@@ -450,8 +450,8 @@ export function FoldersTable({
 																</TooltipTrigger>
 																<TooltipContent>
 																	{folder.lastIndexed
-																			? `Indexed on ${formatDate(folder.lastIndexed)}`
-																			: 'Never indexed'}
+																		? `Indexed on ${formatDate(folder.lastIndexed)}`
+																		: 'Never indexed'}
 																</TooltipContent>
 															</Tooltip>
 														</div>

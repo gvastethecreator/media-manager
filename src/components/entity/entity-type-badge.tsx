@@ -119,9 +119,7 @@ export function EntityTypeBadge({
 							<span className="font-semibold">{displayName}</span>
 						</div>
 
-						{metadata?.hasPreview === true && (
-							<div className="text-muted-foreground text-xs">✨ Supports preview</div>
-						)}
+						{metadata?.hasPreview === true && <div className="text-muted-foreground text-xs">✨ Supports preview</div>}
 
 						{metadata?.isContainer === true && (
 							<div className="text-muted-foreground text-xs">📦 Contenedor de elementos</div>

@@ -174,8 +174,8 @@ export function SystemMetricsPanel() {
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-									formatter={(value) => [`${toNumberValue(value)}%`, 'CPU Usage']}
-									labelFormatter={(time) => `Time: ${time}`}
+										formatter={(value) => [`${toNumberValue(value)}%`, 'CPU Usage']}
+										labelFormatter={(time) => `Time: ${time}`}
 									/>
 									<Line dataKey="usage" stroke={METRIC_COLORS.cpu} strokeWidth={2} type="monotone" />
 								</LineChart>
@@ -206,8 +206,8 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-									formatter={(value) => [`${toNumberValue(value)} MB`, 'Memory']}
-									labelFormatter={(time) => `Time: ${time}`}
+										formatter={(value) => [`${toNumberValue(value)} MB`, 'Memory']}
+										labelFormatter={(time) => `Time: ${time}`}
 									/>
 									<Area
 										dataKey="used"
@@ -246,7 +246,7 @@ export function SystemMetricsPanel() {
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-									formatter={(value) => [`${toNumberValue(value)}%`, 'Usage']}
+										formatter={(value) => [`${toNumberValue(value)}%`, 'Usage']}
 										labelFormatter={(name) => `${name}`}
 									/>
 									<Bar dataKey="usage" fill={CHART_COLORS.primary} />
@@ -335,7 +335,7 @@ export function SystemMetricsPanel() {
 									<YAxis dataKey="endpoint" tick={{ fontSize: 10 }} type="category" width={80} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-									formatter={(value) => [formatNumber(toNumberValue(value)), 'Requests']}
+										formatter={(value) => [formatNumber(toNumberValue(value)), 'Requests']}
 										labelFormatter={(name) => `Endpoint: ${name}`}
 									/>
 									<Bar dataKey="hits" fill={CHART_COLORS.primary} />
@@ -402,7 +402,7 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-									formatter={(value) => [`${toNumberValue(value)} MB/s`, 'Speed']}
+										formatter={(value) => [`${toNumberValue(value)} MB/s`, 'Speed']}
 										labelFormatter={(name) => `Operation: ${name}`}
 									/>
 									<Bar dataKey="value" fill={CHART_COLORS.primary}>

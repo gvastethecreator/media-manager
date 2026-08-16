@@ -82,10 +82,10 @@ export function DocumentSettings() {
 										<div>
 											<div className="font-medium text-sm">{d.name}</div>
 											<div className="text-muted-foreground text-xs">
-											{d.size ? `${(d.size / 1024).toFixed(1)}KB` : 'Size unavailable'}
+												{d.size ? `${(d.size / 1024).toFixed(1)}KB` : 'Size unavailable'}
 											</div>
-										{d.pageCount && <div className="text-muted-foreground text-xs">{d.pageCount} pages</div>}
-										{d.wordCount && <div className="text-muted-foreground text-xs">{d.wordCount} words</div>}
+											{d.pageCount && <div className="text-muted-foreground text-xs">{d.pageCount} pages</div>}
+											{d.wordCount && <div className="text-muted-foreground text-xs">{d.wordCount} words</div>}
 										</div>
 										<div className="flex items-center gap-1">
 											<Button
@@ -95,7 +95,7 @@ export function DocumentSettings() {
 													setNameInput(d.name);
 												}}
 												size="icon"
-											title="Edit"
+												title="Edit"
 												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
@@ -104,7 +104,7 @@ export function DocumentSettings() {
 												className="h-8 w-8 hover:text-destructive"
 												onClick={() => handleDelete(d.id)}
 												size="icon"
-											title="Delete"
+												title="Delete"
 												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />

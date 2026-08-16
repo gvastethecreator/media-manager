@@ -137,12 +137,7 @@ export function File3DContentView() {
 
 	if (loading && !file3D) {
 		return (
-			<BaseContentView
-				description="Loading 3D file..."
-				headerControls={headerControls}
-				icon="🧊"
-				title="3D Details"
-			>
+			<BaseContentView description="Loading 3D file..." headerControls={headerControls} icon="🧊" title="3D Details">
 				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
 						<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />

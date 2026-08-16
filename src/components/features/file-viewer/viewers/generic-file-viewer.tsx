@@ -332,7 +332,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 
 					{/* File Metadata */}
 					<div className="rounded-lg border p-6">
-					<h3 className="mb-4 font-semibold text-lg">File information</h3>
+						<h3 className="mb-4 font-semibold text-lg">File information</h3>
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<div>
 								<span className="font-medium">Name:</span>

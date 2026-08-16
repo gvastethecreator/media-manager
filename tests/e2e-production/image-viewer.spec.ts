@@ -136,7 +136,7 @@ test('abre el visor global desde el detalle de una imagen', async ({ page, reque
 	await page.goto(`/images/${image.id}`, { waitUntil: 'domcontentloaded' });
 	await expectImageReady(page.getByRole('img', { name: fileName }));
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('image-detail-preview.png') });
-	const openViewerButton = page.getByRole('button', { exact: true, name: 'Visor' });
+	const openViewerButton = page.getByRole('button', { exact: true, name: 'Viewer' });
 	await expect(openViewerButton).toBeVisible();
 	await openViewerButton.click();
 	const dialog = page.getByRole('dialog');
@@ -158,7 +158,7 @@ test('abre el visor global desde un resultado de búsqueda de imagen', async ({ 
 	const { image } = await createImageFixture(request, mediaRoot, fileName);
 
 	await page.goto('/search', { waitUntil: 'domcontentloaded' });
-	await page.getByPlaceholder('Buscar imágenes, videos, audios, documentos...').fill(fileName);
+	await page.getByPlaceholder('Search images, videos, audio, documents...').fill(fileName);
 	const item = page.locator(`[data-item-id="${image.id}"]`);
 	await expect(item).toBeVisible({ timeout: 30_000 });
 	const contentResponse = page.waitForResponse(
@@ -215,7 +215,7 @@ test('informa una fuente de imagen ausente sin dejar un visor vacío', async ({ 
 	await page.goto('/all-images', { waitUntil: 'domcontentloaded' });
 	const item = page.getByText(fileName, { exact: true }).first();
 	await expect(item).toBeVisible();
-	await rm(resolve(mediaRoot, relativePath));
+	await rm(resolve(mediaRoot, relativePath), { force: true, maxRetries: 10, recursive: true, retryDelay: 200 });
 	const contentResponse = page.waitForResponse(
 		(response) =>
 			response.request().method() === 'GET' && new URL(response.url()).pathname === `/api/images/${image.id}/content`
@@ -224,7 +224,7 @@ test('informa una fuente de imagen ausente sin dejar un visor vacío', async ({ 
 	expect((await contentResponse).status()).toBe(404);
 	const dialog = page.getByRole('dialog');
 	await expect(dialog).toBeVisible();
-	await expect(dialog.getByRole('alert')).toContainText('No se pudo cargar esta imagen.');
+	await expect(dialog.getByRole('alert')).toContainText('This image could not be loaded.');
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('image-viewer-missing-source.png') });
 	await page.keyboard.press('Escape');
 	await expect(dialog).toBeHidden();

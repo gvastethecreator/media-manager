@@ -277,17 +277,11 @@ export function AppearanceSettingsModern() {
 					icon={<LayoutGrid />}
 					title="Visual Effects"
 				>
-					<SettingsRow
-						description="Enable smooth transitions between interface states"
-						label="Global Animations"
-					>
+					<SettingsRow description="Enable smooth transitions between interface states" label="Global Animations">
 						<Switch checked={preferences.animations} onCheckedChange={(v) => setPreferences({ animations: v })} />
 					</SettingsRow>
 
-					<SettingsRow
-						description="Add subtle elevation effects when hovering over items"
-						label="Thumbnail Animations"
-					>
+					<SettingsRow description="Add subtle elevation effects when hovering over items" label="Thumbnail Animations">
 						<Switch
 							checked={preferences.thumbnailsAnimations}
 							onCheckedChange={(v) => setPreferences({ thumbnailsAnimations: v })}

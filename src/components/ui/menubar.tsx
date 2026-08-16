@@ -16,84 +16,96 @@ import { cn } from '@/lib/utils';
 
 const useMenubarAnimation = () => {
 	const prefersReducedMotion = useReducedMotion();
-	const animateContent = React.useCallback((element: HTMLElement, isOpen: boolean) => {
-		if (!(element && !prefersReducedMotion)) return;
+	const animateContent = React.useCallback(
+		(element: HTMLElement, isOpen: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
 
-		if (isOpen) {
-			gsap.fromTo(
-				element,
-				{
-					opacity: 0,
-					y: -8,
-					scale: 0.95,
-				},
-				{
-					opacity: 1,
-					y: 0,
-					scale: 1,
-					duration: 0.2,
-					ease: 'power2.out',
-				}
-			);
-		} else {
-			gsap.fromTo(
-				element,
-				{
-					opacity: 1,
-					y: 0,
-					scale: 1,
-				},
-				{
-					opacity: 0,
-					y: -4,
-					scale: 0.98,
-					duration: 0.15,
-					ease: 'power2.out',
-				}
-			);
-		}
-	}, [prefersReducedMotion]);
+			if (isOpen) {
+				gsap.fromTo(
+					element,
+					{
+						opacity: 0,
+						y: -8,
+						scale: 0.95,
+					},
+					{
+						opacity: 1,
+						y: 0,
+						scale: 1,
+						duration: 0.2,
+						ease: 'power2.out',
+					}
+				);
+			} else {
+				gsap.fromTo(
+					element,
+					{
+						opacity: 1,
+						y: 0,
+						scale: 1,
+					},
+					{
+						opacity: 0,
+						y: -4,
+						scale: 0.98,
+						duration: 0.15,
+						ease: 'power2.out',
+					}
+				);
+			}
+		},
+		[prefersReducedMotion]
+	);
 
-	const animateSubContent = React.useCallback((element: HTMLElement, isOpen: boolean) => {
-		if (!(element && !prefersReducedMotion)) return;
+	const animateSubContent = React.useCallback(
+		(element: HTMLElement, isOpen: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
 
-		if (isOpen) {
-			gsap.fromTo(
-				element,
-				{
-					opacity: 0,
-					x: -8,
-				},
-				{
-					opacity: 1,
-					x: 0,
-					duration: 0.15,
-					ease: 'power2.out',
-				}
-			);
-		}
-	}, [prefersReducedMotion]);
+			if (isOpen) {
+				gsap.fromTo(
+					element,
+					{
+						opacity: 0,
+						x: -8,
+					},
+					{
+						opacity: 1,
+						x: 0,
+						duration: 0.15,
+						ease: 'power2.out',
+					}
+				);
+			}
+		},
+		[prefersReducedMotion]
+	);
 
-	const animateItemHover = React.useCallback((element: HTMLElement, isHovering: boolean) => {
-		if (!(element && !prefersReducedMotion)) return;
+	const animateItemHover = React.useCallback(
+		(element: HTMLElement, isHovering: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
 
-		gsap.to(element, {
-			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 15%, transparent)' : 'transparent',
-			scale: isHovering ? 1.01 : 1,
-			duration: 0.15,
-			ease: 'power2.out',
-		});
-	}, [prefersReducedMotion]);
+			gsap.to(element, {
+				backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 15%, transparent)' : 'transparent',
+				scale: isHovering ? 1.01 : 1,
+				duration: 0.15,
+				ease: 'power2.out',
+			});
+		},
+		[prefersReducedMotion]
+	);
 
-	const animateTriggerHover = React.useCallback((element: HTMLElement, isHovering: boolean) => {
-		if (!(element && !prefersReducedMotion)) return;
+	const animateTriggerHover = React.useCallback(
+		(element: HTMLElement, isHovering: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
 
-		gsap.to(element, {
-			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
-			duration: 0.15,
-			ease: 'power2.out',
-		});
-	}, [prefersReducedMotion]);
+			gsap.to(element, {
+				backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
+				duration: 0.15,
+				ease: 'power2.out',
+			});
+		},
+		[prefersReducedMotion]
+	);
 
 	return { animateContent, animateSubContent, animateItemHover, animateTriggerHover };
 };

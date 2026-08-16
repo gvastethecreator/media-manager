@@ -117,9 +117,7 @@ export function FileBrowserToolbar({
 			<div className="flex items-center gap-2">
 				{hasSelection ? (
 					<>
-						<span className="text-muted-foreground text-sm">
-							{selectedCount} selected
-						</span>
+						<span className="text-muted-foreground text-sm">{selectedCount} selected</span>
 						<Button onClick={onClearSelection} size="sm" variant="ghost">
 							Clear
 						</Button>

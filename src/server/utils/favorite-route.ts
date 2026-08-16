@@ -26,11 +26,7 @@ function normalizeSortValue(value: unknown): number | string {
 	return 0;
 }
 
-function sortEntitiesByField<T extends object>(
-	items: T[],
-	sortBy: string,
-	sortOrder: 'asc' | 'desc'
-): T[] {
+function sortEntitiesByField<T extends object>(items: T[], sortBy: string, sortOrder: 'asc' | 'desc'): T[] {
 	const direction = sortOrder === 'asc' ? 1 : -1;
 
 	return [...items].sort((left, right) => {
@@ -49,10 +45,7 @@ function sortEntitiesByField<T extends object>(
 	});
 }
 
-export interface ListFavoriteEntitiesOptions<
-	TEntity extends object,
-	TResult extends object = TEntity,
-> {
+export interface ListFavoriteEntitiesOptions<TEntity extends object, TResult extends object = TEntity> {
 	entityType: FavoriteEntityType;
 	getEntityById: (entityId: string) => Effect.Effect<TEntity, unknown, never>;
 	limit: number;
@@ -68,10 +61,7 @@ export interface ListFavoriteEntitiesResult<TResult extends object> {
 	total: number;
 }
 
-export function listFavoriteEntities<
-	TEntity extends object,
-	TResult extends object = TEntity,
->(
+export function listFavoriteEntities<TEntity extends object, TResult extends object = TEntity>(
 	options: ListFavoriteEntitiesOptions<TEntity, TResult>
 ): Effect.Effect<ListFavoriteEntitiesResult<TResult>, Error, never> {
 	return Effect.gen(function* () {

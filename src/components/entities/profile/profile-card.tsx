@@ -96,8 +96,7 @@ export function ProfileCard({
 									<span className="font-medium">Created:</span> {new Date(profile.createdAt).toLocaleDateString()}
 								</p>
 								<p className="text-sm">
-									<span className="font-medium">Last updated:</span>{' '}
-									{new Date(profile.updatedAt).toLocaleDateString()}
+									<span className="font-medium">Last updated:</span> {new Date(profile.updatedAt).toLocaleDateString()}
 								</p>
 								{/* Más detalles del perfil */}
 							</div>

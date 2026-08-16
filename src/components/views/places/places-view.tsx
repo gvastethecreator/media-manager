@@ -148,11 +148,7 @@ export function PlacesView({ isVisible }: ViewProps) {
 					</motion.div>
 				) : (
 					<EmptyState
-						description={
-							localSearch
-								? `No places match "${localSearch}"`
-								: 'No places available'
-						}
+						description={localSearch ? `No places match "${localSearch}"` : 'No places available'}
 						icon={MapPin}
 						title="No places"
 					/>

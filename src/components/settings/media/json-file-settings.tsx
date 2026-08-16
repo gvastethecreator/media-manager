@@ -76,11 +76,11 @@ export function JsonFileSettings() {
 										<div>
 											<div className="font-medium text-sm">{f.name}</div>
 											<div className="text-muted-foreground text-xs">
-											{f.size ? `${(f.size / 1024).toFixed(1)}KB` : 'Size unavailable'}
+												{f.size ? `${(f.size / 1024).toFixed(1)}KB` : 'Size unavailable'}
 											</div>
 											{f.isValid !== undefined && (
 												<div className={`text-xs ${f.isValid ? 'text-success' : 'text-destructive'}`}>
-												{f.isValid ? 'Valid JSON' : 'Invalid JSON'}
+													{f.isValid ? 'Valid JSON' : 'Invalid JSON'}
 												</div>
 											)}
 										</div>
@@ -92,7 +92,7 @@ export function JsonFileSettings() {
 													setNameInput(f.name);
 												}}
 												size="icon"
-											title="Edit"
+												title="Edit"
 												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
@@ -101,7 +101,7 @@ export function JsonFileSettings() {
 												className="h-8 w-8 hover:text-destructive"
 												onClick={() => handleDelete(f.id)}
 												size="icon"
-											title="Delete"
+												title="Delete"
 												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />
