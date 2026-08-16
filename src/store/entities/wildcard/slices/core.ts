@@ -23,35 +23,35 @@ import type { WildcardState } from '../types';
 const wildcardLogger = clientLogger.withContext('WildcardStore');
 
 export interface WildcardCoreSlice {
-	// Getters
-	getWildcard: (id: string) => WildcardWithStats | undefined;
-	getWildcards: () => WildcardWithStats[];
-	getWildcardItems: (wildcardId: string) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
-	getChildWildcards: (parentId: string | null) => WildcardWithStats[];
-	getWildcardHierarchy: () => Record<string | 'root', string[]>;
+	_updateWildcard: (id: string, data: Partial<WildcardWithStats>) => void;
+
+	// Gestión de elementos
+	addItemToWildcard: (wildcardId: string, itemId: string, itemType: 'image' | 'video' | 'note' | 'tag') => void;
 
 	// Operaciones síncronas
 	addWildcard: (wildcard: WildcardWithStats) => void;
 	addWildcards: (wildcards: WildcardWithStats[]) => void;
-	_updateWildcard: (id: string, data: Partial<WildcardWithStats>) => void;
-	deleteWildcard: (id: string) => void;
-
-	// Gestión de elementos
-	addItemToWildcard: (wildcardId: string, itemId: string, itemType: 'image' | 'video' | 'note' | 'tag') => void;
-	removeItemFromWildcard: (wildcardId: string, itemId: string) => void;
 	clearWildcardItems: (wildcardId: string) => void;
-
-	// Estado de carga
-	setLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
+	createWildcard: (data: WildcardCreateInput) => Promise<WildcardWithStats | undefined>;
+	deleteWildcard: (id: string) => void;
 
 	// Acciones asíncronas
 	fetchWildcard: (id: string) => Promise<WildcardWithStats | undefined>;
 	fetchWildcards: () => Promise<WildcardWithStats[]>;
-	createWildcard: (data: WildcardCreateInput) => Promise<WildcardWithStats | undefined>;
-	updateWildcard: (id: string, data: WildcardUpdateInput) => Promise<WildcardWithStats | undefined>;
-	removeWildcard: (id: string) => Promise<boolean>;
+	getChildWildcards: (parentId: string | null) => WildcardWithStats[];
+	// Getters
+	getWildcard: (id: string) => WildcardWithStats | undefined;
+	getWildcardHierarchy: () => Record<string | 'root', string[]>;
+	getWildcardItems: (wildcardId: string) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
+	getWildcards: () => WildcardWithStats[];
 	moveWildcard: (id: string, newParentId: string | null) => Promise<boolean>;
+	removeItemFromWildcard: (wildcardId: string, itemId: string) => void;
+	removeWildcard: (id: string) => Promise<boolean>;
+	setError: (error: string | null) => void;
+
+	// Estado de carga
+	setLoading: (isLoading: boolean) => void;
+	updateWildcard: (id: string, data: WildcardUpdateInput) => Promise<WildcardWithStats | undefined>;
 }
 
 export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreSlice, [], [], WildcardCoreSlice> = (

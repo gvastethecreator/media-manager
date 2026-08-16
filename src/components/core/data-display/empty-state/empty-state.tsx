@@ -4,10 +4,10 @@ import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
+	className?: string;
+	description: string;
 	icon: LucideIcon;
 	title: string;
-	description: string;
-	className?: string;
 }
 
 export function EmptyState({ icon: Icon, title, description, className }: EmptyStateProps) {

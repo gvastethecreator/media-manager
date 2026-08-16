@@ -33,8 +33,7 @@ export function useMainNavigation() {
 	const handleMainNavigate = useCallback(
 		(id: ViewType) => {
 			logger.info(`🧭 Navegando a: ${id}`);
-			// Convertir ViewType a ruta
-			const route = id === 'all-images' ? '/gallery' : `/${id}`;
+			const route = id === '' ? '/' : `/${id}`;
 			navigate(route);
 		},
 		[navigate]

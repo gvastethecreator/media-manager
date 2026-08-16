@@ -1,138 +1,97 @@
 import { Library } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
-import type { CollectionContentProps } from '@/components/views/base/types';
-import { useAddImageToCollection, useCollectionImages, useRemoveImageFromCollection } from '@/lib/api/collections';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
+import { BaseContentView } from '@/components/views/base/base-content-view';
+import { useCollection, useCollectionImages } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { useCollectionStore } from '@/store/entities/collection';
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 const logger = clientLogger.withContext('CollectionContentView');
 
 export function CollectionContentView() {
-	const { selectedCollectionId, getSelectedCollection, selectCollection, isLoading } = useCollectionStore();
+	const { id } = useParams<{ id: string }>();
+	const { selectedCollectionId, getSelectedCollection, getCollectionById, selectCollection, isLoading } =
+		useCollectionStore();
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
+	const effectiveCollectionId = id || selectedCollectionId;
+	const { data: collectionFromRoute, isLoading: isLoadingCollection } = useCollection(id || '');
 
-	const currentCollection = getSelectedCollection();
-
-	const [collectionImages, setCollectionImages] = useState<EntityWithStats[]>([]);
-	const [loadingImages, setLoadingImages] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-
-	const {
-		data: collectionImagesData,
-		isLoading: isLoadingImages,
-		error: collectionError,
-		refetch: refetchCollectionImages,
-	} = useCollectionImages(selectedCollectionId || '');
-
-	const removeImageMutation = useRemoveImageFromCollection();
-	const addImageMutation = useAddImageToCollection();
+	const currentCollection = effectiveCollectionId
+		? ((id ? collectionFromRoute : undefined) ?? getCollectionById(effectiveCollectionId) ?? getSelectedCollection())
+		: getSelectedCollection();
 
 	useEffect(() => {
-		if (!selectedCollectionId) {
-			setCollectionImages([]);
-			return;
+		if (id && id !== selectedCollectionId) {
+			selectCollection(id);
 		}
+	}, [id, selectCollection, selectedCollectionId]);
 
-		const loadImages = async () => {
-			try {
-				setLoadingImages(true);
-				logger.info(`🔄 Cargando imágenes para colección: ${selectedCollectionId}`);
-				if (collectionImagesData) {
-					setCollectionImages(collectionImagesData as EntityWithStats[]);
-				}
-				setError(null);
-				logger.info(`✅ ${collectionImagesData?.length || 0} imágenes cargadas para colección`);
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-				logger.error('❌ Error cargando imágenes de colección:', error);
-				setError(errorMessage);
-				setCollectionImages([]);
-			} finally {
-				setLoadingImages(false);
-			}
-		};
+	useEffect(() => {
+		if (id && collectionFromRoute && id !== selectedCollectionId) {
+			selectCollection(id);
+		}
+	}, [collectionFromRoute, id, selectCollection, selectedCollectionId]);
 
-		loadImages();
-	}, [selectedCollectionId, collectionImagesData]);
-
-	const handleToggleItemSelection = useCallback(
-		async (item: EntityWithStats) => {
-			if (!selectedCollectionId) {
-				logger.warn('⚠️ No hay colección seleccionada para modificar');
-				return;
-			}
-
-			const isSelected = collectionImages.some((img) => img.id === item.id);
-			logger.info(
-				`🔄 ${isSelected ? 'Eliminando' : 'Añadiendo'} imagen ${item.id} ${isSelected ? 'de' : 'a'} colección ${selectedCollectionId}`
-			);
-
-			try {
-				if (isSelected) {
-					await removeImageMutation.mutateAsync({ collectionId: selectedCollectionId, imageId: item.id });
-				} else {
-					await addImageMutation.mutateAsync({ collectionId: selectedCollectionId, imageId: item.id });
-				}
-
-				// Recargar imágenes después de la operación
-				refetchCollectionImages();
-				logger.info('✅ Colección actualizada correctamente');
-			} catch (error) {
-				logger.error('❌ Error al modificar colección:', error);
-				setError('Error al modificar la colección');
-			}
-		},
-		[selectedCollectionId, collectionImages, addImageMutation, removeImageMutation, refetchCollectionImages]
+	const { data: images = [], isLoading: isLoadingImages, error } = useCollectionImages(effectiveCollectionId || '');
+	const browserItems = useMemo(
+		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
+		[images]
 	);
 
-	const contentProps: CollectionContentProps = {
-		items: collectionImages,
-		isLoading: isLoading || loadingImages,
-		error,
-		toggleItemSelection: handleToggleItemSelection,
-		currentContainerId: selectedCollectionId,
-		containerName: currentCollection?.name ?? null,
-		setCurrentContainer: useCallback(
-			async (id: string) => {
-				logger.info(`🔄 Cambiando a colección: ${id}`);
-				selectCollection(id);
-			},
-			[selectCollection]
-		),
-		emptyState: {
-			icon: Library,
-			title: 'Colección vacía',
-			description: currentCollection
-				? `No se encontraron imágenes en ${currentCollection.name}`
-				: 'No hay colección seleccionada',
+	const handleItemSelect = useCallback(
+		(item: BrowserItem) => {
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
+			setSelectedItems([entity]);
+			setDetailsPanelVisible(true);
 		},
-	};
+		[setSelectedItems, setDetailsPanelVisible]
+	);
 
-	if (isLoading || isLoadingImages) {
-		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;
-	}
+	const headerTitle = useMemo(
+		() => (currentCollection?.name ? `Collection images: ${currentCollection.name}` : 'Select a collection'),
+		[currentCollection?.name]
+	);
 
-	if (error || collectionError) {
+	if (!effectiveCollectionId) {
 		return (
-			<div className="flex items-center justify-center p-8 text-red-500">
-				Error: {error || collectionError?.message}
-			</div>
+			<BaseContentView>
+				<div className="flex h-full items-center justify-center">
+					<EmptyState
+						description="Select a collection to view its related images"
+						icon={Library}
+						title="No collection selected"
+					/>
+				</div>
+			</BaseContentView>
 		);
 	}
 
-	if (!collectionImages || collectionImages.length === 0) {
-		return <div className="flex items-center justify-center p-8">No se encontraron imágenes</div>;
+	if (error) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<div className="flex h-full items-center justify-center text-destructive">Error: {error.message}</div>
+			</BaseContentView>
+		);
+	}
+
+	if ((isLoading || isLoadingCollection || isLoadingImages) && images.length === 0) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<LoadingScreen />
+			</BaseContentView>
+		);
 	}
 
 	return (
-		<ContentViewProvider {...contentProps}>
-			<BaseContentView>
-				{/* Collection content will be added here */}
-				<div className="p-4">
-					<p>Contenido de la colección se mostrará aquí</p>
-				</div>
-			</BaseContentView>
-		</ContentViewProvider>
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
+			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
+		</BaseContentView>
 	);
 }

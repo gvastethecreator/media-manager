@@ -1,8 +1,3 @@
-/**
- * Servicio de estadísticas del sistema.
- * Se ha retirado @ts-nocheck y se añaden tipos explícitos donde es factible.
- */
-
 import { randomUUID } from 'crypto';
 import { eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
@@ -29,79 +24,28 @@ import {
 	wildcards,
 	worldItems,
 } from '@/lib/drizzle/schema/index';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
-
-// Constantes para caché
-const STATS_CACHE_TAG = 'stats';
-const STATS_REVALIDATE_SECONDS = 300; // 5 minutos en lugar de 1 minuto
-
-// Logger para estadísticas
-const statsLogger = serverLogger.withContext('StatsService');
-
-// Manejo de errores - enfoque funcional (sin enum)
-const StatsErrorCode = {
-	NOT_FOUND: 'NOT_FOUND',
-	VALIDATION_ERROR: 'VALIDATION_ERROR',
-	OPERATION_FAILED: 'OPERATION_FAILED',
-	ENTITY_NOT_FOUND: 'ENTITY_NOT_FOUND',
-} as const;
-type StatsErrorCode = (typeof StatsErrorCode)[keyof typeof StatsErrorCode];
-
-const createStatsError = (
-	message: string,
-	code: StatsErrorCode = StatsErrorCode.OPERATION_FAILED,
-	cause?: unknown
-): Error & { code: StatsErrorCode; cause?: unknown } => {
-	const error = new Error(message) as Error & { code: StatsErrorCode; cause?: unknown };
-	error.name = 'StatsError';
-	error.code = code;
-	if (cause !== undefined) error.cause = cause;
-	return error;
-};
+import { getRealSystemMetrics } from '@/server/utils/system-metrics';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
+import { createStatsError, StatsErrorCode, statsLogger } from './stats';
 
 // Interfaces
 export interface GeneralStats {
-	totalImages: number;
-	totalVideos: number;
-	totalAudio: number;
-	totalDocuments: number;
-	totalJsonFiles: number;
-	totalFile3D: number;
-	totalFolders: number;
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalNotes: number;
-	totalProperties: number;
-	totalWildcards: number;
-	totalFavorites: number;
-	totalThumbnails: number;
-	totalMetadata: number;
-	totalViews: number;
-	totalDownloads: number;
-	totalSize: number;
-	totalActivities: number;
-	// Información de espacio
-	usedSpace?: number;
-	freeSpace?: number;
+	averageFileSize?: number;
+	cpuCores?: number;
+	cpuModel?: string;
+	cpuUsage?: number;
+	databaseSize?: number;
+	formattedDatabaseSize?: string;
 	diskUsage?: {
 		total: number;
 		used: number;
 		free: number;
 		usedPercentage: number;
 	};
-	topTags: Array<{
-		id: string;
-		name: string;
-		color: string;
-		count: number;
-	}>;
+	freeSpace?: number;
+	hostname?: string;
+	lastUpdated?: string;
 	recentActivity: Array<{
 		id: string;
 		type: string;
@@ -113,27 +57,53 @@ export interface GeneralStats {
 			thumbnail: Uint8Array | null;
 		} | null;
 	}>;
+	topTags: Array<{
+		id: string;
+		name: string;
+		color: string;
+		count: number;
+	}>;
+	totalActivities: number;
+	totalAlbums: number;
+	totalAudio: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalConcepts: number;
+	totalDocuments: number;
+	totalDownloads: number;
+	totalFavorites: number;
+	totalFile3D: number;
+	totalFolders: number;
+	totalImages: number;
+	totalJsonFiles: number;
+	totalMetadata: number;
+	totalNotes: number;
+	totalPlaces: number;
+	totalPrompts: number;
+	totalProperties: number;
+	totalSize: number;
+	totalTags: number;
+	totalThumbnails: number;
+	totalVideos: number;
+	totalViews: number;
+	totalWildcards: number;
+	totalWorldItems: number;
+	videoSize: number;
+	thumbnailSize: number;
+	// Información de espacio
+	usedSpace?: number;
+	memoryFree?: number;
+	memoryTotal?: number;
+	memoryUsage?: number;
+	memoryUsed?: number;
+	nodeVersion?: string;
+	platform?: string;
+	storageAvailable?: number;
+	storageUsed?: number;
+	uptime?: number;
 }
 
 export interface StatsResponse {
-	collections: Array<{
-		id: string;
-		name: string;
-		count: number;
-		color?: string;
-		emoji?: string;
-	}>;
-	folders: Array<{
-		id: string;
-		name: string;
-		count: number;
-	}>;
-	tags: Array<{
-		id: string;
-		name: string;
-		count: number;
-		color: string;
-	}>;
 	albums: Array<{
 		id: string;
 		name: string;
@@ -146,11 +116,29 @@ export interface StatsResponse {
 		count: number;
 		emoji: string;
 	}>;
+	collections: Array<{
+		id: string;
+		name: string;
+		count: number;
+		color?: string;
+		emoji?: string;
+	}>;
+	folders: Array<{
+		id: string;
+		name: string;
+		count: number;
+	}>;
 	places: Array<{
 		id: string;
 		name: string;
 		count: number;
 		emoji: string;
+	}>;
+	tags: Array<{
+		id: string;
+		name: string;
+		count: number;
+		color: string;
 	}>;
 	worldItems: Array<{
 		id: string;
@@ -162,30 +150,37 @@ export interface StatsResponse {
 
 // Tipo para las etiquetas populares
 interface TopTag {
-	id: string;
-	name: string;
-	color: string;
 	_count: {
 		images: number;
 	};
+	color: string;
+	id: string;
+	name: string;
 }
 
 // Helpers internos para reducir complejidad en la obtención de estadísticas
-type CountRow = { count: number };
-type SizeRow = { totalSize: number };
+interface CountRow {
+	count: number;
+}
+interface SizeRow {
+	totalSize: number;
+}
 
-type MediaCounts = {
-	images: number;
-	videos: number;
+interface MediaCounts {
 	audios: number;
 	documents: number;
-	jsonFiles: number;
 	file3Ds: number;
-};
+	images: number;
+	jsonFiles: number;
+	videos: number;
+}
 
 async function fetchMediaCounts(): Promise<MediaCounts> {
 	const [imagesCount, videosCount, audiosCount, documentsCount, jsonFilesCount, file3DsCount] = await Promise.all([
-		db.select({ count: sql<number>`count(*)` }).from(images),
+		db
+			.select({ count: sql<number>`count(*)` })
+			.from(images)
+			.where(visibleImageLifecycleCondition()),
 		db.select({ count: sql<number>`count(*)` }).from(videos),
 		db.select({ count: sql<number>`count(*)` }).from(audios),
 		db.select({ count: sql<number>`count(*)` }).from(documents),
@@ -202,13 +197,13 @@ async function fetchMediaCounts(): Promise<MediaCounts> {
 	};
 }
 
-type OrgCounts = {
-	folders: number;
+interface OrgCounts {
 	albums: number;
 	collections: number;
-	tags: number;
 	favorites: number;
-};
+	folders: number;
+	tags: number;
+}
 
 async function fetchOrgCounts(): Promise<OrgCounts> {
 	const [foldersCount, albumsCount, collectionsCount, tagsCount, favoritesCount] = await Promise.all([
@@ -227,16 +222,16 @@ async function fetchOrgCounts(): Promise<OrgCounts> {
 	};
 }
 
-type WorldCounts = {
+interface WorldCounts {
 	characters: number;
-	places: number;
-	worldItems: number;
 	concepts: number;
-	prompts: number;
 	notes: number;
+	places: number;
+	prompts: number;
 	properties: number;
 	wildcards: number;
-};
+	worldItems: number;
+}
 
 async function fetchWorldCounts(): Promise<WorldCounts> {
 	const [
@@ -270,10 +265,10 @@ async function fetchWorldCounts(): Promise<WorldCounts> {
 	};
 }
 
-type SystemCounts = {
-	thumbnails: number;
+interface SystemCounts {
 	metadatas: number;
-};
+	thumbnails: number;
+}
 
 async function fetchSystemCounts(): Promise<SystemCounts> {
 	const [thumbnailsCount, metadataCount] = await Promise.all([
@@ -287,20 +282,35 @@ async function fetchSystemCounts(): Promise<SystemCounts> {
 }
 
 async function fetchSizeSums() {
-	const [totalSizeResult, audioSizeResult, documentSizeResult, jsonSizeResult, file3DSizeResult] = await Promise.all([
-		db.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` }).from(folders),
+	const [
+		imageSizeResult,
+		audioSizeResult,
+		documentSizeResult,
+		jsonSizeResult,
+		file3DSizeResult,
+		videoSizeResult,
+		thumbnailSizeResult,
+	] = await Promise.all([
+		db
+			.select({ totalSize: sql<number>`COALESCE(SUM(${images.size}), 0)` })
+			.from(images)
+			.where(visibleImageLifecycleCondition()),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` }).from(audios),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)` }).from(documents),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` }).from(jsonFiles),
 		db.select({ totalSize: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` }).from(file3Ds),
+		db.select({ totalSize: sql<number>`COALESCE(SUM(${videos.size}), 0)` }).from(videos),
+		db.select({ totalSize: sql<number>`COALESCE(SUM(${thumbnails.fileSize}), 0)` }).from(thumbnails),
 	]);
 
 	return {
-		totalFoldersSize: totalSizeResult[0]?.totalSize || 0,
+		totalImageSize: imageSizeResult[0]?.totalSize || 0,
 		totalAudioSize: audioSizeResult[0]?.totalSize || 0,
 		totalDocumentSize: documentSizeResult[0]?.totalSize || 0,
 		totalJsonSize: jsonSizeResult[0]?.totalSize || 0,
 		totalFile3DSize: file3DSizeResult[0]?.totalSize || 0,
+		totalVideoSize: videoSizeResult[0]?.totalSize || 0,
+		totalThumbnailSize: thumbnailSizeResult[0]?.totalSize || 0,
 	} as const;
 }
 
@@ -313,27 +323,73 @@ function buildDiskUsage(totalFileSize: number) {
 	} as const;
 }
 
+function formatBytes(bytes: number): string {
+	if (bytes <= 0) {
+		return '0 B';
+	}
+
+	const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+	let value = bytes;
+	let unitIndex = 0;
+
+	while (value >= 1024 && unitIndex < units.length - 1) {
+		value /= 1024;
+		unitIndex++;
+	}
+
+	return `${value >= 10 ? Math.round(value) : Math.round(value * 10) / 10} ${units[unitIndex]}`;
+}
+
 // Funciones exportadas
 export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 	statsLogger.info('📊 Obteniendo estadísticas del sistema CON 22 ENTIDADES');
 
 	try {
 		// Obtener conteos por dominio y tamaños usando helpers (menor complejidad)
-		const [media, org, world, system, sizes] = await Promise.all([
+		const [media, org, world, system, sizes, realMetrics] = await Promise.all([
 			fetchMediaCounts(),
 			fetchOrgCounts(),
 			fetchWorldCounts(),
 			fetchSystemCounts(),
 			fetchSizeSums(),
+			getRealSystemMetrics(),
 		]);
 
 		// Calcular información de disco (aproximada basada en el total de archivos)
 		const totalFileSize =
-			sizes.totalFoldersSize +
+			sizes.totalImageSize +
+			sizes.totalVideoSize +
 			sizes.totalAudioSize +
 			sizes.totalDocumentSize +
 			sizes.totalJsonSize +
 			sizes.totalFile3DSize;
+
+		const totalTrackedItems =
+			media.images + media.videos + media.audios + media.documents + media.jsonFiles + media.file3Ds;
+
+		const databaseSize =
+			(media.images +
+				media.videos +
+				media.audios +
+				media.documents +
+				media.jsonFiles +
+				media.file3Ds +
+				org.folders +
+				org.albums +
+				org.collections +
+				org.tags +
+				org.favorites +
+				world.characters +
+				world.places +
+				world.worldItems +
+				world.concepts +
+				world.prompts +
+				world.notes +
+				world.properties +
+				world.wildcards +
+				system.thumbnails +
+				system.metadatas) *
+			512;
 
 		const result = {
 			// Archivos multimedia
@@ -368,11 +424,37 @@ export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 			totalDownloads: 0, // TODO: Implementar cuando se agregue sistema de descargas
 			totalSize: totalFileSize,
 			totalActivities: 0, // TODO: Implementar actividades
+			videoSize: sizes.totalVideoSize,
+			thumbnailSize: sizes.totalThumbnailSize,
 
 			// Información de espacio
 			usedSpace: totalFileSize,
-			freeSpace: 0, // TODO: Calcular espacio libre real del disco
-			diskUsage: buildDiskUsage(totalFileSize),
+			freeSpace: realMetrics?.disk?.available ?? 0,
+			storageUsed: realMetrics?.disk?.used ?? totalFileSize,
+			storageAvailable: realMetrics?.disk?.available ?? 0,
+			diskUsage: realMetrics?.disk
+				? {
+						total: realMetrics.disk.total,
+						used: realMetrics.disk.used,
+						free: realMetrics.disk.available,
+						usedPercentage: realMetrics.disk.usagePercentage,
+					}
+				: buildDiskUsage(totalFileSize),
+			databaseSize,
+			formattedDatabaseSize: formatBytes(databaseSize),
+			averageFileSize: totalTrackedItems > 0 ? Math.round(totalFileSize / totalTrackedItems) : 0,
+			cpuUsage: realMetrics?.cpu?.usage ?? 0,
+			cpuCores: realMetrics?.cpu?.cores,
+			cpuModel: realMetrics?.cpu?.model,
+			memoryUsage: realMetrics?.memory?.usagePercentage ?? 0,
+			memoryTotal: realMetrics?.memory?.total ?? 0,
+			memoryUsed: realMetrics?.memory?.used ?? 0,
+			memoryFree: realMetrics?.memory?.free ?? 0,
+			nodeVersion: process.version,
+			platform: realMetrics?.os?.platform ?? process.platform,
+			hostname: realMetrics?.os?.hostname,
+			uptime: realMetrics?.os?.uptime ?? 0,
+			lastUpdated: new Date().toISOString(),
 
 			topTags: [],
 			recentActivity: [],
@@ -381,7 +463,7 @@ export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 		statsLogger.info('✅ Estadísticas del sistema obtenidas');
 		return result;
 	} catch (error) {
-		statsLogger.error('Error al obtener estadísticas del sistema:', error);
+		statsLogger.error('Could not get system statistics:', error);
 		return null;
 	}
 }
@@ -393,10 +475,10 @@ export async function getSystemStats(): Promise<GeneralStats | null> {
 
 // Nuevos tipos para stats de entidades extendidas
 export interface ExtendedStats {
-	totalDocuments: number;
 	totalAudio: number;
-	totalJsonFiles: number;
+	totalDocuments: number;
 	totalFile3D: number;
+	totalJsonFiles: number;
 }
 
 // Función para obtener estadísticas detalladas de carpetas
@@ -431,6 +513,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 			db
 				.select({ count: sql<number>`count(*)` })
 				.from(images)
+				.where(visibleImageLifecycleCondition())
 				.then((rows: Array<{ count: number }>) => {
 					statsLogger.info('✅ Consulta images completada:', rows);
 					return rows;
@@ -498,8 +581,9 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					return [{ count: 0 }];
 				}),
 			db
-				.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` })
-				.from(folders)
+				.select({ totalSize: sql<number>`COALESCE(SUM(${images.size}), 0)` })
+				.from(images)
+				.where(visibleImageLifecycleCondition())
 				.then((rows: Array<{ totalSize: number }>) => {
 					statsLogger.info('✅ Consulta totalSize completada:', rows);
 					return rows;
@@ -515,6 +599,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					thumbnailsCacheSize: sql<number>`COALESCE(SUM(${images.thumbnailSize}), 0)`,
 				})
 				.from(images)
+				.where(visibleImageLifecycleCondition())
 				.then((rows: Array<{ totalThumbnails: number; thumbnailsCacheSize: number }>) => {
 					statsLogger.info('✅ Consulta thumbnails stats completada:', rows);
 					return rows;
@@ -580,7 +665,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 		statsLogger.info('✅ Estadísticas detalladas de carpetas obtenidas');
 		return result;
 	} catch (error) {
-		statsLogger.error('❌ Error al obtener estadísticas de carpetas:', error);
+		statsLogger.error('❌ Could not get statistics de carpetas:', error);
 		return null;
 	}
 }
@@ -603,11 +688,11 @@ export async function getSystemStatsExtended(): Promise<(GeneralStats & Extended
 
 // Interfaces para los mapeos de datos
 interface EntityWithImageCount {
-	id: string;
-	name: string;
 	_count: {
 		images: number;
 	};
+	id: string;
+	name: string;
 }
 
 interface CollectionWithData extends EntityWithImageCount {
@@ -649,8 +734,7 @@ export function invalidateStats(): void {
 	statsLogger.info('✅ Caché de estadísticas invalidada');
 }
 
-// TODO: Extraer tipo FileStats desde schema cuando se genere type helper
-export async function getImageStats(imageId: string): Promise<any> {
+export async function getImageStats(imageId: string) {
 	try {
 		statsLogger.info('🔍 Obteniendo estadísticas de imagen:', imageId);
 
@@ -685,7 +769,7 @@ export async function getImageStats(imageId: string): Promise<any> {
 		statsLogger.info('✅ Estadísticas de imagen obtenidas');
 		return stats;
 	} catch (error) {
-		statsLogger.error('❌ Error al obtener estadísticas de imagen:', error);
+		statsLogger.error('❌ Could not get image statistics:', error);
 		throw createStatsError(
 			'No se pudieron obtener las estadísticas de la imagen',
 			StatsErrorCode.OPERATION_FAILED,
@@ -694,7 +778,7 @@ export async function getImageStats(imageId: string): Promise<any> {
 	}
 }
 
-export async function incrementImageView(imageId: string): Promise<any> {
+export async function incrementImageView(imageId: string) {
 	try {
 		statsLogger.info('👁️ Incrementando visualización de imagen:', imageId);
 
@@ -746,7 +830,7 @@ export async function incrementImageView(imageId: string): Promise<any> {
 	}
 }
 
-export async function incrementImageDownload(imageId: string): Promise<any> {
+export async function incrementImageDownload(imageId: string) {
 	try {
 		statsLogger.info('⬇️ Incrementando descarga de imagen:', imageId);
 		const now = new Date();

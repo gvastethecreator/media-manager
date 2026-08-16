@@ -47,7 +47,11 @@ export function toGroupWithStats(group: GroupBase, counts?: Record<string, numbe
 		propertyCount;
 
 	// Calcular completitud basada en campos importantes
-	const completenessScore = calculateCompleteness(group, ['name', 'description', 'category']);
+	const completenessScore = calculateCompleteness(group as unknown as Record<string, unknown>, [
+		'name',
+		'description',
+		'category',
+	]);
 
 	// Calcular popularidad basada en el total de items
 	const popularity = Math.log1p(totalItems);

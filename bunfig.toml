@@ -1,8 +1,4 @@
-[test]
-exclude = ["tests/e2e/**"]
-preload = ["./tests/setup.ts"]
-coverage = true
-coverageReporter = ["text"]
-
-[test.coverageThreshold]
-statements = 90
+# Tests unitarios usan el bloque `test` de vite.config.ts mediante Vite+.
+# Esta sección solo se mantiene como referencia / legacy
+# [test]
+# ...configuración anterior removida...

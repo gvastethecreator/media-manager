@@ -19,7 +19,7 @@ export function ExpandedSubfolders({ folders }: ExpandedSubfoldersProps) {
 						{/* Mostrar estadísticas básicas */}
 						{(child.totalFiles || 0) > 0 && (
 							<Badge className="h-4 px-1 text-[10px]" variant="outline">
-								{child.totalFiles} archivos
+								{child.totalFiles} files
 							</Badge>
 						)}
 						<Badge className="h-4 px-1 text-[10px]" variant="outline">

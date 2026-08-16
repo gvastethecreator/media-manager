@@ -9,49 +9,49 @@ import { useViewConfiguration } from './use-view-configuration';
 
 export interface GridLayout {
 	columns: number;
-	itemSize: number;
-	itemHeight: number;
 	gap: number;
+	itemHeight: number;
+	itemSize: number;
 	padding: number;
 }
 
 export interface GridViewConfig {
-	showSelectionIndicators: boolean;
-	enableAnimations: boolean;
-	animationDuration: number;
-	animationDelay: number;
-	hoverEffects: boolean;
-	compactMode: boolean;
-	aspectRatio: number;
-	minItemSize: number;
-	maxItemSize: number;
 	adaptiveColumns: boolean;
+	animationDelay: number;
+	animationDuration: number;
+	aspectRatio: number;
+	compactMode: boolean;
+	enableAnimations: boolean;
+	hoverEffects: boolean;
+	maxItemSize: number;
+	minItemSize: number;
 	responsiveBreakpoints: {
 		sm: number;
 		md: number;
 		lg: number;
 		xl: number;
 	};
+	showSelectionIndicators: boolean;
 }
 
 export interface HoverOverlayConfig {
+	animationDuration: number;
 	enabled: boolean;
-	showPreview: boolean;
+	opacity: number;
+	position: 'top' | 'bottom' | 'center';
 	showActions: boolean;
 	showMetadata: boolean;
-	position: 'top' | 'bottom' | 'center';
-	opacity: number;
-	animationDuration: number;
+	showPreview: boolean;
 }
 
 export interface LabelConfig {
-	position: 'none' | 'bottom' | 'overlay' | 'tooltip';
-	showFullName: boolean;
-	showExtension: boolean;
-	showSize: boolean;
-	showDate: boolean;
-	maxLines: number;
 	fontSize: 'xs' | 'sm' | 'md';
+	maxLines: number;
+	position: 'none' | 'bottom' | 'overlay' | 'tooltip';
+	showDate: boolean;
+	showExtension: boolean;
+	showFullName: boolean;
+	showSize: boolean;
 	truncate: boolean;
 }
 

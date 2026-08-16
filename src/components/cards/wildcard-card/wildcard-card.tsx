@@ -1,5 +1,5 @@
 import { Shuffle } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -8,39 +8,28 @@ import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 export interface WildcardCardProps {
-	wildcard: Wildcard;
-	onClick?: (wildcard: Wildcard) => void;
 	className?: string;
+	onClick?: (wildcard: Wildcard) => void;
 	showBadges?: boolean;
+	wildcard: Wildcard;
 }
 
 /**
  * Card para mostrar un comodín
  * Sigue el diseño de los otros componentes de tarjetas
  */
-export function WildcardCard({ wildcard, onClick, className, showBadges = true }: WildcardCardProps) {
+export const WildcardCard = memo(function WildcardCard({
+	wildcard,
+	onClick,
+	className,
+	showBadges = true,
+}: WildcardCardProps) {
 	// Calcular colores
-	const primaryColor = useMemo(() => wildcard.color || '#3b82f6', [wildcard.color]);
+	const primaryColor = useMemo(() => wildcard.color || 'var(--dt-primary-500)', [wildcard.color]);
 	const secondaryColor = useMemo(() => {
-		if (!wildcard.color) {
-			return '#2563eb';
-		}
-
-		try {
-			// Convertir hex a RGB y oscurecer
-			const r = Number.parseInt(wildcard.color.slice(1, 3), 16);
-			const g = Number.parseInt(wildcard.color.slice(3, 5), 16);
-			const b = Number.parseInt(wildcard.color.slice(5, 7), 16);
-
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			return '#2563eb';
-		}
+		if (!wildcard.color) return 'var(--dt-primary-600)';
+		// Usar color-mix para oscurecer
+		return `color-mix(in oklab, ${wildcard.color}, black 30%)`;
 	}, [wildcard.color]);
 
 	// Calcular número total de relaciones
@@ -98,19 +87,31 @@ export function WildcardCard({ wildcard, onClick, className, showBadges = true }
 				{showBadges && (
 					<div className="mt-auto flex flex-wrap gap-1">
 						{totalMedia > 0 && (
-							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
-								{totalMedia} archivos
+							<Badge
+								className="px-2 py-1 text-sm"
+								style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }}
+								variant="outline"
+							>
+								{totalMedia} files
 							</Badge>
 						)}
 
 						{childCount > 0 && (
-							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
+							<Badge
+								className="px-2 py-1 text-sm"
+								style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }}
+								variant="outline"
+							>
 								{childCount} variantes
 							</Badge>
 						)}
 
 						{Array.isArray(children) && children.length > 0 && (
-							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
+							<Badge
+								className="px-2 py-1 text-sm"
+								style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }}
+								variant="outline"
+							>
 								{children.length} opciones
 							</Badge>
 						)}
@@ -140,7 +141,7 @@ export function WildcardCard({ wildcard, onClick, className, showBadges = true }
 			{cardContent}
 		</Link>
 	);
-}
+});
 
 // Exportar también un componente memorizado
-export const MemoizedWildcardCard = React.memo(WildcardCard);
+export const MemoizedWildcardCard = WildcardCard;

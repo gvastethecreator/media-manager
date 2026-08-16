@@ -8,16 +8,16 @@
 import type { UploadedImageCreateInput, UploadedImageUpdateInput } from '../../types/entities/uploaded-image/types';
 
 // Tipos de datos para Drizzle
-type DrizzleUploadedImageCreateInput = {
+interface DrizzleUploadedImageCreateInput {
+	createdAt?: Date;
+	hash: string;
 	id?: string;
+	imageId: string;
+	metadata?: string | null;
 	name: string;
 	path: string;
 	size: number;
-	hash: string;
-	metadata?: string | null;
-	imageId: string;
-	createdAt?: Date;
-};
+}
 
 type DrizzleUploadedImageUpdateInput = Partial<Omit<DrizzleUploadedImageCreateInput, 'hash' | 'imageId'>>;
 

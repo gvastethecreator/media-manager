@@ -18,8 +18,8 @@ const CACHE_CONFIG = {
 
 // Sistema de caché LRU optimizado
 class LRUCache<K, V> {
-	private cache: Map<K, { value: V; timestamp: number }>;
-	private maxSize: number;
+	private readonly cache: Map<K, { value: V; timestamp: number }>;
+	private readonly maxSize: number;
 
 	constructor(maxSize: number) {
 		this.cache = new Map();
@@ -75,31 +75,31 @@ class LRUCache<K, V> {
 }
 
 interface ImageResource {
-	id: string;
-	thumbnail?: string;
-	originalUrl?: string;
-	isLoading: boolean;
-	error?: string;
-	lastUpdate: number;
 	dimensions?: {
 		width: number;
 		height: number;
 	};
+	error?: string;
+	id: string;
+	isLoading: boolean;
+	lastUpdate: number;
+	originalUrl?: string;
+	thumbnail?: string;
 }
 
 interface ImageResourcesState {
-	resources: LRUCache<string, ImageResource>;
-	loadingQueue: Set<string>;
-	preloadQueue: string[];
-	isProcessing: boolean;
-	version: number;
+	clearResources: () => void;
+	getOriginalUrl: (id: string) => Promise<string | undefined>;
 
 	// Métodos principales
 	getThumbnail: (id: string) => Promise<string | undefined>;
-	getOriginalUrl: (id: string) => Promise<string | undefined>;
-	preloadResources: (ids: string[]) => void;
 	isLoading: (id: string) => boolean;
-	clearResources: () => void;
+	isProcessing: boolean;
+	loadingQueue: Set<string>;
+	preloadQueue: string[];
+	preloadResources: (ids: string[]) => void;
+	resources: LRUCache<string, ImageResource>;
+	version: number;
 }
 
 export const useImageResources = create<ImageResourcesState>((set, get) => {

@@ -12,15 +12,15 @@ export type SortField = 'format' | 'width' | 'height' | 'size' | 'createdAt' | '
 export type SortDirection = 'asc' | 'desc';
 
 export interface MetadataFilterOptions {
+	colorSpace?: string[];
 	format?: string[];
-	minWidth?: number;
+	hasAlpha?: boolean;
+	maxHeight?: number;
+	maxSize?: number;
 	maxWidth?: number;
 	minHeight?: number;
-	maxHeight?: number;
 	minSize?: number;
-	maxSize?: number;
-	colorSpace?: string[];
-	hasAlpha?: boolean;
+	minWidth?: number;
 	searchTerm?: string;
 }
 
@@ -36,19 +36,19 @@ export interface FiltersState {
 
 // Acciones
 export interface FiltersActions {
+	getFilteredAndSortedMetadatas: () => MetadataWithStats[];
+
+	// Selectores
+	getFilteredMetadatas: () => MetadataWithStats[];
+	resetFilters: () => void;
+
+	// Filtros
+	setFilterOptions: (options: MetadataFilterOptions) => void;
 	// Setters
 	setSortBy: (field: SortField) => void;
 	setSortDirection: (direction: SortDirection) => void;
 	toggleSortDirection: () => void;
-
-	// Filtros
-	setFilterOptions: (options: MetadataFilterOptions) => void;
 	updateFilterOption: <K extends keyof MetadataFilterOptions>(key: K, value: MetadataFilterOptions[K]) => void;
-	resetFilters: () => void;
-
-	// Selectores
-	getFilteredMetadatas: () => MetadataWithStats[];
-	getFilteredAndSortedMetadatas: () => MetadataWithStats[];
 }
 
 // Estado inicial

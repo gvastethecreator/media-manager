@@ -23,6 +23,6 @@ export type BlendMode =
  * Interfaz para las opciones de modos de mezcla
  */
 export interface BlendModeOption {
-	value: BlendMode;
 	label: string;
+	value: BlendMode;
 }

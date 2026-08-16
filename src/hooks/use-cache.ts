@@ -10,57 +10,57 @@ import { EntityStatsType } from '../types/file-browser/entity-stats';
 import { FileItem } from '../types/file-browser/file-item';
 
 interface UseCacheOptions {
-	config?: Partial<CacheConfig>;
-	events?: CacheEvents;
 	autoCleanup?: boolean;
+	config?: Partial<CacheConfig>;
 	enableStatistics?: boolean;
+	events?: CacheEvents;
 }
 
 interface CacheHookResult {
-	// Core operations
-	get: <T>(key: string) => T | null;
-	set: <T>(key: string, data: T, ttl?: number, tags?: string[]) => boolean;
-	delete: (key: string) => boolean;
-	has: (key: string) => boolean;
-	clear: () => void;
-
-	// Batch operations
-	getMultiple: <T>(keys: string[]) => Map<string, T>;
-	setMultiple: <T>(entries: Map<string, T>, ttl?: number, tags?: string[]) => boolean;
-
-	// Tag operations
-	getByTag: (tag: string) => Map<string, any>;
-	deleteByTag: (tag: string) => number;
+	cacheDirectoryListing: (path: string, items: FileItem[], ttl?: number) => boolean;
 
 	// File-specific operations
 	cacheFileItem: (item: FileItem, ttl?: number) => boolean;
-	getCachedFileItem: (id: string) => FileItem | null;
-	cacheDirectoryListing: (path: string, items: FileItem[], ttl?: number) => boolean;
-	getCachedDirectoryListing: (path: string) => FileItem[] | null;
 	cacheFileStats: (id: string, stats: EntityStatsType, ttl?: number) => boolean;
-	getCachedFileStats: (id: string) => EntityStatsType | null;
-	cacheThumbnail: (id: string, thumbnail: string, ttl?: number) => boolean;
-	getCachedThumbnail: (id: string) => string | null;
 	cacheSearchResults: (query: string, results: FileItem[], ttl?: number) => boolean;
-	getCachedSearchResults: (query: string) => FileItem[] | null;
+	cacheThumbnail: (id: string, thumbnail: string, ttl?: number) => boolean;
 
 	// Management
 	cleanup: () => void;
-	evictLRU: (count?: number) => number;
-	evictLFU: (count?: number) => number;
-
-	// Statistics and config
-	statistics: CacheStatistics;
+	clear: () => void;
 	config: CacheConfig;
-	updateConfig: (newConfig: Partial<CacheConfig>) => void;
+	delete: (key: string) => boolean;
+	deleteByTag: (tag: string) => number;
+	error: Error | null;
+	evictLFU: (count?: number) => number;
+	evictLRU: (count?: number) => number;
+	// Core operations
+	get: <T>(key: string) => T | null;
 
-	// Persistence
-	saveToDisk: () => Promise<boolean>;
-	loadFromDisk: () => Promise<boolean>;
+	// Tag operations
+	getByTag: (tag: string) => Map<string, any>;
+	getCachedDirectoryListing: (path: string) => FileItem[] | null;
+	getCachedFileItem: (id: string) => FileItem | null;
+	getCachedFileStats: (id: string) => EntityStatsType | null;
+	getCachedSearchResults: (query: string) => FileItem[] | null;
+	getCachedThumbnail: (id: string) => string | null;
+
+	// Batch operations
+	getMultiple: <T>(keys: string[]) => Map<string, T>;
+	has: (key: string) => boolean;
 
 	// State
 	isReady: boolean;
-	error: Error | null;
+	loadFromDisk: () => Promise<boolean>;
+
+	// Persistence
+	saveToDisk: () => Promise<boolean>;
+	set: <T>(key: string, data: T, ttl?: number, tags?: string[]) => boolean;
+	setMultiple: <T>(entries: Map<string, T>, ttl?: number, tags?: string[]) => boolean;
+
+	// Statistics and config
+	statistics: CacheStatistics;
+	updateConfig: (newConfig: Partial<CacheConfig>) => void;
 }
 
 export const useCache = (options: UseCacheOptions = {}): CacheHookResult => {

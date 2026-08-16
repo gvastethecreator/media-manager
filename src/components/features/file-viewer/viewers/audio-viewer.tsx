@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { formatDurationSeconds as formatDuration, formatFileSize } from '@/lib/utils';
 import type { AudioWithStats } from '@/types/entities/audio';
+import { WaveformVisualizer } from './waveform-visualizer';
 
 interface AudioViewerProps {
 	audio: AudioWithStats;
@@ -55,7 +56,7 @@ function MetadataPanel({
 			<div className="grid grid-cols-2 gap-4 text-sm">
 				<div>
 					<span className="font-medium">Formato:</span>
-					<span className="ml-2 text-muted-foreground">{audio.path?.split('.').pop()?.toUpperCase() || 'Audio'}</span>
+					<span className="ml-2 text-muted-foreground">{audio.extension?.toUpperCase() || 'Audio'}</span>
 				</div>
 				{audio.stats?.sampleRate && (
 					<div>
@@ -70,7 +71,7 @@ function MetadataPanel({
 					</div>
 				)}
 				<div>
-					<span className="font-medium">Creado:</span>
+					<span className="font-medium">Created:</span>
 					<span className="ml-2 text-muted-foreground">{new Date(audio.createdAt).toLocaleDateString()}</span>
 				</div>
 			</div>
@@ -89,7 +90,8 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 	const [error, setError] = useState<string | null>(null);
 
 	// Audio source URL
-	const audioSrc = audio.path || `/api/audio/${audio.id}/stream`;
+	const audioSrc = `/api/files/content?assetType=audio&assetId=${encodeURIComponent(audio.id)}`;
+	const downloadUrl = `/api/download?assetType=audio&assetId=${encodeURIComponent(audio.id)}`;
 
 	useEffect(() => {
 		const audioElement = audioRef.current;
@@ -112,7 +114,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 		};
 
 		const handleError = () => {
-			setError('Error al cargar el archivo de audio');
+			setError('Could not load the audio file');
 			setIsLoading(false);
 		};
 
@@ -183,7 +185,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 
 	const handleDownload = () => {
 		const link = document.createElement('a');
-		link.href = audioSrc;
+		link.href = downloadUrl;
 		link.download = audio.name || 'audio';
 		document.body.appendChild(link);
 		link.click();
@@ -200,7 +202,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 			return 'Mono';
 		}
 		if (channels === 2) {
-			return 'Estéreo';
+			return 'Stereo';
 		}
 		return `${channels} canales`;
 	};
@@ -216,7 +218,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 					<track
 						default
 						kind="captions"
-						label="Subtítulos (generados)"
+						label="Captions (generated)"
 						src="data:text/vtt;charset=utf-8,WEBVTT"
 						srcLang="es"
 					/>
@@ -227,22 +229,29 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 					<h2 className="mb-2 font-bold text-2xl">{audio.name}</h2>
 					{audio.description && <p className="mb-4 text-muted-foreground">{audio.description}</p>}
 					<div className="flex items-center justify-center space-x-4 text-muted-foreground text-sm">
-						<span>Tamaño: {formatFileSize(audio.size || 0)}</span>
-						{duration > 0 && <span>Duración: {formatDuration(duration)}</span>}
+						<span>Size: {formatFileSize(audio.size || 0)}</span>
+						{duration > 0 && <span>Duration: {formatDuration(duration)}</span>}
 						{audio.stats?.bitrate && <span>Bitrate: {audio.stats.bitrate} kbps</span>}
 					</div>
 				</div>
 
-				{/* Waveform Placeholder */}
-				<div className="mb-8 flex h-32 w-full max-w-2xl items-center justify-center rounded-lg bg-muted">
-					<div className="text-muted-foreground text-sm">Visualización de forma de onda</div>
-				</div>
+				{/* Waveform Visualizer */}
+				<WaveformVisualizer
+					audioUrl={audioSrc}
+					className="mb-8"
+					height={128}
+					isPlaying={isPlaying}
+					onPositionClick={(percent: number) => {
+						handleSeek([percent]);
+					}}
+					progress={progress}
+				/>
 
 				{/* Error State */}
-				{error && <div className="mb-4 text-center text-red-500">{error}</div>}
+				{error && <div className="mb-4 text-center text-destructive">{error}</div>}
 
 				{/* Loading State */}
-				{isLoading && <div className="mb-4 text-center text-muted-foreground">Cargando audio...</div>}
+				{isLoading && <div className="mb-4 text-center text-muted-foreground">Loading audio...</div>}
 
 				{/* Controls */}
 				<div className="w-full max-w-2xl">

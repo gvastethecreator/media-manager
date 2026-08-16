@@ -2,6 +2,7 @@
  * @file Utilidades para generación de thumbnails específicos por tipo de entidad
  * @module config/thumbnail-generators
  * @description Generadores especializados de thumbnails para diferentes tipos de archivo
+ *              Usa el sistema unificado de thumbnails del backend
  */
 
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
@@ -13,10 +14,10 @@ import type { DisplayableEntity } from '@/types/entities';
 export interface ThumbnailConfig {
 	/** Calidad por defecto */
 	defaultQuality: ThumbnailQuality;
-	/** Dimensiones preferidas */
-	preferredSize: { width: number; height: number };
 	/** Formato de salida */
 	outputFormat: 'webp' | 'jpeg' | 'png';
+	/** Dimensiones preferidas */
+	preferredSize: { width: number; height: number };
 	/** Si soporta animación */
 	supportsAnimation: boolean;
 }
@@ -49,13 +50,13 @@ export const THUMBNAIL_CONFIGS: Record<string, ThumbnailConfig> = {
 		outputFormat: 'jpeg',
 		supportsAnimation: false,
 	},
-	json: {
+	jsonFile: {
 		defaultQuality: ThumbnailQuality.MEDIUM,
 		preferredSize: { width: 300, height: 400 }, // JSON structure
 		outputFormat: 'png',
 		supportsAnimation: false,
 	},
-	'3d': {
+	file3d: {
 		defaultQuality: ThumbnailQuality.MEDIUM,
 		preferredSize: { width: 300, height: 300 }, // Square for 3D model
 		outputFormat: 'png',
@@ -69,8 +70,10 @@ export const THUMBNAIL_CONFIGS: Record<string, ThumbnailConfig> = {
 	},
 };
 
+// ===================== GENERADORES UNIFICADOS =====================
+
 /**
- * 🖼️ Generador avanzado de thumbnail para imágenes
+ * 🖼️ Generador de URL de thumbnail para imágenes (Sistema Unificado)
  */
 export function generateAdvancedImageThumbnail(
 	item: DisplayableEntity,
@@ -80,26 +83,20 @@ export function generateAdvancedImageThumbnail(
 		return Promise.resolve('');
 	}
 
-	// Prioridad de fuentes de thumbnail
-	const sources = [
-		() => (item as any).thumbnailUrl,
-		() => ((item as any).thumbnail ? `data:image/jpeg;base64,${(item as any).thumbnail}` : null),
-		() => `/api/images/${item.id}/thumbnail?quality=${quality}`,
-		() => ((item as any).path ? `/api/files/thumbnail?path=${encodeURIComponent((item as any).path)}` : null),
-	];
-
-	for (const source of sources) {
-		const url = source();
-		if (url && typeof url === 'string') {
-			return Promise.resolve(url);
-		}
+	// Prioridad de fuentes de thumbnail:
+	// 1. URL existente en la entidad
+	// 2. Thumbnail inline (base64)
+	// 3. API unificada (genera si no existe)
+	const thumbnailUrl = item.thumbnailUrl;
+	if (thumbnailUrl && typeof thumbnailUrl === 'string') {
+		return Promise.resolve(thumbnailUrl);
 	}
 
-	return Promise.resolve('');
+	return Promise.resolve(buildUnifiedThumbnailUrl('image', item.id, { quality }));
 }
 
 /**
- * 🎬 Generador avanzado de thumbnail para videos
+ * 🎬 Generador de URL de thumbnail para videos (Sistema Unificado)
  */
 export function generateAdvancedVideoThumbnail(
 	item: DisplayableEntity,
@@ -111,29 +108,18 @@ export function generateAdvancedVideoThumbnail(
 
 	const { timeOffset = 5, quality = ThumbnailQuality.MEDIUM } = options;
 
-	// Prioridad de fuentes de thumbnail
-	const sources = [
-		() => (item as any).thumbnailUrl,
-		() => ((item as any).thumbnail ? `data:image/jpeg;base64,${(item as any).thumbnail}` : null),
-		() => `/api/videos/${item.id}/thumbnail?time=${timeOffset}&quality=${quality}`,
-		() =>
-			(item as any).path
-				? `/api/files/video-thumbnail?path=${encodeURIComponent((item as any).path)}&time=${timeOffset}`
-				: null,
-	];
-
-	for (const source of sources) {
-		const url = source();
-		if (url && typeof url === 'string') {
-			return Promise.resolve(url);
-		}
+	// Para videos, si tenemos thumbnail como Buffer, indicar via API
+	if ('thumbnail' in item && item.thumbnail) {
+		// Video has a thumbnail buffer; use the API to serve it
+		return Promise.resolve(buildUnifiedThumbnailUrl('video', item.id, { quality, time: timeOffset }));
 	}
 
-	return Promise.resolve('');
+	// Usar API unificada
+	return Promise.resolve(buildUnifiedThumbnailUrl('video', item.id, { quality, time: timeOffset }));
 }
 
 /**
- * 🎵 Generador de waveform para audio
+ * 🎵 Generador de URL de waveform para audio (Sistema Unificado)
  */
 export function generateAudioWaveform(
 	item: DisplayableEntity,
@@ -143,25 +129,18 @@ export function generateAudioWaveform(
 		return Promise.resolve('');
 	}
 
-	const { width = 300, height = 100, color = '#3b82f6' } = options;
-
-	// Si ya tiene waveform generado
-	if ((item as any).waveformUrl) {
-		return Promise.resolve((item as any).waveformUrl);
+	// Si ya tiene waveform generado inline
+	if ('waveformUrl' in item && typeof item.waveformUrl === 'string' && item.waveformUrl) {
+		return Promise.resolve(item.waveformUrl);
 	}
 
-	// Generar waveform via API
-	const params = new URLSearchParams({
-		width: width.toString(),
-		height: height.toString(),
-		color: color.replace('#', ''),
-	});
-
-	return Promise.resolve(`/api/audio/${item.id}/waveform?${params.toString()}`);
+	// Usar API unificada
+	const { width = 300, height = 100 } = options;
+	return Promise.resolve(buildUnifiedThumbnailUrl('audio', item.id, { width, height }));
 }
 
 /**
- * 📄 Generador de preview para documentos
+ * 📄 Generador de URL de preview para documentos (Sistema Unificado)
  */
 export function generateDocumentPreview(
 	item: DisplayableEntity,
@@ -173,17 +152,12 @@ export function generateDocumentPreview(
 
 	const { page = 1, quality = ThumbnailQuality.MEDIUM } = options;
 
-	// Si ya tiene preview
-	if ((item as any).previewUrl) {
-		return Promise.resolve((item as any).previewUrl);
-	}
-
-	// Generar preview via API
-	return Promise.resolve(`/api/documents/${item.id}/preview?page=${page}&quality=${quality}`);
+	// Usar API unificada
+	return Promise.resolve(buildUnifiedThumbnailUrl('document', item.id, { quality, page }));
 }
 
 /**
- * 📝 Generador de preview para archivos JSON
+ * 📝 Generador de URL de preview para archivos JSON (Sistema Unificado)
  */
 export function generateJsonPreview(
 	item: DisplayableEntity,
@@ -195,33 +169,22 @@ export function generateJsonPreview(
 		showLineNumbers?: boolean;
 	} = {}
 ): Promise<string> {
-	// TODO: Agregar 'jsonFile' al tipo EntityType
-	// jsonFile aún no forma parte de DisplayableEntity, comprobación dinámica
-	if ((item as any).entityType !== 'jsonFile') {
+	if (item.entityType !== 'jsonFile') {
 		return Promise.resolve('');
 	}
 
-	const { maxLines = 20, width = 300, height = 400, theme = 'light', showLineNumbers = true } = options;
-
-	// Si ya tiene preview generado
-	if ((item as any).previewUrl) {
-		return Promise.resolve((item as any).previewUrl);
+	// Si ya tiene preview generado inline
+	if ('previewUrl' in item && typeof item.previewUrl === 'string' && item.previewUrl) {
+		return Promise.resolve(item.previewUrl);
 	}
 
-	// Generar preview via API
-	const params = new URLSearchParams({
-		maxLines: maxLines.toString(),
-		width: width.toString(),
-		height: height.toString(),
-		theme,
-		showLineNumbers: showLineNumbers.toString(),
-	});
-
-	return Promise.resolve(`/api/json/${item.id}/preview?${params.toString()}`);
+	// Usar API unificada
+	const { width = 300, height = 400 } = options;
+	return Promise.resolve(buildUnifiedThumbnailUrl('jsonFile', item.id, { width, height }));
 }
 
 /**
- * 🎲 Generador de thumbnail para modelos 3D
+ * 🎲 Generador de URL de thumbnail para modelos 3D (Sistema Unificado)
  */
 export function generate3DModelThumbnail(
 	item: DisplayableEntity,
@@ -238,35 +201,18 @@ export function generate3DModelThumbnail(
 		return Promise.resolve('');
 	}
 
-	const {
-		angle = 45,
-		lightIntensity = 1.5,
-		backgroundColor = '#ffffff',
-		width = 300,
-		height = 300,
-		wireframe = false,
-	} = options;
-
-	// Si ya tiene thumbnail generado
-	if ((item as any).thumbnailUrl) {
-		return Promise.resolve((item as any).thumbnailUrl);
+	// Si ya tiene thumbnail generado inline
+	if ('thumbnailUrl' in item && typeof item.thumbnailUrl === 'string' && item.thumbnailUrl) {
+		return Promise.resolve(item.thumbnailUrl);
 	}
 
-	// Generar thumbnail via API usando three.js headless
-	const params = new URLSearchParams({
-		angle: angle.toString(),
-		lightIntensity: lightIntensity.toString(),
-		backgroundColor: backgroundColor.replace('#', ''),
-		width: width.toString(),
-		height: height.toString(),
-		wireframe: wireframe.toString(),
-	});
-
-	return Promise.resolve(`/api/3d/${item.id}/thumbnail?${params.toString()}`);
+	// Usar API unificada
+	const { width = 300, height = 300 } = options;
+	return Promise.resolve(buildUnifiedThumbnailUrl('file3d', item.id, { width, height }));
 }
 
 /**
- * 📁 Generador de preview compuesto para carpetas
+ * 📁 Generador de URL de preview compuesto para carpetas
  */
 export function generateFolderPreview(
 	item: DisplayableEntity,
@@ -279,8 +225,8 @@ export function generateFolderPreview(
 	const { maxItems = 4, layout = 'grid' } = options;
 
 	// Si ya tiene preview
-	if ((item as any).previewUrl) {
-		return Promise.resolve((item as any).previewUrl);
+	if ('previewUrl' in item && typeof item.previewUrl === 'string' && item.previewUrl) {
+		return Promise.resolve(item.previewUrl);
 	}
 
 	// Generar preview compuesto via API
@@ -304,8 +250,8 @@ export function generateEntityAvatar(
 	}
 
 	// Si ya tiene avatar personalizado
-	if ((item as any).avatarUrl) {
-		return Promise.resolve((item as any).avatarUrl);
+	if ('avatarUrl' in item && typeof item.avatarUrl === 'string' && item.avatarUrl) {
+		return Promise.resolve(item.avatarUrl);
 	}
 
 	// Generar avatar basado en nombre/ID
@@ -313,8 +259,10 @@ export function generateEntityAvatar(
 	return Promise.resolve(`/api/avatars/generate?seed=${encodeURIComponent(seed)}&size=${size}&style=${style}`);
 }
 
+// ===================== FUNCIONES UNIFICADAS =====================
+
 /**
- * 🔧 Función unificada para generar thumbnail según el tipo
+ * 🔧 Función unificada para generar URL de thumbnail según el tipo
  */
 export function generateThumbnailByType(item: DisplayableEntity, options: Record<string, any> = {}): Promise<string> {
 	switch (item.entityType) {
@@ -330,9 +278,8 @@ export function generateThumbnailByType(item: DisplayableEntity, options: Record
 		case 'document':
 			return generateDocumentPreview(item, options);
 
-		// TODO: Agregar 'jsonFile' al tipo EntityType
-		// case 'jsonFile':
-		//   return generateJsonPreview(item, options);
+		case 'jsonFile':
+			return generateJsonPreview(item, options);
 
 		case 'file3d':
 			return generate3DModelThumbnail(item, options);
@@ -370,34 +317,7 @@ export function getThumbnailConfig(entityType: string): ThumbnailConfig {
 	return THUMBNAIL_CONFIGS[entityType] || THUMBNAIL_CONFIGS.image;
 }
 
-/**
- * 📐 Calcula dimensiones óptimas para thumbnail manteniendo aspect ratio
- */
-export function calculateOptimalSize(
-	originalWidth: number,
-	originalHeight: number,
-	maxWidth: number,
-	maxHeight: number
-): { width: number; height: number } {
-	const aspectRatio = originalWidth / originalHeight;
-
-	if (originalWidth <= maxWidth && originalHeight <= maxHeight) {
-		return { width: originalWidth, height: originalHeight };
-	}
-
-	let width = maxWidth;
-	let height = width / aspectRatio;
-
-	if (height > maxHeight) {
-		height = maxHeight;
-		width = height * aspectRatio;
-	}
-
-	return {
-		width: Math.round(width),
-		height: Math.round(height),
-	};
-}
+// ===================== HELPERS =====================
 
 /**
  * 🎨 Genera URL de thumbnail con parámetros optimizados
@@ -435,10 +355,40 @@ export function buildThumbnailUrl(
 }
 
 /**
- * 🔄 Cache de thumbnails generados
+ * 🔗 Construye URL del endpoint unificado de thumbnails
+ */
+function buildUnifiedThumbnailUrl(entityType: string, entityId: string, options: Record<string, any> = {}): string {
+	const mapping: Record<string, string> = {
+		image: 'image',
+		video: 'video',
+		audio: 'audio',
+		document: 'document',
+		jsonFile: 'json',
+		file3d: '3d',
+	};
+
+	const route = mapping[entityType] || entityType;
+	const params = new URLSearchParams();
+
+	// Agregar opciones como query params
+	if (options.quality) params.set('quality', options.quality);
+	if (options.width) params.set('width', options.width.toString());
+	if (options.height) params.set('height', options.height.toString());
+	if (options.time) params.set('time', options.time.toString());
+	if (options.page) params.set('page', options.page.toString());
+
+	const queryString = params.toString();
+	return `/api/thumbnails/unified/${route}/${entityId}${queryString ? `?${queryString}` : ''}`;
+}
+
+// ===================== CACHÉ =====================
+
+/**
+ * 🔄 Cache de thumbnails generados (con límite de tamaño)
  */
 const thumbnailCache = new Map<string, { url: string; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+const MAX_CACHE_SIZE = 500; // Límite máximo de entradas para evitar memory leaks
 
 /**
  * 💾 Obtiene thumbnail desde cache o genera uno nuevo
@@ -454,6 +404,15 @@ export async function getCachedThumbnail(item: DisplayableEntity, options: Recor
 	const url = await generateThumbnailByType(item, options);
 
 	if (url) {
+		// Evict oldest entries if cache is full
+		if (thumbnailCache.size >= MAX_CACHE_SIZE) {
+			clearExpiredThumbnailCache();
+			// If still full, remove oldest entry
+			if (thumbnailCache.size >= MAX_CACHE_SIZE) {
+				const oldestKey = thumbnailCache.keys().next().value;
+				if (oldestKey) thumbnailCache.delete(oldestKey);
+			}
+		}
 		thumbnailCache.set(cacheKey, {
 			url,
 			timestamp: Date.now(),
@@ -475,7 +434,7 @@ export function clearExpiredThumbnailCache(): void {
 	}
 }
 
-// Limpiar cache periódicamente
+// Limpiar cache periódicamente (solo en cliente)
 if (typeof window !== 'undefined') {
 	setInterval(clearExpiredThumbnailCache, CACHE_DURATION);
 }

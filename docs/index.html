@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			name="description"
+			content="Media Manager is a local-first workbench for indexing, understanding, and organizing large creative libraries."
+		/>
+		<meta name="theme-color" content="#191a17" />
+		<title>Media Manager — Library, not a landfill</title>
+		<link rel="stylesheet" href="site.css" />
+		<script src="site.js" defer></script>
+	</head>
+	<body>
+		<a class="skip-link" href="#main">Skip to content</a>
+		<header class="site-header">
+			<a class="wordmark" href="#top" aria-label="Media Manager home">
+				<span class="wordmark-mark" aria-hidden="true">MM</span>
+				<span>Media Manager</span>
+			</a>
+			<nav aria-label="Primary navigation">
+				<a href="#workbench">Workbench</a>
+				<a href="#principles">Principles</a>
+				<a href="https://github.com/gvastethecreator/media-manager">GitHub</a>
+			</nav>
+		</header>
+
+		<main id="main">
+			<section class="hero" id="top">
+				<div class="hero-copy">
+					<p class="eyebrow">Local-first multimedia workbench</p>
+					<h1>Library,<br /><em>not a landfill.</em></h1>
+					<p class="lede">
+						Index the files you already own. Find the useful frame, buried document, forgotten model, or exact prompt
+						without surrendering your library to a cloud catalog.
+					</p>
+					<div class="hero-actions">
+						<a class="button primary" href="https://github.com/gvastethecreator/media-manager#quick-start"
+							>Run locally</a
+						>
+						<a class="button secondary" href="https://github.com/gvastethecreator/media-manager">Read the source</a>
+					</div>
+					<dl class="hero-facts">
+						<div>
+							<dt>7</dt>
+							<dd>media families</dd>
+						</div>
+						<div>
+							<dt>Local</dt>
+							<dd>files stay yours</dd>
+						</div>
+						<div>
+							<dt>1</dt>
+							<dd>searchable catalog</dd>
+						</div>
+					</dl>
+				</div>
+
+				<div class="library-sample" aria-label="A sample organized media library">
+					<article class="sample-card card-tall" data-kind="image">
+						<span class="card-index">01</span>
+						<div class="paper-landscape" aria-hidden="true"><i></i><b></b></div>
+						<div><strong>North ridge study</strong><span>IMAGE · 42 MP</span></div>
+					</article>
+					<article class="sample-card card-wide" data-kind="audio">
+						<span class="card-index">02</span>
+						<div class="waveform" aria-hidden="true"></div>
+						<div><strong>Room tone, station hall</strong><span>AUDIO · 03:48</span></div>
+					</article>
+					<article class="sample-card card-square" data-kind="model">
+						<span class="card-index">03</span>
+						<div class="wire-object" aria-hidden="true"></div>
+						<div><strong>Atlas camera body</strong><span>3D · GLB</span></div>
+					</article>
+					<article class="sample-card card-note" data-kind="document">
+						<span class="card-index">04</span>
+						<blockquote>“The archive becomes useful when every object has a reason to be found again.”</blockquote>
+						<div><strong>Field notes</strong><span>DOCUMENT · 8 PAGES</span></div>
+					</article>
+				</div>
+			</section>
+
+			<section class="workbench" id="workbench">
+				<div class="section-heading">
+					<p class="eyebrow">One catalog, many formats</p>
+					<h2>Keep context attached.</h2>
+					<p>
+						Filter the sample collection to see how one restrained interface can hold very different source material.
+					</p>
+				</div>
+				<div class="filter-bar" role="group" aria-label="Filter sample media">
+					<button class="active" type="button" data-filter="all">All</button>
+					<button type="button" data-filter="image">Images</button>
+					<button type="button" data-filter="audio">Audio</button>
+					<button type="button" data-filter="model">3D</button>
+					<button type="button" data-filter="document">Documents</button>
+				</div>
+				<div class="catalog" aria-live="polite">
+					<article data-kind="image">
+						<span>TIFF</span><strong>Contact sheet 07</strong><small>4 tags · 2 collections</small>
+					</article>
+					<article data-kind="audio">
+						<span>WAV</span><strong>Night market ambience</strong><small>48 kHz · stereo</small>
+					</article>
+					<article data-kind="model">
+						<span>GLB</span><strong>Transit kiosk study</strong><small>18.2 MB · 4 materials</small>
+					</article>
+					<article data-kind="document">
+						<span>PDF</span><strong>Location treatment</strong><small>12 pages · indexed text</small>
+					</article>
+					<article data-kind="image">
+						<span>WEBP</span><strong>Palette fragments</strong><small>12 tags · favorite</small>
+					</article>
+					<article data-kind="document">
+						<span>JSON</span><strong>Render workflow</strong><small>ComfyUI · 48 nodes</small>
+					</article>
+				</div>
+			</section>
+
+			<section class="principles" id="principles">
+				<article>
+					<span>01</span>
+					<h3>Point, do not import</h3>
+					<p>Authorized roots let the catalog understand your existing folders without forcing a second copy.</p>
+				</article>
+				<article>
+					<span>02</span>
+					<h3>Search beyond filenames</h3>
+					<p>Metadata, relationships, tags, and extracted text turn storage into a working memory.</p>
+				</article>
+				<article>
+					<span>03</span>
+					<h3>Recover explicitly</h3>
+					<p>File operations report partial outcomes instead of pretending every mutation is atomic.</p>
+				</article>
+			</section>
+		</main>
+
+		<footer>
+			<p>Built for large, private creative libraries.</p>
+			<div>
+				<a href="https://github.com/gvastethecreator/media-manager">Source</a
+				><a href="https://ko-fi.com/gvaste">Sponsor</a>
+			</div>
+		</footer>
+	</body>
+</html>

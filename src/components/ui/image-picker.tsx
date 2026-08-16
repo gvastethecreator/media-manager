@@ -5,12 +5,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { cn } from '@/lib/utils';
 
 export interface ImagePickerProps {
-	value?: string | null;
-	defaultValue?: string | null;
-	onChange?: (value: string | null) => void;
 	className?: string;
+	defaultValue?: string | null;
 	disabled?: boolean;
+	onChange?: (value: string | null) => void;
 	placeholder?: string;
+	value?: string | null;
 }
 
 export function ImagePicker({
@@ -19,7 +19,7 @@ export function ImagePicker({
 	onChange,
 	className,
 	disabled = false,
-	placeholder = 'Seleccionar imagen',
+	placeholder = 'Select image',
 }: ImagePickerProps) {
 	const [selectedImage, setSelectedImage] = React.useState<string | null>(value || defaultValue);
 	const [isOpen, setIsOpen] = React.useState(false);
@@ -47,7 +47,13 @@ export function ImagePicker({
 				<div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
 					<img alt="Selected" className="h-full w-full object-cover" src={selectedImage} />
 					{!disabled && (
-						<Button className="absolute top-2 right-2" onClick={handleRemoveImage} size="icon" variant="destructive">
+						<Button
+							aria-label="Remove image"
+							className="absolute top-2 right-2"
+							onClick={handleRemoveImage}
+							size="icon"
+							variant="destructive"
+						>
 							<X className="h-4 w-4" />
 						</Button>
 					)}
@@ -66,11 +72,11 @@ export function ImagePicker({
 					</DialogTrigger>
 					<DialogContent>
 						<DialogHeader>
-							<DialogTitle>Seleccionar Imagen</DialogTitle>
+							<DialogTitle>Select Image</DialogTitle>
 						</DialogHeader>
 						<div className="grid grid-cols-3 gap-4 py-4">
 							{/* Aquí irá la galería de imágenes */}
-							<div className="text-center text-muted-foreground text-sm">Galería en desarrollo...</div>
+							<div className="text-center text-muted-foreground text-sm">Gallery under development...</div>
 						</div>
 					</DialogContent>
 				</Dialog>

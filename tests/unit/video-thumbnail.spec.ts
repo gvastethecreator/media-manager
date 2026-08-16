@@ -1,27 +1,29 @@
-import { describe, expect, it } from 'bun:test';
-import { EntityType } from '@/types/file-entity-mapper';
-import { createMockFileEntityMapper } from '../factories';
+import { vi } from 'vitest';
+import { VideoProcessor } from '@/services/file-entity-mapper/processors/video.processor';
+import { getEntityTypeFromExtension } from '@/services/file-entity-mapper/utils/file-info.utils';
 
-describe('Video thumbnail generation', () => {
-	it('generates thumbnail for video file', async () => {
-		const mapper = createMockFileEntityMapper();
+describe('video thumbnail generation', () => {
+	it('retorna video para extensión .mp4', () => {
+		const type = getEntityTypeFromExtension('.mp4');
+		expect(type).toBe('video');
+	});
 
-		// Mock successful thumbnail generation
-		mapper.generateThumbnail.mockResolvedValue({
-			success: true,
-			thumbnailPath: '/thumbnails/video-thumb.jpg',
-			width: 320,
-			height: 240,
-		});
+	it('retorna video para extensión .webm', () => {
+		const type = getEntityTypeFromExtension('.webm');
+		expect(type).toBe('video');
+	});
 
-		const result = await mapper.generateThumbnail('test-video.mp4', EntityType.VIDEO);
+	it('VideoProcessor tiene método generateThumbnail', () => {
+		const processor = new VideoProcessor();
+		expect(typeof processor.generateThumbnail).toBe('function');
+	});
 
+	it('VideoProcessor.generateThumbnail retorna success cuando se mockea', async () => {
+		const processor = new VideoProcessor();
+		// Mock del resultado - el processor real requiere ffmpeg
+		const spy = vi.spyOn(processor, 'generateThumbnail').mockResolvedValue({ success: true });
+		const result = await processor.generateThumbnail('video.mp4', 'vid-id');
 		expect(result.success).toBe(true);
-		expect(result.thumbnailPath).toBe('/thumbnails/video-thumb.jpg');
-		// Verificar llamada manualmente usando spy ligero
-		expect(mapper.generateThumbnail.calls.length).toBeGreaterThan(0);
-		const firstCall = mapper.generateThumbnail.calls[0];
-		expect(firstCall[0]).toBe('test-video.mp4');
-		expect(firstCall[1]).toBe(EntityType.VIDEO);
+		expect(spy).toHaveBeenCalledWith('video.mp4', 'vid-id');
 	});
 });

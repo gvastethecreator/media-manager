@@ -7,45 +7,45 @@
  * 📸 Datos EXIF básicos
  */
 export interface EXIFData {
-	make?: string;
-	model?: string;
-	software?: string;
+	artist?: string;
+	copyright?: string;
 	dateTime?: string;
-	dateTimeOriginal?: string;
 	dateTimeDigitized?: string;
+	dateTimeOriginal?: string;
 	exposureTime?: string;
-	fNumber?: number;
-	iso?: number;
-	focalLength?: string;
-	lensModel?: string;
 	flash?: string;
-	whiteBalance?: string;
+	fNumber?: number;
+	focalLength?: string;
 	gps?: {
 		latitude?: number;
 		longitude?: number;
 		altitude?: number;
 	};
-	artist?: string;
-	copyright?: string;
+	iso?: number;
+	lensModel?: string;
+	make?: string;
+	model?: string;
+	software?: string;
+	whiteBalance?: string;
 }
 
 /**
  * 🤖 Metadatos de IA para imágenes generadas
  */
 export interface AIGenerationInfo {
-	type?: string;
+	cfg?: number;
+	cfg_scale?: number;
+	clip_skip?: number;
+	created_at?: string;
+	extra_params?: Record<string, unknown>;
 	model?: string;
+	negative_prompt?: string;
+	prompt?: string;
 	sampler?: string;
 	seed?: number;
 	steps?: number;
-	cfg_scale?: number;
-	clip_skip?: number;
-	cfg?: number;
-	prompt?: string;
-	negative_prompt?: string;
+	type?: string;
 	workflow?: string;
-	extra_params?: Record<string, unknown>;
-	created_at?: string;
 	[key: string]: unknown; // Index signature para propiedades adicionales
 }
 
@@ -53,60 +53,22 @@ export interface AIGenerationInfo {
  * 🤖 Metadatos de IA para imágenes generadas
  */
 export interface AIMetadata {
-	model?: string;
-	prompt?: string;
-	negativePrompt?: string;
-	seed?: number;
-	samplingSteps?: number;
 	cfgScale?: number;
-	samplingMethod?: string;
 	extraParameters?: Record<string, unknown>;
+	model?: string;
+	negativePrompt?: string;
+	prompt?: string;
+	samplingMethod?: string;
+	samplingSteps?: number;
+	seed?: number;
 }
 
 /**
  * 📊 Metadatos generales de archivos
  */
 export interface FileMetadata {
-	// Propiedades básicas del archivo
-	format?: string;
-	compression?: string;
-	colorSpace?: string;
-	bitDepth?: number;
-	hasAlpha?: boolean;
-	orientation?: number;
-	width?: number;
-	height?: number;
-	totalSize?: number;
-	mimeType?: string;
-	itemCount?: number;
-	lastModified?: Date;
-	fileSize?: number;
-	gps?: Record<string, unknown>; // Para datos GPS
-	colorProfile?: string;
-	density?: number;
-	isAnimated?: boolean;
-	sizeInBytes?: number;
-	dimensions?: { width: number; height: number };
-	duration?: number;
-	encoding?: string;
-	hash?: string;
-	customFields?: Record<string, unknown>;
-	dpi?: {
-		x: number;
-		y: number;
-	};
-
-	// Datos EXIF
-	exif?: EXIFData;
-
-	// Otros metadatos estándar
-	iptc?: Record<string, unknown>;
-	xmp?: Record<string, unknown>;
-	icc?: Record<string, unknown>;
-
 	// Metadatos de AI
 	ai?: AIMetadata;
-	generation?: AIGenerationInfo;
 
 	// Análisis automatizado
 	analysis?: {
@@ -126,6 +88,39 @@ export interface FileMetadata {
 		safetyRating?: 'safe' | 'moderate' | 'adult';
 		confidenceScores?: Record<string, number>;
 	};
+	bitDepth?: number;
+	colorProfile?: string;
+	colorSpace?: string;
+	compression?: string;
+	customFields?: Record<string, unknown>;
+	density?: number;
+	dimensions?: { width: number; height: number };
+	dpi?: {
+		x: number;
+		y: number;
+	};
+	duration?: number;
+	encoding?: string;
+
+	// Datos EXIF
+	exif?: EXIFData;
+	fileSize?: number;
+	// Propiedades básicas del archivo
+	format?: string;
+	generation?: AIGenerationInfo;
+	gps?: Record<string, unknown>; // Para datos GPS
+	hasAlpha?: boolean;
+	hash?: string;
+	height?: number;
+	icc?: Record<string, unknown>;
+
+	// Otros metadatos estándar
+	iptc?: Record<string, unknown>;
+	isAnimated?: boolean;
+	itemCount?: number;
+	lastModified?: Date;
+	mimeType?: string;
+	orientation?: number;
 
 	// Metadatos de procesamiento
 	processing?: {
@@ -135,25 +130,29 @@ export interface FileMetadata {
 		errors?: string[];
 		warnings?: string[];
 	};
+	sizeInBytes?: number;
+	totalSize?: number;
+	width?: number;
+	xmp?: Record<string, unknown>;
 }
 
 /**
  * 📊 Metadatos extendidos con información adicional
  */
 export interface ExtendedFileMetadata extends FileMetadata {
+	created?: Date;
 	// Información del archivo en el sistema
 	filePath?: string;
 	fileSize?: number;
-	lastModified?: Date;
-	created?: Date;
-
-	// Información de procesamiento
-	thumbnailGenerated?: boolean;
 	hashCalculated?: boolean;
-	metadataComplete?: boolean;
 
 	// Estado de validación
 	isValid?: boolean;
+	lastModified?: Date;
+	metadataComplete?: boolean;
+
+	// Información de procesamiento
+	thumbnailGenerated?: boolean;
 	validationErrors?: string[];
 	validationWarnings?: string[];
 }

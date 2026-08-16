@@ -8,24 +8,25 @@ import {
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
+	type RowData,
 	type SortingState,
 	useReactTable,
 	type VisibilityState,
-} from '@tanstack/react-table';
+} from '@/lib/tanstack-react-table';
 import React from 'react';
 
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { DataTableToolbar } from '@/components/ui/data-table-toolbar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-interface DataTableProps<TData, TValue> {
-	columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData extends RowData, TValue> {
+	columns: ColumnDef<any, TData, TValue>[];
 	data: TData[];
-	onUpdate?: (data: TData) => Promise<void>;
 	onDelete?: (data: TData) => Promise<void>;
+	onUpdate?: (data: TData) => Promise<void>;
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable<TData extends RowData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -33,7 +34,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 
 	const table = useReactTable({
 		data,
-		columns,
+		columns: columns as any,
 		state: {
 			sorting,
 			columnVisibility,
@@ -54,16 +55,16 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 	});
 
 	return (
-		<div className="space-y-4">
+		<div aria-busy={false} className="space-y-4">
 			<DataTableToolbar table={table} />
-			<div className="rounded-md border">
-				<Table>
+			<div className="rounded-dt-md border-2 border-border/50 shadow-dt-1">
+				<Table role="grid">
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
-							<TableRow key={headerGroup.id}>
+							<TableRow className="border-border/40" key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {
 									return (
-										<TableHead key={header.id}>
+										<TableHead className="text-muted-foreground" key={header.id}>
 											{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
 										</TableHead>
 									);
@@ -74,7 +75,11 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 					<TableBody>
 						{table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
-								<TableRow data-state={row.getIsSelected() && 'selected'} key={row.id}>
+								<TableRow
+									className="transition-colors duration-dt-fast ease-dt-out hover:bg-muted/40"
+									data-state={row.getIsSelected() && 'selected'}
+									key={row.id}
+								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
 									))}
@@ -82,7 +87,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 							))
 						) : (
 							<TableRow>
-								<TableCell className="h-24 text-center" colSpan={columns.length}>
+								<TableCell className="h-24 text-center text-muted-foreground" colSpan={columns.length}>
 									No hay resultados.
 								</TableCell>
 							</TableRow>

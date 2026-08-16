@@ -1,127 +1,182 @@
 /**
  * @file Tipos base para la entidad Favorite.
  * @module types/entities/favorite/base
- * @description Define los tipos canónicos para Favorite usando el patrón Base + Statistics + WithStats.
- * ✅ MIGRADO A DRIZZLE - Enero 2025
+ * @description Define el contrato canónico de Favorite como relación transversal scoped al perfil activo.
  */
 
 /**
- * ⭐ Enum para los tipos de entidades que pueden ser marcadas como favoritas.
+ * Enum histórico compartido por el bridge canónico y compatibilidad transitoria.
+ * El perímetro canónico vigente está definido por `CANONICAL_FAVORITE_ENTITY_TYPES`.
  */
 export enum FavoriteEntityType {
 	IMAGE = 'image',
 	VIDEO = 'video',
+	AUDIO = 'audio',
+	DOCUMENT = 'document',
+	JSON_FILE = 'jsonFile',
+	FILE_3D = 'file3d',
 	ALBUM = 'album',
 	COLLECTION = 'collection',
 	FOLDER = 'folder',
+	GROUP = 'group',
+	TAG = 'tag',
 	CHARACTER = 'character',
 	PLACE = 'place',
-	WORLD_ITEM = 'world-item',
+	WORLD_ITEM = 'worldItem',
 	CONCEPT = 'concept',
+	PROPERTY = 'property',
 	PROMPT = 'prompt',
 	NOTE = 'note',
-	DOCUMENT = 'document',
-	FILE = 'file',
-	TAG = 'tag',
-	GROUP = 'group',
+	WILDCARD = 'wildcard',
 }
 
 /**
- * ⭐ Tipo base de Favorite directamente desde el schema de Drizzle.
- * Representa las propiedades fundamentales de un favorito sin estadísticas calculadas.
+ * Tipos permitidos por la API canónica de Favorite.
+ * `task` permanece fuera del perímetro inicial documentado.
+ */
+export const CANONICAL_FAVORITE_ENTITY_TYPES = [
+	FavoriteEntityType.IMAGE,
+	FavoriteEntityType.VIDEO,
+	FavoriteEntityType.AUDIO,
+	FavoriteEntityType.DOCUMENT,
+	FavoriteEntityType.JSON_FILE,
+	FavoriteEntityType.FILE_3D,
+	FavoriteEntityType.ALBUM,
+	FavoriteEntityType.COLLECTION,
+	FavoriteEntityType.FOLDER,
+	FavoriteEntityType.GROUP,
+	FavoriteEntityType.TAG,
+	FavoriteEntityType.CHARACTER,
+	FavoriteEntityType.PLACE,
+	FavoriteEntityType.WORLD_ITEM,
+	FavoriteEntityType.CONCEPT,
+	FavoriteEntityType.PROPERTY,
+	FavoriteEntityType.PROMPT,
+	FavoriteEntityType.NOTE,
+	FavoriteEntityType.WILDCARD,
+] as const satisfies readonly FavoriteEntityType[];
+
+export type CanonicalFavoriteEntityType = (typeof CANONICAL_FAVORITE_ENTITY_TYPES)[number];
+
+const canonicalFavoriteEntityTypeSet = new Set<FavoriteEntityType>(CANONICAL_FAVORITE_ENTITY_TYPES);
+
+export function isCanonicalFavoriteEntityType(
+	entityType: FavoriteEntityType | string | null | undefined
+): entityType is CanonicalFavoriteEntityType {
+	return typeof entityType === 'string' && canonicalFavoriteEntityTypeSet.has(entityType as FavoriteEntityType);
+}
+
+/**
+ * Relación base persistida para Favorite.
  */
 export interface FavoriteBase {
-	// Identificación
-	id: string;
-
-	// Entidad favorita
+	addedAt: Date;
 	entityId: string;
 	entityType: FavoriteEntityType;
-
-	// Usuario (opcional para compatibilidad)
-	userId: string | null;
-	profileId: string | null;
-
-	// Propiedades adicionales
-	addedAt: Date;
-	notes: string | null;
-	category: string | null;
-	priority: number | null;
-
-	// Timestamps del sistema
-	createdAt: Date;
-	updatedAt: Date;
+	id: string;
+	profileId: string;
 }
 
-import { EntityStats } from '../entity.types';
-
 /**
- * 📊 Estadísticas calculadas y métricas para un favorito.
+ * Estadísticas derivadas para el read model de favoritos.
  */
-export interface FavoriteStatistics extends EntityStats {
-	/** Tipo de entidad legible para humanos */
+export interface FavoriteStatistics {
+	daysSinceAdded: number;
 	entityTypeName: string;
-	/** Fecha de creación formateada */
-	formattedCreatedAt: string;
-	/** Días desde que se marcó como favorito */
-	daysSinceFavorited: number;
-	/** Indicador si es un favorito reciente (menos de 7 días) */
-	isRecent: boolean;
-	/** Indicador si es un favorito antiguo (más de 30 días) */
+	formattedAddedAt: string;
 	isOld: boolean;
+	isRecent: boolean;
 }
 
 /**
- * 📊 Alias para compatibilidad - FavoriteStats apunta a FavoriteStatistics
+ * Alias de compatibilidad para agregados ligeros de favoritos.
  */
 export type FavoriteStats = FavoriteStatistics;
 
 /**
- * ⭐ Tipo enriquecido de Favorite que incluye estadísticas calculadas.
- * Este es el tipo canónico que debe usarse en la aplicación.
+ * Read model enriquecido para UI y respuestas API.
  */
 export interface FavoriteWithStats extends FavoriteBase {
+	entityName: string;
+	entityThumbnail: string | null;
 	stats: FavoriteStatistics;
 }
 
 /**
- * 🎨 Emojis para cada tipo de entidad favorita
+ * Emojis por tipo de target favorito.
  */
 export const FAVORITE_ENTITY_EMOJIS: Record<FavoriteEntityType, string> = {
 	[FavoriteEntityType.IMAGE]: '🖼️',
 	[FavoriteEntityType.VIDEO]: '🎥',
+	[FavoriteEntityType.AUDIO]: '🎵',
+	[FavoriteEntityType.DOCUMENT]: '📄',
+	[FavoriteEntityType.JSON_FILE]: '🧾',
+	[FavoriteEntityType.FILE_3D]: '🧊',
 	[FavoriteEntityType.ALBUM]: '📸',
 	[FavoriteEntityType.COLLECTION]: '📚',
 	[FavoriteEntityType.FOLDER]: '📁',
+	[FavoriteEntityType.GROUP]: '👥',
+	[FavoriteEntityType.TAG]: '🏷️',
 	[FavoriteEntityType.CHARACTER]: '👤',
 	[FavoriteEntityType.PLACE]: '📍',
 	[FavoriteEntityType.WORLD_ITEM]: '🌍',
 	[FavoriteEntityType.CONCEPT]: '💡',
+	[FavoriteEntityType.PROPERTY]: '🔍',
 	[FavoriteEntityType.PROMPT]: '🤖',
 	[FavoriteEntityType.NOTE]: '📝',
-	[FavoriteEntityType.DOCUMENT]: '📄',
-	[FavoriteEntityType.FILE]: '📎',
-	[FavoriteEntityType.TAG]: '🏷️',
-	[FavoriteEntityType.GROUP]: '👥',
+	[FavoriteEntityType.WILDCARD]: '🃏',
 };
 
 /**
- * 🎨 Colores para cada tipo de entidad favorita
+ * Colores por tipo de target favorito.
  */
 export const FAVORITE_ENTITY_COLORS: Record<FavoriteEntityType, string> = {
-	[FavoriteEntityType.IMAGE]: '#3b82f6',
-	[FavoriteEntityType.VIDEO]: '#ef4444',
-	[FavoriteEntityType.ALBUM]: '#8b5cf6',
-	[FavoriteEntityType.COLLECTION]: '#06b6d4',
-	[FavoriteEntityType.FOLDER]: '#eab308',
-	[FavoriteEntityType.CHARACTER]: '#f59e0b',
-	[FavoriteEntityType.PLACE]: '#10b981',
-	[FavoriteEntityType.WORLD_ITEM]: '#84cc16',
-	[FavoriteEntityType.CONCEPT]: '#f97316',
-	[FavoriteEntityType.PROMPT]: '#6366f1',
-	[FavoriteEntityType.NOTE]: '#22c55e',
-	[FavoriteEntityType.TAG]: '#ec4899',
-	[FavoriteEntityType.DOCUMENT]: '#64748b',
-	[FavoriteEntityType.FILE]: '#6b7280',
-	[FavoriteEntityType.GROUP]: '#14b8a6',
+	[FavoriteEntityType.IMAGE]: 'var(--entity-image)',
+	[FavoriteEntityType.VIDEO]: 'var(--entity-video)',
+	[FavoriteEntityType.AUDIO]: 'var(--entity-audio)',
+	[FavoriteEntityType.DOCUMENT]: 'var(--entity-document)',
+	[FavoriteEntityType.JSON_FILE]: 'var(--entity-json)',
+	[FavoriteEntityType.FILE_3D]: 'var(--entity-file-3d)',
+	[FavoriteEntityType.ALBUM]: 'var(--entity-album)',
+	[FavoriteEntityType.COLLECTION]: 'var(--entity-collection)',
+	[FavoriteEntityType.FOLDER]: 'var(--entity-folder)',
+	[FavoriteEntityType.GROUP]: 'var(--entity-group)',
+	[FavoriteEntityType.TAG]: 'var(--entity-tag)',
+	[FavoriteEntityType.CHARACTER]: 'var(--entity-character)',
+	[FavoriteEntityType.PLACE]: 'var(--entity-place)',
+	[FavoriteEntityType.WORLD_ITEM]: 'var(--entity-world-item)',
+	[FavoriteEntityType.CONCEPT]: 'var(--entity-concept)',
+	[FavoriteEntityType.PROPERTY]: 'var(--entity-property)',
+	[FavoriteEntityType.PROMPT]: 'var(--entity-prompt)',
+	[FavoriteEntityType.NOTE]: 'var(--entity-note)',
+	[FavoriteEntityType.WILDCARD]: 'var(--entity-wildcard)',
 };
+
+/**
+ * Labels canónicos por tipo de target favorito.
+ */
+export const FAVORITE_ENTITY_DISPLAY_NAMES: Record<FavoriteEntityType, string> = {
+	[FavoriteEntityType.IMAGE]: 'Imagen',
+	[FavoriteEntityType.VIDEO]: 'Video',
+	[FavoriteEntityType.AUDIO]: 'Audio',
+	[FavoriteEntityType.DOCUMENT]: 'Documento',
+	[FavoriteEntityType.JSON_FILE]: 'Archivo JSON',
+	[FavoriteEntityType.FILE_3D]: 'Archivo 3D',
+	[FavoriteEntityType.ALBUM]: 'Álbum',
+	[FavoriteEntityType.COLLECTION]: 'Colección',
+	[FavoriteEntityType.FOLDER]: 'Carpeta',
+	[FavoriteEntityType.GROUP]: 'Grupo',
+	[FavoriteEntityType.TAG]: 'Tag',
+	[FavoriteEntityType.CHARACTER]: 'Personaje',
+	[FavoriteEntityType.PLACE]: 'Lugar',
+	[FavoriteEntityType.WORLD_ITEM]: 'Objeto del mundo',
+	[FavoriteEntityType.CONCEPT]: 'Concepto',
+	[FavoriteEntityType.PROPERTY]: 'Propiedad',
+	[FavoriteEntityType.PROMPT]: 'Prompt',
+	[FavoriteEntityType.NOTE]: 'Nota',
+	[FavoriteEntityType.WILDCARD]: 'Wildcard',
+};
+
+export function getFavoriteEntityDisplayName(entityType: FavoriteEntityType): string {
+	return FAVORITE_ENTITY_DISPLAY_NAMES[entityType] ?? entityType;
+}

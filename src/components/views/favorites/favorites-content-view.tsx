@@ -1,35 +1,29 @@
 import { Heart } from 'lucide-react';
 import React from 'react';
-import { FavoriteCard } from '@/components/cards/favorite-card';
-import { LoadingScreen } from '@/components/core/feedback';
+import { FavoriteCard } from '@/components/cards/favorite-card/favorite-card';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Textarea } from '@/components/ui/textarea';
-import type { FavoriteWithStats } from '@/types/entities/favorite/base';
-import { FAVORITE_ENTITY_COLORS, FAVORITE_ENTITY_EMOJIS } from '@/types/entities/favorite/base';
-import type { FavoriteExtended } from '@/types/entities/favorite/types';
+import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
+import type { FavoriteExtended, FavoriteWithStats } from '@/types/entities/favorite';
+import { FAVORITE_ENTITY_COLORS, FAVORITE_ENTITY_EMOJIS } from '@/types/entities/favorite';
 
 /**
  * Transforma un FavoriteWithStats a FavoriteExtended para compatibilidad con FavoriteCard
  */
 function transformToExtended(favorite: FavoriteWithStats): FavoriteExtended {
 	const entityIcon = FAVORITE_ENTITY_EMOJIS[favorite.entityType] || '⭐';
-	const entityColor = FAVORITE_ENTITY_COLORS[favorite.entityType] || '#6b7280';
+	const entityColor = FAVORITE_ENTITY_COLORS[favorite.entityType] || DEFAULT_NEUTRAL_COLOR;
 
 	return {
 		...favorite,
-		// Propiedades adicionales requeridas por FavoriteExtended
-		addedAt: favorite.createdAt, // Mapear createdAt a addedAt
-		notes: null, // Valor por defecto
-		category: null, // Valor por defecto
-		priority: null, // Valor por defecto
 		// Propiedades de UI
-		entityName: favorite.stats.entityTypeName,
-		entityPreview: '',
+		entityName: favorite.entityName || favorite.stats.entityTypeName,
+		entityPreview: favorite.entityThumbnail || '',
 		entityIcon,
 		entityColor,
 		isSelected: false,
@@ -38,21 +32,15 @@ function transformToExtended(favorite: FavoriteWithStats): FavoriteExtended {
 }
 
 interface FavoritesContentViewProps {
-	favorites: FavoriteWithStats[];
-	isLoading: boolean;
-	error: Error | null;
-	localSearch: string;
-	showForm: boolean;
-	newFavoriteName: string;
-	newFavoriteDescription: string;
-	selectedFavoriteId: string | null;
-	setShowForm: (show: boolean) => void;
-	setNewFavoriteName: (name: string) => void;
-	setNewFavoriteDescription: (description: string) => void;
-	handleFavoriteSelect: (favoriteId: string) => void;
-	handleCreateFavorite: () => void;
-	handleRetry: () => void;
 	className?: string;
+	error: Error | null;
+	favorites: FavoriteWithStats[];
+	handleFavoriteSelect: (favoriteId: string) => void;
+	handleRetry: () => void;
+	isLoading: boolean;
+	localSearch: string;
+	selectedFavoriteId: string | null;
+	setLocalSearch: (value: string) => void;
 }
 
 const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
@@ -60,29 +48,23 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 	isLoading,
 	error,
 	localSearch,
-	showForm,
-	newFavoriteName,
-	newFavoriteDescription,
 	selectedFavoriteId,
-	setShowForm,
-	setNewFavoriteName,
-	setNewFavoriteDescription,
+	setLocalSearch,
 	handleFavoriteSelect,
-	handleCreateFavorite,
 	handleRetry,
 	className,
 }) => {
 	if (isLoading) {
-		return <LoadingScreen message="Cargando favoritos..." />;
+		return <LoadingScreen message="Loading favorites..." />;
 	}
 
 	if (error) {
 		return (
 			<EmptyState
-				actions={<Button onClick={handleRetry}>Reintentar</Button>}
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				actions={<Button onClick={handleRetry}>Retry</Button>}
+				description={error instanceof Error ? error.message : 'An unexpected error occurred'}
 				icon={Heart}
-				title="Error al cargar favoritos"
+				title="Could not load favorites"
 			/>
 		);
 	}
@@ -90,41 +72,28 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'flex-1'}>
 			<div className="p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Favoritos</h2>
-
-				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Favorito'}
-				</Button>
-
-				{showForm && (
-					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Favorito</h3>
-						<div className="mb-3 grid gap-2">
-							<Label htmlFor="favoriteName">Nombre</Label>
-							<Input
-								id="favoriteName"
-								onChange={(e) => setNewFavoriteName(e.target.value)}
-								placeholder="Nombre del favorito"
-								value={newFavoriteName}
-							/>
-						</div>
-						<div className="mb-4 grid gap-2">
-							<Label htmlFor="favoriteDescription">Descripción</Label>
-							<Textarea
-								id="favoriteDescription"
-								onChange={(e) => setNewFavoriteDescription(e.target.value)}
-								placeholder="Descripción del favorito (opcional)"
-								value={newFavoriteDescription}
-							/>
-						</div>
-						<Button onClick={handleCreateFavorite}>Guardar Favorito</Button>
+				<div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+					<div>
+						<h2 className="font-bold text-xl">Favorites</h2>
+						<p className="text-muted-foreground text-sm">Add or remove favorites from each item in the application.</p>
 					</div>
-				)}
+					<div className="w-full md:max-w-sm">
+						<Label className="sr-only" htmlFor="favoritesSearch">
+							Search favorites
+						</Label>
+						<Input
+							id="favoritesSearch"
+							onChange={(e) => setLocalSearch(e.target.value)}
+							placeholder="Search favorites..."
+							value={localSearch}
+						/>
+					</div>
+				</div>
 
-				{favorites?.length || isLoading || showForm ? (
+				{favorites.length > 0 || isLoading ? (
 					<motion.div
 						animate={{ opacity: 1, y: 0 }}
-						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
 						initial={{ opacity: 0, y: 20 }}
 						transition={{ duration: 0.3 }}
 					>

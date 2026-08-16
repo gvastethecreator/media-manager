@@ -5,69 +5,69 @@
  */
 
 // Tipos locales para mock (equivalentes a Drizzle)
-type MockImage = {
+interface MockImage {
+	addedAt: Date;
+	createdAt: Date;
+	folderId: string | null;
+	height: number | null;
 	id: string;
+	isFavorite: boolean;
+	metadata: string | null;
 	name: string | null;
 	path: string;
 	size: number;
-	width: number | null;
-	height: number | null;
-	metadata: string | null;
 	thumbnail: Buffer | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
 	thumbnailError: string | null;
 	thumbnailErrorAt: Date | null;
+	thumbnailHeight: number | null;
 	thumbnailOptimizedAt: Date | null;
-	isFavorite: boolean;
-	folderId: string | null;
-	addedAt: Date;
-	createdAt: Date;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
 	updatedAt: Date;
-};
+	width: number | null;
+}
 
-type MockTag = {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
+interface MockTag {
 	category: string | null;
+	color: string | null;
+	createdAt: Date;
+	description: string | null;
+	emoji: string | null;
+	featuredImage: string | null;
+	id: string;
+	isFavorite: boolean;
+	name: string;
 	shortcut: string | null;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
-type MockCollection = {
-	id: string;
-	name: string;
+interface MockCollection {
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	isPrivate: boolean;
-	isFavorite: boolean;
 	featuredImage: string | null;
-	userId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-};
-
-type MockAlbum = {
 	id: string;
+	isFavorite: boolean;
+	isPrivate: boolean;
 	name: string;
+	updatedAt: Date;
+	userId: string | null;
+}
+
+interface MockAlbum {
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	isPrivate: boolean;
-	isFavorite: boolean;
 	featuredImage: string | null;
-	userId: string | null;
-	createdAt: Date;
+	id: string;
+	isFavorite: boolean;
+	isPrivate: boolean;
+	name: string;
 	updatedAt: Date;
-};
+	userId: string | null;
+}
 
 /**
  * Datos mock para imágenes
@@ -110,9 +110,9 @@ export const mockTags: Partial<MockTag>[] = [
 	{
 		id: 'tag-1',
 		name: 'Paisaje',
-		description: 'Imágenes de paisajes naturales',
+		description: 'Natural landscape images',
 		emoji: '🏞️',
-		color: '#10b981',
+		color: 'var(--dt-success-500)',
 		category: 'general',
 		isFavorite: false,
 		createdAt: new Date('2024-01-01'),
@@ -121,9 +121,9 @@ export const mockTags: Partial<MockTag>[] = [
 	{
 		id: 'tag-2',
 		name: 'Retrato',
-		description: 'Fotografías de retratos',
+		description: 'Portrait photography',
 		emoji: '��',
-		color: '#3b82f6',
+		color: 'var(--dt-primary-500)',
 		category: 'general',
 		isFavorite: false,
 		createdAt: new Date('2024-01-01'),
@@ -140,7 +140,7 @@ export const mockCollections: Partial<MockCollection>[] = [
 		name: 'Fotos de Vacaciones',
 		description: 'Recuerdos de mis vacaciones',
 		emoji: '🏖️',
-		color: '#f59e0b',
+		color: 'var(--dt-warning-500)',
 		isPrivate: false,
 		isFavorite: false,
 		featuredImage: null,

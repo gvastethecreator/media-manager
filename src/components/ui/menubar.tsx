@@ -1,236 +1,574 @@
 'use client';
 
 import * as MenubarPrimitive from '@radix-ui/react-menubar';
-import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
+import gsap from 'gsap';
+import { Check, ChevronRight, Circle } from 'lucide-react';
 import * as React from 'react';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 import { cn } from '@/lib/utils';
 
-function Menubar({ className, ...props }: React.ComponentProps<typeof MenubarPrimitive.Root>) {
-	return (
-		<MenubarPrimitive.Root
-			className={cn('flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs', className)}
-			data-slot="menubar"
-			{...props}
-		/>
+// Final GSAP-driven menubar implementation.
+
+// ============================================================================
+// ANIMATION UTILITIES
+// ============================================================================
+
+const useMenubarAnimation = () => {
+	const prefersReducedMotion = useReducedMotion();
+	const animateContent = React.useCallback(
+		(element: HTMLElement, isOpen: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
+
+			if (isOpen) {
+				gsap.fromTo(
+					element,
+					{
+						opacity: 0,
+						y: -8,
+						scale: 0.95,
+					},
+					{
+						opacity: 1,
+						y: 0,
+						scale: 1,
+						duration: 0.2,
+						ease: 'power2.out',
+					}
+				);
+			} else {
+				gsap.fromTo(
+					element,
+					{
+						opacity: 1,
+						y: 0,
+						scale: 1,
+					},
+					{
+						opacity: 0,
+						y: -4,
+						scale: 0.98,
+						duration: 0.15,
+						ease: 'power2.out',
+					}
+				);
+			}
+		},
+		[prefersReducedMotion]
 	);
-}
+
+	const animateSubContent = React.useCallback(
+		(element: HTMLElement, isOpen: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
+
+			if (isOpen) {
+				gsap.fromTo(
+					element,
+					{
+						opacity: 0,
+						x: -8,
+					},
+					{
+						opacity: 1,
+						x: 0,
+						duration: 0.15,
+						ease: 'power2.out',
+					}
+				);
+			}
+		},
+		[prefersReducedMotion]
+	);
+
+	const animateItemHover = React.useCallback(
+		(element: HTMLElement, isHovering: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
+
+			gsap.to(element, {
+				backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 15%, transparent)' : 'transparent',
+				scale: isHovering ? 1.01 : 1,
+				duration: 0.15,
+				ease: 'power2.out',
+			});
+		},
+		[prefersReducedMotion]
+	);
+
+	const animateTriggerHover = React.useCallback(
+		(element: HTMLElement, isHovering: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
+
+			gsap.to(element, {
+				backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
+				duration: 0.15,
+				ease: 'power2.out',
+			});
+		},
+		[prefersReducedMotion]
+	);
+
+	return { animateContent, animateSubContent, animateItemHover, animateTriggerHover };
+};
+
+// ============================================================================
+// MENU COMPONENTS
+// ============================================================================
 
 function MenubarMenu({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Menu>) {
-	return <MenubarPrimitive.Menu data-slot="menubar-menu" {...props} />;
+	return <MenubarPrimitive.Menu {...props} />;
 }
 
 function MenubarGroup({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Group>) {
-	return <MenubarPrimitive.Group data-slot="menubar-group" {...props} />;
+	return <MenubarPrimitive.Group {...props} />;
 }
 
 function MenubarPortal({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Portal>) {
-	return <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />;
+	return <MenubarPrimitive.Portal {...props} />;
 }
 
 function MenubarRadioGroup({ ...props }: React.ComponentProps<typeof MenubarPrimitive.RadioGroup>) {
-	return <MenubarPrimitive.RadioGroup data-slot="menubar-radio-group" {...props} />;
-}
-
-function MenubarTrigger({ className, ...props }: React.ComponentProps<typeof MenubarPrimitive.Trigger>) {
-	return (
-		<MenubarPrimitive.Trigger
-			className={cn(
-				'flex select-none items-center rounded-sm px-2 py-1 font-medium text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
-				className
-			)}
-			data-slot="menubar-trigger"
-			{...props}
-		/>
-	);
-}
-
-function MenubarContent({
-	className,
-	align = 'start',
-	alignOffset = -4,
-	sideOffset = 8,
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.Content>) {
-	return (
-		<MenubarPortal>
-			<MenubarPrimitive.Content
-				align={align}
-				alignOffset={alignOffset}
-				className={cn(
-					'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[12rem] origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in',
-					className
-				)}
-				data-slot="menubar-content"
-				sideOffset={sideOffset}
-				{...props}
-			/>
-		</MenubarPortal>
-	);
-}
-
-function MenubarItem({
-	className,
-	inset,
-	variant = 'default',
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.Item> & {
-	inset?: boolean;
-	variant?: 'default' | 'destructive';
-}) {
-	return (
-		<MenubarPrimitive.Item
-			className={cn(
-				"data-[variant=destructive]:*:[svg]:!text-destructive relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[disabled]:opacity-50 data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				className
-			)}
-			data-inset={inset}
-			data-slot="menubar-item"
-			data-variant={variant}
-			{...props}
-		/>
-	);
-}
-
-function MenubarCheckboxItem({
-	className,
-	children,
-	checked,
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.CheckboxItem>) {
-	return (
-		<MenubarPrimitive.CheckboxItem
-			checked={checked}
-			className={cn(
-				"relative flex cursor-default select-none items-center gap-2 rounded-xs py-1.5 pr-2 pl-8 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				className
-			)}
-			data-slot="menubar-checkbox-item"
-			{...props}
-		>
-			<span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
-				<MenubarPrimitive.ItemIndicator>
-					<CheckIcon className="size-4" />
-				</MenubarPrimitive.ItemIndicator>
-			</span>
-			{children}
-		</MenubarPrimitive.CheckboxItem>
-	);
-}
-
-function MenubarRadioItem({ className, children, ...props }: React.ComponentProps<typeof MenubarPrimitive.RadioItem>) {
-	return (
-		<MenubarPrimitive.RadioItem
-			className={cn(
-				"relative flex cursor-default select-none items-center gap-2 rounded-xs py-1.5 pr-2 pl-8 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				className
-			)}
-			data-slot="menubar-radio-item"
-			{...props}
-		>
-			<span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
-				<MenubarPrimitive.ItemIndicator>
-					<CircleIcon className="size-2 fill-current" />
-				</MenubarPrimitive.ItemIndicator>
-			</span>
-			{children}
-		</MenubarPrimitive.RadioItem>
-	);
-}
-
-function MenubarLabel({
-	className,
-	inset,
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.Label> & {
-	inset?: boolean;
-}) {
-	return (
-		<MenubarPrimitive.Label
-			className={cn('px-2 py-1.5 font-medium text-sm data-[inset]:pl-8', className)}
-			data-inset={inset}
-			data-slot="menubar-label"
-			{...props}
-		/>
-	);
-}
-
-function MenubarSeparator({ className, ...props }: React.ComponentProps<typeof MenubarPrimitive.Separator>) {
-	return (
-		<MenubarPrimitive.Separator
-			className={cn('-mx-1 my-1 h-px bg-border', className)}
-			data-slot="menubar-separator"
-			{...props}
-		/>
-	);
-}
-
-function MenubarShortcut({ className, ...props }: React.ComponentProps<'span'>) {
-	return (
-		<span
-			className={cn('ml-auto text-muted-foreground text-xs tracking-widest', className)}
-			data-slot="menubar-shortcut"
-			{...props}
-		/>
-	);
+	return <MenubarPrimitive.RadioGroup {...props} />;
 }
 
 function MenubarSub({ ...props }: React.ComponentProps<typeof MenubarPrimitive.Sub>) {
 	return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />;
 }
 
-function MenubarSubTrigger({
-	className,
-	inset,
-	children,
-	...props
-}: React.ComponentProps<typeof MenubarPrimitive.SubTrigger> & {
-	inset?: boolean;
-}) {
-	return (
-		<MenubarPrimitive.SubTrigger
-			className={cn(
-				'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[inset]:pl-8 data-[state=open]:text-accent-foreground',
-				className
-			)}
-			data-inset={inset}
-			data-slot="menubar-sub-trigger"
-			{...props}
-		>
-			{children}
-			<ChevronRightIcon className="ml-auto h-4 w-4" />
-		</MenubarPrimitive.SubTrigger>
-	);
-}
+// ============================================================================
+// MENUBAR ROOT
+// ============================================================================
 
-function MenubarSubContent({ className, ...props }: React.ComponentProps<typeof MenubarPrimitive.SubContent>) {
+const Menubar = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.Root>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Root>
+>(({ className, ...props }, ref) => (
+	<MenubarPrimitive.Root
+		className={cn(
+			'flex h-12 items-center gap-1 rounded-dt-md',
+			'border-2 border-[oklch(from_var(--border)_l_c_h_/0.4)]',
+			'bg-background/80 backdrop-blur-sm',
+			'p-1.5 shadow-dt-1',
+			className
+		)}
+		ref={ref}
+		{...props}
+	/>
+));
+Menubar.displayName = MenubarPrimitive.Root.displayName;
+
+// ============================================================================
+// MENUBAR TRIGGER
+// ============================================================================
+
+const MenubarTrigger = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.Trigger>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Trigger>
+>(({ className, ...props }, ref) => {
+	const triggerRef = React.useRef<HTMLButtonElement>(null);
+	const { animateTriggerHover } = useMenubarAnimation();
+
+	React.useImperativeHandle(ref, () => triggerRef.current!);
+
+	const handleMouseEnter = React.useCallback(() => {
+		if (triggerRef.current) {
+			animateTriggerHover(triggerRef.current, true);
+		}
+	}, [animateTriggerHover]);
+
+	const handleMouseLeave = React.useCallback(() => {
+		if (triggerRef.current) {
+			animateTriggerHover(triggerRef.current, false);
+		}
+	}, [animateTriggerHover]);
+
 	return (
-		<MenubarPrimitive.SubContent
+		<MenubarPrimitive.Trigger
 			className={cn(
-				'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=open]:animate-in',
+				'flex cursor-default select-none items-center rounded-dt-sm',
+				'min-h-11 px-4 py-2 font-medium text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
+				'border-2 border-transparent',
+				'data-[state=open]:border-[oklch(from_var(--accent)_l_c_h_/0.3)]',
+				'data-[state=open]:bg-accent/10',
+				'data-[state=open]:text-accent-foreground',
+				'data-[state=open]:shadow-dt-inset-1',
+				'disabled:pointer-events-none disabled:opacity-50',
 				className
 			)}
-			data-slot="menubar-sub-content"
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+			ref={triggerRef}
 			{...props}
 		/>
 	);
-}
+});
+MenubarTrigger.displayName = MenubarPrimitive.Trigger.displayName;
+
+// ============================================================================
+// MENUBAR SUB TRIGGER (Nested Menus)
+// ============================================================================
+
+const MenubarSubTrigger = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.SubTrigger>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.SubTrigger> & {
+		inset?: boolean;
+	}
+>(({ className, inset, children, ...props }, ref) => {
+	const triggerRef = React.useRef<HTMLDivElement>(null);
+	const { animateItemHover } = useMenubarAnimation();
+
+	React.useImperativeHandle(ref, () => triggerRef.current!);
+
+	const handleMouseEnter = React.useCallback(() => {
+		if (triggerRef.current) {
+			animateItemHover(triggerRef.current, true);
+		}
+	}, [animateItemHover]);
+
+	const handleMouseLeave = React.useCallback(() => {
+		if (triggerRef.current) {
+			animateItemHover(triggerRef.current, false);
+		}
+	}, [animateItemHover]);
+
+	return (
+		<MenubarPrimitive.SubTrigger
+			className={cn(
+				'flex cursor-default select-none items-center rounded-dt-sm',
+				'min-h-11 px-3 py-2.5 text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
+				'focus:bg-accent/15 focus:text-accent-foreground',
+				'data-[state=open]:bg-accent/15 data-[state=open]:text-accent-foreground',
+				'disabled:pointer-events-none disabled:opacity-50',
+				inset && 'pl-8',
+				className
+			)}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+			ref={triggerRef}
+			{...props}
+		>
+			{children}
+			<ChevronRight className="ml-auto h-4 w-4 opacity-60" />
+		</MenubarPrimitive.SubTrigger>
+	);
+});
+MenubarSubTrigger.displayName = MenubarPrimitive.SubTrigger.displayName;
+
+// ============================================================================
+// MENUBAR SUB CONTENT (Nested Menu Content)
+// ============================================================================
+
+const MenubarSubContent = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.SubContent>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.SubContent>
+>(({ className, ...props }, ref) => {
+	const contentRef = React.useRef<HTMLDivElement>(null);
+	const { animateSubContent } = useMenubarAnimation();
+
+	React.useImperativeHandle(ref, () => contentRef.current!);
+
+	React.useEffect(() => {
+		if (contentRef.current) {
+			animateSubContent(contentRef.current, true);
+		}
+	}, [animateSubContent]);
+
+	return (
+		<MenubarPrimitive.SubContent
+			className={cn(
+				'z-50 min-w-40 overflow-hidden rounded-dt-md',
+				'border-2 border-[oklch(from_var(--border)_l_c_h_/0.35)]',
+				'bg-popover/95 backdrop-blur-md',
+				'p-1.5 shadow-dt-3',
+				'origin-[--radix-menubar-content-transform-origin]',
+				className
+			)}
+			ref={contentRef}
+			{...props}
+		/>
+	);
+});
+MenubarSubContent.displayName = MenubarPrimitive.SubContent.displayName;
+
+// ============================================================================
+// MENUBAR CONTENT (Main Menu)
+// ============================================================================
+
+const MenubarContent = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.Content>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Content>
+>(({ className, align = 'start', alignOffset = -4, sideOffset = 8, ...props }, ref) => {
+	const contentRef = React.useRef<HTMLDivElement>(null);
+	const { animateContent } = useMenubarAnimation();
+	const [isOpen, setIsOpen] = React.useState(false);
+
+	React.useImperativeHandle(ref, () => contentRef.current!);
+
+	// Track open state through Radix's onInteractOutside or other means
+	React.useEffect(() => {
+		if (contentRef.current) {
+			const observer = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					if (mutation.type === 'attributes' && mutation.attributeName === 'data-state') {
+						const state = contentRef.current?.getAttribute('data-state');
+						const newIsOpen = state === 'open';
+						if (newIsOpen !== isOpen) {
+							setIsOpen(newIsOpen);
+							animateContent(contentRef.current!, newIsOpen);
+						}
+					}
+				});
+			});
+
+			if (contentRef.current) {
+				observer.observe(contentRef.current, { attributes: true });
+			}
+
+			return () => observer.disconnect();
+		}
+	}, [animateContent, isOpen]);
+
+	return (
+		<MenubarPrimitive.Portal>
+			<MenubarPrimitive.Content
+				align={align}
+				alignOffset={alignOffset}
+				className={cn(
+					'z-50 min-w-48 overflow-hidden rounded-dt-md',
+					'border-2 border-[oklch(from_var(--border)_l_c_h_/0.35)]',
+					'bg-popover/95 backdrop-blur-md',
+					'p-1.5 shadow-dt-3',
+					'origin-[--radix-menubar-content-transform-origin]',
+					className
+				)}
+				ref={contentRef}
+				sideOffset={sideOffset}
+				{...props}
+			/>
+		</MenubarPrimitive.Portal>
+	);
+});
+MenubarContent.displayName = MenubarPrimitive.Content.displayName;
+
+// ============================================================================
+// MENUBAR ITEM
+// ============================================================================
+
+const MenubarItem = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.Item>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Item> & {
+		inset?: boolean;
+	}
+>(({ className, inset, ...props }, ref) => {
+	const itemRef = React.useRef<HTMLDivElement>(null);
+	const { animateItemHover } = useMenubarAnimation();
+
+	React.useImperativeHandle(ref, () => itemRef.current!);
+
+	const handleMouseEnter = React.useCallback(() => {
+		if (itemRef.current) {
+			animateItemHover(itemRef.current, true);
+		}
+	}, [animateItemHover]);
+
+	const handleMouseLeave = React.useCallback(() => {
+		if (itemRef.current) {
+			animateItemHover(itemRef.current, false);
+		}
+	}, [animateItemHover]);
+
+	return (
+		<MenubarPrimitive.Item
+			className={cn(
+				'relative flex cursor-default select-none items-center rounded-dt-sm',
+				'min-h-11 px-3 py-2.5 text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
+				'focus:bg-accent/15 focus:text-accent-foreground',
+				'data-disabled:pointer-events-none data-disabled:opacity-50',
+				inset && 'pl-8',
+				className
+			)}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+			ref={itemRef}
+			{...props}
+		/>
+	);
+});
+MenubarItem.displayName = MenubarPrimitive.Item.displayName;
+
+// ============================================================================
+// MENUBAR CHECKBOX ITEM
+// ============================================================================
+
+const MenubarCheckboxItem = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.CheckboxItem>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.CheckboxItem>
+>(({ className, children, checked, ...props }, ref) => {
+	const itemRef = React.useRef<HTMLDivElement>(null);
+	const { animateItemHover } = useMenubarAnimation();
+
+	React.useImperativeHandle(ref, () => itemRef.current!);
+
+	const handleMouseEnter = React.useCallback(() => {
+		if (itemRef.current) {
+			animateItemHover(itemRef.current, true);
+		}
+	}, [animateItemHover]);
+
+	const handleMouseLeave = React.useCallback(() => {
+		if (itemRef.current) {
+			animateItemHover(itemRef.current, false);
+		}
+	}, [animateItemHover]);
+
+	return (
+		<MenubarPrimitive.CheckboxItem
+			checked={checked}
+			className={cn(
+				'relative flex cursor-default select-none items-center rounded-dt-sm',
+				'min-h-11 py-2.5 pr-3 pl-8 text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
+				'focus:bg-accent/15 focus:text-accent-foreground',
+				'data-disabled:pointer-events-none data-disabled:opacity-50',
+				className
+			)}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+			ref={itemRef}
+			{...props}
+		>
+			<span className="absolute left-2.5 flex h-4 w-4 items-center justify-center">
+				<MenubarPrimitive.ItemIndicator>
+					<Check className="h-4 w-4 text-primary" />
+				</MenubarPrimitive.ItemIndicator>
+			</span>
+			{children}
+		</MenubarPrimitive.CheckboxItem>
+	);
+});
+MenubarCheckboxItem.displayName = MenubarPrimitive.CheckboxItem.displayName;
+
+// ============================================================================
+// MENUBAR RADIO ITEM
+// ============================================================================
+
+const MenubarRadioItem = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.RadioItem>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.RadioItem>
+>(({ className, children, ...props }, ref) => {
+	const itemRef = React.useRef<HTMLDivElement>(null);
+	const { animateItemHover } = useMenubarAnimation();
+
+	React.useImperativeHandle(ref, () => itemRef.current!);
+
+	const handleMouseEnter = React.useCallback(() => {
+		if (itemRef.current) {
+			animateItemHover(itemRef.current, true);
+		}
+	}, [animateItemHover]);
+
+	const handleMouseLeave = React.useCallback(() => {
+		if (itemRef.current) {
+			animateItemHover(itemRef.current, false);
+		}
+	}, [animateItemHover]);
+
+	return (
+		<MenubarPrimitive.RadioItem
+			className={cn(
+				'relative flex cursor-default select-none items-center rounded-dt-sm',
+				'min-h-11 py-2.5 pr-3 pl-8 text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
+				'focus:bg-accent/15 focus:text-accent-foreground',
+				'data-disabled:pointer-events-none data-disabled:opacity-50',
+				className
+			)}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+			ref={itemRef}
+			{...props}
+		>
+			<span className="absolute left-2.5 flex h-4 w-4 items-center justify-center">
+				<MenubarPrimitive.ItemIndicator>
+					<Circle className="h-2.5 w-2.5 fill-current text-primary" />
+				</MenubarPrimitive.ItemIndicator>
+			</span>
+			{children}
+		</MenubarPrimitive.RadioItem>
+	);
+});
+MenubarRadioItem.displayName = MenubarPrimitive.RadioItem.displayName;
+
+// ============================================================================
+// MENUBAR LABEL
+// ============================================================================
+
+const MenubarLabel = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.Label>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Label> & {
+		inset?: boolean;
+	}
+>(({ className, inset, ...props }, ref) => (
+	<MenubarPrimitive.Label
+		className={cn('px-3 py-2 font-semibold text-muted-foreground text-sm', inset && 'pl-8', className)}
+		ref={ref}
+		{...props}
+	/>
+));
+MenubarLabel.displayName = MenubarPrimitive.Label.displayName;
+
+// ============================================================================
+// MENUBAR SEPARATOR
+// ============================================================================
+
+const MenubarSeparator = React.forwardRef<
+	React.ElementRef<typeof MenubarPrimitive.Separator>,
+	React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+	<MenubarPrimitive.Separator
+		className={cn(
+			'-mx-1.5 my-1.5 h-px',
+			'bg-[linear-gradient(90deg,transparent,oklch(from_var(--border)_l_c_h_/0.6),transparent)]',
+			className
+		)}
+		ref={ref}
+		{...props}
+	/>
+));
+MenubarSeparator.displayName = MenubarPrimitive.Separator.displayName;
+
+// ============================================================================
+// MENUBAR SHORTCUT
+// ============================================================================
+
+const MenubarShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
+	return (
+		<span className={cn('ml-auto text-muted-foreground text-xs tracking-widest', 'opacity-70', className)} {...props} />
+	);
+};
+MenubarShortcut.displayName = 'MenubarShortcut';
+
+// ============================================================================
+// EXPORTS
+// ============================================================================
 
 export {
 	Menubar,
-	MenubarPortal,
-	MenubarMenu,
-	MenubarTrigger,
+	MenubarCheckboxItem,
 	MenubarContent,
 	MenubarGroup,
-	MenubarSeparator,
-	MenubarLabel,
 	MenubarItem,
-	MenubarShortcut,
-	MenubarCheckboxItem,
+	MenubarLabel,
+	MenubarMenu,
+	MenubarPortal,
 	MenubarRadioGroup,
 	MenubarRadioItem,
+	MenubarSeparator,
+	MenubarShortcut,
 	MenubarSub,
-	MenubarSubTrigger,
 	MenubarSubContent,
+	MenubarSubTrigger,
+	MenubarTrigger,
 };

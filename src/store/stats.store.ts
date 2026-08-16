@@ -8,103 +8,103 @@ const statsLogger = clientLogger.withContext('StatsStore');
 
 // Interfaces existentes
 interface FolderStat {
+	count: number;
 	id: string;
 	name: string;
-	count: number;
 }
 
 interface CollectionStat {
+	count: number;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	count: number;
 }
 
 interface TagStat {
-	id: string;
-	name: string;
 	color: string | undefined;
 	count: number;
+	id: string;
+	name: string;
 }
 
 interface AlbumStat {
+	count: number;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	count: number;
 }
 
 interface CharacterStat {
+	count: number;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	count: number;
 }
 
 interface PlaceStat {
+	count: number;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	count: number;
 }
 
 interface WorldItemStat {
+	count: number;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	count: number;
 }
 
 interface Activity {
-	id: string;
-	type: string;
-	description: string;
 	createdAt: Date;
+	description: string;
+	id: string;
 	image: {
 		id: string;
 		name: string;
 		thumbnail: Uint8Array | null;
 	} | null;
+	type: string;
 }
 
 // Interfaz base para estadísticas
 interface StatsData extends BaseEntity {
+	albums: AlbumStat[];
+	characters: CharacterStat[];
+	collections: CollectionStat[];
 	// Metadatos de entidad
 	createdAt: Date;
-	updatedAt: Date;
-
-	// Conteos básicos
-	totalImages: number;
-	totalFolders: number;
-	totalTags: number;
-	totalCollections: number;
-	totalFavorites: number;
-	totalViews: number;
-	totalDownloads: number;
-	totalSize: number;
-	totalAlbums: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalActivities: number;
-	totalDocuments: number;
-	totalAudio: number;
-	totalJsonFiles: number;
-	totalFile3D: number;
 
 	// Listas detalladas
 	folders: FolderStat[];
-	collections: CollectionStat[];
-	tags: TagStat[];
-	albums: AlbumStat[];
-	characters: CharacterStat[];
 	places: PlaceStat[];
-	worldItems: WorldItemStat[];
-	topTags: TagStat[];
 	recentActivity: Activity[];
+	tags: TagStat[];
 
 	// Metadata
 	timestamp: number;
+	topTags: TagStat[];
+	totalActivities: number;
+	totalAlbums: number;
+	totalAudio: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalDocuments: number;
+	totalDownloads: number;
+	totalFavorites: number;
+	totalFile3D: number;
+	totalFolders: number;
+
+	// Conteos básicos
+	totalImages: number;
+	totalJsonFiles: number;
+	totalPlaces: number;
+	totalSize: number;
+	totalTags: number;
+	totalViews: number;
+	totalWorldItems: number;
+	updatedAt: Date;
+	worldItems: WorldItemStat[];
 }
 
 // Estado extendido específico para Stats
@@ -114,8 +114,8 @@ interface StatsFilters {
 		endDate: string | null;
 		type: string[];
 	};
-	refreshInterval: number;
 	lastRefresh: number;
+	refreshInterval: number;
 	setFilters: (filters: Partial<StatsFilters['filters']>) => void;
 	setRefreshInterval: (interval: number) => void;
 	updateLastRefresh: () => void;
@@ -140,7 +140,7 @@ const getStats = async () => {
 			},
 		];
 	} catch (error) {
-		statsLogger.error('Error al obtener estadísticas:', error);
+		statsLogger.error('Could not get statistics:', error);
 		throw error;
 	}
 };
@@ -215,7 +215,7 @@ export const useStatsBaseStore = create<{
 				loading: false,
 			});
 		} catch (error) {
-			statsLogger.error('Error al obtener estadísticas:', error);
+			statsLogger.error('Could not get statistics:', error);
 			set({ error: error instanceof Error ? error.message : 'Error desconocido', loading: false });
 		}
 	},

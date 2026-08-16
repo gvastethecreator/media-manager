@@ -6,8 +6,10 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 
-// Definimos los temas personalizados (mantenidos de la versión original)
+// Definimos los temas personalizados disponibles
+// Cada tema tiene su definición en src/app/themes.css
 const customThemes = [
 	'light',
 	'dark',
@@ -21,25 +23,27 @@ const customThemes = [
 	'carbon',
 	'teal',
 	'citrico',
+	'aurora',
+	'neon',
 ] as const;
 
 type Theme = (typeof customThemes)[number] | 'system';
 
 interface ThemeContextType {
-	theme: Theme;
-	setTheme: (theme: Theme) => void;
 	resolvedTheme: (typeof customThemes)[number];
-	themes: readonly string[];
+	setTheme: (theme: Theme) => void;
+	theme: Theme;
+	themes: typeof customThemes;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export interface ThemeProviderProps {
+	attribute?: string;
 	children: React.ReactNode;
 	defaultTheme?: Theme;
-	storageKey?: string;
-	attribute?: string;
 	enableSystem?: boolean;
+	storageKey?: string;
 }
 
 // Componente de debug para monitorear cambios en el tema (mantenido)
@@ -49,8 +53,8 @@ function ThemeDebugger() {
 			for (const mutation of mutations) {
 				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
 					const target = mutation.target as HTMLElement;
-					console.log(`Tema cambiado a: ${target.getAttribute('data-theme')}`);
-					console.log(`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`);
+					clientLogger.debug(`Theme changed to: ${target.getAttribute('data-theme')}`);
+					clientLogger.debug(`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`);
 				}
 			}
 		});
@@ -63,18 +67,8 @@ function ThemeDebugger() {
 	return null;
 }
 
-// Componente para forzar la aplicación del tema actual (mantenido)
-function ThemeEnforcer() {
-	const { theme, resolvedTheme } = useTheme();
-
-	useEffect(() => {
-		if (resolvedTheme && typeof document !== 'undefined') {
-			console.log(`Forzando aplicación del tema: ${resolvedTheme}`);
-			document.documentElement.setAttribute('data-theme', resolvedTheme);
-		}
-	}, [resolvedTheme]);
-
-	return null;
+function isTheme(value: string | null): value is Theme {
+	return value === 'system' || customThemes.some((theme) => theme === value);
 }
 
 export function ThemeProvider({
@@ -84,7 +78,23 @@ export function ThemeProvider({
 	attribute = 'data-theme',
 	enableSystem = true,
 }: ThemeProviderProps) {
-	const [theme, setTheme] = useState<Theme>(defaultTheme);
+	const [theme, setTheme] = useState<Theme>(() => {
+		if (typeof window === 'undefined') {
+			return defaultTheme;
+		}
+		try {
+			const storedTheme = window.localStorage.getItem(storageKey);
+			if (isTheme(storedTheme)) {
+				return storedTheme;
+			}
+			if (storedTheme !== null) {
+				window.localStorage.removeItem(storageKey);
+			}
+		} catch (error) {
+			clientLogger.warn('The persisted theme could not be read; using the fallback.', error);
+		}
+		return defaultTheme;
+	});
 	const [resolvedTheme, setResolvedTheme] = useState<(typeof customThemes)[number]>('light');
 
 	// Detectar preferencia del sistema
@@ -106,10 +116,13 @@ export function ThemeProvider({
 		[getSystemTheme]
 	);
 
-	// Aplicar tema al DOM
+	// Aplicar tema al DOM con transición fluida
 	const applyTheme = React.useCallback(
 		(themeToApply: (typeof customThemes)[number]) => {
 			const root = document.documentElement;
+
+			// Activar transición fluida
+			root.classList.add('theme-transitioning');
 
 			// Remover todas las clases de tema anteriores
 			for (const t of customThemes) {
@@ -119,21 +132,18 @@ export function ThemeProvider({
 			// Aplicar nueva clase de tema
 			root.classList.add(themeToApply);
 
-			// Aplicar atributo data-theme
-			if (attribute) {
+			// Las clases siempre se administran arriba; un atributo adicional es opcional.
+			if (attribute && attribute !== 'class') {
 				root.setAttribute(attribute, themeToApply);
 			}
+
+			// Remover clase de transición después de completar
+			window.setTimeout(() => {
+				root.classList.remove('theme-transitioning');
+			}, 350);
 		},
 		[attribute]
 	);
-
-	// Inicializar tema desde localStorage
-	useEffect(() => {
-		const storedTheme = localStorage.getItem(storageKey) as Theme;
-		if (storedTheme && (customThemes.includes(storedTheme as any) || storedTheme === 'system')) {
-			setTheme(storedTheme);
-		}
-	}, [storageKey]);
 
 	// Actualizar tema resuelto cuando cambia el tema o la preferencia del sistema
 	useEffect(() => {
@@ -156,10 +166,17 @@ export function ThemeProvider({
 	}, [theme, enableSystem, applyTheme, resolveTheme]);
 
 	// Función para cambiar tema
-	const handleSetTheme = (newTheme: Theme) => {
-		setTheme(newTheme);
-		localStorage.setItem(storageKey, newTheme);
-	};
+	const handleSetTheme = useCallback(
+		(newTheme: Theme) => {
+			setTheme(newTheme);
+			try {
+				localStorage.setItem(storageKey, newTheme);
+			} catch (error) {
+				clientLogger.warn('The theme changed but could not be persisted.', error);
+			}
+		},
+		[storageKey]
+	);
 
 	const value: ThemeContextType = {
 		theme,
@@ -171,8 +188,7 @@ export function ThemeProvider({
 	return (
 		<ThemeContext.Provider value={value}>
 			{children}
-			<ThemeDebugger />
-			<ThemeEnforcer />
+			{import.meta.env.DEV ? <ThemeDebugger /> : null}
 		</ThemeContext.Provider>
 	);
 }

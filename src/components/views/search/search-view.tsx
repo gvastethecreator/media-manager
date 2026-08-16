@@ -1,114 +1,119 @@
 import { Search } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { toFileViewerItem } from '@/components/features/file-viewer/file-viewer-item';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useImageStore } from '@/store/entities/image';
-import { useImageViewer } from '@/store/image-viewer.store';
-import type { AnyEntityWithStats } from '@/types/entities';
-import type { EntityWithStats } from '@/types/entities/entity.types';
-import type { ImageWithStats } from '@/types/entities/image';
-import { isImageWithStats } from '@/types/entity-guards';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useDebounce } from '@/hooks/use-debounce';
+import { useSearchUnified } from '@/lib/api/search';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { ViewProps } from '../types';
 
-interface SearchFilters {
-	query: string;
-	type: 'name' | 'content' | 'metadata' | 'all';
-	dateFrom?: Date;
-	dateTo?: Date;
-	tags?: string[];
-	collections?: string[];
-	folders?: string[];
-}
-
-// const _PAGE_SIZE = 100; // No usado por ahora
-
-/**
- * ✅ MIGRADO: SearchView ahora usa FileBrowserV2 con EntityWithStats
- * - FileBrowser → FileBrowserV2
- * - FileItem → EntityWithStats
- * - useFileStore → useImageStore (específico por entidad)
- */
 export function SearchView(_props: ViewProps) {
-	const [filters, setFilters] = useState<SearchFilters>({
+	const navigate = useNavigate();
+	const [filters, setFilters] = useState({
 		query: '',
-		type: 'all',
+		type: 'all' as 'all' | 'image' | 'video' | 'audio' | 'document',
+	});
+	const debouncedQuery = useDebounce(filters.query, 500);
+
+	const {
+		data: searchResponse,
+		isLoading,
+		error,
+	} = useSearchUnified({
+		query: debouncedQuery,
+		type: filters.type,
+		limit: 100,
 	});
 
-	// ✅ MIGRADO: Usar store específico de imágenes
-	const { isLoading, getSortedImages, loadImages } = useImageStore();
+	const { openViewer } = useFileViewerStore();
+	const { setSelectedItems, setVisible } = useDetailsPanel();
 
-	const { openViewer } = useImageViewer();
+	const browserItems = useMemo(() => {
+		if (!searchResponse?.results) return [];
+		return searchResponse.results.map((item: any) =>
+			toBrowserItem({
+				...(item.data as Record<string, unknown>),
+				entityType: item.type,
+			})
+		);
+	}, [searchResponse]);
 
-	// Obtener imágenes tipadas del store
-	const items: ImageWithStats[] = getSortedImages();
-
-	const handleSearch = useCallback(async () => {
-		if (!filters.query) {
-			return;
-		}
-
-		try {
-			// TODO: Implementar búsqueda con EntityWithStats
-			// Por ahora, cargar todas las imágenes
-			await loadImages();
-		} catch (err) {
-			console.error('Error en búsqueda:', err);
-		}
-	}, [filters, loadImages]);
-
-	const handleItemSelect = useCallback((item: AnyEntityWithStats) => {
-		// TODO: Implementar selección con el nuevo sistema
-		console.log('Item seleccionado:', item.id);
+	const handleItemSelect = useCallback((item: any) => {
+		clientLogger.debug('Search item selected:', item.id);
 	}, []);
 
 	const handleItemDoubleClick = useCallback(
-		(item: AnyEntityWithStats) => {
-			// ✅ Usar directamente las imágenes tipadas del store con EntityWithStats
-			if (!isImageWithStats(item)) {
+		(item: BrowserItem) => {
+			const entity = item.raw as unknown as any;
+			if (!entity) return;
+
+			if (entity.entityType === 'image') {
+				const imageItems = browserItems
+					.map((i: BrowserItem) => i.raw)
+					.filter((i: any) => i?.entityType === 'image')
+					.map((image: Record<string, unknown>) => toFileViewerItem(image, 'image'));
+				const imgIndex = imageItems.findIndex((i: any) => i.id === entity.id);
+				openViewer(imageItems, Math.max(0, imgIndex));
 				return;
 			}
 
-			const imageItems: ImageWithStats[] = items;
-			const currentIndex = imageItems.findIndex((i) => i.id === item.id);
+			const routeByEntityType: Record<string, string> = {
+				album: `/albums/${entity.id}`,
+				collection: `/collections/${entity.id}`,
+				group: `/groups/${entity.id}`,
+				tag: `/tags/${entity.id}`,
+				character: `/characters/${entity.id}`,
+				place: `/places/${entity.id}`,
+				'world-item': `/world-items/${entity.id}`,
+				concept: `/concepts/${entity.id}`,
+				prompt: `/prompts/${entity.id}`,
+				property: `/properties/${entity.id}`,
+				'json-file': `/json-files/${entity.id}`,
+				jsonFile: `/json-files/${entity.id}`,
+				file3d: `/file3d/${entity.id}`,
+				'3d': `/file3d/${entity.id}`,
+			};
 
-			// openViewer espera EntityWithStats[]; adaptamos a tipo más amplio sin copiar
-			const asEntities = imageItems as unknown as EntityWithStats[];
-			openViewer(asEntities, currentIndex < 0 ? 0 : currentIndex);
+			const directRoute = routeByEntityType[entity.entityType];
+			if (directRoute) {
+				navigate(directRoute);
+				return;
+			}
+
+			const sectionByEntityType: Record<string, string> = {
+				video: '/videos',
+				audio: '/audios',
+				document: '/documents',
+				note: '/notes',
+			};
+
+			const sectionRoute = sectionByEntityType[entity.entityType];
+			if (sectionRoute) {
+				setSelectedItems([entity]);
+				setVisible(true);
+				navigate(sectionRoute);
+				return;
+			}
+
+			clientLogger.info('Search entity has no specific route; showing it in the details panel', {
+				id: entity.id,
+				entityType: entity.entityType,
+			});
+			setSelectedItems([entity]);
+			setVisible(true);
 		},
-		[openViewer, items]
+		[browserItems, navigate, openViewer, setSelectedItems, setVisible]
 	);
-
-	const renderContent = () => {
-		if (isLoading) {
-			return <LoadingScreen />;
-		}
-		if (items && items.length > 0) {
-			return (
-				<FileBrowser
-					isLoading={isLoading}
-					items={items as unknown as AnyEntityWithStats[]}
-					onItemClick={handleItemSelect}
-					onItemDoubleClick={handleItemDoubleClick}
-				/>
-			);
-		}
-		if (filters.query) {
-			return (
-				<EmptyState
-					description="Intenta con otros términos de búsqueda"
-					icon={Search}
-					title="No se encontraron resultados"
-				/>
-			);
-		}
-		return null;
-	};
 
 	return (
 		<div className="flex h-full flex-col">
@@ -117,89 +122,60 @@ export function SearchView(_props: ViewProps) {
 					<div className="space-y-4">
 						<div className="flex gap-4">
 							<Input
+								className="flex-1"
 								onChange={(e) => setFilters((prev) => ({ ...prev, query: e.target.value }))}
-								onKeyDown={(e) => {
-									if (e.key === 'Enter') {
-										handleSearch();
-									}
-								}}
-								placeholder="Buscar imágenes..."
+								placeholder="Search images, videos, audio, documents..."
 								value={filters.query}
 							/>
-							<Button onClick={handleSearch} type="button">
-								Buscar
+							<Button disabled={!filters.query.trim()} onClick={() => setFilters((prev) => ({ ...prev }))}>
+								Search
 							</Button>
 						</div>
-
-						<Tabs className="w-full" defaultValue="basic">
+						<Tabs
+							className="w-full"
+							defaultValue="all"
+							onValueChange={(v) => setFilters((prev) => ({ ...prev, type: v as any }))}
+							value={filters.type}
+						>
 							<TabsList>
-								<TabsTrigger value="basic">Búsqueda Básica</TabsTrigger>
-								<TabsTrigger value="advanced">Filtros Avanzados</TabsTrigger>
+								<TabsTrigger value="all">Todo</TabsTrigger>
+								<TabsTrigger value="image">Images</TabsTrigger>
+								<TabsTrigger value="video">Videos</TabsTrigger>
+								<TabsTrigger value="audio">Audio</TabsTrigger>
+								<TabsTrigger value="document">Docs</TabsTrigger>
 							</TabsList>
-							<TabsContent className="space-y-4" value="basic">
-								<div className="grid grid-cols-2 gap-4">
-									<div>
-										<Label>Tipo de búsqueda</Label>
-										<select
-											className="w-full rounded border p-2"
-											onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value as any }))}
-											value={filters.type}
-										>
-											<option value="all">Todo</option>
-											<option value="name">Nombre</option>
-											<option value="content">Contenido</option>
-											<option value="metadata">Metadatos</option>
-										</select>
-									</div>
-								</div>
-							</TabsContent>
-							<TabsContent className="space-y-4" value="advanced">
-								<div className="grid grid-cols-2 gap-4">
-									<div>
-										<Label>Fecha desde</Label>
-										<Input
-											onChange={(e) =>
-												setFilters((prev) => ({
-													...prev,
-													dateFrom: e.target.value ? new Date(e.target.value) : undefined,
-												}))
-											}
-											type="date"
-										/>
-									</div>
-									<div>
-										<Label>Fecha hasta</Label>
-										<Input
-											onChange={(e) =>
-												setFilters((prev) => ({
-													...prev,
-													dateTo: e.target.value ? new Date(e.target.value) : undefined,
-												}))
-											}
-											type="date"
-										/>
-									</div>
-								</div>
-								<div>
-									<Label>Tags (separados por comas)</Label>
-									<Input
-										onChange={(e) => {
-											const tags = e.target.value
-												.split(',')
-												.map((tag) => tag.trim())
-												.filter(Boolean);
-											setFilters((prev) => ({ ...prev, tags }));
-										}}
-										placeholder="tag1, tag2, tag3"
-									/>
-								</div>
-							</TabsContent>
 						</Tabs>
 					</div>
 				</CardContent>
 			</Card>
-
-			<div className="flex-1 overflow-auto p-6">{renderContent()}</div>
+			<div className="flex-1 overflow-auto p-6">
+				{isLoading ? (
+					<LoadingScreen message="Buscando..." />
+				) : error ? (
+					<p className="text-center text-destructive">Search failed</p>
+				) : filters.query ? (
+					browserItems.length === 0 ? (
+						<EmptyState description="Try different terms or clear the filters" icon={Search} title="Sin resultados" />
+					) : (
+						<div className="mb-4">
+							<p className="mb-4 text-muted-foreground text-sm">
+								Se encontraron <strong>{searchResponse?.total || 0}</strong> resultados para "
+								<strong>{filters.query}</strong>"
+							</p>
+							<FileBrowser
+								items={browserItems}
+								onItemClick={(it) => handleItemSelect(it.raw)}
+								onItemDoubleClick={handleItemDoubleClick}
+							/>
+						</div>
+					)
+				) : (
+					<div className="flex h-full items-center justify-center text-muted-foreground">
+						<Search className="mb-4 h-12 w-12 opacity-20" />
+						<p>Enter a search term</p>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

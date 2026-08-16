@@ -15,24 +15,24 @@ import type { FolderWithStats } from '@/types/entities/folder';
 const logger = clientLogger.withContext('AutoFolderIndexing');
 
 export interface AutoIndexingStatus {
-	isIndexing: boolean;
-	indexedFolders: number;
-	totalFolders: number;
 	currentFolder: string | null;
 	errors: Array<{ folderId: string; message: string }>;
+	indexedFolders: number;
+	isIndexing: boolean;
+	totalFolders: number;
 }
 
 export interface UseAutoFolderIndexingOptions {
+	/** Si debe ejecutarse automáticamente al montar */
+	autoStart?: boolean;
 	/** Intervalo en milisegundos para verificar carpetas (por defecto 30 segundos) */
 	checkInterval?: number;
 	/** Límite máximo de carpetas a procesar en cada verificación */
 	maxFoldersPerBatch?: number;
-	/** Si debe ejecutarse automáticamente al montar */
-	autoStart?: boolean;
-	/** Callback cuando se inicia la indexación */
-	onIndexingStart?: () => void;
 	/** Callback cuando se completa la indexación */
 	onIndexingComplete?: (status: AutoIndexingStatus) => void;
+	/** Callback cuando se inicia la indexación */
+	onIndexingStart?: () => void;
 	/** Callback cuando hay progreso */
 	onProgress?: (status: AutoIndexingStatus) => void;
 }
@@ -245,7 +245,9 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 				toastService.success(`✅ ${indexedCount} carpetas indexadas automáticamente`);
 				logger.info(`✅ Indexación automática completada: ${indexedCount} carpetas procesadas`);
 			} else {
-				toastService.warning(`⚠️ Indexación completada con errores: ${indexedCount} exitosas, ${errors.length} errores`);
+				toastService.warning(
+					`⚠️ Indexación completada con errores: ${indexedCount} exitosas, ${errors.length} errores`
+				);
 				logger.warn(`⚠️ Indexación con errores: ${indexedCount} exitosas, ${errors.length} errores`);
 
 				// Log batch completion with errors

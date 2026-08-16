@@ -23,15 +23,15 @@ export type CharacterCardData = Omit<CharacterWithStats, 'stats'> & {
 };
 
 export interface CharacterCardProps {
-	characterId: string;
 	character: CharacterCardData;
+	characterId: string;
+	className?: string;
+	compact?: boolean;
+	disabled?: boolean;
+	isSelected?: boolean;
 	onClick?: (character: CharacterCardData) => void;
 	onDoubleClick?: (character: CharacterCardData) => void;
-	disabled?: boolean;
-	className?: string;
+	onSelect?: (character: CharacterCardData) => void;
 	style?: React.CSSProperties;
 	tcgMode?: boolean;
-	compact?: boolean;
-	isSelected?: boolean;
-	onSelect?: (character: CharacterCardData) => void;
 }

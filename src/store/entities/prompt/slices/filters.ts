@@ -7,22 +7,22 @@ import type { PromptStore } from '../types';
 const filtersLogger = clientLogger.withContext('PromptStore:Filters');
 
 export interface FiltersSlice {
+	clearFilters: () => void;
 	// Estado
 	filters: PromptFilters;
-	sortBy: PromptSortOption;
 	page: number;
 	pageSize: number;
+	setCategoryFilter: (category: string | null) => void;
 
 	// Acciones
 	setFilters: (filters: Partial<PromptFilters>) => void;
-	setSortBy: (sortBy: PromptSortOption) => void;
+	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
 	setPage: (page: number) => void;
 	setPageSize: (pageSize: number) => void;
-	setCategoryFilter: (category: string | null) => void;
 	setSearchFilter: (search: string) => void;
+	setSortBy: (sortBy: PromptSortOption) => void;
 	setTagsFilter: (tags: string[]) => void;
-	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
-	clearFilters: () => void;
+	sortBy: PromptSortOption;
 }
 
 export const createFiltersSlice: StateCreator<PromptStore, [], [], FiltersSlice> = (set) => ({

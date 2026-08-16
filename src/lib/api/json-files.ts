@@ -1,49 +1,50 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { apiClient } from './client';
 
 export interface JsonFileFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface JsonFileCreateInput {
-	name: string;
-	path: string;
-	size: number;
-	hash: string;
-	mimeType: string;
+	content?: string | null;
+	depth?: number | null;
 	extension: string;
 	folderId: string;
-	isFavorite?: boolean;
+	hash: string;
 	isArchived?: boolean;
-	content?: string | null;
-	schema?: string | null;
+	isFavorite?: boolean;
 	isValid?: boolean;
-	validationErrors?: string | null;
 	keyCount?: number | null;
-	depth?: number | null;
+	mimeType: string;
+	name: string;
+	source: AuthorizedPathReference;
+	schema?: string | null;
+	size: number;
+	validationErrors?: string | null;
 }
 
 export interface JsonFileUpdateInput {
-	name?: string;
-	path?: string;
-	size?: number;
-	hash?: string;
-	mimeType?: string;
+	content?: string | null;
+	depth?: number | null;
 	extension?: string;
 	folderId?: string;
-	isFavorite?: boolean;
+	hash?: string;
 	isArchived?: boolean;
-	content?: string | null;
-	schema?: string | null;
+	isFavorite?: boolean;
 	isValid?: boolean;
-	validationErrors?: string | null;
 	keyCount?: number | null;
-	depth?: number | null;
+	mimeType?: string;
+	name?: string;
+	source?: AuthorizedPathReference;
+	schema?: string | null;
+	size?: number;
+	validationErrors?: string | null;
 }
 
 export interface JsonFilesResponse {

@@ -5,6 +5,7 @@
  */
 
 import { LogLevel, loggerConfig } from './logger.config';
+import { sanitizeSensitiveLogOutput, sanitizeSensitiveLogText } from '@/lib/security/sanitize-sensitive-output';
 
 export interface ClientLoggerOptions {
 	context?: string;
@@ -15,8 +16,8 @@ export interface ClientLoggerOptions {
  * Logger para el cliente que es seguro en entornos del navegador
  */
 export class ClientLogger {
-	private context: string;
-	private level: LogLevel;
+	private readonly context: string;
+	private readonly level: LogLevel;
 
 	constructor(options: ClientLoggerOptions = {}) {
 		this.context = options.context || 'Client';
@@ -61,44 +62,44 @@ export class ClientLogger {
 	 * Formatea un mensaje para la consola del cliente
 	 */
 	private formatMessage(level: string, message: string): string {
-		return `[${level.toUpperCase()}] [${this.context}] ${message}`;
+		return `[${level.toUpperCase()}] [${this.context}] ${sanitizeSensitiveLogText(message)}`;
 	}
 
 	// Métodos de logging
 	debug(message: string, context?: unknown): void {
 		if (this.shouldLog('debug') && typeof console !== 'undefined') {
-			console.debug(this.formatMessage('debug', message), context || '');
+			console.debug(this.formatMessage('debug', message), sanitizeSensitiveLogOutput(context) ?? '');
 		}
 	}
 
 	info(message: string, context?: unknown): void {
 		if (this.shouldLog('info') && typeof console !== 'undefined') {
-			console.info(this.formatMessage('info', message), context || '');
+			console.info(this.formatMessage('info', message), sanitizeSensitiveLogOutput(context) ?? '');
 		}
 	}
 
 	warn(message: string, context?: unknown): void {
 		if (this.shouldLog('warn') && typeof console !== 'undefined') {
-			console.warn(this.formatMessage('warn', message), context || '');
+			console.warn(this.formatMessage('warn', message), sanitizeSensitiveLogOutput(context) ?? '');
 		}
 	}
 
 	error(message: string, context?: unknown): void {
 		if (this.shouldLog('error') && typeof console !== 'undefined') {
-			console.error(this.formatMessage('error', message), context || '');
+			console.error(this.formatMessage('error', message), sanitizeSensitiveLogOutput(context) ?? '');
 		}
 	}
 
 	success(message: string, context?: unknown): void {
 		if (this.shouldLog('info') && typeof console !== 'undefined') {
-			console.info(this.formatMessage('success', message), context || '');
+			console.info(this.formatMessage('success', message), sanitizeSensitiveLogOutput(context) ?? '');
 		}
 	}
 
 	// Métodos especiales
 	group(label: string): void {
 		if (typeof console !== 'undefined' && console.group) {
-			console.group(label);
+			console.group(sanitizeSensitiveLogText(label));
 		}
 	}
 

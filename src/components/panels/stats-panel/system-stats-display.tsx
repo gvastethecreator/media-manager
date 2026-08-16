@@ -10,10 +10,18 @@ import {
 	UsersIcon,
 } from 'lucide-react';
 import { memo } from 'react';
-// Card UI no utilizado en este componente
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigationStats } from '@/lib/api/navigation';
-import { formatFileSize } from '@/lib/utils';
+import { ApiClientError } from '@/lib/api/client';
+import { cn, formatFileSize } from '@/lib/utils';
+
+interface IconProps {
+	className?: string;
+}
+
+export function isAuthorizedStatsScopeUnavailable(error: unknown): boolean {
+	return error instanceof ApiClientError && error.status === 410 && error.code === 'AUTHORIZED_SCOPE_REQUIRED';
+}
 
 const StatsItem = memo(function StatsItemComponent({
 	icon: Icon,
@@ -21,17 +29,19 @@ const StatsItem = memo(function StatsItemComponent({
 	value,
 	color = 'text-muted-foreground',
 }: {
-	icon: any;
+	icon: React.ComponentType<IconProps>;
 	label: string;
 	value: string | number;
 	color?: string;
 }) {
 	return (
-		<div className="flex items-center gap-3 p-1 transition-colors hover:bg-muted/50">
-			<Icon className={`h-4 w-4 ${color}`} />
+		<div className="flex items-center gap-3 rounded-dt-xs p-2 transition-colors duration-dt-fast hover:bg-muted/50">
+			<div className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-dt-xs bg-current/10', color)}>
+				<Icon className="h-3.5 w-3.5" />
+			</div>
 			<div className="min-w-0 flex-1">
-				<p className="truncate text-sm">{label}</p>
-				<p className="text-muted-foreground text-xs">{value}</p>
+				<p className="body-sm truncate font-medium">{label}</p>
+				<p className="caption tabular-nums">{value}</p>
 			</div>
 		</div>
 	);
@@ -42,15 +52,16 @@ const StatsGrid = memo(function StatsGridComponent({
 	items,
 }: {
 	title: string;
-	items: Array<{ icon: any; label: string; value: string | number; color?: string }>;
+	items: Array<{ icon: React.ComponentType<IconProps>; label: string; value: string | number; color?: string }>;
 }) {
 	return (
-		<div className="mb-3 border-2 border-accent/20 p-2">
-			<h2 className="mb-2 font-medium text-md">{title} </h2>
-
-			{items.map((item) => (
-				<StatsItem key={`${title}-${item.label}`} {...item} />
-			))}
+		<div className="rounded-dt-md border border-border/50 bg-card/50 p-3">
+			<h2 className="heading-sm mb-2 flex items-center gap-2">{title}</h2>
+			<div className="stack-xs">
+				{items.map((item) => (
+					<StatsItem key={`${title}-${item.label}`} {...item} />
+				))}
+			</div>
 		</div>
 	);
 });
@@ -64,16 +75,16 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 
 	if (isLoading) {
 		return (
-			<div className="space-y-4 p-4">
-				<div className="space-y-2">
+			<div className="stack-md p-4">
+				<div className="stack-xs">
 					<Skeleton className="h-4 w-24" />
 					<Skeleton className="h-3 w-32" />
 				</div>
-				{['a', 'b', 'c', 'd', 'e', 'f'].map((id) => (
-					<div className="space-y-2" key={`skeleton-${id}`}>
+				{['a', 'b', 'c', 'd'].map((id) => (
+					<div className="stack-xs rounded-dt-md border border-border/50 p-3" key={`skeleton-${id}`}>
+						<Skeleton className="h-5 w-32" />
 						<Skeleton className="h-10 w-full" />
-						<Skeleton className="h-8 w-full" />
-						<Skeleton className="h-8 w-full" />
+						<Skeleton className="h-10 w-full" />
 					</div>
 				))}
 			</div>
@@ -81,18 +92,34 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 	}
 
 	if (error) {
+		if (isAuthorizedStatsScopeUnavailable(error)) {
+			return (
+				<div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
+					<div className="flex h-12 w-12 items-center justify-center rounded-dt-md bg-muted">
+						<FolderIcon className="h-6 w-6 text-muted-foreground" />
+					</div>
+					<p className="heading-sm">Library Statistics</p>
+					<p className="caption text-muted-foreground">
+						Select a folder or library to view metrics within an authorized scope.
+					</p>
+				</div>
+			);
+		}
 		return (
-			<div className="p-4 text-center">
-				<p className="text-destructive text-sm">Error al cargar estadísticas</p>
-				<p className="mt-1 text-muted-foreground text-xs">{error.message || 'Error desconocido'}</p>
+			<div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
+				<div className="flex h-12 w-12 items-center justify-center rounded-dt-md bg-destructive/10">
+					<FolderIcon className="h-6 w-6 text-destructive" />
+				</div>
+				<p className="heading-sm text-destructive">Could not load statistics</p>
+				<p className="caption">{error.message || 'Unknown error'}</p>
 			</div>
 		);
 	}
 
 	if (!stats) {
 		return (
-			<div className="p-4 text-center">
-				<p className="text-muted-foreground text-sm">No hay datos disponibles</p>
+			<div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
+				<p className="body-sm text-muted-foreground">No hay datos disponibles</p>
 			</div>
 		);
 	}
@@ -101,27 +128,27 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 	const contentStats = [
 		{
 			icon: ImageIcon,
-			label: 'Imágenes',
+			label: 'Images',
 			value: stats.totalImages.toLocaleString(),
-			color: 'text-blue-500',
+			color: 'text-[color:var(--entity-image)]',
 		},
 		{
 			icon: TagIcon,
-			label: 'Etiquetas',
+			label: 'Tags',
 			value: stats.totalTags.toLocaleString(),
-			color: 'text-green-500',
+			color: 'text-[color:var(--entity-tag)]',
 		},
 		{
 			icon: ArchiveIcon,
-			label: 'Colecciones',
+			label: 'Collections',
 			value: stats.totalCollections.toLocaleString(),
-			color: 'text-purple-500',
+			color: 'text-[color:var(--entity-collection)]',
 		},
 		{
 			icon: FolderIcon,
-			label: 'Álbumes',
+			label: 'Albums',
 			value: stats.totalAlbums.toLocaleString(),
-			color: 'text-yellow-500',
+			color: 'text-[color:var(--entity-album)]',
 		},
 	];
 
@@ -129,27 +156,27 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 	const worldStats = [
 		{
 			icon: UsersIcon,
-			label: 'Personajes',
+			label: 'Characters',
 			value: stats.totalCharacters.toLocaleString(),
-			color: 'text-pink-500',
+			color: 'text-[color:var(--entity-character)]',
 		},
 		{
 			icon: MapPinIcon,
-			label: 'Lugares',
+			label: 'Places',
 			value: stats.totalPlaces.toLocaleString(),
-			color: 'text-orange-500',
+			color: 'text-[color:var(--entity-place)]',
 		},
 		{
 			icon: BoxIcon,
 			label: 'Objetos del mundo',
 			value: stats.totalWorldItems.toLocaleString(),
-			color: 'text-indigo-500',
+			color: 'text-[color:var(--entity-world-item)]',
 		},
 		{
 			icon: SparklesIcon,
 			label: 'Favoritos',
 			value: stats.totalFavorites.toLocaleString(),
-			color: 'text-cyan-500',
+			color: 'text-[color:var(--entity-favorite)]',
 		},
 	];
 
@@ -159,7 +186,7 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 			icon: FileTextIcon,
 			label: 'Actividades',
 			value: stats.totalActivities.toLocaleString(),
-			color: 'text-slate-500',
+			color: 'text-[color:var(--status-info)]',
 		},
 	];
 
@@ -167,20 +194,20 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 	const storageStats = [
 		{
 			icon: FolderIcon,
-			label: 'Carpetas',
+			label: 'Folders',
 			value: stats.totalFolders.toLocaleString(),
-			color: 'text-amber-500',
+			color: 'text-[color:var(--entity-folder)]',
 		},
 		{
 			icon: ImageIcon,
-			label: 'Tamaño total',
+			label: 'Total size',
 			value: formatFileSize(stats.totalSize),
-			color: 'text-blue-400',
+			color: 'text-[color:var(--entity-file)]',
 		},
 	];
 
 	return (
-		<div className="max-h-full w-full space-y-4 overflow-y-auto p-4">
+		<div className="stack-sm max-h-full w-full overflow-y-auto p-3">
 			<StatsGrid items={contentStats} title="📁 Contenido Principal" />
 			<StatsGrid items={worldStats} title="🌍 Worldbuilding" />
 			<StatsGrid items={activityStats} title="📊 Actividad" />

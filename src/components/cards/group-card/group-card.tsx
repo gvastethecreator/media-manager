@@ -1,6 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from '@/components/ui/motion-shim';
+import { useRecentGroupMedia } from '@/lib/api/groups';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import type { GroupCardProps } from './group-card.types';
 import { GroupCardContent } from './group-card-content';
@@ -8,7 +10,7 @@ import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
 import { GroupCardImages } from './group-card-images';
 
-export function GroupCard({
+export const GroupCard = memo(function GroupCard({
 	group,
 	onClick,
 	className,
@@ -19,39 +21,34 @@ export function GroupCard({
 }: GroupCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 
+	// Cargar media reciente si no viene en las props
+	const { data: mediaData } = useRecentGroupMedia(group?.id || '', 6);
+
 	// Calcular colores
-	const primaryColor = useMemo(() => group?.color || '#3b82f6', [group?.color]);
+	const primaryColor = useMemo(() => group?.color || 'var(--entity-group)', [group?.color]);
 	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar un valor por defecto
+		// Si no hay color definido, usar un valor por defecto (cielo/azul de grupos)
 		if (!group?.color) {
-			return '#2563eb';
+			return 'oklch(0.68 0.16 230)';
 		}
 
-		// Oscurecer el color primario para el secundario
-		try {
-			// Convertir hex a RGB
-			const r = Number.parseInt(group.color.slice(1, 3), 16);
-			const g = Number.parseInt(group.color.slice(3, 5), 16);
-			const b = Number.parseInt(group.color.slice(5, 7), 16);
+		return `color-mix(in oklab, ${primaryColor}, black 20%)`;
+	}, [group?.color, primaryColor]);
 
-			// Oscurecer los componentes
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
+	// Preparar media para la galería (usar props o datos cargados)
+	const recentImages = useMemo(() => {
+		if (group?.recentImages?.length) return group.recentImages;
+		return mediaData?.filter((m) => !m.isVideo).map((m) => m.thumbnailUrl) || [];
+	}, [group?.recentImages, mediaData]);
 
-			// Convertir de vuelta a hex
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
-			return '#2563eb';
-		}
-	}, [group?.color]);
+	const recentVideos = useMemo(() => {
+		if (group?.recentVideos?.length) return group.recentVideos;
+		return mediaData?.filter((m) => m.isVideo).map((m) => m.thumbnailUrl) || [];
+	}, [group?.recentVideos, mediaData]);
 
-	// Preparar media para la galería
 	const allMedia = useMemo(() => {
-		return [...(group?.recentImages || []), ...(group?.recentVideos || [])];
-	}, [group?.recentImages, group?.recentVideos]);
+		return [...recentImages, ...recentVideos];
+	}, [recentImages, recentVideos]);
 
 	// Función de manejadores de eventos
 	const handleClick = useCallback(() => {
@@ -97,7 +94,7 @@ export function GroupCard({
 				const parsedFilters = JSON.parse(group.filters);
 				return Array.isArray(parsedFilters) ? parsedFilters.length : 0;
 			} catch (e) {
-				console.error('Error parsing group filters:', e);
+				clientLogger.error('Error parsing group filters:', e);
 				return 0;
 			}
 		}
@@ -123,8 +120,10 @@ export function GroupCard({
 				maxWidth: compact ? '280px' : '300px',
 				minWidth: compact ? '220px' : '260px',
 				borderRadius: tcgMode ? '0.5rem' : '0.375rem',
-				boxShadow: tcgMode ? `0 0 0 1px ${primaryColor}30, 0 2px 10px ${primaryColor}20` : undefined,
-				backgroundColor: tcgMode ? '#1a1a1a' : undefined,
+				boxShadow: tcgMode
+					? `0 0 0 1px color-mix(in oklab, ${primaryColor}, transparent 70%), 0 2px 10px color-mix(in oklab, ${primaryColor}, transparent 80%)`
+					: undefined,
+				backgroundColor: tcgMode ? 'var(--card)' : undefined,
 				...(isSelected && { '--tw-ring-color': primaryColor }),
 			}}
 		>
@@ -146,11 +145,11 @@ export function GroupCard({
 				compact={compact}
 				emoji={group.emoji || ''}
 				holographicEffect={isHovered}
-				images={group.recentImages || []}
+				images={recentImages}
 				primaryColor={primaryColor}
 				rarityLevel={Number(group.rarityLevel) || 1}
 				tcgMode={tcgMode}
-				videos={group.recentVideos || []}
+				videos={recentVideos}
 			/>
 
 			{/* Contenido */}
@@ -173,7 +172,7 @@ export function GroupCard({
 				compact={compact}
 				hp={group.hp || 0}
 				id={group.id}
-				imagesCount={group.stats.imageCount}
+				imagesCount={group.stats?.imageCount || 0}
 				isFavorite={group.isFavorite}
 				mp={group.mp || 0}
 				name={group.name}
@@ -182,7 +181,7 @@ export function GroupCard({
 				primaryColor={primaryColor}
 				rarityLevel={Number(group.rarityLevel) || 1}
 				tcgMode={tcgMode}
-				videosCount={group.stats.videoCount}
+				videosCount={group.stats?.videoCount || 0}
 			/>
 
 			{/* Efecto holográfico general en modo TCG */}
@@ -193,7 +192,7 @@ export function GroupCard({
 					}}
 					className="pointer-events-none absolute inset-0 z-50 opacity-30 mix-blend-overlay"
 					style={{
-						background: `linear-gradient(45deg, ${primaryColor}50, transparent)`,
+						background: `linear-gradient(45deg, color-mix(in oklab, ${primaryColor}, transparent 50%), transparent)`,
 					}}
 					transition={{
 						duration: 2,
@@ -236,4 +235,4 @@ export function GroupCard({
 			{cardContent}
 		</Link>
 	);
-}
+});

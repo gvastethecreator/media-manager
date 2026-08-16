@@ -1,39 +1,23 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { executePrompt as runPromptExecution } from '@/lib/utils/prompt/execution';
 import type { PromptExecutionParams, PromptExecutionResult } from '@/types/entities/prompt/extended';
 import type { PromptStore } from '../types';
 
 const executionLogger = clientLogger.withContext('PromptStore:Execution');
 
 export interface ExecutionSlice {
-	// Estado
-	isExecuting: boolean;
-	executionResult: PromptExecutionResult | null;
-	executionError: string | null;
+	clearExecutionResult: () => void;
 
 	// Acciones
 	executePrompt: (params: PromptExecutionParams) => Promise<PromptExecutionResult | null>;
-	clearExecutionResult: () => void;
+	executionError: string | null;
+	executionResult: PromptExecutionResult | null;
+	// Estado
+	isExecuting: boolean;
 }
 
-// Acción mock para desarrollo (se reemplazará con server action real)
-const mockExecutePrompt = async (params: PromptExecutionParams): Promise<PromptExecutionResult> => {
-	await new Promise((resolve) => setTimeout(resolve, 1000));
-	return {
-		promptId: params.promptId,
-		content: `Respuesta simulada para prompt: ${params.promptId}\nContexto: ${params.context || 'No proporcionado'}\nVariables: ${JSON.stringify(params.variables || {})}`,
-		tokens: {
-			prompt: 50,
-			completion: 100,
-			total: 150,
-		},
-		model: params.options?.model || 'mock-model',
-		executionTime: 1.2,
-		timestamp: new Date(),
-	};
-};
-
-export const createExecutionSlice: StateCreator<PromptStore, [], [], ExecutionSlice> = (set) => ({
+export const createExecutionSlice: StateCreator<PromptStore, [], [], ExecutionSlice> = (set, get) => ({
 	// Estado inicial
 	isExecuting: false,
 	executionResult: null,
@@ -45,8 +29,30 @@ export const createExecutionSlice: StateCreator<PromptStore, [], [], ExecutionSl
 			set({ isExecuting: true, executionError: null });
 			executionLogger.info('🚀 Ejecutando prompt:', params);
 
-			// Llamar a server action para ejecutar prompt
-			const result = await mockExecutePrompt(params);
+			const state = get();
+			const selectedPrompt =
+				state.selectedPrompt ?? state.prompts.find((prompt) => prompt.id === params.promptId) ?? null;
+
+			if (!selectedPrompt) {
+				throw new Error(`No se encontró el prompt con id ${params.promptId}`);
+			}
+
+			const promptForExecution = params.context
+				? {
+						...selectedPrompt,
+						content: [selectedPrompt.content ?? '', '', 'Contexto adicional:', params.context]
+							.filter(Boolean)
+							.join('\n'),
+					}
+				: selectedPrompt;
+
+			const result = await runPromptExecution(promptForExecution, {
+				model: params.options?.model,
+				maxTokens: params.options?.maxTokens,
+				temperature: params.options?.temperature,
+				variables: params.variables,
+				saveToHistory: true,
+			});
 
 			set({ executionResult: result, isExecuting: false });
 			executionLogger.info('✅ Prompt ejecutado:', result);

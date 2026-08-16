@@ -8,22 +8,25 @@ import { and, eq, inArray, like } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { visibleAssetLifecycleCondition } from '@/services/media-core/canonical-media-persistence';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import type { FolderFile } from './folder-files.service';
 
 const logger = serverLogger.withContext('FolderFilesStream');
 
 export interface StreamOptions {
+	batchSize?: number;
+	delayMs?: number;
+	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
 	folderId: string;
 	includeSubfolders?: boolean;
 	search?: string;
-	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'json' | '3d'>;
-	batchSize?: number;
-	delayMs?: number;
 }
 
 export interface StreamChunk {
-	type: 'data' | 'metadata' | 'complete' | 'error';
 	data?: FolderFile[];
+	error?: string;
 	metadata?: {
 		totalEstimate: number;
 		processedCount: number;
@@ -31,7 +34,7 @@ export interface StreamChunk {
 		totalBatches: number;
 		queryTime: number;
 	};
-	error?: string;
+	type: 'data' | 'metadata' | 'complete' | 'error';
 }
 
 /**
@@ -42,7 +45,7 @@ export async function* streamFolderFiles(options: StreamOptions): AsyncGenerator
 		folderId,
 		includeSubfolders = false,
 		search,
-		fileTypes = ['image', 'video', 'audio', 'document', 'json', '3d'],
+		fileTypes = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'],
 		batchSize = 200,
 		delayMs = 10,
 	} = options;
@@ -166,7 +169,7 @@ async function getSubfolderIds(folderId: string): Promise<string[]> {
 async function estimateTotalFiles(
 	folderIds: string[],
 	search?: string,
-	fileTypes: string[] = ['image', 'video', 'audio', 'document', 'json', '3d']
+	fileTypes: string[] = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d']
 ): Promise<number> {
 	try {
 		const promises: Promise<number>[] = [];
@@ -184,10 +187,10 @@ async function estimateTotalFiles(
 		if (fileTypes.includes('document')) {
 			promises.push(countFiles(documents, folderIds, search));
 		}
-		if (fileTypes.includes('json')) {
+		if (fileTypes.includes('jsonFile')) {
 			promises.push(countFiles(jsonFiles, folderIds, search));
 		}
-		if (fileTypes.includes('3d')) {
+		if (fileTypes.includes('file3d')) {
 			promises.push(countFiles(file3Ds, folderIds, search));
 		}
 
@@ -215,6 +218,7 @@ async function countFiles(table: any, folderIds: string[], search?: string): Pro
 		if (search?.trim()) {
 			conditions.push(like(table.name, `%${search.trim()}%`));
 		}
+		conditions.push(visibleAssetLifecycleCondition(table.assetId));
 
 		const result = await db
 			.select({ count: db.$count() })
@@ -241,31 +245,38 @@ async function fetchFilesBatch(
 	try {
 		let table: any;
 		let entityType: FolderFile['entityType'];
+		let favoriteEntityType: FavoriteEntityType;
 
 		switch (fileType) {
 			case 'image':
 				table = images;
 				entityType = 'image';
+				favoriteEntityType = FavoriteEntityType.IMAGE;
 				break;
 			case 'video':
 				table = videos;
 				entityType = 'video';
+				favoriteEntityType = FavoriteEntityType.VIDEO;
 				break;
 			case 'audio':
 				table = audios;
 				entityType = 'audio';
+				favoriteEntityType = FavoriteEntityType.AUDIO;
 				break;
 			case 'document':
 				table = documents;
 				entityType = 'document';
+				favoriteEntityType = FavoriteEntityType.DOCUMENT;
 				break;
-			case 'json':
+			case 'jsonFile':
 				table = jsonFiles;
-				entityType = 'json';
+				entityType = 'jsonFile';
+				favoriteEntityType = FavoriteEntityType.JSON_FILE;
 				break;
-			case '3d':
+			case 'file3d':
 				table = file3Ds;
-				entityType = '3d';
+				entityType = 'file3d';
+				favoriteEntityType = FavoriteEntityType.FILE_3D;
 				break;
 			default:
 				return [];
@@ -282,6 +293,7 @@ async function fetchFilesBatch(
 		if (search?.trim()) {
 			conditions.push(like(table.name, `%${search.trim()}%`));
 		}
+		conditions.push(visibleAssetLifecycleCondition(table.assetId));
 
 		const results = await db
 			.select()
@@ -289,8 +301,10 @@ async function fetchFilesBatch(
 			.where(and(...conditions))
 			.limit(limit)
 			.offset(offset);
+		const favoriteEntityIds = new Set(await favoriteService.getFavoriteEntityIdsOrEmpty(favoriteEntityType));
 
 		// Mapear a FolderFile
+		// Generar URL de API para thumbnail (NO usar item.thumbnailPath que puede contener base64)
 		return results.map((item: any) => ({
 			id: item.id,
 			name: item.name,
@@ -301,16 +315,21 @@ async function fetchFilesBatch(
 			folderId: item.folderId,
 			entityType,
 			extension: item.extension || '',
-			thumbnailPath: item.thumbnailPath,
+			thumbnailPath:
+				entityType === 'image'
+					? `/api/images/${item.id}/thumbnail`
+					: entityType === 'video'
+						? `/api/videos/${item.id}/thumbnail`
+						: undefined,
 			metadata: extractMetadata(item, entityType),
 			stats: {
 				views: item.views || 0,
-				isFavorite: item.isFavorite,
+				isFavorite: favoriteEntityIds.has(item.id),
 			},
 		}));
 	} catch (error) {
 		logger.error(`Error fetching ${fileType} batch:`, error);
-		return [];
+		throw error;
 	}
 }
 
@@ -345,12 +364,12 @@ function extractMetadata(item: any, entityType: FolderFile['entityType']): Recor
 				title: item.title,
 				author: item.author,
 			};
-		case 'json':
+		case 'jsonFile':
 			return {
 				isValid: item.isValid,
 				keys: item.keys,
 			};
-		case '3d':
+		case 'file3d':
 			return {
 				vertices: item.vertices,
 				faces: item.faces,

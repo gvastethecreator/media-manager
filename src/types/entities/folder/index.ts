@@ -6,11 +6,7 @@
  * Legacy eliminado.
  */
 
-export {
-	FolderSortBy,
-	FolderType,
-	FolderViewMode,
-} from './enums';
+export { FolderSortBy, FolderType, FolderViewMode } from './enums';
 export type {
 	CreateFolderData,
 	FolderBase,

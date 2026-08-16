@@ -19,17 +19,17 @@ import { FileType } from '../../types/entities/file/base';
 type FileInfo = FileBase;
 
 interface DirectoryReadResult {
-	path: string;
 	items: FileBase[];
+	path: string;
 	total: number;
 }
 
 interface FileOperationResult {
-	success: boolean;
-	path: string;
-	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename';
-	file?: FileInfo;
 	error?: string;
+	file?: FileInfo;
+	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename';
+	path: string;
+	success: boolean;
 }
 
 /**

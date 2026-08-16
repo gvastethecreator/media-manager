@@ -1,9 +1,9 @@
 import { Users } from 'lucide-react';
 import React from 'react';
-import { CharacterCard } from '@/components/cards/character-card';
+import { CharacterCard } from '@/components/cards/character-card/character-card';
 import { adaptCharacterWithStats } from '@/components/cards/character-card/character-card-adapter';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,20 +14,20 @@ import type { CharacterWithStats } from '@/types/entities/character';
 
 interface CharactersContentViewProps {
 	characters: CharacterWithStats[];
-	isLoading: boolean;
+	className?: string;
 	error: Error | null;
-	localSearch: string;
-	showForm: boolean;
-	newCharacterName: string;
-	newCharacterDescription: string;
-	selectedCharacterId: string | null;
-	setShowForm: (show: boolean) => void;
-	setNewCharacterName: (name: string) => void;
-	setNewCharacterDescription: (description: string) => void;
 	handleCharacterSelect: (characterId: string) => void;
 	handleCreateCharacter: () => void;
 	handleRetry: () => void;
-	className?: string;
+	isLoading: boolean;
+	localSearch: string;
+	newCharacterDescription: string;
+	newCharacterName: string;
+	selectedCharacterId: string | null;
+	setNewCharacterDescription: (description: string) => void;
+	setNewCharacterName: (name: string) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 const CharactersContentView: React.FC<CharactersContentViewProps> = ({
@@ -48,19 +48,19 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 	className,
 }) => {
 	if (isLoading) {
-		return <LoadingScreen message="Cargando personajes..." />;
+		return <LoadingScreen message="Loading characters..." />;
 	}
 
 	if (error) {
 		return (
 			<div className="flex flex-col items-center justify-center py-12">
 				<EmptyState
-					description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+					description={error instanceof Error ? error.message : 'An unexpected error occurred'}
 					icon={Users}
-					title="Error al cargar personajes"
+					title="Could not load characters"
 				/>
 				<Button className="mt-4" onClick={handleRetry}>
-					Reintentar
+					Retry
 				</Button>
 			</div>
 		);
@@ -69,69 +69,72 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'flex-1'}>
 			<div className="p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Personajes</h2>
+				<h2 className="mb-4 font-bold text-xl">Characters</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Personaje'}
+					{showForm ? 'Cancel' : 'Create Character'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Personaje</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Character</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="characterName">Nombre</Label>
+							<Label htmlFor="characterName">Name</Label>
 							<Input
 								id="characterName"
 								onChange={(e) => setNewCharacterName(e.target.value)}
-								placeholder="Nombre del personaje"
+								placeholder="Character name"
 								value={newCharacterName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="characterDescription">Descripción</Label>
+							<Label htmlFor="characterDescription">Description</Label>
 							<Textarea
 								id="characterDescription"
 								onChange={(e) => setNewCharacterDescription(e.target.value)}
-								placeholder="Descripción del personaje (opcional)"
+								placeholder="Character description (optional)"
 								value={newCharacterDescription}
 							/>
 						</div>
-						<Button onClick={handleCreateCharacter}>Guardar Personaje</Button>
+						<Button onClick={handleCreateCharacter}>Save Character</Button>
 					</div>
 				)}
 
 				{characters.length || isLoading || showForm ? (
 					<motion.div
 						animate={{ opacity: 1, y: 0 }}
-						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
 						initial={{ opacity: 0, y: 20 }}
 						transition={{ duration: 0.3 }}
 					>
 						{characters.map((character, index) => (
-							<motion.div
+							<motion.article
 								animate={{ opacity: 1, y: 0 }}
+								data-character-id={character.id}
 								initial={{ opacity: 0, y: 20 }}
 								key={character.id}
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
+								{/*
+									Compat E2E/a11y: los tests buscan <article> con el nombre.
+									CharacterCard puede renderizar un placeholder mientras carga;
+									este texto asegura que el nombre esté presente inmediatamente.
+								*/}
+								<span className="sr-only">{character.name}</span>
 								<CharacterCard
 									character={adaptCharacterWithStats(character)}
 									characterId={character.id}
 									isSelected={character.id === selectedCharacterId}
 									onSelect={() => handleCharacterSelect(character.id)}
 								/>
-							</motion.div>
+							</motion.article>
 						))}
 					</motion.div>
 				) : (
 					<EmptyState
-						description={
-							localSearch
-								? `No se encontraron personajes que coincidan con "${localSearch}"`
-								: 'No hay personajes disponibles'
-						}
+						description={localSearch ? `No characters match "${localSearch}"` : 'No characters are available'}
 						icon={Users}
-						title="Sin personajes"
+						title="No characters yet"
 					/>
 				)}
 			</div>

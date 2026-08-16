@@ -36,11 +36,10 @@ export const tagCreateSchema = z.object({
 	color: z
 		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/)
-		.default('#6B7280'),
+		.default('var(--dt-neutral-500)'),
 	category: z.string().max(50).optional(),
 	shortcut: z.string().max(10).optional(),
 	featuredImage: z.string().url().optional(),
-	isFavorite: z.boolean().default(false),
 });
 
 /**
@@ -58,7 +57,6 @@ export const tagUpdateSchema = z.object({
 	category: z.string().max(50).nullable().optional(),
 	shortcut: z.string().max(10).nullable().optional(),
 	featuredImage: z.string().url().nullable().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 /**

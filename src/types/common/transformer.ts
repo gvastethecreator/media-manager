@@ -31,40 +31,40 @@ export interface BaseEntity extends z.infer<typeof BaseEntitySchema>, UIFields {
  * 🔍 Tipo para opciones de búsqueda
  */
 export interface BaseSearchOptions {
+	include?: Record<string, boolean>;
+	orderBy?: Record<string, 'asc' | 'desc'>;
 	skip?: number;
 	take?: number;
-	orderBy?: Record<string, 'asc' | 'desc'>;
 	where?: Record<string, unknown>;
-	include?: Record<string, boolean>;
 }
 
 /**
  * 📝 Tipo para resultados de búsqueda
  */
 export interface BaseSearchResult<T> {
+	hasMore: boolean;
 	items: T[];
 	total: number;
-	hasMore: boolean;
 }
 
 /**
  * 🔄 Tipo para relaciones base
  */
 export interface BaseRelations {
-	images?: boolean;
-	videos?: boolean;
 	albums?: boolean;
-	collections?: boolean;
-	tags?: boolean;
 	characters?: boolean;
-	places?: boolean;
-	worldItems?: boolean;
+	collections?: boolean;
 	concepts?: boolean;
-	prompts?: boolean;
-	notes?: boolean;
-	wildcards?: boolean;
-	properties?: boolean;
 	groups?: boolean;
+	images?: boolean;
+	notes?: boolean;
+	places?: boolean;
+	prompts?: boolean;
+	properties?: boolean;
+	tags?: boolean;
+	videos?: boolean;
+	wildcards?: boolean;
+	worldItems?: boolean;
 }
 
 /**
@@ -93,32 +93,32 @@ export interface BaseRelationCounts {
  * 🎯 Tipo para filtros base
  */
 export interface BaseFilters {
-	search?: string;
 	categories?: string[];
-	tags?: string[];
 	dateRange?: {
 		start?: Date;
 		end?: Date;
 	};
 	isFavorite?: boolean;
+	search?: string;
+	tags?: string[];
 }
 
 /**
  * 🔄 Tipo para opciones de transformación
  */
 export interface TransformerOptions {
-	includeRelations?: boolean;
-	includeCount?: boolean;
-	validateFields?: boolean;
 	customFields?: string[];
+	includeCount?: boolean;
+	includeRelations?: boolean;
+	validateFields?: boolean;
 }
 
 /**
  * 🛠️ Interfaz base para transformers
  */
 export interface BaseTransformer<T, U, P = unknown> {
+	extend(data: T, options?: TransformerOptions): Promise<T>;
 	toDbFormat(data: Partial<T>): P;
 
 	validate(data: unknown): T;
-	extend(data: T, options?: TransformerOptions): Promise<T>;
 }

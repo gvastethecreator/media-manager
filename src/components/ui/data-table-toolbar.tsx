@@ -1,15 +1,15 @@
-import type { Table } from '@tanstack/react-table';
+import type { RowData, Table } from '@/lib/tanstack-react-table';
 import { X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import { Input } from '@/components/ui/input';
 
-interface DataTableToolbarProps<TData> {
-	table: Table<TData>;
+interface DataTableToolbarProps<TData extends RowData> {
+	table: Table<any, TData>;
 }
 
-export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData extends RowData>({ table }: DataTableToolbarProps<TData>) {
 	const isFiltered = table.getState().columnFilters.length > 0;
 
 	return (

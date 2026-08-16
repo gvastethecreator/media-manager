@@ -1,5 +1,3 @@
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Cpu, Database, HardDrive, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -21,6 +19,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CHART_COLORS, METRIC_COLORS } from '@/lib/styles/chart-colors';
+import { enUSLocale, formatDistanceToNow } from '@/lib/utils/date';
 import { useTechMetrics } from '../hooks/use-tech-metrics';
 
 // Formateador para números
@@ -28,9 +28,14 @@ const formatNumber = (num: number): string => {
 	return new Intl.NumberFormat('es-ES').format(num);
 };
 
+function toNumberValue(value: unknown): number {
+	if (Array.isArray(value)) return Number(value[0] ?? 0);
+	return Number(value ?? 0);
+}
+
 // Formateador para segundos a texto legible
 const formatUptime = (seconds: number): string => {
-	return formatDistanceToNow(Date.now() - seconds * 1000, { locale: es });
+	return formatDistanceToNow(Date.now() - seconds * 1000, { locale: enUSLocale });
 };
 
 // Componente para mostrar las métricas del sistema
@@ -104,13 +109,13 @@ export function SystemMetricsPanel() {
 		return (
 			<div className="flex items-center justify-center p-8">
 				<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				<span>Cargando métricas técnicas...</span>
+				<span>Loading technical metrics...</span>
 			</div>
 		);
 	}
 
 	if (!(technicalMetrics && fileSystemPerformance && imageProcessingPerformance)) {
-		return <div className="p-4 text-center text-muted-foreground">No se pudieron cargar las métricas técnicas.</div>;
+		return <div className="p-4 text-center text-muted-foreground">Technical metrics could not be loaded.</div>;
 	}
 
 	return (
@@ -118,15 +123,15 @@ export function SystemMetricsPanel() {
 			<TabsList className="grid w-full grid-cols-3">
 				<TabsTrigger className="flex items-center gap-2" value="system">
 					<Cpu className="h-4 w-4" />
-					Sistema
+					System
 				</TabsTrigger>
 				<TabsTrigger className="flex items-center gap-2" value="database">
 					<Database className="h-4 w-4" />
-					Base de Datos & API
+					Database & API
 				</TabsTrigger>
 				<TabsTrigger className="flex items-center gap-2" value="filesystem">
 					<HardDrive className="h-4 w-4" />
-					Sistema de Archivos
+					File System
 				</TabsTrigger>
 			</TabsList>
 
@@ -135,19 +140,19 @@ export function SystemMetricsPanel() {
 					{/* Información del sistema */}
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Información del Sistema</CardTitle>
+							<CardTitle className="font-medium text-sm">System Information</CardTitle>
 						</CardHeader>
 						<CardContent className="grid gap-2">
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Plataforma:</span>
+								<span className="text-muted-foreground text-sm">Platform:</span>
 								<span className="font-medium text-sm">{technicalMetrics.systemInfo.platform}</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Versión de Node:</span>
+								<span className="text-muted-foreground text-sm">Node version:</span>
 								<span className="font-medium text-sm">{technicalMetrics.systemInfo.nodeVersion}</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Tiempo activo:</span>
+								<span className="text-muted-foreground text-sm">Uptime:</span>
 								<span className="font-medium text-sm">{formatUptime(technicalMetrics.systemInfo.uptime)}</span>
 							</div>
 						</CardContent>
@@ -156,7 +161,7 @@ export function SystemMetricsPanel() {
 					{/* Gráfico de CPU */}
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Uso de CPU</CardTitle>
+							<CardTitle className="font-medium text-sm">CPU Usage</CardTitle>
 							<div className="flex items-center gap-2">
 								<Progress className="h-2" value={technicalMetrics.systemInfo.cpuUsage.overall} />
 								<span className="font-medium text-sm">{technicalMetrics.systemInfo.cpuUsage.overall}%</span>
@@ -169,10 +174,10 @@ export function SystemMetricsPanel() {
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number) => [`${value}%`, 'Uso de CPU']}
-										labelFormatter={(time) => `Hora: ${time}`}
+										formatter={(value) => [`${toNumberValue(value)}%`, 'CPU Usage']}
+										labelFormatter={(time) => `Time: ${time}`}
 									/>
-									<Line dataKey="usage" stroke="#10b981" strokeWidth={2} type="monotone" />
+									<Line dataKey="usage" stroke={METRIC_COLORS.cpu} strokeWidth={2} type="monotone" />
 								</LineChart>
 							</ResponsiveContainer>
 						</CardContent>
@@ -181,7 +186,7 @@ export function SystemMetricsPanel() {
 					{/* Gráfico de Memoria */}
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Uso de Memoria</CardTitle>
+							<CardTitle className="font-medium text-sm">Memory Usage</CardTitle>
 							<div className="flex items-center gap-2">
 								<Progress
 									className="h-2"
@@ -201,11 +206,23 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number) => [`${value} MB`, 'Memoria']}
-										labelFormatter={(time) => `Hora: ${time}`}
+										formatter={(value) => [`${toNumberValue(value)} MB`, 'Memory']}
+										labelFormatter={(time) => `Time: ${time}`}
 									/>
-									<Area dataKey="used" fill="#3b82f6" stackId="1" stroke="#3b82f6" type="monotone" />
-									<Area dataKey="free" fill="#10b981" stackId="1" stroke="#10b981" type="monotone" />
+									<Area
+										dataKey="used"
+										fill={METRIC_COLORS.memory}
+										stackId="1"
+										stroke={METRIC_COLORS.memory}
+										type="monotone"
+									/>
+									<Area
+										dataKey="free"
+										fill={METRIC_COLORS.memoryFree}
+										stackId="1"
+										stroke={METRIC_COLORS.memoryFree}
+										type="monotone"
+									/>
 									<Legend />
 								</AreaChart>
 							</ResponsiveContainer>
@@ -215,7 +232,7 @@ export function SystemMetricsPanel() {
 					{/* Uso por núcleo */}
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Uso por Núcleo</CardTitle>
+							<CardTitle className="font-medium text-sm">Usage by Core</CardTitle>
 						</CardHeader>
 						<CardContent className="h-[180px]">
 							<ResponsiveContainer height="100%" width="100%">
@@ -228,8 +245,11 @@ export function SystemMetricsPanel() {
 									<XAxis dataKey="name" tick={{ fontSize: 10 }} />
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
-									<Tooltip formatter={(value: number) => [`${value}%`, 'Uso']} labelFormatter={(name) => `${name}`} />
-									<Bar dataKey="usage" fill="#3b82f6" />
+									<Tooltip
+										formatter={(value) => [`${toNumberValue(value)}%`, 'Usage']}
+										labelFormatter={(name) => `${name}`}
+									/>
+									<Bar dataKey="usage" fill={CHART_COLORS.primary} />
 								</BarChart>
 							</ResponsiveContainer>
 						</CardContent>
@@ -242,31 +262,31 @@ export function SystemMetricsPanel() {
 					{/* Métricas de la Base de Datos */}
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Métricas de Base de Datos</CardTitle>
+							<CardTitle className="font-medium text-sm">Database Metrics</CardTitle>
 						</CardHeader>
 						<CardContent className="grid gap-2">
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Tamaño del pool:</span>
+								<span className="text-muted-foreground text-sm">Pool size:</span>
 								<span className="font-medium text-sm">{technicalMetrics.databaseMetrics.connectionPoolSize}</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Conexiones activas:</span>
+								<span className="text-muted-foreground text-sm">Active connections:</span>
 								<span className="font-medium text-sm">{technicalMetrics.databaseMetrics.activeConnections}</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Tiempo de respuesta:</span>
+								<span className="text-muted-foreground text-sm">Response time:</span>
 								<span className="font-medium text-sm">
 									{technicalMetrics.databaseMetrics.queryResponseTime.toFixed(2)} ms
 								</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Consultas totales:</span>
+								<span className="text-muted-foreground text-sm">Total queries:</span>
 								<span className="font-medium text-sm">
 									{formatNumber(technicalMetrics.databaseMetrics.totalQueries)}
 								</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Tasa de error:</span>
+								<span className="text-muted-foreground text-sm">Error rate:</span>
 								<Badge variant={technicalMetrics.databaseMetrics.errorRate < 1 ? 'default' : 'secondary'}>
 									{technicalMetrics.databaseMetrics.errorRate.toFixed(2)}%
 								</Badge>
@@ -277,21 +297,21 @@ export function SystemMetricsPanel() {
 					{/* Métricas de la API */}
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Métricas de API</CardTitle>
+							<CardTitle className="font-medium text-sm">API Metrics</CardTitle>
 						</CardHeader>
 						<CardContent className="grid gap-2">
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Solicitudes por minuto:</span>
+								<span className="text-muted-foreground text-sm">Requests per minute:</span>
 								<span className="font-medium text-sm">{technicalMetrics.apiMetrics.requestsPerMinute}</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Tiempo de respuesta:</span>
+								<span className="text-muted-foreground text-sm">Response time:</span>
 								<span className="font-medium text-sm">
 									{technicalMetrics.apiMetrics.averageResponseTime.toFixed(2)} ms
 								</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Tasa de error:</span>
+								<span className="text-muted-foreground text-sm">Error rate:</span>
 								<Badge variant={technicalMetrics.apiMetrics.errorRate < 1 ? 'default' : 'secondary'}>
 									{technicalMetrics.apiMetrics.errorRate.toFixed(2)}%
 								</Badge>
@@ -302,7 +322,7 @@ export function SystemMetricsPanel() {
 					{/* Endpoints principales */}
 					<Card className="md:col-span-2">
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Endpoints Principales</CardTitle>
+							<CardTitle className="font-medium text-sm">Top Endpoints</CardTitle>
 						</CardHeader>
 						<CardContent className="h-[200px]">
 							<ResponsiveContainer height="100%" width="100%">
@@ -315,10 +335,10 @@ export function SystemMetricsPanel() {
 									<YAxis dataKey="endpoint" tick={{ fontSize: 10 }} type="category" width={80} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number) => [formatNumber(value), 'Solicitudes']}
+										formatter={(value) => [formatNumber(toNumberValue(value)), 'Requests']}
 										labelFormatter={(name) => `Endpoint: ${name}`}
 									/>
-									<Bar dataKey="hits" fill="#3b82f6" />
+									<Bar dataKey="hits" fill={CHART_COLORS.primary} />
 								</BarChart>
 							</ResponsiveContainer>
 						</CardContent>
@@ -331,31 +351,31 @@ export function SystemMetricsPanel() {
 					{/* Rendimiento del sistema de archivos */}
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Rendimiento de E/S</CardTitle>
+							<CardTitle className="font-medium text-sm">I/O Performance</CardTitle>
 						</CardHeader>
 						<CardContent className="grid gap-2">
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Velocidad de lectura:</span>
+								<span className="text-muted-foreground text-sm">Read speed:</span>
 								<span className="font-medium text-sm">{fileSystemPerformance.readSpeed} MB/s</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Velocidad de escritura:</span>
+								<span className="text-muted-foreground text-sm">Write speed:</span>
 								<span className="font-medium text-sm">{fileSystemPerformance.writeSpeed} MB/s</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Tiempo de acceso:</span>
+								<span className="text-muted-foreground text-sm">Access time:</span>
 								<span className="font-medium text-sm">{fileSystemPerformance.averageAccessTime.toFixed(2)} ms</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">IOPS lectura:</span>
+								<span className="text-muted-foreground text-sm">Read IOPS:</span>
 								<span className="font-medium text-sm">{formatNumber(fileSystemPerformance.iopsRead)}</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">IOPS escritura:</span>
+								<span className="text-muted-foreground text-sm">Write IOPS:</span>
 								<span className="font-medium text-sm">{formatNumber(fileSystemPerformance.iopsWrite)}</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Operaciones actuales:</span>
+								<span className="text-muted-foreground text-sm">Current operations:</span>
 								<span className="font-medium text-sm">{fileSystemPerformance.currentOperations}</span>
 							</div>
 						</CardContent>
@@ -364,15 +384,15 @@ export function SystemMetricsPanel() {
 					{/* Comparación de velocidad */}
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Velocidades de E/S</CardTitle>
+							<CardTitle className="font-medium text-sm">I/O Speeds</CardTitle>
 						</CardHeader>
 						<CardContent className="h-[200px]">
 							<ResponsiveContainer height="100%" width="100%">
 								<BarChart
 									data={[
-										{ name: 'Lectura', value: fileSystemPerformance.readSpeed },
+										{ name: 'Read', value: fileSystemPerformance.readSpeed },
 										{
-											name: 'Escritura',
+											name: 'Write',
 											value: fileSystemPerformance.writeSpeed,
 										},
 									]}
@@ -382,12 +402,12 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number) => [`${value} MB/s`, 'Velocidad']}
-										labelFormatter={(name) => `Operación: ${name}`}
+										formatter={(value) => [`${toNumberValue(value)} MB/s`, 'Speed']}
+										labelFormatter={(name) => `Operation: ${name}`}
 									/>
-									<Bar dataKey="value" fill="#3b82f6">
-										<Cell fill="#10b981" />
-										<Cell fill="#3b82f6" />
+									<Bar dataKey="value" fill={CHART_COLORS.primary}>
+										<Cell fill={METRIC_COLORS.io.read} />
+										<Cell fill={METRIC_COLORS.io.write} />
 									</Bar>
 								</BarChart>
 							</ResponsiveContainer>
@@ -397,16 +417,16 @@ export function SystemMetricsPanel() {
 					{/* Procesamiento de imágenes */}
 					<Card className="md:col-span-2">
 						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Procesamiento de Imágenes</CardTitle>
+							<CardTitle className="font-medium text-sm">Image Processing</CardTitle>
 						</CardHeader>
 						<CardContent className="grid grid-cols-1 gap-4 md:grid-cols-3">
 							<div className="space-y-2">
 								<div className="flex flex-col">
-									<span className="text-muted-foreground text-sm">Tiempo promedio de procesamiento</span>
+									<span className="text-muted-foreground text-sm">Average processing time</span>
 									<span className="font-medium text-lg">{imageProcessingPerformance.averageProcessingTime} ms</span>
 								</div>
 								<div className="flex flex-col">
-									<span className="text-muted-foreground text-sm">Imágenes procesadas por hora</span>
+									<span className="text-muted-foreground text-sm">Images processed per hour</span>
 									<span className="font-medium text-lg">
 										{formatNumber(imageProcessingPerformance.imagesProcessedPerHour)}
 									</span>
@@ -415,11 +435,11 @@ export function SystemMetricsPanel() {
 
 							<div className="space-y-2">
 								<div className="flex flex-col">
-									<span className="text-muted-foreground text-sm">Tamaño de lote</span>
+									<span className="text-muted-foreground text-sm">Batch size</span>
 									<span className="font-medium text-lg">{imageProcessingPerformance.batchSize}</span>
 								</div>
 								<div className="flex flex-col">
-									<span className="text-muted-foreground text-sm">Memoria por imagen</span>
+									<span className="text-muted-foreground text-sm">Memory per image</span>
 									<span className="font-medium text-lg">
 										{imageProcessingPerformance.memoryUsagePerImage.toFixed(2)} MB
 									</span>
@@ -428,11 +448,11 @@ export function SystemMetricsPanel() {
 
 							<div className="space-y-2">
 								<div className="flex flex-col">
-									<span className="text-muted-foreground text-sm">Tamaño de cola</span>
+									<span className="text-muted-foreground text-sm">Queue size</span>
 									<span className="font-medium text-lg">{imageProcessingPerformance.queueSize}</span>
 								</div>
 								<div className="flex flex-col">
-									<span className="text-muted-foreground text-sm">Tasa de éxito</span>
+									<span className="text-muted-foreground text-sm">Success rate</span>
 									<Badge variant={imageProcessingPerformance.successRate > 99 ? 'default' : 'secondary'}>
 										{imageProcessingPerformance.successRate.toFixed(2)}%
 									</Badge>

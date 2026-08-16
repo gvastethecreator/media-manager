@@ -13,11 +13,15 @@ import { devtools } from 'zustand/middleware';
 import {
 	createJsonFileInApi,
 	deleteJsonFileFromApi,
+	getJsonFileFromApi,
 	getJsonFilesFromApi,
+	toggleJsonFileFavoriteInApi,
 	updateJsonFileInApi,
+	type PublicJsonFileCreateInput,
+	type PublicJsonFileUpdateInput,
 } from '@/lib/api/client/json-file.client';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
+import type { JsonFileWithStats } from '@/types/entities/json-file';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type JsonFileFilters = Record<string, any>;
@@ -26,35 +30,36 @@ export type JsonFileFilters = Record<string, any>;
  * 🏪 Estado del store de JsonFile
  */
 export interface JsonFileState {
-	// Estado de datos
-	jsonFiles: JsonFileWithStats[];
-	selectedJsonFiles: JsonFileWithStats[];
+	clearFilters: () => void;
+	clearSelection: () => void;
+	createJsonFile: (data: PublicJsonFileCreateInput) => Promise<JsonFileWithStats | undefined>;
 	currentJsonFile: JsonFileWithStats | null;
-
-	// Estado de UI
-	loading: boolean;
+	deleteJsonFile: (id: string) => Promise<void>;
+	deselectJsonFile: (jsonFileId: string) => void;
 	error: string | null;
-	filters: JsonFileFilters;
 
 	// Acciones de datos
+	fetchJsonFile: (id: string) => Promise<JsonFileWithStats | undefined>;
 	fetchJsonFiles: () => Promise<void>;
-	createJsonFile: (data: JsonFileCreateInput) => Promise<JsonFileWithStats | undefined>;
-	updateJsonFile: (id: string, data: JsonFileUpdateInput) => Promise<JsonFileWithStats | undefined>;
-	deleteJsonFile: (id: string) => Promise<void>;
-
-	// Acciones de selección
-	selectJsonFile: (jsonFile: JsonFileWithStats) => void;
-	deselectJsonFile: (jsonFileId: string) => void;
-	clearSelection: () => void;
-
-	// Acciones de filtrado
-	setFilters: (filters: Partial<JsonFileFilters>) => void;
-	clearFilters: () => void;
+	filters: JsonFileFilters;
 
 	// Utilidades
 	getJsonFileById: (id: string) => JsonFileWithStats | undefined;
 	getSortedJsonFiles: () => JsonFileWithStats[];
+	// Estado de datos
+	jsonFiles: JsonFileWithStats[];
+
+	// Estado de UI
+	loading: boolean;
+	selectedJsonFiles: JsonFileWithStats[];
+
+	// Acciones de selección
+	selectJsonFile: (jsonFile: JsonFileWithStats) => void;
+
+	// Acciones de filtrado
+	setFilters: (filters: Partial<JsonFileFilters>) => void;
 	toggleFavorite: (id: string) => Promise<void>;
+	updateJsonFile: (id: string, data: PublicJsonFileUpdateInput) => Promise<JsonFileWithStats | undefined>;
 }
 
 const useJsonFileStoreBase = create<JsonFileState>()(
@@ -79,7 +84,25 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 				}
 			},
 
-			createJsonFile: async (data: JsonFileCreateInput) => {
+			fetchJsonFile: async (id: string) => {
+				set({ loading: true, error: null });
+				try {
+					const jsonFile = await getJsonFileFromApi(id);
+					set((state) => ({
+						jsonFiles: state.jsonFiles.some((item) => item.id === id)
+							? state.jsonFiles.map((item) => (item.id === id ? jsonFile : item))
+							: [...state.jsonFiles, jsonFile],
+						currentJsonFile: jsonFile,
+						loading: false,
+					}));
+					return jsonFile;
+				} catch (error) {
+					set({ error: (error as Error).message, loading: false });
+					return;
+				}
+			},
+
+			createJsonFile: async (data: PublicJsonFileCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newJsonFile = await createJsonFileInApi(data);
@@ -94,7 +117,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 				}
 			},
 
-			updateJsonFile: async (id: string, data: JsonFileUpdateInput) => {
+			updateJsonFile: async (id: string, data: PublicJsonFileUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedJsonFile = await updateJsonFileInApi(id, data);
@@ -160,7 +183,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			},
 
 			getSortedJsonFiles: () => {
-				return get().jsonFiles.sort((a, b) => {
+				return [...get().jsonFiles].sort((a, b) => {
 					// Ordenar por nombre alfabéticamente
 					return a.name.localeCompare(b.name);
 				});
@@ -169,7 +192,17 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			toggleFavorite: async (id: string) => {
 				const jsonFile = get().getJsonFileById(id);
 				if (jsonFile) {
-					await get().updateJsonFile(id, { isFavorite: !jsonFile.isFavorite });
+					set({ loading: true, error: null });
+					try {
+						const updatedJsonFile = await toggleJsonFileFavoriteInApi(id);
+						set((state) => ({
+							jsonFiles: state.jsonFiles.map((item) => (item.id === id ? updatedJsonFile : item)),
+							currentJsonFile: state.currentJsonFile?.id === id ? updatedJsonFile : state.currentJsonFile,
+							loading: false,
+						}));
+					} catch (error) {
+						set({ error: (error as Error).message, loading: false });
+					}
 				}
 			},
 		}),

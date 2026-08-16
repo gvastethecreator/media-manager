@@ -3,10 +3,10 @@ import { Progress } from '@/components/ui/progress';
 import { StatusBadge } from './status-badge';
 
 export interface Feature {
-	name: string;
-	status: 'completed' | 'in-progress' | 'pending' | 'failed';
 	description: string;
+	name: string;
 	progress?: number;
+	status: 'completed' | 'in-progress' | 'pending' | 'failed';
 }
 
 export function FeatureCard({ feature }: { feature: Feature }) {

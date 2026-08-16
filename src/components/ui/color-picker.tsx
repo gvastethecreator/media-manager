@@ -4,43 +4,40 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { DEFAULT_ENTITY_COLOR, DEFAULT_LIGHT_COLOR, PRESET_COLORS_HEX } from '@/lib/styles/color-tokens';
 import { cn } from '@/lib/utils';
 
-// Paleta de colores predefinidos
-const PRESET_COLORS = [
-	'#3b82f6', // Blue
-	'#ef4444', // Red
-	'#22c55e', // Green
-	'#eab308', // Yellow
-	'#ec4899', // Pink
-	'#8b5cf6', // Purple
-	'#06b6d4', // Cyan
-	'#f97316', // Orange
-	'#14b8a6', // Teal
-	'#f43f5e', // Rose
-	'#6366f1', // Indigo
-	'#0ea5e9', // Sky
-	'#64748b', // Slate
-	'#6b7280', // Gray
-	'#d946ef', // Fuchsia
-	'#84cc16', // Lime
-	'#0891b2', // Cyan Dark
-	'#9333ea', // Purple Darker
-	'#000000', // Black
-	'#ffffff', // White
-];
+// Paleta de colores predefinidos - importada de tokens centralizados
+const PRESET_COLORS = PRESET_COLORS_HEX;
 
 interface ColorPickerProps {
-	value: string;
-	onChange: (value: string) => void;
 	className?: string;
 	compact?: boolean;
+	onChange: (value: string) => void;
 	showLabel?: boolean;
+	value?: string;
 }
 
-export function ColorPicker({ value, onChange, className, compact = false, showLabel = true }: ColorPickerProps) {
+export function ColorPicker({
+	value = DEFAULT_ENTITY_COLOR,
+	onChange,
+	className,
+	compact = false,
+	showLabel = true,
+}: ColorPickerProps) {
 	const [open, setOpen] = useState(false);
 	const [currentColor, setCurrentColor] = useState(value);
+
+	const normalizeHex = (hex: string) => {
+		const v = hex.trim().toLowerCase();
+		if (/^#[0-9a-f]{3}$/.test(v)) {
+			// #rgb -> #rrggbb
+			return `#${v[1]}${v[1]}${v[2]}${v[2]}${v[3]}${v[3]}`;
+		}
+		return v;
+	};
+
+	const isPureWhite = (hex: string) => normalizeHex(hex) === normalizeHex(DEFAULT_LIGHT_COLOR);
 
 	// Gestionar cambio directo de color mediante input
 	const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,7 +116,7 @@ export function ColorPicker({ value, onChange, className, compact = false, showL
 						<div className={cn('grid gap-2', compact ? 'grid-cols-6' : 'grid-cols-5')}>
 							{PRESET_COLORS.slice(0, compact ? 12 : 20).map((color) => (
 								<button
-									aria-label={`Seleccionar color ${color}`}
+									aria-label={`Select color ${color}`}
 									className={cn(
 										'flex h-6 w-6 items-center justify-center rounded-md border border-muted',
 										isSelected(color) && 'ring-1 ring-ring'
@@ -131,7 +128,7 @@ export function ColorPicker({ value, onChange, className, compact = false, showL
 								>
 									{isSelected(color) && (
 										<Check
-											className={cn(color === '#ffffff' ? 'text-black' : 'text-white', compact ? 'h-3 w-3' : 'h-4 w-4')}
+											className={cn(isPureWhite(color) ? 'text-black' : 'text-white', compact ? 'h-3 w-3' : 'h-4 w-4')}
 										/>
 									)}
 									<span className="sr-only">{color}</span>

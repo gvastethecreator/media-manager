@@ -1,0 +1,371 @@
+/**
+ * 🎨 COMPONENT RECIPES
+ * ====================
+ * Clases CSS utilitarias basadas en el sistema de tokens
+ * Para uso con componentes que no pueden usar Tailwind directamente
+ *
+ * @see docs/UX-UI-AUDIT-2025-12-30.md
+ */
+
+/* =====================================================
+ * 🔘 BOTONES
+ * ===================================================== */
+
+/* Base táctil para todos los botones */
+.tactile-button {
+	position: relative;
+	box-shadow: var(--dt-shadow-1), var(--dt-highlight-1);
+	transform: translateY(0);
+	transition:
+		box-shadow var(--dt-duration-fast) var(--dt-ease-default),
+		transform var(--dt-duration-fast) var(--dt-ease-default),
+		background-color var(--dt-duration-fast) var(--dt-ease-default),
+		filter var(--dt-duration-fast) var(--dt-ease-default);
+}
+
+.tactile-button:hover:not(:disabled) {
+	box-shadow: var(--dt-shadow-2), var(--dt-highlight-2);
+	transform: translateY(-1px);
+}
+
+.tactile-button:active:not(:disabled) {
+	box-shadow: var(--dt-shadow-0), var(--dt-inset-2);
+	transform: translateY(1px);
+}
+
+.tactile-button:focus-visible {
+	outline: none;
+	box-shadow: var(--dt-focus-ring);
+}
+
+.tactile-button:disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
+	filter: grayscale(0.3);
+	transform: none;
+}
+
+/* Botón con gradiente primario */
+.btn-gradient-primary {
+	background: var(--dt-g-primary-solid);
+	border: var(--dt-border-width) solid transparent;
+	border-radius: var(--dt-radius-md);
+}
+
+.btn-gradient-primary:hover:not(:disabled) {
+	filter: brightness(1.05);
+}
+
+.btn-gradient-primary:active:not(:disabled) {
+	filter: brightness(0.95);
+}
+
+/* Botón con gradiente destructivo */
+.btn-gradient-danger {
+	background: var(--dt-g-danger-solid);
+	border: var(--dt-border-width) solid transparent;
+	border-radius: var(--dt-radius-md);
+}
+
+/* Botón con gradiente success */
+.btn-gradient-success {
+	background: var(--dt-g-success-solid);
+	border: var(--dt-border-width) solid transparent;
+	border-radius: var(--dt-radius-md);
+}
+
+/* =====================================================
+ * 📝 INPUTS & CONTROLES
+ * ===================================================== */
+
+.input-enhanced {
+	background: var(--background);
+	border: var(--dt-border-width) solid var(--border);
+	border-radius: var(--dt-radius-md);
+	box-shadow: var(--dt-inset-1);
+	transition:
+		border-color var(--dt-duration-fast) var(--dt-ease-default),
+		box-shadow var(--dt-duration-fast) var(--dt-ease-default),
+		background-color var(--dt-duration-fast) var(--dt-ease-default);
+}
+
+.input-enhanced:hover:not(:disabled):not(:focus) {
+	border-color: var(--dt-primary-300);
+}
+
+.input-enhanced:focus {
+	outline: none;
+	border-color: var(--dt-primary-500);
+	box-shadow:
+		var(--dt-inset-1),
+		0 0 0 3px oklch(from var(--dt-primary-500) l c h / 0.15);
+}
+
+.input-enhanced:disabled {
+	cursor: not-allowed;
+	background: var(--muted);
+	opacity: 0.5;
+}
+
+.input-enhanced[aria-invalid='true'],
+.input-enhanced.input-error {
+	border-color: var(--dt-danger-500);
+	box-shadow:
+		var(--dt-inset-1),
+		0 0 0 3px oklch(from var(--dt-danger-500) l c h / 0.15);
+}
+
+/* =====================================================
+ * 🃏 SUPERFICIES (CARDS, PANELS)
+ * ===================================================== */
+
+.surface-elevated {
+	background: var(--card);
+	border: var(--dt-border-width) solid var(--border);
+	border-radius: var(--dt-radius-lg);
+	box-shadow: var(--dt-shadow-2);
+	transition:
+		box-shadow var(--dt-duration-normal) var(--dt-ease-default),
+		transform var(--dt-duration-normal) var(--dt-ease-default);
+}
+
+.surface-elevated:hover {
+	box-shadow: var(--dt-shadow-3);
+	transform: translateY(-2px);
+}
+
+/* Superficie para modales */
+.surface-modal {
+	background: var(--popover);
+	border: var(--dt-border-width) solid var(--border);
+	border-radius: var(--dt-radius-xl);
+	box-shadow: var(--dt-shadow-4);
+}
+
+/* Superficie para tooltips y popovers */
+.surface-floating {
+	background: var(--popover);
+	border: var(--dt-border-width) solid oklch(from var(--border) l c h / 0.5);
+	border-radius: var(--dt-radius-md);
+	box-shadow: var(--dt-shadow-3);
+}
+
+/* =====================================================
+ * 🏷️ BADGES & TAGS
+ * ===================================================== */
+
+.badge-enhanced {
+	background: var(--dt-g-primary-soft);
+	border: var(--dt-border-width) solid oklch(from var(--dt-primary-500) l c h / 0.2);
+	border-radius: var(--dt-radius-sm);
+	box-shadow: var(--dt-shadow-1);
+	transition: transform var(--dt-duration-fast) var(--dt-ease-bounce);
+}
+
+.badge-enhanced:hover {
+	transform: scale(1.02);
+}
+
+.badge-destructive {
+	background: linear-gradient(135deg, var(--dt-danger-100), var(--dt-danger-200));
+	border-color: oklch(from var(--dt-danger-500) l c h / 0.3);
+}
+
+.badge-success {
+	background: linear-gradient(135deg, var(--dt-success-100), var(--dt-success-200));
+	border-color: oklch(from var(--dt-success-500) l c h / 0.3);
+}
+
+.badge-warning {
+	background: linear-gradient(135deg, var(--dt-warning-100), var(--dt-warning-200));
+	border-color: oklch(from var(--dt-warning-500) l c h / 0.3);
+}
+
+/* =====================================================
+ * 🧭 NAVEGACIÓN
+ * ===================================================== */
+
+.nav-item-enhanced {
+	background: transparent;
+	border: var(--dt-border-width) solid transparent;
+	border-radius: var(--dt-radius-sm);
+	transition:
+		background-color var(--dt-duration-fast) var(--dt-ease-default),
+		border-color var(--dt-duration-fast) var(--dt-ease-default),
+		box-shadow var(--dt-duration-fast) var(--dt-ease-default);
+}
+
+.nav-item-enhanced:hover {
+	background: var(--accent);
+	border-color: oklch(from var(--border) l c h / 0.5);
+}
+
+.nav-item-enhanced[data-active='true'],
+.nav-item-enhanced.active {
+	background: var(--dt-g-primary-soft);
+	border-color: var(--dt-primary-500);
+	box-shadow:
+		inset 3px 0 0 var(--dt-primary-500),
+		var(--dt-shadow-1);
+}
+
+.nav-item-enhanced:focus-visible {
+	outline: none;
+	box-shadow: var(--dt-focus-ring);
+}
+
+/* =====================================================
+ * 📊 TABLAS
+ * ===================================================== */
+
+.table-row-enhanced {
+	transition: background-color var(--dt-duration-fast) var(--dt-ease-default);
+}
+
+.table-row-enhanced:hover {
+	background: oklch(from var(--muted) l c h / 0.5);
+}
+
+.table-row-enhanced[data-selected='true'],
+.table-row-enhanced.selected {
+	background: oklch(from var(--dt-primary-500) l c h / 0.1);
+	box-shadow: inset 3px 0 0 var(--dt-primary-500);
+}
+
+/* =====================================================
+ * 🔔 TOASTS & NOTIFICACIONES
+ * ===================================================== */
+
+.toast-enhanced {
+	background: var(--popover);
+	border: var(--dt-border-width) solid var(--border);
+	border-left-color: var(--dt-primary-500);
+	border-left-width: 4px;
+	border-radius: var(--dt-radius-md);
+	box-shadow: var(--dt-shadow-3);
+}
+
+.toast-enhanced.toast-success {
+	border-left-color: var(--dt-success-500);
+}
+
+.toast-enhanced.toast-warning {
+	border-left-color: var(--dt-warning-500);
+}
+
+.toast-enhanced.toast-error {
+	border-left-color: var(--dt-danger-500);
+}
+
+/* =====================================================
+ * 🌈 BORDER GRADIENT
+ * ===================================================== */
+
+.border-gradient {
+	position: relative;
+	overflow: hidden;
+	background: var(--card);
+	border-radius: var(--dt-radius-md);
+}
+
+.border-gradient::before {
+	position: absolute;
+	inset: 0;
+	padding: var(--dt-border-width);
+	pointer-events: none;
+	content: '';
+	background: linear-gradient(135deg, var(--dt-primary-400), var(--dt-primary-600));
+	border-radius: inherit;
+	-webkit-mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+}
+
+/* =====================================================
+ * 🎚️ CONTROLES (SLIDERS, PROGRESS)
+ * ===================================================== */
+
+.slider-track-enhanced {
+	background: oklch(from var(--dt-primary-500) l c h / 0.2);
+	border-radius: var(--dt-radius-full);
+}
+
+.slider-range-enhanced {
+	background: var(--dt-g-primary-solid);
+	border-radius: var(--dt-radius-full);
+}
+
+.slider-thumb-enhanced {
+	background: var(--background);
+	border: var(--dt-border-width) solid var(--dt-primary-500);
+	border-radius: var(--dt-radius-full);
+	box-shadow: var(--dt-shadow-2);
+	transition:
+		box-shadow var(--dt-duration-fast) var(--dt-ease-default),
+		transform var(--dt-duration-fast) var(--dt-ease-default);
+}
+
+.slider-thumb-enhanced:hover {
+	box-shadow: var(--dt-shadow-3);
+	transform: scale(1.1);
+}
+
+.slider-thumb-enhanced:active {
+	box-shadow: var(--dt-shadow-1);
+	transform: scale(0.95);
+}
+
+.progress-bar-enhanced {
+	overflow: hidden;
+	background: oklch(from var(--dt-primary-500) l c h / 0.2);
+	border-radius: var(--dt-radius-full);
+}
+
+.progress-indicator-enhanced {
+	background: var(--dt-g-primary-solid);
+	border-radius: var(--dt-radius-full);
+	transition: width var(--dt-duration-normal) var(--dt-ease-default);
+}
+
+/* =====================================================
+ * 📊 CHARTS
+ * ===================================================== */
+
+.chart-tooltip-enhanced {
+	background: var(--popover);
+	border: var(--dt-border-width) solid var(--border);
+	border-radius: var(--dt-radius-md);
+	box-shadow: var(--dt-shadow-3);
+}
+
+.chart-legend-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: var(--dt-radius-sm);
+	box-shadow: var(--dt-shadow-1);
+}
+
+/* =====================================================
+ * ♿ REDUCED MOTION
+ * ===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+	.tactile-button,
+	.surface-elevated,
+	.badge-enhanced,
+	.nav-item-enhanced,
+	.table-row-enhanced,
+	.slider-thumb-enhanced,
+	.progress-indicator-enhanced {
+		transition: none;
+	}
+
+	.tactile-button:hover,
+	.surface-elevated:hover,
+	.badge-enhanced:hover,
+	.slider-thumb-enhanced:hover {
+		transform: none;
+	}
+}

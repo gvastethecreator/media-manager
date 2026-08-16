@@ -13,24 +13,23 @@ const logger = clientLogger.withContext('FavoriteStore.CoreSlice');
 
 // Estado
 export interface CoreState {
+	error: string | null;
 	favorites: FavoriteExtended[];
 	isLoading: boolean;
-	error: string | null;
 }
 
 // Acciones
 export interface CoreActions {
+	// Gestión de favoritos
+	addFavorite: (isFavorite: FavoriteExtended) => void;
+	clearFavorites: () => void;
+	isFavorited: (id: string) => boolean;
+	removeFavorite: (id: string) => void;
+	setError: (error: string | null) => void;
 	// Carga de datos
 	setFavorites: (favorites: FavoriteExtended[]) => void;
 	setLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
-
-	// Gestión de favoritos
-	addFavorite: (isFavorite: FavoriteExtended) => void;
-	removeFavorite: (id: string) => void;
 	updateFavorite: (id: string, data: Partial<FavoriteExtended>) => void;
-	clearFavorites: () => void;
-	isFavorited: (id: string) => boolean;
 }
 
 // Slice del store para core
@@ -87,7 +86,7 @@ export const createCoreSlice: StateCreator<FavoriteStore, [], [], CoreState & Co
 	// Verificación de favoritos
 	isFavorited: (id: string) => {
 		const { favorites } = get();
-		const result = favorites.some((favorite) => favorite.id === id);
+		const result = favorites.some((favorite) => favorite.entityId === id);
 		logger.debug(`Verificando favorito para ID ${id}: ${result}`);
 		return result;
 	},

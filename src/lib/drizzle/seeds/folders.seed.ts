@@ -4,7 +4,10 @@ import { seedLogger } from './index';
 
 /**
  * Siembra las carpetas por defecto en la base de datos con Drizzle
- * Mantiene la estructura original del sistema Prisma
+ *
+ * NOTA: Los colores hex en este archivo son datos de prueba para inicializar la DB.
+ * No se usan directamente en la UI de producción - la UI usa tokens CSS
+ * definidos en src/styles/tokens.css y src/styles/design-tokens.css.
  */
 export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('📁 Creando carpetas por defecto...');
@@ -16,16 +19,28 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 			// Carpetas padre
 			// Más subcarpetas para demostrar jerarquía
 			{
+				id: 'test-files',
+				name: 'Test Files',
+				description: 'Test files for development',
+				path: 'D:\\DEV\\image-manager\\test-files',
+				emoji: '🧪',
+				totalFiles: 0,
+				totalSize: 0,
+				lastIndexed: null,
+				color: '#6366f1', // indigo
+				parentId: null,
+				presetId: null,
+			},
+			{
 				id: 'posters',
 				name: 'Posters',
-				description: 'Fotografías de posters',
+				description: 'Poster photography',
 				path: 'A:\\MOKLOS DATASETS\\! POSTERS',
 				emoji: '🌿',
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: '#22c55e',
-				isFavorite: false,
+				color: '#22c55e', // green
 				parentId: null,
 				presetId: null,
 			},
@@ -38,8 +53,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: '#fbbf24',
-				isFavorite: true,
+				color: '#eab308', // yellow
 				parentId: null,
 				presetId: null,
 			},
@@ -53,8 +67,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: '#fbbf24',
-				isFavorite: true,
+				color: '#eab308', // yellow
 				parentId: null,
 				presetId: null,
 			},
@@ -67,22 +80,20 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: '#3b82f6',
-				isFavorite: true,
+				color: '#8b5cf6', // violet
 				parentId: null,
 				presetId: null,
 			},
 			{
 				id: 'primigenios-core',
 				name: 'Primigenios Core',
-				description: 'Fotografías personales',
+				description: 'Personal photography',
 				path: 'A:\\MOKLOS DATASETS\\! PRIMIGENIOS CORE',
 				emoji: '📷',
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: '#10b981',
-				isFavorite: false,
+				color: '#22c55e', // green
 				parentId: null,
 				presetId: null,
 			},
@@ -95,8 +106,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: '#ef4444',
-				isFavorite: false,
+				color: '#ef4444', // red
 				parentId: null,
 				presetId: null,
 			},
@@ -109,22 +119,20 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: '#8b5cf6',
-				isFavorite: false,
+				color: '#a855f7', // purple
 				parentId: null,
 				presetId: null,
 			},
 			{
 				id: 'aesthethic',
 				name: 'Aesthethic',
-				description: 'Fotografías estéticas',
+				description: 'Aesthetic photography',
 				path: 'D:\\Pictures\\Photography\\Aesthethic',
 				emoji: '🏰',
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: '#f59e0b',
-				isFavorite: true,
+				color: '#f59e0b', // amber/orange
 				parentId: null,
 				presetId: null,
 			},
@@ -133,9 +141,9 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 		// Insertar carpetas
 		await db.insert(folders).values(sampleFolders);
 
-		seedLogger.success(`✅ ${sampleFolders.length} carpetas creadas (incluyendo jerarquía padre-hijo)`);
+		seedLogger.success(`✅ ${sampleFolders.length} folders created (including parent-child hierarchy)`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando carpetas:', error);
+		seedLogger.error('❌ Could not create folders:', error);
 		throw error;
 	}
 }

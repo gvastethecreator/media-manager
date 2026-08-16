@@ -56,13 +56,13 @@ graph TD
 import { CollectionCard } from '@/components/cards/collection-card';
 
 function CollectionsList({ collections }) {
-  return (
-    <div className="grid grid-cols-3 gap-4">
-      {collections.map(collection => (
-        <CollectionCard key={collection.id} collection={collection} />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-3 gap-4">
+			{collections.map((collection) => (
+				<CollectionCard key={collection.id} collection={collection} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -72,17 +72,13 @@ function CollectionsList({ collections }) {
 import { CollectionCard } from '@/components/cards/collection-card';
 
 function CollectionSelector({ collections, onSelect }) {
-  return (
-    <div className="grid grid-cols-3 gap-4">
-      {collections.map(collection => (
-        <CollectionCard
-          key={collection.id}
-          collection={collection}
-          onClick={() => onSelect(collection)}
-        />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-3 gap-4">
+			{collections.map((collection) => (
+				<CollectionCard key={collection.id} collection={collection} onClick={() => onSelect(collection)} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -92,17 +88,13 @@ function CollectionSelector({ collections, onSelect }) {
 import { CollectionCard } from '@/components/cards/collection-card';
 
 function CollectionCompactList({ collections }) {
-  return (
-    <div className="grid grid-cols-4 gap-3">
-      {collections.map(collection => (
-        <CollectionCard
-          key={collection.id}
-          collection={collection}
-          compact={true}
-        />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-4 gap-3">
+			{collections.map((collection) => (
+				<CollectionCard key={collection.id} collection={collection} compact={true} />
+			))}
+		</div>
+	);
 }
 ```
 

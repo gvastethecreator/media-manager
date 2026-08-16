@@ -1,11 +1,10 @@
-import { describe, expect, it } from 'bun:test';
 import { sortMediaItems, sortSingleCriterion } from '@/transformers/file/sort';
 
 interface Item {
-	id: string;
-	name: string;
 	createdAt: string;
+	id: string;
 	modifiedAt: string;
+	name: string;
 	size: number;
 	type: string;
 }

@@ -22,7 +22,7 @@ export function formatPromptDate(date: string | Date): string {
 			minute: '2-digit',
 		}).format(dateObj);
 	} catch (error) {
-		formattersLogger.error('❌ Error al formatear fecha de prompt:', error);
+		formattersLogger.error('❌ Could not format prompt date:', error);
 		return 'Fecha desconocida';
 	}
 }
@@ -112,7 +112,7 @@ export function generatePromptPreview(prompt: PromptBase | PromptExtended): stri
 
 		return preview;
 	} catch (error) {
-		formattersLogger.error('❌ Error al generar vista previa de prompt:', error);
+		formattersLogger.error('❌ Could not generate prompt preview:', error);
 		return truncatePromptContent(prompt.content || '');
 	}
 }
@@ -145,7 +145,7 @@ export function formatExecutionTime(executionTime: number): string {
 		const seconds = executionTime / 1000;
 		return `${seconds.toFixed(2)}s`;
 	} catch (error) {
-		formattersLogger.error('❌ Error al formatear tiempo de ejecución:', error);
+		formattersLogger.error('❌ Could not format execution time:', error);
 		return `${executionTime}ms`;
 	}
 }
@@ -191,7 +191,7 @@ export function formatParametersForDisplay(parameters: Record<string, any> | str
 			})
 			.join(', ');
 	} catch (error) {
-		formattersLogger.error('❌ Error al formatear parámetros para mostrar:', error);
+		formattersLogger.error('❌ Could not format parameters for display:', error);
 		return 'Parámetros inválidos';
 	}
 }

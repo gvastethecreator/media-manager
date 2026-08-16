@@ -1,4 +1,7 @@
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { EnhancedMetadataResult, MetadataField } from '../types';
+
+const logger = clientLogger.withContext('MetadataExtractors');
 
 /**
  * Extrae metadatos de archivos de video
@@ -20,11 +23,11 @@ export const extractVideoMetadata = (result: EnhancedMetadataResult, metadata: M
 			hours > 0
 				? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 				: `${minutes}:${seconds.toString().padStart(2, '0')}`;
-		metadata.push({ key: 'Duración', value: formattedDuration, category: 'video' });
+		metadata.push({ key: 'Duration', value: formattedDuration, category: 'video' });
 	}
 
 	if (video.width && video.height) {
-		metadata.push({ key: 'Resolución', value: `${video.width}×${video.height}`, category: 'video' });
+		metadata.push({ key: 'Resolution', value: `${video.width}×${video.height}`, category: 'video' });
 	}
 
 	if (video.framerate || video.fps) {
@@ -39,11 +42,11 @@ export const extractVideoMetadata = (result: EnhancedMetadataResult, metadata: M
 	}
 
 	if (video.codec || video.videoCodec) {
-		metadata.push({ key: 'Códec de Video', value: video.codec || video.videoCodec, category: 'video' });
+		metadata.push({ key: 'Video Codec', value: video.codec || video.videoCodec, category: 'video' });
 	}
 
 	if (video.audioCodec) {
-		metadata.push({ key: 'Códec de Audio', value: video.audioCodec, category: 'video' });
+		metadata.push({ key: 'Audio Codec', value: video.audioCodec, category: 'video' });
 	}
 
 	if (video.format || video.container) {
@@ -66,7 +69,7 @@ export const extractAudioMetadata = (result: EnhancedMetadataResult, metadata: M
 		const duration = typeof audio.duration === 'number' ? audio.duration : Number.parseFloat(audio.duration);
 		const minutes = Math.floor(duration / 60);
 		const seconds = Math.floor(duration % 60);
-		metadata.push({ key: 'Duración', value: `${minutes}:${seconds.toString().padStart(2, '0')}`, category: 'audio' });
+		metadata.push({ key: 'Duration', value: `${minutes}:${seconds.toString().padStart(2, '0')}`, category: 'audio' });
 	}
 
 	if (audio.bitrate) {
@@ -82,7 +85,7 @@ export const extractAudioMetadata = (result: EnhancedMetadataResult, metadata: M
 	if (audio.channels) {
 		const channelNames: Record<number, string> = {
 			1: 'Mono',
-			2: 'Estéreo',
+			2: 'Stereo',
 			6: '5.1 Surround',
 			8: '7.1 Surround',
 		};
@@ -92,12 +95,12 @@ export const extractAudioMetadata = (result: EnhancedMetadataResult, metadata: M
 	}
 
 	if (audio.codec || audio.format) {
-		metadata.push({ key: 'Códec', value: audio.codec || audio.format, category: 'audio' });
+		metadata.push({ key: 'Codec', value: audio.codec || audio.format, category: 'audio' });
 	}
 
 	// Metadatos de etiquetas ID3/metadata
 	if (audio.title) {
-		metadata.push({ key: 'Título', value: audio.title, category: 'audio' });
+		metadata.push({ key: 'Title', value: audio.title, category: 'audio' });
 	}
 
 	if (audio.artist) {
@@ -105,15 +108,15 @@ export const extractAudioMetadata = (result: EnhancedMetadataResult, metadata: M
 	}
 
 	if (audio.album) {
-		metadata.push({ key: 'Álbum', value: audio.album, category: 'audio' });
+		metadata.push({ key: 'Album', value: audio.album, category: 'audio' });
 	}
 
 	if (audio.year || audio.date) {
-		metadata.push({ key: 'Año', value: audio.year || audio.date, category: 'audio' });
+		metadata.push({ key: 'Year', value: audio.year || audio.date, category: 'audio' });
 	}
 
 	if (audio.genre) {
-		metadata.push({ key: 'Género', value: audio.genre, category: 'audio' });
+		metadata.push({ key: 'Genre', value: audio.genre, category: 'audio' });
 	}
 
 	if (audio.track) {
@@ -133,15 +136,15 @@ export const extractJSONMetadata = (result: EnhancedMetadataResult, metadata: Me
 
 	// Información sobre la estructura del JSON
 	if (json.size !== undefined) {
-		metadata.push({ key: 'Tamaño del archivo', value: `${(json.size / 1024).toFixed(1)} KB`, category: 'json' });
+		metadata.push({ key: 'File Size', value: `${(json.size / 1024).toFixed(1)} KB`, category: 'json' });
 	}
 
 	if (json.objectCount !== undefined) {
-		metadata.push({ key: 'Número de objetos', value: json.objectCount.toString(), category: 'json' });
+		metadata.push({ key: 'Object Count', value: json.objectCount.toString(), category: 'json' });
 	}
 
 	if (json.arrayCount !== undefined) {
-		metadata.push({ key: 'Número de arrays', value: json.arrayCount.toString(), category: 'json' });
+		metadata.push({ key: 'Array Count', value: json.arrayCount.toString(), category: 'json' });
 	}
 
 	if (json.depth !== undefined) {
@@ -174,13 +177,13 @@ export const extractJSONMetadata = (result: EnhancedMetadataResult, metadata: Me
 	// Metadatos específicos si es un package.json
 	if (json.isPackageJson) {
 		if (json.packageName) {
-			metadata.push({ key: 'Nombre del paquete', value: json.packageName, category: 'json' });
+			metadata.push({ key: 'Package Name', value: json.packageName, category: 'json' });
 		}
 		if (json.version) {
-			metadata.push({ key: 'Versión', value: json.version, category: 'json' });
+			metadata.push({ key: 'Version', value: json.version, category: 'json' });
 		}
 		if (json.description) {
-			metadata.push({ key: 'Descripción', value: json.description, category: 'json' });
+			metadata.push({ key: 'Description', value: json.description, category: 'json' });
 		}
 		if (json.dependencies) {
 			metadata.push({ key: 'Dependencias', value: Object.keys(json.dependencies).length.toString(), category: 'json' });
@@ -204,7 +207,7 @@ export const extractDocumentMetadata = (result: EnhancedMetadataResult, metadata
 	}
 
 	if (doc.lineCount !== undefined) {
-		metadata.push({ key: 'Líneas', value: doc.lineCount.toString(), category: 'document' });
+		metadata.push({ key: 'Lines', value: doc.lineCount.toString(), category: 'document' });
 	}
 
 	if (doc.characterCount !== undefined) {
@@ -212,7 +215,7 @@ export const extractDocumentMetadata = (result: EnhancedMetadataResult, metadata
 	}
 
 	if (doc.size !== undefined) {
-		metadata.push({ key: 'Tamaño', value: `${(doc.size / 1024).toFixed(1)} KB`, category: 'document' });
+		metadata.push({ key: 'Size', value: `${(doc.size / 1024).toFixed(1)} KB`, category: 'document' });
 	}
 
 	// Metadatos específicos de Markdown
@@ -226,37 +229,37 @@ export const extractDocumentMetadata = (result: EnhancedMetadataResult, metadata
 		}
 
 		if (doc.imageCount !== undefined) {
-			metadata.push({ key: 'Imágenes', value: doc.imageCount.toString(), category: 'document' });
+			metadata.push({ key: 'Images', value: doc.imageCount.toString(), category: 'document' });
 		}
 
 		if (doc.codeBlockCount !== undefined) {
-			metadata.push({ key: 'Bloques de código', value: doc.codeBlockCount.toString(), category: 'document' });
+			metadata.push({ key: 'Code Blocks', value: doc.codeBlockCount.toString(), category: 'document' });
 		}
 
 		// Frontmatter de Markdown
 		if (doc.frontmatter) {
 			if (doc.frontmatter.title) {
-				metadata.push({ key: 'Título', value: doc.frontmatter.title, category: 'document' });
+				metadata.push({ key: 'Title', value: doc.frontmatter.title, category: 'document' });
 			}
 
 			if (doc.frontmatter.author) {
-				metadata.push({ key: 'Autor', value: doc.frontmatter.author, category: 'document' });
+				metadata.push({ key: 'Author', value: doc.frontmatter.author, category: 'document' });
 			}
 
 			if (doc.frontmatter.date) {
-				metadata.push({ key: 'Fecha', value: doc.frontmatter.date, category: 'document' });
+				metadata.push({ key: 'Date', value: doc.frontmatter.date, category: 'document' });
 			}
 
 			if (doc.frontmatter.tags) {
 				const tags = Array.isArray(doc.frontmatter.tags) ? doc.frontmatter.tags.join(', ') : doc.frontmatter.tags;
-				metadata.push({ key: 'Etiquetas', value: tags, category: 'document' });
+				metadata.push({ key: 'Tags', value: tags, category: 'document' });
 			}
 		}
 	}
 
 	// Encoding y formato
 	if (doc.encoding) {
-		metadata.push({ key: 'Codificación', value: doc.encoding, category: 'document' });
+		metadata.push({ key: 'Encoding', value: doc.encoding, category: 'document' });
 	}
 
 	if (doc.format) {
@@ -280,17 +283,13 @@ export const extractDocumentMetadata = (result: EnhancedMetadataResult, metadata
 export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: MetadataField[]): void => {
 	// Logging de debug para ver qué datos llegan
 	if (import.meta.env?.DEV) {
-		console.debug('[extractAIMetadata] Datos recibidos:', {
+		logger.debug('[extractAIMetadata] Datos recibidos:', {
 			hasOrigin: !!result.metadata?.origin,
 			hasAiMetadata: !!result.metadata?.aiMetadata,
 			aiMetadataKeys: result.metadata?.aiMetadata ? Object.keys(result.metadata.aiMetadata) : [],
 			originEngine: result.metadata?.origin?.engine,
 			originConfidence: result.metadata?.origin?.confidence,
 		});
-
-		if (result.metadata?.aiMetadata) {
-			console.debug('[extractAIMetadata] aiMetadata completa:', result.metadata.aiMetadata);
-		}
 	}
 
 	// Información del engine (mostrar aunque no haya aiMetadata detallado)
@@ -306,7 +305,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 			ideogram: 'Ideogram',
 			stability_ai: 'Stability AI',
 			dalle: 'DALL·E',
-			unknown: 'Desconocido',
+			unknown: 'Unknown',
 		};
 		const engineName = engineNames[result.metadata.origin.engine] || result.metadata.origin.engine;
 		const confidence = result.metadata.origin.confidence
@@ -321,7 +320,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 
 	if (!result.metadata?.aiMetadata) {
 		if (import.meta.env?.DEV) {
-			console.debug('[extractAIMetadata] No aiMetadata encontrada, terminando early');
+			logger.debug('[extractAIMetadata] No aiMetadata encontrada, terminando early');
 		}
 		return; // no más campos
 	}
@@ -329,7 +328,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 	const ai = result.metadata.aiMetadata;
 
 	if (import.meta.env?.DEV) {
-		console.debug('[extractAIMetadata] Procesando aiMetadata:', ai);
+		logger.debug('[extractAIMetadata] Procesando aiMetadata:', ai);
 	}
 
 	// Los datos AI están estructurados de manera anidada:
@@ -342,7 +341,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 	const combinedData = { ...commonData, ...engineSpecificData };
 
 	if (import.meta.env?.DEV) {
-		console.debug('[extractAIMetadata] Datos combinados:', {
+		logger.debug('[extractAIMetadata] Datos combinados:', {
 			commonKeys: Object.keys(commonData),
 			engineSpecificKeys: Object.keys(engineSpecificData),
 			combinedKeys: Object.keys(combinedData),
@@ -371,7 +370,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 		scheduler_name: { key: 'Scheduler' },
 		width: { key: 'Ancho' },
 		height: { key: 'Alto' },
-		size: { key: 'Tamaño' },
+		size: { key: 'Size' },
 		batch_size: { key: 'Batch Size' },
 		batchSize: { key: 'Batch Size' },
 		denoising_strength: { key: 'Denoising Strength' },
@@ -390,18 +389,18 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 		controlnet: { key: 'ControlNet' },
 		vae: { key: 'VAE' },
 		// Campos adicionales comunes
-		creation_date: { key: 'Fecha Creación' },
-		creationDate: { key: 'Fecha Creación' },
-		created_at: { key: 'Fecha Creación' },
+		creation_date: { key: 'Created' },
+		creationDate: { key: 'Created' },
+		created_at: { key: 'Created' },
 		software: { key: 'Software' },
-		version: { key: 'Versión' },
-		style: { key: 'Estilo' },
-		quality: { key: 'Calidad' },
+		version: { key: 'Version' },
+		style: { key: 'Style' },
+		quality: { key: 'Quality' },
 	};
 
 	if (import.meta.env?.DEV) {
-		console.debug('[extractAIMetadata] Procesando todos los campos disponibles...');
-		console.debug('[extractAIMetadata] Campos disponibles:', Object.keys(combinedData));
+		logger.debug('[extractAIMetadata] Procesando todos los campos disponibles...');
+		logger.debug('[extractAIMetadata] Campos disponibles:', Object.keys(combinedData));
 	}
 
 	// Procesar todos los campos disponibles en los datos combinados
@@ -415,7 +414,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 		const fieldConfig = fieldDisplayNames[fieldName] || { key: fieldName };
 
 		if (import.meta.env?.DEV) {
-			console.debug(`[extractAIMetadata] Procesando campo ${fieldName}:`, {
+			logger.debug(`[extractAIMetadata] Procesando campo ${fieldName}:`, {
 				value: fieldValue,
 				config: fieldConfig,
 			});
@@ -447,14 +446,14 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 		});
 
 		if (import.meta.env?.DEV) {
-			console.debug(`[extractAIMetadata] Agregado campo ${fieldConfig.key}:`, displayValue);
+			logger.debug(`[extractAIMetadata] Agregado campo ${fieldConfig.key}:`, displayValue);
 		}
 	}
 
 	if (import.meta.env?.DEV) {
 		const aiFields = metadata.filter((m) => m.category === 'ia');
-		console.debug('[extractAIMetadata] Campos AI procesados:', aiFields.length);
-		console.debug(
+		logger.debug('[extractAIMetadata] Campos AI procesados:', aiFields.length);
+		logger.debug(
 			'[extractAIMetadata] Lista de campos:',
 			aiFields.map((m) => m.key)
 		);
@@ -479,7 +478,7 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 
 	if (import.meta.env?.DEV) {
 		const finalAiFields = metadata.filter((m) => m.category === 'ia');
-		console.debug('[extractAIMetadata] Total final de campos AI:', finalAiFields.length);
+		logger.debug('[extractAIMetadata] Total final de campos AI:', finalAiFields.length);
 	}
 };
 
@@ -497,7 +496,7 @@ export const extractEXIFMetadata = (result: EnhancedMetadataResult, metadata: Me
 	if (exif.make || exif.model) {
 		const camera = `${exif.make || ''} ${exif.model || ''}`.trim();
 		if (camera) {
-			metadata.push({ key: 'Cámara', value: camera, category: 'exif' });
+			metadata.push({ key: 'Camera', value: camera, category: 'exif' });
 		}
 	}
 
@@ -533,16 +532,16 @@ export const extractIPTCMetadata = (result: EnhancedMetadataResult, metadata: Me
 	const iptc = result.metadata.iptcData;
 
 	if (iptc.headline) {
-		metadata.push({ key: 'Título', value: iptc.headline, category: 'iptc' });
+		metadata.push({ key: 'Title', value: iptc.headline, category: 'iptc' });
 	}
 
 	if (iptc.description) {
-		metadata.push({ key: 'Descripción', value: iptc.description, category: 'iptc' });
+		metadata.push({ key: 'Description', value: iptc.description, category: 'iptc' });
 	}
 
 	if (iptc.keywords?.length) {
 		metadata.push({
-			key: 'Palabras clave',
+			key: 'Keywords',
 			value: iptc.keywords.join(', '),
 			category: 'iptc',
 		});
@@ -560,14 +559,14 @@ export const extractXMPMetadata = (result: EnhancedMetadataResult, metadata: Met
 	const xmp = result.metadata.xmpData;
 
 	if (xmp.title) {
-		metadata.push({ key: 'Título XMP', value: xmp.title, category: 'xmp' });
+		metadata.push({ key: 'Title XMP', value: xmp.title, category: 'xmp' });
 	}
 
 	if (xmp.description) {
-		metadata.push({ key: 'Descripción XMP', value: xmp.description, category: 'xmp' });
+		metadata.push({ key: 'Description XMP', value: xmp.description, category: 'xmp' });
 	}
 
 	if (xmp.rating) {
-		metadata.push({ key: 'Calificación', value: `${xmp.rating}/5`, category: 'xmp' });
+		metadata.push({ key: 'Rating', value: `${xmp.rating}/5`, category: 'xmp' });
 	}
 };

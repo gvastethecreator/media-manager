@@ -12,24 +12,25 @@ import { Button } from '@/components/ui/button';
 import { motion } from '@/components/ui/motion-shim';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
+import { formatFileSize } from '@/lib/utils/format.utils';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { getEntityStatsType } from '@/types/entity-guards';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import { EntityTypeBadge } from './entity-type-badge';
 
 interface EntityTypeInfoProps {
+	/** Clases CSS adicionales */
+	className?: string;
 	/** Entidad para mostrar información */
 	entity: AnyEntityWithStats;
 	/** Modo de visualización */
 	mode?: 'compact' | 'detailed' | 'full';
+	/** Callbacks para acciones */
+	onAction?: (action: string, entity: AnyEntityWithStats) => void;
 	/** Si mostrar acciones disponibles */
 	showActions?: boolean;
 	/** Si mostrar estadísticas */
 	showStats?: boolean;
-	/** Clases CSS adicionales */
-	className?: string;
-	/** Callbacks para acciones */
-	onAction?: (action: string, entity: AnyEntityWithStats) => void;
 }
 
 /**
@@ -66,7 +67,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 			return (
 				<div className={cn('flex items-center gap-2', className)}>
 					<EntityTypeBadge size="sm" type={entityType} />
-					<span className="truncate text-muted-foreground text-sm">{entity.name || 'Sin nombre'}</span>
+					<span className="truncate text-muted-foreground text-sm">{entity.name || 'Unnamed'}</span>
 				</div>
 			);
 		}
@@ -117,7 +118,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 
 			if ('createdAt' in entity && entity.createdAt) {
 				stats.push({
-					label: 'Creado',
+					label: 'Created',
 					value: new Date(entity.createdAt).toLocaleDateString(),
 				});
 			}
@@ -131,7 +132,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 
 			if ('size' in entity && entity.size) {
 				stats.push({
-					label: 'Tamaño',
+					label: 'Size',
 					value: formatFileSize(entity.size as number),
 				});
 			}
@@ -163,11 +164,14 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 				>
 					<div className="flex items-start justify-between">
 						<div className="flex items-center gap-3">
-							<div className="rounded-md p-2" style={{ backgroundColor: `${config.color}20` }}>
+							<div
+								className="rounded-md p-2"
+								style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}
+							>
 								<config.icon className="h-5 w-5" style={{ color: config.color }} />
 							</div>
 							<div>
-								<h3 className="truncate font-medium">{entity.name || 'Sin nombre'}</h3>
+								<h3 className="truncate font-medium">{entity.name || 'Unnamed'}</h3>
 								<p className="text-muted-foreground text-sm">{config.displayName}</p>
 							</div>
 						</div>
@@ -188,11 +192,14 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 			>
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-4">
-						<div className="rounded-lg p-3" style={{ backgroundColor: `${config.color}20` }}>
+						<div
+							className="rounded-lg p-3"
+							style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}
+						>
 							<config.icon className="h-8 w-8" style={{ color: config.color }} />
 						</div>
 						<div>
-							<h2 className="font-semibold text-xl">{entity.name || 'Sin nombre'}</h2>
+							<h2 className="font-semibold text-xl">{entity.name || 'Unnamed'}</h2>
 							<div className="mt-1 flex items-center gap-2">
 								<EntityTypeBadge type={entityType} />
 								<Badge variant="outline">
@@ -205,7 +212,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 				</div>
 
 				{/* Información adicional basada en el tipo */}
-				<div className="text-muted-foreground text-sm">Tipo de entidad: {config.displayName}</div>
+				<div className="text-muted-foreground text-sm">Entity type: {config.displayName}</div>
 
 				{renderStats()}
 			</motion.div>
@@ -233,8 +240,8 @@ export const EntityTypeHeader = memo<{
 
 	return (
 		<div className={cn('flex items-center gap-2', className)}>
-			<config.icon className="h-4 w-4 flex-shrink-0" style={{ color: config.color }} />
-			<span className="truncate font-medium text-sm">{entity.name || 'Sin nombre'}</span>
+			<config.icon className="h-4 w-4 shrink-0" style={{ color: config.color }} />
+			<span className="truncate font-medium text-sm">{entity.name || 'Unnamed'}</span>
 			<Badge className="ml-auto" variant="secondary">
 				{config.emoji}
 			</Badge>
@@ -243,18 +250,3 @@ export const EntityTypeHeader = memo<{
 });
 
 EntityTypeHeader.displayName = 'EntityTypeHeader';
-
-/**
- * Utilidad para formatear tamaños de archivo
- */
-function formatFileSize(bytes: number): string {
-	if (bytes === 0) {
-		return '0 B';
-	}
-
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
-}

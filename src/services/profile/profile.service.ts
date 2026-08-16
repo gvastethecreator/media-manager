@@ -7,6 +7,7 @@ import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 // Importar Drizzle para coexistencia
 import { db } from '@/lib/drizzle';
 import { profiles, settings } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
 import { type ProfileTransformed, transformProfile } from '@/transformers/profile/profile-transformers';
 // Importar tipos desde '@/types/entities/profile' y './client'; evitar re-export circular
@@ -114,12 +115,12 @@ class ProfileServiceImpl {
 			const queryWithPagination = query.limit(limit).offset((page - 1) * limit);
 
 			// 5. Ejecutar consulta
-			const drizzleProfiles = await queryWithPagination;
+			const drizzleProfiles = await queryWithPagination.execute();
 
 			// 6. Validar que el resultado sea un array (puede estar vacío)
 			if (!Array.isArray(drizzleProfiles)) {
 				// Si no es un array, devolver array vacío (caso común cuando no hay perfiles)
-				console.warn('ProfileService: Query did not return array, returning empty array', drizzleProfiles);
+				serverLogger.warn('ProfileService: Query did not return array, returning empty array', drizzleProfiles);
 				return [];
 			}
 
@@ -143,7 +144,7 @@ class ProfileServiceImpl {
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
-				message: 'Error al obtener perfiles',
+				message: 'Could not get profiles',
 				context: { filters, pagination },
 			});
 		}
@@ -236,7 +237,8 @@ class ProfileServiceImpl {
 				.from(profiles)
 				.leftJoin(settings, eq(settings.profileId, profiles.id))
 				.where(eq(profiles.isActive, true))
-				.limit(1);
+				.limit(1)
+				.execute();
 
 			// Restructurar el resultado para que sea compatible con el transformador legacy
 			let drizzleResult = null;
@@ -271,7 +273,7 @@ class ProfileServiceImpl {
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
-				message: 'Error al obtener perfil activo',
+				message: 'Could not get active profile',
 			});
 		}
 	}
@@ -307,7 +309,8 @@ class ProfileServiceImpl {
 				.from(profiles)
 				.leftJoin(settings, eq(settings.profileId, profiles.id))
 				.where(eq(profiles.id, id))
-				.limit(1);
+				.limit(1)
+				.execute();
 
 			// Restructurar el resultado para que sea compatible con el transformador legacy
 			let drizzleResult = null;

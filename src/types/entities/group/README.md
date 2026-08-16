@@ -18,7 +18,7 @@ graph TD
 ## 🚨 Notas de migración
 
 - **Legacy eliminado:** Solo se exportan tipos canónicos.
-**
+  \*\*
 - **Validar siempre con GroupSchema antes de persistir.**
 
 ## 📝 Ejemplo de uso

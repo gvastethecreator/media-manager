@@ -1,6 +1,6 @@
+import * as SlotPrimitive from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Check, Copy } from 'lucide-react';
-import { Slot as SlotPrimitive } from 'radix-ui';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 
 export interface CodeProps extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof codeVariants> {
 	asChild?: boolean;
-	showCopyButton?: boolean;
 	copyText?: string;
+	showCopyButton?: boolean;
 }
 
 const codeVariants = cva('relative rounded-md bg-muted font-medium font-mono text-sm', {

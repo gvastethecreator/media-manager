@@ -1,9 +1,15 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { properties } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra propiedades minimalistas para verificación del sistema
+ * Siembra propiedades con IDs legibles
+ * Formato: prop-nombre-01, prop-nombre-02, etc.
+ *
+ * NOTA: Los colores hex en este archivo son datos de prueba para inicializar la DB.
+ * No se usan directamente en la UI de producción - la UI usa tokens CSS
+ * definidos en src/styles/tokens.css y src/styles/design-tokens.css.
  */
 export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('🔍 Creando propiedades de prueba...');
@@ -11,26 +17,20 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 	try {
 		const sampleProperties = [
 			{
-				id: 'property-1',
+				id: generateReadableId('property', 'Estilo Artistico', 1),
 				name: 'Estilo Artístico',
-				description: 'Define el estilo visual de la imagen',
+				description: 'Defines the visual style of the image',
 				emoji: '🎨',
 				color: '#f59e0b',
 				category: 'visual',
-				shortcut: 'ctrl+e',
-				featuredImage: null,
-				isFavorite: true,
 			},
 			{
-				id: 'property-2',
+				id: generateReadableId('property', 'Calidad', 1),
 				name: 'Calidad',
-				description: 'Nivel de calidad de la imagen',
+				description: 'Image quality level',
 				emoji: '⭐',
-				color: '#10b981',
+				color: '#22c55e',
 				category: 'técnico',
-				shortcut: 'ctrl+q',
-				featuredImage: null,
-				isFavorite: false,
 			},
 		];
 
@@ -38,7 +38,7 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 
 		seedLogger.success(`✅ ${sampleProperties.length} propiedades creadas`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando propiedades:', error);
+		seedLogger.error('❌ Could not create properties:', error);
 		throw error;
 	}
 }

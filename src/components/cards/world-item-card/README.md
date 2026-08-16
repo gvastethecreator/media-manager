@@ -43,13 +43,13 @@ graph TD
 import { WorldItemCard } from '@/components/cards/world-item-card';
 
 function WorldItemsList({ worldItems }) {
-  return (
-    <div className="grid grid-cols-3 gap-4">
-      {worldItems.map(item => (
-        <WorldItemCard key={item.id} worldItem={item} />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-3 gap-4">
+			{worldItems.map((item) => (
+				<WorldItemCard key={item.id} worldItem={item} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -59,17 +59,13 @@ function WorldItemsList({ worldItems }) {
 import { WorldItemCard } from '@/components/cards/world-item-card';
 
 function WorldItemsSelector({ worldItems, onSelect }) {
-  return (
-    <div className="grid grid-cols-3 gap-4">
-      {worldItems.map(item => (
-        <WorldItemCard
-          key={item.id}
-          worldItem={item}
-          onClick={onSelect}
-        />
-      ))}
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-3 gap-4">
+			{worldItems.map((item) => (
+				<WorldItemCard key={item.id} worldItem={item} onClick={onSelect} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -107,26 +103,26 @@ import { WorldItemCard } from '@/components/cards/world-item-card';
 
 // Dentro de tu componente
 <WorldItemCard
-  worldItem={worldItemWithRelations}
-  onClick={() => handleWorldItemClick(worldItem.id)}
-  tcgMode={true}
-  compact={false}
-/>
+	worldItem={worldItemWithRelations}
+	onClick={() => handleWorldItemClick(worldItem.id)}
+	tcgMode={true}
+	compact={false}
+/>;
 ```
 
 ## Props
 
-| Prop | Tipo | Descripción |
-|------|------|-------------|
-| `worldItem` | `WorldItemWithRelations` | Objeto con relaciones y contadores |
-| `onClick` | `() => void` | Función a ejecutar al hacer clic en la tarjeta |
-| `className` | `string` | Clases CSS adicionales |
-| `style` | `React.CSSProperties` | Estilos inline adicionales |
-| `tcgMode` | `boolean` | Activar/desactivar diseño TCG (por defecto: `true`) |
-| `isSelected` | `boolean` | Indica si la tarjeta está seleccionada |
-| `compact` | `boolean` | Versión más compacta de la tarjeta |
-| `disabled` | `boolean` | Deshabilita la interacción |
-| `interactive` | `boolean` | Habilita/deshabilita efectos interactivos (por defecto: `true`) |
+| Prop          | Tipo                     | Descripción                                                     |
+| ------------- | ------------------------ | --------------------------------------------------------------- |
+| `worldItem`   | `WorldItemWithRelations` | Objeto con relaciones y contadores                              |
+| `onClick`     | `() => void`             | Función a ejecutar al hacer clic en la tarjeta                  |
+| `className`   | `string`                 | Clases CSS adicionales                                          |
+| `style`       | `React.CSSProperties`    | Estilos inline adicionales                                      |
+| `tcgMode`     | `boolean`                | Activar/desactivar diseño TCG (por defecto: `true`)             |
+| `isSelected`  | `boolean`                | Indica si la tarjeta está seleccionada                          |
+| `compact`     | `boolean`                | Versión más compacta de la tarjeta                              |
+| `disabled`    | `boolean`                | Deshabilita la interacción                                      |
+| `interactive` | `boolean`                | Habilita/deshabilita efectos interactivos (por defecto: `true`) |
 
 ## Tipo de Datos
 
@@ -134,41 +130,41 @@ El componente espera un objeto `WorldItemWithRelations` que incluye:
 
 ```typescript
 interface WorldItemWithRelations {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string;
-  description: string | null;
-  shortcut: string | null;
-  category: string;
-  type: string;
-  rarity: string;
-  size: string;
-  origin: string;
-  attributes: string[] | string;
-  effects: WorldItemEffect[] | string;
-  requirements: Record<string, WorldItemRequirement> | string;
-  stats: WorldItemStats | string;
-  properties: WorldItemProperty[] | string;
-  featuredImage: string | object | null;
-  isFavorite: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  _count?: {
-    images: number;
-    videos: number;
-    albums: number;
-    collections: number;
-    tags: number;
-    characters: number;
-    places: number;
-    concepts: number;
-    prompts: number;
-    notes: number;
-    wildcards: number;
-    properties: number;
-    groups: number;
-  }
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string;
+	type: string;
+	rarity: string;
+	size: string;
+	origin: string;
+	attributes: string[] | string;
+	effects: WorldItemEffect[] | string;
+	requirements: Record<string, WorldItemRequirement> | string;
+	stats: WorldItemStats | string;
+	properties: WorldItemProperty[] | string;
+	featuredImage: string | object | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	_count?: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
 }
 ```
 
@@ -181,7 +177,7 @@ Esta implementación se alinea con el modelo WorldItem en el esquema Prisma, inc
 - Datos estructurados JSON (attributes, effects, requirements, stats, properties)
 - Configuración visual (featuredImage, isFavorite)
 - Relaciones con otras entidades (albums, collections, characters, etc.)
-- Conteos de relaciones (_count)
+- Conteos de relaciones (\_count)
 
 ## Componentes auxiliares
 

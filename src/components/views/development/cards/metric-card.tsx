@@ -3,10 +3,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 export interface SystemMetric {
-	name: string;
-	value: number | string;
-	unit: string;
-	icon: ComponentType<{ className?: string }>;
 	change?: {
 		value: number;
 		type: 'increase' | 'decrease';
@@ -15,6 +11,10 @@ export interface SystemMetric {
 		data: number[];
 		labels: string[];
 	};
+	icon: ComponentType<{ className?: string }>;
+	name: string;
+	unit: string;
+	value: number | string;
 }
 
 export function MetricCard({ metric }: { metric: SystemMetric }) {
@@ -42,7 +42,7 @@ export function MetricCard({ metric }: { metric: SystemMetric }) {
 								<div
 									className={cn(
 										'flex items-center gap-1 font-medium text-xs',
-										metric.change.type === 'increase' ? 'text-green-500' : 'text-red-500'
+										metric.change.type === 'increase' ? 'text-success' : 'text-destructive'
 									)}
 								>
 									{metric.change.type === 'increase' ? '+' : '-'}

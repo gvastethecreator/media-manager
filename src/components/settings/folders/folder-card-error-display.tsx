@@ -16,7 +16,7 @@ export const FolderErrorDisplay = memo(function FolderErrorDisplay({ folder }: F
 		<div className="mt-1">
 			<Alert className="p-2" variant="destructive">
 				<AlertCircle className="mr-1 h-3.5 w-3.5" />
-				<AlertTitle className="text-xs">Error en carpeta</AlertTitle>
+				<AlertTitle className="text-xs">Folder error</AlertTitle>
 				<AlertDescription className="mt-1 text-xs">{folder.error}</AlertDescription>
 			</Alert>
 		</div>

@@ -6,18 +6,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tool
 
 export interface StatItem {
 	/**
-	 * Valor numérico de la estadística
-	 */
-	value: number;
-	/**
-	 * Etiqueta para la estadística
-	 */
-	label: string;
-	/**
-	 * Icono opcional (componente de Lucide o SVG)
-	 */
-	icon?: React.ReactNode;
-	/**
 	 * Color personalizado para esta estadística (hex, rgb, nombre de color)
 	 */
 	color?: string;
@@ -26,24 +14,24 @@ export interface StatItem {
 	 */
 	description?: string;
 	/**
+	 * Icono opcional (componente de Lucide o SVG)
+	 */
+	icon?: React.ReactNode;
+	/**
 	 * Identificador único para la estadística, usado como key
 	 */
 	id?: string;
+	/**
+	 * Etiqueta para la estadística
+	 */
+	label: string;
+	/**
+	 * Valor numérico de la estadística
+	 */
+	value: number;
 }
 
 export interface EntityStatsProps {
-	/**
-	 * Estadísticas a mostrar
-	 */
-	stats: StatItem[];
-	/**
-	 * Color principal para utilizar en las estadísticas (se usa como fallback)
-	 */
-	primaryColor?: string;
-	/**
-	 * Tamaño del componente
-	 */
-	size?: 'sm' | 'md' | 'lg';
 	/**
 	 * Activar animación al aparecer
 	 */
@@ -56,6 +44,18 @@ export interface EntityStatsProps {
 	 * Clases adicionales
 	 */
 	className?: string;
+	/**
+	 * Color principal para utilizar en las estadísticas (se usa como fallback)
+	 */
+	primaryColor?: string;
+	/**
+	 * Tamaño del componente
+	 */
+	size?: 'sm' | 'md' | 'lg';
+	/**
+	 * Estadísticas a mostrar
+	 */
+	stats: StatItem[];
 }
 
 /**
@@ -64,7 +64,7 @@ export interface EntityStatsProps {
  */
 export function EntityStats({
 	stats,
-	primaryColor = '#3b82f6',
+	primaryColor = 'var(--dt-primary-500)',
 	size = 'md',
 	animated = true,
 	asBadges = false,
@@ -103,7 +103,9 @@ export function EntityStats({
 							<TooltipTrigger asChild>
 								<Badge
 									className={cn(fontSize, 'whitespace-nowrap')}
-									style={{ borderColor: stat.color ? `${stat.color}50` : `${primaryColor}50` }}
+									style={{
+										borderColor: `color-mix(in oklab, ${stat.color || primaryColor}, transparent 50%)`,
+									}}
 									variant="outline"
 								>
 									{stat.icon ? <span className="mr-1">{stat.icon}</span> : null}
@@ -126,7 +128,7 @@ export function EntityStats({
 	return (
 		<div className={cn('flex flex-wrap gap-2', className)}>
 			{statsWithKeys.map((stat, index) => {
-				const StatsContainer = animated ? motion.div : 'div';
+				const StatsContainer = animated ? (motion.div as any) : 'div';
 
 				return (
 					<TooltipProvider key={stat.key}>

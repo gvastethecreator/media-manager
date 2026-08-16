@@ -1,4 +1,4 @@
 {
-  "title": "Frontend",
-  "pages": ["components-and-stores", "ui-patterns"]
+	"title": "Frontend",
+	"pages": ["components-and-stores", "ui-patterns"]
 }

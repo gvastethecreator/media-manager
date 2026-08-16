@@ -7,10 +7,10 @@
  * Interfaz para errores del sistema
  */
 export interface SystemErrorData {
-	name: string;
-	message: string;
-	code?: string;
 	cause?: unknown;
+	code?: string;
+	message: string;
+	name: string;
 }
 
 /**

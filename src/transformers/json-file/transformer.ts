@@ -1,7 +1,6 @@
 /**
  * @file Transformador principal para la entidad JsonFile
  * @module transformers/json-file/transformer
-
  */
 
 import { TransformerError } from '@/lib/errors/transformer-error';
@@ -9,63 +8,49 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { createDefaultEntityStats } from '@/lib/utils';
 import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file/base';
 
-/**
- * 📊 Calcula la profundidad de anidamiento de un objeto JSON
- */
-function calculateNestingDepth(obj: unknown): number {
-	if (obj === null || typeof obj !== 'object') {
-		return 0;
-	}
-
-	let maxDepth = 0;
-
-	if (Array.isArray(obj)) {
-		for (const item of obj) {
-			const depth = calculateNestingDepth(item);
-			maxDepth = Math.max(maxDepth, depth);
-		}
-	} else {
-		for (const value of Object.values(obj as Record<string, unknown>)) {
-			const depth = calculateNestingDepth(value);
-			maxDepth = Math.max(maxDepth, depth);
-		}
-	}
-
-	return maxDepth + 1;
-}
-
-/**
- * 🔢 Cuenta el número total de claves en un objeto (recursivamente)
- */
-function calculateKeyCount(obj: unknown): number {
-	if (obj === null || typeof obj !== 'object') {
-		return 0;
-	}
-
-	let count = 0;
-
-	if (Array.isArray(obj)) {
-		for (const item of obj) {
-			count += calculateKeyCount(item);
-		}
-	} else {
-		const objRecord = obj as Record<string, unknown>;
-		count += Object.keys(objRecord).length;
-
-		for (const value of Object.values(objRecord)) {
-			count += calculateKeyCount(value);
-		}
-	}
-
-	return count;
-}
-
 const logger = serverLogger.withContext('JsonFileTransformer');
 
 /**
- * 🔄 Transforma un objeto JsonFile de Prisma a nuestro tipo canónico JsonFileWithStats.
+ * Calcula la profundidad máxima de anidamiento de un objeto/array JSON
+ * @param value - Valor JSON a analizar
+ * @param currentDepth - Profundidad actual (para recursión)
+ * @returns Profundidad máxima de anidamiento
+ */
+function calculateNestingDepth(value: unknown, currentDepth = 0): number {
+	if (value === null || typeof value !== 'object') {
+		return currentDepth;
+	}
+
+	const values = Array.isArray(value) ? value : Object.values(value);
+	if (values.length === 0) {
+		return currentDepth + 1;
+	}
+
+	return Math.max(...values.map((v) => calculateNestingDepth(v, currentDepth + 1)));
+}
+
+/**
+ * Cuenta recursivamente todas las keys en un objeto JSON (incluyendo anidadas)
+ * @param value - Valor JSON a analizar
+ * @returns Número total de keys
+ */
+function countAllKeys(value: unknown): number {
+	if (value === null || typeof value !== 'object') {
+		return 0;
+	}
+
+	if (Array.isArray(value)) {
+		return value.reduce((sum, item) => sum + countAllKeys(item), 0);
+	}
+
+	const keys = Object.keys(value);
+	return keys.length + keys.reduce((sum, key) => sum + countAllKeys((value as Record<string, unknown>)[key]), 0);
+}
+
+/**
+ * 🔄 Transforma un objeto JsonFile de Drizzle a nuestro tipo canónico JsonFileWithStats.
  *
- * @param prismaJsonFile - El objeto JsonFileBase obtenido de Prisma.
+ * @param drizzleJsonFile - El objeto JsonFileBase obtenido de Drizzle.
  * @returns Un objeto JsonFileWithStats compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
@@ -91,20 +76,16 @@ export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWith
 				const content = JSON.parse(drizzleJsonFile.content);
 				stats.size = drizzleJsonFile.content.length;
 				stats.isValid = true;
-				stats.keyCount = calculateKeyCount(content);
+				stats.keyCount = countAllKeys(content);
 				stats.nestingDepth = calculateNestingDepth(content);
-			} catch (e) {
+			} catch {
 				// El JSON no es válido, se mantienen los stats por defecto
-				logger.warn('JSON content is invalid', {
-					jsonFileId: drizzleJsonFile.id,
-					contentLength: drizzleJsonFile.content?.length || 0,
-				});
 			}
 		}
 
 		const jsonFileWithStats: JsonFileWithStats = {
 			...drizzleJsonFile,
-			entityType: 'json-file',
+			entityType: 'jsonFile',
 			stats,
 		};
 
@@ -119,7 +100,7 @@ export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWith
 }
 
 /**
- * 🔄 Transforma una lista de archivos JSON de Prisma a una lista de JsonFileWithStats.
+ * 🔄 Transforma una lista de archivos JSON de Drizzle a una lista de JsonFileWithStats.
  *
  * @param drizzleJsonFiles - Un array de objetos JsonFile de Drizzle.
  * @returns Un array de objetos JsonFileWithStats.

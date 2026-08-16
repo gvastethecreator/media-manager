@@ -2,6 +2,10 @@
 
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
+/**
+ * @deprecated `@/lib/database/cache` está en zona de deprecación (ver `@/lib/database/`).
+ * Migrar a `@/lib/drizzle` o a un módulo de cache específico cuando se consolide.
+ */
 import {
 	charactersCache,
 	metadataCache,
@@ -11,13 +15,13 @@ import {
 	thumbnailCache,
 	worldItemsCache,
 } from '@/lib/database/cache';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 
-const cacheProviderLogger = serverLogger.withContext('CacheProvider');
+const cacheProviderLogger = clientLogger.withContext('CacheProvider');
 
 export function CacheProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
-		cacheProviderLogger.info('🚀 Inicializando sistema de caché');
+		cacheProviderLogger.info('🚀 Initializing cache system');
 
 		return () => {
 			// Limpiar todos los caches al desmontar
@@ -30,7 +34,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
 				placesCache.stop(),
 				worldItemsCache.stop(),
 			]).catch((error) => {
-				cacheProviderLogger.error('❌ Error al detener caches:', error);
+				cacheProviderLogger.error('❌ Error stopping caches:', error);
 			});
 		};
 	}, []);

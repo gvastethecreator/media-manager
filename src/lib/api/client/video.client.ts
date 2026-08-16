@@ -1,8 +1,22 @@
 /**
- * Cliente de API para videos.
- * Permite interactuar con /api/videos desde el cliente.
+ * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
+ * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
+ * Ver #1 deepening opportunity en architecture review.
  */
-import type { VideoCreateInput, VideoFilters, VideoWithStats } from '@/types/entities/video';
+
+/**
+ * Cliente de API para videos.
+ */
+import type { AuthorizedPathReference } from '@/lib/api/authorized-roots';
+import type { VideoCreateInput, VideoFilters, VideoUpdateInput, VideoWithStats } from '@/types/entities/video';
+
+export type PublicVideoCreateInput = Omit<VideoCreateInput, 'path'> & {
+	source: AuthorizedPathReference;
+};
+
+export type PublicVideoUpdateInput = Omit<VideoUpdateInput, 'path'> & {
+	source?: AuthorizedPathReference;
+};
 
 const API_BASE_PATH = '/api/videos';
 
@@ -12,7 +26,7 @@ export async function getVideoFromApi(id: string): Promise<VideoWithStats | null
 		if (response.status === 404) {
 			return null;
 		}
-		throw new Error('Error al obtener video');
+		throw new Error('Could not get video');
 	}
 	return response.json();
 }
@@ -46,7 +60,7 @@ export async function findVideosInApi(options: FindVideosOptions = {}): Promise<
 	const url = `${API_BASE_PATH}?${params.toString()}`;
 	const response = await fetch(url);
 	if (!response.ok) {
-		throw new Error('Error al buscar videos');
+		throw new Error('Could not search videos');
 	}
 	// El backend retorna { data, pagination }
 	const payload = await response.json();
@@ -57,14 +71,26 @@ export async function findVideosInApi(options: FindVideosOptions = {}): Promise<
 	return (payload?.data as VideoWithStats[]) || [];
 }
 
-export async function createVideoInApi(data: VideoCreateInput): Promise<VideoWithStats> {
+export async function createVideoInApi(data: PublicVideoCreateInput): Promise<VideoWithStats> {
 	const response = await fetch(API_BASE_PATH, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear video');
+		throw new Error('Could not create video');
+	}
+	return response.json();
+}
+
+export async function updateVideoInApi(id: string, data: PublicVideoUpdateInput): Promise<VideoWithStats> {
+	const response = await fetch(`${API_BASE_PATH}/${id}`, {
+		method: 'PATCH',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data),
+	});
+	if (!response.ok) {
+		throw new Error('Could not update video');
 	}
 	return response.json();
 }
@@ -72,6 +98,6 @@ export async function createVideoInApi(data: VideoCreateInput): Promise<VideoWit
 export async function deleteVideoFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar video');
+		throw new Error('Could not delete video');
 	}
 }

@@ -27,19 +27,19 @@ export type { WorldItemBase, WorldItemComplete, WorldItemStatistics, WorldItemWi
 // --- TIPOS PARA RELACIONES ---
 
 export interface WorldItemRelations {
-	images?: ImageWithStats[];
-	videos?: VideoWithStats[];
 	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
 	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
+	collections?: CollectionWithStats[];
 	concepts?: ConceptWithStats[];
-	prompts?: PromptComplete[];
-	notes?: NoteWithStats[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyComplete[];
 	groups?: GroupWithStats[];
+	images?: ImageWithStats[];
+	notes?: NoteWithStats[];
+	places?: PlaceComplete[];
+	prompts?: PromptComplete[];
+	properties?: PropertyComplete[];
+	tags?: TagWithStats[];
+	videos?: VideoWithStats[];
+	wildcards?: WildcardWithStats[];
 }
 
 export interface WorldItemCounts {
@@ -62,27 +62,29 @@ export interface WorldItemCounts {
 
 // --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---
 
-export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt' | 'isFavorite'> {
+	isFavorite?: boolean;
+}
 
 export type WorldItemUpdateInput = Partial<WorldItemCreateInput>;
 
 // --- OTROS TIPOS ---
 
 export interface WorldItemFilters {
+	category?: string | string[];
+	hasImage?: boolean;
+	isFavorite?: boolean;
 	query?: string;
+	rarity?: string | string[];
 	searchTerm?: string; // Alias para compatibilidad
 	type?: string | string[];
-	category?: string | string[];
-	rarity?: string | string[];
-	isFavorite?: boolean;
-	hasImage?: boolean;
 }
 
 export interface WorldItemSearchOptions {
-	skip?: number;
-	take?: number;
 	filters?: WorldItemFilters;
+	skip?: number;
 	sortBy?: string;
+	take?: number;
 }
 
 // --- TIPOS PARA OPERACIONES ---

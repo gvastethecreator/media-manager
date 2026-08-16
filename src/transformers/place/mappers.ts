@@ -10,38 +10,12 @@
 import { createDefaultEntityStats } from '@/lib/utils';
 import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
+import { normalizeCounts } from '../common/counts';
 import { PlaceCreateInput, PlaceStatistics, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
 
 // Tipos locales equivalentes a Drizzle
-type DrizzlePlaceWithCounts = {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-
-	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	type: string | null;
-	location: string | null;
-	climate: string | null;
-	population: string | null;
-	government: string | null;
-	economy: string | null;
-	culture: string | null;
-	history: string | null;
-	geography: string | null;
-	landmarks: string | null;
-	dangers: string | null;
-	resources: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	parentId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
+interface DrizzlePlaceWithCounts {
 	_count?: {
 		images?: number;
 		tags?: number;
@@ -50,59 +24,84 @@ type DrizzlePlaceWithCounts = {
 		collections?: number;
 		concepts?: number;
 	};
-};
+	category: string | null;
+	climate: string | null;
+	color: string | null;
+	createdAt: Date;
+	culture: string | null;
+	dangers: string | null;
+	description: string | null;
+	economy: string | null;
+	emoji: string | null;
+	featuredImage: string | null;
+	geography: string | null;
+	government: string | null;
+	history: string | null;
+	id: string;
 
-type DrizzleCreatePlaceData = {
+	isFavorite: boolean;
+	landmarks: string | null;
+	location: string | null;
 	name: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
+	notes: string | null;
+	parentId: string | null;
+	population: string | null;
+	resources: string | null;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	updatedAt: Date;
+}
 
-	isFavorite?: boolean;
+interface DrizzleCreatePlaceData {
+	category?: string | null;
+	climate?: string | null;
+	color?: string | null;
+	culture?: string | null;
+	dangers?: string | null; // JSON
+	description?: string | null;
+	economy?: string | null;
+	emoji?: string | null;
+	featuredImage?: string | null;
+	geography?: string | null;
+	government?: string | null;
+	history?: string | null;
+	landmarks?: string | null;
+	location?: string | null;
+	name: string;
+	notes?: string | null;
+	parentId?: string | null;
+	population?: string | null;
+	resources?: string | null; // JSON
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	location?: string | null;
-	climate?: string | null;
-	population?: string | null;
-	government?: string | null;
-	economy?: string | null;
-	culture?: string | null;
-	history?: string | null;
-	geography?: string | null;
-	landmarks?: string | null;
-	dangers?: string | null; // JSON
-	resources?: string | null; // JSON
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-};
+}
 
 type DrizzleUpdatePlaceData = Partial<DrizzleCreatePlaceData>;
 
-type DrizzleOrderBy = {
+interface DrizzleOrderBy {
 	[key: string]: 'asc' | 'desc';
-};
+}
 
-type DrizzleWhereFilter = {
+interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
-	OR?: DrizzleWhereFilter[];
-	name?: { contains?: string; equals?: string };
+	category?: { equals?: string; in?: string[] };
 	description?: { contains?: string; equals?: string };
 	history?: { contains?: string; equals?: string };
-	category?: { equals?: string; in?: string[] };
-	type?: { equals?: string; in?: string[] };
-	location?: { equals?: string };
 	isFavorite?: boolean;
-};
+	location?: { equals?: string };
+	name?: { contains?: string; equals?: string };
+	OR?: DrizzleWhereFilter[];
+	type?: { equals?: string; in?: string[] };
+}
 
-type DrizzleFindManyArgs = {
-	where?: DrizzleWhereFilter;
+interface DrizzleFindManyArgs {
 	orderBy?: DrizzleOrderBy;
 	skip?: number;
 	take?: number;
-};
+	where?: DrizzleWhereFilter;
+}
 
 /**
  * 🗺️ Transforma un objeto Place de Drizzle a un objeto PlaceWithStats enriquecido.
@@ -113,6 +112,8 @@ type DrizzleFindManyArgs = {
  */
 export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats {
 	const { _count, ...rest } = place;
+
+	const counts = normalizeCounts(_count);
 
 	// Campos que contribuyen a la puntuación de completitud
 	const completenessFields = [
@@ -126,20 +127,15 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 	];
 
 	// Métricas de popularidad basadas en conteos
-	const popularity =
-		(_count?.images ?? 0) +
-		(_count?.notes ?? 0) +
-		(_count?.characters ?? 0) +
-		(_count?.collections ?? 0) +
-		(_count?.tags ?? 0);
+	const popularity = counts.images + counts.notes + counts.characters + counts.collections + counts.tags;
 
 	const statistics: PlaceStatistics = {
 		...createDefaultEntityStats({
-			imageCount: _count?.images ?? 0,
-			noteCount: _count?.notes ?? 0,
-			tagCount: _count?.tags ?? 0,
-			collectionCount: _count?.collections ?? 0,
-			conceptCount: _count?.concepts ?? 0,
+			imageCount: counts.images,
+			noteCount: counts.notes,
+			tagCount: counts.tags,
+			collectionCount: counts.collections,
+			conceptCount: counts.concepts,
 			placeCount: 1,
 			totalItems: popularity,
 			type: 'place',
@@ -163,12 +159,12 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 		metadata: {},
 		region: null,
 		// Conteos individuales para compatibilidad
-		images: _count?.images ?? 0,
-		tags: _count?.tags ?? 0,
-		notesCount: _count?.notes ?? 0,
-		characters: _count?.characters ?? 0,
-		collections: _count?.collections ?? 0,
-		concepts: _count?.concepts ?? 0,
+		images: counts.images,
+		tags: counts.tags,
+		notesCount: counts.notes,
+		characters: counts.characters,
+		collections: counts.collections,
+		concepts: counts.concepts,
 	};
 
 	return result;
@@ -316,29 +312,3 @@ export function toSearchOptionsForDrizzle(options: PlaceSearchOptions = {}): Dri
 
 	return args;
 }
-
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar toCreateDataForDrizzle
- */
-export const toCreateData = toCreateDataForDrizzle;
-
-/**
- * @deprecated Usar toUpdateDataForDrizzle
- */
-export const toUpdateData = toUpdateDataForDrizzle;
-
-/**
- * @deprecated Usar createOrderByForDrizzle
- */
-export const createOrderBy = createOrderByForDrizzle;
-
-/**
- * @deprecated Usar createFilterForDrizzle
- */
-export const createFilter = createFilterForDrizzle;
-
-/**
- * @deprecated Usar toSearchOptionsForDrizzle
- */
-export const toSearchOptions = toSearchOptionsForDrizzle;

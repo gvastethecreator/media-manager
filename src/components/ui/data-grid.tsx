@@ -1,63 +1,60 @@
 'use client';
 
-import { ColumnFiltersState, RowData, SortingState, Table } from '@tanstack/react-table';
+import { ColumnFiltersState, RowData, SortingState, Table, TableFeatures } from '@/lib/tanstack-react-table';
 import { createContext, ReactNode, useContext } from 'react';
 import { cn } from '@/lib/utils';
 
-declare module '@tanstack/react-table' {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	interface ColumnMeta<TData extends RowData, TValue> {
-		headerTitle?: string;
-		headerClassName?: string;
-		cellClassName?: string;
-		skeleton?: ReactNode;
-		expandedContent?: (row: TData) => ReactNode;
-		// Referencia fantasma para marcar uso de TValue en tipo
-		readonly __valueType__?: TValue | undefined;
-	}
-}
-
-export type DataGridApiFetchParams = {
+export interface DataGridApiFetchParams {
+	filters?: ColumnFiltersState;
 	pageIndex: number;
 	pageSize: number;
-	sorting?: SortingState;
-	filters?: ColumnFiltersState;
 	searchQuery?: string;
-};
+	sorting?: SortingState;
+}
 
-export type DataGridApiResponse<T> = {
+export interface DataGridApiResponse<T> {
 	data: T[];
 	empty: boolean;
 	pagination: {
 		total: number;
 		page: number;
 	};
-};
-
-export interface DataGridContextProps<TData extends object> {
-	props: DataGridProps<TData>;
-	table: Table<TData>;
-	recordCount: number;
-	isLoading: boolean;
 }
 
-export type DataGridRequestParams = {
+export interface DataGridContextProps<TData extends RowData> {
+	isLoading: boolean;
+	props: DataGridProps<TData>;
+	recordCount: number;
+	table: Table<any, TData>;
+}
+
+export interface DataGridRequestParams {
+	columnFilters?: ColumnFiltersState;
 	pageIndex: number;
 	pageSize: number;
 	sorting?: SortingState;
-	columnFilters?: ColumnFiltersState;
-};
+}
 
-export interface DataGridProps<TData extends object> {
-	className?: string;
-	table?: Table<TData>;
-	recordCount: number;
+export interface DataGridProps<TData extends RowData> {
 	children?: ReactNode;
-	onRowClick?: (row: TData) => void;
-	isLoading?: boolean;
-	loadingMode?: 'skeleton' | 'spinner';
-	loadingMessage?: ReactNode | string;
+	className?: string;
 	emptyMessage?: ReactNode | string;
+	isLoading?: boolean;
+	loadingMessage?: ReactNode | string;
+	loadingMode?: 'skeleton' | 'spinner';
+	onRowClick?: (row: TData) => void;
+	recordCount: number;
+	table?: Table<any, TData>;
+	tableClassNames?: {
+		base?: string;
+		header?: string;
+		headerRow?: string;
+		headerSticky?: string;
+		body?: string;
+		bodyRow?: string;
+		footer?: string;
+		edgeCell?: string;
+	};
 	tableLayout?: {
 		dense?: boolean;
 		cellBorder?: boolean;
@@ -75,16 +72,6 @@ export interface DataGridProps<TData extends object> {
 		columnsDraggable?: boolean;
 		rowsDraggable?: boolean;
 	};
-	tableClassNames?: {
-		base?: string;
-		header?: string;
-		headerRow?: string;
-		headerSticky?: string;
-		body?: string;
-		bodyRow?: string;
-		footer?: string;
-		edgeCell?: string;
-	};
 }
 
 const DataGridContext = createContext<
@@ -100,16 +87,16 @@ function useDataGrid() {
 	return context;
 }
 
-function DataGridProvider<TData extends object>({
+function DataGridProvider<TData extends RowData>({
 	children,
 	table,
 	...props
-}: DataGridProps<TData> & { table: Table<TData> }) {
+}: DataGridProps<TData> & { table: Table<any, TData> }) {
 	return (
 		<DataGridContext.Provider
 			value={{
 				props,
-				table,
+				table: table as Table<any, any>,
 				recordCount: props.recordCount,
 				isLoading: !!props.isLoading,
 			}}
@@ -119,7 +106,7 @@ function DataGridProvider<TData extends object>({
 	);
 }
 
-function DataGrid<TData extends object>({ children, table, ...props }: DataGridProps<TData>) {
+function DataGrid<TData extends RowData>({ children, table, ...props }: DataGridProps<TData>) {
 	const defaultProps: Partial<DataGridProps<TData>> = {
 		loadingMode: 'skeleton',
 		tableLayout: {
@@ -186,7 +173,10 @@ function DataGridContainer({
 	border: boolean;
 }) {
 	return (
-		<div className={cn('grid w-full', border && 'rounded-lg border border-border', className)} data-slot="data-grid">
+		<div
+			className={cn('grid w-full', border && 'rounded-dt-lg border-2 border-border/50 shadow-dt-1', className)}
+			data-slot="data-grid"
+		>
 			{children}
 		</div>
 	);

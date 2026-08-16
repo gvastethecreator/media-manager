@@ -1,8 +1,8 @@
 import { ZapIcon } from 'lucide-react';
 import { memo, useMemo } from 'react';
-import { PromptCard } from '@/components/cards/prompt-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { PromptCard } from '@/components/cards/prompt-card/prompt-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePrompts } from '@/lib/api/prompts';
@@ -38,7 +38,7 @@ const PromptsContentView = () => {
 			<div className="container mx-auto p-6">
 				<h2 className="mb-4 font-bold text-xl">Prompts</h2>
 				{items.length === 0 ? (
-					<EmptyState description="Aún no has creado prompts." icon={ZapIcon} title="Sin prompts" />
+					<EmptyState description="You have not created any prompts yet." icon={ZapIcon} title="Sin prompts" />
 				) : (
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 						{items.map((prompt, index) => (

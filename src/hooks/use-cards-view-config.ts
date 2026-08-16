@@ -8,51 +8,51 @@ import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { useViewConfiguration } from './use-view-configuration';
 
 export interface CardsLayout {
-	columns: number;
-	rows: number;
-	cardWidth: number;
 	cardHeight: number;
+	cardWidth: number;
+	columns: number;
 	gap: number;
 	padding: number;
+	rows: number;
 }
 
 export interface InteractiveConfig {
+	actionButtons: string[];
 	enabled: boolean;
 	hoverDelay: number;
-	showInfoOverlay: boolean;
-	showActionButtons: boolean;
 	overlayPosition: 'top' | 'bottom' | 'center' | 'auto';
-	actionButtons: string[];
+	showActionButtons: boolean;
+	showInfoOverlay: boolean;
 }
 
 export interface MetadataConfig {
-	showSize: boolean;
-	showDate: boolean;
-	showType: boolean;
-	showTags: boolean;
-	showDescription: boolean;
 	maxDescriptionLength: number;
+	showDate: boolean;
+	showDescription: boolean;
+	showSize: boolean;
+	showTags: boolean;
+	showType: boolean;
 }
 
 export interface CardsViewConfig {
-	cardStyle: 'default' | 'compact' | 'detailed';
-	cardAspectRatio: number;
-	minCardWidth: number;
-	maxCardWidth: number;
 	adaptiveColumns: boolean;
-	showShadows: boolean;
-	roundedCorners: boolean;
-	showSelectionIndicators: boolean;
-	animationsEnabled: boolean;
 	animationDuration: number;
+	animationsEnabled: boolean;
+	cardAspectRatio: number;
+	cardStyle: 'default' | 'compact' | 'detailed';
 	interactiveConfig: InteractiveConfig;
+	maxCardWidth: number;
 	metadataConfig: MetadataConfig;
+	minCardWidth: number;
 	responsiveBreakpoints: {
 		sm: number;
 		md: number;
 		lg: number;
 		xl: number;
 	};
+	roundedCorners: boolean;
+	showSelectionIndicators: boolean;
+	showShadows: boolean;
 }
 
 const DEFAULT_CONFIG: CardsViewConfig = {

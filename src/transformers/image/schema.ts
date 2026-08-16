@@ -8,6 +8,10 @@ import { z } from 'zod';
 
 export const ImageBaseSchema = z.object({
 	id: z.string().uuid(),
+	assetId: z.string().uuid().nullable(),
+	legacyId: z.string().uuid(),
+	canonicalState: z.enum(['canonical', 'legacy_only', 'diverged']),
+	canonicalDivergences: z.array(z.string()),
 	name: z.string().min(1).max(255),
 	description: z.string().max(1000).nullable(),
 	path: z.string().min(1),

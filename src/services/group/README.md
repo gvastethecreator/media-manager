@@ -119,19 +119,19 @@ import { groupService } from '@/services/index';
 
 // Crear un grupo básico
 const newGroup = await groupService.createGroup({
-  name: 'Equipo de Diseño',
-  description: 'Grupo para colaboración del equipo de diseño gráfico',
-  isPrivate: false,
-  avatarUrl: 'https://example.com/avatars/design-team.png'
+	name: 'Equipo de Diseño',
+	description: 'Grupo para colaboración del equipo de diseño gráfico',
+	isPrivate: false,
+	avatarUrl: 'https://example.com/avatars/design-team.png',
 });
 
 // Crear un grupo con configuración avanzada
 const projectGroup = await groupService.createGroup({
-  name: 'Proyecto XYZ',
-  description: 'Grupo exclusivo para el desarrollo del Proyecto XYZ',
-  isPrivate: true,
-  joinPolicy: 'INVITE_ONLY',
-  features: ['STORAGE_QUOTA_10GB', 'MAX_MEMBERS_15']
+	name: 'Proyecto XYZ',
+	description: 'Grupo exclusivo para el desarrollo del Proyecto XYZ',
+	isPrivate: true,
+	joinPolicy: 'INVITE_ONLY',
+	features: ['STORAGE_QUOTA_10GB', 'MAX_MEMBERS_15'],
 });
 ```
 
@@ -142,15 +142,15 @@ import { groupService } from '@/services/index';
 
 // Añadir un miembro al grupo
 await groupService.addMember('group-id-123', 'user-id-456', {
-  role: 'EDITOR',
-  addedBy: 'admin-user-id'
+	role: 'EDITOR',
+	addedBy: 'admin-user-id',
 });
 
 // Obtener todos los miembros de un grupo
 const members = await groupService.getGroupMembers('group-id-123', {
-  includeRoles: true,
-  page: 1,
-  limit: 50
+	includeRoles: true,
+	page: 1,
+	limit: 50,
 });
 
 // Actualizar el rol de un miembro
@@ -167,27 +167,27 @@ import { groupService } from '@/services/index';
 
 // Compartir una colección con un grupo
 await groupService.shareResource('group-id-123', {
-  resourceType: 'COLLECTION',
-  resourceId: 'collection-id-789',
-  accessLevel: 'READ_WRITE'
+	resourceType: 'COLLECTION',
+	resourceId: 'collection-id-789',
+	accessLevel: 'READ_WRITE',
 });
 
 // Obtener todas las colecciones compartidas con un grupo
 const collections = await groupService.getGroupResources('group-id-123', {
-  resourceType: 'COLLECTION',
-  page: 1,
-  limit: 20
+	resourceType: 'COLLECTION',
+	page: 1,
+	limit: 20,
 });
 
 // Actualizar permisos de un recurso
 await groupService.updateResourceAccess('group-id-123', 'collection-id-789', {
-  accessLevel: 'READ_ONLY'
+	accessLevel: 'READ_ONLY',
 });
 
 // Revocar acceso a un recurso
 await groupService.revokeResourceAccess('group-id-123', {
-  resourceType: 'COLLECTION',
-  resourceId: 'collection-id-789'
+	resourceType: 'COLLECTION',
+	resourceId: 'collection-id-789',
 });
 ```
 
@@ -198,71 +198,71 @@ import { groupService } from '@/services/index';
 
 // Buscar grupos con filtros
 const groups = await groupService.findGroups({
-  search: 'diseño',
-  isPrivate: false,
-  memberCount: { min: 5 },
-  sortBy: 'activityLevel',
-  sortDirection: 'desc',
-  page: 1,
-  limit: 20
+	search: 'diseño',
+	isPrivate: false,
+	memberCount: { min: 5 },
+	sortBy: 'activityLevel',
+	sortDirection: 'desc',
+	page: 1,
+	limit: 20,
 });
 
 // Obtener grupos a los que pertenece un usuario
 const userGroups = await groupService.getUserGroups('user-id-456', {
-  roles: ['ADMIN', 'EDITOR'],
-  includePrivate: true
+	roles: ['ADMIN', 'EDITOR'],
+	includePrivate: true,
 });
 ```
 
 ## Relaciones con Otras Entidades
 
-| Entidad        | Tipo de Relación     | Descripción                                          |
-|----------------|----------------------|------------------------------------------------------|
-| **User**       | Muchos a muchos      | Los usuarios pueden pertenecer a múltiples grupos    |
-| **Collection** | Muchos a muchos      | Las colecciones pueden compartirse con grupos        |
-| **Album**      | Muchos a muchos      | Los álbumes pueden compartirse con grupos            |
-| **Folder**     | Muchos a muchos      | Las carpetas pueden compartirse con grupos           |
-| **Image**      | Muchos a muchos      | Las imágenes pueden compartirse con grupos directamente |
-| **Video**      | Muchos a muchos      | Los videos pueden compartirse con grupos directamente |
-| **Activity**   | Referencial          | Las actividades pueden referenciar grupos            |
-| **Group**      | Auto-referencial     | Los grupos pueden estar anidados (grupo padre-hijo)  |
+| Entidad        | Tipo de Relación | Descripción                                             |
+| -------------- | ---------------- | ------------------------------------------------------- |
+| **User**       | Muchos a muchos  | Los usuarios pueden pertenecer a múltiples grupos       |
+| **Collection** | Muchos a muchos  | Las colecciones pueden compartirse con grupos           |
+| **Album**      | Muchos a muchos  | Los álbumes pueden compartirse con grupos               |
+| **Folder**     | Muchos a muchos  | Las carpetas pueden compartirse con grupos              |
+| **Image**      | Muchos a muchos  | Las imágenes pueden compartirse con grupos directamente |
+| **Video**      | Muchos a muchos  | Los videos pueden compartirse con grupos directamente   |
+| **Activity**   | Referencial      | Las actividades pueden referenciar grupos               |
+| **Group**      | Auto-referencial | Los grupos pueden estar anidados (grupo padre-hijo)     |
 
 ## Modelo de Datos
 
 ```typescript
 // Modelo básico de Group
 interface Group {
-  id: string;                  // Identificador único
-  name: string;                // Nombre del grupo
-  description?: string;        // Descripción opcional
-  isPrivate: boolean;          // Indica si el grupo es privado
-  avatarUrl?: string;          // URL de la imagen de perfil del grupo
-  joinPolicy: GroupJoinPolicy; // Política de unión (OPEN, APPROVAL, INVITE_ONLY)
-  memberCount: number;         // Número total de miembros
-  parentId?: string;           // ID del grupo padre (si es un subgrupo)
-  features: string[];          // Características o capacidades habilitadas
-  createdAt: Date;             // Fecha de creación
-  updatedAt: Date;             // Fecha de última actualización
+	id: string; // Identificador único
+	name: string; // Nombre del grupo
+	description?: string; // Descripción opcional
+	isPrivate: boolean; // Indica si el grupo es privado
+	avatarUrl?: string; // URL de la imagen de perfil del grupo
+	joinPolicy: GroupJoinPolicy; // Política de unión (OPEN, APPROVAL, INVITE_ONLY)
+	memberCount: number; // Número total de miembros
+	parentId?: string; // ID del grupo padre (si es un subgrupo)
+	features: string[]; // Características o capacidades habilitadas
+	createdAt: Date; // Fecha de creación
+	updatedAt: Date; // Fecha de última actualización
 }
 
 // Membresía de Grupo
 interface GroupMembership {
-  groupId: string;             // ID del grupo
-  userId: string;              // ID del usuario miembro
-  role: GroupRole;             // Rol del usuario (ADMIN, EDITOR, VIEWER)
-  joinedAt: Date;              // Fecha de unión al grupo
-  addedBy?: string;            // ID del usuario que añadió al miembro
-  status: MembershipStatus;    // Estado (ACTIVE, PENDING, BLOCKED)
+	groupId: string; // ID del grupo
+	userId: string; // ID del usuario miembro
+	role: GroupRole; // Rol del usuario (ADMIN, EDITOR, VIEWER)
+	joinedAt: Date; // Fecha de unión al grupo
+	addedBy?: string; // ID del usuario que añadió al miembro
+	status: MembershipStatus; // Estado (ACTIVE, PENDING, BLOCKED)
 }
 
 // Acceso a recurso
 interface GroupResourceAccess {
-  groupId: string;             // ID del grupo
-  resourceType: ResourceType;  // Tipo de recurso (COLLECTION, ALBUM, FOLDER, etc.)
-  resourceId: string;          // ID del recurso
-  accessLevel: AccessLevel;    // Nivel de acceso (READ, READ_WRITE, ADMIN)
-  grantedAt: Date;             // Fecha en que se concedió el acceso
-  grantedBy: string;           // ID del usuario que concedió el acceso
+	groupId: string; // ID del grupo
+	resourceType: ResourceType; // Tipo de recurso (COLLECTION, ALBUM, FOLDER, etc.)
+	resourceId: string; // ID del recurso
+	accessLevel: AccessLevel; // Nivel de acceso (READ, READ_WRITE, ADMIN)
+	grantedAt: Date; // Fecha en que se concedió el acceso
+	grantedBy: string; // ID del usuario que concedió el acceso
 }
 ```
 
@@ -278,13 +278,13 @@ interface GroupResourceAccess {
 
 ## Solución de Problemas Comunes
 
-| Problema | Solución |
-|----------|----------|
-| **Conflictos de roles** | Implemente una política clara de precedencia cuando un usuario tiene múltiples roles |
-| **Grupos abandonados** | Configure limpieza automática de grupos inactivos sin miembros o con solo miembros inactivos |
-| **Sobrecarga de permisos** | Utilice roles predefinidos en lugar de permisos granulares para simplificar la gestión |
-| **Escalabilidad** | Implemente caché de permisos y verifique en lotes para mejorar rendimiento |
-| **Invitaciones pendientes** | Establezca un tiempo de expiración para invitaciones no aceptadas |
+| Problema                    | Solución                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| **Conflictos de roles**     | Implemente una política clara de precedencia cuando un usuario tiene múltiples roles         |
+| **Grupos abandonados**      | Configure limpieza automática de grupos inactivos sin miembros o con solo miembros inactivos |
+| **Sobrecarga de permisos**  | Utilice roles predefinidos en lugar de permisos granulares para simplificar la gestión       |
+| **Escalabilidad**           | Implemente caché de permisos y verifique en lotes para mejorar rendimiento                   |
+| **Invitaciones pendientes** | Establezca un tiempo de expiración para invitaciones no aceptadas                            |
 
 ## Roadmap y Mejoras Futuras
 

@@ -15,12 +15,12 @@ import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/ui.store';
 
 interface NavPanelHeaderProps {
+	isAnimating?: boolean;
 	isCollapsed?: boolean;
-	onOpenSettings: () => void;
 	onOpenDevelopment: () => void;
 	onOpenEntityCards: () => void;
+	onOpenSettings: () => void;
 	onToggleZenMode?: () => void; // 🧘 Nuevo prop para modo zen
-	isAnimating?: boolean;
 }
 
 // Componente de botón memoizado para evitar re-renderizados
@@ -41,6 +41,7 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 		<Tooltip>
 			<TooltipTrigger asChild>
 				<Button
+					aria-label={tooltipTitle}
 					className="h-7 w-7 cursor-pointer rounded-md bg-transparent text-muted-foreground transition-all hover:bg-secondary/40 hover:text-foreground"
 					onClick={onClick}
 					size="icon"
@@ -50,9 +51,9 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 				</Button>
 			</TooltipTrigger>
 			<TooltipContent className="text-xs">
-				<p className="font-medium text-amber-400">{tooltipTitle}</p>
+				<p className="font-medium text-foreground">{tooltipTitle}</p>
 				<p>{tooltipContent}</p>
-				{tooltipNote && <p className="mt-1.5 text-[10px] text-zinc-400">{tooltipNote}</p>}
+				{tooltipNote && <p className="mt-1.5 text-[10px] text-muted-foreground">{tooltipNote}</p>}
 			</TooltipContent>
 		</Tooltip>
 	);
@@ -66,7 +67,7 @@ const MemoizedAvatar = memo(function Avatar({ color, emoji }: { color: string; e
 				className="flex h-6 w-6 cursor-pointer items-center justify-center overflow-hidden rounded-full shadow-sm transition-all duration-200 group-hover:brightness-110"
 				style={{
 					backgroundColor: color,
-					boxShadow: '0 0 0 1px rgba(0,0,0,0.05), 0 1px 3px 0 rgba(0,0,0,0.1)',
+					boxShadow: '0 0 0 1px oklch(0 0 0 / 5%), 0 1px 3px 0 var(--dt-shadow-color)',
 				}}
 			>
 				<span className="font-large text-sm">{emoji}</span>
@@ -78,29 +79,31 @@ const MemoizedAvatar = memo(function Avatar({ color, emoji }: { color: string; e
 function getThemeIcon(theme: string | undefined) {
 	switch (theme) {
 		case 'light':
-			return <Sun className="h-4 w-4 text-yellow-400" />;
+			return <Sun className="h-4 w-4 text-primary" />;
 		case 'dark':
-			return <Moon className="h-4 w-4 text-blue-400" />;
-		case 'cafe':
-			return <Palette className="h-4 w-4 text-amber-700" />;
-		case 'violeta':
-			return <Palette className="h-4 w-4 text-violet-400" />;
-		case 'madera':
-			return <Palette className="h-4 w-4 text-yellow-800" />;
+			return <Moon className="h-4 w-4 text-primary" />;
 		case 'nocturno':
-			return <Moon className="h-4 w-4 text-sky-400" />;
-		case 'verde':
-			return <Palette className="h-4 w-4 text-green-400" />;
-		case 'atardecer':
-			return <Palette className="h-4 w-4 text-orange-400" />;
-		case 'corporativo':
-			return <Palette className="h-4 w-4 text-blue-600" />;
 		case 'carbon':
-			return <Palette className="h-4 w-4 text-neutral-500" />;
+			return <Moon className="h-4 w-4 text-primary" />;
+		case 'cafe':
+		case 'madera':
+			return <Palette className="h-4 w-4 text-amber-600" />;
+		case 'violeta':
+			return <Palette className="h-4 w-4 text-purple-500" />;
+		case 'verde':
+			return <Palette className="h-4 w-4 text-green-500" />;
+		case 'atardecer':
+			return <Palette className="h-4 w-4 text-orange-500" />;
+		case 'corporativo':
+			return <Palette className="h-4 w-4 text-blue-500" />;
 		case 'teal':
-			return <Palette className="h-4 w-4 text-teal-400" />;
+			return <Palette className="h-4 w-4 text-teal-500" />;
 		case 'citrico':
-			return <Palette className="h-4 w-4 text-lime-400" />;
+			return <Palette className="h-4 w-4 text-lime-500" />;
+		case 'aurora':
+			return <Palette className="h-4 w-4 text-cyan-400" />;
+		case 'neon':
+			return <Palette className="h-4 w-4 text-pink-500" />;
 		default:
 			return <Palette className="h-4 w-4 text-primary" />;
 	}
@@ -118,9 +121,9 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 	// Perfil por defecto - reemplazar con datos reales del contexto de usuario
 	const activeProfileData = useMemo(
 		() => ({
-			name: 'Usuario',
+			name: 'User',
 			emoji: '🎨',
-			color: '#3b82f6',
+			color: 'var(--entity-profile)',
 		}),
 		[]
 	);
@@ -138,28 +141,28 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 	}, []);
 
 	return (
-		<div className="border-border/20 border-b bg-gradient-to-b from-background/90 to-transparent py-2 shadow-sm">
+		<div className="min-w-0 overflow-hidden border-border/20 border-b bg-gradient-to-b from-background/90 to-transparent py-2 shadow-sm">
 			{/* 📋 Layout responsivo */}
 			<div
 				className={cn(
-					'flex inline-flex w-full gap-2 px-2 transition-all duration-300',
+					'flex w-full min-w-0 gap-2 px-2 transition-all duration-300',
 					isCollapsed ? 'flex-col items-center py-1' : 'flex-col'
 				)}
 			>
 				{/* Avatar */}
 				<div
 					className={cn(
-						'flex w-full items-center justify-between p-1',
+						'flex w-full min-w-0 items-center justify-between p-1',
 						isCollapsed ? 'mb-1 justify-center' : 'w-full justify-between'
 					)}
 				>
-					<div className={cn('flex items-center gap-2', isCollapsed && 'justify-center')}>
+					<div className={cn('flex min-w-0 items-center gap-2', isCollapsed && 'justify-center')}>
 						<MemoizedAvatar color={activeProfileData.color} emoji={activeProfileData.emoji} />
 
 						{!isCollapsed && (
-							<div className="flex ">
-								<div className="flex items-center gap-2">
-									<span className="font-medium text-foreground/80 text-sm leading-tight">
+							<div className="flex min-w-0 overflow-hidden">
+								<div className="flex min-w-0 items-center gap-2">
+									<span className="truncate font-medium text-foreground/80 text-sm leading-tight">
 										{activeProfileData?.name}
 									</span>
 								</div>
@@ -168,7 +171,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 					</div>
 					{/* Botones de acción */}
 					{!isCollapsed && (
-						<div className="flex w-full justify-end gap-1">
+						<div className="ml-auto flex shrink-0 items-center gap-1">
 							<MemoizedHeaderButton
 								icon={<Home className="h-3.5 w-3.5" />}
 								onClick={handleHomeClick}
@@ -186,7 +189,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							<MemoizedHeaderButton
 								icon={<Bug className="h-3.5 w-3.5" />}
 								onClick={onOpenDevelopment}
-								tooltipContent="Accede a herramientas de desarrollo y depuración"
+								tooltipContent="Open development and debugging tools"
 								tooltipNote="Solo para administradores"
 								tooltipTitle="Modo Desarrollador"
 							/>
@@ -194,8 +197,8 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							<MemoizedHeaderButton
 								icon={<BookOpen className="h-3.5 w-3.5" />}
 								onClick={() => window.open('/docs', '_blank')}
-								tooltipContent="Abre la documentación de la aplicación"
-								tooltipTitle="Documentación"
+								tooltipContent="Open the application documentation"
+								tooltipTitle="Documentation"
 							/>
 
 							{/* 🧘 Botón de modo zen */}
@@ -203,7 +206,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 								<MemoizedHeaderButton
 									icon={<Eye className="h-3.5 w-3.5" />}
 									onClick={onToggleZenMode}
-									tooltipContent="Activa el modo de concentración"
+									tooltipContent="Enable focus mode"
 									tooltipNote="Oculta distracciones"
 									tooltipTitle="Modo Zen"
 								/>
@@ -212,6 +215,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
+										aria-label="Change theme"
 										className="h-7 w-7 cursor-pointer rounded-md bg-transparent text-muted-foreground transition-all hover:bg-secondary/40 hover:text-foreground"
 										size="icon"
 										variant="ghost"
@@ -236,7 +240,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 								icon={<Settings2 className="h-3.5 w-3.5" />}
 								onClick={onOpenSettings}
 								tooltipContent="Personaliza tu experiencia"
-								tooltipTitle="Configuración"
+								tooltipTitle="Settings"
 							/>
 						</div>
 					)}
@@ -249,7 +253,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							icon={<Settings2 className="h-2.5 w-2.5" />}
 							onClick={onOpenSettings}
 							tooltipContent="Personaliza tu experiencia"
-							tooltipTitle="Configuración"
+							tooltipTitle="Settings"
 						/>
 					</div>
 				)}

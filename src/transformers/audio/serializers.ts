@@ -4,24 +4,24 @@ import { createDefaultEntityStats } from '@/lib/utils';
 import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
 import { audioSchema } from '@/types/entities/audio/audio.schema';
 
-type DrizzleAudio = {
-	id: string;
-	name: string;
-	filePath: string;
-	duration?: number | null;
-	format?: string | null;
-	size: number;
+interface DrizzleAudio {
 	bitrate?: number | null;
-	sampleRate?: number | null;
 	channels?: number | null;
-	metadata?: string | null; // JSON
-	thumbnail?: string | null;
+	createdAt: Date;
+	duration?: number | null;
+	filePath: string;
+	folderId: string;
+	format?: string | null;
+	id: string;
 
 	isFavorite: boolean;
-	folderId: string;
-	createdAt: Date;
+	metadata?: string | null; // JSON
+	name: string;
+	sampleRate?: number | null;
+	size: number;
+	thumbnail?: string | null;
 	updatedAt: Date;
-};
+}
 
 /**
  * Valida un objeto Audio usando el schema

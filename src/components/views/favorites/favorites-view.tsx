@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useCreateFavorite, useFavorites } from '@/lib/api/favorites';
+import { useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFavoriteStore } from '@/store/entities/favorite';
@@ -26,12 +26,8 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		},
 		[selectedIds, selectFavorite, deselectFavorite]
 	);
-	const { mutate: createFavorite } = useCreateFavorite();
 
 	const [localSearch, setLocalSearch] = useState('');
-	const [showForm, setShowForm] = useState(false);
-	const [newFavoriteName, setNewFavoriteName] = useState('');
-	const [newFavoriteDescription, setNewFavoriteDescription] = useState('');
 
 	// Usar React Query hook en lugar de server action
 	const {
@@ -56,23 +52,6 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		[setSelectedFavoriteId]
 	);
 
-	const handleCreateFavorite = useCallback(() => {
-		// const { toast } = useToast();
-		if (newFavoriteName.trim() === '') {
-			// toast({
-			// 	title: '❌ Error',
-			// 	description: 'El nombre del favorito no puede estar vacío.',
-			// 	variant: 'destructive',
-			// });
-			return;
-		}
-		// TODO: Implementar correctamente con entityId y entityType
-		// createFavorite({ entityId: 'temp', entityType: FavoriteEntityType.IMAGE, userId: null, addedAt: new Date(), notes: newFavoriteDescription, category: null, priority: null });
-		setNewFavoriteName('');
-		setNewFavoriteDescription('');
-		setShowForm(false);
-	}, [newFavoriteName]);
-
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar favorites');
 		refetch();
@@ -86,18 +65,12 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		<FavoritesContentView
 			error={error}
 			favorites={favorites}
-			handleCreateFavorite={handleCreateFavorite}
 			handleFavoriteSelect={handleFavoriteSelect}
 			handleRetry={handleRetry}
 			isLoading={isLoading}
 			localSearch={localSearch}
-			newFavoriteDescription={newFavoriteDescription}
-			newFavoriteName={newFavoriteName}
 			selectedFavoriteId={selectedFavoriteId}
-			setNewFavoriteDescription={setNewFavoriteDescription}
-			setNewFavoriteName={setNewFavoriteName}
-			setShowForm={setShowForm}
-			showForm={showForm}
+			setLocalSearch={setLocalSearch}
 		/>
 	);
 }

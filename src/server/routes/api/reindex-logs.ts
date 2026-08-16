@@ -5,8 +5,8 @@
  */
 
 import express from 'express';
-import { reindexFileLogger } from '../../../lib/logger/reindex-file-logger';
-import { serverLogger } from '../../../lib/logger/server-logger';
+import { reindexFileLogger } from '@/lib/logger/reindex-file-logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 export const reindexLogsRouter = express.Router();
 
@@ -15,7 +15,7 @@ export const reindexLogsRouter = express.Router();
  */
 reindexLogsRouter.get('/stats', (_req, res) => {
 	try {
-		const stats = reindexFileLogger.getLogStats();
+		const stats = reindexFileLogger.getPublicLogStats();
 		res.json({
 			success: true,
 			data: stats,
@@ -91,26 +91,6 @@ reindexLogsRouter.get('/summary', async (req, res) => {
 		res.status(500).json({
 			success: false,
 			error: 'Error obteniendo resumen de logs',
-		});
-	}
-});
-
-/**
- * POST /api/reindex-logs/cleanup - Limpia logs antiguos
- */
-reindexLogsRouter.post('/cleanup', (_req, res) => {
-	try {
-		reindexFileLogger.cleanupOldLogs();
-
-		res.json({
-			success: true,
-			message: 'Limpieza de logs completada',
-		});
-	} catch (error) {
-		serverLogger.error('Error en limpieza de logs de reindexado:', error);
-		res.status(500).json({
-			success: false,
-			error: 'Error en limpieza de logs',
 		});
 	}
 });

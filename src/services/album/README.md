@@ -123,22 +123,22 @@ import { albumService } from '@/services/index';
 
 // Crear un álbum básico
 const newAlbum = await albumService.createAlbum({
-  name: 'Vacaciones 2023',
-  description: 'Recuerdos de nuestro viaje a la playa',
-  emoji: '🏖️',
-  color: '#3498db'
+	name: 'Vacaciones 2023',
+	description: 'Recuerdos de nuestro viaje a la playa',
+	emoji: '🏖️',
+	color: '#3498db',
 });
 
 // Crear un álbum con configuración avanzada
 const customAlbum = await albumService.createAlbum({
-  name: 'Fotografía de Naturaleza',
-  description: 'Colección de fotos de paisajes naturales',
-  emoji: '🌲',
-  color: '#27ae60',
-  sortBy: 'capturedAt',
-  sortDirection: 'desc',
-  viewMode: 'GRID',
-  thumbnailSize: 'MEDIUM'
+	name: 'Fotografía de Naturaleza',
+	description: 'Colección de fotos de paisajes naturales',
+	emoji: '🌲',
+	color: '#27ae60',
+	sortBy: 'capturedAt',
+	sortDirection: 'desc',
+	viewMode: 'GRID',
+	thumbnailSize: 'MEDIUM',
 });
 ```
 
@@ -155,10 +155,10 @@ await albumService.setFeaturedImage('album-id-123', 'image-id-2');
 
 // Obtener todas las imágenes de un álbum
 const albumImages = await albumService.getAlbumImages('album-id-123', {
-  page: 1,
-  limit: 50,
-  sortBy: 'dateAdded',
-  sortDirection: 'desc'
+	page: 1,
+	limit: 50,
+	sortBy: 'dateAdded',
+	sortDirection: 'desc',
 });
 
 // Eliminar una imagen del álbum
@@ -172,23 +172,23 @@ import { albumService } from '@/services/index';
 
 // Actualizar configuración de visualización
 await albumService.updateAlbum('album-id-123', {
-  viewMode: 'MASONRY',
-  thumbnailSize: 'LARGE',
-  showCaptions: true,
-  sortBy: 'name',
-  sortDirection: 'asc'
+	viewMode: 'MASONRY',
+	thumbnailSize: 'LARGE',
+	showCaptions: true,
+	sortBy: 'name',
+	sortDirection: 'asc',
 });
 
 // Aplicar filtros de visualización
 const filteredImages = await albumService.getAlbumImages('album-id-123', {
-  filters: {
-    tags: ['playa', 'atardecer'],
-    dateRange: {
-      from: new Date('2023-06-01'),
-      to: new Date('2023-06-30')
-    },
-    orientation: 'LANDSCAPE'
-  }
+	filters: {
+		tags: ['playa', 'atardecer'],
+		dateRange: {
+			from: new Date('2023-06-01'),
+			to: new Date('2023-06-30'),
+		},
+		orientation: 'LANDSCAPE',
+	},
 });
 ```
 
@@ -199,87 +199,88 @@ import { albumService } from '@/services/index';
 
 // Compartir un álbum con un usuario específico
 await albumService.shareAlbum('album-id-123', 'user-id-456', {
-  accessLevel: 'EDIT'
+	accessLevel: 'EDIT',
 });
 
 // Compartir un álbum con un grupo
 await albumService.shareAlbumWithGroup('album-id-123', 'group-id-789', {
-  accessLevel: 'VIEW'
+	accessLevel: 'VIEW',
 });
 
 // Generar un enlace público de compartición
 const shareLink = await albumService.generateShareLink('album-id-123', {
-  expiresIn: '7d',
-  allowDownload: true
+	expiresIn: '7d',
+	allowDownload: true,
 });
 ```
 
 ## Diferencias con Otras Entidades Organizativas
 
-| Característica | Album | Collection | Folder | Tag |
-|----------------|-------|------------|--------|-----|
-| **Propósito principal** | Presentación visual | Agrupación temática | Organización jerárquica | Clasificación conceptual |
-| **Contenido principal** | Imágenes y videos | Contenido mixto | Archivos y carpetas | Transversal a entidades |
-| **Experiencia de usuario** | Galería visual | Agrupación flexible | Navegación de archivos | Filtrado por concepto |
-| **Opciones visuales** | Extensivas | Básicas | Mínimas | No aplica |
-| **Compartición** | Orientada a visualización | Orientada a colaboración | Orientada a acceso | No aplica directamente |
-| **Ordenación** | Personalizable | Limitada | Criterios estándar | Alfabética/frecuencia |
+| Característica             | Album                     | Collection               | Folder                  | Tag                      |
+| -------------------------- | ------------------------- | ------------------------ | ----------------------- | ------------------------ |
+| **Propósito principal**    | Presentación visual       | Agrupación temática      | Organización jerárquica | Clasificación conceptual |
+| **Contenido principal**    | Imágenes y videos         | Contenido mixto          | Archivos y carpetas     | Transversal a entidades  |
+| **Experiencia de usuario** | Galería visual            | Agrupación flexible      | Navegación de archivos  | Filtrado por concepto    |
+| **Opciones visuales**      | Extensivas                | Básicas                  | Mínimas                 | No aplica                |
+| **Compartición**           | Orientada a visualización | Orientada a colaboración | Orientada a acceso      | No aplica directamente   |
+| **Ordenación**             | Personalizable            | Limitada                 | Criterios estándar      | Alfabética/frecuencia    |
 
 ## Relaciones con Otras Entidades
 
-| Entidad        | Tipo de Relación     | Descripción                                          |
-|----------------|----------------------|------------------------------------------------------|
-| **Image**      | Muchos a muchos      | Los álbumes pueden contener múltiples imágenes       |
-| **Video**      | Muchos a muchos      | Los álbumes pueden contener múltiples videos         |
-| **User**       | Muchos a uno         | Los álbumes pertenecen a usuarios                    |
-| **Tag**        | Muchos a muchos      | Los álbumes pueden tener múltiples etiquetas         |
-| **Collection** | Muchos a muchos      | Los álbumes pueden formar parte de colecciones       |
-| **Group**      | Muchos a muchos      | Los álbumes pueden compartirse con grupos            |
-| **Activity**   | Referencial          | Las actividades pueden referenciar álbumes           |
+| Entidad        | Tipo de Relación | Descripción                                    |
+| -------------- | ---------------- | ---------------------------------------------- |
+| **Image**      | Muchos a muchos  | Los álbumes pueden contener múltiples imágenes |
+| **Video**      | Muchos a muchos  | Los álbumes pueden contener múltiples videos   |
+| **User**       | Muchos a uno     | Los álbumes pertenecen a usuarios              |
+| **Tag**        | Muchos a muchos  | Los álbumes pueden tener múltiples etiquetas   |
+| **Collection** | Muchos a muchos  | Los álbumes pueden formar parte de colecciones |
+| **Group**      | Muchos a muchos  | Los álbumes pueden compartirse con grupos      |
+| **Activity**   | Referencial      | Las actividades pueden referenciar álbumes     |
 
 ## Modelo de Datos
 
 ```typescript
 // Modelo básico de Album
 interface Album {
-  id: string;                  // Identificador único
-  name: string;                // Nombre del álbum
-  description?: string;        // Descripción opcional
-  emoji?: string;              // Emoji representativo
-  color?: string;              // Color asociado (hex o nombre)
-  viewMode: AlbumViewMode;     // Modo de visualización (GRID, MASONRY, SLIDESHOW, etc.)
-  thumbnailSize: ThumbnailSize; // Tamaño de miniaturas (SMALL, MEDIUM, LARGE)
-  sortBy: string;              // Campo de ordenación (name, createdAt, etc.)
-  sortDirection: SortDirection; // Dirección de ordenación (asc, desc)
-  isFavorite: boolean;         // Indica si está marcado como favorito
-  featuredImageId?: string;    // ID de la imagen destacada
-  showCaptions: boolean;       // Muestra títulos bajo las imágenes
-  createdAt: Date;             // Fecha de creación
-  updatedAt: Date;             // Fecha de última actualización
+	id: string; // Identificador único
+	name: string; // Nombre del álbum
+	description?: string; // Descripción opcional
+	emoji?: string; // Emoji representativo
+	color?: string; // Color asociado (hex o nombre)
+	viewMode: AlbumViewMode; // Modo de visualización (GRID, MASONRY, SLIDESHOW, etc.)
+	thumbnailSize: ThumbnailSize; // Tamaño de miniaturas (SMALL, MEDIUM, LARGE)
+	sortBy: string; // Campo de ordenación (name, createdAt, etc.)
+	sortDirection: SortDirection; // Dirección de ordenación (asc, desc)
+	isFavorite: boolean; // Indica si está marcado como favorito
+	featuredImageId?: string; // ID de la imagen destacada
+	showCaptions: boolean; // Muestra títulos bajo las imágenes
+	createdAt: Date; // Fecha de creación
+	updatedAt: Date; // Fecha de última actualización
 }
 
 // Extensión con estadísticas
 interface AlbumWithStats extends Album {
-  stats: {
-    imageCount: number;        // Cantidad de imágenes
-    videoCount: number;        // Cantidad de videos
-    tagCount: number;          // Cantidad de etiquetas
-    viewCount: number;         // Cantidad de visualizaciones
-    totalSize: number;         // Tamaño total en bytes
-    lastUpdated?: Date;        // Última actualización de contenido
-    distribution?: {           // Distribución por tipo, formato, etc.
-      [key: string]: number;
-    }
-  }
+	stats: {
+		imageCount: number; // Cantidad de imágenes
+		videoCount: number; // Cantidad de videos
+		tagCount: number; // Cantidad de etiquetas
+		viewCount: number; // Cantidad de visualizaciones
+		totalSize: number; // Tamaño total en bytes
+		lastUpdated?: Date; // Última actualización de contenido
+		distribution?: {
+			// Distribución por tipo, formato, etc.
+			[key: string]: number;
+		};
+	};
 }
 
 // Relación entre álbum e imagen
 interface AlbumImage {
-  albumId: string;             // ID del álbum
-  imageId: string;             // ID de la imagen
-  order: number;               // Orden de visualización
-  addedAt: Date;               // Fecha de adición
-  addedBy: string;             // ID del usuario que añadió la imagen
+	albumId: string; // ID del álbum
+	imageId: string; // ID de la imagen
+	order: number; // Orden de visualización
+	addedAt: Date; // Fecha de adición
+	addedBy: string; // ID del usuario que añadió la imagen
 }
 ```
 
@@ -295,13 +296,13 @@ interface AlbumImage {
 
 ## Solución de Problemas Comunes
 
-| Problema | Solución |
-|----------|----------|
-| **Álbumes vacíos** | Utilice `albumService.findEmptyAlbums()` para identificar y gestionar |
-| **Imágenes duplicadas** | Detecte con `albumService.findDuplicateImages()` antes de añadir |
-| **Rendimiento en álbumes grandes** | Implemente carga progresiva y visualización virtualizada |
-| **Inconsistencia de estadísticas** | Recalcule con `albumService.refreshStats()` |
-| **Problemas de ordenación** | Valide y corrija con `albumService.reorderImages()` |
+| Problema                           | Solución                                                              |
+| ---------------------------------- | --------------------------------------------------------------------- |
+| **Álbumes vacíos**                 | Utilice `albumService.findEmptyAlbums()` para identificar y gestionar |
+| **Imágenes duplicadas**            | Detecte con `albumService.findDuplicateImages()` antes de añadir      |
+| **Rendimiento en álbumes grandes** | Implemente carga progresiva y visualización virtualizada              |
+| **Inconsistencia de estadísticas** | Recalcule con `albumService.refreshStats()`                           |
+| **Problemas de ordenación**        | Valide y corrija con `albumService.reorderImages()`                   |
 
 ## Roadmap y Mejoras Futuras
 

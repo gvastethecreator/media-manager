@@ -29,7 +29,6 @@ export const GroupCreateSchema = z.object({
 		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/)
 		.optional(),
-	isFavorite: z.boolean().default(false),
 });
 
 export const GroupUpdateSchema = z.object({
@@ -40,7 +39,6 @@ export const GroupUpdateSchema = z.object({
 		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/)
 		.optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 export const GroupStatisticsSchema = z.object({

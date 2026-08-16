@@ -3,13 +3,13 @@ import { useId } from 'react';
 import { cn } from '@/lib/utils';
 
 interface GridPatternProps {
-	width?: number;
+	className?: string;
 	height?: number;
-	x?: number;
-	y?: number;
 	squares?: [x: number, y: number][];
 	strokeDasharray?: string;
-	className?: string;
+	width?: number;
+	x?: number;
+	y?: number;
 	[key: string]: unknown;
 }
 
@@ -42,7 +42,7 @@ export function GridPattern({
 			<rect fill={`url(#${id})`} height="100%" strokeWidth={0} width="100%" />
 			{squares && (
 				<svg aria-labelledby={`title-${id}`} className="overflow-visible" x={x} y={y}>
-					<title id={`title-${id}`}>Patrón de cuadrícula</title>
+					<title id={`title-${id}`}>Grid pattern</title>
 					{squares.map(([x, y]) => (
 						<rect
 							height={height - 1}

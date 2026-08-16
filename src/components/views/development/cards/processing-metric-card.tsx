@@ -3,10 +3,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
 export interface ProcessingMetric {
+	icon: ComponentType<{ className?: string }>;
+	max: number;
 	name: string;
 	value: number;
-	max: number;
-	icon: ComponentType<{ className?: string }>;
 }
 
 export function ProcessingMetricCard({ metric }: { metric: ProcessingMetric }) {

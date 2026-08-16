@@ -11,11 +11,15 @@ import { devtools } from 'zustand/middleware';
 import {
 	createFile3DInApi,
 	deleteFile3DFromApi,
+	getFile3DFromApi,
 	getFile3DsFromApi,
+	toggleFile3DFavoriteInApi,
 	updateFile3DInApi,
+	type PublicFile3DCreateInput,
+	type PublicFile3DUpdateInput,
 } from '@/lib/api/client/file3d.client';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
+import type { File3DWithStats } from '@/types/entities/file3d';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type File3DFilters = Record<string, any>;
@@ -24,34 +28,35 @@ export type File3DFilters = Record<string, any>;
  * 🏪 Estado del store de File3D
  */
 export interface File3DState {
-	// Estado de datos
-	file3Ds: File3DWithStats[];
-	selectedFile3Ds: File3DWithStats[];
+	clearFilters: () => void;
+	clearSelection: () => void;
+	createFile3D: (data: PublicFile3DCreateInput) => Promise<File3DWithStats | undefined>;
 	currentFile3D: File3DWithStats | null;
-
-	// Estado de UI
-	loading: boolean;
+	deleteFile3D: (id: string) => Promise<void>;
+	deselectFile3D: (file3DId: string) => void;
 	error: string | null;
-	filters: File3DFilters;
 
 	// Acciones de datos
+	fetchFile3D: (id: string) => Promise<File3DWithStats | undefined>;
 	fetchFile3Ds: () => Promise<void>;
-	createFile3D: (data: File3DCreateInput) => Promise<File3DWithStats | undefined>;
-	updateFile3D: (id: string, data: File3DUpdateInput) => Promise<File3DWithStats | undefined>;
-	deleteFile3D: (id: string) => Promise<void>;
-
-	// Acciones de selección
-	selectFile3D: (file3D: File3DWithStats) => void;
-	deselectFile3D: (file3DId: string) => void;
-	clearSelection: () => void;
-
-	// Acciones de filtrado
-	setFilters: (filters: Partial<File3DFilters>) => void;
-	clearFilters: () => void;
+	// Estado de datos
+	file3Ds: File3DWithStats[];
+	filters: File3DFilters;
 
 	// Utilidades
 	getFile3DById: (id: string) => File3DWithStats | undefined;
+
+	// Estado de UI
+	loading: boolean;
+	selectedFile3Ds: File3DWithStats[];
+
+	// Acciones de selección
+	selectFile3D: (file3D: File3DWithStats) => void;
+
+	// Acciones de filtrado
+	setFilters: (filters: Partial<File3DFilters>) => void;
 	toggleFavorite: (id: string) => Promise<void>;
+	updateFile3D: (id: string, data: PublicFile3DUpdateInput) => Promise<File3DWithStats | undefined>;
 }
 
 const useFile3DStoreBase = create<File3DState>()(
@@ -76,7 +81,25 @@ const useFile3DStoreBase = create<File3DState>()(
 				}
 			},
 
-			createFile3D: async (data: File3DCreateInput) => {
+			fetchFile3D: async (id: string) => {
+				set({ loading: true, error: null });
+				try {
+					const file3D = await getFile3DFromApi(id);
+					set((state) => ({
+						file3Ds: state.file3Ds.some((item) => item.id === id)
+							? state.file3Ds.map((item) => (item.id === id ? file3D : item))
+							: [...state.file3Ds, file3D],
+						currentFile3D: file3D,
+						loading: false,
+					}));
+					return file3D;
+				} catch (error) {
+					set({ error: (error as Error).message, loading: false });
+					return;
+				}
+			},
+
+			createFile3D: async (data: PublicFile3DCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newFile3D = await createFile3DInApi(data);
@@ -91,7 +114,7 @@ const useFile3DStoreBase = create<File3DState>()(
 				}
 			},
 
-			updateFile3D: async (id: string, data: File3DUpdateInput) => {
+			updateFile3D: async (id: string, data: PublicFile3DUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedFile3D = await updateFile3DInApi(id, data);
@@ -159,9 +182,17 @@ const useFile3DStoreBase = create<File3DState>()(
 			toggleFavorite: async (id: string) => {
 				const file3D = get().getFile3DById(id);
 				if (file3D) {
-					await get().updateFile3D(id, {
-						isFavorite: !file3D.isFavorite,
-					});
+					set({ loading: true, error: null });
+					try {
+						const updatedFile3D = await toggleFile3DFavoriteInApi(id);
+						set((state) => ({
+							file3Ds: state.file3Ds.map((item) => (item.id === id ? updatedFile3D : item)),
+							currentFile3D: state.currentFile3D?.id === id ? updatedFile3D : state.currentFile3D,
+							loading: false,
+						}));
+					} catch (error) {
+						set({ error: (error as Error).message, loading: false });
+					}
 				}
 			},
 		}),

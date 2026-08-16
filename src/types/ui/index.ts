@@ -4,16 +4,10 @@
  */
 
 // Exportar tipos inferidos de esquemas
-export type {
-	InterfacePreferencesInput,
-	InterfacePreferencesOutput,
-} from './interface.schema';
+export type { InterfacePreferencesInput, InterfacePreferencesOutput } from './interface.schema';
 
 // Exportar el esquema de validación
 export { interfacePreferencesSchema } from './interface.schema';
 
 // Exportar los tipos principales de UI
-export type {
-	InterfacePreferences,
-	InterfaceSettingsState,
-} from './types';
+export type { InterfacePreferences, InterfaceSettingsState } from './types';

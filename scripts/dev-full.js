@@ -1,58 +1,56 @@
 #!/usr/bin/env bun
 
 /**
- * Script para ejecutar frontend (Vite) y backend (Express) simultÃƒÂ¡neamente.
- * Ejecuta ambos servidores en paralelo con logs diferenciados.
+ * Script para ejecutar frontend (Vite) y backend (Express) simultáneamente
+ * Ejecuta ambos servidores en paralelo con logs diferenciados
  */
 
 import chalk from 'chalk';
 import { spawn } from 'child_process';
+import { createLocalSessionEnvironment } from './local-session-environment.js';
 
 const processes = [];
-let shuttingDown = false;
+const localSessionEnvironment = createLocalSessionEnvironment();
+let isCleaningUp = false;
 
+// Función para manejar la salida con colores
 function logWithPrefix(prefix, color, data) {
 	const lines = data
-		?.toString()
+		.toString()
 		.split('\n')
 		.filter((line) => line.trim());
-
-	if (!lines) {
-		return;
-	}
-
 	for (const line of lines) {
 		console.log(chalk[color](`[${prefix}]`), line);
 	}
 }
 
-function cleanup(reason = 'EXIT') {
-	if (shuttingDown) {
-		return;
-	}
+// Función para limpiar procesos al salir
+function cleanup() {
+	if (isCleaningUp) return;
+	isCleaningUp = true;
 
-	shuttingDown = true;
-	console.log(chalk.yellow(`\nCerrando servidores (${reason})...`));
-
+	console.log(chalk.yellow('\n🛑 Cerrando servidores...'));
 	for (const proc of processes) {
 		if (proc && !proc.killed) {
 			proc.kill('SIGTERM');
 		}
 	}
-
-	if (reason !== 'EXIT') {
-		process.exit(0);
-	}
 }
 
-process.once('SIGINT', () => cleanup('SIGINT'));
-process.once('SIGTERM', () => cleanup('SIGTERM'));
-process.on('exit', () => cleanup('EXIT'));
+// Manejar señales de cierre
+process.on('SIGINT', () => {
+	cleanup();
+	process.exit(0);
+});
+process.on('SIGTERM', () => {
+	cleanup();
+	process.exit(0);
+});
 
-console.log(chalk.blue('Iniciando desarrollo completo...'));
+console.log(chalk.blue('🚀 Iniciando desarrollo completo...'));
 console.log(chalk.gray('   Frontend: http://localhost:5173'));
-console.log(chalk.gray('   Backend:  http://localhost:4000\n'));
-
+console.log(chalk.gray(`   Backend:  ${localSessionEnvironment.MEDIA_MANAGER_API_TARGET}\n`));
+// Utilidad: esperar a que el backend esté listo antes de lanzar Vite
 async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 	for (let i = 0; i < retries; i++) {
 		try {
@@ -61,16 +59,18 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 		} catch {
 			// ignorar mientras arranca
 		}
-		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+		await new Promise((r) => setTimeout(r, intervalMs));
 	}
 	return false;
 }
 
 (async () => {
+	// Ejecutar backend (Express con hot reload) una sola vez
 	const serverProcess = spawn('bun', ['run', 'dev:server:hot'], {
 		stdio: 'pipe',
 		shell: true,
 		cwd: process.cwd(),
+		env: localSessionEnvironment,
 	});
 
 	serverProcess.stdout.on('data', (data) => {
@@ -87,15 +87,20 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 
 	processes.push(serverProcess);
 
-	const ok = await waitForHealth('http://localhost:4000/health');
+	const backendUrl = localSessionEnvironment.MEDIA_MANAGER_API_TARGET;
+	const ok = await waitForHealth(`${backendUrl}/health`);
 	if (!ok) {
-		console.warn(chalk.yellow('[DEV] Backend no respondiÃƒÂ³ al health check a tiempo, se lanza Vite igualmente.'));
+		console.warn(chalk.yellow('[DEV] Backend no respondió al health check a tiempo, lanzando Vite de todas formas...'));
+	} else {
+		console.log(chalk.green(`[DEV] ✅ Backend listo en ${backendUrl}`));
 	}
 
+	// Ejecutar frontend (Vite) una vez que el backend esté arriba (o tras timeout)
 	const viteProcess = spawn('bun', ['run', 'dev:vite'], {
 		stdio: 'pipe',
 		shell: true,
 		cwd: process.cwd(),
+		env: localSessionEnvironment,
 	});
 
 	viteProcess.stdout.on('data', (data) => {
@@ -112,5 +117,12 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 
 	processes.push(viteProcess);
 
-	console.log(chalk.yellow('Presiona Ctrl+C para detener ambos servidores\n'));
+	const viteReady = await waitForHealth('http://localhost:5173', { retries: 80, intervalMs: 250 });
+	if (viteReady) {
+		console.log(
+			chalk.green(`[DEV] ✅ Desarrollo completo listo. Frontend: http://localhost:5173 · Backend: ${backendUrl}`)
+		);
+	}
+
+	console.log(chalk.yellow('⌨️  Presiona Ctrl+C para detener ambos servidores\n'));
 })();

@@ -1,56 +1,97 @@
 import { Terminal } from 'lucide-react';
-import { useCallback } from 'react';
-import type { BaseContentProps } from '@/components/views/base';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
+import { BaseContentView } from '@/components/views/base/base-content-view';
 import { usePromptImages } from '@/lib/api/prompts';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { usePromptStore } from '@/store/entities/prompt/store';
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 const viewLogger = clientLogger.withContext('PromptContentView');
 
 export function PromptContentView() {
+	const { id } = useParams<{ id: string }>();
 	const selectedPrompt = usePromptStore((state) => state.selectedPrompt);
+	const prompts = usePromptStore((state) => state.prompts);
+	const selectPrompt = usePromptStore((state) => state.selectPrompt);
+	const loadPrompts = usePromptStore((state) => state.loadPrompts);
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	// Usar React Query hook en lugar de server action
-	const { data: images = [], isLoading, error, refetch: loadPromptImages } = usePromptImages(selectedPrompt?.id || '');
+	const routedPrompt = id ? (prompts.find((prompt) => prompt.id === id) ?? null) : null;
+	const effectivePrompt = routedPrompt ?? selectedPrompt;
+	const promptId = id || effectivePrompt?.id || null;
 
-	const toggleItemSelection = useCallback((item: EntityWithStats) => {
-		// Implementar la lógica de selección de items si es necesaria
-		viewLogger.info('🔄 Toggle selección de item:', item?.id);
-	}, []);
+	useEffect(() => {
+		if (id && routedPrompt && routedPrompt.id !== selectedPrompt?.id) {
+			selectPrompt(routedPrompt);
+		}
+	}, [id, routedPrompt, selectPrompt, selectedPrompt?.id]);
 
-	const handleRefresh = useCallback((): Promise<void> => {
-		viewLogger.info('🔄 Refrescando imágenes del prompt:', selectedPrompt?.id);
-		return loadPromptImages().then(() => Promise.resolve());
-	}, [loadPromptImages, selectedPrompt?.id]);
+	useEffect(() => {
+		if (id && !routedPrompt) {
+			void loadPrompts();
+		}
+	}, [id, loadPrompts, routedPrompt]);
 
-	const contentProps: BaseContentProps = {
-		items: images,
-		isLoading,
-		error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
-		toggleItemSelection,
-		currentContainerId: selectedPrompt?.id ?? null,
-		containerName: selectedPrompt?.name ?? null,
-		setCurrentContainer: (_id: string) => Promise.resolve(), // No es necesario en el nuevo enfoque
-		emptyState: {
-			icon: Terminal,
-			title: 'Prompt vacío',
-			description: `No se encontraron imágenes en ${
-				selectedPrompt?.name || 'este prompt'
-			}. Puedes agregar imágenes arrastrándolas aquí.`,
+	const { data: images = [], isLoading, error } = usePromptImages(promptId || '');
+	const browserItems = useMemo(
+		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
+		[images]
+	);
+
+	const handleItemSelect = useCallback(
+		(item: BrowserItem) => {
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
+			setSelectedItems([entity]);
+			setDetailsPanelVisible(true);
 		},
-		onRefresh: handleRefresh,
-	};
+		[setSelectedItems, setDetailsPanelVisible]
+	);
 
-	return (
-		<ContentViewProvider {...contentProps}>
+	const headerTitle = useMemo(
+		() => (effectivePrompt?.name ? `Prompt images: ${effectivePrompt.name}` : 'Selecciona un prompt'),
+		[effectivePrompt?.name]
+	);
+
+	if (!promptId) {
+		return (
 			<BaseContentView>
-				{/* Prompt content will be added here */}
-				<div className="p-4">
-					<p>Contenido del prompt se mostrará aquí</p>
+				<div className="flex h-full items-center justify-center">
+					<EmptyState
+						description="Select a prompt to view related images"
+						icon={Terminal}
+						title="Sin prompt seleccionado"
+					/>
 				</div>
 			</BaseContentView>
-		</ContentViewProvider>
+		);
+	}
+
+	if (error) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<div className="flex h-full items-center justify-center text-destructive">Error: {error.message}</div>
+			</BaseContentView>
+		);
+	}
+
+	if (isLoading && images.length === 0) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<LoadingScreen />
+			</BaseContentView>
+		);
+	}
+
+	return (
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
+			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
+		</BaseContentView>
 	);
 }

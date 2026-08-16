@@ -2,35 +2,36 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { GroupWithStats } from '@/types/entities/group';
 import type { ImageWithStats } from '@/types/entities/image';
 import { apiClient } from './client';
+import { invalidateFavoriteQueries } from './favorite-cache';
 
 export interface GroupFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface GroupCreateInput {
-	name: string;
-	description?: string | null;
-	color?: string | null;
-	emoji?: string | null;
-	isFavorite?: boolean;
 	category?: string | null;
+	color?: string | null;
+	description?: string | null;
+	emoji?: string | null;
 	filters?: string | null;
 	isActive?: boolean;
+	isFavorite?: boolean;
+	name: string;
 }
 
 export interface GroupUpdateInput {
-	name?: string;
-	description?: string | null;
-	color?: string | null;
-	emoji?: string | null;
-	isFavorite?: boolean;
 	category?: string | null;
+	color?: string | null;
+	description?: string | null;
+	emoji?: string | null;
 	filters?: string | null;
 	isActive?: boolean;
+	isFavorite?: boolean;
+	name?: string;
 }
 
 export interface GroupsResponse {
@@ -96,6 +97,7 @@ export function useCreateGroup() {
 		mutationFn: (data) => apiClient.post<GroupWithStats>('/groups', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 		},
 	});
 }
@@ -107,6 +109,7 @@ export function useUpdateGroup() {
 		mutationFn: ({ id, data }) => apiClient.put<GroupWithStats>(`/groups/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.setQueryData(groupKeys.detail(data.id), data);
 		},
 	});
@@ -119,6 +122,7 @@ export function useDeleteGroup() {
 		mutationFn: (id) => apiClient.delete(`/groups/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.removeQueries({ queryKey: groupKeys.detail(id) });
 			queryClient.removeQueries({ queryKey: groupKeys.images(id) });
 		},

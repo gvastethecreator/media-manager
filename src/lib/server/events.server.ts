@@ -1,4 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
+import { sanitizePublicPayload } from '@/server/security/sanitize-public-payload';
 import type { ProcessStatus } from '@/types/folders';
 
 // Mapa de rutas a revalidar por tipo de evento (conservado para compatibilidad)
@@ -104,14 +105,22 @@ export type EventType =
 	| 'directory:deleted';
 
 export interface EventData<T = unknown> {
-	type: EventType;
-	id?: string;
-	objectId?: string;
-	worldItemId?: string;
-	imageId?: string;
 	data?: T;
+	id?: string;
+	imageId?: string;
+	objectId?: string;
 	timestamp?: number;
+	type: EventType;
+	worldItemId?: string;
 }
+
+export type EventTransport = 'auto' | 'direct' | 'http';
+export type ResolvedEventTransport = Exclude<EventTransport, 'auto'>;
+
+export type EventRuntime = {
+	hasWindow: boolean;
+	isTest: boolean;
+};
 
 // Store para eventos en memoria (compartido con el endpoint)
 const eventStore = new Map<string, EventData[]>();
@@ -127,6 +136,7 @@ function truncateString(value: string, max = 256): string {
 }
 
 function sanitizeObject(input: unknown, depth = 0): unknown {
+	input = sanitizePublicPayload(input);
 	if (depth > 3) return '[depth-limit]';
 	if (input == null) return input;
 	if (typeof input === 'string') return truncateString(input, 256);
@@ -150,7 +160,7 @@ function sanitizeObject(input: unknown, depth = 0): unknown {
 	return out;
 }
 
-function sanitizeEventForStore(event: EventData): EventData {
+export function sanitizeEventForStore(event: EventData): EventData {
 	const data = sanitizeObject(event.data);
 	return { ...event, data };
 }
@@ -164,7 +174,7 @@ function eventLogPreview(event: EventData): Record<string, unknown> {
 		const keys = Object.keys(event.data as Record<string, unknown>);
 		preview.dataKeys = keys.slice(0, 10);
 	} else if (typeof event.data === 'string') {
-		preview.data = truncateString(event.data, 128);
+		preview.data = '[string-data]';
 	}
 	return preview;
 }
@@ -181,6 +191,22 @@ export function getEventStore() {
  */
 export function getEventSubscribers() {
 	return eventSubscribers;
+}
+
+function detectEventRuntime(): EventRuntime {
+	const isTest =
+		typeof process !== 'undefined' &&
+		typeof process.env === 'object' &&
+		(process.env.VITEST === 'true' || process.env.NODE_ENV === 'test');
+	return { hasWindow: typeof globalThis.window !== 'undefined' && globalThis.window != null, isTest };
+}
+
+export function resolveEventTransport(
+	transport: EventTransport,
+	runtime: EventRuntime = detectEventRuntime()
+): ResolvedEventTransport {
+	if (transport !== 'auto') return transport;
+	return runtime.isTest || !runtime.hasWindow ? 'direct' : 'http';
 }
 
 /**
@@ -209,7 +235,7 @@ function emitDirect(event: EventData) {
 	// Notificar a suscriptores
 	for (const subscriber of eventSubscribers) {
 		try {
-			subscriber(event);
+			subscriber(sanitized);
 		} catch (error) {
 			logger.error('Error notificando suscriptor:', error);
 		}
@@ -219,18 +245,17 @@ function emitDirect(event: EventData) {
 /**
  * Emite un evento (versión híbrida - directo en servidor, HTTP en cliente)
  */
-export async function emit(event: EventData) {
+export async function emit(event: EventData, transport: EventTransport = 'auto') {
 	try {
-		// Detectar si estamos en el servidor (Node.js) o cliente (navegador)
-		const isServer = typeof window === 'undefined';
+		const resolvedTransport = resolveEventTransport(transport);
 
-		if (isServer) {
+		if (resolvedTransport === 'direct') {
 			// En el servidor, emitir directamente
 			emitDirect(event);
 		} else {
 			// En el cliente, usar HTTP
 			logger.info('🚀 Emitiendo evento (cliente HTTP):', eventLogPreview(event));
-			const response = await fetch('/api/events', {
+			const response = await globalThis.fetch('/api/events', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(event),
@@ -249,7 +274,7 @@ export async function emit(event: EventData) {
 /**
  * Emite un evento de progreso (versión cliente)
  */
-export async function emitProgress(type: EventType, data: ProcessStatus) {
+export async function emitProgress(type: EventType, data: ProcessStatus, transport: EventTransport = 'auto') {
 	// Asegurarse de que timestamp esté presente
 	const dataWithTimestamp = {
 		...data,
@@ -257,8 +282,11 @@ export async function emitProgress(type: EventType, data: ProcessStatus) {
 	};
 
 	// Emitir el evento
-	await emit({
-		type,
-		data: dataWithTimestamp,
-	});
+	await emit(
+		{
+			type,
+			data: dataWithTimestamp,
+		},
+		transport
+	);
 }

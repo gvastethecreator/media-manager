@@ -1,0 +1,16 @@
+# Antigravity Ignore File
+# Prevent agent from interacting with these patterns
+
+# Windows reserved names
+nul
+con
+prn
+aux
+com1
+lpt1
+
+# System files
+System Volume Information
+$RECYCLE.BIN
+desktop.ini
+thumbs.db

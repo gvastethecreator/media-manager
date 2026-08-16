@@ -15,24 +15,24 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import { ImageThumbnail } from './image-thumbnail';
 
 interface EntityThumbnailProps {
-	/** Entidad para la cual generar el thumbnail */
-	entity: AnyEntityWithStats;
-	/** Tamaño del thumbnail */
-	size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-	/** Calidad del thumbnail a generar */
-	quality?: 'low' | 'medium' | 'high';
-	/** Clases CSS adicionales */
-	className?: string;
-	/** Si mostrar overlay con información */
-	showOverlay?: boolean;
 	/** Si aplicar animaciones */
 	animated?: boolean;
-	/** Callback cuando se hace clic */
-	onClick?: () => void;
-	/** Si está en modo de carga */
-	loading?: boolean;
 	/** Aspecto ratio personalizado */
 	aspectRatio?: string;
+	/** Clases CSS adicionales */
+	className?: string;
+	/** Entidad para la cual generar el thumbnail */
+	entity: AnyEntityWithStats;
+	/** Si está en modo de carga */
+	loading?: boolean;
+	/** Callback cuando se hace clic */
+	onClick?: () => void;
+	/** Calidad del thumbnail a generar */
+	quality?: 'low' | 'medium' | 'high';
+	/** Si mostrar overlay con información */
+	showOverlay?: boolean;
+	/** Tamaño del thumbnail */
+	size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }
 
 const sizeClasses = {
@@ -113,7 +113,7 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 				return (
 					<ImageThumbnail
 						className="h-full w-full object-cover"
-						name={entity?.name || 'Sin nombre'}
+						name={entity?.name || 'Unnamed'}
 						path={(entity as any)?.path || '/placeholder.jpg'}
 						size={qualityToImageSize[quality]}
 					/>
@@ -125,7 +125,7 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			return (
 				<div
 					className="flex h-full w-full items-center justify-center"
-					style={{ backgroundColor: `${config.color}20` }}
+					style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}
 				>
 					<IconComponent className="h-1/2 w-1/2 text-muted-foreground" style={{ color: config.color }} />
 				</div>
@@ -139,9 +139,9 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			}
 
 			return (
-				<div className="absolute inset-0 flex items-end bg-black/50 p-2 opacity-0 transition-opacity duration-200 hover:opacity-100">
+				<div className="absolute inset-0 flex items-end bg-muted/50 p-2 opacity-0 transition-opacity duration-200 hover:opacity-100">
 					<div className="text-white text-xs">
-						<div className="truncate font-medium">{entity?.name || 'Sin nombre'}</div>
+						<div className="truncate font-medium">{entity?.name || 'Unnamed'}</div>
 						<div className="text-white/80">{config?.displayName ?? ''}</div>
 					</div>
 				</div>
@@ -186,7 +186,9 @@ export const EntityThumbnailCompact = memo<Omit<EntityThumbnailProps, 'size' | '
 				aria-label={config?.displayName ?? 'thumbnail'}
 				className={cn('flex h-6 w-6 flex-shrink-0 items-center justify-center rounded', className)}
 				role="img"
-				style={{ backgroundColor: `${config?.color ?? '#888'}20` }}
+				style={{
+					backgroundColor: `color-mix(in oklab, ${config?.color ?? 'var(--muted-foreground)'}, transparent 80%)`,
+				}}
 			>
 				{IconComponent ? (
 					<IconComponent className="h-4 w-4" style={{ color: config?.color }} />
@@ -204,11 +206,11 @@ EntityThumbnailCompact.displayName = 'EntityThumbnailCompact';
  * Grid de thumbnails para mostrar múltiples entidades
  */
 interface EntityThumbnailGridProps {
+	className?: string;
 	entities: AnyEntityWithStats[];
 	maxItems?: number;
-	size?: EntityThumbnailProps['size'];
-	className?: string;
 	onEntityClick?: (entity: AnyEntityWithStats) => void;
+	size?: EntityThumbnailProps['size'];
 }
 
 export const EntityThumbnailGrid = memo<EntityThumbnailGridProps>(

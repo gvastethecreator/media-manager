@@ -1,5 +1,6 @@
 import { Edit, Trash2 } from 'lucide-react';
 import { memo, useCallback, useEffect, useState } from 'react';
+import { CreateNoteForm } from '@/components/settings/forms/create-note-form';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -13,13 +14,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { ViewProps } from '@/components/views/types';
-import { useCreateNote, useDeleteNote, useNotes, useUpdateNote } from '@/lib/api/notes';
+import { useDeleteNote, useNotes } from '@/lib/api/notes';
+import { getTaxonomyArtifactOrNull } from '@/lib/api/taxonomy-artifacts';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { NoteWithStats } from '@/types/entities/note';
 
@@ -27,67 +26,57 @@ const viewLogger = clientLogger.withContext('NotesView');
 
 export const NotesView = memo(function NotesView({ className }: ViewProps) {
 	const { data: notesResponse, isLoading, error } = useNotes();
-	const { mutate: createNote } = useCreateNote();
-	const { mutate: updateNote } = useUpdateNote();
-	const { mutate: deleteNote } = useDeleteNote();
+	const deleteNote = useDeleteNote();
+	const { toast } = useToast();
 
 	const [showForm, setShowForm] = useState(false);
 	const [editingNote, setEditingNote] = useState<NoteWithStats | null>(null);
-	const [noteTitle, setNoteTitle] = useState('');
-	const [noteContent, setNoteContent] = useState('');
 
 	const notes = notesResponse?.data || [];
 
 	useEffect(() => {
 		if (notes.length === 0) {
-			viewLogger.info('Cargando notas desde el servidor...');
+			viewLogger.info('Loading notes from the server...');
 		}
 	}, [notes.length]);
 
 	const handleEditNote = useCallback((note: NoteWithStats) => {
 		setEditingNote(note);
-		setNoteTitle(note.title);
-		setNoteContent(note.content || '');
 		setShowForm(true);
 	}, []);
 
 	const handleDeleteNote = useCallback(
-		(noteId: string) => {
-			deleteNote(noteId);
+		async (noteId: string) => {
+			try {
+				const artifact = await getTaxonomyArtifactOrNull('note', noteId);
+				let deleteMissingConfirmed = false;
+				if (artifact?.syncStatus === 'missing') {
+					deleteMissingConfirmed = globalThis.confirm(
+						'The canonical file is missing. Also delete the identity and its latest indexed projection?'
+					);
+					if (!deleteMissingConfirmed) return;
+				}
+				await deleteNote.mutateAsync({
+					contentHash: artifact?.contentHash,
+					deleteMissingConfirmed,
+					id: noteId,
+					syncStatus: artifact?.syncStatus,
+				});
+			} catch (error) {
+				toast({
+					description: error instanceof Error ? error.message : 'The note could not be deleted.',
+					title: 'Could not delete',
+					variant: 'destructive',
+				});
+			}
 		},
-		[deleteNote]
+		[deleteNote, toast]
 	);
 
-	const { toast } = useToast();
-	const handleSubmitForm = useCallback(() => {
-		if (noteTitle.trim() === '') {
-			toast({
-				title: '❌ Error',
-				description: 'El título de la nota no puede estar vacío.',
-				variant: 'destructive',
-			});
-			return;
-		}
-
-		if (editingNote) {
-			updateNote({ id: editingNote.id, data: { title: noteTitle, content: noteContent } });
-		} else {
-			createNote({
-				title: noteTitle,
-				content: noteContent,
-				category: null,
-				priority: 1,
-				status: null,
-				featuredImage: null,
-				isFavorite: false,
-				presetId: null,
-			});
-		}
-		setNoteTitle('');
-		setNoteContent('');
+	const closeForm = useCallback(() => {
 		setEditingNote(null);
 		setShowForm(false);
-	}, [noteTitle, noteContent, editingNote, createNote, updateNote, toast]);
+	}, []);
 
 	if (error) {
 		return (
@@ -100,50 +89,35 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 	return (
 		<div className={className}>
 			<div className="p-4">
-				<h2 className="mb-4 font-bold text-xl">Vista de Notas</h2>
+				<h2 className="mb-4 font-bold text-xl">Notes</h2>
 
 				<Button
 					className="mb-4"
 					onClick={() => {
 						setShowForm(!showForm);
 						setEditingNote(null);
-						setNoteTitle('');
-						setNoteContent('');
 					}}
 				>
-					{showForm ? 'Cancelar' : 'Crear Nota'}
+					{showForm ? 'Cancel' : 'Create Note'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">{editingNote ? 'Editar Nota' : 'Nueva Nota'}</h3>
-						<div className="mb-3 grid gap-2">
-							<Label htmlFor="noteTitle">Título</Label>
-							<Input
-								id="noteTitle"
-								onChange={(e) => setNoteTitle(e.target.value)}
-								placeholder="Título de la nota"
-								value={noteTitle}
-							/>
-						</div>
-						<div className="mb-4 grid gap-2">
-							<Label htmlFor="noteContent">Contenido</Label>
-							<Textarea
-								id="noteContent"
-								onChange={(e) => setNoteContent(e.target.value)}
-								placeholder="Contenido de la nota"
-								value={noteContent}
-							/>
-						</div>
-						<Button onClick={handleSubmitForm}>{editingNote ? 'Guardar Cambios' : 'Guardar Nota'}</Button>
+						<h3 className="mb-3 font-semibold text-lg">{editingNote ? 'Edit Note' : 'New Note'}</h3>
+						<CreateNoteForm
+							isEditing={Boolean(editingNote)}
+							note={editingNote}
+							onCancel={closeForm}
+							onSuccess={closeForm}
+						/>
 					</div>
 				)}
 
 				{isLoading ? (
-					<p>Cargando notas...</p>
+					<p>Loading notes...</p>
 				) : notes && notes.length > 0 ? (
 					<ScrollArea className="h-[calc(100vh-200px)]">
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+						<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 							{notes.map((note: NoteWithStats) => (
 								<Card key={note.id}>
 									<CardHeader>
@@ -153,28 +127,29 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 										<p className="text-muted-foreground text-sm">{note.content}</p>
 										<div className="mt-2 flex gap-2">
 											<Button onClick={() => handleEditNote(note)} size="sm" variant="outline">
-												<Edit className="mr-1 h-4 w-4" /> Editar
+												<Edit className="mr-1 h-4 w-4" /> Edit
 											</Button>
 											<AlertDialog>
 												<AlertDialogTrigger asChild>
 													<Button size="sm" variant="destructive">
-														<Trash2 className="mr-1 h-4 w-4" /> Eliminar
+														<Trash2 className="mr-1 h-4 w-4" /> Delete
 													</Button>
 												</AlertDialogTrigger>
 												<AlertDialogContent>
 													<AlertDialogHeader>
-														<AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+														<AlertDialogTitle>Are you sure?</AlertDialogTitle>
 														<AlertDialogDescription>
-															Esta acción eliminará permanentemente la nota "{note.title}".
+															This action will permanently delete the note "{note.title}".
 														</AlertDialogDescription>
 													</AlertDialogHeader>
 													<AlertDialogFooter>
-														<AlertDialogCancel>Cancelar</AlertDialogCancel>
+														<AlertDialogCancel>Cancel</AlertDialogCancel>
 														<AlertDialogAction
 															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+															disabled={deleteNote.isPending}
 															onClick={() => handleDeleteNote(note.id)}
 														>
-															Eliminar
+															Delete
 														</AlertDialogAction>
 													</AlertDialogFooter>
 												</AlertDialogContent>

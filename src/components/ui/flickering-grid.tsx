@@ -2,22 +2,22 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface FlickeringGridProps {
-	squareSize?: number;
-	gridGap?: number;
-	flickerChance?: number;
-	color?: string;
-	width?: number;
-	height?: number;
 	className?: string;
+	color?: string;
+	flickerChance?: number;
+	gridGap?: number;
+	height?: number;
 
 	maxOpacity?: number;
+	squareSize?: number;
+	width?: number;
 }
 
 const FlickeringGrid: React.FC<FlickeringGridProps> = ({
 	squareSize = 4,
 	gridGap = 6,
 	flickerChance = 0.3,
-	color = 'rgb(0, 0, 0)',
+	color = 'currentColor',
 	width,
 	height,
 	className,

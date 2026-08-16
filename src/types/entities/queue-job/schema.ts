@@ -11,6 +11,7 @@ import { QueueJobStatus } from './types';
  */
 export const QueueJobSchema = z.object({
 	id: z.string(),
+	idempotencyKey: z.string().min(1).max(200).nullable().optional(),
 	queue: z.string(),
 	data: z.string(),
 	status: z.nativeEnum(QueueJobStatus),
@@ -42,6 +43,7 @@ export const queueJobMetadataSchema = z
 export const createQueueJobSchema = z.object({
 	queue: z.string().min(1, 'Cola requerida'),
 	data: z.string().min(1, 'Datos requeridos'),
+	idempotencyKey: z.string().min(1).max(200).optional(),
 	maxAttempts: z.number().int().min(1).max(10).default(3),
 	priority: z.number().int().min(0).max(10).default(0),
 	metadata: queueJobMetadataSchema,

@@ -29,11 +29,11 @@ export const WildcardStatsSchema = z.object({
 /**
  * Tipo para hijos de comodín (recursivo)
  */
-export type WildcardChild = {
+export interface WildcardChild {
+	children?: WildcardChild[];
 	id: string;
 	name: string;
-	children?: WildcardChild[];
-};
+}
 
 /**
  * Esquema para hijos de comodín (estructura anidada)
@@ -49,9 +49,15 @@ export const WildcardChildSchema: z.ZodType<WildcardChild> = z.object({
  */
 export const WildcardSchema = z.object({
 	id: z.string(),
-	name: z.string().min(1, 'El nombre es obligatorio'),
+	name: z.string().min(1, 'The name is required'),
 	emoji: z.string().default('🎭'),
-	color: z.string().default('#6366F1'),
+	color: z
+		.string()
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color must be a valid hexadecimal value or CSS variable'
+		)
+		.default('var(--entity-wildcard)'),
 	description: z.string().nullable().optional(),
 	shortcut: z.string().nullable().optional(),
 	category: z.string().nullable().optional(),
@@ -72,20 +78,25 @@ export const WildcardSchema = z.object({
  */
 export const CreateWildcardSchema = WildcardSchema.omit({
 	id: true,
+	isFavorite: true,
 	createdAt: true,
 	updatedAt: true,
 }).extend({
-	name: z.string().min(1, 'El nombre es obligatorio'),
+	name: z.string().min(1, 'The name is required'),
+	isFavorite: z.boolean().optional(),
 });
 
 /**
  * Esquema para actualizar un comodín
  */
-export const UpdateWildcardSchema = WildcardSchema.partial().omit({
-	id: true,
-	createdAt: true,
-	updatedAt: true,
-});
+export const UpdateWildcardSchema = WildcardSchema.partial()
+	.omit({
+		id: true,
+		isFavorite: true,
+		createdAt: true,
+		updatedAt: true,
+	})
+	.extend({ isFavorite: z.boolean().optional() });
 
 /**
  * Esquema para relaciones de un comodín

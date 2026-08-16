@@ -6,7 +6,7 @@
  */
 
 import { execSync } from 'child_process';
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -42,76 +42,16 @@ try {
 	process.exit(1);
 }
 
-// 3. Preparar base de datos para distribución
-console.log('🗃️  Preparando base de datos...');
-const dbSourcePath = join(rootDir, 'db.sqlite');
-const dbTargetPath = join(rootDir, 'dist', 'server', 'db.sqlite');
-
-try {
-	// Crear directorio si no existe
-	const dbTargetDir = dirname(dbTargetPath);
-	if (!existsSync(dbTargetDir)) {
-		mkdirSync(dbTargetDir, { recursive: true });
-	}
-
-	// Copiar base de datos si existe
-	if (existsSync(dbSourcePath)) {
-		cpSync(dbSourcePath, dbTargetPath);
-		console.log('✅ Base de datos copiada a dist/server/\n');
-	} else {
-		console.log('⚠️  No se encontró db.sqlite, se creará una nueva en la primera ejecución\n');
-	}
-} catch (error) {
-	console.error('❌ Error preparando base de datos:', error.message);
+// 3. La distribución incluye migraciones, nunca una copia de datos del workspace.
+console.log('🗃️  Verificando migraciones versionadas...');
+const migrationsPath = join(rootDir, 'src', 'lib', 'drizzle', 'migrations', '0000_baseline.sql');
+if (!existsSync(migrationsPath)) {
+	console.error('❌ Falta el baseline de migraciones versionado.');
 	process.exit(1);
 }
+console.log('✅ Baseline listo; no se empaquetará db.sqlite\n');
 
-// 4. Crear script wrapper para el backend
-console.log('📝 Creando wrapper del backend...');
-const wrapperScript = `#!/usr/bin/env node
-
-// Wrapper para ejecutar el backend en el contexto de Tauri
-const { join } = require('path');
-const { existsSync } = require('fs');
-
-// Determinar la ruta del ejecutable
-const isPackaged = process.env.TAURI_ENV === 'prod';
-const backendPath = isPackaged
-  ? join(process.resourcesPath, 'server', 'index.js')
-  : join(__dirname, 'index.js');
-
-// Configurar variables de entorno
-if (isPackaged) {
-  // Modo producción: usar recursos empaquetados
-  process.env.NODE_ENV = 'production';
-  process.env.DATABASE_URL = 'file:' + join(process.resourcesPath, 'server', 'db.sqlite');
-  process.env.API_PORT = process.env.PORT || '4000';
-  process.env.CORS_ORIGIN = 'tauri://localhost';
-} else {
-  // Modo desarrollo: usar variables de entorno del proyecto
-  process.env.NODE_ENV = 'development';
-  process.env.DATABASE_URL = 'file:' + join(__dirname, 'db.sqlite');
-  process.env.API_PORT = process.env.PORT || '4000';
-  process.env.CORS_ORIGIN = 'http://localhost:5173';
-  process.env.VITE_API_URL = 'http://localhost:4000/api';
-}
-
-// Log para debug
-console.log('[Tauri Backend] Configuración:');
-console.log('- NODE_ENV:', process.env.NODE_ENV);
-console.log('- DATABASE_URL:', process.env.DATABASE_URL);
-console.log('- API_PORT:', process.env.API_PORT);
-console.log('- Packaged:', isPackaged);
-
-// Ejecutar el backend
-require(backendPath);
-`;
-
-const wrapperPath = join(rootDir, 'dist', 'server', 'wrapper.js');
-writeFileSync(wrapperPath, wrapperScript);
-console.log('✅ Wrapper del backend creado\n');
-
-// 5. Construir aplicación Tauri
+// 4. Construir aplicación Tauri
 console.log('🦀 Construyendo aplicación Tauri...');
 try {
 	execSync('bunx tauri build', {

@@ -1,108 +1,47 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/types/entities/album';
 import type { ImageWithStats } from '@/types/entities/image';
+import { createEntityHooks } from './hook-factory';
+import type { EntityListResult } from './hook-factory';
 import { apiClient } from './client';
 
-// Re-export types for external use
 export type { AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/types/entities/album';
 
 export interface AlbumFilters {
-	search?: string;
+	[key: string]: unknown;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 }
 
-export interface AlbumsResponse {
-	data: AlbumWithStats[];
-	pagination: {
-		total: number;
-		limit: number;
-		offset: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	};
-}
+const hooks = createEntityHooks<AlbumWithStats, AlbumCreateInput, AlbumUpdateInput, AlbumFilters>({
+	entityName: 'albums',
+	baseEndpoint: '/albums',
+	listStaleTime: 60_000,
+	detailStaleTime: 60_000,
+});
 
-// Query keys
 export const albumKeys = {
-	all: ['albums'] as const,
-	lists: () => [...albumKeys.all, 'list'] as const,
-	list: (filters: AlbumFilters) => [...albumKeys.lists(), filters] as const,
-	details: () => [...albumKeys.all, 'detail'] as const,
-	detail: (id: string) => [...albumKeys.details(), id] as const,
-	images: (id: string) => [...albumKeys.detail(id), 'images'] as const,
+	...hooks.keys,
+	images: (id: string) => [...hooks.keys.detail(id), 'images'] as const,
 };
 
-// Hooks
-export function useAlbums(filters: AlbumFilters = {}) {
-	return useQuery<AlbumsResponse, Error>({
-		queryKey: albumKeys.list(filters),
-		queryFn: () => {
-			const params = new URLSearchParams();
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					params.append(key, String(value));
-				}
-			}
-			return apiClient.get<AlbumsResponse>(`/albums?${params.toString()}`);
-		},
-		staleTime: 1000 * 60, // 1 minuto
-	});
-}
+export const useAlbums = hooks.useList;
+export const useAlbum = hooks.useDetail;
+export const useCreateAlbum = hooks.useCreate;
+export const useUpdateAlbum = hooks.useUpdate;
+export const useDeleteAlbum = hooks.useDelete;
 
-export function useAlbum(id: string) {
-	return useQuery<AlbumWithStats, Error>({
-		queryKey: albumKeys.detail(id),
-		queryFn: () => apiClient.get<AlbumWithStats>(`/albums/${id}`),
-		enabled: !!id,
-		staleTime: 1000 * 60, // 1 minuto
-	});
-}
+export type AlbumsResponse = EntityListResult<AlbumWithStats>;
 
 export function useAlbumImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: albumKeys.images(id),
 		queryFn: () => apiClient.get<ImageWithStats[]>(`/albums/${id}/images`),
 		enabled: !!id,
-		staleTime: 1000 * 30, // 30 segundos
-	});
-}
-
-export function useCreateAlbum() {
-	const queryClient = useQueryClient();
-
-	return useMutation<AlbumWithStats, Error, AlbumCreateInput>({
-		mutationFn: (data) => apiClient.post<AlbumWithStats>('/albums', data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
-		},
-	});
-}
-
-export function useUpdateAlbum() {
-	const queryClient = useQueryClient();
-
-	return useMutation<AlbumWithStats, Error, { id: string; data: AlbumUpdateInput }>({
-		mutationFn: ({ id, data }) => apiClient.put<AlbumWithStats>(`/albums/${id}`, data),
-		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
-			queryClient.setQueryData(albumKeys.detail(data.id), data);
-		},
-	});
-}
-
-export function useDeleteAlbum() {
-	const queryClient = useQueryClient();
-
-	return useMutation<void, Error, string>({
-		mutationFn: (id) => apiClient.delete(`/albums/${id}`),
-		onSuccess: (_, id) => {
-			queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
-			queryClient.removeQueries({ queryKey: albumKeys.detail(id) });
-			queryClient.removeQueries({ queryKey: albumKeys.images(id) });
-		},
+		staleTime: 1000 * 30,
 	});
 }
 
@@ -127,5 +66,19 @@ export function useRemoveImageFromAlbum() {
 			queryClient.invalidateQueries({ queryKey: albumKeys.images(albumId) });
 			queryClient.invalidateQueries({ queryKey: albumKeys.detail(albumId) });
 		},
+	});
+}
+
+export function useAlbumRecentMedia(albumId: string, limit = 6) {
+	return useQuery<
+		Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>,
+		Error
+	>({
+		queryKey: [...albumKeys.detail(albumId), 'recent-media', limit],
+		queryFn: () =>
+			apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>>(
+				`/albums/${albumId}/recent-media?limit=${limit}`
+			),
+		enabled: !!albumId,
 	});
 }

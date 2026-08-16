@@ -2,83 +2,97 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from './client';
 
 export interface GeneralStats {
-	totalImages: number;
-	totalVideos: number;
-	totalAudio: number;
-	totalDocuments: number;
-	totalJsonFiles: number;
-	totalFile3D: number;
-	totalWorkflows: number;
-	totalFolders: number;
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalNotes: number;
-	totalProperties: number;
-	totalWildcards: number;
-	totalFavorites: number;
-	totalThumbnails: number;
-	totalMetadata: number;
-	totalActivities: number;
-	// Información de espacio
-	usedSpace?: number;
-	freeSpace?: number;
+	averageFileSize: number;
+	cpuCores?: number;
+	cpuModel?: string;
+	cpuUsage?: number;
+	databaseSize?: number;
+	formattedDatabaseSize?: string;
 	diskUsage?: {
 		total: number;
 		used: number;
 		free: number;
 		usedPercentage: number;
 	};
+	freeSpace?: number;
+	hostname?: string;
+	memoryFree?: number;
+	memoryTotal?: number;
+	memoryUsage?: number;
+	memoryUsed?: number;
+	nodeVersion?: string;
+	platform?: string;
 	// Estadísticas calculadas
+	storageAvailable?: number;
 	storageUsed: number;
-	averageFileSize: number;
+	totalActivities: number;
+	totalAlbums: number;
+	totalAudio: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalConcepts: number;
+	totalDocuments: number;
+	totalFavorites: number;
+	totalFile3D: number;
+	totalFolders: number;
+	totalImages: number;
+	totalJsonFiles: number;
+	totalMetadata: number;
+	totalNotes: number;
+	totalPlaces: number;
+	totalPrompts: number;
+	totalProperties: number;
+	totalTags: number;
+	totalThumbnails: number;
+	totalVideos: number;
+	totalWildcards: number;
+	totalWorkflows: number;
+	totalWorldItems: number;
+	uptime?: number;
+	// Información de espacio
+	usedSpace?: number;
 }
 
 export interface RecentActivity {
-	id: string;
-	type: 'create' | 'update' | 'delete';
-	entityType: string;
+	details?: Record<string, unknown>;
 	entityId: string;
 	entityName: string;
-	userId?: string;
+	entityType: string;
+	id: string;
 	timestamp: string;
-	details?: Record<string, unknown>;
+	type: 'create' | 'update' | 'delete';
+	userId?: string;
 }
 
 export interface TopTag {
-	id: string;
-	name: string;
-	emoji?: string;
 	color?: string;
+	emoji?: string;
+	id: string;
 	imageCount: number;
+	name: string;
 	percentage: number;
 }
 
 export interface StorageBreakdown {
-	images: { count: number; size: number; percentage: number };
-	videos: { count: number; size: number; percentage: number };
 	audio: { count: number; size: number; percentage: number };
 	documents: { count: number; size: number; percentage: number };
-	thumbnails: { count: number; size: number; percentage: number };
+	images: { count: number; size: number; percentage: number };
 	other: { count: number; size: number; percentage: number };
+	thumbnails: { count: number; size: number; percentage: number };
+	videos: { count: number; size: number; percentage: number };
 }
 
 export interface SystemStatsExtended extends GeneralStats {
-	recentActivity: RecentActivity[];
-	topTags: TopTag[];
-	storageBreakdown: StorageBreakdown;
 	lastUpdated: string;
+	recentActivity: RecentActivity[];
+	storageBreakdown: StorageBreakdown;
+	topTags: TopTag[];
 }
 
 export interface StatsFilters {
-	period?: 'day' | 'week' | 'month' | 'year';
 	entityType?: string;
 	limit?: number;
+	period?: 'day' | 'week' | 'month' | 'year';
 }
 
 // Query keys

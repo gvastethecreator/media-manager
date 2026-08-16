@@ -1,39 +1,39 @@
 'use client';
 
+import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
-import { Accordion as AccordionPrimitive } from 'radix-ui';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 interface AccordionMenuContextValue {
-	matchPath: (href: string) => boolean;
-	selectedValue: string | undefined;
-	setSelectedValue: React.Dispatch<React.SetStateAction<string | undefined>>;
 	classNames?: AccordionMenuClassNames;
+	matchPath: (href: string) => boolean;
 	nestedStates: Record<string, string | string[]>;
-	setNestedStates: React.Dispatch<React.SetStateAction<Record<string, string | string[]>>>;
 	onItemClick?: (value: string, event: React.MouseEvent) => void;
+	selectedValue: string | undefined;
+	setNestedStates: React.Dispatch<React.SetStateAction<Record<string, string | string[]>>>;
+	setSelectedValue: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 interface AccordionMenuClassNames {
-	root?: string;
 	group?: string;
-	label?: string;
-	separator?: string;
-	item?: string;
-	sub?: string;
-	subTrigger?: string;
-	subContent?: string;
-	subWrapper?: string;
 	indicator?: string;
+	item?: string;
+	label?: string;
+	root?: string;
+	separator?: string;
+	sub?: string;
+	subContent?: string;
+	subTrigger?: string;
+	subWrapper?: string;
 }
 
 interface AccordionMenuProps {
-	selectedValue?: string;
-	matchPath?: (href: string) => boolean;
 	classNames?: AccordionMenuClassNames;
+	matchPath?: (href: string) => boolean;
 	onItemClick?: (value: string, event: React.MouseEvent) => void;
+	selectedValue?: string;
 }
 
 const AccordionMenuContext = React.createContext<AccordionMenuContextValue>({
@@ -282,7 +282,7 @@ function AccordionMenuSubTrigger({
 				{children}
 				<ChevronDown
 					className={cn(
-						'[[data-state=open]>&]:-rotate-180 ms-auto size-3.5! shrink-0 text-muted-foreground transition-transform duration-200'
+						'ms-auto size-3.5! shrink-0 text-muted-foreground transition-transform duration-dt-fast ease-dt-out [[data-state=open]>&]:-rotate-180'
 					)}
 					data-slot="accordion-menu-sub-indicator"
 				/>

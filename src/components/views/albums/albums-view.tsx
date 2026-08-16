@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCreateAlbum, useDeleteAlbum, useUpdateAlbum } from '@/lib/api/albums';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { useAlbumStore } from '@/store/entities/album';
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { ViewProps } from '../types';
@@ -9,11 +11,13 @@ import AlbumsContentView from './albums-content-view';
 const viewLogger = clientLogger.withContext('AlbumsView');
 
 export function AlbumsView(_props: ViewProps) {
+	const navigate = useNavigate();
 	const albumsRecord = useAlbumStore((s) => s.albums);
 	const isLoading = useAlbumStore((s) => s.isLoading);
 	const error = useAlbumStore((s) => s.error);
 	const loadAlbums = useAlbumStore((s) => s.loadAlbums);
 	const getSortedAlbums = useAlbumStore((s) => s.getSortedAlbums);
+	const setCurrentAlbumId = useAlbumStore((s) => s.setCurrentAlbumId);
 	const { mutate: createAlbum } = useCreateAlbum();
 	const { mutate: updateAlbum } = useUpdateAlbum();
 	const { mutate: deleteAlbum } = useDeleteAlbum();
@@ -25,15 +29,19 @@ export function AlbumsView(_props: ViewProps) {
 
 	useEffect(() => {
 		if (Object.keys(albumsRecord).length === 0) {
-			viewLogger.info('Store de álbumes vacío, cargando desde el servidor...');
+			viewLogger.info('Album store is empty, loading from the server...');
 			loadAlbums();
 		}
 	}, [loadAlbums, albumsRecord]);
 
-	const handleAlbumClick = useCallback((album: AlbumWithStats) => {
-		viewLogger.info('🖱️ Click en álbum:', album.name);
-		// TODO: Lógica de navegación o apertura de visor aquí
-	}, []);
+	const handleAlbumClick = useCallback(
+		(album: AlbumWithStats) => {
+			viewLogger.info('🖱️ Album clicked:', album.name);
+			setCurrentAlbumId(album.id);
+			navigate(`/albums/${album.id}`);
+		},
+		[navigate, setCurrentAlbumId]
+	);
 
 	const handleEditAlbum = useCallback((album: AlbumWithStats) => {
 		setEditingAlbum(album);
@@ -66,8 +74,7 @@ export function AlbumsView(_props: ViewProps) {
 				name: albumName,
 				description: albumDescription,
 				emoji: '📸',
-				color: '#3b82f6',
-				isFavorite: false,
+				color: DEFAULT_ENTITY_COLOR,
 				filters: '[]',
 				sortBy: 'name',
 				featuredImage: undefined,
@@ -82,8 +89,9 @@ export function AlbumsView(_props: ViewProps) {
 	}, [albumName, albumDescription, editingAlbum, createAlbum, updateAlbum]);
 
 	const sortedAlbums = useMemo(() => {
+		viewLogger.info('Recalculando sortedAlbums. Registros:', Object.keys(albumsRecord).length);
 		return getSortedAlbums();
-	}, [getSortedAlbums]);
+	}, [getSortedAlbums, albumsRecord]);
 
 	return (
 		<AlbumsContentView

@@ -1,133 +1,160 @@
+import { Effect } from 'effect';
 import express from 'express';
+import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { getFolderStats, getStats, getSystemStats, getSystemStatsExtended } from '../services/stats.service';
+import { sanitizeLimit } from '../utils/pagination';
 
 const router = express.Router();
 
-// GET /stats/general - Obtener estadísticas generales
-router.get('/general', async (_req, res) => {
-	try {
-		const stats = await getStats();
-		res.json(stats);
-	} catch (error) {
-		console.error('Error getting general stats:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
+router.use((_req, res) => {
+	res.status(410).json({
+		code: 'AUTHORIZED_SCOPE_REQUIRED',
+		message: 'Las estadísticas globales fueron retiradas hasta disponer de agregados por media root.',
+		retryable: false,
+	});
 });
+
+/**
+ * Helper para crear errores tipados en catch de Effect.tryPromise
+ */
+function toError(context: string, error: unknown): Error {
+	serverLogger.error(`${context}:`, error);
+	return new Error(`${context}: ${error instanceof Error ? error.message : String(error)}`);
+}
+
+// GET /stats/general - Obtener estadísticas generales
+router.get(
+	'/general',
+	effectHandler((_req, _res) =>
+		Effect.tryPromise({
+			try: () => getStats(),
+			catch: (error) => toError('Error getting general stats', error),
+		})
+	)
+);
 
 // GET /stats/system - Obtener estadísticas del sistema (compatibilidad con frontend)
-router.get('/system', async (_req, res) => {
-	console.log('🎯 [ROUTER] /stats/system endpoint llamado');
-	try {
-		console.log('🎯 [ROUTER] Llamando a getSystemStats()...');
-		const stats = await getSystemStats();
-		console.log('🎯 [ROUTER] Resultado de getSystemStats:', stats);
-		res.json(stats);
-	} catch (error) {
-		console.error('🚨 [ROUTER] Error getting system stats:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
+router.get(
+	'/system',
+	effectHandler((_req, _res) =>
+		Effect.tryPromise({
+			try: () => getSystemStats(),
+			catch: (error) => toError('Error getting system stats', error),
+		})
+	)
+);
 
 // GET /stats/extended - Obtener estadísticas extendidas del sistema
-router.get('/extended', async (_req, res) => {
-	try {
-		const stats = await getSystemStatsExtended();
-		res.json(stats);
-	} catch (error) {
-		console.error('Error getting extended stats:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
+router.get(
+	'/extended',
+	effectHandler((_req, _res) =>
+		Effect.tryPromise({
+			try: () => getSystemStatsExtended(),
+			catch: (error) => toError('Error getting extended stats', error),
+		})
+	)
+);
 
 // GET /stats/activity - Obtener actividad reciente
-router.get('/activity', async (req, res) => {
-	try {
-		const { limit = '50' } = req.query;
-		const stats = await getSystemStats();
-		const activity = stats?.recentActivity?.slice(0, Number.parseInt(limit as string, 10)) || [];
-		res.json(activity);
-	} catch (error) {
-		console.error('Error getting recent activity:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
+router.get(
+	'/activity',
+	effectHandler((req, _res) =>
+		Effect.tryPromise({
+			try: async () => {
+				const { limit = '50' } = req.query;
+				const stats = await getSystemStats();
+				return stats?.recentActivity?.slice(0, sanitizeLimit(limit, 50, 200)) || [];
+			},
+			catch: (error) => toError('Error getting recent activity', error),
+		})
+	)
+);
 
 // GET /stats/top-tags - Obtener tags más populares
-router.get('/top-tags', async (req, res) => {
-	try {
-		const { limit = '10' } = req.query;
-		const stats = await getSystemStats();
-		const topTags = stats?.topTags?.slice(0, Number.parseInt(limit as string, 10)) || [];
-		res.json(topTags);
-	} catch (error) {
-		console.error('Error getting top tags:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
+router.get(
+	'/top-tags',
+	effectHandler((req, _res) =>
+		Effect.tryPromise({
+			try: async () => {
+				const { limit = '10' } = req.query;
+				const stats = await getSystemStats();
+				return stats?.topTags?.slice(0, sanitizeLimit(limit, 10, 100)) || [];
+			},
+			catch: (error) => toError('Error getting top tags', error),
+		})
+	)
+);
 
 // GET /stats/folders - Obtener estadísticas detalladas de carpetas
-router.get('/folders', async (_req, res) => {
-	try {
-		const stats = await getFolderStats();
-		if (!stats) {
-			res.status(500).json({ error: 'No se pudieron obtener las estadísticas de carpetas' });
-			return;
-		}
-		res.json(stats);
-	} catch (error) {
-		console.error('Error getting folder stats:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
+router.get(
+	'/folders',
+	effectHandler((_req, res) =>
+		Effect.tryPromise({
+			try: async () => {
+				const stats = await getFolderStats();
+				if (!stats) {
+					res.status(500);
+					return { error: 'No se pudieron obtener las estadísticas de carpetas' };
+				}
+				return stats;
+			},
+			catch: (error) => toError('Error getting folder stats', error),
+		})
+	)
+);
 
 // GET /stats/storage - Obtener desglose de almacenamiento
-router.get('/storage', async (_req, res) => {
-	try {
-		const stats = await getSystemStatsExtended();
+router.get(
+	'/storage',
+	effectHandler((_req, _res) =>
+		Effect.tryPromise({
+			try: async () => {
+				const stats = await getSystemStatsExtended();
 
-		const totalSize = stats?.totalSize || 0;
-		const totalDocuments = stats?.totalDocuments || 0;
-		const totalAudio = stats?.totalAudio || 0;
-		const totalJsonFiles = stats?.totalJsonFiles || 0;
-		const totalWorkflows = 0; // stats?.totalWorkflows || 0; // totalWorkflows no está disponible
-		const totalFile3D = stats?.totalFile3D || 0;
+				const totalSize = stats?.totalSize || 0;
+				const totalDocuments = stats?.totalDocuments || 0;
+				const totalAudio = stats?.totalAudio || 0;
+				const totalJsonFiles = stats?.totalJsonFiles || 0;
+				const totalWorkflows = 0;
+				const totalFile3D = stats?.totalFile3D || 0;
 
-		const storage = {
-			images: { count: stats?.totalImages || 0, size: totalSize, percentage: 0 },
-			videos: { count: stats?.totalVideos || 0, size: 0, percentage: 0 }, // TODO: Añadir tamaño de videos
-			audio: { count: stats?.totalAudio || 0, size: totalAudio, percentage: 0 },
-			documents: { count: stats?.totalDocuments || 0, size: totalDocuments, percentage: 0 },
-			thumbnails: { count: stats?.totalThumbnails || 0, size: 0, percentage: 0 }, // TODO: Añadir tamaño de thumbnails
-			other: {
-				count: (stats?.totalJsonFiles || 0) + (stats?.totalFile3D || 0) + totalWorkflows,
-				size: totalJsonFiles + totalFile3D,
-				percentage: 0,
+				const storage = {
+					images: { count: stats?.totalImages || 0, size: totalSize, percentage: 0 },
+					videos: { count: stats?.totalVideos || 0, size: stats?.videoSize || 0, percentage: 0 },
+					audio: { count: stats?.totalAudio || 0, size: totalAudio, percentage: 0 },
+					documents: { count: stats?.totalDocuments || 0, size: totalDocuments, percentage: 0 },
+					thumbnails: { count: stats?.totalThumbnails || 0, size: stats?.thumbnailSize || 0, percentage: 0 },
+					other: {
+						count: (stats?.totalJsonFiles || 0) + (stats?.totalFile3D || 0) + totalWorkflows,
+						size: totalJsonFiles + totalFile3D,
+						percentage: 0,
+					},
+				};
+
+				// Calcular porcentajes
+				const grandTotalSize =
+					storage.images.size +
+					storage.videos.size +
+					storage.audio.size +
+					storage.documents.size +
+					storage.thumbnails.size +
+					storage.other.size;
+
+				if (grandTotalSize > 0) {
+					storage.images.percentage = (storage.images.size / grandTotalSize) * 100;
+					storage.videos.percentage = (storage.videos.size / grandTotalSize) * 100;
+					storage.audio.percentage = (storage.audio.size / grandTotalSize) * 100;
+					storage.documents.percentage = (storage.documents.size / grandTotalSize) * 100;
+					storage.thumbnails.percentage = (storage.thumbnails.size / grandTotalSize) * 100;
+					storage.other.percentage = (storage.other.size / grandTotalSize) * 100;
+				}
+
+				return storage;
 			},
-		};
-
-		// Calcular porcentajes
-		const grandTotalSize =
-			storage.images.size +
-			storage.videos.size +
-			storage.audio.size +
-			storage.documents.size +
-			storage.thumbnails.size +
-			storage.other.size;
-
-		if (grandTotalSize > 0) {
-			storage.images.percentage = (storage.images.size / grandTotalSize) * 100;
-			storage.videos.percentage = (storage.videos.size / grandTotalSize) * 100;
-			storage.audio.percentage = (storage.audio.size / grandTotalSize) * 100;
-			storage.documents.percentage = (storage.documents.size / grandTotalSize) * 100;
-			storage.thumbnails.percentage = (storage.thumbnails.size / grandTotalSize) * 100;
-			storage.other.percentage = (storage.other.size / grandTotalSize) * 100;
-		}
-
-		res.json(storage);
-	} catch (error) {
-		console.error('Error getting storage breakdown:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
+			catch: (error) => toError('Error getting storage breakdown', error),
+		})
+	)
+);
 
 export default router;

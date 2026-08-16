@@ -34,12 +34,8 @@ export function toDrizzleNote(
 			NoteSchema.parse(note);
 		}
 
-		const { isFavorite, ...otherProps } = note as Record<string, any>;
+		const { isFavorite: _ignoredIsFavorite, ...otherProps } = note as Record<string, any>;
 		const drizzleData: Record<string, any> = { ...otherProps };
-
-		if (isFavorite !== undefined) {
-			drizzleData.isFavorite = isFavorite;
-		}
 
 		return drizzleData;
 	} catch (error) {
@@ -103,14 +99,14 @@ export function fromDrizzleNote(
 			if (noteComplete.updatedAt) {
 				noteComplete.formattedDate =
 					noteComplete.updatedAt instanceof Date
-						? noteComplete.updatedAt.toLocaleDateString('es-ES', {
+						? noteComplete.updatedAt.toLocaleDateString('en-US', {
 								day: '2-digit',
 								month: '2-digit',
 								year: 'numeric',
 								hour: '2-digit',
 								minute: '2-digit',
 							})
-						: new Date(noteComplete.updatedAt).toLocaleDateString('es-ES', {
+						: new Date(noteComplete.updatedAt).toLocaleDateString('en-US', {
 								day: '2-digit',
 								month: '2-digit',
 								year: 'numeric',
@@ -175,18 +171,3 @@ export function extendNotes(
 ): NoteComplete[] {
 	return notes.map((note) => extendNote(note, options));
 }
-
-/**
- * @deprecated Usa las funciones específicas en su lugar
- * Objeto con las funciones de serialización para compatibilidad
- */
-export const NoteSerializer = {
-	toDrizzleNote,
-	fromDrizzleNote,
-	validateNote,
-	extendNote,
-	extendNotes,
-};
-
-// Exportar como default para compatibilidad
-export default NoteSerializer;

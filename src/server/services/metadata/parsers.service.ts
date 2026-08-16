@@ -6,19 +6,19 @@ import { extractAllMetadata, quickOriginDetection } from './unified-parser.servi
  * Tipo para los datos de generación por IA (legacy compatibility)
  */
 export interface AIGenerationMetadata {
-	type: string;
-	prompt?: string;
-	negative_prompt?: string;
-	model?: string;
-	steps?: number;
-	cfg_scale?: number;
 	cfg?: number;
-	seed?: number | string;
+	cfg_scale?: number;
+	clip_skip?: number;
+	extra_params?: Record<string, string | number | boolean | null | undefined | string[]>;
+	model?: string;
+	negative_prompt?: string;
+	prompt?: string;
 	sampler?: string;
 	scheduler?: string;
-	clip_skip?: number;
+	seed?: number | string;
+	steps?: number;
+	type: string;
 	workflow?: string;
-	extra_params?: Record<string, string | number | boolean | null | undefined | string[]>;
 }
 
 /**
@@ -31,14 +31,13 @@ export type ParserFunction = (metadata: Record<string, unknown>) => Promise<AIGe
  */
 export interface AIGenerationParserModule {
 	/**
-	 * Nombre identificativo del parser
-	 */
-	name: string;
-
-	/**
 	 * Función para determinar si este parser puede procesar los metadatos
 	 */
 	canParse: (metadata: Record<string, unknown>) => Promise<boolean>;
+	/**
+	 * Nombre identificativo del parser
+	 */
+	name: string;
 
 	/**
 	 * Función para extraer y convertir los metadatos

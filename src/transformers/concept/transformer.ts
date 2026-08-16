@@ -140,29 +140,3 @@ export function fromDrizzleConcepts(
 		.map(({ concept, counts }) => fromDrizzleConcept(concept, counts))
 		.filter((c): c is ConceptWithStats => c !== null);
 }
-
-/**
- * 🔄 Función legacy de compatibilidad - transforma concepto con relaciones extendidas.
- * @deprecated Usar fromDrizzleConcept en su lugar.
- */
-export function fromDrizzleConceptWithRelations(
-	conceptData: ConceptBase | null,
-	counts: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	}
-): ConceptWithStats | null {
-	// Delegar a la función principal
-	return fromDrizzleConcept(conceptData, counts);
-}

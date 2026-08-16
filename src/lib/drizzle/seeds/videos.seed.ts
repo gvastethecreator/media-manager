@@ -1,13 +1,39 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { videos } from '../schema/index';
 import { seedLogger } from './index';
 
 /**
- * Seed vacío para videos - base de datos limpia
- * Los videos se generarán dinámicamente al escanear carpetas
+ * Seed para videos - datos de prueba sin asociaciones
  */
 export async function seedVideos(db: LibSQLDatabase<Record<string, never>>) {
-	seedLogger.info('🎥 Seeds de videos omitidas - base de datos limpia');
+	seedLogger.info('🎥 Creando videos de prueba (sin asociaciones)...');
 
-	// No insertar datos mockup - los videos reales se detectarán al escanear carpetas
-	seedLogger.success('✅ Tabla videos lista para datos reales');
+	try {
+		const sampleVideos = [
+			{
+				id: 'vid-seed-001',
+				name: 'Seed Video 1',
+				path: 'A:\\MOKLOS DATASETS\\! POSTERS\\seed_video1.mp4',
+				hash: 'b3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b857',
+				size: 10_240,
+				duration: 60,
+				folderId: 'posters',
+			},
+			{
+				id: 'vid-seed-002',
+				name: 'test-video.mp4',
+				path: 'D:\\DEV\\image-manager\\test-files\\test-video.mp4',
+				hash: 'd3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b859',
+				size: 20_480,
+				duration: 120,
+				folderId: 'test-files',
+			},
+		];
+
+		await db.insert(videos).values(sampleVideos);
+		seedLogger.success(`✅ ${sampleVideos.length} videos creados`);
+	} catch (error) {
+		seedLogger.error('❌ Could not create videos:', error);
+		throw error;
+	}
 }

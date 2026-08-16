@@ -14,7 +14,7 @@ export function isValidPromptTitle(title: string): boolean {
 		// El título debe tener entre 3 y 100 caracteres
 		return title.trim().length >= 3 && title.trim().length <= 100;
 	} catch (error) {
-		validatorsLogger.error('❌ Error al validar título de prompt:', error);
+		validatorsLogger.error('❌ Could not validate prompt title:', error);
 		return false;
 	}
 }
@@ -44,7 +44,7 @@ export function isValidPromptCategory(category: string): boolean {
 		// Verificar que sea una de las categorías válidas
 		return Object.values(PromptCategory).includes(category as PromptCategory);
 	} catch (error) {
-		validatorsLogger.error('❌ Error al validar categoría de prompt:', error);
+		validatorsLogger.error('❌ Could not validate prompt category:', error);
 		return false;
 	}
 }
@@ -87,7 +87,7 @@ export function isValidPromptParameters(parameters: string | Record<string, any>
 		// Verificación adicional para cada parámetro si es necesario
 		return true;
 	} catch (error) {
-		validatorsLogger.error('❌ Error al validar parámetros de prompt:', error);
+		validatorsLogger.error('❌ Could not validate prompt parameters:', error);
 		return false;
 	}
 }

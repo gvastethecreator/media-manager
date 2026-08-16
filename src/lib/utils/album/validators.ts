@@ -75,7 +75,7 @@ export const albumViewConfigSchema = z.object({
  * Schema Zod para datos de creación de álbum
  */
 export const createAlbumSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'The name is required'),
 	description: z.string().optional(),
 	coverImageId: z.string().optional(),
 	type: z.nativeEnum(AlbumType).optional(),

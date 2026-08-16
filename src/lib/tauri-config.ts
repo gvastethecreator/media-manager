@@ -15,8 +15,8 @@ export const getAppConfig = () => {
 	return {
 		isDesktop,
 		isBrowser: !isDesktop,
-		// URL base para APIs - en desktop usamos el servidor embebido
-		apiBaseUrl: isDesktop ? 'http://localhost:4000/api' : '/api',
+		// El broker local mantiene la sesión fuera del bundle de React.
+		apiBaseUrl: '/api',
 		// Configuración de CORS
 		corsEnabled: !isDesktop,
 		// Configuración de rutas
@@ -56,7 +56,7 @@ export const getOSInfo = async () => {
 // Funciones de comunicación con el backend de Tauri
 export const tauriInvoke = async <T>(command: string, args?: Record<string, unknown>): Promise<T> => {
 	if (!isTauri()) {
-		throw new Error('tauriInvoke solo está disponible en el entorno desktop');
+		throw new Error('tauriInvoke is only available in the desktop environment');
 	}
 
 	try {

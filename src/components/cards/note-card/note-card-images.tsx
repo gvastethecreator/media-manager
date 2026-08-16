@@ -31,25 +31,25 @@ export const NoteCardImages = memo(function NoteCardImagesComponent({
 	const getBorderStyles = useMemo(() => {
 		if (tcgMode) {
 			return {
-				borderBottom: `2px solid ${primaryColor}40`,
-				borderImage: `linear-gradient(to right, transparent, ${primaryColor}60, transparent) 1`,
+				borderBottom: `2px solid color-mix(in oklab, ${primaryColor}, transparent 60%)`,
+				borderImage: `linear-gradient(to right, transparent, color-mix(in oklab, ${primaryColor}, transparent 40%), transparent) 1`,
 			};
 		}
 		return {
-			borderBottom: `1px solid ${primaryColor}30`,
+			borderBottom: `1px solid color-mix(in oklab, ${primaryColor}, transparent 70%)`,
 		};
 	}, [tcgMode, primaryColor]);
 
 	const backgroundStyle = useMemo(
 		() => ({
-			backgroundImage: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
+			backgroundImage: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 75%), color-mix(in oklab, ${secondaryColor}, transparent 50%))`,
 		}),
 		[primaryColor, secondaryColor]
 	);
 
 	return (
 		<div
-			className={cn('relative h-[150px] overflow-hidden border-gray-400/30 border-b', tcgMode && 'pb-1')}
+			className={cn('relative h-[150px] overflow-hidden border-muted-foreground/30/30 border-b', tcgMode && 'pb-1')}
 			style={getBorderStyles}
 		>
 			{/* Contenedor de im?genes con grid */}
@@ -95,7 +95,7 @@ export const NoteCardImages = memo(function NoteCardImagesComponent({
 										key={image.id}
 									>
 										<img
-											alt={`Imagen ${index + 1}`}
+											alt={`Attachment ${index + 1}`}
 											className="h-full w-full object-cover"
 											loading="lazy"
 											src={image.thumbnailUrl}
@@ -111,8 +111,8 @@ export const NoteCardImages = memo(function NoteCardImagesComponent({
 									[...new Array(6 - images.length)].map((_, i) => (
 										<div
 											className={cn(
-												'flex h-full w-full items-center justify-center bg-black/20',
-												tcgMode && 'border border-white/10'
+												'flex h-full w-full items-center justify-center bg-muted/20',
+												tcgMode && 'border border-border/40'
 											)}
 											key={`placeholder-${renderKey}-position-${i + 1}`}
 										>
@@ -127,7 +127,7 @@ export const NoteCardImages = memo(function NoteCardImagesComponent({
 
 			{/* Decoraci?n TCG por debajo de las im?genes */}
 			{tcgMode && (
-				<div className="-bottom-1 absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+				<div className="absolute inset-x-0 -bottom-1 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 			)}
 		</div>
 	);
@@ -138,7 +138,7 @@ function ImageLoading({ backgroundColor }: { backgroundColor: string }) {
 	return (
 		<div
 			className="relative flex h-full w-full animate-pulse items-center justify-center overflow-hidden"
-			style={{ backgroundColor: `${backgroundColor}30` }}
+			style={{ backgroundColor: `color-mix(in oklab, ${backgroundColor}, transparent 70%)` }}
 		>
 			<ImageIcon className="h-5 w-5 opacity-20" />
 		</div>

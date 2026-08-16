@@ -1,25 +1,19 @@
-import { describe, expect, it } from 'bun:test';
 import { extractAllMetadata } from '@/server/services/metadata/unified-parser.service';
 
 // Implementación ligera CRC32 (IEEE) para evitar dependencia externa solo para el test
 const CRC_TABLE = new Uint32Array(256).map((_, n) => {
 	let c = n;
 	for (let k = 0; k < 8; k++) {
-		// biome-ignore lint/nursery/noBitwiseOperators: CRC32 usa shifts/AND/XOR por definición
 		c = c & 1 ? 0xed_b8_83_20 ^ (c >>> 1) : c >>> 1;
 	}
-	// biome-ignore lint/nursery/noBitwiseOperators: normalizar a uint32
 	return c >>> 0;
 });
 
 function crc32(buf: Buffer): number {
-	// biome-ignore lint/nursery/noBitwiseOperators: CRC32 initialization
 	let crc = 0 ^ -1;
 	for (const byte of buf) {
-		// biome-ignore lint/nursery/noBitwiseOperators: CRC32 core loop
 		crc = (crc >>> 8) ^ CRC_TABLE[(crc ^ byte) & 0xff];
 	}
-	// biome-ignore lint/nursery/noBitwiseOperators: finalize CRC32
 	return (crc ^ -1) >>> 0;
 }
 
@@ -29,7 +23,6 @@ function buildChunk(type: string, data: Buffer): Buffer {
 	lengthBuf.writeUInt32BE(data.length, 0);
 	const crcVal = crc32(Buffer.concat([typeBuf, data]));
 	const crcBuf = Buffer.alloc(4);
-	// biome-ignore lint/nursery/noBitwiseOperators: asegurar uint32
 	crcBuf.writeUInt32BE(crcVal >>> 0, 0);
 	return Buffer.concat([lengthBuf, typeBuf, data, crcBuf]);
 }

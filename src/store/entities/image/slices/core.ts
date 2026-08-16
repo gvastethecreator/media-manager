@@ -15,33 +15,32 @@ import type { ImageState } from '../types';
 const imageLogger = clientLogger.withContext('ImageStore');
 
 export interface ImageCoreState {
-	images: Record<string, ImageWithStats>;
-	isLoading: boolean;
-	error: string | null;
-	folderLoadState?: Record<string, { loading: boolean; loaded: boolean; lastLoadedAt?: number }>;
-
-	// Getters
-	getImage: (id: string) => ImageWithStats | undefined;
-	getImages: () => ImageWithStats[];
-	getSortedImages: () => ImageWithStats[];
-	getImagesByFolder: (folderId: string) => ImageWithStats[];
-	getImageByPath: (path: string) => ImageWithStats | undefined;
-
 	// Operaciones síncronas
 	addImage: (image: ImageWithStats) => void;
 	addImages: (images: ImageWithStats[]) => void;
-	updateImageData: (id: string, data: Partial<ImageWithStats>) => void;
-	deleteImage: (id: string) => void;
-	clearImages: () => void;
 	clearFolderImages: (folderId: string) => void;
+	clearImages: () => void;
+	deleteImage: (id: string) => void;
+	error: string | null;
 
 	// Acciones asíncronas
 	fetchImage: (id: string) => Promise<ImageWithStats | undefined>;
 	fetchImages: (options?: { folderId?: string; refresh?: boolean }) => Promise<ImageWithStats[]>;
+	folderLoadState?: Record<string, { loading: boolean; loaded: boolean; lastLoadedAt?: number }>;
+
+	// Getters
+	getImage: (id: string) => ImageWithStats | undefined;
+	getImageByPath: (path: string) => ImageWithStats | undefined;
+	getImages: () => ImageWithStats[];
+	getImagesByFolder: (folderId: string) => ImageWithStats[];
+	getSortedImages: () => ImageWithStats[];
+	images: Record<string, ImageWithStats>;
+	isLoading: boolean;
 	loadImages: (options?: { folderId?: string; refresh?: boolean }) => Promise<ImageWithStats[]>;
+	removeImage: (id: string) => Promise<boolean>;
 	// createImage: (data: ImageCreateInput) => Promise<ImageWithStats | undefined>; // Comentado temporalmente
 	updateImage: (id: string, data: any) => Promise<ImageWithStats | undefined>;
-	removeImage: (id: string) => Promise<boolean>;
+	updateImageData: (id: string, data: Partial<ImageWithStats>) => void;
 }
 
 export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [], [], ImageCoreState> = (set, get) => ({
@@ -130,7 +129,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	},
 	fetchImages: async (options: { folderId?: string; refresh?: boolean } = {}) => {
 		const { folderId, refresh } = options;
-		console.log('[ImageStore] fetchImages', options);
+		clientLogger.debug('[ImageStore] fetchImages', options);
 		if (get().isLoading && !refresh) {
 			return get().getImages();
 		}
@@ -148,27 +147,15 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 					}
 				: state.folderLoadState,
 		}));
-		if (refresh) {
-			// Si hay folderId específico, solo limpiar las imágenes de esa carpeta
-			// Si no hay folderId, limpiar todo el store
-			if (folderId) {
-				// Remover solo las imágenes de esta carpeta del store
-				const currentImages = get().getImages();
-				const filteredImages = currentImages.filter((img) => img.folderId !== folderId);
-				set({ images: Object.fromEntries(filteredImages.map((img) => [img.id, img])) });
-			} else {
-				get().clearImages();
-			}
-		}
 		try {
 			const limit = 100;
 			async function loadBatch(offset: number, acc: ImageWithStats[]): Promise<ImageWithStats[]> {
-				const apiOptions: any = { limit, offset };
+				const apiOptions: Record<string, unknown> = { limit, offset };
 				if (folderId) {
 					apiOptions.folderId = folderId;
 				}
 				const result = await getImagesFromApi(apiOptions);
-				const batch = (result as any).images as ImageWithStats[] | undefined;
+				const batch = (result as { images?: ImageWithStats[] }).images;
 				if (batch?.length) {
 					for (const img of batch) {
 						acc.push(img);
@@ -180,7 +167,15 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 				return loadBatch(offset + limit, acc);
 			}
 			const all = await loadBatch(0, []);
-			// Solo agregar las nuevas imágenes sin limpiar otras carpetas
+			// Si es refresh, limpiamos antes de agregar (después de fetch exitoso)
+			if (refresh) {
+				if (folderId) {
+					get().clearFolderImages(folderId);
+				} else {
+					get().clearImages();
+				}
+			}
+			// Agregar las nuevas imágenes
 			get().addImages(all);
 			return get().getImages();
 		} catch (e: unknown) {

@@ -10,9 +10,9 @@ import { NoteCardFooter } from './note-card-footer';
 import { NoteCardImages } from './note-card-images';
 
 export interface NoteCardProps {
+	className?: string;
 	noteId: string;
 	onClick?: (noteData: NoteComplete) => void;
-	className?: string;
 	style?: React.CSSProperties;
 	tcgMode?: boolean;
 }
@@ -20,7 +20,7 @@ export interface NoteCardProps {
 /**
  * Card para mostrar una nota, con un diseño inspirado en cartas de TCG.
  */
-export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: NoteCardProps) {
+export const NoteCard = memo(function NoteCard({ noteId, onClick, className, style, tcgMode = true }: NoteCardProps) {
 	const { data: note, isLoading, error } = useNote(noteId);
 	const { data: recentImagesData } = useRecentNoteImages(noteId);
 	const { data: noteCounts } = useNoteCounts(noteId);
@@ -56,33 +56,17 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		charactersCount;
 
 	// Colores para el gradiente
-	const primaryColor = useMemo(() => color || '#ec4899', [color]);
+	const primaryColor = useMemo(() => color || 'var(--entity-note)', [color]);
 	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar un valor por defecto
+		// Si no hay color definido, usar un valor por defecto basado en OKLCH (rojo/rosa de notas)
 		if (!color) {
-			return '#db2777';
+			return 'oklch(0.55 0.24 29)';
 		}
 
-		// Oscurecer el color primario para el secundario
-		try {
-			// Convertir hex a RGB
-			const r = Number.parseInt(color.slice(1, 3), 16);
-			const g = Number.parseInt(color.slice(3, 5), 16);
-			const b = Number.parseInt(color.slice(5, 7), 16);
-
-			// Oscurecer los componentes
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			// Convertir de vuelta a hex
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
-			return '#db2777';
-		}
-	}, [color]);
+		// Usar color-mix para oscurecer el color de forma nativa en CSS si es posible,
+		// o simplemente retornar el mismo color (el CSS se encargará de las variaciones)
+		return `color-mix(in oklab, ${primaryColor}, black 20%)`;
+	}, [color, primaryColor]);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
@@ -99,11 +83,11 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 	const cardStyle = useMemo(
 		() => ({
 			// Borde basado en el color primario
-			borderColor: tcgMode ? `${primaryColor}70` : primaryColor,
+			borderColor: tcgMode ? `color-mix(in oklab, ${primaryColor}, transparent 30%)` : primaryColor,
 			// Fondo con gradiente sutil basado en el color primario
 			background: tcgMode
-				? `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}10)`
-				: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
+				? `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 80%), color-mix(in oklab, ${secondaryColor}, transparent 90%))`
+				: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 85%), color-mix(in oklab, ${primaryColor}, transparent 95%))`,
 			...style,
 		}),
 		[primaryColor, secondaryColor, style, tcgMode]
@@ -114,11 +98,11 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		return (
 			<div
 				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-muted md:w-[320px] dark:bg-background',
 					className
 				)}
 			>
-				<p className="text-gray-500">Cargando nota...</p>
+				<p className="text-muted-foreground">Loading note...</p>
 			</div>
 		);
 	}
@@ -127,11 +111,11 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		return (
 			<div
 				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-dt-danger-100 md:w-[320px] dark:bg-dt-danger-900',
 					className
 				)}
 			>
-				<p className="text-red-800">Error: {error?.message || 'Nota no encontrada'}</p>
+				<p className="text-destructive">Error: {error?.message || 'Nota no encontrada'}</p>
 			</div>
 		);
 	}
@@ -146,7 +130,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 				'h-[420px] w-[300px] overflow-hidden rounded-[4.75%]',
 				tcgMode ? 'border-[3px] shadow-xl' : 'border-2 shadow-md',
 				// Interacción
-				'transition-all duration-300 ease-out',
+				'ui-motion-standard',
 				'hover:scale-[1.02] hover:shadow-lg',
 				'active:scale-[0.98]',
 				// Cursor
@@ -164,9 +148,9 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 			whileTap={{ scale: 0.98 }}
 		>
 			{/* Resplandor de borde en hover */}
-			<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
+			<div className="ui-overlay-hover-glow">
 				<div
-					className="-z-10 absolute inset-0 rounded-[4.75%] blur-sm"
+					className="absolute inset-0 -z-10 rounded-[4.75%] blur-sm"
 					style={{ boxShadow: `0 0 15px 2px ${primaryColor}` }}
 				/>
 			</div>
@@ -186,7 +170,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 				}
 				primaryColor={primaryColor}
 				subtitle={note.category || 'General'}
-				title={note.title || 'Sin título'}
+				title={note.title || 'Untitled'}
 			/>
 
 			{/* Sección de imágenes */}
@@ -221,7 +205,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 			/>
 		</motion.div>
 	);
-}
+});
 
-// Versión memorizada para optimizar rendimiento en listas
-export const MemoizedNoteCard = memo(NoteCard);
+// Versión memorizada ya incluida en la definición principal
+export const MemoizedNoteCard = NoteCard;

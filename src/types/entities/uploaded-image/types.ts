@@ -13,20 +13,20 @@ import { UploadedFileType } from './enums';
  * Interfaz base canónica para UploadedImage
  */
 export interface UploadedImageBase {
+	category: string | null;
+	createdAt: Date;
+	hash: string;
+	height: number | null;
 	id: string;
+	imageId: string;
+	isFavorite: boolean;
+	metadata: string | null;
 	name: string;
 	path: string;
 	size: number;
-	hash: string;
-	metadata: string | null;
-	imageId: string;
 	type: string | null;
-	category: string | null;
-	width: number | null;
-	height: number | null;
-	isFavorite: boolean;
-	createdAt: Date;
 	updatedAt: Date;
+	width: number | null;
 }
 
 /**
@@ -45,9 +45,9 @@ export type UploadedImageUpdateInput = Partial<
  * Dimensiones de imagen
  */
 export interface UploadedImageDimensions {
-	width: number;
-	height: number;
 	aspectRatio: number;
+	height: number;
+	width: number;
 }
 
 import { EntityStats } from '../entity.types';
@@ -56,20 +56,20 @@ import { EntityStats } from '../entity.types';
  * Estadísticas de imagen subida
  */
 export interface UploadedImageStatistics extends EntityStats {
-	totalViews: number;
 	lastAccessed: string;
 	processingTime?: number;
+	totalViews: number;
 }
 
 /**
  * Versión extendida con dimensiones y estadísticas
  */
 export interface UploadedImageExtended extends UploadedImageBase {
-	uploadedAt: Date;
 	dimensions: UploadedImageDimensions;
-	url: string;
-	thumbnailUrl?: string;
 	stats?: UploadedImageStatistics;
+	thumbnailUrl?: string;
+	uploadedAt: Date;
+	url: string;
 }
 
 /**

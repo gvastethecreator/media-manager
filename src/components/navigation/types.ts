@@ -1,4 +1,10 @@
+/**
+ * @file Tipos para los componentes de navegación
+ * @module components/navigation/types
+ */
+
 import type { LucideIcon } from 'lucide-react';
+import { ViewType } from '@/components/views/types';
 import type { NavigationData } from '@/lib/api/navigation';
 
 /**
@@ -30,48 +36,46 @@ export type NavigationCategory =
 	| 'videos';
 
 /**
- * @description Representa una entidad que puede tener un conteo de imágenes asociadas.
- *              Utilizado comúnmente por modelos de Prisma con relaciones _count.
+ * Representa un elemento de categoría en el panel de navegación
  */
-export type ItemWithImageCount = {
-	_count?: { images?: number }; // 🖼️ El conteo de imágenes es opcional.
-};
-
-export interface NavPanelProps {
-	initialData: NavigationData;
-	isCollapsed?: boolean;
-	onToggleCollapse?: () => void;
-	isAnimating?: boolean;
-}
-
 export interface CategoryItem {
-	id: NavigationCategory;
-	icon: LucideIcon;
-	label: string;
 	color: string;
+	icon: LucideIcon;
+	id: ViewType;
+	label: string;
 }
 
+/**
+ * Representa un elemento hijo dentro de una categoría
+ */
 export interface CategoryChild {
-	id: string;
-	name: string;
-	label?: string;
-	title?: string; // Para notas que usan title en lugar de name
-	emoji?: string;
-	color?: string;
-	path?: string;
-	description?: string;
-	icon?: LucideIcon;
-	itemCount?: number; // Conteo total de elementos
-	totalFiles?: number;
-	totalSize?: number;
-	parentId?: string | null; // Para jerarquía de carpetas
 	_count?: {
 		images?: number;
 		folders?: number;
 		collections?: number;
 		tags?: number;
 	};
+	color?: string;
+	description?: string;
+	emoji?: string;
+	icon?: LucideIcon;
+	id: string;
+	itemCount?: number; // Conteo total de elementos
+	label?: string;
+	name: string;
+	parentId?: string | null; // Para jerarquía de carpetas
+	path?: string;
+	title?: string; // Para notas que usan title en lugar de name
+	totalFiles?: number;
+	totalSize?: number;
 }
 
-// Tipo para vista de elementos en el panel de navegación
-export type ViewMode = 'list' | 'grid';
+/**
+ * Props para el componente NavPanel
+ */
+export interface NavPanelProps {
+	initialData: NavigationData;
+	isAnimating?: boolean;
+	isCollapsed?: boolean;
+	onToggleCollapse?: () => void;
+}

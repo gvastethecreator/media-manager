@@ -1,6 +1,7 @@
 import { RefreshCw } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -12,8 +13,8 @@ import type { AnyEntityWithStats } from '@/types/entities';
 const logger = clientLogger.withContext('MixedContentView');
 
 interface MixedContentViewProps {
-	filterType?: string;
 	filterId?: string | null;
+	filterType?: string;
 }
 
 export function MixedContentView(_props: MixedContentViewProps = {}) {
@@ -25,37 +26,40 @@ export function MixedContentView(_props: MixedContentViewProps = {}) {
 	const [isRetrying, setIsRetrying] = useState(false);
 
 	const handleItemSelect = useCallback(
-		(item: AnyEntityWithStats) => {
+		(item: BrowserItem) => {
 			logger.info('🖱️ Elemento seleccionado:', item.name);
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
 
 			// Mostrar panel de detalles con el elemento seleccionado
-			setSelectedItems([item]);
+			setSelectedItems([entity]);
 			setDetailsPanelVisible(true);
 		},
 		[setSelectedItems, setDetailsPanelVisible]
 	);
 
 	const handleItemDoubleClick = useCallback(
-		(item: AnyEntityWithStats) => {
+		(item: BrowserItem) => {
 			logger.info('🖱️ Doble click en elemento:', item.name);
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
 
 			// Abrir el visor con el elemento
 			// El FileBrowser se encargará de obtener todos los elementos relacionados
 			const viewerItem = {
-				id: item.id,
-				name: item.name,
-				type: (item as any).type || 'file',
-				path: (item as any).path || '',
-				size: (item as any).size || 0,
-				url: (item as any).url,
-				thumbnail: (item as any).thumbnail,
-				thumbnailUrl: (item as any).thumbnailUrl,
-				src: (item as any).src,
-				alt: (item as any).alt,
-				mimeType: (item as any).mimeType,
-				metadata: (item as any).metadata,
-				width: (item as any).width || 0,
-				height: (item as any).height || 0,
+				id: entity.id,
+				name: entity.name,
+				type: (entity as any).type || (entity as any).entityType || 'file',
+				size: (entity as any).size || 0,
+				url: (entity as any).url,
+				thumbnail: (entity as any).thumbnail,
+				thumbnailUrl: (entity as any).thumbnailUrl,
+				src: (entity as any).src,
+				alt: (entity as any).alt,
+				mimeType: (entity as any).mimeType,
+				metadata: (entity as any).metadata,
+				width: (entity as any).width || 0,
+				height: (entity as any).height || 0,
 			};
 
 			// Abrir el visor con el elemento actual
@@ -81,14 +85,14 @@ export function MixedContentView(_props: MixedContentViewProps = {}) {
 	// Renderizar vista de contenido mixto usando BaseContentView y FileBrowser
 	return (
 		<BaseContentView
-			description="Vista unificada de todos los tipos de archivos"
+			description="Unified view of all file types"
 			headerControls={
 				<Button disabled={isRetrying} onClick={handleForceRefresh} size="sm" variant="outline">
 					<RefreshCw className={`mr-2 h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`} />
-					{isRetrying ? 'Recargando...' : 'Recargar'}
+					{isRetrying ? 'Reloading...' : 'Reload'}
 				</Button>
 			}
-			title="Contenido Mixto"
+			title="Mixed Content"
 		>
 			<FileBrowser
 				className="h-full"

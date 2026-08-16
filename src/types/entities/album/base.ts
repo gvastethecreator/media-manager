@@ -2,27 +2,27 @@
  * 🗿 Modelo base de Album, basado en el esquema de Drizzle.
  * Este tipo no se modifica y representa la estructura en la base de datos.
  */
-export type AlbumBase = {
-	id: string;
-	name: string;
+export interface AlbumBase {
+	category: string | null;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
 	featuredImage: string | null;
+	filters: string | null;
+	id: string;
 
 	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	totalSize: number;
-	filters: string | null;
-	shortcut: string | null;
-	category: string | null;
-	metadata: Record<string, any> | null;
 	lastImageAddedAt: Date | null;
 	lastVideoAddedAt: Date | null;
-	createdAt: Date;
+	metadata: Record<string, any> | null;
+	name: string;
+	shortcut: string | null;
+	totalImages: number;
+	totalSize: number;
+	totalVideos: number;
 	updatedAt: Date;
-};
+}
 
 import type { EntityStats } from '../entity.types';
 
@@ -44,10 +44,10 @@ export interface AlbumStatistics extends EntityStats {
  */
 export interface AlbumWithStats extends AlbumBase {
 	entityType: 'album';
-	stats: AlbumStatistics;
 	isRecent?: boolean;
 	/** Tamaño total del álbum (alias para totalSize) */
 	size?: number;
+	stats: AlbumStatistics;
 	/** URL de la imagen en miniatura */
 	thumbnailUrl?: string;
 }

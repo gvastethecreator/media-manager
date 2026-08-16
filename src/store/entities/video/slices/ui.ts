@@ -8,12 +8,12 @@ import { VideoViewMode } from '@/types/entities/video';
 import type { VideoStore } from '..';
 
 export interface VideoUIState {
+	currentVideoId: string | null;
+	expandedIds: string[];
+	highlightedId: string | null;
+	isViewerOpen: boolean;
 	selectedIds: string[];
 	viewMode: VideoViewMode;
-	isViewerOpen: boolean;
-	currentVideoId: string | null;
-	highlightedId: string | null;
-	expandedIds: string[];
 }
 
 export const initialUIState: VideoUIState = {
@@ -27,35 +27,35 @@ export const initialUIState: VideoUIState = {
 
 // Slice para estado de UI
 export interface VideoUISlice extends VideoUIState {
-	// Selección de videos
-	selectVideo: (id: string | null) => void;
-	deselectVideo: (id: string) => void;
-	toggleVideoSelection: (id: string) => void;
-	selectMultipleVideos: (ids: string[]) => void;
 	clearSelection: () => void;
-	getSelectedVideos: () => string[];
-	isVideoSelected: (id: string) => boolean;
-
-	// Visor de videos
-	openViewer: (videoId: string) => void;
 	closeViewer: () => void;
-	nextVideo: () => void;
-	previousVideo: () => void;
-	getCurrentVideo: () => string | null;
-
-	// Modo de visualización
-	setViewMode: (viewMode: VideoViewMode) => void;
-	getViewMode: () => VideoViewMode;
+	collapseVideo: (id: string) => void;
+	deselectVideo: (id: string) => void;
 
 	// Expansión de detalles
 	expandVideo: (id: string) => void;
-	collapseVideo: (id: string) => void;
-	toggleVideoExpansion: (id: string) => void;
-	isVideoExpanded: (id: string) => boolean;
+	getCurrentVideo: () => string | null;
+	getHighlightedVideo: () => string | null;
+	getSelectedVideos: () => string[];
+	getViewMode: () => VideoViewMode;
 
 	// Resaltado
 	highlightVideo: (id: string | null) => void;
-	getHighlightedVideo: () => string | null;
+	isVideoExpanded: (id: string) => boolean;
+	isVideoSelected: (id: string) => boolean;
+	nextVideo: () => void;
+
+	// Visor de videos
+	openViewer: (videoId: string) => void;
+	previousVideo: () => void;
+	selectMultipleVideos: (ids: string[]) => void;
+	// Selección de videos
+	selectVideo: (id: string | null) => void;
+
+	// Modo de visualización
+	setViewMode: (viewMode: VideoViewMode) => void;
+	toggleVideoExpansion: (id: string) => void;
+	toggleVideoSelection: (id: string) => void;
 }
 
 // Creador del slice
@@ -131,7 +131,10 @@ export const createVideoUISlice: StateCreator<VideoStore, [], [], VideoUISlice> 
 	getCurrentVideo: () => get().currentVideoId,
 
 	// Modo de visualización
-	setViewMode: (viewMode) => set({ viewMode }),
+	setViewMode: (viewMode) => {
+		if (get().viewMode === viewMode) return;
+		set({ viewMode });
+	},
 	getViewMode: () => get().viewMode,
 
 	// Expansión de detalles

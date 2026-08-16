@@ -6,29 +6,29 @@ import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 // Types
-export type TreeNode = {
-	id: string;
-	label: string;
-	icon?: React.ReactNode;
+export interface TreeNode {
 	children?: TreeNode[];
 	data?: any;
-};
+	icon?: React.ReactNode;
+	id: string;
+	label: string;
+}
 
-export type TreeViewProps = {
-	data: TreeNode[];
+export interface TreeViewProps {
+	animateExpand?: boolean;
 	className?: string;
+	data: TreeNode[];
+	defaultExpandedIds?: string[];
+	indent?: number;
+	multiSelect?: boolean;
 	onNodeClick?: (node: TreeNode) => void;
 	onNodeExpand?: (nodeId: string, expanded: boolean) => void;
-	defaultExpandedIds?: string[];
-	showLines?: boolean;
-	showIcons?: boolean;
-	selectable?: boolean;
-	multiSelect?: boolean;
-	selectedIds?: string[];
 	onSelectionChange?: (selectedIds: string[]) => void;
-	indent?: number;
-	animateExpand?: boolean;
-};
+	selectable?: boolean;
+	selectedIds?: string[];
+	showIcons?: boolean;
+	showLines?: boolean;
+}
 
 // Main TreeView component
 export function TreeView({

@@ -3,7 +3,7 @@
 */
 
 /* Tema Light - Modificado a tonos grises en lugar de blanco */
-html[data-theme="light"] {
+html[data-theme='light'] {
 	/* Escala de grises con menos contraste */
 	--background: oklch(0.92 0.002 0); /* gris claro */
 	--foreground: oklch(0.28 0.002 0); /* gris oscuro */
@@ -46,7 +46,7 @@ html[data-theme="light"] {
 }
 
 /* Tema Café - Versión intermedia y menos saturada */
-html[data-theme="cafe"] {
+html[data-theme='cafe'] {
 	--background: oklch(0.3 0.04 40);
 	--foreground: oklch(0.9 0.01 60);
 	--card: oklch(0.35 0.05 40);
@@ -85,7 +85,7 @@ html[data-theme="cafe"] {
 }
 
 /* Tema Violeta - Versión más oscura */
-html[data-theme="violeta"] {
+html[data-theme='violeta'] {
 	--background: oklch(0.25 0.05 280);
 	--foreground: oklch(0.9 0.01 290);
 	--card: oklch(0.3 0.06 280);
@@ -124,7 +124,7 @@ html[data-theme="violeta"] {
 }
 
 /* Tema Madera - Versión intermedia y neutra */
-html[data-theme="madera"] {
+html[data-theme='madera'] {
 	--background: oklch(0.35 0.04 50);
 	--foreground: oklch(0.9 0.01 60);
 	--card: oklch(0.4 0.03 45);
@@ -163,7 +163,7 @@ html[data-theme="madera"] {
 }
 
 /* Tema Nocturno - Tema oscuro con tonos azulados para reducir fatiga visual */
-html[data-theme="nocturno"] {
+html[data-theme='nocturno'] {
 	--background: oklch(0.12 0.02 240);
 	--foreground: oklch(0.9 0.01 240);
 	--card: oklch(0.16 0.03 240);
@@ -202,7 +202,7 @@ html[data-theme="nocturno"] {
 }
 
 /* Tema Verde - Versión más oscura */
-html[data-theme="verde"] {
+html[data-theme='verde'] {
 	--background: oklch(0.3 0.06 140);
 	--foreground: oklch(0.9 0.01 150);
 	--card: oklch(0.35 0.07 140);
@@ -241,7 +241,7 @@ html[data-theme="verde"] {
 }
 
 /* Tema Atardecer - Versión más oscura */
-html[data-theme="atardecer"] {
+html[data-theme='atardecer'] {
 	--background: oklch(0.3 0.06 40);
 	--foreground: oklch(0.9 0.01 50);
 	--card: oklch(0.35 0.07 40);
@@ -280,7 +280,7 @@ html[data-theme="atardecer"] {
 }
 
 /* Tema Corporativo - Versión más oscura */
-html[data-theme="corporativo"] {
+html[data-theme='corporativo'] {
 	--background: oklch(0.3 0.04 240);
 	--foreground: oklch(0.9 0.01 240);
 	--card: oklch(0.35 0.05 240);
@@ -319,7 +319,7 @@ html[data-theme="corporativo"] {
 }
 
 /* Tema Oscuro Carbón - Negro profundo con acentos grises */
-html[data-theme="carbon"] {
+html[data-theme='carbon'] {
 	--background: oklch(0.1 0.005 0);
 	--foreground: oklch(0.95 0.005 0);
 	--card: oklch(0.13 0.005 0);
@@ -358,7 +358,7 @@ html[data-theme="carbon"] {
 }
 
 /* Tema Teal - Versión más oscura */
-html[data-theme="teal"] {
+html[data-theme='teal'] {
 	--background: oklch(0.3 0.06 180);
 	--foreground: oklch(0.9 0.01 180);
 	--card: oklch(0.35 0.07 180);
@@ -397,7 +397,7 @@ html[data-theme="teal"] {
 }
 
 /* Tema Cítrico - Versión más oscura */
-html[data-theme="citrico"] {
+html[data-theme='citrico'] {
 	--background: oklch(0.3 0.06 90);
 	--foreground: oklch(0.9 0.01 90);
 	--card: oklch(0.35 0.07 90);
@@ -439,7 +439,7 @@ html[data-theme="citrico"] {
  * NUEVO TEMA: Aurora - Inspirado en las auroras boreales
  * Una combinación de azules, púrpuras y verdes con un toque mágico
  */
-html[data-theme="aurora"] {
+html[data-theme='aurora'] {
 	/* Tipografía específica para tema aurora */
 	--font-theme: var(--font-sans);
 
@@ -500,7 +500,7 @@ html[data-theme="aurora"] {
  * NUEVO TEMA: Neón - Inspirado en luces de neón urbanas
  * Colores brillantes contrastantes sobre fondo oscuro
  */
-html[data-theme="neon"] {
+html[data-theme='neon'] {
 	/* Tipografía específica para tema neón */
 	--font-theme: var(--font-mono);
 

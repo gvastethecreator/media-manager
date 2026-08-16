@@ -29,10 +29,10 @@ export type EntityStatsTypeValue =
  * @description Define la estructura base que toda entidad debe tener
  */
 export interface EntityBase {
+	createdAt: Date;
+	description: string | null;
 	id: string;
 	name: string;
-	description: string | null;
-	createdAt: Date;
 	updatedAt: Date;
 }
 
@@ -41,52 +41,52 @@ export interface EntityBase {
  * @description Define la estructura común de estadísticas que todas las entidades pueden tener
  */
 export interface EntityStats {
+	albumCount: number;
+	birthtime: Date;
+	characterCount: number;
+	collectionCount: number;
+	commentCount?: number;
+	completenessScore?: number;
+	conceptCount: number;
+	downloadCount?: number;
+	groupCount: number;
 	// Conteos de relaciones
 	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	collectionCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
 
-	// Métricas globales
-	totalItems: number;
-	totalAssociations: number;
+	// Estado
+	isDuplicate?: boolean;
+	isOrphaned?: boolean;
+	lastModified?: Date | null;
 
 	// Timestamps
 	lastUpdated: Date;
 	// Permitir null en derivados (compatibilidad con Album/Video)
 	lastViewed?: Date | null;
-	lastModified?: Date | null;
-
-	// Métricas de uso
-	viewCount?: number;
-	downloadCount?: number;
 	likeCount?: number;
-	commentCount?: number;
+	mtime: Date;
+	needsAttention?: boolean;
+	noteCount: number;
+	placeCount: number;
+	promptCount: number;
+	propertyCount: number;
 
 	// Métricas de calidad
 	qualityScore?: number;
-	completenessScore?: number;
-
-	// Estado
-	isDuplicate?: boolean;
-	isOrphaned?: boolean;
-	needsAttention?: boolean;
 
 	// Propiedades del sistema de archivos
 	size: number;
-	mtime: Date;
-	birthtime: Date;
+	tagCount: number;
+	totalAssociations: number;
+
+	// Métricas globales
+	totalItems: number;
 	type: string;
+	videoCount: number;
+
+	// Métricas de uso
+	viewCount?: number;
+	wildcardCount: number;
+	worldItemCount: number;
 }
 
 /**
@@ -95,15 +95,6 @@ export interface EntityStats {
  * @template TStats Tipo de estadísticas específicas de la entidad
  */
 export interface EntityWithStats<TStats = EntityStats> extends EntityBase {
-	// Discriminador para identificar el tipo de entidad
-	entityType: EntityStatsTypeValue;
-
-	// Estadísticas de la entidad
-	stats: TStats;
-
-	// Campo de compatibilidad legacy
-	statistics?: TStats;
-
 	// Conteos y relaciones
 	_count?: {
 		images?: number;
@@ -121,4 +112,12 @@ export interface EntityWithStats<TStats = EntityStats> extends EntityBase {
 		properties?: number;
 		groups?: number;
 	};
+	// Discriminador para identificar el tipo de entidad
+	entityType: EntityStatsTypeValue;
+
+	// Campo de compatibilidad legacy
+	statistics?: TStats;
+
+	// Estadísticas de la entidad
+	stats: TStats;
 }

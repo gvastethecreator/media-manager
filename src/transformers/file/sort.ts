@@ -4,8 +4,8 @@
 // si todos los criterios empatan, preserva el orden original usando índice inicial.
 
 export interface SortCriterion {
-	field: string;
 	direction: 'asc' | 'desc';
+	field: string;
 }
 
 export type GenericRecord = Record<string, any>;

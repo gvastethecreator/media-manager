@@ -8,11 +8,11 @@ const validatorsLogger = serverLogger.withContext('ConceptValidators');
  * Esquema para validar la creación de un concepto
  */
 export const conceptCreateSchema = z.object({
-	name: z.string().min(1, { message: 'El nombre es obligatorio' }).max(100, {
-		message: 'El nombre no puede exceder 100 caracteres',
+	name: z.string().min(1, { message: 'The name is required' }).max(100, {
+		message: 'The name cannot exceed 100 characters',
 	}),
 	emoji: z.string().optional().default('💡'),
-	color: z.string().optional().default('#3b82f6'),
+	color: z.string().optional().default('var(--dt-primary-500)'),
 	description: z.string().optional().nullable(),
 	content: z.string().optional().default(''),
 	category: z.nativeEnum(ConceptCategory).optional().default(ConceptCategory.GENERAL),
@@ -33,9 +33,9 @@ export const conceptUpdateSchema = z.object({
 	id: z.string().min(1, { message: 'El ID es obligatorio' }),
 	name: z
 		.string()
-		.min(1, { message: 'El nombre es obligatorio' })
+		.min(1, { message: 'The name is required' })
 		.max(100, {
-			message: 'El nombre no puede exceder 100 caracteres',
+			message: 'The name cannot exceed 100 characters',
 		})
 		.optional(),
 	emoji: z.string().optional(),
@@ -79,7 +79,7 @@ export function validateConceptCreate(data: unknown): ConceptCreateSchema {
 	try {
 		return conceptCreateSchema.parse(data);
 	} catch (error) {
-		validatorsLogger.error('❌ Error de validación en creación de concepto:', error);
+		validatorsLogger.error('❌ Concept creation validation failed:', error);
 		throw error;
 	}
 }
@@ -93,7 +93,7 @@ export function validateConceptUpdate(data: unknown): ConceptUpdateSchema {
 	try {
 		return conceptUpdateSchema.parse(data);
 	} catch (error) {
-		validatorsLogger.error('❌ Error de validación en actualización de concepto:', error);
+		validatorsLogger.error('❌ Concept update validation failed:', error);
 		throw error;
 	}
 }
@@ -107,7 +107,7 @@ export function validateConceptFilters(filters: unknown): ConceptFiltersSchema {
 	try {
 		return conceptFiltersSchema.parse(filters);
 	} catch (error) {
-		validatorsLogger.error('❌ Error de validación en filtros de concepto:', error);
+		validatorsLogger.error('❌ Concept filter validation failed:', error);
 		throw error;
 	}
 }

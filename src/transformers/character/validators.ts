@@ -38,7 +38,7 @@ export function validateCreateCharacterData(
 	try {
 		// Validaciones básicas
 		if (!data.name || data.name.trim().length === 0) {
-			return { success: false, error: 'El nombre es requerido' };
+			return { success: false, error: 'The name is required' };
 		}
 
 		if (data.name.length > 100) {
@@ -73,7 +73,7 @@ export function validateUpdateCharacterData(
 	try {
 		// Validaciones opcionales para actualización
 		if (data.name !== undefined && data.name.trim().length === 0) {
-			return { success: false, error: 'El nombre no puede estar vacío' };
+			return { success: false, error: 'The name cannot be empty' };
 		}
 
 		if (data.name !== undefined && data.name.length > 100) {

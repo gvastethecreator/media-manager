@@ -1,36 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { PropertyWithStats } from '@/types/entities/property';
 import { apiClient } from './client';
+import { invalidateFavoriteQueries } from './favorite-cache';
 
 export interface PropertyFilters {
-	search?: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 	type?: string;
 }
 
 export interface PropertyCreateInput {
-	name: string;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name: string;
+	shortcut?: string | null;
 }
 
 export interface PropertyUpdateInput {
-	name?: string;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name?: string;
+	shortcut?: string | null;
 }
 
 export interface PropertiesResponse {
@@ -86,6 +87,7 @@ export function useCreateProperty() {
 		mutationFn: (data) => apiClient.post<PropertyWithStats>('/properties', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 		},
 	});
 }
@@ -97,6 +99,7 @@ export function useUpdateProperty() {
 		mutationFn: ({ id, data }) => apiClient.put<PropertyWithStats>(`/properties/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.setQueryData(propertyKeys.detail(data.id), data);
 		},
 	});
@@ -109,6 +112,7 @@ export function useDeleteProperty() {
 		mutationFn: (id) => apiClient.delete(`/properties/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });
+			void invalidateFavoriteQueries(queryClient);
 			queryClient.removeQueries({ queryKey: propertyKeys.detail(id) });
 		},
 	});

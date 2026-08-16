@@ -10,18 +10,18 @@
  * 🗿 Modelo base de Property, derivado del schema de Drizzle.
  */
 export interface PropertyBase {
-	id: string;
-	name: string;
-	value: string | number;
+	category: string | null;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	shortcut: string | null;
-	category: string | null;
 	featuredImage: string | null;
+	id: string;
 	isFavorite: boolean;
-	createdAt: Date;
+	name: string;
+	shortcut: string | null;
 	updatedAt: Date;
+	value: string | number;
 }
 
 /**
@@ -74,20 +74,20 @@ import { EntityStats } from '../entity.types';
  * Métricas para analizar el uso y relevancia de una Property.
  */
 export interface PropertyStatistics extends EntityStats {
-	/** Número de entidades que usan esta propiedad. */
-	usageCount: number;
-	/** Diversidad de valores únicos para esta propiedad. */
-	valueDiversity: number;
 	/** Puntuación de la completitud de la información de la propiedad. */
 	completenessScore: number;
-	/** Popularidad basada en el número de entidades relacionadas. */
-	popularity: number;
-	/** Total de relaciones con otras entidades */
-	totalRelations: number;
 
 	// File system functions
 	isDirectory: boolean;
 	isFile: boolean;
+	/** Popularidad basada en el número de entidades relacionadas. */
+	popularity: number;
+	/** Total de relaciones con otras entidades */
+	totalRelations: number;
+	/** Número de entidades que usan esta propiedad. */
+	usageCount: number;
+	/** Diversidad de valores únicos para esta propiedad. */
+	valueDiversity: number;
 }
 
 /**
@@ -95,11 +95,6 @@ export interface PropertyStatistics extends EntityStats {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface PropertyWithStats extends PropertyBase {
-	entityType: 'property';
-	type?: string; // Alias para category para compatibilidad
-	stats: PropertyStatistics;
-	/** Alias para compatibilidad - apunta a stats */
-	statistics?: PropertyStatistics;
 	_count?: {
 		images: number;
 		videos: number;
@@ -115,13 +110,17 @@ export interface PropertyWithStats extends PropertyBase {
 		wildcards: number;
 		groups: number;
 	};
+	entityType: 'property';
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: PropertyStatistics;
+	stats: PropertyStatistics;
+	type?: string; // Alias para category para compatibilidad
 }
 
 /**
  * 🌟 Tipo completo de Property con todas las relaciones
  */
 export interface PropertyComplete extends PropertyWithStats {
-	tags: string[];
 	relations: {
 		images: string[];
 		videos: string[];
@@ -136,36 +135,37 @@ export interface PropertyComplete extends PropertyWithStats {
 		wildcards: string[];
 		groups: string[];
 	};
+	tags: string[];
 }
 
 /**
  * 📝 Datos para crear una Property
  */
 export interface PropertyCreateInput {
-	name: string;
-	value?: string | number;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name: string;
+	shortcut?: string | null;
+	value?: string | number;
 }
 
 /**
  * 📝 Datos para actualizar una Property
  */
 export interface PropertyUpdateInput {
-	name?: string;
-	value?: string | number;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	name?: string;
+	shortcut?: string | null;
+	value?: string | number;
 }
 
 // ----------------------------------------------------------------

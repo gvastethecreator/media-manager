@@ -14,46 +14,48 @@ import type { EntityBase } from '../entity.types';
  * 📁 Tipo base para una carpeta - Campos principales
  */
 export interface FolderBase extends EntityBase {
-	name: string;
-	description: string | null;
-	path: string;
-	emoji: string | null;
 	color: string | null;
+	description: string | null;
+	emoji: string | null;
 	featuredImage: string | null;
 	isFavorite: boolean;
+	lastIndexed: Date | null;
+	name: string;
+	parentId: string | null;
+	path: string;
+	presetId: string | null;
 	totalFiles: number;
 	totalSize: number;
-	lastIndexed: Date | null;
-	parentId: string | null;
-	presetId: string | null;
 }
 
 /**
  * 📁 Tipo principal optimizado con estadísticas (USAR ESTE)
  */
 export interface FolderWithStats extends FolderBase {
-	entityType: 'folder';
-	stats: FolderStatistics;
-
-	// Propiedades adicionales de archivo
-	type?: string;
+	// Conteos para compatibilidad
+	_count?: FolderCounts;
 
 	// Propiedades del sistema de archivos y navegación
 	children?: FolderWithStats[]; // Para estructuras recursivas
+	entityType: 'folder';
 	recentImages?: Array<{
 		id: string;
 		name: string;
 		thumbnailUrl: string;
 	}>; // Imágenes recientes para compatibilidad con ExtendedFolder
+	stats: FolderStatistics;
 
-	// Conteos para compatibilidad
-	_count?: FolderCounts;
+	// Propiedades adicionales de archivo
+	type?: string;
 }
 
 /**
  * 📁 Input para crear una nueva carpeta
  */
-export interface FolderCreateInput extends Omit<FolderBase, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface FolderCreateInput extends Pick<
+	FolderBase,
+	'color' | 'description' | 'emoji' | 'featuredImage' | 'name' | 'parentId' | 'path' | 'presetId'
+> {}
 
 /**
  * 📁 Input para actualizar una carpeta existente
@@ -64,51 +66,47 @@ export type FolderUpdateInput = Partial<FolderCreateInput>;
  * 📁 Filtros para buscar carpetas
  */
 export interface FolderFilters {
-	search?: string;
-	isFavorite?: boolean;
-	parentId?: string | null;
 	hasImages?: boolean;
 	hierarchyDepth?: number;
+	isFavorite?: boolean;
 	organizationScore?: { min?: number; max?: number };
+	parentId?: string | null;
+	search?: string;
 }
 
 /**
  * 📁 Opciones para las consultas de búsqueda de carpetas
  */
 export interface FolderSearchOptions {
-	skip?: number;
-	take?: number;
-	orderBy?: Record<string, 'asc' | 'desc'>;
 	filters?: FolderFilters;
 	include?: Record<string, boolean>;
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	skip?: number;
+	take?: number;
 }
 
 /**
  * 📁 Configuración de vista para carpetas
  */
 export interface FolderViewConfig {
-	viewType: 'grid' | 'list' | 'tree';
-	gridColumns: number;
 	cardSize: 'small' | 'medium' | 'large';
+	compactView: boolean;
+	enableAnimations: boolean;
+	gridColumns: number;
+	groupBy: string | null;
+	imageCount: number;
+	showImages: boolean;
+	showStats: boolean;
 	sortBy: string;
 	sortDirection: 'asc' | 'desc';
-	showImages: boolean;
-	imageCount: number;
-	enableAnimations: boolean;
-	groupBy: string | null;
-	showStats: boolean;
-	compactView: boolean;
+	viewType: 'grid' | 'list' | 'tree';
 }
 
 /**
  * 📁 Propiedades de UI para carpetas
  */
 export interface FolderUIProps {
-	_count?: {
-		children?: number;
-		images?: number;
-		videos?: number;
-	};
+	_count?: FolderCounts;
 }
 
 import { EntityStats } from '../entity.types';
@@ -117,71 +115,75 @@ import { EntityStats } from '../entity.types';
  * 📁 Estadísticas avanzadas para carpetas
  */
 export interface FolderStatistics extends EntityStats {
-	// Métricas de jerarquía
-	hierarchyDepth: number;
-	totalDescendants: number;
-	directChildren: number; // También conocido como directoryCount
+	// Métricas de uso
+	accessFrequency: number;
+
+	// Auto-tags generados
+	autoTags: string[];
+	averageFileSize: number;
+
+	// Breadcrumbs y navegación
+	breadcrumbs: Array<{ id: string; name: string; path: string }>;
 
 	// Métricas de contenido
 	contentDiversity: number;
-	organizationScore: number;
-	folderCount: number; // Número total de subcarpetas
-	totalAudio: number; // Archivos de audio
-	totalOthers: number; // Otros tipos de archivos
-	totalImages: number; // Total de imágenes
-	totalVideos: number; // Total de videos
-	totalDocuments: number; // Total de documentos
-	totalFolders: number; // Total de carpetas
-	totalFiles: number; // Total de archivos
+	directChildren: number; // También conocido como directoryCount
 	documentCount: number; // Conteo de documentos
-	totalRelations: number; // Total de relaciones
-
-	// Métricas de uso
-	accessFrequency: number;
-	lastActivity: Date | null;
+	folderCount: number; // Número total de subcarpetas
 
 	// Métricas de tamaño
 	formattedSize: string;
-	totalSize: number; // Tamaño total en bytes
-	averageFileSize: number;
-	largestFile: number;
+	fullPath: string;
 
 	// Análisis de nombres y organización
 	hasConsistentNaming: boolean;
 	hasDeepHierarchy: boolean;
+	// Métricas de jerarquía
+	hierarchyDepth: number;
+
+	// Funciones de archivo del sistema
+	isDirectory?: () => boolean;
+	isFile?: () => boolean;
 	isWellOrganized: boolean;
-
-	// Breadcrumbs y navegación
-	breadcrumbs: Array<{ id: string; name: string; path: string }>;
-	fullPath: string;
-	relativePath: string;
-
-	// Auto-tags generados
-	autoTags: string[];
-
-	// Calidad general
-	qualityGrade: 'A' | 'B' | 'C' | 'D';
+	largestFile: number;
+	lastActivity: Date | null;
 
 	// Compatibilidad con componentes
 	lastScanned?: string;
+	organizationScore: number;
+
+	// Calidad general
+	qualityGrade: 'A' | 'B' | 'C' | 'D';
 	recentImages?: Array<{
 		id: string;
 		path: string;
 		name: string;
 		createdAt: string;
 	}>;
-
-	// Funciones de archivo del sistema
-	isDirectory?: () => boolean;
-	isFile?: () => boolean;
+	relativePath: string;
+	totalAudio: number; // Archivos de audio
+	totalDescendants: number;
+	totalDocuments: number; // Total de documentos
+	totalFiles: number; // Total de archivos
+	totalFolders: number; // Total de carpetas
+	totalImages: number; // Total de imágenes
+	totalOthers: number; // Otros tipos de archivos
+	totalRelations: number; // Total de relaciones
+	totalSize: number; // Tamaño total en bytes
+	totalVideos: number; // Total de videos
 }
 
 /**
  * 📁 Conteos relacionados para carpetas
  */
 export interface FolderCounts {
+	audios?: number;
 	children?: number;
+	documents?: number;
+	file3Ds?: number;
 	images?: number;
+	jsonFiles?: number;
+	totalFiles?: number;
 	videos?: number;
 }
 
@@ -189,9 +191,9 @@ export interface FolderCounts {
  * 📁 Relaciones de carpetas
  */
 export interface FolderRelations {
-	parent?: FolderBase | null;
 	children?: FolderBase[];
 	images?: any[];
+	parent?: FolderBase | null;
 	videos?: any[];
 }
 
@@ -199,11 +201,11 @@ export interface FolderRelations {
  * 📁 Carpeta completa con relaciones
  */
 export interface FolderComplete extends FolderBase {
-	parent?: FolderBase | null;
+	_count?: FolderCounts;
 	children?: FolderComplete[];
 	images?: any[];
+	parent?: FolderBase | null;
 	videos?: any[];
-	_count?: FolderCounts;
 }
 
 /**

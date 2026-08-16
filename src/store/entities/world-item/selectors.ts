@@ -10,10 +10,10 @@ import { useWorldItemStore } from './index';
  * Tipos para estadísticas de WorldItem
  */
 export interface WorldItemStats {
-	total: number;
-	byType: Record<string, number>;
 	byCategory: Record<string, number>;
+	byType: Record<string, number>;
 	favorites: number;
+	total: number;
 }
 
 /**
@@ -112,16 +112,16 @@ export const selectWorldItemSummary = () => {
  * @returns Opciones de ordenamiento
  */
 export const selectSortOptions = () => [
-	{ value: 'name_asc', label: 'Nombre (A-Z)' },
-	{ value: 'name_desc', label: 'Nombre (Z-A)' },
-	{ value: 'created_asc', label: 'Fecha creación (más antigua)' },
-	{ value: 'created_desc', label: 'Fecha creación (más reciente)' },
-	{ value: 'updated_asc', label: 'Última actualización (más antigua)' },
-	{ value: 'updated_desc', label: 'Última actualización (más reciente)' },
-	{ value: 'type_asc', label: 'Tipo (A-Z)' },
-	{ value: 'type_desc', label: 'Tipo (Z-A)' },
-	{ value: 'rarity_asc', label: 'Rareza (común a legendario)' },
-	{ value: 'rarity_desc', label: 'Rareza (legendario a común)' },
+	{ value: 'name_asc', label: 'Name (A-Z)' },
+	{ value: 'name_desc', label: 'Name (Z-A)' },
+	{ value: 'created_asc', label: 'Created (oldest first)' },
+	{ value: 'created_desc', label: 'Created (newest first)' },
+	{ value: 'updated_asc', label: 'Updated (oldest first)' },
+	{ value: 'updated_desc', label: 'Updated (newest first)' },
+	{ value: 'type_asc', label: 'Type (A-Z)' },
+	{ value: 'type_desc', label: 'Type (Z-A)' },
+	{ value: 'rarity_asc', label: 'Rarity (common to legendary)' },
+	{ value: 'rarity_desc', label: 'Rarity (legendary to common)' },
 ];
 
 /**

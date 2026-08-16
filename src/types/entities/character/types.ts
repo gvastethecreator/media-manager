@@ -14,42 +14,42 @@ import { CharacterAlignment, CharacterCategory, CharacterClass, CharacterRace } 
  * Contiene todos los campos primitivos y datos serializados en JSON.
  */
 export interface CharacterBase extends EntityBase {
-	name: string;
+	abilities?: string; // JSON string
+	age: string | null;
+	alignment?: string;
+	background: string | null;
+	backstory?: string;
+	beliefs?: string; // JSON string
+	category: string | null;
+	class?: string;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	category: string | null;
+	equipment: string | null;
+	fears?: string; // JSON string
+	featuredImage: string | null;
+	gender: string | null;
+	goals?: string; // JSON string
 
 	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	age: string | null;
-	gender: string | null;
-	species: string | null;
-	occupation: string | null;
-	personality: string | null;
-	background: string | null;
-	relationships: string | null;
-	skills: string | null;
-	equipment: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	parentId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
 	// Additional properties used in the codebase but stored as JSON strings
 	level?: number;
-	class?: string;
-	race?: string;
-	alignment?: string;
-	backstory?: string;
+	name: string;
+	notes: string | null;
+	occupation: string | null;
+	parentId: string | null;
+	personality: string | null;
 	psychologicalProfile?: string | null;
-	socialProfile?: string | null;
-	goals?: string; // JSON string
-	fears?: string; // JSON string
-	beliefs?: string; // JSON string
-	abilities?: string; // JSON string
+	race?: string;
+	relationships: string | null;
 	rpgStats?: string; // JSON string for RPG stats
+	skills: string | null;
+	socialProfile?: string | null;
+	species: string | null;
+	totalImages: number;
+	totalVideos: number;
+	updatedAt: Date;
 }
 
 /**
@@ -57,7 +57,6 @@ export interface CharacterBase extends EntityBase {
  * Optimizado para rendimiento con conteos en lugar de relaciones completas.
  */
 export interface CharacterWithStats extends CharacterBase {
-	entityType: 'character';
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -75,12 +74,13 @@ export interface CharacterWithStats extends CharacterBase {
 		relatedCharacters?: number;
 		relatedTo?: number;
 	};
+	entityType: 'character';
 	images?: ImageWithStats[];
-	videos?: VideoWithStats[];
-	// Estadísticas de asociaciones y uso
-	stats: CharacterAssociationStats;
 	/** Alias para compatibilidad - apunta a stats */
 	statistics?: CharacterAssociationStats;
+	// Estadísticas de asociaciones y uso
+	stats: CharacterAssociationStats;
+	videos?: VideoWithStats[];
 }
 
 /**
@@ -89,40 +89,38 @@ export interface CharacterWithStats extends CharacterBase {
  * Campos opcionales para facilitar la creación desde formularios.
  */
 export interface CharacterCreateInput {
-	name: string;
+	abilities?: string | null;
+	age?: string | null;
+	alignment?: string | null;
+	background?: string | null;
+	backstory?: string | null;
+	beliefs?: string | null;
+	category?: string | null;
+	class?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-
-	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	age?: string | null;
-	gender?: string | null;
-	species?: string | null;
-	occupation?: string | null;
-	personality?: string | null;
-	background?: string | null;
-	relationships?: string | null;
-	skills?: string | null;
 	equipment?: string | null;
-	notes?: string | null;
+	fears?: string | null;
 	featuredImage?: string | null;
-	parentId?: string | null;
+	gender?: string | null;
+	goals?: string | null;
 	// Additional properties
 	level?: number;
-	class?: string | null;
-	race?: string | null;
-	alignment?: string | null;
-	backstory?: string | null;
+	name: string;
+	notes?: string | null;
+	occupation?: string | null;
+	parentId?: string | null;
+	personality?: string | null;
 	psychologicalProfile?: string | null;
-	socialProfile?: string | null;
-	goals?: string | null;
-	fears?: string | null;
-	beliefs?: string | null;
-	abilities?: string | null;
+	race?: string | null;
+	relationships?: string | null;
 	rpgStats?: string | null;
+	skills?: string | null;
+	socialProfile?: string | null;
+	species?: string | null;
+	totalImages?: number;
+	totalVideos?: number;
 }
 
 /**
@@ -139,13 +137,13 @@ export type UpdateCharacterData = CharacterUpdateInput;
  * 🧑‍🎤 Filtros para buscar personajes.
  */
 export interface CharacterFilters {
-	search?: string;
-	level?: { min?: number; max?: number };
-	class?: string[];
-	race?: string[];
 	alignment?: string[];
 	category?: string[];
+	class?: string[];
 	isFavorite?: boolean;
+	level?: { min?: number; max?: number };
+	race?: string[];
+	search?: string;
 	tagIds?: string[];
 }
 
@@ -153,54 +151,54 @@ export interface CharacterFilters {
  * 🧑‍🎤 Configuración de visualización para personajes.
  */
 export interface CharacterViewConfig {
-	viewType: 'grid' | 'list' | 'table';
+	cardSize: 'small' | 'medium' | 'large';
+	compactView: boolean;
+	enableAnimations: boolean;
+	gridColumns: number;
+	groupBy: string | null;
+	imageCount: number;
+	showImages: boolean;
+	showStats: boolean;
 	sortBy: string;
 	sortDirection: 'asc' | 'desc';
-	showImages: boolean;
-	imageCount: number;
-	enableAnimations: boolean;
-	groupBy: string | null;
-	showStats: boolean;
-	compactView: boolean;
-	gridColumns: number;
-	cardSize: 'small' | 'medium' | 'large';
+	viewType: 'grid' | 'list' | 'table';
 }
 
 /**
  * 🧑‍🎤 Opciones para las consultas de búsqueda de personajes.
  */
 export interface CharacterSearchOptions {
-	skip?: number;
-	take?: number;
-	// Ordenamiento - se pueden usar propiedades básicas
-	orderBy?: Record<string, 'asc' | 'desc'>;
 	filters?: CharacterFilters;
 	// Inclusión - se pueden especificar relaciones a incluir
 	include?: Record<string, boolean>;
+	// Ordenamiento - se pueden usar propiedades básicas
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	skip?: number;
+	take?: number;
 }
 
 /**
  * 🧑‍🎤 Estructura de una relación entre personajes.
  */
 export interface CharacterRelationship {
+	description?: string;
 	id: string;
+	strength: number;
 	targetId: string;
 	targetName: string;
 	type: string;
-	strength: number;
-	description?: string;
 }
 
 /**
  * 🧑‍🎤 Estadísticas RPG de un personaje.
  */
 export interface CharacterStats {
-	strength?: number;
-	dexterity?: number;
-	constitution?: number;
-	intelligence?: number;
-	wisdom?: number;
 	charisma?: number;
+	constitution?: number;
+	dexterity?: number;
+	intelligence?: number;
+	strength?: number;
+	wisdom?: number;
 	[key: string]: number | undefined;
 }
 
@@ -208,43 +206,43 @@ export interface CharacterStats {
  * 📊 Estadísticas de asociaciones y uso de un personaje.
  */
 export interface CharacterAssociationStats {
-	totalImages: number;
-	totalVideos: number;
-	totalTags: number;
-	totalGroups: number;
-	totalProperties: number;
-	totalCollections: number;
-	totalAlbums: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalNotes: number;
-	totalWildcards: number;
-	totalRelatedCharacters: number;
-	totalRelatedTo: number;
-	totalAssociations: number;
-	lastUpdated: Date;
-	powerLevel: number;
-	rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-	// Propiedades RPG adicionales
-	healthPoints?: number;
-	manaPoints?: number;
-	imageCount?: number; // Alias para totalImages
-
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
 	/** File creation time */
 	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
+	// Propiedades RPG adicionales
+	healthPoints?: number;
+	imageCount?: number; // Alias para totalImages
 	/** Whether this is a directory */
 	isDirectory: boolean;
 	/** Whether this is a file */
 	isFile: boolean;
+	lastUpdated: Date;
+	manaPoints?: number;
+	/** Last modification time */
+	mtime: Date;
+	powerLevel: number;
+	rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	totalAlbums: number;
+	totalAssociations: number;
+	totalCollections: number;
+	totalConcepts: number;
+	totalGroups: number;
+	totalImages: number;
+	totalNotes: number;
+	totalPlaces: number;
+	totalPrompts: number;
+	totalProperties: number;
+	totalRelatedCharacters: number;
+	totalRelatedTo: number;
+	totalTags: number;
+	totalVideos: number;
+	totalWildcards: number;
+	totalWorldItems: number;
+	/** File type for browser compatibility */
+	type: string;
 }
 
 /**

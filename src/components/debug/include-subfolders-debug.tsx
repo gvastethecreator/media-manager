@@ -15,9 +15,9 @@ export function IncludeSubfoldersDebug() {
 	const resetLocalStorage = useViewOptionsStore((state) => state.resetLocalStorage);
 
 	return (
-		<Card className="m-4 border-red-500">
+		<Card className="m-4 border-destructive">
 			<CardHeader>
-				<CardTitle className="text-red-600">🚨 Debug: includeSubfolders Issue</CardTitle>
+				<CardTitle className="text-destructive">🚨 Debug: includeSubfolders Issue</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="grid grid-cols-2 gap-4">
@@ -47,7 +47,7 @@ export function IncludeSubfoldersDebug() {
 
 				<div className="space-y-2">
 					<Button className="w-full" onClick={resetLocalStorage} size="sm" variant="destructive">
-						🗑️ Reset localStorage y Recargar
+						🗑️ Reset localStorage and Reload
 					</Button>
 					<Button className="w-full" onClick={() => debugLocalStorageSize()} size="sm" variant="outline">
 						🔍 Debug localStorage Size
@@ -56,7 +56,7 @@ export function IncludeSubfoldersDebug() {
 						🧹 Limpiar Items Grandes
 					</Button>
 					<div className="text-muted-foreground text-xs">
-						Usar si el estado está corrupto en localStorage o hay error 431
+						Use when localStorage state is corrupt or error 431 occurs
 					</div>
 				</div>
 
@@ -65,8 +65,8 @@ export function IncludeSubfoldersDebug() {
 					<ol className="list-inside list-decimal space-y-1 text-sm">
 						<li>Verificar que el estado inicial sea FALSE</li>
 						<li>Hacer toggle y verificar que cambie</li>
-						<li>Recargar página y verificar persistencia</li>
-						<li>Ver si los archivos de subcarpetas aparecen/desaparecen correctamente</li>
+						<li>Reload the page and verify persistence</li>
+						<li>Check that subfolder files appear and disappear correctly</li>
 					</ol>
 				</div>
 			</CardContent>

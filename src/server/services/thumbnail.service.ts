@@ -1,5 +1,6 @@
-import { count, desc, eq, isNull, not, sql, sum } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { existsSync } from 'fs';
+import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
 import { thumbsConfig } from '@/config/thumbs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
@@ -8,122 +9,30 @@ import { images } from '@/lib/drizzle/schema/index';
 import type { ThumbnailResult as LibThumbResult } from '@/lib/image/thumbnail';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { thumbnailMemoryCache } from '@/services/cache/memory-cache.service';
-import {
-	generateContentHash,
-	readFromCache,
-	writeToCache,
-	initializeDiskCache,
-} from '@/services/cache/disk-cache.service';
-import { thumbnailService as baseThumbnailService } from '@/services/thumbnail/index';
-import type { ThumbnailStats } from '@/types/stats';
-import type { LastProcessedThumbnail, ProcessOptions } from '@/types/thumbnails';
+import type { ProcessOptions } from '@/types/thumbnails';
 
 const thumbLogger = serverLogger.withContext('ThumbnailService');
 
-// Cola optimizada con prioridades y gestión avanzada
-const queue = new PQueue({ 
-	concurrency: thumbsConfig.concurrency,
-	interval: 100, // Procesar cada 100ms para mejor responsiveness
-	intervalCap: Math.max(2, Math.floor(thumbsConfig.concurrency / 2)), // Máximo 50% por intervalo
-	timeout: 30_000, // 30 segundos timeout
-	throwOnTimeout: true,
-	autoStart: true,
-});
-
-// Prioridades para la cola
-const PRIORITY = {
-	UI_REQUEST: 10, // Solicitudes directas de UI (máxima prioridad)
-	BATCH_SMALL: 5, // Lotes pequeños (< 10 imágenes)
-	BATCH_LARGE: 1, // Lotes grandes (< 50 imágenes)
-	BACKGROUND: 0,  // Tareas de fondo (limpieza, optimización)
-} as const;
-
-// Métricas de performance
-const metrics = {
-	totalRequests: 0,
-	cacheHits: 0,
-	cacheMisses: 0,
-	averageResponseTime: 0,
-	requestTimes: [] as number[],
-};
-
+// LRU en memoria para resultados recientes
+const memoryCache = new LRUCache<string, LibThumbResult>({ max: thumbsConfig.memory.maxEntries });
+// Cola para evitar tormenta de solicitudes de la misma imagen
+const queue = new PQueue({ concurrency: thumbsConfig.concurrency });
 // Deduplicación de tareas en vuelo por clave (path+quality)
 const inflight = new Map<string, Promise<LibThumbResult>>();
 
-// Queue events para métricas
-queue.on('add', () => {
-	thumbLogger.debug(`🔄 Tarea añadida a cola. Pendientes: ${queue.size}, Activas: ${queue.pending}`);
-});
-
-queue.on('next', () => {
-	thumbLogger.debug(`⚡ Procesando siguiente tarea. Restantes: ${queue.size}`);
-});
-
-queue.on('idle', () => {
-	thumbLogger.debug(`😴 Cola vacía. Métricas: ${metrics.cacheHits} hits, ${metrics.cacheMisses} misses`);
-});
-
-queue.on('error', (error) => {
-	thumbLogger.error('❌ Error en cola de thumbnails:', error);
-});
-
-// Inicializar sistema de cache al arrancar
-let cacheInitialized = false;
-async function ensureCacheInitialized() {
-	if (!cacheInitialized && thumbsConfig.provider === 'disk') {
-		await initializeDiskCache();
-		cacheInitialized = true;
-		thumbLogger.info('✅ Sistema de cache inicializado');
-	}
-}
-
-// Función para determinar prioridad basada en contexto
-function getPriority(context: 'ui' | 'batch-small' | 'batch-large' | 'background' = 'ui'): number {
-	switch (context) {
-		case 'ui': return PRIORITY.UI_REQUEST;
-		case 'batch-small': return PRIORITY.BATCH_SMALL;
-		case 'batch-large': return PRIORITY.BATCH_LARGE;
-		case 'background': return PRIORITY.BACKGROUND;
-		default: return PRIORITY.UI_REQUEST;
-	}
-}
-
-// Función para actualizar métricas
-function updateMetrics(startTime: number, fromCache: boolean) {
-	const responseTime = Date.now() - startTime;
-	metrics.totalRequests++;
-	
-	if (fromCache) {
-		metrics.cacheHits++;
-	} else {
-		metrics.cacheMisses++;
-	}
-	
-	metrics.requestTimes.push(responseTime);
-	if (metrics.requestTimes.length > 100) {
-		metrics.requestTimes.shift(); // Mantener solo últimas 100 mediciones
-	}
-	
-	metrics.averageResponseTime = metrics.requestTimes.reduce((a, b) => a + b, 0) / metrics.requestTimes.length;
-}
-
 export interface ThumbnailResponse {
+	error?: string;
+	height?: number;
+	mimeType?: string;
+	size?: number;
 	thumbnailUrl?: string;
 	width?: number;
-	height?: number;
-	size?: number;
-	mimeType?: string;
-	error?: string;
 }
 
 export async function getThumbnail(
 	id: string,
-	quality: ThumbnailQuality = ThumbnailQuality.MEDIUM,
-	context: 'ui' | 'batch-small' | 'batch-large' | 'background' = 'ui'
+	quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
 ): Promise<ThumbnailResponse> {
-	const startTime = Date.now();
-	
 	try {
 		// Validar que la calidad sea una de las opciones válidas
 		let validQuality = quality;
@@ -142,7 +51,7 @@ export async function getThumbnail(
 			};
 		}
 
-		thumbLogger.debug('🔄 Obteniendo thumbnail:', { id, quality: validQuality, context });
+		thumbLogger.info('🔄 Obteniendo thumbnail:', { id, quality: validQuality });
 
 		const image = await db.query.images.findFirst({
 			where: eq(images.id, id),
@@ -198,8 +107,18 @@ export async function getThumbnail(
 		}
 
 		// Validar que la ruta del archivo exista
-		if (!(image.path && existsSync(image.path))) {
-			const error = `Archivo no encontrado en ruta: ${image.path}`;
+		// Protección contra rutas corruptas o demasiado largas (ej. base64 en lugar de path)
+		if (!image.path || image.path.length > 1024) {
+			const error = 'La ubicación del archivo es inválida o demasiado larga.';
+			thumbLogger.error(`❌ ${error}`);
+			return {
+				thumbnailUrl: '',
+				error,
+			};
+		}
+
+		if (!existsSync(image.path)) {
+			const error = 'El archivo fuente no existe o ya no está disponible.';
 			// Registrar el error en la base de datos
 			await db
 				.update(images)
@@ -217,104 +136,38 @@ export async function getThumbnail(
 		// Si el proveedor es disco o no hay thumbnail en DB, generar/servir desde disco
 		thumbLogger.info(`🔄 Generando/servidor thumbnail (provider=${thumbsConfig.provider}):`, {
 			id,
-			path: image.path,
 		});
 
 		try {
-			// Asegurar que el cache esté inicializado
-			await ensureCacheInitialized();
-
 			// Clave por ruta + calidad para deduplicar y cachear
 			const memKey = `${image.path}:${validQuality}`;
-			const sizeKey = validQuality as keyof typeof thumbsConfig.sizes;
 
-			// 1. Verificar cache en memoria primero
-			const memCached = thumbnailMemoryCache.get(
-				await generateContentHash(image.path + validQuality),
-				validQuality
-			);
-			
-			if (memCached) {
-				thumbLogger.debug(`✅ Thumbnail servido desde memoria: ${id}`);
-				updateMetrics(startTime, true);
-				return {
-					thumbnailUrl: `/api/images/${id}/thumbnail?quality=${validQuality}`,
-					width: memCached.width,
-					height: memCached.height,
-					size: memCached.buffer.length,
-					mimeType: `image/${memCached.format}`,
-				};
-			}
-
-			// 2. Verificar cache en disco (si provider es disk)
+			// Si está en memoria, usarlo
+			const cached = memoryCache.get(memKey);
 			let thumbnail: LibThumbResult;
-			const hash = await generateContentHash(image.path + validQuality);
-			
-			if (thumbsConfig.provider === 'disk') {
-				const diskCached = await readFromCache(hash, sizeKey);
-				
-				if (diskCached) {
-					// Cargar en memoria para próximos accesos
-					const buffer = await require('fs').promises.readFile(diskCached.path);
-					thumbnailMemoryCache.set(hash, validQuality, buffer, {
-						width: diskCached.width,
-						height: diskCached.height,
-						format: 'webp',
-					});
-					
-					thumbLogger.debug(`✅ Thumbnail servido desde disco: ${id}`);
-					updateMetrics(startTime, true);
-					return {
-						thumbnailUrl: `/api/images/${id}/thumbnail?quality=${validQuality}`,
-						width: diskCached.width,
-						height: diskCached.height,
-						size: diskCached.fileSize,
-						mimeType: diskCached.mimeType,
-					};
+			if (cached) {
+				// Actualizar en background si se quisiera: aquí retornamos directo
+				thumbnail = cached;
+			} else {
+				// Si hay una tarea en vuelo, esperarla; si no, crearla a través de la cola
+				const existing = inflight.get(memKey);
+				if (existing) {
+					thumbnail = await existing;
+					inflight.delete(memKey);
+				} else {
+					const newPromise: Promise<LibThumbResult> = queue.add(
+						async (): Promise<LibThumbResult> => {
+							const result = await generateThumbnail(image.path, { quality: validQuality });
+							memoryCache.set(memKey, result);
+							return result;
+						},
+						{ priority: 0 }
+					) as Promise<LibThumbResult>;
+					inflight.set(memKey, newPromise);
+					thumbnail = await newPromise;
+					inflight.delete(memKey);
 				}
 			}
-
-			// 3. Si no está en cache, verificar tareas en vuelo
-			const existing = inflight.get(memKey);
-			if (existing) {
-				thumbnail = await existing;
-				inflight.delete(memKey);
-			} else {
-				// 4. Generar nuevo thumbnail con prioridad según contexto
-				const priority = getPriority(context);
-				const newPromise: Promise<LibThumbResult> = queue.add(
-					async (): Promise<LibThumbResult> => {
-						thumbLogger.debug(`🎯 Generando thumbnail: ${id} (prioridad: ${priority})`);
-						const result = await generateThumbnail(image.path, { quality: validQuality });
-						
-						// Guardar en cache en memoria
-						thumbnailMemoryCache.set(hash, validQuality, result.buffer, {
-							width: result.width,
-							height: result.height,
-							format: result.format,
-						});
-
-						// Guardar en cache en disco si el provider es disk
-						if (thumbsConfig.provider === 'disk') {
-							await writeToCache(hash, sizeKey, result.buffer, {
-								width: result.width,
-								height: result.height,
-							});
-						}
-
-						return result;
-					},
-					{ 
-						priority,
-						throwOnTimeout: true,
-					}
-				);
-				inflight.set(memKey, newPromise);
-				thumbnail = await newPromise;
-				inflight.delete(memKey);
-			}
-
-			updateMetrics(startTime, false);
 
 			if (!thumbnail?.buffer) {
 				throw new Error('No se pudo generar el thumbnail');
@@ -365,7 +218,7 @@ export async function getThumbnail(
 			};
 		} catch (genError) {
 			// Registrar el error en la imagen
-			const errorMessage = genError instanceof Error ? genError.message : 'Error desconocido';
+			const errorMessage = 'No se pudo generar el thumbnail.';
 			await db
 				.update(images)
 				.set({
@@ -373,15 +226,21 @@ export async function getThumbnail(
 				})
 				.where(eq(images.id, id));
 
-			thumbLogger.error('❌ Error generando thumbnail:', genError);
+			thumbLogger.error('❌ Error generando thumbnail:', {
+				id,
+				kind: genError instanceof Error ? genError.name : 'UnknownError',
+			});
 			return {
 				thumbnailUrl: '',
 				error: errorMessage,
 			};
 		}
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-		thumbLogger.error('❌ Error obteniendo thumbnail:', { error: errorMessage, id });
+		const errorMessage = 'No se pudo obtener el thumbnail.';
+		thumbLogger.error('❌ Error obteniendo thumbnail:', {
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
+			id,
+		});
 		return {
 			thumbnailUrl: '',
 			error: errorMessage,
@@ -389,207 +248,23 @@ export async function getThumbnail(
 	}
 }
 
-export async function optimizeThumbnails(options?: ProcessOptions) {
-	try {
-		thumbLogger.info('🔄 Iniciando optimización de thumbnails');
-		return await baseThumbnailService.optimizeThumbnails(options);
-	} catch (error) {
-		thumbLogger.error('❌ Error optimizando thumbnails:', error);
-		throw error;
-	}
-}
-
-export async function reprocessThumbnails(options?: ProcessOptions) {
-	try {
-		thumbLogger.info('🔄 Iniciando reprocesamiento de thumbnails');
-		return await baseThumbnailService.reprocessAll(options);
-	} catch (error) {
-		thumbLogger.error('❌ Error reprocesando thumbnails:', error);
-		throw error;
-	}
-}
-
-export async function cleanThumbnails(options?: ProcessOptions) {
-	try {
-		thumbLogger.info('🔄 Iniciando limpieza de thumbnails');
-		return await baseThumbnailService.cleanThumbnails(options);
-	} catch (error) {
-		thumbLogger.error('❌ Error limpiando thumbnails:', error);
-		throw error;
-	}
-}
-
-/**
- * 📊 Obtiene métricas del sistema de thumbnails
- */
-export function getThumbnailMetrics() {
-	return {
-		queue: {
-			size: queue.size,
-			pending: queue.pending,
-			isPaused: queue.isPaused,
-		},
-		performance: {
-			totalRequests: metrics.totalRequests,
-			cacheHitRate: metrics.totalRequests > 0 ? metrics.cacheHits / metrics.totalRequests : 0,
-			cacheMissRate: metrics.totalRequests > 0 ? metrics.cacheMisses / metrics.totalRequests : 0,
-			averageResponseTime: metrics.averageResponseTime,
-		},
-		memory: thumbnailMemoryCache.getStats(),
-		inflight: inflight.size,
-	};
-}
-
-export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcessedThumbnail[]> {
-	try {
-		thumbLogger.info('🔄 Obteniendo últimas miniaturas procesadas:', { limit });
-
-		const imagesData = await db.query.images.findMany({
-			where: not(isNull(images.thumbnail)),
-			orderBy: desc(images.updatedAt),
-			limit,
-			columns: {
-				id: true,
-				path: true,
-				updatedAt: true,
-				thumbnailSize: true,
-			},
-		});
-
-		return imagesData.map((image: any) => ({
-			id: image.id,
-			path: image.path,
-			processedAt: image.updatedAt,
-			status: 'success' as const,
-		}));
-	} catch (error) {
-		thumbLogger.error('❌ Error obteniendo últimas miniaturas:', error);
-		throw error;
-	}
-}
-
-export async function getThumbnailStats(): Promise<ThumbnailStats> {
-	try {
-		thumbLogger.info('🔄 Obteniendo estadísticas de thumbnails');
-
-		// Verificar la conexión a la base de datos antes de continuar
-		try {
-			// Consulta simple para verificar la conexión
-			await db.execute(sql`SELECT 1`);
-		} catch (dbError) {
-			thumbLogger.error('❌ Error de conexión a la base de datos:', dbError);
-			throw new Error('No se pudo conectar a la base de datos. Verifica tu conexión.');
-		}
-
-		const [totalFilesResult, withThumbnailResult, pendingResult, errorsData, totalSizeResult] = await Promise.all([
-			db.select({ count: count() }).from(images),
-			db
-				.select({ count: count() })
-				.from(images)
-				.where(not(isNull(images.thumbnail))),
-			db.select({ count: count() }).from(images).where(isNull(images.thumbnail)),
-			db.query.images.findMany({
-				where: not(isNull(images.thumbnailError)),
-				columns: {
-					id: true,
-					path: true,
-					thumbnailError: true,
-					updatedAt: true,
-				},
-			}),
-			db
-				.select({ totalSize: sum(images.thumbnailSize) })
-				.from(images)
-				.where(not(isNull(images.thumbnailSize))),
-		]);
-
-		const totalFiles = totalFilesResult[0].count;
-		const withThumbnail = withThumbnailResult[0].count;
-		const pending = pendingResult[0].count;
-		const errors = errorsData;
-		const totalSize = totalSizeResult[0].totalSize || 0;
-
-		return {
-			total: totalFiles,
-			processed: withThumbnail,
-			pending,
-			errors: errors.length,
-			totalFiles,
-			totalSize,
-		};
-	} catch (error) {
-		thumbLogger.error('❌ Error obteniendo estadísticas:', error);
-
-		if (error instanceof Error) {
-			throw error;
-		}
-		throw new Error('Error al obtener estadísticas de miniaturas. Por favor, intenta más tarde.');
-	}
-}
-
-export async function verifySignedToken(token: string): Promise<{ buffer: Buffer; mimeType: string }> {
-	try {
-		thumbLogger.info('🔄 Verificando token firmado:', token);
-
-		// TODO: Implementar lógica real de verificación de token
-		// Por ahora retornamos un placeholder
-		throw new Error('Token verification not implemented yet');
-	} catch (error) {
-		thumbLogger.error('❌ Error verificando token:', error);
-		throw new Error(`Token inválido: ${token}`);
-	}
-}
-
 export async function bulkGenerateThumbnails(imageIds: string[], options?: ProcessOptions) {
-	const quality = options?.quality as ThumbnailQuality || ThumbnailQuality.MEDIUM;
-	const maxConcurrency = options?.maxConcurrency || thumbsConfig.concurrency;
-	
-	thumbLogger.info(`� Iniciando generación en lote: ${imageIds.length} imágenes`);
-	
-	// Determinar prioridad según el tamaño del lote
-	const context = imageIds.length <= 10 ? 'batch-small' : 'batch-large';
-	
-	const success: string[] = [];
-	const errors: Array<{ id: string; error: string }> = [];
-	
-	// Procesar en chunks para no sobrecargar el sistema
-	const chunkSize = Math.min(maxConcurrency, 10);
-	const chunks = [];
-	
-	for (let i = 0; i < imageIds.length; i += chunkSize) {
-		chunks.push(imageIds.slice(i, i + chunkSize));
-	}
-	
-	for (const chunk of chunks) {
-		const promises = chunk.map(async (id) => {
-			try {
-				const result = await getThumbnail(id, quality, context);
-				if (result.error) {
-					errors.push({ id, error: result.error });
-				} else {
-					success.push(id);
-				}
-			} catch (error) {
-				const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
-				errors.push({ id, error: errorMsg });
-			}
-		});
-		
-		await Promise.all(promises);
-		
-		// Pequeña pausa entre chunks para permitir otras tareas
-		if (chunks.length > 1) {
-			await new Promise(resolve => setTimeout(resolve, 50));
+	thumbLogger.info(`🔄 Generando thumbnails en lote para ${imageIds.length} imágenes`);
+	const generated: string[] = [];
+	const errors: { id: string; error: string }[] = [];
+
+	for (const imageId of imageIds) {
+		try {
+			await getThumbnail(imageId, options?.quality as any);
+			generated.push(imageId);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			errors.push({ id: imageId, error: errorMessage });
 		}
 	}
-	
-	thumbLogger.info(`✅ Lote completado: ${success.length} éxitos, ${errors.length} errores`);
-	
-	return { 
-		generated: success, 
-		errors,
-		metrics: getThumbnailMetrics()
-	};
+
+	thumbLogger.info(`✅ Generación en lote completada. Generados: ${generated.length}, Errores: ${errors.length}`);
+	return { generated, errors };
 }
 
 export async function deleteThumbnail(imageId: string): Promise<{ success: boolean; message: string }> {

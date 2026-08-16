@@ -17,31 +17,22 @@ export type { ImageBase, ImageStatistics, ImageWithStats } from './base';
 
 // --- Enumeraciones ---
 export { ImageFormat, ImageStatus } from './enums';
-export type {
-	ImageFilters,
-	ImageMetadata,
-	ImageSearchResult,
-} from './types';
+export type { ImageFilters, ImageMetadata, ImageSearchResult } from './types';
 
 // --- Tipos derivados ---
 import type { ImageBase, ImageWithStats } from './base';
+import type { ImageCreateInput as ImageCreateShape, ImageUpdateInput as ImageUpdateShape } from './types';
 export type Image = ImageWithStats;
 export type ImageComplete = ImageWithStats;
-export type ImageCreateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
-export type ImageUpdateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
-export type ImageSearchOptions = {
+export type ImageCreateInput = ImageCreateShape;
+export type ImageUpdateInput = ImageUpdateShape;
+export interface ImageSearchOptions {
+	orderBy?: Record<string, 'asc' | 'desc'>;
 	skip?: number;
 	take?: number;
-	orderBy?: Record<string, 'asc' | 'desc'>;
 	where?: Record<string, unknown>;
-};
+}
 
-export {
-	IMAGE_SORT_PROPERTY_MAP,
-	ImageSchema,
-	ImageSortCriteria,
-	ImageSortOption,
-	ImageViewMode,
-} from './types';
+export { IMAGE_SORT_PROPERTY_MAP, ImageSchema, ImageSortCriteria, ImageSortOption, ImageViewMode } from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.

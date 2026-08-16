@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTheme } from '@/components/ui/theme-provider';
 import { useSettings } from '@/lib/contexts/settings-context';
-import { useTheme } from '@/lib/contexts/theme-context';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 /**
  * Componente que sincroniza el tema entre settings-context y theme-context
@@ -15,7 +16,7 @@ export function ThemeSync() {
 	// Sincronizar el tema de settings con theme-context
 	useEffect(() => {
 		if (settings.theme !== themeContextTheme) {
-			console.log(`🔄 Sincronizando tema: ${settings.theme} -> theme-context`);
+			clientLogger.debug(`🔄 Synchronizing theme: ${settings.theme} -> theme-context`);
 			setTheme(settings.theme);
 		}
 	}, [settings.theme, themeContextTheme, setTheme]);

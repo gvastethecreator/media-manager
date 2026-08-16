@@ -17,9 +17,9 @@ export { ConceptSortOption, ConceptViewMode } from './enums';
  * Tipo extendido de Concept con campos adicionales
  */
 export interface ConceptExtended extends ConceptBase {
+	lastUsed?: Date;
 	// Campos adicionales para compatibilidad
 	totalAssociations?: number;
-	lastUsed?: Date;
 	usageCount?: number;
 }
 
@@ -27,38 +27,36 @@ export interface ConceptExtended extends ConceptBase {
  * Input para creación
  */
 export interface ConceptCreateInput {
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	content?: string;
+	albumIds?: string[];
+	applications?: string | null;
 	category?: string | null;
-
-	isFavorite?: boolean;
+	characterIds?: string[];
+	collectionIds?: string[];
+	color?: string;
+	complexity?: string | null;
+	content?: string;
+	description?: string | null;
+	emoji?: string;
+	examples?: string | null;
+	featuredImage?: string | null;
+	groupIds?: string[];
+	// Relaciones por ID (para compatibilidad)
+	imageIds?: string[];
+	name: string;
+	noteIds?: string[];
+	notes?: string | null;
+	parentId?: string | null;
+	placeIds?: string[];
+	promptIds?: string[];
+	propertyIds?: string[];
+	relatedConcepts?: string | null;
+	tagIds?: string[];
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	complexity?: string | null;
-	applications?: string | null;
-	examples?: string | null;
-	relatedConcepts?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-	// Relaciones por ID (para compatibilidad)
-	imageIds?: string[];
 	videoIds?: string[];
-	albumIds?: string[];
-	collectionIds?: string[];
-	tagIds?: string[];
-	characterIds?: string[];
-	placeIds?: string[];
-	worldItemIds?: string[];
-	promptIds?: string[];
-	noteIds?: string[];
 	wildcardIds?: string[];
-	propertyIds?: string[];
-	groupIds?: string[];
+	worldItemIds?: string[];
 }
 
 /**
@@ -71,13 +69,13 @@ export type ConceptUpdateInput = Partial<ConceptCreateInput>;
  */
 export interface ConceptFilters {
 	category?: string | string[];
+	onlyFavorites?: boolean;
+	page?: number;
+	pageSize?: number;
 	search?: string;
 	sortBy?: 'name' | 'category' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
-	page?: number;
-	pageSize?: number;
 	tags?: string[];
-	onlyFavorites?: boolean;
 }
 
 /**
@@ -85,13 +83,13 @@ export interface ConceptFilters {
  */
 export interface ConceptResults {
 	items: ConceptBase[];
-	total: number;
 	page: number;
 	pageSize: number;
 	stats?: {
 		totalConcepts: number;
 		categoriesStats: Record<string, number>;
 	};
+	total: number;
 }
 
 /**

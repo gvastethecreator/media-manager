@@ -19,8 +19,8 @@ import { GenericFileViewer } from './viewers/generic-file-viewer';
 import { VideoViewer } from './viewers/video-viewer';
 
 interface MultiEntityViewerProps {
-	entities: AnyEntityWithStats[];
 	currentIndex: number;
+	entities: AnyEntityWithStats[];
 	isOpen: boolean;
 	onClose: () => void;
 	onIndexChange: (index: number) => void;
@@ -133,7 +133,7 @@ export function MultiEntityViewer({ entities, currentIndex, isOpen, onClose, onI
 			{isOpen && (
 				<motion.div
 					animate={{ opacity: 1 }}
-					className="fixed inset-0 z-[9999] bg-background"
+					className="fixed inset-0 z-[9998] bg-background"
 					exit={{ opacity: 0 }}
 					initial={{ opacity: 0 }}
 					transition={{ duration: 0.2 }}

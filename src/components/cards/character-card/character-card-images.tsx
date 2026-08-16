@@ -10,13 +10,17 @@ import { cn } from '@/lib/utils';
 // Imágenes con thumbnails para el componente de galería
 export interface ThumbnailImage {
 	id: string;
-	thumbnailUrl: string;
-	name?: string;
-	url?: string;
 	isVideo?: boolean;
+	name?: string;
+	thumbnailUrl: string;
+	url?: string;
 }
 
 interface CharacterCardImagesProps {
+	/** Si está en modo compacto */
+	compact?: boolean;
+	/** Si está habilitado el efecto holográfico */
+	holographicEffect?: boolean;
 	/** Imágenes a mostrar (rutas) */
 	images?: string[];
 	/** URL de la imagen destacada */
@@ -25,12 +29,8 @@ interface CharacterCardImagesProps {
 	primaryColor?: string;
 	/** Nivel de rareza (1-10) para determinar efectos */
 	rarityLevel?: number;
-	/** Si está habilitado el efecto holográfico */
-	holographicEffect?: boolean;
 	/** Si está en modo tarjeta TCG */
 	tcgMode?: boolean;
-	/** Si está en modo compacto */
-	compact?: boolean;
 }
 
 // Eliminado getHolographicEffects: sustituido por buildHolographicStyle + config centralizada.
@@ -45,19 +45,19 @@ export function CharacterCardImages(props: CharacterCardImagesProps) {
 }
 
 interface CharacterCardImagesState extends CharacterCardImagesProps {
+	active: boolean;
+	ariaLabel: string;
 	displayImage: string | null;
 	hasImage: boolean;
-	viewAngle: { x: number; y: number };
-	setViewAngle: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
-	active: boolean;
 	holographicStyle: React.CSSProperties;
-	ariaLabel: string;
+	setViewAngle: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+	viewAngle: { x: number; y: number };
 }
 
 function useCharacterCardImagesState({
 	images = [],
 	mainImage,
-	primaryColor = '#8e44ad',
+	primaryColor = 'var(--entity-character)',
 	rarityLevel = 1,
 	holographicEffect = true,
 	tcgMode = true,
@@ -70,8 +70,8 @@ function useCharacterCardImagesState({
 	const rarityConfig = computeRarityVisualConfig({ level: rarityLevel });
 	const holographicStyle = buildHolographicStyle(primaryColor, rarityConfig, active);
 	const ariaLabel = hasImage
-		? rarityAccessibilityLabel('Imagen de personaje', rarityConfig)
-		: 'Imagen de personaje no disponible';
+		? rarityAccessibilityLabel('Character image', rarityConfig)
+		: 'Character image unavailable';
 	return {
 		images,
 		mainImage,
@@ -94,7 +94,7 @@ const CharacterCardImagesView: React.FC<CharacterCardImagesState> = ({
 	ariaLabel,
 	compact = false,
 	tcgMode = true,
-	primaryColor = '#8e44ad',
+	primaryColor = 'var(--entity-character)',
 	rarityLevel = 1,
 	displayImage,
 	hasImage,
@@ -116,7 +116,7 @@ const CharacterCardImagesView: React.FC<CharacterCardImagesState> = ({
 	return (
 		<div
 			aria-label={ariaLabel}
-			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-white/10 border-b')}
+			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-border/40 border-b')}
 			onBlur={resetAngle}
 			onFocus={resetAngle}
 			onMouseLeave={resetAngle}
@@ -145,7 +145,7 @@ const CharacterCardImagesView: React.FC<CharacterCardImagesState> = ({
 // Subcomponentes decorativos
 const BackgroundDecor: React.FC<{ primaryColor: string }> = ({ primaryColor }) => (
 	<div
-		className="absolute inset-0 z-0 bg-black/20"
+		className="absolute inset-0 z-0 bg-muted/20"
 		style={{ backgroundImage: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 80%)` }}
 	/>
 );
@@ -190,7 +190,7 @@ const MainImageLayer: React.FC<{
 			<div
 				className="pointer-events-none absolute inset-0 z-20 opacity-30"
 				style={{
-					background: `linear-gradient(${135 + viewAngle.x * 30}deg,transparent,rgba(255, 255, 255, 0.5) ${50 + viewAngle.y * 10}%,transparent)`,
+					background: `linear-gradient(${135 + viewAngle.x * 30}deg,transparent,color-mix(in oklch, var(--foreground), transparent 50%) ${50 + viewAngle.y * 10}%,transparent)`,
 				}}
 			/>
 		)}
@@ -208,7 +208,7 @@ const MainImageLayer: React.FC<{
 
 const Placeholder: React.FC<{ primaryColor: string }> = ({ primaryColor }) => (
 	<div
-		className="flex h-full w-full items-center justify-center bg-black/20 text-white/50"
+		className="flex h-full w-full items-center justify-center bg-muted/20 text-white/50"
 		style={{ background: `radial-gradient(circle, ${primaryColor}30 0%, transparent 70%)` }}
 	>
 		<span className="-rotate-12 transform text-4xl">?</span>
@@ -218,7 +218,7 @@ const Placeholder: React.FC<{ primaryColor: string }> = ({ primaryColor }) => (
 const OverlayEffects: React.FC<{ primaryColor: string; rarityLevel: number }> = ({ primaryColor, rarityLevel }) => (
 	<div className="pointer-events-none absolute inset-0 z-30">
 		<div
-			className="absolute inset-3 rounded border border-white/10"
+			className="absolute inset-3 rounded border border-border/40"
 			style={{ boxShadow: rarityLevel >= 5 ? `0 0 10px ${primaryColor}50 inset` : 'none' }}
 		/>
 		<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />

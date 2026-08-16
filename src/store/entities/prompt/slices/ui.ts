@@ -6,27 +6,27 @@ import type { PromptStore } from '../types';
 const uiLogger = clientLogger.withContext('PromptStore:UI');
 
 export interface UISlice {
-	// Estado
-	viewMode: PromptViewMode;
+	closeCreateModal: () => void;
+	closeDeleteDialog: () => void;
+	closeDetailsDrawer: () => void;
+	closeEditModal: () => void;
+	closeExecuteModal: () => void;
 	isCreateModalOpen: boolean;
-	isEditModalOpen: boolean;
 	isDeleteDialogOpen: boolean;
 	isDetailsDrawerOpen: boolean;
+	isEditModalOpen: boolean;
 	isExecuteModalOpen: boolean;
+	openCreateModal: () => void;
+	openDeleteDialog: () => void;
+	openDetailsDrawer: () => void;
+	openEditModal: () => void;
+	openExecuteModal: () => void;
+	resetUI: () => void;
 
 	// Acciones
 	setViewMode: (viewMode: PromptViewMode) => void;
-	openCreateModal: () => void;
-	closeCreateModal: () => void;
-	openEditModal: () => void;
-	closeEditModal: () => void;
-	openDeleteDialog: () => void;
-	closeDeleteDialog: () => void;
-	openDetailsDrawer: () => void;
-	closeDetailsDrawer: () => void;
-	openExecuteModal: () => void;
-	closeExecuteModal: () => void;
-	resetUI: () => void;
+	// Estado
+	viewMode: PromptViewMode;
 }
 
 export const createUISlice: StateCreator<PromptStore, [], [], UISlice> = (set) => ({

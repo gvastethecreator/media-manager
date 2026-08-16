@@ -1,16 +1,14 @@
 /**
  * @file Mappers para la entidad Favorite.
  * @module transformers/favorite/mappers
- * @description Contiene funciones para transformar datos de Favorite entre tipos base y enriquecidos.
- * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import { createDefaultEntityStats } from '@/lib/utils';
 import {
 	type FavoriteBase,
 	FavoriteEntityType,
 	type FavoriteStatistics,
 	type FavoriteWithStats,
+	getFavoriteEntityDisplayName,
 } from '@/types/entities/favorite';
 
 /**
@@ -21,46 +19,19 @@ import {
  */
 function calculateFavoriteStats(favorite: FavoriteBase): FavoriteStatistics {
 	const now = new Date();
-	const createdAt = new Date(favorite.createdAt);
-	const daysSinceFavorited = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
-
-	// Mapeo de tipos de entidad a nombres legibles
-	const entityTypeNames: Record<FavoriteEntityType, string> = {
-		[FavoriteEntityType.FAVORITE]: 'Favorito', // clave canónica para el propio tipo
-		[FavoriteEntityType.IMAGE]: 'Imagen',
-		[FavoriteEntityType.VIDEO]: 'Video',
-		[FavoriteEntityType.ALBUM]: 'Álbum',
-		[FavoriteEntityType.COLLECTION]: 'Colección',
-		[FavoriteEntityType.FOLDER]: 'Carpeta',
-		[FavoriteEntityType.CHARACTER]: 'Personaje',
-		[FavoriteEntityType.PLACE]: 'Lugar',
-		[FavoriteEntityType.WORLD_ITEM]: 'Elemento del Mundo',
-		[FavoriteEntityType.CONCEPT]: 'Concepto',
-		[FavoriteEntityType.PROMPT]: 'Prompt',
-		[FavoriteEntityType.NOTE]: 'Nota',
-		[FavoriteEntityType.DOCUMENT]: 'Documento',
-		[FavoriteEntityType.FILE]: 'Archivo',
-		[FavoriteEntityType.TAG]: 'Etiqueta',
-		[FavoriteEntityType.GROUP]: 'Grupo',
-	};
+	const addedAt = new Date(favorite.addedAt);
+	const daysSinceAdded = Math.floor((now.getTime() - addedAt.getTime()) / (1000 * 60 * 60 * 24));
 
 	return {
-		...createDefaultEntityStats({
-			lastUpdated: favorite.updatedAt,
-			mtime: favorite.updatedAt,
-			birthtime: favorite.createdAt,
-			type: 'favorite',
-			totalItems: 1,
-		}),
-		entityTypeName: entityTypeNames[favorite.entityType],
-		formattedCreatedAt: createdAt.toLocaleDateString('es-ES', {
+		daysSinceAdded,
+		entityTypeName: getFavoriteEntityDisplayName(favorite.entityType),
+		formattedAddedAt: addedAt.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',
 		}),
-		daysSinceFavorited,
-		isRecent: daysSinceFavorited <= 7,
-		isOld: daysSinceFavorited > 30,
+		isRecent: daysSinceAdded <= 7,
+		isOld: daysSinceAdded > 30,
 	};
 }
 
@@ -76,6 +47,8 @@ export function toFavoriteWithStats(favorite: FavoriteBase): FavoriteWithStats {
 
 	return {
 		...favorite,
+		entityName: getFavoriteEntityDisplayName(favorite.entityType),
+		entityThumbnail: null,
 		stats,
 	};
 }
@@ -123,7 +96,7 @@ export function groupFavoritesByType(favorites: FavoriteWithStats[]): Record<Fav
 export function getFavoritesSummary(favorites: FavoriteWithStats[]) {
 	const byType = Object.fromEntries(
 		Object.values(FavoriteEntityType).map((type) => [type, favorites.filter((f) => f.entityType === type).length])
-	);
+	) as Partial<Record<FavoriteEntityType, number>>;
 
 	const recentFavorites = favorites.filter((f) => f.stats.isRecent);
 	const oldFavorites = favorites.filter((f) => f.stats.isOld);
@@ -133,7 +106,7 @@ export function getFavoritesSummary(favorites: FavoriteWithStats[]) {
 		byType,
 		recentCount: recentFavorites.length,
 		oldCount: oldFavorites.length,
-		mostRecentDate: favorites.reduce((latest, f) => (f.createdAt > latest ? f.createdAt : latest), new Date(0)),
-		oldestDate: favorites.reduce((oldest, f) => (f.createdAt < oldest ? f.createdAt : oldest), new Date()),
+		mostRecentDate: favorites.reduce((latest, f) => (f.addedAt > latest ? f.addedAt : latest), new Date(0)),
+		oldestDate: favorites.reduce((oldest, f) => (f.addedAt < oldest ? f.addedAt : oldest), new Date()),
 	};
 }

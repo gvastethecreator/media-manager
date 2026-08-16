@@ -4,28 +4,28 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 
 interface ColorPickerProps {
-	value: string;
-	onChange: (value: string) => void;
 	className?: string;
+	onChange: (value: string) => void;
+	value: string;
 }
 
 const presetColors = [
-	'#ef4444', // Red
-	'#f97316', // Orange
-	'#f59e0b', // Amber
-	'#22c55e', // Green
-	'#10b981', // Emerald
-	'#14b8a6', // Teal
-	'#06b6d4', // Cyan
-	'#0ea5e9', // Sky
-	'#3b82f6', // Blue
-	'#6366f1', // Indigo
-	'#8b5cf6', // Violet
-	'#a855f7', // Purple
-	'#d946ef', // Fuchsia
-	'#ec4899', // Pink
-	'#f43f5e', // Rose
-	'#64748b', // Slate
+	'var(--preset-red)',
+	'var(--preset-orange)',
+	'var(--preset-yellow)',
+	'var(--preset-green)',
+	'var(--preset-emerald)',
+	'var(--preset-teal)',
+	'var(--preset-cyan)',
+	'var(--preset-sky)',
+	'var(--preset-blue)',
+	'var(--preset-indigo)',
+	'var(--preset-violet)',
+	'var(--preset-purple)',
+	'var(--preset-fuchsia)',
+	'var(--preset-pink)',
+	'var(--preset-rose)',
+	'var(--preset-slate)',
 ];
 
 export const ColorPicker = memo(function ColorPickerImpl({ value, onChange, className }: ColorPickerProps) {

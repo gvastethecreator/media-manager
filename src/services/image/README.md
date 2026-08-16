@@ -133,12 +133,12 @@ import { imageService } from '@/services/index';
 
 // Subir una imagen a una carpeta específica
 const newImage = await imageService.uploadImage({
-  file: imageFile, // Objeto File del navegador
-  name: 'Amanecer en la playa',
-  description: 'Fotografía del amanecer en la playa de Valencia',
-  folderId: 'folder-id-123',
-  tags: ['amanecer', 'playa', 'naturaleza'],
-  isPrivate: false
+	file: imageFile, // Objeto File del navegador
+	name: 'Amanecer en la playa',
+	description: 'Fotografía del amanecer en la playa de Valencia',
+	folderId: 'folder-id-123',
+	tags: ['amanecer', 'playa', 'naturaleza'],
+	isPrivate: false,
 });
 ```
 
@@ -149,18 +149,18 @@ import { imageService } from '@/services/index';
 
 // Obtener imágenes con filtros avanzados
 const images = await imageService.getImages({
-  search: 'playa',
-  tags: ['vacaciones'],
-  folderId: 'folder-id-123',
-  minWidth: 1920,
-  minHeight: 1080,
-  formats: ['jpeg', 'png'],
-  dateFrom: new Date('2023-01-01'),
-  dateTo: new Date('2023-12-31'),
-  sortBy: 'createdAt',
-  sortDirection: 'desc',
-  page: 1,
-  limit: 20
+	search: 'playa',
+	tags: ['vacaciones'],
+	folderId: 'folder-id-123',
+	minWidth: 1920,
+	minHeight: 1080,
+	formats: ['jpeg', 'png'],
+	dateFrom: new Date('2023-01-01'),
+	dateTo: new Date('2023-12-31'),
+	sortBy: 'createdAt',
+	sortDirection: 'desc',
+	page: 1,
+	limit: 20,
 });
 ```
 
@@ -171,11 +171,11 @@ import { imageService } from '@/services/index';
 
 // Actualizar propiedades de una imagen
 const updatedImage = await imageService.updateImage('image-id-123', {
-  name: 'Nuevo título de imagen',
-  description: 'Descripción actualizada',
-  isPrivate: true,
-  tags: ['etiqueta1', 'etiqueta2'],
-  folderId: 'nueva-carpeta-id'
+	name: 'Nuevo título de imagen',
+	description: 'Descripción actualizada',
+	isPrivate: true,
+	tags: ['etiqueta1', 'etiqueta2'],
+	folderId: 'nueva-carpeta-id',
 });
 ```
 
@@ -186,8 +186,8 @@ import { imageService } from '@/services/index';
 
 // Generar o regenerar miniaturas para una imagen
 const thumbnails = await imageService.generateThumbnails('image-id-123', {
-  sizes: ['small', 'medium', 'large'],
-  forceRegenerate: true
+	sizes: ['small', 'medium', 'large'],
+	forceRegenerate: true,
 });
 ```
 
@@ -206,62 +206,62 @@ console.log(`Fecha de captura: ${metadata.exif?.dateTimeOriginal}`);
 
 ## Relaciones con Otras Entidades
 
-| Entidad        | Tipo de Relación     | Descripción                                          |
-|----------------|----------------------|------------------------------------------------------|
-| **Folder**     | Muchos a uno         | Las imágenes pertenecen a carpetas                   |
-| **Tag**        | Muchos a muchos      | Las imágenes pueden tener múltiples etiquetas        |
-| **Album**      | Muchos a muchos      | Las imágenes pueden formar parte de álbumes          |
-| **Collection** | Muchos a muchos      | Las imágenes pueden estar en colecciones             |
-| **Metadata**   | Uno a uno            | Cada imagen tiene metadatos asociados                |
-| **Thumbnail**  | Uno a muchos         | Una imagen puede tener múltiples miniaturas          |
-| **Activity**   | Referencial          | Las actividades pueden referenciar imágenes          |
-| **User**       | Muchos a uno         | Las imágenes pertenecen a usuarios                   |
+| Entidad        | Tipo de Relación | Descripción                                   |
+| -------------- | ---------------- | --------------------------------------------- |
+| **Folder**     | Muchos a uno     | Las imágenes pertenecen a carpetas            |
+| **Tag**        | Muchos a muchos  | Las imágenes pueden tener múltiples etiquetas |
+| **Album**      | Muchos a muchos  | Las imágenes pueden formar parte de álbumes   |
+| **Collection** | Muchos a muchos  | Las imágenes pueden estar en colecciones      |
+| **Metadata**   | Uno a uno        | Cada imagen tiene metadatos asociados         |
+| **Thumbnail**  | Uno a muchos     | Una imagen puede tener múltiples miniaturas   |
+| **Activity**   | Referencial      | Las actividades pueden referenciar imágenes   |
+| **User**       | Muchos a uno     | Las imágenes pertenecen a usuarios            |
 
 ## Modelo de Datos
 
 ```typescript
 // Modelo simplificado de Image
 interface Image {
-  id: string;                  // Identificador único
-  name: string;                // Nombre o título de la imagen
-  description?: string;        // Descripción opcional
-  path: string;                // Ruta completa en el sistema de archivos
-  originalFilename: string;    // Nombre de archivo original
-  mimeType: string;            // Tipo MIME (image/jpeg, image/png, etc.)
-  size: number;                // Tamaño en bytes
-  width: number;               // Ancho en píxeles
-  height: number;              // Alto en píxeles
-  format: ImageFormat;         // Formato (jpeg, png, gif, etc.)
-  folderId?: string;           // ID de la carpeta contenedora
-  isPrivate: boolean;          // Indica si la imagen es privada
-  isFavorite: boolean;         // Indica si está marcada como favorita
-  status: ImageStatus;         // Estado de la imagen (ACTIVE, PROCESSING, etc.)
-  uploadedAt: Date;            // Fecha de subida
-  capturedAt?: Date;           // Fecha de captura (de EXIF si disponible)
-  createdAt: Date;             // Fecha de creación
-  updatedAt: Date;             // Fecha de última actualización
+	id: string; // Identificador único
+	name: string; // Nombre o título de la imagen
+	description?: string; // Descripción opcional
+	path: string; // Ruta completa en el sistema de archivos
+	originalFilename: string; // Nombre de archivo original
+	mimeType: string; // Tipo MIME (image/jpeg, image/png, etc.)
+	size: number; // Tamaño en bytes
+	width: number; // Ancho en píxeles
+	height: number; // Alto en píxeles
+	format: ImageFormat; // Formato (jpeg, png, gif, etc.)
+	folderId?: string; // ID de la carpeta contenedora
+	isPrivate: boolean; // Indica si la imagen es privada
+	isFavorite: boolean; // Indica si está marcada como favorita
+	status: ImageStatus; // Estado de la imagen (ACTIVE, PROCESSING, etc.)
+	uploadedAt: Date; // Fecha de subida
+	capturedAt?: Date; // Fecha de captura (de EXIF si disponible)
+	createdAt: Date; // Fecha de creación
+	updatedAt: Date; // Fecha de última actualización
 }
 
 // Extensión con metadatos
 interface ImageWithMetadata extends Image {
-  metadata: {
-    exif?: ExifMetadata;       // Metadatos EXIF (cámara, configuración, GPS, etc.)
-    colorProfile?: string;     // Perfil de color
-    colorSpace?: string;       // Espacio de color
-    hasAlpha: boolean;         // Indica si tiene canal alfa
-    dpi?: number;              // Puntos por pulgada
-    orientation?: number;      // Orientación EXIF
-  }
+	metadata: {
+		exif?: ExifMetadata; // Metadatos EXIF (cámara, configuración, GPS, etc.)
+		colorProfile?: string; // Perfil de color
+		colorSpace?: string; // Espacio de color
+		hasAlpha: boolean; // Indica si tiene canal alfa
+		dpi?: number; // Puntos por pulgada
+		orientation?: number; // Orientación EXIF
+	};
 }
 
 // Extensión con relaciones
 interface ImageComplete extends ImageWithMetadata {
-  folder?: Folder;             // Carpeta contenedora
-  thumbnails: Thumbnail[];     // Miniaturas asociadas
-  tags: Tag[];                 // Etiquetas asociadas
-  albums: Album[];             // Álbumes que contienen esta imagen
-  collections: Collection[];   // Colecciones que contienen esta imagen
-  user: User;                  // Usuario propietario
+	folder?: Folder; // Carpeta contenedora
+	thumbnails: Thumbnail[]; // Miniaturas asociadas
+	tags: Tag[]; // Etiquetas asociadas
+	albums: Album[]; // Álbumes que contienen esta imagen
+	collections: Collection[]; // Colecciones que contienen esta imagen
+	user: User; // Usuario propietario
 }
 ```
 
@@ -285,13 +285,13 @@ interface ImageComplete extends ImageWithMetadata {
 
 ## Solución de Problemas Comunes
 
-| Problema | Solución |
-|----------|----------|
-| **Imágenes huérfanas** | Ejecute `imageService.findOrphanImages()` para detectar |
-| **Miniaturas faltantes** | Use `imageService.regenerateMissingThumbnails()` |
-| **Corrupción de imágenes** | Valide con `imageService.verifyImageIntegrity()` |
-| **Metadatos incorrectos** | Repare con `imageService.refreshMetadata()` |
-| **Problemas de permisos** | Verifique con `imageService.validateAccess()` |
+| Problema                   | Solución                                                |
+| -------------------------- | ------------------------------------------------------- |
+| **Imágenes huérfanas**     | Ejecute `imageService.findOrphanImages()` para detectar |
+| **Miniaturas faltantes**   | Use `imageService.regenerateMissingThumbnails()`        |
+| **Corrupción de imágenes** | Valide con `imageService.verifyImageIntegrity()`        |
+| **Metadatos incorrectos**  | Repare con `imageService.refreshMetadata()`             |
+| **Problemas de permisos**  | Verifique con `imageService.validateAccess()`           |
 
 ## Roadmap y Mejoras Futuras
 

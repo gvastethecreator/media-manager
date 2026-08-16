@@ -1,61 +1,51 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { characters } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra personajes minimalistas para verificación del sistema
+ * Siembra personajes con IDs legibles
+ * Formato: char-nombre-01, char-nombre-02, etc.
  */
 export async function seedCharacters(db: LibSQLDatabase<Record<string, never>>) {
-	seedLogger.info('👤 Creando personajes de prueba...');
+	seedLogger.info('🎭 Creando personajes de prueba...');
 
 	try {
 		const sampleCharacters = [
 			{
-				id: 'character-1',
+				id: generateReadableId('character', 'Heroe Principal', 1),
 				name: 'Héroe Principal',
-				description: 'Protagonista principal de la historia',
-				emoji: '🦸',
-				color: '#3b82f6',
-				category: 'protagonista',
-				isPublic: true,
-				isFavorite: true,
-				totalImages: 0,
-				totalVideos: 0,
-				age: 'Adulto',
-				gender: 'Neutro',
-				species: 'Humano',
-				occupation: 'Aventurero',
-				personality: 'Valiente y decidido',
-				background: 'Origen humilde',
-				relationships: null,
-				skills: 'Combat, liderazgo',
-				equipment: 'Espada, escudo',
-				notes: 'Personaje principal para pruebas',
-				featuredImage: null,
+				description: 'Protagonista de la historia',
+				notes: 'Valiente y decidido',
+				personality: 'Valiente, determinado, altruista',
+				category: 'principal',
 				parentId: null,
 			},
 			{
-				id: 'character-2',
-				name: 'Compañero Mágico',
-				description: 'Aliado con habilidades mágicas',
-				emoji: '🧙',
-				color: '#8b5cf6',
-				category: 'aliado',
-				isPublic: true,
-				isFavorite: false,
-				totalImages: 0,
-				totalVideos: 0,
-				age: 'Anciano',
-				gender: 'Masculino',
-				species: 'Mago',
-				occupation: 'Hechicero',
-				personality: 'Sabio y misterioso',
-				background: 'Torre de magia',
-				relationships: null,
-				skills: 'Magia elemental',
-				equipment: 'Bastón, túnica',
-				notes: 'Mentor y guía',
-				featuredImage: null,
+				id: generateReadableId('character', 'Mentor Sabio', 1),
+				name: 'Mentor Sabio',
+				description: 'Guide for a heroic journey',
+				notes: 'Posee conocimientos antiguos',
+				personality: 'Sabio, paciente, enigmático',
+				category: 'apoyo',
+				parentId: null,
+			},
+			{
+				id: generateReadableId('character', 'Villano Oscuro', 1),
+				name: 'Villano Oscuro',
+				description: 'Antagonista principal',
+				notes: 'Maestro de las sombras',
+				personality: 'Calculador, ambicioso, despiadado',
+				category: 'antagonista',
+				parentId: null,
+			},
+			{
+				id: generateReadableId('character', 'Aliado Comico', 1),
+				name: 'Aliado Cómico',
+				description: 'Comic relief for the story',
+				notes: 'Siempre tiene un chiste listo',
+				personality: 'Gracioso, leal, optimista',
+				category: 'apoyo',
 				parentId: null,
 			},
 		];
@@ -64,7 +54,7 @@ export async function seedCharacters(db: LibSQLDatabase<Record<string, never>>) 
 
 		seedLogger.success(`✅ ${sampleCharacters.length} personajes creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando personajes:', error);
+		seedLogger.error('❌ Could not create characters:', error);
 		throw error;
 	}
 }

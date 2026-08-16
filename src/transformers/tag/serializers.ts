@@ -76,7 +76,7 @@ export function normalizeTag(tagData: Partial<TagBase>): TagBase {
 		name: tagData.name || '',
 		description: tagData.description || null,
 		emoji: tagData.emoji || null,
-		color: tagData.color || '#6B7280',
+		color: tagData.color || 'var(--dt-neutral-500)',
 		category: tagData.category || null,
 		shortcut: tagData.shortcut || null,
 		featuredImage: tagData.featuredImage || null,

@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 // import { useAutoFolderIndexing } from '@/hooks/use-auto-folder-indexing'; // Deshabilitado temporalmente
+import { toFileViewerItem } from '@/components/features/file-viewer/file-viewer-item';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
-import { useImageViewer } from '@/store/image-viewer.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
-import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { ImageWithStats } from '@/types/entities/image';
 import { isImageWithStats } from '@/types/entity-guards';
 import type { ViewProps } from '../types';
@@ -40,64 +39,38 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 		return images.slice().sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 	}, [imagesRecord]); // Solo depende del record de imágenes
 
-	// Auto-indexing deshabilitado temporalmente para evitar loops infinitos
-	// TODO: Re-habilitar una vez corregido el problema de re-renders
-	// const { status, isIndexing, progress, startIndexing } = useAutoFolderIndexing({
-	//   autoStart: true,
-	//   maxFoldersPerBatch: 2,
-	//   checkInterval: 5 * 60 * 1000, // 5 minutos
-	//   onIndexingComplete: (status) => {
-	//     logger.info('✅ Auto-indexing completado:', status);
-	//   },
-	// });
-
-	// Valores por defecto mientras auto-indexing está deshabilitado
-	const status = {
-		isIndexing: false,
-		indexedFolders: 0,
-		totalFolders: 0,
-		currentFolder: null,
-		errors: [],
-	};
-	const isIndexing = false;
-	const progress = 0;
-	const startIndexing = () => {
-		viewLogger.info('Auto-indexing está temporalmente deshabilitado');
-	};
-
 	// Flag para controlar si ya se intentó cargar las imágenes
 	const hasTriedToLoad = useRef(false);
 
 	useEffect(() => {
-		console.log('🔍 DEBUG AllImagesView: useEffect ejecutado');
-		console.log('🔍 DEBUG AllImagesView: imageCount:', imageCount);
-		console.log('🔍 DEBUG AllImagesView: hasTriedToLoad:', hasTriedToLoad.current);
+		clientLogger.debug('🔍 DEBUG AllImagesView: useEffect ejecutado');
+		clientLogger.debug('🔍 DEBUG AllImagesView: imageCount:', imageCount);
+		clientLogger.debug('🔍 DEBUG AllImagesView: hasTriedToLoad:', hasTriedToLoad.current);
 
 		// Solo cargar la primera vez cuando el componente se monta
 		if (!hasTriedToLoad.current && imageCount === 0 && !isLoading) {
 			hasTriedToLoad.current = true;
-			console.log('🚀 DEBUG AllImagesView: Store de imágenes vacío, llamando loadImages()');
-			viewLogger.info('Store de imágenes vacío, cargando desde el servidor...');
+			clientLogger.debug('🚀 DEBUG AllImagesView: image store is empty, calling loadImages()');
+			viewLogger.info('Image store is empty, loading from the server...');
 			loadImages();
 		} else {
-			console.log('✅ DEBUG AllImagesView: Ya se intentó cargar o no es necesario');
+			clientLogger.debug('✅ DEBUG AllImagesView: load already attempted or not required');
 		}
 	}, [imageCount, isLoading, loadImages]); // Dependencias necesarias
 
-	const navigate = useNavigate();
-	const { openViewer } = useImageViewer();
+	const { openViewer } = useFileViewerStore();
 
 	const handleImageClick = useCallback((item: AnyEntityWithStats) => {
 		// Verificar que sea una imagen usando type guard
 		if (isImageWithStats(item)) {
 			const image = item as ImageWithStats;
-			viewLogger.info('🖱️ Click en imagen:', image.name);
+			viewLogger.info('🖱️ Image clicked:', image.name);
 
 			// Navegar a la vista de detalle de imagen
 			// Por ahora mantenemos en la misma vista
-			viewLogger.info('Imagen seleccionada:', image.name);
+			viewLogger.info('Selected image:', image.name);
 		} else {
-			viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
+			viewLogger.warn('⚠️ Clicked item is not an image:', item);
 		}
 	}, []);
 
@@ -106,48 +79,28 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 			// Verificar que sea una imagen usando type guard
 			if (isImageWithStats(item)) {
 				const image = item as ImageWithStats;
-				viewLogger.info('🖱️ Doble click en imagen:', image.name);
+				viewLogger.info('🖱️ Image double-clicked:', image.name);
 
 				// Abrir visor de imágenes
-				const imageEntities = (sortedImages || []).filter((img: AnyEntityWithStats) =>
-					isImageWithStats(img)
-				) as EntityWithStats[];
-
-				const currentIndex = imageEntities.findIndex((img: EntityWithStats) => img.id === image.id);
-				openViewer(imageEntities, currentIndex);
+				const imageItems = sortedImages.map((item) =>
+					toFileViewerItem(item as unknown as Record<string, unknown>, 'image')
+				);
+				const currentIndex = imageItems.findIndex((item) => item.id === image.id);
+				openViewer(imageItems, Math.max(0, currentIndex));
 			} else {
-				viewLogger.warn('⚠️ Item con doble click no es una imagen:', item);
+				viewLogger.warn('⚠️ Double-clicked item is not an image:', item);
 			}
 		},
 		[sortedImages, openViewer]
 	);
 
-	// Función para manejar el upload de archivos
-	const handleFileUpload = useCallback(
-		async (_files: File[]) => {
-			// Esto debería ser manejado por el content view, pero aquí se recargan las imágenes
-			loadImages({ refresh: true });
-		},
-		[loadImages]
-	);
-
-	const handleFileSelect = useCallback((_event: React.ChangeEvent<HTMLInputElement>) => {
-		// Esto debería ser manejado por el content view
-	}, []);
-
 	return (
 		<AllImagesContentView
 			error={error}
-			handleFileSelect={handleFileSelect}
-			handleFileUpload={handleFileUpload}
 			handleImageClick={handleImageClick}
 			handleImageDoubleClick={handleImageDoubleClick}
 			images={sortedImages}
-			indexingStatus={status}
-			isIndexing={isIndexing}
 			isLoading={isLoading}
-			progress={progress}
-			startIndexing={startIndexing}
 		/>
 	);
 };

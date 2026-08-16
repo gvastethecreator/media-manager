@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { useNavigate } from 'react-router-dom';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useJsonFileStore } from '@/store/entities/json-file';
-import type { AnyEntityWithStats } from '@/types/entities';
 import type { ViewProps } from '../types';
 
 const logger = clientLogger.withContext('JsonFilesView');
 
 export function JsonFilesView(_props: ViewProps) {
+	const navigate = useNavigate();
 	const jsonFiles = useJsonFileStore((s) => s.jsonFiles);
 	const loading = useJsonFileStore((s) => s.loading);
 	const error = useJsonFileStore((s) => s.error);
@@ -16,36 +19,47 @@ export function JsonFilesView(_props: ViewProps) {
 	const hasInitRef = useRef(false);
 	const items = useMemo(() => jsonFiles || [], [jsonFiles]);
 	const count = items.length;
+	const browserItems = useMemo(
+		() => items.map((it) => toBrowserItem(it as unknown as Record<string, unknown>)),
+		[items]
+	);
 
 	useEffect(() => {
 		if (!hasInitRef.current && count === 0 && !loading) {
 			hasInitRef.current = true;
-			logger.info('Cargando JSON files...');
+			logger.info('Loading JSON files...');
 			fetchJsonFiles();
 		}
 	}, [count, loading, fetchJsonFiles]);
 
-	const handleClick = useCallback((item: AnyEntityWithStats) => {
+	const handleClick = useCallback((item: BrowserItem) => {
 		logger.info('Click en JSON', { id: item.id, name: item.name });
 	}, []);
 
-	const handleDoubleClick = useCallback((item: AnyEntityWithStats) => {
-		logger.info('Doble click en JSON', { id: item.id, name: item.name });
-		// TODO: Abrir visor JSON específico o mostrar el contenido
-	}, []);
+	const handleDoubleClick = useCallback(
+		(item: BrowserItem) => {
+			logger.info('Doble click en JSON', { id: item.id, name: item.name });
+			navigate(`/json-files/${item.id}`);
+		},
+		[navigate]
+	);
+
+	if (loading && count === 0) {
+		return <LoadingScreen message="Loading JSON files..." />;
+	}
 
 	if (error) {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<h2 className="mb-2 font-semibold text-lg">Error al cargar archivos JSON</h2>
+					<h2 className="mb-2 font-semibold text-lg">Could not load JSON files</h2>
 					<p className="mb-4 text-muted-foreground">Error: {error}</p>
 					<button
 						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 						onClick={() => fetchJsonFiles()}
 						type="button"
 					>
-						Intentar de nuevo
+						Try again
 					</button>
 				</div>
 			</div>
@@ -58,20 +72,19 @@ export function JsonFilesView(_props: ViewProps) {
 			<div className="flex items-center justify-between gap-3 border-border border-b bg-background/40 px-3 py-2 backdrop-blur-sm">
 				<div className="flex min-w-0 items-center gap-3">
 					<div className="min-w-0">
-						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">Archivos JSON</h2>
+						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">JSON Files</h2>
 						<p className="truncate text-muted-foreground text-xs leading-tight">
-							{count} {count === 1 ? 'archivo' : 'archivos'} JSON
+							{count} {count === 1 ? 'file' : 'files'} JSON
 						</p>
 					</div>
 				</div>
 			</div>
 
-			{/* FileBrowser para mostrar todos los archivos JSON */}
+			{/* FileBrowser para mostrar todos los files JSON */}
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
-					isLoading={loading}
-					items={items as unknown as AnyEntityWithStats[]}
+					items={browserItems}
 					onItemClick={handleClick}
 					onItemDoubleClick={handleDoubleClick}
 				/>

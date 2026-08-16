@@ -1,115 +1,97 @@
 import { Lightbulb } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { BaseContentProps } from '@/components/views/base';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { memo, useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
+import { BaseContentView } from '@/components/views/base/base-content-view';
 import { useConceptImages } from '@/lib/api/concepts';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { selectSelectedConcept, useConceptStore } from '@/store/entities/concept';
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 const viewLogger = clientLogger.withContext('ConceptContentView');
 
 export const ConceptContentView = memo(function ConceptContentView() {
+	const { id } = useParams<{ id: string }>();
 	const selectedConcept = useConceptStore(selectSelectedConcept);
-	const [items, setItems] = useState<EntityWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [currentConceptId, setCurrentConceptId] = useState(selectedConcept?.id);
+	const concepts = useConceptStore((state) => state.concepts);
+	const selectConcept = useConceptStore((state) => state.selectConcept);
+	const loadConcepts = useConceptStore((state) => state.loadConcepts);
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	const {
-		data: conceptImages,
-		isLoading: isLoadingImages,
-		error: conceptError,
-	} = useConceptImages(currentConceptId || '');
-
-	const loadConceptImages = useCallback(async () => {
-		if (!currentConceptId) {
-			return;
-		}
-
-		try {
-			setError(null);
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando imágenes del concepto...');
-			if (conceptImages) {
-				setItems(conceptImages as EntityWithStats[]);
-			}
-			viewLogger.info('✅ Imágenes cargadas');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			setError(errorMessage);
-			viewLogger.error('❌ Error cargando imágenes del concepto:', errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [currentConceptId, conceptImages]);
+	const routedConcept = id ? (concepts.find((concept) => concept.id === id) ?? null) : null;
+	const effectiveConcept = routedConcept ?? selectedConcept;
+	const conceptId = id || effectiveConcept?.id || null;
 
 	useEffect(() => {
-		loadConceptImages();
-	}, [loadConceptImages]);
+		if (id && routedConcept && routedConcept.id !== selectedConcept?.id) {
+			selectConcept(routedConcept);
+		}
+	}, [id, routedConcept, selectConcept, selectedConcept?.id]);
 
-	const toggleItemSelection = useCallback((item: EntityWithStats) => {
-		// Implementar la lógica de selección de items si es necesaria
-		viewLogger.info('🔄 Toggle selección de item:', item?.id);
-	}, []);
+	useEffect(() => {
+		if (id && !routedConcept) {
+			void loadConcepts();
+		}
+	}, [id, loadConcepts, routedConcept]);
 
-	const emptyState = useMemo(
-		() => ({
-			icon: Lightbulb,
-			title: 'Concepto vacío',
-			description: `No se encontraron imágenes en ${
-				selectedConcept?.name || 'este concepto'
-			}. Puedes agregar imágenes arrastrándolas aquí.`,
-		}),
-		[selectedConcept?.name]
+	const { data: images = [], isLoading, error } = useConceptImages(conceptId || '');
+	const browserItems = useMemo(
+		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
+		[images]
 	);
 
-	const contentProps: BaseContentProps = useMemo(
-		() => ({
-			items,
-			isLoading,
-			error,
-			toggleItemSelection,
-			currentContainerId: selectedConcept?.id ?? null,
-			containerName: selectedConcept?.name ?? null,
-			setCurrentContainer: async (_id: string) => {}, // No es necesario en el nuevo enfoque
-			emptyState,
-			onRefresh: loadConceptImages,
-		}),
-		[
-			items,
-			isLoading,
-			error,
-			toggleItemSelection,
-			selectedConcept?.id,
-			selectedConcept?.name,
-			emptyState,
-			loadConceptImages,
-		]
+	const handleItemSelect = useCallback(
+		(item: BrowserItem) => {
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
+			setSelectedItems([entity]);
+			setDetailsPanelVisible(true);
+		},
+		[setSelectedItems, setDetailsPanelVisible]
 	);
 
-	if (isLoading || isLoadingImages) {
-		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;
-	}
+	const headerTitle = useMemo(
+		() => (effectiveConcept?.name ? `Concept images: ${effectiveConcept.name}` : 'Selecciona un concepto'),
+		[effectiveConcept?.name]
+	);
 
-	if (error || conceptError) {
+	if (!conceptId) {
 		return (
-			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || conceptError?.message}</div>
+			<BaseContentView>
+				<div className="flex h-full items-center justify-center">
+					<EmptyState
+						description="Select a concept to view related images"
+						icon={Lightbulb}
+						title="Sin concepto seleccionado"
+					/>
+				</div>
+			</BaseContentView>
 		);
 	}
 
-	if (!items || items.length === 0) {
-		return <div className="flex items-center justify-center p-8">No se encontraron imágenes</div>;
+	if (error) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<div className="flex h-full items-center justify-center text-destructive">Error: {error.message}</div>
+			</BaseContentView>
+		);
+	}
+
+	if (isLoading && images.length === 0) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<LoadingScreen />
+			</BaseContentView>
+		);
 	}
 
 	return (
-		<ContentViewProvider {...contentProps}>
-			<BaseContentView>
-				{/* Concept content will be added here */}
-				<div className="p-4">
-					<p>Contenido del concepto se mostrará aquí</p>
-				</div>
-			</BaseContentView>
-		</ContentViewProvider>
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
+			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
+		</BaseContentView>
 	);
 });

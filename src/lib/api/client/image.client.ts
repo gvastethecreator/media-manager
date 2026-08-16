@@ -1,14 +1,44 @@
 /**
+ * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
+ * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
+ * Ver #1 deepening opportunity en architecture review.
+ */
+
+/**
  * @file Cliente de API para el servicio de imágenes
  * @module lib/api/client/image.client
  * @description Funciones para interactuar con los endpoints de la API de imágenes desde el cliente.
  */
 
-import type { GetImagesOptions, GetImagesResult } from '@/services/image/image.service';
 import type { ImageWithStats } from '@/types/entities/image/base';
 import type { ImageUpdateInput } from '@/types/entities/image/types';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 
 const API_BASE_PATH = '/api/images';
+
+export interface GetImagesOptions {
+	folderId?: string;
+	limit?: number;
+	offset?: number;
+	page?: number;
+	pageSize?: number;
+	search?: string;
+	sortBy?: string;
+	sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetImagesResult {
+	hasMore: boolean;
+	images: ImageWithStats[];
+	pagination: {
+		total: number;
+		limit: number;
+		offset: number;
+		hasNext: boolean;
+		hasPrev: boolean;
+	};
+	total: number;
+}
 
 /**
  * Obtiene una lista de imágenes desde la API.
@@ -49,10 +79,32 @@ export async function getImagesFromApi(options: GetImagesOptions = {}): Promise<
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.error || 'Error al obtener las imágenes');
+		throw new Error(errorData.error || 'Could not get images');
 	}
 
-	return response.json();
+	const payload = (await response.json()) as {
+		data: ImageWithStats[];
+		pagination: {
+			total: number;
+			limit: number;
+			offset: number;
+			hasNext: boolean;
+			hasPrev: boolean;
+		};
+	};
+
+	return {
+		images: payload.data ?? [],
+		total: payload.pagination?.total ?? 0,
+		hasMore: payload.pagination?.hasNext ?? false,
+		pagination: payload.pagination ?? {
+			total: 0,
+			limit: options.limit ?? 0,
+			offset: options.offset ?? 0,
+			hasNext: false,
+			hasPrev: false,
+		},
+	};
 }
 
 /**
@@ -61,11 +113,11 @@ export async function getImagesFromApi(options: GetImagesOptions = {}): Promise<
  * @returns Una promesa que se resuelve con los datos de la imagen.
  */
 export async function getImageFromApi(id: string): Promise<ImageWithStats> {
-	const response = await fetch(`${API_BASE_PATH}/${id}`);
+	const response = await fetch(`${API_BASE_PATH}/${id}/stats`);
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.error || `Error al obtener la imagen ${id}`);
+		throw new Error(errorData.error || `Could not get the image ${id}`);
 	}
 
 	return response.json();
@@ -79,7 +131,7 @@ export async function getImageFromApi(id: string): Promise<ImageWithStats> {
  */
 export async function updateImageInApi(id: string, data: ImageUpdateInput): Promise<ImageWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, {
-		method: 'PUT',
+		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
 		},
@@ -88,9 +140,10 @@ export async function updateImageInApi(id: string, data: ImageUpdateInput): Prom
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.error || 'Error al actualizar la imagen');
+		throw new Error(errorData.error || 'Could not update the image');
 	}
 
+	await invalidateFavoriteQueries();
 	return response.json();
 }
 
@@ -105,7 +158,7 @@ export async function deleteImageFromApi(id: string): Promise<void> {
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.error || 'Error al eliminar la imagen');
+		throw new Error(errorData.error || 'Could not delete the image');
 	}
 }
 

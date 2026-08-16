@@ -2,17 +2,17 @@ import { CircleDashed } from 'lucide-react';
 import { motion } from '@/components/ui/motion-shim';
 
 interface LoadingScreenProps {
-	message?: string;
+	/** Clases extra para personalizar el contenedor */
+	className?: string;
 	/**
 	 * Si es true, el overlay podrá recibir eventos de puntero.
 	 * Por defecto es false para no interferir con la UI/Tests.
 	 */
 	interactive?: boolean;
-	/** Clases extra para personalizar el contenedor */
-	className?: string;
+	message?: string;
 }
 
-export function LoadingScreen({ message = 'Cargando...', interactive = false, className = '' }: LoadingScreenProps) {
+export function LoadingScreen({ message = 'Loading...', interactive = false, className = '' }: LoadingScreenProps) {
 	return (
 		<motion.div
 			animate={{ opacity: 1 }}
@@ -24,7 +24,7 @@ export function LoadingScreen({ message = 'Cargando...', interactive = false, cl
 			initial={{ opacity: 0 }}
 		>
 			<CircleDashed className="h-10 w-10 animate-spin text-primary" />
-			<p className="p-2 text-white/70 text-xs">{message}</p>
+			<p className="ui-overlay-text-muted p-2 text-xs">{message}</p>
 		</motion.div>
 	);
 }

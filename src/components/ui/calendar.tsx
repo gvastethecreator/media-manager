@@ -24,7 +24,7 @@ function Calendar({
 		<DayPicker
 			captionLayout={captionLayout}
 			className={cn(
-				'group/calendar bg-background p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
+				'group/calendar bg-background p-3 [--cell-size:2rem] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
 				String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
 				String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
 				className
@@ -36,20 +36,20 @@ function Calendar({
 				nav: cn('absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1', defaultClassNames.nav),
 				button_previous: cn(
 					buttonVariants({ variant: buttonVariant }),
-					'size-(--cell-size) select-none p-0 aria-disabled:opacity-50',
+					'h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50',
 					defaultClassNames.button_previous
 				),
 				button_next: cn(
 					buttonVariants({ variant: buttonVariant }),
-					'size-(--cell-size) select-none p-0 aria-disabled:opacity-50',
+					'h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50',
 					defaultClassNames.button_next
 				),
 				month_caption: cn(
-					'flex h-(--cell-size) w-full items-center justify-center px-(--cell-size)',
+					'flex h-[--cell-size] w-full items-center justify-center px-[--cell-size]',
 					defaultClassNames.month_caption
 				),
 				dropdowns: cn(
-					'flex h-(--cell-size) w-full items-center justify-center gap-1.5 font-medium text-sm',
+					'flex h-[--cell-size] w-full items-center justify-center gap-1.5 font-medium text-sm',
 					defaultClassNames.dropdowns
 				),
 				dropdown_root: cn(
@@ -64,14 +64,14 @@ function Calendar({
 						: 'flex h-8 items-center gap-1 rounded-md pr-1 pl-2 text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground',
 					defaultClassNames.caption_label
 				),
-				table: 'w-full border-collapse',
+				month_grid: 'w-full border-collapse',
 				weekdays: cn('flex', defaultClassNames.weekdays),
 				weekday: cn(
 					'flex-1 select-none rounded-md font-normal text-[0.8rem] text-muted-foreground',
 					defaultClassNames.weekday
 				),
 				week: cn('mt-2 flex w-full', defaultClassNames.week),
-				week_number_header: cn('w-(--cell-size) select-none', defaultClassNames.week_number_header),
+				week_number_header: cn('w-[--cell-size] select-none', defaultClassNames.week_number_header),
 				week_number: cn('select-none text-[0.8rem] text-muted-foreground', defaultClassNames.week_number),
 				day: cn(
 					'group/day relative aspect-square h-full w-full select-none p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md',
@@ -90,10 +90,28 @@ function Calendar({
 				...classNames,
 			}}
 			components={{
-				Root: CalendarRoot,
-				Chevron: CalendarChevron,
+				Root: ({ className, rootRef, ...props }) => {
+					return <div className={cn(className)} data-slot="calendar" ref={rootRef} {...props} />;
+				},
+				Chevron: ({ className, orientation, ...props }) => {
+					if (orientation === 'left') {
+						return <ChevronLeftIcon className={cn('size-4', className)} {...props} />;
+					}
+
+					if (orientation === 'right') {
+						return <ChevronRightIcon className={cn('size-4', className)} {...props} />;
+					}
+
+					return <ChevronDownIcon className={cn('size-4', className)} {...props} />;
+				},
 				DayButton: CalendarDayButton,
-				WeekNumber: CalendarWeekNumber,
+				WeekNumber: ({ children, ...props }) => {
+					return (
+						<td {...props}>
+							<div className="flex size-[--cell-size] items-center justify-center text-center">{children}</div>
+						</td>
+					);
+				},
 				...components,
 			}}
 			formatters={{
@@ -117,7 +135,7 @@ function CalendarDayButton({ className, day, modifiers, ...props }: React.Compon
 	return (
 		<Button
 			className={cn(
-				'flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 font-normal leading-none data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-start=true]:rounded-l-md data-[range-end=true]:bg-primary data-[range-middle=true]:bg-accent data-[range-start=true]:bg-primary data-[selected-single=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:text-accent-foreground data-[range-start=true]:text-primary-foreground data-[selected-single=true]:text-primary-foreground group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground [&>span]:text-xs [&>span]:opacity-70',
+				'flex aspect-square h-auto w-full min-w-[--cell-size] flex-col gap-1 font-normal leading-none data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-end=true]:bg-primary data-[range-middle=true]:bg-accent data-[range-start=true]:bg-primary data-[selected-single=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:text-accent-foreground data-[range-start=true]:text-primary-foreground data-[selected-single=true]:text-primary-foreground group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 [&>span]:text-xs [&>span]:opacity-70',
 				defaultClassNames.day,
 				className
 			)}
@@ -137,26 +155,3 @@ function CalendarDayButton({ className, day, modifiers, ...props }: React.Compon
 }
 
 export { Calendar, CalendarDayButton };
-
-// Hoisted subcomponents to avoid nested definitions
-function CalendarRoot({ className, rootRef, ...props }: any) {
-	return <div className={cn(className)} data-slot="calendar" ref={rootRef} {...props} />;
-}
-
-function CalendarChevron({ className, orientation, ...props }: any) {
-	if (orientation === 'left') {
-		return <ChevronLeftIcon className={cn('size-4', className)} {...props} />;
-	}
-	if (orientation === 'right') {
-		return <ChevronRightIcon className={cn('size-4', className)} {...props} />;
-	}
-	return <ChevronDownIcon className={cn('size-4', className)} {...props} />;
-}
-
-function CalendarWeekNumber({ children, ...props }: any) {
-	return (
-		<td {...props}>
-			<div className="flex size-(--cell-size) items-center justify-center text-center">{children}</div>
-		</td>
-	);
-}

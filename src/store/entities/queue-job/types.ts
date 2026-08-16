@@ -60,22 +60,22 @@ export type QueueJobSortOrder = 'asc' | 'desc';
  * Estado core del store
  */
 export interface QueueJobCoreState {
+	/** Error actual */
+	error: Error | null;
+	/** Indica si se está cargando */
+	isLoading: boolean;
 	/** Lista de trabajos */
 	items: QueueJobExtended[];
+	/** Límite por página */
+	limit: number;
+	/** Página actual */
+	page: number;
 	/** Trabajo seleccionado */
 	selectedJob: QueueJobExtended | null;
 	/** Estadísticas de la cola */
 	stats: QueueStats | null;
-	/** Indica si se está cargando */
-	isLoading: boolean;
-	/** Error actual */
-	error: Error | null;
 	/** Total de elementos */
 	total: number;
-	/** Página actual */
-	page: number;
-	/** Límite por página */
-	limit: number;
 	/** Total de páginas */
 	totalPages: number;
 }
@@ -99,8 +99,8 @@ export const initialCoreState: QueueJobCoreState = {
  * Opciones de paginación
  */
 export interface QueueJobPagination {
-	page: number;
 	limit: number;
+	page: number;
 	sortField?: QueueJobSortField;
 	sortOrder?: QueueJobSortOrder;
 }
@@ -109,9 +109,9 @@ export interface QueueJobPagination {
  * Estado del store completo usando la arquitectura de slices
  */
 export interface QueueJobState extends QueueJobCoreState {
-	ui: typeof initialUIState;
 	filters: typeof initialFiltersState;
 	pagination: QueueJobPagination;
+	ui: typeof initialUIState;
 }
 
 /**

@@ -7,28 +7,28 @@ import type { ConceptStore } from '../types';
 const uiLogger = clientLogger.withContext('ConceptStore:UI');
 
 export interface UISlice {
+	closeCreateModal: () => void;
+	closeDeleteDialog: () => void;
+	closeDetailsDrawer: () => void;
+	closeEditModal: () => void;
 	// Estado
 	isCreateModalOpen: boolean;
-	isEditModalOpen: boolean;
 	isDeleteDialogOpen: boolean;
 	isDetailsDrawerOpen: boolean;
-	viewMode: ConceptViewMode;
+	isEditModalOpen: boolean;
 
 	// Acciones - modales y diálogos
 	openCreateModal: () => void;
-	closeCreateModal: () => void;
-	openEditModal: () => void;
-	closeEditModal: () => void;
 	openDeleteDialog: () => void;
-	closeDeleteDialog: () => void;
 	openDetailsDrawer: () => void;
-	closeDetailsDrawer: () => void;
-
-	// Acciones - vista
-	setViewMode: (mode: ConceptViewMode) => void;
+	openEditModal: () => void;
 
 	// Reset
 	resetUI: () => void;
+
+	// Acciones - vista
+	setViewMode: (mode: ConceptViewMode) => void;
+	viewMode: ConceptViewMode;
 }
 
 // Estado inicial por defecto para UI

@@ -11,41 +11,41 @@ import type { ProfileExtended, ProfileFilters, ProfilePaginationOptions } from '
 export interface ProfileState {
 	// Estado del perfil activo
 	activeProfile: ProfileExtended | null;
-	isLoadingActive: boolean;
 	activeProfileError: string | null;
-
-	// Estado de la lista de perfiles
-	profiles: ProfileExtended[];
-	isLoadingProfiles: boolean;
-	profilesError: string | null;
-	totalProfiles: number;
 	currentPage: number;
 
 	// Estado de filtros y paginación
 	filters: ProfileFilters;
+	isLoadingActive: boolean;
+	isLoadingProfiles: boolean;
 	pagination: ProfilePaginationOptions;
+
+	// Estado de la lista de perfiles
+	profiles: ProfileExtended[];
+	profilesError: string | null;
+	totalProfiles: number;
 }
 
 /**
  * Configuración de vista para perfiles
  */
 export interface ProfileViewConfig {
-	mode: 'grid' | 'list' | 'cards';
-	showStats: boolean;
-	showDescription: boolean;
+	cardSize: 'small' | 'medium' | 'large';
 	defaultView: 'grid' | 'list' | 'cards';
 	gridColumns: 2 | 3 | 4;
-	cardSize: 'small' | 'medium' | 'large';
+	mode: 'grid' | 'list' | 'cards';
+	showDescription: boolean;
+	showStats: boolean;
 }
 
 /**
  * Estado UI del store de Profile
  */
 export interface ProfileUIState {
-	viewConfig: ProfileViewConfig;
-	selectedProfileId: string | null;
-	hoveredProfileId: string | null;
 	expandedProfileIds: string[];
+	hoveredProfileId: string | null;
+	selectedProfileId: string | null;
+	viewConfig: ProfileViewConfig;
 }
 
 /**
@@ -53,10 +53,10 @@ export interface ProfileUIState {
  */
 export interface ProfileFiltersState {
 	activeFilters: string[];
-	searchTerm: string;
-	defaultSortOption: string;
 	currentSortOption: string;
+	defaultSortOption: string;
 	groupBy: 'none' | 'theme' | 'language' | 'status';
+	searchTerm: string;
 }
 
 /**

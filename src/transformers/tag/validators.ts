@@ -40,11 +40,10 @@ export const tagCreateSchema = z.object({
 	color: z
 		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un código hexadecimal válido')
-		.default('#6B7280'),
+		.default('var(--dt-neutral-500)'),
 	category: z.string().max(50, 'Categoría no puede exceder 50 caracteres').optional(),
 	shortcut: z.string().max(10, 'Shortcut no puede exceder 10 caracteres').optional(),
 	featuredImage: z.string().url('Featured image debe ser una URL válida').optional(),
-	isFavorite: z.boolean().default(false),
 });
 
 /**
@@ -62,7 +61,6 @@ export const tagUpdateSchema = z.object({
 	category: z.string().max(50, 'Categoría no puede exceder 50 caracteres').nullable().optional(),
 	shortcut: z.string().max(10, 'Shortcut no puede exceder 10 caracteres').nullable().optional(),
 	featuredImage: z.string().url('Featured image debe ser una URL válida').nullable().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 // Tipos inferidos

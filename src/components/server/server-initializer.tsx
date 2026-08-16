@@ -24,7 +24,7 @@ export function ServerInitializer() {
 				await initServerMutation.mutateAsync();
 				logger.success('Servidor inicializado correctamente');
 			} catch (error) {
-				logger.error('Error al inicializar el servidor', {
+				logger.error('Could not initialize server', {
 					error: error instanceof Error ? error.message : String(error),
 					fullError: error,
 				});

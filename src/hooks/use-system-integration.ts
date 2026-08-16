@@ -12,63 +12,63 @@ import type { AnyEntityWithStats } from '@/types/entities';
 
 // File System Access API types
 interface FilePickerAcceptType {
-	description?: string;
 	accept: Record<string, string | string[]>;
+	description?: string;
 }
 
 interface SaveFilePickerOptions {
+	excludeAcceptAllOption?: boolean;
 	suggestedName?: string;
 	types?: FilePickerAcceptType[];
-	excludeAcceptAllOption?: boolean;
 }
 
 interface OpenFilePickerOptions {
+	excludeAcceptAllOption?: boolean;
 	multiple?: boolean;
 	types?: FilePickerAcceptType[];
-	excludeAcceptAllOption?: boolean;
 }
 
 const logger = clientLogger.withContext('SystemIntegration');
 
 interface SystemIntegrationOptions {
-	enableFileAssociations?: boolean;
-	enableContextMenu?: boolean;
-	enableSystemNotifications?: boolean;
 	enableClipboardIntegration?: boolean;
+	enableContextMenu?: boolean;
+	enableFileAssociations?: boolean;
+	enableSystemNotifications?: boolean;
 }
 
 interface SystemCapabilities {
-	hasFileSystemAccess: boolean;
-	hasClipboardAccess: boolean;
-	hasNotificationAccess: boolean;
 	canShowDirectoryPicker: boolean;
-	canShowSaveFilePicker: boolean;
 	canShowOpenFilePicker: boolean;
+	canShowSaveFilePicker: boolean;
+	hasClipboardAccess: boolean;
+	hasFileSystemAccess: boolean;
+	hasNotificationAccess: boolean;
 }
 
 interface UseSystemIntegrationReturn {
 	capabilities: SystemCapabilities;
+
+	// Clipboard operations
+	copyToClipboard: (items: AnyEntityWithStats[]) => Promise<boolean>;
 	isSupported: boolean;
 
 	// File system operations
 	openInExplorer: (path: string) => Promise<boolean>;
-	selectInExplorer: (path: string) => Promise<boolean>;
 	openWithDefaultApp: (path: string) => Promise<boolean>;
-
-	// Directory operations
-	showDirectoryPicker: () => Promise<FileSystemDirectoryHandle | null>;
-	showSaveFilePicker: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle | null>;
-	showOpenFilePicker: (options?: OpenFilePickerOptions) => Promise<FileSystemFileHandle[] | null>;
-
-	// Clipboard operations
-	copyToClipboard: (items: AnyEntityWithStats[]) => Promise<boolean>;
 	pasteFromClipboard: () => Promise<File[] | null>;
-
-	// System notifications
-	showSystemNotification: (title: string, options?: NotificationOptions) => Promise<boolean>;
 
 	// File associations
 	registerFileHandler: (extension: string, handler: (file: File) => void) => boolean;
+	selectInExplorer: (path: string) => Promise<boolean>;
+
+	// Directory operations
+	showDirectoryPicker: () => Promise<FileSystemDirectoryHandle | null>;
+	showOpenFilePicker: (options?: OpenFilePickerOptions) => Promise<FileSystemFileHandle[] | null>;
+	showSaveFilePicker: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle | null>;
+
+	// System notifications
+	showSystemNotification: (title: string, options?: NotificationOptions) => Promise<boolean>;
 	unregisterFileHandler: (extension: string) => boolean;
 }
 
@@ -123,13 +123,7 @@ export const useSystemIntegration = (_options: SystemIntegrationOptions = {}): U
 			}
 
 			// For local files, show a message to the user
-			toastService.info(`To open in explorer: ${path}`, {
-				duration: 5000,
-				action: {
-					label: 'Copy Path',
-					onClick: () => navigator.clipboard?.writeText(path),
-				},
-			});
+			toastService.info('Abrir rutas locales requiere la integración segura de Tauri.', { duration: 5000 });
 
 			return false;
 		} catch (error) {
@@ -161,16 +155,8 @@ export const useSystemIntegration = (_options: SystemIntegrationOptions = {}): U
 				return true;
 			}
 
-			// For local files, create a download link
-			const link = document.createElement('a');
-			link.href = path;
-			link.target = '_blank';
-			link.rel = 'noopener noreferrer';
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-
-			return true;
+			toastService.info('Abrir archivos locales requiere la integración segura de Tauri.');
+			return false;
 		} catch (error) {
 			logger.error('Failed to open with default app:', error);
 			return false;
@@ -264,7 +250,6 @@ export const useSystemIntegration = (_options: SystemIntegrationOptions = {}): U
 				const clipboardData = items.map((item) => ({
 					id: item.id,
 					name: item.name,
-					path: 'path' in item ? item.path : '',
 					type: item.entityType,
 				}));
 

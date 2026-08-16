@@ -1,15 +1,26 @@
 import { apiClient } from '../client';
 
 export interface AlbumCardData {
-	id: string;
-	name: string;
-	description?: string | null;
 	category?: string | null;
 	color?: string | null;
+	createdAt: Date;
+	description?: string | null;
 	emoji?: string | null;
 	featuredImage?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
+	filters?: unknown[] | string;
+	id: string;
+	metadata?: {
+		itemCount?: number;
+		imageCount?: number;
+		videoCount?: number;
+		coverImageUrl?: string | null;
+		thumbnailUrls?: string[];
+		lastModified?: Date | string;
+		entitiesCount?: number;
+	};
+	name: string;
+	recentImages?: string[];
+	recentVideos?: string[];
 	stats: {
 		imageCount: number;
 		videoCount: number;
@@ -25,19 +36,8 @@ export interface AlbumCardData {
 		propertyCount: number;
 		groupCount: number;
 	};
-	recentImages?: string[];
-	recentVideos?: string[];
 	totalSize?: number;
-	filters?: unknown[] | string;
-	metadata?: {
-		itemCount?: number;
-		imageCount?: number;
-		videoCount?: number;
-		coverImageUrl?: string | null;
-		thumbnailUrls?: string[];
-		lastModified?: Date | string;
-		entitiesCount?: number;
-	};
+	updatedAt: Date;
 	viewConfig?: {
 		theme?: string;
 		layout?: string;
@@ -46,39 +46,39 @@ export interface AlbumCardData {
 }
 
 export interface GetAlbumsOptions {
-	limit?: number;
 	category?: string;
-	searchTerm?: string;
+	includeStats?: boolean;
+	isFavorite?: boolean;
+	limit?: number;
 	orderBy?: 'name' | 'updatedAt' | 'createdAt';
 	orderDir?: 'asc' | 'desc';
-	isFavorite?: boolean;
-	includeStats?: boolean;
+	searchTerm?: string;
 }
 
 export interface ThumbnailImage {
 	id: string;
+	isVideo?: boolean;
 	name?: string | null;
 	thumbnailUrl: string;
 	url?: string;
-	isVideo?: boolean;
 }
 
 export interface SearchAlbumsOptions {
-	searchTerm: string;
-	limit?: number;
-	offset?: number;
 	category?: string;
-	orderBy?: 'name' | 'updatedAt' | 'createdAt';
-	orderDir?: 'asc' | 'desc';
 	includeHidden?: boolean;
 	includeStats?: boolean;
+	limit?: number;
+	offset?: number;
+	orderBy?: 'name' | 'updatedAt' | 'createdAt';
+	orderDir?: 'asc' | 'desc';
+	searchTerm: string;
 }
 
 export interface AlbumStats {
-	imageCount: number;
-	videoCount: number;
-	totalSize: number;
 	entitiesCount: number;
+	imageCount: number;
+	totalSize: number;
+	videoCount: number;
 }
 
 /**

@@ -8,6 +8,7 @@
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createDefaultEntityStats } from '@/lib/utils';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 import type { ConceptBase, ConceptStats, ConceptWithStats } from '@/types/entities/concept';
 import {
 	ConceptBaseSchema,
@@ -200,34 +201,22 @@ export function sanitizeConceptData(data: Partial<ConceptBase>): Partial<Concept
  * @returns Concept con estadísticas estructuradas.
  */
 export function transformConceptWithStats(data: any): ConceptWithStats {
+	const counts = normalizeCounts(data._count);
 	const conceptStats = {
-		imageCount: data._count?.images ?? 0,
-		videoCount: data._count?.videos ?? 0,
-		noteCount: data._count?.notes ?? 0,
-		albumCount: data._count?.albums ?? 0,
-		collectionCount: data._count?.collections ?? 0,
-		tagCount: data._count?.tags ?? 0,
-		characterCount: data._count?.characters ?? 0,
-		placeCount: data._count?.places ?? 0,
-		worldItemCount: data._count?.worldItems ?? 0,
-		propertyCount: data._count?.properties ?? 0,
-		groupCount: data._count?.groups ?? 0,
-		wildcardCount: data._count?.wildcards ?? 0,
-		promptCount: data._count?.prompts ?? 0,
-		totalAssociations:
-			(data._count?.images ?? 0) +
-			(data._count?.videos ?? 0) +
-			(data._count?.notes ?? 0) +
-			(data._count?.albums ?? 0) +
-			(data._count?.collections ?? 0) +
-			(data._count?.tags ?? 0) +
-			(data._count?.characters ?? 0) +
-			(data._count?.places ?? 0) +
-			(data._count?.worldItems ?? 0) +
-			(data._count?.properties ?? 0) +
-			(data._count?.groups ?? 0) +
-			(data._count?.wildcards ?? 0) +
-			(data._count?.prompts ?? 0),
+		imageCount: counts.images,
+		videoCount: counts.videos,
+		noteCount: counts.notes,
+		albumCount: counts.albums,
+		collectionCount: counts.collections,
+		tagCount: counts.tags,
+		characterCount: counts.characters,
+		placeCount: counts.places,
+		worldItemCount: counts.worldItems,
+		propertyCount: counts.properties,
+		groupCount: counts.groups,
+		wildcardCount: counts.wildcards,
+		promptCount: counts.prompts,
+		totalAssociations: sumCounts(data._count, STANDARD_COUNT_KEYS),
 		lastUpdated: new Date(),
 	};
 

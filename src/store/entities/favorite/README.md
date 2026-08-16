@@ -73,13 +73,13 @@ src/types/entities/favorite/
 
 ```typescript
 interface FavoriteBase {
-  id: string;
-  entityId: string;              // ID de la entidad marcada como favorita
-  entityType: FavoriteEntityType; // Tipo de entidad
-  userId?: string;               // ID del usuario (opcional)
-  profileId?: string;            // ID del perfil (opcional)
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	entityId: string; // ID de la entidad marcada como favorita
+	entityType: FavoriteEntityType; // Tipo de entidad
+	userId?: string; // ID del usuario (opcional)
+	profileId?: string; // ID del perfil (opcional)
+	createdAt: Date;
+	updatedAt: Date;
 }
 ```
 
@@ -87,13 +87,13 @@ interface FavoriteBase {
 
 ```typescript
 interface FavoriteExtended extends FavoriteComplete {
-  entityName?: string;           // Nombre de la entidad
-  entityPreview?: string;        // Vista previa de la entidad
-  entityIcon?: string;           // Icono de la entidad
-  entityColor?: string;          // Color de la entidad
-  isSelected?: boolean;          // Estado de selección
-  isHovered?: boolean;           // Estado de hover
-  _count?: Record<string, number>; // Contadores
+	entityName?: string; // Nombre de la entidad
+	entityPreview?: string; // Vista previa de la entidad
+	entityIcon?: string; // Icono de la entidad
+	entityColor?: string; // Color de la entidad
+	isSelected?: boolean; // Estado de selección
+	isHovered?: boolean; // Estado de hover
+	_count?: Record<string, number>; // Contadores
 }
 ```
 
@@ -101,16 +101,16 @@ interface FavoriteExtended extends FavoriteComplete {
 
 ```typescript
 enum FavoriteEntityType {
-  IMAGE = 'image',
-  ALBUM = 'album',
-  COLLECTION = 'collection',
-  FOLDER = 'folder',
-  CHARACTER = 'character',
-  PLACE = 'place',
-  WORLD_ITEM = 'worldItem',
-  CONCEPT = 'concept',
-  PROMPT = 'prompt',
-  NOTE = 'note',
+	IMAGE = 'image',
+	ALBUM = 'album',
+	COLLECTION = 'collection',
+	FOLDER = 'folder',
+	CHARACTER = 'character',
+	PLACE = 'place',
+	WORLD_ITEM = 'worldItem',
+	CONCEPT = 'concept',
+	PROMPT = 'prompt',
+	NOTE = 'note',
 }
 ```
 
@@ -340,11 +340,11 @@ import { transformFavorite, groupFavoritesByType } from '@/transformers/favorite
 
 // Transformar datos de API
 const rawFavorite = {
-  id: 'fav-1',
-  entity_id: 'img-123',
-  entity_type: 'image',
-  user_id: 'user-1',
-  created_at: '2024-01-15T10:00:00Z'
+	id: 'fav-1',
+	entity_id: 'img-123',
+	entity_type: 'image',
+	user_id: 'user-1',
+	created_at: '2024-01-15T10:00:00Z',
 };
 
 const favorite = transformFavorite(rawFavorite);
@@ -370,19 +370,19 @@ console.log(groupedFavorites);
 
 ```typescript
 // Modo de vista por defecto
-DEFAULT_VIEW_MODE = FavoriteViewMode.GRID
+DEFAULT_VIEW_MODE = FavoriteViewMode.GRID;
 
 // Criterio de ordenación por defecto
-DEFAULT_SORT_CRITERIA = FavoriteSortCriteria.UPDATED_AT
-DEFAULT_SORT_DIRECTION = 'desc'
+DEFAULT_SORT_CRITERIA = FavoriteSortCriteria.UPDATED_AT;
+DEFAULT_SORT_DIRECTION = 'desc';
 
 // Filtros por defecto
 DEFAULT_FILTERS = {
-  entityType: [],
-  createdAfter: null,
-  createdBefore: null,
-  search: '',
-}
+	entityType: [],
+	createdAfter: null,
+	createdBefore: null,
+	search: '',
+};
 ```
 
 ### Persistencia
@@ -417,9 +417,9 @@ graph LR
 
 ```typescript
 interface FavoriteStats {
-  totalCount: number;                    // Total de favoritos
-  byType: Record<string, number>;        // Conteo por tipo
-  recentlyAdded: FavoriteComplete[];     // Favoritos recientes
+	totalCount: number; // Total de favoritos
+	byType: Record<string, number>; // Conteo por tipo
+	recentlyAdded: FavoriteComplete[]; // Favoritos recientes
 }
 ```
 
@@ -427,12 +427,12 @@ interface FavoriteStats {
 
 ```typescript
 interface FavoritesByType {
-  type: string;           // Tipo de entidad
-  displayName: string;    // Nombre para mostrar
-  icon: string;          // Icono del tipo
-  color: string;         // Color del tipo
-  count: number;         // Cantidad de favoritos
-  items: FavoriteComplete[]; // Favoritos del tipo
+	type: string; // Tipo de entidad
+	displayName: string; // Nombre para mostrar
+	icon: string; // Icono del tipo
+	color: string; // Color del tipo
+	count: number; // Cantidad de favoritos
+	items: FavoriteComplete[]; // Favoritos del tipo
 }
 ```
 
@@ -447,4 +447,4 @@ interface FavoritesByType {
 
 ---
 
-*Documentación generada automáticamente - Última actualización: 2024*
+_Documentación generada automáticamente - Última actualización: 2024_

@@ -4,40 +4,23 @@
  * @description Define la interfaz FileItem para el explorador de archivos
  */
 
+import { formatFileSize } from '@/lib/utils/format.utils';
 import type { AnyEntityWithStats } from '@/types/entities';
 
 /**
  * Interfaz base para items del explorador de archivos
  */
 export interface FileItem {
-	/** ID único del item */
-	id: string;
-	/** Nombre del item */
-	name: string;
-	/** Tipo de item */
-	type: 'file' | 'directory';
-	/** Tamaño en bytes */
-	size: number;
-	/** Fecha de modificación */
-	modifiedAt: Date;
-	/** Ruta del item */
-	path: string;
-	/** Si es un directorio */
-	isDirectory: boolean;
-	/** Extensión del archivo */
-	extension: string;
-	/** Tipo MIME */
-	mimeType: string;
-	/** URL del thumbnail */
-	thumbnailUrl?: string;
-	/** Si está marcado como favorito */
-	isFavorite?: boolean;
-
-	// File system properties added for compatibility with entity statistics
-	/** Last modification time (alias for modifiedAt) */
-	mtime?: Date;
 	/** File creation time */
 	birthtime?: Date;
+	/** Extensión del archivo */
+	extension: string;
+	/** ID único del item */
+	id: string;
+	/** Si es un directorio */
+	isDirectory: boolean;
+	/** Si está marcado como favorito */
+	isFavorite?: boolean;
 	/** Whether this is a file */
 	isFile?: boolean;
 
@@ -58,6 +41,24 @@ export interface FileItem {
 		/** Propiedades adicionales */
 		[key: string]: any;
 	};
+	/** Tipo MIME */
+	mimeType: string;
+	/** Fecha de modificación */
+	modifiedAt: Date;
+
+	// File system properties added for compatibility with entity statistics
+	/** Last modification time (alias for modifiedAt) */
+	mtime?: Date;
+	/** Nombre del item */
+	name: string;
+	/** Ruta del item */
+	path: string;
+	/** Tamaño en bytes */
+	size: number;
+	/** URL del thumbnail */
+	thumbnailUrl?: string;
+	/** Tipo de item */
+	type: 'file' | 'directory';
 }
 
 /**
@@ -96,15 +97,4 @@ export function entityToFileItem(entity: AnyEntityWithStats): FileItem {
 	};
 }
 
-/**
- * Formatea el tamaño de archivo en bytes a una cadena legible
- */
-function formatFileSize(bytes: number): string {
-	if (bytes === 0) {
-		return '0 B';
-	}
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
-}
+// formatFileSize importada desde @/lib/utils/format.utils

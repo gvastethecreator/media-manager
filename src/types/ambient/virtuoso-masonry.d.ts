@@ -2,12 +2,12 @@ declare module '@virtuoso.dev/masonry' {
 	import type { ComponentType, CSSProperties } from 'react';
 
 	export interface VirtuosoMasonryProps<Data = any, Context = any> {
-		data?: Data[];
 		columnCount?: number;
-		ItemContent: ComponentType<{ data: Data }>;
-		style?: CSSProperties;
-		initialItemCount?: number;
 		computeItemKey?: (params: { data: Data; index: number }) => string | number;
+		data?: Data[];
+		ItemContent: ComponentType<{ data: Data }>;
+		initialItemCount?: number;
+		style?: CSSProperties;
 		useWindowScroll?: boolean;
 	}
 

@@ -1,20 +1,19 @@
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { BarChart4, Calendar, Heart, Image, LinkIcon, ListChecks, RefreshCw, Star, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from '@/lib/utils/date';
 
 interface NoteCardFooterProps {
 	createdAt: Date | string;
-	updatedAt: Date | string;
 	imagesCount: number;
-	videosCount: number;
-	relationsCount: number;
 	isFavorite?: boolean;
-	status?: string | null;
-	priority?: number | null;
 	primaryColor: string;
+	priority?: number | null;
+	relationsCount: number;
 	secondaryColor: string;
+	status?: string | null;
 	tcgMode?: boolean;
+	updatedAt: Date | string;
+	videosCount: number;
 }
 
 /**
@@ -41,7 +40,6 @@ export function NoteCardFooter({
 	// Formatear fecha relativa
 	const formattedDate = formatDistanceToNow(createdAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 
 	// Formatear fecha actualizada si es diferente a la creación
@@ -49,7 +47,6 @@ export function NoteCardFooter({
 	const updatedFormattedDate = wasUpdated
 		? formatDistanceToNow(updatedAtDate, {
 				addSuffix: true,
-				locale: es,
 			})
 		: null;
 
@@ -57,13 +54,13 @@ export function NoteCardFooter({
 	const getPriorityColor = () => {
 		switch (priority) {
 			case 0:
-				return '#4b5563'; // Gris para normal
+				return 'var(--dt-neutral-600)'; // Gris para normal
 			case 1:
-				return '#fbbf24'; // Amarillo para alta
+				return 'var(--dt-warning-400)'; // Amarillo para alta
 			case 2:
-				return '#ef4444'; // Rojo para urgente
+				return 'var(--dt-danger-500)'; // Rojo para urgente
 			default:
-				return '#9ca3af'; // Gris claro para baja
+				return 'var(--dt-neutral-400)'; // Gris claro para baja
 		}
 	};
 
@@ -71,32 +68,32 @@ export function NoteCardFooter({
 	const getFooterStyles = () => {
 		if (tcgMode) {
 			return {
-				background: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}45)`,
-				borderTop: `1px solid ${primaryColor}50`,
-				borderImage: `linear-gradient(to right, transparent, ${primaryColor}60, transparent) 1`,
+				background: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 75%), color-mix(in oklab, ${secondaryColor}, transparent 55%))`,
+				borderTop: `1px solid color-mix(in oklab, ${primaryColor}, transparent 50%)`,
+				borderImage: `linear-gradient(to right, transparent, color-mix(in oklab, ${primaryColor}, transparent 40%), transparent) 1`,
 			};
 		}
 
 		return {
-			background: `linear-gradient(to bottom, ${primaryColor}10, ${secondaryColor}30)`,
-			borderTop: `1px solid ${primaryColor}30`,
+			background: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 90%), color-mix(in oklab, ${secondaryColor}, transparent 70%))`,
+			borderTop: `1px solid color-mix(in oklab, ${primaryColor}, transparent 70%)`,
 		};
 	};
 
 	return (
 		<div
 			className={cn(
-				'mt-auto flex flex-col gap-1 border-gray-400/30 border-t px-3 py-2',
+				'mt-auto flex flex-col gap-1 border-muted-foreground/30/30 border-t px-3 py-2',
 				tcgMode && 'rounded-b-[4.75%] backdrop-blur-sm'
 			)}
 			style={getFooterStyles()}
 		>
 			{/* Fila superior con estado y prioridad */}
 			{(status || priority !== undefined) && (
-				<div className="flex items-center justify-between text-xs">
+				<div className="flex items-center justify-between text-sm">
 					{status && (
 						<div className="flex items-center gap-1">
-							<ListChecks className="h-3 w-3" style={{ color: primaryColor }} />
+							<ListChecks className="h-4 w-4" style={{ color: primaryColor }} />
 							<span className={cn('opacity-80', tcgMode && 'font-medium tracking-wide')}>
 								{status.charAt(0).toUpperCase() + status.slice(1)}
 							</span>
@@ -104,7 +101,7 @@ export function NoteCardFooter({
 					)}
 					{priority !== undefined && (
 						<div className="flex items-center gap-1">
-							<BarChart4 className="h-3 w-3" style={{ color: getPriorityColor() }} />
+							<BarChart4 className="h-4 w-4" style={{ color: getPriorityColor() }} />
 							<span className={cn('opacity-80', tcgMode && 'font-medium')} style={{ color: getPriorityColor() }}>
 								P{priority}
 							</span>
@@ -114,43 +111,43 @@ export function NoteCardFooter({
 			)}
 
 			{/* Fila de contadores con iconos */}
-			<div className="flex items-center justify-between text-xs">
+			<div className="flex items-center justify-between text-sm">
 				<div className="flex items-center gap-3">
 					{/* Contador de imágenes */}
 					<div className="flex items-center gap-1">
-						<Image className="h-3 w-3 text-muted-foreground" />
+						<Image className="h-4 w-4 text-muted-foreground" />
 						<span className="opacity-80">{imagesCount}</span>
 					</div>
 
 					{/* Contador de videos */}
 					{(videosCount > 0 || tcgMode) && (
 						<div className="flex items-center gap-1">
-							<Video className="h-3 w-3 text-muted-foreground" />
+							<Video className="h-4 w-4 text-muted-foreground" />
 							<span className="opacity-80">{videosCount}</span>
 						</div>
 					)}
 
 					{/* Contador de relaciones */}
 					<div className="flex items-center gap-1">
-						<LinkIcon className="h-3 w-3 text-muted-foreground" />
+						<LinkIcon className="h-4 w-4 text-muted-foreground" />
 						<span className="opacity-80">{relationsCount}</span>
 					</div>
 
 					{/* Indicador de favorito */}
 					{isFavorite &&
 						(tcgMode ? (
-							<Star className="h-3.5 w-3.5 fill-current text-yellow-500" />
+							<Star className="h-4 w-4 fill-current text-warning" />
 						) : (
-							<Heart className="h-3 w-3 fill-current text-pink-500" />
+							<Heart className="h-4 w-4 fill-current text-dt-primary-500" />
 						))}
 				</div>
 
 				{/* Fecha */}
 				<div className="flex items-center gap-1">
 					{wasUpdated ? (
-						<RefreshCw className="h-3 w-3 text-muted-foreground" />
+						<RefreshCw className="h-4 w-4 text-muted-foreground" />
 					) : (
-						<Calendar className="h-3 w-3 text-muted-foreground" />
+						<Calendar className="h-4 w-4 text-muted-foreground" />
 					)}
 					<span className={cn('text-[0.65rem] opacity-80', tcgMode && 'tracking-tight')}>
 						{wasUpdated ? updatedFormattedDate : formattedDate}
@@ -161,13 +158,13 @@ export function NoteCardFooter({
 			{/* Fecha de actualización (solo en modo no-TCG) */}
 			{wasUpdated && updatedFormattedDate && !tcgMode && (
 				<div className="mt-0.5 flex items-center justify-end text-[0.65rem] opacity-60">
-					<span>Actualizado {updatedFormattedDate}</span>
+					<span>Updated {updatedFormattedDate}</span>
 				</div>
 			)}
 
 			{/* Sello TCG en la parte inferior */}
 			{tcgMode && (
-				<div className="mt-1 flex justify-center border-white/10 border-t pt-1">
+				<div className="mt-1 flex justify-center border-border/40 border-t pt-1">
 					<div
 						className="font-medium text-[0.65rem] uppercase tracking-wide opacity-60"
 						style={{ color: primaryColor }}

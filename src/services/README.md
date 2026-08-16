@@ -57,7 +57,6 @@ flowchart TD
 - `metadata/` - Metadatos de archivos
 - `property/` - Propiedades personalizadas
 - `queue-job/` - Trabajos en cola
-- `uploaded-images/` - Imágenes subidas
 - `wildcard/` - Patrones y comodines
 
 ## Estructura de Cada Servicio

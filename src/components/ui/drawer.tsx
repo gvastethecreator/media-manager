@@ -5,94 +5,112 @@ import { Drawer as DrawerPrimitive } from 'vaul';
 
 import { cn } from '@/lib/utils';
 
-function Drawer({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
-	return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
-}
+/**
+ * Drawer con soporte para reduced-motion y mejoras de UX
+ * - shouldScaleBackground: escala el fondo al abrir
+ * - Desactiva animaciones si el usuario prefiere reduced-motion
+ */
+const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
+	<DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
+);
+Drawer.displayName = 'Drawer';
 
-function DrawerTrigger({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
-	return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
-}
+const DrawerTrigger = DrawerPrimitive.Trigger;
 
-function DrawerPortal({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
-	return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />;
-}
+const DrawerPortal = DrawerPrimitive.Portal;
 
-function DrawerClose({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
-	return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
-}
+const DrawerClose = DrawerPrimitive.Close;
 
-function DrawerOverlay({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Overlay>) {
-	return (
-		<DrawerPrimitive.Overlay
+/**
+ * DrawerOverlay con blur y transiciones suaves
+ * - backdrop-blur-sm para efecto de profundidad
+ * - transición de opacidad suave
+ * - respects reduced-motion
+ */
+const DrawerOverlay = React.forwardRef<
+	React.ElementRef<typeof DrawerPrimitive.Overlay>,
+	React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+	<DrawerPrimitive.Overlay
+		className={cn(
+			'ui-overlay-backdrop-medium fixed inset-0 z-50 transition-all duration-dt-normal ease-dt-out',
+			'data-[state=closed]:animate-out data-[state=open]:animate-in',
+			'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+			className
+		)}
+		ref={ref}
+		{...props}
+	/>
+));
+DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
+
+/**
+ * DrawerContent con Design Tokens v2 y animaciones mejoradas
+ * - rounded-t-dt-lg en lugar de valor hardcodeado
+ * - shadow-dt-4 para profundidad
+ * - Handle visual mejorado con design tokens
+ * - Soporte para reduced-motion mediante media query
+ * - max-h-[90vh] para evitar overflow
+ */
+const DrawerContent = React.forwardRef<
+	React.ElementRef<typeof DrawerPrimitive.Content>,
+	React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+	<DrawerPortal>
+		<DrawerOverlay />
+		<DrawerPrimitive.Content
 			className={cn(
-				'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=open]:animate-in',
+				'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col',
+				'rounded-t-dt-lg border-2 border-border bg-background shadow-dt-4',
+				'max-h-[90vh] overflow-hidden',
+				// Animaciones de entrada/salida
+				'data-[state=closed]:animate-out data-[state=open]:animate-in',
+				'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+				'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+				// Reduced motion: sin animaciones
+				'motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none',
 				className
 			)}
-			data-slot="drawer-overlay"
+			ref={ref}
 			{...props}
-		/>
-	);
-}
+		>
+			{/* Handle visual mejorado */}
+			<div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted-foreground/30 transition-colors hover:bg-muted-foreground/50" />
+			<div className="overflow-y-auto">{children}</div>
+		</DrawerPrimitive.Content>
+	</DrawerPortal>
+));
+DrawerContent.displayName = 'DrawerContent';
 
-function DrawerContent({ className, children, ...props }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
-	return (
-		<DrawerPortal data-slot="drawer-portal">
-			<DrawerOverlay />
-			<DrawerPrimitive.Content
-				className={cn(
-					'group/drawer-content fixed z-50 flex h-auto flex-col bg-background',
-					'data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg data-[vaul-drawer-direction=top]:border-b',
-					'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[80vh] data-[vaul-drawer-direction=bottom]:rounded-t-lg data-[vaul-drawer-direction=bottom]:border-t',
-					'data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=right]:sm:max-w-sm',
-					'data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=left]:sm:max-w-sm',
-					className
-				)}
-				data-slot="drawer-content"
-				{...props}
-			>
-				<div className="mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full bg-muted group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
-				{children}
-			</DrawerPrimitive.Content>
-		</DrawerPortal>
-	);
-}
+const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+	<div className={cn('grid gap-1.5 p-4 text-center sm:text-left', className)} {...props} />
+);
+DrawerHeader.displayName = 'DrawerHeader';
 
-function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
-	return (
-		<div
-			className={cn(
-				'flex flex-col gap-0.5 p-4 group-data-[vaul-drawer-direction=bottom]/drawer-content:text-center group-data-[vaul-drawer-direction=top]/drawer-content:text-center md:gap-1.5 md:text-left',
-				className
-			)}
-			data-slot="drawer-header"
-			{...props}
-		/>
-	);
-}
+const DrawerFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+	<div className={cn('mt-auto flex flex-col gap-2 p-4', className)} {...props} />
+);
+DrawerFooter.displayName = 'DrawerFooter';
 
-function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
-	return <div className={cn('mt-auto flex flex-col gap-2 p-4', className)} data-slot="drawer-footer" {...props} />;
-}
+const DrawerTitle = React.forwardRef<
+	React.ElementRef<typeof DrawerPrimitive.Title>,
+	React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
+>(({ className, ...props }, ref) => (
+	<DrawerPrimitive.Title
+		className={cn('font-semibold text-foreground text-lg leading-none tracking-tight', className)}
+		ref={ref}
+		{...props}
+	/>
+));
+DrawerTitle.displayName = DrawerPrimitive.Title.displayName;
 
-function DrawerTitle({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Title>) {
-	return (
-		<DrawerPrimitive.Title
-			className={cn('font-semibold text-foreground', className)}
-			data-slot="drawer-title"
-			{...props}
-		/>
-	);
-}
-
-function DrawerDescription({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Description>) {
-	return (
-		<DrawerPrimitive.Description
-			className={cn('text-muted-foreground text-sm', className)}
-			data-slot="drawer-description"
-			{...props}
-		/>
-	);
-}
+const DrawerDescription = React.forwardRef<
+	React.ElementRef<typeof DrawerPrimitive.Description>,
+	React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
+>(({ className, ...props }, ref) => (
+	<DrawerPrimitive.Description className={cn('text-muted-foreground text-sm', className)} ref={ref} {...props} />
+));
+DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
 	Drawer,

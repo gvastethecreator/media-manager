@@ -1,14 +1,11 @@
 // src/server/services/system.service.ts
-/**
- * Limpieza: retirada de @ts-nocheck. Tipos explícitos añadidos donde es viable
- * sin expandir el alcance del refactor.
- */
 
 import { count } from 'drizzle-orm';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
-import { db } from '@/lib/drizzle';
+import { db, getDbClient } from '@/lib/drizzle';
+import { requireDatabaseUrl, resolveLocalDatabaseFilePath } from '@/lib/drizzle/database-url';
 import {
 	albums,
 	audios,
@@ -31,53 +28,45 @@ import {
 	worldItems,
 } from '@/lib/drizzle/schema/index';
 import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
+import { getPublicFolderFileTotals } from '@/services/folder/folder-public-stats';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { createSystemError } from '@/lib/errors/system';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { settingsService } from '@/services/settings/settings.service';
 import { fileBrowserConfigSchema } from '@/transformers/settings/schema';
 import type { Settings } from '@/types/settings';
 
-// Loggers simplificados para evitar problemas
-interface BasicLogger {
-	info: (msg: string, meta?: unknown) => void;
-	error: (msg: string, error?: unknown) => void;
-	warn?: (msg: string, error?: unknown) => void;
-	debug?: (msg: string, meta?: unknown) => void;
-}
-const navLogger: BasicLogger = {
-	info: (msg) => console.log(`[NAV] ${msg}`),
-	error: (msg, error) => console.error(`[NAV ERROR] ${msg}`, error),
-	warn: (msg, error) => console.warn(`[NAV WARN] ${msg}`, error),
-};
-const systemLogger: BasicLogger = {
-	info: (msg) => console.log(`[SYSTEM] ${msg}`),
-	error: (msg, error) => console.error(`[SYSTEM ERROR] ${msg}`, error),
-	warn: (msg, error) => console.warn(`[SYSTEM WARN] ${msg}`, error),
-};
-const settingsLogger: BasicLogger = {
-	info: (msg) => console.log(`[SETTINGS] ${msg}`),
-	error: (msg, error) => console.error(`[SETTINGS ERROR] ${msg}`, error),
-	debug: (msg, data) => console.log(`[SETTINGS DEBUG] ${msg}`, data),
-};
+// Loggers con contexto
+const navLogger = serverLogger.withContext('Navigation');
+const systemLogger = serverLogger.withContext('System');
+const settingsLogger = serverLogger.withContext('Settings');
 
-type NavigationStats = {
-	totalImages: number;
-	totalFolders: number;
-	totalCollections: number;
-	totalTags: number;
+interface NavigationStats {
+	recentActivity: unknown[];
+	topTags: Array<{ id: string; name: string; count: number }>;
+	totalActivities: number;
 	totalAlbums: number;
 	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalFavorites: number;
-	totalActivities: number;
-	totalSize: number;
-	totalViews: number;
+	totalCollections: number;
 	totalDownloads: number;
-	topTags: Array<{ id: string; name: string; count: number }>;
-	recentActivity: unknown[];
-};
+	totalFavorites: number;
+	totalFolders: number;
+	totalImages: number;
+	totalPlaces: number;
+	totalSize: number;
+	totalTags: number;
+	totalViews: number;
+	totalWorldItems: number;
+}
 
 export interface NavigationData {
+	albums: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	audios: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
+	characters: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
+	concepts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	documents: Array<{ id: string; name: string; type?: string; itemCount?: number }>;
+	file3ds: Array<{ id: string; name: string; format?: string; itemCount?: number }>;
 	folders: Array<{
 		id: string;
 		name: string;
@@ -86,24 +75,17 @@ export interface NavigationData {
 		parentId?: string | null;
 		_count?: { images: number; videos: number };
 	}>;
-	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
-	tags: Array<{ id: string; name: string; count?: number }>;
-	albums: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	characters: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	places: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	worldItems: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	concepts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	prompts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	notes: Array<{ id: string; title: string; content?: string; itemCount?: number }>;
 	groups: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	properties: Array<{ id: string; name: string; value?: string; itemCount?: number }>;
-	wildcards: Array<{ id: string; name: string; pattern?: string; itemCount?: number }>;
-	audios: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
-	documents: Array<{ id: string; name: string; type?: string; itemCount?: number }>;
 	jsonFiles: Array<{ id: string; name: string; size?: number; itemCount?: number }>;
-	file3ds: Array<{ id: string; name: string; format?: string; itemCount?: number }>;
-	videos: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
+	notes: Array<{ id: string; title: string; content?: string; itemCount?: number }>;
+	places: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	prompts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	properties: Array<{ id: string; name: string; value?: string; itemCount?: number }>;
 	stats: NavigationStats;
+	tags: Array<{ id: string; name: string; count?: number }>;
+	videos: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
+	wildcards: Array<{ id: string; name: string; pattern?: string; itemCount?: number }>;
+	worldItems: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
 }
 
 export async function getNavigationData(): Promise<NavigationData> {
@@ -157,9 +139,10 @@ export async function getNavigationData(): Promise<NavigationData> {
 
 		// Obtener conteos de imágenes y videos
 		const [imageCount, videoCount] = await Promise.all([
-			db.select({ count: count() }).from(images),
+			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
 			db.select({ count: count() }).from(videos),
 		]);
+		const publicFolderTotals = await getPublicFolderFileTotals(foldersData.map((folder: { id: string }) => folder.id));
 
 		// Obtener estadísticas actualizadas
 		const basicStats = {
@@ -187,7 +170,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 				id: f.id,
 				name: f.name,
 				path: f.path,
-				itemCount: f.totalFiles || 0,
+				itemCount: publicFolderTotals.get(f.id)?.totalFiles ?? 0,
 				parentId: f.parentId || null,
 			})),
 			collections: collectionsData.map((c: any) => ({
@@ -301,47 +284,139 @@ export async function getNavigationData(): Promise<NavigationData> {
 
 export async function revalidateNavigation() {
 	try {
-		navLogger.info('🔄 Iniciando revalidación de rutas de navegación (MOCK)');
-		// En Vite no necesitamos revalidación real
-		navLogger.info('✅ Rutas de navegación revalidadas exitosamente (MOCK)');
+		navLogger.info('🔄 Verificando si la navegación requiere revalidación manual');
+		// En el runtime actual la navegación se recalcula por consulta, así que no hay caché manual que invalidar.
+		navLogger.info('✅ No se requirió revalidación manual de navegación');
 	} catch (error) {
 		navLogger.error('❌ Error al revalidar rutas de navegación:', error);
 		throw new Error('No se pudieron revalidar las rutas de navegación');
 	}
 }
 
+function getDatabaseFileCandidates(): string[] {
+	const resolvedPath = resolveLocalDatabaseFilePath(requireDatabaseUrl());
+	if (!resolvedPath) return [];
+
+	return [resolvedPath, `${resolvedPath}-wal`, `${resolvedPath}-shm`];
+}
+
+async function getExistingFileSize(filePath: string): Promise<number> {
+	try {
+		const fileStats = await fs.stat(filePath);
+		return fileStats.size;
+	} catch {
+		return 0;
+	}
+}
+
+async function getDirectorySize(dirPath: string): Promise<number> {
+	try {
+		const entries = await fs.readdir(dirPath, { withFileTypes: true });
+		let totalSize = 0;
+
+		for (const entry of entries) {
+			const entryPath = path.join(dirPath, entry.name);
+			if (entry.isDirectory()) {
+				totalSize += await getDirectorySize(entryPath);
+				continue;
+			}
+
+			if (entry.isFile()) {
+				totalSize += await getExistingFileSize(entryPath);
+			}
+		}
+
+		return totalSize;
+	} catch {
+		return 0;
+	}
+}
+
+async function getDatabaseSize(): Promise<number> {
+	const dbFiles = getDatabaseFileCandidates();
+	const sizes = await Promise.all(dbFiles.map((filePath) => getExistingFileSize(filePath)));
+	return sizes.reduce((total, size) => total + size, 0);
+}
+
+async function getDiskMetrics(targetPath: string): Promise<{
+	available: number;
+	total: number;
+	used: number;
+} | null> {
+	try {
+		const fsStats = await fs.statfs(targetPath);
+		const blockSize = Number(fsStats.bsize);
+		const total = Number(fsStats.blocks) * blockSize;
+		const available = Number(fsStats.bavail) * blockSize;
+		const used = Math.max(total - available, 0);
+
+		if (!Number.isFinite(total) || !Number.isFinite(available)) {
+			return null;
+		}
+
+		return { total, available, used };
+	} catch (error) {
+		systemLogger.warn('⚠️ No se pudo obtener información real de disco', { error, targetPath });
+		return null;
+	}
+}
+
+async function getCacheSize(): Promise<number> {
+	const cacheDirectories = [
+		path.join(process.cwd(), '.vite'),
+		path.join(process.cwd(), 'node_modules', '.vite'),
+		path.join(process.cwd(), '.bun'),
+	];
+
+	const sizes = await Promise.all(cacheDirectories.map((dirPath) => getDirectorySize(dirPath)));
+	return Math.round(sizes.reduce((total, size) => total + size, 0) / (1024 * 1024));
+}
+
+async function getPackageMetadata(): Promise<{ buildDate: string; version: string }> {
+	const packageJsonPath = path.join(process.cwd(), 'package.json');
+	const packageStats = await fs.stat(packageJsonPath);
+	const packageContent = await fs.readFile(packageJsonPath, 'utf8');
+	const packageJson = JSON.parse(packageContent) as { version?: string };
+
+	return {
+		version: packageJson.version || '0.0.0',
+		buildDate: process.env.BUILD_DATE || packageStats.mtime.toISOString(),
+	};
+}
+
 // Interfaz para estadísticas del sistema en tiempo real
 export interface RuntimeSystemStats {
-	totalImages: number;
-	totalVideos: number;
-	totalAudio: number;
-	totalFolders: number;
-	totalAlbums: number;
-	totalCharacters: number;
-	totalCollections: number;
-	totalTags: number;
-	storageUsed: number;
-	storageAvailable: number;
 	dbSize: number;
 	lastBackup?: string;
+	storageAvailable: number;
+	storageUsed: number;
+	totalAlbums: number;
+	totalAudio: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalFolders: number;
+	totalImages: number;
+	totalTags: number;
+	totalVideos: number;
 }
 
 export interface SystemRuntimeStats {
-	cpuUsage: number;
-	memoryUsage: number;
 	cacheSize: number;
+	cpuUsage: number;
 	dbSize: number;
+	hostname: string;
+	memoryUsage: number;
+	nodeVersion: string;
 	totalEntities: number;
 	uptime: number;
-	nodeVersion: string;
-	hostname: string;
 }
 
 // Respuesta estándar para operaciones del sistema
 export interface SystemResponse {
-	success: boolean;
-	message: string;
 	data?: unknown;
+	message: string;
+	success: boolean;
+	timestamp: string;
 }
 
 /**
@@ -362,7 +437,7 @@ export async function getSystemStats(): Promise<RuntimeSystemStats> {
 			collectionsResult,
 			tagsResult,
 		] = await Promise.all([
-			db.select({ count: count() }).from(images),
+			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
 			db.select({ count: count() }).from(videos),
 			db.select({ count: count() }).from(audios),
 			db.select({ count: count() }).from(folders),
@@ -381,19 +456,10 @@ export async function getSystemStats(): Promise<RuntimeSystemStats> {
 		const totalCollections = collectionsResult[0]?.count || 0;
 		const totalTags = tagsResult[0]?.count || 0;
 
-		// Calcular tamaño de almacenamiento (estimado)
-		const totalEntities =
-			totalImages +
-			totalVideos +
-			totalAudio +
-			totalFolders +
-			totalAlbums +
-			totalCharacters +
-			totalCollections +
-			totalTags;
-		const storageUsed = totalEntities * 1024 * 100; // Estimación: 100KB por entidad
-		const storageAvailable = 1024 * 1024 * 1024; // 1GB simulado disponible
-		const dbSize = totalEntities * 512; // Estimación: 512 bytes por entidad
+		const dbSize = await getDatabaseSize();
+		const diskMetrics = await getDiskMetrics(process.cwd());
+		const storageUsed = diskMetrics?.used ?? dbSize;
+		const storageAvailable = diskMetrics?.available ?? 0;
 
 		systemLogger.info('✅ Estadísticas del sistema obtenidas');
 
@@ -409,10 +475,10 @@ export async function getSystemStats(): Promise<RuntimeSystemStats> {
 			storageUsed,
 			storageAvailable,
 			dbSize,
-			lastBackup: undefined, // TODO: Implementar sistema de backup
+			lastBackup: undefined,
 		} satisfies RuntimeSystemStats;
 	} catch (error) {
-		systemLogger.error('❌ Error al obtener estadísticas del sistema:', error);
+		systemLogger.error('❌ Could not get system statistics:', error);
 		throw createSystemError('No se pudieron obtener las estadísticas del sistema', 'STATS_FETCH_ERROR', error);
 	}
 }
@@ -445,15 +511,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 		const freeMem = os.freemem();
 		const memoryUsage = Math.round(((totalMem - freeMem) / totalMem) * 100);
 
-		// Obtener tamaño de caché (simulado con el directorio de Vite)
-		let cacheSize = 0;
-		try {
-			const viteCachePath = path.join(process.cwd(), '.vite');
-			const cacheStats = await fs.stat(viteCachePath).catch(() => ({ size: 0 }));
-			cacheSize = Math.round(cacheStats.size / (1024 * 1024)); // Convertir a MB
-		} catch (error) {
-			systemLogger.warn?.('⚠️ Error al obtener tamaño de caché:', error);
-		}
+		const cacheSize = await getCacheSize();
 
 		// Obtener estadísticas reales de la base de datos
 		const [
@@ -466,7 +524,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 			videosResult,
 			audiosResult,
 		] = await Promise.all([
-			db.select({ count: count() }).from(images),
+			db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition()),
 			db.select({ count: count() }).from(collections),
 			db.select({ count: count() }).from(tags),
 			db.select({ count: count() }).from(albums),
@@ -488,8 +546,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 		const totalEntities =
 			totalImages + totalCollections + totalTags + totalAlbums + totalNotes + totalFolders + totalVideos + totalAudio;
 
-		// Obtener tamaño de la base de datos (estimado basado en entidades)
-		const dbSize = totalEntities * 0.5; // Estimación: 500 bytes por entidad
+		const dbSize = Math.round((await getDatabaseSize()) / (1024 * 1024));
 
 		systemLogger.info('✅ Estadísticas de runtime del sistema obtenidas');
 
@@ -504,7 +561,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 			hostname: os.hostname(),
 		} satisfies SystemRuntimeStats;
 	} catch (error) {
-		systemLogger.error('❌ Error al obtener estadísticas de runtime del sistema:', error);
+		systemLogger.error('❌ Could not get statistics de runtime del sistema:', error);
 		throw createSystemError(
 			'No se pudieron obtener las estadísticas de runtime del sistema',
 			'STATS_FETCH_ERROR',
@@ -519,59 +576,44 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 export async function repairSystem(): Promise<SystemResponse> {
 	try {
 		systemLogger.info('🔧 Iniciando reparación del sistema');
+		const actions: string[] = [];
 
-		// 1. Limpiar caché de Vite (simulado)
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await fs.mkdir(path.join(process.cwd(), 'logs'), { recursive: true });
+		actions.push('directorio de logs verificado');
 
-		// 2. Verificar integridad de la base de datos (simulado)
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await fs.mkdir(path.join(process.cwd(), 'public', 'uploads'), { recursive: true });
+		actions.push('directorio de uploads verificado');
 
-		// 3. Optimizar índices (simulado)
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		const dbClient = getDbClient();
+		if (dbClient) {
+			const integrityResult = await dbClient.execute('PRAGMA integrity_check');
+			const integrityStatus = String(integrityResult.rows[0]?.[0] ?? 'unknown').toLowerCase();
 
-		// 4. Eliminar archivos temporales (simulado)
-		await new Promise((resolve) => setTimeout(resolve, 500));
+			if (integrityStatus !== 'ok') {
+				throw new Error(`La base de datos reportó un estado de integridad no válido: ${integrityStatus}`);
+			}
+
+			await dbClient.execute('PRAGMA optimize');
+			await dbClient.execute('PRAGMA wal_checkpoint(PASSIVE)');
+			actions.push('integridad SQLite verificada');
+			actions.push('optimizaciones PRAGMA ejecutadas');
+		} else {
+			actions.push('cliente SQL no disponible en este contexto');
+		}
 
 		systemLogger.info('✅ Sistema reparado correctamente');
 		return {
 			success: true,
-			message: 'Sistema reparado correctamente',
+			message: `Sistema verificado y optimizado: ${actions.join(', ')}`,
+			timestamp: new Date().toISOString(),
+			data: { actions },
 		};
 	} catch (error) {
 		systemLogger.error('❌ Error al reparar el sistema:', error);
 		return {
 			success: false,
 			message: error instanceof Error ? error.message : 'Error desconocido en la reparación del sistema',
-		};
-	}
-}
-
-/**
- * Resetea la base de datos (elimina todos los datos)
- * ¡PRECAUCIÓN! Esta acción es irreversible
- */
-export async function resetDatabase(): Promise<SystemResponse> {
-	try {
-		systemLogger.warn?.('⚠️ Iniciando reseteo de base de datos');
-
-		// Esta es una simulación, en producción implementaríamos el borrado real
-		// Aquí se implementaría la lógica para:
-		// 1. Hacer backup de seguridad
-		// 2. Truncar todas las tablas
-		// 3. Restaurar configuraciones mínimas
-
-		await new Promise((resolve) => setTimeout(resolve, 3000));
-
-		systemLogger.info('✅ Base de datos reseteada correctamente');
-		return {
-			success: true,
-			message: 'Base de datos reseteada correctamente',
-		};
-	} catch (error) {
-		systemLogger.error('❌ Error al resetear la base de datos:', error);
-		return {
-			success: false,
-			message: error instanceof Error ? error.message : 'Error desconocido al resetear la base de datos',
+			timestamp: new Date().toISOString(),
 		};
 	}
 }
@@ -586,11 +628,11 @@ export async function getSystemVersion(): Promise<{
 }> {
 	try {
 		systemLogger.info('📋 Obteniendo información de versión del sistema');
+		const packageMetadata = await getPackageMetadata();
 
-		// En una implementación real, esto leería del package.json o un archivo de build
 		return {
-			version: '1.0.0',
-			buildDate: new Date().toISOString(),
+			version: packageMetadata.version,
+			buildDate: packageMetadata.buildDate,
 			environment: process.env.NODE_ENV || 'development',
 		};
 	} catch (error) {
@@ -603,16 +645,16 @@ export async function getSystemVersion(): Promise<{
  * Respuesta estándar para operaciones de configuración
  */
 export interface SettingsResponse {
-	success: boolean;
-	message: string;
 	data?: Settings;
+	message: string;
+	success: boolean;
 }
 
 /**
  * Obtiene la configuración global del sistema
  */
 export async function getSystemSettings(): Promise<Settings> {
-	settingsLogger.debug?.('📤 Action: Obteniendo configuración global del sistema');
+	settingsLogger.debug('📤 Action: Obteniendo configuración global del sistema');
 
 	try {
 		return await settingsService.getSystemSettings();
@@ -629,7 +671,7 @@ export async function getSystemSettings(): Promise<Settings> {
  * Actualiza la configuración global del sistema
  */
 export async function updateSystemSettings(data: Partial<Settings>): Promise<Settings> {
-	settingsLogger.debug?.('📥 Action: Actualizando configuración global del sistema', { data });
+	settingsLogger.debug('📥 Action: Actualizando configuración global del sistema', { data });
 
 	try {
 		return await settingsService.updateSystemSettings(data);
@@ -646,7 +688,7 @@ export async function updateSystemSettings(data: Partial<Settings>): Promise<Set
  * Resetea la configuración global a valores predeterminados
  */
 export async function resetSystemSettings(): Promise<Settings> {
-	settingsLogger.debug?.('🔄 Action: Reseteando configuración global a valores predeterminados');
+	settingsLogger.debug('🔄 Action: Reseteando configuración global a valores predeterminados');
 
 	try {
 		return await settingsService.resetSystemSettings();
@@ -663,7 +705,7 @@ export async function resetSystemSettings(): Promise<Settings> {
  * Obtiene la configuración de un perfil específico
  */
 export async function getProfileSettings(profileId: string): Promise<Settings | null> {
-	settingsLogger.debug?.(`📤 Action: Obteniendo configuración del perfil: ${profileId}`);
+	settingsLogger.debug(`📤 Action: Obteniendo configuración del perfil: ${profileId}`);
 
 	try {
 		return await settingsService.getProfileSettings(profileId);
@@ -680,7 +722,7 @@ export async function getProfileSettings(profileId: string): Promise<Settings | 
  * Actualiza la configuración de un perfil específico
  */
 export async function updateProfileSettings(profileId: string, data: Partial<Settings>): Promise<Settings> {
-	settingsLogger.debug?.(`📥 Action: Actualizando configuración del perfil: ${profileId}`, { data });
+	settingsLogger.debug(`📥 Action: Actualizando configuración del perfil: ${profileId}`, { data });
 
 	try {
 		return await settingsService.updateProfileSettings(profileId, data);
@@ -697,7 +739,7 @@ export async function updateProfileSettings(profileId: string, data: Partial<Set
  * Resetea la configuración de un perfil a los valores globales
  */
 export async function resetProfileSettings(profileId: string): Promise<void> {
-	settingsLogger.debug?.(`🔄 Action: Reseteando configuración del perfil: ${profileId}`);
+	settingsLogger.debug(`🔄 Action: Reseteando configuración del perfil: ${profileId}`);
 
 	try {
 		return await settingsService.resetProfileSettings(profileId);
@@ -722,7 +764,7 @@ export async function createDefaultSettingsData(): Promise<Settings> {
 			appearance: {
 				theme: 'system',
 				fontSize: 16,
-				language: 'es',
+				language: 'en',
 				reducedAnimations: false,
 				highContrast: false,
 			},

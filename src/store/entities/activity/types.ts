@@ -3,7 +3,7 @@
  * @module store/entities/activity/types
  */
 
-import { ActivityCategory, ActivityComplete, ActivitySortCriteria } from '../../../types/entities/activity';
+import { ActivityCategory, ActivityComplete, ActivitySortCriteria } from '@/types/entities/activity';
 
 /**
  * Estado principal del store de actividades (estructura plana)
@@ -11,26 +11,26 @@ import { ActivityCategory, ActivityComplete, ActivitySortCriteria } from '../../
 export interface ActivityState {
 	// Datos principales
 	activities: Record<string, ActivityComplete>;
-	isLoading: boolean;
-	error: string | null;
-	lastUpdated: number | null;
-
-	// Estado UI
-	selectedIds: string[];
-	expandedIds: string[];
-	highlightedId: string | null;
-	detailActivityId: string | null;
-	isDetailModalOpen: boolean;
-	groupByDate: boolean;
-
-	// Estado de filtros
-	sortBy: ActivitySortCriteria;
-	searchQuery: string;
-	selectedCategories: ActivityCategory[];
-	onlyAlerts: boolean;
 	dateRange: {
 		from: Date | null;
 		to: Date | null;
 	};
+	detailActivityId: string | null;
+	error: string | null;
+	expandedIds: string[];
 	filterByImageId: string | null;
+	groupByDate: boolean;
+	highlightedId: string | null;
+	isDetailModalOpen: boolean;
+	isLoading: boolean;
+	lastUpdated: number | null;
+	onlyAlerts: boolean;
+	searchQuery: string;
+	selectedCategories: ActivityCategory[];
+
+	// Estado UI
+	selectedIds: string[];
+
+	// Estado de filtros
+	sortBy: ActivitySortCriteria;
 }

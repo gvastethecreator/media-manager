@@ -1,6 +1,75 @@
 {
-    "workbench.colorTheme": "Bearded Theme Black & Gold",
+    "workbench.colorTheme": "Bearded Theme Aquarelle Hydrangea",
     "editor.formatOnSave": true,
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "[typescript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
     "workbench.iconTheme": "flow-dark",
-    "terminal.integrated.smoothScrolling": true
+    "projectColors.mainColor": "#060609",
+    "window.title": "MEDIA MANAGER",
+    "workbench.colorCustomizations": {
+        "[Bearded Theme Black & Gold]": {},
+        "statusBarItem.warningBackground": "#060609",
+        "statusBarItem.warningForeground": "#ffffff",
+        "statusBarItem.warningHoverBackground": "#060609",
+        "statusBarItem.warningHoverForeground": "#ffffff90",
+        "statusBarItem.remoteBackground": "#131316",
+        "statusBarItem.remoteForeground": "#ffffff",
+        "statusBarItem.remoteHoverBackground": "#202023",
+        "statusBarItem.remoteHoverForeground": "#ffffff90",
+        "statusBar.background": "#060609",
+        "statusBar.foreground": "#ffffff",
+        "statusBar.border": "#060609",
+        "statusBar.debuggingBackground": "#060609",
+        "statusBar.debuggingForeground": "#ffffff",
+        "statusBar.debuggingBorder": "#060609",
+        "statusBar.noFolderBackground": "#060609",
+        "statusBar.noFolderForeground": "#ffffff",
+        "statusBar.noFolderBorder": "#060609",
+        "statusBar.prominentBackground": "#060609",
+        "statusBar.prominentForeground": "#ffffff",
+        "statusBar.prominentHoverBackground": "#060609",
+        "statusBar.prominentHoverForeground": "#ffffff90",
+        "focusBorder": "#06060999",
+        "progressBar.background": "#060609",
+        "textLink.foreground": "#464649",
+        "textLink.activeForeground": "#535356",
+        "selection.background": "#000000",
+        "list.highlightForeground": "#060609",
+        "list.focusAndSelectionOutline": "#06060999",
+        "button.background": "#060609",
+        "button.foreground": "#ffffff",
+        "button.hoverBackground": "#131316",
+        "tab.activeBorderTop": "#131316",
+        "pickerGroup.foreground": "#131316",
+        "list.activeSelectionBackground": "#0606094d",
+        "panelTitle.activeBorder": "#131316",
+        "activityBar.activeBorder": "#060609",
+        "activityBarBadge.foreground": "#ffffff",
+        "activityBarBadge.background": "#060609",
+        "titleBar.activeBackground": "#060609",
+        "titleBar.activeForeground": "#ffffff",
+        "titleBar.inactiveBackground": "#060609",
+        "titleBar.inactiveForeground": "#ffffff90"
+    },
+    "projectColors.name": "MEDIA MANAGER",
+    "projectColors.isActivityBarColored": false,
+    "projectColors.isTitleBarColored": true,
+    "projectColors.isStatusBarColored": true,
+    "projectColors.isProjectNameColored": true,
+    "projectColors.isActiveItemsColored": true,
+    "projectColors.setWindowTitle": true
 }

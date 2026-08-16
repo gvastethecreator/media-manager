@@ -5,35 +5,40 @@ Sistema completo de visualización de archivos que soporta múltiples tipos de e
 ## Componentes Implementados
 
 ### 1. MultiEntityViewer
+
 **Archivo:** `multi-entity-viewer.tsx`
 
 Viewer principal que determina automáticamente qué viewer específico usar basado en el tipo de entidad.
 
 **Características:**
+
 - Soporte para múltiples tipos de entidades
 - Navegación con teclado (flechas, ESC)
 - Transiciones suaves entre viewers
 - Integración con el sistema de tipos EntityStatsType
 
 **Uso:**
+
 ```tsx
 import { MultiEntityViewer } from '@/components/features/file-viewer/multi-entity-viewer';
 
 <MultiEntityViewer
-  entities={entities}
-  currentIndex={currentIndex}
-  isOpen={isOpen}
-  onClose={onClose}
-  onIndexChange={onIndexChange}
-/>
+	entities={entities}
+	currentIndex={currentIndex}
+	isOpen={isOpen}
+	onClose={onClose}
+	onIndexChange={onIndexChange}
+/>;
 ```
 
 ### 2. VideoViewer
+
 **Archivo:** `viewers/video-viewer.tsx`
 
 Viewer especializado para archivos de video.
 
 **Características:**
+
 - Controles de reproducción (play/pause, seek, volumen)
 - Pantalla completa
 - Información de metadatos (duración, resolución, codec)
@@ -41,11 +46,13 @@ Viewer especializado para archivos de video.
 - Descarga de archivos
 
 ### 3. AudioViewer
+
 **Archivo:** `viewers/audio-viewer.tsx`
 
 Viewer especializado para archivos de audio.
 
 **Características:**
+
 - Controles de reproducción de audio
 - Visualización de forma de onda (placeholder)
 - Información de metadatos (artista, álbum, duración, bitrate)
@@ -53,11 +60,13 @@ Viewer especializado para archivos de audio.
 - Controles de volumen
 
 ### 4. DocumentViewer
+
 **Archivo:** `viewers/document-viewer.tsx`
 
 Viewer para documentos PDF y archivos de texto.
 
 **Características:**
+
 - Vista previa de PDFs con iframe
 - Navegación por páginas
 - Controles de zoom y rotación
@@ -66,11 +75,13 @@ Viewer para documentos PDF y archivos de texto.
 - Información de metadatos (páginas, palabras, autor)
 
 ### 5. GenericFileViewer
+
 **Archivo:** `viewers/generic-file-viewer.tsx`
 
 Viewer genérico para tipos de archivo no específicos.
 
 **Características:**
+
 - Categorización automática de archivos
 - Vista previa de contenido para archivos de texto pequeños
 - Iconos específicos por tipo de archivo
@@ -80,23 +91,28 @@ Viewer genérico para tipos de archivo no específicos.
 ## Tipos de Archivo Soportados
 
 ### Imágenes
+
 - Usa el `FileViewer` existente
 - Formatos: JPG, PNG, GIF, WebP, SVG, etc.
 
 ### Videos
+
 - Formatos: MP4, WebM, AVI, MOV, etc.
 - Controles nativos del navegador
 
 ### Audio
+
 - Formatos: MP3, WAV, FLAC, AAC, OGG, etc.
 - Controles de audio personalizados
 
 ### Documentos
+
 - PDFs: Vista previa con iframe
 - Texto: TXT, MD, JSON, XML, CSV
 - Office: DOC, DOCX, XLS, XLSX, PPT, PPTX (descarga/apertura externa)
 
 ### Archivos Genéricos
+
 - Código: JS, TS, Python, Java, etc.
 - Comprimidos: ZIP, RAR, 7Z, etc.
 - Datos: JSON, XML, CSV, SQL, etc.
@@ -124,6 +140,7 @@ switch (entity.type) {
 ## Navegación y Controles
 
 ### Teclado
+
 - `←` / `→`: Navegar entre archivos
 - `ESC`: Cerrar viewer
 - `Space`: Play/Pause (video/audio)
@@ -131,6 +148,7 @@ switch (entity.type) {
 - `R`: Reset view (imágenes)
 
 ### Mouse
+
 - Click fuera del contenido: Cerrar
 - Rueda del mouse: Zoom (donde aplique)
 - Doble click: Reset view (imágenes)

@@ -197,7 +197,7 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 	{
 		id: 'quick-view',
 		icon: 'Eye',
-		tooltip: 'Vista rápida',
+		tooltip: 'Quick view',
 		action: () => {
 			// noop: se configurará desde la UI
 		},
@@ -207,7 +207,7 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 	{
 		id: 'favorite',
 		icon: 'Heart',
-		tooltip: 'Agregar a favoritos',
+		tooltip: 'Add to favorites',
 		action: () => {
 			// noop: se configurará desde la UI
 		},
@@ -227,7 +227,7 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 	{
 		id: 'download',
 		icon: 'Download',
-		tooltip: 'Descargar',
+		tooltip: 'Download',
 		action: () => {
 			// noop: se configurará desde la UI
 		},

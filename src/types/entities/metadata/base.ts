@@ -10,18 +10,18 @@
  * 🗿 Modelo base de Metadata, derivado del schema de Drizzle.
  */
 export interface MetadataBase {
-	id: string;
-	format: string;
-	width: number;
-	height: number;
-	size: number;
 	colorSpace: string | null;
-	hasAlpha: boolean;
 	compressionRatio: number | null;
-	orientation: string | null;
-	dpi: number | null;
 	createdAt: Date;
+	dpi: number | null;
+	format: string;
+	hasAlpha: boolean;
+	height: number;
+	id: string;
+	orientation: string | null;
+	size: number;
 	updatedAt: Date;
+	width: number;
 }
 
 import { EntityStats } from '../entity.types';
@@ -31,10 +31,10 @@ import { EntityStats } from '../entity.types';
  */
 export interface MetadataStatistics extends EntityStats {
 	aspectRatio: number; // Ratio width/height
-	resolution: number; // width * height
-	qualityScore: number; // Score de calidad basado en resolución y propiedades
 	compressionEfficiency: number; // Eficiencia de compresión
 	fileComplexity: number; // Complejidad basada en formato y propiedades
+	qualityScore: number; // Score de calidad basado en resolución y propiedades
+	resolution: number; // width * height
 }
 
 /**
@@ -49,30 +49,30 @@ export interface MetadataWithStats extends MetadataBase {
  * 📝 Datos para crear un Metadata
  */
 export interface MetadataCreateInput {
-	format: string;
-	width: number;
-	height: number;
-	size: number;
 	colorSpace?: string | null;
-	hasAlpha?: boolean;
 	compressionRatio?: number | null;
-	orientation?: string | null;
 	dpi?: number | null;
+	format: string;
+	hasAlpha?: boolean;
+	height: number;
+	orientation?: string | null;
+	size: number;
+	width: number;
 }
 
 /**
  * 📝 Datos para actualizar un Metadata
  */
 export interface MetadataUpdateInput {
-	format?: string;
-	width?: number;
-	height?: number;
-	size?: number;
 	colorSpace?: string | null;
-	hasAlpha?: boolean;
 	compressionRatio?: number | null;
-	orientation?: string | null;
 	dpi?: number | null;
+	format?: string;
+	hasAlpha?: boolean;
+	height?: number;
+	orientation?: string | null;
+	size?: number;
+	width?: number;
 }
 
 // ----------------------------------------------------------------

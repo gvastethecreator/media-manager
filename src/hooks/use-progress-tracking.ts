@@ -10,45 +10,45 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { OperationType, ProgressInfo, ProgressOperation } from '@/types/file-browser/progress-tracking';
 
 export interface UseProgressTrackingOptions {
-	/** Whether to automatically track all operations */
-	trackAll?: boolean;
-	/** Specific operation types to track */
-	operationTypes?: OperationType[];
-	/** Callback when any operation starts */
-	onOperationStart?: (operation: ProgressOperation) => void;
+	/** Callback when any operation is cancelled */
+	onOperationCancelled?: (operation: ProgressOperation) => void;
 	/** Callback when any operation completes */
 	onOperationComplete?: (operation: ProgressOperation) => void;
 	/** Callback when any operation fails */
 	onOperationFailed?: (operation: ProgressOperation, error: string) => void;
-	/** Callback when any operation is cancelled */
-	onOperationCancelled?: (operation: ProgressOperation) => void;
+	/** Callback when any operation starts */
+	onOperationStart?: (operation: ProgressOperation) => void;
+	/** Specific operation types to track */
+	operationTypes?: OperationType[];
+	/** Whether to automatically track all operations */
+	trackAll?: boolean;
 }
 
 export interface UseProgressTrackingReturn {
-	/** All active operations */
-	operations: ProgressOperation[];
-	/** Whether any operations are running */
-	hasActiveOperations: boolean;
-	/** Start a new operation */
-	startOperation: (type: OperationType, options: Partial<ProgressOperation>) => string;
-	/** Update operation progress */
-	updateProgress: (operationId: string, progress: ProgressInfo, stepId?: string) => void;
+	/** Cancel an operation */
+	cancelOperation: (operationId: string) => void;
+	/** Clear completed operations */
+	clearCompleted: () => void;
 	/** Complete an operation */
 	completeOperation: (operationId: string) => void;
 	/** Fail an operation */
 	failOperation: (operationId: string, error: string) => void;
-	/** Cancel an operation */
-	cancelOperation: (operationId: string) => void;
 	/** Get specific operation by ID */
 	getOperation: (operationId: string) => ProgressOperation | undefined;
-	/** Clear completed operations */
-	clearCompleted: () => void;
+	/** Whether any operations are running */
+	hasActiveOperations: boolean;
+	/** All active operations */
+	operations: ProgressOperation[];
+	/** Start a new operation */
+	startOperation: (type: OperationType, options: Partial<ProgressOperation>) => string;
+	/** Update operation progress */
+	updateProgress: (operationId: string, progress: ProgressInfo, stepId?: string) => void;
 }
 
 // Internal service simulation
 class ProgressTrackingServiceImpl {
-	private operations = new Map<string, ProgressOperation>();
-	private eventListeners = new Map<string, ((operation: ProgressOperation) => void)[]>();
+	private readonly operations = new Map<string, ProgressOperation>();
+	private readonly eventListeners = new Map<string, ((operation: ProgressOperation) => void)[]>();
 
 	generateId(): string {
 		return `op_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;

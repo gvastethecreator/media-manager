@@ -20,7 +20,6 @@ export const PlaceCreateSchema = z.object({
 	country: z.string().max(100).optional(),
 	region: z.string().max(100).optional(),
 	city: z.string().max(100).optional(),
-	isFavorite: z.boolean().default(false),
 });
 
 export const PlaceUpdateSchema = z.object({
@@ -37,7 +36,6 @@ export const PlaceUpdateSchema = z.object({
 	country: z.string().max(100).optional(),
 	region: z.string().max(100).optional(),
 	city: z.string().max(100).optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 export const PlaceSchema = z.object({
