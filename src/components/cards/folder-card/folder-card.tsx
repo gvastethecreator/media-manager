@@ -1,4 +1,6 @@
 import { memo, useCallback, useMemo } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { normalizeSafePreviewImageUrl } from '@/lib/media/preview-url';
 import { cn } from '@/lib/utils';
 import type { FolderWithStats } from '@/types/entities/folder';
 import { FolderCardContent } from './folder-card-content';
@@ -7,11 +9,11 @@ import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
 
 export interface FolderCardProps {
-	folder: FolderWithStats;
-	onClick?: () => void;
-	href?: string;
 	className?: string;
+	folder: FolderWithStats;
+	href?: string;
 	interactive?: boolean;
+	onClick?: () => void;
 	tcgMode?: boolean;
 }
 
@@ -22,7 +24,7 @@ export const FolderCard = memo(
 			const isWithStats = 'stats' in folder;
 
 			// Debug deshabilitado para limpiar consola
-			// console.log('🔍 FolderCard Debug:', {
+			// clientLogger.debug('🔍 FolderCard Debug:', {
 			//   folderName: folder.name,
 			//   totalFiles: folder.totalFiles,
 			//   totalSize: folder.totalSize,
@@ -40,21 +42,12 @@ export const FolderCard = memo(
 				},
 				totalFiles: folder.stats?.totalItems ?? folder.totalFiles ?? 0,
 				totalSize: folder.stats?.totalSize ?? folder.totalSize ?? 0,
-				// Normalizamos thumbnails: aceptar `thumbnailUrl` (que puede venir con base64 crudo)
-				// o `thumbnail` y convertir a data URL si es necesario
+				featuredImage: normalizeSafePreviewImageUrl(folder.featuredImage),
+				// Sólo se cargan previews locales autorizados o datos ráster; los enlaces heredados quedan fuera del browser.
 				recentImageUrls: (folder.recentImages || [])
-					.map((img: any) => {
-						const raw: unknown = img?.thumbnailUrl ?? img?.thumbnail ?? null;
-						if (typeof raw !== 'string' || raw.length === 0) return null;
-						const trimmed = raw.trim();
-						// Si ya es data URL, devolver tal cual
-						if (trimmed.startsWith('data:')) return trimmed;
-						// Si parece una URL/route (http(s), blob:, file:, /), dejarla como está
-						if (/^(https?:|blob:|file:|\/)/i.test(trimmed)) return trimmed;
-						// Caso contrario, asumimos base64 crudo (posible con saltos de línea) → data URL webp
-						const base64 = trimmed.replace(/\s+/g, '');
-						return `data:image/webp;base64,${base64}`;
-					})
+					.map((image: { thumbnail?: unknown; thumbnailUrl?: unknown }) =>
+						normalizeSafePreviewImageUrl(image.thumbnailUrl ?? image.thumbnail)
+					)
 					.filter(Boolean) as string[],
 				childrenCount: folder.stats?.folderCount ?? 0,
 				lastIndexed: folder.lastIndexed ?? null,
@@ -62,8 +55,11 @@ export const FolderCard = memo(
 		}, [folder]);
 
 		// Colores para personalización
-		const primaryColor = useMemo(() => folderData.color || '#3b82f6', [folderData.color]);
-		const secondaryColor = useMemo(() => (primaryColor === '#3b82f6' ? '#1d4ed8' : primaryColor), [primaryColor]);
+		const primaryColor = useMemo(() => folderData.color || 'var(--entity-folder)', [folderData.color]);
+		const secondaryColor = useMemo(
+			() => (primaryColor === 'var(--entity-folder)' ? 'var(--dt-primary-600)' : primaryColor),
+			[primaryColor]
+		);
 
 		// Manejador de clicks para la tarjeta
 		const handleCardClick = useCallback(() => {
@@ -74,7 +70,7 @@ export const FolderCard = memo(
 
 		// Validar que el objeto folder exista
 		if (!folder) {
-			console.error('FolderCard recibió un objeto folder inválido');
+			clientLogger.error('FolderCard received an invalid folder object');
 			return null;
 		}
 
@@ -82,15 +78,15 @@ export const FolderCard = memo(
 		const cardContent = (
 			<div
 				className={cn(
-					'group relative flex h-full flex-col overflow-hidden rounded-md transition-all duration-300',
-					tcgMode ? 'border border-white/10 bg-gradient-to-b from-gray-900 to-black shadow-lg' : 'bg-card shadow',
+					'group relative flex h-full flex-col overflow-hidden rounded-md ui-motion-standard',
+					tcgMode ? 'border border-border/40 bg-linear-to-b from-gray-900 to-black shadow-lg' : 'bg-card shadow',
 					interactive && 'cursor-pointer hover:shadow-md',
 					className
 				)}
 				style={
 					tcgMode
 						? {
-								boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
+								boxShadow: `0 10px 15px -3px color-mix(in oklab, ${primaryColor}, transparent 80%), 0 4px 6px -4px color-mix(in oklab, ${primaryColor}, transparent 70%)`,
 							}
 						: {}
 				}
@@ -98,9 +94,9 @@ export const FolderCard = memo(
 				{/* Borde brillante para TCG mode */}
 				{tcgMode && (
 					<div
-						className="pointer-events-none absolute inset-0 rounded-md opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+						className="ui-overlay-group-glow rounded-md"
 						style={{
-							boxShadow: `inset 0 0 0 1px ${primaryColor}50, 0 0 15px ${primaryColor}30`,
+							boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${primaryColor}, transparent 50%), 0 0 15px color-mix(in oklab, ${primaryColor}, transparent 70%)`,
 							zIndex: 20,
 						}}
 					/>
@@ -117,6 +113,8 @@ export const FolderCard = memo(
 				{/* Sección de imágenes */}
 				<FolderCardImages
 					featuredImage={folderData.featuredImage}
+					folderName={folderData.name}
+					previewUrl={`/api/folders/${encodeURIComponent(folderData.id)}/preview?max=4&layout=grid&v=${encodeURIComponent(String(folderData.updatedAt ?? folderData.lastIndexed ?? folderData.totalFiles ?? '1'))}`}
 					primaryColor={primaryColor}
 					recentImages={folderData.recentImageUrls}
 					secondaryColor={secondaryColor}
@@ -146,7 +144,7 @@ export const FolderCard = memo(
 				>
 					{tcgMode && (
 						<div className="flex items-center">
-							<span className="text-white/60 text-xs">
+							<span className="text-sm text-white/60">
 								{folderData.updatedAt ? new Date(folderData.updatedAt).toLocaleDateString() : ''}
 							</span>
 						</div>
@@ -157,9 +155,9 @@ export const FolderCard = memo(
 					<>
 						{/* Textura de fondo sutil */}
 						<div
-							className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+							className="ui-overlay-group-glow"
 							style={{
-								background: `radial-gradient(circle at 50% 50%, ${primaryColor}10 0%, transparent 70%)`,
+								background: `radial-gradient(circle at 50% 50%, color-mix(in oklab, ${primaryColor}, transparent 90%) 0%, transparent 70%)`,
 								zIndex: 1,
 							}}
 						/>
@@ -167,19 +165,19 @@ export const FolderCard = memo(
 						{/* Esquinas decorativas TCG */}
 						<div
 							className="pointer-events-none absolute top-0 left-0 h-6 w-6 rounded-br-sm border-t-2 border-l-2 opacity-60"
-							style={{ borderColor: `${primaryColor}80` }}
+							style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 20%)` }}
 						/>
 						<div
 							className="pointer-events-none absolute top-0 right-0 h-6 w-6 rounded-bl-sm border-t-2 border-r-2 opacity-60"
-							style={{ borderColor: `${primaryColor}80` }}
+							style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 20%)` }}
 						/>
 						<div
 							className="pointer-events-none absolute bottom-0 left-0 h-6 w-6 rounded-tr-sm border-b-2 border-l-2 opacity-60"
-							style={{ borderColor: `${primaryColor}80` }}
+							style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 20%)` }}
 						/>
 						<div
 							className="pointer-events-none absolute right-0 bottom-0 h-6 w-6 rounded-tl-sm border-r-2 border-b-2 opacity-60"
-							style={{ borderColor: `${primaryColor}80` }}
+							style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 20%)` }}
 						/>
 					</>
 				)}
@@ -237,7 +235,9 @@ export const FolderCard = memo(
 		if (prevFolder.featuredImage !== nextFolder.featuredImage) return false;
 		if (prevFolder.totalFiles !== nextFolder.totalFiles) return false;
 		if (prevFolder.totalSize !== nextFolder.totalSize) return false;
-		if (prevFolder.lastIndexed?.getTime() !== nextFolder.lastIndexed?.getTime()) return false;
+		const prevTime = prevFolder.lastIndexed instanceof Date ? prevFolder.lastIndexed.getTime() : 0;
+		const nextTime = nextFolder.lastIndexed instanceof Date ? nextFolder.lastIndexed.getTime() : 0;
+		if (prevTime !== nextTime) return false;
 
 		// Compare stats object
 		if (prevFolder.stats?.totalItems !== nextFolder.stats?.totalItems) return false;

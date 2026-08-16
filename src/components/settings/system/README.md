@@ -66,12 +66,12 @@ El componente utiliza server actions para operaciones que requieren acceso direc
 import { SystemSettings } from '@/components/settings/system/system-settings';
 
 export default function SystemPage() {
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-xl font-bold mb-4">Configuración del Sistema</h1>
-      <SystemSettings />
-    </div>
-  );
+	return (
+		<div className="container mx-auto p-4">
+			<h1 className="text-xl font-bold mb-4">Configuración del Sistema</h1>
+			<SystemSettings />
+		</div>
+	);
 }
 ```
 

@@ -2,15 +2,15 @@ import { Heart, Shield, Sparkles, Sword, Wand } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CharacterCardHeaderProps {
-	name: string;
-	emoji: string | null;
-	color: string;
-	isFavorite?: boolean;
 	class?: string | null;
+	color: string;
+	compact?: boolean;
+	emoji: string | null;
+	isFavorite?: boolean;
 	level?: number | null;
+	name: string;
 	race?: string | null;
 	tcgMode?: boolean;
-	compact?: boolean;
 }
 
 export function CharacterCardHeader({
@@ -27,28 +27,28 @@ export function CharacterCardHeader({
 	const classIcon = () => {
 		const lowerCaseClass = characterClass?.toLowerCase();
 		if (lowerCaseClass?.includes('warrior')) {
-			return <Sword className="h-3.5 w-3.5" />;
+			return <Sword className="h-4 w-4" />;
 		}
 		if (lowerCaseClass?.includes('mage')) {
-			return <Wand className="h-3.5 w-3.5" />;
+			return <Wand className="h-4 w-4" />;
 		}
 		if (lowerCaseClass?.includes('tank')) {
-			return <Shield className="h-3.5 w-3.5" />;
+			return <Shield className="h-4 w-4" />;
 		}
 		return null;
 	};
 
 	if (compact) {
 		return (
-			<div className="flex items-center gap-2 rounded-t-lg bg-gray-800/50 p-2">
+			<div className="flex items-center gap-2 rounded-t-lg bg-muted/50 p-2">
 				<span className="text-lg">{emoji}</span>
 				<div className="flex-1 truncate">
-					<h3 className="truncate font-bold text-sm text-white">{name}</h3>
-					<p className="truncate text-gray-300 text-xs">
+					<h3 className="truncate font-bold text-base text-foreground">{name}</h3>
+					<p className="truncate text-muted-foreground text-sm">
 						{characterClass ?? 'Unknown'} • Lvl {level ?? '?'}
 					</p>
 				</div>
-				{isFavorite && <Heart className="h-4 w-4 flex-shrink-0 fill-current text-red-500" />}
+				{isFavorite && <Heart className="h-4 w-4 shrink-0 fill-current text-destructive" />}
 			</div>
 		);
 	}
@@ -58,7 +58,7 @@ export function CharacterCardHeader({
 			<div
 				className="relative flex h-16 items-center overflow-hidden px-3.5 pt-2.5"
 				style={{
-					background: `linear-gradient(90deg, ${color}95, ${color}70)`,
+					background: `linear-gradient(90deg, color-mix(in oklab, ${color}, transparent 5%), color-mix(in oklab, ${color}, transparent 30%))`,
 					borderBottom: `2px solid ${color}`,
 				}}
 			>
@@ -66,9 +66,9 @@ export function CharacterCardHeader({
 					className="absolute inset-0 opacity-20"
 					style={{
 						backgroundImage:
-							'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), ' +
-							'radial-gradient(circle at 80% 50%, white 1px, transparent 1px), ' +
-							'radial-gradient(circle at 50% 20%, white 1px, transparent 1px)',
+							'radial-gradient(circle at 20% 50%, rgba(var(--effect-highlight-rgb), 1) 1px, transparent 1px), ' +
+							'radial-gradient(circle at 80% 50%, rgba(var(--effect-highlight-rgb), 1) 1px, transparent 1px), ' +
+							'radial-gradient(circle at 50% 20%, rgba(var(--effect-highlight-rgb), 1) 1px, transparent 1px)',
 						backgroundSize: '20px 20px, 20px 20px, 30px 30px',
 					}}
 				/>
@@ -83,31 +83,31 @@ export function CharacterCardHeader({
 				<div className="relative z-10 flex flex-1 items-center space-x-2">
 					<div
 						className={cn(
-							'relative flex flex-shrink-0 items-center justify-center rounded-full text-xl',
+							'relative flex shrink-0 items-center justify-center rounded-full text-xl',
 							tcgMode ? 'h-10 w-10' : 'h-8 w-8'
 						)}
 						style={{
-							background: `radial-gradient(circle, ${color}30 0%, ${color}60 100%)`,
-							boxShadow: `0 0 8px rgba(0,0,0,0.4), inset 0 0 5px ${color}`,
+							background: `radial-gradient(circle, color-mix(in oklab, ${color}, transparent 70%) 0%, color-mix(in oklab, ${color}, transparent 40%) 100%)`,
+							boxShadow: `0 0 8px rgba(var(--effect-shadow-rgb), 0.4), inset 0 0 5px ${color}`,
 						}}
 					>
 						<div className="absolute inset-0 overflow-hidden rounded-full">
 							<div
 								className="absolute top-0 left-1/4 h-1/3 w-1/2 blur-[1px]"
 								style={{
-									background: 'linear-gradient(to bottom, rgba(255,255,255,0.7), transparent)',
+									background: 'linear-gradient(to bottom, rgba(var(--effect-highlight-rgb), 0.7), transparent)',
 								}}
 							/>
 						</div>
-						<div className="absolute inset-0 rounded-full border-2 border-white/20" />
+						<div className="absolute inset-0 rounded-full border-2 border-border/60" />
 						<span className="relative z-10 drop-shadow-sm">{emoji}</span>
 					</div>
 					<div className="flex flex-col">
 						<h3 className={cn('truncate font-bold text-lg tracking-tight', 'text-white drop-shadow-md')}>
 							{name}
-							{isFavorite && <Sparkles className="-mt-1 ml-1 inline h-4 w-4 text-yellow-200" />}
+							{isFavorite && <Sparkles className="-mt-1 ml-1 inline h-4 w-4 text-dt-warning-400" />}
 						</h3>
-						<div className="flex items-center gap-1 text-white/80 text-xs">
+						<div className="flex items-center gap-1 text-sm text-white/80">
 							{classIcon()}
 							<span className="truncate">
 								{characterClass ?? 'Unknown'}
@@ -116,13 +116,14 @@ export function CharacterCardHeader({
 						</div>
 					</div>
 				</div>
-				<div className="relative z-10 flex flex-shrink-0 items-center gap-1">
+				<div className="relative z-10 flex shrink-0 items-center gap-1">
 					{isFavorite && (
 						<span
 							className="flex items-center justify-center rounded-full px-2 py-0.5"
 							style={{
-								background: 'rgba(255, 255, 255, 0.3)',
-								boxShadow: '0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 3px rgba(255, 255, 255, 0.5)',
+								background: 'rgba(var(--effect-highlight-rgb), 0.3)',
+								boxShadow:
+									'0 0 10px rgba(var(--effect-highlight-rgb), 0.5), inset 0 0 3px rgba(var(--effect-highlight-rgb), 0.5)',
 							}}
 						>
 							<Heart className="h-4 w-4 fill-white text-white" />
@@ -131,8 +132,8 @@ export function CharacterCardHeader({
 					<div
 						className="flex h-8 w-8 items-center justify-center rounded-full font-bold text-white"
 						style={{
-							background: `radial-gradient(circle, ${color} 0%, ${color}90 100%)`,
-							boxShadow: `0 0 8px rgba(0,0,0,0.4), inset 0 0 5px ${color}60`,
+							background: `radial-gradient(circle, ${color} 0%, color-mix(in oklab, ${color}, transparent 10%) 100%)`,
+							boxShadow: `0 0 8px rgba(var(--effect-shadow-rgb), 0.4), inset 0 0 5px color-mix(in oklab, ${color}, transparent 40%)`,
 						}}
 					>
 						{level ?? '?'}
@@ -140,27 +141,28 @@ export function CharacterCardHeader({
 				</div>
 				<div
 					className="absolute top-0 left-0 h-5 w-5 rounded-br-sm border-t-2 border-l-2"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 				<div
 					className="absolute top-0 right-0 h-5 w-5 rounded-bl-sm border-t-2 border-r-2"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 			</div>
 			<div
-				className="relative flex items-center justify-between px-3.5 py-1.5 text-white text-xs"
+				className="relative flex items-center justify-between px-3.5 py-1.5 text-sm text-white"
 				style={{
-					borderBottom: `2px solid ${color}70`,
-					background: 'linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.5))',
+					borderBottom: `2px solid color-mix(in oklab, ${color}, transparent 30%)`,
+					background:
+						'linear-gradient(to right, rgba(var(--effect-shadow-rgb), 0.6), rgba(var(--effect-shadow-rgb), 0.5))',
 				}}
 			>
 				<div
 					className="absolute top-0 left-0 h-4 w-4 border-t border-l"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 				<div
 					className="absolute top-0 right-0 h-4 w-4 border-t border-r"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 				<span className="ml-1 flex items-center gap-1 font-semibold tracking-wide">
 					{(characterClass ?? 'Unknown').toUpperCase()} • {(race ?? 'Unknown').toUpperCase()}
@@ -170,9 +172,9 @@ export function CharacterCardHeader({
 						const starValue = `${name}-star-${i + 1}`;
 						return (
 							<div
-								className="h-3 w-3 rounded-full bg-yellow-300"
+								className="h-4 w-4 rounded-full bg-dt-warning-400"
 								key={starValue}
-								style={{ boxShadow: '0 0 3px rgba(255, 255, 255, 0.7)' }}
+								style={{ boxShadow: '0 0 3px rgba(var(--effect-highlight-rgb), 0.7)' }}
 							/>
 						);
 					})}

@@ -22,9 +22,9 @@ import { cn, formatFileSize } from '@/lib/utils';
 import { useImageStore } from '@/store/entities/image';
 
 interface FolderStatsDisplayProps {
+	className?: string;
 	folderId: string;
 	folderName?: string;
-	className?: string;
 }
 
 const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
@@ -58,26 +58,22 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 
 	if (isLoading) {
 		return (
-			<div className={cn('flex items-center justify-center p-2', className)}>
-				<div className="flex flex-col items-center gap-2">
-					<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-					<p className="text-muted-foreground text-sm">Cargando estadísticas...</p>
-				</div>
+			<div className={cn('flex flex-col items-center justify-center gap-3 p-6', className)}>
+				<Loader2 className="h-6 w-6 animate-spin text-primary" />
+				<p className="body-sm text-muted-foreground">Loading statistics...</p>
 			</div>
 		);
 	}
 
 	if (error) {
 		return (
-			<div className={cn('flex items-center justify-center p-2', className)}>
-				<div className="flex flex-col items-center gap-2 text-center">
-					<div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-						<Folder className="h-6 w-6 text-destructive" />
-					</div>
-					<div>
-						<p className="font-medium text-destructive text-sm">Error al cargar estadísticas</p>
-						<p className="text-muted-foreground text-xs">No se pudieron obtener los datos de la carpeta</p>
-					</div>
+			<div className={cn('flex flex-col items-center justify-center gap-3 p-6', className)}>
+				<div className="flex h-12 w-12 items-center justify-center rounded-dt-md bg-destructive/10">
+					<Folder className="h-6 w-6 text-destructive" />
+				</div>
+				<div className="text-center">
+					<p className="heading-sm text-destructive">Could not load statistics</p>
+					<p className="caption">Folder data could not be loaded</p>
 				</div>
 			</div>
 		);
@@ -90,11 +86,21 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 	// Preparar estadísticas de tipos de archivo
 	const fileTypeStats = folderStats
 		? [
-				{ type: 'Imágenes', count: folderStats.totalImages, icon: ImageIcon, color: 'text-blue-500' },
-				{ type: 'Videos', count: folderStats.totalVideos, icon: Video, color: 'text-purple-500' },
-				{ type: 'Audio', count: folderStats.totalAudio, icon: Music, color: 'text-green-500' },
-				{ type: 'Documentos', count: folderStats.totalDocuments, icon: FileText, color: 'text-orange-500' },
-				{ type: 'Otros', count: folderStats.totalOthers, icon: File, color: 'text-gray-500' },
+				{
+					type: 'Images',
+					count: folderStats.totalImages,
+					icon: ImageIcon,
+					color: 'text-[color:var(--entity-image)]',
+				},
+				{ type: 'Videos', count: folderStats.totalVideos, icon: Video, color: 'text-[color:var(--entity-video)]' },
+				{ type: 'Audio', count: folderStats.totalAudio, icon: Music, color: 'text-[color:var(--entity-audio)]' },
+				{
+					type: 'Documentos',
+					count: folderStats.totalDocuments,
+					icon: FileText,
+					color: 'text-[color:var(--entity-document)]',
+				},
+				{ type: 'Otros', count: folderStats.totalOthers, icon: File, color: 'text-[color:var(--entity-file)]' },
 			].filter((stat) => stat.count > 0)
 		: [];
 
@@ -122,7 +128,9 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 				<div className="min-w-0 flex-1">
 					<div className="flex h-12 items-center gap-2">
 						<h1 className="truncate font-medium text-xl">{displayName}</h1>
-						{folderDetails?.isFavorite && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />}
+						{folderDetails?.isFavorite && (
+							<Star className="h-3 w-3 fill-[color:var(--entity-favorite)] text-[color:var(--entity-favorite)]" />
+						)}
 					</div>
 
 					{folderDetails?.color && (
@@ -145,7 +153,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 						{imageCount > 0 && (
 							<div className="mt-2">
 								<Progress className="h-1" value={100} />
-								<p className="mt-1 text-muted-foreground text-xs">Todas las imágenes cargadas</p>
+								<p className="mt-1 text-muted-foreground text-xs">All images loaded</p>
 							</div>
 						)}
 					</div>
@@ -197,12 +205,12 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 								);
 							})}
 
-							{/* Tamaño total */}
+							{/* Total size */}
 							{folderStats && folderStats.totalSize > 0 && (
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-2">
-										<Hash className="h-4 w-4 text-indigo-600" />
-										<span className="text-sm">Tamaño total</span>
+										<Hash className="h-4 w-4 text-[color:var(--entity-file)]" />
+										<span className="text-sm">Total size</span>
 									</div>
 									<Badge className="text-xs" variant="outline">
 										{formatFileSize(folderStats.totalSize)}
@@ -227,7 +235,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
 										<span className="flex items-center gap-1 text-muted-foreground text-xs">
 											<Folder className="h-3 w-3" />
-											Carpeta padre
+											Parent folder
 										</span>
 										<Badge className="font-mono text-xs" variant="secondary">
 											{folderDetails.parentId}
@@ -240,7 +248,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
 										<span className="flex items-center gap-1 text-muted-foreground text-xs">
 											<ImageIcon className="h-3 w-3" />
-											Imagen destacada
+											Featured image
 										</span>
 										<Badge className="font-mono text-xs" variant="secondary">
 											Configurada
@@ -261,7 +269,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 								{/* Total Files desde schema */}
 								{folderDetails.totalFiles !== null && folderDetails.totalFiles !== undefined && (
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
-										<span className="text-muted-foreground text-xs">Archivos (schema)</span>
+										<span className="text-muted-foreground text-xs">Files (schema)</span>
 										<Badge className="text-xs" variant="secondary">
 											{folderDetails.totalFiles}
 										</Badge>
@@ -273,7 +281,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									folderDetails.totalSize !== undefined &&
 									folderDetails.totalSize > 0 && (
 										<div className="flex items-center justify-between border-border/50 border-b py-2">
-											<span className="text-muted-foreground text-xs">Tamaño (schema)</span>
+											<span className="text-muted-foreground text-xs">Size (schema)</span>
 											<Badge className="text-xs" variant="secondary">
 												{formatFileSize(folderDetails.totalSize)}
 											</Badge>
@@ -285,7 +293,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
 										<span className="flex items-center gap-1 text-muted-foreground text-xs">
 											<Calendar className="h-3 w-3" />
-											Último indexado
+											Last indexed
 										</span>
 										<span className="font-mono text-xs">{formatDate(folderDetails.lastIndexed)}</span>
 									</div>
@@ -313,21 +321,21 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									</div>
 								)}
 
-								{/* Última actividad del backend */}
+								{/* Last activity del backend */}
 								{folderStats?.lastActivity && (
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
 										<span className="flex items-center gap-1 text-muted-foreground text-xs">
 											<Calendar className="h-3 w-3" />
-											Última actividad
+											Last activity
 										</span>
 										<span className="font-mono text-xs">{formatDate(folderStats.lastActivity)}</span>
 									</div>
 								)}
 
-								{/* Descripción si existe */}
+								{/* Description si existe */}
 								{folderDetails.description && (
 									<div className="py-2">
-										<p className="mb-1 text-muted-foreground text-xs">Descripción</p>
+										<p className="mb-1 text-muted-foreground text-xs">Description</p>
 										<p className="text-xs">{folderDetails.description}</p>
 									</div>
 								)}

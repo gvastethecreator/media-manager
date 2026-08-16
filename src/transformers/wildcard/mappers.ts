@@ -11,6 +11,7 @@ import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createDefaultEntityStats } from '@/lib/utils';
 import { calculateCompleteness } from '../../lib/utils/transformers/calculate-completeness';
+import { normalizeCounts } from '../common/counts';
 import type {
 	WildcardCreateInput,
 	WildcardStatistics,
@@ -30,31 +31,27 @@ const logger = serverLogger.withContext('WildcardMappers');
 export function toWildcardWithStats(wildcard: WildcardWithCounts): WildcardWithStats {
 	const { _count, ...rest } = wildcard;
 
+	const counts = normalizeCounts(_count);
+
 	const completenessFields = [rest.description, rest.category];
-	const relationCounts = [
-		_count?.images ?? 0,
-		_count?.notes ?? 0,
-		_count?.characters ?? 0,
-		_count?.places ?? 0,
-		_count?.tags ?? 0,
-	];
+	const relationCounts = [counts.images, counts.notes, counts.characters, counts.places, counts.tags];
 
 	const popularity = relationCounts.reduce((sum, count) => sum + count, 0);
 	const usageDiversity = relationCounts.filter((count) => count > 0).length;
 
 	const statistics: WildcardStatistics = {
 		...createDefaultEntityStats(),
-		imageCount: _count?.images ?? 0,
+		imageCount: counts.images,
 		videoCount: 0, // wildcard no tiene videos directamente
 		albumCount: 0, // wildcard no tiene albums directamente
 		collectionCount: 0, // wildcard no tiene collections directamente
-		tagCount: _count?.tags ?? 0,
-		characterCount: _count?.characters ?? 0,
-		placeCount: _count?.places ?? 0,
+		tagCount: counts.tags,
+		characterCount: counts.characters,
+		placeCount: counts.places,
 		worldItemCount: 0, // wildcard no tiene worldItems directamente
 		conceptCount: 0, // wildcard no tiene concepts directamente
 		promptCount: 0, // wildcard no tiene prompts directamente
-		noteCount: _count?.notes ?? 0,
+		noteCount: counts.notes,
 		wildcardCount: _count?.childWildcards ?? 0,
 		propertyCount: 0, // wildcard no tiene properties directamente
 		groupCount: 0, // wildcard no tiene groups directamente
@@ -95,7 +92,6 @@ export function mapCreateWildcardData(input: WildcardCreateInput): WildcardCreat
 			category: input.category ?? null,
 			shortcut: input.shortcut ?? null,
 			featuredImage: input.featuredImage ?? null,
-			isFavorite: input.isFavorite ?? false,
 			parentId: input.parentId ?? null,
 		};
 	} catch (error) {

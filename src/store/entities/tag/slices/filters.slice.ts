@@ -12,28 +12,28 @@ import type { TagCategory, TagStore } from '../types';
  * 🔍 Filtros para tags
  */
 export interface TagFilters {
-	/** Criterio de ordenación */
-	sortBy: TagSortCriteria;
-	/** Término de búsqueda */
-	searchTerm: string;
 	/** Filtro por categoría */
 	category: TagCategory | null;
 	/** Filtro por rareza - @deprecated La rareza no es una propiedad del modelo de datos actual. */
 	rarity?: string | null;
+	/** Término de búsqueda */
+	searchTerm: string;
+	/** Criterio de ordenación */
+	sortBy: TagSortCriteria;
 }
 
 /**
  * 🔍 Acciones del filter slice
  */
 export interface TagFilterActions {
-	/** Actualiza los filtros */
-	updateFilters: (filters: Partial<TagFilters>) => void;
 	/** Limpia todos los filtros */
 	clearFilters: () => void;
 	/** Obtiene tags filtrados */
 	getFilteredTags: () => TagWithStats[];
 	/** Obtiene tags filtrados y ordenados */
 	getSortedTags: () => TagWithStats[];
+	/** Actualiza los filtros */
+	updateFilters: (filters: Partial<TagFilters>) => void;
 }
 
 /**

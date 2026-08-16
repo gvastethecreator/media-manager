@@ -7,26 +7,26 @@
 /**
  * 🟫 Tipo base de JsonFile directamente desde el schema de Drizzle.
  */
-export type JsonFileBase = {
-	id: string;
-	name: string;
-	path: string;
-	size: number;
-	hash: string;
-	mimeType: string;
+export interface JsonFileBase {
+	content: string | null;
+	createdAt: Date;
+	depth: number | null;
 	extension: string;
 	folderId: string;
-	isFavorite: boolean;
+	hash: string;
+	id: string;
 	isArchived: boolean;
-	content: string | null;
-	schema: string | null;
+	isFavorite: boolean;
 	isValid: boolean | null;
-	validationErrors: string | null;
 	keyCount: number | null;
-	depth: number | null;
-	createdAt: Date;
+	mimeType: string;
+	name: string;
+	path: string;
+	schema: string | null;
+	size: number;
 	updatedAt: Date;
-};
+	validationErrors: string | null;
+}
 
 import { EntityStats } from '../entity.types';
 
@@ -35,12 +35,12 @@ import { EntityStats } from '../entity.types';
  * Estas métricas se enfocan en la estructura y validez del contenido JSON.
  */
 export interface JsonFileStatistics extends EntityStats {
-	/** Profundidad máxima de anidamiento del JSON */
-	nestingDepth: number;
 	/** Indica si el contenido JSON es válido y parseable */
 	isValid: boolean;
 	/** Número total de claves en el objeto JSON */
 	keyCount: number;
+	/** Profundidad máxima de anidamiento del JSON */
+	nestingDepth: number;
 }
 
 /**
@@ -48,7 +48,7 @@ export interface JsonFileStatistics extends EntityStats {
  * Este es el tipo canónico para usar en la aplicación.
  */
 export interface JsonFileWithStats extends JsonFileBase {
-	entityType: 'json-file';
+	entityType: 'jsonFile';
 	stats: JsonFileStatistics;
 }
 

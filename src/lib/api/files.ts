@@ -1,5 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FavoriteEntityType } from '@/types/entities/favorite';
+import { apiClient } from '@/lib/api/client';
+import {
+	type FavoriteToggleInput,
+	type FavoriteToggleResponse,
+	normalizeFavoriteEntityType,
+} from '@/lib/api/favorites';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 
 const API_BASE = '/api';
 
@@ -8,28 +14,22 @@ export const useToggleFavorite = () => {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (fileId: string) => {
-			const response = await fetch(`${API_BASE}/favorites/toggle`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					entityId: fileId,
-					entityType: FavoriteEntityType.IMAGE,
-				}),
-			});
+		mutationFn: async ({ entityId, entityType }: FavoriteToggleInput): Promise<FavoriteToggleResponse> => {
+			const normalizedEntityType = normalizeFavoriteEntityType(entityType);
 
-			if (!response.ok) {
-				throw new Error('Failed to toggle favorite');
+			if (!normalizedEntityType) {
+				throw new Error(`Tipo de favorito no soportado: ${entityType}`);
 			}
 
-			return response.json();
+			return apiClient.post<FavoriteToggleResponse>('/favorites/toggle', {
+				entityId,
+				entityType: normalizedEntityType,
+			});
 		},
 		onSuccess: () => {
 			// Invalidar queries relevantes para que se actualicen los datos
 			queryClient.invalidateQueries({ queryKey: ['files'] });
-			queryClient.invalidateQueries({ queryKey: ['favorites'] });
+			void invalidateFavoriteQueries(queryClient);
 		},
 	});
 };

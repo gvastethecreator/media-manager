@@ -7,6 +7,30 @@ Servicio central para la gestión de carpetas, indexado, reindexado, borrado y e
 - **Stack:** Bun Runtime, React, Drizzle ORM, eventos custom, Express.
 - **Ubicación:** `src/services/folder/`
 
+## 📦 Estructura Modular (Refactorizado)
+
+El servicio ha sido dividido en módulos especializados para mejorar mantenibilidad:
+
+### `folder-api.service.ts` (~105 líneas)
+
+**Responsabilidad**: Operaciones CRUD usando fetch API (cliente)
+
+- Funciones: `getFolders`, `getFolder`, `createFolder`, `updateFolder`, `deleteFolder`, `getFoldersWithStats`
+- **Uso**: Componentes React, hooks TanStack Query
+
+### `folder-stats.service.ts` (~140 líneas)
+
+**Responsabilidad**: Estadísticas optimizadas con SQL directo
+
+- Función principal: `getFolderMediaCountsBatch(folderIds[])` - Conteos batch (evita N+1)
+- **Uso**: Transformadores, servicios backend
+
+### `index.ts`
+
+**Responsabilidad**: Punto de entrada unificado
+
+- Re-exporta todos los módulos manteniendo API pública sin cambios
+
 ## Eventos soportados
 
 - `PROGRESS` → `folder:progress`

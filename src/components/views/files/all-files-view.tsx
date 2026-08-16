@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { toFileViewerItem } from '@/components/features/file-viewer/file-viewer-item';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
@@ -9,7 +11,6 @@ import { useFile3DStore } from '@/store/entities/file-3d';
 import { useImageStore } from '@/store/entities/image';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import { useVideoStore } from '@/store/entities/video';
-import { useImageViewer } from '@/store/image-viewer.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { isImageWithStats, isVideoWithStats } from '@/types/entity-guards';
@@ -114,11 +115,15 @@ export function AllFilesView(_: ViewProps) {
 	);
 	const error = imagesError || videosError || audiosError || documentsError || jsonError || file3DsError;
 	const fileCount = allFiles.length;
+	const browserItems = useMemo(
+		() => allFiles.map((f) => toBrowserItem(f as unknown as Record<string, unknown>)),
+		[allFiles]
+	);
 
 	useEffect(() => {
 		// Cargar todos los tipos de archivos solo una vez al montar el componente
 		if (!hasInitializedRef.current) {
-			viewLogger.info('Cargando todos los tipos de archivos...');
+			viewLogger.info('Loading all file types...');
 			hasInitializedRef.current = true;
 
 			// Cargar solo si no hay datos ya cargados
@@ -163,12 +168,11 @@ export function AllFilesView(_: ViewProps) {
 		fetchFile3Ds,
 	]);
 
-	const { openViewer: openImageViewer } = useImageViewer();
 	const { openViewer: openFileViewer } = useFileViewerStore();
 
 	const handleFileClick = useCallback(
-		(file: AnyEntityWithStats) => {
-			viewLogger.info('🖱️ Click en archivo:', file.name);
+		(file: BrowserItem) => {
+			viewLogger.info('🖱️ File clicked:', file.name);
 
 			// Navegar según el entityType
 			switch (file.entityType) {
@@ -185,30 +189,40 @@ export function AllFilesView(_: ViewProps) {
 					navigate('/documents');
 					break;
 				default:
-					viewLogger.info('Abriendo archivo:', file.name);
+					viewLogger.info('Opening file:', file.name);
 			}
 		},
 		[navigate]
 	);
 
 	const handleFileDoubleClick = useCallback(
-		(file: AnyEntityWithStats) => {
-			viewLogger.info('🖱️ Doble click en archivo:', file.name);
+		(file: BrowserItem) => {
+			viewLogger.info('🖱️ File double-clicked:', file.name);
 			viewLogger.info('🔍 Debug - entityType:', file.entityType);
-			viewLogger.info('🔍 Debug - isImageWithStats:', isImageWithStats(file));
-			viewLogger.info('🔍 Debug - isVideoWithStats:', isVideoWithStats(file));
 
-			// Manejar imágenes con el image viewer
-			if (isImageWithStats(file)) {
-				viewLogger.info('📸 Abriendo imagen en image viewer');
-				const imageEntities = allFiles.filter((item) => isImageWithStats(item));
-				const currentIndex = imageEntities.findIndex((img) => img.id === file.id);
-				openImageViewer(imageEntities, currentIndex);
+			const entity = file.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) {
+				viewLogger.info('🔍 Debug - item has no raw data; using navigation fallback');
+				handleFileClick(file);
+				return;
+			}
+
+			viewLogger.info('🔍 Debug - isImageWithStats:', isImageWithStats(entity));
+			viewLogger.info('🔍 Debug - isVideoWithStats:', isVideoWithStats(entity));
+
+			// Las imágenes usan el visor global igual que el resto de media.
+			if (isImageWithStats(entity)) {
+				viewLogger.info('📸 Opening image in file viewer');
+				const imageItems = allFiles
+					.filter((item) => isImageWithStats(item))
+					.map((image) => toFileViewerItem(image as unknown as Record<string, unknown>, 'image'));
+				const currentIndex = imageItems.findIndex((item) => item.id === entity.id);
+				openFileViewer(imageItems, Math.max(0, currentIndex));
 				return;
 			}
 
 			// Manejar videos con el file viewer
-			if (isVideoWithStats(file)) {
+			if (isVideoWithStats(entity)) {
 				viewLogger.info('🎬 Abriendo video en file viewer');
 				const videoItems = allFiles
 					.filter((item) => isVideoWithStats(item))
@@ -216,7 +230,6 @@ export function AllFilesView(_: ViewProps) {
 						id: video.id,
 						name: video.name,
 						type: 'video' as const,
-						path: video.path,
 						size: video.size || 0,
 						width: video.width,
 						height: video.height,
@@ -225,27 +238,27 @@ export function AllFilesView(_: ViewProps) {
 						metadata: video.metadata,
 					}));
 
-				const currentIndex = videoItems.findIndex((item) => item.id === file.id);
+				const currentIndex = videoItems.findIndex((item) => item.id === entity.id);
 				openFileViewer(videoItems, Math.max(0, currentIndex));
 				return;
 			}
 
 			// Para otros tipos de archivos, usar comportamiento anterior (navegar)
-			viewLogger.info('📁 Tipo de archivo no soportado, navegando');
+			viewLogger.info('📁 Unsupported file type, navigating');
 			handleFileClick(file);
 		},
-		[allFiles, openImageViewer, openFileViewer, handleFileClick]
+		[allFiles, openFileViewer, handleFileClick]
 	);
 
 	if (isLoading && allFiles.length === 0) {
-		return <LoadingScreen message="Cargando archivos..." />;
+		return <LoadingScreen message="Loading files..." />;
 	}
 
 	if (error && allFiles.length === 0) {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<h2 className="mb-2 font-semibold text-lg">Error al cargar archivos</h2>
+					<h2 className="mb-2 font-semibold text-lg">Could not load files</h2>
 					<p className="mb-4 text-muted-foreground">Error: {error}</p>
 					<button
 						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
@@ -259,7 +272,7 @@ export function AllFilesView(_: ViewProps) {
 						}}
 						type="button"
 					>
-						Intentar de nuevo
+						Try again
 					</button>
 				</div>
 			</div>
@@ -268,12 +281,7 @@ export function AllFilesView(_: ViewProps) {
 
 	return (
 		<div className="h-full">
-			<FileBrowser
-				isLoading={isLoading}
-				items={allFiles}
-				onItemClick={handleFileClick}
-				onItemDoubleClick={handleFileDoubleClick}
-			/>
+			<FileBrowser items={browserItems} onItemClick={handleFileClick} onItemDoubleClick={handleFileDoubleClick} />
 		</div>
 	);
 }

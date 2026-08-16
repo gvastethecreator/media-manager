@@ -4,8 +4,8 @@ import type { Album } from '@/types/entities/album';
 
 interface AlbumCardHeaderProps {
 	album: Album;
-	primaryColor: string;
 	compact?: boolean;
+	primaryColor: string;
 }
 
 /**
@@ -16,7 +16,7 @@ export function AlbumCardHeader({ album, primaryColor, compact = false }: AlbumC
 
 	return (
 		<header
-			className={cn('relative z-20 flex items-center gap-3 px-3 py-2', compact ? 'pb-1' : 'border-white/10 border-b')}
+			className={cn('relative z-20 flex items-center gap-3 px-3 py-2', compact ? 'pb-1' : 'border-border/40 border-b')}
 		>
 			{/* Emoji o imagen del álbum */}
 			{emoji && (
@@ -34,7 +34,7 @@ export function AlbumCardHeader({ album, primaryColor, compact = false }: AlbumC
 			{/* Texto y categoría */}
 			<div className="flex-1 overflow-hidden">
 				<h3 className={cn('truncate font-bold text-foreground', compact ? 'text-sm' : 'text-base')}>{name}</h3>
-				{category && !compact && <p className="truncate text-muted-foreground text-xs">{category}</p>}
+				{category && !compact && <p className="truncate text-muted-foreground text-sm">{category}</p>}
 			</div>
 
 			{/* Indicador de favorito */}
@@ -48,7 +48,7 @@ export function AlbumCardHeader({ album, primaryColor, compact = false }: AlbumC
 			{isFavorite && (
 				<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 					<div
-						className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
+						className="absolute top-0 right-0 h-24 w-24 translate-x-12 -translate-y-8 rotate-45 opacity-70"
 						style={{
 							background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 							backgroundSize: '600% 600%',

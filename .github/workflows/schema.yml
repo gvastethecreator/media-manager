@@ -1,0 +1,34 @@
+name: Schema contract
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/schema.yml'
+      - 'drizzle.config.ts'
+      - 'scripts/db/**'
+      - 'src/lib/drizzle/migrations/**'
+      - 'src/lib/drizzle/schema/**'
+      - 'src/lib/drizzle/schema-contract.json'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/schema.yml'
+      - 'drizzle.config.ts'
+      - 'scripts/db/**'
+      - 'src/lib/drizzle/migrations/**'
+      - 'src/lib/drizzle/schema/**'
+      - 'src/lib/drizzle/schema-contract.json'
+
+jobs:
+  verify-schema:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: bun run db:schema:check
+      - run: bun test --timeout 120000 scripts/db/database-safety.test.ts scripts/db/export-schema.test.ts scripts/db/legacy-adoption.test.ts scripts/db/migrations.test.ts scripts/db/orphan-inventory.test.ts

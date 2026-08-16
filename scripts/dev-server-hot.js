@@ -11,6 +11,7 @@ import chokidar from 'chokidar';
 import { existsSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { createLocalSessionEnvironment } from './local-session-environment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -48,52 +49,57 @@ function loadEnvFile(filePath) {
 const defaultEnv = loadEnvFile(join(rootDir, '.env'));
 const tauriEnv = loadEnvFile(join(rootDir, '.env.tauri'));
 
-// Combinar variables de entorno (prioridad: tauri > default > process.env)
-const serverEnv = {
-	...process.env,
+// Combinar variables de entorno (prioridad: process.env > tauri > default).
+// Un supervisor/test debe poder fijar DATABASE_URL y grants sin que un archivo local lo redirija a otra base.
+const configuredServerEnv = {
 	...defaultEnv,
 	...tauriEnv,
+	...process.env,
+};
+const inheritedSupervisorSession =
+	process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR === '1' && process.env.MEDIA_MANAGER_SESSION_TOKEN
+		? process.env
+		: createLocalSessionEnvironment(configuredServerEnv);
+const serverEnv = {
+	...configuredServerEnv,
+	MEDIA_MANAGER_API_TARGET: inheritedSupervisorSession.MEDIA_MANAGER_API_TARGET,
+	MEDIA_MANAGER_TRUSTED_SUPERVISOR: inheritedSupervisorSession.MEDIA_MANAGER_TRUSTED_SUPERVISOR,
+	MEDIA_MANAGER_SESSION_TOKEN: inheritedSupervisorSession.MEDIA_MANAGER_SESSION_TOKEN,
+	MEDIA_MANAGER_SESSION_ALLOWED_HOSTS: inheritedSupervisorSession.MEDIA_MANAGER_SESSION_ALLOWED_HOSTS,
+	MEDIA_MANAGER_SESSION_ALLOWED_ORIGINS: inheritedSupervisorSession.MEDIA_MANAGER_SESSION_ALLOWED_ORIGINS,
 };
 
+if (process.env.MEDIA_MANAGER_ENV_PROBE === '1') {
+	console.log(
+		JSON.stringify({
+			databaseUrlMatchesExpected:
+				Boolean(process.env.MEDIA_MANAGER_ENV_PROBE_EXPECTED_DATABASE_URL) &&
+				serverEnv.DATABASE_URL === process.env.MEDIA_MANAGER_ENV_PROBE_EXPECTED_DATABASE_URL,
+			nodeEnv: serverEnv.NODE_ENV,
+		})
+	);
+	process.exit(0);
+}
+
 console.log(chalk.blue('🔧 Variables de entorno cargadas:'));
-console.log(`- DATABASE_URL: ${serverEnv.DATABASE_URL || 'undefined'}`);
+console.log(`- Database: ${serverEnv.DATABASE_URL ? 'configured' : 'undefined'}`);
 console.log(`- API_PORT: ${serverEnv.API_PORT || serverEnv.PORT || 'undefined'}`);
 console.log(`- NODE_ENV: ${serverEnv.NODE_ENV || 'undefined'}`);
+console.log('- API session: isolated standalone session (use dev:full for a connected UI)');
 console.log();
 
 const SERVER_SRC = 'src/server/index.ts';
-const SERVER_DIST = 'dist/server/index.js';
 const SERVER_DIR = 'src/server';
 const REQUIRED_DEPS = ['music-metadata', 'ffprobe-static'];
+const SERVER_PORT = Number(serverEnv.API_PORT || serverEnv.PORT || 4000);
 
 let serverProcess = null;
+let bootSequence = 0;
 
-// Función para compilar el servidor con Bun
-function buildServer() {
-	console.log(chalk.blue('🔨 Compilando servidor con Bun...'));
-
-	try {
-		const buildProcess = spawn('bun', ['build', SERVER_SRC, '--outdir', 'dist/server', '--target', 'node'], {
-			stdio: 'inherit',
-			shell: true,
-		});
-
-		return new Promise((resolve, reject) => {
-			buildProcess.on('close', (code) => {
-				if (code === 0) {
-					console.log(chalk.green('✅ Build exitoso'));
-					resolve(true);
-				} else {
-					console.log(chalk.red('❌ Error en build'));
-					reject(new Error(`Build falló con código ${code}`));
-				}
-			});
-		});
-	} catch (error) {
-		console.error(chalk.red('❌ Error compilando servidor:'), error);
-		throw error;
-	}
-}
+// NOTE:
+// En desarrollo, preferimos ejecutar el entrypoint TS directamente.
+// Esto evita fallos sutiles del bundler (orden de inicialización / exports undefined)
+// y acelera el ciclo de feedback cuando el servidor se reinicia por cambios.
 
 function checkRequiredDependencies() {
 	const missing = [];
@@ -111,21 +117,46 @@ function checkRequiredDependencies() {
 	return true;
 }
 
+async function waitForHealth(url, currentBoot, { retries = 50, intervalMs = 250 } = {}) {
+	for (let i = 0; i < retries; i++) {
+		if (currentBoot !== bootSequence) {
+			return false;
+		}
+
+		try {
+			const response = await fetch(url, { method: 'GET' });
+			if (response.ok) {
+				return true;
+			}
+		} catch {
+			// seguir intentando mientras arranca
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+	}
+
+	return false;
+}
+
 // Función para iniciar el servidor
 function startServer() {
+	bootSequence += 1;
+	const currentBoot = bootSequence;
+	const healthUrl = `http://localhost:${SERVER_PORT}/health`;
+
 	if (serverProcess) {
 		console.log(chalk.yellow('🔄 Reiniciando servidor...'));
 		serverProcess.kill();
 	}
 
-	if (!existsSync(SERVER_DIST)) {
-		console.log(chalk.red('❌ Archivo compilado no encontrado:', SERVER_DIST));
+	if (!existsSync(SERVER_SRC)) {
+		console.log(chalk.red('❌ Entry point no encontrado:', SERVER_SRC));
 		return;
 	}
 
-	console.log(chalk.green('🚀 Iniciando servidor con variables de entorno...'));
+	console.log(chalk.green('🚀 Iniciando servidor (TS) con variables de entorno...'));
 
-	serverProcess = spawn('bun', [SERVER_DIST], {
+	serverProcess = spawn('bun', [SERVER_SRC], {
 		stdio: 'inherit',
 		shell: true,
 		env: serverEnv, // Usar las variables de entorno cargadas
@@ -140,6 +171,12 @@ function startServer() {
 			console.log(chalk.red(`❌ Servidor terminó con código ${code}`));
 		}
 	});
+
+	void waitForHealth(healthUrl, currentBoot).then((isReady) => {
+		if (isReady) {
+			console.log(chalk.green(`✅ Backend listo en http://localhost:${SERVER_PORT}`));
+		}
+	});
 }
 
 // Función principal
@@ -150,8 +187,6 @@ async function main() {
 		if (!checkRequiredDependencies()) {
 			process.exit(1);
 		}
-		// Build inicial
-		await buildServer();
 		startServer();
 
 		// Configurar watcher
@@ -165,13 +200,7 @@ async function main() {
 
 		watcher.on('change', async (path) => {
 			console.log(chalk.yellow(`📝 Cambio detectado: ${path}`));
-
-			try {
-				await buildServer();
-				startServer();
-			} catch (error) {
-				console.error(chalk.red('❌ Error en hot reload:'), error);
-			}
+			startServer();
 		});
 
 		// Manejar cierre graceful

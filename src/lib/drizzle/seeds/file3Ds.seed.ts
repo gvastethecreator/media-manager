@@ -1,11 +1,32 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { file3Ds } from '../schema/index';
 import { seedLogger } from './index';
 
 /**
- * Siembra archivos 3D - VACÍA
- * No se generan datos para mantener la base de datos limpia
+ * Seed para archivos 3D - datos de prueba sin asociaciones
  */
 export async function seedFile3Ds(db: LibSQLDatabase<Record<string, never>>) {
-	seedLogger.info('🎲 Seed file3Ds: Sin datos (vacía por política de DB limpia)');
-	// Sin inserción de datos - seed vacía
+	seedLogger.info('🎲 Creando archivos 3D de prueba (sin asociaciones)...');
+
+	try {
+		const sampleFile3Ds = [
+			{
+				id: '3d-seed-001',
+				name: 'test-3d.glb',
+				path: 'D:\\DEV\\image-manager\\test-files\\test-3d.glb',
+				size: 10_240,
+				hash: 'd3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b865',
+				mimeType: 'model/gltf-binary',
+				extension: 'glb',
+				folderId: 'test-files',
+				isArchived: false,
+			},
+		];
+
+		await db.insert(file3Ds).values(sampleFile3Ds);
+		seedLogger.success(`✅ ${sampleFile3Ds.length} 3D files created`);
+	} catch (error) {
+		seedLogger.error('❌ Could not create 3D files:', error);
+		throw error;
+	}
 }

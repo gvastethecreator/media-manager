@@ -1,16 +1,15 @@
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Calendar, Clock, Image as ImageIcon, ShieldCheck, Sparkles, Star } from 'lucide-react';
+import { formatDistanceToNow } from '@/lib/utils/date';
 
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 
 interface WorldItemCardFooterProps {
-	worldItem: WorldItemWithStats;
 	_totalRelations: number;
+	compact?: boolean;
+	intensityFactor: number;
 	primaryColor: string;
 	secondaryColor: string;
-	intensityFactor: number;
-	compact?: boolean;
+	worldItem: WorldItemWithStats;
 }
 
 /**
@@ -28,17 +27,15 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 	const { createdAt, updatedAt, isFavorite, category, type, stats } = worldItem;
 	const imagesCount = stats?.imageCount || worldItem.stats?.imageCount || 0;
 	// Convertir fechas a objetos Date si son strings
-	const createdAtDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
-	const updatedAtDate = typeof updatedAt === 'string' ? new Date(updatedAt) : updatedAt;
+	const createdAtDate = createdAt ? (typeof createdAt === 'string' ? new Date(createdAt) : createdAt) : new Date();
+	const updatedAtDate = updatedAt ? (typeof updatedAt === 'string' ? new Date(updatedAt) : updatedAt) : new Date();
 
 	// Calcular tiempo relativo
 	const createdTimeAgo = formatDistanceToNow(createdAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 	const updatedTimeAgo = formatDistanceToNow(updatedAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 
 	// Mapear el tipo a un icono
@@ -55,7 +52,7 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 
 	return (
 		<div
-			className="px-3 py-2 text-white/80 text-xs"
+			className="px-3 py-2 text-sm text-white/80"
 			style={{
 				background: `linear-gradient(to top, ${secondaryColor}90, ${secondaryColor}60)`,
 				borderTop: `1px solid ${primaryColor}40`,
@@ -71,7 +68,7 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 				{/* Contador de imágenes y favorito */}
 				<div className="flex items-center space-x-2">
 					{/* Indicador de favorito */}
-					{isFavorite && <Star aria-label="Favorito" className="fill-yellow-400 text-yellow-400" size={14} />}
+					{isFavorite && <Star aria-label="Favorito" className="fill-warning text-warning" size={14} />}
 
 					{/* Contador de imágenes */}
 					<div className="flex items-center">
@@ -84,11 +81,11 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 					<div className="flex justify-between text-[0.65rem] text-white/60">
 						<div className="flex items-center">
 							<Calendar className="mr-1" size={12} />
-							<span title={`Creado: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
+							<span title={`Created: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
 						</div>
 						<div className="flex items-center">
 							<Clock className="mr-1" size={12} />
-							<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
+							<span title={`Updated: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
 						</div>
 					</div>
 				)}

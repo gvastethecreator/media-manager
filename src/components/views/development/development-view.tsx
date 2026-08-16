@@ -1,7 +1,22 @@
 // Se reemplaza react-markdown por el visor de @uiw/react-md-editor
 import MDEditor from '@uiw/react-md-editor';
-import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Image, Loader2, RefreshCw, Server, Tag } from 'lucide-react';
-import { FoldersSettings } from '@/components/settings/folders/folders-settings';
+import {
+	BarChart,
+	Bug,
+	Code2,
+	FileCode2,
+	Folder,
+	Gauge,
+	Image,
+	Loader2,
+	RefreshCw,
+	Server,
+	Sparkles,
+	Tag,
+} from 'lucide-react';
+import { ScannedImagesSettings } from '@/components/settings/media/scanned-images-settings';
+import { FilesSettingsModern } from '@/components/settings/modern/files-settings-modern';
+import { TaxonomySettingsModern } from '@/components/settings/modern/taxonomy-settings-modern';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
@@ -9,7 +24,11 @@ import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { ViewProps } from '../types';
-import { FeatureCard, IssueCard, MetricCard, ProcessingMetricCard, ServiceCard } from './cards';
+import { FeatureCard } from './cards/feature-card';
+import { IssueCard } from './cards/issue-card';
+import { MetricCard } from './cards/metric-card';
+import { ProcessingMetricCard } from './cards/processing-metric-card';
+import { ServiceCard } from './cards/service-card';
 import {
 	FileDistributionChart,
 	IndexingActivityChart,
@@ -20,6 +39,7 @@ import { SystemMetricsPanel } from './charts/tech-metrics';
 import { DOCUMENTATION_FILES, useDocumentation } from './hooks/use-documentation';
 import { useFeaturesIssues } from './hooks/use-features-issues';
 import { useSystemStats } from './hooks/use-system-stats';
+import { TransitionsDemo } from './transitions-demo';
 
 export function DevelopmentView(_props: ViewProps) {
 	const { metrics, processingMetrics, isLoading: isLoadingStats, refreshData: refreshStats } = useSystemStats();
@@ -46,19 +66,19 @@ export function DevelopmentView(_props: ViewProps) {
 				{/* Header */}
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className="font-bold text-2xl">Panel de Desarrollo</h1>
-						<p className="text-muted-foreground">Monitoreo y gestión del sistema</p>
+						<h1 className="font-bold text-2xl">Development Panel</h1>
+						<p className="text-muted-foreground">System monitoring and management</p>
 					</div>
 					<Button className="gap-2" disabled={isLoading} onClick={handleRefresh} type="button" variant="outline">
 						{isLoading ? (
 							<>
 								<Loader2 className="h-4 w-4 animate-spin" />
-								Actualizando...
+								Refreshing...
 							</>
 						) : (
 							<>
 								<RefreshCw className="h-4 w-4" />
-								Actualizar
+								Refresh
 							</>
 						)}
 					</Button>
@@ -68,7 +88,7 @@ export function DevelopmentView(_props: ViewProps) {
 					<TabsList>
 						<TabsTrigger className="gap-2" value="services">
 							<Server className="h-4 w-4" />
-							Servicios
+							Services
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="features">
 							<Code2 className="h-4 w-4" />
@@ -80,27 +100,31 @@ export function DevelopmentView(_props: ViewProps) {
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="docs">
 							<FileCode2 className="h-4 w-4" />
-							Documentación
+							Documentation
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="folders">
 							<Folder className="h-4 w-4" />
-							Carpetas
+							Folders
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="tags">
 							<Tag className="h-4 w-4" />
-							Etiquetas
+							Tags
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="images">
 							<Image className="h-4 w-4" />
-							Imágenes
+							Images
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="stats">
 							<BarChart className="h-4 w-4" />
-							Estadísticas
+							Statistics
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="tech">
 							<Gauge className="h-4 w-4" />
-							Métricas Técnicas
+							Technical Metrics
+						</TabsTrigger>
+						<TabsTrigger className="gap-2" value="transitions">
+							<Sparkles className="h-4 w-4" />
+							Transitions
 						</TabsTrigger>
 					</TabsList>
 
@@ -168,7 +192,7 @@ export function DevelopmentView(_props: ViewProps) {
 														<MDEditor.Markdown source={documentationContent[doc]} />
 													) : (
 														<p className="text-muted-foreground">
-															{isLoadingDocs ? 'Cargando documentación...' : 'No se pudo cargar la documentación'}
+															{isLoadingDocs ? 'Loading documentation...' : 'Documentation could not be loaded'}
 														</p>
 													)}
 												</div>
@@ -181,29 +205,15 @@ export function DevelopmentView(_props: ViewProps) {
 					</TabsContent>
 
 					<TabsContent className="mt-4" value="folders">
-						<FoldersSettings />
+						<FilesSettingsModern />
 					</TabsContent>
 
 					<TabsContent className="mt-4" value="tags">
-						<Card className="border-2 border-primary/10">
-							<CardContent className="p-4">
-								<div className="p-4">
-									<h3 className="font-medium text-lg">Etiquetas</h3>
-									<p className="text-muted-foreground">Gestión de etiquetas en desarrollo</p>
-								</div>
-							</CardContent>
-						</Card>
+						<TaxonomySettingsModern />
 					</TabsContent>
 
 					<TabsContent className="mt-4" value="images">
-						<Card className="border-2 border-primary/10">
-							<CardContent className="p-4">
-								<div className="p-4">
-									<h3 className="font-medium text-lg">Imágenes</h3>
-									<p className="text-muted-foreground">Gestión de imágenes en desarrollo</p>
-								</div>
-							</CardContent>
-						</Card>
+						<ScannedImagesSettings />
 					</TabsContent>
 
 					<TabsContent className="mt-4" value="stats">
@@ -221,6 +231,10 @@ export function DevelopmentView(_props: ViewProps) {
 								<SystemMetricsPanel />
 							</CardContent>
 						</Card>
+					</TabsContent>
+
+					<TabsContent className="mt-4" value="transitions">
+						<TransitionsDemo />
 					</TabsContent>
 				</Tabs>
 

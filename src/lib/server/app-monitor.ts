@@ -13,11 +13,20 @@ const appLogger = serverLogger.withContext('AppMonitor');
 
 // Interfaz para las estadísticas de la aplicación
 interface AppStats {
-	requests: {
-		total: number;
-		success: number;
-		error: number;
-		pending: number;
+	cache: {
+		hits: number;
+		misses: number;
+		ratio: number;
+	};
+	database: {
+		queries: number;
+		avgQueryTime: number;
+		slowQueries: number;
+	};
+	errors: {
+		count: number;
+		lastError?: Error;
+		byType: Record<string, number>;
 	};
 	performance: {
 		avgResponseTime: number;
@@ -25,20 +34,11 @@ interface AppStats {
 		maxResponseTime: number;
 		p95ResponseTime: number;
 	};
-	errors: {
-		count: number;
-		lastError?: Error;
-		byType: Record<string, number>;
-	};
-	database: {
-		queries: number;
-		avgQueryTime: number;
-		slowQueries: number;
-	};
-	cache: {
-		hits: number;
-		misses: number;
-		ratio: number;
+	requests: {
+		total: number;
+		success: number;
+		error: number;
+		pending: number;
 	};
 }
 

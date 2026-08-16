@@ -6,6 +6,8 @@
 
 import type { Audio, AudioCreateInput, AudioFormData, AudioUIInput } from '@/types/entities/audio';
 
+type AudioCreateDraft = Omit<AudioCreateInput, 'source'>;
+
 /**
  * 🎨 Mapea un Audio a formato UI
  * @param audio - Objeto Audio a mapear
@@ -53,7 +55,7 @@ export function mapAudioToUI(audio: Audio) {
  * @param uiData - Datos de la UI
  * @returns Objeto AudioFormData
  */
-export function mapAudioFromUI(uiData: AudioUIInput): AudioFormData {
+export function mapAudioFromUI(uiData: AudioUIInput): Omit<AudioFormData, 'source'> {
 	return {
 		name: uiData.name || '',
 		description: uiData.description || null,
@@ -93,7 +95,7 @@ export function mapAudioFromUI(uiData: AudioUIInput): AudioFormData {
  * @param formData - Datos del formulario
  * @returns Objeto AudioCreateInput
  */
-export function mapFormDataToCreateInput(formData: AudioFormData): AudioCreateInput {
+export function mapFormDataToCreateInput(formData: Omit<AudioFormData, 'source'>): AudioCreateDraft {
 	return {
 		name: formData.name,
 		path: formData.path,

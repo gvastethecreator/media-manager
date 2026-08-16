@@ -10,11 +10,8 @@ import { circuitBreakerRegistry } from './circuit-breaker';
 const logger = clientLogger.withContext('ReindexMonitor');
 
 export interface OperationMetrics {
-	operationId: string;
-	startTime: number;
-	endTime?: number;
 	duration?: number;
-	status: 'running' | 'completed' | 'failed' | 'timeout';
+	endTime?: number;
 	error?: string;
 	metadata: {
 		folderId?: string;
@@ -22,22 +19,25 @@ export interface OperationMetrics {
 		fileCount?: number;
 		type: 'single-folder' | 'auto-index' | 'global-reindex';
 	};
+	operationId: string;
+	startTime: number;
+	status: 'running' | 'completed' | 'failed' | 'timeout';
 }
 
 export interface SystemHealth {
 	activeOperations: number;
 	averageOperationTime: number;
+	circuitBreakerStatus: Record<string, any>;
 	errorRate: number;
 	memoryPressure: 'low' | 'medium' | 'high';
-	circuitBreakerStatus: Record<string, any>;
 }
 
 /**
  * Monitor global para operaciones de reindexado
  */
 class ReindexMonitor {
-	private operations = new Map<string, OperationMetrics>();
-	private maxOperationsHistory = 100;
+	private readonly operations = new Map<string, OperationMetrics>();
+	private readonly maxOperationsHistory = 100;
 	private healthCheckInterval?: NodeJS.Timeout;
 	private isMonitoring = false;
 
@@ -90,7 +90,7 @@ class ReindexMonitor {
 		};
 
 		this.operations.set(operationId, operation);
-		logger.debug(`🚀 Operación iniciada: ${operationId}`, { metadata });
+		logger.debug(`🚀 Operation iniciada: ${operationId}`, { metadata });
 
 		// Limpiar historial si es necesario
 		this.cleanupOldOperations();
@@ -102,7 +102,7 @@ class ReindexMonitor {
 	completeOperation(operationId: string): void {
 		const operation = this.operations.get(operationId);
 		if (!operation) {
-			logger.warn(`⚠️ Operación no encontrada: ${operationId}`);
+			logger.warn(`⚠️ Operation no encontrada: ${operationId}`);
 			return;
 		}
 
@@ -112,7 +112,7 @@ class ReindexMonitor {
 		operation.status = 'completed';
 
 		this.operations.set(operationId, operation);
-		logger.debug(`✅ Operación completada: ${operationId} (${operation.duration}ms)`);
+		logger.debug(`✅ Operation completada: ${operationId} (${operation.duration}ms)`);
 	}
 
 	/**
@@ -121,7 +121,7 @@ class ReindexMonitor {
 	failOperation(operationId: string, error: string): void {
 		const operation = this.operations.get(operationId);
 		if (!operation) {
-			logger.warn(`⚠️ Operación no encontrada: ${operationId}`);
+			logger.warn(`⚠️ Operation no encontrada: ${operationId}`);
 			return;
 		}
 
@@ -132,7 +132,7 @@ class ReindexMonitor {
 		operation.error = error;
 
 		this.operations.set(operationId, operation);
-		logger.debug(`❌ Operación fallida: ${operationId} (${operation.duration}ms) - ${error}`);
+		logger.debug(`❌ Operation fallida: ${operationId} (${operation.duration}ms) - ${error}`);
 	}
 
 	/**
@@ -173,7 +173,7 @@ class ReindexMonitor {
 				const runningTime = now - operation.startTime;
 
 				if (runningTime > stuckThreshold) {
-					logger.error(`🔒 Operación posiblemente colgada: ${operationId} (${Math.round(runningTime / 1000)}s)`);
+					logger.error(`🔒 Operation posiblemente colgada: ${operationId} (${Math.round(runningTime / 1000)}s)`);
 
 					// Marcar como timeout
 					operation.status = 'timeout';

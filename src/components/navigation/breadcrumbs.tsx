@@ -14,7 +14,6 @@ import { ViewType } from '@/components/views/types';
 import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 
 interface BreadcrumbsProps {
-	currentView: ViewType;
 	currentItem?: {
 		id?: string | null;
 		name?: string;
@@ -31,62 +30,63 @@ interface BreadcrumbsProps {
 		// Para vistas de carpeta: cadena de breadcrumbs jerárquicos
 		breadcrumbs?: Array<{ id: string; name: string; path: string }>;
 	};
+	currentView: ViewType;
 }
 
 interface BreadcrumbConfig {
-	label: string;
-	path: string;
 	contentPath?: string;
 	icon?: React.ReactNode;
+	label: string;
+	path: string;
 }
 
 const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> & Record<string, BreadcrumbConfig> = {
-	'': { label: 'Inicio', path: '/' },
-	settings: { label: 'Ajustes', path: '/settings' },
-	'all-images': { label: 'Galería', path: '/gallery' },
-	'uploaded-images': { label: 'Imágenes Subidas', path: '/uploaded-images' },
-	files: { label: 'Archivos', path: '/files' },
-	favorites: { label: 'Favoritos', path: '/favorites' },
-	search: { label: 'Búsqueda', path: '/search' },
-	collections: { label: 'Colecciones', path: '/collections' },
-	'collection-content': { label: 'Colecciones', path: '/collections', contentPath: '/collections' },
-	folders: { label: 'Carpetas', path: '/folders' },
-	'folder-content': { label: 'Carpetas', path: '/folders', contentPath: '/folders' },
+	'': { label: 'Home', path: '/' },
+	settings: { label: 'Settings', path: '/settings' },
+	'all-images': { label: 'Gallery', path: '/all-images' },
+	files: { label: 'Files', path: '/files' },
+	favorites: { label: 'Favorites', path: '/favorites' },
+	search: { label: 'Search', path: '/search' },
+	collections: { label: 'Collections', path: '/collections' },
+	'collection-content': { label: 'Collections', path: '/collections', contentPath: '/collections' },
+	folders: { label: 'Folders', path: '/folders' },
+	'folder-content': { label: 'Folders', path: '/folders', contentPath: '/folders' },
 	canvas: { label: 'Canvas', path: '/canvas' },
 	chat: { label: 'Chat', path: '/chat' },
-	tags: { label: 'Etiquetas', path: '/tags' },
-	'tag-content': { label: 'Etiquetas', path: '/tags', contentPath: '/tags' },
-	albums: { label: 'Álbumes', path: '/albums' },
-	'album-content': { label: 'Álbumes', path: '/albums', contentPath: '/albums' },
-	characters: { label: 'Personajes', path: '/characters' },
-	'character-content': { label: 'Personajes', path: '/characters', contentPath: '/characters' },
-	places: { label: 'Lugares', path: '/places' },
-	'place-content': { label: 'Lugares', path: '/places', contentPath: '/places' },
-	'world-items': { label: 'Objetos', path: '/world-items' },
-	'world-item-content': { label: 'Objetos', path: '/world-items', contentPath: '/world-items' },
-	concepts: { label: 'Conceptos', path: '/concepts' },
-	'concept-content': { label: 'Conceptos', path: '/concepts', contentPath: '/concepts' },
+	tags: { label: 'Tags', path: '/tags' },
+	'tag-content': { label: 'Tags', path: '/tags', contentPath: '/tags' },
+	albums: { label: 'Albums', path: '/albums' },
+	'album-content': { label: 'Albums', path: '/albums', contentPath: '/albums' },
+	characters: { label: 'Characters', path: '/characters' },
+	'character-content': { label: 'Characters', path: '/characters', contentPath: '/characters' },
+	places: { label: 'Places', path: '/places' },
+	'place-content': { label: 'Places', path: '/places', contentPath: '/places' },
+	'world-items': { label: 'World items', path: '/world-items' },
+	'world-item-content': { label: 'World items', path: '/world-items', contentPath: '/world-items' },
+	concepts: { label: 'Concepts', path: '/concepts' },
+	'concept-content': { label: 'Concepts', path: '/concepts', contentPath: '/concepts' },
 	prompts: { label: 'Prompts', path: '/prompts' },
 	'prompt-content': { label: 'Prompts', path: '/prompts', contentPath: '/prompts' },
-	notes: { label: 'Notas', path: '/notes' },
-	'note-content': { label: 'Notas', path: '/notes', contentPath: '/notes' },
-	groups: { label: 'Grupos', path: '/groups' },
-	'group-content': { label: 'Grupos', path: '/groups', contentPath: '/groups' },
-	properties: { label: 'Propiedades', path: '/properties' },
-	'property-content': { label: 'Propiedades', path: '/properties', contentPath: '/properties' },
+	notes: { label: 'Notes', path: '/notes' },
+	'note-content': { label: 'Notes', path: '/notes', contentPath: '/notes' },
+	groups: { label: 'Groups', path: '/groups' },
+	'group-content': { label: 'Groups', path: '/groups', contentPath: '/groups' },
+	properties: { label: 'Properties', path: '/properties' },
+	'property-content': { label: 'Properties', path: '/properties', contentPath: '/properties' },
 	wildcards: { label: 'Wildcards', path: '/wildcards' },
 	'wildcard-content': { label: 'Wildcards', path: '/wildcards', contentPath: '/wildcards' },
 	'entity-cards': { label: 'Entity Cards', path: '/entity-cards' },
-	development: { label: 'Desarrollo', path: '/development' },
-	documents: { label: 'Documentos', path: '/documents' },
-	'document-content': { label: 'Documentos', path: '/documents', contentPath: '/documents' },
-	audios: { label: 'Audios', path: '/audios' },
-	'audio-content': { label: 'Audios', path: '/audios', contentPath: '/audios' },
-	'json-files': { label: 'Archivos JSON', path: '/json-files' },
-	'json-file-content': { label: 'Archivos JSON', path: '/json-files', contentPath: '/json-files' },
-	'file-3ds': { label: 'Archivos 3D', path: '/file-3ds' },
-	'file-3d-content': { label: 'Archivos 3D', path: '/file-3ds', contentPath: '/file-3ds' },
-	mixed: { label: 'Mixto', path: '/' },
+	development: { label: 'Development', path: '/development' },
+	documents: { label: 'Documents', path: '/documents' },
+	'document-content': { label: 'Documents', path: '/documents', contentPath: '/documents' },
+	audios: { label: 'Audio', path: '/audios' },
+	'audio-content': { label: 'Audio', path: '/audios', contentPath: '/audios' },
+	'json-files': { label: 'JSON files', path: '/json-files' },
+	'json-file-content': { label: 'JSON files', path: '/json-files', contentPath: '/json-files' },
+	file3d: { label: '3D files', path: '/file3d' },
+	'file-3ds': { label: '3D files', path: '/file3d' },
+	'file-3d-content': { label: '3D files', path: '/file3d', contentPath: '/file3d' },
+	mixed: { label: 'Mixed', path: '/' },
 };
 
 const formatBytes = (bytes: number): string => {
@@ -100,7 +100,7 @@ const formatBytes = (bytes: number): string => {
 };
 
 const formatDate = (date: Date): string => {
-	return new Intl.DateTimeFormat('es-ES', {
+	return new Intl.DateTimeFormat('en-US', {
 		day: '2-digit',
 		month: '2-digit',
 		year: 'numeric',
@@ -139,13 +139,13 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 	return (
 		<motion.div
 			animate={{ opacity: 1, y: 0 }}
-			className="flex items-center"
+			className="flex min-w-0 items-center overflow-hidden"
 			initial={{ opacity: 0, y: -5 }}
 			transition={{ duration: 0.15 }}
 		>
-			<Breadcrumb>
-				<BreadcrumbList className="flex items-center gap-0">
-					<BreadcrumbItem>
+			<Breadcrumb className="min-w-0 overflow-hidden">
+				<BreadcrumbList className="flex min-w-0 flex-nowrap items-center gap-0 overflow-hidden">
+					<BreadcrumbItem className="shrink-0">
 						<Button
 							className="flex h-6 cursor-pointer items-center gap-0.5 p-0 font-medium text-primary hover:text-primary/80"
 							onClick={() => navigate('/')}
@@ -159,10 +159,10 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 					{/* En vistas de contenido, enlazar al índice de la entidad */}
 					{isContentView && (
 						<>
-							<BreadcrumbSeparator>
+							<BreadcrumbSeparator className="shrink-0">
 								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
-							<BreadcrumbItem>
+							<BreadcrumbItem className="shrink-0">
 								<Button
 									className="h-6 cursor-pointer p-0 font-medium text-primary text-xs hover:text-primary/80"
 									onClick={() => navigate(config.contentPath || config.path)}
@@ -182,15 +182,17 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 							const isLast = idx === crumbs.length - 1;
 							return (
 								<Fragment key={c.id}>
-									<BreadcrumbSeparator>
+									<BreadcrumbSeparator className="shrink-0">
 										<ChevronRight className="h-2 w-2 text-muted-foreground" />
 									</BreadcrumbSeparator>
-									<BreadcrumbItem>
+									<BreadcrumbItem className="min-w-0 overflow-hidden">
 										{isLast ? (
-											<BreadcrumbPage className="font-medium text-muted-foreground text-xs">{c.name}</BreadcrumbPage>
+											<BreadcrumbPage className="truncate font-medium text-muted-foreground text-xs">
+												{c.name}
+											</BreadcrumbPage>
 										) : (
 											<Button
-												className="h-6 cursor-pointer p-0 font-medium text-primary text-xs hover:text-primary/80"
+												className="h-6 cursor-pointer truncate p-0 font-medium text-primary text-xs hover:text-primary/80"
 												onClick={() => {
 													// Usar navegación jerárquica
 													const hierarchicalPath = buildHierarchicalPath(c.id);
@@ -217,10 +219,10 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 					{/* Fallback: si no hay breadcrumbs, mostrar nombre simple */}
 					{isContentView && !isFolderContent && currentItem?.name && (
 						<>
-							<BreadcrumbSeparator>
+							<BreadcrumbSeparator className="shrink-0">
 								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
-							<BreadcrumbItem>
+							<BreadcrumbItem className="min-w-0 overflow-hidden">
 								<div className="flex min-w-0 items-center overflow-hidden">
 									<CornerDownRight className="mr-0.5 h-2 w-2 shrink-0 text-muted" />
 									{currentItem.emoji && <span className="mr-0.5 shrink-0 text-xs">{currentItem.emoji}</span>}
@@ -232,10 +234,10 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 
 					{!isContentView && (
 						<>
-							<BreadcrumbSeparator>
+							<BreadcrumbSeparator className="shrink-0">
 								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
-							<BreadcrumbItem>
+							<BreadcrumbItem className="shrink-0">
 								<BreadcrumbPage className="font-medium text-muted-foreground text-xs">{config.label}</BreadcrumbPage>
 							</BreadcrumbItem>
 						</>

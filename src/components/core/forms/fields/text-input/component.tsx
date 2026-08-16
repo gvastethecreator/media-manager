@@ -3,9 +3,9 @@ import React from 'react';
 import { Input as BaseTextInput } from '@/components/ui/input';
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-	label?: string;
-	id: string;
 	error?: string;
+	id: string;
+	label?: string;
 }
 
 const TextInput: React.FC<TextInputProps> = ({
@@ -39,7 +39,7 @@ const TextInput: React.FC<TextInputProps> = ({
 				value={value}
 				{...(props as any)}
 			/>
-			{error && <p className="mt-1 text-red-500 text-sm">{error}</p>}
+			{error && <p className="mt-1 text-destructive text-sm">{error}</p>}
 		</div>
 	);
 };

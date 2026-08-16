@@ -4,9 +4,9 @@ import type { Album } from '@/types/entities/album';
 interface AlbumCardContentProps {
 	album: Album;
 	imagesCount: number;
-	videosCount: number;
 	primaryColor: string;
 	tcgMode?: boolean;
+	videosCount: number;
 }
 
 /**
@@ -37,7 +37,7 @@ export function AlbumCardContent({
 		<div className="flex-shrink-0 px-3 py-2">
 			{/* Descripción principal */}
 			{album.description && (
-				<p className={cn('mb-2 line-clamp-2 text-muted-foreground text-xs', tcgMode && 'italic')}>
+				<p className={cn('mb-2 line-clamp-2 text-muted-foreground text-sm', tcgMode && 'italic')}>
 					{album.description}
 				</p>
 			)}
@@ -47,19 +47,19 @@ export function AlbumCardContent({
 				{/* Contadores */}
 				<div className="flex flex-col gap-1">
 					<div className="flex items-center justify-between">
-						<span className="text-muted-foreground text-xs">Imágenes:</span>
-						<span className="font-medium text-xs">{imagesCount}</span>
+						<span className="text-muted-foreground text-sm">Images:</span>
+						<span className="font-medium text-sm">{imagesCount}</span>
 					</div>
 
 					<div className="flex items-center justify-between">
-						<span className="text-muted-foreground text-xs">Videos:</span>
-						<span className="font-medium text-xs">{videosCount}</span>
+						<span className="text-muted-foreground text-sm">Videos:</span>
+						<span className="font-medium text-sm">{videosCount}</span>
 					</div>
 
 					{album.shortcut && (
 						<div className="flex items-center justify-between">
-							<span className="text-muted-foreground text-xs">Atajo:</span>
-							<span className="rounded bg-muted px-1.5 font-mono text-xs">{album.shortcut}</span>
+							<span className="text-muted-foreground text-sm">Atajo:</span>
+							<span className="rounded bg-muted px-1.5 font-mono text-sm">{album.shortcut}</span>
 						</div>
 					)}
 				</div>
@@ -70,8 +70,8 @@ export function AlbumCardContent({
 						{/* Barra de progreso estilo TCG - Porcentaje de imágenes */}
 						<div className="flex flex-col">
 							<div className="mb-1 flex items-center justify-between">
-								<span className="text-muted-foreground text-xs">Imágenes</span>
-								<span className="font-medium text-xs">
+								<span className="text-muted-foreground text-sm">Images</span>
+								<span className="font-medium text-sm">
 									{imagesCount}/{imagesCount + videosCount}
 								</span>
 							</div>
@@ -89,8 +89,8 @@ export function AlbumCardContent({
 						{/* Barra de progreso estilo TCG - Porcentaje de videos */}
 						<div className="flex flex-col">
 							<div className="mb-1 flex items-center justify-between">
-								<span className="text-muted-foreground text-xs">Videos</span>
-								<span className="font-medium text-xs">
+								<span className="text-muted-foreground text-sm">Videos</span>
+								<span className="font-medium text-sm">
 									{videosCount}/{imagesCount + videosCount}
 								</span>
 							</div>
@@ -111,18 +111,18 @@ export function AlbumCardContent({
 			{/* Filtros si existen */}
 			{filters.length > 0 && (
 				<div className="mb-2">
-					<p className="mb-1 font-medium text-xs">Filtros activos:</p>
+					<p className="mb-1 font-medium text-sm">Active filters:</p>
 					<div className="flex flex-wrap gap-1">
 						{filters.slice(0, 3).map((filter: any) => (
 							<span
-								className="rounded bg-background/40 px-1.5 py-0.5 text-[10px]"
+								className="rounded bg-background/40 px-1.5 py-0.5 text-xs"
 								key={`filter-${filter.field || filter.type || 'unknown'}-${filter.value || ''}`}
 							>
 								{filter.field || filter.type}
 							</span>
 						))}
 						{filters.length > 3 && (
-							<span className="rounded bg-background/40 px-1.5 py-0.5 text-[10px]">+{filters.length - 3} más</span>
+							<span className="rounded bg-background/40 px-1.5 py-0.5 text-xs">+{filters.length - 3} more</span>
 						)}
 					</div>
 				</div>

@@ -10,16 +10,16 @@
  * 🗿 Modelo base de Tag, derivado del schema de Drizzle.
  */
 export interface TagBase {
-	id: string;
-	name: string;
+	category: string | null;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
-	category: string | null;
-	shortcut: string | null;
 	featuredImage: string | null;
+	id: string;
 	isFavorite: boolean;
-	createdAt: Date;
+	name: string;
+	shortcut: string | null;
 	updatedAt: Date;
 }
 
@@ -71,10 +71,10 @@ import { EntityStats } from '../entity.types';
  * 📊 Estadísticas calculadas para un Tag.
  */
 export interface TagStatistics extends EntityStats {
+	completenessScore: number; // Qué tan completo está el perfil del tag (descripción, etc.)
+	popularity: number; // Un score de popularidad general
 	totalRelations: number; // Suma de todas las relaciones
 	usageDiversity: number; // Cuán distribuido está el uso del tag entre diferentes tipos de entidades
-	popularity: number; // Un score de popularidad general
-	completenessScore: number; // Qué tan completo está el perfil del tag (descripción, etc.)
 }
 
 /**
@@ -82,10 +82,6 @@ export interface TagStatistics extends EntityStats {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface TagWithStats extends TagBase {
-	entityType: 'tag';
-	stats: TagStatistics;
-	/** Alias para compatibilidad - apunta a stats */
-	statistics?: TagStatistics;
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -101,13 +97,16 @@ export interface TagWithStats extends TagBase {
 		properties?: number;
 		groups?: number;
 	};
+	entityType: 'tag';
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: TagStatistics;
+	stats: TagStatistics;
 }
 
 /**
  * 🌟 Tipo completo de Tag con todas las relaciones
  */
 export interface TagComplete extends TagWithStats {
-	tags: string[];
 	relations: {
 		images: string[];
 		videos: string[];
@@ -123,34 +122,33 @@ export interface TagComplete extends TagWithStats {
 		properties: string[];
 		groups: string[];
 	};
+	tags: string[];
 }
 
 /**
  * 📝 Datos para crear un Tag
  */
 export interface TagCreateInput {
-	name: string;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
+	name: string;
+	shortcut?: string | null;
 }
 
 /**
  * 📝 Datos para actualizar un Tag
  */
 export interface TagUpdateInput {
-	name?: string;
+	category?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
+	name?: string;
+	shortcut?: string | null;
 }
 
 // ----------------------------------------------------------------

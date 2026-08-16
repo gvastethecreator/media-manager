@@ -11,30 +11,30 @@ import type { AudioComplete, AudioFilters, AudioFormData } from '@/types/entitie
 export interface AudioState {
 	// Estado de datos
 	audios: AudioComplete[];
-	selectedAudios: AudioComplete[];
+	clearFilters: () => void;
+	clearSelection: () => void;
+	createAudio: (data: AudioFormData) => Promise<AudioComplete | undefined>;
 	currentAudio: AudioComplete | null;
-
-	// Estado de UI
-	loading: boolean;
+	deleteAudio: (id: string) => Promise<void>;
+	deselectAudio: (audioId: string) => void;
 	error: string | null;
-	filters: AudioFilters;
 
 	// Acciones de datos
 	fetchAudios: () => Promise<void>;
-	createAudio: (data: AudioFormData) => Promise<AudioComplete | undefined>;
-	updateAudio: (id: string, data: AudioFormData) => Promise<AudioComplete | undefined>;
-	deleteAudio: (id: string) => Promise<void>;
-
-	// Acciones de selección
-	selectAudio: (audio: AudioComplete) => void;
-	deselectAudio: (audioId: string) => void;
-	clearSelection: () => void;
-
-	// Acciones de filtrado
-	setFilters: (filters: Partial<AudioFilters>) => void;
-	clearFilters: () => void;
+	filters: AudioFilters;
 
 	// Utilidades
 	getAudioById: (id: string) => AudioComplete | undefined;
+
+	// Estado de UI
+	loading: boolean;
+
+	// Acciones de selección
+	selectAudio: (audio: AudioComplete) => void;
+	selectedAudios: AudioComplete[];
+
+	// Acciones de filtrado
+	setFilters: (filters: Partial<AudioFilters>) => void;
 	toggleFavorite: (id: string) => Promise<void>;
+	updateAudio: (id: string, data: AudioFormData) => Promise<AudioComplete | undefined>;
 }

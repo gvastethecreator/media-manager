@@ -13,28 +13,28 @@ import type { CollectionState } from '../types';
  * Slice de filtros y ordenamiento para colecciones
  */
 export interface CollectionFiltersSlice {
+	applyFilters: (filters: CollectionFilter[]) => CollectionWithStats[];
+	clearFilters: () => void;
 	// Filtros básicos
 	filterByCategory: (category: string | null) => CollectionWithStats[];
-	filterByRarity: (rarity: string | null) => CollectionWithStats[];
-	filterByPrice: (minPrice: number | null, maxPrice: number | null) => CollectionWithStats[];
 	filterByName: (searchTerm: string) => CollectionWithStats[];
+	filterByPrice: (minPrice: number | null, maxPrice: number | null) => CollectionWithStats[];
+	filterByRarity: (rarity: string | null) => CollectionWithStats[];
+	getFilteredCollections: () => CollectionWithStats[];
+	getGroupedCollections: (groupBy?: 'rarity' | null) => Record<string, CollectionWithStats[]>;
 
 	// Ordenamiento y agrupamiento
 	getSortedCollections: (sortOption?: string) => CollectionWithStats[];
-	getGroupedCollections: (groupBy?: 'rarity' | null) => Record<string, CollectionWithStats[]>;
 
 	// Filtros avanzados
 	setActiveFilters: (filters: CollectionFilter[]) => void;
-	clearFilters: () => void;
-	applyFilters: (filters: CollectionFilter[]) => CollectionWithStats[];
+	setGroupBy: (groupBy: 'category' | 'rarity' | 'platform' | null) => void;
 
 	// Búsqueda
 	setSearchTerm: (term: string) => void;
-	getFilteredCollections: () => CollectionWithStats[];
 
 	// Configuración de vista
 	setSortOption: (option: string) => void;
-	setGroupBy: (groupBy: 'category' | 'rarity' | 'platform' | null) => void;
 }
 
 /**

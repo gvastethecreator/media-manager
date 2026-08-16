@@ -116,27 +116,27 @@ graph TB
 ```typescript
 // Tipo base del prompt
 interface PromptBase extends BaseEntity {
-  name: string;              // Nombre del prompt
-  emoji: string;             // Emoji representativo
-  color: string;             // Color para UI
-  description: string | null; // Descripción opcional
-  content: string;           // Contenido del prompt
-  purpose: string;           // Propósito/uso del prompt
-  category: string;          // Categoría de clasificación
-  parameters: string;        // Parámetros JSON serializados
-  tags?: string;             // Tags JSON serializados (opcional)
-  featuredImage: string | null; // Imagen destacada
-  isFavorite: boolean;       // Marcado como favorito
+	name: string; // Nombre del prompt
+	emoji: string; // Emoji representativo
+	color: string; // Color para UI
+	description: string | null; // Descripción opcional
+	content: string; // Contenido del prompt
+	purpose: string; // Propósito/uso del prompt
+	category: string; // Categoría de clasificación
+	parameters: string; // Parámetros JSON serializados
+	tags?: string; // Tags JSON serializados (opcional)
+	featuredImage: string | null; // Imagen destacada
+	isFavorite: boolean; // Marcado como favorito
 }
 
 // Tipo para parámetros de un prompt
 interface PromptParameter {
-  name: string;
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
-  description?: string;
-  required?: boolean;
-  defaultValue?: any;
-  options?: string[];
+	name: string;
+	type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+	description?: string;
+	required?: boolean;
+	defaultValue?: any;
+	options?: string[];
 }
 
 // Tipo completo con relaciones y conteos
@@ -144,12 +144,12 @@ type PromptComplete = PromptBase & PromptRelations & PromptCounts;
 
 // Tipo extendido para UI
 interface PromptExtended extends PromptBase {
-  _count: PromptCounts['_count'];
-  parsedTags?: string[];
-  parsedParameters?: Record<string, any>;
-  previewContent?: string;
-  lastUpdated?: Date;
-  stats?: PromptStats;
+	_count: PromptCounts['_count'];
+	parsedTags?: string[];
+	parsedParameters?: Record<string, any>;
+	previewContent?: string;
+	lastUpdated?: Date;
+	stats?: PromptStats;
 }
 ```
 
@@ -157,19 +157,19 @@ interface PromptExtended extends PromptBase {
 
 ```typescript
 interface PromptFilters {
-  searchQuery?: string;      // Búsqueda por texto
-  categories?: string[];     // Filtrar por categorías
-  purposes?: string[];       // Filtrar por propósitos
-  onlyFavorites?: boolean;   // Solo favoritos
+	searchQuery?: string; // Búsqueda por texto
+	categories?: string[]; // Filtrar por categorías
+	purposes?: string[]; // Filtrar por propósitos
+	onlyFavorites?: boolean; // Solo favoritos
 }
 
 enum PromptSortCriteria {
-  NAME_ASC = 'name:asc',
-  NAME_DESC = 'name:desc',
-  CREATED_ASC = 'created:asc',
-  CREATED_DESC = 'created:desc',
-  UPDATED_ASC = 'updated:asc',
-  UPDATED_DESC = 'updated:desc',
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	CREATED_ASC = 'created:asc',
+	CREATED_DESC = 'created:desc',
+	UPDATED_ASC = 'updated:asc',
+	UPDATED_DESC = 'updated:desc',
 }
 ```
 

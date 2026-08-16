@@ -8,12 +8,12 @@ import { WorldItemViewMode } from '@/types/entities/world-item';
 import type { WorldItemActions, WorldItemState, WorldItemUIState } from '../types';
 
 export interface WorldItemUISlice {
-	ui: WorldItemUIState;
-	selectWorldItem: (id: string | null) => void;
-	startEditing: (id: string | null) => void;
-	highlightWorldItem: (id: string | null) => void;
-	setViewMode: (mode: WorldItemViewMode) => void;
 	clearSelection: () => void;
+	highlightWorldItem: (id: string | null) => void;
+	selectWorldItem: (id: string | null) => void;
+	setViewMode: (mode: WorldItemViewMode) => void;
+	startEditing: (id: string | null) => void;
+	ui: WorldItemUIState;
 }
 
 export const createWorldItemUISlice: StateCreator<WorldItemState & WorldItemActions, [], [], WorldItemUISlice> = (
@@ -28,6 +28,10 @@ export const createWorldItemUISlice: StateCreator<WorldItemState & WorldItemActi
 	selectWorldItem: (id) => set((state) => ({ ui: { ...state.ui, selectedId: id, editingId: null } })),
 	startEditing: (id) => set((state) => ({ ui: { ...state.ui, editingId: id } })),
 	highlightWorldItem: (id) => set((state) => ({ ui: { ...state.ui, highlightedId: id } })),
-	setViewMode: (mode) => set((state) => ({ ui: { ...state.ui, viewMode: mode } })),
+	setViewMode: (mode) =>
+		set((state) => {
+			if (state.ui.viewMode === mode) return state;
+			return { ui: { ...state.ui, viewMode: mode } };
+		}),
 	clearSelection: () => set((state) => ({ ui: { ...state.ui, selectedId: null, editingId: null } })),
 });

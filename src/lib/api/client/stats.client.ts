@@ -1,4 +1,10 @@
 /**
+ * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
+ * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
+ * Ver #1 deepening opportunity en architecture review.
+ */
+
+/**
  * Cliente de API para estadísticas del sistema.
  */
 import type { SystemStats } from '@/lib/api/system';
@@ -9,7 +15,7 @@ const API_BASE_PATH = '/api/stats';
 export async function getSystemStatsFromApi(): Promise<SystemStats> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener estadísticas');
+		throw new Error('Could not get statistics');
 	}
 	return response.json();
 }
@@ -17,7 +23,7 @@ export async function getSystemStatsFromApi(): Promise<SystemStats> {
 export async function invalidateStatsInApi(): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/invalidate`, { method: 'POST' });
 	if (!response.ok) {
-		throw new Error('Error al invalidar estadísticas');
+		throw new Error('Could not invalidate statistics');
 	}
 }
 
@@ -28,7 +34,7 @@ export async function invalidateStatsInApi(): Promise<void> {
 export async function getImageStatsFromApi(imageId: string): Promise<ImageStatistics> {
 	const response = await fetch(`/api/images/${imageId}/stats`);
 	if (!response.ok) {
-		throw new Error('Error al obtener estadísticas de imagen');
+		throw new Error('Could not get image statistics');
 	}
 	return response.json();
 }

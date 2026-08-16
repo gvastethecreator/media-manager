@@ -102,13 +102,21 @@ const safeJsonParse = (defaultValue: unknown) => (val: unknown) => {
  */
 export const CharacterSchema = BaseEntitySchema.extend({
 	id: z.string().cuid(),
-	name: z.string().min(1, 'El nombre es obligatorio'),
+	name: z.string().min(1, 'The name is required'),
 	description: z.string().optional(),
 	level: z.number().int().min(1).max(100).default(1),
 	class: z.string(),
 	race: z.string(),
 	alignment: z.string(),
 	backstory: z.string().optional(),
+	emoji: z.string().default('👤'),
+	color: z
+		.string()
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color must be a valid hexadecimal value or CSS variable'
+		)
+		.default('var(--entity-character)'),
 
 	// Objetos complejos (parsear JSON antes de validar)
 	stats: z.preprocess(safeJsonParse({}), CharacterStatsSchema.optional()),
@@ -158,6 +166,7 @@ export const CreateCharacterSchema = CharacterSchema.omit({
 	id: true,
 	createdAt: true,
 	updatedAt: true,
+	isFavorite: true,
 });
 
 /**

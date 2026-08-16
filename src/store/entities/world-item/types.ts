@@ -25,9 +25,9 @@ export type WorldItem = WorldItemWithStats;
  * 🎮 Estado de UI del store
  */
 export interface WorldItemUIState {
-	selectedId: string | null;
 	editingId: string | null;
 	highlightedId: string | null;
+	selectedId: string | null;
 	viewMode: WorldItemViewMode;
 }
 
@@ -35,50 +35,51 @@ export interface WorldItemUIState {
  * 📊 Estado global del store (solo datos, sin métodos)
  */
 export interface WorldItemState {
-	// 📋 Datos principales
-	worldItems: WorldItem[];
-	isLoading: boolean;
 	error: string | null;
+	filters: WorldItemFilters;
+	isLoading: boolean;
 
 	// 🎨 UI y configuración visual
 	ui: WorldItemUIState;
-	filters: WorldItemFilters;
+	// 📋 Datos principales
+	worldItems: WorldItem[];
 }
 
 /**
  * 🔄 Acciones disponibles en el store
  */
 export interface WorldItemActions {
-	// 📥 Carga de datos
-	loadWorldItems: () => Promise<void>;
+	addWorldItem: (worldItem: WorldItem) => void;
+	clearFilters: () => void;
+	clearSelection: () => void;
 
 	// 📝 Gestión de items
 	createWorldItem: (item: CreateWorldItemData) => Promise<void>;
-	updateWorldItem: (id: string, item: WorldItemUpdateInput) => Promise<void>;
 	deleteWorldItem: (id: string) => Promise<void>;
-
-	// 🔍 Selectores y getters
-	getWorldItemById: (id: string) => WorldItem | undefined;
 	getFilteredWorldItems: () => WorldItem[];
 	getSortedWorldItems: () => WorldItem[];
 
+	// 🔍 Selectores y getters
+	getWorldItemById: (id: string) => WorldItem | undefined;
+	highlightWorldItem: (id: string | null) => void;
+	// 📥 Carga de datos
+	loadWorldItems: () => Promise<void>;
+	resetStore: () => void;
+
 	// 🎮 Acciones de UI
 	selectWorldItem: (id: string | null) => void;
-	startEditing: (id: string | null) => void;
-	highlightWorldItem: (id: string | null) => void;
-	setViewMode: (mode: WorldItemViewMode) => void;
-	clearSelection: () => void;
-
-	// 🔍 Filtros
-	updateFilters: (filters: Partial<WorldItemFilters>) => void;
-	clearFilters: () => void;
+	setError: (error: string | null) => void;
 	setSearchQuery: (query: string) => void;
+	setViewMode: (mode: WorldItemViewMode) => void;
 
 	// 🛠️ Utilidades del store
 	setWorldItems: (worldItems: WorldItem[]) => void;
-	addWorldItem: (worldItem: WorldItem) => void;
-	resetStore: () => void;
-	setError: (error: string | null) => void;
+	startEditing: (id: string | null) => void;
+
+	// 🔍 Filtros
+	toggleWorldItemFavorite: (id: string) => Promise<void>;
+	updateFilters: (filters: Partial<WorldItemFilters>) => void;
+	updateWorldItem: (id: string, item: WorldItemUpdateInput) => Promise<void>;
 }
 
 /**
@@ -96,6 +97,16 @@ export interface WorldItemApiOptions {
 	baseUrl?: string;
 
 	/**
+	 * Tiempo de caché en milisegundos
+	 */
+	cacheTime?: number;
+
+	/**
+	 * Manejador de errores personalizado
+	 */
+	errorHandler?: (error: unknown) => string;
+
+	/**
 	 * Objeto de configuración fetch para las solicitudes
 	 */
 	fetchOptions?: RequestInit;
@@ -104,16 +115,6 @@ export interface WorldItemApiOptions {
 	 * Función de transformación personalizada para los datos obtenidos
 	 */
 	transform?: (data: unknown) => WorldItem[];
-
-	/**
-	 * Manejador de errores personalizado
-	 */
-	errorHandler?: (error: unknown) => string;
-
-	/**
-	 * Tiempo de caché en milisegundos
-	 */
-	cacheTime?: number;
 }
 
 /**
@@ -131,24 +132,24 @@ export interface WorldItemExportOptions {
 	ids?: string[];
 
 	/**
-	 * Incluir relaciones (imágenes, notas)
-	 */
-	includeRelations?: boolean;
-
-	/**
 	 * Incluir metadatos (fechas, ids)
 	 */
 	includeMetadata?: boolean;
+
+	/**
+	 * Incluir relaciones (imágenes, notas)
+	 */
+	includeRelations?: boolean;
 }
 
 /**
  * Resultado del servicio de búsqueda de WorldItem
  */
 export interface WorldItemSearchResult {
-	items: WorldItem[];
-	totalCount: number;
 	hasMore: boolean;
+	items: WorldItem[];
 	nextCursor?: string;
+	totalCount: number;
 }
 
 /**
@@ -156,19 +157,18 @@ export interface WorldItemSearchResult {
  */
 export interface WorldItemBatchOptions {
 	/**
-	 * Operación a realizar
+	 * Datos para la operación (solo para update, changeType, changeCategory)
 	 */
-	operation: 'delete' | 'update' | 'favorite' | 'unfavorite' | 'changeType' | 'changeCategory';
+	data?: Partial<WorldItem> | { [key: string]: unknown };
 
 	/**
 	 * IDs de los elementos a procesar
 	 */
 	ids: string[];
-
 	/**
-	 * Datos para la operación (solo para update, changeType, changeCategory)
+	 * Operation a realizar
 	 */
-	data?: Partial<WorldItem> | { [key: string]: unknown };
+	operation: 'delete' | 'update' | 'favorite' | 'unfavorite' | 'changeType' | 'changeCategory';
 }
 
 // Re-exportar tipos canónicos

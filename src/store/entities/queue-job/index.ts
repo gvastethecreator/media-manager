@@ -13,12 +13,5 @@ export type { QueueJobFiltersSlice } from './slices/filters';
 export { queueJobSelectors } from './slices/selectors';
 export type { QueueJobUISlice } from './slices/ui';
 // Exportar tipos
-export type {
-	QueueJobCoreState,
-	QueueJobState,
-} from './types';
-export {
-	initialQueueJobState,
-	QueueJobStatus,
-	QueueJobType,
-} from './types';
+export type { QueueJobCoreState, QueueJobState } from './types';
+export { initialQueueJobState, QueueJobStatus, QueueJobType } from './types';

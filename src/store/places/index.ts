@@ -15,61 +15,61 @@ import { filterPlaces, findPlaceById, findPlacesByIds, sortPlaces } from '../../
  * Estado del store de lugares
  */
 interface PlacesState {
-	// Datos
-	places: Place[];
-	selectedPlaceIds: string[];
-	expandedPlaceIds: string[];
-	lastViewedPlaceId: string | null;
-
-	// UI
-	isLoading: boolean;
-	view: string;
-	sortBy: string;
-	filters: PlaceFilters;
+	addPlace: (place: any) => void;
+	clearSelection: () => void;
+	collapsePlace: (id: string) => void;
 
 	// Config
 	configId: string | null;
-
-	// Acciones: carga de datos
-	setPlaces: (places: any[]) => void;
-	addPlace: (place: any) => void;
-	updatePlace: (id: string, data: any) => void;
 	deletePlace: (id: string) => void;
-
-	// Acciones: selección
-	selectPlace: (id: string) => void;
 	deselectPlace: (id: string) => void;
-	setSelectedPlaceIds: (ids: string[]) => void;
-	clearSelection: () => void;
-	togglePlaceSelection: (id: string) => void;
+	expandedPlaceIds: string[];
 
 	// Acciones: expansión
 	expandPlace: (id: string) => void;
-	collapsePlace: (id: string) => void;
-	setExpandedPlaceIds: (ids: string[]) => void;
-
-	// Acciones: navegación
-	setLastViewedPlace: (id: string | null) => void;
-
-	// Acciones: vista y ordenación
-	setView: (view: string) => void;
-	setSortBy: (sortBy: string) => void;
-	setFilters: (filters: PlaceFilters) => void;
-	resetFilters: () => void;
-
-	// Acciones: configuración
-	setConfigId: (id: string) => void;
-
-	// Acciones: carga y estado
-	setIsLoading: (isLoading: boolean) => void;
+	filters: PlaceFilters;
+	getFilteredPlaces: () => Place[];
 
 	// Selectores
 	getPlaceById: (id: string) => Place | undefined;
 	getSelectedPlaces: () => Place[];
-	getFilteredPlaces: () => Place[];
 	getSortedAndFilteredPlaces: () => Place[];
-	isPlaceSelected: (id: string) => boolean;
+
+	// UI
+	isLoading: boolean;
 	isPlaceExpanded: (id: string) => boolean;
+	isPlaceSelected: (id: string) => boolean;
+	lastViewedPlaceId: string | null;
+	// Datos
+	places: Place[];
+	resetFilters: () => void;
+	selectedPlaceIds: string[];
+
+	// Acciones: selección
+	selectPlace: (id: string) => void;
+
+	// Acciones: configuración
+	setConfigId: (id: string) => void;
+	setExpandedPlaceIds: (ids: string[]) => void;
+	setFilters: (filters: PlaceFilters) => void;
+
+	// Acciones: carga y estado
+	setIsLoading: (isLoading: boolean) => void;
+
+	// Acciones: navegación
+	setLastViewedPlace: (id: string | null) => void;
+
+	// Acciones: carga de datos
+	setPlaces: (places: any[]) => void;
+	setSelectedPlaceIds: (ids: string[]) => void;
+	setSortBy: (sortBy: string) => void;
+
+	// Acciones: vista y ordenación
+	setView: (view: string) => void;
+	sortBy: string;
+	togglePlaceSelection: (id: string) => void;
+	updatePlace: (id: string, data: any) => void;
+	view: string;
 }
 
 /**

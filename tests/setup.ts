@@ -1,26 +1,28 @@
-import '@testing-library/jest-dom';
-import { afterEach } from 'bun:test';
+import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-// @ts-expect-error faltan tipos de jsdom en entorno Bun; solo se usa en tests
-import { JSDOM } from 'jsdom';
+import { afterEach, vi } from 'vitest';
+import { assertIsolatedTestDatabase } from './safety/test-database-guard';
+import { prepareWorkerTestDatabase } from './safety/prepare-worker-database';
 
-// Configurar jsdom como entorno DOM para pruebas
-const dom = new JSDOM('<!doctype html><html lang="es"><head><meta charset="utf-8"></head><body></body></html>', {
-	url: 'http://localhost/',
-	pretendToBeVisual: true,
-});
+// Asegurar flags de entorno para ejecución de tests unitarios
+// - Fuerza detección de "test" en módulos compartidos (p.ej. Drizzle)
+// - Evita inicializaciones pesadas (FTS5) durante unit tests
+process.env.NODE_ENV ??= 'test';
+process.env.DISABLE_FTS5 ??= '1';
 
-// Asignar globals esperados por React Testing Library y React 19
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const globalAny: any = globalThis as any;
-globalAny.window = dom.window;
-globalAny.document = dom.window.document;
-globalAny.navigator = { userAgent: 'node.js' };
-globalAny.requestAnimationFrame = (cb: FrameRequestCallback) =>
-	setTimeout(() => cb(Date.now()), 0) as unknown as number;
-globalAny.cancelAnimationFrame = (id: number) => clearTimeout(id);
+await prepareWorkerTestDatabase();
+assertIsolatedTestDatabase();
+
+const { getDbClient } = await import('@/lib/drizzle');
+const dbClient = getDbClient();
+if (dbClient) {
+	await dbClient.execute('PRAGMA busy_timeout = 5000');
+	await dbClient.execute('PRAGMA journal_mode = WAL');
+	await dbClient.execute('PRAGMA foreign_keys = ON');
+}
+
 // Polyfill sencillo de ResizeObserver para jsdom
-class RO {
+class ResizeObserverMock {
 	observe() {
 		/* noop */
 	}
@@ -31,25 +33,60 @@ class RO {
 		/* noop */
 	}
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-globalAny.ResizeObserver = RO as any;
 
-// Polyfill KeyboardEvent si no existe (algunos tests lo requieren)
-if (typeof globalAny.KeyboardEvent === 'undefined') {
-	class PolyfillKeyboardEvent extends dom.window.Event {
-		key: string;
-		constructor(type: string, options: any = {}) {
-			super(type, options);
-			this.key = options.key || '';
+// Solo asignar si no existe (jsdom moderno ya lo tiene)
+if (typeof globalThis.ResizeObserver === 'undefined') {
+	globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
+}
+
+// Polyfill requestAnimationFrame/cancelAnimationFrame si no existen
+if (typeof globalThis.requestAnimationFrame === 'undefined') {
+	globalThis.requestAnimationFrame = (cb: FrameRequestCallback) =>
+		setTimeout(() => cb(Date.now()), 0) as unknown as number;
+}
+if (typeof globalThis.cancelAnimationFrame === 'undefined') {
+	globalThis.cancelAnimationFrame = (id: number) => clearTimeout(id);
+}
+
+// Mock IntersectionObserver si no existe
+if (typeof globalThis.IntersectionObserver === 'undefined') {
+	class IntersectionObserverMock {
+		observe() {
+			/* noop */
+		}
+		unobserve() {
+			/* noop */
+		}
+		disconnect() {
+			/* noop */
 		}
 	}
-	globalAny.KeyboardEvent = PolyfillKeyboardEvent;
+	// @ts-expect-error mock simple
+	globalThis.IntersectionObserver = IntersectionObserverMock;
 }
 
 // Evitar advertencias de act con React 19
-globalAny.IS_REACT_ACT_ENVIRONMENT = true;
+// @ts-expect-error React testing flag
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-// Limpiar después de cada test
+// Mock matchMedia (necesario para algunos componentes UI)
+if (typeof window !== 'undefined' && !window.matchMedia) {
+	Object.defineProperty(window, 'matchMedia', {
+		writable: true,
+		value: vi.fn().mockImplementation((query: string) => ({
+			matches: false,
+			media: query,
+			onchange: null,
+			addListener: vi.fn(),
+			removeListener: vi.fn(),
+			addEventListener: vi.fn(),
+			removeEventListener: vi.fn(),
+			dispatchEvent: vi.fn(),
+		})),
+	});
+}
+
+// Limpiar después de cada test (React Testing Library)
 afterEach(() => {
 	cleanup();
 });

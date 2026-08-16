@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { WildcardSortCriteria, WildcardViewMode } from '../../../types/entities/wildcard';
+import { WildcardSortCriteria, WildcardViewMode } from '@/types/entities/wildcard';
 import { createWildcardCoreSlice, type WildcardCoreSlice } from './slices/core';
 import { createWildcardFiltersSlice, type WildcardFiltersSlice } from './slices/filters';
 import { createWildcardUISlice, type WildcardUISlice } from './slices/ui';

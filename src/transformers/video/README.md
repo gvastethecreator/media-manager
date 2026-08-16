@@ -17,31 +17,31 @@ El transformer de Video implementa el patrón **EntityWithStats** para convertir
 
 ```typescript
 interface VideoStatistics {
-  // Conteos de relaciones (12 tipos)
-  albumsCount: number;
-  collectionsCount: number;
-  tagsCount: number;
-  // ... más conteos
+	// Conteos de relaciones (12 tipos)
+	albumsCount: number;
+	collectionsCount: number;
+	tagsCount: number;
+	// ... más conteos
 
-  // Métricas técnicas
-  durationMinutes: number;
-  durationHours: number;
-  megabytes: number;
-  gigabytes: number;
-  aspectRatio: string;
-  resolution: string;
-  qualityLevel: VideoQuality;
+	// Métricas técnicas
+	durationMinutes: number;
+	durationHours: number;
+	megabytes: number;
+	gigabytes: number;
+	aspectRatio: string;
+	resolution: string;
+	qualityLevel: VideoQuality;
 
-  // Análisis de calidad
-  qualityScore: number; // 0-100
-  technicalGrade: 'A' | 'B' | 'C' | 'D';
-  hasAudio: boolean;
-  hasSubtitles: boolean;
+	// Análisis de calidad
+	qualityScore: number; // 0-100
+	technicalGrade: 'A' | 'B' | 'C' | 'D';
+	hasAudio: boolean;
+	hasSubtitles: boolean;
 
-  // Campos derivados
-  formattedSize: string;
-  formattedDuration: string;
-  qualityLabel: string;
+	// Campos derivados
+	formattedSize: string;
+	formattedDuration: string;
+	qualityLabel: string;
 }
 ```
 
@@ -71,12 +71,12 @@ Función principal que transforma un video de Drizzle a VideoWithStats.
 
 ```typescript
 const drizzleVideo = await db.query.videos.findFirst({
-  where: (videos, { eq }) => eq(videos.id, id),
-  with: {
-    albums: { columns: { id: true } },
-    collections: { columns: { id: true } },
-    tags: { columns: { id: true } },
-  },
+	where: (videos, { eq }) => eq(videos.id, id),
+	with: {
+		albums: { columns: { id: true } },
+		collections: { columns: { id: true } },
+		tags: { columns: { id: true } },
+	},
 });
 
 const videoWithStats = fromDrizzleVideoWithCounts(drizzleVideo);
@@ -105,22 +105,22 @@ const allVideos = getAllVideos(videosRecord);
 
 ### Quality Score (0-100)
 
-| Componente | Puntuación Máxima | Criterios |
-|------------|-------------------|-----------|
-| **Resolución** | 30 pts | 1080p+ (30), 720p (25), 480p (15), Cualquiera (5) |
-| **Duración** | 20 pts | 1-120 min (20), Cualquiera (10) |
-| **Bitrate** | 15 pts | 5-50 MB/min (15), Cualquiera (5) |
-| **Metadatos** | 15 pts | Metadata (10) + Thumbnail (5) |
-| **Asociaciones** | 20 pts | 10+ (20), 5+ (15), 1+ (10), Base (5) |
+| Componente       | Puntuación Máxima | Criterios                                         |
+| ---------------- | ----------------- | ------------------------------------------------- |
+| **Resolución**   | 30 pts            | 1080p+ (30), 720p (25), 480p (15), Cualquiera (5) |
+| **Duración**     | 20 pts            | 1-120 min (20), Cualquiera (10)                   |
+| **Bitrate**      | 15 pts            | 5-50 MB/min (15), Cualquiera (5)                  |
+| **Metadatos**    | 15 pts            | Metadata (10) + Thumbnail (5)                     |
+| **Asociaciones** | 20 pts            | 10+ (20), 5+ (15), 1+ (10), Base (5)              |
 
 ### Technical Grade
 
-| Grado | Criterios |
-|-------|-----------|
+| Grado | Criterios                     |
+| ----- | ----------------------------- |
 | **A** | Score ≥85 + Ultra HD + ≥100MB |
-| **B** | Score ≥70 + HD + ≥50MB |
-| **C** | Score ≥50 + Medium quality |
-| **D** | Resto |
+| **B** | Score ≥70 + HD + ≥50MB        |
+| **C** | Score ≥50 + Medium quality    |
+| **D** | Resto                         |
 
 ## 🎥 Análisis Técnico
 
@@ -128,11 +128,11 @@ const allVideos = getAllVideos(videosRecord);
 
 ```typescript
 enum VideoQuality {
-  ULTRA = 'ultra',  // ≥1920x1080
-  HIGH = 'high',    // ≥1280x720
-  MEDIUM = 'medium', // ≥640x480
-  LOW = 'low',      // <640x480
-  UNKNOWN = 'unknown'
+	ULTRA = 'ultra', // ≥1920x1080
+	HIGH = 'high', // ≥1280x720
+	MEDIUM = 'medium', // ≥640x480
+	LOW = 'low', // <640x480
+	UNKNOWN = 'unknown',
 }
 ```
 
@@ -148,10 +148,10 @@ enum VideoQuality {
 
 ```typescript
 // Ejemplos de salida
-"45s"           // < 1 minuto
-"5m 30s"        // < 1 hora
-"2h 15m"        // ≥ 1 hora
-"1h"            // Exacto
+'45s'; // < 1 minuto
+'5m 30s'; // < 1 hora
+'2h 15m'; // ≥ 1 hora
+'1h'; // Exacto
 ```
 
 ## 📈 Beneficios de Rendimiento
@@ -162,20 +162,20 @@ enum VideoQuality {
 // ANTES: Select * y luego conteos manuales (o Drizzle include)
 // DESPUÉS: Drizzle con with y count (más eficiente)
 const videosWithCounts = await db.query.videos.findMany({
-  with: {
-    albums: { columns: { id: true } },
-    collections: { columns: { id: true } },
-    tags: { columns: { id: true } },
-  },
+	with: {
+		albums: { columns: { id: true } },
+		collections: { columns: { id: true } },
+		tags: { columns: { id: true } },
+	},
 });
 
-const transformedVideos = videosWithCounts.map(video => ({
-  ...video,
-  _count: {
-    albums: video.albums.length,
-    collections: video.collections.length,
-    tags: video.tags.length,
-  },
+const transformedVideos = videosWithCounts.map((video) => ({
+	...video,
+	_count: {
+		albums: video.albums.length,
+		collections: video.collections.length,
+		tags: video.tags.length,
+	},
 }));
 ```
 
@@ -183,7 +183,7 @@ const transformedVideos = videosWithCounts.map(video => ({
 
 ```typescript
 // ANTES: Array lineal O(n)
-const video = videos.find(v => v.id === id);
+const video = videos.find((v) => v.id === id);
 
 // DESPUÉS: Record optimizado O(1)
 const video = videosRecord[id];
@@ -201,41 +201,39 @@ const video = videosRecord[id];
 
 ```typescript
 const videos = await findVideos({
-  filters: { qualityLevel: [VideoQuality.HIGH, VideoQuality.ULTRA] }
+	filters: { qualityLevel: [VideoQuality.HIGH, VideoQuality.ULTRA] },
 });
 
-videos.forEach(video => {
-  console.log(`${video.statistics.displayName} - ${video.statistics.qualityLabel}`);
-  console.log(`Duración: ${video.statistics.formattedDuration}`);
-  console.log(`Tamaño: ${video.statistics.formattedSize}`);
+videos.forEach((video) => {
+	console.log(`${video.statistics.displayName} - ${video.statistics.qualityLabel}`);
+	console.log(`Duración: ${video.statistics.formattedDuration}`);
+	console.log(`Tamaño: ${video.statistics.formattedSize}`);
 });
 ```
 
 ### 2. Análisis de Calidad
 
 ```typescript
-const highQualityVideos = videos.filter(v =>
-  v.statistics.technicalGrade === 'A' || v.statistics.technicalGrade === 'B'
+const highQualityVideos = videos.filter(
+	(v) => v.statistics.technicalGrade === 'A' || v.statistics.technicalGrade === 'B'
 );
 
-const avgQualityScore = videos.reduce((sum, v) =>
-  sum + v.statistics.qualityScore, 0
-) / videos.length;
+const avgQualityScore = videos.reduce((sum, v) => sum + v.statistics.qualityScore, 0) / videos.length;
 ```
 
 ### 3. Auto-categorización
 
 ```typescript
-videos.forEach(video => {
-  const tags = video.statistics.autoTags;
+videos.forEach((video) => {
+	const tags = video.statistics.autoTags;
 
-  if (tags.includes('ultra-hd')) {
-    // Procesar videos 4K
-  }
+	if (tags.includes('ultra-hd')) {
+		// Procesar videos 4K
+	}
 
-  if (tags.includes('película')) {
-    // Procesar videos largos
-  }
+	if (tags.includes('película')) {
+		// Procesar videos largos
+	}
 });
 ```
 
@@ -245,16 +243,16 @@ videos.forEach(video => {
 
 ```typescript
 export async function getVideo(id: string): Promise<VideoWithStats | null> {
-  const drizzleVideo = await db.query.videos.findFirst({
-    where: (videos, { eq }) => eq(videos.id, id),
-    with: {
-      albums: { columns: { id: true } },
-      collections: { columns: { id: true } },
-      tags: { columns: { id: true } },
-    },
-  });
+	const drizzleVideo = await db.query.videos.findFirst({
+		where: (videos, { eq }) => eq(videos.id, id),
+		with: {
+			albums: { columns: { id: true } },
+			collections: { columns: { id: true } },
+			tags: { columns: { id: true } },
+		},
+	});
 
-  return drizzleVideo ? fromDrizzleVideoWithCounts(drizzleVideo) : null;
+	return drizzleVideo ? fromDrizzleVideoWithCounts(drizzleVideo) : null;
 }
 ```
 
@@ -262,10 +260,10 @@ export async function getVideo(id: string): Promise<VideoWithStats | null> {
 
 ```typescript
 interface VideoStore {
-  videos: Record<string, VideoWithStats>;
+	videos: Record<string, VideoWithStats>;
 
-  addVideos: (videos: VideoWithStats[]) => void;
-  getVideo: (id: string) => VideoWithStats | undefined;
+	addVideos: (videos: VideoWithStats[]) => void;
+	getVideo: (id: string) => VideoWithStats | undefined;
 }
 ```
 

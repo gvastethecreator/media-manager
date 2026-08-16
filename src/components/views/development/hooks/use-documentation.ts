@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { loadDocumentationFiles } from '../services/documentation';
 
 export const DOCUMENTATION_FILES = ['PRD.md', 'FRONTEND.md', 'BACKEND.md', 'ROADMAP.md'];
@@ -16,8 +17,8 @@ export function useDocumentation() {
 			const content = await loadDocumentationFiles(DOCUMENTATION_FILES);
 			setDocumentationContent(content);
 		} catch (error) {
-			console.error('Error al cargar documentación:', error);
-			setError('No se pudo cargar la documentación');
+			clientLogger.error('Could not load documentation:', error);
+			setError('Documentation could not be loaded');
 		} finally {
 			setIsLoading(false);
 		}

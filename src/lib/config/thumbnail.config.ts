@@ -14,14 +14,14 @@ export enum ThumbnailQuality {
  * Interfaz para la configuración de calidad de thumbnails
  */
 export interface ThumbnailQualityConfig {
-	/** Ancho máximo del thumbnail en píxeles */
-	width: number;
 	/** Alto máximo del thumbnail en píxeles */
 	height: number;
-	/** Calidad de compresión (1-100) */
-	quality: number;
 	/** Descripción legible para la interfaz de usuario */
 	label: string;
+	/** Calidad de compresión (1-100) */
+	quality: number;
+	/** Ancho máximo del thumbnail en píxeles */
+	width: number;
 }
 
 /**

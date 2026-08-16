@@ -45,14 +45,18 @@ export const conceptsApi = {
 };
 
 export interface ConceptCardData {
-	id: string;
-	name: string;
-	description?: string | null;
 	category?: string | null;
 	color?: string | null;
-	emoji?: string | null;
 	createdAt: Date;
-	updatedAt: Date;
+	description?: string | null;
+	emoji?: string | null;
+	id: string;
+	metadata?: {
+		coverImageUrl?: string | null;
+		lastModified?: Date | string;
+		relationTypes?: string[];
+	};
+	name: string;
 	stats: {
 		imageCount: number;
 		videoCount: number;
@@ -62,21 +66,17 @@ export interface ConceptCardData {
 		characterCount: number;
 		totalRelations: number;
 	};
-	metadata?: {
-		coverImageUrl?: string | null;
-		lastModified?: Date | string;
-		relationTypes?: string[];
-	};
+	updatedAt: Date;
 }
 
 export interface GetConceptsOptions {
+	category?: string;
+	includeStats?: boolean;
 	limit?: number;
 	offset?: number;
-	searchTerm?: string;
-	category?: string;
 	orderBy?: 'name' | 'createdAt' | 'updatedAt' | 'relationCount';
 	orderDir?: 'asc' | 'desc';
-	includeStats?: boolean;
+	searchTerm?: string;
 }
 
 /**

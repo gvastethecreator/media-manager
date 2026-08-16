@@ -1,13 +1,9 @@
 import { create } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { imageService } from '@/services/image/image.service';
 import type { ThumbnailStats } from '@/types/thumbnails';
 
 export interface ProcessStatus {
-	status: string;
-	progress: number;
 	current?: number;
-	total?: number;
 	currentFile?: string;
 	lastProcessed?: {
 		id: string;
@@ -15,21 +11,24 @@ export interface ProcessStatus {
 		processedAt: string;
 		saved?: number;
 	};
+	progress: number;
+	status: string;
+	total?: number;
 }
 
 interface ThumbnailStore {
+	error: string | null;
+	initialize: () => Promise<void>;
 	isLoading: boolean;
 	isProcessing: boolean;
-	error: string | null;
-	stats: ThumbnailStats;
 	processStatus: ProcessStatus;
+	reset: () => void;
+	setError: (error: string | null) => void;
 	setLoading: (loading: boolean) => void;
 	setProcessing: (processing: boolean) => void;
-	setError: (error: string | null) => void;
-	setStats: (stats: Partial<ThumbnailStats>) => void;
 	setProcessStatus: (status: Partial<ProcessStatus>) => void;
-	initialize: () => Promise<void>;
-	reset: () => void;
+	setStats: (stats: Partial<ThumbnailStats>) => void;
+	stats: ThumbnailStats;
 }
 
 const initialStats: ThumbnailStats = {
@@ -49,7 +48,7 @@ const initialProcessStatus: ProcessStatus = {
 	progress: 0,
 };
 
-const _BASE_URL = import.meta.env.VITE_API_URL || '';
+const THUMBNAILS_BASE_URL = '/api/thumbnails';
 
 export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 	isLoading: true,
@@ -110,7 +109,11 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 
 			while (retries > 0 && !stats) {
 				try {
-					stats = await imageService.getThumbnailProcessingStats();
+					const response = await fetch(`${THUMBNAILS_BASE_URL}/stats`);
+					if (!response.ok) {
+						throw new Error('Could not get statistics de miniaturas');
+					}
+					stats = (await response.json()) as ThumbnailStats;
 					break;
 				} catch (error) {
 					_lastError = error;

@@ -15,12 +15,11 @@ export async function extractVideoMetadata(filePath: string): Promise<VideoMetad
 
 		// Verificar que el buffer no esté vacío
 		if (!fileBuffer || fileBuffer.length === 0) {
-			logger.warn('Archivo vacío o no leído correctamente', { filePath });
+			logger.warn('Archivo vacío o no leído correctamente');
 			return null;
 		}
 
 		logger.debug('Archivo leído correctamente', {
-			filePath,
 			size: fileBuffer.length,
 			firstBytes: Array.from(fileBuffer.subarray(0, 8))
 				.map((b) => b.toString(16))
@@ -39,20 +38,20 @@ export async function extractVideoMetadata(filePath: string): Promise<VideoMetad
 		// Verificar formato válido primero
 		try {
 			const inputFormat = await input.getFormat();
-			logger.debug('Formato detectado', { filePath, format: inputFormat?.name });
+			logger.debug('Formato detectado', { format: inputFormat?.name });
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : String(error);
-			logger.warn('Formato no reconocido por mediabunny', { filePath, error: errorMessage });
+			logger.warn('Formato no reconocido por mediabunny', { error: errorMessage });
 			return null;
 		}
 
 		try {
 			const duration = await input.computeDuration();
 			result.duration = duration;
-			logger.debug('Duración extraída', { filePath, duration });
+			logger.debug('Duración extraída', { duration });
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : String(error);
-			logger.warn('Error computando duración', { filePath, error: errorMessage });
+			logger.warn('Error computando duración', { error: errorMessage });
 		}
 
 		const videoTrack = await input.getPrimaryVideoTrack();
@@ -84,16 +83,15 @@ export async function extractVideoMetadata(filePath: string): Promise<VideoMetad
 				result.format = extension;
 			}
 		} else {
-			logger.warn('No se encontró track de video', { filePath });
+			logger.warn('No se encontró track de video');
 		}
 
-		logger.debug('Metadatos extraídos exitosamente', { filePath, result });
+		logger.debug('Metadatos extraídos exitosamente', { result });
 		return result;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const errorStack = error instanceof Error ? error.stack?.substring(0, 500) : undefined;
 		logger.warn('Error extrayendo metadatos de video con mediabunny', {
-			filePath,
 			error: errorMessage,
 			stack: errorStack,
 		});
@@ -138,7 +136,9 @@ export async function extractAudioMetadata(filePath: string) {
 
 		return result;
 	} catch (error) {
-		logger.warn('Error extrayendo metadatos de audio con mediabunny', { filePath, error });
+		logger.warn('Error extrayendo metadatos de audio con mediabunny', {
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
+		});
 		return null;
 	}
 }

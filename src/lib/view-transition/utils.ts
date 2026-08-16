@@ -88,7 +88,7 @@ async function animateWithCSS(_before: any, _after: any): Promise<void> {
 		height: 100%;
 		pointer-events: none;
 		z-index: 9999;
-		background: linear-gradient(45deg, transparent 48%, rgba(255,255,255,0.1) 50%, transparent 52%);
+		background: linear-gradient(45deg, transparent 48%, color-mix(in oklch, var(--foreground), transparent 90%) 50%, transparent 52%);
 		opacity: 0;
 		transition: opacity 0.3s ease-out;
 	`;

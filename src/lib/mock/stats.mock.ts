@@ -32,9 +32,9 @@ export const MOCK_STATS: GeneralStats = {
 
 	// Etiquetas más populares simuladas
 	topTags: [
-		{ id: '1', name: 'paisaje', color: '#3b82f6', count: 231, percentage: 0 },
-		{ id: '2', name: 'retrato', color: '#10b981', count: 187, percentage: 0 },
-		{ id: '3', name: 'animales', color: '#f59e0b', count: 143, percentage: 0 },
+		{ id: '1', name: 'paisaje', color: 'var(--dt-primary-500)', count: 231, percentage: 0 },
+		{ id: '2', name: 'retrato', color: 'var(--dt-success-500)', count: 187, percentage: 0 },
+		{ id: '3', name: 'animales', color: 'var(--dt-warning-500)', count: 143, percentage: 0 },
 		{ id: '4', name: 'arquitectura', color: '#8b5cf6', count: 98, percentage: 0 },
 		{ id: '5', name: 'comida', color: '#f43f5e', count: 76, percentage: 0 },
 	],
@@ -44,7 +44,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '1',
 			type: 'UPLOAD',
-			description: 'Imagen subida: "Amanecer en la montaña"',
+			description: 'Image uploaded: "Mountain sunrise"',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '1',
@@ -53,7 +53,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '2',
 			type: 'TAG',
-			description: 'Etiquetas añadidas a "Retrato familiar"',
+			description: 'Tags added to "Family portrait"',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '2',
@@ -62,7 +62,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '3',
 			type: 'COLLECTION',
-			description: 'Imagen añadida a colección "Vacaciones 2023"',
+			description: 'Image added to collection "Vacation 2023"',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '3',
@@ -71,7 +71,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '4',
 			type: 'EDIT',
-			description: 'Imagen editada: "Vista desde la ventana"',
+			description: 'Image edited: "View from the window"',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '4',
@@ -80,7 +80,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '5',
 			type: 'FAVORITE',
-			description: 'Imagen marcada como favorita',
+			description: 'Image marked as favorite',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '5',

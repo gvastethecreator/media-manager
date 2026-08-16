@@ -51,8 +51,8 @@ const DEFAULT_CONFIG: ViewTransitionConfig = {
  * Props del ViewTransitionProvider
  */
 interface ViewTransitionProviderProps {
-	config?: Partial<ViewTransitionConfig>;
 	children: ReactNode;
+	config?: Partial<ViewTransitionConfig>;
 }
 
 /**
@@ -244,7 +244,7 @@ export function withViewTransition<P extends object>(
 					setIsTransitioning(false);
 				}
 			},
-			[startTransition, transitionOptions]
+			[startTransition]
 		);
 
 		// Agregar props de transición al componente

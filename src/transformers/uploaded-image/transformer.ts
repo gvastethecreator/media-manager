@@ -12,40 +12,40 @@ import {
 } from '../../types/entities/uploaded-image/types';
 
 // Tipos locales para uploaded image (migración a Drizzle)
-type DrizzleUploadedImageWithRelations = {
-	id: string;
-	name: string;
-	path: string;
-	size: number;
-	hash: string;
-	metadata: string | null;
-	imageId: string;
-	type: string;
+interface DrizzleUploadedImageWithRelations {
 	category: string;
-	width: number | null;
-	height: number | null;
 	createdAt: Date;
-	updatedAt: Date;
+	hash: string;
+	height: number | null;
+	id: string;
 	image?: {
 		thumbnailPath?: string;
 	} | null;
-};
-
-type DrizzleUploadedImageBase = {
-	id: string;
+	imageId: string;
+	metadata: string | null;
 	name: string;
 	path: string;
 	size: number;
-	hash: string;
-	metadata: string | null;
-	imageId: string;
 	type: string;
-	category: string;
-	width: number | null;
-	height: number | null;
-	createdAt: Date;
 	updatedAt: Date;
-};
+	width: number | null;
+}
+
+interface DrizzleUploadedImageBase {
+	category: string;
+	createdAt: Date;
+	hash: string;
+	height: number | null;
+	id: string;
+	imageId: string;
+	metadata: string | null;
+	name: string;
+	path: string;
+	size: number;
+	type: string;
+	updatedAt: Date;
+	width: number | null;
+}
 
 /**
  * Transforms a base Drizzle UploadedImage object into a canonical UploadedImageBase.

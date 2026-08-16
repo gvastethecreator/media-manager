@@ -6,6 +6,7 @@
  * the existing file service and toast service for user feedback.
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
 import type {
 	ItemsInfo,
 	OperationType,
@@ -34,7 +35,7 @@ type ProgressEvents =
 type Listener<T> = (payload: T) => void;
 
 class TypedEventEmitter {
-	private events: Map<string, Set<Listener<any>>> = new Map();
+	private readonly events: Map<string, Set<Listener<any>>> = new Map();
 
 	on<TEvent extends ProgressEvents['type']>(
 		event: TEvent,
@@ -65,8 +66,7 @@ class TypedEventEmitter {
 			try {
 				(listener as Listener<typeof payload>)(payload);
 			} catch (err) {
-				// eslint-disable-next-line no-console
-				console.error('[ProgressTracking] listener error', err);
+				clientLogger.error('[ProgressTracking] listener error', err);
 			}
 		}
 	}
@@ -81,8 +81,6 @@ class TypedEventEmitter {
 }
 
 export interface ProgressOptions {
-	/** Show toast notifications */
-	showToast?: boolean;
 	/** Auto-dismiss completed operations */
 	autoDismiss?: boolean;
 	/** Auto-dismiss delay in milliseconds */
@@ -91,12 +89,16 @@ export interface ProgressOptions {
 	cancellable?: boolean;
 	/** Custom operation description */
 	description?: string;
-	/** Total number of items */
-	totalItems?: number;
-	/** Priority level */
-	priority?: number;
 	/** Metadata */
 	metadata?: Record<string, any>;
+	/** Called when the user cancels the operation from progress UI. */
+	onCancel?: () => void;
+	/** Priority level */
+	priority?: number;
+	/** Show toast notifications */
+	showToast?: boolean;
+	/** Total number of items */
+	totalItems?: number;
 }
 
 export type ProgressCallback = (operation: ProgressOperation) => void;
@@ -106,9 +108,10 @@ export type ProgressCallback = (operation: ProgressOperation) => void;
  * Manages progress tracking for long-running file operations
  */
 class ProgressTrackingService extends TypedEventEmitter {
-	private operations = new Map<string, ProgressOperation>();
-	private callbacks = new Map<string, ProgressCallback[]>();
-	private toastIds = new Map<string, string | number>();
+	private readonly cancelCallbacks = new Map<string, () => void>();
+	private readonly operations = new Map<string, ProgressOperation>();
+	private readonly callbacks = new Map<string, ProgressCallback[]>();
+	private readonly toastIds = new Map<string, string | number>();
 
 	/**
 	 * Generate unique operation ID
@@ -120,7 +123,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 	/**
 	 * Start tracking a new operation
 	 */
-	startOperation(type: OperationType, totalItems: number, options: ProgressOptions = {}): ProgressInfo {
+	startOperation(type: OperationType, totalItems: number, options: ProgressOptions = {}): string {
 		const operationId = this.generateOperationId();
 		const now = Date.now();
 
@@ -174,6 +177,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 
 		this.operations.set(operationId, operation);
 		this.callbacks.set(operationId, []);
+		if (options.onCancel) this.cancelCallbacks.set(operationId, options.onCancel);
 
 		// Show initial toast if enabled
 		if (options.showToast !== false) {
@@ -191,7 +195,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 		}
 
 		this.emit('operationStarted', operation);
-		return progressInfo;
+		return operationId;
 	}
 
 	/**
@@ -359,9 +363,10 @@ class ProgressTrackingService extends TypedEventEmitter {
 	 */
 	cancelOperation(operationId: string): void {
 		const operation = this.operations.get(operationId);
-		if (!operation) {
+		if (!operation || operation.status === 'cancelled') {
 			return;
 		}
+		this.cancelCallbacks.get(operationId)?.();
 
 		const cancelledOperation: ProgressOperation = {
 			...operation,
@@ -453,6 +458,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 	 * Clean up operation data
 	 */
 	private cleanupOperation(operationId: string): void {
+		this.cancelCallbacks.delete(operationId);
 		this.operations.delete(operationId);
 		this.callbacks.delete(operationId);
 
@@ -505,7 +511,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 			case 'sync_files':
 				return `Sincronizando ${totalItems} ${itemText}`;
 			case 'batch_operation':
-				return `Operación en lote: ${totalItems} ${itemText}`;
+				return `Operation en lote: ${totalItems} ${itemText}`;
 			default:
 				return `Procesando ${totalItems} ${itemText}`;
 		}

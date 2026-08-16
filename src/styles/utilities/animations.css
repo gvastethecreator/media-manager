@@ -1,0 +1,563 @@
+/**
+ * 🎭 ANIMATION SYSTEM v2.0
+ * ========================
+ * Sistema de animaciones sutiles para feedback visual inmediato
+ *
+ * Categorías:
+ * - Micro-interactions (feedback táctil)
+ * - State transitions (cambios de estado)
+ * - Entrance/Exit (aparición/desaparición)
+ * - Loading (estados de carga)
+ * - Emphasis (llamar atención)
+ *
+ * @see docs/UX-UI-AUDIT-2025-12-30.md
+ */
+
+/* =====================================================
+ * 🎯 KEYFRAMES - MICRO INTERACTIONS
+ * ===================================================== */
+
+/* Pulso sutil para feedback de click */
+@keyframes dt-pulse-subtle {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(0.97);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+/* Bounce suave para success */
+@keyframes dt-bounce-soft {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	30% {
+		transform: translateY(-4px);
+	}
+	60% {
+		transform: translateY(-2px);
+	}
+}
+
+/* Shake para errores */
+@keyframes dt-shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	20%,
+	60% {
+		transform: translateX(-3px);
+	}
+	40%,
+	80% {
+		transform: translateX(3px);
+	}
+}
+
+/* Ripple effect */
+@keyframes dt-ripple {
+	0% {
+		transform: scale(0);
+		opacity: 0.4;
+	}
+	100% {
+		transform: scale(2.5);
+		opacity: 0;
+	}
+}
+
+/* Ring expand (focus) */
+@keyframes dt-ring-expand {
+	0% {
+		box-shadow: 0 0 0 0 var(--dt-primary-500);
+		opacity: 0.6;
+	}
+	100% {
+		box-shadow: 0 0 0 4px var(--dt-primary-500);
+		opacity: 0;
+	}
+}
+
+/* =====================================================
+ * 🎯 KEYFRAMES - ENTRANCE/EXIT
+ * ===================================================== */
+
+/* Fade in suave */
+@keyframes dt-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* Fade out suave */
+@keyframes dt-fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+/* Slide up con fade */
+@keyframes dt-slide-up-fade {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Slide down con fade */
+@keyframes dt-slide-down-fade {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Slide left con fade */
+@keyframes dt-slide-left-fade {
+	from {
+		opacity: 0;
+		transform: translateX(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+/* Slide right con fade */
+@keyframes dt-slide-right-fade {
+	from {
+		opacity: 0;
+		transform: translateX(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+/* Scale in con fade */
+@keyframes dt-scale-in {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* Scale out con fade */
+@keyframes dt-scale-out {
+	from {
+		opacity: 1;
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+}
+
+/* Zoom bounce (modal/dialog) */
+@keyframes dt-zoom-bounce {
+	0% {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	50% {
+		transform: scale(1.02);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* =====================================================
+ * 🎯 KEYFRAMES - LOADING STATES
+ * ===================================================== */
+
+/* Spin suave */
+@keyframes dt-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Pulse para skeleton */
+@keyframes dt-skeleton-pulse {
+	0%,
+	100% {
+		opacity: 0.4;
+	}
+	50% {
+		opacity: 0.7;
+	}
+}
+
+/* Shimmer para skeleton premium */
+@keyframes dt-skeleton-shimmer {
+	0% {
+		background-position: -200% 0;
+	}
+	100% {
+		background-position: 200% 0;
+	}
+}
+
+/* Progress indeterminate */
+@keyframes dt-progress-indeterminate {
+	0% {
+		transform: translateX(-100%);
+	}
+	50% {
+		transform: translateX(0%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+/* Dots loading */
+@keyframes dt-dots-bounce {
+	0%,
+	80%,
+	100% {
+		transform: scale(0.6);
+		opacity: 0.5;
+	}
+	40% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+/* =====================================================
+ * 🎯 KEYFRAMES - EMPHASIS
+ * ===================================================== */
+
+/* Attention pulse */
+@keyframes dt-attention-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 var(--dt-primary-500);
+	}
+	50% {
+		box-shadow: 0 0 0 6px transparent;
+	}
+}
+
+/* Glow suave */
+@keyframes dt-glow {
+	0%,
+	100% {
+		box-shadow: 0 0 5px var(--dt-primary-400);
+	}
+	50% {
+		box-shadow: 0 0 15px var(--dt-primary-500);
+	}
+}
+
+/* Success checkmark */
+@keyframes dt-checkmark-draw {
+	0% {
+		stroke-dashoffset: 100;
+	}
+	100% {
+		stroke-dashoffset: 0;
+	}
+}
+
+/* =====================================================
+ * 📦 UTILITY CLASSES - MICRO INTERACTIONS
+ * ===================================================== */
+
+/* Click feedback */
+.animate-click {
+	animation: dt-pulse-subtle var(--dt-duration-fast) var(--dt-ease-out);
+}
+
+/* Success feedback */
+.animate-success {
+	animation: dt-bounce-soft var(--dt-duration-normal) var(--dt-ease-bounce);
+}
+
+/* Error feedback */
+.animate-error {
+	animation: dt-shake var(--dt-duration-normal) var(--dt-ease-default);
+}
+
+/* Ripple container */
+.ripple-container {
+	position: relative;
+	overflow: hidden;
+}
+
+.ripple-container::after {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	content: '';
+	background: radial-gradient(circle, currentColor 10%, transparent 10.01%);
+	opacity: 0;
+	transform: scale(0);
+}
+
+.ripple-container:active::after {
+	animation: dt-ripple var(--dt-duration-slow) var(--dt-ease-out);
+}
+
+/* =====================================================
+ * 📦 UTILITY CLASSES - ENTRANCE
+ * ===================================================== */
+
+.animate-fade-in {
+	animation: dt-fade-in var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+.animate-fade-out {
+	animation: dt-fade-out var(--dt-duration-fast) var(--dt-ease-in) forwards;
+}
+
+.animate-slide-up {
+	animation: dt-slide-up-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+.animate-slide-down {
+	animation: dt-slide-down-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+.animate-slide-left {
+	animation: dt-slide-left-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+.animate-slide-right {
+	animation: dt-slide-right-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+.animate-scale-in {
+	animation: dt-scale-in var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+.animate-scale-out {
+	animation: dt-scale-out var(--dt-duration-fast) var(--dt-ease-in) forwards;
+}
+
+.animate-zoom-bounce {
+	animation: dt-zoom-bounce var(--dt-duration-normal) var(--dt-ease-bounce) forwards;
+}
+
+/* =====================================================
+ * 📦 UTILITY CLASSES - LOADING
+ * ===================================================== */
+
+.animate-spin-smooth {
+	animation: dt-spin 1s linear infinite;
+}
+
+.animate-skeleton {
+	animation: dt-skeleton-pulse 1.5s var(--dt-ease-default) infinite;
+}
+
+.animate-skeleton-shimmer {
+	background: linear-gradient(90deg, var(--dt-neutral-200) 0%, var(--dt-neutral-100) 50%, var(--dt-neutral-200) 100%);
+	background-size: 200% 100%;
+	animation: dt-skeleton-shimmer 1.5s var(--dt-ease-default) infinite;
+}
+
+.dark .animate-skeleton-shimmer {
+	background: linear-gradient(90deg, var(--dt-neutral-800) 0%, var(--dt-neutral-700) 50%, var(--dt-neutral-800) 100%);
+	background-size: 200% 100%;
+}
+
+.animate-progress-indeterminate {
+	animation: dt-progress-indeterminate 1.5s var(--dt-ease-default) infinite;
+}
+
+/* Dots loading pattern */
+.loading-dots {
+	display: inline-flex;
+	gap: 4px;
+}
+
+.loading-dots > span {
+	width: 6px;
+	height: 6px;
+	background-color: currentColor;
+	border-radius: 50%;
+	animation: dt-dots-bounce 1.4s var(--dt-ease-default) infinite;
+}
+
+.loading-dots > span:nth-child(1) {
+	animation-delay: 0s;
+}
+.loading-dots > span:nth-child(2) {
+	animation-delay: 0.16s;
+}
+.loading-dots > span:nth-child(3) {
+	animation-delay: 0.32s;
+}
+
+/* =====================================================
+ * 📦 UTILITY CLASSES - EMPHASIS
+ * ===================================================== */
+
+.animate-attention {
+	animation: dt-attention-pulse 2s var(--dt-ease-default) infinite;
+}
+
+.animate-glow {
+	animation: dt-glow 2s var(--dt-ease-default) infinite;
+}
+
+/* =====================================================
+ * 📦 UTILITY CLASSES - STAGGER (para listas)
+ * ===================================================== */
+
+.stagger-children > * {
+	opacity: 0;
+	animation: dt-slide-up-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+.stagger-children > *:nth-child(1) {
+	animation-delay: 0ms;
+}
+.stagger-children > *:nth-child(2) {
+	animation-delay: 50ms;
+}
+.stagger-children > *:nth-child(3) {
+	animation-delay: 100ms;
+}
+.stagger-children > *:nth-child(4) {
+	animation-delay: 150ms;
+}
+.stagger-children > *:nth-child(5) {
+	animation-delay: 200ms;
+}
+.stagger-children > *:nth-child(6) {
+	animation-delay: 250ms;
+}
+.stagger-children > *:nth-child(7) {
+	animation-delay: 300ms;
+}
+.stagger-children > *:nth-child(8) {
+	animation-delay: 350ms;
+}
+.stagger-children > *:nth-child(n + 9) {
+	animation-delay: 400ms;
+}
+
+/* =====================================================
+ * 📦 HOVER/FOCUS ENHANCEMENTS
+ * ===================================================== */
+
+/* Hover lift sutil */
+.hover-lift {
+	transition:
+		transform var(--dt-duration-fast) var(--dt-ease-out),
+		box-shadow var(--dt-duration-fast) var(--dt-ease-out);
+}
+
+.hover-lift:hover {
+	box-shadow: var(--dt-shadow-2);
+	transform: translateY(-2px);
+}
+
+/* Hover scale sutil */
+.hover-scale {
+	transition: transform var(--dt-duration-fast) var(--dt-ease-out);
+}
+
+.hover-scale:hover {
+	transform: scale(1.02);
+}
+
+/* Hover glow */
+.hover-glow {
+	transition: box-shadow var(--dt-duration-fast) var(--dt-ease-out);
+}
+
+.hover-glow:hover {
+	box-shadow: 0 0 12px var(--dt-primary-400);
+}
+
+/* Focus ring animated */
+.focus-ring-animated {
+	transition: box-shadow var(--dt-duration-fast) var(--dt-ease-out);
+}
+
+.focus-ring-animated:focus-visible {
+	outline: none;
+	box-shadow: var(--dt-focus-ring);
+}
+
+/* =====================================================
+ * ♿ REDUCED MOTION
+ * ===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+	.animate-click,
+	.animate-success,
+	.animate-error,
+	.animate-fade-in,
+	.animate-fade-out,
+	.animate-slide-up,
+	.animate-slide-down,
+	.animate-slide-left,
+	.animate-slide-right,
+	.animate-scale-in,
+	.animate-scale-out,
+	.animate-zoom-bounce,
+	.animate-attention,
+	.animate-glow,
+	.stagger-children > * {
+		opacity: 1 !important;
+		transform: none !important;
+		animation: none !important;
+	}
+
+	.hover-lift:hover,
+	.hover-scale:hover {
+		transform: none !important;
+	}
+
+	.ripple-container:active::after {
+		animation: none !important;
+	}
+
+	/* Mantener animaciones esenciales pero más rápidas */
+	.animate-spin-smooth {
+		animation-duration: 2s;
+	}
+
+	.animate-skeleton,
+	.animate-skeleton-shimmer {
+		opacity: 0.5 !important;
+		animation: none !important;
+	}
+}

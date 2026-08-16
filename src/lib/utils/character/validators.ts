@@ -76,7 +76,6 @@ export const createCharacterSchema = z.object({
 	psychologicalProfile: z.string().max(1000).nullable().optional(),
 	socialProfile: z.string().max(1000).nullable().optional(),
 	featuredImage: z.string().uuid().nullable().optional(),
-	isFavorite: z.boolean().optional(),
 	category: z.nativeEnum(CharacterCategory).nullable().optional(),
 	presetId: z.string().uuid().nullable().optional(),
 });
@@ -131,7 +130,7 @@ export function validateCharacterStats(stats: unknown): Record<string, number> |
 
 		return null;
 	} catch (error) {
-		console.error('Error validando estadísticas:', error);
+		console.error('Could not validate statistics:', error);
 		return null;
 	}
 }
@@ -170,7 +169,7 @@ export function validateCharacterFilters(filters: unknown): z.infer<typeof chara
 			})
 			.filter(Boolean) as z.infer<typeof characterFilterSchema>[];
 	} catch (error) {
-		console.error('Error validando filtros:', error);
+		console.error('Could not validate filters:', error);
 		return [];
 	}
 }
@@ -239,7 +238,7 @@ export function validateCreateCharacter(data: unknown): {
 			errors: result.error,
 		};
 	} catch (error) {
-		console.error('Error en validación de creación de personaje:', error);
+		console.error('Character creation validation failed:', error);
 		return {
 			isValid: false,
 		};
@@ -271,7 +270,7 @@ export function validateUpdateCharacter(data: unknown): {
 			errors: result.error,
 		};
 	} catch (error) {
-		console.error('Error en validación de actualización de personaje:', error);
+		console.error('Character update validation failed:', error);
 		return {
 			isValid: false,
 		};

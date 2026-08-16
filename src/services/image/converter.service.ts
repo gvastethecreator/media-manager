@@ -5,125 +5,129 @@ import type { ImageWithStats } from '@/types/entities/image';
 const converterLogger = serverLogger.withContext('ImageConverter');
 
 interface RelatedCollection {
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 }
 
 interface RelatedTag {
+	color: string;
 	id: string;
 	name: string;
-	color: string;
 }
 
 interface RelatedAlbum {
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 }
 
 interface RelatedCharacter {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	level?: number;
 	class?: string;
+	color: string;
+	emoji: string;
+	id: string;
+	level?: number;
+	name: string;
 	race?: string;
 }
 
 interface RelatedPlace {
+	climate?: string;
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 	region?: string;
 	type?: string;
-	climate?: string;
 }
 
 interface RelatedWorldItem {
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
-	type?: string;
 	rarity?: string;
+	type?: string;
 }
 
 interface RelatedConcept {
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 }
 
 interface RelatedPrompt {
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 }
 
 interface RelatedNote {
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 }
 
 interface RelatedGroup {
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 }
 
 interface RelatedProperty {
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 }
 
 interface RelatedWildcard {
+	color: string;
+	emoji: string;
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 }
 
 export interface ServerImage {
-	id: string;
-	name: string;
-	path: string;
-	size: number;
-	width: number | null;
+	albums?: RelatedAlbum[];
+	assetId?: string | null;
+	canonicalDivergences?: string[];
+	canonicalState?: 'canonical' | 'legacy_only' | 'diverged';
+	characters?: RelatedCharacter[];
+	collections?: RelatedCollection[];
+	concepts?: RelatedConcept[];
+	createdAt: Date;
+	folderId: string;
+	groups?: RelatedGroup[];
 	height: number | null;
-	metadata: string | null;
-	thumbnail: Buffer | Uint8Array | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
+	id: string;
+	legacyId?: string;
 
 	isFavorite: boolean;
-	folderId: string;
-	createdAt: Date;
-	updatedAt: Date;
-	collections?: RelatedCollection[];
-	tags?: RelatedTag[];
-	albums?: RelatedAlbum[];
-	characters?: RelatedCharacter[];
-	places?: RelatedPlace[];
-	worldItems?: RelatedWorldItem[];
-	concepts?: RelatedConcept[];
-	prompts?: RelatedPrompt[];
+	metadata: string | null;
+	name: string;
 	notes?: RelatedNote[];
-	groups?: RelatedGroup[];
+	path: string;
+	places?: RelatedPlace[];
+	prompts?: RelatedPrompt[];
 	properties?: RelatedProperty[];
+	size: number;
+	tags?: RelatedTag[];
+	thumbnail: Buffer | Uint8Array | null;
+	thumbnailHeight: number | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	updatedAt: Date;
+	width: number | null;
 	wildcards?: RelatedWildcard[];
+	worldItems?: RelatedWorldItem[];
 }
 
 export const convertServerImageToFileItem = (image: ServerImage): ImageWithStats => {
@@ -137,7 +141,11 @@ export const convertServerImageToFileItem = (image: ServerImage): ImageWithStats
 
 		// Crear ImageWithStats compatible
 		const imageWithStats = {
-			id: image.id,
+			id: image.assetId ?? image.id,
+			assetId: image.assetId ?? null,
+			legacyId: image.legacyId ?? image.id,
+			canonicalState: image.canonicalState ?? (image.assetId ? 'canonical' : 'legacy_only'),
+			canonicalDivergences: image.canonicalDivergences ?? [],
 			name: image.name,
 			description: null,
 			path: image.path,

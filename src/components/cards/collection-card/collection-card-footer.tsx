@@ -1,16 +1,15 @@
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Calendar, Database, Heart, Image } from 'lucide-react';
+import { formatDate } from '@/lib/utils/date';
 
 interface CollectionCardFooterProps {
+	compact?: boolean;
 	createdAt: Date | string;
-	updatedAt: Date | string;
-	imagesCount?: number;
 	entitiesCount?: number;
+	imagesCount?: number;
+	isFavorite?: boolean;
 	primaryColor: string;
 	secondaryColor: string;
-	isFavorite?: boolean;
-	compact?: boolean;
+	updatedAt: Date | string;
 }
 
 /**
@@ -34,8 +33,8 @@ export function CollectionCardFooter({
 	};
 
 	// Formatear fechas
-	const formattedCreated = format(new Date(createdAt), 'dd/MM/yy', { locale: es });
-	const formattedUpdated = format(new Date(updatedAt), 'dd/MM/yy', { locale: es });
+	const formattedCreated = formatDate(new Date(createdAt), 'dd/MM/yy');
+	const formattedUpdated = formatDate(new Date(updatedAt), 'dd/MM/yy');
 
 	return (
 		<div
@@ -58,7 +57,7 @@ export function CollectionCardFooter({
 							boxShadow: `0 1px 3px ${primaryColor}20`,
 						}}
 					>
-						<Image className="h-3.5 w-3.5" />
+						<Image className="h-4 w-4" />
 						<span className="text-foreground">{imagesCount}</span>
 					</div>
 
@@ -71,7 +70,7 @@ export function CollectionCardFooter({
 							boxShadow: `0 1px 3px ${primaryColor}20`,
 						}}
 					>
-						<Database className="h-3.5 w-3.5" />
+						<Database className="h-4 w-4" />
 						<span className="text-foreground">{entitiesCount}</span>
 					</div>
 				</div>
@@ -79,14 +78,14 @@ export function CollectionCardFooter({
 				{/* Parte derecha - Favorito con estilo TCG */}
 				{isFavorite && (
 					<div
-						className="flex items-center gap-1 rounded-sm bg-red-500/10 px-2 py-1"
+						className="flex items-center gap-1 rounded-sm bg-destructive/10 px-2 py-1"
 						style={{
-							color: 'rgb(239, 68, 68)',
-							boxShadow: '0 0 5px rgba(239, 68, 68, 0.3)',
+							color: 'var(--ui-error-text)',
+							boxShadow: '0 0 5px color-mix(in oklch, var(--ui-error-text), transparent 70%)',
 						}}
 					>
-						<Heart className="h-3.5 w-3.5 fill-current" />
-						<span className="font-medium text-xs uppercase tracking-wide">Favorito</span>
+						<Heart className="h-4 w-4 fill-current" />
+						<span className="font-medium text-sm uppercase tracking-wide">Favorito</span>
 					</div>
 				)}
 			</div>
@@ -95,17 +94,17 @@ export function CollectionCardFooter({
 			{!compact && (
 				<>
 					{/* Información adicional - Similar a la línea de coleccionista en TCG */}
-					<div className="mt-2 flex items-center justify-between text-muted-foreground text-xs">
+					<div className="mt-2 flex items-center justify-between text-muted-foreground text-sm">
 						{/* Fecha de creación */}
 						<div className="flex items-center gap-1">
-							<Calendar className="h-3 w-3" />
-							<span className="mr-1 opacity-70">Creado:</span>
+							<Calendar className="h-4 w-4" />
+							<span className="mr-1 opacity-70">Created:</span>
 							<span className="font-medium">{formattedCreated}</span>
 						</div>
 
 						{/* Fecha de actualización (reducida en espacio si es necesario) */}
 						<div className="flex items-center gap-1">
-							<Calendar className="h-3 w-3" />
+							<Calendar className="h-4 w-4" />
 							<span className="mr-1 opacity-70">Act:</span>
 							<span className="font-medium">{formattedUpdated}</span>
 						</div>
@@ -113,13 +112,13 @@ export function CollectionCardFooter({
 
 					{/* Línea de ilustrador - estilo TCG */}
 					<div
-						className="mt-1 text-center text-muted-foreground text-xs italic"
+						className="mt-1 text-center text-muted-foreground text-sm italic"
 						style={{
 							opacity: 0.7,
 							textShadow: `0 0 5px ${primaryColor}30`,
 						}}
 					>
-						♦ Colección digital ♦ {getItemsText()}
+						♦ Digital collection ♦ {getItemsText()}
 					</div>
 				</>
 			)}

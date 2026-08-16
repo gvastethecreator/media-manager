@@ -4,7 +4,11 @@
  */
 
 import { StateCreator } from 'zustand';
+import { apiClient } from '@/lib/api/client';
+import { normalizeFavoriteEntityType } from '@/lib/api/favorites';
+import { invalidateFavoriteQueries } from '@/lib/api/favorite-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { FavoriteExtended } from '@/types/entities/favorite';
 import { FavoriteStore } from '..';
 
 // Logger específico para este slice
@@ -12,22 +16,23 @@ const logger = clientLogger.withContext('FavoriteStore.ApiSlice');
 
 // Estado para operaciones API
 export interface ApiState {
-	isApiLoading: boolean;
 	apiError: string | null;
+	isApiLoading: boolean;
 	lastFetch: Date | null;
 }
 
 // Acciones para operaciones API
 export interface ApiActions {
-	// Operaciones CRUD
-	fetchFavorites: () => Promise<void>;
+	clearApiError: () => void;
 	createFavorite: (entityId: string, entityType: string) => Promise<void>;
 	deleteFavorite: (id: string) => Promise<void>;
+	// Operaciones CRUD
+	fetchFavorites: () => Promise<void>;
+	setApiError: (error: string | null) => void;
 
 	// Estados de API
 	setApiLoading: (loading: boolean) => void;
-	setApiError: (error: string | null) => void;
-	clearApiError: () => void;
+	toggleFavorite: (entityId: string, entityType: string) => Promise<boolean>;
 }
 
 // Slice del store para API
@@ -42,11 +47,16 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 		set({ isApiLoading: true, apiError: null });
 
 		try {
-			// TODO: Implementar llamada real a la API
 			logger.info('🔄 Cargando favoritos...');
 
-			// Simulación temporal
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+			const response = await apiClient.get<{ data: FavoriteExtended[] }>('/favorites');
+
+			// Actualizar el estado con los favoritos obtenidos
+			if (response?.data) {
+				get().setFavorites(response.data);
+			} else {
+				get().setFavorites([]);
+			}
 
 			set({
 				isApiLoading: false,
@@ -68,11 +78,23 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 		set({ isApiLoading: true, apiError: null });
 
 		try {
-			// TODO: Implementar llamada real a la API
 			logger.info('➕ Creando favorito:', { entityId, entityType });
 
-			// Simulación temporal
-			await new Promise((resolve) => setTimeout(resolve, 500));
+			const normalizedEntityType = normalizeFavoriteEntityType(entityType);
+			if (!normalizedEntityType) {
+				throw new Error(`Tipo de favorito no soportado: ${entityType}`);
+			}
+
+			const result = await apiClient.put<{ isFavorite: boolean; id?: string }>('/favorites/state', {
+				entityId,
+				entityType: normalizedEntityType,
+				isFavorite: true,
+			});
+			await invalidateFavoriteQueries();
+
+			if (result.isFavorite) {
+				await get().fetchFavorites();
+			}
 
 			set({ isApiLoading: false });
 			logger.info('✅ Favorito creado exitosamente');
@@ -90,11 +112,10 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 		set({ isApiLoading: true, apiError: null });
 
 		try {
-			// TODO: Implementar llamada real a la API
 			logger.info('🗑️ Eliminando favorito:', id);
 
-			// Simulación temporal
-			await new Promise((resolve) => setTimeout(resolve, 500));
+			await apiClient.delete(`/favorites/${id}`);
+			await invalidateFavoriteQueries();
 
 			// Eliminar del estado local
 			get().removeFavorite(id);
@@ -108,6 +129,39 @@ export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiA
 				apiError: errorMessage,
 			});
 			logger.error('❌ Error eliminando favorito:', error);
+		}
+	},
+
+	toggleFavorite: async (entityId: string, entityType: string): Promise<boolean> => {
+		set({ isApiLoading: true, apiError: null });
+
+		try {
+			logger.info('🔄 Alternando favorito:', { entityId, entityType });
+
+			const normalizedEntityType = normalizeFavoriteEntityType(entityType);
+			if (!normalizedEntityType) {
+				throw new Error(`Tipo de favorito no soportado: ${entityType}`);
+			}
+
+			const result = await apiClient.post<{ isFavorite: boolean; id?: string }>('/favorites/toggle', {
+				entityId,
+				entityType: normalizedEntityType,
+			});
+			await invalidateFavoriteQueries();
+
+			await get().fetchFavorites();
+
+			set({ isApiLoading: false });
+			logger.info('✅ Favorito alternado exitosamente:', { isFavorite: result.isFavorite });
+			return result.isFavorite;
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			set({
+				isApiLoading: false,
+				apiError: errorMessage,
+			});
+			logger.error('❌ Error alternando favorito:', error);
+			return false;
 		}
 	},
 

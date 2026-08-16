@@ -22,9 +22,9 @@ export function TauriBackendStatus() {
 			return <Loader2 className="h-4 w-4 animate-spin" />;
 		}
 		if (isRunning) {
-			return <CheckCircle className="h-4 w-4 text-green-500" />;
+			return <CheckCircle className="h-4 w-4 text-success" />;
 		}
-		return <AlertCircle className="h-4 w-4 text-red-500" />;
+		return <AlertCircle className="h-4 w-4 text-destructive" />;
 	};
 
 	const getStatusBadge = () => {
@@ -33,7 +33,7 @@ export function TauriBackendStatus() {
 		}
 		if (isRunning) {
 			return (
-				<Badge className="bg-green-500" variant="primary">
+				<Badge className="bg-success" variant="primary">
 					Conectado
 				</Badge>
 			);
@@ -48,7 +48,7 @@ export function TauriBackendStatus() {
 					<Server className="h-4 w-4" />
 					Estado del Backend
 				</CardTitle>
-				<CardDescription className="text-xs">Conexión con el servidor local</CardDescription>
+				<CardDescription className="text-xs">Local server connection</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">
 				<div className="flex items-center justify-between">
@@ -74,7 +74,7 @@ export function TauriBackendStatus() {
 
 				<div className="space-y-1 text-muted-foreground text-xs">
 					<div>Puerto: 4000</div>
-					<div>Modo: Aplicación de escritorio</div>
+					<div>Mode: Desktop application</div>
 				</div>
 			</CardContent>
 		</Card>

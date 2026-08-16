@@ -4,25 +4,25 @@
  */
 
 export interface BaseStats {
-	total: number;
-	processed: number;
 	errors: number;
+	processed: number;
+	total: number;
 }
 
 export interface ThumbnailStats extends BaseStats {
-	totalSize: number;
-	totalFiles: number;
-	pending: number;
 	// errors heredado de BaseStats
 	lastProcessed?: Date;
+	pending: number;
 	successRate?: number;
+	totalFiles: number;
+	totalSize: number;
 }
 
 export interface TagStats {
+	completenessScore: number;
+	popularity: number;
 	totalRelations: number;
 	usageDiversity: number;
-	popularity: number;
-	completenessScore: number;
 }
 
 export interface EntityStats {
@@ -34,122 +34,122 @@ export interface EntityStats {
 }
 
 export interface SystemStats {
-	images: EntityStats;
-	tags: EntityStats;
-	collections: EntityStats;
 	albums: EntityStats;
 	characters: EntityStats;
-	places: EntityStats;
-	worldItems: EntityStats;
+	collections: EntityStats;
 	concepts: EntityStats;
-	prompts: EntityStats;
-	notes: EntityStats;
 	groups: EntityStats;
+	images: EntityStats;
+	notes: EntityStats;
+	places: EntityStats;
+	prompts: EntityStats;
 	properties: EntityStats;
-	wildcards: EntityStats;
+	tags: EntityStats;
 	thumbnails: ThumbnailStats;
+	wildcards: EntityStats;
+	worldItems: EntityStats;
 }
 
 /**
  * Datos del sistema con métricas de rendimiento
  */
 export interface SystemData {
-	cpuUsage: number;
-	memoryUsage: number;
 	cacheSize: number;
-	totalEntities: number;
-	uptime: number;
-	nodeVersion: string;
+	cpuUsage: number;
 	hostname: string;
 	lastUpdated?: Date;
+	memoryUsage: number;
+	nodeVersion: string;
+	totalEntities: number;
+	uptime: number;
 }
 
 export interface PerformanceStats {
-	memoryUsage: {
-		used: number;
-		total: number;
-		percentage: number;
-	};
+	databaseSize: number;
 	diskUsage: {
 		used: number;
 		total: number;
 		percentage: number;
 	};
-	databaseSize: number;
 	lastUpdated: Date;
+	memoryUsage: {
+		used: number;
+		total: number;
+		percentage: number;
+	};
 }
 
 export interface GeneralStats {
-	totalImages: number;
-	totalFolders: number;
-	totalCollections: number;
-	totalTags: number;
-	totalAlbums: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalFavorites: number;
-	totalViews: number;
-	totalDownloads: number;
-	totalSize: number;
+	recentActivity?: RecentActivity[];
+	topTags?: TopTag[];
 	totalActivities: number;
+	totalAlbums: number;
+	totalAudio?: number;
+	totalCharacters: number;
+	totalCollections: number;
 	// Campos adicionales para el panel de estadísticas
 	totalDocuments?: number;
-	totalAudio?: number;
-	totalJsonFiles?: number;
+	totalDownloads: number;
+	totalFavorites: number;
 	totalFile3D?: number;
-	topTags?: TopTag[];
-	recentActivity?: RecentActivity[];
+	totalFolders: number;
+	totalImages: number;
+	totalJsonFiles?: number;
+	totalPlaces: number;
+	totalSize: number;
+	totalTags: number;
+	totalViews: number;
+	totalWorldItems: number;
 }
 
 export interface TagSummaryStats {
+	count: number;
 	id: string;
 	name: string;
-	count: number;
 	percentage: number;
 }
 
 export interface ActivityStats {
+	createdAt: Date;
+	description: string;
+	entityId?: string;
+	entityType?: string;
 	id: string;
 	type: string;
-	description: string;
-	createdAt: Date;
-	entityType?: string;
-	entityId?: string;
 }
 
 export interface TopTag {
-	id: string;
-	name: string;
 	color?: string;
 	count: number;
+	id: string;
+	name: string;
 	percentage?: number;
 }
 
 export interface RecentActivity {
-	id: string;
-	type: string;
-	description: string;
-	entityType: string;
-	entityId: string;
 	createdAt: Date;
-	metadata?: Record<string, unknown>;
+	description: string;
+	entityId: string;
+	entityType: string;
+	id: string;
 	image?: {
 		id: string;
 		name: string;
 		thumbnail: Uint8Array | null;
 	} | null;
+	metadata?: Record<string, unknown>;
+	type: string;
 }
 
 export interface StorageBreakdown {
-	images: number;
-	videos: number;
 	audio: number;
-	documents: number;
-	thumbnails: number;
 	cache: number;
+	documents: number;
+	images: number;
 	other: number;
+	thumbnails: number;
 	total: number;
+	videos: number;
 }
 
 /**

@@ -4,9 +4,9 @@ import { z } from 'zod';
  * Validación para crear una propiedad
  */
 export const createPropertySchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(50, 'El nombre no puede tener más de 50 caracteres'),
+	name: z.string().min(1, 'Name is required').max(50, 'Name cannot exceed 50 characters'),
 	emoji: z.string().default('🔍'),
-	color: z.string().default('#3b82f6'),
+	color: z.string().default('var(--dt-primary-500)'),
 	description: z.string().optional(),
 	shortcut: z.string().optional(),
 	category: z.enum(['general', 'technical', 'artistic', 'management']).default('general'),

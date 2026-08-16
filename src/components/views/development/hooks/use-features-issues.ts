@@ -1,5 +1,6 @@
 import { BookImage, Cloud, Database, Folder, ImageIcon, Server, Settings, Zap } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { Feature } from '../cards/feature-card';
 import type { Issue } from '../cards/issue-card';
 import { ServiceStatus } from '../cards/service-card';
@@ -21,13 +22,13 @@ export function useFeaturesIssues() {
 	// Mapa de iconos memoizado para evitar recreaciones en cada render
 	const iconMap = useMemo(
 		() => ({
-			'Indexación de Archivos': Folder,
-			'Procesamiento de Imágenes': ImageIcon,
+			'File Indexing': Folder,
+			'Image Processing': ImageIcon,
 			'Base de Datos': Database,
 			'API REST': Server,
-			'Sistema de Caché': Zap,
+			'Cache System': Zap,
 			'Background Jobs': Settings,
-			'Reconocimiento de Imágenes': BookImage,
+			'Image Recognition': BookImage,
 			Sincronización: Cloud,
 			default: Server,
 		}),
@@ -74,7 +75,7 @@ export function useFeaturesIssues() {
 					}
 				}, 50);
 			} catch (error) {
-				console.error('Error al obtener datos de features e issues:', error);
+				clientLogger.error('Could not get feature and issue data:', error);
 				if (showLoadingIndicator) {
 					setIsLoading(false);
 				}

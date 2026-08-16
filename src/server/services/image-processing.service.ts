@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { existsSync } from 'fs';
-import sharp from 'sharp';
+import sharp, { type FitEnum } from 'sharp';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -10,11 +10,11 @@ const SERVICE_NAME = 'ImageProcessingService';
 const imageLogger = serverLogger.withContext(SERVICE_NAME);
 
 export interface ImageProcessingOptions {
+	fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
+	format?: 'jpeg' | 'png' | 'webp';
+	height?: number;
 	quality?: number;
 	width?: number;
-	height?: number;
-	format?: 'jpeg' | 'png' | 'webp';
-	fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
 }
 
 /**
@@ -35,6 +35,13 @@ export async function processImage(imageId: string, options: ImageProcessingOpti
 			throw createEntityNotFoundError('Imagen', imageId, SERVICE_NAME);
 		}
 
+		// Protección contra rutas corruptas o demasiado largas
+		if (!image.path || image.path.length > 1024) {
+			const errorMsg = `Ruta de archivo inválida o demasiado larga: ${image.path ? `${image.path.substring(0, 50)}...` : 'null'}`;
+			imageLogger.error(`❌ ${errorMsg}`);
+			throw createFileNotFoundError(image.path || 'unknown', { imageId, error: errorMsg }, SERVICE_NAME);
+		}
+
 		if (!existsSync(image.path)) {
 			throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
 		}
@@ -50,7 +57,7 @@ export async function processImage(imageId: string, options: ImageProcessingOpti
 			processor = processor.resize({
 				width,
 				height,
-				fit: fit as keyof sharp.FitEnum,
+				fit: fit as keyof FitEnum,
 				withoutEnlargement: true,
 			});
 		}

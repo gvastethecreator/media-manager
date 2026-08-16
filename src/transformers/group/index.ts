@@ -6,11 +6,7 @@
  */
 
 // Exportar adaptador principal
-export {
-	adaptGroupsWithStats,
-	adaptGroupWithStats,
-	defaultGroupStats,
-} from './adapter';
+export { adaptGroupsWithStats, adaptGroupWithStats, defaultGroupStats } from './adapter';
 
 // Exportar mappers, serializers, validators y schemas
 export * from './mappers';
@@ -18,9 +14,5 @@ export { toGroupWithStats } from './mappers';
 export * from './schema';
 export * from './serializers';
 // Exportar funciones principales de transformación
-export {
-	fromDrizzleGroup,
-	fromDrizzleGroups,
-	toDrizzleGroup,
-} from './transformer';
+export { fromDrizzleGroup, fromDrizzleGroups, toDrizzleGroup } from './transformer';
 export * from './validators';

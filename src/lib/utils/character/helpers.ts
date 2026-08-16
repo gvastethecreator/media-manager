@@ -3,7 +3,7 @@
  * @module utils/character/helpers
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 // Importación comentada porque las funciones no existen actualmente
 // import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
 import {
@@ -22,7 +22,7 @@ import {
  * @returns String con ID único
  */
 export function generateCharacterId(): string {
-	return uuidv4();
+	return nanoid();
 }
 
 /**
@@ -31,12 +31,8 @@ export function generateCharacterId(): string {
  * @returns Objeto Character con valores predeterminados
  */
 export function createNewCharacter(overrides: Partial<CharacterBase> = {}): CharacterBase {
-	// Lógica comentada que dependía de getSuggestedAppearance
-	// const characterClass = (overrides.class?.toLowerCase() || 'warrior') as CharacterClass;
-	// const { color, emoji } = getSuggestedAppearance(characterClass);
-
-	// Valores por defecto temporales para color y emoji
-	const color = '#CCCCCC';
+	const characterClass = (overrides.class?.toLowerCase() || 'warrior') as CharacterClass;
+	const color = 'var(--dt-neutral-400)';
 	const emoji = '👤';
 
 	const now = new Date();

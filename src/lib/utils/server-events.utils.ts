@@ -10,8 +10,8 @@ import { clientEvents } from '@/lib/events/client';
 type EventCallback<T = unknown> = (data: T) => void;
 
 interface EventSubscription {
-	type: string;
 	callback: EventCallback;
+	type: string;
 }
 
 /**

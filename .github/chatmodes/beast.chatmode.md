@@ -1,14 +1,44 @@
 ---
 description: 'Mode creado para todas las tareas.'
-tools: ['codebase', 'usages', 'vscodeAPI', 'think', 'problems', 'changes', 'testFailure', 'terminalSelection', 'terminalLastCommand', 'openSimpleBrowser', 'fetch', 'findTestFiles', 'searchResults', 'githubRepo', 'extensions', 'todos', 'runTests', 'editFiles', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'memory', 'playwright', 'sequentialthinking', 'context7']
+tools:
+  [
+    'codebase',
+    'usages',
+    'vscodeAPI',
+    'think',
+    'problems',
+    'changes',
+    'testFailure',
+    'terminalSelection',
+    'terminalLastCommand',
+    'openSimpleBrowser',
+    'fetch',
+    'findTestFiles',
+    'searchResults',
+    'githubRepo',
+    'extensions',
+    'todos',
+    'runTests',
+    'editFiles',
+    'runNotebooks',
+    'search',
+    'new',
+    'runCommands',
+    'runTasks',
+    'memory',
+    'playwright',
+    'sequentialthinking',
+    'context7',
+  ]
 ---
+
 ## 🧭 Guía Rápida para Agentes de Código
 
 Objetivo: máxima productividad inmediata en este monorepo híbrido (React 19 + Express sobre Bun + Drizzle ORM + Playwright + Tauri). Mantén cambios pequeños, tipados y consistentes con los patrones existentes.
 
 # CRITICAL ENFORCEMENT RULES
 
-1. MANDATORY TASKS PROTOCOL 
+1. MANDATORY TASKS PROTOCOL
 2. Mantén respuestas en español.
 3. Respuestas concisas y directas.
 4. Solución primero, explicaciones después.
@@ -18,6 +48,7 @@ Objetivo: máxima productividad inmediata en este monorepo híbrido (React 19 + 
 8. Prioriza tus herramientas internas antes que comandos de terminal como playwright mcp o las tareas de task.json
 
 ## BEFORE ANY ACTION:
+
 1. CREATE Task Lists with all tasks involved in the current request.
 2. MARK each task as COMPLETE when done.
 3. UPDATE status in real-time.
@@ -29,7 +60,6 @@ Objetivo: máxima productividad inmediata en este monorepo híbrido (React 19 + 
 - same goes for all tasks
 
 ### ⚡ ENFORCEMENT ABSOLUTO
-
 
 ### CONFIRMACIÓN VISUAL OBLIGATORIA EN CADA RESPUESTA
 
@@ -50,19 +80,20 @@ Objetivo: máxima productividad inmediata en este monorepo híbrido (React 19 + 
 
 ```javascript
 async function get_context(request) {
-    return {
-        'project_structure': await analyze_project_structure(),
-        'dependencies': await map_dependencies(),
-        'existing_code': await search_existing_implementations(),
-        'configuration': await read_config_files(),
-        'breaking_risks': await assess_breaking_changes()
-    }
+	return {
+		project_structure: await analyze_project_structure(),
+		dependencies: await map_dependencies(),
+		existing_code: await search_existing_implementations(),
+		configuration: await read_config_files(),
+		breaking_risks: await assess_breaking_changes(),
+	};
 }
 ```
 
 ### Modo Conocimiento (Documentación/Investigación)
 
 **Características:**
+
 - Expansivo y explorador
 - Múltiples perspectivas
 - Enlaces bidireccionales [[]]
@@ -70,6 +101,7 @@ async function get_context(request) {
 - Pensamiento lateral y generativo
 
 **Formato:**
+
 - Markdown enriquecido
 - Metadatos estructurados
 - Conexiones explícitas
@@ -80,12 +112,14 @@ async function get_context(request) {
 ### Estilo Adaptativo
 
 **Para Código:**
+
 - Técnico y preciso
 - Conciso pero completo
 - Enfoque en soluciones
 - Anticipar necesidades técnicas
 
 **Para Conocimiento:**
+
 - Conversacional y exploratorio
 - Expansivo y detallado
 - Conexiones creativas
@@ -99,16 +133,20 @@ async function get_context(request) {
 - **Contexto**: Explicar por qué se toman ciertas decisiones
 
 ### 1. Arquitectura Mental (Mapa de Dominios)
+
 Frontend (React) en `src/components`, estado en `src/store|stores` (Zustand), queries con TanStack Query. Backend Express en `src/server` expone REST + SSE y orquesta servicios de dominio en `src/services/*` (uno por entidad). Persistencia: Drizzle ORM (`src/lib/drizzle/{schema,relations}.ts`) sobre SQLite/Turso. Transformaciones/DTOs y serializadores en `src/transformers/*`. Tipos compartidos centralizados en `src/types/**`. Utilidades transversales y bootstrap en `src/lib/**` (`drizzle/`, `filesystem/`, `logger/`, `image/`, `events/`). Scripts operativos en `scripts/` (prefijo run-with-log para logging tolerante). Tauri (desktop) en `src-tauri/` (no tocar a menos que la feature lo requiera).
 
 ### 2. Patrón de Servicios
+
 Cada carpeta en `src/services/<entidad>/` implementa lógica CRUD + enriquecimientos (stats, relationships, favoritos). Evita mezclar lógica de acceso directo a Drizzle fuera de servicios. Si añades una entidad:
+
 1. Define tablas en `src/lib/drizzle/schema/<dominio>/` y agrega a `schema/index.ts` y relaciones.
 2. Crea servicio en `src/services/<entidad>/<entidad>.service.ts` siguiendo naming existente (examinar p.ej. `image/`, `tag/`).
 3. Añade transformadores opcionales en `src/transformers/<entidad>/` para map → view / stats.
 4. Exponer rutas en `src/server/routes/` consumiendo el servicio (no acceder a Drizzle directo).
 
 ### 3. Convenciones de Código Clave
+
 - Import paths: usar paths absolutos configurados (ver `tsconfig.json` y ejemplos en código) en lugar de rutas relativas profundas.
 - Estado UI: usar stores finos (evita mega-store). Reutiliza patrones existentes en `src/stores/`.
 - No duplicar tipos: importar de `src/types/...` o de esquemas Drizzle cuando corresponda.
@@ -116,34 +154,43 @@ Cada carpeta en `src/services/<entidad>/` implementa lógica CRUD + enriquecimie
 - Logs: usar utilidades en `src/lib/logger/` (si existe) o seguir estilo de `scripts/run-with-log.js` para color y tolerancia.
 
 ### 4. Flujo de Desarrollo (Bun)
+
 Comando unificado (frontend + backend): `bun run dev:full` (ya mapea a `scripts/dev-full.js`). Para aislar:
+
 - Frontend: `bun run dev:vite`
 - Backend con HMR: `bun run dev:server:hot`
 - Tauri (desktop): `bun run dev:tauri`
-Siempre preferir scripts existentes; no introducir nuevos nombres redundantes.
+  Siempre preferir scripts existentes; no introducir nuevos nombres redundantes.
 
 ### 5. Migración Drizzle (Legacy Prisma)
+
 StatsService aún parcialmente legacy (usa SQL raw). No introducir nuevas dependencias Prisma. Para nuevas queries complejas, usar Drizzle SQL tagged (`sql` import) dentro de servicio dedicado. Mantener consistencia de índices (ver ejemplos en `schema/content/index.ts`).
 
 ### 6. Esquema y Seeds
+
 Seeds sólo crean entidades abstractas (no media binaria). Respetar política: no generar datos falsos de archivos físicos. Si agregas seed, ubicar en `src/lib/drizzle/seeds/` y mantener límite reducido (≤2 ejemplos) salvo folders.
 
 ### 7. Tests y Calidad
+
 - E2E: usar Playwright scripts (`test:e2e`, `test:ui`). Añadir nuevos specs siguiendo jerarquía en `tests/e2e/` y nombrar con sufijo `.spec.ts`.
-- Lint/format: usar scripts con logging tolerante: `bun run biome`, `bun run format:check`. No invocar herramientas directamente sin pasar por wrapper cuando se busca logging consistente en CI local.
+- Lint/format: usar scripts con logging tolerante: `bun run lint`, `bun run format:check` o `bun run check`. No invocar herramientas directamente sin pasar por wrapper cuando se busca logging consistente en CI local.
 - Tipos: `bun run tsc` (no emitir). Corregir tipos antes de commits grandes.
 
 ### 8. Logging y Observabilidad Dev
+
 Al añadir scripts, envolver con `scripts/run-with-log.js <alias> <comando>` para integrar resumen automático de errores. Mantener nombres de log cortos (kebab-case). Logs se guardan en `/logs` con timestamp ISO (sanitize de `:` a `-`).
 
 ### 9. Rutas y Comunicación
+
 - API HTTP/SSE central en `src/server/`. Nueva feature: primero definir contrato (handler fino) luego servicio. No poner lógica de formateo pesada en route handlers.
 - Para streaming o procesos largos reutilizar patrón SSE existente (buscar en código `EventSource` o `events/`).
 
 ### 10. Performance / UI Patterns
+
 Listas grandes: usar virtualización (`@tanstack/react-virtual`). Al introducir nueva vista masiva, copiar patrón de una vista existente con grid virtualizado. Caching de datos: TanStack Query (definir keys semánticos, p.ej. `['images','byFolder',folderId]`). Evitar estados duplicados entre store y query sin razón.
 
 ### 11. Extensión / Nueva Entidad (Checklist)
+
 1. Tabla Drizzle + índices razonables
 2. Relaciones en `relations.ts` si aplica
 3. Servicio CRUD con métodos consistentes (`list`, `get`, `create`, `update`, `delete`)
@@ -153,15 +200,18 @@ Listas grandes: usar virtualización (`@tanstack/react-virtual`). Al introducir 
 7. Tests E2E básicos (crear, listar, borrar)
 
 ### 12. Anti-Patrones a Evitar
+
 - Acceso directo al filesystem fuera de utilidades existentes.
 - Duplicar lógica de conteo/stats (centralizar en servicios especializados).
 - Añadir dependencias pesadas para problemas ya resueltos en utilidades locales.
 - Mezclar concerns (render + fetch + transformación) en un único componente grande.
 
 ### 13. Commit & Mensajería
+
 Seguir Conventional Commits: `feat:`, `fix:`, `refactor:`, `chore:`, `test:`. Para migraciones schema: `feat(schema): ...` o `refactor(schema): ...`.
 
 ### 14. Dudas Rápidas
+
 Si patrón no es evidente: inspeccionar servicio homólogo (ej: añadir `world-item` mirar `character` o `place`). Reutilizar mappers existentes antes de crear nuevos.
 
 ---
@@ -173,6 +223,7 @@ Proporciona feedback si falta algún patrón crítico o si una sección requiere
 ## Code Rules
 
 ### Accessibility (a11y)
+
 - Don't use `accessKey` attribute on any HTML element.
 - Don't set `aria-hidden="true"` on focusable elements.
 - Don't add ARIA roles, states, and properties to elements that don't support them.
@@ -209,6 +260,7 @@ Proporciona feedback si falta algún patrón crítico o si una sección requiere
 - Use correct ISO language/country codes for the `lang` attribute.
 
 ### Code Complexity and Quality
+
 - Don't use consecutive spaces in regular expression literals.
 - Don't use the `arguments` object.
 - Don't use primitive type aliases or misleading types.
@@ -264,6 +316,7 @@ Proporciona feedback si falta algún patrón crítico o si una sección requiere
 - Don't use literal numbers that lose precision.
 
 ### React and JSX Best Practices
+
 - Don't use the return value of React.render.
 - Make sure all dependencies are correctly specified in React hooks.
 - Make sure all React hooks are called from the top level of component functions.
@@ -282,6 +335,7 @@ Proporciona feedback si falta algún patrón crítico o si una sección requiere
 - Watch out for possible "wrong" semicolons inside JSX elements.
 
 ### Correctness and Safety
+
 - Don't assign a value to itself.
 - Don't return a value from a setter.
 - Don't compare expressions that modify string case with non-compliant values.
@@ -306,7 +360,7 @@ Proporciona feedback si falta algún patrón crítico o si una sección requiere
 - Don't use bitwise operators.
 - Don't use expressions where the operation doesn't change the value.
 - Make sure Promise-like statements are handled appropriately.
-- Don't use __dirname and __filename in the global scope.
+- Don't use **dirname and **filename in the global scope.
 - Prevent import cycles.
 - Don't use configured elements.
 - Don't hardcode sensitive data like API keys and tokens.
@@ -337,6 +391,7 @@ Proporciona feedback si falta algún patrón crítico o si una sección requiere
 - Don't use `target="_blank"` without `rel="noopener"`.
 
 ### TypeScript Best Practices
+
 - Don't use TypeScript enums.
 - Don't export imported variables.
 - Don't add type annotations to variables, parameters, and class properties that are initialized with literal expressions.
@@ -361,6 +416,7 @@ Proporciona feedback si falta algún patrón crítico o si una sección requiere
 - Use the namespace keyword instead of the module keyword to declare TypeScript namespaces.
 
 ### Style and Consistency
+
 - Don't use global `eval()`.
 - Don't use callbacks in asynchronous tests and hooks.
 - Don't use negation in `if` statements that have `else` clauses.
@@ -448,37 +504,41 @@ Proporciona feedback si falta algún patrón crítico o si una sección requiere
 - Make sure to use the "use strict" directive in script files.
 
 ### Next.js Specific Rules
+
 - Don't use `<img>` elements in Next.js projects.
 - Don't use `<head>` elements in Next.js projects.
-- Don't import next/document outside of pages/_document.jsx in Next.js projects.
-- Don't use the next/head module in pages/_document.js on Next.js projects.
+- Don't import next/document outside of pages/\_document.jsx in Next.js projects.
+- Don't use the next/head module in pages/\_document.js on Next.js projects.
 
 ### Testing Best Practices
+
 - Don't use export or module.exports in test files.
 - Don't use focused tests.
 - Make sure the assertion function, like expect, is placed inside an it() function call.
 - Don't use disabled tests.
 
 ## Common Tasks
+
 - `npx ultracite init` - Initialize Ultracite in your project
 - `npx ultracite format` - Format and fix code automatically
 - `npx ultracite lint` - Check for issues without fixing
 
 ## Example: Error Handling
+
 ```typescript
 // ✅ Good: Comprehensive error handling
 try {
-  const result = await fetchData();
-  return { success: true, data: result };
+	const result = await fetchData();
+	return { success: true, data: result };
 } catch (error) {
-  console.error('API call failed:', error);
-  return { success: false, error: error.message };
+	console.error('API call failed:', error);
+	return { success: false, error: error.message };
 }
 
 // ❌ Bad: Swallowing errors
 try {
-  return await fetchData();
+	return await fetchData();
 } catch (e) {
-  console.log(e);
+	console.log(e);
 }
 ```

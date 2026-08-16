@@ -4,9 +4,8 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import type { Profile, Settings } from '@/lib/drizzle';
+import { formatDate } from '@/lib/utils/date';
 
 /**
  * Tipo extendido de Profile que incluye settings (para compatibilidad con transformadores legacy)
@@ -40,13 +39,13 @@ export interface ProfileTransformed extends ProfileExtended {
 export function getThemeModeText(theme: ThemeMode): string {
 	switch (theme) {
 		case ThemeMode.LIGHT:
-			return 'Claro';
+			return 'Light';
 		case ThemeMode.DARK:
-			return 'Oscuro';
+			return 'Dark';
 		case ThemeMode.SYSTEM:
-			return 'Sistema';
+			return 'System';
 		default:
-			return 'Sistema';
+			return 'System';
 	}
 }
 
@@ -58,20 +57,20 @@ export function getThemeModeText(theme: ThemeMode): string {
 export function getLanguageText(language: Language): string {
 	switch (language) {
 		case Language.SPANISH:
-			return 'Español';
+			return 'Spanish';
 		case Language.ENGLISH:
-			return 'Inglés';
+			return 'English';
 		case Language.PORTUGUESE:
-			return 'Portugués';
+			return 'Portuguese';
 		case Language.FRENCH:
-			return 'Francés';
+			return 'French';
 		default:
-			return 'Español';
+			return 'English';
 	}
 }
 
 /**
- * Formatea la fecha de creación/actualización del perfil
+ * Formatea una fecha para mostrar en el perfil
  * @param date - Fecha a formatear
  * @returns Fecha formateada
  */
@@ -79,7 +78,7 @@ export function formatProfileDate(date: Date): string {
 	if (!date) {
 		return '';
 	}
-	return format(new Date(date), 'PPP', { locale: es });
+	return formatDate(new Date(date), 'PPP');
 }
 
 /**
@@ -118,11 +117,11 @@ export function parseProfilePreferences(profile: ProfileWithSettings): ProfilePr
 			const colorRegex = /^#[0-9A-Fa-f]{6}$/;
 			if (!colorRegex.test(rawPreferences.color)) {
 				console.warn(`[Profile Transformer] Invalid color format '${rawPreferences.color}' found. Using default.`);
-				rawPreferences.color = '#3b82f6'; // Use default color
+				rawPreferences.color = 'var(--dt-primary-500)'; // Use default color
 			}
 		} else if ('color' in rawPreferences && typeof rawPreferences.color !== 'string') {
 			console.warn(`[Profile Transformer] Invalid type for color ('${typeof rawPreferences.color}'). Using default.`);
-			rawPreferences.color = '#3b82f6'; // Use default color
+			rawPreferences.color = 'var(--dt-primary-500)'; // Use default color
 		} // No else needed, if color is missing, Zod default applies
 
 		// Validar y parsear con Zod (ahora con rawPreferences más seguro)
@@ -234,5 +233,5 @@ export function getContrastColor(hexColor: string): string {
 	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
 	// Retornar blanco o negro dependiendo de la luminosidad
-	return luminance > 0.5 ? '#000000' : '#ffffff';
+	return luminance > 0.5 ? 'var(--dt-neutral-950)' : 'var(--background)';
 }

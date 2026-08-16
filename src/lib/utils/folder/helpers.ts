@@ -6,8 +6,8 @@
 import type { FolderExtended } from '@/types/entities/folder';
 
 const FOLDER_DEFAULT_COLORS = {
-	DEFAULT: '#3b82f6',
-	SYSTEM: '#6b7280',
+	DEFAULT: 'var(--dt-primary-500)',
+	SYSTEM: 'var(--dt-neutral-500)',
 };
 
 const FOLDER_DEFAULT_EMOJIS = {
@@ -47,7 +47,7 @@ export function formatLastIndexed(date: Date | string | null | undefined): strin
 	}
 
 	const dateObj = typeof date === 'string' ? new Date(date) : date;
-	return dateObj.toLocaleDateString('es-ES', {
+	return dateObj.toLocaleDateString('en-US', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',

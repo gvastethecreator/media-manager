@@ -1,7 +1,7 @@
 import { MapPin } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import { PlaceCard } from '@/components/cards/place-card';
-import { LoadingScreen } from '@/components/core/feedback';
+import { PlaceCard } from '@/components/cards/place-card/place-card';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
@@ -43,7 +43,7 @@ export function PlacesView({ isVisible }: ViewProps) {
 
 	const handlePlaceSelect = useCallback(
 		(placeId: string) => {
-			viewLogger.info('📍 Seleccionando place', { placeId });
+			viewLogger.info('📍 Selecting place', { placeId });
 			selectPlace(placeId);
 			clientEvents.emit('place:selected', { placeId });
 		},
@@ -55,7 +55,7 @@ export function PlacesView({ isVisible }: ViewProps) {
 		if (newPlaceName.trim() === '') {
 			toast({
 				title: '❌ Error',
-				description: 'El nombre del lugar no puede estar vacío.',
+				description: 'Place name cannot be empty.',
 				variant: 'destructive',
 			});
 			return;
@@ -67,25 +67,25 @@ export function PlacesView({ isVisible }: ViewProps) {
 	}, [newPlaceName, newPlaceDescription, createPlace, toast]);
 
 	const handleRetry = useCallback(() => {
-		viewLogger.info('🔄 Reintentando cargar places');
+		viewLogger.info('🔄 Retrying place loading');
 		refetch();
 	}, [refetch]);
 
-	if (!isVisible) {
+	if (isVisible === false) {
 		return null;
 	}
 
 	if (isLoading) {
-		return <LoadingScreen message="Cargando lugares..." />;
+		return <LoadingScreen message="Loading places..." />;
 	}
 
 	if (error) {
 		return (
 			<EmptyState
-				actions={<Button onClick={handleRetry}>Reintentar</Button>}
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				actions={<Button onClick={handleRetry}>Retry</Button>}
+				description={error instanceof Error ? error.message : 'An unexpected error occurred'}
 				icon={MapPin}
-				title="Error al cargar lugares"
+				title="Could not load places"
 			/>
 		);
 	}
@@ -93,41 +93,41 @@ export function PlacesView({ isVisible }: ViewProps) {
 	return (
 		<ScrollArea className="flex-1">
 			<div className="p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Lugares</h2>
+				<h2 className="mb-4 font-bold text-xl">Places</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Lugar'}
+					{showForm ? 'Cancel' : 'Create Place'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Lugar</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Place</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="placeName">Nombre</Label>
+							<Label htmlFor="placeName">Name</Label>
 							<Input
 								id="placeName"
 								onChange={(e) => setNewPlaceName(e.target.value)}
-								placeholder="Nombre del lugar"
+								placeholder="Place name"
 								value={newPlaceName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="placeDescription">Descripción</Label>
+							<Label htmlFor="placeDescription">Description</Label>
 							<Textarea
 								id="placeDescription"
 								onChange={(e) => setNewPlaceDescription(e.target.value)}
-								placeholder="Descripción del lugar (opcional)"
+								placeholder="Place description (optional)"
 								value={newPlaceDescription}
 							/>
 						</div>
-						<Button onClick={handleCreatePlace}>Guardar Lugar</Button>
+						<Button onClick={handleCreatePlace}>Save Place</Button>
 					</div>
 				)}
 
 				{places.length || isLoading || showForm ? (
 					<motion.div
 						animate={{ opacity: 1, y: 0 }}
-						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
 						initial={{ opacity: 0, y: 20 }}
 						transition={{ duration: 0.3 }}
 					>
@@ -148,13 +148,9 @@ export function PlacesView({ isVisible }: ViewProps) {
 					</motion.div>
 				) : (
 					<EmptyState
-						description={
-							localSearch
-								? `No se encontraron lugares que coincidan con "${localSearch}"`
-								: 'No hay lugares disponibles'
-						}
+						description={localSearch ? `No places match "${localSearch}"` : 'No places available'}
 						icon={MapPin}
-						title="Sin lugares"
+						title="No places"
 					/>
 				)}
 			</div>

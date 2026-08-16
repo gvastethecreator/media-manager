@@ -58,19 +58,19 @@ export const baseFilterSchema = z.object({
  * Tipo para representar un contador genérico de relaciones
  */
 export interface BaseEntityCount {
-	total: number;
 	images: number;
-	videos: number;
 	notes: number;
 	tags: number;
+	total: number;
+	videos: number;
 }
 
 /**
  * Tipo para response básica de API
  */
 export interface APIResponse<T = unknown> {
-	success: boolean;
 	data?: T;
 	error?: string;
 	message?: string;
+	success: boolean;
 }

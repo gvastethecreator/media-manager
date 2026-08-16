@@ -6,6 +6,13 @@
 // ===== Tipos Base =====
 
 export interface BaseMetadata {
+	// Propiedades de color/imagen
+	color?: {
+		colorType?: string;
+		bitDepth?: number;
+		compression?: string;
+		hasAlpha?: boolean;
+	};
 	// Propiedades técnicas básicas
 	dimensions?: {
 		width: number;
@@ -22,14 +29,6 @@ export interface BaseMetadata {
 		filename: string;
 	};
 
-	// Propiedades de color/imagen
-	color?: {
-		colorType?: string;
-		bitDepth?: number;
-		compression?: string;
-		hasAlpha?: boolean;
-	};
-
 	// Para PNG específicos
 	png?: {
 		filterMethod?: string;
@@ -40,50 +39,50 @@ export interface BaseMetadata {
 // ===== Metadata de Generación IA =====
 
 export interface AIGenerationParameters {
-	// Prompts
-	prompt?: string;
-	negative_prompt?: string;
-
-	// Configuración de generación
-	steps?: number;
-	cfg_scale?: number;
 	cfg?: number; // Alias para cfg_scale
-	sampler?: string;
-	scheduler?: string;
-
-	// Información del modelo
-	model?: string;
+	cfg_scale?: number;
+	chaos?: number;
 	checkpoint?: string;
-	vae?: string;
-	engine?: string;
-
-	// Seeds y control
-	seed?: number | string;
-	subseed?: number;
-	subseed_strength?: number;
-	denoise?: number;
 
 	// Configuración avanzada
 	clip_skip?: number;
+	denoise?: number;
+	engine?: string;
 	eta?: number;
+
+	// Parámetros adicionales
+	extra_params?: Record<string, unknown>;
 
 	// Timing (SwarmUI)
 	generation_time?: number;
-	prep_time?: number;
 
 	// Midjourney específico
 	job_id?: string;
-	chaos?: number;
-	stylize?: number;
+
+	// Información del modelo
+	model?: string;
+	negative_prompt?: string;
+	prep_time?: number;
+	// Prompts
+	prompt?: string;
 	quality?: number;
+	sampler?: string;
+	scheduler?: string;
+
+	// Seeds y control
+	seed?: number | string;
+
+	// Configuración de generación
+	steps?: number;
+	stylize?: number;
+	subseed?: number;
+	subseed_strength?: number;
+	vae?: string;
 	version?: string;
 
 	// Workflow datos (ComfyUI)
 	workflow?: string;
 	workflow_json?: Record<string, unknown>;
-
-	// Parámetros adicionales
-	extra_params?: Record<string, unknown>;
 }
 
 // ===== Detección de Origen =====
@@ -103,8 +102,8 @@ export enum AIEngine {
 }
 
 export interface OriginDetectionResult {
-	engine: AIEngine;
 	confidence: number; // 0-1
+	engine: AIEngine;
 	evidence: string[]; // Lista de evidencias encontradas
 	version?: string; // Versión del engine si se puede detectar
 }
@@ -114,37 +113,27 @@ export interface OriginDetectionResult {
 export interface TechnicalMetadata {
 	exif?: ExifData;
 	iptc?: IptcData;
-	xmp?: XmpData;
 	rawTags?: Record<string, unknown>;
+	xmp?: XmpData;
 }
 
 export interface ExifData {
-	// Información básica de la imagen
-	imageWidth?: number;
-	imageHeight?: number;
-	orientation?: number;
+	// Información técnica
+	colorSpace?: number;
 
-	// Información de la cámara
-	make?: string;
-	model?: string;
-	software?: string;
-
-	// Configuración de captura
-	exposureTime?: string;
-	fNumber?: number;
-	iso?: number;
-	focalLength?: number;
+	// Información de archivo
+	compression?: number;
 
 	// Fechas
 	dateTime?: string;
-	dateTimeOriginal?: string;
 	dateTimeDigitized?: string;
+	dateTimeOriginal?: string;
 
-	// Información técnica
-	colorSpace?: number;
-	whiteBalance?: number;
+	// Configuración de captura
+	exposureTime?: string;
 	flash?: number;
-	meteringMode?: number;
+	fNumber?: number;
+	focalLength?: number;
 
 	// GPS si está disponible
 	gps?: {
@@ -157,71 +146,78 @@ export interface ExifData {
 		timestamp?: string;
 		datestamp?: string;
 	};
+	imageHeight?: number;
+	// Información básica de la imagen
+	imageWidth?: number;
+	iso?: number;
 
-	// Información de archivo
-	compression?: number;
+	// Información de la cámara
+	make?: string;
+	meteringMode?: number;
+	model?: string;
+	orientation?: number;
+	resolutionUnit?: number;
+	software?: string;
+	whiteBalance?: number;
 	xResolution?: number;
 	yResolution?: number;
-	resolutionUnit?: number;
 }
 
 export interface IptcData {
-	// Información de identificación
-	title?: string;
-	description?: string;
-	keywords?: string[];
-
 	// Información de autoría
 	byline?: string;
 	bylineTitle?: string;
-	credit?: string;
-	source?: string;
-	copyright?: string;
-
-	// Información editorial
-	headline?: string;
-	urgency?: number;
 	category?: string;
-	supplementalCategories?: string[];
+	city?: string;
+	copyright?: string;
+	country?: string;
+	countryCode?: string;
+	credit?: string;
 
 	// Información de fecha y ubicación
 	dateCreated?: string;
-	timeCreated?: string;
-	city?: string;
-	state?: string;
-	country?: string;
-	countryCode?: string;
+	description?: string;
 
 	// Información técnica
 	editorialUpdate?: string;
 	fixture?: string;
+
+	// Información editorial
+	headline?: string;
+	keywords?: string[];
 	languageIdentifier?: string;
+	source?: string;
+	state?: string;
+	supplementalCategories?: string[];
+	timeCreated?: string;
+	// Información de identificación
+	title?: string;
+	urgency?: number;
 }
 
 export interface XmpData {
-	// Dublin Core
-	title?: string;
-	description?: string;
-	subject?: string[];
-	creator?: string[];
-	rights?: string;
-
-	// Adobe XMP
-	rating?: number;
-	createDate?: string;
-	modifyDate?: string;
-	creatorTool?: string;
-
-	// Adobe Photoshop
-	photoshopColorMode?: number;
-	photoshopICCProfile?: string;
-	photoshopHistory?: string;
-
 	// Camera Raw (si está disponible)
 	cameraRawSettings?: Record<string, any>;
+	createDate?: string;
+	creator?: string[];
+	creatorTool?: string;
 
 	// Metadatos personalizados
 	customFields?: Record<string, any>;
+	description?: string;
+	modifyDate?: string;
+
+	// Adobe Photoshop
+	photoshopColorMode?: number;
+	photoshopHistory?: string;
+	photoshopICCProfile?: string;
+
+	// Adobe XMP
+	rating?: number;
+	rights?: string;
+	subject?: string[];
+	// Dublin Core
+	title?: string;
 }
 
 // ===== Metadata Específicos por Engine =====
@@ -229,57 +225,56 @@ export interface XmpData {
 export interface Automatic1111Metadata extends AIGenerationParameters {
 	engine: AIEngine.AUTOMATIC1111;
 
-	// A1111 específicos
-	restore_faces?: boolean;
-	tiling?: boolean;
-	hires_upscaler?: string;
-	hires_steps?: number;
-	hires_denoising_strength?: number;
-
 	// Forge extensiones
 	forge_attention?: string;
 	forge_memory?: string;
+	hires_denoising_strength?: number;
+	hires_steps?: number;
+	hires_upscaler?: string;
+
+	// A1111 específicos
+	restore_faces?: boolean;
+	tiling?: boolean;
 }
 
 export interface ComfyUIMetadata extends AIGenerationParameters {
+	checkpoint_loader?: string;
 	engine: AIEngine.COMFYUI;
-
-	// Workflow completo
-	workflow_nodes?: Record<string, unknown>;
-	workflow_links?: unknown[];
 
 	// Nodos específicos
 	text_encode_nodes?: string[];
-	checkpoint_loader?: string;
 	vae_loader?: string;
+	workflow_links?: unknown[];
+
+	// Workflow completo
+	workflow_nodes?: Record<string, unknown>;
 }
 
 export interface SwarmUIMetadata extends AIGenerationParameters {
-	engine: AIEngine.SWARMUI;
-
 	// SwarmUI específicos
 	aspect_ratio?: string;
-	total_time?: number;
-	gpu_memory?: number;
+	batch_count?: number;
 
 	// Configuración de batching
 	batch_size?: number;
-	batch_count?: number;
+	engine: AIEngine.SWARMUI;
+	gpu_memory?: number;
+	total_time?: number;
 }
 
 export interface MidjourneyMetadata extends AIGenerationParameters {
-	engine: AIEngine.MIDJOURNEY;
+	aspect_ratio?: string;
 
 	// Midjourney específicos
 	author?: string;
-	job_type?: string;
-	aspect_ratio?: string;
-	reference_image?: string;
-	style_reference?: string;
 	character_reference?: string;
 
 	// Parámetros de comando
 	command_params?: Record<string, unknown>;
+	engine: AIEngine.MIDJOURNEY;
+	job_type?: string;
+	reference_image?: string;
+	style_reference?: string;
 }
 
 export interface IdeogramMetadata extends AIGenerationParameters {
@@ -292,63 +287,46 @@ export interface IdeogramMetadata extends AIGenerationParameters {
 // ===== Metadata para Video =====
 
 export interface VideoMetadata extends BaseMetadata {
-	// Propiedades básicas
-	filename?: string;
-	format?: string;
-	size?: number;
+	// Metadata de generación si es video generado por IA
+	ai_generation?: AIGenerationParameters;
+	aiMetadata?: Record<string, any>; // Para metadatos de IA extraídos
+	audio_codec?: string;
+	audioChannels?: number;
+	audioCodec?: string; // Alias para compatibilidad
+	audioSampleRate?: number;
+	bitrate?: number;
+	container?: string; // Alias para compatibilidad
+
+	// Contenedores
+	container_format?: string;
+
+	// Timestamps
+	createdAt?: string;
 
 	// Propiedades de video
 	duration?: number;
+	// Propiedades básicas
+	filename?: string;
+	format?: string;
 	frame_rate?: number;
 	frameRate?: number; // Alias para compatibilidad
-	bitrate?: number;
-
-	// Dimensiones
-	width?: number;
 	height?: number;
+	modifiedAt?: string;
 	resolution?: string;
+	size?: number;
 
 	// Codec información
 	video_codec?: string;
 	videoCodec?: string; // Alias para compatibilidad
 	videoProfile?: string;
-	audio_codec?: string;
-	audioCodec?: string; // Alias para compatibilidad
-	audioChannels?: number;
-	audioSampleRate?: number;
 
-	// Contenedores
-	container_format?: string;
-	container?: string; // Alias para compatibilidad
-
-	// Timestamps
-	createdAt?: string;
-	modifiedAt?: string;
-
-	// Metadata de generación si es video generado por IA
-	ai_generation?: AIGenerationParameters;
-	aiMetadata?: Record<string, any>; // Para metadatos de IA extraídos
+	// Dimensiones
+	width?: number;
 }
 
 // ===== Resultado Final =====
 
 export interface MetadataExtractionResult {
-	success: boolean;
-
-	// Metadata base
-	base: BaseMetadata;
-
-	// EXIF/IPTC tradicional
-	exif?: Record<string, unknown>;
-	iptc?: Record<string, unknown>;
-	xmp?: Record<string, unknown>;
-
-	// C2PA (Content Credentials)
-	c2pa?: Record<string, unknown>;
-
-	// Detección de origen
-	origin?: OriginDetectionResult;
-
 	// Metadata de IA específico por engine
 	ai_metadata?:
 		| StructuredAIMetadata
@@ -359,84 +337,98 @@ export interface MetadataExtractionResult {
 		| IdeogramMetadata
 		| AIGenerationParameters; // Fallback genérico
 
-	// Para videos
-	video_metadata?: VideoMetadata;
+	// Metadata base
+	base: BaseMetadata;
+
+	// C2PA (Content Credentials)
+	c2pa?: Record<string, unknown>;
 
 	// Errores durante extracción
 	errors: string[];
-	warnings: string[];
+
+	// EXIF/IPTC tradicional
+	exif?: Record<string, unknown>;
+	iptc?: Record<string, unknown>;
+
+	// Detección de origen
+	origin?: OriginDetectionResult;
 
 	// Info de procesamiento
 	parser_used?: string;
 	processing_time?: number;
+	success: boolean;
+
+	// Para videos
+	video_metadata?: VideoMetadata;
+	warnings: string[];
+	xmp?: Record<string, unknown>;
 }
 
 // ===== Opciones de Configuración =====
 
 export interface MetadataExtractionOptions {
+	// Debug
+	debug?: boolean;
+	extract_ai_metadata?: boolean;
+	extract_c2pa?: boolean;
 	// Control de qué extraer
 	extract_exif?: boolean;
 	extract_iptc?: boolean;
-	extract_xmp?: boolean;
-	extract_c2pa?: boolean;
-	extract_ai_metadata?: boolean;
-	extract_video_metadata?: boolean;
-
-	// Control de procesamiento
-	timeout?: number; // milliseconds
-	max_file_size?: number; // bytes
 
 	// Específico para video
 	extract_thumbnail?: boolean;
+	extract_video_metadata?: boolean;
+	extract_xmp?: boolean;
+	include_raw_data?: boolean;
+	max_file_size?: number; // bytes
 	thumbnail_time?: number; // segundo en el video
 
-	// Debug
-	debug?: boolean;
-	include_raw_data?: boolean;
+	// Control de procesamiento
+	timeout?: number; // milliseconds
 }
 
 // ===== Tipos para Parsers =====
 
 export interface ParserResult {
-	detected: boolean;
 	confidence: number;
 	data?: AIGenerationParameters;
+	detected: boolean;
 	errors?: string[];
 }
 
 export interface MetadataParser {
-	name: string;
-	engine: AIEngine;
 	canParse(metadata: Record<string, unknown>): Promise<boolean>;
+	engine: AIEngine;
+	name: string;
 	parse(metadata: Record<string, unknown>): Promise<ParserResult>;
 }
 
 // ===== Interfaz Modular de Parsers de Engine =====
 export interface AIEngineParser {
-	name: string;
 	engines: AIEngine[];
-	priority?: number;
 	matches(metadata: Record<string, unknown>): Promise<boolean> | boolean;
+	name: string;
 	parse(metadata: Record<string, unknown>): Promise<StructuredAIMetadata | null>;
+	priority?: number;
 }
 
 // ===== Metadata Estructurado Unificado =====
 export interface StructuredAIMetadataCommon extends AIGenerationParameters {
-	engine: AIEngine;
 	confidence?: number;
+	engine: AIEngine;
 	evidence?: string[];
 }
 
 export interface StructuredAIMetadata {
-	engine: AIEngine;
-	common: StructuredAIMetadataCommon;
 	automatic1111?: Automatic1111Metadata;
 	comfyui?: ComfyUIMetadata;
-	swarmui?: SwarmUIMetadata;
-	midjourney?: MidjourneyMetadata;
+	common: StructuredAIMetadataCommon;
+	engine: AIEngine;
+	errors?: string[];
 	ideogram?: IdeogramMetadata;
 	legacy_flat: AIGenerationParameters;
-	errors?: string[];
+	midjourney?: MidjourneyMetadata;
+	swarmui?: SwarmUIMetadata;
 	warnings?: string[];
 }
 

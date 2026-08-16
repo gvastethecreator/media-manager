@@ -22,18 +22,18 @@ export interface FiltersState {
 
 // Acciones
 export interface FiltersActions {
-	// Gestión de filtros
-	setFilters: (filters: Partial<FavoriteFilters>) => void;
 	clearFilters: () => void;
-
-	// Filtros específicos
-	setEntityTypeFilter: (types: string[]) => void;
-	setDateRangeFilter: (from: Date | null, to: Date | null) => void;
-	setSearchFilter: (query: string) => void;
+	getActiveFilters: () => string[];
 
 	// Selectores
 	getFilteredFavorites: () => FavoriteExtended[];
-	getActiveFilters: () => string[];
+	setDateRangeFilter: (from: Date | null, to: Date | null) => void;
+
+	// Filtros específicos
+	setEntityTypeFilter: (types: string[]) => void;
+	// Gestión de filtros
+	setFilters: (filters: Partial<FavoriteFilters>) => void;
+	setSearchFilter: (query: string) => void;
 }
 
 // Helpers
@@ -57,22 +57,20 @@ const applyFilters = (favorites: FavoriteExtended[], filters: FavoriteFilters): 
 			return false;
 		}
 
-		// Filtro por fecha de creación (después de)
-		if (filters.createdAfter && favorite.createdAt < filters.createdAfter) {
+		// Filtro por fecha de agregado (después de)
+		if (filters.createdAfter && favorite.addedAt < filters.createdAfter) {
 			return false;
 		}
 
-		// Filtro por fecha de creación (antes de)
-		if (filters.createdBefore && favorite.createdAt > filters.createdBefore) {
+		// Filtro por fecha de agregado (antes de)
+		if (filters.createdBefore && favorite.addedAt > filters.createdBefore) {
 			return false;
 		}
 
 		// Filtro por búsqueda
 		if (filters.search && filters.search.trim() !== '') {
 			const searchLower = filters.search.toLowerCase();
-			// Usar el cast a FavoriteExtended para acceder a entityName
-			const favoriteExtended = favorite as any;
-			const nameMatch = favoriteExtended.entityName?.toLowerCase().includes(searchLower);
+			const nameMatch = favorite.entityName.toLowerCase().includes(searchLower);
 			const typeMatch = favorite.entityType.toLowerCase().includes(searchLower);
 
 			if (!(nameMatch || typeMatch)) {

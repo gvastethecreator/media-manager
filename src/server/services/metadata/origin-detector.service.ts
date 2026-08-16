@@ -11,14 +11,14 @@ const logger = serverLogger.withContext('OriginDetectorService');
 /**
  * Especificación de patrones para detección de engine
  */
-type EnginePatternSpec = {
+interface EnginePatternSpec {
 	metadata_keys?: string[];
 	metadata_patterns?: RegExp[];
-	software_patterns?: RegExp[];
 	png_chunk_keys?: string[];
 	png_chunk_patterns?: RegExp[];
+	software_patterns?: RegExp[];
 	specific_combinations: string[][];
-};
+}
 
 /**
  * Patrones de detección para cada engine

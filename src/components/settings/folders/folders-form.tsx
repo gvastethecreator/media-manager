@@ -1,60 +1,54 @@
-import { Folder } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { type AuthorizedPathReference, useAuthorizedRoots } from '@/lib/api/authorized-roots';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Logger específico para este componente
 const formLogger = clientLogger.withContext('FolderForm');
 
-// Extender la interfaz Window para incluir showDirectoryPicker
-declare global {
-	interface Window {
-		showDirectoryPicker?: (options?: {
-			id?: string;
-			mode?: 'read';
-			startIn?: 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos';
-		}) => Promise<any>;
-	}
-}
-
-interface DirectoryHandle {
-	name: string;
-	path?: string;
-	fullPath?: string;
-	[key: string]: unknown;
-}
-
 interface FolderFormProps {
-	onAddFolder: (path: string) => Promise<void>;
-	isProcessing: boolean;
 	isLoading: boolean;
+	isProcessing: boolean;
+	onAddFolder: (source: AuthorizedPathReference) => Promise<void>;
 }
 
 export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormProps) {
-	const [folderPath, setFolderPath] = useState('');
+	const { data: roots = [], error: rootsError, isLoading: isLoadingRoots } = useAuthorizedRoots();
+	const eligibleRoots = useMemo(
+		() => roots.filter((root) => root.permissions.includes('read') && root.permissions.includes('index')),
+		[roots]
+	);
+	const [relativePath, setRelativePath] = useState('');
+	const [rootId, setRootId] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-	const isPathInvalid = (p: string) => !p?.trim();
+	useEffect(() => {
+		if (!eligibleRoots.some((root) => root.id === rootId)) {
+			setRootId(eligibleRoots[0]?.id ?? '');
+		}
+	}, [eligibleRoots, rootId]);
 
-	const mapErrorToMessage = (err: unknown, path: string): string => {
+	const mapErrorToMessage = (err: unknown): string => {
 		if (!(err instanceof Error)) {
-			return 'Error al agregar carpeta';
+			return 'Could not add folder';
 		}
 		const msg = err.message;
-		if (msg.includes('Ya existe una carpeta')) {
-			return msg;
+		if (msg.includes('Ya existe una carpeta') || msg.includes('A folder already exists')) {
+			return 'A folder already exists for this path';
 		}
 		if (msg.includes('409')) {
-			return `La carpeta '${path}' ya existe en el sistema`;
+			return 'The selected folder already exists';
 		}
 		if (msg.includes('404')) {
-			return 'La ruta especificada no existe o no es accesible';
+			return 'The specified path does not exist or is not accessible';
 		}
 		if (msg.includes('403')) {
-			return 'No tienes permisos para acceder a esta carpeta';
+			return 'You do not have permission to access this folder';
 		}
 		return msg;
 	};
@@ -62,64 +56,31 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
-		if (isPathInvalid(folderPath)) {
-			setErrorMessage('Por favor ingresa una ruta de carpeta válida');
+		if (!rootId) {
+			setErrorMessage('Select an authorized media root');
 			return;
 		}
 
 		try {
 			setIsSubmitting(true);
 			setErrorMessage(null);
-			formLogger.info('Agregando carpeta:', { path: folderPath });
+			formLogger.info('Adding a folder from an authorized media root', { rootId });
 
-			await onAddFolder(folderPath);
-			setFolderPath('');
-			formLogger.info('✅ Carpeta agregada exitosamente');
+			await onAddFolder({ relativePath: relativePath.trim(), rootId });
+			setRelativePath('');
+			formLogger.info('✅ Folder added successfully');
 		} catch (err) {
-			formLogger.error('Error al agregar carpeta:', err);
-			setErrorMessage(mapErrorToMessage(err, folderPath));
+			formLogger.error('Could not add an authorized folder', {
+				message: err instanceof Error ? err.message : 'Unknown error',
+			});
+			setErrorMessage(mapErrorToMessage(err));
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
-	const handleBrowse = async () => {
-		try {
-			// Verificar si la API está disponible
-			if (!window.showDirectoryPicker) {
-				setErrorMessage('Tu navegador no soporta la selección nativa de carpetas');
-				return;
-			}
-
-			// Usar el diálogo nativo para seleccionar carpetas
-			const directoryPicker = await window.showDirectoryPicker({
-				id: 'folder-selection',
-				mode: 'read',
-				startIn: 'pictures',
-			});
-
-			if (directoryPicker) {
-				// Intentar obtener la ruta completa del sistema de archivos usando accesos seguros
-				const anyHandle = directoryPicker as Record<string, unknown> | undefined;
-				const maybePath = (
-					anyHandle && typeof anyHandle === 'object' && '_path' in anyHandle ? (anyHandle as any)._path : undefined
-				) as string | undefined;
-				const fullPath = maybePath || directoryPicker.fullPath || directoryPicker.path || directoryPicker.name;
-				formLogger.info('Carpeta seleccionada:', { path: fullPath });
-				setFolderPath(fullPath);
-				setErrorMessage(null);
-			}
-		} catch (error) {
-			formLogger.error('Error al seleccionar carpeta:', error);
-			// No mostrar error si el usuario canceló la selección
-			if (error instanceof Error && !error.message.includes('user aborted')) {
-				setErrorMessage('Error al seleccionar la carpeta');
-			}
-		}
-	};
-
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFolderPath(e.target.value);
+		setRelativePath(e.target.value);
 		// Limpiar error cuando el usuario modifica el input
 		if (errorMessage) {
 			setErrorMessage(null);
@@ -127,53 +88,66 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 	};
 
 	return (
-		<form className="space-y-2" onSubmit={handleSubmit}>
-			<div className="flex items-center gap-2">
-				<div className="relative flex-1">
-					<Input
-						className={`pr-24 ${errorMessage ? 'border-red-500' : ''}`}
-						disabled={isSubmitting || isProcessing || isLoading}
-						onChange={handleInputChange}
-						placeholder="Ruta de la carpeta"
-						type="text"
-						value={folderPath}
-					/>
-					<Button
-						className="-translate-y-1/2 absolute top-1/2 right-1 h-7 cursor-pointer text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
-						disabled={isSubmitting || isProcessing || isLoading}
-						onClick={handleBrowse}
-						size="sm"
-						type="button"
-						variant="ghost"
-					>
-						<Folder className="mr-1 h-3.5 w-3.5" />
-						Explorar
-					</Button>
-				</div>
-				<Button
-					className="h-9 cursor-pointer transition-colors hover:bg-primary/90"
-					disabled={isSubmitting || isProcessing || isLoading || !folderPath.trim()}
-					size="sm"
-					type="submit"
-				>
-					{isSubmitting ? 'Agregando...' : 'Agregar'}
-				</Button>
+		<form className="space-y-3" onSubmit={handleSubmit}>
+			<div className="flex flex-col gap-1.5">
+				<Label className="font-semibold text-foreground text-sm opacity-90">Authorized media root</Label>
+				<Select disabled={isLoadingRoots || eligibleRoots.length === 0} onValueChange={setRootId} value={rootId}>
+					<SelectTrigger aria-label="Authorized media root" size="sm">
+						<SelectValue placeholder={isLoadingRoots ? 'Loading roots…' : 'Select a root'} />
+					</SelectTrigger>
+					<SelectContent>
+						{eligibleRoots.map((root) => (
+							<SelectItem key={root.id} value={root.id}>
+								{root.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</div>
 
+			<div className="flex flex-col gap-1.5">
+				<Label className="font-semibold text-foreground text-sm opacity-90" htmlFor="authorized-folder-path">
+					Relative path
+				</Label>
+				<Input
+					className={`border-input/60 bg-card focus-visible:ring-primary/20 ${errorMessage ? 'border-destructive' : ''}`}
+					disabled={isSubmitting || isProcessing || isLoading || !rootId}
+					id="authorized-folder-path"
+					onChange={handleInputChange}
+					placeholder="Example: photos/2026 (leave empty to use the root)"
+					type="text"
+					value={relativePath}
+				/>
+				<p className="text-muted-foreground text-xs">Use `/` and do not enter an absolute path.</p>
+			</div>
+
+			{!isLoadingRoots && eligibleRoots.length === 0 && !rootsError && (
+				<div className="rounded-dt-sm border border-border bg-muted/40 p-3 text-muted-foreground text-sm">
+					No media roots have read and index permissions. Configure `MEDIA_MANAGER_ROOT_GRANTS` and restart the
+					application.
+				</div>
+			)}
+
+			{rootsError && (
+				<div className="rounded-dt-sm border border-destructive/20 bg-ui-error/10 p-3 text-destructive text-sm">
+					Authorized media roots could not be loaded.
+				</div>
+			)}
+
+			<Button
+				className="w-full font-medium"
+				disabled={isSubmitting || isProcessing || isLoading || isLoadingRoots || !rootId}
+				size="sm"
+				type="submit"
+				variant="secondary"
+			>
+				{isSubmitting ? 'Adding…' : 'Add folder'}
+			</Button>
+
 			{errorMessage && (
-				<div className="mt-1 rounded-md border border-red-200 bg-red-50 p-2">
+				<div className="mt-1 rounded-md border border-destructive/20 border-ui-error-border bg-ui-error/10 p-2">
 					<div className="flex items-start gap-2">
-						<div className="mt-0.5 text-red-400">
-							<svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-								<title>Icono de error</title>
-								<path
-									clipRule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-									fillRule="evenodd"
-								/>
-							</svg>
-						</div>
-						<div className="text-red-700 text-xs">{errorMessage}</div>
+						<div className="font-medium text-destructive text-xs">{errorMessage}</div>
 					</div>
 				</div>
 			)}

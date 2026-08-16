@@ -26,7 +26,9 @@ export const entityAggregates = sqliteTable(
 		totalFiles: integer('totalFiles').notNull().default(0),
 		totalSize: integer('totalSize').notNull().default(0),
 		// Timestamps
-		lastIndexed: integer('lastIndexed', { mode: 'timestamp_ms' }).default(sql`(CURRENT_TIMESTAMP)`),
+		lastIndexed: integer('lastIndexed', { mode: 'timestamp_ms' }).default(
+			sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+		),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({

@@ -10,7 +10,7 @@ import { z } from 'zod';
  */
 export const BaseImageSchema = z.object({
 	id: z.string(),
-	name: z.string().default('Imagen sin nombre'),
+	name: z.string().default('Unnamed image'),
 	path: z.string(),
 	hash: z.string().nullable().optional(),
 	createdAt: z.date().or(z.string().pipe(z.coerce.date())),

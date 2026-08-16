@@ -1,51 +1,48 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": [
-      "vite/client",
-      "@testing-library/jest-dom",
-      "@types/react",
-      "@types/react-dom"
-      /* Nota: tipos bun no incluidos porque 'bun-types' no está instalado. Añadir si se requiere autocompletado específico. */
-    ],
-    "paths": {
-      "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"]
-    },
-    "strictNullChecks": true
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "vite.config.ts",
-    "vitest.config.ts",
-    "src/**/*.d.ts",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
-    "tests/types/**/*.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "src/components/cards/examples/**",
-    "src/services/file-entity-mapper/file-entity-mapper.service.backup.ts",
-    "src/services/file-entity-mapper/file-entity-mapper.service.clean.ts",
-    "src/components/features/file-browser/file-browser-backup.tsx"
-  ]
+	"compilerOptions": {
+		"target": "esnext",
+		"lib": ["dom", "dom.iterable", "esnext", "webworker"],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"noEmit": true,
+		"esModuleInterop": true,
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"jsx": "react-jsx",
+		"incremental": true,
+		"allowSyntheticDefaultImports": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["vite/client", "@testing-library/jest-dom", "@types/react", "@types/react-dom", "vitest/globals"],
+		"paths": {
+			"@/*": ["./src/*"],
+			"@components/*": ["./src/components/*"]
+		},
+		"rootDir": ".",
+		"strictNullChecks": true
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"vite.config.ts",
+		"oxlint.config.ts",
+		"src/**/*.d.ts",
+		"tests/**/*.ts",
+		"tests/**/*.tsx",
+		"tests/types/**/*.d.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"build",
+		"src/components/deprecated/**",
+		"src/components/test/**",
+		"src/components/cards/examples/**",
+		"src/services/file-entity-mapper/file-entity-mapper.service.backup.ts",
+		"src/services/file-entity-mapper/file-entity-mapper.service.clean.ts",
+		"src/components/features/file-browser/file-browser-backup.tsx"
+	]
 }

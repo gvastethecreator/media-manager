@@ -5,29 +5,29 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, Clock, FileText, RefreshCw, Trash2, XCircle } from 'lucide-react';
+import { AlertTriangle, Clock, FileText, RefreshCw, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { JsonViewer } from '@/components/panels/details-panel/components/json-viewer';
 import type { ReindexLogEntry } from '@/lib/logger/reindex-file-logger';
 
 interface LogStats {
-	errorLogPath: string;
-	warningLogPath: string;
-	errorLogSize: number;
-	warningLogSize: number;
 	errorLogExists: boolean;
+	errorLogPath: string;
+	errorLogSize: number;
 	warningLogExists: boolean;
+	warningLogPath: string;
+	warningLogSize: number;
 }
 
 interface LogResponse<T = ReindexLogEntry[]> {
-	success: boolean;
-	data: T;
-	count?: number;
-	period?: string;
 	breakdown?: {
 		errors: number;
 		warnings: number;
 	};
+	count?: number;
+	data: T;
+	period?: string;
+	success: boolean;
 }
 
 /**
@@ -52,17 +52,17 @@ const formatRelativeTime = (timestamp: string): string => {
 	const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-	if (diffMins < 1) return 'ahora';
-	if (diffMins < 60) return `hace ${diffMins}min`;
-	if (diffHours < 24) return `hace ${diffHours}h`;
-	return `hace ${diffDays}d`;
+	if (diffMins < 1) return 'now';
+	if (diffMins < 60) return `${diffMins} min ago`;
+	if (diffHours < 24) return `${diffHours} hr ago`;
+	return `${diffDays} days ago`;
 };
 
 /**
  * Obtiene el color para el tipo de log
  */
 const getLogTypeColor = (level: 'ERROR' | 'WARN'): string => {
-	return level === 'ERROR' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400';
+	return level === 'ERROR' ? 'text-destructive' : 'text-warning';
 };
 
 /**
@@ -77,14 +77,14 @@ const getLogTypeIcon = (level: 'ERROR' | 'WARN') => {
  */
 const getSourceColor = (source: string): string => {
 	const colors: Record<string, string> = {
-		'circuit-breaker': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-		'auto-indexing': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-		'folder-stats': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-		monitor: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-		'operation-queue': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-		'file-browser': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
+		'circuit-breaker': 'bg-destructive/10 text-destructive',
+		'auto-indexing': 'bg-primary/10 text-primary',
+		'folder-stats': 'bg-success/10 text-success',
+		monitor: 'bg-entity-image/10 text-entity-image',
+		'operation-queue': 'bg-warning/10 text-warning',
+		'file-browser': 'bg-entity-folder/10 text-entity-folder',
 	};
-	return colors[source] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+	return colors[source] || 'bg-muted text-muted-foreground';
 };
 
 export default function ReindexLogsViewer() {
@@ -96,7 +96,7 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-stats'],
 		queryFn: async () => {
 			const response = await fetch('/api/reindex-logs/stats');
-			if (!response.ok) throw new Error('Error obteniendo estadísticas de logs');
+			if (!response.ok) throw new Error('Could not retrieve log statistics');
 			return response.json();
 		},
 		refetchInterval: 30_000, // Actualizar cada 30 segundos
@@ -107,7 +107,7 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-recent', logLimit],
 		queryFn: async () => {
 			const response = await fetch(`/api/reindex-logs/recent?limit=${logLimit}`);
-			if (!response.ok) throw new Error('Error obteniendo logs recientes');
+			if (!response.ok) throw new Error('Could not retrieve recent logs');
 			return response.json();
 		},
 		enabled: activeTab === 'recent',
@@ -119,7 +119,7 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-errors', logLimit],
 		queryFn: async () => {
 			const response = await fetch(`/api/reindex-logs/errors?limit=${logLimit}`);
-			if (!response.ok) throw new Error('Error obteniendo logs de errores');
+			if (!response.ok) throw new Error('Could not retrieve error logs');
 			return response.json();
 		},
 		enabled: activeTab === 'errors',
@@ -131,7 +131,7 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-warnings', logLimit],
 		queryFn: async () => {
 			const response = await fetch(`/api/reindex-logs/warnings?limit=${logLimit}`);
-			if (!response.ok) throw new Error('Error obteniendo logs de warnings');
+			if (!response.ok) throw new Error('Could not retrieve warning logs');
 			return response.json();
 		},
 		enabled: activeTab === 'warnings',
@@ -143,24 +143,12 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-summary'],
 		queryFn: async () => {
 			const response = await fetch('/api/reindex-logs/summary?days=7');
-			if (!response.ok) throw new Error('Error obteniendo resumen de logs');
+			if (!response.ok) throw new Error('Could not retrieve the log summary');
 			return response.json();
 		},
 		enabled: activeTab === 'summary',
 		refetchInterval: 60_000, // Actualizar cada minuto
 	});
-
-	// Limpiar logs antiguos
-	const handleCleanupLogs = async () => {
-		try {
-			const response = await fetch('/api/reindex-logs/cleanup', { method: 'POST' });
-			if (!response.ok) throw new Error('Error en limpieza de logs');
-			// Refetch statistics after cleanup
-			await statsQuery.refetch();
-		} catch (error) {
-			console.error('Error limpiando logs:', error);
-		}
-	};
 
 	const currentQuery = {
 		recent: recentQuery,
@@ -172,29 +160,21 @@ export default function ReindexLogsViewer() {
 	return (
 		<div className="space-y-6">
 			{/* Header con estadísticas */}
-			<div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+			<div className="rounded-lg border border-border bg-card p-4">
 				<div className="mb-4 flex items-center justify-between">
 					<div className="flex items-center gap-2">
-						<FileText className="h-6 w-6 text-blue-600" />
-						<h2 className="font-semibold text-gray-900 text-xl dark:text-gray-100">Logs de Sistema de Reindexado</h2>
+						<FileText className="h-6 w-6 text-primary" />
+						<h2 className="font-semibold text-foreground text-xl">Reindexing System Logs</h2>
 					</div>
 					<div className="flex items-center gap-2">
 						<button
-							className="flex items-center gap-1 rounded-md bg-red-100 px-3 py-1.5 text-red-700 text-sm transition-colors hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800"
-							onClick={handleCleanupLogs}
-							type="button"
-						>
-							<Trash2 className="h-4 w-4" />
-							Limpiar Antiguos
-						</button>
-						<button
-							className="flex items-center gap-1 rounded-md bg-blue-100 px-3 py-1.5 text-blue-700 text-sm transition-colors hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+							className="flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5 text-primary text-sm transition-colors hover:bg-primary/20"
 							disabled={currentQuery.isFetching}
 							onClick={() => currentQuery.refetch()}
 							type="button"
 						>
 							<RefreshCw className={`h-4 w-4 ${currentQuery.isFetching ? 'animate-spin' : ''}`} />
-							Actualizar
+							Refresh
 						</button>
 					</div>
 				</div>
@@ -202,35 +182,33 @@ export default function ReindexLogsViewer() {
 				{statsQuery.data?.success && (
 					<div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
 						<div className="flex flex-col">
-							<span className="text-gray-500 dark:text-gray-400">Errores</span>
+							<span className="text-muted-foreground">Errors</span>
 							<span className="font-mono text-lg">
 								{statsQuery.data.data.errorLogExists ? formatBytes(statsQuery.data.data.errorLogSize) : '0 B'}
 							</span>
 						</div>
 						<div className="flex flex-col">
-							<span className="text-gray-500 dark:text-gray-400">Warnings</span>
+							<span className="text-muted-foreground">Warnings</span>
 							<span className="font-mono text-lg">
 								{statsQuery.data.data.warningLogExists ? formatBytes(statsQuery.data.data.warningLogSize) : '0 B'}
 							</span>
 						</div>
 						<div className="flex flex-col">
-							<span className="text-gray-500 dark:text-gray-400">Log Errores</span>
+							<span className="text-muted-foreground">Error Log</span>
 							<span
-								className={`text-sm ${
-									statsQuery.data.data.errorLogExists ? 'text-green-600 dark:text-green-400' : 'text-gray-400'
-								}`}
+								className={`text-sm ${statsQuery.data.data.errorLogExists ? 'text-success' : 'text-muted-foreground'}`}
 							>
-								{statsQuery.data.data.errorLogExists ? '✓ Activo' : '○ Vacío'}
+								{statsQuery.data.data.errorLogExists ? '✓ Active' : '○ Empty'}
 							</span>
 						</div>
 						<div className="flex flex-col">
-							<span className="text-gray-500 dark:text-gray-400">Log Warnings</span>
+							<span className="text-muted-foreground">Warning Log</span>
 							<span
 								className={`text-sm ${
-									statsQuery.data.data.warningLogExists ? 'text-green-600 dark:text-green-400' : 'text-gray-400'
+									statsQuery.data.data.warningLogExists ? 'text-success' : 'text-muted-foreground'
 								}`}
 							>
-								{statsQuery.data.data.warningLogExists ? '✓ Activo' : '○ Vacío'}
+								{statsQuery.data.data.warningLogExists ? '✓ Active' : '○ Empty'}
 							</span>
 						</div>
 					</div>
@@ -238,20 +216,20 @@ export default function ReindexLogsViewer() {
 			</div>
 
 			{/* Tabs */}
-			<div className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-				<div className="border-gray-200 border-b dark:border-gray-700">
+			<div className="rounded-lg border border-border bg-card">
+				<div className="border-border border-b">
 					<nav className="flex space-x-8 px-6">
 						{[
-							{ key: 'recent' as const, label: 'Recientes', icon: Clock },
-							{ key: 'errors' as const, label: 'Errores', icon: XCircle },
+							{ key: 'recent' as const, label: 'Recent', icon: Clock },
+							{ key: 'errors' as const, label: 'Errors', icon: XCircle },
 							{ key: 'warnings' as const, label: 'Warnings', icon: AlertTriangle },
-							{ key: 'summary' as const, label: 'Resumen', icon: FileText },
+							{ key: 'summary' as const, label: 'Summary', icon: FileText },
 						].map(({ key, label, icon: Icon }) => (
 							<button
 								className={`flex items-center gap-2 border-b-2 px-1 py-4 font-medium text-sm transition-colors ${
 									activeTab === key
-										? 'border-blue-500 text-blue-600 dark:text-blue-400'
-										: 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+										? 'border-primary text-primary'
+										: 'border-transparent text-muted-foreground hover:text-foreground'
 								}`}
 								key={key}
 								onClick={() => setActiveTab(key)}
@@ -265,70 +243,66 @@ export default function ReindexLogsViewer() {
 				</div>
 
 				{/* Controls */}
-				<div className="border-gray-200 border-b p-4 dark:border-gray-700">
+				<div className="border-border border-b p-4">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-2">
-							<label className="text-gray-600 text-sm dark:text-gray-400" htmlFor="logLimit">
-								Mostrar:
+							<label className="text-muted-foreground text-sm" htmlFor="logLimit">
+								Show:
 							</label>
 							<select
-								className="rounded border border-gray-300 bg-white px-3 py-1 text-gray-900 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+								className="rounded border border-input bg-background px-3 py-1 text-foreground text-sm"
 								id="logLimit"
 								onChange={(e) => setLogLimit(Number.parseInt(e.target.value, 10))}
 								value={logLimit}
 							>
-								<option value={25}>25 entradas</option>
-								<option value={50}>50 entradas</option>
-								<option value={100}>100 entradas</option>
-								<option value={200}>200 entradas</option>
+								<option value={25}>25 entries</option>
+								<option value={50}>50 entries</option>
+								<option value={100}>100 entries</option>
+								<option value={200}>200 entries</option>
 							</select>
 						</div>
 
 						{currentQuery.data?.success && (
-							<div className="text-gray-500 text-sm dark:text-gray-400">
+							<div className="text-muted-foreground text-sm">
 								{activeTab === 'recent' && currentQuery.data.breakdown
-									? `${currentQuery.data.breakdown.errors} errores, ${currentQuery.data.breakdown.warnings} warnings`
-									: `${currentQuery.data.count} entradas`}
+									? `${currentQuery.data.breakdown.errors} errors, ${currentQuery.data.breakdown.warnings} warnings`
+									: `${currentQuery.data.count} entries`}
 							</div>
 						)}
 					</div>
 				</div>
 
 				{/* Content */}
-				<div className="p-6">
+				<div className="p-4">
 					{currentQuery.isLoading && (
 						<div className="flex items-center justify-center py-8">
-							<RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
-							<span className="ml-2 text-gray-600 dark:text-gray-400">Cargando logs...</span>
+							<RefreshCw className="h-6 w-6 animate-spin text-primary" />
+							<span className="ml-2 text-muted-foreground">Loading logs...</span>
 						</div>
 					)}
 
 					{currentQuery.error && (
-						<div className="flex items-center justify-center py-8 text-red-600 dark:text-red-400">
+						<div className="flex items-center justify-center py-8 text-destructive">
 							<XCircle className="mr-2 h-6 w-6" />
-							Error cargando logs: {(currentQuery.error as Error).message}
+							Could not load logs: {(currentQuery.error as Error).message}
 						</div>
 					)}
 
 					{/* Summary View */}
 					{activeTab === 'summary' && summaryQuery.data?.success && (
 						<div className="space-y-4">
-							<h3 className="mb-4 font-medium text-gray-900 text-lg dark:text-gray-100">
-								Errores por fuente (últimos 7 días)
-							</h3>
+							<h3 className="mb-4 font-medium text-foreground text-lg">Errors by Source (Last 7 Days)</h3>
 							{Object.keys(summaryQuery.data.data).length === 0 ? (
-								<div className="py-8 text-center text-gray-500 dark:text-gray-400">
-									No hay errores registrados en los últimos 7 días
-								</div>
+								<div className="py-8 text-center text-muted-foreground">No errors recorded in the last 7 days</div>
 							) : (
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 									{Object.entries(summaryQuery.data.data).map(([source, count]) => (
-										<div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700" key={source}>
+										<div className="rounded-lg border border-border p-4" key={source}>
 											<div className="flex items-center justify-between">
 												<span className={`rounded-full px-2 py-1 font-medium text-xs ${getSourceColor(source)}`}>
 													{source}
 												</span>
-												<span className="font-bold font-mono text-red-600 text-xl dark:text-red-400">{count}</span>
+												<span className="font-bold font-mono text-destructive text-xl">{count}</span>
 											</div>
 										</div>
 									))}
@@ -341,15 +315,13 @@ export default function ReindexLogsViewer() {
 					{activeTab !== 'summary' && currentQuery.data?.success && Array.isArray(currentQuery.data.data) && (
 						<div className="space-y-2">
 							{currentQuery.data.data.length === 0 ? (
-								<div className="py-8 text-center text-gray-500 dark:text-gray-400">
-									No hay logs de {activeTab} disponibles
-								</div>
+								<div className="py-8 text-center text-muted-foreground">No {activeTab} logs available</div>
 							) : (
 								currentQuery.data.data.map((log: ReindexLogEntry, index: number) => {
 									const Icon = getLogTypeIcon(log.level);
 									return (
 										<div
-											className="rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
+											className="rounded-lg border border-border p-4 transition-colors hover:bg-muted/50"
 											key={`${log.timestamp}-${index}`}
 										>
 											<div className="flex items-start gap-3">
@@ -361,21 +333,17 @@ export default function ReindexLogsViewer() {
 														>
 															{log.source}
 														</span>
-														<span className="text-gray-500 text-xs dark:text-gray-400">
-															{formatRelativeTime(log.timestamp)}
-														</span>
+														<span className="text-muted-foreground text-xs">{formatRelativeTime(log.timestamp)}</span>
 														{log.folderId && (
-															<span className="rounded bg-gray-100 px-2 py-1 font-mono text-xs dark:bg-gray-700">
+															<span className="rounded bg-muted px-2 py-1 font-mono text-xs">
 																{log.folderId.slice(0, 8)}...
 															</span>
 														)}
 													</div>
-													<p className="mb-2 text-gray-900 text-sm dark:text-gray-100">{log.message}</p>
+													<p className="mb-2 text-foreground text-sm">{log.message}</p>
 													{log.context && (
-														<details className="text-gray-600 text-xs dark:text-gray-400">
-															<summary className="cursor-pointer hover:text-gray-800 dark:hover:text-gray-200">
-																Contexto
-															</summary>
+														<details className="text-muted-foreground text-xs">
+															<summary className="cursor-pointer hover:text-foreground">Context</summary>
 															<div className="mt-2">
 																<JsonViewer
 																	content={JSON.stringify(log.context, null, 2)}
@@ -386,11 +354,9 @@ export default function ReindexLogsViewer() {
 														</details>
 													)}
 													{log.error && (
-														<details className="mt-2 text-red-600 text-xs dark:text-red-400">
-															<summary className="cursor-pointer hover:text-red-800 dark:hover:text-red-200">
-																Error Details
-															</summary>
-															<div className="mt-2 rounded bg-red-50 p-2 dark:bg-red-900/20">
+														<details className="mt-2 text-destructive text-xs">
+															<summary className="cursor-pointer hover:underline">Error Details</summary>
+															<div className="mt-2 rounded border border-destructive/10 bg-destructive/5 p-2">
 																<p>
 																	<strong>Name:</strong> {log.error.name}
 																</p>

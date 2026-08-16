@@ -7,7 +7,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { type AnySQLiteColumn, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 // Modelo para los lugares
 export const places = sqliteTable(
@@ -17,9 +17,12 @@ export const places = sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('📍'),
-		color: text('color').default('#3b82f6'),
+		color: text('color').default('#14b8a6'),
 		category: text('category'),
+		filters: text('filters'),
+		// @deprecated Usar tabla canónica `favorites`. ADR-0002 + batch bridge Favorite.
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
+		metadata: text('metadata'),
 		// Agregados movidos a EntityAggregates tabla genérica
 		type: text('type'),
 		location: text('location'),
@@ -35,11 +38,19 @@ export const places = sqliteTable(
 		resources: text('resources'),
 		notes: text('notes'),
 		featuredImage: text('featuredImage'),
-		parentId: text('parentId'),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		parentId: text('parentId').references((): AnySQLiteColumn => places.id, {
+			onDelete: 'set null',
+			onUpdate: 'cascade',
+		}),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' })
+			.notNull()
+			.default(
+				sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`
+			),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
 		nameIdx: uniqueIndex('Place_name_key').on(table.name),
+		parentIdIdx: index('Place_parentId_idx').on(table.parentId),
 	})
 );

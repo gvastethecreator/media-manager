@@ -11,23 +11,23 @@ import { safeJsonParse } from '../../lib/utils/json';
 import type { WorldItemEffect, WorldItemProperty, WorldItemRequirement } from '../../types/entities/world-item';
 
 // Tipos para serializers compatibles
-type WorldItemAttribute = {
+interface WorldItemAttribute {
+	description?: string;
 	name: string;
 	value: string | number;
-	description?: string;
-};
+}
 
-type WorldItemFilter = {
-	property: string;
+interface WorldItemFilter {
 	operator: string;
+	property: string;
 	value: unknown;
-};
+}
 
-type WorldItemStat = {
+interface WorldItemStat {
 	name: string;
-	value: number;
 	type?: string;
-};
+	value: number;
+}
 
 const logger = serverLogger.withContext('WorldItemSerializers');
 

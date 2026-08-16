@@ -4,6 +4,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { formatFileSize } from '@/lib/utils/format.utils';
 import { useSettingsStore } from '@/store/settings.store';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { ListColumnConfig, ListViewConfig } from '@/types/file-browser/list-column-config';
@@ -11,7 +12,6 @@ import {
 	DEFAULT_LIST_VIEW_CONFIG,
 	formatDate,
 	formatDuration,
-	formatFileSize,
 	getColumnsForEntityType,
 } from '@/types/file-browser/list-column-config';
 

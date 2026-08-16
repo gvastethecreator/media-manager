@@ -29,15 +29,15 @@ graph TD
 
 El componente `PlaceCard` acepta las siguientes propiedades:
 
-| Propiedad | Tipo | Descripción |
-|-----------|------|-------------|
-| place | `PlaceCardData` | Datos del lugar a mostrar |
-| compact | `boolean` | Modo compacto con menos información |
-| tcgMode | `boolean` | Activa efectos visuales de carta tipo TCG |
-| disabled | `boolean` | Deshabilita interacciones con la tarjeta |
-| className | `string` | Clases CSS adicionales |
-| onClick | `() => void` | Función para manejar clic en la tarjeta |
-| isSelected | `boolean` | Indica si la tarjeta está seleccionada |
+| Propiedad  | Tipo            | Descripción                               |
+| ---------- | --------------- | ----------------------------------------- |
+| place      | `PlaceCardData` | Datos del lugar a mostrar                 |
+| compact    | `boolean`       | Modo compacto con menos información       |
+| tcgMode    | `boolean`       | Activa efectos visuales de carta tipo TCG |
+| disabled   | `boolean`       | Deshabilita interacciones con la tarjeta  |
+| className  | `string`        | Clases CSS adicionales                    |
+| onClick    | `() => void`    | Función para manejar clic en la tarjeta   |
+| isSelected | `boolean`       | Indica si la tarjeta está seleccionada    |
 
 ## Ejemplo de uso
 
@@ -47,16 +47,10 @@ import { getPlaceCardData } from '@/components/cards/place-card/place-server-act
 
 // En un Server Component
 const PlaceCardExample = async () => {
-  const placeData = await getPlaceCardData('place-id-here');
+	const placeData = await getPlaceCardData('place-id-here');
 
-  return (
-    <PlaceCard
-      place={placeData}
-      tcgMode={true}
-      onClick={() => console.log('Tarjeta clickeada')}
-    />
-  );
-}
+	return <PlaceCard place={placeData} tcgMode={true} onClick={() => console.log('Tarjeta clickeada')} />;
+};
 ```
 
 ## Server Actions

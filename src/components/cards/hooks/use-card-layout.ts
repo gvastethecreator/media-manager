@@ -10,26 +10,26 @@ import type { BaseCardProps, CardLayoutConfig } from '../types/card-layout.types
 import { resolveLayoutConfig } from '../types/card-layout.types';
 
 interface UseCardLayoutReturn {
-	/** Clases CSS para el contenedor principal */
-	containerClasses: string;
-	/** Clases CSS para el contenido */
-	contentClasses: string;
-	/** Clases CSS para la imagen/thumbnail */
-	imageClasses: string;
-	/** Clases CSS para el texto */
-	textClasses: string;
-	/** Clases CSS para los metadatos */
-	metadataClasses: string;
-	/** Estilos inline para el contenedor */
-	containerStyles: React.CSSProperties;
 	/** Configuración de  resuelta */
 	config: CardLayoutConfig;
+	/** Clases CSS para el contenedor principal */
+	containerClasses: string;
+	/** Estilos inline para el contenedor */
+	containerStyles: React.CSSProperties;
+	/** Clases CSS para el contenido */
+	contentClasses: string;
 	/** Información de dimensiones */
 	dimensions: {
 		width?: number | string;
 		height?: number | string;
 		aspectRatio?: string;
 	};
+	/** Clases CSS para la imagen/thumbnail */
+	imageClasses: string;
+	/** Clases CSS para los metadatos */
+	metadataClasses: string;
+	/** Clases CSS para el texto */
+	textClasses: string;
 }
 
 /**
@@ -151,13 +151,13 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 				classes.push('bg-transparent border-2 border-border rounded-lg');
 				break;
 			case 'tcg':
-				classes.push('bg-gradient-to-b from-gray-900 to-black border border-white/10 rounded-lg shadow-lg');
+				classes.push('bg-gradient-to-b from-muted to-background border border-border rounded-lg shadow-lg');
 				break;
 			case 'polaroid':
-				classes.push('bg-white border border-gray-200 rounded-lg shadow-sm p-2');
+				classes.push('bg-card border border-border rounded-lg shadow-sm p-2');
 				break;
 			case 'glass':
-				classes.push('bg-white/10 backdrop-blur-md border border-white/20 rounded-lg');
+				classes.push('bg-background/10 backdrop-blur-md border border-border/20 rounded-lg');
 				break;
 			default:
 				break;
@@ -222,7 +222,7 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 
 		// Variantes específicas para imágenes
 		if (config.variant === 'polaroid') {
-			classes.push('border border-gray-100');
+			classes.push('border border-border/30');
 		}
 
 		return cn(classes);
@@ -299,7 +299,8 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 
 		// Estilos específicos para TCG mode
 		if (config.variant === 'tcg') {
-			styles.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -4px rgba(59, 130, 246, 0.3)';
+			styles.boxShadow =
+				'0 10px 15px -3px color-mix(in oklch, var(--dt-primary-500) 20%, transparent), 0 4px 6px -4px color-mix(in oklch, var(--dt-primary-500) 30%, transparent)';
 		}
 
 		return styles;

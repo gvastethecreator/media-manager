@@ -48,14 +48,24 @@ export type EntityItem = Omit<BaseCardProps, 'onClick' | 'href'> & {
 
 export interface EntityListProps {
 	/**
-	 * Lista de entidades para mostrar
+	 * Permitir seleccionar ítems (múltiples)
 	 */
-	items: EntityItem[];
+	allowSelection?: boolean;
 
 	/**
-	 * Título de la lista
+	 * Permitir cambiar el tipo de vista
 	 */
-	title?: string;
+	allowViewChange?: boolean;
+
+	/**
+	 * Filtros disponibles por categoría
+	 */
+	categoryFilters?: string[];
+
+	/**
+	 * Clases adicionales para el contenedor
+	 */
+	className?: string;
 
 	/**
 	 * Descripción de la lista
@@ -66,75 +76,15 @@ export interface EntityListProps {
 	 * Elemento a mostrar cuando no hay ítems
 	 */
 	emptyState?: React.ReactNode;
-
 	/**
-	 * Tipo de vista (grid, list, compact)
+	 * Lista de entidades para mostrar
 	 */
-	viewType?: 'grid' | 'list' | 'compact';
-
-	/**
-	 * Permitir cambiar el tipo de vista
-	 */
-	allowViewChange?: boolean;
-
-	/**
-	 * Mostrar la barra de búsqueda
-	 */
-	showSearch?: boolean;
-
-	/**
-	 * Mostrar los filtros
-	 */
-	showFilters?: boolean;
-
-	/**
-	 * Permitir seleccionar ítems (múltiples)
-	 */
-	allowSelection?: boolean;
-
-	/**
-	 * Función llamada cuando se seleccionan ítems
-	 */
-	onSelectionChange?: (selectedIds: string[]) => void;
-
-	/**
-	 * Texto del input de búsqueda
-	 */
-	searchPlaceholder?: string;
-
-	/**
-	 * Mostrar paginación
-	 */
-	pagination?: boolean;
+	items: EntityItem[];
 
 	/**
 	 * Número de ítems por página
 	 */
 	itemsPerPage?: number;
-
-	/**
-	 * Tipos de ordenación disponibles
-	 */
-	sortOptions?: Array<{
-		label: string;
-		value: string;
-		sortFn?: (a: EntityItem, b: EntityItem) => number;
-	}>;
-
-	/**
-	 * Filtros disponibles por categoría
-	 */
-	categoryFilters?: string[];
-
-	/**
-	 * Filtros disponibles por etiquetas
-	 */
-	tagFilters?: string[];
-
-	/**
-	 * Clases adicionales para el contenedor
-	 */
-	className?: string;
 
 	/**
 	 * Función llamada al hacer clic en item (reemplaza onClick del item)
@@ -147,9 +97,58 @@ export interface EntityListProps {
 	onItemDoubleClick?: (id: string) => void;
 
 	/**
+	 * Función llamada cuando se seleccionan ítems
+	 */
+	onSelectionChange?: (selectedIds: string[]) => void;
+
+	/**
+	 * Mostrar paginación
+	 */
+	pagination?: boolean;
+
+	/**
+	 * Texto del input de búsqueda
+	 */
+	searchPlaceholder?: string;
+
+	/**
+	 * Mostrar los filtros
+	 */
+	showFilters?: boolean;
+
+	/**
+	 * Mostrar la barra de búsqueda
+	 */
+	showSearch?: boolean;
+
+	/**
+	 * Tipos de ordenación disponibles
+	 */
+	sortOptions?: Array<{
+		label: string;
+		value: string;
+		sortFn?: (a: EntityItem, b: EntityItem) => number;
+	}>;
+
+	/**
+	 * Filtros disponibles por etiquetas
+	 */
+	tagFilters?: string[];
+
+	/**
 	 * Modo TCG para las tarjetas
 	 */
 	tcgMode?: boolean;
+
+	/**
+	 * Título de la lista
+	 */
+	title?: string;
+
+	/**
+	 * Tipo de vista (grid, list, compact)
+	 */
+	viewType?: 'grid' | 'list' | 'compact';
 }
 
 /**
@@ -158,7 +157,7 @@ export interface EntityListProps {
  */
 export function EntityList({
 	items = [],
-	title = 'Entidades',
+	title = 'Entities',
 	description,
 	emptyState,
 	viewType: initialViewType = 'grid',
@@ -167,13 +166,13 @@ export function EntityList({
 	showFilters = true,
 	allowSelection = false,
 	onSelectionChange,
-	searchPlaceholder = 'Buscar...',
+	searchPlaceholder = 'Search...',
 	pagination = true,
 	itemsPerPage = 9,
 	sortOptions = [
-		{ label: 'Nombre', value: 'name' },
-		{ label: 'Más recientes', value: 'recent' },
-		{ label: 'Más antiguos', value: 'oldest' },
+		{ label: 'Name', value: 'name' },
+		{ label: 'Newest', value: 'recent' },
+		{ label: 'Oldest', value: 'oldest' },
 	],
 	categoryFilters = [],
 	tagFilters = [],
@@ -309,8 +308,8 @@ export function EntityList({
 						<div className="mb-4 rounded-full bg-muted p-3">
 							<Search className="h-6 w-6 text-muted-foreground" />
 						</div>
-						<h3 className="font-medium text-lg">No se encontraron elementos</h3>
-						<p className="mt-1 text-muted-foreground text-sm">Intenta ajustar tus filtros o búsqueda</p>
+						<h3 className="font-medium text-lg">No items found</h3>
+						<p className="mt-1 text-muted-foreground text-sm">Try adjusting your filters or search</p>
 					</div>
 				)
 			);
@@ -434,7 +433,7 @@ export function EntityList({
 						{/* Selector de ordenación */}
 						<Select onValueChange={setSelectedSort} value={selectedSort}>
 							<SelectTrigger className="w-[140px]">
-								<SelectValue placeholder="Ordenar por" />
+								<SelectValue placeholder="Sort by" />
 							</SelectTrigger>
 							<SelectContent>
 								{sortOptions.map((option) => (
@@ -447,6 +446,7 @@ export function EntityList({
 
 						{/* Botón para mostrar filtros adicionales */}
 						<Button
+							aria-label="Show filters"
 							onClick={() => setShowFiltersPanel(!showFiltersPanel)}
 							size="icon"
 							variant={showFiltersPanel ? 'default' : 'outline'}
@@ -463,14 +463,14 @@ export function EntityList({
 					{/* Filtros de categoría */}
 					{categoryFilters.length > 0 && (
 						<div>
-							<h4 className="mb-2 font-medium text-sm">Categorías</h4>
+							<h4 className="mb-2 font-medium text-sm">Categories</h4>
 							<div className="flex flex-wrap gap-2">
 								<Badge
 									className="cursor-pointer"
 									onClick={() => setSelectedCategoryFilter('all')}
 									variant={selectedCategoryFilter === 'all' ? 'default' : 'outline'}
 								>
-									Todas
+									All
 								</Badge>
 								{categoryFilters.map((category) => (
 									<Badge
@@ -489,14 +489,14 @@ export function EntityList({
 					{/* Filtros de etiquetas */}
 					{tagFilters.length > 0 && (
 						<div>
-							<h4 className="mb-2 font-medium text-sm">Etiquetas</h4>
+							<h4 className="mb-2 font-medium text-sm">Tags</h4>
 							<div className="flex flex-wrap gap-2">
 								<Badge
 									className="cursor-pointer"
 									onClick={() => setSelectedTagFilter('all')}
 									variant={selectedTagFilter === 'all' ? 'default' : 'outline'}
 								>
-									Todas
+									All
 								</Badge>
 								{tagFilters.map((tag) => (
 									<Badge
@@ -517,13 +517,13 @@ export function EntityList({
 			{/* Barra de información y selección */}
 			{(allowSelection || filteredItems.length > 0) && (
 				<div className="flex items-center justify-between text-muted-foreground text-sm">
-					<div>{filteredItems.length} elementos encontrados</div>
+					<div>{filteredItems.length} items found</div>
 
 					{allowSelection && selectedIds.length > 0 && (
 						<div className="flex items-center gap-2">
-							<span>{selectedIds.length} seleccionados</span>
+							<span>{selectedIds.length} selected</span>
 							<Button onClick={clearSelection} size="sm" variant="ghost">
-								Limpiar
+								Clear
 							</Button>
 						</div>
 					)}
@@ -537,6 +537,7 @@ export function EntityList({
 			{pagination && totalPages > 1 && (
 				<div className="mt-6 flex items-center justify-center gap-2">
 					<Button
+						aria-label="Previous page"
 						disabled={currentPage === 1}
 						onClick={() => handlePageChange(currentPage - 1)}
 						size="icon"
@@ -575,6 +576,7 @@ export function EntityList({
 					</div>
 
 					<Button
+						aria-label="Next page"
 						disabled={currentPage === totalPages}
 						onClick={() => handlePageChange(currentPage + 1)}
 						size="icon"

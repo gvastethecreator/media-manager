@@ -7,22 +7,22 @@ const modelsLogger = serverLogger.withContext('PromptModels');
  * Interfaz para metadatos de modelo de IA
  */
 export interface AIModelMetadata {
-	id: PromptModel;
-	name: string;
-	provider: string;
+	apiVersionRequired?: string;
+	contextSize: number;
 	description: string;
 	icon: string;
+	id: PromptModel;
+	isAvailable: boolean;
 	maxTokens: number;
+	name: string;
+	order: number;
+	provider: string;
 	supports: {
 		images: boolean;
 		code: boolean;
 		functions: boolean;
 		assistants: boolean;
 	};
-	contextSize: number;
-	order: number;
-	isAvailable: boolean;
-	apiVersionRequired?: string;
 }
 
 /**
@@ -67,7 +67,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 		id: PromptModel.GPT4_VISION,
 		name: 'GPT-4 Vision',
 		provider: 'OpenAI',
-		description: 'Modelo de OpenAI con capacidades de visión',
+		description: 'OpenAI model with vision capabilities',
 		icon: '👁️',
 		maxTokens: 4096,
 		supports: {
@@ -84,7 +84,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 		id: PromptModel.GPT_4_TURBO,
 		name: 'GPT-4 Turbo',
 		provider: 'OpenAI',
-		description: 'Versión mejorada de GPT-4 con mayor velocidad y contexto',
+		description: 'Improved GPT-4 version with greater speed and context',
 		icon: '⚡',
 		maxTokens: 4096,
 		supports: {
@@ -101,7 +101,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 		id: PromptModel.CLAUDE_INSTANT,
 		name: 'Claude Instant',
 		provider: 'Anthropic',
-		description: 'Modelo rápido de Anthropic para respuestas cortas',
+		description: 'Fast Anthropic model for short responses',
 		icon: '🔮',
 		maxTokens: 4096,
 		supports: {
@@ -135,7 +135,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 		id: PromptModel.CLAUDE_3_OPUS,
 		name: 'Claude 3 Opus',
 		provider: 'Anthropic',
-		description: 'Modelo más potente de Anthropic con capacidades avanzadas',
+		description: 'More capable Anthropic model with advanced features',
 		icon: '🎭',
 		maxTokens: 4096,
 		supports: {
@@ -169,7 +169,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 		id: PromptModel.CLAUDE_3_HAIKU,
 		name: 'Claude 3 Haiku',
 		provider: 'Anthropic',
-		description: 'Modelo más rápido y ligero de Claude 3',
+		description: 'Faster, lighter Claude 3 model',
 		icon: '🎋',
 		maxTokens: 4096,
 		supports: {
@@ -203,7 +203,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 		id: PromptModel.LLAMA_3_70B,
 		name: 'Llama 3 70B',
 		provider: 'Meta',
-		description: 'Modelo más grande de Meta con alta capacidad de razonamiento',
+		description: 'Largest Meta model with strong reasoning capabilities',
 		icon: '🦙',
 		maxTokens: 4096,
 		supports: {
@@ -237,7 +237,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 		id: PromptModel.GEMINI_FLASH,
 		name: 'Gemini Flash',
 		provider: 'Google',
-		description: 'Modelo rápido de Google para respuestas eficientes',
+		description: 'Fast Google model for efficient responses',
 		icon: '⚡',
 		maxTokens: 8192,
 		supports: {
@@ -254,7 +254,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 		id: PromptModel.MISTRAL_7B,
 		name: 'Mistral 7B',
 		provider: 'Mistral AI',
-		description: 'Modelo eficiente de Mistral AI con buena relación rendimiento/costo',
+		description: 'Efficient Mistral AI model with a strong performance-to-cost ratio',
 		icon: '🌀',
 		maxTokens: 4096,
 		supports: {
@@ -295,7 +295,7 @@ export function getModelMetadata(modelId: PromptModel | string): AIModelMetadata
 	try {
 		return AI_MODELS[modelId as PromptModel];
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener metadatos de modelo:', error);
+		modelsLogger.error('❌ Could not get model metadata:', error);
 		return;
 	}
 }
@@ -308,7 +308,7 @@ export function getAllModels(): AIModelMetadata[] {
 	try {
 		return Object.values(AI_MODELS).sort((a, b) => a.order - b.order);
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener todos los modelos:', error);
+		modelsLogger.error('❌ Could not get all models:', error);
 		return [];
 	}
 }
@@ -323,7 +323,7 @@ export function getAvailableModels(): AIModelMetadata[] {
 			.filter((model) => model.isAvailable)
 			.sort((a, b) => a.order - b.order);
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener modelos disponibles:', error);
+		modelsLogger.error('❌ Could not get available models:', error);
 		return [];
 	}
 }
@@ -339,7 +339,7 @@ export function getModelsByProvider(provider: string): AIModelMetadata[] {
 			.filter((model) => model.provider.toLowerCase() === provider.toLowerCase())
 			.sort((a, b) => a.order - b.order);
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener modelos por proveedor:', error);
+		modelsLogger.error('❌ Could not get models by provider:', error);
 		return [];
 	}
 }
@@ -376,7 +376,7 @@ export function getModelName(modelId: string | PromptModel): string {
 		const model = getModelMetadata(modelId);
 		return model?.name || String(modelId);
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener nombre de modelo:', error);
+		modelsLogger.error('❌ Could not get model name:', error);
 		return String(modelId);
 	}
 }
@@ -395,7 +395,7 @@ export function modelSupportsFeature(
 		const model = getModelMetadata(modelId);
 		return Boolean(model?.supports[feature]);
 	} catch (error) {
-		modelsLogger.error('❌ Error al verificar soporte de característica:', error);
+		modelsLogger.error('❌ Could not verify feature support:', error);
 		return false;
 	}
 }

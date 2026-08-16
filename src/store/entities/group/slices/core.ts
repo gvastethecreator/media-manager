@@ -52,7 +52,7 @@ export const createGroupCoreSlice: StateCreator<GroupStore, [], [], GroupCoreSli
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			set({ error: errorMessage });
-			logger.error('❌ Error al crear grupo:', errorMessage);
+			logger.error('❌ Could not create group:', errorMessage);
 			throw error;
 		}
 	},
@@ -74,7 +74,7 @@ export const createGroupCoreSlice: StateCreator<GroupStore, [], [], GroupCoreSli
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			set({ error: errorMessage });
-			logger.error('❌ Error al actualizar grupo:', errorMessage);
+			logger.error('❌ Could not update group:', errorMessage);
 			throw error;
 		}
 	},
@@ -90,7 +90,7 @@ export const createGroupCoreSlice: StateCreator<GroupStore, [], [], GroupCoreSli
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			set({ error: errorMessage });
-			logger.error('❌ Error al eliminar grupo:', errorMessage);
+			logger.error('❌ Could not delete group:', errorMessage);
 			throw error;
 		}
 	},

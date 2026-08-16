@@ -1,0 +1,258 @@
+/**
+ * @file Componente de Toolbar del File Browser
+ * @module file-browser-new/components/toolbar
+ */
+
+import {
+	ArrowDown,
+	ArrowUp,
+	ArrowUpDown,
+	ChevronDown,
+	Columns3,
+	Grid,
+	LayoutGrid,
+	List,
+	RefreshCw,
+	Search,
+	Table2,
+	X,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { Toggle } from '@/components/ui/toggle';
+import { cn } from '@/lib/utils';
+import type { ToolbarProps } from '../types/props.types';
+import type { SortOption, ViewMode } from '../types/view.types';
+
+const VIEW_ICONS: Record<ViewMode, React.ComponentType<{ className?: string }>> = {
+	grid: Grid,
+	masonry: LayoutGrid,
+	cards: Columns3,
+	list: List,
+	table: Table2,
+};
+
+const VIEW_LABELS: Record<ViewMode, string> = {
+	grid: 'Grid',
+	masonry: 'Masonry',
+	cards: 'Cards',
+	list: 'List',
+	table: 'Table',
+};
+
+export interface FileBrowserToolbarProps extends ToolbarProps {
+	/** Tamaño actual de item */
+	itemSize?: number;
+	/** Handler para limpiar selección */
+	onClearSelection?: () => void;
+	/** Handler para cambiar tamaño de item */
+	onItemSizeChange?: (size: number) => void;
+	/** Handler para cambiar búsqueda */
+	onSearchChange?: (query: string) => void;
+	/** Handler para seleccionar todos */
+	onSelectAll?: () => void;
+	/** Handler para cambiar ordenamiento */
+	onSortChange?: (field: string) => void;
+	/** Handler para cambiar vista */
+	onViewModeChange?: (mode: ViewMode) => void;
+	/** Query de búsqueda */
+	searchQuery?: string;
+	/** Items seleccionados */
+	selectedCount?: number;
+	/** Opciones de ordenamiento */
+	sortOptions?: SortOption[];
+	/** Modo de vista actual */
+	viewMode: ViewMode;
+}
+
+export function FileBrowserToolbar({
+	itemIds,
+	isLoading = false,
+	onRefresh,
+	viewMode,
+	onViewModeChange,
+	selectedCount = 0,
+	onSelectAll,
+	onClearSelection,
+	itemSize = 150,
+	onItemSizeChange,
+	searchQuery = '',
+	onSearchChange,
+	sortOptions = [],
+	onSortChange,
+	className,
+}: FileBrowserToolbarProps) {
+	const hasSelection = selectedCount > 0;
+	const showSizeSlider = viewMode === 'grid' || viewMode === 'masonry' || viewMode === 'cards';
+
+	const AVAILABLE_SORT_OPTIONS = [
+		{ field: 'name', label: 'Name' },
+		{ field: 'size', label: 'Size' },
+		{ field: 'createdAt', label: 'Date' },
+		{ field: 'updatedAt', label: 'Modified' },
+	];
+
+	const activeSort = sortOptions[0];
+	const activeSortLabel = activeSort
+		? (AVAILABLE_SORT_OPTIONS.find((o) => o.field === activeSort.field)?.label ?? activeSort.field)
+		: 'Sort';
+
+	return (
+		<div
+			className={cn(
+				'flex items-center justify-between gap-2 border-border/40 border-b px-3 py-2',
+				'bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60',
+				className
+			)}
+			data-testid="file-browser-toolbar"
+		>
+			{/* Lado izquierdo: acciones de selección */}
+			<div className="flex items-center gap-2">
+				{hasSelection ? (
+					<>
+						<span className="text-muted-foreground text-sm">{selectedCount} selected</span>
+						<Button onClick={onClearSelection} size="sm" variant="ghost">
+							Clear
+						</Button>
+					</>
+				) : (
+					<Button disabled={itemIds.length === 0} onClick={onSelectAll} size="sm" variant="ghost">
+						Select all ({itemIds.length})
+					</Button>
+				)}
+			</div>
+
+			{/* Centro: modos de vista */}
+			<div className="flex items-center gap-2">
+				{/* Dropdown (compatibilidad con tests E2E legacy) */}
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button data-testid="view-mode-dropdown-trigger" size="sm" variant="ghost">
+							<span className="text-caption">View</span>
+							<ChevronDown className="ml-1 h-3.5 w-3.5" />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent
+						align="center"
+						className="transition-none data-[state=closed]:animate-none data-[state=open]:animate-none"
+						forceMount
+						sideOffset={0}
+					>
+						{(Object.keys(VIEW_ICONS) as ViewMode[]).map((mode) => {
+							const Icon = VIEW_ICONS[mode];
+							return (
+								<DropdownMenuItem
+									data-testid={`view-mode-${mode}-btn`}
+									key={mode}
+									onSelect={(e) => {
+										// Compat E2E: el re-render inmediato puede desmontar el item
+										// durante el click de Playwright. Diferimos el cambio de vista
+										// para que el handler termine y Radix cierre el menú normalmente.
+										window.setTimeout(() => onViewModeChange?.(mode), 0);
+									}}
+								>
+									<Icon className="mr-2 h-4 w-4" />
+									{VIEW_LABELS[mode]}
+								</DropdownMenuItem>
+							);
+						})}
+					</DropdownMenuContent>
+				</DropdownMenu>
+
+				{/* Toggles (UX rápida) */}
+				<div className="flex items-center gap-1">
+					{(Object.keys(VIEW_ICONS) as ViewMode[]).map((mode) => {
+						const Icon = VIEW_ICONS[mode];
+						return (
+							<Toggle
+								aria-label={VIEW_LABELS[mode]}
+								key={mode}
+								onClick={() => onViewModeChange?.(mode)}
+								pressed={viewMode === mode}
+								size="sm"
+								title={VIEW_LABELS[mode]}
+							>
+								<Icon className="h-4 w-4" />
+							</Toggle>
+						);
+					})}
+				</div>
+			</div>
+
+			{/* Slider de tamaño (solo para vistas de grid) */}
+			{showSizeSlider && onItemSizeChange && (
+				<div className="flex min-w-30 items-center gap-2">
+					<Slider
+						className="w-full"
+						max={300}
+						min={80}
+						onValueChange={(v) => onItemSizeChange(v[0])}
+						step={10}
+						value={[itemSize]}
+					/>
+				</div>
+			)}
+
+			{/* Ordenamiento */}
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button className="gap-1 px-2" size="sm" variant="ghost">
+						<ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+						<span className="hidden text-caption sm:inline-block">{activeSortLabel}</span>
+						{activeSort &&
+							(activeSort.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end">
+					{AVAILABLE_SORT_OPTIONS.map((option) => {
+						const activeState = sortOptions.find((s) => s.field === option.field);
+						return (
+							<DropdownMenuItem key={option.field} onClick={() => onSortChange?.(option.field)}>
+								<span className={cn('flex-1', activeState && 'font-bold')}>{option.label}</span>
+								{activeState?.direction === 'asc' && <ArrowUp className="ml-2 h-4 w-4" />}
+								{activeState?.direction === 'desc' && <ArrowDown className="ml-2 h-4 w-4" />}
+							</DropdownMenuItem>
+						);
+					})}
+				</DropdownMenuContent>
+			</DropdownMenu>
+
+			{/* Búsqueda */}
+			<div className="relative flex w-45 items-center">
+				<Search className="absolute left-2 h-3.5 w-3.5 text-muted-foreground" />
+				<Input
+					className="h-8 px-8 text-sm"
+					onChange={(e) => onSearchChange?.(e.target.value)}
+					placeholder="Search..."
+					type="search"
+					value={searchQuery}
+				/>
+				{searchQuery && (
+					<Button
+						className="absolute right-1 h-6 w-6 p-0"
+						onClick={() => onSearchChange?.('')}
+						size="icon"
+						variant="ghost"
+					>
+						<X className="h-3 w-3" />
+					</Button>
+				)}
+			</div>
+
+			{/* Lado derecho: refresh */}
+			<div className="flex items-center gap-2">
+				<Button disabled={isLoading} onClick={onRefresh} size="sm" variant="ghost">
+					<RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
+					<span className="sr-only">Refresh</span>
+				</Button>
+			</div>
+		</div>
+	);
+}

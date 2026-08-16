@@ -1,24 +1,94 @@
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
-import { defineConfig } from 'vite';
+import { type ProxyOptions } from 'vite';
+import { defineConfig } from 'vite-plus';
 import svgr from 'vite-plugin-svgr';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import { resolveLocalServiceHost } from './src/config/local-runtime-security.ts';
 
-const emptyModule = resolve(__dirname, 'src/empty.ts');
+const testMaxWorkers = Math.max(1, Number.parseInt(process.env.VITEST_MAX_WORKERS ?? '2', 10) || 2);
+
+const emptyModule = resolve(import.meta.dirname, 'src/config/empty.ts');
+const isViteBuildCommand = process.argv.some((argument) => argument === 'build');
+const nodeEnvironment = process.env.NODE_ENV ?? (isViteBuildCommand ? 'production' : 'development');
+const isTestEnvironment = process.env.NODE_ENV === 'test';
+const appVersion = process.env.npm_package_version ?? '0.1.0';
+const viteHost = resolveLocalServiceHost({
+	allowExternalBind: process.env.ALLOW_EXTERNAL_BIND === '1',
+	host: process.env.VITE_HOST,
+	serviceName: 'Vite dev server',
+});
+const localSessionToken = process.env.MEDIA_MANAGER_SESSION_TOKEN;
+const shouldUseLocalSessionProxy = !isTestEnvironment || Boolean(localSessionToken);
+const localApiTarget = process.env.MEDIA_MANAGER_API_TARGET || 'http://127.0.0.1:4000';
+const configureLocalSessionProxy: ProxyOptions['configure'] = (proxy) => {
+	if (!localSessionToken) {
+		throw new Error('Vite local API proxy requires a supervisor-provided MEDIA_MANAGER_SESSION_TOKEN.');
+	}
+	proxy.on('proxyReq', (proxyRequest) => {
+		proxyRequest.setHeader('Authorization', `Bearer ${localSessionToken}`);
+		proxyRequest.setHeader('X-Local-App-Request', '1');
+	});
+};
+const localSessionProxy: ProxyOptions = {
+	target: localApiTarget,
+	changeOrigin: true,
+	secure: false,
+	timeout: 30_000,
+	proxyTimeout: 30_000,
+	configure: configureLocalSessionProxy,
+};
+function getManualChunkName(id: string) {
+	if (!id.includes('node_modules')) {
+		return undefined;
+	}
+
+	const matchesPackage = (pkg: string) =>
+		id.includes(`/node_modules/${pkg}/`) || id.includes(`\\node_modules\\${pkg}\\`);
+
+	if (matchesPackage('react') || matchesPackage('react-dom')) return 'react';
+	if (matchesPackage('react-router-dom')) return 'router';
+	if (matchesPackage('@tanstack/react-query')) return 'query';
+	// Los renderizadores pesados deben quedar junto a sus rutas o visores diferidos.
+	// Forzarlos a un chunk global hace que Vite los precargue desde index.html.
+	if (matchesPackage('@radix-ui') || matchesPackage('@base-ui-components')) return 'radix-ui';
+	if (matchesPackage('gsap') || matchesPackage('@gsap') || matchesPackage('lucide-react')) return 'ui';
+	if (matchesPackage('zustand') || matchesPackage('lodash') || matchesPackage('date-fns')) return 'vendor';
+	if (matchesPackage('clsx') || matchesPackage('tailwind-merge') || matchesPackage('class-variance-authority'))
+		return 'utils';
+
+	return undefined;
+}
+
+const toolingIgnorePatterns = [
+	'node_modules/**',
+	'node_modules-*/**',
+	'dist/**',
+	'build/**',
+	'coverage/**',
+	'out/**',
+	'.vercel/**',
+	'.cache/**',
+	'.image-cache/**',
+	'.thumbnail-cache/**',
+	'public/assets/**',
+	'.env',
+	'.env.*',
+	'*.log',
+	'*.lock',
+	'*.d.ts',
+	'*.tsbuildinfo',
+	'*.sqlite',
+	'*.sqlite3',
+	'*.sqlite-journal',
+	'.vscode/**',
+	'src/components/features/file-browser/file-browser-backup.tsx',
+	'**/*.backup.*',
+];
 
 export default defineConfig({
 	plugins: [
 		react({
-			// Optimizaci?n para Bun: usar SWC en lugar de Babel cuando sea posible
 			jsxRuntime: 'automatic',
-			babel: {
-				parserOpts: {
-					plugins: ['decorators-legacy'],
-				},
-			},
-		}),
-		tsconfigPaths({
-			ignoreConfigErrors: true,
 		}),
 		svgr({
 			svgrOptions: {
@@ -26,44 +96,28 @@ export default defineConfig({
 			},
 		}),
 	],
-	esbuild: {
-		// Optimizaci?n para Bun: target m?s moderno
-		target: 'esnext',
-		// Mejorar performance de transformaci?n
-		minifyIdentifiers: false,
-		minifySyntax: true,
-		minifyWhitespace: true,
-		// Optimizar para desarrollo
-		drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
-	},
 	server: {
 		port: 5173,
-		host: true,
+		host: viteHost,
 		// Optimizaci?n HMR para Bun
 		hmr: {
 			port: 5175,
 			// Mejorar compatibilidad con Bun
 			clientPort: 5175,
-			host: 'localhost',
+			host: viteHost,
 		},
 		// Configuraci?n adicional para mejorar compatibilidad con Bun
 		middlewareMode: false,
 		fs: {
-			strict: false,
-			// Permitir acceso a archivos fuera del workspace
-			allow: ['..', '../..'],
+			strict: true,
 		},
 		// Optimizaci?n de proxy para mejor rendimiento
-		proxy: {
-			'/api': {
-				target: 'http://localhost:4000',
-				changeOrigin: true,
-				secure: false,
-				// Optimizaciones de proxy
-				timeout: 30_000,
-				proxyTimeout: 30_000,
-			},
-		},
+		proxy: shouldUseLocalSessionProxy
+			? {
+					'/api': localSessionProxy,
+					'/uploads': localSessionProxy,
+				}
+			: undefined,
 		// Optimizaci?n de watch para Bun
 		watch: {
 			usePolling: false,
@@ -71,9 +125,11 @@ export default defineConfig({
 		},
 	},
 	preview: {
+		host: viteHost,
 		port: 4173,
 	},
 	build: {
+		outDir: 'dist/client',
 		// Optimizaciones de build para Bun
 		target: 'esnext',
 		sourcemap: true,
@@ -81,15 +137,7 @@ export default defineConfig({
 		chunkSizeWarningLimit: 1000,
 		rollupOptions: {
 			output: {
-				// Optimizaci?n de chunks m?s granular
-				manualChunks: {
-					react: ['react', 'react-dom'],
-					router: ['react-router-dom'],
-					query: ['@tanstack/react-query'],
-					ui: ['gsap', '@gsap/react', 'lucide-react'],
-					vendor: ['zustand', 'lodash', 'date-fns'],
-					utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
-				},
+				manualChunks: getManualChunkName,
 				// Optimizar nombres de archivos
 				chunkFileNames: 'assets/[name]-[hash].js',
 				entryFileNames: 'assets/[name]-[hash].js',
@@ -97,11 +145,6 @@ export default defineConfig({
 			},
 			// Evitar que Rollup intente resolver dependencias de Node.js
 			external: ['fs', 'fs/promises', 'path', 'crypto', 'sharp', 'http'],
-			// Optimizaciones de tree-shaking
-			treeshake: {
-				preset: 'recommended',
-				manualPureFunctions: ['console.log', 'console.info'],
-			},
 		},
 		// Optimizaci?n de minificaci?n
 		minify: 'esbuild',
@@ -113,10 +156,11 @@ export default defineConfig({
 	},
 	define: {
 		// Definir variables de entorno para el cliente
-		'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+		'process.env.NODE_ENV': JSON.stringify(nodeEnvironment),
+		'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion),
 		// Optimizaci?n: definir variables en tiempo de build
-		__DEV__: process.env.NODE_ENV !== 'production',
-		__PROD__: process.env.NODE_ENV === 'production',
+		__DEV__: nodeEnvironment !== 'production',
+		__PROD__: nodeEnvironment === 'production',
 	},
 	optimizeDeps: {
 		// Optimizaci?n de dependencias para Bun
@@ -146,25 +190,25 @@ export default defineConfig({
 			'clsx',
 			'tailwind-merge',
 		],
-		// Optimizaci?n de ESBuild para dependencias
-		esbuildOptions: {
-			target: 'esnext',
-			platform: 'browser',
-			mainFields: ['browser', 'module', 'main'],
-			conditions: ['browser', 'module', 'import'],
-		},
 		// Forzar re-optimizaci?n en desarrollo
-		force: process.env.NODE_ENV === 'development',
+		force: nodeEnvironment === 'development',
 	},
 	resolve: {
+		tsconfigPaths: true,
 		alias: [
-			// Alias para m?dulos de Node.js que no deben incluirse en el bundle del cliente
-			{ find: 'fs/promises', replacement: emptyModule },
-			{ find: 'fs', replacement: emptyModule },
-			{ find: 'path', replacement: emptyModule },
-			{ find: 'crypto', replacement: emptyModule },
-			{ find: 'sharp', replacement: emptyModule },
-			{ find: 'http', replacement: emptyModule },
+			{ find: '@', replacement: resolve(import.meta.dirname, 'src') },
+			{ find: '@components', replacement: resolve(import.meta.dirname, 'src/components') },
+			// El runner ejecuta servicios de Node. Los aliases vacíos son sólo para el bundle del browser.
+			...(isTestEnvironment
+				? []
+				: [
+						{ find: 'fs/promises', replacement: emptyModule },
+						{ find: 'fs', replacement: emptyModule },
+						{ find: 'path', replacement: emptyModule },
+						{ find: 'crypto', replacement: emptyModule },
+						{ find: 'sharp', replacement: emptyModule },
+						{ find: 'http', replacement: emptyModule },
+					]),
 		],
 		// Optimizaci?n de resoluci?n de m?dulos
 		mainFields: ['browser', 'module', 'main'],
@@ -176,7 +220,121 @@ export default defineConfig({
 		format: 'es',
 		plugins: () => [react()],
 	},
+	test: {
+		environment: 'jsdom',
+		setupFiles: ['./tests/setup.ts'],
+		exclude: ['**/node_modules/**', '**/dist/**', 'tests/e2e/**', '**/*.e2e.spec.ts'],
+		include: [
+			'src/**/*.{test,spec}.{ts,tsx}',
+			'tests/unit/**/*.{test,spec}.{ts,tsx}',
+			'tests/integration/**/*.{test,spec}.{ts,tsx}',
+		],
+		globals: true,
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'json', 'html'],
+			reportsDirectory: './coverage',
+			exclude: ['node_modules/**', 'dist/**', 'tests/**', '**/*.d.ts', '**/*.config.*', 'src-tauri/**', 'scripts/**'],
+			thresholds: {
+				statements: 50,
+			},
+		},
+		testTimeout: 30_000,
+		hookTimeout: 30_000,
+		fileParallelism: true,
+		maxWorkers: testMaxWorkers,
+		maxConcurrency: 1,
+		sequence: {
+			concurrent: false,
+			shuffle: false,
+		},
+		pool: 'forks',
+		isolate: true,
+		reporters: ['default'],
+		silent: false,
+	},
+	lint: {
+		ignorePatterns: toolingIgnorePatterns,
+		plugins: ['typescript', 'react', 'vitest', 'jsx-a11y', 'import', 'promise', 'node'],
+		env: {
+			browser: true,
+			node: true,
+			es6: true,
+		},
+		settings: {
+			react: {
+				version: '19.2.6',
+			},
+			vitest: {
+				typecheck: false,
+			},
+		},
+		rules: {
+			'no-console': 'off',
+			'no-debugger': 'error',
+			'no-unused-vars': 'off',
+			eqeqeq: 'off',
+			'no-unused-expressions': 'off',
+			'no-control-regex': 'off',
+			'require-yield': 'off',
+			'react/react-in-jsx-scope': 'off',
+			'react/no-unescaped-entities': 'off',
+			'react-hooks/exhaustive-deps': 'off',
+			'jsx-a11y/alt-text': 'off',
+			'jsx-a11y/anchor-has-content': 'off',
+			'jsx-a11y/click-events-have-key-events': 'off',
+			'jsx-a11y/heading-has-content': 'off',
+			'jsx-a11y/media-has-caption': 'off',
+			'jsx-a11y/no-autofocus': 'off',
+			'jsx-a11y/no-static-element-interactions': 'off',
+			'jsx-a11y/prefer-tag-over-role': 'off',
+			'@typescript-eslint/no-explicit-any': 'off',
+			'@typescript-eslint/no-non-null-assertion': 'off',
+			'@typescript-eslint/explicit-module-boundary-types': 'off',
+			'@typescript-eslint/no-empty-interface': 'off',
+			'import/no-cycle': 'off',
+			'import/namespace': 'off',
+			'jest/expect-expect': 'off',
+			'jest/no-conditional-expect': 'off',
+			'jest/require-to-throw-message': 'off',
+			'vitest/expect-expect': 'off',
+			'vitest/no-conditional-expect': 'off',
+			'vitest/require-mock-type-parameters': 'off',
+			'vitest/require-to-throw-message': 'off',
+			'promise/prefer-await-to-then': 'off',
+		},
+	},
+	fmt: {
+		ignorePatterns: toolingIgnorePatterns,
+		useTabs: true,
+		tabWidth: 2,
+		printWidth: 120,
+		singleQuote: true,
+		semi: true,
+		trailingComma: 'es5',
+		endOfLine: 'lf',
+		insertFinalNewline: true,
+	},
+	run: {
+		tasks: {
+			'build:server': {
+				command: 'bun run build:server',
+			},
+			'build:tauri': {
+				command: 'bun run build:tauri',
+			},
+			'db:check': {
+				command: 'bun run db:check',
+			},
+			tsc: {
+				command: 'bun run tsc',
+			},
+		},
+	},
+	staged: {
+		'*': 'vp check --fix',
+	},
 	// Optimizaci?n de logs
-	logLevel: process.env.NODE_ENV === 'development' ? 'info' : 'warn',
+	logLevel: nodeEnvironment === 'development' ? 'info' : 'warn',
 	clearScreen: false,
-});
+} as any);

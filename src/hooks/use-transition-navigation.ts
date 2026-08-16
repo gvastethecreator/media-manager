@@ -13,18 +13,18 @@ import type { ViewTransitionOptions, ViewTransitionType } from '@/types/view-tra
  * Opciones para navegación con transición
  */
 export interface NavigationTransitionOptions {
-	/** Tipo de transición (por defecto: 'navigation') */
-	type?: ViewTransitionType;
+	/** Clase CSS personalizada para el elemento */
+	className?: string;
 	/** Duración personalizada */
 	duration?: number;
 	/** Función de easing personalizada */
 	easing?: 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear';
-	/** Clase CSS personalizada para el elemento */
-	className?: string;
 	/** Reemplazar en historial en lugar de push */
 	replace?: boolean;
 	/** Estado para pasar con la navegación */
 	state?: any;
+	/** Tipo de transición (por defecto: 'navigation') */
+	type?: ViewTransitionType;
 }
 
 /**

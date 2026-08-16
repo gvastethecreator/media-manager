@@ -6,142 +6,118 @@
  */
 
 import { z } from 'zod';
-// Removed broken import - will define types here
-import { NoteSortOption as NoteSortCriteria } from './enums';
-
-// Re-export enums for direct access from types
-export { NoteCategory, NotePriority, NoteSortOption as NoteSortCriteria, NoteStatus, NoteViewMode } from './enums';
-
-// Import base entity types
-import { EntityStats } from '../entity.types';
+import type { AlbumWithStats } from '../album';
+import type { CharacterWithStats } from '../character';
+import type { CollectionWithStats } from '../collection';
+import type { ConceptWithStats } from '../concept';
+import type { GroupWithStats } from '../group';
+import type { ImageComplete } from '../image';
+import type { PlaceComplete } from '../place';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagWithStats } from '../tag';
+import type { VideoWithStats } from '../video';
+import type { WildcardWithStats } from '../wildcard';
+import type { WorldItemWithStats } from '../world-item';
 
 /**
  * 📝 Tipo base canónico para Note
  */
 export interface NoteBase {
-	id: string;
-	title: string;
-	content: string;
-	summary?: string;
-	emoji?: string | null;
-	color?: string | null;
 	category: string;
-	priority: number;
-	status: string;
+	color?: string | null;
+	content: string;
+	createdAt: Date;
+	emoji?: string | null;
 	featuredImage: string | null;
+	id: string;
 	isFavorite: boolean;
 	presetId: string | null;
+	priority: number;
+	status: string;
+	summary?: string;
 	tags?: any;
-	createdAt: Date;
+	title: string;
 	updatedAt: Date;
-}
-
-/**
- * 📊 Estadísticas de Note
- */
-export interface NoteStatistics extends EntityStats {
-	wordCount: number;
-	readingTime: number;
-	completionScore: number;
-
-	// File system functions
-	isDirectory: boolean;
-	isFile: boolean;
-}
-
-/**
- * 📝 Note con estadísticas
- */
-export interface NoteWithStats extends NoteBase {
-	stats: NoteStatistics; // Campo principal (statistics es alias legacy)
-	statistics?: NoteStatistics; // Alias para retrocompatibilidad legacy
 }
 
 /**
  * 🆕 Datos para crear un Note
  */
 export interface NoteCreateInput {
-	title: string;
-	content?: string;
-	summary?: string;
+	albums?: string[];
 	category?: string;
-	priority?: number;
-	status?: string;
+	characters?: string[];
+	collections?: string[];
 	color?: string;
+	concepts?: string[];
+	content?: string;
 	emoji?: string;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
-	presetId?: string | null;
-	images?: string[];
-	videos?: string[];
-	albums?: string[];
-	collections?: string[];
-	tags?: string[];
-	characters?: string[];
-	places?: string[];
-	worldItems?: string[];
-	concepts?: string[];
-	prompts?: string[];
-	wildcards?: string[];
-	properties?: string[];
 	groups?: string[];
+	images?: string[];
+	places?: string[];
+	presetId?: string | null;
+	priority?: number;
+	prompts?: string[];
+	properties?: string[];
+	status?: string;
+	summary?: string;
+	tags?: string[];
+	title: string;
+	videos?: string[];
+	wildcards?: string[];
+	worldItems?: string[];
 }
 
 /**
  * 📝 Datos para actualizar un Note
  */
 export interface NoteUpdateInput {
-	title?: string;
-	content?: string;
-	summary?: string;
+	albums?: string[];
 	category?: string;
-	priority?: number;
-	status?: string;
+	characters?: string[];
+	collections?: string[];
 	color?: string;
+	concepts?: string[];
+	content?: string;
 	emoji?: string;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
-	presetId?: string | null;
-	images?: string[];
-	videos?: string[];
-	albums?: string[];
-	collections?: string[];
-	tags?: string[];
-	characters?: string[];
-	places?: string[];
-	worldItems?: string[];
-	concepts?: string[];
-	prompts?: string[];
-	wildcards?: string[];
-	properties?: string[];
 	groups?: string[];
+	images?: string[];
+	places?: string[];
+	presetId?: string | null;
+	priority?: number;
+	prompts?: string[];
+	properties?: string[];
+	status?: string;
+	summary?: string;
+	tags?: string[];
+	title?: string;
+	videos?: string[];
+	wildcards?: string[];
+	worldItems?: string[];
 }
 
 /**
  * 🔎 Filtros de búsqueda para Note
  */
 export interface NoteFilters {
-	searchQuery?: string;
 	categories?: string[];
-	priorities?: number[];
-	statuses?: string[];
-	onlyFavorites?: boolean;
 	contentContains?: string;
-	hasTags?: boolean;
 	hasImages?: boolean;
+	hasTags?: boolean;
 	hasVideos?: boolean;
+	onlyFavorites?: boolean;
+	priorities?: number[];
+	searchQuery?: string;
+	statuses?: string[];
 }
 
 /**
  * 🔎 Opciones de búsqueda para Note
  */
 export interface NoteSearchOptions {
-	skip?: number;
-	take?: number;
-	orderBy?: {
-		[key in keyof NoteBase]?: 'asc' | 'desc';
-	};
-	where?: NoteFilters;
 	include?: {
 		images?: boolean;
 		videos?: boolean;
@@ -158,44 +134,102 @@ export interface NoteSearchOptions {
 		groups?: boolean;
 		_count?: boolean;
 	};
+	orderBy?: {
+		[key in keyof NoteBase]?: 'asc' | 'desc';
+	};
+	skip?: number;
+	take?: number;
+	where?: NoteFilters;
 }
 
 /**
  * 📊 Resultado de búsqueda de Notes
  */
 export interface NoteSearchResult {
+	hasMore: boolean;
 	items: NoteComplete[];
 	total: number;
-	hasMore: boolean;
 }
 
 /**
  * 🛠️ Opciones para el transformer de Note
  */
 export interface NoteTransformerOptions {
-	includeRelations?: boolean;
-	includeCount?: boolean;
-	validateFields?: boolean;
-	deserializeFields?: boolean;
-	includeUI?: boolean;
 	customFields?: (keyof NoteComplete)[];
+	deserializeFields?: boolean;
+	includeCount?: boolean;
+	includeRelations?: boolean;
+	includeUI?: boolean;
+	validateFields?: boolean;
 }
 
 /**
  * 🔗 Interfaz para notas relacionadas
  */
 export interface RelatedNote {
-	id: string;
-	title: string;
-	excerpt?: string;
 	category?: string;
 	count: number;
+	excerpt?: string;
+	id: string;
 	strength: number;
+	title: string;
 }
 
 /**
- * 🔗 Interfaz para notas relacionadas
+ * 🏷️ Enumeraciones y tipos auxiliares
  */
+export enum NoteStatus {
+	ACTIVE = 'active',
+	ARCHIVED = 'archived',
+	COMPLETED = 'completed',
+	DRAFT = 'draft',
+	PENDING = 'pending',
+}
+
+export enum NoteCategory {
+	GENERAL = 'general',
+	STORY = 'story',
+	LORE = 'lore',
+	MECHANICS = 'mechanics',
+	CHARACTER = 'character',
+	PLACE = 'place',
+	WORLD_ITEM = 'world_item',
+	PROMPT = 'prompt',
+	IDEA = 'idea',
+	TODO = 'todo',
+}
+
+export enum NotePriority {
+	LOWEST = 0,
+	LOW = 1,
+	MEDIUM = 2,
+	HIGH = 3,
+	HIGHEST = 4,
+}
+
+export enum NoteSortCriteria {
+	TITLE_ASC = 'title:asc',
+	TITLE_DESC = 'title:desc',
+	PRIORITY_ASC = 'priority:asc',
+	PRIORITY_DESC = 'priority:desc',
+	STATUS_ASC = 'status:asc',
+	STATUS_DESC = 'status:desc',
+	CREATED_ASC = 'created:asc',
+	CREATED_DESC = 'created:desc',
+	UPDATED_ASC = 'updated:asc',
+	UPDATED_DESC = 'updated:desc',
+}
+
+/**
+ * 📋 Opciones de ordenamiento para UI
+ */
+export enum NoteViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	CARDS = 'cards',
+	COMPACT = 'compact',
+	DETAIL = 'detail',
+}
 
 export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
 	[NoteSortCriteria.TITLE_ASC]: 'title',
@@ -208,43 +242,27 @@ export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
 	[NoteSortCriteria.CREATED_DESC]: 'createdAt',
 	[NoteSortCriteria.UPDATED_ASC]: 'updatedAt',
 	[NoteSortCriteria.UPDATED_DESC]: 'updatedAt',
-	[NoteSortCriteria.CATEGORY_ASC]: 'category',
-	[NoteSortCriteria.CATEGORY_DESC]: 'category',
 };
 
+import { EntityStats } from '../entity.types';
+
 /**
- * 📊 Estadísticas de Note (duplicated interface removed)
+ * 📊 Estadísticas de Note
  */
-export interface NoteStatisticsDuplicated extends EntityStats {
-	wordCount: number;
-	readingTime: number;
+export interface NoteStatistics extends EntityStats {
 	completionScore: number;
 
 	// File system functions
 	isDirectory: boolean;
 	isFile: boolean;
+	readingTime: number;
+	wordCount: number;
 }
 
 /**
  * 📝 Note completo con relaciones
  */
 export interface NoteComplete extends NoteBase {
-	entityType: 'note';
-	// Relaciones - using any[] to avoid circular dependencies
-	images?: any[];
-	videos?: any[];
-	albums?: any[];
-	collections?: any[];
-	tags?: any[];
-	characters?: any[];
-	places?: any[];
-	worldItems?: any[];
-	concepts?: any[];
-	prompts?: any[];
-	wildcards?: any[];
-	properties?: any[];
-	groups?: any[];
-
 	// Conteos
 	_count?: {
 		images?: number;
@@ -261,17 +279,27 @@ export interface NoteComplete extends NoteBase {
 		properties?: number;
 		groups?: number;
 	};
+	albums?: AlbumWithStats[];
+	characters?: CharacterWithStats[];
+	collections?: CollectionWithStats[];
+	concepts?: ConceptWithStats[];
+	entityType: 'note';
+	groups?: GroupWithStats[];
+	// Relaciones
+	images?: ImageComplete[];
+	places?: PlaceComplete[];
+	prompts?: PromptComplete[];
+	properties?: PropertyComplete[];
+	tags?: TagWithStats[];
+	videos?: VideoWithStats[];
+	wildcards?: WildcardWithStats[];
+	worldItems?: WorldItemWithStats[];
 }
 
 /**
  * 📊 Note con estadísticas
  */
 export interface NoteWithStats extends NoteBase {
-	entityType: 'note';
-	// Propiedades requeridas para compatibilidad con AnyEntityWithStats
-	name: string; // Alias para title
-	description: string | null; // Alias para summary o content
-	stats: NoteStatistics; // Campo principal (statistics es alias legacy)
 	_count?: {
 		images: number;
 		videos: number;
@@ -287,6 +315,11 @@ export interface NoteWithStats extends NoteBase {
 		properties: number;
 		groups: number;
 	};
+	description: string | null; // Alias para summary o content
+	entityType: 'note';
+	// Propiedades requeridas para compatibilidad con AnyEntityWithStats
+	name: string; // Alias para title
+	stats: NoteStatistics; // Campo principal (statistics es alias legacy)
 }
 
 // Esquema Zod para validación

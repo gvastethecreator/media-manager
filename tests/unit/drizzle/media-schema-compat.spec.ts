@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'bun:test';
 import type { ImageBase } from '@/types/entities/image/base';
 
 // Nota: Este test no toca DB; solo verifica correspondencia de shape entre
@@ -37,6 +36,10 @@ describe('Drizzle schema vs tipos: Image', () => {
 		// Crear un objeto dummy del tipo ImageBase (con valores triviales)
 		const _: ImageBase = {
 			id: '',
+			assetId: null,
+			legacyId: '',
+			canonicalState: 'legacy_only',
+			canonicalDivergences: [],
 			name: '',
 			description: null,
 			path: '',

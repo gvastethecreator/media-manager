@@ -14,9 +14,5 @@ export * from './mappers';
 export * from './schema';
 export * from './serializers';
 // Exportar funciones principales de transformación
-export {
-	fromDrizzlePlace,
-	fromDrizzlePlaces,
-	toDrizzlePlace,
-} from './transformer';
+export { fromDrizzlePlace, fromDrizzlePlaces, toDrizzlePlace } from './transformer';
 export * from './validators';

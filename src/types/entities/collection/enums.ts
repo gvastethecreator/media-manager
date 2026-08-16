@@ -55,18 +55,18 @@ export enum CollectionRarity {
 }
 
 export const COLLECTION_CATEGORY_COLORS: Record<CollectionCategory, string> = {
-	[CollectionCategory.ART]: '#f59e0b',
-	[CollectionCategory.PHOTOGRAPHY]: '#10b981',
-	[CollectionCategory.DIGITAL]: '#3b82f6',
-	[CollectionCategory.NFT]: '#8b5cf6',
-	[CollectionCategory.PERSONAL]: '#ef4444',
-	[CollectionCategory.WORK]: '#6b7280',
-	[CollectionCategory.PROJECT]: '#06b6d4',
-	[CollectionCategory.GAME]: '#ef4444',
-	[CollectionCategory.COMIC]: '#6366f1',
-	[CollectionCategory.MUSIC]: '#ec4899',
-	[CollectionCategory.MOVIE]: '#f97316',
-	[CollectionCategory.OTHER]: '#9ca3af',
+	[CollectionCategory.ART]: 'var(--preset-orange)',
+	[CollectionCategory.PHOTOGRAPHY]: 'var(--preset-green)',
+	[CollectionCategory.DIGITAL]: 'var(--preset-blue)',
+	[CollectionCategory.NFT]: 'var(--preset-purple)',
+	[CollectionCategory.PERSONAL]: 'var(--preset-red)',
+	[CollectionCategory.WORK]: 'var(--preset-gray)',
+	[CollectionCategory.PROJECT]: 'var(--preset-cyan)',
+	[CollectionCategory.GAME]: 'var(--preset-red)',
+	[CollectionCategory.COMIC]: 'var(--preset-indigo)',
+	[CollectionCategory.MUSIC]: 'var(--preset-pink)',
+	[CollectionCategory.MOVIE]: 'var(--preset-orange)',
+	[CollectionCategory.OTHER]: 'var(--preset-slate)',
 };
 
 export const COLLECTION_CATEGORY_EMOJIS: Record<CollectionCategory, string> = {

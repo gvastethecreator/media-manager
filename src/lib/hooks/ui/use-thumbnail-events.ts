@@ -8,12 +8,10 @@ import type { ThumbnailError } from '@/types/thumbnails';
 const RETRY_INTERVAL = 5000;
 const HEARTBEAT_TIMEOUT = 30_000;
 const MAX_RECONNECT_ATTEMPTS = 5;
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
-type EventSourceMessage = {
+interface EventSourceMessage {
 	data: string;
 	type?: string;
-};
+}
 
 export function useThumbnailEvents() {
 	const { setProcessing, setStats, setError, setProcessStatus } = useThumbnailStore();
@@ -40,8 +38,7 @@ export function useThumbnailEvents() {
 			}
 
 			try {
-				const url = new URL('/api/thumbnails/events', BASE_URL);
-				eventSource = new EventSourcePolyfill(url.toString(), {
+				eventSource = new EventSourcePolyfill('/api/thumbnails/events', {
 					heartbeatTimeout: HEARTBEAT_TIMEOUT,
 					withCredentials: true,
 					headers: {
@@ -57,8 +54,8 @@ export function useThumbnailEvents() {
 				};
 
 				eventSource.onerror = (error) => {
-					serverLogger.error('❌ Error en conexión SSE:', error);
-					setError('Error en la conexión de eventos');
+					serverLogger.error('❌ SSE connection error:', error);
+					setError('Event connection error');
 					reconnect();
 				};
 
@@ -77,7 +74,7 @@ export function useThumbnailEvents() {
 						}
 						return data;
 					} catch (error: unknown) {
-						serverLogger.error('❌ Error procesando evento:', error);
+						serverLogger.error('❌ Could not process event:', error);
 						return null;
 					}
 				};
@@ -112,16 +109,16 @@ export function useThumbnailEvents() {
 					}
 				};
 			} catch (error) {
-				serverLogger.error('❌ Error creando conexión SSE:', error);
-				setError(error instanceof Error ? error.message : 'Error al establecer la conexión');
+				serverLogger.error('❌ Could not create SSE connection:', error);
+				setError(error instanceof Error ? error.message : 'Could not establish the connection');
 				reconnect();
 			}
 		};
 
 		const reconnect = () => {
 			if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-				serverLogger.error('❌ Máximo número de intentos de reconexión alcanzado');
-				setError('No se pudo restablecer la conexión después de varios intentos');
+				serverLogger.error('❌ Maximum reconnection attempts reached');
+				setError('Could not restore the connection after several attempts');
 				return;
 			}
 

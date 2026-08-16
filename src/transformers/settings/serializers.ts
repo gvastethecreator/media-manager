@@ -106,7 +106,7 @@ export function mergeSettingsData(base: Partial<Settings>, override: Partial<Set
 		appearance: {
 			theme: override.appearance?.theme ?? base.appearance?.theme ?? 'system',
 			fontSize: override.appearance?.fontSize ?? base.appearance?.fontSize ?? 16,
-			language: override.appearance?.language ?? base.appearance?.language ?? 'es',
+			language: override.appearance?.language ?? base.appearance?.language ?? 'en',
 			reducedAnimations: override.appearance?.reducedAnimations ?? base.appearance?.reducedAnimations ?? false,
 			highContrast: override.appearance?.highContrast ?? base.appearance?.highContrast ?? false,
 		},

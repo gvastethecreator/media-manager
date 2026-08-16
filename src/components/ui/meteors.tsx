@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface MeteorsProps {
-	number?: number;
 	className?: string;
+	number?: number;
 }
 
 export const Meteors = ({ number = 20 }: MeteorsProps) => {
@@ -26,13 +26,13 @@ export const Meteors = ({ number = 20 }: MeteorsProps) => {
 				// Meteor Head
 				<span
 					className={cn(
-						'pointer-events-none absolute top-1/2 left-1/2 size-0.5 rotate-[215deg] animate-meteor rounded-full bg-slate-500 shadow-[0_0_0_1px_#ffffff10]'
+						'pointer-events-none absolute top-1/2 left-1/2 size-0.5 rotate-[215deg] animate-meteor rounded-full bg-muted-foreground shadow-[0_0_0_1px_var(--border)]'
 					)}
 					key={`meteor-${Math.random().toString(36).substring(2, 9)}`}
 					style={style}
 				>
 					{/* Meteor Tail */}
-					<span className="-z-10 -translate-y-1/2 absolute top-1/2 h-[1px] w-[50px] bg-gradient-to-r from-slate-500 to-transparent" />
+					<span className="absolute top-1/2 -z-10 h-[1px] w-[50px] -translate-y-1/2 bg-gradient-to-r from-muted-foreground to-transparent" />
 				</span>
 			))}
 		</>

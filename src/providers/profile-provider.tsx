@@ -2,20 +2,18 @@
 
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 import { useActiveProfile } from '@/lib/api/profiles';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { selectIsDarkMode, useProfileStore } from '@/store/entities/profile/profile-store';
 import { type ProfileBase, ThemeMode } from '@/types/entities/profile';
+
+const logger = clientLogger.withContext('ProfileProvider');
 
 // Contexto para acceso síncrono al perfil
 export interface ProfileContextValue {
 	/**
-	 * Perfil activo - puede ser null si aún no se ha cargado
+	 * Error asociado al perfil
 	 */
-	profile: ProfileBase | null;
-
-	/**
-	 * Indicador de carga del perfil
-	 */
-	isLoading: boolean;
+	error: string | null;
 
 	/**
 	 * Modo oscuro actual (true = oscuro, false = claro)
@@ -23,9 +21,13 @@ export interface ProfileContextValue {
 	isDarkMode: boolean;
 
 	/**
-	 * Error asociado al perfil
+	 * Indicador de carga del perfil
 	 */
-	error: string | null;
+	isLoading: boolean;
+	/**
+	 * Perfil activo - puede ser null si aún no se ha cargado
+	 */
+	profile: ProfileBase | null;
 }
 
 const ProfileContext = createContext<ProfileContextValue>({
@@ -60,7 +62,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 				}
 				setIsInitialized(true);
 			} catch (error) {
-				console.error('Error inicializando perfil:', error);
+				logger.error('Error initializing profile:', error);
 			}
 		};
 

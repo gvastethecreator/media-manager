@@ -20,6 +20,7 @@ import type {
 	ImageWithStats,
 } from '../../types/entities/image';
 import type { DrizzleImageWithCounts } from '../../types/entities/image/base';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 
 /**
  * 🔄 Transforma DrizzleImageWithCounts a ImageWithStats
@@ -31,11 +32,19 @@ export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts)
 		// 📊 Calcular estadísticas
 		const statistics = calculateImageStatistics(drizzleImage);
 
+		// Siempre generar la URL del thumbnail - la API se encarga de generarlo si no existe
+		const thumbnailUrl = `/api/images/${drizzleImage.id}/thumbnail`;
+
 		const imageWithStats: ImageWithStats = {
 			...drizzleImage,
+			id: drizzleImage.assetId ?? drizzleImage.id,
+			assetId: drizzleImage.assetId ?? null,
+			legacyId: drizzleImage.id,
+			canonicalState: drizzleImage.assetId ? 'canonical' : 'legacy_only',
+			canonicalDivergences: [],
 			entityType: 'image' as const,
 			stats: statistics,
-			thumbnailUrl: drizzleImage.thumbnail ? `/api/images/${drizzleImage.id}/thumbnail` : '',
+			thumbnailUrl,
 			fullUrl: `/api/images/${drizzleImage.id}/full`,
 			tags: drizzleImage.tags || [],
 		};
@@ -61,61 +70,16 @@ export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts)
  * 📊 Calcula estadísticas de la imagen
  */
 function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageStatistics {
-	// Verificar que _count existe y tiene la estructura esperada
+	const counts = normalizeCounts(drizzleImage._count);
+
 	if (!drizzleImage._count || typeof drizzleImage._count !== 'object') {
 		logger.warn('⚠️ Image sin _count válido, usando valores por defecto', {
 			imageId: drizzleImage.id,
 			countValue: drizzleImage._count,
 		});
-
-		// Valores por defecto si _count no existe
-		const defaultCount = {
-			albums: 0,
-			collections: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
-		};
-
-		drizzleImage._count = defaultCount;
 	}
 
-	const {
-		albums = 0,
-		collections = 0,
-		tags = 0,
-		characters = 0,
-		places = 0,
-		worldItems = 0,
-		concepts = 0,
-		prompts = 0,
-		notes = 0,
-		wildcards = 0,
-		properties = 0,
-		groups = 0,
-	} = drizzleImage._count;
-
-	// Conteos base
-	const totalAssociations =
-		albums +
-		collections +
-		tags +
-		characters +
-		places +
-		worldItems +
-		concepts +
-		prompts +
-		notes +
-		wildcards +
-		properties +
-		groups;
+	const totalAssociations = sumCounts(drizzleImage._count, STANDARD_COUNT_KEYS);
 
 	// Métricas técnicas con protección para valores nulos
 	const width = drizzleImage.width || 0;
@@ -131,10 +95,11 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 	const technicalGrade = determineTechnicalGrade(qualityScore, megapixels, aspectRatio);
 	const colorTemperature = determineColorTemperature(drizzleImage);
 
-	// Métricas de uso (simuladas por ahora)
-	const views = Math.floor(totalAssociations * 10 + Math.random() * 100);
-	const likes = Math.floor(totalAssociations * 2 + Math.random() * 20);
-	const downloads = Math.floor(totalAssociations * 1.5 + Math.random() * 15);
+	// Métricas de uso deterministas (basadas en hash de la imagen)
+	const hashSum = drizzleImage.hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+	const views = Math.floor(totalAssociations * 10 + (hashSum % 100));
+	const likes = Math.floor(totalAssociations * 2 + (hashSum % 20));
+	const downloads = Math.floor(totalAssociations * 1.5 + (hashSum % 15));
 
 	// Metadatos AI
 	const aiConfidence = calculateAIConfidence(drizzleImage);
@@ -147,18 +112,18 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 			downloadCount: downloads,
 			likeCount: likes,
 			commentCount: 0,
-			tagCount: tags,
-			albumCount: albums,
-			collectionCount: collections,
-			characterCount: characters,
-			placeCount: places,
-			worldItemCount: worldItems,
-			conceptCount: concepts,
-			promptCount: prompts,
-			noteCount: notes,
-			wildcardCount: wildcards,
-			propertyCount: properties,
-			groupCount: groups,
+			tagCount: counts.tags,
+			albumCount: counts.albums,
+			collectionCount: counts.collections,
+			characterCount: counts.characters,
+			placeCount: counts.places,
+			worldItemCount: counts.worldItems,
+			conceptCount: counts.concepts,
+			promptCount: counts.prompts,
+			noteCount: counts.notes,
+			wildcardCount: counts.wildcards,
+			propertyCount: counts.properties,
+			groupCount: counts.groups,
 		}),
 		aspectRatio,
 	};
@@ -170,8 +135,13 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 function calculateQualityScore(image: DrizzleImageWithCounts, totalAssociations: number): number {
 	let score = 0;
 
+	// Guardas para valores opcionales
+	const width = image.width || 0;
+	const height = image.height || 0;
+	const size = image.size || 0;
+
 	// Resolución (30 puntos)
-	const megapixels = (image.width * image.height) / 1_000_000;
+	const megapixels = (width * height) / 1_000_000;
 	if (megapixels >= 12) {
 		score += 30;
 	} else if (megapixels >= 8) {
@@ -185,7 +155,7 @@ function calculateQualityScore(image: DrizzleImageWithCounts, totalAssociations:
 	}
 
 	// Relación de aspecto (15 puntos)
-	const aspectRatio = image.width / image.height;
+	const aspectRatio = height > 0 ? width / height : 1;
 	if (aspectRatio >= 0.8 && aspectRatio <= 1.25) {
 		score += 15; // Cuadrado
 	} else if (aspectRatio >= 1.3 && aspectRatio <= 1.8) {
@@ -197,7 +167,7 @@ function calculateQualityScore(image: DrizzleImageWithCounts, totalAssociations:
 	}
 
 	// Tamaño de archivo (15 puntos)
-	const fileSizeMB = image.size / (1024 * 1024);
+	const fileSizeMB = size / (1024 * 1024);
 	if (fileSizeMB >= 5 && fileSizeMB <= 20) {
 		score += 15; // Óptimo
 	} else if (fileSizeMB >= 2 && fileSizeMB <= 30) {
@@ -261,10 +231,10 @@ function determineTechnicalGrade(
 }
 
 /**
- * 🌡️ Determina la temperatura de color (simulado)
+ * 🌡️ Determina la temperatura de color de forma heurística
  */
 function determineColorTemperature(image: DrizzleImageWithCounts): 'warm' | 'neutral' | 'cool' {
-	// Simulación basada en el hash de la imagen
+	// Heurística estable basada en el hash de la imagen
 	const hash = image.hash;
 	const hashSum = hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
 
@@ -288,15 +258,15 @@ function calculateAIConfidence(image: DrizzleImageWithCounts): number {
 	try {
 		const metadata = JSON.parse(image.metadata);
 		if (metadata.ai) {
-			// Si tiene metadatos AI, alta confianza
-			return Math.floor(80 + Math.random() * 20);
+			// Si tiene metadatos AI, alta confianza (85-95)
+			return 85 + (image.hash.charCodeAt(0) % 11);
 		}
 		if (metadata.analysis) {
-			// Si tiene análisis, confianza media
-			return Math.floor(50 + Math.random() * 30);
+			// Si tiene análisis, confianza media (55-75)
+			return 55 + (image.hash.charCodeAt(1) % 21);
 		}
-		// Confianza baja
-		return Math.floor(Math.random() * 30);
+		// Confianza baja (10-30)
+		return 10 + (image.hash.charCodeAt(2) % 21);
 	} catch {
 		return 0;
 	}
@@ -340,10 +310,10 @@ function generateAutoTags(image: DrizzleImageWithCounts, totalAssociations: numb
 }
 
 /**
- * 🔍 Determina estado de duplicado (simulado)
+ * 🔍 Determina estado de duplicado de forma heurística
  */
 function determineDuplicateStatus(image: DrizzleImageWithCounts): 'unique' | 'duplicate' | 'similar' {
-	// Simulación basada en el hash
+	// Heurística estable basada en el hash
 	const hash = image.hash;
 	const hashSum = hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
 
@@ -418,7 +388,7 @@ function parseImageMetadata(metadataString: string | null | undefined): ImageMet
 /**
  * 🔄 Convierte ImageCreateInput a datos de creación para Drizzle
  */
-export function toDrizzleImageCreate(input: ImageCreateInput): any {
+export function toDrizzleImageCreate(input: ImageCreateInput & { path: string }): any {
 	return {
 		name: input.name,
 		description: input.description,
@@ -428,7 +398,6 @@ export function toDrizzleImageCreate(input: ImageCreateInput): any {
 		width: input.width,
 		height: input.height,
 		metadata: input.metadata,
-		isFavorite: input.isFavorite ?? false,
 		folderId: input.folderId,
 		addedAt: new Date(),
 		tags: input.tags ? JSON.stringify(input.tags) : null,
@@ -447,12 +416,6 @@ export function toDrizzleImageUpdate(input: ImageUpdateInput): any {
 	}
 	if (input.description !== undefined) {
 		updateData.description = input.description;
-	}
-	if (input.isFavorite !== undefined) {
-		updateData.isFavorite = input.isFavorite;
-	}
-	if (input.folderId !== undefined) {
-		updateData.folderId = input.folderId;
 	}
 	if (input.metadata !== undefined) {
 		updateData.metadata = input.metadata;

@@ -20,14 +20,14 @@
 ```typescript
 // TIPO PRINCIPAL - USAR ESTE
 export interface VideoWithStats extends VideoBase {
-  statistics: VideoStatistics; // 25+ métricas pre-calculadas
-  _count?: VideoCountsFromDrizzle;
-  relations?: Partial<VideoRelations>;
+	statistics: VideoStatistics; // 25+ métricas pre-calculadas
+	_count?: VideoCountsFromDrizzle;
+	relations?: Partial<VideoRelations>;
 }
 
 // Solo para casos especiales
 export interface VideoComplete extends VideoBase, VideoRelations {
-  _count?: VideoCountsFromDrizzle;
+	_count?: VideoCountsFromDrizzle;
 }
 ```
 
@@ -47,9 +47,9 @@ export interface VideoComplete extends VideoBase, VideoRelations {
 
 ```typescript
 interface VideoState {
-  videos: Record<string, VideoWithStats>; // Record optimizado
-  getVideo: (id: string) => VideoWithStats | undefined; // O(1)
-  getVideosByFolder: (folderId: string) => VideoWithStats[];
+	videos: Record<string, VideoWithStats>; // Record optimizado
+	getVideo: (id: string) => VideoWithStats | undefined; // O(1)
+	getVideosByFolder: (folderId: string) => VideoWithStats[];
 }
 ```
 
@@ -130,28 +130,28 @@ updateVideo(id: string, data: Partial<VideoWithStats>): void
 
 ```typescript
 interface VideoStatistics {
-  // Conteos de relaciones (12 tipos)
-  albumsCount: number;
-  collectionsCount: number;
-  tagsCount: number;
-  // ... 9 más
-  totalRelations: number;
+	// Conteos de relaciones (12 tipos)
+	albumsCount: number;
+	collectionsCount: number;
+	tagsCount: number;
+	// ... 9 más
+	totalRelations: number;
 
-  // Métricas técnicas
-  durationMinutes: number;
-  aspectRatio: string;
-  resolution: string;
-  qualityLevel: VideoQuality;
+	// Métricas técnicas
+	durationMinutes: number;
+	aspectRatio: string;
+	resolution: string;
+	qualityLevel: VideoQuality;
 
-  // Análisis de calidad
-  qualityScore: number; // 0-100
-  technicalGrade: 'A' | 'B' | 'C' | 'D';
-  autoTags: string[]; // 20+ tags automáticos
+	// Análisis de calidad
+	qualityScore: number; // 0-100
+	technicalGrade: 'A' | 'B' | 'C' | 'D';
+	autoTags: string[]; // 20+ tags automáticos
 
-  // Campos derivados
-  formattedDuration: string; // "5m 30s", "2h 15m"
-  formattedSize: string; // "156.7 MB", "2.3 GB"
-  qualityLabel: string; // "Ultra HD 4K", "HD 1080p"
+	// Campos derivados
+	formattedDuration: string; // "5m 30s", "2h 15m"
+	formattedSize: string; // "156.7 MB", "2.3 GB"
+	qualityLabel: string; // "Ultra HD 4K", "HD 1080p"
 }
 ```
 
@@ -207,12 +207,7 @@ video: VideoCard, // ✅ Integrado correctamente
 7. ✅ Image - EXCELENTE (98/100)
 8. ✅ **Video - EXCELENTE (96/100)** 🎉
 
-**Entidades Pendientes (5/13)**:
-9. ⏳ Prompt
-10. ⏳ Task
-11. ⏳ Workflow
-12. ⏳ Place
-13. ⏳ Folder (parcial)
+**Entidades Pendientes (5/13)**: 9. ⏳ Prompt 10. ⏳ Task 11. ⏳ Workflow 12. ⏳ Place 13. ⏳ Folder (parcial)
 
 ---
 

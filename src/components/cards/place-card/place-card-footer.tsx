@@ -1,19 +1,18 @@
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { HeartIcon, ImageIcon, Star, VideoIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/date';
 
 interface PlaceCardFooterProps {
+	cardId?: string;
+	compact?: boolean;
 	createdAt?: Date;
+	healthPoints?: number;
 	imagesCount?: number;
-	videosCount?: number;
+	power?: number;
 	primaryColor?: string;
 	secondaryColor?: string;
-	power?: number;
-	healthPoints?: number;
-	cardId?: string;
 	tcgMode?: boolean;
-	compact?: boolean;
+	videosCount?: number;
 }
 
 /**
@@ -24,7 +23,7 @@ export function PlaceCardFooter({
 	createdAt,
 	imagesCount = 0,
 	videosCount = 0,
-	primaryColor = '#10b981',
+	primaryColor = 'var(--dt-success-500)',
 	power = 1,
 	healthPoints = 100,
 	cardId = '',
@@ -35,13 +34,15 @@ export function PlaceCardFooter({
 	const _powerStars = Math.max(1, Math.min(5, Math.ceil(power / 2)));
 
 	// Formatear fecha de creación
-	const formattedDate = createdAt ? format(createdAt, 'MMM yyyy', { locale: es }) : '';
+	const formattedDate = createdAt ? formatDate(createdAt, 'MMM yyyy') : '';
 
 	return (
 		<div
-			className={cn('px-3 py-2', tcgMode ? 'border-white/10 border-t' : '')}
+			className={cn('px-3 py-2', tcgMode ? 'border-border/40 border-t' : '')}
 			style={{
-				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined,
+				background: tcgMode
+					? `linear-gradient(to top, color-mix(in oklab, ${primaryColor}, transparent 80%), transparent)`
+					: undefined,
 			}}
 		>
 			{tcgMode ? (
@@ -50,26 +51,26 @@ export function PlaceCardFooter({
 					<div className="flex items-center justify-between">
 						{/* HP */}
 						<div className="flex items-center">
-							<HeartIcon className="mr-1 h-3.5 w-3.5" style={{ color: primaryColor }} />
-							<span className="font-semibold text-xs">{healthPoints}</span>
+							<HeartIcon className="mr-1 h-4 w-4" style={{ color: primaryColor }} />
+							<span className="font-semibold text-sm">{healthPoints}</span>
 						</div>
 
 						{/* Fecha de creación */}
-						{createdAt && !compact && <div className="text-xs opacity-70">{formattedDate}</div>}
+						{createdAt && !compact && <div className="text-sm opacity-70">{formattedDate}</div>}
 					</div>
 
 					{/* Segunda fila: contadores de medios */}
 					{(imagesCount > 0 || videosCount > 0) && !compact && (
 						<div className="flex items-center gap-2">
 							{imagesCount > 0 && (
-								<div className="flex items-center text-xs">
-									<ImageIcon className="mr-1 h-3 w-3 opacity-70" />
+								<div className="flex items-center text-sm">
+									<ImageIcon className="mr-1 h-4 w-4 opacity-70" />
 									<span>{imagesCount}</span>
 								</div>
 							)}
 							{videosCount > 0 && (
-								<div className="flex items-center text-xs">
-									<VideoIcon className="mr-1 h-3 w-3 opacity-70" />
+								<div className="flex items-center text-sm">
+									<VideoIcon className="mr-1 h-4 w-4 opacity-70" />
 									<span>{videosCount}</span>
 								</div>
 							)}
@@ -82,35 +83,35 @@ export function PlaceCardFooter({
 						<div className="flex items-center">
 							{/* Renderizar estrellas sin usar índices como keys */}
 							<div className="flex">
-								{power >= 1 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
-								{power >= 3 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
-								{power >= 5 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
-								{power >= 7 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
-								{power >= 9 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
+								{power >= 1 && <Star className="h-4 w-4 fill-current" style={{ color: primaryColor }} />}
+								{power >= 3 && <Star className="h-4 w-4 fill-current" style={{ color: primaryColor }} />}
+								{power >= 5 && <Star className="h-4 w-4 fill-current" style={{ color: primaryColor }} />}
+								{power >= 7 && <Star className="h-4 w-4 fill-current" style={{ color: primaryColor }} />}
+								{power >= 9 && <Star className="h-4 w-4 fill-current" style={{ color: primaryColor }} />}
 							</div>
 						</div>
 
 						{/* ID de carta */}
-						<div className="font-mono text-[10px] opacity-60">{cardId}</div>
+						<div className="font-mono text-xs opacity-60">{cardId}</div>
 					</div>
 				</div>
 			) : (
 				// Versión no-TCG simplificada
 				<div className="flex items-center justify-between">
-					<div className="flex items-center text-muted-foreground text-xs">
+					<div className="flex items-center text-muted-foreground text-sm">
 						{createdAt && <span>{formattedDate}</span>}
 					</div>
 
-					<div className="flex items-center space-x-2 text-muted-foreground text-xs">
+					<div className="flex items-center space-x-2 text-muted-foreground text-sm">
 						{imagesCount > 0 && (
 							<div className="flex items-center">
-								<ImageIcon className="mr-1 h-3.5 w-3.5 opacity-70" />
+								<ImageIcon className="mr-1 h-4 w-4 opacity-70" />
 								<span>{imagesCount}</span>
 							</div>
 						)}
 						{videosCount > 0 && (
 							<div className="flex items-center">
-								<VideoIcon className="mr-1 h-3.5 w-3.5 opacity-70" />
+								<VideoIcon className="mr-1 h-4 w-4 opacity-70" />
 								<span>{videosCount}</span>
 							</div>
 						)}

@@ -1,11 +1,15 @@
 import { memo, useMemo } from 'react';
+import { FolderBrowserVisual } from '@/components/features/file-browser-new/components/folder-browser-visual';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
+import type { BrowserItem } from '@/components/features/file-browser-new/types/item.types';
 
 export interface FolderCardImagesProps {
 	featuredImage?: string | null;
-	recentImages?: string[] | null;
+	folderName?: string;
+	previewUrl?: string | null;
 	primaryColor: string;
+	recentImages?: string[] | null;
 	secondaryColor?: string;
 	tcgMode?: boolean;
 	totalFiles?: number;
@@ -19,6 +23,8 @@ export interface FolderCardImagesProps {
  */
 export const FolderCardImages = memo(function FolderCardImages({
 	featuredImage,
+	folderName,
+	previewUrl,
 	recentImages = [],
 	primaryColor,
 	secondaryColor = primaryColor,
@@ -39,11 +45,36 @@ export const FolderCardImages = memo(function FolderCardImages({
 	const isDataUrl = (src?: string | null) => (src ? src.startsWith('data:') : false);
 	const isLargeDataUrl = (src?: string | null) => (isDataUrl(src) ? (src?.length || 0) > 200_000 : false);
 
+	const browserFolderPreview = useMemo(
+		() =>
+			({
+				id: `folder-preview-${featuredImage ?? computedStats.displayImages[0] ?? 'empty'}`,
+				name: folderName ?? 'Folder preview',
+				entityType: 'folder',
+				color: primaryColor,
+				thumbnailUrl: featuredImage ?? computedStats.displayImages[0] ?? previewUrl ?? null,
+				totalItems: totalFiles,
+				recentImages: computedStats.displayImages.map((image, index) => ({
+					id: `folder-recent-${index}`,
+					thumbnailUrl: image,
+				})),
+			}) satisfies BrowserItem,
+		[computedStats.displayImages, featuredImage, folderName, previewUrl, primaryColor, totalFiles]
+	);
+
+	if (!tcgMode) {
+		return (
+			<div className="h-40 w-full overflow-hidden bg-muted/30">
+				<FolderBrowserVisual item={browserFolderPreview} />
+			</div>
+		);
+	}
+
 	// Si hay una imagen destacada, la mostramos como principal
 	if (featuredImage) {
 		return (
 			<div
-				className={cn('relative h-40 w-full overflow-hidden', tcgMode ? 'border-white/10 border-b' : '')}
+				className={cn('relative h-40 w-full overflow-hidden', tcgMode ? 'border-border/40 border-b' : '')}
 				style={
 					isLargeDataUrl(featuredImage)
 						? { backgroundImage: `url(${featuredImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -53,7 +84,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 				{/* Imagen principal */}
 				{!isLargeDataUrl(featuredImage) && (
 					<img
-						alt="Imagen destacada"
+						alt="Featured image"
 						className="h-full w-full object-cover"
 						onError={(e) => {
 							// fallback: ocultar img si falla y usar fondo liso
@@ -79,10 +110,10 @@ export const FolderCardImages = memo(function FolderCardImages({
 				{tcgMode && (
 					<>
 						{/* Esquinas decorativas */}
-						<div className="absolute top-0 left-0 h-6 w-6 border-white/30 border-t-2 border-l-2" />
-						<div className="absolute top-0 right-0 h-6 w-6 border-white/30 border-t-2 border-r-2" />
-						<div className="absolute bottom-0 left-0 h-6 w-6 border-white/30 border-b-2 border-l-2" />
-						<div className="absolute right-0 bottom-0 h-6 w-6 border-white/30 border-r-2 border-b-2" />
+						<div className="absolute top-0 left-0 h-6 w-6 border-border/80 border-t-2 border-l-2" />
+						<div className="absolute top-0 right-0 h-6 w-6 border-border/80 border-t-2 border-r-2" />
+						<div className="absolute bottom-0 left-0 h-6 w-6 border-border/80 border-b-2 border-l-2" />
+						<div className="absolute right-0 bottom-0 h-6 w-6 border-border/80 border-r-2 border-b-2" />
 
 						{/* Insignia de rareza */}
 						<div
@@ -103,7 +134,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 			<div
 				className={cn(
 					'relative grid h-40 w-full grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden',
-					tcgMode ? 'border-white/10 border-b bg-black/20 p-0.5' : ''
+					tcgMode ? 'border-border/40 border-b bg-muted/20 p-0.5' : ''
 				)}
 			>
 				{images.map((image, index) => (
@@ -118,7 +149,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 					>
 						{!isLargeDataUrl(image) && (
 							<img
-								alt={`Imagen reciente ${index + 1}`}
+								alt={`Recent image ${index + 1}`}
 								className="h-full w-full object-cover"
 								onError={(e) => {
 									const el = e.currentTarget as HTMLImageElement;
@@ -145,18 +176,18 @@ export const FolderCardImages = memo(function FolderCardImages({
 				{tcgMode && (
 					<div className="pointer-events-none absolute inset-0">
 						{/* Bordes externos decorativos */}
-						<div className="absolute top-0 left-0 h-4 w-4 border-white/30 border-t border-l" />
-						<div className="absolute top-0 right-0 h-4 w-4 border-white/30 border-t border-r" />
-						<div className="absolute bottom-0 left-0 h-4 w-4 border-white/30 border-b border-l" />
-						<div className="absolute right-0 bottom-0 h-4 w-4 border-white/30 border-r border-b" />
+						<div className="absolute top-0 left-0 h-4 w-4 border-border/80 border-t border-l" />
+						<div className="absolute top-0 right-0 h-4 w-4 border-border/80 border-t border-r" />
+						<div className="absolute bottom-0 left-0 h-4 w-4 border-border/80 border-b border-l" />
+						<div className="absolute right-0 bottom-0 h-4 w-4 border-border/80 border-r border-b" />
 
 						{/* Marcador de elementos */}
 						<div
-							className="absolute top-1 right-1 rounded-sm px-1 font-bold text-xs"
+							className="absolute top-1 right-1 rounded-sm px-1 font-bold text-sm"
 							style={{
 								background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
 								color: 'white',
-								textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+								textShadow: '0 1px 2px oklch(from var(--foreground) 0 0 0)',
 							}}
 						>
 							x{images.length}
@@ -173,7 +204,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 			<div
 				className={cn(
 					'relative flex h-40 w-full items-center justify-center',
-					tcgMode ? 'border-white/10 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
+					tcgMode ? 'border-border/40 border-b bg-linear-to-br from-gray-900 to-gray-800' : 'bg-muted'
 				)}
 				style={
 					tcgMode
@@ -184,17 +215,17 @@ export const FolderCardImages = memo(function FolderCardImages({
 				}
 			>
 				<div className={cn('p-4 text-center', tcgMode ? 'text-white/70' : 'text-muted-foreground')}>
-					<div className="mb-1 font-semibold text-lg">{totalFiles} archivos</div>
+					<div className="mb-1 font-semibold text-lg">{totalFiles} files</div>
 					<div className="text-sm opacity-80">{computedStats.formattedSize}</div>
 				</div>
 
 				{/* Decoraciones TCG para estadísticas */}
 				{tcgMode && (
 					<>
-						<div className="absolute top-0 left-0 h-6 w-6 border-white/20 border-t-2 border-l-2" />
-						<div className="absolute top-0 right-0 h-6 w-6 border-white/20 border-t-2 border-r-2" />
-						<div className="absolute bottom-0 left-0 h-6 w-6 border-white/20 border-b-2 border-l-2" />
-						<div className="absolute right-0 bottom-0 h-6 w-6 border-white/20 border-r-2 border-b-2" />
+						<div className="absolute top-0 left-0 h-6 w-6 border-border/60 border-t-2 border-l-2" />
+						<div className="absolute top-0 right-0 h-6 w-6 border-border/60 border-t-2 border-r-2" />
+						<div className="absolute bottom-0 left-0 h-6 w-6 border-border/60 border-b-2 border-l-2" />
+						<div className="absolute right-0 bottom-0 h-6 w-6 border-border/60 border-r-2 border-b-2" />
 
 						<div
 							className="absolute right-2 bottom-2 h-8 w-8 rounded-full opacity-30"
@@ -213,7 +244,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 		<div
 			className={cn(
 				'relative flex h-40 w-full items-center justify-center',
-				tcgMode ? 'border-white/10 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
+				tcgMode ? 'border-border/40 border-b bg-linear-to-br from-gray-900 to-gray-800' : 'bg-muted'
 			)}
 			style={
 				tcgMode
@@ -224,16 +255,16 @@ export const FolderCardImages = memo(function FolderCardImages({
 			}
 		>
 			<div className={cn('p-4 text-center font-medium text-lg', tcgMode ? 'text-white/70' : 'text-muted-foreground')}>
-				Sin imágenes
+				No images
 			</div>
 
 			{/* Decoraciones TCG para el placeholder */}
 			{tcgMode && (
 				<>
-					<div className="absolute top-0 left-0 h-6 w-6 border-white/20 border-t-2 border-l-2" />
-					<div className="absolute top-0 right-0 h-6 w-6 border-white/20 border-t-2 border-r-2" />
-					<div className="absolute bottom-0 left-0 h-6 w-6 border-white/20 border-b-2 border-l-2" />
-					<div className="absolute right-0 bottom-0 h-6 w-6 border-white/20 border-r-2 border-b-2" />
+					<div className="absolute top-0 left-0 h-6 w-6 border-border/60 border-t-2 border-l-2" />
+					<div className="absolute top-0 right-0 h-6 w-6 border-border/60 border-t-2 border-r-2" />
+					<div className="absolute bottom-0 left-0 h-6 w-6 border-border/60 border-b-2 border-l-2" />
+					<div className="absolute right-0 bottom-0 h-6 w-6 border-border/60 border-r-2 border-b-2" />
 
 					<div
 						className="absolute right-2 bottom-2 h-8 w-8 rounded-full opacity-30"

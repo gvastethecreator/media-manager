@@ -1,5 +1,4 @@
-import { describe, expect, it } from 'bun:test';
-import { useFileBrowserStore } from '@/stores/file-browser-store';
+import { useFileBrowserStore } from '@/store/file-browser-store';
 
 describe('FileBrowser Store', () => {
 	it('estado inicial correcto', () => {

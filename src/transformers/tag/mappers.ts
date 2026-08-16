@@ -8,6 +8,7 @@
 import { createDefaultEntityStats } from '@/lib/utils';
 import type { TagBase, TagStatistics, TagWithStats } from '@/types/entities/tag';
 import { calculateCompleteness } from '../../lib/utils/transformers/calculate-completeness';
+import { normalizeCounts, sumCounts } from '../common/counts';
 
 /**
  * Mapea un tag de la base de datos a TagWithStats
@@ -31,10 +32,9 @@ function computeTagStats(
 		};
 	}
 ): TagStatistics {
-	const counts = baseTag._count ?? {};
-	const countValues = Object.values(counts) as number[];
-	const totalRelations = countValues.reduce((sum, n) => sum + (n || 0), 0);
-	const usageDiversity = countValues.filter((n) => (n || 0) > 0).length;
+	const counts = normalizeCounts(baseTag._count);
+	const totalRelations = sumCounts(counts);
+	const usageDiversity = Object.values(counts).filter((n) => n > 0).length;
 	const denominator = Math.max(Object.keys(counts).length || 0, 1);
 	const popularity = totalRelations * (usageDiversity / denominator);
 
@@ -48,19 +48,19 @@ function computeTagStats(
 
 	return {
 		...createDefaultEntityStats({ type: 'tag' }),
-		imageCount: counts.images || 0,
-		videoCount: counts.videos || 0,
-		albumCount: counts.albums || 0,
-		collectionCount: counts.collections || 0,
-		characterCount: counts.characters || 0,
-		placeCount: counts.places || 0,
-		worldItemCount: counts.worldItems || 0,
-		conceptCount: counts.concepts || 0,
-		promptCount: counts.prompts || 0,
-		noteCount: counts.notes || 0,
-		wildcardCount: counts.wildcards || 0,
-		propertyCount: counts.properties || 0,
-		groupCount: counts.groups || 0,
+		imageCount: counts.images,
+		videoCount: counts.videos,
+		albumCount: counts.albums,
+		collectionCount: counts.collections,
+		characterCount: counts.characters,
+		placeCount: counts.places,
+		worldItemCount: counts.worldItems,
+		conceptCount: counts.concepts,
+		promptCount: counts.prompts,
+		noteCount: counts.notes,
+		wildcardCount: counts.wildcards,
+		propertyCount: counts.properties,
+		groupCount: counts.groups,
 		tagCount: 1,
 		totalItems: totalRelations,
 		totalAssociations: totalRelations,

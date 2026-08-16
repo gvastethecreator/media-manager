@@ -1,9 +1,13 @@
-import { apiClient } from '@/lib/api/client';
-import type { SystemStats } from '@/lib/api/system';
-import { serverLogger } from '@/lib/logger/server-logger';
-import { type EventType, emit } from '@/lib/server/events.server';
+/**
+ * @deprecated Este archivo se mantiene solo para compatibilidad hacia atrás.
+ * Use directamente las funciones desde `@/server/services/stats.service`
+ * o los métodos de `OptimizedStatsService`.
+ *
+ * El StatsService legacy basado en apiClient ha sido eliminado.
+ * El OptimizedStatsService proporciona la misma funcionalidad con mejor rendimiento.
+ */
 
-const statsLogger = serverLogger.withContext('StatsService');
+import { type EventType, emit } from '@/lib/server/events.server';
 
 // Eventos de estadísticas
 export const STATS_EVENTS = {
@@ -90,89 +94,13 @@ export const statsEventEmitter = {
 	},
 };
 
-// Versión migrada del servicio que usa API calls
-export class StatsService {
-	private static instance: StatsService;
+// Re-exportar la clase optimizada para compatibilidad
+export {
+	OptimizedStatsService as StatsService,
+	OptimizedStatsService,
+	optimizedStatsUtils,
+} from './optimized-stats.service';
 
-	private constructor() {
-		statsLogger.info('🚀 Inicializando StatsService');
-	}
-
-	static getInstance(): StatsService {
-		if (!StatsService.instance) {
-			StatsService.instance = new StatsService();
-		}
-		return StatsService.instance;
-	}
-
-	// Método privado para emitir eventos
-	private async emitEvent(event: string, data: unknown): Promise<void> {
-		// Emitir al sistema de eventos del servidor
-		await emit({
-			type: (EVENT_TYPE_MAPPING[event] || 'update') as EventType,
-			data,
-		});
-	}
-
-	async invalidateStats() {
-		// No hay acción específica para invalidar, se puede implementar cache busting
-		statsLogger.info('Invalidando estadísticas (cache busting)');
-	}
-
-	async getGeneralStats(): Promise<SystemStats> {
-		try {
-			const stats = await apiClient.get<SystemStats>('/system/stats');
-			if (!stats) {
-				throw new Error('No se pudieron obtener las estadísticas del sistema');
-			}
-			await this.emitEvent(STATS_EVENTS.STATS_UPDATED, stats);
-			return stats;
-		} catch (error) {
-			statsLogger.error('Error al obtener estadísticas generales', { error });
-			await this.emitEvent('error', error);
-			throw error;
-		}
-	}
-
-	async getOrCreateImageStats(imageId: string) {
-		try {
-			// Usar API call para obtener stats de imagen específica
-			const stats = await apiClient.get(`/images/${imageId}/stats`);
-			return stats;
-		} catch (error) {
-			statsLogger.error('Error al obtener estadísticas de imagen', {
-				error,
-				imageId,
-			});
-			await this.emitEvent('error', error);
-			throw error;
-		}
-	}
-
-	async incrementViewCount(imageId: string) {
-		try {
-			const stats = await apiClient.post(`/images/${imageId}/view`);
-			await this.emitEvent(STATS_EVENTS.VIEW_INCREMENTED, { imageId, stats });
-			return stats;
-		} catch (error) {
-			statsLogger.error('Error al incrementar vistas', { error, imageId });
-			await this.emitEvent('error', error);
-			throw error;
-		}
-	}
-
-	async incrementDownloadCount(imageId: string) {
-		try {
-			const stats = await apiClient.post(`/images/${imageId}/download`);
-			await this.emitEvent(STATS_EVENTS.DOWNLOAD_INCREMENTED, { imageId, stats });
-			return stats;
-		} catch (error) {
-			statsLogger.error('Error al incrementar descargas', { error, imageId });
-			await this.emitEvent('error', error);
-			throw error;
-		}
-	}
-}
-
-// Exportar la instancia del servicio
-export const statsService = StatsService.getInstance();
+// Exportar instancia singleton
+import { OptimizedStatsService } from './optimized-stats.service';
+export const statsService = OptimizedStatsService.getInstance();

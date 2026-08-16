@@ -9,33 +9,33 @@ import { useContextMenuShortcuts } from './use-keyboard-shortcuts';
 export interface ContextMenuNavigationOptions {
 	/** Si está habilitada la navegación */
 	enabled?: boolean;
-	/** Callback cuando se ejecuta una acción */
-	onExecute?: (index: number) => void;
 	/** Callback cuando se cierra el menú */
 	onClose?: () => void;
+	/** Callback cuando se ejecuta una acción */
+	onExecute?: (index: number) => void;
 	/** Callback cuando se navega a un item */
 	onNavigate?: (index: number) => void;
 }
 
 export interface ContextMenuNavigationReturn {
-	/** Índice del item actualmente seleccionado */
-	selectedIndex: number;
-	/** Establecer el índice seleccionado */
-	setSelectedIndex: (index: number) => void;
-	/** Navegar hacia arriba */
-	navigateUp: () => void;
-	/** Navegar hacia abajo */
-	navigateDown: () => void;
-	/** Ejecutar acción del item seleccionado */
-	executeSelected: () => void;
 	/** Cerrar menú */
 	closeMenu: () => void;
+	/** Ejecutar acción del item seleccionado */
+	executeSelected: () => void;
 	/** Props para aplicar a los items del menú */
 	getItemProps: (index: number) => {
 		'data-selected': boolean;
 		onMouseEnter: () => void;
 		onClick: () => void;
 	};
+	/** Navegar hacia abajo */
+	navigateDown: () => void;
+	/** Navegar hacia arriba */
+	navigateUp: () => void;
+	/** Índice del item actualmente seleccionado */
+	selectedIndex: number;
+	/** Establecer el índice seleccionado */
+	setSelectedIndex: (index: number) => void;
 }
 
 /**
@@ -114,7 +114,7 @@ export const useContextMenuNavigation = (
 				key: 'enter',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Ejecutar acción',
+				description: 'Run action',
 				action: 'context-menu-execute',
 			},
 			executeSelected
@@ -125,7 +125,7 @@ export const useContextMenuNavigation = (
 				key: 'escape',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Cerrar menú',
+				description: 'Close menu',
 				action: 'context-menu-close',
 			},
 			closeMenu

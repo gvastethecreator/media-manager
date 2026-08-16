@@ -1,8 +1,8 @@
 import { Tag } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { TagCard } from '@/components/cards/tag-card/tag-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,16 +53,16 @@ export function TagsView() {
 	const handleTagClick = useCallback(
 		(tag: TagWithStats) => {
 			if (!tag?.id) {
-				console.error('❌ Error: Intento de seleccionar una etiqueta inválida', tag);
+				clientLogger.error('❌ Error: Attempted to select an invalid tag', tag);
 				return;
 			}
 
 			// Comprobar que la etiqueta tiene todos los datos necesarios
 			if (!tag.name) {
-				console.warn('⚠️ Advertencia: La etiqueta no tiene un nombre definido');
+				clientLogger.warn('⚠️ Warning: The tag does not have a name');
 			}
 
-			viewLogger.info('🔍 Seleccionando etiqueta:', { tagId: tag.id, tagName: tag.name });
+			viewLogger.info('🔍 Selecting tag:', { tagId: tag.id, tagName: tag.name });
 
 			// Actualizar el estado de selección en el store de etiquetas
 			selectTag(tag.id);
@@ -75,7 +75,7 @@ export function TagsView() {
 
 	const handleCreateTag = useCallback(() => {
 		if (newTagName.trim() === '') {
-			console.error('❌ Error: El nombre de la etiqueta no puede estar vacío');
+			clientLogger.error('❌ Error: Tag name cannot be empty');
 			return;
 		}
 		createTag({ name: newTagName, description: newTagDescription });
@@ -100,45 +100,45 @@ export function TagsView() {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Etiquetas</h2>
+				<h2 className="mb-4 font-bold text-xl">Tags</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Etiqueta'}
+					{showForm ? 'Cancel' : 'Create Tag'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nueva Etiqueta</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Tag</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="tagName">Nombre</Label>
+							<Label htmlFor="tagName">Name</Label>
 							<Input
 								id="tagName"
 								onChange={(e) => setNewTagName(e.target.value)}
-								placeholder="Nombre de la etiqueta"
+								placeholder="Tag name"
 								value={newTagName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="tagDescription">Descripción</Label>
+							<Label htmlFor="tagDescription">Description</Label>
 							<Textarea
 								id="tagDescription"
 								onChange={(e) => setNewTagDescription(e.target.value)}
-								placeholder="Descripción de la etiqueta (opcional)"
+								placeholder="Tag description (optional)"
 								value={newTagDescription}
 							/>
 						</div>
-						<Button onClick={handleCreateTag}>Guardar Etiqueta</Button>
+						<Button onClick={handleCreateTag}>Save Tag</Button>
 					</div>
 				)}
 
 				{!tags || (tags.length === 0 && !isLoading && !showForm) ? (
 					<EmptyState
-						description="Crea etiquetas para organizar tus imágenes por temas o características."
+						description="Create tags to organize your images by topic or characteristic."
 						icon={Tag}
-						title="No hay etiquetas creadas"
+						title="No tags yet"
 					/>
 				) : (
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{tags.map((tag, index) => (
 							<motion.div
 								animate={{ opacity: 1, y: 0 }}

@@ -1,5 +1,5 @@
 import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import { WorldItemRarity, WorldItemType, WorldItemWithStats } from '@/types/entities/world-item';
@@ -7,24 +7,6 @@ import { CardHeader } from '../card-header';
 import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';
 import { WorldItemCardImages } from './world-item-card-images';
-
-// Función auxiliar para oscurecer colores
-function darkenColor(color: string): string {
-	if (!color) {
-		return '#000000';
-	}
-	// Convertir hex a RGB
-	const hex = color.replace('#', '');
-	const r = Number.parseInt(hex.substr(0, 2), 16);
-	const g = Number.parseInt(hex.substr(2, 2), 16);
-	const b = Number.parseInt(hex.substr(4, 2), 16);
-	// Oscurecer reduciendo cada componente en un 30%
-	const newR = Math.floor(r * 0.7);
-	const newG = Math.floor(g * 0.7);
-	const newB = Math.floor(b * 0.7);
-	// Convertir de vuelta a hex
-	return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
-}
 
 // Helper genérico para parsear JSON seguro
 function parseJSONOr<TFallback>(value: unknown, fallback: TFallback): TFallback {
@@ -44,11 +26,11 @@ function parseJSONOr<TFallback>(value: unknown, fallback: TFallback): TFallback 
 // Visuales por rareza centralizados
 function getRarityVisuals(rarity?: string | null) {
 	const colorMap: Record<string, string> = {
-		common: '#6b7280',
-		uncommon: '#22c55e',
-		rare: '#3b82f6',
-		epic: '#8b5cf6',
-		legendary: '#f59e0b',
+		common: 'var(--dt-neutral-500)',
+		uncommon: 'var(--dt-success-500)',
+		rare: 'var(--dt-primary-500)',
+		epic: 'var(--entity-character)',
+		legendary: 'var(--dt-warning-500)',
 	};
 	const glowMap: Record<string, number> = {
 		common: 0,
@@ -66,11 +48,11 @@ function WorldItemCardSkeleton({ className }: { className?: string }) {
 	return (
 		<div
 			className={cn(
-				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-muted md:w-[320px] dark:bg-background',
 				className
 			)}
 		>
-			<p className="text-gray-500">Cargando objeto del mundo...</p>
+			<p className="text-muted-foreground">Loading world item...</p>
 		</div>
 	);
 }
@@ -83,7 +65,7 @@ function WorldItemCardError({ error, className }: { error?: Error; className?: s
 				className
 			)}
 		>
-			<p className="text-red-800">Error: {error?.message || 'Objeto del mundo no encontrado'}</p>
+			<p className="text-destructive">Error: {error?.message || 'Objeto del mundo no encontrado'}</p>
 		</div>
 	);
 }
@@ -107,16 +89,18 @@ function TCGVisualEffects({
 	return (
 		<>
 			<div
-				className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-30"
+				className="ui-overlay-hover-strong"
 				style={{
-					backgroundImage: `linear-gradient(125deg, transparent 0%, ${primaryColor}30 25%, ${rarityColor}30 50%, ${primaryColor}30 75%, transparent 100%)`,
+					backgroundImage: `linear-gradient(125deg, transparent 0%, color-mix(in oklab, ${primaryColor}, transparent 70%) 25%, color-mix(in oklab, ${rarityColor}, transparent 70%) 50%, color-mix(in oklab, ${primaryColor}, transparent 70%) 75%, transparent 100%)`,
 					backgroundSize: '200% 200%',
 					animation: 'gradient-shift 3s ease infinite',
 				}}
 			/>
 			<div
-				className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 opacity-10"
-				style={{ background: `radial-gradient(circle, ${rarityColor}50 0%, transparent 70%)` }}
+				className="pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 opacity-10"
+				style={{
+					background: `radial-gradient(circle, color-mix(in oklab, ${rarityColor}, transparent 50%) 0%, transparent 70%)`,
+				}}
 			>
 				<div className="flex h-full w-full items-center justify-center">{icon}</div>
 			</div>
@@ -124,7 +108,7 @@ function TCGVisualEffects({
 				<div className="absolute top-2 right-2 z-10">
 					<div
 						className={cn('rounded-full p-1', rarity.toLowerCase() === 'legendary' && 'animate-pulse')}
-						style={{ backgroundColor: `${rarityColor}30` }}
+						style={{ backgroundColor: `color-mix(in oklab, ${rarityColor}, transparent 70%)` }}
 					>
 						<Sparkles className="h-4 w-4" style={{ color: rarityColor }} />
 					</div>
@@ -135,18 +119,18 @@ function TCGVisualEffects({
 }
 
 export interface WorldItemCardProps {
-	worldItemId: string;
-	worldItem?: WorldItemWithStats;
-	isLoading?: boolean;
-	error?: Error;
-	onClick?: (worldItemData: WorldItemWithStats) => void;
 	className?: string;
-	style?: React.CSSProperties;
-	tcgMode?: boolean;
-	isSelected?: boolean;
 	compact?: boolean;
 	disabled?: boolean;
+	error?: Error;
 	interactive?: boolean;
+	isLoading?: boolean;
+	isSelected?: boolean;
+	onClick?: (worldItemData: WorldItemWithStats) => void;
+	style?: React.CSSProperties;
+	tcgMode?: boolean;
+	worldItem?: WorldItemWithStats;
+	worldItemId: string;
 }
 
 /**
@@ -156,15 +140,31 @@ export interface WorldItemCardProps {
  */
 // Cálculo de colores/icono según tipo y rareza
 function computeItemVisuals(worldItem?: Pick<WorldItemWithStats, 'color' | 'type' | 'rarity'> | null) {
-	const baseColor = worldItem?.color || '#4F46E5';
+	const baseColor = worldItem?.color || 'var(--dt-primary-600)';
 	const key = worldItem?.type?.toLowerCase() || 'default';
 	const map: Record<string, { icon: React.ReactNode; p: string; s: string }> = {
-		artifact: { icon: <GemIcon className="h-4 w-4" />, p: baseColor, s: darkenColor(baseColor) },
-		book: { icon: <BookOpenText className="h-4 w-4" />, p: baseColor, s: darkenColor(baseColor) },
-		consumable: { icon: <Beaker className="h-4 w-4" />, p: baseColor, s: darkenColor(baseColor) },
-		weapon: { icon: <Sword className="h-4 w-4" />, p: baseColor, s: darkenColor(baseColor) },
-		equipment: { icon: <StoreIcon className="h-4 w-4" />, p: baseColor, s: darkenColor(baseColor) },
-		default: { icon: <Box className="h-4 w-4" />, p: baseColor, s: darkenColor(baseColor) },
+		artifact: {
+			icon: <GemIcon className="h-4 w-4" />,
+			p: baseColor,
+			s: `color-mix(in oklab, ${baseColor}, black 20%)`,
+		},
+		book: {
+			icon: <BookOpenText className="h-4 w-4" />,
+			p: baseColor,
+			s: `color-mix(in oklab, ${baseColor}, black 20%)`,
+		},
+		consumable: {
+			icon: <Beaker className="h-4 w-4" />,
+			p: baseColor,
+			s: `color-mix(in oklab, ${baseColor}, black 20%)`,
+		},
+		weapon: { icon: <Sword className="h-4 w-4" />, p: baseColor, s: `color-mix(in oklab, ${baseColor}, black 20%)` },
+		equipment: {
+			icon: <StoreIcon className="h-4 w-4" />,
+			p: baseColor,
+			s: `color-mix(in oklab, ${baseColor}, black 20%)`,
+		},
+		default: { icon: <Box className="h-4 w-4" />, p: baseColor, s: `color-mix(in oklab, ${baseColor}, black 20%)` },
 	};
 	const def = map[key] || map.default;
 	const intensityMap: Record<string, number> = { common: 1, uncommon: 1.1, rare: 1.2, epic: 1.3, legendary: 1.5 };
@@ -374,9 +374,9 @@ interface WorldItemCardPresentationalProps {
 		type: WorldItemType;
 		description?: string | null;
 	};
+	handleKeyDown: (e: React.KeyboardEvent) => void;
 	icon: React.ReactNode;
 	onHoverChange: (v: boolean) => void;
-	handleKeyDown: (e: React.KeyboardEvent) => void;
 	tcgMode: boolean;
 }
 
@@ -391,7 +391,7 @@ function WorldItemCardPresentational({
 }: WorldItemCardPresentationalProps) {
 	const { className, compact, disabled, interactive, onClick, rest, style } = _cardProps;
 	const { primaryColor, rarityColor, rarityGlow, secondaryColor } = colors;
-	const safeSecondary = secondaryColor || '#000000';
+	const safeSecondary = secondaryColor || 'var(--dt-neutral-950)';
 	return (
 		<ArticleWrapper
 			ariaLabel={data.name}
@@ -436,9 +436,11 @@ function WorldItemCardPresentational({
 
 interface ArticleWrapperProps {
 	ariaLabel: string;
+	children: React.ReactNode;
 	className?: string;
 	compact?: boolean;
 	disabled?: boolean;
+	handleKeyDown: (e: React.KeyboardEvent) => void;
 	id: string;
 	interactive?: boolean;
 	onClick?: (w: WorldItemWithStats) => void;
@@ -446,10 +448,8 @@ interface ArticleWrapperProps {
 	primaryColor: string;
 	rarityGlow: number;
 	rest: Record<string, unknown>;
-	handleKeyDown: (e: React.KeyboardEvent) => void;
 	style?: React.CSSProperties;
 	tcgMode: boolean;
-	children: React.ReactNode;
 }
 
 function ArticleWrapper(props: ArticleWrapperProps) {
@@ -472,11 +472,11 @@ function ArticleWrapper(props: ArticleWrapperProps) {
 	} = props;
 	const clickable = interactive && !disabled && onClick;
 	const articleStyle: React.CSSProperties = {
-		background: 'rgba(0, 0, 0, 0.05)',
-		border: tcgMode ? `1px solid ${primaryColor}60` : undefined,
+		background: 'oklch(0 0 0 / 5%)',
+		border: tcgMode ? `1px solid color-mix(in oklab, ${primaryColor}, transparent 40%)` : undefined,
 		borderRadius: tcgMode ? '8px' : undefined,
 		maxWidth: compact ? 300 : undefined,
-		boxShadow: tcgMode ? `0 0 ${rarityGlow}px ${primaryColor}30` : undefined,
+		boxShadow: tcgMode ? `0 0 ${rarityGlow}px color-mix(in oklab, ${primaryColor}, transparent 70%)` : undefined,
 		...style,
 	};
 	return (
@@ -555,7 +555,9 @@ function WorldItemCardInner({
 				tcgMode && 'shadow-md',
 				tcgMode && 'scale-[1.01]'
 			)}
-			style={{ background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)` }}
+			style={{
+				background: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 85%), color-mix(in oklab, ${primaryColor}, transparent 95%))`,
+			}}
 		>
 			<TCGVisualEffects
 				icon={icon}
@@ -589,6 +591,6 @@ function WorldItemCardInner({
 	);
 }
 
-export function WorldItemCard(props: WorldItemCardProps) {
+export const WorldItemCard = memo(function WorldItemCard(props: WorldItemCardProps) {
 	return <WorldItemCardBase {...props} />;
-}
+});

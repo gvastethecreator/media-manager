@@ -34,8 +34,8 @@ function DescriptionSection({
 	return (
 		<div
 			className={cn(
-				'mb-3 text-xs',
-				tcgMode ? 'rounded border border-white/5 bg-black/10 p-2' : 'text-muted-foreground'
+				'mb-3 text-sm',
+				tcgMode ? 'rounded border border-border/20 bg-muted/10 p-2' : 'text-muted-foreground'
 			)}
 			style={{
 				lineHeight: '1.25rem',
@@ -46,7 +46,7 @@ function DescriptionSection({
 			{description ? (
 				<p className={tcgMode ? '' : 'italic'}>{description}</p>
 			) : (
-				<p className="text-center italic opacity-70">Sin descripción</p>
+				<p className="text-center italic opacity-70">No description</p>
 			)}
 		</div>
 	);
@@ -70,25 +70,25 @@ function DecorativeIcon({ tcgMode, primaryColor }: { tcgMode: boolean; primaryCo
 }
 
 interface TagCardContentProps {
-	description?: string | null;
-	shortcut?: string | null;
-	primaryColor: string;
-	secondaryColor?: string;
-	tcgMode?: boolean;
-	rarity?: TagRarity;
-	imagesCount?: number;
-	videosCount?: number;
 	albumsCount?: number;
-	collectionsCount?: number;
 	charactersCount?: number;
-	placesCount?: number;
-	worldItemsCount?: number;
+	collectionsCount?: number;
 	conceptsCount?: number;
-	promptsCount?: number;
-	notesCount?: number;
-	wildcardsCount?: number;
-	propertiesCount?: number;
+	description?: string | null;
 	groupsCount?: number;
+	imagesCount?: number;
+	notesCount?: number;
+	placesCount?: number;
+	primaryColor: string;
+	promptsCount?: number;
+	propertiesCount?: number;
+	rarity?: TagRarity;
+	secondaryColor?: string;
+	shortcut?: string | null;
+	tcgMode?: boolean;
+	videosCount?: number;
+	wildcardsCount?: number;
+	worldItemsCount?: number;
 }
 
 /**
@@ -153,12 +153,12 @@ export function TagCardContent({
 		}
 
 		return (
-			<div className="mb-1 flex items-center gap-1.5 text-xs last:mb-0">
+			<div className="mb-1 flex items-center gap-1.5 text-sm last:mb-0">
 				<div className="flex min-w-12 items-center gap-1">
 					{icon}
 					<span className="opacity-90">{label}</span>
 				</div>
-				<div className="h-1.5 flex-grow overflow-hidden rounded-full bg-black/20">
+				<div className="h-1.5 flex-grow overflow-hidden rounded-full bg-muted/20">
 					<div
 						className="h-full rounded-full"
 						style={{
@@ -168,7 +168,7 @@ export function TagCardContent({
 						}}
 					/>
 				</div>
-				<span className="font-mono text-xs" style={{ color }}>
+				<span className="font-mono text-sm" style={{ color }}>
 					{count}
 				</span>
 			</div>
@@ -205,30 +205,30 @@ export function TagCardContent({
 				{/* Contadores de relaciones en modo TCG */}
 				{tcgMode && hasRelationships && (
 					<div className="mb-3 flex flex-col">
-						{renderStatBar(<Image className="h-3.5 w-3.5" />, imagesCount, 'Imágenes')}
-						{renderStatBar(<Video className="h-3.5 w-3.5" />, videosCount, 'Videos')}
-						{renderStatBar(<Album className="h-3.5 w-3.5" />, albumsCount, 'Álbumes')}
-						{renderStatBar(<Folder className="h-3.5 w-3.5" />, collectionsCount, 'Colecciones')}
-						{renderStatBar(<UserSquare className="h-3.5 w-3.5" />, charactersCount, 'Personajes')}
-						{renderStatBar(<MapPin className="h-3.5 w-3.5" />, placesCount, 'Lugares')}
-						{renderStatBar(<Package className="h-3.5 w-3.5" />, worldItemsCount, 'Objetos')}
-						{renderStatBar(<BookOpen className="h-3.5 w-3.5" />, conceptsCount, 'Conceptos')}
-						{renderStatBar(<MessageSquare className="h-3.5 w-3.5" />, promptsCount, 'Prompts')}
-						{renderStatBar(<FileText className="h-3.5 w-3.5" />, notesCount, 'Notas')}
-						{renderStatBar(<FileImage className="h-3.5 w-3.5" />, wildcardsCount, 'Wildcards')}
-						{renderStatBar(<ListChecks className="h-3.5 w-3.5" />, propertiesCount, 'Propiedades')}
-						{renderStatBar(<PanelTop className="h-3.5 w-3.5" />, groupsCount, 'Grupos')}
+						{renderStatBar(<Image className="h-4 w-4" />, imagesCount, 'Images')}
+						{renderStatBar(<Video className="h-4 w-4" />, videosCount, 'Videos')}
+						{renderStatBar(<Album className="h-4 w-4" />, albumsCount, 'Albums')}
+						{renderStatBar(<Folder className="h-4 w-4" />, collectionsCount, 'Collections')}
+						{renderStatBar(<UserSquare className="h-4 w-4" />, charactersCount, 'Characters')}
+						{renderStatBar(<MapPin className="h-4 w-4" />, placesCount, 'Places')}
+						{renderStatBar(<Package className="h-4 w-4" />, worldItemsCount, 'Objetos')}
+						{renderStatBar(<BookOpen className="h-4 w-4" />, conceptsCount, 'Conceptos')}
+						{renderStatBar(<MessageSquare className="h-4 w-4" />, promptsCount, 'Prompts')}
+						{renderStatBar(<FileText className="h-4 w-4" />, notesCount, 'Notas')}
+						{renderStatBar(<FileImage className="h-4 w-4" />, wildcardsCount, 'Wildcards')}
+						{renderStatBar(<ListChecks className="h-4 w-4" />, propertiesCount, 'Propiedades')}
+						{renderStatBar(<PanelTop className="h-4 w-4" />, groupsCount, 'Grupos')}
 					</div>
 				)}
 
 				{/* Atajo de teclado */}
 				{shortcut && (
 					<div className={cn('mt-auto', !tcgMode && 'pt-2')}>
-						<div className="flex items-center gap-1 text-xs">
-							<Keyboard className="h-3.5 w-3.5 text-muted-foreground" />
+						<div className="flex items-center gap-1 text-sm">
+							<Keyboard className="h-4 w-4 text-muted-foreground" />
 							<span className="font-medium text-muted-foreground">Atajo:</span>
 							<code
-								className="rounded px-1.5 py-0.5 font-mono text-xs"
+								className="rounded px-1.5 py-0.5 font-mono text-sm"
 								style={{
 									background: `${primaryColor}15`,
 									border: `1px solid ${primaryColor}30`,
@@ -238,8 +238,8 @@ export function TagCardContent({
 								{shortcut}
 							</code>
 						</div>
-						<div className="mt-1 text-muted-foreground text-xs">
-							<span className="opacity-70">Puedes usar este atajo para aplicar rápidamente esta etiqueta.</span>
+						<div className="mt-1 text-muted-foreground text-sm">
+							<span className="opacity-70">Use this shortcut to apply the tag quickly.</span>
 						</div>
 					</div>
 				)}

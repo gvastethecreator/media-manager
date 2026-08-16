@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { AnyEntityWithStats } from '@/types/entities';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('VideosView');
@@ -18,29 +19,32 @@ export default function VideosView(_props: ViewProps) {
 
 	const videos = useMemo(() => Object.values(videosRecord || {}), [videosRecord]);
 	const videoCount = videos.length;
+	const browserItems = useMemo(
+		() => videos.map((v) => toBrowserItem(v as unknown as Record<string, unknown>)),
+		[videos]
+	);
 
 	useEffect(() => {
 		if (!hasInitializedRef.current && videoCount === 0 && !isLoading) {
 			hasInitializedRef.current = true;
-			viewLogger.info('Cargando videos...');
+			viewLogger.info('Loading videos...');
 			fetchVideos();
 		}
 	}, [videoCount, isLoading, fetchVideos]);
 
 	const { openViewer } = useFileViewerStore();
 
-	const handleItemClick = useCallback((item: AnyEntityWithStats) => {
+	const handleItemClick = useCallback((item: BrowserItem) => {
 		viewLogger.info('Click en video', { id: item.id, name: item.name });
 	}, []);
 
 	const handleItemDoubleClick = useCallback(
-		(item: AnyEntityWithStats) => {
+		(item: BrowserItem) => {
 			// Abrir el visor con todos los videos
 			const mediaItems = videos.map((video) => ({
 				id: video.id,
 				name: video.name,
 				type: 'video' as const,
-				path: (video as any).path,
 				size: (video as any).size || 0,
 				width: (video as any).width,
 				height: (video as any).height,
@@ -54,18 +58,22 @@ export default function VideosView(_props: ViewProps) {
 		[videos, openViewer]
 	);
 
+	if (isLoading && videoCount === 0) {
+		return <LoadingScreen message="Loading videos..." />;
+	}
+
 	if (error) {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<h2 className="mb-2 font-semibold text-lg">Error al cargar videos</h2>
+					<h2 className="mb-2 font-semibold text-lg">Could not load videos</h2>
 					<p className="mb-4 text-muted-foreground">Error: {error}</p>
 					<button
 						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 						onClick={() => fetchVideos()}
 						type="button"
 					>
-						Intentar de nuevo
+						Try again
 					</button>
 				</div>
 			</div>
@@ -90,8 +98,7 @@ export default function VideosView(_props: ViewProps) {
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
-					isLoading={isLoading}
-					items={videos as unknown as AnyEntityWithStats[]}
+					items={browserItems}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
 				/>

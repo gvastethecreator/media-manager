@@ -67,6 +67,7 @@ export function createTestImage(overrides: Partial<Image> = {}): Image {
 		aiEngine: null,
 		aiModel: null,
 		aiOriginDetected: false,
+		assetId: null,
 		isFavorite: false,
 		folderId: 'test-folder-1',
 		noteId: null,

@@ -11,7 +11,6 @@
 !.yarn/versions
 /dist
 ~/
-logs/*.log
 
 # testing
 /coverage
@@ -26,15 +25,27 @@ logs/*.log
 # misc
 .DS_Store
 *.pem
+*.local
+.cache/
+.vite/
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+bun-debug.log*
+.outdated*.log
+tsc_output.txt
+
+# local maintenance transcripts (keep durable evidence under .scratch/)
+/.tmp-*.log
+/.tmp-*.json
+/tmp_test_output.txt
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -43,10 +54,50 @@ yarn-error.log*
 *.tsbuildinfo
 
 # project
+/.scratch/
 .image-cache
 .thumbnail-cache
+/bin/
+/public/uploads/**
+!/public/uploads/.gitkeep
+/reports/generated/
 
+# database
 db.sqlite
-/src/lib/drizzle/migrations/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+db.sqlite-shm
+db.sqlite-wal
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+# Canonical schema history is source code and must remain versioned.
+!/src/lib/drizzle/migrations/
+!/src/lib/drizzle/migrations/**
+
+# logs
+/logs/**
+!/logs/.gitkeep
 
 .qodo
+
+# agent directories with broken symlinks
+.cline
+.codex
+.gemini
+.opencode
+
+# IDE / local tooling
+.idea/
+
+# windows reserved names
+nul
+con
+prn
+aux
+com1
+lpt1

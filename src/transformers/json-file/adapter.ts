@@ -56,7 +56,7 @@ export function defaultJsonFileStats(): JsonFileStatistics {
 		size: 0,
 		mtime: new Date(),
 		birthtime: new Date(),
-		type: 'json-file',
+		type: 'jsonFile',
 
 		// Campos específicos de JsonFileStatistics
 		nestingDepth: 0,
@@ -188,7 +188,7 @@ export function adaptJsonFileWithStats(
 		size: jsonFile.size || 0,
 		mtime: jsonFile.updatedAt || new Date(),
 		birthtime: jsonFile.createdAt || new Date(),
-		type: 'json-file',
+		type: 'jsonFile',
 
 		// Campos específicos de JsonFileStatistics
 		nestingDepth,
@@ -199,7 +199,7 @@ export function adaptJsonFileWithStats(
 	// Crear objeto JsonFileWithStats
 	return {
 		...jsonFile,
-		entityType: 'json-file',
+		entityType: 'jsonFile',
 		stats,
 	};
 }

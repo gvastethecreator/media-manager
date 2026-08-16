@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 import type { FolderBase } from '@/types/entities/folder';
 
 interface FolderCardFooterProps {
+	children?: ReactNode;
 	folder: Pick<FolderBase, 'id' | 'name' | 'color'>;
 	tcgMode?: boolean;
-	children?: ReactNode;
 }
 
 /**
@@ -24,21 +24,21 @@ export const FolderCardFooter = memo(function FolderCardFooter({
 		<div
 			className={cn(
 				'mt-auto flex items-center justify-between p-2',
-				tcgMode ? 'border-white/20 border-t bg-black/40' : 'bg-card'
+				tcgMode ? 'border-border/60 border-t bg-muted/40' : 'bg-card'
 			)}
-			style={tcgMode ? {} : { borderTop: `1px solid ${folder.color ?? '#000000'}20` }}
+			style={tcgMode ? {} : { borderTop: `1px solid ${folder.color ?? 'var(--dt-neutral-950)'}20` }}
 		>
 			{/* Contenido del footer */}
 			<div className="flex items-center gap-2">
 				{/* Información de la carta TCG */}
 				{tcgMode && (
-					<div className="flex items-center text-xs">
+					<div className="flex items-center text-sm">
 						<div
-							className="flex h-5 w-5 items-center justify-center rounded-full border border-white/10 bg-black/50"
-							style={{ borderColor: `${folder.color ?? '#000000'}50` }}
+							className="flex h-5 w-5 items-center justify-center rounded-full border border-border/40 bg-muted/50"
+							style={{ borderColor: `${folder.color ?? 'var(--dt-neutral-950)'}50` }}
 							title="Folder icon"
 						>
-							<FolderIcon className="h-3 w-3" style={{ color: folder.color ?? '#000000' }} />
+							<FolderIcon className="h-4 w-4" style={{ color: folder.color ?? 'var(--dt-neutral-950)' }} />
 						</div>
 						<span className="ml-1 font-semibold text-[0.65rem] text-white/70">
 							Collection ID: {folderId.slice(0, 8)}

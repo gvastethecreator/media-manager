@@ -37,14 +37,14 @@ ${chalk.bold('Uso:')}
   bun scripts/check-errors.js [opciones]
 
 ${chalk.bold('Opciones:')}
-  ${chalk.green('--tool, -t')} <nombre>   - Filtra por herramienta (eslint, biome, tsc, all). Por defecto: 'all'.
+	${chalk.green('--tool, -t')} <nombre>   - Filtra por herramienta (oxc, eslint, tsc, all). Por defecto: 'all'.
   ${chalk.green('--days, -d')} <días>     - Días hacia atrás para buscar. Por defecto: 1.
   ${chalk.green('--help, -h')}            - Mostrar esta ayuda.
 
 ${chalk.bold('Ejemplos:')}
   bun scripts/check-errors.js
-  bun scripts/check-errors.js --tool eslint
-  bun scripts/check-errors.js -t biome -d 7
+	bun scripts/check-errors.js --tool oxc
+	bun scripts/check-errors.js -t tsc -d 7
 `)
 	);
 }
@@ -150,11 +150,11 @@ function displayResults(allSummaries, totalFiles) {
 function showSuggestedCommands(allSummaries) {
 	console.log(chalk.cyan('\n💡 Comandos sugeridos para corregir:'));
 
-	if (allSummaries.has('eslint') || allSummaries.has('eslint-fix')) {
-		console.log(chalk.yellow('  bun lint:fix'));
+	if (allSummaries.has('eslint') || allSummaries.has('eslint-fix') || allSummaries.has('oxc')) {
+		console.log(chalk.yellow('  bun run lint:fix'));
 	}
-	if (allSummaries.has('biome') || allSummaries.has('biome-check') || allSummaries.has('biome-fix')) {
-		console.log(chalk.yellow('  bun biome:fix'));
+	if (allSummaries.has('oxfmt') || allSummaries.has('format') || allSummaries.has('vp-check')) {
+		console.log(chalk.yellow('  bun run format'));
 	}
 	if (allSummaries.has('tsc')) {
 		console.log(chalk.dim('  # Los errores de TypeScript requieren corrección manual.'));

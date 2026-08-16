@@ -4,10 +4,10 @@ import { cn } from '@/lib/utils';
 import { normalizeThumbailUrl } from './utils/folder-helpers';
 
 interface ThumbnailGridProps {
-	images: Array<{ id: string; name: string; thumbnailUrl?: string; thumbnail?: string }>;
-	totalImages: number;
 	className?: string;
+	images: Array<{ id: string; name: string; thumbnailUrl?: string; thumbnail?: string }>;
 	showCount?: boolean;
+	totalImages: number;
 }
 
 export const ThumbnailGrid = memo(function ThumbnailGrid({
@@ -61,7 +61,7 @@ export const ThumbnailGrid = memo(function ThumbnailGrid({
 									<ImageIcon className="h-3 w-3 text-muted-foreground/60" />
 								</div>
 							) : (
-								<div className="h-full w-full border-2 border-muted-foreground/20 border-dashed bg-muted/30" />
+								<div className="h-full w-full border border-muted-foreground/20 border-dashed bg-muted/30" />
 							)}
 						</div>
 					);
@@ -71,7 +71,7 @@ export const ThumbnailGrid = memo(function ThumbnailGrid({
 			{/* Contador de imágenes restantes */}
 			{showCount && remainingCount > 0 && (
 				<div className="mt-1 text-center">
-					<span className="font-medium text-[9px] text-muted-foreground">+{remainingCount} más</span>
+					<span className="font-medium text-[9px] text-muted-foreground">+{remainingCount} more</span>
 				</div>
 			)}
 		</div>

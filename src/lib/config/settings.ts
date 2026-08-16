@@ -1,5 +1,6 @@
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { Settings } from '@/types/settings';
 
 // Clave para almacenar configuraciones en localStorage
@@ -9,7 +10,7 @@ const DEFAULT_SETTINGS: Settings = {
 	appearance: {
 		theme: 'system',
 		fontSize: 16,
-		language: 'es',
+		language: 'en',
 		reducedAnimations: false,
 		highContrast: false,
 	},
@@ -58,7 +59,7 @@ export function loadSettings(): Settings {
 		const parsedSettings = JSON.parse(savedSettings);
 		return merge(DEFAULT_SETTINGS, parsedSettings);
 	} catch (error) {
-		console.error('Error loading settings:', error);
+		clientLogger.error('Error loading settings:', error);
 		return DEFAULT_SETTINGS;
 	}
 }
@@ -67,7 +68,7 @@ export function saveSettings(settings: Settings): void {
 	try {
 		localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 	} catch (error) {
-		console.error('Error saving settings:', error);
+		clientLogger.error('Error saving settings:', error);
 	}
 }
 
@@ -108,7 +109,7 @@ export function importSettings(jsonString: string): Settings {
 		saveSettings(mergedSettings);
 		return mergedSettings;
 	} catch (error) {
-		console.error('Error importing settings:', error);
+		clientLogger.error('Error importing settings:', error);
 		return DEFAULT_SETTINGS;
 	}
 }

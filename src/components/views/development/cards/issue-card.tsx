@@ -3,24 +3,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from './status-badge';
 
 export interface Issue {
-	id: string;
-	title: string;
 	description: string;
+	id: string;
 	severity: 'low' | 'medium' | 'high' | 'critical';
 	status: 'open' | 'in-progress' | 'resolved';
+	title: string;
 }
 
 export function IssueCard({ issue }: { issue: Issue }) {
 	const getSeverityIcon = () => {
 		switch (issue.severity) {
 			case 'critical':
-				return <XCircle className="h-4 w-4 text-red-500" />;
+				return <XCircle className="h-4 w-4 text-destructive" />;
 			case 'high':
-				return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+				return <AlertTriangle className="h-4 w-4 text-warning" />;
 			case 'medium':
-				return <Info className="h-4 w-4 text-yellow-500" />;
+				return <Info className="h-4 w-4 text-warning" />;
 			case 'low':
-				return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+				return <CheckCircle2 className="h-4 w-4 text-success" />;
 			default:
 				return <Info className="h-4 w-4 text-muted-foreground" />;
 		}

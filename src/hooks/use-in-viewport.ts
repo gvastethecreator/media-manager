@@ -5,25 +5,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseInViewportOptions {
-	/** Margen del root para disparar la detección antes/después del viewport */
-	rootMargin?: string;
-	/** Umbral de intersección (0-1) para considerar el elemento como visible */
-	threshold?: number;
 	/** Si debe disparar solo una vez o en cada entrada al viewport */
 	once?: boolean;
 	/** Callback cuando el elemento entra al viewport */
 	onIntersect?: (entry: IntersectionObserverEntry) => void;
 	/** Callback cuando el elemento sale del viewport */
 	onLeave?: (entry: IntersectionObserverEntry) => void;
+	/** Margen del root para disparar la detección antes/después del viewport */
+	rootMargin?: string;
+	/** Umbral de intersección (0-1) para considerar el elemento como visible */
+	threshold?: number;
 }
 
 export interface UseInViewportReturn {
-	/** Ref para asignar al elemento que queremos observar */
-	ref: React.RefObject<HTMLDivElement | null>;
-	/** Si el elemento está actualmente en viewport */
-	inViewport: boolean;
 	/** Si el elemento ha entrado al viewport al menos una vez */
 	hasBeenInViewport: boolean;
+	/** Si el elemento está actualmente en viewport */
+	inViewport: boolean;
+	/** Ref para asignar al elemento que queremos observar */
+	ref: React.RefObject<HTMLDivElement | null>;
 }
 
 /**

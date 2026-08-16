@@ -8,6 +8,7 @@
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createDefaultEntityStats } from '@/lib/utils';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
 
 const logger = serverLogger.withContext('GroupTransformer');
@@ -23,34 +24,22 @@ export function fromDrizzleGroup(drizzleGroup: any): GroupWithStats {
 	try {
 		const { _count, ...baseData } = drizzleGroup;
 
-		const imageCount = _count?.images || 0;
-		const videoCount = _count?.videos || 0;
-		const albumCount = _count?.albums || 0;
-		const collectionCount = _count?.collections || 0;
-		const tagCount = _count?.tags || 0;
-		const characterCount = _count?.characters || 0;
-		const placeCount = _count?.places || 0;
-		const worldItemCount = _count?.worldItems || 0;
-		const conceptCount = _count?.concepts || 0;
-		const promptCount = _count?.prompts || 0;
-		const noteCount = _count?.notes || 0;
-		const wildcardCount = _count?.wildcards || 0;
-		const propertyCount = _count?.properties || 0;
+		const counts = normalizeCounts(_count);
+		const imageCount = counts.images;
+		const videoCount = counts.videos;
+		const albumCount = counts.albums;
+		const collectionCount = counts.collections;
+		const tagCount = counts.tags;
+		const characterCount = counts.characters;
+		const placeCount = counts.places;
+		const worldItemCount = counts.worldItems;
+		const conceptCount = counts.concepts;
+		const promptCount = counts.prompts;
+		const noteCount = counts.notes;
+		const wildcardCount = counts.wildcards;
+		const propertyCount = counts.properties;
 
-		const totalItems =
-			imageCount +
-			videoCount +
-			albumCount +
-			collectionCount +
-			tagCount +
-			characterCount +
-			placeCount +
-			worldItemCount +
-			conceptCount +
-			promptCount +
-			noteCount +
-			wildcardCount +
-			propertyCount;
+		const totalItems = sumCounts(_count, STANDARD_COUNT_KEYS);
 
 		const stats: GroupStatistics = {
 			...createDefaultEntityStats(),

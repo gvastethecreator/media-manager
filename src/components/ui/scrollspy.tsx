@@ -1,16 +1,16 @@
 import { ReactNode, RefObject, useCallback, useEffect, useRef } from 'react';
 
-type ScrollspyProps = {
+interface ScrollspyProps {
 	children: ReactNode;
-	targetRef?: RefObject<HTMLElement | HTMLDivElement | Document | null | undefined>;
-	onUpdate?: (id: string) => void;
-	offset?: number;
-	smooth?: boolean;
 	className?: string;
 	dataAttribute?: string;
 	history?: boolean;
+	offset?: number;
+	onUpdate?: (id: string) => void;
+	smooth?: boolean;
+	targetRef?: RefObject<HTMLElement | HTMLDivElement | Document | null | undefined>;
 	throttleTime?: number;
-};
+}
 
 export function Scrollspy({
 	children,

@@ -11,7 +11,7 @@ Esta vista permite editar y previsualizar archivos Markdown usando `@uiw/react-m
 ## Ejemplo de uso
 
 ```tsx
-<MdEditor initialValue={"# Título\nTexto"} onSave={console.log} />
+<MdEditor initialValue={'# Título\nTexto'} onSave={console.log} />
 ```
 
 ## Dependencias

@@ -1,4 +1,4 @@
-import { Column } from '@tanstack/react-table';
+import { Column, RowData } from '@/lib/tanstack-react-table';
 import {
 	ArrowDown,
 	ArrowLeft,
@@ -29,16 +29,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
-interface DataGridColumnHeaderProps<TData, TValue> extends HTMLAttributes<HTMLDivElement> {
-	column: Column<TData, TValue>;
-	title?: string;
+interface DataGridColumnHeaderProps<TData extends RowData, TValue> extends HTMLAttributes<HTMLDivElement> {
+	column: Column<any, TData, TValue>;
+	filter?: ReactNode;
 	icon?: ReactNode;
 	pinnable?: boolean;
-	filter?: ReactNode;
+	title?: string;
 	visibility?: boolean;
 }
 
-function DataGridColumnHeader<TData, TValue>({
+function DataGridColumnHeader<TData extends RowData, TValue>({
 	column,
 	title = '',
 	icon,
@@ -192,15 +192,15 @@ function DataGridColumnHeader<TData, TValue>({
 
 						{props.tableLayout?.columnsPinnable && column.getCanPin() && (
 							<>
-								<DropdownMenuItem onClick={() => column.pin(column.getIsPinned() === 'left' ? false : 'left')}>
+								<DropdownMenuItem onClick={() => column.pin(column.getIsPinned() === 'start' ? false : 'start')}>
 									<ArrowLeftToLine aria-hidden="true" className="size-3.5!" />
 									<span className="grow">Pin to left</span>
-									{column.getIsPinned() === 'left' && <Check className="size-4 text-primary opacity-100!" />}
+									{column.getIsPinned() === 'start' && <Check className="size-4 text-primary opacity-100!" />}
 								</DropdownMenuItem>
-								<DropdownMenuItem onClick={() => column.pin(column.getIsPinned() === 'right' ? false : 'right')}>
+								<DropdownMenuItem onClick={() => column.pin(column.getIsPinned() === 'end' ? false : 'end')}>
 									<ArrowRightToLine aria-hidden="true" className="size-3.5!" />
 									<span className="grow">Pin to right</span>
-									{column.getIsPinned() === 'right' && <Check className="size-4 text-primary opacity-100!" />}
+									{column.getIsPinned() === 'end' && <Check className="size-4 text-primary opacity-100!" />}
 								</DropdownMenuItem>
 							</>
 						)}

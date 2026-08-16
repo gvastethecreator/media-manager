@@ -2,31 +2,31 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
-import { type CreateProfileInput, type ProfileExtended, type UpdateProfileInput } from '@/services/profile';
-import { profileClient } from '@/services/profile/client';
+import {
+	type CreateProfileInput,
+	type ProfileExtended,
+	profileClient,
+	type UpdateProfileInput,
+} from '@/services/profile/client';
 import { toastService } from '@/services/toast/toast.service';
 import type { ThumbnailQuality } from '@/types/thumbnails';
+import type { ThumbnailAdvancedConfig } from '@/types/thumbnails-advanced.config';
+import { DEFAULT_THUMBNAIL_ADVANCED_CONFIG } from '@/types/thumbnails-advanced.config';
 
 export interface Settings {
-	// Configuraciones básicas
-	theme: 'light' | 'dark' | 'system';
-	language: 'es' | 'en';
-	notifications: boolean;
-	thumbnailQuality: 'low' | 'medium' | 'high' | ThumbnailQuality;
+	activeProfile?: string | null;
 	autoBackup: boolean;
 	compressUploads: boolean;
-	defaultView: 'grid' | 'list';
 	defaultSort: 'name' | 'date' | 'size';
 	defaultSortOrder: 'asc' | 'desc';
 	defaultThumbnailSize: 'small' | 'medium' | 'large';
-
-	// Configuraciones avanzadas
-	videoThumbnailAnimation?: boolean;
-	shortcuts?: { [key: string]: string };
+	defaultView: 'grid' | 'list';
+	language: 'es' | 'en';
+	notifications: boolean;
 
 	// Colecciones, etiquetas y perfiles
 	profiles?: ProfileExtended[];
-	activeProfile?: string | null;
+	shortcuts?: { [key: string]: string };
 
 	// Información del sistema
 	system?: {
@@ -34,25 +34,32 @@ export interface Settings {
 		memoryUsage?: number;
 		cacheSize?: number;
 	};
+	// Configuraciones básicas
+	theme: 'light' | 'dark' | 'system';
+	thumbnailAdvancedConfig?: ThumbnailAdvancedConfig;
+	thumbnailQuality: 'low' | 'medium' | 'high' | ThumbnailQuality;
+
+	// Configuraciones avanzadas
+	videoThumbnailAnimation?: boolean;
 }
 
 interface SettingsContextType {
-	settings: Settings;
-	updateSettings: (settings: Partial<Settings>) => Promise<void>;
-	resetSettings: () => void;
-	isLoading: boolean;
+	deleteProfile: (id: string) => Promise<void>;
 	error: string | null;
+	isLoading: boolean;
+	resetSettings: () => void;
+	setActiveProfile: (id: string) => Promise<void>;
+	settings: Settings;
 
 	// Funciones para colecciones, etiquetas y perfiles
 
 	updateProfile: (id: string | null, data: CreateProfileInput | UpdateProfileInput) => Promise<void>;
-	setActiveProfile: (id: string) => Promise<void>;
-	deleteProfile: (id: string) => Promise<void>;
+	updateSettings: (settings: Partial<Settings>) => Promise<void>;
 }
 
 const defaultSettings: Settings = {
 	theme: 'system',
-	language: 'es',
+	language: 'en',
 	notifications: true,
 	thumbnailQuality: 'medium',
 	autoBackup: false,
@@ -62,6 +69,7 @@ const defaultSettings: Settings = {
 	defaultSortOrder: 'asc',
 	defaultThumbnailSize: 'medium',
 	videoThumbnailAnimation: true,
+	thumbnailAdvancedConfig: DEFAULT_THUMBNAIL_ADVANCED_CONFIG,
 	profiles: [],
 	activeProfile: null,
 	shortcuts: {},
@@ -96,7 +104,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		} catch (err) {
 			setError('Error loading settings');
 			console.error('Failed to load settings:', err);
-			toastService.error('No se pudo cargar la configuración');
+			toastService.error('Settings could not be loaded');
 		} finally {
 			setIsLoading(false);
 		}
@@ -120,7 +128,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				activeProfile: activeProfile?.id || null,
 			}));
 		} catch (err) {
-			console.error('Error cargando perfiles:', err);
+			console.error('Error loading profiles:', err);
 			toastService.error('No se pudieron cargar los perfiles');
 		}
 	}, []);
@@ -165,7 +173,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			return Promise.resolve();
 		} catch (err) {
 			console.error('Error updating settings:', err);
-			toastService.error('No se pudieron actualizar las configuraciones');
+			toastService.error('Settings could not be updated');
 			return Promise.reject(err);
 		}
 	};
@@ -186,10 +194,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			}
 			// Recargar los perfiles para obtener la lista actualizada
 			await loadProfiles();
-			toastService.success('Perfil actualizado correctamente');
+			toastService.success('Profile updated successfully');
 		} catch (err) {
 			console.error('Error updating profile:', err);
-			toastService.error('No se pudo actualizar el perfil');
+			toastService.error('Profile could not be updated');
 			throw err;
 		}
 	};
@@ -199,7 +207,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		try {
 			await profileClient.setActiveProfile(id);
 			await loadProfiles();
-			toastService.success('Perfil activo actualizado correctamente');
+			toastService.success('Active profile updated successfully');
 		} catch (err) {
 			console.error('Error setting active profile:', err);
 			toastService.error('No se pudo establecer el perfil activo');
@@ -215,7 +223,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			toastService.success('Perfil eliminado correctamente');
 		} catch (err) {
 			console.error('Error deleting profile:', err);
-			toastService.error('No se pudo eliminar el perfil');
+			toastService.error('Profile could not be deleted');
 			throw err;
 		}
 	};
@@ -273,7 +281,7 @@ export function useThemeSync() {
 	return {
 		theme: settings.theme,
 		setTheme: (theme: 'light' | 'dark' | 'system') => {
-			console.log(`🎨 Actualizando tema a: ${theme}`);
+			console.log(`🎨 Updating theme to: ${theme}`);
 			updateSettings({ theme });
 		},
 	};

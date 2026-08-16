@@ -11,68 +11,71 @@ import type { WorldItemBase, WorldItemFilters, WorldItemRelations } from './type
  * Configuración visual para la entidad WorldItem
  */
 export interface WorldItemVisualConfig {
-	view: WorldItemViewMode;
-	sortBy: WorldItemSortCriteria;
+	expandedWorldItemIds: string[];
 	filters: string;
 	lastViewedWorldItemId: string | null;
-	expandedWorldItemIds: string[];
 	selectedWorldItemIds: string[];
+	sortBy: WorldItemSortCriteria;
+	view: WorldItemViewMode;
 }
 
 /**
  * Configuración visual parseada con campos deserializados
  */
 export interface ParsedWorldItemVisualConfig {
-	view: WorldItemViewMode;
-	sortBy: WorldItemSortCriteria;
+	expandedWorldItemIds: string[];
 	filters: WorldItemFilters;
 	lastViewedWorldItemId: string | null;
-	expandedWorldItemIds: string[];
 	selectedWorldItemIds: string[];
+	sortBy: WorldItemSortCriteria;
+	view: WorldItemViewMode;
 }
 
 /**
  * Datos de objeto del mundo con campos parseados
  */
-export interface ParsedWorldItem
-	extends Omit<WorldItemBase, 'stats' | 'attributes' | 'effects' | 'properties' | 'requirements' | 'filters'> {
-	statsObject: WorldItemStats;
+export interface ParsedWorldItem extends Omit<
+	WorldItemBase,
+	'stats' | 'attributes' | 'effects' | 'properties' | 'requirements' | 'filters'
+> {
 	attributesArray: string[];
 	effectsArray: WorldItemEffect[];
+	filtersObject: WorldItemFilters;
 	propertiesArray: WorldItemProperty[];
 	requirementsObject: Record<string, WorldItemRequirement>;
-	filtersObject: WorldItemFilters;
+	statsObject: WorldItemStats;
 }
 
 /**
  * Datos completos de objeto del mundo con relaciones y campos parseados
  */
 export interface ParsedWorldItemWithRelations
-	extends Omit<WorldItemRelations, keyof ParsedWorldItem>,
-		ParsedWorldItem {}
+	extends Omit<WorldItemRelations, keyof ParsedWorldItem>, ParsedWorldItem {}
 
 /**
  * Interfaz extendida con campos deserializados para WorldItem
  * Convierte los campos JSON string a sus respectivos objetos/arrays
  */
-export interface WorldItemExtended
-	extends Omit<WorldItemBase, 'stats' | 'attributes' | 'effects' | 'properties' | 'requirements' | 'filters'> {
-	// Campos deserializados
-	stats: WorldItemStats;
+export interface WorldItemExtended extends Omit<
+	WorldItemBase,
+	'stats' | 'attributes' | 'effects' | 'properties' | 'requirements' | 'filters'
+> {
 	attributes: string[];
+	conceptsCount?: number;
 	effects: WorldItemEffect[];
-	properties: WorldItemProperty[];
-	requirements: Record<string, WorldItemRequirement>;
 	filters: WorldItemFilters;
-
-	// Propiedades de UI
-	isSelected?: boolean;
-	isExpanded?: boolean;
-	isEditing?: boolean;
 
 	// Cache de relaciones
 	imagesCount?: number;
+	isEditing?: boolean;
+	isExpanded?: boolean;
+
+	// Propiedades de UI
+	isSelected?: boolean;
 	notesCount?: number;
-	conceptsCount?: number;
 	promptsCount?: number;
+	properties: WorldItemProperty[];
+	requirements: Record<string, WorldItemRequirement>;
+	// Campos deserializados
+	stats: WorldItemStats;
 }

@@ -52,69 +52,69 @@ export type ThumbnailPosition = (typeof ThumbnailPosition)[keyof typeof Thumbnai
  * Opciones de generación de thumbnail
  */
 export interface ThumbnailOptions {
-	width?: number;
-	height?: number;
-	quality?: ThumbnailQuality;
-	fit?: ThumbnailFit;
-	position?: ThumbnailPosition;
 	background?: string;
-	progressive?: boolean;
-	withMetadata?: boolean;
-	stripAlpha?: boolean;
+	fit?: ThumbnailFit;
+	height?: number;
 	optimizeOutput?: boolean;
+	position?: ThumbnailPosition;
+	progressive?: boolean;
+	quality?: ThumbnailQuality;
+	stripAlpha?: boolean;
+	width?: number;
+	withMetadata?: boolean;
 }
 
 /**
  * Metadatos de thumbnail
  */
 export interface ThumbnailMetadata {
-	width: number;
-	height: number;
 	format: string;
-	size: number;
-	quality: ThumbnailQuality;
-	originalWidth: number;
-	originalHeight: number;
-	originalFormat: string;
-	originalSize: number;
 	generatedAt: Date;
+	height: number;
+	originalFormat: string;
+	originalHeight: number;
+	originalSize: number;
+	originalWidth: number;
+	quality: ThumbnailQuality;
+	size: number;
+	width: number;
 }
 
 /**
  * Resultado de generación de thumbnail
  */
 export interface ThumbnailResult {
+	metadata: JSONString<ThumbnailMetadata>;
 	path: string;
 	url: string;
-	metadata: JSONString<ThumbnailMetadata>;
 }
 
 /**
  * Estadísticas de thumbnails
  */
 export interface ThumbnailStats {
-	total: number;
-	processed: number;
-	failed: number;
-	pending: number;
-	totalSize: number;
-	processedSize: number;
-	totalFiles: number;
-	errors: Array<{ message: string; path: string; timestamp: Date }>;
 	averageProcessingTime: number;
-	processingRate?: number;
+	errors: Array<{ message: string; path: string; timestamp: Date }>;
+	failed: number;
 	lastProcessedAt?: Date;
+	pending: number;
+	processed: number;
+	processedSize: number;
+	processingRate?: number;
+	total: number;
+	totalFiles: number;
+	totalSize: number;
 }
 
 /**
  * Último thumbnail procesado
  */
 export interface LastProcessedThumbnail {
+	error?: string;
 	id: string;
 	path: string;
 	processedAt: Date;
 	status: 'success' | 'error';
-	error?: string;
 }
 
 /**
@@ -122,19 +122,19 @@ export interface LastProcessedThumbnail {
  */
 export interface ProcessOptions {
 	forceRegenerate?: boolean;
-	quality?: ThumbnailQuality;
-	maxConcurrency?: number;
 	logProgress?: boolean;
+	maxConcurrency?: number;
+	quality?: ThumbnailQuality;
 }
 
 /**
  * Estado de procesamiento de thumbnails
  */
 export interface ProcessStatus {
-	processed: number;
-	total: number;
 	current?: string;
+	processed: number;
 	progress: number;
+	total: number;
 }
 
 /**
@@ -153,10 +153,10 @@ export type ProcessState = (typeof ProcessState)[keyof typeof ProcessState];
  * Error de thumbnail
  */
 export interface ThumbnailError {
-	message: string;
 	code?: string;
-	path?: string;
 	details?: unknown;
+	message: string;
+	path?: string;
 }
 
 // Validaciones Zod

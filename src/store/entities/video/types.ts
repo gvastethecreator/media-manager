@@ -5,72 +5,69 @@
  * Última refactorización: 2025-01-27
  */
 
-import type {
-	VideoCreateInput,
-	VideoPlayState,
-	VideoSortCriteria,
-	VideoUpdateInput,
-	VideoViewMode,
-	VideoWithStats,
-} from '@/types/entities/video';
+import type { PublicVideoCreateInput, PublicVideoUpdateInput } from '@/lib/api/client/video.client';
+import type { VideoPlayState, VideoSortCriteria, VideoViewMode, VideoWithStats } from '@/types/entities/video';
 
 /**
  * 🎬 Estado principal del store de videos
  */
 export interface VideoState {
-	// 📊 Datos principales (Record optimizado)
-	videos: Record<string, VideoWithStats>;
-	isLoading: boolean;
 	error: string | null;
-	lastUpdated: number | null;
-
-	// 🎮 UI y configuración
-	ui: VideoUIState;
 	filters: VideoFiltersState;
-	player: VideoPlayerState;
+	getFilteredVideos: () => VideoWithStats[];
+	getSortedVideos: () => VideoWithStats[];
 
 	// 🔍 Selectores y getters optimizados
 	getVideoById: (id: string) => VideoWithStats | undefined;
-	getFilteredVideos: () => VideoWithStats[];
-	getSortedVideos: () => VideoWithStats[];
 	getVideosByFolder: (folderId: string) => VideoWithStats[];
+	isLoading: boolean;
+	lastUpdated: number | null;
+	player: VideoPlayerState;
+
+	// 🎮 UI y configuración
+	ui: VideoUIState;
+	// 📊 Datos principales (Record optimizado)
+	videos: Record<string, VideoWithStats>;
 }
 
 /**
  * 🎮 Estado de UI del store
  */
 export interface VideoUIState {
-	selectedIds: string[];
-	viewMode: VideoViewMode;
-	isViewerOpen: boolean;
 	currentVideoId: string | null;
 	displayState: Record<string, VideoDisplayState>;
 	draggedVideoId: string | null;
 	dropTargetVideoId: string | null;
-	highlightedId: string | null;
 	expandedIds: string[];
+	highlightedId: string | null;
+	isViewerOpen: boolean;
+	selectedIds: string[];
+	viewMode: VideoViewMode;
 }
 
 /**
  * 🎭 Estado de visualización por video
  */
 export interface VideoDisplayState {
-	isExpanded: boolean;
-	isVisible: boolean;
-	isPlaying: boolean;
 	currentTime: number;
+	isExpanded: boolean;
+	isPlaying: boolean;
+	isVisible: boolean;
 }
 
 /**
  * 🔍 Estado de filtros del store
  */
 export interface VideoFiltersState {
-	// Filtros básicos
-	query: string;
-	searchQuery: string; // Alias para compatibilidad
+	albums?: string[];
+	characters?: string[];
+	collections?: string[];
 
-	// Filtros específicos de video
-	sortBy: VideoSortCriteria;
+	// Rango de fechas
+	dateRange: {
+		from: Date | null;
+		to: Date | null;
+	};
 	filterByFolder: string | null;
 	filterByQuality: string | null;
 	filterFavorites: boolean;
@@ -80,95 +77,90 @@ export interface VideoFiltersState {
 
 	// Filtros de contenido
 	folders?: string[];
-	tags?: string[];
-	albums?: string[];
-	collections?: string[];
-	characters?: string[];
+	maxDuration?: number;
+	maxHeight?: number;
+	maxSize?: number;
+	maxWidth?: number;
 
 	// Filtros técnicos
 	minDuration?: number;
-	maxDuration?: number;
-	minWidth?: number;
-	maxWidth?: number;
 	minHeight?: number;
-	maxHeight?: number;
-	minSize?: number;
-	maxSize?: number;
 	minQualityScore?: number;
-	technicalGrade?: ('A' | 'B' | 'C' | 'D')[];
+	minSize?: number;
+	minWidth?: number;
+	// Filtros básicos
+	query: string;
+	searchQuery: string; // Alias para compatibilidad
 
-	// Rango de fechas
-	dateRange: {
-		from: Date | null;
-		to: Date | null;
-	};
+	// Filtros específicos de video
+	sortBy: VideoSortCriteria;
+	tags?: string[];
+	technicalGrade?: ('A' | 'B' | 'C' | 'D')[];
 }
 
 /**
  * 🎵 Estado del reproductor de video
  */
 export interface VideoPlayerState {
+	// Configuración del reproductor
+	autoplay: boolean;
+	bookmarks: Record<string, number>; // videoId -> timestamp
+	currentIndex: number;
 	// Estado de reproducción actual
 	currentVideo: VideoWithStats | null;
-	playState: VideoPlayState;
+	fullscreen: boolean;
+	isShuffled: boolean;
+	pictureInPicture: boolean;
 
 	// Cola de reproducción
 	playlist: string[]; // IDs de videos
-	currentIndex: number;
-	isShuffled: boolean;
-	repeatMode: 'none' | 'one' | 'all';
-
-	// Configuración del reproductor
-	autoplay: boolean;
-	showControls: boolean;
-	fullscreen: boolean;
-	pictureInPicture: boolean;
+	playState: VideoPlayState;
 
 	// Historial y favoritos
 	recentlyPlayed: string[];
-	bookmarks: Record<string, number>; // videoId -> timestamp
+	repeatMode: 'none' | 'one' | 'all';
+	showControls: boolean;
 }
 
 /**
  * 🔄 Acciones disponibles en el store
  */
 export interface VideoActions {
-	// 📥 Carga de datos
-	loadVideos: () => Promise<void>;
-	loadVideoById: (id: string) => Promise<VideoWithStats | undefined>;
-	loadVideosByFolder: (folderId: string) => Promise<void>;
-
-	// 📝 Gestión de videos
-	createVideo: (video: VideoCreateInput) => Promise<void>;
-	updateVideo: (id: string, video: VideoUpdateInput) => Promise<void>;
-	deleteVideo: (id: string) => Promise<void>;
-
-	// 🎮 Acciones UI
-	selectVideo: (id: string | null) => void;
-	selectMultipleVideos: (ids: string[]) => void;
-	toggleSelection: (id: string) => void;
+	// 📋 Lista de reproducción
+	addToPlaylist: (videoId: string) => void;
+	clearFilters: () => void;
+	clearPlaylist: () => void;
 	clearSelection: () => void;
 
-	// 🔍 Filtros
-	updateFilters: (filters: Partial<VideoFiltersState>) => void;
-	clearFilters: () => void;
-	setSearchQuery: (query: string) => void;
+	// 📝 Gestión de videos
+	createVideo: (video: PublicVideoCreateInput) => Promise<void>;
+	deleteVideo: (id: string) => Promise<void>;
+	loadVideoById: (id: string) => Promise<VideoWithStats | undefined>;
+	// 📥 Carga de datos
+	loadVideos: () => Promise<void>;
+	loadVideosByFolder: (folderId: string) => Promise<void>;
+	pauseVideo: () => void;
 
 	// 🎵 Reproductor
 	playVideo: (id: string) => void;
-	pauseVideo: () => void;
-	stopVideo: () => void;
-	seekTo: (time: number) => void;
-	setVolume: (volume: number) => void;
-	toggleMute: () => void;
-	setPlaybackRate: (rate: number) => void;
-
-	// 📋 Lista de reproducción
-	addToPlaylist: (videoId: string) => void;
 	removeFromPlaylist: (videoId: string) => void;
-	clearPlaylist: () => void;
-	shufflePlaylist: () => void;
+	seekTo: (time: number) => void;
+	selectMultipleVideos: (ids: string[]) => void;
+
+	// 🎮 Acciones UI
+	selectVideo: (id: string | null) => void;
+	setPlaybackRate: (rate: number) => void;
 	setRepeatMode: (mode: 'none' | 'one' | 'all') => void;
+	setSearchQuery: (query: string) => void;
+	setVolume: (volume: number) => void;
+	shufflePlaylist: () => void;
+	stopVideo: () => void;
+	toggleMute: () => void;
+	toggleSelection: (id: string) => void;
+
+	// 🔍 Filtros
+	updateFilters: (filters: Partial<VideoFiltersState>) => void;
+	updateVideo: (id: string, video: PublicVideoUpdateInput) => Promise<void>;
 }
 
 /**

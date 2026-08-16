@@ -7,11 +7,11 @@ const categoriesLogger = serverLogger.withContext('PromptCategories');
  * Interfaz para metadatos de categoría de prompt
  */
 export interface PromptCategoryMetadata {
-	id: PromptCategory;
-	name: string;
+	color: string;
 	description: string;
 	icon: string;
-	color: string;
+	id: PromptCategory;
+	name: string;
 	order: number;
 }
 
@@ -22,65 +22,65 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 	[PromptCategory.GENERAL]: {
 		id: PromptCategory.GENERAL,
 		name: 'General',
-		description: 'Prompts de propósito general y uso común',
+		description: 'General-purpose and commonly used prompts',
 		icon: '🌐',
-		color: '#6366f1',
+		color: 'var(--preset-indigo)',
 		order: 0,
 	},
 	[PromptCategory.TEXT]: {
 		id: PromptCategory.TEXT,
 		name: 'Texto',
-		description: 'Generación y manipulación de texto, resúmenes, reescritura',
+		description: 'Text generation and manipulation, summaries, and rewriting',
 		icon: '📝',
-		color: '#22c55e',
+		color: 'var(--preset-green)',
 		order: 1,
 	},
 	[PromptCategory.IMAGE]: {
 		id: PromptCategory.IMAGE,
 		name: 'Imagen',
-		description: 'Prompts para describir y analizar imágenes',
+		description: 'Prompts for describing and analyzing images',
 		icon: '🖼️',
-		color: '#ef4444',
+		color: 'var(--dt-danger-500)',
 		order: 2,
 	},
 	[PromptCategory.CODE]: {
 		id: PromptCategory.CODE,
 		name: 'Código',
-		description: 'Generación y análisis de código de programación',
+		description: 'Programming code generation and analysis',
 		icon: '👨‍💻',
-		color: '#3b82f6',
+		color: 'var(--dt-primary-500)',
 		order: 3,
 	},
 	[PromptCategory.CREATIVE]: {
 		id: PromptCategory.CREATIVE,
 		name: 'Creativo',
-		description: 'Prompts para creación de contenido creativo y storytelling',
+		description: 'Prompts for creative content and storytelling',
 		icon: '🎨',
-		color: '#ec4899',
+		color: 'var(--preset-pink)',
 		order: 4,
 	},
 	[PromptCategory.CHARACTER]: {
 		id: PromptCategory.CHARACTER,
 		name: 'Personajes',
-		description: 'Creación y desarrollo de personajes',
+		description: 'Character creation and development',
 		icon: '👤',
-		color: '#f97316',
+		color: 'var(--preset-orange)',
 		order: 5,
 	},
 	[PromptCategory.WORLDBUILDING]: {
 		id: PromptCategory.WORLDBUILDING,
 		name: 'Worldbuilding',
-		description: 'Creación de mundos, escenarios y ambientación',
+		description: 'World, setting, and atmosphere creation',
 		icon: '🌍',
-		color: '#8b5cf6',
+		color: 'var(--preset-purple)',
 		order: 6,
 	},
 	[PromptCategory.ASSISTANT]: {
 		id: PromptCategory.ASSISTANT,
 		name: 'Asistente',
-		description: 'Prompts para crear asistentes virtuales especializados',
+		description: 'Prompts for creating specialized virtual assistants',
 		icon: '🤖',
-		color: '#0ea5e9',
+		color: 'var(--preset-sky)',
 		order: 7,
 	},
 	[PromptCategory.SYSTEM]: {
@@ -88,21 +88,21 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Sistema',
 		description: 'Prompts reservados para uso del sistema',
 		icon: '⚙️',
-		color: '#6b7280',
+		color: 'var(--dt-neutral-500)',
 		order: 8,
 	},
 	[PromptCategory.AUDIO]: {
 		id: PromptCategory.AUDIO,
 		name: 'Audio',
-		description: 'Prompts enfocados en generación y análisis de audio',
+		description: 'Prompts focused on audio generation and analysis',
 		icon: '🎵',
-		color: '#0ea5e9',
+		color: 'var(--preset-sky)',
 		order: 9,
 	},
 	[PromptCategory.VIDEO]: {
 		id: PromptCategory.VIDEO,
 		name: 'Video',
-		description: 'Prompts para video o animación',
+		description: 'Prompts for video or animation',
 		icon: '🎬',
 		color: '#fb923c',
 		order: 10,
@@ -112,15 +112,15 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Chat',
 		description: 'Prompts para conversaciones o chatbots',
 		icon: '💬',
-		color: '#10b981',
+		color: 'var(--dt-success-500)',
 		order: 11,
 	},
 	[PromptCategory.SETTING]: {
 		id: PromptCategory.SETTING,
 		name: 'Entorno',
-		description: 'Creación de escenarios y ubicaciones',
+		description: 'Setting and location creation',
 		icon: '🏞️',
-		color: '#84cc16',
+		color: 'var(--preset-lime)',
 		order: 12,
 	},
 	[PromptCategory.STORY]: {
@@ -134,15 +134,15 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 	[PromptCategory.UNCLASSIFIED]: {
 		id: PromptCategory.UNCLASSIFIED,
 		name: 'Sin clasificar',
-		description: 'Prompts sin categoría específica',
+		description: 'Prompts without a specific category',
 		icon: '❔',
-		color: '#9ca3af',
+		color: 'var(--dt-neutral-400)',
 		order: 14,
 	},
 	[PromptCategory.OTHER]: {
 		id: PromptCategory.OTHER,
 		name: 'Otros',
-		description: 'Categorías diversas de prompts',
+		description: 'Miscellaneous prompt categories',
 		icon: '📦',
 		color: '#a855f7',
 		order: 15,
@@ -158,7 +158,7 @@ export function getCategoryMetadata(categoryId: PromptCategory | string): Prompt
 	try {
 		return PROMPT_CATEGORIES[categoryId as PromptCategory];
 	} catch (error) {
-		categoriesLogger.error('❌ Error al obtener metadatos de categoría:', error);
+		categoriesLogger.error('❌ Could not get category metadata:', error);
 		return;
 	}
 }
@@ -171,7 +171,7 @@ export function getAllCategories(): PromptCategoryMetadata[] {
 	try {
 		return Object.values(PROMPT_CATEGORIES).sort((a, b) => a.order - b.order);
 	} catch (error) {
-		categoriesLogger.error('❌ Error al obtener todas las categorías:', error);
+		categoriesLogger.error('❌ Could not get all categories:', error);
 		return [];
 	}
 }
@@ -187,7 +187,7 @@ export function getUserVisibleCategories(): PromptCategoryMetadata[] {
 			.filter((category) => category.id !== PromptCategory.SYSTEM)
 			.sort((a, b) => a.order - b.order);
 	} catch (error) {
-		categoriesLogger.error('❌ Error al obtener categorías visibles:', error);
+		categoriesLogger.error('❌ Could not get visible categories:', error);
 		return [];
 	}
 }
@@ -201,7 +201,7 @@ export function isValidCategory(categoryId: string | PromptCategory): boolean {
 	try {
 		return Object.values(PromptCategory).includes(categoryId as PromptCategory);
 	} catch (error) {
-		categoriesLogger.error('❌ Error al validar categoría:', error);
+		categoriesLogger.error('❌ Could not validate category:', error);
 		return false;
 	}
 }
@@ -224,7 +224,7 @@ export function getCategoryName(categoryId: string | PromptCategory): string {
 		const category = getCategoryMetadata(categoryId);
 		return category?.name || String(categoryId);
 	} catch (error) {
-		categoriesLogger.error('❌ Error al obtener nombre de categoría:', error);
+		categoriesLogger.error('❌ Could not get category name:', error);
 		return String(categoryId);
 	}
 }
@@ -257,7 +257,7 @@ export function groupPromptsByCategory<T extends { category: string | PromptCate
 
 		return grouped;
 	} catch (error) {
-		categoriesLogger.error('❌ Error al agrupar prompts por categoría:', error);
+		categoriesLogger.error('❌ Could not group prompts by category:', error);
 		return {};
 	}
 }

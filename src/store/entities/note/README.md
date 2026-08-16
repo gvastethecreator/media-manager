@@ -54,51 +54,51 @@ graph TB
 ```typescript
 // Tipo base de la nota
 interface NoteBase {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  priority: number;
-  status: string;
-  featuredImage: string | null;
-  isFavorite: boolean;
-  presetId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	title: string;
+	content: string;
+	category: string;
+	priority: number;
+	status: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	presetId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 // Tipo extendido con relaciones
 interface NoteExtended extends NoteComplete {
-  isSelected: boolean;
-  isHighlighted: boolean;
-  isEditing: boolean;
-  isExpanded: boolean;
-  isLoading: boolean;
-  hasError: boolean;
-  isDragging: boolean;
-  isDropTarget: boolean;
-  totalItems: number;
+	isSelected: boolean;
+	isHighlighted: boolean;
+	isEditing: boolean;
+	isExpanded: boolean;
+	isLoading: boolean;
+	hasError: boolean;
+	isDragging: boolean;
+	isDropTarget: boolean;
+	totalItems: number;
 }
 
 // Tipo completo con estadísticas
 interface NoteWithStats extends NoteComplete {
-  stats: {
-    totalItems: number;
-    totalImages: number;
-    totalVideos: number;
-    totalAlbums: number;
-    totalCollections: number;
-    totalTags: number;
-    totalCharacters: number;
-    totalPlaces: number;
-    totalWorldItems: number;
-    totalConcepts: number;
-    totalPrompts: number;
-    totalWildcards: number;
-    totalProperties: number;
-    totalGroups: number;
-    lastUpdated: Date;
-  };
+	stats: {
+		totalItems: number;
+		totalImages: number;
+		totalVideos: number;
+		totalAlbums: number;
+		totalCollections: number;
+		totalTags: number;
+		totalCharacters: number;
+		totalPlaces: number;
+		totalWorldItems: number;
+		totalConcepts: number;
+		totalPrompts: number;
+		totalWildcards: number;
+		totalProperties: number;
+		totalGroups: number;
+		lastUpdated: Date;
+	};
 }
 ```
 
@@ -106,21 +106,21 @@ interface NoteWithStats extends NoteComplete {
 
 ```typescript
 interface NoteFilters {
-  searchQuery?: string;
-  categories?: string[];
-  priorities?: number[];
-  statuses?: string[];
-  onlyFavorites?: boolean;
-  contentContains?: string;
-  hasTags?: boolean;
-  hasImages?: boolean;
-  hasVideos?: boolean;
+	searchQuery?: string;
+	categories?: string[];
+	priorities?: number[];
+	statuses?: string[];
+	onlyFavorites?: boolean;
+	contentContains?: string;
+	hasTags?: boolean;
+	hasImages?: boolean;
+	hasVideos?: boolean;
 }
 
 interface NoteSearchResult {
-  items: NoteComplete[];
-  total: number;
-  hasMore: boolean;
+	items: NoteComplete[];
+	total: number;
+	hasMore: boolean;
 }
 ```
 
@@ -128,40 +128,40 @@ interface NoteSearchResult {
 
 ```typescript
 enum NoteCategory {
-  GENERAL = 'general',
-  STORY = 'story',
-  LORE = 'lore',
-  MECHANICS = 'mechanics',
-  CHARACTER = 'character',
-  PLACE = 'place',
-  WORLD_ITEM = 'world_item',
-  PROMPT = 'prompt',
-  IDEA = 'idea',
-  TODO = 'todo',
+	GENERAL = 'general',
+	STORY = 'story',
+	LORE = 'lore',
+	MECHANICS = 'mechanics',
+	CHARACTER = 'character',
+	PLACE = 'place',
+	WORLD_ITEM = 'world_item',
+	PROMPT = 'prompt',
+	IDEA = 'idea',
+	TODO = 'todo',
 }
 
 enum NoteStatus {
-  ACTIVE = 'active',
-  ARCHIVED = 'archived',
-  COMPLETED = 'completed',
-  DRAFT = 'draft',
-  PENDING = 'pending',
+	ACTIVE = 'active',
+	ARCHIVED = 'archived',
+	COMPLETED = 'completed',
+	DRAFT = 'draft',
+	PENDING = 'pending',
 }
 
 enum NotePriority {
-  LOWEST = 0,
-  LOW = 1,
-  MEDIUM = 2,
-  HIGH = 3,
-  HIGHEST = 4,
+	LOWEST = 0,
+	LOW = 1,
+	MEDIUM = 2,
+	HIGH = 3,
+	HIGHEST = 4,
 }
 
 enum NoteViewMode {
-  GRID = 'grid',
-  LIST = 'list',
-  CARDS = 'cards',
-  COMPACT = 'compact',
-  DETAIL = 'detail',
+	GRID = 'grid',
+	LIST = 'list',
+	CARDS = 'cards',
+	COMPACT = 'compact',
+	DETAIL = 'detail',
 }
 ```
 
@@ -259,8 +259,8 @@ resetUI: () => void
 
 ```typescript
 // 🔗 Gestión de relaciones
-addNoteToEntity: (noteId: string, entityId: string, entityType: EntityType) => Promise<void>
-removeNoteFromEntity: (noteId: string, entityId: string, entityType: EntityType) => Promise<void>
+addNoteToEntity: (noteId: string, entityId: string, entityType: EntityType) => Promise<void>;
+removeNoteFromEntity: (noteId: string, entityId: string, entityType: EntityType) => Promise<void>;
 ```
 
 ## 🎯 Ejemplos de Uso
@@ -269,16 +269,11 @@ removeNoteFromEntity: (noteId: string, entityId: string, entityType: EntityType)
 
 ```typescript
 // En un componente React
-const {
-  notes,
-  isLoading,
-  error,
-  loadNotes
-} = useNoteStore();
+const { notes, isLoading, error, loadNotes } = useNoteStore();
 
 // Cargar notas al montar
 useEffect(() => {
-  loadNotes();
+	loadNotes();
 }, [loadNotes]);
 
 // Convertir Record a Array para mostrar
@@ -291,59 +286,53 @@ const notesArray = Object.values(notes);
 const { createNote } = useNoteStore();
 
 const handleCreateNote = async (formData: NoteCreateInput) => {
-  try {
-    const noteId = await createNote({
-      title: formData.title,
-      content: formData.content || '',
-      category: formData.category || 'general',
-      priority: formData.priority || 2,
-      status: formData.status || 'active',
-      isFavorite: formData.isFavorite || false,
-    });
+	try {
+		const noteId = await createNote({
+			title: formData.title,
+			content: formData.content || '',
+			category: formData.category || 'general',
+			priority: formData.priority || 2,
+			status: formData.status || 'active',
+			isFavorite: formData.isFavorite || false,
+		});
 
-    if (noteId) {
-      console.log('✅ Nota creada:', noteId);
-    }
-  } catch (error) {
-    console.error('❌ Error creando nota:', error);
-  }
+		if (noteId) {
+			console.log('✅ Nota creada:', noteId);
+		}
+	} catch (error) {
+		console.error('❌ Error creando nota:', error);
+	}
 };
 ```
 
 ### **Filtrar y Buscar Notas**
 
 ```typescript
-const {
-  setSearchFilter,
-  setCategoryFilter,
-  setPriorityFilter,
-  setOnlyFavoritesFilter,
-  clearFilters
-} = useNoteStore();
+const { setSearchFilter, setCategoryFilter, setPriorityFilter, setOnlyFavoritesFilter, clearFilters } = useNoteStore();
 
 // Buscar por texto
 const handleSearch = (query: string) => {
-  setSearchFilter(query);
+	setSearchFilter(query);
 };
 
 // Filtrar por categoría
 const handleCategoryFilter = (category: string) => {
-  setCategoryFilter(category);
+	setCategoryFilter(category);
 };
 
 // Filtrar por prioridad
 const handlePriorityFilter = (priority: number) => {
-  setPriorityFilter(priority);
+	setPriorityFilter(priority);
 };
 
 // Mostrar solo favoritas
 const handleFavoritesFilter = () => {
-  setOnlyFavoritesFilter(true);
+	setOnlyFavoritesFilter(true);
 };
 
 // Limpiar filtros
 const handleClearFilters = () => {
-  clearFilters();
+	clearFilters();
 };
 ```
 
@@ -351,39 +340,39 @@ const handleClearFilters = () => {
 
 ```typescript
 const {
-  selectedNoteId,
-  selectedNoteIds,
-  isMultiSelectMode,
-  selectNote,
-  toggleMultiSelectMode,
-  toggleNoteSelection,
-  selectAllNotes,
-  clearSelection
+	selectedNoteId,
+	selectedNoteIds,
+	isMultiSelectMode,
+	selectNote,
+	toggleMultiSelectMode,
+	toggleNoteSelection,
+	selectAllNotes,
+	clearSelection,
 } = useNoteStore();
 
 // Seleccionar nota individual
 const handleSelectNote = (noteId: string) => {
-  selectNote(noteId);
+	selectNote(noteId);
 };
 
 // Activar modo multi-selección
 const handleToggleMultiSelect = () => {
-  toggleMultiSelectMode();
+	toggleMultiSelectMode();
 };
 
 // Toggle selección en modo múltiple
 const handleToggleNote = (noteId: string) => {
-  toggleNoteSelection(noteId);
+	toggleNoteSelection(noteId);
 };
 
 // Seleccionar todas
 const handleSelectAll = () => {
-  selectAllNotes();
+	selectAllNotes();
 };
 
 // Limpiar selección
 const handleClearSelection = () => {
-  clearSelection();
+	clearSelection();
 };
 ```
 
@@ -391,29 +380,29 @@ const handleClearSelection = () => {
 
 ```typescript
 const {
-  viewMode,
-  isCreateModalOpen,
-  isEditModalOpen,
-  setViewMode,
-  openCreateModal,
-  closeCreateModal,
-  openEditModal,
-  closeEditModal
+	viewMode,
+	isCreateModalOpen,
+	isEditModalOpen,
+	setViewMode,
+	openCreateModal,
+	closeCreateModal,
+	openEditModal,
+	closeEditModal,
 } = useNoteStore();
 
 // Cambiar modo de vista
 const handleViewModeChange = (mode: NoteViewMode) => {
-  setViewMode(mode);
+	setViewMode(mode);
 };
 
 // Abrir modal de creación
 const handleOpenCreate = () => {
-  openCreateModal();
+	openCreateModal();
 };
 
 // Abrir modal de edición
 const handleOpenEdit = () => {
-  openEditModal();
+	openEditModal();
 };
 ```
 
@@ -459,23 +448,20 @@ stateDiagram-v2
 ```typescript
 // Hook para notas filtradas
 const useFilteredNotes = () => {
-  const { notes, filters } = useNoteStore();
-  return useMemo(() => {
-    // Aplicar filtros a las notas
-    return Object.values(notes).filter(note => {
-      // Lógica de filtrado
-      return true;
-    });
-  }, [notes, filters]);
+	const { notes, filters } = useNoteStore();
+	return useMemo(() => {
+		// Aplicar filtros a las notas
+		return Object.values(notes).filter((note) => {
+			// Lógica de filtrado
+			return true;
+		});
+	}, [notes, filters]);
 };
 
 // Hook para notas seleccionadas
 const useSelectedNotes = () => {
-  const { notes, selectedNoteIds } = useNoteStore();
-  return useMemo(() =>
-    selectedNoteIds.map(id => notes[id]).filter(Boolean),
-    [notes, selectedNoteIds]
-  );
+	const { notes, selectedNoteIds } = useNoteStore();
+	return useMemo(() => selectedNoteIds.map((id) => notes[id]).filter(Boolean), [notes, selectedNoteIds]);
 };
 ```
 

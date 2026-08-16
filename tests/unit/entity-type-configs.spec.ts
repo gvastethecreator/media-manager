@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'bun:test';
 import {
 	detectEntityTypeFromExtension,
 	generateEntityThumbnail,
@@ -17,10 +16,12 @@ const baseEntity = { id: '1', name: 'X', description: null, createdAt: new Date(
 describe('entity-type-configs', () => {
 	it('retorna config válida para IMAGE', () => {
 		const cfg = getEntityTypeConfig(EntityStatsType.IMAGE);
-		expect(cfg?.displayName).toBe('Imagen');
-		expect(getEntityTypeColor(EntityStatsType.IMAGE)).toMatch(/^#/);
-		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE)).toBe('Imagen');
-		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE, true)).toBe('Imágenes');
+		expect(cfg?.displayName).toBe('Image');
+		// Acepta tanto colores hex (#RRGGBB) como variables CSS (var(--...))
+		const color = getEntityTypeColor(EntityStatsType.IMAGE);
+		expect(color).toMatch(/^(#[0-9A-Fa-f]{6}|var\(--[\w-]+\))$/);
+		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE)).toBe('Image');
+		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE, true)).toBe('Images');
 		expect(getEntityTypeEmoji(EntityStatsType.IMAGE)).toBeTruthy();
 		expect(getEntityTypeSupportedOperations(EntityStatsType.IMAGE).length).toBeGreaterThan(0);
 	});
@@ -28,6 +29,11 @@ describe('entity-type-configs', () => {
 	it('thumbnail generator de IMAGE devuelve URL', async () => {
 		const url = await generateEntityThumbnail({ ...baseEntity, entityType: 'image', thumbnailUrl: '/t.jpg' } as any);
 		expect(url).toBe('/t.jpg');
+	});
+
+	it('thumbnail generator de DOCUMENT usa la ruta unificada existente', async () => {
+		const url = await generateEntityThumbnail({ ...baseEntity, entityType: 'document' } as any);
+		expect(url).toBe('/api/thumbnails/unified/document/1');
 	});
 
 	it('detecta tipos por extensión', () => {

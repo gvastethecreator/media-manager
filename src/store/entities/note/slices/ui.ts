@@ -6,28 +6,28 @@ import type { NoteStore } from '../types';
 const uiLogger = clientLogger.withContext('NoteStore:UI');
 
 export interface UISlice {
+	closeCreateModal: () => void;
+	closeDeleteDialog: () => void;
+	closeDetailsDrawer: () => void;
+	closeEditModal: () => void;
 	// Estado
 	isCreateModalOpen: boolean;
-	isEditModalOpen: boolean;
 	isDeleteDialogOpen: boolean;
 	isDetailsDrawerOpen: boolean;
-	viewMode: NoteViewMode;
+	isEditModalOpen: boolean;
 
 	// Acciones - modales y diálogos
 	openCreateModal: () => void;
-	closeCreateModal: () => void;
-	openEditModal: () => void;
-	closeEditModal: () => void;
 	openDeleteDialog: () => void;
-	closeDeleteDialog: () => void;
 	openDetailsDrawer: () => void;
-	closeDetailsDrawer: () => void;
-
-	// Acciones - vista
-	setViewMode: (mode: NoteViewMode) => void;
+	openEditModal: () => void;
 
 	// Reset
 	resetUI: () => void;
+
+	// Acciones - vista
+	setViewMode: (mode: NoteViewMode) => void;
+	viewMode: NoteViewMode;
 }
 
 // Estado inicial por defecto para UI

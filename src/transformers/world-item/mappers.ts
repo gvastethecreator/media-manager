@@ -7,6 +7,7 @@
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createDefaultEntityStats } from '@/lib/utils';
+import { normalizeCounts } from '../common/counts';
 import type {
 	WorldItemComplete,
 	WorldItemCreateInput,
@@ -20,47 +21,46 @@ import type {
 // Las funciones de serialización ya no se usan en este archivo
 
 // Tipos de datos para Drizzle
-type DrizzleWorldItemCreateInput = {
-	name: string;
-	description?: string | null;
-	type: string;
-	category: string;
-	rarity: string;
-	value?: number | null;
-	weight?: number | null;
-	featuredImage?: string | null;
+interface DrizzleWorldItemCreateInput {
 	attributes: string;
+	category: string;
+	description?: string | null;
 	effects: string;
+	featuredImage?: string | null;
+	filters: string;
+	name: string;
+	properties: string;
+	rarity: string;
 	requirements: string;
 	stats: string;
-	properties: string;
-	filters: string;
 	tags: string;
-	isFavorite?: boolean;
+	type: string;
+	value?: number | null;
+	weight?: number | null;
 	// Las relaciones se manejan por separado en Drizzle
-};
+}
 
 type DrizzleWorldItemUpdateInput = Partial<DrizzleWorldItemCreateInput>;
 
-type DrizzleWorldItemWhereInput = {
-	OR?: Array<{ name?: { contains?: string }; description?: { contains?: string } }>;
-	type?: { in?: string[] };
+interface DrizzleWorldItemWhereInput {
 	category?: { in?: string[] };
-	rarity?: { in?: string[] };
-	isFavorite?: boolean;
 	images?: { some?: Record<string, never> } | { none?: Record<string, never> };
-};
+	isFavorite?: boolean;
+	OR?: Array<{ name?: { contains?: string }; description?: { contains?: string } }>;
+	rarity?: { in?: string[] };
+	type?: { in?: string[] };
+}
 
-type DrizzleWorldItemFindManyArgs = {
-	where?: DrizzleWorldItemWhereInput;
+interface DrizzleWorldItemFindManyArgs {
 	orderBy?: { [key: string]: 'asc' | 'desc' };
-	take?: number;
 	skip?: number;
-};
+	take?: number;
+	where?: DrizzleWorldItemWhereInput;
+}
 
-type DrizzleWorldItemOrderByInput = {
+interface DrizzleWorldItemOrderByInput {
 	[key: string]: 'asc' | 'desc';
-};
+}
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext('WorldItemMappers');
@@ -90,7 +90,6 @@ export function mapCreateWorldItemDataToDrizzle(input: WorldItemCreateInput): Dr
 			properties: typeof input.properties === 'string' ? input.properties : JSON.stringify(input.properties || {}),
 			filters: '{}', // Campo adicional para Drizzle
 			tags: '[]', // Campo adicional para Drizzle
-			isFavorite: input.isFavorite,
 		};
 
 		return drizzleData;
@@ -146,9 +145,6 @@ export function mapUpdateWorldItemDataToDrizzle(input: WorldItemUpdateInput): Dr
 		if (input.properties !== undefined) {
 			drizzleData.properties =
 				typeof input.properties === 'string' ? input.properties : JSON.stringify(input.properties);
-		}
-		if (input.isFavorite !== undefined) {
-			drizzleData.isFavorite = input.isFavorite;
 		}
 
 		return drizzleData;
@@ -226,6 +222,8 @@ function mapSortByToDrizzle(sortBy?: string): DrizzleWorldItemOrderByInput {
 export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWithStats {
 	const { _count, ...rest } = worldItem;
 
+	const counts = normalizeCounts(_count);
+
 	// Calcular puntuación de rareza
 	const rarityScores: Record<string, number> = {
 		common: 10,
@@ -277,12 +275,7 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 
 	// Calcular popularidad basada en relaciones
 	const totalRelations =
-		(_count?.images || 0) +
-		(_count?.videos || 0) +
-		(_count?.characters || 0) +
-		(_count?.places || 0) +
-		(_count?.notes || 0) +
-		(_count?.concepts || 0);
+		counts.images + counts.videos + counts.characters + counts.places + counts.notes + counts.concepts;
 
 	const popularityScore = Math.min(
 		100,
@@ -300,19 +293,19 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 	const statistics: WorldItemStatistics = {
 		...createDefaultEntityStats(),
 		// Conteos de relaciones
-		imageCount: _count?.images || 0,
-		videoCount: _count?.videos || 0,
-		albumCount: _count?.albums || 0,
-		collectionCount: _count?.collections || 0,
-		tagCount: _count?.tags || 0,
-		characterCount: _count?.characters || 0,
-		placeCount: _count?.places || 0,
-		conceptCount: _count?.concepts || 0,
-		promptCount: _count?.prompts || 0,
-		noteCount: _count?.notes || 0,
-		wildcardCount: _count?.wildcards || 0,
-		propertyCount: _count?.properties || 0,
-		groupCount: _count?.groups || 0,
+		imageCount: counts.images,
+		videoCount: counts.videos,
+		albumCount: counts.albums,
+		collectionCount: counts.collections,
+		tagCount: counts.tags,
+		characterCount: counts.characters,
+		placeCount: counts.places,
+		conceptCount: counts.concepts,
+		promptCount: counts.prompts,
+		noteCount: counts.notes,
+		wildcardCount: counts.wildcards,
+		propertyCount: counts.properties,
+		groupCount: counts.groups,
 
 		// Métricas globales requeridas por EntityStats
 		totalItems: totalRelations,
@@ -343,7 +336,7 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		hasEffects: effects.length > 0,
 		hasRequirements: requirements.length > 0,
 		hasStats: statsData.length > 0,
-		mediaRichness: (_count?.images || 0) + (_count?.videos || 0),
+		mediaRichness: counts.images + counts.videos,
 		// Análisis temporal
 		createdThisMonth: daysSinceCreation <= 30,
 		updatedThisWeek: daysSinceLastUpdate <= 7,
@@ -362,6 +355,6 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		entityType: 'world-item' as const,
 		statistics,
 		stats: statistics,
-		_count: _count || {},
+		_count: counts,
 	};
 }

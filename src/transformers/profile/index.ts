@@ -10,8 +10,5 @@ export * from './mappers';
 export * from './schema';
 export * from './serializers';
 // Exportar funciones principales de transformación
-export {
-	fromDrizzleProfile,
-	fromDrizzleProfiles,
-} from './transformer';
+export { fromDrizzleProfile, fromDrizzleProfiles } from './transformer';
 export * from './validators';

@@ -2,13 +2,13 @@ import { FolderTreeIcon, Star } from 'lucide-react';
 import { memo, useMemo } from 'react';
 
 interface FolderCardHeaderProps {
-	name: string;
 	emoji?: string | null;
+	isFavorite?: boolean;
+	name: string;
+	path?: string;
 	primaryColor: string;
 	secondaryColor?: string;
-	path?: string;
 	tcgMode?: boolean;
-	isFavorite?: boolean;
 }
 
 /**
@@ -87,13 +87,13 @@ export const FolderCardHeader = memo(function FolderCardHeader({
 							{name}
 						</h3>
 						{path && (
-							<p className="truncate text-muted-foreground text-xs">
+							<p className="truncate text-muted-foreground text-sm">
 								{path.length > 30 ? `...${path.substring(path.length - 30)}` : path}
 							</p>
 						)}
 					</div>
 
-					{isFavorite && <Star className="ml-2 h-4 w-4 fill-yellow-200 text-yellow-400" />}
+					{isFavorite && <Star className="ml-2 h-4 w-4 fill-yellow-200 text-warning" />}
 				</div>
 			)}
 
@@ -113,7 +113,7 @@ export const FolderCardHeader = memo(function FolderCardHeader({
 					<div className="absolute inset-0 z-0 bg-noise-subtle opacity-10 mix-blend-overlay" />
 
 					{/* Encabezado principal con nombre y emoji */}
-					<div className="relative z-10 flex items-center p-3">
+					<div className="relative z-10 flex items-center p-4">
 						<div
 							className="relative mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2"
 							style={{
@@ -139,8 +139,8 @@ export const FolderCardHeader = memo(function FolderCardHeader({
 								{name}
 							</h3>
 							{path && (
-								<div className="flex items-center text-xs">
-									<FolderTreeIcon className="mr-1 h-3 w-3 text-white/70" />
+								<div className="flex items-center text-sm">
+									<FolderTreeIcon className="mr-1 h-4 w-4 text-white/70" />
 									<p className="truncate text-white/70">
 										{path.length > 30 ? `...${path.substring(path.length - 30)}` : path}
 									</p>
@@ -148,21 +148,21 @@ export const FolderCardHeader = memo(function FolderCardHeader({
 							)}
 						</div>
 
-						{isFavorite && <Star className="ml-2 h-5 w-5 fill-yellow-200 text-yellow-400" />}
+						{isFavorite && <Star className="ml-2 h-5 w-5 fill-yellow-200 text-warning" />}
 					</div>
 
 					{/* Barra inferior con tipo de carpeta */}
 					<div
-						className="flex items-center justify-between border-y bg-black/40 px-3.5 py-1.5 text-white text-xs"
+						className="flex items-center justify-between border-y bg-muted/40 px-3.5 py-1.5 text-sm text-white"
 						style={{
 							borderBottom: `1px solid ${primaryColor}50`,
 							borderTop: `1px solid ${primaryColor}30`,
-							boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3)',
+							boxShadow: 'inset 0 0 10px var(--dt-shadow-color-strong)',
 						}}
 					>
 						<span className="font-semibold tracking-wide">{folderType}</span>
 						<span
-							className="rounded-sm bg-black/30 px-1.5 py-0.5 text-[10px] opacity-80"
+							className="rounded-sm bg-muted/30 px-1.5 py-0.5 text-xs opacity-80"
 							style={{ border: `1px solid ${primaryColor}40` }}
 						>
 							{getFolderTypeCode()}-{name.substring(0, 3).toUpperCase()}

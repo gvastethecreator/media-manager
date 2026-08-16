@@ -1,60 +1,31 @@
 /**
- * @file Servicio para operaciones con archivos
+ * @file Lectura de directorios autorizados.
  * @module services/file/file.service
- * ✅ MIGRADO DESDE SERVER ACTIONS - 2025-07-03
+ *
+ * Las mutaciones de filesystem viven en rutas de dominio que parten de una
+ * referencia autorizada de asset. Este módulo no acepta rutas del cliente para
+ * crear, copiar, mover, renombrar o borrar.
  */
 
-// Tipos corregidos para FileBase
-
 import { Effect, Schedule } from 'effect';
-import type { Dirent } from 'fs';
+import { type Dirent } from 'fs';
 import fs, { stat } from 'fs/promises';
 import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { emit } from '@/lib/server/events.server';
-import {
-	determineFileType,
-	determineMimeType,
-	generateFileId,
-	serializeDirectoryContents,
-	serializeFileOperationResult,
-} from '@/transformers/file';
-import { mapStatsToFileInfo } from '@/transformers/file/utils.server';
-import type { AnyEntityWithStats } from '@/types/entities';
-import {
-	type FileBase,
-	type FileCopyMoveResult,
-	FileErrorCode,
-	FileEventType,
-	type FileOperationOptions,
-	type FileOperationResult,
-	FileType,
-} from '@/types/entities/file';
-import { batchFileOperationsService } from './batch-operations.service';
+import { determineFileType, determineMimeType, generateFileId, serializeDirectoryContents } from '@/transformers/file';
+import { type FileBase, FileErrorCode, FileType } from '@/types/entities/file';
 
-// Usar tipos de FileBase directamente
 type FileInfo = FileBase;
 
 interface DirectoryReadResult {
-	path: string;
 	items: FileInfo[];
+	path: string;
 	total: number;
 }
 
 const logger = serverLogger.withContext('FileService');
-
-// Regex a nivel superior para sanitizar rutas
 const PATH_SANITIZE_REGEX = /^(\.\.(\/|\\|$))+/;
 
-/**
- * Interfaz para respuesta de Data URL
- */
-interface DataUrlResponse {
-	dataUrl: string;
-	mimeType: string;
-}
-
-// Función creadora de errores (enfoque funcional)
 const createFileError = (
 	message: string,
 	code: FileErrorCode = FileErrorCode.OPERATION_FAILED,
@@ -65,170 +36,29 @@ const createFileError = (
 	return Object.assign(error, { code, cause });
 };
 
-/**
- * Valida y sanitiza una ruta de archivo para prevenir ataques de ruta
- * @param filePath Ruta del archivo a validar
- * @returns Ruta normalizada y sanitizada
- */
-function validateAndSanitizePath(filePath: string): string {
-	// Normalizar la ruta y eliminar intentos de navegar fuera del directorio permitido
-	const normalizedPath = path.normalize(filePath).replace(PATH_SANITIZE_REGEX, '');
-
-	// Verificar que la ruta existe y es un archivo válido
-	return normalizedPath;
+function normalizeAuthorizedDirectoryPath(filePath: string): string {
+	return path.normalize(filePath).replace(PATH_SANITIZE_REGEX, '');
 }
 
 /**
- * Obtiene metadatos de un archivo
- * @param filePath Ruta del archivo
- * @returns Información del archivo
- */
-export async function getFileInfo(filePath: string): Promise<FileInfo> {
-	try {
-		logger.info('📊 Obteniendo información del archivo:', filePath);
-
-		// Validar y sanitizar la ruta
-		const normalizedPath = validateAndSanitizePath(filePath);
-
-		// Verificar que el archivo existe
-		const fileStats = await stat(normalizedPath);
-		if (!fileStats.isFile()) {
-			throw createFileError('La ruta especificada no es un archivo válido', FileErrorCode.NOT_A_FILE);
-		}
-
-		// Usar transformer para mapear stats a FileInfo
-		const fileInfo = mapStatsToFileInfo(normalizedPath, fileStats);
-
-		logger.info('✅ Información del archivo obtenida');
-		return fileInfo;
-	} catch (error) {
-		if (error instanceof Error && error.name === 'FileError') {
-			throw error;
-		}
-		logger.error('❌ Error al obtener información del archivo:', error);
-		throw createFileError('No se pudo obtener información del archivo', FileErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-/**
- * Lee un archivo como buffer
- * Esta función es interna para ser utilizada por otras acciones de archivos
- */
-async function readFileAsBuffer(filePath: string): Promise<{
-	buffer: Buffer;
-	fileInfo: FileInfo;
-}> {
-	try {
-		// Validar y obtener información del archivo
-		const fileInfo = await getFileInfo(filePath);
-
-		// Leer el archivo
-		const buffer = await fs.readFile(fileInfo.path);
-
-		return { buffer, fileInfo };
-	} catch (error) {
-		if (error instanceof Error && error.name === 'FileError') {
-			throw error;
-		}
-		logger.error('❌ Error al leer archivo:', error);
-		throw createFileError('No se pudo leer el archivo', FileErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-/**
- * Obtiene el contenido de un directorio
- * @param dirPath Ruta del directorio
- * @returns Resultado de la lectura del directorio
- */
-export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadResult> {
-	try {
-		logger.info('📁 Obteniendo contenido del directorio:', dirPath);
-
-		// Validar y sanitizar la ruta
-		const normalizedPath = validateAndSanitizePath(dirPath);
-
-		// Verificar que el directorio existe
-		const dirStats = await stat(normalizedPath);
-		if (!dirStats.isDirectory()) {
-			throw createFileError('La ruta especificada no es un directorio válido', FileErrorCode.NOT_A_DIRECTORY);
-		}
-
-		// Leer contenido del directorio
-		const items = await fs.readdir(normalizedPath, { withFileTypes: true });
-
-		// Procesar cada elemento (sin await en bucles)
-		const processedItems: FileBase[] = await Promise.all(
-			items.map(async (item) => {
-				const itemPath = path.join(normalizedPath, item.name);
-				const itemStats = await stat(itemPath);
-				const fileBase: FileBase = {
-					id: generateFileId(itemPath),
-					name: item.name,
-					path: itemPath,
-					size: itemStats.size,
-					hash: '',
-					mimeType: item.isDirectory() ? 'directory' : determineMimeType(item.name),
-					extension: item.isDirectory() ? '' : path.extname(item.name),
-					type: item.isDirectory() ? FileType.DIRECTORY : determineFileType(item.name),
-					isDirectory: item.isDirectory(),
-					parentPath: path.dirname(itemPath),
-					absolutePath: path.resolve(itemPath),
-					relativePath: path.relative(process.cwd(), itemPath),
-					modifiedAt: itemStats.mtime,
-					accessedAt: itemStats.atime,
-					folderId: null,
-					isHidden: item.name.startsWith('.'),
-					isReadonly: false,
-					createdAt: itemStats.birthtime,
-					updatedAt: itemStats.mtime,
-				};
-				return fileBase;
-			})
-		);
-
-		// Usar transformer para serializar el resultado
-		const result = serializeDirectoryContents(normalizedPath, processedItems);
-
-		logger.info('✅ Contenido del directorio obtenido:', {
-			path: normalizedPath,
-			itemCount: processedItems.length,
-		});
-
-		return result;
-	} catch (error) {
-		if (error instanceof Error && error.name === 'FileError') {
-			throw error;
-		}
-		logger.error('❌ Error al obtener contenido del directorio:', error);
-		throw createFileError('No se pudo obtener el contenido del directorio', FileErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-/**
- * Lee un directorio con concurrencia controlada y reintentos usando Effect
- * - Límite de concurrencia configurable (por ahora fijo a 8)
- * - Reintentos con backoff para lecturas de stat intermitentes
- * - Timeout por item para evitar bloqueos
+ * Lee un directorio ya autorizado con concurrencia limitada y reintentos de
+ * `stat`. La autorización se hace antes de llamar a esta función.
  */
 export async function getDirectoryInfoConcurrent(dirPath: string): Promise<DirectoryReadResult> {
-	logger.info('📁 (Effect) Obteniendo contenido del directorio con concurrencia:', dirPath);
+	logger.info('Obteniendo contenido de directorio autorizado con concurrencia');
 
-	// Validación básica y listado
-	const normalizedPath = validateAndSanitizePath(dirPath);
+	const normalizedPath = normalizeAuthorizedDirectoryPath(dirPath);
 	const dirStats = await stat(normalizedPath);
 	if (!dirStats.isDirectory()) {
 		throw createFileError('La ruta especificada no es un directorio válido', FileErrorCode.NOT_A_DIRECTORY);
 	}
 
 	const dirents = await fs.readdir(normalizedPath, { withFileTypes: true });
-
-	// Efecto para procesar un item
 	const processItem = (item: Dirent) => {
 		const itemPath = path.join(normalizedPath, item.name);
-
-		const eff = Effect.tryPromise({
+		return Effect.tryPromise({
 			try: () => stat(itemPath),
-			catch: (err) => createFileError(`stat falló para ${itemPath}`, FileErrorCode.OPERATION_FAILED, err),
+			catch: (error) => createFileError('stat falló para un item autorizado', FileErrorCode.OPERATION_FAILED, error),
 		}).pipe(
 			Effect.map((itemStats) => {
 				const fileBase: FileBase = {
@@ -254,429 +84,26 @@ export async function getDirectoryInfoConcurrent(dirPath: string): Promise<Direc
 				};
 				return fileBase;
 			}),
-			// timeout por item
 			Effect.timeout('10 seconds'),
-			// reintentos con backoff corto (3 intentos)
-			Effect.retry(Schedule.addDelay(Schedule.recurs(2), () => '150 millis'))
+			Effect.retry(Schedule.addDelay(Schedule.recurs(2), () => '150 millis')),
+			Effect.catchAll(() => {
+				logger.warn('Omitiendo un item por error de stat');
+				return Effect.succeed(null);
+			})
 		);
-
-		return eff;
 	};
 
-	// Ejecutar con concurrencia limitada
-	const effectAll = Effect.all(dirents.map(processItem), { concurrency: 8, mode: 'validate' as const });
-
 	try {
-		const processedItems = await Effect.runPromise(effectAll);
+		const results = await Effect.runPromise(Effect.all(dirents.map(processItem), { concurrency: 8 }));
+		const processedItems = results.filter((item): item is FileBase => item !== null);
 		const result = serializeDirectoryContents(normalizedPath, processedItems);
-		logger.info('✅ (Effect) Contenido del directorio obtenido:', {
-			path: normalizedPath,
-			itemCount: processedItems.length,
-		});
+		logger.info('Contenido del directorio obtenido', { itemCount: processedItems.length });
 		return result;
 	} catch (error) {
-		logger.error('❌ (Effect) Error al obtener contenido del directorio:', error);
-		if (error instanceof Error && (error as any).name === 'FileError') {
-			throw error;
-		}
+		logger.error('Error al obtener contenido del directorio', {
+			code: (error as NodeJS.ErrnoException).code ?? 'DIRECTORY_READ_FAILED',
+		});
+		if (error instanceof Error && error.name === 'FileError') throw error;
 		throw createFileError('No se pudo obtener el contenido del directorio', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
-
-/**
- * Crea un nuevo directorio
- * @param dirPath Ruta del directorio a crear
- * @param options Opciones de operación
- * @returns Resultado de la operación
- */
-export async function createDirectory(dirPath: string, options?: FileOperationOptions): Promise<FileOperationResult> {
-	try {
-		logger.info('📁 Creando directorio:', dirPath);
-
-		// Validar y sanitizar la ruta
-		const normalizedPath = validateAndSanitizePath(dirPath);
-
-		// Crear directorio (recursive por defecto)
-		await fs.mkdir(normalizedPath, { recursive: options?.recursive ?? true });
-
-		// Emitir evento
-		await emit({
-			type: FileEventType.CREATED,
-			data: { path: normalizedPath, type: 'directory' },
-		});
-
-		logger.info('✅ Directorio creado');
-		return serializeFileOperationResult(true, normalizedPath, 'create');
-	} catch (error) {
-		logger.error('❌ Error al crear directorio:', error);
-		throw createFileError('No se pudo crear el directorio', FileErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-/**
- * Elimina un archivo del sistema
- * @param filePath Ruta del archivo a eliminar
- * @returns Resultado de la operación
- */
-export async function deleteFile(filePath: string): Promise<FileOperationResult> {
-	try {
-		logger.info('🗑️ Eliminando archivo:', filePath);
-
-		// Validar y sanitizar la ruta
-		const normalizedPath = validateAndSanitizePath(filePath);
-
-		// Verificar que el archivo existe
-		const fileStats = await stat(normalizedPath);
-		if (!fileStats.isFile()) {
-			throw createFileError('La ruta especificada no es un archivo válido', FileErrorCode.NOT_A_FILE);
-		}
-
-		// Eliminar el archivo
-		await fs.unlink(normalizedPath);
-
-		// Emitir evento
-		await emit({
-			type: FileEventType.DELETED,
-			data: { path: normalizedPath },
-		});
-
-		logger.info('✅ Archivo eliminado');
-		return serializeFileOperationResult(true, normalizedPath, 'delete');
-	} catch (error) {
-		if (error instanceof Error && error.name === 'FileError') {
-			throw error;
-		}
-		logger.error('❌ Error al eliminar archivo:', error);
-		throw createFileError('No se pudo eliminar el archivo', FileErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-/**
- * Obtiene el contenido de un archivo como una URL de datos (data URL)
- * Útil para imágenes que necesitan ser copiadas al portapapeles
- * @param filePath Ruta del archivo
- * @returns Data URL del archivo
- */
-export async function getFileAsDataUrl(filePath: string): Promise<DataUrlResponse> {
-	try {
-		logger.info('📄 Obteniendo archivo como URL de datos:', filePath);
-
-		// Leer el archivo como buffer
-		const { buffer, fileInfo } = await readFileAsBuffer(filePath);
-
-		// Verificar que el archivo es una imagen
-		if (fileInfo.type !== FileType.IMAGE) {
-			throw createFileError('El archivo no es una imagen soportada', FileErrorCode.INVALID_PATH);
-		}
-
-		// Convertir a Data URL
-		const dataUrl = `data:${fileInfo.mimeType};base64,${buffer.toString('base64')}`;
-
-		logger.info('✅ Archivo convertido a URL de datos');
-		return {
-			dataUrl,
-			mimeType: fileInfo.mimeType,
-		};
-	} catch (error) {
-		if (error instanceof Error && error.name === 'FileError') {
-			throw error;
-		}
-		logger.error('❌ Error al obtener archivo como URL de datos:', error);
-		throw createFileError('No se pudo obtener el archivo como URL de datos', FileErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-/**
- * Renombra un archivo o directorio
- * @param oldPath Ruta actual
- * @param newPath Nueva ruta
- * @param options Opciones de operación
- * @returns Resultado de la operación
- */
-export async function renameFile(
-	oldPath: string,
-	newPath: string,
-	options?: FileOperationOptions
-): Promise<FileOperationResult> {
-	try {
-		logger.info('📝 Renombrando archivo:', { from: oldPath, to: newPath });
-
-		// Validar rutas
-		const normalizedOldPath = validateAndSanitizePath(oldPath);
-		const normalizedNewPath = validateAndSanitizePath(newPath);
-
-		// Verificar que el archivo/directorio origen existe
-		await stat(normalizedOldPath);
-
-		// Verificar si el destino ya existe (a menos que se permita sobrescribir)
-		if (!options?.overwrite) {
-			try {
-				await stat(normalizedNewPath);
-				throw createFileError('El archivo destino ya existe', FileErrorCode.ALREADY_EXISTS);
-			} catch (error: any) {
-				// Si el archivo no existe, está bien (es lo que queremos)
-				if (error.code !== 'ENOENT' && error.name !== 'FileError') {
-					throw error;
-				}
-			}
-		}
-
-		// Renombrar/mover el archivo
-		await fs.rename(normalizedOldPath, normalizedNewPath);
-
-		// Emitir evento
-		await emit({
-			type: FileEventType.MOVED,
-			data: { oldPath: normalizedOldPath, newPath: normalizedNewPath },
-		});
-
-		logger.info('✅ Archivo renombrado');
-		return serializeFileOperationResult(true, normalizedNewPath, 'rename');
-	} catch (error) {
-		if (error instanceof Error && error.name === 'FileError') {
-			throw error;
-		}
-		logger.error('❌ Error al renombrar archivo:', error);
-		throw createFileError('No se pudo renombrar el archivo', FileErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-/**
- * Copia un archivo
- * @param sourcePath Ruta origen
- * @param destPath Ruta destino
- * @param options Opciones de operación
- * @returns Resultado de la operación
- */
-export async function copyFile(
-	sourcePath: string,
-	destPath: string,
-	options?: FileOperationOptions
-): Promise<FileCopyMoveResult> {
-	try {
-		logger.info('📋 Copiando archivo:', { from: sourcePath, to: destPath });
-
-		// Validar rutas
-		const normalizedSourcePath = validateAndSanitizePath(sourcePath);
-		const normalizedDestPath = validateAndSanitizePath(destPath);
-
-		// Verificar que el archivo origen existe y es un archivo
-		const sourceStats = await stat(normalizedSourcePath);
-		if (!sourceStats.isFile()) {
-			throw createFileError('El origen no es un archivo válido', FileErrorCode.NOT_A_FILE);
-		}
-
-		// Verificar si el destino ya existe
-		if (!options?.overwrite) {
-			try {
-				await stat(normalizedDestPath);
-				throw createFileError('El archivo destino ya existe', FileErrorCode.ALREADY_EXISTS);
-			} catch (error: any) {
-				if (error.code !== 'ENOENT' && error.name !== 'FileError') {
-					throw error;
-				}
-			}
-		}
-
-		// Copiar el archivo
-		await fs.copyFile(normalizedSourcePath, normalizedDestPath);
-
-		// Emitir evento
-		await emit({
-			type: FileEventType.COPIED,
-			data: { sourcePath: normalizedSourcePath, destPath: normalizedDestPath },
-		});
-
-		logger.info('✅ Archivo copiado');
-
-		// Obtener información de los archivos
-		const sourceInfo = await getFileInfo(normalizedSourcePath);
-		const destInfo = await getFileInfo(normalizedDestPath);
-
-		return {
-			success: true,
-			sourcePath: normalizedSourcePath,
-			destPath: normalizedDestPath,
-			isDirectory: false,
-			sourceInfo,
-			destInfo,
-			timestamp: new Date(),
-		};
-	} catch (error) {
-		if (error instanceof Error && error.name === 'FileError') {
-			throw error;
-		}
-		logger.error('❌ Error al copiar archivo:', error);
-		throw createFileError('No se pudo copiar el archivo', FileErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-/**
- * Mueve un archivo
- * @param sourcePath Ruta origen
- * @param destPath Ruta destino
- * @param options Opciones de operación
- * @returns Resultado de la operación
- */
-export async function moveFile(
-	sourcePath: string,
-	destPath: string,
-	options?: FileOperationOptions
-): Promise<FileCopyMoveResult> {
-	try {
-		logger.info('🚚 Moviendo archivo:', { from: sourcePath, to: destPath });
-
-		// Primero copiar el archivo
-		const copyResult = await copyFile(sourcePath, destPath, options);
-
-		if (copyResult.success) {
-			// Luego eliminar el archivo origen
-			await deleteFile(sourcePath);
-
-			// Emitir evento de movimiento
-			await emit({
-				type: FileEventType.MOVED,
-				data: { oldPath: sourcePath, newPath: destPath },
-			});
-
-			logger.info('✅ Archivo movido');
-			return copyResult;
-		}
-		throw createFileError('Error en la copia durante el movimiento', FileErrorCode.OPERATION_FAILED);
-	} catch (error) {
-		if (error instanceof Error && error.name === 'FileError') {
-			throw error;
-		}
-		logger.error('❌ Error al mover archivo:', error);
-		throw createFileError('No se pudo mover el archivo', FileErrorCode.OPERATION_FAILED, error);
-	}
-}
-
-// Export enhanced file operations service (clipboardManager se exporta desde services/clipboard)
-export { enhancedFileOperationsService } from './enhanced-file-operations.service';
-
-/**
- * Batch Operations Convenience Functions
- *
- * These functions provide easy access to batch operations
- * from the main file service.
- */
-
-/**
- * Queue a batch copy operation for multiple files
- */
-export function batchCopyFiles(
-	items: AnyEntityWithStats[],
-	targetPath: string,
-	options: FileOperationOptions & {
-		priority?: 'low' | 'normal' | 'high' | 'urgent';
-		showProgress?: boolean;
-		continueOnError?: boolean;
-		description?: string;
-	} = {}
-): Promise<string> {
-	logger.info('🔄 Starting batch copy operation:', {
-		itemCount: items.length,
-		targetPath,
-	});
-
-	return batchFileOperationsService.queueCopyOperation(items, targetPath, {
-		overwrite: options.overwrite,
-		preserveTimestamps: options.preserveTimestamps,
-		priority: options.priority || 'normal',
-		showProgress: options.showProgress !== false,
-		continueOnError: options.continueOnError !== false,
-		description: options.description,
-		autoCleanup: true,
-	});
-}
-
-/**
- * Queue a batch move operation for multiple files
- */
-export function batchMoveFiles(
-	items: AnyEntityWithStats[],
-	targetPath: string,
-	options: FileOperationOptions & {
-		priority?: 'low' | 'normal' | 'high' | 'urgent';
-		showProgress?: boolean;
-		continueOnError?: boolean;
-		description?: string;
-	} = {}
-): Promise<string> {
-	logger.info('🚚 Starting batch move operation:', {
-		itemCount: items.length,
-		targetPath,
-	});
-
-	return batchFileOperationsService.queueMoveOperation(items, targetPath, {
-		overwrite: options.overwrite,
-		preserveTimestamps: options.preserveTimestamps,
-		priority: options.priority || 'normal',
-		showProgress: options.showProgress !== false,
-		continueOnError: options.continueOnError !== false,
-		description: options.description,
-		autoCleanup: true,
-	});
-}
-
-/**
- * Queue a batch delete operation for multiple files
- */
-export function batchDeleteFiles(
-	items: AnyEntityWithStats[],
-	options: {
-		priority?: 'low' | 'normal' | 'high' | 'urgent';
-		showProgress?: boolean;
-		continueOnError?: boolean;
-		description?: string;
-		recursive?: boolean;
-	} = {}
-): Promise<string> {
-	logger.info('🗑️ Starting batch delete operation:', {
-		itemCount: items.length,
-	});
-
-	return batchFileOperationsService.queueDeleteOperation(items, {
-		recursive: options.recursive,
-		priority: options.priority || 'normal',
-		showProgress: options.showProgress !== false,
-		continueOnError: options.continueOnError === true, // More conservative for delete
-		description: options.description,
-		autoCleanup: true,
-	});
-}
-
-/**
- * Check if batch operations are currently running
- */
-export function isBatchProcessing(): boolean {
-	const operations = batchFileOperationsService.getAllOperations();
-	return operations.some((op) => op.status === 'running');
-}
-
-/**
- * Get summary of all batch operations
- */
-export function getBatchOperationsSummary() {
-	const operations = batchFileOperationsService.getAllOperations();
-
-	return {
-		total: operations.length,
-		active: operations.filter((op) => ['queued', 'running', 'paused'].includes(op.status)).length,
-		completed: operations.filter((op) => op.status === 'completed').length,
-		failed: operations.filter((op) => op.status === 'failed').length,
-		cancelled: operations.filter((op) => op.status === 'cancelled').length,
-	};
-}
-
-// Compatibilidad legacy: solo alias, sin re-export
-/** Alias legacy para compatibilidad con API anterior */
-export const readDirectory = getDirectoryInfo;
-export const deleteFileOrDirectory = deleteFile;
-export const copyFileOrDirectory = copyFile;
-export const moveFileOrDirectory = moveFile;
-export const renameFileOrDirectory = renameFile;
-
-// Exportar tipos solo vía export-from (no export de import)
-export type { FileCopyMoveResult, FileOperationOptions, FileOperationResult } from '@/types/entities/file';

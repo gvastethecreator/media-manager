@@ -3,21 +3,23 @@
  * @description Compatible con Vite + React - ✅ MIGRADO A DRIZZLE
  */
 
-import { count, gte, sum } from 'drizzle-orm';
+import { and, count, gte, sum } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections, folders, images, tags } from '@/lib/drizzle/schema/index';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { formatBytes } from '@/lib/utils/format.utils';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 
 /**
  * Obtiene el total de archivos indexados en la base de datos
  */
 export async function getIndexedFilesCount(): Promise<number> {
 	try {
-		const [result] = await db.select({ count: count() }).from(images);
+		const [result] = await db.select({ count: count() }).from(images).where(visibleImageLifecycleCondition());
 
 		return result.count;
 	} catch (error) {
-		console.error('Error al obtener conteo de archivos:', error);
+		clientLogger.error('Could not get file count:', error);
 		return 0;
 	}
 }
@@ -30,7 +32,10 @@ export async function getTotalSpaceUsed(): Promise<{
 	formatted: string;
 }> {
 	try {
-		const [result] = await db.select({ totalSize: sum(images.size) }).from(images);
+		const [result] = await db
+			.select({ totalSize: sum(images.size) })
+			.from(images)
+			.where(visibleImageLifecycleCondition());
 
 		const totalBytes = Number(result.totalSize) || 0;
 
@@ -39,7 +44,7 @@ export async function getTotalSpaceUsed(): Promise<{
 			formatted: formatBytes(totalBytes),
 		};
 	} catch (error) {
-		console.error('Error al calcular espacio usado:', error);
+		clientLogger.error('Error al calcular espacio usado:', error);
 		return {
 			raw: 0,
 			formatted: formatBytes(0),
@@ -56,13 +61,13 @@ export async function getMonitoredFoldersCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		console.error('Error al obtener carpetas monitoreadas:', error);
+		clientLogger.error('Could not get monitored folders:', error);
 		return 0;
 	}
 }
 
 /**
- * Obtiene el número de colecciones creadas
+ * Obtiene el número de collections created
  */
 export async function getCollectionsCount(): Promise<number> {
 	try {
@@ -70,7 +75,7 @@ export async function getCollectionsCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		console.error('Error al obtener colecciones:', error);
+		clientLogger.error('Could not get collections:', error);
 		return 0;
 	}
 }
@@ -84,7 +89,7 @@ export async function getTagsCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		console.error('Error al obtener etiquetas:', error);
+		clientLogger.error('Could not get tags:', error);
 		return 0;
 	}
 }
@@ -105,7 +110,7 @@ export async function getFilesHistoricalData(): Promise<
 		const files = await db
 			.select({ createdAt: images.createdAt })
 			.from(images)
-			.where(gte(images.createdAt, sevenDaysAgo));
+			.where(and(gte(images.createdAt, sevenDaysAgo), visibleImageLifecycleCondition()));
 
 		// Agrupar por día
 		const groupedByDay = files.reduce(
@@ -131,7 +136,7 @@ export async function getFilesHistoricalData(): Promise<
 
 		return result;
 	} catch (error) {
-		console.error('Error al obtener datos históricos:', error);
+		clientLogger.error('Could not get historical data:', error);
 		return [];
 	}
 }
@@ -178,23 +183,35 @@ export async function getTagsHistoricalData(): Promise<
 
 		return result;
 	} catch (error) {
-		console.error('Error al obtener datos históricos de etiquetas:', error);
+		clientLogger.error('Could not get historical tag data:', error);
 		return [];
 	}
 }
 
 /**
- * Obtiene métricas del sistema (simuladas)
+ * Obtiene métricas del sistema (REAL)
  */
 export async function getSystemMetrics(): Promise<{
 	cpuUsage: number;
 	memoryUsage: number;
 	queueSize: number;
 }> {
-	// Simular métricas del sistema ya que no tenemos acceso real
-	return {
-		cpuUsage: Math.floor(Math.random() * 100),
-		memoryUsage: Math.floor(Math.random() * 100),
-		queueSize: Math.floor(Math.random() * 10),
-	};
+	try {
+		const response = await fetch('/api/system/stats');
+		if (!response.ok) throw new Error('Failed to fetch system stats');
+		const data = await response.json();
+
+		return {
+			cpuUsage: data.cpuUsage || 0,
+			memoryUsage: data.memoryUsage || 0,
+			queueSize: 0,
+		};
+	} catch (error) {
+		console.error('Could not get system metrics:', error);
+		return {
+			cpuUsage: 0,
+			memoryUsage: 0,
+			queueSize: 0,
+		};
+	}
 }

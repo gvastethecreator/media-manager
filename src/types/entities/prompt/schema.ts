@@ -10,9 +10,15 @@ import { z } from 'zod';
  */
 export const PromptSchema = z.object({
 	id: z.string().uuid().optional(),
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'The name is required'),
 	emoji: z.string().default('📝'),
-	color: z.string().default('#3b82f6'),
+	color: z
+		.string()
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color must be a valid hexadecimal value or CSS variable'
+		)
+		.default('var(--entity-prompt)'),
 	description: z.string().nullable().default(null),
 	content: z.string().default(''),
 	purpose: z.string().default(''),
@@ -38,6 +44,7 @@ export const CreatePromptSchema = PromptSchema.omit({
 	id: true,
 	createdAt: true,
 	updatedAt: true,
+	isFavorite: true,
 });
 
 /**

@@ -6,151 +6,76 @@
 import type { CollectionWithStats } from '@/types/entities/collection';
 
 export interface CollectionViewConfig {
-	viewType: 'grid' | 'list' | 'table';
-	gridColumns: number;
 	cardSize: 'small' | 'medium' | 'large';
+	compactView: boolean;
+	enableAnimations: boolean;
+	gridColumns: number;
+	groupBy: string | null;
+	imageCount: number;
+	showImages: boolean;
+	showStats: boolean;
 	sortBy: string;
 	sortDirection: 'asc' | 'desc';
-	showImages: boolean;
-	imageCount: number;
-	enableAnimations: boolean;
-	groupBy: string | null;
-	showStats: boolean;
-	compactView: boolean;
+	viewType: 'grid' | 'list' | 'table';
 }
 
 export interface CollectionFilter {
 	field: string;
-	value: any;
 	operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'gte' | 'lt' | 'lte' | 'between';
+	value: any;
 }
 
 /**
  * Estado base para el store de Collection
  */
 export interface CollectionState {
-	// Datos principales - usando Record para mejor performance
-	collections: Record<string, CollectionWithStats>;
-
-	// Estado UI
-	viewConfig: CollectionViewConfig;
-	selectedCollectionId: string | null;
-	hoveredCollectionId: string | null;
-	expandedCollectionIds: string[];
-
-	// Estado de carga y errores
-	isLoading: boolean;
-	error: string | null;
-
 	// Filtrado y ordenamiento
 	activeFilters: CollectionFilter[];
-	searchTerm: string;
-	defaultSortOption: string;
+	// Datos principales - usando Record para mejor performance
+	collections: Record<string, CollectionWithStats>;
 	currentSortOption: string;
+	defaultSortOption: string;
+	error: string | null;
+	expandedCollectionIds: string[];
 
 	// Agrupamiento
 	groupBy: 'category' | 'rarity' | 'platform' | null;
+	hoveredCollectionId: string | null;
+
+	// Estado de carga y errores
+	isLoading: boolean;
+	searchTerm: string;
+	selectedCollectionId: string | null;
+
+	// Estado UI
+	viewConfig: CollectionViewConfig;
 }
 
 export interface CollectionStore {
-	// 🗂️ Estado principal
-	collections: Record<string, CollectionWithStats>;
-	loading: boolean;
-	error: string | null;
-	lastUpdated: Date | null;
-
-	// 📊 Estadísticas
-	totalCollections: number;
-	totalItems: number;
-	totalValue: number;
-	averageRating: number;
-
-	// 🔍 Filtros y búsqueda
-	searchQuery: string;
-	filters: CollectionFilter;
-
-	// 📋 Ordenamiento
-	sortBy: 'name' | 'createdAt' | 'updatedAt' | 'itemCount' | 'totalValue' | 'rating';
-	sortDirection: 'asc' | 'desc';
-
-	// 👁️ Vista
-	viewMode: 'grid' | 'list' | 'table';
-	itemSize: 'small' | 'medium' | 'large';
-	showStats: boolean;
-	showThumbnails: boolean;
-
-	// 📊 Agrupamiento
-	groupBy: 'none' | 'category' | 'rarity' | 'owner';
-	groupDirection: 'asc' | 'desc';
-
-	// 🎯 Selección
-	selectedCollections: string[];
-	lastSelectedCollection: string | null;
-
-	// 📄 Paginación
-	currentPage: number;
-	itemsPerPage: number;
-	totalPages: number;
-
 	// 🔄 Acciones principales
 	addCollection: (collection: Omit<CollectionWithStats, 'id' | 'createdAt' | 'updatedAt' | 'statistics'>) => void;
-	updateCollection: (id: string, updates: Partial<CollectionWithStats>) => void;
-	removeCollection: (id: string) => void;
+	averageRating: number;
 	bulkAddCollections: (
 		collections: Omit<CollectionWithStats, 'id' | 'createdAt' | 'updatedAt' | 'statistics'>[]
 	) => void;
-	bulkUpdateCollections: (updates: Record<string, Partial<CollectionWithStats>>) => void;
 	bulkRemoveCollections: (ids: string[]) => void;
-
-	// 🔍 Filtros y búsqueda
-	setSearchQuery: (query: string) => void;
-	setFilters: (filters: Partial<CollectionFilter>) => void;
+	bulkUpdateCollections: (updates: Record<string, Partial<CollectionWithStats>>) => void;
 	clearFilters: () => void;
-	filterByCategory: (categories: string[]) => void;
-	filterByRarity: (rarities: string[]) => void;
-	filterByPrice: (min: number, max: number) => void;
-	filterByRating: (rating: number) => void;
-	filterByPublic: (isPublic: boolean | null) => void;
-	filterByHasItems: (hasItems: boolean | null) => void;
-
-	// 📋 Ordenamiento
-	setSortBy: (sortBy: CollectionStore['sortBy']) => void;
-	setSortDirection: (direction: 'asc' | 'desc') => void;
-	toggleSortDirection: () => void;
-
-	// 👁️ Vista
-	setViewMode: (mode: 'grid' | 'list' | 'table') => void;
-	setItemSize: (size: 'small' | 'medium' | 'large') => void;
-	toggleStats: () => void;
-	toggleThumbnails: () => void;
-
-	// 📊 Agrupamiento
-	setGroupBy: (groupBy: 'none' | 'category' | 'rarity' | 'owner') => void;
-	setGroupDirection: (direction: 'asc' | 'desc') => void;
-
-	// 🎯 Selección
-	selectCollection: (id: string) => void;
-	selectMultipleCollections: (ids: string[]) => void;
 	clearSelection: () => void;
-	toggleSelection: (id: string) => void;
-	selectAll: () => void;
+	// 🗂️ Estado principal
+	collections: Record<string, CollectionWithStats>;
 
 	// 📄 Paginación
-	setCurrentPage: (page: number) => void;
-	setItemsPerPage: (count: number) => void;
-	nextPage: () => void;
-	prevPage: () => void;
-
-	// 📖 Getters computados
-	getFilteredCollections: () => CollectionWithStats[];
-	getSortedCollections: () => CollectionWithStats[];
-	getGroupedCollections: () => Record<string, CollectionWithStats[]>;
-	getPaginatedCollections: () => CollectionWithStats[];
-	getSelectedCollections: () => CollectionWithStats[];
+	currentPage: number;
+	error: string | null;
+	filterByCategory: (categories: string[]) => void;
+	filterByHasItems: (hasItems: boolean | null) => void;
+	filterByPrice: (min: number, max: number) => void;
+	filterByPublic: (isPublic: boolean | null) => void;
+	filterByRarity: (rarities: string[]) => void;
+	filterByRating: (rating: number) => void;
+	filters: CollectionFilter;
 	getCollectionById: (id: string) => CollectionWithStats | undefined;
-	getCollectionsByCategory: (category: string) => CollectionWithStats[];
-	getCollectionsByRarity: (rarity: string) => CollectionWithStats[];
-	getCollectionsByOwner: (owner: string) => CollectionWithStats[];
 	getCollectionStatistics: () => {
 		total: number;
 		byCategory: Record<string, number>;
@@ -159,4 +84,77 @@ export interface CollectionStore {
 		averageValue: number;
 		totalValue: number;
 	};
+	getCollectionsByCategory: (category: string) => CollectionWithStats[];
+	getCollectionsByOwner: (owner: string) => CollectionWithStats[];
+	getCollectionsByRarity: (rarity: string) => CollectionWithStats[];
+
+	// 📖 Getters computados
+	getFilteredCollections: () => CollectionWithStats[];
+	getGroupedCollections: () => Record<string, CollectionWithStats[]>;
+	getPaginatedCollections: () => CollectionWithStats[];
+	getSelectedCollections: () => CollectionWithStats[];
+	getSortedCollections: () => CollectionWithStats[];
+
+	// 📊 Agrupamiento
+	groupBy: 'none' | 'category' | 'rarity' | 'owner';
+	groupDirection: 'asc' | 'desc';
+	itemSize: 'small' | 'medium' | 'large';
+	itemsPerPage: number;
+	lastSelectedCollection: string | null;
+	lastUpdated: Date | null;
+	loading: boolean;
+	nextPage: () => void;
+	prevPage: () => void;
+	removeCollection: (id: string) => void;
+
+	// 🔍 Filtros y búsqueda
+	searchQuery: string;
+	selectAll: () => void;
+
+	// 🎯 Selección
+	selectCollection: (id: string) => void;
+
+	// 🎯 Selección
+	selectedCollections: string[];
+	selectMultipleCollections: (ids: string[]) => void;
+
+	// 📄 Paginación
+	setCurrentPage: (page: number) => void;
+	setFilters: (filters: Partial<CollectionFilter>) => void;
+
+	// 📊 Agrupamiento
+	setGroupBy: (groupBy: 'none' | 'category' | 'rarity' | 'owner') => void;
+	setGroupDirection: (direction: 'asc' | 'desc') => void;
+	setItemSize: (size: 'small' | 'medium' | 'large') => void;
+	setItemsPerPage: (count: number) => void;
+
+	// 🔍 Filtros y búsqueda
+	setSearchQuery: (query: string) => void;
+
+	// 📋 Ordenamiento
+	setSortBy: (sortBy: CollectionStore['sortBy']) => void;
+	setSortDirection: (direction: 'asc' | 'desc') => void;
+
+	// 👁️ Vista
+	setViewMode: (mode: 'grid' | 'list' | 'table') => void;
+	showStats: boolean;
+	showThumbnails: boolean;
+
+	// 📋 Ordenamiento
+	sortBy: 'name' | 'createdAt' | 'updatedAt' | 'itemCount' | 'totalValue' | 'rating';
+	sortDirection: 'asc' | 'desc';
+	toggleSelection: (id: string) => void;
+	toggleSortDirection: () => void;
+	toggleStats: () => void;
+	toggleThumbnails: () => void;
+
+	// 📊 Estadísticas
+	totalCollections: number;
+	totalItems: number;
+	totalPages: number;
+	totalValue: number;
+	updateCollection: (id: string, updates: Partial<CollectionWithStats>) => void;
+
+	// 👁️ Vista
+	viewMode: 'grid' | 'list' | 'table';
 }

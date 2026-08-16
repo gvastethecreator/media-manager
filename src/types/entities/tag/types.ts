@@ -3,50 +3,78 @@
  * @module types/entities/tag/types
  */
 
-import type { TagBase, TagWithStats } from './base';
-import { TagSortCriteria } from './enums';
+import type { EntityBase } from '@/types/entities/entity.types';
+import type { TagWithStats } from './base';
 
 // Re-export TagWithStats for external use
 export type { TagWithStats } from './base';
 
-// Reutilizar TagBase canónico: crear inputs específicos sin duplicar campos
-export type TagCreateInput = Omit<TagBase, 'id' | 'createdAt' | 'updatedAt' | 'featuredImage' | 'shortcut'> & {
+export interface TagBase extends EntityBase {
+	category: string | null;
+	color: string | null;
+	description: string | null;
+	emoji: string | null;
+	isFavorite: boolean;
+	name: string;
+	totalImages: number;
+	totalVideos: number;
+}
+
+export interface TagCreateInput {
+	category?: string | null;
+	color?: string | null;
+	description?: string | null;
+	emoji?: string | null;
 	featuredImage?: string | null;
+	name: string;
 	shortcut?: string | null;
-};
-export type TagUpdateInput = Partial<TagCreateInput>;
+}
+
+export interface TagUpdateInput extends Partial<TagCreateInput> {}
 
 export interface TagFilters {
-	search?: string;
-	isFavorite?: boolean;
 	category?: string;
-	hasImage?: boolean;
-	hasVideo?: boolean;
 	hasAlbum?: boolean;
-	hasCollection?: boolean;
 	hasCharacter?: boolean;
-	hasPlace?: boolean;
-	hasWorldItem?: boolean;
+	hasCollection?: boolean;
 	hasConcept?: boolean;
-	hasPrompt?: boolean;
-	hasNote?: boolean;
-	hasWildcard?: boolean;
-	hasProperty?: boolean;
 	hasGroup?: boolean;
+	hasImage?: boolean;
+	hasNote?: boolean;
+	hasPlace?: boolean;
+	hasPrompt?: boolean;
+	hasProperty?: boolean;
+	hasVideo?: boolean;
+	hasWildcard?: boolean;
+	hasWorldItem?: boolean;
+	isFavorite?: boolean;
+	search?: string;
+}
+
+export enum TagSortCriteria {
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	CREATED_ASC = 'createdAt:asc',
+	CREATED_DESC = 'createdAt:desc',
+	UPDATED_ASC = 'updatedAt:asc',
+	UPDATED_DESC = 'updatedAt:desc',
+	USAGE_ASC = 'usage:asc',
+	USAGE_DESC = 'usage:desc',
+	POPULARITY_ASC = 'popularity:asc',
+	POPULARITY_DESC = 'popularity:desc',
 }
 
 // TagStatistics y TagWithStats están definidos en base.ts
 // para evitar duplicación y conflictos de tipos
 
 export interface TagPaginationOptions {
-	page?: number;
 	limit?: number;
+	page?: number;
 	sortBy?: TagSortCriteria;
 	sortDirection?: 'asc' | 'desc';
 }
 
 export interface TagsResponse {
-	tags: TagWithStats[];
 	pagination: {
 		page: number;
 		limit: number;
@@ -55,6 +83,7 @@ export interface TagsResponse {
 		hasNextPage: boolean;
 		hasPreviousPage: boolean;
 	};
+	tags: TagWithStats[];
 }
 
 export type TagComplete = TagWithStats;

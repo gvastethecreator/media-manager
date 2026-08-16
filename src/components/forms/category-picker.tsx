@@ -5,22 +5,22 @@ import type { createPropertySchema } from '@/types/validations/property';
 type PropertyCategory = z.infer<typeof createPropertySchema>['category'];
 
 interface CategoryPickerProps {
-	value: PropertyCategory;
 	onChange: (value: PropertyCategory) => void;
+	value: PropertyCategory;
 }
 
 const categories: Array<{ value: PropertyCategory; label: string; icon: string }> = [
 	{ value: 'general', label: 'General', icon: '🔧' },
-	{ value: 'technical', label: 'Técnico', icon: '⚙️' },
-	{ value: 'artistic', label: 'Artístico', icon: '🎨' },
-	{ value: 'management', label: 'Gestión', icon: '📊' },
+	{ value: 'technical', label: 'Technical', icon: '⚙️' },
+	{ value: 'artistic', label: 'Artistic', icon: '🎨' },
+	{ value: 'management', label: 'Management', icon: '📊' },
 ];
 
 export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
 	return (
 		<Select onValueChange={(val: PropertyCategory) => onChange(val)} value={value}>
 			<SelectTrigger>
-				<SelectValue placeholder="Selecciona una categoría" />
+				<SelectValue placeholder="Select a category" />
 			</SelectTrigger>
 			<SelectContent>
 				{categories.map(({ value: catValue, label, icon }) => (

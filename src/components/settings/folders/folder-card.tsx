@@ -84,8 +84,8 @@ FolderIcon.displayName = 'FolderIcon';
 // ===== FOLDER METADATA COMPONENT =====
 interface FolderMetadataProps {
 	folder: ExtendedFolder;
-	parentFolderName?: string;
 	indexStatus: IndexStatus;
+	parentFolderName?: string;
 	statusMessage?: ReactNode;
 }
 
@@ -111,7 +111,7 @@ const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMess
 			{/* Favorite indicator con animación */}
 			{folder.isFavorite && (
 				<Badge className="fade-in-50 h-5 animate-in px-1.5 text-xs duration-300" variant="secondary">
-					<Heart className="mr-1 h-3 w-3 animate-pulse fill-current text-red-500" />
+					<Heart className="mr-1 h-3 w-3 animate-pulse fill-current text-destructive" />
 					Favorito
 				</Badge>
 			)}
@@ -139,7 +139,7 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 		return (
 			<div
 				className={cn(
-					'flex flex-shrink-0 items-center justify-center bg-muted/50 transition-all duration-300',
+					'flex shrink-0 items-center justify-center bg-muted/50 transition-all duration-300',
 					'animate-pulse hover:bg-muted/70',
 					size
 				)}
@@ -154,8 +154,8 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 		return (
 			<div
 				className={cn(
-					'group/thumbnail relative flex-shrink-0 overflow-hidden transition-all duration-300',
-					'hover:scale-105 hover:shadow-md hover:ring-2 hover:ring-primary/20',
+					'group/thumbnail relative shrink-0 overflow-hidden transition-all duration-300',
+					'hover:scale-105 hover:shadow-dt-1 hover:ring-2 hover:ring-primary/20',
 					size
 				)}
 			>
@@ -165,7 +165,7 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 					totalImages={folderStats.totalImages || 0}
 				/>
 				{/* Overlay sutil en hover */}
-				<div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover/thumbnail:opacity-100" />
+				<div className="absolute inset-0 bg-gradient-to-t from-foreground/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover/thumbnail:opacity-100" />
 			</div>
 		);
 	}
@@ -174,8 +174,8 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 	return (
 		<div
 			className={cn(
-				'flex flex-shrink-0 items-center justify-center border-2 border-dashed transition-all duration-300',
-				'border-muted-foreground/20 bg-muted/30 hover:scale-105 hover:border-muted-foreground/40 hover:bg-muted/50',
+				'flex shrink-0 items-center justify-center border border-dashed transition-all duration-300',
+				'border-border/40 bg-muted/30 hover:scale-105 hover:border-border/60 hover:bg-muted/50',
 				size
 			)}
 		>
@@ -206,19 +206,19 @@ FolderStatsSummary.displayName = 'FolderStatsSummary';
 // ===== MAIN FOLDER CARD COMPONENT =====
 
 interface FolderCardProps {
-	folder: ExtendedFolder;
-	selectedFolder: string | null;
-	isProcessing: boolean;
-	processStatus: ExtendedProcessStatus;
-	isGloballyProcessing: boolean;
-	globalCurrentFolderId?: string | null;
 	allFolders?: ExtendedFolder[];
-	onReindex: (folderId: string) => void;
-	onFolderClick: (folderId: string) => void;
+	folder: ExtendedFolder;
 	getFolderIndexStatus: (folder: ExtendedFolder) => IndexStatus;
-	onUpdateFolder?: (folderId: string, updates: { emoji?: string; description?: string; isFavorite?: boolean }) => void;
-	onToggleExpanded?: (folderId: string) => void;
+	globalCurrentFolderId?: string | null;
 	isExpanded?: boolean;
+	isGloballyProcessing: boolean;
+	isProcessing: boolean;
+	onFolderClick: (folderId: string) => void;
+	onReindex: (folderId: string) => void;
+	onToggleExpanded?: (folderId: string) => void;
+	onUpdateFolder?: (folderId: string, updates: { emoji?: string; description?: string; isFavorite?: boolean }) => void;
+	processStatus: ExtendedProcessStatus;
+	selectedFolder: string | null;
 }
 
 export const FolderCard = memo(
@@ -352,20 +352,19 @@ export const FolderCard = memo(
 			<div>
 				<div
 					className={cn(
-						'group overflow-hiddenborder-2 relative h-full transition-all duration-300 ease-out',
-						// Padding adaptativo según el modo
-						isFocusedMode ? 'p-6' : 'p-3',
-						'border-border/60 bg-gradient-to-br from-card to-card/95 shadow-sm',
+						'group relative h-full overflow-hidden transition-all duration-300 ease-out',
+						// Padding adaptativo según el modo - más compacto
+						isFocusedMode ? 'p-4' : 'p-2.5',
+						'border border-border/40 bg-gradient-to-br from-card to-card/95 shadow-dt-0',
 						// Hover effects con animaciones suaves
-						'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10',
-						// Estados visuales con mejor destacado en modo focused y transiciones
+						'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-dt-2 hover:shadow-primary/10',
+						// Estados visuales con bordes suaves y transiciones
 						{
-							'translate-y-0 border-primary/30 shadow-lg shadow-primary/10 ring-2 ring-primary/20': isSelected,
-							'border-emerald-400/30 shadow-emerald-400/10 shadow-lg ring-2 ring-emerald-400/20': showCompleteAnimation,
-							'scale-[1.02] border-blue-400/40 shadow-blue-400/20 shadow-xl ring-4 ring-blue-400/15':
-								isReindexing && isFocusedMode,
-							'border-blue-400/30 shadow-blue-400/10 shadow-md ring-2 ring-blue-400/20': isReindexing && !isFocusedMode,
-							'border-destructive/30 shadow-destructive/10 shadow-lg ring-2 ring-destructive/20': hasError,
+							'translate-y-0 border-primary/40 shadow-dt-1 shadow-primary/5': isSelected,
+							'border-success/40 shadow-dt-1 shadow-success/5': showCompleteAnimation,
+							'scale-[1.01] border-info/50 shadow-dt-2 shadow-info/5': isReindexing && isFocusedMode,
+							'border-info/40 shadow-dt-1 shadow-info/5': isReindexing && !isFocusedMode,
+							'border-destructive/40 shadow-destructive/5 shadow-dt-1': hasError,
 						}
 					)}
 				>
@@ -375,7 +374,7 @@ export const FolderCard = memo(
 					<div className="flex min-w-0 flex-col gap-3">
 						{/* Top section: Thumbnail + Icon + Metadata con mejor spacing */}
 						<div className="flex min-w-0 items-start gap-3">
-							<div className="flex flex-shrink-0 items-center gap-2">
+							<div className="flex shrink-0 items-center gap-2">
 								<FolderThumbnail
 									folderStats={folderStats}
 									isCompact={!isFocusedMode}
@@ -400,11 +399,11 @@ export const FolderCard = memo(
 					{/* Controls Section - Mejor posicionamiento para evitar solapamientos */}
 					<div className="absolute top-3 right-3 z-20">
 						<div
-							aria-label="Controles de carpeta"
+							aria-label="Folder controls"
 							className={cn(
-								'flex items-center gap-1 rounded-lg border border-border/30 bg-background/95 shadow-lg backdrop-blur-sm',
+								'flex items-center gap-1 rounded-lg border border-border/30 bg-background/95 shadow-dt-2 backdrop-blur-sm',
 								'opacity-0 transition-all duration-200 ease-out group-hover:opacity-100',
-								'translate-x-2 hover:bg-background hover:shadow-xl group-hover:translate-x-0',
+								'translate-x-2 hover:bg-background hover:shadow-dt-3 group-hover:translate-x-0',
 								// Padding adaptativo para controles
 								isFocusedMode ? 'p-1.5' : 'p-1'
 							)}

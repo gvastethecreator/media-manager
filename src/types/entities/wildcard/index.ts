@@ -20,96 +20,90 @@ export type {
 	WildcardWithStats,
 } from './base';
 
-// --- 🔢 Enums ---
-export { WildcardSortCriteria, WildcardViewMode } from './enums';
-
-// --- 🎨 Constantes ---
-export { WILDCARD_SORT_PROPERTY_MAP } from './types';
+// --- 🎨 Enums y Constantes ---
+export { WILDCARD_SORT_PROPERTY_MAP, WildcardSortCriteria, WildcardViewMode } from './types';
 
 // --- 🔄 Aliases for compatibility ---
 // WildcardComplete is now exported from base.ts
 
 // --- 🔍 Filter types ---
 export interface WildcardFilters {
-	search?: string;
-	searchQuery?: string; // Alias para compatibilidad
-	category?: string | string[];
 	categories?: string[]; // Plural para compatibilidad
-	type?: string | string[];
-	onlyFavorites?: boolean;
-	tags?: string[];
-	parentId?: string;
-	hasChildren?: boolean;
-	limit?: number;
-	offset?: number;
-	sortBy?: string;
-	sortOrder?: 'asc' | 'desc';
-	isFavorite?: boolean;
-	ids?: string[];
-	excludeIds?: string[];
+	category?: string | string[];
 	createdAfter?: Date;
 	createdBefore?: Date;
+	excludeIds?: string[];
+	hasChildren?: boolean;
+	ids?: string[];
+	isFavorite?: boolean;
+	limit?: number;
+	offset?: number;
+	onlyFavorites?: boolean;
+	parentId?: string;
+	search?: string;
+	searchQuery?: string; // Alias para compatibilidad
+	sortBy?: string;
+	sortOrder?: 'asc' | 'desc';
+	tags?: string[];
+	type?: string | string[];
 	updatedAfter?: Date;
 	updatedBefore?: Date;
 }
 
 // --- 📝 Data types for mappers ---
 export interface CreateWildcardData {
-	id: string;
-	name: string;
+	category?: string | null;
+	children?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
-	children?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
+	id: string;
+	name: string;
 	parentId?: string | null;
+	shortcut?: string | null;
 }
 
 export interface UpdateWildcardData {
-	name?: string;
+	category?: string | null;
+	children?: string | null;
+	color?: string | null;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	shortcut?: string | null;
-	children?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
+	name?: string;
 	parentId?: string | null;
+	shortcut?: string | null;
 }
 
 export interface WildcardBulkUpdateData {
-	parentId?: string | null;
 	category?: string | null;
-	isFavorite?: boolean;
+	parentId?: string | null;
 }
 
 export interface WildcardRelated {
-	id: string;
-	name: string;
-	emoji: string | null;
-	color: string | null;
 	category: string | null;
-	parentId: string | null;
+	color: string | null;
+	emoji: string | null;
+	id: string;
 	isFavorite: boolean;
+	name: string;
+	parentId: string | null;
 }
 
 export interface WildcardSearchOptions {
-	page?: number;
+	filters?: WildcardFilters;
+	includeAlbums?: boolean;
+	includeImages?: boolean;
+	includeParent?: boolean;
+	includeStats?: boolean;
+	includeTags?: boolean;
+	includeVideos?: boolean;
 	limit?: number;
+	page?: number;
+	searchQuery?: string;
 	sortBy?: string;
 	sortOrder?: 'asc' | 'desc';
-	searchQuery?: string;
-	filters?: WildcardFilters;
-	includeStats?: boolean;
-	includeImages?: boolean;
-	includeVideos?: boolean;
-	includeAlbums?: boolean;
-	includeTags?: boolean;
-	includeParent?: boolean;
 }
 
 // Alias para compatibilidad con código existente
@@ -117,9 +111,9 @@ export type WildcardSearchFilters = WildcardFilters;
 
 // --- 📊 Response types ---
 export interface WildcardResponse {
-	success: boolean;
 	data: WildcardWithStats[];
-	total: number;
 	page: number;
+	success: boolean;
+	total: number;
 	totalPages: number;
 }

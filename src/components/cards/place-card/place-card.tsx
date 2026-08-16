@@ -1,6 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { getRarityGradient } from '@/components/cards/shared/rarity-gradients';
-import { darkenHex } from '@/components/cards/shared/rarity-style';
 import { motion } from '@/components/ui/motion-shim';
 import { useRecentPlaceMedia } from '@/lib/api/places';
 import { cn } from '@/lib/utils';
@@ -12,20 +11,20 @@ import { PlaceCardHeader } from './place-card-header';
 import { PlaceCardImages } from './place-card-images';
 
 export interface PlaceCardProps {
-	/** Lugar a mostrar */
-	place: PlaceWithStats;
-	/** Tamaño compacto con menos información */
-	compact?: boolean;
-	/** Modo TCG con efectos especiales de carta */
-	tcgMode?: boolean;
-	/** Deshabilitar interacciones */
-	disabled?: boolean;
 	/** Clase CSS adicional para la carta */
 	className?: string;
-	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
+	/** Tamaño compacto con menos información */
+	compact?: boolean;
+	/** Deshabilitar interacciones */
+	disabled?: boolean;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
+	/** Función a ejecutar al hacer clic en la tarjeta */
+	onClick?: () => void;
+	/** Lugar a mostrar */
+	place: PlaceWithStats;
+	/** Modo TCG con efectos especiales de carta */
+	tcgMode?: boolean;
 }
 
 /**
@@ -35,36 +34,37 @@ export interface PlaceCardProps {
 // --- Helpers & constantes extraídas para reducir complejidad del componente principal ---
 
 const TYPE_COLORS: Record<string, string> = {
-	city: '#2563eb',
-	forest: '#047857',
-	mountain: '#b91c1c',
-	desert: '#d97706',
+	city: 'var(--preset-blue)',
+	forest: 'var(--preset-green)',
+	mountain: 'var(--preset-red)',
+	desert: 'var(--preset-orange)',
 };
 
 // darkenHex centralizado en shared/rarity-style
 
 function computeSecondaryColor(color: string | undefined, type: string | undefined): string {
 	if (!color) {
-		return TYPE_COLORS[type ?? ''] || '#064e3b';
+		return TYPE_COLORS[type ?? ''] || 'var(--entity-place)';
 	}
-	return darkenHex(color, 0.7);
+	// Usar color-mix para oscurecer el color de forma nativa en CSS
+	return `color-mix(in oklab, ${color}, black 20%)`;
 }
 
 interface DerivedPlaceData {
-	primaryColor: string;
-	secondaryColor: string;
-	rarityLevel: number;
-	power: number;
-	healthPoints: number;
-	valueLevel: number;
 	cardId: string;
-	imagesCount: number;
-	videosCount: number;
 	cardMedia: Array<{ id: string; name: string; thumbnailUrl: string; url: string; type: string; isVideo: boolean }>;
-	parsedResources: { name: string; abundance: number; description?: string }[];
+	healthPoints: number;
+	imagesCount: number;
 	parsedDangers: { type: string; level: number; description?: string }[];
+	parsedResources: { name: string; abundance: number; description?: string }[];
 	parsedStats: Record<string, number>;
 	population: number;
+	power: number;
+	primaryColor: string;
+	rarityLevel: number;
+	secondaryColor: string;
+	valueLevel: number;
+	videosCount: number;
 }
 
 function normalizeArrays(parsedResources: unknown, parsedDangers: unknown, parsedStats: unknown) {
@@ -102,7 +102,7 @@ function extractMetadata(metadata: unknown, id: string) {
 
 function preparePlaceDerivedData(place: PlaceWithStats, recentMediaData: any[] | undefined): DerivedPlaceData {
 	const {
-		color = '#10b981',
+		color = 'var(--entity-place)',
 		type,
 		parsedResources = [],
 		parsedDangers = [],
@@ -113,7 +113,7 @@ function preparePlaceDerivedData(place: PlaceWithStats, recentMediaData: any[] |
 		id,
 	} = place as any;
 	const population = typeof rawPopulation === 'string' ? Number.parseInt(rawPopulation, 10) : rawPopulation;
-	const primaryColor = color || '#10b981';
+	const primaryColor = color || 'var(--entity-place)';
 	const secondaryColor = computeSecondaryColor(color, type);
 	const { safeParsedResources, safeParsedDangers, safeParsedStats } = normalizeArrays(
 		parsedResources,
@@ -145,11 +145,11 @@ function preparePlaceDerivedData(place: PlaceWithStats, recentMediaData: any[] |
 const PlaceCardLoading: React.FC<{ className?: string }> = ({ className }) => (
 	<div
 		className={cn(
-			'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+			'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-muted md:w-[320px] dark:bg-background',
 			className
 		)}
 	>
-		<p className="text-gray-500">Cargando lugar...</p>
+		<p className="text-muted-foreground">Loading place...</p>
 	</div>
 );
 
@@ -160,13 +160,13 @@ const PlaceCardError: React.FC<{ className?: string; message: string }> = ({ cla
 			className
 		)}
 	>
-		<p className="text-red-800">Error: {message}</p>
+		<p className="text-destructive">Error: {message}</p>
 	</div>
 );
 
 interface PlaceCardViewProps extends Omit<PlaceCardProps, 'placeId'> {
-	place: PlaceWithStats;
 	derived: DerivedPlaceData;
+	place: PlaceWithStats;
 }
 
 const TCGEffects: React.FC<{
@@ -183,14 +183,14 @@ const TCGEffects: React.FC<{
 	return (
 		<>
 			<div
-				className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-30"
+				className="ui-overlay-hover-strong z-1"
 				style={{
-					backgroundImage: `linear-gradient(125deg,transparent 0%,${primaryColor}30 25%,${secondaryColor}30 50%,${primaryColor}30 75%,transparent 100%)`,
+					backgroundImage: `linear-gradient(125deg, transparent 0%, color-mix(in oklab, ${primaryColor}, transparent 70%) 25%, color-mix(in oklab, ${secondaryColor}, transparent 70%) 50%, color-mix(in oklab, ${primaryColor}, transparent 70%) 75%, transparent 100%)`,
 					backgroundSize: '200% 200%',
 					animation: 'gradient-shift 3s ease infinite',
 				}}
 			/>
-			<div className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-20">
+			<div className="ui-overlay-hover-soft z-1">
 				<div
 					className="absolute inset-0"
 					style={{
@@ -200,12 +200,12 @@ const TCGEffects: React.FC<{
 					}}
 				/>
 			</div>
-			<div className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/3 left-1/2 z-1 h-20 w-20 opacity-10">
+			<div className="pointer-events-none absolute top-1/3 left-1/2 z-1 h-20 w-20 -translate-x-1/2 -translate-y-1/2 opacity-10">
 				<div
 					className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed"
 					style={{ borderColor: primaryColor }}
 				>
-					<div className="font-bold text-xs" style={{ color: primaryColor }}>
+					<div className="font-bold text-sm" style={{ color: primaryColor }}>
 						VALOR
 						<br />
 						{valueLevel}
@@ -215,7 +215,7 @@ const TCGEffects: React.FC<{
 			{isFavorite && (
 				<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 					<div
-						className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
+						className="absolute top-0 right-0 h-24 w-24 translate-x-12 -translate-y-8 rotate-45 opacity-70"
 						style={{
 							background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 							backgroundSize: '600% 600%',
@@ -260,8 +260,8 @@ const PlaceCardView: React.FC<PlaceCardViewProps> = ({
 		name,
 		emoji = '📍',
 		climate = 'templado',
-		region = 'desconocido',
-		type = 'desconocido',
+		region = 'unknown',
+		type = 'unknown',
 		description,
 		government,
 		isFavorite = false,
@@ -327,7 +327,7 @@ const PlaceCardView: React.FC<PlaceCardViewProps> = ({
 
 	return (
 		<motion.div
-			aria-label={`Lugar: ${name}`}
+			aria-label={`Place: ${name}`}
 			className={cn(
 				'w-[300px] md:w-[320px]',
 				tcgMode ? 'h-[470px]' : 'h-[400px]',
@@ -380,7 +380,7 @@ const PlaceCardView: React.FC<PlaceCardViewProps> = ({
 	);
 };
 
-export function PlaceCard({
+export const PlaceCard = memo(function PlaceCard({
 	place,
 	compact = false,
 	tcgMode = true,
@@ -394,7 +394,7 @@ export function PlaceCard({
 
 	// Validación simple de place requerido
 	if (!place) {
-		return <PlaceCardError className={className} message="Lugar no encontrado" />;
+		return <PlaceCardError className={className} message="Place not found" />;
 	}
 
 	const derived = useMemo(() => preparePlaceDerivedData(place, recentMediaData), [place, recentMediaData]);
@@ -411,4 +411,4 @@ export function PlaceCard({
 			tcgMode={tcgMode}
 		/>
 	);
-}
+});

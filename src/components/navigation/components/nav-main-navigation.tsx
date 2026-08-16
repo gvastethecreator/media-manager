@@ -23,51 +23,57 @@ import {
 	Users,
 	Video,
 } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ViewType } from '@/components/views/types';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { cn } from '@/lib/utils';
-import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
+import type { CategoryChild } from '../types';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import { NavCategoryChildren } from './nav-category-children';
 
 interface NavMainNavigationProps {
-	currentView: string;
-	onNavigate?: (id: ViewType) => void;
 	isCollapsed?: boolean;
 }
 
+function getCategoryPath(categoryId: string): string {
+	if (categoryId === 'all-files') return '/files';
+	if (categoryId === 'file-3ds') return '/file3d';
+	return `/${categoryId}`;
+}
+
+function getCategoryItemPath(categoryId: string, item: CategoryChild): string {
+	if (item.path?.startsWith('/')) return item.path;
+	return `/${categoryId}/${encodeURIComponent(item.id)}`;
+}
+
 const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
-	currentView,
-	onNavigate,
 	isCollapsed = false,
 }: NavMainNavigationProps) {
 	const { stats, getCategoryItemCount, getCategoryItems } = useCategoryStats();
 	const { navigateWithTransition } = useSeamlessNavigation();
-	const { buildHierarchicalPath } = useHierarchicalNavigation();
 
 	// Nueva estructura file-centric con contadores y colores únicos
 	const NAVIGATION_CATEGORIES = useMemo(
 		() => [
 			{
 				id: 'folders',
-				label: 'Carpetas',
-				color: '#F59E0B', // Amber
+				label: 'Folders',
+				color: 'var(--entity-folder)',
 				icon: Folder,
 				children: [],
 				showTreeView: true, // Nueva propiedad para mostrar TreeView directamente
 			},
 			{
 				id: 'files',
-				label: 'Archivos',
-				color: '#3B82F6', // Blue
+				label: 'Files',
+				color: 'var(--entity-file)',
 				icon: Files,
 				children: [
 					{
 						id: 'all-files',
-						label: 'Todos los archivos',
+						label: 'All files',
 						icon: FileStack,
 						// Total de archivos = imágenes + videos (otros tipos opcionales se suman si están)
 						count:
@@ -78,67 +84,91 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 							(stats.totalJsonFiles || 0) +
 							(stats.totalFile3D || 0) +
 							(stats.totalWorkflows || 0),
-						color: '#6B7280',
+						color: 'var(--entity-file)',
 					},
-					{ id: 'all-images', label: 'Imágenes', icon: ImageIcon, count: stats.totalImages || 0, color: '#10B981' },
-					{ id: 'videos', label: 'Videos', icon: Video, count: stats.totalVideos || 0, color: '#EF4444' },
-					{ id: 'audios', label: 'Audio', icon: Music, count: stats.totalAudio || 0, color: '#8B5CF6' },
+					{
+						id: 'all-images',
+						label: 'Images',
+						icon: ImageIcon,
+						count: stats.totalImages || 0,
+						color: 'var(--entity-image)',
+					},
+					{
+						id: 'videos',
+						label: 'Videos',
+						icon: Video,
+						count: stats.totalVideos || 0,
+						color: 'var(--entity-video)',
+					},
+					{
+						id: 'audios',
+						label: 'Audio',
+						icon: Music,
+						count: stats.totalAudio || 0,
+						color: 'var(--entity-audio)',
+					},
 					{
 						id: 'documents',
-						label: 'Documentos',
+						label: 'Documents',
 						icon: FileText,
 						count: stats.totalDocuments || 0,
-						color: '#F97316',
+						color: 'var(--entity-document)',
 					},
 					{
 						id: 'json-files',
 						label: 'JSON',
 						icon: Brackets,
 						count: stats.totalJsonFiles || 0,
-						color: '#06B6D4',
+						color: 'var(--entity-json)',
 					},
 
-					{ id: 'file-3ds', label: '3D', icon: Box, count: stats.totalFile3D || 0, color: '#EC4899' },
+					{ id: 'file-3ds', label: '3D', icon: Box, count: stats.totalFile3D || 0, color: 'var(--entity-file-3d)' },
 				],
 			},
 			{
 				id: 'library',
-				label: 'Librería',
-				color: '#A21CAF', // Fuchsia
+				label: 'Library',
+				color: 'var(--entity-collection)',
 				icon: Layers,
 				children: [
-					{ id: 'favorites', label: 'Favoritos', icon: Star, count: stats.totalFavorites || 0, color: '#FBBF24' },
+					{
+						id: 'favorites',
+						label: 'Favorites',
+						icon: Star,
+						count: stats.totalFavorites || 0,
+						color: 'var(--entity-favorite)',
+					},
 					{
 						id: 'albums',
-						label: 'Álbumes',
+						label: 'Albums',
 						icon: Album,
 						count: stats.totalAlbums || 0,
 						hasChildren: true,
-						color: '#8B5CF6',
+						color: 'var(--entity-album)',
 					},
 					{
 						id: 'groups',
-						label: 'Grupos',
+						label: 'Groups',
 						icon: Users,
 						count: getCategoryItemCount('groups'),
 						hasChildren: true,
-						color: '#06B6D4',
+						color: 'var(--entity-group)',
 					},
 					{
 						id: 'tags',
-						label: 'Etiquetas',
+						label: 'Tags',
 						icon: Tag,
 						count: stats.totalTags || 0,
 						hasChildren: true,
-						color: '#10B981',
+						color: 'var(--entity-tag)',
 					},
 					{
 						id: 'collections',
-						label: 'Colecciones',
+						label: 'Collections',
 						icon: Bookmark,
 						count: stats.totalCollections || 0,
 						hasChildren: true,
-						color: '#F97316',
+						color: 'var(--entity-collection)',
 					},
 					{
 						id: 'prompts',
@@ -146,79 +176,79 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: MessageSquare,
 						count: getCategoryItemCount('prompts'),
 						hasChildren: true,
-						color: '#EF4444',
+						color: 'var(--entity-prompt)',
 					},
 				],
 			},
 			{
 				id: 'worldbuilding',
 				label: 'Worldbuilding',
-				color: '#059669', // Emerald
+				color: 'var(--entity-world-item)',
 				icon: Globe,
 				children: [
 					{
 						id: 'characters',
-						label: 'Personajes',
+						label: 'Characters',
 						icon: User,
 						count: stats.totalCharacters || 0,
 						hasChildren: true,
-						color: '#3B82F6',
+						color: 'var(--entity-character)',
 					},
 					{
 						id: 'places',
-						label: 'Lugares',
+						label: 'Places',
 						icon: MapPin,
 						count: stats.totalPlaces || 0,
 						hasChildren: true,
-						color: '#EF4444',
+						color: 'var(--entity-place)',
 					},
 					{
 						id: 'world-items',
-						label: 'Objetos del mundo',
+						label: 'World items',
 						icon: Box,
 						count: stats.totalWorldItems || 0,
 						hasChildren: true,
-						color: '#F59E0B',
+						color: 'var(--entity-world-item)',
 					},
 					{
 						id: 'concepts',
-						label: 'Conceptos',
+						label: 'Concepts',
 						icon: Lightbulb,
 						count: getCategoryItemCount('concepts'),
 						hasChildren: true,
-						color: '#FBBF24',
+						color: 'var(--entity-concept)',
 					},
 					{
 						id: 'wildcards',
-						label: 'Comodines',
+						label: 'Wildcards',
 						icon: Asterisk,
 						count: getCategoryItemCount('wildcards'),
 						hasChildren: true,
-						color: '#8B5CF6',
+						color: 'var(--entity-wildcard)',
 					},
 				],
 			},
 			{
 				id: 'management',
-				label: 'Gestión',
-				color: '#6D28D9', // Violet
+				label: 'Management',
+				color: 'var(--entity-note)',
 				icon: Asterisk,
 				children: [
 					{
 						id: 'notes',
-						label: 'Notas',
+						label: 'Notes',
 						icon: FileText,
 						count: getCategoryItemCount('notes'),
 						hasChildren: true,
-						color: '#06B6D4',
+						color: 'var(--entity-note)',
 					},
 					{
 						id: 'properties',
-						label: 'Propiedades',
+						label: 'Properties',
 						icon: Asterisk,
 						count: getCategoryItemCount('properties'),
 						hasChildren: true,
-						color: '#EC4899',
+						color: 'var(--entity-property)',
 					},
 				],
 			},
@@ -227,10 +257,13 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 	);
 
 	const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+	const hasInitializedCategories = useRef(false);
 
-	// Inicializar categorías expandidas cuando NAVIGATION_CATEGORIES esté disponible
+	// La carga de estadísticas no debe cerrar secciones que el usuario ya abrió.
 	useEffect(() => {
+		if (hasInitializedCategories.current) return;
 		setExpandedCategories(new Set(NAVIGATION_CATEGORIES.map((c) => c.id)));
+		hasInitializedCategories.current = true;
 	}, [NAVIGATION_CATEGORIES]);
 
 	// Toggle función para expandir/contraer categorías
@@ -250,46 +283,6 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 	const innerContainerClasses = useMemo(() => cn('rounded-md p-0.5 shadow-sm', isCollapsed && 'p-0.5'), [isCollapsed]);
 	const flexContainerClasses = useMemo(() => cn('flex flex-col gap-1'), []);
 
-	const handleChildClick = useCallback(
-		(childId: string) => {
-			// Navegar al item hijo específico
-			console.log('Navegando a item hijo:', childId);
-
-			// Para carpetas, navegar a la vista específica de la carpeta
-			if (childId?.match(/^folder_/)) {
-				// Extraer el ID real de la carpeta (remover prefijo si existe)
-				const folderId = childId.replace('folder_', '');
-
-				// Usar navegación jerárquica
-				const hierarchicalPath = buildHierarchicalPath(folderId);
-
-				// Navegar usando path jerárquico
-				if (hierarchicalPath) {
-					navigateWithTransition(`/folders/${hierarchicalPath}`);
-				} else {
-					// Fallback para carpeta raíz o error
-					navigateWithTransition('/folders');
-				}
-			} else {
-				// Para otras entidades, navegar a su vista específica
-				// Por ejemplo: notas, propiedades, etc.
-				navigateWithTransition(`/${childId}`);
-			}
-		},
-		[navigateWithTransition, buildHierarchicalPath]
-	);
-
-	const handleNavigate = useCallback(
-		(id: ViewType) => {
-			if (onNavigate) {
-				onNavigate(id);
-			} else {
-				navigateWithTransition(id === '' ? '/' : `/${id}`);
-			}
-		},
-		[onNavigate, navigateWithTransition]
-	);
-
 	return (
 		<ScrollArea className={containerClasses}>
 			<div className={innerContainerClasses}>
@@ -298,14 +291,15 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						<div className="mb-1" key={category.id}>
 							<button
 								aria-expanded={expandedCategories.has(category.id)}
+								aria-label={`${expandedCategories.has(category.id) ? 'Contraer' : 'Expandir'} ${category.label}`}
 								className={cn(
-									'mb-0.5 flex items-center gap-1 transition-all duration-300',
+									'mb-0.5 flex items-center gap-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
 									isCollapsed ? 'justify-center px-1 py-1' : ''
 								)}
 								onClick={() => {
 									// Para carpetas, navegar a la vista principal además de expandir/contraer
 									if (category.id === 'folders') {
-										handleNavigate('folders' as ViewType);
+										navigateWithTransition('/folders');
 									}
 									toggleCategory(category.id);
 								}}
@@ -320,20 +314,22 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 									</TooltipTrigger>
 									{isCollapsed && (
 										<TooltipContent className="text-xs" side="right">
-											<p className="font-medium text-amber-400">{category.label}</p>
+											<p className="font-medium" style={{ color: category.color }}>
+												{category.label}
+											</p>
 										</TooltipContent>
 									)}
 								</Tooltip>
 								{!isCollapsed && (
 									<>
-										<span className="flex-1 font-semibold text-xs" style={{ color: category.color }}>
+										<span className="flex-1 truncate font-semibold text-xs" style={{ color: category.color }}>
 											{category.label}
 										</span>
 										{((category.children && category.children.length > 0) || category.showTreeView) &&
 											(expandedCategories.has(category.id) ? (
-												<ChevronDown className="h-4 w-4 text-muted-foreground" />
+												<ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
 											) : (
-												<ChevronRight className="h-4 w-4 text-muted-foreground" />
+												<ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
 											))}
 									</>
 								)}
@@ -342,55 +338,45 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 								<>
 									{/* TreeView directo para carpetas */}
 									{category.showTreeView && (
-										<div className="mt-1">
-											<NavCategoryChildren
-												categoryId={category.id}
-												currentView={currentView}
-												isCollapsed={isCollapsed}
-												items={[]}
-												onItemClick={handleChildClick}
-												selectedChildId={null}
-											/>
+										<div className="mt-1 min-w-0 overflow-hidden">
+											<NavCategoryChildren categoryId={category.id} isCollapsed={isCollapsed} items={[]} />
 										</div>
 									)}
 									{/* Categorías normales */}
 									{!category.showTreeView && (
-										<div className="flex flex-col gap-0.5">
+										<div className="flex min-w-0 flex-col gap-0.5 overflow-hidden">
 											{(category.children || []).map((child, _idx) => (
-												<div className="flex flex-col" key={child.id}>
-													<div
-														className={cn(
-															'flex w-full items-center justify-between rounded px-2 py-1 text-xs transition-all duration-300',
-															'transition-colors hover:bg-secondary/50',
-															currentView === child.id && 'bg-secondary font-bold',
-															isCollapsed ? 'justify-center px-1' : ''
-														)}
-													>
-														<div className={cn('flex flex-1 items-center', isCollapsed ? 'justify-center' : '')}>
-															<button
-																className="flex items-center"
-																onClick={() => handleNavigate(child.id as ViewType)}
-																type="button"
-															>
-																<child.icon className="h-3 w-3" style={{ color: child.color }} />
-																{!isCollapsed && <span className="ml-2">{child.label}</span>}
-															</button>
-														</div>
+												<div className="flex min-w-0 flex-col" key={child.id}>
+													<div className="flex w-full min-w-0 items-center justify-between rounded text-xs">
+														<NavLink
+															className={({ isActive }) =>
+																cn(
+																	'flex min-w-0 flex-1 items-center rounded px-2 py-1 transition-colors hover:bg-secondary/50',
+																	'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+																	isActive && 'bg-secondary font-bold',
+																	isCollapsed && 'justify-center px-1'
+																)
+															}
+															to={getCategoryPath(child.id)}
+														>
+															<child.icon className="h-3 w-3 shrink-0" style={{ color: child.color }} />
+															{!isCollapsed && <span className="ml-2 truncate">{child.label}</span>}
+															{child.count !== undefined && (
+																<span
+																	className="min-w-[18px] text-right text-[10px] text-muted-foreground tabular-nums"
+																	data-testid={`nav-count-${child.id}`}
+																>
+																	{child.count}
+																</span>
+															)}
+														</NavLink>
 														{!isCollapsed && (
-															<div className="flex items-center gap-1">
-																{child.count !== undefined && (
-																	<span
-																		className="min-w-[18px] text-right text-[10px] text-muted-foreground tabular-nums"
-																		data-testid={`nav-count-${child.id}`}
-																	>
-																		{child.count}
-																	</span>
-																)}
+															<div className="flex shrink-0 items-center gap-1">
 																{child.hasChildren && (
 																	<button
 																		aria-expanded={expandedCategories.has(child.id)}
 																		aria-label={`Toggle ${child.label} children`}
-																		className="flex h-5 w-5 items-center justify-center rounded-sm border border-border/30 bg-background/50 p-0.5 hover:bg-secondary/70"
+																		className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-border/30 bg-background/50 p-0.5 hover:bg-secondary/70"
 																		onClick={(e) => {
 																			e.stopPropagation();
 																			toggleCategory(child.id);
@@ -411,11 +397,9 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 														<div className="mt-1 ml-4 border-border/50 border-l pl-2">
 															<NavCategoryChildren
 																categoryId={child.id}
-																currentView={currentView}
+																getItemHref={(item) => getCategoryItemPath(child.id, item)}
 																isCollapsed={isCollapsed}
 																items={getCategoryItems(child.id as any)}
-																onItemClick={handleChildClick}
-																selectedChildId={null}
 															/>
 														</div>
 													)}

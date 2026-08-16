@@ -18,63 +18,63 @@ export type FileCreateInput = Omit<FileBase, 'id' | 'createdAt' | 'updatedAt' | 
 
 export type FileUpdateInput = Partial<Omit<FileBase, 'id'>>;
 
-export type FileFilterOptions = {
-	searchTerm?: string;
-	fileTypes?: FileType[];
+export interface FileFilterOptions {
 	extensions?: string[];
-	minSize?: number;
+	fileTypes?: FileType[];
 	maxSize?: number;
+	minSize?: number;
 	modifiedAfter?: Date;
 	modifiedBefore?: Date;
+	searchTerm?: string;
 	sortBy?: keyof FileBase;
 	sortOrder?: 'asc' | 'desc';
-};
+}
 
 /**
  * Resultado de la lectura de un directorio
  */
-export type DirectoryReadResult = {
-	path: string;
-	items: FileBase[]; // mezcla de archivos y carpetas
-	files: FileInfo[];
+export interface DirectoryReadResult {
 	directories: DirectoryInfo[];
-	totalItems: number;
+	files: FileInfo[];
 	hasMore: boolean;
+	items: FileBase[]; // mezcla de archivos y carpetas
+	path: string;
+	totalItems: number;
 	// Campos agregados opcionalmente por el servidor
 	totalSize?: number;
-};
+}
 
 /**
  * Resultado de operaciones de copia o movimiento de archivos
  */
-export type FileCopyMoveResult = {
-	success: boolean;
-	sourcePath: string;
+export interface FileCopyMoveResult {
+	destInfo: FileBase;
 	destPath: string;
+	error?: string;
 	isDirectory: boolean;
 	sourceInfo: FileBase;
-	destInfo: FileBase;
+	sourcePath: string;
+	success: boolean;
 	timestamp: Date;
-	error?: string;
-};
+}
 
 /**
  * Opciones para operaciones de archivo
  */
-export type FileOperationOptions = {
-	overwrite?: boolean;
-	recursive?: boolean;
-	preserveTimestamps?: boolean;
+export interface FileOperationOptions {
 	filter?: (path: string) => boolean;
-};
+	overwrite?: boolean;
+	preserveTimestamps?: boolean;
+	recursive?: boolean;
+}
 
 /**
  * Resultado de operaciones generales de archivo
  */
-export type FileOperationResult = {
-	success: boolean;
-	path: string;
-	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename';
-	file?: FileBase;
+export interface FileOperationResult {
 	error?: string;
-};
+	file?: FileBase;
+	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename';
+	path: string;
+	success: boolean;
+}

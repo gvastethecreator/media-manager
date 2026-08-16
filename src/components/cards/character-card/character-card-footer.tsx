@@ -4,31 +4,31 @@ import React from 'react';
 import { getCardIdFromUrl } from '@/lib/utils/index';
 
 interface CharacterCardFooterProps {
-	/** ID o URL del personaje */
-	id: string;
-	/** Color primario de la tarjeta */
-	primaryColor: string;
-	/** Número de imágenes del personaje */
-	imagesCount?: number;
-	/** Número de videos del personaje */
-	videosCount?: number;
-	/** Nivel de rareza (1-10) */
-	rarityLevel?: number;
+	/** Alineación del personaje */
+	alignment?: string;
+	cardId?: string;
+	compact?: boolean;
 	/** HP del personaje (puntos de vida) */
 	hp?: number;
+	/** ID o URL del personaje */
+	id: string;
+	/** Número de imágenes del personaje */
+	imagesCount?: number;
+	level?: number | null;
 	/** MP del personaje (puntos de maná) */
 	mp?: number;
 	/** Clasificación de poder (1-10) */
 	power?: number;
-	/** Alineación del personaje */
-	alignment?: string;
+	/** Color primario de la tarjeta */
+	primaryColor: string;
+	/** Nivel de rareza (1-10) */
+	rarityLevel?: number;
 	/** Habilidades principales del personaje */
 	skills?: { name: string; level: number }[];
 	/** Si está en modo TCG con efectos especiales */
 	tcgMode?: boolean;
-	cardId?: string;
-	level?: number | null;
-	compact?: boolean;
+	/** Número de videos del personaje */
+	videosCount?: number;
 }
 
 /**
@@ -70,21 +70,20 @@ export function CharacterCardFooter({
 		return RARITY_NAMES[threshold];
 	};
 
-	// Determinar el color de rareza
 	const getRarityColor = (level: number) => {
 		if (level >= 9) {
-			return 'rgb(255, 100, 255)'; // Mítico
+			return 'var(--rarity-mythic)';
 		}
 		if (level >= 7) {
-			return 'rgb(255, 128, 0)'; // Legendario
+			return 'var(--rarity-legendary)';
 		}
 		if (level >= 5) {
-			return 'rgb(163, 53, 238)'; // Épico
+			return 'var(--rarity-epic)';
 		}
 		if (level >= 3) {
-			return 'rgb(0, 112, 221)'; // Raro
+			return 'var(--rarity-rare)';
 		}
-		return 'rgb(30, 255, 0)'; // Común
+		return 'var(--rarity-common)';
 	};
 
 	// Calcular estrellas de rareza (1-5)
@@ -94,58 +93,58 @@ export function CharacterCardFooter({
 	const getAlignmentIcon = () => {
 		const lowerAlignment = alignment.toLowerCase();
 		if (lowerAlignment.includes('good') || lowerAlignment.includes('lawful')) {
-			return <Shield className="h-3.5 w-3.5" />;
+			return <Shield className="h-4 w-4" />;
 		}
 		if (lowerAlignment.includes('evil') || lowerAlignment.includes('chaotic')) {
-			return <Swords className="h-3.5 w-3.5" />;
+			return <Swords className="h-4 w-4" />;
 		}
 		if (lowerAlignment.includes('neutral')) {
-			return <Scroll className="h-3.5 w-3.5" />;
+			return <Scroll className="h-4 w-4" />;
 		}
-		return <Star className="h-3.5 w-3.5" />;
+		return <Star className="h-4 w-4" />;
 	};
 
 	if (!tcgMode) {
 		return (
-			<div className="flex items-center justify-between px-3 py-2 text-xs">
+			<div className="flex items-center justify-between px-3 py-2 text-sm">
 				<div className="flex items-center space-x-2 text-white/70">
 					<div className="flex items-center">
-						<ImageIcon className="mr-1 h-3.5 w-3.5" />
+						<ImageIcon className="mr-1 h-4 w-4" />
 						<span>{imagesCount}</span>
 					</div>
 					{videosCount > 0 && (
 						<div className="flex items-center">
-							<Video className="mr-1 h-3.5 w-3.5" />
+							<Video className="mr-1 h-4 w-4" />
 							<span>{videosCount}</span>
 						</div>
 					)}
 				</div>
-				<div className="text-right text-[9px] opacity-60">#{characterId}</div>
+				<div className="text-right text-xs opacity-60">#{characterId}</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="px-4 py-3 text-xs">
+		<div className="px-4 py-3 text-sm">
 			{/* Sección de estadísticas de TCG */}
 			<div className="mb-2 flex justify-between">
 				{/* HP/MP/POWER en estilo TCG */}
 				<div className="flex items-center gap-3">
 					{/* HP (Puntos de vida) */}
 					<div className="flex items-center gap-1">
-						<Heart className="h-3.5 w-3.5 text-red-500" />
+						<Heart className="h-4 w-4 text-destructive" />
 						<span className="font-medium">{hp}</span>
 					</div>
 
 					{/* MP (Puntos de maná) */}
 					<div className="flex items-center gap-1">
-						<Wand className="h-3.5 w-3.5 text-blue-400" />
+						<Wand className="h-4 w-4 text-blue-400" />
 						<span className="font-medium">{mp}</span>
 					</div>
 
 					{/* Power (Nivel de poder) */}
 					<div className="flex items-center gap-1">
-						<Sparkles className="h-3.5 w-3.5 text-yellow-400" />
+						<Sparkles className="h-4 w-4 text-warning" />
 						<span className="font-medium">{power}</span>
 					</div>
 				</div>
@@ -153,7 +152,7 @@ export function CharacterCardFooter({
 				{/* Alineación */}
 				<div className="flex items-center gap-1">
 					{getAlignmentIcon()}
-					<span className="font-medium text-[10px] uppercase opacity-80">{alignment}</span>
+					<span className="font-medium text-xs uppercase opacity-80">{alignment}</span>
 				</div>
 			</div>
 
@@ -162,13 +161,13 @@ export function CharacterCardFooter({
 				{/* Contador de imágenes y vídeos */}
 				<div className="flex items-center space-x-2 text-white/70">
 					<div className="flex items-center">
-						<ImageIcon className="mr-1 h-3.5 w-3.5" />
+						<ImageIcon className="mr-1 h-4 w-4" />
 						<span>{imagesCount}</span>
 					</div>
 
 					{videosCount > 0 && (
 						<div className="flex items-center">
-							<Video className="mr-1 h-3.5 w-3.5" />
+							<Video className="mr-1 h-4 w-4" />
 							<span>{videosCount}</span>
 						</div>
 					)}
@@ -176,24 +175,24 @@ export function CharacterCardFooter({
 
 				{/* Indicador de rareza con estrellas */}
 				<div className="flex items-center gap-0.5" style={{ color: getRarityColor(rarityLevel) }}>
-					<span className="mr-1 font-semibold text-[10px]">{getRarityName(rarityLevel)}</span>
+					<span className="mr-1 font-semibold text-xs">{getRarityName(rarityLevel)}</span>
 					{[...new Array(rarityStars)].map((_, i) => (
-						<Star className="h-3 w-3 fill-current" key={`rarity-star-${renderKey}-${i + 1}`} />
+						<Star className="h-4 w-4 fill-current" key={`rarity-star-${renderKey}-${i + 1}`} />
 					))}
 				</div>
 			</div>
 
 			{/* Habilidades destacadas (si existen) */}
 			{skills && skills.length > 0 && (
-				<div className="mt-2 border-white/10 border-t pt-2">
+				<div className="mt-2 border-border/40 border-t pt-2">
 					<div className="flex flex-wrap gap-1.5">
 						{skills.slice(0, 3).map((skill, _index) => (
 							<div
-								className="flex items-center gap-0.5 rounded px-1.5 py-0.5 font-medium text-[10px]"
+								className="flex items-center gap-0.5 rounded px-1.5 py-0.5 font-medium text-xs"
 								key={`skill-${characterId}-${skill.name}`}
 								style={{
-									backgroundColor: `${primaryColor}40`,
-									border: `1px solid ${primaryColor}80`,
+									backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)`,
+									border: `1px solid color-mix(in oklab, ${primaryColor}, transparent 20%)`,
 								}}
 							>
 								<span>{skill.name}</span>
@@ -205,7 +204,10 @@ export function CharacterCardFooter({
 			)}
 
 			{/* Línea decorativa inferior en estilo TCG */}
-			<div className="mt-2 h-1 w-full overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+			<div
+				className="mt-2 h-1 w-full overflow-hidden rounded-full"
+				style={{ background: 'rgba(var(--effect-highlight-rgb), 0.1)' }}
+			>
 				<div
 					className="h-full rounded-full"
 					style={{
@@ -217,7 +219,7 @@ export function CharacterCardFooter({
 			</div>
 
 			{/* ID de la carta en formato TCG */}
-			<div className="mt-2 text-right text-[9px] opacity-60">#{characterId}</div>
+			<div className="mt-2 text-right text-xs opacity-60">#{characterId}</div>
 		</div>
 	);
 }

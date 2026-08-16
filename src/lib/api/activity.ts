@@ -2,27 +2,27 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Tipos para la API
 interface CreateActivityData {
-	type: string;
-	entityType: string;
-	entityId: string;
 	action: string;
-	userId: string;
 	description: string;
-	metadata?: Record<string, any>;
+	entityId: string;
+	entityType: string;
 	ipAddress?: string;
-	userAgent?: string;
+	metadata?: Record<string, any>;
 	sessionId?: string;
+	type: string;
+	userAgent?: string;
+	userId: string;
 }
 
 interface GetActivitiesParams {
-	page?: number;
-	limit?: number;
-	type?: string;
-	imageId?: string;
 	albumId?: string;
-	folderId?: string;
 	characterId?: string;
 	collectionId?: string;
+	folderId?: string;
+	imageId?: string;
+	limit?: number;
+	page?: number;
+	type?: string;
 }
 
 interface ActivityStatsParams {
@@ -31,19 +31,19 @@ interface ActivityStatsParams {
 }
 
 interface Activity {
-	id: string;
-	type: string;
-	entityType: string;
-	entityId: string;
 	action: string;
-	userId: string;
-	description: string;
-	metadata?: Record<string, any>;
-	ipAddress?: string;
-	userAgent?: string;
-	sessionId?: string;
 	createdAt: string;
+	description: string;
+	entityId: string;
+	entityType: string;
+	id: string;
+	ipAddress?: string;
+	metadata?: Record<string, any>;
+	sessionId?: string;
+	type: string;
 	updatedAt: string;
+	userAgent?: string;
+	userId: string;
 }
 
 interface ActivitiesResponse {
@@ -64,17 +64,17 @@ interface ActivityResponse {
 }
 
 interface ActivityStats {
-	totalActivities: number;
-	activitiesByType: Record<string, number>;
 	activitiesByDay: Array<{
 		date: string;
 		count: number;
 	}>;
+	activitiesByType: Record<string, number>;
 	mostActiveEntities: Array<{
 		entityId: string;
 		entityType: string;
 		count: number;
 	}>;
+	totalActivities: number;
 }
 
 interface ActivityStatsResponse {

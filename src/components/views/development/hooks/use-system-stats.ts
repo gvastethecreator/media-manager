@@ -1,5 +1,6 @@
 import { Activity, BarChart, Boxes, Cpu, FileJson, Folder, HardDrive, Library, Tag } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { SystemMetric } from '../cards/metric-card';
 import type { ProcessingMetric } from '../cards/processing-metric-card';
 import {
@@ -47,21 +48,21 @@ export function useSystemStats() {
 			const filesChartData = filesHistorical.map((item) => item.count);
 			const filesChartLabels = filesHistorical.map((item) => {
 				const date = new Date(item.date);
-				return date.toLocaleDateString('es-ES', { weekday: 'short' });
+				return date.toLocaleDateString('en-US', { weekday: 'short' });
 			});
 
 			const tagsChartData = tagsHistorical.map((item) => item.count);
 			const tagsChartLabels = tagsHistorical.map((item) => {
 				const date = new Date(item.date);
-				return date.toLocaleDateString('es-ES', { weekday: 'short' });
+				return date.toLocaleDateString('en-US', { weekday: 'short' });
 			});
 
 			// Crear métricas
 			const systemMetricsData: SystemMetric[] = [
 				{
-					name: 'Archivos Indexados',
+					name: 'Indexed Files',
 					value: filesCount,
-					unit: 'archivos',
+					unit: 'files',
 					icon: FileJson,
 					chart: {
 						data: filesChartData,
@@ -75,19 +76,19 @@ export function useSystemStats() {
 					icon: HardDrive,
 				},
 				{
-					name: 'Carpetas Monitoreadas',
+					name: 'Monitored Folders',
 					value: foldersCount,
-					unit: 'carpetas',
+					unit: 'folders',
 					icon: Folder,
 				},
 				{
-					name: 'Colecciones',
+					name: 'Collections',
 					value: collectionsCount,
 					unit: 'total',
 					icon: Library,
 				},
 				{
-					name: 'Etiquetas',
+					name: 'Tags',
 					value: tagsCount,
 					unit: 'total',
 					icon: Tag,
@@ -97,7 +98,7 @@ export function useSystemStats() {
 					},
 				},
 				{
-					name: 'Estadísticas',
+					name: 'Statistics',
 					value: '-',
 					unit: '',
 					icon: BarChart,
@@ -129,7 +130,7 @@ export function useSystemStats() {
 			setMetrics(systemMetricsData);
 			setProcessingMetrics(processingMetricsData);
 		} catch (error) {
-			console.error('Error al obtener estadísticas del sistema:', error);
+			clientLogger.error('Could not get system statistics:', error);
 		} finally {
 			setIsLoading(false);
 		}

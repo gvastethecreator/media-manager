@@ -9,22 +9,22 @@ import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 interface GroupCardImagesProps {
-	/** Imágenes a mostrar (rutas) */
-	images?: string[];
-	/** Videos a mostrar (rutas de thumbnails) */
-	videos?: string[];
+	/** Si está en modo compacto */
+	compact?: boolean;
 	/** Emoji del grupo para mostrar si no hay imágenes */
 	emoji?: string;
+	/** Si está habilitado el efecto holográfico */
+	holographicEffect?: boolean;
+	/** Imágenes a mostrar (rutas) */
+	images?: string[];
 	/** Color primario para estilizado */
 	primaryColor?: string;
 	/** Nivel de rareza (1-10) para determinar efectos */
 	rarityLevel?: number;
-	/** Si está habilitado el efecto holográfico */
-	holographicEffect?: boolean;
 	/** Si está en modo tarjeta TCG */
 	tcgMode?: boolean;
-	/** Si está en modo compacto */
-	compact?: boolean;
+	/** Videos a mostrar (rutas de thumbnails) */
+	videos?: string[];
 }
 
 /**
@@ -35,7 +35,7 @@ export function GroupCardImages({
 	images = [],
 	videos = [],
 	emoji = '📂',
-	primaryColor = '#3b82f6',
+	primaryColor = 'var(--dt-primary-500)',
 	rarityLevel = 1,
 	holographicEffect = true,
 	tcgMode = true,
@@ -81,15 +81,15 @@ export function GroupCardImages({
 	// aria-label accesible usando helper central
 	const ariaLabel = hasMedia
 		? rarityAccessibilityLabel(
-				`Galería de grupo con ${allMedia.length} ${allMedia.length === 1 ? 'elemento' : 'elementos'}`,
+				`Group gallery with ${allMedia.length} ${allMedia.length === 1 ? 'item' : 'items'}`,
 				rarityConfig
 			)
-		: 'Grupo sin imágenes disponibles';
+		: 'Group has no images available';
 
 	return (
 		<div
 			aria-label={ariaLabel}
-			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-40', tcgMode && 'border-white/10 border-b')}
+			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-40', tcgMode && 'border-border/40 border-b')}
 			onBlur={handleMouseLeave}
 			onFocus={handleMouseLeave}
 			onMouseLeave={handleMouseLeave}
@@ -99,7 +99,7 @@ export function GroupCardImages({
 			{/* Fondo decorativo para cartas TCG */}
 			{tcgMode && (
 				<div
-					className="absolute inset-0 z-0 bg-black/20"
+					className="absolute inset-0 z-0 bg-muted/20"
 					style={{
 						backgroundImage: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 80%)`,
 					}}
@@ -144,7 +144,7 @@ export function GroupCardImages({
 					{/* Mostrar imágenes en una grilla 2x2 */}
 					{allMedia.map((media, index) => (
 						<div
-							className="relative overflow-hidden bg-black/10"
+							className="relative overflow-hidden bg-muted/10"
 							key={`media-${index}-${media.substring(media.lastIndexOf('/') + 1)}`}
 						>
 							<img
@@ -175,7 +175,7 @@ export function GroupCardImages({
 					{/* Relleno para grilla si faltan imágenes */}
 					{Array.from({ length: Math.max(0, 4 - allMedia.length) }).map((_, idx) => (
 						<div
-							className="flex items-center justify-center bg-black/10"
+							className="flex items-center justify-center bg-muted/10"
 							key={`placeholder-${emoji}-${rarityLevel}-${idx + 1}`}
 						>
 							<FolderIcon className="h-6 w-6 opacity-20" />
@@ -190,7 +190,7 @@ export function GroupCardImages({
 								background: `linear-gradient(
                   ${135 + viewAngle.x * 30}deg,
                   transparent,
-                  rgba(255, 255, 255, 0.5) ${50 + viewAngle.y * 10}%,
+                  color-mix(in oklch, var(--foreground), transparent 50%) ${50 + viewAngle.y * 10}%,
                   transparent
                 )`,
 							}}
@@ -200,7 +200,7 @@ export function GroupCardImages({
 			) : (
 				// Placeholder cuando no hay multimedia
 				<div
-					className="flex h-full w-full items-center justify-center bg-black/10 text-white/50"
+					className="flex h-full w-full items-center justify-center bg-muted/10 text-white/50"
 					style={{
 						background: `radial-gradient(circle, ${primaryColor}30 0%, transparent 70%)`,
 					}}

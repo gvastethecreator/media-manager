@@ -1,15 +1,17 @@
 import { Sparkles } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { WildcardCard } from '@/components/cards/wildcard-card';
-import { LoadingScreen } from '@/components/core/feedback';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { WildcardCard } from '@/components/cards/wildcard-card/wildcard-card';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuthorizedRoots } from '@/lib/api/authorized-roots';
 import { useCreateWildcard, useWildcards } from '@/lib/api/wildcards';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -24,12 +26,28 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		ui: { currentWildcardId },
 		setCurrentWildcard,
 	} = useWildcardStore();
-	const { mutate: createWildcard } = useCreateWildcard();
+	const createWildcardMutation = useCreateWildcard();
+	const { data: authorizedRoots = [] } = useAuthorizedRoots();
+	const writableRoots = useMemo(
+		() =>
+			authorizedRoots.filter(
+				(root) =>
+					root.permissions.includes('read') && root.permissions.includes('write') && root.permissions.includes('index')
+			),
+		[authorizedRoots]
+	);
 
 	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
 	const [newWildcardName, setNewWildcardName] = useState('');
 	const [newWildcardDescription, setNewWildcardDescription] = useState('');
+	const [newWildcardValues, setNewWildcardValues] = useState('');
+	const [artifactRootId, setArtifactRootId] = useState('');
+	const createInFlight = useRef(false);
+
+	useEffect(() => {
+		if (!artifactRootId && writableRoots[0]) setArtifactRootId(writableRoots[0].id);
+	}, [artifactRootId, writableRoots]);
 
 	// Usar React Query hook en lugar de server action
 	const {
@@ -55,32 +73,64 @@ export function WildcardsView({ isVisible }: ViewProps) {
 	);
 
 	const { toast } = useToast();
-	const handleCreateWildcard = useCallback(() => {
+	const handleCreateWildcard = useCallback(async () => {
+		if (createInFlight.current) return;
 		if (newWildcardName.trim() === '') {
 			toast({
 				title: '❌ Error',
-				description: 'El nombre del wildcard no puede estar vacío.',
+				description: 'Wildcard name cannot be empty.',
 				variant: 'destructive',
 			});
 			return;
 		}
-		createWildcard({ name: newWildcardName, description: newWildcardDescription });
-		setNewWildcardName('');
-		setNewWildcardDescription('');
-		setShowForm(false);
-	}, [newWildcardName, newWildcardDescription, createWildcard, toast]);
+		const values = newWildcardValues
+			.split('\n')
+			.map((value) => value.trim())
+			.filter(Boolean);
+		if (!artifactRootId || values.length === 0) {
+			toast({
+				title: 'Canonical file missing',
+				description: artifactRootId
+					? 'Add at least one value, one per line.'
+					: 'Configure a root with read, write, and index permissions to create Wildcards.',
+				variant: 'destructive',
+			});
+			return;
+		}
+		createInFlight.current = true;
+		try {
+			await createWildcardMutation.mutateAsync({
+				description: newWildcardDescription,
+				fileBacking: { body: values.join('\n'), rootId: artifactRootId },
+				name: newWildcardName,
+			});
+			setNewWildcardName('');
+			setNewWildcardDescription('');
+			setNewWildcardValues('');
+			setShowForm(false);
+		} catch (error) {
+			toast({
+				title: 'The Wildcard could not be created',
+				description: error instanceof Error ? error.message : 'Unexpected error.',
+				variant: 'destructive',
+			});
+		} finally {
+			createInFlight.current = false;
+		}
+	}, [artifactRootId, createWildcardMutation, newWildcardDescription, newWildcardName, newWildcardValues, toast]);
 
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar wildcards');
 		refetch();
 	}, [refetch]);
 
-	if (!isVisible) {
+	// Si isVisible es explícitamente false (modo tabs), no renderizar
+	if (isVisible === false) {
 		return null;
 	}
 
 	if (isLoading) {
-		return <LoadingScreen message="Cargando wildcards..." />;
+		return <LoadingScreen message="Loading wildcards..." />;
 	}
 
 	if (error) {
@@ -88,12 +138,12 @@ export function WildcardsView({ isVisible }: ViewProps) {
 			<EmptyState
 				actions={
 					<Button onClick={handleRetry} variant="outline">
-						Reintentar
+						Retry
 					</Button>
 				}
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				description={error instanceof Error ? error.message : 'An unexpected error occurred'}
 				icon={Sparkles}
-				title="Error al cargar wildcards"
+				title="Could not load wildcards"
 			/>
 		);
 	}
@@ -101,41 +151,67 @@ export function WildcardsView({ isVisible }: ViewProps) {
 	return (
 		<ScrollArea className="flex-1">
 			<div className="p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Wildcards</h2>
+				<h2 className="mb-4 font-bold text-xl">Wildcards</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Wildcard'}
+					{showForm ? 'Cancel' : 'Create Wildcard'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Wildcard</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Wildcard</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="wildcardName">Nombre</Label>
+							<Label htmlFor="wildcardName">Name</Label>
 							<Input
 								id="wildcardName"
 								onChange={(e) => setNewWildcardName(e.target.value)}
-								placeholder="Nombre del wildcard"
+								placeholder="Wildcard name"
 								value={newWildcardName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="wildcardDescription">Descripción</Label>
+							<Label htmlFor="wildcardDescription">Description</Label>
 							<Textarea
 								id="wildcardDescription"
 								onChange={(e) => setNewWildcardDescription(e.target.value)}
-								placeholder="Descripción del wildcard (opcional)"
+								placeholder="Wildcard description (optional)"
 								value={newWildcardDescription}
 							/>
 						</div>
-						<Button onClick={handleCreateWildcard}>Guardar Wildcard</Button>
+						<div className="mb-4 grid gap-2">
+							<Label htmlFor="wildcardValues">Values</Label>
+							<Textarea
+								id="wildcardValues"
+								onChange={(event) => setNewWildcardValues(event.target.value)}
+								placeholder={'One value per line\nred\ngreen\nblue'}
+								value={newWildcardValues}
+							/>
+						</div>
+						<div className="mb-4 grid gap-2">
+							<Label>Canonical Library</Label>
+							<Select onValueChange={setArtifactRootId} value={artifactRootId || undefined}>
+								<SelectTrigger>
+									<SelectValue placeholder="Select a root" />
+								</SelectTrigger>
+								<SelectContent>
+									{writableRoots.map((root) => (
+										<SelectItem key={root.id} value={root.id}>
+											{root.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<Button disabled={createWildcardMutation.isPending} onClick={handleCreateWildcard}>
+							{createWildcardMutation.isPending ? 'Guardando…' : 'Save Wildcard'}
+						</Button>
 					</div>
 				)}
 
 				{wildcards.length || isLoading || showForm ? (
 					<motion.div
 						animate={{ opacity: 1, y: 0 }}
-						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
 						initial={{ opacity: 0, y: 20 }}
 						transition={{ duration: 0.3 }}
 					>

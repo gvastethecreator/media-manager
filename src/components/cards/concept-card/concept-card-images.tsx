@@ -1,11 +1,8 @@
 import { ImageIcon, Sparkles } from 'lucide-react';
 import { nanoid } from 'nanoid';
-import React, { Suspense, useEffect, useState } from 'react';
+import { Suspense, useMemo } from 'react';
+import { useRecentConceptImages } from '@/lib/api/concepts';
 import { cn } from '@/lib/utils';
-
-import { ConceptService } from '@/services/concept/concept.service';
-
-const { getRecentConceptImages } = ConceptService;
 
 interface ConceptCardImagesProps {
 	conceptId: string;
@@ -19,34 +16,24 @@ interface ConceptCardImagesProps {
  * Diseñado para parecer la ilustración de una carta TCG con efectos visuales.
  */
 export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcgMode = true }: ConceptCardImagesProps) {
-	const [images, setImages] = useState<{ id: string; thumbnailUrl: string }[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const { data, isLoading, error } = useRecentConceptImages(conceptId, 6);
+
+	// Filtrar solo imágenes con thumbnailUrl válida
+	const images = useMemo(() => {
+		if (!data) return [];
+		return data.filter((img) => img.thumbnailUrl);
+	}, [data]);
 
 	// Generar un ID de renderizado único
-	const renderKey = React.useMemo(() => nanoid(), []);
-
-	useEffect(() => {
-		const loadImages = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getRecentConceptImages(conceptId);
-				// Filtrar solo imágenes con thumbnailUrl válida
-				const validImages = data.filter((img) => img.thumbnailUrl);
-				setImages(validImages);
-			} catch (err) {
-				console.error('Error cargando imágenes:', err);
-				setError(err instanceof Error ? err.message : 'Error desconocido');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		loadImages();
-	}, [conceptId]);
+	const renderKey = useMemo(() => nanoid(), []);
 
 	return (
-		<div className={cn('relative h-[160px] overflow-hidden', tcgMode ? 'border-b-0' : 'border-gray-400/30 border-b')}>
+		<div
+			className={cn(
+				'relative h-[160px] overflow-hidden',
+				tcgMode ? 'border-b-0' : 'border-muted-foreground/30/30 border-b'
+			)}
+		>
 			{/* Marco decorativo para TCG */}
 			{tcgMode && (
 				<>
@@ -70,9 +57,11 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 				)}
 				style={{
 					backgroundImage: tcgMode
-						? `linear-gradient(to bottom, ${secondaryColor}80, ${secondaryColor})`
-						: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
-					borderBottom: tcgMode ? `2px solid ${primaryColor}` : `1px solid ${primaryColor}50`,
+						? `linear-gradient(to bottom, color-mix(in oklab, ${secondaryColor}, transparent 50%), ${secondaryColor})`
+						: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 81%), color-mix(in oklab, ${secondaryColor}, transparent 69%))`,
+					borderBottom: tcgMode
+						? `2px solid ${primaryColor}`
+						: `1px solid color-mix(in oklab, ${primaryColor}, transparent 69%)`,
 				}}
 			>
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} tcgMode={tcgMode} />}>
@@ -88,14 +77,14 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 					) : error ? (
 						// Mostrar mensaje de error
 						<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">
-							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error}
+							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error.message}
 						</div>
 					) : images.length === 0 ? (
 						// Mostrar mensaje si no hay imágenes
 						<div
 							className={cn(
 								'col-span-full row-span-full flex flex-col items-center justify-center p-4 text-center',
-								tcgMode ? 'bg-black/30' : ''
+								tcgMode ? 'bg-muted/30' : ''
 							)}
 						>
 							{tcgMode ? (
@@ -105,13 +94,13 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 										<ImageIcon className="h-6 w-6 text-white/60" />
 										<Sparkles className="ml-1 h-5 w-5 text-white/40" />
 									</div>
-									<p className="font-semibold text-sm text-white/80">Imaginación Conceptual</p>
-									<p className="text-white/50 text-xs italic">Sin visualizaciones</p>
+									<p className="font-semibold text-sm text-white/80">Concept Art</p>
+									<p className="text-sm text-white/50 italic">No visualizations</p>
 								</div>
 							) : (
 								<>
 									<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
-									<p className="text-sm opacity-70">No hay imágenes</p>
+									<p className="text-sm opacity-70">No images</p>
 								</>
 							)}
 						</div>
@@ -120,11 +109,11 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 						<>
 							{images.map((image, index) => (
 								<div
-									className={cn('relative h-full w-full overflow-hidden', tcgMode ? 'border border-white/10' : '')}
+									className={cn('relative h-full w-full overflow-hidden', tcgMode ? 'border border-border/40' : '')}
 									key={image.id}
 								>
 									<img
-										alt={`Imagen ${index + 1}`}
+										alt={`Concept visual ${index + 1}`}
 										className={cn(
 											'h-full w-full object-cover',
 											tcgMode ? 'transition-transform duration-500 hover:scale-110' : ''
@@ -143,7 +132,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 									<div
 										className={cn(
 											'flex h-full w-full items-center justify-center',
-											tcgMode ? 'border border-white/5 bg-black/40' : 'bg-black/20'
+											tcgMode ? 'border border-border/20 bg-muted/40' : 'bg-muted/20'
 										)}
 										key={`placeholder-${renderKey}-position-${i + 1}`}
 									>
@@ -157,7 +146,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 
 			{/* Sello de agua TCG */}
 			{tcgMode && (
-				<div className="absolute right-2 bottom-2 font-mono text-white text-xs tracking-tight opacity-20">
+				<div className="absolute right-2 bottom-2 font-mono text-sm text-white tracking-tight opacity-20">
 					◊ C-{conceptId.substring(0, 4)} ◊
 				</div>
 			)}
@@ -171,9 +160,13 @@ function ImageLoading({ backgroundColor, tcgMode = false }: { backgroundColor: s
 		<div
 			className={cn(
 				'relative flex h-full w-full animate-pulse items-center justify-center overflow-hidden',
-				tcgMode ? 'border border-white/5' : ''
+				tcgMode ? 'border border-border/20' : ''
 			)}
-			style={{ backgroundColor: tcgMode ? `${backgroundColor}60` : `${backgroundColor}30` }}
+			style={{
+				backgroundColor: tcgMode
+					? `color-mix(in oklab, ${backgroundColor}, transparent 63%)`
+					: `color-mix(in oklab, ${backgroundColor}, transparent 81%)`,
+			}}
 		>
 			<ImageIcon className="h-5 w-5 opacity-20" />
 		</div>

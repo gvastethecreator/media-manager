@@ -1,8 +1,8 @@
 import { BookMarked } from 'lucide-react';
 import { memo } from 'react';
-import { CollectionCard } from '@/components/cards/collection-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { CollectionCard } from '@/components/cards/collection-card/collection-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,18 +12,18 @@ import { Textarea } from '@/components/ui/textarea';
 import type { CollectionWithStats } from '@/types/entities/collection';
 
 interface CollectionsContentViewProps {
+	className?: string;
 	collections: CollectionWithStats[];
-	isLoading: boolean;
 	error: string | null;
-	showForm: boolean;
-	newCollectionName: string;
-	newCollectionDescription: string;
-	setShowForm: (show: boolean) => void;
-	setNewCollectionName: (name: string) => void;
-	setNewCollectionDescription: (description: string) => void;
 	handleCollectionClick: (collection: CollectionWithStats) => void;
 	handleCreateCollection: () => void;
-	className?: string;
+	isLoading: boolean;
+	newCollectionDescription: string;
+	newCollectionName: string;
+	setNewCollectionDescription: (description: string) => void;
+	setNewCollectionName: (name: string) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 const MemoizedCollectionCard = memo(CollectionCard);
@@ -57,45 +57,45 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'h-full'}>
 			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Colecciones</h2>
+				<h2 className="mb-4 font-bold text-xl">Collections</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Colección'}
+					{showForm ? 'Cancel' : 'Create Collection'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nueva Colección</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Collection</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="collectionName">Nombre</Label>
+							<Label htmlFor="collectionName">Name</Label>
 							<Input
 								id="collectionName"
 								onChange={(e) => setNewCollectionName(e.target.value)}
-								placeholder="Nombre de la colección"
+								placeholder="Collection name"
 								value={newCollectionName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="collectionDescription">Descripción</Label>
+							<Label htmlFor="collectionDescription">Description</Label>
 							<Textarea
 								id="collectionDescription"
 								onChange={(e) => setNewCollectionDescription(e.target.value)}
-								placeholder="Descripción de la colección (opcional)"
+								placeholder="Collection description (optional)"
 								value={newCollectionDescription}
 							/>
 						</div>
-						<Button onClick={handleCreateCollection}>Guardar Colección</Button>
+						<Button onClick={handleCreateCollection}>Save Collection</Button>
 					</div>
 				)}
 
 				{(!collections || collections.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
-						description="Crea una colección para organizar tus imágenes de forma temática."
+						description="Create a collection to organize related images."
 						icon={BookMarked}
-						title="No hay colecciones creadas"
+						title="No collections yet"
 					/>
 				) : (
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{collections?.map((collection, index) => (
 							<motion.div
 								animate={{ opacity: 1, y: 0 }}

@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand';
 // Ahora usamos el cliente de API y no el servicio del servidor
 import { createNoteInApi, deleteNoteFromApi, getNotesFromApi, updateNoteInApi } from '@/lib/api/client/note.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/services/toast/toast.service';
 import { adaptNoteCompleteToWithStats, adaptNotesCompleteToWithStats } from '@/transformers/note/note-adapter';
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import type { NoteStore } from '../types';
@@ -10,24 +10,24 @@ import type { NoteStore } from '../types';
 const coreLogger = clientLogger.withContext('NoteStore:Core');
 
 export interface CoreSlice {
-	// Estado principal
-	notes: Record<string, NoteWithStats>;
-	selectedNote: NoteWithStats | null;
-	selectedNoteId: string | null;
-	selectedNoteIds: string[];
-	isMultiSelectMode: boolean;
-	isLoading: boolean;
-	loading: boolean; // Alias para compatibilidad
+	createNote: (note: NoteCreateInput) => Promise<void>;
+	deleteNote: (id: string) => Promise<void>;
 	error: string | null;
-	version: string;
+	isLoading: boolean;
+	isMultiSelectMode: boolean;
+	loading: boolean; // Alias para compatibilidad
 
 	// Acciones
 	loadNotes: () => Promise<void>;
-	createNote: (note: NoteCreateInput) => Promise<void>;
-	updateNote: (id: string, note: NoteUpdateInput) => Promise<void>;
-	deleteNote: (id: string) => Promise<void>;
-	selectNote: (note: NoteWithStats | null) => void;
+	// Estado principal
+	notes: Record<string, NoteWithStats>;
 	reset: () => void;
+	selectedNote: NoteWithStats | null;
+	selectedNoteId: string | null;
+	selectedNoteIds: string[];
+	selectNote: (note: NoteWithStats | null) => void;
+	updateNote: (id: string, note: NoteUpdateInput) => Promise<void>;
+	version: string;
 }
 
 function getPriorityLabel(priority: number): string {
@@ -156,13 +156,13 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			toastService.success('Nota creada correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al crear nota:', errorMessage);
+			coreLogger.error('❌ Could not create note:', errorMessage);
 			set({
 				error: errorMessage,
 				isLoading: false,
 				loading: false,
 			});
-			toastService.error('Error al crear nota', { description: errorMessage });
+			toastService.error('Could not create note', { description: errorMessage });
 		}
 	},
 
@@ -186,13 +186,13 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			toastService.success('Nota actualizada correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al actualizar nota:', errorMessage);
+			coreLogger.error('❌ Could not update note:', errorMessage);
 			set({
 				error: errorMessage,
 				isLoading: false,
 				loading: false,
 			});
-			toastService.error('Error al actualizar nota', { description: errorMessage });
+			toastService.error('Could not update note', { description: errorMessage });
 		}
 	},
 
@@ -219,13 +219,13 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			toastService.success('Nota eliminada correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al eliminar nota:', errorMessage);
+			coreLogger.error('❌ Could not delete note:', errorMessage);
 			set({
 				error: errorMessage,
 				isLoading: false,
 				loading: false,
 			});
-			toastService.error('Error al eliminar nota', { description: errorMessage });
+			toastService.error('Could not delete note', { description: errorMessage });
 		}
 	},
 

@@ -1,14 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
+import { folderKeys } from '@/lib/api/folders';
 import { navigationKeys } from '@/lib/api/navigation';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 const logger = clientLogger.withContext('NavigationRefresh');
 
 interface FolderEvent {
-	type: string;
 	data?: unknown;
 	timestamp?: number;
+	type: string;
 }
 
 /**
@@ -17,10 +18,37 @@ interface FolderEvent {
 export function useNavigationRefresh(): void {
 	const qc = useQueryClient();
 	const esRef = useRef<EventSource | null>(null);
+	const reindexRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+	const isGlobalReindexingRef = useRef(false);
 
 	useEffect(() => {
 		// Proteger múltiples montajes
 		if (esRef.current) return;
+
+		const invalidateNavigationAndFolders = () => {
+			qc.invalidateQueries({ queryKey: navigationKeys.data() });
+			qc.invalidateQueries({ queryKey: navigationKeys.stats() });
+			qc.invalidateQueries({ queryKey: folderKeys.tree() });
+		};
+
+		const startReindexRefresh = () => {
+			if (reindexRefreshIntervalRef.current) {
+				return;
+			}
+
+			reindexRefreshIntervalRef.current = setInterval(() => {
+				logger.info('Refresh periódico de navegación y árbol durante reindexado');
+				invalidateNavigationAndFolders();
+			}, 30_000);
+		};
+
+		const stopReindexRefresh = () => {
+			isGlobalReindexingRef.current = false;
+			if (reindexRefreshIntervalRef.current) {
+				clearInterval(reindexRefreshIntervalRef.current);
+				reindexRefreshIntervalRef.current = null;
+			}
+		};
 
 		const es = new EventSource('/api/events/stream', { withCredentials: false });
 		esRef.current = es;
@@ -37,11 +65,27 @@ export function useNavigationRefresh(): void {
 			try {
 				const payload: FolderEvent = JSON.parse(e.data);
 				const t = payload.type;
-				if (t === 'folder:complete' || t === 'folder:reindexAll:complete') {
+				if (t === 'folder:reindexAll:start' || t === 'folder:reindexAll:progress') {
+					isGlobalReindexingRef.current = true;
+					startReindexRefresh();
+				}
+				if (t === 'folder:progress') {
+					startReindexRefresh();
+				}
+				if (t === 'folder:complete' && !isGlobalReindexingRef.current) {
 					logger.info('Evento de indexado completado recibido, invalidando navegación', { type: t });
-					// Invalidar datos y stats de navegación
-					qc.invalidateQueries({ queryKey: navigationKeys.data() });
-					qc.invalidateQueries({ queryKey: navigationKeys.stats() });
+					invalidateNavigationAndFolders();
+					stopReindexRefresh();
+				}
+				if (t === 'folder:error' && !isGlobalReindexingRef.current) {
+					logger.info('Evento de error de indexado recibido, invalidando navegación', { type: t });
+					invalidateNavigationAndFolders();
+					stopReindexRefresh();
+				}
+				if (t === 'folder:reindexAll:complete') {
+					logger.info('Evento de indexado completado recibido, invalidando navegación', { type: t });
+					invalidateNavigationAndFolders();
+					stopReindexRefresh();
 				}
 			} catch (err) {
 				logger.warn('No se pudo parsear evento SSE', { error: err instanceof Error ? err.message : String(err) });
@@ -58,6 +102,7 @@ export function useNavigationRefresh(): void {
 		es.addEventListener('error', onError as EventListener);
 
 		return () => {
+			stopReindexRefresh();
 			es.removeEventListener('connected', onConnected as EventListener);
 			es.removeEventListener('heartbeat', onHeartbeat as EventListener);
 			es.removeEventListener('event', onEvent as EventListener);

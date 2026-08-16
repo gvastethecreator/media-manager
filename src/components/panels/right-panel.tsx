@@ -1,13 +1,14 @@
 import { lazy, memo as reactMemo, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { DetailsPanel } from '@/components/panels/details-panel';
+import { DetailsPanel } from '@/components/panels/details-panel/details-panel';
 import { FolderStatsDisplay } from '@/components/panels/stats-panel/folder-stats-display';
-import { SystemStatsDisplay } from '@/components/panels/stats-panel/system-stats-display';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
 // Lazy load InterfaceSection para no impactar bundle inicial
-const FileBrowserSettings = lazy(() => import('@/components/features/file-browser/components/file-browser-settings'));
+const FileBrowserSettings = lazy(
+	() => import('@/components/features/file-browser-new/components/settings/file-browser-settings')
+);
 
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
@@ -31,7 +32,7 @@ const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
 	if (!shouldRender) {
 		return (
 			<div className="flex h-full w-full items-center justify-center">
-				<div className="animate-pulse p-4 text-muted-foreground text-sm">Inicializando estadísticas...</div>
+				<div className="animate-pulse p-4 text-muted-foreground text-sm">Initializing statistics...</div>
 			</div>
 		);
 	}
@@ -39,25 +40,28 @@ const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
 	// Si hay folderId, mostrar estadísticas de carpeta
 	if (folderId) {
 		return (
-			<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
+			<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Loading statistics...</div>}>
 				<FolderStatsDisplay folderId={folderId} />
 			</Suspense>
 		);
 	}
 
-	// Si no hay folderId, mostrar estadísticas del sistema
+	// Los agregados globales no pertenecen a ningún media root autorizado. No iniciar una consulta que el servidor debe rechazar.
 	return (
-		<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
-			<SystemStatsDisplay />
-		</Suspense>
+		<div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
+			<p className="heading-sm">Library Statistics</p>
+			<p className="caption text-muted-foreground">
+				Select a folder or library to view metrics within an authorized scope.
+			</p>
+		</div>
 	);
 });
 
 interface RightPanelProps {
 	className?: string;
+	isAnimating?: boolean;
 	isCollapsed?: boolean;
 	onToggleCollapse?: () => void;
-	isAnimating?: boolean;
 }
 
 /**
@@ -112,24 +116,24 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 	}, [mounted]);
 
 	// Determinamos el título según el contenido actual
-	const panelTitle = showInterfaceSettings ? 'Configuración' : hasSelectedItems ? 'Detalles' : 'Panel';
+	const panelTitle = showInterfaceSettings ? 'Settings' : hasSelectedItems ? 'Details' : 'Panel';
 
 	// No mostramos nada si no hay razón para mostrar el panel
-	if (!shouldShowPanel) {
+	if (!(shouldShowPanel || isCollapsed)) {
 		return null;
 	}
 
 	return (
 		<div
 			className={cn(
-				'flex h-full w-full bg-background',
+				'flex h-full w-full min-w-0 bg-background',
 				isAnimating && 'transition-all duration-50',
 				isCollapsed && 'right-panel-collapsed'
 			)}
 		>
 			{!isCollapsed &&
 				(showInterfaceSettings ? (
-					<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando configuración...</div>}>
+					<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Loading settings...</div>}>
 						<div className="w-full overflow-y-auto p-2 pr-3">
 							<FileBrowserSettings />
 						</div>

@@ -3,11 +3,11 @@ import { serverLogger } from '../logger/server-logger';
 
 // Interfaz para las opciones del logger de API
 interface ApiLoggerOptions {
-	showHeaders?: boolean;
-	showBody?: boolean;
-	showQuery?: boolean;
-	sensitiveHeaders?: string[];
 	sensitiveBodyFields?: string[];
+	sensitiveHeaders?: string[];
+	showBody?: boolean;
+	showHeaders?: boolean;
+	showQuery?: boolean;
 }
 
 // Opciones predeterminadas

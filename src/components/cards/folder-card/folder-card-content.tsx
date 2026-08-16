@@ -3,14 +3,14 @@ import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface FolderCardContentProps {
+	childrenCount?: number;
 	description?: string | null;
+	featuredImage?: string | null;
+	lastIndexed?: Date | null;
+	primaryColor: string;
+	tcgMode?: boolean;
 	totalFiles: number;
 	totalSize: number;
-	lastIndexed?: Date | null;
-	childrenCount?: number;
-	primaryColor: string;
-	featuredImage?: string | null;
-	tcgMode?: boolean;
 }
 
 /**
@@ -40,7 +40,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 		return {
 			formattedSize: formatBytes(totalSize),
 			formattedDate: lastIndexed
-				? new Date(lastIndexed).toLocaleDateString('es-ES', {
+				? new Date(lastIndexed).toLocaleDateString('en-US', {
 						day: '2-digit',
 						month: '2-digit',
 						year: '2-digit',
@@ -70,7 +70,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 		<div
 			className={cn(
 				'relative flex-grow overflow-hidden p-3 text-card-foreground',
-				tcgMode ? 'bg-black/20' : 'bg-card/90'
+				tcgMode ? 'bg-muted/20' : 'bg-card/90'
 			)}
 			style={{
 				backgroundImage: featuredImage ? `url(${featuredImage})` : undefined,
@@ -80,7 +80,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 			}}
 		>
 			{/* Overlay para mantener legibilidad sobre imagen */}
-			{featuredImage && <div className="absolute inset-0 z-0 bg-black/50" />}
+			{featuredImage && <div className="absolute inset-0 z-0 bg-muted/50" />}
 
 			{/* Contenido con posición relativa para estar sobre el overlay */}
 			<div className="relative z-10 flex h-full flex-col">
@@ -91,7 +91,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 							className={cn(
 								'min-h-[3em] italic',
 								tcgMode
-									? 'rounded-sm border border-white/10 bg-black/40 p-2 text-sm text-white/90 shadow-inner'
+									? 'rounded-sm border border-border/40 bg-muted/40 p-2 text-sm text-white/90 shadow-inner'
 									: 'text-muted-foreground text-sm'
 							)}
 							style={tcgMode ? {} : { color: primaryColor }}
@@ -102,10 +102,10 @@ export const FolderCardContent = memo(function FolderCardContent({
 						<div
 							className={cn(
 								'flex min-h-[3em] items-center justify-center text-center italic',
-								tcgMode ? 'rounded-sm bg-black/20 p-2 text-white/50' : 'text-muted-foreground/50'
+								tcgMode ? 'rounded-sm bg-muted/20 p-2 text-white/50' : 'text-muted-foreground/50'
 							)}
 						>
-							Sin descripción
+							No description
 						</div>
 					)}
 				</div>
@@ -113,8 +113,8 @@ export const FolderCardContent = memo(function FolderCardContent({
 				{/* Estadísticas de la carpeta (como caja de texto en TCG) */}
 				<div
 					className={cn(
-						'rounded-sm pt-1 text-xs',
-						tcgMode ? 'border border-white/10 bg-black/30 p-2 shadow-inner' : 'border-t p-1'
+						'rounded-sm pt-1 text-sm',
+						tcgMode ? 'border border-border/40 bg-muted/30 p-2 shadow-inner' : 'border-t p-1'
 					)}
 					style={
 						tcgMode
@@ -131,7 +131,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 							<div className="flex flex-col">
 								<span className="mb-0.5 text-[0.65rem] text-white/70 uppercase tracking-wide">Poder</span>
 								<div className="flex items-center">
-									<div className="h-1.5 w-full overflow-hidden rounded-sm bg-black/50" style={{ width: '60px' }}>
+									<div className="h-1.5 w-full overflow-hidden rounded-sm bg-muted/50" style={{ width: '60px' }}>
 										<div
 											className="h-full"
 											style={{
@@ -153,15 +153,15 @@ export const FolderCardContent = memo(function FolderCardContent({
 					<div className="grid grid-cols-2 gap-2">
 						<div className="flex items-center justify-between">
 							<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
-								<FolderOutputIcon className="mr-1 inline h-3 w-3" />
-								Archivos:
+								<FolderOutputIcon className="mr-1 inline h-4 w-4" />
+								Files:
 							</span>
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{totalFiles}</span>
 						</div>
 						<div className="flex items-center justify-between">
 							<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
-								<HardDriveIcon className="mr-1 inline h-3 w-3" />
-								Tamaño:
+								<HardDriveIcon className="mr-1 inline h-4 w-4" />
+								Size:
 							</span>
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{computedStats.formattedSize}</span>
 						</div>
@@ -181,13 +181,13 @@ export const FolderCardContent = memo(function FolderCardContent({
 					<div
 						className={cn(
 							'mt-1 flex items-center justify-between pt-1',
-							tcgMode ? 'border-white/10 border-t' : 'border-t border-dashed'
+							tcgMode ? 'border-border/40 border-t' : 'border-t border-dashed'
 						)}
 						style={tcgMode ? {} : { borderColor: `${primaryColor}20` }}
 					>
 						<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
-							<TimerResetIcon className="mr-1 inline h-3 w-3" />
-							Última indexación:
+							<TimerResetIcon className="mr-1 inline h-4 w-4" />
+							Last indexed:
 						</span>
 						<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{formattedLastIndexed}</span>
 					</div>

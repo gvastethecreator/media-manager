@@ -5,6 +5,7 @@
  */
 
 import { createDefaultEntityStats } from '@/lib/utils';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 import { serverLogger } from '../../lib/logger/server-logger';
 import type {
 	NoteCreateInput,
@@ -16,40 +17,39 @@ import type {
 
 const logger = serverLogger.withContext('NoteMappers');
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
-type DrizzleCreateNoteData = {
-	title: string;
-	content: string;
+// Tipos locales para Drizzle ORM
+interface DrizzleCreateNoteData {
 	category: string;
+	content: string;
 	priority: number;
 	status: string;
-	isFavorite: boolean;
-};
+	title: string;
+}
 
 type DrizzleUpdateNoteData = Partial<DrizzleCreateNoteData>;
 
-type DrizzleWhereFilter = {
+interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
-	OR?: DrizzleWhereFilter[];
-	title?: { contains?: string; equals?: string };
-	content?: { contains?: string; equals?: string };
 	category?: { in?: string[] };
+	content?: { contains?: string; equals?: string };
+	isFavorite?: boolean;
+	OR?: DrizzleWhereFilter[];
 	priority?: { in?: number[] };
 	status?: { in?: string[] };
-	isFavorite?: boolean;
-};
+	title?: { contains?: string; equals?: string };
+}
 
-type DrizzleFindManyArgs = {
-	where?: DrizzleWhereFilter;
+interface DrizzleFindManyArgs {
 	orderBy?: { [key: string]: 'asc' | 'desc' };
 	skip?: number;
 	take?: number;
-};
+	where?: DrizzleWhereFilter;
+}
 
-type DrizzleUpdateResult = {
+interface DrizzleUpdateResult {
 	data: DrizzleUpdateNoteData;
 	// Los includes se manejan por separado en Drizzle
-};
+}
 
 /**
  * 🔄 Mapea datos de creación de nota a formato compatible con Drizzle.
@@ -81,7 +81,6 @@ export function mapCreateNoteDataToDrizzle(data: NoteCreateInput): DrizzleCreate
 			category: rest.category ?? 'general',
 			priority: rest.priority ?? 0,
 			status: rest.status ?? 'draft',
-			isFavorite: rest.isFavorite ?? false,
 		};
 
 		// Las relaciones se manejan por separado en Drizzle con junction tables
@@ -214,20 +213,20 @@ export function toNoteWithStats(note: any): any {
 		}
 
 		// Extraer conteos de relaciones
-		const counts = note._count || {};
-		const imageCount = counts.images || 0;
-		const videoCount = counts.videos || 0;
-		const albumCount = counts.albums || 0;
-		const collectionCount = counts.collections || 0;
-		const tagCount = counts.tags || 0;
-		const characterCountStat = counts.characters || 0;
-		const placeCount = counts.places || 0;
-		const worldItemCount = counts.worldItems || 0;
-		const conceptCount = counts.concepts || 0;
-		const promptCount = counts.prompts || 0;
-		const wildcardCount = counts.wildcards || 0;
-		const propertyCount = counts.properties || 0;
-		const groupCount = counts.groups || 0;
+		const counts = normalizeCounts(note._count);
+		const imageCount = counts.images;
+		const videoCount = counts.videos;
+		const albumCount = counts.albums;
+		const collectionCount = counts.collections;
+		const tagCount = counts.tags;
+		const characterCountStat = counts.characters;
+		const placeCount = counts.places;
+		const worldItemCount = counts.worldItems;
+		const conceptCount = counts.concepts;
+		const promptCount = counts.prompts;
+		const wildcardCount = counts.wildcards;
+		const propertyCount = counts.properties;
+		const groupCount = counts.groups;
 
 		const statistics = {
 			...createDefaultEntityStats(),
@@ -249,20 +248,7 @@ export function toNoteWithStats(note: any): any {
 			readingTime,
 			completionScore: completenessScore,
 			totalItems: imageCount + videoCount + albumCount + collectionCount,
-			totalAssociations:
-				imageCount +
-				videoCount +
-				albumCount +
-				collectionCount +
-				tagCount +
-				characterCountStat +
-				placeCount +
-				worldItemCount +
-				conceptCount +
-				promptCount +
-				wildcardCount +
-				propertyCount +
-				groupCount,
+			totalAssociations: sumCounts(note._count, STANDARD_COUNT_KEYS),
 			lastUpdated: note.updatedAt || new Date(),
 			isDirectory: false,
 			isFile: true,

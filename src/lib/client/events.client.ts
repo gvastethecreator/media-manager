@@ -31,7 +31,7 @@ export function useEvents<T>(initialState: T) {
 	}, [initialState, state]);
 
 	const addEvent = useCallback((event: EventData) => {
-		eventsLogger.info('📨 Evento recibido (MOCK):', event);
+		eventsLogger.info('📨 Evento recibido en cliente:', event);
 
 		// Emitir el evento a los suscriptores
 		const eventType = event.type;

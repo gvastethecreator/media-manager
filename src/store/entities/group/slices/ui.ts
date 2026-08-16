@@ -12,58 +12,58 @@ const groupLogger = clientLogger.withContext('GroupUI');
 
 // Slice para estado de UI
 export interface GroupUISlice {
-	// Estado de UI
-	selectedIds: string[];
-	setSelectedIds: (ids: string[]) => void;
-	viewMode: GroupViewMode;
-	isViewerOpen: boolean;
+	clearSelection: () => void;
+	closeViewer: () => void;
+	collapseAllGroups: () => void;
+	collapseGroup: (id: string) => void;
 	currentGroupId: string | null;
+	deselectGroup: (id: string) => void;
 	displayState: Record<string, GroupDisplayState>;
 	draggedGroupId: string | null;
 	dropTargetGroupId: string | null;
-	highlightedId: string | null;
+	expandAllGroups: () => void;
 	expandedIds: string[];
-	viewConfig: GroupViewConfig;
-
-	// Selección de grupos
-	selectGroup: (id: string | null) => void;
-	deselectGroup: (id: string) => void;
-	toggleGroupSelection: (id: string) => void;
-	selectMultipleGroups: (ids: string[]) => void;
-	clearSelection: () => void;
-	getSelectedGroups: () => string[];
-	isGroupSelected: (id: string) => boolean;
-
-	// Visor de grupos
-	openViewer: (groupId: string) => void;
-	closeViewer: () => void;
-	getCurrentGroup: () => GroupWithStats | null;
-
-	// Modo de visualización
-	setViewMode: (viewMode: GroupViewMode) => void;
-	getViewMode: () => GroupViewMode;
-
-	// Estado de visualización
-	setGroupDisplayState: (id: string, state: GroupDisplayState) => void;
-	getGroupDisplayState: (id: string) => GroupDisplayState;
 
 	// Expansión de grupos
 	expandGroup: (id: string) => void;
-	collapseGroup: (id: string) => void;
-	toggleGroupExpansion: (id: string) => void;
+	getCurrentGroup: () => GroupWithStats | null;
+	getDraggedGroup: () => string | null;
+	getDropTargetGroup: () => string | null;
+	getGroupDisplayState: (id: string) => GroupDisplayState;
+	getHighlightedGroup: () => string | null;
+	getSelectedGroups: () => string[];
+	getViewMode: () => GroupViewMode;
+	highlightedId: string | null;
+
+	// Resaltado
+	highlightGroup: (id: string | null) => void;
 	isGroupExpanded: (id: string) => boolean;
-	expandAllGroups: () => void;
-	collapseAllGroups: () => void;
+	isGroupSelected: (id: string) => boolean;
+	isViewerOpen: boolean;
+
+	// Visor de grupos
+	openViewer: (groupId: string) => void;
+	// Estado de UI
+	selectedIds: string[];
+
+	// Selección de grupos
+	selectGroup: (id: string | null) => void;
+	selectMultipleGroups: (ids: string[]) => void;
 
 	// Drag & Drop
 	setDraggedGroup: (id: string | null) => void;
 	setDropTargetGroup: (id: string | null) => void;
-	getDraggedGroup: () => string | null;
-	getDropTargetGroup: () => string | null;
 
-	// Resaltado
-	highlightGroup: (id: string | null) => void;
-	getHighlightedGroup: () => string | null;
+	// Estado de visualización
+	setGroupDisplayState: (id: string, state: GroupDisplayState) => void;
+	setSelectedIds: (ids: string[]) => void;
+
+	// Modo de visualización
+	setViewMode: (viewMode: GroupViewMode) => void;
+	toggleGroupExpansion: (id: string) => void;
+	toggleGroupSelection: (id: string) => void;
+	viewConfig: GroupViewConfig;
+	viewMode: GroupViewMode;
 }
 
 // Creador del slice

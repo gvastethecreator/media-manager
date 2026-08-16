@@ -1,0 +1,1 @@
+ALTER TABLE `Wildcard` ADD `shortcut` text;

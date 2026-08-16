@@ -10,21 +10,21 @@ const helpersLogger = serverLogger.withContext('ConceptHelpers');
  */
 export function generateRandomConceptColor(): string {
 	const colors = [
-		'#3b82f6', // blue
-		'#8b5cf6', // purple
-		'#ec4899', // pink
+		'var(--dt-primary-500)', // blue
+		'var(--preset-purple)', // purple
+		'var(--preset-pink)', // pink
 		'#f43f5e', // rose
-		'#ef4444', // red
-		'#f97316', // orange
-		'#f59e0b', // amber
+		'var(--dt-danger-500)', // red
+		'var(--preset-orange)', // orange
+		'var(--dt-warning-500)', // amber
 		'#eab308', // yellow
-		'#84cc16', // lime
-		'#22c55e', // green
-		'#10b981', // emerald
+		'var(--preset-lime)', // lime
+		'var(--preset-green)', // green
+		'var(--dt-success-500)', // emerald
 		'#14b8a6', // teal
-		'#06b6d4', // cyan
-		'#0ea5e9', // sky
-		'#6366f1', // indigo
+		'var(--preset-cyan)', // cyan
+		'var(--preset-sky)', // sky
+		'var(--preset-indigo)', // indigo
 		'#a855f7', // violet
 	];
 
@@ -130,7 +130,7 @@ export function calculateConceptsStats(concepts: ConceptBase[]): {
 			withRelations,
 		};
 	} catch (error) {
-		helpersLogger.error('❌ Error al calcular estadísticas de conceptos:', error);
+		helpersLogger.error('❌ Could not calculate concept statistics:', error);
 		return { total: 0, byCategory: {}, favorites: 0, withImages: 0, withRelations: 0 };
 	}
 }

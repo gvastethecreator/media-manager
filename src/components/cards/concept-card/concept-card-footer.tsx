@@ -1,21 +1,20 @@
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { BookOpen, Calendar, Clock, Lightbulb, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from '@/lib/utils/date';
 
 interface ConceptCardFooterProps {
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	imagesCount?: number;
-	videosCount?: number;
-	promptsCount?: number;
-	notesCount?: number;
-	totalRelations?: number;
-	isFavorite?: boolean;
 	category?: string | null;
+	createdAt: Date | string;
+	imagesCount?: number;
+	isFavorite?: boolean;
+	notesCount?: number;
 	primaryColor: string;
+	promptsCount?: number;
 	secondaryColor: string;
 	tcgMode?: boolean;
+	totalRelations?: number;
+	updatedAt: Date | string;
+	videosCount?: number;
 }
 
 /**
@@ -43,25 +42,23 @@ export function ConceptCardFooter({
 	// Calcular tiempo relativo
 	const createdTimeAgo = formatDistanceToNow(createdAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 	const updatedTimeAgo = formatDistanceToNow(updatedAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 
 	// Calcular rareza basado en relaciones totales
 	const getRarity = () => {
 		if (totalRelations > 50) {
-			return 'Mítico';
+			return 'Mythic';
 		}
 		if (totalRelations > 25) {
-			return 'Raro';
+			return 'Rare';
 		}
 		if (totalRelations > 10) {
 			return 'Infrecuente';
 		}
-		return 'Común';
+		return 'Common';
 	};
 
 	// Calcular "ID" de colección al estilo TCG
@@ -91,16 +88,19 @@ export function ConceptCardFooter({
 	return (
 		<div
 			className={cn(
-				'px-3 py-2 text-white/80 text-xs',
-				tcgMode ? 'border-white/10 border-t' : '',
-				isFavorite && tcgMode ? 'bg-gradient-to-t from-amber-950/40 to-amber-900/20' : ''
+				'px-3 py-2 text-sm text-white/80',
+				tcgMode ? 'border-border/40 border-t' : '',
+				isFavorite && tcgMode ? 'bg-linear-to-t from-amber-950/40 to-amber-900/20' : ''
 			)}
 			style={{
 				background: tcgMode
 					? `linear-gradient(to top, ${secondaryColor}, ${secondaryColor}90)`
 					: `linear-gradient(to top, ${secondaryColor}90, ${secondaryColor}60)`,
 				borderTop: tcgMode ? `1px solid ${primaryColor}60` : `1px solid ${primaryColor}40`,
-				boxShadow: isFavorite && tcgMode ? 'inset 0 0 10px rgba(255, 215, 0, 0.2)' : undefined,
+				boxShadow:
+					isFavorite && tcgMode
+						? 'inset 0 0 10px color-mix(in oklch, var(--preset-yellow), transparent 80%)'
+						: undefined,
 			}}
 		>
 			<div className="mb-1.5 flex items-center justify-between">
@@ -138,9 +138,9 @@ export function ConceptCardFooter({
 						<span
 							className="rounded-sm px-1.5 py-0.5 font-bold text-[0.65rem]"
 							style={{
-								backgroundColor: isFavorite ? '#FFD700' : primaryColor,
+								backgroundColor: isFavorite ? 'var(--preset-yellow)' : primaryColor,
 								color: isFavorite ? 'black' : 'white',
-								boxShadow: isFavorite ? '0 0 5px rgba(255, 215, 0, 0.7)' : 'none',
+								boxShadow: isFavorite ? '0 0 5px color-mix(in oklch, var(--preset-yellow), transparent 30%)' : 'none',
 							}}
 						>
 							{rarity}
@@ -151,7 +151,7 @@ export function ConceptCardFooter({
 					{isFavorite && (
 						<Star
 							aria-label="Favorito"
-							className={cn(tcgMode ? 'fill-yellow-300 text-yellow-300' : 'fill-yellow-400 text-yellow-400')}
+							className={cn(tcgMode ? 'fill-yellow-300 text-yellow-300' : 'fill-warning text-warning')}
 							size={14}
 						/>
 					)}
@@ -162,7 +162,7 @@ export function ConceptCardFooter({
 			<div className="mb-1.5 flex items-center justify-between text-[0.65rem]">
 				{/* ID de colección */}
 				{tcgMode && collectionId && (
-					<div className="flex items-center rounded-sm bg-black/30 px-1.5 py-0.5">
+					<div className="flex items-center rounded-sm bg-muted/30 px-1.5 py-0.5">
 						<span className="font-mono tracking-wide">{collectionId}</span>
 					</div>
 				)}
@@ -187,17 +187,17 @@ export function ConceptCardFooter({
 			<div className="flex justify-between text-[0.65rem] text-white/60">
 				<div className="flex items-center">
 					<Calendar className="mr-1" size={12} />
-					<span title={`Creado: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
+					<span title={`Created: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
 				</div>
 				<div className="flex items-center">
 					<Clock className="mr-1" size={12} />
-					<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
+					<span title={`Updated: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
 				</div>
 			</div>
 
 			{/* Sello de copyright al estilo TCG */}
 			{tcgMode && (
-				<div className="mt-1 border-white/10 border-t pt-1 text-center text-[0.6rem] opacity-60">
+				<div className="mt-1 border-border/40 border-t pt-1 text-center text-[0.6rem] opacity-60">
 					™ & © {new Date().getFullYear()} IdeaVault · {(category || 'CONCEPTO').toUpperCase()} · #{collectionId}
 				</div>
 			)}

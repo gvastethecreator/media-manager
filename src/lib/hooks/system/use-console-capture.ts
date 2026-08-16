@@ -8,6 +8,10 @@ type ConsoleFunction = (...args: unknown[]) => void;
 
 interface UseConsoleCapture {
 	/**
+	 * Indica si la captura está activa
+	 */
+	isCapturing: boolean;
+	/**
 	 * Función para iniciar la captura de logs de consola
 	 */
 	startCapture: () => void;
@@ -16,11 +20,6 @@ interface UseConsoleCapture {
 	 * Función para detener la captura de logs de consola
 	 */
 	stopCapture: () => void;
-
-	/**
-	 * Indica si la captura está activa
-	 */
-	isCapturing: boolean;
 }
 
 /**

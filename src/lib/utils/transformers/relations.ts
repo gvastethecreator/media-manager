@@ -8,10 +8,10 @@ const logger = new Logger({ context: 'TransformerRelations' });
  * 🔄 Tipo para definición de relaciones
  */
 export interface RelationDefinition {
-	type: (typeof RELATION_TYPES)[keyof typeof RELATION_TYPES];
-	target: string;
 	inverse?: string;
 	required?: boolean;
+	target: string;
+	type: (typeof RELATION_TYPES)[keyof typeof RELATION_TYPES];
 }
 
 /**
@@ -189,14 +189,14 @@ export function validateEntityRelations(entityName: string, relations: Record<st
 
 	for (const relation of requiredRelations) {
 		if (!relations[relation]) {
-			throw new RelationError(`La relación ${relation} es requerida para ${entityName}`);
+			throw new RelationError(`The relation ${relation} es requerida para ${entityName}`);
 		}
 	}
 
 	// Validar relaciones proporcionadas
 	for (const relation of Object.keys(relations)) {
 		if (!entityRelations[relation]) {
-			throw new RelationError(`La relación ${relation} no está definida para ${entityName}`);
+			throw new RelationError(`The relation ${relation} is not defined for ${entityName}`);
 		}
 	}
 }

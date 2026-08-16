@@ -4,10 +4,10 @@ import { cn } from '@/lib/utils';
 import { StatusBadge } from './status-badge';
 
 export interface ServiceStatus {
-	name: string;
-	status: 'online' | 'offline' | 'warning';
 	description: string;
 	icon: LucideIcon;
+	name: string;
+	status: 'online' | 'offline' | 'warning';
 }
 
 export function ServiceCard({ service }: { service: ServiceStatus }) {
@@ -21,9 +21,9 @@ export function ServiceCard({ service }: { service: ServiceStatus }) {
 						<div
 							className={cn(
 								'rounded-md border-2 border-primary/10 p-2',
-								service.status === 'online' && 'bg-green-500/20',
-								service.status === 'warning' && 'bg-yellow-500/20',
-								service.status === 'offline' && 'bg-red-500/20'
+								service.status === 'online' && 'bg-success/20',
+								service.status === 'warning' && 'bg-warning/20',
+								service.status === 'offline' && 'bg-destructive/20'
 							)}
 						>
 							<Icon className="h-4 w-4" />

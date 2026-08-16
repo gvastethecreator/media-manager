@@ -1,0 +1,364 @@
+/**
+ * 🌊 TRANSITIONS SYSTEM v2.0
+ * ==========================
+ * Transiciones fluidas entre estados y vistas
+ * Mantiene contexto visual durante cambios
+ *
+ * @see docs/UX-UI-AUDIT-2025-12-30.md
+ */
+
+/* =====================================================
+ * 🎯 VIEW TRANSITIONS API ENHANCEMENTS
+ * ===================================================== */
+
+/* Transición de página suave */
+@view-transition {
+	navigation: auto;
+}
+
+/* Animaciones base para View Transitions */
+::view-transition-old(root) {
+	animation: dt-fade-out var(--dt-duration-fast) var(--dt-ease-in) forwards;
+}
+
+::view-transition-new(root) {
+	animation: dt-fade-in var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+/* Transiciones para elementos con data-transition-name */
+[data-transition='slide-up'] {
+	view-transition-name: slide-up-element;
+}
+
+::view-transition-old(slide-up-element) {
+	opacity: 0;
+	animation: none;
+}
+
+::view-transition-new(slide-up-element) {
+	animation: dt-slide-up-fade var(--dt-duration-normal) var(--dt-ease-out);
+}
+
+[data-transition='scale'] {
+	view-transition-name: scale-element;
+}
+
+::view-transition-old(scale-element) {
+	animation: dt-scale-out var(--dt-duration-fast) var(--dt-ease-in);
+}
+
+::view-transition-new(scale-element) {
+	animation: dt-scale-in var(--dt-duration-normal) var(--dt-ease-out);
+}
+
+/* =====================================================
+ * 🔄 STATE TRANSITIONS
+ * ===================================================== */
+
+/* Contenedor con transiciones de estado */
+.state-container {
+	position: relative;
+}
+
+.state-container > * {
+	transition:
+		opacity var(--dt-duration-normal) var(--dt-ease-out),
+		transform var(--dt-duration-normal) var(--dt-ease-out);
+}
+
+/* Estado: entrando */
+.state-entering {
+	opacity: 0;
+	transform: translateY(8px);
+}
+
+/* Estado: visible */
+.state-entered {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+/* Estado: saliendo */
+.state-exiting {
+	opacity: 0;
+	transform: translateY(-8px);
+}
+
+/* Estado: oculto */
+.state-exited {
+	display: none;
+	opacity: 0;
+}
+
+/* =====================================================
+ * 📱 LAYOUT TRANSITIONS
+ * Mantiene contexto durante cambios de layout
+ * ===================================================== */
+
+/* Grid/List transition container */
+.layout-transition {
+	display: grid;
+	gap: var(--gap, 1rem);
+	transition: grid-template-columns var(--dt-duration-normal) var(--dt-ease-out);
+}
+
+.layout-transition > * {
+	transition:
+		transform var(--dt-duration-normal) var(--dt-ease-out),
+		opacity var(--dt-duration-normal) var(--dt-ease-out);
+}
+
+/* Collapse/Expand */
+.collapsible {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows var(--dt-duration-normal) var(--dt-ease-out);
+}
+
+.collapsible[data-state='open'] {
+	grid-template-rows: 1fr;
+}
+
+.collapsible > * {
+	overflow: hidden;
+}
+
+/* =====================================================
+ * 🎨 CONTENT TRANSITIONS
+ * Para cambios de contenido dinámico
+ * ===================================================== */
+
+/* Crossfade entre contenidos */
+.content-crossfade {
+	position: relative;
+}
+
+.content-crossfade > .content-old {
+	position: absolute;
+	inset: 0;
+	animation: dt-fade-out var(--dt-duration-fast) var(--dt-ease-in) forwards;
+}
+
+.content-crossfade > .content-new {
+	animation: dt-fade-in var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+/* Slide transition */
+.content-slide {
+	position: relative;
+	overflow: hidden;
+}
+
+.content-slide > .slide-left-enter {
+	animation: dt-slide-left-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+.content-slide > .slide-right-enter {
+	animation: dt-slide-right-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+/* =====================================================
+ * 🖼️ IMAGE TRANSITIONS
+ * Transiciones suaves para imágenes
+ * ===================================================== */
+
+/* Placeholder to image */
+.image-reveal {
+	position: relative;
+	overflow: hidden;
+}
+
+.image-reveal > img {
+	opacity: 0;
+	transition: opacity var(--dt-duration-normal) var(--dt-ease-out);
+}
+
+.image-reveal > img[data-loaded='true'] {
+	opacity: 1;
+}
+
+.image-reveal > .image-placeholder {
+	position: absolute;
+	inset: 0;
+	background: var(--dt-neutral-200);
+	transition: opacity var(--dt-duration-normal) var(--dt-ease-out);
+}
+
+.image-reveal > img[data-loaded='true'] + .image-placeholder {
+	pointer-events: none;
+	opacity: 0;
+}
+
+.dark .image-reveal > .image-placeholder {
+	background: var(--dt-neutral-800);
+}
+
+/* Zoom on hover con transition suave */
+.image-zoom-container {
+	overflow: hidden;
+}
+
+.image-zoom-container > img {
+	transition: transform var(--dt-duration-slow) var(--dt-ease-out);
+}
+
+.image-zoom-container:hover > img {
+	transform: scale(1.05);
+}
+
+/* =====================================================
+ * 📋 LIST TRANSITIONS
+ * Para listas con items que entran/salen
+ * ===================================================== */
+
+/* Lista con animación escalonada */
+.list-stagger > * {
+	opacity: 0;
+	transform: translateY(8px);
+	animation: dt-slide-up-fade var(--dt-duration-normal) var(--dt-ease-out) forwards;
+}
+
+/* Delays escalonados hasta 12 items */
+.list-stagger > *:nth-child(1) {
+	animation-delay: calc(1 * 40ms);
+}
+.list-stagger > *:nth-child(2) {
+	animation-delay: calc(2 * 40ms);
+}
+.list-stagger > *:nth-child(3) {
+	animation-delay: calc(3 * 40ms);
+}
+.list-stagger > *:nth-child(4) {
+	animation-delay: calc(4 * 40ms);
+}
+.list-stagger > *:nth-child(5) {
+	animation-delay: calc(5 * 40ms);
+}
+.list-stagger > *:nth-child(6) {
+	animation-delay: calc(6 * 40ms);
+}
+.list-stagger > *:nth-child(7) {
+	animation-delay: calc(7 * 40ms);
+}
+.list-stagger > *:nth-child(8) {
+	animation-delay: calc(8 * 40ms);
+}
+.list-stagger > *:nth-child(9) {
+	animation-delay: calc(9 * 40ms);
+}
+.list-stagger > *:nth-child(10) {
+	animation-delay: calc(10 * 40ms);
+}
+.list-stagger > *:nth-child(11) {
+	animation-delay: calc(11 * 40ms);
+}
+.list-stagger > *:nth-child(12) {
+	animation-delay: calc(12 * 40ms);
+}
+.list-stagger > *:nth-child(n + 13) {
+	animation-delay: 500ms;
+}
+
+/* Item removido con animación */
+.list-item-exit {
+	animation: dt-scale-out var(--dt-duration-fast) var(--dt-ease-in) forwards;
+}
+
+/* Item agregado con animación */
+.list-item-enter {
+	animation: dt-scale-in var(--dt-duration-normal) var(--dt-ease-bounce) forwards;
+}
+
+/* =====================================================
+ * 🔲 MODAL/DIALOG TRANSITIONS
+ * ===================================================== */
+
+/* Backdrop */
+.modal-backdrop {
+	opacity: 0;
+	backdrop-filter: blur(0);
+	transition:
+		opacity var(--dt-duration-normal) var(--dt-ease-out),
+		backdrop-filter var(--dt-duration-normal) var(--dt-ease-out);
+}
+
+.modal-backdrop[data-state='open'] {
+	opacity: 1;
+	backdrop-filter: blur(4px);
+}
+
+/* Modal content */
+.modal-content {
+	opacity: 0;
+	transform: scale(0.95) translateY(8px);
+	transition:
+		opacity var(--dt-duration-normal) var(--dt-ease-out),
+		transform var(--dt-duration-normal) var(--dt-ease-bounce);
+}
+
+.modal-content[data-state='open'] {
+	opacity: 1;
+	transform: scale(1) translateY(0);
+}
+
+/* =====================================================
+ * 🎯 FOCUS TRANSITIONS
+ * Transiciones de focus suaves
+ * ===================================================== */
+
+.focus-transition {
+	transition:
+		box-shadow var(--dt-duration-fast) var(--dt-ease-out),
+		outline var(--dt-duration-fast) var(--dt-ease-out);
+}
+
+.focus-transition:focus-visible {
+	outline: none;
+	box-shadow: var(--dt-focus-ring);
+}
+
+/* =====================================================
+ * ♿ REDUCED MOTION
+ * ===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+	/* Deshabilitar View Transitions */
+	::view-transition-old(root),
+	::view-transition-new(root),
+	::view-transition-old(slide-up-element),
+	::view-transition-new(slide-up-element),
+	::view-transition-old(scale-element),
+	::view-transition-new(scale-element) {
+		animation: none !important;
+	}
+
+	/* State transitions instantáneas */
+	.state-container > *,
+	.layout-transition > *,
+	.collapsible,
+	.image-reveal > img,
+	.image-zoom-container > img {
+		transition: none !important;
+	}
+
+	/* Deshabilitar animaciones de lista */
+	.list-stagger > *,
+	.list-item-exit,
+	.list-item-enter {
+		opacity: 1 !important;
+		transform: none !important;
+		animation: none !important;
+	}
+
+	/* Modal/Dialog sin transición */
+	.modal-backdrop,
+	.modal-content {
+		transition: none !important;
+	}
+
+	.modal-backdrop[data-state='open'],
+	.modal-content[data-state='open'] {
+		opacity: 1;
+		transform: none;
+	}
+}

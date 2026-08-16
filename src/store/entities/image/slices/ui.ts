@@ -9,36 +9,36 @@ import type { ImageState } from '../types';
 
 // Slice para estado de UI
 export interface ImageUISlice {
-	// Selección de imágenes
-	selectImage: (id: string | null) => void;
-	deselectImage: (id: string) => void;
-	toggleImageSelection: (id: string) => void;
-	selectMultipleImages: (ids: string[]) => void;
 	clearSelection: () => void;
-	getSelectedImages: () => string[];
-	isImageSelected: (id: string) => boolean;
-
-	// Visor de imágenes
-	openViewer: (imageId: string) => void;
 	closeViewer: () => void;
-	nextImage: () => void;
-	previousImage: () => void;
-	isViewerOpen: () => boolean;
-	getCurrentImage: () => string | null;
-
-	// Modo de visualización
-	setViewMode: (viewMode: ImageViewMode) => void;
-	getViewMode: () => ImageViewMode;
+	collapseImage: (id: string) => void;
+	deselectImage: (id: string) => void;
 
 	// Expansión de detalles
 	expandImage: (id: string) => void;
-	collapseImage: (id: string) => void;
-	toggleImageExpansion: (id: string) => void;
-	isImageExpanded: (id: string) => boolean;
+	getCurrentImage: () => string | null;
+	getHighlightedImage: () => string | null;
+	getSelectedImages: () => string[];
+	getViewMode: () => ImageViewMode;
 
 	// Resaltado
 	highlightImage: (id: string | null) => void;
-	getHighlightedImage: () => string | null;
+	isImageExpanded: (id: string) => boolean;
+	isImageSelected: (id: string) => boolean;
+	isViewerOpen: () => boolean;
+	nextImage: () => void;
+
+	// Visor de imágenes
+	openViewer: (imageId: string) => void;
+	previousImage: () => void;
+	// Selección de imágenes
+	selectImage: (id: string | null) => void;
+	selectMultipleImages: (ids: string[]) => void;
+
+	// Modo de visualización
+	setViewMode: (viewMode: ImageViewMode) => void;
+	toggleImageExpansion: (id: string) => void;
+	toggleImageSelection: (id: string) => void;
 }
 
 // Creador del slice

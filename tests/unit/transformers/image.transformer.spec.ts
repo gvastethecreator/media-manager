@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'bun:test';
 import { mapImageToComplete, mapToImageSummaries, mapToImageSummary } from '@/transformers/image/mappers';
 import type { ImageWithStats } from '@/types/entities/image/base';
 
@@ -46,6 +45,25 @@ describe('Image transformers', () => {
 		expect(s.hash).toBe('h');
 		expect(s.width).toBe(2);
 		expect(s.height).toBe(3);
+	});
+
+	it('proyecta Asset Identity como id público de UI y conserva el id legacy sólo para diagnóstico', () => {
+		const image = mapImageToComplete({
+			id: 'legacy-image-id',
+			assetId: 'canonical-asset-id',
+			name: 'canonical.jpg',
+			path: 'canonical.jpg',
+			hash: 'a'.repeat(64),
+			size: 1,
+			width: 1,
+			height: 1,
+			folderId: 'folder',
+		});
+
+		expect(image.id).toBe('canonical-asset-id');
+		expect(image.assetId).toBe('canonical-asset-id');
+		expect(image.legacyId).toBe('legacy-image-id');
+		expect(mapToImageSummary(image).id).toBe('canonical-asset-id');
 	});
 
 	it('mapToImageSummaries procesa listas', () => {

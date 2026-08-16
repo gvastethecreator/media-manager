@@ -6,35 +6,35 @@
 
 import { type ActivityFilters, ActivityType, type CreateActivityData } from '../../types/entities/activity/index';
 
-type DrizzleCreateActivityData = {
-	type: string;
-	entityType: string;
-	entityId: string;
+interface DrizzleCreateActivityData {
 	action: string;
-	userId: string;
 	description: string;
-	metadata?: Record<string, any> | null;
+	entityId: string;
+	entityType: string;
 	ipAddress?: string | null;
-	userAgent?: string | null;
+	metadata?: Record<string, any> | null;
 	sessionId?: string | null;
-};
+	type: string;
+	userAgent?: string | null;
+	userId: string;
+}
 
-type DrizzleWhereFilter = {
+interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
-	OR?: DrizzleWhereFilter[];
-	type?: { in?: string[] };
-	imageId?: string;
 	createdAt?: { gte?: Date; lte?: Date };
 	description?: { contains?: string };
-};
+	imageId?: string;
+	OR?: DrizzleWhereFilter[];
+	type?: { in?: string[] };
+}
 
-type DrizzleFindManyArgs = {
-	where?: DrizzleWhereFilter;
-	take?: number;
-	skip?: number;
+interface DrizzleFindManyArgs {
 	orderBy?: { [key: string]: 'asc' | 'desc' };
+	skip?: number;
+	take?: number;
+	where?: DrizzleWhereFilter;
 	// Los includes se manejan por separado en Drizzle
-};
+}
 
 /**
  * Mapea datos de creación de actividad a formato compatible con Drizzle
@@ -159,8 +159,8 @@ export function generateActivityDescription(type: ActivityType | string, data: R
 		[ActivityType.SYSTEM_RESTORE]: `Restauración ${data.status}`,
 		[ActivityType.SYSTEM_UPDATE]: `Actualización ${data.status}`,
 
-		[ActivityType.USER_LOGIN]: `Usuario "${data.name}" ha iniciado sesión`,
-		[ActivityType.USER_LOGOUT]: `Usuario "${data.name}" ha cerrado sesión`,
+		[ActivityType.USER_LOGIN]: `User "${data.name}" signed in`,
+		[ActivityType.USER_LOGOUT]: `User "${data.name}" signed out`,
 		[ActivityType.USER_SETTINGS_UPDATE]: 'Configuración de usuario actualizada',
 		[ActivityType.USER_PROFILE_UPDATE]: 'Perfil de usuario actualizado',
 

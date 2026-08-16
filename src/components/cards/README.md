@@ -226,16 +226,16 @@ cards/
 
 ```typescript
 interface EntityCardProps {
-  [entity]: EntityWithStats;    // 📊 Datos de la entidad
-  compact?: boolean;            // 📱 Modo compacto
-  tcgMode?: boolean;            // 🎴 Efectos TCG
-  disabled?: boolean;           // 🚫 Deshabilitar
-  className?: string;           // 🎨 CSS personalizado
-  onClick?: () => void;         // 🖱️ Handler de clic
-  isSelected?: boolean;         // ✅ Estado seleccionado
-  isActive?: boolean;           // 🔥 Estado activo
-  isScrolling?: boolean;        // 📜 Optimización scroll
-  shouldLoad?: boolean;         // ⚡ Carga condicional
+	[entity]: EntityWithStats; // 📊 Datos de la entidad
+	compact?: boolean; // 📱 Modo compacto
+	tcgMode?: boolean; // 🎴 Efectos TCG
+	disabled?: boolean; // 🚫 Deshabilitar
+	className?: string; // 🎨 CSS personalizado
+	onClick?: () => void; // 🖱️ Handler de clic
+	isSelected?: boolean; // ✅ Estado seleccionado
+	isActive?: boolean; // 🔥 Estado activo
+	isScrolling?: boolean; // 📜 Optimización scroll
+	shouldLoad?: boolean; // ⚡ Carga condicional
 }
 ```
 

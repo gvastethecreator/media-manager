@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
 import { type ProfileTransformed, transformProfile } from '@/transformers/profile/profile-transformers';
 import {
@@ -41,22 +42,22 @@ type ProfileState = typeof initialState;
 
 // Acciones del store
 interface ProfileActions {
+	applySystemTheme: () => void;
 	// Acciones para perfil activo
 	fetchActiveProfile: () => Promise<ProfileTransformed | null>;
-	setActiveProfileById: (id: string) => Promise<boolean>;
 
 	// Acciones para lista de perfiles
 	fetchProfiles: (filters?: ProfileFilters, pagination?: ProfilePaginationOptions) => Promise<PaginatedProfiles>;
-	setFilters: (filters: Partial<ProfileFilters>) => void;
-	setPagination: (pagination: Partial<ProfilePaginationOptions>) => void;
-
-	// Gestión de preferencias
-	updateTheme: (theme: ThemeMode) => void;
-	updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => void;
-	applySystemTheme: () => void;
 
 	// Resetear el store
 	reset: () => void;
+	setActiveProfileById: (id: string) => Promise<boolean>;
+	setFilters: (filters: Partial<ProfileFilters>) => void;
+	setPagination: (pagination: Partial<ProfilePaginationOptions>) => void;
+	updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => void;
+
+	// Gestión de preferencias
+	updateTheme: (theme: ThemeMode) => void;
 }
 
 // Tipo completo del store
@@ -143,9 +144,9 @@ export const useProfileStore = create<ProfileStore>()(
 							if (state.activeProfile && !state.activeProfile.preferences) {
 								state.activeProfile.preferences = {
 									theme: ThemeMode.SYSTEM,
-									color: '#3b82f6',
+									color: 'var(--dt-primary-500)',
 									emoji: '👤',
-									language: Language.SPANISH,
+									language: Language.ENGLISH,
 									enableAnimations: true,
 									enableSounds: false,
 									enableHaptics: false,
@@ -203,7 +204,7 @@ export const useProfileStore = create<ProfileStore>()(
 				updateTheme: (_theme: ThemeMode) => {
 					// TODO: Implement theme update logic. This should not directly call React hooks.
 					// Consider dispatching an event or calling a utility function that handles theme updates.
-					console.warn('Theme update logic needs to be implemented outside the store.');
+					clientLogger.warn('Theme update logic needs to be implemented outside the store.');
 				},
 
 				updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => {
@@ -216,9 +217,9 @@ export const useProfileStore = create<ProfileStore>()(
 							if (!state.activeProfile.preferences) {
 								state.activeProfile.preferences = {
 									theme: ThemeMode.SYSTEM,
-									color: '#3b82f6',
+									color: 'var(--dt-primary-500)',
 									emoji: '👤',
-									language: Language.SPANISH,
+									language: Language.ENGLISH,
 									enableAnimations: true,
 									enableSounds: false,
 									enableHaptics: false,
@@ -290,7 +291,7 @@ export const selectPreference =
 		state.activeProfile?.preferences?.[key];
 
 // Selector para obtener el color del perfil activo
-export const selectProfileColor = (state: ProfileStore) => state.activeProfile?.color || '#3b82f6';
+export const selectProfileColor = (state: ProfileStore) => state.activeProfile?.color || 'var(--dt-primary-500)';
 
 // Selector para verificar si hay un perfil activo
 export const selectHasActiveProfile = (state: ProfileStore) => !!state.activeProfile;
@@ -300,7 +301,7 @@ export const selectActiveProfileInfo = (state: ProfileStore) => ({
 	id: state.activeProfile?.id || '',
 	name: state.activeProfile?.name || '',
 	emoji: state.activeProfile?.emoji || '👤',
-	color: state.activeProfile?.color || '#3b82f6',
+	color: state.activeProfile?.color || 'var(--dt-primary-500)',
 });
 
 // Selector para verificar si el sistema está en modo oscuro

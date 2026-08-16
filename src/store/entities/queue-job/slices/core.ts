@@ -32,22 +32,22 @@ const coreLogger = clientLogger.withContext('QueueJobStore:Core');
  * Slice que contiene el estado y las acciones principales para los trabajos en cola
  */
 export interface QueueJobCoreSlice {
+	cancelJob: (id: string) => Promise<QueueJobExtended>;
+
+	// Acciones CRUD
+	createJob: (input: CreateQueueJobInput) => Promise<QueueJobExtended>;
+	deleteJob: (id: string) => Promise<void>;
 	// Acciones de carga
 	loadJobs: () => Promise<void>;
 	loadStats: () => Promise<void>;
 
-	// Acciones CRUD
-	createJob: (input: CreateQueueJobInput) => Promise<QueueJobExtended>;
-	updateJob: (id: string, input: UpdateQueueJobInput) => Promise<QueueJobExtended>;
-	deleteJob: (id: string) => Promise<void>;
+	// Reseteo
+	resetJobs: () => void;
 
 	// Acciones específicas
 	retryJob: (id: string) => Promise<QueueJobExtended>;
-	cancelJob: (id: string) => Promise<QueueJobExtended>;
 	selectJob: (job?: QueueJobExtended) => void;
-
-	// Reseteo
-	resetJobs: () => void;
+	updateJob: (id: string, input: UpdateQueueJobInput) => Promise<QueueJobExtended>;
 }
 
 /**
@@ -135,7 +135,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Trabajo en cola creado', { jobId: job.id });
 			return job;
 		} catch (error) {
-			coreLogger.error('Error al crear trabajo en cola', { error, input });
+			coreLogger.error('Could not create job en cola', { error, input });
 			set((state) => ({
 				...state,
 				error: error as Error,
@@ -173,7 +173,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Trabajo en cola actualizado', { jobId: id });
 			return job;
 		} catch (error) {
-			coreLogger.error('Error al actualizar trabajo en cola', { error, id, input });
+			coreLogger.error('Could not update job en cola', { error, id, input });
 			set((state) => ({
 				...state,
 				error: error as Error,
@@ -211,7 +211,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 
 			coreLogger.info('Trabajo en cola eliminado', { jobId: id });
 		} catch (error) {
-			coreLogger.error('Error al eliminar trabajo en cola', { error, id });
+			coreLogger.error('Could not delete job en cola', { error, id });
 			set((state) => ({
 				...state,
 				error: error as Error,
@@ -249,7 +249,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Trabajo en cola reintentado', { jobId: id });
 			return job;
 		} catch (error) {
-			coreLogger.error('Error al reintentar trabajo en cola', { error, id });
+			coreLogger.error('Could not retry job en cola', { error, id });
 			set((state) => ({
 				...state,
 				error: error as Error,
@@ -287,7 +287,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Trabajo en cola cancelado', { jobId: id });
 			return job;
 		} catch (error) {
-			coreLogger.error('Error al cancelar trabajo en cola', { error, id });
+			coreLogger.error('Could not cancel job en cola', { error, id });
 			set((state) => ({
 				...state,
 				error: error as Error,

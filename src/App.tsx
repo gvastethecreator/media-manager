@@ -6,11 +6,14 @@
 import React from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { useNavigationRefresh } from '@/hooks/use-navigation-refresh';
-import { useEntityCatalogStore } from '@/stores/entity-catalog-store';
+import { useEntityCatalogStore } from '@/store/entity-catalog-store';
 import { ErrorBoundary } from './components/core/error-boundary';
-import { ThemeProvider } from './components/ui/theme-provider';
+import { InterfaceSynchronizer } from './components/core/interface-synchronizer';
+import { FeedbackProvider } from './components/ui/feedback-provider';
+import { SkipLink } from './components/ui/skip-link';
+import { TooltipProvider } from './components/ui/tooltip';
 import { ReactScanProvider } from './lib/dev/react-scan';
-import lastLogContent from './logs/last-log.json' with { type: 'json' };
+// import lastLogContent from './logs/last-log.json' with { type: 'json' };
 import { ViewTransitionProvider } from './providers/ViewTransitionProvider';
 import { router } from './router';
 
@@ -29,17 +32,23 @@ function EntityCatalogBootstrapper() {
 
 export function App() {
 	return (
-		<ThemeProvider defaultTheme="system" storageKey="theme">
+		<TooltipProvider>
 			<ViewTransitionProvider>
 				<ReactScanProvider>
-					<ErrorBoundary lastLogContent={lastLogContent}>
-						<SSENavigationRefresher />
-						<EntityCatalogBootstrapper />
-						<RouterProvider router={router} />
-					</ErrorBoundary>
+					<FeedbackProvider>
+						<InterfaceSynchronizer />
+						<ErrorBoundary>
+							{/* SkipLink para accesibilidad - WCAG 2.4.1 */}
+							<SkipLink targetId="main-content">Skip to main content</SkipLink>
+
+							<SSENavigationRefresher />
+							<EntityCatalogBootstrapper />
+							<RouterProvider router={router} />
+						</ErrorBoundary>
+					</FeedbackProvider>
 				</ReactScanProvider>
 			</ViewTransitionProvider>
-		</ThemeProvider>
+		</TooltipProvider>
 	);
 }
 

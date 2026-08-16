@@ -19,24 +19,23 @@ export enum PromptExportFormat {
  */
 export interface PromptExportConfig {
 	/**
+	 * Nombre del archivo de exportación
+	 */
+	fileName?: string;
+	/**
 	 * Formato de exportación
 	 */
 	format: PromptExportFormat;
 
 	/**
-	 * Si se deben incluir metadatos (solo aplicable a algunos formatos)
-	 */
-	includeMetadata?: boolean;
-
-	/**
-	 * Nombre del archivo de exportación
-	 */
-	fileName?: string;
-
-	/**
 	 * Opciones específicas por formato
 	 */
 	formatOptions?: Record<string, any>;
+
+	/**
+	 * Si se deben incluir metadatos (solo aplicable a algunos formatos)
+	 */
+	includeMetadata?: boolean;
 }
 
 /**
@@ -49,11 +48,6 @@ export interface PromptExportResult {
 	content: string;
 
 	/**
-	 * Tipo MIME para descarga
-	 */
-	mimeType: string;
-
-	/**
 	 * Nombre de archivo sugerido para descarga
 	 */
 	fileName: string;
@@ -62,6 +56,11 @@ export interface PromptExportResult {
 	 * Formato usado para la exportación
 	 */
 	format: PromptExportFormat;
+
+	/**
+	 * Tipo MIME para descarga
+	 */
+	mimeType: string;
 }
 
 /**
@@ -336,7 +335,7 @@ export function exportPrompt(prompt: PromptBase | PromptExtended, config: Prompt
 			}
 
 			default:
-				throw new Error(`Formato de exportación no soportado: ${format}`);
+				throw new Error(`Unsupported export format: ${format}`);
 		}
 
 		// Sanitizar el nombre del archivo
@@ -375,7 +374,7 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 
 		// Verificar campos mínimos requeridos
 		if (!(parsed.name && parsed.content)) {
-			throw new Error('El JSON no contiene un prompt válido (faltan name o content)');
+			throw new Error('The JSON does not contain a valid prompt (name or content is missing)');
 		}
 
 		// Asignar ID nuevo si no tiene o para evitar colisiones
@@ -386,7 +385,7 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 			id,
 			name: parsed.name,
 			emoji: parsed.emoji || '📝',
-			color: parsed.color || '#3b82f6',
+			color: parsed.color || 'var(--dt-primary-500)',
 			description: parsed.description || null,
 			content: parsed.content,
 			category: parsed.category || null,
@@ -459,6 +458,6 @@ export function downloadPrompt(exportResult: PromptExportResult): void {
 			URL.revokeObjectURL(url);
 		}, 100);
 	} catch (error) {
-		exportLogger.error('❌ Error al descargar prompt:', error);
+		exportLogger.error('❌ Could not download prompt:', error);
 	}
 }

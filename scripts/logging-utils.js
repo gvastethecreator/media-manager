@@ -119,8 +119,8 @@ function categorizeByTool(line, lowerLine, categories) {
 		categories.typescript.push(line);
 	} else if (lowerLine.includes('eslint')) {
 		categories.eslint.push(line);
-	} else if (lowerLine.includes('biome')) {
-		categories.biome.push(line);
+	} else if (lowerLine.includes('oxlint') || lowerLine.includes('oxfmt') || lowerLine.includes('vite+')) {
+		categories.oxc.push(line);
 	} else if (line.trim()) {
 		categories.other.push(line);
 	}
@@ -140,7 +140,7 @@ export function parseLogsByCategory(logFile) {
 		info: [],
 		typescript: [],
 		eslint: [],
-		biome: [],
+		oxc: [],
 		other: [],
 	};
 
@@ -203,7 +203,7 @@ export function listRecentLogs(limit = 10) {
 /**
  * Genera el resumen de errores al final de la ejecución y lo agrega al principio del log
  */
-export function generatePostExecutionSummary(logFile, command) {
+export function generatePostExecutionSummary(logFile, command, exitCode = null) {
 	console.log(`\n${'═'.repeat(60)}`);
 	console.log('📊 RESUMEN AUTOMÁTICO DE ERRORES');
 	console.log('═'.repeat(60));
@@ -241,14 +241,25 @@ export function generatePostExecutionSummary(logFile, command) {
 
 		return summary.stats;
 	}
-	console.log('\n✅ No se encontraron errores de sintaxis o linting');
+	if (exitCode !== null && exitCode !== 0) {
+		console.log(`\n❌ El comando finalizó con exit code ${exitCode}; el parser no clasificó detalles adicionales.`);
+		return null;
+	}
+	console.log('\n✅ No se encontraron errores categorizados en el log');
 	return null;
 }
 
 // Función auxiliar para detectar si es una herramienta de linting/checking
 function isLintingTool(command) {
 	return (
-		command.includes('biome') || command.includes('eslint') || command.includes('tsc') || command.includes('prettier')
+		command.includes('vp check') ||
+		command.includes('vp lint') ||
+		command.includes('vp fmt') ||
+		command.includes('oxlint') ||
+		command.includes('oxfmt') ||
+		command.includes('eslint') ||
+		command.includes('tsc') ||
+		command.includes('prettier')
 	);
 }
 
@@ -257,8 +268,11 @@ function detectToolFromCommand(command) {
 	if (command.includes('tsc') || command.includes('typescript')) {
 		return 'tsc';
 	}
-	if (command.includes('biome')) {
-		return 'biome';
+	if (command.includes('vp check') || command.includes('vp lint') || command.includes('vp fmt')) {
+		return 'vite-plus';
+	}
+	if (command.includes('oxlint') || command.includes('oxfmt')) {
+		return 'oxc';
 	}
 	if (command.includes('eslint')) {
 		return 'eslint';

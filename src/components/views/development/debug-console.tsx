@@ -6,170 +6,166 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useConsoleCapture } from '@/lib/hooks/system/use-console-capture';
 import { clientLogger } from '@/lib/logger/client-logger';
 
-// Crear un logger específico para este componente
+// Create a logger for this component
 const debugLogger = clientLogger.withContext('DebugConsole');
 
 export function DebugConsole() {
 	const [activeTab, setActiveTab] = useState('console');
 	const { logs, addLog, clearLogs, debug, info, warn, error, success } = useLogViewer();
 
-	// Crear un wrapper para adaptar la signatura de addLog a LogEntry
+	// Adapt addLog to the LogEntry signature
 	const handleCaptureLog = (logEntry: any) => {
 		addLog(logEntry.level, logEntry.message, logEntry.context, logEntry.data);
 	};
 
 	const { startCapture, stopCapture, isCapturing } = useConsoleCapture(handleCaptureLog);
 
-	// Iniciar captura al montar el componente
+	// Start capturing when the component mounts
 	useEffect(() => {
 		startCapture();
 		return () => stopCapture();
 	}, [startCapture, stopCapture]);
 
-	// Generar logs de ejemplo
+	// Generate example logs
 	const generateExampleLogs = () => {
-		// Logs normales de consola
-		console.log('Este es un log normal de consola');
-		console.info('Este es un mensaje informativo');
-		console.warn('Este es un mensaje de advertencia');
-		console.error('Este es un mensaje de error');
-		console.debug('Este es un mensaje de depuración');
+		// Standard console logs
+		console.log('This is a standard console log');
+		console.info('This is an informational message');
+		console.warn('This is a warning message');
+		console.error('This is an error message');
+		console.debug('This is a debug message');
 
-		// Logs con datos adicionales
-		console.log('Log con datos', { userId: 1, name: 'Usuario de prueba' });
-		console.error('Error con detalles', new Error('Error de ejemplo'));
+		// Logs with extra data
+		console.log('Log with data', { userId: 1, name: 'Test user' });
+		console.error('Error with details', new Error('Example error'));
 
-		// Logs con el logger mejorado
-		debugLogger.info('Mensaje usando el logger mejorado');
-		debugLogger.success('Operación completada con éxito');
-		debugLogger.warn('Advertencia desde el logger mejorado', { code: 'WARN_001' });
-		debugLogger.error('Error desde el logger mejorado', {
+		// Logs with the enhanced logger
+		debugLogger.info('Message from the enhanced logger');
+		debugLogger.success('Operation completed successfully');
+		debugLogger.warn('Warning from the enhanced logger', { code: 'WARN_001' });
+		debugLogger.error('Error from the enhanced logger', {
 			code: 'ERR_001',
-			details: 'Detalles adicionales del error',
+			details: 'Additional error details',
 		});
 
-		// Logs directos al visor
-		debug('Log de depuración directo al visor', 'DirectAPI');
-		info('Log informativo directo al visor', 'DirectAPI');
-		warn('Advertencia directa al visor', 'DirectAPI');
-		error('Error directo al visor', 'DirectAPI');
-		success('Éxito directo al visor', 'DirectAPI');
+		// Logs sent directly to the viewer
+		debug('Debug log sent directly to the viewer', 'DirectAPI');
+		info('Info log sent directly to the viewer', 'DirectAPI');
+		warn('Warning sent directly to the viewer', 'DirectAPI');
+		error('Error sent directly to the viewer', 'DirectAPI');
+		success('Success sent directly to the viewer', 'DirectAPI');
 	};
 
-	// Ejemplo de grupo de logs
+	// Generate grouped logs
 	const generateGroupedLogs = () => {
-		console.group('Grupo de logs de ejemplo');
-		console.log('Log dentro de un grupo');
-		console.info('Info dentro de un grupo');
+		console.group('Example log group');
+		console.log('Log inside a group');
+		console.info('Info inside a group');
 
-		console.group('Subgrupo anidado');
-		console.warn('Advertencia en subgrupo');
-		console.error('Error en subgrupo');
+		console.group('Nested subgroup');
+		console.warn('Warning in subgroup');
+		console.error('Error in subgroup');
 		console.groupEnd();
 
-		console.log('Volviendo al grupo principal');
+		console.log('Returning to the main group');
 		console.groupEnd();
 	};
 
-	// Ejemplo de medición de tiempo
+	// Measure an example operation
 	const measurePerformance = () => {
-		console.time('operacionPesada');
+		console.time('heavyOperation');
 
-		// Simulamos una operación que toma tiempo
+		// Simulate a time-consuming operation
 		const start = Date.now();
 		while (Date.now() - start < 1000) {
-			// Esperar 1 segundo
+			// Wait one second
 		}
 
-		console.timeEnd('operacionPesada');
+		console.timeEnd('heavyOperation');
 	};
 
 	return (
 		<div className="space-y-6">
 			<Card>
 				<CardHeader>
-					<CardTitle>Consola de Depuración</CardTitle>
-					<CardDescription>Herramienta para visualizar y capturar logs de la aplicación</CardDescription>
+					<CardTitle>Debug Console</CardTitle>
+					<CardDescription>Inspect and capture application logs</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="mb-4 flex flex-wrap gap-2">
 						<Button onClick={generateExampleLogs} type="button" variant="primary">
-							Generar logs de ejemplo
+							Generate example logs
 						</Button>
 						<Button onClick={generateGroupedLogs} type="button" variant="outline">
-							Generar logs agrupados
+							Generate grouped logs
 						</Button>
 						<Button onClick={measurePerformance} type="button" variant="outline">
-							Medir rendimiento
+							Measure performance
 						</Button>
 						<Button onClick={clearLogs} type="button" variant="destructive">
-							Limpiar logs
+							Clear logs
 						</Button>
 						<Button
 							onClick={isCapturing ? stopCapture : startCapture}
 							type="button"
 							variant={isCapturing ? 'primary' : 'outline'}
 						>
-							{isCapturing ? 'Detener captura' : 'Iniciar captura'}
+							{isCapturing ? 'Stop capture' : 'Start capture'}
 						</Button>
 					</div>
 
 					<Tabs onValueChange={setActiveTab} value={activeTab}>
 						<TabsList className="grid w-full grid-cols-2">
-							<TabsTrigger value="console">Consola</TabsTrigger>
-							<TabsTrigger value="help">Ayuda</TabsTrigger>
+							<TabsTrigger value="console">Console</TabsTrigger>
+							<TabsTrigger value="help">Help</TabsTrigger>
 						</TabsList>
 						<TabsContent className="mt-4" value="console">
-							<LogViewer logs={logs} maxHeight="500px" onClear={clearLogs} title="Logs Capturados" />
+							<LogViewer logs={logs} maxHeight="500px" onClear={clearLogs} title="Captured Logs" />
 						</TabsContent>
 						<TabsContent className="mt-4" value="help">
 							<Card>
 								<CardHeader>
-									<CardTitle>Guía de Uso</CardTitle>
+									<CardTitle>Usage Guide</CardTitle>
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<div>
-										<h3 className="font-medium text-lg">Captura de Logs</h3>
+										<h3 className="font-medium text-lg">Log Capture</h3>
 										<p className="text-muted-foreground text-sm">
-											Esta herramienta captura automáticamente todos los logs de consola y los muestra en la interfaz.
-											Puedes detener la captura en cualquier momento con el botón &quot;Detener Captura&quot;.
+											This tool captures console logs automatically and displays them here. Stop capture at any time
+											with the &quot;Stop capture&quot; button.
 										</p>
 									</div>
 
 									<div>
-										<h3 className="font-medium text-lg">Logger Mejorado</h3>
-										<p className="text-muted-foreground text-sm">
-											Puedes usar el logger mejorado en tu código importando:
-										</p>
+										<h3 className="font-medium text-lg">Enhanced Logger</h3>
+										<p className="text-muted-foreground text-sm">Import the enhanced logger in your code:</p>
 										<pre className="mt-2 rounded-md bg-muted p-2 text-xs">
 											{`import { clientLogger } from '@/lib/logger/client-logger';
 
-// Crear un logger específico para tu componente
-const myLogger = clientLogger.withContext('MiComponente');
+// Create a logger for your component
+const myLogger = clientLogger.withContext('MyComponent');
 
-// Usar el logger
-myLogger.info('Mensaje informativo');
-myLogger.success('Operación exitosa');
-myLogger.warn('Advertencia');
-myLogger.error('Error', { detalles: 'Información adicional' });`}
+// Use the logger
+myLogger.info('Informational message');
+myLogger.success('Operation succeeded');
+myLogger.warn('Warning');
+myLogger.error('Error', { details: 'Additional information' });`}
 										</pre>
 									</div>
 
 									<div>
-										<h3 className="font-medium text-lg">Visor de Logs</h3>
-										<p className="text-muted-foreground text-sm">
-											Puedes integrar el visor de logs en cualquier componente:
-										</p>
+										<h3 className="font-medium text-lg">Log Viewer</h3>
+										<p className="text-muted-foreground text-sm">Add the log viewer to any component:</p>
 										<pre className="mt-2 rounded-md bg-muted p-2 text-xs">
 											{`import { LogViewer, useLogViewer } from '@/components/ui/log-viewer';
 
-// En tu componente
+// In your component
 const { logs, addLog, clearLogs } = useLogViewer();
 
-// Añadir logs manualmente
-addLog('info', 'Mi mensaje', 'Contexto', { datos: 'adicionales' });
+// Add logs manually
+addLog('info', 'My message', 'Context', { data: 'additional' });
 
-// Renderizar el visor
+// Render the viewer
 <LogViewer logs={logs} onClear={clearLogs} />`}
 										</pre>
 									</div>

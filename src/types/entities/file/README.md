@@ -22,7 +22,7 @@ graph TD
 ## 🚨 Notas de migración
 
 - **Legacy eliminado:** Solo se exportan tipos y enums canónicos.
-**
+  \*\*
 - **Validar siempre con Zod antes de persistir.**
 
 ## 📝 Ejemplo de uso

@@ -3,14 +3,14 @@ import { cn } from '@/lib/utils';
 import { TagCategory, TagRarity } from '@/store/entities/tag/types';
 
 export interface TagCardHeaderProps {
-	name: string;
-	emoji: string;
-	color: string;
 	category?: string | null | TagCategory;
-	rarity?: string | TagRarity;
-	isFavorite?: boolean;
-	tcgMode?: boolean;
+	color: string;
 	compact?: boolean;
+	emoji: string;
+	isFavorite?: boolean;
+	name: string;
+	rarity?: string | TagRarity;
+	tcgMode?: boolean;
 }
 
 /**
@@ -29,15 +29,15 @@ export function TagCardHeader({
 }: TagCardHeaderProps) {
 	// Mapeo de rareza a texto legible
 	const rarityText = {
-		[TagRarity.COMMON]: 'Común',
-		[TagRarity.UNCOMMON]: 'Poco común',
-		[TagRarity.RARE]: 'Rara',
-		[TagRarity.VERY_RARE]: 'Muy Rara',
-		[TagRarity.LEGENDARY]: 'Legendaria',
+		[TagRarity.COMMON]: 'Common',
+		[TagRarity.UNCOMMON]: 'Uncommon',
+		[TagRarity.RARE]: 'Rare',
+		[TagRarity.VERY_RARE]: 'Very Rare',
+		[TagRarity.LEGENDARY]: 'Legendary',
 	};
 
 	// Obtener el texto de rareza
-	const rarityLabel = rarityText[rarity as keyof typeof rarityText] || 'Común';
+	const rarityLabel = rarityText[rarity as keyof typeof rarityText] || 'Common';
 
 	// Estilo especial para el encabezado de etiquetas, con un diseño más distintivo
 	return (
@@ -56,7 +56,7 @@ export function TagCardHeader({
 					<div
 						className={cn('flex items-center justify-center rounded-full text-lg', compact ? 'h-6 w-6' : 'h-7 w-7')}
 						style={{
-							background: 'rgba(255, 255, 255, 0.25)',
+							background: 'rgba(var(--effect-highlight-rgb), 0.25)',
 							boxShadow: `0 0 8px ${color}40`,
 						}}
 					>
@@ -71,24 +71,20 @@ export function TagCardHeader({
 
 				{/* Icono de etiqueta o favorito a la derecha */}
 				<div
-					className="flex flex-shrink-0 items-center gap-1"
+					className="flex shrink-0 items-center gap-1"
 					style={{
-						color: 'rgba(255, 255, 255, 0.7)',
+						color: 'rgba(var(--effect-highlight-rgb), 0.7)',
 					}}
 				>
 					{isFavorite && (
 						<Heart
-							className={cn('drop-shadow-sm', compact ? 'h-4 w-4' : 'h-5 w-5')}
-							style={{
-								color: 'rgb(239, 68, 68)',
-								fill: 'rgb(239, 68, 68)',
-							}}
+							className={cn('fill-destructive text-destructive drop-shadow-sm', compact ? 'h-4 w-4' : 'h-5 w-5')}
 						/>
 					)}
 					<TagIcon
 						className={cn('drop-shadow-sm', compact ? 'h-4 w-4' : 'h-5 w-5')}
 						style={{
-							filter: 'drop-shadow(0 0 2px rgba(0, 0, 0, 0.3))',
+							filter: 'drop-shadow(0 0 2px rgba(var(--effect-shadow-rgb), 0.3))',
 						}}
 					/>
 				</div>
@@ -96,20 +92,20 @@ export function TagCardHeader({
 
 			{/* Barra secundaria con categoría y rareza */}
 			<div
-				className={cn('flex items-center justify-between text-white text-xs', compact ? 'px-3 py-1' : 'px-3.5 py-1.5')}
+				className={cn('flex items-center justify-between text-sm text-white', compact ? 'px-3 py-1' : 'px-3.5 py-1.5')}
 				style={{
-					background: tcgMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.2)',
+					background: tcgMode ? 'rgba(var(--effect-shadow-rgb), 0.3)' : 'rgba(var(--effect-shadow-rgb), 0.2)',
 					borderBottom: `1px solid ${color}50`,
 				}}
 			>
 				{/* Categoría - similar al tipo en cartas TCG */}
 				<div className="flex items-center gap-1">
-					<span className="font-semibold tracking-wide">ETIQUETA</span>
+					<span className="font-semibold tracking-wide">TAG</span>
 					{category && (
 						<>
 							<span className="mx-0.5">•</span>
 							<div className="flex items-center gap-1">
-								<BookOpen className="h-3 w-3" />
+								<BookOpen className="h-4 w-4" />
 								<span>{typeof category === 'string' ? category.toUpperCase() : 'GENERAL'}</span>
 							</div>
 						</>
@@ -119,7 +115,7 @@ export function TagCardHeader({
 				{/* Indicador de rareza para modo TCG */}
 				{tcgMode && (
 					<div className="flex items-center gap-1">
-						{rarity !== TagRarity.COMMON && <Sparkles className="h-3 w-3" />}
+						{rarity !== TagRarity.COMMON && <Sparkles className="h-4 w-4" />}
 						<span className="font-medium">{rarityLabel}</span>
 					</div>
 				)}

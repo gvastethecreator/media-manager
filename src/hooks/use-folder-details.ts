@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getFolder } from '@/services/folder/folder.service';
+import { getFolder } from '@/services/folder/folder-api.service';
 import type { FolderComplete } from '@/types/entities/folder';
 
 /**

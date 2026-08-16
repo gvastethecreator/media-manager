@@ -4,13 +4,17 @@ import { cn } from '@/lib/utils';
 
 interface CardMediaItem {
 	id: string;
+	isVideo?: boolean;
 	name?: string | null;
 	thumbnailUrl: string;
 	url?: string;
-	isVideo?: boolean;
 }
 
 interface PlaceCardImagesProps {
+	/** Si está en modo compacto */
+	compact?: boolean;
+	/** Si está habilitado el efecto holográfico */
+	holographicEffect?: boolean;
 	/** Imágenes a mostrar (rutas) */
 	images?: CardMediaItem[];
 	/** URL de la imagen destacada */
@@ -19,12 +23,8 @@ interface PlaceCardImagesProps {
 	primaryColor?: string;
 	/** Nivel de rareza (1-10) para determinar efectos */
 	rarityLevel?: number;
-	/** Si está habilitado el efecto holográfico */
-	holographicEffect?: boolean;
 	/** Si está en modo tarjeta TCG */
 	tcgMode?: boolean;
-	/** Si está en modo compacto */
-	compact?: boolean;
 }
 
 /**
@@ -34,7 +34,7 @@ interface PlaceCardImagesProps {
 export function PlaceCardImages({
 	images = [],
 	mainImage,
-	primaryColor = '#10b981',
+	primaryColor = 'var(--dt-success-500)',
 	rarityLevel = 1,
 	holographicEffect = true,
 	tcgMode = true,
@@ -52,11 +52,11 @@ export function PlaceCardImages({
 	// Helper function para generar aria-label
 	const getImageAriaLabel = (): string => {
 		if (!hasImage) {
-			return 'Lugar sin imagen disponible';
+			return 'Place image unavailable';
 		}
 
-		const baseLabel = 'Imagen de lugar';
-		const specialEffects = rarityLevel >= 5 ? ' con efectos especiales' : '';
+		const baseLabel = 'Place image';
+		const specialEffects = rarityLevel >= 5 ? ' with special effects' : '';
 		return `${baseLabel}${specialEffects}`;
 	};
 
@@ -86,7 +86,7 @@ export function PlaceCardImages({
 		if (rarityLevel >= 5) {
 			return {
 				// Efecto de cambio de gradiente para lugares épicos
-				background: `linear-gradient(45deg, ${primaryColor}40, ${primaryColor}90, ${primaryColor}40)`,
+				background: `linear-gradient(45deg, color-mix(in oklab, ${primaryColor}, transparent 75%), color-mix(in oklab, ${primaryColor}, transparent 44%), color-mix(in oklab, ${primaryColor}, transparent 75%))`,
 				backgroundSize: '200% 200%',
 				animation: 'var(--animate-gradient-shift)',
 			};
@@ -125,19 +125,17 @@ export function PlaceCardImages({
 	return (
 		<div
 			aria-label={getImageAriaLabel()}
-			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-white/10 border-b')}
-			onBlur={handleMouseLeave}
-			onFocus={handleMouseLeave}
-			onMouseLeave={handleMouseLeave}
-			onMouseMove={handleMouseMove}
+			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-border/40 border-b')}
+			onPointerLeave={handleMouseLeave}
+			onPointerMove={handleMouseMove}
 			role="img"
 		>
 			{/* Fondo decorativo para cartas TCG */}
 			{tcgMode && (
 				<div
-					className="absolute inset-0 z-0 bg-black/20"
+					className="absolute inset-0 z-0 bg-muted/20"
 					style={{
-						backgroundImage: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 80%)`,
+						backgroundImage: `radial-gradient(circle at 50% 50%, color-mix(in oklab, ${primaryColor}, transparent 81%), transparent 80%)`,
 					}}
 				/>
 			)}
@@ -177,16 +175,18 @@ export function PlaceCardImages({
 				>
 					{/* Imagen del lugar */}
 					<img
-						alt="Lugar"
+						alt="Place"
 						className={cn(
 							'h-full w-full object-cover',
 							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
 						)}
+						height={compact ? 96 : 192}
 						src={displayImage?.thumbnailUrl || ''}
 						style={{
 							...holographicStyle,
 							transformStyle: 'preserve-3d',
 						}}
+						width={192}
 					/>
 
 					{/* Efecto holográfico de brillo */}
@@ -197,7 +197,7 @@ export function PlaceCardImages({
 								background: `linear-gradient(
 									${135 + viewAngle.x * 30}deg,
 									transparent,
-									rgba(255, 255, 255, 0.5) ${50 + viewAngle.y * 10}%,
+									color-mix(in oklch, var(--foreground), transparent 50%) ${50 + viewAngle.y * 10}%,
 									transparent
 								)`,
 							}}
@@ -212,7 +212,7 @@ export function PlaceCardImages({
 								backgroundImage: `repeating-linear-gradient(
 									${90 + viewAngle.x * 20}deg,
 									transparent,
-									rgba(255, 255, 255, 0.8) 1px,
+									color-mix(in oklch, var(--effect-highlight-rgb), transparent 20%) 1px,
 									transparent 2px
 								)`,
 								backgroundSize: '4px 4px',
@@ -223,9 +223,9 @@ export function PlaceCardImages({
 			) : (
 				// Placeholder cuando no hay imagen
 				<div
-					className="flex h-full w-full items-center justify-center bg-black/20 text-white/50"
+					className="flex h-full w-full items-center justify-center bg-muted/20 text-white/50"
 					style={{
-						background: `radial-gradient(circle, ${primaryColor}30 0%, transparent 70%)`,
+						background: `radial-gradient(circle, color-mix(in oklab, ${primaryColor}, transparent 81%) 0%, transparent 70%)`,
 					}}
 				>
 					<span className="-rotate-12 transform text-4xl">📍</span>
@@ -237,17 +237,18 @@ export function PlaceCardImages({
 				<div className="pointer-events-none absolute inset-0 z-30">
 					{/* Marco interno */}
 					<div
-						className="absolute inset-3 rounded border border-white/10"
+						className="absolute inset-3 rounded border border-border/40"
 						style={{
-							boxShadow: rarityLevel >= 5 ? `0 0 10px ${primaryColor}50 inset` : 'none',
+							boxShadow:
+								rarityLevel >= 5 ? `0 0 10px color-mix(in oklab, ${primaryColor}, transparent 69%) inset` : 'none',
 						}}
 					/>
 
 					{/* Efecto viñeta */}
-					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+					<div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/30" />
 
 					{/* Efecto de brillo superior */}
-					<div className="absolute top-0 right-0 left-0 h-[20%] bg-gradient-to-b from-white/10 to-transparent" />
+					<div className="absolute top-0 right-0 left-0 h-[20%] bg-linear-to-b from-white/10 to-transparent" />
 				</div>
 			)}
 		</div>

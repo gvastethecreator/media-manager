@@ -7,36 +7,36 @@
 /**
  * 🧊 Tipo base de File3D directamente desde el schema de Drizzle.
  */
-export type File3DBase = {
-	id: string;
-	name: string;
-	path: string;
-	size: number;
-	hash: string;
-	mimeType: string;
-	extension: string;
-	folderId: string;
-	isFavorite: boolean;
-	isArchived: boolean;
-	format: string | null;
-	version: string | null;
-	vertices: number | null;
-	faces: number | null;
-	triangles: number | null;
-	materials: number | null;
-	textures: number | null;
+export interface File3DBase {
 	animations: number | null;
 	bones: number | null;
-	scenes: number | null;
-	cameras: number | null;
-	lights: number | null;
-	hasUV: boolean | null;
-	hasNormals: boolean | null;
-	hasColors: boolean | null;
 	boundingBox: string | null;
+	cameras: number | null;
 	createdAt: Date;
+	extension: string;
+	faces: number | null;
+	folderId: string;
+	format: string | null;
+	hasColors: boolean | null;
+	hash: string;
+	hasNormals: boolean | null;
+	hasUV: boolean | null;
+	id: string;
+	isArchived: boolean;
+	isFavorite: boolean;
+	lights: number | null;
+	materials: number | null;
+	mimeType: string;
+	name: string;
+	path: string;
+	scenes: number | null;
+	size: number;
+	textures: number | null;
+	triangles: number | null;
 	updatedAt: Date;
-};
+	version: string | null;
+	vertices: number | null;
+}
 
 import { EntityStats } from '../entity.types';
 
@@ -45,20 +45,20 @@ import { EntityStats } from '../entity.types';
  * Estas métricas se enfocan en las características técnicas y complejidad del modelo.
  */
 export interface File3DStatistics extends EntityStats {
-	/** Número de polígonos del modelo */
-	polygonCount: number;
-	/** Tamaño total de las texturas asociadas en MB */
-	textureSize: number;
 	/** Formato del archivo (por ejemplo, 'glb', 'obj') */
 	format: string;
-	/** Número de vértices del modelo */
-	vertexCount: number;
-	/** Número de materiales utilizados en el modelo */
-	materialCount: number;
 
 	// File system functions
 	isDirectory: boolean;
 	isFile: boolean;
+	/** Número de materiales utilizados en el modelo */
+	materialCount: number;
+	/** Número de polígonos del modelo */
+	polygonCount: number;
+	/** Tamaño total de las texturas asociadas en MB */
+	textureSize: number;
+	/** Número de vértices del modelo */
+	vertexCount: number;
 }
 
 /**
