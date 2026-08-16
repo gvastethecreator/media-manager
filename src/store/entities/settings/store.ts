@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { interfacePreferencesSchema } from '@/types/ui/interface.schema';
 import type { InterfacePreferences, InterfaceSettingsState } from '@/types/ui/types';
 
@@ -111,7 +112,7 @@ export const useInterfaceSettingsStore = create<InterfaceSettingsState>()(
 				} else {
 					// 🚨 Log de error de validación
 
-					console.warn('Preferencias de interfaz inválidas', parsed.error);
+					clientLogger.warn('Preferencias de interfaz inválidas', parsed.error);
 				}
 			},
 		}),

@@ -84,7 +84,7 @@ function setupCleanShutdown(stopMonitor: () => void) {
 
 	// Manejar excepciones no capturadas
 	process.on('uncaughtException', (error) => {
-		initLogger.error('Excepción no capturada', {
+		initLogger.error('Uncaught exception', {
 			error: error.message,
 			stack: error.stack,
 		});

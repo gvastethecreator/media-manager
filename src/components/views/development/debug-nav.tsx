@@ -2,26 +2,26 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 interface DebugNavItem {
-	title: string;
-	href: string;
 	description: string;
+	href: string;
+	title: string;
 }
 
 const navItems: DebugNavItem[] = [
 	{
-		title: 'Consola de Logs',
+		title: 'Log Console',
 		href: '/debug',
-		description: 'Visualización y captura de logs en tiempo real',
+		description: 'View and capture logs in real time',
 	},
 	{
 		title: 'Server Actions',
 		href: '/debug/actions',
-		description: 'Prueba de Server Actions con logging mejorado',
+		description: 'Test Server Actions with enhanced logging',
 	},
 	{
 		title: 'API Logger',
 		href: '/debug/api',
-		description: 'Prueba del sistema de logging para rutas API',
+		description: 'Test logging for API routes',
 	},
 ];
 
@@ -32,7 +32,7 @@ export function DebugNav() {
 	return (
 		<div className="flex flex-col space-y-1">
 			<div className="px-3 py-2">
-				<h2 className="mb-2 px-4 font-semibold text-lg tracking-tight">Herramientas de Depuración</h2>
+				<h2 className="mb-2 px-4 font-semibold text-lg tracking-tight">Debug Tools</h2>
 				<div className="space-y-1">
 					{navItems.map((item) => (
 						<Link

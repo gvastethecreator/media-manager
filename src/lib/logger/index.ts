@@ -6,21 +6,11 @@
  */
 
 // Exportar el logger del cliente para componentes del lado del cliente
-export {
-	ClientLogger,
-	clientLogger,
-	createClientServiceLogger,
-} from './client-logger';
+export { ClientLogger, clientLogger, createClientServiceLogger } from './client-logger';
 // enhanced-logger eliminado - usar serverLogger en su lugar
 
 // Exportar configuración y tipos
-export {
-	type LoggerConfig,
-	LoggerConfigSchema,
-	type LogLevel,
-	LogLevelSchema,
-	loggerConfig,
-} from './logger.config';
+export { type LoggerConfig, LoggerConfigSchema, type LogLevel, LogLevelSchema, loggerConfig } from './logger.config';
 // Exportar directamente desde el logger del servidor
 export {
 	createServerServiceLogger as createLogger, // Exportar ServerLogger también como Logger para compatibilidad

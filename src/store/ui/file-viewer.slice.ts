@@ -2,23 +2,23 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
+import type { ImageItem } from '@/components/features/file-viewer/file-viewer.types';
 
 export interface FileViewerState {
-	// Estado
-	isOpen: boolean;
-	currentIndex: number;
-	items: ImageItem[];
-
-	// Acciones
-	openViewer: (items: ImageItem[], initialIndex?: number) => void;
 	closeViewer: () => void;
-	setCurrentIndex: (index: number) => void;
-	nextItem: () => void;
-	previousItem: () => void;
+	currentIndex: number;
 
 	// Selectores
 	getCurrentItem: () => ImageItem | null;
+	// Estado
+	isOpen: boolean;
+	items: ImageItem[];
+	nextItem: () => void;
+
+	// Acciones
+	openViewer: (items: ImageItem[], initialIndex?: number) => void;
+	previousItem: () => void;
+	setCurrentIndex: (index: number) => void;
 }
 
 /**

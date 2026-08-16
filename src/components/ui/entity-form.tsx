@@ -33,39 +33,23 @@ export type EntityFieldType =
 // Definición de un campo para el formulario
 export interface EntityFormField {
 	/**
-	 * Nombre del campo (corresponde a la propiedad en el objeto de datos)
-	 */
-	name: string;
-
-	/**
-	 * Etiqueta para mostrar en el formulario
-	 */
-	label: string;
-
-	/**
-	 * Tipo de campo
-	 */
-	type: EntityFieldType;
-
-	/**
 	 * Texto de ayuda para mostrar debajo del campo
 	 */
 	description?: string;
 
 	/**
-	 * Indica si el campo es requerido
+	 * Si debe ocupar ancho completo (en diseño de columnas)
 	 */
-	required?: boolean;
+	fullWidth?: boolean;
 
 	/**
-	 * Placeholder del campo
+	 * Etiqueta para mostrar en el formulario
 	 */
-	placeholder?: string;
-
+	label: string;
 	/**
-	 * Orden del campo en el formulario
+	 * Nombre del campo (corresponde a la propiedad en el objeto de datos)
 	 */
-	order?: number;
+	name: string;
 
 	/**
 	 * Opciones para campos select o multiselect
@@ -76,9 +60,29 @@ export interface EntityFormField {
 	}>;
 
 	/**
-	 * Si debe ocupar ancho completo (en diseño de columnas)
+	 * Orden del campo en el formulario
 	 */
-	fullWidth?: boolean;
+	order?: number;
+
+	/**
+	 * Placeholder del campo
+	 */
+	placeholder?: string;
+
+	/**
+	 * Propiedades adicionales específicas para cada tipo de campo
+	 */
+	props?: Record<string, any>;
+
+	/**
+	 * Indica si el campo es requerido
+	 */
+	required?: boolean;
+
+	/**
+	 * Tipo de campo
+	 */
+	type: EntityFieldType;
 
 	/**
 	 * Validación personalizada (además de required)
@@ -91,59 +95,19 @@ export interface EntityFormField {
 		pattern?: RegExp;
 		customMessage?: string;
 	};
-
-	/**
-	 * Propiedades adicionales específicas para cada tipo de campo
-	 */
-	props?: Record<string, any>;
 }
 
 // Props del componente EntityForm
 export interface EntityFormProps {
-	/**
-	 * Título del formulario
-	 */
-	title?: string;
-
-	/**
-	 * Descripción del formulario
-	 */
-	description?: string;
-
-	/**
-	 * Campos a mostrar en el formulario
-	 */
-	fields: EntityFormField[];
-
-	/**
-	 * Datos iniciales para el formulario
-	 */
-	initialData?: Record<string, any>;
-
-	/**
-	 * Función a ejecutar al enviar el formulario (después de validación)
-	 */
-	onSubmit: (data: Record<string, any>) => Promise<void> | void;
-
-	/**
-	 * Función a ejecutar al cancelar
-	 */
-	onCancel?: () => void;
-
-	/**
-	 * Texto del botón de envío
-	 */
-	submitLabel?: string;
-
 	/**
 	 * Texto del botón de cancelar
 	 */
 	cancelLabel?: string;
 
 	/**
-	 * Indicador de validación asíncrona en curso
+	 * Clases adicionales
 	 */
-	isLoading?: boolean;
+	className?: string;
 
 	/**
 	 * Si debe mostrar un modal de confirmación antes de enviar
@@ -156,19 +120,14 @@ export interface EntityFormProps {
 	confirmMessage?: string;
 
 	/**
-	 * Si debe mostrar un mensaje toast al completar
+	 * Descripción del formulario
 	 */
-	showToastOnSuccess?: boolean;
+	description?: string;
 
 	/**
-	 * Mensaje para el toast de éxito
+	 * Campos a mostrar en el formulario
 	 */
-	successMessage?: string;
-
-	/**
-	 * URL a la que redirigir después de enviar con éxito
-	 */
-	redirectUrl?: string;
+	fields: EntityFormField[];
 
 	/**
 	 * Estilo del formulario
@@ -176,9 +135,48 @@ export interface EntityFormProps {
 	formStyle?: 'default' | 'compact' | 'card';
 
 	/**
-	 * Clases adicionales
+	 * Datos iniciales para el formulario
 	 */
-	className?: string;
+	initialData?: Record<string, any>;
+
+	/**
+	 * Indicador de validación asíncrona en curso
+	 */
+	isLoading?: boolean;
+
+	/**
+	 * Función a ejecutar al cancelar
+	 */
+	onCancel?: () => void;
+
+	/**
+	 * Función a ejecutar al enviar el formulario (después de validación)
+	 */
+	onSubmit: (data: Record<string, any>) => Promise<void> | void;
+
+	/**
+	 * URL a la que redirigir después de enviar con éxito
+	 */
+	redirectUrl?: string;
+
+	/**
+	 * Si debe mostrar un mensaje toast al completar
+	 */
+	showToastOnSuccess?: boolean;
+
+	/**
+	 * Texto del botón de envío
+	 */
+	submitLabel?: string;
+
+	/**
+	 * Mensaje para el toast de éxito
+	 */
+	successMessage?: string;
+	/**
+	 * Título del formulario
+	 */
+	title?: string;
 }
 
 /**
@@ -192,13 +190,13 @@ export function EntityForm({
 	initialData = {},
 	onSubmit,
 	onCancel,
-	submitLabel = 'Guardar',
-	cancelLabel = 'Cancelar',
+	submitLabel = 'Save',
+	cancelLabel = 'Cancel',
 	isLoading = false,
 	confirmBeforeSubmit = false,
-	confirmMessage = '¿Estás seguro de guardar los cambios?',
+	confirmMessage = 'Save these changes?',
 	showToastOnSuccess = true,
-	successMessage = 'Cambios guardados correctamente',
+	successMessage = 'Changes saved successfully',
 	redirectUrl,
 	formStyle = 'default',
 	className,
@@ -241,7 +239,7 @@ export function EntityForm({
 					fieldSchema = z.string().default('');
 					break;
 				case 'color':
-					fieldSchema = z.string().default('#3b82f6');
+					fieldSchema = z.string().default('var(--dt-primary-500)');
 					break;
 				default:
 					fieldSchema = z.string().optional();
@@ -264,15 +262,14 @@ export function EntityForm({
 					fieldSchema = fieldSchema.min(
 						field.validation.minLength,
 						field.validation.customMessage ||
-							`${field.label} debe tener al menos ${field.validation.minLength} caracteres`
+							`${field.label} must contain at least ${field.validation.minLength} characters`
 					);
 				}
 
 				if (field.validation.maxLength && (field.type === 'text' || field.type === 'textarea')) {
 					fieldSchema = fieldSchema.max(
 						field.validation.maxLength,
-						field.validation.customMessage ||
-							`${field.label} no puede tener más de ${field.validation.maxLength} caracteres`
+						field.validation.customMessage || `${field.label} cannot exceed ${field.validation.maxLength} characters`
 					);
 				}
 
@@ -286,14 +283,14 @@ export function EntityForm({
 				if (field.validation.max && field.type === 'number') {
 					fieldSchema = fieldSchema.max(
 						field.validation.max,
-						field.validation.customMessage || `${field.label} no puede ser mayor a ${field.validation.max}`
+						field.validation.customMessage || `${field.label} cannot be greater than ${field.validation.max}`
 					);
 				}
 
 				if (field.validation.pattern && (field.type === 'text' || field.type === 'url')) {
 					fieldSchema = fieldSchema.regex(
 						field.validation.pattern,
-						field.validation.customMessage || `Formato de ${field.label.toLowerCase()} inválido`
+						field.validation.customMessage || `${field.label} has an invalid format`
 					);
 				}
 			}
@@ -333,7 +330,7 @@ export function EntityForm({
 							defaultValues[field.name] = [];
 							break;
 						case 'color':
-							defaultValues[field.name] = '#3b82f6';
+							defaultValues[field.name] = 'var(--dt-primary-500)';
 							break;
 						case 'emoji':
 							defaultValues[field.name] = '📝';
@@ -371,7 +368,7 @@ export function EntityForm({
 				navigateWithTransition(redirectUrl);
 			}
 		} catch (error: any) {
-			toastService.error(error.message || 'Error al guardar los cambios');
+			toastService.error(error.message || 'Could not save changes');
 		} finally {
 			setIsSubmitting(false);
 			setShowConfirmation(false);
@@ -467,7 +464,7 @@ export function EntityForm({
 								>
 									<FormControl>
 										<SelectTrigger>
-											<SelectValue placeholder={field.placeholder || `Seleccionar ${field.label.toLowerCase()}`} />
+											<SelectValue placeholder={field.placeholder || `Select ${field.label.toLowerCase()}`} />
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
@@ -529,13 +526,17 @@ export function EntityForm({
 													className="h-5 w-5 cursor-pointer rounded-md border"
 													style={{
 														backgroundColor:
-															typeof formField.value === 'string' ? (formField.value as string) : undefined,
+															typeof formField.value === 'string'
+																? formField.value.startsWith('var(')
+																	? formField.value
+																	: formField.value
+																: undefined,
 													}}
 												/>
 												<Input
-													className="w-20 font-mono"
+													className="w-40 font-mono text-xs"
 													onChange={formField.onChange}
-													placeholder="#RRGGBB"
+													placeholder="#RRGGBB o var(--...)"
 													value={typeof formField.value === 'string' ? formField.value : ''}
 												/>
 											</div>
@@ -543,7 +544,11 @@ export function EntityForm({
 									</PopoverTrigger>
 									<PopoverContent className="w-auto p-3">
 										<HexColorPicker
-											color={typeof formField.value === 'string' ? formField.value : '#000000'}
+											color={
+												typeof formField.value === 'string' && formField.value.startsWith('#')
+													? formField.value
+													: 'var(--dt-neutral-950)'
+											}
 											onChange={formField.onChange}
 										/>
 									</PopoverContent>
@@ -630,15 +635,15 @@ export function EntityForm({
 
 				{/* Confirmación antes de enviar (esto podría expandirse a un componente de diálogo) */}
 				{showConfirmation && (
-					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+					<div className="fixed inset-0 z-50 flex items-center justify-center bg-muted/50">
 						<div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg">
-							<h3 className="mb-4 font-medium text-lg">Confirmar acción</h3>
+							<h3 className="mb-4 font-medium text-lg">Confirm Action</h3>
 							<p className="mb-6">{confirmMessage}</p>
 							<div className="flex justify-end gap-3">
 								<Button onClick={() => setShowConfirmation(false)} variant="outline">
-									Cancelar
+									Cancel
 								</Button>
-								<Button onClick={() => form.handleSubmit(handleSubmit)()}>Confirmar</Button>
+								<Button onClick={() => form.handleSubmit(handleSubmit)()}>Confirm</Button>
 							</div>
 						</div>
 					</div>

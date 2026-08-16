@@ -1,6 +1,50 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // === ATAJOS COMUNES (nombres cortos) ===
+    {
+      "label": "🚀 dev",
+      "type": "shell",
+      "command": "bun run dev:full",
+      "isBackground": true,
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🏗️ build",
+      "type": "shell",
+      "command": "bun run build",
+      "group": "build",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "🔎 check",
+      "type": "shell",
+      "command": "bun run check",
+      "group": "test",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "🧪 test",
+      "type": "shell",
+      "command": "bun run test:unit",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "🎭 e2e",
+      "type": "shell",
+      "command": "bun run test:e2e",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "📦 deps",
+      "type": "shell",
+      "command": "bun run deps:outdated",
+      "group": "build",
+      "problemMatcher": []
+    },
     // === TAREAS DE DESARROLLO (PRIORIDAD ALTA) ===
     {
       "label": "🚀 Desarrollo: Full Stack",
@@ -11,7 +55,17 @@
         "isDefault": true
       },
       "isBackground": true,
-      "problemMatcher": [],
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": ".*"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "🚀 Iniciando desarrollo completo",
+          "endsPattern": "\\[DEV\\] ✅ Desarrollo completo listo\\."
+        }
+      },
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -28,12 +82,22 @@
       }
     },
     {
-      "label": "🌐 Desarrollo: Frontend (Vite)",
+      "label": "🌐 Desarrollo: Frontend (Vite+)",
       "type": "shell",
       "command": "bun run dev:vite",
       "group": "build",
       "isBackground": true,
-      "problemMatcher": [],
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": ".*"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "🚀 Iniciando Vite\\+",
+          "endsPattern": "✅ Frontend listo en http://localhost:5173"
+        }
+      },
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -46,7 +110,17 @@
       "command": "bun run dev:server:hot",
       "group": "build",
       "isBackground": true,
-      "problemMatcher": [],
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": ".*"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "🌟 Iniciando desarrollo del servidor",
+          "endsPattern": "✅ Backend listo en http://localhost:4000"
+        }
+      },
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -81,7 +155,7 @@
       }
     },
     {
-      "label": "🏗️ Build: Frontend",
+      "label": "🏗️ Build: Frontend (Vite+)",
       "type": "shell",
       "command": "bun run build:vite",
       "group": "build",
@@ -119,6 +193,13 @@
     },
     // Calidad de código
     {
+      "label": "🧩 Check: Vite+",
+      "type": "shell",
+      "command": "bun run check",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
       "label": "🎨 Format: Check",
       "type": "shell",
       "command": "bun run format:check",
@@ -133,16 +214,16 @@
       "problemMatcher": []
     },
     {
-      "label": "🔍 Biome: Check",
+      "label": "🔍 Lint: Oxc",
       "type": "shell",
-      "command": "bun run biome",
+      "command": "bun run lint",
       "group": "build",
       "problemMatcher": []
     },
     {
-      "label": "🔧 Biome: Fix",
+      "label": "🔧 Lint: Oxc Fix",
       "type": "shell",
-      "command": "bun run biome:fix",
+      "command": "bun run lint:fix",
       "group": "build",
       "problemMatcher": []
     },
@@ -158,7 +239,8 @@
     {
       "label": "🗃️ DB: Studio",
       "type": "shell",
-      "command": "bun run db:studio",
+      "command": "bun run db:studio -- --database \"${input:mediaManagerDatabasePath}\"",
+      "detail": "Abre Studio sólo en la base elegida.",
       "group": "build",
       "isBackground": true,
       "problemMatcher": []
@@ -166,16 +248,22 @@
     {
       "label": "🗃️ DB: Check",
       "type": "shell",
-      "command": "bun run db:check",
+      "command": "bun run db:check -- --database \"${input:mediaManagerDatabasePath}\"",
+      "detail": "Comprueba una base explícita sin cambiarla.",
       "group": "build",
       "problemMatcher": []
     },
     {
-      "label": "🗃️ DB: Reset",
+      "label": "⚠️ DB: Reset disposable (dry-run)",
       "type": "shell",
-      "command": "bun run db:reset",
-      "group": "build",
-      "problemMatcher": []
+      "command": "bun run db:reset -- --database \"${input:mediaManagerDisposableDatabasePath}\"",
+      "detail": "No borra. Requiere una DB marcada bajo .scratch o temp.",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated"
+      }
     },
     {
       "label": "🔍 Logs: List",
@@ -212,6 +300,20 @@
       "group": "test",
       "isBackground": true,
       "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "mediaManagerDatabasePath",
+      "type": "promptString",
+      "description": "Ruta de la base para Studio o Check",
+      "default": "${workspaceFolder}/.scratch/dev.sqlite"
+    },
+    {
+      "id": "mediaManagerDisposableDatabasePath",
+      "type": "promptString",
+      "description": "Ruta descartable bajo .scratch o temp para el dry-run de reset",
+      "default": "${workspaceFolder}/.scratch/dev.sqlite"
     }
   ]
 }

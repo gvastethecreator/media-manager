@@ -10,18 +10,18 @@ const coreLogger = clientLogger.withContext('ConceptStore:Core');
 export interface CoreSlice {
 	// Estado
 	concepts: ConceptWithStats[];
-	selectedConcept: ConceptWithStats | null;
-	isLoading: boolean;
+	createConcept: (concept: ConceptCreateInput) => Promise<void>;
+	deleteConcept: (id: string) => Promise<void>;
 	error: string | null;
+	isLoading: boolean;
 
 	// Acciones
 	loadConcepts: () => Promise<void>;
-	setConcepts: (concepts: ConceptWithStats[]) => void;
-	createConcept: (concept: ConceptCreateInput) => Promise<void>;
-	updateConcept: (id: string, concept: ConceptUpdateInput) => Promise<void>;
-	deleteConcept: (id: string) => Promise<void>;
-	selectConcept: (concept: ConceptWithStats | null) => void;
 	reset: () => void;
+	selectConcept: (concept: ConceptWithStats | null) => void;
+	selectedConcept: ConceptWithStats | null;
+	setConcepts: (concepts: ConceptWithStats[]) => void;
+	updateConcept: (id: string, concept: ConceptUpdateInput) => Promise<void>;
 }
 
 export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (set, get) => ({
@@ -68,7 +68,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('✅ Concepto creado');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al crear concepto';
-			coreLogger.error('❌ Error al crear concepto:', error);
+			coreLogger.error('❌ Could not create concept:', error);
 			set({ error: message, isLoading: false });
 		}
 	},
@@ -87,7 +87,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('✅ Concepto actualizado');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al actualizar concepto';
-			coreLogger.error('❌ Error al actualizar concepto:', error);
+			coreLogger.error('❌ Could not update concept:', error);
 			set({ error: message, isLoading: false });
 		}
 	},
@@ -111,7 +111,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('✅ Concepto eliminado');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al eliminar concepto';
-			coreLogger.error('❌ Error al eliminar concepto:', error);
+			coreLogger.error('❌ Could not delete concept:', error);
 			set({ error: message, isLoading: false });
 		}
 	},

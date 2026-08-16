@@ -111,17 +111,17 @@ graph TB
 ```typescript
 // Tipo base de la nota
 interface NoteBase {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  priority: number;          // 0-10 para priorización
-  status: string;            // draft, active, archived, etc.
-  featuredImage: string | null;
-  isFavorite: boolean;
-  presetId: string | null;   // Referencia a preset de nota
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	title: string;
+	content: string;
+	category: string;
+	priority: number; // 0-10 para priorización
+	status: string; // draft, active, archived, etc.
+	featuredImage: string | null;
+	isFavorite: boolean;
+	presetId: string | null; // Referencia a preset de nota
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 // Tipo completo con relaciones y conteos
@@ -129,15 +129,15 @@ type NoteComplete = NoteBase & NoteRelations & NoteCounts & NoteUI;
 
 // Tipo extendido para UI
 interface NoteExtended extends NoteComplete {
-  isSelected: boolean;
-  isHighlighted: boolean;
-  isEditing: boolean;
-  isExpanded: boolean;
-  isLoading: boolean;
-  hasError: boolean;
-  isDragging: boolean;
-  isDropTarget: boolean;
-  totalItems: number;
+	isSelected: boolean;
+	isHighlighted: boolean;
+	isEditing: boolean;
+	isExpanded: boolean;
+	isLoading: boolean;
+	hasError: boolean;
+	isDragging: boolean;
+	isDropTarget: boolean;
+	totalItems: number;
 }
 ```
 
@@ -145,30 +145,32 @@ interface NoteExtended extends NoteComplete {
 
 ```typescript
 interface NoteFilters {
-  searchQuery?: string;      // Búsqueda en título y contenido
-  categories?: string[];     // Filtrar por categorías
-  priorities?: number[];     // Filtrar por niveles de prioridad
-  statuses?: string[];       // Filtrar por estados
-  onlyFavorites?: boolean;   // Solo favoritas
-  contentContains?: string;  // Contenido específico
-  hasTags?: boolean;         // Que tengan tags
-  hasImages?: boolean;       // Que tengan imágenes
-  hasVideos?: boolean;       // Que tengan videos
+	searchQuery?: string; // Búsqueda en título y contenido
+	categories?: string[]; // Filtrar por categorías
+	priorities?: number[]; // Filtrar por niveles de prioridad
+	statuses?: string[]; // Filtrar por estados
+	onlyFavorites?: boolean; // Solo favoritas
+	contentContains?: string; // Contenido específico
+	hasTags?: boolean; // Que tengan tags
+	hasImages?: boolean; // Que tengan imágenes
+	hasVideos?: boolean; // Que tengan videos
 }
 
 interface NoteSearchOptions {
-  skip?: number;             // Offset para paginación
-  take?: number;             // Límite de resultados
-  orderBy?: {                // Ordenación
-    [key in keyof NoteBase]?: 'asc' | 'desc';
-  };
-  where?: NoteFilters;       // Condiciones de filtrado
-  include?: {                // Relaciones a incluir
-    images?: boolean;
-    videos?: boolean;
-    // ... otras relaciones
-    _count?: boolean;
-  };
+	skip?: number; // Offset para paginación
+	take?: number; // Límite de resultados
+	orderBy?: {
+		// Ordenación
+		[key in keyof NoteBase]?: 'asc' | 'desc';
+	};
+	where?: NoteFilters; // Condiciones de filtrado
+	include?: {
+		// Relaciones a incluir
+		images?: boolean;
+		videos?: boolean;
+		// ... otras relaciones
+		_count?: boolean;
+	};
 }
 ```
 
@@ -211,32 +213,32 @@ interface NoteSearchOptions {
 
 ```typescript
 enum NoteStatus {
-  ACTIVE = 'active',
-  ARCHIVED = 'archived',
-  COMPLETED = 'completed',
-  DRAFT = 'draft',
-  PENDING = 'pending',
+	ACTIVE = 'active',
+	ARCHIVED = 'archived',
+	COMPLETED = 'completed',
+	DRAFT = 'draft',
+	PENDING = 'pending',
 }
 
 enum NoteCategory {
-  GENERAL = 'general',
-  STORY = 'story',
-  LORE = 'lore',
-  MECHANICS = 'mechanics',
-  CHARACTER = 'character',
-  PLACE = 'place',
-  WORLD_ITEM = 'world_item',
-  PROMPT = 'prompt',
-  IDEA = 'idea',
-  TODO = 'todo',
+	GENERAL = 'general',
+	STORY = 'story',
+	LORE = 'lore',
+	MECHANICS = 'mechanics',
+	CHARACTER = 'character',
+	PLACE = 'place',
+	WORLD_ITEM = 'world_item',
+	PROMPT = 'prompt',
+	IDEA = 'idea',
+	TODO = 'todo',
 }
 
 enum NotePriority {
-  LOWEST = 0,
-  LOW = 1,
-  MEDIUM = 2,
-  HIGH = 3,
-  HIGHEST = 4,
+	LOWEST = 0,
+	LOW = 1,
+	MEDIUM = 2,
+	HIGH = 3,
+	HIGHEST = 4,
 }
 ```
 
@@ -246,13 +248,13 @@ enum NotePriority {
 
 ```typescript
 const nuevaNota = await createNote({
-  title: "Ideas para el Proyecto",
-  content: "Lista de ideas y conceptos a desarrollar...",
-  category: "idea",
-  priority: 3,
-  status: "draft",
-  isFavorite: false,
-  tags: ["proyecto", "ideas", "desarrollo"]
+	title: 'Ideas para el Proyecto',
+	content: 'Lista de ideas y conceptos a desarrollar...',
+	category: 'idea',
+	priority: 3,
+	status: 'draft',
+	isFavorite: false,
+	tags: ['proyecto', 'ideas', 'desarrollo'],
 });
 ```
 
@@ -260,18 +262,18 @@ const nuevaNota = await createNote({
 
 ```typescript
 const resultados = await searchNotes(
-  {
-    searchQuery: "proyecto",
-    categories: ["idea", "todo"],
-    priorities: [3, 4],
-    onlyFavorites: true
-  },
-  {
-    skip: 0,
-    take: 20,
-    orderBy: { priority: 'desc', updatedAt: 'desc' },
-    include: { images: true, tags: true, _count: true }
-  }
+	{
+		searchQuery: 'proyecto',
+		categories: ['idea', 'todo'],
+		priorities: [3, 4],
+		onlyFavorites: true,
+	},
+	{
+		skip: 0,
+		take: 20,
+		orderBy: { priority: 'desc', updatedAt: 'desc' },
+		include: { images: true, tags: true, _count: true },
+	}
 );
 ```
 
@@ -279,10 +281,10 @@ const resultados = await searchNotes(
 
 ```typescript
 const notaActualizada = await updateNote(notaId, {
-  content: "Contenido actualizado...",
-  priority: 4,
-  status: "active",
-  isFavorite: true
+	content: 'Contenido actualizado...',
+	priority: 4,
+	status: 'active',
+	isFavorite: true,
 });
 ```
 
@@ -353,93 +355,97 @@ graph TD
 ### 🔧 **Componentes del Sistema**
 
 #### 1. **Tipos Optimizados** (`types.ts`)
+
 ```typescript
 interface NoteWithStats extends NoteBase {
-  statistics: NoteStatistics;
-  excerpt: string;
-  formattedDate: string;
-  priorityLabel: string;
-  statusLabel: string;
-  categoryLabel: string;
+	statistics: NoteStatistics;
+	excerpt: string;
+	formattedDate: string;
+	priorityLabel: string;
+	statusLabel: string;
+	categoryLabel: string;
 }
 
 interface NoteStatistics {
-  // Conteos de relaciones
-  totalImages: number;
-  totalVideos: number;
-  totalTags: number;
-  // ... otros conteos
+	// Conteos de relaciones
+	totalImages: number;
+	totalVideos: number;
+	totalTags: number;
+	// ... otros conteos
 
-  // Métricas de contenido
-  wordCount: number;
-  characterCount: number;
-  readingTime: number; // en minutos
-  completionScore: number; // 0-100
-  lastUpdated: Date;
+	// Métricas de contenido
+	wordCount: number;
+	characterCount: number;
+	readingTime: number; // en minutos
+	completionScore: number; // 0-100
+	lastUpdated: Date;
 }
 ```
 
 #### 2. **Transformer Principal** (`transformer.ts`)
+
 ```typescript
-export function fromDrizzleNoteWithCounts(
-  note: DrizzleNoteWithCounts
-): NoteWithStats {
-  // Calcula estadísticas desde _count
-  // Genera excerpt automático
-  // Calcula reading time (200 palabras/min)
-  // Determina completion score (0-100)
-  // Formatea fechas y etiquetas
+export function fromDrizzleNoteWithCounts(note: DrizzleNoteWithCounts): NoteWithStats {
+	// Calcula estadísticas desde _count
+	// Genera excerpt automático
+	// Calcula reading time (200 palabras/min)
+	// Determina completion score (0-100)
+	// Formatea fechas y etiquetas
 }
 ```
 
 #### 3. **Adaptador de Compatibilidad** (`note-adapter.ts`)
+
 ```typescript
-export function adaptNoteCompleteToWithStats(
-  note: NoteComplete
-): NoteWithStats {
-  // Convierte NoteComplete → NoteWithStats
-  // Mantiene compatibilidad con server actions
-  // Calcula estadísticas desde _count
-  // Genera campos derivados
+export function adaptNoteCompleteToWithStats(note: NoteComplete): NoteWithStats {
+	// Convierte NoteComplete → NoteWithStats
+	// Mantiene compatibilidad con server actions
+	// Calcula estadísticas desde _count
+	// Genera campos derivados
 }
 ```
 
 ### 🚀 **Características Únicas de Note**
 
 #### **Sistema de Completion Score (0-100)**
+
 - **Contenido base (40 pts)**: Título, contenido extenso
 - **Categorización (20 pts)**: Categoría específica, prioridad, estado
 - **Metadatos (20 pts)**: Imagen destacada, color, emoji
 - **Relaciones (20 pts)**: Conexiones con otras entidades
 
 #### **Auto-excerpt Inteligente**
-- Limpia markdown (`#*_``)
+
+- Limpia markdown (`#\*\_``)
 - Trunca en 150 caracteres
 - Respeta límites de palabras
 - Añade "..." automáticamente
 
 #### **Reading Time Calculado**
+
 - Basado en 200 palabras por minuto
 - Cuenta solo palabras reales
 - Mínimo 1 minuto
 
 #### **Campos Personalizables**
+
 - `color`: Color personalizado para la nota
 - `emoji`: Emoji representativo
 - `featuredImage`: Imagen destacada
 
 ### 📈 **Beneficios de Rendimiento**
 
-| Métrica | Antes (NoteComplete) | Después (NoteWithStats) | Mejora |
-|---------|---------------------|-------------------------|--------|
-| Consulta DB | Include completo | Solo conteos | 60-80% |
-| Memoria | Relaciones cargadas | Solo estadísticas | 70% |
-| UI Updates | Recálculo en render | Pre-calculado | 90% |
-| Store Access | Array O(n) | Record O(1) | 95% |
+| Métrica      | Antes (NoteComplete) | Después (NoteWithStats) | Mejora |
+| ------------ | -------------------- | ----------------------- | ------ |
+| Consulta DB  | Include completo     | Solo conteos            | 60-80% |
+| Memoria      | Relaciones cargadas  | Solo estadísticas       | 70%    |
+| UI Updates   | Recálculo en render  | Pre-calculado           | 90%    |
+| Store Access | Array O(n)           | Record O(1)             | 95%    |
 
 ### 🔄 **Flujo de Transformación**
 
 #### **Carga Inicial**
+
 ```typescript
 // Server Action → NoteComplete
 const notes = await getNotes();
@@ -452,6 +458,7 @@ const notesRecord = notesToRecord(notesWithStats);
 ```
 
 #### **Creación/Actualización**
+
 ```typescript
 // Input → Server Action
 const newNote = await createNote(noteData);
@@ -464,31 +471,32 @@ store.addNote(noteWithStats);
 ### 🛠️ **Integración con Store**
 
 #### **Estructura Record Optimizada**
+
 ```typescript
 interface NoteStore {
-  notes: Record<string, NoteWithStats>; // O(1) access
-  selectedNote: NoteWithStats | null;
-  // ... otros campos
+	notes: Record<string, NoteWithStats>; // O(1) access
+	selectedNote: NoteWithStats | null;
+	// ... otros campos
 }
 ```
 
 #### **Operaciones Eficientes**
+
 ```typescript
 // Acceso directo O(1)
 const note = store.notes[noteId];
 
 // Búsqueda optimizada
-const filteredNotes = Object.values(store.notes)
-  .filter(note => note.statistics.completionScore > 80);
+const filteredNotes = Object.values(store.notes).filter((note) => note.statistics.completionScore > 80);
 
 // Ordenamiento por estadísticas
-const sortedNotes = Object.values(store.notes)
-  .sort((a, b) => b.statistics.wordCount - a.statistics.wordCount);
+const sortedNotes = Object.values(store.notes).sort((a, b) => b.statistics.wordCount - a.statistics.wordCount);
 ```
 
 ### 🎨 **Integración con UI**
 
 #### **Componentes Optimizados**
+
 ```typescript
 // NoteCard usa estadísticas pre-calculadas
 <NoteCard
@@ -501,56 +509,56 @@ const sortedNotes = Object.values(store.notes)
 ```
 
 #### **Filtros Eficientes**
+
 ```typescript
 // Filtro por completion score
-const highQualityNotes = notes.filter(
-  note => note.statistics.completionScore >= 80
-);
+const highQualityNotes = notes.filter((note) => note.statistics.completionScore >= 80);
 
 // Filtro por reading time
-const quickReads = notes.filter(
-  note => note.statistics.readingTime <= 5
-);
+const quickReads = notes.filter((note) => note.statistics.readingTime <= 5);
 ```
 
 ### 🔍 **Casos de Uso Específicos**
 
 #### **Dashboard de Productividad**
+
 ```typescript
 const productivity = {
-  totalNotes: Object.keys(notes).length,
-  averageCompletion: calculateAverageCompletion(notes),
-  totalWords: sumWordCounts(notes),
-  readingTimeDistribution: getReadingTimeDistribution(notes)
+	totalNotes: Object.keys(notes).length,
+	averageCompletion: calculateAverageCompletion(notes),
+	totalWords: sumWordCounts(notes),
+	readingTimeDistribution: getReadingTimeDistribution(notes),
 };
 ```
 
 #### **Búsqueda Avanzada**
+
 ```typescript
-const searchResults = Object.values(notes).filter(note => {
-  const matchesContent = note.content.includes(query);
-  const matchesExcerpt = note.excerpt.includes(query);
-  const hasMinQuality = note.statistics.completionScore >= minScore;
-  return (matchesContent || matchesExcerpt) && hasMinQuality;
+const searchResults = Object.values(notes).filter((note) => {
+	const matchesContent = note.content.includes(query);
+	const matchesExcerpt = note.excerpt.includes(query);
+	const hasMinQuality = note.statistics.completionScore >= minScore;
+	return (matchesContent || matchesExcerpt) && hasMinQuality;
 });
 ```
 
 ### 🧪 **Testing y Validación**
 
 #### **Tests de Transformer**
+
 ```typescript
 describe('NoteTransformer', () => {
-  test('calcula completion score correctamente', () => {
-    const note = createMockNoteComplete();
-    const result = adaptNoteCompleteToWithStats(note);
-    expect(result.statistics.completionScore).toBeGreaterThan(0);
-  });
+	test('calcula completion score correctamente', () => {
+		const note = createMockNoteComplete();
+		const result = adaptNoteCompleteToWithStats(note);
+		expect(result.statistics.completionScore).toBeGreaterThan(0);
+	});
 
-  test('genera excerpt apropiado', () => {
-    const note = createMockNoteComplete({ content: longContent });
-    const result = adaptNoteCompleteToWithStats(note);
-    expect(result.excerpt).toHaveLength(150);
-  });
+	test('genera excerpt apropiado', () => {
+		const note = createMockNoteComplete({ content: longContent });
+		const result = adaptNoteCompleteToWithStats(note);
+		expect(result.excerpt).toHaveLength(150);
+	});
 });
 ```
 
@@ -564,6 +572,7 @@ describe('NoteTransformer', () => {
 ### 🎉 **Estado Actual: ✅ COMPLETADO**
 
 La entidad Note ha sido completamente refactorizada siguiendo el patrón establecido:
+
 - ✅ Tipos optimizados con `NoteWithStats`
 - ✅ Transformer con estadísticas pre-calculadas
 - ✅ Adaptador de compatibilidad

@@ -12,16 +12,16 @@ const logger = clientLogger.withContext('CircuitBreaker');
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
 export interface CircuitBreakerConfig {
-	/** Número máximo de fallos antes de abrir el circuito */
-	failureThreshold: number;
-	/** Tiempo en ms antes de intentar cerrar el circuito */
-	recoveryTimeout: number;
-	/** Tiempo máximo en ms para una operación individual */
-	operationTimeout: number;
 	/** Multiplicador para backoff exponencial */
 	backoffMultiplier: number;
+	/** Número máximo de fallos antes de abrir el circuito */
+	failureThreshold: number;
 	/** Tiempo máximo de backoff en ms */
 	maxBackoffTime: number;
+	/** Tiempo máximo en ms para una operación individual */
+	operationTimeout: number;
+	/** Tiempo en ms antes de intentar cerrar el circuito */
+	recoveryTimeout: number;
 }
 
 export const DEFAULT_CIRCUIT_CONFIG: CircuitBreakerConfig = {
@@ -33,21 +33,21 @@ export const DEFAULT_CIRCUIT_CONFIG: CircuitBreakerConfig = {
 };
 
 export interface CircuitBreakerState {
-	state: CircuitState;
+	currentBackoffTime: number;
 	failureCount: number;
 	lastFailureTime: number;
 	nextAttemptTime: number;
-	currentBackoffTime: number;
+	state: CircuitState;
 }
 
 /**
  * Circuit Breaker que previene loops infinitos y operaciones repetitivas fallidas
  */
 export class CircuitBreaker {
-	private name: string;
-	private config: CircuitBreakerConfig;
+	private readonly name: string;
+	private readonly config: CircuitBreakerConfig;
 	private state: CircuitBreakerState;
-	private activeOperations = new Set<string>();
+	private readonly activeOperations = new Set<string>();
 
 	constructor(name: string, config: Partial<CircuitBreakerConfig> = {}) {
 		this.name = name;
@@ -70,9 +70,9 @@ export class CircuitBreaker {
 		// Verificar si podemos ejecutar la operación
 		this.checkState();
 
-		// Verificar si la operación ya está en progreso
+		// Verificar si la operación is already in progress
 		if (this.activeOperations.has(operationId)) {
-			throw new Error(`Operación ${operationId} ya está en progreso`);
+			throw new Error(`Operation ${operationId} is already in progress`);
 		}
 
 		// Marcar operación como activa
@@ -133,7 +133,7 @@ export class CircuitBreaker {
 	 * Maneja operación exitosa
 	 */
 	private onSuccess(): void {
-		logger.info(`✅ Operación exitosa en ${this.name}`);
+		logger.info(`✅ Operation exitosa en ${this.name}`);
 
 		if (this.state.state === 'HALF_OPEN') {
 			logger.info(`🔒 Cerrando circuit breaker: ${this.name}`);
@@ -263,7 +263,7 @@ export class CircuitBreaker {
  * Registry global de circuit breakers
  */
 class CircuitBreakerRegistry {
-	private breakers = new Map<string, CircuitBreaker>();
+	private readonly breakers = new Map<string, CircuitBreaker>();
 
 	/**
 	 * Obtiene o crea un circuit breaker
@@ -274,7 +274,7 @@ class CircuitBreakerRegistry {
 		}
 		const breaker = this.breakers.get(name);
 		if (!breaker) {
-			throw new Error(`Error interno: No se pudo crear circuit breaker ${name}`);
+			throw new Error(`Internal error: Could not create circuit breaker ${name}`);
 		}
 		return breaker;
 	}

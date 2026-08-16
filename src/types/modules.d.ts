@@ -6,9 +6,24 @@
 declare module 'dom-to-image-more' {
 	interface DomToImageOptions {
 		/**
-		 * Width in pixels to be applied to node before rendering
+		 * A string value for the background color, any valid CSS color value
 		 */
-		width?: number;
+		bgcolor?: string;
+
+		/**
+		 * Append the current time as a query string to URL requests to enable cache busting
+		 */
+		cacheBust?: boolean;
+
+		/**
+		 * Configure for cross-origin content
+		 */
+		corsImg?: boolean | { [key: string]: string };
+
+		/**
+		 * Function to filter elements that should not be rendered
+		 */
+		filter?: (node: HTMLElement) => boolean;
 
 		/**
 		 * Height in pixels to be applied to node before rendering
@@ -16,9 +31,14 @@ declare module 'dom-to-image-more' {
 		height?: number;
 
 		/**
-		 * A string value for the background color, any valid CSS color value
+		 * A data URL for a placeholder image that will be used when fetching an image fails
 		 */
-		bgcolor?: string;
+		imagePlaceholder?: string;
+
+		/**
+		 * Function to be called when cloning document for rendering, may be used to modify cloned DOM elements
+		 */
+		onclone?: (clonedDoc: Document) => void | Promise<void>;
 
 		/**
 		 * A number between 0 and 1 indicating image quality (e.g. 0.92 => 92%) of the JPEG image
@@ -31,34 +51,13 @@ declare module 'dom-to-image-more' {
 		scale?: number;
 
 		/**
-		 * Append the current time as a query string to URL requests to enable cache busting
-		 */
-		cacheBust?: boolean;
-
-		/**
-		 * A data URL for a placeholder image that will be used when fetching an image fails
-		 */
-		imagePlaceholder?: string;
-
-		/**
-		 * Function to filter elements that should not be rendered
-		 */
-		filter?: (node: HTMLElement) => boolean;
-
-		/**
-		 * Function to be called when cloning document for rendering, may be used to modify cloned DOM elements
-		 */
-		onclone?: (clonedDoc: Document) => void | Promise<void>;
-
-		/**
-		 * Configure for cross-origin content
-		 */
-		corsImg?: boolean | { [key: string]: string };
-
-		/**
 		 * Allows optionally setting the useCredentials option if the resource matches a pattern
 		 */
 		useCredentialFilters?: string[];
+		/**
+		 * Width in pixels to be applied to node before rendering
+		 */
+		width?: number;
 	}
 
 	/**

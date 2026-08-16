@@ -48,7 +48,7 @@ export function RoundedPieChart() {
 			<CardHeader className="items-center pb-0">
 				<CardTitle>
 					Pie Chart
-					<Badge className="ml-2 border-none bg-green-500/10 text-green-500" variant="outline">
+					<Badge className="ml-2 border-none bg-success/10 text-success" variant="outline">
 						<TrendingUp className="h-4 w-4" />
 						<span>5.2%</span>
 					</Badge>
@@ -68,7 +68,7 @@ export function RoundedPieChart() {
 								fill="currentColor"
 								fontSize={12}
 								fontWeight={500}
-								formatter={(value: number) => value.toString()}
+								formatter={(value: unknown) => String(value)}
 								stroke="none"
 							/>
 						</Pie>

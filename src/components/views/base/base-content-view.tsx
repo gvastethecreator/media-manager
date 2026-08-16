@@ -2,20 +2,20 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface BaseContentViewProps {
-	/** Título principal de la vista */
-	title?: string;
-	/** Descripción opcional */
-	description?: string;
-	/** Emoji o icono para el título */
-	icon?: string;
 	/** Contenido principal */
 	children: React.ReactNode;
-	/** Controles adicionales para el header */
-	headerControls?: React.ReactNode;
 	/** Clase CSS adicional */
 	className?: string;
+	/** Descripción opcional */
+	description?: string;
+	/** Controles adicionales para el header */
+	headerControls?: React.ReactNode;
+	/** Emoji o icono para el título */
+	icon?: string;
 	/** Si mostrar el header o no */
 	showHeader?: boolean;
+	/** Título principal de la vista */
+	title?: string;
 }
 
 const BaseContentView: React.FC<BaseContentViewProps> = ({
@@ -48,7 +48,7 @@ const BaseContentView: React.FC<BaseContentViewProps> = ({
 			)}
 
 			{/* Contenido principal */}
-			<div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+			<div className="flex min-h-0 flex-1 flex-col">{children}</div>
 		</div>
 	);
 };

@@ -1,4 +1,4 @@
-import { Column } from '@tanstack/react-table';
+import { Column, RowData } from '@/lib/tanstack-react-table';
 import { Check, CirclePlus } from 'lucide-react';
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -16,17 +16,21 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
-interface DataGridColumnFilterProps<TData, TValue> {
-	column?: Column<TData, TValue>;
-	title?: string;
+interface DataGridColumnFilterProps<TData extends RowData, TValue> {
+	column?: Column<any, TData, TValue>;
 	options: {
 		label: string;
 		value: string;
 		icon?: React.ComponentType<{ className?: string }>;
 	}[];
+	title?: string;
 }
 
-function DataGridColumnFilter<TData, TValue>({ column, title, options }: DataGridColumnFilterProps<TData, TValue>) {
+function DataGridColumnFilter<TData extends RowData, TValue>({
+	column,
+	title,
+	options,
+}: DataGridColumnFilterProps<TData, TValue>) {
 	const facets = column?.getFacetedUniqueValues();
 	const selectedValues = new Set(column?.getFilterValue() as string[]);
 

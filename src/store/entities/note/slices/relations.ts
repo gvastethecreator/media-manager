@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand';
+import { apiClient } from '@/lib/api/client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { EntityType } from '@/types/entities/entities';
 import type { NoteStore } from '../types';
@@ -11,19 +12,18 @@ export interface RelationsSlice {
 	removeNoteFromEntity: (noteId: string, entityId: string, entityType: EntityType) => Promise<void>;
 }
 
-// API mock para simular llamadas a server actions
-const mockRelationsApi = {
-	addNoteToEntity: async (_noteId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
-		return new Promise((resolve) => {
-			setTimeout(() => resolve(), 500);
-		});
-	},
-	removeNoteFromEntity: async (_noteId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
-		return new Promise((resolve) => {
-			setTimeout(() => resolve(), 500);
-		});
-	},
-};
+function getNoteRelationEndpoint(noteId: string, entityId: string, entityType: EntityType): string {
+	switch (entityType) {
+		case EntityType.IMAGE:
+			return `/notes/${noteId}/images/${entityId}`;
+		case EntityType.VIDEO:
+			return `/notes/${noteId}/videos/${entityId}`;
+		default:
+			throw new Error(
+				`Las relaciones de notas sólo están soportadas para imágenes y videos. Tipo recibido: ${entityType}`
+			);
+	}
+}
 
 export const createRelationsSlice: StateCreator<NoteStore, [], [], RelationsSlice> = (set, get) => ({
 	addNoteToEntity: async (noteId, entityId, entityType) => {
@@ -35,8 +35,7 @@ export const createRelationsSlice: StateCreator<NoteStore, [], [], RelationsSlic
 				entityType,
 			});
 
-			// Llamar a server action para crear relación
-			await mockRelationsApi.addNoteToEntity(noteId, entityId, entityType);
+			await apiClient.post(getNoteRelationEndpoint(noteId, entityId, entityType));
 
 			// Recargar notas para actualizar la lista con las nuevas relaciones
 			await get().loadNotes();
@@ -62,8 +61,7 @@ export const createRelationsSlice: StateCreator<NoteStore, [], [], RelationsSlic
 				entityType,
 			});
 
-			// Llamar a server action para eliminar relación
-			await mockRelationsApi.removeNoteFromEntity(noteId, entityId, entityType);
+			await apiClient.delete(getNoteRelationEndpoint(noteId, entityId, entityType));
 
 			// Recargar notas para actualizar la lista
 			await get().loadNotes();
@@ -74,8 +72,8 @@ export const createRelationsSlice: StateCreator<NoteStore, [], [], RelationsSlic
 				entityType,
 			});
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Error al eliminar nota de entidad';
-			relationsLogger.error('❌ Error al eliminar nota de entidad:', error);
+			const message = error instanceof Error ? error.message : 'Could not delete note de entidad';
+			relationsLogger.error('❌ Could not delete note de entidad:', error);
 			set({ error: message, isLoading: false });
 		}
 	},

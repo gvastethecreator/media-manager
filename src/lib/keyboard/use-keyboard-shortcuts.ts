@@ -20,18 +20,18 @@ export interface UseKeyboardShortcutsOptions {
 }
 
 export interface UseKeyboardShortcutsReturn {
+	/** Obtener shortcuts del contexto actual */
+	getShortcuts: () => KeyboardShortcutConfig[];
 	/** Registrar un nuevo shortcut */
 	register: (shortcut: KeyboardShortcutConfig, handler: ShortcutHandler) => void;
-	/** Desregistrar un shortcut */
-	unregister: (shortcut: KeyboardShortcutConfig) => void;
-	/** Desregistrar por acción */
-	unregisterByAction: (action: string) => void;
 	/** Cambiar contexto */
 	setContext: (context: string) => void;
 	/** Habilitar/deshabilitar */
 	setEnabled: (enabled: boolean) => void;
-	/** Obtener shortcuts del contexto actual */
-	getShortcuts: () => KeyboardShortcutConfig[];
+	/** Desregistrar un shortcut */
+	unregister: (shortcut: KeyboardShortcutConfig) => void;
+	/** Desregistrar por acción */
+	unregisterByAction: (action: string) => void;
 }
 
 /**

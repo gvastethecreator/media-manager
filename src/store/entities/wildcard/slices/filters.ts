@@ -13,24 +13,24 @@ const filtersLogger = clientLogger.withContext('WildcardStore:Filters');
 
 // Slice para operaciones de filtrado
 export interface WildcardFiltersSlice {
-	// Filtros básicos
-	setSearchQuery: (query: string) => void;
-	setFilterByCategory: (category: string | null) => void;
-	setFilterFavorites: (filterFavorites: boolean) => void;
-
-	// Filtros específicos para jerarquía
-	setParentId: (parentId: string | null) => void;
-	setOnlyWithChildren: (onlyWithChildren: boolean) => void;
-
-	// Ordenación
-	setSortBy: (sortBy: WildcardSortCriteria) => void;
-
-	// Fecha
-	setDateRange: (from: Date | null, to: Date | null) => void;
 	clearDateRange: () => void;
 
 	// Reset
 	resetFilters: () => void;
+
+	// Fecha
+	setDateRange: (from: Date | null, to: Date | null) => void;
+	setFilterByCategory: (category: string | null) => void;
+	setFilterFavorites: (filterFavorites: boolean) => void;
+	setOnlyWithChildren: (onlyWithChildren: boolean) => void;
+
+	// Filtros específicos para jerarquía
+	setParentId: (parentId: string | null) => void;
+	// Filtros básicos
+	setSearchQuery: (query: string) => void;
+
+	// Ordenación
+	setSortBy: (sortBy: WildcardSortCriteria) => void;
 }
 
 // Creador del slice

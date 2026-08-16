@@ -7,6 +7,7 @@
 import { create, type StateCreator } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 // Ahora usamos llamadas a la API en lugar del servicio del servidor
+import { apiClient } from '@/lib/api/client';
 import {
 	createConceptInApi,
 	deleteConceptFromApi,
@@ -21,6 +22,7 @@ import {
 	ConceptViewMode,
 	ConceptWithStats,
 } from '@/types/entities/concept';
+import { EntityType } from '@/types/entities/entities';
 import type {
 	ConceptCoreSlice,
 	ConceptFiltersSlice,
@@ -129,7 +131,7 @@ const initialUIState = {
 	isDetailsDrawerOpen: false,
 	viewMode: ConceptViewMode.GRID,
 };
-const createUISlice: StateCreator<ConceptStore, [], [], ConceptUISlice> = (set) => ({
+const createUISlice: StateCreator<ConceptStore, [], [], ConceptUISlice> = (set, get) => ({
 	...initialUIState,
 	openCreateModal: () => set({ isCreateModalOpen: true }),
 	closeCreateModal: () => set({ isCreateModalOpen: false }),
@@ -139,22 +141,36 @@ const createUISlice: StateCreator<ConceptStore, [], [], ConceptUISlice> = (set) 
 	closeDeleteDialog: () => set({ isDeleteDialogOpen: false }),
 	openDetailsDrawer: () => set({ isDetailsDrawerOpen: true }),
 	closeDetailsDrawer: () => set({ isDetailsDrawerOpen: false }),
-	setViewMode: (mode) => set({ viewMode: mode as ConceptViewMode }),
+	setViewMode: (mode) => {
+		if (get().viewMode === mode) return;
+		set({ viewMode: mode as ConceptViewMode });
+	},
 	resetUI: () => set({ ...initialUIState }),
 });
 
-// --- SLICE: Relations (Mock) ---
+function getConceptRelationEndpoint(conceptId: string, entityId: string, entityType: EntityType): string {
+	switch (entityType) {
+		case EntityType.IMAGE:
+			return `/concepts/${conceptId}/images/${entityId}`;
+		case EntityType.VIDEO:
+			return `/concepts/${conceptId}/videos/${entityId}`;
+		default:
+			throw new Error(
+				`Las relaciones de conceptos sólo están soportadas para imágenes y videos. Tipo recibido: ${entityType}`
+			);
+	}
+}
+
+// --- SLICE: Relations ---
 const createRelationsSlice: StateCreator<ConceptStore, [], [], ConceptRelationsSlice> = (_set, get) => ({
 	addConceptToEntity: async (conceptId, entityId, entityType) => {
-		// Mock implementation, replace with actual server action
 		storeLogger.info(`🔗 Linking concept ${conceptId} to ${entityType} ${entityId}`);
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await apiClient.post(getConceptRelationEndpoint(conceptId, entityId, entityType));
 		await get().loadConcepts();
 	},
 	removeConceptFromEntity: async (conceptId, entityId, entityType) => {
-		// Mock implementation, replace with actual server action
 		storeLogger.info(`✂️ Unlinking concept ${conceptId} from ${entityType} ${entityId}`);
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await apiClient.delete(getConceptRelationEndpoint(conceptId, entityId, entityType));
 		await get().loadConcepts();
 	},
 });

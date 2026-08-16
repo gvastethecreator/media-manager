@@ -8,9 +8,9 @@ import { formatRelativeDate } from './utils/folder-helpers';
 export type IndexStatus = 'indexed' | 'outdated' | 'pending' | 'not_found' | 'error';
 
 interface FolderIndexStatusBadgeProps {
-	status: IndexStatus;
-	lastIndexed: Date | null;
 	className?: string;
+	lastIndexed: Date | null;
+	status: IndexStatus;
 }
 
 export function FolderIndexStatusBadge({ status, lastIndexed, className }: FolderIndexStatusBadgeProps) {
@@ -18,26 +18,26 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 		switch (status) {
 			case 'indexed':
 				return (
-					<CircleCheckBig className="h-3 w-3 text-green-500">
-						<title>Indexado</title>
+					<CircleCheckBig className="h-3 w-3 text-success">
+						<title>Indexed</title>
 					</CircleCheckBig>
 				);
 			case 'outdated':
 				return (
-					<TimerReset className="h-3 w-3 text-amber-500">
-						<title>Desactualizado</title>
+					<TimerReset className="h-3 w-3 text-warning">
+						<title>Outdated</title>
 					</TimerReset>
 				);
 			case 'pending':
 				return (
 					<CircleDashed className="h-3 w-3 text-muted-foreground">
-						<title>Pendiente</title>
+						<title>Pending</title>
 					</CircleDashed>
 				);
 			case 'not_found':
 				return (
 					<CircleAlert className="h-3 w-3 text-destructive">
-						<title>No encontrado</title>
+						<title>Not found</title>
 					</CircleAlert>
 				);
 			case 'error':
@@ -49,7 +49,7 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 			default:
 				return (
 					<CircleDashed className="h-3 w-3 text-muted-foreground">
-						<title>Pendiente</title>
+						<title>Pending</title>
 					</CircleDashed>
 				);
 		}
@@ -58,17 +58,17 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 	const getStatusLabel = () => {
 		switch (status) {
 			case 'indexed':
-				return 'Indexado';
+				return 'Indexed';
 			case 'outdated':
-				return 'Desactualizado';
+				return 'Outdated';
 			case 'pending':
-				return 'Pendiente';
+				return 'Pending';
 			case 'not_found':
-				return 'No encontrado';
+				return 'Not found';
 			case 'error':
 				return 'Error';
 			default:
-				return 'Pendiente';
+				return 'Pending';
 		}
 	};
 
@@ -76,13 +76,13 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 
 	let tooltipContent: string;
 	if (status === 'not_found') {
-		tooltipContent = 'Carpeta no encontrada en el sistema';
+		tooltipContent = 'Folder not found in the system';
 	} else if (status === 'error') {
-		tooltipContent = 'Error en la carpeta';
+		tooltipContent = 'Folder error';
 	} else if (lastIndexed) {
-		tooltipContent = `Última indexación: ${formatDate(lastIndexed)} (${lastIndexed.toLocaleTimeString()})`;
+		tooltipContent = `Last indexed: ${formatDate(lastIndexed)} (${lastIndexed.toLocaleTimeString()})`;
 	} else {
-		tooltipContent = 'Nunca indexado';
+		tooltipContent = 'Never indexed';
 	}
 
 	return (
@@ -90,8 +90,8 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 			<Badge
 				className={cn(
 					'flex h-4 items-center gap-1 px-2 text-[10px]',
-					status === 'indexed' && 'border-green-200 bg-green-50/30 text-green-600',
-					status === 'outdated' && 'border-amber-200 bg-amber-50/30 text-amber-600',
+					status === 'indexed' && 'border-ui-success-border bg-ui-success text-ui-success-text',
+					status === 'outdated' && 'border-ui-warning-border bg-ui-warning text-ui-warning-text',
 					status === 'pending' && 'border-muted bg-muted/30 text-muted-foreground',
 					(status === 'not_found' || status === 'error') && 'border-destructive/30 bg-destructive/10 text-destructive',
 					className

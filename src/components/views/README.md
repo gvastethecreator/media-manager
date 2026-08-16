@@ -1,33 +1,32 @@
 # 🎯 Vistas Principales - Sistema Completo
 
-Este directorio contiene las **20 vistas principales** del sistema de gestión de imágenes, todas optimizadas y usando el patrón **EntityCard TCG** para consistencia visual.
+Este directorio contiene las vistas principales del sistema de gestión de imágenes y sus componentes relacionados.
 
-## 📋 Estado Actual: **20/20 Vistas Implementadas**
+## 📋 Estado Actual
 
-### ✅ **Vistas Completamente Optimizadas (20/20)**
+### ✅ **Vistas Completamente Optimizadas**
 
-| Vista | Entidad | Card Usada | Store | Estado |
-|-------|---------|------------|-------|--------|
-| AllImagesView | Image | EntityCard | ✅ | ✅ Optimizada |
-| AlbumsView | Album | AlbumCard | ✅ | ✅ Optimizada |
-| AudioView | Audio | AudioCard | ✅ | ✅ Optimizada |
-| CharactersView | Character | CharacterCard | ✅ | ✅ Optimizada |
-| CollectionsView | Collection | CollectionCard | ✅ | ✅ Optimizada |
-| ConceptsView | Concept | ConceptCard | ✅ | ✅ Optimizada |
-| DocumentsView | Document | DocumentCard | ✅ | ✅ Optimizada |
-| FavoritesView | Mixed | EntityCard | ✅ | ✅ Optimizada |
-| File3DView | File3D | File3DCard | ✅ | ✅ Optimizada |
-| GroupsView | Group | GroupCard | ✅ | ✅ Optimizada |
-| JsonFilesView | JsonFile | JsonFileCard | ✅ | ✅ Optimizada |
-| NotesView | Note | NoteCard | ✅ | ✅ Optimizada |
-| PlacesView | Place | PlaceCard | ✅ | ✅ Optimizada |
-| PromptsView | Prompt | PromptCard | ✅ | ✅ Optimizada |
-| PropertiesView | Property | PropertyCard | ✅ | ✅ Optimizada |
-| SearchView | Mixed | EntityCard | ✅ | ✅ Optimizada |
-| TagsView | Tag | TagCard | ✅ | ✅ Optimizada |
-| UploadedImagesView | UploadedImage | UploadedImageCard | ✅ | ✅ Optimizada |
-| WildcardsView | Wildcard | WildcardCard | ✅ | ✅ Optimizada |
-| WorkflowsView | Workflow | WorkflowCard | ✅ | ✅ Optimizada |
+| Vista           | Entidad    | Card Usada     | Store | Estado        |
+| --------------- | ---------- | -------------- | ----- | ------------- |
+| AllImagesView   | Image      | EntityCard     | ✅    | ✅ Optimizada |
+| AlbumsView      | Album      | AlbumCard      | ✅    | ✅ Optimizada |
+| AudioView       | Audio      | AudioCard      | ✅    | ✅ Optimizada |
+| CharactersView  | Character  | CharacterCard  | ✅    | ✅ Optimizada |
+| CollectionsView | Collection | CollectionCard | ✅    | ✅ Optimizada |
+| ConceptsView    | Concept    | ConceptCard    | ✅    | ✅ Optimizada |
+| DocumentsView   | Document   | DocumentCard   | ✅    | ✅ Optimizada |
+| FavoritesView   | Mixed      | EntityCard     | ✅    | ✅ Optimizada |
+| File3DView      | File3D     | File3DCard     | ✅    | ✅ Optimizada |
+| GroupsView      | Group      | GroupCard      | ✅    | ✅ Optimizada |
+| JsonFilesView   | JsonFile   | JsonFileCard   | ✅    | ✅ Optimizada |
+| NotesView       | Note       | NoteCard       | ✅    | ✅ Optimizada |
+| PlacesView      | Place      | PlaceCard      | ✅    | ✅ Optimizada |
+| PromptsView     | Prompt     | PromptCard     | ✅    | ✅ Optimizada |
+| PropertiesView  | Property   | PropertyCard   | ✅    | ✅ Optimizada |
+| SearchView      | Mixed      | EntityCard     | ✅    | ✅ Optimizada |
+| TagsView        | Tag        | TagCard        | ✅    | ✅ Optimizada |
+| WildcardsView   | Wildcard   | WildcardCard   | ✅    | ✅ Optimizada |
+| WorkflowsView   | Workflow   | WorkflowCard   | ✅    | ✅ Optimizada |
 
 ## 🏗️ **Arquitectura Unificada**
 
@@ -107,7 +106,6 @@ views/
 ├── properties/          # Vista de propiedades
 ├── search/              # Vista de búsqueda
 ├── tags/                # Vista de etiquetas
-├── uploaded-images/     # Vista de imágenes subidas
 ├── wildcards/           # Vista de wildcards
 └── workflows/           # Vista de workflows
 ```
@@ -119,26 +117,25 @@ El `ViewContainer` maneja el enrutamiento de todas las vistas:
 ```typescript
 // Mapeo completo de 20 vistas
 const viewMapping: Record<ViewType, ComponentType> = {
-  'all-images': AllImagesView,
-  'albums': AlbumsView,
-  'audio': AudioView,
-  'characters': CharactersView,
-  'collections': CollectionsView,
-  'concepts': ConceptsView,
-  'document': DocumentsView,
-  'favorites': FavoritesView,
-  'file3d': File3DView,
-  'groups': GroupsView,
-  'json-file': JsonFilesView,
-  'notes': NotesView,
-  'places': PlacesView,
-  'prompts': PromptsView,
-  'properties': PropertiesView,
-  'search': SearchView,
-  'tags': TagsView,
-  'files': UploadedImagesView,
-  'wildcards': WildcardsView,
-  'workflow': WorkflowsView,
+	'all-images': AllImagesView,
+	albums: AlbumsView,
+	audio: AudioView,
+	characters: CharactersView,
+	collections: CollectionsView,
+	concepts: ConceptsView,
+	document: DocumentsView,
+	favorites: FavoritesView,
+	file3d: File3DView,
+	groups: GroupsView,
+	'json-file': JsonFilesView,
+	notes: NotesView,
+	places: PlacesView,
+	prompts: PromptsView,
+	properties: PropertiesView,
+	search: SearchView,
+	tags: TagsView,
+	wildcards: WildcardsView,
+	workflow: WorkflowsView,
 };
 ```
 

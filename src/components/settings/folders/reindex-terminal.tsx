@@ -1,30 +1,31 @@
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
 import { AlertCircle, Check, Info, Terminal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { animate } from '@/lib/animation';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 
 interface LogEntry {
+	folderId?: string;
+	folderPath?: string;
 	id: string;
-	timestamp: string;
+	isFolderMain?: boolean; // Marca si es un log de carpeta principal (no progress ni complete)
+	isSticky?: boolean; // Marca si debe ser sticky
 	level: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
 	message: string;
 	source?: string;
-	folderId?: string;
-	folderPath?: string;
-	isFolderMain?: boolean; // Marca si es un log de carpeta principal (no progress ni complete)
-	isSticky?: boolean; // Marca si debe ser sticky
+	timestamp: string;
 }
 
 interface ReindexTerminalProps {
-	/** Si está en modo activo (mostrando logs en tiempo real) */
-	isActive?: boolean;
 	/** Clase CSS adicional */
 	className?: string;
-	/** Callback cuando se recibe un log */
-	onLogReceived?: (log: LogEntry) => void;
 	/** Logs iniciales */
 	initialLogs?: LogEntry[];
+	/** Si está en modo activo (mostrando logs en tiempo real) */
+	isActive?: boolean;
+	/** Callback cuando se recibe un log */
+	onLogReceived?: (log: LogEntry) => void;
+	onProgressChange?: (progress: number) => void;
 	/** Progreso actual (0-100) */
 	progress?: number;
 	/** Si mostrar barra de progreso */
@@ -33,6 +34,10 @@ interface ReindexTerminalProps {
 
 // Límite máximo de líneas para performance
 const MAX_LINES = 25;
+// Configuración de reconexión SSE
+const MAX_RECONNECT_ATTEMPTS = 10;
+const BASE_RECONNECT_DELAY = 1000; // 1 segundo inicial
+const MAX_RECONNECT_DELAY = 30_000; // 30 segundos máximo
 
 const LOG_ICONS = {
 	INFO: Info,
@@ -42,10 +47,10 @@ const LOG_ICONS = {
 } as const;
 
 const LOG_COLORS = {
-	INFO: 'text-blue-400',
-	SUCCESS: 'text-green-400',
-	WARNING: 'text-yellow-400',
-	ERROR: 'text-red-400',
+	INFO: 'text-primary',
+	SUCCESS: 'text-success',
+	WARNING: 'text-warning',
+	ERROR: 'text-destructive',
 } as const;
 
 /**
@@ -56,12 +61,18 @@ export function ReindexTerminal({
 	isActive = false,
 	className,
 	onLogReceived,
+	onProgressChange,
 	initialLogs = [],
 	progress = 0,
 	showProgress = true,
 }: ReindexTerminalProps) {
 	const [logs, setLogs] = useState<LogEntry[]>(initialLogs.slice(-MAX_LINES));
 	const [currentProgress, setCurrentProgress] = useState(progress);
+
+	useEffect(() => {
+		if (onProgressChange) onProgressChange(currentProgress);
+	}, [currentProgress, onProgressChange]);
+
 	const [startTime, setStartTime] = useState<Date | null>(null);
 	const [elapsedTime, setElapsedTime] = useState(0);
 	const [activeFolderLogId, setActiveFolderLogId] = useState<string | null>(null); // ID del log de carpeta activa
@@ -69,9 +80,9 @@ export function ReindexTerminal({
 	const logCounterRef = useRef(0);
 	const logContainerRef = useRef<HTMLDivElement>(null);
 	const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-	// GSAP Context para animaciones
-	const { contextSafe } = useGSAP();
+	const reconnectAttemptRef = useRef(0);
+	const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const isConnectingRef = useRef(false);
 
 	// Formato de timestamp para terminal
 	const formatTimestamp = (timestamp: string) => {
@@ -100,24 +111,17 @@ export function ReindexTerminal({
 		return `${secs}s`;
 	};
 
-	// Animación para nuevas líneas
-	const animateNewLog = contextSafe((element: HTMLElement) => {
-		gsap.fromTo(
-			element,
-			{
-				x: -20,
-				opacity: 0,
-				scale: 0.95,
-			},
-			{
-				x: 0,
-				opacity: 1,
-				scale: 1,
-				duration: 0.3,
-				ease: 'back.out(1.7)',
-			}
-		);
-	});
+	// Animación para nuevas líneas con GSAP
+	const animateNewLog = useCallback((element: HTMLElement) => {
+		return animate({
+			targets: element,
+			translateX: [-20, 0],
+			opacity: [0, 1],
+			scale: [0.95, 1],
+			duration: 300,
+			easing: 'easeOutBack',
+		});
+	}, []);
 
 	// Agregar un nuevo log con límite de líneas y manejo de sticky
 	const addLog = useCallback(
@@ -175,7 +179,7 @@ export function ReindexTerminal({
 
 			switch (type) {
 				case 'folder:reindexAll:start': {
-					addLog('INFO', `🚀 Iniciando reindexado global de ${data.totalFolders || '?'} carpetas...`, {
+					addLog('INFO', `🚀 Starting global reindex of ${data.totalFolders || '?'} folders...`, {
 						source: 'reindex-all',
 					});
 					// Iniciar el timer
@@ -188,7 +192,7 @@ export function ReindexTerminal({
 					// Validar datos y proveer fallbacks para evitar undefined
 					const processedFolders = data.filesProcessed ?? data.processedFolders ?? 0;
 					const totalFolders = data.totalFiles ?? data.totalFolders ?? 0;
-					const currentFolder = data.currentFolder ?? data.folderName ?? 'Procesando...';
+					const currentFolder = data.currentFolder ?? data.folderName ?? 'Processing...';
 
 					addLog('INFO', `📂 [${processedFolders}/${totalFolders}] ${currentFolder}`, {
 						source: 'reindex-all',
@@ -205,18 +209,81 @@ export function ReindexTerminal({
 				}
 
 				case 'folder:progress': {
-					const progressMsg = data.message || `Progreso: ${data.filesProcessed || 0}/${data.totalFiles || 0}`;
-					addLog('INFO', `   └── ${progressMsg}`, {
+					const progressMsg = data.message || `Progress: ${data.filesProcessed || 0}/${data.totalFiles || 0}`;
+					const phase = data.phase || 'processing';
+					const progress = data.progress || 0;
+
+					// Detectar si es un log de archivo individual (mensaje empieza con └──)
+					const isFileLog = progressMsg.includes('└──');
+
+					// Determinar icono y nivel según fase
+					let icon = '└──';
+					let level: LogEntry['level'] = 'INFO';
+
+					if (phase === 'starting') icon = '🚀';
+					else if (phase === 'analysis') icon = '📊';
+					else if (phase === 'existence') icon = '🔍';
+					else if (phase === 'deletion') icon = '🗑️';
+					else if (phase === 'structure') icon = '🌳';
+					else if (phase === 'processing') {
+						// Para archivos individuales
+						if (isFileLog) {
+							// Log de archivo individual (no sticky)
+							addLog('INFO', progressMsg, {
+								source: 'file-processing',
+								folderId: data.folderId,
+								folderPath: data.folderPath,
+							});
+
+							// Actualizar progreso con granularidad fina
+							// Base 45% + progreso proporcional de archivos en carpeta actual
+							if (progress > 0 && data.totalFiles > 0) {
+								const folderProgress = progress / 100;
+								// Asumiendo que indexing ocupa 15% del total (45% a 60%)
+								setCurrentProgress(45 + folderProgress * 15);
+							}
+							break; // Salir temprano para no duplicar
+						}
+
+						// Para carpetas principales (sin └──)
+						if (data.folderId && !isFileLog) {
+							icon = '📁';
+							// Log de carpeta principal (sticky)
+							addLog('INFO', progressMsg, {
+								source: 'folder-processing',
+								folderId: data.folderId,
+								folderPath: data.folderPath,
+								isFolderMain: true, // Marcar como sticky
+							});
+							break; // Salir temprano para no duplicar
+						}
+						icon = '└──';
+					} else if (phase === 'metadata') icon = '📊';
+					else if (phase === 'complete') {
+						icon = '✅';
+						level = 'SUCCESS';
+					} else if (phase === 'error') {
+						icon = '❌';
+						level = 'ERROR';
+					}
+
+					// Log genérico de fase (solo si no fue manejado arriba)
+					addLog(level, `${icon} ${progressMsg}`, {
 						source: 'folder-progress',
 						folderId: data.folderId,
 						folderPath: data.folderPath,
 					});
+
+					// Actualizar progreso general
+					if (progress > 0) {
+						setCurrentProgress(progress);
+					}
 					break;
 				}
 
 				case 'folder:complete': {
 					const stats = data.stats || {};
-					addLog('SUCCESS', `✅ Completado: ${data.folderPath || 'carpeta'} (${stats.totalImages || 0} imágenes)`, {
+					addLog('SUCCESS', `✅ Complete: ${data.folderPath || 'folder'} (${stats.totalImages || 0} images)`, {
 						source: 'folder-complete',
 						folderId: data.folderId,
 						folderPath: data.folderPath,
@@ -227,7 +294,7 @@ export function ReindexTerminal({
 				}
 
 				case 'folder:error': {
-					addLog('ERROR', `❌ Error en ${data.folderPath || 'carpeta'}: ${data.error || 'Error desconocido'}`, {
+					addLog('ERROR', `❌ Error in ${data.folderPath || 'folder'}: ${data.error || 'Unknown error'}`, {
 						source: 'folder-error',
 						folderId: data.folderId,
 						folderPath: data.folderPath,
@@ -236,8 +303,8 @@ export function ReindexTerminal({
 				}
 
 				case 'folder:reindexAll:complete': {
-					const duration = data.duration ? `en ${Math.round(data.duration / 1000)}s` : '';
-					addLog('SUCCESS', `🎉 Reindexado global completado ${duration}`, {
+					const duration = data.duration ? `in ${Math.round(data.duration / 1000)}s` : '';
+					addLog('SUCCESS', `🎉 Global reindex complete ${duration}`, {
 						source: 'reindex-all',
 					});
 					// Completar progreso
@@ -248,7 +315,7 @@ export function ReindexTerminal({
 				default: {
 					// Otros eventos relacionados con folders
 					if (type.startsWith('folder:')) {
-						addLog('INFO', `📡 Evento: ${type}`, { source: 'events' });
+						addLog('INFO', `📡 Event: ${type}`, { source: 'events' });
 					}
 				}
 			}
@@ -273,48 +340,106 @@ export function ReindexTerminal({
 		};
 	}, [startTime]);
 
-	// Configurar conexión SSE cuando está activo
+	// Configurar conexión SSE cuando está activo - con reconexión automática
 	useEffect(() => {
 		if (!isActive) return;
 
-		addLog('INFO', '🔌 Conectando al servidor de eventos...', { source: 'terminal' });
-
-		const eventSource = new EventSource('/api/events/stream');
-		sseRef.current = eventSource;
-
-		eventSource.onopen = () => {
-			addLog('SUCCESS', '✅ Conexión establecida con el servidor', { source: 'sse' });
+		// Función para calcular delay con exponential backoff
+		const getReconnectDelay = (attempt: number) => {
+			const delay = Math.min(BASE_RECONNECT_DELAY * 2 ** attempt, MAX_RECONNECT_DELAY);
+			// Añadir jitter para evitar thundering herd
+			return delay + Math.random() * 1000;
 		};
 
-		eventSource.addEventListener('connected', (e) => {
-			const data = JSON.parse(e.data);
-			addLog('SUCCESS', '🎯 Suscrito a eventos de reindexado', {
-				source: 'sse',
-				timestamp: new Date(data.timestamp).toISOString(),
-			});
-		});
-
-		eventSource.addEventListener('event', (e) => {
-			try {
-				const event = JSON.parse(e.data);
-				handleSSEEvent(event);
-			} catch (error) {
-				console.error('Error parsing SSE event:', error);
-				addLog('ERROR', '❌ Error procesando evento del servidor', { source: 'sse' });
+		// Función para conectar SSE con manejo de reconexión
+		const connectSSE = () => {
+			// Evitar conexiones duplicadas
+			if (isConnectingRef.current || sseRef.current?.readyState === EventSource.OPEN) {
+				return;
 			}
-		});
 
-		eventSource.addEventListener('heartbeat', () => {
-			// Opcional: mostrar heartbeat
-			// addLog('INFO', '💓 Heartbeat', { source: 'sse' });
-		});
+			isConnectingRef.current = true;
 
-		eventSource.onerror = (error) => {
-			console.error('SSE Error:', error);
-			addLog('WARNING', '⚠️  Conexión perdida, intentando reconectar...', { source: 'sse' });
+			if (reconnectAttemptRef.current === 0) {
+				addLog('INFO', '🔌 Connecting to the event server...', { source: 'terminal' });
+			} else {
+				addLog('INFO', `🔄 Reconnecting... (attempt ${reconnectAttemptRef.current}/${MAX_RECONNECT_ATTEMPTS})`, {
+					source: 'sse',
+				});
+			}
+
+			// Cerrar conexión existente si hay
+			if (sseRef.current) {
+				sseRef.current.close();
+				sseRef.current = null;
+			}
+
+			const eventSource = new EventSource('/api/events/stream');
+			sseRef.current = eventSource;
+
+			eventSource.onopen = () => {
+				isConnectingRef.current = false;
+				reconnectAttemptRef.current = 0; // Reset intentos en conexión exitosa
+				addLog('SUCCESS', '✅ Connected to the server', { source: 'sse' });
+			};
+
+			eventSource.addEventListener('connected', (e) => {
+				const data = JSON.parse(e.data);
+				addLog('SUCCESS', '🎯 Subscribed to reindex events', {
+					source: 'sse',
+					timestamp: new Date(data.timestamp).toISOString(),
+				});
+			});
+
+			eventSource.addEventListener('event', (e) => {
+				try {
+					const event = JSON.parse(e.data);
+					handleSSEEvent(event);
+				} catch (error) {
+					clientLogger.error('Error parsing SSE event:', error);
+					addLog('ERROR', '❌ Could not process the server event', { source: 'sse' });
+				}
+			});
+
+			eventSource.addEventListener('heartbeat', () => {
+				// Heartbeat silencioso - confirma que conexión está viva
+			});
+
+			eventSource.onerror = (error) => {
+				isConnectingRef.current = false;
+				clientLogger.error('SSE Error:', error);
+
+				// Solo intentar reconectar si está activo y no hemos agotado intentos
+				if (isActive && reconnectAttemptRef.current < MAX_RECONNECT_ATTEMPTS) {
+					const delay = getReconnectDelay(reconnectAttemptRef.current);
+					addLog('WARNING', `⚠️ Connection lost. Reconnecting in ${Math.round(delay / 1000)}s...`, { source: 'sse' });
+
+					// Limpiar timeout anterior si existe
+					if (reconnectTimeoutRef.current) {
+						clearTimeout(reconnectTimeoutRef.current);
+					}
+
+					reconnectAttemptRef.current++;
+					reconnectTimeoutRef.current = setTimeout(() => {
+						connectSSE();
+					}, delay);
+				} else if (reconnectAttemptRef.current >= MAX_RECONNECT_ATTEMPTS) {
+					addLog('ERROR', '❌ Could not restore the connection. Logs may be out of date.', {
+						source: 'sse',
+					});
+				}
+			};
 		};
+
+		// Iniciar conexión
+		connectSSE();
 
 		return () => {
+			// Limpiar todo al desmontar
+			if (reconnectTimeoutRef.current) {
+				clearTimeout(reconnectTimeoutRef.current);
+				reconnectTimeoutRef.current = null;
+			}
 			if (sseRef.current) {
 				sseRef.current.close();
 				sseRef.current = null;
@@ -322,6 +447,8 @@ export function ReindexTerminal({
 			if (timerRef.current) {
 				clearInterval(timerRef.current);
 			}
+			reconnectAttemptRef.current = 0;
+			isConnectingRef.current = false;
 		};
 	}, [isActive, addLog, handleSSEEvent]);
 
@@ -340,25 +467,46 @@ export function ReindexTerminal({
 		const Icon = LOG_ICONS[log.level];
 		const colorClass = LOG_COLORS[log.level];
 
+		// Detectar si es un sub-log (archivo individual)
+		const isSubLog = log.message.includes('└──');
+		// Detectar si es una carpeta sticky
+		const isFolderLog = log.isSticky || log.isFolderMain;
+
 		return (
 			<div
 				className={cn(
-					'flex h-6 items-center gap-3 p-1',
+					'flex min-h-[32px] items-center gap-3 px-3 py-2',
+					// Estilo para carpetas sticky
 					log.isSticky && {
-						'sticky top-0 z-10 border-gray-700/50 py-3 shadow-lg backdrop-blur-sm': true,
-						'bg-gradient-to-r from-blue-900/20 to-transparent': true,
-						'ring-1 ring-blue-500/20': true,
-					}
+						'sticky top-0 z-10 border-primary/30 border-b py-3 shadow-dt-2 backdrop-blur-sm': true,
+						'bg-gradient-to-r from-primary/20 via-primary/10 to-transparent': true,
+						'ring-1 ring-primary/30': true,
+					},
+					// Estilo para carpetas normales (no sticky pero importante)
+					isFolderLog && !log.isSticky && 'bg-muted/30 font-semibold',
+					// Estilo para sub-logs (archivos)
+					isSubLog && 'pl-12 text-muted-foreground hover:bg-muted/20'
 				)}
 				data-sticky={log.isSticky}
 				key={log.id}
 			>
-				<span className="font-mono text-gray-500 text-xs tabular-nums">{formatTimestamp(log.timestamp)}</span>
-				<Icon className={cn('h-3 w-3 flex-shrink-0', colorClass)} />
 				<span
 					className={cn(
-						'overflow-hidden break-words font-mono text-sm leading-tight',
-						log.isSticky ? 'font-medium text-gray-50' : 'text-gray-100'
+						'font-mono tabular-nums',
+						log.isSticky ? 'text-primary/80 text-xs' : 'text-[10px] text-muted-foreground/60'
+					)}
+				>
+					{formatTimestamp(log.timestamp)}
+				</span>
+				<Icon className={cn('shrink-0', log.isSticky ? 'h-4 w-4' : 'h-3 w-3', colorClass)} />
+				<span
+					className={cn(
+						'flex-1 overflow-hidden break-words font-mono leading-relaxed',
+						// Tamaño y peso según tipo
+						log.isSticky && 'font-bold text-base text-foreground',
+						isFolderLog && !log.isSticky && 'font-semibold text-foreground text-sm',
+						isSubLog && 'text-muted-foreground text-xs',
+						!(isFolderLog || isSubLog) && 'text-foreground/90 text-sm'
 					)}
 				>
 					{log.message}
@@ -368,16 +516,39 @@ export function ReindexTerminal({
 	};
 
 	return (
-		<div className={cn('h-full w-full', className)}>
-			{/* Terminal con soporte para sticky logs - usando todo el ancho disponible */}
-			<div className="relative h-full w-full overflow-y-auto rounded-sm bg-black p-4">
+		<div className={cn('flex h-full w-full flex-col', className)}>
+			{/* Barra de progreso */}
+			{showProgress && (
+				<div className="border-border border-b bg-background px-4 py-3">
+					<div className="mb-2 flex items-center justify-between text-xs">
+						<span className="font-mono text-muted-foreground">
+							{currentProgress < 100 ? 'Processing...' : 'Complete'}
+						</span>
+						<span className="font-bold font-mono text-primary">{currentProgress.toFixed(1)}%</span>
+					</div>
+					<div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+						<div
+							className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+							style={{ width: `${currentProgress}%` }}
+						/>
+					</div>
+					{startTime && currentProgress < 100 && (
+						<div className="mt-2 font-mono text-[10px] text-muted-foreground/60">
+							Elapsed time: {formatElapsedTime(elapsedTime)}
+						</div>
+					)}
+				</div>
+			)}
+
+			{/* Terminal con soporte para sticky logs */}
+			<div className="relative flex-1 overflow-y-auto rounded-sm border border-border/40 bg-background shadow-inner">
 				{logs.length === 0 ? (
-					<div className="flex items-center justify-center p-4 text-gray-500">
-						<Terminal className="mr-2 h-4 w-4" />
-						<span className="font-mono text-sm">Esperando logs...</span>
+					<div className="flex items-center justify-center p-4 text-muted-foreground/40">
+						<Terminal className="mr-3 h-5 w-5" />
+						<span className="font-mono text-sm">Waiting for logs...</span>
 					</div>
 				) : (
-					<div className="w-full space-y-1" ref={logContainerRef}>
+					<div className="w-full space-y-0.5 p-2" ref={logContainerRef}>
 						{logs.map((log, index) => renderLogEntry(log, index))}
 					</div>
 				)}

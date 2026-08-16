@@ -14,27 +14,27 @@ const thumbLogger = serverLogger.withContext('Thumbnail');
 const CACHE_DIR_BASE = join(process.cwd(), '.image-cache', 'thumbnails');
 
 export interface ThumbnailOptions {
-	quality: ThumbnailQuality;
+	background?: string;
 	format?: ImageFormat;
 	preserveMetadata?: boolean;
-	background?: string;
 	progressive?: boolean;
+	quality: ThumbnailQuality;
 }
 
 export interface ThumbnailResult {
 	buffer: Buffer;
-	width: number;
-	height: number;
 	format: ImageFormat;
-	size: number;
+	height: number;
 	originalSize?: number;
+	size: number;
+	width: number;
 }
 
 export interface OptimizeResult {
 	data: Buffer;
+	height: number;
 	size: number;
 	width: number;
-	height: number;
 }
 
 const SUPPORTED_FORMATS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif']);
@@ -55,7 +55,7 @@ async function ensureCacheDir(quality: ThumbnailQuality = ThumbnailQuality.MEDIU
 		const dir = getThumbDirFor(quality);
 		await fs.mkdir(dir, { recursive: true });
 	} catch (error) {
-		thumbLogger.error('Error creando directorio de caché:', error);
+		thumbLogger.error('Could not create cache directory:', error);
 	}
 }
 
@@ -100,7 +100,7 @@ async function saveToCache(cacheKey: string, buffer: Buffer, quality: ThumbnailQ
 	try {
 		await fs.writeFile(cachePath, buffer);
 	} catch (error) {
-		thumbLogger.error('Error guardando en caché:', error);
+		thumbLogger.error('Could not save to cache:', error);
 	}
 }
 
@@ -178,28 +178,41 @@ export async function generateThumbnail(
 ): Promise<ThumbnailResult> {
 	try {
 		// 🟡 Logging de diagnóstico: primero existencia, luego permisos
-		thumbLogger.info('🔍 Verificando acceso al archivo para thumbnail:', filePath);
-		const exists = existsSync(filePath);
+		thumbLogger.info('🔍 Verificando acceso al archivo para thumbnail');
+
+		// Protección contra rutas inválidas (ej. base64 pasado como path)
+		if (filePath.length > 1024) {
+			thumbLogger.error(`❌ File path is too long (${filePath.length} chars). Posible data corrupta.`);
+			throw new Error('Invalid file path (too long)');
+		}
+
+		// Protección adicional para existsSync que puede lanzar en algunas versiones de Node con paths muy largos
+		let exists = false;
+		try {
+			exists = existsSync(filePath);
+		} catch (e) {
+			thumbLogger.error('❌ Could not verify file existence (possibly invalid path)', {
+				kind: e instanceof Error ? e.name : 'UnknownError',
+			});
+			throw new Error('Could not verify the source file.');
+		}
+
 		thumbLogger.info('🟡 existsSync:', exists);
 		if (!exists) {
-			thumbLogger.error(`Archivo no encontrado: ${filePath}`);
-			throw new Error(`Archivo no encontrado: ${filePath}`);
+			thumbLogger.error('Source file not found');
+			throw new Error('Source file not found.');
 		}
 		try {
 			await fs.access(filePath, fs.constants.R_OK);
-			thumbLogger.info('🟢 Permiso de lectura OK para:', filePath);
+			thumbLogger.info('🟢 Permiso de lectura OK');
 		} catch (permError: any) {
 			const code = permError?.code;
 			if (code === 'EACCES' || code === 'EPERM') {
-				thumbLogger.error('🔴 Permiso denegado al leer:', { path: filePath, code, message: permError.message });
-				throw new Error(`Permiso denegado: ${filePath}`);
+				thumbLogger.error('🔴 Permiso denegado al leer:', { code });
+				throw new Error('Permission denied while reading the source file.');
 			}
 			// Otros errores inesperados de access
-			thumbLogger.error('🔴 Error comprobando acceso de lectura:', {
-				path: filePath,
-				code,
-				message: permError instanceof Error ? permError.message : String(permError),
-			});
+			thumbLogger.error('🔴 Error comprobando acceso de lectura:', { code });
 			throw permError;
 		}
 		thumbLogger.info('🟡 Usuario proceso:', process.env.USERNAME || process.env.USER || 'N/A');
@@ -214,8 +227,8 @@ export async function generateThumbnail(
 		const finalOptions = { ...DEFAULT_OPTIONS, ...options };
 		const config = THUMBNAIL_QUALITY_CONFIG[finalOptions.quality as ThumbnailQuality];
 		if (!config) {
-			thumbLogger.error(`Calidad inválida: ${finalOptions.quality}`);
-			throw new Error(`Calidad inválida: ${finalOptions.quality}`);
+			thumbLogger.error(`Invalid quality: ${finalOptions.quality}`);
+			throw new Error(`Invalid quality: ${finalOptions.quality}`);
 		}
 
 		// Verificar caché
@@ -224,7 +237,6 @@ export async function generateThumbnail(
 		const cached = await getFromCache(cacheKey, finalOptions.quality as ThumbnailQuality);
 		if (cached) {
 			thumbLogger.debug('Thumbnail recuperado de caché:', {
-				path: filePath,
 				dimensions: `${cached.width}x${cached.height}`,
 				size: formatBytes(cached.size),
 			});
@@ -232,7 +244,6 @@ export async function generateThumbnail(
 		}
 
 		thumbLogger.debug('Generando thumbnail:', {
-			path: filePath,
 			options: finalOptions,
 			config,
 		});
@@ -249,8 +260,8 @@ export async function generateThumbnail(
 		// Obtener metadata
 		const metadata = await image.metadata();
 		if (!(metadata.width && metadata.height)) {
-			thumbLogger.error('No se pudieron obtener las dimensiones de la imagen', { filePath });
-			throw new Error('No se pudieron obtener las dimensiones de la imagen');
+			thumbLogger.error('Could not get image dimensions');
+			throw new Error('Could not get image dimensions');
 		}
 
 		// Calcular dimensiones con valores seguros
@@ -337,9 +348,9 @@ export async function generateThumbnail(
 				originalSize: metadata.size,
 			};
 		} catch (processingError) {
-			thumbLogger.error('Error procesando imagen:', processingError);
+			thumbLogger.error('Could not process image:', processingError);
 			throw new Error(
-				`Error procesando imagen: ${processingError instanceof Error ? processingError.message : String(processingError)}`
+				`Could not process image: ${processingError instanceof Error ? processingError.message : String(processingError)}`
 			);
 		}
 	} catch (error) {
@@ -361,7 +372,7 @@ export async function clearThumbnailCache(): Promise<void> {
 		}
 		thumbLogger.info('Caché de thumbnails limpiada');
 	} catch (error) {
-		thumbLogger.error('Error limpiando caché:', error);
+		thumbLogger.error('Could not clear cache:', error);
 		throw error;
 	}
 }

@@ -13,18 +13,18 @@ import {
 } from '@/types/entities/profile/types';
 
 // Tipo local para Profile de Drizzle
-type DrizzleProfile = {
-	id: string;
-	name: string;
+interface DrizzleProfile {
+	color: string;
+	createdAt: Date;
 	description: string | null;
 	emoji: string;
-	color: string;
-	isActive: boolean;
-	createdAt: Date;
-	updatedAt: Date | null;
-	settingsId: string | null;
+	id: string;
 	imageId: string | null;
-};
+	isActive: boolean;
+	name: string;
+	settingsId: string | null;
+	updatedAt: Date | null;
+}
 
 /**
  * Construye condiciones de filtro para consultas Drizzle
@@ -138,7 +138,7 @@ export async function setActiveProfile(id: string): Promise<boolean> {
 
 		return true;
 	} catch (error) {
-		console.error('Error estableciendo perfil activo:', error);
+		console.error('Could not set active profile:', error);
 		return false;
 	}
 }
@@ -160,7 +160,7 @@ export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 					id: `profile-${Date.now()}`,
 					name: 'Perfil por defecto',
 					emoji: '👤',
-					color: '#3b82f6',
+					color: 'var(--dt-primary-500)',
 					isActive: true,
 					description: null,
 					settingsId: null,
@@ -174,7 +174,7 @@ export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 					id: `profile-${Date.now()}`,
 					name: 'Perfil por defecto',
 					emoji: '👤',
-					color: '#3b82f6',
+					color: 'var(--dt-primary-500)',
 					isActive: true,
 					description: null,
 					settingsId: null,
@@ -215,7 +215,7 @@ export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 				id: `profile-${Date.now()}`,
 				name: 'Perfil por defecto',
 				emoji: '👤',
-				color: '#3b82f6',
+				color: 'var(--dt-primary-500)',
 				isActive: true,
 				description: null,
 				settingsId: null,
@@ -229,7 +229,7 @@ export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 				id: `profile-${Date.now()}`,
 				name: 'Perfil por defecto',
 				emoji: '👤',
-				color: '#3b82f6',
+				color: 'var(--dt-primary-500)',
 				isActive: true,
 				description: null,
 				settingsId: null,
@@ -245,7 +245,7 @@ export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 			id: `profile-${Date.now()}`,
 			name: 'Perfil por defecto',
 			emoji: '👤',
-			color: '#3b82f6',
+			color: 'var(--dt-primary-500)',
 			isActive: true,
 			description: null,
 			settingsId: null,

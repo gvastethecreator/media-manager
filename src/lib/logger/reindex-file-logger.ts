@@ -7,34 +7,35 @@
 import fs from 'fs';
 import path from 'path';
 import { serverLogger } from './server-logger';
+import { sanitizeSensitiveLogOutput, sanitizeSensitiveLogText } from '@/lib/security/sanitize-sensitive-output';
 
 export interface ReindexLogEntry {
-	timestamp: string;
-	level: 'ERROR' | 'WARN';
-	source: 'circuit-breaker' | 'auto-indexing' | 'folder-stats' | 'monitor' | 'operation-queue' | 'file-browser';
-	operationId?: string;
-	folderId?: string;
-	folderPath?: string;
-	message: string;
 	context?: any;
 	error?: {
 		name: string;
 		message: string;
 		stack?: string;
 	};
+	folderId?: string;
+	folderPath?: string;
+	level: 'ERROR' | 'WARN';
+	message: string;
+	operationId?: string;
+	source: 'circuit-breaker' | 'auto-indexing' | 'folder-stats' | 'monitor' | 'operation-queue' | 'file-browser';
+	timestamp: string;
 }
 
 /**
  * File logger específico para el sistema de reindexado
  */
 export class ReindexFileLogger {
-	private baseDir: string;
+	private readonly baseDir: string;
 	private currentDate!: string;
 	private errorLogPath!: string;
 	private warningLogPath!: string;
 
-	constructor() {
-		this.baseDir = path.resolve(process.cwd(), 'logs', 'reindex');
+	constructor(baseDir = path.resolve(process.cwd(), 'logs', 'reindex')) {
+		this.baseDir = path.resolve(baseDir);
 		this.updateLogPaths();
 		this.ensureLogDirectory();
 	}
@@ -58,7 +59,7 @@ export class ReindexFileLogger {
 				serverLogger.info(`📁 Directorio de logs de reindexado creado: ${this.baseDir}`);
 			}
 		} catch (error) {
-			serverLogger.error('❌ Error creando directorio de logs de reindexado:', error);
+			serverLogger.error('❌ Could not create reindex log directory:', error);
 		}
 	}
 
@@ -86,7 +87,7 @@ export class ReindexFileLogger {
 			fs.appendFileSync(filePath, `${logLine}\n`, 'utf8');
 		} catch (error) {
 			// Fallback a console si no se puede escribir al archivo
-			serverLogger.error('❌ Error escribiendo log de reindexado:', error);
+			serverLogger.error('❌ Could not write reindex log:', error);
 			console.error('[REINDEX-LOG-FALLBACK]', logLine);
 		}
 	}
@@ -95,12 +96,17 @@ export class ReindexFileLogger {
 	 * Formatea una entrada de log como JSON estructurado
 	 */
 	private formatLogEntry(entry: ReindexLogEntry): string {
+		const sanitizedEntry = this.sanitizeLogEntry(entry);
 		try {
-			return JSON.stringify(entry);
+			return JSON.stringify(sanitizedEntry);
 		} catch (error) {
 			// Fallback a formato simple si hay problemas con JSON
-			return `${entry.timestamp} [${entry.level}] ${entry.source}: ${entry.message}`;
+			return `${sanitizedEntry.timestamp} [${sanitizedEntry.level}] ${sanitizedEntry.source}: ${sanitizeSensitiveLogText(sanitizedEntry.message)}`;
 		}
+	}
+
+	private sanitizeLogEntry(entry: ReindexLogEntry): ReindexLogEntry {
+		return sanitizeSensitiveLogOutput(entry) as ReindexLogEntry;
 	}
 
 	/**
@@ -205,6 +211,11 @@ export class ReindexFileLogger {
 		};
 	}
 
+	getPublicLogStats(): Omit<ReturnType<ReindexFileLogger['getLogStats']>, 'errorLogPath' | 'warningLogPath'> {
+		const { errorLogPath: _errorLogPath, warningLogPath: _warningLogPath, ...publicStats } = this.getLogStats();
+		return publicStats;
+	}
+
 	/**
 	 * Lee las últimas entradas de un archivo de log
 	 */
@@ -229,19 +240,19 @@ export class ReindexFileLogger {
 
 			return recentLines.map((line) => {
 				try {
-					return JSON.parse(line) as ReindexLogEntry;
+					return this.sanitizeLogEntry(JSON.parse(line) as ReindexLogEntry);
 				} catch {
 					// Si no se puede parsear como JSON, crear entrada básica
-					return {
+					return this.sanitizeLogEntry({
 						timestamp: new Date().toISOString(),
 						level: type === 'error' ? 'ERROR' : 'WARN',
 						source: 'unknown' as any,
-						message: line,
-					};
+						message: sanitizeSensitiveLogText(line),
+					});
 				}
 			});
 		} catch (error) {
-			serverLogger.error(`Error leyendo logs de reindexado (${type}):`, error);
+			serverLogger.error(`Could not read reindex logs (${type}):`, error);
 			return [];
 		}
 	}

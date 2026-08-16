@@ -19,76 +19,74 @@ import { normalizeFolderPath } from './serializers';
 const logger = serverLogger.withContext('FolderMappers');
 
 // Tipos locales equivalentes a Drizzle (migración a Drizzle)
-type DrizzleFolderCreateInput = {
-	id?: string;
-	name: string;
-	path: string;
-	description?: string | null;
-	emoji?: string | null;
+interface DrizzleFolderCreateInput {
 	color?: string | null;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	totalFiles?: number;
-	totalSize?: number;
-	lastIndexed?: Date | null;
-	parentId?: string | null;
-	presetId?: string | null;
 	createdAt?: Date;
-	updatedAt?: Date;
-};
-
-type DrizzleFolderUpdateInput = {
-	name?: string;
-	path?: string;
 	description?: string | null;
 	emoji?: string | null;
-	color?: string | null;
 	featuredImage?: string | null;
-	isFavorite?: boolean;
+	id?: string;
+	lastIndexed?: Date | null;
+	name: string;
+	parentId?: string | null;
+	path: string;
+	presetId?: string | null;
 	totalFiles?: number;
 	totalSize?: number;
-	lastIndexed?: Date | null;
-	parentId?: string | null;
-	presetId?: string | null;
 	updatedAt?: Date;
-};
+}
 
-type DrizzleFolderWhereInput = {
-	id?: string;
-	name?: { contains?: string };
-	description?: { contains?: string };
-	path?: string;
-	isFavorite?: boolean;
+interface DrizzleFolderUpdateInput {
+	color?: string | null;
+	description?: string | null;
+	emoji?: string | null;
+	featuredImage?: string | null;
+	lastIndexed?: Date | null;
+	name?: string;
 	parentId?: string | null;
-	OR?: DrizzleFolderWhereInput[];
-	images?: { some?: any };
-};
+	path?: string;
+	presetId?: string | null;
+	totalFiles?: number;
+	totalSize?: number;
+	updatedAt?: Date;
+}
 
-type DrizzleFolderFindManyArgs = {
+interface DrizzleFolderWhereInput {
+	description?: { contains?: string };
+	id?: string;
+	images?: { some?: any };
+	isFavorite?: boolean;
+	name?: { contains?: string };
+	OR?: DrizzleFolderWhereInput[];
+	parentId?: string | null;
+	path?: string;
+}
+
+interface DrizzleFolderFindManyArgs {
+	include?: any;
+	orderBy?: any;
 	skip?: number;
 	take?: number;
-	orderBy?: any;
 	where?: DrizzleFolderWhereInput;
-	include?: any;
-};
+}
 
-type DrizzleFolder = {
-	id: string;
-	name: string;
-	path: string;
+interface DrizzleFolder {
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
 	featuredImage: string | null;
+	id: string;
 	isFavorite: boolean;
+	lastIndexed: Date | null;
+	name: string;
+	parentId: string | null;
+	path: string;
+	presetId: string | null;
 	totalFiles: number;
 	totalSize: number;
-	lastIndexed: Date | null;
-	parentId: string | null;
-	presetId: string | null;
-	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 /**
  * 🔄 Mapea un `FolderCreateInput` a un `DrizzleFolderCreateInput`.
@@ -107,7 +105,6 @@ export async function mapCreateFolderDataToDrizzle(data: FolderCreateInput): Pro
 			color: data.color ?? null,
 			parentId: data.parentId ?? null,
 			presetId: data.presetId ?? null,
-			isFavorite: data.isFavorite ?? false,
 			featuredImage: data.featuredImage ?? null,
 			totalFiles: 0,
 			totalSize: 0,

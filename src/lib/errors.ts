@@ -37,10 +37,10 @@ export enum EntityErrorCode {
 
 // Interfaz para objetos de error serializables
 export interface SerializableError {
-	name: string;
-	message: string;
-	code: EntityErrorCode;
 	cause?: unknown;
+	code: EntityErrorCode;
+	message: string;
+	name: string;
 }
 
 // Clase base para errores de entidades
@@ -147,7 +147,7 @@ export function handleDatabaseError(error: unknown, customMessage?: string): nev
 	if (error instanceof Error) {
 		throw new StatsError(`${baseMessage}: ${error.message}`, error);
 	}
-	throw new StatsError(`${baseMessage}: Error desconocido en la base de datos`, error);
+	throw new StatsError(`${baseMessage}: Unknown database error`, error);
 }
 
 export function handleNotFoundError(message: string): never {

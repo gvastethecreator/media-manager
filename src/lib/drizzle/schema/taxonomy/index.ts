@@ -18,3 +18,4 @@ export { notes } from './notes';
 export { prompts } from './prompts';
 export { properties } from './properties';
 export { wildcards } from './wildcards';
+export { taxonomyArtifactDeletionLedger, taxonomyArtifactMutationPermits, taxonomyArtifacts } from './artifacts';

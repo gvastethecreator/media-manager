@@ -9,15 +9,15 @@ import { FolderSortCriteria, FolderViewMode } from '@/types/entities/folder/enum
 import type { CompleteFolderStore, FolderFiltersSlice } from '../types';
 
 export interface FolderFiltersState {
+	itemSize: 'small' | 'medium' | 'large';
+	maxDepth: number | null;
+	minOrganizationScore: number;
+	searchQuery: string;
+	showEmptyFolders: boolean;
+	showOnlyFavorites: boolean;
 	sortBy: FolderSortCriteria;
 	sortDirection: 'asc' | 'desc';
 	viewMode: FolderViewMode;
-	itemSize: 'small' | 'medium' | 'large';
-	searchQuery: string;
-	showOnlyFavorites: boolean;
-	minOrganizationScore: number;
-	showEmptyFolders: boolean;
-	maxDepth: number | null;
 }
 
 export const initialFiltersState: FolderFiltersState = {
@@ -39,7 +39,10 @@ export const createFolderFiltersSlice: StateCreator<CompleteFolderStore, [], [],
 	// Establecer filtros
 	setSortBy: (sortBy) => set({ sortBy }),
 	setSortDirection: (direction) => set({ sortDirection: direction }),
-	setViewMode: (viewMode) => set({ viewMode }),
+	setViewMode: (viewMode) => {
+		if (get().viewMode === viewMode) return;
+		set({ viewMode });
+	},
 	setItemSize: (size) => set({ itemSize: size }),
 	setSearchQuery: (query) => set({ searchQuery: query }),
 	setShowOnlyFavorites: (show) => set({ showOnlyFavorites: show }),

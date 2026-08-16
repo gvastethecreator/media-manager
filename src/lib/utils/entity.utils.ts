@@ -1,10 +1,10 @@
 import type { EntityBase } from '@/types/entities/entity.types';
 
 export interface BaseFormData {
-	id?: string;
-	name: string;
 	description?: string;
 	emoji?: string;
+	id?: string;
+	name: string;
 	shortcut?: string;
 }
 
@@ -35,35 +35,35 @@ export function formDataToBase<T extends EntityBase>(data: BaseFormData, id?: st
 }
 
 export interface BaseStats {
-	total: number;
 	active: number;
-	isFavorite: number;
 	archived: number;
+	isFavorite: number;
+	total: number;
 }
 
 export interface ExtendedStats extends BaseStats {
-	totalItems: number;
-	totalImages: number;
-	totalSize: number;
 	distribution: Array<{
 		name: string;
 		count: number;
 	}>;
+	lastUpdated?: Date;
 	recentItems: Array<{
 		id: string;
 		name: string;
 		emoji?: string;
 		count?: number;
 	}>;
-	lastUpdated?: Date;
+	totalImages: number;
+	totalItems: number;
+	totalSize: number;
 }
 
 // Interfaz para entidades con contadores y estado
 interface EntityWithStatsLocal extends EntityBase {
 	_count?: { images: number };
-	totalSize?: number;
 	isArchived?: boolean;
 	isFavorite?: boolean;
+	totalSize?: number;
 }
 
 export function calculateStats<T extends EntityWithStatsLocal>(

@@ -3,8 +3,6 @@
  * @module types/entities/profile
  */
 
-// Exportar enums
-export { Language, ThemeMode } from './enums';
 // Exportar tipos inferidos de esquemas
 export type {
 	CreateProfileSchemaType,
@@ -36,5 +34,6 @@ export type {
 	ProfileUpdateInput,
 	ProfileWithStats,
 } from './types';
+// Exportar enums como valores
 // Exportar el esquema de validación
-export { ProfileSchema } from './types';
+export { Language, ProfileSchema, ThemeMode } from './types';

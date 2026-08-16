@@ -1,5 +1,5 @@
 import { AlertCircle, Microscope } from 'lucide-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -8,9 +8,9 @@ import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 export interface PropertyCardProps {
-	property: PropertyWithStats;
-	onClick?: () => void;
 	className?: string;
+	onClick?: () => void;
+	property: PropertyWithStats;
 	showBadges?: boolean;
 }
 
@@ -18,30 +18,17 @@ export interface PropertyCardProps {
  * Card para mostrar una propiedad - Refactorizado para usar PropertyWithStats
  * Sigue el diseño de los otros componentes de tarjetas estandarizados
  */
-export function PropertyCard({ property, onClick, className, showBadges = true }: PropertyCardProps) {
+export const PropertyCard = memo(function PropertyCard({
+	property,
+	onClick,
+	className,
+	showBadges = true,
+}: PropertyCardProps) {
 	// Calcular colores
-	const primaryColor = useMemo(() => property?.color || '#3b82f6', [property?.color]);
+	const primaryColor = useMemo(() => property?.color || 'var(--dt-primary-500)', [property?.color]);
 	const secondaryColor = useMemo(() => {
-		if (!property?.color) {
-			return '#2563eb';
-		}
-
-		try {
-			// Convertir hex a RGB y oscurecer
-			const r = Number.parseInt(primaryColor.slice(1, 3), 16);
-			const g = Number.parseInt(primaryColor.slice(3, 5), 16);
-			const b = Number.parseInt(primaryColor.slice(5, 7), 16);
-
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			return '#2563eb';
-		}
-	}, [primaryColor, property?.color]);
+		return `color-mix(in oklab, ${primaryColor}, black 20%)`;
+	}, [primaryColor]);
 
 	// Calcular número total de relaciones desde stats
 	const totalRelations = property?.stats?.totalRelations ?? 0;
@@ -87,7 +74,11 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 				{showBadges && (
 					<div className="mt-auto flex flex-wrap gap-1">
 						{totalRelations > 0 && (
-							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
+							<Badge
+								className="text-sm"
+								style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }}
+								variant="outline"
+							>
 								{totalRelations} relaciones
 							</Badge>
 						)}
@@ -102,11 +93,11 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 		return (
 			<CardContainer className={cn('border-red-300 bg-red-50', className)}>
 				<CardHeader
-					icon={<AlertCircle className="h-4 w-4 text-red-600" />}
-					primaryColor="#dc2626"
+					icon={<AlertCircle className="h-4 w-4 text-destructive" />}
+					primaryColor="var(--dt-danger-500)"
 					title="Property no encontrada"
 				/>
-				<p className="text-red-800">Error: Propiedad no encontrada</p>
+				<p className="text-destructive">Error: Property not found</p>
 			</CardContainer>
 		);
 	} // Si hay onClick, usamos un botón para mejor accesibilidad
@@ -129,7 +120,7 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 			{cardContent}
 		</Link>
 	);
-}
+});
 
 // Exportar también un componente memorizado si es necesario
-export const MemoizedPropertyCard = React.memo(PropertyCard);
+export const MemoizedPropertyCard = PropertyCard;

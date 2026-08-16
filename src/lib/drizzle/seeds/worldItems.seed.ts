@@ -1,26 +1,29 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { worldItems } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra objetos del mundo minimalistas para verificación del sistema
+ * Siembra objetos del mundo con IDs legibles
+ * Formato: item-nombre-01, item-nombre-02, etc.
+ *
+ * NOTA: Los colores hex en este archivo son datos de prueba para inicializar la DB.
+ * No se usan directamente en la UI de producción - la UI usa tokens CSS
+ * definidos en src/styles/tokens.css y src/styles/design-tokens.css.
  */
 export async function seedWorldItems(db: LibSQLDatabase<Record<string, never>>) {
-	seedLogger.info('🎯 Creando world items de prueba...');
+	seedLogger.info('🎯 Creando objetos del mundo de prueba...');
 
 	try {
 		const sampleWorldItems = [
 			{
-				id: 'worlditem-1',
+				id: generateReadableId('world-item', 'Espada Legendaria', 1),
 				name: 'Espada Legendaria',
-				description: 'Arma mítica de gran poder',
+				description: 'Mythical weapon of great power',
 				emoji: '🗡️',
 				color: '#f59e0b',
 				category: 'arma',
-				isPublic: true,
-				isFavorite: true,
-				totalImages: 0,
-				totalVideos: 0,
+				subtype: 'arma',
 				type: 'arma',
 				rarity: 'legendaria',
 				value: '10000',
@@ -31,20 +34,16 @@ export async function seedWorldItems(db: LibSQLDatabase<Record<string, never>>) 
 				uses: 'combate',
 				history: 'usada en la gran guerra',
 				notes: 'Solo para pruebas',
-				featuredImage: null,
 				parentId: null,
 			},
 			{
-				id: 'worlditem-2',
+				id: generateReadableId('world-item', 'Pocion Curativa', 1),
 				name: 'Poción Curativa',
 				description: 'Restaura la salud',
 				emoji: '🧪',
-				color: '#10b981',
+				color: '#22c55e',
 				category: 'consumible',
-				isPublic: false,
-				isFavorite: false,
-				totalImages: 0,
-				totalVideos: 0,
+				subtype: 'poción',
 				type: 'poción',
 				rarity: 'común',
 				value: '50',
@@ -55,16 +54,55 @@ export async function seedWorldItems(db: LibSQLDatabase<Record<string, never>>) 
 				uses: 'curación',
 				history: 'usada por aventureros',
 				notes: 'Solo para pruebas',
-				featuredImage: null,
+				parentId: null,
+			},
+			{
+				id: generateReadableId('world-item', 'Amuleto Proteccion', 1),
+				name: 'Amuleto de Protección',
+				description: 'Grants magical defense',
+				emoji: '📿',
+				color: '#3b82f6',
+				category: 'accesorio',
+				subtype: 'amuleto',
+				type: 'amuleto',
+				rarity: 'raro',
+				value: '2500',
+				weight: '0.05kg',
+				materials: 'plata, gema azul',
+				origin: 'Templo del Este',
+				properties: 'resistencia mágica +20',
+				uses: 'protección',
+				history: 'Bendecido por sacerdotes antiguos',
+				notes: 'Brillante en presencia de magia',
+				parentId: null,
+			},
+			{
+				id: generateReadableId('world-item', 'Mapa del Tesoro', 1),
+				name: 'Mapa del Tesoro',
+				description: 'Shows the location of hidden treasure',
+				emoji: '🗺️',
+				color: '#a16207',
+				category: 'especial',
+				subtype: 'documento',
+				type: 'documento',
+				rarity: 'épico',
+				value: 'incalculable',
+				weight: '0.01kg',
+				materials: 'pergamino, tinta mágica',
+				origin: 'Pirata Barbanegra',
+				properties: 'revela ubicación al activarse',
+				uses: 'navegación',
+				history: 'Perdido hace 200 años',
+				notes: 'Solo puede leerse bajo la luna llena',
 				parentId: null,
 			},
 		];
 
 		await db.insert(worldItems).values(sampleWorldItems);
 
-		seedLogger.success(`✅ ${sampleWorldItems.length} world items creados`);
+		seedLogger.success(`✅ ${sampleWorldItems.length} objetos del mundo creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando world items:', error);
+		seedLogger.error('❌ Could not create world items:', error);
 		throw error;
 	}
 }

@@ -14,19 +14,18 @@
  * 📝 Documenta cualquier cambio relevante aquí.
  */
 
-export type MetadataBase = {
-	id: string;
-	entityType: string;
-	entityId: string;
-	key: string;
-	value: string | null;
-	type: string | null;
-
+export interface MetadataBase {
 	category: string | null;
-	description: string | null;
 	createdAt: Date;
+	description: string | null;
+	entityId: string;
+	entityType: string;
+	id: string;
+	key: string;
+	type: string | null;
 	updatedAt: Date;
-};
+	value: string | null;
+}
 
 export type MetadataCreateInput = Omit<MetadataBase, 'id' | 'createdAt' | 'updatedAt'>;
 

@@ -1,110 +1,259 @@
+/* TCG Card Styles - Must be at the top before Tailwind */
+@import '../components/ui/tcg/tcg-card.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
-    --radius: 0.5rem;
-  }
+	:root {
+		--background: 0 0% 100%;
+		--foreground: 240 10% 3.9%;
+		--card: 0 0% 100%;
+		--card-foreground: 240 10% 3.9%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 240 10% 3.9%;
+		--primary: 240 5.9% 10%;
+		--primary-foreground: 0 0% 98%;
+		--secondary: 240 4.8% 95.9%;
+		--secondary-foreground: 240 5.9% 10%;
+		--muted: 240 4.8% 95.9%;
+		--muted-foreground: 240 3.8% 46.1%;
+		--accent: 240 4.8% 95.9%;
+		--accent-foreground: 240 5.9% 10%;
+		--destructive: 0 84.2% 60.2%;
+		--destructive-foreground: 0 0% 98%;
+		--border: 240 5.9% 90%;
+		--input: 240 5.9% 90%;
+		--ring: 240 10% 3.9%;
+		--radius: 0.5rem;
+	}
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-  }
+	.dark {
+		--background: 240 10% 3.9%;
+		--foreground: 0 0% 98%;
+		--card: 240 10% 3.9%;
+		--card-foreground: 0 0% 98%;
+		--popover: 240 10% 3.9%;
+		--popover-foreground: 0 0% 98%;
+		--primary: 0 0% 98%;
+		--primary-foreground: 240 5.9% 10%;
+		--secondary: 240 3.7% 15.9%;
+		--secondary-foreground: 0 0% 98%;
+		--muted: 240 3.7% 15.9%;
+		--muted-foreground: 240 5% 64.9%;
+		--accent: 240 3.7% 15.9%;
+		--accent-foreground: 0 0% 98%;
+		--destructive: 0 62.8% 30.6%;
+		--destructive-foreground: 0 0% 98%;
+		--border: 240 3.7% 15.9%;
+		--input: 240 3.7% 15.9%;
+		--ring: 240 4.9% 83.9%;
+	}
 }
 
 @layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
+	* {
+		border-color: hsl(var(--border));
+	}
 
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+	body {
+		font-feature-settings:
+			'rlig' 1,
+			'calt' 1;
+		color: hsl(var(--foreground));
+		background-color: hsl(var(--background));
+	}
 
-  /* Ensure full height propagation */
-  html,
-  body,
-  #root {
-    height: 100%;
-    min-height: 100%;
-  }
+	/* Ensure full height propagation */
+	html,
+	body,
+	#root {
+		height: 100%;
+		min-height: 100%;
+	}
 }
 
 /* Custom scrollbar styles */
 @layer components {
-  .scrollbar-thin {
-    scrollbar-width: thin;
-  }
+	.scrollbar-thin {
+		scrollbar-width: thin;
+	}
 
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
+	.ui-motion-standard {
+		transition-duration: var(--dt-duration-normal);
+		transition-property: all;
+		transition-timing-function: var(--dt-ease-out);
+	}
 
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background-color: hsl(var(--muted));
-  }
+	.ui-touch-target {
+		min-height: 44px;
+		min-width: 44px;
+	}
 
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted-foreground) / 0.3);
-    border-radius: 9999px;
-  }
+	.ui-touch-target-dense {
+		min-height: 40px;
+		min-width: 40px;
+	}
 
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(var(--muted-foreground) / 0.5);
-  }
+	.ui-overlay-hover-soft {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.ui-overlay-hover-soft:hover {
+		opacity: 0.2;
+	}
+
+	.ui-overlay-hover-strong {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.ui-overlay-hover-strong:hover {
+		opacity: 0.3;
+	}
+
+	.ui-overlay-hover-glow {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.ui-overlay-hover-glow:hover {
+		opacity: 1;
+	}
+
+	.ui-overlay-group-soft {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.ui-overlay-group-strong {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.ui-overlay-group-glow {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition-duration: var(--dt-duration-normal);
+		transition-property: opacity;
+		transition-timing-function: var(--dt-ease-out);
+	}
+
+	.group:hover .ui-overlay-group-soft {
+		opacity: 0.2;
+	}
+
+	.group:hover .ui-overlay-group-strong {
+		opacity: 0.3;
+	}
+
+	.group:hover .ui-overlay-group-glow {
+		opacity: 1;
+	}
+
+	.ui-overlay-backdrop-soft {
+		background-color: var(--overlay-backdrop-soft);
+		backdrop-filter: blur(4px);
+	}
+
+	.ui-overlay-backdrop-medium {
+		background-color: var(--overlay-backdrop-medium);
+		backdrop-filter: blur(8px);
+	}
+
+	.ui-overlay-backdrop-strong {
+		background-color: var(--overlay-backdrop-strong);
+		backdrop-filter: blur(8px);
+	}
+
+	.ui-overlay-control-surface {
+		border: 1px solid var(--overlay-control-border);
+		background-color: var(--overlay-control-bg);
+		backdrop-filter: blur(12px);
+	}
+
+	.ui-overlay-control-surface:hover {
+		background-color: var(--overlay-control-bg-hover);
+	}
+
+	.ui-overlay-text {
+		color: var(--overlay-foreground);
+	}
+
+	.ui-overlay-text-muted {
+		color: var(--overlay-foreground-muted);
+	}
+
+	.scrollbar-thin::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-track {
+		background-color: hsl(var(--muted));
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb {
+		background-color: hsl(var(--muted-foreground) / 0.3);
+		border-radius: 9999px;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+		background-color: hsl(var(--muted-foreground) / 0.5);
+	}
 }
 
 /* Animation improvements */
 @layer utilities {
-  .animate-in {
-    animation-duration: 0.3s;
-    animation-fill-mode: both;
-    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  }
+	.animate-in {
+		animation-duration: var(--dt-duration-normal);
+		animation-timing-function: var(--dt-ease-out);
+		animation-fill-mode: both;
+	}
 
-  .animate-out {
-    animation-duration: 0.2s;
-    animation-fill-mode: both;
-    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  }
+	.animate-out {
+		animation-duration: var(--dt-duration-fast);
+		animation-timing-function: var(--dt-ease-in);
+		animation-fill-mode: both;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
+	}
 }

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { AnyEntityWithStats } from '@/types/entities';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AudioView');
@@ -18,29 +19,32 @@ export default function AudioView(_props: ViewProps) {
 
 	const audios = useMemo(() => audiosArray || [], [audiosArray]);
 	const audioCount = audios.length;
+	const browserItems = useMemo(
+		() => audios.map((a) => toBrowserItem(a as unknown as Record<string, unknown>)),
+		[audios]
+	);
 
 	useEffect(() => {
 		if (!hasInitializedRef.current && audioCount === 0 && !isLoading) {
 			hasInitializedRef.current = true;
-			viewLogger.info('Cargando audios...');
+			viewLogger.info('Loading audio files...');
 			fetchAudios();
 		}
 	}, [audioCount, isLoading, fetchAudios]);
 
 	const { openViewer } = useFileViewerStore();
 
-	const handleItemClick = useCallback((item: AnyEntityWithStats) => {
+	const handleItemClick = useCallback((item: BrowserItem) => {
 		viewLogger.info('Click en audio', { id: item.id, name: item.name });
 	}, []);
 
 	const handleItemDoubleClick = useCallback(
-		(item: AnyEntityWithStats) => {
+		(item: BrowserItem) => {
 			// Abrir el visor con todos los audios
 			const mediaItems = audios.map((audio) => ({
 				id: audio.id,
 				name: audio.name,
 				type: 'audio' as const,
-				path: (audio as any).path,
 				size: (audio as any).size || 0,
 				duration: (audio as any).duration,
 				thumbnail: (audio as any).thumbnail || `/api/audio/${audio.id}/waveform`,
@@ -52,18 +56,22 @@ export default function AudioView(_props: ViewProps) {
 		[audios, openViewer]
 	);
 
+	if (isLoading && audioCount === 0) {
+		return <LoadingScreen message="Loading audio files..." />;
+	}
+
 	if (error) {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<h2 className="mb-2 font-semibold text-lg">Error al cargar audios</h2>
+					<h2 className="mb-2 font-semibold text-lg">Could not load audio files</h2>
 					<p className="mb-4 text-muted-foreground">Error: {error}</p>
 					<button
 						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 						onClick={() => fetchAudios()}
 						type="button"
 					>
-						Intentar de nuevo
+						Try again
 					</button>
 				</div>
 			</div>
@@ -78,7 +86,7 @@ export default function AudioView(_props: ViewProps) {
 					<div className="min-w-0">
 						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">Audio</h2>
 						<p className="truncate text-muted-foreground text-xs leading-tight">
-							{audioCount} {audioCount === 1 ? 'archivo' : 'archivos'} de audio
+							{audioCount} {audioCount === 1 ? 'file' : 'files'} de audio
 						</p>
 					</div>
 				</div>
@@ -88,8 +96,7 @@ export default function AudioView(_props: ViewProps) {
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
-					isLoading={isLoading}
-					items={audios as unknown as AnyEntityWithStats[]}
+					items={browserItems}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
 				/>

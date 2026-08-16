@@ -4,8 +4,8 @@
  */
 
 import { formatBytes } from '@/lib/utils/format.utils';
+import type { AlbumWithStats } from '@/types/entities/album';
 import { AlbumType } from '@/types/entities/album/enums';
-import type { AlbumWithStats } from '@/types/entities/album/types';
 
 /**
  * Genera una URL para la miniatura de un álbum

@@ -38,7 +38,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'name',
-			label: 'Nombre',
+			label: 'Name',
 			width: 'auto',
 			sortable: true,
 			visible: true,
@@ -49,7 +49,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'dimensions',
-			label: 'Dimensiones',
+			label: 'Dimensions',
 			width: 120,
 			sortable: true,
 			visible: true,
@@ -61,7 +61,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'size',
-			label: 'Tamaño',
+			label: 'Size',
 			width: 100,
 			sortable: true,
 			visible: true,
@@ -73,7 +73,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'dateModified',
-			label: 'Modificado',
+			label: 'Modified',
 			width: 140,
 			sortable: true,
 			visible: true,
@@ -85,7 +85,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'dateCreated',
-			label: 'Creado',
+			label: 'Created',
 			width: 140,
 			sortable: false,
 			visible: false,
@@ -97,7 +97,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'type',
-			label: 'Tipo',
+			label: 'Type',
 			width: 80,
 			sortable: true,
 			visible: true,
@@ -109,7 +109,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'tags',
-			label: 'Etiquetas',
+			label: 'Tags',
 			width: 150,
 			sortable: false,
 			visible: true,
@@ -135,7 +135,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'name',
-			label: 'Nombre',
+			label: 'Name',
 			width: 'auto',
 			sortable: true,
 			visible: true,
@@ -146,7 +146,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'duration',
-			label: 'Duración',
+			label: 'Duration',
 			width: 100,
 			sortable: true,
 			visible: true,
@@ -158,7 +158,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'dimensions',
-			label: 'Resolución',
+			label: 'Resolution',
 			width: 120,
 			sortable: true,
 			visible: true,
@@ -170,7 +170,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'size',
-			label: 'Tamaño',
+			label: 'Size',
 			width: 100,
 			sortable: true,
 			visible: true,
@@ -194,7 +194,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'dateModified',
-			label: 'Modificado',
+			label: 'Modified',
 			width: 140,
 			sortable: true,
 			visible: true,
@@ -220,7 +220,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'name',
-			label: 'Nombre',
+			label: 'Name',
 			width: 'auto',
 			sortable: true,
 			visible: true,
@@ -231,7 +231,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'duration',
-			label: 'Duración',
+			label: 'Duration',
 			width: 100,
 			sortable: true,
 			visible: true,
@@ -243,7 +243,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'artist',
-			label: 'Artista',
+			label: 'Artist',
 			width: 150,
 			sortable: true,
 			visible: true,
@@ -255,7 +255,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'album',
-			label: 'Álbum',
+			label: 'Album',
 			width: 150,
 			sortable: true,
 			visible: true,
@@ -279,7 +279,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'size',
-			label: 'Tamaño',
+			label: 'Size',
 			width: 100,
 			sortable: true,
 			visible: true,
@@ -305,7 +305,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'name',
-			label: 'Nombre',
+			label: 'Name',
 			width: 'auto',
 			sortable: true,
 			visible: true,
@@ -316,7 +316,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'type',
-			label: 'Tipo',
+			label: 'Type',
 			width: 80,
 			sortable: true,
 			visible: true,
@@ -328,7 +328,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'pages',
-			label: 'Páginas',
+			label: 'Pages',
 			width: 80,
 			sortable: true,
 			visible: true,
@@ -340,7 +340,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'size',
-			label: 'Tamaño',
+			label: 'Size',
 			width: 100,
 			sortable: true,
 			visible: true,
@@ -352,7 +352,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'dateModified',
-			label: 'Modificado',
+			label: 'Modified',
 			width: 140,
 			sortable: true,
 			visible: true,
@@ -379,7 +379,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'name',
-			label: 'Nombre',
+			label: 'Name',
 			width: 'auto',
 			sortable: true,
 			visible: true,
@@ -390,7 +390,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'type',
-			label: 'Tipo',
+			label: 'Type',
 			width: 100,
 			sortable: true,
 			visible: true,
@@ -402,7 +402,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'size',
-			label: 'Tamaño',
+			label: 'Size',
 			width: 100,
 			sortable: true,
 			visible: true,
@@ -414,7 +414,7 @@ export const DEFAULT_COLUMNS: Record<string, ListColumnConfig[]> = {
 		},
 		{
 			key: 'dateModified',
-			label: 'Modificado',
+			label: 'Modified',
 			width: 140,
 			sortable: true,
 			visible: true,
@@ -451,19 +451,6 @@ export function getColumnsForEntityType(entityType: string): ListColumnConfig[] 
 }
 
 /**
- * Helper function para formatear tamaño de archivo
- */
-export function formatFileSize(bytes: number): string {
-	if (bytes === 0) {
-		return '0 B';
-	}
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
-}
-
-/**
  * Helper function para formatear duración
  */
 export function formatDuration(seconds: number): string {
@@ -482,7 +469,7 @@ export function formatDuration(seconds: number): string {
  */
 export function formatDate(date: Date | string): string {
 	const d = typeof date === 'string' ? new Date(date) : date;
-	return d.toLocaleDateString('es-ES', {
+	return d.toLocaleDateString('en-US', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',

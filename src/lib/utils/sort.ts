@@ -6,14 +6,14 @@
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortOption<T = string> {
-	field: T;
 	direction: SortDirection;
+	field: T;
 	label: string;
 }
 
 export interface SortConfig<T = string> {
-	field: T;
 	direction: SortDirection;
+	field: T;
 }
 
 /**
@@ -89,12 +89,12 @@ export function toggleSortDirection(direction: SortDirection): SortDirection {
  * Opciones de ordenamiento comunes para entidades
  */
 export const commonSortOptions = {
-	name: { field: 'name', direction: 'asc' as const, label: 'Nombre (A-Z)' },
-	nameDesc: { field: 'name', direction: 'desc' as const, label: 'Nombre (Z-A)' },
-	createdAt: { field: 'createdAt', direction: 'desc' as const, label: 'Más recientes' },
-	createdAtAsc: { field: 'createdAt', direction: 'asc' as const, label: 'Más antiguos' },
-	updatedAt: { field: 'updatedAt', direction: 'desc' as const, label: 'Últimos modificados' },
-	updatedAtAsc: { field: 'updatedAt', direction: 'asc' as const, label: 'Primeros modificados' },
+	name: { field: 'name', direction: 'asc' as const, label: 'Name (A-Z)' },
+	nameDesc: { field: 'name', direction: 'desc' as const, label: 'Name (Z-A)' },
+	createdAt: { field: 'createdAt', direction: 'desc' as const, label: 'Newest' },
+	createdAtAsc: { field: 'createdAt', direction: 'asc' as const, label: 'Oldest' },
+	updatedAt: { field: 'updatedAt', direction: 'desc' as const, label: 'Recently modified' },
+	updatedAtAsc: { field: 'updatedAt', direction: 'asc' as const, label: 'Least recently modified' },
 };
 
 /**
@@ -102,10 +102,10 @@ export const commonSortOptions = {
  */
 export const imageSortOptions = {
 	...commonSortOptions,
-	size: { field: 'size', direction: 'desc' as const, label: 'Tamaño (Mayor a menor)' },
-	sizeAsc: { field: 'size', direction: 'asc' as const, label: 'Tamaño (Menor a mayor)' },
-	width: { field: 'width', direction: 'desc' as const, label: 'Ancho (Mayor a menor)' },
-	height: { field: 'height', direction: 'desc' as const, label: 'Alto (Mayor a menor)' },
+	size: { field: 'size', direction: 'desc' as const, label: 'Size (Largest first)' },
+	sizeAsc: { field: 'size', direction: 'asc' as const, label: 'Size (Smallest first)' },
+	width: { field: 'width', direction: 'desc' as const, label: 'Width (Largest first)' },
+	height: { field: 'height', direction: 'desc' as const, label: 'Height (Largest first)' },
 };
 
 /**
@@ -113,6 +113,6 @@ export const imageSortOptions = {
  */
 export const tagSortOptions = {
 	...commonSortOptions,
-	popularity: { field: 'popularity', direction: 'desc' as const, label: 'Más populares' },
-	usage: { field: 'totalRelations', direction: 'desc' as const, label: 'Más usados' },
+	popularity: { field: 'popularity', direction: 'desc' as const, label: 'Most popular' },
+	usage: { field: 'totalRelations', direction: 'desc' as const, label: 'Most used' },
 };

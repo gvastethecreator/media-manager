@@ -1,96 +1,93 @@
 import { ScrollText } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import type { BaseContentProps } from '@/components/views/base';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
-import { useNoteImages } from '@/lib/api/notes';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
+import { BaseContentView } from '@/components/views/base/base-content-view';
+import { useNote, useNoteImages } from '@/lib/api/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { useNoteStore } from '@/store/entities/note';
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 const viewLogger = clientLogger.withContext('NoteContentView');
 
 export function NoteContentView() {
+	const { id } = useParams<{ id: string }>();
 	const selectedNote = useNoteStore((state) => state.selectedNote);
-	const [items, setItems] = useState<EntityWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const selectNote = useNoteStore((state) => state.selectNote);
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	// React Query hook must be at top level
-	const { data: noteImages, isLoading: isLoadingImages, error: noteError } = useNoteImages(selectedNote?.id || '');
-
-	const loadNoteImages = useCallback((): Promise<void> => {
-		if (!selectedNote) {
-			setItems([]);
-			return Promise.resolve();
-		}
-
-		try {
-			setError(null);
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando imágenes de la nota...');
-			if (noteImages) {
-				setItems(noteImages as EntityWithStats[]);
-			}
-			viewLogger.info('✅ Imágenes cargadas');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			setError(errorMessage);
-			viewLogger.error('❌ Error cargando imágenes de la nota:', errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-		return Promise.resolve();
-	}, [selectedNote, noteImages]);
+	const { data: routedNote, error: noteError, isLoading: isLoadingNote } = useNote(id ?? '');
+	const effectiveNote = id ? (routedNote ?? null) : selectedNote;
+	const noteId = id ?? selectedNote?.id ?? null;
+	const { data: images = [], isLoading: isLoadingImages, error: imagesError } = useNoteImages(noteId || '');
+	const error = noteError ?? imagesError;
+	const isLoading = isLoadingNote || isLoadingImages;
 
 	useEffect(() => {
-		loadNoteImages();
-	}, [loadNoteImages]);
+		if (routedNote && routedNote.id !== selectedNote?.id) {
+			selectNote(routedNote);
+		}
+	}, [routedNote, selectNote, selectedNote?.id]);
+	const browserItems = useMemo(
+		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
+		[images]
+	);
 
-	const toggleItemSelection = useCallback((item: EntityWithStats): void => {
-		// Implementar la lógica de selección de items si es necesaria
-		viewLogger.info('🔄 Toggle selección de item:', item?.id);
-	}, []);
+	const handleItemSelect = useCallback(
+		(item: BrowserItem) => {
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
+			setSelectedItems([entity]);
+			setDetailsPanelVisible(true);
+		},
+		[setSelectedItems, setDetailsPanelVisible]
+	);
 
-	if (isLoading || isLoadingImages) {
-		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;
-	}
+	const headerTitle = useMemo(
+		() =>
+			effectiveNote?.title || effectiveNote?.name
+				? `Note images: ${effectiveNote?.title ?? effectiveNote?.name}`
+				: 'Selecciona una nota',
+		[effectiveNote?.title, effectiveNote?.name]
+	);
 
-	if (error || noteError) {
+	if (!noteId) {
 		return (
-			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || noteError?.message}</div>
+			<BaseContentView>
+				<div className="flex h-full items-center justify-center">
+					<EmptyState
+						description="Select a note to view related images"
+						icon={ScrollText}
+						title="Sin nota seleccionada"
+					/>
+				</div>
+			</BaseContentView>
 		);
 	}
 
-	if (!items || items.length === 0) {
-		return <div className="flex items-center justify-center p-8">No se encontraron imágenes</div>;
+	if (error) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<div className="flex h-full items-center justify-center text-destructive">Error: {error.message}</div>
+			</BaseContentView>
+		);
 	}
 
-	const contentProps: BaseContentProps = {
-		items,
-		isLoading,
-		error,
-		toggleItemSelection,
-		currentContainerId: selectedNote?.id ?? null,
-		containerName: selectedNote?.title ?? selectedNote?.name ?? null,
-		setCurrentContainer: (_id: string) => Promise.resolve(),
-		emptyState: {
-			icon: ScrollText,
-			title: 'Nota vacía',
-			description: `No se encontraron imágenes en ${
-				selectedNote?.title ?? selectedNote?.name ?? 'esta nota'
-			}. Puedes agregar imágenes arrastrándolas aquí.`,
-		},
-		onRefresh: loadNoteImages,
-	};
+	if (isLoading && images.length === 0) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<LoadingScreen />
+			</BaseContentView>
+		);
+	}
 
 	return (
-		<ContentViewProvider {...contentProps}>
-			<BaseContentView>
-				{/* Note content will be added here */}
-				<div className="p-4">
-					<p>Contenido de la nota se mostrará aquí</p>
-				</div>
-			</BaseContentView>
-		</ContentViewProvider>
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
+			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
+		</BaseContentView>
 	);
 }

@@ -2,15 +2,15 @@ import { FolderIcon, FolderTreeIcon, LibraryBigIcon, PackageOpenIcon } from 'luc
 import { cn } from '@/lib/utils';
 
 interface GroupCardHeaderProps {
-	name: string;
-	emoji?: string;
-	color?: string;
 	category?: string;
-	organizationType?: string;
-	organizationLevel?: number;
-	isFavorite?: boolean;
-	tcgMode?: boolean;
+	color?: string;
 	compact?: boolean;
+	emoji?: string;
+	isFavorite?: boolean;
+	name: string;
+	organizationLevel?: number;
+	organizationType?: string;
+	tcgMode?: boolean;
 }
 
 /**
@@ -19,7 +19,7 @@ interface GroupCardHeaderProps {
 export function GroupCardHeader({
 	name,
 	emoji = '📂',
-	color = '#3b82f6',
+	color = 'var(--dt-primary-500)',
 	category = 'General',
 	organizationType = 'Mixto',
 	organizationLevel = 1,
@@ -31,15 +31,15 @@ export function GroupCardHeader({
 	const getOrgTypeIcon = () => {
 		switch (organizationType.toLowerCase()) {
 			case 'archivo':
-				return <LibraryBigIcon className="h-3 w-3" />;
+				return <LibraryBigIcon className="h-4 w-4" />;
 			case 'colección':
-				return <PackageOpenIcon className="h-3 w-3" />;
+				return <PackageOpenIcon className="h-4 w-4" />;
 			case 'mundo':
-				return <FolderTreeIcon className="h-3 w-3" />;
+				return <FolderTreeIcon className="h-4 w-4" />;
 			case 'utilidad':
-				return <FolderIcon className="h-3 w-3" />;
+				return <FolderIcon className="h-4 w-4" />;
 			default:
-				return <FolderIcon className="h-3 w-3" />;
+				return <FolderIcon className="h-4 w-4" />;
 		}
 	};
 
@@ -47,7 +47,7 @@ export function GroupCardHeader({
 		<div
 			className={cn(
 				'relative overflow-hidden border-b',
-				tcgMode ? 'border-white/10 bg-gradient-to-r from-black/30 to-transparent' : 'border-gray-200',
+				tcgMode ? 'border-border/40 bg-gradient-to-r from-black/30 to-transparent' : 'border-border',
 				compact ? 'p-2' : 'p-3'
 			)}
 			style={{
@@ -72,7 +72,7 @@ export function GroupCardHeader({
 				<div
 					className={cn(
 						'flex items-center justify-center rounded',
-						tcgMode ? 'bg-black/20 p-1' : 'bg-white/10 p-0.5',
+						tcgMode ? 'bg-muted/20 p-1' : 'bg-background/10 p-0.5',
 						compact ? 'mr-1.5 h-6 w-6' : 'mr-2 h-8 w-8'
 					)}
 					style={{
@@ -86,7 +86,7 @@ export function GroupCardHeader({
 				<div className="min-w-0 flex-1">
 					<h3 className={cn('line-clamp-1 font-semibold', compact ? 'text-sm' : 'text-base')}>{name}</h3>
 					<div className="flex items-center">
-						<span className={cn('text-xs opacity-80', compact ? 'line-clamp-1' : '')}>{category}</span>
+						<span className={cn('text-sm opacity-80', compact ? 'line-clamp-1' : '')}>{category}</span>
 					</div>
 				</div>
 
@@ -94,7 +94,7 @@ export function GroupCardHeader({
 				{tcgMode && (
 					<div className="ml-2 flex flex-col items-end">
 						<div className="mb-1 flex items-center">
-							<span className="mr-1 font-medium text-xs">{organizationType}</span>
+							<span className="mr-1 font-medium text-sm">{organizationType}</span>
 							{getOrgTypeIcon()}
 						</div>
 
@@ -104,7 +104,7 @@ export function GroupCardHeader({
 								const levelValue = `org-level-${name}-${i + 1}-${organizationLevel}`;
 								return <div className="h-1.5 w-1.5 rounded-full" key={levelValue} style={{ backgroundColor: color }} />;
 							})}
-							{organizationLevel > 5 && <span className="ml-1 text-[10px]">+{organizationLevel - 5}</span>}
+							{organizationLevel > 5 && <span className="ml-1 text-xs">+{organizationLevel - 5}</span>}
 						</div>
 					</div>
 				)}
@@ -125,7 +125,7 @@ export function GroupCardHeader({
 			)}
 
 			{/* Estrella de favorito */}
-			{isFavorite && <div className="absolute top-1 right-1 text-xs text-yellow-400">★</div>}
+			{isFavorite && <div className="absolute top-1 right-1 text-sm text-warning">★</div>}
 		</div>
 	);
 }

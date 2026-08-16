@@ -3,36 +3,36 @@
 import type { File3DBase } from '@/types/entities/file3d';
 
 // Tipo local equivalente a Drizzle
-type DrizzleFile3D = {
-	id: string;
-	name: string;
-	path: string;
-	size: number;
-	hash: string;
-	mimeType: string;
-	extension: string;
-	folderId: string;
-	isFavorite: boolean;
-	isArchived: boolean;
-	format: string | null;
-	version: string | null;
-	vertices: number | null;
-	faces: number | null;
-	triangles: number | null;
-	materials: number | null;
-	textures: number | null;
+interface DrizzleFile3D {
 	animations: number | null;
 	bones: number | null;
-	scenes: number | null;
-	cameras: number | null;
-	lights: number | null;
-	hasUV: boolean | null;
-	hasNormals: boolean | null;
-	hasColors: boolean | null;
 	boundingBox: string | null;
+	cameras: number | null;
 	createdAt: Date;
+	extension: string;
+	faces: number | null;
+	folderId: string;
+	format: string | null;
+	hasColors: boolean | null;
+	hash: string;
+	hasNormals: boolean | null;
+	hasUV: boolean | null;
+	id: string;
+	isArchived: boolean;
+	isFavorite: boolean;
+	lights: number | null;
+	materials: number | null;
+	mimeType: string;
+	name: string;
+	path: string;
+	scenes: number | null;
+	size: number;
+	textures: number | null;
+	triangles: number | null;
 	updatedAt: Date;
-};
+	version: string | null;
+	vertices: number | null;
+}
 
 /**
  * Convierte un objeto File3D de Drizzle al tipo de la aplicación

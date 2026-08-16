@@ -8,44 +8,44 @@
 /**
  * 🗿 Modelo base de Collection, basado en el esquema de Drizzle.
  */
-export type CollectionBase = {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
+export interface CollectionBase {
+	alternativeUrl: string | null;
+	category: string | null;
 	color: string | null;
+	createdAt: Date;
+	description: string | null;
+	editions: CollectionEdition[] | null;
+	emoji: string | null;
 	featuredImage: string | null;
+	id: string;
 
 	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	totalSize: number;
 	lastImageAddedAt: Date | null;
 	lastVideoAddedAt: Date | null;
+	name: string;
+	network: string | null;
 	parentId: string | null;
-	category: string | null;
 	platform: string | null;
 	price: number | null;
-	network: string | null;
-	tokenId: string | null;
-	url: string | null;
-	alternativeUrl: string | null;
-	editions: CollectionEdition[] | null;
 	sourceImage: string | null;
-	createdAt: Date;
+	tokenId: string | null;
+	totalImages: number;
+	totalSize: number;
+	totalVideos: number;
 	updatedAt: Date;
-};
+	url: string | null;
+}
 
 export interface CollectionEdition {
+	available: number;
+	currency: string;
 	id: string;
+	metadata?: Record<string, any>;
 	name: string;
 	price: number;
-	currency: string;
 	quantity: number;
-	available: number;
 	releaseDate: Date;
 	year: number;
-	metadata?: Record<string, any>;
 }
 
 import { EntityStats } from '../entity.types';
@@ -66,6 +66,6 @@ export interface CollectionStatistics extends EntityStats {
  */
 export interface CollectionWithStats extends CollectionBase {
 	entityType: 'collection';
-	stats: CollectionStatistics;
 	isRecent?: boolean;
+	stats: CollectionStatistics;
 }

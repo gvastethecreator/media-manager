@@ -1,0 +1,53 @@
+@keyframes fileBrowserItemFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.file-browser-item {
+	animation: fileBrowserItemFadeIn 220ms ease-out both;
+	animation-delay: var(--fb-item-delay, 0ms);
+}
+
+.file-browser-item .file-browser-item-content {
+	opacity: 0;
+	animation: fileBrowserItemFadeIn 220ms ease-out both;
+	animation-delay: var(--fb-item-delay, 0ms);
+}
+
+.fb-entity-badge {
+	color: color-mix(in oklch, var(--fb-entity-color) 65%, hsl(var(--foreground)));
+	background: color-mix(in oklch, var(--fb-entity-color) 18%, transparent);
+	border: 1px solid color-mix(in oklch, var(--fb-entity-color) 35%, transparent);
+}
+
+.fb-entity-badge--overlay {
+	color: hsl(var(--foreground));
+	background: color-mix(in oklch, var(--fb-entity-color) 55%, transparent);
+	border-color: color-mix(in oklch, var(--fb-entity-color) 60%, transparent);
+}
+
+.fb-thumb-overlay {
+	background: linear-gradient(
+		to top,
+		color-mix(in oklch, var(--foreground) 65%, transparent),
+		color-mix(in oklch, var(--foreground) 30%, transparent),
+		transparent
+	);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.file-browser-item {
+		animation: none;
+	}
+
+	.file-browser-item .file-browser-item-content {
+		opacity: 1;
+		animation: none;
+	}
+}

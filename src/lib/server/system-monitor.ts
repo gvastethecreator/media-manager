@@ -23,21 +23,21 @@ interface SystemStats {
 		processUsed: number;
 		processUsedPercent: number;
 	};
-	uptime: {
-		system: number;
-		process: number;
-	};
 	network: {
 		interfaces: string[];
+	};
+	nodejs: {
+		version: string;
+		pid: number;
 	};
 	platform: {
 		type: string;
 		release: string;
 		arch: string;
 	};
-	nodejs: {
-		version: string;
-		pid: number;
+	uptime: {
+		system: number;
+		process: number;
 	};
 }
 
@@ -49,42 +49,42 @@ async function getSystemStats(): Promise<SystemStats> {
 	try {
 		const response = await fetch('/api/system/stats');
 		if (!response.ok) {
-			throw new Error('Error al obtener estadísticas del sistema');
+			throw new Error('Could not get system statistics');
 		}
 		return response.json();
 	} catch (error) {
-		console.warn('❌ Error al obtener estadísticas del sistema:', error);
-		// Retornar datos mock en caso de error
+		console.warn('❌ Could not get system statistics:', error);
+		// Mantener una respuesta neutra cuando la API de stats no está disponible.
 		return {
 			cpu: {
 				usage: 0,
-				cores: 4,
+				cores: 0,
 				model: 'Unknown',
 				loadAvg: [0, 0, 0],
 			},
 			memory: {
-				total: 8_589_934_592, // 8GB
-				free: 4_294_967_296, // 4GB
-				used: 4_294_967_296, // 4GB
-				usedPercent: 50,
-				processUsed: 134_217_728, // 128MB
-				processUsedPercent: 2,
+				total: 0,
+				free: 0,
+				used: 0,
+				usedPercent: 0,
+				processUsed: 0,
+				processUsedPercent: 0,
 			},
 			uptime: {
-				system: 86_400, // 1 día
-				process: 3600, // 1 hora
+				system: 0,
+				process: 0,
 			},
 			network: {
-				interfaces: ['eth0', 'lo'],
+				interfaces: [],
 			},
 			platform: {
 				type: 'unknown',
 				release: 'unknown',
-				arch: 'x64',
+				arch: 'unknown',
 			},
 			nodejs: {
-				version: 'v18.0.0',
-				pid: 1234,
+				version: 'unknown',
+				pid: 0,
 			},
 		};
 	}

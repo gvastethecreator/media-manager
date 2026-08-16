@@ -1,154 +1,590 @@
-# CRITICAL ENFORCEMENT RULES
+# 🤖 Instrucciones para Agentes IA (Copilot/Claude)
 
-1. FOLLOW ALL MANDATORY TASKS PROTOCOLS STRICTLY.
-2. Mantén respuestas en español.
-3. Respuestas concisas y directas.
-4. Necesitamos soluciones completas, no parciales ni vagas, junto con sus explicaciones.
-5. Mostrar solo modificaciones necesarias cuando sea necesario.
-6. Comentarios técnicos precisos y útiles.
-7. No te detendras a preguntar hasta terminar todas las tareas de la lista, sin excepciones.
-8. Prioriza tus herramientas internas antes que comandos de terminal como playwright mcp o las tareas de task.json
+Este archivo guía a agentes IA (GitHub Copilot, Claude, etc.) para ser productivos inmediatamente en el codebase de **Image Manager**.
 
-## BEFORE ANY ACTION:
-1. CREATE Task Lists with all tasks involved in the current request.
-2. CHECK and MARK each task as COMPLETE when done.
-3. UPDATE status in real-time to the user.
-4. VALIDATE completion.
+---
 
-- NEVER accept failing tests as "okay" or "acceptable" - all tests must pass before declaring success
-- If any test fails, investigate and fix the root cause - no exceptions
-- Continue working until 100% test success rate is achieved across all test suites
-- same goes for all tasks
-- máxima productividad inmediata.
-stack : React 19 + Express sobre Bun + Drizzle ORM + Playwright + Tauri). Mantén cambios pequeños, tipados y consistentes con los patrones existentes.
+## 🎯 Visión General del Proyecto
 
-### ⚡ ENFORCEMENT ABSOLUTO
+**Image Manager** es un sistema monolítico para gestión inteligente de archivos multimedia con arquitectura React 19 + Express/Bun + Drizzle ORM + SQLite.
 
-**DETENER EJECUCIÓN INMEDIATAMENTE SI:**
-- No se crea TODO antes de cualquier acción.
-- No se busca contexto PRIMERO.
-- No se marcan tareas como completadas.
-- No se valida implementación antes de continuar.
+### Stack Clave
 
-### CONFIRMACIÓN VISUAL OBLIGATORIA EN CADA RESPUESTA
+- **Frontend**: React 19 + TypeScript + Vite+ (Vite + Rolldown) + Zustand + TanStack Query
+- **Backend**: Express (Bun runtime) con HMR
+- **Database**: Drizzle ORM + SQLite (libsql)
+- **Testing**: Vitest + Playwright
+- **Desktop**: Tauri 2 (opcional)
+- **Linting**: Oxc (Oxlint + Oxfmt) con `Vite+` para checks unificados
 
-**INICIAR:** 🌕🌕🌕🌕 (Confirma lectura y aplicación de reglas)
-**TERMINAR:** ☄️☄️☄️☄️ (Confirma cumplimiento completo)
+### Dominios Principales
 
-## 🔍 FLUJO DE TRABAJO OBLIGATORIO
+- 📂 **Archivos**: Images, Videos, Audios, Documents, JSON, 3D
+- 🏷️ **Organización**: Folders, Tags, Albums, Collections, Groups, Favorites
+- 🌍 **Worldbuilding**: Characters, Places, Concepts, World Items
+- 📊 **Sistema**: Settings, Stats, Activities, Metadata, Thumbnails
 
-### Secuencia Estricta
+---
 
-1. **BUSCAR CONTEXTO PRIMERO** - Explorar codebase antes de crear TODO
-2. **CREAR TODO** - Después de buscar contexto
-3. **ANALIZAR CONTEXTO** - Obtener contexto comprehensivo
-4. **EJECUTAR TAREAS** - Con actualizaciones TODO obligatorias
-5. **VALIDAR** - Verificar problemas antes de terminar
+## 🧠 Behavioral Guidelines para AI Agents
 
-### Análisis de Contexto
+Estas reglas reducen errores comunes de LLMs. Prioriza claridad sobre velocidad.
 
-```javascript
-async function get_context(request) {
-    return {
-        'project_structure': await analyze_project_structure(),
-        'dependencies': await map_dependencies(),
-        'existing_code': await search_existing_implementations(),
-        'configuration': await read_config_files(),
-        'breaking_risks': await assess_breaking_changes()
-    }
+### 1. **Piensa Antes de Codificar**
+
+❌ **No asumir**. Si hay incertidumbre, surfácila.
+
+- **Declara suposiciones explícitamente** antes de implementar
+- Si hay múltiples interpretaciones, presenta opciones (no elijas silenciosamente)
+- Si un enfoque más simple existe, menciona que existe
+- Si algo es confuso, detente y pregunta en lugar de proceder
+
+**Ejemplo**:
+
+```
+Usuario: "Agregar validación"
+❌ Mal: Validar silenciosamente e implementar
+✅ Bien: "¿Debo validar en route o en transformer? ¿Qué campos?"
+```
+
+### 2. **Simplicidad Primero**
+
+**Código mínimo que resuelve el problema. Nada especulativo.**
+
+- ❌ No agregar features no solicitadas
+- ❌ No crear abstracciones para código usado una sola vez
+- ❌ No añadir "flexibilidad" futura
+- ❌ No manejar errores de escenarios imposibles
+- ✅ Si escribes 200 líneas que podrían ser 50, reescribe
+
+**Test**: ¿Diría un senior engineer "esto está sobrecomplejo"? Si sí, simplifica.
+
+### 3. **Cambios Quirúrgicos**
+
+**Toca solo lo necesario. Limpia solo lo tuyo.**
+
+Cuando edites código existente:
+
+- ❌ No "mejores" código adyacente no relacionado
+- ❌ No refactorices cosas que funcionan
+- ✅ Usa el estilo existente, aunque hagas algo diferente
+- ✅ Si notas código muerto pre-existente, menciona (no borres)
+
+**Si TUS cambios crean órfanos** (imports/variables sin usar):
+
+- ✅ Elimina solo lo que TUS cambios hicieron innecesario
+- ❌ No elimines código muerto pre-existente
+
+**Test**: Cada línea cambiada debe rastrear directamente a lo que el usuario pidió.
+
+### 4. **Ejecución Guiada por Objetivos**
+
+**Define criterios de éxito. Verifica antes de terminar.**
+
+Para cada tarea, transforma en objetivos verificables:
+
+```
+Tarea: "Agregar validación"
+↓
+Objetivo: "Escribir tests para inputs inválidos, luego hacerlos pasar"
+
+Tarea: "Refactorizar X"
+↓
+Objetivo: "Tests pasen antes y después del refactor"
+```
+
+**Para tareas multi-paso**:
+
+```
+1. [Paso] → verificar: [cómo confirmar]
+2. [Paso] → verificar: [cómo confirmar]
+3. [Paso] → verificar: [cómo confirmar]
+```
+
+Criterios fuertes = loop independiente. Criterios débiles ("hazlo funcionar") = necesita clarificación constante.
+
+---
+
+## ⚡ Desarrollo: Comandos Esenciales
+
+### Iniciar Desarrollo
+
+```bash
+bun run dev:full      # Full stack (frontend + backend + HMR) — más común
+bun run dev:vite      # Solo frontend (Vite+ dev server)
+bun run dev:server:hot # Solo backend (Express con HMR)
+```
+
+### Build & Testing
+
+```bash
+bun run build         # Build completo (Vite + server)
+bun run test          # Tests unitarios (Vitest)
+bun run test:e2e      # Tests E2E (Playwright)
+bun run check         # Gate operativo (lint + typecheck)
+bun run check:full    # Auditoría completa Vite+ (lint + format repo)
+bun run lint          # Lint directo con Oxlint
+bun run format        # Formato con Oxfmt
+bun run tsc           # Type check
+```
+
+### Database
+
+```bash
+bun run db:studio -- --database .scratch/dev.sqlite  # GUI local con DB explícita
+bun run db:check -- --database .scratch/dev.sqlite   # Verifica estado sin mutar
+bun run db:migrate -- --database .scratch/dev.sqlite # Aplica migraciones versionadas
+bun run db:mark-disposable -- --database .scratch/dev.sqlite --confirm MARK-DISPOSABLE
+bun run db:reset -- --database .scratch/dev.sqlite   # Dry-run; exige confirmación para borrar
+```
+
+### Logs & Debugging
+
+```bash
+bun run logs:list     # Lista logs generados
+bun run check:errors  # Resume errores compilación/tipos
+```
+
+---
+
+## 🏗️ Arquitectura: Flujo de Datos
+
+### Patrón Estándar por Entidad
+
+Cada entidad (Image, Video, Tag, etc.) sigue este flujo:
+
+```
+API Request
+    ↓
+[Route Handler] (src/server/routes/<entity>.ts)
+    • Validación con Zod
+    • Llamada a servicio
+    ↓
+[Service Layer] (src/services/<entity>/<entity>.service.ts)
+    • CRUD + lógica de negocio
+    • Acceso directo a Drizzle
+    ↓
+[Drizzle ORM] (src/lib/drizzle/schema/...)
+    • Consultas SQL
+    ↓
+[Transformer] (src/transformers/<entity>/transformer.ts)
+    • Convierte Drizzle → DTO enriquecido
+    • Agrupa estadísticas
+    ↓
+Response → Store (Zustand) → React Components
+```
+
+### Ejemplo Real: Obtener Imágenes por Carpeta
+
+1. **Ruta** (`src/server/routes/images.ts`):
+
+   ```typescript
+   router.get('/:folderId/list', async (req, res) => {
+   	const images = await imageService.getByFolder(req.params.folderId);
+   	const transformed = images.map(fromDrizzleImageWithStats);
+   	res.json(transformed);
+   });
+   ```
+
+2. **Servicio** (`src/services/image/image.service.ts`):
+
+   ```typescript
+   export async function getByFolder(folderId: string) {
+   	return db.query.images.findMany({
+   		where: eq(images.folderId, folderId),
+   		with: { tags: true, albums: true },
+   	});
+   }
+   ```
+
+3. **Transformer** (`src/transformers/image/transformer.ts`):
+
+   ```typescript
+   export function fromDrizzleImageWithStats(drizzleImage: any) {
+     return {
+       ...drizzleImage,
+       _count: { tags: drizzleImage.tags.length, ... },
+       _stats: { ... }
+     };
+   }
+   ```
+
+4. **Frontend** (Hook + Store):
+   ```typescript
+   const images = useImageStore((s) => s.images);
+   useEffect(() => {
+   	imageService.getByFolder(folderId).then((data) => setImages(data));
+   }, []);
+   ```
+
+---
+
+## 🎨 Patrones & Convenciones Críticas
+
+### 1. **Sin Archivos Barrel en Services/Transformers**
+
+❌ **NUNCA** hagas `src/services/<entity>/index.ts` con re-exports.
+✅ **Importa directo**: `import { videoService } from '@/services/video/video.service.effect'`
+
+**Razón**: Performance + claridad.
+
+### 2. **Transformers = Punto Único de Enriquecimiento**
+
+- Servicios: retornan datos crudos de Drizzle
+- Transformers: agregan `_count`, `_stats`, enumerables, conversiones
+- Routes: llaman transformers antes de enviar respuesta
+
+❌ Evitar: Lógica de enriquecimiento dispersa en routes o servicios
+✅ Correcto: Toda transformación centralizada en `transformer.ts`
+
+### 3. **Stores Zustand: Fine-Grained, No Mega-Stores**
+
+```typescript
+// ✅ Bien: Store específica + selectors
+const useImageStore = create<ImageState>()(
+  devtools(immer((...) => ({
+    images: [] as Image[],
+    loadImages: async () => { ... },
+  })))
+);
+
+export const useImages = () => useImageStore(s => s.images);
+export const useLoadImages = () => useImageStore(s => s.loadImages);
+```
+
+❌ Evitar: Un mega-store global con todo.
+
+### 4. **TanStack Query Keys: Semánticos**
+
+```typescript
+// ✅ Patrón: [entidad, operación, identificador]
+const { data } = useQuery({
+	queryKey: ['images', 'byFolder', folderId],
+	queryFn: () => imageService.getByFolder(folderId),
+	staleTime: 5 * 60 * 1000,
+});
+```
+
+### 5. **Feature Flags para Migraciones Effect-TS**
+
+```typescript
+// src/config/features.ts
+export const FEATURES = {
+  USE_EFFECT_TAGS: true,      // Migrado → effect.ts
+  USE_EFFECT_IMAGES: false,   // Aún en .ts clásico
+} as const;
+
+// Usar en routes
+if (FEATURES.USE_EFFECT_IMAGES) {
+  return imageServiceEffect.list(...);
+} else {
+  return imageService.list(...);
 }
 ```
 
+### 6. **Validación con Zod en Routes**
 
-**Formato:**
-- Markdown enriquecido
-- Metadatos estructurados
-- Conexiones explícitas
-- Ideas emergentes
+```typescript
+router.post('/', async (req, res) => {
+	const input = createImageSchema.parse(req.body);
+	const image = await imageService.create(input);
+	res.json(fromDrizzleImageWithStats(image));
+});
+```
 
-## 🗣️ PROTOCOLO DE COMUNICACIÓN
+---
 
-### Estilo Adaptativo
+## 📂 Estructura de Directorios (Resumen)
 
-**Para Código:**
-- Técnico y preciso
-- Conciso pero completo
-- Enfoque en soluciones
-- Anticipar necesidades técnicas
+```
+src/
+├── components/
+│   ├── ui/              # Primitivos (Button, Input, Dialog, etc.)
+│   ├── views/           # Vistas por entidad (ImageView, VideoView, etc.)
+│   ├── features/        # Features complejos (FileBrowser, FileViewer)
+│   └── cards/           # Tarjetas reutilizables
+├── server/
+│   ├── routes/          # Handlers Express (una por entidad)
+│   ├── middleware/      # Middleware HTTP
+│   └── index.ts         # Servidor Express
+├── services/            # Lógica de negocio (una carpeta por entidad)
+├── transformers/        # DTO enriquecidos (una carpeta por entidad)
+├── store/               # Zustand stores (UI state)
+├── lib/
+│   ├── drizzle/         # ORM schema, relations, migrations
+│   ├── logger/          # clientLogger, serverLogger
+│   ├── hooks/           # Hooks personalizados
+│   └── api/             # Cliente API de cliente
+├── types/               # TypeScript type definitions
+├── config/              # Configuración (features, constants)
+├── hooks/               # React hooks globales
+├── providers/           # React Context providers
+└── styles/              # CSS + design tokens (Tailwind 4)
+```
 
-**Para Conocimiento:**
-- Conversacional y exploratorio
-- Expansivo y detallado
-- Conexiones creativas
-- Preguntas generativas
+---
 
-### Transparencia
+## 🎯 Convenciones de Código
 
-- **Incertidumbre**: Marcar especulaciones con "Probablemente..."
-- **Limitaciones**: Ser explícito sobre limitaciones
-- **Alternativas**: Sugerir múltiples enfoques cuando sea apropiado
-- **Contexto**: Explicar por qué se toman ciertas decisiones
+### TypeScript Strict (siempre activo)
 
-### 1. Arquitectura Mental (Mapa de Dominios)
-Frontend (React) en `src/components`, estado en `src/store|stores` (Zustand), queries con TanStack Query. Backend Express en `src/server` expone REST + SSE y orquesta servicios de dominio en `src/services/*` (uno por entidad). Persistencia: Drizzle ORM (`src/lib/drizzle/{schema,relations}.ts`) sobre SQLite/Turso. Transformaciones/DTOs y serializadores en `src/transformers/*`. Tipos compartidos centralizados en `src/types/**`. Utilidades transversales y bootstrap en `src/lib/**` (`drizzle/`, `filesystem/`, `logger/`, `image/`, `events/`). Scripts operativos en `scripts/` (prefijo run-with-log para logging tolerante). Tauri (desktop) en `src-tauri/` (no tocar a menos que la feature lo requiera).
+- ❌ Evitar `any`, `!` (non-null assertion)
+- ✅ Usar type narrowing y refinements
+- ✅ `export type` / `import type` para tipos
 
-### 2. Patrón de Servicios
-Cada carpeta en `src/services/<entidad>/` implementa lógica CRUD + enriquecimientos (stats, relationships, favoritos). Evita mezclar lógica de acceso directo a Drizzle fuera de servicios. Si añades una entidad:
-1. Define tablas en `src/lib/drizzle/schema/<dominio>/` y agrega a `schema/index.ts` y relaciones.
-2. Crea servicio en `src/services/<entidad>/<entidad>.service.ts` siguiendo naming existente (examinar p.ej. `image/`, `tag/`).
-3. Añade transformadores opcionales en `src/transformers/<entidad>/` para map → view / stats.
-4. Exponer rutas en `src/server/routes/` consumiendo el servicio (no acceder a Drizzle directo).
+### Nombres de Variables
 
-### 3. Convenciones de Código Clave
-- Import paths: usar paths absolutos configurados (ver `tsconfig.json` y ejemplos en código) en lugar de rutas relativas profundas.
-- Estado UI: usar stores finos (evita mega-store). Reutiliza patrones existentes en `src/stores/`.
-- No duplicar tipos: importar de `src/types/...` o de esquemas Drizzle cuando corresponda.
-- Serialización: centralizar lógica de enriquecimiento en `transformers` (no en componentes ni servicios directamente si crece).
-- Logs: usar utilidades en `src/lib/logger/` (si existe) o seguir estilo de `scripts/run-with-log.js` para color y tolerancia.
+- **Services**: `<entity>Service` → `imageService`
+- **Transformers**: `fromDrizzle<Entity>WithStats`, `mappers`, `serializers`
+- **Stores**: `use<Entity>Store` → `useImageStore`
+- **Routes**: `GET /api/<entity>`, `POST /api/<entity>`, etc.
 
-### 4. Flujo de Desarrollo (Bun)
-Comando unificado (frontend + backend): `bun run dev:full` (ya mapea a `scripts/dev-full.js`). Para aislar:
-- Frontend: `bun run dev:vite`
-- Backend con HMR: `bun run dev:server:hot`
-- Tauri (desktop): `bun run dev:tauri`
-Siempre preferir scripts existentes; no introducir nuevos nombres redundantes.
+### React/JSX
 
-### 5. Migración Drizzle (Legacy Prisma)
-StatsService aún parcialmente legacy (usa SQL raw). No introducir nuevas dependencias Prisma. Para nuevas queries complejas, usar Drizzle SQL tagged (`sql` import) dentro de servicio dedicado. Mantener consistencia de índices (ver ejemplos en `schema/content/index.ts`).
+- ✅ Hooks desde top del componente + dependencias correctas
+- ✅ Lazy loading de rutas (Vite lo hace automático)
+- ✅ `React.memo()` para optimizar re-renders
+- ❌ Evitar ternarios anidados (preferir early returns)
+- ❌ Evitar `dangerouslySetInnerHTML` (XSS risk)
 
-### 6. Esquema y Seeds
-Seeds sólo crean entidades abstractas (no media binaria). Respetar política: no generar datos falsos de archivos físicos. Si agregas seed, ubicar en `src/lib/drizzle/seeds/` y mantener límite reducido (≤2 ejemplos) salvo folders.
+### Oxc (Linting/Formatting)
 
-### 7. Tests y Calidad
-- E2E: usar Playwright scripts (`test:e2e`, `test:ui`). Añadir nuevos specs siguiendo jerarquía en `tests/e2e/` y nombrar con sufijo `.spec.ts`.
-- Lint/format: usar scripts con logging tolerante: `bun run biome`, `bun run format:check`. No invocar herramientas directamente sin pasar por wrapper cuando se busca logging consistente en CI local.
-- Tipos: `bun run tsc` . Corregir tipos antes de commits grandes.
+- Indentation: **tabs** (width: 2)
+- Semicolons: **sempre**
+- Quotes: **single** (`'...'` no `"..."`)
+- No `console.log` en producción (allowed en dev/server)
 
-### 8. Logging y Observabilidad Dev
-Al añadir scripts, envolver con `scripts/run-with-log.js <alias> <comando>` para integrar resumen automático de errores. Mantener nombres de log cortos (kebab-case). Logs se guardan en `/logs` con timestamp ISO (sanitize de `:` a `-`).
+---
 
-### 9. Rutas y Comunicación
-- API HTTP/SSE central en `src/server/`. Nueva feature: primero definir contrato (handler fino) luego servicio. No poner lógica de formateo pesada en route handlers.
-- Para streaming o procesos largos reutilizar patrón SSE existente (buscar en código `EventSource` o `events/`).
+## 🗄️ Database: Drizzle ORM Essentials
 
-### 10. Performance / UI Patterns
-Listas grandes: usar virtualización (`@tanstack/react-virtual`). Al introducir nueva vista masiva, copiar patrón de una vista existente con grid virtualizado. Caching de datos: TanStack Query (definir keys semánticos, p.ej. `['images','byFolder',folderId]`). Evitar estados duplicados entre store y query sin razón.
+### Schema Organization
 
-### 11. Extensión / Nueva Entidad (Checklist)
-1. Tabla Drizzle + índices razonables
-2. Relaciones en `relations.ts` si aplica
-3. Servicio CRUD con métodos consistentes (`list`, `get`, `create`, `update`, `delete`)
-4. Transformers para DTO / view
-5. Rutas Express + validación ligera (zod si ya se usa en ejemplos)
-6. Store/query hooks si requiere UI reactiva
-7. Tests E2E básicos (crear, listar, borrar)
+```
+src/lib/drizzle/schema/
+├── core/           # queueJobs, profiles, settings, thumbnails, etc.
+├── files/          # images, videos, audios, documents, json, 3d
+├── organization/   # folders, albums, collections, groups, favorites
+├── taxonomy/       # tags, properties, prompts, notes, tasks
+├── worldbuilding/  # characters, places, concepts, world-items
+└── relations.ts    # Relaciones many-to-many
+```
 
-### 12. Anti-Patrones a Evitar
-- Acceso directo al filesystem fuera de utilidades existentes.
-- Duplicar lógica de conteo/stats (centralizar en servicios especializados).
-- Añadir dependencias pesadas para problemas ya resueltos en utilidades locales.
-- Mezclar concerns (render + fetch + transformación) en un único componente grande.
+### Patrón de Query Común
 
+```typescript
+// Con relaciones y conteos
+const images = await db
+	.select({
+		...getTableColumns(images),
+		_count: {
+			tags: sql<number>`count(distinct ${imageTags.B})`,
+		},
+	})
+	.from(images)
+	.leftJoin(imageTags, eq(images.id, imageTags.A))
+	.where(eq(images.folderId, folderId))
+	.groupBy(images.id);
+```
 
+### Migrations
 
-**APLICACIÓN INMEDIATA CONSTANTE Y PERSISTENTE OBLIGATORIA.**
+```bash
+bunx drizzle-kit generate                              # Genera una migración revisable
+bun run db:migrate -- --database .scratch/dev.sqlite   # Aplica migraciones versionadas
+bun run db:studio -- --database .scratch/dev.sqlite    # GUI para inspeccionar una DB explícita
+```
+
+---
+
+## 🧪 Testing: Patrones
+
+### Unit Tests (Vitest)
+
+- Ubicación: `src/**/*.{test,spec}.ts` o `tests/unit/`
+- Config: `jsdom`; `fileParallelism: true` con una copia migrada de SQLite por worker.
+- Globals enabled (no importar describe/it/expect)
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { imageService } from '@/services/image/image.service';
+
+describe('imageService', () => {
+	it('should list images by folder', async () => {
+		const result = await imageService.getByFolder('folder-1');
+		expect(result).toHaveLength(5);
+	});
+});
+```
+
+### E2E Tests (Playwright)
+
+- Ubicación: `tests/e2e/*.spec.ts`
+- Base URL: `http://localhost:5173`
+- Auto-starts dev server: `bun run dev:full`
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('should display images grid', async ({ page }) => {
+	await page.goto('/images');
+	await expect(page.locator('.image-card')).toHaveCount(3);
+});
+```
+
+---
+
+## 🔑 Puntos Críticos & Anti-Patrones
+
+### ✅ Haz
+
+1. **Acceso a Drizzle solo desde servicios** (no desde routes directamente)
+2. **Transformers para toda conversión Drizzle → DTO** enriquecida
+3. **Stores Zustand fine-grained**, no mega-stores
+4. **Validación Zod en routes** antes de llamar servicios
+5. **Feature flags** para migraciones gradualmente
+6. **SSE (Server-Sent Events)** para operaciones largas con progreso
+7. **Absolute paths** (`@/...`) en imports
+
+### ❌ Evita
+
+1. ❌ Acceso directo a Drizzle desde routes
+2. ❌ Archivos barrel (`index.ts`) en `services/` y `transformers/`
+3. ❌ Lógica dispersa de enriquecimiento (no centralizada)
+4. ❌ Mega-stores Zustand
+5. ❌ `console.log` en código de producción del navegador (usar logger)
+6. ❌ Colores hardcodeados (usar CSS tokens: `--dt-primary-500`)
+7. ❌ Ejecutar Vitest directo contra `db.sqlite`; usar `bun run test` para crear DBs descartables por worker.
+8. ❌ Ignorar tipos TypeScript (usar refinements en lugar de `!` o `as`)
+
+---
+
+## 🎨 Design System: Tokens CSS
+
+### Uso de Variables
+
+✅ **Siempre usar tokens**:
+
+```tsx
+<div className="text-dt-primary-500 bg-card shadow-dt-2" />
+<div style={{ background: 'var(--primary)' }} />
+```
+
+❌ **Nunca hardcodear colores**:
+
+```tsx
+<div style={{ color: '#3b82f6' }} />          // ❌
+<div className="text-[#3b82f6]" />            // ❌
+<div style={{ background: 'rgba(255,255,255,0.3)' }} /> // ❌
+```
+
+### Paletas Disponibles
+
+```css
+/* Design tokens v2.0 */
+--dt-primary-50 a --dt-primary-950
+--dt-neutral-50 a --dt-neutral-950
+--dt-success-50 a --dt-success-900
+--dt-warning-50 a --dt-warning-900
+--dt-danger-50 a --dt-danger-900
+
+/* Colores de entidades */
+--entity-image, --entity-video, --entity-audio
+--entity-folder, --entity-album, --entity-tag
+
+/* Sombras */
+--dt-shadow-0, --dt-shadow-1, --dt-shadow-2, --dt-shadow-3, --dt-shadow-4
+
+/* Timing */
+--dt-duration-instant: 50ms
+--dt-duration-fast: 150ms
+--dt-duration-normal: 250ms
+--dt-duration-slow: 400ms
+```
+
+### 14 Temas Disponibles
+
+`light`, `dark`, `cafe`, `violeta`, `madera`, `nocturno`, `verde`, `atardecer`, `corporativo`, `carbon`, `teal`, `citrico`, `aurora`, `neon`
+
+---
+
+## 📚 Documentación Importante
+
+- **AGENTS.md** (este proyecto) — Guía técnica detallada
+- **src/services/README.md** — Patrones de servicios
+- **src/transformers/README.md** — Enriquecimiento de DTOs
+- **src/components/views/README.md** — Patrón de vistas
+- **content/docs/** — Guías arquitectónicas (markdown)
+
+---
+
+## 🚀 Workflow Recomendado para AI Agents
+
+### Antes de implementar cualquier cambio:
+
+1. **Buscar contexto** (semantic search) en patterns existentes
+2. **Crear TODO list** (si es multi-paso)
+3. **Implementar cambios** (aplicar patrones encontrados)
+4. **Validar**: `bun run tsc && bun run check && bun run test`
+5. **Marcar tasks completadas** en TODO
+
+### Ejemplo:
+
+```
+TODO:
+1. ✅ Entender patrón de servicio (búsqueda)
+2. ⏳ Crear nuevo servicio (en progreso)
+3. ⬜ Crear transformer
+4. ⬜ Crear route handler
+5. ⬜ Tests unitarios
+```
+
+---
+
+## ⚠️ Gotchas & Troubleshooting
+
+### `SQLITE_BUSY` en tests
+
+- ✅ Usar `bun run test`; su wrapper crea una SQLite descartable por worker y conserva `fileParallelism: true`.
+
+### Port 4000 en uso
+
+```bash
+# Windows
+netstat -ano | findstr :4000 | findstr LISTENING
+
+# Mac/Linux
+lsof -i :4000
+```
+
+### Build size large
+
+- Vite chunking automático: 28+ chunks
+- Lazy loading en rutas: verificar `router.tsx`
+
+### Types not found
+
+- ✅ Imports con `@/types/entities/<entity>/index.ts`
+- Verificar tsconfig.json paths
+
+---
+
+## 📞 Preguntas Frecuentes
+
+**P: ¿Dónde agregar una nueva entidad?**
+R: Schema → Service → Transformer → Route → Store → Component
+
+**P: ¿Por qué no hay `index.ts` en services/?**
+R: Performance + claridad. Importa directo de `service.ts`.
+
+**P: ¿Cómo debuguear una query lenta?**
+R: `bun run db:studio` + inspector Network en DevTools
+
+**P: ¿Feature flags para gradualmente migrar a Effect-TS?**
+R: `src/config/features.ts` + `FEATURES.USE_EFFECT_<ENTITY>`
+
+---
+
+**Última actualización**: 30 enero 2026
+**Responsable**: AI Agents (Copilot/Claude)
+**Stack**: React 19 + Express/Bun + Drizzle + SQLite

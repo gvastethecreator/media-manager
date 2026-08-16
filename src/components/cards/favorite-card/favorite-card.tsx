@@ -1,20 +1,26 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import type { FavoriteExtended } from '@/types/entities/favorite';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 interface FavoriteCardProps {
-	favorite: FavoriteExtended;
-	onSelect?: () => void;
-	isSelected?: boolean;
 	className?: string;
+	favorite: FavoriteExtended;
+	isSelected?: boolean;
+	onSelect?: () => void;
 }
 
 /**
  * Card sencilla para mostrar un favorito
  */
-export function FavoriteCard({ favorite, onSelect, isSelected, className }: FavoriteCardProps) {
-	const primaryColor = favorite.entityColor || '#eab308';
+export const FavoriteCard = memo(function FavoriteCard({
+	favorite,
+	onSelect,
+	isSelected,
+	className,
+}: FavoriteCardProps) {
+	const primaryColor = favorite.entityColor || 'var(--dt-warning-500)';
 	const content = (
 		<CardContainer
 			className={cn(className, 'transition-colors', isSelected ? 'ring-2 ring-primary' : '')}
@@ -35,4 +41,4 @@ export function FavoriteCard({ favorite, onSelect, isSelected, className }: Favo
 	) : (
 		content
 	);
-}
+});

@@ -25,7 +25,7 @@ import {
 	Video,
 	WandSparkles,
 } from 'lucide-react';
-import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
+import type { ContextMenuAction } from '@/components/features/file-browser-new/components/item-context-menu';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
 
@@ -33,28 +33,28 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
  * 🎨 Configuración completa para cada tipo de entidad
  */
 export interface EntityTypeConfig {
-	/** Tipo de entidad */
-	type: EntityStatsType;
+	/** Color principal (hex) */
+	color: string;
 	/** Nombre para mostrar */
 	displayName: string;
 	/** Nombre plural */
 	displayNamePlural: string;
-	/** Icono de Lucide React */
-	icon: LucideIcon;
-	/** Color principal (hex) */
-	color: string;
-	/** Color secundario opcional para gradientes */
-	secondaryColor?: string;
 	/** Emoji representativo */
 	emoji: string;
-	/** Operaciones soportadas en menú contextual */
-	supportedOperations: ContextMenuAction[];
-	/** Formatos de archivo soportados (si aplica) */
-	supportedFormats?: string[];
-	/** Función para generar thumbnail */
-	thumbnailGenerator?: (item: AnyEntityWithStats) => Promise<string>;
+	/** Icono de Lucide React */
+	icon: LucideIcon;
 	/** Configuración adicional específica del tipo */
 	metadata?: Record<string, unknown>;
+	/** Color secundario opcional para gradientes */
+	secondaryColor?: string;
+	/** Formatos de archivo soportados (si aplica) */
+	supportedFormats?: string[];
+	/** Operaciones soportadas en menú contextual */
+	supportedOperations: ContextMenuAction[];
+	/** Función para generar thumbnail */
+	thumbnailGenerator?: (item: AnyEntityWithStats) => Promise<string>;
+	/** Tipo de entidad */
+	type: EntityStatsType;
 }
 
 /**
@@ -153,7 +153,7 @@ function generateDocumentThumbnail(item: AnyEntityWithStats): Promise<string> {
 		return Promise.resolve('');
 	}
 
-	return Promise.resolve(`/api/documents/${item.id}/thumbnail`);
+	return Promise.resolve(`/api/thumbnails/unified/document/${item.id}`);
 }
 
 /**
@@ -175,11 +175,10 @@ function generateFolderThumbnail(item: AnyEntityWithStats): Promise<string> {
 export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 	[EntityStatsType.IMAGE]: {
 		type: EntityStatsType.IMAGE,
-		displayName: 'Imagen',
-		displayNamePlural: 'Imágenes',
+		displayName: 'Image',
+		displayNamePlural: 'Images',
 		icon: ImageIcon,
-		color: '#3b82f6', // Azul
-		secondaryColor: '#1d4ed8',
+		color: 'var(--entity-image)',
 		emoji: '🖼️',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif', '.bmp', '.tiff', '.svg'],
@@ -196,8 +195,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Video',
 		displayNamePlural: 'Videos',
 		icon: Video,
-		color: '#ef4444', // Rojo
-		secondaryColor: '#dc2626',
+		color: 'var(--entity-video)',
 		emoji: '🎬',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.mp4', '.webm', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.m4v'],
@@ -214,8 +212,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Audio',
 		displayNamePlural: 'Audios',
 		icon: AudioWaveform,
-		color: '#10b981', // Verde
-		secondaryColor: '#059669',
+		color: 'var(--entity-audio)',
 		emoji: '🎵',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.wma', '.m4a'],
@@ -229,11 +226,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.DOCUMENT]: {
 		type: EntityStatsType.DOCUMENT,
-		displayName: 'Documento',
-		displayNamePlural: 'Documentos',
+		displayName: 'Document',
+		displayNamePlural: 'Documents',
 		icon: FileText,
-		color: '#f59e0b', // Amarillo
-		secondaryColor: '#d97706',
+		color: 'var(--entity-document)',
 		emoji: '📄',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt'],
@@ -247,11 +243,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.FOLDER]: {
 		type: EntityStatsType.FOLDER,
-		displayName: 'Carpeta',
-		displayNamePlural: 'Carpetas',
+		displayName: 'Folder',
+		displayNamePlural: 'Folders',
 		icon: Folder,
-		color: '#eab308', // Oro
-		secondaryColor: '#ca8a04',
+		color: 'var(--entity-folder)',
 		emoji: '📁',
 		supportedOperations: CONTAINER_OPERATIONS,
 		thumbnailGenerator: generateFolderThumbnail,
@@ -263,11 +258,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.COLLECTION]: {
 		type: EntityStatsType.COLLECTION,
-		displayName: 'Colección',
-		displayNamePlural: 'Colecciones',
+		displayName: 'Collection',
+		displayNamePlural: 'Collections',
 		icon: SquareStack,
-		color: '#8b5cf6', // Púrpura
-		secondaryColor: '#7c3aed',
+		color: 'var(--entity-collection)',
 		emoji: '📚',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -279,11 +273,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.ALBUM]: {
 		type: EntityStatsType.ALBUM,
-		displayName: 'Álbum',
-		displayNamePlural: 'Álbumes',
+		displayName: 'Album',
+		displayNamePlural: 'Albums',
 		icon: Grid2X2,
-		color: '#06b6d4', // Cian
-		secondaryColor: '#0891b2',
+		color: 'var(--entity-album)',
 		emoji: '📖',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -295,11 +288,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.TAG]: {
 		type: EntityStatsType.TAG,
-		displayName: 'Etiqueta',
-		displayNamePlural: 'Etiquetas',
+		displayName: 'Tag',
+		displayNamePlural: 'Tags',
 		icon: Tag,
-		color: '#ec4899', // Rosa
-		secondaryColor: '#db2777',
+		color: 'var(--entity-tag)',
 		emoji: '🏷️',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -311,11 +303,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.CHARACTER]: {
 		type: EntityStatsType.CHARACTER,
-		displayName: 'Personaje',
-		displayNamePlural: 'Personajes',
+		displayName: 'Character',
+		displayNamePlural: 'Characters',
 		icon: Users,
-		color: '#f97316', // Naranja
-		secondaryColor: '#ea580c',
+		color: 'var(--entity-character)',
 		emoji: '🧑‍🎤',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -327,11 +318,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.PLACE]: {
 		type: EntityStatsType.PLACE,
-		displayName: 'Lugar',
-		displayNamePlural: 'Lugares',
+		displayName: 'Place',
+		displayNamePlural: 'Places',
 		icon: MapPin,
-		color: '#14b8a6', // Teal
-		secondaryColor: '#0f766e',
+		color: 'var(--entity-place)',
 		emoji: '📍',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -343,11 +333,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.WORLD_ITEM]: {
 		type: EntityStatsType.WORLD_ITEM,
-		displayName: 'Objeto',
-		displayNamePlural: 'Objetos',
+		displayName: 'World Item',
+		displayNamePlural: 'World Items',
 		icon: WandSparkles,
-		color: '#84cc16', // Lima
-		secondaryColor: '#65a30d',
+		color: 'var(--entity-world-item)',
 		emoji: '🌍',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -359,11 +348,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.CONCEPT]: {
 		type: EntityStatsType.CONCEPT,
-		displayName: 'Concepto',
-		displayNamePlural: 'Conceptos',
+		displayName: 'Concept',
+		displayNamePlural: 'Concepts',
 		icon: Palette,
-		color: '#6366f1', // Índigo
-		secondaryColor: '#4f46e5',
+		color: 'var(--entity-concept)',
 		emoji: '💡',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -378,8 +366,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Prompt',
 		displayNamePlural: 'Prompts',
 		icon: MessageSquare,
-		color: '#22c55e', // Verde esmeralda
-		secondaryColor: '#16a34a',
+		color: 'var(--entity-prompt)',
 		emoji: '🤖',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -391,11 +378,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.NOTE]: {
 		type: EntityStatsType.NOTE,
-		displayName: 'Nota',
-		displayNamePlural: 'Notas',
+		displayName: 'Note',
+		displayNamePlural: 'Notes',
 		icon: StickyNote,
-		color: '#a855f7', // Violeta
-		secondaryColor: '#9333ea',
+		color: 'var(--entity-note)',
 		emoji: '📝',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -407,11 +393,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.PROPERTY]: {
 		type: EntityStatsType.PROPERTY,
-		displayName: 'Propiedad',
-		displayNamePlural: 'Propiedades',
+		displayName: 'Property',
+		displayNamePlural: 'Properties',
 		icon: Database,
-		color: '#64748b', // Pizarra
-		secondaryColor: '#475569',
+		color: 'var(--entity-property)',
 		emoji: '🔧',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -423,11 +408,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.WILDCARD]: {
 		type: EntityStatsType.WILDCARD,
-		displayName: 'Comodín',
-		displayNamePlural: 'Comodines',
+		displayName: 'Wildcard',
+		displayNamePlural: 'Wildcards',
 		icon: WandSparkles,
-		color: '#d946ef', // Fucsia
-		secondaryColor: '#c026d3',
+		color: 'var(--entity-wildcard)',
 		emoji: '🃏',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -439,11 +423,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.GROUP]: {
 		type: EntityStatsType.GROUP,
-		displayName: 'Grupo',
-		displayNamePlural: 'Grupos',
+		displayName: 'Group',
+		displayNamePlural: 'Groups',
 		icon: FolderKanban,
-		color: '#0ea5e9', // Cielo
-		secondaryColor: '#0284c7',
+		color: 'var(--entity-group)',
 		emoji: '👥',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -455,11 +438,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.UPLOADED_IMAGE]: {
 		type: EntityStatsType.UPLOADED_IMAGE,
-		displayName: 'Imagen Subida',
-		displayNamePlural: 'Imágenes Subidas',
+		displayName: 'Uploaded Image',
+		displayNamePlural: 'Uploaded Images',
 		icon: ImageIcon,
-		color: '#15803d', // Verde
-		secondaryColor: '#166534',
+		color: 'var(--entity-image)',
 		emoji: '📤',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
@@ -473,11 +455,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.JSON_FILE]: {
 		type: EntityStatsType.JSON_FILE,
-		displayName: 'Archivo JSON',
-		displayNamePlural: 'Archivos JSON',
+		displayName: 'JSON File',
+		displayNamePlural: 'JSON Files',
 		icon: FileText,
-		color: '#0ea5e9', // Azul cielo
-		secondaryColor: '#0284c7',
+		color: 'var(--entity-json)',
 		emoji: '🧾',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.json'],
@@ -489,11 +470,10 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.FILE_3D]: {
 		type: EntityStatsType.FILE_3D,
-		displayName: 'Archivo 3D',
-		displayNamePlural: 'Archivos 3D',
+		displayName: '3D File',
+		displayNamePlural: '3D Files',
 		icon: File,
-		color: '#06b6d4', // Cian
-		secondaryColor: '#0891b2',
+		color: 'var(--entity-file-3d)',
 		emoji: '📦',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.obj', '.fbx', '.gltf', '.glb', '.stl'],
@@ -516,7 +496,7 @@ export function getEntityTypeConfig(type: EntityStatsType): EntityTypeConfig | u
  */
 export function getEntityTypeColor(type: EntityStatsType): string {
 	const config = getEntityTypeConfig(type);
-	return config?.color || '#6b7280'; // Gris por defecto
+	return config?.color || 'var(--dt-neutral-500)'; // Gris por defecto
 }
 
 /**

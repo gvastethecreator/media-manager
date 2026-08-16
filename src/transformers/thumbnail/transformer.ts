@@ -17,10 +17,10 @@ import { validateThumbnail } from './validators';
  * Tipo para datos de entrada del transformer
  */
 export interface ThumbnailInputData extends Partial<ThumbnailBase> {
+	created_at?: Date | string;
 	// Propiedades adicionales que podrían venir de DB
 	source_id?: string;
 	source_type?: string;
-	created_at?: Date | string;
 	updated_at?: Date | string;
 	usageCount?: number;
 }

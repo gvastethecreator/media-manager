@@ -16,20 +16,21 @@ import { DocumentCard } from './document-card/document-card';
 import { FolderCard } from './folder-card/folder-card';
 import { GroupCard } from './group-card/group-card';
 import { useCardLayout } from './hooks/use-card-layout';
-import { ImageCard } from './image-card';
+import { ImageCard } from './image-card/image-card';
 import { PlaceCard } from './place-card/place-card';
 import { PromptCard } from './prompt-card/prompt-card';
 import { PropertyCard } from './property-card/property-card';
 import { TagCard } from './tag-card/tag-card';
+import { TCGEntityCard } from './tcg-entity-card';
 // Importar el nuevo sistema de layouts
 import type { BaseCardProps, CardVariant } from './types/card-layout.types';
-import { UploadedImageCard } from './uploaded-image-card';
+import { UploadedImageCard } from './uploaded-image-card/uploaded-image-card';
 import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
 
 // Importar estilos de accesibilidad
-import '../features/file-browser/styles/accessibility.css';
+import '../features/file-browser-new/styles/accessibility.css';
 
 // Utilidad de no-op para evitar cuerpos vacíos en funciones
 const noop = () => {
@@ -54,15 +55,15 @@ const mapToImageCardVariant = (cardVariant: CardVariant): 'default' | 'minimal' 
 // (se mantiene noop por compatibilidad potencial)
 
 // Contexto para renderers
-type RenderCtx = {
-	entity: AnyEntityWithStats;
-	isSelected?: boolean;
+interface RenderCtx {
 	className?: string;
 	config: ReturnType<typeof useCardLayout>['config'];
+	entity: AnyEntityWithStats;
 	finalOnClick?: (e: React.MouseEvent) => void;
 	finalOnDoubleClick?: () => void;
+	isSelected?: boolean;
 	thumbnailQuality?: 'low' | 'medium' | 'high';
-};
+}
 
 // Renderers por tipo
 const renderImage = ({
@@ -77,7 +78,7 @@ const renderImage = ({
 	return (
 		<ImageCard
 			aria-describedby={`entity-${(entity as any).id}-description`}
-			aria-label={`Imagen: ${(entity as any).name || 'Sin nombre'}`}
+			aria-label={`Image: ${(entity as any).name || 'Unnamed'}`}
 			aspectRatio={config.aspectRatio as string}
 			className={`entity-card ${isSelected ? 'entity-card--selected' : ''} ${className || ''}`}
 			data-item-id={(entity as any).id}
@@ -116,7 +117,7 @@ const renderImage = ({
 const renderVideo = ({ entity, isSelected, className, config, finalOnClick }: RenderCtx) => (
 	<button
 		aria-describedby={`entity-${(entity as any).id}-description`}
-		aria-label={`Video: ${(entity as any).name || 'Sin nombre'}`}
+		aria-label={`Video: ${(entity as any).name || 'Unnamed'}`}
 		aria-pressed={isSelected}
 		className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
 		data-item-id={(entity as any).id}
@@ -149,7 +150,7 @@ const renderVideo = ({ entity, isSelected, className, config, finalOnClick }: Re
 			video={entity as any}
 		/>
 		<div className="sr-only" id={`entity-${(entity as any).id}-description`}>
-			{`Video ${(entity as any).name || 'sin nombre'}. ${isSelected ? 'Seleccionado.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
+			{`Video ${(entity as any).name || 'unnamed'}. ${isSelected ? 'Selected.' : ''} Press Enter to open or Space to select.`}
 		</div>
 	</button>
 );
@@ -157,7 +158,7 @@ const renderVideo = ({ entity, isSelected, className, config, finalOnClick }: Re
 const renderAlbum = ({ entity, isSelected, className, config, finalOnClick }: RenderCtx) => (
 	<button
 		aria-describedby={`entity-${(entity as any).id}-description`}
-		aria-label={`Álbum: ${(entity as any).name || 'Sin nombre'}`}
+		aria-label={`Album: ${(entity as any).name || 'Unnamed'}`}
 		aria-pressed={isSelected}
 		className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
 		data-item-id={(entity as any).id}
@@ -188,7 +189,7 @@ const renderAlbum = ({ entity, isSelected, className, config, finalOnClick }: Re
 			onClick={finalOnClick ? () => (finalOnClick as any)({} as any) : undefined}
 		/>
 		<div className="sr-only" id={`entity-${(entity as any).id}-description`}>
-			{`Álbum ${(entity as any).name || 'sin nombre'}. ${isSelected ? 'Seleccionado.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
+			{`Album ${(entity as any).name || 'unnamed'}. ${isSelected ? 'Selected.' : ''} Press Enter to open or Space to select.`}
 		</div>
 	</button>
 );
@@ -424,7 +425,7 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		// debug: estado final de handlers (se removió console por reglas de estilo)
 
 		// debug: estado final de handlers (removido console por reglas de estilo)
-		// Usar el hook de  para obtener la configuración
+		// Usar el hook de layout para obtener la configuración
 		const { config } = useCardLayout(
 			{
 				Config,
@@ -440,7 +441,26 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				tcgMode,
 			},
 			preset
-		); // Render genérico por tipo
+		);
+
+		// Si el modo es TCG, usar el nuevo componente TCGEntityCard
+		if (config.variant === 'tcg') {
+			return (
+				<TCGEntityCard
+					className={className}
+					disable3D={false}
+					entity={entity}
+					isCompact={compact}
+					isSelected={isSelected}
+					onClick={finalOnClick}
+					onDoubleClick={finalOnDoubleClick}
+					size={config.size as 'sm' | 'md' | 'lg' | 'xl'}
+					thumbnailQuality={thumbnailQuality}
+				/>
+			);
+		}
+
+		// Render genérico por tipo para otras variantes
 		const type = getEntityStatsType(entity as any) ?? 'unknown';
 		return renderEntityByType(type as string, {
 			entity,

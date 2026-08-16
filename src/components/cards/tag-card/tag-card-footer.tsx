@@ -1,8 +1,7 @@
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Calendar, Clock, Heart, Image, Video } from 'lucide-react';
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/date';
 import { TagRarity } from '@/store/entities/tag/types';
 
 // Componente para contador individual
@@ -23,10 +22,12 @@ function Counter({
 }) {
 	return (
 		<div
-			className={cn('flex items-center gap-1 rounded bg-black/20 px-2 py-1 font-bold text-sm', tcgMode && 'border')}
+			className={cn('flex items-center gap-1 rounded bg-muted/20 px-2 py-1 font-bold text-sm', tcgMode && 'border')}
 			style={{
 				borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
-				background: tcgMode ? `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}30)` : 'rgba(0,0,0,0.1)',
+				background: tcgMode
+					? `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}30)`
+					: 'var(--dt-shadow-color)',
 				boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none',
 			}}
 		>
@@ -44,29 +45,29 @@ function FavoriteIndicator({ isFavorite, tcgMode }: { isFavorite: boolean; tcgMo
 
 	return (
 		<div
-			className={cn('flex items-center gap-1 rounded-sm bg-black/10 px-2 py-1', tcgMode && 'border border-red-900/20')}
+			className={cn('flex items-center gap-1 rounded-sm bg-muted/10 px-2 py-1', tcgMode && 'border border-red-900/20')}
 			style={{
-				color: 'rgb(239, 68, 68)',
-				boxShadow: tcgMode ? '0 0 5px rgba(239, 68, 68, 0.3)' : 'none',
+				color: 'var(--ui-error-text)',
+				boxShadow: tcgMode ? '0 0 5px color-mix(in oklch, var(--ui-error-text), transparent 70%)' : 'none',
 			}}
 		>
-			<Heart className="h-3.5 w-3.5 fill-current" />
-			<span className="font-medium text-xs uppercase tracking-wide">Fav</span>
+			<Heart className="h-4 w-4 fill-current" />
+			<span className="font-medium text-sm uppercase tracking-wide">Fav</span>
 		</div>
 	);
 }
 
 interface TagCardFooterProps {
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	imagesCount: number;
-	videosCount?: number;
-	primaryColor: string;
-	secondaryColor: string;
-	rarity?: TagRarity;
-	isFavorite?: boolean;
-	tcgMode?: boolean;
 	compact?: boolean;
+	createdAt: Date | string;
+	imagesCount: number;
+	isFavorite?: boolean;
+	primaryColor: string;
+	rarity?: TagRarity;
+	secondaryColor: string;
+	tcgMode?: boolean;
+	updatedAt: Date | string;
+	videosCount?: number;
 }
 
 /**
@@ -88,19 +89,19 @@ export function TagCardFooter({
 	// Extraer configuración visual de rareza
 	const raritySettings = (() => {
 		const configMap = {
-			[TagRarity.COMMON]: { glow: 0, text: 'Común' },
-			[TagRarity.UNCOMMON]: { glow: 3, text: 'Poco común' },
-			[TagRarity.RARE]: { glow: 5, text: 'Rara' },
-			[TagRarity.VERY_RARE]: { glow: 7, text: 'Muy Rara' },
-			[TagRarity.LEGENDARY]: { glow: 10, text: 'Legendaria' },
+			[TagRarity.COMMON]: { glow: 0, text: 'Common' },
+			[TagRarity.UNCOMMON]: { glow: 3, text: 'Uncommon' },
+			[TagRarity.RARE]: { glow: 5, text: 'Rare' },
+			[TagRarity.VERY_RARE]: { glow: 7, text: 'Very Rare' },
+			[TagRarity.LEGENDARY]: { glow: 10, text: 'Legendary' },
 		};
 
 		return configMap[rarity as keyof typeof configMap] || configMap[TagRarity.COMMON];
 	})();
 
 	// Formatear fechas
-	const formattedCreated = format(new Date(createdAt), 'dd/MM/yy', { locale: es });
-	const formattedUpdated = format(new Date(updatedAt), 'dd/MM/yy', { locale: es });
+	const formattedCreated = formatDate(new Date(createdAt), 'dd/MM/yy');
+	const formattedUpdated = formatDate(new Date(updatedAt), 'dd/MM/yy');
 
 	const { glow } = raritySettings;
 
@@ -113,7 +114,7 @@ export function TagCardFooter({
 					<Counter
 						count={imagesCount}
 						glow={glow}
-						icon={<Image className="h-3.5 w-3.5" />}
+						icon={<Image className="h-4 w-4" />}
 						primaryColor={primaryColor}
 						secondaryColor={secondaryColor}
 						tcgMode={tcgMode}
@@ -124,7 +125,7 @@ export function TagCardFooter({
 						<Counter
 							count={videosCount}
 							glow={glow}
-							icon={<Video className="h-3.5 w-3.5" />}
+							icon={<Video className="h-4 w-4" />}
 							primaryColor={primaryColor}
 							secondaryColor={secondaryColor}
 							tcgMode={tcgMode}
@@ -138,18 +139,18 @@ export function TagCardFooter({
 
 			{/* Información adicional - Similar a la línea de coleccionista en cartas TCG */}
 			<div
-				className={cn('flex items-center justify-between text-muted-foreground text-xs', compact ? 'mt-1.5' : 'mt-2')}
+				className={cn('flex items-center justify-between text-muted-foreground text-sm', compact ? 'mt-1.5' : 'mt-2')}
 			>
 				{/* Fecha de creación */}
 				<div className="flex items-center gap-1">
-					<Calendar className="h-3 w-3" />
-					<span className="mr-1 opacity-70">Creado:</span>
+					<Calendar className="h-4 w-4" />
+					<span className="mr-1 opacity-70">Created:</span>
 					<span className="font-medium">{formattedCreated}</span>
 				</div>
 
 				{/* Fecha de actualización */}
 				<div className="flex items-center gap-1">
-					<Clock className="h-3 w-3" />
+					<Clock className="h-4 w-4" />
 					<span className="mr-1 opacity-70">Act:</span>
 					<span className="font-medium">{formattedUpdated}</span>
 				</div>
@@ -158,10 +159,10 @@ export function TagCardFooter({
 			{/* Línea de colección */}
 			{tcgMode && (
 				<div
-					className={cn('text-center text-muted-foreground text-xs italic', compact ? 'mt-0.5' : 'mt-1')}
+					className={cn('text-center text-muted-foreground text-sm italic', compact ? 'mt-0.5' : 'mt-1')}
 					style={{ opacity: 0.7 }}
 				>
-					♦ Colección personal ♦
+					♦ Personal collection ♦
 				</div>
 			)}
 		</div>

@@ -177,19 +177,19 @@ export function calculateMaxDepth(wildcards: WildcardComplete[]): number {
  */
 export function generateWildcardColor(category?: string): string {
 	const categoryColors: Record<string, string> = {
-		character: '#3B82F6', // Azul
-		style: '#8B5CF6', // Púrpura
-		pose: '#10B981', // Verde
-		lighting: '#F59E0B', // Amarillo
-		background: '#6B7280', // Gris
-		object: '#EF4444', // Rojo
-		effect: '#EC4899', // Rosa
-		mood: '#F97316', // Naranja
-		technical: '#06B6D4', // Cian
-		prompt: '#84CC16', // Lima
+		character: 'var(--dt-primary-500)', // Azul
+		style: 'var(--preset-purple)', // Púrpura
+		pose: 'var(--dt-success-500)', // Verde
+		lighting: 'var(--dt-warning-500)', // Amarillo
+		background: 'var(--dt-neutral-500)', // Gris
+		object: 'var(--dt-danger-500)', // Rojo
+		effect: 'var(--preset-pink)', // Rosa
+		mood: 'var(--preset-orange)', // Naranja
+		technical: 'var(--preset-cyan)', // Cian
+		prompt: 'var(--preset-lime)', // Lima
 	};
 
-	return categoryColors[category?.toLowerCase() || 'other'] || '#9CA3AF';
+	return categoryColors[category?.toLowerCase() || 'other'] || 'var(--dt-neutral-400)';
 }
 
 /**
@@ -310,9 +310,9 @@ function calculateDepthFromRoot(wildcard: WildcardComplete, wildcardMap: Map<str
  * Interfaz para nodo del árbol de Wildcards
  */
 export interface WildcardTreeNode {
-	wildcard: WildcardComplete;
 	children: WildcardTreeNode[];
 	depth: number;
+	wildcard: WildcardComplete;
 }
 
 /**

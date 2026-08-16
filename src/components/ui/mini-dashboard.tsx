@@ -1,9 +1,9 @@
 interface MiniDashboardProps {
-	title: string;
 	items: {
 		label: string;
 		value: number | string;
 	}[];
+	title: string;
 }
 
 export function MiniDashboard({ title, items }: MiniDashboardProps) {

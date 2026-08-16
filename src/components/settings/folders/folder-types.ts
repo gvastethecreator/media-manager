@@ -6,13 +6,14 @@ import type { FolderExtended, FolderStatistics } from '@/types/entities/folder';
  * Usado en los componentes de UI para mostrar errores de procesamiento
  */
 export interface ExtendedFolder extends FolderExtended {
-	error?: string; // Error temporal durante el procesamiento
 	// lastIndexed ya está en FolderBase
 	// emoji ya está en FolderBase
 	// description ya está en FolderBase
 	// isFavorite ya está en FolderBase
 	// parentId ya está en FolderBase
 	children?: ExtendedFolder[]; // Override para usar ExtendedFolder en lugar de FolderComplete
+	error?: string; // Error temporal durante el procesamiento
+	recentImages?: Array<{ id: string; name: string; thumbnailUrl?: string }>;
 	// autoReindex eliminado del modelo
 	// path ya está en FolderBase
 
@@ -20,61 +21,60 @@ export interface ExtendedFolder extends FolderExtended {
 	totalAudio?: number;
 	totalDocuments?: number;
 	totalOthers?: number;
-	recentImages?: Array<{ id: string; name: string; thumbnailUrl?: string }>;
 }
 
 // 🔄 Estado extendido del proceso con propiedades adicionales
 export interface ExtendedProcessStatus {
-	isProcessing: boolean;
-	progress?: number;
-	message?: string;
-	error?: string;
-	folderId?: string;
-	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete' | 'indexing' | 'thumbnails';
-	timestamp?: number;
-	filesProcessed?: number;
-	totalFiles?: number;
-	status?: 'processing' | 'completed' | 'error';
-	startTime?: number;
-	endTime?: number;
 	currentFile?: string;
-	estimatedTimeRemaining?: number;
+	endTime?: number;
+	error?: string;
 	errors?: string[];
+	estimatedTimeRemaining?: number;
 	extendedStats?: {
 		processingSpeed?: number;
 		averageSize?: number;
 	};
+	filesProcessed?: number;
+	folderId?: string;
 	globalProgress?: {
 		current: number;
 		total: number;
 		progress: number;
 	};
+	isProcessing: boolean;
+	message?: string;
+	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete' | 'indexing' | 'thumbnails';
+	progress?: number;
+	startTime?: number;
+	status?: 'processing' | 'completed' | 'error';
+	timestamp?: number;
+	totalFiles?: number;
 }
 
 export interface GlobalReindexStatus {
-	isProcessing: boolean;
-	progress: number;
-	processedFolders: number;
-	totalFolders: number;
-	errors: Array<{ folderId: string; error: string }>;
 	currentFolder?: string;
-	phase?: string;
-	status?: string;
-	startTime?: number;
-	endTime?: number;
 	duration?: number;
+	endTime?: number;
+	errors: Array<{ folderId: string; error: string }>;
+	isProcessing: boolean;
 	lastUpdate?: number;
+	phase?: string;
+	processedFolders: number;
+	progress: number;
+	startTime?: number;
+	status?: string;
+	totalFolders: number;
 }
 
 export interface GlobalProcessingState {
-	isProcessing: boolean;
-	currentFolder: string | null;
 	currentFile: string | null;
+	currentFolder: string | null;
 	fileProgress: {
 		processed: number;
 		total: number;
 		current: string;
 	};
+	isProcessing: boolean;
 }
 
 // Usar FolderStatistics del tipo correcto

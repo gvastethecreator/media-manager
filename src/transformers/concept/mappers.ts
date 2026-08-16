@@ -16,83 +16,79 @@ import type {
 import { ConceptSortOption } from '@/types/entities/concept';
 
 // Tipos locales equivalentes a Drizzle
-type DrizzleConceptCreateInput = {
+interface DrizzleConceptCreateInput {
+	applications?: string | null;
+	category?: string | null;
+	color?: string | null;
+	complexity?: string | null;
+	createdAt?: Date;
+	description?: string | null;
+	emoji?: string | null;
+	examples?: string | null;
+	featuredImage?: string | null;
 	id?: string;
 	name: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-
-	isFavorite?: boolean;
+	notes?: string | null;
+	parentId?: string | null;
+	relatedConcepts?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	complexity?: string | null;
-	applications?: string | null;
-	examples?: string | null;
-	relatedConcepts?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
-	createdAt?: Date;
 	updatedAt?: Date;
-};
+}
 
-type DrizzleConceptUpdateInput = {
+interface DrizzleConceptUpdateInput {
+	applications?: string | null;
+	category?: string | null;
+	color?: string | null;
+	complexity?: string | null;
+	description?: string | null;
+	emoji?: string | null;
+	examples?: string | null;
+	featuredImage?: string | null;
 	name?: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-
-	isFavorite?: boolean;
+	notes?: string | null;
+	parentId?: string | null;
+	relatedConcepts?: string | null;
 	totalImages?: number;
 	totalVideos?: number;
 	type?: string | null;
-	complexity?: string | null;
-	applications?: string | null;
-	examples?: string | null;
-	relatedConcepts?: string | null;
-	notes?: string | null;
-	featuredImage?: string | null;
-	parentId?: string | null;
 	updatedAt?: Date;
-};
+}
 
-type DrizzleConceptWhereInput = {
-	id?: string;
-	name?: { contains?: string };
-	description?: { contains?: string };
+interface DrizzleConceptWhereInput {
+	applications?: { contains?: string };
 	category?: { in?: string[] } | string;
+	complexity?: { in?: string[] };
+	description?: { contains?: string };
+	examples?: { contains?: string };
+	featuredImage?: { contains?: string };
+	id?: string;
 
 	isFavorite?: boolean;
-	type?: { in?: string[] };
-	complexity?: { in?: string[] };
-	applications?: { contains?: string };
-	examples?: { contains?: string };
-	relatedConcepts?: { contains?: string };
+	name?: { contains?: string };
 	notes?: { contains?: string };
-	featuredImage?: { contains?: string };
-	parentId?: string;
 	OR?: DrizzleConceptWhereInput[];
+	parentId?: string;
+	relatedConcepts?: { contains?: string };
 	tagEntities?: { some?: { id?: { in?: string[] } } };
-};
+	type?: { in?: string[] };
+}
 
-type DrizzleConceptOrderByInput = {
-	name?: 'asc' | 'desc';
-	createdAt?: 'asc' | 'desc';
-	updatedAt?: 'asc' | 'desc';
+interface DrizzleConceptOrderByInput {
 	category?: 'asc' | 'desc';
-};
+	createdAt?: 'asc' | 'desc';
+	name?: 'asc' | 'desc';
+	updatedAt?: 'asc' | 'desc';
+}
 
-type DrizzleConceptFindManyArgs = {
-	where?: DrizzleConceptWhereInput;
+interface DrizzleConceptFindManyArgs {
+	include?: unknown;
 	orderBy?: DrizzleConceptOrderByInput;
 	skip?: number;
 	take?: number;
-	include?: any;
-};
+	where?: DrizzleConceptWhereInput;
+}
 
 /**
  * Mapea la entrada de creación de un concepto al formato de Drizzle.
@@ -122,10 +118,8 @@ export function toCreateDataDrizzle(input: ConceptCreateInput): DrizzleConceptCr
 		...rest,
 		id: crypto.randomUUID(),
 		emoji: input.emoji || '💡',
-		color: input.color || '#3b82f6',
+		color: input.color || 'var(--dt-primary-500)',
 		category: input.category || 'general',
-
-		isFavorite: input.isFavorite,
 		totalImages: input.totalImages || 0,
 		totalVideos: input.totalVideos || 0,
 		type: input.type || null,
@@ -313,29 +307,3 @@ export function processConcepts(
 		total: filteredConcepts.length,
 	};
 }
-
-// Mantener funciones legacy con nombres de Drizzle por compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar toCreateDataDrizzle en su lugar
- */
-export const toCreateData = toCreateDataDrizzle;
-
-/**
- * @deprecated Usar toUpdateDataDrizzle en su lugar
- */
-export const toUpdateData = toUpdateDataDrizzle;
-
-/**
- * @deprecated Usar createOrderByDrizzle en su lugar
- */
-export const createOrderBy = createOrderByDrizzle;
-
-/**
- * @deprecated Usar createFilterDrizzle en su lugar
- */
-export const createFilter = createFilterDrizzle;
-
-/**
- * @deprecated Usar toSearchOptionsDrizzle en su lugar
- */
-export const toSearchOptions = toSearchOptionsDrizzle;

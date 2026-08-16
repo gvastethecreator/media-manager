@@ -15,20 +15,20 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
  * 🏷️ Props para EntityTypeBadge
  */
 export interface EntityTypeBadgeProps {
-	/** Tipo de entidad */
-	type: EntityStatsType;
+	/** Mostrar animación al hacer hover */
+	animated?: boolean;
+	/** Clase CSS adicional */
+	className?: string;
 	/** Mostrar texto además del icono */
 	showText?: boolean;
 	/** Mostrar tooltip con información adicional */
 	showTooltip?: boolean;
 	/** Tamaño del badge */
 	size?: 'sm' | 'md' | 'lg';
+	/** Tipo de entidad */
+	type: EntityStatsType;
 	/** Variante visual */
 	variant?: 'solid' | 'outline' | 'ghost';
-	/** Mostrar animación al hacer hover */
-	animated?: boolean;
-	/** Clase CSS adicional */
-	className?: string;
 }
 
 /**
@@ -54,28 +54,36 @@ export function EntityTypeBadge({
 
 	// Estilos según la variante
 	const getVariantStyles = () => {
+		const baseStyles: React.CSSProperties = {
+			'--entity-color': color,
+		} as any;
+
 		switch (variant) {
 			case 'solid':
 				return {
-					backgroundColor: color,
+					...baseStyles,
+					backgroundColor: 'var(--entity-color)',
 					color: 'white',
 					border: 'none',
 				};
 			case 'outline':
 				return {
+					...baseStyles,
 					backgroundColor: 'transparent',
-					color,
-					borderColor: color,
+					color: 'var(--entity-color)',
+					borderColor: 'var(--entity-color)',
 					borderWidth: '1px',
+					borderStyle: 'solid',
 				};
 			case 'ghost':
 				return {
-					backgroundColor: `${color}10`, // 10% opacity
-					color,
+					...baseStyles,
+					backgroundColor: 'color-mix(in oklab, var(--entity-color), transparent 90%)',
+					color: 'var(--entity-color)',
 					border: 'none',
 				};
 			default:
-				return {};
+				return baseStyles;
 		}
 	};
 
@@ -91,7 +99,7 @@ export function EntityTypeBadge({
 			whileHover={animated ? { scale: 1.05 } : {}}
 			whileTap={animated ? { scale: 0.95 } : {}}
 		>
-			<Icon className={cn('flex-shrink-0', size === 'sm' ? 'h-3 w-3' : size === 'md' ? 'h-4 w-4' : 'h-5 w-5')} />
+			<Icon className={cn('shrink-0', size === 'sm' ? 'h-3 w-3' : size === 'md' ? 'h-4 w-4' : 'h-5 w-5')} />
 			{showText && <span className="truncate">{displayName}</span>}
 		</motion.div>
 	);
@@ -111,9 +119,7 @@ export function EntityTypeBadge({
 							<span className="font-semibold">{displayName}</span>
 						</div>
 
-						{metadata?.hasPreview === true && (
-							<div className="text-muted-foreground text-xs">✨ Soporta vista previa</div>
-						)}
+						{metadata?.hasPreview === true && <div className="text-muted-foreground text-xs">✨ Supports preview</div>}
 
 						{metadata?.isContainer === true && (
 							<div className="text-muted-foreground text-xs">📦 Contenedor de elementos</div>
@@ -133,14 +139,14 @@ export function EntityTypeBadge({
  * 📊 Componente para mostrar estadísticas de tipos de entidad
  */
 export interface EntityTypeStatsProps {
-	/** Estadísticas por tipo */
-	stats: Record<EntityStatsType, number>;
 	/** Mostrar solo tipos con elementos */
 	hideEmpty?: boolean;
 	/** Límite de tipos a mostrar */
 	limit?: number;
 	/** Orientación del  */
 	orientation?: 'horizontal' | 'vertical';
+	/** Estadísticas por tipo */
+	stats: Record<EntityStatsType, number>;
 }
 
 export function EntityTypeStats({ stats, hideEmpty = true, limit, orientation = 'horizontal' }: EntityTypeStatsProps) {
@@ -176,14 +182,14 @@ export function EntityTypeStats({ stats, hideEmpty = true, limit, orientation = 
  * 🎨 Componente para selector de tipo de entidad
  */
 export interface EntityTypeSelectorProps {
-	/** Tipo seleccionado actualmente */
-	selected?: EntityStatsType[];
-	/** Callback cuando cambia la selección */
-	onSelectionChange?: (types: EntityStatsType[]) => void;
 	/** Tipos disponibles (si no se especifica, muestra todos) */
 	availableTypes?: EntityStatsType[];
 	/** Permitir selección múltiple */
 	multiple?: boolean;
+	/** Callback cuando cambia la selección */
+	onSelectionChange?: (types: EntityStatsType[]) => void;
+	/** Tipo seleccionado actualmente */
+	selected?: EntityStatsType[];
 	/** Tamaño de los badges */
 	size?: 'sm' | 'md' | 'lg';
 }

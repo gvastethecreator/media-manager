@@ -5,8 +5,8 @@
 
 import * as crypto from 'crypto';
 import { and, eq, gte, lte, sql } from 'drizzle-orm';
-import { db } from '@/lib/database/db';
-import { queueJobs } from '@/lib/database/schema';
+import { db } from '@/lib/drizzle';
+import { queueJobs } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { getPaginationInfo } from '@/lib/utils/pagination';
 import { serializeQueueJobMetadata, transformQueueJob, transformQueueJobs } from '@/transformers/queue-job';
@@ -46,24 +46,50 @@ export class QueueJobServiceError extends Error {
 export async function createQueueJob(data: CreateQueueJobInput): Promise<QueueJobExtended> {
 	try {
 		logger.info('📋 Creando nuevo trabajo en cola:', { queue: data.queue });
+		const serializedData = JSON.stringify(data.data);
+		const serializedMetadata = data.metadata ? serializeQueueJobMetadata(data.metadata) : null;
 
-		const [queueJob] = await db
+		const [createdQueueJob] = await db
 			.insert(queueJobs)
 			.values({
 				id: crypto.randomUUID(), // Generate UUID for id
 				queue: data.queue,
-				data: JSON.stringify(data.data), // Store data as JSON string
+				idempotencyKey: data.idempotencyKey,
+				data: serializedData, // Store data as JSON string
 				maxAttempts: data.maxAttempts,
 				priority: data.priority,
-				metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : null,
+				metadata: serializedMetadata,
 				status: QueueJobStatus.PENDING,
+				updatedAt: new Date(),
 			})
+			.onConflictDoNothing({ target: [queueJobs.queue, queueJobs.idempotencyKey] })
 			.returning();
+		let queueJob = createdQueueJob;
+		if (!queueJob && data.idempotencyKey) {
+			[queueJob] = await db
+				.select()
+				.from(queueJobs)
+				.where(and(eq(queueJobs.queue, data.queue), eq(queueJobs.idempotencyKey, data.idempotencyKey)))
+				.limit(1);
+			if (!queueJob) {
+				throw new QueueJobServiceError('No se pudo resolver el trabajo idempotente existente', 'IDEMPOTENCY_RACE');
+			}
+			const payloadMatches =
+				queueJob.data === serializedData &&
+				queueJob.metadata === serializedMetadata &&
+				queueJob.maxAttempts === (data.maxAttempts ?? 3) &&
+				queueJob.priority === (data.priority ?? 0);
+			if (!payloadMatches) {
+				throw new QueueJobServiceError('La idempotency key ya existe con un payload diferente', 'IDEMPOTENCY_CONFLICT');
+			}
+		}
+		if (!queueJob) throw new QueueJobServiceError('No se creó el trabajo en cola', 'CREATE_EMPTY');
 
 		logger.info('✅ Trabajo en cola creado:', { id: queueJob.id, queue: queueJob.queue });
 		return transformQueueJob(queueJob);
 	} catch (error) {
-		logger.error('❌ Error al crear trabajo en cola:', error);
+		logger.error('❌ Could not create job en cola:', error);
+		if (error instanceof QueueJobServiceError) throw error;
 		throw new QueueJobServiceError('No se pudo crear el trabajo en cola', 'CREATE_FAILED', error);
 	}
 }
@@ -94,7 +120,7 @@ export async function updateQueueJob(id: string, data: UpdateQueueJobInput): Pro
 				metadata: data.metadata
 					? serializeQueueJobMetadata(typeof data.metadata === 'string' ? JSON.parse(data.metadata) : data.metadata)
 					: null,
-				updatedAt: sql`(strftime('%s', 'now'))`,
+				updatedAt: new Date(),
 			})
 			.where(eq(queueJobs.id, id))
 			.returning();
@@ -102,7 +128,7 @@ export async function updateQueueJob(id: string, data: UpdateQueueJobInput): Pro
 		logger.info('✅ Trabajo en cola actualizado:', { id });
 		return transformQueueJob(queueJob);
 	} catch (error) {
-		logger.error('❌ Error al actualizar trabajo en cola:', { id, error });
+		logger.error('❌ Could not update job en cola:', { id, error });
 		throw new QueueJobServiceError('No se pudo actualizar el trabajo en cola', 'UPDATE_FAILED', error);
 	}
 }
@@ -153,7 +179,7 @@ export async function deleteQueueJob(id: string): Promise<boolean> {
 		logger.info('✅ Trabajo en cola eliminado:', { id });
 		return true;
 	} catch (error) {
-		logger.error('❌ Error al eliminar trabajo en cola:', { id, error });
+		logger.error('❌ Could not delete job en cola:', { id, error });
 		throw new QueueJobServiceError('No se pudo eliminar el trabajo en cola', 'DELETE_FAILED', error);
 	}
 }
@@ -186,8 +212,8 @@ export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
 			.update(queueJobs)
 			.set({
 				status: QueueJobStatus.CANCELLED,
-				finishedAt: sql`(strftime('%s', 'now'))`,
-				updatedAt: sql`(strftime('%s', 'now'))`,
+				finishedAt: new Date(),
+				updatedAt: new Date(),
 			})
 			.where(eq(queueJobs.id, id))
 			.returning();
@@ -195,7 +221,7 @@ export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.info('✅ Trabajo en cola cancelado:', { id });
 		return transformQueueJob(queueJob);
 	} catch (error) {
-		logger.error('❌ Error al cancelar trabajo en cola:', { id, error });
+		logger.error('❌ Could not cancel job en cola:', { id, error });
 		throw new QueueJobServiceError('No se pudo cancelar el trabajo en cola', 'CANCEL_FAILED', error);
 	}
 }
@@ -231,8 +257,8 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
 				status: QueueJobStatus.RETRYING,
 				progress: 0,
 				error: null,
-				retryAt: sql`(strftime('%s', 'now'))`,
-				updatedAt: sql`(strftime('%s', 'now'))`,
+				retryAt: new Date(),
+				updatedAt: new Date(),
 			})
 			.where(eq(queueJobs.id, id))
 			.returning();
@@ -240,7 +266,7 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.info('✅ Trabajo en cola preparado para reintento:', { id });
 		return transformQueueJob(queueJob);
 	} catch (error) {
-		logger.error('❌ Error al reintentar trabajo en cola:', { id, error });
+		logger.error('❌ Could not retry job en cola:', { id, error });
 		throw new QueueJobServiceError('No se pudo reintentar el trabajo en cola', 'RETRY_FAILED', error);
 	}
 }
@@ -291,7 +317,10 @@ export async function findQueueJobs(
 		const finalWhere = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
 		// Ejecutar consulta para contar total
-		const [totalResult] = await db.select({ count: sql<number>`count(*)` }).from(queueJobs).where(finalWhere);
+		const [totalResult] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(queueJobs)
+			.where(finalWhere);
 		const total = totalResult.count;
 
 		// Ejecutar consulta para obtener datos
@@ -414,7 +443,7 @@ export async function getQueueStats(): Promise<QueueStats> {
 				);
 
 			if (completedJobs.length > 0) {
-				const totalTime = completedJobs.reduce((sum, job) => {
+				const totalTime = completedJobs.reduce((sum: number, job: (typeof completedJobs)[0]) => {
 					if (job.startedAt && job.finishedAt) {
 						return sum + (job.finishedAt.getTime() - job.startedAt.getTime());
 					}
@@ -428,8 +457,8 @@ export async function getQueueStats(): Promise<QueueStats> {
 		logger.info('✅ Estadísticas de cola obtenidas:', stats);
 		return stats;
 	} catch (error) {
-		logger.error('❌ Error al obtener estadísticas de cola:', error);
-		throw new QueueJobServiceError('Error al obtener estadísticas de cola', 'STATS_FAILED', error);
+		logger.error('❌ Could not get queue statistics:', error);
+		throw new QueueJobServiceError('Could not get queue statistics', 'STATS_FAILED', error);
 	}
 }
 
@@ -479,7 +508,11 @@ export async function findRecentQueueJobs(limit = 5): Promise<QueueJobExtended[]
 	try {
 		logger.info('🕒 Buscando trabajos recientes', { limit });
 
-		const queueJobsData = await db.select().from(queueJobs).orderBy(sql`${queueJobs.createdAt} DESC`).limit(limit);
+		const queueJobsData = await db
+			.select()
+			.from(queueJobs)
+			.orderBy(sql`${queueJobs.createdAt} DESC`)
+			.limit(limit);
 
 		logger.info('✅ Trabajos recientes encontrados', { count: queueJobsData.length });
 		return transformQueueJobs(queueJobsData);
@@ -588,8 +621,8 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 		logger.info('✅ Estadísticas obtenidas para cola específica', { queue, stats });
 		return stats;
 	} catch (error) {
-		logger.error('❌ Error al obtener estadísticas para cola específica:', { queue, error });
-		throw new QueueJobServiceError('Error al obtener estadísticas para cola específica', 'QUEUE_STATS_FAILED', error);
+		logger.error('❌ Could not get statistics para cola específica:', { queue, error });
+		throw new QueueJobServiceError('Could not get statistics para cola específica', 'QUEUE_STATS_FAILED', error);
 	}
 }
 
@@ -672,7 +705,7 @@ export async function findProcessingTimes(since: Date): Promise<number[]> {
 				}
 				return 0;
 			})
-			.filter((time) => time > 0);
+			.filter((time: number) => time > 0);
 	} catch (error) {
 		logger.error('❌ Error al buscar tiempos de procesamiento:', error);
 		throw new QueueJobServiceError('Error al buscar tiempos de procesamiento', 'FIND_PROCESSING_TIMES_FAILED', error);

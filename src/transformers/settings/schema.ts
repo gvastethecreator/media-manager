@@ -207,7 +207,7 @@ const hoverAnimationSchema = z.object({
 const selectionAnimationSchema = z.object({
 	enabled: z.boolean().default(true),
 	duration: z.number().min(0).max(1000).default(200),
-	highlightColor: z.string().default('#3b82f6'),
+	highlightColor: z.string().default('var(--dt-primary-500)'),
 });
 
 const loadingAnimationSchema = z.object({
@@ -244,7 +244,7 @@ export const animationConfigSchema = z.object({
 
 const accessibilityFocusSchema = z.object({
 	showIndicators: z.boolean().default(true),
-	indicatorColor: z.string().default('#3b82f6'),
+	indicatorColor: z.string().default('var(--dt-primary-500)'),
 	indicatorWidth: z.number().min(1).max(5).default(2),
 });
 

@@ -1,7 +1,7 @@
 import { StickyNote } from 'lucide-react';
 import React from 'react';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,17 +15,17 @@ const NotesViewSimple: React.FC<NotesViewSimpleProps> = ({ className }) => {
 	const [showForm] = React.useState(false);
 
 	if (isLoading) {
-		return <LoadingScreen message="Cargando notas..." />;
+		return <LoadingScreen message="Loading notes..." />;
 	}
 
 	return (
 		<ScrollArea className={className || 'flex-1'}>
 			<div className="p-6">
 				<div className="mb-6 flex items-center justify-between">
-					<h2 className="font-bold text-2xl">Vista de Notas</h2>
+					<h2 className="font-bold text-2xl">Notes</h2>
 					<Button>
 						<StickyNote className="mr-2 h-4 w-4" />
-						Crear Nota
+						Create Note
 					</Button>
 				</div>
 

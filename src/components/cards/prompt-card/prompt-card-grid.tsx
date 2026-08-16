@@ -2,32 +2,33 @@ import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getPrompts } from '@/lib/api/client/prompt.client';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { debounceEvent } from '@/lib/system/event-throttler';
-import { searchPromptsService } from '@/services/prompt/prompt.service';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import { PromptCard } from './prompt-card';
 
 interface PromptCardGridProps {
-	/** Título del grid */
-	title?: string;
-	/** Mostrar barra de búsqueda */
-	showSearch?: boolean;
-	/** Si está cargando */
-	isLoading?: boolean;
-	/** Datos iniciales */
-	initialPrompts?: PromptWithStats[];
-	/** Función a ejecutar al hacer click en un prompt */
-	onPromptClick?: (prompt: PromptWithStats) => void;
-	/** Si las tarjetas están en modo TCG */
-	tcgMode?: boolean;
 	/** Si las tarjetas están en modo compacto */
 	compact?: boolean;
-	/** Si alguna tarjeta está seleccionada */
-	selectedPromptId?: string | null;
-	/** Placeholder de la búsqueda */
-	searchPlaceholder?: string;
+	/** Datos iniciales */
+	initialPrompts?: PromptWithStats[];
+	/** Si está cargando */
+	isLoading?: boolean;
 	/** Máximo de tarjetas a mostrar */
 	maxPrompts?: number;
+	/** Función a ejecutar al hacer click en un prompt */
+	onPromptClick?: (prompt: PromptWithStats) => void;
+	/** Placeholder de la búsqueda */
+	searchPlaceholder?: string;
+	/** Si alguna tarjeta está seleccionada */
+	selectedPromptId?: string | null;
+	/** Mostrar barra de búsqueda */
+	showSearch?: boolean;
+	/** Si las tarjetas están en modo TCG */
+	tcgMode?: boolean;
+	/** Título del grid */
+	title?: string;
 }
 
 /**
@@ -43,7 +44,7 @@ export function PromptCardGrid({
 	tcgMode = true,
 	compact = false,
 	selectedPromptId = null,
-	searchPlaceholder = 'Buscar prompts...',
+	searchPlaceholder = 'Search prompts...',
 	maxPrompts = 50,
 }: PromptCardGridProps) {
 	const [prompts, setPrompts] = useState<PromptWithStats[]>(initialPrompts);
@@ -57,10 +58,10 @@ export function PromptCardGrid({
 		debounceEvent(async (query: string) => {
 			try {
 				setLoading(true);
-				const results = await searchPromptsService({ search: query }, { pageSize: maxPrompts });
-				setPrompts(results.data);
+				const results = await getPrompts({ search: query, limit: maxPrompts });
+				setPrompts(results);
 			} catch (error) {
-				console.error('Error al buscar prompts:', error);
+				clientLogger.error('Error searching prompts:', error);
 			} finally {
 				setLoading(false);
 			}
@@ -104,7 +105,7 @@ export function PromptCardGrid({
 
 				{showSearch && (
 					<div className="relative w-full md:w-[320px]">
-						<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
+						<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
 						<Input
 							className="w-full pl-10"
 							onChange={handleSearchChange}

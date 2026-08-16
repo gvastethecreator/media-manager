@@ -15,11 +15,11 @@ function LoadingPlaceholder({ className }: { className?: string }) {
 	return (
 		<div
 			className={cn(
-				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-muted md:w-[320px] dark:bg-background',
 				className
 			)}
 		>
-			<p className="text-gray-500">Cargando personaje...</p>
+			<p className="text-muted-foreground">Loading character...</p>
 		</div>
 	);
 }
@@ -28,11 +28,11 @@ function ErrorPlaceholder({ className, message }: { className?: string; message?
 	return (
 		<div
 			className={cn(
-				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
+				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-dt-danger-100 md:w-[320px] dark:bg-dt-danger-900',
 				className
 			)}
 		>
-			<p className="text-red-800">Error: {message || 'Personaje no encontrado'}</p>
+			<p className="text-destructive">Error: {message || 'Character not found'}</p>
 		</div>
 	);
 }
@@ -58,21 +58,21 @@ function TcgVisualOverlays({
 	return (
 		<>
 			<div
-				className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-30"
+				className="ui-overlay-hover-strong z-1"
 				style={{
 					backgroundImage: `
 						linear-gradient(125deg,
 						transparent 0%,
-						${primaryColor}30 25%,
-						${secondaryColor}30 50%,
-						${primaryColor}30 75%,
+						color-mix(in oklab, ${primaryColor}, transparent 70%) 25%,
+						color-mix(in oklab, ${secondaryColor}, transparent 70%) 50%,
+						color-mix(in oklab, ${primaryColor}, transparent 70%) 75%,
 						transparent 100%)
 					`,
 					backgroundSize: '200% 200%',
 					animation: 'gradient-shift 3s ease infinite',
 				}}
 			/>
-			<div className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-20">
+			<div className="ui-overlay-hover-soft z-1">
 				<div
 					className="absolute inset-0"
 					style={{
@@ -82,12 +82,12 @@ function TcgVisualOverlays({
 					}}
 				/>
 			</div>
-			<div className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/3 left-1/2 z-1 h-20 w-20 opacity-10">
+			<div className="pointer-events-none absolute top-1/3 left-1/2 z-1 h-20 w-20 -translate-x-1/2 -translate-y-1/2 opacity-10">
 				<div
 					className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed"
 					style={{ borderColor: primaryColor }}
 				>
-					<div className="font-bold text-xs" style={{ color: primaryColor }}>
+					<div className="font-bold text-sm" style={{ color: primaryColor }}>
 						POWER
 						<br />
 						{power}
@@ -97,7 +97,7 @@ function TcgVisualOverlays({
 			{isFavorite && (
 				<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 					<div
-						className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
+						className="absolute top-0 right-0 h-24 w-24 translate-x-12 -translate-y-8 rotate-45 opacity-70"
 						style={{
 							background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 							backgroundSize: '600% 600%',
@@ -112,17 +112,17 @@ function TcgVisualOverlays({
 
 // Versión estática del gradiente por rareza para usar fuera del componente
 function getRarityGradientStatic(primaryColor: string, secondaryColor: string, rarity?: string | null) {
-	const base = `linear-gradient(45deg, transparent, ${primaryColor}40, transparent)`;
+	const base = `linear-gradient(45deg, transparent, color-mix(in oklab, ${primaryColor}, transparent 60%), transparent)`;
 	if (!rarity) {
 		return base;
 	}
 	switch (rarity) {
 		case 'Mythic':
-			return `linear-gradient(45deg, transparent, ${primaryColor}70, gold, ${primaryColor}70, transparent)`;
+			return `linear-gradient(45deg, transparent, color-mix(in oklab, ${primaryColor}, transparent 30%), gold, color-mix(in oklab, ${primaryColor}, transparent 30%), transparent)`;
 		case 'Rare':
-			return `linear-gradient(45deg, transparent, ${primaryColor}70, silver, ${primaryColor}70, transparent)`;
+			return `linear-gradient(45deg, transparent, color-mix(in oklab, ${primaryColor}, transparent 30%), silver, color-mix(in oklab, ${primaryColor}, transparent 30%), transparent)`;
 		case 'Uncommon':
-			return `linear-gradient(45deg, transparent, ${primaryColor}70, ${secondaryColor}70, transparent)`;
+			return `linear-gradient(45deg, transparent, color-mix(in oklab, ${primaryColor}, transparent 30%), color-mix(in oklab, ${secondaryColor}, transparent 30%), transparent)`;
 		default:
 			return base;
 	}
@@ -132,21 +132,15 @@ function getRarityGradientStatic(primaryColor: string, secondaryColor: string, r
 function getSecondaryColorFromCharacter(character: { color?: string | null; class?: string | null } | null) {
 	if (!character?.color) {
 		const classLower = character?.class?.toLowerCase() ?? '';
-		const map: Record<string, string> = { warrior: '#c0392b', mage: '#2980b9', rogue: '#27ae60' };
-		return map[classLower] ?? '#8e44ad';
+		const map: Record<string, string> = {
+			warrior: 'var(--preset-red)',
+			mage: 'var(--preset-blue)',
+			rogue: 'var(--preset-green)',
+		};
+		return map[classLower] ?? 'var(--entity-character)';
 	}
-	try {
-		const r = Number.parseInt(character.color.slice(1, 3), 16);
-		const g = Number.parseInt(character.color.slice(3, 5), 16);
-		const b = Number.parseInt(character.color.slice(5, 7), 16);
-		const darkenFactor = 0.7;
-		const darkerR = Math.floor(r * darkenFactor);
-		const darkerG = Math.floor(g * darkenFactor);
-		const darkerB = Math.floor(b * darkenFactor);
-		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-	} catch (_e) {
-		return '#6d28d9';
-	}
+
+	return `color-mix(in oklab, ${character.color}, black 20%)`;
 }
 
 function CardShell({
@@ -195,11 +189,7 @@ function CardShell({
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
 		>
 			<CardContainer
-				className={cn(
-					'transition-all duration-300',
-					isHovered && 'scale-[1.02]',
-					isSelected && 'ring-4 ring-primary/60'
-				)}
+				className={cn('ui-motion-standard', isHovered && 'scale-[1.02]', isSelected && 'ring-4 ring-primary/60')}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 			>
@@ -238,7 +228,7 @@ function CharacterCardBody({
 		[onClick, disabled, character]
 	);
 
-	const primaryColor = useMemo(() => character?.color || '#8e44ad', [character?.color]);
+	const primaryColor = useMemo(() => character?.color || 'var(--entity-character)', [character?.color]);
 	const secondaryColor = useMemo(() => getSecondaryColorFromCharacter(character), [character]);
 
 	const getRarityGradient = useCallback(
@@ -254,6 +244,7 @@ function CharacterCardBody({
 			disabled={disabled}
 			isSelected={isSelected}
 			onClick={onClick ? () => onClick(character) : undefined}
+			onKeyDown={handleKeyDown}
 			primaryColor={primaryColor}
 			secondaryColor={secondaryColor}
 			tcgMode={tcgMode}
@@ -274,7 +265,7 @@ function CharacterCardBody({
 					emoji={character.emoji || ''}
 					isFavorite={character.isFavorite}
 					level={character.level}
-					name={character.name || 'Sin nombre'}
+					name={character.name || 'Unnamed'}
 					race={character.race}
 					tcgMode={tcgMode}
 				/>
@@ -318,10 +309,19 @@ export function CharacterCard({
 	disabled = false,
 	className,
 	onClick,
+	onSelect,
 	isSelected = false,
 }: CharacterCardProps) {
 	const { data: characterData, isLoading, error } = useCharacter(characterId);
 	const { data: recentMediaData } = useRecentCharacterMedia(characterId);
+
+	const handleCardSelect = useCallback(
+		(c: ReturnType<typeof adaptCharacterWithStats>) => {
+			onSelect?.(c as any);
+			onClick?.(c as any);
+		},
+		[onClick, onSelect]
+	);
 
 	const character = useMemo(() => (characterData ? adaptCharacterWithStats(characterData) : null), [characterData]);
 
@@ -342,7 +342,7 @@ export function CharacterCard({
 			compact={compact}
 			disabled={disabled}
 			isSelected={isSelected}
-			onClick={onClick}
+			onClick={onSelect || onClick ? handleCardSelect : undefined}
 			recentThumbnails={thumbnails}
 			tcgMode={tcgMode}
 		/>

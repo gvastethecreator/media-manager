@@ -1,8 +1,8 @@
 import { SearchIcon } from 'lucide-react';
 import { memo, useMemo } from 'react';
-import { PropertyCard } from '@/components/cards/property-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { PropertyCard } from '@/components/cards/property-card/property-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useProperties } from '@/lib/api/properties';
@@ -38,7 +38,11 @@ const PropertiesContentView = () => {
 			<div className="container mx-auto p-6">
 				<h2 className="mb-4 font-bold text-xl">Propiedades</h2>
 				{items.length === 0 ? (
-					<EmptyState description="Aún no has creado propiedades." icon={SearchIcon} title="Sin propiedades" />
+					<EmptyState
+						description="You have not created any properties yet."
+						icon={SearchIcon}
+						title="Sin propiedades"
+					/>
 				) : (
 					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{items.map((property, index) => (

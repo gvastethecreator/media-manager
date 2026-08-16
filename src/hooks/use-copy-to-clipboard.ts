@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export function useCopyToClipboard({ timeout = 2000, onCopy }: { timeout?: number; onCopy?: () => void } = {}) {
 	const [copied, setCopied] = React.useState(false);
@@ -22,7 +23,7 @@ export function useCopyToClipboard({ timeout = 2000, onCopy }: { timeout?: numbe
 			setTimeout(() => {
 				setCopied(false);
 			}, timeout);
-		}, console.error);
+		}, clientLogger.error);
 	};
 
 	return { copied, copy };

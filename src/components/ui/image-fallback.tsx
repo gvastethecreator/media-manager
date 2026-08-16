@@ -3,16 +3,16 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 // Propiedades básicas para el componente
-type ImageFallbackProps = {
-	src?: string;
+interface ImageFallbackProps {
 	alt: string;
 	className?: string;
 	fallbackClassName?: string;
-	width?: number | string;
 	height?: number | string;
-	onLoad?: () => void;
 	onError?: () => void;
-};
+	onLoad?: () => void;
+	src?: string;
+	width?: number | string;
+}
 
 /**
  * Componente que muestra una imagen con un fallback para cuando la imagen
@@ -70,7 +70,7 @@ export function ImageFallback({
 		<div className={cn('relative', className)} style={containerStyle}>
 			<img
 				alt={alt}
-				className="h-full w-full object-cover transition-opacity duration-300"
+				className="h-full w-full object-cover transition-opacity duration-dt-normal ease-dt-out"
 				onError={handleError}
 				onLoad={handleLoad}
 				ref={imgRef}

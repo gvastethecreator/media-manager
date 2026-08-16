@@ -1,20 +1,24 @@
 /**
- * @file Barrel consolidado para tipos de Thumbnail
- * Unifica exportaciones evitando duplicados (resuelve errores TS2300 / TS2459)
- * Fuente de verdad: base.ts (canónico) + enums.ts
- * types.ts queda como legacy parcial (solo metadata opcional mientras se migra)
+ * @file Punto de entrada para los tipos de Thumbnail
+ * @module types/entities/thumbnail
+ * @updated 2025-01-27 - Migrado a estructura canónica Base+Statistics+WithStats
  */
 
-// Canónicos
+// ✅ EXPORTACIONES PRINCIPALES (estructura canónica)
 export type {
 	ThumbnailBase,
+	// Legacy para compatibilidad temporal
+	// ThumbnailComplete, // No existe en base.ts
 	ThumbnailCreateInput,
+	// ThumbnailExtended, // No existe en base.ts
 	ThumbnailStatistics,
 	ThumbnailUpdateInput,
 	ThumbnailWithStats,
 } from './base';
-// NOTA: ThumbnailFormat se expone SOLO desde enums.ts para evitar duplicación
+
 export { ThumbnailFormat, ThumbnailQuality } from './enums';
-// Legacy (mantener mientras se elimina dependencia en código antiguo)
-export type { ThumbnailMetadata } from './types';
+
+// 🔧 LEGACY: Exportaciones del archivo types.ts (en transición)
+export type { ThumbnailMetadata, ThumbnailRelations } from './types';
+
 export { thumbnailBaseSchema } from './types';

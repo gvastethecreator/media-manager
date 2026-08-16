@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
+import type { PublicFile3DCreateInput, PublicFile3DUpdateInput } from '@/lib/api/client/file3d.client';
+import type { File3DWithStats } from '@/types/entities/file3d';
 import { apiClient } from './client';
 
 export const file3dKeys = {
@@ -29,7 +30,7 @@ export function useFile3DById(id: string) {
 
 export function useCreateFile3D() {
 	const qc = useQueryClient();
-	return useMutation<File3DWithStats, Error, File3DCreateInput>({
+	return useMutation<File3DWithStats, Error, PublicFile3DCreateInput>({
 		mutationFn: (data) => apiClient.post<File3DWithStats>('/file3ds', data),
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: file3dKeys.lists() });
@@ -39,7 +40,7 @@ export function useCreateFile3D() {
 
 export function useUpdateFile3D() {
 	const qc = useQueryClient();
-	return useMutation<File3DWithStats, Error, { id: string; data: File3DUpdateInput }>({
+	return useMutation<File3DWithStats, Error, { id: string; data: PublicFile3DUpdateInput }>({
 		mutationFn: ({ id, data }) => apiClient.put<File3DWithStats>(`/file3ds/${id}`, data),
 		onSuccess: (data) => {
 			qc.invalidateQueries({ queryKey: file3dKeys.lists() });

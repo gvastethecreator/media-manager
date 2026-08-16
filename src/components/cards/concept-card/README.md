@@ -40,41 +40,43 @@ graph TD
 
 ```typescript
 interface ConceptCardProps {
-  concept: ConceptComplete | (ConceptWithStats & {
-    _count?: {
-      images: number;
-      videos: number;
-      albums: number;
-      collections: number;
-      tags: number;
-      characters: number;
-      places: number;
-      worldItems: number;
-      prompts: number;
-      notes: number;
-      wildcards: number;
-      properties: number;
-      groups: number;
-    };
-    imageCount?: number;
-    videoCount?: number;
-    promptCount?: number;
-    noteCount?: number;
-    characterCount?: number;
-    placeCount?: number;
-    worldItemCount?: number;
-    propertyCount?: number;
-    wildcardCount?: number;
-    groupCount?: number;
-    albumCount?: number;
-    collectionCount?: number;
-    tagCount?: number;
-    tags?: string[] | string;
-  });
-  onClick?: () => void;
-  className?: string;
-  style?: React.CSSProperties;
-  tcgMode?: boolean;
+	concept:
+		| ConceptComplete
+		| (ConceptWithStats & {
+				_count?: {
+					images: number;
+					videos: number;
+					albums: number;
+					collections: number;
+					tags: number;
+					characters: number;
+					places: number;
+					worldItems: number;
+					prompts: number;
+					notes: number;
+					wildcards: number;
+					properties: number;
+					groups: number;
+				};
+				imageCount?: number;
+				videoCount?: number;
+				promptCount?: number;
+				noteCount?: number;
+				characterCount?: number;
+				placeCount?: number;
+				worldItemCount?: number;
+				propertyCount?: number;
+				wildcardCount?: number;
+				groupCount?: number;
+				albumCount?: number;
+				collectionCount?: number;
+				tagCount?: number;
+				tags?: string[] | string;
+		  });
+	onClick?: () => void;
+	className?: string;
+	style?: React.CSSProperties;
+	tcgMode?: boolean;
 }
 ```
 
@@ -123,35 +125,22 @@ El componente utiliza las siguientes acciones del servidor:
 import { ConceptCard } from '@/components/cards/concept-card';
 
 // En tu componente
-return (
-  <ConceptCard
-    concept={conceptData}
-    onClick={() => router.push(`/concepts/${conceptData.id}`)}
-  />
-);
+return <ConceptCard concept={conceptData} onClick={() => router.push(`/concepts/${conceptData.id}`)} />;
 ```
 
 ### Con Modo TCG Desactivado
 
 ```jsx
-<ConceptCard
-  concept={conceptData}
-  tcgMode={false}
-  className="max-w-xs mx-auto"
-/>
+<ConceptCard concept={conceptData} tcgMode={false} className="max-w-xs mx-auto" />
 ```
 
 ### En un Grid de Conceptos
 
 ```jsx
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-  {concepts.map(concept => (
-    <ConceptCard
-      key={concept.id}
-      concept={concept}
-      onClick={() => router.push(`/concepts/${concept.id}`)}
-    />
-  ))}
+	{concepts.map((concept) => (
+		<ConceptCard key={concept.id} concept={concept} onClick={() => router.push(`/concepts/${concept.id}`)} />
+	))}
 </div>
 ```
 

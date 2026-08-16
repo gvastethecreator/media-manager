@@ -10,8 +10,8 @@ import type { EntityId } from './utils/types/utility-types';
  * Interfaz base para todas las entidades
  */
 export interface BaseEntity {
-	id: EntityId;
 	createdAt: Date;
+	id: EntityId;
 	updatedAt: Date;
 }
 
@@ -19,55 +19,55 @@ export interface BaseEntity {
  * Estado base para stores
  */
 export interface BaseState<T extends BaseEntity = BaseEntity> {
-	items: Record<string, T>;
-	selectedIds: Set<string>;
 	activeId: string | null;
-	isLoading: boolean;
 	error: Error | null;
 	filters: JSONString<Record<string, unknown>>;
-	sortBy: string;
-	viewMode: string;
+	isLoading: boolean;
+	items: Record<string, T>;
 	pagination: {
 		page: number;
 		limit: number;
 		total: number;
 	};
+	selectedIds: Set<string>;
+	sortBy: string;
+	viewMode: string;
 }
 
 /**
  * Acciones base para stores
  */
 export interface BaseActions<T extends BaseEntity = BaseEntity> {
-	setItems: (items: T[]) => void;
 	addItem: (item: T) => void;
-	updateItem: (id: string, data: Partial<T>) => void;
+	clearSelection: () => void;
+	deselectItem: (id: string) => void;
 	removeItem: (id: string) => void;
 	selectItem: (id: string) => void;
-	deselectItem: (id: string) => void;
-	clearSelection: () => void;
 	setActiveItem: (id: string | null) => void;
-	setLoading: (isLoading: boolean) => void;
 	setError: (error: Error | null) => void;
 	setFilters: (filters: unknown) => void;
+	setItems: (items: T[]) => void;
+	setLoading: (isLoading: boolean) => void;
+	setPagination: (page: number, limit?: number) => void;
 	setSortBy: (sortBy: string) => void;
 	setViewMode: (mode: string) => void;
-	setPagination: (page: number, limit?: number) => void;
+	updateItem: (id: string, data: Partial<T>) => void;
 }
 
 /**
  * Store completo con estado y acciones
  */
 export interface Store<T extends BaseEntity = BaseEntity> {
-	state: BaseState<T>;
 	actions: BaseActions<T>;
+	state: BaseState<T>;
 }
 
 /**
  * Opciones de configuración para stores
  */
 export interface StoreOptions<T extends BaseEntity = BaseEntity> {
-	name: string;
 	initialState?: Partial<BaseState<T>>;
+	name: string;
 	validators?: {
 		create?: (data: unknown) => boolean;
 		update?: (data: unknown) => boolean;

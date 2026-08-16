@@ -1,11 +1,13 @@
 import { ArrowLeft, Download, Heart, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toFileViewerItem } from '@/components/features/file-viewer/file-viewer-item';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
+import { useFavorite } from '@/hooks/use-favorite';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
-import { useImageViewer } from '@/store/image-viewer.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { ImageWithStats } from '@/types/entities/image';
 
 const viewLogger = clientLogger.withContext('ImageDetailView');
@@ -22,13 +24,22 @@ export function ImageDetailView() {
 	const [error, setError] = useState<string | null>(null);
 
 	// Store actions
-	const { getImage, fetchImage } = useImageStore();
-	const { openViewer } = useImageViewer();
+	const { getImage, fetchImage, updateImage } = useImageStore();
+	const { openViewer } = useFileViewerStore();
+	const {
+		isFavorite,
+		isLoading: isFavoriteLoading,
+		toggleFavorite,
+	} = useFavorite({
+		entityId: image?.id ?? id ?? '',
+		entityType: 'image',
+		initialIsFavorite: image?.isFavorite ?? false,
+	});
 
 	// Cargar la imagen
 	useEffect(() => {
 		if (!id) {
-			setError('ID de imagen no proporcionado');
+			setError('Image ID was not provided');
 			setIsLoading(false);
 			return;
 		}
@@ -43,22 +54,22 @@ export function ImageDetailView() {
 
 				// Si no está en el store, cargarla del servidor
 				if (!imageData) {
-					viewLogger.info('Imagen no encontrada en store, cargando del servidor...', { imageId: id });
+					viewLogger.info('Image not found in the store; loading it from the server', { imageId: id });
 					await fetchImage(id);
 					imageData = getImage(id);
 				}
 
 				if (imageData) {
 					setImage(imageData);
-					viewLogger.info('Imagen cargada exitosamente', { imageName: imageData.name });
+					viewLogger.info('Image loaded successfully', { imageName: imageData.name });
 				} else {
-					setError('Imagen no encontrada');
-					viewLogger.warn('Imagen no encontrada después de cargar', { imageId: id });
+					setError('Image not found');
+					viewLogger.warn('Image was still unavailable after loading', { imageId: id });
 				}
 			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				const errorMessage = err instanceof Error ? err.message : 'Unknown error';
 				setError(errorMessage);
-				viewLogger.error('Error cargando imagen:', errorMessage);
+				viewLogger.error('Could not load image:', errorMessage);
 			} finally {
 				setIsLoading(false);
 			}
@@ -70,8 +81,37 @@ export function ImageDetailView() {
 	// Abrir en visor de imágenes
 	const handleOpenViewer = () => {
 		if (image) {
-			// Pasar la imagen como EntityWithStats
-			openViewer([image], 0);
+			openViewer([toFileViewerItem(image as unknown as Record<string, unknown>, 'image')], 0);
+		}
+	};
+
+	const handleDownload = () => {
+		if (!image) {
+			return;
+		}
+
+		const link = document.createElement('a');
+		link.href = `/api/images/${image.id}/content`;
+		link.download = image.name || `image-${image.id}`;
+		link.rel = 'noopener noreferrer';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		viewLogger.info('Image download started', { imageId: image.id, imageName: image.name });
+	};
+
+	const handleToggleFavorite = async () => {
+		if (!image || isFavoriteLoading) {
+			return;
+		}
+
+		try {
+			toggleFavorite();
+		} catch (err) {
+			viewLogger.error('Could not update image favorite', {
+				imageId: image.id,
+				error: err instanceof Error ? err.message : err,
+			});
 		}
 	};
 
@@ -80,40 +120,30 @@ export function ImageDetailView() {
 		<div className="flex items-center gap-2">
 			<Button className="gap-2" onClick={() => navigate(-1)} size="sm" variant="outline">
 				<ArrowLeft className="h-4 w-4" />
-				Volver
+				Back
 			</Button>
 
 			{image && (
 				<>
 					<Button className="gap-2" onClick={handleOpenViewer} size="sm" variant="outline">
 						<Share2 className="h-4 w-4" />
-						Visor
+						Viewer
 					</Button>
 
-					<Button
-						className="gap-2"
-						onClick={() => {
-							// TODO: Implementar descarga
-							viewLogger.info('Descarga solicitada para imagen:', image.name);
-						}}
-						size="sm"
-						variant="outline"
-					>
+					<Button className="gap-2" onClick={handleDownload} size="sm" variant="outline">
 						<Download className="h-4 w-4" />
-						Descargar
+						Download
 					</Button>
 
 					<Button
 						className="gap-2"
-						onClick={() => {
-							// TODO: Implementar favoritos
-							viewLogger.info('Favorito toggleado para imagen:', image.name);
-						}}
+						disabled={isFavoriteLoading}
+						onClick={handleToggleFavorite}
 						size="sm"
-						variant="outline"
+						variant={isFavorite ? 'default' : 'outline'}
 					>
-						<Heart className="h-4 w-4" />
-						Favorito
+						<Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+						{isFavorite ? 'In Favorites' : 'Add to Favorites'}
 					</Button>
 				</>
 			)}
@@ -123,15 +153,15 @@ export function ImageDetailView() {
 	if (isLoading) {
 		return (
 			<BaseContentView
-				description="Obteniendo información de la imagen..."
+				description="Retrieving image information..."
 				headerControls={headerControls}
 				icon="🖼️"
-				title="Cargando imagen..."
+				title="Loading image..."
 			>
 				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
 						<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
-						<p className="text-muted-foreground">Cargando imagen...</p>
+						<p className="text-muted-foreground">Loading image...</p>
 					</div>
 				</div>
 			</BaseContentView>
@@ -140,17 +170,12 @@ export function ImageDetailView() {
 
 	if (error || !image) {
 		return (
-			<BaseContentView
-				description={error || 'Imagen no encontrada'}
-				headerControls={headerControls}
-				icon="❌"
-				title="Error"
-			>
+			<BaseContentView description={error || 'Image not found'} headerControls={headerControls} icon="❌" title="Error">
 				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
-						<p className="mb-4 text-destructive">{error || 'Imagen no encontrada'}</p>
+						<p className="mb-4 text-destructive">{error || 'Image not found'}</p>
 						<Button onClick={() => navigate(-1)} variant="outline">
-							Volver
+							Back
 						</Button>
 					</div>
 				</div>
@@ -160,15 +185,15 @@ export function ImageDetailView() {
 
 	return (
 		<BaseContentView
-			description={`${image.width || 0} × ${image.height || 0} píxeles`}
+			description={`${image.width || 0} × ${image.height || 0} pixels`}
 			headerControls={headerControls}
 			icon="🖼️"
-			title={image.name || 'Sin nombre'}
+			title={image.name || 'Untitled'}
 		>
 			<div className="flex h-full w-full items-center justify-center p-4">
 				<div className="max-h-full max-w-full">
 					<button
-						aria-label="Abrir visor de imagen"
+						aria-label="Open image viewer"
 						className="max-h-full max-w-full cursor-pointer rounded-lg"
 						onClick={handleOpenViewer}
 						type="button"

@@ -4,19 +4,19 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { VideoPlayState } from '../../../../types/entities/video/enums';
+import { VideoPlayState } from '@/types/entities/video/enums';
 import type { VideoStore } from '..';
 
 export interface VideoPlayerState {
-	isFullscreen: boolean;
-	volume: number;
-	playbackRate: number;
-	isMuted: boolean;
-	playState: VideoPlayState;
+	bufferedPercentage: number;
 	currentTime: number;
 	duration: number;
-	bufferedPercentage: number;
+	isFullscreen: boolean;
+	isMuted: boolean;
+	playbackRate: number;
+	playState: VideoPlayState;
 	quality: string;
+	volume: number;
 }
 
 export const initialPlayerState: VideoPlayerState = {
@@ -33,42 +33,41 @@ export const initialPlayerState: VideoPlayerState = {
 
 // Slice para el reproductor de video
 export interface VideoPlayerSlice extends VideoPlayerState {
-	// Control de reproducción
-	play: () => void;
-	pause: () => void;
-	stop: () => void;
-	seek: (time: number) => void;
-	setPlaybackRate: (rate: number) => void;
-
-	// Control de volumen
-	setVolume: (volume: number) => void;
-	mute: () => void;
-	unmute: () => void;
-	toggleMute: () => void;
-
 	// Control de pantalla completa
 	enterFullscreen: () => void;
 	exitFullscreen: () => void;
-	toggleFullscreen: () => void;
-
-	// Control de calidad
-	setQuality: (quality: string) => void;
 	getAvailableQualities: () => string[];
+	getBufferedPercentage: () => number;
 
 	// Información de reproducción
 	getCurrentTime: () => number;
 	getDuration: () => number;
-	getBufferedPercentage: () => number;
-	getPlayState: () => VideoPlayState;
-	getVolume: () => number;
 	getIsFullscreen: () => boolean;
 	getIsMuted: () => boolean;
-
-	// Eventos de reproducción
-	onTimeUpdate: (currentTime: number) => void;
+	getPlayState: () => VideoPlayState;
+	getVolume: () => number;
+	mute: () => void;
 	onDurationChange: (duration: number) => void;
 	onProgress: (bufferedPercentage: number) => void;
 	onStateChange: (playState: VideoPlayState) => void;
+
+	// Eventos de reproducción
+	onTimeUpdate: (currentTime: number) => void;
+	pause: () => void;
+	// Control de reproducción
+	play: () => void;
+	seek: (time: number) => void;
+	setPlaybackRate: (rate: number) => void;
+
+	// Control de calidad
+	setQuality: (quality: string) => void;
+
+	// Control de volumen
+	setVolume: (volume: number) => void;
+	stop: () => void;
+	toggleFullscreen: () => void;
+	toggleMute: () => void;
+	unmute: () => void;
 }
 
 export const createVideoPlayerSlice: StateCreator<VideoStore, [], [], VideoPlayerSlice> = (set, get) => ({

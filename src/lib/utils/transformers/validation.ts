@@ -14,7 +14,7 @@ export function validateBaseEntity(data: unknown) {
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			logger.error('Error validando campos base:', { error: error.issues });
-			throw new Error(`Error de validación: ${error.issues.map((e) => e.message).join(', ')}`);
+			throw new Error(`Validation error: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}
@@ -29,7 +29,7 @@ export function validateUIFields(data: unknown) {
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			logger.error('Error validando campos UI:', { error: error.issues });
-			throw new Error(`Error de validación UI: ${error.issues.map((e) => e.message).join(', ')}`);
+			throw new Error(`UI validation error: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}
@@ -44,7 +44,7 @@ export function validateMetadataFields(data: unknown) {
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			logger.error('Error validando campos de metadata:', { error: error.issues });
-			throw new Error(`Error de validación metadata: ${error.issues.map((e) => e.message).join(', ')}`);
+			throw new Error(`Metadata validation error: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}
@@ -61,7 +61,7 @@ export function validateRelations(relations: unknown, allowedRelations: string[]
 	const invalidRelations = Object.keys(relations as object).filter((key) => !allowedRelations.includes(key));
 
 	if (invalidRelations.length > 0) {
-		throw new Error(`Relaciones inválidas: ${invalidRelations.join(', ')}`);
+		throw new Error(`Invalid relations: ${invalidRelations.join(', ')}`);
 	}
 }
 
@@ -113,8 +113,8 @@ export function validateSearchFilters(filters: unknown) {
 		return searchFilterSchema.parse(filters);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			logger.error('Error validando filtros de búsqueda:', { error: error.issues });
-			throw new Error(`Error de validación de filtros: ${error.issues.map((e) => e.message).join(', ')}`);
+			logger.error('Could not validate search filters:', { error: error.issues });
+			throw new Error(`Filter validation error: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}
@@ -136,8 +136,8 @@ export function validateSearchOptions(options: unknown) {
 		return searchOptionsSchema.parse(options);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			logger.error('Error validando opciones de búsqueda:', { error: error.issues });
-			throw new Error(`Error de validación de opciones: ${error.issues.map((e) => e.message).join(', ')}`);
+			logger.error('Could not validate search options:', { error: error.issues });
+			throw new Error(`Options validation error: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}

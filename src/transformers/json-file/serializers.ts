@@ -21,7 +21,7 @@ export function validateAndSerializeJsonFile(input: unknown): JsonFileWithStats 
 
 	// Validaciones básicas
 	if (!data.name || typeof data.name !== 'string') {
-		throw new Error('El nombre es requerido y debe ser una cadena');
+		throw new Error('The name is required y debe ser una cadena');
 	}
 
 	if (!data.content) {
@@ -48,7 +48,7 @@ export function validateAndSerializeJsonFile(input: unknown): JsonFileWithStats 
 		validationErrors: null,
 		keyCount: calculateKeyCount(data.content),
 		depth: calculateNestingDepth(data.content),
-		entityType: 'json-file',
+		entityType: 'jsonFile',
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		// Estadísticas calculadas

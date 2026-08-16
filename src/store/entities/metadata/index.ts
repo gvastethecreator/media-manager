@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { createSelectors } from '@/lib/utils/store-selectors.utils';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
 
 // Importar slices
 import { CoreActions, CoreState, createCoreSlice } from './slices/core.slice';

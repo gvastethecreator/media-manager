@@ -2,24 +2,24 @@ import { Building2, Cloud, Compass, Droplets, Mountain, Palmtree, Sparkles, Spro
 import { cn } from '@/lib/utils';
 
 interface PlaceCardHeaderProps {
-	/** Nombre del lugar */
-	name: string;
-	/** Emoji que representa el lugar */
-	emoji: string;
-	/** Color primario para el tema */
-	color: string;
-	/** Región donde se encuentra el lugar */
-	region?: string;
-	/** Tipo de lugar (ciudad, bosque, etc.) */
-	type?: string;
 	/** Clima del lugar */
 	climate?: string;
-	/** Si el lugar está marcado como favorito */
-	isFavorite?: boolean;
-	/** Si está en modo TCG con efectos especiales */
-	tcgMode?: boolean;
+	/** Color primario para el tema */
+	color: string;
 	/** Si está en modo compacto */
 	compact?: boolean;
+	/** Emoji que representa el lugar */
+	emoji: string;
+	/** Si el lugar está marcado como favorito */
+	isFavorite?: boolean;
+	/** Nombre del lugar */
+	name: string;
+	/** Región donde se encuentra el lugar */
+	region?: string;
+	/** Si está en modo TCG con efectos especiales */
+	tcgMode?: boolean;
+	/** Tipo de lugar (ciudad, bosque, etc.) */
+	type?: string;
 }
 
 /**
@@ -31,8 +31,8 @@ export function PlaceCardHeader({
 	name,
 	emoji,
 	color,
-	region = 'Desconocido',
-	type = 'Desconocido',
+	region = 'Unknown',
+	type = 'Unknown',
 	climate = 'Templado',
 	isFavorite = false,
 	tcgMode = true,
@@ -41,39 +41,39 @@ export function PlaceCardHeader({
 	const getTypeIcon = () => {
 		const typeLC = type.toLowerCase();
 		if (typeLC.includes('city') || typeLC.includes('ciudad')) {
-			return <Building2 className="h-3.5 w-3.5" />;
+			return <Building2 className="h-4 w-4" />;
 		}
 		if (typeLC.includes('forest') || typeLC.includes('bosque')) {
-			return <Trees className="h-3.5 w-3.5" />;
+			return <Trees className="h-4 w-4" />;
 		}
 		if (typeLC.includes('mountain') || typeLC.includes('montaña')) {
-			return <Mountain className="h-3.5 w-3.5" />;
+			return <Mountain className="h-4 w-4" />;
 		}
 		if (typeLC.includes('desert') || typeLC.includes('desierto')) {
-			return <Palmtree className="h-3.5 w-3.5" />;
+			return <Palmtree className="h-4 w-4" />;
 		}
-		return <Compass className="h-3.5 w-3.5" />;
+		return <Compass className="h-4 w-4" />;
 	};
 
 	// Determinar icono según el clima
 	const getClimateIcon = () => {
 		const climateLC = climate.toLowerCase();
 		if (climateLC.includes('tropical')) {
-			return <Palmtree className="h-3.5 w-3.5" />;
+			return <Palmtree className="h-4 w-4" />;
 		}
 		if (climateLC.includes('desert') || climateLC.includes('desierto')) {
-			return <Palmtree className="h-3.5 w-3.5" />;
+			return <Palmtree className="h-4 w-4" />;
 		}
 		if (climateLC.includes('cold') || climateLC.includes('frío')) {
-			return <Cloud className="h-3.5 w-3.5" />;
+			return <Cloud className="h-4 w-4" />;
 		}
 		if (climateLC.includes('rain') || climateLC.includes('lluvia')) {
-			return <Droplets className="h-3.5 w-3.5" />;
+			return <Droplets className="h-4 w-4" />;
 		}
 		if (climateLC.includes('forest') || climateLC.includes('bosque')) {
-			return <Sprout className="h-3.5 w-3.5" />;
+			return <Sprout className="h-4 w-4" />;
 		}
-		return <Cloud className="h-3.5 w-3.5" />;
+		return <Cloud className="h-4 w-4" />;
 	};
 
 	return (
@@ -82,7 +82,7 @@ export function PlaceCardHeader({
 			<div
 				className="relative flex h-16 items-center overflow-hidden px-3.5 pt-2.5"
 				style={{
-					background: `linear-gradient(90deg, ${color}95, ${color}70)`,
+					background: `linear-gradient(90deg, color-mix(in oklab, ${color}, transparent 5%), color-mix(in oklab, ${color}, transparent 30%))`,
 					borderBottom: `2px solid ${color}`,
 				}}
 			>
@@ -91,9 +91,9 @@ export function PlaceCardHeader({
 					className="absolute inset-0 opacity-20"
 					style={{
 						backgroundImage:
-							'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), ' +
-							'radial-gradient(circle at 80% 50%, white 1px, transparent 1px), ' +
-							'radial-gradient(circle at 50% 20%, white 1px, transparent 1px)',
+							'radial-gradient(circle at 20% 50%, rgba(var(--effect-highlight-rgb), 1) 1px, transparent 1px), ' +
+							'radial-gradient(circle at 80% 50%, rgba(var(--effect-highlight-rgb), 1) 1px, transparent 1px), ' +
+							'radial-gradient(circle at 50% 20%, rgba(var(--effect-highlight-rgb), 1) 1px, transparent 1px)',
 						backgroundSize: '20px 20px, 20px 20px, 30px 30px',
 					}}
 				/>
@@ -113,12 +113,12 @@ export function PlaceCardHeader({
 					{/* Emoji (como símbolo de la tarjeta en TCG) */}
 					<div
 						className={cn(
-							'relative flex flex-shrink-0 items-center justify-center rounded-full text-xl',
+							'relative flex shrink-0 items-center justify-center rounded-full text-xl',
 							tcgMode ? 'h-10 w-10' : 'h-8 w-8'
 						)}
 						style={{
-							background: `radial-gradient(circle, ${color}30 0%, ${color}60 100%)`,
-							boxShadow: `0 0 8px rgba(0,0,0,0.4), inset 0 0 5px ${color}`,
+							background: `radial-gradient(circle, color-mix(in oklab, ${color}, transparent 70%) 0%, color-mix(in oklab, ${color}, transparent 40%) 100%)`,
+							boxShadow: `0 0 8px rgba(var(--effect-shadow-rgb), 0.4), inset 0 0 5px ${color}`,
 						}}
 					>
 						{/* Efecto de brillo en el emoji */}
@@ -126,13 +126,13 @@ export function PlaceCardHeader({
 							<div
 								className="absolute top-0 left-1/4 h-1/3 w-1/2 blur-[1px]"
 								style={{
-									background: 'linear-gradient(to bottom, rgba(255,255,255,0.7), transparent)',
+									background: 'linear-gradient(to bottom, rgba(var(--effect-highlight-rgb), 0.7), transparent)',
 								}}
 							/>
 						</div>
 
 						{/* Anillo brillante alrededor del emoji */}
-						<div className="absolute inset-0 rounded-full border-2 border-white/20" />
+						<div className="absolute inset-0 rounded-full border-2 border-border/60" />
 
 						<span className="relative z-10 drop-shadow-sm">{emoji}</span>
 					</div>
@@ -145,21 +145,22 @@ export function PlaceCardHeader({
 						</h3>
 
 						{/* Subtítulo con región */}
-						<div className="flex items-center gap-1 text-white/80 text-xs">
-							<Compass className="h-3.5 w-3.5" />
+						<div className="flex items-center gap-1 text-sm text-white/80">
+							<Compass className="h-4 w-4" />
 							<span className="truncate">{region}</span>
 						</div>
 					</div>
 				</div>
 
 				{/* Parte derecha: Clima y Favorito */}
-				<div className="relative z-10 flex flex-shrink-0 items-center gap-1">
+				<div className="relative z-10 flex shrink-0 items-center gap-1">
 					{isFavorite && (
 						<span
 							className="flex items-center justify-center rounded-full px-2 py-0.5"
 							style={{
-								background: 'rgba(255, 255, 255, 0.3)',
-								boxShadow: '0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 3px rgba(255, 255, 255, 0.5)',
+								background: 'rgba(var(--effect-highlight-rgb), 0.3)',
+								boxShadow:
+									'0 0 10px rgba(var(--effect-highlight-rgb), 0.5), inset 0 0 3px rgba(var(--effect-highlight-rgb), 0.5)',
 							}}
 						>
 							<Sparkles className="h-4 w-4 text-white" />
@@ -170,8 +171,8 @@ export function PlaceCardHeader({
 					<div
 						className="flex h-8 w-8 items-center justify-center rounded-full text-white"
 						style={{
-							background: `radial-gradient(circle, ${color} 0%, ${color}90 100%)`,
-							boxShadow: `0 0 8px rgba(0,0,0,0.4), inset 0 0 5px ${color}60`,
+							background: `radial-gradient(circle, ${color} 0%, color-mix(in oklab, ${color}, transparent 10%) 100%)`,
+							boxShadow: `0 0 8px rgba(var(--effect-shadow-rgb), 0.4), inset 0 0 5px color-mix(in oklab, ${color}, transparent 40%)`,
 						}}
 					>
 						{getClimateIcon()}
@@ -181,30 +182,31 @@ export function PlaceCardHeader({
 				{/* Elementos decorativos de esquina estilo TCG */}
 				<div
 					className="absolute top-0 left-0 h-5 w-5 rounded-br-sm border-t-2 border-l-2"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 				<div
 					className="absolute top-0 right-0 h-5 w-5 rounded-bl-sm border-t-2 border-r-2"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 			</div>
 
 			{/* Tipo de lugar - similar a la línea de tipo en TCG */}
 			<div
-				className="relative flex items-center justify-between px-3.5 py-1.5 text-white text-xs"
+				className="relative flex items-center justify-between px-3.5 py-1.5 text-sm text-white"
 				style={{
-					borderBottom: `2px solid ${color}70`,
-					background: 'linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.5))',
+					borderBottom: `2px solid color-mix(in oklab, ${color}, transparent 30%)`,
+					background:
+						'linear-gradient(to right, rgba(var(--effect-shadow-rgb), 0.6), rgba(var(--effect-shadow-rgb), 0.5))',
 				}}
 			>
 				{/* Decoración de esquina de TCG */}
 				<div
 					className="absolute top-0 left-0 h-4 w-4 border-t border-l"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 				<div
 					className="absolute top-0 right-0 h-4 w-4 border-t border-r"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 
 				<span className="ml-1 flex items-center gap-1 font-semibold tracking-wide">
@@ -218,21 +220,21 @@ export function PlaceCardHeader({
 						className="h-1.5 w-1.5 rounded-full"
 						style={{
 							backgroundColor: color,
-							boxShadow: '0 0 2px rgba(255, 255, 255, 0.7)',
+							boxShadow: '0 0 2px rgba(var(--effect-highlight-rgb), 0.7)',
 						}}
 					/>
 					<div
 						className="h-1.5 w-1.5 rounded-full"
 						style={{
 							backgroundColor: color,
-							boxShadow: '0 0 2px rgba(255, 255, 255, 0.7)',
+							boxShadow: '0 0 2px rgba(var(--effect-highlight-rgb), 0.7)',
 						}}
 					/>
 					<div
 						className="h-1.5 w-1.5 rounded-full"
 						style={{
 							backgroundColor: color,
-							boxShadow: '0 0 2px rgba(255, 255, 255, 0.7)',
+							boxShadow: '0 0 2px rgba(var(--effect-highlight-rgb), 0.7)',
 						}}
 					/>
 				</div>

@@ -13,6 +13,7 @@ import {
 	getCollectionsFromApi,
 	updateCollectionInApi,
 } from '@/lib/api/client/collection.client';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import type { CollectionState } from '../types';
 
@@ -20,31 +21,31 @@ import type { CollectionState } from '../types';
  * Slice principal con operaciones CRUD básicas para colecciones
  */
 export interface CollectionCoreSlice {
-	// Operaciones de consulta
-	getCollectionById: (id: string) => CollectionWithStats | undefined;
-	getCollections: () => CollectionWithStats[];
-	getSelectedCollection: () => CollectionWithStats | undefined;
-
-	// Operaciones de mutación
-	setCollections: (collections: CollectionWithStats[]) => void;
 	addCollection: (collection: CollectionWithStats) => void;
-	updateCollection: (id: string, data: Partial<CollectionWithStats>) => void;
-	removeCollection: (id: string) => void;
-	selectCollection: (id: string | null) => void;
-
-	// Estado de carga y errores
-	setLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
+	createCollectionServer: (data: CollectionCreateInput) => Promise<CollectionWithStats | undefined>;
 
 	// Acciones asíncronas con Server Actions
 	fetchCollection: (id: string) => Promise<CollectionWithStats | undefined>;
 	fetchCollections: () => Promise<CollectionWithStats[]>;
-	createCollectionServer: (data: CollectionCreateInput) => Promise<CollectionWithStats | undefined>;
+	// Operaciones de consulta
+	getCollectionById: (id: string) => CollectionWithStats | undefined;
+	getCollections: () => CollectionWithStats[];
+	getSelectedCollection: () => CollectionWithStats | undefined;
+	removeCollection: (id: string) => void;
+	removeCollectionServer: (id: string) => Promise<boolean>;
+	selectCollection: (id: string | null) => void;
+
+	// Operaciones de mutación
+	setCollections: (collections: CollectionWithStats[]) => void;
+	setError: (error: string | null) => void;
+
+	// Estado de carga y errores
+	setLoading: (isLoading: boolean) => void;
+	updateCollection: (id: string, data: Partial<CollectionWithStats>) => void;
 	updateCollectionServer: (
 		id: string,
 		data: Partial<CollectionUpdateInput>
 	) => Promise<CollectionWithStats | undefined>;
-	removeCollectionServer: (id: string) => Promise<boolean>;
 }
 
 /**
@@ -148,7 +149,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error fetching collection:', error);
+			clientLogger.error('Error fetching collection:', error);
 			return;
 		} finally {
 			set({ isLoading: false });
@@ -163,7 +164,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return collections;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error fetching collections:', error);
+			clientLogger.error('Error fetching collections:', error);
 			return [];
 		} finally {
 			set({ isLoading: false });
@@ -178,7 +179,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return newCollection;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error creating collection:', error);
+			clientLogger.error('Error creating collection:', error);
 			return;
 		} finally {
 			set({ isLoading: false });
@@ -193,7 +194,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return updatedCollection;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error updating collection:', error);
+			clientLogger.error('Error updating collection:', error);
 			return;
 		} finally {
 			set({ isLoading: false });
@@ -208,7 +209,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return true;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error removing collection:', error);
+			clientLogger.error('Error removing collection:', error);
 			return false;
 		} finally {
 			set({ isLoading: false });

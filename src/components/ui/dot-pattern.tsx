@@ -3,14 +3,14 @@ import { useId } from 'react';
 import { cn } from '@/lib/utils';
 
 interface DotPatternProps {
-	width?: number;
-	height?: number;
-	x?: number;
-	y?: number;
+	className?: string;
+	cr?: number;
 	cx?: number;
 	cy?: number;
-	cr?: number;
-	className?: string;
+	height?: number;
+	width?: number;
+	x?: number;
+	y?: number;
 	[key: string]: unknown;
 }
 export function DotPattern({

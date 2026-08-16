@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { devtools, persist as zustandPersist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { createSelectors } from '@/lib/utils/store-selectors.utils';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
 import { settingsClient } from '@/services/settings/settings.client';
 import type { Settings, SettingsUpdate } from '@/types/settings';
 
@@ -16,36 +16,36 @@ const logger = clientLogger.withContext('SettingsStore');
 
 // Interfaz del estado para la store de configuración
 interface SettingsState {
-	// Datos actuales de configuración
-	settings: Settings | null;
-	// Estado de carga
-	isLoading: boolean;
-	// Estado de error
-	error: string | null;
-	// Indica si se están guardando cambios
-	isSaving: boolean;
-	// Indica si se ha cargado la configuración
-	isInitialized: boolean;
 	// Perfil activo (si hay uno)
 	activeProfileId: string | null;
+	// Estado de error
+	error: string | null;
+	// Indica si se ha cargado la configuración
+	isInitialized: boolean;
+	// Estado de carga
+	isLoading: boolean;
+	// Indica si se están guardando cambios
+	isSaving: boolean;
+	// Datos actuales de configuración
+	settings: Settings | null;
 }
 
 // Interfaz de acciones para la store de configuración
 interface SettingsActions {
 	// Inicializa la configuración global
 	initialize: () => Promise<void>;
-	// Carga la configuración global del sistema
-	loadSystemSettings: () => Promise<void>;
 	// Carga la configuración de un perfil específico
 	loadProfileSettings: (profileId: string) => Promise<void>;
-	// Actualiza la configuración global
-	updateSettings: (data: SettingsUpdate) => Promise<void>;
+	// Carga la configuración global del sistema
+	loadSystemSettings: () => Promise<void>;
 	// Restablece la configuración a valores predeterminados
 	resetSettings: () => Promise<void>;
 	// Cambia al perfil activo
 	setActiveProfile: (profileId: string | null) => void;
 	// Establece un mensaje de error
 	setError: (error: string | null) => void;
+	// Actualiza la configuración global
+	updateSettings: (data: SettingsUpdate) => Promise<void>;
 }
 
 // Combinación de estado y acciones
@@ -271,4 +271,4 @@ export const selectPrivacy = (state: SettingsState) => state.settings?.privacy;
 export const selectAdvanced = (state: SettingsState) => state.settings?.advanced;
 
 export const selectTheme = (state: SettingsState) => state.settings?.appearance.theme || 'system';
-export const selectLanguage = (state: SettingsState) => state.settings?.appearance.language || 'es';
+export const selectLanguage = (state: SettingsState) => state.settings?.appearance.language || 'en';

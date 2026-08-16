@@ -6,28 +6,28 @@ export interface BaseEntity {
 }
 
 export interface BaseState<T extends BaseEntity> {
-	items: T[];
-	loading: boolean;
-	error: Error | null;
 	currentPage: number;
-	totalPages: number;
+	error: Error | null;
+	items: T[];
 	itemsPerPage: number;
+	lastSelectedItem: T | null;
+	loading: boolean;
 	selectedItem: T | null;
 	selectedItems: T[];
-	lastSelectedItem: T | null;
+	totalPages: number;
 }
 
 export interface BaseActions<T extends BaseEntity, CreateType = Partial<T>, UpdateType = Partial<T>> {
+	clearSelection: () => void;
+	createItem: (data: CreateType) => Promise<void>;
+	deleteItem: (id: string) => Promise<void>;
+	deselectItem: (id: string) => void;
 	loadItems: () => Promise<void>;
 	loadMoreItems: () => Promise<void>;
 	refreshItems: () => Promise<void>;
-	createItem: (data: CreateType) => Promise<void>;
-	updateItem: (id: string, data: UpdateType) => Promise<void>;
-	deleteItem: (id: string) => Promise<void>;
 	selectItem: (item: T) => void;
-	deselectItem: (id: string) => void;
 	toggleItemSelection: (item: T, isMultiSelect: boolean) => void;
-	clearSelection: () => void;
+	updateItem: (id: string, data: UpdateType) => Promise<void>;
 }
 
 export type BaseStore<T extends BaseEntity, CreateType = Partial<T>, UpdateType = Partial<T>> = BaseState<T> &
@@ -47,12 +47,12 @@ export type StoreCreator<
 	UpdateType = Partial<T>,
 > = StateCreator<ExtendedStore<T, S, CreateType, UpdateType>, [], [], ExtendedStore<T, S, CreateType, UpdateType>>;
 
-export type StoreHook<
+export interface StoreHook<
 	T extends BaseEntity,
 	S = Record<string, unknown>,
 	CreateType = Partial<T>,
 	UpdateType = Partial<T>,
-> = {
+> {
 	(): ExtendedStore<T, S, CreateType, UpdateType>;
 	<U>(selector: (state: ExtendedStore<T, S, CreateType, UpdateType>) => U): U;
-};
+}

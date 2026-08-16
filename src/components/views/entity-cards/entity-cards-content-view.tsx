@@ -5,9 +5,9 @@ import type { AnyEntityWithStats } from '@/types/entities';
 
 interface EntityCardsContentViewProps {
 	data: NavigationData | undefined;
-	isLoading: boolean;
-	isError: boolean;
 	error: Error | null;
+	isError: boolean;
+	isLoading: boolean;
 }
 
 const EntityCardsContentView: React.FC<EntityCardsContentViewProps> = memo(function EntityCardsContentView({
@@ -19,7 +19,7 @@ const EntityCardsContentView: React.FC<EntityCardsContentViewProps> = memo(funct
 	if (isLoading) {
 		return (
 			<div className="flex h-full w-full flex-col items-center justify-center p-6">
-				<p className="text-muted-foreground">Cargando datos de entidades...</p>
+				<p className="text-muted-foreground">Loading entity data...</p>
 			</div>
 		);
 	}
@@ -27,7 +27,7 @@ const EntityCardsContentView: React.FC<EntityCardsContentViewProps> = memo(funct
 	if (isError) {
 		return (
 			<div className="flex h-full w-full flex-col items-center justify-center p-6">
-				<p className="text-red-500">Error al cargar los datos: {error?.message}</p>
+				<p className="text-destructive">Error loading data: {error?.message}</p>
 			</div>
 		);
 	}
@@ -200,10 +200,10 @@ const EntityCardsContentView: React.FC<EntityCardsContentViewProps> = memo(funct
 		})) as unknown as AnyEntityWithStats[];
 
 		return [
-			{ key: 'folders', title: `Carpetas (${mapFolders.length})`, items: mapFolders },
-			{ key: 'collections', title: `Colecciones (${mapCollections.length})`, items: mapCollections },
-			{ key: 'tags', title: `Etiquetas (${mapTags.length})`, items: mapTags },
-			{ key: 'places', title: `Lugares (${mapPlaces.length})`, items: mapPlaces },
+			{ key: 'folders', title: `Folders (${mapFolders.length})`, items: mapFolders },
+			{ key: 'collections', title: `Collections (${mapCollections.length})`, items: mapCollections },
+			{ key: 'tags', title: `Tags (${mapTags.length})`, items: mapTags },
+			{ key: 'places', title: `Places (${mapPlaces.length})`, items: mapPlaces },
 			{ key: 'world-items', title: `World Items (${mapWorldItems.length})`, items: mapWorldItems },
 		].filter((s) => s.items.length > 0);
 	}, [data]);

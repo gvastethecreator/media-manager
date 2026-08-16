@@ -32,6 +32,7 @@ import {
 	imageWorldItems,
 	jsonFiles,
 	metadatas,
+	sourceFiles,
 	thumbnails,
 	uploadedImages,
 	videoAlbums,
@@ -60,15 +61,15 @@ const syncLogger = serverLogger.withContext('FolderSync');
  */
 export interface FolderSyncResult {
 	added: Array<{ id: string; path: string; name: string }>; // Carpetas agregadas
-	removed: Array<{ id: string; path: string; name: string }>; // Carpetas eliminadas
-	updated: Array<{ id: string; oldPath: string; newPath: string }>; // Carpetas actualizadas
 	errors: string[]; // Errores durante la sincronización
+	removed: Array<{ id: string; path: string; name: string }>; // Carpetas eliminadas
 	stats: {
 		totalProcessed: number;
 		duration: number;
 		startTime: Date;
 		endTime: Date;
 	};
+	updated: Array<{ id: string; oldPath: string; newPath: string }>; // Carpetas actualizadas
 }
 
 /**
@@ -76,10 +77,10 @@ export interface FolderSyncResult {
  */
 export interface FolderSyncOptions {
 	dryRun?: boolean; // Solo simular, no hacer cambios reales
-	maxDepth?: number; // Profundidad máxima de escaneo
-	includeHidden?: boolean; // Incluir carpetas ocultas
-	ignorePatterns?: string[]; // Patrones de carpetas a ignorar
 	forceSync?: boolean; // Forzar sincronización incluso si hay errores
+	ignorePatterns?: string[]; // Patrones de carpetas a ignorar
+	includeHidden?: boolean; // Incluir carpetas ocultas
+	maxDepth?: number; // Profundidad máxima de escaneo
 }
 
 /**
@@ -237,6 +238,7 @@ async function scanFileSystemFromRoot(
 			recursive: true,
 			maxDepth: options.maxDepth,
 			includeHidden: options.includeHidden,
+			limit: 0,
 		});
 
 		// Agregar todas las subcarpetas encontradas
@@ -362,7 +364,42 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 	try {
 		// 1. Eliminar contenidos y relaciones de carpetas que ya no existen
 		if (result.removed.length > 0) {
-			const folderIds = result.removed.map((f) => f.id);
+			const observedFolderIds = result.removed.map((folder) => folder.id);
+			const removedFolderRows: Array<{ id: string; parentId: string | null }> = await db
+				.select({ id: folders.id, parentId: folders.parentId })
+				.from(folders)
+				.where(inArray(folders.id, observedFolderIds));
+			const canonicalSources: Array<{ folderId: string | null; id: string }> = await db
+				.select({ folderId: sourceFiles.folderId, id: sourceFiles.id })
+				.from(sourceFiles)
+				.where(inArray(sourceFiles.folderId, observedFolderIds));
+			const protectedFolderIds = new Set(
+				canonicalSources.flatMap((source) => (source.folderId ? [source.folderId] : []))
+			);
+			const removedParentById = new Map(removedFolderRows.map((folder) => [folder.id, folder.parentId]));
+			for (const sourceFolderId of [...protectedFolderIds]) {
+				let ancestorId = removedParentById.get(sourceFolderId) ?? null;
+				while (ancestorId && !protectedFolderIds.has(ancestorId)) {
+					protectedFolderIds.add(ancestorId);
+					ancestorId = removedParentById.get(ancestorId) ?? null;
+				}
+			}
+			if (canonicalSources.length > 0) {
+				await db
+					.update(sourceFiles)
+					.set({ availability: 'missing', observedAt: new Date(), updatedAt: new Date() })
+					.where(
+						inArray(
+							sourceFiles.id,
+							canonicalSources.map((source) => source.id)
+						)
+					);
+				syncLogger.warn('Se preservaron carpetas y placements canónicos ausentes', {
+					canonicalSources: canonicalSources.length,
+					folders: protectedFolderIds.size,
+				});
+			}
+			const folderIds = observedFolderIds.filter((folderId) => !protectedFolderIds.has(folderId));
 
 			syncLogger.info(`🗑️ Limpieza en cascada para ${folderIds.length} carpetas eliminadas`);
 
@@ -406,9 +443,7 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 							tx.delete(imageConcepts).where(inArray(imageConcepts.A, ids)),
 							tx.delete(imagePrompts).where(inArray(imagePrompts.A, ids)),
 							tx.delete(imageNotes).where(inArray(imageNotes.A, ids)),
-							tx
-								.delete(groupImages)
-								.where(inArray(groupImages.A, ids)), // Fixed: usando A en lugar de imageId
+							tx.delete(groupImages).where(inArray(groupImages.A, ids)), // Fixed: usando A en lugar de imageId
 						]);
 					}
 				}
@@ -428,9 +463,7 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 							tx.delete(videoConcepts).where(inArray(videoConcepts.A, ids)),
 							tx.delete(videoPrompts).where(inArray(videoPrompts.A, ids)),
 							tx.delete(videoNotes).where(inArray(videoNotes.A, ids)),
-							tx
-								.delete(groupVideos)
-								.where(inArray(groupVideos.A, ids)), // Fixed: usando A en lugar de videoId
+							tx.delete(groupVideos).where(inArray(groupVideos.A, ids)), // Fixed: usando A en lugar de videoId
 						]);
 					}
 				}
@@ -493,9 +526,11 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 				if (jsonIds.length > 0) {
 					for (const ids of chunk(jsonIds, 800)) {
 						await Promise.all([
-							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'json'))),
-							tx.delete(thumbnails).where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'json'))),
-							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'json'))),
+							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'jsonFile'))),
+							tx
+								.delete(thumbnails)
+								.where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'jsonFile'))),
+							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'jsonFile'))),
 						]);
 					}
 				}
@@ -538,7 +573,11 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 				}
 			});
 
-			syncLogger.info(`✅ Limpieza en cascada completada y carpetas eliminadas: ${result.removed.length}`);
+			if (folderIds.length > 0) {
+				syncLogger.info(`✅ Limpieza en cascada completada y carpetas eliminadas: ${folderIds.length}`);
+			} else {
+				syncLogger.info('✅ No hubo limpieza destructiva: todas las carpetas ausentes contienen placements canónicos');
+			}
 		}
 
 		// 2. Agregar nuevas carpetas
@@ -672,6 +711,7 @@ export async function syncSpecificFolder(folderId: string, options: FolderSyncOp
 		.select({
 			id: folders.id,
 			name: folders.name,
+			parentId: folders.parentId,
 			path: folders.path,
 		})
 		.from(folders)
@@ -679,25 +719,43 @@ export async function syncSpecificFolder(folderId: string, options: FolderSyncOp
 		.limit(1);
 
 	if (folder.length === 0) {
-		throw new Error(`Carpeta con ID ${folderId} no encontrada`);
+		throw new Error(`Folder with ID ${folderId} no encontrada`);
 	}
 
 	// Verificar si la carpeta aún existe en el sistema de archivos
 	const folderPath = folder[0].path;
 	if (!(await folderExists(folderPath))) {
-		// La carpeta no existe, marcarla para eliminación
-		return {
+		const allFolders: Array<{ id: string; name: string; parentId: string | null; path: string }> = await db
+			.select({ id: folders.id, name: folders.name, parentId: folders.parentId, path: folders.path })
+			.from(folders);
+		const removedFolderIds = new Set([folderId]);
+		let expanded = true;
+		while (expanded) {
+			expanded = false;
+			for (const candidate of allFolders) {
+				if (candidate.parentId && removedFolderIds.has(candidate.parentId) && !removedFolderIds.has(candidate.id)) {
+					removedFolderIds.add(candidate.id);
+					expanded = true;
+				}
+			}
+		}
+		const removed = allFolders
+			.filter((candidate) => removedFolderIds.has(candidate.id))
+			.map(({ id, name, path }) => ({ id, name, path }));
+		const result: FolderSyncResult = {
 			added: [],
-			removed: [{ id: folder[0].id, path: folder[0].path, name: folder[0].name }],
+			removed,
 			updated: [],
 			errors: [],
 			stats: {
-				totalProcessed: 1,
+				totalProcessed: removed.length,
 				duration: 0,
 				startTime: new Date(),
 				endTime: new Date(),
 			},
 		};
+		if (!options.dryRun) await executeSyncChanges(result);
+		return result;
 	}
 
 	// Si existe, realizar sincronización completa desde esta carpeta

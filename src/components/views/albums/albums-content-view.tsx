@@ -1,8 +1,8 @@
 import { Album as AlbumIcon, Edit, Trash2 } from 'lucide-react';
 import React from 'react';
-import { AlbumCard } from '@/components/cards/album-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { AlbumCard } from '@/components/cards/album-card/album-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -23,22 +23,22 @@ import { Textarea } from '@/components/ui/textarea';
 import type { AlbumWithStats } from '@/types/entities/album';
 
 interface AlbumsContentViewProps {
-	albums: AlbumWithStats[];
-	isLoading: boolean;
-	error: string | null;
-	showForm: boolean;
-	editingAlbum: AlbumWithStats | null;
-	albumName: string;
 	albumDescription: string;
-	setShowForm: (show: boolean) => void;
-	setEditingAlbum: (album: AlbumWithStats | null) => void;
-	setAlbumName: (name: string) => void;
-	setAlbumDescription: (description: string) => void;
-	handleAlbumClick: (album: AlbumWithStats) => void;
-	handleEditAlbum: (album: AlbumWithStats) => void;
-	handleDeleteAlbum: (albumId: string) => void;
-	handleSubmitForm: () => void;
+	albumName: string;
+	albums: AlbumWithStats[];
 	className?: string;
+	editingAlbum: AlbumWithStats | null;
+	error: string | null;
+	handleAlbumClick: (album: AlbumWithStats) => void;
+	handleDeleteAlbum: (albumId: string) => void;
+	handleEditAlbum: (album: AlbumWithStats) => void;
+	handleSubmitForm: () => void;
+	isLoading: boolean;
+	setAlbumDescription: (description: string) => void;
+	setAlbumName: (name: string) => void;
+	setEditingAlbum: (album: AlbumWithStats | null) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 const MemoizedAlbumCard = React.memo(
@@ -94,18 +94,16 @@ const MemoizedAlbumCard = React.memo(
 					</AlertDialogTrigger>
 					<AlertDialogContent>
 						<AlertDialogHeader>
-							<AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-							<AlertDialogDescription>
-								Esta acción eliminará permanentemente el álbum "{album.name}".
-							</AlertDialogDescription>
+							<AlertDialogTitle>Delete this album?</AlertDialogTitle>
+							<AlertDialogDescription>This will permanently delete the album "{album.name}".</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Cancelar</AlertDialogCancel>
+							<AlertDialogCancel>Cancel</AlertDialogCancel>
 							<AlertDialogAction
 								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 								onClick={() => onDelete(album.id)}
 							>
-								Eliminar
+								Delete
 							</AlertDialogAction>
 						</AlertDialogFooter>
 					</AlertDialogContent>
@@ -153,7 +151,7 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'h-full'}>
 			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Álbumes</h2>
+				<h2 className="mb-4 font-bold text-xl">Albums</h2>
 
 				<Button
 					className="mb-4"
@@ -164,42 +162,38 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 						setAlbumDescription('');
 					}}
 				>
-					{showForm ? 'Cancelar' : 'Crear Álbum'}
+					{showForm ? 'Cancel' : 'Create Album'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">{editingAlbum ? 'Editar Álbum' : 'Nuevo Álbum'}</h3>
+						<h3 className="mb-3 font-semibold text-lg">{editingAlbum ? 'Edit Album' : 'New Album'}</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="albumName">Nombre</Label>
+							<Label htmlFor="albumName">Name</Label>
 							<Input
 								id="albumName"
 								onChange={(e) => setAlbumName(e.target.value)}
-								placeholder="Nombre del álbum"
+								placeholder="Album name"
 								value={albumName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="albumDescription">Descripción</Label>
+							<Label htmlFor="albumDescription">Description</Label>
 							<Textarea
 								id="albumDescription"
 								onChange={(e) => setAlbumDescription(e.target.value)}
-								placeholder="Descripción del álbum (opcional)"
+								placeholder="Album description (optional)"
 								value={albumDescription}
 							/>
 						</div>
-						<Button onClick={handleSubmitForm}>{editingAlbum ? 'Guardar Cambios' : 'Guardar Álbum'}</Button>
+						<Button onClick={handleSubmitForm}>{editingAlbum ? 'Save Changes' : 'Save Album'}</Button>
 					</div>
 				)}
 
 				{(!albums || albums.length === 0) && !isLoading && !showForm ? (
-					<EmptyState
-						description="Crea un álbum para organizar tus imágenes."
-						icon={AlbumIcon}
-						title="No hay álbumes creados"
-					/>
+					<EmptyState description="Create an album to organize your images." icon={AlbumIcon} title="No albums yet" />
 				) : (
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{albums?.map((album, index) => {
 							const onAlbumClick = () => handleAlbumClick(album);
 							return (

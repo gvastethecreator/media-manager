@@ -13,41 +13,35 @@ import type { FileItem } from '@/types/files';
 import { useProgressTracking } from './use-progress-tracking';
 
 export interface DownloadQueueItem {
-	id: string;
-	files: FileItem[];
-	options: DownloadOptions;
-	status: 'pending' | 'downloading' | 'completed' | 'failed' | 'cancelled';
-	result?: DownloadResult | BatchDownloadResult;
-	error?: string;
 	createdAt: number;
+	error?: string;
+	files: FileItem[];
+	id: string;
+	options: DownloadOptions;
+	result?: DownloadResult | BatchDownloadResult;
+	status: 'pending' | 'downloading' | 'completed' | 'failed' | 'cancelled';
 }
 
 export interface UseDownloadManagerOptions {
-	/** Maximum number of concurrent downloads */
-	maxConcurrent?: number;
 	/** Auto-start downloads when added to queue */
 	autoStart?: boolean;
+	/** Maximum number of concurrent downloads */
+	maxConcurrent?: number;
 	/** Show notifications for download events */
 	showNotifications?: boolean;
 }
 
 export interface UseDownloadManagerReturn {
-	/** Current download queue */
-	queue: DownloadQueueItem[];
 	/** Active downloads count */
 	activeDownloads: number;
-	/** Whether downloads are currently processing */
-	isProcessing: boolean;
-	/** Download a single file */
-	downloadFile: (file: FileItem, options?: DownloadOptions) => Promise<string>;
-	/** Download multiple files */
-	downloadFiles: (files: FileItem[], options?: DownloadOptions) => Promise<string>;
 	/** Cancel a download */
 	cancelDownload: (downloadId: string) => boolean;
 	/** Clear completed downloads from queue */
 	clearCompleted: () => void;
-	/** Retry a failed download */
-	retryDownload: (downloadId: string) => Promise<void>;
+	/** Download a single file */
+	downloadFile: (file: FileItem, options?: DownloadOptions) => Promise<string>;
+	/** Download multiple files */
+	downloadFiles: (files: FileItem[], options?: DownloadOptions) => Promise<string>;
 	/** Get download statistics */
 	getStats: () => {
 		total: number;
@@ -56,6 +50,12 @@ export interface UseDownloadManagerReturn {
 		pending: number;
 		totalSize: number;
 	};
+	/** Whether downloads are currently processing */
+	isProcessing: boolean;
+	/** Current download queue */
+	queue: DownloadQueueItem[];
+	/** Retry a failed download */
+	retryDownload: (downloadId: string) => Promise<void>;
 }
 
 /**
@@ -89,13 +89,19 @@ export function useDownloadManager(options: UseDownloadManagerOptions = {}): Use
 				let result: DownloadResult | BatchDownloadResult;
 
 				if (downloadItem.files.length === 1) {
-					// Descarga de un único archivo: pasar el FileItem completo para cumplir tipos
 					const file = downloadItem.files[0];
-					result = await enhancedDownloadService.downloadFile(file, downloadItem.options);
+					result = await enhancedDownloadService.downloadFile(file, {
+						...downloadItem.options,
+						operationId: downloadItem.id,
+					});
 				} else {
-					// Descarga múltiple: pasar los FileItem completos
-					result = await enhancedDownloadService.downloadMultipleFiles(downloadItem.files, downloadItem.options);
+					result = await enhancedDownloadService.downloadMultipleFiles(downloadItem.files, {
+						...downloadItem.options,
+						operationId: downloadItem.id,
+					});
 				}
+				if (!result.success)
+					throw new Error('error' in result && result.error ? result.error : 'La descarga no se completó.');
 
 				// Update queue with success
 				setQueue((prev) =>
@@ -111,9 +117,10 @@ export function useDownloadManager(options: UseDownloadManagerOptions = {}): Use
 
 				// Update queue with error
 				setQueue((prev) =>
-					prev.map((item) =>
-						item.id === downloadItem.id ? { ...item, status: 'failed' as const, error: errorMessage } : item
-					)
+					prev.map((item) => {
+						if (item.id !== downloadItem.id || item.status === 'cancelled') return item;
+						return { ...item, status: 'failed' as const, error: errorMessage };
+					})
 				);
 
 				if (showNotifications) {

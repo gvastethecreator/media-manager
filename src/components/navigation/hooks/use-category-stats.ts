@@ -1,21 +1,12 @@
 import { useCallback, useMemo } from 'react';
-import { useNavigationData, useNavigationStats } from '@/lib/api/navigation';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useNavigationData } from '@/lib/api/navigation';
 import type { CategoryChild, NavigationCategory } from '../types';
 
+const logger = clientLogger.withContext('useCategoryStats');
+
 // Tipo que representa cualquier posible item de navegación
-type NavItem = {
-	id: string;
-	name?: string;
-	title?: string;
-	emoji?: string;
-	color?: string;
-	path?: string;
-	description?: string;
-	totalFiles?: number;
-	totalSize?: number;
-	imageCount?: number;
-	itemCount?: number; // Conteo total de elementos
-	parentId?: string | null; // Para jerarquía de carpetas
+interface NavItem {
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -23,15 +14,28 @@ type NavItem = {
 		collections?: number;
 		tags?: number;
 	};
-};
+	color?: string;
+	description?: string;
+	emoji?: string;
+	id: string;
+	imageCount?: number;
+	itemCount?: number; // Conteo total de elementos
+	name?: string;
+	parentId?: string | null; // Para jerarquía de carpetas
+	path?: string;
+	title?: string;
+	totalFiles?: number;
+	totalSize?: number;
+}
 
 /**
  * Hook que proporciona funciones para calcular estadísticas de categorías
  * Migrado para usar API calls en lugar de datos mock
  */
 export function useCategoryStats() {
-	const { data: navigationData, isLoading: isLoadingNavigation } = useNavigationData();
-	const { data: statsData, isLoading: isLoadingStats } = useNavigationStats();
+	const { data: navigationData, isLoading: isLoadingNavigation, error: navError } = useNavigationData();
+
+	if (navError) logger.error('Nav Error:', navError);
 
 	const categoryDataMap = useMemo(() => {
 		if (!navigationData) {
@@ -91,29 +95,27 @@ export function useCategoryStats() {
 				return [];
 			}
 
-			return items.map(
-				(item): CategoryChild => ({
-					id: item.id || '',
-					name: item.name || item.title || '',
-					title: item.title,
-					emoji: item.emoji,
-					color: item.color,
-					path: item.path,
-					description: item.description,
-					itemCount: item.itemCount || item.imageCount || (item._count?.images ?? 0) + (item._count?.videos ?? 0),
-					totalFiles: item.totalFiles || 0,
-					totalSize: item.totalSize || 0,
-					parentId: item.parentId || null,
-					_count: item._count
-						? {
-								images: item._count.images || 0,
-								folders: item._count.folders,
-								collections: item._count.collections,
-								tags: item._count.tags,
-							}
-						: undefined,
-				})
-			);
+			return items.map((item): CategoryChild => ({
+				id: item.id || '',
+				name: item.name || item.title || '',
+				title: item.title,
+				emoji: item.emoji,
+				color: item.color,
+				path: item.path,
+				description: item.description,
+				itemCount: item.itemCount || item.imageCount || (item._count?.images ?? 0) + (item._count?.videos ?? 0),
+				totalFiles: item.totalFiles || 0,
+				totalSize: item.totalSize || 0,
+				parentId: item.parentId || null,
+				_count: item._count
+					? {
+							images: item._count.images || 0,
+							folders: item._count.folders,
+							collections: item._count.collections,
+							tags: item._count.tags,
+						}
+					: undefined,
+			}));
 		},
 		[categoryDataMap]
 	);
@@ -145,31 +147,28 @@ export function useCategoryStats() {
 
 	const stats = useMemo(
 		() => ({
-			totalImages: statsData?.totalImages || navigationData?.stats?.totalImages || 0,
-			totalFolders: statsData?.totalFolders || navigationData?.stats?.totalFolders || 0,
-			totalCollections: statsData?.totalCollections || navigationData?.stats?.totalCollections || 0,
-			totalTags: statsData?.totalTags || navigationData?.stats?.totalTags || 0,
-			totalAlbums: statsData?.totalAlbums || navigationData?.stats?.totalAlbums || 0,
-			totalCharacters: statsData?.totalCharacters || navigationData?.stats?.totalCharacters || 0,
-			totalPlaces: statsData?.totalPlaces || navigationData?.stats?.totalPlaces || 0,
-			totalWorldItems: statsData?.totalWorldItems || navigationData?.stats?.totalWorldItems || 0,
-			totalFavorites: statsData?.totalFavorites || navigationData?.stats?.totalFavorites || 0,
-			totalActivities: statsData?.totalActivities || navigationData?.stats?.totalActivities || 0,
-			totalSize: statsData?.totalSize || navigationData?.stats?.totalSize || 0,
-			totalViews: statsData?.totalViews || navigationData?.stats?.totalViews || 0,
-			totalDownloads: statsData?.totalDownloads || navigationData?.stats?.totalDownloads || 0,
+			totalImages: navigationData?.stats?.totalImages || 0,
+			totalFolders: navigationData?.stats?.totalFolders || 0,
+			totalCollections: navigationData?.stats?.totalCollections || 0,
+			totalTags: navigationData?.stats?.totalTags || 0,
+			totalAlbums: navigationData?.stats?.totalAlbums || 0,
+			totalCharacters: navigationData?.stats?.totalCharacters || 0,
+			totalPlaces: navigationData?.stats?.totalPlaces || 0,
+			totalWorldItems: navigationData?.stats?.totalWorldItems || 0,
+			totalFavorites: navigationData?.stats?.totalFavorites || 0,
+			totalActivities: navigationData?.stats?.totalActivities || 0,
+			totalSize: navigationData?.stats?.totalSize || 0,
+			totalViews: navigationData?.stats?.totalViews || 0,
+			totalDownloads: navigationData?.stats?.totalDownloads || 0,
 			// Adicionales con fallback a derivados
-			totalVideos: statsData?.totalVideos ?? navigationData?.stats?.totalVideos ?? derivedTotals.totalVideos,
-			totalAudio: statsData?.totalAudio ?? navigationData?.stats?.totalAudio ?? derivedTotals.totalAudio,
-			totalDocuments:
-				statsData?.totalDocuments ?? navigationData?.stats?.totalDocuments ?? derivedTotals.totalDocuments,
-			totalJsonFiles:
-				statsData?.totalJsonFiles ?? navigationData?.stats?.totalJsonFiles ?? derivedTotals.totalJsonFiles,
-			totalFile3D: statsData?.totalFile3D ?? navigationData?.stats?.totalFile3D ?? derivedTotals.totalFile3D,
-			totalWorkflows:
-				statsData?.totalWorkflows ?? navigationData?.stats?.totalWorkflows ?? derivedTotals.totalWorkflows,
+			totalVideos: navigationData?.stats?.totalVideos ?? derivedTotals.totalVideos,
+			totalAudio: navigationData?.stats?.totalAudio ?? derivedTotals.totalAudio,
+			totalDocuments: navigationData?.stats?.totalDocuments ?? derivedTotals.totalDocuments,
+			totalJsonFiles: navigationData?.stats?.totalJsonFiles ?? derivedTotals.totalJsonFiles,
+			totalFile3D: navigationData?.stats?.totalFile3D ?? derivedTotals.totalFile3D,
+			totalWorkflows: navigationData?.stats?.totalWorkflows ?? derivedTotals.totalWorkflows,
 		}),
-		[statsData, navigationData, derivedTotals]
+		[navigationData, derivedTotals]
 	);
 
 	return {
@@ -177,8 +176,10 @@ export function useCategoryStats() {
 		getCategoryItemCount,
 		getImagesForCategory,
 		getCategoryItems,
-		isLoading: isLoadingNavigation || isLoadingStats,
+		isLoading: isLoadingNavigation,
+		isLoadingNavigation,
+		isLoadingStats: isLoadingNavigation,
 		navigationData,
-		statsData,
+		statsData: navigationData?.stats,
 	};
 }

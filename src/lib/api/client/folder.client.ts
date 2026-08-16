@@ -1,4 +1,10 @@
 /**
+ * @deprecated Usa `fetch` directo en vez de `ApiClient` (src/lib/api/client.ts).
+ * Migrar a `apiClient.get/post/put/delete` para timeout, logging, y headers consistentes.
+ * Ver #1 deepening opportunity en architecture review.
+ */
+
+/**
  * @file Cliente de API para carpetas
  * @description Permite obtener imagenes de una carpeta usando la API REST
  */
@@ -41,7 +47,7 @@ export async function getFolderImagesFromApi(
 
 	if (!response.ok) {
 		const errorData = await response.json().catch(() => ({}));
-		throw new Error(errorData.error || 'Error al obtener las imágenes de la carpeta');
+		throw new Error(errorData.error || 'Could not get images from the folder');
 	}
 
 	const data = await response.json();

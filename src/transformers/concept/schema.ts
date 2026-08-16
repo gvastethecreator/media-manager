@@ -112,7 +112,6 @@ export const ConceptCreateSchema = z.object({
 	content: z.string().min(1, 'Contenido es requerido'),
 	category: z.string().min(1, 'Categoría es requerida'),
 	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().optional(),
 });
 
 /**

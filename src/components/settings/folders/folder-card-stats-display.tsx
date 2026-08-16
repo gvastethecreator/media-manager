@@ -11,11 +11,11 @@ interface FolderStatsDisplayProps {
 }
 
 interface MicroProgressBarProps {
-	label: string;
+	color: string;
 	count: number;
 	icon: React.ComponentType<{ className?: string }>;
+	label: string;
 	total: number;
-	color: string;
 }
 
 const MicroProgressBar = memo(function MicroProgressBar({
@@ -42,7 +42,7 @@ const MicroProgressBar = memo(function MicroProgressBar({
 			</div>
 			<div
 				className={cn(
-					'-top-8 -translate-x-1/2 absolute left-1/2 z-10 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground shadow-md',
+					'absolute -top-8 left-1/2 z-10 -translate-x-1/2 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground shadow-dt-1',
 					'opacity-0 transition-all duration-200 ease-out',
 					'group-hover:-translate-y-1 group-hover:opacity-100'
 				)}
@@ -73,31 +73,31 @@ const FileTypeProgressBars = memo(function FileTypeProgressBars({
 			count: folderStats?.totalImages || 0,
 			icon: Image,
 			label: 'images',
-			color: 'bg-blue-500',
+			color: 'bg-primary',
 		},
 		{
 			count: folderStats?.totalVideos || 0,
 			icon: Video,
 			label: 'videos',
-			color: 'bg-purple-500',
+			color: 'bg-entity-video',
 		},
 		{
 			count: folderStats?.totalAudio || 0,
 			icon: Music,
 			label: 'audio',
-			color: 'bg-green-500',
+			color: 'bg-success',
 		},
 		{
 			count: folderStats?.totalDocuments || 0,
 			icon: FileText,
 			label: 'docs',
-			color: 'bg-orange-500',
+			color: 'bg-entity-document',
 		},
 		{
 			count: folderStats?.totalOthers || 0,
 			icon: File,
 			label: 'others',
-			color: 'bg-gray-500',
+			color: 'bg-muted/500',
 		},
 	].filter((stat) => stat.count > 0);
 

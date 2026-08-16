@@ -6,6 +6,7 @@ import { db } from '@/lib/drizzle';
 import { buildInList } from '@/lib/drizzle/helpers/in-list';
 import { instrumentedAll } from '@/lib/drizzle/instrumentation';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { favoriteService } from '@/services/favorite/favorite.service';
 
 /**
  * 🚀 Servicio optimizado que agrupa consultas SUM y usa caché inteligente
@@ -13,7 +14,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
  */
 export class OptimizedStatsService {
 	private static instance: OptimizedStatsService;
-	private logger = serverLogger.withContext('OptimizedStatsService');
+	private readonly logger = serverLogger.withContext('OptimizedStatsService');
 
 	private constructor() {
 		// Constructor vacío - ya no necesitamos PrismaClient
@@ -117,7 +118,7 @@ export class OptimizedStatsService {
 				breakdown,
 			};
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas de álbum:', { albumId, error });
+			this.logger.error('❌ Could not get statistics de álbum:', { albumId, error });
 			throw error;
 		}
 	};
@@ -134,6 +135,7 @@ export class OptimizedStatsService {
 		this.logger.debug(`📊 Obteniendo estadísticas por lotes para ${albumIds.length} álbumes`);
 
 		try {
+			const activeProfileId = await favoriteService.resolveActiveProfileIdOrNull();
 			// 🚀 Consulta agregada con parámetros seguros usando helper buildInList
 			const { clause: inClause } = buildInList(sql`a.id`, albumIds);
 			const batchStatsQuery = await instrumentedAll(
@@ -146,13 +148,15 @@ export class OptimizedStatsService {
 					COUNT(DISTINCT v.id) as videoCount,
 					COALESCE(SUM(i.size), 0) as imageTotalSize,
 					COALESCE(SUM(v.size), 0) as videoTotalSize,
-					COUNT(DISTINCT CASE WHEN i.isFavorite = true THEN i.id END) as favoriteImagesCount,
-					COUNT(DISTINCT CASE WHEN v.isFavorite = true THEN v.id END) as favoriteVideosCount
+					COUNT(DISTINCT CASE WHEN fi.id IS NOT NULL THEN i.id END) as favoriteImagesCount,
+					COUNT(DISTINCT CASE WHEN fv.id IS NOT NULL THEN v.id END) as favoriteVideosCount
 				FROM Album a
-				LEFT JOIN _AlbumToImage ai ON a.id = ai.A
-				LEFT JOIN Image i ON ai.B = i.id
-				LEFT JOIN _AlbumToVideo av ON a.id = av.A
-				LEFT JOIN Video v ON av.B = v.id
+				LEFT JOIN _ImageToAlbum ai ON a.id = ai.B
+				LEFT JOIN Image i ON ai.A = i.id
+				LEFT JOIN Favorite fi ON fi.profileId = ${activeProfileId ?? ''} AND fi.entityType = 'image' AND fi.entityId = i.id
+				LEFT JOIN _VideoToAlbum av ON a.id = av.B
+				LEFT JOIN Video v ON av.A = v.id
+				LEFT JOIN Favorite fv ON fv.profileId = ${activeProfileId ?? ''} AND fv.entityType = 'video' AND fv.entityId = v.id
 				WHERE ${inClause}
 				GROUP BY a.id, a.name
 			`
@@ -174,7 +178,7 @@ export class OptimizedStatsService {
 				{} as Record<string, any>
 			);
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas por lotes:', { albumIds, error });
+			this.logger.error('❌ Could not get statistics por lotes:', { albumIds, error });
 			throw error;
 		}
 	};
@@ -202,6 +206,7 @@ export class OptimizedStatsService {
 		this.logger.debug('📊 Obteniendo estadísticas globales optimizadas');
 
 		try {
+			const activeProfileId = await favoriteService.resolveActiveProfileIdOrNull();
 			// 🚀 Una sola consulta SQL para todos los conteos globales usando Drizzle (instrumentada)
 			const globalStatsQuery = await instrumentedAll(
 				'stats.global',
@@ -219,8 +224,20 @@ export class OptimizedStatsService {
 						(SELECT COUNT(*) FROM Activity) as totalActivities,
 						(SELECT COALESCE(SUM(size), 0) FROM Image) as totalImagesSize,
 						(SELECT COALESCE(SUM(size), 0) FROM Video) as totalVideosSize,
-						(SELECT COUNT(*) FROM Image WHERE isFavorite = true) as totalFavoriteImages,
-						(SELECT COUNT(*) FROM Video WHERE isFavorite = true) as totalFavoriteVideos
+						(
+							SELECT COUNT(*)
+							FROM Favorite favoriteImage
+							INNER JOIN Image imageEntity ON imageEntity.id = favoriteImage.entityId
+							WHERE favoriteImage.profileId = ${activeProfileId ?? ''}
+								AND favoriteImage.entityType = 'image'
+						) as totalFavoriteImages,
+						(
+							SELECT COUNT(*)
+							FROM Favorite favoriteVideo
+							INNER JOIN Video videoEntity ON videoEntity.id = favoriteVideo.entityId
+							WHERE favoriteVideo.profileId = ${activeProfileId ?? ''}
+								AND favoriteVideo.entityType = 'video'
+						) as totalFavoriteVideos
 				`
 			);
 
@@ -243,7 +260,7 @@ export class OptimizedStatsService {
 				totalFavorites: (Number(stats.totalFavoriteImages) || 0) + (Number(stats.totalFavoriteVideos) || 0),
 			};
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas globales:', { error });
+			this.logger.error('❌ Could not get statistics globales:', { error });
 			throw error;
 		}
 	};
@@ -313,7 +330,7 @@ export class OptimizedStatsService {
 				},
 			};
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas de grupo:', { groupId, error });
+			this.logger.error('❌ Could not get statistics de grupo:', { groupId, error });
 			throw error;
 		}
 	};
@@ -418,7 +435,7 @@ export class OptimizedStatsService {
 				{}
 			);
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas por lotes de tags:', { tagIds, error });
+			this.logger.error('❌ Could not get statistics por lotes de tags:', { tagIds, error });
 			throw error;
 		}
 	};
@@ -521,7 +538,7 @@ export class OptimizedStatsService {
 				{}
 			);
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas por lotes de colecciones:', { collectionIds, error });
+			this.logger.error('❌ Could not get statistics por lotes de colecciones:', { collectionIds, error });
 			throw error;
 		}
 	};
@@ -537,18 +554,54 @@ export class OptimizedStatsService {
 		this.logger.debug('📊 Obteniendo estadísticas de favoritos optimizadas');
 
 		try {
+			const activeProfileId = await favoriteService.resolveActiveProfileIdOrNull();
 			// 🚀 Una sola consulta SQL para todos los conteos de favoritos usando Drizzle (instrumentada)
 			const favoriteStatsQuery = await instrumentedAll(
 				'stats.favorites',
 				sql`
 					SELECT
-						(SELECT COUNT(*) FROM Character WHERE isFavorite = true) as characterCount,
-						(SELECT COUNT(*) FROM Place WHERE isFavorite = true) as placeCount,
-						(SELECT COUNT(*) FROM WorldItem WHERE isFavorite = true) as worldItemCount,
-						(SELECT COUNT(*) FROM Collection WHERE isFavorite = true) as collectionCount,
-						(SELECT COUNT(*) FROM Concept WHERE isFavorite = true) as conceptCount,
-						(SELECT COUNT(*) FROM Prompt WHERE isFavorite = true) as promptCount,
-						(SELECT COUNT(*) FROM Note WHERE isFavorite = true) as noteCount
+						(
+							SELECT COUNT(*) FROM Favorite favoriteCharacter
+							INNER JOIN Character entity ON entity.id = favoriteCharacter.entityId
+							WHERE favoriteCharacter.profileId = ${activeProfileId ?? ''}
+								AND favoriteCharacter.entityType = 'character'
+						) as characterCount,
+						(
+							SELECT COUNT(*) FROM Favorite favoritePlace
+							INNER JOIN Place entity ON entity.id = favoritePlace.entityId
+							WHERE favoritePlace.profileId = ${activeProfileId ?? ''}
+								AND favoritePlace.entityType = 'place'
+						) as placeCount,
+						(
+							SELECT COUNT(*) FROM Favorite favoriteWorldItem
+							INNER JOIN WorldItem entity ON entity.id = favoriteWorldItem.entityId
+							WHERE favoriteWorldItem.profileId = ${activeProfileId ?? ''}
+								AND favoriteWorldItem.entityType = 'worldItem'
+						) as worldItemCount,
+						(
+							SELECT COUNT(*) FROM Favorite favoriteCollection
+							INNER JOIN Collection entity ON entity.id = favoriteCollection.entityId
+							WHERE favoriteCollection.profileId = ${activeProfileId ?? ''}
+								AND favoriteCollection.entityType = 'collection'
+						) as collectionCount,
+						(
+							SELECT COUNT(*) FROM Favorite favoriteConcept
+							INNER JOIN Concept entity ON entity.id = favoriteConcept.entityId
+							WHERE favoriteConcept.profileId = ${activeProfileId ?? ''}
+								AND favoriteConcept.entityType = 'concept'
+						) as conceptCount,
+						(
+							SELECT COUNT(*) FROM Favorite favoritePrompt
+							INNER JOIN Prompt entity ON entity.id = favoritePrompt.entityId
+							WHERE favoritePrompt.profileId = ${activeProfileId ?? ''}
+								AND favoritePrompt.entityType = 'prompt'
+						) as promptCount,
+						(
+							SELECT COUNT(*) FROM Favorite favoriteNote
+							INNER JOIN Note entity ON entity.id = favoriteNote.entityId
+							WHERE favoriteNote.profileId = ${activeProfileId ?? ''}
+								AND favoriteNote.entityType = 'note'
+						) as noteCount
 				`
 			);
 
@@ -586,7 +639,7 @@ export class OptimizedStatsService {
 				},
 			};
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas de favoritos:', { error });
+			this.logger.error('❌ Could not get statistics de favoritos:', { error });
 			throw error;
 		}
 	};
@@ -641,7 +694,7 @@ export class OptimizedStatsService {
 			return topTagsQuery.map((tag) => ({
 				id: tag.id,
 				name: tag.name,
-				color: tag.color || '#6B7280',
+				color: tag.color || '#22c55e',
 				count: Number(tag.totalCount) || 0,
 				imageCount: Number(tag.imageCount) || 0,
 				videoCount: Number(tag.videoCount) || 0,

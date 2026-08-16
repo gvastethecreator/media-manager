@@ -1,18 +1,39 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ImperativePanelHandle } from 'react-resizable-panels';
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { PanelImperativeHandle } from 'react-resizable-panels';
 import { Outlet, useLocation, useParams } from 'react-router-dom';
-import { FileViewer } from '@/components/features/file-viewer/file-viewer';
+import { SkipLinks } from '@/components/a11y/skip-links';
+import { GlobalReindexTerminal } from '@/components/settings/folders/global-reindex-terminal';
 import { NavPanel } from '@/components/navigation/navigation-panel';
+import { DetailsPanelTransition, NavPanelTransition } from '@/components/panels/panel-transitions';
 import { RightPanel } from '@/components/panels/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
-import { NavigationTransition } from '@/components/transitions/ViewTransition';
+import { NavigationTransition } from '@/components/transitions/view-transition';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useReindexFolder } from '@/lib/api/folders';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
+import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFolderStore } from '@/store/entities/folder';
 import { useImageStore } from '@/store/entities/image';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useUIStore } from '@/store/ui.store';
+
+const LazyFileViewer = lazy(() =>
+	import('@/components/features/file-viewer/file-viewer').then((module) => ({ default: module.FileViewer }))
+);
+
+const DeferredFileViewer = memo(function DeferredFileViewer() {
+	const isOpen = useFileViewerStore((state) => state.isOpen);
+
+	if (!isOpen) return null;
+
+	return (
+		<Suspense fallback={null}>
+			<LazyFileViewer />
+		</Suspense>
+	);
+});
 
 const MainLayoutComponent = memo(function MainLayoutImpl() {
 	const location = useLocation();
@@ -86,12 +107,12 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 		}
 
 		try {
-			toastService.info('Escaneando carpeta...');
+			toastService.info('Scanning folder...');
 			await reindexFolderMutation.mutateAsync({ id: currentFolderId });
-			toastService.success('Carpeta escaneada correctamente');
+			toastService.success('Folder scanned successfully');
 		} catch (error) {
-			console.error('Error al escanear carpeta:', error);
-			toastService.error('Error al escanear la carpeta');
+			clientLogger.error('Failed to scan folder:', error);
+			toastService.error('Could not scan the folder');
 		}
 	}, [currentFolderId, reindexFolderMutation]);
 
@@ -101,45 +122,97 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 		}
 
 		try {
-			toastService.info('Recargando carpeta...');
+			toastService.info('Reloading folder...');
 			await reindexFolderMutation.mutateAsync({ id: currentFolderId });
-			toastService.success('Carpeta recargada correctamente');
+			toastService.success('Folder reloaded successfully');
 		} catch (error) {
-			console.error('Error al recargar carpeta:', error);
-			toastService.error('Error al recargar la carpeta');
+			clientLogger.error('Failed to reload folder:', error);
+			toastService.error('Could not reload the folder');
 		}
 	}, [currentFolderId, reindexFolderMutation]);
 
 	// Referencias para controlar los paneles programáticamente
-	const leftPanelRef = useRef<ImperativePanelHandle>(null);
-	const rightPanelRef = useRef<ImperativePanelHandle>(null);
+	const leftPanelRef = useRef<PanelImperativeHandle | null>(null);
+	const rightPanelRef = useRef<PanelImperativeHandle | null>(null);
 
 	// Sincronizar visibilidad del details panel con el estado del
 	useEffect(() => {
-		console.log('📋 MainLayout: Sincronizando isVisible:', isVisible);
+		clientLogger.debug('📋 MainLayout: Synchronizing isVisible:', isVisible);
 		setIsRightCollapsed(!isVisible);
 	}, [isVisible]);
 
 	// Sincronizar store UI con el panel físico
 	useEffect(() => {
-		console.log('🔄 MainLayout: Sincronizando UI store panel collapsed:', uiPanelCollapsed);
-		if (rightPanelRef.current) {
-			if (uiPanelCollapsed) {
-				console.log('📐 MainLayout: Colapsando panel físico');
-				rightPanelRef.current.collapse();
-			} else {
-				console.log('📐 MainLayout: Expandiendo panel físico');
-				rightPanelRef.current.expand();
-			}
+		clientLogger.debug('🔄 MainLayout: Synchronizing collapsed panel state:', uiPanelCollapsed);
+		if (!rightPanelRef.current) {
+			return;
 		}
-	}, [uiPanelCollapsed]); // Handlers para sincronizar con los componentes resizable
-	const handleLeftPanelCollapse = (collapsed: boolean) => {
-		setIsLeftCollapsed(collapsed);
-	};
 
-	const handleRightPanelCollapse = (collapsed: boolean) => {
-		setIsRightCollapsed(collapsed);
-	};
+		let cancelled = false;
+		let timeout: NodeJS.Timeout | null = null;
+		let attempt = 0;
+
+		const applyPhysicalState = () => {
+			if (cancelled) {
+				return;
+			}
+			const panel = rightPanelRef.current;
+			if (!panel) {
+				return;
+			}
+			try {
+				if (uiPanelCollapsed) {
+					clientLogger.debug('📐 MainLayout: Collapsing physical panel');
+					panel.collapse();
+				} else {
+					clientLogger.debug('📐 MainLayout: Expanding physical panel');
+					panel.expand();
+				}
+			} catch (error) {
+				// En dev/StrictMode/HMR puede dispararse antes de que el Group se registre
+				const message = error instanceof Error ? error.message : String(error);
+				clientLogger.warn('⚠️ MainLayout: Could not synchronize right panel (retry):', {
+					message,
+					attempt,
+					uiPanelCollapsed,
+				});
+
+				const shouldRetry = message.includes('Group') && message.includes('not found');
+				if (shouldRetry && attempt < 5) {
+					attempt += 1;
+					const delay = 50 * attempt;
+					if (timeout) {
+						clearTimeout(timeout);
+					}
+					timeout = setTimeout(() => {
+						applyPhysicalState();
+					}, delay);
+				}
+			}
+		};
+
+		// Primera aplicación: próximo frame para asegurar registro del Group
+		requestAnimationFrame(() => {
+			applyPhysicalState();
+		});
+
+		return () => {
+			cancelled = true;
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+		};
+	}, [uiPanelCollapsed]);
+
+	const handleLeftPanelResize = useCallback((panelSize: { asPercentage: number }) => {
+		const collapsed = panelSize.asPercentage <= 0.5;
+		setIsLeftCollapsed((prev) => (prev === collapsed ? prev : collapsed));
+	}, []);
+
+	const handleRightPanelResize = useCallback((panelSize: { asPercentage: number }) => {
+		const collapsed = panelSize.asPercentage <= 0.5;
+		setIsRightCollapsed((prev) => (prev === collapsed ? prev : collapsed));
+	}, []);
 
 	const toggleLeftPanel = () => {
 		if (leftPanelRef.current) {
@@ -176,31 +249,38 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 	};
 
 	return (
-		<div className="flex h-screen w-full bg-background text-foreground">
-			<ResizablePanelGroup className="h-full" direction="horizontal">
-				{/* Panel de navegación izquierdo */}
+		<div className="flex h-screen min-h-0 w-full min-w-0 bg-background text-foreground">
+			<SkipLinks />
+			<ResizablePanelGroup className="h-full" id="main-layout-v13-final" orientation="horizontal">
+				{/* Panel de navegación izquierdo con transiciones */}
 				<ResizablePanel
-					className="border-border border-r"
-					collapsedSize={2}
+					className={cn('border-border border-r', !isLeftCollapsed && 'is-expanded')}
+					collapsedSize="0"
 					collapsible={true}
-					defaultSize={20}
-					maxSize={35}
-					minSize={15}
-					onCollapse={() => handleLeftPanelCollapse(true)}
-					onExpand={() => handleLeftPanelCollapse(false)}
-					ref={leftPanelRef}
+					defaultSize="20"
+					id="left-nav"
+					minSize="15"
+					onResize={handleLeftPanelResize}
+					panelRef={leftPanelRef}
 				>
-					<NavPanel isAnimating={isLeftAnimating} isCollapsed={isLeftCollapsed} onToggleCollapse={toggleLeftPanel} />
+					<NavPanelTransition isAnimating={isLeftAnimating} isExpanded={!isLeftCollapsed}>
+						<NavPanel isAnimating={isLeftAnimating} isCollapsed={isLeftCollapsed} onToggleCollapse={toggleLeftPanel} />
+					</NavPanelTransition>
 				</ResizablePanel>
 
 				<ResizableHandle withHandle />
 
 				{/* Panel central con toolbar y view container */}
-				<ResizablePanel className="flex flex-col" defaultSize={shouldHideToolbarAndPanel ? 80 : 50} minSize={30}>
-					<div className="flex h-full flex-col bg-background">
+				<ResizablePanel
+					className="flex min-h-0 min-w-0 flex-col overflow-hidden"
+					defaultSize={`${shouldHideToolbarAndPanel ? 80 : 55}`}
+					id="center"
+					minSize="20"
+				>
+					<div className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-background">
 						{/* Toolbar superior - solo mostrar en vistas que lo necesiten */}
 						{!shouldHideToolbarAndPanel && (
-							<div className="border-border border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95">
+							<div className="border-border border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/95">
 								<ViewToolbar
 									allItemIds={allItemIds}
 									currentFolderId={currentFolderId || undefined}
@@ -214,42 +294,56 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 								/>
 							</div>
 						)}
-						{/* Contenido principal */}
-						<NavigationTransition className="min-h-0 flex-1 bg-background">
-							<Outlet />
+						{/* Contenido principal - id para SkipLink WCAG 2.4.1 */}
+						<NavigationTransition
+							aria-label="Contenido principal"
+							as="main"
+							className="min-h-0 min-w-0 flex-1 overflow-hidden bg-background outline-none focus:outline-none"
+							id="main-content"
+							tabIndex={-1}
+						>
+							<Suspense
+								fallback={
+									<div className="flex h-full w-full items-center justify-center bg-background text-muted-foreground">
+										<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+									</div>
+								}
+							>
+								<Outlet />
+							</Suspense>
 						</NavigationTransition>
 					</div>
 				</ResizablePanel>
 
-				{/* Panel de detalles derecho - solo mostrar en vistas que lo necesiten */}
+				{/* Panel de detalles derecho con transiciones - solo mostrar en vistas que lo necesiten */}
 				{!shouldHideToolbarAndPanel && (
 					<>
 						<ResizableHandle withHandle />
 						<ResizablePanel
-							className="border-border border-l"
-							collapsedSize={0}
+							className={cn('border-border border-l', !isRightCollapsed && 'is-expanded')}
+							collapsedSize="0"
 							collapsible={true}
-							defaultSize={30}
-							maxSize={55}
-							minSize={25}
-							onCollapse={() => handleRightPanelCollapse(true)}
-							onExpand={() => handleRightPanelCollapse(false)}
-							ref={rightPanelRef}
+							defaultSize="25"
+							id="right-details"
+							minSize="15"
+							onResize={handleRightPanelResize}
+							panelRef={rightPanelRef}
 						>
-							{!isRightCollapsed && (
+							<DetailsPanelTransition isAnimating={isRightAnimating} isVisible={!isRightCollapsed}>
 								<RightPanel
 									isAnimating={isRightAnimating}
 									isCollapsed={isRightCollapsed}
 									onToggleCollapse={toggleRightPanel}
 								/>
-							)}
+							</DetailsPanelTransition>
 						</ResizablePanel>
 					</>
 				)}
 			</ResizablePanelGroup>
 
-			{/* FileViewer global - modal overlay */}
-			<FileViewer />
+			{/* Se carga recién al abrirlo para no arrastrar renderizadores pesados al arranque. */}
+			<DeferredFileViewer />
+			<GlobalReindexTerminal />
 		</div>
 	);
 });

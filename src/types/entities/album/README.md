@@ -30,7 +30,7 @@ graph TD
 ## 🚨 Notas de migración
 
 - **Legacy eliminado:** Solo se exportan tipos y enums canónicos.
-**
+  \*\*
 - **Validar siempre con AlbumSchema antes de persistir.**
 
 ## 📝 Ejemplo de uso

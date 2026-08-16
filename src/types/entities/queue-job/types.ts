@@ -11,43 +11,45 @@ import { QueueJobStatus } from './enums';
  * Tipo base canónico para QueueJob
  */
 export interface QueueJobBase {
-	id: string;
-	queue: string;
-	data: string;
-	status: QueueJobStatus;
 	attempts: number;
-	maxAttempts: number;
-	error?: string | null;
-	progress: number;
-	startedAt?: Date | null;
-	finishedAt?: Date | null;
 	createdAt: Date;
-	updatedAt: Date;
-	priority: number;
+	data: string;
+	error?: string | null;
+	finishedAt?: Date | null;
+	id: string;
+	idempotencyKey?: string | null;
+	maxAttempts: number;
 	metadata?: string | null;
+	priority: number;
+	progress: number;
+	queue: string;
 	retryAt?: Date | null;
+	startedAt?: Date | null;
+	status: QueueJobStatus;
+	updatedAt: Date;
 }
 
 /**
  * Tipo para metadata del trabajo
  */
 export interface QueueJobMetadata {
-	source?: string;
-	target?: string;
-	processId?: string;
-	tags?: string[];
 	customData?: Record<string, unknown>;
+	processId?: string;
+	source?: string;
+	tags?: string[];
+	target?: string;
 }
 
 /**
  * Input para creación
  */
 export interface QueueJobCreateInput {
-	queue: string;
 	data: string;
+	idempotencyKey?: string;
 	maxAttempts?: number;
-	priority?: number;
 	metadata?: QueueJobMetadata;
+	priority?: number;
+	queue: string;
 }
 
 /**
@@ -69,52 +71,52 @@ export type UpdateQueueJobInput = QueueJobUpdateInput;
  * Queue job extendido con relaciones
  */
 export interface QueueJobExtended extends QueueJobBase {
+	canCancel?: boolean;
+	canRetry?: boolean;
 	// Propiedades adicionales para UI
 	duration?: number;
-	executionTime?: number;
-	parsedMetadata?: QueueJobMetadata;
-	formattedCreatedAt?: string;
-	formattedUpdatedAt?: string;
-	formattedStartedAt?: string;
-	formattedFinishedAt?: string;
-	formattedRetryAt?: string;
 	elapsedTime?: string;
 	estimatedTimeRemaining?: string;
+	executionTime?: number;
+	formattedCreatedAt?: string;
+	formattedFinishedAt?: string;
+	formattedRetryAt?: string;
+	formattedStartedAt?: string;
+	formattedUpdatedAt?: string;
 	isActive?: boolean;
-	canRetry?: boolean;
-	canCancel?: boolean;
+	parsedMetadata?: QueueJobMetadata;
 }
 
 /**
  * Filtros para búsqueda de queue jobs
  */
 export interface QueueJobFilters {
-	queue?: string;
-	status?: QueueJobStatus | null;
-	statusList?: QueueJobStatus[];
-	type?: string | null;
-	typeList?: string[];
-	startDate?: Date | null;
-	endDate?: Date | null;
-	userId?: string | null;
-	priority?: number | null;
-	sortField?: string;
-	sortOrder?: string;
-	page?: number;
-	pageSize?: number;
-	totalItems?: number;
-	totalPages?: number;
-	searchTerm?: string;
 	createdAfter?: Date;
 	createdBefore?: Date;
+	endDate?: Date | null;
+	page?: number;
+	pageSize?: number;
+	priority?: number | null;
+	queue?: string;
+	searchTerm?: string;
+	sortField?: string;
+	sortOrder?: string;
+	startDate?: Date | null;
+	status?: QueueJobStatus | null;
+	statusList?: QueueJobStatus[];
+	totalItems?: number;
+	totalPages?: number;
+	type?: string | null;
+	typeList?: string[];
+	userId?: string | null;
 }
 
 /**
  * Opciones de paginación para queue jobs
  */
 export interface QueueJobPaginationOptions {
-	page?: number;
 	limit?: number;
+	page?: number;
 	sortBy?: 'createdAt' | 'priority' | 'status' | 'queue';
 	sortDirection?: 'asc' | 'desc';
 }
@@ -124,31 +126,31 @@ export interface QueueJobPaginationOptions {
  */
 export interface PaginatedQueueJobs {
 	items: QueueJobBase[];
-	total: number;
 	pagination: {
 		page: number;
 		limit: number;
 		total: number;
 		totalPages: number;
 	};
+	total: number;
 }
 
 /**
  * Estadísticas de la cola
  */
 export interface QueueStats {
-	total: number;
-	pending: number;
-	processing: number;
+	averageProcessingTime?: number; // Tiempo promedio de procesamiento en ms
+	cancelled: number;
 	completed: number;
 	failed: number;
-	retrying: number;
-	cancelled: number;
-	paused: number;
-	queue?: string; // Opcional para estadísticas específicas de cola
-	successRate?: number; // Porcentaje de éxito
 	failureRate?: number; // Porcentaje de fallo
-	averageProcessingTime?: number; // Tiempo promedio de procesamiento en ms
+	paused: number;
+	pending: number;
+	processing: number;
+	queue?: string; // Opcional para estadísticas específicas de cola
+	retrying: number;
+	successRate?: number; // Porcentaje de éxito
+	total: number;
 }
 
 // 🟢 Documentación:

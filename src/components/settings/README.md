@@ -78,8 +78,8 @@ src/components/settings/
 ├── system/                            # Configuración del sistema
 │   ├── system-settings.tsx
 │   └── ...
-└── uploaded-images/                   # Configuración de imágenes subidas
-    ├── uploaded-images-settings.tsx
+└── media/                             # Configuración de media
+    ├── uploaded-images-settings.tsx     # Orienta al explorador autorizado
     └── ...
 ```
 
@@ -100,7 +100,7 @@ graph TD
     B --> C9[Concepts Settings]
     B --> C10[Prompts Settings]
     B --> C11[Notes Settings]
-    B --> C12[Uploaded Images Settings]
+    B --> C12[Authorized Media Browser]
     B --> C13[Thumbnails Settings]
     B --> C14[Folders Settings]
     B --> C15[Shortcuts Settings]
@@ -117,9 +117,7 @@ graph TD
     C4 --> F1[Tags List]
     C4 --> F2[Tag Form]
 
-    C12 --> G1[Images Stats]
-    C12 --> G2[Upload Interface]
-    C12 --> G3[Storage Options]
+    C12 --> G1[Media Root Workflow]
 ```
 
 ## Componentes Principales
@@ -146,17 +144,17 @@ Los componentes utilizan server actions para operaciones de servidor:
 ```typescript
 // Ejemplo de integración con server actions
 const handleCreate = async (data) => {
-  try {
-    const result = await createEntity(data);
-    if (result.success) {
-      toastService.success('Entidad creada correctamente');
-      // Actualizar estado local
-    } else {
-      toastService.error(result.error || 'Error al crear la entidad');
-    }
-  } catch (error) {
-    // Manejar errores
-  }
+	try {
+		const result = await createEntity(data);
+		if (result.success) {
+			toastService.success('Entidad creada correctamente');
+			// Actualizar estado local
+		} else {
+			toastService.error(result.error || 'Error al crear la entidad');
+		}
+	} catch (error) {
+		// Manejar errores
+	}
 };
 ```
 
@@ -180,11 +178,11 @@ const handleCreate = async (data) => {
 import { SettingsView } from '@/components/settings/settings-view';
 
 export default function SettingsPage() {
-  return (
-    <div className="container p-0 h-full">
-      <SettingsView />
-    </div>
-  );
+	return (
+		<div className="container p-0 h-full">
+			<SettingsView />
+		</div>
+	);
 }
 ```
 
@@ -208,7 +206,7 @@ graph TD
 ```tsx
 import InterfaceSection from './interface-section';
 
-<InterfaceSection />
+<InterfaceSection />;
 ```
 
 ### Best practices
@@ -253,6 +251,7 @@ Componente principal para configurar todos los aspectos visuales y de comportami
 ### ✨ Características
 
 #### 🎨 Configuración General
+
 - **Tipografía**: Sistema, Serif, Monoespaciada, Redondeada
 - **Tamaño de fuente**: Pequeño, Mediano, Grande
 - **Tema**: Sistema, Claro, Oscuro
@@ -262,6 +261,7 @@ Componente principal para configurar todos los aspectos visuales y de comportami
 #### 👁️ Configuración del FileBrowser
 
 ##### 📋 General
+
 - Vista por defecto (Grid, Cards, Mosaico, Lista)
 - Elementos por lote (10-200)
 - Carga progresiva
@@ -272,12 +272,14 @@ Componente principal para configurar todos los aspectos visuales y de comportami
 - Mostrar tamaño total
 
 ##### 🔲 Vista Grid
+
 - **Columnas**: Mínimo (1-10), Máximo (2-12)
 - **Tamaño**: Elemento (80-400px), Espaciado (0-32px)
 - **Aspecto**: Relación de aspecto (0.5-3.0)
 - **Interacción**: Info al hover, Animaciones hover
 
 ##### 🗃️ Vista Cards
+
 - **Columnas**: Mínimo (1-6), Máximo (2-8)
 - **Dimensiones**: Ancho (200-600px), Alto (250-800px)
 - **Espaciado**: Gap entre tarjetas (8-48px)
@@ -285,6 +287,7 @@ Componente principal para configurar todos los aspectos visuales y de comportami
 - **Preview**: Tamaño (Pequeño, Mediano, Grande)
 
 ##### 🧱 Vista Masonry/Mosaico
+
 - **Columnas**: Mínimo (2-8), Máximo (3-12)
 - **Dimensiones**: Ancho columna (120-400px)
 - **Espaciado**: Gap columnas (2-24px), Gap filas (2-24px)
@@ -292,6 +295,7 @@ Componente principal para configurar todos los aspectos visuales y de comportami
 - **Comportamiento**: Respetar aspect ratio, Balanceo automático
 
 ##### 📋 Vista List
+
 - **Filas**: Altura (40-120px), Gap (0-16px)
 - **Thumbnails**: Mostrar/Ocultar, Tamaño (Pequeño, Mediano, Grande)
 - **Columnas visibles**:
@@ -300,6 +304,7 @@ Componente principal para configurar todos los aspectos visuales y de comportami
 - **Visualización**: Líneas zebra, Modo compacto
 
 ##### ⚡ Rendimiento
+
 - **Virtualización**: Habilitada/Deshabilitada
 - **Pre-carga**: Elementos (5-100)
 - **Cache**: Habilitado, Límite (50-1000)
@@ -311,23 +316,25 @@ Componente principal para configurar todos los aspectos visuales y de comportami
 import InterfaceSection from '@/components/settings/interface-section';
 
 function SettingsPage() {
-  return (
-    <div className="space-y-6">
-      <InterfaceSection />
-    </div>
-  );
+	return (
+		<div className="space-y-6">
+			<InterfaceSection />
+		</div>
+	);
 }
 ```
 
 ### 🏗️ Arquitectura
 
 #### 📊 Store Integration
+
 - **Zustand Store**: `useInterfaceSettingsStore`
 - **Persistencia**: LocalStorage automática
 - **Validación**: Zod schema en tiempo real
 - **Reactividad**: Cambios aplicados inmediatamente
 
 #### 🎯 Helpers
+
 ```tsx
 // Actualizar configuración general del FileBrowser
 updateFileBrowserConfig(section: string, key: string, value: any)
@@ -340,11 +347,13 @@ updateListColumn(column: string, visible: boolean)
 ```
 
 #### 🔑 IDs Únicos
+
 Usa `useId()` para generar IDs únicos para componentes Switch y evitar conflictos.
 
 ### 📱 UI/UX
 
 #### 🎨 Componentes UI
+
 - **Cards**: Secciones organizadas con headers
 - **Tabs**: Navegación entre configuraciones de vistas
 - **Switches**: Controles booleanos
@@ -353,6 +362,7 @@ Usa `useId()` para generar IDs únicos para componentes Switch y evitar conflict
 - **Labels**: Asociación semántica con controles
 
 #### 🎯 Iconografía
+
 - **Settings**: Configuración general
 - **Eye**: Visor de archivos
 - **Grid**: Vista grilla
@@ -364,20 +374,22 @@ Usa `useId()` para generar IDs únicos para componentes Switch y evitar conflict
 ### 🔄 Tipos y Validación
 
 #### 📋 Tipos Principales
+
 ```typescript
 interface FileBrowserConfig {
-  views: {
-    grid: GridViewConfig;
-    cards: CardsViewConfig;
-    masonry: MasonryViewConfig;
-    list: ListViewConfig;
-  };
-  general: GeneralConfig;
-  performance: PerformanceConfig;
+	views: {
+		grid: GridViewConfig;
+		cards: CardsViewConfig;
+		masonry: MasonryViewConfig;
+		list: ListViewConfig;
+	};
+	general: GeneralConfig;
+	performance: PerformanceConfig;
 }
 ```
 
 #### ✅ Validación Zod
+
 - Rangos numéricos validados
 - Enums para opciones predefinidas
 - Validación en tiempo real
@@ -386,21 +398,25 @@ interface FileBrowserConfig {
 ### 🎯 Configuraciones por Vista
 
 #### 🔲 Grid (Óptima para navegación rápida)
+
 - **Propósito**: Vista general rápida de imágenes
 - **Casos de uso**: Navegación, selección múltiple
 - **Optimizaciones**: Aspect ratio consistente, hover info
 
 #### 🗃️ Cards (Rica en información)
+
 - **Propósito**: Vista detallada con metadatos
 - **Casos de uso**: Revisión de contenido, organización
 - **Optimizaciones**: Badges, info técnica, previews grandes
 
 #### 🧱 Masonry (Estética visual)
+
 - **Propósito**: Presentación visual atractiva
 - **Casos de uso**: Portfolios, galerías, inspiración
 - **Optimizaciones**: Aspect ratio natural, balanceo automático
 
 #### 📋 List (Eficiencia de datos)
+
 - **Propósito**: Vista tabular con información detallada
 - **Casos de uso**: Gestión de archivos, análisis de datos
 - **Optimizaciones**: Columnas configurables, modo compacto
@@ -408,16 +424,19 @@ interface FileBrowserConfig {
 ### 🚀 Optimizaciones de Rendimiento
 
 #### ⚡ Virtualización
+
 - **Propósito**: Renderizar solo elementos visibles
 - **Beneficio**: Manejo de miles de imágenes sin lag
 - **Configuración**: Elementos de pre-carga ajustables
 
 #### 🗄️ Cache de Thumbnails
+
 - **Propósito**: Evitar re-generación de miniaturas
 - **Beneficio**: Navegación más fluida
 - **Configuración**: Límite de cache y calidad ajustables
 
 #### 📦 Carga Progresiva
+
 - **Propósito**: Cargar contenido en lotes
 - **Beneficio**: Tiempo de carga inicial reducido
 - **Configuración**: Tamaño de lote personalizable
@@ -425,12 +444,14 @@ interface FileBrowserConfig {
 ### 🎨 Personalización Avanzada
 
 #### 🖼️ Thumbnails
+
 - **Bordes**: Configurables por vista (0-32px)
 - **Animaciones**: Habilitables/Deshabilitables
 - **Aspect Ratio**: Respeto al original o forzado
 - **Rendimiento**: Modo ultra performance
 
 #### 🎭 Animaciones
+
 - **Transiciones**: Entre cambios de vista
 - **Hover**: Efectos de interacción
 - **Performance**: Deshabilitables para dispositivos lentos
@@ -439,30 +460,33 @@ interface FileBrowserConfig {
 
 ```typescript
 const defaultFileBrowserConfig = {
-  views: {
-    grid: { minColumns: 4, maxColumns: 8, itemSize: 160, gap: 8 },
-    cards: { minColumns: 2, maxColumns: 4, cardWidth: 320, cardHeight: 400 },
-    masonry: { minColumns: 3, maxColumns: 6, columnWidth: 200 },
-    list: { rowHeight: 60, showThumbnails: true, thumbnailSize: 'small' }
-  },
-  general: { defaultViewMode: 'grid', itemsPerBatch: 50 },
-  performance: { enableVirtualization: true, thumbnailQuality: 'medium' }
+	views: {
+		grid: { minColumns: 4, maxColumns: 8, itemSize: 160, gap: 8 },
+		cards: { minColumns: 2, maxColumns: 4, cardWidth: 320, cardHeight: 400 },
+		masonry: { minColumns: 3, maxColumns: 6, columnWidth: 200 },
+		list: { rowHeight: 60, showThumbnails: true, thumbnailSize: 'small' },
+	},
+	general: { defaultViewMode: 'grid', itemsPerBatch: 50 },
+	performance: { enableVirtualization: true, thumbnailQuality: 'medium' },
 };
 ```
 
 ### 🔮 Casos de Uso Específicos
 
 #### 📸 Fotógrafo Profesional
+
 - **Grid**: 6-8 columnas, info al hover
 - **Cards**: Metadatos completos, preview grande
 - **Performance**: Alta calidad, cache amplio
 
 #### 🎨 Diseñador Gráfico
+
 - **Masonry**: Aspect ratio natural, balanceo automático
 - **Cards**: Badges de proyectos, info técnica
 - **Performance**: Calidad alta, animaciones habilitadas
 
 #### 📊 Gestor de Contenido
+
 - **List**: Todas las columnas visibles, modo compacto
 - **Grid**: Muchas columnas, sin animaciones
 - **Performance**: Virtualización, carga rápida
@@ -470,12 +494,14 @@ const defaultFileBrowserConfig = {
 ### 🛠️ Desarrollo y Extensión
 
 #### 🔧 Agregar Nueva Vista
+
 1. Definir tipos en `types.ts`
 2. Agregar schema en `interface.schema.ts`
 3. Configurar valores por defecto en `store.ts`
 4. Implementar tab en `InterfaceSection`
 
 #### 📋 Agregar Nueva Configuración
+
 1. Extender interfaces existentes
 2. Actualizar schemas de validación
 3. Agregar controles UI
@@ -492,4 +518,4 @@ const defaultFileBrowserConfig = {
 
 ---
 
-*Documentación actualizada para la versión con configuración completa del FileBrowser* 🚀
+_Documentación actualizada para la versión con configuración completa del FileBrowser_ 🚀

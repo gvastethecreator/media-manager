@@ -44,46 +44,46 @@ graph TB
 ```typescript
 // Tipo base del grupo
 interface GroupBase {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string;
-  description?: string;
-  category?: string;
-  isFavorite: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description?: string;
+	category?: string;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 // Tipo extendido con relaciones
 interface GroupExtended extends GroupBase {
-  itemsCount: number;
-  tags?: Array<{ id: string; name: string; color: string }>;
-  images?: Array<{ id: string; name: string; path: string }>;
-  collections?: Array<{ id: string; name: string; emoji: string }>;
-  // ... otras relaciones
+	itemsCount: number;
+	tags?: Array<{ id: string; name: string; color: string }>;
+	images?: Array<{ id: string; name: string; path: string }>;
+	collections?: Array<{ id: string; name: string; emoji: string }>;
+	// ... otras relaciones
 
-  // Estados de UI
-  isSelected?: boolean;
-  isHighlighted?: boolean;
-  isEditing?: boolean;
-  isExpanded?: boolean;
+	// Estados de UI
+	isSelected?: boolean;
+	isHighlighted?: boolean;
+	isEditing?: boolean;
+	isExpanded?: boolean;
 }
 
 // Tipo completo con contadores
 interface GroupComplete extends GroupBase {
-  _count: {
-    images?: number;
-    collections?: number;
-    tags?: number;
-    places?: number;
-    worldItems?: number;
-    concepts?: number;
-    prompts?: number;
-    notes?: number;
-    wildcards?: number;
-    properties?: number;
-  };
+	_count: {
+		images?: number;
+		collections?: number;
+		tags?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+	};
 }
 ```
 
@@ -91,25 +91,25 @@ interface GroupComplete extends GroupBase {
 
 ```typescript
 interface GroupFilters {
-  name?: string;
-  category?: string;
-  color?: string;
-  isFavorite?: boolean;
-  hasImages?: boolean;
-  minItemsCount?: number;
-  maxItemsCount?: number;
-  createdAfter?: Date;
-  createdBefore?: Date;
+	name?: string;
+	category?: string;
+	color?: string;
+	isFavorite?: boolean;
+	hasImages?: boolean;
+	minItemsCount?: number;
+	maxItemsCount?: number;
+	createdAfter?: Date;
+	createdBefore?: Date;
 }
 
 interface GroupSearchResult {
-  items: GroupExtended[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
-  filters: GroupFilters;
-  sortBy: GroupSortCriteria;
+	items: GroupExtended[];
+	total: number;
+	page: number;
+	limit: number;
+	hasMore: boolean;
+	filters: GroupFilters;
+	sortBy: GroupSortCriteria;
 }
 ```
 
@@ -192,17 +192,11 @@ setError: (error: string | null) => void
 
 ```typescript
 // En un componente React
-const {
-  groups,
-  isLoading,
-  error,
-  loadGroups,
-  getFilteredGroups
-} = useGroupStore();
+const { groups, isLoading, error, loadGroups, getFilteredGroups } = useGroupStore();
 
 // Cargar grupos al montar
 useEffect(() => {
-  loadGroups();
+	loadGroups();
 }, [loadGroups]);
 
 // Obtener grupos filtrados
@@ -215,76 +209,65 @@ const filteredGroups = getFilteredGroups();
 const { createGroup } = useGroupStore();
 
 const handleCreateGroup = async (formData: GroupCreateInput) => {
-  try {
-    const newGroup = await createGroup({
-      name: formData.name,
-      emoji: formData.emoji || '📂',
-      color: formData.color || '#3b82f6',
-      category: formData.category,
-      description: formData.description,
-    });
+	try {
+		const newGroup = await createGroup({
+			name: formData.name,
+			emoji: formData.emoji || '📂',
+			color: formData.color || '#3b82f6',
+			category: formData.category,
+			description: formData.description,
+		});
 
-    console.log('✅ Grupo creado:', newGroup);
-  } catch (error) {
-    console.error('❌ Error creando grupo:', error);
-  }
+		console.log('✅ Grupo creado:', newGroup);
+	} catch (error) {
+		console.error('❌ Error creando grupo:', error);
+	}
 };
 ```
 
 ### **Filtrar y Buscar**
 
 ```typescript
-const {
-  setSearchQuery,
-  setFilterByCategory,
-  setFilterFavorites,
-  clearFilters
-} = useGroupStore();
+const { setSearchQuery, setFilterByCategory, setFilterFavorites, clearFilters } = useGroupStore();
 
 // Buscar por nombre
 const handleSearch = (query: string) => {
-  setSearchQuery(query);
+	setSearchQuery(query);
 };
 
 // Filtrar por categoría
 const handleCategoryFilter = (category: string) => {
-  setFilterByCategory(category);
+	setFilterByCategory(category);
 };
 
 // Mostrar solo favoritos
 const handleFavoritesFilter = () => {
-  setFilterFavorites(true);
+	setFilterFavorites(true);
 };
 
 // Limpiar filtros
 const handleClearFilters = () => {
-  clearFilters();
+	clearFilters();
 };
 ```
 
 ### **Gestión de Selección**
 
 ```typescript
-const {
-  selectedGroups,
-  setSelectedGroups,
-  toggleGroupSelection
-} = useGroupStore();
+const { selectedGroups, setSelectedGroups, toggleGroupSelection } = useGroupStore();
 
 // Seleccionar múltiples grupos
 const handleSelectAll = (groupIds: string[]) => {
-  setSelectedGroups(groupIds);
+	setSelectedGroups(groupIds);
 };
 
 // Toggle selección individual
 const handleToggleGroup = (groupId: string) => {
-  toggleGroupSelection(groupId);
+	toggleGroupSelection(groupId);
 };
 
 // Obtener grupos seleccionados
-const selectedGroupsData = groups.filter(g =>
-  selectedGroups.includes(g.id)
-);
+const selectedGroupsData = groups.filter((g) => selectedGroups.includes(g.id));
 ```
 
 ## 🔧 Transformaciones
@@ -294,26 +277,23 @@ const selectedGroupsData = groups.filter(g =>
 ```typescript
 // Extender grupo base con propiedades adicionales
 const extendGroup = (group: GroupBase): GroupComplete => ({
-  ...group,
-  _count: {
-    images: 0,
-    collections: 0,
-    tags: 0,
-    // ... otros contadores
-  }
+	...group,
+	_count: {
+		images: 0,
+		collections: 0,
+		tags: 0,
+		// ... otros contadores
+	},
 });
 
 // Transformar para UI
-const transformGroupToExtended = (
-  group: GroupComplete,
-  options: { isSelected?: boolean } = {}
-): GroupExtended => ({
-  ...group,
-  itemsCount: Object.values(group._count).reduce((a, b) => a + (b || 0), 0),
-  isSelected: options.isSelected || false,
-  isHighlighted: false,
-  isEditing: false,
-  isExpanded: false,
+const transformGroupToExtended = (group: GroupComplete, options: { isSelected?: boolean } = {}): GroupExtended => ({
+	...group,
+	itemsCount: Object.values(group._count).reduce((a, b) => a + (b || 0), 0),
+	isSelected: options.isSelected || false,
+	isHighlighted: false,
+	isEditing: false,
+	isExpanded: false,
 });
 ```
 
@@ -358,17 +338,14 @@ stateDiagram-v2
 ```typescript
 // Hook para grupos filtrados
 const useFilteredGroups = () => {
-  const { getFilteredGroups } = useGroupStore();
-  return useMemo(() => getFilteredGroups(), [getFilteredGroups]);
+	const { getFilteredGroups } = useGroupStore();
+	return useMemo(() => getFilteredGroups(), [getFilteredGroups]);
 };
 
 // Hook para grupos seleccionados
 const useSelectedGroups = () => {
-  const { groups, selectedGroups } = useGroupStore();
-  return useMemo(() =>
-    groups.filter(g => selectedGroups.includes(g.id)),
-    [groups, selectedGroups]
-  );
+	const { groups, selectedGroups } = useGroupStore();
+	return useMemo(() => groups.filter((g) => selectedGroups.includes(g.id)), [groups, selectedGroups]);
 };
 ```
 

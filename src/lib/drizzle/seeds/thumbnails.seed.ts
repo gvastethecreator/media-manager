@@ -12,9 +12,9 @@ export async function seedThumbnails(db: LibSQLDatabase<Record<string, never>>) 
 	try {
 		const sampleThumbnails = [
 			{
-				id: 'thumb-1',
+				id: '13131313-1313-4131-a131-131313131311',
 				entityType: 'image',
-				entityId: 'img-example-1',
+				entityId: 'img-seed-001',
 				size: 'small',
 				path: '/thumbnails/images/img-example-1_150x150.jpg',
 				width: 150,
@@ -25,9 +25,9 @@ export async function seedThumbnails(db: LibSQLDatabase<Record<string, never>>) 
 				isGenerated: true,
 			},
 			{
-				id: 'thumb-2',
+				id: '13131313-1313-4131-a131-131313131312',
 				entityType: 'video',
-				entityId: 'vid-example-1',
+				entityId: 'vid-seed-001',
 				size: 'medium',
 				path: '/thumbnails/videos/vid-example-1_300x200.jpg',
 				width: 300,
@@ -42,7 +42,7 @@ export async function seedThumbnails(db: LibSQLDatabase<Record<string, never>>) 
 		await db.insert(thumbnails).values(sampleThumbnails);
 		seedLogger.success(`✅ ${sampleThumbnails.length} miniaturas de ejemplo creadas`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando miniaturas de ejemplo:', error);
+		seedLogger.error('❌ Could not create sample thumbnails:', error);
 		throw error;
 	}
 }

@@ -25,14 +25,18 @@ const logger = serverLogger.withContext('SettingsService');
  */
 export interface SettingsService {
 	/**
+	 * Obtiene la configuración de un perfil específico
+	 */
+	getProfileSettings(profileId: string): Promise<Settings | null>;
+	/**
 	 * Obtiene la configuración global del sistema
 	 */
 	getSystemSettings(): Promise<Settings>;
 
 	/**
-	 * Actualiza la configuración global del sistema
+	 * Resetea la configuración de un perfil a los valores globales
 	 */
-	updateSystemSettings(data: Partial<Settings>): Promise<Settings>;
+	resetProfileSettings(profileId: string): Promise<void>;
 
 	/**
 	 * Resetea la configuración global a valores predeterminados
@@ -40,19 +44,14 @@ export interface SettingsService {
 	resetSystemSettings(): Promise<Settings>;
 
 	/**
-	 * Obtiene la configuración de un perfil específico
-	 */
-	getProfileSettings(profileId: string): Promise<Settings | null>;
-
-	/**
 	 * Actualiza la configuración de un perfil específico
 	 */
 	updateProfileSettings(profileId: string, data: Partial<Settings>): Promise<Settings>;
 
 	/**
-	 * Resetea la configuración de un perfil a los valores globales
+	 * Actualiza la configuración global del sistema
 	 */
-	resetProfileSettings(profileId: string): Promise<void>;
+	updateSystemSettings(data: Partial<Settings>): Promise<Settings>;
 }
 
 /**
@@ -72,7 +71,7 @@ async function createDefaultSettingsData(): Promise<Record<string, unknown>> {
 		appearance: {
 			theme: 'system',
 			fontSize: 16,
-			language: 'es',
+			language: 'en',
 			reducedAnimations: false,
 			highContrast: false,
 		},

@@ -67,7 +67,7 @@ export function useFolderImages(folderId: string | null) {
 
 				return response;
 			} catch (error) {
-				logger.error(`❌ Error obteniendo imágenes para carpeta ${folderId}:`, error);
+				logger.error(`❌ Could not get images for folder ${folderId}:`, error);
 				throw error;
 			}
 		},
@@ -98,7 +98,7 @@ export function useFolderImages(folderId: string | null) {
 		if (query.isLoading) {
 			logger.debug(`⏳ Cargando imágenes para carpeta: ${folderId || 'null'}`);
 		} else if (query.isError) {
-			logger.error(`❌ Error en query para carpeta ${folderId}:`, query.error);
+			logger.error(`❌ Folder query failed ${folderId}:`, query.error);
 		} else if (query.isSuccess) {
 			const imageCount = safeData?.items?.length || 0;
 			logger.debug(`✅ Query exitoso para carpeta ${folderId}: ${imageCount} imágenes (validadas)`);

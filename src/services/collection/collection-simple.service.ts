@@ -6,7 +6,9 @@ import { desc } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import type { CollectionWithStats } from '@/types/entities/collection';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const logger = serverLogger.withContext('CollectionService');
 
@@ -17,11 +19,13 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 	try {
 		logger.info('📚 Obteniendo todas las colecciones');
 
+		const favoriteEntityIds = await favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.COLLECTION);
+		const favoriteIdSet = new Set(favoriteEntityIds);
 		const drizzleCollections = await db.select().from(collections).orderBy(desc(collections.createdAt));
 
 		const result = drizzleCollections.map((collection: any) => ({
 			...collection,
-			isFavorite: Boolean(collection.isFavorite),
+			isFavorite: favoriteIdSet.has(collection.id),
 			stats: {
 				imageCount: collection.totalImages || 0,
 				videoCount: collection.totalVideos || 0,
@@ -42,7 +46,7 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 		logger.info(`✅ ${result.length} colecciones obtenidas`);
 		return result;
 	} catch (error) {
-		logger.error('❌ Error al obtener colecciones', { error });
+		logger.error('❌ Could not get collections', { error });
 		return [];
 	}
 };

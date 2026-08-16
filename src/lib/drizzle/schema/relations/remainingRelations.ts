@@ -3,241 +3,156 @@
  * REMAINING RELATIONS - DRIZZLE ORM
  * =================================================================================
  * Definición de las relaciones many-to-many restantes del sistema
+ * Refactorizado para usar helpers DRY
  * =================================================================================
  */
 
-import { index, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { createRelationTable } from './relation-helpers';
+import { images } from '../files/images';
+import { videos } from '../files/videos';
+import { albums } from '../organization/albums';
+import { groups } from '../organization/groups';
+import { tags } from '../organization/tags';
+import { notes } from '../taxonomy/notes';
+import { prompts } from '../taxonomy/prompts';
+import { wildcards } from '../taxonomy/wildcards';
+import { characters } from '../worldbuilding/characters';
+import { concepts } from '../worldbuilding/concepts';
+import { places } from '../worldbuilding/places';
+import { worldItems } from '../worldbuilding/worldItems';
 
-// Relación Image-Wildcard
-export const imageWildcards = sqliteTable(
+// =================================================================================
+// MEDIA - WILDCARD RELATIONS
+// =================================================================================
+export const imageWildcards = createRelationTable(
 	'_ImageToWildcard',
-	{
-		A: text('A').notNull(), // imageId
-		B: text('B').notNull(), // wildcardId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_ImageToWildcard_AB_unique').on(table.A, table.B),
-		B_index: index('_ImageToWildcard_B_index').on(table.B),
-	})
+	() => images.id,
+	() => wildcards.id
 );
-
-// Relación Video-Wildcard
-export const videoWildcards = sqliteTable(
+export const videoWildcards = createRelationTable(
 	'_VideoToWildcard',
-	{
-		A: text('A').notNull(), // videoId
-		B: text('B').notNull(), // wildcardId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_VideoToWildcard_AB_unique').on(table.A, table.B),
-		B_index: index('_VideoToWildcard_B_index').on(table.B),
-	})
+	() => videos.id,
+	() => wildcards.id
 );
 
-// Relación Image-Character
-export const imageCharacters = sqliteTable(
+// =================================================================================
+// MEDIA - CHARACTER RELATIONS
+// =================================================================================
+export const imageCharacters = createRelationTable(
 	'_ImageToCharacter',
-	{
-		A: text('A').notNull(), // imageId
-		B: text('B').notNull(), // characterId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_ImageToCharacter_AB_unique').on(table.A, table.B),
-		B_index: index('_ImageToCharacter_B_index').on(table.B),
-	})
+	() => images.id,
+	() => characters.id
 );
-
-// Relación Video-Character
-export const videoCharacters = sqliteTable(
+export const videoCharacters = createRelationTable(
 	'_VideoToCharacter',
-	{
-		A: text('A').notNull(), // videoId
-		B: text('B').notNull(), // characterId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_VideoToCharacter_AB_unique').on(table.A, table.B),
-		B_index: index('_VideoToCharacter_B_index').on(table.B),
-	})
+	() => videos.id,
+	() => characters.id
 );
 
-// Relación Image-Place
-export const imagePlaces = sqliteTable(
+// =================================================================================
+// MEDIA - PLACE RELATIONS
+// =================================================================================
+export const imagePlaces = createRelationTable(
 	'_ImageToPlace',
-	{
-		A: text('A').notNull(), // imageId
-		B: text('B').notNull(), // placeId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_ImageToPlace_AB_unique').on(table.A, table.B),
-		B_index: index('_ImageToPlace_B_index').on(table.B),
-	})
+	() => images.id,
+	() => places.id
 );
-
-// Relación Video-Place
-export const videoPlaces = sqliteTable(
+export const videoPlaces = createRelationTable(
 	'_VideoToPlace',
-	{
-		A: text('A').notNull(), // videoId
-		B: text('B').notNull(), // placeId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_VideoToPlace_AB_unique').on(table.A, table.B),
-		B_index: index('_VideoToPlace_B_index').on(table.B),
-	})
+	() => videos.id,
+	() => places.id
 );
 
-// Relación Image-WorldItem
-export const imageWorldItems = sqliteTable(
+// =================================================================================
+// ENTITY - PLACE CROSS RELATIONS
+// =================================================================================
+export const albumPlaces = createRelationTable(
+	'_AlbumToPlace',
+	() => albums.id,
+	() => places.id
+);
+export const characterPlaces = createRelationTable(
+	'_CharacterToPlace',
+	() => characters.id,
+	() => places.id
+);
+
+// =================================================================================
+// MEDIA - WORLD ITEM RELATIONS
+// =================================================================================
+export const imageWorldItems = createRelationTable(
 	'_ImageToWorldItem',
-	{
-		A: text('A').notNull(), // imageId
-		B: text('B').notNull(), // worldItemId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_ImageToWorldItem_AB_unique').on(table.A, table.B),
-		B_index: index('_ImageToWorldItem_B_index').on(table.B),
-	})
+	() => images.id,
+	() => worldItems.id
 );
-
-// Relación Video-WorldItem
-export const videoWorldItems = sqliteTable(
+export const videoWorldItems = createRelationTable(
 	'_VideoToWorldItem',
-	{
-		A: text('A').notNull(), // videoId
-		B: text('B').notNull(), // worldItemId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_VideoToWorldItem_AB_unique').on(table.A, table.B),
-		B_index: index('_VideoToWorldItem_B_index').on(table.B),
-	})
+	() => videos.id,
+	() => worldItems.id
 );
 
-// Relación Image-Concept
-export const imageConcepts = sqliteTable(
+// =================================================================================
+// MEDIA - CONCEPT RELATIONS
+// =================================================================================
+export const imageConcepts = createRelationTable(
 	'_ImageToConcept',
-	{
-		A: text('A').notNull(), // imageId
-		B: text('B').notNull(), // conceptId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_ImageToConcept_AB_unique').on(table.A, table.B),
-		B_index: index('_ImageToConcept_B_index').on(table.B),
-	})
+	() => images.id,
+	() => concepts.id
 );
-
-// Relación Video-Concept
-export const videoConcepts = sqliteTable(
+export const videoConcepts = createRelationTable(
 	'_VideoToConcept',
-	{
-		A: text('A').notNull(), // videoId
-		B: text('B').notNull(), // conceptId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_VideoToConcept_AB_unique').on(table.A, table.B),
-		B_index: index('_VideoToConcept_B_index').on(table.B),
-	})
+	() => videos.id,
+	() => concepts.id
 );
 
-// Relación Image-Prompt
-export const imagePrompts = sqliteTable(
+// =================================================================================
+// MEDIA - PROMPT RELATIONS
+// =================================================================================
+export const imagePrompts = createRelationTable(
 	'_ImageToPrompt',
-	{
-		A: text('A').notNull(), // imageId
-		B: text('B').notNull(), // promptId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_ImageToPrompt_AB_unique').on(table.A, table.B),
-		B_index: index('_ImageToPrompt_B_index').on(table.B),
-	})
+	() => images.id,
+	() => prompts.id
 );
-
-// Relación Video-Prompt
-export const videoPrompts = sqliteTable(
+export const videoPrompts = createRelationTable(
 	'_VideoToPrompt',
-	{
-		A: text('A').notNull(), // videoId
-		B: text('B').notNull(), // promptId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_VideoToPrompt_AB_unique').on(table.A, table.B),
-		B_index: index('_VideoToPrompt_B_index').on(table.B),
-	})
+	() => videos.id,
+	() => prompts.id
 );
 
-// Relación Image-Note
-export const imageNotes = sqliteTable(
+// =================================================================================
+// MEDIA - NOTE RELATIONS
+// =================================================================================
+export const imageNotes = createRelationTable(
 	'_ImageToNote',
-	{
-		A: text('A').notNull(), // imageId
-		B: text('B').notNull(), // noteId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_ImageToNote_AB_unique').on(table.A, table.B),
-		B_index: index('_ImageToNote_B_index').on(table.B),
-	})
+	() => images.id,
+	() => notes.id
 );
-
-// Relación Video-Note
-export const videoNotes = sqliteTable(
+export const videoNotes = createRelationTable(
 	'_VideoToNote',
-	{
-		A: text('A').notNull(), // videoId
-		B: text('B').notNull(), // noteId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_VideoToNote_AB_unique').on(table.A, table.B),
-		B_index: index('_VideoToNote_B_index').on(table.B),
-	})
+	() => videos.id,
+	() => notes.id
 );
 
-// Relación Group-Image
-export const groupImages = sqliteTable(
+// =================================================================================
+// GROUP - MEDIA RELATIONS
+// =================================================================================
+export const groupImages = createRelationTable(
 	'_GroupToImage',
-	{
-		A: text('A').notNull(), // groupId
-		B: text('B').notNull(), // imageId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_GroupToImage_AB_unique').on(table.A, table.B),
-		B_index: index('_GroupToImage_B_index').on(table.B),
-	})
+	() => groups.id,
+	() => images.id
 );
-
-// Relación Group-Video
-export const groupVideos = sqliteTable(
+export const groupVideos = createRelationTable(
 	'_GroupToVideo',
-	{
-		A: text('A').notNull(), // groupId
-		B: text('B').notNull(), // videoId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_GroupToVideo_AB_unique').on(table.A, table.B),
-		B_index: index('_GroupToVideo_B_index').on(table.B),
-	})
+	() => groups.id,
+	() => videos.id
 );
-
-// Relación Group-Album
-export const groupAlbums = sqliteTable(
+export const groupAlbums = createRelationTable(
 	'_GroupToAlbum',
-	{
-		A: text('A').notNull(), // groupId
-		B: text('B').notNull(), // albumId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_GroupToAlbum_AB_unique').on(table.A, table.B),
-		B_index: index('_GroupToAlbum_B_index').on(table.B),
-	})
+	() => groups.id,
+	() => albums.id
 );
-
-// Relación Group-Tag
-export const groupTags = sqliteTable(
+export const groupTags = createRelationTable(
 	'_GroupToTag',
-	{
-		A: text('A').notNull(), // groupId
-		B: text('B').notNull(), // tagId
-	},
-	(table) => ({
-		AB_unique: uniqueIndex('_GroupToTag_AB_unique').on(table.A, table.B),
-		B_index: index('_GroupToTag_B_index').on(table.B),
-	})
+	() => groups.id,
+	() => tags.id
 );

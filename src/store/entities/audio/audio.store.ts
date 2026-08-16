@@ -9,13 +9,16 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 // Migrado a cliente de API
 import {
+	type PublicAudioCreateInput,
+	type PublicAudioUpdateInput,
 	createAudioInApi,
 	deleteAudioFromApi,
 	getAudiosFromApi,
+	toggleAudioFavoriteInApi,
 	updateAudioInApi,
 } from '@/lib/api/client/audio.client';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
+import type { AudioWithStats } from '@/types/entities/audio';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type AudioFilters = Record<string, any>;
@@ -26,33 +29,33 @@ export type AudioFilters = Record<string, any>;
 export interface AudioState {
 	// Estado de datos
 	audios: AudioWithStats[];
-	selectedAudios: AudioWithStats[];
+	clearFilters: () => void;
+	clearSelection: () => void;
+	createAudio: (data: PublicAudioCreateInput) => Promise<AudioWithStats | undefined>;
 	currentAudio: AudioWithStats | null;
+	deleteAudio: (id: string) => Promise<void>;
+	deselectAudio: (audioId: string) => void;
+	error: string | null;
+
+	// Acciones de datos
+	fetchAudios: () => Promise<void>;
+	filters: AudioFilters;
+
+	// Utilidades
+	getAudioById: (id: string) => AudioWithStats | undefined;
 
 	// Estado de UI
 	isLoading: boolean;
 	loading: boolean;
-	error: string | null;
-	filters: AudioFilters;
-
-	// Acciones de datos
-	fetchAudios: () => Promise<void>;
-	createAudio: (data: AudioCreateInput) => Promise<AudioWithStats | undefined>;
-	updateAudio: (id: string, data: AudioUpdateInput) => Promise<AudioWithStats | undefined>;
-	deleteAudio: (id: string) => Promise<void>;
 
 	// Acciones de selección
 	selectAudio: (audio: AudioWithStats) => void;
-	deselectAudio: (audioId: string) => void;
-	clearSelection: () => void;
+	selectedAudios: AudioWithStats[];
 
 	// Acciones de filtrado
 	setFilters: (filters: Partial<AudioFilters>) => void;
-	clearFilters: () => void;
-
-	// Utilidades
-	getAudioById: (id: string) => AudioWithStats | undefined;
 	toggleFavorite: (id: string) => Promise<void>;
+	updateAudio: (id: string, data: PublicAudioUpdateInput) => Promise<AudioWithStats | undefined>;
 }
 
 const useAudioStoreBase = create<AudioState>()(
@@ -78,7 +81,7 @@ const useAudioStoreBase = create<AudioState>()(
 				}
 			},
 
-			createAudio: async (data: AudioCreateInput) => {
+			createAudio: async (data: PublicAudioCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newAudio = await createAudioInApi(data);
@@ -93,7 +96,7 @@ const useAudioStoreBase = create<AudioState>()(
 				}
 			},
 
-			updateAudio: async (id: string, data: AudioUpdateInput) => {
+			updateAudio: async (id: string, data: PublicAudioUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedAudio = await updateAudioInApi(id, data);
@@ -161,9 +164,17 @@ const useAudioStoreBase = create<AudioState>()(
 			toggleFavorite: async (id: string) => {
 				const audio = get().getAudioById(id);
 				if (audio) {
-					await get().updateAudio(id, {
-						isFavorite: !audio.isFavorite,
-					});
+					set({ loading: true, error: null });
+					try {
+						const updatedAudio = await toggleAudioFavoriteInApi(id);
+						set((state) => ({
+							audios: state.audios.map((item) => (item.id === id ? updatedAudio : item)),
+							currentAudio: state.currentAudio?.id === id ? updatedAudio : state.currentAudio,
+							loading: false,
+						}));
+					} catch (error) {
+						set({ error: (error as Error).message, loading: false });
+					}
 				}
 			},
 		}),

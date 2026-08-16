@@ -18,7 +18,7 @@ export function extendAlbum(album: Album): AlbumWithStats {
 		// Asegurar que todas las propiedades estén definidas
 		description: album.description || '',
 		emoji: album.emoji || '📸',
-		color: album.color || '#3b82f6',
+		color: album.color || 'var(--dt-primary-500)',
 		isFavorite: album.isFavorite,
 	};
 }

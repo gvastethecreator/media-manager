@@ -36,104 +36,97 @@ export const ImageSchema = z.object({
  * 🖼️ Tipo base canónico para Image
  */
 export interface ImageBase {
-	id: string;
-	name: string;
+	addedAt: Date;
+	createdAt: Date;
 	description: string | null;
-	path: string;
+	folderId: string;
 	hash: string;
-	size: number;
-	width: number;
 	height: number;
+	id: string;
+	isFavorite: boolean;
 	metadata: string | null;
+	name: string;
+	noteId: string | null;
+	path: string;
+	size: number;
 	thumbnail: string | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
-	thumbnailMimeType: string | null;
 	thumbnailError: string | null;
 	thumbnailErrorAt: Date | null;
+	thumbnailHeight: number | null;
+	thumbnailMimeType: string | null;
 	thumbnailOptimizedAt: Date | null;
-	isFavorite: boolean;
-	folderId: string;
-	noteId: string | null;
-	createdAt: Date;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
 	updatedAt: Date;
-	addedAt: Date;
+	width: number;
 }
 
 /**
  * 📝 Datos para crear una Image
  */
 export interface ImageCreateInput {
-	name: string;
-	description?: string | null;
-	path: string;
-	hash: string;
-	size: number;
-	width: number;
-	height: number;
-	metadata?: string | null;
-	isFavorite?: boolean;
-	folderId: string;
 	// Relaciones opcionales
 	albums?: string[];
-	collections?: string[];
-	tags?: string[];
 	characters?: string[];
-	places?: string[];
-	worldItems?: string[];
+	collections?: string[];
 	concepts?: string[];
-	prompts?: string[];
-	notes?: string[];
-	wildcards?: string[];
-	properties?: string[];
+	description?: string | null;
+	folderId: string;
 	groups?: string[];
+	isFavorite?: boolean;
+	hash: string;
+	height: number;
+	metadata?: string | null;
+	name: string;
+	notes?: string[];
+	places?: string[];
+	prompts?: string[];
+	properties?: string[];
+	size: number;
+	source: {
+		relativePath: string;
+		rootId: string;
+	};
+	tags?: string[];
+	width: number;
+	wildcards?: string[];
+	worldItems?: string[];
 }
 
 /**
  * 📝 Datos para actualizar una Image
  */
 export interface ImageUpdateInput {
-	name?: string;
-	description?: string | null;
-	isFavorite?: boolean;
-	folderId?: string | null;
-	metadata?: string | null;
 	// Relaciones opcionales
 	albums?: string[];
-	collections?: string[];
-	tags?: string[];
 	characters?: string[];
-	places?: string[];
-	worldItems?: string[];
+	collections?: string[];
 	concepts?: string[];
-	prompts?: string[];
-	notes?: string[];
-	wildcards?: string[];
-	properties?: string[];
+	description?: string | null;
 	groups?: string[];
+	isFavorite?: boolean;
+	metadata?: string | null;
+	name?: string;
+	notes?: string[];
+	places?: string[];
+	prompts?: string[];
+	properties?: string[];
+	tags?: string[];
+	wildcards?: string[];
+	worldItems?: string[];
 }
 
 /**
  * 🔎 Filtros de búsqueda para Image
  */
 export interface ImageFilters {
-	searchQuery?: string;
-	folders?: string[];
-	tags?: string[];
 	albums?: string[];
+	aspectRatios?: string[];
 	collections?: string[];
-	onlyFavorites?: boolean;
-	hasMetadata?: boolean;
-	hasThumbnail?: boolean;
-	hasError?: boolean;
+	colorTemperatures?: ('warm' | 'neutral' | 'cool')[];
 	dateRange?: {
 		start?: Date;
 		end?: Date;
-	};
-	sizeRange?: {
-		min?: number;
-		max?: number;
 	};
 	dimensionRange?: {
 		minWidth?: number;
@@ -141,12 +134,21 @@ export interface ImageFilters {
 		minHeight?: number;
 		maxHeight?: number;
 	};
+	folders?: string[];
+	hasError?: boolean;
+	hasMetadata?: boolean;
+	hasThumbnail?: boolean;
+	onlyFavorites?: boolean;
 	qualityRange?: {
 		min?: number;
 		max?: number;
 	};
-	aspectRatios?: string[];
-	colorTemperatures?: ('warm' | 'neutral' | 'cool')[];
+	searchQuery?: string;
+	sizeRange?: {
+		min?: number;
+		max?: number;
+	};
+	tags?: string[];
 	technicalGrades?: ('A' | 'B' | 'C' | 'D')[];
 }
 
@@ -154,12 +156,6 @@ export interface ImageFilters {
  * 🔎 Opciones de búsqueda para Image
  */
 export interface ImageSearchOptions {
-	skip?: number;
-	take?: number;
-	orderBy?: {
-		[key in keyof ImageBase]?: 'asc' | 'desc';
-	};
-	where?: ImageFilters;
 	include?: {
 		albums?: boolean;
 		collections?: boolean;
@@ -176,117 +172,123 @@ export interface ImageSearchOptions {
 		folder?: boolean;
 		_count?: boolean;
 	};
+	orderBy?: {
+		[key in keyof ImageBase]?: 'asc' | 'desc';
+	};
+	skip?: number;
+	take?: number;
+	where?: ImageFilters;
 }
 
 /**
  * 📊 Resultado de búsqueda de Images
  */
 export interface ImageSearchResult {
+	hasMore: boolean;
 	items: ImageComplete[];
 	total: number;
-	hasMore: boolean;
 }
 
 /**
  * 🛠️ Opciones para el transformer de Image
  */
 export interface ImageTransformerOptions {
-	includeRelations?: boolean;
-	includeCount?: boolean;
-	includeThumbnail?: boolean;
-	validateFields?: boolean;
-	deserializeMetadata?: boolean;
-	includeUI?: boolean;
 	customFields?: (keyof ImageComplete)[];
+	deserializeMetadata?: boolean;
+	includeCount?: boolean;
+	includeRelations?: boolean;
+	includeThumbnail?: boolean;
+	includeUI?: boolean;
+	validateFields?: boolean;
 }
 
 /**
  * 📊 Metadatos de imagen parseados
  */
 export interface ImageMetadata {
-	format?: string;
-	compression?: string;
-	colorSpace?: string;
+	ai?: ImageAIMetadata;
+	analysis?: ImageAnalysis;
 	bitDepth?: number;
-	hasAlpha?: boolean;
-	orientation?: number;
+	colorSpace?: string;
+	compression?: string;
 	dpi?: {
 		x: number;
 		y: number;
 	};
 	exif?: ImageEXIFData;
-	iptc?: Record<string, unknown>;
-	xmp?: Record<string, unknown>;
+	format?: string;
+	hasAlpha?: boolean;
 	icc?: Record<string, unknown>;
-	ai?: ImageAIMetadata;
-	analysis?: ImageAnalysis;
+	iptc?: Record<string, unknown>;
+	orientation?: number;
+	xmp?: Record<string, unknown>;
 }
 
 /**
  * 📸 Datos EXIF de imagen
  */
 export interface ImageEXIFData {
-	make?: string;
-	model?: string;
-	software?: string;
+	artist?: string;
+	copyright?: string;
 	dateTime?: string;
-	dateTimeOriginal?: string;
 	dateTimeDigitized?: string;
+	dateTimeOriginal?: string;
 	exposureTime?: string;
-	fNumber?: number;
-	iso?: number;
-	focalLength?: string;
-	lensModel?: string;
 	flash?: string;
-	whiteBalance?: string;
+	fNumber?: number;
+	focalLength?: string;
 	gps?: {
 		latitude?: number;
 		longitude?: number;
 		altitude?: number;
 	};
-	artist?: string;
-	copyright?: string;
+	iso?: number;
+	lensModel?: string;
+	make?: string;
+	model?: string;
+	software?: string;
+	whiteBalance?: string;
 }
 
 /**
  * 🤖 Metadatos de AI
  */
 export interface ImageAIMetadata {
-	model?: string;
-	prompt?: string;
-	negativePrompt?: string;
-	seed?: number;
-	steps?: number;
 	cfgScale?: number;
-	sampler?: string;
-	scheduler?: string;
-	strength?: number;
-	guidance?: number;
 	clipSkip?: number;
 	extraParameters?: Record<string, unknown>;
 	generatedAt?: Date;
+	guidance?: number;
+	model?: string;
+	negativePrompt?: string;
 	processingTime?: number;
+	prompt?: string;
+	sampler?: string;
+	scheduler?: string;
+	seed?: number;
+	steps?: number;
+	strength?: number;
 }
 
 /**
  * 🔬 Análisis de imagen
  */
 export interface ImageAnalysis {
-	dominantColors?: string[];
 	averageBrightness?: number;
-	contrast?: number;
-	sharpness?: number;
-	noise?: number;
-	faces?: number;
-	objects?: string[];
-	scenes?: string[];
-	emotions?: string[];
-	text?: string[];
-	landmarks?: string[];
-	celebrities?: string[];
 	brands?: string[];
-	safetyRating?: 'safe' | 'moderate' | 'adult';
+	celebrities?: string[];
 	confidenceScores?: Record<string, number>;
+	contrast?: number;
+	dominantColors?: string[];
+	emotions?: string[];
+	faces?: number;
+	landmarks?: string[];
+	noise?: number;
+	objects?: string[];
+	safetyRating?: 'safe' | 'moderate' | 'adult';
+	scenes?: string[];
+	sharpness?: number;
+	text?: string[];
 }
 
 /**
@@ -295,9 +297,9 @@ export interface ImageAnalysis {
 export interface RelatedImage {
 	id: string;
 	name: string;
-	thumbnailUrl: string;
-	similarity: number;
 	relationship: string;
+	similarity: number;
+	thumbnailUrl: string;
 }
 
 /**
@@ -352,21 +354,21 @@ export enum ImageViewMode {
  * 📊 Configuración de vista para Images
  */
 export interface ImageViewConfig {
-	viewMode: ImageViewMode;
-	sortBy: ImageSortOption;
-	sortDirection: 'asc' | 'desc';
+	autoPlay: boolean;
+	enableAnimations: boolean;
+	enableFullscreen: boolean;
+	enableZoom: boolean;
 	gridSize: 'small' | 'medium' | 'large' | 'xl';
+	groupBy: 'folder' | 'date' | 'tag' | 'album' | 'quality' | null;
+	showDimensions: boolean;
+	showFavorites: boolean;
+	showFilenames: boolean;
+	showFileSize: boolean;
 	showMetadata: boolean;
 	showThumbnails: boolean;
-	showFilenames: boolean;
-	showDimensions: boolean;
-	showFileSize: boolean;
-	groupBy: 'folder' | 'date' | 'tag' | 'album' | 'quality' | null;
-	enableAnimations: boolean;
-	autoPlay: boolean;
-	showFavorites: boolean;
-	enableZoom: boolean;
-	enableFullscreen: boolean;
+	sortBy: ImageSortOption;
+	sortDirection: 'asc' | 'desc';
+	viewMode: ImageViewMode;
 }
 
 export const IMAGE_SORT_PROPERTY_MAP: Record<ImageSortCriteria, string> = {
@@ -392,20 +394,6 @@ export type ImageValidated = z.infer<typeof ImageSchema>;
  * 🖼️ Image con propiedades extendidas para UI y relaciones
  */
 export interface ImageExtended extends ImageBase {
-	// Relaciones (simplificadas para evitar dependencias circulares)
-	albums?: any[];
-	collections?: any[];
-	tags?: any[];
-	characters?: any[];
-	places?: any[];
-	worldItems?: any[];
-	concepts?: any[];
-	prompts?: any[];
-	notes?: any[];
-	wildcards?: any[];
-	properties?: any[];
-	groups?: any[];
-	folder?: any;
 	// Conteos (siempre presentes en ImageWithStats)
 	_count?: {
 		albums?: number;
@@ -421,6 +409,20 @@ export interface ImageExtended extends ImageBase {
 		properties?: number;
 		groups?: number;
 	};
+	// Relaciones (simplificadas para evitar dependencias circulares)
+	albums?: any[];
+	characters?: any[];
+	collections?: any[];
+	concepts?: any[];
+	folder?: any;
+	groups?: any[];
+	notes?: any[];
+	places?: any[];
+	prompts?: any[];
+	properties?: any[];
+	tags?: any[];
+	wildcards?: any[];
+	worldItems?: any[];
 }
 
 /**
@@ -435,6 +437,13 @@ export interface ImageComplete extends ImageExtended {
  * 📊 Image con estadísticas
  */
 export interface ImageWithStats extends ImageExtended {
+	averageSize?: number;
+	dimensions?: {
+		width: number;
+		height: number;
+		aspectratio: number;
+		orientation: 'landscape' | 'portrait' | 'square';
+	};
 	statistics?: {
 		views: number;
 		likes: number;
@@ -449,25 +458,18 @@ export interface ImageWithStats extends ImageExtended {
 		lastSharedAt?: Date;
 		lastDownloadedAt?: Date;
 	};
-	dimensions?: {
-		width: number;
-		height: number;
-		aspectratio: number;
-		orientation: 'landscape' | 'portrait' | 'square';
-	};
 	url?: string;
-	averageSize?: number;
 }
 
 /**
  * 🗂️ Estado del slice de imágenes para gestión de estado
  */
 export interface ImageCoreSlice {
-	images: ImageBase[];
-	selectedImageId: string | null;
-	loading: boolean;
 	error: string | null;
 	filters: ImageSearchOptions;
-	totalCount: number;
 	hasMore: boolean;
+	images: ImageBase[];
+	loading: boolean;
+	selectedImageId: string | null;
+	totalCount: number;
 }

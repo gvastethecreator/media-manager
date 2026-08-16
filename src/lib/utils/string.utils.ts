@@ -11,7 +11,7 @@
  */
 export function generateTagColor(name: string): string {
 	if (!name) {
-		return '#3b82f6'; // Color por defecto
+		return 'var(--dt-primary-500)'; // Color por defecto
 	}
 
 	// Hash sin bitwise: acumulación multiplicativa con módulo de 2^32

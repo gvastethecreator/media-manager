@@ -37,18 +37,21 @@ graph TB
 ## 🎯 Características Especiales
 
 ### 🎮 Sistema RPG/D&D
+
 - **Tipos de objetos**: Armas, armaduras, accesorios, consumibles, materiales, artefactos
 - **Sistema de rareza**: Common, Uncommon, Rare, Epic, Legendary, Mythic, Unique, Artifact
 - **Categorías**: Equipment, Quest, Crafting, Lore, Collectible, Utility, Magical, Technological
 - **Propiedades mágicas**: Atributos, efectos, requisitos, estadísticas
 
 ### 🔍 Filtrado Avanzado
+
 - **Búsqueda por texto**: Nombre, descripción, tipo, categoría, rareza
 - **Filtros específicos**: Tipo, categoría, rareza, favoritos
 - **Filtros numéricos**: Nivel mínimo/máximo, valor mínimo/máximo
 - **Filtros de relaciones**: Con imágenes, notas, conceptos, prompts
 
 ### 📊 Ordenamiento
+
 - **Por nombre**: Ascendente/Descendente
 - **Por tipo**: Ascendente/Descendente
 - **Por rareza**: Peso numérico de rareza
@@ -57,104 +60,111 @@ graph TB
 ## 🧩 Estructura del Store
 
 ### 📊 Estado Principal
+
 ```typescript
 interface WorldItemState {
-  worldItems: WorldItem[]           // Lista de objetos del mundo
-  isLoading: boolean               // Estado de carga
-  error: string | null             // Error actual
-  ui: WorldItemUIState             // Estado de interfaz
-  filters: WorldItemFilters        // Filtros activos
+	worldItems: WorldItem[]; // Lista de objetos del mundo
+	isLoading: boolean; // Estado de carga
+	error: string | null; // Error actual
+	ui: WorldItemUIState; // Estado de interfaz
+	filters: WorldItemFilters; // Filtros activos
 }
 ```
 
 ### 🎮 Estado de UI
+
 ```typescript
 interface WorldItemUIState {
-  selectedId: string | null        // ID del objeto seleccionado
-  editingId: string | null         // ID del objeto en edición
-  highlightedId: string | null     // ID del objeto resaltado
-  viewMode: WorldItemViewMode      // Modo de visualización
+	selectedId: string | null; // ID del objeto seleccionado
+	editingId: string | null; // ID del objeto en edición
+	highlightedId: string | null; // ID del objeto resaltado
+	viewMode: WorldItemViewMode; // Modo de visualización
 }
 ```
 
 ### 🔍 Filtros
+
 ```typescript
 interface WorldItemFilters {
-  sortBy: WorldItemSortCriteria    // Criterio de ordenamiento
-  searchTerm: string | null        // Término de búsqueda
-  type: string | null              // Filtro por tipo
-  category: string | null          // Filtro por categoría
-  rarity: string | null            // Filtro por rareza
-  minLevel?: number                // Nivel mínimo
-  maxLevel?: number                // Nivel máximo
-  minValue?: number                // Valor mínimo
-  maxValue?: number                // Valor máximo
-  isFavorite?: boolean             // Solo favoritos
-  hasImages?: boolean              // Con imágenes
-  hasNotes?: boolean               // Con notas
-  hasConcepts?: boolean            // Con conceptos
-  hasPrompts?: boolean             // Con prompts
+	sortBy: WorldItemSortCriteria; // Criterio de ordenamiento
+	searchTerm: string | null; // Término de búsqueda
+	type: string | null; // Filtro por tipo
+	category: string | null; // Filtro por categoría
+	rarity: string | null; // Filtro por rareza
+	minLevel?: number; // Nivel mínimo
+	maxLevel?: number; // Nivel máximo
+	minValue?: number; // Valor mínimo
+	maxValue?: number; // Valor máximo
+	isFavorite?: boolean; // Solo favoritos
+	hasImages?: boolean; // Con imágenes
+	hasNotes?: boolean; // Con notas
+	hasConcepts?: boolean; // Con conceptos
+	hasPrompts?: boolean; // Con prompts
 }
 ```
 
 ## 🔄 Acciones Principales
 
 ### 📥 Gestión de Datos
+
 ```typescript
 // Cargar objetos del mundo
-await loadWorldItems()
+await loadWorldItems();
 
 // Crear nuevo objeto
-await createWorldItem(data)
+await createWorldItem(data);
 
 // Actualizar objeto existente
-await updateWorldItem(id, data)
+await updateWorldItem(id, data);
 
 // Eliminar objeto
-await deleteWorldItem(id)
+await deleteWorldItem(id);
 ```
 
 ### 🎮 Gestión de UI
+
 ```typescript
 // Seleccionar objeto
-selectWorldItem(id)
+selectWorldItem(id);
 
 // Iniciar edición
-startEditing(id)
+startEditing(id);
 
 // Resaltar objeto
-highlightWorldItem(id)
+highlightWorldItem(id);
 
 // Cambiar modo de vista
-setViewMode(mode)
+setViewMode(mode);
 
 // Limpiar selección
-clearSelection()
+clearSelection();
 ```
 
 ### 🔍 Filtros y Búsqueda
+
 ```typescript
 // Actualizar filtros
-updateFilters({ type: 'weapon', rarity: 'legendary' })
+updateFilters({ type: 'weapon', rarity: 'legendary' });
 
 // Buscar por texto
-setSearchQuery('espada mágica')
+setSearchQuery('espada mágica');
 
 // Limpiar filtros
-clearFilters()
+clearFilters();
 
 // Obtener datos filtrados
-const filtered = getFilteredWorldItems()
-const sorted = getSortedWorldItems()
+const filtered = getFilteredWorldItems();
+const sorted = getSortedWorldItems();
 ```
 
 ## 🛠️ Utilidades Disponibles
 
 ### 📊 Estadísticas
-```typescript
-import { getWorldItemStats } from '@/utils/world-item'
 
-const stats = getWorldItemStats(worldItems)
+```typescript
+import { getWorldItemStats } from '@/utils/world-item';
+
+const stats = getWorldItemStats(worldItems);
 // {
 //   total: 150,
 //   byType: { weapon: 45, armor: 30, ... },
@@ -166,31 +176,35 @@ const stats = getWorldItemStats(worldItems)
 ```
 
 ### 🔄 Ordenamiento
-```typescript
-import { sortWorldItems } from '@/utils/world-item'
 
-const sorted = sortWorldItems(worldItems, 'rarity:desc')
+```typescript
+import { sortWorldItems } from '@/utils/world-item';
+
+const sorted = sortWorldItems(worldItems, 'rarity:desc');
 ```
 
 ### 🏷️ Agrupamiento
-```typescript
-import { groupWorldItems } from '@/utils/world-item'
 
-const grouped = groupWorldItems(worldItems, 'type')
+```typescript
+import { groupWorldItems } from '@/utils/world-item';
+
+const grouped = groupWorldItems(worldItems, 'type');
 // { weapon: [...], armor: [...], ... }
 ```
 
 ### 🎨 Generación Visual
-```typescript
-import { generateWorldItemColor, generateWorldItemEmoji } from '@/utils/world-item'
 
-const color = generateWorldItemColor('legendary') // '#F59E0B'
-const emoji = generateWorldItemEmoji('weapon')    // '⚔️'
+```typescript
+import { generateWorldItemColor, generateWorldItemEmoji } from '@/utils/world-item';
+
+const color = generateWorldItemColor('legendary'); // '#F59E0B'
+const emoji = generateWorldItemEmoji('weapon'); // '⚔️'
 ```
 
 ## 📦 Uso del Store
 
 ### 🎯 En Componentes React
+
 ```typescript
 import { useWorldItemStore } from '@/store/entities/world-item'
 
@@ -227,6 +241,7 @@ function WorldItemList() {
 ```
 
 ### 🔍 Filtrado Avanzado
+
 ```typescript
 function WorldItemFilters() {
   const { filters, updateFilters } = useWorldItemStore()
@@ -251,6 +266,7 @@ function WorldItemFilters() {
 ## 🎨 Personalización Visual
 
 ### 🌈 Colores por Rareza
+
 - **Common**: `#9CA3AF` (Gris)
 - **Uncommon**: `#10B981` (Verde)
 - **Rare**: `#3B82F6` (Azul)
@@ -261,6 +277,7 @@ function WorldItemFilters() {
 - **Artifact**: `#F97316` (Naranja)
 
 ### 🎭 Emojis por Tipo
+
 - **Weapon**: ⚔️
 - **Armor**: 🛡️
 - **Accessory**: 💍
@@ -274,6 +291,7 @@ function WorldItemFilters() {
 ## 🔄 Persistencia
 
 El store utiliza persistencia automática para:
+
 - ✅ **Estado de UI**: Modo de vista, selecciones
 - ✅ **Filtros**: Criterios de búsqueda y filtrado
 - ❌ **Datos**: Se recargan desde el servidor
@@ -281,11 +299,13 @@ El store utiliza persistencia automática para:
 ## 🚀 Optimizaciones
 
 ### ⚡ Performance
+
 - **Memoización**: Selectores memoizados para evitar recálculos
 - **Lazy Loading**: Carga bajo demanda de relaciones
 - **Debounce**: Búsqueda con retardo para evitar llamadas excesivas
 
 ### 💾 Gestión de Memoria
+
 - **Cleanup**: Limpieza automática de referencias
 - **Weak References**: Para evitar memory leaks
 - **Garbage Collection**: Optimizado para objetos grandes
@@ -293,40 +313,40 @@ El store utiliza persistencia automática para:
 ## 📚 Ejemplos de Uso
 
 ### 🎮 Creación de Objeto Mágico
+
 ```typescript
 const magicalSword = {
-  name: 'Espada del Amanecer',
-  description: 'Una espada legendaria forjada con luz solar',
-  type: 'weapon',
-  category: 'equipment',
-  rarity: 'legendary',
-  attributes: JSON.stringify([
-    { name: 'attack', value: 150, maxValue: 200 },
-    { name: 'magic', value: 75, maxValue: 100 }
-  ]),
-  effects: JSON.stringify([
-    { name: 'Solar Flare', description: 'Daño adicional durante el día' }
-  ]),
-  isFavorite: true
-}
+	name: 'Espada del Amanecer',
+	description: 'Una espada legendaria forjada con luz solar',
+	type: 'weapon',
+	category: 'equipment',
+	rarity: 'legendary',
+	attributes: JSON.stringify([
+		{ name: 'attack', value: 150, maxValue: 200 },
+		{ name: 'magic', value: 75, maxValue: 100 },
+	]),
+	effects: JSON.stringify([{ name: 'Solar Flare', description: 'Daño adicional durante el día' }]),
+	isFavorite: true,
+};
 
-await createWorldItem(magicalSword)
+await createWorldItem(magicalSword);
 ```
 
 ### 🔍 Búsqueda Avanzada
+
 ```typescript
 // Buscar armas legendarias con imágenes
 updateFilters({
-  type: 'weapon',
-  rarity: 'legendary',
-  hasImages: true
-})
+	type: 'weapon',
+	rarity: 'legendary',
+	hasImages: true,
+});
 
 // Buscar objetos por nivel
 updateFilters({
-  minLevel: 50,
-  maxLevel: 100
-})
+	minLevel: 50,
+	maxLevel: 100,
+});
 ```
 
 ---

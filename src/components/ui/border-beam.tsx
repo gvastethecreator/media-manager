@@ -2,14 +2,14 @@ import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
 interface BorderBeamProps {
-	className?: string;
-	size?: number;
-	duration?: number;
-	borderWidth?: number;
 	anchor?: number;
+	borderWidth?: number;
+	className?: string;
 	colorFrom?: string;
 	colorTo?: string;
 	delay?: number;
+	duration?: number;
+	size?: number;
 }
 
 export const BorderBeam = ({
@@ -18,8 +18,8 @@ export const BorderBeam = ({
 	duration = 15,
 	anchor = 90,
 	borderWidth = 1.5,
-	colorFrom = '#ffaa40',
-	colorTo = '#9c40ff',
+	colorFrom = 'var(--primary)',
+	colorTo = 'var(--accent)',
 	delay = 0,
 }: BorderBeamProps) => {
 	return (

@@ -1,13 +1,83 @@
 {
-  "version": "7",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1757900450739,
-      "tag": "0000_worthless_rafael_vega",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "6",
+			"when": 1784106366893,
+			"tag": "0000_baseline",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1784150992495,
+			"tag": "0001_relational_integrity",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1784151510396,
+			"tag": "0002_queue_idempotency",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1784160000000,
+			"tag": "0003_epoch_ms_normalization",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "6",
+			"when": 1784170728866,
+			"tag": "0004_canonical_asset_source",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "6",
+			"when": 1784173216280,
+			"tag": "0005_image_asset_link",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "6",
+			"when": 1784209577414,
+			"tag": "0006_media_specialization_asset_links",
+			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "6",
+			"when": 1784219530961,
+			"tag": "0007_media_folder_created_indexes",
+			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "6",
+			"when": 1784244677973,
+			"tag": "0008_taxonomy_artifact_projection",
+			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "6",
+			"when": 1784247859709,
+			"tag": "0009_wildcard_shortcut_projection",
+			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "6",
+			"when": 1784252294362,
+			"tag": "0010_semantic_relation_model",
+			"breakpoints": true
+		}
+	]
 }

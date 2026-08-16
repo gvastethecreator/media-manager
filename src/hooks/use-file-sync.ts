@@ -12,23 +12,25 @@ import { toastService } from '@/lib/ui/toast';
 const logger = clientLogger.withContext('FileSync');
 
 export interface FileSyncStatus {
+	/** Errores durante la sincronización */
+	errors: string[];
 	/** Si está ejecutándose una sincronización */
 	isSyncing: boolean;
-	/** Archivos eliminados en la última sincronización */
-	removedFiles: Array<{
-		id: string;
-		path: string;
-		name: string;
-		type: 'image' | 'video' | 'audio' | 'document' | 'file3d';
-	}>;
+	/** Timestamp de la última sincronización */
+	lastSync?: Date;
 	/** Archivos nuevos detectados en la última sincronización */
 	newFiles: Array<{
 		path: string;
 		name: string;
 		extension: string;
 	}>;
-	/** Errores durante la sincronización */
-	errors: string[];
+	/** Archivos eliminados en la última sincronización */
+	removedFiles: Array<{
+		id: string;
+		path: string;
+		name: string;
+		type: 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d';
+	}>;
 	/** Estadísticas de la última sincronización */
 	stats?: {
 		totalChecked: number;
@@ -36,21 +38,19 @@ export interface FileSyncStatus {
 		newFilesFound: number;
 		duration: number;
 	};
-	/** Timestamp de la última sincronización */
-	lastSync?: Date;
 }
 
 export interface UseFileSyncOptions {
 	/** Si debe ejecutarse automáticamente al cargar */
 	autoSync?: boolean;
-	/** Intervalo en milisegundos para verificar cambios (por defecto 60 segundos) */
-	syncInterval?: number;
 	/** Callback cuando se completa la sincronización */
 	onSyncComplete?: (status: FileSyncStatus) => void;
 	/** Callback cuando hay errores */
 	onSyncError?: (errors: string[]) => void;
 	/** Si debe mostrar notificaciones automáticamente */
 	showNotifications?: boolean;
+	/** Intervalo en milisegundos para verificar cambios (por defecto 60 segundos) */
+	syncInterval?: number;
 }
 
 /**
@@ -145,6 +145,7 @@ export function useFileSync(folderId?: string, options: UseFileSyncOptions = {})
 				queryClient.invalidateQueries({ queryKey: ['videos', 'folder', folderId] });
 				queryClient.invalidateQueries({ queryKey: ['audios', 'folder', folderId] });
 				queryClient.invalidateQueries({ queryKey: ['documents', 'folder', folderId] });
+				queryClient.invalidateQueries({ queryKey: ['json-files'] });
 				queryClient.invalidateQueries({ queryKey: ['file3ds', 'folder', folderId] });
 				queryClient.invalidateQueries({ queryKey: ['folders'] });
 			}
@@ -342,6 +343,7 @@ export function useGlobalFileSync(options?: UseFileSyncOptions) {
 			queryClient.invalidateQueries({ queryKey: ['videos'] });
 			queryClient.invalidateQueries({ queryKey: ['audios'] });
 			queryClient.invalidateQueries({ queryKey: ['documents'] });
+			queryClient.invalidateQueries({ queryKey: ['json-files'] });
 			queryClient.invalidateQueries({ queryKey: ['file3ds'] });
 			queryClient.invalidateQueries({ queryKey: ['folders'] });
 

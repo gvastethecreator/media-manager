@@ -1,11 +1,11 @@
 // Configuración centralizada para límites de procesamiento de medios
 // Previene OOM / cuelgues durante reindex de directorios masivos
 export interface MediaProcessingLimits {
-	maxImageFileSizeBytes: number; // Límite duro para creación + thumbnail
-	maxVideoFileSizeBytes: number; // Límite para procesamiento de videos
+	enableImageSizeSkip: boolean; // Activar/Desactivar skip
 	max3DFileSizeBytes: number; // Límite para archivos 3D (obj, fbx, blend, etc.)
 	maxDocumentFileSizeBytes: number; // Límite para documentos (pdf, etc.)
-	enableImageSizeSkip: boolean; // Activar/Desactivar skip
+	maxImageFileSizeBytes: number; // Límite duro para creación + thumbnail
+	maxVideoFileSizeBytes: number; // Límite para procesamiento de videos
 }
 
 const MB = 1024 * 1024;

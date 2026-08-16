@@ -11,29 +11,29 @@ import { Switch } from './switch';
 import { Tabs, TabsList, TabsTrigger } from './tabs';
 
 export interface LogEntry {
-	id: string;
-	timestamp: string;
-	level: 'debug' | 'info' | 'warn' | 'error' | 'success';
-	message: string;
 	context?: string;
 	data?: any;
+	id: string;
+	level: 'debug' | 'info' | 'warn' | 'error' | 'success';
+	message: string;
+	timestamp: string;
 }
 
 interface LogViewerProps {
-	title?: string;
+	autoScroll?: boolean;
+	className?: string;
 	logs?: LogEntry[];
 	maxHeight?: string;
-	autoScroll?: boolean;
 	onClear?: () => void;
-	className?: string;
+	title?: string;
 }
 
 const LOG_COLORS = {
-	debug: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-	info: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-	warn: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-	error: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-	success: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
+	debug: 'bg-ui-info text-ui-info-text',
+	info: 'bg-ui-success text-ui-success-text',
+	warn: 'bg-ui-warning text-ui-warning-text',
+	error: 'bg-ui-error text-ui-error-text',
+	success: 'bg-ui-success text-ui-success-text',
 };
 
 const LOG_ICONS = {
@@ -168,7 +168,7 @@ export function LogViewer({
 			<Tabs className="px-4" onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="grid h-8 grid-cols-5">
 					<TabsTrigger className="text-xs" value="all">
-						Todos
+						All
 						<Badge className="ml-1 text-xs" variant="secondary">
 							{logs.length}
 						</Badge>
@@ -220,7 +220,7 @@ export function LogViewer({
 						if (!last) {
 							return 'No hay logs';
 						}
-						return `Último log: ${new Date(last.timestamp).toLocaleTimeString()}`;
+						return `Latest log: ${new Date(last.timestamp).toLocaleTimeString()}`;
 					})()}
 				</div>
 				<div className="flex gap-1">

@@ -1,42 +1,36 @@
 import { Group as GroupIcon } from 'lucide-react';
 import React, { memo } from 'react';
-import { GroupCard } from '@/components/cards/group-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { GroupCard } from '@/components/cards/group-card/group-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { GroupWithStats } from '@/types/entities/group';
 
 interface GroupsContentViewProps {
-	groups: GroupWithStats[];
-	isLoading: boolean;
-	error: string | null;
-	showForm: boolean;
-	newGroupName: string;
-	newGroupDescription: string;
-	optimisticGroups: GroupWithStats[];
-	setShowForm: (show: boolean) => void;
-	setNewGroupName: (name: string) => void;
-	setNewGroupDescription: (description: string) => void;
-	handleGroupClick: (group: GroupWithStats) => void;
-	handleCreateGroup: () => void;
 	className?: string;
+	error: string | null;
+	groups: GroupWithStats[];
+	handleCreateGroup: () => void;
+	handleGroupClick: (group: GroupWithStats) => void;
+	isLoading: boolean;
+	newGroupDescription: string;
+	newGroupName: string;
+	optimisticGroups: GroupWithStats[];
+	setNewGroupDescription: (description: string) => void;
+	setNewGroupName: (name: string) => void;
+	setShowForm: (show: boolean) => void;
+	showForm: boolean;
 }
 
 // Componente memoizado para cada tarjeta de grupo
 const MemoizedGroupCard = memo(
 	({ group, onGroupClick }: { group: GroupWithStats; onGroupClick: () => void }) => {
-		// Asegurarse de que el grupo tenga todas las propiedades requeridas
-		const completeGroup = {
-			...group,
-			emoji: '📂',
-			color: '#60a5fa',
-		};
-
 		return <GroupCard className="h-full" group={group} onClick={onGroupClick} />;
 	},
 	(prevProps, nextProps) => {
@@ -82,34 +76,34 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'h-full'}>
 			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Grupos</h2>
+				<h2 className="mb-4 font-bold text-xl">Groups</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Grupo'}
+					{showForm ? 'Cancel' : 'Create Group'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Grupo</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Group</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="groupName">Nombre</Label>
+							<Label htmlFor="groupName">Name</Label>
 							<Input
 								id="groupName"
 								onChange={(e) => setNewGroupName(e.target.value)}
-								placeholder="Nombre del grupo"
+								placeholder="Group name"
 								value={newGroupName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="groupDescription">Descripción</Label>
+							<Label htmlFor="groupDescription">Description</Label>
 							<Textarea
 								id="groupDescription"
 								onChange={(e) => setNewGroupDescription(e.target.value)}
-								placeholder="Descripción del grupo (opcional)"
+								placeholder="Group description (optional)"
 								value={newGroupDescription}
 							/>
 						</div>
-						<Button onClick={handleCreateGroup}>Guardar Grupo</Button>
+						<Button onClick={handleCreateGroup}>Save Group</Button>
 					</div>
 				)}
 
@@ -120,11 +114,11 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 						title="No hay grupos creados"
 					/>
 				) : (
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{optimisticGroups.map((group, index) => {
 							// Verificar que el grupo tenga un id válido
 							if (!group?.id) {
-								console.error('Grupo sin id válido:', group);
+								clientLogger.error('Group has no valid ID:', group);
 								return null;
 							}
 
@@ -140,7 +134,7 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 									transition={{ delay: index * 0.1 }}
 								>
 									<div
-										className="h-full w-full transition-all duration-300 ease-in-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
+										className="h-full w-full transition-all duration-dt-normal ease-dt-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
 										data-group-id={group.id}
 									>
 										<MemoizedGroupCard group={group} onGroupClick={onGroupClick} />

@@ -7,18 +7,34 @@
 import { and, count, desc, eq, gte, ilike, inArray, lte } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { activities, images } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Activity, ActivityFilters, ActivityListResponse, CreateActivityData } from '@/types/entities/activity';
+
+const activityLogger = serverLogger.withContext('ActivityService');
 
 /**
  * Interfaz para el servicio de Activity
  */
 export interface ActivityService {
 	/**
+	 * Elimina todas las actividades o las que coincidan con los filtros
+	 * @param filters Filtros opcionales
+	 * @returns Número de actividades eliminadas
+	 */
+	clearAll(filters?: ActivityFilters): Promise<number>;
+	/**
 	 * Crea una nueva actividad
 	 * @param data Datos para la creación
 	 * @returns Actividad creada
 	 */
 	create(data: CreateActivityData): Promise<Activity>;
+
+	/**
+	 * Elimina una actividad por su identificador
+	 * @param id Identificador de la actividad
+	 * @returns true si se eliminó correctamente
+	 */
+	delete(id: string): Promise<boolean>;
 
 	/**
 	 * Busca una actividad por su identificador
@@ -33,20 +49,6 @@ export interface ActivityService {
 	 * @returns Respuesta con actividades y metadatos
 	 */
 	list(filters?: ActivityFilters): Promise<ActivityListResponse>;
-
-	/**
-	 * Elimina una actividad por su identificador
-	 * @param id Identificador de la actividad
-	 * @returns true si se eliminó correctamente
-	 */
-	delete(id: string): Promise<boolean>;
-
-	/**
-	 * Elimina todas las actividades o las que coincidan con los filtros
-	 * @param filters Filtros opcionales
-	 * @returns Número de actividades eliminadas
-	 */
-	clearAll(filters?: ActivityFilters): Promise<number>;
 }
 
 /**
@@ -129,7 +131,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return this.transformActivityResponse({ ...newActivity, image: imageData });
 		} catch (error) {
-			console.error('Error al crear actividad:', error);
+			activityLogger.error('Could not create activity:', error);
 			throw new Error('No se pudo crear la actividad');
 		}
 	}
@@ -173,7 +175,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return this.transformActivityResponse(result[0]);
 		} catch (error) {
-			console.error('Error al buscar actividad:', error);
+			activityLogger.error('Error al buscar actividad:', error);
 			throw new Error('No se pudo buscar la actividad');
 		}
 	}
@@ -231,7 +233,7 @@ export class ActivityServiceImpl implements ActivityService {
 				hasMore: offset + limit < totalCount,
 			};
 		} catch (error) {
-			console.error('Error al listar actividades:', error);
+			activityLogger.error('Error al listar actividades:', error);
 			throw new Error('No se pudieron listar las actividades');
 		}
 	}
@@ -247,7 +249,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return result.length > 0;
 		} catch (error) {
-			console.error('Error al eliminar actividad:', error);
+			activityLogger.error('Could not delete activity:', error);
 			return false;
 		}
 	}
@@ -265,7 +267,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return result.length;
 		} catch (error) {
-			console.error('Error al eliminar todas las actividades:', error);
+			activityLogger.error('Error al eliminar todas las actividades:', error);
 			throw new Error('No se pudieron eliminar las actividades');
 		}
 	}
@@ -332,16 +334,16 @@ export class ActivityServiceImpl implements ActivityService {
 			return '#3b82f6';
 		}
 		if (type.startsWith('video_')) {
-			return '#ec4899';
+			return '#8b5cf6';
 		}
 		if (type.startsWith('album_')) {
 			return '#f59e0b';
 		}
 		if (type.startsWith('tag_')) {
-			return '#10b981';
+			return '#22c55e';
 		}
 		if (type.startsWith('user_')) {
-			return '#8b5cf6';
+			return '#ec4899';
 		}
 
 		// Default
@@ -367,7 +369,7 @@ export class ActivityServiceImpl implements ActivityService {
 			return 'Etiquetas';
 		}
 		if (type.startsWith('user_')) {
-			return 'Usuarios';
+			return 'Users';
 		}
 
 		// Default
@@ -396,5 +398,5 @@ export const ActivityService = getActivityService();
  * Función de inicialización del servicio
  */
 export function initActivityService(): void {
-	console.log('ActivityService inicializado');
+	activityLogger.debug('ActivityService inicializado');
 }

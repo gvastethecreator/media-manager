@@ -6,16 +6,16 @@
 // ===== COLORES DE ESTADO =====
 export const STATUS_COLORS = {
 	indexed: {
-		bg: 'bg-green-50/30',
-		border: 'border-green-200',
-		text: 'text-green-600',
-		ring: 'ring-green-200',
+		bg: 'bg-ui-success',
+		border: 'border-ui-success-border',
+		text: 'text-ui-success-text',
+		ring: 'ring-ui-success-border',
 	},
 	outdated: {
-		bg: 'bg-amber-50/30',
-		border: 'border-amber-200',
-		text: 'text-amber-600',
-		ring: 'ring-amber-200',
+		bg: 'bg-ui-warning',
+		border: 'border-ui-warning-border',
+		text: 'text-ui-warning-text',
+		ring: 'ring-ui-warning-border',
 	},
 	pending: {
 		bg: 'bg-muted/30',
@@ -30,26 +30,26 @@ export const STATUS_COLORS = {
 		ring: 'ring-destructive/30',
 	},
 	processing: {
-		bg: 'bg-blue-50',
-		border: 'border-blue-200',
-		text: 'text-blue-600',
-		ring: 'ring-blue-200',
+		bg: 'bg-ui-info',
+		border: 'border-ui-info-border',
+		text: 'text-ui-info-text',
+		ring: 'ring-ui-info-border',
 	},
 	complete: {
-		bg: 'bg-emerald-50',
-		border: 'border-emerald-200',
-		text: 'text-emerald-600',
-		ring: 'ring-emerald-200',
+		bg: 'bg-ui-success',
+		border: 'border-ui-success-border',
+		text: 'text-ui-success-text',
+		ring: 'ring-ui-success-border',
 	},
 } as const;
 
 // ===== COLORES POR TIPO DE ARCHIVO =====
 export const FILE_TYPE_COLORS = {
-	images: 'bg-blue-500',
-	videos: 'bg-purple-500',
-	audio: 'bg-green-500',
-	documents: 'bg-orange-500',
-	others: 'bg-gray-500',
+	images: 'bg-entity-image',
+	videos: 'bg-entity-video',
+	audio: 'bg-entity-audio',
+	documents: 'bg-entity-document',
+	others: 'bg-entity-file',
 } as const;
 
 // ===== TAMAÑOS DE COMPONENTES =====
@@ -96,9 +96,9 @@ export const ANIMATIONS = {
 
 // ===== UTILIDADES DE CLASE =====
 export const COMMON_CLASSES = {
-	cardBase: 'relative h-full cursor-pointer overflow-hidden border-2 px-1 py-2 transition-all duration-200',
+	cardBase: 'relative h-full cursor-pointer overflow-hidden border px-1 py-2 transition-all duration-200',
 	cardGradient: 'border-border/60 bg-gradient-to-br from-card to-card/95',
-	cardHover: 'hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5',
+	cardHover: 'hover:-translate-y-1 hover:shadow-dt-2 hover:shadow-primary/5',
 	textTruncate: 'truncate font-semibold text-foreground text-md leading-tight',
 	flexCenter: 'flex items-center justify-center',
 	absoluteTopRight: 'absolute bottom-0 right-0',

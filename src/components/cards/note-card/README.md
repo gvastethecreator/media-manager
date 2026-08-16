@@ -33,22 +33,19 @@ El componente sigue el diseño de una carta Magic con:
 import { NoteCard } from '@/components/cards/note-card';
 
 // Dentro de un componente
-<NoteCard
-  note={note}
-  onClick={() => handleNoteClick(note)}
-/>
+<NoteCard note={note} onClick={() => handleNoteClick(note)} />;
 ```
 
 ## Props
 
 ### NoteCardProps
 
-| Propiedad  | Tipo                   | Descripción                              |
-|------------|------------------------|------------------------------------------|
-| note       | Note                   | Objeto con datos de la nota a mostrar    |
-| onClick    | () => void (opcional)  | Función para manejar clics en la tarjeta |
-| className  | string (opcional)      | Clases CSS adicionales                   |
-| style      | CSSProperties (opcional)| Estilos inline adicionales              |
+| Propiedad | Tipo                     | Descripción                              |
+| --------- | ------------------------ | ---------------------------------------- |
+| note      | Note                     | Objeto con datos de la nota a mostrar    |
+| onClick   | () => void (opcional)    | Función para manejar clics en la tarjeta |
+| className | string (opcional)        | Clases CSS adicionales                   |
+| style     | CSSProperties (opcional) | Estilos inline adicionales               |
 
 ## Features
 
@@ -82,15 +79,13 @@ graph TD
 ## Ejemplos
 
 ### Vista básica
+
 ```tsx
 <NoteCard note={note} />
 ```
 
 ### Con manejo de eventos
+
 ```tsx
-<NoteCard
-  note={note}
-  onClick={() => navigate(`/notes/${note.id}`)}
-  className="transition-all hover:scale-105"
-/>
+<NoteCard note={note} onClick={() => navigate(`/notes/${note.id}`)} className="transition-all hover:scale-105" />
 ```

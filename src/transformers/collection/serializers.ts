@@ -16,23 +16,23 @@ import type {
 } from '@/types/entities/collection';
 
 // Tipos locales equivalentes a Drizzle
-type DrizzleCollectionCreateInput = {
+interface DrizzleCollectionCreateInput {
+	description?: string | null;
+	editions?: string;
+	filters?: string;
 	name: string;
-	description?: string | null;
-	filters?: string;
 	sortBy?: string;
-	editions?: string;
 	// Las relaciones se manejan por separado en Drizzle
-};
+}
 
-type DrizzleCollectionUpdateInput = {
-	name?: string;
+interface DrizzleCollectionUpdateInput {
 	description?: string | null;
-	filters?: string;
-	sortBy?: string;
 	editions?: string;
+	filters?: string;
+	name?: string;
+	sortBy?: string;
 	// Las relaciones se manejan por separado en Drizzle
-};
+}
 
 const logger = serverLogger.withContext('CollectionSerializers');
 

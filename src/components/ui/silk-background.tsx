@@ -5,29 +5,18 @@
 import { Canvas, RootState, useFrame, useThree } from '@react-three/fiber';
 /* eslint-disable react/no-unknown-property */
 import React, { forwardRef, useLayoutEffect, useMemo, useRef } from 'react';
-// @ts-expect-error: Three.js types not available, but module works correctly
 import { Color, IUniform, Mesh, ShaderMaterial } from 'three';
-
-type NormalizedRGB = [number, number, number];
-
-const hexToNormalizedRGB = (hex: string): NormalizedRGB => {
-	const clean = hex.replace('#', '');
-	const r = Number.parseInt(clean.slice(0, 2), 16) / 255;
-	const g = Number.parseInt(clean.slice(2, 4), 16) / 255;
-	const b = Number.parseInt(clean.slice(4, 6), 16) / 255;
-	return [r, g, b];
-};
 
 interface UniformValue<T = number | Color> {
 	value: T;
 }
 
 interface SilkUniforms {
-	uSpeed: UniformValue<number>;
-	uScale: UniformValue<number>;
-	uNoiseIntensity: UniformValue<number>;
 	uColor: UniformValue<Color>;
+	uNoiseIntensity: UniformValue<number>;
 	uRotation: UniformValue<number>;
+	uScale: UniformValue<number>;
+	uSpeed: UniformValue<number>;
 	uTime: UniformValue<number>;
 	[uniform: string]: IUniform;
 }
@@ -93,6 +82,46 @@ interface SilkPlaneProps {
 	uniforms: SilkUniforms;
 }
 
+function resolveCssColor(color: string): string {
+	if (typeof document === 'undefined') {
+		return color;
+	}
+
+	let resolvedColor = color;
+
+	if (color.startsWith('var(')) {
+		const temp = document.createElement('div');
+		temp.style.color = color;
+		document.body.appendChild(temp);
+		resolvedColor = getComputedStyle(temp).color || color;
+		document.body.removeChild(temp);
+	}
+
+	const canvas = document.createElement('canvas');
+	canvas.width = 1;
+	canvas.height = 1;
+	const context = canvas.getContext('2d', { willReadFrequently: true });
+
+	if (!context) {
+		return resolvedColor;
+	}
+
+	try {
+		context.clearRect(0, 0, 1, 1);
+		context.fillStyle = resolvedColor;
+		context.fillRect(0, 0, 1, 1);
+		const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data;
+
+		if (a === 0) {
+			return resolvedColor;
+		}
+
+		return `rgb(${r}, ${g}, ${b})`;
+	} catch {
+		return resolvedColor;
+	}
+}
+
 const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
 	const { viewport } = useThree();
 
@@ -123,27 +152,41 @@ const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane({ uniforms
 SilkPlane.displayName = 'SilkPlane';
 
 export interface SilkProps {
-	speed?: number;
-	scale?: number;
 	color?: string;
 	noiseIntensity?: number;
 	rotation?: number;
+	scale?: number;
+	speed?: number;
 }
 
-const Silk: React.FC<SilkProps> = ({ speed = 5, scale = 1, color = '#7B7481', noiseIntensity = 1.5, rotation = 0 }) => {
+const Silk: React.FC<SilkProps> = ({
+	speed = 5,
+	scale = 1,
+	color = 'var(--dt-neutral-500)',
+	noiseIntensity = 1.5,
+	rotation = 0,
+}) => {
 	const meshRef = useRef<Mesh>(null);
 
-	const uniforms = useMemo<SilkUniforms>(
-		() => ({
+	const uniforms = useMemo<SilkUniforms>(() => {
+		const threeColor = new Color();
+		const normalizedColor = resolveCssColor(color);
+
+		try {
+			threeColor.set(normalizedColor);
+		} catch {
+			threeColor.set('rgb(38, 49, 73)');
+		}
+
+		return {
 			uSpeed: { value: speed },
 			uScale: { value: scale },
 			uNoiseIntensity: { value: noiseIntensity },
-			uColor: { value: new Color(...hexToNormalizedRGB(color)) },
+			uColor: { value: threeColor },
 			uRotation: { value: rotation },
 			uTime: { value: 0 },
-		}),
-		[speed, scale, noiseIntensity, color, rotation]
-	);
+		};
+	}, [speed, scale, noiseIntensity, color, rotation]);
 
 	return (
 		<Canvas dpr={[1, 2]} frameloop="always">

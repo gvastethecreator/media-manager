@@ -9,7 +9,7 @@ import * as crypto from 'crypto';
 import { desc, eq } from 'drizzle-orm';
 // Imports para extracción de metadatos (migrados desde server actions)
 import { promises as fs, Stats } from 'fs';
-import sharp from 'sharp';
+import sharp, { type Metadata as SharpMetadata } from 'sharp';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { metadatas } from '@/lib/drizzle/schema/index';
@@ -26,18 +26,40 @@ import type { MediaMetadata } from '@/types/metadata.types';
 
 const metadataLogger = serverLogger.withContext('MetadataService');
 
-// Cache simple en memoria para metadatos (migrado desde server actions)
+// Cache en memoria con límite para prevenir memory leaks
+const CACHE_MAX_SIZE = 5000;
 const metadataCache = new Map<string, MediaMetadata>();
 
-export type MetadataOptions = {
-	skipExif?: boolean;
-	skipIptc?: boolean;
-	skipXmp?: boolean;
+/** Agrega al cache con evicción LRU simple (elimina entradas más antiguas al exceder límite) */
+function cacheSet(key: string, value: MediaMetadata): void {
+	if (metadataCache.size >= CACHE_MAX_SIZE) {
+		// Eliminar la primera entrada (más antigua en Map)
+		const firstKey = metadataCache.keys().next().value;
+		if (firstKey !== undefined) metadataCache.delete(firstKey);
+	}
+	metadataCache.set(key, value);
+}
+
+/** Obtiene del cache y promueve (LRU) */
+function cacheGet(key: string): MediaMetadata | undefined {
+	const val = metadataCache.get(key);
+	if (val !== undefined) {
+		// Promover: eliminar y re-insertar al final
+		metadataCache.delete(key);
+		metadataCache.set(key, val);
+	}
+	return val;
+}
+
+export interface MetadataOptions {
 	retry?: {
 		maxRetries: number;
 		delay: number;
 	};
-};
+	skipExif?: boolean;
+	skipIptc?: boolean;
+	skipXmp?: boolean;
+}
 
 const DEFAULT_RETRY_CONFIG = {
 	maxRetries: 3,
@@ -75,7 +97,7 @@ export async function getAllMetadata(): Promise<MetadataExtended[]> {
 
 		return transformMetadatas(transformedMetadatas as any);
 	} catch (error) {
-		console.error('Error al obtener metadatos:', error);
+		serverLogger.error('Error al obtener metadatos:', error);
 		return [];
 	}
 }
@@ -117,7 +139,7 @@ export async function getMetadataByImageId(imageId: string): Promise<MetadataExt
 
 		return transformMetadata(transformedMetadata as any);
 	} catch (error) {
-		console.error(`Error al obtener metadatos para imagen ${imageId}:`, error);
+		serverLogger.error(`Error al obtener metadatos para imagen ${imageId}:`, error);
 		return null;
 	}
 }
@@ -159,7 +181,7 @@ export async function getMetadataById(id: string): Promise<MetadataExtended | nu
 
 		return transformMetadata(transformedMetadata as any);
 	} catch (error) {
-		console.error(`Error al obtener metadatos ${id}:`, error);
+		serverLogger.error(`Error al obtener metadatos ${id}:`, error);
 		return null;
 	}
 }
@@ -200,7 +222,7 @@ export async function createMetadata(data: MetadataCreateInput): Promise<Metadat
 
 		return transformMetadata(transformedMetadata as any);
 	} catch (error) {
-		console.error('Error al crear metadatos:', error);
+		serverLogger.error('Error al crear metadatos:', error);
 		return null;
 	}
 }
@@ -237,7 +259,7 @@ export async function updateMetadata(
 
 		return transformMetadata(transformedMetadata as any);
 	} catch (error) {
-		console.error(`Error al actualizar metadatos ${id}:`, error);
+		serverLogger.error(`Error al actualizar metadatos ${id}:`, error);
 		return null;
 	}
 }
@@ -283,7 +305,7 @@ export async function deleteMetadata(id: string): Promise<boolean> {
 
 		return true;
 	} catch (error) {
-		console.error(`Error al eliminar metadatos ${id}:`, error);
+		serverLogger.error(`Error al eliminar metadatos ${id}:`, error);
 		return false;
 	}
 }
@@ -300,7 +322,7 @@ export async function deleteMetadataByImageId(imageId: string): Promise<boolean>
 
 		return true;
 	} catch (error) {
-		console.error(`Error al eliminar metadatos para imagen ${imageId}:`, error);
+		serverLogger.error(`Error al eliminar metadatos para imagen ${imageId}:`, error);
 		return false;
 	}
 }
@@ -314,7 +336,7 @@ export async function deleteMetadataByImageId(imageId: string): Promise<boolean>
  * Función de reintento con backoff exponencial
  */
 async function withRetry<T>(operation: () => Promise<T>, config = DEFAULT_RETRY_CONFIG): Promise<T> {
-	let lastError: Error = new Error('Operación fallida después de múltiples reintentos');
+	let lastError: Error = new Error('Operation fallida después de múltiples reintentos');
 
 	for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
 		try {
@@ -421,7 +443,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	const normalizedPath = normalizePathForCache(path);
 
 	// Verificar cache
-	const cached = metadataCache.get(normalizedPath);
+	const cached = cacheGet(normalizedPath);
 	if (
 		cached &&
 		typeof cached === 'object' &&
@@ -455,7 +477,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	try {
 		// Extraer metadatos con Sharp
 		const sharpInstance = sharp(buffer);
-		const sharpMeta = await withRetry<sharp.Metadata>(
+		const sharpMeta = await withRetry<SharpMetadata>(
 			() => sharpInstance.metadata(),
 			options?.retry || DEFAULT_RETRY_CONFIG
 		);
@@ -552,7 +574,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	};
 
 	// Guardar en cache
-	metadataCache.set(normalizedPath, finalMetadata);
+	cacheSet(normalizedPath, finalMetadata);
 	return finalMetadata;
 }
 

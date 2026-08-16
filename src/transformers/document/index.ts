@@ -6,16 +6,10 @@
  */
 
 // --- Adaptadores estandarizados ---
-export {
-	adaptDocumentsWithStats,
-	adaptDocumentWithStats,
-	defaultDocumentStats,
-} from './adapter';
+export { adaptDocumentsWithStats, adaptDocumentWithStats, defaultDocumentStats } from './adapter';
 
 // --- Transformadores principales ---
 export { toDocumentWithStats, toDocumentWithStatsList } from './mappers';
-// --- Schema de Drizzle ---
-export { type DocumentInsert, type DocumentSchema, documentsTable } from './schema';
 // --- Serializadores ---
 export {
 	serializeDocumentBase,

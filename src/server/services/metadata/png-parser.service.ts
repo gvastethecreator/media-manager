@@ -65,16 +65,16 @@ type AIMetadata =
 
 // Interfaces para PNG chunks
 interface PngTextChunk {
-	type: 'tEXt' | 'zTXt' | 'iTXt';
 	keyword: string;
-	text: string;
 	language?: string;
+	text: string;
 	translatedKeyword?: string;
+	type: 'tEXt' | 'zTXt' | 'iTXt';
 }
 
 interface PngChunksResult {
-	textChunks: PngTextChunk[];
 	rawChunks: any[];
+	textChunks: PngTextChunk[];
 }
 
 // Keywords conocidos para metadatos de IA

@@ -11,64 +11,62 @@ export type ViewMode = 'list' | 'grid' | 'tree' | 'details';
 
 // Estado
 export interface UIState {
-	// Selección
-	selectedFileIds: string[];
-
-	// Visualización
-	viewMode: ViewMode;
-	lastVisitedPath: string | null;
+	// Detalles
+	activeFileId: string | null;
+	breadcrumbItems: { id: string; path: string; name: string }[];
+	clipboardFiles: { id: string; path: string; action: 'copy' | 'cut' }[];
 	expandedFolders: string[];
 
 	// Modales
 	isCreateFolderModalOpen: boolean;
 	isDeleteModalOpen: boolean;
 	isPropertiesModalOpen: boolean;
-	isUploadModalOpen: boolean;
 	isRenameModalOpen: boolean;
+	isUploadModalOpen: boolean;
+	lastVisitedPath: string | null;
+	// Selección
+	selectedFileIds: string[];
 
-	// Detalles
-	activeFileId: string | null;
-	clipboardFiles: { id: string; path: string; action: 'copy' | 'cut' }[];
-	breadcrumbItems: { id: string; path: string; name: string }[];
+	// Visualización
+	viewMode: ViewMode;
 }
 
 // Acciones
 export interface UIActions {
-	// Selección
-	selectFile: (id: string) => void;
-	deselectFile: (id: string) => void;
-	toggleSelectFile: (id: string) => void;
-	selectAllFiles: () => void;
-	deselectAllFiles: () => void;
-
-	// Visualización
-	setViewMode: (mode: ViewMode) => void;
-	setLastVisitedPath: (path: string | null) => void;
-	toggleExpandFolder: (path: string) => void;
-	expandFolder: (path: string) => void;
-	collapseFolder: (path: string) => void;
-
-	// Modales
-	openCreateFolderModal: () => void;
-	closeCreateFolderModal: () => void;
-	openDeleteModal: () => void;
-	closeDeleteModal: () => void;
-	openPropertiesModal: (id: string) => void;
-	closePropertiesModal: () => void;
-	openUploadModal: () => void;
-	closeUploadModal: () => void;
-	openRenameModal: (id: string) => void;
-	closeRenameModal: () => void;
-
 	// Clipboard
 	addToClipboard: (fileId: string, filePath: string, action: 'copy' | 'cut') => void;
 	clearClipboard: () => void;
+	closeCreateFolderModal: () => void;
+	closeDeleteModal: () => void;
+	closePropertiesModal: () => void;
+	closeRenameModal: () => void;
+	closeUploadModal: () => void;
+	collapseFolder: (path: string) => void;
+	deselectAllFiles: () => void;
+	deselectFile: (id: string) => void;
+	expandFolder: (path: string) => void;
 
-	// Breadcrumbs
-	updateBreadcrumbs: (path: string | null) => void;
+	// Modales
+	openCreateFolderModal: () => void;
+	openDeleteModal: () => void;
+	openPropertiesModal: (id: string) => void;
+	openRenameModal: (id: string) => void;
+	openUploadModal: () => void;
+	selectAllFiles: () => void;
+	// Selección
+	selectFile: (id: string) => void;
 
 	// Activo
 	setActiveFileId: (id: string | null) => void;
+	setLastVisitedPath: (path: string | null) => void;
+
+	// Visualización
+	setViewMode: (mode: ViewMode) => void;
+	toggleExpandFolder: (path: string) => void;
+	toggleSelectFile: (id: string) => void;
+
+	// Breadcrumbs
+	updateBreadcrumbs: (path: string | null) => void;
 }
 
 // Estado inicial
@@ -127,7 +125,10 @@ export const createUISlice: StateCreator<FileStore, [], [], UIState & UIActions>
 	},
 
 	// Visualización
-	setViewMode: (viewMode) => set({ viewMode }),
+	setViewMode: (viewMode) => {
+		if (get().viewMode === viewMode) return;
+		set({ viewMode });
+	},
 
 	setLastVisitedPath: (lastVisitedPath) => set({ lastVisitedPath }),
 

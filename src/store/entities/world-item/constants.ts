@@ -36,54 +36,54 @@ export const DEFAULT_WORLD_ITEM_VIEW_CONFIG = {
  * Opciones de ordenamiento
  */
 export const WORLD_ITEM_SORT_OPTIONS = [
-	{ value: 'name_asc', label: 'Nombre (A-Z)' },
-	{ value: 'name_desc', label: 'Nombre (Z-A)' },
-	{ value: 'created_asc', label: 'Fecha creación (más antigua)' },
-	{ value: 'created_desc', label: 'Fecha creación (más reciente)' },
-	{ value: 'updated_asc', label: 'Última actualización (más antigua)' },
-	{ value: 'updated_desc', label: 'Última actualización (más reciente)' },
-	{ value: 'type_asc', label: 'Tipo (A-Z)' },
-	{ value: 'type_desc', label: 'Tipo (Z-A)' },
-	{ value: 'rarity_asc', label: 'Rareza (común a legendario)' },
-	{ value: 'rarity_desc', label: 'Rareza (legendario a común)' },
+	{ value: 'name_asc', label: 'Name (A-Z)' },
+	{ value: 'name_desc', label: 'Name (Z-A)' },
+	{ value: 'created_asc', label: 'Created (oldest first)' },
+	{ value: 'created_desc', label: 'Created (newest first)' },
+	{ value: 'updated_asc', label: 'Updated (oldest first)' },
+	{ value: 'updated_desc', label: 'Updated (newest first)' },
+	{ value: 'type_asc', label: 'Type (A-Z)' },
+	{ value: 'type_desc', label: 'Type (Z-A)' },
+	{ value: 'rarity_asc', label: 'Rarity (common to legendary)' },
+	{ value: 'rarity_desc', label: 'Rarity (legendary to common)' },
 ];
 
 /**
  * Mensaje para estado vacío
  */
-export const EMPTY_WORLD_ITEMS_MESSAGE = 'No hay objetos del mundo disponibles';
+export const EMPTY_WORLD_ITEMS_MESSAGE = 'No world items available';
 
 /**
  * Mensaje para error de carga
  */
-export const LOAD_WORLD_ITEMS_ERROR = 'Error al cargar objetos del mundo';
+export const LOAD_WORLD_ITEMS_ERROR = 'Could not load world items';
 
 /**
  * Colores para categorías de objetos
  */
 export const WORLD_ITEM_CATEGORY_COLORS = {
-	combat: '#ef4444',
-	magic: '#8b5cf6',
-	technology: '#06b6d4',
-	utility: '#10b981',
-	decoration: '#f59e0b',
-	survival: '#84cc16',
-	transportation: '#0ea5e9',
-	quest: '#ec4899',
-	lore: '#d946ef',
-	other: '#6b7280',
+	combat: 'var(--preset-red)',
+	magic: 'var(--preset-purple)',
+	technology: 'var(--preset-cyan)',
+	utility: 'var(--preset-green)',
+	decoration: 'var(--preset-yellow)',
+	survival: 'var(--preset-lime)',
+	transportation: 'var(--preset-sky)',
+	quest: 'var(--preset-pink)',
+	lore: 'var(--preset-fuchsia)',
+	other: 'var(--dt-neutral-500)',
 };
 
 /**
  * Colores para rareza de objetos
  */
 export const WORLD_ITEM_RARITY_COLORS = {
-	common: '#6b7280',
-	uncommon: '#22c55e',
-	rare: '#3b82f6',
-	epic: '#a855f7',
-	legendary: '#f59e0b',
-	mythic: '#ef4444',
-	unique: '#ec4899',
-	artifact: '#fcd34d',
+	common: 'var(--dt-neutral-500)',
+	uncommon: 'var(--preset-green)',
+	rare: 'var(--preset-blue)',
+	epic: 'var(--preset-violet)',
+	legendary: 'var(--preset-yellow)',
+	mythic: 'var(--preset-red)',
+	unique: 'var(--preset-pink)',
+	artifact: 'var(--preset-orange)',
 };

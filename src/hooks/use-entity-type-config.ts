@@ -19,6 +19,7 @@ import {
 	isFormatSupported,
 } from '@/config/entity-type-configs';
 import { getCachedThumbnail } from '@/config/thumbnail-generators';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
 
@@ -26,28 +27,28 @@ import { EntityStatsType } from '@/types/file-browser/entity-stats';
  * 🎯 Resultado del hook useEntityTypeConfig
  */
 export interface UseEntityTypeConfigResult {
-	/** Configuración completa del tipo de entidad */
-	config: EntityTypeConfig | undefined;
 	/** Color principal */
 	color: string;
-	/** Color secundario (si existe) */
-	secondaryColor?: string;
-	/** Icono de Lucide React */
-	icon: React.ComponentType<any>;
+	/** Configuración completa del tipo de entidad */
+	config: EntityTypeConfig | undefined;
 	/** Nombre para mostrar */
 	displayName: string;
 	/** Nombre plural para mostrar */
 	displayNamePlural: string;
 	/** Emoji representativo */
 	emoji: string;
-	/** Operaciones soportadas */
-	supportedOperations: string[];
-	/** Metadatos específicos del tipo */
-	metadata: Record<string, unknown>;
-	/** Función para verificar si un formato es soportado */
-	isFormatSupported: (format: string) => boolean;
 	/** Función para generar thumbnail */
 	generateThumbnail: (item: AnyEntityWithStats, options?: Record<string, any>) => Promise<string>;
+	/** Icono de Lucide React */
+	icon: React.ComponentType<any>;
+	/** Función para verificar si un formato es soportado */
+	isFormatSupported: (format: string) => boolean;
+	/** Metadatos específicos del tipo */
+	metadata: Record<string, unknown>;
+	/** Color secundario (si existe) */
+	secondaryColor?: string;
+	/** Operaciones soportadas */
+	supportedOperations: string[];
 }
 
 /**
@@ -117,9 +118,9 @@ export function useEntityTypeFromItem(item: AnyEntityWithStats | null) {
 			return {
 				type: null,
 				config: null,
-				color: '#6b7280',
+				color: 'var(--dt-neutral-500)',
 				secondaryColor: undefined,
-				icon: getEntityTypeIcon(EntityStatsType.IMAGE), // Fallback
+				icon: getEntityTypeIcon(EntityStatsType.IMAGE),
 				displayName: 'Elemento',
 				displayNamePlural: 'Elementos',
 				emoji: '📄',
@@ -246,7 +247,7 @@ export function useEntityThumbnails() {
 						const thumbnail = await getCachedThumbnail(item, options);
 						results[item.id] = thumbnail;
 					} catch (error) {
-						console.warn(`Error generando thumbnail para ${item.id}:`, error);
+						clientLogger.warn(`Error generando thumbnail para ${item.id}:`, error);
 						results[item.id] = '';
 					}
 				});

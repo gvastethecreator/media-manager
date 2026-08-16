@@ -8,23 +8,29 @@
 import type { StateCreator } from 'zustand';
 // Refactor 2025-07: se reemplazan servicios por cliente API
 // Refactor 2025-07: se reemplazan servicios por cliente API
-import { createVideoInApi, deleteVideoFromApi, findVideosInApi, getVideoFromApi } from '@/lib/api/client/video.client';
+import {
+	createVideoInApi,
+	deleteVideoFromApi,
+	findVideosInApi,
+	getVideoFromApi,
+	type PublicVideoCreateInput,
+} from '@/lib/api/client/video.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import type { VideoCreateInput, VideoFilters, VideoWithStats } from '@/types/entities/video';
+import type { VideoFilters, VideoWithStats } from '@/types/entities/video';
 import type { VideoStore } from '..';
 
 export interface VideoCoreState {
-	/** 🎬 Mapa de videos indexados por ID (Record optimizado) */
-	videos: Record<string, VideoWithStats>;
+	/** ❌ Error si existe */
+	error: string | null;
 	/** 📁 Items asociados a cada folder */
 	folderVideos: Record<string, string[]>; // folderId -> videoIds[]
 	/** ⏳ Estado de carga */
 	isLoading: boolean;
-	/** ❌ Error si existe */
-	error: string | null;
 	/** 📅 Fecha de última actualización */
 	lastUpdated: Date | null;
+	/** 🎬 Mapa de videos indexados por ID (Record optimizado) */
+	videos: Record<string, VideoWithStats>;
 }
 
 // Estado inicial optimizado
@@ -42,10 +48,20 @@ const videoLogger = clientLogger.withContext('VideoStore:Core');
 // --- Slice Interface ---
 
 export interface VideoCoreSlice extends VideoCoreState {
+	// ⚡ Operaciones síncronas optimizadas
+	addVideo: (video: VideoWithStats) => void;
+	addVideos: (videos: VideoWithStats[]) => void;
+	createVideo: (data: PublicVideoCreateInput) => Promise<VideoWithStats | undefined>;
+	deleteVideo: (id: string) => void;
+
+	// 🌐 Acciones asíncronas
+	fetchVideo: (id: string) => Promise<VideoWithStats | undefined>;
+	fetchVideos: (folderIds?: string[]) => Promise<VideoWithStats[]>;
 	// 🔍 Getters optimizados (acceso O(1))
 	getVideo: (id: string) => VideoWithStats | undefined;
 	getVideos: () => VideoWithStats[];
 	getVideosByFolder: (folderId: string) => VideoWithStats[];
+	removeVideo: (id: string) => Promise<boolean>;
 
 	// 🎯 Selectores avanzados
 	selectVideos: (options?: {
@@ -53,22 +69,11 @@ export interface VideoCoreSlice extends VideoCoreState {
 		sortBy?: keyof VideoWithStats;
 		sortDirection?: 'asc' | 'desc';
 	}) => VideoWithStats[];
-
-	// ⚡ Operaciones síncronas optimizadas
-	addVideo: (video: VideoWithStats) => void;
-	addVideos: (videos: VideoWithStats[]) => void;
-	updateVideo: (id: string, data: Partial<VideoWithStats>) => void;
-	deleteVideo: (id: string) => void;
+	setError: (error: string | null) => void;
 
 	// 📊 Estado de carga y errores
 	setLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
-
-	// 🌐 Acciones asíncronas
-	fetchVideo: (id: string) => Promise<VideoWithStats | undefined>;
-	fetchVideos: (folderIds?: string[]) => Promise<VideoWithStats[]>;
-	createVideo: (data: VideoCreateInput) => Promise<VideoWithStats | undefined>;
-	removeVideo: (id: string) => Promise<boolean>;
+	updateVideo: (id: string, data: Partial<VideoWithStats>) => void;
 }
 
 // --- Implementación del Slice ---

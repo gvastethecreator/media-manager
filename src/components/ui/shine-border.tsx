@@ -4,14 +4,14 @@ import { cn } from '@/lib/utils';
 type TColorProp = string | string[];
 
 interface ShineBorderProps {
+	borderRadius?: number;
 	/**
 	 * Border width in pixels. Between 1 and 3.
 	 */
 	borderWidth?: 1 | 2 | 3;
-	borderRadius?: number;
-	color?: TColorProp;
-	className?: string;
 	children: React.ReactNode;
+	className?: string;
+	color?: TColorProp;
 }
 
 /**
@@ -28,7 +28,7 @@ export function ShineBorder({
 	children,
 	borderWidth = 1,
 	borderRadius = 8,
-	color = '#ffffff',
+	color = 'var(--border)',
 }: ShineBorderProps) {
 	return (
 		<div
@@ -51,7 +51,7 @@ export function ShineBorder({
 						'--mask-width': `${borderWidth}px`,
 						'--mask-image': 'linear-gradient(black, black)',
 						'--mask-compound': 'exclude',
-						'--mask-linear-gradient': 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+						'--mask-linear-gradient': 'linear-gradient(white 0 0) content-box, linear-gradient(white 0 0)',
 						'--background-radial-gradient': `radial-gradient(transparent,transparent, ${Array.isArray(color) ? color.join(',') : color},transparent,transparent)`,
 					} as React.CSSProperties
 				}

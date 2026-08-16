@@ -1,6 +1,7 @@
 import { produce } from 'immer';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Logger para el store de UI
@@ -11,26 +12,26 @@ export type ThumbnailSize = 'none' | 'small' | 'medium' | 'large';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface UIState {
-	// Estado
-	view: ViewMode;
-	thumbnailSize: ThumbnailSize;
-	zoomLevel: number;
-	isSettingsOpen: boolean;
 	isRightPanelCollapsed: boolean;
-	searchQuery: string;
-	theme: ThemeMode;
-	showSettings: boolean;
+	isSettingsOpen: boolean;
 	lastUpdate: number;
+	resetState: () => void;
+	searchQuery: string;
+	setSearchQuery: (query: string) => void;
+	setTheme: (theme: ThemeMode) => void;
+	setThumbnailSize: (size: ThumbnailSize) => void;
 
 	// Acciones
 	setView: (view: ViewMode) => void;
-	setThumbnailSize: (size: ThumbnailSize) => void;
 	setZoomLevel: (level: number) => void;
-	toggleSettings: () => void;
+	showSettings: boolean;
+	theme: ThemeMode;
+	thumbnailSize: ThumbnailSize;
 	toggleRightPanel: () => void;
-	setSearchQuery: (query: string) => void;
-	setTheme: (theme: ThemeMode) => void;
-	resetState: () => void;
+	toggleSettings: () => void;
+	// Estado
+	view: ViewMode;
+	zoomLevel: number;
 }
 
 // Constantes
@@ -56,9 +57,10 @@ export const useUIStore = create<UIState>()(
 			...initialState,
 
 			setView: (view) => {
-				uiLogger.info('🎯 Cambiando vista a:', view);
 				set(
 					produce((state: UIState) => {
+						if (state.view === view) return;
+						uiLogger.info('🎯 Cambiando vista a:', view);
 						state.view = view;
 						state.lastUpdate = Date.now();
 					})
@@ -159,21 +161,25 @@ export const useUIStore = create<UIState>()(
 	)
 );
 
-// Selectores memoizados
-export const useViewSettings = () => {
-	const { view, thumbnailSize, zoomLevel } = useUIStore();
-	return { view, thumbnailSize, zoomLevel };
-};
+// Selectores memoizados con shallow comparison para evitar re-renders
+export const useViewSettings = () =>
+	useUIStore(
+		useShallow((state) => ({
+			view: state.view,
+			thumbnailSize: state.thumbnailSize,
+			zoomLevel: state.zoomLevel,
+		}))
+	);
 
-export const usePanelSettings = () => {
-	const { isSettingsOpen, isRightPanelCollapsed } = useUIStore();
-	return { isSettingsOpen, isRightPanelCollapsed };
-};
+export const usePanelSettings = () =>
+	useUIStore(
+		useShallow((state) => ({
+			isSettingsOpen: state.isSettingsOpen,
+			isRightPanelCollapsed: state.isRightPanelCollapsed,
+		}))
+	);
 
-export const useThemeSetting = () => {
-	const { theme } = useUIStore();
-	return theme;
-};
+export const useThemeSetting = () => useUIStore((state) => state.theme);
 
 // Tipos exportados para uso en componentes
 export type { UIState };

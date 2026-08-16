@@ -1,58 +1,55 @@
+/**
+ * 📊 FOLDER STATS - FUNCIONES PRINCIPALES
+ *
+ * Procesamiento y actualización de estadísticas de carpetas
+ */
+
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ProcessStatus } from '@/types/folders';
+import type { AuthorizedRootRegistry } from '@/server/security/authorized-roots';
+import { recomputeAndPersistFolderAggregates } from './folder-stats.aggregates';
+import type { ProcessOptions, ProgressEmitter, SimpleStats } from './folder-stats.types';
+import { computeOverallProgress, mapWithConcurrency, safeEmitProgress } from './folder-stats.utils';
 
-export type SimpleStats = {
-	totalFiles: number;
-	processed: number;
-	successful: number;
-	failed: number;
-	errors: Array<{ file: string; error: string }>;
-};
+export { getFolderStats, recomputeAndPersistFolderAggregates } from './folder-stats.aggregates';
+// Re-export tipos y utilidades para backward compatibility
+export type {
+	AggregateResult,
+	FileEntityMapper,
+	ProcessOptions,
+	ProgressEmitter,
+	SimpleStats,
+} from './folder-stats.types';
+export { computeOverallProgress, mapWithConcurrency, safeEmitProgress } from './folder-stats.utils';
 
-type ProgressEmitter = (status: ProcessStatus) => void;
+export async function syncExistingFolderFilesBeforeReindex(
+	folderIds: string[],
+	authorizedRootRegistry?: AuthorizedRootRegistry
+): Promise<void> {
+	if (folderIds.length === 0) return;
 
-interface ProcessOptions {
-	concurrency?: number;
-	progressEmitter?: ProgressEmitter;
-	microPauseMs?: number;
-}
-
-// Ejecuta tareas con concurrencia limitada preservando orden de resultados
-async function mapWithConcurrency<T, R>(
-	items: T[],
-	limit: number,
-	worker: (item: T, index: number) => Promise<R>
-): Promise<R[]> {
-	const results: R[] = new Array(items.length);
-	let cursor = 0;
-	async function run(): Promise<void> {
-		const i = cursor++;
-		if (i >= items.length) return;
-		results[i] = await worker(items[i], i);
-		await run();
-	}
-	const effective = Math.max(1, Math.min(limit || 1, items.length || 1));
-	await Promise.all(Array.from({ length: effective }, () => run()));
-	return results;
-}
-
-async function safeEmitProgress(payload: ProcessStatus): Promise<void> {
-	try {
-		const { emitProgress } = await import('@/lib/server/events.server');
-		await emitProgress('folder:progress', {
-			...payload,
-			timestamp: payload.timestamp || Date.now(),
-		});
-	} catch {
-		// silencioso en tests o cuando no está el servidor
+	const [{ syncMultipleFolders }, { getConfiguredMediaRootRegistry }] = await Promise.all([
+		import('@/lib/filesystem/file-sync.service'),
+		import('@/server/security/configured-media-source'),
+	]);
+	const registry = authorizedRootRegistry ?? (await getConfiguredMediaRootRegistry());
+	const results = await syncMultipleFolders(folderIds, {
+		authorizedRootRegistry: registry,
+		dryRun: false,
+	});
+	const failures = Object.entries(results).flatMap(([folderId, result]) =>
+		result.errors.map((error) => ({ error, folderId }))
+	);
+	if (failures.length > 0) {
+		throw new Error(
+			`Could not reconcile the catalog before reindexing: ${failures
+				.map(({ error, folderId }) => `${folderId}: ${error}`)
+				.join(' | ')}`
+		);
 	}
 }
 
-function computeOverallProgress(stage: 1 | 2 | 3, stageProcessed: number, stageTotal: number): number {
-	const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
-	const base = stage === 1 ? 0 : stage === 2 ? 33 : 66;
-	const portion = stageTotal > 0 ? (stageProcessed / stageTotal) * 33 : 0;
-	return clamp(Math.floor(base + portion), 0, 99);
+export interface ReindexAllDependencies {
+	afterFolderAuthorization?: (folderId: string) => Promise<void>;
 }
 
 export async function processFilesWithProgress(
@@ -328,9 +325,15 @@ export async function updateFolderStats(
 	// 4) Sincronización opcional de archivos (solo si se pide)
 	if (_enableSync) {
 		try {
-			const { FileSyncService } = await import('@/lib/filesystem/file-sync.service');
-			const svc = FileSyncService.getInstance();
-			await svc.syncFolderFiles(folderId, { dryRun: false });
+			const { getFileSystemSyncAdapter } = await import('@/lib/filesystem/sync-adapter');
+			const sync = getFileSystemSyncAdapter();
+
+			const newFiles = await sync.detectNewFiles(folderId);
+			for (const file of newFiles) {
+				await sync.syncFile(file.path, folderId);
+			}
+
+			await sync.cleanOrphanRecords(folderId);
 		} catch {
 			// continuar aunque la sync falle; se registrará en servicios
 		}
@@ -403,7 +406,7 @@ export async function updateFolderStats(
 			progress: 100,
 			filesProcessed: stats.processed,
 			totalFiles: aggregatedTotalFiles,
-			message: `Completado: ${stats.successful}/${stats.totalFiles}`,
+			message: `Completed: ${stats.successful}/${stats.totalFiles}`,
 			timestamp: Date.now(),
 		});
 	}
@@ -433,125 +436,6 @@ export async function updateFolderStats(
 	});
 
 	return stats;
-}
-
-// Helper: recalcula y persiste agregados de carpeta (totalFiles, totalSize)
-async function recomputeAndPersistFolderAggregates(
-	folderId: string
-): Promise<{ totalFiles: number; totalSize: number }> {
-	const { db } = await import('@/lib/drizzle');
-	const { folders, images, videos, audios, documents, jsonFiles, file3Ds } = await import('@/lib/drizzle/schema/index');
-	const { recomputeAggregatesForFolder } = await import('@/server/services/aggregates.service');
-	const { eq, sql } = await import('drizzle-orm');
-
-	const [imgAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${images.size}), 0)` })
-		.from(images)
-		.where(eq(images.folderId, folderId));
-	const [vidAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${videos.size}), 0)` })
-		.from(videos)
-		.where(eq(videos.folderId, folderId));
-	const [audAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${audios.size}), 0)` })
-		.from(audios)
-		.where(eq(audios.folderId, folderId));
-	const [docAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${documents.size}), 0)` })
-		.from(documents)
-		.where(eq(documents.folderId, folderId));
-	const [jsonAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` })
-		.from(jsonFiles)
-		.where(eq(jsonFiles.folderId, folderId));
-	const [f3dAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` })
-		.from(file3Ds)
-		.where(eq(file3Ds.folderId, folderId));
-
-	const totalFiles =
-		Number(imgAgg?.count ?? 0) +
-		Number(vidAgg?.count ?? 0) +
-		Number(audAgg?.count ?? 0) +
-		Number(docAgg?.count ?? 0) +
-		Number(jsonAgg?.count ?? 0) +
-		Number(f3dAgg?.count ?? 0);
-	const totalSize =
-		Number(imgAgg?.size ?? 0) +
-		Number(vidAgg?.size ?? 0) +
-		Number(audAgg?.size ?? 0) +
-		Number(docAgg?.size ?? 0) +
-		Number(jsonAgg?.size ?? 0) +
-		Number(f3dAgg?.size ?? 0);
-
-	await db.update(folders).set({ totalFiles, totalSize, lastIndexed: new Date() }).where(eq(folders.id, folderId));
-	// Sincroniza agregados genéricos (upsert)
-	try {
-		await recomputeAggregatesForFolder(folderId);
-	} catch {
-		// No bloquear si falla la ruta genérica; el cache de Folder sigue actualizado
-	}
-
-	return { totalFiles, totalSize };
-}
-
-export async function getFolderStats(folderId: string) {
-	const { db } = await import('@/lib/drizzle');
-	const { folders, images, videos, audios, documents, jsonFiles, file3Ds } = await import('@/lib/drizzle/schema/index');
-	const { eq, sql } = await import('drizzle-orm');
-
-	const [imgAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${images.size}), 0)` })
-		.from(images)
-		.where(eq(images.folderId, folderId));
-	const [vidAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${videos.size}), 0)` })
-		.from(videos)
-		.where(eq(videos.folderId, folderId));
-	const [audAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${audios.size}), 0)` })
-		.from(audios)
-		.where(eq(audios.folderId, folderId));
-	const [docAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${documents.size}), 0)` })
-		.from(documents)
-		.where(eq(documents.folderId, folderId));
-	const [jsonAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` })
-		.from(jsonFiles)
-		.where(eq(jsonFiles.folderId, folderId));
-	const [f3dAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` })
-		.from(file3Ds)
-		.where(eq(file3Ds.folderId, folderId));
-
-	const totalFiles =
-		Number(imgAgg?.count ?? 0) +
-		Number(vidAgg?.count ?? 0) +
-		Number(audAgg?.count ?? 0) +
-		Number(docAgg?.count ?? 0) +
-		Number(jsonAgg?.count ?? 0) +
-		Number(f3dAgg?.count ?? 0);
-	const totalSize =
-		Number(imgAgg?.size ?? 0) +
-		Number(vidAgg?.size ?? 0) +
-		Number(audAgg?.size ?? 0) +
-		Number(docAgg?.size ?? 0) +
-		Number(jsonAgg?.size ?? 0) +
-		Number(f3dAgg?.size ?? 0);
-
-	const row = await db
-		.select({ lastIndexed: folders.lastIndexed })
-		.from(folders)
-		.where(eq(folders.id, folderId))
-		.limit(1);
-
-	return {
-		totalFiles,
-		totalSize,
-		lastIndexed: row[0]?.lastIndexed as Date | undefined,
-		imageCount: Number(imgAgg?.count ?? 0),
-	};
 }
 
 export async function updateAllFolderStats(): Promise<void> {
@@ -598,9 +482,11 @@ export async function updateAllFolderStats(): Promise<void> {
 			.from(file3Ds)
 			.where(eq(file3Ds.folderId, id));
 
+		const totalImages = Number(imgAgg?.count ?? 0);
+		const totalVideos = Number(vidAgg?.count ?? 0);
 		const totalFiles =
-			Number(imgAgg?.count ?? 0) +
-			Number(vidAgg?.count ?? 0) +
+			totalImages +
+			totalVideos +
 			Number(audAgg?.count ?? 0) +
 			Number(docAgg?.count ?? 0) +
 			Number(jsonAgg?.count ?? 0) +
@@ -613,7 +499,16 @@ export async function updateAllFolderStats(): Promise<void> {
 			Number(jsonAgg?.size ?? 0) +
 			Number(f3dAgg?.size ?? 0);
 
-		await db.update(folders).set({ totalFiles, totalSize, lastIndexed: new Date() }).where(eq(folders.id, id));
+		await db
+			.update(folders)
+			.set({
+				totalImages,
+				totalVideos,
+				totalFiles,
+				totalSize,
+				lastIndexed: new Date(),
+			})
+			.where(eq(folders.id, id));
 		try {
 			await recomputeAggregatesForFolder(id);
 		} catch {}
@@ -623,7 +518,8 @@ export async function updateAllFolderStats(): Promise<void> {
 // Reindexación global en 3 pasadas: 1) index de TODOS los archivos de TODAS las carpetas,
 // 2) thumbnails de TODOS, 3) metadata de TODOS. No por carpeta.
 export async function reindexAllFoldersThreePasses(
-	options: { concurrency?: number; microPauseMs?: number; includeHidden?: boolean } = {}
+	options: { concurrency?: number; microPauseMs?: number; includeHidden?: boolean } = {},
+	dependencies: ReindexAllDependencies = {}
 ): Promise<{
 	totalItems: number;
 	processed: number;
@@ -631,65 +527,47 @@ export async function reindexAllFoldersThreePasses(
 	failed: number;
 	errors: Array<{ file: string; error: string }>;
 }> {
-	const { emit, emitProgress } = await import('@/lib/server/events.server');
+	const { emitProgress } = await import('@/lib/server/events.server');
 	const { db } = await import('@/lib/drizzle');
 	const { folders } = await import('@/lib/drizzle/schema/index');
-	const { eq } = await import('drizzle-orm');
-	const { folderExists, scanFolder } = await import('@/lib/filesystem/folder-scanner');
+	const { scanFolder } = await import('@/lib/filesystem/folder-scanner');
+	const { getConfiguredMediaRootRegistry } = await import('@/server/security/configured-media-source');
 	const { FileEntityMapperService } = await import('@/services/file-entity-mapper/file-entity-mapper.service');
 
 	const concurrency = Math.max(1, options.concurrency ?? 4);
 	const microPauseMs = options.microPauseMs ?? 6;
 	const includeHidden = options.includeHidden ?? false;
 
-	// 0) Sincronizar estructura de carpetas primero
-	try {
-		const { syncFoldersWithFileSystem } = await import('@/lib/filesystem/folder-sync');
-		await syncFoldersWithFileSystem({ dryRun: false, forceSync: true });
-	} catch (e) {
-		serverLogger.warn('reindexAll: fallo syncFoldersWithFileSystem; continúo', { err: e });
-	}
+	const allFolders: Array<{ id: string; name: string; path: string }> = await db
+		.select({ id: folders.id, path: folders.path, name: folders.name })
+		.from(folders);
 
-	const allFolders = await db.select({ id: folders.id, path: folders.path, name: folders.name }).from(folders);
-
-	// 1) Depurar carpetas inexistentes físicamente
-	const stillExisting: { id: string; path: string; name: string }[] = [];
-	for (const f of allFolders) {
-		try {
-			if (await folderExists(f.path)) {
-				stillExisting.push(f);
-			} else {
-				serverLogger.warn('reindexAll: carpeta inexistente en FS; eliminando de DB', { id: f.id, path: f.path });
-				await db.delete(folders).where(eq(folders.id, f.id));
-				try {
-					await emit({ type: 'directory:deleted', data: { folderId: f.id, path: f.path, timestamp: Date.now() } });
-				} catch {}
-			}
-		} catch (e) {
-			serverLogger.warn('reindexAll: error verificando carpeta', { id: f.id, path: f.path, err: e });
-		}
-	}
-
-	// 1.b) Purga de archivos huérfanos en BD antes de procesar (evita file_not_found en thumbnails)
-	try {
-		const { syncMultipleFolders } = await import('@/lib/filesystem/file-sync.service');
-		const folderIds = stillExisting.map((f) => f.id);
-		if (folderIds.length > 0) {
-			await syncMultipleFolders(folderIds, { dryRun: false, forceSync: true });
-		}
-	} catch (e) {
-		serverLogger.warn('reindexAll: fallo sincronizando archivos por carpeta; continúo', { err: e });
-	}
+	// 1) Autorizar y reconciliar todas las carpetas catalogadas antes de filtrar o tocar estructura.
+	// Un root offline no implica que el catálogo deba borrarse y nunca puede convertirse en un reindex vacío exitoso.
+	const authorizedRootRegistry = await getConfiguredMediaRootRegistry();
+	await syncExistingFolderFilesBeforeReindex(
+		allFolders.map((folder) => folder.id),
+		authorizedRootRegistry
+	);
+	const stillExisting = allFolders;
 
 	// 2) Escanear TODAS las carpetas (RECURSIVO para incluir archivos en subcarpetas)
-	type Item = { filePath: string; folderId: string };
+	interface Item {
+		filePath: string;
+		folderId: string;
+	}
 	const items: Item[] = [];
 	for (const f of stillExisting) {
 		try {
-			const scan = await scanFolder(f.path, { recursive: true, includeHidden, limit: 0 });
+			let authorizedFolder = await authorizedRootRegistry.authorizeAbsolutePath(f.path, 'read');
+			authorizedFolder = await authorizedRootRegistry.authorizeAbsolutePath(f.path, 'index');
+			await dependencies.afterFolderAuthorization?.(f.id);
+			const scan = await scanFolder(authorizedFolder.absolutePath, { recursive: true, includeHidden, limit: 0 });
+			if (scan.error) throw new Error(scan.error);
 			for (const file of scan.files) items.push({ filePath: file.path, folderId: f.id });
 		} catch (e) {
-			serverLogger.warn('reindexAll: fallo escaneando carpeta; continúo', { id: f.id, path: f.path, err: e });
+			serverLogger.warn('reindexAll: Folder no disponible durante el escaneo autorizado', { err: e, id: f.id });
+			throw new Error(`El Folder ${f.id} became unavailable during reindexing.`);
 		}
 	}
 

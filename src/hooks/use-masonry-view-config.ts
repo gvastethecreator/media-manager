@@ -8,22 +8,22 @@ import type { AnyEntityWithStats } from '@/types/entities';
 import { useViewConfiguration } from './use-view-configuration';
 
 export interface MasonryLayoutItem {
+	aspectRatio: number;
+	height: number;
 	item: AnyEntityWithStats;
+	width: number;
 	x: number;
 	y: number;
-	width: number;
-	height: number;
-	aspectRatio: number;
 }
 
 export interface MasonryLayoutResult {
-	items: MasonryLayoutItem[];
-	columns: number;
-	totalHeight: number;
 	balance: {
 		balanceFactor: number;
 		heightDifference: number;
 	};
+	columns: number;
+	items: MasonryLayoutItem[];
+	totalHeight: number;
 }
 
 export interface MasonrySpacing {
@@ -39,29 +39,29 @@ export interface MasonryOptimization {
 }
 
 export interface MasonryViewConfig {
-	columnWidth: number;
-	minColumns: number;
-	maxColumns: number;
 	adaptiveColumns: boolean;
-	spacing: MasonrySpacing;
-	optimization: MasonryOptimization;
-	showShadows: boolean;
-	roundedCorners: boolean;
-	showSelectionIndicators: boolean;
-	hoverEffects: boolean;
-	animationsEnabled: boolean;
 	animationDuration: number;
+	animationsEnabled: boolean;
 	aspectRatioVariation: {
 		enabled: boolean;
 		minRatio: number;
 		maxRatio: number;
 	};
+	columnWidth: number;
+	hoverEffects: boolean;
+	maxColumns: number;
+	minColumns: number;
+	optimization: MasonryOptimization;
 	responsiveBreakpoints: {
 		sm: number;
 		md: number;
 		lg: number;
 		xl: number;
 	};
+	roundedCorners: boolean;
+	showSelectionIndicators: boolean;
+	showShadows: boolean;
+	spacing: MasonrySpacing;
 }
 
 const DEFAULT_CONFIG: MasonryViewConfig = {

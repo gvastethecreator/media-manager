@@ -3,36 +3,29 @@
  * @module types/entities/collection/types
  */
 
+import type { CollectionEdition } from './base';
 import { CollectionSortOption } from './enums';
 
 export interface CollectionBase {
-	id: string;
-	name: string;
+	color: string | null;
+	createdAt: Date;
 	description: string | null;
 	emoji: string | null;
-	color: string | null;
 	featuredImage: string | null;
+	id: string;
 
 	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	totalSize: number;
 	lastImageAddedAt: Date | null;
 	lastVideoAddedAt: Date | null;
+	name: string;
 	parentId: string | null;
-	createdAt: Date;
+	totalImages: number;
+	totalSize: number;
+	totalVideos: number;
 	updatedAt: Date;
 }
 
 export interface CollectionWithStats extends CollectionBase {
-	entityType: 'collection';
-	stats?: {
-		totalItems: number;
-		imageCount: number;
-		videoCount: number;
-		totalValue: number;
-		lastActivity: Date | null;
-	};
 	_count?: {
 		images: number;
 		videos: number;
@@ -48,56 +41,79 @@ export interface CollectionWithStats extends CollectionBase {
 		properties: number;
 		groups: number;
 	};
+	entityType: 'collection';
+	stats?: {
+		totalItems: number;
+		imageCount: number;
+		videoCount: number;
+		totalValue: number;
+		lastActivity: Date | null;
+	};
 }
 
 export interface CreateCollectionInput {
-	name: string;
-	description?: string | null;
-	emoji?: string | null;
+	alternativeUrl?: string | null;
+	category?: string | null;
 	color?: string | null;
+	description?: string | null;
+	editions?: CollectionEdition[] | null;
+	emoji?: string | null;
 	featuredImage?: string | null;
-
 	isFavorite?: boolean;
+	name: string;
+	network?: string | null;
 	parentId?: string | null;
+	platform?: string | null;
+	price?: number | null;
+	sourceImage?: string | null;
+	tokenId?: string | null;
+	url?: string | null;
 }
 
 export interface UpdateCollectionInput {
-	name?: string;
-	description?: string | null;
-	emoji?: string | null;
+	alternativeUrl?: string | null;
+	category?: string | null;
 	color?: string | null;
+	description?: string | null;
+	editions?: CollectionEdition[] | null;
+	emoji?: string | null;
 	featuredImage?: string | null;
-
 	isFavorite?: boolean;
+	name?: string;
+	network?: string | null;
 	parentId?: string | null;
+	platform?: string | null;
+	price?: number | null;
+	sourceImage?: string | null;
+	tokenId?: string | null;
+	url?: string | null;
 }
 
 export interface CollectionFilter {
 	field: string;
-	value: any;
 	operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'gte' | 'lt' | 'lte' | 'between';
+	value: any;
 }
 
 export interface CollectionFilters {
-	search?: string;
-
 	hasImages?: boolean;
+	search?: string;
 	sortBy?: CollectionSortOption;
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface CollectionViewConfig {
-	viewType: 'grid' | 'list' | 'table';
-	gridColumns: number;
 	cardSize: 'small' | 'medium' | 'large';
+	compactView: boolean;
+	enableAnimations: boolean;
+	gridColumns: number;
+	groupBy: string | null;
+	imageCount: number;
+	showImages: boolean;
+	showStats: boolean;
 	sortBy: string;
 	sortDirection: 'asc' | 'desc';
-	showImages: boolean;
-	imageCount: number;
-	enableAnimations: boolean;
-	groupBy: string | null;
-	showStats: boolean;
-	compactView: boolean;
+	viewType: 'grid' | 'list' | 'table';
 }
 
 /**
@@ -116,9 +132,9 @@ export type CollectionExtended = CollectionWithStats;
 export type CollectionStatistics = CollectionWithStats['stats'];
 
 export interface CollectionSearchOptions {
-	skip?: number;
-	take?: number;
-	orderBy?: Record<string, 'asc' | 'desc'>;
 	filters?: CollectionFilters;
 	include?: Record<string, boolean>;
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	skip?: number;
+	take?: number;
 }

@@ -5,6 +5,7 @@
  */
 
 import { createDefaultEntityStats } from '@/lib/utils';
+import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { calculateCompleteness } from '../../lib/utils/stats';
 import type { PropertyBase, PropertyStatistics, PropertyWithStats } from '../../types/entities/property';
@@ -32,8 +33,9 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 		if (hasCounts) {
 			const { _count, ...baseProperty } = drizzleProperty;
 
+			const counts = normalizeCounts(_count);
 			const countValues = Object.values(_count) as number[];
-			const totalRelations = countValues.reduce((sum: number, count: number) => sum + count, 0);
+			const totalRelations = sumCounts(_count, STANDARD_COUNT_KEYS);
 			const usageDiversity = countValues.filter((count: number) => count > 0).length;
 			const totalPossibleRelations = Object.keys(_count).length;
 			const diversityRatio = totalPossibleRelations > 0 ? usageDiversity / totalPossibleRelations : 0;
@@ -42,20 +44,20 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 
 			const stats: PropertyStatistics = {
 				...createDefaultEntityStats(),
-				imageCount: _count.images || 0,
-				videoCount: _count.videos || 0,
-				albumCount: _count.albums || 0,
-				collectionCount: _count.collections || 0,
-				tagCount: _count.tags || 0,
-				characterCount: _count.characters || 0,
-				placeCount: _count.places || 0,
-				worldItemCount: _count.worldItems || 0,
-				conceptCount: _count.concepts || 0,
-				promptCount: _count.prompts || 0,
-				noteCount: _count.notes || 0,
-				wildcardCount: _count.wildcards || 0,
+				imageCount: counts.images,
+				videoCount: counts.videos,
+				albumCount: counts.albums,
+				collectionCount: counts.collections,
+				tagCount: counts.tags,
+				characterCount: counts.characters,
+				placeCount: counts.places,
+				worldItemCount: counts.worldItems,
+				conceptCount: counts.concepts,
+				promptCount: counts.prompts,
+				noteCount: counts.notes,
+				wildcardCount: counts.wildcards,
 				propertyCount: 0,
-				groupCount: _count.groups || 0,
+				groupCount: counts.groups,
 				totalItems: 0,
 				totalAssociations: totalRelations,
 				totalRelations,

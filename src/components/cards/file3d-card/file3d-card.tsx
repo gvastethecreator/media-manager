@@ -1,5 +1,5 @@
 import { BoxIcon, DownloadIcon, EyeIcon, RotateCcwIcon, ZoomInIcon } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { File3DWithStats } from '@/types/entities/file3d';
@@ -7,32 +7,32 @@ import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 interface File3DCardProps {
-	/** Datos del archivo 3D a mostrar */
-	file3d: File3DWithStats;
-	/** Tamaño compacto con menos información */
-	compact?: boolean;
-	/** Modo TCG con efectos especiales de carta */
-	tcgMode?: boolean;
-	/** Deshabilitar interacciones */
-	disabled?: boolean;
 	/** Clase CSS adicional para la carta */
 	className?: string;
-	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
-	/** Si la tarjeta está seleccionada */
-	isSelected?: boolean;
+	/** Tamaño compacto con menos información */
+	compact?: boolean;
+	/** Deshabilitar interacciones */
+	disabled?: boolean;
+	/** Datos del archivo 3D a mostrar */
+	file3d: File3DWithStats;
 	/** Si la tarjeta está activa */
 	isActive?: boolean;
 	/** Si está en modo scroll (para optimización) */
 	isScrolling?: boolean;
+	/** Si la tarjeta está seleccionada */
+	isSelected?: boolean;
+	/** Función a ejecutar al hacer clic en la tarjeta */
+	onClick?: () => void;
 	/** Si debe cargar contenido */
 	shouldLoad?: boolean;
+	/** Modo TCG con efectos especiales de carta */
+	tcgMode?: boolean;
 }
 
 /**
  * File3DCard - Componente de tarjeta para archivos 3D con viewer integrado
  */
-export function File3DCard({
+export const File3DCard = memo(function File3DCard({
 	file3d,
 	compact = false,
 	tcgMode = true,
@@ -51,19 +51,19 @@ export function File3DCard({
 		switch (format) {
 			case 'glb':
 			case 'gltf':
-				return '#8b5cf6'; // Púrpura para GLTF/GLB
+				return 'var(--entity-character)'; // Púrpura para GLTF/GLB
 			case 'obj':
-				return '#f59e0b'; // Amarillo para OBJ
+				return 'var(--dt-warning-500)'; // Amarillo para OBJ
 			case 'fbx':
-				return '#3b82f6'; // Azul para FBX
+				return 'var(--dt-primary-500)'; // Azul para FBX
 			case 'dae':
-				return '#10b981'; // Verde para DAE
+				return 'var(--dt-success-500)'; // Verde para DAE
 			case 'ply':
-				return '#ef4444'; // Rojo para PLY
+				return 'var(--dt-danger-500)'; // Rojo para PLY
 			case '3ds':
-				return '#ec4899'; // Rosa para 3DS
+				return 'var(--entity-file-3d)'; // Rosa para 3DS
 			default:
-				return '#6b7280'; // Gris para otros
+				return 'var(--dt-neutral-500)'; // Gris para otros
 		}
 	}, [file3d.format]);
 
@@ -181,7 +181,7 @@ export function File3DCard({
 					{file3d.isFavorite && (
 						<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 							<div
-								className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
+								className="absolute top-0 right-0 h-24 w-24 translate-x-12 -translate-y-8 rotate-45 opacity-70"
 								style={{
 									background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 									backgroundSize: '600% 600%',
@@ -196,12 +196,12 @@ export function File3DCard({
 			{/* Contenedor principal */}
 			<div className="relative z-1 flex h-full flex-col">
 				{/* Cabecera */}
-				<CardHeader compact={compact} emoji="🎲" primaryColor={primaryColor} title={file3d.name || 'Sin nombre'} />
+				<CardHeader compact={compact} emoji="🎲" primaryColor={primaryColor} title={file3d.name || 'Unnamed'} />
 
 				{/* Contenido principal */}
 				{!compact && (
 					<div className="flex flex-1 flex-col gap-3 p-4">
-						{/* Viewer 3D simulado */}
+						{/* Preview 3D simplificado */}
 						<div className="flex items-center justify-center py-4">
 							<div
 								className="perspective-1000 relative rounded-2xl p-6"
@@ -223,7 +223,7 @@ export function File3DCard({
 
 								{/* Badge del formato */}
 								<div
-									className="-top-2 -right-2 absolute rounded-md px-2 py-1 font-bold text-xs"
+									className="absolute -top-2 -right-2 rounded-md px-2 py-1 font-bold text-sm"
 									style={{
 										backgroundColor: primaryColor,
 										color: 'white',
@@ -234,7 +234,7 @@ export function File3DCard({
 
 								{/* Indicador de complejidad */}
 								<div
-									className="-bottom-2 -left-2 absolute rounded-md px-2 py-1 font-bold text-xs"
+									className="absolute -bottom-2 -left-2 rounded-md px-2 py-1 font-bold text-sm"
 									style={{
 										backgroundColor: secondaryColor,
 										color: 'white',
@@ -249,12 +249,12 @@ export function File3DCard({
 
 						{/* Estadísticas en modo TCG */}
 						{tcgMode && (
-							<div className="grid grid-cols-2 gap-2 text-xs">
+							<div className="grid grid-cols-2 gap-2 text-sm">
 								<div
 									className="flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
-									<span>Tamaño</span>
+									<span>Size</span>
 									<span className="font-bold">{fileSize}</span>
 								</div>
 								<div
@@ -271,25 +271,25 @@ export function File3DCard({
 
 				{/* Pie de tarjeta */}
 				<div className="border-border/20 border-t p-3">
-					<div className="flex items-center justify-between text-xs">
+					<div className="flex items-center justify-between text-sm">
 						{/* Controles 3D */}
 						<div className="flex items-center gap-2">
 							<button
 								className={cn('rounded p-1 transition-colors hover:bg-muted/50', isRotating && 'bg-muted/50')}
 								onClick={toggleRotation}
 								style={{ color: primaryColor }}
-								title={isRotating ? 'Detener rotación' : 'Iniciar rotación'}
+								title={isRotating ? 'Stop rotation' : 'Start rotation'}
 								type="button"
 							>
-								<RotateCcwIcon className="h-3.5 w-3.5" />
+								<RotateCcwIcon className="h-4 w-4" />
 							</button>
 							<button
 								className="rounded p-1 transition-colors hover:bg-muted/50"
 								style={{ color: primaryColor }}
-								title="Vista previa"
+								title="Preview"
 								type="button"
 							>
-								<EyeIcon className="h-3.5 w-3.5" />
+								<EyeIcon className="h-4 w-4" />
 							</button>
 							<button
 								className="rounded p-1 transition-colors hover:bg-muted/50"
@@ -297,15 +297,15 @@ export function File3DCard({
 								title="Zoom"
 								type="button"
 							>
-								<ZoomInIcon className="h-3.5 w-3.5" />
+								<ZoomInIcon className="h-4 w-4" />
 							</button>
 							<button
 								className="rounded p-1 transition-colors hover:bg-muted/50"
 								style={{ color: primaryColor }}
-								title="Descargar"
+								title="Download"
 								type="button"
 							>
-								<DownloadIcon className="h-3.5 w-3.5" />
+								<DownloadIcon className="h-4 w-4" />
 							</button>
 						</div>
 
@@ -330,4 +330,4 @@ export function File3DCard({
 			</div>
 		</CardContainer>
 	);
-}
+});

@@ -20,9 +20,9 @@ import { cn } from '@/lib/utils';
 
 export interface EntityHeaderAction {
 	/**
-	 * Etiqueta para el botón
+	 * URL para navegación
 	 */
-	label: string;
+	href?: string;
 
 	/**
 	 * Icono para el botón
@@ -30,56 +30,35 @@ export interface EntityHeaderAction {
 	icon?: React.ReactNode;
 
 	/**
+	 * Si mostrar en el menú desplegable en lugar de como botón independiente
+	 */
+	inDropdown?: boolean;
+	/**
+	 * Etiqueta para el botón
+	 */
+	label: string;
+
+	/**
 	 * Función a ejecutar al hacer clic
 	 */
 	onClick?: () => void;
 
 	/**
-	 * URL para navegación
+	 * Posición en la lista (menor número = más a la izquierda)
 	 */
-	href?: string;
+	order?: number;
 
 	/**
 	 * Variante del botón
 	 */
 	variant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary';
-
-	/**
-	 * Si mostrar en el menú desplegable en lugar de como botón independiente
-	 */
-	inDropdown?: boolean;
-
-	/**
-	 * Posición en la lista (menor número = más a la izquierda)
-	 */
-	order?: number;
 }
 
 export interface EntityHeaderProps {
 	/**
-	 * Título principal
+	 * Acciones disponibles para la entidad
 	 */
-	title: string;
-
-	/**
-	 * Subtítulo opcional
-	 */
-	subtitle?: string;
-
-	/**
-	 * Descripción opcional
-	 */
-	description?: string;
-
-	/**
-	 * Icono para mostrar junto al título
-	 */
-	icon?: React.ReactNode;
-
-	/**
-	 * URL de retorno (generalmente a la página de listado)
-	 */
-	backUrl?: string;
+	actions?: EntityHeaderAction[];
 
 	/**
 	 * Texto para el enlace de retorno
@@ -87,24 +66,9 @@ export interface EntityHeaderProps {
 	backLabel?: string;
 
 	/**
-	 * Color principal
+	 * URL de retorno (generalmente a la página de listado)
 	 */
-	primaryColor?: string;
-
-	/**
-	 * Items de estadísticas para mostrar
-	 */
-	stats?: StatItem[];
-
-	/**
-	 * Acciones disponibles para la entidad
-	 */
-	actions?: EntityHeaderAction[];
-
-	/**
-	 * URL de imagen destacada
-	 */
-	featuredImage?: string;
+	backUrl?: string;
 
 	/**
 	 * Items para la ruta de navegación (breadcrumbs)
@@ -113,6 +77,26 @@ export interface EntityHeaderProps {
 		label: string;
 		href?: string;
 	}>;
+
+	/**
+	 * Clases adicionales para el contenedor
+	 */
+	className?: string;
+
+	/**
+	 * Descripción opcional
+	 */
+	description?: string;
+
+	/**
+	 * URL de imagen destacada
+	 */
+	featuredImage?: string;
+
+	/**
+	 * Icono para mostrar junto al título
+	 */
+	icon?: React.ReactNode;
 
 	/**
 	 * Si es favorito
@@ -125,19 +109,33 @@ export interface EntityHeaderProps {
 	onToggleFavorite?: () => void;
 
 	/**
-	 * Si se debe mostrar el botón de favorito
+	 * Color principal
 	 */
-	showFavoriteButton?: boolean;
-
-	/**
-	 * Clases adicionales para el contenedor
-	 */
-	className?: string;
+	primaryColor?: string;
 
 	/**
 	 * Contenido personalizado para la sección derecha
 	 */
 	rightContent?: React.ReactNode;
+
+	/**
+	 * Si se debe mostrar el botón de favorito
+	 */
+	showFavoriteButton?: boolean;
+
+	/**
+	 * Items de estadísticas para mostrar
+	 */
+	stats?: StatItem[];
+
+	/**
+	 * Subtítulo opcional
+	 */
+	subtitle?: string;
+	/**
+	 * Título principal
+	 */
+	title: string;
 }
 
 /**
@@ -151,7 +149,7 @@ export function EntityHeader({
 	icon,
 	backUrl,
 	backLabel = 'Volver',
-	primaryColor = '#3b82f6',
+	primaryColor = 'var(--dt-primary-500)',
 	stats,
 	actions = [],
 	featuredImage,
@@ -197,14 +195,14 @@ export function EntityHeader({
 
 	// Acciones predefinidas comunes
 	const _editAction: EntityHeaderAction = {
-		label: 'Editar',
+		label: 'Edit',
 		icon: <PencilIcon className="h-4 w-4" />,
 		variant: 'outline',
 		order: 10,
 	};
 
 	const _deleteAction: EntityHeaderAction = {
-		label: 'Eliminar',
+		label: 'Delete',
 		icon: <TrashIcon className="h-4 w-4" />,
 		variant: 'destructive',
 		inDropdown: true,
@@ -251,7 +249,7 @@ export function EntityHeader({
 						{icon && (
 							<div
 								className="flex h-8 w-8 items-center justify-center rounded-full"
-								style={{ backgroundColor: `${primaryColor}20` }}
+								style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 80%)` }}
 							>
 								{icon}
 							</div>
@@ -261,7 +259,7 @@ export function EntityHeader({
 								{title}
 								{showFavoriteButton && onToggleFavorite && (
 									<button
-										aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+										aria-label={isFavorite ? 'Quitar de favoritos' : 'Add to favorites'}
 										className="focus:outline-none"
 										onClick={onToggleFavorite}
 										type="button"
@@ -269,7 +267,7 @@ export function EntityHeader({
 										<StarIcon
 											className={cn(
 												'h-5 w-5 transition-colors',
-												isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground hover:text-yellow-400'
+												isFavorite ? 'fill-warning text-warning' : 'text-muted-foreground hover:text-warning'
 											)}
 										/>
 									</button>
@@ -303,7 +301,7 @@ export function EntityHeader({
 									<DropdownMenuTrigger asChild>
 										<Button size="sm" variant="outline">
 											<MoreHorizontal className="h-4 w-4" />
-											<span className="sr-only">Más acciones</span>
+											<span className="sr-only">More actions</span>
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end">
@@ -337,7 +335,7 @@ export function EntityHeader({
 					initial={{ opacity: 0, y: 10 }}
 					transition={{ duration: 0.3 }}
 				>
-					<img alt={`Imagen destacada de ${title}`} className="h-full w-full object-cover" src={featuredImage} />
+					<img alt={`Featured visual for ${title}`} className="h-full w-full object-cover" src={featuredImage} />
 					<div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 				</motion.div>
 			)}

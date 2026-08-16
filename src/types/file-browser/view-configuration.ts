@@ -18,26 +18,26 @@ export type ViewType = FileBrowserViewType; // Alias for compatibility
 
 // Common view settings that apply to all views
 export interface CommonViewSettings {
-	/** Show thumbnails for supported file types */
-	showThumbnails: boolean;
+	/** Animation duration in milliseconds */
+	animationDuration: number;
+	/** Enable animations */
+	enableAnimations: boolean;
+	/** Enable hover effects */
+	enableHoverEffects: boolean;
+	/** Show hidden files */
+	showHiddenFiles: boolean;
 	/** Show metadata information */
 	showMetadata: boolean;
-	/** Show file tags */
-	showTags: boolean;
 	/** Show file statistics */
 	showStats: boolean;
+	/** Show file tags */
+	showTags: boolean;
+	/** Show thumbnails for supported file types */
+	showThumbnails: boolean;
 	/** Sort field */
 	sortBy: string;
 	/** Sort direction */
 	sortDirection: 'asc' | 'desc';
-	/** Enable animations */
-	enableAnimations: boolean;
-	/** Animation duration in milliseconds */
-	animationDuration: number;
-	/** Show hidden files */
-	showHiddenFiles: boolean;
-	/** Enable hover effects */
-	enableHoverEffects: boolean;
 }
 
 // View-specific settings union
@@ -51,76 +51,76 @@ export type ViewSpecificSettings =
 export interface ListViewSettings {
 	/** Column configurations */
 	columns: ListColumnConfig[];
-	/** Row height in pixels */
-	rowHeight: number;
-	/** Show zebra stripes */
-	showZebraStripes: boolean;
-	/** Show column headers */
-	showHeaders: boolean;
-	/** Enable column resizing */
-	enableColumnResizing: boolean;
-	/** Enable column reordering */
-	enableColumnReordering: boolean;
 	/** Compact mode */
 	compactMode: boolean;
+	/** Enable column reordering */
+	enableColumnReordering: boolean;
+	/** Enable column resizing */
+	enableColumnResizing: boolean;
+	/** Row height in pixels */
+	rowHeight: number;
+	/** Show column headers */
+	showHeaders: boolean;
+	/** Show zebra stripes */
+	showZebraStripes: boolean;
 }
 
 // Complete view configuration
 export interface ViewConfiguration {
-	/** View type identifier */
-	type: FileBrowserViewType;
 	/** Common settings for all views */
 	common: CommonViewSettings;
-	/** View-specific settings */
-	specific: ViewSpecificSettings;
 	/** Configuration metadata */
 	metadata: ViewConfigurationMetadata;
+	/** View-specific settings */
+	specific: ViewSpecificSettings;
+	/** View type identifier */
+	type: FileBrowserViewType;
 }
 
 // Configuration metadata
 export interface ViewConfigurationMetadata {
-	/** Configuration name/label */
-	name: string;
-	/** Configuration description */
-	description?: string;
 	/** Creation timestamp */
 	createdAt: number;
-	/** Last modified timestamp */
-	lastModified: number;
-	/** Configuration version */
-	version: string;
+	/** Configuration description */
+	description?: string;
 	/** Whether this is a user-created configuration */
 	isCustom: boolean;
 	/** Whether this is the default configuration for the view type */
 	isDefault: boolean;
+	/** Last modified timestamp */
+	lastModified: number;
+	/** Configuration name/label */
+	name: string;
+	/** Configuration version */
+	version: string;
 }
 
 // Preset configurations
 export interface ViewPreset {
+	/** Preset category */
+	category: 'default' | 'compact' | 'detailed' | 'custom';
+	/** View configuration */
+	configuration: ViewConfiguration;
+	/** Preset description */
+	description: string;
 	/** Preset identifier */
 	id: string;
 	/** Preset name */
 	name: string;
-	/** Preset description */
-	description: string;
-	/** View configuration */
-	configuration: ViewConfiguration;
-	/** Preset category */
-	category: 'default' | 'compact' | 'detailed' | 'custom';
 	/** Supported entity types */
 	supportedEntityTypes?: string[];
 }
 
 // View customization options
 export interface ViewCustomizationOptions {
-	/** Available themes */
-	themes: ViewTheme[];
 	/** Available color schemes */
 	colorSchemes: ColorScheme[];
-	/** Available density options */
-	densityOptions: DensityOption[];
 	/** Custom CSS classes */
 	customClasses?: string[];
+	/** Available density options */
+	densityOptions: DensityOption[];
+	/** Available themes */
+	themes: ViewTheme[];
 }
 
 // Theme configuration
@@ -129,14 +129,18 @@ export interface ViewTheme {
 	id: string;
 	/** Theme name */
 	name: string;
-	/** Theme CSS variables */
-	variables: Record<string, string>;
 	/** Dark mode support */
 	supportsDarkMode: boolean;
+	/** Theme CSS variables */
+	variables: Record<string, string>;
 }
 
 // Color scheme
 export interface ColorScheme {
+	/** Accent color */
+	accent: string;
+	/** Background color */
+	background: string;
 	/** Scheme identifier */
 	id: string;
 	/** Scheme name */
@@ -145,10 +149,6 @@ export interface ColorScheme {
 	primary: string;
 	/** Secondary color */
 	secondary: string;
-	/** Accent color */
-	accent: string;
-	/** Background color */
-	background: string;
 	/** Text color */
 	text: string;
 }
@@ -159,10 +159,10 @@ export interface DensityOption {
 	id: string;
 	/** Density name */
 	name: string;
-	/** Spacing multiplier */
-	spacingMultiplier: number;
 	/** Size multiplier */
 	sizeMultiplier: number;
+	/** Spacing multiplier */
+	spacingMultiplier: number;
 }
 
 // Configuration validation schemas
@@ -321,12 +321,12 @@ export function cloneViewConfiguration(config: ViewConfiguration): ViewConfigura
 
 // Animation configuration
 export interface AnimationConfig {
-	/** Enable animations globally */
-	enabled: boolean;
 	/** Default animation duration in milliseconds */
 	duration: number;
 	/** Default easing function */
 	easing: 'linear' | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out';
+	/** Enable animations globally */
+	enabled: boolean;
 	/** Reduce motion for users with vestibular disorders */
 	reduceMotion?: boolean;
 	/** Animation type configurations */
@@ -356,30 +356,12 @@ export interface AnimationConfig {
 
 // Accessibility configuration
 export interface AccessibilityConfig {
-	/** Enable keyboard navigation */
-	keyboardNavigation: boolean;
-	/** Enable screen reader announcements */
-	screenReaderAnnouncements: boolean;
-	/** Enable high contrast mode */
-	highContrast: boolean;
-	/** Reduce motion for users with vestibular disorders */
-	reduceMotion: boolean;
-	/** Use larger fonts */
-	largeFonts: boolean;
-	/** Show focus indicators */
-	focusIndicators?: boolean;
-	/** Use large text */
-	largeText?: boolean;
-	/** Text scale factor */
-	textScale?: number;
-	/** Enable descriptive tooltips */
-	descriptiveTooltips?: boolean;
 	/** Enable audio feedback */
 	audioFeedback?: boolean;
 	/** Audio volume level */
 	audioVolume?: number;
-	/** Enable screen reader support */
-	screenReader?: boolean;
+	/** Enable descriptive tooltips */
+	descriptiveTooltips?: boolean;
 	/** Additional accessibility features */
 	features?: string[];
 	/** Focus indicator settings */
@@ -388,104 +370,102 @@ export interface AccessibilityConfig {
 		indicatorColor: string;
 		indicatorWidth: number;
 	};
+	/** Show focus indicators */
+	focusIndicators?: boolean;
+	/** Enable high contrast mode */
+	highContrast: boolean;
+	/** Enable keyboard navigation */
+	keyboardNavigation: boolean;
+	/** Use larger fonts */
+	largeFonts: boolean;
+	/** Use large text */
+	largeText?: boolean;
+	/** Reduce motion for users with vestibular disorders */
+	reduceMotion: boolean;
+	/** Enable screen reader support */
+	screenReader?: boolean;
+	/** Enable screen reader announcements */
+	screenReaderAnnouncements: boolean;
+	/** Text scale factor */
+	textScale?: number;
 }
 
 // Performance configuration
 export interface PerformanceConfig {
-	/** Maximum number of items to render at once */
-	maxRenderItems: number;
-	/** Enable virtualization for large lists */
-	virtualization: boolean;
-	/** Virtualization buffer size */
-	virtualizationBuffer: number;
-	/** Buffer size for additional items */
-	bufferSize?: number;
-	/** Enable lazy loading for thumbnails */
-	lazyThumbnails: boolean;
-	/** Thumbnail quality setting */
-	thumbnailQuality: 'low' | 'medium' | 'high';
-	/** Enable thumbnail cache */
-	thumbnailCache?: boolean;
-	/** Maximum cache size in MB */
-	maxCacheSize?: number;
-	/** Enable item preloading */
-	preloadItems?: boolean;
-	/** Maximum FPS for animations */
-	maxFPS?: number;
-	/** Scroll debounce time */
-	scrollDebounce?: number;
-	/** Enable lazy loading */
-	lazyLoading?: boolean;
-	/** Memory limit in MB */
-	memoryLimit?: number;
 	/** Enable automatic cleanup */
 	autoCleanup?: boolean;
 	/** Batch processing size */
 	batchSize?: number;
-	/** Performance optimizations */
-	optimizations?: string[];
-	/** Enable virtual scrolling */
-	virtualScrolling: boolean;
-	/** Enable lazy image loading */
-	lazyImageLoading: boolean;
-	/** Cache strategy */
-	cacheStrategy: 'memory' | 'disk' | 'hybrid';
-	/** Maximum memory usage in MB */
-	maxMemoryUsage: number;
-	/** Compression level */
-	compressionLevel: number;
+	/** Buffer size for additional items */
+	bufferSize?: number;
 	/** Cache settings */
 	cache: {
 		thumbnails: boolean;
 		maxSize: number;
 		ttl: number;
 	};
+	/** Cache strategy */
+	cacheStrategy: 'memory' | 'disk' | 'hybrid';
+	/** Compression level */
+	compressionLevel: number;
 	/** Debounce settings */
 	debounce: {
 		search: number;
 		resize: number;
 		scroll: number;
 	};
+	/** Enable lazy image loading */
+	lazyImageLoading: boolean;
+	/** Enable lazy loading */
+	lazyLoading?: boolean;
+	/** Enable lazy loading for thumbnails */
+	lazyThumbnails: boolean;
+	/** Maximum cache size in MB */
+	maxCacheSize?: number;
+	/** Maximum FPS for animations */
+	maxFPS?: number;
+	/** Maximum memory usage in MB */
+	maxMemoryUsage: number;
+	/** Maximum number of items to render at once */
+	maxRenderItems: number;
+	/** Memory limit in MB */
+	memoryLimit?: number;
+	/** Performance optimizations */
+	optimizations?: string[];
+	/** Enable item preloading */
+	preloadItems?: boolean;
+	/** Scroll debounce time */
+	scrollDebounce?: number;
+	/** Enable thumbnail cache */
+	thumbnailCache?: boolean;
+	/** Thumbnail quality setting */
+	thumbnailQuality: 'low' | 'medium' | 'high';
+	/** Enable virtualization for large lists */
+	virtualization: boolean;
+	/** Virtualization buffer size */
+	virtualizationBuffer: number;
+	/** Enable virtual scrolling */
+	virtualScrolling: boolean;
 }
 
 // Global view configuration
 export interface GlobalViewConfig {
-	/** Animation settings */
-	animations: AnimationConfig;
-	/** Default view mode */
-	defaultViewMode: FileBrowserViewType;
-	/** Default view */
-	defaultView?: string;
-	/** Remember view per folder */
-	rememberViewPerFolder?: boolean;
-	/** Sync settings */
-	syncSettings?: boolean;
 	/** Accessibility settings */
 	accessibility: AccessibilityConfig;
-	/** Performance settings */
-	performance: PerformanceConfig;
-	/** Experimental features */
-	experimentalFeatures?: string[];
-	/** Preferred view */
-	preferredView?: string;
-	/** Default sort */
-	defaultSort?: { field: string; direction: 'asc' | 'desc' };
-	/** Show thumbnails */
-	showThumbnails?: boolean;
-	/** Show metadata */
-	showMetadata?: boolean;
-	/** Visible fields */
-	visibleFields?: string[];
+	/** Animation settings */
+	animations: AnimationConfig;
 	/** Custom options */
 	customOptions?: Record<string, any>;
+	/** Default sort */
+	defaultSort?: { field: string; direction: 'asc' | 'desc' };
+	/** Default view */
+	defaultView?: string;
+	/** Default view mode */
+	defaultViewMode: FileBrowserViewType;
 	/** Entity type configurations */
 	entityTypeConfigs?: Record<string, EntityViewConfig>;
-	/** Theme settings */
-	theme: {
-		mode: 'light' | 'dark' | 'auto';
-		colorScheme: string;
-		customColors?: Record<string, string>;
-	};
+	/** Experimental features */
+	experimentalFeatures?: string[];
 	/** Layout settings */
 	layout: {
 		sidebar: {
@@ -504,28 +484,34 @@ export interface GlobalViewConfig {
 			showSelectionInfo: boolean;
 		};
 	};
+	/** Performance settings */
+	performance: PerformanceConfig;
+	/** Preferred view */
+	preferredView?: string;
+	/** Remember view per folder */
+	rememberViewPerFolder?: boolean;
+	/** Show metadata */
+	showMetadata?: boolean;
+	/** Show thumbnails */
+	showThumbnails?: boolean;
+	/** Sync settings */
+	syncSettings?: boolean;
+	/** Theme settings */
+	theme: {
+		mode: 'light' | 'dark' | 'auto';
+		colorScheme: string;
+		customColors?: Record<string, string>;
+	};
+	/** Visible fields */
+	visibleFields?: string[];
 }
 
 // Entity-specific configuration
 export interface EntityViewConfig {
-	/** Entity type */
-	entityType: string;
-	/** View configuration for this entity type */
-	viewConfig: ViewConfiguration;
-	/** Experimental features */
-	experimentalFeatures?: string[];
-	/** Preferred view */
-	preferredView?: string;
-	/** Default sort */
-	defaultSort?: { field: string; direction: 'asc' | 'desc' };
-	/** Show thumbnails */
-	showThumbnails?: boolean;
-	/** Show metadata */
-	showMetadata?: boolean;
-	/** Visible fields */
-	visibleFields?: string[];
 	/** Custom options */
 	customOptions?: Record<string, any>;
+	/** Default sort */
+	defaultSort?: { field: string; direction: 'asc' | 'desc' };
 	/** Custom display settings */
 	display: {
 		showPreview: boolean;
@@ -533,22 +519,34 @@ export interface EntityViewConfig {
 		showMetadata: boolean;
 		metadataFields: string[];
 	};
+	/** Entity type */
+	entityType: string;
+	/** Experimental features */
+	experimentalFeatures?: string[];
+	/** Preferred view */
+	preferredView?: string;
+	/** Show metadata */
+	showMetadata?: boolean;
+	/** Show thumbnails */
+	showThumbnails?: boolean;
+	/** View configuration for this entity type */
+	viewConfig: ViewConfiguration;
+	/** Visible fields */
+	visibleFields?: string[];
 }
 
 // Configuration preset
 export interface ViewConfigurationPreset {
-	/** Preset identifier */
-	id: string;
-	/** Preset name */
-	name: string;
-	/** Preset description */
-	description: string;
 	/** Preset category */
 	category: 'default' | 'compact' | 'detailed' | 'performance' | 'accessibility' | 'custom';
-	/** Global configuration */
-	globalConfig: GlobalViewConfig;
+	/** Preset description */
+	description: string;
 	/** Entity-specific configurations */
 	entityConfigs: EntityViewConfig[];
+	/** Global configuration */
+	globalConfig: GlobalViewConfig;
+	/** Preset identifier */
+	id: string;
 	/** Preset metadata */
 	metadata: {
 		author: string;
@@ -557,6 +555,8 @@ export interface ViewConfigurationPreset {
 		lastModified: number;
 		tags: string[];
 	};
+	/** Preset name */
+	name: string;
 }
 
 // All types are already exported with their definitions above

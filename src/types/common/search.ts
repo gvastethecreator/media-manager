@@ -20,10 +20,10 @@ export const SearchOptionsSchema = z.object({
  * Tipo de opciones de búsqueda base
  */
 export interface SearchOptions {
+	include?: Record<string, boolean>;
+	orderBy?: Record<string, 'asc' | 'desc'>;
 	skip?: number;
 	take?: number;
-	orderBy?: Record<string, 'asc' | 'desc'>;
-	include?: Record<string, boolean>;
 	where?: Record<string, unknown>;
 }
 
@@ -39,8 +39,8 @@ export enum SortDirection {
  * Opciones para filtros de fechas
  */
 export interface DateRangeFilter {
-	start?: Date;
 	end?: Date;
+	start?: Date;
 }
 
 /**
@@ -72,9 +72,9 @@ export interface FilterField {
  * Opciones para resultados de búsqueda paginados
  */
 export interface PaginatedResult<T> {
-	items: T[];
-	total: number;
 	hasMore: boolean;
+	items: T[];
 	page?: number;
 	pageSize?: number;
+	total: number;
 }

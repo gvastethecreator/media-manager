@@ -1,53 +1,53 @@
-import { useQuery } from '@tanstack/react-query';
+import { type QueryClient, useQuery } from '@tanstack/react-query';
 import { apiClient } from './client';
 
 // Tipos para el sistema de navegación
 export interface SystemStats {
-	totalImages: number;
-	totalFolders: number;
-	totalCollections: number;
-	totalTags: number;
-	totalAlbums: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalFavorites: number;
+	recentActivity: unknown[];
+	topTags: Array<{ id: string; name: string; count: number }>;
 	totalActivities: number;
-	totalSize: number;
-	totalViews: number;
+	totalAlbums: number;
+	totalAudio?: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalDocuments?: number;
 	totalDownloads: number;
+	totalFavorites: number;
+	totalFile3D?: number;
+	totalFolders: number;
+	totalImages: number;
+	totalJsonFiles?: number;
+	totalPlaces: number;
+	totalSize: number;
+	totalTags: number;
 	// Totales adicionales (opcionales) provenientes de /stats/system
 	totalVideos?: number;
-	totalAudio?: number;
-	totalDocuments?: number;
-	totalJsonFiles?: number;
-	totalFile3D?: number;
+	totalViews: number;
 	totalWorkflows?: number;
-	topTags: Array<{ id: string; name: string; count: number }>;
-	recentActivity: unknown[];
+	totalWorldItems: number;
 }
 
 export interface NavigationData {
-	folders: Array<{ id: string; name: string; path: string; itemCount: number; parentId?: string | null }>;
-	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
-	tags: Array<{ id: string; name: string; count?: number }>;
 	albums: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	characters: Array<{ id: string; name: string; description?: string }>;
-	places: Array<{ id: string; name: string; description?: string }>;
-	worldItems: Array<{ id: string; name: string; description?: string }>;
-	concepts: Array<{ id: string; name: string; description?: string }>;
-	prompts: Array<{ id: string; name: string; description?: string }>;
-	notes: Array<{ id: string; title: string; content?: string }>;
-	groups: Array<{ id: string; name: string; description?: string }>;
-	properties: Array<{ id: string; name: string; value?: string }>;
-	wildcards: Array<{ id: string; name: string; pattern?: string }>;
 	audios: Array<{ id: string; name: string; duration?: number }>;
+	characters: Array<{ id: string; name: string; description?: string }>;
+	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
+	concepts: Array<{ id: string; name: string; description?: string }>;
 	documents: Array<{ id: string; name: string; type?: string }>;
-	jsonFiles: Array<{ id: string; name: string; size?: number }>;
 	file3ds: Array<{ id: string; name: string; format?: string }>;
-	videos: Array<{ id: string; name: string; duration?: number }>;
-	workflows: Array<{ id: string; name: string; status?: string }>;
+	folders: Array<{ id: string; name: string; path: string; itemCount: number; parentId?: string | null }>;
+	groups: Array<{ id: string; name: string; description?: string }>;
+	jsonFiles: Array<{ id: string; name: string; size?: number }>;
+	notes: Array<{ id: string; title: string; content?: string }>;
+	places: Array<{ id: string; name: string; description?: string }>;
+	prompts: Array<{ id: string; name: string; description?: string }>;
+	properties: Array<{ id: string; name: string; value?: string }>;
 	stats: SystemStats;
+	tags: Array<{ id: string; name: string; count?: number }>;
+	videos: Array<{ id: string; name: string; duration?: number }>;
+	wildcards: Array<{ id: string; name: string; pattern?: string }>;
+	workflows: Array<{ id: string; name: string; status?: string }>;
+	worldItems: Array<{ id: string; name: string; description?: string }>;
 }
 
 // Query keys
@@ -56,6 +56,10 @@ export const navigationKeys = {
 	data: () => [...navigationKeys.all, 'data'] as const,
 	stats: () => [...navigationKeys.all, 'stats'] as const,
 };
+
+export function invalidateNavigationData(queryClient: QueryClient): Promise<void> {
+	return queryClient.invalidateQueries({ queryKey: navigationKeys.data() });
+}
 
 // Hook principal para obtener datos de navegación
 export function useNavigationData() {

@@ -1,32 +1,33 @@
 import { Copy, Eye, EyeOff } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 
 export interface JsonViewerProps {
 	/**
+	 * Clases CSS adicionales
+	 */
+	className?: string;
+	/**
 	 * Contenido JSON como string
 	 */
 	content: string;
-	/**
-	 * Altura máxima del viewer en píxeles
-	 * @default 300
-	 */
-	maxHeight?: number;
 	/**
 	 * Si debe estar expandido por defecto
 	 * @default false
 	 */
 	defaultExpanded?: boolean;
 	/**
-	 * Clases CSS adicionales
-	 */
-	className?: string;
-	/**
 	 * Si debe mostrar syntax highlighting
 	 * @default true
 	 */
 	enableSyntaxHighlight?: boolean;
+	/**
+	 * Altura máxima del viewer en píxeles
+	 * @default 300
+	 */
+	maxHeight?: number;
 	/**
 	 * Límite de líneas antes de mostrar scroll
 	 * @default 15
@@ -72,7 +73,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		} catch (error) {
-			console.error('Error copying to clipboard:', error);
+			clientLogger.error('Error copying to clipboard:', error);
 		}
 	};
 
@@ -84,7 +85,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
 		// Para evitar dangerouslySetInnerHTML, usamos un componente simple sin highlighting avanzado
 		// Se puede mejorar con una librería como react-syntax-highlighter si se necesita
-		return <pre className="whitespace-pre-wrap break-words text-green-600 dark:text-green-400">{text}</pre>;
+		return <pre className="whitespace-pre-wrap break-words text-[color:var(--status-success)]">{text}</pre>;
 	};
 
 	return (
@@ -102,7 +103,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
 				<Button className="h-6 px-2 text-xs" onClick={handleCopy} size="sm" variant="ghost">
 					<Copy className="mr-1 h-3 w-3" />
-					{copied ? 'Copiado!' : 'Copiar'}
+					{copied ? 'Copiado!' : 'Copy'}
 				</Button>
 			</div>
 
@@ -126,7 +127,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
 			{/* Info adicional */}
 			<div className="mt-1 text-muted-foreground text-xs">
-				{lines.length} líneas • {formattedContent.length} caracteres
+				{lines.length} lines • {formattedContent.length} caracteres
 			</div>
 		</div>
 	);

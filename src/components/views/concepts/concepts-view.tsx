@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
+import { cn } from '@/lib/utils';
 import { useConceptStore } from '@/store/entities/concept';
 import type { ConceptCreateInput } from '@/types/entities/concept';
 import ConceptsContentView from './concepts-content-view';
 
 const viewLogger = clientLogger.withContext('ConceptsView');
 
-export function ConceptsView() {
+export function ConceptsView({ className }: { className?: string }) {
 	const navigate = useNavigate();
 	const {
 		concepts,
@@ -52,7 +54,7 @@ export function ConceptsView() {
 
 	const handleCreateConcept = useCallback(async () => {
 		if (newConceptName.trim() === '') {
-			console.error('❌ Error: El nombre del concepto no puede estar vacío');
+			clientLogger.error('❌ Error: Concept name cannot be empty');
 			return;
 		}
 
@@ -61,10 +63,9 @@ export function ConceptsView() {
 				name: newConceptName,
 				description: newConceptDescription || null,
 				emoji: '💡',
-				color: '#3b82f6',
+				color: DEFAULT_ENTITY_COLOR,
 				category: 'general',
 				content: newConceptDescription || '',
-				isFavorite: false,
 
 				totalImages: 0,
 				totalVideos: 0,
@@ -74,25 +75,27 @@ export function ConceptsView() {
 			setNewConceptDescription('');
 			setShowForm(false);
 		} catch (error) {
-			console.error('❌ Error creando concepto:', error);
+			clientLogger.error('❌ Error creating concept:', error);
 		}
 	}, [newConceptName, newConceptDescription, createConcept]);
 
 	return (
-		<ConceptsContentView
-			concepts={concepts}
-			error={error}
-			handleConceptSelect={handleConceptSelect}
-			handleCreateConcept={handleCreateConcept}
-			isLoading={isLoading}
-			newConceptDescription={newConceptDescription}
-			newConceptName={newConceptName}
-			searchTerm={searchTerm}
-			setNewConceptDescription={setNewConceptDescription}
-			setNewConceptName={setNewConceptName}
-			setSearchTerm={setSearchTerm}
-			setShowForm={setShowForm}
-			showForm={showForm}
-		/>
+		<div className={cn('h-full', className)}>
+			<ConceptsContentView
+				concepts={concepts}
+				error={error}
+				handleConceptSelect={handleConceptSelect}
+				handleCreateConcept={handleCreateConcept}
+				isLoading={isLoading}
+				newConceptDescription={newConceptDescription}
+				newConceptName={newConceptName}
+				searchTerm={searchTerm}
+				setNewConceptDescription={setNewConceptDescription}
+				setNewConceptName={setNewConceptName}
+				setSearchTerm={setSearchTerm}
+				setShowForm={setShowForm}
+				showForm={showForm}
+			/>
+		</div>
 	);
 }

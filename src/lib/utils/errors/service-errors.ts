@@ -90,13 +90,13 @@ export const ErrorHttpStatusMap: Record<ServiceErrorCategory, number> = {
  * Interfaz para errores de servicio
  */
 export interface ServiceError extends Error {
-	code: ServiceErrorCode;
 	category: ServiceErrorCategory;
-	message: string;
 	cause?: unknown;
+	code: ServiceErrorCode;
 	context?: Record<string, unknown>;
-	timestamp: Date;
 	httpStatus: number;
+	message: string;
+	timestamp: Date;
 }
 
 /**
@@ -154,11 +154,11 @@ const ErrorCodeCategoryMap: Record<ServiceErrorCode, ServiceErrorCategory> = {
  * Opciones para crear un error de servicio
  */
 export interface CreateServiceErrorOptions {
-	code: ServiceErrorCode;
-	message: string;
 	cause?: unknown;
+	code: ServiceErrorCode;
 	context?: Record<string, unknown>;
 	logLevel?: 'error' | 'warn' | 'info';
+	message: string;
 	serviceName?: string;
 }
 
@@ -311,7 +311,7 @@ export function createFileNotFoundError(
 ): ServiceError {
 	return createServiceError({
 		code: ServiceErrorCode.FILE_NOT_FOUND,
-		message: `Archivo no encontrado: ${path}`,
+		message: `File not found: ${path}`,
 		context: { path, ...context },
 		serviceName,
 	});

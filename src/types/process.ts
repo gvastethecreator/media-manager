@@ -52,17 +52,17 @@ export type ProcessPriority = (typeof ProcessPriority)[keyof typeof ProcessPrior
  * Interfaz base para procesos
  */
 export interface Process {
+	cancelledAt?: Date;
+	completedAt?: Date;
+	error?: Error;
 	id: string;
-	type: ProcessType;
-	status: ProcessStatus;
+	message: string;
+	metadata: JSONString<Record<string, unknown>>;
 	priority: ProcessPriority;
 	progress: number;
-	message: string;
-	error?: Error;
-	metadata: JSONString<Record<string, unknown>>;
 	startedAt: Date;
-	completedAt?: Date;
-	cancelledAt?: Date;
+	status: ProcessStatus;
+	type: ProcessType;
 }
 
 /**
@@ -70,24 +70,24 @@ export interface Process {
  */
 export interface ProcessEvent {
 	id: string;
-	processId: string;
-	type: string;
 	message: string;
 	metadata: JSONString<Record<string, unknown>>;
+	processId: string;
 	timestamp: Date;
+	type: string;
 }
 
 /**
  * Opciones de proceso
  */
 export interface ProcessOptions {
-	priority?: ProcessPriority;
-	timeout?: number;
-	retries?: number;
-	onProgress?: (progress: number) => void;
+	onCancel?: () => void;
 	onComplete?: () => void;
 	onError?: (error: Error) => void;
-	onCancel?: () => void;
+	onProgress?: (progress: number) => void;
+	priority?: ProcessPriority;
+	retries?: number;
+	timeout?: number;
 }
 
 // Validaciones Zod

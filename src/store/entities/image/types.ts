@@ -30,10 +30,10 @@ export enum ImageGroupType {
  * Estructura optimizada de un grupo de imágenes
  */
 export interface ImageGroup {
-	id: string;
-	label: string;
 	count: number;
+	id: string;
 	images: ImageWithStats[];
+	label: string;
 	subgroups?: ImageGroup[];
 }
 
@@ -42,18 +42,18 @@ export interface ImageGroup {
  */
 export interface ImageState {
 	core: ImageCoreState;
-	ui: ImageUIState;
 	filters: ImageFiltersState;
 	grouping: ImageGroupingState;
+	ui: ImageUIState;
 }
 
 /**
  * Estado del slice core (optimizado con Record)
  */
 export interface ImageCoreState {
+	error: string | null;
 	images: Record<string, ImageWithStats>;
 	isLoading: boolean;
-	error: string | null;
 	lastUpdated: number | null;
 }
 
@@ -61,66 +61,66 @@ export interface ImageCoreState {
  * Estado del slice de agrupación
  */
 export interface ImageGroupingState {
-	groupBy: ImageGroupType | null;
-	sortCriteria: ImageSortCriteria;
-	groupedImages: ImageGroup[];
 	filteredImages: ImageWithStats[];
-	stats: ImageStoreStats;
+	groupBy: ImageGroupType | null;
+	groupedImages: ImageGroup[];
 	selection: {
 		selectedIds: string[];
 	};
+	sortCriteria: ImageSortCriteria;
+	stats: ImageStoreStats;
 }
 
 /**
  * Estado del slice UI
  */
 export interface ImageUIState {
-	selectedIds: string[];
-	viewMode: ImageViewMode;
-	isViewerOpen: boolean;
 	currentImageId: string | null;
-	highlightedId: string | null;
 	expandedIds: string[];
+	highlightedId: string | null;
+	isViewerOpen: boolean;
+	selectedIds: string[];
 	viewConfig: ImageViewConfig;
+	viewMode: ImageViewMode;
 }
 
 /**
  * Estado del slice de filtros
  */
 export interface ImageFiltersState {
-	sortBy: ImageSortCriteria;
-	searchQuery: string;
-	filterByTag: string[];
-	filterByAlbum: string[];
-	filterByFolderId: string | null;
-	filterFavorites: boolean;
-	filterPublic: boolean;
 	dateRange: {
 		from: Date | null;
 		to: Date | null;
 	};
+	filterByAlbum: string[];
+	filterByFolderId: string | null;
+	filterByTag: string[];
+	filterFavorites: boolean;
+	filterPublic: boolean;
+	searchQuery: string;
+	sortBy: ImageSortCriteria;
 }
 
 /**
  * Estadísticas optimizadas de imágenes
  */
 export interface ImageStoreStats {
-	totalImages: number;
-	totalSize: number;
 	averageSize: number;
 	byFolder: Record<string, number>;
-	byTag: Record<string, number>;
 	byMonth: Record<string, number>;
 	byResolution: Record<string, number>;
+	byTag: Record<string, number>;
 	favorites: number;
-	public: number;
-	private: number;
-	withThumbnails: number;
-	withoutThumbnails: number;
 	largest: ImageWithStats | null;
-	smallest: ImageWithStats | null;
 	newest: ImageWithStats | null;
 	oldest: ImageWithStats | null;
+	private: number;
+	public: number;
+	smallest: ImageWithStats | null;
+	totalImages: number;
+	totalSize: number;
+	withoutThumbnails: number;
+	withThumbnails: number;
 }
 
 /**

@@ -6,13 +6,12 @@ export default function imageLoader({ src, width, quality }: { src: string; widt
 
 	// Si es una ruta de API, agregamos los parámetros de optimización
 	if (src.startsWith('/api/images/')) {
-		const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:4000';
-		const url = new URL(src, baseUrl);
+		const url = new URL(src, 'http://local.invalid');
 		url.searchParams.set('w', width.toString());
 		if (quality) {
 			url.searchParams.set('q', quality.toString());
 		}
-		return url.toString();
+		return `${url.pathname}${url.search}`;
 	}
 
 	// Para imágenes locales en public/, usar la ruta relativa

@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useSettingsStore } from '@/store/settings.store';
 import {
 	CommonViewSettings,
@@ -24,36 +25,36 @@ import {
 
 // Hook interface
 export interface UseViewConfigurationReturn {
-	// Current configuration
-	currentConfiguration: ViewConfiguration;
-	currentConfig: ViewConfiguration;
-
-	// Configuration management
-	updateConfiguration: (updates: Partial<ViewConfiguration>) => void;
-	updateCommonSettings: (settings: Partial<CommonViewSettings>) => void;
-	updateSpecificSettings: (settings: Partial<ViewSpecificSettings['config']>) => void;
-	updateViewConfig: (updates: Partial<ViewConfiguration>) => void;
-	updateGlobalConfig: (updates: any) => void;
-	updateEntityConfig: (updates: any) => void;
-	resetToDefault: () => void;
-	resetConfiguration: () => Promise<boolean>;
+	applyPreset: (presetId: string) => Promise<boolean>;
 
 	// Preset management
 	availablePresets: ViewPreset[];
-	applyPreset: (presetId: string) => Promise<boolean>;
-	saveAsPreset: (name: string, description?: string) => void;
+	currentConfig: ViewConfiguration;
+	// Current configuration
+	currentConfiguration: ViewConfiguration;
 	deletePreset: (presetId: string) => void;
-	getAvailablePresets: () => ViewPreset[];
 
 	// Configuration utilities
 	exportConfiguration: (options?: any) => { data: string; timestamp: Date };
-	importConfiguration: (configJson: string, options?: any) => Promise<{ success: boolean; errors: string[] }>;
-	isDefault: boolean;
-	hasUnsavedChanges: boolean;
+	getAvailablePresets: () => ViewPreset[];
 
 	// View-specific helpers
 	getViewSpecificConfig: <T = any>() => T;
+	hasUnsavedChanges: boolean;
+	importConfiguration: (configJson: string, options?: any) => Promise<{ success: boolean; errors: string[] }>;
 	isConfigurationValid: boolean;
+	isDefault: boolean;
+	resetConfiguration: () => Promise<boolean>;
+	resetToDefault: () => void;
+	saveAsPreset: (name: string, description?: string) => void;
+	updateCommonSettings: (settings: Partial<CommonViewSettings>) => void;
+
+	// Configuration management
+	updateConfiguration: (updates: Partial<ViewConfiguration>) => void;
+	updateEntityConfig: (updates: any) => void;
+	updateGlobalConfig: (updates: any) => void;
+	updateSpecificSettings: (settings: Partial<ViewSpecificSettings['config']>) => void;
+	updateViewConfig: (updates: Partial<ViewConfiguration>) => void;
 }
 
 // Default presets for each view type
@@ -157,7 +158,7 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 			try {
 				return validateViewConfiguration(savedConfig);
 			} catch (error) {
-				console.warn(`Invalid view configuration for ${viewType}, using default:`, error);
+				clientLogger.warn(`Invalid view configuration for ${viewType}, using default:`, error);
 			}
 		}
 
@@ -308,14 +309,14 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 				const validatedConfig = validateViewConfiguration(config);
 
 				if (validatedConfig.type !== viewType) {
-					console.error(`Configuration type mismatch: expected ${viewType}, got ${validatedConfig.type}`);
+					clientLogger.error(`Configuration type mismatch: expected ${viewType}, got ${validatedConfig.type}`);
 					return false;
 				}
 
 				updateConfiguration(validatedConfig);
 				return true;
 			} catch (error) {
-				console.error('Failed to import configuration:', error);
+				clientLogger.error('Failed to import configuration:', error);
 				return false;
 			}
 		},

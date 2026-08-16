@@ -6,20 +6,14 @@ import {
 	extractDocumentMetadata,
 	extractEXIFMetadata,
 	extractIPTCMetadata,
+	extractJSONMetadata,
 	extractVideoMetadata,
 	extractXMPMetadata,
 } from '../metadata/enhanced-metadata-extractors';
 import type { EnhancedMetadataOptions, EnhancedMetadataResult, MetadataField } from '../types';
 
-/**
- * Obtiene la ruta del archivo desde una entidad
- */
-const getFilePath = (item: AnyEntityWithStats): string | null => {
-	if ('path' in item && typeof item.path === 'string' && item.path) {
-		return item.path;
-	}
-	return null;
-};
+const toMediaAssetType = (entityType: AnyEntityWithStats['entityType']) =>
+	entityType === 'jsonFile' ? 'json' : entityType;
 
 /**
  * Agrega el hash del item a los metadatos si existe
@@ -29,7 +23,7 @@ const addHashMetadata = (item: AnyEntityWithStats, metadata: MetadataField[]): v
 		metadata.push({
 			key: 'Hash',
 			value: `${item.hash.substring(0, 16)}...`,
-			category: 'técnico',
+			category: 'technical',
 		});
 	}
 };
@@ -37,17 +31,17 @@ const addHashMetadata = (item: AnyEntityWithStats, metadata: MetadataField[]): v
 /**
  * Realiza la llamada a la API de extracción de metadatos
  */
-const fetchMetadataFromAPI = async (filePath: string, options: EnhancedMetadataOptions): Promise<any> => {
-	const response = await fetch('/api/metadata-advanced/extract-from-path', {
+const fetchMetadataFromAPI = async (item: AnyEntityWithStats, options: EnhancedMetadataOptions): Promise<any> => {
+	const response = await fetch('/api/metadata-advanced/extract', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({ filePath, options }),
+		body: JSON.stringify({ asset: { assetId: item.id, assetType: toMediaAssetType(item.entityType) }, options }),
 	});
 
 	if (!response.ok) {
-		throw new Error(`Error al extraer metadatos: ${response.statusText}`);
+		throw new Error(`Could not extract metadata: ${response.statusText}`);
 	}
 
 	return response.json();
@@ -106,7 +100,7 @@ const normalizeEXIF = (exifSrc: any) => {
 };
 
 // Pipeline resumen:
-// 1. fetchMetadataFromAPI -> POST /api/metadata-advanced/extract-from-path
+// 1. fetchMetadataFromAPI -> POST /api/metadata-advanced/extract con referencia opaca de asset
 // 2. normalizeMetadataResponse -> adapta snake_case backend a camelCase esperado (ai/exif/iptc/xmp + origin)
 // 3. processMetadataResult -> aplica extractores (AI, EXIF, IPTC, XMP) y agrega hash técnico
 // 4. Hook expone enhancedMetadata listo para UI; si falla => [] y panel usa fallback sintético
@@ -186,10 +180,9 @@ const processMetadataResult = (result: EnhancedMetadataResult, item: AnyEntityWi
 	}
 
 	// Metadatos de JSON
-	// TODO: Agregar 'jsonFile' al tipo EntityType
-	// if (entityType === 'jsonFile') {
-	//   extractJSONMetadata(result, metadata);
-	// }
+	if (entityType === 'jsonFile') {
+		extractJSONMetadata(result, metadata);
+	}
 
 	// Metadatos de documentos (markdown, txt, etc.)
 	if (entityType === 'document') {
@@ -209,7 +202,7 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 
 	const loadEnhancedMetadata = useCallback(async () => {
 		// Verificar si es un tipo de archivo soportado
-		const supportedTypes = ['image', 'video', 'audio', 'json', 'document'];
+		const supportedTypes = ['image', 'video', 'audio', 'jsonFile', 'document'];
 		if (!item) {
 			setEnhancedMetadata([]);
 			return;
@@ -220,12 +213,6 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 			return;
 		}
 
-		const filePath = getFilePath(item);
-		if (!filePath) {
-			console.warn('❌ No se encontró la ruta del archivo en item.path');
-			setEnhancedMetadata([]);
-			return;
-		}
 		setError(null);
 		setIsLoadingMetadata(true);
 		try {
@@ -237,27 +224,27 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 				detectAIOrigin: item.entityType === 'image',
 			};
 
-			const raw = await fetchMetadataFromAPI(filePath, options);
+			const raw = await fetchMetadataFromAPI(item, options);
 			const normalized = normalizeMetadataResponse(raw);
 			if (!normalized.success) {
-				console.warn('⚠️ Extracción de metadatos no exitosa', raw);
+				console.warn('⚠️ Metadata extraction was unsuccessful', raw);
 				setEnhancedMetadata([]);
-				setError('Extracción no exitosa');
+				setError('Extraction was unsuccessful');
 				return;
 			}
 			const metadata = processMetadataResult(normalized, item);
 			setEnhancedMetadata(metadata);
 		} catch (e) {
-			console.error('Error al obtener metadatos mejorados:', e);
+			console.error('Could not retrieve enhanced metadata:', e);
 			setEnhancedMetadata([]);
-			setError(e instanceof Error ? e.message : 'Error desconocido');
+			setError(e instanceof Error ? e.message : 'Unknown error');
 		} finally {
 			setIsLoadingMetadata(false);
 		}
 	}, [item]);
 
 	useEffect(() => {
-		const supportedTypes = ['image', 'video', 'audio', 'json', 'document'];
+		const supportedTypes = ['image', 'video', 'audio', 'jsonFile', 'document'];
 		if (item && supportedTypes.includes(item.entityType)) {
 			loadEnhancedMetadata();
 		} else {
@@ -286,7 +273,6 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 				),
 				itemDetails: {
 					id: item.id,
-					path: 'path' in item ? item.path : undefined,
 					hash: 'hash' in item ? item.hash : undefined,
 				},
 			};

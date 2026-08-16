@@ -24,29 +24,29 @@ export interface MetadataExtended extends MetadataBase {
 
 // Tipo para la vista de metadatos en tarjetas
 export interface MetadataCard {
+	category: string | null;
 	id: string;
 	key: string;
-	value: string | null;
 	type: string | null;
-	category: string | null;
+	value: string | null;
 }
 
 // Tipo para la vista de lista de metadatos
 export interface MetadataListItem {
-	id: string;
 	entityId: string;
+	id: string;
 	key: string;
-	value: string | null;
 	type: string | null;
 	updatedAt: Date;
+	value: string | null;
 }
 
 // Tipo para filtros de metadatos
 export interface MetadataFilter {
+	category?: string;
 	entityType?: string;
 	key?: string;
 	type?: string;
-	category?: string;
 }
 
 // Tipo para verificar que MetadataExtended tiene todas las propiedades necesarias

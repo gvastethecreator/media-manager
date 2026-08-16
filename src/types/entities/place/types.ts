@@ -8,40 +8,40 @@ import type { PlaceBase, PlaceStatistics, PlaceWithStats } from './base';
 import { PlaceCategory, PlaceSortCriteria, PlaceType, PlaceViewMode } from './enums';
 
 export interface PlaceSearchOptions {
-	query?: string;
 	category?: PlaceCategory;
-	type?: PlaceType;
+	filters?: PlaceFilters;
 	limit?: number;
 	offset?: number;
-	sortBy?: PlaceSortCriteria;
-	sortOrder?: 'asc' | 'desc';
 	orderBy?: Record<string, 'asc' | 'desc'>;
-	filters?: PlaceFilters;
 	pagination?: {
 		skip?: number;
 		take?: number;
 	};
+	query?: string;
+	sortBy?: PlaceSortCriteria;
+	sortOrder?: 'asc' | 'desc';
+	type?: PlaceType;
 }
 
 // Alias para compatibilidad
 export type PlaceComplete = PlaceWithStats;
 
 export interface PlaceFilters {
-	search?: string;
 	category?: PlaceCategory[] | PlaceCategory;
-	type?: PlaceType[] | PlaceType;
-	location?: string;
-	isFavorite?: boolean;
-	hasImages?: boolean;
-	hasVideos?: boolean;
 	dateRange?: {
 		start?: Date;
 		end?: Date;
 	};
+	hasImages?: boolean;
+	hasVideos?: boolean;
+	isFavorite?: boolean;
+	location?: string;
 	populationRange?: {
 		min?: number;
 		max?: number;
 	};
+	search?: string;
+	type?: PlaceType[] | PlaceType;
 }
 
 /**

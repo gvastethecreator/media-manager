@@ -42,7 +42,7 @@ export function fromDbToSettings(dbSettings: DbSettings): Settings {
 		appearance: {
 			theme: (dbSettings.theme as 'light' | 'dark' | 'system') || 'system',
 			fontSize: parsedData.fontSize || 16,
-			language: (dbSettings.language as 'es' | 'en') || 'es',
+			language: (dbSettings.language as 'es' | 'en') || 'en',
 			reducedAnimations: Boolean(parsedData.reducedAnimations),
 			highContrast: Boolean(parsedData.highContrast),
 		},
