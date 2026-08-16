@@ -26,7 +26,7 @@ export async function getFeatures(): Promise<Feature[]> {
 			progress: f.progress,
 		}));
 	} catch (error) {
-		console.error('Error al obtener features:', error);
+		console.error('Could not get features:', error);
 		return [];
 	}
 }
@@ -45,7 +45,7 @@ export async function getIssues(): Promise<Issue[]> {
 			severity: mapLevelToSeverity(alert.level),
 		}));
 	} catch (error) {
-		console.error('Error al obtener alertas:', error);
+		console.error('Could not get alerts:', error);
 		return [];
 	}
 }
@@ -68,14 +68,14 @@ function mapLevelToSeverity(level: string): 'low' | 'medium' | 'high' | 'critica
 export async function getServices(): Promise<Omit<ServiceStatus, 'icon'>[]> {
 	return Promise.resolve([
 		{
-			name: 'Indexación de Archivos',
+			name: 'File Indexing',
 			status: 'online',
-			description: 'Servicio de escaneo e indexación de archivos',
+			description: 'File scanning and indexing service',
 		},
 		{
-			name: 'Procesamiento de Imágenes',
+			name: 'Image Processing',
 			status: 'online',
-			description: 'Servicio de procesamiento y transformación de imágenes',
+			description: 'Image processing and transformation service',
 		},
 	]);
 }

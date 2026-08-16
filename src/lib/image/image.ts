@@ -46,7 +46,7 @@ const QUALITY_REDUCTION_STEP = 20;
 export async function processImage(imagePath: string, options: ProcessImageOptions): Promise<ProcessImageResult> {
 	try {
 		if (!existsSync(imagePath)) {
-			throw new Error(`Archivo no encontrado: ${imagePath}`);
+			throw new Error(`File not found: ${imagePath}`);
 		}
 
 		const finalOptions = { ...DEFAULT_OPTIONS, ...options };
@@ -60,7 +60,7 @@ export async function processImage(imagePath: string, options: ProcessImageOptio
 		// Obtener metadata original
 		const metadata = await image.metadata();
 		if (!metadata) {
-			throw new Error('No se pudo obtener metadata de la imagen');
+			throw new Error('Could not get image metadata');
 		}
 
 		// Aplicar transformaciones
@@ -112,7 +112,7 @@ export async function processImage(imagePath: string, options: ProcessImageOptio
 		const buffer = await processor.toBuffer();
 
 		if (!buffer || buffer.length === 0) {
-			throw new Error('Error generando buffer de imagen');
+			throw new Error('Could not generate image buffer');
 		}
 
 		const result: ProcessImageResult = {
@@ -132,11 +132,11 @@ export async function processImage(imagePath: string, options: ProcessImageOptio
 
 		return result;
 	} catch (error) {
-		serverLogger.error('Error procesando imagen:', {
+		serverLogger.error('Could not process image:', {
 			path: imagePath,
 			error: error instanceof Error ? error.message : error,
 		});
-		throw error instanceof Error ? error : new Error('Error procesando imagen');
+		throw error instanceof Error ? error : new Error('Could not process image');
 	}
 }
 
@@ -149,11 +149,11 @@ export async function processImage(imagePath: string, options: ProcessImageOptio
 export async function createThumbnail(imagePath: string, options: ProcessImageOptions): Promise<ProcessImageResult> {
 	try {
 		if (!imagePath) {
-			throw new Error('Path de imagen requerido');
+			throw new Error('Image path is required');
 		}
 
 		if (!existsSync(imagePath)) {
-			throw new Error(`Archivo no encontrado: ${imagePath}`);
+			throw new Error(`File not found: ${imagePath}`);
 		}
 
 		serverLogger.debug('Creando thumbnail:', { path: imagePath, options });
@@ -185,7 +185,7 @@ export async function createThumbnail(imagePath: string, options: ProcessImageOp
 		});
 
 		if (lowerQualityResult.size > MAX_THUMBNAIL_SIZE) {
-			throw new Error('No se pudo generar un thumbnail de tamaño aceptable');
+			throw new Error('Could not generate a thumbnail of an acceptable size');
 		}
 
 		serverLogger.info('Thumbnail generado con calidad reducida:', {
@@ -197,10 +197,10 @@ export async function createThumbnail(imagePath: string, options: ProcessImageOp
 
 		return lowerQualityResult;
 	} catch (error) {
-		serverLogger.error('Error creando thumbnail:', {
+		serverLogger.error('Could not create thumbnail:', {
 			path: imagePath,
 			error: error instanceof Error ? error.message : error,
 		});
-		throw error instanceof Error ? error : new Error('Error creando thumbnail');
+		throw error instanceof Error ? error : new Error('Could not create thumbnail');
 	}
 }

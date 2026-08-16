@@ -62,16 +62,17 @@ columnas embebidas permanecen sólo como compatibilidad de schema durante expand
 ### REL-001 — Relaciones híbridas
 
 - [x] Catálogo de relaciones tipadas y reglas por contexto.
-- [x] Junctions fuertes para relaciones críticas/consultadas.
-- [x] Modelo flexible sólo donde el dominio lo requiere.
-- [x] Constraints, cascades y queries inversas.
-- [x] Migración/reconciliación de junctions existentes.
+- [x] Junctions fuertes conservadas para relaciones críticas/consultadas.
+- [x] Modelo flexible limitado a vínculos semánticos cross-context.
+- [x] Constraints, cleanup y queries inversas.
+- [x] Migración aditiva e inventario de endpoints polimórficos.
 
-Checkpoint aceptado 2026-07-17: `STRONG_RELATION_CATALOG` inventaría las 28 junctions authored con endpoints tipados,
-contexto y política; `FLEXIBLE_RELATION_CATALOG` limita el target polimórfico a seis proyecciones operativas
-explícitas. El inventario de orphans consume el catálogo ejecutable en vez de duplicar listas. Las migraciones
-versionadas mantienen dos FKs `CASCADE/CASCADE`, unicidad `(A,B)` e índice inverso `B`; tests sobre una SQLite creada
-desde cero prueban que catálogo y schema no divergen. Contrato humano: `docs/domain/RELATION-CATALOG.md`.
+Checkpoint aceptado 2026-07-28 tras tres rondas adversariales: `SemanticRelation`, `RelationRole`, aplicabilidad,
+conflictos, normalización simétrica, inversas, ciclos, lifecycle, autorización y cleanup tienen contrato ejecutable. Los
+roles usados no pueden cambiar slug ni políticas que invaliden filas; Drizzle registra las cuatro tablas; el inventario
+cubre source/target; y la API oculta por igual relaciones existentes o ausentes cuando falta permiso de lectura. Evidencia
+focal final: servicio 13/13, tooling 18/18 con 170 assertions, lint/formato/diff verdes y revisión independiente `accept`
+sin P0/P1/P2. El contrato vive en `docs/domain/SEMANTIC-RELATIONS.md`; el último delta aún no tiene una suite global nueva.
 
 ### TAX-001 — Taxonomía file-backed
 
@@ -81,13 +82,10 @@ desde cero prueban que catálogo y schema no divergen. Contrato humano: `docs/do
 - [x] Recovery si archivo y DB divergen.
 - [x] Tests en roots temporales y compatibilidad Windows.
 
-Checkpoint aceptado 2026-07-17: Markdown/frontmatter gobernado es autoridad authored; `TaxonomyArtifact` sólo guarda
-binding, hash, sync e índice. Escritura temporal same-directory + fsync + rename, UTF-8 estricto, SHA-256 optimista,
-quarantine de deletes y compensación DB/archivo cubren el lifecycle. El rebuild acotado adopta writes interrumpidos,
-recupera renames por identidad y resuelve quarantines según entidad/binding. Wildcard nuevo usa backing canónico por
-defecto en UI, mientras Prompt/Note pueden externalizarse; los writes inline de bindings existentes responden 409.
-Evidencia: tests de primitivas/manager/API/migración/cliente, TypeScript/lint/build verdes y prueba browser real sobre
-SQLite/root descartables con archivo final verificado. Contrato: `docs/domain/TAXONOMY-ARTIFACTS.md`.
+Implementación reparada tras el rechazo del 2026-07-17: autorización, CAS optimista, recovery de `missing`, ventanas de
+crash, delete compensado, guard DB contra bypass inline y editores Prompt/Note/Wildcard tienen pruebas focales. El
+contrato actual vive en `docs/domain/TAXONOMY-ARTIFACTS.md`. El browser de producción pasa 2/2 en Chrome a 1440x900 y
+1024x768; las capturas fueron inspeccionadas. El checkpoint sigue abierto hasta una revisión independiente nueva.
 
 ## Wave 4 — Flujos de producto
 

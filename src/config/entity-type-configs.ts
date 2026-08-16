@@ -175,8 +175,8 @@ function generateFolderThumbnail(item: AnyEntityWithStats): Promise<string> {
 export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 	[EntityStatsType.IMAGE]: {
 		type: EntityStatsType.IMAGE,
-		displayName: 'Imagen',
-		displayNamePlural: 'Imágenes',
+		displayName: 'Image',
+		displayNamePlural: 'Images',
 		icon: ImageIcon,
 		color: 'var(--entity-image)',
 		emoji: '🖼️',
@@ -226,8 +226,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.DOCUMENT]: {
 		type: EntityStatsType.DOCUMENT,
-		displayName: 'Documento',
-		displayNamePlural: 'Documentos',
+		displayName: 'Document',
+		displayNamePlural: 'Documents',
 		icon: FileText,
 		color: 'var(--entity-document)',
 		emoji: '📄',
@@ -243,8 +243,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.FOLDER]: {
 		type: EntityStatsType.FOLDER,
-		displayName: 'Carpeta',
-		displayNamePlural: 'Carpetas',
+		displayName: 'Folder',
+		displayNamePlural: 'Folders',
 		icon: Folder,
 		color: 'var(--entity-folder)',
 		emoji: '📁',
@@ -258,8 +258,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.COLLECTION]: {
 		type: EntityStatsType.COLLECTION,
-		displayName: 'Colección',
-		displayNamePlural: 'Colecciones',
+		displayName: 'Collection',
+		displayNamePlural: 'Collections',
 		icon: SquareStack,
 		color: 'var(--entity-collection)',
 		emoji: '📚',
@@ -273,8 +273,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.ALBUM]: {
 		type: EntityStatsType.ALBUM,
-		displayName: 'Álbum',
-		displayNamePlural: 'Álbumes',
+		displayName: 'Album',
+		displayNamePlural: 'Albums',
 		icon: Grid2X2,
 		color: 'var(--entity-album)',
 		emoji: '📖',
@@ -288,8 +288,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.TAG]: {
 		type: EntityStatsType.TAG,
-		displayName: 'Etiqueta',
-		displayNamePlural: 'Etiquetas',
+		displayName: 'Tag',
+		displayNamePlural: 'Tags',
 		icon: Tag,
 		color: 'var(--entity-tag)',
 		emoji: '🏷️',
@@ -303,8 +303,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.CHARACTER]: {
 		type: EntityStatsType.CHARACTER,
-		displayName: 'Personaje',
-		displayNamePlural: 'Personajes',
+		displayName: 'Character',
+		displayNamePlural: 'Characters',
 		icon: Users,
 		color: 'var(--entity-character)',
 		emoji: '🧑‍🎤',
@@ -318,8 +318,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.PLACE]: {
 		type: EntityStatsType.PLACE,
-		displayName: 'Lugar',
-		displayNamePlural: 'Lugares',
+		displayName: 'Place',
+		displayNamePlural: 'Places',
 		icon: MapPin,
 		color: 'var(--entity-place)',
 		emoji: '📍',
@@ -333,8 +333,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.WORLD_ITEM]: {
 		type: EntityStatsType.WORLD_ITEM,
-		displayName: 'Objeto',
-		displayNamePlural: 'Objetos',
+		displayName: 'World Item',
+		displayNamePlural: 'World Items',
 		icon: WandSparkles,
 		color: 'var(--entity-world-item)',
 		emoji: '🌍',
@@ -348,8 +348,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.CONCEPT]: {
 		type: EntityStatsType.CONCEPT,
-		displayName: 'Concepto',
-		displayNamePlural: 'Conceptos',
+		displayName: 'Concept',
+		displayNamePlural: 'Concepts',
 		icon: Palette,
 		color: 'var(--entity-concept)',
 		emoji: '💡',
@@ -378,8 +378,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.NOTE]: {
 		type: EntityStatsType.NOTE,
-		displayName: 'Nota',
-		displayNamePlural: 'Notas',
+		displayName: 'Note',
+		displayNamePlural: 'Notes',
 		icon: StickyNote,
 		color: 'var(--entity-note)',
 		emoji: '📝',
@@ -393,8 +393,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.PROPERTY]: {
 		type: EntityStatsType.PROPERTY,
-		displayName: 'Propiedad',
-		displayNamePlural: 'Propiedades',
+		displayName: 'Property',
+		displayNamePlural: 'Properties',
 		icon: Database,
 		color: 'var(--entity-property)',
 		emoji: '🔧',
@@ -408,8 +408,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.WILDCARD]: {
 		type: EntityStatsType.WILDCARD,
-		displayName: 'Comodín',
-		displayNamePlural: 'Comodines',
+		displayName: 'Wildcard',
+		displayNamePlural: 'Wildcards',
 		icon: WandSparkles,
 		color: 'var(--entity-wildcard)',
 		emoji: '🃏',
@@ -423,8 +423,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.GROUP]: {
 		type: EntityStatsType.GROUP,
-		displayName: 'Grupo',
-		displayNamePlural: 'Grupos',
+		displayName: 'Group',
+		displayNamePlural: 'Groups',
 		icon: FolderKanban,
 		color: 'var(--entity-group)',
 		emoji: '👥',
@@ -438,8 +438,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.UPLOADED_IMAGE]: {
 		type: EntityStatsType.UPLOADED_IMAGE,
-		displayName: 'Imagen Subida',
-		displayNamePlural: 'Imágenes Subidas',
+		displayName: 'Uploaded Image',
+		displayNamePlural: 'Uploaded Images',
 		icon: ImageIcon,
 		color: 'var(--entity-image)',
 		emoji: '📤',
@@ -455,8 +455,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.JSON_FILE]: {
 		type: EntityStatsType.JSON_FILE,
-		displayName: 'Archivo JSON',
-		displayNamePlural: 'Archivos JSON',
+		displayName: 'JSON File',
+		displayNamePlural: 'JSON Files',
 		icon: FileText,
 		color: 'var(--entity-json)',
 		emoji: '🧾',
@@ -470,8 +470,8 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 
 	[EntityStatsType.FILE_3D]: {
 		type: EntityStatsType.FILE_3D,
-		displayName: 'Archivo 3D',
-		displayNamePlural: 'Archivos 3D',
+		displayName: '3D File',
+		displayNamePlural: '3D Files',
 		icon: File,
 		color: 'var(--entity-file-3d)',
 		emoji: '📦',

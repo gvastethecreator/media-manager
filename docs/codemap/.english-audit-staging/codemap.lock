@@ -1,0 +1,111 @@
+{
+  "source_commit": "530242aef9a287c07c150becf0fae99859a1a02e",
+  "working_tree_dirty": true,
+  "generated_at": "2026-08-15T11:48:00Z",
+  "scanned_scope": [
+    "."
+  ],
+  "excluded_directories": [
+    ".cache",
+    ".git",
+    ".hg",
+    ".next",
+    ".nuxt",
+    ".scratch",
+    ".svn",
+    ".turbo",
+    ".venv",
+    "__pycache__",
+    "build",
+    "coverage",
+    "dist",
+    "docs/codemap",
+    "generated",
+    "node_modules",
+    "out",
+    "target",
+    "vendor",
+    "venv"
+  ],
+  "fingerprint_algorithm": "sha256-path-content-v1",
+  "modules": [
+    {
+      "id": ".",
+      "path": ".",
+      "file_count": 56,
+      "fingerprint": "6a4b28c4d06ac92856471140026f518fe6cd44f4957ff8d4633a28ce27826e95"
+    },
+    {
+      "id": ".github",
+      "path": ".github",
+      "file_count": 6,
+      "fingerprint": "447047c1bad7ecee59d337a7d8f5b8bed317bb1f3d9f372af4861706e5d2799f"
+    },
+    {
+      "id": ".vscode",
+      "path": ".vscode",
+      "file_count": 4,
+      "fingerprint": "04d322ea04606129fa27eee686e14d153ed5acf852bdea2146d7858cb1455617"
+    },
+    {
+      "id": "content",
+      "path": "content",
+      "file_count": 18,
+      "fingerprint": "d0925af794f7101597697e12c8b48dbfe105331d7853a38cf67b724e6414631f"
+    },
+    {
+      "id": "docs",
+      "path": "docs",
+      "file_count": 113,
+      "fingerprint": "938be922183bd141497a4e73ca8c46e758bd02bebe78432dbb7b5ceb08c70698"
+    },
+    {
+      "id": "public",
+      "path": "public",
+      "file_count": 5,
+      "fingerprint": "13409a8f56d92a460d030dff0dcabd0caf228dae3fee09f3bdd42660ff5ecad1"
+    },
+    {
+      "id": "reports",
+      "path": "reports",
+      "file_count": 4,
+      "fingerprint": "0dcd2ee348c35a6f024d9588fe43f60db451c2b088c3f03f96423fef5d4937d4"
+    },
+    {
+      "id": "scripts",
+      "path": "scripts",
+      "file_count": 111,
+      "fingerprint": "f2daff9a0fdb46c542aad6346b0a381746ca02a43937c40847bdce95759902be"
+    },
+    {
+      "id": "skills",
+      "path": "skills",
+      "file_count": 512,
+      "fingerprint": "b59b52a2e5031c9e172a1ab0724e1609c91a917a8b38eb32986f170e483c7664"
+    },
+    {
+      "id": "src",
+      "path": "src",
+      "file_count": 1991,
+      "fingerprint": "d655870317e9becbf67a3f62ad6a2a1042bf372a6daac294f5ab21bf0efdda34"
+    },
+    {
+      "id": "src-tauri",
+      "path": "src-tauri",
+      "file_count": 25,
+      "fingerprint": "ab0d6e89dc7aa891ed586eb018df05ee593dd1646f7baf41eed08f05ee7959d5"
+    },
+    {
+      "id": "test-files",
+      "path": "test-files",
+      "file_count": 8,
+      "fingerprint": "f1856c92cbce29197f016981244b53d6dfc12bfa60a1fbfb2898ffd06824c412"
+    },
+    {
+      "id": "tests",
+      "path": "tests",
+      "file_count": 44,
+      "fingerprint": "1ff8a77c57effaa91fe5248d0d6fbf6504c01f639baad8387d628a974d846598"
+    }
+  ]
+}

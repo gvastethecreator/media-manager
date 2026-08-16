@@ -70,9 +70,9 @@ export class CircuitBreaker {
 		// Verificar si podemos ejecutar la operación
 		this.checkState();
 
-		// Verificar si la operación ya está en progreso
+		// Verificar si la operación is already in progress
 		if (this.activeOperations.has(operationId)) {
-			throw new Error(`Operación ${operationId} ya está en progreso`);
+			throw new Error(`Operation ${operationId} is already in progress`);
 		}
 
 		// Marcar operación como activa
@@ -133,7 +133,7 @@ export class CircuitBreaker {
 	 * Maneja operación exitosa
 	 */
 	private onSuccess(): void {
-		logger.info(`✅ Operación exitosa en ${this.name}`);
+		logger.info(`✅ Operation exitosa en ${this.name}`);
 
 		if (this.state.state === 'HALF_OPEN') {
 			logger.info(`🔒 Cerrando circuit breaker: ${this.name}`);
@@ -274,7 +274,7 @@ class CircuitBreakerRegistry {
 		}
 		const breaker = this.breakers.get(name);
 		if (!breaker) {
-			throw new Error(`Error interno: No se pudo crear circuit breaker ${name}`);
+			throw new Error(`Internal error: Could not create circuit breaker ${name}`);
 		}
 		return breaker;
 	}

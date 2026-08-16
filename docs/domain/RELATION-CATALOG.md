@@ -1,5 +1,8 @@
 # Catálogo canónico de relaciones
 
+Este inventario cubre las relaciones estructurales tipadas existentes. La capa semántica híbrida que convive con ellas
+está especificada en `docs/domain/SEMANTIC-RELATIONS.md`; no debe confundirse con las tablas operativas polimórficas.
+
 `src/lib/drizzle/schema/relations/catalog.ts` es la autoridad de alcance para las relaciones authored. El contrato es
 híbrido de forma deliberada:
 

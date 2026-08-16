@@ -88,7 +88,7 @@ export async function createQueueJob(data: CreateQueueJobInput): Promise<QueueJo
 		logger.info('✅ Trabajo en cola creado:', { id: queueJob.id, queue: queueJob.queue });
 		return transformQueueJob(queueJob);
 	} catch (error) {
-		logger.error('❌ Error al crear trabajo en cola:', error);
+		logger.error('❌ Could not create job en cola:', error);
 		if (error instanceof QueueJobServiceError) throw error;
 		throw new QueueJobServiceError('No se pudo crear el trabajo en cola', 'CREATE_FAILED', error);
 	}
@@ -128,7 +128,7 @@ export async function updateQueueJob(id: string, data: UpdateQueueJobInput): Pro
 		logger.info('✅ Trabajo en cola actualizado:', { id });
 		return transformQueueJob(queueJob);
 	} catch (error) {
-		logger.error('❌ Error al actualizar trabajo en cola:', { id, error });
+		logger.error('❌ Could not update job en cola:', { id, error });
 		throw new QueueJobServiceError('No se pudo actualizar el trabajo en cola', 'UPDATE_FAILED', error);
 	}
 }
@@ -179,7 +179,7 @@ export async function deleteQueueJob(id: string): Promise<boolean> {
 		logger.info('✅ Trabajo en cola eliminado:', { id });
 		return true;
 	} catch (error) {
-		logger.error('❌ Error al eliminar trabajo en cola:', { id, error });
+		logger.error('❌ Could not delete job en cola:', { id, error });
 		throw new QueueJobServiceError('No se pudo eliminar el trabajo en cola', 'DELETE_FAILED', error);
 	}
 }
@@ -221,7 +221,7 @@ export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.info('✅ Trabajo en cola cancelado:', { id });
 		return transformQueueJob(queueJob);
 	} catch (error) {
-		logger.error('❌ Error al cancelar trabajo en cola:', { id, error });
+		logger.error('❌ Could not cancel job en cola:', { id, error });
 		throw new QueueJobServiceError('No se pudo cancelar el trabajo en cola', 'CANCEL_FAILED', error);
 	}
 }
@@ -266,7 +266,7 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.info('✅ Trabajo en cola preparado para reintento:', { id });
 		return transformQueueJob(queueJob);
 	} catch (error) {
-		logger.error('❌ Error al reintentar trabajo en cola:', { id, error });
+		logger.error('❌ Could not retry job en cola:', { id, error });
 		throw new QueueJobServiceError('No se pudo reintentar el trabajo en cola', 'RETRY_FAILED', error);
 	}
 }
@@ -457,8 +457,8 @@ export async function getQueueStats(): Promise<QueueStats> {
 		logger.info('✅ Estadísticas de cola obtenidas:', stats);
 		return stats;
 	} catch (error) {
-		logger.error('❌ Error al obtener estadísticas de cola:', error);
-		throw new QueueJobServiceError('Error al obtener estadísticas de cola', 'STATS_FAILED', error);
+		logger.error('❌ Could not get queue statistics:', error);
+		throw new QueueJobServiceError('Could not get queue statistics', 'STATS_FAILED', error);
 	}
 }
 
@@ -621,8 +621,8 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 		logger.info('✅ Estadísticas obtenidas para cola específica', { queue, stats });
 		return stats;
 	} catch (error) {
-		logger.error('❌ Error al obtener estadísticas para cola específica:', { queue, error });
-		throw new QueueJobServiceError('Error al obtener estadísticas para cola específica', 'QUEUE_STATS_FAILED', error);
+		logger.error('❌ Could not get statistics para cola específica:', { queue, error });
+		throw new QueueJobServiceError('Could not get statistics para cola específica', 'QUEUE_STATS_FAILED', error);
 	}
 }
 

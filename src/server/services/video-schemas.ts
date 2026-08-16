@@ -9,7 +9,7 @@ import { z } from 'zod';
  * Schema para crear un video
  */
 export const CreateVideoSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(255),
+	name: z.string().min(1, 'The name is required').max(255),
 	description: z.string().max(1000).optional().nullable(),
 	path: z.string().min(1, 'La ruta es requerida'),
 	size: z.number().int().positive(),

@@ -157,7 +157,7 @@ export interface EntityListProps {
  */
 export function EntityList({
 	items = [],
-	title = 'Entidades',
+	title = 'Entities',
 	description,
 	emptyState,
 	viewType: initialViewType = 'grid',
@@ -166,13 +166,13 @@ export function EntityList({
 	showFilters = true,
 	allowSelection = false,
 	onSelectionChange,
-	searchPlaceholder = 'Buscar...',
+	searchPlaceholder = 'Search...',
 	pagination = true,
 	itemsPerPage = 9,
 	sortOptions = [
-		{ label: 'Nombre', value: 'name' },
-		{ label: 'Más recientes', value: 'recent' },
-		{ label: 'Más antiguos', value: 'oldest' },
+		{ label: 'Name', value: 'name' },
+		{ label: 'Newest', value: 'recent' },
+		{ label: 'Oldest', value: 'oldest' },
 	],
 	categoryFilters = [],
 	tagFilters = [],
@@ -308,8 +308,8 @@ export function EntityList({
 						<div className="mb-4 rounded-full bg-muted p-3">
 							<Search className="h-6 w-6 text-muted-foreground" />
 						</div>
-						<h3 className="font-medium text-lg">No se encontraron elementos</h3>
-						<p className="mt-1 text-muted-foreground text-sm">Intenta ajustar tus filtros o búsqueda</p>
+						<h3 className="font-medium text-lg">No items found</h3>
+						<p className="mt-1 text-muted-foreground text-sm">Try adjusting your filters or search</p>
 					</div>
 				)
 			);
@@ -433,7 +433,7 @@ export function EntityList({
 						{/* Selector de ordenación */}
 						<Select onValueChange={setSelectedSort} value={selectedSort}>
 							<SelectTrigger className="w-[140px]">
-								<SelectValue placeholder="Ordenar por" />
+							<SelectValue placeholder="Sort by" />
 							</SelectTrigger>
 							<SelectContent>
 								{sortOptions.map((option) => (
@@ -446,7 +446,7 @@ export function EntityList({
 
 						{/* Botón para mostrar filtros adicionales */}
 						<Button
-							aria-label="Mostrar filtros"
+							aria-label="Show filters"
 							onClick={() => setShowFiltersPanel(!showFiltersPanel)}
 							size="icon"
 							variant={showFiltersPanel ? 'default' : 'outline'}
@@ -463,14 +463,14 @@ export function EntityList({
 					{/* Filtros de categoría */}
 					{categoryFilters.length > 0 && (
 						<div>
-							<h4 className="mb-2 font-medium text-sm">Categorías</h4>
+							<h4 className="mb-2 font-medium text-sm">Categories</h4>
 							<div className="flex flex-wrap gap-2">
 								<Badge
 									className="cursor-pointer"
 									onClick={() => setSelectedCategoryFilter('all')}
 									variant={selectedCategoryFilter === 'all' ? 'default' : 'outline'}
 								>
-									Todas
+									All
 								</Badge>
 								{categoryFilters.map((category) => (
 									<Badge
@@ -489,14 +489,14 @@ export function EntityList({
 					{/* Filtros de etiquetas */}
 					{tagFilters.length > 0 && (
 						<div>
-							<h4 className="mb-2 font-medium text-sm">Etiquetas</h4>
+							<h4 className="mb-2 font-medium text-sm">Tags</h4>
 							<div className="flex flex-wrap gap-2">
 								<Badge
 									className="cursor-pointer"
 									onClick={() => setSelectedTagFilter('all')}
 									variant={selectedTagFilter === 'all' ? 'default' : 'outline'}
 								>
-									Todas
+									All
 								</Badge>
 								{tagFilters.map((tag) => (
 									<Badge
@@ -517,13 +517,13 @@ export function EntityList({
 			{/* Barra de información y selección */}
 			{(allowSelection || filteredItems.length > 0) && (
 				<div className="flex items-center justify-between text-muted-foreground text-sm">
-					<div>{filteredItems.length} elementos encontrados</div>
+					<div>{filteredItems.length} items found</div>
 
 					{allowSelection && selectedIds.length > 0 && (
 						<div className="flex items-center gap-2">
-							<span>{selectedIds.length} seleccionados</span>
+							<span>{selectedIds.length} selected</span>
 							<Button onClick={clearSelection} size="sm" variant="ghost">
-								Limpiar
+								Clear
 							</Button>
 						</div>
 					)}
@@ -537,7 +537,7 @@ export function EntityList({
 			{pagination && totalPages > 1 && (
 				<div className="mt-6 flex items-center justify-center gap-2">
 					<Button
-						aria-label="Página anterior"
+						aria-label="Previous page"
 						disabled={currentPage === 1}
 						onClick={() => handlePageChange(currentPage - 1)}
 						size="icon"
@@ -576,7 +576,7 @@ export function EntityList({
 					</div>
 
 					<Button
-						aria-label="Página siguiente"
+						aria-label="Next page"
 						disabled={currentPage === totalPages}
 						onClick={() => handlePageChange(currentPage + 1)}
 						size="icon"

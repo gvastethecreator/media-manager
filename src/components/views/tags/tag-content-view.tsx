@@ -55,7 +55,7 @@ export function TagContentView() {
 	);
 
 	const headerTitle = useMemo(
-		() => (selectedTag?.name ? `Imágenes con etiqueta: ${selectedTag.name}` : 'Selecciona una etiqueta'),
+		() => (selectedTag?.name ? `Images tagged: ${selectedTag.name}` : 'Select a tag'),
 		[selectedTag?.name]
 	);
 
@@ -64,9 +64,9 @@ export function TagContentView() {
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Selecciona una etiqueta para ver su contenido"
+						description="Select a tag to view its content"
 						icon={Tag}
-						title="Sin etiqueta seleccionada"
+						title="No tag selected"
 					/>
 				</div>
 			</BaseContentView>
@@ -91,14 +91,14 @@ export function TagContentView() {
 
 	return (
 		<BaseContentView
-			description={effectiveTag?._count?.images ? `${effectiveTag._count.images} imágenes` : undefined}
-			title={effectiveTag?.name ? `Imágenes con etiqueta: ${effectiveTag.name}` : headerTitle}
+			description={effectiveTag?._count?.images ? `${effectiveTag._count.images} images` : undefined}
+			title={effectiveTag?.name ? `Images tagged: ${effectiveTag.name}` : headerTitle}
 		>
 			<FileBrowser
 				className="h-full"
 				items={browserItems}
 				onItemClick={handleItemSelect}
-				// Doble clic: el FileBrowser abre visor por defecto para imágenes
+				// Doble clic: el FileBrowser abre visor por defecto para images
 			/>
 		</BaseContentView>
 	);

@@ -463,7 +463,7 @@ export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 		statsLogger.info('✅ Estadísticas del sistema obtenidas');
 		return result;
 	} catch (error) {
-		statsLogger.error('Error al obtener estadísticas del sistema:', error);
+		statsLogger.error('Could not get system statistics:', error);
 		return null;
 	}
 }
@@ -665,7 +665,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 		statsLogger.info('✅ Estadísticas detalladas de carpetas obtenidas');
 		return result;
 	} catch (error) {
-		statsLogger.error('❌ Error al obtener estadísticas de carpetas:', error);
+		statsLogger.error('❌ Could not get statistics de carpetas:', error);
 		return null;
 	}
 }
@@ -769,7 +769,7 @@ export async function getImageStats(imageId: string) {
 		statsLogger.info('✅ Estadísticas de imagen obtenidas');
 		return stats;
 	} catch (error) {
-		statsLogger.error('❌ Error al obtener estadísticas de imagen:', error);
+		statsLogger.error('❌ Could not get image statistics:', error);
 		throw createStatsError(
 			'No se pudieron obtener las estadísticas de la imagen',
 			StatsErrorCode.OPERATION_FAILED,

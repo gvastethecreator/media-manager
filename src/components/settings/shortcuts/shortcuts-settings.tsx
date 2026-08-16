@@ -27,30 +27,30 @@ const shortcutCategories = [
 		name: 'General',
 		icon: Command,
 		shortcuts: [
-			{ action: 'Abrir configuración', keys: 'Ctrl + ,', Icon: Settings2 },
-			{ action: 'Buscar', keys: 'Ctrl + F', Icon: Search },
-			{ action: 'Recargar vista', keys: 'F5', Icon: Command },
+			{ action: 'Open settings', keys: 'Ctrl + ,', Icon: Settings2 },
+			{ action: 'Search', keys: 'Ctrl + F', Icon: Search },
+			{ action: 'Reload view', keys: 'F5', Icon: Command },
 		],
 	},
 	{
-		name: 'Navegación',
+		name: 'Navigation',
 		icon: Home,
 		shortcuts: [
-			{ action: 'Ir a Dashboard', keys: 'Alt + H', Icon: Home },
-			{ action: 'Ir a Carpetas', keys: 'Alt + F', Icon: Folder },
-			{ action: 'Ir a Colecciones', keys: 'Alt + C', Icon: Bookmark },
-			{ action: 'Ir a Galería', keys: 'Alt + G', Icon: Image },
-			{ action: 'Ir a Etiquetas', keys: 'Alt + T', Icon: Tag },
+			{ action: 'Go to Dashboard', keys: 'Alt + H', Icon: Home },
+			{ action: 'Go to Folders', keys: 'Alt + F', Icon: Folder },
+			{ action: 'Go to Collections', keys: 'Alt + C', Icon: Bookmark },
+			{ action: 'Go to Gallery', keys: 'Alt + G', Icon: Image },
+			{ action: 'Go to Tags', keys: 'Alt + T', Icon: Tag },
 		],
 	},
 	{
-		name: 'Archivos',
+		name: 'Files',
 		icon: FileUp,
 		shortcuts: [
-			{ action: 'Seleccionar todo', keys: 'Ctrl + A', Icon: Command },
-			{ action: 'Copiar', keys: 'Ctrl + C', Icon: Copy },
-			{ action: 'Pegar', keys: 'Ctrl + V', Icon: FileUp },
-			{ action: 'Eliminar', keys: 'Delete', Icon: Trash2 },
+			{ action: 'Select all', keys: 'Ctrl + A', Icon: Command },
+			{ action: 'Copy', keys: 'Ctrl + C', Icon: Copy },
+			{ action: 'Paste', keys: 'Ctrl + V', Icon: FileUp },
+			{ action: 'Delete', keys: 'Delete', Icon: Trash2 },
 		],
 	},
 ];
@@ -117,8 +117,8 @@ export function ShortcutsSettings() {
 	return (
 		<div className="space-y-6">
 			<SettingsPageHeader
-				description="Consulta y personaliza los atajos más usados. En pantallas amplias, cada categoría aprovecha mejor el ancho disponible."
-				title="Atajos de Teclado"
+				description="Review and customize common shortcuts. Categories use the available width on larger screens."
+				title="Keyboard Shortcuts"
 			/>
 
 			<div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">

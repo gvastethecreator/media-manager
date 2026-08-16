@@ -100,7 +100,7 @@ export function CreateAlbumForm({
 		const newErrors: Partial<FormData> = {};
 
 		if (!formData.name.trim()) {
-			newErrors.name = 'El nombre es requerido';
+			newErrors.name = 'Name is required';
 		}
 
 		setErrors(newErrors);
@@ -135,7 +135,7 @@ export function CreateAlbumForm({
 					if (onUpdated) {
 						onUpdated(updatedAlbum);
 					}
-					toastService.success('Álbum actualizado correctamente');
+					toastService.success('Album updated');
 				} else {
 					// Crear nuevo álbum
 					const newAlbum = await createAlbumMutation.mutateAsync(albumData as AlbumCreateInput);
@@ -150,11 +150,11 @@ export function CreateAlbumForm({
 						color: DEFAULT_ENTITY_COLOR,
 						category: '',
 					});
-					toastService.success('Álbum creado correctamente');
+					toastService.success('Album created');
 				}
 			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el álbum`, {
+				const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+				toastService.error(`Could not ${isEditing ? 'update' : 'create'} the album`, {
 					description: errorMessage,
 				});
 			} finally {
@@ -184,13 +184,13 @@ export function CreateAlbumForm({
 			{/* Nombre */}
 			<div>
 				<Label className="font-medium text-foreground text-sm" htmlFor="name">
-					Nombre *
+					Name *
 				</Label>
 				<Input
 					className={errors.name ? 'border-destructive' : ''}
 					id="name"
 					onChange={(e) => handleChange('name', e.target.value)}
-					placeholder="Nombre del álbum..."
+					placeholder="Album name..."
 					type="text"
 					value={formData.name}
 				/>
@@ -200,12 +200,12 @@ export function CreateAlbumForm({
 			{/* Descripción */}
 			<div>
 				<Label className="font-medium text-foreground text-sm" htmlFor="description">
-					Descripción
+					Description
 				</Label>
 				<Textarea
 					id="description"
 					onChange={(e) => handleChange('description', e.target.value)}
-					placeholder="Descripción opcional..."
+					placeholder="Optional description..."
 					rows={3}
 					value={formData.description}
 				/>
@@ -249,23 +249,23 @@ export function CreateAlbumForm({
 			{/* Categoría */}
 			<div>
 				<Label className="font-medium text-foreground text-sm" htmlFor="category">
-					Categoría
+					Category
 				</Label>
 				<Select onValueChange={(value) => handleChange('category', value)} value={formData.category}>
 					<SelectTrigger>
-						<SelectValue placeholder="Seleccionar categoría..." />
+						<SelectValue placeholder="Select a category..." />
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="personal">Personal</SelectItem>
-						<SelectItem value="trabajo">Trabajo</SelectItem>
+						<SelectItem value="trabajo">Work</SelectItem>
 						<SelectItem value="hobbies">Hobbies</SelectItem>
-						<SelectItem value="viajes">Viajes</SelectItem>
-						<SelectItem value="familia">Familia</SelectItem>
-						<SelectItem value="arte">Arte</SelectItem>
-						<SelectItem value="naturaleza">Naturaleza</SelectItem>
-						<SelectItem value="arquitectura">Arquitectura</SelectItem>
-						<SelectItem value="eventos">Eventos</SelectItem>
-						<SelectItem value="colecciones">Colecciones</SelectItem>
+						<SelectItem value="viajes">Travel</SelectItem>
+						<SelectItem value="familia">Family</SelectItem>
+						<SelectItem value="arte">Art</SelectItem>
+						<SelectItem value="naturaleza">Nature</SelectItem>
+						<SelectItem value="arquitectura">Architecture</SelectItem>
+						<SelectItem value="eventos">Events</SelectItem>
+						<SelectItem value="collections">Collections</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
@@ -274,11 +274,11 @@ export function CreateAlbumForm({
 			<div className="flex justify-end gap-2 pt-4">
 				<Button disabled={isSubmitting} onClick={handleCancel} type="button" variant="outline">
 					<X className="mr-2 h-4 w-4" />
-					Cancelar
+					Cancel
 				</Button>
 				<Button disabled={isSubmitting} type="submit">
 					{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-					{isEditing ? 'Actualizar' : 'Crear'} álbum
+					{isEditing ? 'Update' : 'Create'} album
 				</Button>
 			</div>
 		</form>

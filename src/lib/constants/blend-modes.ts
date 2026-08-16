@@ -14,9 +14,9 @@ export const blendModeOptions = [
 	{ value: 'hard-light', label: 'Luz fuerte' },
 	{ value: 'soft-light', label: 'Luz suave' },
 	{ value: 'difference', label: 'Diferencia' },
-	{ value: 'exclusion', label: 'Exclusión' },
+	{ value: 'exclusion', label: 'Exclusion' },
 	{ value: 'hue', label: 'Tono' },
-	{ value: 'saturation', label: 'Saturación' },
+	{ value: 'saturation', label: 'Saturation' },
 	{ value: 'color', label: 'Color' },
 	{ value: 'luminosity', label: 'Luminosidad' },
 ];

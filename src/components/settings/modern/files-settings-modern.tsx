@@ -76,32 +76,32 @@ function FolderCard({
 					</div>
 					<div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
 						<Button
-							aria-label={`Editar ${folder.name}`}
+							aria-label={`Edit ${folder.name}`}
 							className="h-8 w-8"
 							onClick={actions.onEdit}
 							size="icon"
-							title={`Editar ${folder.name}`}
+							title={`Edit ${folder.name}`}
 							variant="ghost"
 						>
 							<Settings2 className="h-4 w-4" />
 						</Button>
 						<Button
-							aria-label={`Reindexar ${folder.name}`}
+							aria-label={`Reindex ${folder.name}`}
 							className="h-8 w-8"
 							disabled={isReindexing}
 							onClick={onReindex}
 							size="icon"
-							title={`Reindexar ${folder.name}`}
+							title={`Reindex ${folder.name}`}
 							variant="ghost"
 						>
 							{isReindexing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
 						</Button>
 						<Button
-							aria-label={`Eliminar ${folder.name}`}
+							aria-label={`Delete ${folder.name}`}
 							className="h-8 w-8 text-destructive"
 							onClick={actions.onDelete}
 							size="icon"
-							title={`Eliminar ${folder.name}`}
+							title={`Delete ${folder.name}`}
 							variant="ghost"
 						>
 							<Trash2 className="h-4 w-4" />
@@ -117,9 +117,9 @@ function FolderCard({
 					</p>
 				</div>
 				<div className="mt-4 flex items-center justify-between text-muted-foreground text-sm">
-					<span>{folder.stats?.imageCount || 0} imágenes</span>
+					<span>{folder.stats?.imageCount || 0} images</span>
 					<Badge className="text-xs" variant="secondary">
-						Activo
+						Active
 					</Badge>
 				</div>
 			</Card>
@@ -140,13 +140,13 @@ function FolderCard({
 			<div className="flex items-center gap-4">
 				<span className="text-muted-foreground text-sm">{folder.stats?.imageCount || 0} items</span>
 				<Badge className="text-sm" variant="default">
-					Activo
+					Active
 				</Badge>
 				<Button className="gap-1" disabled={isReindexing} onClick={onReindex} size="sm" variant="outline">
 					<RefreshCw className={cn('h-3 w-3', isReindexing && 'animate-spin')} />
-					{isReindexing ? 'Reindexando...' : 'Reindexar'}
+					{isReindexing ? 'Reindexing...' : 'Reindex'}
 				</Button>
-				<Button aria-label={`Eliminar ${folder.name}`} onClick={actions.onDelete} size="sm" variant="ghost">
+				<Button aria-label={`Delete ${folder.name}`} onClick={actions.onDelete} size="sm" variant="ghost">
 					<Trash2 className="h-4 w-4" />
 				</Button>
 			</div>
@@ -206,19 +206,19 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 	const folderStats = useMemo(
 		() => [
 			{
-				label: 'Carpetas',
+				label: 'Folders',
 				value: folders.length,
 				icon: <Folder className="h-5 w-5" />,
 				color: 'var(--entity-folder)',
 			},
 			{
-				label: 'Imágenes',
+				label: 'Images',
 				value: folders.reduce((acc: number, f: FolderWithStats) => acc + (f.stats?.imageCount || 0), 0),
 				icon: <Image className="h-5 w-5" />,
 				color: 'var(--entity-image)',
 			},
 			{
-				label: 'Espacio',
+				label: 'Storage',
 				value: formatBytes(folders.reduce((acc: number, f: FolderWithStats) => acc + (f.stats?.totalSize || 0), 0)),
 				icon: <HardDrive className="h-5 w-5" />,
 				color: 'var(--primary)',
@@ -253,9 +253,9 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 			try {
 				useReindexStore.getState().setOpen(true);
 				await reindexFolderMutation.mutateAsync({ id: folderId });
-				toastService.success('Carpeta reindexada correctamente');
+				toastService.success('Folder reindexed successfully');
 			} catch (err) {
-				toastService.error('Error al reindexar carpeta');
+				toastService.error('Could not reindex folder');
 			} finally {
 				setReindexingFolderId(null);
 			}
@@ -267,9 +267,9 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 		async (quality: ThumbnailQuality) => {
 			try {
 				await updateSettings({ thumbnailQuality: quality });
-				toastService.success('Calidad de miniaturas actualizada');
+				toastService.success('Thumbnail quality updated');
 			} catch (err) {
-				toastService.error('Error al actualizar calidad');
+				toastService.error('Could not update quality');
 			}
 		},
 		[updateSettings]
@@ -278,19 +278,19 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 	return (
 		<div className="space-y-6" ref={containerRef}>
 			<SettingsPageHeader
-				description="Gestiona carpetas, miniaturas y configuración de almacenamiento"
-				title="Archivos y Almacenamiento"
+				description="Manage folders, thumbnails, and storage settings"
+				title="Files and storage"
 			/>
 
 			<Tabs onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="grid w-full grid-cols-2 lg:w-80">
 					<TabsTrigger className="gap-2" value="folders">
 						<Folder className="h-4 w-4" />
-						Carpetas
+						Folders
 					</TabsTrigger>
 					<TabsTrigger className="gap-2" value="thumbnails">
 						<Image className="h-4 w-4" />
-						Miniaturas
+						Thumbnails
 					</TabsTrigger>
 				</TabsList>
 
@@ -327,7 +327,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 								<CardContent className="p-4">
 									<div className="flex items-center justify-between">
 										<div>
-											<p className="font-medium text-muted-foreground text-sm">Archivos</p>
+											<p className="font-medium text-muted-foreground text-sm">Files</p>
 											<p className="font-bold text-2xl" data-testid="stats-total-files">
 												{totalFiles}
 											</p>
@@ -351,7 +351,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 								<input
 									className="w-full rounded-lg border bg-background px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 									onChange={(e) => setSearchQuery(e.target.value)}
-									placeholder="Buscar carpetas..."
+									placeholder="Search folders..."
 									type="text"
 									value={searchQuery}
 								/>
@@ -359,7 +359,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 							<div className="flex flex-wrap items-center gap-2 xl:justify-end">
 								<div className="flex items-center rounded-lg border p-0.5">
 									<Button
-										aria-label="Usar vista de cuadrícula"
+									aria-label="Use grid view"
 										className="h-8 w-8 p-0"
 										onClick={() => setViewMode('grid')}
 										size="sm"
@@ -368,7 +368,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 										<Grid3X3 className="h-4 w-4" />
 									</Button>
 									<Button
-										aria-label="Usar vista de lista"
+									aria-label="Use list view"
 										className="h-8 w-8 p-0"
 										onClick={() => setViewMode('list')}
 										size="sm"
@@ -382,47 +382,47 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									<DialogTrigger asChild>
 										<Button size="sm" variant="outline">
 											<Info className="mr-2 h-4 w-4" />
-											Proceso de reindexado
+											Reindex process
 										</Button>
 									</DialogTrigger>
 									<DialogContent className="sm:max-w-150">
 										<DialogHeader>
-											<DialogTitle>Proceso de reindexado</DialogTitle>
+										<DialogTitle>Reindex process</DialogTitle>
 											<DialogDescription>
-												Cada reindexación se ejecuta sobre una carpeta autorizada y completa todas las fases necesarias.
+											Each reindex runs on an authorized folder and completes every required phase.
 											</DialogDescription>
 										</DialogHeader>
 										<ol className="grid gap-2 text-sm sm:grid-cols-2" id="canonical-reindex-phases">
 											<li className="rounded-dt-sm border border-border/50 bg-muted/30 p-3">
-												1. Analiza y verifica archivos.
+												1. Analyze and verify files.
 											</li>
 											<li className="rounded-dt-sm border border-border/50 bg-muted/30 p-3">
-												2. Sincroniza estructura e índice.
+												2. Synchronize structure and index.
 											</li>
 											<li className="rounded-dt-sm border border-border/50 bg-muted/30 p-3">
-												3. Genera miniaturas necesarias.
+												3. Generate required thumbnails.
 											</li>
 											<li className="rounded-dt-sm border border-border/50 bg-muted/30 p-3">
-												4. Extrae metadata y valida el resultado.
+												4. Extract metadata and validate the result.
 											</li>
 										</ol>
 										<p className="text-muted-foreground text-sm">
-											Usa Reindexar en la carpeta que quieras actualizar. No hay un atajo global porque cada ejecución
-											requiere autorización de su carpeta.
+											Use Reindex on the folder you want to update. There is no global shortcut because every run requires
+											authorization for its folder.
 										</p>
 									</DialogContent>
 								</Dialog>
 
 								<Button className="gap-2" onClick={handleCreateFolder}>
 									<Plus className="h-4 w-4" />
-									Agregar Carpeta
+									Add folder
 								</Button>
 
 								<Button
-									aria-label="Abrir terminal de reindexado"
+									aria-label="Open reindex terminal"
 									onClick={() => useReindexStore.getState().setOpen(true)}
 									size="icon"
-									title="Ver Terminal"
+									title="View terminal"
 									variant="outline"
 								>
 									<Terminal className="h-4 w-4" />
@@ -432,7 +432,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									data-testid="reindex-all-guidance"
 								>
 									<RefreshCw aria-hidden="true" className="h-4 w-4" />
-									Reindexa cada carpeta desde su acción.
+									Reindex each folder from its own action.
 								</p>
 							</div>
 						</div>
@@ -447,17 +447,17 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 								<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 									<Folder className="h-6 w-6 text-muted-foreground" />
 								</div>
-								<h3 className="font-medium text-lg">No hay carpetas</h3>
+								<h3 className="font-medium text-lg">No folders</h3>
 								<p className="mt-1 text-muted-foreground text-sm">
-									{searchQuery ? 'No se encontraron resultados' : 'Agrega una carpeta para comenzar'}
+									{searchQuery ? 'No results found' : 'Add a folder to get started'}
 								</p>
 								<div className="mt-4">
 									{searchQuery ? (
 										<Button onClick={() => setSearchQuery('')} variant="outline">
-											Limpiar búsqueda
+											Clear search
 										</Button>
 									) : (
-										<Button onClick={handleCreateFolder}>Agregar Carpeta</Button>
+										<Button onClick={handleCreateFolder}>Add folder</Button>
 									)}
 								</div>
 							</div>
@@ -474,12 +474,12 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 										actions={{
 											onEdit: () => handleEditFolder(folder),
 											onDelete: async () => {
-												if (confirm('¿Estás seguro de eliminar esta carpeta?')) {
+												if (confirm('Are you sure you want to delete this folder?')) {
 													try {
 														await deleteFolderMutation.mutateAsync(folder.id);
-														toastService.success('Carpeta eliminada');
+														toastService.success('Folder deleted');
 													} catch (error) {
-														toastService.error('Error al eliminar carpeta');
+														toastService.error('Could not delete folder');
 													}
 												}
 											},
@@ -500,17 +500,17 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2 text-lg">
 									<Image className="h-5 w-5" />
-									Procesamiento por carpeta
+									Per-folder processing
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 								<p className="max-w-2xl text-muted-foreground text-sm">
-									Las miniaturas se generan durante el reindexado de cada carpeta autorizada. Las estadísticas y el
-									mantenimiento se consultan dentro de esa biblioteca.
+									Thumbnails are generated while each authorized folder is reindexed. Statistics and maintenance are
+									available within that library.
 								</p>
 								<Button className="shrink-0" onClick={() => setActiveTab('folders')} variant="outline">
 									<Folder className="mr-2 h-4 w-4" />
-									Ver carpetas autorizadas
+									View authorized folders
 								</Button>
 							</CardContent>
 						</Card>
@@ -519,14 +519,14 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2 text-lg">
 									<Image className="h-5 w-5" />
-									Configuración de Miniaturas
+									Thumbnail settings
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-6">
 								<div className="flex items-center justify-between">
 									<div>
-										<p className="font-medium">Calidad de miniaturas</p>
-										<p className="text-muted-foreground text-sm">Balance entre calidad visual y espacio en disco</p>
+										<p className="font-medium">Thumbnail quality</p>
+										<p className="text-muted-foreground text-sm">Balance visual quality and disk space</p>
 									</div>
 									<Select
 										onValueChange={(v) => handleQualityChange(v as ThumbnailQuality)}
@@ -536,9 +536,9 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
-											<SelectItem value={ThumbnailQuality.LOW}>Baja (rápido)</SelectItem>
-											<SelectItem value={ThumbnailQuality.MEDIUM}>Media (recomendado)</SelectItem>
-											<SelectItem value={ThumbnailQuality.HIGH}>Alta (calidad)</SelectItem>
+											<SelectItem value={ThumbnailQuality.LOW}>Low (fast)</SelectItem>
+											<SelectItem value={ThumbnailQuality.MEDIUM}>Medium (recommended)</SelectItem>
+											<SelectItem value={ThumbnailQuality.HIGH}>High (quality)</SelectItem>
 										</SelectContent>
 									</Select>
 								</div>
@@ -547,8 +547,8 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 
 								<div className="flex items-center justify-between">
 									<div>
-										<p className="font-medium">Animación en videos</p>
-										<p className="text-muted-foreground text-sm">Mostrar preview animado al pasar el cursor</p>
+										<p className="font-medium">Video animation</p>
+										<p className="text-muted-foreground text-sm">Show an animated preview on hover</p>
 									</div>
 									<Switch
 										checked={settings?.videoThumbnailAnimation ?? true}
@@ -567,7 +567,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 			<Dialog onOpenChange={setShowFolderForm} open={showFolderForm}>
 				<DialogContent className="sm:max-w-150">
 					<DialogHeader>
-						<DialogTitle>{editingFolder ? 'Editar Carpeta' : 'Agregar Carpeta'}</DialogTitle>
+						<DialogTitle>{editingFolder ? 'Edit folder' : 'Add folder'}</DialogTitle>
 					</DialogHeader>
 					<FolderForm
 						isLoading={createFolderMutation.isPending}
@@ -576,10 +576,10 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 							try {
 								const name = source.relativePath.split('/').filter(Boolean).pop() || source.rootId;
 								await createFolderMutation.mutateAsync({ name, source });
-								toastService.success('Carpeta agregada correctamente');
+								toastService.success('Folder added successfully');
 								setShowFolderForm(false);
 							} catch (error) {
-								toastService.error('Error al agregar carpeta');
+								toastService.error('Could not add folder');
 							}
 						}}
 					/>

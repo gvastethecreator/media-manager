@@ -50,7 +50,7 @@ export function NoteContentView() {
 	const headerTitle = useMemo(
 		() =>
 			effectiveNote?.title || effectiveNote?.name
-				? `Imágenes de la nota: ${effectiveNote?.title ?? effectiveNote?.name}`
+				? `Note images: ${effectiveNote?.title ?? effectiveNote?.name}`
 				: 'Selecciona una nota',
 		[effectiveNote?.title, effectiveNote?.name]
 	);
@@ -60,7 +60,7 @@ export function NoteContentView() {
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Selecciona una nota para ver sus imágenes relacionadas"
+						description="Select a note to view related images"
 						icon={ScrollText}
 						title="Sin nota seleccionada"
 					/>
@@ -86,7 +86,7 @@ export function NoteContentView() {
 	}
 
 	return (
-		<BaseContentView description={images.length ? `${images.length} imágenes` : undefined} title={headerTitle}>
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
 			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
 		</BaseContentView>
 	);

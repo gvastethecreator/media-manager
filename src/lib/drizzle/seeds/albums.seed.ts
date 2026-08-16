@@ -19,7 +19,7 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('album', 'Favoritos', 1),
 				name: 'Favoritos',
-				description: 'Álbum de imágenes favoritas',
+				description: 'Favorite images album',
 				emoji: '⭐',
 				color: '#f59e0b',
 				featuredImage: null,
@@ -27,7 +27,7 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('album', 'Coleccion Digital', 1),
 				name: 'Colección Digital',
-				description: 'Arte y diseño digital',
+				description: 'Digital art and design',
 				emoji: '🎨',
 				color: '#a855f7',
 				featuredImage: null,
@@ -35,7 +35,7 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('album', 'Paisajes Epic', 1),
 				name: 'Paisajes Épicos',
-				description: 'Vistas panorámicas y naturaleza',
+				description: 'Panoramic views and nature',
 				emoji: '🏔️',
 				color: '#22c55e',
 				featuredImage: null,
@@ -43,7 +43,7 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('album', 'Retratos Creativos', 1),
 				name: 'Retratos Creativos',
-				description: 'Retratos artísticos y expresivos',
+				description: 'Artistic and expressive portraits',
 				emoji: '📸',
 				color: '#ec4899',
 				featuredImage: null,
@@ -52,9 +52,9 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 
 		await db.insert(albums).values(sampleAlbums);
 
-		seedLogger.success(`✅ ${sampleAlbums.length} álbumes creados`);
+		seedLogger.success(`✅ ${sampleAlbums.length} albums created`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando álbumes:', error);
+		seedLogger.error('❌ Could not create albums:', error);
 		throw error;
 	}
 }

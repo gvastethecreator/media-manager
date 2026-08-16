@@ -311,7 +311,7 @@ export function createFileNotFoundError(
 ): ServiceError {
 	return createServiceError({
 		code: ServiceErrorCode.FILE_NOT_FOUND,
-		message: `Archivo no encontrado: ${path}`,
+		message: `File not found: ${path}`,
 		context: { path, ...context },
 		serviceName,
 	});

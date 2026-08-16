@@ -236,7 +236,7 @@ Eso evita:
 
 Eso no significa que un mismo par de objetos sólo pueda tener una lectura posible. Pueden coexistir varios roles distintos entre el mismo `source` y `target` siempre que cada uno aporte semántica realmente diferente. Lo que se prohíbe es repetir el mismo significado, no expresar varios significados genuinamente distintos.
 
-En cambio, una relación sin role no debe convivir por defecto con otra relación roleada equivalente sobre el mismo par. El vínculo sin role sólo tiene sentido cuando no hace falta semántica adicional; si el significado ya quedó explicitado por un role, la fila desnuda tendería a introducir ruido más que valor.
+En cambio, una relación sin role no debe convivir por defecto con otra relación roleada equivalente en la misma orientación. Como el vínculo base es dirigido, `A → B` no es equivalente a `B → A`: una fila desnuda en la primera orientación puede convivir con una roleada en la segunda. El vínculo sin role sólo tiene sentido cuando no hace falta semántica adicional; si el significado de esa misma dirección ya quedó explicitado por un role, la fila desnuda tendería a introducir ruido más que valor.
 
 La decisión, además, no se queda en convivencia posterior. Si el significado del vínculo encaja claramente en un `Relation Role` existente y aplicable, crear la `Semantic Relation` sin role se considera inválido. La relación desnuda sólo existe cuando de verdad no hace falta un role semántico adicional.
 

@@ -94,14 +94,14 @@ export function PanelsSettings() {
 	const handleSave = () => {
 		setPreferences({ panels: panelConfig } as any);
 		setHasChanges(false);
-		toastService.success('Configuración de paneles guardada');
+	toastService.success('Panel settings saved');
 	};
 
 	const handleReset = () => {
 		setPanelConfig(defaultPanelConfig);
 		setPreferences({ panels: defaultPanelConfig } as any);
 		setHasChanges(false);
-		toastService.info('Configuración de paneles restaurada');
+	toastService.info('Panel settings restored');
 	};
 
 	return (
@@ -111,35 +111,35 @@ export function PanelsSettings() {
 					<>
 						<Button className="gap-2" disabled={!hasChanges} onClick={handleReset} size="sm" variant="outline">
 							<RotateCcw className="h-4 w-4" />
-							Restaurar
+							Reset
 						</Button>
 						<Button className="gap-2" disabled={!hasChanges} onClick={handleSave} size="sm">
 							<Save className="h-4 w-4" />
-							Guardar
+							Save
 						</Button>
 					</>
 				}
-				description="Personaliza el layout de los paneles laterales, la barra de herramientas y la navegación contextual."
-				title="Configuración de Paneles"
+				description="Customize the side panels, toolbar, and contextual navigation layout."
+				title="Panel Settings"
 			/>
 
 			<BentoGrid className="2xl:grid-cols-2">
 				{/* Panel Izquierdo (Navegación) */}
 				<SettingsCard
 					color="var(--entity-folder)"
-					description="Configura el panel de navegación lateral izquierdo"
+					description="Configure the left navigation panel"
 					icon={<PanelLeft />}
-					title="Panel de Navegación"
+					title="Navigation Panel"
 				>
-					<SettingsGroup title="Visibilidad">
-						<SettingsRow description="Mostrar el panel de navegación en la interfaz" label="Panel visible">
+					<SettingsGroup title="Visibility">
+						<SettingsRow description="Show the navigation panel in the interface" label="Show panel">
 							<Switch
 								checked={panelConfig.leftPanel.visible}
 								onCheckedChange={(checked) => updateConfig('leftPanel', { visible: checked })}
 							/>
 						</SettingsRow>
 
-						<SettingsRow description="Permitir colapsar el panel para ganar espacio" label="Permitir colapsar">
+						<SettingsRow description="Allow the panel to collapse to save space" label="Allow collapse">
 							<Switch
 								checked={panelConfig.leftPanel.collapsible}
 								disabled={!panelConfig.leftPanel.visible}
@@ -147,7 +147,7 @@ export function PanelsSettings() {
 							/>
 						</SettingsRow>
 
-						<SettingsRow description="El panel inicia colapsado al abrir la aplicación" label="Iniciar colapsado">
+						<SettingsRow description="Start with the panel collapsed" label="Start collapsed">
 							<Switch
 								checked={panelConfig.leftPanel.defaultCollapsed}
 								disabled={!panelConfig.leftPanel.collapsible}
@@ -156,15 +156,15 @@ export function PanelsSettings() {
 						</SettingsRow>
 					</SettingsGroup>
 
-					<SettingsGroup title="Dimensiones">
+					<SettingsGroup title="Dimensions">
 						<div className="space-y-3">
 							<div className="flex items-center justify-between">
-								<Label className="text-sm">Ancho del panel: {panelConfig.leftPanel.width}px</Label>
+								<Label className="text-sm">Panel width: {panelConfig.leftPanel.width}px</Label>
 								<span className="text-muted-foreground text-xs">
 									{panelConfig.leftPanel.width < 250
-										? 'Compacto'
+										? 'Compact'
 										: panelConfig.leftPanel.width > 350
-											? 'Amplio'
+											? 'Wide'
 											: 'Normal'}
 								</span>
 							</div>
@@ -188,19 +188,19 @@ export function PanelsSettings() {
 				{/* Panel Derecho (Detalles) */}
 				<SettingsCard
 					color="var(--entity-image)"
-					description="Configura el panel de detalles lateral derecho"
+					description="Configure the right details panel"
 					icon={<PanelRight />}
-					title="Panel de Detalles"
+					title="Details Panel"
 				>
-					<SettingsGroup title="Visibilidad">
-						<SettingsRow description="Mostrar el panel de detalles en la interfaz" label="Panel visible">
+					<SettingsGroup title="Visibility">
+						<SettingsRow description="Show the details panel in the interface" label="Show panel">
 							<Switch
 								checked={panelConfig.rightPanel.visible}
 								onCheckedChange={(checked) => updateConfig('rightPanel', { visible: checked })}
 							/>
 						</SettingsRow>
 
-						<SettingsRow description="Permitir colapsar el panel para ganar espacio" label="Permitir colapsar">
+						<SettingsRow description="Allow the panel to collapse to save space" label="Allow collapse">
 							<Switch
 								checked={panelConfig.rightPanel.collapsible}
 								disabled={!panelConfig.rightPanel.visible}
@@ -208,7 +208,7 @@ export function PanelsSettings() {
 							/>
 						</SettingsRow>
 
-						<SettingsRow description="El panel inicia colapsado al abrir la aplicación" label="Iniciar colapsado">
+						<SettingsRow description="Start with the panel collapsed" label="Start collapsed">
 							<Switch
 								checked={panelConfig.rightPanel.defaultCollapsed}
 								disabled={!panelConfig.rightPanel.collapsible}
@@ -217,15 +217,15 @@ export function PanelsSettings() {
 						</SettingsRow>
 					</SettingsGroup>
 
-					<SettingsGroup title="Dimensiones">
+					<SettingsGroup title="Dimensions">
 						<div className="space-y-3">
 							<div className="flex items-center justify-between">
-								<Label className="text-sm">Ancho del panel: {panelConfig.rightPanel.width}px</Label>
+								<Label className="text-sm">Panel width: {panelConfig.rightPanel.width}px</Label>
 								<span className="text-muted-foreground text-xs">
 									{panelConfig.rightPanel.width < 280
-										? 'Compacto'
+										? 'Compact'
 										: panelConfig.rightPanel.width > 380
-											? 'Amplio'
+											? 'Wide'
 											: 'Normal'}
 								</span>
 							</div>
@@ -249,18 +249,18 @@ export function PanelsSettings() {
 				{/* Barra de Herramientas */}
 				<SettingsCard
 					color="var(--primary)"
-					description="Configura la barra de herramientas superior"
+					description="Configure the main toolbar"
 					icon={<Layout />}
-					title="Barra de Herramientas"
+					title="Toolbar"
 				>
-					<SettingsRow description="Mostrar la barra de herramientas principal" label="Barra visible">
+					<SettingsRow description="Show the main toolbar" label="Show toolbar">
 						<Switch
 							checked={panelConfig.toolbar.visible}
 							onCheckedChange={(checked) => updateConfig('toolbar', { visible: checked })}
 						/>
 					</SettingsRow>
 
-					<SettingsRow description="La barra permanece fija al hacer scroll" label="Barra fija (sticky)">
+					<SettingsRow description="Keep the toolbar fixed while scrolling" label="Sticky toolbar">
 						<Switch
 							checked={panelConfig.toolbar.sticky}
 							disabled={!panelConfig.toolbar.visible}
@@ -268,7 +268,7 @@ export function PanelsSettings() {
 						/>
 					</SettingsRow>
 
-					<SettingsRow description="Posición de la barra de herramientas" label="Posición">
+					<SettingsRow description="Choose the toolbar position" label="Position">
 						<Select
 							disabled={!panelConfig.toolbar.visible}
 							onValueChange={(value) => updateConfig('toolbar', { position: value as 'top' | 'bottom' })}
@@ -278,8 +278,8 @@ export function PanelsSettings() {
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="top">Arriba</SelectItem>
-								<SelectItem value="bottom">Abajo</SelectItem>
+								<SelectItem value="top">Top</SelectItem>
+								<SelectItem value="bottom">Bottom</SelectItem>
 							</SelectContent>
 						</Select>
 					</SettingsRow>
@@ -288,18 +288,18 @@ export function PanelsSettings() {
 				{/* Breadcrumbs */}
 				<SettingsCard
 					color="var(--muted-foreground)"
-					description="Configura la navegación por migas de pan"
+					description="Configure breadcrumb navigation"
 					icon={<ChevronRight />}
 					title="Breadcrumbs"
 				>
-					<SettingsRow description="Mostrar la ruta de navegación actual" label="Breadcrumbs visibles">
+					<SettingsRow description="Show the current navigation path" label="Show breadcrumbs">
 						<Switch
 							checked={panelConfig.breadcrumbs.visible}
 							onCheckedChange={(checked) => updateConfig('breadcrumbs', { visible: checked })}
 						/>
 					</SettingsRow>
 
-					<SettingsRow description="Incluir enlace al inicio en el breadcrumb" label="Mostrar inicio">
+					<SettingsRow description="Include a Home link in the breadcrumb" label="Show Home">
 						<Switch
 							checked={panelConfig.breadcrumbs.showHome}
 							disabled={!panelConfig.breadcrumbs.visible}
@@ -307,7 +307,7 @@ export function PanelsSettings() {
 						/>
 					</SettingsRow>
 
-					<SettingsRow description="Número máximo de elementos visibles" label="Máximo de items">
+					<SettingsRow description="Set the maximum number of visible items" label="Maximum items">
 						<Select
 							disabled={!panelConfig.breadcrumbs.visible}
 							onValueChange={(value) => updateConfig('breadcrumbs', { maxItems: Number.parseInt(value, 10) })}
@@ -331,9 +331,9 @@ export function PanelsSettings() {
 			{/* Preview Visual */}
 			<SettingsCard
 				color="var(--primary)"
-				description="Vista previa del layout configurado"
+				description="Preview the configured layout"
 				icon={<Maximize2 />}
-				title="Vista Previa"
+				title="Preview"
 			>
 				<div className="rounded-lg border border-border/50 bg-muted/30 p-4">
 					<div className="flex h-48 gap-2 rounded border border-border/50 border-dashed bg-background p-2">
@@ -361,13 +361,13 @@ export function PanelsSettings() {
 								<div className="flex h-4 items-center gap-1 px-1 text-[10px] text-muted-foreground">
 									{panelConfig.breadcrumbs.showHome && <span>🏠</span>}
 									<ChevronRight className="h-2 w-2" />
-									<span>Carpeta</span>
+									<span>Folder</span>
 									<ChevronRight className="h-2 w-2" />
 									<span>...</span>
 								</div>
 							)}
 							<div className="flex flex-1 items-center justify-center rounded bg-muted/30 text-muted-foreground text-xs">
-								Contenido Principal
+								Main content
 							</div>
 							{panelConfig.toolbar.visible && panelConfig.toolbar.position === 'bottom' && (
 								<div className="flex h-6 items-center justify-center rounded bg-primary/10 text-muted-foreground text-xs">
@@ -385,7 +385,7 @@ export function PanelsSettings() {
 								}}
 							>
 								<PanelRight className="mb-1 h-4 w-4" />
-								{!panelConfig.rightPanel.defaultCollapsed && <span>Detalles</span>}
+								{!panelConfig.rightPanel.defaultCollapsed && <span>Details</span>}
 							</div>
 						)}
 					</div>

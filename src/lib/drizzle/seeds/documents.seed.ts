@@ -37,7 +37,7 @@ export async function seedDocuments(db: LibSQLDatabase<Record<string, never>>) {
 		await db.insert(documents).values(sampleDocuments);
 		seedLogger.success(`✅ ${sampleDocuments.length} documentos creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando documentos:', error);
+		seedLogger.error('❌ Could not create documents:', error);
 		throw error;
 	}
 }

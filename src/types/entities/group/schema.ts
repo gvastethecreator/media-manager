@@ -50,13 +50,13 @@ export const GroupAdvancedFilterSchema = z.object({
  */
 export const GroupSchema = z.object({
 	id: z.string(),
-	name: z.string().min(1, 'El nombre es obligatorio'),
+	name: z.string().min(1, 'The name is required'),
 	emoji: z.string().default('👥'),
 	color: z
 		.string()
 		.refine(
 			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
-			'Color debe ser un valor hexadecimal o una variable CSS válida'
+			'Color must be a valid hexadecimal value or CSS variable'
 		)
 		.default('var(--entity-group)'),
 	description: z.string().nullable().optional(),
@@ -82,7 +82,7 @@ export const CreateGroupSchema = GroupSchema.omit({
 	createdAt: true,
 	updatedAt: true,
 }).extend({
-	name: z.string().min(1, 'El nombre es obligatorio'),
+	name: z.string().min(1, 'The name is required'),
 	isFavorite: z.boolean().optional(),
 });
 

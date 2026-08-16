@@ -39,13 +39,13 @@ export interface ProfileTransformed extends ProfileExtended {
 export function getThemeModeText(theme: ThemeMode): string {
 	switch (theme) {
 		case ThemeMode.LIGHT:
-			return 'Claro';
+			return 'Light';
 		case ThemeMode.DARK:
-			return 'Oscuro';
+			return 'Dark';
 		case ThemeMode.SYSTEM:
-			return 'Sistema';
+			return 'System';
 		default:
-			return 'Sistema';
+			return 'System';
 	}
 }
 
@@ -57,15 +57,15 @@ export function getThemeModeText(theme: ThemeMode): string {
 export function getLanguageText(language: Language): string {
 	switch (language) {
 		case Language.SPANISH:
-			return 'Español';
+			return 'Spanish';
 		case Language.ENGLISH:
-			return 'Inglés';
+			return 'English';
 		case Language.PORTUGUESE:
-			return 'Portugués';
+			return 'Portuguese';
 		case Language.FRENCH:
-			return 'Francés';
+			return 'French';
 		default:
-			return 'Español';
+			return 'English';
 	}
 }
 

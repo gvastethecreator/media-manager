@@ -78,10 +78,10 @@ export function GroupContentView(_props: ViewProps) {
 				{/* Pestañas para diferentes tipos de contenido */}
 				<Tabs className="mt-6" defaultValue="all">
 					<TabsList className="mb-4 grid grid-cols-4">
-						<TabsTrigger value="all">Todos</TabsTrigger>
+						<TabsTrigger value="all">All</TabsTrigger>
 						<TabsTrigger value="images">
 							<ImageIcon className="mr-2 h-4 w-4" />
-							Imágenes
+							Images
 						</TabsTrigger>
 						<TabsTrigger value="tags">
 							<TagIcon className="mr-2 h-4 w-4" />
@@ -103,14 +103,14 @@ export function GroupContentView(_props: ViewProps) {
 					<TabsContent className="space-y-4" value="images">
 						{imagesError ? (
 							<div className="flex items-center justify-center py-10 text-destructive">
-								Error: {imagesError instanceof Error ? imagesError.message : 'No se pudieron cargar las imágenes'}
+								Error: {imagesError instanceof Error ? imagesError.message : 'Images could not be loaded'}
 							</div>
 						) : isLoadingImages && images.length === 0 ? (
 							<div className="py-6">
-								<LoadingScreen message="Cargando imágenes del grupo..." />
+								<LoadingScreen message="Loading group images..." />
 							</div>
 						) : images.length === 0 ? (
-							<p className="py-10 text-center text-muted-foreground">Este grupo no tiene imágenes asociadas</p>
+							<p className="py-10 text-center text-muted-foreground">This group has no associated images</p>
 						) : (
 							<div className="h-[60vh] min-h-90">
 								<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />

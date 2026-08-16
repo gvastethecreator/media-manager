@@ -53,7 +53,7 @@ export function AppearanceSettingsModern() {
 	const density = (preferences?.density as Density) || 'default';
 
 	if (!preferences) {
-		return <div className="p-4 text-center text-muted-foreground">Cargando configuración...</div>;
+		return <div className="p-4 text-center text-muted-foreground">Loading settings...</div>;
 	}
 
 	const currentTheme = theme || 'system';
@@ -63,7 +63,7 @@ export function AppearanceSettingsModern() {
 		return (
 			<div className="space-y-4">
 				<Button className="mb-2" onClick={() => setShowThemeSettings(false)} size="sm" variant="ghost">
-					← Volver a Apariencia
+					← Back to Appearance
 				</Button>
 				<ThemeSettings />
 			</div>
@@ -73,17 +73,17 @@ export function AppearanceSettingsModern() {
 	return (
 		<div className="space-y-6">
 			<SettingsPageHeader
-				description="Personaliza el tema, colores y estilo de la interfaz. Los cambios se aplican inmediatamente."
-				title="Apariencia"
+				description="Customize the interface theme, colors, and style. Changes apply immediately."
+				title="Appearance"
 			/>
 
 			<BentoGrid>
 				<SettingsCard
 					className="md:col-span-2 xl:col-span-4"
 					color="var(--primary)"
-					description="Elige entre modo claro, oscuro o cualquiera de los 14 temas disponibles. Cada tema ajusta automáticamente los colores de la interfaz."
+					description="Choose light mode, dark mode, or one of the 14 available themes. Each theme adjusts the interface colors automatically."
 					icon={<Palette />}
-					title="Tema de Color"
+					title="Color Theme"
 				>
 					{/* Quick access to built-in themes (showing first 8) */}
 					<div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8">
@@ -132,7 +132,7 @@ export function AppearanceSettingsModern() {
 					{customThemes.length > 0 && (
 						<div className="mt-4 border-border/50 border-t pt-4">
 							<div className="mb-2 flex items-center justify-between">
-								<span className="font-medium text-muted-foreground text-sm">Mis Temas ({customThemes.length})</span>
+								<span className="font-medium text-muted-foreground text-sm">My Themes ({customThemes.length})</span>
 							</div>
 							<div className="flex flex-wrap gap-2">
 								{customThemes.slice(0, 4).map((t) => (
@@ -148,7 +148,7 @@ export function AppearanceSettingsModern() {
 								))}
 								{customThemes.length > 4 && (
 									<span className="flex items-center text-muted-foreground text-xs">
-										+{customThemes.length - 4} más
+										+{customThemes.length - 4} more
 									</span>
 								)}
 							</div>
@@ -171,9 +171,9 @@ export function AppearanceSettingsModern() {
 								<Monitor className="h-4 w-4 text-muted-foreground" />
 							</div>
 							<div className="flex-1 text-left">
-								<span className="font-medium text-foreground text-sm">Automático</span>
+								<span className="font-medium text-foreground text-sm">Automatic</span>
 								<p className="text-muted-foreground text-xs">
-									Según sistema ({resolvedTheme === 'dark' ? 'oscuro' : 'claro'})
+									Follow system ({resolvedTheme === 'dark' ? 'dark' : 'light'})
 								</p>
 							</div>
 							{currentTheme === 'system' && (
@@ -186,11 +186,11 @@ export function AppearanceSettingsModern() {
 						<div className="flex gap-2">
 							<Button className="gap-2" onClick={() => setShowThemeSettings(true)} size="sm" variant="outline">
 								<Edit className="h-3.5 w-3.5" />
-								Editar Temas
+								Edit Themes
 							</Button>
 							<Button className="gap-2" onClick={() => setShowThemeSettings(true)} size="sm" variant="default">
 								<Plus className="h-3.5 w-3.5" />
-								Crear Tema
+								Create Theme
 							</Button>
 						</div>
 					</div>
@@ -200,19 +200,19 @@ export function AppearanceSettingsModern() {
 				<SettingsCard
 					className="md:col-span-2 xl:col-span-2"
 					color="var(--primary)"
-					description="Ajusta el tamaño de fuente, la densidad de la interfaz y el espaciado entre elementos"
+					description="Adjust font size, interface density, and spacing"
 					icon={<Type />}
-					title="Tipografía y Densidad"
+					title="Typography and Density"
 				>
-					<SettingsGroup title="Tamaño de Fuente">
+					<SettingsGroup title="Font Size">
 						<RadioGroup onValueChange={(v) => setPreferences({ fontSize: v as FontSize })} value={preferences.fontSize}>
 							<div className="flex flex-col gap-3">
 								{[
-									{ value: 'xs', label: 'Extra pequeño', size: 'text-xs', desc: '12px - Compacto' },
-									{ value: 'sm', label: 'Pequeño', size: 'text-sm', desc: '14px - Eficiente' },
-									{ value: 'base', label: 'Normal', size: 'text-base', desc: '16px - Balanceado' },
-									{ value: 'lg', label: 'Grande', size: 'text-lg', desc: '18px - Legible' },
-									{ value: 'xl', label: 'Extra grande', size: 'text-xl', desc: '20px - Accesible' },
+									{ value: 'xs', label: 'Extra small', size: 'text-xs', desc: '12px - Compact' },
+									{ value: 'sm', label: 'Small', size: 'text-sm', desc: '14px - Efficient' },
+									{ value: 'base', label: 'Normal', size: 'text-base', desc: '16px - Balanced' },
+									{ value: 'lg', label: 'Large', size: 'text-lg', desc: '18px - Readable' },
+									{ value: 'xl', label: 'Extra large', size: 'text-xl', desc: '20px - Accessible' },
 								].map((item) => (
 									<RadioGroupItem
 										className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/50 p-3 transition-all hover:border-border/80 hover:bg-muted/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary/5"
@@ -230,23 +230,23 @@ export function AppearanceSettingsModern() {
 						</RadioGroup>
 					</SettingsGroup>
 
-					<SettingsGroup title="Densidad de Interfaz">
+					<SettingsGroup title="Interface Density">
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 							{[
 								{
 									value: 'comfortable',
-									label: 'Espaciado',
-									desc: 'Más espacio entre elementos',
+									label: 'Comfortable',
+									desc: 'More space between items',
 								},
 								{
 									value: 'default',
 									label: 'Normal',
-									desc: 'Balance entre espacio y contenido',
+									desc: 'Balanced spacing and content',
 								},
 								{
 									value: 'compact',
-									label: 'Compacto',
-									desc: 'Máximo contenido visible',
+									label: 'Compact',
+									desc: 'Show as much content as possible',
 								},
 							].map((item) => (
 								<button
@@ -273,20 +273,20 @@ export function AppearanceSettingsModern() {
 				<SettingsCard
 					className="md:col-span-1 xl:col-span-1"
 					color="var(--primary)"
-					description="Controla las animaciones y efectos visuales de la interfaz. Desactivar animaciones puede mejorar el rendimiento en dispositivos más lentos."
+					description="Control interface animations and visual effects. Disabling animations can improve performance on slower devices."
 					icon={<LayoutGrid />}
-					title="Efectos Visuales"
+					title="Visual Effects"
 				>
 					<SettingsRow
-						description="Habilita transiciones suaves entre estados de la interfaz"
-						label="Animaciones Globales"
+						description="Enable smooth transitions between interface states"
+						label="Global Animations"
 					>
 						<Switch checked={preferences.animations} onCheckedChange={(v) => setPreferences({ animations: v })} />
 					</SettingsRow>
 
 					<SettingsRow
-						description="Efectos de elevación y brillo al pasar el cursor sobre items"
-						label="Animaciones en Miniaturas"
+						description="Add subtle elevation effects when hovering over items"
+						label="Thumbnail Animations"
 					>
 						<Switch
 							checked={preferences.thumbnailsAnimations}
@@ -295,8 +295,8 @@ export function AppearanceSettingsModern() {
 					</SettingsRow>
 
 					<SettingsRow
-						description="Desactiva todos los efectos visuales costosos para máximo rendimiento"
-						label="Modo Ultra Performance"
+						description="Disable expensive visual effects for maximum performance"
+						label="Ultra Performance Mode"
 					>
 						<Switch
 							checked={preferences.thumbnailsUltraPerformance}
@@ -309,14 +309,14 @@ export function AppearanceSettingsModern() {
 				<SettingsCard
 					className="md:col-span-1 xl:col-span-1"
 					color="var(--entity-image)"
-					description="Configura cómo se muestran las imágenes y videos en los grids de la aplicación"
+					description="Configure how images and videos appear in application grids"
 					icon={<ImageIcon />}
-					title="Visualización de Media"
+					title="Media Display"
 				>
-					<SettingsGroup title="Opciones de Grid">
+					<SettingsGroup title="Grid Options">
 						<SettingsRow
-							description="Mantiene las proporciones originales de las imágenes en lugar de forzar cuadrados"
-							label="Respetar Aspect Ratio"
+							description="Keep original image proportions instead of forcing square thumbnails"
+							label="Preserve Aspect Ratio"
 						>
 							<Switch
 								checked={preferences.thumbnailsRespectAspectRatio}
@@ -325,8 +325,8 @@ export function AppearanceSettingsModern() {
 						</SettingsRow>
 
 						<SettingsRow
-							description="Muestra información adicional como etiquetas y metadatos sobre las imágenes"
-							label="Mostrar Metadatos en Grid"
+							description="Show extra information such as tags and metadata over images"
+							label="Show Grid Metadata"
 						>
 							<Switch
 								checked={Boolean(preferences.showMetadataInGrid)}
@@ -335,8 +335,8 @@ export function AppearanceSettingsModern() {
 						</SettingsRow>
 
 						<SettingsRow
-							description="Ajusta la calidad de las miniaturas. Mayor calidad consume más recursos."
-							label="Calidad de Miniaturas"
+							description="Adjust thumbnail quality. Higher quality uses more resources."
+							label="Thumbnail Quality"
 						>
 							<div className="flex items-center gap-2">
 								<select
@@ -346,9 +346,9 @@ export function AppearanceSettingsModern() {
 									}
 									value={String(preferences.thumbnailQuality || 'medium')}
 								>
-									<option value="low">Baja (rápido)</option>
-									<option value="medium">Media (balance)</option>
-									<option value="high">Alta (detallado)</option>
+									<option value="low">Low (fast)</option>
+									<option value="medium">Medium (balanced)</option>
+									<option value="high">High (detailed)</option>
 								</select>
 							</div>
 						</SettingsRow>

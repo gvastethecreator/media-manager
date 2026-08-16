@@ -1,21 +1,8 @@
 'use client';
 
-import { ColumnFiltersState, RowData, SortingState, Table } from '@tanstack/react-table';
+import { ColumnFiltersState, RowData, SortingState, Table, TableFeatures } from '@/lib/tanstack-react-table';
 import { createContext, ReactNode, useContext } from 'react';
 import { cn } from '@/lib/utils';
-
-declare module '@tanstack/react-table' {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	interface ColumnMeta<TData extends RowData, TValue> {
-		// Referencia fantasma para marcar uso de TValue en tipo
-		readonly __valueType__?: TValue | undefined;
-		cellClassName?: string;
-		expandedContent?: (row: TData) => ReactNode;
-		headerClassName?: string;
-		headerTitle?: string;
-		skeleton?: ReactNode;
-	}
-}
 
 export interface DataGridApiFetchParams {
 	filters?: ColumnFiltersState;
@@ -34,11 +21,11 @@ export interface DataGridApiResponse<T> {
 	};
 }
 
-export interface DataGridContextProps<TData extends object> {
+export interface DataGridContextProps<TData extends RowData> {
 	isLoading: boolean;
 	props: DataGridProps<TData>;
 	recordCount: number;
-	table: Table<TData>;
+	table: Table<any, TData>;
 }
 
 export interface DataGridRequestParams {
@@ -48,7 +35,7 @@ export interface DataGridRequestParams {
 	sorting?: SortingState;
 }
 
-export interface DataGridProps<TData extends object> {
+export interface DataGridProps<TData extends RowData> {
 	children?: ReactNode;
 	className?: string;
 	emptyMessage?: ReactNode | string;
@@ -57,7 +44,7 @@ export interface DataGridProps<TData extends object> {
 	loadingMode?: 'skeleton' | 'spinner';
 	onRowClick?: (row: TData) => void;
 	recordCount: number;
-	table?: Table<TData>;
+	table?: Table<any, TData>;
 	tableClassNames?: {
 		base?: string;
 		header?: string;
@@ -100,16 +87,16 @@ function useDataGrid() {
 	return context;
 }
 
-function DataGridProvider<TData extends object>({
+function DataGridProvider<TData extends RowData>({
 	children,
 	table,
 	...props
-}: DataGridProps<TData> & { table: Table<TData> }) {
+}: DataGridProps<TData> & { table: Table<any, TData> }) {
 	return (
 		<DataGridContext.Provider
 			value={{
 				props,
-				table,
+				table: table as Table<any, any>,
 				recordCount: props.recordCount,
 				isLoading: !!props.isLoading,
 			}}
@@ -119,7 +106,7 @@ function DataGridProvider<TData extends object>({
 	);
 }
 
-function DataGrid<TData extends object>({ children, table, ...props }: DataGridProps<TData>) {
+function DataGrid<TData extends RowData>({ children, table, ...props }: DataGridProps<TData>) {
 	const defaultProps: Partial<DataGridProps<TData>> = {
 		loadingMode: 'skeleton',
 		tableLayout: {

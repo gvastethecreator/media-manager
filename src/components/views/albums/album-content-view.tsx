@@ -52,7 +52,7 @@ export function AlbumContentView() {
 	);
 
 	const headerTitle = useMemo(
-		() => (album?.name ? `Imágenes del álbum: ${album.name}` : 'Selecciona un álbum'),
+		() => (album?.name ? `Album images: ${album.name}` : 'Select an album'),
 		[album?.name]
 	);
 
@@ -61,9 +61,9 @@ export function AlbumContentView() {
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Selecciona un álbum para ver sus imágenes relacionadas"
+						description="Select an album to view its related images"
 						icon={Album}
-						title="Sin álbum seleccionado"
+						title="No album selected"
 					/>
 				</div>
 			</BaseContentView>
@@ -87,7 +87,7 @@ export function AlbumContentView() {
 	}
 
 	return (
-		<BaseContentView description={images.length ? `${images.length} imágenes` : undefined} title={headerTitle}>
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
 			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
 		</BaseContentView>
 	);

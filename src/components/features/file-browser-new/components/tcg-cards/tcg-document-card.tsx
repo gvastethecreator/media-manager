@@ -1,6 +1,6 @@
 /**
  * @file TCG Document Card - Tarjeta TCG especializada para documentos
- * @description Card con preview de documento, páginas y tipo de archivo
+ * @description Card con preview de documento, pages y tipo de archivo
  */
 
 import {
@@ -162,7 +162,7 @@ export const TCGDocumentCard = memo(function TCGDocumentCard({ item, variant, wi
 			{doc.pageCount && (
 				<div className="tcg-stat-badge">
 					<BookOpen size={10} />
-					<span>{doc.pageCount} pág</span>
+					<span>{doc.pageCount} page</span>
 				</div>
 			)}
 		</>
@@ -204,13 +204,13 @@ export const TCGDocumentCard = memo(function TCGDocumentCard({ item, variant, wi
 						</span>
 					)}
 					{relationCounts.albums > 0 && (
-						<span className="tcg-relations__item" title={`${relationCounts.albums} álbumes`}>
+						<span className="tcg-relations__item" title={`${relationCounts.albums} albums`}>
 							<Layers size={10} />
 							{relationCounts.albums}
 						</span>
 					)}
 					{relationCounts.collections > 0 && (
-						<span className="tcg-relations__item" title={`${relationCounts.collections} colecciones`}>
+						<span className="tcg-relations__item" title={`${relationCounts.collections} collections`}>
 							<BookMarked size={10} />
 							{relationCounts.collections}
 						</span>

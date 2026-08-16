@@ -179,7 +179,7 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
 						</AlertDialogHeader>
 						<AlertDialogFooter>
 							<AlertDialogAction onClick={handleAlertClose}>
-								{alertState.options.confirmText || 'Aceptar'}
+								{alertState.options.confirmText || 'OK'}
 							</AlertDialogAction>
 						</AlertDialogFooter>
 					</AlertDialogContent>

@@ -335,7 +335,7 @@ export function exportPrompt(prompt: PromptBase | PromptExtended, config: Prompt
 			}
 
 			default:
-				throw new Error(`Formato de exportación no soportado: ${format}`);
+				throw new Error(`Unsupported export format: ${format}`);
 		}
 
 		// Sanitizar el nombre del archivo
@@ -374,7 +374,7 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 
 		// Verificar campos mínimos requeridos
 		if (!(parsed.name && parsed.content)) {
-			throw new Error('El JSON no contiene un prompt válido (faltan name o content)');
+			throw new Error('The JSON does not contain a valid prompt (name or content is missing)');
 		}
 
 		// Asignar ID nuevo si no tiene o para evitar colisiones
@@ -458,6 +458,6 @@ export function downloadPrompt(exportResult: PromptExportResult): void {
 			URL.revokeObjectURL(url);
 		}, 100);
 	} catch (error) {
-		exportLogger.error('❌ Error al descargar prompt:', error);
+		exportLogger.error('❌ Could not download prompt:', error);
 	}
 }

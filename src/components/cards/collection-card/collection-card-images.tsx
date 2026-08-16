@@ -40,7 +40,7 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 		<div className="flex h-full items-center justify-center p-4 text-center" style={{ color: `${primaryColor}80` }}>
 			<div className="flex flex-col items-center gap-2">
 				<ImageOffIcon className="h-10 w-10 opacity-40" />
-				<p className="text-sm opacity-60">No hay imágenes disponibles</p>
+				<p className="text-sm opacity-60">No images available</p>
 			</div>
 		</div>
 	);

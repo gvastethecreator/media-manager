@@ -22,16 +22,16 @@ export const PLACE_STORAGE_KEY = 'place-store-storage';
  * Opciones de ordenación para lugares
  */
 export const PLACE_SORT_OPTIONS = [
-	{ value: 'name_asc', label: 'Nombre (A-Z)' },
-	{ value: 'name_desc', label: 'Nombre (Z-A)' },
-	{ value: 'created_asc', label: 'Creación (Más antigua)' },
-	{ value: 'created_desc', label: 'Creación (Más reciente)' },
-	{ value: 'updated_asc', label: 'Actualización (Más antigua)' },
-	{ value: 'updated_desc', label: 'Actualización (Más reciente)' },
-	{ value: 'type_asc', label: 'Tipo (A-Z)' },
-	{ value: 'type_desc', label: 'Tipo (Z-A)' },
-	{ value: 'population_asc', label: 'Población (Ascendente)' },
-	{ value: 'population_desc', label: 'Población (Descendente)' },
+	{ value: 'name_asc', label: 'Name (A-Z)' },
+	{ value: 'name_desc', label: 'Name (Z-A)' },
+	{ value: 'created_asc', label: 'Created (oldest first)' },
+	{ value: 'created_desc', label: 'Created (newest first)' },
+	{ value: 'updated_asc', label: 'Updated (oldest first)' },
+	{ value: 'updated_desc', label: 'Updated (newest first)' },
+	{ value: 'type_asc', label: 'Type (A-Z)' },
+	{ value: 'type_desc', label: 'Type (Z-A)' },
+	{ value: 'population_asc', label: 'Population (ascending)' },
+	{ value: 'population_desc', label: 'Population (descending)' },
 ];
 
 /**

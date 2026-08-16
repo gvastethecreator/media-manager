@@ -24,7 +24,7 @@ export function ProfilesSettings() {
 
 	const handleAddProfile = async () => {
 		await updateProfile(null, {
-			name: 'Nuevo Perfil',
+			name: 'New Profile',
 			emoji: '👤',
 			color: DEFAULT_ENTITY_COLOR,
 		});
@@ -41,25 +41,25 @@ export function ProfilesSettings() {
 		return (
 			<div className="space-y-6">
 				<SettingsPageHeader
-					description="Crea perfiles para separar preferencias, temas y personalizaciones según el contexto de uso."
-					title="Perfiles"
+					description="Create profiles to separate preferences, themes, and customizations for different contexts."
+					title="Profiles"
 				/>
 				<Card className="flex flex-col gap-2 rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="bg-transparent p-2 pb-0">
 						<CardTitle className="flex items-center justify-between pl-1 text-heading-sm text-muted-foreground">
 							<span className="flex h-7 items-center gap-2">
-								<UserCog className="h-5 w-5" /> Perfiles
+								<UserCog className="h-5 w-5" /> Profiles
 							</span>
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="p-4 py-6 text-center">
 						<UserPlus className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
-						<p className="text-muted-foreground text-sm">No hay perfiles configurados</p>
+						<p className="text-muted-foreground text-sm">No profiles configured</p>
 						<p className="mt-1 mb-4 text-muted-foreground/75 text-xs">
 							Crea un perfil para personalizar tu experiencia
 						</p>
 						<Button className="mt-2" onClick={handleAddProfile}>
-							Crear perfil
+							Create profile
 						</Button>
 					</CardContent>
 				</Card>
@@ -73,18 +73,18 @@ export function ProfilesSettings() {
 				actions={
 					<Button className="h-9 gap-2" onClick={handleAddProfile} size="sm" variant="outline">
 						<UserPlus className="h-4 w-4" />
-						Nuevo perfil
+						New profile
 					</Button>
 				}
-				description="Gestiona perfiles separados para cambiar rápidamente entre temas, idioma y preferencias de uso."
-				title="Perfiles"
+				description="Use separate profiles to switch quickly between themes, language, and preferences."
+				title="Profiles"
 			/>
 
 			<div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
 				<Card className="flex flex-col gap-2 rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="bg-transparent p-4 pb-0">
 						<CardTitle className="flex items-center gap-2 text-heading-sm text-muted-foreground">
-							<Smile className="h-4 w-4" /> Perfil Activo
+							<Smile className="h-4 w-4" /> Active Profile
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="p-4 pt-3">
@@ -109,13 +109,13 @@ export function ProfilesSettings() {
 								<Input
 									className="h-10 border-none p-3 text-base"
 									onChange={(e) => handleUpdateActiveProfile({ name: e.target.value })}
-									placeholder="Nombre del perfil"
+									placeholder="Profile name"
 									value={activeProfileData?.name}
 								/>
 								<div className="flex flex-wrap items-center gap-3 text-muted-foreground text-xs">
-									<div>Perfil activo: {activeProfileData?.name}</div>
-									<div>Tema: {activeProfileData?.preferences?.theme ?? 'system'}</div>
-									<div>Idioma: {activeProfileData?.preferences?.language === 'es' ? 'Español' : 'English'}</div>
+									<div>Active profile: {activeProfileData?.name}</div>
+									<div>Theme: {activeProfileData?.preferences?.theme ?? 'system'}</div>
+									<div>Language: {activeProfileData?.preferences?.language === 'es' ? 'Spanish' : 'English'}</div>
 								</div>
 							</div>
 
@@ -139,7 +139,7 @@ export function ProfilesSettings() {
 				<Card className="flex flex-col gap-2 rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="bg-transparent p-4 pb-0">
 						<CardTitle className="flex items-center gap-2 text-heading-sm text-muted-foreground">
-							<Users className="h-4 w-4" /> Otros Perfiles
+							<Users className="h-4 w-4" /> Other Profiles
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="p-4 pt-3">
@@ -170,11 +170,11 @@ export function ProfilesSettings() {
 																{profile.preferences?.theme === 'system'
 																	? 'Sistema'
 																	: profile.preferences?.theme === 'light'
-																		? 'Claro'
-																		: 'Oscuro'}
+																	? 'Light'
+																		: 'Dark'}
 															</span>
 															<span>•</span>
-															<span>{profile.preferences?.language === 'es' ? 'Español' : 'English'}</span>
+															<span>{profile.preferences?.language === 'es' ? 'Spanish' : 'English'}</span>
 														</div>
 													</div>
 												</div>
@@ -203,9 +203,9 @@ export function ProfilesSettings() {
 							{profiles.length <= 1 && (
 								<div className="py-8 text-center">
 									<UserPlus className="mx-auto mb-2 h-6 w-6 text-muted-foreground/50" />
-									<p className="text-muted-foreground text-xs">No hay perfiles adicionales</p>
+									<p className="text-muted-foreground text-xs">No additional profiles</p>
 									<p className="mt-1 text-[10px] text-muted-foreground/75">
-										Crea más perfiles para diferentes configuraciones
+										Create more profiles for different setups
 									</p>
 								</div>
 							)}

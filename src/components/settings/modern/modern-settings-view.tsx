@@ -24,7 +24,13 @@ import { WorldbuildingSettingsModern } from './worldbuilding-settings-modern';
 /**
  * Componente de contenido dinámico basado en el item seleccionado
  */
-function SettingsContent({ itemId }: { itemId: string }) {
+function SettingsContent({
+	itemId,
+	onWorldbuildingEntityChange,
+}: {
+	itemId: string;
+	onWorldbuildingEntityChange: (itemId: string) => void;
+}) {
 	// Estado de carga para simular loading
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -41,7 +47,7 @@ function SettingsContent({ itemId }: { itemId: string }) {
 			<div className="flex h-96 items-center justify-center">
 				<div className="flex flex-col items-center gap-3">
 					<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-					<p className="text-muted-foreground text-sm">Cargando configuración...</p>
+					<p className="text-muted-foreground text-sm">Loading settings...</p>
 				</div>
 			</div>
 		);
@@ -97,7 +103,12 @@ function SettingsContent({ itemId }: { itemId: string }) {
 		case 'prompts':
 		case 'notes':
 		case 'wildcards':
-			return <WorldbuildingSettingsModern />;
+			return (
+				<WorldbuildingSettingsModern
+					defaultEntity={itemId === 'world-items' ? 'items' : itemId}
+					onEntityChange={onWorldbuildingEntityChange}
+				/>
+			);
 
 		default:
 			return (
@@ -106,10 +117,10 @@ function SettingsContent({ itemId }: { itemId: string }) {
 						<span className="text-2xl">⚙️</span>
 					</div>
 					<div className="text-center">
-						<p className="font-medium">Configuración en desarrollo</p>
+						<p className="font-medium">Settings Under Development</p>
 						<p className="text-sm">
-							La sección <code className="rounded bg-muted px-1 py-0.5 font-mono">{itemId}</code> estará disponible
-							pronto
+							The section <code className="rounded bg-muted px-1 py-0.5 font-mono">{itemId}</code> will be available
+							soon
 						</p>
 					</div>
 				</div>
@@ -157,7 +168,10 @@ export function ModernSettingsView() {
 			categories={SETTINGS_CATEGORIES}
 			onNavigate={handleNavigate}
 		>
-			<SettingsContent itemId={currentItem} />
+			<SettingsContent
+				itemId={currentItem}
+				onWorldbuildingEntityChange={(itemId) => handleNavigate('worldbuilding', itemId)}
+			/>
 		</ModernSettingsLayout>
 	);
 }

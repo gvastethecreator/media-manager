@@ -169,7 +169,7 @@ function toDocumentError(operation: string, error: unknown): DocumentError {
 
 function validateCreateInput(input: CreateDocumentInput): void {
 	if (!input.name || input.name.trim().length === 0) {
-		throw new DocumentValidationError({ field: 'name', value: input.name, reason: 'El nombre es requerido' });
+		throw new DocumentValidationError({ field: 'name', value: input.name, reason: 'The name is required' });
 	}
 	if (!input.path || input.path.trim().length === 0) {
 		throw new DocumentValidationError({ field: 'path', value: input.path, reason: 'El path es requerido' });

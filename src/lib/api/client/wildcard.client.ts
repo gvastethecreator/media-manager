@@ -19,7 +19,7 @@ export async function getWildcardFromApi(id: string): Promise<WildcardWithStats 
 		if (response.status === 404) {
 			return null;
 		}
-		throw new Error('Error al obtener wildcard');
+		throw new Error('Could not get wildcard');
 	}
 	return response.json();
 }
@@ -27,7 +27,7 @@ export async function getWildcardFromApi(id: string): Promise<WildcardWithStats 
 export async function getWildcardsFromApi(): Promise<WildcardWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener wildcards');
+		throw new Error('Could not get wildcards');
 	}
 	const result = await response.json();
 	return unwrapArrayResponse<WildcardWithStats>(result);
@@ -40,7 +40,7 @@ export async function createWildcardInApi(data: WildcardCreateInput): Promise<Wi
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear wildcard');
+		throw new Error('Could not create wildcard');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -53,7 +53,7 @@ export async function updateWildcardInApi(id: string, data: WildcardUpdateInput)
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar wildcard');
+		throw new Error('Could not update wildcard');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -62,7 +62,7 @@ export async function updateWildcardInApi(id: string, data: WildcardUpdateInput)
 export async function deleteWildcardFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar wildcard');
+		throw new Error('Could not delete wildcard');
 	}
 	await invalidateFavoriteQueries();
 }
@@ -74,6 +74,6 @@ export async function moveWildcardInApi(id: string, newParentId: string | null):
 		body: JSON.stringify({ parentId: newParentId }),
 	});
 	if (!response.ok) {
-		throw new Error('Error al mover wildcard');
+		throw new Error('Could not move wildcard');
 	}
 }

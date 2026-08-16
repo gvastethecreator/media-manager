@@ -114,11 +114,11 @@ export function FileProvider({ children }: { children: ReactNode }) {
 					entityId: item.id,
 					action: 'view',
 					userId: 'anonymous', // TODO: obtener del contexto de usuario
-					description: `Vista de ${item.name}`,
+					description: `View of ${item.name}`,
 				});
 			} catch (err) {
 				// No bloquear la UI por errores de logging
-				fileCtxLogger.error('Error registrando actividad', { error: err });
+				fileCtxLogger.error('Error recording activity', { error: err });
 			}
 		},
 		[selectFiles, logActivity]
@@ -175,7 +175,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			const targetFile = files.find((file) => file.id === fileId);
 
 			if (!targetFile) {
-				fileCtxLogger.warn('No se encontró archivo para alternar favorito', { fileId });
+				fileCtxLogger.warn('No file found when toggling favorite', { fileId });
 				return;
 			}
 
@@ -191,7 +191,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 						);
 					},
 					onError: (error) => {
-						fileCtxLogger.error('Error alternando favorito desde FileContext', { fileId, error });
+						fileCtxLogger.error('Error toggling favorite from FileContext', { fileId, error });
 					},
 				}
 			);

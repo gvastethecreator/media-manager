@@ -12,7 +12,7 @@ import {
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Cell, flexRender, HeaderGroup, Row } from '@tanstack/react-table';
+import { Cell, flexRender, HeaderGroup, Row, RowData } from '@/lib/tanstack-react-table';
 import { GripHorizontal } from 'lucide-react';
 import { CSSProperties, useId } from 'react';
 import { Button } from '@/components/ui/button';
@@ -44,7 +44,7 @@ function DataGridTableDndRowHandle({ rowId }: { rowId: string }) {
 	);
 }
 
-function DataGridTableDndRow<TData>({ row }: { row: Row<TData> }) {
+function DataGridTableDndRow<TData extends RowData>({ row }: { row: Row<any, TData> }) {
 	const { transform, transition, setNodeRef, isDragging } = useSortable({
 		id: row.id,
 	});
@@ -58,7 +58,7 @@ function DataGridTableDndRow<TData>({ row }: { row: Row<TData> }) {
 	};
 	return (
 		<DataGridTableBodyRow dndRef={setNodeRef} dndStyle={style} key={row.id} row={row}>
-			{row.getVisibleCells().map((cell: Cell<TData, unknown>, colIndex) => {
+			{row.getVisibleCells().map((cell: Cell<any, TData, unknown>, colIndex) => {
 				return (
 					<DataGridTableBodyRowCell cell={cell} key={colIndex}>
 						{flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -69,7 +69,7 @@ function DataGridTableDndRow<TData>({ row }: { row: Row<TData> }) {
 	);
 }
 
-function DataGridTableDndRows<TData>({
+function DataGridTableDndRows<TData extends RowData>({
 	handleDragEnd,
 	dataIds,
 }: {
@@ -86,7 +86,7 @@ function DataGridTableDndRows<TData>({
 			<div className="relative">
 				<DataGridTableBase>
 					<DataGridTableHead>
-						{table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>, index) => {
+						{table.getHeaderGroups().map((headerGroup: HeaderGroup<any, TData>, index) => {
 							return (
 								<DataGridTableHeadRow headerGroup={headerGroup} key={index}>
 									{headerGroup.headers.map((header, index) => {
@@ -123,7 +123,7 @@ function DataGridTableDndRows<TData>({
 							))
 						) : table.getRowModel().rows.length ? (
 							<SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
-								{table.getRowModel().rows.map((row: Row<TData>) => {
+								{table.getRowModel().rows.map((row: Row<any, any>) => {
 									return <DataGridTableDndRow key={row.id} row={row} />;
 								})}
 							</SortableContext>

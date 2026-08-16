@@ -68,7 +68,7 @@ export interface ActionCallbacks {
 }
 
 /**
- * Acción que puede ser deshecha/rehecha
+ * Action que puede ser deshecha/rehecha
  */
 export interface UndoableAction {
 	/** Callbacks de la acción */

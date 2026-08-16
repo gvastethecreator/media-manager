@@ -260,7 +260,7 @@ export async function scanFolder(folderPath: string, options: ScanFolderOptions 
 		return result;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
-		scannerLogger.error('❌ Error escaneando carpeta:', { path: normalizedPath, error });
+		scannerLogger.error('❌ Could not scan folder:', { path: normalizedPath, error });
 
 		result.error = errorMessage;
 		return result;

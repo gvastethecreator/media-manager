@@ -77,8 +77,8 @@ export function useFoldersState() {
 				lastActivity: new Date(),
 			});
 		} catch (loadErr) {
-			stateLogger.error('❌ Error cargando carpetas:', loadErr);
-			setError(loadErr instanceof Error ? loadErr.message : 'No se pudieron cargar las carpetas');
+			stateLogger.error('❌ Could not load folders:', loadErr);
+			setError(loadErr instanceof Error ? loadErr.message : 'Folders could not be loaded');
 		} finally {
 			setIsLoading(false);
 		}
@@ -94,8 +94,8 @@ export function useFoldersState() {
 			setIsLoading(false);
 			stateLogger.info('✅ Estadísticas cargadas');
 		} catch (statsErr) {
-			stateLogger.error('❌ Error cargando estadísticas:', statsErr);
-			setError(statsErr instanceof Error ? statsErr.message : 'Error cargando estadísticas');
+			stateLogger.error('❌ Could not load statistics:', statsErr);
+			setError(statsErr instanceof Error ? statsErr.message : 'Could not load statistics');
 			setIsLoading(false);
 		}
 	}, [loadFolders]);

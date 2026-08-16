@@ -44,7 +44,7 @@ export function JsonFileContentView() {
 
 	useEffect(() => {
 		if (!id) {
-			setError('ID de archivo JSON no proporcionado');
+			setError('JSON file ID was not provided');
 			return;
 		}
 
@@ -61,7 +61,7 @@ export function JsonFileContentView() {
 
 				if (!currentJsonFile) {
 					if (!isCancelled) {
-						setError('No se encontró el archivo JSON solicitado');
+						setError('The requested JSON file was not found');
 					}
 					return;
 				}
@@ -81,7 +81,7 @@ export function JsonFileContentView() {
 					`/api/files/content?assetType=json&assetId=${encodeURIComponent(currentJsonFile.id)}`
 				);
 				if (!response.ok) {
-					throw new Error('No se pudo cargar el contenido del archivo JSON');
+					throw new Error('Could not load the JSON file contents');
 				}
 
 				const rawContent = await response.text();
@@ -90,8 +90,8 @@ export function JsonFileContentView() {
 				}
 			} catch (loadError) {
 				if (!isCancelled) {
-					const message = loadError instanceof Error ? loadError.message : 'Error desconocido cargando el JSON';
-					logger.error('Error cargando detalle JSON', { id, error: message });
+					const message = loadError instanceof Error ? loadError.message : 'Unknown error while loading JSON';
+					logger.error('Could not load JSON details', { id, error: message });
 					setError(message);
 				}
 			}
@@ -106,10 +106,10 @@ export function JsonFileContentView() {
 
 	const headerDescription = useMemo(() => {
 		if (!jsonFile) {
-			return 'Detalle de archivo JSON';
+			return 'JSON file details';
 		}
 
-		return `${jsonFile.extension.toUpperCase()} · ${formatBytes(jsonFile.size)} · ${jsonFile.isValid ? 'válido' : 'con errores'}`;
+		return `${jsonFile.extension.toUpperCase()} · ${formatBytes(jsonFile.size)} · ${jsonFile.isValid ? 'valid' : 'has errors'}`;
 	}, [jsonFile]);
 
 	const handleDownload = () => {
@@ -142,7 +142,7 @@ export function JsonFileContentView() {
 		try {
 			toggleFavorite();
 		} catch (toggleError) {
-			logger.error('Error alternando favorito en JSON', {
+			logger.error('Could not toggle JSON favorite', {
 				id,
 				error: toggleError instanceof Error ? toggleError.message : toggleError,
 			});
@@ -153,17 +153,17 @@ export function JsonFileContentView() {
 		<>
 			<Button className="gap-2" onClick={() => navigate(-1)} size="sm" variant="outline">
 				<ArrowLeft className="h-4 w-4" />
-				Volver
+				Back
 			</Button>
 			{jsonFile && (
 				<>
 					<Button className="gap-2" onClick={handleCopyReference} size="sm" variant="outline">
 						<Copy className="h-4 w-4" />
-						Copiar referencia
+						Copy reference
 					</Button>
 					<Button className="gap-2" onClick={handleDownload} size="sm" variant="outline">
 						<Download className="h-4 w-4" />
-						Descargar
+						Download
 					</Button>
 					<Button
 						className="gap-2"
@@ -173,7 +173,7 @@ export function JsonFileContentView() {
 						variant={isFavorite ? 'default' : 'outline'}
 					>
 						<Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
-						{isFavorite ? 'En favoritos' : 'Favorito'}
+						{isFavorite ? 'In Favorites' : 'Add to Favorites'}
 					</Button>
 				</>
 			)}
@@ -183,15 +183,15 @@ export function JsonFileContentView() {
 	if (loading && !jsonFile) {
 		return (
 			<BaseContentView
-				description="Cargando archivo JSON..."
+				description="Loading JSON file..."
 				headerControls={headerControls}
 				icon="📋"
-				title="Detalle JSON"
+				title="JSON Details"
 			>
 				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
 						<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
-						<p className="text-muted-foreground">Cargando archivo JSON...</p>
+						<p className="text-muted-foreground">Loading JSON file...</p>
 					</div>
 				</div>
 			</BaseContentView>
@@ -201,22 +201,22 @@ export function JsonFileContentView() {
 	if (error || storeError || !jsonFile) {
 		return (
 			<BaseContentView
-				description={error || storeError || 'No se pudo cargar el archivo JSON'}
+				description={error || storeError || 'Could not load the JSON file'}
 				headerControls={headerControls}
 				icon="❌"
-				title="Detalle JSON"
+				title="JSON Details"
 			>
 				<div className="flex h-full items-center justify-center p-6">
 					<Card className="max-w-lg p-6">
 						<div className="mb-4 flex items-start gap-3">
 							<AlertCircle className="mt-0.5 h-5 w-5 text-destructive" />
 							<div>
-								<h3 className="font-semibold">No se pudo cargar el detalle JSON</h3>
+								<h3 className="font-semibold">Could not load JSON details</h3>
 								<p className="mt-1 text-muted-foreground text-sm">{error || storeError}</p>
 							</div>
 						</div>
 						<Button onClick={() => navigate(-1)} variant="outline">
-							Volver
+							Back
 						</Button>
 					</Card>
 				</div>
@@ -230,22 +230,22 @@ export function JsonFileContentView() {
 				<div className="space-y-4 p-4">
 					<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
 						<Card className="p-4">
-							<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Tamaño</p>
+							<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Size</p>
 							<p className="font-semibold text-lg">{formatBytes(jsonFile.size)}</p>
 						</Card>
 						<Card className="p-4">
-							<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Profundidad</p>
+							<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Depth</p>
 							<p className="font-semibold text-lg">{jsonFile.depth ?? jsonFile.stats.nestingDepth ?? 0}</p>
 						</Card>
 						<Card className="p-4">
-							<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Claves</p>
+							<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Keys</p>
 							<p className="font-semibold text-lg">{jsonFile.keyCount ?? jsonFile.stats.keyCount ?? 0}</p>
 						</Card>
 						<Card className="p-4">
-							<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Estado</p>
+							<p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">Status</p>
 							<div className="flex items-center gap-2">
 								<Badge variant={jsonFile.isValid ? 'default' : 'destructive'}>
-									{jsonFile.isValid ? 'JSON válido' : 'JSON inválido'}
+									{jsonFile.isValid ? 'Valid JSON' : 'Invalid JSON'}
 								</Badge>
 							</div>
 						</Card>
@@ -255,7 +255,7 @@ export function JsonFileContentView() {
 						<Card className="border-destructive/30 p-4">
 							<div className="mb-2 flex items-center gap-2 text-destructive">
 								<AlertCircle className="h-4 w-4" />
-								<h3 className="font-semibold">Errores de validación</h3>
+								<h3 className="font-semibold">Validation Errors</h3>
 							</div>
 							<p className="whitespace-pre-wrap text-muted-foreground text-sm">{jsonFile.validationErrors}</p>
 						</Card>
@@ -265,9 +265,9 @@ export function JsonFileContentView() {
 						<div className="mb-4 flex items-center gap-2">
 							<FileJson className="h-5 w-5 text-primary" />
 							<div>
-								<h3 className="font-semibold">Explorador de contenido</h3>
+								<h3 className="font-semibold">Content Explorer</h3>
 								<p className="text-muted-foreground text-sm">
-									Árbol, tarjetas, estadísticas y descarga del JSON original.
+									Tree, cards, statistics, and original JSON download.
 								</p>
 							</div>
 						</div>
@@ -275,7 +275,7 @@ export function JsonFileContentView() {
 							<JsonAdvancedViewer className="min-h-[560px]" content={content} fileName={jsonFile.name} />
 						) : (
 							<div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-								No hay contenido JSON embebido disponible para mostrar.
+								No embedded JSON content is available to display.
 							</div>
 						)}
 					</Card>

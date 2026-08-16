@@ -24,7 +24,7 @@ function parseBoundedInteger(value: string | undefined, fallback: number, minimu
 	if (value === undefined || value.trim() === '') return fallback;
 	const parsed = Number(value);
 	if (!Number.isSafeInteger(parsed) || parsed < minimum || parsed > maximum) {
-		throw new Error(`Valor SQLite inválido: ${value}. Se esperaba un entero entre ${minimum} y ${maximum}.`);
+		throw new Error(`Invalid SQLite value: ${value}. Se esperaba un entero entre ${minimum} y ${maximum}.`);
 	}
 	return parsed;
 }
@@ -46,7 +46,7 @@ export function resolveSqliteConnectionPolicy(
 	const busyTimeoutMs = parseBoundedInteger(environment.SQLITE_BUSY_TIMEOUT_MS, DEFAULT_BUSY_TIMEOUT_MS, 0, 60_000);
 	const requestedJournalMode = environment.SQLITE_JOURNAL_MODE?.trim().toLowerCase();
 	if (requestedJournalMode && requestedJournalMode !== 'wal' && requestedJournalMode !== 'delete') {
-		throw new Error('SQLITE_JOURNAL_MODE sólo admite WAL o DELETE.');
+		throw new Error('SQLITE_JOURNAL_MODE only accepts WAL or DELETE.');
 	}
 	const journalMode =
 		(requestedJournalMode as 'delete' | 'wal' | undefined) ?? (isLikelyLocalSqliteUrl(databaseUrl) ? 'wal' : null);
@@ -64,14 +64,14 @@ export function resolveSqliteConnectionPolicy(
 
 function firstNumber(rows: ArrayLike<unknown>[], pragma: string): number {
 	const value = Number(rows[0]?.[0]);
-	if (!Number.isFinite(value)) throw new Error(`SQLite no devolvió un valor numérico para ${pragma}.`);
+	if (!Number.isFinite(value)) throw new Error(`SQLite did not return a numeric value for ${pragma}.`);
 	return value;
 }
 
 function firstString(rows: ArrayLike<unknown>[], pragma: string): string {
 	const value = rows[0]?.[0];
 	if (typeof value !== 'string' && typeof value !== 'number') {
-		throw new Error(`SQLite no devolvió un valor para ${pragma}.`);
+		throw new Error(`SQLite did not return a value for ${pragma}.`);
 	}
 	return String(value).toLowerCase();
 }
@@ -86,7 +86,7 @@ export async function configureSqliteConnection(
 	await client.execute('PRAGMA foreign_keys = ON');
 
 	const foreignKeys = firstNumber((await client.execute('PRAGMA foreign_keys')).rows, 'foreign_keys') === 1;
-	if (!foreignKeys) throw new Error('SQLite rechazó PRAGMA foreign_keys=ON; la conexión no es segura para operar.');
+	if (!foreignKeys) throw new Error('SQLite rejected PRAGMA foreign_keys=ON; the connection is not safe to use.');
 
 	if (policy.journalMode) {
 		const journalMode = firstString(
@@ -94,7 +94,7 @@ export async function configureSqliteConnection(
 			'journal_mode'
 		);
 		if (journalMode !== policy.journalMode) {
-			throw new Error(`SQLite no pudo activar journal_mode=${policy.journalMode}; devolvió ${journalMode}.`);
+			throw new Error(`SQLite no pudo activar journal_mode=${policy.journalMode}; returned ${journalMode}.`);
 		}
 	}
 

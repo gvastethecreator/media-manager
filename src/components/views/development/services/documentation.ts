@@ -23,8 +23,8 @@ export async function loadDocumentationFile(filename: string): Promise<string> {
 
 		return await response.text();
 	} catch (error) {
-		clientLogger.error(`Error al cargar el archivo de documentación ${filename}:`, error);
-		return `# Error al cargar ${filename}\n\nNo se pudo cargar el archivo solicitado.`;
+		clientLogger.error(`Could not load the documentation file ${filename}:`, error);
+		return `# Error al cargar ${filename}\n\nThe requested file could not be loaded.`;
 	}
 }
 
@@ -40,7 +40,7 @@ export async function loadDocumentationFiles(filenames: string[]): Promise<Recor
 				result[filename] = await loadDocumentationFile(filename);
 			} catch (error) {
 				clientLogger.error(`Error al cargar ${filename}:`, error);
-				result[filename] = `# Error al cargar ${filename}\n\nNo se pudo cargar el archivo solicitado.`;
+				result[filename] = `# Error al cargar ${filename}\n\nThe requested file could not be loaded.`;
 			}
 		})
 	);

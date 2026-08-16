@@ -190,13 +190,13 @@ export function EntityForm({
 	initialData = {},
 	onSubmit,
 	onCancel,
-	submitLabel = 'Guardar',
-	cancelLabel = 'Cancelar',
+	submitLabel = 'Save',
+	cancelLabel = 'Cancel',
 	isLoading = false,
 	confirmBeforeSubmit = false,
-	confirmMessage = '¿Estás seguro de guardar los cambios?',
+	confirmMessage = 'Save these changes?',
 	showToastOnSuccess = true,
-	successMessage = 'Cambios guardados correctamente',
+	successMessage = 'Changes saved successfully',
 	redirectUrl,
 	formStyle = 'default',
 	className,
@@ -262,7 +262,7 @@ export function EntityForm({
 					fieldSchema = fieldSchema.min(
 						field.validation.minLength,
 						field.validation.customMessage ||
-							`${field.label} debe tener al menos ${field.validation.minLength} caracteres`
+							`${field.label} must contain at least ${field.validation.minLength} characters`
 					);
 				}
 
@@ -270,7 +270,7 @@ export function EntityForm({
 					fieldSchema = fieldSchema.max(
 						field.validation.maxLength,
 						field.validation.customMessage ||
-							`${field.label} no puede tener más de ${field.validation.maxLength} caracteres`
+							`${field.label} cannot exceed ${field.validation.maxLength} characters`
 					);
 				}
 
@@ -284,14 +284,14 @@ export function EntityForm({
 				if (field.validation.max && field.type === 'number') {
 					fieldSchema = fieldSchema.max(
 						field.validation.max,
-						field.validation.customMessage || `${field.label} no puede ser mayor a ${field.validation.max}`
+						field.validation.customMessage || `${field.label} cannot be greater than ${field.validation.max}`
 					);
 				}
 
 				if (field.validation.pattern && (field.type === 'text' || field.type === 'url')) {
 					fieldSchema = fieldSchema.regex(
 						field.validation.pattern,
-						field.validation.customMessage || `Formato de ${field.label.toLowerCase()} inválido`
+						field.validation.customMessage || `${field.label} has an invalid format`
 					);
 				}
 			}
@@ -369,7 +369,7 @@ export function EntityForm({
 				navigateWithTransition(redirectUrl);
 			}
 		} catch (error: any) {
-			toastService.error(error.message || 'Error al guardar los cambios');
+		toastService.error(error.message || 'Could not save changes');
 		} finally {
 			setIsSubmitting(false);
 			setShowConfirmation(false);
@@ -465,7 +465,7 @@ export function EntityForm({
 								>
 									<FormControl>
 										<SelectTrigger>
-											<SelectValue placeholder={field.placeholder || `Seleccionar ${field.label.toLowerCase()}`} />
+										<SelectValue placeholder={field.placeholder || `Select ${field.label.toLowerCase()}`} />
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
@@ -638,13 +638,13 @@ export function EntityForm({
 				{showConfirmation && (
 					<div className="fixed inset-0 z-50 flex items-center justify-center bg-muted/50">
 						<div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg">
-							<h3 className="mb-4 font-medium text-lg">Confirmar acción</h3>
+							<h3 className="mb-4 font-medium text-lg">Confirm Action</h3>
 							<p className="mb-6">{confirmMessage}</p>
 							<div className="flex justify-end gap-3">
 								<Button onClick={() => setShowConfirmation(false)} variant="outline">
-									Cancelar
+									Cancel
 								</Button>
-								<Button onClick={() => form.handleSubmit(handleSubmit)()}>Confirmar</Button>
+								<Button onClick={() => form.handleSubmit(handleSubmit)()}>Confirm</Button>
 							</div>
 						</div>
 					</div>

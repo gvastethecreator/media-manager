@@ -45,7 +45,7 @@ export async function folderIdExists(id: string): Promise<boolean> {
 
 		return result.length > 0;
 	} catch (error) {
-		console.error('Error verificando existencia de ID de carpeta:', error);
+		console.error('Could not verify folder ID existence:', error);
 		return false;
 	}
 }

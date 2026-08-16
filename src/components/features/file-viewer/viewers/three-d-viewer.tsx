@@ -160,15 +160,15 @@ function ErrorPlaceholder({
 	return (
 		<div className="flex h-full flex-col items-center justify-center p-8 text-center">
 			<BoxIcon className="mb-4 h-16 w-16 text-muted-foreground/30" />
-			<h3 className="mb-2 font-semibold text-lg">{error ? 'Error al cargar modelo' : 'Vista previa limitada'}</h3>
+			<h3 className="mb-2 font-semibold text-lg">{error ? 'Could not load model' : 'Limited preview'}</h3>
 			<p className="mb-4 max-w-md text-muted-foreground text-sm">
 				{error ||
-					'Algunos formatos 3D requieren software especializado. Descarga el archivo para verlo en una aplicacion compatible.'}
+					'Some 3D formats require specialized software. Download the file to open it in a compatible application.'}
 			</p>
 			{fileName && <p className="mb-4 text-muted-foreground text-xs">{fileName}</p>}
 			<Button onClick={onDownload} variant="outline">
 				<Download className="mr-2 h-4 w-4" />
-				Descargar archivo
+				Download file
 			</Button>
 		</div>
 	);
@@ -185,14 +185,14 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 
 	const handleError = useCallback((err: unknown) => {
 		logger.error('Error loading 3D model:', err);
-		setError('No se pudo cargar el modelo 3D. El formato puede no ser compatible o el archivo esta corrupto.');
+		setError('Could not load the 3D model. The format may be unsupported or the file may be corrupted.');
 		setIsLoading(false);
 	}, []);
 
 	const handleDownload = useCallback(() => {
 		const link = document.createElement('a');
 		link.href = src;
-		link.download = fileName || 'modelo-3d';
+		link.download = fileName || '3d-model';
 		link.click();
 	}, [src, fileName]);
 
@@ -219,7 +219,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 		return (
 			<Card className={cn('flex h-full items-center justify-center', className)}>
 				<ErrorPlaceholder
-					error={error || (format ? undefined : `Formato .${fileExtension} no soportado para vista previa`)}
+					error={error || (format ? undefined : `.${fileExtension} files are not supported for preview`)}
 					fileName={fileName}
 					onDownload={handleDownload}
 				/>
@@ -231,7 +231,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 		<Card className={cn('relative h-full overflow-hidden', className)}>
 			<div className="absolute inset-0 bg-gradient-to-b from-background to-muted">
 				<ErrorBoundary
-					fallback={<ErrorPlaceholder error="No se pudo renderizar la vista 3D." fileName={fileName} onDownload={handleDownload} />}
+					fallback={<ErrorPlaceholder error="Could not render the 3D view." fileName={fileName} onDownload={handleDownload} />}
 				>
 					<Canvas
 						camera={{ position: [0, 1.6, 4.2], fov: 50 }}
@@ -249,7 +249,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 				<div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80">
 					<div className="flex flex-col items-center gap-2">
 						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-						<p className="text-muted-foreground text-sm">Cargando modelo 3D...</p>
+						<p className="text-muted-foreground text-sm">Loading 3D model...</p>
 					</div>
 				</div>
 			)}
@@ -257,7 +257,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 			<div className="absolute top-4 right-4 left-4 z-10 flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<Button
-						aria-label="Mostrar informacion del modelo"
+						aria-label="Show model information"
 						className="bg-background/80 backdrop-blur"
 						onClick={toggleInfo}
 						size="icon"
@@ -266,7 +266,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 						<Info className="h-4 w-4" />
 					</Button>
 					<Button
-						aria-label="Reiniciar vista 3D"
+						aria-label="Reset 3D view"
 						className="bg-background/80 backdrop-blur"
 						onClick={handleReset}
 						size="icon"
@@ -277,7 +277,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 				</div>
 				<Button className="bg-background/80 backdrop-blur" onClick={handleDownload} size="sm" variant="secondary">
 					<Download className="mr-2 h-4 w-4" />
-					Descargar
+					Download
 				</Button>
 			</div>
 
@@ -285,19 +285,19 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 				<div className="absolute right-4 bottom-4 left-4 z-10 rounded-lg bg-background/95 p-4 backdrop-blur">
 					<div className="flex items-start justify-between">
 						<div>
-							<h4 className="mb-1 font-semibold text-sm">{fileName || 'Modelo 3D'}</h4>
-							<p className="text-muted-foreground text-xs">Formato: {fileExtension.toUpperCase()}</p>
+							<h4 className="mb-1 font-semibold text-sm">{fileName || '3D Model'}</h4>
+							<p className="text-muted-foreground text-xs">Format: {fileExtension.toUpperCase()}</p>
 						</div>
 						<Button onClick={closeInfo} size="sm" variant="ghost">
-							Cerrar
+							Close
 						</Button>
 					</div>
 					<div className="mt-2 text-muted-foreground text-xs">
-						<p>Controles:</p>
+						<p>Controls:</p>
 						<ul className="mt-1 list-inside list-disc">
-							<li>Arrastrar para rotar</li>
-							<li>Scroll para zoom</li>
-							<li>Clic derecho para pan</li>
+							<li>Drag to rotate</li>
+							<li>Scroll to zoom</li>
+							<li>Right-click to pan</li>
 						</ul>
 					</div>
 				</div>
@@ -305,7 +305,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 
 			{!(showInfo || isLoading) && (
 				<div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-background/80 px-3 py-1.5 text-muted-foreground text-xs backdrop-blur">
-					Arrastrar para rotar - Scroll para zoom
+					Drag to rotate - Scroll to zoom
 				</div>
 			)}
 		</Card>

@@ -56,7 +56,7 @@ function ErrorFallback({ error, onReset }: { error: Error | null; onReset: () =>
 				initial={{ y: 20, opacity: 0 }}
 				transition={{ delay: 0.1, duration: 0.5 }}
 			>
-				Algo salió mal
+				Something went wrong
 			</motion.h1>
 
 			<motion.p
@@ -65,7 +65,7 @@ function ErrorFallback({ error, onReset }: { error: Error | null; onReset: () =>
 				initial={{ y: 20, opacity: 0 }}
 				transition={{ delay: 0.2, duration: 0.5 }}
 			>
-				Ha ocurrido un error inesperado. Nuestro equipo ha sido notificado.
+				An unexpected error occurred. The team has been notified.
 			</motion.p>
 
 			{error && (
@@ -96,7 +96,7 @@ function ErrorFallback({ error, onReset }: { error: Error | null; onReset: () =>
 			>
 				<Button className="gap-2" onClick={handleReload} size="lg" variant="outline">
 					<RefreshCw className="h-4 w-4" />
-					Recargar página
+					Reload page
 				</Button>
 				<Button className="gap-2" onClick={handleGoHome} size="lg">
 					<Home className="h-4 w-4" />
@@ -125,7 +125,7 @@ export class ErrorBoundary extends Component<Props, State> {
 		this.setState({ errorInfo });
 
 		// Log del error
-		clientLogger.error('Error Boundary capturó error:', {
+		clientLogger.error('Error Boundary captured an error:', {
 			error: error.message,
 			stack: error.stack,
 			componentStack: errorInfo.componentStack,

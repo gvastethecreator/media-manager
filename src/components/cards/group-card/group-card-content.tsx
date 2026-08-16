@@ -86,7 +86,7 @@ export function GroupCardContent({
 						<div className="flex items-center space-x-1">
 							<FilterIcon className="h-4 w-4" style={{ color: primaryColor }} />
 							<span className="font-medium">
-								{filtersCount} {filtersCount === 1 ? 'filtro' : 'filtros'}
+								{filtersCount} {filtersCount === 1 ? 'filter' : 'filters'}
 							</span>
 						</div>
 					)}
@@ -172,7 +172,7 @@ export function GroupCardContent({
 
 					{filtersCount > 0 && (
 						<Badge className="h-5 px-1" variant="outline">
-							<span className="text-sm">{filtersCount} filtros</span>
+							<span className="text-sm">{filtersCount} filters</span>
 						</Badge>
 					)}
 

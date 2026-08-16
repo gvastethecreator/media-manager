@@ -55,16 +55,16 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 	className,
 }) => {
 	if (isLoading) {
-		return <LoadingScreen message="Cargando favoritos..." />;
+		return <LoadingScreen message="Loading favorites..." />;
 	}
 
 	if (error) {
 		return (
 			<EmptyState
-				actions={<Button onClick={handleRetry}>Reintentar</Button>}
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				actions={<Button onClick={handleRetry}>Retry</Button>}
+				description={error instanceof Error ? error.message : 'An unexpected error occurred'}
 				icon={Heart}
-				title="Error al cargar favoritos"
+				title="Could not load favorites"
 			/>
 		);
 	}
@@ -74,19 +74,19 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 			<div className="p-6">
 				<div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 					<div>
-						<h2 className="font-bold text-xl">Vista de Favoritos</h2>
+						<h2 className="font-bold text-xl">Favorites</h2>
 						<p className="text-muted-foreground text-sm">
-							Los favoritos se agregan y se quitan desde las entidades reales de la aplicación.
+							Add or remove favorites from each item in the application.
 						</p>
 					</div>
 					<div className="w-full md:max-w-sm">
 						<Label className="sr-only" htmlFor="favoritesSearch">
-							Buscar favoritos
+							Search favorites
 						</Label>
 						<Input
 							id="favoritesSearch"
 							onChange={(e) => setLocalSearch(e.target.value)}
-							placeholder="Buscar favoritos..."
+							placeholder="Search favorites..."
 							value={localSearch}
 						/>
 					</div>

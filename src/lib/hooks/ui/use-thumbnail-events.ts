@@ -54,8 +54,8 @@ export function useThumbnailEvents() {
 				};
 
 				eventSource.onerror = (error) => {
-					serverLogger.error('❌ Error en conexión SSE:', error);
-					setError('Error en la conexión de eventos');
+					serverLogger.error('❌ SSE connection error:', error);
+					setError('Event connection error');
 					reconnect();
 				};
 
@@ -74,7 +74,7 @@ export function useThumbnailEvents() {
 						}
 						return data;
 					} catch (error: unknown) {
-						serverLogger.error('❌ Error procesando evento:', error);
+						serverLogger.error('❌ Could not process event:', error);
 						return null;
 					}
 				};
@@ -109,16 +109,16 @@ export function useThumbnailEvents() {
 					}
 				};
 			} catch (error) {
-				serverLogger.error('❌ Error creando conexión SSE:', error);
-				setError(error instanceof Error ? error.message : 'Error al establecer la conexión');
+				serverLogger.error('❌ Could not create SSE connection:', error);
+				setError(error instanceof Error ? error.message : 'Could not establish the connection');
 				reconnect();
 			}
 		};
 
 		const reconnect = () => {
 			if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-				serverLogger.error('❌ Máximo número de intentos de reconexión alcanzado');
-				setError('No se pudo restablecer la conexión después de varios intentos');
+				serverLogger.error('❌ Maximum reconnection attempts reached');
+				setError('Could not restore the connection after several attempts');
 				return;
 			}
 

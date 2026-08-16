@@ -26,11 +26,11 @@ export function GlobalReindexTerminal() {
 				<div className="flex items-center justify-between border-b border-border/30 bg-muted/40 px-3 py-2">
 					<div className="flex items-center gap-2">
 						<Terminal className="h-4 w-4 text-primary" />
-						<span className="font-mono text-sm font-semibold">Terminal de Reindexado</span>
+						<span className="font-mono text-sm font-semibold">Reindex Terminal</span>
 					</div>
 					<div className="flex items-center gap-1">
 						<Button
-							aria-label={isMinimized ? 'Expandir terminal de reindexado' : 'Minimizar terminal de reindexado'}
+							aria-label={isMinimized ? 'Expand reindex terminal' : 'Minimize reindex terminal'}
 							variant="ghost"
 							size="icon"
 							className="h-6 w-6 rounded-sm opacity-70 hover:opacity-100"
@@ -39,7 +39,7 @@ export function GlobalReindexTerminal() {
 							{isMinimized ? <Maximize2 className="h-3.5 w-3.5" /> : <Minimize2 className="h-3.5 w-3.5" />}
 						</Button>
 						<Button
-							aria-label="Cerrar terminal de reindexado"
+							aria-label="Close reindex terminal"
 							variant="ghost"
 							size="icon"
 							className="h-6 w-6 rounded-sm opacity-70 hover:bg-destructive hover:text-destructive-foreground hover:opacity-100"

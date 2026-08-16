@@ -4,6 +4,11 @@
  */
 
 import { Data } from 'effect';
+import { errorCauseMessages } from '@/lib/errors/error-cause-chain';
+import {
+	isTaxonomyArtifactInlineMutationError,
+	TaxonomyArtifactInlineMutationError,
+} from '@/services/taxonomy/file-backed/mutation-permit';
 
 // ============= Place Errors =============
 
@@ -184,11 +189,22 @@ export class PromptUnknownError extends Data.TaggedError('PromptUnknownError')<{
 
 export const fromUnknownPromptError = (operation: string, error: unknown): PromptError => {
 	if (error instanceof Error) {
-		const msg = error.message.toLowerCase();
+		if (isTaxonomyArtifactInlineMutationError(error)) {
+			return new TaxonomyArtifactInlineMutationError({
+				message: 'El Prompt es file-backed; usa el editor canónico para modificarlo o eliminarlo.',
+			});
+		}
+		const messages = errorCauseMessages(error);
+		const msg = messages[0] ?? '';
 		if (msg.includes('not found')) {
 			return new PromptNotFound({ promptId: 'unknown' });
 		}
-		if (msg.includes('unique')) {
+		if (
+			messages.some(
+				(message) =>
+					message.includes('unique') && (message.includes('prompt.name') || message.includes('prompt_name_key'))
+			)
+		) {
 			return new PromptNameConflict({ name: 'unknown' });
 		}
 		return new PromptDatabaseError({ operation, message: error.message });
@@ -201,5 +217,6 @@ export type PromptError =
 	| PromptValidationError
 	| PromptNameConflict
 	| PromptHasRelationsError
+	| TaxonomyArtifactInlineMutationError
 	| PromptDatabaseError
 	| PromptUnknownError;

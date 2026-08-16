@@ -95,7 +95,7 @@ export function formatActivityDate(date: Date | string): string {
 		month: 'short',
 		year: 'numeric',
 	};
-	return activityDate.toLocaleDateString('es-ES', options);
+	return activityDate.toLocaleDateString('en-US', options);
 }
 
 /**

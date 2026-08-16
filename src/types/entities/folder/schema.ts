@@ -11,7 +11,7 @@ import { z } from 'zod';
  */
 export const FolderBaseSchema = z.object({
 	id: z.string().uuid('ID debe ser un UUID válido'),
-	name: z.string().min(1, 'El nombre es requerido').max(255, 'Nombre muy largo'),
+	name: z.string().min(1, 'The name is required').max(255, 'Nombre muy largo'),
 	description: z.string().max(1000, 'Descripción muy larga').nullable(),
 	path: z.string().min(1, 'La ruta es requerida'),
 	emoji: z.string().max(10, 'Emoji muy largo').nullable(),
@@ -36,7 +36,7 @@ export const FolderBaseSchema = z.object({
 export const CreateFolderSchema = z.object({
 	name: z
 		.string()
-		.min(1, 'El nombre es requerido')
+		.min(1, 'The name is required')
 		.max(255, 'El nombre no puede exceder 255 caracteres')
 		.regex(/^[^<>:"/\\|?*]+$/, 'El nombre contiene caracteres no válidos'),
 	description: z.string().max(1000, 'La descripción no puede exceder 1000 caracteres').optional().nullable(),
@@ -62,7 +62,7 @@ export const CreateFolderSchema = z.object({
 export const UpdateFolderSchema = z.object({
 	name: z
 		.string()
-		.min(1, 'El nombre es requerido')
+		.min(1, 'The name is required')
 		.max(255, 'El nombre no puede exceder 255 caracteres')
 		.regex(/^[^<>:"/\\|?*]+$/, 'El nombre contiene caracteres no válidos')
 		.optional(),

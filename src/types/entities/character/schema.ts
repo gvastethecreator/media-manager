@@ -102,7 +102,7 @@ const safeJsonParse = (defaultValue: unknown) => (val: unknown) => {
  */
 export const CharacterSchema = BaseEntitySchema.extend({
 	id: z.string().cuid(),
-	name: z.string().min(1, 'El nombre es obligatorio'),
+	name: z.string().min(1, 'The name is required'),
 	description: z.string().optional(),
 	level: z.number().int().min(1).max(100).default(1),
 	class: z.string(),
@@ -114,7 +114,7 @@ export const CharacterSchema = BaseEntitySchema.extend({
 		.string()
 		.refine(
 			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
-			'Color debe ser un valor hexadecimal o una variable CSS válida'
+			'Color must be a valid hexadecimal value or CSS variable'
 		)
 		.default('var(--entity-character)'),
 

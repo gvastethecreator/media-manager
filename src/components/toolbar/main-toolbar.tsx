@@ -86,7 +86,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 						className="h-7 w-7 hover:bg-accent"
 						onClick={toggleLeftPanelCollapse}
 						size="icon"
-						title={isLeftPanelCollapsed ? 'Abrir panel izquierdo' : 'Cerrar panel izquierdo'}
+						title={isLeftPanelCollapsed ? 'Open left panel' : 'Close left panel'}
 						variant="ghost"
 					>
 						{isLeftPanelCollapsed ? (
@@ -138,7 +138,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 						className="h-7 w-7 hover:bg-accent"
 						onClick={toggleRightPanelCollapse}
 						size="icon"
-						title={isRightPanelCollapsed ? 'Abrir panel derecho' : 'Cerrar panel derecho'}
+						title={isRightPanelCollapsed ? 'Open right panel' : 'Close right panel'}
 						variant="ghost"
 					>
 						{isRightPanelCollapsed ? (

@@ -19,7 +19,7 @@ export async function seedCollections(db: LibSQLDatabase<Record<string, never>>)
 			{
 				id: generateReadableId('collection', 'Biblioteca Principal', 1),
 				name: 'Biblioteca Principal',
-				description: 'Colección principal de recursos',
+				description: 'Main resource collection',
 				emoji: '📚',
 				color: '#3b82f6',
 				featuredImage: null,
@@ -28,7 +28,7 @@ export async function seedCollections(db: LibSQLDatabase<Record<string, never>>)
 			{
 				id: generateReadableId('collection', 'Archivo Personal', 1),
 				name: 'Archivo Personal',
-				description: 'Colección personal privada',
+				description: 'Private personal collection',
 				emoji: '🗃️',
 				color: '#64748b',
 				featuredImage: null,
@@ -56,9 +56,9 @@ export async function seedCollections(db: LibSQLDatabase<Record<string, never>>)
 
 		await db.insert(collections).values(sampleCollections);
 
-		seedLogger.success(`✅ ${sampleCollections.length} colecciones creadas`);
+		seedLogger.success(`✅ ${sampleCollections.length} collections created`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando colecciones:', error);
+		seedLogger.error('❌ Could not create collections:', error);
 		throw error;
 	}
 }

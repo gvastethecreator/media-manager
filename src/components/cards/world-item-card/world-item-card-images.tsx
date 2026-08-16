@@ -54,7 +54,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 						// Mostrar mensaje si no hay imágenes
 						<div className="col-span-full row-span-full flex flex-col items-center justify-center p-4 text-center">
 							<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
-							<p className="text-sm opacity-70">No hay imágenes</p>
+							<p className="text-sm opacity-70">No images</p>
 						</div>
 					) : (
 						// Mostrar las imágenes disponibles
@@ -62,7 +62,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 							{images.map((image, index) => (
 								<div className="relative h-full w-full overflow-hidden" key={image.id}>
 									<img
-										alt={`Imagen ${index + 1}`}
+								alt={`Image ${index + 1}`}
 										className="h-full w-full object-cover"
 										loading="lazy"
 										src={image.thumbnailUrl}

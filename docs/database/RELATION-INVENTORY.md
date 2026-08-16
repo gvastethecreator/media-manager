@@ -1,18 +1,21 @@
 # Inventario de relaciones conceptuales
 
-`scripts/db/orphan-inventory.ts` mantiene un catálogo ejecutable de 90 relaciones. Desde `0001_relational_integrity`,
+`scripts/db/orphan-inventory.ts` mantiene un catálogo ejecutable de 93 relaciones: 84 directas, una compuesta y ocho
+polimórficas. Desde `0001_relational_integrity`,
 las relaciones directas soportadas por SQLite también tienen FK físicas; el catálogo sigue siendo necesario para las
 referencias polimórficas, compatibilidad legacy y diagnóstico antes/después de upgrades:
 
-<!-- relation-catalog-counts: total=90 direct=84 composite=1 polymorphic=5 junctions=28 endpoints=56 -->
+<!-- relation-catalog-counts: total=93 direct=84 composite=1 polymorphic=8 junctions=28 endpoints=56 -->
 
 - 56 extremos de 28 junctions de Group/Image/Video/Album/Character hacia organización, taxonomía y worldbuilding;
 - placements `folderId` de siete tablas de archivos hacia `Folder`;
 - nueve jerarquías `parentId` de Character/Collection/Concept/Folder/Place/Prompt/Tag/Wildcard/WorldItem;
-- doce referencias directas adicionales: siete de Settings/Profile/UploadedImage/FileStats/Favorite, `Image.noteId`,
-  el enlace expand-contract `Image.assetId` y cuatro de `Asset`/`SourceFile`/`MediaRoot`;
+- doce referencias directas adicionales: `Settings.profileId`, `Profile.settingsId`, `Profile.imageId`,
+  `UploadedImage.imageId`, `FileStats.fileId`, `Favorite.profileId`, `Image.noteId`, el enlace expand-contract
+  `Image.assetId`, `SourceFile.assetId`, `SourceFile.rootId`, `SourceFile.folderId` y `Asset.primarySourceFileId`;
 - una relación compuesta que exige que el primary Source File pertenezca al mismo Asset;
-- cinco referencias polimórficas de Favorite/Thumbnail/Metadata/Activity/EntityAggregates.
+- ocho referencias polimórficas de `Favorite`, `Thumbnail`, `Metadata`, `Activity`, `EntityAggregates`,
+  `TaxonomyArtifact` y los extremos `source`/`target` de `SemanticRelation`.
 
 El inventario abre SQLite en modo read-only y entrega únicamente `count`, `technicalIds`, nombre del contrato y política.
 No serializa paths, nombres de medios, metadata ni contenido. Las muestras son hashes técnicos SHA-256 truncados a 24

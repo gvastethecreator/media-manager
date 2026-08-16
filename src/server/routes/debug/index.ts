@@ -124,7 +124,7 @@ router.get('/system-stats', async (_req, res) => {
 		res.json(formattedStats);
 	} catch (error) {
 		res.status(500).json({
-			error: 'Error al obtener estadísticas del sistema',
+			error: 'Could not get system statistics',
 			message: error instanceof Error ? error.message : String(error),
 		});
 	}

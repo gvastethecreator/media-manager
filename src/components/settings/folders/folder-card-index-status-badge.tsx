@@ -19,25 +19,25 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 			case 'indexed':
 				return (
 					<CircleCheckBig className="h-3 w-3 text-success">
-						<title>Indexado</title>
+						<title>Indexed</title>
 					</CircleCheckBig>
 				);
 			case 'outdated':
 				return (
 					<TimerReset className="h-3 w-3 text-warning">
-						<title>Desactualizado</title>
+						<title>Outdated</title>
 					</TimerReset>
 				);
 			case 'pending':
 				return (
 					<CircleDashed className="h-3 w-3 text-muted-foreground">
-						<title>Pendiente</title>
+						<title>Pending</title>
 					</CircleDashed>
 				);
 			case 'not_found':
 				return (
 					<CircleAlert className="h-3 w-3 text-destructive">
-						<title>No encontrado</title>
+						<title>Not found</title>
 					</CircleAlert>
 				);
 			case 'error':
@@ -49,7 +49,7 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 			default:
 				return (
 					<CircleDashed className="h-3 w-3 text-muted-foreground">
-						<title>Pendiente</title>
+						<title>Pending</title>
 					</CircleDashed>
 				);
 		}
@@ -58,17 +58,17 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 	const getStatusLabel = () => {
 		switch (status) {
 			case 'indexed':
-				return 'Indexado';
+				return 'Indexed';
 			case 'outdated':
-				return 'Desactualizado';
+				return 'Outdated';
 			case 'pending':
-				return 'Pendiente';
+				return 'Pending';
 			case 'not_found':
-				return 'No encontrado';
+				return 'Not found';
 			case 'error':
 				return 'Error';
 			default:
-				return 'Pendiente';
+				return 'Pending';
 		}
 	};
 
@@ -76,13 +76,13 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 
 	let tooltipContent: string;
 	if (status === 'not_found') {
-		tooltipContent = 'Carpeta no encontrada en el sistema';
+		tooltipContent = 'Folder not found in the system';
 	} else if (status === 'error') {
-		tooltipContent = 'Error en la carpeta';
+		tooltipContent = 'Folder error';
 	} else if (lastIndexed) {
-		tooltipContent = `Última indexación: ${formatDate(lastIndexed)} (${lastIndexed.toLocaleTimeString()})`;
+		tooltipContent = `Last indexed: ${formatDate(lastIndexed)} (${lastIndexed.toLocaleTimeString()})`;
 	} else {
-		tooltipContent = 'Nunca indexado';
+		tooltipContent = 'Never indexed';
 	}
 
 	return (

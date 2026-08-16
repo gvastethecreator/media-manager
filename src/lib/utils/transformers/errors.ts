@@ -125,5 +125,5 @@ export function handleTransformerError(error: unknown): TransformerError {
 		return new TransformerError(error.message);
 	}
 
-	return new TransformerError('Error desconocido en el transformer');
+	return new TransformerError('Unknown transformer error');
 }

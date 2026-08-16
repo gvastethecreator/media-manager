@@ -61,42 +61,42 @@ export function WorldItemsView(_props: ViewProps) {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Objetos del Mundo</h2>
+				<h2 className="mb-4 font-bold text-xl">World Items</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Objeto'}
+					{showForm ? 'Cancel' : 'Create Item'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Objeto</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Item</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="itemName">Nombre</Label>
+							<Label htmlFor="itemName">Name</Label>
 							<Input
 								id="itemName"
 								onChange={(e) => setNewItemName(e.target.value)}
-								placeholder="Nombre del objeto"
+								placeholder="Item name"
 								value={newItemName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="itemDescription">Descripción</Label>
+							<Label htmlFor="itemDescription">Description</Label>
 							<Textarea
 								id="itemDescription"
 								onChange={(e) => setNewItemDescription(e.target.value)}
-								placeholder="Descripción del objeto (opcional)"
+								placeholder="Item description (optional)"
 								value={newItemDescription}
 							/>
 						</div>
-						<Button onClick={handleCreateWorldItem}>Guardar Objeto</Button>
+						<Button onClick={handleCreateWorldItem}>Save Item</Button>
 					</div>
 				)}
 
 				{(!worldItems || worldItems.length === 0) && !showForm ? (
 					<EmptyState
-						description="Los objetos del mundo te ayudan a organizar tus imágenes. Crea un nuevo objeto del mundo."
+						description="World items help organize your images. Create a new world item."
 						icon={Box}
-						title="No hay objetos del mundo"
+						title="No world items yet"
 					/>
 				) : (
 					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">

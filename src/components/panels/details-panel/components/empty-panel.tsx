@@ -20,15 +20,15 @@ export const EmptyPanel: React.FC<EmptyPanelProps> = ({ className = '' }) => {
 
 			{/* Texto principal */}
 			<div className="stack-xs text-center">
-				<p className="heading-sm text-foreground/80">Ningún elemento seleccionado</p>
-				<p className="body-sm text-muted-foreground">Selecciona un archivo o carpeta para ver sus detalles</p>
+				<p className="heading-sm text-foreground/80">No item selected</p>
+				<p className="body-sm text-muted-foreground">Select a file or folder to view its details</p>
 			</div>
 
 			{/* Hint adicional */}
 			<div className="mt-2 flex items-center gap-2 rounded-dt-sm bg-muted/30 px-3 py-1.5">
 				<span className="text-muted-foreground text-xs">
 					<kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">Click</kbd>
-					{' para seleccionar'}
+					{' to select'}
 				</span>
 			</div>
 		</div>

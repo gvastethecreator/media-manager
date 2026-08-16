@@ -76,34 +76,34 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'h-full'}>
 			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Grupos</h2>
+				<h2 className="mb-4 font-bold text-xl">Groups</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Grupo'}
+					{showForm ? 'Cancel' : 'Create Group'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Grupo</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Group</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="groupName">Nombre</Label>
+							<Label htmlFor="groupName">Name</Label>
 							<Input
 								id="groupName"
 								onChange={(e) => setNewGroupName(e.target.value)}
-								placeholder="Nombre del grupo"
+								placeholder="Group name"
 								value={newGroupName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="groupDescription">Descripción</Label>
+							<Label htmlFor="groupDescription">Description</Label>
 							<Textarea
 								id="groupDescription"
 								onChange={(e) => setNewGroupDescription(e.target.value)}
-								placeholder="Descripción del grupo (opcional)"
+								placeholder="Group description (optional)"
 								value={newGroupDescription}
 							/>
 						</div>
-						<Button onClick={handleCreateGroup}>Guardar Grupo</Button>
+						<Button onClick={handleCreateGroup}>Save Group</Button>
 					</div>
 				)}
 
@@ -118,7 +118,7 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 						{optimisticGroups.map((group, index) => {
 							// Verificar que el grupo tenga un id válido
 							if (!group?.id) {
-								clientLogger.error('Grupo sin id válido:', group);
+								clientLogger.error('Group has no valid ID:', group);
 								return null;
 							}
 

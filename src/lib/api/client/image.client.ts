@@ -79,7 +79,7 @@ export async function getImagesFromApi(options: GetImagesOptions = {}): Promise<
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.error || 'Error al obtener las imágenes');
+		throw new Error(errorData.error || 'Could not get images');
 	}
 
 	const payload = (await response.json()) as {
@@ -117,7 +117,7 @@ export async function getImageFromApi(id: string): Promise<ImageWithStats> {
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.error || `Error al obtener la imagen ${id}`);
+		throw new Error(errorData.error || `Could not get the image ${id}`);
 	}
 
 	return response.json();
@@ -140,7 +140,7 @@ export async function updateImageInApi(id: string, data: ImageUpdateInput): Prom
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.error || 'Error al actualizar la imagen');
+		throw new Error(errorData.error || 'Could not update the image');
 	}
 
 	await invalidateFavoriteQueries();
@@ -158,7 +158,7 @@ export async function deleteImageFromApi(id: string): Promise<void> {
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.error || 'Error al eliminar la imagen');
+		throw new Error(errorData.error || 'Could not delete the image');
 	}
 }
 

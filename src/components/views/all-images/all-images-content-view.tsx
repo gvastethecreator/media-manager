@@ -33,16 +33,16 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 		return <LoadingScreen />;
 	}
 
-	// El FileBrowser maneja el estado vacío internamente
+	// FileBrowser handles its empty state internally.
 	return (
 		<div className="h-full">
-			{/* Toolbar con controles superiores */}
+			{/* Toolbar with primary controls. */}
 			<div className="flex items-center justify-between gap-3 border-border border-b bg-background/40 px-3 py-2 backdrop-blur-sm">
 				<div className="flex min-w-0 items-center gap-3">
 					<div className="min-w-0">
-						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">Todas las Imágenes</h2>
+						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">All Images</h2>
 						<p className="truncate text-muted-foreground text-xs leading-tight">
-							{images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'} en total
+							{images?.length || 0} {(images?.length || 0) === 1 ? 'image' : 'images'} total
 						</p>
 					</div>
 				</div>
@@ -50,13 +50,13 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 					<Button asChild variant="outline">
 						<a href="/files">
 							<FolderUp aria-hidden="true" className="mr-2 h-4 w-4" />
-							Gestionar reindexado
+							Manage reindexing
 						</a>
 					</Button>
 				</div>
 			</div>
 
-			{/* FileBrowser para mostrar todas las imágenes */}
+			{/* FileBrowser displays the complete image collection. */}
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
@@ -72,12 +72,12 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 				/>
 			</div>
 
-			{/* Footer con información adicional */}
+			{/* Collection summary. */}
 			{images && images.length > 0 && (
 				<div className="border-border border-t bg-background/40 px-3 py-2">
 					<div className="flex items-center justify-between text-muted-foreground text-sm">
 						<span>
-							Mostrando {images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'}
+							Showing {images?.length || 0} {(images?.length || 0) === 1 ? 'image' : 'images'}
 						</span>
 					</div>
 				</div>
@@ -86,7 +86,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 			<Button asChild className="fixed right-4 bottom-4 z-50" variant="primary">
 				<a href="/files">
 					<FolderUp aria-hidden="true" className="mr-2 h-4 w-4" />
-					Abrir explorador de archivos
+					Open file browser
 				</a>
 			</Button>
 		</div>
