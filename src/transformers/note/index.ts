@@ -1,101 +1,32 @@
 /**
- * @file Índice de transformadores para la entidad Note
+ * @file Exportaciones principales del transformador Note
  * @module transformers/note
- 
+ * @description Barrel file que centraliza las exportaciones del transformador Note.
+ * Las implementaciones CRUD están distribuidas en archivos específicos.
  */
 
-import { TransformerError } from '@/lib/errors/transformer-error';
-import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-	NoteComplete,
-	NoteCreateInput,
-	NoteFilters,
-	NoteSearchOptions,
-	NoteSearchResult,
-	NoteUpdateInput,
-} from '@/types/entities/note/types';
+// --- Mappers ---
+export {
+	mapCreateNoteDataToDrizzle,
+	mapNoteFiltersToDrizzle,
+	mapNoteSearchOptionsToDrizzle,
+	mapUpdateNoteDataToDrizzle,
+	toCreateNoteData,
+	toNoteWithStats,
+	toUpdateNoteData,
+} from './mappers';
 
-// 📊 Logger específico para NoteTransformer
-const logger = serverLogger.withContext('NoteTransformer');
+// --- Schemas ---
+export * from './schema';
 
-/**
- * Busca notas según los filtros proporcionados
- */
-export async function searchNotes(
-	_filters: NoteFilters = {},
-	_options: NoteSearchOptions = {}
-): Promise<NoteSearchResult> {
-	// Lógica de búsqueda con Drizzle (a implementar)
-	// TODO: Implementar lógica de búsqueda con Drizzle
-	return {
-		items: [],
-		total: 0,
-		hasMore: false,
-	};
-}
+// --- Serializers ---
+export { fromDrizzleNote, validateNote } from './serializers';
 
-/**
- * Obtiene una nota por su ID
- */
-export async function getNoteById(
-	_id: string,
-	_options: {
-		includeRelations?: boolean;
-		includeUI?: boolean;
-		throwIfNotFound?: boolean;
-	} = {}
-): Promise<NoteComplete | null> {
-	// Lógica de obtención con Drizzle (a implementar)
-	// TODO: Implementar lógica de obtención con Drizzle
-	return null;
-}
+// --- Transformers ---
+export * from './transformer';
 
-/**
- * Obtiene varias notas por sus IDs
- */
-export async function getNotesByIds(
-	_ids: string[],
-	_options: {
-		includeRelations?: boolean;
-		includeUI?: boolean;
-	} = {}
-): Promise<NoteComplete[]> {
-	// Lógica de obtención con Drizzle (a implementar)
-	// TODO: Implementar lógica de obtención con Drizzle
-	return [];
-}
-
-/**
- * Crea una nueva nota
- */
-export async function createNote(_data: NoteCreateInput): Promise<NoteComplete> {
-	// Lógica de creación con Drizzle (a implementar)
-	// TODO: Implementar lógica de creación con Drizzle
-	throw new TransformerError('Función no implementada');
-}
-
-/**
- * Actualiza una nota existente
- */
-export async function updateNote(_id: string, _data: NoteUpdateInput): Promise<NoteComplete> {
-	// Lógica de actualización con Drizzle (a implementar)
-	// TODO: Implementar lógica de actualización con Drizzle
-	throw new TransformerError('Función no implementada');
-}
-
-/**
- * Elimina una nota
- */
-export async function deleteNote(
-	_id: string,
-	_options: {
-		softDelete?: boolean;
-	} = {}
-): Promise<boolean> {
-	// Lógica de eliminación con Drizzle (a implementar)
-	// TODO: Implementar lógica de eliminación con Drizzle
-	return false;
-}
+// --- Validators ---
+export * from './validators';
 
 /**
  * Transforma una nota para su uso en relaciones
@@ -132,7 +63,6 @@ export function toRelatedNote(
 
 		return relatedNote;
 	} catch (error) {
-		logger.error('Error creando nota relacionada:', error);
 		// En caso de error, devolver al menos el ID
 		return {
 			id: note.id,
@@ -141,10 +71,3 @@ export function toRelatedNote(
 		};
 	}
 }
-
-// Reexportar funciones clave de mappers y serializers para compatibilidad y uso directo
-export { toCreateNoteData, toNoteWithStats, toUpdateNoteData } from './mappers';
-export * from './schema';
-export { fromDrizzleNote, validateNote } from './serializers';
-// Exportar validators y schemas
-export * from './validators';

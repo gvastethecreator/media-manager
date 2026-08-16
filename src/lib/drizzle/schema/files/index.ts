@@ -20,6 +20,7 @@ export { folders } from '../organization/folders';
 export { audios } from './audio';
 export { documents } from './documents';
 export { file3Ds } from './file3Ds';
+export { files } from './files';
 export { images } from './images';
 export { jsonFiles } from './jsonFiles';
 export { uploadedImages } from './uploadedImages';

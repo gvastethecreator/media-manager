@@ -7,6 +7,7 @@
 import type { EntityBase } from '../entity.types';
 import type { ImageWithStats } from '../image';
 import type { VideoWithStats } from '../video';
+import { CharacterAlignment, CharacterCategory, CharacterClass, CharacterRace } from './enums';
 
 /**
  * 🧑‍🎤 Tipo base para un personaje.
@@ -131,60 +132,6 @@ export interface CharacterUpdateInput extends Partial<CharacterCreateInput> {}
 // Aliases para compatibilidad y migración gradual
 export type CreateCharacterData = CharacterCreateInput;
 export type UpdateCharacterData = CharacterUpdateInput;
-
-// Enums para tipos de personajes
-export enum CharacterClass {
-	WARRIOR = 'warrior',
-	MAGE = 'mage',
-	ROGUE = 'rogue',
-	CLERIC = 'cleric',
-	RANGER = 'ranger',
-	PALADIN = 'paladin',
-	BARBARIAN = 'barbarian',
-	BARD = 'bard',
-	DRUID = 'druid',
-	MONK = 'monk',
-	SORCERER = 'sorcerer',
-	WARLOCK = 'warlock',
-	WIZARD = 'wizard',
-}
-
-export enum CharacterRace {
-	HUMAN = 'human',
-	ELF = 'elf',
-	DWARF = 'dwarf',
-	HALFLING = 'halfling',
-	ORC = 'orc',
-	GNOME = 'gnome',
-	TIEFLING = 'tiefling',
-	DRAGONBORN = 'dragonborn',
-	HALF_ELF = 'half-elf',
-	HALF_ORC = 'half-orc',
-}
-
-export enum CharacterAlignment {
-	LAWFUL_GOOD = 'lawful-good',
-	NEUTRAL_GOOD = 'neutral-good',
-	CHAOTIC_GOOD = 'chaotic-good',
-	LAWFUL_NEUTRAL = 'lawful-neutral',
-	TRUE_NEUTRAL = 'true-neutral',
-	CHAOTIC_NEUTRAL = 'chaotic-neutral',
-	LAWFUL_EVIL = 'lawful-evil',
-	NEUTRAL_EVIL = 'neutral-evil',
-	CHAOTIC_EVIL = 'chaotic-evil',
-}
-
-export enum CharacterCategory {
-	PLAYER = 'player',
-	NPC = 'npc',
-	VILLAIN = 'villain',
-	HERO = 'hero',
-	COMPANION = 'companion',
-	MERCHANT = 'merchant',
-	GUARD = 'guard',
-	NOBLE = 'noble',
-	COMMONER = 'commoner',
-}
 
 /**
  * 🧑‍🎤 Filtros para buscar personajes.

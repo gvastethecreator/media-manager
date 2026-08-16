@@ -7,16 +7,7 @@
 
 import { z } from 'zod';
 
-/**
- * Enum para el tipo de archivo subido
- */
-export enum UploadedFileType {
-	IMAGE = 'image',
-	VIDEO = 'video',
-	AUDIO = 'audio',
-	DOCUMENT = 'document',
-	OTHER = 'other',
-}
+import { UploadedFileType } from './enums';
 
 /**
  * Interfaz base canónica para UploadedImage

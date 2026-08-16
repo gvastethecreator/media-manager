@@ -37,5 +37,5 @@ export type {
 	UpdateQueueJobInput,
 } from './types';
 
-// Re-exportar el enum
+// Import and re-export status from types (no duplicate)
 export { QueueJobStatus } from './types';

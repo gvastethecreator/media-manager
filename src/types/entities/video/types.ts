@@ -20,61 +20,7 @@ import type { WildcardWithStats } from '../wildcard';
 import type { WorldItemWithStats } from '../world-item';
 // Imports optimizados usando tipos WithStats
 import type { VideoStatistics } from './base';
-
-/**
- * 🎥 Enums para Video
- */
-export enum VideoFormat {
-	MP4 = 'mp4',
-	AVI = 'avi',
-	MOV = 'mov',
-	WMV = 'wmv',
-	FLV = 'flv',
-	WEBM = 'webm',
-	MKV = 'mkv',
-	M4V = 'm4v',
-	THREE_GP = '3gp',
-	OGV = 'ogv',
-}
-
-export enum VideoCodec {
-	H264 = 'h264',
-	H265 = 'h265',
-	VP8 = 'vp8',
-	VP9 = 'vp9',
-	AV1 = 'av1',
-	XVID = 'xvid',
-	DIVX = 'divx',
-}
-
-export enum VideoQuality {
-	LOW = 'low', // < 480p
-	MEDIUM = 'medium', // 480p-720p
-	HIGH = 'high', // 720p-1080p
-	ULTRA = 'ultra', // > 1080p
-	UNKNOWN = 'unknown',
-}
-
-export enum VideoSortCriteria {
-	NAME_ASC = 'name:asc',
-	NAME_DESC = 'name:desc',
-	CREATED_ASC = 'created:asc',
-	CREATED_DESC = 'created:desc',
-	UPDATED_ASC = 'updated:asc',
-	UPDATED_DESC = 'updated:desc',
-	DURATION_ASC = 'duration:asc',
-	DURATION_DESC = 'duration:desc',
-	SIZE_ASC = 'size:asc',
-	SIZE_DESC = 'size:desc',
-	QUALITY_ASC = 'quality:asc',
-	QUALITY_DESC = 'quality:desc',
-}
-
-export enum VideoViewMode {
-	GRID = 'grid',
-	LIST = 'list',
-	TIMELINE = 'timeline',
-}
+import { VideoCodec, VideoFormat, VideoQuality, VideoSortCriteria, VideoViewMode } from './enums';
 
 /**
  * 📝 Tipo base para Video - definición canónica

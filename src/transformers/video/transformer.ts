@@ -12,7 +12,6 @@ import { createDefaultEntityStats } from '../../lib/utils';
 import { formatFileSize } from '../../lib/utils/format.utils';
 import type { VideoStatistics } from '../../types/entities/video/base';
 import type { VideoComplete, VideoWithStats } from '../../types/entities/video/types';
-import { VideoQuality } from '../../types/entities/video/types';
 import { normalizeCounts, sumCounts, STANDARD_COUNT_KEYS } from '../common/counts';
 
 // Enum para calidad de video (definición local si no existe en types)
@@ -124,7 +123,7 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 		});
 
 		// 📈 Determinar technical grade
-		const technicalGrade = determineTechnicalGrade(qualityScore, qualityLevel as unknown as VideoQuality, megabytes);
+		const technicalGrade = determineTechnicalGrade(qualityScore, qualityLevel, megabytes);
 
 		// 🤖 Análisis AI y metadatos
 		const metadata = parseVideoMetadata(baseData.metadata);
@@ -135,7 +134,7 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 
 		// 🏷️ Auto-tagging inteligente
 		const autoTags = generateAutoTags({
-			qualityLevel: qualityLevel as unknown as VideoQuality,
+			qualityLevel,
 			durationMinutes,
 			hasAudio,
 			hasSubtitles,
@@ -464,16 +463,16 @@ function calculateQualityScore(params: {
  */
 function determineTechnicalGrade(
 	qualityScore: number,
-	qualityLevel: VideoQuality,
+	qualityLevel: VideoQualityLocal,
 	_megabytes: number
 ): 'A' | 'B' | 'C' | 'D' {
-	if (qualityScore >= 80 && qualityLevel === VideoQuality.ULTRA) {
+	if (qualityScore >= 80 && qualityLevel === VideoQualityLocal.ULTRA) {
 		return 'A';
 	}
-	if (qualityScore >= 60 && qualityLevel === VideoQuality.HIGH) {
+	if (qualityScore >= 60 && qualityLevel === VideoQualityLocal.HIGH) {
 		return 'B';
 	}
-	if (qualityScore >= 40 && qualityLevel === VideoQuality.MEDIUM) {
+	if (qualityScore >= 40 && qualityLevel === VideoQualityLocal.MEDIUM) {
 		return 'C';
 	}
 	return 'D';
@@ -498,7 +497,7 @@ function parseVideoMetadata(metadataStr: string | null): Record<string, unknown>
  * 🏷️ Genera tags automáticos basados en características
  */
 function generateAutoTags(params: {
-	qualityLevel: VideoQuality;
+	qualityLevel: VideoQualityLocal;
 	durationMinutes: number;
 	hasAudio: boolean;
 	hasSubtitles: boolean;
@@ -508,13 +507,13 @@ function generateAutoTags(params: {
 	const tags: string[] = [];
 
 	// Tags de calidad
-	if (params.qualityLevel === VideoQuality.ULTRA) {
+	if (params.qualityLevel === VideoQualityLocal.ULTRA) {
 		tags.push('4K', 'Ultra HD');
-	} else if (params.qualityLevel === VideoQuality.HIGH) {
+	} else if (params.qualityLevel === VideoQualityLocal.HIGH) {
 		tags.push('2K', 'Full HD');
-	} else if (params.qualityLevel === VideoQuality.MEDIUM) {
+	} else if (params.qualityLevel === VideoQualityLocal.MEDIUM) {
 		tags.push('HD');
-	} else if (params.qualityLevel === VideoQuality.LOW) {
+	} else if (params.qualityLevel === VideoQualityLocal.LOW) {
 		tags.push('SD');
 	}
 
