@@ -9,10 +9,7 @@ export class InMemoryFileSystemSyncAdapter implements FileSystemSync {
 	private readonly orphanPathsByFolder = new Map<string, Set<string>>();
 
 	seedFiles(folderId: string, files: FileInfo[]): void {
-		this.filesByFolder.set(
-			folderId,
-			new Map(files.map((file) => [file.path, file]))
-		);
+		this.filesByFolder.set(folderId, new Map(files.map((file) => [file.path, file])));
 	}
 
 	markOrphan(folderId: string, filePath: string): void {

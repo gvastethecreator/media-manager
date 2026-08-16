@@ -277,10 +277,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 
 	return (
 		<div className="space-y-6" ref={containerRef}>
-			<SettingsPageHeader
-				description="Manage folders, thumbnails, and storage settings"
-				title="Files and storage"
-			/>
+			<SettingsPageHeader description="Manage folders, thumbnails, and storage settings" title="Files and storage" />
 
 			<Tabs onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="grid w-full grid-cols-2 lg:w-80">
@@ -359,7 +356,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 							<div className="flex flex-wrap items-center gap-2 xl:justify-end">
 								<div className="flex items-center rounded-lg border p-0.5">
 									<Button
-									aria-label="Use grid view"
+										aria-label="Use grid view"
 										className="h-8 w-8 p-0"
 										onClick={() => setViewMode('grid')}
 										size="sm"
@@ -368,7 +365,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 										<Grid3X3 className="h-4 w-4" />
 									</Button>
 									<Button
-									aria-label="Use list view"
+										aria-label="Use list view"
 										className="h-8 w-8 p-0"
 										onClick={() => setViewMode('list')}
 										size="sm"
@@ -387,9 +384,9 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 									</DialogTrigger>
 									<DialogContent className="sm:max-w-150">
 										<DialogHeader>
-										<DialogTitle>Reindex process</DialogTitle>
+											<DialogTitle>Reindex process</DialogTitle>
 											<DialogDescription>
-											Each reindex runs on an authorized folder and completes every required phase.
+												Each reindex runs on an authorized folder and completes every required phase.
 											</DialogDescription>
 										</DialogHeader>
 										<ol className="grid gap-2 text-sm sm:grid-cols-2" id="canonical-reindex-phases">
@@ -407,8 +404,8 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 											</li>
 										</ol>
 										<p className="text-muted-foreground text-sm">
-											Use Reindex on the folder you want to update. There is no global shortcut because every run requires
-											authorization for its folder.
+											Use Reindex on the folder you want to update. There is no global shortcut because every run
+											requires authorization for its folder.
 										</p>
 									</DialogContent>
 								</Dialog>

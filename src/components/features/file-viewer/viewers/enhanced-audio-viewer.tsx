@@ -375,7 +375,7 @@ export function EnhancedAudioViewer({
 						{isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
 					</Button>
 					<Slider
-					aria-label="Volume"
+						aria-label="Volume"
 						className="flex-1"
 						disabled={Boolean(errorMessage)}
 						max={100}

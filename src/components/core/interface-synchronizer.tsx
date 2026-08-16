@@ -9,7 +9,8 @@ const FONT_STACK: Record<string, string> = {
 	lato: 'Lato, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 	montserrat: 'Montserrat, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 	poppins: 'Poppins, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-	'source-sans': '"Source Sans 3", "Source Sans Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+	'source-sans':
+		'"Source Sans 3", "Source Sans Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 	serif: 'Georgia, Cambria, "Times New Roman", Times, serif',
 	georgia: 'Georgia, Cambria, "Times New Roman", Times, serif',
 	playfair: '"Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif',

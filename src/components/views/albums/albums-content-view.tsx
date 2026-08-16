@@ -95,9 +95,7 @@ const MemoizedAlbumCard = React.memo(
 					<AlertDialogContent>
 						<AlertDialogHeader>
 							<AlertDialogTitle>Delete this album?</AlertDialogTitle>
-							<AlertDialogDescription>
-								This will permanently delete the album "{album.name}".
-							</AlertDialogDescription>
+							<AlertDialogDescription>This will permanently delete the album "{album.name}".</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
 							<AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -193,11 +191,7 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 				)}
 
 				{(!albums || albums.length === 0) && !isLoading && !showForm ? (
-					<EmptyState
-						description="Create an album to organize your images."
-						icon={AlbumIcon}
-						title="No albums yet"
-					/>
+					<EmptyState description="Create an album to organize your images." icon={AlbumIcon} title="No albums yet" />
 				) : (
 					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{albums?.map((album, index) => {

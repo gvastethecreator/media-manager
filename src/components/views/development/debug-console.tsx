@@ -131,16 +131,14 @@ export function DebugConsole() {
 									<div>
 										<h3 className="font-medium text-lg">Log Capture</h3>
 										<p className="text-muted-foreground text-sm">
-											This tool captures console logs automatically and displays them here. Stop capture at any time with
-											the &quot;Stop capture&quot; button.
+											This tool captures console logs automatically and displays them here. Stop capture at any time
+											with the &quot;Stop capture&quot; button.
 										</p>
 									</div>
 
 									<div>
 										<h3 className="font-medium text-lg">Enhanced Logger</h3>
-										<p className="text-muted-foreground text-sm">
-											Import the enhanced logger in your code:
-										</p>
+										<p className="text-muted-foreground text-sm">Import the enhanced logger in your code:</p>
 										<pre className="mt-2 rounded-md bg-muted p-2 text-xs">
 											{`import { clientLogger } from '@/lib/logger/client-logger';
 
@@ -157,9 +155,7 @@ myLogger.error('Error', { details: 'Additional information' });`}
 
 									<div>
 										<h3 className="font-medium text-lg">Log Viewer</h3>
-										<p className="text-muted-foreground text-sm">
-											Add the log viewer to any component:
-										</p>
+										<p className="text-muted-foreground text-sm">Add the log viewer to any component:</p>
 										<pre className="mt-2 rounded-md bg-muted p-2 text-xs">
 											{`import { LogViewer, useLogViewer } from '@/components/ui/log-viewer';
 

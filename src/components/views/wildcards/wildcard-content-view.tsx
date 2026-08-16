@@ -52,11 +52,7 @@ export const WildcardContentView = memo(function WildcardContentView({
 	if (!effectiveWildcardId) {
 		return (
 			<BaseContentView className={className} icon="🃏" title="Wildcard">
-				<EmptyState
-					description="Select a wildcard to view its content."
-					icon={Hash}
-					title="No wildcard selected"
-				/>
+				<EmptyState description="Select a wildcard to view its content." icon={Hash} title="No wildcard selected" />
 			</BaseContentView>
 		);
 	}
@@ -71,11 +67,7 @@ export const WildcardContentView = memo(function WildcardContentView({
 				title="Loading wildcard..."
 			>
 				<div className="flex h-full items-center justify-center">
-					<EmptyState
-						description="Preparing wildcard information."
-						icon={Sparkles}
-						title="Loading wildcard..."
-					/>
+					<EmptyState description="Preparing wildcard information." icon={Sparkles} title="Loading wildcard..." />
 				</div>
 			</BaseContentView>
 		);
@@ -104,7 +96,9 @@ export const WildcardContentView = memo(function WildcardContentView({
 	return (
 		<BaseContentView
 			className={className}
-			description={wildcard.description || wildcard.category || 'A flexible entity for grouping and classifying content'}
+			description={
+				wildcard.description || wildcard.category || 'A flexible entity for grouping and classifying content'
+			}
 			headerControls={headerControls}
 			icon="🃏"
 			title={wildcard.name}

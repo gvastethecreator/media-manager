@@ -87,7 +87,9 @@ describe('TaxonomyArtifact migration contract', () => {
 				rootId: 'taxonomy-ledger-renamed',
 			});
 			database.query('DELETE FROM MediaRoot WHERE id = ?').run('taxonomy-ledger-renamed');
-			expect(database.query('SELECT count(*) AS count FROM TaxonomyArtifactDeletionLedger').get()).toEqual({ count: 0 });
+			expect(database.query('SELECT count(*) AS count FROM TaxonomyArtifactDeletionLedger').get()).toEqual({
+				count: 0,
+			});
 			expect(database.query('PRAGMA foreign_key_check').all()).toEqual([]);
 		} finally {
 			database.clearQueryCache();

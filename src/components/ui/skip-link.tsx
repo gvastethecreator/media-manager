@@ -25,11 +25,7 @@ interface SkipLinkProps {
  * <nav>...</nav>
  * <main id="main-content">...</main>
  */
-export function SkipLink({
-	targetId = 'main-content',
-	children = 'Skip to main content',
-	className,
-}: SkipLinkProps) {
+export function SkipLink({ targetId = 'main-content', children = 'Skip to main content', className }: SkipLinkProps) {
 	const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
 		e.preventDefault();
 		const target = document.getElementById(targetId);

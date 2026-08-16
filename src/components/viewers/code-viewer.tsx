@@ -44,7 +44,7 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 				if (!signal?.aborted) setLoading(false);
 			}
 		},
-		[file],
+		[file]
 	);
 
 	const handleClose = useCallback(
@@ -56,7 +56,7 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 			}
 			onOpenChange(open);
 		},
-		[onOpenChange],
+		[onOpenChange]
 	);
 
 	useEffect(() => {

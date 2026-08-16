@@ -46,7 +46,10 @@ async function createFolderPreviewFixture(request: APIRequestContext, mediaRoot:
 	return { folder, image };
 }
 
-test('muestra previews de carpeta desde la API local en el browser de producción', async ({ page, request }, testInfo) => {
+test('muestra previews de carpeta desde la API local en el browser de producción', async ({
+	page,
+	request,
+}, testInfo) => {
 	const mediaRoot = process.env.MEDIA_MANAGER_SMOKE_ROOT_PATH;
 	if (!mediaRoot) throw new Error('MEDIA_MANAGER_SMOKE_ROOT_PATH es obligatorio para el smoke de previews de carpeta.');
 

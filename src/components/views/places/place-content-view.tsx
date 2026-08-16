@@ -52,11 +52,7 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 		return (
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
-					<EmptyState
-						description="Select a place to view its content"
-						icon={MapPin}
-						title="No place selected"
-					/>
+					<EmptyState description="Select a place to view its content" icon={MapPin} title="No place selected" />
 				</div>
 			</BaseContentView>
 		);

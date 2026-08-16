@@ -62,7 +62,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 							{images.map((image, index) => (
 								<div className="relative h-full w-full overflow-hidden" key={image.id}>
 									<img
-								alt={`Image ${index + 1}`}
+										alt={`Image ${index + 1}`}
 										className="h-full w-full object-cover"
 										loading="lazy"
 										src={image.thumbnailUrl}

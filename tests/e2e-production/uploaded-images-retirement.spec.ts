@@ -11,8 +11,8 @@ test('retires the direct upload screen and its API in favor of the authorized fi
 	page.on('pageerror', (error) => errors.push(error.message));
 
 	await page.goto('/settings?section=media&item=uploaded-images');
-	await expect(page.getByRole('heading', { name: 'Cargas directas retiradas' })).toBeVisible();
-	await expect(page.getByRole('link', { name: 'Abrir explorador de archivos' })).toHaveAttribute('href', '/files');
+	await expect(page.getByRole('heading', { name: 'Direct uploads retired' })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Open file browser' })).toHaveAttribute('href', '/files');
 	await page.screenshot({ path: testInfo.outputPath('uploaded-images-retirement.png'), fullPage: true });
 
 	const response = await page.evaluate(async () => {

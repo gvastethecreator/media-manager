@@ -58,9 +58,7 @@ function parseInlinePromptMetadataForUpdate(value: unknown): Record<string, unkn
 	try {
 		parsed = typeof value === 'string' ? JSON.parse(value) : value;
 	} catch {
-		throw new Error(
-			'The current prompt metadata does not contain valid JSON. Fix the record before editing it.'
-		);
+		throw new Error('The current prompt metadata does not contain valid JSON. Fix the record before editing it.');
 	}
 
 	if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {

@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
 
-import { createHash, randomUUID } from "node:crypto";
-import { chmod, lstat, mkdir, mkdtemp, readdir, readFile, realpath, rename, rm, writeFile } from "node:fs/promises";
-import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import { TEST_DATABASE_MARKER, TEST_DATABASE_OWNER } from "../tests/safety/test-database-guard";
-import { migrateDatabase } from "./db/migrations";
-import { seedDeterministicTestFixture } from "./db/test-fixture";
+import { createHash, randomUUID } from 'node:crypto';
+import { chmod, lstat, mkdir, mkdtemp, readdir, readFile, realpath, rename, rm, writeFile } from 'node:fs/promises';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { TEST_DATABASE_MARKER, TEST_DATABASE_OWNER } from '../tests/safety/test-database-guard';
+import { migrateDatabase } from './db/migrations';
+import { seedDeterministicTestFixture } from './db/test-fixture';
 
 type RunIsolatedCommandOptions = {
 	command: string[];
@@ -15,7 +15,7 @@ type RunIsolatedCommandOptions = {
 	testRootPath?: string;
 };
 
-type TestRunMarkerState = "initializing" | "ready";
+type TestRunMarkerState = 'initializing' | 'ready';
 
 type TestRunMarker = {
 	databasePath: string;
@@ -29,7 +29,7 @@ type TestRunMarker = {
 	childProcessId?: number;
 };
 
-type OwnerLiveness = "alive" | "dead" | "any";
+type OwnerLiveness = 'alive' | 'dead' | 'any';
 
 type TestRunVerificationOptions = {
 	testRootPath: string;
@@ -72,27 +72,27 @@ type NativeTreeStatus = {
 	childProcessId: number;
 	error?: string;
 	exitCode?: number;
-	state: "ready" | "completed" | "error";
+	state: 'ready' | 'completed' | 'error';
 };
 
 export const ORPHANED_TEST_RUN_MINIMUM_AGE_MS = 5 * 60 * 1000;
 
-const SUPERVISOR_ARGUMENT = "--isolated-test-supervisor";
-const QUARANTINE_PREFIX = ".test-run-quarantine-";
+const SUPERVISOR_ARGUMENT = '--isolated-test-supervisor';
+const QUARANTINE_PREFIX = '.test-run-quarantine-';
 const PROCESS_TREE_POLL_INTERVAL_MS = 25;
 const CHILD_TERMINATION_TIMEOUT_MS = 2_000;
 const NATIVE_TREE_COMPLETION_TIMEOUT_MS = 15_000;
 const NATIVE_HELPER_LOCK_TIMEOUT_MS = 30_000;
 const NATIVE_HELPER_STALE_LOCK_MS = 2 * 60 * 1000;
 const NATIVE_HELPER_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
-const NATIVE_HELPER_CACHE_VERSION = "v2";
+const NATIVE_HELPER_CACHE_VERSION = 'v2';
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const SCRIPTS_DIRECTORY = dirname(fileURLToPath(import.meta.url));
-const WORKSPACE_DIRECTORY = resolve(SCRIPTS_DIRECTORY, "..");
-const NATIVE_HELPER_CACHE_DIRECTORY = resolve(WORKSPACE_DIRECTORY, ".scratch", "tooling");
-const WINDOWS_JOB_COMPILER_PATH = resolve(SCRIPTS_DIRECTORY, "windows-test-job.ps1");
-const WINDOWS_JOB_SOURCE_PATH = resolve(SCRIPTS_DIRECTORY, "windows-test-job.cs");
-const POSIX_TREE_SOURCE_PATH = resolve(SCRIPTS_DIRECTORY, "posix-test-tree.c");
+const WORKSPACE_DIRECTORY = resolve(SCRIPTS_DIRECTORY, '..');
+const NATIVE_HELPER_CACHE_DIRECTORY = resolve(WORKSPACE_DIRECTORY, '.scratch', 'tooling');
+const WINDOWS_JOB_COMPILER_PATH = resolve(SCRIPTS_DIRECTORY, 'windows-test-job.ps1');
+const WINDOWS_JOB_SOURCE_PATH = resolve(SCRIPTS_DIRECTORY, 'windows-test-job.cs');
+const POSIX_TREE_SOURCE_PATH = resolve(SCRIPTS_DIRECTORY, 'posix-test-tree.c');
 let cleanupIdentityInterlock: CleanupIdentityInterlock | undefined;
 
 export function setCleanupIdentityInterlockForTests(interlock?: CleanupIdentityInterlock): void {
@@ -100,31 +100,31 @@ export function setCleanupIdentityInterlockForTests(interlock?: CleanupIdentityI
 }
 
 const normalizePath = (value: string): string => {
-	const resolvedValue = resolve(value).replace(/^\\\\\?\\/, "");
-	return process.platform === "win32" ? resolvedValue.toLowerCase() : resolvedValue;
+	const resolvedValue = resolve(value).replace(/^\\\\\?\\/, '');
+	return process.platform === 'win32' ? resolvedValue.toLowerCase() : resolvedValue;
 };
 
 const pathsMatch = (left: string, right: string): boolean => normalizePath(left) === normalizePath(right);
 
 const isPathInside = (parent: string, child: string): boolean => {
 	const childRelativePath = relative(parent, child);
-	return childRelativePath !== "" && !childRelativePath.startsWith("..") && !isAbsolute(childRelativePath);
+	return childRelativePath !== '' && !childRelativePath.startsWith('..') && !isAbsolute(childRelativePath);
 };
 
 const getErrorCode = (error: unknown): string | undefined =>
-	typeof error === "object" && error !== null && "code" in error && typeof error.code === "string"
+	typeof error === 'object' && error !== null && 'code' in error && typeof error.code === 'string'
 		? error.code
 		: undefined;
 
 const delay = (milliseconds: number): Promise<void> =>
 	new Promise((resolveDelay) => setTimeout(resolveDelay, milliseconds));
 
-type NativeHelperKind = "posix-test-tree" | "windows-test-job";
+type NativeHelperKind = 'posix-test-tree' | 'windows-test-job';
 
 const sha256File = async (path: string): Promise<string> =>
-	createHash("sha256")
+	createHash('sha256')
 		.update(await readFile(path))
-		.digest("hex");
+		.digest('hex');
 
 async function ensureNativeHelperCacheDirectory(): Promise<void> {
 	await mkdir(NATIVE_HELPER_CACHE_DIRECTORY, { recursive: true });
@@ -143,7 +143,7 @@ async function isValidCachedNativeHelper(executablePath: string, integrityPath: 
 		const [executableStat, integrityStat, expectedHash] = await Promise.all([
 			lstat(executablePath),
 			lstat(integrityPath),
-			readFile(integrityPath, "utf8"),
+			readFile(integrityPath, 'utf8'),
 		]);
 		if (
 			!executableStat.isFile() ||
@@ -171,7 +171,7 @@ async function quarantineStaleNativeHelperLock(lockPath: string): Promise<boolea
 			return false;
 		}
 		try {
-			const owner = JSON.parse(await readFile(resolve(lockPath, "owner.json"), "utf8")) as {
+			const owner = JSON.parse(await readFile(resolve(lockPath, 'owner.json'), 'utf8')) as {
 				processId?: unknown;
 			};
 			if (isPositiveProcessId(owner.processId) && isProcessAlive(owner.processId)) {
@@ -196,7 +196,7 @@ async function quarantineStaleNativeHelperLock(lockPath: string): Promise<boolea
 async function acquireNativeHelperLock(
 	lockPath: string,
 	executablePath: string,
-	integrityPath: string,
+	integrityPath: string
 ): Promise<boolean> {
 	const deadline = Date.now() + NATIVE_HELPER_LOCK_TIMEOUT_MS;
 	while (Date.now() < deadline) {
@@ -206,13 +206,13 @@ async function acquireNativeHelperLock(
 		try {
 			await mkdir(lockPath);
 			await writeFile(
-				resolve(lockPath, "owner.json"),
+				resolve(lockPath, 'owner.json'),
 				JSON.stringify({ processId: process.pid, startedAt: new Date().toISOString() }),
-				"utf8",
+				'utf8'
 			);
 			return true;
 		} catch (error) {
-			if (getErrorCode(error) !== "EEXIST") {
+			if (getErrorCode(error) !== 'EEXIST') {
 				throw error;
 			}
 			await quarantineStaleNativeHelperLock(lockPath);
@@ -224,31 +224,31 @@ async function acquireNativeHelperLock(
 
 async function compileNativeHelper(kind: NativeHelperKind, sourcePath: string, outputPath: string): Promise<void> {
 	const compilation =
-		kind === "windows-test-job"
+		kind === 'windows-test-job'
 			? Bun.spawn(
 					[
 						process.env.SystemRoot
-							? resolve(process.env.SystemRoot, "System32", "WindowsPowerShell", "v1.0", "powershell.exe")
-							: "powershell.exe",
-						"-NoLogo",
-						"-NoProfile",
-						"-NonInteractive",
-						"-ExecutionPolicy",
-						"Bypass",
-						"-File",
+							? resolve(process.env.SystemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+							: 'powershell.exe',
+						'-NoLogo',
+						'-NoProfile',
+						'-NonInteractive',
+						'-ExecutionPolicy',
+						'Bypass',
+						'-File',
 						WINDOWS_JOB_COMPILER_PATH,
-						"-SourcePath",
+						'-SourcePath',
 						sourcePath,
-						"-OutputPath",
+						'-OutputPath',
 						outputPath,
 					],
-					{ cwd: WORKSPACE_DIRECTORY, stderr: "pipe", stdin: "ignore", stdout: "ignore", windowsHide: true },
+					{ cwd: WORKSPACE_DIRECTORY, stderr: 'pipe', stdin: 'ignore', stdout: 'ignore', windowsHide: true }
 				)
-			: Bun.spawn(["cc", "-O2", "-std=c11", "-Wall", "-Wextra", sourcePath, "-o", outputPath], {
+			: Bun.spawn(['cc', '-O2', '-std=c11', '-Wall', '-Wextra', sourcePath, '-o', outputPath], {
 					cwd: WORKSPACE_DIRECTORY,
-					stderr: "pipe",
-					stdin: "ignore",
-					stdout: "ignore",
+					stderr: 'pipe',
+					stdin: 'ignore',
+					stdout: 'ignore',
 				});
 	const [exitCode, errorOutput] = await Promise.all([compilation.exited, new Response(compilation.stderr).text()]);
 	if (exitCode !== 0) {
@@ -279,7 +279,7 @@ async function cleanupOldNativeHelpers(kind: NativeHelperKind, currentExecutable
 			if (entryStat.isSymbolicLink() || Date.now() - entryStat.mtimeMs < NATIVE_HELPER_RETENTION_MS) {
 				continue;
 			}
-			if (entryStat.isDirectory() && entry.name.endsWith(".lock")) {
+			if (entryStat.isDirectory() && entry.name.endsWith('.lock')) {
 				await quarantineStaleNativeHelperLock(entryPath);
 			} else if (entryStat.isFile()) {
 				await rm(entryPath, { force: true });
@@ -292,10 +292,10 @@ async function cleanupOldNativeHelpers(kind: NativeHelperKind, currentExecutable
 
 async function prepareNativeHelper(kind: NativeHelperKind): Promise<string> {
 	await ensureNativeHelperCacheDirectory();
-	const sourcePath = kind === "windows-test-job" ? WINDOWS_JOB_SOURCE_PATH : POSIX_TREE_SOURCE_PATH;
+	const sourcePath = kind === 'windows-test-job' ? WINDOWS_JOB_SOURCE_PATH : POSIX_TREE_SOURCE_PATH;
 	for (let attempt = 0; attempt < 2; attempt += 1) {
 		const sourceHash = await sha256File(sourcePath);
-		const extension = kind === "windows-test-job" ? ".exe" : "";
+		const extension = kind === 'windows-test-job' ? '.exe' : '';
 		const executableName = `${kind}-${NATIVE_HELPER_CACHE_VERSION}-${sourceHash}${extension}`;
 		const executablePath = resolve(NATIVE_HELPER_CACHE_DIRECTORY, executableName);
 		const integrityPath = `${executablePath}.sha256`;
@@ -310,7 +310,7 @@ async function prepareNativeHelper(kind: NativeHelperKind): Promise<string> {
 			continue;
 		}
 		const temporaryExecutablePath =
-			kind === "windows-test-job"
+			kind === 'windows-test-job'
 				? `${executablePath}.tmp-${process.pid}-${randomUUID()}.exe`
 				: `${executablePath}.tmp-${process.pid}-${randomUUID()}`;
 		const temporaryIntegrityPath = `${temporaryExecutablePath}.sha256`;
@@ -318,13 +318,13 @@ async function prepareNativeHelper(kind: NativeHelperKind): Promise<string> {
 			await rm(executablePath, { force: true });
 			await rm(integrityPath, { force: true });
 			await compileNativeHelper(kind, sourcePath, temporaryExecutablePath);
-			if (kind === "posix-test-tree") {
+			if (kind === 'posix-test-tree') {
 				await chmod(temporaryExecutablePath, 0o755);
 			}
 			if ((await sha256File(sourcePath)) !== sourceHash) {
 				continue;
 			}
-			await writeFile(temporaryIntegrityPath, await sha256File(temporaryExecutablePath), "utf8");
+			await writeFile(temporaryIntegrityPath, await sha256File(temporaryExecutablePath), 'utf8');
 			await rename(temporaryExecutablePath, executablePath);
 			await rename(temporaryIntegrityPath, integrityPath);
 			if (!(await isValidCachedNativeHelper(executablePath, integrityPath))) {
@@ -345,36 +345,36 @@ async function prepareNativeHelper(kind: NativeHelperKind): Promise<string> {
 async function readNativeTreeStatus(statusPath: string, expectedNonce: string): Promise<NativeTreeStatus | undefined> {
 	let content: string;
 	try {
-		content = await readFile(statusPath, "utf8");
+		content = await readFile(statusPath, 'utf8');
 	} catch (error) {
-		if (getErrorCode(error) === "ENOENT") {
+		if (getErrorCode(error) === 'ENOENT') {
 			return undefined;
 		}
 		throw error;
 	}
 
-	const [state, nonce, rawProcessId, payload = "", completionProof = ""] = content.split(/\r?\n/u);
+	const [state, nonce, rawProcessId, payload = '', completionProof = ''] = content.split(/\r?\n/u);
 	const childProcessId = Number(rawProcessId);
 	if (
 		nonce !== expectedNonce ||
 		!Number.isSafeInteger(childProcessId) ||
 		childProcessId < 0 ||
-		!["ready", "completed", "error"].includes(state)
+		!['ready', 'completed', 'error'].includes(state)
 	) {
 		return undefined;
 	}
 
-	if (state === "ready" && childProcessId > 0) {
+	if (state === 'ready' && childProcessId > 0) {
 		return { childProcessId, state };
 	}
-	if (state === "completed" && childProcessId > 0 && completionProof === "tree-empty") {
+	if (state === 'completed' && childProcessId > 0 && completionProof === 'tree-empty') {
 		const exitCode = Number(payload);
 		return Number.isSafeInteger(exitCode) ? { childProcessId, exitCode, state } : undefined;
 	}
-	if (state === "error") {
-		let decodedError = "El helper de Job Object falló sin detalle legible.";
+	if (state === 'error') {
+		let decodedError = 'El helper de Job Object falló sin detalle legible.';
 		try {
-			decodedError = Buffer.from(payload, "base64").toString("utf8");
+			decodedError = Buffer.from(payload, 'base64').toString('utf8');
 		} catch {
 			// Conserva el mensaje seguro por defecto.
 		}
@@ -388,29 +388,29 @@ async function waitForNativeTreeInitialStatus(
 	helper: ReturnType<typeof Bun.spawn>,
 	statusPath: string,
 	nonce: string,
-	ownerDisconnected: Promise<void>,
-): Promise<{ kind: "owner" } | { kind: "status"; status: NativeTreeStatus }> {
-	const helperExited = helper.exited.then((exitCode) => ({ exitCode, kind: "helper" as const }));
-	const ownerExited = ownerDisconnected.then(() => ({ kind: "owner" as const }));
+	ownerDisconnected: Promise<void>
+): Promise<{ kind: 'owner' } | { kind: 'status'; status: NativeTreeStatus }> {
+	const helperExited = helper.exited.then((exitCode) => ({ exitCode, kind: 'helper' as const }));
+	const ownerExited = ownerDisconnected.then(() => ({ kind: 'owner' as const }));
 
 	while (true) {
 		const status = await readNativeTreeStatus(statusPath, nonce);
 		if (status) {
-			return { kind: "status", status };
+			return { kind: 'status', status };
 		}
 
 		const event = await Promise.race([
 			helperExited,
 			ownerExited,
-			delay(PROCESS_TREE_POLL_INTERVAL_MS).then(() => ({ kind: "poll" as const })),
+			delay(PROCESS_TREE_POLL_INTERVAL_MS).then(() => ({ kind: 'poll' as const })),
 		]);
-		if (event.kind === "owner") {
+		if (event.kind === 'owner') {
 			return event;
 		}
-		if (event.kind === "helper") {
+		if (event.kind === 'helper') {
 			const finalStatus = await readNativeTreeStatus(statusPath, nonce);
 			if (finalStatus) {
-				return { kind: "status", status: finalStatus };
+				return { kind: 'status', status: finalStatus };
 			}
 			throw new Error(`El helper de Job Object terminó con código ${event.exitCode} sin emitir estado.`);
 		}
@@ -419,7 +419,7 @@ async function waitForNativeTreeInitialStatus(
 
 async function waitForNativeHelperExit(
 	helper: ReturnType<typeof Bun.spawn>,
-	timeoutMs: number,
+	timeoutMs: number
 ): Promise<number | undefined> {
 	return await new Promise((resolveExit) => {
 		const timeout = setTimeout(() => resolveExit(undefined), timeoutMs);
@@ -434,7 +434,7 @@ async function confirmNativeTreeCompletion(
 	helper: ReturnType<typeof Bun.spawn>,
 	statusPath: string,
 	nonce: string,
-	expectedChildProcessId?: number,
+	expectedChildProcessId?: number
 ): Promise<{ exitCode: number; stopped: boolean }> {
 	const helperExitCode = await waitForNativeHelperExit(helper, NATIVE_TREE_COMPLETION_TIMEOUT_MS);
 	if (helperExitCode === undefined) {
@@ -443,12 +443,12 @@ async function confirmNativeTreeCompletion(
 	}
 
 	const status = await readNativeTreeStatus(statusPath, nonce);
-	if (status?.state === "error") {
+	if (status?.state === 'error') {
 		console.error(`El helper de Job Object falló: ${status.error}`);
 		return { exitCode: helperExitCode, stopped: false };
 	}
 	if (
-		status?.state !== "completed" ||
+		status?.state !== 'completed' ||
 		status.exitCode === undefined ||
 		(expectedChildProcessId !== undefined && status.childProcessId !== expectedChildProcessId) ||
 		helperExitCode !== status.exitCode
@@ -466,35 +466,35 @@ const parseIsoTimestamp = (value: string): number | undefined => {
 };
 
 const hasSchemaVersion = (value: unknown): value is number | string =>
-	(typeof value === "string" && value.trim().length > 0) || (typeof value === "number" && Number.isFinite(value));
+	(typeof value === 'string' && value.trim().length > 0) || (typeof value === 'number' && Number.isFinite(value));
 
 const isTestRunMarkerState = (value: unknown): value is TestRunMarkerState =>
-	value === "initializing" || value === "ready";
+	value === 'initializing' || value === 'ready';
 
 const isPositiveProcessId = (value: unknown): value is number =>
-	typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+	typeof value === 'number' && Number.isSafeInteger(value) && value > 0;
 
 const isTestRunMarker = (value: unknown): value is TestRunMarker => {
-	if (typeof value !== "object" || value === null || Array.isArray(value)) {
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) {
 		return false;
 	}
 
 	const marker = value as Record<string, unknown>;
 	return (
-		typeof marker.databasePath === "string" &&
+		typeof marker.databasePath === 'string' &&
 		marker.databasePath.length > 0 &&
 		isAbsolute(marker.databasePath) &&
 		marker.owner === TEST_DATABASE_OWNER &&
 		isPositiveProcessId(marker.processId) &&
 		isPositiveProcessId(marker.supervisorProcessId) &&
 		hasSchemaVersion(marker.schemaVersion) &&
-		typeof marker.startedAt === "string" &&
+		typeof marker.startedAt === 'string' &&
 		parseIsoTimestamp(marker.startedAt) !== undefined &&
-		typeof marker.cleanupNonce === "string" &&
+		typeof marker.cleanupNonce === 'string' &&
 		marker.cleanupNonce.length >= 16 &&
 		isTestRunMarkerState(marker.state) &&
-		((marker.state === "initializing" && marker.childProcessId === undefined) ||
-			(marker.state === "ready" && isPositiveProcessId(marker.childProcessId)))
+		((marker.state === 'initializing' && marker.childProcessId === undefined) ||
+			(marker.state === 'ready' && isPositiveProcessId(marker.childProcessId)))
 	);
 };
 
@@ -503,7 +503,7 @@ const isProcessAlive = (processId: number): boolean => {
 		process.kill(processId, 0);
 		return true;
 	} catch (error) {
-		return getErrorCode(error) !== "ESRCH";
+		return getErrorCode(error) !== 'ESRCH';
 	}
 };
 
@@ -532,7 +532,7 @@ function createOwnerChannel(): OwnerChannel {
 			resolveDisconnected();
 		};
 	});
-	process.once("disconnect", markDisconnected);
+	process.once('disconnect', markDisconnected);
 	if (!connected) {
 		queueMicrotask(markDisconnected);
 	}
@@ -545,7 +545,7 @@ function createOwnerChannel(): OwnerChannel {
 
 function disconnectOwnerChannel(): void {
 	const ipcProcess = process as IpcProcess;
-	if (ipcProcess.connected !== true || typeof ipcProcess.disconnect !== "function") {
+	if (ipcProcess.connected !== true || typeof ipcProcess.disconnect !== 'function') {
 		return;
 	}
 	try {
@@ -562,11 +562,11 @@ async function findExistingPathAncestor(path: string): Promise<string> {
 			await lstat(candidate);
 			return candidate;
 		} catch (error) {
-			if (getErrorCode(error) !== "ENOENT") {
+			if (getErrorCode(error) !== 'ENOENT') {
 				throw error;
 			}
 
-			const parent = resolve(candidate, "..");
+			const parent = resolve(candidate, '..');
 			if (pathsMatch(parent, candidate)) {
 				throw new Error(`No se encontró un ancestro existente para el root temporal: ${path}`);
 			}
@@ -605,7 +605,7 @@ async function resolveCanonicalTestRoot(testRootPath: string, createIfMissing: b
 }
 
 async function writeTestRunMarker(markerPath: string, marker: TestRunMarker): Promise<void> {
-	await writeFile(markerPath, JSON.stringify(marker, null, 2), "utf8");
+	await writeFile(markerPath, JSON.stringify(marker, null, 2), 'utf8');
 }
 
 async function verifyTestRun(options: TestRunVerificationOptions): Promise<VerifiedTestRun | undefined> {
@@ -635,7 +635,7 @@ async function verifyTestRun(options: TestRunVerificationOptions): Promise<Verif
 			return undefined;
 		}
 
-		const marker = JSON.parse(await readFile(markerPath, "utf8"));
+		const marker = JSON.parse(await readFile(markerPath, 'utf8'));
 		if (!isTestRunMarker(marker)) {
 			return undefined;
 		}
@@ -654,23 +654,23 @@ async function verifyTestRun(options: TestRunVerificationOptions): Promise<Verif
 
 		const ownerIsAlive = isProcessAlive(marker.processId);
 		if (
-			(options.requiredOwnerLiveness === "alive" && !ownerIsAlive) ||
-			(options.requiredOwnerLiveness === "dead" && ownerIsAlive)
+			(options.requiredOwnerLiveness === 'alive' && !ownerIsAlive) ||
+			(options.requiredOwnerLiveness === 'dead' && ownerIsAlive)
 		) {
 			return undefined;
 		}
 		const supervisorIsAlive = isProcessAlive(marker.supervisorProcessId);
 		if (
-			(options.requiredSupervisorLiveness === "alive" && !supervisorIsAlive) ||
-			(options.requiredSupervisorLiveness === "dead" && supervisorIsAlive)
+			(options.requiredSupervisorLiveness === 'alive' && !supervisorIsAlive) ||
+			(options.requiredSupervisorLiveness === 'dead' && supervisorIsAlive)
 		) {
 			return undefined;
 		}
 		if (marker.childProcessId !== undefined) {
 			const childIsAlive = isProcessAlive(marker.childProcessId);
 			if (
-				(options.requiredChildLiveness === "alive" && !childIsAlive) ||
-				(options.requiredChildLiveness === "dead" && childIsAlive)
+				(options.requiredChildLiveness === 'alive' && !childIsAlive) ||
+				(options.requiredChildLiveness === 'dead' && childIsAlive)
 			) {
 				return undefined;
 			}
@@ -683,12 +683,12 @@ async function verifyTestRun(options: TestRunVerificationOptions): Promise<Verif
 			return undefined;
 		}
 
-		if (marker.state === "initializing" && !options.allowInitializing) {
+		if (marker.state === 'initializing' && !options.allowInitializing) {
 			return undefined;
 		}
 
 		const recordedDatabasePath = resolve(marker.databasePath);
-		const expectedRecordedDatabasePath = resolve(recordedRunDirectory, "db.sqlite");
+		const expectedRecordedDatabasePath = resolve(recordedRunDirectory, 'db.sqlite');
 		if (
 			!pathsMatch(recordedDatabasePath, expectedRecordedDatabasePath) ||
 			!isPathInside(recordedRunDirectory, recordedDatabasePath)
@@ -696,7 +696,7 @@ async function verifyTestRun(options: TestRunVerificationOptions): Promise<Verif
 			return undefined;
 		}
 
-		const databasePath = resolve(runDirectory, "db.sqlite");
+		const databasePath = resolve(runDirectory, 'db.sqlite');
 		try {
 			const databaseStat = await lstat(databasePath);
 			if (!databaseStat.isFile() || databaseStat.isSymbolicLink()) {
@@ -707,7 +707,7 @@ async function verifyTestRun(options: TestRunVerificationOptions): Promise<Verif
 				return undefined;
 			}
 		} catch (error) {
-			if (getErrorCode(error) !== "ENOENT" || marker.state !== "initializing" || !options.allowInitializing) {
+			if (getErrorCode(error) !== 'ENOENT' || marker.state !== 'initializing' || !options.allowInitializing) {
 				return undefined;
 			}
 		}
@@ -729,7 +729,7 @@ async function createQuarantineDirectory(testRoot: string, runDirectory: string)
 			await rename(runDirectory, quarantineDirectory);
 			return quarantineDirectory;
 		} catch (error) {
-			if (getErrorCode(error) !== "EEXIST" && getErrorCode(error) !== "ENOTEMPTY") {
+			if (getErrorCode(error) !== 'EEXIST' && getErrorCode(error) !== 'ENOTEMPTY') {
 				return undefined;
 			}
 		}
@@ -741,7 +741,7 @@ async function createQuarantineDirectory(testRoot: string, runDirectory: string)
 async function restoreQuarantinedRun(
 	testRoot: string,
 	quarantineDirectory: string,
-	runDirectory: string,
+	runDirectory: string
 ): Promise<boolean> {
 	try {
 		if (!isPathInside(testRoot, quarantineDirectory) || !isPathInside(testRoot, runDirectory)) {
@@ -760,7 +760,7 @@ async function restoreQuarantinedRun(
 			await lstat(runDirectory);
 			return false;
 		} catch (error) {
-			if (getErrorCode(error) !== "ENOENT") {
+			if (getErrorCode(error) !== 'ENOENT') {
 				return false;
 			}
 		}
@@ -775,7 +775,7 @@ async function restoreQuarantinedRun(
 async function countWorkerDatabases(runDirectory: string): Promise<number> {
 	try {
 		return (await readdir(runDirectory, { withFileTypes: true })).filter(
-			(entry) => entry.isDirectory() && entry.name.startsWith("worker-"),
+			(entry) => entry.isDirectory() && entry.name.startsWith('worker-')
 		).length;
 	} catch {
 		return 0;
@@ -783,7 +783,7 @@ async function countWorkerDatabases(runDirectory: string): Promise<number> {
 }
 
 async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, directory: string): Promise<boolean> {
-	if (process.platform !== "win32" && process.platform !== "linux") {
+	if (process.platform !== 'win32' && process.platform !== 'linux') {
 		console.error(`Borrado fail-closed sin helper por handle/dirfd para ${process.platform}: ${directory}`);
 		return false;
 	}
@@ -793,24 +793,24 @@ async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, director
 	const controlPath = resolve(testRoot, `.test-delete-control-${handshakeNonce}`);
 	let deleter: ReturnType<typeof Bun.spawn> | undefined;
 	try {
-		const helperKind: NativeHelperKind = process.platform === "win32" ? "windows-test-job" : "posix-test-tree";
+		const helperKind: NativeHelperKind = process.platform === 'win32' ? 'windows-test-job' : 'posix-test-tree';
 		const helperExecutablePath = await prepareNativeHelper(helperKind);
 		if (!isPathInside(testRoot, readyPath) || !isPathInside(testRoot, controlPath)) {
 			return false;
 		}
-		deleter = Bun.spawn([helperExecutablePath, "--delete-tree", directory, readyPath, controlPath], {
+		deleter = Bun.spawn([helperExecutablePath, '--delete-tree', directory, readyPath, controlPath], {
 			cwd: testRoot,
-			detached: process.platform !== "win32",
-			stderr: "inherit",
-			stdin: "ignore",
-			stdout: "ignore",
+			detached: process.platform !== 'win32',
+			stderr: 'inherit',
+			stdin: 'ignore',
+			stdout: 'ignore',
 			windowsHide: true,
 		});
 		const readyDeadline = Date.now() + 30_000;
 		let locked = false;
 		while (Date.now() < readyDeadline && deleter.exitCode === null) {
 			try {
-				locked = (await readFile(readyPath, "utf8")) === "locked";
+				locked = (await readFile(readyPath, 'utf8')) === 'locked';
 			} catch {
 				locked = false;
 			}
@@ -820,7 +820,7 @@ async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, director
 			await delay(PROCESS_TREE_POLL_INTERVAL_MS);
 		}
 		if (!locked) {
-			if (process.platform === "win32") {
+			if (process.platform === 'win32') {
 				await stopWindowsHelperAsFallback(deleter);
 			} else {
 				await terminatePosixProcessTree(deleter);
@@ -836,10 +836,10 @@ async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, director
 			interlockPassed = false;
 			console.error(`Borrado bloqueado por el interlock de identidad: ${String(error)}`);
 		}
-		await writeFile(controlPath, interlockPassed ? "delete" : "abort", "utf8");
+		await writeFile(controlPath, interlockPassed ? 'delete' : 'abort', 'utf8');
 		const deleterExitCode = await waitForNativeHelperExit(deleter, 30_000);
 		if (deleterExitCode === undefined) {
-			if (process.platform === "win32") {
+			if (process.platform === 'win32') {
 				await stopWindowsHelperAsFallback(deleter);
 			} else {
 				await terminatePosixProcessTree(deleter);
@@ -853,7 +853,7 @@ async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, director
 			await lstat(directory);
 			return false;
 		} catch (error) {
-			return getErrorCode(error) === "ENOENT";
+			return getErrorCode(error) === 'ENOENT';
 		}
 	} catch (error) {
 		console.error(`Directorio temporal preservado tras fallar el borrado por handle: ${directory}. ${String(error)}`);
@@ -897,7 +897,7 @@ async function cleanupVerifiedTestRun(options: TestRunVerificationOptions): Prom
 
 async function inferRecordedRunDirectoryFromQuarantine(
 	testRoot: string,
-	quarantineDirectory: string,
+	quarantineDirectory: string
 ): Promise<string | undefined> {
 	try {
 		const quarantineName = basename(quarantineDirectory);
@@ -910,14 +910,14 @@ async function inferRecordedRunDirectoryFromQuarantine(
 		if (!markerStat.isFile() || markerStat.isSymbolicLink()) {
 			return undefined;
 		}
-		const marker = JSON.parse(await readFile(markerPath, "utf8"));
-		if (!isTestRunMarker(marker) || marker.state !== "ready") {
+		const marker = JSON.parse(await readFile(markerPath, 'utf8'));
+		if (!isTestRunMarker(marker) || marker.state !== 'ready') {
 			return undefined;
 		}
 
 		const recordedRunDirectory = dirname(resolve(marker.databasePath));
 		const recordedRunName = basename(recordedRunDirectory);
-		if (!recordedRunName.startsWith("run-") || !isPathInside(testRoot, recordedRunDirectory)) {
+		if (!recordedRunName.startsWith('run-') || !isPathInside(testRoot, recordedRunDirectory)) {
 			return undefined;
 		}
 		const quarantineNonce = quarantineName.slice(`${QUARANTINE_PREFIX}${recordedRunName}-`.length);
@@ -929,7 +929,7 @@ async function inferRecordedRunDirectoryFromQuarantine(
 			await lstat(recordedRunDirectory);
 			return undefined;
 		} catch (error) {
-			if (getErrorCode(error) !== "ENOENT") {
+			if (getErrorCode(error) !== 'ENOENT') {
 				return undefined;
 			}
 		}
@@ -950,9 +950,9 @@ async function cleanupInterruptedQuarantine(testRoot: string, quarantineDirector
 		testRootPath: testRoot,
 		runDirectory: quarantineDirectory,
 		recordedRunDirectory,
-		requiredOwnerLiveness: "dead",
-		requiredSupervisorLiveness: "dead",
-		requiredChildLiveness: "dead",
+		requiredOwnerLiveness: 'dead',
+		requiredSupervisorLiveness: 'dead',
+		requiredChildLiveness: 'dead',
 	});
 	if (!verified) {
 		return false;
@@ -962,7 +962,7 @@ async function cleanupInterruptedQuarantine(testRoot: string, quarantineDirector
 		await lstat(recordedRunDirectory);
 		return false;
 	} catch (error) {
-		if (getErrorCode(error) !== "ENOENT") {
+		if (getErrorCode(error) !== 'ENOENT') {
 			return false;
 		}
 	}
@@ -1003,7 +1003,7 @@ export async function cleanupOrphanedTestRuns(testRootPath: string): Promise<str
 	}
 
 	for (const entry of entries) {
-		if (!entry.isDirectory() || entry.isSymbolicLink() || !entry.name.startsWith("run-")) {
+		if (!entry.isDirectory() || entry.isSymbolicLink() || !entry.name.startsWith('run-')) {
 			continue;
 		}
 
@@ -1011,10 +1011,10 @@ export async function cleanupOrphanedTestRuns(testRootPath: string): Promise<str
 		const cleanupResult = await cleanupVerifiedTestRun({
 			testRootPath: testRoot,
 			runDirectory,
-			requiredOwnerLiveness: "dead",
+			requiredOwnerLiveness: 'dead',
 			minimumAgeMs: ORPHANED_TEST_RUN_MINIMUM_AGE_MS,
-			requiredSupervisorLiveness: "dead",
-			requiredChildLiveness: "dead",
+			requiredSupervisorLiveness: 'dead',
+			requiredChildLiveness: 'dead',
 		});
 		if (!cleanupResult.removed) {
 			continue;
@@ -1042,7 +1042,7 @@ const isProcessGroupAlive = (processGroupId: number): boolean => {
 		process.kill(-processGroupId, 0);
 		return true;
 	} catch (error) {
-		return getErrorCode(error) !== "ESRCH";
+		return getErrorCode(error) !== 'ESRCH';
 	}
 };
 
@@ -1063,14 +1063,14 @@ async function stopWindowsHelperAsFallback(child: ReturnType<typeof Bun.spawn>):
 		return false;
 	}
 
-	const systemRoot = process.env.SystemRoot ?? process.env.windir ?? "C:\\Windows";
-	const taskkillPath = join(systemRoot, "System32", "taskkill.exe");
+	const systemRoot = process.env.SystemRoot ?? process.env.windir ?? 'C:\\Windows';
+	const taskkillPath = join(systemRoot, 'System32', 'taskkill.exe');
 	let taskkill: ReturnType<typeof Bun.spawn>;
 	try {
-		taskkill = Bun.spawn([taskkillPath, "/PID", String(child.pid), "/T", "/F"], {
-			stderr: "pipe",
-			stdin: "ignore",
-			stdout: "ignore",
+		taskkill = Bun.spawn([taskkillPath, '/PID', String(child.pid), '/T', '/F'], {
+			stderr: 'pipe',
+			stdin: 'ignore',
+			stdout: 'ignore',
 			windowsHide: true,
 		});
 	} catch (error) {
@@ -1081,7 +1081,7 @@ async function stopWindowsHelperAsFallback(child: ReturnType<typeof Bun.spawn>):
 	const [taskkillExitCode, taskkillError] = await Promise.all([taskkill.exited, new Response(taskkill.stderr).text()]);
 	if (taskkillExitCode !== 0) {
 		console.error(
-			`taskkill.exe no confirmó el cierre del árbol ${child.pid} (exit ${taskkillExitCode}): ${taskkillError.trim()}`,
+			`taskkill.exe no confirmó el cierre del árbol ${child.pid} (exit ${taskkillExitCode}): ${taskkillError.trim()}`
 		);
 		return false;
 	}
@@ -1100,9 +1100,9 @@ async function terminatePosixProcessTree(child: ReturnType<typeof Bun.spawn>): P
 	}
 
 	try {
-		process.kill(-child.pid, "SIGTERM");
+		process.kill(-child.pid, 'SIGTERM');
 	} catch (error) {
-		if (getErrorCode(error) !== "ESRCH") {
+		if (getErrorCode(error) !== 'ESRCH') {
 			return false;
 		}
 	}
@@ -1111,9 +1111,9 @@ async function terminatePosixProcessTree(child: ReturnType<typeof Bun.spawn>): P
 	}
 
 	try {
-		process.kill(-child.pid, "SIGKILL");
+		process.kill(-child.pid, 'SIGKILL');
 	} catch (error) {
-		if (getErrorCode(error) !== "ESRCH") {
+		if (getErrorCode(error) !== 'ESRCH') {
 			return false;
 		}
 	}
@@ -1121,28 +1121,28 @@ async function terminatePosixProcessTree(child: ReturnType<typeof Bun.spawn>): P
 }
 
 async function stopNativeHelperAsFallback(child: ReturnType<typeof Bun.spawn>): Promise<false> {
-	if (process.platform === "win32") {
+	if (process.platform === 'win32') {
 		await stopWindowsHelperAsFallback(child);
 	} else {
 		let subreaperStopped = false;
 		try {
-			process.kill(child.pid, "SIGUSR1");
+			process.kill(child.pid, 'SIGUSR1');
 			subreaperStopped = (await waitForNativeHelperExit(child, NATIVE_TREE_COMPLETION_TIMEOUT_MS)) !== undefined;
 		} catch (error) {
-			if (getErrorCode(error) !== "ESRCH") {
+			if (getErrorCode(error) !== 'ESRCH') {
 				console.error(`No se pudo pedir el cierre de emergencia al subreaper POSIX ${child.pid}: ${String(error)}`);
 			}
 		}
 		if (subreaperStopped) {
 			console.error(
-				`El subreaper POSIX ${child.pid} agotó el árbol como resguardo, pero el recibo llegó fuera del flujo confirmado.`,
+				`El subreaper POSIX ${child.pid} agotó el árbol como resguardo, pero el recibo llegó fuera del flujo confirmado.`
 			);
 		} else {
 			const helperGroupStopped = await terminatePosixProcessTree(child);
 			console.error(
 				helperGroupStopped
 					? `El grupo del helper POSIX ${child.pid} se detuvo sin confirmar que el subreaper agotó sus descendientes.`
-					: `El fallback no confirmó siquiera el cierre del grupo del helper POSIX ${child.pid}.`,
+					: `El fallback no confirmó siquiera el cierre del grupo del helper POSIX ${child.pid}.`
 			);
 		}
 	}
@@ -1155,7 +1155,7 @@ async function cleanupSupervisorRun(
 	runDirectory: string,
 	ownerProcessId: number,
 	supervisorProcessId: number,
-	cleanupNonce: string,
+	cleanupNonce: string
 ): Promise<CleanupResult> {
 	return await cleanupVerifiedTestRun({
 		testRootPath,
@@ -1163,9 +1163,9 @@ async function cleanupSupervisorRun(
 		expectedCleanupNonce: cleanupNonce,
 		expectedOwnerProcessId: ownerProcessId,
 		expectedSupervisorProcessId: supervisorProcessId,
-		requiredOwnerLiveness: "any",
-		requiredSupervisorLiveness: "alive",
-		requiredChildLiveness: "dead",
+		requiredOwnerLiveness: 'any',
+		requiredSupervisorLiveness: 'alive',
+		requiredChildLiveness: 'dead',
 		allowInitializing: true,
 	});
 }
@@ -1173,7 +1173,7 @@ async function cleanupSupervisorRun(
 async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promise<number> {
 	const supervisorStartedAt = Date.now();
 	const debugWindowsJob = (message: string): void => {
-		if (process.env.MEDIA_MANAGER_TEST_JOB_DEBUG === "1") {
+		if (process.env.MEDIA_MANAGER_TEST_JOB_DEBUG === '1') {
 			console.error(`[isolated-test-supervisor ${Date.now() - supervisorStartedAt}ms] ${message}`);
 		}
 	};
@@ -1197,13 +1197,13 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 		return 143;
 	}
 
-	const runDirectory = await mkdtemp(join(testRoot, "run-"));
+	const runDirectory = await mkdtemp(join(testRoot, 'run-'));
 	if (!isPathInside(testRoot, runDirectory)) {
 		console.error(`Supervisor de tests bloqueado fuera del root autorizado: ${runDirectory}`);
 		return 1;
 	}
 
-	const databasePath = resolve(runDirectory, "db.sqlite");
+	const databasePath = resolve(runDirectory, 'db.sqlite');
 	const markerPath = resolve(runDirectory, TEST_DATABASE_MARKER);
 	const startedAt = new Date().toISOString();
 	let marker: TestRunMarker = {
@@ -1211,17 +1211,17 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 		owner: TEST_DATABASE_OWNER,
 		processId: config.ownerProcessId,
 		supervisorProcessId: process.pid,
-		schemaVersion: "initializing",
+		schemaVersion: 'initializing',
 		startedAt,
 		cleanupNonce: config.cleanupNonce,
-		state: "initializing",
+		state: 'initializing',
 	};
 	let child: ReturnType<typeof Bun.spawn> | undefined;
 	let childTreeStopped = true;
 
 	try {
 		await writeTestRunMarker(markerPath, marker);
-		console.log("🔒 Creando DB de tests descartable desde migraciones versionadas");
+		console.log('🔒 Creando DB de tests descartable desde migraciones versionadas');
 		const migrationResult = await migrateDatabase({ databasePath });
 		if (!ownerChannel.isConnected()) {
 			return 143;
@@ -1232,21 +1232,21 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 			return 143;
 		}
 
-		const schemaVersion = process.env.MEDIA_MANAGER_TEST_SCHEMA_VERSION ?? migrationResult.applied.at(-1) ?? "current";
+		const schemaVersion = process.env.MEDIA_MANAGER_TEST_SCHEMA_VERSION ?? migrationResult.applied.at(-1) ?? 'current';
 		const childEnvironment = {
 			...process.env,
 			DATABASE_URL: pathToFileURL(databasePath).href,
-			DISABLE_FTS5: "1",
-			MEDIA_MANAGER_TEST_DB: "1",
+			DISABLE_FTS5: '1',
+			MEDIA_MANAGER_TEST_DB: '1',
 			MEDIA_MANAGER_TEST_DB_ROOT: runDirectory,
 			MEDIA_MANAGER_TEST_DB_TEMPLATE: databasePath,
 			MEDIA_MANAGER_TEST_SCHEMA_VERSION: schemaVersion,
-			NODE_ENV: "test",
+			NODE_ENV: 'test',
 		};
 
-		if (process.platform === "win32" || process.platform === "linux") {
-			debugWindowsJob("preparando helper nativo");
-			const helperKind: NativeHelperKind = process.platform === "win32" ? "windows-test-job" : "posix-test-tree";
+		if (process.platform === 'win32' || process.platform === 'linux') {
+			debugWindowsJob('preparando helper nativo');
+			const helperKind: NativeHelperKind = process.platform === 'win32' ? 'windows-test-job' : 'posix-test-tree';
 			let helperExecutablePath: string;
 			try {
 				helperExecutablePath = await prepareNativeHelper(helperKind);
@@ -1258,11 +1258,11 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 				return 143;
 			}
 
-			const statusFileName = process.platform === "win32" ? "windows-job-status" : "posix-tree-status";
-			const nativeTreeConfigPath = resolve(runDirectory, "native-tree-config");
+			const statusFileName = process.platform === 'win32' ? 'windows-job-status' : 'posix-tree-status';
+			const nativeTreeConfigPath = resolve(runDirectory, 'native-tree-config');
 			const nativeTreeStatusPath = resolve(runDirectory, statusFileName);
-			const nativeTreeStopPath = resolve(runDirectory, "native-tree-stop");
-			const encodeNativeTreeValue = (value: string): string => Buffer.from(value, "utf8").toString("base64");
+			const nativeTreeStopPath = resolve(runDirectory, 'native-tree-stop');
+			const encodeNativeTreeValue = (value: string): string => Buffer.from(value, 'utf8').toString('base64');
 			await writeFile(
 				nativeTreeConfigPath,
 				[
@@ -1272,17 +1272,17 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 					encodeNativeTreeValue(nativeTreeStopPath),
 					String(config.command.length),
 					...config.command.map(encodeNativeTreeValue),
-				].join("\n"),
-				"utf8",
+				].join('\n'),
+				'utf8'
 			);
 			childTreeStopped = false;
 			child = Bun.spawn([helperExecutablePath, nativeTreeConfigPath], {
 				cwd: config.cwd,
-				detached: process.platform !== "win32",
+				detached: process.platform !== 'win32',
 				env: childEnvironment,
-				stderr: "inherit",
-				stdin: "inherit",
-				stdout: "inherit",
+				stderr: 'inherit',
+				stdin: 'inherit',
+				stdout: 'inherit',
 				windowsHide: true,
 			});
 			debugWindowsJob(`helper iniciado (${child.pid})`);
@@ -1290,16 +1290,16 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 				child,
 				nativeTreeStatusPath,
 				config.cleanupNonce,
-				ownerChannel.disconnected,
+				ownerChannel.disconnected
 			);
 			debugWindowsJob(`estado inicial recibido (${initialResult.kind})`);
-			if (initialResult.kind === "owner") {
-				await writeFile(nativeTreeStopPath, config.cleanupNonce, "utf8");
+			if (initialResult.kind === 'owner') {
+				await writeFile(nativeTreeStopPath, config.cleanupNonce, 'utf8');
 				const completion = await confirmNativeTreeCompletion(child, nativeTreeStatusPath, config.cleanupNonce);
 				childTreeStopped = completion.stopped;
 				return 143;
 			}
-			if (initialResult.status.state === "error") {
+			if (initialResult.status.state === 'error') {
 				throw new Error(initialResult.status.error);
 			}
 
@@ -1308,39 +1308,39 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 				...marker,
 				childProcessId: nativeChildProcessId,
 				schemaVersion,
-				state: "ready",
+				state: 'ready',
 			};
 			await writeTestRunMarker(markerPath, marker);
 
-			if (initialResult.status.state === "completed") {
+			if (initialResult.status.state === 'completed') {
 				const completion = await confirmNativeTreeCompletion(
 					child,
 					nativeTreeStatusPath,
 					config.cleanupNonce,
-					nativeChildProcessId,
+					nativeChildProcessId
 				);
 				childTreeStopped = completion.stopped;
 				return completion.stopped ? completion.exitCode : 1;
 			}
 
 			const result = await Promise.race([
-				child.exited.then(() => ({ kind: "helper" as const })),
-				ownerChannel.disconnected.then(() => ({ kind: "owner" as const })),
+				child.exited.then(() => ({ kind: 'helper' as const })),
+				ownerChannel.disconnected.then(() => ({ kind: 'owner' as const })),
 			]);
 			debugWindowsJob(`evento terminal recibido (${result.kind})`);
-			if (result.kind === "owner") {
-				await writeFile(nativeTreeStopPath, config.cleanupNonce, "utf8");
+			if (result.kind === 'owner') {
+				await writeFile(nativeTreeStopPath, config.cleanupNonce, 'utf8');
 			}
 
 			const completion = await confirmNativeTreeCompletion(
 				child,
 				nativeTreeStatusPath,
 				config.cleanupNonce,
-				nativeChildProcessId,
+				nativeChildProcessId
 			);
 			debugWindowsJob(`confirmación leída (${completion.stopped})`);
 			childTreeStopped = completion.stopped;
-			return result.kind === "owner" ? 143 : completion.stopped ? completion.exitCode : 1;
+			return result.kind === 'owner' ? 143 : completion.stopped ? completion.exitCode : 1;
 		}
 
 		childTreeStopped = false;
@@ -1356,20 +1356,20 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 		if (!childTreeStopped) {
 			console.error(`Cleanup bloqueado: el árbol de tests no confirmó su cierre para ${runDirectory}`);
 		} else {
-			debugWindowsJob("iniciando cleanup");
+			debugWindowsJob('iniciando cleanup');
 			const cleanupResult = await cleanupSupervisorRun(
 				testRoot,
 				runDirectory,
 				config.ownerProcessId,
 				process.pid,
-				config.cleanupNonce,
+				config.cleanupNonce
 			);
 			if (cleanupResult.workerDatabaseCount > 0) {
 				console.log(`🧪 DBs SQLite aisladas creadas: ${cleanupResult.workerDatabaseCount}`);
 			}
 			if (cleanupResult.removed) {
 				console.log(`🧹 DB de tests eliminada: ${runDirectory}`);
-				debugWindowsJob("cleanup terminado");
+				debugWindowsJob('cleanup terminado');
 			} else {
 				console.error(`Cleanup bloqueado para el run de tests: ${runDirectory}`);
 			}
@@ -1378,27 +1378,27 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 }
 
 function encodeSupervisorConfig(config: TestRunSupervisorConfig): string {
-	return Buffer.from(JSON.stringify(config), "utf8").toString("base64url");
+	return Buffer.from(JSON.stringify(config), 'utf8').toString('base64url');
 }
 
 function decodeSupervisorConfig(value: string | undefined): TestRunSupervisorConfig {
 	if (!value) {
-		throw new Error("Falta la configuración del supervisor de tests.");
+		throw new Error('Falta la configuración del supervisor de tests.');
 	}
 
-	const parsed = JSON.parse(Buffer.from(value, "base64url").toString("utf8")) as Partial<TestRunSupervisorConfig>;
+	const parsed = JSON.parse(Buffer.from(value, 'base64url').toString('utf8')) as Partial<TestRunSupervisorConfig>;
 	if (
 		!Array.isArray(parsed.command) ||
-		!parsed.command.every((part) => typeof part === "string") ||
-		typeof parsed.cleanupNonce !== "string" ||
+		!parsed.command.every((part) => typeof part === 'string') ||
+		typeof parsed.cleanupNonce !== 'string' ||
 		parsed.cleanupNonce.length < 16 ||
-		typeof parsed.cwd !== "string" ||
-		typeof parsed.ownerProcessId !== "number" ||
+		typeof parsed.cwd !== 'string' ||
+		typeof parsed.ownerProcessId !== 'number' ||
 		!Number.isSafeInteger(parsed.ownerProcessId) ||
 		parsed.ownerProcessId <= 0 ||
-		typeof parsed.testRootPath !== "string"
+		typeof parsed.testRootPath !== 'string'
 	) {
-		throw new Error("La configuración del supervisor de tests es inválida.");
+		throw new Error('La configuración del supervisor de tests es inválida.');
 	}
 
 	return {
@@ -1414,10 +1414,10 @@ export async function runIsolatedCommand({
 	command,
 	cwd = process.cwd(),
 	environment = process.env,
-	testRootPath = environment.MEDIA_MANAGER_TEST_ROOT ?? resolve(cwd, ".scratch", "test-dbs"),
+	testRootPath = environment.MEDIA_MANAGER_TEST_ROOT ?? resolve(cwd, '.scratch', 'test-dbs'),
 }: RunIsolatedCommandOptions): Promise<number> {
 	if (command.length === 0) {
-		throw new Error("Falta el comando de tests a ejecutar.");
+		throw new Error('Falta el comando de tests a ejecutar.');
 	}
 
 	const testRoot = await resolveCanonicalTestRoot(testRootPath, true);
@@ -1435,13 +1435,13 @@ export async function runIsolatedCommand({
 	let supervisor: IpcSubprocess | undefined;
 	let requestedSignalExitCode: number | undefined;
 	const requestExitForSignal = (signal: NodeJS.Signals) => {
-		const exitCode = signal === "SIGINT" ? 130 : 143;
+		const exitCode = signal === 'SIGINT' ? 130 : 143;
 		if (requestedSignalExitCode !== undefined) {
 			process.exit(exitCode);
 		}
 
 		requestedSignalExitCode = exitCode;
-		if (!supervisor || typeof supervisor.disconnect !== "function") {
+		if (!supervisor || typeof supervisor.disconnect !== 'function') {
 			process.exit(exitCode);
 		}
 		try {
@@ -1450,10 +1450,10 @@ export async function runIsolatedCommand({
 			process.exit(exitCode);
 		}
 	};
-	const handleInterrupt = () => requestExitForSignal("SIGINT");
-	const handleTermination = () => requestExitForSignal("SIGTERM");
-	process.on("SIGINT", handleInterrupt);
-	process.on("SIGTERM", handleTermination);
+	const handleInterrupt = () => requestExitForSignal('SIGINT');
+	const handleTermination = () => requestExitForSignal('SIGTERM');
+	process.on('SIGINT', handleInterrupt);
+	process.on('SIGTERM', handleTermination);
 
 	try {
 		supervisor = Bun.spawn(
@@ -1463,16 +1463,16 @@ export async function runIsolatedCommand({
 				detached: true,
 				env: environment,
 				ipc: () => {},
-				stderr: "inherit",
-				stdin: "inherit",
-				stdout: "inherit",
-			},
+				stderr: 'inherit',
+				stdin: 'inherit',
+				stdout: 'inherit',
+			}
 		);
 		const supervisorExitCode = await supervisor.exited;
 		return requestedSignalExitCode ?? supervisorExitCode;
 	} finally {
-		process.off("SIGINT", handleInterrupt);
-		process.off("SIGTERM", handleTermination);
+		process.off('SIGINT', handleInterrupt);
+		process.off('SIGTERM', handleTermination);
 	}
 }
 
@@ -1489,7 +1489,7 @@ if (import.meta.main) {
 	} else {
 		const testArguments = process.argv.slice(2);
 		const exitCode = await runIsolatedCommand({
-			command: [process.execPath, "x", "vp", "test", ...testArguments],
+			command: [process.execPath, 'x', 'vp', 'test', ...testArguments],
 		});
 		process.exitCode = exitCode;
 	}

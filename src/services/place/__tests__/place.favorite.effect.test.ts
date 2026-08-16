@@ -22,7 +22,11 @@ const expectSuccess = async <A, E>(effect: Effect.Effect<A, E, PlaceService>) =>
 let createdActiveProfileId: string | null = null;
 
 const ensureActiveProfile = async () => {
-	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+	const [activeProfile] = await db
+		.select({ id: profiles.id })
+		.from(profiles)
+		.where(eq(profiles.isActive, true))
+		.limit(1);
 
 	if (activeProfile) {
 		return activeProfile.id;

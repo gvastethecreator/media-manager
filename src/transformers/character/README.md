@@ -89,9 +89,7 @@ Sistema automático de rareza:
 // ❌ Carga todas las relaciones
 const character = await db.query.characters.findFirst({
 	where: eq(characters.id, id),
-	with: {
-		/* todas las relaciones */
-	},
+	with: {/* todas las relaciones */},
 });
 // 🐌 Lento, consume mucha memoria
 ```

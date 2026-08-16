@@ -30,7 +30,8 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
 			const raw = props.value ?? props.defaultValue;
 			return Array.isArray(raw) && raw.length > 0 ? raw : [0];
 		}, [props.value, props.defaultValue]);
-		const ariaProps = props['aria-label'] || props['aria-labelledby'] ? {} : ({ 'aria-label': 'Control deslizante' } as const);
+		const ariaProps =
+			props['aria-label'] || props['aria-labelledby'] ? {} : ({ 'aria-label': 'Control deslizante' } as const);
 
 		// Generar ticks
 		const ticks = showTicks
@@ -46,10 +47,7 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
 		return (
 			<div className={cn('relative w-full', className)}>
 				<SliderPrimitive.Root
-					className={cn(
-						'relative flex w-full touch-none select-none items-center',
-						'min-h-11'
-					)}
+					className={cn('relative flex w-full touch-none select-none items-center', 'min-h-11')}
 					ref={ref}
 					{...ariaProps}
 					{...props}

@@ -8,7 +8,13 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-function DataGridColumnVisibility<TData extends RowData>({ table, trigger }: { table: Table<any, TData>; trigger: ReactNode }) {
+function DataGridColumnVisibility<TData extends RowData>({
+	table,
+	trigger,
+}: {
+	table: Table<any, TData>;
+	trigger: ReactNode;
+}) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>

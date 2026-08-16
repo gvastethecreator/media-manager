@@ -97,9 +97,7 @@ export function ServerStats() {
 			{error && (
 				<Card className="border-destructive">
 					<CardContent className="pt-6">
-						<p className="text-destructive">
-							{error instanceof Error ? error.message : 'Could not load statistics'}
-						</p>
+						<p className="text-destructive">{error instanceof Error ? error.message : 'Could not load statistics'}</p>
 					</CardContent>
 				</Card>
 			)}
@@ -343,9 +341,7 @@ export function ServerStats() {
 					) : (
 						<Card>
 							<CardContent className="pt-6">
-								<p className="text-center text-muted-foreground">
-									Application statistics could not be loaded
-								</p>
+								<p className="text-center text-muted-foreground">Application statistics could not be loaded</p>
 							</CardContent>
 						</Card>
 					)}

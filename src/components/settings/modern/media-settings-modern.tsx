@@ -134,10 +134,7 @@ export function MediaSettingsModern() {
 
 	return (
 		<div className="space-y-6">
-			<SettingsPageHeader
-				description="Customize how each file type looks and behaves"
-				title="Media settings"
-			/>
+			<SettingsPageHeader description="Customize how each file type looks and behaves" title="Media settings" />
 
 			{/* Media Type Selector */}
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">

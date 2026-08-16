@@ -170,7 +170,7 @@ export function ProfilesSettings() {
 																{profile.preferences?.theme === 'system'
 																	? 'Sistema'
 																	: profile.preferences?.theme === 'light'
-																	? 'Light'
+																		? 'Light'
 																		: 'Dark'}
 															</span>
 															<span>•</span>
@@ -204,9 +204,7 @@ export function ProfilesSettings() {
 								<div className="py-8 text-center">
 									<UserPlus className="mx-auto mb-2 h-6 w-6 text-muted-foreground/50" />
 									<p className="text-muted-foreground text-xs">No additional profiles</p>
-									<p className="mt-1 text-[10px] text-muted-foreground/75">
-										Create more profiles for different setups
-									</p>
+									<p className="mt-1 text-[10px] text-muted-foreground/75">Create more profiles for different setups</p>
 								</div>
 							)}
 						</div>

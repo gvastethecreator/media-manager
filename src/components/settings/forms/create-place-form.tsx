@@ -255,7 +255,7 @@ export function CreatePlaceForm({
 									<Select onValueChange={field.onChange} value={field.value ?? ''}>
 										<FormControl>
 											<SelectTrigger>
-											<SelectValue placeholder="Select type" />
+												<SelectValue placeholder="Select type" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
@@ -282,7 +282,7 @@ export function CreatePlaceForm({
 									<Select onValueChange={field.onChange} value={field.value ?? ''}>
 										<FormControl>
 											<SelectTrigger>
-											<SelectValue placeholder="Select category" />
+												<SelectValue placeholder="Select category" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
@@ -311,7 +311,7 @@ export function CreatePlaceForm({
 									<Select onValueChange={field.onChange} value={field.value ?? ''}>
 										<FormControl>
 											<SelectTrigger>
-											<SelectValue placeholder="Select climate" />
+												<SelectValue placeholder="Select climate" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
@@ -356,7 +356,7 @@ export function CreatePlaceForm({
 									<Select onValueChange={field.onChange} value={field.value ?? ''}>
 										<FormControl>
 											<SelectTrigger>
-											<SelectValue placeholder="Select government" />
+												<SelectValue placeholder="Select government" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
@@ -386,7 +386,7 @@ export function CreatePlaceForm({
 								<FormControl>
 									<Textarea
 										className="min-h-32 resize-none"
-									placeholder="Lore and stories about this place..."
+										placeholder="Lore and stories about this place..."
 										{...field}
 										value={field.value ?? ''}
 									/>
@@ -406,7 +406,7 @@ export function CreatePlaceForm({
 								<FormControl>
 									<Textarea
 										className="min-h-32 resize-none"
-									placeholder="History of this place..."
+										placeholder="History of this place..."
 										{...field}
 										value={field.value ?? ''}
 									/>
@@ -432,7 +432,6 @@ export function CreatePlaceForm({
 							</FormItem>
 						)}
 					/>
-
 				</div>
 				<div className="flex justify-end gap-2">
 					{onCancel && (

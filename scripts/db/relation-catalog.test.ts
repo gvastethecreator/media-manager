@@ -1,10 +1,10 @@
-import { afterEach, describe, expect, it } from "bun:test";
-import { Database } from "bun:sqlite";
-import { mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { FLEXIBLE_RELATION_CATALOG, STRONG_RELATION_CATALOG } from "../../src/lib/drizzle/schema/relations/catalog";
-import { migrateDatabase } from "./migrations";
+import { afterEach, describe, expect, it } from 'bun:test';
+import { Database } from 'bun:sqlite';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { FLEXIBLE_RELATION_CATALOG, STRONG_RELATION_CATALOG } from '../../src/lib/drizzle/schema/relations/catalog';
+import { migrateDatabase } from './migrations';
 
 const temporaryDirectories: string[] = [];
 
@@ -17,15 +17,15 @@ afterEach(async () => {
 });
 
 async function createDatabase(): Promise<Database> {
-	const directory = await mkdtemp(join(tmpdir(), "media-manager-relation-catalog-"));
+	const directory = await mkdtemp(join(tmpdir(), 'media-manager-relation-catalog-'));
 	temporaryDirectories.push(directory);
-	const databasePath = join(directory, "catalog.sqlite");
+	const databasePath = join(directory, 'catalog.sqlite');
 	await migrateDatabase({ databasePath });
 	return new Database(databasePath, { strict: true });
 }
 
-describe("canonical relation catalog", () => {
-	it("covers every live authored junction exactly once", async () => {
+describe('canonical relation catalog', () => {
+	it('covers every live authored junction exactly once', async () => {
 		const database = await createDatabase();
 		const liveJunctions = (
 			database
@@ -39,7 +39,7 @@ describe("canonical relation catalog", () => {
 		database.close();
 	});
 
-	it("enforces typed endpoints, cascade cleanup, pair uniqueness and inverse indexes", async () => {
+	it('enforces typed endpoints, cascade cleanup, pair uniqueness and inverse indexes', async () => {
 		const database = await createDatabase();
 
 		for (const relation of STRONG_RELATION_CATALOG) {
@@ -51,19 +51,19 @@ describe("canonical relation catalog", () => {
 			}>;
 			expect(foreignKeys).toContainEqual(
 				expect.objectContaining({
-					from: "A",
-					on_delete: "CASCADE",
-					on_update: "CASCADE",
+					from: 'A',
+					on_delete: 'CASCADE',
+					on_update: 'CASCADE',
 					table: relation.leftTable,
-				}),
+				})
 			);
 			expect(foreignKeys).toContainEqual(
 				expect.objectContaining({
-					from: "B",
-					on_delete: "CASCADE",
-					on_update: "CASCADE",
+					from: 'B',
+					on_delete: 'CASCADE',
+					on_update: 'CASCADE',
 					table: relation.rightTable,
-				}),
+				})
 			);
 
 			const indexes = database.query(`PRAGMA index_list('${relation.tableName}')`).all() as Array<{
@@ -76,30 +76,30 @@ describe("canonical relation catalog", () => {
 			expect(inverseIndex?.unique).toBe(0);
 			expect(
 				(database.query(`PRAGMA index_info('${pairIndex?.name}')`).all() as Array<{ name: string }>).map(
-					(column) => column.name,
-				),
-			).toEqual(["A", "B"]);
+					(column) => column.name
+				)
+			).toEqual(['A', 'B']);
 			expect(
 				(database.query(`PRAGMA index_info('${inverseIndex?.name}')`).all() as Array<{ name: string }>).map(
-					(column) => column.name,
-				),
-			).toEqual(["B"]);
+					(column) => column.name
+				)
+			).toEqual(['B']);
 		}
 
-		expect(database.query("PRAGMA foreign_key_check").all()).toEqual([]);
+		expect(database.query('PRAGMA foreign_key_check').all()).toEqual([]);
 		database.close();
 	});
 
-	it("limits flexible targets to an explicit operational catalog", async () => {
+	it('limits flexible targets to an explicit operational catalog', async () => {
 		const database = await createDatabase();
 		const catalogNames = FLEXIBLE_RELATION_CATALOG.map((relation) => relation.tableName).sort();
 		expect(catalogNames).toEqual([
-			"Activity",
-			"EntityAggregates",
-			"Favorite",
-			"Metadata",
-			"TaxonomyArtifact",
-			"Thumbnail",
+			'Activity',
+			'EntityAggregates',
+			'Favorite',
+			'Metadata',
+			'TaxonomyArtifact',
+			'Thumbnail',
 		]);
 		for (const tableName of catalogNames) {
 			expect(database.query("SELECT name FROM sqlite_master WHERE type='table' AND name=?").get(tableName)).toEqual({

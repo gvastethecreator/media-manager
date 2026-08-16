@@ -269,8 +269,7 @@ export function EntityForm({
 				if (field.validation.maxLength && (field.type === 'text' || field.type === 'textarea')) {
 					fieldSchema = fieldSchema.max(
 						field.validation.maxLength,
-						field.validation.customMessage ||
-							`${field.label} cannot exceed ${field.validation.maxLength} characters`
+						field.validation.customMessage || `${field.label} cannot exceed ${field.validation.maxLength} characters`
 					);
 				}
 
@@ -369,7 +368,7 @@ export function EntityForm({
 				navigateWithTransition(redirectUrl);
 			}
 		} catch (error: any) {
-		toastService.error(error.message || 'Could not save changes');
+			toastService.error(error.message || 'Could not save changes');
 		} finally {
 			setIsSubmitting(false);
 			setShowConfirmation(false);
@@ -465,7 +464,7 @@ export function EntityForm({
 								>
 									<FormControl>
 										<SelectTrigger>
-										<SelectValue placeholder={field.placeholder || `Select ${field.label.toLowerCase()}`} />
+											<SelectValue placeholder={field.placeholder || `Select ${field.label.toLowerCase()}`} />
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>

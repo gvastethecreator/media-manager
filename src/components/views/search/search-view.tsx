@@ -155,11 +155,7 @@ export function SearchView(_props: ViewProps) {
 					<p className="text-center text-destructive">Search failed</p>
 				) : filters.query ? (
 					browserItems.length === 0 ? (
-						<EmptyState
-							description="Try different terms or clear the filters"
-							icon={Search}
-							title="Sin resultados"
-						/>
+						<EmptyState description="Try different terms or clear the filters" icon={Search} title="Sin resultados" />
 					) : (
 						<div className="mb-4">
 							<p className="mb-4 text-muted-foreground text-sm">

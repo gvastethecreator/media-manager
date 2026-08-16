@@ -79,7 +79,7 @@ test('abre un documento de texto desde su fuente autorizada y permite cerrar el 
 	});
 
 	await page.goto('/documents', { waitUntil: 'domcontentloaded' });
-	await expect(page.getByRole('heading', { name: 'Documentos' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Documents' })).toBeVisible();
 	const documentItem = page.getByText(fileName, { exact: true }).first();
 	await expect(documentItem).toBeVisible();
 	const contentResponse = page.waitForResponse(
@@ -89,7 +89,7 @@ test('abre un documento de texto desde su fuente autorizada y permite cerrar el 
 	expect((await contentResponse).status()).toBe(200);
 	const dialog = page.getByRole('dialog');
 	await expect(dialog).toBeVisible();
-	await expect(dialog.getByRole('button', { name: 'Descargar' })).toBeEnabled();
+	await expect(dialog.getByRole('button', { name: 'Download' })).toBeEnabled();
 	await expect(dialog.getByText(content, { exact: true })).toBeVisible();
 
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('document-viewer-desktop.png') });
@@ -153,12 +153,12 @@ test('renderiza un PDF desde su fuente autorizada y descarga por la ruta protegi
 	expect(documentContentResponse.headers()['content-security-policy']).toBeUndefined();
 	const dialog = page.getByRole('dialog');
 	await expect(dialog).toBeVisible();
-	await expect(dialog.getByText('Página 1 de 1')).toBeVisible();
+	await expect(dialog.getByText('Page 1 of 1')).toBeVisible();
 	await expect(dialog.locator('canvas')).toBeVisible();
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('pdf-viewer-desktop.png') });
 
 	const downloadPromise = page.waitForEvent('download');
-	await dialog.getByRole('link', { name: 'Descargar' }).click();
+	await dialog.getByRole('link', { name: 'Download' }).click();
 	expect((await downloadPromise).suggestedFilename()).toBe(fileName);
 
 	await page.setViewportSize({ height: 768, width: 1024 });
@@ -201,8 +201,8 @@ test('informa un PDF corrupto sin romper el diálogo del visor', async ({ page, 
 	await documentItem.dblclick();
 	const dialog = page.getByRole('dialog');
 	await expect(dialog).toBeVisible();
-	await expect(dialog.getByRole('alert')).toContainText('Comprueba que el archivo no esté dañado o protegido.');
-	await expect(dialog.getByRole('button', { name: 'Reintentar' })).toBeVisible();
+	await expect(dialog.getByRole('alert')).toContainText('Check that the file is not damaged or protected.');
+	await expect(dialog.getByRole('button', { name: 'Retry' })).toBeVisible();
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('pdf-viewer-error-desktop.png') });
 	await page.setViewportSize({ height: 768, width: 1024 });
 	expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);

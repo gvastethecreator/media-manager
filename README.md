@@ -21,10 +21,10 @@ Media Manager is a local-first workbench for large creative libraries. It indexe
 
 The captures below come from the local application with an empty, privacy-safe library. No personal paths or files are shown.
 
-| Library overview | Keyboard workflow |
-| --- | --- |
-| <img src="docs/assets/screenshots/library-overview.webp" alt="Media Manager dashboard with media categories and library statistics" /> | <img src="docs/assets/screenshots/keyboard-workflow.webp" alt="Media Manager keyboard shortcut settings" /> |
-| **Appearance and layout** | **Settings and indexing** |
+| Library overview                                                                                                                        | Keyboard workflow                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="docs/assets/screenshots/library-overview.webp" alt="Media Manager dashboard with media categories and library statistics" />  | <img src="docs/assets/screenshots/keyboard-workflow.webp" alt="Media Manager keyboard shortcut settings" />                              |
+| **Appearance and layout**                                                                                                               | **Settings and indexing**                                                                                                                |
 | <img src="docs/assets/screenshots/appearance-and-layout.webp" alt="Media Manager appearance settings with restrained theme controls" /> | <img src="docs/assets/screenshots/settings-and-indexing.webp" alt="Media Manager settings for authorized folders and indexing status" /> |
 
 ## Why it exists
@@ -64,19 +64,19 @@ Copy `.env.example` when you need to customize ports, the database path, CORS, m
 
 ## Development commands
 
-| Command | Purpose |
-| --- | --- |
-| `bun run dev:full` | Start the frontend and backend |
-| `bun run dev:vite` | Start only the frontend |
-| `bun run dev:server:hot` | Start only the backend |
-| `bun run dev:tauri` | Start the Tauri desktop shell |
-| `bun run check` | Run lint and TypeScript checks |
-| `bun run test` | Run the isolated unit and integration suite |
-| `bun run test:tooling` | Verify repository tooling |
-| `bun run test:e2e` | Run Playwright browser coverage |
-| `bun run build` | Build the frontend and Bun server |
-| `bun run db:schema:check` | Verify the generated schema contract |
-| `bun run deps:outdated` | Check direct dependency freshness |
+| Command                   | Purpose                                     |
+| ------------------------- | ------------------------------------------- |
+| `bun run dev:full`        | Start the frontend and backend              |
+| `bun run dev:vite`        | Start only the frontend                     |
+| `bun run dev:server:hot`  | Start only the backend                      |
+| `bun run dev:tauri`       | Start the Tauri desktop shell               |
+| `bun run check`           | Run lint and TypeScript checks              |
+| `bun run test`            | Run the isolated unit and integration suite |
+| `bun run test:tooling`    | Verify repository tooling                   |
+| `bun run test:e2e`        | Run Playwright browser coverage             |
+| `bun run build`           | Build the frontend and Bun server           |
+| `bun run db:schema:check` | Verify the generated schema contract        |
+| `bun run deps:outdated`   | Check direct dependency freshness           |
 
 The broad local gate is:
 
@@ -89,17 +89,17 @@ bun run build
 
 ## Architecture
 
-| Area | Responsibility |
-| --- | --- |
-| `src/components/` | Application shell, views, panels, cards, and file workflows |
-| `src/server/` | Express API, middleware, routes, and runtime integration |
-| `src/services/` | Media processing, indexing, metadata, and domain services |
-| `src/store/` | Zustand state and entity operations |
-| `src/lib/` | Drizzle, filesystem boundaries, logging, Effect adapters, and shared infrastructure |
-| `src/types/` | Domain types, validation contracts, and view configuration |
-| `src-tauri/` | Optional Rust/Tauri desktop shell |
-| `scripts/` | Bun automation, isolated tests, builds, and database operations |
-| `docs/` | Product site and detailed engineering references |
+| Area              | Responsibility                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| `src/components/` | Application shell, views, panels, cards, and file workflows                         |
+| `src/server/`     | Express API, middleware, routes, and runtime integration                            |
+| `src/services/`   | Media processing, indexing, metadata, and domain services                           |
+| `src/store/`      | Zustand state and entity operations                                                 |
+| `src/lib/`        | Drizzle, filesystem boundaries, logging, Effect adapters, and shared infrastructure |
+| `src/types/`      | Domain types, validation contracts, and view configuration                          |
+| `src-tauri/`      | Optional Rust/Tauri desktop shell                                                   |
+| `scripts/`        | Bun automation, isolated tests, builds, and database operations                     |
+| `docs/`           | Product site and detailed engineering references                                    |
 
 Start with these references when changing a major subsystem:
 
