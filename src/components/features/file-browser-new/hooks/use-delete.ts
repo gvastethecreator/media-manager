@@ -79,7 +79,7 @@ export async function deleteBrowserItems(items: BrowserItem[]): Promise<FileMuta
 			}
 
 			const route = deletionRoute(entityType);
-			if (!route) throw new Error(`Tipo no compatible para eliminar: ${entityType}`);
+			if (!route) throw new Error(`Unsupported type for deletion: ${entityType}`);
 
 			for (const item of group) {
 				await apiClient.delete(`/${route}/${encodeURIComponent(item.id)}`);
@@ -88,7 +88,7 @@ export async function deleteBrowserItems(items: BrowserItem[]): Promise<FileMuta
 		}
 	} catch (error) {
 		throw new PartialFileMutationError(
-			error instanceof Error ? error.message : 'No se pudieron eliminar todos los elementos.',
+			error instanceof Error ? error.message : 'Not all items could be deleted.',
 			summary,
 			error
 		);
@@ -118,7 +118,7 @@ export function useDelete(): DeleteResult {
 			const partial = error instanceof PartialFileMutationError ? error.summary : null;
 			toast({
 				variant: 'destructive',
-				title: partial?.applied ? '⚠️ Eliminación parcialmente aplicada' : '❌ Error al eliminar',
+				title: partial?.applied ? '⚠️ Deletion partially applied' : '❌ Delete failed',
 				description: partial?.applied
 					? `${partial.applied} de ${partial.total} elementos se eliminaron antes del fallo. Revisa la lista antes de volver a intentarlo.`
 					: error.message,

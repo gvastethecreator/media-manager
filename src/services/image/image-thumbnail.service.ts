@@ -95,7 +95,7 @@ class ThumbnailService {
 			} catch (permError: any) {
 				const code = permError?.code;
 				if (code === 'ENOENT' || code === 'ENOTDIR') {
-					thumbnailLogger.error('[thumbnail] Archivo no encontrado:', { path: sourcePath, code });
+					thumbnailLogger.error('[thumbnail] File not found:', { path: sourcePath, code });
 					throw createFileNotFoundError(sourcePath, { imageId }, SERVICE_NAME);
 				}
 				if (code === 'EACCES' || code === 'EPERM') {
@@ -340,7 +340,7 @@ class ThumbnailService {
 		} catch (error) {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_READ_ERROR,
-				message: 'Error al obtener la imagen original',
+				message: 'Could not get the image original',
 				context: { imageId },
 				serviceName: SERVICE_NAME,
 			});
@@ -388,10 +388,10 @@ class ThumbnailService {
 				lastProcessedAt: lastProcessedImage[0]?.date || undefined,
 			};
 		} catch (error) {
-			thumbnailLogger.error('Error al obtener estadísticas de miniaturas:', error);
+			thumbnailLogger.error('Could not get statistics de miniaturas:', error);
 			throw toServiceError(error, {
 				code: ServiceErrorCode.DATABASE_ERROR,
-				message: 'Error al obtener estadísticas de miniaturas',
+				message: 'Could not get statistics de miniaturas',
 				serviceName: SERVICE_NAME,
 			});
 		}

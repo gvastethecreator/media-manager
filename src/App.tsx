@@ -39,7 +39,7 @@ export function App() {
 						<InterfaceSynchronizer />
 						<ErrorBoundary>
 							{/* SkipLink para accesibilidad - WCAG 2.4.1 */}
-							<SkipLink targetId="main-content">Saltar al contenido principal</SkipLink>
+							<SkipLink targetId="main-content">Skip to main content</SkipLink>
 
 						<SSENavigationRefresher />
 						<EntityCatalogBootstrapper />

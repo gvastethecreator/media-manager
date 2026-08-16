@@ -26,7 +26,7 @@ export async function getVideoFromApi(id: string): Promise<VideoWithStats | null
 		if (response.status === 404) {
 			return null;
 		}
-		throw new Error('Error al obtener video');
+		throw new Error('Could not get video');
 	}
 	return response.json();
 }
@@ -60,7 +60,7 @@ export async function findVideosInApi(options: FindVideosOptions = {}): Promise<
 	const url = `${API_BASE_PATH}?${params.toString()}`;
 	const response = await fetch(url);
 	if (!response.ok) {
-		throw new Error('Error al buscar videos');
+		throw new Error('Could not search videos');
 	}
 	// El backend retorna { data, pagination }
 	const payload = await response.json();
@@ -78,7 +78,7 @@ export async function createVideoInApi(data: PublicVideoCreateInput): Promise<Vi
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear video');
+		throw new Error('Could not create video');
 	}
 	return response.json();
 }
@@ -90,7 +90,7 @@ export async function updateVideoInApi(id: string, data: PublicVideoUpdateInput)
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar video');
+		throw new Error('Could not update video');
 	}
 	return response.json();
 }
@@ -98,6 +98,6 @@ export async function updateVideoInApi(id: string, data: PublicVideoUpdateInput)
 export async function deleteVideoFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar video');
+		throw new Error('Could not delete video');
 	}
 }

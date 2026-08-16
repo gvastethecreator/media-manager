@@ -82,7 +82,7 @@ const downloadFile = async (url: string, filename: string): Promise<void> => {
 		a.click();
 		URL.revokeObjectURL(objectUrl);
 	} catch (err) {
-		console.error('Error descargando archivo:', err);
+		console.error('Error downloading file:', err);
 	}
 };
 
@@ -135,7 +135,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 	const detailedMetadata = getDetailedMetadata(item, effectiveEnhanced);
 	const EntityIcon = getEntityIcon(item.entityType || 'file');
 
-	const itemName = 'name' in item ? (item.name as string) : 'Sin nombre';
+	const itemName = 'name' in item ? (item.name as string) : 'Unnamed';
 	const itemExtension = useMemo(() => {
 		if ('extension' in item && typeof item.extension === 'string') return item.extension.toUpperCase();
 		return itemName.includes('.') ? itemName.split('.').pop()?.toUpperCase() || '' : '';
@@ -211,7 +211,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 			'Seed',
 			'Ancho',
 			'Alto',
-			'Tamaño',
+			'Size',
 			'Batch Size',
 			'Denoising Strength',
 			'CLIP Skip',
@@ -224,7 +224,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 				if (k === 'Seed') {
 					icon = Target;
 					iconColor = 'text-(--meta-seed)';
-				} else if (['Ancho', 'Alto', 'Tamaño'].includes(k)) {
+				} else if (['Ancho', 'Alto', 'Size'].includes(k)) {
 					icon = Monitor;
 					iconColor = 'text-(--meta-dimension)';
 				} else if (['Pasos', 'CFG Scale'].includes(k)) {
@@ -292,14 +292,14 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</div>
 						<p className="mb-2 break-words text-muted-foreground leading-tight">{effectiveError}</p>
 						<Button className="h-6 px-2 font-bold text-[9px]" onClick={() => refetch()} size="sm" variant="outline">
-							<RefreshCw className="mr-1 h-2.5 w-2.5" /> REINTENTAR
+							<RefreshCw className="mr-1 h-2.5 w-2.5" /> RETRY
 						</Button>
 					</div>
 				)}
 
 				{originRows.length > 0 && <MetadataTable dense rows={originRows} />}
 				{modelRows.length > 0 && <MetadataTable dense multiColumn rows={modelRows} title="Modelos" />}
-				{paramRows.length > 0 && <MetadataTable dense multiColumn rows={paramRows} title="Parámetros" />}
+				{paramRows.length > 0 && <MetadataTable dense multiColumn rows={paramRows} title="Parameters" />}
 				{promptsRows.length > 0 && <MetadataTable rows={promptsRows} />}
 				{detectedLoras.length > 0 && (
 					<MetadataTable
@@ -358,7 +358,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 							title={
 								isCanonicalFavoriteSupported
 									? 'Alternar favorito'
-									: 'Esta entidad está fuera del perímetro canónico de Favorite'
+									: 'This entity is outside the canonical Favorite boundary'
 							}
 							variant="ghost"
 						>
@@ -375,7 +375,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 									Acciones
 								</DropdownMenuLabel>
 								<DropdownMenuItem className="font-medium text-xs" onClick={handleCopyImage}>
-									<Copy className="mr-2 h-3.5 w-3.5 opacity-60" /> Copiar Imagen
+									<Copy className="mr-2 h-3.5 w-3.5 opacity-60" /> Copy Image
 								</DropdownMenuItem>
 								<DropdownMenuSeparator className="opacity-40" />
 								<DropdownMenuLabel className="font-black text-[10px] uppercase tracking-[0.1em] opacity-40">
@@ -411,7 +411,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 									onClick={handleDownload}
 									size="sm"
 								>
-									<Download className="mr-1 h-2.5 w-2.5 shrink-0" /> <span className="truncate">GUARDAR</span>
+									<Download className="mr-1 h-2.5 w-2.5 shrink-0" /> <span className="truncate">SAVE</span>
 								</Button>
 								<Button
 									className="h-6 min-w-0 flex-1 rounded-md border-none bg-background/90 px-2 font-black text-[8px] uppercase tracking-wider shadow-xl backdrop-blur"
@@ -454,7 +454,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 					{'description' in item && item.description && (
 						<div className="w-full min-w-0 space-y-1 overflow-hidden rounded-r-md border-primary/20 border-l-2 bg-primary/[0.02] py-1.5 pl-2.5">
 							<Label className="font-black text-[8px] text-primary uppercase tracking-[0.15em] opacity-60">
-								Descripción
+								Description
 							</Label>
 							<p className="break-words font-medium text-[11px] text-foreground/80 italic leading-snug">
 								{item.description}
@@ -475,7 +475,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 											<Zap className="h-3.5 w-3.5 text-(--meta-lora)" />
 										</div>
 										<span className="min-w-0 flex-1 truncate font-black text-[9.5px] uppercase tracking-tight">
-											IA & Generación
+											AI & Generation
 										</span>
 										{effectiveLoading && (
 											<RefreshCw className="mr-1 h-3 w-3 shrink-0 animate-spin text-muted-foreground" />
@@ -534,7 +534,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 											<Camera className="h-3.5 w-3.5 text-(--meta-exif)" />
 										</div>
 										<span className="min-w-0 flex-1 truncate font-black text-[9.5px] uppercase tracking-tight">
-											Técnico
+											Technical
 										</span>
 									</div>
 								</AccordionTrigger>
@@ -543,7 +543,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 										const items = groupedMetadata[cat];
 										if (!items || items.length === 0) return null;
 										const catLabels: Record<string, { label: string; icon: any; color: string }> = {
-											exif: { label: 'Cámara', icon: Camera, color: 'text-(--meta-exif)' },
+											exif: { label: 'Camera', icon: Camera, color: 'text-(--meta-exif)' },
 											iptc: { label: 'Editorial', icon: Tag, color: 'text-(--meta-iptc)' },
 											xmp: { label: 'XMP', icon: Hash, color: 'text-(--meta-xmp)' },
 										};

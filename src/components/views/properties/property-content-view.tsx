@@ -48,7 +48,7 @@ export const PropertyContentView = memo(function PropertyContentView({
 		return (
 			<div className={className}>
 				<EmptyState
-					description="Selecciona una propiedad desde la vista de propiedades para ver su contenido."
+					description="Select a property to view its content."
 					icon={Database}
 					title="No hay propiedad seleccionada"
 				/>
@@ -61,16 +61,16 @@ export const PropertyContentView = memo(function PropertyContentView({
 		return (
 			<BaseContentView
 				className={className}
-				description="Obteniendo información de la propiedad."
+				description="Retrieving property information."
 				headerControls={headerControls}
 				icon="🏷️"
-				title="Cargando propiedad..."
+				title="Loading property..."
 			>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Obteniendo información de la propiedad."
+						description="Retrieving property information."
 						icon={Database}
-						title="Cargando propiedad..."
+						title="Loading property..."
 					/>
 				</div>
 			</BaseContentView>
@@ -111,10 +111,10 @@ export const PropertyContentView = memo(function PropertyContentView({
 					<Card className="p-4">
 						<div className="mb-3 flex items-center gap-2">
 							<Sparkles className="h-4 w-4 text-primary" />
-							<h3 className="font-semibold">Descripción</h3>
+							<h3 className="font-semibold">Description</h3>
 						</div>
 						<p className="text-muted-foreground text-sm">
-							{property.description || 'Esta propiedad no tiene descripción adicional todavía.'}
+							{property.description || 'This property does not have an additional description yet.'}
 						</p>
 					</Card>
 
@@ -134,7 +134,7 @@ export const PropertyContentView = memo(function PropertyContentView({
 							</div>
 							<div>
 								<p className="text-muted-foreground text-xs uppercase tracking-wide">Favorita</p>
-								<p className="mt-1 font-medium">{property.isFavorite ? 'Sí' : 'No'}</p>
+								<p className="mt-1 font-medium">{property.isFavorite ? 'Yes' : 'No'}</p>
 							</div>
 							<div>
 								<p className="text-muted-foreground text-xs uppercase tracking-wide">Actualizada</p>
@@ -159,13 +159,13 @@ export const PropertyContentView = memo(function PropertyContentView({
 								))}
 							</div>
 						) : (
-							<p className="text-muted-foreground text-sm">Esta propiedad aún no está enlazada a otras entidades.</p>
+							<p className="text-muted-foreground text-sm">This property is not linked to other entities yet.</p>
 						)}
 					</Card>
 
 					<Card className="p-4">
-						<p className="text-muted-foreground text-xs uppercase tracking-wide">Categoría</p>
-						<p className="mt-1 font-medium">{property.category || 'Sin categoría'}</p>
+						<p className="text-muted-foreground text-xs uppercase tracking-wide">Category</p>
+						<p className="mt-1 font-medium">{property.category || 'Uncategorized'}</p>
 						{property.emoji && <p className="mt-3 text-2xl">{property.emoji}</p>}
 					</Card>
 				</div>

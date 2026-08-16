@@ -19,8 +19,8 @@ export interface ErrorStateProps {
 }
 
 export function FileBrowserErrorState({
-	title = 'Error al cargar',
-	message = 'No se pudieron cargar los archivos. Por favor, intenta de nuevo.',
+	title = 'Could not load files',
+	message = 'Files could not be loaded. Please try again.',
 	onRetry,
 	className,
 }: ErrorStateProps) {
@@ -39,7 +39,7 @@ export function FileBrowserErrorState({
 			{onRetry && (
 				<Button onClick={onRetry} variant="outline">
 					<RefreshCw className="mr-2 h-4 w-4" />
-					Reintentar
+					Retry
 				</Button>
 			)}
 		</div>

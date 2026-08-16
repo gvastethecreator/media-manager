@@ -157,7 +157,7 @@ export interface StatusBarProps {
  * Props de estado vacío
  */
 export interface EmptyStateProps {
-	/** Acción opcional */
+	/** Action opcional */
 	action?: {
 		label: string;
 		onClick: () => void;

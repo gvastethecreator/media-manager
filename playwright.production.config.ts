@@ -10,6 +10,7 @@ function requiredPort(name: string): number {
 
 const publicPort = requiredPort('MEDIA_MANAGER_APP_PORT');
 const baseURL = `http://127.0.0.1:${publicPort}`;
+const browserExecutable = process.env.MEDIA_MANAGER_BROWSER_EXECUTABLE?.trim();
 
 export default defineConfig({
 	expect: { timeout: 15_000 },
@@ -19,7 +20,10 @@ export default defineConfig({
 	projects: [
 		{
 			name: 'production-chromium',
-			use: { ...devices['Desktop Chrome'] },
+			use: {
+				...devices['Desktop Chrome'],
+				...(browserExecutable ? { launchOptions: { executablePath: browserExecutable } } : {}),
+			},
 		},
 	],
 	reporter: [['list']],

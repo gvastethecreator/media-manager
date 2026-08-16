@@ -128,7 +128,7 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 				<div className="flex w-0 min-w-0 flex-1 items-center gap-1">
 					{hasChildren && (
 						<button
-							aria-label={isExpanded ? 'Contraer carpeta' : 'Expandir carpeta'}
+							aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
 							className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm hover:bg-secondary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 							onClick={handleToggleClick}
 							type="button"
@@ -139,7 +139,7 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 					{!hasChildren && <div className="h-4 w-4" />}
 
 					<button
-						aria-label={`Abrir carpeta ${folder.name}`}
+						aria-label={`Open folder ${folder.name}`}
 						className="flex w-0 min-w-0 flex-1 items-center gap-1 overflow-hidden text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
 						onClick={handleClick}
 						onKeyDown={(e) => {
@@ -251,11 +251,11 @@ const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 	);
 
 	if (isLoadingFolders && folders.length === 0) {
-		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">Cargando carpetas...</div>;
+		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">Loading folders...</div>;
 	}
 
 	if (treeData.length === 0 && !isLoadingFolders) {
-		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">No hay carpetas</div>;
+		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">No folders</div>;
 	}
 
 	if (isCollapsed) {

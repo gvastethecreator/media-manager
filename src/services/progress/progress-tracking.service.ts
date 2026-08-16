@@ -511,7 +511,7 @@ class ProgressTrackingService extends TypedEventEmitter {
 			case 'sync_files':
 				return `Sincronizando ${totalItems} ${itemText}`;
 			case 'batch_operation':
-				return `Operación en lote: ${totalItems} ${itemText}`;
+				return `Operation en lote: ${totalItems} ${itemText}`;
 			default:
 				return `Procesando ${totalItems} ${itemText}`;
 		}

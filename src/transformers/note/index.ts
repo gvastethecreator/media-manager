@@ -112,7 +112,7 @@ export function toRelatedNote(
 		// Datos básicos
 		const relatedNote = {
 			id: note.id,
-			title: note.title || 'Sin título',
+			title: note.title || 'Untitled',
 			type: 'note',
 		};
 

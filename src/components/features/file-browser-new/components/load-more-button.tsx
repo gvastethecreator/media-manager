@@ -43,11 +43,11 @@ export function LoadMoreButton({
 				{isLoading ? (
 					<>
 						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-						Cargando...
+						Loading...
 					</>
 				) : (
 					<>
-						Cargar más
+						Load more
 						{remaining > 0 && (
 							<span className="ml-1 text-muted-foreground">({remaining.toLocaleString()} restantes)</span>
 						)}

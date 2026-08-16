@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { type QueryClient, useQuery } from '@tanstack/react-query';
 import { apiClient } from './client';
 
 // Tipos para el sistema de navegación
@@ -56,6 +56,10 @@ export const navigationKeys = {
 	data: () => [...navigationKeys.all, 'data'] as const,
 	stats: () => [...navigationKeys.all, 'stats'] as const,
 };
+
+export function invalidateNavigationData(queryClient: QueryClient): Promise<void> {
+	return queryClient.invalidateQueries({ queryKey: navigationKeys.data() });
+}
 
 // Hook principal para obtener datos de navegación
 export function useNavigationData() {

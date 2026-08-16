@@ -137,21 +137,21 @@ export function AlbumCard({
 	const rarityLevel = useMemo(() => {
 		const total = totalMedia + totalEntities;
 		if (total > 200) {
-			return 'Mítica';
+			return 'Mythic';
 		}
 		if (total > 100) {
-			return 'Rara';
+			return 'Rare';
 		}
 		if (total > 50) {
-			return 'Poco común';
+			return 'Uncommon';
 		}
-		return 'Común';
+		return 'Common';
 	}, [totalMedia, totalEntities]);
 
 	// Render del componente
 	return (
 		<motion.div
-			aria-label={`Álbum: ${album.name}`}
+			aria-label={`Album: ${album.name}`}
 			className={cn(
 				// Base
 				'relative bg-card',

@@ -230,7 +230,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 
 						{!isLoading && (!currentImage || (currentImage && !urls[currentImage.id])) && (
 							<div className="flex h-full items-center justify-center text-center text-muted-foreground">
-								<p>Error al cargar el archivo</p>
+								<p>Could not load file</p>
 							</div>
 						)}
 					</div>
@@ -244,8 +244,8 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 
 			{/* Hints */}
 			<div className="ui-overlay-text-muted pointer-events-none fixed left-4 z-50 text-xs" style={{ bottom: 120 }}>
-				<p>Flechas: navegar · Rueda: zoom · Arrastrar: mover</p>
-				<p>ESC: cerrar · R: restablecer</p>
+				<p>Arrow keys: navigate · Wheel: zoom · Drag: pan</p>
+				<p>ESC: close · R: reset</p>
 			</div>
 		</dialog>
 	);

@@ -53,7 +53,7 @@ function ThemeDebugger() {
 			for (const mutation of mutations) {
 				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
 					const target = mutation.target as HTMLElement;
-					clientLogger.debug(`Tema cambiado a: ${target.getAttribute('data-theme')}`);
+					clientLogger.debug(`Theme changed to: ${target.getAttribute('data-theme')}`);
 					clientLogger.debug(`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`);
 				}
 			}
@@ -91,7 +91,7 @@ export function ThemeProvider({
 				window.localStorage.removeItem(storageKey);
 			}
 		} catch (error) {
-			clientLogger.warn('No se pudo leer el tema persistido; se usará el fallback.', error);
+			clientLogger.warn('The persisted theme could not be read; using the fallback.', error);
 		}
 		return defaultTheme;
 	});
@@ -172,7 +172,7 @@ export function ThemeProvider({
 			try {
 				localStorage.setItem(storageKey, newTheme);
 			} catch (error) {
-				clientLogger.warn('El tema cambió, pero no se pudo persistir.', error);
+				clientLogger.warn('The theme changed but could not be persisted.', error);
 			}
 		},
 		[storageKey]

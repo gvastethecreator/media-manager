@@ -19,7 +19,7 @@ export function useConceptActions() {
 		removeConceptFromEntity,
 	} = useConceptStore();
 
-	// Acción para cargar conceptos (con manejo de errores)
+	// Action para cargar conceptos (con manejo de errores)
 	const handleLoadConcepts = useCallback(async () => {
 		try {
 			await loadConcepts();
@@ -30,49 +30,49 @@ export function useConceptActions() {
 		}
 	}, [loadConcepts]);
 
-	// Acción para crear un concepto
+	// Action para crear un concepto
 	const handleCreateConcept = useCallback(
 		async (data: ConceptCreateInput) => {
 			try {
 				await createConcept(data);
 				return true;
 			} catch (error) {
-				console.error('Error al crear concepto:', error);
+				console.error('Could not create concept:', error);
 				return false;
 			}
 		},
 		[createConcept]
 	);
 
-	// Acción para actualizar un concepto
+	// Action para actualizar un concepto
 	const handleUpdateConcept = useCallback(
 		async (id: string, data: ConceptUpdateInput) => {
 			try {
 				await updateConcept(id, data);
 				return true;
 			} catch (error) {
-				console.error('Error al actualizar concepto:', error);
+				console.error('Could not update concept:', error);
 				return false;
 			}
 		},
 		[updateConcept]
 	);
 
-	// Acción para eliminar un concepto
+	// Action para eliminar un concepto
 	const handleDeleteConcept = useCallback(
 		async (id: string) => {
 			try {
 				await deleteConcept(id);
 				return true;
 			} catch (error) {
-				console.error('Error al eliminar concepto:', error);
+				console.error('Could not delete concept:', error);
 				return false;
 			}
 		},
 		[deleteConcept]
 	);
 
-	// Acción para añadir un concepto a una entidad
+	// Action para añadir un concepto a una entidad
 	const handleAddConceptToEntity = useCallback(
 		async (conceptId: string, entityId: string, entityType: EntityType) => {
 			try {
@@ -86,14 +86,14 @@ export function useConceptActions() {
 		[addConceptToEntity]
 	);
 
-	// Acción para eliminar un concepto de una entidad
+	// Action para eliminar un concepto de una entidad
 	const handleRemoveConceptFromEntity = useCallback(
 		async (conceptId: string, entityId: string, entityType: EntityType) => {
 			try {
 				await removeConceptFromEntity(conceptId, entityId, entityType);
 				return true;
 			} catch (error) {
-				console.error('Error al desvincular concepto de entidad:', error);
+				console.error('Could not unlink concept from entity:', error);
 				return false;
 			}
 		},

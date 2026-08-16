@@ -97,7 +97,7 @@ export const PropertyCard = memo(function PropertyCard({
 					primaryColor="var(--dt-danger-500)"
 					title="Property no encontrada"
 				/>
-				<p className="text-destructive">Error: Propiedad no encontrada</p>
+				<p className="text-destructive">Error: Property not found</p>
 			</CardContainer>
 		);
 	} // Si hay onClick, usamos un botón para mejor accesibilidad

@@ -21,8 +21,8 @@ export const EmptyFoldersState = memo(function EmptyFoldersState() {
 	return (
 		<div className="col-span-full py-8 text-center">
 			<Folder className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
-			<p className="text-muted-foreground text-sm">No hay carpetas indexadas</p>
-			<p className="mt-1 text-muted-foreground/75 text-xs">Agrega una carpeta para comenzar a indexar imágenes</p>
+			<p className="text-muted-foreground text-sm">No indexed folders</p>
+			<p className="mt-1 text-muted-foreground/75 text-xs">Add a folder to start indexing images</p>
 		</div>
 	);
 });
@@ -39,7 +39,7 @@ export const ErrorCard = memo(function ErrorCard({ message, onRetry }: { message
 					<p className="text-sm">{message}</p>
 				</div>
 				<Button className="mt-1 w-full text-xs" onClick={onRetry} size="sm" variant="outline">
-					Reintentar
+					Retry
 				</Button>
 			</div>
 		</div>

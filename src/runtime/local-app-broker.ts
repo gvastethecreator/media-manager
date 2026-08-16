@@ -85,7 +85,7 @@ interface BunRuntime {
 
 function getBunRuntime(): BunRuntime {
 	const runtime = (globalThis as typeof globalThis & { Bun?: BunRuntime }).Bun;
-	if (!runtime) throw new Error('El broker local requiere Bun.');
+	if (!runtime) throw new Error('The local broker requires Bun.');
 	return runtime;
 }
 
@@ -195,7 +195,7 @@ async function proxyRequest(
 		});
 
 		const activeRequest = upstreamRequest;
-		if (!activeRequest) throw new Error('No se pudo crear la solicitud al backend local.');
+		if (!activeRequest) throw new Error('The request to the local backend could not be created.');
 		void (async () => {
 			try {
 				if (!request.body || ['GET', 'HEAD'].includes(request.method)) {
@@ -264,7 +264,7 @@ async function proxyRequest(
 	} catch {
 		request.signal.removeEventListener('abort', abortFromRequest);
 		if (request.signal.aborted) reportAbort();
-		return jsonResponse(502, 'LOCAL_BACKEND_UNAVAILABLE', 'El backend local no está disponible.');
+		return jsonResponse(502, 'LOCAL_BACKEND_UNAVAILABLE', 'The local backend is unavailable.');
 	}
 }
 
@@ -303,7 +303,7 @@ async function resolveClientFile(
 
 async function serveClient(request: Request, clientRoot: string): Promise<Response> {
 	if (!['GET', 'HEAD'].includes(request.method)) {
-		return jsonResponse(405, 'METHOD_NOT_ALLOWED', 'Método no permitido.');
+		return jsonResponse(405, 'METHOD_NOT_ALLOWED', 'Method not allowed.');
 	}
 	const requestUrl = new URL(request.url);
 	const acceptsHtml = request.headers.get('accept')?.includes('text/html') ?? false;
@@ -331,17 +331,17 @@ async function serveClient(request: Request, clientRoot: string): Promise<Respon
 export function createLocalAppBrokerHandler(options: LocalAppBrokerOptions): (request: Request) => Promise<Response> {
 	const backend = new URL(options.backendOrigin);
 	if (backend.protocol !== 'http:' || !['127.0.0.1', 'localhost'].includes(backend.hostname)) {
-		throw new Error('El broker sólo puede apuntar a un backend HTTP loopback.');
+		throw new Error('The broker can only target a loopback HTTP backend.');
 	}
 	if (!Number.isSafeInteger(options.publicPort) || options.publicPort < 1 || options.publicPort > 65_535) {
-		throw new Error('El broker requiere un puerto público válido.');
+		throw new Error('The broker requires a valid public port.');
 	}
 	if (
 		!options.sessionToken ||
 		Buffer.byteLength(options.sessionToken, 'utf8') < 32 ||
 		/\s/.test(options.sessionToken)
 	) {
-		throw new Error('El broker requiere un secreto de sesión local válido.');
+		throw new Error('The broker requires a valid local session secret.');
 	}
 	const clientRoot = resolve(options.clientRoot);
 	let publishedHealth = options.runtimeHealth?.() ?? {
@@ -388,7 +388,7 @@ export function createLocalAppBrokerHandler(options: LocalAppBrokerOptions): (re
 		const requestPath = new URL(request.url).pathname;
 		if (requestPath === '/health') {
 			if (!['GET', 'HEAD'].includes(request.method)) {
-				return jsonResponse(405, 'METHOD_NOT_ALLOWED', 'Método no permitido.');
+				return jsonResponse(405, 'METHOD_NOT_ALLOWED', 'Method not allowed.');
 			}
 			const snapshot = await resolvePublicHealth();
 			return new Response(request.method === 'HEAD' ? null : JSON.stringify(snapshot), {
@@ -402,17 +402,17 @@ export function createLocalAppBrokerHandler(options: LocalAppBrokerOptions): (re
 		}
 		if (requestPath === '/api' || requestPath.startsWith('/api/') || requestPath.startsWith('/uploads/')) {
 			if (!hasAllowedBrowserContext(request)) {
-				return jsonResponse(403, 'LOCAL_BROKER_ORIGIN_FORBIDDEN', 'Origen local no autorizado.');
+				return jsonResponse(403, 'LOCAL_BROKER_ORIGIN_FORBIDDEN', 'Unauthorized local origin.');
 			}
 			if (hasExcessiveContentLength(request)) {
-				return jsonResponse(413, 'PAYLOAD_TOO_LARGE', 'El cuerpo de la solicitud supera el límite permitido.');
+				return jsonResponse(413, 'PAYLOAD_TOO_LARGE', 'The request body exceeds the allowed limit.');
 			}
 			return proxyRequest(request, backend, options.sessionToken, options.onUpstreamAbort);
 		}
 		try {
 			return await serveClient(request, clientRoot);
 		} catch {
-			return jsonResponse(500, 'CLIENT_ASSET_READ_FAILED', 'No se pudo leer el recurso.');
+			return jsonResponse(500, 'CLIENT_ASSET_READ_FAILED', 'The client asset could not be read.');
 		}
 	};
 }

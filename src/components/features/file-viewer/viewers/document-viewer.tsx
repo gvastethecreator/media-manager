@@ -96,7 +96,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
 						<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
-						<p className="text-muted-foreground">Cargando documento...</p>
+						<p className="text-muted-foreground">Loading document...</p>
 					</div>
 				</div>
 			);
@@ -110,7 +110,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 						<p className="mb-4 text-destructive">{error}</p>
 						<Button onClick={handleDownload} variant="outline">
 							<Download className="mr-2 h-4 w-4" />
-							Descargar archivo
+							Download file
 						</Button>
 					</div>
 				</div>
@@ -122,18 +122,18 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 				<div className="flex h-full items-center justify-center">
 					<div className="max-w-md text-center">
 						<FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-						<h3 className="mb-2 font-semibold text-lg">Vista previa no disponible</h3>
+						<h3 className="mb-2 font-semibold text-lg">Preview unavailable</h3>
 						<p className="mb-6 text-muted-foreground">
-							Este tipo de archivo ({fileExtension.toUpperCase()}) no se puede previsualizar en el navegador.
+							This file type ({fileExtension.toUpperCase()}) cannot be previewed in the browser.
 						</p>
 						<div className="flex justify-center gap-2">
 							<Button onClick={handleDownload} variant="outline">
 								<Download className="mr-2 h-4 w-4" />
-								Descargar
+								Download
 							</Button>
 							<Button onClick={handleOpenExternal} variant="outline">
 								<ExternalLink className="mr-2 h-4 w-4" />
-								Abrir en nueva pestaña
+								Open in new tab
 							</Button>
 						</div>
 					</div>
@@ -146,7 +146,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 				<div className="flex h-full items-center justify-center">
 					<iframe
 						className="h-full w-full border-0"
-						onError={() => setError('Error al cargar el documento PDF')}
+						onError={() => setError('Could not load the PDF document')}
 						onLoad={() => setIsLoading(false)}
 						ref={iframeRef}
 						src={`${documentSrc}#page=${currentPage}&zoom=${zoom}`}
@@ -154,7 +154,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 							transform: `rotate(${rotation}deg)`,
 							transformOrigin: 'center center',
 						}}
-						title={`Visor PDF: ${documentEntity.name}`}
+						title={`PDF viewer: ${documentEntity.name}`}
 					/>
 				</div>
 			);
@@ -165,7 +165,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 				<div className="h-full overflow-auto p-4">
 					<iframe
 						className="h-full w-full rounded-lg border"
-						onError={() => setError('Error al cargar el archivo de texto')}
+						onError={() => setError('Could not load the text file')}
 						onLoad={() => setIsLoading(false)}
 						ref={iframeRef}
 						src={documentSrc}
@@ -174,7 +174,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 							transform: `rotate(${rotation}deg)`,
 							transformOrigin: 'center center',
 						}}
-						title={`Vista texto: ${documentEntity.name}`}
+						title={`Text view: ${documentEntity.name}`}
 					/>
 				</div>
 			);
@@ -236,7 +236,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 								<ChevronLeft className="h-4 w-4" />
 							</Button>
 							<span className="text-sm">
-								Página {currentPage} de {totalPages}
+								Page {currentPage} of {totalPages}
 							</span>
 							<Button
 								disabled={currentPage >= totalPages}
@@ -256,7 +256,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 							<Input
 								className="w-48 pl-8"
 								onChange={(e) => setSearchTerm(e.target.value)}
-								placeholder="Buscar en documento..."
+								placeholder="Search document..."
 								value={searchTerm}
 							/>
 						</div>
@@ -274,40 +274,40 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 			<div className="border-t p-4">
 				<div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
 					<div>
-						<span className="font-medium">Tipo:</span>
+						<span className="font-medium">Type:</span>
 						<span className="ml-2 text-muted-foreground">{fileExtension.toUpperCase()}</span>
 					</div>
 					<div>
-						<span className="font-medium">Tamaño:</span>
+						<span className="font-medium">Size:</span>
 						<span className="ml-2 text-muted-foreground">{formatFileSize(documentEntity.size || 0)}</span>
 					</div>
 					{documentEntity.pageCount && (
 						<div>
-							<span className="font-medium">Páginas:</span>
+							<span className="font-medium">Pages:</span>
 							<span className="ml-2 text-muted-foreground">{documentEntity.pageCount}</span>
 						</div>
 					)}
 					<div>
-						<span className="font-medium">Creado:</span>
+						<span className="font-medium">Created:</span>
 						<span className="ml-2 text-muted-foreground">
-							{new Date(documentEntity.createdAt).toLocaleDateString()}
+							{new Date(documentEntity.createdAt).toLocaleDateString('en-US')}
 						</span>
 					</div>
 					{documentEntity.wordCount && (
 						<div>
-							<span className="font-medium">Palabras:</span>
-							<span className="ml-2 text-muted-foreground">{documentEntity.wordCount.toLocaleString()}</span>
+							<span className="font-medium">Words:</span>
+							<span className="ml-2 text-muted-foreground">{documentEntity.wordCount.toLocaleString('en-US')}</span>
 						</div>
 					)}
 					{documentEntity.author && (
 						<div>
-							<span className="font-medium">Autor:</span>
+							<span className="font-medium">Author:</span>
 							<span className="ml-2 text-muted-foreground">{documentEntity.author}</span>
 						</div>
 					)}
 					{documentEntity.description && (
 						<div className="col-span-2">
-							<span className="font-medium">Descripción:</span>
+							<span className="font-medium">Description:</span>
 							<span className="ml-2 text-muted-foreground">{documentEntity.description}</span>
 						</div>
 					)}

@@ -228,7 +228,7 @@ export class PromptExecutionHistory {
 			// Actualizar el historial
 			this.executions.set(promptId, promptHistory);
 		} catch (error) {
-			executionLogger.error('❌ Error al añadir ejecución al historial:', error);
+			executionLogger.error('❌ Could not add execution to history:', error);
 		}
 	}
 
@@ -258,7 +258,7 @@ export class PromptExecutionHistory {
 	 */
 	public setMaxHistorySize(size: number): void {
 		if (size < 1) {
-			throw new Error('El tamaño máximo del historial debe ser al menos 1');
+			throw new Error('The maximum history size must be at least 1');
 		}
 		this.maxHistoryPerPrompt = size;
 

@@ -1,11 +1,11 @@
-import { apiClient } from "./client";
+import { ApiClientError, apiClient } from './client';
 
-export type TaxonomyArtifactType = "note" | "prompt" | "wildcard";
-export type TaxonomyArtifactParameterType = "text" | "number" | "boolean" | "date" | "enum_token";
+export type TaxonomyArtifactType = 'note' | 'prompt' | 'wildcard';
+export type TaxonomyArtifactParameterType = 'text' | 'number' | 'boolean' | 'date' | 'enum_token';
 export type TaxonomyArtifactParameterValue = boolean | number | string | boolean[] | number[] | string[];
 
 export interface TaxonomyArtifactParameter {
-	canonicalKey?: "subject" | "context" | "tone" | "style" | "constraints";
+	canonicalKey?: 'subject' | 'context' | 'tone' | 'style' | 'constraints';
 	custom: boolean;
 	default?: TaxonomyArtifactParameterValue;
 	description?: string;
@@ -39,7 +39,7 @@ export interface TaxonomyArtifactDocument {
 	metadata: TaxonomyArtifactMetadata;
 	relativePath: string;
 	rootId: string;
-	syncStatus: "conflict" | "error" | "external_change" | "missing" | "synced";
+	syncStatus: 'conflict' | 'error' | 'external_change' | 'missing' | 'synced';
 }
 
 /** Indexed search projection. Unlike an authored document, this shape does not imply a filesystem read. */
@@ -55,24 +55,30 @@ export interface TaxonomyArtifactSearchHit {
 	lastSyncedAt: string;
 	relativePath: string;
 	rootId: string;
-	syncStatus: TaxonomyArtifactDocument["syncStatus"];
+	syncStatus: TaxonomyArtifactDocument['syncStatus'];
 	updatedAt: string;
 }
 
 export interface SaveTaxonomyArtifactInput {
 	body: string;
 	expectedHash?: string;
-	metadata: Omit<TaxonomyArtifactMetadata, "id" | "kind" | "schemaVersion">;
+	metadata: Omit<TaxonomyArtifactMetadata, 'id' | 'kind' | 'schemaVersion'>;
 	operational?: {
 		featuredImage?: string | null;
 		parentId?: string | null;
 		shortcut?: string | null;
 	};
 	rootId?: string;
+	restoreMissing?: boolean;
 }
 
 export interface CreateFileBackedWildcardResult<TEntity = unknown> {
 	artifact: TaxonomyArtifactDocument;
+	entity: TEntity;
+}
+
+/** The canonical PUT keeps the artifact document at top level and adds the committed entity projection. */
+export interface SaveTaxonomyArtifactResult<TEntity = unknown> extends TaxonomyArtifactDocument {
 	entity: TEntity;
 }
 
@@ -82,41 +88,47 @@ function artifactEndpoint(entityType: TaxonomyArtifactType, entityId: string): s
 
 export function getTaxonomyArtifact(
 	entityType: TaxonomyArtifactType,
-	entityId: string,
+	entityId: string
 ): Promise<TaxonomyArtifactDocument> {
 	return apiClient.get<TaxonomyArtifactDocument>(artifactEndpoint(entityType, entityId));
 }
 
 export async function getTaxonomyArtifactOrNull(
 	entityType: TaxonomyArtifactType,
-	entityId: string,
+	entityId: string
 ): Promise<TaxonomyArtifactDocument | null> {
 	try {
 		return await getTaxonomyArtifact(entityType, entityId);
 	} catch (error) {
-		if (error instanceof Error && error.message.includes("HTTP 404")) return null;
+		if (error instanceof ApiClientError && error.status === 404) return null;
 		throw error;
 	}
 }
 
-export function saveTaxonomyArtifact(
+export function saveTaxonomyArtifact<TEntity = unknown>(
 	entityType: TaxonomyArtifactType,
 	entityId: string,
-	input: SaveTaxonomyArtifactInput,
-): Promise<TaxonomyArtifactDocument> {
-	return apiClient.put<TaxonomyArtifactDocument>(artifactEndpoint(entityType, entityId), input);
+	input: SaveTaxonomyArtifactInput
+): Promise<SaveTaxonomyArtifactResult<TEntity>> {
+	return apiClient.put<SaveTaxonomyArtifactResult<TEntity>>(artifactEndpoint(entityType, entityId), input);
 }
 
 export function createFileBackedWildcard<TEntity = unknown>(
-	input: Omit<SaveTaxonomyArtifactInput, "expectedHash" | "rootId"> & { rootId: string },
+	input: Pick<SaveTaxonomyArtifactInput, 'body' | 'metadata' | 'operational'> & { rootId: string }
 ): Promise<CreateFileBackedWildcardResult<TEntity>> {
-	return apiClient.post<CreateFileBackedWildcardResult<TEntity>>("/taxonomy-artifacts/wildcard", input);
+	const { body, metadata, operational, rootId } = input;
+	return apiClient.post<CreateFileBackedWildcardResult<TEntity>>('/taxonomy-artifacts/wildcard', {
+		body,
+		metadata,
+		operational,
+		rootId,
+	});
 }
 
 export function relocateTaxonomyArtifact(
 	entityType: TaxonomyArtifactType,
 	entityId: string,
-	input: { expectedHash: string; fileName: string },
+	input: { expectedHash: string; fileName: string }
 ): Promise<TaxonomyArtifactDocument> {
 	return apiClient.patch<TaxonomyArtifactDocument>(`${artifactEndpoint(entityType, entityId)}/location`, input);
 }
@@ -125,8 +137,9 @@ export function deleteTaxonomyArtifact(
 	entityType: TaxonomyArtifactType,
 	entityId: string,
 	expectedHash: string,
+	deleteMissing = false
 ): Promise<void> {
-	return apiClient.delete<void>(artifactEndpoint(entityType, entityId), { expectedHash });
+	return apiClient.delete<void>(artifactEndpoint(entityType, entityId), { deleteMissing, expectedHash });
 }
 
 export function rebuildTaxonomyArtifactIndex(entityType?: TaxonomyArtifactType): Promise<{
@@ -134,13 +147,17 @@ export function rebuildTaxonomyArtifactIndex(entityType?: TaxonomyArtifactType):
 	conflict: number;
 	error: number;
 	finalizedDeletes: number;
+	finalizedWrites: number;
 	missing: number;
+	quarantinedTemps: number;
 	recoveredDeletes: number;
 	relocated: number;
+	suppressedReappearances: number;
 	synced: number;
+	tombstones: number;
 	total: number;
 }> {
-	return apiClient.post("/taxonomy-artifacts/rebuild", entityType ? { entityType } : {});
+	return apiClient.post('/taxonomy-artifacts/rebuild', entityType ? { entityType } : {});
 }
 
 export function searchTaxonomyArtifacts(input: {
@@ -149,7 +166,7 @@ export function searchTaxonomyArtifacts(input: {
 	offset?: number;
 	query: string;
 }): Promise<{ data: TaxonomyArtifactSearchHit[]; limit: number; offset: number }> {
-	return apiClient.get("/taxonomy-artifacts/search", {
+	return apiClient.get('/taxonomy-artifacts/search', {
 		params: { entityType: input.entityType, limit: input.limit, offset: input.offset, q: input.query },
 	});
 }

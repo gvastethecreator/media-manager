@@ -21,7 +21,7 @@ const cacheProviderLogger = clientLogger.withContext('CacheProvider');
 
 export function CacheProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
-		cacheProviderLogger.info('🚀 Inicializando sistema de caché');
+		cacheProviderLogger.info('🚀 Initializing cache system');
 
 		return () => {
 			// Limpiar todos los caches al desmontar
@@ -34,7 +34,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
 				placesCache.stop(),
 				worldItemsCache.stop(),
 			]).catch((error) => {
-				cacheProviderLogger.error('❌ Error al detener caches:', error);
+				cacheProviderLogger.error('❌ Error stopping caches:', error);
 			});
 		};
 	}, []);

@@ -49,7 +49,7 @@ export function SearchView(_props: ViewProps) {
 	}, [searchResponse]);
 
 	const handleItemSelect = useCallback((item: any) => {
-		clientLogger.debug('Item seleccionado en búsqueda:', item.id);
+		clientLogger.debug('Search item selected:', item.id);
 	}, []);
 
 	const handleItemDoubleClick = useCallback(
@@ -105,7 +105,7 @@ export function SearchView(_props: ViewProps) {
 				return;
 			}
 
-			clientLogger.info('Entidad de búsqueda sin ruta específica; mostrando en panel de detalles', {
+			clientLogger.info('Search entity has no specific route; showing it in the details panel', {
 				id: entity.id,
 				entityType: entity.entityType,
 			});
@@ -124,11 +124,11 @@ export function SearchView(_props: ViewProps) {
 							<Input
 								className="flex-1"
 								onChange={(e) => setFilters((prev) => ({ ...prev, query: e.target.value }))}
-								placeholder="Buscar imágenes, videos, audios, documentos..."
+								placeholder="Search images, videos, audio, documents..."
 								value={filters.query}
 							/>
 							<Button disabled={!filters.query.trim()} onClick={() => setFilters((prev) => ({ ...prev }))}>
-								Buscar
+								Search
 							</Button>
 						</div>
 						<Tabs
@@ -139,7 +139,7 @@ export function SearchView(_props: ViewProps) {
 						>
 							<TabsList>
 								<TabsTrigger value="all">Todo</TabsTrigger>
-								<TabsTrigger value="image">Imágenes</TabsTrigger>
+								<TabsTrigger value="image">Images</TabsTrigger>
 								<TabsTrigger value="video">Videos</TabsTrigger>
 								<TabsTrigger value="audio">Audio</TabsTrigger>
 								<TabsTrigger value="document">Docs</TabsTrigger>
@@ -152,11 +152,11 @@ export function SearchView(_props: ViewProps) {
 				{isLoading ? (
 					<LoadingScreen message="Buscando..." />
 				) : error ? (
-					<p className="text-center text-destructive">Error al realizar búsqueda</p>
+					<p className="text-center text-destructive">Search failed</p>
 				) : filters.query ? (
 					browserItems.length === 0 ? (
 						<EmptyState
-							description="Intenta con otros términos o elimina filtros"
+							description="Try different terms or clear the filters"
 							icon={Search}
 							title="Sin resultados"
 						/>
@@ -176,7 +176,7 @@ export function SearchView(_props: ViewProps) {
 				) : (
 					<div className="flex h-full items-center justify-center text-muted-foreground">
 						<Search className="mb-4 h-12 w-12 opacity-20" />
-						<p>Escribe algo para buscar</p>
+						<p>Enter a search term</p>
 					</div>
 				)}
 			</div>

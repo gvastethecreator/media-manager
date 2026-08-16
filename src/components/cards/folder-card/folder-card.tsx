@@ -70,7 +70,7 @@ export const FolderCard = memo(
 
 		// Validar que el objeto folder exista
 		if (!folder) {
-			clientLogger.error('FolderCard recibió un objeto folder inválido');
+			clientLogger.error('FolderCard received an invalid folder object');
 			return null;
 		}
 

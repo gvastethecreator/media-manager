@@ -130,7 +130,7 @@ export function calculateConceptsStats(concepts: ConceptBase[]): {
 			withRelations,
 		};
 	} catch (error) {
-		helpersLogger.error('❌ Error al calcular estadísticas de conceptos:', error);
+		helpersLogger.error('❌ Could not calculate concept statistics:', error);
 		return { total: 0, byCategory: {}, favorites: 0, withImages: 0, withRelations: 0 };
 	}
 }

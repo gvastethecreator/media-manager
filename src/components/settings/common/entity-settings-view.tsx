@@ -208,10 +208,10 @@ export function EntitySettingsView<T extends EntityWithStats>({
 				await deleteMutation.mutateAsync(id);
 				setSelectedEntity(null);
 				setIsEditing(false);
-				toastService.success(`${entityLabel} eliminado correctamente`);
+				toastService.success(`${entityLabel} deleted successfully`);
 			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				toastService.error(`Error al eliminar ${entityLabel.toLowerCase()}`, {
+				const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+				toastService.error(`Could not delete ${entityLabel.toLowerCase()}`, {
 					description: errorMessage,
 				});
 			}
@@ -237,7 +237,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 			setSelectedEntity(null);
 			setIsEditing(false);
 			toastService.success(
-				isEditing ? `${entityLabel} actualizado correctamente` : `${entityLabel} creado correctamente`
+				isEditing ? `${entityLabel} updated successfully` : `${entityLabel} created successfully`
 			);
 		},
 		[isEditing, entityLabel]
@@ -272,7 +272,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 				<CardContent className="p-4">
 					<div className="flex items-center justify-center gap-3">
 						<Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-						<p className="text-muted-foreground text-sm">Cargando {entityLabelPlural.toLowerCase()}...</p>
+						<p className="text-muted-foreground text-sm">Loading {entityLabelPlural.toLowerCase()}...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -282,9 +282,9 @@ export function EntitySettingsView<T extends EntityWithStats>({
 	if (error) {
 		return (
 			<EmptyState
-				description={error.message || `No se pudieron cargar los ${entityLabelPlural.toLowerCase()}`}
+				description={error.message || `Could not load ${entityLabelPlural.toLowerCase()}`}
 				icon={Icon as LucideIcon}
-				title="Error al cargar"
+				title="Could not load data"
 			/>
 		);
 	}
@@ -298,7 +298,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 			<div>
 				<h2 className="font-semibold text-2xl text-foreground">{entityLabelPlural}</h2>
 				<p className="mt-1 text-muted-foreground text-sm">
-					Gestiona tus {entityLabelPlural.toLowerCase()} y configura sus opciones
+					Manage your {entityLabelPlural.toLowerCase()} and configure their options
 				</p>
 			</div>
 
@@ -334,7 +334,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 							<Input
 								className="w-70 pl-9"
 								onChange={(e) => setSearchQuery(e.target.value)}
-								placeholder={`Buscar ${entityLabelPlural.toLowerCase()}...`}
+								placeholder={`Search ${entityLabelPlural.toLowerCase()}...`}
 								value={searchQuery}
 							/>
 						</div>
@@ -374,7 +374,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 
 					<Button className="gap-2" onClick={handleCreate}>
 						<Plus className="h-4 w-4" />
-						Crear {entityLabel}
+						Create {entityLabel}
 					</Button>
 				</div>
 			</div>
@@ -387,19 +387,19 @@ export function EntitySettingsView<T extends EntityWithStats>({
 							className: 'h-6 w-6 text-muted-foreground',
 						})}
 					</div>
-					<h3 className="font-medium text-lg">No hay {entityLabelPlural.toLowerCase()}</h3>
+					<h3 className="font-medium text-lg">No {entityLabelPlural.toLowerCase()} yet</h3>
 					<p className="mt-1 max-w-sm text-muted-foreground text-sm">
 						{searchQuery || onlyFavorites
-							? 'No se encontraron resultados con los filtros aplicados'
-							: `Comienza creando tu primer ${entityLabel.toLowerCase()}`}
+							? 'No results match the active filters'
+							: `Create your first ${entityLabel.toLowerCase()} to get started`}
 					</p>
 					<div className="mt-4">
 						{searchQuery || onlyFavorites ? (
 							<Button onClick={clearFilters} variant="outline">
-								Limpiar filtros
+								Clear filters
 							</Button>
 						) : (
-							<Button onClick={handleCreate}>Crear {entityLabel}</Button>
+							<Button onClick={handleCreate}>Create {entityLabel}</Button>
 						)}
 					</div>
 				</div>

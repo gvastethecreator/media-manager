@@ -11,36 +11,36 @@ import {
 	formatDuration as dateFnsFormatDuration,
 	intervalToDuration,
 } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 // Re-exportar intervalToDuration directamente
 export { intervalToDuration };
 
-// Locale español exportado
-export const esLocale = es;
+// Shared English locale.
+export const enUSLocale = enUS;
 
 /**
- * Wrapper de format con locale español por defecto
+ * Formats a date with the English locale by default.
  */
-export function format(date: Date | number, formatStr: string, options?: { locale?: typeof es }): string {
-	return dateFnsFormat(date, formatStr, { locale: es, ...options });
+export function format(date: Date | number, formatStr: string, options?: { locale?: typeof enUS }): string {
+	return dateFnsFormat(date, formatStr, { locale: enUS, ...options });
 }
 
 /**
- * Wrapper de formatDistanceToNow con locale español por defecto
+ * Formats relative time with the English locale by default.
  */
 export function formatDistanceToNow(
 	date: Date | number,
-	options?: { addSuffix?: boolean; includeSeconds?: boolean; locale?: typeof es }
+	options?: { addSuffix?: boolean; includeSeconds?: boolean; locale?: typeof enUS }
 ): string {
-	return dateFnsFormatDistanceToNow(date, { locale: es, ...options });
+	return dateFnsFormatDistanceToNow(date, { locale: enUS, ...options });
 }
 
 /**
- * Wrapper de formatDuration con locale español por defecto
+ * Formats a duration with the English locale by default.
  */
 export function formatDuration(duration: Duration, options?: Omit<FormatDurationOptions, 'locale'>): string {
-	return dateFnsFormatDuration(duration, { locale: es, ...options });
+	return dateFnsFormatDuration(duration, { locale: enUS, ...options });
 }
 
 /**

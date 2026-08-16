@@ -142,6 +142,8 @@ async function createLegacyBackup(options: LegacyFixtureOptions = {}): Promise<{
 }
 
 afterEach(async () => {
+	// On Windows, Bun SQLite can retain a mapped section until GC runs even after close().
+	Bun.gc(true);
 	for (const directory of temporaryDirectories.splice(0)) {
 		await rm(directory, { force: true, maxRetries: 100, recursive: true, retryDelay: 100 });
 	}
@@ -156,7 +158,7 @@ describe('legacy SQLite adoption', () => {
 		});
 
 		const adoption = await runAdoptionInChild(fixture);
-		expect(adoption.exitCode).toBe(0);
+		expect(adoption.exitCode, adoption.stderr).toBe(0);
 		const report = adoption.report as LegacyAdoptionReport;
 		const [check, outputInventory, sourceManifestAfter] = await Promise.all([
 			checkDatabase({ databasePath: fixture.outputPath }),
@@ -177,6 +179,9 @@ describe('legacy SQLite adoption', () => {
 		expect(outputInventory.tableCounts.Asset).toBe(0);
 		expect(outputInventory.tableCounts.MediaRoot).toBe(0);
 		expect(outputInventory.tableCounts.SourceFile).toBe(0);
+		expect(outputInventory.tableCounts.RelationRole).toBe(4);
+		expect(outputInventory.tableCounts.RelationRoleApplicability).toBe(114);
+		expect(outputInventory.tableCounts.RelationRoleConflict).toBe(1);
 		expect(sourceManifestAfter.sha256).toBe(sourceManifest.sha256);
 	}, 60_000);
 

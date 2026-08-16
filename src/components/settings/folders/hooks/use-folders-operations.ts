@@ -27,13 +27,13 @@ const normalizeInput = (source: AuthorizedPathReference): { input: FolderCreateI
 // Mapeo de error para alta de carpeta (puro)
 const mapAddFolderError = (error: unknown): string => {
 	if (error instanceof Error) {
-		const msg = error.message || 'Error desconocido';
+		const msg = error.message || 'Unknown error';
 		if (msg.includes('409') || msg.includes('Ya existe una carpeta')) {
-			return 'La carpeta seleccionada ya está registrada';
+			return 'The selected folder is already registered';
 		}
 		return msg;
 	}
-	return 'Error desconocido';
+	return 'Unknown error';
 };
 
 // Utilidades comunes
@@ -52,16 +52,16 @@ const withTimeout = async <T>(promise: Promise<T>, ms: number, message: string):
 };
 
 const mapNetworkTimeoutError = (error: unknown): string => {
-	const fallback = 'Error desconocido';
+	const fallback = 'Unknown error';
 	if (!(error instanceof Error)) {
 		return fallback;
 	}
 	const msg = error.message;
 	if (msg.includes('Failed to fetch') || msg.includes('ERR_EMPTY_RESPONSE')) {
-		return 'Error de conexión durante el reindexado. El proceso puede continuar en segundo plano.';
+		return 'The connection failed during reindexing. The process may continue in the background.';
 	}
 	if (msg.includes('Timeout')) {
-		return 'El reindexado está tomando más tiempo del esperado. Puede continuar en segundo plano.';
+		return 'Reindexing is taking longer than expected. It may continue in the background.';
 	}
 	return msg || fallback;
 };
@@ -88,7 +88,7 @@ export function useFoldersOperations({ onStartProcessing, onLoadData, onError }:
 	const ensureRootSelected = useCallback(
 		(source: AuthorizedPathReference): boolean => {
 			if (!source.rootId?.trim()) {
-				const msg = 'Selecciona un media root autorizado';
+				const msg = 'Select an authorized media root';
 				operationsLogger.error('❌ Media root no seleccionado');
 				onError(msg);
 				toastService.error(msg);
@@ -103,11 +103,11 @@ export function useFoldersOperations({ onStartProcessing, onLoadData, onError }:
 		async (folderId: string, folderName: string) => {
 			try {
 				await reindexFolderMutation.mutateAsync({ id: folderId });
-				toastService.success(`La carpeta ${folderName} se ha agregado e indexado correctamente`);
+				toastService.success(`Folder ${folderName} was added and indexed successfully`);
 			} catch (indexError) {
 				operationsLogger.warn('⚠️ Error iniciando indexación automática:', indexError);
-				toastService.success(`La carpeta ${folderName} se ha agregado correctamente`);
-				toastService.warning('No se pudo iniciar la indexación automática');
+				toastService.success(`Folder ${folderName} was added successfully`);
+				toastService.warning('Automatic indexing could not be started');
 			}
 		},
 		[reindexFolderMutation.mutateAsync]
@@ -135,7 +135,7 @@ export function useFoldersOperations({ onStartProcessing, onLoadData, onError }:
 				const { input, name } = inputData;
 				const result = await createFolderMutation.mutateAsync(input);
 				if (!result?.id) {
-					throw new Error('Error: La respuesta del servidor no contiene un ID válido');
+					throw new Error('Error: The server response does not contain a valid ID');
 				}
 
 				onStartProcessing(result.id);
@@ -145,7 +145,7 @@ export function useFoldersOperations({ onStartProcessing, onLoadData, onError }:
 				operationsLogger.info('🚀 Iniciando indexación automática para carpeta:', result.id);
 				await startAutoIndexing(result.id, name);
 			} catch (error) {
-				operationsLogger.error('❌ Error al agregar carpeta:', error);
+				operationsLogger.error('❌ Could not add folder:', error);
 				const errorMessage = mapAddFolderError(error);
 				onError(errorMessage);
 				toastService.error(errorMessage);
@@ -159,22 +159,22 @@ export function useFoldersOperations({ onStartProcessing, onLoadData, onError }:
 		async (folderId: string) => {
 			if (!folderId || folderId === 'undefined') {
 				operationsLogger.error('❌ Error: Invalid folderId for reindex:', folderId);
-				toastService.error('Error: ID de carpeta inválido');
+				toastService.error('Error: Invalid folder ID');
 				return;
 			}
 			try {
 				operationsLogger.info('🔄 Reindexando carpeta:', { folderId });
 				onStartProcessing(folderId);
-				toastService.info('🔄 Iniciando reindexado', {
-					description: 'El proceso de reindexación ha comenzado...',
+				toastService.info('🔄 Starting reindex', {
+					description: 'The reindexing process has started...',
 					duration: 3000,
 				});
-				await withTimeout(reindexFolderMutation.mutateAsync({ id: folderId }), 120_000, 'Timeout en reindexación');
+				await withTimeout(reindexFolderMutation.mutateAsync({ id: folderId }), 120_000, 'Reindexing timed out');
 				await onLoadData();
 				operationsLogger.info('✅ Reindexación completada');
-				toastService.success('Carpeta reindexada correctamente');
+				toastService.success('Folder reindexed successfully');
 			} catch (error) {
-				operationsLogger.error('❌ Error al reindexar carpeta:', error);
+				operationsLogger.error('❌ Could not reindex folder:', error);
 				const errorMessage = mapNetworkTimeoutError(error);
 				onError(errorMessage);
 				toastService.error(errorMessage);
@@ -193,18 +193,18 @@ export function useFoldersOperations({ onStartProcessing, onLoadData, onError }:
 		async (folderId: string) => {
 			if (!folderId || folderId === 'undefined') {
 				operationsLogger.error('❌ Error: Invalid folderId for delete:', folderId);
-				toastService.error('Error: ID de carpeta inválido');
+				toastService.error('Error: Invalid folder ID');
 				return;
 			}
 			try {
 				operationsLogger.info('🗑️ Eliminando carpeta:', { folderId });
 				await deleteFolderMutation.mutateAsync(folderId);
 				await onLoadData();
-				toastService.success('La carpeta ha sido eliminada correctamente');
+				toastService.success('The folder was deleted successfully');
 			} catch (error) {
-				operationsLogger.error('❌ Error al eliminar carpeta:', error);
-				onError(error instanceof Error ? error.message : 'Error desconocido');
-				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
+				operationsLogger.error('❌ Could not delete folder:', error);
+				onError(error instanceof Error ? error.message : 'Unknown error');
+				toastService.error(error instanceof Error ? error.message : 'Unknown error');
 			}
 		},
 		[onLoadData, onError, deleteFolderMutation.mutateAsync]
@@ -219,11 +219,11 @@ export function useFoldersOperations({ onStartProcessing, onLoadData, onError }:
 			operationsLogger.info('🧹 Limpiando caché de metadatos');
 			await clearMetadataCache();
 			await onLoadData();
-			toastService.success('El caché de metadatos ha sido limpiado correctamente');
+			toastService.success('The metadata cache was cleared successfully');
 		} catch (error) {
-			operationsLogger.error('❌ Error al limpiar caché:', error);
-			onError(error instanceof Error ? error.message : 'Error desconocido');
-			toastService.error(error instanceof Error ? error.message : 'Error desconocido');
+			operationsLogger.error('❌ Could not clear cache:', error);
+			onError(error instanceof Error ? error.message : 'Unknown error');
+			toastService.error(error instanceof Error ? error.message : 'Unknown error');
 		}
 	}, [onError, onLoadData]);
 

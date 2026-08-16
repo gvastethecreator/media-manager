@@ -43,11 +43,11 @@ const ConceptsContentView: React.FC<ConceptsContentViewProps> = ({
 	handleCreateConcept,
 }) => {
 	if (isLoading) {
-		return <LoadingScreen message="Cargando conceptos..." />;
+		return <LoadingScreen message="Loading concepts..." />;
 	}
 
 	if (error) {
-		return <EmptyState description={error} icon={Lightbulb} title="Error al cargar conceptos" />;
+		return <EmptyState description={error} icon={Lightbulb} title="Could not load concepts" />;
 	}
 
 	// Filtrar conceptos por término de búsqueda
@@ -61,8 +61,8 @@ const ConceptsContentView: React.FC<ConceptsContentViewProps> = ({
 		<ScrollArea className="flex-1">
 			<div className="p-6">
 				<div className="mb-4 flex items-center justify-between">
-					<h2 className="font-bold text-xl">Vista de Conceptos</h2>
-					<Button onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancelar' : 'Crear Concepto'}</Button>
+					<h2 className="font-bold text-xl">Concepts</h2>
+					<Button onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancel' : 'Create Concept'}</Button>
 				</div>
 
 				{/* Barra de búsqueda */}
@@ -70,7 +70,7 @@ const ConceptsContentView: React.FC<ConceptsContentViewProps> = ({
 					<Input
 						className="max-w-sm"
 						onChange={(e) => setSearchTerm(e.target.value)}
-						placeholder="Buscar conceptos..."
+						placeholder="Search concepts..."
 						value={searchTerm}
 					/>
 				</div>
@@ -78,26 +78,26 @@ const ConceptsContentView: React.FC<ConceptsContentViewProps> = ({
 				{/* Formulario de crear concepto */}
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Concepto</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Concept</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="conceptName">Nombre</Label>
+							<Label htmlFor="conceptName">Name</Label>
 							<Input
 								id="conceptName"
 								onChange={(e) => setNewConceptName(e.target.value)}
-								placeholder="Nombre del concepto"
+								placeholder="Concept name"
 								value={newConceptName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="conceptDescription">Descripción</Label>
+							<Label htmlFor="conceptDescription">Description</Label>
 							<Textarea
 								id="conceptDescription"
 								onChange={(e) => setNewConceptDescription(e.target.value)}
-								placeholder="Descripción del concepto (opcional)"
+								placeholder="Concept description (optional)"
 								value={newConceptDescription}
 							/>
 						</div>
-						<Button onClick={handleCreateConcept}>Guardar Concepto</Button>
+						<Button onClick={handleCreateConcept}>Save Concept</Button>
 					</div>
 				)}
 
@@ -106,11 +106,11 @@ const ConceptsContentView: React.FC<ConceptsContentViewProps> = ({
 					<EmptyState
 						description={
 							searchTerm
-								? `No se encontraron conceptos que coincidan con "${searchTerm}"`
-								: 'No hay conceptos disponibles'
+								? `No concepts match "${searchTerm}"`
+								: 'No concepts are available'
 						}
 						icon={Lightbulb}
-						title="Sin conceptos"
+						title="No concepts yet"
 					/>
 				) : (
 					<motion.div

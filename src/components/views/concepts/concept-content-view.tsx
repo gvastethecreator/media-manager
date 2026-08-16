@@ -55,7 +55,7 @@ export const ConceptContentView = memo(function ConceptContentView() {
 	);
 
 	const headerTitle = useMemo(
-		() => (effectiveConcept?.name ? `Imágenes del concepto: ${effectiveConcept.name}` : 'Selecciona un concepto'),
+		() => (effectiveConcept?.name ? `Concept images: ${effectiveConcept.name}` : 'Selecciona un concepto'),
 		[effectiveConcept?.name]
 	);
 
@@ -64,7 +64,7 @@ export const ConceptContentView = memo(function ConceptContentView() {
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Selecciona un concepto para ver sus imágenes relacionadas"
+						description="Select a concept to view related images"
 						icon={Lightbulb}
 						title="Sin concepto seleccionado"
 					/>
@@ -90,7 +90,7 @@ export const ConceptContentView = memo(function ConceptContentView() {
 	}
 
 	return (
-		<BaseContentView description={images.length ? `${images.length} imágenes` : undefined} title={headerTitle}>
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
 			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
 		</BaseContentView>
 	);

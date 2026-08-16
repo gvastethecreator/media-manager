@@ -45,6 +45,10 @@ import {
 	prompts,
 	properties,
 	queueJobs,
+	relationRoleApplicability,
+	relationRoleConflicts,
+	relationRoles,
+	semanticRelations,
 	settings,
 	sourceFiles,
 	tags,
@@ -149,6 +153,10 @@ const schema = {
 	groupVideos,
 	groupAlbums,
 	groupTags,
+	relationRoles,
+	relationRoleApplicability,
+	relationRoleConflicts,
+	semanticRelations,
 };
 
 // Combinar schema y relaciones para Drizzle
@@ -444,7 +452,7 @@ export async function checkDatabaseConnection(): Promise<boolean> {
 		const result = await client.execute('SELECT 1 as test');
 		return result.rows.length > 0 && result.rows[0][0] === 1;
 	} catch (error) {
-		console.error('Error al verificar la conexión a la base de datos:', error);
+		console.error('Could not verify the database connection:', error);
 		return false;
 	}
 }
@@ -479,7 +487,7 @@ export async function getDatabaseInfo() {
 			url: databaseUrl,
 		};
 	} catch (error) {
-		console.error('Error al obtener información de la base de datos:', error);
+		console.error('Could not get database information:', error);
 		return null;
 	}
 }

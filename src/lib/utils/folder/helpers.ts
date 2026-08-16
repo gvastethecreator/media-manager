@@ -47,7 +47,7 @@ export function formatLastIndexed(date: Date | string | null | undefined): strin
 	}
 
 	const dateObj = typeof date === 'string' ? new Date(date) : date;
-	return dateObj.toLocaleDateString('es-ES', {
+	return dateObj.toLocaleDateString('en-US', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',

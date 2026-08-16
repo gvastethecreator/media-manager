@@ -1,51 +1,49 @@
-import { Sparkles } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { WildcardCard } from "@/components/cards/wildcard-card/wildcard-card";
-import { LoadingScreen } from "@/components/core/feedback/loading/loading-screen";
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { motion } from "@/components/ui/motion-shim";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
-import { useAuthorizedRoots } from "@/lib/api/authorized-roots";
-import { useCreateWildcard, useWildcards } from "@/lib/api/wildcards";
-import { clientEvents } from "@/lib/client/events.client";
-import { clientLogger } from "@/lib/logger/client-logger";
+import { Sparkles } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { WildcardCard } from '@/components/cards/wildcard-card/wildcard-card';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { useAuthorizedRoots } from '@/lib/api/authorized-roots';
+import { useCreateWildcard, useWildcards } from '@/lib/api/wildcards';
+import { clientEvents } from '@/lib/client/events.client';
+import { clientLogger } from '@/lib/logger/client-logger';
 // El store se expone desde el barrel de la entidad
-import { useWildcardStore } from "@/store/entities/wildcard";
-import type { ViewProps } from "../types";
+import { useWildcardStore } from '@/store/entities/wildcard';
+import type { ViewProps } from '../types';
 
-const viewLogger = clientLogger.withContext("WildcardsView");
+const viewLogger = clientLogger.withContext('WildcardsView');
 
 export function WildcardsView({ isVisible }: ViewProps) {
 	const {
 		ui: { currentWildcardId },
 		setCurrentWildcard,
 	} = useWildcardStore();
-	const { mutateAsync: createWildcard } = useCreateWildcard();
+	const createWildcardMutation = useCreateWildcard();
 	const { data: authorizedRoots = [] } = useAuthorizedRoots();
 	const writableRoots = useMemo(
 		() =>
 			authorizedRoots.filter(
 				(root) =>
-					root.permissions.includes("read") &&
-					root.permissions.includes("write") &&
-					root.permissions.includes("delete") &&
-					root.permissions.includes("index"),
+					root.permissions.includes('read') && root.permissions.includes('write') && root.permissions.includes('index')
 			),
-		[authorizedRoots],
+		[authorizedRoots]
 	);
 
-	const [localSearch, setLocalSearch] = useState("");
+	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
-	const [newWildcardName, setNewWildcardName] = useState("");
-	const [newWildcardDescription, setNewWildcardDescription] = useState("");
-	const [newWildcardValues, setNewWildcardValues] = useState("");
-	const [artifactRootId, setArtifactRootId] = useState("");
+	const [newWildcardName, setNewWildcardName] = useState('');
+	const [newWildcardDescription, setNewWildcardDescription] = useState('');
+	const [newWildcardValues, setNewWildcardValues] = useState('');
+	const [artifactRootId, setArtifactRootId] = useState('');
+	const createInFlight = useRef(false);
 
 	useEffect(() => {
 		if (!artifactRootId && writableRoots[0]) setArtifactRootId(writableRoots[0].id);
@@ -59,66 +57,70 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		refetch,
 	} = useWildcards({
 		search: localSearch,
-		sortBy: "name",
-		sortOrder: "asc",
+		sortBy: 'name',
+		sortOrder: 'asc',
 	});
 
 	const wildcards = wildcardsResponse?.data || [];
 
 	const handleWildcardSelect = useCallback(
 		(wildcardId: string) => {
-			viewLogger.info("✨ Seleccionando wildcard", { wildcardId });
+			viewLogger.info('✨ Seleccionando wildcard', { wildcardId });
 			setCurrentWildcard(wildcardId);
-			clientEvents.emit("wildcard:selected", { wildcardId });
+			clientEvents.emit('wildcard:selected', { wildcardId });
 		},
-		[setCurrentWildcard],
+		[setCurrentWildcard]
 	);
 
 	const { toast } = useToast();
 	const handleCreateWildcard = useCallback(async () => {
-		if (newWildcardName.trim() === "") {
+		if (createInFlight.current) return;
+		if (newWildcardName.trim() === '') {
 			toast({
-				title: "❌ Error",
-				description: "El nombre del wildcard no puede estar vacío.",
-				variant: "destructive",
+				title: '❌ Error',
+				description: 'Wildcard name cannot be empty.',
+				variant: 'destructive',
 			});
 			return;
 		}
 		const values = newWildcardValues
-			.split("\n")
+			.split('\n')
 			.map((value) => value.trim())
 			.filter(Boolean);
 		if (!artifactRootId || values.length === 0) {
 			toast({
-				title: "Falta el archivo canónico",
+				title: 'Canonical file missing',
 				description: artifactRootId
-					? "Agrega al menos un valor, uno por línea."
-					: "Configura una raíz con permisos completos para crear Wildcards.",
-				variant: "destructive",
+					? 'Add at least one value, one per line.'
+					: 'Configure a root with read, write, and index permissions to create Wildcards.',
+				variant: 'destructive',
 			});
 			return;
 		}
+		createInFlight.current = true;
 		try {
-			await createWildcard({
+			await createWildcardMutation.mutateAsync({
 				description: newWildcardDescription,
-				fileBacking: { body: values.join("\n"), rootId: artifactRootId },
+				fileBacking: { body: values.join('\n'), rootId: artifactRootId },
 				name: newWildcardName,
 			});
-			setNewWildcardName("");
-			setNewWildcardDescription("");
-			setNewWildcardValues("");
+			setNewWildcardName('');
+			setNewWildcardDescription('');
+			setNewWildcardValues('');
 			setShowForm(false);
 		} catch (error) {
 			toast({
-				title: "No se pudo crear el Wildcard",
-				description: error instanceof Error ? error.message : "Error inesperado.",
-				variant: "destructive",
+				title: 'The Wildcard could not be created',
+				description: error instanceof Error ? error.message : 'Unexpected error.',
+				variant: 'destructive',
 			});
+		} finally {
+			createInFlight.current = false;
 		}
-	}, [artifactRootId, createWildcard, newWildcardDescription, newWildcardName, newWildcardValues, toast]);
+	}, [artifactRootId, createWildcardMutation, newWildcardDescription, newWildcardName, newWildcardValues, toast]);
 
 	const handleRetry = useCallback(() => {
-		viewLogger.info("🔄 Reintentando cargar wildcards");
+		viewLogger.info('🔄 Reintentando cargar wildcards');
 		refetch();
 	}, [refetch]);
 
@@ -128,7 +130,7 @@ export function WildcardsView({ isVisible }: ViewProps) {
 	}
 
 	if (isLoading) {
-		return <LoadingScreen message="Cargando wildcards..." />;
+		return <LoadingScreen message="Loading wildcards..." />;
 	}
 
 	if (error) {
@@ -136,12 +138,12 @@ export function WildcardsView({ isVisible }: ViewProps) {
 			<EmptyState
 				actions={
 					<Button onClick={handleRetry} variant="outline">
-						Reintentar
+						Retry
 					</Button>
 				}
-				description={error instanceof Error ? error.message : "Ha ocurrido un error inesperado"}
+				description={error instanceof Error ? error.message : 'An unexpected error occurred'}
 				icon={Sparkles}
-				title="Error al cargar wildcards"
+				title="Could not load wildcards"
 			/>
 		);
 	}
@@ -149,47 +151,47 @@ export function WildcardsView({ isVisible }: ViewProps) {
 	return (
 		<ScrollArea className="flex-1">
 			<div className="p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Wildcards</h2>
+				<h2 className="mb-4 font-bold text-xl">Wildcards</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? "Cancelar" : "Crear Wildcard"}
+					{showForm ? 'Cancel' : 'Create Wildcard'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Wildcard</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Wildcard</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="wildcardName">Nombre</Label>
+							<Label htmlFor="wildcardName">Name</Label>
 							<Input
 								id="wildcardName"
 								onChange={(e) => setNewWildcardName(e.target.value)}
-								placeholder="Nombre del wildcard"
+								placeholder="Wildcard name"
 								value={newWildcardName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="wildcardDescription">Descripción</Label>
+							<Label htmlFor="wildcardDescription">Description</Label>
 							<Textarea
 								id="wildcardDescription"
 								onChange={(e) => setNewWildcardDescription(e.target.value)}
-								placeholder="Descripción del wildcard (opcional)"
+								placeholder="Wildcard description (optional)"
 								value={newWildcardDescription}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="wildcardValues">Valores</Label>
+							<Label htmlFor="wildcardValues">Values</Label>
 							<Textarea
 								id="wildcardValues"
 								onChange={(event) => setNewWildcardValues(event.target.value)}
-								placeholder={"Un valor por línea\nrojo\nverde\nazul"}
+								placeholder={'One value per line\nred\ngreen\nblue'}
 								value={newWildcardValues}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label>Biblioteca canónica</Label>
+							<Label>Canonical Library</Label>
 							<Select onValueChange={setArtifactRootId} value={artifactRootId || undefined}>
 								<SelectTrigger>
-									<SelectValue placeholder="Selecciona una raíz" />
+									<SelectValue placeholder="Select a root" />
 								</SelectTrigger>
 								<SelectContent>
 									{writableRoots.map((root) => (
@@ -200,7 +202,9 @@ export function WildcardsView({ isVisible }: ViewProps) {
 								</SelectContent>
 							</Select>
 						</div>
-						<Button onClick={handleCreateWildcard}>Guardar Wildcard</Button>
+						<Button disabled={createWildcardMutation.isPending} onClick={handleCreateWildcard}>
+							{createWildcardMutation.isPending ? 'Guardando…' : 'Save Wildcard'}
+						</Button>
 					</div>
 				)}
 
@@ -219,7 +223,7 @@ export function WildcardsView({ isVisible }: ViewProps) {
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
 								<WildcardCard
-									className={wildcard.id === currentWildcardId ? "ring-2 ring-primary" : ""}
+									className={wildcard.id === currentWildcardId ? 'ring-2 ring-primary' : ''}
 									onClick={() => handleWildcardSelect(wildcard.id)}
 									wildcard={wildcard}
 								/>
@@ -231,7 +235,7 @@ export function WildcardsView({ isVisible }: ViewProps) {
 						description={
 							localSearch
 								? `No se encontraron wildcards que coincidan con "${localSearch}"`
-								: "No hay wildcards disponibles"
+								: 'No hay wildcards disponibles'
 						}
 						icon={Sparkles}
 						title="Sin wildcards"

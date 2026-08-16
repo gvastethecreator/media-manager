@@ -228,7 +228,7 @@ function rollbackQuietly(database: Database): void {
 function readPragmaNumber(database: Database, pragma: string): number {
 	const row = database.query(`PRAGMA ${pragma}`).get() as Record<string, unknown> | null;
 	const value = Number(row ? Object.values(row)[0] : Number.NaN);
-	if (!Number.isFinite(value)) throw new Error(`SQLite no devolvió un valor numérico para PRAGMA ${pragma}.`);
+	if (!Number.isFinite(value)) throw new Error(`SQLite did not return a numeric value for PRAGMA ${pragma}.`);
 	return value;
 }
 
@@ -359,7 +359,7 @@ export async function migrateDatabase({
 			readFirstValue(database.query('PRAGMA journal_mode = WAL').get() as Record<string, unknown> | null) ?? ''
 		).toLowerCase();
 		if (journalMode !== 'wal')
-			throw new Error(`SQLite no pudo activar WAL para la migración; devolvió ${journalMode}.`);
+			throw new Error(`SQLite no pudo activar WAL para la migración; returned ${journalMode}.`);
 		database.exec('PRAGMA synchronous = NORMAL');
 		setForeignKeys(database, true);
 

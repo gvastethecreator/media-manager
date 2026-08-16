@@ -23,14 +23,14 @@ export function CollectionsView(_props: ViewProps) {
 
 	useEffect(() => {
 		if (collections.length === 0 && !isLoading) {
-			viewLogger.info('🔄 No hay colecciones en el store, cargando desde el servidor...');
+			viewLogger.info('🔄 Collection store is empty, loading from the server...');
 			fetchCollections();
 		}
 	}, [collections.length, isLoading, fetchCollections]);
 
 	const handleCollectionClick = useCallback(
 		(collection: CollectionWithStats) => {
-			viewLogger.info('🖱️ Click en colección:', collection.name);
+			viewLogger.info('🖱️ Collection clicked:', collection.name);
 			selectCollection(collection.id);
 			navigate('/collection-content');
 		},

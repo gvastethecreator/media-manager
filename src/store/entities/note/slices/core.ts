@@ -156,13 +156,13 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			toastService.success('Nota creada correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al crear nota:', errorMessage);
+			coreLogger.error('❌ Could not create note:', errorMessage);
 			set({
 				error: errorMessage,
 				isLoading: false,
 				loading: false,
 			});
-			toastService.error('Error al crear nota', { description: errorMessage });
+			toastService.error('Could not create note', { description: errorMessage });
 		}
 	},
 
@@ -186,13 +186,13 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			toastService.success('Nota actualizada correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al actualizar nota:', errorMessage);
+			coreLogger.error('❌ Could not update note:', errorMessage);
 			set({
 				error: errorMessage,
 				isLoading: false,
 				loading: false,
 			});
-			toastService.error('Error al actualizar nota', { description: errorMessage });
+			toastService.error('Could not update note', { description: errorMessage });
 		}
 	},
 
@@ -219,13 +219,13 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			toastService.success('Nota eliminada correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al eliminar nota:', errorMessage);
+			coreLogger.error('❌ Could not delete note:', errorMessage);
 			set({
 				error: errorMessage,
 				isLoading: false,
 				loading: false,
 			});
-			toastService.error('Error al eliminar nota', { description: errorMessage });
+			toastService.error('Could not delete note', { description: errorMessage });
 		}
 	},
 

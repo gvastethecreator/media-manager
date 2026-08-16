@@ -180,7 +180,7 @@ const TagsBlock: React.FC<{ tags: string[]; primaryColor: string; renderKey: str
 	<div className="mb-2">
 		<div className="mb-1 flex items-center gap-1 text-sm opacity-70">
 			<Tag className="h-4 w-4" />
-			<span>Etiquetas</span>
+			<span>Tags</span>
 		</div>
 		<div className="flex flex-wrap gap-1">
 			{tags.slice(0, 5).map((tag) => (
@@ -199,7 +199,7 @@ const TagsBlock: React.FC<{ tags: string[]; primaryColor: string; renderKey: str
 			))}
 			{tags.length > 5 && (
 				<Badge className="px-2 py-1 text-sm opacity-70" variant="outline">
-					+{tags.length - 5} más
+					+{tags.length - 5} more
 				</Badge>
 			)}
 		</div>
@@ -213,7 +213,7 @@ const TCGStats: React.FC<{ relationCounts?: Record<string, number>; primaryColor
 	<div className="mt-auto grid grid-cols-2 gap-x-4 gap-y-1 rounded border border-border/40 bg-muted/30 px-3 py-2">
 		<StatBar
 			icon={<Image className="h-4 w-4" />}
-			label="Imágenes"
+			label="Images"
 			maxValue={20}
 			primaryColor={primaryColor}
 			value={relationCounts?.images || 0}
@@ -234,7 +234,7 @@ const TCGStats: React.FC<{ relationCounts?: Record<string, number>; primaryColor
 		/>
 		<StatBar
 			icon={<FolderOpen className="h-4 w-4" />}
-			label="Colecciones"
+			label="Collections"
 			maxValue={20}
 			primaryColor={primaryColor}
 			value={relationCounts?.collections || 0}
@@ -256,7 +256,7 @@ const StandardCounters: React.FC<{ relationCounts?: Record<string, number>; prim
 		<StatCounter
 			count={relationCounts?.places || 0}
 			icon={<MapPin className="h-4 w-4" />}
-			label="Lugares"
+			label="Places"
 			primaryColor={primaryColor}
 		/>
 		<StatCounter

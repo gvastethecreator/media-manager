@@ -121,7 +121,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 	// Perfil por defecto - reemplazar con datos reales del contexto de usuario
 	const activeProfileData = useMemo(
 		() => ({
-			name: 'Usuario',
+			name: 'User',
 			emoji: '🎨',
 			color: 'var(--entity-profile)',
 		}),
@@ -189,7 +189,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							<MemoizedHeaderButton
 								icon={<Bug className="h-3.5 w-3.5" />}
 								onClick={onOpenDevelopment}
-								tooltipContent="Accede a herramientas de desarrollo y depuración"
+								tooltipContent="Open development and debugging tools"
 								tooltipNote="Solo para administradores"
 								tooltipTitle="Modo Desarrollador"
 							/>
@@ -197,8 +197,8 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							<MemoizedHeaderButton
 								icon={<BookOpen className="h-3.5 w-3.5" />}
 								onClick={() => window.open('/docs', '_blank')}
-								tooltipContent="Abre la documentación de la aplicación"
-								tooltipTitle="Documentación"
+								tooltipContent="Open the application documentation"
+								tooltipTitle="Documentation"
 							/>
 
 							{/* 🧘 Botón de modo zen */}
@@ -206,7 +206,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 								<MemoizedHeaderButton
 									icon={<Eye className="h-3.5 w-3.5" />}
 									onClick={onToggleZenMode}
-									tooltipContent="Activa el modo de concentración"
+									tooltipContent="Enable focus mode"
 									tooltipNote="Oculta distracciones"
 									tooltipTitle="Modo Zen"
 								/>
@@ -215,7 +215,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
-										aria-label="Cambiar tema"
+										aria-label="Change theme"
 										className="h-7 w-7 cursor-pointer rounded-md bg-transparent text-muted-foreground transition-all hover:bg-secondary/40 hover:text-foreground"
 										size="icon"
 										variant="ghost"
@@ -240,7 +240,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 								icon={<Settings2 className="h-3.5 w-3.5" />}
 								onClick={onOpenSettings}
 								tooltipContent="Personaliza tu experiencia"
-								tooltipTitle="Configuración"
+								tooltipTitle="Settings"
 							/>
 						</div>
 					)}
@@ -253,7 +253,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							icon={<Settings2 className="h-2.5 w-2.5" />}
 							onClick={onOpenSettings}
 							tooltipContent="Personaliza tu experiencia"
-							tooltipTitle="Configuración"
+							tooltipTitle="Settings"
 						/>
 					</div>
 				)}

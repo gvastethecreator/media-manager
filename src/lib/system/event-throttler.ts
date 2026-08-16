@@ -184,7 +184,7 @@ export class BatchThrottler<T> {
 				items: itemsToProcess.length,
 			});
 		} catch (error) {
-			throttlerLogger.error('❌ Error procesando batch:', {
+			throttlerLogger.error('❌ Could not process batch:', {
 				items: itemsToProcess.length,
 				error,
 			});

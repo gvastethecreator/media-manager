@@ -47,7 +47,7 @@ export async function getFolderImagesFromApi(
 
 	if (!response.ok) {
 		const errorData = await response.json().catch(() => ({}));
-		throw new Error(errorData.error || 'Error al obtener las imágenes de la carpeta');
+		throw new Error(errorData.error || 'Could not get images from the folder');
 	}
 
 	const data = await response.json();

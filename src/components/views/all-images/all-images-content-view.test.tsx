@@ -18,10 +18,10 @@ describe('AllImagesContentView', () => {
 			/>
 		);
 
-		expect(screen.getByRole('link', { name: 'Abrir explorador de archivos' })).toHaveAttribute('href', '/files');
-		expect(screen.getByRole('link', { name: 'Gestionar reindexado' })).toHaveAttribute('href', '/files');
-		expect(screen.queryByRole('button', { name: 'Reindexar' })).not.toBeInTheDocument();
-		expect(screen.queryByText('Subir Imágenes')).not.toBeInTheDocument();
-		expect(screen.queryByLabelText('Seleccionar Imágenes')).not.toBeInTheDocument();
+		expect(screen.getByRole('link', { name: 'Open file browser' })).toHaveAttribute('href', '/files');
+		expect(screen.getByRole('link', { name: 'Manage reindexing' })).toHaveAttribute('href', '/files');
+		expect(screen.queryByRole('button', { name: 'Reindex' })).not.toBeInTheDocument();
+		expect(screen.queryByText('Upload Images')).not.toBeInTheDocument();
+		expect(screen.queryByLabelText('Select Images')).not.toBeInTheDocument();
 	});
 });

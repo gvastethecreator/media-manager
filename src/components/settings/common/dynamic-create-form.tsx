@@ -3,7 +3,7 @@
 // Muestra solo el campo nombre inicialmente y permite agregar campos opcionales uno a uno
 // ⚠️ No usar para carpetas (folders)
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ export interface DynamicCreateFormProps<T extends Record<string, any> = Record<s
 	 */
 	alwaysVisibleFields?: string[];
 	/**
-	 * Acción opcional para cancelar/cerrar el formulario.
+	 * Action opcional para cancelar/cerrar el formulario.
 	 */
 	onCancel?: () => void;
 	/**
@@ -59,7 +59,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 	onSubmit,
 	initialData,
 	extraValidation,
-	submitLabel = 'Crear',
+	submitLabel = 'Create',
 	validateName,
 }: DynamicCreateFormProps<T>) {
 	const normalizedInitialData = useMemo(() => ({ name: '', ...(initialData ?? {}) }), [initialData]);
@@ -76,6 +76,12 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 
 		return [...visibleFields];
 	}, [alwaysVisibleFields, normalizedInitialData, optionalFields]);
+	const initializationKey = JSON.stringify({
+		alwaysVisibleFields,
+		initialData: normalizedInitialData,
+		optionalFieldNames: optionalFields.map((field) => field.name),
+	});
+	const lastInitializationKey = useRef(initializationKey);
 
 	const [formData, setFormData] = useState<Record<string, any>>(normalizedInitialData);
 	const [addedFields, setAddedFields] = useState<string[]>(initialAddedFields);
@@ -84,11 +90,13 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	useEffect(() => {
+		if (lastInitializationKey.current === initializationKey) return;
+		lastInitializationKey.current = initializationKey;
 		setFormData(normalizedInitialData);
 		setAddedFields(initialAddedFields);
 		setSelectedField('');
 		setError(null);
-	}, [initialAddedFields, normalizedInitialData]);
+	}, [initialAddedFields, initializationKey, normalizedInitialData]);
 
 	// Manejar cambio de nombre
 	const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,7 +125,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 		const validationError = validateName ? validateName(formData.name) : null;
 		const extraValidationError = extraValidation ? extraValidation(formData as Partial<T & { name: string }>) : null;
 		if (!formData.name || validationError || extraValidationError) {
-			setError(validationError || 'El nombre es obligatorio');
+			setError(validationError || 'Name is required');
 			if (extraValidationError) {
 				setError(extraValidationError);
 			}
@@ -130,7 +138,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 			setAddedFields(alwaysVisibleFields);
 			setError(null);
 		} catch (err: any) {
-			setError(err.message || 'Error al crear la entidad');
+			setError(err.message || 'Could not create entity');
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -142,13 +150,13 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 	return (
 		<form className="space-y-4" onSubmit={handleSubmit}>
 			<div className="space-y-2">
-				<Label htmlFor="name">Nombre</Label>
+				<Label htmlFor="name">Name</Label>
 				<Input
 					className={error ? 'border-destructive' : ''}
 					disabled={isSubmitting}
 					id="name"
 					onChange={handleNameChange}
-					placeholder="Nombre de la entidad"
+					placeholder="Entity name"
 					required
 					value={formData.name || ''}
 				/>
@@ -160,7 +168,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 				<div className="flex items-end gap-2">
 					<Select onValueChange={setSelectedField} value={selectedField}>
 						<SelectTrigger className="w-48">
-							<SelectValue placeholder="Agregar campo opcional" />
+							<SelectValue placeholder="Add optional field" />
 						</SelectTrigger>
 						<SelectContent>
 							{availableFields.map((f) => (
@@ -171,7 +179,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 						</SelectContent>
 					</Select>
 					<Button disabled={!selectedField} onClick={handleAddField} type="button">
-						Agregar campo
+						Add field
 					</Button>
 				</div>
 			)}
@@ -196,7 +204,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 			<div className="flex justify-end gap-2">
 				{onCancel && (
 					<Button disabled={isSubmitting} onClick={onCancel} type="button" variant="outline">
-						Cancelar
+						Cancel
 					</Button>
 				)}
 				<Button disabled={isSubmitting || !formData.name} type="submit">

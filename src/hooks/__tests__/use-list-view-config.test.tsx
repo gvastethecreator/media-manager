@@ -1,6 +1,6 @@
 /**
- * @file Tests para hook de configuración de ListView
- * @description Tests para verificar la funcionalidad del hook useListViewConfig
+ * @file Tests for the ListView configuration hook.
+ * @description Verifies the behavior exposed by useListViewConfig.
  */
 
 import { renderHook } from '@testing-library/react';
@@ -11,7 +11,7 @@ const mockListViewConfig = {
 	columns: [
 		{
 			key: 'name',
-			label: 'Nombre',
+			label: 'Name',
 			width: 'auto',
 			visible: true,
 			sortable: true,
@@ -19,7 +19,7 @@ const mockListViewConfig = {
 		},
 		{
 			key: 'size',
-			label: 'Tamaño',
+			label: 'Size',
 			width: 100,
 			visible: true,
 			sortable: true,
@@ -37,7 +37,7 @@ const mockListViewConfig = {
 	cellPadding: 12,
 };
 
-// Mock de dependencias usando el selector pattern de zustand
+// Mock dependencies with Zustand's selector pattern.
 vi.mock('@/store/settings.store', () => ({
 	useSettingsStore: vi.fn((selector?: (state: any) => any) => {
 		const state = {
@@ -53,7 +53,7 @@ vi.mock('@/store/settings.store', () => ({
 }));
 
 describe('useListViewConfig', () => {
-	it('retorna la configuración por defecto cuando no hay configuración guardada', () => {
+	it('returns the default configuration when no saved configuration exists', () => {
 		const { result } = renderHook(() => useListViewConfig());
 
 		expect(result.current.config).toBeDefined();
@@ -62,7 +62,7 @@ describe('useListViewConfig', () => {
 		expect(result.current.visibleColumns).toBeDefined();
 	});
 
-	it('proporciona funciones de actualización', () => {
+	it('provides update functions', () => {
 		const { result } = renderHook(() => useListViewConfig());
 
 		expect(typeof result.current.updateConfig).toBe('function');
@@ -73,7 +73,7 @@ describe('useListViewConfig', () => {
 		expect(typeof result.current.resetToDefault).toBe('function');
 	});
 
-	it('filtra y ordena correctamente las columnas visibles', () => {
+	it('filters and sorts visible columns', () => {
 		const { result } = renderHook(() => useListViewConfig());
 
 		const visibleColumns = result.current.visibleColumns;
@@ -82,14 +82,14 @@ describe('useListViewConfig', () => {
 		expect(visibleColumns[1].key).toBe('size');
 	});
 
-	it('proporciona utilidades para columnas', () => {
+	it('provides column utilities', () => {
 		const { result } = renderHook(() => useListViewConfig());
 
 		expect(typeof result.current.getColumnsWithRenderers).toBe('function');
 		expect(typeof result.current.getColumnsForEntityType).toBe('function');
 	});
 
-	it('getColumnsWithRenderers retorna columnas con renderers', () => {
+	it('getColumnsWithRenderers returns columns with renderers', () => {
 		const { result } = renderHook(() => useListViewConfig());
 
 		const columnsWithRenderers = result.current.getColumnsWithRenderers('image');

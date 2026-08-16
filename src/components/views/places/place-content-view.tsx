@@ -53,9 +53,9 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Selecciona un lugar para ver su contenido"
+						description="Select a place to view its content"
 						icon={MapPin}
-						title="Sin lugar seleccionado"
+						title="No place selected"
 					/>
 				</div>
 			</BaseContentView>
@@ -72,7 +72,7 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 
 	if (isLoading && images.length === 0) {
 		return (
-			<BaseContentView description={undefined} title={selectedPlace?.name ?? 'Lugar'}>
+			<BaseContentView description={undefined} title={selectedPlace?.name ?? 'Place'}>
 				<LoadingScreen />
 			</BaseContentView>
 		);
@@ -80,8 +80,8 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 
 	return (
 		<BaseContentView
-			description={selectedPlace?._count?.images ? `${selectedPlace._count.images} imágenes` : undefined}
-			title={selectedPlace?.name ?? 'Lugar'}
+			description={selectedPlace?._count?.images ? `${selectedPlace._count.images} images` : undefined}
+			title={selectedPlace?.name ?? 'Place'}
 		>
 			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
 		</BaseContentView>

@@ -95,7 +95,7 @@ export const NoteCardImages = memo(function NoteCardImagesComponent({
 										key={image.id}
 									>
 										<img
-											alt={`Imagen ${index + 1}`}
+										alt={`Attachment ${index + 1}`}
 											className="h-full w-full object-cover"
 											loading="lazy"
 											src={image.thumbnailUrl}

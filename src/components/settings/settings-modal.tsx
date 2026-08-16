@@ -45,7 +45,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
 						'data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]'
 					)}
 				>
-					<DialogTitle className="sr-only">Configuración</DialogTitle>
+					<DialogTitle className="sr-only">Settings</DialogTitle>
 					<div className="h-full w-full overflow-hidden">
 						<ModernSettingsView />
 					</div>

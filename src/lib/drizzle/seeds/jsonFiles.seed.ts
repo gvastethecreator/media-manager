@@ -25,9 +25,9 @@ export async function seedJsonFiles(db: LibSQLDatabase<Record<string, never>>) {
 		];
 
 		await db.insert(jsonFiles).values(sampleJsonFiles);
-		seedLogger.success(`✅ ${sampleJsonFiles.length} archivos JSON creados`);
+		seedLogger.success(`✅ ${sampleJsonFiles.length} JSON files created`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando archivos JSON:', error);
+		seedLogger.error('❌ Could not create JSON files:', error);
 		throw error;
 	}
 }

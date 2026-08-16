@@ -85,14 +85,14 @@ export function MixedContentView(_props: MixedContentViewProps = {}) {
 	// Renderizar vista de contenido mixto usando BaseContentView y FileBrowser
 	return (
 		<BaseContentView
-			description="Vista unificada de todos los tipos de archivos"
+			description="Unified view of all file types"
 			headerControls={
 				<Button disabled={isRetrying} onClick={handleForceRefresh} size="sm" variant="outline">
 					<RefreshCw className={`mr-2 h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`} />
-					{isRetrying ? 'Recargando...' : 'Recargar'}
+					{isRetrying ? 'Reloading...' : 'Reload'}
 				</Button>
 			}
-			title="Contenido Mixto"
+			title="Mixed Content"
 		>
 			<FileBrowser
 				className="h-full"

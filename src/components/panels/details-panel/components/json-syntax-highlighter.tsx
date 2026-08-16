@@ -222,12 +222,12 @@ export const CollapsibleJSON: React.FC<CollapsibleJSONProps> = ({
 					{isExpanded ? (
 						<>
 							<span className="mr-1">↑</span>
-							Colapsar JSON ({lines.length} líneas)
+							Colapsar JSON ({lines.length} lines)
 						</>
 					) : (
 						<>
 							<span className="mr-1">↓</span>
-							Expandir JSON ({lines.length} líneas)
+							Expandir JSON ({lines.length} lines)
 						</>
 					)}
 				</button>

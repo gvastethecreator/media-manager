@@ -728,7 +728,7 @@ const make = (): AlbumServiceInterface => {
 			for (const { id, result } of results) {
 				if (result._tag === 'Left') {
 					failed.push(id);
-					logger.warn(`❌ Error al eliminar álbum ${id}: ${result.left.displayMessage}`);
+					logger.warn(`❌ Could not delete album ${id}: ${result.left.displayMessage}`);
 				} else {
 					deleted++;
 				}

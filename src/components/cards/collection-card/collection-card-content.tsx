@@ -257,7 +257,7 @@ const EditionsList: React.FC<{ editionsList: CollectionEdition[]; primaryColor: 
 					</li>
 				))}
 				{editionsList.length > 2 && (
-					<li className="text-muted-foreground text-sm italic">...y {editionsList.length - 2} más</li>
+					<li className="text-muted-foreground text-sm italic">...and {editionsList.length - 2} more</li>
 				)}
 			</ul>
 		</div>

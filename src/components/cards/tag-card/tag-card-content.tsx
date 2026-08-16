@@ -46,7 +46,7 @@ function DescriptionSection({
 			{description ? (
 				<p className={tcgMode ? '' : 'italic'}>{description}</p>
 			) : (
-				<p className="text-center italic opacity-70">Sin descripción</p>
+				<p className="text-center italic opacity-70">No description</p>
 			)}
 		</div>
 	);
@@ -205,12 +205,12 @@ export function TagCardContent({
 				{/* Contadores de relaciones en modo TCG */}
 				{tcgMode && hasRelationships && (
 					<div className="mb-3 flex flex-col">
-						{renderStatBar(<Image className="h-4 w-4" />, imagesCount, 'Imágenes')}
+						{renderStatBar(<Image className="h-4 w-4" />, imagesCount, 'Images')}
 						{renderStatBar(<Video className="h-4 w-4" />, videosCount, 'Videos')}
-						{renderStatBar(<Album className="h-4 w-4" />, albumsCount, 'Álbumes')}
-						{renderStatBar(<Folder className="h-4 w-4" />, collectionsCount, 'Colecciones')}
-						{renderStatBar(<UserSquare className="h-4 w-4" />, charactersCount, 'Personajes')}
-						{renderStatBar(<MapPin className="h-4 w-4" />, placesCount, 'Lugares')}
+						{renderStatBar(<Album className="h-4 w-4" />, albumsCount, 'Albums')}
+						{renderStatBar(<Folder className="h-4 w-4" />, collectionsCount, 'Collections')}
+						{renderStatBar(<UserSquare className="h-4 w-4" />, charactersCount, 'Characters')}
+						{renderStatBar(<MapPin className="h-4 w-4" />, placesCount, 'Places')}
 						{renderStatBar(<Package className="h-4 w-4" />, worldItemsCount, 'Objetos')}
 						{renderStatBar(<BookOpen className="h-4 w-4" />, conceptsCount, 'Conceptos')}
 						{renderStatBar(<MessageSquare className="h-4 w-4" />, promptsCount, 'Prompts')}
@@ -239,7 +239,7 @@ export function TagCardContent({
 							</code>
 						</div>
 						<div className="mt-1 text-muted-foreground text-sm">
-							<span className="opacity-70">Puedes usar este atajo para aplicar rápidamente esta etiqueta.</span>
+							<span className="opacity-70">Use this shortcut to apply the tag quickly.</span>
 						</div>
 					</div>
 				)}

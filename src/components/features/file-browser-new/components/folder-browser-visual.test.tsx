@@ -7,14 +7,14 @@ function folderItem(overrides: Partial<BrowserItem> = {}): BrowserItem {
 	return {
 		entityType: 'folder',
 		id: 'folder-1',
-		name: 'Carpeta de prueba',
+		name: 'Test folder',
 		totalItems: 1,
 		...overrides,
 	};
 }
 
 describe('FolderBrowserVisual', () => {
-	it('usa sólo un thumbnail local autorizado en los estilos de preview', () => {
+	it('uses only an allowed local thumbnail in preview styles', () => {
 		const { container } = render(
 			<FolderBrowserVisual
 				item={folderItem({
@@ -26,7 +26,7 @@ describe('FolderBrowserVisual', () => {
 		expect(container.querySelector('[style*="/api/images/image-1/thumbnail"]')).not.toBeNull();
 	});
 
-	it('descarta una ruta que intentaría cerrar url() en el estilo', () => {
+	it('rejects a path that attempts to close url() inside the style', () => {
 		const tracker = 'https://example.test/tracker.png';
 		const { container } = render(
 			<FolderBrowserVisual

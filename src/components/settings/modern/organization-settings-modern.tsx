@@ -35,61 +35,61 @@ const ALBUM_STATS = [
 		icon: <Album className="h-5 w-5" />,
 		color: 'var(--entity-album)',
 		getValue: (items: AlbumWithStats[]) => items.length,
-		getSubtitle: (items: AlbumWithStats[]) => `${items.filter((i) => i.isFavorite).length} favoritos`,
+		getSubtitle: (items: AlbumWithStats[]) => `${items.filter((i) => i.isFavorite).length} favorites`,
 	},
 	{
 		key: 'images',
-		label: 'Imágenes',
+		label: 'Images',
 		icon: <Image className="h-5 w-5" />,
 		color: 'var(--entity-image)',
 		getValue: (items: AlbumWithStats[]) => items.reduce((acc, item) => acc + (item.stats?.imageCount || 0), 0),
-		getSubtitle: () => 'Total en albums',
+		getSubtitle: () => 'Total in albums',
 	},
 	{
 		key: 'empty',
-		label: 'Vacíos',
+		label: 'Empty',
 		icon: <Folder className="h-5 w-5" />,
 		color: 'var(--muted-foreground)',
 		getValue: (items: AlbumWithStats[]) => items.filter((i) => (i.stats?.imageCount || 0) === 0).length,
-		getSubtitle: () => 'Sin contenido',
+		getSubtitle: () => 'No content',
 	},
 ];
 
 const COLLECTION_STATS = [
 	{
 		key: 'total',
-		label: 'Colecciones',
+		label: 'Collections',
 		icon: <LayoutGrid className="h-5 w-5" />,
 		color: 'var(--entity-collection)',
 		getValue: (items: CollectionWithStats[]) => items.length,
-		getSubtitle: (items: CollectionWithStats[]) => `${items.filter((i) => i.category === 'smart').length} inteligentes`,
+		getSubtitle: (items: CollectionWithStats[]) => `${items.filter((i) => i.category === 'smart').length} smart`,
 	},
 	{
 		key: 'images',
-		label: 'Imágenes',
+		label: 'Images',
 		icon: <Image className="h-5 w-5" />,
 		color: 'var(--entity-image)',
 		getValue: (items: CollectionWithStats[]) => items.reduce((acc, item) => acc + (item.stats?.imageCount || 0), 0),
-		getSubtitle: () => 'Total indexadas',
+		getSubtitle: () => 'Total indexed',
 	},
 ];
 
 const GROUP_STATS = [
 	{
 		key: 'total',
-		label: 'Grupos',
+		label: 'Groups',
 		icon: <Users className="h-5 w-5" />,
 		color: 'var(--entity-group)',
 		getValue: (items: GroupWithStats[]) => items.length,
-		getSubtitle: () => 'Organizaciones',
+		getSubtitle: () => 'Organizations',
 	},
 	{
 		key: 'files',
-		label: 'Archivos',
+		label: 'Files',
 		icon: <Folder className="h-5 w-5" />,
 		color: 'var(--entity-file)',
 		getValue: (items: GroupWithStats[]) => items.reduce((acc, item) => acc + (item.stats?.totalAssociations || 0), 0),
-		getSubtitle: () => 'Asignados a grupos',
+		getSubtitle: () => 'Assigned to groups',
 	},
 ];
 
@@ -134,7 +134,7 @@ function AlbumCard({ album, actions, isGrid }: { album: AlbumWithStats; actions:
 						</span>
 						<span className="flex items-center gap-1">
 							<Clock className="h-3 w-3" />
-							{album.updatedAt ? new Date(album.updatedAt).toLocaleDateString() : 'Nunca'}
+							{album.updatedAt ? new Date(album.updatedAt).toLocaleDateString('en-US') : 'Never'}
 						</span>
 					</div>
 				</CardContent>
@@ -190,7 +190,7 @@ function CollectionCard({
 						<LayoutGrid className="h-5 w-5 text-primary" />
 					</div>
 					<Badge variant={collection.category === 'smart' ? 'default' : 'secondary'}>
-						{collection.category === 'smart' ? 'Inteligente' : 'Manual'}
+						{collection.category === 'smart' ? 'Smart' : 'Manual'}
 					</Badge>
 				</div>
 				<CardTitle className="mt-3 text-base">{collection.name}</CardTitle>
@@ -226,7 +226,7 @@ function CollectionCard({
 					<p className="flex items-center gap-2 font-medium">
 						{collection.name}
 						<Badge className="text-sm" variant={collection.category === 'smart' ? 'default' : 'secondary'}>
-							{collection.category === 'smart' ? 'Inteligente' : 'Manual'}
+							{collection.category === 'smart' ? 'Smart' : 'Manual'}
 						</Badge>
 					</p>
 					{collection.description && <p className="text-muted-foreground text-sm">{collection.description}</p>}
@@ -263,7 +263,7 @@ function GroupCard({ group, actions, isGrid }: { group: GroupWithStats; actions:
 			</CardHeader>
 			<CardContent>
 				<div className="flex items-center justify-between">
-					<span className="text-muted-foreground text-sm">{group.stats?.totalAssociations || 0} archivos</span>
+					<span className="text-muted-foreground text-sm">{group.stats?.totalAssociations || 0} files</span>
 					<div className="flex gap-1">
 						<Button onClick={actions.onEdit} size="sm" variant="ghost">
 							<Edit2 className="h-4 w-4" />
@@ -293,7 +293,7 @@ function GroupCard({ group, actions, isGrid }: { group: GroupWithStats; actions:
 				</div>
 			</div>
 			<div className="flex items-center gap-4">
-				<span className="text-muted-foreground text-sm">{group.stats?.totalAssociations || 0} archivos</span>
+				<span className="text-muted-foreground text-sm">{group.stats?.totalAssociations || 0} files</span>
 				<div className="flex gap-1">
 					<Button onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
@@ -341,13 +341,13 @@ export function OrganizationSettingsModern() {
 	const handleCreated = useCallback(() => {
 		setShowForm(false);
 		setEditingItem(null);
-		toastService.success('Creado correctamente');
+		toastService.success('Created successfully');
 	}, []);
 
 	const handleUpdated = useCallback(() => {
 		setShowForm(false);
 		setEditingItem(null);
-		toastService.success('Actualizado correctamente');
+		toastService.success('Updated successfully');
 	}, []);
 
 	// Render del formulario según el tab activo
@@ -360,7 +360,7 @@ export function OrganizationSettingsModern() {
 					<Dialog onOpenChange={setShowForm} open={showForm}>
 						<DialogContent className="sm:max-w-[600px]">
 							<DialogHeader>
-								<DialogTitle>{editingItem ? 'Editar Album' : 'Crear Album'}</DialogTitle>
+								<DialogTitle>{editingItem ? 'Edit Album' : 'Create Album'}</DialogTitle>
 							</DialogHeader>
 							<CreateAlbumForm
 								album={editingItem as AlbumWithStats}
@@ -377,7 +377,7 @@ export function OrganizationSettingsModern() {
 					<Dialog onOpenChange={setShowForm} open={showForm}>
 						<DialogContent className="sm:max-w-[600px]">
 							<DialogHeader>
-								<DialogTitle>{editingItem ? 'Editar Colección' : 'Crear Colección'}</DialogTitle>
+								<DialogTitle>{editingItem ? 'Edit Collection' : 'Create Collection'}</DialogTitle>
 							</DialogHeader>
 							<CreateCollectionForm
 								collection={editingItem as CollectionWithStats}
@@ -394,7 +394,7 @@ export function OrganizationSettingsModern() {
 					<Dialog onOpenChange={setShowForm} open={showForm}>
 						<DialogContent className="sm:max-w-[600px]">
 							<DialogHeader>
-								<DialogTitle>{editingItem ? 'Editar Grupo' : 'Crear Grupo'}</DialogTitle>
+								<DialogTitle>{editingItem ? 'Edit Group' : 'Create Group'}</DialogTitle>
 							</DialogHeader>
 							<CreateGroupForm
 								group={editingItem as GroupWithStats}
@@ -425,8 +425,8 @@ export function OrganizationSettingsModern() {
 	return (
 		<div className="space-y-6">
 			<SettingsPageHeader
-				description="Gestiona albums, colecciones inteligentes y grupos de organización"
-				title="Organización"
+				description="Manage albums, smart collections, and organization groups"
+				title="Organization"
 			/>
 
 			<Tabs onValueChange={(v) => setActiveTab(v as typeof activeTab)} value={activeTab}>
@@ -440,14 +440,14 @@ export function OrganizationSettingsModern() {
 					</TabsTrigger>
 					<TabsTrigger className="gap-2" value="collections">
 						<LayoutGrid className="h-4 w-4" />
-						Colecciones
+						Collections
 						<Badge className="ml-1 text-sm" variant="secondary">
 							{collectionsQuery.data?.data?.length || 0}
 						</Badge>
 					</TabsTrigger>
 					<TabsTrigger className="gap-2" value="groups">
 						<Users className="h-4 w-4" />
-						Grupos
+						Groups
 						<Badge className="ml-1 text-sm" variant="secondary">
 							{groupsQuery.data?.data?.length || 0}
 						</Badge>
@@ -473,8 +473,8 @@ export function OrganizationSettingsModern() {
 
 					<TabsContent className="m-0" value="collections">
 						<EntityList
-							entityLabel="colección"
-							entityLabelPlural="colecciones"
+							entityLabel="collection"
+							entityLabelPlural="collections"
 							isLoading={collectionsQuery.isLoading}
 							items={collectionsQuery.data?.data || []}
 							onCreate={handleCreate}
@@ -489,8 +489,8 @@ export function OrganizationSettingsModern() {
 
 					<TabsContent className="m-0" value="groups">
 						<EntityList
-							entityLabel="grupo"
-							entityLabelPlural="grupos"
+							entityLabel="group"
+							entityLabelPlural="groups"
 							isLoading={groupsQuery.isLoading}
 							items={groupsQuery.data?.data || []}
 							onCreate={handleCreate}
@@ -591,7 +591,7 @@ function EntityList({
 					<input
 						className="w-full rounded-lg border bg-background px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 						onChange={(e) => setSearchQuery(e.target.value)}
-						placeholder={`Buscar ${entityLabelPlural}...`}
+						placeholder={`Search ${entityLabelPlural}...`}
 						type="text"
 						value={searchQuery}
 					/>
@@ -617,7 +617,7 @@ function EntityList({
 					</div>
 					<Button className="gap-2" onClick={onCreate}>
 						<Album className="h-4 w-4" />
-						Crear {entityLabel}
+						Create {entityLabel}
 					</Button>
 				</div>
 			</div>
@@ -625,9 +625,9 @@ function EntityList({
 			{/* Content */}
 			{filteredItems.length === 0 ? (
 				<EmptyState
-					action={<Button onClick={onCreate}>Crear {entityLabel}</Button>}
-					description={searchQuery ? 'No se encontraron resultados' : `Comienza creando tu primer ${entityLabel}`}
-					title={`No hay ${entityLabelPlural}`}
+					action={<Button onClick={onCreate}>Create {entityLabel}</Button>}
+					description={searchQuery ? 'No results found' : `Create your first ${entityLabel} to get started`}
+					title={`No ${entityLabelPlural} yet`}
 				/>
 			) : (
 				<div

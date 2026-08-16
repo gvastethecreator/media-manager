@@ -40,7 +40,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 		return {
 			formattedSize: formatBytes(totalSize),
 			formattedDate: lastIndexed
-				? new Date(lastIndexed).toLocaleDateString('es-ES', {
+				? new Date(lastIndexed).toLocaleDateString('en-US', {
 						day: '2-digit',
 						month: '2-digit',
 						year: '2-digit',
@@ -105,7 +105,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 								tcgMode ? 'rounded-sm bg-muted/20 p-2 text-white/50' : 'text-muted-foreground/50'
 							)}
 						>
-							Sin descripción
+							No description
 						</div>
 					)}
 				</div>
@@ -154,14 +154,14 @@ export const FolderCardContent = memo(function FolderCardContent({
 						<div className="flex items-center justify-between">
 							<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
 								<FolderOutputIcon className="mr-1 inline h-4 w-4" />
-								Archivos:
+								Files:
 							</span>
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{totalFiles}</span>
 						</div>
 						<div className="flex items-center justify-between">
 							<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
 								<HardDriveIcon className="mr-1 inline h-4 w-4" />
-								Tamaño:
+								Size:
 							</span>
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{computedStats.formattedSize}</span>
 						</div>
@@ -187,7 +187,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 					>
 						<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
 							<TimerResetIcon className="mr-1 inline h-4 w-4" />
-							Última indexación:
+							Last indexed:
 						</span>
 						<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{formattedLastIndexed}</span>
 					</div>

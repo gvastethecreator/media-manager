@@ -9,7 +9,7 @@ function ImagePlaceholder({ primaryColor, error }: { primaryColor: string; error
 		<div className="flex h-full flex-col items-center justify-center">
 			<ImageIcon className="mb-2 text-muted-foreground" style={{ color: `${primaryColor}70` }} />
 			<p className="text-center text-muted-foreground text-sm" style={{ color: `${primaryColor}90` }}>
-				{error?.message || 'No hay imágenes con esta etiqueta'}
+				{error?.message || 'No images use this tag'}
 			</p>
 		</div>
 	);
@@ -169,7 +169,7 @@ export function TagCardImages({
 					<div className="relative overflow-hidden bg-muted/20" key={image.id}>
 						{/* Imagen */}
 						<img
-							alt={image.name || 'Imagen etiquetada'}
+							alt={image.name || 'Tagged image'}
 							className="h-full w-full object-cover"
 							loading="lazy"
 							src={image.thumbnailUrl}

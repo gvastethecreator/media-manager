@@ -55,7 +55,7 @@ const TOAST_TYPES = {
 		error: '❌ Error del sistema',
 		warning: '⚠️ Advertencia del sistema',
 		info: 'ℹ️ Información del sistema',
-		success: '✅ Operación exitosa',
+		success: '✅ Operation exitosa',
 	},
 };
 

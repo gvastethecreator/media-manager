@@ -114,7 +114,7 @@ export const useContextMenuNavigation = (
 				key: 'enter',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Ejecutar acción',
+				description: 'Run action',
 				action: 'context-menu-execute',
 			},
 			executeSelected
@@ -125,7 +125,7 @@ export const useContextMenuNavigation = (
 				key: 'escape',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Cerrar menú',
+				description: 'Close menu',
 				action: 'context-menu-close',
 			},
 			closeMenu

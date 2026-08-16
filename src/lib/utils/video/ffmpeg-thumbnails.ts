@@ -276,7 +276,7 @@ export async function getVideoInfo(videoPath: string): Promise<{
 			codec: videoStream.codec_name || 'unknown',
 		};
 	} catch (error) {
-		logger.error('Error obteniendo información del video.', {
+		logger.error('Could not get video information.', {
 			errorKind: error instanceof Error ? error.name : 'UnknownError',
 		});
 		return null;

@@ -5,12 +5,12 @@
  * @created 2025-10-11 - Fase 1 Effect Implementation
  */
 
-import { Effect } from 'effect';
+import { Effect, Either } from 'effect';
 import type { NextFunction, Request, Response } from 'express';
 import type { RequestHandler } from 'express-serve-static-core';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { sanitizePublicPayload } from '@/server/security/sanitize-public-payload';
-import { runPromise } from '../runtime/runtime';
+import { runPromise, runPromiseEither } from '../runtime/runtime';
 
 const logger = serverLogger.withContext('ExpressAdapter');
 
@@ -29,6 +29,7 @@ function isZodLikeError(error: unknown): error is { issues: unknown[]; message?:
  * Tipo para errores con status HTTP
  */
 export interface HttpError {
+	readonly code?: string;
 	readonly details?: unknown;
 	readonly message: string;
 	readonly status: number;
@@ -49,9 +50,19 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 	if (error && typeof error === 'object' && 'status' in error) {
 		const status = (error as { status?: unknown }).status;
 		if (typeof status === 'number' && Number.isInteger(status) && status >= 400 && status <= 599) {
+			const code =
+				'code' in error && typeof (error as { code?: unknown }).code === 'string'
+					? (error as { code: string }).code
+					: undefined;
 			return {
+				code,
 				status,
-				message: error instanceof Error ? error.message : 'Request failed',
+				message:
+					error instanceof Error
+						? error.message
+						: 'message' in error && typeof (error as { message?: unknown }).message === 'string'
+							? (error as { message: string }).message
+							: 'Request failed',
 				details: error,
 			};
 		}
@@ -62,6 +73,21 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 		const taggedError = error as any;
 
 		switch (taggedError._tag) {
+			case 'TaxonomyArtifactInlineMutationError':
+				return {
+					code: 'ARTIFACT_FILE_BACKED',
+					status: 409,
+					message: taggedError.displayMessage || taggedError.message || 'La entidad es file-backed.',
+				};
+			case 'PromptNotFound':
+				return { code: 'PROMPT_NOT_FOUND', message: 'Prompt no encontrado.', status: 404 };
+			case 'NoteNotFound':
+			case 'WildcardNotFound':
+				return {
+					code: 'TAXONOMY_ENTITY_NOT_FOUND',
+					message: 'Entidad taxonomy no encontrada.',
+					status: 404,
+				};
 			case 'TagNotFound':
 			case 'ImageNotFound':
 			case 'VideoNotFound':
@@ -77,6 +103,24 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 					details: taggedError,
 				};
 
+			case 'PromptValidationError':
+				return {
+					code: 'PROMPT_VALIDATION_ERROR',
+					status: 400,
+					message: taggedError.displayMessage || taggedError.message || 'Invalid prompt.',
+				};
+			case 'NoteValidationError':
+				return {
+					code: 'NOTE_VALIDATION_ERROR',
+					status: 400,
+					message: taggedError.displayMessage || taggedError.message || 'Invalid note.',
+				};
+			case 'WildcardValidationError':
+				return {
+					code: 'WILDCARD_VALIDATION_ERROR',
+					status: 400,
+					message: taggedError.displayMessage || taggedError.message || 'Invalid wildcard.',
+				};
 			case 'TagNameConflict':
 			case 'ValidationError':
 			case 'TagValidationError':
@@ -93,6 +137,45 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 				};
 
 			case 'TagHasRelationsError':
+				return {
+					code: 'TAG_HAS_RELATIONS',
+					status: 409,
+					message:
+						taggedError.message ||
+						(typeof taggedError.tagId === 'string' && typeof taggedError.relationCount === 'number'
+							? `El tag ${taggedError.tagId} no puede ser eliminado porque tiene ${taggedError.relationCount} relaciones activas`
+							: 'El tag tiene relaciones activas.'),
+				};
+			case 'NoteTitleConflict':
+				return {
+					code: 'NOTE_TITLE_CONFLICT',
+					status: 409,
+					message: 'A note with that title already exists.',
+				};
+			case 'PromptNameConflict':
+				return {
+					code: 'PROMPT_NAME_CONFLICT',
+					status: 409,
+					message: 'A prompt with that name already exists.',
+				};
+			case 'WildcardNameConflict':
+				return {
+					code: 'WILDCARD_NAME_CONFLICT',
+					status: 409,
+					message: 'A wildcard with that name already exists.',
+				};
+			case 'PromptHasRelationsError':
+				return {
+					code: 'PROMPT_HAS_RELATIONS',
+					status: 409,
+					message: taggedError.displayMessage || taggedError.message || 'El prompt tiene relaciones activas.',
+				};
+			case 'WildcardHasRelationsError':
+				return {
+					code: 'WILDCARD_HAS_RELATIONS',
+					status: 409,
+					message: taggedError.displayMessage || taggedError.message || 'El wildcard tiene relaciones activas.',
+				};
 			case 'ImageHasRelationsError':
 			case 'VideoHasRelationsError':
 			case 'AudioHasRelationsError':
@@ -112,6 +195,10 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 
 			case 'TagDatabaseError':
 			case 'DatabaseError':
+			case 'PromptDatabaseError':
+			case 'PromptUnknownError':
+			case 'NoteDatabaseError':
+			case 'WildcardDatabaseError':
 			case 'ImageDatabaseError':
 			case 'VideoDatabaseError':
 			case 'AudioDatabaseError':
@@ -147,17 +234,8 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 		}
 	}
 
-	// 2. Si es un FiberFailure (error de runtime de Effect), intentamos extraer información del nombre o stack
+	// 2. Los defectos del runtime no se reinterpretan como errores de dominio.
 	if (error instanceof Error) {
-		// Detectar FolderNotFound envuelto en FiberFailure
-		if (error.name.includes('FolderNotFound') || error.message.includes('FolderNotFound')) {
-			return {
-				status: 404,
-				message: 'Folder not found',
-				details: { name: error.name, message: error.message },
-			};
-		}
-
 		return {
 			status: 500,
 			message: 'Internal server error',
@@ -172,6 +250,35 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 		details: error,
 	};
 };
+
+function publicHttpErrorPayload(error: HttpError): Record<string, unknown> {
+	if (error.code) return { code: error.code, message: error.message };
+	return {
+		error: error.message,
+		...(process.env.NODE_ENV === 'development' && { details: error.details }),
+	};
+}
+
+function respondWithMappedError(
+	error: unknown,
+	res: Response,
+	logMessage: string,
+	context: Record<string, unknown> = {}
+): void {
+	const httpError = errorToHttpStatus(error);
+
+	const logContext = {
+		...context,
+		status: httpError.status,
+		error: httpError.details,
+	};
+	if (httpError.status >= 500) logger.error(logMessage, logContext);
+	else logger.warn(logMessage, logContext);
+
+	if (!res.headersSent) {
+		res.status(httpError.status).json(sanitizePublicPayload(publicHttpErrorPayload(httpError)));
+	}
+}
 
 /**
  * Wrapper para ejecutar un Effect en un Express handler
@@ -199,9 +306,20 @@ export const effectHandler = <A, E>(
 	const handler = async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const effect = fn(req, res);
+			const outcome = await runPromiseEither(effect);
 
-			// Ejecutar el Effect
-			const result = await runPromise(effect);
+			if (Either.isLeft(outcome)) {
+				if (options?.onError) {
+					options.onError(outcome.left, res);
+				} else {
+					respondWithMappedError(outcome.left, res, 'Effect handler failed', {
+						method: req.method,
+					});
+				}
+				return;
+			}
+
+			const result = outcome.right;
 
 			// Handler de éxito
 			if (options?.onSuccess) {
@@ -213,28 +331,7 @@ export const effectHandler = <A, E>(
 				}
 			}
 		} catch (error) {
-			// Handler de error
-			if (options?.onError) {
-				options.onError(error as E, res);
-			} else {
-				// Comportamiento por defecto: mapear a HTTP status
-				const httpError = errorToHttpStatus(error);
-
-				logger.error('Effect handler failed', {
-					status: httpError.status,
-					method: req.method,
-					error: httpError.details,
-				});
-
-				if (!res.headersSent) {
-					res.status(httpError.status).json(
-						sanitizePublicPayload({
-							error: httpError.message,
-							...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
-						})
-					);
-				}
-			}
+			respondWithMappedError(error, res, 'Effect handler defect', { method: req.method });
 		}
 	};
 	return handler as RequestHandler;
@@ -280,7 +377,14 @@ export const runEffectForExpress = async <A, E>(
 	}
 ): Promise<void> => {
 	try {
-		const result = await runPromise(effect);
+		const outcome = await runPromiseEither(effect);
+
+		if (Either.isLeft(outcome)) {
+			respondWithMappedError(outcome.left, res, 'Effect execution failed');
+			return;
+		}
+
+		const result = outcome.right;
 
 		const responseData = options?.onSuccess ? options.onSuccess(result) : result;
 		const status = options?.successStatus || 200;
@@ -289,21 +393,7 @@ export const runEffectForExpress = async <A, E>(
 			res.status(status).json(responseData);
 		}
 	} catch (error) {
-		const httpError = errorToHttpStatus(error);
-
-		logger.error('Effect execution failed', {
-			status: httpError.status,
-			error: httpError.details,
-		});
-
-		if (!res.headersSent) {
-			res.status(httpError.status).json(
-				sanitizePublicPayload({
-					error: httpError.message,
-					...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
-				})
-			);
-		}
+		respondWithMappedError(error, res, 'Effect execution defect');
 	}
 };
 

@@ -229,13 +229,13 @@ export const Dashboard = memo(function Dashboard() {
 	const mediaCategories = useMemo(
 		() => [
 			{
-				title: 'Imágenes',
+				title: 'Images',
 				icon: ImageIcon,
 				count: combinedStats.totalImages,
 				href: '/all-images',
 				color: 'var(--entity-image)',
 				stats: [
-					{ label: 'Nuevas', value: formatNumber(recentImages?.data?.length || 0) },
+					{ label: 'New', value: formatNumber(recentImages?.data?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalImages) },
 				],
 			},
@@ -246,7 +246,7 @@ export const Dashboard = memo(function Dashboard() {
 				href: '/videos',
 				color: 'var(--entity-video)',
 				stats: [
-					{ label: 'Nuevos', value: formatNumber(recentVideos?.data?.length || 0) },
+					{ label: 'New', value: formatNumber(recentVideos?.data?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalVideos) },
 				],
 			},
@@ -257,7 +257,7 @@ export const Dashboard = memo(function Dashboard() {
 				href: '/audio',
 				color: 'var(--entity-audio)',
 				stats: [
-					{ label: 'Nuevos', value: formatNumber(recentAudio?.length || 0) },
+					{ label: 'New', value: formatNumber(recentAudio?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalAudio) },
 				],
 			},
@@ -276,7 +276,7 @@ export const Dashboard = memo(function Dashboard() {
 	const orgCategories = useMemo(
 		() => [
 			{
-				title: 'Carpetas',
+				title: 'Folders',
 				icon: Folder,
 				count: combinedStats.totalFolders,
 				href: '/folders',
@@ -284,24 +284,24 @@ export const Dashboard = memo(function Dashboard() {
 				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalFolders) }],
 			},
 			{
-				title: 'Álbumes',
+				title: 'Albums',
 				icon: Camera,
 				count: combinedStats.totalAlbums,
 				href: '/albums',
 				color: 'var(--entity-album)',
 				stats: [
-					{ label: 'Nuevos', value: formatNumber(recentAlbums?.data?.length || 0) },
+					{ label: 'New', value: formatNumber(recentAlbums?.data?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalAlbums) },
 				],
 			},
 			{
-				title: 'Colecciones',
+				title: 'Collections',
 				icon: Layers,
 				count: combinedStats.totalCollections,
 				href: '/collections',
 				color: 'var(--entity-collection)',
 				stats: [
-					{ label: 'Nuevas', value: formatNumber(recentCollections?.data?.length || 0) },
+					{ label: 'New', value: formatNumber(recentCollections?.data?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalCollections) },
 				],
 			},
@@ -320,28 +320,28 @@ export const Dashboard = memo(function Dashboard() {
 	const worldbuildingCategories = useMemo(
 		() => [
 			{
-				title: 'Personajes',
+				title: 'Characters',
 				icon: Users,
 				count: combinedStats.totalCharacters,
 				href: '/characters',
 				color: 'var(--entity-character)',
 			},
 			{
-				title: 'Lugares',
+				title: 'Places',
 				icon: Calendar,
 				count: combinedStats.totalPlaces,
 				href: '/places',
 				color: 'var(--entity-place)',
 			},
 			{
-				title: 'Conceptos',
+				title: 'Concepts',
 				icon: Zap,
 				count: combinedStats.totalConcepts,
 				href: '/concepts',
 				color: 'var(--entity-concept)',
 			},
 			{
-				title: 'Notas',
+				title: 'Notes',
 				icon: BookOpen,
 				count: combinedStats.totalNotes,
 				href: '/notes',
@@ -368,14 +368,14 @@ export const Dashboard = memo(function Dashboard() {
 				color: 'var(--entity-file-3d)',
 			},
 			{
-				title: 'Favoritos',
+				title: 'Favorites',
 				icon: Heart,
 				count: combinedStats.totalFavorites,
 				href: '/favorites',
 				color: 'var(--entity-favorite)',
 			},
 			{
-				title: 'Mundos',
+				title: 'Worlds',
 				icon: Archive,
 				count: combinedStats.totalWorldItems,
 				href: '/world-items',
@@ -389,7 +389,7 @@ export const Dashboard = memo(function Dashboard() {
 		() => [
 			{
 				icon: ImageIcon,
-				label: 'Imágenes',
+				label: 'Images',
 				value: formatNumber(combinedStats.totalImages),
 				subtitle: totalMediaFiles > 0 ? `${((combinedStats.totalImages / totalMediaFiles) * 100).toFixed(0)}%` : '0%',
 				variant: 'image',
@@ -409,7 +409,7 @@ export const Dashboard = memo(function Dashboard() {
 			},
 			{
 				icon: FolderOpen,
-				label: 'Carpetas',
+				label: 'Folders',
 				value: formatNumber(combinedStats.totalFolders),
 				variant: 'folder',
 			},
@@ -421,19 +421,19 @@ export const Dashboard = memo(function Dashboard() {
 			},
 			{
 				icon: Users,
-				label: 'Personajes',
+				label: 'Characters',
 				value: formatNumber(combinedStats.totalCharacters),
 				variant: 'character',
 			},
 			{
 				icon: Calendar,
-				label: 'Lugares',
+				label: 'Places',
 				value: formatNumber(combinedStats.totalPlaces),
 				variant: 'place',
 			},
 			{
 				icon: Database,
-				label: 'BD',
+				label: 'Database',
 				value: formatBytes(combinedStats.dbSize),
 				variant: 'muted',
 			},
@@ -446,13 +446,13 @@ export const Dashboard = memo(function Dashboard() {
 		if (combinedStats.totalConcepts > 0) {
 			cards.push({
 				icon: Zap,
-				label: 'Conceptos',
+				label: 'Concepts',
 				value: formatNumber(combinedStats.totalConcepts),
 				variant: 'secondary',
 			});
 		}
 		if (combinedStats.totalNotes > 0) {
-			cards.push({ icon: BookOpen, label: 'Notas', value: formatNumber(combinedStats.totalNotes), variant: 'warning' });
+			cards.push({ icon: BookOpen, label: 'Notes', value: formatNumber(combinedStats.totalNotes), variant: 'warning' });
 		}
 		if (combinedStats.totalPrompts > 0) {
 			cards.push({
@@ -468,7 +468,7 @@ export const Dashboard = memo(function Dashboard() {
 		if (combinedStats.totalWildcards > 0) {
 			cards.push({
 				icon: Shuffle,
-				label: 'Comodines',
+				label: 'Wildcards',
 				value: formatNumber(combinedStats.totalWildcards),
 				variant: 'accent',
 			});
@@ -482,7 +482,7 @@ export const Dashboard = memo(function Dashboard() {
 		if (combinedStats.totalFavorites > 0) {
 			cards.push({
 				icon: Heart,
-				label: 'Favoritos',
+				label: 'Favorites',
 				value: formatNumber(combinedStats.totalFavorites),
 				variant: 'destructive',
 			});
@@ -490,7 +490,7 @@ export const Dashboard = memo(function Dashboard() {
 		if (combinedStats.totalWorldItems > 0) {
 			cards.push({
 				icon: Archive,
-				label: 'Mundos',
+				label: 'Worlds',
 				value: formatNumber(combinedStats.totalWorldItems),
 				variant: 'collection',
 			});
@@ -507,7 +507,7 @@ export const Dashboard = memo(function Dashboard() {
 				</div>
 				<div className="relative z-10 flex flex-col items-center gap-4">
 					<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-					<p className="text-muted-foreground text-sm">Cargando dashboard...</p>
+					<p className="text-muted-foreground text-sm">Loading dashboard...</p>
 				</div>
 			</div>
 		);
@@ -534,7 +534,7 @@ export const Dashboard = memo(function Dashboard() {
 								<h1 className="bg-linear-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-2xl text-transparent">
 									Dashboard
 								</h1>
-								<p className="text-muted-foreground/70 text-xs">Bienvenido a tu gestor de multimedia</p>
+								<p className="text-muted-foreground/70 text-xs">Your media workspace at a glance</p>
 							</div>
 						</div>
 						<div className="flex items-center gap-4 text-right">
@@ -544,7 +544,7 @@ export const Dashboard = memo(function Dashboard() {
 							</div>
 							<div className="h-8 w-px bg-border/40" />
 							<div>
-								<p className="text-[10px] text-muted-foreground/80 uppercase tracking-wider">Almacenamiento</p>
+								<p className="text-[10px] text-muted-foreground/80 uppercase tracking-wider">Storage</p>
 								<p className="font-bold text-foreground text-xl tabular-nums">
 									{formatBytes(combinedStats.storageUsed)}
 								</p>
@@ -556,13 +556,13 @@ export const Dashboard = memo(function Dashboard() {
 						<div className="mb-3 flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<div className="h-4 w-1 rounded-full bg-primary" />
-								<h2 className="font-semibold text-foreground text-sm">Estadísticas Rápidas</h2>
+								<h2 className="font-semibold text-foreground text-sm">Quick stats</h2>
 							</div>
 							<Badge
 								className="rounded-dt-xs border-border/25 bg-background/50 font-mono text-[10px] text-muted-foreground/75"
 								variant="outline"
 							>
-								{formatNumber(totalMediaFiles)} archivos
+								{formatNumber(totalMediaFiles)} files
 							</Badge>
 						</div>
 						<DashboardStatGrid columns={{ default: 2, sm: 3, md: 4, lg: 4, xl: 4 }}>
@@ -594,7 +594,7 @@ export const Dashboard = memo(function Dashboard() {
 						<section>
 							<div className="mb-3 flex items-center gap-2">
 								<div className="h-4 w-1 rounded-full bg-(--entity-folder)" />
-								<h2 className="font-semibold text-base text-foreground">Organización</h2>
+								<h2 className="font-semibold text-base text-foreground">Organization</h2>
 							</div>
 							<div className="grid grid-cols-2 gap-3">
 								{orgCategories.map((category, index) => (
@@ -652,7 +652,7 @@ export const Dashboard = memo(function Dashboard() {
 						<section className="rounded-dt-sm border border-border/30 bg-card/70 p-4">
 							<div className="mb-3 flex items-center gap-2">
 								<div className="h-4 w-1 rounded-full bg-muted" />
-								<h2 className="font-semibold text-foreground text-sm">Más Estadísticas</h2>
+								<h2 className="font-semibold text-foreground text-sm">More stats</h2>
 							</div>
 							<DashboardStatGrid columns={{ default: 3, sm: 4, md: 5, lg: 6, xl: 7 }}>
 								{extendedStatsCards.map((card) => (
@@ -669,9 +669,9 @@ export const Dashboard = memo(function Dashboard() {
 									<HardDrive className="h-4 w-4 text-muted-foreground/80" />
 								</div>
 								<div>
-									<h3 className="font-semibold text-foreground text-xs">Almacenamiento</h3>
+									<h3 className="font-semibold text-foreground text-xs">Storage</h3>
 									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">
-										{storageUsedPercentage.toFixed(1)}% usado
+										{storageUsedPercentage.toFixed(1)}% used
 									</p>
 								</div>
 							</div>
@@ -681,7 +681,7 @@ export const Dashboard = memo(function Dashboard() {
 										{formatBytes(combinedStats.storageUsed)}
 									</span>
 									<span className="text-[10px] text-muted-foreground/70">
-										de {formatBytes(combinedStats.storageUsed + combinedStats.storageAvailable)}
+										of {formatBytes(combinedStats.storageUsed + combinedStats.storageAvailable)}
 									</span>
 								</div>
 								<div className="relative h-1.5 overflow-hidden rounded-full bg-border/30">
@@ -691,7 +691,7 @@ export const Dashboard = memo(function Dashboard() {
 									/>
 								</div>
 								<div className="flex justify-between font-mono text-[9px] text-muted-foreground/60">
-									<span>{formatBytes(combinedStats.storageAvailable)} libre</span>
+									<span>{formatBytes(combinedStats.storageAvailable)} free</span>
 								</div>
 							</div>
 						</div>
@@ -702,13 +702,13 @@ export const Dashboard = memo(function Dashboard() {
 									<Activity className="h-4 w-4 text-status-success/80" />
 								</div>
 								<div>
-									<h3 className="font-semibold text-foreground text-xs">Actividad Reciente</h3>
-									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">Últimas acciones</p>
+									<h3 className="font-semibold text-foreground text-xs">Recent activity</h3>
+									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">Latest actions</p>
 								</div>
 							</div>
 							<div className="flex flex-col items-center justify-center py-4 text-center">
 								<Activity className="mb-1 h-5 w-5 opacity-10" />
-								<p className="text-[10px] text-muted-foreground/60">Sin actividad autorizada</p>
+								<p className="text-[10px] text-muted-foreground/60">No authorized activity</p>
 							</div>
 						</div>
 
@@ -718,8 +718,8 @@ export const Dashboard = memo(function Dashboard() {
 									<Star className="h-4 w-4 text-status-warning/80" />
 								</div>
 								<div>
-									<h3 className="font-semibold text-foreground text-xs">Tags Populares</h3>
-									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">Más utilizados</p>
+									<h3 className="font-semibold text-foreground text-xs">Popular tags</h3>
+									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">Most used</p>
 								</div>
 							</div>
 							{topTags.length > 0 ? (
@@ -744,7 +744,7 @@ export const Dashboard = memo(function Dashboard() {
 							) : (
 								<div className="flex flex-col items-center justify-center py-4 text-center">
 									<Tags className="mb-1 h-5 w-5 opacity-10" />
-									<p className="text-[10px] text-muted-foreground/60">Sin etiquetas aún</p>
+									<p className="text-[10px] text-muted-foreground/60">No tags yet</p>
 								</div>
 							)}
 						</div>

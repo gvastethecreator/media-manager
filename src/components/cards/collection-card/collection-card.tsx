@@ -114,7 +114,7 @@ export function CollectionCard({
 	// Render del componente
 	return (
 		<motion.div
-			aria-label={`Colección: ${collection.name}`}
+			aria-label={`Collection: ${collection.name}`}
 			className={cn(
 				// Base
 				'relative bg-card',
@@ -198,7 +198,7 @@ export function CollectionCard({
 			<div className="relative z-1 flex h-full flex-col">
 				{/* Encabezado de la tarjeta */}
 				<CollectionCardHeader
-					category={collection.category ?? 'Colección'}
+					category={collection.category ?? 'Collection'}
 					color={primaryColor}
 					emoji={collection.emoji ?? '📦'}
 					name={collection.name}

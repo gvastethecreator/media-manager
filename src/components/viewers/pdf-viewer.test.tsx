@@ -15,20 +15,20 @@ vi.mock('react-pdf', () => ({
 	}) => (
 		<div data-testid="pdf-document">
 			<button onClick={() => onLoadSuccess({ numPages: 2 })} type="button">
-				Completar carga
+				Complete load
 			</button>
 			<button onClick={onLoadError} type="button">
-				Forzar error
+				Force error
 			</button>
 			{children}
 		</div>
 	),
-	Page: ({ pageNumber }: { pageNumber: number }) => <div>{`Página renderizada ${pageNumber}`}</div>,
+	Page: ({ pageNumber }: { pageNumber: number }) => <div>{`Rendered page ${pageNumber}`}</div>,
 	pdfjs: { GlobalWorkerOptions: {} },
 }));
 
 describe('PdfViewer', () => {
-	it('monta el documento mientras muestra la carga y habilita la navegación al resolverlo', async () => {
+	it('mounts the document while loading and enables navigation after it resolves', async () => {
 		render(
 			<PdfViewer
 				file={{ id: 'document-1', name: 'example.pdf', url: '/api/documents/document-1/content' }}
@@ -37,20 +37,20 @@ describe('PdfViewer', () => {
 			/>
 		);
 
-		expect(screen.getByText('Cargando...')).toBeInTheDocument();
+		expect(screen.getByText('Loading...')).toBeInTheDocument();
 		expect(screen.getByTestId('pdf-document')).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: 'Descargar' })).toHaveAttribute(
+		expect(screen.getByRole('link', { name: 'Download' })).toHaveAttribute(
 			'href',
 			'/api/documents/document-1/content'
 		);
-		expect(screen.getByRole('link', { name: 'Descargar' })).toHaveAttribute('download', 'example.pdf');
-		fireEvent.click(screen.getByRole('button', { name: 'Completar carga' }));
+		expect(screen.getByRole('link', { name: 'Download' })).toHaveAttribute('download', 'example.pdf');
+		fireEvent.click(screen.getByRole('button', { name: 'Complete load' }));
 
-		await waitFor(() => expect(screen.getByText('Página 1 de 2')).toBeInTheDocument());
-		expect(screen.queryByText('Cargando...')).not.toBeInTheDocument();
+		await waitFor(() => expect(screen.getByText('Page 1 of 2')).toBeInTheDocument());
+		expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
 	});
 
-	it('explica un PDF inválido y permite reintentar sin cerrar el diálogo', () => {
+	it('explains an invalid PDF and allows retrying without closing the dialog', () => {
 		render(
 			<PdfViewer
 				file={{ id: 'document-1', name: 'broken.pdf', url: '/api/documents/document-1/content' }}
@@ -59,12 +59,12 @@ describe('PdfViewer', () => {
 			/>
 		);
 
-		fireEvent.click(screen.getByRole('button', { name: 'Forzar error' }));
+		fireEvent.click(screen.getByRole('button', { name: 'Force error' }));
 		expect(screen.getByRole('alert')).toHaveTextContent(
-			'No se pudo cargar el PDF. Comprueba que el archivo no esté dañado o protegido.'
+			'The PDF could not be loaded. Check that the file is not damaged or protected.'
 		);
-		fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+		fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
 		expect(screen.getByTestId('pdf-document')).toBeInTheDocument();
-		expect(screen.getByText('Cargando...')).toBeInTheDocument();
+		expect(screen.getByText('Loading...')).toBeInTheDocument();
 	});
 });

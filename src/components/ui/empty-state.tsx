@@ -105,11 +105,11 @@ interface PresetEmptyStateProps extends Omit<EmptyStateProps, 'icon'> {
 
 export function PresetEmptyState({ type, ...props }: PresetEmptyStateProps) {
 	const presets = {
-		inbox: { icon: Inbox, title: 'No hay elementos', description: 'Los nuevos elementos aparecerán aquí' },
+		inbox: { icon: Inbox, title: 'No hay elementos', description: 'New items will appear here' },
 		search: { icon: SearchX, title: 'Sin resultados', description: 'No se encontraron elementos con esos criterios' },
-		folder: { icon: FolderOpen, title: 'Carpeta vacía', description: 'Arrastra archivos aquí o usa el botón de subir' },
-		image: { icon: ImageOff, title: 'Sin imágenes', description: 'No hay imágenes para mostrar' },
-		error: { icon: AlertCircle, title: 'Algo salió mal', description: 'Hubo un error al cargar los datos' },
+		folder: { icon: FolderOpen, title: 'Empty folder', description: 'Drop files here or use the upload button' },
+		image: { icon: ImageOff, title: 'No images', description: 'No images to display' },
+		error: { icon: AlertCircle, title: 'Something went wrong', description: 'An error occurred while loading data' },
 		documents: { icon: FileQuestion, title: 'Sin documentos', description: 'No hay documentos para mostrar' },
 	};
 

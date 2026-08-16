@@ -178,7 +178,7 @@ export function useAddToEntity() {
 									break;
 								}
 
-								throw new Error(`${item.entityType} no soporta etiquetas desde este menú`);
+								throw new Error(`${item.entityType} does not support tags from this menu`);
 							}
 							case 'favorite':
 								await createFavorite.mutateAsync({
@@ -193,7 +193,7 @@ export function useAddToEntity() {
 						added++;
 					} catch (error: any) {
 						failed++;
-						const errorMsg = error?.message || 'Error desconocido';
+						const errorMsg = error?.message || 'Unknown error';
 						errors.push(`${item.id}: ${errorMsg}`);
 						clientLogger.error(`[useAddToEntity] Failed to add ${item.id} to ${entityType}:${entityId}`, error);
 					}
@@ -222,8 +222,8 @@ export function useAddToEntity() {
 				clientLogger.error(`[useAddToEntity] Error toast: ${errors[0]}`);
 				toast({
 					variant: 'destructive',
-					title: '❌ Error al agregar',
-					description: errors[0] || 'No se pudo completar la operación',
+					title: '❌ Add failed',
+					description: errors[0] || 'The operation could not be completed',
 				});
 			}
 
@@ -240,15 +240,15 @@ export function useAddToEntity() {
  */
 function getEntityLabel(entityType: EntityType): string {
 	const labels: Record<EntityType, string> = {
-		album: 'álbum',
-		collection: 'colección',
+		album: 'album',
+		collection: 'collection',
 		group: 'grupo',
-		tag: 'etiqueta',
+		tag: 'tag',
 		'world-item': 'elemento del mundo',
 		character: 'personaje',
 		concept: 'concepto',
 		note: 'nota',
-		place: 'lugar',
+		place: 'place',
 		prompt: 'prompt',
 		property: 'propiedad',
 		wildcard: 'wildcard',

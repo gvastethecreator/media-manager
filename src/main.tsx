@@ -14,7 +14,7 @@ if (import.meta.env.DEV) {
 
 const container = document.getElementById('root');
 if (!container) {
-	throw new Error('No se encontró el elemento root');
+	throw new Error('Root element not found');
 }
 
 const root = createRoot(container);

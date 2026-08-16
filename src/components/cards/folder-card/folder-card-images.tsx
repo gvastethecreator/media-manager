@@ -84,7 +84,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 				{/* Imagen principal */}
 				{!isLargeDataUrl(featuredImage) && (
 					<img
-						alt="Imagen destacada"
+						alt="Featured image"
 						className="h-full w-full object-cover"
 						onError={(e) => {
 							// fallback: ocultar img si falla y usar fondo liso
@@ -149,7 +149,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 					>
 						{!isLargeDataUrl(image) && (
 							<img
-								alt={`Imagen reciente ${index + 1}`}
+								alt={`Recent image ${index + 1}`}
 								className="h-full w-full object-cover"
 								onError={(e) => {
 									const el = e.currentTarget as HTMLImageElement;
@@ -215,7 +215,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 				}
 			>
 				<div className={cn('p-4 text-center', tcgMode ? 'text-white/70' : 'text-muted-foreground')}>
-					<div className="mb-1 font-semibold text-lg">{totalFiles} archivos</div>
+					<div className="mb-1 font-semibold text-lg">{totalFiles} files</div>
 					<div className="text-sm opacity-80">{computedStats.formattedSize}</div>
 				</div>
 
@@ -255,7 +255,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 			}
 		>
 			<div className={cn('p-4 text-center font-medium text-lg', tcgMode ? 'text-white/70' : 'text-muted-foreground')}>
-				Sin imágenes
+				No images
 			</div>
 
 			{/* Decoraciones TCG para el placeholder */}

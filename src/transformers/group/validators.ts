@@ -13,7 +13,7 @@ import type { GroupBase, GroupCreateInput, GroupUpdateInput } from '../../types/
  */
 export function validateGroupCreate(data: unknown): GroupCreateInput {
 	const schema = z.object({
-		name: z.string().min(1, 'El nombre es requerido').max(100),
+		name: z.string().min(1, 'The name is required').max(100),
 		description: z.string().max(500).optional(),
 		emoji: z.string().max(10).optional(),
 		color: z

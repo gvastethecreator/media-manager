@@ -71,7 +71,7 @@ async function createDefaultSettingsData(): Promise<Record<string, unknown>> {
 		appearance: {
 			theme: 'system',
 			fontSize: 16,
-			language: 'es',
+			language: 'en',
 			reducedAnimations: false,
 			highContrast: false,
 		},

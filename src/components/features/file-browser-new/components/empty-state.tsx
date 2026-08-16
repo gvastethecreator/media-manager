@@ -10,8 +10,8 @@ import { EmptyState } from '@/components/ui/empty-state';
 import type { EmptyStateProps } from '../types/props.types';
 
 export function FileBrowserEmptyState({
-	title = 'Sin archivos',
-	description = 'No se encontraron archivos en esta carpeta.',
+	title = 'No files',
+	description = 'No files were found in this folder.',
 	icon: Icon = FolderOpen,
 	action,
 	className,

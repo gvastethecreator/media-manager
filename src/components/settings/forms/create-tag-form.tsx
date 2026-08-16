@@ -78,17 +78,17 @@ export function CreateTagForm({
 				const updated = await updateTagMutation.mutateAsync({ id: tag.id, data: tagData });
 				onUpdated?.(updated);
 				onPreview?.(updated);
-				toastService.success('Etiqueta actualizada correctamente');
+				toastService.success('Tag updated');
 			} else {
 				const created = await createTagMutation.mutateAsync(tagData);
 				onCreated?.(created);
 				onPreview?.(created);
 				form.reset();
-				toastService.success('Etiqueta creada correctamente');
+				toastService.success('Tag created');
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la etiqueta`, {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			toastService.error(`Could not ${isEditing ? 'update' : 'create'} the tag`, {
 				description: errorMessage,
 			});
 		}
@@ -112,9 +112,9 @@ export function CreateTagForm({
 					name="name"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Nombre</FormLabel>
+							<FormLabel>Name</FormLabel>
 							<FormControl>
-								<Input placeholder="Nombre de la etiqueta" {...field} />
+								<Input placeholder="Tag name" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -164,11 +164,11 @@ export function CreateTagForm({
 					name="category"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Categoría</FormLabel>
+							<FormLabel>Category</FormLabel>
 							<Select defaultValue={field.value || undefined} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Selecciona una categoría" />
+									<SelectValue placeholder="Select a category" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -189,9 +189,9 @@ export function CreateTagForm({
 					name="description"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Descripción</FormLabel>
+							<FormLabel>Description</FormLabel>
 							<FormControl>
-								<Textarea placeholder="Descripción de la etiqueta..." rows={3} {...field} value={field.value ?? ''} />
+								<Textarea placeholder="Tag description..." rows={3} {...field} value={field.value ?? ''} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -200,14 +200,14 @@ export function CreateTagForm({
 
 				<div className="flex justify-end space-x-2">
 					<Button onClick={onCancel} type="button" variant="outline">
-						Cancelar
+						Cancel
 					</Button>
 					{onPreview && (
 						<Button onClick={() => onPreview(form.getValues())} type="button" variant="secondary">
-							Vista previa
+							Preview
 						</Button>
 					)}
-					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear etiqueta'}</Button>
+					<Button type="submit">{isEditing ? 'Save changes' : 'Create tag'}</Button>
 				</div>
 			</form>
 		</Form>

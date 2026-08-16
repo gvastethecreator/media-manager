@@ -179,7 +179,7 @@ export function ReindexTerminal({
 
 			switch (type) {
 				case 'folder:reindexAll:start': {
-					addLog('INFO', `🚀 Iniciando reindexado global de ${data.totalFolders || '?'} carpetas...`, {
+					addLog('INFO', `🚀 Starting global reindex of ${data.totalFolders || '?'} folders...`, {
 						source: 'reindex-all',
 					});
 					// Iniciar el timer
@@ -192,7 +192,7 @@ export function ReindexTerminal({
 					// Validar datos y proveer fallbacks para evitar undefined
 					const processedFolders = data.filesProcessed ?? data.processedFolders ?? 0;
 					const totalFolders = data.totalFiles ?? data.totalFolders ?? 0;
-					const currentFolder = data.currentFolder ?? data.folderName ?? 'Procesando...';
+					const currentFolder = data.currentFolder ?? data.folderName ?? 'Processing...';
 
 					addLog('INFO', `📂 [${processedFolders}/${totalFolders}] ${currentFolder}`, {
 						source: 'reindex-all',
@@ -209,7 +209,7 @@ export function ReindexTerminal({
 				}
 
 				case 'folder:progress': {
-					const progressMsg = data.message || `Progreso: ${data.filesProcessed || 0}/${data.totalFiles || 0}`;
+					const progressMsg = data.message || `Progress: ${data.filesProcessed || 0}/${data.totalFiles || 0}`;
 					const phase = data.phase || 'processing';
 					const progress = data.progress || 0;
 
@@ -283,7 +283,7 @@ export function ReindexTerminal({
 
 				case 'folder:complete': {
 					const stats = data.stats || {};
-					addLog('SUCCESS', `✅ Completado: ${data.folderPath || 'carpeta'} (${stats.totalImages || 0} imágenes)`, {
+					addLog('SUCCESS', `✅ Complete: ${data.folderPath || 'folder'} (${stats.totalImages || 0} images)`, {
 						source: 'folder-complete',
 						folderId: data.folderId,
 						folderPath: data.folderPath,
@@ -294,7 +294,7 @@ export function ReindexTerminal({
 				}
 
 				case 'folder:error': {
-					addLog('ERROR', `❌ Error en ${data.folderPath || 'carpeta'}: ${data.error || 'Error desconocido'}`, {
+					addLog('ERROR', `❌ Error in ${data.folderPath || 'folder'}: ${data.error || 'Unknown error'}`, {
 						source: 'folder-error',
 						folderId: data.folderId,
 						folderPath: data.folderPath,
@@ -303,8 +303,8 @@ export function ReindexTerminal({
 				}
 
 				case 'folder:reindexAll:complete': {
-					const duration = data.duration ? `en ${Math.round(data.duration / 1000)}s` : '';
-					addLog('SUCCESS', `🎉 Reindexado global completado ${duration}`, {
+					const duration = data.duration ? `in ${Math.round(data.duration / 1000)}s` : '';
+					addLog('SUCCESS', `🎉 Global reindex complete ${duration}`, {
 						source: 'reindex-all',
 					});
 					// Completar progreso
@@ -315,7 +315,7 @@ export function ReindexTerminal({
 				default: {
 					// Otros eventos relacionados con folders
 					if (type.startsWith('folder:')) {
-						addLog('INFO', `📡 Evento: ${type}`, { source: 'events' });
+						addLog('INFO', `📡 Event: ${type}`, { source: 'events' });
 					}
 				}
 			}
@@ -361,9 +361,9 @@ export function ReindexTerminal({
 			isConnectingRef.current = true;
 
 			if (reconnectAttemptRef.current === 0) {
-				addLog('INFO', '🔌 Conectando al servidor de eventos...', { source: 'terminal' });
+				addLog('INFO', '🔌 Connecting to the event server...', { source: 'terminal' });
 			} else {
-				addLog('INFO', `🔄 Reconectando... (intento ${reconnectAttemptRef.current}/${MAX_RECONNECT_ATTEMPTS})`, {
+				addLog('INFO', `🔄 Reconnecting... (attempt ${reconnectAttemptRef.current}/${MAX_RECONNECT_ATTEMPTS})`, {
 					source: 'sse',
 				});
 			}
@@ -380,12 +380,12 @@ export function ReindexTerminal({
 			eventSource.onopen = () => {
 				isConnectingRef.current = false;
 				reconnectAttemptRef.current = 0; // Reset intentos en conexión exitosa
-				addLog('SUCCESS', '✅ Conexión establecida con el servidor', { source: 'sse' });
+				addLog('SUCCESS', '✅ Connected to the server', { source: 'sse' });
 			};
 
 			eventSource.addEventListener('connected', (e) => {
 				const data = JSON.parse(e.data);
-				addLog('SUCCESS', '🎯 Suscrito a eventos de reindexado', {
+				addLog('SUCCESS', '🎯 Subscribed to reindex events', {
 					source: 'sse',
 					timestamp: new Date(data.timestamp).toISOString(),
 				});
@@ -397,7 +397,7 @@ export function ReindexTerminal({
 					handleSSEEvent(event);
 				} catch (error) {
 					clientLogger.error('Error parsing SSE event:', error);
-					addLog('ERROR', '❌ Error procesando evento del servidor', { source: 'sse' });
+					addLog('ERROR', '❌ Could not process the server event', { source: 'sse' });
 				}
 			});
 
@@ -412,7 +412,7 @@ export function ReindexTerminal({
 				// Solo intentar reconectar si está activo y no hemos agotado intentos
 				if (isActive && reconnectAttemptRef.current < MAX_RECONNECT_ATTEMPTS) {
 					const delay = getReconnectDelay(reconnectAttemptRef.current);
-					addLog('WARNING', `⚠️ Conexión perdida. Reconectando en ${Math.round(delay / 1000)}s...`, { source: 'sse' });
+					addLog('WARNING', `⚠️ Connection lost. Reconnecting in ${Math.round(delay / 1000)}s...`, { source: 'sse' });
 
 					// Limpiar timeout anterior si existe
 					if (reconnectTimeoutRef.current) {
@@ -424,7 +424,7 @@ export function ReindexTerminal({
 						connectSSE();
 					}, delay);
 				} else if (reconnectAttemptRef.current >= MAX_RECONNECT_ATTEMPTS) {
-					addLog('ERROR', '❌ No se pudo restablecer la conexión. Los logs pueden estar desactualizados.', {
+					addLog('ERROR', '❌ Could not restore the connection. Logs may be out of date.', {
 						source: 'sse',
 					});
 				}
@@ -522,7 +522,7 @@ export function ReindexTerminal({
 				<div className="border-border border-b bg-background px-4 py-3">
 					<div className="mb-2 flex items-center justify-between text-xs">
 						<span className="font-mono text-muted-foreground">
-							{currentProgress < 100 ? 'Procesando...' : 'Completado'}
+							{currentProgress < 100 ? 'Processing...' : 'Complete'}
 						</span>
 						<span className="font-bold font-mono text-primary">{currentProgress.toFixed(1)}%</span>
 					</div>
@@ -534,7 +534,7 @@ export function ReindexTerminal({
 					</div>
 					{startTime && currentProgress < 100 && (
 						<div className="mt-2 font-mono text-[10px] text-muted-foreground/60">
-							Tiempo transcurrido: {formatElapsedTime(elapsedTime)}
+							Elapsed time: {formatElapsedTime(elapsedTime)}
 						</div>
 					)}
 				</div>
@@ -545,7 +545,7 @@ export function ReindexTerminal({
 				{logs.length === 0 ? (
 					<div className="flex items-center justify-center p-4 text-muted-foreground/40">
 						<Terminal className="mr-3 h-5 w-5" />
-						<span className="font-mono text-sm">Esperando logs...</span>
+						<span className="font-mono text-sm">Waiting for logs...</span>
 					</div>
 				) : (
 					<div className="w-full space-y-0.5 p-2" ref={logContainerRef}>

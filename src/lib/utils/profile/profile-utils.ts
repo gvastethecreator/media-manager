@@ -138,7 +138,7 @@ export async function setActiveProfile(id: string): Promise<boolean> {
 
 		return true;
 	} catch (error) {
-		console.error('Error estableciendo perfil activo:', error);
+		console.error('Could not set active profile:', error);
 		return false;
 	}
 }

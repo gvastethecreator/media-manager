@@ -30,7 +30,7 @@ export function useSystemInit() {
 			systemLogger.info('🎉 Inicialización del sistema completada');
 		},
 		onError: (error) => {
-			systemLogger.error('💥 Error en la inicialización del sistema:', error);
+			systemLogger.error('💥 System initialization failed:', error);
 		},
 	});
 }
@@ -54,7 +54,7 @@ export function useSystemStatus() {
 					health: 'good',
 				};
 			} catch (error) {
-				systemLogger.error('❌ Error al obtener estado del sistema:', error);
+				systemLogger.error('❌ Could not get system status:', error);
 				throw error;
 			}
 		},

@@ -31,20 +31,20 @@ export function AudioSettings() {
 			await updateAudio.mutateAsync({ id: editing.id, data: { name: nameInput.trim() } });
 			setEditing(null);
 			setNameInput('');
-			toastService.success('Audio actualizado');
+			toastService.success('Audio updated');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al actualizar audio', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not update the audio file', { description: msg });
 		}
 	};
 
 	const handleDelete = async (id: string) => {
 		try {
 			await deleteAudio.mutateAsync(id);
-			toastService.success('Audio eliminado');
+			toastService.success('Audio deleted');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al eliminar audio', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not delete the audio file', { description: msg });
 		}
 	};
 
@@ -59,12 +59,12 @@ export function AudioSettings() {
 				</CardHeader>
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
-						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar audios..." value={search} />
+						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Search audio files..." value={search} />
 					</div>
 
 					{isLoading ? (
 						<div className="flex items-center gap-2 text-muted-foreground text-sm">
-							<Loader2 className="h-4 w-4 animate-spin" /> Cargando...
+							<Loader2 className="h-4 w-4 animate-spin" /> Loading...
 						</div>
 					) : error ? (
 						<div className="text-destructive text-sm">{error.message}</div>
@@ -85,7 +85,7 @@ export function AudioSettings() {
 													setNameInput(a.name);
 												}}
 												size="icon"
-												title="Editar"
+											title="Edit"
 												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
@@ -94,7 +94,7 @@ export function AudioSettings() {
 												className="h-8 w-8 hover:text-destructive"
 												onClick={() => handleDelete(a.id)}
 												size="icon"
-												title="Eliminar"
+											title="Delete"
 												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />
@@ -119,10 +119,10 @@ export function AudioSettings() {
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
-						<DialogTitle>Editar audio</DialogTitle>
+						<DialogTitle>Edit Audio</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Name" value={nameInput} />
 						<div className="flex justify-end gap-2">
 							<Button
 								onClick={() => {
@@ -131,9 +131,9 @@ export function AudioSettings() {
 								}}
 								variant="outline"
 							>
-								Cancelar
+								Cancel
 							</Button>
-							<Button onClick={handleUpdate}>Guardar</Button>
+							<Button onClick={handleUpdate}>Save</Button>
 						</div>
 					</div>
 				</DialogContent>

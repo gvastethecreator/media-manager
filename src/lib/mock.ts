@@ -110,7 +110,7 @@ export const mockTags: Partial<MockTag>[] = [
 	{
 		id: 'tag-1',
 		name: 'Paisaje',
-		description: 'Imágenes de paisajes naturales',
+		description: 'Natural landscape images',
 		emoji: '🏞️',
 		color: 'var(--dt-success-500)',
 		category: 'general',
@@ -121,7 +121,7 @@ export const mockTags: Partial<MockTag>[] = [
 	{
 		id: 'tag-2',
 		name: 'Retrato',
-		description: 'Fotografías de retratos',
+		description: 'Portrait photography',
 		emoji: '��',
 		color: 'var(--dt-primary-500)',
 		category: 'general',

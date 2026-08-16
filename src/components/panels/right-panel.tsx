@@ -32,7 +32,7 @@ const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
 	if (!shouldRender) {
 		return (
 			<div className="flex h-full w-full items-center justify-center">
-				<div className="animate-pulse p-4 text-muted-foreground text-sm">Inicializando estadísticas...</div>
+				<div className="animate-pulse p-4 text-muted-foreground text-sm">Initializing statistics...</div>
 			</div>
 		);
 	}
@@ -40,7 +40,7 @@ const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
 	// Si hay folderId, mostrar estadísticas de carpeta
 	if (folderId) {
 		return (
-			<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
+			<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Loading statistics...</div>}>
 				<FolderStatsDisplay folderId={folderId} />
 			</Suspense>
 		);
@@ -49,9 +49,9 @@ const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
 	// Los agregados globales no pertenecen a ningún media root autorizado. No iniciar una consulta que el servidor debe rechazar.
 	return (
 		<div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
-			<p className="heading-sm">Estadísticas por biblioteca</p>
+			<p className="heading-sm">Library Statistics</p>
 			<p className="caption text-muted-foreground">
-				Selecciona una carpeta o biblioteca para consultar métricas dentro de un scope autorizado.
+				Select a folder or library to view metrics within an authorized scope.
 			</p>
 		</div>
 	);
@@ -116,7 +116,7 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 	}, [mounted]);
 
 	// Determinamos el título según el contenido actual
-	const panelTitle = showInterfaceSettings ? 'Configuración' : hasSelectedItems ? 'Detalles' : 'Panel';
+	const panelTitle = showInterfaceSettings ? 'Settings' : hasSelectedItems ? 'Details' : 'Panel';
 
 	// No mostramos nada si no hay razón para mostrar el panel
 	if (!(shouldShowPanel || isCollapsed)) {
@@ -133,7 +133,7 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 		>
 			{!isCollapsed &&
 				(showInterfaceSettings ? (
-					<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando configuración...</div>}>
+					<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Loading settings...</div>}>
 						<div className="w-full overflow-y-auto p-2 pr-3">
 							<FileBrowserSettings />
 						</div>

@@ -12,21 +12,21 @@ import { TagCategory, TagRarity } from '@/store/entities/tag/types';
 export const createTagSchema = z.object({
 	name: z
 		.string()
-		.min(2, 'El nombre debe tener al menos 2 caracteres')
-		.max(50, 'El nombre no puede exceder 50 caracteres')
+		.min(2, 'The name must be at least 2 characters')
+		.max(50, 'The name cannot exceed 50 characters')
 		.refine((value) => /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s_\-:.]+$/.test(value), {
-			message: 'El nombre solo puede contener letras, números, espacios y algunos caracteres especiales (_-:.)',
+			message: 'The name can only contain letters, numbers, spaces, and these special characters: _-:.',
 		}),
 	emoji: z.string().max(5, 'El emoji no puede exceder 5 caracteres').nullable().optional(),
 	color: z
 		.string()
 		.refine(
 			(val) => !val || /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
-			'El color debe ser un valor hexadecimal o una variable CSS válida'
+			'The color must be a valid hexadecimal value or CSS variable'
 		)
 		.nullable()
 		.optional(),
-	description: z.string().max(500, 'La descripción no puede exceder 500 caracteres').nullable().optional(),
+	description: z.string().max(500, 'The description cannot exceed 500 characters').nullable().optional(),
 	shortcut: z.string().max(20, 'El atajo no puede exceder 20 caracteres').nullable().optional(),
 	category: z.nativeEnum(TagCategory).nullable().optional(),
 	rarity: z.nativeEnum(TagRarity).nullable().optional(),
@@ -39,10 +39,10 @@ export const createTagSchema = z.object({
 export const updateTagSchema = z.object({
 	name: z
 		.string()
-		.min(2, 'El nombre debe tener al menos 2 caracteres')
-		.max(50, 'El nombre no puede exceder 50 caracteres')
+		.min(2, 'The name must be at least 2 characters')
+		.max(50, 'The name cannot exceed 50 characters')
 		.refine((value) => /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s_\-:.]+$/.test(value), {
-			message: 'El nombre solo puede contener letras, números, espacios y algunos caracteres especiales (_-:.)',
+			message: 'The name can only contain letters, numbers, spaces, and these special characters: _-:.',
 		})
 		.optional(),
 	emoji: z.string().max(5, 'El emoji no puede exceder 5 caracteres').nullable().optional(),
@@ -50,11 +50,11 @@ export const updateTagSchema = z.object({
 		.string()
 		.refine(
 			(val) => !val || /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
-			'El color debe ser un valor hexadecimal o una variable CSS válida'
+			'The color must be a valid hexadecimal value or CSS variable'
 		)
 		.nullable()
 		.optional(),
-	description: z.string().max(500, 'La descripción no puede exceder 500 caracteres').nullable().optional(),
+	description: z.string().max(500, 'The description cannot exceed 500 characters').nullable().optional(),
 	shortcut: z.string().max(20, 'El atajo no puede exceder 20 caracteres').nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
 	category: z.nativeEnum(TagCategory).nullable().optional(),
@@ -90,7 +90,7 @@ export const tagFiltersSchema = z
 			return true;
 		},
 		{
-			message: 'El conteo mínimo no puede ser mayor que el conteo máximo',
+			message: 'The minimum count cannot exceed the maximum count',
 			path: ['minCount'],
 		}
 	);

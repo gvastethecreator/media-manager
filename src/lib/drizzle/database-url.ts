@@ -14,6 +14,6 @@ export function resolveLocalDatabaseFilePath(databaseUrl: string, cwd = process.
 			? resolve(fileURLToPath(databaseUrl))
 			: resolve(cwd, decodeURIComponent(databaseUrl.slice('file:'.length)));
 	} catch {
-		throw new Error('DATABASE_URL contiene una file URL inválida.');
+		throw new Error('DATABASE_URL contiene una file Invalid URL.');
 	}
 }

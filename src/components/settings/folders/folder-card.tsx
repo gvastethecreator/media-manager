@@ -399,7 +399,7 @@ export const FolderCard = memo(
 					{/* Controls Section - Mejor posicionamiento para evitar solapamientos */}
 					<div className="absolute top-3 right-3 z-20">
 						<div
-							aria-label="Controles de carpeta"
+							aria-label="Folder controls"
 							className={cn(
 								'flex items-center gap-1 rounded-lg border border-border/30 bg-background/95 shadow-dt-2 backdrop-blur-sm',
 								'opacity-0 transition-all duration-200 ease-out group-hover:opacity-100',

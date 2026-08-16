@@ -21,7 +21,7 @@ export interface ImageZoomDialogProps {
 	title?: string;
 }
 
-export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', onClose }: ImageZoomDialogProps) {
+export function ImageZoomDialog({ isOpen, imageUrl, title = 'Expanded view', onClose }: ImageZoomDialogProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -200,7 +200,7 @@ export function ImageZoomDialog({ isOpen, imageUrl, title = 'Vista ampliada', on
 
 				{/* Instrucciones */}
 				<div className="ui-overlay-control-surface ui-overlay-text-muted pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-3 py-1.5 text-xs">
-					Scroll para zoom • Arrastrar para mover • Doble click para reset
+					Scroll to zoom • Drag to pan • Double-click to reset
 				</div>
 			</DialogContent>
 		</Dialog>

@@ -40,30 +40,30 @@ export function ScannedImagesSettings() {
 			await updateImage.mutateAsync({ id: editing.id, data: { name: nameInput.trim() } });
 			setEditing(null);
 			setNameInput('');
-			toastService.success('Imagen actualizada');
+			toastService.success('Image updated');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al actualizar imagen', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not update the image', { description: msg });
 		}
 	};
 
 	const handleDelete = async (id: string) => {
-		if (!confirm('¿Estás seguro de eliminar esta imagen? Esta acción no se puede deshacer.')) return;
+		if (!confirm('Delete this image? This action cannot be undone.')) return;
 		try {
 			await deleteImage.mutateAsync(id);
-			toastService.success('Imagen eliminada');
+			toastService.success('Image deleted');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al eliminar imagen', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not delete the image', { description: msg });
 		}
 	};
 
 	const handleToggleFavorite = async (image: ImageWithStats) => {
 		try {
 			const result = await toggleFavorite.mutateAsync({ id: image.id });
-			toastService.success(result.isFavorite ? 'Añadido a favoritos' : 'Quitado de favoritos');
+			toastService.success(result.isFavorite ? 'Added to favorites' : 'Removed from favorites');
 		} catch (e) {
-			toastService.error('Error al actualizar favoritos');
+			toastService.error('Could not update favorites');
 		}
 	};
 
@@ -74,7 +74,7 @@ export function ScannedImagesSettings() {
 					<CardTitle className="flex items-center justify-between font-medium text-base text-muted-foreground">
 						<div className="flex items-center gap-2">
 							<ImageIcon className="h-4 w-4" />
-							<span>Biblioteca de Imágenes ({pagination?.total || 0})</span>
+							<span>Image Library ({pagination?.total || 0})</span>
 						</div>
 					</CardTitle>
 				</CardHeader>
@@ -86,23 +86,23 @@ export function ScannedImagesSettings() {
 								setSearch(e.target.value);
 								setPage(1);
 							}}
-							placeholder="Buscar imágenes..."
+							placeholder="Search images..."
 							value={search}
 						/>
 					</div>
 
 					{isLoading ? (
 						<div className="flex items-center justify-center gap-2 py-8 text-muted-foreground text-sm">
-							<Loader2 className="h-4 w-4 animate-spin" /> Cargando biblioteca...
+							<Loader2 className="h-4 w-4 animate-spin" /> Loading library...
 						</div>
 					) : error ? (
-						<div className="p-4 text-center text-destructive text-sm">Error al cargar imágenes: {error.message}</div>
+						<div className="p-4 text-center text-destructive text-sm">Could not load images: {error.message}</div>
 					) : images.length === 0 ? (
 						<div className="py-6 text-center text-muted-foreground">
 							<div className="mb-2 flex justify-center">
 								<ImageIcon className="h-10 w-10 opacity-20" />
 							</div>
-							<p>No se encontraron imágenes</p>
+							<p>No images found</p>
 						</div>
 					) : (
 						<div className="space-y-4">
@@ -132,7 +132,7 @@ export function ScannedImagesSettings() {
 														setNameInput(img.name);
 													}}
 													size="icon"
-													title="Editar nombre"
+													title="Edit name"
 													variant="ghost"
 												>
 													<Edit2 className="h-4 w-4" />
@@ -144,7 +144,7 @@ export function ScannedImagesSettings() {
 													)}
 													onClick={() => handleToggleFavorite(img)}
 													size="icon"
-													title={img.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+													title={img.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
 													variant="ghost"
 												>
 													{img.isFavorite ? <Star className="h-4 w-4 fill-current" /> : <StarOff className="h-4 w-4" />}
@@ -163,7 +163,7 @@ export function ScannedImagesSettings() {
 													className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive"
 													onClick={() => handleDelete(img.id)}
 													size="sm"
-													title="Eliminar"
+												title="Delete"
 													variant="ghost"
 												>
 													<Trash className="h-3 w-3" />
@@ -183,10 +183,10 @@ export function ScannedImagesSettings() {
 										size="sm"
 										variant="outline"
 									>
-										Anterior
+										Previous
 									</Button>
 									<span className="flex items-center px-4 text-muted-foreground text-sm">
-										Página {page} de {Math.ceil(pagination.total / limit)}
+										Page {page} of {Math.ceil(pagination.total / limit)}
 									</span>
 									<Button
 										disabled={!pagination.hasNext}
@@ -194,7 +194,7 @@ export function ScannedImagesSettings() {
 										size="sm"
 										variant="outline"
 									>
-										Siguiente
+										Next
 									</Button>
 								</div>
 							)}
@@ -214,10 +214,10 @@ export function ScannedImagesSettings() {
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
-						<DialogTitle>Editar imagen</DialogTitle>
+						<DialogTitle>Edit image</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Name" value={nameInput} />
 						<div className="flex justify-end gap-2">
 							<Button
 								onClick={() => {
@@ -226,9 +226,9 @@ export function ScannedImagesSettings() {
 								}}
 								variant="outline"
 							>
-								Cancelar
+								Cancel
 							</Button>
-							<Button onClick={handleUpdate}>Guardar</Button>
+							<Button onClick={handleUpdate}>Save</Button>
 						</div>
 					</div>
 				</DialogContent>

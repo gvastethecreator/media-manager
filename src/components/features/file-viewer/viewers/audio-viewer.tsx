@@ -71,7 +71,7 @@ function MetadataPanel({
 					</div>
 				)}
 				<div>
-					<span className="font-medium">Creado:</span>
+					<span className="font-medium">Created:</span>
 					<span className="ml-2 text-muted-foreground">{new Date(audio.createdAt).toLocaleDateString()}</span>
 				</div>
 			</div>
@@ -114,7 +114,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 		};
 
 		const handleError = () => {
-			setError('Error al cargar el archivo de audio');
+			setError('Could not load the audio file');
 			setIsLoading(false);
 		};
 
@@ -202,7 +202,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 			return 'Mono';
 		}
 		if (channels === 2) {
-			return 'Estéreo';
+			return 'Stereo';
 		}
 		return `${channels} canales`;
 	};
@@ -218,7 +218,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 					<track
 						default
 						kind="captions"
-						label="Subtítulos (generados)"
+						label="Captions (generated)"
 						src="data:text/vtt;charset=utf-8,WEBVTT"
 						srcLang="es"
 					/>
@@ -229,8 +229,8 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 					<h2 className="mb-2 font-bold text-2xl">{audio.name}</h2>
 					{audio.description && <p className="mb-4 text-muted-foreground">{audio.description}</p>}
 					<div className="flex items-center justify-center space-x-4 text-muted-foreground text-sm">
-						<span>Tamaño: {formatFileSize(audio.size || 0)}</span>
-						{duration > 0 && <span>Duración: {formatDuration(duration)}</span>}
+						<span>Size: {formatFileSize(audio.size || 0)}</span>
+						{duration > 0 && <span>Duration: {formatDuration(duration)}</span>}
 						{audio.stats?.bitrate && <span>Bitrate: {audio.stats.bitrate} kbps</span>}
 					</div>
 				</div>
@@ -251,7 +251,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 				{error && <div className="mb-4 text-center text-destructive">{error}</div>}
 
 				{/* Loading State */}
-				{isLoading && <div className="mb-4 text-center text-muted-foreground">Cargando audio...</div>}
+				{isLoading && <div className="mb-4 text-center text-muted-foreground">Loading audio...</div>}
 
 				{/* Controls */}
 				<div className="w-full max-w-2xl">

@@ -51,7 +51,7 @@ function getContentPreview(content: string, compact: boolean): string {
 	} as const;
 
 	if (!content) {
-		return 'Sin descripción';
+		return 'No description';
 	}
 
 	const limit = compact ? CONTENT_LIMITS.compact : CONTENT_LIMITS.normal;
@@ -98,7 +98,7 @@ function CategoryHeader({
 				<div className="flex items-center text-sm opacity-70">
 					<Settings className="mr-1 h-4 w-4" />
 					<span>
-						{parameterKeys.length} {parameterKeys.length === 1 ? 'parámetro' : 'parámetros'}
+						{parameterKeys.length} {parameterKeys.length === 1 ? 'parameter' : 'parameters'}
 					</span>
 				</div>
 			)}
@@ -224,7 +224,7 @@ function ParametersSection({
 		>
 			<div className="mb-1 flex items-center gap-1 font-medium text-sm" style={{ color: primaryColor }}>
 				<Settings className="h-4 w-4" />
-				<span>Parámetros</span>
+				<span>Parameters</span>
 			</div>
 			<div className="grid grid-cols-2 gap-1.5 text-sm">
 				{parameterKeys.slice(0, 4).map((key) => (
@@ -261,13 +261,13 @@ function StatsGrid({
 			<StatCounter
 				count={relationCounts.collections || 0}
 				icon={<Image className="h-4 w-4" />}
-				label="Colecciones"
+				label="Collections"
 				primaryColor={primaryColor}
 			/>
 			<StatCounter
 				count={relationCounts.albums || 0}
 				icon={<Album className="h-4 w-4" />}
-				label="Álbumes"
+				label="Albums"
 				primaryColor={primaryColor}
 			/>
 			<StatCounter

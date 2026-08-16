@@ -9,7 +9,7 @@ export function getFolderIndexStatus(folder: ExtendedFolder): IndexStatus {
 	if (folder.error) {
 		// Verificar si el error está relacionado con no encontrar la carpeta
 		if (
-			folder.error.includes('no está disponible en el sistema') ||
+			folder.error.includes('is unavailable on this system') ||
 			folder.error.includes('PATH_NOT_FOUND') ||
 			folder.error.includes('no encontrada') ||
 			folder.error.toLowerCase().includes('not found')

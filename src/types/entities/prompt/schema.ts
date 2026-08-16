@@ -10,13 +10,13 @@ import { z } from 'zod';
  */
 export const PromptSchema = z.object({
 	id: z.string().uuid().optional(),
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'The name is required'),
 	emoji: z.string().default('📝'),
 	color: z
 		.string()
 		.refine(
 			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
-			'Color debe ser un valor hexadecimal o una variable CSS válida'
+			'Color must be a valid hexadecimal value or CSS variable'
 		)
 		.default('var(--entity-prompt)'),
 	description: z.string().nullable().default(null),

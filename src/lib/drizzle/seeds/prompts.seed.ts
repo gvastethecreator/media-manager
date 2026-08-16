@@ -19,7 +19,7 @@ export async function seedPrompts(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('prompt', 'Paisaje Fantastico', 1),
 				name: 'Paisaje Fantástico',
-				description: 'Prompt para generar paisajes de fantasía',
+				description: 'Prompt for generating fantasy landscapes',
 				content: 'Un paisaje montañoso con castillo flotante, cielo púrpura, iluminación mágica',
 				emoji: '🏔️',
 				color: '#22c55e',
@@ -43,7 +43,7 @@ export async function seedPrompts(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('prompt', 'Criatura Mitica', 1),
 				name: 'Criatura Mítica',
-				description: 'Prompt para crear criaturas de fantasía',
+				description: 'Prompt for creating fantasy creatures',
 				content: 'Dragón majestuoso con escamas iridiscentes, alas de cristal, ojos brillantes',
 				emoji: '🐉',
 				color: '#a855f7',
@@ -55,7 +55,7 @@ export async function seedPrompts(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('prompt', 'Arquitectura Art Deco', 1),
 				name: 'Arquitectura Art Deco',
-				description: 'Edificios con estética art deco de los años 20',
+				description: 'Buildings with a 1920s Art Deco aesthetic',
 				content: 'Rascacielos art deco dorado, líneas geométricas, ornamentos metálicos',
 				emoji: '🏙️',
 				color: '#f59e0b',
@@ -70,7 +70,7 @@ export async function seedPrompts(db: LibSQLDatabase<Record<string, never>>) {
 
 		seedLogger.success(`✅ ${samplePrompts.length} prompts creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando prompts:', error);
+		seedLogger.error('❌ Could not create prompts:', error);
 		throw error;
 	}
 }

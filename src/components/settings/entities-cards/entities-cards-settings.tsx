@@ -51,14 +51,14 @@ export const EntitiesCardsSettings: React.FC = () => {
 	const handleSave = () => {
 		setPreferences({ entityCards: cardConfig } as any);
 		setHasChanges(false);
-		toastService.success('Configuración de tarjetas guardada');
+		toastService.success('Card settings saved');
 	};
 
 	const handleReset = () => {
 		setCardConfig(defaultCardConfig);
 		setPreferences({ entityCards: defaultCardConfig } as any);
 		setHasChanges(false);
-		toastService.info('Configuración de tarjetas restaurada');
+		toastService.info('Card settings restored');
 	};
 
 	return (
@@ -70,7 +70,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 						<IdCard className="h-5 w-5 text-primary dark:text-primary" />
 					</div>
 					<div>
-						<h2 className="font-semibold text-xl">Configuración de Tarjetas de Entidades</h2>
+						<h2 className="font-semibold text-xl">Entity Card Settings</h2>
 						<p className="text-muted-foreground text-sm">
 							Personaliza la apariencia y comportamiento de las tarjetas de entidades
 						</p>
@@ -79,11 +79,11 @@ export const EntitiesCardsSettings: React.FC = () => {
 				<div className="flex gap-2">
 					<Button className="gap-2" disabled={!hasChanges} onClick={handleReset} size="sm" variant="outline">
 						<RotateCcw className="h-4 w-4" />
-						Restaurar
+						Restore
 					</Button>
 					<Button className="gap-2" disabled={!hasChanges} onClick={handleSave} size="sm">
 						<Save className="h-4 w-4" />
-						Guardar
+						Save
 					</Button>
 				</div>
 			</div>
@@ -98,12 +98,12 @@ export const EntitiesCardsSettings: React.FC = () => {
 							<Palette className="h-4 w-4" />
 							Apariencia General
 						</CardTitle>
-						<CardDescription>Configura el estilo visual y tamaño de las tarjetas</CardDescription>
+						<CardDescription>Set the visual style and size of cards</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* Tamaño de tarjetas */}
 						<div className="space-y-3">
-							<Label className="font-medium text-sm">Tamaño de tarjetas: {cardSize}px</Label>
+							<Label className="font-medium text-sm">Card size: {cardSize}px</Label>
 							<Slider
 								className="w-full"
 								max={400}
@@ -144,7 +144,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="compact">Compacto</SelectItem>
-									<SelectItem value="comfortable">Cómodo</SelectItem>
+									<SelectItem value="comfortable">Comfortable</SelectItem>
 									<SelectItem value="spacious">Espacioso</SelectItem>
 								</SelectContent>
 							</Select>
@@ -159,7 +159,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 							<Layout className="h-4 w-4" />
 							Funcionalidad
 						</CardTitle>
-						<CardDescription>Controla qué información mostrar en las tarjetas</CardDescription>
+						<CardDescription>Choose what information appears on cards</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* Mostrar metadatos */}
@@ -167,7 +167,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 							<div className="space-y-1">
 								<Label className="font-medium text-sm">Mostrar metadatos</Label>
 								<p className="text-muted-foreground text-xs">
-									Incluye información adicional como fechas, tamaños y etiquetas
+									Show extra details such as dates, sizes, and tags
 								</p>
 							</div>
 							<Switch checked={showMetadata} onCheckedChange={(v) => updateConfig({ showMetadata: v })} />
@@ -176,9 +176,9 @@ export const EntitiesCardsSettings: React.FC = () => {
 						{/* Mostrar vista previa */}
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
-								<Label className="font-medium text-sm">Vista previa automática</Label>
+								<Label className="font-medium text-sm">Automatic preview</Label>
 								<p className="text-muted-foreground text-xs">
-									Muestra una vista previa al pasar el cursor sobre la tarjeta
+									Show a preview when you hover over a card
 								</p>
 							</div>
 							<Switch checked={showPreview} onCheckedChange={(v) => updateConfig({ showPreview: v })} />
@@ -197,14 +197,14 @@ export const EntitiesCardsSettings: React.FC = () => {
 					</CardContent>
 				</Card>
 
-				{/* Vista Previa */}
+				{/* Preview */}
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Eye className="h-4 w-4" />
-							Vista Previa
+							Preview
 						</CardTitle>
-						<CardDescription>Ejemplo de cómo se verán las tarjetas con la configuración actual</CardDescription>
+						<CardDescription>Example of cards with the current settings</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="rounded-lg border bg-muted/20 p-4">
@@ -220,13 +220,13 @@ export const EntitiesCardsSettings: React.FC = () => {
 								<div className="mb-3 flex aspect-video items-center justify-center rounded-md bg-linear-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20">
 									<IdCard className="h-8 w-8 text-muted-foreground" />
 								</div>
-								<h3 className="mb-1 font-medium text-sm">Tarjeta de Ejemplo</h3>
+								<h3 className="mb-1 font-medium text-sm">Example Card</h3>
 								{showMetadata && (
 									<div className="space-y-1">
-										<p className="text-muted-foreground text-xs">Ejemplo de metadatos</p>
+										<p className="text-muted-foreground text-xs">Example metadata</p>
 										<div className="flex gap-1">
 											<Badge className="text-xs" variant="secondary">
-												Etiqueta
+												Tag
 											</Badge>
 											<Badge className="text-xs" variant="outline">
 												Tipo

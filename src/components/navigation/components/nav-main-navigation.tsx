@@ -59,7 +59,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 		() => [
 			{
 				id: 'folders',
-				label: 'Carpetas',
+				label: 'Folders',
 				color: 'var(--entity-folder)',
 				icon: Folder,
 				children: [],
@@ -67,13 +67,13 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 			},
 			{
 				id: 'files',
-				label: 'Archivos',
+				label: 'Files',
 				color: 'var(--entity-file)',
 				icon: Files,
 				children: [
 					{
 						id: 'all-files',
-						label: 'Todos los archivos',
+						label: 'All files',
 						icon: FileStack,
 						// Total de archivos = imágenes + videos (otros tipos opcionales se suman si están)
 						count:
@@ -88,7 +88,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'all-images',
-						label: 'Imágenes',
+						label: 'Images',
 						icon: ImageIcon,
 						count: stats.totalImages || 0,
 						color: 'var(--entity-image)',
@@ -109,7 +109,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'documents',
-						label: 'Documentos',
+						label: 'Documents',
 						icon: FileText,
 						count: stats.totalDocuments || 0,
 						color: 'var(--entity-document)',
@@ -127,20 +127,20 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 			},
 			{
 				id: 'library',
-				label: 'Librería',
+				label: 'Library',
 				color: 'var(--entity-collection)',
 				icon: Layers,
 				children: [
 					{
 						id: 'favorites',
-						label: 'Favoritos',
+						label: 'Favorites',
 						icon: Star,
 						count: stats.totalFavorites || 0,
 						color: 'var(--entity-favorite)',
 					},
 					{
 						id: 'albums',
-						label: 'Álbumes',
+						label: 'Albums',
 						icon: Album,
 						count: stats.totalAlbums || 0,
 						hasChildren: true,
@@ -148,7 +148,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'groups',
-						label: 'Grupos',
+						label: 'Groups',
 						icon: Users,
 						count: getCategoryItemCount('groups'),
 						hasChildren: true,
@@ -156,7 +156,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'tags',
-						label: 'Etiquetas',
+						label: 'Tags',
 						icon: Tag,
 						count: stats.totalTags || 0,
 						hasChildren: true,
@@ -164,7 +164,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'collections',
-						label: 'Colecciones',
+						label: 'Collections',
 						icon: Bookmark,
 						count: stats.totalCollections || 0,
 						hasChildren: true,
@@ -188,7 +188,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 				children: [
 					{
 						id: 'characters',
-						label: 'Personajes',
+						label: 'Characters',
 						icon: User,
 						count: stats.totalCharacters || 0,
 						hasChildren: true,
@@ -196,7 +196,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'places',
-						label: 'Lugares',
+						label: 'Places',
 						icon: MapPin,
 						count: stats.totalPlaces || 0,
 						hasChildren: true,
@@ -204,7 +204,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'world-items',
-						label: 'Objetos del mundo',
+						label: 'World items',
 						icon: Box,
 						count: stats.totalWorldItems || 0,
 						hasChildren: true,
@@ -212,7 +212,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'concepts',
-						label: 'Conceptos',
+						label: 'Concepts',
 						icon: Lightbulb,
 						count: getCategoryItemCount('concepts'),
 						hasChildren: true,
@@ -220,7 +220,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'wildcards',
-						label: 'Comodines',
+						label: 'Wildcards',
 						icon: Asterisk,
 						count: getCategoryItemCount('wildcards'),
 						hasChildren: true,
@@ -230,13 +230,13 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 			},
 			{
 				id: 'management',
-				label: 'Gestión',
+				label: 'Management',
 				color: 'var(--entity-note)',
 				icon: Asterisk,
 				children: [
 					{
 						id: 'notes',
-						label: 'Notas',
+						label: 'Notes',
 						icon: FileText,
 						count: getCategoryItemCount('notes'),
 						hasChildren: true,
@@ -244,7 +244,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					},
 					{
 						id: 'properties',
-						label: 'Propiedades',
+						label: 'Properties',
 						icon: Asterisk,
 						count: getCategoryItemCount('properties'),
 						hasChildren: true,

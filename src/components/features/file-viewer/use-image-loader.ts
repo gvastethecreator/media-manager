@@ -83,7 +83,7 @@ export function useImageLoader(images: ImageItem[], currentIndex: number, isOpen
 						return `/api/images/${imageId}/content`;
 				}
 			} catch (error) {
-				logger.error(`Error cargando URL para ${imageId}:`, error);
+				logger.error(`Could not load URL for ${imageId}:`, error);
 				throw error;
 			}
 		},
@@ -129,7 +129,7 @@ export function useImageLoader(images: ImageItem[], currentIndex: number, isOpen
 							const url = loadImageUrl(item.id);
 							if (url) newUrls[item.id] = url;
 						} catch (error) {
-							logger.error(`Error cargando URL para ${item.name}:`, error);
+							logger.error(`Could not load URL for ${item.name}:`, error);
 						}
 					})
 				);
@@ -140,7 +140,7 @@ export function useImageLoader(images: ImageItem[], currentIndex: number, isOpen
 
 				setIsLoading(false);
 			} catch (error) {
-				logger.error('Error cargando URLs iniciales:', error);
+				logger.error('Could not load initial URLs:', error);
 				setIsLoading(false);
 			}
 		};

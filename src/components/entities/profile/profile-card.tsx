@@ -93,10 +93,10 @@ export function ProfileCard({
 							{/* Contenido expandido */}
 							<div className="space-y-2">
 								<p className="text-sm">
-									<span className="font-medium">Creado:</span> {new Date(profile.createdAt).toLocaleDateString()}
+									<span className="font-medium">Created:</span> {new Date(profile.createdAt).toLocaleDateString()}
 								</p>
 								<p className="text-sm">
-									<span className="font-medium">Última actualización:</span>{' '}
+									<span className="font-medium">Last updated:</span>{' '}
 									{new Date(profile.updatedAt).toLocaleDateString()}
 								</p>
 								{/* Más detalles del perfil */}
@@ -112,12 +112,12 @@ export function ProfileCard({
 						e.stopPropagation();
 						onExpand?.(profile);
 					}}
-					title={isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}
+					title={isExpanded ? 'Collapse details' : 'Expand details'}
 					type="button"
 				>
 					<motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
 						<svg
-							aria-label={isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}
+							aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
 							fill="none"
 							height="20"
 							role="img"
@@ -129,7 +129,7 @@ export function ProfileCard({
 							width="20"
 							xmlns="http://www.w3.org/2000/svg"
 						>
-							<title>{isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}</title>
+							<title>{isExpanded ? 'Collapse details' : 'Expand details'}</title>
 							<polyline points="6 9 12 15 18 9" />
 						</svg>
 					</motion.div>

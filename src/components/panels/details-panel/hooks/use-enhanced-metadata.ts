@@ -23,7 +23,7 @@ const addHashMetadata = (item: AnyEntityWithStats, metadata: MetadataField[]): v
 		metadata.push({
 			key: 'Hash',
 			value: `${item.hash.substring(0, 16)}...`,
-			category: 'técnico',
+			category: 'technical',
 		});
 	}
 };
@@ -41,7 +41,7 @@ const fetchMetadataFromAPI = async (item: AnyEntityWithStats, options: EnhancedM
 	});
 
 	if (!response.ok) {
-		throw new Error(`Error al extraer metadatos: ${response.statusText}`);
+		throw new Error(`Could not extract metadata: ${response.statusText}`);
 	}
 
 	return response.json();
@@ -227,17 +227,17 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 			const raw = await fetchMetadataFromAPI(item, options);
 			const normalized = normalizeMetadataResponse(raw);
 			if (!normalized.success) {
-				console.warn('⚠️ Extracción de metadatos no exitosa', raw);
+				console.warn('⚠️ Metadata extraction was unsuccessful', raw);
 				setEnhancedMetadata([]);
-				setError('Extracción no exitosa');
+				setError('Extraction was unsuccessful');
 				return;
 			}
 			const metadata = processMetadataResult(normalized, item);
 			setEnhancedMetadata(metadata);
 		} catch (e) {
-			console.error('Error al obtener metadatos mejorados:', e);
+			console.error('Could not retrieve enhanced metadata:', e);
 			setEnhancedMetadata([]);
-			setError(e instanceof Error ? e.message : 'Error desconocido');
+			setError(e instanceof Error ? e.message : 'Unknown error');
 		} finally {
 			setIsLoadingMetadata(false);
 		}

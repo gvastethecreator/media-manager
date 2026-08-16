@@ -73,14 +73,14 @@ export function ServerStats() {
 		: 0;
 
 	const handleRefresh = useCallback(() => {
-		logger.info('🔄 Refrescando estadísticas del servidor');
+		logger.info('🔄 Refreshing server statistics');
 		fetchStats();
 	}, [fetchStats]);
 
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h2 className="font-bold text-2xl">Estadísticas del Servidor</h2>
+				<h2 className="font-bold text-2xl">Server Statistics</h2>
 				<Button
 					className="flex items-center gap-2"
 					disabled={loading}
@@ -90,7 +90,7 @@ export function ServerStats() {
 					variant="outline"
 				>
 					<RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-					Actualizar
+					Refresh
 				</Button>
 			</div>
 
@@ -98,7 +98,7 @@ export function ServerStats() {
 				<Card className="border-destructive">
 					<CardContent className="pt-6">
 						<p className="text-destructive">
-							{error instanceof Error ? error.message : 'Error al cargar estadísticas'}
+							{error instanceof Error ? error.message : 'Could not load statistics'}
 						</p>
 					</CardContent>
 				</Card>
@@ -106,8 +106,8 @@ export function ServerStats() {
 
 			<Tabs onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="system">Sistema</TabsTrigger>
-					<TabsTrigger value="app">Aplicación</TabsTrigger>
+					<TabsTrigger value="system">System</TabsTrigger>
+					<TabsTrigger value="app">Application</TabsTrigger>
 				</TabsList>
 
 				<TabsContent className="mt-4 space-y-4" value="system">
@@ -115,12 +115,12 @@ export function ServerStats() {
 						<>
 							<Card>
 								<CardHeader>
-									<CardTitle>Información del Sistema</CardTitle>
-									<CardDescription>Datos reales del host y del runtime</CardDescription>
+									<CardTitle>System Information</CardTitle>
+									<CardDescription>Live host and runtime data</CardDescription>
 								</CardHeader>
 								<CardContent className="grid grid-cols-2 gap-4">
 									<div>
-										<p className="text-muted-foreground text-sm">Plataforma</p>
+										<p className="text-muted-foreground text-sm">Platform</p>
 										<p className="font-medium">{statsData.platform || 'N/A'}</p>
 									</div>
 									<div>
@@ -138,7 +138,7 @@ export function ServerStats() {
 									<div className="col-span-2">
 										<p className="text-muted-foreground text-sm">CPU</p>
 										<p className="font-medium">
-											{statsData.cpuModel || 'N/A'} ({statsData.cpuCores || 0} núcleos)
+											{statsData.cpuModel || 'N/A'} ({statsData.cpuCores || 0} cores)
 										</p>
 									</div>
 								</CardContent>
@@ -148,11 +148,11 @@ export function ServerStats() {
 								<Card>
 									<CardHeader>
 										<CardTitle>CPU</CardTitle>
-										<CardDescription>Carga actual del procesador</CardDescription>
+										<CardDescription>Current processor load</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-2">
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Uso</span>
+											<span className="text-muted-foreground text-sm">Usage</span>
 											<span className="font-medium">{(statsData.cpuUsage || 0).toFixed(1)}%</span>
 										</div>
 										<Progress className="h-2" value={statsData.cpuUsage || 0} />
@@ -161,8 +161,8 @@ export function ServerStats() {
 
 								<Card>
 									<CardHeader>
-										<CardTitle>Memoria</CardTitle>
-										<CardDescription>Consumo real de RAM</CardDescription>
+										<CardTitle>Memory</CardTitle>
+										<CardDescription>Live RAM usage</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-2">
 										<div className="flex items-center justify-between text-sm">
@@ -170,11 +170,11 @@ export function ServerStats() {
 											<span>{formatBytes(statsData.memoryTotal)}</span>
 										</div>
 										<div className="flex items-center justify-between text-sm">
-											<span className="text-muted-foreground">Usado</span>
+											<span className="text-muted-foreground">Used</span>
 											<span>{formatBytes(statsData.memoryUsed)}</span>
 										</div>
 										<div className="flex items-center justify-between text-sm">
-											<span className="text-muted-foreground">Libre</span>
+											<span className="text-muted-foreground">Free</span>
 											<span>{formatBytes(statsData.memoryFree)}</span>
 										</div>
 										<Progress className="mt-2 h-2" value={statsData.memoryUsage || 0} />
@@ -184,8 +184,8 @@ export function ServerStats() {
 
 							<Card>
 								<CardHeader>
-									<CardTitle>Disco</CardTitle>
-									<CardDescription>Uso real del almacenamiento del equipo</CardDescription>
+									<CardTitle>Disk</CardTitle>
+									<CardDescription>Live machine storage usage</CardDescription>
 								</CardHeader>
 								<CardContent className="space-y-3">
 									<div className="flex items-center justify-between text-sm">
@@ -193,11 +193,11 @@ export function ServerStats() {
 										<span>{formatBytes(statsData.diskUsage?.total)}</span>
 									</div>
 									<div className="flex items-center justify-between text-sm">
-										<span className="text-muted-foreground">Usado</span>
+										<span className="text-muted-foreground">Used</span>
 										<span>{formatBytes(statsData.diskUsage?.used)}</span>
 									</div>
 									<div className="flex items-center justify-between text-sm">
-										<span className="text-muted-foreground">Libre</span>
+										<span className="text-muted-foreground">Free</span>
 										<span>{formatBytes(statsData.diskUsage?.free)}</span>
 									</div>
 									<Progress className="mt-2 h-2" value={statsData.diskUsage?.usedPercentage || 0} />
@@ -207,13 +207,13 @@ export function ServerStats() {
 					) : loading ? (
 						<Card>
 							<CardContent className="pt-6">
-								<p className="text-center text-muted-foreground">Cargando estadísticas del sistema...</p>
+								<p className="text-center text-muted-foreground">Loading system statistics...</p>
 							</CardContent>
 						</Card>
 					) : (
 						<Card>
 							<CardContent className="pt-6">
-								<p className="text-center text-muted-foreground">No se pudieron cargar las estadísticas del sistema</p>
+								<p className="text-center text-muted-foreground">System statistics could not be loaded</p>
 							</CardContent>
 						</Card>
 					)}
@@ -225,14 +225,14 @@ export function ServerStats() {
 							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<Card>
 									<CardHeader>
-										<CardTitle>Biblioteca</CardTitle>
-										<CardDescription>Totales reales indexados</CardDescription>
+										<CardTitle>Library</CardTitle>
+										<CardDescription>Live indexed totals</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-4">
 										<div className="grid grid-cols-2 gap-4">
 											<div className="rounded-lg border bg-muted/40 p-3 text-center">
 												<p className="font-bold text-2xl">{statsData.totalImages}</p>
-												<p className="text-muted-foreground text-sm">Imágenes</p>
+												<p className="text-muted-foreground text-sm">Images</p>
 											</div>
 											<div className="rounded-lg border bg-muted/40 p-3 text-center">
 												<p className="font-bold text-2xl">{statsData.totalVideos}</p>
@@ -240,10 +240,10 @@ export function ServerStats() {
 											</div>
 										</div>
 										<div className="text-center">
-											<p className="text-muted-foreground text-sm">Entidades totales</p>
+											<p className="text-muted-foreground text-sm">Total entities</p>
 											<p className="font-semibold text-lg">{totalEntities}</p>
 											<Badge className="mt-1" variant="secondary">
-												{statsData.totalFavorites} favoritos
+												{statsData.totalFavorites} favorites
 											</Badge>
 										</div>
 									</CardContent>
@@ -251,24 +251,24 @@ export function ServerStats() {
 
 								<Card>
 									<CardHeader>
-										<CardTitle>Almacenamiento indexado</CardTitle>
-										<CardDescription>Tamaño real registrado por la aplicación</CardDescription>
+										<CardTitle>Indexed Storage</CardTitle>
+										<CardDescription>Actual size recorded by the application</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-3">
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Archivos indexados</span>
+											<span className="text-muted-foreground text-sm">Indexed files</span>
 											<span className="font-medium">{formatBytes(statsData.usedSpace)}</span>
 										</div>
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Disco del sistema usado</span>
+											<span className="text-muted-foreground text-sm">System disk used</span>
 											<span className="font-medium">{formatBytes(statsData.storageUsed)}</span>
 										</div>
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Espacio libre</span>
+											<span className="text-muted-foreground text-sm">Free space</span>
 											<span className="font-medium">{formatBytes(statsData.storageAvailable)}</span>
 										</div>
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Promedio por archivo</span>
+											<span className="text-muted-foreground text-sm">Average per file</span>
 											<span className="font-medium">{formatBytes(statsData.averageFileSize)}</span>
 										</div>
 									</CardContent>
@@ -278,12 +278,12 @@ export function ServerStats() {
 							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<Card>
 									<CardHeader>
-										<CardTitle>Base de Datos</CardTitle>
-										<CardDescription>Tamaño y artefactos persistidos</CardDescription>
+										<CardTitle>Database</CardTitle>
+										<CardDescription>Persisted size and artifacts</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-3">
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Tamaño estimado DB</span>
+											<span className="text-muted-foreground text-sm">Estimated DB size</span>
 											<span className="font-medium">
 												{statsData.formattedDatabaseSize || formatBytes(statsData.databaseSize)}
 											</span>
@@ -301,30 +301,30 @@ export function ServerStats() {
 
 								<Card>
 									<CardHeader>
-										<CardTitle>Organización</CardTitle>
-										<CardDescription>Entidades organizativas y de worldbuilding</CardDescription>
+										<CardTitle>Organization</CardTitle>
+										<CardDescription>Organization and worldbuilding entities</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-3">
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Álbumes / colecciones</span>
+											<span className="text-muted-foreground text-sm">Albums / collections</span>
 											<span className="font-medium">
 												{statsData.totalAlbums} / {statsData.totalCollections}
 											</span>
 										</div>
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Tags / propiedades</span>
+											<span className="text-muted-foreground text-sm">Tags / properties</span>
 											<span className="font-medium">
 												{statsData.totalTags} / {statsData.totalProperties}
 											</span>
 										</div>
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Personajes / lugares / objetos</span>
+											<span className="text-muted-foreground text-sm">Characters / places / items</span>
 											<span className="font-medium">
 												{statsData.totalCharacters} / {statsData.totalPlaces} / {statsData.totalWorldItems}
 											</span>
 										</div>
 										<div className="flex items-center justify-between">
-											<span className="text-muted-foreground text-sm">Conceptos / prompts / notas / wildcards</span>
+											<span className="text-muted-foreground text-sm">Concepts / prompts / notes / wildcards</span>
 											<span className="font-medium">
 												{statsData.totalConcepts} / {statsData.totalPrompts} / {statsData.totalNotes} /{' '}
 												{statsData.totalWildcards}
@@ -337,14 +337,14 @@ export function ServerStats() {
 					) : loading ? (
 						<Card>
 							<CardContent className="pt-6">
-								<p className="text-center text-muted-foreground">Cargando estadísticas de la aplicación...</p>
+								<p className="text-center text-muted-foreground">Loading application statistics...</p>
 							</CardContent>
 						</Card>
 					) : (
 						<Card>
 							<CardContent className="pt-6">
 								<p className="text-center text-muted-foreground">
-									No se pudieron cargar las estadísticas de la aplicación
+									Application statistics could not be loaded
 								</p>
 							</CardContent>
 						</Card>

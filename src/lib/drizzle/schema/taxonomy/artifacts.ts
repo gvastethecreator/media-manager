@@ -1,73 +1,161 @@
-import { sql } from "drizzle-orm";
-import { check, index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import { mediaRoots } from "../media-core/assets";
+import { sql } from 'drizzle-orm';
+import { check, index, integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { mediaRoots } from '../media-core/assets';
 
 const epochMilliseconds = sql`(CAST(strftime('%s', 'now') AS INTEGER) * 1000 + CAST(substr(strftime('%f', 'now'), 4, 3) AS INTEGER))`;
 
 /** Operational projection for file-backed Prompt, Note and Wildcard content. */
 export const taxonomyArtifacts = sqliteTable(
-	"TaxonomyArtifact",
+	'TaxonomyArtifact',
 	{
-		entityType: text("entityType").notNull(),
-		entityId: text("entityId").notNull(),
-		rootId: text("rootId")
+		entityType: text('entityType').notNull(),
+		entityId: text('entityId').notNull(),
+		rootId: text('rootId')
 			.notNull()
-			.references(() => mediaRoots.id, { onDelete: "restrict", onUpdate: "cascade" }),
-		relativePath: text("relativePath").notNull(),
-		contentHash: text("contentHash").notNull(),
-		byteSize: integer("byteSize").notNull(),
-		syncStatus: text("syncStatus").notNull().default("synced"),
-		indexedTitle: text("indexedTitle").notNull(),
-		indexedSummary: text("indexedSummary"),
-		indexedBody: text("indexedBody").notNull(),
-		lastSyncedAt: integer("lastSyncedAt", { mode: "timestamp_ms" }).notNull().default(epochMilliseconds),
-		createdAt: integer("createdAt", { mode: "timestamp_ms" }).notNull().default(epochMilliseconds),
-		updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+			.references(() => mediaRoots.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+		relativePath: text('relativePath').notNull(),
+		contentHash: text('contentHash').notNull(),
+		byteSize: integer('byteSize').notNull(),
+		syncStatus: text('syncStatus').notNull().default('synced'),
+		indexedTitle: text('indexedTitle').notNull(),
+		indexedSummary: text('indexedSummary'),
+		indexedBody: text('indexedBody').notNull(),
+		lastSyncedAt: integer('lastSyncedAt', { mode: 'timestamp_ms' }).notNull().default(epochMilliseconds),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(epochMilliseconds),
+		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' })
 			.notNull()
 			.default(epochMilliseconds)
 			.$onUpdate(() => new Date()),
+		authoredMetadata: text('authoredMetadata').notNull().default('{}'),
 	},
 	(table) => ({
-		pk: primaryKey({ columns: [table.entityType, table.entityId], name: "TaxonomyArtifact_pk" }),
-		locationKey: uniqueIndex("TaxonomyArtifact_rootId_relativePath_key").on(
+		pk: primaryKey({ columns: [table.entityType, table.entityId], name: 'TaxonomyArtifact_pk' }),
+		locationKey: uniqueIndex('TaxonomyArtifact_rootId_relativePath_key').on(
 			table.rootId,
-			sql`${table.relativePath} COLLATE NOCASE`,
+			sql`${table.relativePath} COLLATE NOCASE`
 		),
-		rootIdIdx: index("TaxonomyArtifact_rootId_idx").on(table.rootId),
-		statusIdx: index("TaxonomyArtifact_syncStatus_idx").on(table.syncStatus),
-		typeTitleIdx: index("TaxonomyArtifact_entityType_title_idx").on(table.entityType, table.indexedTitle),
-		entityTypeCheck: check("TaxonomyArtifact_entity_type_check", sql`entityType IN ('prompt', 'note', 'wildcard')`),
+		rootIdIdx: index('TaxonomyArtifact_rootId_idx').on(table.rootId),
+		statusIdx: index('TaxonomyArtifact_syncStatus_idx').on(table.syncStatus),
+		typeTitleIdx: index('TaxonomyArtifact_entityType_title_idx').on(table.entityType, table.indexedTitle),
+		entityTypeCheck: check('TaxonomyArtifact_entity_type_check', sql`entityType IN ('prompt', 'note', 'wildcard')`),
 		syncStatusCheck: check(
-			"TaxonomyArtifact_sync_status_check",
-			sql`syncStatus IN ('synced', 'external_change', 'missing', 'conflict', 'error')`,
+			'TaxonomyArtifact_sync_status_check',
+			sql`syncStatus IN ('synced', 'external_change', 'missing', 'conflict', 'error')`
 		),
 		contentHashCheck: check(
-			"TaxonomyArtifact_content_hash_check",
+			'TaxonomyArtifact_content_hash_check',
 			sql`length(contentHash) = 64 AND contentHash = lower(contentHash)
-				AND contentHash NOT GLOB '*[^0-9a-f]*'`,
+				AND contentHash NOT GLOB '*[^0-9a-f]*'`
 		),
-		byteSizeCheck: check("TaxonomyArtifact_byte_size_check", sql`byteSize BETWEEN 0 AND 2097152`),
+		byteSizeCheck: check('TaxonomyArtifact_byte_size_check', sql`byteSize BETWEEN 0 AND 2097152`),
 		relativePathCheck: check(
-			"TaxonomyArtifact_relative_path_check",
+			'TaxonomyArtifact_relative_path_check',
 			sql`length(relativePath) BETWEEN 1 AND 2048
 				AND substr(relativePath, 1, 1) <> '/'
 				AND instr(relativePath, '\\') = 0
 				AND instr(relativePath, char(0)) = 0
 				AND instr('/' || relativePath || '/', '/../') = 0
-				AND instr('/' || relativePath || '/', '/./') = 0`,
+				AND instr('/' || relativePath || '/', '/./') = 0`
 		),
 		storageTypesCheck: check(
-			"TaxonomyArtifact_storage_types_check",
+			'TaxonomyArtifact_storage_types_check',
 			sql`typeof(entityType) = 'text' AND typeof(entityId) = 'text' AND typeof(rootId) = 'text'
 				AND typeof(relativePath) = 'text' AND typeof(contentHash) = 'text' AND typeof(byteSize) = 'integer'
 				AND typeof(syncStatus) = 'text' AND typeof(indexedTitle) = 'text'
 				AND typeof(indexedSummary) IN ('null', 'text') AND typeof(indexedBody) = 'text'
 				AND typeof(lastSyncedAt) = 'integer' AND typeof(createdAt) = 'integer'
-				AND typeof(updatedAt) = 'integer'`,
+				AND typeof(updatedAt) = 'integer' AND typeof(authoredMetadata) = 'text'`
+		),
+		authoredMetadataCheck: check(
+			'TaxonomyArtifact_authored_metadata_check',
+			sql`json_valid(authoredMetadata) AND json_type(authoredMetadata) = 'object'`
 		),
 		timestampsCheck: check(
-			"TaxonomyArtifact_timestamps_check",
-			sql`lastSyncedAt >= 0 AND createdAt >= 0 AND updatedAt >= createdAt`,
+			'TaxonomyArtifact_timestamps_check',
+			sql`lastSyncedAt >= 0 AND createdAt >= 0 AND updatedAt >= createdAt`
 		),
-	}),
+	})
+);
+
+/** Transaction-scoped capability used by canonical file-backed projection/delete paths. */
+export const taxonomyArtifactMutationPermits = sqliteTable(
+	'TaxonomyArtifactMutationPermit',
+	{
+		entityType: text('entityType').notNull(),
+		entityId: text('entityId').notNull(),
+		operation: text('operation').notNull(),
+	},
+	(table) => ({
+		pk: primaryKey({
+			columns: [table.entityType, table.entityId, table.operation],
+			name: 'TaxonomyArtifactMutationPermit_pk',
+		}),
+		entityTypeCheck: check(
+			'TaxonomyArtifactMutationPermit_entity_type_check',
+			sql`entityType IN ('prompt', 'note', 'wildcard')`
+		),
+		operationCheck: check('TaxonomyArtifactMutationPermit_operation_check', sql`operation IN ('update', 'delete')`),
+	})
+);
+
+/**
+ * Durable server-side authorization for a deletion marker. A marker on disk
+ * has no authority until every identity field matches a row in this ledger.
+ */
+export const taxonomyArtifactDeletionLedger = sqliteTable(
+	'TaxonomyArtifactDeletionLedger',
+	{
+		rootId: text('rootId')
+			.notNull()
+			.references(() => mediaRoots.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+		relativePath: text('relativePath').notNull(),
+		entityType: text('entityType').notNull(),
+		entityId: text('entityId').notNull(),
+		contentHash: text('contentHash').notNull(),
+		nonce: text('nonce').notNull(),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(epochMilliseconds),
+	},
+	(table) => ({
+		pk: primaryKey({
+			columns: [table.rootId, table.relativePath, table.entityType, table.entityId, table.contentHash, table.nonce],
+			name: 'TaxonomyArtifactDeletionLedger_pk',
+		}),
+		nonceKey: uniqueIndex('TaxonomyArtifactDeletionLedger_nonce_key').on(table.nonce),
+		rootPathEntityIdx: index('TaxonomyArtifactDeletionLedger_root_path_entity_idx').on(
+			table.rootId,
+			table.relativePath,
+			table.entityType,
+			table.entityId
+		),
+		entityTypeCheck: check(
+			'TaxonomyArtifactDeletionLedger_entity_type_check',
+			sql`entityType IN ('prompt', 'note', 'wildcard')`
+		),
+		contentHashCheck: check(
+			'TaxonomyArtifactDeletionLedger_content_hash_check',
+			sql`length(contentHash) = 64 AND contentHash = lower(contentHash)
+				AND contentHash NOT GLOB '*[^0-9a-f]*'`
+		),
+		nonceCheck: check(
+			'TaxonomyArtifactDeletionLedger_nonce_check',
+			sql`length(nonce) = 36 AND nonce = lower(nonce) AND nonce NOT GLOB '*[^0-9a-f-]*'
+				AND substr(nonce, 9, 1) = '-' AND substr(nonce, 14, 1) = '-'
+				AND substr(nonce, 19, 1) = '-' AND substr(nonce, 24, 1) = '-'`
+		),
+		relativePathCheck: check(
+			'TaxonomyArtifactDeletionLedger_relative_path_check',
+			sql`length(relativePath) BETWEEN 1 AND 2048
+				AND substr(relativePath, 1, 1) <> '/'
+				AND instr(relativePath, '\\') = 0
+				AND instr(relativePath, char(0)) = 0
+				AND instr('/' || relativePath || '/', '/../') = 0
+				AND instr('/' || relativePath || '/', '/./') = 0`
+		),
+		storageTypesCheck: check(
+			'TaxonomyArtifactDeletionLedger_storage_types_check',
+			sql`typeof(rootId) = 'text' AND typeof(relativePath) = 'text' AND typeof(entityType) = 'text'
+				AND typeof(entityId) = 'text' AND typeof(contentHash) = 'text' AND typeof(nonce) = 'text'
+				AND typeof(createdAt) = 'integer' AND createdAt >= 0`
+		),
+	})
 );

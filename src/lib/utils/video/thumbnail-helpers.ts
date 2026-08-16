@@ -79,7 +79,7 @@ export async function generateAnimatedVideoThumbnail(
 		// Verificar FFmpeg disponible (incluye binario local)
 		const ffmpegAvailable = await isFFmpegAvailable(true);
 		if (!ffmpegAvailable) {
-			console.error('❌ Ni mediabunny ni FFmpeg están disponibles para generar thumbnails animados');
+			console.error('❌ Neither mediabunny nor FFmpeg is available to generate animated thumbnails');
 			return null;
 		}
 
@@ -320,7 +320,7 @@ export async function generateStaticVideoThumbnail(
 		// Verificar FFmpeg disponible (incluye binario local)
 		const ffmpegAvailable = await isFFmpegAvailable(true);
 		if (!ffmpegAvailable) {
-			console.error('❌ Ni mediabunny ni FFmpeg están disponibles para generar thumbnails');
+			console.error('❌ Neither mediabunny nor FFmpeg is available to generate thumbnails');
 			return null;
 		}
 
@@ -331,7 +331,7 @@ export async function generateStaticVideoThumbnail(
 		}
 		return ffmpegResult;
 	} catch (error) {
-		console.error('❌ Error con fallback FFmpeg para thumbnail estático.', toSafeErrorContext(error));
+		console.error('❌ FFmpeg fallback failed for the static thumbnail.', toSafeErrorContext(error));
 		return null;
 	}
 }
@@ -466,7 +466,7 @@ async function generateStaticVideoThumbnailMediabunny(
 			return null;
 		}
 	} catch (error) {
-		console.error('Error generando thumbnail estático con mediabunny.', toSafeErrorContext(error));
+		console.error('Could not generate a static thumbnail with mediabunny.', toSafeErrorContext(error));
 		return null;
 	}
 }

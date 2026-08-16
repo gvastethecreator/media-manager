@@ -48,22 +48,22 @@ export async function validateName(entityType: keyof typeof entityTableMap, name
 
 	// Verificar longitud mínima
 	if (normalizedName.length < 1) {
-		throw new Error('El nombre no puede estar vacío');
+		throw new Error('The name cannot be empty');
 	}
 
 	// Verificar longitud máxima
 	if (normalizedName.length > 50) {
-		throw new Error('El nombre no puede tener más de 50 caracteres');
+		throw new Error('The name cannot exceed 50 characters');
 	}
 
 	// Verificar caracteres válidos (letras, números, espacios y guiones)
 	if (!VALID_NAME_REGEX.test(normalizedName)) {
-		throw new Error('El nombre solo puede contener letras, números, espacios y guiones');
+		throw new Error('The name can only contain letters, numbers, spaces, and hyphens');
 	}
 
 	const table = entityTableMap[entityType];
 	if (!table) {
-		throw new Error(`Tipo de entidad desconocido: ${entityType}`);
+		throw new Error(`Unknown entity type: ${entityType}`);
 	}
 
 	// Verificar que no exista
@@ -73,6 +73,6 @@ export async function validateName(entityType: keyof typeof entityTableMap, name
 		.where(sql`name = ${name}`);
 
 	if (result.count > 0) {
-		throw new Error(`Ya existe ${entityType === 'property' ? 'una propiedad' : 'un elemento'} con este nombre`);
+		throw new Error(`Ya existe ${entityType === 'property' ? 'una propiedad' : 'un elemento'} with this name`);
 	}
 }

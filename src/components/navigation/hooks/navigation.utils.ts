@@ -106,7 +106,7 @@ export function useNavigation() {
 				// Cambiar la vista
 				navigate(`/${viewType}`);
 			} catch (error) {
-				navLogger.error('❌ Error al navegar a la vista:', error);
+				navLogger.error('❌ Could not navigate to view:', error);
 			}
 		},
 		[navigate, clearAllSelections]

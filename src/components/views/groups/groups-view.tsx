@@ -45,7 +45,7 @@ export function GroupsView(_props: ViewProps) {
 
 	const handleCreateGroup = useCallback(() => {
 		if (newGroupName.trim() === '') {
-			viewLogger.error('Nombre del grupo vacío');
+			viewLogger.error('Group name is empty');
 			return;
 		}
 		addGroup({ name: newGroupName, description: newGroupDescription });

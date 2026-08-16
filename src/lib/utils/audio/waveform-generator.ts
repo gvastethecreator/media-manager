@@ -75,7 +75,7 @@ async function generateWaveformFromFile(
 	const audioBuffer = await fs.readFile(audioPath);
 
 	if (audioBuffer.length === 0) {
-		throw new Error('El archivo de audio está vacío y no se puede generar un perfil visual');
+		throw new Error('The audio file is empty, so a visual profile cannot be generated');
 	}
 
 	const points = generateWaveformDataFromBuffer(audioBuffer, config.samples, config.height);

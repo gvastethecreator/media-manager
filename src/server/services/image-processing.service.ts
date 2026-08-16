@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { existsSync } from 'fs';
-import sharp from 'sharp';
+import sharp, { type FitEnum } from 'sharp';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -57,7 +57,7 @@ export async function processImage(imageId: string, options: ImageProcessingOpti
 			processor = processor.resize({
 				width,
 				height,
-				fit: fit as keyof sharp.FitEnum,
+				fit: fit as keyof FitEnum,
 				withoutEnlargement: true,
 			});
 		}

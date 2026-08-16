@@ -28,7 +28,7 @@ export interface TableViewProps extends Omit<BrowserViewProps, 'config'> {
 	onSortChange?: (field: string) => void;
 	/** Página actual (para paginación) */
 	page?: number;
-	/** Tamaño de página */
+	/** Size de página */
 	pageSize?: number;
 	/** IDs seleccionados */
 	selectedIds?: Set<string>;
@@ -102,13 +102,13 @@ function TableThumbnail({ item }: { item: BrowserItem }) {
 const DEFAULT_COLUMNS: TableColumn[] = [
 	{
 		key: 'name',
-		label: 'Nombre',
+		label: 'Name',
 		width: 300,
 		sortable: true,
 		render: (item) => (
 			<div className="flex items-center gap-2">
 				<TableThumbnail item={item} />
-				<span className="truncate">{item.isSynthetic && item.name === '..' ? 'Subir nivel' : item.name}</span>
+				<span className="truncate">{item.isSynthetic && item.name === '..' ? 'Go up one level' : item.name}</span>
 			</div>
 		),
 	},
@@ -121,14 +121,14 @@ const DEFAULT_COLUMNS: TableColumn[] = [
 	},
 	{
 		key: 'size',
-		label: 'Tamaño',
+		label: 'Size',
 		width: 100,
 		sortable: true,
 		render: (item) => (item.size != null ? formatFileSize(item.size) : '-'),
 	},
 	{
 		key: 'createdAt',
-		label: 'Fecha',
+		label: 'Date',
 		width: 150,
 		sortable: true,
 		render: (item) => (item.createdAt ? formatDate(item.createdAt) : '-'),

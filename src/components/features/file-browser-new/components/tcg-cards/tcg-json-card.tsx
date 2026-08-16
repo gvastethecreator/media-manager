@@ -104,7 +104,7 @@ export const TCGJsonCard = memo(function TCGJsonCard({ item, variant, width, ...
 			</div>
 
 			{/* Validation indicator */}
-			<div className="absolute top-6 left-6 z-10" title={isValid ? 'JSON válido' : 'JSON inválido'}>
+			<div className="absolute top-6 left-6 z-10" title={isValid ? 'Valid JSON' : 'Invalid JSON'}>
 				{isValid ? (
 					<CheckCircle2 className="text-dt-success-500" size={14} />
 				) : (
@@ -168,13 +168,13 @@ export const TCGJsonCard = memo(function TCGJsonCard({ item, variant, width, ...
 						</span>
 					)}
 					{relationCounts.albums > 0 && (
-						<span className="tcg-relations__item" title={`${relationCounts.albums} álbumes`}>
+						<span className="tcg-relations__item" title={`${relationCounts.albums} albums`}>
 							<Layers size={10} />
 							{relationCounts.albums}
 						</span>
 					)}
 					{relationCounts.collections > 0 && (
-						<span className="tcg-relations__item" title={`${relationCounts.collections} colecciones`}>
+						<span className="tcg-relations__item" title={`${relationCounts.collections} collections`}>
 							<BookMarked size={10} />
 							{relationCounts.collections}
 						</span>

@@ -219,7 +219,7 @@ export function JsonFlowViewer({ content, fileName, className }: JsonFlowViewerP
 	if (!parsedJson) {
 		return (
 			<Card className={cn('flex h-full flex-col p-6', className)}>
-				<div className="text-destructive">Error: JSON inválido</div>
+				<div className="text-destructive">Error: Invalid JSON</div>
 				<div className="mt-4 flex-1 overflow-auto">
 					<pre className="text-muted-foreground text-sm">{content}</pre>
 				</div>
@@ -241,7 +241,7 @@ export function JsonFlowViewer({ content, fileName, className }: JsonFlowViewerP
 				</div>
 				<Button onClick={handleCopy} size="sm" variant="outline">
 					{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-					{copied ? 'Copiado!' : 'Copiar'}
+					{copied ? 'Copiado!' : 'Copy'}
 				</Button>
 			</div>
 
@@ -277,7 +277,7 @@ export function JsonFlowViewer({ content, fileName, className }: JsonFlowViewerP
 								<Controls className="m-2" />
 							</ReactFlow>
 						) : (
-							<div className="flex h-full items-center justify-center text-muted-foreground">Estructura vacía</div>
+							<div className="flex h-full items-center justify-center text-muted-foreground">Empty structure</div>
 						)}
 					</div>
 				</TabsContent>

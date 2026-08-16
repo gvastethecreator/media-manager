@@ -19,7 +19,7 @@ function LoadingPlaceholder({ className }: { className?: string }) {
 				className
 			)}
 		>
-			<p className="text-muted-foreground">Cargando personaje...</p>
+			<p className="text-muted-foreground">Loading character...</p>
 		</div>
 	);
 }
@@ -32,7 +32,7 @@ function ErrorPlaceholder({ className, message }: { className?: string; message?
 				className
 			)}
 		>
-			<p className="text-destructive">Error: {message || 'Personaje no encontrado'}</p>
+			<p className="text-destructive">Error: {message || 'Character not found'}</p>
 		</div>
 	);
 }
@@ -269,7 +269,7 @@ function CharacterCardBody({
 					emoji={character.emoji || ''}
 					isFavorite={character.isFavorite}
 					level={character.level}
-					name={character.name || 'Sin nombre'}
+					name={character.name || 'Unnamed'}
 					race={character.race}
 					tcgMode={tcgMode}
 				/>

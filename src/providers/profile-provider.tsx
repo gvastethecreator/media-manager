@@ -62,7 +62,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 				}
 				setIsInitialized(true);
 			} catch (error) {
-				logger.error('Error inicializando perfil:', error);
+				logger.error('Error initializing profile:', error);
 			}
 		};
 

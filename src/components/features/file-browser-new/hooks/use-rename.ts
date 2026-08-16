@@ -104,7 +104,7 @@ export function useRename(): RenameResult {
 			try {
 				for (const rename of operations) {
 					const assetType = toMediaAssetType(rename.item.entityType);
-					if (!assetType) throw new Error(`No se puede renombrar el tipo ${rename.item.entityType}`);
+					if (!assetType) throw new Error(`Cannot rename type ${rename.item.entityType}`);
 					const response = await apiClient.put<{
 						data: { renamed: FileMutationItemResult[] };
 						success: true;
@@ -112,12 +112,12 @@ export function useRename(): RenameResult {
 						renames: [{ asset: { assetId: rename.item.id, assetType }, newName: rename.newName }],
 					});
 					const renamed = response.data.renamed[0];
-					if (!renamed) throw new Error('El servidor no confirmó el asset renombrado.');
+					if (!renamed) throw new Error('The server did not confirm the renamed asset.');
 					addFileMutationResult(summary, renamed);
 				}
 			} catch (error) {
 				throw new PartialFileMutationError(
-					error instanceof Error ? error.message : 'No se pudieron renombrar todos los archivos.',
+					error instanceof Error ? error.message : 'Not all files could be renamed.',
 					summary,
 					error
 				);
@@ -127,19 +127,19 @@ export function useRename(): RenameResult {
 		onSuccess: (summary, input) => {
 			const reconciliation = pendingFileMutationDescription(summary);
 			if (reconciliation) {
-				toast({ title: '⚠️ Renombrado aplicado con tareas pendientes', description: reconciliation });
+				toast({ title: '⚠️ Rename applied with pending work', description: reconciliation });
 				return;
 			}
 			if ('renames' in input) {
 				const count = input.renames.length;
 				toast({
-					title: '✅ Archivos renombrados',
-					description: `${count} archivo${count > 1 ? 's' : ''} renombrado${count > 1 ? 's' : ''} exitosamente`,
+					title: '✅ Files renamed',
+					description: `${count} file${count === 1 ? '' : 's'} renamed successfully`,
 				});
 			} else {
 				toast({
-					title: '✅ Archivo renombrado',
-					description: 'El archivo ha sido renombrado exitosamente',
+					title: '✅ File renamed',
+					description: 'The file was renamed successfully',
 				});
 			}
 		},
@@ -150,20 +150,20 @@ export function useRename(): RenameResult {
 			if (partial?.applied) {
 				toast({
 					variant: 'destructive',
-					title: '⚠️ Renombrado parcialmente aplicado',
-					description: `${partial.applied} de ${partial.total} archivos fueron renombrados antes del fallo. Revisa la lista antes de reintentar.`,
+					title: '⚠️ Rename partially applied',
+					description: `${partial.applied} de ${partial.total} files were renamed before the failure. Review the list before retrying.`,
 				});
 			} else if ('renames' in input) {
 				toast({
 					variant: 'destructive',
-					title: '❌ Error al renombrar',
-					description: error.message || 'Error desconocido',
+					title: '❌ Rename failed',
+					description: error.message || 'Unknown error',
 				});
 			} else {
 				toast({
 					variant: 'destructive',
-					title: '❌ Error al renombrar',
-					description: error.message || 'No se pudo renombrar el archivo',
+					title: '❌ Rename failed',
+					description: error.message || 'The file could not be renamed',
 				});
 			}
 		},

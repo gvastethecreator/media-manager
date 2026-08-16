@@ -45,7 +45,7 @@ export function LoadingSpinner({
 	size,
 	variant,
 	state = 'loading',
-	label = 'Cargando...',
+	label = 'Loading...',
 	showLabel = false,
 	className,
 	...props
@@ -82,7 +82,7 @@ export function LoadingDots({ size = 'md', className, ...props }: LoadingDotsPro
 	};
 
 	return (
-		<output aria-label="Cargando" className={cn('loading-dots', sizeClasses[size], className)} {...props}>
+		<output aria-label="Loading" className={cn('loading-dots', sizeClasses[size], className)} {...props}>
 			<span />
 			<span />
 			<span />

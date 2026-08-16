@@ -22,7 +22,7 @@ const API_BASE_PATH = '/api/world-items';
 export async function getWorldItemsFromApi(): Promise<WorldItem[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener world items');
+		throw new Error('Could not get world items');
 	}
 	const result = await response.json();
 	return unwrapArrayResponse<WorldItem>(result);
@@ -35,7 +35,7 @@ export async function createWorldItemInApi(data: CreateWorldItemData): Promise<W
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear world item');
+		throw new Error('Could not create world item');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -48,7 +48,7 @@ export async function updateWorldItemInApi(id: string, data: UpdateWorldItemData
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar world item');
+		throw new Error('Could not update world item');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -63,7 +63,7 @@ export async function toggleWorldItemFavoriteInApi(id: string): Promise<WorldIte
 export async function deleteWorldItemFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar world item');
+		throw new Error('Could not delete world item');
 	}
 	await invalidateFavoriteQueries();
 }

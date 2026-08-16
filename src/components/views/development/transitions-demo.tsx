@@ -60,7 +60,7 @@ function FlipDemo() {
 						Shuffle
 					</Button>
 					<Button onClick={toggleLayout} variant="outline">
-						Cambiar Layout
+						Change layout
 					</Button>
 				</div>
 
@@ -123,7 +123,7 @@ function EnterExitDemo() {
 			<CardContent className="space-y-4">
 				<div className="grid grid-cols-2 gap-4">
 					<div className="space-y-2">
-						<Label>Dirección</Label>
+						<Label>Direction</Label>
 						<Select onValueChange={(v) => setDirection(v as any)} value={direction}>
 							<SelectTrigger>
 								<SelectValue />
@@ -138,7 +138,7 @@ function EnterExitDemo() {
 					</div>
 
 					<div className="space-y-2">
-						<Label>Duración: {duration}ms</Label>
+						<Label>Duration: {duration}ms</Label>
 						<Slider max={1000} min={100} onValueChange={([v]) => setDuration(v)} step={50} value={[duration]} />
 					</div>
 				</div>
@@ -149,7 +149,7 @@ function EnterExitDemo() {
 				</div>
 
 				<div className="flex gap-2">
-					<Button onClick={addItem}>Agregar</Button>
+					<Button onClick={addItem}>Add</Button>
 					<Button onClick={clearAll} variant="destructive">
 						Limpiar
 					</Button>
@@ -203,9 +203,9 @@ function MorphDemo() {
 	const shapes = [
 		{ value: 'square', label: 'Cuadrado' },
 		{ value: 'rounded', label: 'Redondeado' },
-		{ value: 'circle', label: 'Círculo' },
-		{ value: 'pill', label: 'Píldora' },
-		{ value: 'organic', label: 'Orgánico' },
+		{ value: 'circle', label: 'Circle' },
+		{ value: 'pill', label: 'Pill' },
+		{ value: 'organic', label: 'Organic' },
 	];
 
 	const colors = [
@@ -283,8 +283,8 @@ function EntityCardDemo() {
 	const [expanded, setExpanded] = useState<string | null>(null);
 
 	const entities = [
-		{ id: '1', type: 'folder' as const, name: 'Carpeta 1', count: 42 },
-		{ id: '2', type: 'image' as const, name: 'Imagen 1', count: 128 },
+		{ id: '1', type: 'folder' as const, name: 'Folder 1', count: 42 },
+		{ id: '2', type: 'image' as const, name: 'Image 1', count: 128 },
 		{ id: '3', type: 'video' as const, name: 'Video 1', count: 15 },
 	];
 
@@ -307,7 +307,7 @@ function EntityCardDemo() {
 						/>
 					))}
 				</div>
-				<p className="text-muted-foreground text-sm">Click para seleccionar, doble click para expandir</p>
+				<p className="text-muted-foreground text-sm">Click to select, double-click to expand</p>
 			</CardContent>
 		</Card>
 	);
@@ -337,7 +337,7 @@ function EntityCardDemoItem({ entity, isSelected, isExpanded, onSelect, onExpand
 		handleCardClick(() => onExpand());
 	};
 
-	// Efecto de selección
+	// Selection effect
 	React.useEffect(() => {
 		handleSelectionChange(isSelected);
 	}, [isSelected, handleSelectionChange]);
@@ -385,8 +385,8 @@ export function TransitionsDemo() {
 	return (
 		<div className="container mx-auto space-y-6 p-6">
 			<div className="space-y-2">
-				<h1 className="font-bold text-3xl">Sistema de Transiciones</h1>
-				<p className="text-muted-foreground">Demostración del sistema de transiciones fluidas para Image Manager</p>
+				<h1 className="font-bold text-3xl">Transition System</h1>
+				<p className="text-muted-foreground">A demonstration of the Media Manager transition system</p>
 			</div>
 
 			<Tabs className="space-y-6" defaultValue="flip">

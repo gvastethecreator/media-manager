@@ -154,7 +154,7 @@ export function SystemSettingsModern() {
 				toastService.error(result.message);
 			}
 		} catch (error) {
-			toastService.error('Error al reparar el sistema');
+			toastService.error('Could not repair the system');
 		}
 	};
 
@@ -164,11 +164,11 @@ export function SystemSettingsModern() {
 				actions={
 					<Button className="gap-2" disabled={isLoading} onClick={handleRefresh} size="sm" variant="outline">
 						<RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
-						Actualizar
+						Refresh
 					</Button>
 				}
-				description="Monitoreo y configuración general del servidor"
-				title="Configuración del Sistema"
+				description="Monitor and configure the server"
+				title="System Settings"
 			/>
 
 			{/* Stats Overview - 4 Real Data Cards */}
@@ -180,7 +180,7 @@ export function SystemSettingsModern() {
 				>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="font-medium text-sm">Almacenamiento</CardTitle>
+							<CardTitle className="font-medium text-sm">Storage</CardTitle>
 							<HardDrive className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
@@ -188,11 +188,11 @@ export function SystemSettingsModern() {
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
 								<span className="font-bold text-3xl text-foreground">{Math.round(diskUsagePercentage)}%</span>
-								<span className="text-muted-foreground text-sm">en uso</span>
+								<span className="text-muted-foreground text-sm">in use</span>
 							</div>
 							<Progress className="h-2" value={diskUsagePercentage} />
 							<p className="text-muted-foreground text-xs uppercase tracking-tight">
-								{formatBytes(diskUsed)} usados • {formatBytes(diskFree)} libres
+								{formatBytes(diskUsed)} used • {formatBytes(diskFree)} free
 							</p>
 						</div>
 					</CardContent>
@@ -205,7 +205,7 @@ export function SystemSettingsModern() {
 				>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="font-medium text-sm">Archivos Totales</CardTitle>
+							<CardTitle className="font-medium text-sm">Total Files</CardTitle>
 							<Database className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
@@ -213,7 +213,7 @@ export function SystemSettingsModern() {
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
 								<span className="font-bold text-3xl text-foreground">{stats.totalEntities}</span>
-								<span className="text-muted-foreground text-sm">registros</span>
+								<span className="text-muted-foreground text-sm">records</span>
 							</div>
 							<div className="flex gap-1 text-[10px] text-muted-foreground">
 								<span>{rawStats?.totalImages || 0} IMG</span>
@@ -233,7 +233,7 @@ export function SystemSettingsModern() {
 				>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="font-medium text-sm">Organización</CardTitle>
+							<CardTitle className="font-medium text-sm">Organization</CardTitle>
 							<Users className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
@@ -260,7 +260,7 @@ export function SystemSettingsModern() {
 				<Card className="border-l-2 bg-card/50" style={{ borderLeftColor: 'var(--entity-collection)' }}>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="font-medium text-sm">Base de Datos</CardTitle>
+							<CardTitle className="font-medium text-sm">Database</CardTitle>
 							<Database className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
@@ -285,26 +285,26 @@ export function SystemSettingsModern() {
 					<SettingsCard
 						className="h-full"
 						color="var(--primary)"
-						description="Ajustes de rendimiento y disponibilidad"
+						description="Performance and availability settings"
 						icon={<Server />}
-						title="Configuración del Servidor"
+						title="Server Settings"
 						variant="outlined"
 					>
-						<SettingsGroup title="Rendimiento">
+						<SettingsGroup title="Performance">
 							<SettingsRow
-								description="Actualizar métricas del sistema cada 30 segundos"
-								label="Auto-actualización de estadísticas"
+								description="Refresh system metrics every 30 seconds"
+								label="Automatic Statistics Refresh"
 							>
 								<Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
 							</SettingsRow>
-							<SettingsRow description="Habilitar caché para queries frecuentes" label="Cache de consultas">
+							<SettingsRow description="Cache frequently used queries" label="Query Cache">
 								<Switch defaultChecked />
 							</SettingsRow>
 						</SettingsGroup>
 
 						<Separator className="my-4" />
 
-						<SettingsGroup title="Nivel de Logging">
+						<SettingsGroup title="Log Level">
 							<RadioGroup className="space-y-3" onValueChange={(value) => setLogLevel(value)} value={logLevel}>
 								{['error', 'warn', 'info', 'debug'].map((level) => (
 									<div className="flex items-center justify-between" key={level}>
@@ -326,19 +326,19 @@ export function SystemSettingsModern() {
 							<SettingsCard
 								className="cursor-pointer hover:bg-muted/50"
 								color="var(--entity-collection)"
-								description="Configuración y mantenimiento de Drizzle ORM"
+								description="Configure and maintain Drizzle ORM"
 								icon={<Database />}
-								title="Acciones de Base de Datos"
+								title="Database Actions"
 							>
 								<ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
 							</SettingsCard>
 						</CollapsibleTrigger>
 						<CollapsibleContent className="space-y-4 pt-4">
-							<SettingsGroup title="Mantenimiento">
-								<SettingsRow description="Verificar integridad y reparar índices" label="Reparar Sistema">
+							<SettingsGroup title="Maintenance">
+								<SettingsRow description="Verify integrity and repair indexes" label="Repair System">
 									<Button disabled={repairSystemMutation.isPending} onClick={handleRepair} size="sm" variant="outline">
 										<Eye className={cn('mr-2 h-4 w-4', repairSystemMutation.isPending && 'animate-spin')} />
-										{repairSystemMutation.isPending ? 'Reparando...' : 'Ejecutar Reparación'}
+										{repairSystemMutation.isPending ? 'Repairing...' : 'Run Repair'}
 									</Button>
 								</SettingsRow>
 							</SettingsGroup>
@@ -354,7 +354,7 @@ export function SystemSettingsModern() {
 										<CheckCircle className="h-5 w-5" style={{ color: 'var(--dt-success-600)' }} />
 									</div>
 									<div className="flex flex-col gap-0.5">
-										<span className="font-medium text-foreground text-sm">Estado: Conectado</span>
+										<span className="font-medium text-foreground text-sm">Status: Connected</span>
 										<span className="text-muted-foreground text-sm">Driver: SQLite-Drizzle</span>
 									</div>
 								</div>
@@ -368,16 +368,16 @@ export function SystemSettingsModern() {
 					<SettingsCard
 						className="h-full"
 						color="var(--entity-system)"
-						description="Detalles técnicos y versión"
+						description="Technical details and version information"
 						icon={<Zap />}
-						title="Información del Sistema"
+						title="System Information"
 						variant="outlined"
 					>
 						<div className="space-y-4">
-							<SettingsRow label="Versión">
+							<SettingsRow label="Version">
 								<Badge variant="outline">{stats.version}</Badge>
 							</SettingsRow>
-							<SettingsRow label="Sistema operativo">
+							<SettingsRow label="Operating system">
 								<Badge variant="outline">{stats.platform}</Badge>
 							</SettingsRow>
 							<SettingsRow label="Host">
@@ -386,12 +386,12 @@ export function SystemSettingsModern() {
 							<SettingsRow label="Node/Bun runtime">
 								<span className="text-muted-foreground text-sm">{stats.nodeVersion}</span>
 							</SettingsRow>
-							<SettingsRow label="CPU actual">
+							<SettingsRow label="Current CPU">
 								<span className="text-muted-foreground text-sm">
 									{stats.cpuUsage}% • {stats.cpuModel}
 								</span>
 							</SettingsRow>
-							<SettingsRow label="Memoria">
+							<SettingsRow label="Memory">
 								<span className="text-muted-foreground text-sm">
 									{stats.memoryUsed} / {stats.memoryTotal} ({stats.memoryUsage}%)
 								</span>

@@ -89,7 +89,7 @@ export function SvgText({ svg, children, className = '', fontSize = '20vw', font
 				viewBox={`0 0 ${textDimensions.width} ${textDimensions.height}`}
 				width={textDimensions.width}
 			>
-				<title>Texto con máscara SVG</title>
+				<title>Text with SVG mask</title>
 				<defs>
 					<mask id={maskId}>
 						<rect fill="black" height="100%" width="100%" />

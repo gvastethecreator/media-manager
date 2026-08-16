@@ -242,9 +242,9 @@ describe('isolated test runner', () => {
 		const toolingRunner = await readFile(resolve(workspacePath, 'scripts/run-tooling-tests-isolated.ts'), 'utf8');
 
 		expect(packageJson.scripts['test:tooling']).toBe('bun scripts/run-tooling-tests-isolated.ts');
-		expect(toolingRunner).toContain("import { runIsolatedCommand } from './run-tests-isolated'");
+		expect(toolingRunner).toMatch(/import\s+\{\s*runIsolatedCommand\s*\}\s+from\s+['"]\.\/run-tests-isolated['"]/);
 		expect(toolingRunner).not.toMatch(/DATABASE_URL\s*:/);
-		expect(toolingRunner).toContain("process.execPath, 'test'");
+		expect(toolingRunner).toMatch(/process\.execPath,\s*['"]test['"]/);
 	});
 });
 
@@ -332,7 +332,7 @@ describe('production bootstrap contract', () => {
 		expect(tauriConfig).toContain('../src/lib/drizzle/migrations/');
 		expect(tauriConfig).not.toContain('dist/server/db.sqlite');
 		expect(tauriBuild).toContain("'0000_baseline.sql'");
-		expect(tauriBuild).toContain('MEDIA_MANAGER_DATABASE_PATH');
+		expect(tauriBuild).not.toContain('MEDIA_MANAGER_DATABASE_PATH');
 		expect(tauriBuild).not.toContain('cpSync(dbSourcePath');
 	});
 

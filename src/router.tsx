@@ -129,10 +129,10 @@ const NotFoundPage = () => {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-background p-4">
 			<div className="w-full max-w-md rounded-lg border border-destructive/20 bg-card p-6 text-center">
-				<h1 className="mb-4 font-bold text-2xl text-destructive">Página no encontrada</h1>
-				<p className="mb-4 text-destructive">La página que estás buscando no existe o ha sido movida.</p>
+				<h1 className="mb-4 font-bold text-2xl text-destructive">Page not found</h1>
+				<p className="mb-4 text-destructive">The page you are looking for does not exist or has moved.</p>
 				<a className="font-semibold text-destructive hover:underline" href="/">
-					Volver al inicio
+					Back to Home
 				</a>
 			</div>
 		</div>

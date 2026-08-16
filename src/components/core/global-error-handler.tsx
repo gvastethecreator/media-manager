@@ -11,7 +11,7 @@ import { ErrorBoundary } from './error-boundary';
 export function GlobalErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
 	// Registrar el error en la consola para depuración
 	React.useEffect(() => {
-		clientLogger.error('Error global capturado:', error);
+		clientLogger.error('Global error captured:', error);
 	}, [error]);
 
 	return (
@@ -19,18 +19,18 @@ export function GlobalErrorFallback({ error, resetError }: { error: Error; reset
 			<div className="w-full max-w-md rounded-lg border border-destructive/30 bg-card p-6 shadow-lg">
 				<div className="flex flex-col items-center text-center">
 					<AlertCircle className="mb-4 h-12 w-12 text-destructive" />
-					<h2 className="mb-2 font-bold text-xl">Ha ocurrido un error</h2>
+					<h2 className="mb-2 font-bold text-xl">An error occurred</h2>
 					<p className="mb-4 text-muted-foreground">
-						Lo sentimos, algo salió mal. Estamos trabajando para solucionarlo.
+						Something went wrong. We are working to resolve it.
 					</p>
 					{import.meta.env.DEV ? (
 						<div className="mb-4 max-h-32 w-full overflow-auto rounded bg-muted/50 p-3">
-							<p className="font-mono text-destructive/80 text-xs">{error.message || 'Error desconocido'}</p>
+							<p className="font-mono text-destructive/80 text-xs">{error.message || 'Unknown error'}</p>
 						</div>
 					) : null}
 					<Button className="flex items-center" onClick={resetError} variant="primary">
 						<RefreshCw className="mr-2 h-4 w-4" />
-						Reintentar
+						Retry
 					</Button>
 				</div>
 			</div>

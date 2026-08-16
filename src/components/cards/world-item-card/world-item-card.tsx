@@ -52,7 +52,7 @@ function WorldItemCardSkeleton({ className }: { className?: string }) {
 				className
 			)}
 		>
-			<p className="text-muted-foreground">Cargando objeto del mundo...</p>
+			<p className="text-muted-foreground">Loading world item...</p>
 		</div>
 	);
 }

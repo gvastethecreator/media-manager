@@ -63,7 +63,7 @@ export const createRelationsSlice: StateCreator<ConceptStore, [], [], RelationsS
 			relationsLogger.info('✅ Concepto desvinculado correctamente');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al desvincular concepto';
-			relationsLogger.error('❌ Error al desvincular concepto de entidad:', error);
+			relationsLogger.error('❌ Could not unlink concept from entity:', error);
 			set({ error: message });
 		}
 	},

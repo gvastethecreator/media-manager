@@ -72,7 +72,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 			case 'cards':
 				return (
 					<Row>
-						<Label className="text-muted-foreground text-xs">Tamaño de celda</Label>
+						<Label className="text-muted-foreground text-xs">Cell size</Label>
 						<div className="flex items-center gap-2">
 							<Input
 								className="h-7 w-20 text-right text-xs"
@@ -90,7 +90,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 				return (
 					<div className="space-y-2">
 						<Row>
-							<Label className="text-muted-foreground text-xs">Ancho columna</Label>
+							<Label className="text-muted-foreground text-xs">Column width</Label>
 							<div className="flex items-center gap-2">
 								<Input
 									className="h-7 w-20 text-right text-xs"
@@ -136,21 +136,21 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 							/>
 						</Row>
 						<Row>
-							<Label className="text-muted-foreground text-xs">Holográfico</Label>
+							<Label className="text-muted-foreground text-xs">Holographic</Label>
 							<Switch
 								checked={masonry.tcgHolo ?? true}
 								onCheckedChange={(v) => setViewConfig('masonry' as any, { tcgHolo: v } as any)}
 							/>
 						</Row>
 						<Row>
-							<Label className="text-muted-foreground text-xs">Sombras</Label>
+							<Label className="text-muted-foreground text-xs">Shadows</Label>
 							<Switch
 								checked={masonry.tcgShadows ?? true}
 								onCheckedChange={(v) => setViewConfig('masonry' as any, { tcgShadows: v } as any)}
 							/>
 						</Row>
 						<Row>
-							<Label className="text-muted-foreground text-xs">Bordes redondeados</Label>
+							<Label className="text-muted-foreground text-xs">Rounded corners</Label>
 							<Switch
 								checked={masonry.tcgRounded ?? true}
 								onCheckedChange={(v) => setViewConfig('masonry' as any, { tcgRounded: v } as any)}
@@ -170,7 +170,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 			case 'table':
 				return (
 					<Row>
-						<Label className="text-muted-foreground text-xs">Altura de fila</Label>
+						<Label className="text-muted-foreground text-xs">Row height</Label>
 						<div className="flex items-center gap-2">
 							<Input
 								className="h-7 w-20 text-right text-xs"
@@ -196,7 +196,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 					<div className="rounded-md bg-primary/10 p-1.5 text-primary">
 						<Sliders className="h-4 w-4" />
 					</div>
-					<h3 className="font-bold text-foreground text-sm tracking-tight">Ajustes del Explorador</h3>
+					<h3 className="font-bold text-foreground text-sm tracking-tight">Browser settings</h3>
 				</div>
 				<Button
 					className="h-8 w-8 hover:bg-muted"
@@ -215,16 +215,16 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 						<AccordionTrigger className="py-3 hover:no-underline">
 							<div className="flex items-center gap-2.5">
 								<Monitor className="h-4 w-4" style={{ color: 'var(--dt-info-500)' }} />
-								<span className="font-semibold text-sm">Apariencia</span>
+								<span className="font-semibold text-sm">Appearance</span>
 							</div>
 						</AccordionTrigger>
 						<AccordionContent className="space-y-3 pb-4">
 							<div className="space-y-2">
 								<Label className="font-bold text-[11px] text-muted-foreground/70 uppercase tracking-wider">
-									Interfaz Global
+									Global interface
 								</Label>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Modo de vista</Label>
+									<Label className="font-medium text-muted-foreground text-xs">View mode</Label>
 									<Select onValueChange={(v) => setViewMode(v as ViewMode)} value={viewMode}>
 										<SelectTrigger className="h-7 w-32 text-xs">
 											<SelectValue />
@@ -245,14 +245,14 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 									</Select>
 								</Row>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Fondo personalizado</Label>
+									<Label className="font-medium text-muted-foreground text-xs">Custom background</Label>
 									<ColorPicker onChange={setBackgroundColor} value={backgroundColor} />
 								</Row>
 							</div>
 
 							<div className="space-y-2 pt-1">
 								<Label className="font-bold text-[11px] text-muted-foreground/70 uppercase tracking-wider">
-									Ajustes de Vista ({viewMode})
+									View settings ({viewMode})
 								</Label>
 								{activeViewConfig}
 							</div>
@@ -264,34 +264,34 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 						<AccordionTrigger className="py-3 hover:no-underline">
 							<div className="flex items-center gap-2.5">
 								<FolderTree className="h-4 w-4" style={{ color: 'var(--dt-success-500)' }} />
-								<span className="font-semibold text-sm">Organización</span>
+								<span className="font-semibold text-sm">Organization</span>
 							</div>
 						</AccordionTrigger>
 						<AccordionContent className="space-y-3 pb-4">
 							<Row>
 								<div className="flex flex-col gap-0.5">
-									<Label className="font-medium text-xs">Agrupar por tipo</Label>
-									<p className="text-[10px] text-muted-foreground">Separa imágenes de videos</p>
+									<Label className="font-medium text-xs">Group by type</Label>
+									<p className="text-[10px] text-muted-foreground">Separates images from videos</p>
 								</div>
 								<Switch checked={groupByEntityType} onCheckedChange={toggleGroupByEntityType} />
 							</Row>
 							<Row>
 								<div className="flex flex-col gap-0.5">
-									<Label className="font-medium text-xs">Modo recursivo</Label>
-									<p className="text-[10px] text-muted-foreground">Incluir subcarpetas</p>
+									<Label className="font-medium text-xs">Recursive mode</Label>
+									<p className="text-[10px] text-muted-foreground">Include subfolders</p>
 								</div>
 								<Switch checked={includeSubfolders} onCheckedChange={toggleIncludeSubfolders} />
 							</Row>
 							<div className="space-y-2 pt-2">
 								<Label className="font-bold text-[11px] text-muted-foreground/70 uppercase tracking-wider">
-									Búsqueda Rápida
+									Quick search
 								</Label>
 								<div className="relative">
 									<Search className="absolute top-2.5 left-2.5 h-3.5 w-3.5 text-muted-foreground" />
 									<Input
 										className="h-9 pl-8 text-xs focus-visible:ring-success/30"
 										onChange={(e) => setSearchQuery(e.target.value)}
-										placeholder="Filtrar por nombre..."
+										placeholder="Filter by name..."
 									/>
 								</div>
 							</div>
@@ -303,42 +303,42 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 						<AccordionTrigger className="py-3 hover:no-underline">
 							<div className="flex items-center gap-2.5">
 								<Eye className="h-4 w-4" style={{ color: 'var(--dt-warning-500)' }} />
-								<span className="font-semibold text-sm">Visualización</span>
+								<span className="font-semibold text-sm">Display</span>
 							</div>
 						</AccordionTrigger>
 						<AccordionContent className="space-y-3 pb-4">
 							<div className="space-y-3">
 								<Label className="font-bold text-[11px] text-muted-foreground/70 uppercase tracking-wider">
-									Elementos a mostrar
+									Items to show
 								</Label>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Mostrar thumbnails</Label>
+									<Label className="font-medium text-muted-foreground text-xs">Show thumbnails</Label>
 									<Switch checked={showThumbnails} onCheckedChange={toggleShowThumbnails} />
 								</Row>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Mostrar metadata</Label>
+									<Label className="font-medium text-muted-foreground text-xs">Show metadata</Label>
 									<Switch checked={showMetadata} onCheckedChange={toggleShowMetadata} />
 								</Row>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Mostrar tags</Label>
+									<Label className="font-medium text-muted-foreground text-xs">Show tags</Label>
 									<Switch checked={showTags} onCheckedChange={toggleShowTags} />
 								</Row>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Mostrar estadísticas</Label>
+									<Label className="font-medium text-muted-foreground text-xs">Show stats</Label>
 									<Switch checked={showStats} onCheckedChange={toggleShowStats} />
 								</Row>
 							</div>
 
 							<div className="space-y-3 pt-2">
 								<Label className="font-bold text-[11px] text-muted-foreground/70 uppercase tracking-wider">
-									Animaciones
+									Animations
 								</Label>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Activar animaciones</Label>
+									<Label className="font-medium text-muted-foreground text-xs">Enable animations</Label>
 									<Switch checked={enableAnimations} onCheckedChange={toggleEnableAnimations} />
 								</Row>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Duración (ms)</Label>
+									<Label className="font-medium text-muted-foreground text-xs">Duration (ms)</Label>
 									<Input
 										className="h-7 w-20 text-right text-xs"
 										disabled={!enableAnimations}
@@ -358,7 +358,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 						<AccordionTrigger className="py-3 hover:no-underline">
 							<div className="flex items-center gap-2.5">
 								<Gauge className="h-4 w-4" style={{ color: 'var(--dt-warning-500)' }} />
-								<span className="font-semibold text-sm">Rendimiento</span>
+								<span className="font-semibold text-sm">Performance</span>
 							</div>
 						</AccordionTrigger>
 						<AccordionContent className="space-y-4 pb-4">
@@ -366,14 +366,14 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 							<div className="space-y-2">
 								<div className="flex items-center justify-between">
 									<Label className="font-bold text-[11px] text-muted-foreground/70 uppercase tracking-wider">
-										Virtualización
+										Virtualization
 									</Label>
 									<Switch checked={virtualization.enabled} onCheckedChange={(v) => setVirtualization({ enabled: v })} />
 								</div>
 								{virtualization.enabled && (
 									<div className="grid grid-cols-2 gap-2">
 										<div className="space-y-1.5 rounded-md border border-border/20 bg-muted/30 p-2">
-											<Label className="font-medium text-[10px] text-muted-foreground uppercase">Umbral</Label>
+											<Label className="font-medium text-[10px] text-muted-foreground uppercase">Threshold</Label>
 											<div className="flex items-center gap-1.5">
 												<Input
 													className="h-6 w-full text-right text-xs"
@@ -395,7 +395,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 													type="number"
 													value={virtualization.overscan}
 												/>
-												<span className="text-[10px] text-muted-foreground">filas</span>
+												<span className="text-[10px] text-muted-foreground">rows</span>
 											</div>
 										</div>
 									</div>
@@ -405,26 +405,26 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 							{/* Paginación */}
 							<div className="mt-2 space-y-2 border-border/20 border-t pt-1">
 								<Label className="font-bold text-[11px] text-muted-foreground/70 uppercase tracking-wider">
-									Carga de Datos
+									Data loading
 								</Label>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Método</Label>
+									<Label className="font-medium text-muted-foreground text-xs">Method</Label>
 									<Select onValueChange={(v) => setPaginationMode(v as PaginationMode)} value={pagination.mode}>
 										<SelectTrigger className="h-7 w-32 text-xs">
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem className="text-xs" value="pagination">
-												Páginas
+											Pages
 											</SelectItem>
 											<SelectItem className="text-xs" value="infinite">
-												Scroll infinito
+											Infinite scroll
 											</SelectItem>
 										</SelectContent>
 									</Select>
 								</Row>
 								<Row>
-									<Label className="font-medium text-muted-foreground text-xs">Items por página</Label>
+									<Label className="font-medium text-muted-foreground text-xs">Items per page</Label>
 									<div className="flex items-center gap-1.5">
 										<Input
 											className="h-7 w-20 text-right text-xs"
@@ -453,7 +453,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 										style={{ borderColor: 'color-mix(in oklab, var(--dt-warning-500), transparent 80%)' }}
 									>
 										<div className="flex h-6 items-center justify-between gap-2 border-none bg-transparent p-0">
-											<Label className="text-[11px] text-muted-foreground">Carga automática</Label>
+										<Label className="text-[11px] text-muted-foreground">Auto load</Label>
 											<Switch checked={infiniteScroll.autoLoad} onCheckedChange={toggleInfiniteScrollAutoLoad} />
 										</div>
 										<div className="grid grid-cols-2 gap-2 pt-1">
@@ -477,7 +477,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 												</div>
 											</div>
 											<div className="flex flex-col gap-1">
-												<Label className="text-[10px] text-muted-foreground">Umbral</Label>
+												<Label className="text-[10px] text-muted-foreground">Threshold</Label>
 												<div className="flex items-center gap-1">
 													<Input
 														className="h-6 w-full text-right text-xs"
@@ -502,7 +502,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 						<AccordionTrigger className="py-3 opacity-70 transition-opacity hover:no-underline hover:opacity-100">
 							<div className="flex items-center gap-2.5">
 								<Settings className="h-4 w-4" style={{ color: 'var(--dt-primary-500)' }} />
-								<span className="font-semibold text-sm">Avanzado</span>
+								<span className="font-semibold text-sm">Advanced</span>
 							</div>
 						</AccordionTrigger>
 						<AccordionContent className="space-y-2 pt-1 pb-4">
@@ -513,7 +513,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 									variant="outline"
 								>
 									<RefreshCcw className="mr-2 h-3 w-3" />
-									Reset Filtros
+									Reset filters
 								</Button>
 								<Button
 									className="h-8 justify-start px-2 text-[11px] hover:border-warning/30 hover:bg-warning/10 hover:text-warning"
@@ -521,7 +521,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 									variant="outline"
 								>
 									<RotateCcw className="mr-2 h-3 w-3" />
-									Limpiar Todo
+									Reset all
 								</Button>
 							</div>
 							<Button
@@ -533,11 +533,10 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 								variant="outline"
 							>
 								<X className="mr-2 h-3 w-3" />
-								Restablecer Memoria (LocalStorage)
+								Reset local storage
 							</Button>
 							<div className="rounded-md bg-muted/50 p-2 text-[9px] text-muted-foreground leading-relaxed">
-								<strong>Nota:</strong> Estas acciones restaurarán los valores de fábrica. Restablecer memoria recargará
-								la página por completo.
+								<strong>Note:</strong> These actions restore factory defaults. Resetting local storage reloads the entire page.
 							</div>
 						</AccordionContent>
 					</AccordionItem>

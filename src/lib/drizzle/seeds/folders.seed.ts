@@ -21,7 +21,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: 'test-files',
 				name: 'Test Files',
-				description: 'Archivos de prueba para desarrollo',
+				description: 'Test files for development',
 				path: 'D:\\DEV\\image-manager\\test-files',
 				emoji: '🧪',
 				totalFiles: 0,
@@ -34,7 +34,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: 'posters',
 				name: 'Posters',
-				description: 'Fotografías de posters',
+				description: 'Poster photography',
 				path: 'A:\\MOKLOS DATASETS\\! POSTERS',
 				emoji: '🌿',
 				totalFiles: 0,
@@ -87,7 +87,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: 'primigenios-core',
 				name: 'Primigenios Core',
-				description: 'Fotografías personales',
+				description: 'Personal photography',
 				path: 'A:\\MOKLOS DATASETS\\! PRIMIGENIOS CORE',
 				emoji: '📷',
 				totalFiles: 0,
@@ -126,7 +126,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: 'aesthethic',
 				name: 'Aesthethic',
-				description: 'Fotografías estéticas',
+				description: 'Aesthetic photography',
 				path: 'D:\\Pictures\\Photography\\Aesthethic',
 				emoji: '🏰',
 				totalFiles: 0,
@@ -141,9 +141,9 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 		// Insertar carpetas
 		await db.insert(folders).values(sampleFolders);
 
-		seedLogger.success(`✅ ${sampleFolders.length} carpetas creadas (incluyendo jerarquía padre-hijo)`);
+		seedLogger.success(`✅ ${sampleFolders.length} folders created (including parent-child hierarchy)`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando carpetas:', error);
+		seedLogger.error('❌ Could not create folders:', error);
 		throw error;
 	}
 }

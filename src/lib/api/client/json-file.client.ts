@@ -27,7 +27,7 @@ const API_BASE_PATH = '/api/json-files';
 export async function getJsonFilesFromApi(): Promise<JsonFileWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener archivos JSON');
+		throw new Error('Could not get JSON files');
 	}
 	const payload = await response.json();
 	if (Array.isArray(payload)) {
@@ -39,7 +39,7 @@ export async function getJsonFilesFromApi(): Promise<JsonFileWithStats[]> {
 export async function getJsonFileFromApi(id: string): Promise<JsonFileWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`);
 	if (!response.ok) {
-		throw new Error('Error al obtener archivo JSON');
+		throw new Error('Could not get JSON file');
 	}
 	return response.json();
 }
@@ -51,7 +51,7 @@ export async function createJsonFileInApi(data: PublicJsonFileCreateInput): Prom
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear archivo JSON');
+		throw new Error('Could not create JSON file');
 	}
 	return response.json();
 }
@@ -63,7 +63,7 @@ export async function updateJsonFileInApi(id: string, data: PublicJsonFileUpdate
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar archivo JSON');
+		throw new Error('Could not update JSON file');
 	}
 	return response.json();
 }
@@ -77,6 +77,6 @@ export async function toggleJsonFileFavoriteInApi(id: string): Promise<JsonFileW
 export async function deleteJsonFileFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar archivo JSON');
+		throw new Error('Could not delete JSON file');
 	}
 }

@@ -40,11 +40,11 @@ const VIEW_ICONS: Record<ViewMode, React.ComponentType<{ className?: string }>> 
 };
 
 const VIEW_LABELS: Record<ViewMode, string> = {
-	grid: 'Cuadrícula',
+	grid: 'Grid',
 	masonry: 'Masonry',
-	cards: 'Tarjetas',
-	list: 'Lista',
-	table: 'Tabla',
+	cards: 'Cards',
+	list: 'List',
+	table: 'Table',
 };
 
 export interface FileBrowserToolbarProps extends ToolbarProps {
@@ -93,16 +93,16 @@ export function FileBrowserToolbar({
 	const showSizeSlider = viewMode === 'grid' || viewMode === 'masonry' || viewMode === 'cards';
 
 	const AVAILABLE_SORT_OPTIONS = [
-		{ field: 'name', label: 'Nombre' },
-		{ field: 'size', label: 'Tamaño' },
-		{ field: 'createdAt', label: 'Fecha' },
-		{ field: 'updatedAt', label: 'Modificado' },
+		{ field: 'name', label: 'Name' },
+		{ field: 'size', label: 'Size' },
+		{ field: 'createdAt', label: 'Date' },
+		{ field: 'updatedAt', label: 'Modified' },
 	];
 
 	const activeSort = sortOptions[0];
 	const activeSortLabel = activeSort
 		? (AVAILABLE_SORT_OPTIONS.find((o) => o.field === activeSort.field)?.label ?? activeSort.field)
-		: 'Ordenar';
+		: 'Sort';
 
 	return (
 		<div
@@ -118,15 +118,15 @@ export function FileBrowserToolbar({
 				{hasSelection ? (
 					<>
 						<span className="text-muted-foreground text-sm">
-							{selectedCount} seleccionado{selectedCount !== 1 ? 's' : ''}
+							{selectedCount} selected
 						</span>
 						<Button onClick={onClearSelection} size="sm" variant="ghost">
-							Limpiar
+							Clear
 						</Button>
 					</>
 				) : (
 					<Button disabled={itemIds.length === 0} onClick={onSelectAll} size="sm" variant="ghost">
-						Seleccionar todos ({itemIds.length})
+						Select all ({itemIds.length})
 					</Button>
 				)}
 			</div>
@@ -137,7 +137,7 @@ export function FileBrowserToolbar({
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button data-testid="view-mode-dropdown-trigger" size="sm" variant="ghost">
-							<span className="text-caption">Vista</span>
+							<span className="text-caption">View</span>
 							<ChevronDown className="ml-1 h-3.5 w-3.5" />
 						</Button>
 					</DropdownMenuTrigger>
@@ -232,7 +232,7 @@ export function FileBrowserToolbar({
 				<Input
 					className="h-8 px-8 text-sm"
 					onChange={(e) => onSearchChange?.(e.target.value)}
-					placeholder="Buscar..."
+					placeholder="Search..."
 					type="search"
 					value={searchQuery}
 				/>
@@ -252,7 +252,7 @@ export function FileBrowserToolbar({
 			<div className="flex items-center gap-2">
 				<Button disabled={isLoading} onClick={onRefresh} size="sm" variant="ghost">
 					<RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
-					<span className="sr-only">Refrescar</span>
+					<span className="sr-only">Refresh</span>
 				</Button>
 			</div>
 		</div>

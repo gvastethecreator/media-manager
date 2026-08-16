@@ -27,7 +27,7 @@ export default function AudioView(_props: ViewProps) {
 	useEffect(() => {
 		if (!hasInitializedRef.current && audioCount === 0 && !isLoading) {
 			hasInitializedRef.current = true;
-			viewLogger.info('Cargando audios...');
+			viewLogger.info('Loading audio files...');
 			fetchAudios();
 		}
 	}, [audioCount, isLoading, fetchAudios]);
@@ -57,21 +57,21 @@ export default function AudioView(_props: ViewProps) {
 	);
 
 	if (isLoading && audioCount === 0) {
-		return <LoadingScreen message="Cargando audios..." />;
+		return <LoadingScreen message="Loading audio files..." />;
 	}
 
 	if (error) {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<h2 className="mb-2 font-semibold text-lg">Error al cargar audios</h2>
+					<h2 className="mb-2 font-semibold text-lg">Could not load audio files</h2>
 					<p className="mb-4 text-muted-foreground">Error: {error}</p>
 					<button
 						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 						onClick={() => fetchAudios()}
 						type="button"
 					>
-						Intentar de nuevo
+						Try again
 					</button>
 				</div>
 			</div>
@@ -86,7 +86,7 @@ export default function AudioView(_props: ViewProps) {
 					<div className="min-w-0">
 						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">Audio</h2>
 						<p className="truncate text-muted-foreground text-xs leading-tight">
-							{audioCount} {audioCount === 1 ? 'archivo' : 'archivos'} de audio
+							{audioCount} {audioCount === 1 ? 'file' : 'files'} de audio
 						</p>
 					</div>
 				</div>

@@ -22,7 +22,7 @@ export async function getActivityFromApi(id: string): Promise<Activity> {
 		if (response.status === 404) {
 			throw new Error(`Actividad con ID ${id} no encontrada`);
 		}
-		throw new Error(`Error al obtener actividad: ${response.status}`);
+		throw new Error(`Could not get activity: ${response.status}`);
 	}
 	const result = await response.json();
 	return result.data ?? result;
@@ -55,7 +55,7 @@ export async function getActivitiesFromApi(filters: ActivityFilters = {}): Promi
 	const query = params.toString();
 	const response = await fetch(query ? `${API_BASE_PATH}?${query}` : API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener actividades');
+		throw new Error('Could not get activities');
 	}
 	const result = await response.json();
 	// El endpoint devuelve datos y paginación; adaptamos a la estructura del store
@@ -73,7 +73,7 @@ export async function createActivityInApi(data: CreateActivityData): Promise<Act
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear actividad');
+		throw new Error('Could not create activity');
 	}
 	const result = await response.json();
 	return result.data ?? result;
@@ -82,6 +82,6 @@ export async function createActivityInApi(data: CreateActivityData): Promise<Act
 export async function deleteActivityFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar actividad');
+		throw new Error('Could not delete activity');
 	}
 }

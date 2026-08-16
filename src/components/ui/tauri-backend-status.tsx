@@ -48,7 +48,7 @@ export function TauriBackendStatus() {
 					<Server className="h-4 w-4" />
 					Estado del Backend
 				</CardTitle>
-				<CardDescription className="text-xs">Conexión con el servidor local</CardDescription>
+				<CardDescription className="text-xs">Local server connection</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">
 				<div className="flex items-center justify-between">
@@ -74,7 +74,7 @@ export function TauriBackendStatus() {
 
 				<div className="space-y-1 text-muted-foreground text-xs">
 					<div>Puerto: 4000</div>
-					<div>Modo: Aplicación de escritorio</div>
+					<div>Mode: Desktop application</div>
 				</div>
 			</CardContent>
 		</Card>

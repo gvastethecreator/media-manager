@@ -218,7 +218,7 @@ export const useCustomThemeStore = create<CustomThemeStore>()(
 					id: generateThemeId(),
 					name,
 					description: `Basado en ${builtIn.name}`,
-					author: 'Usuario',
+					author: 'User',
 					isDark: builtIn.isDark,
 					createdAt: now,
 					updatedAt: now,

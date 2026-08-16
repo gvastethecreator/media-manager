@@ -17,7 +17,7 @@ import {
 	type LogType,
 } from './console-formatter';
 import { type LogLevel, loggerConfig } from './logger.config';
-import { sanitizeSensitiveOutput, sanitizeSensitiveText } from '@/lib/security/sanitize-sensitive-output';
+import { sanitizeSensitiveLogOutput, sanitizeSensitiveLogText } from '@/lib/security/sanitize-sensitive-output';
 
 // Colores ANSI para la consola del servidor
 const SERVER_COLORS = {
@@ -145,8 +145,8 @@ export class ServerLogger {
 		startTime?: number
 	): string {
 		// Agregar información adicional al mensaje
-		let enhancedMessage = sanitizeSensitiveText(message);
-		const sanitizedContext = sanitizeSensitiveOutput(context);
+		let enhancedMessage = sanitizeSensitiveLogText(message);
+		const sanitizedContext = sanitizeSensitiveLogOutput(context);
 
 		// Agregar ID de solicitud si está habilitado y disponible
 		if (this.showRequestId && requestId) {
@@ -208,15 +208,8 @@ export class ServerLogger {
 
 	error(message: string, context?: unknown, requestId?: string, startTime?: number): void {
 		if (this.shouldLog('error')) {
-			// Asegurarse de que el mensaje y el contexto sean strings válidos
 			const safeMessage = String(message);
-			const safeContext = context
-				? typeof context === 'string'
-					? context
-					: JSON.stringify(context, null, 2)
-				: undefined;
-
-			console.error(this.formatServerMessage('error', safeMessage, safeContext, requestId, startTime));
+			console.error(this.formatServerMessage('error', safeMessage, context, requestId, startTime));
 		}
 	}
 
@@ -253,13 +246,13 @@ export class ServerLogger {
 	// Métodos para agrupar logs
 	group(label: string): void {
 		if (loggerConfig.enableConsole) {
-			console.group(`${CONSOLE_COLORS.bright}${sanitizeSensitiveText(label)}${CONSOLE_COLORS.reset}`);
+			console.group(`${CONSOLE_COLORS.bright}${sanitizeSensitiveLogText(label)}${CONSOLE_COLORS.reset}`);
 		}
 	}
 
 	groupCollapsed(label: string): void {
 		if (loggerConfig.enableConsole) {
-			console.groupCollapsed(`${CONSOLE_COLORS.bright}${sanitizeSensitiveText(label)}${CONSOLE_COLORS.reset}`);
+			console.groupCollapsed(`${CONSOLE_COLORS.bright}${sanitizeSensitiveLogText(label)}${CONSOLE_COLORS.reset}`);
 		}
 	}
 

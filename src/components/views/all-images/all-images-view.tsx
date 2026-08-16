@@ -50,11 +50,11 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 		// Solo cargar la primera vez cuando el componente se monta
 		if (!hasTriedToLoad.current && imageCount === 0 && !isLoading) {
 			hasTriedToLoad.current = true;
-			clientLogger.debug('🚀 DEBUG AllImagesView: Store de imágenes vacío, llamando loadImages()');
-			viewLogger.info('Store de imágenes vacío, cargando desde el servidor...');
+			clientLogger.debug('🚀 DEBUG AllImagesView: image store is empty, calling loadImages()');
+			viewLogger.info('Image store is empty, loading from the server...');
 			loadImages();
 		} else {
-			clientLogger.debug('✅ DEBUG AllImagesView: Ya se intentó cargar o no es necesario');
+			clientLogger.debug('✅ DEBUG AllImagesView: load already attempted or not required');
 		}
 	}, [imageCount, isLoading, loadImages]); // Dependencias necesarias
 
@@ -64,13 +64,13 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 		// Verificar que sea una imagen usando type guard
 		if (isImageWithStats(item)) {
 			const image = item as ImageWithStats;
-			viewLogger.info('🖱️ Click en imagen:', image.name);
+			viewLogger.info('🖱️ Image clicked:', image.name);
 
 			// Navegar a la vista de detalle de imagen
 			// Por ahora mantenemos en la misma vista
-			viewLogger.info('Imagen seleccionada:', image.name);
+			viewLogger.info('Selected image:', image.name);
 		} else {
-			viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
+			viewLogger.warn('⚠️ Clicked item is not an image:', item);
 		}
 	}, []);
 
@@ -79,7 +79,7 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 			// Verificar que sea una imagen usando type guard
 			if (isImageWithStats(item)) {
 				const image = item as ImageWithStats;
-				viewLogger.info('🖱️ Doble click en imagen:', image.name);
+				viewLogger.info('🖱️ Image double-clicked:', image.name);
 
 				// Abrir visor de imágenes
 				const imageItems = sortedImages.map((item) =>
@@ -88,7 +88,7 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 				const currentIndex = imageItems.findIndex((item) => item.id === image.id);
 				openViewer(imageItems, Math.max(0, currentIndex));
 			} else {
-				viewLogger.warn('⚠️ Item con doble click no es una imagen:', item);
+				viewLogger.warn('⚠️ Double-clicked item is not an image:', item);
 			}
 		},
 		[sortedImages, openViewer]

@@ -98,7 +98,7 @@ export function CollectionCardFooter({
 						{/* Fecha de creación */}
 						<div className="flex items-center gap-1">
 							<Calendar className="h-4 w-4" />
-							<span className="mr-1 opacity-70">Creado:</span>
+							<span className="mr-1 opacity-70">Created:</span>
 							<span className="font-medium">{formattedCreated}</span>
 						</div>
 
@@ -118,7 +118,7 @@ export function CollectionCardFooter({
 							textShadow: `0 0 5px ${primaryColor}30`,
 						}}
 					>
-						♦ Colección digital ♦ {getItemsText()}
+						♦ Digital collection ♦ {getItemsText()}
 					</div>
 				</>
 			)}

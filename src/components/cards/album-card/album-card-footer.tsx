@@ -40,7 +40,7 @@ export function AlbumCardFooter({
 				</div>
 
 				<div className="flex items-center gap-1">
-					<span className="text-muted-foreground">Tamaño:</span>
+					<span className="text-muted-foreground">Size:</span>
 					<span>{formatSize(album.metadata?.totalSize)}</span>
 				</div>
 			</div>
@@ -53,7 +53,7 @@ export function AlbumCardFooter({
 				</div>
 
 				<div className="flex items-center gap-1">
-					<span className="text-muted-foreground">Actualizado:</span>
+					<span className="text-muted-foreground">Updated:</span>
 					<span>{new Date(album.updatedAt).toLocaleDateString()}</span>
 				</div>
 			</div>
@@ -63,10 +63,10 @@ export function AlbumCardFooter({
 				<div
 					className={cn(
 						'absolute bottom-1 left-1/2 z-20 -translate-x-1/2 rounded-full px-3 py-0.5 font-medium text-xs',
-						rarityLevel === 'Mítica' && 'bg-gradient-to-r from-amber-400 via-purple-500 to-pink-500 text-white',
-						rarityLevel === 'Rara' && 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white',
-						rarityLevel === 'Poco común' && 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white',
-						rarityLevel === 'Común' && 'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
+						rarityLevel === 'Mythic' && 'bg-gradient-to-r from-amber-400 via-purple-500 to-pink-500 text-white',
+						rarityLevel === 'Rare' && 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white',
+						rarityLevel === 'Uncommon' && 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white',
+						rarityLevel === 'Common' && 'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
 					)}
 				>
 					{rarityLevel}

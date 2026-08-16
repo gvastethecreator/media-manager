@@ -196,7 +196,7 @@ export const File3DCard = memo(function File3DCard({
 			{/* Contenedor principal */}
 			<div className="relative z-1 flex h-full flex-col">
 				{/* Cabecera */}
-				<CardHeader compact={compact} emoji="🎲" primaryColor={primaryColor} title={file3d.name || 'Sin nombre'} />
+				<CardHeader compact={compact} emoji="🎲" primaryColor={primaryColor} title={file3d.name || 'Unnamed'} />
 
 				{/* Contenido principal */}
 				{!compact && (
@@ -254,7 +254,7 @@ export const File3DCard = memo(function File3DCard({
 									className="flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
-									<span>Tamaño</span>
+									<span>Size</span>
 									<span className="font-bold">{fileSize}</span>
 								</div>
 								<div
@@ -278,7 +278,7 @@ export const File3DCard = memo(function File3DCard({
 								className={cn('rounded p-1 transition-colors hover:bg-muted/50', isRotating && 'bg-muted/50')}
 								onClick={toggleRotation}
 								style={{ color: primaryColor }}
-								title={isRotating ? 'Detener rotación' : 'Iniciar rotación'}
+								title={isRotating ? 'Stop rotation' : 'Start rotation'}
 								type="button"
 							>
 								<RotateCcwIcon className="h-4 w-4" />
@@ -286,7 +286,7 @@ export const File3DCard = memo(function File3DCard({
 							<button
 								className="rounded p-1 transition-colors hover:bg-muted/50"
 								style={{ color: primaryColor }}
-								title="Vista previa"
+								title="Preview"
 								type="button"
 							>
 								<EyeIcon className="h-4 w-4" />
@@ -302,7 +302,7 @@ export const File3DCard = memo(function File3DCard({
 							<button
 								className="rounded p-1 transition-colors hover:bg-muted/50"
 								style={{ color: primaryColor }}
-								title="Descargar"
+								title="Download"
 								type="button"
 							>
 								<DownloadIcon className="h-4 w-4" />

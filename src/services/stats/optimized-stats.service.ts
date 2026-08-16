@@ -118,7 +118,7 @@ export class OptimizedStatsService {
 				breakdown,
 			};
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas de álbum:', { albumId, error });
+			this.logger.error('❌ Could not get statistics de álbum:', { albumId, error });
 			throw error;
 		}
 	};
@@ -178,7 +178,7 @@ export class OptimizedStatsService {
 				{} as Record<string, any>
 			);
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas por lotes:', { albumIds, error });
+			this.logger.error('❌ Could not get statistics por lotes:', { albumIds, error });
 			throw error;
 		}
 	};
@@ -260,7 +260,7 @@ export class OptimizedStatsService {
 				totalFavorites: (Number(stats.totalFavoriteImages) || 0) + (Number(stats.totalFavoriteVideos) || 0),
 			};
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas globales:', { error });
+			this.logger.error('❌ Could not get statistics globales:', { error });
 			throw error;
 		}
 	};
@@ -330,7 +330,7 @@ export class OptimizedStatsService {
 				},
 			};
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas de grupo:', { groupId, error });
+			this.logger.error('❌ Could not get statistics de grupo:', { groupId, error });
 			throw error;
 		}
 	};
@@ -435,7 +435,7 @@ export class OptimizedStatsService {
 				{}
 			);
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas por lotes de tags:', { tagIds, error });
+			this.logger.error('❌ Could not get statistics por lotes de tags:', { tagIds, error });
 			throw error;
 		}
 	};
@@ -538,7 +538,7 @@ export class OptimizedStatsService {
 				{}
 			);
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas por lotes de colecciones:', { collectionIds, error });
+			this.logger.error('❌ Could not get statistics por lotes de colecciones:', { collectionIds, error });
 			throw error;
 		}
 	};
@@ -639,7 +639,7 @@ export class OptimizedStatsService {
 				},
 			};
 		} catch (error) {
-			this.logger.error('❌ Error al obtener estadísticas de favoritos:', { error });
+			this.logger.error('❌ Could not get statistics de favoritos:', { error });
 			throw error;
 		}
 	};

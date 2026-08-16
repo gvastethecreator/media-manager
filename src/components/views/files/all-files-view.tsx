@@ -123,7 +123,7 @@ export function AllFilesView(_: ViewProps) {
 	useEffect(() => {
 		// Cargar todos los tipos de archivos solo una vez al montar el componente
 		if (!hasInitializedRef.current) {
-			viewLogger.info('Cargando todos los tipos de archivos...');
+			viewLogger.info('Loading all file types...');
 			hasInitializedRef.current = true;
 
 			// Cargar solo si no hay datos ya cargados
@@ -172,7 +172,7 @@ export function AllFilesView(_: ViewProps) {
 
 	const handleFileClick = useCallback(
 		(file: BrowserItem) => {
-			viewLogger.info('🖱️ Click en archivo:', file.name);
+			viewLogger.info('🖱️ File clicked:', file.name);
 
 			// Navegar según el entityType
 			switch (file.entityType) {
@@ -189,7 +189,7 @@ export function AllFilesView(_: ViewProps) {
 					navigate('/documents');
 					break;
 				default:
-					viewLogger.info('Abriendo archivo:', file.name);
+					viewLogger.info('Opening file:', file.name);
 			}
 		},
 		[navigate]
@@ -197,12 +197,12 @@ export function AllFilesView(_: ViewProps) {
 
 	const handleFileDoubleClick = useCallback(
 		(file: BrowserItem) => {
-			viewLogger.info('🖱️ Doble click en archivo:', file.name);
+			viewLogger.info('🖱️ File double-clicked:', file.name);
 			viewLogger.info('🔍 Debug - entityType:', file.entityType);
 
 			const entity = file.raw as unknown as AnyEntityWithStats | undefined;
 			if (!entity) {
-				viewLogger.info('🔍 Debug - sin raw en item; usando fallback de navegación');
+				viewLogger.info('🔍 Debug - item has no raw data; using navigation fallback');
 				handleFileClick(file);
 				return;
 			}
@@ -212,7 +212,7 @@ export function AllFilesView(_: ViewProps) {
 
 			// Las imágenes usan el visor global igual que el resto de media.
 			if (isImageWithStats(entity)) {
-				viewLogger.info('📸 Abriendo imagen en file viewer');
+				viewLogger.info('📸 Opening image in file viewer');
 				const imageItems = allFiles
 					.filter((item) => isImageWithStats(item))
 					.map((image) => toFileViewerItem(image as unknown as Record<string, unknown>, 'image'));
@@ -244,21 +244,21 @@ export function AllFilesView(_: ViewProps) {
 			}
 
 			// Para otros tipos de archivos, usar comportamiento anterior (navegar)
-			viewLogger.info('📁 Tipo de archivo no soportado, navegando');
+			viewLogger.info('📁 Unsupported file type, navigating');
 			handleFileClick(file);
 		},
 		[allFiles, openFileViewer, handleFileClick]
 	);
 
 	if (isLoading && allFiles.length === 0) {
-		return <LoadingScreen message="Cargando archivos..." />;
+		return <LoadingScreen message="Loading files..." />;
 	}
 
 	if (error && allFiles.length === 0) {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<h2 className="mb-2 font-semibold text-lg">Error al cargar archivos</h2>
+					<h2 className="mb-2 font-semibold text-lg">Could not load files</h2>
 					<p className="mb-4 text-muted-foreground">Error: {error}</p>
 					<button
 						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
@@ -272,7 +272,7 @@ export function AllFilesView(_: ViewProps) {
 						}}
 						type="button"
 					>
-						Intentar de nuevo
+						Try again
 					</button>
 				</div>
 			</div>

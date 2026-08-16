@@ -29,14 +29,14 @@ export function AlbumsView(_props: ViewProps) {
 
 	useEffect(() => {
 		if (Object.keys(albumsRecord).length === 0) {
-			viewLogger.info('Store de álbumes vacío, cargando desde el servidor...');
+			viewLogger.info('Album store is empty, loading from the server...');
 			loadAlbums();
 		}
 	}, [loadAlbums, albumsRecord]);
 
 	const handleAlbumClick = useCallback(
 		(album: AlbumWithStats) => {
-			viewLogger.info('🖱️ Click en álbum:', album.name);
+			viewLogger.info('🖱️ Album clicked:', album.name);
 			setCurrentAlbumId(album.id);
 			navigate(`/albums/${album.id}`);
 		},

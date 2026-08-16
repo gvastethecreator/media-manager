@@ -140,7 +140,7 @@ const getStats = async () => {
 			},
 		];
 	} catch (error) {
-		statsLogger.error('Error al obtener estadísticas:', error);
+		statsLogger.error('Could not get statistics:', error);
 		throw error;
 	}
 };
@@ -215,7 +215,7 @@ export const useStatsBaseStore = create<{
 				loading: false,
 			});
 		} catch (error) {
-			statsLogger.error('Error al obtener estadísticas:', error);
+			statsLogger.error('Could not get statistics:', error);
 			set({ error: error instanceof Error ? error.message : 'Error desconocido', loading: false });
 		}
 	},

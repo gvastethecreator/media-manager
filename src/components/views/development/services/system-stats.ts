@@ -19,7 +19,7 @@ export async function getIndexedFilesCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		clientLogger.error('Error al obtener conteo de archivos:', error);
+		clientLogger.error('Could not get file count:', error);
 		return 0;
 	}
 }
@@ -61,13 +61,13 @@ export async function getMonitoredFoldersCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		clientLogger.error('Error al obtener carpetas monitoreadas:', error);
+		clientLogger.error('Could not get monitored folders:', error);
 		return 0;
 	}
 }
 
 /**
- * Obtiene el número de colecciones creadas
+ * Obtiene el número de collections created
  */
 export async function getCollectionsCount(): Promise<number> {
 	try {
@@ -75,7 +75,7 @@ export async function getCollectionsCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		clientLogger.error('Error al obtener colecciones:', error);
+		clientLogger.error('Could not get collections:', error);
 		return 0;
 	}
 }
@@ -89,7 +89,7 @@ export async function getTagsCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		clientLogger.error('Error al obtener etiquetas:', error);
+		clientLogger.error('Could not get tags:', error);
 		return 0;
 	}
 }
@@ -136,7 +136,7 @@ export async function getFilesHistoricalData(): Promise<
 
 		return result;
 	} catch (error) {
-		clientLogger.error('Error al obtener datos históricos:', error);
+		clientLogger.error('Could not get historical data:', error);
 		return [];
 	}
 }
@@ -183,7 +183,7 @@ export async function getTagsHistoricalData(): Promise<
 
 		return result;
 	} catch (error) {
-		clientLogger.error('Error al obtener datos históricos de etiquetas:', error);
+		clientLogger.error('Could not get historical tag data:', error);
 		return [];
 	}
 }
@@ -207,7 +207,7 @@ export async function getSystemMetrics(): Promise<{
 			queueSize: 0,
 		};
 	} catch (error) {
-		console.error('Error al obtener métricas del sistema:', error);
+		console.error('Could not get system metrics:', error);
 		return {
 			cpuUsage: 0,
 			memoryUsage: 0,

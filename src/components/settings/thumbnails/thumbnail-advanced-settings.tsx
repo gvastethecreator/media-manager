@@ -24,24 +24,24 @@ interface ThumbnailAdvancedSettingsProps {
 const entityLabels: Record<keyof ThumbnailAdvancedConfig['entities'], string> = {
 	video: '🎬 Video',
 	audio: '🎵 Audio',
-	image: '🖼️ Imagen',
-	document: '📄 Documento',
+	image: '🖼️ Image',
+	document: '📄 Document',
 	jsonFile: '📝 JSON',
 	file3d: '🎲 3D',
 };
 
 const fallbackStrategyLabels: Record<ThumbnailFallbackStrategy, { label: string; description: string }> = {
 	[ThumbnailFallbackStrategy.AGGRESSIVE]: {
-		label: 'Agresivo',
-		description: 'Intentar todos los métodos disponibles',
+		label: 'Aggressive',
+		description: 'Try every available method',
 	},
 	[ThumbnailFallbackStrategy.CONSERVATIVE]: {
-		label: 'Conservador',
-		description: 'Intentar solo el primer fallback',
+		label: 'Conservative',
+		description: 'Try only the first fallback',
 	},
 	[ThumbnailFallbackStrategy.NONE]: {
-		label: 'Ninguno',
-		description: 'Fallar inmediatamente sin fallbacks',
+		label: 'None',
+		description: 'Fail immediately without fallbacks',
 	},
 };
 
@@ -80,8 +80,8 @@ function EntityConfigSection({
 				<>
 					<div className="space-y-1.5">
 						<div className="flex items-center gap-1.5">
-							<Label className="text-xs">Timeout (segundos)</Label>
-							<InfoTooltip content="Tiempo máximo para generar el thumbnail antes de fallar" />
+							<Label className="text-xs">Timeout (seconds)</Label>
+							<InfoTooltip content="Maximum thumbnail generation time before failure" />
 						</div>
 						<div className="flex items-center gap-2">
 							<Slider
@@ -98,7 +98,7 @@ function EntityConfigSection({
 
 					<div className="space-y-1.5">
 						<div className="flex items-center gap-1.5">
-							<Label className="text-xs">Estrategia de Fallback</Label>
+							<Label className="text-xs">Fallback Strategy</Label>
 							<InfoTooltip content={fallbackStrategyLabels[config.fallbackStrategy].description} />
 						</div>
 						<Select
@@ -119,7 +119,7 @@ function EntityConfigSection({
 					</div>
 
 					<div className="space-y-1.5">
-						<Label className="text-xs">Formato Preferido</Label>
+						<Label className="text-xs">Preferred Format</Label>
 						<Select
 							onValueChange={(value) => onUpdate({ preferredFormat: value as any })}
 							value={config.preferredFormat}
@@ -129,7 +129,7 @@ function EntityConfigSection({
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem className="text-xs" value="webp">
-									WebP (recomendado)
+									WebP (recommended)
 								</SelectItem>
 								<SelectItem className="text-xs" value="jpeg">
 									JPEG
@@ -156,7 +156,7 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 		<Collapsible onOpenChange={setIsOpen} open={isOpen}>
 			<CollapsibleTrigger asChild>
 				<Button className="w-full justify-between text-sm" size="sm" variant="outline">
-					⚙️ Configuración Avanzada
+					⚙️ Advanced Settings
 					<ChevronDown className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')} />
 				</Button>
 			</CollapsibleTrigger>
@@ -165,14 +165,14 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 				{/* Procesamiento */}
 				<Card className="border-muted/50">
 					<CardHeader className="p-3 pb-2">
-						<CardTitle className="text-sm">🚀 Procesamiento</CardTitle>
-						<CardDescription className="text-xs">Control de rendimiento y concurrencia</CardDescription>
+						<CardTitle className="text-sm">🚀 Processing</CardTitle>
+						<CardDescription className="text-xs">Performance and concurrency controls</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-3 p-3 pt-0">
 						<div className="space-y-1.5">
 							<div className="flex items-center gap-1.5">
-								<Label className="text-xs">Concurrencia</Label>
-								<InfoTooltip content="Número de thumbnails que se procesan simultáneamente" />
+								<Label className="text-xs">Concurrency</Label>
+								<InfoTooltip content="Number of thumbnails processed at the same time" />
 							</div>
 							<div className="flex items-center gap-2">
 								<Slider
@@ -193,8 +193,8 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 
 						<div className="space-y-1.5">
 							<div className="flex items-center gap-1.5">
-								<Label className="text-xs">Tamaño de Lote</Label>
-								<InfoTooltip content="Número de archivos procesados por lote en operaciones masivas" />
+								<Label className="text-xs">Batch Size</Label>
+								<InfoTooltip content="Number of files processed per batch in bulk operations" />
 							</div>
 							<div className="flex items-center gap-2">
 								<Slider
@@ -215,8 +215,8 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-1.5">
-								<Label className="text-xs">Priorizar Recientes</Label>
-								<InfoTooltip content="Procesar primero los archivos más nuevos" />
+								<Label className="text-xs">Prioritize Recent Files</Label>
+								<InfoTooltip content="Process the newest files first" />
 							</div>
 							<Switch
 								checked={config.processing.prioritizeRecent}
@@ -234,14 +234,14 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 				{/* Reintentos */}
 				<Card className="border-muted/50">
 					<CardHeader className="p-3 pb-2">
-						<CardTitle className="text-sm">🔄 Reintentos</CardTitle>
-						<CardDescription className="text-xs">Configuración de reintentos automáticos</CardDescription>
+						<CardTitle className="text-sm">🔄 Retries</CardTitle>
+						<CardDescription className="text-xs">Automatic retry settings</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-3 p-3 pt-0">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-1.5">
-								<Label className="text-xs">Habilitar Reintentos</Label>
-								<InfoTooltip content="Reintentar automáticamente cuando falla la generación" />
+								<Label className="text-xs">Enable Retries</Label>
+								<InfoTooltip content="Retry automatically when generation fails" />
 							</div>
 							<Switch
 								checked={config.retry.enabled}
@@ -257,7 +257,7 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 						{config.retry.enabled && (
 							<>
 								<div className="space-y-1.5">
-									<Label className="text-xs">Máximo de Reintentos</Label>
+									<Label className="text-xs">Maximum Retries</Label>
 									<div className="flex items-center gap-2">
 										<Slider
 											className="flex-1"
@@ -277,8 +277,8 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-1.5">
-										<Label className="text-xs">Backoff Exponencial</Label>
-										<InfoTooltip content="Aumentar el delay entre reintentos exponencialmente" />
+										<Label className="text-xs">Exponential Backoff</Label>
+										<InfoTooltip content="Increase the delay between retries exponentially" />
 									</div>
 									<Switch
 										checked={config.retry.exponentialBackoff}
@@ -298,8 +298,8 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 				{/* Configuración por Tipo */}
 				<Card className="border-muted/50">
 					<CardHeader className="p-3 pb-2">
-						<CardTitle className="text-sm">🎯 Configuración por Tipo</CardTitle>
-						<CardDescription className="text-xs">Ajustes específicos para cada formato</CardDescription>
+						<CardTitle className="text-sm">🎯 Settings by Type</CardTitle>
+						<CardDescription className="text-xs">Format-specific settings</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-2 p-3 pt-0">
 						{(Object.keys(config.entities) as Array<keyof ThumbnailAdvancedConfig['entities']>).map((entityType) => (
@@ -326,13 +326,13 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 				{/* Opciones Generales */}
 				<Card className="border-muted/50">
 					<CardHeader className="p-3 pb-2">
-						<CardTitle className="text-sm">🔧 Opciones Generales</CardTitle>
+						<CardTitle className="text-sm">🔧 General Options</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-2 p-3 pt-0">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-1.5">
-								<Label className="text-xs">Generar al Indexar</Label>
-								<InfoTooltip content="Generar thumbnails automáticamente durante la indexación" />
+								<Label className="text-xs">Generate During Indexing</Label>
+								<InfoTooltip content="Generate thumbnails automatically during indexing" />
 							</div>
 							<Switch
 								checked={config.generateOnIndex}
@@ -343,8 +343,8 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-1.5">
-								<Label className="text-xs">Guardar Placeholders</Label>
-								<InfoTooltip content="Guardar placeholders SVG cuando falla la generación" />
+								<Label className="text-xs">Save Placeholders</Label>
+								<InfoTooltip content="Save SVG placeholders when generation fails" />
 							</div>
 							<Switch
 								checked={config.savePlaceholdersOnError}
@@ -355,8 +355,8 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-1.5">
-								<Label className="text-xs">Logging Detallado</Label>
-								<InfoTooltip content="Activar logs detallados para debugging" />
+								<Label className="text-xs">Verbose Logging</Label>
+								<InfoTooltip content="Enable detailed debugging logs" />
 							</div>
 							<Switch
 								checked={config.verboseLogging}
@@ -379,7 +379,7 @@ export function ThumbnailAdvancedSettings({ config, onUpdate }: ThumbnailAdvance
 					size="sm"
 					variant="outline"
 				>
-					Restaurar Valores por Defecto
+					Restore Defaults
 				</Button>
 			</CollapsibleContent>
 		</Collapsible>

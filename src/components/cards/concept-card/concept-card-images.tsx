@@ -94,13 +94,13 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 										<ImageIcon className="h-6 w-6 text-white/60" />
 										<Sparkles className="ml-1 h-5 w-5 text-white/40" />
 									</div>
-									<p className="font-semibold text-sm text-white/80">Imaginación Conceptual</p>
-									<p className="text-sm text-white/50 italic">Sin visualizaciones</p>
+									<p className="font-semibold text-sm text-white/80">Concept Art</p>
+									<p className="text-sm text-white/50 italic">No visualizations</p>
 								</div>
 							) : (
 								<>
 									<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
-									<p className="text-sm opacity-70">No hay imágenes</p>
+									<p className="text-sm opacity-70">No images</p>
 								</>
 							)}
 						</div>
@@ -113,7 +113,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 									key={image.id}
 								>
 									<img
-										alt={`Imagen ${index + 1}`}
+										alt={`Concept visual ${index + 1}`}
 										className={cn(
 											'h-full w-full object-cover',
 											tcgMode ? 'transition-transform duration-500 hover:scale-110' : ''

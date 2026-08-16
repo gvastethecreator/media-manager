@@ -157,7 +157,7 @@ export class FileSyncService {
 
 		try {
 			if (!authorizedRootRegistry) {
-				throw new Error('La sincronización requiere un registro explícito de media roots autorizados.');
+				throw new Error('Synchronization requires an explicit registry of authorized media roots.');
 			}
 
 			// Obtener la carpeta para acceder a su ruta
@@ -167,7 +167,7 @@ export class FileSyncService {
 			});
 
 			if (!folder) {
-				throw new Error(`Carpeta con ID ${folderId} no encontrada`);
+				throw new Error(`Folder with ID ${folderId} no encontrada`);
 			}
 
 			let authorizedFolder = await authorizedRootRegistry.authorizeAbsolutePath(folder.path, 'read');
@@ -418,7 +418,7 @@ export class FileSyncService {
 						legacyRelativePath.startsWith('../') ||
 						isAbsolute(legacyRelativePath)
 					) {
-						throw new Error(`La proyección legacy ${entityType}:${row.id} queda fuera del Folder autorizado.`);
+						throw new Error(`The legacy projection ${entityType}:${row.id} queda fuera del Folder autorizado.`);
 					}
 					const relativePath = [authorizedFolder.relativePath, legacyRelativePath.replaceAll('\\', '/')]
 						.filter(Boolean)
@@ -431,7 +431,7 @@ export class FileSyncService {
 				}
 
 				if (row.assetId !== row.id) {
-					throw new Error(`Identidad canónica inválida para ${entityType}:${row.id}.`);
+					throw new Error(`Invalid canonical identity for ${entityType}:${row.id}.`);
 				}
 				const source = sourceByAssetId.get(row.assetId);
 				if (
@@ -558,7 +558,7 @@ export class FileSyncService {
 					syncLogger.error(`      Error: ${err.error}`);
 				});
 				if (processingStats.errors.length > 5) {
-					syncLogger.error(`  ... y ${processingStats.errors.length - 5} errores más`);
+					syncLogger.error(`  ... y ${processingStats.errors.length - 5} more errors`);
 				}
 			}
 
@@ -720,7 +720,7 @@ export class FileSyncService {
 				const result = await this.syncFolderFiles(folderId, options);
 				return { folderId, result };
 			} catch (error) {
-				syncLogger.error(`Error sincronizando carpeta ${folderId}:`, error);
+				syncLogger.error(`Could not synchronize folder ${folderId}:`, error);
 				return {
 					folderId,
 					result: {

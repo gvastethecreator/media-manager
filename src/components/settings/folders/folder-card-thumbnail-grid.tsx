@@ -71,7 +71,7 @@ export const ThumbnailGrid = memo(function ThumbnailGrid({
 			{/* Contador de imágenes restantes */}
 			{showCount && remainingCount > 0 && (
 				<div className="mt-1 text-center">
-					<span className="font-medium text-[9px] text-muted-foreground">+{remainingCount} más</span>
+					<span className="font-medium text-[9px] text-muted-foreground">+{remainingCount} more</span>
 				</div>
 			)}
 		</div>

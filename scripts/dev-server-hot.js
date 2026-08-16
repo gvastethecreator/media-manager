@@ -5,17 +5,17 @@
  * Reemplaza tsup por el bundler integrado de Bun
  */
 
-import chalk from "chalk";
-import { spawn } from "child_process";
-import chokidar from "chokidar";
-import { existsSync, readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
-import { createLocalSessionEnvironment } from "./local-session-environment.js";
+import chalk from 'chalk';
+import { spawn } from 'child_process';
+import chokidar from 'chokidar';
+import { existsSync, readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { createLocalSessionEnvironment } from './local-session-environment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const rootDir = join(__dirname, "..");
+const rootDir = join(__dirname, '..');
 
 // Función para cargar variables de entorno desde archivo
 function loadEnvFile(filePath) {
@@ -25,15 +25,15 @@ function loadEnvFile(filePath) {
 			return {};
 		}
 
-		const content = readFileSync(filePath, "utf8");
+		const content = readFileSync(filePath, 'utf8');
 		const env = {};
 
-		for (let line of content.split("\n")) {
+		for (let line of content.split('\n')) {
 			line = line.trim();
-			if (line && !line.startsWith("#")) {
-				const [key, ...valueParts] = line.split("=");
+			if (line && !line.startsWith('#')) {
+				const [key, ...valueParts] = line.split('=');
 				if (key && valueParts.length > 0) {
-					env[key.trim()] = valueParts.join("=").trim();
+					env[key.trim()] = valueParts.join('=').trim();
 				}
 			}
 		}
@@ -46,8 +46,8 @@ function loadEnvFile(filePath) {
 }
 
 // Cargar variables de entorno
-const defaultEnv = loadEnvFile(join(rootDir, ".env"));
-const tauriEnv = loadEnvFile(join(rootDir, ".env.tauri"));
+const defaultEnv = loadEnvFile(join(rootDir, '.env'));
+const tauriEnv = loadEnvFile(join(rootDir, '.env.tauri'));
 
 // Combinar variables de entorno (prioridad: process.env > tauri > default).
 // Un supervisor/test debe poder fijar DATABASE_URL y grants sin que un archivo local lo redirija a otra base.
@@ -57,7 +57,7 @@ const configuredServerEnv = {
 	...process.env,
 };
 const inheritedSupervisorSession =
-	process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR === "1" && process.env.MEDIA_MANAGER_SESSION_TOKEN
+	process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR === '1' && process.env.MEDIA_MANAGER_SESSION_TOKEN
 		? process.env
 		: createLocalSessionEnvironment(configuredServerEnv);
 const serverEnv = {
@@ -69,16 +69,28 @@ const serverEnv = {
 	MEDIA_MANAGER_SESSION_ALLOWED_ORIGINS: inheritedSupervisorSession.MEDIA_MANAGER_SESSION_ALLOWED_ORIGINS,
 };
 
-console.log(chalk.blue("🔧 Variables de entorno cargadas:"));
-console.log(`- DATABASE_URL: ${serverEnv.DATABASE_URL || "undefined"}`);
-console.log(`- API_PORT: ${serverEnv.API_PORT || serverEnv.PORT || "undefined"}`);
-console.log(`- NODE_ENV: ${serverEnv.NODE_ENV || "undefined"}`);
-console.log("- API session: isolated standalone session (use dev:full for a connected UI)");
+if (process.env.MEDIA_MANAGER_ENV_PROBE === '1') {
+	console.log(
+		JSON.stringify({
+			databaseUrlMatchesExpected:
+				Boolean(process.env.MEDIA_MANAGER_ENV_PROBE_EXPECTED_DATABASE_URL) &&
+				serverEnv.DATABASE_URL === process.env.MEDIA_MANAGER_ENV_PROBE_EXPECTED_DATABASE_URL,
+			nodeEnv: serverEnv.NODE_ENV,
+		})
+	);
+	process.exit(0);
+}
+
+console.log(chalk.blue('🔧 Variables de entorno cargadas:'));
+console.log(`- Database: ${serverEnv.DATABASE_URL ? 'configured' : 'undefined'}`);
+console.log(`- API_PORT: ${serverEnv.API_PORT || serverEnv.PORT || 'undefined'}`);
+console.log(`- NODE_ENV: ${serverEnv.NODE_ENV || 'undefined'}`);
+console.log('- API session: isolated standalone session (use dev:full for a connected UI)');
 console.log();
 
-const SERVER_SRC = "src/server/index.ts";
-const SERVER_DIR = "src/server";
-const REQUIRED_DEPS = ["music-metadata", "ffprobe-static"];
+const SERVER_SRC = 'src/server/index.ts';
+const SERVER_DIR = 'src/server';
+const REQUIRED_DEPS = ['music-metadata', 'ffprobe-static'];
 const SERVER_PORT = Number(serverEnv.API_PORT || serverEnv.PORT || 4000);
 
 let serverProcess = null;
@@ -93,13 +105,13 @@ function checkRequiredDependencies() {
 	const missing = [];
 	for (const dep of REQUIRED_DEPS) {
 		// Verifica existencia del directorio del paquete en node_modules
-		if (!existsSync(join(rootDir, "node_modules", dep))) {
+		if (!existsSync(join(rootDir, 'node_modules', dep))) {
 			missing.push(dep);
 		}
 	}
 	if (missing.length > 0) {
-		console.log(chalk.red("❌ Dependencias faltantes detectadas:"), missing.join(", "));
-		console.log(chalk.yellow("👉 Ejecuta: bun install"));
+		console.log(chalk.red('❌ Dependencias faltantes detectadas:'), missing.join(', '));
+		console.log(chalk.yellow('👉 Ejecuta: bun install'));
 		return false;
 	}
 	return true;
@@ -112,7 +124,7 @@ async function waitForHealth(url, currentBoot, { retries = 50, intervalMs = 250 
 		}
 
 		try {
-			const response = await fetch(url, { method: "GET" });
+			const response = await fetch(url, { method: 'GET' });
 			if (response.ok) {
 				return true;
 			}
@@ -133,28 +145,28 @@ function startServer() {
 	const healthUrl = `http://localhost:${SERVER_PORT}/health`;
 
 	if (serverProcess) {
-		console.log(chalk.yellow("🔄 Reiniciando servidor..."));
+		console.log(chalk.yellow('🔄 Reiniciando servidor...'));
 		serverProcess.kill();
 	}
 
 	if (!existsSync(SERVER_SRC)) {
-		console.log(chalk.red("❌ Entry point no encontrado:", SERVER_SRC));
+		console.log(chalk.red('❌ Entry point no encontrado:', SERVER_SRC));
 		return;
 	}
 
-	console.log(chalk.green("🚀 Iniciando servidor (TS) con variables de entorno..."));
+	console.log(chalk.green('🚀 Iniciando servidor (TS) con variables de entorno...'));
 
-	serverProcess = spawn("bun", [SERVER_SRC], {
-		stdio: "inherit",
+	serverProcess = spawn('bun', [SERVER_SRC], {
+		stdio: 'inherit',
 		shell: true,
 		env: serverEnv, // Usar las variables de entorno cargadas
 	});
 
-	serverProcess.on("error", (error) => {
-		console.error(chalk.red("❌ Error ejecutando servidor:"), error);
+	serverProcess.on('error', (error) => {
+		console.error(chalk.red('❌ Error ejecutando servidor:'), error);
 	});
 
-	serverProcess.on("close", (code) => {
+	serverProcess.on('close', (code) => {
 		if (code !== 0 && code !== null) {
 			console.log(chalk.red(`❌ Servidor terminó con código ${code}`));
 		}
@@ -169,7 +181,7 @@ function startServer() {
 
 // Función principal
 async function main() {
-	console.log(chalk.cyan("🌟 Iniciando desarrollo del servidor con Bun hot reload"));
+	console.log(chalk.cyan('🌟 Iniciando desarrollo del servidor con Bun hot reload'));
 
 	try {
 		if (!checkRequiredDependencies()) {
@@ -178,22 +190,22 @@ async function main() {
 		startServer();
 
 		// Configurar watcher
-		console.log(chalk.blue("👀 Monitoreando cambios en", SERVER_DIR));
+		console.log(chalk.blue('👀 Monitoreando cambios en', SERVER_DIR));
 
 		const watcher = chokidar.watch(SERVER_DIR, {
-			ignored: ["**/node_modules/**", "**/.git/**"],
+			ignored: ['**/node_modules/**', '**/.git/**'],
 			persistent: true,
 			ignoreInitial: true,
 		});
 
-		watcher.on("change", async (path) => {
+		watcher.on('change', async (path) => {
 			console.log(chalk.yellow(`📝 Cambio detectado: ${path}`));
 			startServer();
 		});
 
 		// Manejar cierre graceful
-		process.on("SIGINT", () => {
-			console.log(chalk.yellow("\n🛑 Cerrando servidor..."));
+		process.on('SIGINT', () => {
+			console.log(chalk.yellow('\n🛑 Cerrando servidor...'));
 			if (serverProcess) {
 				serverProcess.kill();
 			}
@@ -201,9 +213,9 @@ async function main() {
 			process.exit(0);
 		});
 
-		console.log(chalk.green("✅ Hot reload activo. Presiona Ctrl+C para salir."));
+		console.log(chalk.green('✅ Hot reload activo. Presiona Ctrl+C para salir.'));
 	} catch (error) {
-		console.error(chalk.red("❌ Error iniciando desarrollo:"), error);
+		console.error(chalk.red('❌ Error iniciando desarrollo:'), error);
 		process.exit(1);
 	}
 }

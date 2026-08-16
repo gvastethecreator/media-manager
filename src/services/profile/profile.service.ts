@@ -144,7 +144,7 @@ class ProfileServiceImpl {
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
-				message: 'Error al obtener perfiles',
+				message: 'Could not get profiles',
 				context: { filters, pagination },
 			});
 		}
@@ -273,7 +273,7 @@ class ProfileServiceImpl {
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
-				message: 'Error al obtener perfil activo',
+				message: 'Could not get active profile',
 			});
 		}
 	}

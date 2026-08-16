@@ -4,7 +4,7 @@
  */
 
 export interface KeyboardShortcutConfig {
-	/** Acción a ejecutar */
+	/** Action a ejecutar */
 	action: string;
 	/** Contexto donde aplica el shortcut */
 	context?: 'global' | 'file-browser' | 'file-viewer' | 'context-menu';
@@ -210,63 +210,63 @@ export class KeyboardShortcutManager {
 				key: 'a',
 				modifiers: ['ctrl'],
 				context: 'file-browser',
-				description: 'Seleccionar todo',
+				description: 'Select all',
 				preventDefault: true,
 			},
 			{
 				key: 'delete',
 				modifiers: [],
 				context: 'file-browser',
-				description: 'Eliminar elementos seleccionados',
+				description: 'Delete selected items',
 				preventDefault: true,
 			},
 			{
 				key: 'f2',
 				modifiers: [],
 				context: 'file-browser',
-				description: 'Renombrar elemento seleccionado',
+				description: 'Rename selected item',
 				preventDefault: true,
 			},
 			{
 				key: 'escape',
 				modifiers: [],
 				context: 'global',
-				description: 'Cancelar selección o cerrar menús',
+				description: 'Cancel selection or close menus',
 				preventDefault: true,
 			},
 			{
 				key: 'c',
 				modifiers: ['ctrl'],
 				context: 'file-browser',
-				description: 'Copiar elementos seleccionados',
+				description: 'Copy selected items',
 				preventDefault: true,
 			},
 			{
 				key: 'x',
 				modifiers: ['ctrl'],
 				context: 'file-browser',
-				description: 'Cortar elementos seleccionados',
+				description: 'Cut selected items',
 				preventDefault: true,
 			},
 			{
 				key: 'v',
 				modifiers: ['ctrl'],
 				context: 'file-browser',
-				description: 'Pegar elementos',
+				description: 'Paste items',
 				preventDefault: true,
 			},
 			{
 				key: 'enter',
 				modifiers: [],
 				context: 'file-browser',
-				description: 'Abrir elemento seleccionado',
+				description: 'Open selected item',
 				preventDefault: true,
 			},
 			{
 				key: ' ',
 				modifiers: [],
 				context: 'file-browser',
-				description: 'Vista previa del elemento seleccionado',
+				description: 'Preview selected item',
 				preventDefault: true,
 			},
 		];
@@ -277,42 +277,42 @@ export class KeyboardShortcutManager {
 				key: 'arrowdown',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Navegar hacia abajo en el menú',
+				description: 'Move down in the menu',
 				preventDefault: true,
 			},
 			{
 				key: 'arrowup',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Navegar hacia arriba en el menú',
+				description: 'Move up in the menu',
 				preventDefault: true,
 			},
 			{
 				key: 'arrowright',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Abrir submenú',
+				description: 'Open submenu',
 				preventDefault: true,
 			},
 			{
 				key: 'arrowleft',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Cerrar submenú',
+				description: 'Close submenu',
 				preventDefault: true,
 			},
 			{
 				key: 'enter',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Ejecutar acción seleccionada',
+				description: 'Run selected action',
 				preventDefault: true,
 			},
 			{
 				key: 'escape',
 				modifiers: [],
 				context: 'context-menu',
-				description: 'Cerrar menú contextual',
+				description: 'Close context menu',
 				preventDefault: true,
 			},
 		];

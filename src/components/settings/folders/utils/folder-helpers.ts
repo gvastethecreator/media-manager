@@ -17,7 +17,7 @@ export function formatRelativeDate(date: Date): string {
 
 	if (diffDays === 0) return 'Hoy';
 	if (diffDays === 1) return 'Ayer';
-	if (diffDays < 7) return `Hace ${diffDays} días`;
+	if (diffDays < 7) return `${diffDays} days ago`;
 
 	return date.toLocaleDateString();
 }
@@ -71,7 +71,7 @@ export function getFileTypeStats(folderStats?: {
 	const stats = [
 		{
 			count: folderStats.totalImages ?? 0,
-			label: 'imágenes',
+			label: 'images',
 			key: 'images' as const,
 		},
 		{

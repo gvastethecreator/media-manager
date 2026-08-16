@@ -31,43 +31,43 @@ export const HierarchicalFolderWrapper = memo(function HierarchicalFolderWrapper
 
 	const folderId = useMemo(() => {
 		if (!hierarchicalPath) {
-			logger.info('Sin path jerárquico, mostrando vista raíz');
+			logger.info('No hierarchical path, showing root view');
 			return null;
 		}
 
 		if (folders.length === 0) {
-			logger.debug(`Esperando carpetas para resolver: "${hierarchicalPath}"`);
+			logger.debug(`Waiting for folders to resolve: "${hierarchicalPath}"`);
 			return null;
 		}
 
-		logger.info(`Resolviendo path jerárquico: "${hierarchicalPath}"`);
-		logger.debug(`Carpetas disponibles: ${folders.length}`, {
+		logger.info(`Resolving hierarchical path: "${hierarchicalPath}"`);
+		logger.debug(`Available folders: ${folders.length}`, {
 			folderNames: folders.map((f) => `${f.name} (${f.id}, parent: ${f.parentId})`).slice(0, 5),
 		});
 
 		if (!isValidPath(hierarchicalPath)) {
-			logger.warn(`Path jerárquico inválido: ${hierarchicalPath}`);
+			logger.warn(`Invalid hierarchical path: ${hierarchicalPath}`);
 			return null;
 		}
 
 		const resolvedId = getFolderIdFromPath(hierarchicalPath);
 		if (!resolvedId) {
-			logger.warn(`No se pudo resolver folder ID para path: ${hierarchicalPath}`);
+			logger.warn(`Could not resolve a folder ID for path: ${hierarchicalPath}`);
 			return null;
 		}
 
-		logger.info(`Path jerárquico resuelto: ${hierarchicalPath} → ${resolvedId}`);
+		logger.info(`Resolved hierarchical path: ${hierarchicalPath} → ${resolvedId}`);
 		return resolvedId;
 	}, [hierarchicalPath, folders, getFolderIdFromPath, isValidPath]);
 
 	if (foldersError) {
-		logger.error('Error cargando carpetas:', foldersError);
+		logger.error('Error loading folders:', foldersError);
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<p className="text-destructive">Error cargando carpetas</p>
+					<p className="text-destructive">Could not load folders</p>
 					<p className="text-muted-foreground text-sm">
-						{foldersError instanceof Error ? foldersError.message : 'Error desconocido'}
+						{foldersError instanceof Error ? foldersError.message : 'Unknown error'}
 					</p>
 				</div>
 			</div>
@@ -77,23 +77,21 @@ export const HierarchicalFolderWrapper = memo(function HierarchicalFolderWrapper
 	const isResolving = isFoldersLoading || folders.length === 0;
 
 	if (isResolving) {
-		logger.info(
-			'Resolviendo estructura de carpetas… mostrando pantalla de carga para evitar estado de carpeta anterior'
-		);
+		logger.info('Resolving folder structure and holding the loading state until the previous folder is cleared');
 		return (
 			<div className="flex h-full items-center justify-center" data-testid="hierarchical-wrapper-resolving">
-				<LoadingScreen interactive={false} message="Cargando estructura de carpetas..." />
+				<LoadingScreen interactive={false} message="Loading folder structure..." />
 			</div>
 		);
 	}
 
 	if (!hierarchicalPath) {
-		logger.info('Renderizando vista raíz de carpetas');
+		logger.info('Rendering the root folder view');
 		return <FolderContentView folderId={undefined} />;
 	}
 
 	if (!folderId) {
-		logger.warn('Carpeta no encontrada para el path solicitado:', hierarchicalPath);
+		logger.warn('Folder not found for the requested path:', hierarchicalPath);
 		return (
 			<div className="flex h-full flex-col items-center justify-center p-8 text-center">
 				<div className="mb-4 rounded-full bg-dt-danger-100 p-4 dark:bg-dt-danger-900/30">
@@ -111,9 +109,9 @@ export const HierarchicalFolderWrapper = memo(function HierarchicalFolderWrapper
 						/>
 					</svg>
 				</div>
-				<h3 className="mb-2 font-semibold text-xl">Carpeta no encontrada</h3>
+				<h3 className="mb-2 font-semibold text-xl">Folder not found</h3>
 				<p className="mb-6 max-w-md text-muted-foreground">
-					No pudimos encontrar la carpeta en la ruta: <span className="font-mono text-sm">{hierarchicalPath}</span>
+					No folder was found at: <span className="font-mono text-sm">{hierarchicalPath}</span>
 				</p>
 				<button
 					className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90"
@@ -122,12 +120,12 @@ export const HierarchicalFolderWrapper = memo(function HierarchicalFolderWrapper
 					}}
 					type="button"
 				>
-					Volver a Carpetas
+					Back to Folders
 				</button>
 			</div>
 		);
 	}
 
-	logger.info(`Renderizando contenido de carpeta: ${folderId}`);
+	logger.info(`Rendering folder content: ${folderId}`);
 	return <FolderContentView folderId={folderId ?? undefined} />;
 });

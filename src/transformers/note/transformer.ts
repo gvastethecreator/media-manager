@@ -195,7 +195,7 @@ function formatDate(date: Date): string {
 		return `Hace ${Math.floor(diffDays / 7)} semanas`;
 	}
 
-	return date.toLocaleDateString('es-ES', {
+	return date.toLocaleDateString('en-US', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',

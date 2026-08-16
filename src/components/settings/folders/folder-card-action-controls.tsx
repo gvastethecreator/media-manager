@@ -81,9 +81,9 @@ export const NormalModeControls = memo(function NormalModeControls({
 	return (
 		<>
 			{/* Botón de edición con hover suave */}
-			<SimpleTooltip content="Editar carpeta">
+			<SimpleTooltip content="Edit folder">
 				<Button
-					aria-label="Editar carpeta"
+					aria-label="Edit folder"
 					className={cn(
 						'h-6 w-6 transition-all duration-200 ease-out',
 						'hover:scale-110 hover:bg-accent hover:text-accent-foreground',
@@ -100,9 +100,9 @@ export const NormalModeControls = memo(function NormalModeControls({
 
 			{/* Botón de expansión con rotación animada */}
 			{hasChildren && onToggleExpanded && (
-				<SimpleTooltip content={isExpanded ? 'Contraer subcarpetas' : 'Expandir subcarpetas'}>
+				<SimpleTooltip content={isExpanded ? 'Collapse subfolders' : 'Expand subfolders'}>
 					<Button
-						aria-label={isExpanded ? 'Contraer subcarpetas' : 'Expandir subcarpetas'}
+						aria-label={isExpanded ? 'Collapse subfolders' : 'Expand subfolders'}
 						className={cn(
 							'h-6 w-6 transition-all duration-200 ease-out',
 							'hover:scale-110 hover:bg-accent hover:text-accent-foreground',
@@ -120,9 +120,9 @@ export const NormalModeControls = memo(function NormalModeControls({
 			)}
 
 			{/* Botón de reindexar con spin animation */}
-			<SimpleTooltip content={isReindexing ? 'Reindexando...' : 'Reindexar carpeta'}>
+			<SimpleTooltip content={isReindexing ? 'Reindexing...' : 'Reindex folder'}>
 				<Button
-					aria-label={isReindexing ? 'Reindexando carpeta' : 'Reindexar carpeta'}
+					aria-label={isReindexing ? 'Reindexing folder' : 'Reindex folder'}
 					className={cn(
 						'h-6 w-6 transition-all duration-200 ease-out',
 						'hover:scale-110 hover:bg-accent hover:text-accent-foreground',
@@ -145,9 +145,9 @@ export const NormalModeControls = memo(function NormalModeControls({
 			</SimpleTooltip>
 
 			{/* Botón eliminar con estados visuales mejorados */}
-			<SimpleTooltip content={selectedFolder === folder.id ? 'Confirmar eliminación' : 'Eliminar carpeta'}>
+			<SimpleTooltip content={selectedFolder === folder.id ? 'Confirm deletion' : 'Delete folder'}>
 				<Button
-					aria-label={selectedFolder === folder.id ? 'Confirmar eliminación de carpeta' : 'Eliminar carpeta'}
+					aria-label={selectedFolder === folder.id ? 'Confirm folder deletion' : 'Delete folder'}
 					className={cn(
 						'h-6 w-6 transition-all duration-200 ease-out',
 						'focus:outline-none focus:ring-2',

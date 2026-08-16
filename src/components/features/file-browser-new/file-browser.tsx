@@ -85,8 +85,8 @@ export function FileBrowser({
 			const recovery = await retryRecovery.mutateAsync();
 			if (recovery.manual > 0) {
 				toast({
-					description: `${recovery.manual} operación${recovery.manual === 1 ? '' : 'es'} aún requiere revisión.`,
-					title: 'La revisión no pudo completar todas las operaciones',
+					description: `${recovery.manual} operation${recovery.manual === 1 ? '' : 's'} still require${recovery.manual === 1 ? 's' : ''} review.`,
+					title: 'Review could not complete every operation',
 					variant: 'destructive',
 				});
 				return;
@@ -95,15 +95,15 @@ export function FileBrowser({
 			toast({
 				description:
 					recovery.completed > 0
-						? `${recovery.completed} operación${recovery.completed === 1 ? '' : 'es'} reconciliada${recovery.completed === 1 ? '' : 's'}.`
-						: 'No quedaron operaciones pendientes.',
-				title: 'Revisión de recuperación terminada',
+						? `${recovery.completed} operation${recovery.completed === 1 ? '' : 's'} reconciled.`
+						: 'No pending operations remain.',
+				title: 'Recovery review complete',
 			});
 		} catch (error) {
 			clientLogger.error('File mutation recovery retry failed:', error);
 			toast({
-				description: 'No se pudo volver a revisar la recuperación. El estado se mantiene para una nueva revisión.',
-				title: 'No se pudo revisar la recuperación',
+				description: 'Recovery could not be reviewed again. Its state is preserved for another review.',
+				title: 'Recovery review failed',
 				variant: 'destructive',
 			});
 		}
@@ -275,8 +275,8 @@ export function FileBrowser({
 					if (payload.selected.length > 0) {
 						await navigator.clipboard.writeText(payload.selected.map((item) => item.name).join('\n'));
 						toast({
-							title: '📋 Copiado',
-							description: `${payload.selected.length} nombre${payload.selected.length > 1 ? 's' : ''} copiado${payload.selected.length > 1 ? 's' : ''} al portapapeles`,
+							title: '📋 Copied',
+							description: `${payload.selected.length} name${payload.selected.length > 1 ? 's' : ''} copied to the clipboard`,
 						});
 					}
 					break;
@@ -295,7 +295,7 @@ export function FileBrowser({
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({ asset: { assetId: item.id, assetType } }),
 						});
-						if (!response.ok) throw new Error(`No se pudo descargar ${item.name}`);
+						if (!response.ok) throw new Error(`Could not download ${item.name}`);
 						const url = URL.createObjectURL(await response.blob());
 						try {
 							const link = document.createElement('a');
@@ -308,8 +308,8 @@ export function FileBrowser({
 					}
 					if (payload.selected.length > 0) {
 						toast({
-							title: '⬇️ Descargando',
-							description: `${payload.selected.length} archivo${payload.selected.length > 1 ? 's' : ''}`,
+							title: '⬇️ Downloading',
+							description: `${payload.selected.length} file${payload.selected.length > 1 ? 's' : ''}`,
 						});
 					}
 					break;
@@ -513,7 +513,7 @@ export function FileBrowser({
 
 	return (
 		<section
-			aria-label="Explorador de archivos"
+			aria-label="File browser"
 			className={cn('flex h-full min-h-50 flex-col overflow-hidden', className)}
 			data-ready={browser.shouldRenderContent ? 'true' : 'false'}
 			data-testid="file-browser"
@@ -554,7 +554,7 @@ export function FileBrowser({
 
 			{/* Área de contenido */}
 			<section
-				aria-label="Navegación de explorador de archivos"
+				aria-label="File browser navigation"
 				className="relative flex min-h-0 flex-1 flex-col"
 				data-testid="file-browser-container"
 			>
@@ -562,7 +562,7 @@ export function FileBrowser({
 				{browser.error && browser.items.length > 0 && (
 					<div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center p-2">
 						<div className="rounded-md bg-destructive/80 px-2 py-1 text-destructive-foreground text-xs">
-							Error cargando datos
+							Could not load data
 						</div>
 					</div>
 				)}
@@ -576,7 +576,7 @@ export function FileBrowser({
 						{blockingState === 'error' && (
 							<FileBrowserErrorState
 								className="flex-1"
-								message={browser.error ?? 'No se pudieron cargar los archivos.'}
+								message={browser.error ?? 'Could not load files.'}
 								onRetry={browser.refresh}
 							/>
 						)}
@@ -623,22 +623,21 @@ export function FileBrowser({
 			<Dialog onOpenChange={setIsRecoveryDialogOpen} open={isRecoveryDialogOpen}>
 				<DialogContent className="sm:max-w-[500px]">
 					<DialogHeader>
-						<DialogTitle>Revisión de recuperación</DialogTitle>
+						<DialogTitle>Recovery review</DialogTitle>
 						<DialogDescription>
-							La revisión vuelve a comprobar las operaciones incompletas. Sólo elimina una copia temporal cuando su
-							identidad y su ubicación autorizada siguen coincidiendo con el registro de recuperación.
+							This review checks incomplete operations again. It removes a temporary copy only when its identity and
+							authorized location still match the recovery record.
 						</DialogDescription>
 					</DialogHeader>
 					<p className="text-muted-foreground text-sm">
-						Si no puede confirmar una operación, la mantiene marcada para revisión. No muestra rutas locales ni IDs de
-						assets.
+						If an operation cannot be confirmed, it remains marked for review. Local paths and asset IDs stay hidden.
 					</p>
 					<DialogFooter className="flex-row">
 						<Button disabled={retryRecovery.isPending} onClick={() => setIsRecoveryDialogOpen(false)} variant="outline">
-							Cancelar
+							Cancel
 						</Button>
 						<Button disabled={retryRecovery.isPending} onClick={() => void handleRecoveryRetry()} variant="destructive">
-							{retryRecovery.isPending ? 'Revisando...' : 'Reintentar reparación'}
+							{retryRecovery.isPending ? 'Reviewing...' : 'Retry repair'}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
@@ -663,12 +662,12 @@ export function FileBrowser({
 					void (async () => {
 						if (newNames.length === 1) {
 							const item = renameModal.items.find((candidate) => candidate.id === newNames[0].id);
-							if (!item) throw new Error('No se encontró el asset a renombrar');
+							if (!item) throw new Error('Could not find the asset to rename');
 							await renameItem(item, newNames[0].newName);
 						} else {
 							const renames = newNames.map((rename) => {
 								const item = renameModal.items.find((candidate) => candidate.id === rename.id);
-								if (!item) throw new Error('No se encontró un asset a renombrar');
+								if (!item) throw new Error('Could not find an asset to rename');
 								return { item, newName: rename.newName };
 							});
 							await renameBatch(renames);
@@ -707,7 +706,7 @@ export function FileBrowser({
 					void (async () => {
 						const assets = moveModal.items.map((item) => {
 							const assetType = toMediaAssetType(item.entityType);
-							if (!assetType) throw new Error(`No se puede mover el tipo ${item.entityType}`);
+							if (!assetType) throw new Error(`Cannot move entity type ${item.entityType}`);
 							return { assetId: item.id, assetType };
 						});
 						await moveFiles({ assets, targetFolderId });

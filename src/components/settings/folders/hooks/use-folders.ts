@@ -92,7 +92,7 @@ function applyLatestStatus(
 	}
 	if (isStatusComplete(latest) && latest.folderId) {
 		ctx.onComplete(latest.folderId);
-		toastService.success('Proceso completado correctamente');
+		toastService.success('Process completed successfully');
 	}
 }
 
@@ -190,7 +190,7 @@ export function useFolders() {
 				await Promise.all([loadFolders(/*forceNoCache*/), loadStats()]);
 				folderLogger.info('🟢 Carpetas y stats recargadas tras completar proceso');
 			} catch (err) {
-				folderLogger.error('❌ Error recargando carpetas/stats tras completar:', err);
+				folderLogger.error('❌ Could not reload folders and statistics after completion:', err);
 			}
 
 			// Limpiar estado después de mostrar completado
@@ -222,7 +222,7 @@ export function useFolders() {
 	// Función para manejar los errores de procesamiento
 	const handleProcessError = useCallback(
 		(errorData: ErrorResponse) => {
-			folderLogger.error('❌ Error procesando carpeta:', errorData);
+			folderLogger.error('❌ Could not process folder:', errorData);
 
 			// 🔧 FIX: Limpiar estado inmediatamente al recibir error
 			setIsProcessing(false);
@@ -265,7 +265,7 @@ export function useFolders() {
 			}, 100);
 
 			// Mostrar notificación de error
-			toastService.error(errorData.message || 'Error desconocido al procesar la carpeta');
+			toastService.error(errorData.message || 'Unknown error while processing the folder');
 		},
 		[updateFolder, processStatus.folderId]
 	);
@@ -357,11 +357,11 @@ export function useFolders() {
 				}));
 
 				// Notificar éxito
-				toastService.success('Reindexado global completado correctamente');
+				toastService.success('Global reindex completed successfully');
 
 				// Recargar datos para reflejar cambios (carpetas + estadísticas)
 				Promise.all([loadFolders(), loadStats()]).catch((err) => {
-					folderLogger.error('Error recargando carpetas/stats tras reindexado global:', err);
+					folderLogger.error('Could not reload folders and statistics after global reindexing:', err);
 				});
 
 				// Limpiar mapa de progreso y orden al finalizar
@@ -462,10 +462,10 @@ export function useFolders() {
 			try {
 				await foldersOperations.handleReindexFolder(folderId);
 			} catch (err1) {
-				folderLogger.error(`❌ Error en reindex de carpeta ${folderId}:`, err1);
+				folderLogger.error(`❌ Folder reindex failed ${folderId}:`, err1);
 				handleProcessError({
-					error: err1 instanceof Error ? err1.message : 'Error desconocido',
-					message: err1 instanceof Error ? err1.message : 'Error desconocido',
+					error: err1 instanceof Error ? err1.message : 'Unknown error',
+					message: err1 instanceof Error ? err1.message : 'Unknown error',
 					folderId,
 					timestamp: Date.now(),
 				});
@@ -482,10 +482,10 @@ export function useFolders() {
 				try {
 					await foldersOperations.handleRemoveFolder(folderId);
 					setSelectedFolder(null);
-					toastService.success('Carpeta eliminada correctamente');
+					toastService.success('Folder deleted successfully');
 				} catch (err2) {
-					folderLogger.error('❌ Error eliminando carpeta:', err2);
-					toastService.error('Error al eliminar la carpeta');
+					folderLogger.error('❌ Could not delete folder:', err2);
+					toastService.error('The folder could not be deleted');
 				}
 			} else {
 				// Si no está seleccionada, seleccionar para eliminar

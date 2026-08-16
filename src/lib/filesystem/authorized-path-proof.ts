@@ -28,7 +28,7 @@ export function extendAuthorizedPathInput<TMetadata extends object>(
 	metadata: TMetadata
 ): TMetadata & { relativePath: string; rootId: string } {
 	const proof = authorizedPathProofs.get(input);
-	if (!proof) throw new Error('La source perdió su prueba de autorización en proceso.');
+	if (!proof) throw new Error('The source lost its authorization proof during processing.');
 	return createAuthorizedPathInput(proof, metadata);
 }
 

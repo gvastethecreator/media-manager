@@ -16,7 +16,7 @@ export function ThemeSync() {
 	// Sincronizar el tema de settings con theme-context
 	useEffect(() => {
 		if (settings.theme !== themeContextTheme) {
-			clientLogger.debug(`🔄 Sincronizando tema: ${settings.theme} -> theme-context`);
+			clientLogger.debug(`🔄 Synchronizing theme: ${settings.theme} -> theme-context`);
 			setTheme(settings.theme);
 		}
 	}, [settings.theme, themeContextTheme, setTheme]);

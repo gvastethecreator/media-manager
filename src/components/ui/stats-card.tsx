@@ -153,11 +153,11 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
 													<ImageIcon className="mb-1 h-4 w-4 text-primary" />
 													<p className="numeric-md">{stats.totalImages}</p>
-													<p className="caption">Imágenes</p>
+													<p className="caption">Images</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
-												<p>Total de imágenes asociadas</p>
+												<p>Total associated images</p>
 											</TooltipContent>
 										</Tooltip>
 									)}
@@ -168,11 +168,11 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
 													<HardDrive className="mb-1 h-4 w-4 text-primary" />
 													<p className="numeric-md">{formatSize(stats.totalSize)}</p>
-													<p className="caption">Tamaño</p>
+													<p className="caption">Size</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
-												<p>Tamaño total de archivos</p>
+												<p>Total file size</p>
 											</TooltipContent>
 										</Tooltip>
 									)}
@@ -183,11 +183,11 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
 													<Calendar className="mb-1 h-4 w-4 text-primary" />
 													<p className="body-sm font-medium">{formatDate(stats.lastUpdated)}</p>
-													<p className="caption">Actualizado</p>
+													<p className="caption">Updated</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
-												<p>Última actualización</p>
+												<p>Last updated</p>
 											</TooltipContent>
 										</Tooltip>
 									)}
@@ -229,7 +229,7 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 													</div>
 													<div>
 														<p className="body-sm font-medium">{item.name}</p>
-														{item.count !== undefined && <p className="caption">{item.count} imágenes</p>}
+														{item.count !== undefined && <p className="caption">{item.count} images</p>}
 													</div>
 												</div>
 												<ChevronRight className="h-4 w-4 opacity-0 transition-opacity duration-dt-fast group-hover:opacity-100" />
@@ -240,11 +240,11 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 							</div>
 						)}
 
-						{/* Distribución */}
+						{/* Distribution */}
 						{stats.distribution && stats.distribution.length > 0 && (
 							<div className="stack-sm">
 								<div className="flex items-center justify-between">
-									<h4 className="heading-sm">Distribución</h4>
+									<h4 className="heading-sm">Distribution</h4>
 									<Badge variant="outline">{stats.distribution.length}</Badge>
 								</div>
 								<div className="stack-xs">

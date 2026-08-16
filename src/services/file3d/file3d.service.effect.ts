@@ -167,7 +167,7 @@ function toFile3DError(operation: string, error: unknown): File3DError {
 
 function validateCreateInput(input: CreateFile3DInput): void {
 	if (!input.name || input.name.trim().length === 0) {
-		throw new File3DValidationError({ field: 'name', value: input.name, reason: 'El nombre es requerido' });
+		throw new File3DValidationError({ field: 'name', value: input.name, reason: 'The name is required' });
 	}
 	if (!input.path || input.path.trim().length === 0) {
 		throw new File3DValidationError({ field: 'path', value: input.path, reason: 'El path es requerido' });

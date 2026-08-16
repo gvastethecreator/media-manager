@@ -48,7 +48,7 @@ export const CharacterContentView = memo(function CharacterContentView() {
 
 	const headerTitle = useMemo(() => {
 		if (!effectiveId) return 'Selecciona un personaje';
-		return currentCharacter?.name ? `Imágenes de personaje: ${currentCharacter.name}` : 'Imágenes del personaje';
+		return currentCharacter?.name ? `Character images: ${currentCharacter.name}` : 'Character Images';
 	}, [effectiveId, currentCharacter?.name]);
 
 	if (!effectiveId) {
@@ -56,7 +56,7 @@ export const CharacterContentView = memo(function CharacterContentView() {
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Selecciona un personaje para ver sus imágenes relacionadas"
+						description="Select a character to view related images"
 						icon={Users}
 						title="Sin personaje seleccionado"
 					/>
@@ -82,7 +82,7 @@ export const CharacterContentView = memo(function CharacterContentView() {
 	}
 
 	return (
-		<BaseContentView description={images.length ? `${images.length} imágenes` : undefined} title={headerTitle}>
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
 			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
 		</BaseContentView>
 	);

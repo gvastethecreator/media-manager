@@ -98,7 +98,7 @@ function ImageRendererBase({ item, contentUrl, onError, onLoad, transformStyle, 
 				role="alert"
 			>
 				<p className="max-w-md text-destructive text-sm">
-					No se pudo cargar esta imagen. Comprueba que el archivo siga disponible.
+					This image could not be loaded. Check that the file is still available.
 				</p>
 			</div>
 		);
@@ -110,7 +110,7 @@ function ImageRendererBase({ item, contentUrl, onError, onLoad, transformStyle, 
 			style={transformStyle}
 		>
 			<img
-				alt={item.name || 'sin nombre'}
+				alt={item.name || 'unnamed'}
 				className="pointer-events-none max-h-full max-w-full object-contain"
 				onError={() => {
 					setHasError(true);
@@ -251,7 +251,7 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 				download={item.name}
 				href={contentUrl}
 			>
-				Descargar archivo
+				Download file
 			</a>
 			<Button
 				className="absolute top-4 right-4 z-50"
@@ -314,14 +314,14 @@ function UnknownRenderer({ item, contentUrl, className }: FileContentRendererPro
 			</div>
 			<div className="text-center">
 				<h3 className="font-semibold text-white text-xl">{item.name}</h3>
-				<p className="mt-1 text-sm text-white/60">Tipo de archivo no soportado para vista previa</p>
+				<p className="mt-1 text-sm text-white/60">This file type does not support preview</p>
 			</div>
 			<a
 				className="mt-4 rounded-lg bg-background/10 px-6 py-2 text-white transition-colors hover:bg-background/20"
 				download={item.name}
 				href={contentUrl}
 			>
-				Descargar archivo
+				Download file
 			</a>
 			<Button
 				className="absolute top-4 right-4 z-50"

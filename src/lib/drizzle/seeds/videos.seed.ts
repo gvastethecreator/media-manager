@@ -33,7 +33,7 @@ export async function seedVideos(db: LibSQLDatabase<Record<string, never>>) {
 		await db.insert(videos).values(sampleVideos);
 		seedLogger.success(`✅ ${sampleVideos.length} videos creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando videos:', error);
+		seedLogger.error('❌ Could not create videos:', error);
 		throw error;
 	}
 }

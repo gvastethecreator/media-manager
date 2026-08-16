@@ -59,14 +59,14 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 			{/* Búsqueda */}
 			<div className="relative flex-1">
 				<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-				<Input className="pl-9" onChange={handleSearchChange} placeholder="Buscar perfiles..." value={searchTerm} />
+				<Input className="pl-9" onChange={handleSearchChange} placeholder="Search profiles..." value={searchTerm} />
 			</div>
 
 			<div className="flex items-center gap-2">
 				{/* Modo de vista */}
 				<div className="flex items-center rounded-lg border p-1">
 					<Button
-						aria-label="Vista en grid"
+						aria-label="Grid view"
 						className={viewConfig.mode === 'grid' ? 'bg-muted' : ''}
 						onClick={() => setViewMode('grid')}
 						size="icon"
@@ -75,7 +75,7 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 						<LayoutGrid className="h-4 w-4" />
 					</Button>
 					<Button
-						aria-label="Vista en lista"
+						aria-label="List view"
 						className={viewConfig.mode === 'list' ? 'bg-muted' : ''}
 						onClick={() => setViewMode('list')}
 						size="icon"
@@ -127,25 +127,25 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 						<SelectItem value="name_asc">
 							<div className="flex items-center gap-2">
 								<SortAsc className="h-4 w-4" />
-								<span>Nombre A-Z</span>
+								<span>Name A-Z</span>
 							</div>
 						</SelectItem>
 						<SelectItem value="name_desc">
 							<div className="flex items-center gap-2">
 								<SortDesc className="h-4 w-4" />
-								<span>Nombre Z-A</span>
+								<span>Name Z-A</span>
 							</div>
 						</SelectItem>
 						<SelectItem value="createdAt_desc">
 							<div className="flex items-center gap-2">
 								<SortDesc className="h-4 w-4" />
-								<span>Más recientes</span>
+								<span>Newest</span>
 							</div>
 						</SelectItem>
 						<SelectItem value="createdAt_asc">
 							<div className="flex items-center gap-2">
 								<SortAsc className="h-4 w-4" />
-								<span>Más antiguos</span>
+								<span>Oldest</span>
 							</div>
 						</SelectItem>
 					</SelectContent>
@@ -158,8 +158,8 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="none">Sin agrupar</SelectItem>
-						<SelectItem value="theme">Tema</SelectItem>
-						<SelectItem value="language">Idioma</SelectItem>
+						<SelectItem value="theme">Theme</SelectItem>
+						<SelectItem value="language">Language</SelectItem>
 						<SelectItem value="status">Estado</SelectItem>
 					</SelectContent>
 				</Select>

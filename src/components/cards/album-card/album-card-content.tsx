@@ -47,7 +47,7 @@ export function AlbumCardContent({
 				{/* Contadores */}
 				<div className="flex flex-col gap-1">
 					<div className="flex items-center justify-between">
-						<span className="text-muted-foreground text-sm">Imágenes:</span>
+						<span className="text-muted-foreground text-sm">Images:</span>
 						<span className="font-medium text-sm">{imagesCount}</span>
 					</div>
 
@@ -70,7 +70,7 @@ export function AlbumCardContent({
 						{/* Barra de progreso estilo TCG - Porcentaje de imágenes */}
 						<div className="flex flex-col">
 							<div className="mb-1 flex items-center justify-between">
-								<span className="text-muted-foreground text-sm">Imágenes</span>
+								<span className="text-muted-foreground text-sm">Images</span>
 								<span className="font-medium text-sm">
 									{imagesCount}/{imagesCount + videosCount}
 								</span>
@@ -111,7 +111,7 @@ export function AlbumCardContent({
 			{/* Filtros si existen */}
 			{filters.length > 0 && (
 				<div className="mb-2">
-					<p className="mb-1 font-medium text-sm">Filtros activos:</p>
+					<p className="mb-1 font-medium text-sm">Active filters:</p>
 					<div className="flex flex-wrap gap-1">
 						{filters.slice(0, 3).map((filter: any) => (
 							<span
@@ -122,7 +122,7 @@ export function AlbumCardContent({
 							</span>
 						))}
 						{filters.length > 3 && (
-							<span className="rounded bg-background/40 px-1.5 py-0.5 text-xs">+{filters.length - 3} más</span>
+							<span className="rounded bg-background/40 px-1.5 py-0.5 text-xs">+{filters.length - 3} more</span>
 						)}
 					</div>
 				</div>

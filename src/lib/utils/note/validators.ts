@@ -12,7 +12,7 @@ export const noteTagsSchema = z.object({
  * Esquema para validar la creación de una nota
  */
 export const createNoteSchema = z.object({
-	title: z.string().min(1, 'El título es requerido').max(100, 'El título no puede exceder 100 caracteres'),
+	title: z.string().min(1, 'The title is required').max(100, 'The title cannot exceed 100 characters'),
 	content: z.string().optional().default(''),
 	category: z.nativeEnum(NoteCategory).optional().default(NoteCategory.GENERAL),
 	priority: z.nativeEnum(NotePriority).optional().default(NotePriority.MEDIUM),
@@ -27,7 +27,7 @@ export const createNoteSchema = z.object({
  */
 export const updateNoteSchema = z.object({
 	id: z.string().min(1, 'ID es requerido'),
-	title: z.string().min(1, 'El título es requerido').max(100, 'El título no puede exceder 100 caracteres').optional(),
+	title: z.string().min(1, 'The title is required').max(100, 'The title cannot exceed 100 characters').optional(),
 	content: z.string().optional(),
 	category: z.nativeEnum(NoteCategory).optional(),
 	priority: z.nativeEnum(NotePriority).optional(),
