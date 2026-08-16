@@ -107,12 +107,12 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 		}
 
 		try {
-			toastService.info('Escaneando carpeta...');
+			toastService.info('Scanning folder...');
 			await reindexFolderMutation.mutateAsync({ id: currentFolderId });
-			toastService.success('Carpeta escaneada correctamente');
+			toastService.success('Folder scanned successfully');
 		} catch (error) {
-			clientLogger.error('Error al escanear carpeta:', error);
-			toastService.error('Error al escanear la carpeta');
+			clientLogger.error('Failed to scan folder:', error);
+			toastService.error('Could not scan the folder');
 		}
 	}, [currentFolderId, reindexFolderMutation]);
 
@@ -122,12 +122,12 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 		}
 
 		try {
-			toastService.info('Recargando carpeta...');
+			toastService.info('Reloading folder...');
 			await reindexFolderMutation.mutateAsync({ id: currentFolderId });
-			toastService.success('Carpeta recargada correctamente');
+			toastService.success('Folder reloaded successfully');
 		} catch (error) {
-			clientLogger.error('Error al recargar carpeta:', error);
-			toastService.error('Error al recargar la carpeta');
+			clientLogger.error('Failed to reload folder:', error);
+			toastService.error('Could not reload the folder');
 		}
 	}, [currentFolderId, reindexFolderMutation]);
 
@@ -137,13 +137,13 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 
 	// Sincronizar visibilidad del details panel con el estado del
 	useEffect(() => {
-		clientLogger.debug('📋 MainLayout: Sincronizando isVisible:', isVisible);
+		clientLogger.debug('📋 MainLayout: Synchronizing isVisible:', isVisible);
 		setIsRightCollapsed(!isVisible);
 	}, [isVisible]);
 
 	// Sincronizar store UI con el panel físico
 	useEffect(() => {
-		clientLogger.debug('🔄 MainLayout: Sincronizando UI store panel collapsed:', uiPanelCollapsed);
+		clientLogger.debug('🔄 MainLayout: Synchronizing collapsed panel state:', uiPanelCollapsed);
 		if (!rightPanelRef.current) {
 			return;
 		}
@@ -162,16 +162,16 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 			}
 			try {
 				if (uiPanelCollapsed) {
-					clientLogger.debug('📐 MainLayout: Colapsando panel físico');
+					clientLogger.debug('📐 MainLayout: Collapsing physical panel');
 					panel.collapse();
 				} else {
-					clientLogger.debug('📐 MainLayout: Expandiendo panel físico');
+					clientLogger.debug('📐 MainLayout: Expanding physical panel');
 					panel.expand();
 				}
 			} catch (error) {
 				// En dev/StrictMode/HMR puede dispararse antes de que el Group se registre
 				const message = error instanceof Error ? error.message : String(error);
-				clientLogger.warn('⚠️ MainLayout: Error sincronizando panel derecho (retry):', {
+				clientLogger.warn('⚠️ MainLayout: Could not synchronize right panel (retry):', {
 					message,
 					attempt,
 					uiPanelCollapsed,

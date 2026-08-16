@@ -7,9 +7,9 @@ interface UseGroupSortProps {
 }
 
 export const SORT_OPTIONS = [
-	{ label: 'Nombre', value: 'name' as const },
-	{ label: 'Categoría', value: 'category' as const },
-	{ label: 'Fecha', value: 'createdAt' as const },
+	{ label: 'Name', value: 'name' as const },
+	{ label: 'Category', value: 'category' as const },
+	{ label: 'Date', value: 'createdAt' as const },
 ] as const;
 
 export function useGroupSort({ groups, initialSortKey = 'name' }: UseGroupSortProps) {

@@ -36,20 +36,20 @@ export function File3DSettings() {
 			});
 			setEditing(null);
 			setNameInput('');
-			toastService.success('Archivo 3D actualizado');
+			toastService.success('3D file updated');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al actualizar archivo 3D', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not update the 3D file', { description: msg });
 		}
 	};
 
 	const handleDelete = async (id: string) => {
 		try {
 			await deleteFile3D.mutateAsync(id);
-			toastService.success('Archivo 3D eliminado');
+			toastService.success('3D file deleted');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al eliminar archivo 3D', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not delete the 3D file', { description: msg });
 		}
 	};
 
@@ -59,17 +59,17 @@ export function File3DSettings() {
 				<CardHeader className="p-3 pb-2">
 					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
 						<Box className="h-4 w-4" />
-						<span>Archivos 3D</span>
+						<span>3D Files</span>
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
-						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar archivos 3D..." value={search} />
+						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Search 3D files..." value={search} />
 					</div>
 
 					{isLoading ? (
 						<div className="flex items-center gap-2 text-muted-foreground text-sm">
-							<Loader2 className="h-4 w-4 animate-spin" /> Cargando...
+							<Loader2 className="h-4 w-4 animate-spin" /> Loading...
 						</div>
 					) : error ? (
 						<div className="text-destructive text-sm">{error.message}</div>
@@ -81,15 +81,15 @@ export function File3DSettings() {
 										<div>
 											<div className="font-medium text-sm">{f.name}</div>
 											<div className="text-muted-foreground text-xs">
-												{f.size ? `${(f.size / 1024).toFixed(1)}KB` : 'Sin tamaño'}
+											{f.size ? `${(f.size / 1024).toFixed(1)}KB` : 'Size unavailable'}
 											</div>
 											{f.format && (
-												<div className="text-muted-foreground text-xs">Formato: {f.format.toUpperCase()}</div>
+											<div className="text-muted-foreground text-xs">Format: {f.format.toUpperCase()}</div>
 											)}
 											{f.vertices && (
-												<div className="text-muted-foreground text-xs">{f.vertices.toLocaleString()} vértices</div>
+											<div className="text-muted-foreground text-xs">{f.vertices.toLocaleString('en-US')} vertices</div>
 											)}
-											{f.faces && <div className="text-muted-foreground text-xs">{f.faces.toLocaleString()} caras</div>}
+										{f.faces && <div className="text-muted-foreground text-xs">{f.faces.toLocaleString('en-US')} faces</div>}
 										</div>
 										<div className="flex items-center gap-1">
 											<Button
@@ -99,7 +99,7 @@ export function File3DSettings() {
 													setNameInput(f.name);
 												}}
 												size="icon"
-												title="Editar"
+											title="Edit"
 												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
@@ -108,7 +108,7 @@ export function File3DSettings() {
 												className="h-8 w-8 hover:text-destructive"
 												onClick={() => handleDelete(f.id)}
 												size="icon"
-												title="Eliminar"
+											title="Delete"
 												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />
@@ -133,10 +133,10 @@ export function File3DSettings() {
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
-						<DialogTitle>Editar archivo 3D</DialogTitle>
+						<DialogTitle>Edit 3D File</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Name" value={nameInput} />
 						<div className="flex justify-end gap-2">
 							<Button
 								onClick={() => {
@@ -145,9 +145,9 @@ export function File3DSettings() {
 								}}
 								variant="outline"
 							>
-								Cancelar
+								Cancel
 							</Button>
-							<Button onClick={handleUpdate}>Guardar</Button>
+							<Button onClick={handleUpdate}>Save</Button>
 						</div>
 					</div>
 				</DialogContent>

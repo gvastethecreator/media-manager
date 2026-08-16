@@ -45,7 +45,7 @@ export async function getRealSystemMetrics() {
 			},
 		};
 	} catch (error) {
-		serverLogger.error('Error al obtener métricas del sistema:', error);
+		serverLogger.error('Could not get system metrics:', error);
 		return null;
 	}
 }

@@ -16,12 +16,12 @@ const baseEntity = { id: '1', name: 'X', description: null, createdAt: new Date(
 describe('entity-type-configs', () => {
 	it('retorna config válida para IMAGE', () => {
 		const cfg = getEntityTypeConfig(EntityStatsType.IMAGE);
-		expect(cfg?.displayName).toBe('Imagen');
+		expect(cfg?.displayName).toBe('Image');
 		// Acepta tanto colores hex (#RRGGBB) como variables CSS (var(--...))
 		const color = getEntityTypeColor(EntityStatsType.IMAGE);
 		expect(color).toMatch(/^(#[0-9A-Fa-f]{6}|var\(--[\w-]+\))$/);
-		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE)).toBe('Imagen');
-		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE, true)).toBe('Imágenes');
+		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE)).toBe('Image');
+		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE, true)).toBe('Images');
 		expect(getEntityTypeEmoji(EntityStatsType.IMAGE)).toBeTruthy();
 		expect(getEntityTypeSupportedOperations(EntityStatsType.IMAGE).length).toBeGreaterThan(0);
 	});

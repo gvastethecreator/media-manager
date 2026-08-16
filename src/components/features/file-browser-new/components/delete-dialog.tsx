@@ -40,16 +40,16 @@ export function DeleteDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 	const isMixed = hasFolders && hasFiles;
 
 	const getItemTypeLabel = () => {
-		if (isMixed) return 'elementos';
-		if (hasFolders) return itemCount === 1 ? 'carpeta' : 'carpetas';
-		return itemCount === 1 ? 'archivo' : 'archivos';
+		if (isMixed) return 'items';
+		if (hasFolders) return itemCount === 1 ? 'folder' : 'folders';
+		return itemCount === 1 ? 'file' : 'files';
 	};
 
 	const getWarningMessage = () => {
 		if (hasFolders) {
-			return `Esta acción eliminará ${isSingleItem ? 'la carpeta y todo su contenido' : 'las carpetas seleccionadas y todo su contenido'}. Esta acción no se puede deshacer.`;
+			return `This will permanently delete ${isSingleItem ? 'the folder and all its contents' : 'the selected folders and all their contents'}. This action cannot be undone.`;
 		}
-		return `Esta acción eliminará ${isSingleItem ? 'el archivo permanentemente' : `los ${itemCount} archivos permanentemente`}. Esta acción no se puede deshacer.`;
+		return `This will permanently delete ${isSingleItem ? 'the file' : `${itemCount} files`}. This action cannot be undone.`;
 	};
 
 	return (
@@ -59,7 +59,7 @@ export function DeleteDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 					<div className="flex items-center gap-2 text-destructive">
 						<AlertTriangle className="h-5 w-5" />
 						<DialogTitle>
-							{isSingleItem ? 'Confirmar eliminación' : `Eliminar ${itemCount} ${getItemTypeLabel()}`}
+							{isSingleItem ? 'Confirm deletion' : `Delete ${itemCount} ${getItemTypeLabel()}`}
 						</DialogTitle>
 					</div>
 					<DialogDescription className="pt-2">{getWarningMessage()}</DialogDescription>
@@ -89,10 +89,10 @@ export function DeleteDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 							)}
 						>
 							<p className="text-sm">
-								<strong>{itemCount}</strong> {getItemTypeLabel()} seleccionados
+								<strong>{itemCount}</strong> {getItemTypeLabel()} selected
 							</p>
 							{hasFolders && (
-								<p className="mt-1 text-destructive text-xs">⚠️ Algunas carpetas pueden contener archivos</p>
+								<p className="mt-1 text-destructive text-xs">⚠️ Some folders may contain files</p>
 							)}
 						</div>
 					</div>
@@ -100,10 +100,10 @@ export function DeleteDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 
 				<DialogFooter>
 					<Button disabled={isLoading} onClick={onCancel} variant="outline">
-						Cancelar
+						Cancel
 					</Button>
 					<Button disabled={isLoading} onClick={onConfirm} variant="destructive">
-						{isLoading ? 'Eliminando...' : isSingleItem ? 'Eliminar' : `Eliminar ${itemCount}`}
+						{isLoading ? 'Deleting...' : isSingleItem ? 'Delete' : `Delete ${itemCount}`}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

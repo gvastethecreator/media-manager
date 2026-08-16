@@ -13,7 +13,7 @@ import { serverLogger } from './server-logger';
 export function initializeFileLogging(): void {
 	try {
 		// Test write to verify logging system is working
-		reindexFileLogger.logWarning('monitor', 'Sistema de logging de archivos inicializado correctamente', {
+		reindexFileLogger.logWarning('monitor', 'File logging system initialized successfully', {
 			context: {
 				timestamp: new Date().toISOString(),
 				logDirectory: 'logs/reindex',
@@ -44,7 +44,7 @@ export function initializeFileLogging(): void {
 
 		serverLogger.info('🕐 Limpieza automática de logs programada (cada 24h)');
 	} catch (error) {
-		serverLogger.error('❌ Error inicializando sistema de logging de archivos:', error);
+		serverLogger.error('❌ Could not initialize file logging system:', error);
 		// Don't throw - allow server to continue without file logging
 	}
 }

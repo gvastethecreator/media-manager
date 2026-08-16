@@ -6,6 +6,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { filterAuthorizedMediaEntities, getAuthorizedRootRegistry } from '@/server/security/authorized-root-request';
 import { countAuthorizedMediaAssets } from '@/server/security/media-asset-reference';
 import { RootAuthorizationError } from '@/server/security/authorized-roots';
+import { filterAuthorizedTaxonomyEntities } from '@/services/taxonomy/file-backed/taxonomy-artifact.service';
 import { circuitBreakerRegistry } from '@/lib/system/circuit-breaker';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { getSystemStats } from '../services/stats.service';
@@ -40,25 +41,29 @@ router.get(
 			try: async () => {
 				const data = await getNavigationData();
 				const registry = getAuthorizedRootRegistry(req);
-				const [folders, audios, documents, jsonFiles, file3ds, videos, totalImages] = await Promise.all([
-					Promise.all(
-						data.folders.map(async (folder) => {
-							try {
-								const authorized = await registry.authorizeAbsolutePath(folder.path, 'read');
-								return { ...folder, path: authorized.relativePath, rootId: authorized.rootId };
-							} catch (error) {
-								if (error instanceof RootAuthorizationError) return null;
-								throw error;
-							}
-						})
-					).then((items) => items.filter((folder) => folder !== null)),
-					filterAuthorizedMediaEntities(req, data.audios, 'audio', ['read', 'index']),
-					filterAuthorizedMediaEntities(req, data.documents, 'document', ['read', 'index']),
-					filterAuthorizedMediaEntities(req, data.jsonFiles, 'json', ['read', 'index']),
-					filterAuthorizedMediaEntities(req, data.file3ds, 'file3d', ['read', 'index']),
-					filterAuthorizedMediaEntities(req, data.videos, 'video', ['read', 'index']),
-					countAuthorizedMediaAssets(registry, 'image', 'index'),
-				]);
+				const [folders, audios, documents, jsonFiles, file3ds, videos, totalImages, prompts, notes, wildcards] =
+					await Promise.all([
+						Promise.all(
+							data.folders.map(async (folder) => {
+								try {
+									const authorized = await registry.authorizeAbsolutePath(folder.path, 'read');
+									return { ...folder, path: authorized.relativePath, rootId: authorized.rootId };
+								} catch (error) {
+									if (error instanceof RootAuthorizationError) return null;
+									throw error;
+								}
+							})
+						).then((items) => items.filter((folder) => folder !== null)),
+						filterAuthorizedMediaEntities(req, data.audios, 'audio', ['read', 'index']),
+						filterAuthorizedMediaEntities(req, data.documents, 'document', ['read', 'index']),
+						filterAuthorizedMediaEntities(req, data.jsonFiles, 'json', ['read', 'index']),
+						filterAuthorizedMediaEntities(req, data.file3ds, 'file3d', ['read', 'index']),
+						filterAuthorizedMediaEntities(req, data.videos, 'video', ['read', 'index']),
+						countAuthorizedMediaAssets(registry, 'image', 'index'),
+						filterAuthorizedTaxonomyEntities(registry, 'prompt', data.prompts),
+						filterAuthorizedTaxonomyEntities(registry, 'note', data.notes),
+						filterAuthorizedTaxonomyEntities(registry, 'wildcard', data.wildcards),
+					]);
 				return {
 					...data,
 					audios,
@@ -66,7 +71,10 @@ router.get(
 					file3ds,
 					folders,
 					jsonFiles,
+					notes,
+					prompts,
 					videos,
+					wildcards,
 					stats: { ...data.stats, totalFolders: folders.length, totalImages },
 				};
 			},

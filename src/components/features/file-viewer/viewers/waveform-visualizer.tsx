@@ -92,7 +92,7 @@ export function WaveformVisualizer({
 				}
 			} catch (err) {
 				if (!isCancelled) {
-					setError('Error al analizar el audio');
+					setError('Could not analyze audio');
 					setIsLoading(false);
 				}
 			}
@@ -231,14 +231,14 @@ export function WaveformVisualizer({
 	if (error || !audioData) {
 		return (
 			<div className={cn('flex items-center justify-center rounded-lg bg-muted', className)} style={{ height }}>
-				<span className="text-muted-foreground text-sm">Visualización no disponible</span>
+				<span className="text-muted-foreground text-sm">Visualization unavailable</span>
 			</div>
 		);
 	}
 
 	return (
 		<canvas
-			aria-label="Forma de onda y posición de reproducción"
+			aria-label="Waveform and playback position"
 			aria-valuemax={100}
 			aria-valuemin={0}
 			aria-valuenow={Math.round(progress)}
@@ -249,7 +249,7 @@ export function WaveformVisualizer({
 			role="slider"
 			style={{ height }}
 			tabIndex={0}
-			title="Clic para saltar a esa posición"
+			title="Click to jump to that position"
 		/>
 	);
 }

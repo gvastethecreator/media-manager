@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
-import type { ProxyOptions } from 'vite';
+import { type ProxyOptions } from 'vite';
 import { defineConfig } from 'vite-plus';
 import svgr from 'vite-plugin-svgr';
 import { resolveLocalServiceHost } from './src/config/local-runtime-security.ts';
@@ -61,6 +61,7 @@ function getManualChunkName(id: string) {
 
 const toolingIgnorePatterns = [
 	'node_modules/**',
+	'node_modules-*/**',
 	'dist/**',
 	'build/**',
 	'coverage/**',
@@ -336,4 +337,4 @@ export default defineConfig({
 	// Optimizaci?n de logs
 	logLevel: nodeEnvironment === 'development' ? 'info' : 'warn',
 	clearScreen: false,
-});
+} as any);

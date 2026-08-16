@@ -221,7 +221,7 @@ export const CollapsiblePrompt: React.FC<{
 				onClick={() => setExpanded((v) => !v)}
 				type="button"
 			>
-				{expanded ? '[ Ocultar ]' : '[ Ver más ]'}
+				{expanded ? '[ Ocultar ]' : '[ Show more ]'}
 			</button>
 		</div>
 	);

@@ -88,7 +88,7 @@ export function FoldersGrid({
 									{folder.isFavorite && <Star className="h-3.5 w-3.5 fill-warning text-warning" />}
 									{folder._isOrphan && (
 										<Badge className="text-[10px]" variant="destructive">
-											Huérfana
+											Orphaned
 										</Badge>
 									)}
 								</div>

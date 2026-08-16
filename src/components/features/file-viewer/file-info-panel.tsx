@@ -52,7 +52,7 @@ export const FileInfoPanel = memo(function FileInfoPanel({ item, className }: Fi
 			<div className="space-y-2 border-t pt-3 text-sm">
 				{/* Tamaño */}
 				<div className="flex justify-between">
-					<span className="text-muted-foreground">Tamaño:</span>
+					<span className="text-muted-foreground">Size:</span>
 					<span className="font-medium">{formatFileSize(item.size || 0)}</span>
 				</div>
 

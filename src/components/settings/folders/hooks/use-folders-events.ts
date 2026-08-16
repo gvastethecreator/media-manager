@@ -34,7 +34,7 @@ function toastProgress(status: ProcessStatus) {
 	if (status.progress === undefined || status.progress <= 0) {
 		return;
 	}
-	const progressMessage = status.message || 'Procesando...';
+	const progressMessage = status.message || 'Processing...';
 	const progressPercent = Math.round(status.progress);
 	const now = Date.now();
 	if (
@@ -228,7 +228,7 @@ export function useFoldersEvents({
 					toastProgress(s);
 					callbacksRef.current.onProgress(s);
 				} catch (error) {
-					eventsLogger.error('Error procesando evento de progreso (batch):', error);
+					eventsLogger.error('Could not process progress event (batch):', error);
 				}
 			}
 		});
@@ -236,7 +236,7 @@ export function useFoldersEvents({
 
 	// Manejador de errores estable
 	const handleError = useCallback((error: ErrorResponse) => {
-		eventsLogger.error('❌ Error procesando carpeta:', error);
+		eventsLogger.error('❌ Could not process folder:', error);
 		try {
 			callbacksRef.current.onError(error);
 		} catch (err) {
@@ -258,7 +258,7 @@ export function useFoldersEvents({
 		try {
 			callbacksRef.current.onComplete(data);
 		} catch (error) {
-			eventsLogger.error('Error al manejar el evento de finalización:', error);
+			eventsLogger.error('Could not handle completion event:', error);
 		}
 	}, []);
 
@@ -380,13 +380,13 @@ export function useFoldersEvents({
 					eventsLogger.debug('evt', eventData.type);
 					processSSEEvent(eventData);
 				} catch (error) {
-					eventsLogger.error('❌ Error procesando evento SSE:', error);
+					eventsLogger.error('❌ Could not process SSE event:', error);
 				}
 			});
 
 			// Manejar errores de conexión
 			eventSource.addEventListener('error', (event) => {
-				eventsLogger.error('❌ Error en conexión SSE:', event);
+				eventsLogger.error('❌ SSE connection error:', event);
 			});
 
 			// Manejar heartbeat
@@ -394,7 +394,7 @@ export function useFoldersEvents({
 				eventsLogger.debug('💓 Heartbeat SSE recibido');
 			});
 		} catch (error) {
-			eventsLogger.error('❌ Error iniciando conexión SSE:', error);
+			eventsLogger.error('❌ Could not start SSE connection:', error);
 		}
 
 		// Cleanup

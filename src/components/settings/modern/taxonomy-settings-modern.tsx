@@ -28,46 +28,46 @@ import { SettingsPageHeader, SettingsStatsGrid } from './settings-card';
 const TAG_STATS = [
 	{
 		key: 'total',
-		label: 'Etiquetas',
+		label: 'Tags',
 		icon: <Tag className="h-5 w-5" />,
 		color: 'var(--entity-tag)',
 		getValue: (items: TagWithStats[]) => items.length,
-		getSubtitle: (items: TagWithStats[]) => `${items.filter((i) => i.isFavorite).length} favoritas`,
+		getSubtitle: (items: TagWithStats[]) => `${items.filter((i) => i.isFavorite).length} favorites`,
 	},
 	{
 		key: 'relations',
-		label: 'Relaciones',
+		label: 'Relationships',
 		icon: <Hash className="h-5 w-5" />,
 		color: 'var(--primary)',
 		getValue: (items: TagWithStats[]) => items.reduce((acc, item) => acc + (item._count?.images || 0), 0),
-		getSubtitle: () => 'Total asignaciones',
+		getSubtitle: () => 'Total assignments',
 	},
 	{
 		key: 'categories',
-		label: 'Categorías',
+		label: 'Categories',
 		icon: <Grid3X3 className="h-5 w-5" />,
 		color: 'var(--entity-collection)',
 		getValue: (items: TagWithStats[]) => new Set(items.map((i) => i.category)).size,
-		getSubtitle: () => 'Tipos diferentes',
+		getSubtitle: () => 'Distinct types',
 	},
 ];
 
 const PROPERTY_STATS = [
 	{
 		key: 'total',
-		label: 'Propiedades',
+		label: 'Properties',
 		icon: <Hash className="h-5 w-5" />,
 		color: 'var(--entity-property)',
 		getValue: (items: PropertyWithStats[]) => items.length,
-		getSubtitle: () => 'Metadatos extraídos',
+		getSubtitle: () => 'Extracted metadata',
 	},
 	{
 		key: 'files',
-		label: 'Archivos',
+		label: 'Files',
 		icon: <List className="h-5 w-5" />,
 		color: 'var(--entity-file)',
 		getValue: (items: PropertyWithStats[]) => items.reduce((acc, item) => acc + (item._count?.images || 0), 0),
-		getSubtitle: () => 'Con propiedades',
+		getSubtitle: () => 'With properties',
 	},
 ];
 
@@ -96,7 +96,7 @@ function TagCard({ tag, actions, isGrid }: { tag: TagWithStats; actions: CardAct
 				</CardHeader>
 				<CardContent className="p-4 pt-0">
 					<div className="flex items-center justify-between">
-						<span className="text-muted-foreground text-sm">{tag._count?.images || 0} usos</span>
+						<span className="text-muted-foreground text-sm">{tag._count?.images || 0} uses</span>
 						<div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
 							<Button className="h-8 w-8 p-0" onClick={actions.onEdit} size="sm" variant="ghost">
 								<Edit2 className="h-4 w-4" />
@@ -129,7 +129,7 @@ function TagCard({ tag, actions, isGrid }: { tag: TagWithStats; actions: CardAct
 				</div>
 			</div>
 			<div className="flex items-center gap-4">
-				<span className="text-muted-foreground text-sm">{tag._count?.images || 0} usos</span>
+				<span className="text-muted-foreground text-sm">{tag._count?.images || 0} uses</span>
 				<div className="flex gap-1">
 					<Button onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
@@ -166,7 +166,7 @@ function PropertyCard({
 			</CardHeader>
 			<CardContent>
 				<div className="flex items-center justify-between">
-					<span className="text-muted-foreground text-sm">{property._count?.images || 0} archivos</span>
+					<span className="text-muted-foreground text-sm">{property._count?.images || 0} files</span>
 					<div className="flex gap-1">
 						<Button onClick={actions.onEdit} size="sm" variant="ghost">
 							<Edit2 className="h-4 w-4" />
@@ -201,7 +201,7 @@ function PropertyCard({
 				</div>
 			</div>
 			<div className="flex items-center gap-4">
-				<span className="text-muted-foreground text-sm">{property._count?.images || 0} archivos</span>
+				<span className="text-muted-foreground text-sm">{property._count?.images || 0} files</span>
 				<div className="flex gap-1">
 					<Button onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
@@ -268,7 +268,7 @@ export function TaxonomySettingsModern() {
 	const handleSuccess = useCallback(() => {
 		setShowForm(false);
 		setEditingItem(null);
-		toastService.success(editingItem ? 'Actualizado correctamente' : 'Creado correctamente');
+		toastService.success(editingItem ? 'Updated successfully' : 'Created successfully');
 	}, [editingItem]);
 
 	// Render del formulario
@@ -280,7 +280,7 @@ export function TaxonomySettingsModern() {
 				<Dialog onOpenChange={setShowForm} open={showForm}>
 					<DialogContent className="sm:max-w-[600px]">
 						<DialogHeader>
-							<DialogTitle>{editingItem ? 'Editar Etiqueta' : 'Crear Etiqueta'}</DialogTitle>
+							<DialogTitle>{editingItem ? 'Edit Tag' : 'Create Tag'}</DialogTitle>
 						</DialogHeader>
 						<CreateTagForm
 							isEditing={!!editingItem}
@@ -298,7 +298,7 @@ export function TaxonomySettingsModern() {
 			<Dialog onOpenChange={setShowForm} open={showForm}>
 				<DialogContent className="sm:max-w-[600px]">
 					<DialogHeader>
-						<DialogTitle>{editingItem ? 'Editar Propiedad' : 'Crear Propiedad'}</DialogTitle>
+						<DialogTitle>{editingItem ? 'Edit Property' : 'Create Property'}</DialogTitle>
 					</DialogHeader>
 					<CreatePropertyForm
 						isEditing={!!editingItem}
@@ -318,20 +318,20 @@ export function TaxonomySettingsModern() {
 
 	return (
 		<div className="space-y-6">
-			<SettingsPageHeader description="Gestiona etiquetas, categorías y propiedades de metadatos" title="Taxonomía" />
+			<SettingsPageHeader description="Manage tags, categories, and metadata properties" title="Taxonomy" />
 
 			<Tabs onValueChange={(v) => setActiveTab(v as typeof activeTab)} value={activeTab}>
 				<TabsList className="grid w-full grid-cols-2 lg:w-[300px]">
 					<TabsTrigger className="gap-2" value="tags">
 						<Tag className="h-4 w-4" />
-						Etiquetas
+						Tags
 						<Badge className="ml-1 text-sm" variant="secondary">
 							{tagsQuery.data?.data?.length || 0}
 						</Badge>
 					</TabsTrigger>
 					<TabsTrigger className="gap-2" value="properties">
 						<Hash className="h-4 w-4" />
-						Propiedades
+						Properties
 						<Badge className="ml-1 text-sm" variant="secondary">
 							{propertiesQuery.data?.data?.length || 0}
 						</Badge>
@@ -373,7 +373,7 @@ export function TaxonomySettingsModern() {
 							<input
 								className="w-full rounded-lg border bg-background px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 								onChange={(e) => setSearchQuery(e.target.value)}
-								placeholder={`Buscar ${activeTab === 'tags' ? 'etiquetas' : 'propiedades'}...`}
+								placeholder={`Search ${activeTab === 'tags' ? 'tags' : 'properties'}...`}
 								type="text"
 								value={searchQuery}
 							/>
@@ -399,7 +399,7 @@ export function TaxonomySettingsModern() {
 							</div>
 							<Button className="gap-2" onClick={handleCreate}>
 								<Plus className="h-4 w-4" />
-								Crear {activeTab === 'tags' ? 'Etiqueta' : 'Propiedad'}
+								Create {activeTab === 'tags' ? 'Tag' : 'Property'}
 							</Button>
 						</div>
 					</div>
@@ -414,19 +414,19 @@ export function TaxonomySettingsModern() {
 							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 								<Tag className="h-6 w-6 text-muted-foreground" />
 							</div>
-							<h3 className="font-medium text-lg">No hay {activeTab === 'tags' ? 'etiquetas' : 'propiedades'}</h3>
+							<h3 className="font-medium text-lg">No {activeTab === 'tags' ? 'tags' : 'properties'} yet</h3>
 							<p className="mt-1 text-muted-foreground text-sm">
 								{searchQuery
-									? 'No se encontraron resultados'
-									: `Comienza creando tu primer ${activeTab === 'tags' ? 'etiqueta' : 'propiedad'}`}
+									? 'No results found'
+									: `Create your first ${activeTab === 'tags' ? 'tag' : 'property'} to get started`}
 							</p>
 							<div className="mt-4">
 								{searchQuery ? (
 									<Button onClick={() => setSearchQuery('')} variant="outline">
-										Limpiar búsqueda
+										Clear search
 									</Button>
 								) : (
-									<Button onClick={handleCreate}>Crear {activeTab === 'tags' ? 'Etiqueta' : 'Propiedad'}</Button>
+									<Button onClick={handleCreate}>Create {activeTab === 'tags' ? 'Tag' : 'Property'}</Button>
 								)}
 							</div>
 						</div>

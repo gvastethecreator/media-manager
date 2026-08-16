@@ -31,7 +31,7 @@ export async function getQueueJobsFromApi(
 	}
 	const response = await fetch(`${API_BASE_PATH}?${params.toString()}`);
 	if (!response.ok) {
-		throw new Error('Error al obtener trabajos');
+		throw new Error('Could not get jobs');
 	}
 	return response.json();
 }
@@ -39,7 +39,7 @@ export async function getQueueJobsFromApi(
 export async function getQueueStatsFromApi(): Promise<QueueStats> {
 	const response = await fetch(`${API_BASE_PATH}/stats`);
 	if (!response.ok) {
-		throw new Error('Error al obtener estadísticas de cola');
+		throw new Error('Could not get queue statistics');
 	}
 	return response.json();
 }
@@ -51,7 +51,7 @@ export async function createQueueJobInApi(input: CreateQueueJobInput): Promise<Q
 		body: JSON.stringify(input),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear trabajo');
+		throw new Error('Could not create job');
 	}
 	return response.json();
 }
@@ -63,7 +63,7 @@ export async function updateQueueJobInApi(id: string, input: UpdateQueueJobInput
 		body: JSON.stringify(input),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar trabajo');
+		throw new Error('Could not update job');
 	}
 	return response.json();
 }
@@ -71,14 +71,14 @@ export async function updateQueueJobInApi(id: string, input: UpdateQueueJobInput
 export async function deleteQueueJobFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar trabajo');
+		throw new Error('Could not delete job');
 	}
 }
 
 export async function retryQueueJobInApi(id: string): Promise<QueueJobExtended> {
 	const response = await fetch(`${API_BASE_PATH}/${id}/retry`, { method: 'POST' });
 	if (!response.ok) {
-		throw new Error('Error al reintentar trabajo');
+		throw new Error('Could not retry job');
 	}
 	return response.json();
 }
@@ -86,7 +86,7 @@ export async function retryQueueJobInApi(id: string): Promise<QueueJobExtended> 
 export async function cancelQueueJobInApi(id: string): Promise<QueueJobExtended> {
 	const response = await fetch(`${API_BASE_PATH}/${id}/cancel`, { method: 'POST' });
 	if (!response.ok) {
-		throw new Error('Error al cancelar trabajo');
+		throw new Error('Could not cancel job');
 	}
 	return response.json();
 }

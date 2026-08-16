@@ -719,7 +719,7 @@ export async function syncSpecificFolder(folderId: string, options: FolderSyncOp
 		.limit(1);
 
 	if (folder.length === 0) {
-		throw new Error(`Carpeta con ID ${folderId} no encontrada`);
+		throw new Error(`Folder with ID ${folderId} no encontrada`);
 	}
 
 	// Verificar si la carpeta aún existe en el sistema de archivos

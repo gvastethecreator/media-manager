@@ -24,27 +24,27 @@ const createCollectionSchema = z.object({
 	name: z
 		.string()
 		.min(2, {
-			message: 'El nombre debe tener al menos 2 caracteres',
+			message: 'Name must be at least 2 characters',
 		})
 		.max(50, {
-			message: 'El nombre no debe exceder los 50 caracteres',
+			message: 'Name cannot exceed 50 characters',
 		}),
 	description: z
 		.string()
 		.max(200, {
-			message: 'La descripción no debe exceder los 200 caracteres',
+			message: 'Description cannot exceed 200 characters',
 		})
 		.optional(),
 	color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
-		message: 'El color debe ser un código hexadecimal válido',
+		message: 'Color must be a valid hexadecimal code',
 	}),
 	emoji: z.string().min(1, {
-		message: 'Debes seleccionar un emoji',
+		message: 'Select an emoji',
 	}),
 	category: z.string().optional(),
 	platform: z.string().optional(),
-	url: z.string().url({ message: 'La URL debe ser válida' }).optional().or(z.literal('')),
-	alternativeUrl: z.string().url({ message: 'La URL alternativa debe ser válida' }).optional().or(z.literal('')),
+	url: z.string().url({ message: 'URL must be valid' }).optional().or(z.literal('')),
+	alternativeUrl: z.string().url({ message: 'Alternative URL must be valid' }).optional().or(z.literal('')),
 	price: z.number().nonnegative().optional(),
 });
 
@@ -188,7 +188,7 @@ export function CreateCollectionForm({
 
 			// Validar que name esté presente
 			if (!data.name) {
-				throw new Error('El nombre es requerido');
+				throw new Error('Name is required');
 			}
 
 			// Crear o actualizar colección
@@ -207,7 +207,7 @@ export function CreateCollectionForm({
 			} else {
 				// Asegurar que name esté presente para el tipo CollectionCreateInput
 				if (!data.name) {
-					throw new Error('El nombre es requerido');
+					throw new Error('Name is required');
 				}
 
 				const created = await createCollectionMutation.mutateAsync({
@@ -220,8 +220,8 @@ export function CreateCollectionForm({
 				form.reset();
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la colección`, {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			toastService.error(`Could not ${isEditing ? 'update' : 'create'} the collection`, {
 				description: errorMessage,
 			});
 		} finally {
@@ -242,9 +242,9 @@ export function CreateCollectionForm({
 					name="name"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Nombre</FormLabel>
+							<FormLabel>Name</FormLabel>
 							<FormControl>
-								<Input placeholder="Nombre de la colección" {...field} />
+								<Input placeholder="Collection name" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -284,9 +284,9 @@ export function CreateCollectionForm({
 					name="description"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Descripción</FormLabel>
+							<FormLabel>Description</FormLabel>
 							<FormControl>
-								<Textarea placeholder="Descripción de la colección..." rows={3} {...field} />
+								<Textarea placeholder="Collection description..." rows={3} {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -298,11 +298,11 @@ export function CreateCollectionForm({
 					name="category"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Categoría</FormLabel>
+							<FormLabel>Category</FormLabel>
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Seleccionar categoría" />
+									<SelectValue placeholder="Select category" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -323,17 +323,17 @@ export function CreateCollectionForm({
 					name="platform"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Plataforma</FormLabel>
+							<FormLabel>Platform</FormLabel>
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Seleccionar plataforma" />
+									<SelectValue placeholder="Select platform" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
 									<SelectItem value="web">Web</SelectItem>
 									<SelectItem value="nft">NFT</SelectItem>
-									<SelectItem value="physical">Físico</SelectItem>
+									<SelectItem value="physical">Physical</SelectItem>
 									<SelectItem value="digital">Digital</SelectItem>
 								</SelectContent>
 							</Select>
@@ -361,7 +361,7 @@ export function CreateCollectionForm({
 					name="price"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Precio</FormLabel>
+							<FormLabel>Price</FormLabel>
 							<FormControl>
 								<Input
 									min={0}
@@ -378,9 +378,9 @@ export function CreateCollectionForm({
 
 				<div className="flex justify-end space-x-2">
 					<Button onClick={onCancel} type="button" variant="outline">
-						Cancelar
+						Cancel
 					</Button>
-					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear colección'}</Button>
+					<Button type="submit">{isEditing ? 'Save changes' : 'Create collection'}</Button>
 				</div>
 			</form>
 		</Form>

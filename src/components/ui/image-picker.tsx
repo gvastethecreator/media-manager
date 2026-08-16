@@ -19,7 +19,7 @@ export function ImagePicker({
 	onChange,
 	className,
 	disabled = false,
-	placeholder = 'Seleccionar imagen',
+	placeholder = 'Select image',
 }: ImagePickerProps) {
 	const [selectedImage, setSelectedImage] = React.useState<string | null>(value || defaultValue);
 	const [isOpen, setIsOpen] = React.useState(false);
@@ -48,7 +48,7 @@ export function ImagePicker({
 					<img alt="Selected" className="h-full w-full object-cover" src={selectedImage} />
 					{!disabled && (
 						<Button
-							aria-label="Eliminar imagen"
+							aria-label="Remove image"
 							className="absolute top-2 right-2"
 							onClick={handleRemoveImage}
 							size="icon"
@@ -72,11 +72,11 @@ export function ImagePicker({
 					</DialogTrigger>
 					<DialogContent>
 						<DialogHeader>
-							<DialogTitle>Seleccionar Imagen</DialogTitle>
+							<DialogTitle>Select Image</DialogTitle>
 						</DialogHeader>
 						<div className="grid grid-cols-3 gap-4 py-4">
 							{/* Aquí irá la galería de imágenes */}
-							<div className="text-center text-muted-foreground text-sm">Galería en desarrollo...</div>
+							<div className="text-center text-muted-foreground text-sm">Gallery under development...</div>
 						</div>
 					</DialogContent>
 				</Dialog>

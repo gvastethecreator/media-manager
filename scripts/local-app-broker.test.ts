@@ -259,7 +259,7 @@ it('rechaza targets no loopback y secretos débiles', () => {
 			publicPort: 4000,
 			sessionToken: 'a'.repeat(32),
 		})
-	).toThrow('backend HTTP loopback');
+	).toThrow('loopback HTTP backend');
 	expect(() =>
 		createLocalAppBrokerHandler({
 			backendOrigin: 'http://127.0.0.1:4001',
@@ -267,7 +267,7 @@ it('rechaza targets no loopback y secretos débiles', () => {
 			publicPort: 4000,
 			sessionToken: 'weak',
 		})
-	).toThrow('secreto de sesión local válido');
+	).toThrow('valid local session secret');
 });
 
 it('rechaza de forma inmediata un puerto público ocupado', async () => {

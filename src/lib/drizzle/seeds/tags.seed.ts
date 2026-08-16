@@ -19,7 +19,7 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('tag', 'Arte Digital', 1),
 				name: 'Arte Digital',
-				description: 'Creaciones artísticas digitales',
+				description: 'Digital artwork',
 				emoji: '🎨',
 				color: '#a855f7',
 				category: 'arte',
@@ -35,7 +35,7 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('tag', 'Retrato', 1),
 				name: 'Retrato',
-				description: 'Fotografías de retratos y rostros',
+				description: 'Portrait and face photography',
 				emoji: '👤',
 				color: '#f59e0b',
 				category: 'genero',
@@ -43,7 +43,7 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('tag', 'Cyberpunk', 1),
 				name: 'Cyberpunk',
-				description: 'Estética futurista y tecnológica',
+				description: 'Futuristic technology aesthetic',
 				emoji: '🤖',
 				color: '#ef4444',
 				category: 'estilo',
@@ -51,7 +51,7 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('tag', 'Fantasia', 1),
 				name: 'Fantasía',
-				description: 'Mundos mágicos e imaginarios',
+				description: 'Magical and imaginary worlds',
 				emoji: '🧙',
 				color: '#6366f1',
 				category: 'genero',
@@ -60,9 +60,9 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 
 		await db.insert(tags).values(sampleTags);
 
-		seedLogger.success(`✅ ${sampleTags.length} etiquetas creadas`);
+		seedLogger.success(`✅ ${sampleTags.length} tags created`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando etiquetas:', error);
+		seedLogger.error('❌ Could not create tags:', error);
 		throw error;
 	}
 }

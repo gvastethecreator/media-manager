@@ -38,8 +38,8 @@ export function useToolbarActions(
 				toastService.success('URL copiada al portapapeles');
 			}
 		} catch (error) {
-			logger.error('Error al copiar URL:', error);
-			toastService.error('No se pudo copiar la URL');
+			logger.error('Could not copy URL:', error);
+			toastService.error('The URL could not be copied');
 		}
 	}, [currentImage, urls, setUrls, loadImageUrl]);
 
@@ -80,8 +80,8 @@ export function useToolbarActions(
 				toastService.success('Descarga iniciada');
 			}
 		} catch (error) {
-			logger.error('Error al descargar imagen:', error);
-			toastService.error('No se pudo descargar la imagen');
+			logger.error('Could not download image:', error);
+			toastService.error('The image could not be downloaded');
 		}
 	}, [currentImage, urls, setUrls, loadImageUrl]);
 

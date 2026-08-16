@@ -26,10 +26,10 @@ describe('read-only orphan inventory', () => {
 		const expectedMarker = `<!-- relation-catalog-counts: total=${RELATION_CATALOG.length} direct=${direct.length} composite=${composite.length} polymorphic=${polymorphic.length} junctions=${junctions.size} endpoints=${junctionEndpoints.length} -->`;
 		const documentation = await readFile(resolve(import.meta.dir, '../../docs/database/RELATION-INVENTORY.md'), 'utf8');
 
-		expect(RELATION_CATALOG).toHaveLength(90);
+		expect(RELATION_CATALOG).toHaveLength(93);
 		expect(direct).toHaveLength(84);
 		expect(composite).toHaveLength(1);
-		expect(polymorphic).toHaveLength(5);
+		expect(polymorphic).toHaveLength(8);
 		expect(junctions.size).toBe(28);
 		expect(junctionEndpoints).toHaveLength(56);
 		expect(documentation).toContain(expectedMarker);
@@ -48,6 +48,23 @@ describe('read-only orphan inventory', () => {
 		database
 			.query('INSERT INTO Favorite (id, profileId, entityType, entityId, addedAt) VALUES (?, ?, ?, ?, ?)')
 			.run('favorite-orphan-row', 'profile-for-orphan-test', 'image', 'raw-missing-image-id', Date.now());
+		database.query('INSERT INTO Note (id, title) VALUES (?, ?)').run('semantic-anchor', 'Semantic anchor');
+		database.exec(`
+			DROP TRIGGER IF EXISTS SemanticRelation_endpoint_contract_insert;
+			DROP TRIGGER IF EXISTS SemanticRelation_role_contract_insert;
+		`);
+		database
+			.query(
+				`INSERT INTO SemanticRelation(id, sourceType, sourceId, targetType, targetId, roleSlug, roleKey)
+				 VALUES (?, 'note', ?, 'note', 'semantic-anchor', NULL, '')`
+			)
+			.run('semantic-source-orphan', 'missing-semantic-source');
+		database
+			.query(
+				`INSERT INTO SemanticRelation(id, sourceType, sourceId, targetType, targetId, roleSlug, roleKey)
+				 VALUES (?, 'note', 'semantic-anchor', 'note', ?, NULL, '')`
+			)
+			.run('semantic-target-orphan', 'missing-semantic-target');
 		database.clearQueryCache();
 		database.close();
 		const before = await stat(databasePath);
@@ -56,10 +73,12 @@ describe('read-only orphan inventory', () => {
 		const after = await stat(databasePath);
 		const serialized = JSON.stringify(findings);
 
-		expect(RELATION_CATALOG).toHaveLength(90);
+		expect(RELATION_CATALOG).toHaveLength(93);
 		expect(findings.map((finding) => finding.name)).toContain('_ImageToTag.A->Image.id');
 		expect(findings.map((finding) => finding.name)).toContain('_ImageToTag.B->Tag.id');
 		expect(findings.map((finding) => finding.name)).toContain('Favorite.entityId->entityType target');
+		expect(findings.map((finding) => finding.name)).toContain('SemanticRelation.sourceId->sourceType target');
+		expect(findings.map((finding) => finding.name)).toContain('SemanticRelation.targetId->targetType target');
 		expect(findings.every((finding) => finding.status === 'orphaned')).toBe(true);
 		expect(findings.every((finding) => finding.count > 0 && finding.technicalIds.length > 0)).toBe(true);
 		expect(findings.every((finding) => finding.technicalIds.every((id) => /^[a-f0-9]{24}$/.test(id)))).toBe(true);
@@ -108,6 +127,8 @@ describe('read-only orphan inventory', () => {
 			'Thumbnail.entityId->entityType target',
 			'Metadata.entityId->entityType target',
 			'EntityAggregates.entityId->entityType target',
+			'SemanticRelation.sourceId->sourceType target',
+			'SemanticRelation.targetId->targetType target',
 			'_AlbumToPlace.A->Album.id',
 			'_AlbumToPlace.B->Place.id',
 			'_CharacterToPlace.A->Character.id',

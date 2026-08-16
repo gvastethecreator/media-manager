@@ -24,15 +24,15 @@ function toNumberValue(value: unknown): number {
 
 export function FileDistributionChart() {
 	const data = [
-		{ name: 'Imágenes', value: 8500, color: FILE_TYPE_COLORS.images },
+		{ name: 'Images', value: 8500, color: FILE_TYPE_COLORS.images },
 		{ name: 'Videos', value: 2500, color: FILE_TYPE_COLORS.videos },
-		{ name: 'Documentos', value: 1458, color: FILE_TYPE_COLORS.documents },
+		{ name: 'Documents', value: 1458, color: FILE_TYPE_COLORS.documents },
 	];
 
 	return (
 		<Card className="h-full border-2 border-primary/10">
 			<CardHeader className="pb-2">
-				<CardTitle className="font-medium text-sm">Distribución de Archivos</CardTitle>
+				<CardTitle className="font-medium text-sm">File Distribution</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2">
 				<div className="h-[180px]">
@@ -53,8 +53,8 @@ export function FileDistributionChart() {
 								))}
 							</Pie>
 							<Tooltip
-								formatter={(value) => [`${toNumberValue(value).toLocaleString()} archivos`, 'Cantidad']}
-								labelFormatter={(name) => `Tipo: ${name}`}
+								formatter={(value) => [`${toNumberValue(value).toLocaleString()} files`, 'Count']}
+								labelFormatter={(name) => `Type: ${name}`}
 							/>
 						</PieChart>
 					</ResponsiveContainer>
@@ -66,19 +66,19 @@ export function FileDistributionChart() {
 
 export function IndexingActivityChart() {
 	const data = [
-		{ name: 'Lun', archivos: 450 },
-		{ name: 'Mar', archivos: 520 },
-		{ name: 'Mie', archivos: 380 },
-		{ name: 'Jue', archivos: 650 },
-		{ name: 'Vie', archivos: 420 },
-		{ name: 'Sab', archivos: 580 },
-		{ name: 'Dom', archivos: 720 },
+		{ name: 'Mon', files: 450 },
+		{ name: 'Tue', files: 520 },
+		{ name: 'Wed', files: 380 },
+		{ name: 'Thu', files: 650 },
+		{ name: 'Fri', files: 420 },
+		{ name: 'Sat', files: 580 },
+		{ name: 'Sun', files: 720 },
 	];
 
 	return (
 		<Card className="h-full border-2 border-primary/10">
 			<CardHeader className="pb-2">
-				<CardTitle className="font-medium text-sm">Actividad de Indexación</CardTitle>
+				<CardTitle className="font-medium text-sm">Indexing Activity</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2">
 				<div className="h-[180px]">
@@ -94,11 +94,11 @@ export function IndexingActivityChart() {
 							<YAxis tick={{ fontSize: 12 }} width={30} />
 							<CartesianGrid strokeDasharray="3 3" />
 							<Tooltip
-								formatter={(value) => [`${toNumberValue(value)} archivos`, 'Indexados']}
-								labelFormatter={(name) => `Día: ${name}`}
+								formatter={(value) => [`${toNumberValue(value)} files`, 'Indexed']}
+								labelFormatter={(name) => `Day: ${name}`}
 							/>
 							<Area
-								dataKey="archivos"
+								dataKey="files"
 								fill="url(#colorArchivos)"
 								fillOpacity={1}
 								stroke={CHART_COLORS.primary}
@@ -114,16 +114,16 @@ export function IndexingActivityChart() {
 
 export function ResourceUsageChart() {
 	const data = [
-		{ name: 'CPU', valor: 45 },
-		{ name: 'RAM', valor: 62 },
-		{ name: 'Disco', valor: 78 },
-		{ name: 'Red', valor: 25 },
+		{ name: 'CPU', value: 45 },
+		{ name: 'RAM', value: 62 },
+		{ name: 'Disk', value: 78 },
+		{ name: 'Network', value: 25 },
 	];
 
 	return (
 		<Card className="h-full border-2 border-primary/10">
 			<CardHeader className="pb-2">
-				<CardTitle className="font-medium text-sm">Uso de Recursos</CardTitle>
+				<CardTitle className="font-medium text-sm">Resource Usage</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2">
 				<div className="h-[180px]">
@@ -133,10 +133,10 @@ export function ResourceUsageChart() {
 							<YAxis tick={{ fontSize: 12 }} width={30} />
 							<CartesianGrid strokeDasharray="3 3" />
 							<Tooltip
-								formatter={(value) => [`${toNumberValue(value)}%`, 'Utilización']}
-								labelFormatter={(name) => `Recurso: ${name}`}
+								formatter={(value) => [`${toNumberValue(value)}%`, 'Utilization']}
+								labelFormatter={(name) => `Resource: ${name}`}
 							/>
-							<Bar dataKey="valor" fill={CHART_COLORS.secondary} />
+							<Bar dataKey="value" fill={CHART_COLORS.secondary} />
 						</BarChart>
 					</ResponsiveContainer>
 				</div>
@@ -147,18 +147,18 @@ export function ResourceUsageChart() {
 
 export function SystemPerformanceChart() {
 	const data = [
-		{ name: '00:00', valor: 85 },
-		{ name: '04:00', valor: 92 },
-		{ name: '08:00', valor: 78 },
-		{ name: '12:00', valor: 65 },
-		{ name: '16:00', valor: 88 },
-		{ name: '20:00', valor: 95 },
+		{ name: '00:00', value: 85 },
+		{ name: '04:00', value: 92 },
+		{ name: '08:00', value: 78 },
+		{ name: '12:00', value: 65 },
+		{ name: '16:00', value: 88 },
+		{ name: '20:00', value: 95 },
 	];
 
 	return (
 		<Card className="h-full border-2 border-primary/10">
 			<CardHeader className="pb-2">
-				<CardTitle className="font-medium text-sm">Rendimiento del Sistema</CardTitle>
+				<CardTitle className="font-medium text-sm">System Performance</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2">
 				<div className="h-[180px]">
@@ -168,10 +168,10 @@ export function SystemPerformanceChart() {
 							<YAxis tick={{ fontSize: 12 }} width={30} />
 							<CartesianGrid strokeDasharray="3 3" />
 							<Tooltip
-								formatter={(value) => [`${toNumberValue(value)}/100`, 'Puntuación']}
-								labelFormatter={(name) => `Hora: ${name}`}
+								formatter={(value) => [`${toNumberValue(value)}/100`, 'Score']}
+								labelFormatter={(name) => `Time: ${name}`}
 							/>
-							<Line dataKey="valor" stroke={CHART_COLORS.tertiary} strokeWidth={2} type="monotone" />
+							<Line dataKey="value" stroke={CHART_COLORS.tertiary} strokeWidth={2} type="monotone" />
 						</LineChart>
 					</ResponsiveContainer>
 				</div>

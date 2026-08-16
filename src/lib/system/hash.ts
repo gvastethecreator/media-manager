@@ -12,7 +12,7 @@ export async function computeHash(filePath: string): Promise<string> {
 		const stream = createReadStream(filePath);
 
 		stream.on('error', (error) => {
-			reject(error instanceof Error ? error : new Error('Error al leer el archivo'));
+			reject(error instanceof Error ? error : new Error('Could not read the file'));
 		});
 
 		stream.on('data', (chunk) => {

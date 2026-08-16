@@ -46,7 +46,7 @@ const variantConfig = {
 		iconColor: 'text-destructive',
 		bgColor: 'bg-destructive/10',
 		buttonVariant: 'destructive' as const,
-		confirmDefault: 'Eliminar',
+		confirmDefault: 'Delete',
 	},
 	warning: {
 		icon: AlertTriangle,
@@ -60,14 +60,14 @@ const variantConfig = {
 		iconColor: 'text-dt-primary-600',
 		bgColor: 'bg-dt-primary-50',
 		buttonVariant: 'default' as const,
-		confirmDefault: 'Aceptar',
+		confirmDefault: 'Accept',
 	},
 	success: {
 		icon: CheckCircle2,
 		iconColor: 'text-dt-success-600',
 		bgColor: 'bg-dt-success-50',
 		buttonVariant: 'default' as const,
-		confirmDefault: 'Confirmar',
+		confirmDefault: 'Confirm',
 	},
 };
 
@@ -79,10 +79,10 @@ const variantConfig = {
  *   open={showDeleteDialog}
  *   onClose={() => setShowDeleteDialog(false)}
  *   onConfirm={handleDelete}
- *   title="Eliminar carpeta"
+ *   title="Delete carpeta"
  *   description="Se eliminarán 5 archivos permanentemente."
  *   variant="danger"
- *   confirmText="Eliminar permanentemente"
+ *   confirmText="Delete permanentemente"
  * />
  */
 export function ConfirmDialog({
@@ -92,7 +92,7 @@ export function ConfirmDialog({
 	title,
 	description,
 	confirmText,
-	cancelText = 'Cancelar',
+	cancelText = 'Cancel',
 	variant = 'warning',
 	showIcon = true,
 	disableConfirmDuration = 0,
@@ -198,7 +198,7 @@ export function ConfirmDialog({
  *
  * const handleDelete = async () => {
  *   const confirmed = await confirm({
- *     title: 'Eliminar?',
+ *     title: 'Delete?',
  *     description: 'Esta acción no se puede deshacer',
  *     variant: 'danger'
  *   });

@@ -25,7 +25,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 	componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
 		if (import.meta.env.DEV) {
-			clientLogger.error('Error capturado por ErrorBoundary:', { error, errorInfo });
+			clientLogger.error('Error caught by ErrorBoundary:', { error, errorInfo });
 		}
 	}
 
@@ -58,8 +58,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 				const stack = this.state.error.stack || '';
 				const affectedFiles = this.getAffectedFiles(stack);
 				const envInfo = {
-					version: import.meta.env.VITE_APP_VERSION || 'desconocida',
-					branch: (import.meta as any).env?.VITE_GIT_BRANCH || 'desconocida',
+					version: import.meta.env.VITE_APP_VERSION || 'unknown',
+					branch: (import.meta as any).env?.VITE_GIT_BRANCH || 'unknown',
 					date: new Date().toLocaleString(),
 					path: window.location.pathname,
 				};
@@ -74,16 +74,16 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 					<div className="flex h-full flex-row items-stretch justify-center gap-8 bg-background p-8 text-foreground">
 						<div className="flex max-w-2xl flex-1 flex-col items-center justify-center">
 							<div className="flex w-full flex-col items-center rounded-xl border border-border/50 bg-card p-8 shadow-lg">
-								<h1 className="mb-4 font-bold text-3xl text-destructive">¡Algo salió mal!</h1>
-								<p className="mb-4 text-foreground/80">Intenta recargar la página o reporta el error.</p>
+								<h1 className="mb-4 font-bold text-3xl text-destructive">Something went wrong</h1>
+								<p className="mb-4 text-foreground/80">Reload the page or report the error.</p>
 								<button className="btn btn-primary mb-4" onClick={this.handleReload} type="button">
-									Recargar
+									Reload
 								</button>
 								<div className="mt-4 flex w-full flex-col items-start gap-6">
 									<div className="w-full rounded-lg border border-border/50 bg-background p-4">
-										<strong className="text-destructive/80">Archivos afectados:</strong>
+										<strong className="text-destructive/80">Affected files:</strong>
 										<ul className="mt-2 ml-6 list-disc text-foreground/80 text-xs">
-											{affectedFiles.length === 0 && <li>No detectados en el stack trace.</li>}
+											{affectedFiles.length === 0 && <li>None detected in the stack trace.</li>}
 											{affectedFiles.map((f) => (
 												<li key={`${f.file}:${f.line}`}>
 													<span className="font-mono text-info">
@@ -101,7 +101,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 												onClick={() => navigator.clipboard.writeText(stack)}
 												type="button"
 											>
-												Copiar
+												Copy
 											</button>
 										</div>
 										<pre className="mt-2 max-w-xl overflow-x-auto rounded bg-card p-2 text-foreground/80 text-xs">
@@ -109,27 +109,27 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 										</pre>
 									</div>
 									<div className="w-full rounded-lg border border-border/50 bg-background p-4">
-										<strong className="text-success">Información de entorno:</strong>
+										<strong className="text-success">Environment information:</strong>
 										<ul className="mt-2 ml-4 text-foreground/80 text-xs">
 											<li>
-												Versión: <span className="font-mono text-success/80">{envInfo.version}</span>
+												Version: <span className="font-mono text-success/80">{envInfo.version}</span>
 											</li>
 											<li>
-												Rama: <span className="font-mono text-success/80">{envInfo.branch}</span>
+												Branch: <span className="font-mono text-success/80">{envInfo.branch}</span>
 											</li>
 											<li>
-												Fecha: <span className="font-mono text-success/80">{envInfo.date}</span>
+												Date: <span className="font-mono text-success/80">{envInfo.date}</span>
 											</li>
 											<li>
-												Ruta: <span className="font-mono text-success/80">{envInfo.path}</span>
+												Path: <span className="font-mono text-success/80">{envInfo.path}</span>
 											</li>
 										</ul>
 									</div>
 									<div className="w-full rounded-lg border border-border/50 bg-background p-4">
-										<strong className="text-warning">Estado de stores (debug):</strong>
+										<strong className="text-warning">Store state (debug):</strong>
 										<pre className="mt-2 max-h-40 overflow-auto rounded bg-card p-2 text-warning/80 text-xs">
 											{JSON.stringify(
-												{ /* TODO: dump real de stores aquí */ demo: 'Implementa aquí el snapshot de Zustand o Redux' },
+												{ /* TODO: dump the real stores here */ demo: 'Add the Zustand or Redux snapshot here' },
 												null,
 												2
 											)}
@@ -141,7 +141,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 						{this.props.lastLogContent && (
 							<aside className="flex w-[420px] max-w-full flex-col overflow-auto rounded-lg border-border/30 border-l bg-muted p-4 shadow-inner">
 								<h2 className="mb-2 font-semibold text-foreground/80 text-sm">
-									Último log: <span className="font-mono text-info text-xs">{this.props.lastLogContent.file}</span>
+									Latest log: <span className="font-mono text-info text-xs">{this.props.lastLogContent.file}</span>
 								</h2>
 								<pre className="max-h-[400px] overflow-auto rounded bg-background p-2 text-foreground/70 text-xs">
 									{this.props.lastLogContent.lines.join('\n')}

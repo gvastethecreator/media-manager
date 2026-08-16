@@ -52,10 +52,10 @@ const formatRelativeTime = (timestamp: string): string => {
 	const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-	if (diffMins < 1) return 'ahora';
-	if (diffMins < 60) return `hace ${diffMins}min`;
-	if (diffHours < 24) return `hace ${diffHours}h`;
-	return `hace ${diffDays}d`;
+	if (diffMins < 1) return 'now';
+	if (diffMins < 60) return `${diffMins} min ago`;
+	if (diffHours < 24) return `${diffHours} hr ago`;
+	return `${diffDays} days ago`;
 };
 
 /**
@@ -96,7 +96,7 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-stats'],
 		queryFn: async () => {
 			const response = await fetch('/api/reindex-logs/stats');
-			if (!response.ok) throw new Error('Error obteniendo estadísticas de logs');
+			if (!response.ok) throw new Error('Could not retrieve log statistics');
 			return response.json();
 		},
 		refetchInterval: 30_000, // Actualizar cada 30 segundos
@@ -107,7 +107,7 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-recent', logLimit],
 		queryFn: async () => {
 			const response = await fetch(`/api/reindex-logs/recent?limit=${logLimit}`);
-			if (!response.ok) throw new Error('Error obteniendo logs recientes');
+			if (!response.ok) throw new Error('Could not retrieve recent logs');
 			return response.json();
 		},
 		enabled: activeTab === 'recent',
@@ -119,7 +119,7 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-errors', logLimit],
 		queryFn: async () => {
 			const response = await fetch(`/api/reindex-logs/errors?limit=${logLimit}`);
-			if (!response.ok) throw new Error('Error obteniendo logs de errores');
+			if (!response.ok) throw new Error('Could not retrieve error logs');
 			return response.json();
 		},
 		enabled: activeTab === 'errors',
@@ -131,7 +131,7 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-warnings', logLimit],
 		queryFn: async () => {
 			const response = await fetch(`/api/reindex-logs/warnings?limit=${logLimit}`);
-			if (!response.ok) throw new Error('Error obteniendo logs de warnings');
+			if (!response.ok) throw new Error('Could not retrieve warning logs');
 			return response.json();
 		},
 		enabled: activeTab === 'warnings',
@@ -143,7 +143,7 @@ export default function ReindexLogsViewer() {
 		queryKey: ['reindex-logs-summary'],
 		queryFn: async () => {
 			const response = await fetch('/api/reindex-logs/summary?days=7');
-			if (!response.ok) throw new Error('Error obteniendo resumen de logs');
+			if (!response.ok) throw new Error('Could not retrieve the log summary');
 			return response.json();
 		},
 		enabled: activeTab === 'summary',
@@ -164,7 +164,7 @@ export default function ReindexLogsViewer() {
 				<div className="mb-4 flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<FileText className="h-6 w-6 text-primary" />
-						<h2 className="font-semibold text-foreground text-xl">Logs de Sistema de Reindexado</h2>
+						<h2 className="font-semibold text-foreground text-xl">Reindexing System Logs</h2>
 					</div>
 					<div className="flex items-center gap-2">
 						<button
@@ -174,7 +174,7 @@ export default function ReindexLogsViewer() {
 							type="button"
 						>
 							<RefreshCw className={`h-4 w-4 ${currentQuery.isFetching ? 'animate-spin' : ''}`} />
-							Actualizar
+							Refresh
 						</button>
 					</div>
 				</div>
@@ -182,7 +182,7 @@ export default function ReindexLogsViewer() {
 				{statsQuery.data?.success && (
 					<div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
 						<div className="flex flex-col">
-							<span className="text-muted-foreground">Errores</span>
+							<span className="text-muted-foreground">Errors</span>
 							<span className="font-mono text-lg">
 								{statsQuery.data.data.errorLogExists ? formatBytes(statsQuery.data.data.errorLogSize) : '0 B'}
 							</span>
@@ -194,21 +194,21 @@ export default function ReindexLogsViewer() {
 							</span>
 						</div>
 						<div className="flex flex-col">
-							<span className="text-muted-foreground">Log Errores</span>
+							<span className="text-muted-foreground">Error Log</span>
 							<span
 								className={`text-sm ${statsQuery.data.data.errorLogExists ? 'text-success' : 'text-muted-foreground'}`}
 							>
-								{statsQuery.data.data.errorLogExists ? '✓ Activo' : '○ Vacío'}
+								{statsQuery.data.data.errorLogExists ? '✓ Active' : '○ Empty'}
 							</span>
 						</div>
 						<div className="flex flex-col">
-							<span className="text-muted-foreground">Log Warnings</span>
+							<span className="text-muted-foreground">Warning Log</span>
 							<span
 								className={`text-sm ${
 									statsQuery.data.data.warningLogExists ? 'text-success' : 'text-muted-foreground'
 								}`}
 							>
-								{statsQuery.data.data.warningLogExists ? '✓ Activo' : '○ Vacío'}
+								{statsQuery.data.data.warningLogExists ? '✓ Active' : '○ Empty'}
 							</span>
 						</div>
 					</div>
@@ -220,10 +220,10 @@ export default function ReindexLogsViewer() {
 				<div className="border-border border-b">
 					<nav className="flex space-x-8 px-6">
 						{[
-							{ key: 'recent' as const, label: 'Recientes', icon: Clock },
-							{ key: 'errors' as const, label: 'Errores', icon: XCircle },
+							{ key: 'recent' as const, label: 'Recent', icon: Clock },
+							{ key: 'errors' as const, label: 'Errors', icon: XCircle },
 							{ key: 'warnings' as const, label: 'Warnings', icon: AlertTriangle },
-							{ key: 'summary' as const, label: 'Resumen', icon: FileText },
+							{ key: 'summary' as const, label: 'Summary', icon: FileText },
 						].map(({ key, label, icon: Icon }) => (
 							<button
 								className={`flex items-center gap-2 border-b-2 px-1 py-4 font-medium text-sm transition-colors ${
@@ -247,7 +247,7 @@ export default function ReindexLogsViewer() {
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-2">
 							<label className="text-muted-foreground text-sm" htmlFor="logLimit">
-								Mostrar:
+								Show:
 							</label>
 							<select
 								className="rounded border border-input bg-background px-3 py-1 text-foreground text-sm"
@@ -255,18 +255,18 @@ export default function ReindexLogsViewer() {
 								onChange={(e) => setLogLimit(Number.parseInt(e.target.value, 10))}
 								value={logLimit}
 							>
-								<option value={25}>25 entradas</option>
-								<option value={50}>50 entradas</option>
-								<option value={100}>100 entradas</option>
-								<option value={200}>200 entradas</option>
+								<option value={25}>25 entries</option>
+								<option value={50}>50 entries</option>
+								<option value={100}>100 entries</option>
+								<option value={200}>200 entries</option>
 							</select>
 						</div>
 
 						{currentQuery.data?.success && (
 							<div className="text-muted-foreground text-sm">
 								{activeTab === 'recent' && currentQuery.data.breakdown
-									? `${currentQuery.data.breakdown.errors} errores, ${currentQuery.data.breakdown.warnings} warnings`
-									: `${currentQuery.data.count} entradas`}
+									? `${currentQuery.data.breakdown.errors} errors, ${currentQuery.data.breakdown.warnings} warnings`
+									: `${currentQuery.data.count} entries`}
 							</div>
 						)}
 					</div>
@@ -277,24 +277,24 @@ export default function ReindexLogsViewer() {
 					{currentQuery.isLoading && (
 						<div className="flex items-center justify-center py-8">
 							<RefreshCw className="h-6 w-6 animate-spin text-primary" />
-							<span className="ml-2 text-muted-foreground">Cargando logs...</span>
+							<span className="ml-2 text-muted-foreground">Loading logs...</span>
 						</div>
 					)}
 
 					{currentQuery.error && (
 						<div className="flex items-center justify-center py-8 text-destructive">
 							<XCircle className="mr-2 h-6 w-6" />
-							Error cargando logs: {(currentQuery.error as Error).message}
+							Could not load logs: {(currentQuery.error as Error).message}
 						</div>
 					)}
 
 					{/* Summary View */}
 					{activeTab === 'summary' && summaryQuery.data?.success && (
 						<div className="space-y-4">
-							<h3 className="mb-4 font-medium text-foreground text-lg">Errores por fuente (últimos 7 días)</h3>
+							<h3 className="mb-4 font-medium text-foreground text-lg">Errors by Source (Last 7 Days)</h3>
 							{Object.keys(summaryQuery.data.data).length === 0 ? (
 								<div className="py-8 text-center text-muted-foreground">
-									No hay errores registrados en los últimos 7 días
+									No errors recorded in the last 7 days
 								</div>
 							) : (
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -317,7 +317,7 @@ export default function ReindexLogsViewer() {
 					{activeTab !== 'summary' && currentQuery.data?.success && Array.isArray(currentQuery.data.data) && (
 						<div className="space-y-2">
 							{currentQuery.data.data.length === 0 ? (
-								<div className="py-8 text-center text-muted-foreground">No hay logs de {activeTab} disponibles</div>
+								<div className="py-8 text-center text-muted-foreground">No {activeTab} logs available</div>
 							) : (
 								currentQuery.data.data.map((log: ReindexLogEntry, index: number) => {
 									const Icon = getLogTypeIcon(log.level);
@@ -345,7 +345,7 @@ export default function ReindexLogsViewer() {
 													<p className="mb-2 text-foreground text-sm">{log.message}</p>
 													{log.context && (
 														<details className="text-muted-foreground text-xs">
-															<summary className="cursor-pointer hover:text-foreground">Contexto</summary>
+													<summary className="cursor-pointer hover:text-foreground">Context</summary>
 															<div className="mt-2">
 																<JsonViewer
 																	content={JSON.stringify(log.context, null, 2)}

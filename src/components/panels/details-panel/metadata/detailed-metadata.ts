@@ -8,14 +8,14 @@ const buildFallbackMetadata = (item: AnyEntityWithStats): MetadataField[] => {
 		fallback.push({
 			key: 'Hash',
 			value: `${item.hash.substring(0, 16)}...`,
-			category: 'técnico',
+			category: 'technical',
 		});
 	}
 
 	fallback.push({
-		key: 'Estado',
-		value: 'Metadatos no disponibles',
-		category: 'técnico',
+		key: 'Status',
+		value: 'Metadata unavailable',
+		category: 'technical',
 	});
 
 	return fallback;

@@ -43,9 +43,9 @@ export async function seedImages(db: LibSQLDatabase<Record<string, never>>) {
 		];
 
 		await db.insert(images).values(sampleImages);
-		seedLogger.success(`✅ ${sampleImages.length} imágenes creadas`);
+		seedLogger.success(`✅ ${sampleImages.length} images created`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando imágenes:', error);
+		seedLogger.error('❌ Could not create images:', error);
 		throw error;
 	}
 }

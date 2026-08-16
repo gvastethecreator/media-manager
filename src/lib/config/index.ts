@@ -8,7 +8,7 @@ function validateConfigs() {
 		ImageConfigSchema.parse(imageConfig);
 		CacheConfigSchema.parse(cacheConfig);
 	} catch (error) {
-		console.error('❌ Error en la configuración:', error);
+		console.error('❌ Configuration error:', error);
 		process.exit(1);
 	}
 }

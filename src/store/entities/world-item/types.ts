@@ -166,7 +166,7 @@ export interface WorldItemBatchOptions {
 	 */
 	ids: string[];
 	/**
-	 * Operación a realizar
+	 * Operation a realizar
 	 */
 	operation: 'delete' | 'update' | 'favorite' | 'unfavorite' | 'changeType' | 'changeCategory';
 }

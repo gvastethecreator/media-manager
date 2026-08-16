@@ -31,15 +31,15 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 				if (file.content) content = file.content;
 				else if (file.url) {
 					const response = await fetch(file.url, { signal });
-					if (!response.ok) throw new Error(`El servidor devolvió ${response.status}.`);
+					if (!response.ok) throw new Error(`The server returned ${response.status}.`);
 					content = await response.text();
 				}
 				if (signal?.aborted) return;
 				setCode(content);
 			} catch (error) {
 				if (signal?.aborted || (error instanceof DOMException && error.name === 'AbortError')) return;
-				setError('No se pudo cargar el contenido del archivo.');
-				toastService.error('Error al cargar el archivo');
+				setError('File content could not be loaded.');
+				toastService.error('Could not load file');
 			} finally {
 				if (!signal?.aborted) setLoading(false);
 			}
@@ -85,7 +85,7 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 			setTimeout(() => setCopied(false), 2000);
 			toastService.success('Contenido copiado');
 		} catch {
-			toastService.error('No se pudo copiar el contenido');
+			toastService.error('Content could not be copied');
 		}
 	};
 
@@ -107,7 +107,7 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 							size="sm"
 							variant="outline"
 						>
-							<Download className="h-3.5 w-3.5" /> Descargar
+							<Download className="h-3.5 w-3.5" /> Download
 						</Button>
 						<Button
 							className="h-7 w-7 p-0"
@@ -123,13 +123,13 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 				<div className="flex-1 overflow-hidden">
 					{loading ? (
 						<div className="flex h-full items-center justify-center text-muted-foreground text-sm" role="status">
-							Cargando archivo...
+							Loading file...
 						</div>
 					) : error ? (
 						<div className="flex h-full flex-col items-center justify-center gap-3 px-4 text-center" role="alert">
 							<p className="text-destructive text-sm">{error}</p>
 							<Button onClick={() => void loadContent()} size="sm" variant="outline">
-								<RefreshCw className="h-3.5 w-3.5" /> Reintentar
+								<RefreshCw className="h-3.5 w-3.5" /> Retry
 							</Button>
 						</div>
 					) : (

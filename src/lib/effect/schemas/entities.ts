@@ -546,16 +546,18 @@ export class ConceptWithStats extends Schema.Class<ConceptWithStats>('ConceptWit
  * Schema para Prompt
  */
 export class Prompt extends Schema.Class<Prompt>('Prompt')({
-	id: ID,
+	id: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(128)),
 	name: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(255)),
 	emoji: Schema.NullOr(Schema.String),
 	color: Schema.NullOr(Schema.String),
 	description: Schema.NullOr(Schema.String),
+	content: Schema.NullOr(Schema.String),
 	category: Schema.NullOr(Schema.String),
 	filters: Schema.NullOr(Schema.String),
 	featuredImage: Schema.NullOr(Schema.String),
 	isFavorite: Schema.Boolean,
 	metadata: Schema.NullOr(Schema.Unknown),
+	type: Schema.NullOr(Schema.String),
 	createdAt: Schema.DateFromSelf,
 	updatedAt: Schema.DateFromSelf,
 }) {}
@@ -568,10 +570,12 @@ export class PromptCreateInput extends Schema.Class<PromptCreateInput>('PromptCr
 	emoji: Schema.optional(Schema.NullOr(Schema.String)),
 	color: Schema.optional(Schema.NullOr(Schema.String)),
 	description: Schema.optional(Schema.NullOr(Schema.String)),
+	content: Schema.optional(Schema.NullOr(Schema.String)),
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	type: Schema.optional(Schema.NullOr(Schema.String)),
 }) {}
 
 /**
@@ -582,10 +586,12 @@ export class PromptUpdateInput extends Schema.Class<PromptUpdateInput>('PromptUp
 	emoji: Schema.optional(Schema.NullOr(Schema.String)),
 	color: Schema.optional(Schema.NullOr(Schema.String)),
 	description: Schema.optional(Schema.NullOr(Schema.String)),
+	content: Schema.optional(Schema.NullOr(Schema.String)),
 	category: Schema.optional(Schema.NullOr(Schema.String)),
 	filters: Schema.optional(Schema.NullOr(Schema.String)),
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	type: Schema.optional(Schema.NullOr(Schema.String)),
 }) {}
 
 /**

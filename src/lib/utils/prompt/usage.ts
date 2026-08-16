@@ -141,7 +141,7 @@ export function calculatePromptStats(
 			averageExecutionTime,
 		};
 	} catch (error) {
-		usageLogger.error('❌ Error al calcular estadísticas de prompt:', error);
+		usageLogger.error('❌ Could not calculate prompt statistics:', error);
 		return {
 			totalExecutions: 0,
 			totalTokens: 0,

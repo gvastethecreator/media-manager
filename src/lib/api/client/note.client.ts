@@ -16,7 +16,7 @@ const API_BASE_PATH = '/api/notes';
 export async function getNotesFromApi(): Promise<NoteWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener notas');
+		throw new Error('Could not get notes');
 	}
 	const result = await response.json();
 	return unwrapArrayResponse<NoteWithStats>(result);
@@ -29,7 +29,7 @@ export async function createNoteInApi(data: NoteCreateInput): Promise<NoteWithSt
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear nota');
+		throw new Error('Could not create note');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -42,7 +42,7 @@ export async function updateNoteInApi(id: string, data: NoteUpdateInput): Promis
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar nota');
+		throw new Error('Could not update note');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -51,7 +51,7 @@ export async function updateNoteInApi(id: string, data: NoteUpdateInput): Promis
 export async function deleteNoteFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar nota');
+		throw new Error('Could not delete note');
 	}
 	await invalidateFavoriteQueries();
 }

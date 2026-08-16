@@ -17,8 +17,8 @@ export function useDocumentation() {
 			const content = await loadDocumentationFiles(DOCUMENTATION_FILES);
 			setDocumentationContent(content);
 		} catch (error) {
-			clientLogger.error('Error al cargar documentación:', error);
-			setError('No se pudo cargar la documentación');
+			clientLogger.error('Could not load documentation:', error);
+			setError('Documentation could not be loaded');
 		} finally {
 			setIsLoading(false);
 		}

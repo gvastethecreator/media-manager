@@ -29,15 +29,15 @@ export function TagCardHeader({
 }: TagCardHeaderProps) {
 	// Mapeo de rareza a texto legible
 	const rarityText = {
-		[TagRarity.COMMON]: 'Común',
-		[TagRarity.UNCOMMON]: 'Poco común',
-		[TagRarity.RARE]: 'Rara',
-		[TagRarity.VERY_RARE]: 'Muy Rara',
-		[TagRarity.LEGENDARY]: 'Legendaria',
+		[TagRarity.COMMON]: 'Common',
+		[TagRarity.UNCOMMON]: 'Uncommon',
+		[TagRarity.RARE]: 'Rare',
+		[TagRarity.VERY_RARE]: 'Very Rare',
+		[TagRarity.LEGENDARY]: 'Legendary',
 	};
 
 	// Obtener el texto de rareza
-	const rarityLabel = rarityText[rarity as keyof typeof rarityText] || 'Común';
+	const rarityLabel = rarityText[rarity as keyof typeof rarityText] || 'Common';
 
 	// Estilo especial para el encabezado de etiquetas, con un diseño más distintivo
 	return (
@@ -100,7 +100,7 @@ export function TagCardHeader({
 			>
 				{/* Categoría - similar al tipo en cartas TCG */}
 				<div className="flex items-center gap-1">
-					<span className="font-semibold tracking-wide">ETIQUETA</span>
+					<span className="font-semibold tracking-wide">TAG</span>
 					{category && (
 						<>
 							<span className="mx-0.5">•</span>

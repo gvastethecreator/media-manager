@@ -52,7 +52,7 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 		if (propertyName.trim() === '') {
 			toast({
 				title: '❌ Error',
-				description: 'El nombre de la propiedad no puede estar vacío.',
+				description: 'Property name cannot be empty.',
 				variant: 'destructive',
 			});
 			return;
@@ -72,7 +72,7 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 	return (
 		<div className={className}>
 			<div className="p-4">
-				<h2 className="mb-4 font-bold text-xl">Vista de Propiedades</h2>
+				<h2 className="mb-4 font-bold text-xl">Properties</h2>
 
 				<Button
 					className="mb-4"
@@ -83,36 +83,36 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 						setPropertyValue('');
 					}}
 				>
-					{showForm ? 'Cancelar' : 'Crear Propiedad'}
+					{showForm ? 'Cancel' : 'Create Property'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">{editingProperty ? 'Editar Propiedad' : 'Nueva Propiedad'}</h3>
+						<h3 className="mb-3 font-semibold text-lg">{editingProperty ? 'Edit Property' : 'New Property'}</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="propertyName">Nombre</Label>
+							<Label htmlFor="propertyName">Name</Label>
 							<Input
 								id="propertyName"
 								onChange={(e) => setPropertyName(e.target.value)}
-								placeholder="Nombre de la propiedad"
+								placeholder="Property name"
 								value={propertyName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="propertyValue">Valor</Label>
+							<Label htmlFor="propertyValue">Value</Label>
 							<Input
 								id="propertyValue"
 								onChange={(e) => setPropertyValue(e.target.value)}
-								placeholder="Valor de la propiedad"
+								placeholder="Property value"
 								value={propertyValue}
 							/>
 						</div>
-						<Button onClick={handleSubmitForm}>{editingProperty ? 'Guardar Cambios' : 'Guardar Propiedad'}</Button>
+						<Button onClick={handleSubmitForm}>{editingProperty ? 'Save Changes' : 'Save Property'}</Button>
 					</div>
 				)}
 
 				{isLoading ? (
-					<p>Cargando propiedades...</p>
+					<p>Loading properties...</p>
 				) : properties && properties.length > 0 ? (
 					<ScrollArea className="h-[calc(100vh-200px)]">
 						<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -125,28 +125,28 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 										<p className="text-muted-foreground text-sm">{property.value}</p>
 										<div className="mt-2 flex gap-2">
 											<Button onClick={() => handleEditProperty(property)} size="sm" variant="outline">
-												<Edit className="mr-1 h-4 w-4" /> Editar
+											<Edit className="mr-1 h-4 w-4" /> Edit
 											</Button>
 											<AlertDialog>
 												<AlertDialogTrigger asChild>
 													<Button size="sm" variant="destructive">
-														<Trash2 className="mr-1 h-4 w-4" /> Eliminar
+												<Trash2 className="mr-1 h-4 w-4" /> Delete
 													</Button>
 												</AlertDialogTrigger>
 												<AlertDialogContent>
 													<AlertDialogHeader>
-														<AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+												<AlertDialogTitle>Delete this property?</AlertDialogTitle>
 														<AlertDialogDescription>
-															Esta acción eliminará permanentemente la propiedad "{property.name}".
+													This will permanently delete the property "{property.name}".
 														</AlertDialogDescription>
 													</AlertDialogHeader>
 													<AlertDialogFooter>
-														<AlertDialogCancel>Cancelar</AlertDialogCancel>
+												<AlertDialogCancel>Cancel</AlertDialogCancel>
 														<AlertDialogAction
 															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 															onClick={() => handleDeleteProperty(property.id)}
 														>
-															Eliminar
+													Delete
 														</AlertDialogAction>
 													</AlertDialogFooter>
 												</AlertDialogContent>
@@ -158,7 +158,7 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 						</div>
 					</ScrollArea>
 				) : (
-					<p>No hay propiedades disponibles.</p>
+					<p>No properties available.</p>
 				)}
 			</div>
 		</div>

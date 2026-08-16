@@ -36,12 +36,12 @@ export function FolderContentView({
 	// Efecto para abrir automáticamente el panel de estadísticas al navegar a una carpeta
 	useEffect(() => {
 		if (currentFolderId) {
-			logger.info('📂 Navegando a carpeta:', currentFolderId);
+			logger.info('📂 Navigating to folder:', currentFolderId);
 			// Asegurar visibilidad del contenido del panel de detalles
 			setDetailsPanelVisible(true);
 			// Abrir el panel físico si está colapsado
 			if (isRightPanelCollapsed) {
-				logger.info('🔧 Abriendo panel físico para mostrar estadísticas');
+				logger.info('🔧 Opening the physical panel to show statistics');
 				toggleRightPanel();
 			}
 		}

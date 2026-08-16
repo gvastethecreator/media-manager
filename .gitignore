@@ -38,6 +38,11 @@ bun-debug.log*
 .outdated*.log
 tsc_output.txt
 
+# local maintenance transcripts (keep durable evidence under .scratch/)
+/.tmp-*.log
+/.tmp-*.json
+/tmp_test_output.txt
+
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example

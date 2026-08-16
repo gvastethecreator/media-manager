@@ -81,11 +81,11 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 					<div className="flex justify-between text-[0.65rem] text-white/60">
 						<div className="flex items-center">
 							<Calendar className="mr-1" size={12} />
-							<span title={`Creado: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
+							<span title={`Created: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
 						</div>
 						<div className="flex items-center">
 							<Clock className="mr-1" size={12} />
-							<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
+							<span title={`Updated: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
 						</div>
 					</div>
 				)}

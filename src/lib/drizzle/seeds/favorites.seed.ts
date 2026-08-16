@@ -68,7 +68,7 @@ export async function seedFavorites(db: LibSQLDatabase<Record<string, never>>) {
 		await db.insert(favorites).values(sampleFavorites);
 		seedLogger.success(`✅ ${sampleFavorites.length} favoritos creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando favoritos:', error);
+		seedLogger.error('❌ Could not create favorites:', error);
 		throw error;
 	}
 }

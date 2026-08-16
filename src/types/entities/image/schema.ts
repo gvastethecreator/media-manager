@@ -7,7 +7,7 @@ import { isValidFolderId } from '@/lib/utils/folder-id-generator';
 
 // Schema de validación para crear imagen
 export const CreateImageSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(255),
+	name: z.string().min(1, 'The name is required').max(255),
 	description: z.string().max(1000).nullable().optional(),
 	source: z.object({
 		rootId: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/),

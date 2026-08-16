@@ -45,11 +45,11 @@ export async function getSystemInfo(): Promise<SystemInfo> {
 	try {
 		const response = await fetch('/api/system/info');
 		if (!response.ok) {
-			throw new Error('Error al obtener información del sistema');
+			throw new Error('Could not get system information');
 		}
 		return response.json();
 	} catch (error) {
-		console.warn('❌ Error al obtener información del sistema:', error);
+		console.warn('❌ Could not get system information:', error);
 		// Mantener una respuesta segura y neutra cuando la API no está disponible.
 		return {
 			cpu: {

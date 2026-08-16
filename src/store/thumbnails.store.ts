@@ -111,7 +111,7 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 				try {
 					const response = await fetch(`${THUMBNAILS_BASE_URL}/stats`);
 					if (!response.ok) {
-						throw new Error('Error al obtener estadísticas de miniaturas');
+						throw new Error('Could not get statistics de miniaturas');
 					}
 					stats = (await response.json()) as ThumbnailStats;
 					break;

@@ -56,7 +56,7 @@ export const getOSInfo = async () => {
 // Funciones de comunicación con el backend de Tauri
 export const tauriInvoke = async <T>(command: string, args?: Record<string, unknown>): Promise<T> => {
 	if (!isTauri()) {
-		throw new Error('tauriInvoke solo está disponible en el entorno desktop');
+		throw new Error('tauriInvoke is only available in the desktop environment');
 	}
 
 	try {

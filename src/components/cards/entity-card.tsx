@@ -78,7 +78,7 @@ const renderImage = ({
 	return (
 		<ImageCard
 			aria-describedby={`entity-${(entity as any).id}-description`}
-			aria-label={`Imagen: ${(entity as any).name || 'Sin nombre'}`}
+			aria-label={`Image: ${(entity as any).name || 'Unnamed'}`}
 			aspectRatio={config.aspectRatio as string}
 			className={`entity-card ${isSelected ? 'entity-card--selected' : ''} ${className || ''}`}
 			data-item-id={(entity as any).id}
@@ -117,7 +117,7 @@ const renderImage = ({
 const renderVideo = ({ entity, isSelected, className, config, finalOnClick }: RenderCtx) => (
 	<button
 		aria-describedby={`entity-${(entity as any).id}-description`}
-		aria-label={`Video: ${(entity as any).name || 'Sin nombre'}`}
+		aria-label={`Video: ${(entity as any).name || 'Unnamed'}`}
 		aria-pressed={isSelected}
 		className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
 		data-item-id={(entity as any).id}
@@ -150,7 +150,7 @@ const renderVideo = ({ entity, isSelected, className, config, finalOnClick }: Re
 			video={entity as any}
 		/>
 		<div className="sr-only" id={`entity-${(entity as any).id}-description`}>
-			{`Video ${(entity as any).name || 'sin nombre'}. ${isSelected ? 'Seleccionado.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
+			{`Video ${(entity as any).name || 'unnamed'}. ${isSelected ? 'Selected.' : ''} Press Enter to open or Space to select.`}
 		</div>
 	</button>
 );
@@ -158,7 +158,7 @@ const renderVideo = ({ entity, isSelected, className, config, finalOnClick }: Re
 const renderAlbum = ({ entity, isSelected, className, config, finalOnClick }: RenderCtx) => (
 	<button
 		aria-describedby={`entity-${(entity as any).id}-description`}
-		aria-label={`Álbum: ${(entity as any).name || 'Sin nombre'}`}
+		aria-label={`Album: ${(entity as any).name || 'Unnamed'}`}
 		aria-pressed={isSelected}
 		className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
 		data-item-id={(entity as any).id}
@@ -189,7 +189,7 @@ const renderAlbum = ({ entity, isSelected, className, config, finalOnClick }: Re
 			onClick={finalOnClick ? () => (finalOnClick as any)({} as any) : undefined}
 		/>
 		<div className="sr-only" id={`entity-${(entity as any).id}-description`}>
-			{`Álbum ${(entity as any).name || 'sin nombre'}. ${isSelected ? 'Seleccionado.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
+			{`Album ${(entity as any).name || 'unnamed'}. ${isSelected ? 'Selected.' : ''} Press Enter to open or Space to select.`}
 		</div>
 	</button>
 );

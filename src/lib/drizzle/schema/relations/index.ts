@@ -17,10 +17,10 @@
  * =================================================================================
  */
 
-export { imageAlbums } from "./imageAlbums";
-export { imageCollections } from "./imageCollections";
-export { imageProperties } from "./imageProperties";
-export { imageTags } from "./imageTags";
+export { imageAlbums } from './imageAlbums';
+export { imageCollections } from './imageCollections';
+export { imageProperties } from './imageProperties';
+export { imageTags } from './imageTags';
 export {
 	FLEXIBLE_RELATION_CATALOG,
 	STRONG_RELATION_CATALOG,
@@ -28,12 +28,13 @@ export {
 	type FlexibleRelationPolicy,
 	type StrongRelationContext,
 	type StrongRelationDefinition,
-} from "./catalog";
+} from './catalog';
+export * from './semantic';
 // Exportar helpers para crear nuevas relaciones
-export { createRelationTable, type RelationTable } from "./relation-helpers";
+export { createRelationTable, type RelationTable } from './relation-helpers';
 // Importar las relaciones restantes desde remainingRelations
-export * from "./remainingRelations";
-export { videoAlbums } from "./videoAlbums";
-export { videoCollections } from "./videoCollections";
-export { videoProperties } from "./videoProperties";
-export { videoTags } from "./videoTags";
+export * from './remainingRelations';
+export { videoAlbums } from './videoAlbums';
+export { videoCollections } from './videoCollections';
+export { videoProperties } from './videoProperties';
+export { videoTags } from './videoTags';

@@ -100,7 +100,7 @@ function SettingsSidebar({
 						>
 							<Settings2 className="h-3.5 w-3.5 text-primary" />
 						</div>
-						<span className="flex-1 truncate font-semibold text-xs">Configuración</span>
+						<span className="flex-1 truncate font-semibold text-xs">Settings</span>
 					</div>
 				</div>
 
@@ -113,7 +113,7 @@ function SettingsSidebar({
 						<Input
 							className="h-8 pr-7 pl-8 text-xs"
 							onChange={(e) => onSearch(e.target.value)}
-							placeholder="Buscar..."
+							placeholder="Search..."
 							value={searchTerm}
 						/>
 						{searchTerm && (

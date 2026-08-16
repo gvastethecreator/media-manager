@@ -98,7 +98,7 @@ export const SizeBadge = memo(function SizeBadge({ bytes, variant = 'secondary',
 });
 
 /**
- * Badge que muestra el total de archivos (suma de todos los tipos)
+ * Badge que muestra el total de files (suma de todos los tipos)
  */
 export const TotalFilesBadge = memo(function TotalFilesBadge({
 	folderStats,
@@ -107,7 +107,7 @@ export const TotalFilesBadge = memo(function TotalFilesBadge({
 }: TotalFilesBadgeProps) {
 	const sizeClass = COMPONENT_SIZES.badge[size];
 
-	// Memoizar el cálculo del total de archivos
+	// Memoizar el cálculo del total de files
 	const totalFiles = useMemo(() => getTotalFilesCount(folderStats), [folderStats]);
 
 	if (totalFiles === 0) return null;
@@ -115,7 +115,7 @@ export const TotalFilesBadge = memo(function TotalFilesBadge({
 	return (
 		<Badge className={cn('flex items-center gap-1 px-2', sizeClass)} variant={variant}>
 			<File className={COMPONENT_SIZES.icon.micro} />
-			{totalFiles} archivos
+			{totalFiles} files
 		</Badge>
 	);
 });

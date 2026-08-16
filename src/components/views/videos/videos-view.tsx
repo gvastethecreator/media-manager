@@ -27,7 +27,7 @@ export default function VideosView(_props: ViewProps) {
 	useEffect(() => {
 		if (!hasInitializedRef.current && videoCount === 0 && !isLoading) {
 			hasInitializedRef.current = true;
-			viewLogger.info('Cargando videos...');
+			viewLogger.info('Loading videos...');
 			fetchVideos();
 		}
 	}, [videoCount, isLoading, fetchVideos]);
@@ -59,21 +59,21 @@ export default function VideosView(_props: ViewProps) {
 	);
 
 	if (isLoading && videoCount === 0) {
-		return <LoadingScreen message="Cargando videos..." />;
+		return <LoadingScreen message="Loading videos..." />;
 	}
 
 	if (error) {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<h2 className="mb-2 font-semibold text-lg">Error al cargar videos</h2>
+					<h2 className="mb-2 font-semibold text-lg">Could not load videos</h2>
 					<p className="mb-4 text-muted-foreground">Error: {error}</p>
 					<button
 						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 						onClick={() => fetchVideos()}
 						type="button"
 					>
-						Intentar de nuevo
+						Try again
 					</button>
 				</div>
 			</div>

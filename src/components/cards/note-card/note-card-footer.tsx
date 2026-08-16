@@ -158,7 +158,7 @@ export function NoteCardFooter({
 			{/* Fecha de actualización (solo en modo no-TCG) */}
 			{wasUpdated && updatedFormattedDate && !tcgMode && (
 				<div className="mt-0.5 flex items-center justify-end text-[0.65rem] opacity-60">
-					<span>Actualizado {updatedFormattedDate}</span>
+					<span>Updated {updatedFormattedDate}</span>
 				</div>
 			)}
 

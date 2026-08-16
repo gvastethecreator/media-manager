@@ -25,7 +25,7 @@ export function toFileViewerItem(entity: ViewerEntity, type: ImageItem['type']):
 		id: textValue(entity.id),
 		metadata: typeof entity.metadata === 'string' ? entity.metadata : null,
 		mimeType: textValue(entity.mimeType) || undefined,
-		name: textValue(entity.name, 'Archivo sin nombre'),
+		name: textValue(entity.name, 'Unnamed file'),
 		size: numberValue(entity.size) ?? 0,
 		thumbnail,
 		thumbnailUrl,

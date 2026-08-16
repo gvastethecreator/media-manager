@@ -20,15 +20,15 @@ export function PageState(props: PageStateProps) {
 			<div className="text-center">
 				{mode === 'loading' ? (
 					<div className="flex flex-col items-center gap-3">
-						<LoadingSpinner label={title ?? 'Cargando...'} showLabel size="lg" />
+						<LoadingSpinner label={title ?? 'Loading...'} showLabel size="lg" />
 					</div>
 				) : (
 					<EmptyState
 						actions={actions}
-						description={description ?? 'Intenta de nuevo en unos segundos.'}
+						description={description ?? 'Try again in a few seconds.'}
 						icon={AlertCircle}
 						iconVariant="error"
-						title={title ?? 'Error al cargar'}
+						title={title ?? 'Could not load data'}
 						variant="subtle"
 					/>
 				)}

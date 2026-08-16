@@ -52,11 +52,11 @@ export function PlaceCardImages({
 	// Helper function para generar aria-label
 	const getImageAriaLabel = (): string => {
 		if (!hasImage) {
-			return 'Lugar sin imagen disponible';
+			return 'Place image unavailable';
 		}
 
-		const baseLabel = 'Imagen de lugar';
-		const specialEffects = rarityLevel >= 5 ? ' con efectos especiales' : '';
+		const baseLabel = 'Place image';
+		const specialEffects = rarityLevel >= 5 ? ' with special effects' : '';
 		return `${baseLabel}${specialEffects}`;
 	};
 
@@ -175,7 +175,7 @@ export function PlaceCardImages({
 				>
 					{/* Imagen del lugar */}
 					<img
-						alt="Lugar"
+						alt="Place"
 						className={cn(
 							'h-full w-full object-cover',
 							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'

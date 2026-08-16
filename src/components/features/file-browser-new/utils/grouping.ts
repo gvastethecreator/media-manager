@@ -9,13 +9,13 @@ import type { BrowserEntityType, BrowserItem, BrowserItemGroup } from '../types/
  * Nombres de display para tipos de entidad
  */
 export const ENTITY_TYPE_DISPLAY_NAMES: Record<BrowserEntityType, string> = {
-	folder: 'Carpetas',
-	image: 'Imágenes',
+	folder: 'Folders',
+	image: 'Images',
 	video: 'Videos',
 	audio: 'Audio',
-	document: 'Documentos',
-	jsonFile: 'Archivos JSON',
-	file3d: 'Archivos 3D',
+	document: 'Documents',
+	jsonFile: 'JSON Files',
+	file3d: '3D Files',
 };
 
 /**
@@ -118,16 +118,16 @@ export function groupByDate(items: BrowserItem[], field: 'createdAt' = 'createdA
 		if (value) {
 			const date = value instanceof Date ? value : new Date(value);
 			if (Number.isNaN(date.getTime())) {
-				dateKey = 'Sin fecha';
+				dateKey = 'No date';
 			} else {
-				dateKey = date.toLocaleDateString('es-ES', {
+				dateKey = date.toLocaleDateString('en-US', {
 					year: 'numeric',
 					month: 'long',
 					day: 'numeric',
 				});
 			}
 		} else {
-			dateKey = 'Sin fecha';
+			dateKey = 'No date';
 		}
 
 		const existing = groups.get(dateKey) ?? [];
@@ -137,8 +137,8 @@ export function groupByDate(items: BrowserItem[], field: 'createdAt' = 'createdA
 
 	// Ordenar por fecha descendente
 	const entries = Array.from(groups.entries()).sort(([a], [b]) => {
-		if (a === 'Sin fecha') return 1;
-		if (b === 'Sin fecha') return -1;
+		if (a === 'No date') return 1;
+		if (b === 'No date') return -1;
 		return new Date(b).getTime() - new Date(a).getTime();
 	});
 

@@ -9,7 +9,7 @@ import * as crypto from 'crypto';
 import { desc, eq } from 'drizzle-orm';
 // Imports para extracción de metadatos (migrados desde server actions)
 import { promises as fs, Stats } from 'fs';
-import sharp from 'sharp';
+import sharp, { type Metadata as SharpMetadata } from 'sharp';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { metadatas } from '@/lib/drizzle/schema/index';
@@ -336,7 +336,7 @@ export async function deleteMetadataByImageId(imageId: string): Promise<boolean>
  * Función de reintento con backoff exponencial
  */
 async function withRetry<T>(operation: () => Promise<T>, config = DEFAULT_RETRY_CONFIG): Promise<T> {
-	let lastError: Error = new Error('Operación fallida después de múltiples reintentos');
+	let lastError: Error = new Error('Operation fallida después de múltiples reintentos');
 
 	for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
 		try {
@@ -477,7 +477,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	try {
 		// Extraer metadatos con Sharp
 		const sharpInstance = sharp(buffer);
-		const sharpMeta = await withRetry<sharp.Metadata>(
+		const sharpMeta = await withRetry<SharpMetadata>(
 			() => sharpInstance.metadata(),
 			options?.retry || DEFAULT_RETRY_CONFIG
 		);

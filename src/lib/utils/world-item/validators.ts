@@ -8,7 +8,7 @@ import { RarityLevel, WorldItemCategory, WorldItemType } from '@/types/entities/
 
 // Esquema para validar propiedades de objeto
 export const worldItemPropertySchema = z.object({
-	name: z.string().min(1, { message: 'El nombre de la propiedad es obligatorio' }),
+	name: z.string().min(1, { message: 'The property name is required' }),
 	value: z.union([z.string(), z.number()]),
 	description: z.string().optional(),
 	icon: z.string().optional(),
@@ -17,15 +17,15 @@ export const worldItemPropertySchema = z.object({
 // Esquema para validar requisitos de objeto
 export const worldItemRequirementSchema = z.object({
 	type: z.string().min(1, { message: 'El tipo de requisito es obligatorio' }),
-	name: z.string().min(1, { message: 'El nombre del requisito es obligatorio' }),
+	name: z.string().min(1, { message: 'The requirement name is required' }),
 	value: z.union([z.string(), z.number()]),
 	description: z.string().optional(),
 });
 
 // Esquema para validar efectos
 export const worldItemEffectSchema = z.object({
-	name: z.string().min(1, { message: 'El nombre del efecto es obligatorio' }),
-	description: z.string().min(1, { message: 'La descripción del efecto es obligatoria' }),
+	name: z.string().min(1, { message: 'The effect name is required' }),
+	description: z.string().min(1, { message: 'The effect description is required' }),
 	duration: z.number().nonnegative().optional(),
 	potency: z.number().nonnegative().optional(),
 });
@@ -50,8 +50,8 @@ export const worldItemStatsSchema = z.object({
 export const createWorldItemSchema = z.object({
 	name: z
 		.string()
-		.min(2, { message: 'El nombre debe tener al menos 2 caracteres' })
-		.max(100, { message: 'El nombre no puede superar los 100 caracteres' }),
+		.min(2, { message: 'The name must be at least 2 characters' })
+		.max(100, { message: 'The name cannot exceed 100 characters' }),
 	emoji: z.string().nullable().optional(),
 	color: z.string().nullable().optional(),
 	description: z.string().nullable().optional(),
@@ -73,8 +73,8 @@ export const createWorldItemSchema = z.object({
 export const updateWorldItemSchema = z.object({
 	name: z
 		.string()
-		.min(2, { message: 'El nombre debe tener al menos 2 caracteres' })
-		.max(100, { message: 'El nombre no puede superar los 100 caracteres' })
+		.min(2, { message: 'The name must be at least 2 characters' })
+		.max(100, { message: 'The name cannot exceed 100 characters' })
 		.optional(),
 	emoji: z.string().nullable().optional(),
 	color: z.string().nullable().optional(),

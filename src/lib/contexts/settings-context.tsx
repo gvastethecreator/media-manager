@@ -59,7 +59,7 @@ interface SettingsContextType {
 
 const defaultSettings: Settings = {
 	theme: 'system',
-	language: 'es',
+	language: 'en',
 	notifications: true,
 	thumbnailQuality: 'medium',
 	autoBackup: false,
@@ -104,7 +104,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		} catch (err) {
 			setError('Error loading settings');
 			console.error('Failed to load settings:', err);
-			toastService.error('No se pudo cargar la configuración');
+			toastService.error('Settings could not be loaded');
 		} finally {
 			setIsLoading(false);
 		}
@@ -128,7 +128,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				activeProfile: activeProfile?.id || null,
 			}));
 		} catch (err) {
-			console.error('Error cargando perfiles:', err);
+			console.error('Error loading profiles:', err);
 			toastService.error('No se pudieron cargar los perfiles');
 		}
 	}, []);
@@ -173,7 +173,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			return Promise.resolve();
 		} catch (err) {
 			console.error('Error updating settings:', err);
-			toastService.error('No se pudieron actualizar las configuraciones');
+			toastService.error('Settings could not be updated');
 			return Promise.reject(err);
 		}
 	};
@@ -194,10 +194,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			}
 			// Recargar los perfiles para obtener la lista actualizada
 			await loadProfiles();
-			toastService.success('Perfil actualizado correctamente');
+			toastService.success('Profile updated successfully');
 		} catch (err) {
 			console.error('Error updating profile:', err);
-			toastService.error('No se pudo actualizar el perfil');
+			toastService.error('Profile could not be updated');
 			throw err;
 		}
 	};
@@ -207,7 +207,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		try {
 			await profileClient.setActiveProfile(id);
 			await loadProfiles();
-			toastService.success('Perfil activo actualizado correctamente');
+			toastService.success('Active profile updated successfully');
 		} catch (err) {
 			console.error('Error setting active profile:', err);
 			toastService.error('No se pudo establecer el perfil activo');
@@ -223,7 +223,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			toastService.success('Perfil eliminado correctamente');
 		} catch (err) {
 			console.error('Error deleting profile:', err);
-			toastService.error('No se pudo eliminar el perfil');
+			toastService.error('Profile could not be deleted');
 			throw err;
 		}
 	};
@@ -281,7 +281,7 @@ export function useThemeSync() {
 	return {
 		theme: settings.theme,
 		setTheme: (theme: 'light' | 'dark' | 'system') => {
-			console.log(`🎨 Actualizando tema a: ${theme}`);
+			console.log(`🎨 Updating theme to: ${theme}`);
 			updateSettings({ theme });
 		},
 	};

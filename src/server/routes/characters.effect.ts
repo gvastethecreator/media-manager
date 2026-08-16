@@ -7,10 +7,20 @@
 
 import { Schema } from '@effect/schema';
 import { Effect } from 'effect';
-import express from 'express';
+import express, { type NextFunction, type Response } from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { CharacterCreateInput, CharacterUpdateInput } from '@/lib/effect/schemas/entities';
-import { authorizeMediaAssetParam, filterAuthorizedMediaEntities } from '@/server/security/authorized-root-request';
+import {
+	authorizeMediaAssetParam,
+	filterAuthorizedMediaEntities,
+	getAuthorizedRootRegistry,
+	sendRootAuthorizationError,
+} from '@/server/security/authorized-root-request';
+import { RootAuthorizationError } from '@/server/security/authorized-roots';
+import {
+	assertTaxonomyEntityRootPermissions,
+	type TaxonomyRootPermission,
+} from '@/server/security/taxonomy-root-authorization';
 import { listFavoriteEntities } from '@/server/utils/favorite-route';
 import { CharacterService, CharacterServiceLive } from '@/services/character/character.service.effect';
 import { favoriteService } from '@/services/favorite/favorite.service';
@@ -18,6 +28,28 @@ import { FavoriteEntityType } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
 
 const router = express.Router();
+
+function requireAuthorizedNote(permissions: readonly TaxonomyRootPermission[]) {
+	return async (
+		req: { app: { locals: Record<string, unknown> }; params: Record<string, string> },
+		res: Response,
+		next: NextFunction
+	) => {
+		try {
+			await assertTaxonomyEntityRootPermissions(getAuthorizedRootRegistry(req), 'note', req.params.noteId, permissions);
+			next();
+		} catch (error) {
+			if (error instanceof RootAuthorizationError && error.status === 404) {
+				res.status(404).json({ code: 'TAXONOMY_ENTITY_NOT_FOUND', message: 'Entidad taxonomy no encontrada.' });
+				return;
+			}
+			if (!sendRootAuthorizationError(res, error)) next(error);
+		}
+	};
+}
+
+const requireAuthorizedNoteWrite = requireAuthorizedNote(['read', 'index', 'write']);
+const requireAuthorizedNoteDelete = requireAuthorizedNote(['read', 'index', 'write', 'delete']);
 
 /**
  * GET /characters - Listar characters con filtros
@@ -220,6 +252,7 @@ router.delete(
  */
 router.post(
 	'/:id/notes/:noteId',
+	requireAuthorizedNoteWrite,
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const characterService = yield* CharacterService;
@@ -235,6 +268,7 @@ router.post(
  */
 router.delete(
 	'/:id/notes/:noteId',
+	requireAuthorizedNoteDelete,
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const characterService = yield* CharacterService;

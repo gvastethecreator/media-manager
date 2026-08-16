@@ -16,9 +16,9 @@ import { clientLogger } from '@/lib/logger/client-logger';
 const getNavigationSuggestions = (pathname: string) => {
 	const suggestions = [
 		{ path: '/', label: 'Dashboard', icon: Home },
-		{ path: '/folders', label: 'Carpetas', icon: Search },
-		{ path: '/all-images', label: 'Todas las imágenes', icon: Search },
-		{ path: '/settings', label: 'Configuración', icon: Search },
+		{ path: '/folders', label: 'Folders', icon: Search },
+		{ path: '/all-images', label: 'All Images', icon: Search },
+		{ path: '/settings', label: 'Settings', icon: Search },
 	];
 
 	// Filtrar sugerencias relevantes basadas en la ruta
@@ -38,7 +38,7 @@ export default function NotFoundPage() {
 	const location = useLocation();
 
 	useEffect(() => {
-		clientLogger.warn('Página 404 accedida:', { path: location.pathname });
+		clientLogger.warn('404 page opened:', { path: location.pathname });
 	}, [location.pathname]);
 
 	const handleGoBack = useCallback(() => {
@@ -53,7 +53,7 @@ export default function NotFoundPage() {
 
 	return (
 		<main
-			aria-label="Página no encontrada"
+			aria-label="Page not found"
 			className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12"
 		>
 			{/* Icono animado */}
@@ -85,7 +85,7 @@ export default function NotFoundPage() {
 				initial={{ y: 20, opacity: 0 }}
 				transition={{ delay: 0.1, duration: 0.5 }}
 			>
-				Página no encontrada
+				Page not found
 			</motion.h1>
 
 			{/* Descripción */}
@@ -95,7 +95,7 @@ export default function NotFoundPage() {
 				initial={{ y: 20, opacity: 0 }}
 				transition={{ delay: 0.2, duration: 0.5 }}
 			>
-				Lo sentimos, la página que buscas no existe o ha sido movida.
+				The page you are looking for does not exist or has moved.
 				<br />
 				<span className="mt-2 inline-block font-mono text-muted-foreground/70 text-sm">{location.pathname}</span>
 			</motion.p>
@@ -109,11 +109,11 @@ export default function NotFoundPage() {
 			>
 				<Button className="gap-2" onClick={handleGoBack} size="lg" variant="outline">
 					<ArrowLeft className="h-4 w-4" />
-					Volver atrás
+					Go back
 				</Button>
 				<Button className="gap-2" onClick={handleGoHome} size="lg">
 					<Home className="h-4 w-4" />
-					Ir al inicio
+					Go to Home
 				</Button>
 			</motion.div>
 
@@ -125,7 +125,7 @@ export default function NotFoundPage() {
 				transition={{ delay: 0.4, duration: 0.5 }}
 			>
 				<h2 className="mb-4 text-center font-semibold text-muted-foreground text-sm uppercase tracking-wide">
-					O prueba estas secciones
+					Try one of these sections
 				</h2>
 				<div className="grid grid-cols-2 gap-3">
 					{suggestions.map((suggestion, index) => {
@@ -156,7 +156,7 @@ export default function NotFoundPage() {
 				initial={{ opacity: 0 }}
 				transition={{ delay: 0.8 }}
 			>
-				Si crees que esto es un error, por favor contacta al administrador.
+				If you believe this is an error, contact the administrator.
 			</motion.p>
 		</main>
 	);

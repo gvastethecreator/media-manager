@@ -77,13 +77,13 @@ export const PerformanceMetricsPanel: React.FC<PerformanceMetricsPanelProps> = (
 				data-testid="performance-metrics-panel"
 			>
 				<div className="mb-1 font-medium">Performance</div>
-				<div className="text-muted-foreground">Sin medidas todavía.</div>
+				<div className="text-muted-foreground">No measurements yet.</div>
 				<button
 					className="mt-2 rounded border px-2 py-1 text-xs hover:bg-accent hover:text-accent-foreground"
 					onClick={readEntries}
 					type="button"
 				>
-					Actualizar
+					Refresh
 				</button>
 			</div>
 		);
@@ -130,7 +130,7 @@ export const PerformanceMetricsPanel: React.FC<PerformanceMetricsPanelProps> = (
 				<span className="font-medium tabular-nums">{totalDuration.toFixed(2)} ms</span>
 			</div>
 			<div className="mt-1 text-[10px] text-muted-foreground">
-				Actualizado: {new Date(lastUpdated).toLocaleTimeString()}
+				Updated: {new Date(lastUpdated).toLocaleTimeString()}
 			</div>
 		</div>
 	);

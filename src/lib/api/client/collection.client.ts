@@ -16,7 +16,7 @@ const API_BASE_PATH = '/api/collections';
 export async function getCollectionsFromApi(): Promise<CollectionWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener colecciones');
+		throw new Error('Could not get collections');
 	}
 	const result = await response.json();
 	return unwrapArrayResponse<CollectionWithStats>(result);
@@ -25,7 +25,7 @@ export async function getCollectionsFromApi(): Promise<CollectionWithStats[]> {
 export async function getCollectionFromApi(id: string): Promise<CollectionWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`);
 	if (!response.ok) {
-		throw new Error('Error al obtener la colección');
+		throw new Error('Could not get the collection');
 	}
 	return response.json();
 }
@@ -37,7 +37,7 @@ export async function createCollectionInApi(data: CollectionCreateInput): Promis
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear colección');
+		throw new Error('Could not create collection');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -50,7 +50,7 @@ export async function updateCollectionInApi(id: string, data: CollectionUpdateIn
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar colección');
+		throw new Error('Could not update collection');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -59,7 +59,7 @@ export async function updateCollectionInApi(id: string, data: CollectionUpdateIn
 export async function deleteCollectionFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar colección');
+		throw new Error('Could not delete collection');
 	}
 	await invalidateFavoriteQueries();
 }

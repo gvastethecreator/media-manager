@@ -18,7 +18,7 @@ export async function getActiveProfileFromApi(): Promise<ProfileExtended | null>
 		if (response.status === 404) {
 			return null;
 		}
-		throw new Error('Error al obtener perfil activo');
+		throw new Error('Could not get active profile');
 	}
 	return response.json();
 }
@@ -26,7 +26,7 @@ export async function getActiveProfileFromApi(): Promise<ProfileExtended | null>
 export async function getProfilesFromApi(): Promise<ProfileExtended[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener perfiles');
+		throw new Error('Could not get profiles');
 	}
 	const result = await response.json();
 	return unwrapArrayResponse<ProfileExtended>(result);

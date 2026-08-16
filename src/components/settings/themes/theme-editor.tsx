@@ -53,9 +53,9 @@ export function ThemeEditor({ theme, onSave, onCancel, onDelete, className }: Th
 		const now = new Date().toISOString();
 		return {
 			id: generateThemeId(),
-			name: 'Nuevo Tema',
+			name: 'New Theme',
 			description: '',
-			author: 'Usuario',
+			author: 'User',
 			isDark: true,
 			createdAt: now,
 			updatedAt: now,
@@ -158,8 +158,8 @@ export function ThemeEditor({ theme, onSave, onCancel, onDelete, className }: Th
 						<ArrowLeft className="h-4 w-4" />
 					</Button>
 					<div>
-						<h2 className="font-semibold text-lg">{theme ? 'Editar Tema' : 'Crear Tema'}</h2>
-						<p className="text-muted-foreground text-xs">{hasChanges ? 'Cambios sin guardar' : 'Sin cambios'}</p>
+						<h2 className="font-semibold text-lg">{theme ? 'Edit Theme' : 'Create Theme'}</h2>
+						<p className="text-muted-foreground text-xs">{hasChanges ? 'Unsaved changes' : 'Sin cambios'}</p>
 					</div>
 				</div>
 
@@ -194,7 +194,7 @@ export function ThemeEditor({ theme, onSave, onCancel, onDelete, className }: Th
 
 					<Button disabled={!hasChanges} onClick={handleSave}>
 						<Save className="mr-2 h-4 w-4" />
-						Guardar
+						Save
 					</Button>
 				</div>
 			</div>
@@ -207,33 +207,33 @@ export function ThemeEditor({ theme, onSave, onCancel, onDelete, className }: Th
 						<div className="flex flex-col gap-4">
 							{/* Live Preview */}
 							<div className="flex flex-col gap-2">
-								<Label className="text-muted-foreground text-xs">Vista Previa</Label>
+								<Label className="text-muted-foreground text-xs">Preview</Label>
 								<ThemePreview className="w-full" colors={editedTheme.colors} name={editedTheme.name} size="lg" />
 							</div>
 
 							{/* Metadata */}
 							<div className="flex flex-col gap-3">
 								<div className="flex flex-col gap-1.5">
-									<Label className="text-xs">Nombre</Label>
+									<Label className="text-xs">Name</Label>
 									<Input
 										onChange={(e) => handleMetadataChange({ name: e.target.value })}
-										placeholder="Mi Tema"
+										placeholder="My Theme"
 										value={editedTheme.name}
 									/>
 								</div>
 
 								<div className="flex flex-col gap-1.5">
-									<Label className="text-xs">Descripción</Label>
+									<Label className="text-xs">Description</Label>
 									<Textarea
 										onChange={(e) => handleMetadataChange({ description: e.target.value })}
-										placeholder="Describe tu tema..."
+										placeholder="Describe your theme..."
 										rows={2}
 										value={editedTheme.description || ''}
 									/>
 								</div>
 
 								<div className="flex items-center justify-between">
-									<Label className="text-xs">Tema Oscuro</Label>
+									<Label className="text-xs">Dark Theme</Label>
 									<Switch checked={editedTheme.isDark} onCheckedChange={(isDark) => handleMetadataChange({ isDark })} />
 								</div>
 
@@ -317,19 +317,19 @@ export function DeleteThemeConfirm({
 					<Trash2 className="h-5 w-5 text-destructive" />
 				</div>
 				<div>
-					<h3 className="font-semibold">Eliminar Tema</h3>
+					<h3 className="font-semibold">Delete Theme</h3>
 					<p className="text-muted-foreground text-sm">
-						¿Eliminar <strong>{themeName}</strong>? Esta acción no se puede deshacer.
+						Delete <strong>{themeName}</strong>? This action cannot be undone.
 					</p>
 				</div>
 			</div>
 
 			<div className="flex justify-end gap-2">
 				<Button onClick={onCancel} variant="outline">
-					Cancelar
+					Cancel
 				</Button>
 				<Button onClick={onConfirm} variant="destructive">
-					Eliminar
+					Delete
 				</Button>
 			</div>
 		</div>

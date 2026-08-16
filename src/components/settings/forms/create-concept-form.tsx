@@ -18,11 +18,11 @@ import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod
 const conceptSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(100, 'El nombre es demasiado largo'),
+	name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
 	description: z.string().optional(),
 	content: z.string().optional(),
-	color: z.string().min(1, 'El color es requerido'),
-	emoji: z.string().min(1, 'El emoji es requerido'),
+	color: z.string().min(1, 'Color is required'),
+	emoji: z.string().min(1, 'Emoji is required'),
 	category: z.string().optional(),
 });
 
@@ -106,7 +106,7 @@ export function CreateConceptForm({
 				if (onUpdated) {
 					onUpdated(updatedConcept);
 				}
-				toastService.success('Concepto actualizado correctamente');
+				toastService.success('Concept updated');
 			} else {
 				// Crear nuevo concepto
 				const createData: ConceptCreateInput = {
@@ -118,11 +118,11 @@ export function CreateConceptForm({
 					onCreated(newConcept);
 				}
 				form.reset(); // Limpiar formulario después de crear
-				toastService.success('Concepto creado correctamente');
+				toastService.success('Concept created');
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toastService.error(isEditing ? 'Error al actualizar el concepto' : 'Error al crear el concepto', {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			toastService.error(isEditing ? 'Could not update the concept' : 'Could not create the concept', {
 				description: errorMessage,
 			});
 		} finally {
@@ -133,12 +133,12 @@ export function CreateConceptForm({
 	const optionalFields = [
 		{
 			name: 'content',
-			label: 'Contenido',
+			label: 'Content',
 			render: ({ value, onChange }: any) => (
 				<textarea
 					className="w-full resize-none rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
-					placeholder="Contenido del concepto..."
+					placeholder="Concept content..."
 					rows={4}
 					value={value || ''}
 				/>
@@ -158,12 +158,12 @@ export function CreateConceptForm({
 		},
 		{
 			name: 'description',
-			label: 'Descripción',
+			label: 'Description',
 			render: ({ value, onChange }: any) => (
 				<textarea
 					className="w-full resize-none rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
-					placeholder="Descripción del concepto..."
+					placeholder="Concept description..."
 					rows={3}
 					value={value || ''}
 				/>
@@ -185,7 +185,7 @@ export function CreateConceptForm({
 			onCancel={_onCancel}
 			onSubmit={_onSubmit}
 			optionalFields={optionalFields}
-			submitLabel={isEditing ? 'Guardar cambios' : 'Crear concepto'}
+			submitLabel={isEditing ? 'Save changes' : 'Create concept'}
 		/>
 	);
 }

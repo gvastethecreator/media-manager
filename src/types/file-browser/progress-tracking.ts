@@ -136,7 +136,7 @@ export interface ProgressCallbacks {
 }
 
 /**
- * Operación de progreso completa
+ * Operation de progreso completa
  */
 export interface ProgressOperation {
 	/** Callbacks de la operación */

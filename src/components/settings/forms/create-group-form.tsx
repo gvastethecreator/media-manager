@@ -13,7 +13,7 @@ import type { CreateGroupInput } from '@/types/entities/group/types';
 
 // Esquema de validación para el formulario
 const groupFormSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(50, 'El nombre no puede tener más de 50 caracteres'),
+	name: z.string().min(1, 'Name is required').max(50, 'Name must be 50 characters or fewer'),
 	emoji: z.string().optional(),
 	color: z.string().optional(),
 	description: z.string().optional(),
@@ -49,7 +49,7 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 
 	const handleSubmit = async (data: FormData) => {
 		if (!data.name) {
-			throw new Error('El nombre es requerido');
+			throw new Error('Name is required');
 		}
 
 		const submitData: CreateGroupInput = {
@@ -72,9 +72,9 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 					name="name"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Nombre</FormLabel>
+							<FormLabel>Name</FormLabel>
 							<FormControl>
-								<Input placeholder="Nombre del grupo" {...field} />
+								<Input placeholder="Group name" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -119,9 +119,9 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 					name="description"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Descripción</FormLabel>
+							<FormLabel>Description</FormLabel>
 							<FormControl>
-								<Textarea placeholder="Descripción del grupo..." {...field} />
+								<Textarea placeholder="Group description..." {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -133,9 +133,9 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 					name="category"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Categoría</FormLabel>
+							<FormLabel>Category</FormLabel>
 							<FormControl>
-								<Input placeholder="Categoría del grupo" {...field} />
+								<Input placeholder="Group category" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -144,14 +144,14 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 
 				<div className="flex justify-end space-x-2">
 					<Button onClick={onCancel} type="button" variant="outline">
-						Cancelar
+						Cancel
 					</Button>
 					{onPreview && (
 						<Button onClick={onPreview} type="button" variant="secondary">
-							Vista previa
+							Preview
 						</Button>
 					)}
-					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear grupo'}</Button>
+					<Button type="submit">{isEditing ? 'Save changes' : 'Create group'}</Button>
 				</div>
 			</form>
 		</Form>

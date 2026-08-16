@@ -55,7 +55,7 @@ export function PromptContentView() {
 	);
 
 	const headerTitle = useMemo(
-		() => (effectivePrompt?.name ? `Imágenes del prompt: ${effectivePrompt.name}` : 'Selecciona un prompt'),
+		() => (effectivePrompt?.name ? `Prompt images: ${effectivePrompt.name}` : 'Selecciona un prompt'),
 		[effectivePrompt?.name]
 	);
 
@@ -64,7 +64,7 @@ export function PromptContentView() {
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Selecciona un prompt para ver sus imágenes relacionadas"
+						description="Select a prompt to view related images"
 						icon={Terminal}
 						title="Sin prompt seleccionado"
 					/>
@@ -90,7 +90,7 @@ export function PromptContentView() {
 	}
 
 	return (
-		<BaseContentView description={images.length ? `${images.length} imágenes` : undefined} title={headerTitle}>
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
 			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
 		</BaseContentView>
 	);

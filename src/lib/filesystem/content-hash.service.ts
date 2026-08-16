@@ -49,12 +49,12 @@ export const calculateFileHash = (filePath: string): Effect.Effect<string, Conte
 
 		const stats = yield* Effect.tryPromise({
 			try: async () => await stat(filePath),
-			catch: (error) => new ContentHashError(`Error al obtener stats del archivo: ${error}`, 'STAT_ERROR', filePath),
+			catch: (error) => new ContentHashError(`Could not get file statistics: ${error}`, 'STAT_ERROR', filePath),
 		});
 
 		const fileBuffer = yield* Effect.tryPromise({
 			try: async () => await readFile(filePath),
-			catch: (error) => new ContentHashError(`Error al leer archivo: ${error}`, 'READ_ERROR', filePath),
+			catch: (error) => new ContentHashError(`Could not read file: ${error}`, 'READ_ERROR', filePath),
 		});
 
 		const hash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
@@ -77,7 +77,7 @@ export const checkFileHashChanged = (
 		const currentHash = yield* calculateFileHash(filePath);
 		const stats = yield* Effect.tryPromise({
 			try: async () => await stat(filePath),
-			catch: (error) => new ContentHashError(`Error al obtener stats del archivo: ${error}`, 'STAT_ERROR', filePath),
+			catch: (error) => new ContentHashError(`Could not get file statistics: ${error}`, 'STAT_ERROR', filePath),
 		});
 
 		const hasChanged = !previousHash || currentHash !== previousHash;

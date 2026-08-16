@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Validación para crear un comodín
  */
 export const createWildcardSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(50, 'El nombre no puede tener más de 50 caracteres'),
+	name: z.string().min(1, 'Name is required').max(50, 'Name cannot exceed 50 characters'),
 	emoji: z.string().default('✨'),
 	color: z.string().default('var(--preset-pink)'),
 	description: z.string().optional(),

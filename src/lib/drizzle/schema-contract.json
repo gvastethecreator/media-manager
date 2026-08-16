@@ -1,6 +1,6 @@
 {
 	"formatVersion": 1,
-	"fingerprint": "8e8290f898a9f9fc2d858c9592ac7f126ed92741f8a47f5b492629774ce88b43",
+	"fingerprint": "5c551a5552b531bf630f0bff69aa957f268bf72101aff0659cff6625be7d4c0a",
 	"generatedFrom": "src/lib/drizzle/migrations",
 	"objects": [
 		{
@@ -568,6 +568,48 @@
 			"type": "index"
 		},
 		{
+			"name": "RelationRoleApplicability_target_idx",
+			"sqlHash": "4fe2a9a42b079c74168ad889473f046b1b69a96ccefa9ac472b4154e8d14c611",
+			"tableName": "RelationRoleApplicability",
+			"type": "index"
+		},
+		{
+			"name": "RelationRole_deprecatedAt_idx",
+			"sqlHash": "0bd13145464e41b82f4cf5049600a9b5c9ee730dafe9cc3768a3bbef847842d3",
+			"tableName": "RelationRole",
+			"type": "index"
+		},
+		{
+			"name": "RelationRole_replacementSlug_idx",
+			"sqlHash": "3929d2187520ea77643359e1fae4c5944d37d8971ba616caad1e1343f13c0111",
+			"tableName": "RelationRole",
+			"type": "index"
+		},
+		{
+			"name": "SemanticRelation_logical_identity_key",
+			"sqlHash": "ed4e0d4af1c314766562b845dad08a8cb861870cd78ee84875af4442d82242cc",
+			"tableName": "SemanticRelation",
+			"type": "index"
+		},
+		{
+			"name": "SemanticRelation_roleSlug_idx",
+			"sqlHash": "a8b501504a472561e30e21fa2adc86a28decd4024aa6b66ad97e594143294d28",
+			"tableName": "SemanticRelation",
+			"type": "index"
+		},
+		{
+			"name": "SemanticRelation_source_idx",
+			"sqlHash": "132e4f3e0062fdfa56345817473481b5dd0dffa56ffe011ae65014cabbff3ec7",
+			"tableName": "SemanticRelation",
+			"type": "index"
+		},
+		{
+			"name": "SemanticRelation_target_idx",
+			"sqlHash": "0c8496ce3bca9ae34c5d377d7a071434c3c4286d78d8a933e7e7421c4393a80b",
+			"tableName": "SemanticRelation",
+			"type": "index"
+		},
+		{
 			"name": "Settings_profileId_key",
 			"sqlHash": "4851ee54b6cb0ab3e0271371292002ea051ef18e15f063f54b94b71b4cb45b0f",
 			"tableName": "Settings",
@@ -631,6 +673,18 @@
 			"name": "Tag_parentId_idx",
 			"sqlHash": "536a89f166eb1c5166f69bbdc98a6c861971b87c38271385d82459cb4b6872af",
 			"tableName": "Tag",
+			"type": "index"
+		},
+		{
+			"name": "TaxonomyArtifactDeletionLedger_nonce_key",
+			"sqlHash": "9055cc1919669a0634a38ba75c0041c20b8b9e4cb7e9cfc2822db8c4dd1d898b",
+			"tableName": "TaxonomyArtifactDeletionLedger",
+			"type": "index"
+		},
+		{
+			"name": "TaxonomyArtifactDeletionLedger_root_path_entity_idx",
+			"sqlHash": "e1b5e5731c7563f3b06ad51dba10a521e894e03f3775ef14d26a2059cf2eb994",
+			"tableName": "TaxonomyArtifactDeletionLedger",
 			"type": "index"
 		},
 		{
@@ -1282,6 +1336,30 @@
 			"type": "table"
 		},
 		{
+			"name": "RelationRole",
+			"sqlHash": "75d418fdf55de6219fd96aeb7ff6ff6ea99899f46da14f7aedcbf4009dcb6aea",
+			"tableName": "RelationRole",
+			"type": "table"
+		},
+		{
+			"name": "RelationRoleApplicability",
+			"sqlHash": "53af9726ed558720877898d1d0ad0652741ec91d16a82b21dfc18e78802a27ee",
+			"tableName": "RelationRoleApplicability",
+			"type": "table"
+		},
+		{
+			"name": "RelationRoleConflict",
+			"sqlHash": "f15ffb928ab6a7b94c2c12782bae7946fe8f1c3afb5a06ac5c37c1dd18babe91",
+			"tableName": "RelationRoleConflict",
+			"type": "table"
+		},
+		{
+			"name": "SemanticRelation",
+			"sqlHash": "993f1fab1dbfd8b8402d9d8a0ed007790a86bec14cceb42c584896f60f85defd",
+			"tableName": "SemanticRelation",
+			"type": "table"
+		},
+		{
 			"name": "Settings",
 			"sqlHash": "4c20d41ca6e4ebfb0d9e335645c4af7746f41b45d613f0fe803affb8fbe6864b",
 			"tableName": "Settings",
@@ -1301,8 +1379,20 @@
 		},
 		{
 			"name": "TaxonomyArtifact",
-			"sqlHash": "993c49634310111406d46ea7620c8958fba5cbf6fe1f7d39626e439663b792b1",
+			"sqlHash": "8d5adb8f6e07b1ae74ab38d6b441b7e20fcebaba6236977be7748d44d38b59ee",
 			"tableName": "TaxonomyArtifact",
+			"type": "table"
+		},
+		{
+			"name": "TaxonomyArtifactDeletionLedger",
+			"sqlHash": "a06296180a8ee7d2094802ca277d068bc6a834d8dd1eb6c1960a56c4a1e791ce",
+			"tableName": "TaxonomyArtifactDeletionLedger",
+			"type": "table"
+		},
+		{
+			"name": "TaxonomyArtifactMutationPermit",
+			"sqlHash": "48ea95f1bf53b4a195c16f3f966cb08eabaf0a755006fc64f5f445ea3a9888e6",
+			"tableName": "TaxonomyArtifactMutationPermit",
 			"type": "table"
 		},
 		{
@@ -1514,6 +1604,222 @@
 			"sqlHash": "75594bc9a5850d2b989cf8ab317ada88c89005fe8bb4d83a45c7e1e55489b846",
 			"tableName": "server_alerts",
 			"type": "table"
+		},
+		{
+			"name": "RelationRoleApplicability_semantic_policy_delete",
+			"sqlHash": "a909151af104035f2f35efc451baf7b7941466b9c4dde407680776cce18eff43",
+			"tableName": "RelationRoleApplicability",
+			"type": "trigger"
+		},
+		{
+			"name": "RelationRoleApplicability_semantic_policy_update",
+			"sqlHash": "a6a916f2c0aa0843afb933c2739a8639046f0bcbe43666ebdc58b1e49ed9fd03",
+			"tableName": "RelationRoleApplicability",
+			"type": "trigger"
+		},
+		{
+			"name": "RelationRoleConflict_semantic_policy_delete",
+			"sqlHash": "c51f8ff453f6480da11730a1c36cdec605538edae50603b598dd83ced8c3b7b4",
+			"tableName": "RelationRoleConflict",
+			"type": "trigger"
+		},
+		{
+			"name": "RelationRoleConflict_semantic_policy_insert",
+			"sqlHash": "4f59666ad6a582b2f347349956bb31062bba24ffc35f33dd7545127451541f85",
+			"tableName": "RelationRoleConflict",
+			"type": "trigger"
+		},
+		{
+			"name": "RelationRoleConflict_semantic_policy_update",
+			"sqlHash": "e88085bb9c832069fef2ac17a4412adf656904bd9a0449ccd8cae94e7cf3ff8a",
+			"tableName": "RelationRoleConflict",
+			"type": "trigger"
+		},
+		{
+			"name": "RelationRole_semantic_policy_update",
+			"sqlHash": "6171008e3c545d240066993e1aa12caa0d26fa15f9d2cd7037726f4b63966743",
+			"tableName": "RelationRole",
+			"type": "trigger"
+		},
+		{
+			"name": "RelationRole_slug_immutable",
+			"sqlHash": "829fa5bcf567836e025a58d8318589cada32daeee5d64d54766c583901c4bd70",
+			"tableName": "RelationRole",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_album_delete",
+			"sqlHash": "413c9b7359193f1da731894540394c8938f24767f841edd1e257d8f547453d06",
+			"tableName": "Album",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_asset_delete",
+			"sqlHash": "7cfaef9a9d8193f3c636d9df404bd8194b018f01bb5cc78663520827c71d2f8d",
+			"tableName": "Asset",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_bare_self_insert",
+			"sqlHash": "c24af3a69a357669b6ff7fbf09d4349329d06ce34f9ff823c853c6c4d3a70179",
+			"tableName": "SemanticRelation",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_character_delete",
+			"sqlHash": "232de0b878ebb83b3b8144e2e40782f0a4048afcf05f8c89d2517a8d86f035c3",
+			"tableName": "Character",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_collection_delete",
+			"sqlHash": "edb8af708b5dabc2a240eec4db0673870f16f71b89624ae98ab8c8b4cd368ee6",
+			"tableName": "Collection",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_concept_delete",
+			"sqlHash": "fd0d03cd86d8a401582566cd60c4998b374edd46722210ff563e3b8c6f589d21",
+			"tableName": "Concept",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_derived_cycle_insert",
+			"sqlHash": "5e43af89007f6876145cce45c7c5d620b2d2fe36dd24b285d78eeae3fd96fdfc",
+			"tableName": "SemanticRelation",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_derived_cycle_update",
+			"sqlHash": "e9d457a0e48a938770de6ee5d92911d72c2a449044ef2787853d9600906e82ca",
+			"tableName": "SemanticRelation",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_endpoint_contract_insert",
+			"sqlHash": "ad5e23805ad970055ac37a4469ebbbc26391bd0fec0cdb115105f8b2967fbafa",
+			"tableName": "SemanticRelation",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_endpoint_contract_update",
+			"sqlHash": "b3d9c99328be7068947589345cb26db195c62cfd6178197e24dd2b05940a0713",
+			"tableName": "SemanticRelation",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_folder_delete",
+			"sqlHash": "fa39eb0a7c08ce5307da3d96a1d1821a58ccf10d55969be7e31cbf23bf58c326",
+			"tableName": "Folder",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_group_delete",
+			"sqlHash": "77103abfd329fe5044279d2c97899840dc71c63966a78a1e8a8ff7eddec431b3",
+			"tableName": "Group",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_note_delete",
+			"sqlHash": "7a90090e058e49ae8736ba213f0f160c14dee67aaa91fc7e5f42cb89e6b9adcb",
+			"tableName": "Note",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_pair_semantics_insert",
+			"sqlHash": "c7eb59f80c9b296e11a28244c86d921139b722c4186d0a6c6bb284884727a3c5",
+			"tableName": "SemanticRelation",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_pair_semantics_update",
+			"sqlHash": "c2d56d185d3ae6536ed7c584a11fde2e91642461623d5bddd115ac13f0a465c9",
+			"tableName": "SemanticRelation",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_place_delete",
+			"sqlHash": "f18554d3f73bb27f2cd946cfb07a31ff2f21e7c3b0a8b942ea9fa6d948d72022",
+			"tableName": "Place",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_prompt_delete",
+			"sqlHash": "e653190f7742570b2a76dfacb8b1b8f3e66fc7dec5e3ee398d096bcd4b28bbdc",
+			"tableName": "Prompt",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_role_contract_insert",
+			"sqlHash": "dbb71c7966ddb178d77d7e38c819d0022faa62a299696012102259edeb013eba",
+			"tableName": "SemanticRelation",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_role_contract_update",
+			"sqlHash": "718651255eee759640b0ed1f598b3a1b0949ee85ca30221fbd09a82fa621367f",
+			"tableName": "SemanticRelation",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_wildcard_delete",
+			"sqlHash": "450122003c661a420ae2f7ec1cdf86b5841ad733c1322fd296eaedd4026dc764",
+			"tableName": "Wildcard",
+			"type": "trigger"
+		},
+		{
+			"name": "SemanticRelation_world_item_delete",
+			"sqlHash": "cdccd7db005dc013ea04f98532394aacef6305b5464efbd90a4faf2d6a4d9dd7",
+			"tableName": "WorldItem",
+			"type": "trigger"
+		},
+		{
+			"name": "TaxonomyArtifact_note_inline_delete_guard",
+			"sqlHash": "cec3c9cc0a674d6b6dc563752e86ff8de98f41aede31a3c9b4c58a426c920585",
+			"tableName": "Note",
+			"type": "trigger"
+		},
+		{
+			"name": "TaxonomyArtifact_note_inline_update_guard",
+			"sqlHash": "aac7da70103a2cd8d40b2fd2343ba4ad7488c3b4aac755e9cd03ff22a284ee31",
+			"tableName": "Note",
+			"type": "trigger"
+		},
+		{
+			"name": "TaxonomyArtifact_portable_location_insert",
+			"sqlHash": "22e500e834d1e1cbd0416f420b4adaa25e8b7958bddde647bbb72285cadc98bd",
+			"tableName": "TaxonomyArtifact",
+			"type": "trigger"
+		},
+		{
+			"name": "TaxonomyArtifact_portable_location_update",
+			"sqlHash": "3f80e0f7d3db1435a18d12e14e15090929b3b1b54a7e86dfa9f2b8ae5d7c00cc",
+			"tableName": "TaxonomyArtifact",
+			"type": "trigger"
+		},
+		{
+			"name": "TaxonomyArtifact_prompt_inline_delete_guard",
+			"sqlHash": "98f1d3664e661c895a7c32670286bdc14e73272a858d667b946ca6c2f652fd66",
+			"tableName": "Prompt",
+			"type": "trigger"
+		},
+		{
+			"name": "TaxonomyArtifact_prompt_inline_update_guard",
+			"sqlHash": "5ac060fda27aa299848392cd8dd98dc158c776880105a0dfc56450ce92c9f77a",
+			"tableName": "Prompt",
+			"type": "trigger"
+		},
+		{
+			"name": "TaxonomyArtifact_wildcard_inline_delete_guard",
+			"sqlHash": "e738e015313e8d414d8a3de58097ac176a63b40acad8f197f4cdcc16d83d0388",
+			"tableName": "Wildcard",
+			"type": "trigger"
+		},
+		{
+			"name": "TaxonomyArtifact_wildcard_inline_update_guard",
+			"sqlHash": "92fef92e0e9c75ec45445df665e721e704f49ab1665a8191a4dfe2e76eb592be",
+			"tableName": "Wildcard",
+			"type": "trigger"
 		}
 	]
 }

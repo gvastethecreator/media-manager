@@ -12,7 +12,7 @@ interface LoadingScreenProps {
 	message?: string;
 }
 
-export function LoadingScreen({ message = 'Cargando...', interactive = false, className = '' }: LoadingScreenProps) {
+export function LoadingScreen({ message = 'Loading...', interactive = false, className = '' }: LoadingScreenProps) {
 	return (
 		<motion.div
 			animate={{ opacity: 1 }}

@@ -112,7 +112,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 	const [error, setError] = useState<string | null>(null);
 
 	const fileExtension = file.extension?.toLowerCase() || file.name?.split('.').pop()?.toLowerCase() || '';
-	const fileName = file.name || 'Archivo sin nombre';
+	const fileName = file.name || 'Unnamed file';
 	const fileSize = file.size || 0;
 	const assetType = toMediaAssetType((file as unknown as { entityType?: unknown }).entityType ?? file.type);
 	const contentUrl = assetType
@@ -150,12 +150,12 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 		try {
 			const response = await fetch(contentUrl);
 			if (!response.ok) {
-				throw new Error('Error al cargar el contenido del archivo');
+				throw new Error('Could not load the file contents');
 			}
 			const content = await response.text();
 			setFileContent(content);
 		} catch (err) {
-			setError(err instanceof Error ? err.message : 'Error desconocido');
+			setError(err instanceof Error ? err.message : 'Unknown error');
 		} finally {
 			setIsLoadingContent(false);
 		}
@@ -170,13 +170,13 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 
 	const handleDownload = async () => {
 		try {
-			if (!assetType) throw new Error('Tipo de asset no compatible');
+			if (!assetType) throw new Error('Unsupported asset type');
 			const resp = await fetch('/api/download', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ asset: { assetId: file.id, assetType } }),
 			});
-			if (!resp.ok) throw new Error('No se pudo iniciar la descarga');
+			if (!resp.ok) throw new Error('Could not start the download');
 			const blob = await resp.blob();
 			const url = URL.createObjectURL(blob);
 			const link = document.createElement('a');
@@ -186,9 +186,9 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 			link.click();
 			document.body.removeChild(link);
 			URL.revokeObjectURL(url);
-			toastService.success('Descarga iniciada');
+			toastService.success('Download started');
 		} catch (e) {
-			toastService.error('Error al descargar el archivo');
+			toastService.error('Could not download the file');
 		}
 	};
 
@@ -202,9 +202,9 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 		if (fileContent) {
 			try {
 				await navigator.clipboard.writeText(fileContent);
-				toastService.success('Contenido copiado al portapapeles');
+				toastService.success('Content copied to the clipboard');
 			} catch {
-				toastService.error('Error al copiar el contenido');
+				toastService.error('Could not copy the content');
 			}
 		}
 	};
@@ -224,13 +224,13 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 
 	const getFileDescription = () => {
 		const descriptions = {
-			archive: 'Archivo comprimido',
-			code: 'Archivo de código fuente',
-			data: 'Archivo de datos',
-			text: 'Archivo de texto',
-			config: 'Archivo de configuración',
-			executable: 'Archivo ejecutable',
-			unknown: 'Archivo genérico',
+			archive: 'Compressed archive',
+			code: 'Source code file',
+			data: 'Data file',
+			text: 'Text file',
+			config: 'Configuration file',
+			executable: 'Executable file',
+			unknown: 'General file',
 		};
 		return descriptions[fileCategory as keyof typeof descriptions] || descriptions.unknown;
 	};
@@ -277,16 +277,16 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 					<div className="mb-8 flex justify-center space-x-4">
 						<Button onClick={handleDownload}>
 							<Download className="mr-2 h-4 w-4" />
-							Descargar
+							Download
 						</Button>
 						<Button onClick={handleOpenExternal} variant="outline">
 							<ExternalLink className="mr-2 h-4 w-4" />
-							Abrir externamente
+							Open externally
 						</Button>
 						{canPreview && (
 							<Button onClick={handleToggleContent} variant="outline">
 								{showContent ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
-								{showContent ? 'Ocultar contenido' : 'Ver contenido'}
+								{showContent ? 'Hide content' : 'View content'}
 							</Button>
 						)}
 					</div>
@@ -295,11 +295,11 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 					{showContent && canPreview && (
 						<div className="mb-8">
 							<div className="mb-4 flex items-center justify-between">
-								<h3 className="font-semibold text-lg">Contenido del archivo</h3>
+								<h3 className="font-semibold text-lg">File contents</h3>
 								{fileContent && (
 									<Button onClick={handleCopyContent} size="sm" variant="ghost">
 										<Copy className="mr-2 h-4 w-4" />
-										Copiar
+										Copy
 									</Button>
 								)}
 							</div>
@@ -307,13 +307,13 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 							{isLoadingContent && (
 								<div className="flex items-center justify-center p-8">
 									<div className="h-6 w-6 animate-spin rounded-full border-primary border-b-2" />
-									<span className="ml-2">Cargando contenido...</span>
+									<span className="ml-2">Loading content...</span>
 								</div>
 							)}
 
 							{error && (
 								<div className="rounded-lg border border-ui-error-border bg-ui-error p-4">
-									"<p className="text-destructive dark:text-red-400">{error}</p>
+									<p className="text-destructive dark:text-red-400">{error}</p>
 								</div>
 							)}
 
@@ -321,7 +321,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 								<div className="overflow-hidden rounded-lg border">
 									<Textarea
 										className="min-h-[400px] resize-none border-0 font-mono text-sm focus:ring-0"
-										placeholder="Contenido del archivo..."
+										placeholder="File contents..."
 										readOnly
 										value={fileContent}
 									/>
@@ -332,37 +332,37 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 
 					{/* File Metadata */}
 					<div className="rounded-lg border p-6">
-						<h3 className="mb-4 font-semibold text-lg">Información del archivo</h3>
+					<h3 className="mb-4 font-semibold text-lg">File information</h3>
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<div>
-								<span className="font-medium">Nombre:</span>
+								<span className="font-medium">Name:</span>
 								<span className="ml-2 text-muted-foreground">{fileName}</span>
 							</div>
 							<div>
-								<span className="font-medium">Tamaño:</span>
+								<span className="font-medium">Size:</span>
 								<span className="ml-2 text-muted-foreground">{formatFileSize(fileSize)}</span>
 							</div>
 							<div>
-								<span className="font-medium">Tipo:</span>
+								<span className="font-medium">Type:</span>
 								<span className="ml-2 text-muted-foreground">{fileExtension.toUpperCase()}</span>
 							</div>
 							<div>
-								<span className="font-medium">Categoría:</span>
+								<span className="font-medium">Category:</span>
 								<span className="ml-2 text-muted-foreground">
 									{fileCategory.charAt(0).toUpperCase() + fileCategory.slice(1)}
 								</span>
 							</div>
 							<div>
-								<span className="font-medium">Creado:</span>
+								<span className="font-medium">Created:</span>
 								<span className="ml-2 text-muted-foreground">{new Date(file.createdAt).toLocaleDateString()}</span>
 							</div>
 							<div>
-								<span className="font-medium">Modificado:</span>
+								<span className="font-medium">Modified:</span>
 								<span className="ml-2 text-muted-foreground">{new Date(file.updatedAt).toLocaleDateString()}</span>
 							</div>
 							{file.description && (
 								<div className="md:col-span-2">
-									<span className="font-medium">Descripción:</span>
+									<span className="font-medium">Description:</span>
 									<span className="ml-2 text-muted-foreground">{file.description}</span>
 								</div>
 							)}

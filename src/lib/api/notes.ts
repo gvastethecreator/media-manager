@@ -3,6 +3,14 @@ import type { ImageWithStats } from '@/types/entities/image';
 import type { NoteWithStats } from '@/types/entities/note';
 import { apiClient } from './client';
 import { invalidateFavoriteQueries } from './favorite-cache';
+import { invalidateNavigationData } from './navigation';
+import {
+	deleteTaxonomyArtifact,
+	getTaxonomyArtifactOrNull,
+	saveTaxonomyArtifact,
+	type TaxonomyArtifactDocument,
+	type TaxonomyArtifactMetadata,
+} from './taxonomy-artifacts';
 
 export interface NoteFilters {
 	category?: string;
@@ -18,24 +26,57 @@ export interface NoteFilters {
 
 export interface NoteCreateInput {
 	category?: string | null;
+	color?: string | null;
 	content?: string | null;
+	emoji?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
 	priority?: number;
 	status?: string | null;
+	summary?: string | null;
+	tags?: string[];
 	title: string;
 }
 
 export interface NoteUpdateInput {
 	category?: string | null;
+	color?: string | null;
 	content?: string | null;
+	emoji?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
 	priority?: number;
 	status?: string | null;
+	summary?: string | null;
+	tags?: string[];
 	title?: string;
+}
+
+export type NoteUpdateMutationInput = NoteUpdateInput & {
+	fileBacking?: { expectedHash: string; restoreMissing?: boolean };
+};
+
+export interface NoteDeleteMutationInput {
+	/** Hash observed by the UI before it begins a destructive action. */
+	contentHash?: string;
+	deleteMissingConfirmed?: boolean;
+	id: string;
+	syncStatus?: TaxonomyArtifactDocument['syncStatus'];
+}
+
+export function mergeNoteArtifactMetadata(
+	input: NoteUpdateInput,
+	existing: TaxonomyArtifactMetadata
+): Omit<TaxonomyArtifactMetadata, 'id' | 'kind' | 'schemaVersion'> {
+	return {
+		category: input.category ?? existing.category,
+		color: input.color ?? existing.color,
+		emoji: input.emoji ?? existing.emoji,
+		summary: input.summary ?? existing.summary,
+		title: input.title ?? existing.title,
+	};
 }
 
 export interface NotesResponse {
@@ -102,6 +143,7 @@ export function useCreateNote() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
 			void invalidateFavoriteQueries(queryClient);
+			void invalidateNavigationData(queryClient);
 		},
 	});
 }
@@ -109,11 +151,24 @@ export function useCreateNote() {
 export function useUpdateNote() {
 	const queryClient = useQueryClient();
 
-	return useMutation<NoteWithStats, Error, { id: string; data: NoteUpdateInput }>({
-		mutationFn: ({ id, data }) => apiClient.put<NoteWithStats>(`/notes/${id}`, data),
+	return useMutation<NoteWithStats, Error, { id: string; data: NoteUpdateMutationInput }>({
+		mutationFn: async ({ id, data }) => {
+			const { fileBacking, ...inlineData } = data;
+			const artifact = await getTaxonomyArtifactOrNull('note', id);
+			if (!artifact) return apiClient.put<NoteWithStats>(`/notes/${id}`, inlineData);
+			if (!fileBacking) throw new Error('The note is file-backed; reload the canonical editor before saving.');
+			const saved = await saveTaxonomyArtifact<NoteWithStats>('note', id, {
+				body: inlineData.content ?? artifact.body,
+				expectedHash: fileBacking.expectedHash,
+				metadata: mergeNoteArtifactMetadata(inlineData, artifact.metadata),
+				restoreMissing: fileBacking.restoreMissing,
+			});
+			return saved.entity;
+		},
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
 			void invalidateFavoriteQueries(queryClient);
+			void invalidateNavigationData(queryClient);
 			queryClient.setQueryData(noteKeys.detail(data.id), data);
 		},
 	});
@@ -122,11 +177,20 @@ export function useUpdateNote() {
 export function useDeleteNote() {
 	const queryClient = useQueryClient();
 
-	return useMutation<void, Error, string>({
-		mutationFn: (id) => apiClient.delete(`/notes/${id}`),
-		onSuccess: (_, id) => {
+	return useMutation<void, Error, NoteDeleteMutationInput>({
+		mutationFn: async ({ contentHash, deleteMissingConfirmed = false, id, syncStatus }) => {
+			if (contentHash) {
+				if (syncStatus === 'missing' && !deleteMissingConfirmed) {
+					throw new Error('Explicitly confirm deletion of the note whose canonical file is missing.');
+				}
+				return deleteTaxonomyArtifact('note', id, contentHash, syncStatus === 'missing');
+			}
+			return apiClient.delete(`/notes/${id}`);
+		},
+		onSuccess: (_, { id }) => {
 			queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
 			void invalidateFavoriteQueries(queryClient);
+			void invalidateNavigationData(queryClient);
 			queryClient.removeQueries({ queryKey: noteKeys.detail(id) });
 			queryClient.removeQueries({ queryKey: noteKeys.images(id) });
 		},

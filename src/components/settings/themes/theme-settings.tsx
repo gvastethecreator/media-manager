@@ -174,7 +174,7 @@ export function ThemeSettings() {
 		<div className="space-y-6">
 			<SettingsPageHeader
 				description="Elige entre los temas predefinidos o crea variaciones propias optimizadas para distintos espacios de trabajo."
-				title="Temas"
+				title="Themes"
 			/>
 
 			{/* Tabs: Built-in / Custom */}
@@ -182,11 +182,11 @@ export function ThemeSettings() {
 				<TabsList className="mb-4 grid w-full max-w-xl grid-cols-2">
 					<TabsTrigger className="gap-2" value="builtin">
 						<Palette className="h-4 w-4" />
-						Temas Predefinidos
+						Preset Themes
 					</TabsTrigger>
 					<TabsTrigger className="gap-2" value="custom">
 						<Edit className="h-4 w-4" />
-						Mis Temas ({customThemes.length})
+						My Themes ({customThemes.length})
 					</TabsTrigger>
 				</TabsList>
 
@@ -194,9 +194,9 @@ export function ThemeSettings() {
 				<TabsContent className="mt-0" value="builtin">
 					<SettingsCard
 						color="var(--primary)"
-						description="Selecciona uno de los 14 temas incluidos. Cada tema está optimizado para diferentes condiciones de iluminación y preferencias estéticas."
+						description="Choose one of the 14 included themes. Each is tuned for different lighting conditions and visual preferences."
 						icon={<Palette />}
-						title="Temas del Sistema"
+						title="System Themes"
 					>
 						{/* System preference option */}
 						<button
@@ -213,7 +213,7 @@ export function ThemeSettings() {
 								<Monitor className="h-5 w-5 text-muted-foreground" />
 							</div>
 							<div className="flex-1 text-left">
-								<span className="font-medium text-foreground">Automático</span>
+								<span className="font-medium text-foreground">Automatic</span>
 								<p className="text-muted-foreground text-xs">
 									Usar preferencia del sistema ({resolvedTheme === 'dark' ? 'oscuro' : 'claro'})
 								</p>
@@ -277,9 +277,9 @@ export function ThemeSettings() {
 				<TabsContent className="mt-0" value="custom">
 					<SettingsCard
 						color="var(--entity-character)"
-						description="Crea temas únicos personalizando cada color. Puedes partir de cualquier tema predefinido y modificarlo a tu gusto."
+						description="Create a unique theme by customizing each color. Start from any preset and make it your own."
 						icon={<Edit />}
-						title="Temas Personalizados"
+						title="Custom Themes"
 					>
 						{/* Actions bar */}
 						<div className="flex flex-wrap items-center gap-2">
@@ -288,19 +288,19 @@ export function ThemeSettings() {
 								<DialogTrigger asChild>
 									<Button className="gap-2" size="sm" variant="outline">
 										<Plus className="h-4 w-4" />
-										Crear Tema
+										Create Theme
 									</Button>
 								</DialogTrigger>
 								<DialogContent>
 									<DialogHeader>
-										<DialogTitle>Crear Nuevo Tema</DialogTitle>
+										<DialogTitle>Create New Theme</DialogTitle>
 									</DialogHeader>
 									<div className="flex flex-col gap-4 py-4">
 										<div className="flex flex-col gap-2">
-											<Label>Nombre del tema</Label>
+											<Label>Theme name</Label>
 											<Input
 												onChange={(e) => setNewThemeName(e.target.value)}
-												placeholder="Mi tema personalizado"
+												placeholder="My custom theme"
 												value={newThemeName}
 											/>
 										</div>
@@ -326,7 +326,7 @@ export function ThemeSettings() {
 											</div>
 										</div>
 										<Button className="mt-2" disabled={!newThemeName.trim()} onClick={handleCreateNew}>
-											Crear y Editar
+											Create and Edit
 										</Button>
 									</div>
 								</DialogContent>
@@ -337,16 +337,16 @@ export function ThemeSettings() {
 								<DialogTrigger asChild>
 									<Button className="gap-2" size="sm" variant="ghost">
 										<Upload className="h-4 w-4" />
-										Importar
+									Import
 									</Button>
 								</DialogTrigger>
 								<DialogContent>
 									<DialogHeader>
-										<DialogTitle>Importar Tema</DialogTitle>
+										<DialogTitle>Import Theme</DialogTitle>
 									</DialogHeader>
 									<div className="flex flex-col gap-4 py-4">
 										<p className="text-muted-foreground text-sm">
-											Selecciona un archivo JSON de tema exportado anteriormente.
+											Select a previously exported theme JSON file.
 										</p>
 										<Input accept=".json" onChange={handleImport} type="file" />
 									</div>
@@ -363,7 +363,7 @@ export function ThemeSettings() {
 								<div>
 									<p className="font-medium text-foreground">Sin temas personalizados</p>
 									<p className="text-muted-foreground text-sm">
-										Crea tu primer tema desde cero o basándote en uno existente.
+										Create your first theme from scratch or use an existing theme as a starting point.
 									</p>
 								</div>
 							</div>
@@ -385,7 +385,7 @@ export function ThemeSettings() {
 													<p className="truncate text-muted-foreground text-xs">{theme.description}</p>
 												)}
 												<p className="mt-1 text-[10px] text-muted-foreground">
-													{theme.isDark ? 'Oscuro' : 'Claro'} • Actualizado{' '}
+												{theme.isDark ? 'Dark' : 'Light'} • Updated{' '}
 													{new Date(theme.updatedAt).toLocaleDateString()}
 												</p>
 											</div>

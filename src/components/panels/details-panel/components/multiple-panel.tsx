@@ -16,7 +16,7 @@ export const MultiplePanel: React.FC<MultiplePanelProps> = ({ items, className =
 	return (
 		<div className={cn('details-panel flex h-full w-full flex-col border-l bg-background', className)}>
 			<div className="border-b p-4">
-				<h2 className="heading-sm">Selección múltiple</h2>
+				<h2 className="heading-sm">Multiple selection</h2>
 				<p className="body-sm text-muted-foreground">{items.length} elementos seleccionados</p>
 			</div>
 
@@ -30,7 +30,7 @@ export const MultiplePanel: React.FC<MultiplePanelProps> = ({ items, className =
 						</div>
 						<div className="rounded-dt-md border p-3 text-center">
 							<div className="font-bold text-2xl">{formatFileSize(totalSize)}</div>
-							<div className="text-muted-foreground text-xs">Tamaño total</div>
+							<div className="text-muted-foreground text-xs">Total size</div>
 						</div>
 					</div>
 
@@ -42,7 +42,7 @@ export const MultiplePanel: React.FC<MultiplePanelProps> = ({ items, className =
 							return (
 								<div className="flex items-center gap-2 rounded-dt-md border p-2" key={item.id}>
 									<EntityIcon className="h-4 w-4 text-muted-foreground" />
-									<span className="flex-1 truncate text-sm">{'name' in item ? item.name : 'Sin nombre'}</span>
+									<span className="flex-1 truncate text-sm">{'name' in item ? item.name : 'Unnamed'}</span>
 									{'size' in item && typeof item.size === 'number' && (
 										<span className="text-muted-foreground text-xs">{formatFileSize(item.size)}</span>
 									)}

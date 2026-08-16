@@ -31,20 +31,20 @@ export function JsonFileSettings() {
 			await updateJsonFile.mutateAsync({ id: editing.id, data: { name: nameInput.trim() } });
 			setEditing(null);
 			setNameInput('');
-			toastService.success('Archivo JSON actualizado');
+			toastService.success('JSON file updated');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al actualizar archivo JSON', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not update the JSON file', { description: msg });
 		}
 	};
 
 	const handleDelete = async (id: string) => {
 		try {
 			await deleteJsonFile.mutateAsync(id);
-			toastService.success('Archivo JSON eliminado');
+			toastService.success('JSON file deleted');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al eliminar archivo JSON', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not delete the JSON file', { description: msg });
 		}
 	};
 
@@ -54,17 +54,17 @@ export function JsonFileSettings() {
 				<CardHeader className="p-3 pb-2">
 					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
 						<FileText className="h-4 w-4" />
-						<span>Archivos JSON</span>
+						<span>JSON Files</span>
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
-						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar archivos JSON..." value={search} />
+						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Search JSON files..." value={search} />
 					</div>
 
 					{isLoading ? (
 						<div className="flex items-center gap-2 text-muted-foreground text-sm">
-							<Loader2 className="h-4 w-4 animate-spin" /> Cargando...
+							<Loader2 className="h-4 w-4 animate-spin" /> Loading...
 						</div>
 					) : error ? (
 						<div className="text-destructive text-sm">{error.message}</div>
@@ -76,11 +76,11 @@ export function JsonFileSettings() {
 										<div>
 											<div className="font-medium text-sm">{f.name}</div>
 											<div className="text-muted-foreground text-xs">
-												{f.size ? `${(f.size / 1024).toFixed(1)}KB` : 'Sin tamaño'}
+											{f.size ? `${(f.size / 1024).toFixed(1)}KB` : 'Size unavailable'}
 											</div>
 											{f.isValid !== undefined && (
 												<div className={`text-xs ${f.isValid ? 'text-success' : 'text-destructive'}`}>
-													{f.isValid ? 'JSON válido' : 'JSON inválido'}
+												{f.isValid ? 'Valid JSON' : 'Invalid JSON'}
 												</div>
 											)}
 										</div>
@@ -92,7 +92,7 @@ export function JsonFileSettings() {
 													setNameInput(f.name);
 												}}
 												size="icon"
-												title="Editar"
+											title="Edit"
 												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
@@ -101,7 +101,7 @@ export function JsonFileSettings() {
 												className="h-8 w-8 hover:text-destructive"
 												onClick={() => handleDelete(f.id)}
 												size="icon"
-												title="Eliminar"
+											title="Delete"
 												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />
@@ -126,10 +126,10 @@ export function JsonFileSettings() {
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
-						<DialogTitle>Editar archivo JSON</DialogTitle>
+						<DialogTitle>Edit JSON File</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Name" value={nameInput} />
 						<div className="flex justify-end gap-2">
 							<Button
 								onClick={() => {
@@ -138,9 +138,9 @@ export function JsonFileSettings() {
 								}}
 								variant="outline"
 							>
-								Cancelar
+								Cancel
 							</Button>
-							<Button onClick={handleUpdate}>Guardar</Button>
+							<Button onClick={handleUpdate}>Save</Button>
 						</div>
 					</div>
 				</DialogContent>

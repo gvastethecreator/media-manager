@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { FileBrowserStatusBar } from './status-bar';
 
 describe('FileBrowserStatusBar startup recovery state', () => {
-	it('muestra una alerta accesible para una recuperación que requiere revisión', () => {
+	it('shows an accessible alert when startup recovery requires review', () => {
 		render(
 			<FileBrowserStatusBar
 				selectedCount={0}
@@ -14,25 +14,25 @@ describe('FileBrowserStatusBar startup recovery state', () => {
 		);
 
 		const alert = screen.getByTestId('file-browser-startup-recovery');
-		expect(alert).toHaveTextContent('Rec. 1 revisión');
+		expect(alert).toHaveTextContent('Recovery: 1 review');
 		expect(alert).toHaveAttribute('aria-live', 'polite');
 		expect(alert.getAttribute('title')).toBe(
-			'La recuperación de inicio requiere revisión manual para 1 operación. Además, 2 operaciones siguen pendientes de reconciliación.'
+			'Startup recovery requires manual review for 1 operation. In addition, 2 operations remain pending reconciliation.'
 		);
 		expect(alert).toHaveAttribute('aria-label', alert.getAttribute('title'));
-		expect(screen.queryByText('Listo')).not.toBeInTheDocument();
+		expect(screen.queryByText('Ready')).not.toBeInTheDocument();
 	});
 
-	it('no presenta el explorador como listo cuando no puede consultar la recuperación', () => {
+	it('does not show the browser as ready when recovery status is unavailable', () => {
 		render(<FileBrowserStatusBar selectedCount={0} shownItems={3} startupRecoveryUnavailable totalItems={3} />);
 
 		const alert = screen.getByTestId('file-browser-startup-recovery');
-		expect(alert).toHaveTextContent('Rec. sin estado');
-		expect(alert).toHaveAttribute('title', 'No se pudo comprobar el estado de recuperación al iniciar.');
-		expect(screen.queryByText('Listo')).not.toBeInTheDocument();
+		expect(alert).toHaveTextContent('Recovery unavailable');
+		expect(alert).toHaveAttribute('title', 'Startup recovery status could not be checked.');
+		expect(screen.queryByText('Ready')).not.toBeInTheDocument();
 	});
 
-	it('abre la revisión sólo cuando se proporciona una acción explícita', () => {
+	it('opens the review only when an explicit action is provided', () => {
 		const onReviewRecovery = vi.fn();
 		render(
 			<FileBrowserStatusBar
@@ -44,7 +44,7 @@ describe('FileBrowserStatusBar startup recovery state', () => {
 			/>
 		);
 
-		const review = screen.getByRole('button', { name: /requiere revisión manual/i });
+		const review = screen.getByRole('button', { name: /requires manual review/i });
 		fireEvent.click(review);
 		expect(onReviewRecovery).toHaveBeenCalledTimes(1);
 	});

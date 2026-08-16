@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS: Settings = {
 	appearance: {
 		theme: 'system',
 		fontSize: 16,
-		language: 'es',
+		language: 'en',
 		reducedAnimations: false,
 		highContrast: false,
 	},

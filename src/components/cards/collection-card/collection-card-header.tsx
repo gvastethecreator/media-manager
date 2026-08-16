@@ -105,7 +105,7 @@ export function CollectionCardHeader({
 					) : (
 						<Dices className="h-4 w-4 opacity-80" />
 					)}
-					<span className="font-semibold uppercase tracking-wide">{category || 'COLECCIÓN'}</span>
+					<span className="font-semibold uppercase tracking-wide">{category || 'COLLECTION'}</span>
 				</div>
 
 				{/* Plataforma (como subtipo en cartas TCG) */}

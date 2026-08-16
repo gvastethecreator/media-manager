@@ -131,7 +131,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return this.transformActivityResponse({ ...newActivity, image: imageData });
 		} catch (error) {
-			activityLogger.error('Error al crear actividad:', error);
+			activityLogger.error('Could not create activity:', error);
 			throw new Error('No se pudo crear la actividad');
 		}
 	}
@@ -249,7 +249,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return result.length > 0;
 		} catch (error) {
-			activityLogger.error('Error al eliminar actividad:', error);
+			activityLogger.error('Could not delete activity:', error);
 			return false;
 		}
 	}
@@ -369,7 +369,7 @@ export class ActivityServiceImpl implements ActivityService {
 			return 'Etiquetas';
 		}
 		if (type.startsWith('user_')) {
-			return 'Usuarios';
+			return 'Users';
 		}
 
 		// Default

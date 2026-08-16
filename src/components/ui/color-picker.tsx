@@ -116,7 +116,7 @@ export function ColorPicker({
 						<div className={cn('grid gap-2', compact ? 'grid-cols-6' : 'grid-cols-5')}>
 							{PRESET_COLORS.slice(0, compact ? 12 : 20).map((color) => (
 								<button
-									aria-label={`Seleccionar color ${color}`}
+									aria-label={`Select color ${color}`}
 									className={cn(
 										'flex h-6 w-6 items-center justify-center rounded-md border border-muted',
 										isSelected(color) && 'ring-1 ring-ring'

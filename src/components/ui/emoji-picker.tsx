@@ -113,7 +113,9 @@ export function EmojiPicker({
 			<Popover onOpenChange={setOpen} open={open}>
 				<PopoverTrigger asChild>
 					<Button
+						aria-label={selectedEmoji ? `Change emoji ${selectedEmoji}` : 'Elegir emoji'}
 						className={cn('h-8 w-full', showLabel ? 'justify-between' : 'justify-center', className)}
+						type="button"
 						variant="outline"
 					>
 						<span className="text-base">{selectedEmoji || '😀'}</span>
@@ -128,10 +130,12 @@ export function EmojiPicker({
 							<div className="grid grid-cols-10 gap-1">
 								{commonEmojis.slice(0, 20).map((emoji) => (
 									<Button
+										aria-label={`Elegir emoji ${emoji}`}
 										className={cn('h-6 w-6 p-0 text-sm', selectedEmoji === emoji && 'bg-accent text-accent-foreground')}
 										key={emoji}
 										onClick={() => handleQuickSelect(emoji)}
 										size="sm"
+										type="button"
 										variant="ghost"
 									>
 										{emoji}
@@ -145,7 +149,7 @@ export function EmojiPicker({
 							<EmojiPickerReact
 								height={200}
 								onEmojiClick={handleEmojiSelect}
-								searchPlaceholder="Buscar emoji..."
+								searchPlaceholder="Search emoji..."
 								width={300}
 							/>
 						</div>
@@ -164,10 +168,12 @@ export function EmojiPicker({
 				<div className="grid grid-cols-10 gap-2">
 					{commonEmojis.map((emoji) => (
 						<Button
+							aria-label={`Elegir emoji ${emoji}`}
 							className={cn('h-8 w-8 p-0', selectedEmoji === emoji && 'bg-accent text-accent-foreground')}
 							key={emoji}
 							onClick={() => handleQuickSelect(emoji)}
 							size="sm"
+							type="button"
 							variant="ghost"
 						>
 							{emoji}
@@ -181,7 +187,7 @@ export function EmojiPicker({
 				<EmojiPickerReact
 					height={300}
 					onEmojiClick={handleEmojiSelect}
-					searchPlaceholder="Buscar emoji..."
+					searchPlaceholder="Search emoji..."
 					width={350}
 				/>
 			</div>

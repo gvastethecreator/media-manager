@@ -14,7 +14,7 @@ export function useStatsService() {
 				statsLogger.info('🔄 Inicializando estadísticas desde API');
 				await invalidateStatsInApi();
 			} catch (error) {
-				statsLogger.error('❌ Error al inicializar estadísticas:', error);
+				statsLogger.error('❌ Could not initialize statistics:', error);
 			}
 		})();
 	}, []);

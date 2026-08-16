@@ -18,13 +18,13 @@ interface ThumbnailErrorProps {
 export function ThumbnailError({
 	error,
 	onRetry,
-	title = 'Error en miniaturas',
-	description = 'No se pudieron cargar las estadísticas de miniaturas',
+	title = 'Thumbnail Error',
+	description = 'Thumbnail statistics could not be loaded',
 	showDetails = true,
 }: ThumbnailErrorProps) {
-	const errorMessage = typeof error === 'string' ? error : error?.message || 'Error desconocido';
+	const errorMessage = typeof error === 'string' ? error : error?.message || 'Unknown error';
 	const isDatabaseError =
-		errorMessage.toLowerCase().includes('database') || errorMessage.toLowerCase().includes('conexión');
+		errorMessage.toLowerCase().includes('database') || errorMessage.toLowerCase().includes('connection');
 
 	return (
 		<Card className="border-destructive/30 bg-destructive/5 p-0">
@@ -54,7 +54,7 @@ export function ThumbnailError({
 									variant="outline"
 								>
 									<RefreshCw className="mr-2 h-3.5 w-3.5" />
-									Reintentar
+									Retry
 								</Button>
 							</div>
 						)}

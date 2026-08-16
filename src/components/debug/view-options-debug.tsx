@@ -39,7 +39,7 @@ export function ViewOptionsDebug() {
 						</div>
 						<div className="flex items-center gap-2">
 							<span className="font-medium">searchQuery:</span>
-							<Badge variant="outline">{searchQuery || 'vacío'}</Badge>
+							<Badge variant="outline">{searchQuery || 'empty'}</Badge>
 						</div>
 					</div>
 				</div>

@@ -317,7 +317,7 @@ function validateVideoInput(input: CreateVideoInput | UpdateVideoInput, isUpdate
 	if (!isUpdate) {
 		const createInput = input as CreateVideoInput;
 		if (!createInput.name || createInput.name.trim().length === 0) {
-			throw videoValidationError('name', createInput.name, 'El nombre es requerido');
+			throw videoValidationError('name', createInput.name, 'The name is required');
 		}
 		if (!createInput.path || createInput.path.trim().length === 0) {
 			throw videoValidationError('path', createInput.path, 'El path es requerido');

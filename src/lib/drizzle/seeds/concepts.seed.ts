@@ -19,7 +19,7 @@ export async function seedConcepts(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('concept', 'Iluminacion Natural', 1),
 				name: 'Iluminación Natural',
-				description: 'Técnicas de iluminación usando luz natural',
+				description: 'Lighting techniques using natural light',
 				emoji: '☀️',
 				color: '#f59e0b',
 				category: 'fotografía',
@@ -34,7 +34,7 @@ export async function seedConcepts(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('concept', 'Composicion Visual', 1),
 				name: 'Composición Visual',
-				description: 'Principios de composición en artes visuales',
+				description: 'Composition principles in visual arts',
 				emoji: '🖼️',
 				color: '#3b82f6',
 				category: 'diseño',
@@ -49,7 +49,7 @@ export async function seedConcepts(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('concept', 'Teoria del Color', 1),
 				name: 'Teoría del Color',
-				description: 'Fundamentos de armonía y contraste cromático',
+				description: 'Fundamentals of color harmony and contrast',
 				emoji: '🌈',
 				color: '#ec4899',
 				category: 'diseño',
@@ -64,7 +64,7 @@ export async function seedConcepts(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('concept', 'Perspectiva Atmosferica', 1),
 				name: 'Perspectiva Atmosférica',
-				description: 'Técnica de profundidad mediante desaturación',
+				description: 'Depth technique using desaturation',
 				emoji: '🌫️',
 				color: '#6366f1',
 				category: 'pintura',
@@ -82,7 +82,7 @@ export async function seedConcepts(db: LibSQLDatabase<Record<string, never>>) {
 
 		seedLogger.success(`✅ ${sampleConcepts.length} conceptos creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando conceptos:', error);
+		seedLogger.error('❌ Could not create concepts:', error);
 		throw error;
 	}
 }

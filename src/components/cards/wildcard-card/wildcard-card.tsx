@@ -92,7 +92,7 @@ export const WildcardCard = memo(function WildcardCard({
 								style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }}
 								variant="outline"
 							>
-								{totalMedia} archivos
+								{totalMedia} files
 							</Badge>
 						)}
 

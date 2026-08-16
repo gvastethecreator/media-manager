@@ -17,7 +17,7 @@ export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 		const sampleProfiles = [
 			{
 				id: '88888888-8888-4888-a888-888888888881',
-				name: 'Usuario Principal',
+				name: 'Primary User',
 				emoji: '🎨',
 				color: '#3b82f6',
 				description: 'Perfil principal del sistema',
@@ -27,7 +27,7 @@ export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 			},
 			{
 				id: '88888888-8888-4888-a888-888888888882',
-				name: 'Usuario Secundario',
+				name: 'Secondary User',
 				emoji: '🎭',
 				color: '#ef4444',
 				description: 'Perfil secundario para pruebas',
@@ -40,7 +40,7 @@ export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 				name: 'Artista Digital',
 				emoji: '🖌️',
 				color: '#a855f7',
-				description: 'Perfil para trabajo artístico',
+				description: 'Profile for creative work',
 				isActive: false,
 				settingsId: null,
 				imageId: null,
@@ -50,7 +50,7 @@ export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 				name: 'Fotógrafo',
 				emoji: '📷',
 				color: '#22c55e',
-				description: 'Perfil para fotografía',
+				description: 'Profile for photography',
 				isActive: false,
 				settingsId: null,
 				imageId: null,
@@ -76,7 +76,7 @@ export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 
 		seedLogger.success(`✅ ${sampleProfiles.length} perfiles creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando perfiles:', error);
+		seedLogger.error('❌ Could not create profiles:', error);
 		throw error;
 	}
 }

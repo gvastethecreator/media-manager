@@ -36,27 +36,27 @@ export const DEFAULT_WORLD_ITEM_VIEW_CONFIG = {
  * Opciones de ordenamiento
  */
 export const WORLD_ITEM_SORT_OPTIONS = [
-	{ value: 'name_asc', label: 'Nombre (A-Z)' },
-	{ value: 'name_desc', label: 'Nombre (Z-A)' },
-	{ value: 'created_asc', label: 'Fecha creación (más antigua)' },
-	{ value: 'created_desc', label: 'Fecha creación (más reciente)' },
-	{ value: 'updated_asc', label: 'Última actualización (más antigua)' },
-	{ value: 'updated_desc', label: 'Última actualización (más reciente)' },
-	{ value: 'type_asc', label: 'Tipo (A-Z)' },
-	{ value: 'type_desc', label: 'Tipo (Z-A)' },
-	{ value: 'rarity_asc', label: 'Rareza (común a legendario)' },
-	{ value: 'rarity_desc', label: 'Rareza (legendario a común)' },
+	{ value: 'name_asc', label: 'Name (A-Z)' },
+	{ value: 'name_desc', label: 'Name (Z-A)' },
+	{ value: 'created_asc', label: 'Created (oldest first)' },
+	{ value: 'created_desc', label: 'Created (newest first)' },
+	{ value: 'updated_asc', label: 'Updated (oldest first)' },
+	{ value: 'updated_desc', label: 'Updated (newest first)' },
+	{ value: 'type_asc', label: 'Type (A-Z)' },
+	{ value: 'type_desc', label: 'Type (Z-A)' },
+	{ value: 'rarity_asc', label: 'Rarity (common to legendary)' },
+	{ value: 'rarity_desc', label: 'Rarity (legendary to common)' },
 ];
 
 /**
  * Mensaje para estado vacío
  */
-export const EMPTY_WORLD_ITEMS_MESSAGE = 'No hay objetos del mundo disponibles';
+export const EMPTY_WORLD_ITEMS_MESSAGE = 'No world items available';
 
 /**
  * Mensaje para error de carga
  */
-export const LOAD_WORLD_ITEMS_ERROR = 'Error al cargar objetos del mundo';
+export const LOAD_WORLD_ITEMS_ERROR = 'Could not load world items';
 
 /**
  * Colores para categorías de objetos

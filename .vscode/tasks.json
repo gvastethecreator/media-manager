@@ -1,6 +1,50 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // === ATAJOS COMUNES (nombres cortos) ===
+    {
+      "label": "🚀 dev",
+      "type": "shell",
+      "command": "bun run dev:full",
+      "isBackground": true,
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🏗️ build",
+      "type": "shell",
+      "command": "bun run build",
+      "group": "build",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "🔎 check",
+      "type": "shell",
+      "command": "bun run check",
+      "group": "test",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "🧪 test",
+      "type": "shell",
+      "command": "bun run test:unit",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "🎭 e2e",
+      "type": "shell",
+      "command": "bun run test:e2e",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "📦 deps",
+      "type": "shell",
+      "command": "bun run deps:outdated",
+      "group": "build",
+      "problemMatcher": []
+    },
     // === TAREAS DE DESARROLLO (PRIORIDAD ALTA) ===
     {
       "label": "🚀 Desarrollo: Full Stack",

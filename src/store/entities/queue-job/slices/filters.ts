@@ -268,7 +268,7 @@ export const createQueueJobFiltersSlice: StateCreator<QueueJobState, [], [], Que
 
 			localStorage.setItem('queueJobFilters', JSON.stringify(filtersToSave));
 		} catch (error) {
-			filtersLogger.error('Error al guardar filtros', { error });
+			filtersLogger.error('Could not save filtros', { error });
 		}
 	},
 

@@ -38,7 +38,7 @@ const PromptsContentView = () => {
 			<div className="container mx-auto p-6">
 				<h2 className="mb-4 font-bold text-xl">Prompts</h2>
 				{items.length === 0 ? (
-					<EmptyState description="Aún no has creado prompts." icon={ZapIcon} title="Sin prompts" />
+					<EmptyState description="You have not created any prompts yet." icon={ZapIcon} title="Sin prompts" />
 				) : (
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 						{items.map((prompt, index) => (

@@ -36,7 +36,7 @@ interface MixedViewProps {
 export default function MixedView({ className }: MixedViewProps) {
 	const { navigateWithTransition } = useSeamlessNavigation();
 
-	// Estados de los diferentes stores
+	// State from each store
 	const images = useImageStore((state) => state.core.images);
 	const imagesLoading = useImageStore((state) => state.core.isLoading);
 	const imagesError = useImageStore((state) => state.core.error);
@@ -64,14 +64,14 @@ export default function MixedView({ className }: MixedViewProps) {
 	const fetchFolders = useFolderStore((state) => state.fetchFolders);
 	const folders = Object.values(foldersRecord || {});
 
-	// Estados locales
+	// Local state
 	const [selectedType, setSelectedType] = useState<FileType>('all');
 	const [searchQuery, setSearchQuery] = useState('');
 	const [isRetrying, setIsRetrying] = useState(false);
 
-	// Cargar datos iniciales
+	// Load initial data
 	useEffect(() => {
-		logger.info('🔄 Cargando datos de todos los tipos de archivos');
+		logger.info('🔄 Loading data for all file types');
 		fetchImages();
 		fetchVideos();
 		fetchDocuments();
@@ -79,11 +79,11 @@ export default function MixedView({ className }: MixedViewProps) {
 		fetchFolders();
 	}, [fetchImages, fetchVideos, fetchDocuments, fetchAudios, fetchFolders]);
 
-	// Combinar todos los elementos con información de tipo
+	// Combine all items with their type information
 	const allItems = useMemo(() => {
 		const items: (MixedItem & { itemType: FileType })[] = [];
 
-		// Agregar imágenes
+		// Add images
 		if (images && typeof images === 'object') {
 			for (const image of Object.values(images)) {
 				const imageWithStats = image as ImageWithStats;
@@ -91,7 +91,7 @@ export default function MixedView({ className }: MixedViewProps) {
 			}
 		}
 
-		// Agregar videos
+		// Add videos
 		if (Array.isArray(videos)) {
 			for (const video of videos) {
 				items.push({ ...video, itemType: 'videos' });
@@ -102,22 +102,22 @@ export default function MixedView({ className }: MixedViewProps) {
 			}
 		}
 
-		// Agregar documentos
+		// Add documents
 		for (const document of documents) {
 			items.push({ ...document, itemType: 'documents' });
 		}
 
-		// Agregar audios
+		// Add audio files
 		for (const audio of audios) {
 			items.push({ ...audio, itemType: 'audios' });
 		}
 
-		// Agregar carpetas
+		// Add folders
 		for (const folder of folders) {
 			items.push({ ...folder, itemType: 'folders' });
 		}
 
-		// Ordenar por fecha de modificación (más recientes primero)
+		// Sort by modification date (newest first)
 		return items.sort((a, b) => {
 			const dateA = new Date(a.updatedAt || a.createdAt).getTime();
 			const dateB = new Date(b.updatedAt || b.createdAt).getTime();
@@ -125,16 +125,16 @@ export default function MixedView({ className }: MixedViewProps) {
 		});
 	}, [images, videos, documents, audios, folders]);
 
-	// Filtrar elementos según tipo seleccionado y búsqueda
+	// Filter items by the selected type and search query
 	const filteredItems = useMemo(() => {
 		let filtered = allItems;
 
-		// Filtrar por tipo
+		// Filter by type
 		if (selectedType !== 'all') {
 			filtered = filtered.filter((item) => item.itemType === selectedType);
 		}
 
-		// Filtrar por búsqueda
+		// Filter by search query
 		if (searchQuery.trim()) {
 			const query = searchQuery.toLowerCase().trim();
 			filtered = filtered.filter(
@@ -147,16 +147,16 @@ export default function MixedView({ className }: MixedViewProps) {
 		return filtered;
 	}, [allItems, selectedType, searchQuery]);
 
-	// Estados de carga y error combinados
+	// Combined loading and error state
 	const isLoading = imagesLoading || videosLoading || documentsLoading || audiosLoading || foldersLoading;
 	const hasError = imagesError || videosError || documentsError || audiosError || foldersError;
 
-	// Manejar clic en elemento
+	// Handle item selection
 	const handleItemClick = useCallback(
 		(item: MixedItem & { itemType: FileType }) => {
-			logger.info(`🖱️ Elemento seleccionado: ${item.name}, tipo: ${item.itemType}`);
+			logger.info(`🖱️ Selected item: ${item.name}, type: ${item.itemType}`);
 
-			// Navegar según el tipo de elemento
+			// Navigate according to the item type
 			switch (item.itemType) {
 				case 'images':
 					navigateWithTransition(`/images/${item.id}`);
@@ -174,31 +174,31 @@ export default function MixedView({ className }: MixedViewProps) {
 					navigateWithTransition(`/folders/${item.id}`);
 					break;
 				default:
-					logger.warn(`Tipo de elemento no reconocido: ${item.itemType}`);
+					logger.warn(`Unrecognized item type: ${item.itemType}`);
 			}
 		},
 		[navigateWithTransition]
 	);
 
-	// Manejar reintento
+	// Handle retry
 	const handleRetry = useCallback(async () => {
 		if (isRetrying) {
 			return;
 		}
 
 		setIsRetrying(true);
-		logger.info('🔄 Reintentando carga de todos los archivos');
+		logger.info('🔄 Retrying all file requests');
 
 		try {
 			await Promise.all([fetchImages(), fetchVideos(), fetchDocuments(), fetchAudios(), fetchFolders()]);
 		} catch (error) {
-			logger.error('❌ Error al reintentar:', error);
+			logger.error('❌ Retry failed:', error);
 		} finally {
 			setIsRetrying(false);
 		}
 	}, [isRetrying, fetchImages, fetchVideos, fetchDocuments, fetchAudios, fetchFolders]);
 
-	// Renderizar card según tipo
+	// Render the card for each item type
 	const renderCard = useCallback(
 		(item: MixedItem & { itemType: FileType }) => {
 			const key = `${item.itemType}-${item.id}`;
@@ -243,7 +243,7 @@ export default function MixedView({ className }: MixedViewProps) {
 				default:
 					return (
 						<div className="rounded-lg border p-4" key={key}>
-							<p className="text-muted-foreground text-sm">Tipo no soportado: {item.itemType}</p>
+							<p className="text-muted-foreground text-sm">Unsupported type: {item.itemType}</p>
 							<p className="font-medium">{item.name}</p>
 						</div>
 					);
@@ -252,20 +252,20 @@ export default function MixedView({ className }: MixedViewProps) {
 		[handleItemClick]
 	);
 
-	// Mostrar estado de carga
+	// Show the loading state
 	if (isLoading && allItems.length === 0) {
-		return <LoadingScreen message="Cargando todos los archivos..." />;
+		return <LoadingScreen message="Loading all files..." />;
 	}
 
-	// Mostrar error si hay problemas
+	// Show an error when no content could be loaded
 	if (hasError && allItems.length === 0) {
 		return (
 			<div className="flex h-full flex-col items-center justify-center gap-4">
-				<EmptyState
-					actions={<Button onClick={handleRetry}>Reintentar</Button>}
-					description="No se pudieron cargar algunos tipos de archivos. Verifica tu conexión e inténtalo de nuevo."
-					icon={Grid}
-					title="Error al cargar archivos"
+					<EmptyState
+						actions={<Button onClick={handleRetry}>Retry</Button>}
+						description="Some file types could not be loaded. Check your connection and try again."
+						icon={Grid}
+						title="Could not load files"
 				/>
 			</div>
 		);
@@ -273,37 +273,37 @@ export default function MixedView({ className }: MixedViewProps) {
 
 	return (
 		<div className={`flex h-full flex-col ${className}`}>
-			{/* Header con controles */}
+			{/* Header controls */}
 			<div className="flex flex-col gap-4 border-b p-6">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<Grid className="h-5 w-5" />
-						<h1 className="font-bold text-2xl">Todos los Archivos</h1>
-						<span className="text-muted-foreground text-sm">({filteredItems.length} elementos)</span>
+						<h1 className="font-bold text-2xl">All Files</h1>
+						<span className="text-muted-foreground text-sm">({filteredItems.length} items)</span>
 					</div>
 					<div className="flex items-center gap-2">
 						<Button disabled={isRetrying} onClick={handleRetry} size="sm" variant="outline">
 							<RefreshCw className={`mr-2 h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`} />
-							{isRetrying ? 'Recargando...' : 'Recargar'}
+							{isRetrying ? 'Reloading...' : 'Reload'}
 						</Button>
 					</div>
 				</div>
 
-				{/* Controles de filtrado y búsqueda */}
+				{/* Filter and search controls */}
 				<div className="flex items-center gap-4">
 					<div className="flex items-center gap-2">
 						<Filter className="h-4 w-4" />
 						<Select onValueChange={(value: FileType) => setSelectedType(value)} value={selectedType}>
 							<SelectTrigger className="w-40">
-								<SelectValue placeholder="Filtrar por tipo" />
+								<SelectValue placeholder="Filter by type" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">Todos</SelectItem>
-								<SelectItem value="images">Imágenes</SelectItem>
+								<SelectItem value="all">All</SelectItem>
+								<SelectItem value="images">Images</SelectItem>
 								<SelectItem value="videos">Videos</SelectItem>
-								<SelectItem value="documents">Documentos</SelectItem>
-								<SelectItem value="audios">Audios</SelectItem>
-								<SelectItem value="folders">Carpetas</SelectItem>
+								<SelectItem value="documents">Documents</SelectItem>
+								<SelectItem value="audios">Audio</SelectItem>
+								<SelectItem value="folders">Folders</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -311,24 +311,24 @@ export default function MixedView({ className }: MixedViewProps) {
 					<Input
 						className="max-w-sm"
 						onChange={(e) => setSearchQuery(e.target.value)}
-						placeholder="Buscar archivos..."
+						placeholder="Search files..."
 						value={searchQuery}
 					/>
 				</div>
 			</div>
 
-			{/* Contenido principal */}
+			{/* Main content */}
 			<ScrollArea className="flex-1">
 				<div className="p-6">
 					{filteredItems.length === 0 ? (
 						<EmptyState
 							description={
 								searchQuery
-									? `No se encontraron archivos que coincidan con "${searchQuery}"`
-									: 'Comienza subiendo algunos archivos para verlos aquí.'
+									? `No files match "${searchQuery}"`
+									: 'Upload a few files to see them here.'
 							}
 							icon={Grid}
-							title={searchQuery ? 'No se encontraron archivos' : 'No hay archivos disponibles'}
+							title={searchQuery ? 'No files found' : 'No files yet'}
 						/>
 					) : (
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -342,13 +342,13 @@ export default function MixedView({ className }: MixedViewProps) {
 }
 
 /**
- * 📝 Documentación:
- * - Vista unificada que muestra todos los tipos de archivos
- * - Integra múltiples stores (image, video, document, audio, folder)
- * - Sistema de filtrado por tipo de archivo
- * - Búsqueda unificada entre todos los elementos
- * - Cards apropiados para cada tipo de archivo
- * - Navegación a vistas de contenido específicas
- * - Manejo de estados de carga y error combinados
- * - Ordenación por fecha de modificación
+ * 📝 Notes:
+ * - Unified view for every file type
+ * - Integrates image, video, document, audio, and folder stores
+ * - File-type filtering
+ * - Unified search across all items
+ * - Type-specific cards
+ * - Navigation to content views
+ * - Combined loading and error handling
+ * - Sorted by modification date
  */

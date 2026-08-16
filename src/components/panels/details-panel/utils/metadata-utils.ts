@@ -70,7 +70,7 @@ export const getBasicMetadata = (item: AnyEntityWithStats): BasicMetadataField[]
 	// Agregar tamaño si existe
 	if ('size' in item && typeof item.size === 'number') {
 		metadata.push({
-			key: 'Tamaño',
+			key: 'Size',
 			value: formatFileSize(item.size),
 			icon: HardDrive,
 		});
@@ -111,7 +111,7 @@ export const getBasicMetadata = (item: AnyEntityWithStats): BasicMetadataField[]
  */
 const RELATED_ENTITY_CONFIG: Record<string, Omit<RelatedEntity, 'count'>> = {
 	images: {
-		type: 'Imágenes',
+		type: 'Images',
 		icon: ImageIcon,
 		color: 'bg-[color:color-mix(in_oklch,var(--entity-image)_15%,transparent)] text-[color:var(--entity-image)]',
 	},
@@ -121,18 +121,18 @@ const RELATED_ENTITY_CONFIG: Record<string, Omit<RelatedEntity, 'count'>> = {
 		color: 'bg-[color:color-mix(in_oklch,var(--entity-video)_15%,transparent)] text-[color:var(--entity-video)]',
 	},
 	albums: {
-		type: 'Álbumes',
+		type: 'Albums',
 		icon: Album,
 		color: 'bg-[color:color-mix(in_oklch,var(--entity-album)_15%,transparent)] text-[color:var(--entity-album)]',
 	},
 	collections: {
-		type: 'Colecciones',
+		type: 'Collections',
 		icon: Album,
 		color:
 			'bg-[color:color-mix(in_oklch,var(--entity-collection)_15%,transparent)] text-[color:var(--entity-collection)]',
 	},
 	tags: {
-		type: 'Etiquetas',
+		type: 'Tags',
 		icon: Tag,
 		color: 'bg-[color:color-mix(in_oklch,var(--entity-tag)_15%,transparent)] text-[color:var(--entity-tag)]',
 	},
@@ -143,7 +143,7 @@ const RELATED_ENTITY_CONFIG: Record<string, Omit<RelatedEntity, 'count'>> = {
 			'bg-[color:color-mix(in_oklch,var(--entity-character)_15%,transparent)] text-[color:var(--entity-character)]',
 	},
 	places: {
-		type: 'Lugares',
+		type: 'Places',
 		icon: MapPin,
 		color: 'bg-[color:color-mix(in_oklch,var(--entity-place)_15%,transparent)] text-[color:var(--entity-place)]',
 	},

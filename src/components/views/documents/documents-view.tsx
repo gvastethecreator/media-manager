@@ -31,7 +31,7 @@ export default function DocumentsView(_props: ViewProps) {
 	useEffect(() => {
 		if (!hasInitRef.current && count === 0 && !isLoading) {
 			hasInitRef.current = true;
-			logger.info('Cargando documentos...');
+			logger.info('Loading documents...');
 			fetchDocuments();
 		}
 	}, [count, isLoading, fetchDocuments]);
@@ -54,21 +54,21 @@ export default function DocumentsView(_props: ViewProps) {
 	}, []);
 
 	if (isLoading && count === 0) {
-		return <LoadingScreen message="Cargando documentos..." />;
+		return <LoadingScreen message="Loading documents..." />;
 	}
 
 	if (error) {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<h2 className="mb-2 font-semibold text-lg">Error al cargar documentos</h2>
+					<h2 className="mb-2 font-semibold text-lg">Could not load documents</h2>
 					<p className="mb-4 text-muted-foreground">Error: {error}</p>
 					<button
 						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 						onClick={() => fetchDocuments()}
 						type="button"
 					>
-						Intentar de nuevo
+						Try again
 					</button>
 				</div>
 			</div>
@@ -80,9 +80,9 @@ export default function DocumentsView(_props: ViewProps) {
 			<div className="flex items-center justify-between gap-3 border-border border-b bg-background/40 px-3 py-2 backdrop-blur-sm">
 				<div className="flex min-w-0 items-center gap-3">
 					<div className="min-w-0">
-						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">Documentos</h2>
+						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">Documents</h2>
 						<p className="truncate text-muted-foreground text-xs leading-tight">
-							{count} {count === 1 ? 'documento' : 'documentos'}
+							{count} {count === 1 ? 'document' : 'documents'}
 						</p>
 					</div>
 				</div>

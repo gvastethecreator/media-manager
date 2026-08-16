@@ -7,7 +7,6 @@ import { prepareWorkerTestDatabase } from './safety/prepare-worker-database';
 // Asegurar flags de entorno para ejecución de tests unitarios
 // - Fuerza detección de "test" en módulos compartidos (p.ej. Drizzle)
 // - Evita inicializaciones pesadas (FTS5) durante unit tests
-// @ts-expect-error - TS marca NODE_ENV readonly pero asignamos antes de que se "congele"
 process.env.NODE_ENV ??= 'test';
 process.env.DISABLE_FTS5 ??= '1';
 

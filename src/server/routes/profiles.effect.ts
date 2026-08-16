@@ -15,7 +15,7 @@ const logger = serverLogger.withContext('ProfilesEffect');
 
 // Schema para validación
 const createProfileSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'The name is required'),
 	emoji: z.string().nullable().optional(),
 	color: z.string().nullable().optional(),
 	description: z.string().nullable().optional(),

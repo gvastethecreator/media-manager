@@ -9,7 +9,7 @@ export const exportToCSV = (metadata: MetadataField[], filename = 'metadatos'): 
 	}
 
 	// Crear encabezados CSV
-	const headers = ['Categoría', 'Campo', 'Valor'];
+	const headers = ['Category', 'Campo', 'Valor'];
 	const csvContent = [
 		headers.join(','),
 		...metadata.map(({ key, value, category = 'general' }) => {

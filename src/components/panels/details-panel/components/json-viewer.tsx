@@ -103,7 +103,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
 				<Button className="h-6 px-2 text-xs" onClick={handleCopy} size="sm" variant="ghost">
 					<Copy className="mr-1 h-3 w-3" />
-					{copied ? 'Copiado!' : 'Copiar'}
+					{copied ? 'Copiado!' : 'Copy'}
 				</Button>
 			</div>
 
@@ -127,7 +127,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
 			{/* Info adicional */}
 			<div className="mt-1 text-muted-foreground text-xs">
-				{lines.length} líneas • {formattedContent.length} caracteres
+				{lines.length} lines • {formattedContent.length} caracteres
 			</div>
 		</div>
 	);

@@ -26,7 +26,7 @@ const API_BASE_PATH = '/api/audio';
 export async function getAudiosFromApi(): Promise<AudioWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener audios');
+		throw new Error('Could not get audio files');
 	}
 	return response.json();
 }
@@ -38,7 +38,7 @@ export async function createAudioInApi(data: PublicAudioCreateInput): Promise<Au
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear audio');
+		throw new Error('Could not create audio');
 	}
 	return response.json();
 }
@@ -50,7 +50,7 @@ export async function updateAudioInApi(id: string, data: PublicAudioUpdateInput)
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar audio');
+		throw new Error('Could not update audio');
 	}
 	return response.json();
 }
@@ -64,6 +64,6 @@ export async function toggleAudioFavoriteInApi(id: string): Promise<AudioWithSta
 export async function deleteAudioFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar audio');
+		throw new Error('Could not delete audio');
 	}
 }

@@ -478,7 +478,7 @@ export async function getSystemStats(): Promise<RuntimeSystemStats> {
 			lastBackup: undefined,
 		} satisfies RuntimeSystemStats;
 	} catch (error) {
-		systemLogger.error('❌ Error al obtener estadísticas del sistema:', error);
+		systemLogger.error('❌ Could not get system statistics:', error);
 		throw createSystemError('No se pudieron obtener las estadísticas del sistema', 'STATS_FETCH_ERROR', error);
 	}
 }
@@ -561,7 +561,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 			hostname: os.hostname(),
 		} satisfies SystemRuntimeStats;
 	} catch (error) {
-		systemLogger.error('❌ Error al obtener estadísticas de runtime del sistema:', error);
+		systemLogger.error('❌ Could not get statistics de runtime del sistema:', error);
 		throw createSystemError(
 			'No se pudieron obtener las estadísticas de runtime del sistema',
 			'STATS_FETCH_ERROR',
@@ -764,7 +764,7 @@ export async function createDefaultSettingsData(): Promise<Settings> {
 			appearance: {
 				theme: 'system',
 				fontSize: 16,
-				language: 'es',
+				language: 'en',
 				reducedAnimations: false,
 				highContrast: false,
 			},

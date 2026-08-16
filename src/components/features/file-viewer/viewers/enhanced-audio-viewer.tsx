@@ -53,12 +53,12 @@ export function EnhancedAudioViewer({
 
 	// Título a mostrar
 	const displayTitle = useMemo(() => {
-		return metadata?.title || fileName?.replace(/\.[^/.]+$/, '') || 'Audio sin título';
+		return metadata?.title || fileName?.replace(/\.[^/.]+$/, '') || 'Untitled audio';
 	}, [metadata?.title, fileName]);
 
 	// Artista a mostrar
 	const displayArtist = useMemo(() => {
-		return metadata?.artist || 'Artista desconocido';
+		return metadata?.artist || 'Unknown artist';
 	}, [metadata?.artist]);
 
 	// Formatear tiempo
@@ -119,11 +119,11 @@ export function EnhancedAudioViewer({
 
 		const handleError = () => {
 			const mediaError = audio.error;
-			logger.error('No se pudo cargar el audio', {
+			logger.error('Could not load audio', {
 				code: mediaError?.code,
 				url: audioUrl,
 			});
-			setErrorMessage('No se pudo cargar este audio. Comprueba que el archivo siga disponible.');
+			setErrorMessage('Could not load this audio file. Check that the file is still available.');
 			setIsLoading(false);
 			setIsPlaying(false);
 		};
@@ -156,8 +156,8 @@ export function EnhancedAudioViewer({
 			audio.pause();
 		} else {
 			void audio.play().catch((error) => {
-				logger.error('No se pudo reproducir el audio', { error, url: audioUrl });
-				setErrorMessage('No se pudo reproducir este audio. Intenta descargarlo o vuelve a abrirlo.');
+				logger.error('Could not play audio', { error, url: audioUrl });
+				setErrorMessage('Could not play this audio file. Download it or open it again.');
 			});
 		}
 	}, [audioUrl, isPlaying, isLoading]);
@@ -226,7 +226,7 @@ export function EnhancedAudioViewer({
 		>
 			{/* Audio element oculto */}
 			<audio preload="metadata" ref={audioRef} src={audioUrl}>
-				<track default kind="captions" label="Subtítulos" src="" srcLang="es" />
+				<track default kind="captions" label="Captions" src="" srcLang="en" />
 			</audio>
 
 			{/* Header con Cover Art */}
@@ -266,19 +266,19 @@ export function EnhancedAudioViewer({
 					<div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
 						{metadata?.album && (
 							<div>
-								<span className="text-muted-foreground">Álbum:</span>
+								<span className="text-muted-foreground">Album:</span>
 								<span className="ml-2 font-medium">{metadata.album}</span>
 							</div>
 						)}
 						{metadata?.year && (
 							<div>
-								<span className="text-muted-foreground">Año:</span>
+								<span className="text-muted-foreground">Year:</span>
 								<span className="ml-2 font-medium">{metadata.year}</span>
 							</div>
 						)}
 						{metadata?.genre && (
 							<div>
-								<span className="text-muted-foreground">Género:</span>
+								<span className="text-muted-foreground">Genre:</span>
 								<span className="ml-2 font-medium">{metadata.genre}</span>
 							</div>
 						)}
@@ -296,13 +296,13 @@ export function EnhancedAudioViewer({
 						)}
 						{metadata?.channels && (
 							<div>
-								<span className="text-muted-foreground">Canales:</span>
+								<span className="text-muted-foreground">Channels:</span>
 								<span className="ml-2 font-medium">
 									{metadata.channels === 1
 										? 'Mono'
 										: metadata.channels === 2
-											? 'Estéreo'
-											: `${metadata.channels} canales`}
+											? 'Stereo'
+											: `${metadata.channels} channels`}
 								</span>
 							</div>
 						)}
@@ -310,7 +310,7 @@ export function EnhancedAudioViewer({
 				</div>
 
 				{/* Botón Download */}
-				<Button aria-label="Descargar audio" onClick={handleDownload} size="icon" variant="outline">
+				<Button aria-label="Download audio" onClick={handleDownload} size="icon" variant="outline">
 					<Download className="h-4 w-4" />
 				</Button>
 			</div>
@@ -327,7 +327,7 @@ export function EnhancedAudioViewer({
 				)}
 				{errorMessage ? (
 					<div className="flex h-full min-h-0 items-center justify-center rounded-lg bg-muted px-3 text-center text-muted-foreground text-sm">
-						Visualización no disponible
+						Visualization unavailable
 					</div>
 				) : (
 					<WaveformVisualizer
@@ -353,7 +353,7 @@ export function EnhancedAudioViewer({
 				<div className="flex items-center gap-4">
 					{/* Play/Pause */}
 					<Button
-						aria-label={isPlaying ? 'Pausar audio' : 'Reproducir audio'}
+						aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
 						className="h-14 w-14 rounded-full"
 						disabled={isLoading || Boolean(errorMessage)}
 						onClick={togglePlay}
@@ -366,7 +366,7 @@ export function EnhancedAudioViewer({
 				{/* Volumen */}
 				<div className="flex w-40 items-center gap-2">
 					<Button
-						aria-label={isMuted ? 'Activar sonido' : 'Silenciar audio'}
+						aria-label={isMuted ? 'Unmute' : 'Mute audio'}
 						disabled={Boolean(errorMessage)}
 						onClick={toggleMute}
 						size="icon"
@@ -375,7 +375,7 @@ export function EnhancedAudioViewer({
 						{isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
 					</Button>
 					<Slider
-						aria-label="Volumen"
+					aria-label="Volume"
 						className="flex-1"
 						disabled={Boolean(errorMessage)}
 						max={100}
@@ -389,7 +389,7 @@ export function EnhancedAudioViewer({
 			{/* Barra de progreso */}
 			<div className="shrink-0 px-4 pb-3">
 				<Slider
-					aria-label="Posición de reproducción"
+					aria-label="Playback position"
 					className="w-full"
 					disabled={isLoading || Boolean(errorMessage) || !duration}
 					max={100}

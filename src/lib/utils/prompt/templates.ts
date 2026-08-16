@@ -81,7 +81,7 @@ export const PREDEFINED_TEMPLATES: Record<string, PromptTemplate> = {
 	character_creation: {
 		id: 'template_character_creation',
 		name: 'Crear personaje',
-		description: 'Plantilla para crear un personaje detallado',
+		description: 'Template for creating a detailed character',
 		category: PromptCategory.CHARACTER,
 		model: PromptModel.GPT_4,
 		content:
@@ -113,7 +113,7 @@ export const PREDEFINED_TEMPLATES: Record<string, PromptTemplate> = {
 	image_description: {
 		id: 'template_image_description',
 		name: 'Describir imagen',
-		description: 'Plantilla para generar descripciones detalladas de imágenes',
+		description: 'Template for generating detailed image descriptions',
 		category: PromptCategory.IMAGE,
 		model: PromptModel.CLAUDE_3_SONNET,
 		content:
@@ -140,7 +140,7 @@ export const PREDEFINED_TEMPLATES: Record<string, PromptTemplate> = {
 	code_generator: {
 		id: 'template_code_generator',
 		name: 'Generar código',
-		description: 'Plantilla para generar código basado en requisitos',
+		description: 'Template for generating code from requirements',
 		category: PromptCategory.CODE,
 		model: PromptModel.GPT_4,
 		content:
@@ -178,7 +178,7 @@ export function getTemplateById(templateId: string): PromptTemplate | undefined 
 	try {
 		return PREDEFINED_TEMPLATES[templateId];
 	} catch (error) {
-		templatesLogger.error('❌ Error al obtener plantilla por ID:', error);
+		templatesLogger.error('❌ Could not get template by ID:', error);
 		return;
 	}
 }
@@ -235,7 +235,7 @@ export function createPromptFromTemplate(templateId: string, variables?: Record<
 
 		return newPrompt;
 	} catch (error) {
-		templatesLogger.error('❌ Error al crear prompt desde plantilla:', error);
+		templatesLogger.error('❌ Could not create prompt from template:', error);
 		return null;
 	}
 }
@@ -249,7 +249,7 @@ export function getTemplatesByCategory(category: PromptCategory): PromptTemplate
 	try {
 		return Object.values(PREDEFINED_TEMPLATES).filter((template) => template.category === category);
 	} catch (error) {
-		templatesLogger.error('❌ Error al filtrar plantillas por categoría:', error);
+		templatesLogger.error('❌ Could not filter templates by category:', error);
 		return [];
 	}
 }
@@ -291,7 +291,7 @@ export function convertPromptToTemplate(
 		return {
 			id: `template_${Date.now()}`,
 			name: templateName || prompt.name || 'Plantilla sin nombre',
-			description: `Plantilla basada en el prompt: ${prompt.name || 'Sin título'}`,
+			description: `Plantilla basada en el prompt: ${prompt.name || 'Untitled'}`,
 			category: (prompt.category as PromptCategory) || PromptCategory.TEXT,
 			model: PromptModel.GPT_3_5,
 			content: prompt.content || '',

@@ -99,14 +99,14 @@ export function fromDrizzleNote(
 			if (noteComplete.updatedAt) {
 				noteComplete.formattedDate =
 					noteComplete.updatedAt instanceof Date
-						? noteComplete.updatedAt.toLocaleDateString('es-ES', {
+						? noteComplete.updatedAt.toLocaleDateString('en-US', {
 								day: '2-digit',
 								month: '2-digit',
 								year: 'numeric',
 								hour: '2-digit',
 								minute: '2-digit',
 							})
-						: new Date(noteComplete.updatedAt).toLocaleDateString('es-ES', {
+						: new Date(noteComplete.updatedAt).toLocaleDateString('en-US', {
 								day: '2-digit',
 								month: '2-digit',
 								year: 'numeric',

@@ -12,7 +12,7 @@ interface EditModeControlsProps {
 export function EditModeControls({ onSave, onCancel, isDisabled }: EditModeControlsProps) {
 	return (
 		<>
-			<SimpleTooltip content="Guardar cambios">
+			<SimpleTooltip content="Save changes">
 				<Button
 					className={cn(
 						'h-6 w-6 text-success transition-all duration-200 ease-out',
@@ -33,7 +33,7 @@ export function EditModeControls({ onSave, onCancel, isDisabled }: EditModeContr
 					<Check className="h-3.5 w-3.5 transition-transform duration-200 hover:scale-110" />
 				</Button>
 			</SimpleTooltip>
-			<SimpleTooltip content="Cancelar edición">
+			<SimpleTooltip content="Cancel editing">
 				<Button
 					className={cn(
 						'h-6 w-6 text-destructive transition-all duration-200 ease-out',

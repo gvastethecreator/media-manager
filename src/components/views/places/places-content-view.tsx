@@ -36,9 +36,9 @@ const PlacesContentView = () => {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Lugares</h2>
+				<h2 className="mb-4 font-bold text-xl">Places</h2>
 				{items.length === 0 ? (
-					<EmptyState description="Aún no has creado lugares." icon={MapPinIcon} title="Sin lugares" />
+					<EmptyState description="You have not created any places yet." icon={MapPinIcon} title="No places yet" />
 				) : (
 					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{items.map((place, index) => (

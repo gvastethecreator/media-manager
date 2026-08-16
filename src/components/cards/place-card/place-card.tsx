@@ -149,7 +149,7 @@ const PlaceCardLoading: React.FC<{ className?: string }> = ({ className }) => (
 			className
 		)}
 	>
-		<p className="text-muted-foreground">Cargando lugar...</p>
+		<p className="text-muted-foreground">Loading place...</p>
 	</div>
 );
 
@@ -260,8 +260,8 @@ const PlaceCardView: React.FC<PlaceCardViewProps> = ({
 		name,
 		emoji = '📍',
 		climate = 'templado',
-		region = 'desconocido',
-		type = 'desconocido',
+		region = 'unknown',
+		type = 'unknown',
 		description,
 		government,
 		isFavorite = false,
@@ -327,7 +327,7 @@ const PlaceCardView: React.FC<PlaceCardViewProps> = ({
 
 	return (
 		<motion.div
-			aria-label={`Lugar: ${name}`}
+			aria-label={`Place: ${name}`}
 			className={cn(
 				'w-[300px] md:w-[320px]',
 				tcgMode ? 'h-[470px]' : 'h-[400px]',
@@ -394,7 +394,7 @@ export const PlaceCard = memo(function PlaceCard({
 
 	// Validación simple de place requerido
 	if (!place) {
-		return <PlaceCardError className={className} message="Lugar no encontrado" />;
+		return <PlaceCardError className={className} message="Place not found" />;
 	}
 
 	const derived = useMemo(() => preparePlaceDerivedData(place, recentMediaData), [place, recentMediaData]);

@@ -27,22 +27,22 @@ const createCharacterSchema = z.object({
 	name: z
 		.string()
 		.min(2, {
-			message: 'El nombre debe tener al menos 2 caracteres',
+			message: 'Name must be at least 2 characters',
 		})
 		.max(50, {
-			message: 'El nombre no debe exceder los 50 caracteres',
+			message: 'Name must be 50 characters or fewer',
 		}),
 	description: z
 		.string()
 		.max(200, {
-			message: 'La descripción no debe exceder los 200 caracteres',
+			message: 'Description must be 200 characters or fewer',
 		})
 		.optional(),
 	color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
-		message: 'El color debe ser un código hexadecimal válido',
+		message: 'Color must be a valid hexadecimal value',
 	}),
 	emoji: z.string().min(1, {
-		message: 'Debes seleccionar un emoji',
+		message: 'Select an emoji',
 	}),
 	backstory: z.string().max(1000).optional(),
 	category: z.nativeEnum(CharacterCategory).optional(),
@@ -203,16 +203,16 @@ export function CreateCharacterForm({
 				};
 				const updated = await updateCharacterMutation.mutateAsync({ id: character.id, data: updateData });
 				onUpdated?.(updated);
-				toastService.success('Personaje actualizado correctamente');
+				toastService.success('Character updated');
 			} else {
 				const created = await createCharacterMutation.mutateAsync(characterData);
 				onCreated?.(created);
 				form.reset();
-				toastService.success('Personaje creado correctamente');
+				toastService.success('Character created');
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el personaje`, {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			toastService.error(`Could not ${isEditing ? 'update' : 'create'} the character`, {
 				description: errorMessage,
 			});
 		} finally {
@@ -228,9 +228,9 @@ export function CreateCharacterForm({
 					name="name"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Nombre</FormLabel>
+							<FormLabel>Name</FormLabel>
 							<FormControl>
-								<Input placeholder="Nombre del personaje" {...field} />
+								<Input placeholder="Character name" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -270,11 +270,11 @@ export function CreateCharacterForm({
 					name="class"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Clase</FormLabel>
+							<FormLabel>Class</FormLabel>
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Seleccionar clase" />
+									<SelectValue placeholder="Select a class" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -295,11 +295,11 @@ export function CreateCharacterForm({
 					name="race"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Raza</FormLabel>
+							<FormLabel>Race</FormLabel>
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Seleccionar raza" />
+									<SelectValue placeholder="Select a race" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -320,9 +320,9 @@ export function CreateCharacterForm({
 					name="description"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Descripción</FormLabel>
+							<FormLabel>Description</FormLabel>
 							<FormControl>
-								<Textarea placeholder="Descripción del personaje..." rows={3} {...field} />
+								<Textarea placeholder="Character description..." rows={3} {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -334,7 +334,7 @@ export function CreateCharacterForm({
 					name="level"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Nivel</FormLabel>
+							<FormLabel>Level</FormLabel>
 							<FormControl>
 								<Input
 									max={100}
@@ -351,9 +351,9 @@ export function CreateCharacterForm({
 
 				<div className="flex justify-end space-x-2">
 					<Button onClick={onCancel} type="button" variant="outline">
-						Cancelar
+						Cancel
 					</Button>
-					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear personaje'}</Button>
+					<Button type="submit">{isEditing ? 'Save changes' : 'Create character'}</Button>
 				</div>
 			</form>
 		</Form>

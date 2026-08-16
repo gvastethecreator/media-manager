@@ -78,7 +78,7 @@ export function ConceptCardContent({
 				const counts = await getConceptCountsFromApi(conceptId);
 				setRelationCounts((prev) => ({ ...prev, ...counts }));
 			} catch (error) {
-				clientLogger.error('Error cargando recuentos:', error);
+				clientLogger.error('Error loading counts:', error);
 			}
 		};
 
@@ -155,12 +155,12 @@ export function ConceptCardContent({
 							>
 								{(() => {
 									if (totalRelations > 50) {
-										return 'RARO';
+										return 'RARE';
 									}
 									if (totalRelations > 20) {
-										return 'POCO COMÚN';
+										return 'UNCOMMON';
 									}
-									return 'COMÚN';
+									return 'COMMON';
 								})()}
 							</span>
 						)}
@@ -184,7 +184,7 @@ export function ConceptCardContent({
 					if (contentPreview) {
 						return <div className="line-clamp-2 overflow-hidden italic">{contentPreview}</div>;
 					}
-					return <div className="py-1 text-center italic opacity-70">Sin descripción</div>;
+					return <div className="py-1 text-center italic opacity-70">No description</div>;
 				})()}
 			</div>
 
@@ -271,7 +271,7 @@ export function ConceptCardContent({
 				<StatCounter
 					count={relationCounts.places}
 					icon={<Globe className="h-4 w-4" />}
-					label="Lugares"
+					label="Places"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
@@ -291,7 +291,7 @@ export function ConceptCardContent({
 				<StatCounter
 					count={relationCounts.images}
 					icon={<Image className="h-4 w-4" />}
-					label="Imágenes"
+					label="Images"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter

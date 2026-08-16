@@ -183,13 +183,13 @@ export const TCGAudioCard = memo(function TCGAudioCard({ item, variant, width, .
 						</span>
 					)}
 					{relationCounts.albums > 0 && (
-						<span className="tcg-relations__item" title={`${relationCounts.albums} álbumes`}>
+						<span className="tcg-relations__item" title={`${relationCounts.albums} albums`}>
 							<Layers size={10} />
 							{relationCounts.albums}
 						</span>
 					)}
 					{relationCounts.collections > 0 && (
-						<span className="tcg-relations__item" title={`${relationCounts.collections} colecciones`}>
+						<span className="tcg-relations__item" title={`${relationCounts.collections} collections`}>
 							<BookMarked size={10} />
 							{relationCounts.collections}
 						</span>

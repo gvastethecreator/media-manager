@@ -39,7 +39,7 @@ export function validateCreateAudioData(
 	try {
 		// Validaciones básicas
 		if (!data.name || data.name.trim().length === 0) {
-			return { success: false, error: 'El nombre es requerido' };
+			return { success: false, error: 'The name is required' };
 		}
 
 		if (!data.path || data.path.trim().length === 0) {
@@ -74,7 +74,7 @@ export function validateUpdateAudioData(
 	try {
 		// Validaciones opcionales para actualización
 		if (data.name !== undefined && data.name.trim().length === 0) {
-			return { success: false, error: 'El nombre no puede estar vacío' };
+			return { success: false, error: 'The name cannot be empty' };
 		}
 
 		if (data.size !== undefined && data.size < 0) {

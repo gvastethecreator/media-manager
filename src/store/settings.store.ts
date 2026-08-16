@@ -271,4 +271,4 @@ export const selectPrivacy = (state: SettingsState) => state.settings?.privacy;
 export const selectAdvanced = (state: SettingsState) => state.settings?.advanced;
 
 export const selectTheme = (state: SettingsState) => state.settings?.appearance.theme || 'system';
-export const selectLanguage = (state: SettingsState) => state.settings?.appearance.language || 'es';
+export const selectLanguage = (state: SettingsState) => state.settings?.appearance.language || 'en';

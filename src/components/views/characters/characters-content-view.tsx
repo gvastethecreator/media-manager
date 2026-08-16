@@ -48,19 +48,19 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 	className,
 }) => {
 	if (isLoading) {
-		return <LoadingScreen message="Cargando personajes..." />;
+		return <LoadingScreen message="Loading characters..." />;
 	}
 
 	if (error) {
 		return (
 			<div className="flex flex-col items-center justify-center py-12">
 				<EmptyState
-					description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+					description={error instanceof Error ? error.message : 'An unexpected error occurred'}
 					icon={Users}
-					title="Error al cargar personajes"
+					title="Could not load characters"
 				/>
 				<Button className="mt-4" onClick={handleRetry}>
-					Reintentar
+					Retry
 				</Button>
 			</div>
 		);
@@ -69,34 +69,34 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'flex-1'}>
 			<div className="p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Personajes</h2>
+				<h2 className="mb-4 font-bold text-xl">Characters</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Personaje'}
+					{showForm ? 'Cancel' : 'Create Character'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Personaje</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Character</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="characterName">Nombre</Label>
+							<Label htmlFor="characterName">Name</Label>
 							<Input
 								id="characterName"
 								onChange={(e) => setNewCharacterName(e.target.value)}
-								placeholder="Nombre del personaje"
+								placeholder="Character name"
 								value={newCharacterName}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="characterDescription">Descripción</Label>
+							<Label htmlFor="characterDescription">Description</Label>
 							<Textarea
 								id="characterDescription"
 								onChange={(e) => setNewCharacterDescription(e.target.value)}
-								placeholder="Descripción del personaje (opcional)"
+								placeholder="Character description (optional)"
 								value={newCharacterDescription}
 							/>
 						</div>
-						<Button onClick={handleCreateCharacter}>Guardar Personaje</Button>
+						<Button onClick={handleCreateCharacter}>Save Character</Button>
 					</div>
 				)}
 
@@ -134,11 +134,11 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 					<EmptyState
 						description={
 							localSearch
-								? `No se encontraron personajes que coincidan con "${localSearch}"`
-								: 'No hay personajes disponibles'
+								? `No characters match "${localSearch}"`
+								: 'No characters are available'
 						}
 						icon={Users}
-						title="Sin personajes"
+						title="No characters yet"
 					/>
 				)}
 			</div>

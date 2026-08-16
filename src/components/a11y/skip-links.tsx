@@ -34,8 +34,8 @@ interface SkipLinksProps {
  */
 export function SkipLinks({
 	links = [
-		{ to: 'main-content', label: 'Saltar al contenido principal' },
-		{ to: 'navigation', label: 'Saltar a navegación' },
+		{ to: 'main-content', label: 'Skip to main content' },
+		{ to: 'navigation', label: 'Skip to navigation' },
 	],
 	className,
 }: SkipLinksProps) {
@@ -73,7 +73,7 @@ export function SkipLinks({
 
 	return (
 		<div
-			aria-label="Enlaces de navegación rápida"
+			aria-label="Quick navigation links"
 			className={cn(
 				'fixed top-4 left-4 z-[9999] flex flex-col gap-2 transition-all duration-200',
 				isVisible ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-full opacity-0',

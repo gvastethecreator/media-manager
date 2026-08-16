@@ -169,14 +169,14 @@ export function EntityFilter({
 	initialValues = {},
 	onChange,
 	showQuickSearch = true,
-	searchPlaceholder = 'Buscar...',
+	searchPlaceholder = 'Search...',
 	allowSavedFilters = false,
 	savedFilters = [],
 	onSaveFilter,
 	onDeleteSavedFilter,
 	showActiveCount = true,
 	className,
-	clearButtonText = 'Limpiar filtros',
+	clearButtonText = 'Clear filters',
 	compact = false,
 }: EntityFilterProps) {
 	// Estado de los valores de filtro
@@ -284,10 +284,10 @@ export function EntityFilter({
 							value={filterValues[filter.id] || ''}
 						>
 							<SelectTrigger id={filter.id}>
-								<SelectValue placeholder={filter.placeholder || `Seleccionar ${filter.label.toLowerCase()}`} />
+								<SelectValue placeholder={filter.placeholder || `Select ${filter.label.toLowerCase()}`} />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">Todos</SelectItem>
+								<SelectItem value="all">All</SelectItem>
 								{filter.options?.map((option) => (
 									<SelectItem key={String(option.value)} value={String(option.value)}>
 										{option.label}
@@ -368,9 +368,9 @@ export function EntityFilter({
 									<CalendarIcon className="mr-2 h-4 w-4" />
 									{filterValues[filter.id]
 										? filterValues[filter.id] instanceof Date
-											? filterValues[filter.id].toLocaleDateString()
-											: new Date(filterValues[filter.id]).toLocaleDateString()
-										: filter.placeholder || 'Seleccionar fecha'}
+										? filterValues[filter.id].toLocaleDateString('en-US')
+										: new Date(filterValues[filter.id]).toLocaleDateString('en-US')
+									: filter.placeholder || 'Select a date'}
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent className="w-auto p-0">
@@ -432,7 +432,7 @@ export function EntityFilter({
 							variant="outline"
 						>
 							<SlidersHorizontal className="h-4 w-4" />
-							<span>Filtros</span>
+							<span>Filters</span>
 							{showActiveCount && activeFiltersCount > 0 && (
 								<Badge className="ml-1 rounded-full px-1 py-0 text-xs" variant="secondary">
 									{activeFiltersCount}
@@ -443,7 +443,7 @@ export function EntityFilter({
 					<PopoverContent align="end" className="w-80 p-4 sm:w-[450px]">
 						<div className="space-y-4">
 							<div className="flex items-center justify-between">
-								<h3 className="font-medium text-sm">Filtros avanzados</h3>
+								<h3 className="font-medium text-sm">Advanced Filters</h3>
 								{activeFiltersCount > 0 && (
 									<Button className="h-8 px-2 text-xs" onClick={clearAllFilters} size="sm" variant="ghost">
 										<RotateCcw className="mr-2 h-3 w-3" />
@@ -460,7 +460,7 @@ export function EntityFilter({
 							{/* Filtros guardados */}
 							{allowSavedFilters && (
 								<div className="border-t pt-4">
-									<h4 className="mb-2 font-medium text-sm">Filtros guardados</h4>
+									<h4 className="mb-2 font-medium text-sm">Saved Filters</h4>
 
 									{/* Lista de filtros guardados */}
 									{savedFilters.length > 0 && (
@@ -496,7 +496,7 @@ export function EntityFilter({
 										<div className="flex items-center gap-2">
 											<Input
 												onChange={(e) => setFilterName(e.target.value)}
-												placeholder="Nombre del filtro"
+												placeholder="Filter name"
 												size={1}
 												value={filterName}
 											/>
@@ -508,7 +508,7 @@ export function EntityFilter({
 												variant="outline"
 											>
 												<Save className="mr-1 h-3.5 w-3.5" />
-												Guardar
+												Save
 											</Button>
 										</div>
 									)}
@@ -522,7 +522,7 @@ export function EntityFilter({
 				{activeFiltersCount > 0 && (
 					<Button className="hidden items-center gap-1 sm:flex" onClick={clearAllFilters} size="sm" variant="ghost">
 						<RotateCcw className="mr-1 h-3.5 w-3.5" />
-						Limpiar filtros
+					Clear filters
 					</Button>
 				)}
 			</div>
@@ -558,10 +558,10 @@ export function EntityFilter({
 								}
 							} else if (typeof value === 'boolean') {
 								// Para booleanos, mostrar el propio nombre del filtro
-								displayValue = value ? 'Sí' : 'No';
+								displayValue = value ? 'Yes' : 'No';
 							} else if (value instanceof Date) {
 								// Para fechas, formatear como cadena legible
-								displayValue = value.toLocaleDateString();
+								displayValue = value.toLocaleDateString('en-US');
 							} else if (typeof value === 'object' && value !== null) {
 								// Para objetos, convertir a JSON
 								displayValue = JSON.stringify(value);

@@ -34,13 +34,13 @@ export const ToolbarActions = memo(function ToolbarActionsImpl({
 				<Button className={ACTION_BUTTON_CLASS} onClick={onZoomOut} size="icon" title="Alejar" variant="ghost">
 					<ZoomOut className="h-5 w-5" />
 				</Button>
-				<Button className={ACTION_BUTTON_CLASS} onClick={onReset} size="icon" title="Restablecer vista" variant="ghost">
+				<Button className={ACTION_BUTTON_CLASS} onClick={onReset} size="icon" title="Reset view" variant="ghost">
 					<RotateCcw className="h-5 w-5" />
 				</Button>
-				<Button className={ACTION_BUTTON_CLASS} onClick={onCopy} size="icon" title="Copiar" variant="ghost">
+				<Button className={ACTION_BUTTON_CLASS} onClick={onCopy} size="icon" title="Copy" variant="ghost">
 					<Copy className="h-5 w-5" />
 				</Button>
-				<Button className={ACTION_BUTTON_CLASS} onClick={onDownload} size="icon" title="Descargar" variant="ghost">
+				<Button className={ACTION_BUTTON_CLASS} onClick={onDownload} size="icon" title="Download" variant="ghost">
 					<Download className="h-5 w-5" />
 				</Button>
 			</div>
@@ -50,7 +50,7 @@ export const ToolbarActions = memo(function ToolbarActionsImpl({
 				onClick={onClose}
 				ref={closeButtonRef}
 				size="icon"
-				title="Cerrar"
+				title="Close"
 				variant="ghost"
 			>
 				<X className="h-6 w-6" />

@@ -158,7 +158,7 @@ export function preparePromptForSaving(extendedPrompt: PromptExtended): PromptCo
 			notes: notesEntities,
 		};
 	} catch (error) {
-		helpersLogger.error('❌ Error al preparar prompt para guardar:', error);
+		helpersLogger.error('❌ Could not prepare prompt for saving:', error);
 		// Crear un objeto mínimo válido para PromptComplete
 		const baseFields = {
 			id: extendedPrompt.id,

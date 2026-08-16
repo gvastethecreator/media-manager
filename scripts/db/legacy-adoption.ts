@@ -31,6 +31,14 @@ const FAVORITE_INDEXES = new Set([
 const ALLOWED_CHANGED = new Set(['table:Favorite', ...[...FAVORITE_INDEXES].map((name) => `index:${name}`)]);
 const ALLOWED_MISSING = new Set([...ADDITIVE_INDEXES, ...FAVORITE_INDEXES].map((name) => `index:${name}`));
 
+// Versioned migrations may install governed reference data. Adoption still rejects
+// every other new domain row and requires these cardinalities to match exactly.
+const CANONICAL_SEEDED_TABLE_COUNTS: Readonly<Record<string, number>> = {
+	RelationRole: 4,
+	RelationRoleApplicability: 114,
+	RelationRoleConflict: 1,
+};
+
 const OWNED_BRIDGE_REPAIRS = [
 	['_ImageToAlbum', 'Image', 'Album'],
 	['_VideoToAlbum', 'Video', 'Album'],
@@ -245,12 +253,25 @@ function assertCountsPreserved(expectedCounts: Record<string, number>, outputCou
 			);
 		}
 	}
-	const outputOnlyWithRows = Object.keys(outputCounts).filter(
-		(tableName) =>
-			!(tableName in expectedCounts) && tableName !== MIGRATION_TABLE && Number(outputCounts[tableName] ?? 0) !== 0
-	);
+	for (const [tableName, expectedCount] of Object.entries(CANONICAL_SEEDED_TABLE_COUNTS)) {
+		if (tableName in expectedCounts) continue;
+		const actualCount = Number(outputCounts[tableName] ?? 0);
+		if (actualCount !== expectedCount) {
+			throw new Error(
+				`El seed canónico de ${tableName} no coincide: esperado=${expectedCount}, actual=${actualCount}.`
+			);
+		}
+	}
+	const outputOnlyWithRows = Object.keys(outputCounts).filter((tableName) => {
+		if (tableName in expectedCounts || tableName === MIGRATION_TABLE || tableName in CANONICAL_SEEDED_TABLE_COUNTS) {
+			return false;
+		}
+		return Number(outputCounts[tableName] ?? 0) !== 0;
+	});
 	if (outputOnlyWithRows.length > 0) {
-		throw new Error('La adopción produjo filas en tablas de dominio que no existían en el backup.');
+		throw new Error(
+			`La adopción produjo filas no gobernadas en tablas que no existían en el backup: ${outputOnlyWithRows.join(', ')}.`
+		);
 	}
 }
 

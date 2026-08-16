@@ -26,7 +26,7 @@ const API_BASE_PATH = '/api/file3ds';
 export async function getFile3DsFromApi(): Promise<File3DWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener archivos 3D');
+		throw new Error('Could not get 3D files');
 	}
 	return response.json();
 }
@@ -34,7 +34,7 @@ export async function getFile3DsFromApi(): Promise<File3DWithStats[]> {
 export async function getFile3DFromApi(id: string): Promise<File3DWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`);
 	if (!response.ok) {
-		throw new Error('Error al obtener archivo 3D');
+		throw new Error('Could not get 3D file');
 	}
 	return response.json();
 }
@@ -46,7 +46,7 @@ export async function createFile3DInApi(data: PublicFile3DCreateInput): Promise<
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear archivo 3D');
+		throw new Error('Could not create 3D file');
 	}
 	return response.json();
 }
@@ -58,7 +58,7 @@ export async function updateFile3DInApi(id: string, data: PublicFile3DUpdateInpu
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar archivo 3D');
+		throw new Error('Could not update 3D file');
 	}
 	return response.json();
 }
@@ -72,6 +72,6 @@ export async function toggleFile3DFavoriteInApi(id: string): Promise<File3DWithS
 export async function deleteFile3DFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar archivo 3D');
+		throw new Error('Could not delete 3D file');
 	}
 }

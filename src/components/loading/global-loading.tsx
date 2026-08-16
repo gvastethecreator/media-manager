@@ -38,7 +38,7 @@ const textSizes = {
  * Loading Spinner Global
  */
 export function GlobalLoading({
-	message = 'Cargando...',
+	message = 'Loading...',
 	subMessage,
 	progress,
 	size = 'md',
@@ -174,7 +174,7 @@ export function PageLoading({ className }: { className?: string }) {
 				<div className="h-2 w-full overflow-hidden rounded-full bg-muted">
 					<div className="h-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
 				</div>
-				<p className="text-center text-muted-foreground text-sm">Cargando contenido...</p>
+				<p className="text-center text-muted-foreground text-sm">Loading content...</p>
 			</div>
 		</div>
 	);

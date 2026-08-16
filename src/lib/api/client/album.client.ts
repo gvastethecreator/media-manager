@@ -26,7 +26,7 @@ interface PaginatedResponse<T> {
 export async function getAlbumsFromApi(): Promise<AlbumWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener álbumes');
+		throw new Error('Could not get albums');
 	}
 	const result: PaginatedResponse<AlbumWithStats> = await response.json();
 	return result.data;
@@ -39,7 +39,7 @@ export async function createAlbumInApi(data: AlbumCreateInput): Promise<AlbumWit
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear álbum');
+		throw new Error('Could not create album');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -52,7 +52,7 @@ export async function updateAlbumInApi(id: string, data: AlbumUpdateInput): Prom
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar álbum');
+		throw new Error('Could not update album');
 	}
 	await invalidateFavoriteQueries();
 	return response.json();
@@ -61,7 +61,7 @@ export async function updateAlbumInApi(id: string, data: AlbumUpdateInput): Prom
 export async function deleteAlbumFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar álbum');
+		throw new Error('Could not delete album');
 	}
 	await invalidateFavoriteQueries();
 }

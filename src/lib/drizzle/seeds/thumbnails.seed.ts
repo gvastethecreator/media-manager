@@ -42,7 +42,7 @@ export async function seedThumbnails(db: LibSQLDatabase<Record<string, never>>) 
 		await db.insert(thumbnails).values(sampleThumbnails);
 		seedLogger.success(`✅ ${sampleThumbnails.length} miniaturas de ejemplo creadas`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando miniaturas de ejemplo:', error);
+		seedLogger.error('❌ Could not create sample thumbnails:', error);
 		throw error;
 	}
 }

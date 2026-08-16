@@ -30,16 +30,16 @@ export const PRIORITY_ENTITIES: EntityType[] = ['collections', 'tags', 'albums',
 
 // Mapeo de IDs de entidades a nombres legibles
 export const ENTITY_DISPLAY_NAMES: Record<EntityType, string> = {
-	collections: 'Colecciones',
-	tags: 'Etiquetas',
-	albums: 'Álbumes',
-	characters: 'Personajes',
-	places: 'Lugares',
+	collections: 'Collections',
+	tags: 'Tags',
+	albums: 'Albums',
+	characters: 'Characters',
+	places: 'Places',
 	worldItems: 'Objetos del mundo',
 	prompts: 'Prompts',
 	notes: 'Notas',
-	concepts: 'Conceptos',
-	groups: 'Grupos',
+	concepts: 'Concepts',
+	groups: 'Groups',
 	properties: 'Propiedades',
 	wildcards: 'Comodines',
 };

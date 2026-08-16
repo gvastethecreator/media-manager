@@ -22,13 +22,13 @@ export function useFeaturesIssues() {
 	// Mapa de iconos memoizado para evitar recreaciones en cada render
 	const iconMap = useMemo(
 		() => ({
-			'Indexación de Archivos': Folder,
-			'Procesamiento de Imágenes': ImageIcon,
+			'File Indexing': Folder,
+			'Image Processing': ImageIcon,
 			'Base de Datos': Database,
 			'API REST': Server,
-			'Sistema de Caché': Zap,
+			'Cache System': Zap,
 			'Background Jobs': Settings,
-			'Reconocimiento de Imágenes': BookImage,
+			'Image Recognition': BookImage,
 			Sincronización: Cloud,
 			default: Server,
 		}),
@@ -75,7 +75,7 @@ export function useFeaturesIssues() {
 					}
 				}, 50);
 			} catch (error) {
-				clientLogger.error('Error al obtener datos de features e issues:', error);
+				clientLogger.error('Could not get feature and issue data:', error);
 				if (showLoadingIndicator) {
 					setIsLoading(false);
 				}

@@ -45,7 +45,7 @@ export const WildcardContentView = memo(function WildcardContentView({
 	const headerControls = effectiveWildcardId ? (
 		<Button className="gap-2" onClick={() => navigate(-1)} size="sm" variant="outline">
 			<ArrowLeft className="h-4 w-4" />
-			Volver
+			Back
 		</Button>
 	) : undefined;
 
@@ -53,9 +53,9 @@ export const WildcardContentView = memo(function WildcardContentView({
 		return (
 			<BaseContentView className={className} icon="🃏" title="Wildcard">
 				<EmptyState
-					description="Selecciona un wildcard desde la vista de wildcards para ver su contenido."
+					description="Select a wildcard to view its content."
 					icon={Hash}
-					title="No hay wildcard seleccionado"
+					title="No wildcard selected"
 				/>
 			</BaseContentView>
 		);
@@ -65,16 +65,16 @@ export const WildcardContentView = memo(function WildcardContentView({
 		return (
 			<BaseContentView
 				className={className}
-				description="Cargando detalles del wildcard."
+				description="Loading wildcard details."
 				headerControls={headerControls}
 				icon="🃏"
-				title="Cargando wildcard..."
+				title="Loading wildcard..."
 			>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Estamos preparando la información del wildcard."
+						description="Preparing wildcard information."
 						icon={Sparkles}
-						title="Cargando wildcard..."
+						title="Loading wildcard..."
 					/>
 				</div>
 			</BaseContentView>
@@ -85,16 +85,16 @@ export const WildcardContentView = memo(function WildcardContentView({
 		return (
 			<BaseContentView
 				className={className}
-				description={error instanceof Error ? error.message : 'No se pudo cargar el wildcard.'}
+				description={error instanceof Error ? error.message : 'The wildcard could not be loaded.'}
 				headerControls={headerControls}
 				icon="🃏"
-				title="Wildcard no disponible"
+				title="Wildcard unavailable"
 			>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description={error instanceof Error ? error.message : 'El wildcard solicitado no está disponible.'}
+						description={error instanceof Error ? error.message : 'The requested wildcard is unavailable.'}
 						icon={Hash}
-						title="Wildcard no disponible"
+						title="Wildcard unavailable"
 					/>
 				</div>
 			</BaseContentView>
@@ -104,7 +104,7 @@ export const WildcardContentView = memo(function WildcardContentView({
 	return (
 		<BaseContentView
 			className={className}
-			description={wildcard.description || wildcard.category || 'Entidad flexible para agrupar y clasificar contenido'}
+			description={wildcard.description || wildcard.category || 'A flexible entity for grouping and classifying content'}
 			headerControls={headerControls}
 			icon="🃏"
 			title={wildcard.name}
@@ -114,47 +114,47 @@ export const WildcardContentView = memo(function WildcardContentView({
 					<Card className="p-4">
 						<div className="mb-3 flex items-center gap-2">
 							<Sparkles className="h-4 w-4 text-primary" />
-							<h3 className="font-semibold">Descripción</h3>
+							<h3 className="font-semibold">Description</h3>
 						</div>
 						<p className="text-muted-foreground text-sm">
-							{wildcard.description || wildcard.content || 'Este wildcard aún no tiene descripción enriquecida.'}
+							{wildcard.description || wildcard.content || 'This wildcard does not have a detailed description yet.'}
 						</p>
 						<div className="mt-4 flex flex-wrap gap-2">
 							<Badge variant={wildcard.isActive ? 'default' : 'secondary'}>
-								{wildcard.isActive ? 'Activo' : 'Inactivo'}
+								{wildcard.isActive ? 'Active' : 'Inactive'}
 							</Badge>
 							{wildcard.isFavorite && (
 								<Badge className="gap-1" variant="secondary">
 									<Star className="h-3.5 w-3.5" />
-									Favorito
+									Favorite
 								</Badge>
 							)}
 							{wildcard.type && <Badge variant="outline">{wildcard.type}</Badge>}
-							{wildcard.theme && <Badge variant="outline">Tema: {wildcard.theme}</Badge>}
+							{wildcard.theme && <Badge variant="outline">Theme: {wildcard.theme}</Badge>}
 						</div>
 					</Card>
 
 					<Card className="p-4">
 						<div className="mb-3 flex items-center gap-2">
 							<FolderTree className="h-4 w-4 text-primary" />
-							<h3 className="font-semibold">Jerarquía y relaciones</h3>
+							<h3 className="font-semibold">Hierarchy and relationships</h3>
 						</div>
 						<div className="grid gap-3 sm:grid-cols-2">
 							<div>
-								<p className="text-muted-foreground text-xs uppercase tracking-wide">Padre</p>
-								<p className="mt-1 font-medium">{wildcard.parentId || 'Raíz'}</p>
+								<p className="text-muted-foreground text-xs uppercase tracking-wide">Parent</p>
+								<p className="mt-1 font-medium">{wildcard.parentId || 'Root'}</p>
 							</div>
 							<div>
 								<p className="text-muted-foreground text-xs uppercase tracking-wide">Shortcut</p>
-								<p className="mt-1 font-medium">{wildcard.shortcut || 'Sin shortcut'}</p>
+								<p className="mt-1 font-medium">{wildcard.shortcut || 'No shortcut'}</p>
 							</div>
 							<div>
-								<p className="text-muted-foreground text-xs uppercase tracking-wide">Versión</p>
+								<p className="text-muted-foreground text-xs uppercase tracking-wide">Version</p>
 								<p className="mt-1 font-medium">{wildcard.version}</p>
 							</div>
 							<div>
-								<p className="text-muted-foreground text-xs uppercase tracking-wide">Categoría</p>
-								<p className="mt-1 font-medium">{wildcard.category || 'Sin categoría'}</p>
+								<p className="text-muted-foreground text-xs uppercase tracking-wide">Category</p>
+								<p className="mt-1 font-medium">{wildcard.category || 'Uncategorized'}</p>
 							</div>
 						</div>
 						{relationEntries.length > 0 && (
@@ -173,16 +173,16 @@ export const WildcardContentView = memo(function WildcardContentView({
 					<Card className="p-4">
 						<div className="mb-3 flex items-center gap-2">
 							<Tag className="h-4 w-4 text-primary" />
-							<h3 className="font-semibold">Metadatos</h3>
+							<h3 className="font-semibold">Metadata</h3>
 						</div>
 						<div className="space-y-3 text-sm">
 							<div>
-								<p className="text-muted-foreground text-xs uppercase tracking-wide">Autor</p>
-								<p className="mt-1 font-medium">{wildcard.author || 'Sin autor'}</p>
+								<p className="text-muted-foreground text-xs uppercase tracking-wide">Author</p>
+								<p className="mt-1 font-medium">{wildcard.author || 'Unknown author'}</p>
 							</div>
 							<div>
-								<p className="text-muted-foreground text-xs uppercase tracking-wide">Dificultad</p>
-								<p className="mt-1 font-medium">{wildcard.difficulty || 'No definida'}</p>
+								<p className="text-muted-foreground text-xs uppercase tracking-wide">Difficulty</p>
+								<p className="mt-1 font-medium">{wildcard.difficulty || 'Not set'}</p>
 							</div>
 							<div>
 								<p className="text-muted-foreground text-xs uppercase tracking-wide">Emoji</p>
@@ -194,30 +194,30 @@ export const WildcardContentView = memo(function WildcardContentView({
 					<Card className="p-4">
 						<div className="mb-3 flex items-center gap-2">
 							<Palette className="h-4 w-4 text-primary" />
-							<h3 className="font-semibold">Presentación</h3>
+							<h3 className="font-semibold">Presentation</h3>
 						</div>
-						<p className="text-muted-foreground text-sm">Color: {wildcard.color || 'Sin color asignado'}</p>
-						<p className="mt-2 text-muted-foreground text-sm">Tema visual: {wildcard.theme || 'Sin tema'}</p>
+						<p className="text-muted-foreground text-sm">Color: {wildcard.color || 'No color assigned'}</p>
+						<p className="mt-2 text-muted-foreground text-sm">Visual theme: {wildcard.theme || 'No theme'}</p>
 						{wildcard.featuredImage && (
-							<p className="mt-2 break-all text-muted-foreground text-xs">Imagen destacada: {wildcard.featuredImage}</p>
+							<p className="mt-2 break-all text-muted-foreground text-xs">Featured image: {wildcard.featuredImage}</p>
 						)}
 					</Card>
 
 					<Card className="p-4">
 						<div className="mb-3 flex items-center gap-2">
 							<CalendarClock className="h-4 w-4 text-primary" />
-							<h3 className="font-semibold">Tiempos</h3>
+							<h3 className="font-semibold">Timestamps</h3>
 						</div>
-						<p className="text-muted-foreground text-sm">Creado: {new Date(wildcard.createdAt).toLocaleString()}</p>
+						<p className="text-muted-foreground text-sm">Created: {new Date(wildcard.createdAt).toLocaleString()}</p>
 						<p className="mt-2 text-muted-foreground text-sm">
-							Actualizado: {new Date(wildcard.updatedAt).toLocaleString()}
+							Updated: {new Date(wildcard.updatedAt).toLocaleString()}
 						</p>
 					</Card>
 
 					<Card className="p-4">
 						<div className="mb-3 flex items-center gap-2">
 							<FolderTree className="h-4 w-4 text-primary" />
-							<h3 className="font-semibold">Wildcards hijos</h3>
+							<h3 className="font-semibold">Child wildcards</h3>
 						</div>
 						{childWildcards.length > 0 ? (
 							<div className="flex flex-wrap gap-2">
@@ -228,7 +228,7 @@ export const WildcardContentView = memo(function WildcardContentView({
 								))}
 							</div>
 						) : (
-							<p className="text-muted-foreground text-sm">Este wildcard no tiene hijos directos.</p>
+							<p className="text-muted-foreground text-sm">This wildcard has no direct children.</p>
 						)}
 					</Card>
 				</div>

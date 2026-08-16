@@ -60,7 +60,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 		return (
 			<div className={cn('flex flex-col items-center justify-center gap-3 p-6', className)}>
 				<Loader2 className="h-6 w-6 animate-spin text-primary" />
-				<p className="body-sm text-muted-foreground">Cargando estadísticas...</p>
+				<p className="body-sm text-muted-foreground">Loading statistics...</p>
 			</div>
 		);
 	}
@@ -72,8 +72,8 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 					<Folder className="h-6 w-6 text-destructive" />
 				</div>
 				<div className="text-center">
-					<p className="heading-sm text-destructive">Error al cargar estadísticas</p>
-					<p className="caption">No se pudieron obtener los datos de la carpeta</p>
+					<p className="heading-sm text-destructive">Could not load statistics</p>
+					<p className="caption">Folder data could not be loaded</p>
 				</div>
 			</div>
 		);
@@ -87,7 +87,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 	const fileTypeStats = folderStats
 		? [
 				{
-					type: 'Imágenes',
+					type: 'Images',
 					count: folderStats.totalImages,
 					icon: ImageIcon,
 					color: 'text-[color:var(--entity-image)]',
@@ -153,7 +153,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 						{imageCount > 0 && (
 							<div className="mt-2">
 								<Progress className="h-1" value={100} />
-								<p className="mt-1 text-muted-foreground text-xs">Todas las imágenes cargadas</p>
+								<p className="mt-1 text-muted-foreground text-xs">All images loaded</p>
 							</div>
 						)}
 					</div>
@@ -205,12 +205,12 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 								);
 							})}
 
-							{/* Tamaño total */}
+							{/* Total size */}
 							{folderStats && folderStats.totalSize > 0 && (
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-2">
 										<Hash className="h-4 w-4 text-[color:var(--entity-file)]" />
-										<span className="text-sm">Tamaño total</span>
+										<span className="text-sm">Total size</span>
 									</div>
 									<Badge className="text-xs" variant="outline">
 										{formatFileSize(folderStats.totalSize)}
@@ -235,7 +235,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
 										<span className="flex items-center gap-1 text-muted-foreground text-xs">
 											<Folder className="h-3 w-3" />
-											Carpeta padre
+											Parent folder
 										</span>
 										<Badge className="font-mono text-xs" variant="secondary">
 											{folderDetails.parentId}
@@ -248,7 +248,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
 										<span className="flex items-center gap-1 text-muted-foreground text-xs">
 											<ImageIcon className="h-3 w-3" />
-											Imagen destacada
+											Featured image
 										</span>
 										<Badge className="font-mono text-xs" variant="secondary">
 											Configurada
@@ -269,7 +269,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 								{/* Total Files desde schema */}
 								{folderDetails.totalFiles !== null && folderDetails.totalFiles !== undefined && (
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
-										<span className="text-muted-foreground text-xs">Archivos (schema)</span>
+										<span className="text-muted-foreground text-xs">Files (schema)</span>
 										<Badge className="text-xs" variant="secondary">
 											{folderDetails.totalFiles}
 										</Badge>
@@ -281,7 +281,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									folderDetails.totalSize !== undefined &&
 									folderDetails.totalSize > 0 && (
 										<div className="flex items-center justify-between border-border/50 border-b py-2">
-											<span className="text-muted-foreground text-xs">Tamaño (schema)</span>
+											<span className="text-muted-foreground text-xs">Size (schema)</span>
 											<Badge className="text-xs" variant="secondary">
 												{formatFileSize(folderDetails.totalSize)}
 											</Badge>
@@ -293,7 +293,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
 										<span className="flex items-center gap-1 text-muted-foreground text-xs">
 											<Calendar className="h-3 w-3" />
-											Último indexado
+											Last indexed
 										</span>
 										<span className="font-mono text-xs">{formatDate(folderDetails.lastIndexed)}</span>
 									</div>
@@ -321,21 +321,21 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 									</div>
 								)}
 
-								{/* Última actividad del backend */}
+								{/* Last activity del backend */}
 								{folderStats?.lastActivity && (
 									<div className="flex items-center justify-between border-border/50 border-b py-2">
 										<span className="flex items-center gap-1 text-muted-foreground text-xs">
 											<Calendar className="h-3 w-3" />
-											Última actividad
+											Last activity
 										</span>
 										<span className="font-mono text-xs">{formatDate(folderStats.lastActivity)}</span>
 									</div>
 								)}
 
-								{/* Descripción si existe */}
+								{/* Description si existe */}
 								{folderDetails.description && (
 									<div className="py-2">
-										<p className="mb-1 text-muted-foreground text-xs">Descripción</p>
+										<p className="mb-1 text-muted-foreground text-xs">Description</p>
 										<p className="text-xs">{folderDetails.description}</p>
 									</div>
 								)}

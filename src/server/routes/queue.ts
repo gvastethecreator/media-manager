@@ -69,7 +69,7 @@ queueRouter.post(
 				logger.error('Error en POST /api/queue', { error });
 				res.status(400);
 				return {
-					message: 'Error al crear trabajo en cola',
+					message: 'Could not create job en cola',
 					error: error instanceof Error ? error.message : String(error),
 				};
 			},
@@ -118,7 +118,7 @@ queueRouter.put(
 				logger.error('Error en PUT /api/queue/:id', { error });
 				res.status(400);
 				return {
-					message: 'Error al actualizar trabajo en cola',
+					message: 'Could not update job en cola',
 					error: error instanceof Error ? error.message : String(error),
 				};
 			},

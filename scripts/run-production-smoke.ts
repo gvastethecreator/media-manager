@@ -91,6 +91,7 @@ async function proveOccupiedBackendFailsCleanly(
 }
 
 const workspaceRoot = resolve(import.meta.dir, '..');
+const playwrightArgs = process.argv.slice(2);
 if (
 	!(
 		existsSync(join(workspaceRoot, 'dist/client/index.html')) && existsSync(join(workspaceRoot, 'dist/server/index.js'))
@@ -99,13 +100,29 @@ if (
 	throw new Error('Faltan artefactos de producción. Ejecuta `bun run build` antes del smoke hermético.');
 }
 
+const browserExecutable = [
+	process.env.MEDIA_MANAGER_BROWSER_EXECUTABLE,
+	'C:/Program Files/Google/Chrome/Application/chrome.exe',
+	'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
+	'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
+	'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+].find((candidate): candidate is string => Boolean(candidate && existsSync(candidate)));
+
 const temporaryRoot = await mkdtemp(join(tmpdir(), 'media-manager-production-smoke-'));
 let exitCode = 1;
 try {
 	const databasePath = join(temporaryRoot, 'media-manager.sqlite');
 	const mediaRoot = join(temporaryRoot, 'media');
 	const uploadsRoot = join(temporaryRoot, 'uploads');
-	await Promise.all([mkdir(mediaRoot), mkdir(uploadsRoot)]);
+	const evidenceRoot = join(
+		workspaceRoot,
+		'.scratch',
+		'planning',
+		'2026-07-14-complete-recovery',
+		'artifacts',
+		'rel-tax-production'
+	);
+	await Promise.all([mkdir(mediaRoot), mkdir(uploadsRoot), mkdir(evidenceRoot, { recursive: true })]);
 	await migrateDatabase({ databasePath });
 	const publicPort = await reservePort();
 	let backendPort = await reservePort();
@@ -114,9 +131,14 @@ try {
 	const environment = {
 		...process.env,
 		DATABASE_URL: pathToFileURL(databasePath).href,
+		...(browserExecutable ? { MEDIA_MANAGER_BROWSER_EXECUTABLE: browserExecutable } : {}),
 		MEDIA_MANAGER_APP_PORT: publicPort.toString(),
 		MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL: join(temporaryRoot, 'file-mutation-recovery.jsonl'),
 		MEDIA_MANAGER_INTERNAL_API_PORT: backendPort.toString(),
+		MEDIA_MANAGER_SMOKE_EVIDENCE_PATH: join(evidenceRoot, 'runtime-dashboard.png'),
+		MEDIA_MANAGER_SMOKE_ROOT_PATH: mediaRoot,
+		MEDIA_MANAGER_TAXONOMY_COMPACT_EVIDENCE_PATH: join(evidenceRoot, 'taxonomy-editors-compact.png'),
+		MEDIA_MANAGER_TAXONOMY_DESKTOP_EVIDENCE_PATH: join(evidenceRoot, 'taxonomy-editors-desktop.png'),
 		MEDIA_MANAGER_ROOT_GRANTS: JSON.stringify([
 			{
 				id: 'smoke-root',
@@ -140,12 +162,15 @@ try {
 		state: 'manual_recovery_required',
 	});
 
-	const child = Bun.spawn(['bunx', 'playwright', 'test', '--config', 'playwright.production.config.ts'], {
-		cwd: workspaceRoot,
-		env: environment,
-		stderr: 'inherit',
-		stdout: 'inherit',
-	});
+	const child = Bun.spawn(
+		['bunx', 'playwright', 'test', '--config', 'playwright.production.config.ts', ...playwrightArgs],
+		{
+			cwd: workspaceRoot,
+			env: environment,
+			stderr: 'inherit',
+			stdout: 'inherit',
+		}
+	);
 	exitCode = await child.exited;
 	await Promise.all([waitUntilPortIsReusable(publicPort), waitUntilPortIsReusable(backendPort)]);
 	if (exitCode === 0) {

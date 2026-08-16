@@ -19,7 +19,7 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 			{
 				id: generateReadableId('property', 'Estilo Artistico', 1),
 				name: 'Estilo Artístico',
-				description: 'Define el estilo visual de la imagen',
+				description: 'Defines the visual style of the image',
 				emoji: '🎨',
 				color: '#f59e0b',
 				category: 'visual',
@@ -27,7 +27,7 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 			{
 				id: generateReadableId('property', 'Calidad', 1),
 				name: 'Calidad',
-				description: 'Nivel de calidad de la imagen',
+				description: 'Image quality level',
 				emoji: '⭐',
 				color: '#22c55e',
 				category: 'técnico',
@@ -38,7 +38,7 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 
 		seedLogger.success(`✅ ${sampleProperties.length} propiedades creadas`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando propiedades:', error);
+		seedLogger.error('❌ Could not create properties:', error);
 		throw error;
 	}
 }

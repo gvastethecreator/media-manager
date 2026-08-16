@@ -50,10 +50,10 @@ describe('SQLite connection policy', () => {
 
 	it('rejects unsupported and out-of-range configuration', () => {
 		expect(() => resolveSqliteConnectionPolicy('file:test.sqlite', { SQLITE_JOURNAL_MODE: 'memory' })).toThrow(
-			'WAL o DELETE'
+			'WAL or DELETE'
 		);
 		expect(() => resolveSqliteConnectionPolicy('file:test.sqlite', { SQLITE_BUSY_TIMEOUT_MS: '-1' })).toThrow(
-			'Valor SQLite inválido'
+			'Invalid SQLite value'
 		);
 	});
 
@@ -73,6 +73,6 @@ describe('SQLite connection policy', () => {
 
 	it('fails closed when foreign key enforcement cannot be enabled', async () => {
 		const client = pragmaClient({ foreign_keys: 0 }, { foreignKeysLockedOff: true });
-		await expect(configureSqliteConnection(client, 'file:test.sqlite', {})).rejects.toThrow('la conexión no es segura');
+		await expect(configureSqliteConnection(client, 'file:test.sqlite', {})).rejects.toThrow('connection is not safe');
 	});
 });

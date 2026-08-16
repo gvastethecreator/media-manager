@@ -97,7 +97,7 @@ function PromptCardLoadingState({ className }: { className?: string }) {
 				className
 			)}
 		>
-			<p className="text-muted-foreground">Cargando prompt...</p>
+			<p className="text-muted-foreground">Loading prompt...</p>
 		</div>
 	);
 }

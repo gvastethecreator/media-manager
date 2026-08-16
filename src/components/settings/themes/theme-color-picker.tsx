@@ -202,7 +202,7 @@ export function ThemeColorPicker({
 							{/* Chroma */}
 							<div className="flex flex-col gap-1.5">
 								<div className="flex items-center justify-between">
-									<Label className="text-muted-foreground text-xs">Saturación (C)</Label>
+									<Label className="text-muted-foreground text-xs">Saturation (C)</Label>
 									<span className="font-mono text-foreground text-xs">{color.c.toFixed(2)}</span>
 								</div>
 								<Slider
@@ -283,7 +283,7 @@ export const COLOR_PRESETS = [
 	{ name: 'Rojo', value: 'oklch(0.6 0.24 25)' },
 	{ name: 'Amarillo', value: 'oklch(0.75 0.18 85)' },
 	{ name: 'Rosa', value: 'oklch(0.7 0.2 350)' },
-	{ name: 'Púrpura', value: 'oklch(0.55 0.2 280)' },
+	{ name: 'Purple', value: 'oklch(0.55 0.2 280)' },
 	{ name: 'Cyan', value: 'oklch(0.65 0.15 195)' },
 	{ name: 'Naranja', value: 'oklch(0.7 0.19 45)' },
 	{ name: 'Teal', value: 'oklch(0.55 0.15 180)' },

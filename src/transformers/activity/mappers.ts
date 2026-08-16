@@ -159,8 +159,8 @@ export function generateActivityDescription(type: ActivityType | string, data: R
 		[ActivityType.SYSTEM_RESTORE]: `Restauración ${data.status}`,
 		[ActivityType.SYSTEM_UPDATE]: `Actualización ${data.status}`,
 
-		[ActivityType.USER_LOGIN]: `Usuario "${data.name}" ha iniciado sesión`,
-		[ActivityType.USER_LOGOUT]: `Usuario "${data.name}" ha cerrado sesión`,
+		[ActivityType.USER_LOGIN]: `User "${data.name}" signed in`,
+		[ActivityType.USER_LOGOUT]: `User "${data.name}" signed out`,
 		[ActivityType.USER_SETTINGS_UPDATE]: 'Configuración de usuario actualizada',
 		[ActivityType.USER_PROFILE_UPDATE]: 'Perfil de usuario actualizado',
 

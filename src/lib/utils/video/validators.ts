@@ -90,7 +90,7 @@ export const videoChapterSchema = z
  * Schema Zod para datos de creación de video
  */
 export const createVideoSchema = z.object({
-	title: z.string().min(1, 'El título es requerido'),
+	title: z.string().min(1, 'The title is required'),
 	description: z.string().optional(),
 	path: z.string(),
 	ownerId: z.string(),
@@ -220,7 +220,7 @@ export function validateVideoVisualConfig(data: unknown): boolean {
 		videoVisualConfigSchema.parse(data);
 		return true;
 	} catch (error) {
-		console.error('Error validando configuración visual de video:', error);
+		console.error('Could not validate video display settings:', error);
 		return false;
 	}
 }
@@ -234,7 +234,7 @@ export function parseVideoVisualConfig(data: unknown) {
 	try {
 		return videoVisualConfigSchema.parse(data);
 	} catch (error) {
-		console.error('Error parseando configuración visual de video:', error);
+		console.error('Could not parse video display settings:', error);
 		return null;
 	}
 }
@@ -253,7 +253,7 @@ export function validateUpdateVideoVisualConfig(data: unknown) {
 	try {
 		return updateVideoVisualConfigSchema.parse(data);
 	} catch (error) {
-		console.error('Error validando actualización de configuración visual:', error);
+		console.error('Could not validate display settings update:', error);
 		return null;
 	}
 }

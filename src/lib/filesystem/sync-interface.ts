@@ -30,7 +30,7 @@ export interface SyncFileResult {
 }
 
 /**
- * Operación de sincronización completa de carpeta.
+ * Operation de sincronización completa de carpeta.
  */
 export interface FolderSyncResult {
 	folderId: string;

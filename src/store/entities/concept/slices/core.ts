@@ -68,7 +68,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('✅ Concepto creado');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al crear concepto';
-			coreLogger.error('❌ Error al crear concepto:', error);
+			coreLogger.error('❌ Could not create concept:', error);
 			set({ error: message, isLoading: false });
 		}
 	},
@@ -87,7 +87,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('✅ Concepto actualizado');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al actualizar concepto';
-			coreLogger.error('❌ Error al actualizar concepto:', error);
+			coreLogger.error('❌ Could not update concept:', error);
 			set({ error: message, isLoading: false });
 		}
 	},
@@ -111,7 +111,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('✅ Concepto eliminado');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al eliminar concepto';
-			coreLogger.error('❌ Error al eliminar concepto:', error);
+			coreLogger.error('❌ Could not delete concept:', error);
 			set({ error: message, isLoading: false });
 		}
 	},

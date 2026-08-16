@@ -28,8 +28,8 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 
 	const onDocumentLoadError = () => {
 		setLoading(false);
-		setError('No se pudo cargar el PDF.');
-		toastService.error('Error al cargar el documento PDF');
+		setError('The PDF could not be loaded.');
+		toastService.error('Could not load the PDF document');
 	};
 
 	const changePage = (offset: number) => setPageNumber((prev) => Math.max(1, Math.min(numPages, prev + offset)));
@@ -64,7 +64,7 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 					</div>
 					<Button asChild className="h-7 gap-1.5 text-xs" size="sm" variant="outline">
 						<a download={file.name} href={file.downloadUrl || file.url}>
-							<Download className="h-3.5 w-3.5" /> Descargar
+							<Download className="h-3.5 w-3.5" /> Download
 						</a>
 					</Button>
 				</DialogHeader>
@@ -72,16 +72,16 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 					{loading && (
 						<div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 text-white">
 							<Loader2 className="h-8 w-8 animate-spin" />
-							<span className="text-sm">Cargando...</span>
+							<span className="text-sm">Loading...</span>
 						</div>
 					)}
 					{error ? (
 						<div className="flex flex-col items-center gap-3 px-4 text-center" role="alert">
 							<p className="text-destructive text-sm">
-								{error} Comprueba que el archivo no esté dañado o protegido.
+								{error} Check that the file is not damaged or protected.
 							</p>
 							<Button onClick={retryLoad} size="sm" variant="outline">
-								Reintentar
+								Retry
 							</Button>
 						</div>
 					) : (
@@ -107,7 +107,7 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 							<ChevronLeft className="h-4 w-4" />
 						</Button>
 						<span className="font-medium text-sm tabular-nums">
-							Página {pageNumber} de {numPages}
+							Page {pageNumber} of {numPages}
 						</span>
 						<Button
 							className="h-8 w-8 p-0"

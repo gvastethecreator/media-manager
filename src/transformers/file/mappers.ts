@@ -39,7 +39,7 @@ function calculateFileStats(file: FileBase): FileStatistics {
 		daysSinceAccessed,
 		isRecent: daysSinceModified <= 7,
 		isLarge: file.size > 100 * 1024 * 1024, // > 100MB
-		formattedModifiedAt: modifiedAt.toLocaleDateString('es-ES', {
+		formattedModifiedAt: modifiedAt.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',

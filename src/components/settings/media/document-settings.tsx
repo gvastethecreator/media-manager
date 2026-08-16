@@ -37,20 +37,20 @@ export function DocumentSettings() {
 			});
 			setEditing(null);
 			setNameInput('');
-			toastService.success('Documento actualizado');
+			toastService.success('Document updated');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al actualizar documento', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not update the document', { description: msg });
 		}
 	};
 
 	const handleDelete = async (id: string) => {
 		try {
 			await deleteDocument.mutateAsync(id);
-			toastService.success('Documento eliminado');
+			toastService.success('Document deleted');
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al eliminar documento', { description: msg });
+			const msg = e instanceof Error ? e.message : 'Unknown error';
+			toastService.error('Could not delete the document', { description: msg });
 		}
 	};
 
@@ -60,17 +60,17 @@ export function DocumentSettings() {
 				<CardHeader className="p-3 pb-2">
 					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
 						<FileText className="h-4 w-4" />
-						<span>Documentos</span>
+						<span>Documents</span>
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
-						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar documentos..." value={search} />
+						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Search documents..." value={search} />
 					</div>
 
 					{isLoading ? (
 						<div className="flex items-center gap-2 text-muted-foreground text-sm">
-							<Loader2 className="h-4 w-4 animate-spin" /> Cargando...
+							<Loader2 className="h-4 w-4 animate-spin" /> Loading...
 						</div>
 					) : error ? (
 						<div className="text-destructive text-sm">{error.message}</div>
@@ -82,10 +82,10 @@ export function DocumentSettings() {
 										<div>
 											<div className="font-medium text-sm">{d.name}</div>
 											<div className="text-muted-foreground text-xs">
-												{d.size ? `${(d.size / 1024).toFixed(1)}KB` : 'Sin tamaño'}
+											{d.size ? `${(d.size / 1024).toFixed(1)}KB` : 'Size unavailable'}
 											</div>
-											{d.pageCount && <div className="text-muted-foreground text-xs">{d.pageCount} páginas</div>}
-											{d.wordCount && <div className="text-muted-foreground text-xs">{d.wordCount} palabras</div>}
+										{d.pageCount && <div className="text-muted-foreground text-xs">{d.pageCount} pages</div>}
+										{d.wordCount && <div className="text-muted-foreground text-xs">{d.wordCount} words</div>}
 										</div>
 										<div className="flex items-center gap-1">
 											<Button
@@ -95,7 +95,7 @@ export function DocumentSettings() {
 													setNameInput(d.name);
 												}}
 												size="icon"
-												title="Editar"
+											title="Edit"
 												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
@@ -104,7 +104,7 @@ export function DocumentSettings() {
 												className="h-8 w-8 hover:text-destructive"
 												onClick={() => handleDelete(d.id)}
 												size="icon"
-												title="Eliminar"
+											title="Delete"
 												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />
@@ -129,10 +129,10 @@ export function DocumentSettings() {
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
-						<DialogTitle>Editar documento</DialogTitle>
+						<DialogTitle>Edit Document</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Name" value={nameInput} />
 						<div className="flex justify-end gap-2">
 							<Button
 								onClick={() => {
@@ -141,9 +141,9 @@ export function DocumentSettings() {
 								}}
 								variant="outline"
 							>
-								Cancelar
+								Cancel
 							</Button>
-							<Button onClick={handleUpdate}>Guardar</Button>
+							<Button onClick={handleUpdate}>Save</Button>
 						</div>
 					</div>
 				</DialogContent>
