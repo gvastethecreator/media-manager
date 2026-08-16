@@ -184,8 +184,8 @@ export function ActionFeedback({ state, messages = {}, resetDelay = 2000, onRese
 	if (state === 'idle') return null;
 
 	const variants = {
-		loading: { icon: Loader2, text: messages.loading || 'Procesando...', class: 'loading' },
-		success: { icon: CheckCircle2, text: messages.success || '¡Listo!', class: 'success' },
+		loading: { icon: Loader2, text: messages.loading || 'Processing...', class: 'loading' },
+		success: { icon: CheckCircle2, text: messages.success || 'Done', class: 'success' },
 		error: { icon: XCircle, text: messages.error || 'Error', class: 'error' },
 	};
 
@@ -224,7 +224,7 @@ export function OperationProgress({
 	total,
 	completed,
 	failed = 0,
-	operation = 'Procesando',
+	operation = 'Processing',
 	showDetails = true,
 	className,
 	...props
@@ -248,7 +248,7 @@ export function OperationProgress({
 				{showDetails && (
 					<span className="text-muted-foreground tabular-nums">
 						{completed}/{total}
-						{hasErrors && <span className="ml-2 text-destructive">({failed} errores)</span>}
+						{hasErrors && <span className="ml-2 text-destructive">({failed} errors)</span>}
 					</span>
 				)}
 			</div>
@@ -305,7 +305,7 @@ export function ContextualHint({
 			<div className="flex-1 text-muted-foreground">{children}</div>
 			{dismissible && (
 				<button
-					aria-label="Cerrar"
+					aria-label="Close"
 					className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 					onClick={() => {
 						setVisible(false);

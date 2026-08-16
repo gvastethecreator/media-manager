@@ -35,20 +35,20 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 
 	const mapErrorToMessage = (err: unknown): string => {
 		if (!(err instanceof Error)) {
-			return 'Error al agregar carpeta';
+			return 'Could not add folder';
 		}
 		const msg = err.message;
-		if (msg.includes('Ya existe una carpeta')) {
-			return msg;
+		if (msg.includes('Ya existe una carpeta') || msg.includes('A folder already exists')) {
+			return 'A folder already exists for this path';
 		}
 		if (msg.includes('409')) {
-			return 'La carpeta seleccionada ya existe en el sistema';
+			return 'The selected folder already exists';
 		}
 		if (msg.includes('404')) {
-			return 'La ruta especificada no existe o no es accesible';
+			return 'The specified path does not exist or is not accessible';
 		}
 		if (msg.includes('403')) {
-			return 'No tienes permisos para acceder a esta carpeta';
+			return 'You do not have permission to access this folder';
 		}
 		return msg;
 	};
@@ -57,21 +57,21 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 		e.preventDefault();
 
 		if (!rootId) {
-			setErrorMessage('Selecciona un media root autorizado');
+			setErrorMessage('Select an authorized media root');
 			return;
 		}
 
 		try {
 			setIsSubmitting(true);
 			setErrorMessage(null);
-			formLogger.info('Agregando carpeta desde media root autorizado', { rootId });
+			formLogger.info('Adding a folder from an authorized media root', { rootId });
 
 			await onAddFolder({ relativePath: relativePath.trim(), rootId });
 			setRelativePath('');
-			formLogger.info('✅ Carpeta agregada exitosamente');
+			formLogger.info('✅ Folder added successfully');
 		} catch (err) {
-			formLogger.error('Error al agregar carpeta autorizada', {
-				message: err instanceof Error ? err.message : 'Error desconocido',
+			formLogger.error('Could not add an authorized folder', {
+				message: err instanceof Error ? err.message : 'Unknown error',
 			});
 			setErrorMessage(mapErrorToMessage(err));
 		} finally {
@@ -90,10 +90,10 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 	return (
 		<form className="space-y-3" onSubmit={handleSubmit}>
 			<div className="flex flex-col gap-1.5">
-				<Label className="font-semibold text-foreground text-sm opacity-90">Media root autorizado</Label>
+				<Label className="font-semibold text-foreground text-sm opacity-90">Authorized media root</Label>
 				<Select disabled={isLoadingRoots || eligibleRoots.length === 0} onValueChange={setRootId} value={rootId}>
-					<SelectTrigger aria-label="Media root autorizado" size="sm">
-						<SelectValue placeholder={isLoadingRoots ? 'Cargando roots…' : 'Selecciona un root'} />
+					<SelectTrigger aria-label="Authorized media root" size="sm">
+						<SelectValue placeholder={isLoadingRoots ? 'Loading roots…' : 'Select a root'} />
 					</SelectTrigger>
 					<SelectContent>
 						{eligibleRoots.map((root) => (
@@ -107,30 +107,30 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 
 			<div className="flex flex-col gap-1.5">
 				<Label className="font-semibold text-foreground text-sm opacity-90" htmlFor="authorized-folder-path">
-					Ruta relativa
+					Relative path
 				</Label>
 				<Input
 					className={`border-input/60 bg-card focus-visible:ring-primary/20 ${errorMessage ? 'border-destructive' : ''}`}
 					disabled={isSubmitting || isProcessing || isLoading || !rootId}
 					id="authorized-folder-path"
 					onChange={handleInputChange}
-					placeholder="Ej.: fotos/2026 (vacío usa el root)"
+					placeholder="Example: photos/2026 (leave empty to use the root)"
 					type="text"
 					value={relativePath}
 				/>
-				<p className="text-muted-foreground text-xs">Usa `/` y no ingreses una ruta absoluta.</p>
+				<p className="text-muted-foreground text-xs">Use `/` and do not enter an absolute path.</p>
 			</div>
 
 			{!isLoadingRoots && eligibleRoots.length === 0 && !rootsError && (
 				<div className="rounded-dt-sm border border-border bg-muted/40 p-3 text-muted-foreground text-sm">
-					No hay media roots con permisos de lectura e indexación. Configura `MEDIA_MANAGER_ROOT_GRANTS` y reinicia la
-					aplicación.
+					No media roots have read and index permissions. Configure `MEDIA_MANAGER_ROOT_GRANTS` and restart the
+					application.
 				</div>
 			)}
 
 			{rootsError && (
 				<div className="rounded-dt-sm border border-destructive/20 bg-ui-error/10 p-3 text-destructive text-sm">
-					No se pudieron cargar los media roots autorizados.
+					Authorized media roots could not be loaded.
 				</div>
 			)}
 
@@ -141,7 +141,7 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 				type="submit"
 				variant="secondary"
 			>
-				{isSubmitting ? 'Agregando…' : 'Agregar carpeta'}
+				{isSubmitting ? 'Adding…' : 'Add folder'}
 			</Button>
 
 			{errorMessage && (

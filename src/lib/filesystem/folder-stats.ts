@@ -41,7 +41,7 @@ export async function syncExistingFolderFilesBeforeReindex(
 	);
 	if (failures.length > 0) {
 		throw new Error(
-			`No se pudo reconciliar el catálogo antes de reindexar: ${failures
+			`Could not reconcile the catalog before reindexing: ${failures
 				.map(({ error, folderId }) => `${folderId}: ${error}`)
 				.join(' | ')}`
 		);
@@ -406,7 +406,7 @@ export async function updateFolderStats(
 			progress: 100,
 			filesProcessed: stats.processed,
 			totalFiles: aggregatedTotalFiles,
-			message: `Completado: ${stats.successful}/${stats.totalFiles}`,
+			message: `Completed: ${stats.successful}/${stats.totalFiles}`,
 			timestamp: Date.now(),
 		});
 	}
@@ -567,7 +567,7 @@ export async function reindexAllFoldersThreePasses(
 			for (const file of scan.files) items.push({ filePath: file.path, folderId: f.id });
 		} catch (e) {
 			serverLogger.warn('reindexAll: Folder no disponible durante el escaneo autorizado', { err: e, id: f.id });
-			throw new Error(`El Folder ${f.id} dejó de estar disponible durante el reindex.`);
+			throw new Error(`El Folder ${f.id} became unavailable during reindexing.`);
 		}
 	}
 

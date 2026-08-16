@@ -101,6 +101,9 @@ describe('versioned SQLite migrations', () => {
 			'0005_image_asset_link.sql',
 			'0006_media_specialization_asset_links.sql',
 			'0007_media_folder_created_indexes.sql',
+			'0008_taxonomy_artifact_projection.sql',
+			'0009_wildcard_shortcut_projection.sql',
+			'0010_semantic_relation_model.sql',
 		]);
 
 		const first = await migrateDatabase({ databasePath });

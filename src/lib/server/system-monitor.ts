@@ -49,11 +49,11 @@ async function getSystemStats(): Promise<SystemStats> {
 	try {
 		const response = await fetch('/api/system/stats');
 		if (!response.ok) {
-			throw new Error('Error al obtener estadísticas del sistema');
+			throw new Error('Could not get system statistics');
 		}
 		return response.json();
 	} catch (error) {
-		console.warn('❌ Error al obtener estadísticas del sistema:', error);
+		console.warn('❌ Could not get system statistics:', error);
 		// Mantener una respuesta neutra cuando la API de stats no está disponible.
 		return {
 			cpu: {

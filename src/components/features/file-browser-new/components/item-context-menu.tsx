@@ -466,7 +466,7 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 						entities={entities.collections}
 						icon={<Archive className="h-4 w-4" />}
 						isLoading={isLoading}
-						label="📦 Colección"
+						label="📦 Collection"
 						onSelect={handleSelect}
 					/>
 					<EntityMenuItem
@@ -474,7 +474,7 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 						entities={entities.groups}
 						icon={<Users className="h-4 w-4" />}
 						isLoading={isLoading}
-						label="👥 Grupo"
+						label="👥 Group"
 						onSelect={handleSelect}
 					/>
 				</>
@@ -585,19 +585,19 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 					<MenuItem
 						action="open"
 						icon={<FolderOpen className="h-4 w-4" />}
-						label={`Abrir${selectedCount > 1 ? ` (${selectedCount})` : ''}`}
+						label={`Open${selectedCount > 1 ? ` (${selectedCount})` : ''}`}
 						onSelect={handleSelect}
 					/>
-					<MenuItem action="preview" icon={<Eye className="h-4 w-4" />} label="Vista previa" onSelect={handleSelect} />
+					<MenuItem action="preview" icon={<Eye className="h-4 w-4" />} label="Preview" onSelect={handleSelect} />
 
 					<MenuSeparator />
 
-					<MenuItem action="copy" icon={<Copy className="h-4 w-4" />} label="Copiar" onSelect={handleSelect} />
+					<MenuItem action="copy" icon={<Copy className="h-4 w-4" />} label="Copy" onSelect={handleSelect} />
 					<MenuItem
 						action="rename"
 						disabled={selectedCount > 1}
 						icon={<Pencil className="h-4 w-4" />}
-						label="Renombrar"
+						label="Rename"
 						onSelect={handleSelect}
 					/>
 
@@ -605,7 +605,7 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 
 					{/* Submenú Agregar a... */}
 					{hasAddTargets && (
-						<MenuItem icon={<Bookmark className="h-4 w-4" />} label="Agregar a..." submenu={addToSubmenu} />
+						<MenuItem icon={<Bookmark className="h-4 w-4" />} label="Add to..." submenu={addToSubmenu} />
 					)}
 
 					<MenuSeparator />
@@ -613,23 +613,23 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 					<MenuItem
 						action="download"
 						icon={<Download className="h-4 w-4" />}
-						label="Descargar"
+						label="Download"
 						onSelect={handleSelect}
 					/>
 
 					<MenuSeparator />
 
-					{/* Acción destructiva */}
+					{/* Action destructiva */}
 					<MenuItem
 						action="delete"
 						destructive
 						icon={<Trash2 className="h-4 w-4" />}
-						label="Eliminar"
+						label="Delete"
 						onSelect={handleSelect}
 					/>
 				</>
 			) : (
-				<MenuItem disabled icon={<div className="h-4 w-4" />} label="Sin elementos seleccionados" />
+				<MenuItem disabled icon={<div className="h-4 w-4" />} label="No items selected" />
 			)}
 		</div>
 	);

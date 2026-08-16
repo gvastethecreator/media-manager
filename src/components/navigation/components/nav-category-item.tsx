@@ -45,7 +45,7 @@ const CollapseIndicatorComponent = memo(function CollapseIndicator({
 
 	return (
 		<button
-			aria-label={isCollapsed ? 'Expandir categoría' : 'Colapsar categoría'}
+			aria-label={isCollapsed ? 'Expand category' : 'Collapse category'}
 			className="flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 transition-colors hover:bg-muted/40"
 			onClick={onToggleCollapse}
 			onKeyDown={handleKeyDown}
@@ -108,7 +108,7 @@ const CategoryCountersComponent = memo(function CategoryCounters({
 							handleViewModeToggle(mockEvent);
 						}
 					}}
-					title={viewMode === 'list' ? 'Cambiar a vista de cuadrícula' : 'Cambiar a vista de lista'}
+					title={viewMode === 'list' ? 'Switch to grid view' : 'Switch to list view'}
 					type="button"
 				>
 					{viewMode === 'list' ? <Grid className="h-3 w-3" /> : <List className="h-3 w-3" />}
@@ -242,7 +242,7 @@ export const NavCategoryItem = memo(function NavCategoryItemImpl({
 							<span className="inline-flex min-w-[24px] items-center justify-center rounded-sm bg-muted/30 px-1.5 py-0.5 text-[9px] text-muted-foreground">
 								{imageCount}
 							</span>
-							<span>imágenes</span>
+							<span>images</span>
 						</p>
 					</TooltipContent>
 				</Tooltip>

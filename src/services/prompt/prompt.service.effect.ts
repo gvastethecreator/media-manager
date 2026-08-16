@@ -3,19 +3,20 @@
  * @module services/prompt/prompt.service.effect
  */
 
-import { Schema } from "@effect/schema";
-import { and, asc, count, desc, eq, inArray, like, sql } from "drizzle-orm";
-import { Context, Effect, Layer } from "effect";
-import { db } from "@/lib/drizzle";
-import { imagePrompts, images, prompts, taxonomyArtifacts } from "@/lib/drizzle/schema";
-import { Prompt, PromptCreateInput, PromptUpdateInput, PromptWithStats } from "@/lib/effect/schemas/entities";
-import { serverLogger } from "@/lib/logger/server-logger";
-import { generateReadableId } from "@/lib/utils/id-generator";
-import { favoriteService } from "@/services/favorite/favorite.service";
-import { deleteFavoriteRecordsForEntities } from "@/services/favorite/favorite-write-transaction";
-import type { FavoriteWriteTransaction } from "@/services/favorite/favorite-write-transaction";
-import { visibleImageLifecycleCondition } from "@/services/image/image-lifecycle-query";
-import { FavoriteEntityType } from "@/types/entities/favorite";
+import { Schema } from '@effect/schema';
+import { and, asc, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
+import { Context, Effect, Layer } from 'effect';
+import { db } from '@/lib/drizzle';
+import { imagePrompts, images, prompts, taxonomyArtifacts } from '@/lib/drizzle/schema';
+import { Prompt, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/lib/effect/schemas/entities';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { generateReadableId } from '@/lib/utils/id-generator';
+import { favoriteService } from '@/services/favorite/favorite.service';
+import { deleteFavoriteRecordsForEntities } from '@/services/favorite/favorite-write-transaction';
+import type { FavoriteWriteTransaction } from '@/services/favorite/favorite-write-transaction';
+import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
+import { withTaxonomyArtifactMutationPermit } from '@/services/taxonomy/file-backed/mutation-permit';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 import {
 	fromUnknownPromptError,
 	PromptDatabaseError,
@@ -23,17 +24,17 @@ import {
 	PromptHasRelationsError,
 	PromptNameConflict,
 	PromptNotFound,
-} from "@/services/worldbuilding/worldbuilding-errors.effect";
+} from '@/services/worldbuilding/worldbuilding-errors.effect';
 
-const logger = serverLogger.withContext("PromptService.Effect");
+const logger = serverLogger.withContext('PromptService.Effect');
 
 export interface GetPromptsOptions {
 	category?: string;
 	limit?: number;
 	offset?: number;
 	onlyFavorites?: boolean;
-	orderBy?: "name" | "createdAt" | "updatedAt";
-	orderDirection?: "asc" | "desc";
+	orderBy?: 'name' | 'createdAt' | 'updatedAt';
+	orderDirection?: 'asc' | 'desc';
 	search?: string;
 }
 
@@ -44,15 +45,20 @@ export interface GetPromptsResult {
 	total: number;
 }
 
-export class PromptService extends Context.Tag("PromptService")<PromptService, PromptServiceInterface>() {}
+export class PromptService extends Context.Tag('PromptService')<PromptService, PromptServiceInterface>() {}
 
 export interface PromptServiceInterface {
 	readonly addImage: (id: string, imageId: string) => Effect.Effect<void, PromptError>;
 	readonly create: (input: PromptCreateInput) => Effect.Effect<Prompt, PromptError>;
 	readonly delete: (id: string) => Effect.Effect<void, PromptError>;
+	readonly deleteFileBacked: (
+		id: string,
+		beforeDelete?: (transaction: FavoriteWriteTransaction) => Promise<void>
+	) => Effect.Effect<void, PromptError>;
 	readonly getAll: (options?: GetPromptsOptions) => Effect.Effect<GetPromptsResult, PromptError>;
 	readonly getById: (id: string) => Effect.Effect<Prompt, PromptError>;
 	readonly getImages: (id: string) => Effect.Effect<any[], PromptError>;
+	readonly removeImage: (id: string, imageId: string) => Effect.Effect<void, PromptError>;
 	readonly toggleFavorite: (id: string) => Effect.Effect<Prompt, PromptError>;
 	readonly update: (id: string, input: PromptUpdateInput) => Effect.Effect<Prompt, PromptError>;
 }
@@ -63,7 +69,7 @@ const make = (): PromptServiceInterface => {
 			logger.info(`🔍 Buscando prompt: ${id}`);
 			const result = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
 				try: () => db.select().from(prompts).where(eq(prompts.id, id)).limit(1),
-				catch: (error) => fromUnknownPromptError("getById", error),
+				catch: (error) => fromUnknownPromptError('getById', error),
 			});
 
 			if (result.length === 0) {
@@ -71,12 +77,12 @@ const make = (): PromptServiceInterface => {
 			}
 
 			const validated = yield* Schema.decodeUnknown(Prompt)(result[0]).pipe(
-				Effect.mapError((error) => fromUnknownPromptError("decode", error)),
+				Effect.mapError((error) => fromUnknownPromptError('decode', error))
 			);
 
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], PromptError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.PROMPT),
-				catch: (error) => fromUnknownPromptError("getById.favoriteIds", error),
+				catch: (error) => fromUnknownPromptError('getById.favoriteIds', error),
 			});
 
 			return favoriteService.applyFavoriteProjection(validated, favoriteEntityIds);
@@ -88,15 +94,15 @@ const make = (): PromptServiceInterface => {
 				search,
 				limit = 50,
 				offset = 0,
-				orderBy = "createdAt",
-				orderDirection = "desc",
+				orderBy = 'createdAt',
+				orderDirection = 'desc',
 				category,
 				onlyFavorites,
 			} = options;
 
 			const favoriteEntityIds = yield* Effect.tryPromise<string[], PromptError>({
 				try: () => favoriteService.getFavoriteEntityIdsOrEmpty(FavoriteEntityType.PROMPT),
-				catch: (error) => fromUnknownPromptError("getAll.favoriteIds", error),
+				catch: (error) => fromUnknownPromptError('getAll.favoriteIds', error),
 			});
 
 			const conditions = [];
@@ -117,7 +123,7 @@ const make = (): PromptServiceInterface => {
 
 			const whereClause = conditions.length > 0 ? sql`${sql.join(conditions, sql` AND `)}` : undefined;
 			const orderByColumn = (prompts as any)[orderBy] || prompts.createdAt;
-			const orderByClause = orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn);
+			const orderByClause = orderDirection === 'asc' ? asc(orderByColumn) : desc(orderByColumn);
 
 			const [data, totalResult] = yield* Effect.all([
 				Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
@@ -129,7 +135,7 @@ const make = (): PromptServiceInterface => {
 							.orderBy(orderByClause)
 							.limit(limit)
 							.offset(offset),
-					catch: (error) => fromUnknownPromptError("getAll", error),
+					catch: (error) => fromUnknownPromptError('getAll', error),
 				}),
 				Effect.tryPromise<Array<{ count: number }>, PromptError>({
 					try: () =>
@@ -137,13 +143,13 @@ const make = (): PromptServiceInterface => {
 							.select({ count: count() })
 							.from(prompts)
 							.where(whereClause as any),
-					catch: (error) => fromUnknownPromptError("getCount", error),
+					catch: (error) => fromUnknownPromptError('getCount', error),
 				}),
 			]);
 
 			const normalizedPrompts = favoriteService.applyFavoriteProjectionMany(
 				data,
-				favoriteEntityIds,
+				favoriteEntityIds
 			) as PromptWithStats[];
 
 			return {
@@ -160,14 +166,14 @@ const make = (): PromptServiceInterface => {
 
 			const existing = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
 				try: () => db.select().from(prompts).where(eq(prompts.name, restInput.name)).limit(1),
-				catch: (error) => fromUnknownPromptError("checkDuplicate", error),
+				catch: (error) => fromUnknownPromptError('checkDuplicate', error),
 			});
 
 			if (existing.length > 0) {
 				return yield* Effect.fail(new PromptNameConflict({ name: restInput.name }));
 			}
 
-			const readableId = generateReadableId("prompt", restInput.name, 1);
+			const readableId = generateReadableId('prompt', restInput.name, 1);
 
 			const result = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
 				try: () =>
@@ -177,6 +183,7 @@ const make = (): PromptServiceInterface => {
 							id: readableId,
 							name: restInput.name,
 							description: restInput.description ?? null,
+							content: restInput.content ?? null,
 							emoji: restInput.emoji ?? null,
 							color: restInput.color ?? null,
 							category: restInput.category ?? null,
@@ -184,15 +191,16 @@ const make = (): PromptServiceInterface => {
 							filters: restInput.filters ?? null,
 							isFavorite: false,
 							metadata: restInput.metadata ?? null,
+							type: restInput.type ?? null,
 							createdAt: new Date(),
 							updatedAt: new Date(),
 						})
 						.returning(),
-				catch: (error) => fromUnknownPromptError("create", error),
+				catch: (error) => fromUnknownPromptError('create', error),
 			});
 
 			if (result.length === 0) {
-				return yield* Effect.fail(new PromptDatabaseError({ operation: "create", message: "No row returned" }));
+				return yield* Effect.fail(new PromptDatabaseError({ operation: 'create', message: 'No row returned' }));
 			}
 
 			return yield* getById(readableId);
@@ -210,31 +218,37 @@ const make = (): PromptServiceInterface => {
 						.set({
 							...(restInput.name !== undefined && { name: restInput.name }),
 							...(restInput.description !== undefined && { description: restInput.description }),
+							...(restInput.content !== undefined && { content: restInput.content }),
 							...(restInput.emoji !== undefined && { emoji: restInput.emoji }),
 							...(restInput.color !== undefined && { color: restInput.color }),
 							...(restInput.category !== undefined && { category: restInput.category }),
 							...(restInput.featuredImage !== undefined && { featuredImage: restInput.featuredImage }),
 							...(restInput.filters !== undefined && { filters: restInput.filters }),
 							...(restInput.metadata !== undefined && { metadata: restInput.metadata }),
+							...(restInput.type !== undefined && { type: restInput.type }),
 							updatedAt: new Date(),
 						})
 						.where(eq(prompts.id, id))
 						.returning(),
-				catch: (error) => fromUnknownPromptError("update", error),
+				catch: (error) => fromUnknownPromptError('update', error),
 			});
 
 			if (result.length === 0) {
-				return yield* Effect.fail(new PromptDatabaseError({ operation: "update", message: "No row returned" }));
+				return yield* Effect.fail(new PromptDatabaseError({ operation: 'update', message: 'No row returned' }));
 			}
 
 			return yield* getById(id);
 		});
 
-	const delete_ = (id: string): Effect.Effect<void, PromptError> =>
+	const deleteEntity = (
+		id: string,
+		allowFileBacked: boolean,
+		beforeDelete?: (transaction: FavoriteWriteTransaction) => Promise<void>
+	): Effect.Effect<void, PromptError> =>
 		Effect.gen(function* () {
 			const relationCount = yield* Effect.tryPromise<Array<{ count: number }>, PromptError>({
 				try: () => db.select({ count: count() }).from(imagePrompts).where(eq(imagePrompts.B, id)),
-				catch: (error) => fromUnknownPromptError("checkRelations", error),
+				catch: (error) => fromUnknownPromptError('checkRelations', error),
 			});
 
 			if ((relationCount[0]?.count ?? 0) > 0) {
@@ -242,27 +256,43 @@ const make = (): PromptServiceInterface => {
 					new PromptHasRelationsError({
 						promptId: id,
 						relationCount: relationCount[0].count,
-						relations: ["images"],
-					}),
+						relations: ['images'],
+					})
 				);
 			}
 
 			const result = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
 				try: () =>
 					db.transaction(async (transaction: FavoriteWriteTransaction) => {
-						await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.PROMPT, [id]);
-						await transaction
-							.delete(taxonomyArtifacts)
-							.where(and(eq(taxonomyArtifacts.entityType, "prompt"), eq(taxonomyArtifacts.entityId, id)));
-						return transaction.delete(prompts).where(eq(prompts.id, id)).returning();
+						const deleteRows = async () => {
+							await beforeDelete?.(transaction);
+							const deleted = await transaction.delete(prompts).where(eq(prompts.id, id)).returning();
+							if (deleted.length === 0) return deleted;
+							await deleteFavoriteRecordsForEntities(transaction, FavoriteEntityType.PROMPT, [id]);
+							if (allowFileBacked) {
+								await transaction
+									.delete(taxonomyArtifacts)
+									.where(and(eq(taxonomyArtifacts.entityType, 'prompt'), eq(taxonomyArtifacts.entityId, id)));
+							}
+							return deleted;
+						};
+						return allowFileBacked
+							? withTaxonomyArtifactMutationPermit(transaction, 'prompt', id, 'delete', deleteRows)
+							: deleteRows();
 					}),
-				catch: (error) => fromUnknownPromptError("delete", error),
+				catch: (error) => fromUnknownPromptError('delete', error),
 			});
 
 			if (result.length === 0) {
 				return yield* Effect.fail(new PromptNotFound({ promptId: id }));
 			}
 		});
+	const delete_ = (id: string): Effect.Effect<void, PromptError> => deleteEntity(id, false);
+	const deleteFileBacked = (
+		id: string,
+		beforeDelete?: (transaction: FavoriteWriteTransaction) => Promise<void>
+	): Effect.Effect<void, PromptError> =>
+		deleteEntity(id, true, beforeDelete);
 
 	const toggleFavorite = (id: string): Effect.Effect<Prompt, PromptError> =>
 		Effect.gen(function* () {
@@ -270,13 +300,13 @@ const make = (): PromptServiceInterface => {
 
 			const currentFavoriteStatus = yield* Effect.tryPromise<boolean, PromptError>({
 				try: () => favoriteService.isFavorite(FavoriteEntityType.PROMPT, id),
-				catch: (error) => fromUnknownPromptError("toggleFavorite.isFavorite", error),
+				catch: (error) => fromUnknownPromptError('toggleFavorite.isFavorite', error),
 			});
 			const newFavoriteStatus = !currentFavoriteStatus;
 
 			yield* Effect.tryPromise({
 				try: () => favoriteService.set(FavoriteEntityType.PROMPT, id, newFavoriteStatus),
-				catch: (error) => fromUnknownPromptError("toggleFavorite.set", error),
+				catch: (error) => fromUnknownPromptError('toggleFavorite.set', error),
 			});
 
 			return yield* getById(id);
@@ -292,7 +322,7 @@ const make = (): PromptServiceInterface => {
 						.from(imagePrompts)
 						.innerJoin(images, eq(imagePrompts.A, images.id))
 						.where(and(eq(imagePrompts.B, id), visibleImageLifecycleCondition())),
-				catch: (error) => fromUnknownPromptError("getImages", error),
+				catch: (error) => fromUnknownPromptError('getImages', error),
 			});
 			return result.map((r) => r.image);
 		});
@@ -301,8 +331,17 @@ const make = (): PromptServiceInterface => {
 		Effect.gen(function* () {
 			yield* getById(id);
 			yield* Effect.tryPromise({
-				try: () => db.insert(imagePrompts).values({ A: imageId, B: id }),
-				catch: (error) => fromUnknownPromptError("addImage", error),
+				try: () => db.insert(imagePrompts).values({ A: imageId, B: id }).onConflictDoNothing(),
+				catch: (error) => fromUnknownPromptError('addImage', error),
+			});
+		});
+
+	const removeImage = (id: string, imageId: string): Effect.Effect<void, PromptError> =>
+		Effect.gen(function* () {
+			yield* getById(id);
+			yield* Effect.tryPromise({
+				try: () => db.delete(imagePrompts).where(and(eq(imagePrompts.A, imageId), eq(imagePrompts.B, id))),
+				catch: (error) => fromUnknownPromptError('removeImage', error),
 			});
 		});
 
@@ -312,9 +351,11 @@ const make = (): PromptServiceInterface => {
 		create,
 		update,
 		delete: delete_,
+		deleteFileBacked,
 		toggleFavorite,
 		getImages,
 		addImage,
+		removeImage,
 	};
 };
 

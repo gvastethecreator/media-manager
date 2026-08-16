@@ -43,7 +43,7 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 	const [singleError, setSingleError] = useState<string | null>(null);
 
 	// Modo batch
-	const [pattern, setPattern] = useState('imagen_{n:3}.jpg');
+	const [pattern, setPattern] = useState('image_{n:3}.jpg');
 	const [startNumber, setStartNumber] = useState(1);
 	const [batchError, setBatchError] = useState<string | null>(null);
 
@@ -51,7 +51,7 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 		if (!isOpen) return;
 		setSingleName(firstItem?.name ?? '');
 		setSingleError(null);
-		setPattern('imagen_{n:3}.jpg');
+		setPattern('image_{n:3}.jpg');
 		setStartNumber(1);
 		setBatchError(null);
 	}, [firstItem?.id, firstItem?.name, isOpen]);
@@ -67,16 +67,16 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 	// Validar nombre individual
 	const validateSingle = (name: string): boolean => {
 		if (!name.trim()) {
-			setSingleError('El nombre no puede estar vacío');
+			setSingleError('Name cannot be empty');
 			return false;
 		}
 		if (name.trim() === firstItem?.name) {
-			setSingleError('El nombre no ha cambiado');
+			setSingleError('Name has not changed');
 			return false;
 		}
 		const invalidChars = /[<>:"|?*]/;
 		if (invalidChars.test(name)) {
-			setSingleError('El nombre contiene caracteres inválidos');
+			setSingleError('Name contains invalid characters');
 			return false;
 		}
 		setSingleError(null);
@@ -86,11 +86,11 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 	// Validar patrón batch
 	const validateBatch = (): boolean => {
 		if (!pattern.trim()) {
-			setBatchError('El patrón no puede estar vacío');
+			setBatchError('Pattern cannot be empty');
 			return false;
 		}
 		if (!(pattern.includes('{n') || pattern.includes('{name'))) {
-			setBatchError('El patrón debe incluir {n} o {name}');
+			setBatchError('Pattern must include {n} or {name}');
 			return false;
 		}
 		setBatchError(null);
@@ -133,19 +133,19 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 						{isSingleItem ? (
 							<>
 								<FileIcon className="h-5 w-5" />
-								Renombrar archivo
+								Rename file
 							</>
 						) : (
 							<>
 								<FolderIcon className="h-5 w-5" />
-								Renombrar {items.length} archivos
+								Rename {items.length} files
 							</>
 						)}
 					</DialogTitle>
 					<DialogDescription>
 						{isSingleItem
-							? 'Ingresa el nuevo nombre para el archivo.'
-							: 'Define un patrón para renombrar todos los archivos seleccionados.'}
+							? 'Enter a new name for the file.'
+							: 'Define a pattern for all selected files.'}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -153,7 +153,7 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 					// Vista para un solo archivo
 					<div className="grid gap-4 py-4">
 						<div className="grid gap-2">
-							<Label htmlFor="new-name">Nuevo nombre</Label>
+							<Label htmlFor="new-name">New name</Label>
 							<Input
 								autoFocus
 								className={cn(singleError && 'border-destructive')}
@@ -164,7 +164,7 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 									setSingleError(null);
 								}}
 								onKeyDown={handleKeyDown}
-								placeholder="Nuevo nombre..."
+								placeholder="New name..."
 								value={singleName}
 							/>
 							{singleError && <p className="text-destructive text-sm">{singleError}</p>}
@@ -172,7 +172,7 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 
 						<div className="text-muted-foreground text-xs">
 							<p>
-								Nombre actual: <span className="font-medium">{firstItem?.name}</span>
+								Current name: <span className="font-medium">{firstItem?.name}</span>
 							</p>
 						</div>
 					</div>
@@ -180,14 +180,14 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 					// Vista para múltiples archivos
 					<Tabs className="w-full" defaultValue="pattern">
 						<TabsList className="grid w-full grid-cols-2">
-							<TabsTrigger value="pattern">Por patrón</TabsTrigger>
-							<TabsTrigger value="list">Vista previa</TabsTrigger>
+							<TabsTrigger value="pattern">Pattern</TabsTrigger>
+							<TabsTrigger value="list">Preview</TabsTrigger>
 						</TabsList>
 
 						<TabsContent className="space-y-4" value="pattern">
 							<div className="grid gap-4 py-4">
 								<div className="grid gap-2">
-									<Label htmlFor="pattern">Patrón de nombre</Label>
+									<Label htmlFor="pattern">Name pattern</Label>
 									<Input
 										autoFocus
 										className={cn(batchError && 'border-destructive')}
@@ -197,14 +197,14 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 											setPattern(e.target.value);
 											setBatchError(null);
 										}}
-										placeholder="imagen_{n:3}.jpg"
+										placeholder="image_{n:3}.jpg"
 										value={pattern}
 									/>
 									{batchError && <p className="text-destructive text-sm">{batchError}</p>}
 								</div>
 
 								<div className="grid gap-2">
-									<Label htmlFor="start-number">Número inicial</Label>
+									<Label htmlFor="start-number">Starting number</Label>
 									<Input
 										disabled={isLoading}
 										id="start-number"
@@ -219,12 +219,12 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 									<div className="flex items-start gap-2 text-muted-foreground text-xs">
 										<Info className="h-4 w-4 shrink-0" />
 										<div>
-											<p className="font-medium">Variables disponibles:</p>
+											<p className="font-medium">Available variables:</p>
 											<ul className="mt-1 list-inside list-disc">
-												<li>{'{n}'} - Número secuencial (1, 2, 3...)</li>
-												<li>{'{n:3}'} - Número con ceros (001, 002...)</li>
-												<li>{'{name}'} - Nombre original</li>
-												<li>{'{ext}'} - Extensión original</li>
+												<li>{'{n}'} - Sequential number (1, 2, 3...)</li>
+												<li>{'{n:3}'} - Zero-padded number (001, 002...)</li>
+												<li>{'{name}'} - Original name</li>
+												<li>{'{ext}'} - Original extension</li>
 											</ul>
 										</div>
 									</div>
@@ -244,7 +244,7 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 										</div>
 									))}
 									{items.length > 5 && (
-										<p className="px-4 py-2 text-center text-muted-foreground text-xs">... y {items.length - 5} más</p>
+										<p className="px-4 py-2 text-center text-muted-foreground text-xs">... and {items.length - 5} more</p>
 									)}
 								</div>
 							</div>
@@ -254,10 +254,10 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 
 				<DialogFooter>
 					<Button disabled={isLoading} onClick={onCancel} variant="outline">
-						Cancelar
+						Cancel
 					</Button>
 					<Button disabled={isLoading} onClick={isSingleItem ? handleSingleConfirm : handleBatchConfirm}>
-						{isLoading ? 'Procesando...' : isSingleItem ? 'Renombrar' : <>Renombrar {items.length} archivos</>}
+						{isLoading ? 'Processing...' : isSingleItem ? 'Rename' : <>Rename {items.length} files</>}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

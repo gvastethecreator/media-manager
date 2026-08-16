@@ -201,7 +201,7 @@ function toJsonFileError(operation: string, error: unknown): JsonFileError {
 
 function validateCreateInput(input: CreateJsonFileInput): void {
 	if (!input.name || input.name.trim().length === 0) {
-		throw new JsonFileValidationError({ field: 'name', value: input.name, reason: 'El nombre es requerido' });
+		throw new JsonFileValidationError({ field: 'name', value: input.name, reason: 'The name is required' });
 	}
 	if (!input.path || input.path.trim().length === 0) {
 		throw new JsonFileValidationError({ field: 'path', value: input.path, reason: 'El path es requerido' });

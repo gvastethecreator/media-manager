@@ -19,8 +19,8 @@ export function isValidActivityType(type: string): boolean {
  * Esquema Zod para validación de creación de actividad
  */
 export const createActivitySchema = z.object({
-	type: z.string().refine((type) => isValidActivityType(type), { message: 'Tipo de actividad no válido' }),
-	description: z.string().min(1, 'La descripción es obligatoria'),
+	type: z.string().refine((type) => isValidActivityType(type), { message: 'Invalid activity type' }),
+	description: z.string().min(1, 'The description is required'),
 	imageId: z.string().optional(),
 	metadata: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
 });
@@ -80,7 +80,7 @@ export function validateActivityFilters(filters: unknown) {
  * Esquema Zod para validación de una lista de tipos de actividad
  */
 export const activityTypesSchema = z.array(
-	z.string().refine((type) => isValidActivityType(type), { message: 'Tipo de actividad no válido' })
+	z.string().refine((type) => isValidActivityType(type), { message: 'Invalid activity type' })
 );
 
 /**

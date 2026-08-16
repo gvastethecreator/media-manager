@@ -257,7 +257,7 @@ function buildFavoriteStats(entityType: FavoriteEntityType, addedAt: Date) {
 	return {
 		daysSinceAdded,
 		entityTypeName: FAVORITE_ENTITY_DISPLAY_NAMES[entityType] ?? entityType,
-		formattedAddedAt: normalizedAddedAt.toLocaleDateString('es-ES', {
+		formattedAddedAt: normalizedAddedAt.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',

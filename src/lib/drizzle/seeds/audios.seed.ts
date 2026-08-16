@@ -37,7 +37,7 @@ export async function seedAudios(db: LibSQLDatabase<Record<string, never>>) {
 		await db.insert(audios).values(sampleAudios);
 		seedLogger.success(`✅ ${sampleAudios.length} audios creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando audios:', error);
+		seedLogger.error('❌ Could not create audio files:', error);
 		throw error;
 	}
 }

@@ -20,7 +20,7 @@ export const collectionFilterSchema = z.object({
  * Esquema de validación para una edición de colección
  */
 export const collectionEditionSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'The name is required'),
 	date: z.date().optional(),
 	totalItems: z.number().int().nonnegative().optional(),
 	description: z.string().optional(),
@@ -32,22 +32,22 @@ export const collectionEditionSchema = z.object({
  * Esquema de validación para crear una colección
  */
 export const createCollectionSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(100, 'El nombre es demasiado largo'),
+	name: z.string().min(1, 'The name is required').max(100, 'The name is too long'),
 	emoji: z.string().max(10).default('🌟'),
 	description: z.string().max(1000).optional(),
 	color: z
 		.string()
 		.refine(
 			(val) => /^#([0-9A-F]{3}){1,2}$/i.test(val) || val.startsWith('var(--'),
-			'Color debe ser un valor hexadecimal o una variable CSS válida'
+			'Color must be a valid hexadecimal value or CSS variable'
 		)
 		.default('var(--entity-collection)'),
 	presetId: z.string().optional().nullable(),
 	category: z.nativeEnum(CollectionCategory).optional(),
 	rarity: z.nativeEnum(CollectionRarity).default(CollectionRarity.COMMON),
 	texture: z.string().optional(),
-	url: z.string().refine(isValidCollectionUrl, 'URL inválida').optional(),
-	alternativeUrl: z.string().refine(isValidCollectionUrl, 'URL alternativa inválida').optional(),
+	url: z.string().refine(isValidCollectionUrl, 'Invalid URL').optional(),
+	alternativeUrl: z.string().refine(isValidCollectionUrl, 'Invalid alternate URL').optional(),
 	platform: z.nativeEnum(CollectionPlatform).optional(),
 	price: z.number().nonnegative().optional(),
 });
@@ -56,7 +56,7 @@ export const createCollectionSchema = z.object({
  * Esquema de validación para actualizar una colección
  */
 export const updateCollectionSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(100, 'El nombre es demasiado largo').optional(),
+	name: z.string().min(1, 'The name is required').max(100, 'The name is too long').optional(),
 	emoji: z.string().max(10).optional(),
 	description: z.string().max(1000).optional(),
 	color: z
@@ -68,8 +68,8 @@ export const updateCollectionSchema = z.object({
 	category: z.nativeEnum(CollectionCategory).optional(),
 	rarity: z.nativeEnum(CollectionRarity).optional(),
 	texture: z.string().optional(),
-	url: z.string().refine(isValidCollectionUrl, 'URL inválida').optional(),
-	alternativeUrl: z.string().refine(isValidCollectionUrl, 'URL alternativa inválida').optional(),
+	url: z.string().refine(isValidCollectionUrl, 'Invalid URL').optional(),
+	alternativeUrl: z.string().refine(isValidCollectionUrl, 'Invalid alternate URL').optional(),
 	platform: z.nativeEnum(CollectionPlatform).optional(),
 	price: z.number().nonnegative().optional(),
 	sortBy: z.string().optional(),

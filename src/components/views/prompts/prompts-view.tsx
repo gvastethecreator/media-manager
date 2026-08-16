@@ -48,7 +48,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 
 	const handlePromptSelect = useCallback(
 		(promptId: string) => {
-			viewLogger.info('🤖 Seleccionando prompt', { promptId });
+			viewLogger.info('🤖 Selecting prompt', { promptId });
 			const prompt = prompts.find((p) => p.id === promptId) as PromptWithStats | undefined;
 			if (prompt) {
 				selectPrompt(prompt);
@@ -60,7 +60,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 
 	const handlePromptEdit = useCallback(
 		(promptId: string) => {
-			viewLogger.info('✏️ Editando prompt', { promptId });
+			viewLogger.info('✏️ Editing prompt', { promptId });
 			navigateWithTransition(`/prompts/${promptId}/edit`);
 		},
 		[navigateWithTransition]
@@ -71,7 +71,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 		if (newPromptName.trim() === '' || newPromptContent.trim() === '') {
 			toast({
 				title: '❌ Error',
-				description: 'El nombre y el contenido del prompt no pueden estar vacíos.',
+				description: 'Prompt name and content are required.',
 				variant: 'destructive',
 			});
 			return;
@@ -84,7 +84,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 	}, [newPromptName, newPromptContent, newPromptDescription, createPrompt, toast]);
 
 	const handleRetry = useCallback(() => {
-		viewLogger.info('🔄 Reintentando cargar prompts');
+		viewLogger.info('🔄 Retrying prompt request');
 		refetch();
 	}, [refetch]);
 
@@ -97,7 +97,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 			<div className="flex h-full items-center justify-center">
 				<div className="flex flex-col items-center gap-3">
 					<Spinner size="lg" />
-					<p className="text-muted-foreground text-sm">Cargando prompts...</p>
+					<p className="text-muted-foreground text-sm">Loading prompts...</p>
 				</div>
 			</div>
 		);
@@ -108,11 +108,11 @@ export function PromptsView({ isVisible }: ViewProps) {
 			<div className="p-6">
 				<Alert variant="destructive">
 					<AlertCircle className="h-4 w-4" />
-					<AlertTitle>Error al cargar prompts</AlertTitle>
+					<AlertTitle>Could not load prompts</AlertTitle>
 					<AlertDescription>
-						{error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+						{error instanceof Error ? error.message : 'An unexpected error occurred'}
 						<button className="ml-2 underline hover:no-underline" onClick={handleRetry} type="button">
-							Reintentar
+							Retry
 						</button>
 					</AlertDescription>
 				</Alert>
@@ -123,43 +123,43 @@ export function PromptsView({ isVisible }: ViewProps) {
 	return (
 		<ScrollArea className="flex-1">
 			<div className="p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Prompts</h2>
+				<h2 className="mb-4 font-bold text-xl">Prompts</h2>
 
 				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Prompt'}
+					{showForm ? 'Cancel' : 'Create Prompt'}
 				</Button>
 
 				{showForm && (
 					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Prompt</h3>
+						<h3 className="mb-3 font-semibold text-lg">New Prompt</h3>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="promptName">Nombre</Label>
+							<Label htmlFor="promptName">Name</Label>
 							<Input
 								id="promptName"
 								onChange={(e) => setNewPromptName(e.target.value)}
-								placeholder="Nombre del prompt"
+								placeholder="Prompt name"
 								value={newPromptName}
 							/>
 						</div>
 						<div className="mb-3 grid gap-2">
-							<Label htmlFor="promptContent">Contenido</Label>
+							<Label htmlFor="promptContent">Content</Label>
 							<Textarea
 								id="promptContent"
 								onChange={(e) => setNewPromptContent(e.target.value)}
-								placeholder="Contenido del prompt"
+								placeholder="Prompt content"
 								value={newPromptContent}
 							/>
 						</div>
 						<div className="mb-4 grid gap-2">
-							<Label htmlFor="promptDescription">Descripción</Label>
+							<Label htmlFor="promptDescription">Description</Label>
 							<Textarea
 								id="promptDescription"
 								onChange={(e) => setNewPromptDescription(e.target.value)}
-								placeholder="Descripción del prompt (opcional)"
+								placeholder="Prompt description (optional)"
 								value={newPromptDescription}
 							/>
 						</div>
-						<Button onClick={handleCreatePrompt}>Guardar Prompt</Button>
+						<Button onClick={handleCreatePrompt}>Save Prompt</Button>
 					</div>
 				)}
 
@@ -189,11 +189,11 @@ export function PromptsView({ isVisible }: ViewProps) {
 					<EmptyState
 						description={
 							localSearch
-								? `No se encontraron prompts que coincidan con "${localSearch}"`
-								: 'No hay prompts disponibles'
+								? `No prompts match "${localSearch}"`
+								: 'No prompts are available'
 						}
 						icon={MessageSquare}
-						title="Sin prompts"
+						title="No prompts yet"
 					/>
 				)}
 			</div>

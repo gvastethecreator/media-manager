@@ -195,14 +195,14 @@ export function EntityHeader({
 
 	// Acciones predefinidas comunes
 	const _editAction: EntityHeaderAction = {
-		label: 'Editar',
+		label: 'Edit',
 		icon: <PencilIcon className="h-4 w-4" />,
 		variant: 'outline',
 		order: 10,
 	};
 
 	const _deleteAction: EntityHeaderAction = {
-		label: 'Eliminar',
+		label: 'Delete',
 		icon: <TrashIcon className="h-4 w-4" />,
 		variant: 'destructive',
 		inDropdown: true,
@@ -259,7 +259,7 @@ export function EntityHeader({
 								{title}
 								{showFavoriteButton && onToggleFavorite && (
 									<button
-										aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+										aria-label={isFavorite ? 'Quitar de favoritos' : 'Add to favorites'}
 										className="focus:outline-none"
 										onClick={onToggleFavorite}
 										type="button"
@@ -301,7 +301,7 @@ export function EntityHeader({
 									<DropdownMenuTrigger asChild>
 										<Button size="sm" variant="outline">
 											<MoreHorizontal className="h-4 w-4" />
-											<span className="sr-only">Más acciones</span>
+											<span className="sr-only">More actions</span>
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end">
@@ -335,7 +335,7 @@ export function EntityHeader({
 					initial={{ opacity: 0, y: 10 }}
 					transition={{ duration: 0.3 }}
 				>
-					<img alt={`Imagen destacada de ${title}`} className="h-full w-full object-cover" src={featuredImage} />
+					<img alt={`Featured visual for ${title}`} className="h-full w-full object-cover" src={featuredImage} />
 					<div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 				</motion.div>
 			)}

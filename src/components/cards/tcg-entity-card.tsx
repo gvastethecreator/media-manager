@@ -206,7 +206,7 @@ export const TCGEntityCard = memo(function TCGEntityCard({
 			<TCGCardHeader
 				accentColor={color}
 				cost={<span className="text-sm">{emoji}</span>}
-				title={entity.name || 'Sin nombre'}
+				title={entity.name || 'Unnamed'}
 				typeIcon={<IconComponent className="h-4 w-4" />}
 				typeText={displayName}
 			/>

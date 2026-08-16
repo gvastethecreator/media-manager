@@ -110,7 +110,7 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
 			>
 				{children}
 				<DialogPrimitive.Close
-					aria-label="Cerrar diálogo"
+					aria-label="Close dialog"
 					className={cn(
 						'absolute top-4 right-4 rounded-dt-xs p-1 opacity-70',
 						'ring-offset-background transition-all duration-dt-fast',
@@ -122,7 +122,7 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
 					)}
 				>
 					<X aria-hidden="true" className="h-4 w-4" />
-					<span className="sr-only">Cerrar</span>
+					<span className="sr-only">Close</span>
 				</DialogPrimitive.Close>
 			</DialogPrimitive.Content>
 		);

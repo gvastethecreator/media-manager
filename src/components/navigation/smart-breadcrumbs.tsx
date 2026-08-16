@@ -36,15 +36,15 @@ interface SmartBreadcrumbsProps {
  */
 const ROUTE_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
 	'': { label: 'Inicio', icon: Home },
-	folders: { label: 'Carpetas', icon: Folder },
+	folders: { label: 'Folders', icon: Folder },
 	'folder-content': { label: 'Contenido', icon: Grid },
-	'all-images': { label: 'Imágenes', icon: Image },
-	images: { label: 'Imágenes', icon: Image },
+	'all-images': { label: 'Images', icon: Image },
+	images: { label: 'Images', icon: Image },
 	videos: { label: 'Videos', icon: Video },
 	audio: { label: 'Audio', icon: Music },
-	documents: { label: 'Documentos', icon: FileText },
-	settings: { label: 'Configuración', icon: Settings },
-	development: { label: 'Desarrollo', icon: Settings },
+	documents: { label: 'Documents', icon: FileText },
+	settings: { label: 'Settings', icon: Settings },
+	development: { label: 'Development', icon: Settings },
 };
 
 /**
@@ -81,7 +81,7 @@ function useBreadcrumbs(): BreadcrumbItem[] {
 				const parentSegment = segments[i - 1];
 				if (parentSegment === 'folders') {
 					breadcrumbs.push({
-						label: 'Carpeta',
+						label: 'Folder',
 						path: currentPath,
 						isClickable: false,
 					});

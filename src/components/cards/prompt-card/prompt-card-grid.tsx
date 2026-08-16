@@ -44,7 +44,7 @@ export function PromptCardGrid({
 	tcgMode = true,
 	compact = false,
 	selectedPromptId = null,
-	searchPlaceholder = 'Buscar prompts...',
+	searchPlaceholder = 'Search prompts...',
 	maxPrompts = 50,
 }: PromptCardGridProps) {
 	const [prompts, setPrompts] = useState<PromptWithStats[]>(initialPrompts);
@@ -61,7 +61,7 @@ export function PromptCardGrid({
 				const results = await getPrompts({ search: query, limit: maxPrompts });
 				setPrompts(results);
 			} catch (error) {
-				clientLogger.error('Error al buscar prompts:', error);
+				clientLogger.error('Error searching prompts:', error);
 			} finally {
 				setLoading(false);
 			}

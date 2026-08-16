@@ -19,7 +19,7 @@ export async function seedWildcards(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('wildcard', 'Elemento Aleatorio', 1),
 				name: 'Elemento Aleatorio',
-				description: 'Comodín para elementos aleatorios',
+				description: 'Wildcard for random elements',
 				emoji: '🎲',
 				color: '#ef4444',
 				category: 'aleatorio',
@@ -29,7 +29,7 @@ export async function seedWildcards(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('wildcard', 'Estilo Dinamico', 1),
 				name: 'Estilo Dinámico',
-				description: 'Comodín para estilos variables',
+				description: 'Wildcard for variable styles',
 				emoji: '🌈',
 				color: '#a855f7',
 				category: 'estilo',
@@ -62,7 +62,7 @@ export async function seedWildcards(db: LibSQLDatabase<Record<string, never>>) {
 
 		seedLogger.success(`✅ ${sampleWildcards.length} wildcards creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando wildcards:', error);
+		seedLogger.error('❌ Could not create wildcards:', error);
 		throw error;
 	}
 }

@@ -23,7 +23,7 @@ export function useKeyboardNavigation(
 		(index: number) => {
 			const item = images[index];
 			if (item) {
-				setAnnounceMessage(`Imagen ${index + 1} de ${images.length}: ${item.name}`);
+				setAnnounceMessage(`Image ${index + 1} de ${images.length}: ${item.name}`);
 			}
 		},
 		[images]
@@ -41,7 +41,7 @@ export function useKeyboardNavigation(
 	}, [nextItem, announce, images.length, currentIndex]);
 	const onReset = useCallback(() => {
 		resetView();
-		setAnnounceMessage('Vista restablecida');
+		setAnnounceMessage('View reset');
 	}, [resetView]);
 	const onZoomInKey = useCallback(() => {
 		handleZoom(0.2);

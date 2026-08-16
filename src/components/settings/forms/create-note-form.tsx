@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateNote, useUpdateNote } from '@/lib/api/notes';
+import { getTaxonomyArtifactOrNull, type TaxonomyArtifactDocument } from '@/lib/api/taxonomy-artifacts';
 import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import { NoteCategory } from '@/types/entities/note/enums';
@@ -18,7 +19,7 @@ import type { NoteBase, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '
 
 // Esquema de validación con Zod, alineado con los tipos canónicos
 const noteSchema = z.object({
-	title: z.string().min(1, 'El título es requerido'),
+	title: z.string().min(1, 'Title is required'),
 	summary: z.string().optional(),
 	content: z.string().optional(),
 	color: z.string().optional(),
@@ -42,6 +43,12 @@ interface CreateNoteFormProps {
 export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, onPreview }: CreateNoteFormProps) {
 	const createNoteMutation = useCreateNote();
 	const updateNoteMutation = useUpdateNote();
+	const [artifact, setArtifact] = useState<TaxonomyArtifactDocument | null>(null);
+	const [artifactLoading, setArtifactLoading] = useState(Boolean(note && isEditing));
+	const [artifactError, setArtifactError] = useState<string | null>(null);
+	const [restoreMissingConfirmed, setRestoreMissingConfirmed] = useState(false);
+	const noteRef = useRef(note);
+	noteRef.current = note;
 
 	const form = useForm<NoteFormData>({
 		resolver: zodResolver(noteSchema),
@@ -58,24 +65,89 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 
 	// Cargar datos iniciales si estamos editando
 	useEffect(() => {
-		if (note && isEditing) {
+		const currentNote = noteRef.current;
+		if (currentNote && isEditing) {
 			form.reset({
-				title: note.title,
-				summary: note.summary || '',
-				content: note.content || '',
-				color: note.color || DEFAULT_ENTITY_COLOR,
-				emoji: note.emoji || '📝',
-				category: note.category as NoteCategory,
-				tags: Array.isArray(note.tags) ? note.tags : [],
+				title: currentNote.title,
+				summary: currentNote.summary || '',
+				content: currentNote.content || '',
+				color: currentNote.color || DEFAULT_ENTITY_COLOR,
+				emoji: currentNote.emoji || '📝',
+				category: (currentNote.category as NoteCategory | null) ?? NoteCategory.GENERAL,
+				tags: Array.isArray(currentNote.tags) ? currentNote.tags : [],
 			});
+			return;
 		}
-	}, [note, isEditing, form]);
+
+		form.reset({
+			category: NoteCategory.GENERAL,
+			color: DEFAULT_ENTITY_COLOR,
+			content: '',
+			emoji: '📝',
+			summary: '',
+			tags: [],
+			title: '',
+		});
+	}, [form, isEditing, note?.id]);
+
+	useEffect(() => {
+		let cancelled = false;
+		const currentNote = noteRef.current;
+		const noteId = currentNote?.id;
+		if (!(noteId && currentNote && isEditing)) {
+			setArtifact(null);
+			setArtifactError(null);
+			setArtifactLoading(false);
+			setRestoreMissingConfirmed(false);
+			return;
+		}
+		setArtifactLoading(true);
+		setArtifactError(null);
+		setRestoreMissingConfirmed(false);
+		void getTaxonomyArtifactOrNull('note', noteId)
+			.then((document) => {
+				if (cancelled) return;
+				setArtifact(document);
+				if (document) {
+					form.reset({
+						category: document.metadata.category as NoteCategory | undefined,
+						color: document.metadata.color ?? currentNote.color ?? DEFAULT_ENTITY_COLOR,
+						content: document.body,
+						emoji: document.metadata.emoji ?? currentNote.emoji ?? '📝',
+						summary: document.metadata.summary ?? currentNote.summary ?? '',
+						tags: Array.isArray(currentNote.tags) ? currentNote.tags : [],
+						title: document.metadata.title,
+					});
+				}
+				setArtifactLoading(false);
+			})
+			.catch((error) => {
+				if (cancelled) return;
+				setArtifactLoading(false);
+				setArtifactError(error instanceof Error ? error.message : 'The canonical file could not be verified.');
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [form, isEditing, note?.id]);
 
 	const onSubmit = async (data: NoteFormData) => {
 		try {
 			let result: NoteWithStats;
 			if (isEditing && note?.id) {
-				const updateData: NoteUpdateInput = { ...data };
+				const updateData: NoteUpdateInput & {
+					fileBacking?: { expectedHash: string; restoreMissing?: boolean };
+				} = {
+					...data,
+					...(artifact
+						? {
+								fileBacking: {
+									expectedHash: artifact.contentHash,
+									restoreMissing: artifact.syncStatus === 'missing' && restoreMissingConfirmed,
+								},
+							}
+						: {}),
+				};
 				result = await updateNoteMutation.mutateAsync({ id: note.id, data: updateData });
 				toastService.success('Nota actualizada correctamente');
 			} else {
@@ -86,24 +158,43 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 			}
 			onSuccess?.(result);
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toastService.error(isEditing ? 'Error al actualizar la nota' : 'Error al crear la nota', {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			toastService.error(isEditing ? 'Could not update note' : 'Could not create note', {
 				description: errorMessage,
 			});
 		}
 	};
 
+	if (artifactLoading) return <p className="text-muted-foreground text-sm">Verifying canonical file…</p>;
+	if (artifactError) return <p className="text-destructive text-sm">{artifactError}</p>;
+
 	return (
 		<Form {...form}>
 			<form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+				{artifact?.syncStatus === 'missing' && (
+					<div className="space-y-2 rounded-dt-md border border-destructive/40 bg-destructive/10 p-3" role="alert">
+						<p className="font-medium text-sm">The canonical file no longer exists.</p>
+						<p className="text-muted-foreground text-xs">
+							Saving will recreate the file from this draft. Confirm restoration before continuing.
+						</p>
+						<label className="flex items-center gap-2 text-sm">
+							<input
+								checked={restoreMissingConfirmed}
+								onChange={(event) => setRestoreMissingConfirmed(event.target.checked)}
+								type="checkbox"
+							/>
+							Restore missing canonical file
+						</label>
+					</div>
+				)}
 				<FormField
 					control={form.control}
 					name="title"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Título</FormLabel>
+							<FormLabel>Title</FormLabel>
 							<FormControl>
-								<Input placeholder="Título de la nota" {...field} />
+								<Input placeholder="Note title" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -148,11 +239,11 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 					name="category"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Categoría</FormLabel>
+							<FormLabel>Category</FormLabel>
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Selecciona una categoría" />
+										<SelectValue placeholder="Select a category" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -189,7 +280,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 						<FormItem>
 							<FormLabel>Contenido</FormLabel>
 							<FormControl>
-								<Textarea placeholder="Escribe tu nota aquí..." rows={4} {...field} />
+								<Textarea placeholder="Write your note here..." rows={4} {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -197,15 +288,20 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 				/>
 
 				<div className="flex justify-end space-x-2">
-					<Button onClick={onCancel} type="button" variant="outline">
-						Cancelar
+					<Button disabled={form.formState.isSubmitting} onClick={onCancel} type="button" variant="outline">
+						Cancel
 					</Button>
 					{onPreview && (
 						<Button onClick={onPreview} type="button" variant="secondary">
-							Vista previa
+							Preview
 						</Button>
 					)}
-					<Button type="submit">{isEditing ? 'Guardar Cambios' : 'Crear Nota'}</Button>
+					<Button
+						disabled={form.formState.isSubmitting || (artifact?.syncStatus === 'missing' && !restoreMissingConfirmed)}
+						type="submit"
+					>
+						{form.formState.isSubmitting ? 'Guardando…' : isEditing ? 'Save Changes' : 'Create Note'}
+					</Button>
 				</div>
 			</form>
 		</Form>

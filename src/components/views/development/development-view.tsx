@@ -66,19 +66,19 @@ export function DevelopmentView(_props: ViewProps) {
 				{/* Header */}
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className="font-bold text-2xl">Panel de Desarrollo</h1>
-						<p className="text-muted-foreground">Monitoreo y gestión del sistema</p>
+						<h1 className="font-bold text-2xl">Development Panel</h1>
+						<p className="text-muted-foreground">System monitoring and management</p>
 					</div>
 					<Button className="gap-2" disabled={isLoading} onClick={handleRefresh} type="button" variant="outline">
 						{isLoading ? (
 							<>
 								<Loader2 className="h-4 w-4 animate-spin" />
-								Actualizando...
+								Refreshing...
 							</>
 						) : (
 							<>
 								<RefreshCw className="h-4 w-4" />
-								Actualizar
+								Refresh
 							</>
 						)}
 					</Button>
@@ -88,7 +88,7 @@ export function DevelopmentView(_props: ViewProps) {
 					<TabsList>
 						<TabsTrigger className="gap-2" value="services">
 							<Server className="h-4 w-4" />
-							Servicios
+							Services
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="features">
 							<Code2 className="h-4 w-4" />
@@ -100,31 +100,31 @@ export function DevelopmentView(_props: ViewProps) {
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="docs">
 							<FileCode2 className="h-4 w-4" />
-							Documentación
+							Documentation
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="folders">
 							<Folder className="h-4 w-4" />
-							Carpetas
+							Folders
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="tags">
 							<Tag className="h-4 w-4" />
-							Etiquetas
+							Tags
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="images">
 							<Image className="h-4 w-4" />
-							Imágenes
+							Images
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="stats">
 							<BarChart className="h-4 w-4" />
-							Estadísticas
+							Statistics
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="tech">
 							<Gauge className="h-4 w-4" />
-							Métricas Técnicas
+							Technical Metrics
 						</TabsTrigger>
 						<TabsTrigger className="gap-2" value="transitions">
 							<Sparkles className="h-4 w-4" />
-							Transiciones
+							Transitions
 						</TabsTrigger>
 					</TabsList>
 
@@ -192,7 +192,7 @@ export function DevelopmentView(_props: ViewProps) {
 														<MDEditor.Markdown source={documentationContent[doc]} />
 													) : (
 														<p className="text-muted-foreground">
-															{isLoadingDocs ? 'Cargando documentación...' : 'No se pudo cargar la documentación'}
+															{isLoadingDocs ? 'Loading documentation...' : 'Documentation could not be loaded'}
 														</p>
 													)}
 												</div>

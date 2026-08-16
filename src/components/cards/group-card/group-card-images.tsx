@@ -81,10 +81,10 @@ export function GroupCardImages({
 	// aria-label accesible usando helper central
 	const ariaLabel = hasMedia
 		? rarityAccessibilityLabel(
-				`Galería de grupo con ${allMedia.length} ${allMedia.length === 1 ? 'elemento' : 'elementos'}`,
+				`Group gallery with ${allMedia.length} ${allMedia.length === 1 ? 'item' : 'items'}`,
 				rarityConfig
 			)
-		: 'Grupo sin imágenes disponibles';
+		: 'Group has no images available';
 
 	return (
 		<div

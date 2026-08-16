@@ -94,7 +94,7 @@ export function useStats() {
 
 				return generalStats;
 			} catch (error) {
-				statsLogger.error('Error al obtener estadísticas', { error });
+				statsLogger.error('Could not get statistics', { error });
 				throw error;
 			}
 		},
@@ -132,7 +132,7 @@ export function useImageStats(imageId: string) {
 			try {
 				return await getImageStatsFromApi(imageId);
 			} catch (error) {
-				statsLogger.error('Error al obtener estadísticas de imagen', {
+				statsLogger.error('Could not get image statistics', {
 					error,
 					imageId,
 				});

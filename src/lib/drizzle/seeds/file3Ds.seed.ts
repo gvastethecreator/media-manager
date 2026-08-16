@@ -24,9 +24,9 @@ export async function seedFile3Ds(db: LibSQLDatabase<Record<string, never>>) {
 		];
 
 		await db.insert(file3Ds).values(sampleFile3Ds);
-		seedLogger.success(`✅ ${sampleFile3Ds.length} archivos 3D creados`);
+		seedLogger.success(`✅ ${sampleFile3Ds.length} 3D files created`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando archivos 3D:', error);
+		seedLogger.error('❌ Could not create 3D files:', error);
 		throw error;
 	}
 }

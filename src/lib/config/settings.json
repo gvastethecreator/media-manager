@@ -24,49 +24,49 @@
 	"shortcuts": [
 		{
 			"id": "settings",
-			"action": "Abrir configuración",
+			"action": "Open settings",
 			"keys": "Ctrl + ,",
 			"category": "navigation"
 		},
 		{
 			"id": "search",
-			"action": "Buscar",
+			"action": "Search",
 			"keys": "Ctrl + F",
 			"category": "navigation"
 		},
 		{
 			"id": "reload",
-			"action": "Recargar vista",
+			"action": "Reload view",
 			"keys": "F5",
 			"category": "view"
 		},
 		{
 			"id": "dashboard",
-			"action": "Ir a Dashboard",
+			"action": "Go to dashboard",
 			"keys": "Alt + H",
 			"category": "navigation"
 		},
 		{
 			"id": "folders",
-			"action": "Ir a Carpetas",
+			"action": "Go to folders",
 			"keys": "Alt + F",
 			"category": "navigation"
 		},
 		{
 			"id": "collections",
-			"action": "Ir a Colecciones",
+			"action": "Go to collections",
 			"keys": "Alt + C",
 			"category": "navigation"
 		},
 		{
 			"id": "gallery",
-			"action": "Ir a Galería",
+			"action": "Go to gallery",
 			"keys": "Alt + G",
 			"category": "navigation"
 		},
 		{
 			"id": "tags",
-			"action": "Ir a Etiquetas",
+			"action": "Go to tags",
 			"keys": "Alt + T",
 			"category": "navigation"
 		}
@@ -78,7 +78,7 @@
 			"emoji": "🎨",
 			"color": "#4f46e5",
 			"theme": "system",
-			"language": "es",
+			"language": "en",
 			"syncSettings": true,
 			"notifications": true,
 			"customSettings": {

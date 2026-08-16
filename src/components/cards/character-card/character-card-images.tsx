@@ -70,8 +70,8 @@ function useCharacterCardImagesState({
 	const rarityConfig = computeRarityVisualConfig({ level: rarityLevel });
 	const holographicStyle = buildHolographicStyle(primaryColor, rarityConfig, active);
 	const ariaLabel = hasImage
-		? rarityAccessibilityLabel('Imagen de personaje', rarityConfig)
-		: 'Imagen de personaje no disponible';
+		? rarityAccessibilityLabel('Character image', rarityConfig)
+		: 'Character image unavailable';
 	return {
 		images,
 		mainImage,

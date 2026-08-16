@@ -61,8 +61,8 @@ export function ProfileList({ className }: ProfileListProps) {
 
 			{profiles.length === 0 && (
 				<div className="flex flex-col items-center justify-center py-12">
-					<p className="font-medium text-lg text-muted-foreground">No hay perfiles para mostrar</p>
-					<p className="mt-2 text-muted-foreground text-sm">Crea un nuevo perfil para empezar</p>
+					<p className="font-medium text-lg text-muted-foreground">No profiles to display</p>
+					<p className="mt-2 text-muted-foreground text-sm">Create a profile to get started</p>
 				</div>
 			)}
 		</div>

@@ -25,18 +25,18 @@ export const UploadedImageCard = memo(function UploadedImageCard({
 				<div className="w-full bg-muted" style={{ aspectRatio: '1 / 1' }}>
 					{thumb ? (
 						<img
-							alt={uploadedImage?.name || 'Imagen subida'}
+							alt={uploadedImage?.name || 'Uploaded image'}
 							className="h-full w-full object-cover"
 							loading="lazy"
 							src={thumb}
 						/>
 					) : (
 						<div className="flex h-full w-full items-center justify-center text-muted-foreground text-sm">
-							Sin thumbnail
+							No thumbnail
 						</div>
 					)}
 				</div>
-				<div className="truncate p-2 font-medium text-sm">{uploadedImage?.name || 'Imagen'}</div>
+				<div className="truncate p-2 font-medium text-sm">{uploadedImage?.name || 'Image'}</div>
 			</button>
 		);
 	}
@@ -49,18 +49,18 @@ export const UploadedImageCard = memo(function UploadedImageCard({
 			<div className="w-full bg-muted" style={{ aspectRatio: '1 / 1' }}>
 				{thumb ? (
 					<img
-						alt={uploadedImage?.name || 'Imagen subida'}
+						alt={uploadedImage?.name || 'Uploaded image'}
 						className="h-full w-full object-cover"
 						loading="lazy"
 						src={thumb}
 					/>
 				) : (
 					<div className="flex h-full w-full items-center justify-center text-muted-foreground text-sm">
-						Sin thumbnail
+						No thumbnail
 					</div>
 				)}
 			</div>
-			<div className="truncate p-2 font-medium text-sm">{uploadedImage?.name || 'Imagen'}</div>
+			<div className="truncate p-2 font-medium text-sm">{uploadedImage?.name || 'Image'}</div>
 		</div>
 	);
 });

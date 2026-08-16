@@ -254,7 +254,7 @@ function MediaThumbnailInner({
 					if (alive) setSrc(fallback);
 				}
 			} catch (e) {
-				if (alive) setError(e instanceof Error ? e.message : 'Error generando thumbnail');
+				if (alive) setError(e instanceof Error ? e.message : 'Could not generate thumbnail');
 			}
 		})();
 		return () => {

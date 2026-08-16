@@ -19,7 +19,7 @@ import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod (solo name requerido, el resto opcional)
 const worldItemSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(100, 'El nombre es demasiado largo'),
+	name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
 	description: z.string().optional(),
 	color: z.string().optional(),
 	emoji: z.string().optional(),
@@ -286,8 +286,8 @@ export function CreateWorldItemForm({
 				form.reset(); // Limpiar formulario después de crear
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toastService.error(isEditing ? 'Error al actualizar el objeto' : 'Error al crear el objeto', {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			toastService.error(isEditing ? 'Could not update the world item' : 'Could not create the world item', {
 				description: errorMessage,
 			});
 		} finally {
@@ -317,12 +317,12 @@ export function CreateWorldItemForm({
 		},
 		{
 			name: 'description',
-			label: 'Descripción',
+			label: 'Description',
 			render: ({ value, onChange }: any) => (
 				<textarea
 					className="w-full resize-none rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
-					placeholder="Descripción del objeto..."
+					placeholder="World item description..."
 					rows={3}
 					value={value || ''}
 				/>
@@ -330,14 +330,14 @@ export function CreateWorldItemForm({
 		},
 		{
 			name: 'type',
-			label: 'Tipo',
+			label: 'Type',
 			render: ({ value, onChange }: any) => (
 				<Select onValueChange={onChange} value={value || undefined}>
 					<SelectTrigger>
-						<SelectValue placeholder="Seleccionar tipo" />
+						<SelectValue placeholder="Select a type" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="none">Ninguno</SelectItem>
+						<SelectItem value="none">None</SelectItem>
 						{Object.values(WorldItemType).map((type) => (
 							<SelectItem key={type} value={String(type)}>
 								{String(type)}
@@ -349,14 +349,14 @@ export function CreateWorldItemForm({
 		},
 		{
 			name: 'category',
-			label: 'Categoría',
+			label: 'Category',
 			render: ({ value, onChange }: any) => (
 				<Select onValueChange={onChange} value={value || undefined}>
 					<SelectTrigger>
-						<SelectValue placeholder="Seleccionar categoría" />
+						<SelectValue placeholder="Select a category" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="none">Ninguna</SelectItem>
+						<SelectItem value="none">None</SelectItem>
 						{Object.values(WorldItemCategory).map((cat) => (
 							<SelectItem key={cat} value={String(cat)}>
 								{String(cat)}
@@ -368,14 +368,14 @@ export function CreateWorldItemForm({
 		},
 		{
 			name: 'rarity',
-			label: 'Rareza',
+			label: 'Rarity',
 			render: ({ value, onChange }: any) => (
 				<Select onValueChange={onChange} value={value || undefined}>
 					<SelectTrigger>
-						<SelectValue placeholder="Seleccionar rareza" />
+						<SelectValue placeholder="Select a rarity" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="none">Ninguna</SelectItem>
+						<SelectItem value="none">None</SelectItem>
 						{Object.values(WorldItemRarity).map((rarity) => (
 							<SelectItem key={rarity} value={String(rarity)}>
 								{String(rarity)}
@@ -387,12 +387,12 @@ export function CreateWorldItemForm({
 		},
 		{
 			name: 'origin',
-			label: 'Origen',
+			label: 'Origin',
 			render: ({ value, onChange }: any) => (
 				<input
 					className="w-full rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
-					placeholder="Origen del objeto"
+					placeholder="World item origin"
 					type="text"
 					value={value || ''}
 				/>
@@ -449,11 +449,11 @@ export function CreateWorldItemForm({
 						onCreated?.(createData);
 					}
 				} catch (error) {
-					clientLogger.error('Error al procesar el world item:', error);
+					clientLogger.error('Could not process the world item:', error);
 				}
 			}}
 			optionalFields={optionalFields as any}
-			submitLabel={isEditing ? 'Guardar cambios' : 'Crear objeto'}
+			submitLabel={isEditing ? 'Save changes' : 'Create world item'}
 		/>
 	);
 }

@@ -38,7 +38,7 @@ const NotesContentView = () => {
 			<div className="container mx-auto p-6">
 				<h2 className="mb-4 font-bold text-xl">Notas</h2>
 				{items.length === 0 ? (
-					<EmptyState description="Aún no has creado notas." icon={FileTextIcon} title="Sin notas" />
+					<EmptyState description="You have not created any notes yet." icon={FileTextIcon} title="Sin notas" />
 				) : (
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 						{items.map((note, index) => (

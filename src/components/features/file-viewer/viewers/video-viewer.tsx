@@ -121,19 +121,19 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNe
 			<div className="mb-2 flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					{onPrevious && (
-						<Button aria-label="Anterior" onClick={onPrevious} size="icon" variant="ghost">
-							<span className="sr-only">Anterior</span>
+						<Button aria-label="Previous" onClick={onPrevious} size="icon" variant="ghost">
+							<span className="sr-only">Previous</span>
 							{/* simple chevron using text */}‹
 						</Button>
 					)}
 					{onNext && (
-						<Button aria-label="Siguiente" onClick={onNext} size="icon" variant="ghost">
-							<span className="sr-only">Siguiente</span>›
+						<Button aria-label="Next" onClick={onNext} size="icon" variant="ghost">
+							<span className="sr-only">Next</span>›
 						</Button>
 					)}
 				</div>
 				{onClose && (
-					<Button aria-label="Cerrar" onClick={onClose} size="icon" variant="ghost">
+					<Button aria-label="Close" onClick={onClose} size="icon" variant="ghost">
 						✕
 					</Button>
 				)}
@@ -143,7 +143,7 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNe
 				controls={false}
 				muted={muted}
 				onClick={handlePlayPause}
-				onError={() => setError('Error al cargar el video')}
+				onError={() => setError('Could not load the video')}
 				onLoadedMetadata={handleLoadedMetadata}
 				onTimeUpdate={handleTimeUpdate}
 				poster={video.thumbnail || undefined}
@@ -154,13 +154,13 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNe
 			</video>
 			{error && <div className="mt-2 text-center text-destructive text-sm">{error}</div>}
 			<div className="mt-2 flex items-center gap-2">
-				<Button aria-label={playing ? 'Pausar' : 'Reproducir'} onClick={handlePlayPause} size="icon" variant="ghost">
+				<Button aria-label={playing ? 'Pause' : 'Play'} onClick={handlePlayPause} size="icon" variant="ghost">
 					{playing ? <Pause /> : <Play />}
 				</Button>
-				<Button aria-label="Reiniciar" onClick={handleRestart} size="icon" variant="ghost">
+				<Button aria-label="Restart" onClick={handleRestart} size="icon" variant="ghost">
 					<RotateCcw />
 				</Button>
-				<Button aria-label={muted ? 'Activar sonido' : 'Silenciar'} onClick={handleMute} size="icon" variant="ghost">
+				<Button aria-label={muted ? 'Unmute' : 'Mute'} onClick={handleMute} size="icon" variant="ghost">
 					{muted ? <VolumeX /> : <Volume2 />}
 				</Button>
 				<input
@@ -174,30 +174,30 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNe
 				<span className="w-14 text-right text-xs">
 					{formatTime(currentTime)} / {formatTime(duration)}
 				</span>
-				<Button aria-label="Pantalla completa" onClick={handleFullscreen} size="icon" variant="ghost">
+				<Button aria-label="Fullscreen" onClick={handleFullscreen} size="icon" variant="ghost">
 					{fullscreen ? <Minimize2 /> : <Maximize2 />}
 				</Button>
-				<Button aria-label="Descargar video" onClick={handleDownload} size="icon" variant="ghost">
+				<Button aria-label="Download video" onClick={handleDownload} size="icon" variant="ghost">
 					<Download />
 				</Button>
 			</div>
 			{/* Metadatos del video */}
 			<div className="mt-4 grid grid-cols-2 gap-2 text-muted-foreground text-xs">
 				<div>
-					<span className="font-medium">Nombre:</span> {video.name}
+					<span className="font-medium">Name:</span> {video.name}
 				</div>
 				<div>
-					<span className="font-medium">Duración:</span> {formatTime(video.duration)}
+					<span className="font-medium">Duration:</span> {formatTime(video.duration)}
 				</div>
 				<div>
-					<span className="font-medium">Tamaño:</span> {Math.round(video.size / 1024 / 1024)} MB
+					<span className="font-medium">Size:</span> {Math.round(video.size / 1024 / 1024)} MB
 				</div>
 				<div>
-					<span className="font-medium">Resolución:</span> {video.width}x{video.height}
+					<span className="font-medium">Resolution:</span> {video.width}x{video.height}
 				</div>
 				{video.description && (
 					<div className="col-span-2">
-						<span className="font-medium">Descripción:</span> {video.description}
+						<span className="font-medium">Description:</span> {video.description}
 					</div>
 				)}
 			</div>

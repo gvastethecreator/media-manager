@@ -19,7 +19,7 @@ export async function seedWorldItems(db: LibSQLDatabase<Record<string, never>>) 
 			{
 				id: generateReadableId('world-item', 'Espada Legendaria', 1),
 				name: 'Espada Legendaria',
-				description: 'Arma mítica de gran poder',
+				description: 'Mythical weapon of great power',
 				emoji: '🗡️',
 				color: '#f59e0b',
 				category: 'arma',
@@ -59,7 +59,7 @@ export async function seedWorldItems(db: LibSQLDatabase<Record<string, never>>) 
 			{
 				id: generateReadableId('world-item', 'Amuleto Proteccion', 1),
 				name: 'Amuleto de Protección',
-				description: 'Otorga defensa mágica',
+				description: 'Grants magical defense',
 				emoji: '📿',
 				color: '#3b82f6',
 				category: 'accesorio',
@@ -79,7 +79,7 @@ export async function seedWorldItems(db: LibSQLDatabase<Record<string, never>>) 
 			{
 				id: generateReadableId('world-item', 'Mapa del Tesoro', 1),
 				name: 'Mapa del Tesoro',
-				description: 'Muestra ubicación de un tesoro escondido',
+				description: 'Shows the location of hidden treasure',
 				emoji: '🗺️',
 				color: '#a16207',
 				category: 'especial',
@@ -102,7 +102,7 @@ export async function seedWorldItems(db: LibSQLDatabase<Record<string, never>>) 
 
 		seedLogger.success(`✅ ${sampleWorldItems.length} objetos del mundo creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando world items:', error);
+		seedLogger.error('❌ Could not create world items:', error);
 		throw error;
 	}
 }

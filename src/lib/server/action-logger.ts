@@ -83,7 +83,7 @@ export const actionLogger = {
 						if (options.showResult) {
 							const filteredResult = filterSensitiveData(result, options.sensitiveResultFields || []);
 							logger.success(
-								`Acción ${actionName} completada en ${executionTime}ms`,
+								`Action ${actionName} completada en ${executionTime}ms`,
 								{
 									result: filteredResult,
 									executionTime: `${executionTime}ms`,
@@ -93,7 +93,7 @@ export const actionLogger = {
 							);
 						} else {
 							logger.success(
-								`Acción ${actionName} completada en ${executionTime}ms`,
+								`Action ${actionName} completada en ${executionTime}ms`,
 								{
 									executionTime: `${executionTime}ms`,
 									actionId,
@@ -108,7 +108,7 @@ export const actionLogger = {
 
 						// Registrar error
 						logger.error(
-							`Error en acción ${actionName}: ${(error as Error).message}`,
+							`Action failed ${actionName}: ${(error as Error).message}`,
 							{
 								error: {
 									name: (error as Error).name,

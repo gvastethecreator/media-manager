@@ -110,7 +110,7 @@ function getStatusTone(status: string): 'default' | 'info' | 'success' | 'warnin
 function formatDate(date: string | Date | null): string {
 	if (!date) return '—';
 	const d = new Date(date);
-	return d.toLocaleDateString('es-ES', {
+	return d.toLocaleDateString('en-US', {
 		day: '2-digit',
 		month: '2-digit',
 		year: 'numeric',
@@ -221,7 +221,7 @@ export function FoldersTable({
 					<Input
 						className="max-w-sm border-border/40 focus:border-primary"
 						onChange={(e) => setFilterText(e.target.value)}
-						placeholder="Buscar carpetas..."
+						placeholder="Search folders..."
 						value={filterText}
 					/>
 					<DropdownMenu>
@@ -229,36 +229,36 @@ export function FoldersTable({
 							<Button size="sm" variant="outline">
 								<Filter className="mr-2 h-4 w-4" />
 								{filterStatus === 'all'
-									? 'Todos'
+									? 'All'
 									: filterStatus === 'indexed'
-										? 'Indexadas'
+										? 'Indexed'
 										: filterStatus === 'never'
-											? 'Sin indexar'
-											: 'Favoritas'}
+											? 'Not indexed'
+											: 'Favorites'}
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="start">
 							<DropdownMenuItem onClick={() => setFilterStatus('all')}>
 								<Eye className="mr-2 h-4 w-4" />
-								Mostrar todas
+								Show all
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => setFilterStatus('indexed')}>
 								<Folder className="mr-2 h-4 w-4 text-success" />
-								Solo indexadas
+								Indexed only
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => setFilterStatus('never')}>
 								<Folder className="mr-2 h-4 w-4 text-warning" />
-								Sin indexar
+								Not indexed
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => setFilterStatus('favorite')}>
 								<Heart className="mr-2 h-4 w-4 text-destructive" />
-								Favoritas
+								Favorites
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
 				<div className="text-muted-foreground text-sm">
-					{rows.length} de {orderedFolders.length} carpetas
+					{rows.length} of {orderedFolders.length} folders
 				</div>
 			</div>
 
@@ -274,7 +274,7 @@ export function FoldersTable({
 									size="sm"
 									variant="ghost"
 								>
-									Carpeta
+									Folder
 									<ArrowUpDown
 										className={cn(
 											'ml-2 h-3.5 w-3.5 transition-colors',
@@ -291,7 +291,7 @@ export function FoldersTable({
 									variant="ghost"
 								>
 									<Calendar className="mr-1.5 h-3.5 w-3.5" />
-									Estado
+									Status
 									<ArrowUpDown
 										className={cn(
 											'ml-2 h-3.5 w-3.5 transition-colors',
@@ -308,7 +308,7 @@ export function FoldersTable({
 									variant="ghost"
 								>
 									<Image className="mr-1 h-3.5 w-3.5" />
-									Medios
+									Media
 									<ArrowUpDown
 										className={cn(
 											'ml-1.5 h-3.5 w-3.5 transition-colors',
@@ -317,7 +317,7 @@ export function FoldersTable({
 									/>
 								</Button>
 							</TableHead>
-							<TableHead className="w-32 text-right font-semibold text-[13px]">Acciones</TableHead>
+							<TableHead className="w-32 text-right font-semibold text-[13px]">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -328,8 +328,8 @@ export function FoldersTable({
 										<div className="space-y-4">
 											<Folder className="mx-auto h-12 w-12 text-muted-foreground/30" />
 											<div className="space-y-2">
-												<p className="font-medium">No se encontraron carpetas</p>
-												<p className="text-sm">No hay carpetas que coincidan con los filtros aplicados</p>
+												<p className="font-medium">No folders found</p>
+												<p className="text-sm">No folders match the active filters</p>
 											</div>
 											<Button
 												className="mt-4"
@@ -339,7 +339,7 @@ export function FoldersTable({
 												}}
 												variant="outline"
 											>
-												Limpiar filtros
+												Clear filters
 											</Button>
 										</div>
 									) : (
@@ -413,7 +413,7 @@ export function FoldersTable({
 															{folder.isFavorite && <Star className="h-3 w-3 fill-warning text-warning" />}
 															{folder._isOrphan && (
 																<Badge className="text-[11px]" variant="destructive">
-																	Huérfana
+															Orphaned
 																</Badge>
 															)}
 														</div>
@@ -450,8 +450,8 @@ export function FoldersTable({
 																</TooltipTrigger>
 																<TooltipContent>
 																	{folder.lastIndexed
-																		? `Indexado el ${formatDate(folder.lastIndexed)}`
-																		: 'Nunca indexado'}
+																			? `Indexed on ${formatDate(folder.lastIndexed)}`
+																			: 'Never indexed'}
 																</TooltipContent>
 															</Tooltip>
 														</div>
@@ -504,7 +504,7 @@ export function FoldersTable({
 																<RefreshCw className={cn('h-3 w-3', disabled && 'opacity-50')} />
 															</Button>
 														</TooltipTrigger>
-														<TooltipContent>Reindexar carpeta</TooltipContent>
+														<TooltipContent>Reindex folder</TooltipContent>
 													</Tooltip>
 													<Tooltip>
 														<TooltipTrigger asChild>
@@ -517,7 +517,7 @@ export function FoldersTable({
 																<Trash2 className="h-3 w-3" />
 															</Button>
 														</TooltipTrigger>
-														<TooltipContent>{isSelected ? 'Confirmar eliminación' : 'Eliminar carpeta'}</TooltipContent>
+														<TooltipContent>{isSelected ? 'Confirm deletion' : 'Delete folder'}</TooltipContent>
 													</Tooltip>
 												</div>
 											</MicroCell>

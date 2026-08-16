@@ -168,7 +168,7 @@ export function LogViewer({
 			<Tabs className="px-4" onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="grid h-8 grid-cols-5">
 					<TabsTrigger className="text-xs" value="all">
-						Todos
+						All
 						<Badge className="ml-1 text-xs" variant="secondary">
 							{logs.length}
 						</Badge>
@@ -220,7 +220,7 @@ export function LogViewer({
 						if (!last) {
 							return 'No hay logs';
 						}
-						return `Último log: ${new Date(last.timestamp).toLocaleTimeString()}`;
+						return `Latest log: ${new Date(last.timestamp).toLocaleTimeString()}`;
 					})()}
 				</div>
 				<div className="flex gap-1">

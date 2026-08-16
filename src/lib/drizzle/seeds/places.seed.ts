@@ -19,7 +19,7 @@ export async function seedPlaces(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('place', 'Ciudad Central', 1),
 				name: 'Ciudad Central',
-				description: 'Centro neurálgico del mundo',
+				description: 'Central hub of the world',
 				emoji: '🏙️',
 				color: '#3b82f6',
 				category: 'ciudad',
@@ -41,7 +41,7 @@ export async function seedPlaces(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('place', 'Bosque Antiguo', 1),
 				name: 'Bosque Antiguo',
-				description: 'Bosque místico y extenso',
+				description: 'Vast mystical forest',
 				emoji: '🌲',
 				color: '#22c55e',
 				category: 'naturaleza',
@@ -108,9 +108,9 @@ export async function seedPlaces(db: LibSQLDatabase<Record<string, never>>) {
 
 		await db.insert(places).values(samplePlaces);
 
-		seedLogger.success(`✅ ${samplePlaces.length} lugares creados`);
+		seedLogger.success(`✅ ${samplePlaces.length} places created`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando lugares:', error);
+		seedLogger.error('❌ Could not create places:', error);
 		throw error;
 	}
 }

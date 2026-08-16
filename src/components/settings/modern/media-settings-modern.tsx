@@ -27,12 +27,12 @@ import { BentoGrid, SettingsCard, SettingsGroup, SettingsPageHeader, SettingsRow
 
 // Tipos de media soportados
 const MEDIA_TYPES = [
-	{ id: 'images', label: 'Imágenes', icon: Image, color: 'var(--entity-image)', count: 6245 },
+	{ id: 'images', label: 'Images', icon: Image, color: 'var(--entity-image)', count: 6245 },
 	{ id: 'videos', label: 'Videos', icon: Film, color: 'var(--entity-video)', count: 89 },
 	{ id: 'audio', label: 'Audio', icon: Music, color: 'var(--entity-audio)', count: 156 },
-	{ id: 'documents', label: 'Documentos', icon: FileText, color: 'var(--entity-document)', count: 342 },
-	{ id: '3d', label: 'Archivos 3D', icon: Box, color: 'var(--entity-file-3d)', count: 23 },
-	{ id: 'json', label: 'Archivos JSON', icon: FileJson, color: 'var(--entity-json)', count: 78 },
+	{ id: 'documents', label: 'Documents', icon: FileText, color: 'var(--entity-document)', count: 342 },
+	{ id: '3d', label: '3D files', icon: Box, color: 'var(--entity-file-3d)', count: 23 },
+	{ id: 'json', label: 'JSON files', icon: FileJson, color: 'var(--entity-json)', count: 78 },
 ];
 
 export function MediaSettingsModern() {
@@ -135,8 +135,8 @@ export function MediaSettingsModern() {
 	return (
 		<div className="space-y-6">
 			<SettingsPageHeader
-				description="Personaliza la visualización y comportamiento de cada tipo de archivo"
-				title="Configuración de Media"
+				description="Customize how each file type looks and behaves"
+				title="Media settings"
 			/>
 
 			{/* Media Type Selector */}
@@ -173,8 +173,8 @@ export function MediaSettingsModern() {
 			{activeTab === 'images' && (
 				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="settings">Configuración</TabsTrigger>
-						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
+						<TabsTrigger value="settings">Settings</TabsTrigger>
+						<TabsTrigger value="library">Library & management</TabsTrigger>
 					</TabsList>
 
 					<TabsContent className="mt-6" value="settings">
@@ -182,24 +182,24 @@ export function MediaSettingsModern() {
 							<SettingsCard
 								className="lg:col-span-2"
 								color="var(--entity-image)"
-								description="Configura cómo se muestran las imágenes"
+								description="Configure how images are displayed"
 								icon={<Image />}
-								title="Visualización de Imágenes"
+								title="Image display"
 							>
-								<SettingsGroup title="Comportamiento">
-									<SettingsRow description="Rotar según metadata EXIF" label="Rotación automática">
+								<SettingsGroup title="Behavior">
+									<SettingsRow description="Rotate using EXIF metadata" label="Auto rotate">
 										<Switch
 											checked={imageSettings.autoRotate}
 											onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, autoRotate: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Cargar versión completa en preview" label="Preview de alta calidad">
+									<SettingsRow description="Load the full-resolution preview" label="High-quality preview">
 										<Switch
 											checked={imageSettings.highQualityPreview}
 											onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, highQualityPreview: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Mostrar información EXIF en panel" label="Mostrar metadata">
+									<SettingsRow description="Show EXIF information in the panel" label="Show metadata">
 										<Switch
 											checked={imageSettings.showMetadata}
 											onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, showMetadata: checked }))}
@@ -209,10 +209,10 @@ export function MediaSettingsModern() {
 
 								<Separator className="my-4" />
 
-								<SettingsGroup title="Zoom por defecto">
+								<SettingsGroup title="Default zoom">
 									<div className="space-y-3">
 										<div className="flex items-center justify-between">
-											<Label>Nivel de zoom inicial</Label>
+											<Label>Initial zoom level</Label>
 											<span className="text-muted-foreground text-sm">{imageSettings.defaultZoom}%</span>
 										</div>
 										<Slider
@@ -228,9 +228,9 @@ export function MediaSettingsModern() {
 
 							<SettingsCard
 								color="var(--entity-image)"
-								description="Extensiones de archivo reconocidas"
+								description="Recognized file extensions"
 								icon={<Layers />}
-								title="Formatos Soportados"
+								title="Supported formats"
 								variant="outlined"
 							>
 								<div className="flex flex-wrap gap-2">
@@ -251,13 +251,13 @@ export function MediaSettingsModern() {
 									className="rounded-none border-transparent border-b-2 px-0 py-2 data-[state=active]:border-primary data-[state=active]:shadow-none"
 									value="scanned"
 								>
-									Biblioteca Escaneada
+									Scanned library
 								</TabsTrigger>
 								<TabsTrigger
 									className="rounded-none border-transparent border-b-2 px-0 py-2 data-[state=active]:border-primary data-[state=active]:shadow-none"
 									value="uploaded"
 								>
-									Cargas directas retiradas
+									Direct uploads retired
 								</TabsTrigger>
 							</TabsList>
 							<div className="mt-6">
@@ -276,8 +276,8 @@ export function MediaSettingsModern() {
 			{activeTab === 'videos' && (
 				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="settings">Configuración</TabsTrigger>
-						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
+						<TabsTrigger value="settings">Settings</TabsTrigger>
+						<TabsTrigger value="library">Library & management</TabsTrigger>
 					</TabsList>
 
 					<TabsContent className="mt-6" value="settings">
@@ -285,24 +285,24 @@ export function MediaSettingsModern() {
 							<SettingsCard
 								className="lg:col-span-2"
 								color="var(--entity-video)"
-								description="Configura el comportamiento del reproductor"
+								description="Configure player behavior"
 								icon={<Film />}
-								title="Reproductor de Video"
+								title="Video player"
 							>
-								<SettingsGroup title="Reproducción">
-									<SettingsRow description="Reproducir automáticamente al abrir" label="Autoplay">
+								<SettingsGroup title="Playback">
+									<SettingsRow description="Start playback when opened" label="Autoplay">
 										<Switch
 											checked={videoSettings.autoplay}
 											onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, autoplay: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Iniciar videos sin sonido" label="Silenciado por defecto">
+									<SettingsRow description="Start videos without sound" label="Muted by default">
 										<Switch
 											checked={videoSettings.muted}
 											onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, muted: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Repetir video automáticamente" label="Loop">
+									<SettingsRow description="Repeat the video automatically" label="Loop">
 										<Switch
 											checked={videoSettings.loop}
 											onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, loop: checked }))}
@@ -312,8 +312,8 @@ export function MediaSettingsModern() {
 
 								<Separator className="my-4" />
 
-								<SettingsGroup title="Volumen y Precarga">
-									<SettingsRow description="Nivel inicial de volumen" label="Volumen por defecto">
+								<SettingsGroup title="Volume and preload">
+									<SettingsRow description="Initial volume level" label="Default volume">
 										<div className="flex w-48 items-center gap-3">
 											<Volume2 className="h-4 w-4 text-muted-foreground" />
 											<Slider
@@ -325,7 +325,7 @@ export function MediaSettingsModern() {
 											<span className="w-8 text-sm tabular-nums">{videoSettings.defaultVolume}%</span>
 										</div>
 									</SettingsRow>
-									<SettingsRow description="Cuánto cargar anticipadamente" label="Precarga">
+									<SettingsRow description="How much content to load ahead" label="Preload">
 										<Select
 											onValueChange={(v) => setVideoSettings((s) => ({ ...s, preload: v }))}
 											value={videoSettings.preload}
@@ -334,9 +334,9 @@ export function MediaSettingsModern() {
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="none">Ninguna</SelectItem>
+												<SelectItem value="none">None</SelectItem>
 												<SelectItem value="metadata">Metadata</SelectItem>
-												<SelectItem value="auto">Automática</SelectItem>
+												<SelectItem value="auto">Automatic</SelectItem>
 											</SelectContent>
 										</Select>
 									</SettingsRow>
@@ -345,9 +345,9 @@ export function MediaSettingsModern() {
 
 							<SettingsCard
 								color="var(--entity-video)"
-								description="Codecs y contenedores compatibles"
+								description="Supported codecs and containers"
 								icon={<Layers />}
-								title="Formatos Soportados"
+								title="Supported formats"
 								variant="outlined"
 							>
 								<div className="flex flex-wrap gap-2">
@@ -370,8 +370,8 @@ export function MediaSettingsModern() {
 			{activeTab === 'audio' && (
 				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="settings">Configuración</TabsTrigger>
-						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
+						<TabsTrigger value="settings">Settings</TabsTrigger>
+						<TabsTrigger value="library">Library & management</TabsTrigger>
 					</TabsList>
 
 					<TabsContent className="mt-6" value="settings">
@@ -379,18 +379,18 @@ export function MediaSettingsModern() {
 							<SettingsCard
 								className="lg:col-span-2"
 								color="var(--entity-audio)"
-								description="Configura el comportamiento del reproductor de audio"
+								description="Configure audio player behavior"
 								icon={<Music />}
-								title="Reproductor de Audio"
+								title="Audio player"
 							>
-								<SettingsGroup title="Reproducción">
-									<SettingsRow description="Reproducir automáticamente" label="Autoplay">
+								<SettingsGroup title="Playback">
+									<SettingsRow description="Start playback automatically" label="Autoplay">
 										<Switch
 											checked={audioSettings.autoplay}
 											onCheckedChange={(checked) => setAudioSettings((s) => ({ ...s, autoplay: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Mostrar ondas de audio" label="Visualizador">
+									<SettingsRow description="Show audio waveforms" label="Visualizer">
 										<Switch
 											checked={audioSettings.visualizer}
 											onCheckedChange={(checked) => setAudioSettings((s) => ({ ...s, visualizer: checked }))}
@@ -400,8 +400,8 @@ export function MediaSettingsModern() {
 
 								<Separator className="my-4" />
 
-								<SettingsGroup title="Volumen">
-									<SettingsRow label="Volumen por defecto">
+								<SettingsGroup title="Volume">
+									<SettingsRow label="Default volume">
 										<div className="flex w-48 items-center gap-3">
 											<Volume2 className="h-4 w-4 text-muted-foreground" />
 											<Slider
@@ -420,7 +420,7 @@ export function MediaSettingsModern() {
 								className="md:col-span-2 xl:col-span-1"
 								color="var(--entity-audio)"
 								icon={<Layers />}
-								title="Formatos Soportados"
+								title="Supported formats"
 								variant="outlined"
 							>
 								<div className="flex flex-wrap gap-2">
@@ -443,8 +443,8 @@ export function MediaSettingsModern() {
 			{activeTab === 'documents' && (
 				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="settings">Configuración</TabsTrigger>
-						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
+						<TabsTrigger value="settings">Settings</TabsTrigger>
+						<TabsTrigger value="library">Library & management</TabsTrigger>
 					</TabsList>
 
 					<TabsContent className="mt-6" value="settings">
@@ -452,12 +452,12 @@ export function MediaSettingsModern() {
 							<SettingsCard
 								className="lg:col-span-2"
 								color="var(--entity-document)"
-								description="Configura el visor de PDF y documentos"
+								description="Configure the PDF and document viewer"
 								icon={<FileText />}
-								title="Visor de Documentos"
+								title="Document viewer"
 							>
-								<SettingsGroup title="Visualización">
-									<SettingsRow description="Mostrar navegación de páginas" label="Panel lateral">
+								<SettingsGroup title="Display">
+									<SettingsRow description="Show page navigation" label="Sidebar">
 										<Switch
 											checked={documentSettings.sidebarOpen}
 											onCheckedChange={(checked) => setDocumentSettings((s) => ({ ...s, sidebarOpen: checked }))}
@@ -467,8 +467,8 @@ export function MediaSettingsModern() {
 
 								<Separator className="my-4" />
 
-								<SettingsGroup title="Renderizado">
-									<SettingsRow label="Modo de renderizado">
+								<SettingsGroup title="Rendering">
+									<SettingsRow label="Rendering mode">
 										<Select
 											onValueChange={(v) => setDocumentSettings((s) => ({ ...s, renderMode: v }))}
 											value={documentSettings.renderMode}
@@ -477,12 +477,12 @@ export function MediaSettingsModern() {
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="canvas">Canvas (rápido)</SelectItem>
-												<SelectItem value="svg">SVG (nítido)</SelectItem>
+												<SelectItem value="canvas">Canvas (fast)</SelectItem>
+												<SelectItem value="svg">SVG (sharp)</SelectItem>
 											</SelectContent>
 										</Select>
 									</SettingsRow>
-									<SettingsRow label="Zoom por defecto">
+									<SettingsRow label="Default zoom">
 										<div className="flex w-48 items-center gap-3">
 											<Slider
 												max={200}
@@ -500,7 +500,7 @@ export function MediaSettingsModern() {
 							<SettingsCard
 								color="var(--entity-document)"
 								icon={<Layers />}
-								title="Formatos Soportados"
+								title="Supported formats"
 								variant="outlined"
 							>
 								<div className="flex flex-wrap gap-2">
@@ -523,8 +523,8 @@ export function MediaSettingsModern() {
 			{activeTab === '3d' && (
 				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="settings">Configuración</TabsTrigger>
-						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
+						<TabsTrigger value="settings">Settings</TabsTrigger>
+						<TabsTrigger value="library">Library & management</TabsTrigger>
 					</TabsList>
 
 					<TabsContent className="mt-6" value="settings">
@@ -532,30 +532,30 @@ export function MediaSettingsModern() {
 							<SettingsCard
 								className="lg:col-span-2"
 								color="var(--entity-file-3d)"
-								description="Configura el visor de modelos 3D"
+								description="Configure the 3D model viewer"
 								icon={<Box />}
-								title="Visor 3D"
+								title="3D viewer"
 							>
-								<SettingsGroup title="Visualización">
-									<SettingsRow description="Rotar modelo al cargar" label="Rotación automática">
+								<SettingsGroup title="Display">
+									<SettingsRow description="Rotate the model when loaded" label="Auto rotate">
 										<Switch
 											checked={settings3D.autoRotate}
 											onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, autoRotate: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Mostrar sombras proyectadas" label="Sombras">
+									<SettingsRow description="Show cast shadows" label="Shadows">
 										<Switch
 											checked={settings3D.shadows}
 											onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, shadows: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Ver modelo en wireframe" label="Malla wireframe">
+									<SettingsRow description="Display the model as wireframe" label="Wireframe">
 										<Switch
 											checked={settings3D.wireframe}
 											onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, wireframe: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Mostrar cuadrícula de referencia" label="Grid">
+									<SettingsRow description="Show the reference grid" label="Grid">
 										<Switch
 											checked={settings3D.grid}
 											onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, grid: checked }))}
@@ -567,7 +567,7 @@ export function MediaSettingsModern() {
 							<SettingsCard
 								color="var(--entity-file-3d)"
 								icon={<Layers />}
-								title="Formatos Soportados"
+								title="Supported formats"
 								variant="outlined"
 							>
 								<div className="flex flex-wrap gap-2">
@@ -590,8 +590,8 @@ export function MediaSettingsModern() {
 			{activeTab === 'json' && (
 				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="settings">Configuración</TabsTrigger>
-						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
+						<TabsTrigger value="settings">Settings</TabsTrigger>
+						<TabsTrigger value="library">Library & management</TabsTrigger>
 					</TabsList>
 
 					<TabsContent className="mt-6" value="settings">
@@ -599,30 +599,30 @@ export function MediaSettingsModern() {
 							<SettingsCard
 								className="lg:col-span-2"
 								color="var(--entity-json)"
-								description="Configura el editor y visualizador de JSON"
+								description="Configure the JSON editor and viewer"
 								icon={<FileJson />}
 								title="Editor JSON"
 							>
 								<SettingsGroup title="Editor">
-									<SettingsRow description="Auto-formatear JSON al abrir" label="Formatear al cargar">
+									<SettingsRow description="Format JSON automatically when opened" label="Format on load">
 										<Switch
 											checked={jsonSettings.formatOnLoad}
 											onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, formatOnLoad: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Validar contra schema si existe" label="Validar schema">
+									<SettingsRow description="Validate against a schema when available" label="Validate schema">
 										<Switch
 											checked={jsonSettings.validateSchema}
 											onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, validateSchema: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Mostrar números de línea" label="Números de línea">
+									<SettingsRow description="Show line numbers" label="Line numbers">
 										<Switch
 											checked={jsonSettings.lineNumbers}
 											onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, lineNumbers: checked }))}
 										/>
 									</SettingsRow>
-									<SettingsRow description="Permitir fold/unfold de bloques" label="Plegado de código">
+									<SettingsRow description="Allow blocks to be folded and expanded" label="Code folding">
 										<Switch
 											checked={jsonSettings.folding}
 											onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, folding: checked }))}
@@ -631,7 +631,7 @@ export function MediaSettingsModern() {
 								</SettingsGroup>
 							</SettingsCard>
 
-							<SettingsCard color="var(--entity-json)" icon={<Code />} title="Formatos Soportados" variant="outlined">
+							<SettingsCard color="var(--entity-json)" icon={<Code />} title="Supported formats" variant="outlined">
 								<div className="flex flex-wrap gap-2">
 									{['.json', '.jsonc', '.json5'].map((ext) => (
 										<Badge key={ext} variant="secondary">

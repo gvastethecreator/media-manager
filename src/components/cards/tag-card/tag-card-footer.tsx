@@ -89,11 +89,11 @@ export function TagCardFooter({
 	// Extraer configuración visual de rareza
 	const raritySettings = (() => {
 		const configMap = {
-			[TagRarity.COMMON]: { glow: 0, text: 'Común' },
-			[TagRarity.UNCOMMON]: { glow: 3, text: 'Poco común' },
-			[TagRarity.RARE]: { glow: 5, text: 'Rara' },
-			[TagRarity.VERY_RARE]: { glow: 7, text: 'Muy Rara' },
-			[TagRarity.LEGENDARY]: { glow: 10, text: 'Legendaria' },
+			[TagRarity.COMMON]: { glow: 0, text: 'Common' },
+			[TagRarity.UNCOMMON]: { glow: 3, text: 'Uncommon' },
+			[TagRarity.RARE]: { glow: 5, text: 'Rare' },
+			[TagRarity.VERY_RARE]: { glow: 7, text: 'Very Rare' },
+			[TagRarity.LEGENDARY]: { glow: 10, text: 'Legendary' },
 		};
 
 		return configMap[rarity as keyof typeof configMap] || configMap[TagRarity.COMMON];
@@ -144,7 +144,7 @@ export function TagCardFooter({
 				{/* Fecha de creación */}
 				<div className="flex items-center gap-1">
 					<Calendar className="h-4 w-4" />
-					<span className="mr-1 opacity-70">Creado:</span>
+					<span className="mr-1 opacity-70">Created:</span>
 					<span className="font-medium">{formattedCreated}</span>
 				</div>
 
@@ -162,7 +162,7 @@ export function TagCardFooter({
 					className={cn('text-center text-muted-foreground text-sm italic', compact ? 'mt-0.5' : 'mt-1')}
 					style={{ opacity: 0.7 }}
 				>
-					♦ Colección personal ♦
+					♦ Personal collection ♦
 				</div>
 			)}
 		</div>

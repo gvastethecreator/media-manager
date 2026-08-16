@@ -24,7 +24,7 @@ export async function seedCharacters(db: LibSQLDatabase<Record<string, never>>) 
 			{
 				id: generateReadableId('character', 'Mentor Sabio', 1),
 				name: 'Mentor Sabio',
-				description: 'Guía del héroe en su viaje',
+				description: 'Guide for a heroic journey',
 				notes: 'Posee conocimientos antiguos',
 				personality: 'Sabio, paciente, enigmático',
 				category: 'apoyo',
@@ -42,7 +42,7 @@ export async function seedCharacters(db: LibSQLDatabase<Record<string, never>>) 
 			{
 				id: generateReadableId('character', 'Aliado Comico', 1),
 				name: 'Aliado Cómico',
-				description: 'Alivio cómico de la historia',
+				description: 'Comic relief for the story',
 				notes: 'Siempre tiene un chiste listo',
 				personality: 'Gracioso, leal, optimista',
 				category: 'apoyo',
@@ -54,7 +54,7 @@ export async function seedCharacters(db: LibSQLDatabase<Record<string, never>>) 
 
 		seedLogger.success(`✅ ${sampleCharacters.length} personajes creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando personajes:', error);
+		seedLogger.error('❌ Could not create characters:', error);
 		throw error;
 	}
 }

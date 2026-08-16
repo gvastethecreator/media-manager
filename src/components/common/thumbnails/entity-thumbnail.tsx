@@ -113,7 +113,7 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 				return (
 					<ImageThumbnail
 						className="h-full w-full object-cover"
-						name={entity?.name || 'Sin nombre'}
+						name={entity?.name || 'Unnamed'}
 						path={(entity as any)?.path || '/placeholder.jpg'}
 						size={qualityToImageSize[quality]}
 					/>
@@ -141,7 +141,7 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			return (
 				<div className="absolute inset-0 flex items-end bg-muted/50 p-2 opacity-0 transition-opacity duration-200 hover:opacity-100">
 					<div className="text-white text-xs">
-						<div className="truncate font-medium">{entity?.name || 'Sin nombre'}</div>
+						<div className="truncate font-medium">{entity?.name || 'Unnamed'}</div>
 						<div className="text-white/80">{config?.displayName ?? ''}</div>
 					</div>
 				</div>

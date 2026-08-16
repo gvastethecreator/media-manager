@@ -17,7 +17,7 @@ export interface Resolver<T = unknown> {
  * Esquema base para entidades con propiedades comunes
  */
 export const baseEntitySchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'Name is required'),
 	description: z.string().optional(),
 	emoji: z.string().optional(),
 	color: z.string().optional(),
@@ -28,7 +28,7 @@ export const baseEntitySchema = z.object({
  * Esquema para colecciones
  */
 export const collectionCreateSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'Name is required'),
 	description: z.string().optional(),
 	emoji: z.string().optional(),
 	color: z.string().optional(),
@@ -38,7 +38,7 @@ export const collectionCreateSchema = z.object({
  * Esquema para grupos
  */
 export const groupCreateSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'Name is required'),
 	description: z.string().optional(),
 	emoji: z.string().optional(),
 	color: z.string().optional(),
@@ -48,7 +48,7 @@ export const groupCreateSchema = z.object({
  * Esquema para notas
  */
 export const noteCreateSchema = z.object({
-	title: z.string().min(1, 'El título es requerido'),
+	title: z.string().min(1, 'Title is required'),
 	content: z.string().optional(),
 	summary: z.string().optional(),
 	category: z.string().optional(),
@@ -62,7 +62,7 @@ export const noteCreateSchema = z.object({
  * Esquema para lugares
  */
 export const placeCreateSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'Name is required'),
 	description: z.string().optional(),
 	emoji: z.string().optional(),
 	color: z.string().optional(),
@@ -76,7 +76,7 @@ export const placeCreateSchema = z.object({
  * Esquema para prompts
  */
 export const promptCreateSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'Name is required'),
 	content: z.string().min(1, 'El contenido es requerido'),
 	description: z.string().optional(),
 	category: z.string().optional(),
@@ -87,7 +87,7 @@ export const promptCreateSchema = z.object({
  * Esquema para tags
  */
 export const tagCreateSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido'),
+	name: z.string().min(1, 'Name is required'),
 	description: z.string().optional(),
 	emoji: z.string().optional(),
 	color: z.string().optional(),

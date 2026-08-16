@@ -13,9 +13,9 @@
  * =================================================================================
  */
 
-export { tags } from "../organization/tags";
-export { notes } from "./notes";
-export { prompts } from "./prompts";
-export { properties } from "./properties";
-export { wildcards } from "./wildcards";
-export { taxonomyArtifacts } from "./artifacts";
+export { tags } from '../organization/tags';
+export { notes } from './notes';
+export { prompts } from './prompts';
+export { properties } from './properties';
+export { wildcards } from './wildcards';
+export { taxonomyArtifactDeletionLedger, taxonomyArtifactMutationPermits, taxonomyArtifacts } from './artifacts';

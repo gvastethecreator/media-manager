@@ -67,7 +67,7 @@ export function formatDate(date: Date | string | number, options?: Intl.DateTime
 
 		return new Intl.DateTimeFormat('es-ES', { ...defaultOptions, ...options }).format(dateObj);
 	} catch (error) {
-		console.error('Error formateando fecha:', error);
+		console.error('Could not format date:', error);
 		return 'Fecha inválida';
 	}
 }

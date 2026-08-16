@@ -100,10 +100,10 @@ export const VIEW_CONFIGS: Record<ViewMode, ViewConfig> = {
  * Columnas por defecto para vista de tabla
  */
 export const TABLE_DEFAULT_COLUMNS = [
-	{ key: 'name', label: 'Nombre', width: 250 },
+	{ key: 'name', label: 'Name', width: 250 },
 	{ key: 'entityType', label: 'Tipo', width: 100 },
-	{ key: 'size', label: 'Tamaño', width: 100 },
-	{ key: 'createdAt', label: 'Fecha', width: 150 },
+	{ key: 'size', label: 'Size', width: 100 },
+	{ key: 'createdAt', label: 'Date', width: 150 },
 ] as const;
 
 /**

@@ -120,7 +120,7 @@ export function EntityTypeBadge({
 						</div>
 
 						{metadata?.hasPreview === true && (
-							<div className="text-muted-foreground text-xs">✨ Soporta vista previa</div>
+							<div className="text-muted-foreground text-xs">✨ Supports preview</div>
 						)}
 
 						{metadata?.isContainer === true && (

@@ -20,7 +20,7 @@ export async function seedGroups(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: generateReadableId('group', 'Referencias Artistic', 1),
 				name: 'Referencias Artísticas',
-				description: 'Material de referencia para inspiración',
+				description: 'Reference material for inspiration',
 			},
 			{
 				id: generateReadableId('group', 'Archivo Historico', 1),
@@ -38,7 +38,7 @@ export async function seedGroups(db: LibSQLDatabase<Record<string, never>>) {
 
 		seedLogger.success(`✅ ${sampleGroups.length} grupos creados`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando grupos:', error);
+		seedLogger.error('❌ Could not create groups:', error);
 		throw error;
 	}
 }

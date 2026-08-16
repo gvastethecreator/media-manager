@@ -113,7 +113,7 @@ function MediaItemGridInner({
 				<div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 					<CornerUpLeft className="h-6 w-6 text-muted-foreground" />
 				</div>
-				<span className="font-medium text-muted-foreground text-sm">Subir nivel</span>
+				<span className="font-medium text-muted-foreground text-sm">Go up one level</span>
 			</button>
 		);
 	}
@@ -265,7 +265,7 @@ function MediaItemListInner({
 				<div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
 					<CornerUpLeft className="h-4 w-4 text-muted-foreground" />
 				</div>
-				<span className="flex-1 text-muted-foreground text-sm">Subir nivel</span>
+				<span className="flex-1 text-muted-foreground text-sm">Go up one level</span>
 			</button>
 		);
 	}

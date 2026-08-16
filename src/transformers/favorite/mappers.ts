@@ -25,7 +25,7 @@ function calculateFavoriteStats(favorite: FavoriteBase): FavoriteStatistics {
 	return {
 		daysSinceAdded,
 		entityTypeName: getFavoriteEntityDisplayName(favorite.entityType),
-		formattedAddedAt: addedAt.toLocaleDateString('es-ES', {
+		formattedAddedAt: addedAt.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',

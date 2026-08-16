@@ -67,7 +67,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 			return (
 				<div className={cn('flex items-center gap-2', className)}>
 					<EntityTypeBadge size="sm" type={entityType} />
-					<span className="truncate text-muted-foreground text-sm">{entity.name || 'Sin nombre'}</span>
+					<span className="truncate text-muted-foreground text-sm">{entity.name || 'Unnamed'}</span>
 				</div>
 			);
 		}
@@ -118,7 +118,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 
 			if ('createdAt' in entity && entity.createdAt) {
 				stats.push({
-					label: 'Creado',
+					label: 'Created',
 					value: new Date(entity.createdAt).toLocaleDateString(),
 				});
 			}
@@ -132,7 +132,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 
 			if ('size' in entity && entity.size) {
 				stats.push({
-					label: 'Tamaño',
+					label: 'Size',
 					value: formatFileSize(entity.size as number),
 				});
 			}
@@ -171,7 +171,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 								<config.icon className="h-5 w-5" style={{ color: config.color }} />
 							</div>
 							<div>
-								<h3 className="truncate font-medium">{entity.name || 'Sin nombre'}</h3>
+								<h3 className="truncate font-medium">{entity.name || 'Unnamed'}</h3>
 								<p className="text-muted-foreground text-sm">{config.displayName}</p>
 							</div>
 						</div>
@@ -199,7 +199,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 							<config.icon className="h-8 w-8" style={{ color: config.color }} />
 						</div>
 						<div>
-							<h2 className="font-semibold text-xl">{entity.name || 'Sin nombre'}</h2>
+							<h2 className="font-semibold text-xl">{entity.name || 'Unnamed'}</h2>
 							<div className="mt-1 flex items-center gap-2">
 								<EntityTypeBadge type={entityType} />
 								<Badge variant="outline">
@@ -212,7 +212,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 				</div>
 
 				{/* Información adicional basada en el tipo */}
-				<div className="text-muted-foreground text-sm">Tipo de entidad: {config.displayName}</div>
+				<div className="text-muted-foreground text-sm">Entity type: {config.displayName}</div>
 
 				{renderStats()}
 			</motion.div>
@@ -241,7 +241,7 @@ export const EntityTypeHeader = memo<{
 	return (
 		<div className={cn('flex items-center gap-2', className)}>
 			<config.icon className="h-4 w-4 shrink-0" style={{ color: config.color }} />
-			<span className="truncate font-medium text-sm">{entity.name || 'Sin nombre'}</span>
+			<span className="truncate font-medium text-sm">{entity.name || 'Unnamed'}</span>
 			<Badge className="ml-auto" variant="secondary">
 				{config.emoji}
 			</Badge>

@@ -27,7 +27,7 @@ interface SkipLinkProps {
  */
 export function SkipLink({
 	targetId = 'main-content',
-	children = 'Saltar al contenido principal',
+	children = 'Skip to main content',
 	className,
 }: SkipLinkProps) {
 	const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {

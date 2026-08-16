@@ -43,12 +43,12 @@ export function CreatePropertyForm({
 		},
 		{
 			name: 'description' as const,
-			label: 'Descripción',
+			label: 'Description',
 			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
 				<textarea
 					className="w-full resize-none rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
-					placeholder="Descripción de la propiedad..."
+					placeholder="Property description..."
 					rows={3}
 					value={value || ''}
 				/>
@@ -56,12 +56,12 @@ export function CreatePropertyForm({
 		},
 		{
 			name: 'category' as const,
-			label: 'Categoría',
+			label: 'Category',
 			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
 				<input
 					className="w-full rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
-					placeholder="Categoría de la propiedad"
+					placeholder="Property category"
 					type="text"
 					value={value || ''}
 				/>
@@ -110,7 +110,7 @@ export function CreatePropertyForm({
 				}
 			}
 		} catch (error) {
-			clientLogger.error('Error al procesar la propiedad:', error);
+			clientLogger.error('Error processing property:', error);
 		}
 	};
 
@@ -128,7 +128,7 @@ export function CreatePropertyForm({
 			onCancel={onCancel}
 			onSubmit={handleSubmit}
 			optionalFields={optionalFields}
-			submitLabel={isEditing ? 'Guardar cambios' : 'Crear propiedad'}
+			submitLabel={isEditing ? 'Save changes' : 'Create property'}
 		/>
 	);
 }

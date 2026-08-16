@@ -1,221 +1,131 @@
-# Image Manager
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/header/document.svg?title=Media+Manager&subtitle=Library%2C+not+a+landfill&logo=database&theme=orange&align=center&mode=dark" />
+    <img alt="Media Manager — Library, not a landfill" src="https://shieldcn.dev/header/document.svg?title=Media+Manager&subtitle=Library%2C+not+a+landfill&logo=database&theme=orange&align=center&mode=light" />
+  </picture>
+</p>
 
-Aplicación monolítica para **gestión multimedia local** con frontend en React 19, backend Express sobre Bun, persistencia con Drizzle ORM + SQLite/libsql y empaquetado opcional de escritorio con Tauri 2.
+<p align="center">
+  <a href="https://github.com/gvastethecreator/media-manager/actions/workflows/quality.yml"><img alt="Quality gates" src="https://shieldcn.dev/github/ci/gvastethecreator/media-manager.svg?workflow=quality&branch=main&variant=secondary&size=xs" /></a>
+  <a href="https://gvastethecreator.github.io/media-manager/"><img alt="Project site" src="https://shieldcn.dev/badge/site-pages-d37a52.svg?logo=githubpages&variant=branded&size=xs" /></a>
+  <a href="https://bun.sh/"><img alt="Bun 1.3.14" src="https://shieldcn.dev/badge/Bun-1.3.14-14151a.svg?logo=bun&variant=branded&size=xs" /></a>
+  <a href="https://react.dev/"><img alt="React 19" src="https://shieldcn.dev/badge/React-19-149eca.svg?logo=react&variant=branded&size=xs" /></a>
+  <a href="https://github.com/gvastethecreator/media-manager/stargazers"><img alt="GitHub stars" src="https://shieldcn.dev/github/stars/gvastethecreator/media-manager.svg?variant=secondary&size=xs" /></a>
+</p>
 
-El proyecto está diseñado para trabajar con bibliotecas grandes de archivos y metadatos; no es solo un visor de imágenes. Su objetivo real es indexar, organizar, enriquecer y navegar contenido heterogéneo: imágenes, videos, audio, documentos, JSON, modelos 3D y entidades de worldbuilding.
+Media Manager is a local-first workbench for large creative libraries. It indexes files in place, extracts useful metadata, and connects images, video, audio, documents, JSON, 3D models, prompts, notes, and worldbuilding entities in one searchable catalog.
 
-## Qué resuelve
+[Project site](https://gvastethecreator.github.io/media-manager/) · [Source and issues](https://github.com/gvastethecreator/media-manager) · [Sponsor](https://ko-fi.com/gvaste)
 
-- Indexación de carpetas del sistema de archivos sin obligar a mover los archivos.
-- Organización semántica mediante tags, álbumes, colecciones, grupos y favoritos.
-- Gestión de dominios creativos y narrativos: personajes, lugares, conceptos y world items.
-- Generación de thumbnails y extracción de metadatos para varios tipos de media.
-- Búsqueda global, búsqueda FTS/LIKE y vistas de navegación ricas.
-- Operación dual como app web local y como app de escritorio con Tauri.
+## Product tour
 
-## Stack real del proyecto
+The captures below come from the local application with an empty, privacy-safe library. No personal paths or files are shown.
 
-| Capa | Tecnologías principales |
+| Library overview | Keyboard workflow |
 | --- | --- |
-| Frontend | React 19, TypeScript 6, React Router 7, Vite+ |
-| Estado | Zustand, Immer, TanStack Query |
-| UI | Tailwind CSS 4, Radix UI, GSAP, Lucide |
-| Backend | Express 5, Bun, Effect |
-| Persistencia | Drizzle ORM, SQLite, `@libsql/client` |
-| Procesamiento media | Sharp, exifr, music-metadata, ffprobe-static, mediabunny |
-| Testing | Vitest, Testing Library, Playwright |
-| Desktop | Tauri 2 |
-| Tooling | Oxc/Oxlint/Oxfmt, TypeScript, scripts Bun |
+| <img src="docs/assets/screenshots/library-overview.webp" alt="Media Manager dashboard with media categories and library statistics" /> | <img src="docs/assets/screenshots/keyboard-workflow.webp" alt="Media Manager keyboard shortcut settings" /> |
+| **Appearance and layout** | **Settings and indexing** |
+| <img src="docs/assets/screenshots/appearance-and-layout.webp" alt="Media Manager appearance settings with restrained theme controls" /> | <img src="docs/assets/screenshots/settings-and-indexing.webp" alt="Media Manager settings for authorized folders and indexing status" /> |
 
-## Modos de ejecución
+## Why it exists
 
-| Modo | Frontend | Backend | Desktop |
-| --- | --- | --- | --- |
-| Web local | `http://localhost:5173` | `http://localhost:4000` | No |
-| Tauri dev | WebView Tauri | Express embebido/externo | Sí |
-| Build producción | `dist/` | `dist/server/` | Opcional |
+- Index existing folders without forcing a second managed copy.
+- Search across filenames, extracted metadata, tags, relationships, and document text.
+- Browse images, video, audio, documents, JSON, and 3D files through one interface.
+- Organize creative context with collections, albums, groups, favorites, characters, places, concepts, prompts, and notes.
+- Run as a local web app or through the optional Tauri desktop shell.
+- Report partial file-operation outcomes explicitly so recovery stays understandable.
 
-## Puesta en marcha
+## Current status
 
-### Requisitos
+- The user-facing application, validation messages, recovery states, and primary error paths are English.
+- Bun 1.3.14 owns installation, scripts, the server runtime, and the lockfile.
+- Direct dependencies are current according to `bun outdated`.
+- React 19, TypeScript 7, React Router 7, Vite 8, Express 5, Effect, Drizzle ORM, and SQLite/libsql form the main stack.
+- Windows, macOS, and Linux can run the local web application; the Tauri shell remains an optional desktop path.
+- The repository is under active development. Treat packaging, signing, and installer validation as separate release gates.
 
-- Bun 1.2+
-- Node.js 20+ como soporte para tooling auxiliar
-- Windows, macOS o Linux
-- FFmpeg opcional para algunos flujos de thumbnails y metadata avanzada
+## Quick start
 
-### Instalación
+Requirements:
+
+- Bun 1.3.14 or newer
+- Node.js 20 or newer for auxiliary tooling
+- Optional FFmpeg support for selected thumbnail and metadata flows
 
 ```bash
-bun install
+bun install --frozen-lockfile
+bun run dev:full
 ```
 
-### Entorno
+Open `http://localhost:5173`. The local API uses `http://localhost:4000` by default.
 
-El proyecto usa variables de entorno para puertos, base de datos y flags operativos.
+Copy `.env.example` when you need to customize ports, the database path, CORS, media limits, or logging. Never point tests at a personal database; `bun run test` creates and removes isolated SQLite databases automatically.
 
-Archivos relevantes:
+## Development commands
 
-- `.env` para entorno local
-- `.env.example` como plantilla/base de referencia
-
-Variables clave:
-
-```env
-NODE_ENV=development
-API_PORT=4000
-PORT=4000
-DATABASE_URL=file:./db.sqlite
-VITE_API_URL=http://localhost:4000/api
-CORS_ORIGIN=http://localhost:5173
-UPLOADS_DIR=public/uploads
-LOG_TO_CONSOLE=true
-LOG_LEVEL=info
-DISABLE_FTS5=0
-SEARCH_FTS_REQUIRE=0
-```
-
-## Comandos principales
-
-| Comando | Propósito |
+| Command | Purpose |
 | --- | --- |
-| `bun run dev:full` | Inicia frontend + backend |
-| `bun run dev:vite` | Solo frontend |
-| `bun run dev:server:hot` | Solo backend |
-| `bun run dev:tauri` | Abre la app en Tauri |
-| `bun run build` | Build completo |
-| `bun run check` | Lint + typecheck |
-| `bun run test` | Tests unitarios/integración |
-| `bun run test:e2e` | Tests E2E Playwright |
-| `bun run db:studio` | Exploración visual de DB |
-| `bun run logs:list` | Listado de logs |
+| `bun run dev:full` | Start the frontend and backend |
+| `bun run dev:vite` | Start only the frontend |
+| `bun run dev:server:hot` | Start only the backend |
+| `bun run dev:tauri` | Start the Tauri desktop shell |
+| `bun run check` | Run lint and TypeScript checks |
+| `bun run test` | Run the isolated unit and integration suite |
+| `bun run test:tooling` | Verify repository tooling |
+| `bun run test:e2e` | Run Playwright browser coverage |
+| `bun run build` | Build the frontend and Bun server |
+| `bun run db:schema:check` | Verify the generated schema contract |
+| `bun run deps:outdated` | Check direct dependency freshness |
 
-## Estructura del repositorio
-
-```text
-src/                # Aplicación principal (frontend + backend + servicios)
-src-tauri/          # Shell desktop en Rust/Tauri
-tests/              # Unit, integration y e2e
-scripts/            # Scripts operativos Bun
-docs/               # Documentación técnica, guías y auditorías
-public/             # Assets públicos y uploads
-drizzle/            # Migraciones generadas
-logs/               # Logs de ejecución y métricas
-```
-
-## Cómo está organizado `src/`
-
-| Ruta | Responsabilidad |
-| --- | --- |
-| `src/components/` | UI, layout, features, vistas y paneles |
-| `src/router.tsx` | Mapa de rutas del cliente |
-| `src/server/` | Servidor Express, middleware y rutas API |
-| `src/services/` | Lógica de negocio y sistemas transversales |
-| `src/transformers/` | Enriquecimiento y serialización de entidades |
-| `src/store/` | Estado global con Zustand |
-| `src/lib/` | Infraestructura compartida (Drizzle, logger, effect, filesystem, contexts) |
-| `src/providers/` | Providers de aplicación y compatibilidad |
-| `src/styles/` | Tokens, globals, animaciones y utilidades de tema |
-| `src/types/` | Tipos del dominio |
-
-## Documentación recomendada
-
-### Documentación troncal actualizada
-
-- [`docs/core/PRD.md`](./docs/core/PRD.md): visión de producto, alcance y requerimientos.
-- [`docs/core/ARCHITECTURE.md`](./docs/core/ARCHITECTURE.md): arquitectura completa y flujos.
-- [`docs/core/REPOSITORY-MAP.md`](./docs/core/REPOSITORY-MAP.md): mapa de carpetas y archivos.
-- [`docs/core/DATABASE-SCHEMA.md`](./docs/core/DATABASE-SCHEMA.md): dominios y patrón del esquema Drizzle.
-- [`docs/core/FRONTEND-GUIDE.md`](./docs/core/FRONTEND-GUIDE.md): bootstrap, providers, vistas, stores y UI.
-- [`docs/core/DESIGN-AND-UX.md`](./docs/core/DESIGN-AND-UX.md): shell visual, paneles, temas y criterios UX.
-- [`docs/core/SERVICES-GUIDE.md`](./docs/core/SERVICES-GUIDE.md): servicios, Effect-TS y sistemas transversales.
-- [`docs/core/API-REFERENCE.md`](./docs/core/API-REFERENCE.md): familias de endpoints y convenciones.
-- [`docs/core/IMPLEMENTATION-DETAILS.md`](./docs/core/IMPLEMENTATION-DETAILS.md): implementación de thumbnails, reindex, búsqueda, Tauri y tooling.
-- [`docs/core/CODEBASE-HEALTH-2026-05-08.md`](./docs/core/CODEBASE-HEALTH-2026-05-08.md): auditoría aplicada, fixes, logs y riesgos residuales.
-
-### Documentación especializada complementaria
-
-- [`docs/core/LOGGING-SYSTEM-GUIDE.md`](./docs/core/LOGGING-SYSTEM-GUIDE.md)
-- [`docs/core/STYLES-AND-THEMES-GUIDE.md`](./docs/core/STYLES-AND-THEMES-GUIDE.md)
-- [`docs/core/THUMBNAIL-CONFIG.md`](./docs/core/THUMBNAIL-CONFIG.md)
-
-### Convenciones operativas para agentes y colaboradores
-
-- [`AGENTS.md`](./AGENTS.md)
-- [`.github/copilot-instructions.md`](./.github/copilot-instructions.md)
-
-## Características funcionales principales
-
-### Dominios de archivo
-
-- Imágenes
-- Videos
-- Audios
-- Documentos
-- JSON
-- Archivos 3D
-- Imágenes subidas
-
-### Dominios organizativos y creativos
-
-- Carpetas
-- Tags
-- Álbumes
-- Colecciones
-- Grupos
-- Favoritos
-- Profiles
-- Settings
-- Characters
-- Places
-- Concepts
-- World Items
-- Prompts
-- Notes
-- Properties
-- Tasks
-- Wildcards
-
-### Sistemas técnicos relevantes
-
-- Reindexado estructurado e incremental
-- Mapper de archivos físicos a entidades de BD
-- Thumbnailing unificado y previews específicos por tipo
-- Búsqueda global y FTS con fallback
-- Logging estructurado
-- Sistema de cachés y métricas
-- Reubicación autorizada de archivos con recuperación parcial explícita
-- Paneles, file browser y viewer multi-formato
-
-## Flujo de desarrollo recomendado
+The broad local gate is:
 
 ```bash
 bun run check
+bun run test:tooling
 bun run test
 bun run build
 ```
 
-Estos comandos generan logs en `logs/` mediante `scripts/run-with-log.js`, incluyendo resumen automatico de errores para debugging.
+## Architecture
 
-Si tocas rutas, viewers, thumbnails, búsqueda o reindexado, añade además:
+| Area | Responsibility |
+| --- | --- |
+| `src/components/` | Application shell, views, panels, cards, and file workflows |
+| `src/server/` | Express API, middleware, routes, and runtime integration |
+| `src/services/` | Media processing, indexing, metadata, and domain services |
+| `src/store/` | Zustand state and entity operations |
+| `src/lib/` | Drizzle, filesystem boundaries, logging, Effect adapters, and shared infrastructure |
+| `src/types/` | Domain types, validation contracts, and view configuration |
+| `src-tauri/` | Optional Rust/Tauri desktop shell |
+| `scripts/` | Bun automation, isolated tests, builds, and database operations |
+| `docs/` | Product site and detailed engineering references |
 
-```bash
-bun run test:e2e
-```
+Start with these references when changing a major subsystem:
 
-## Notas arquitectónicas importantes
+- [`docs/core/ARCHITECTURE.md`](docs/core/ARCHITECTURE.md)
+- [`docs/core/DATABASE-SCHEMA.md`](docs/core/DATABASE-SCHEMA.md)
+- [`docs/core/FRONTEND-GUIDE.md`](docs/core/FRONTEND-GUIDE.md)
+- [`docs/core/SERVICES-GUIDE.md`](docs/core/SERVICES-GUIDE.md)
+- [`docs/core/API-REFERENCE.md`](docs/core/API-REFERENCE.md)
+- [`docs/project-readiness.md`](docs/project-readiness.md)
 
-- Es un **monolito cliente-servidor**, no un conjunto de microservicios.
-- Conviven capas nuevas en Effect-TS con utilidades y compatibilidad heredada.
-- Hay doble composición de providers (`src/providers/*` y `src/components/ui/*`) por migraciones históricas; esto está documentado en la guía de arquitectura.
-- El árbol `docs/` contiene material actual y también auditorías históricas; usa `docs/core/` como punto de entrada principal.
+## Security and data boundaries
 
-## Estado del proyecto
+- Filesystem mutations use authorized media roots and canonical asset identities.
+- Recovery and partial-success states must remain visible to the user.
+- The test runner refuses to start without an isolated disposable database.
+- Dependency overrides in `package.json` pin patched transitive releases when an upstream range still resolves a vulnerable version.
+- Never commit personal databases, uploads, generated logs, or private library paths.
 
-Proyecto en desarrollo activo con una base funcional amplia, una capa documental ya madura y una arquitectura con fuerte orientación a tipado, modularidad y operación local. No es un MVP diminuto; es un sistema bastante ancho, con varias capas de compatibilidad y herramientas de mantenimiento.
+## Contributing
 
-Última revisión integral aplicada: **2026-07-23**. El gate `bun run check` quedó verde con Oxlint 0 warnings/0 errors y TypeScript limpio. El shell Tauri cuenta con un gate de compilación Windows y una CSP explícita, pero aún no constituye un instalable autónomo: falta empaquetar y supervisar el backend con sus dependencias nativas, probarlo fuera del checkout y definir firma e instalador.
+Read [`AGENTS.md`](AGENTS.md) and [`.github/copilot-instructions.md`](.github/copilot-instructions.md) before changing the application. Preserve the current Bun workflow and add evidence at the narrowest public seam that can prove the behavior.
 
-## Licencia
+## Support
 
-Consulta la licencia del repositorio si aplica en tu entorno de distribución.
+If Media Manager saves you time, you can sponsor continued work through [GitHub Sponsors](https://github.com/sponsors/gvastethecreator) or [Ko-fi](https://ko-fi.com/gvaste).
+
+## License
+
+See the repository license before redistributing the application or bundled assets.

@@ -80,7 +80,7 @@ export const WorldItemContentView = memo(function WorldItemContentView() {
 
 	return (
 		<BaseContentView
-			description={selectedWorldItem?._count?.images ? `${selectedWorldItem._count.images} imágenes` : undefined}
+			description={selectedWorldItem?._count?.images ? `${selectedWorldItem._count.images} images` : undefined}
 			title={selectedWorldItem?.name ?? 'Objeto del mundo'}
 		>
 			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />

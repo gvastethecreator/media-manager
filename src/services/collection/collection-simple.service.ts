@@ -46,7 +46,7 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 		logger.info(`✅ ${result.length} colecciones obtenidas`);
 		return result;
 	} catch (error) {
-		logger.error('❌ Error al obtener colecciones', { error });
+		logger.error('❌ Could not get collections', { error });
 		return [];
 	}
 };

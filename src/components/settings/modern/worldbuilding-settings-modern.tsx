@@ -19,7 +19,7 @@ import {
 	Trash2,
 	Users,
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +29,11 @@ import { useConcepts, useDeleteConcept } from '@/lib/api/concepts';
 import { useDeleteNote, useNotes } from '@/lib/api/notes';
 import { useDeletePlace, usePlaces } from '@/lib/api/places';
 import { useDeletePrompt, usePrompts } from '@/lib/api/prompts';
+import {
+	getTaxonomyArtifactOrNull,
+	type TaxonomyArtifactDocument,
+	type TaxonomyArtifactType,
+} from '@/lib/api/taxonomy-artifacts';
 import { useCreateWildcard, useDeleteWildcard, useUpdateWildcard, useWildcards } from '@/lib/api/wildcards';
 import { useDeleteWorldItem, useWorldItems } from '@/lib/api/world-items';
 import { toastService } from '@/lib/ui/toast';
@@ -56,8 +61,8 @@ import { SettingsPageHeader, SettingsStatsGrid } from './settings-card';
 
 const ENTITY_CONFIG = {
 	characters: {
-		label: 'Personajes',
-		singular: 'Personaje',
+		label: 'Characters',
+		singular: 'Character',
 		icon: Users,
 		color: 'var(--entity-character)',
 		useQuery: useCharacters,
@@ -65,8 +70,8 @@ const ENTITY_CONFIG = {
 		CreateForm: CreateCharacterForm,
 	},
 	places: {
-		label: 'Lugares',
-		singular: 'Lugar',
+		label: 'Places',
+		singular: 'Place',
 		icon: Globe,
 		color: 'var(--entity-place)',
 		useQuery: usePlaces,
@@ -74,8 +79,8 @@ const ENTITY_CONFIG = {
 		CreateForm: CreatePlaceForm,
 	},
 	items: {
-		label: 'Objetos',
-		singular: 'Objeto',
+		label: 'World Items',
+		singular: 'World Item',
 		icon: Box,
 		color: 'var(--entity-world-item)',
 		useQuery: useWorldItems,
@@ -83,8 +88,8 @@ const ENTITY_CONFIG = {
 		CreateForm: CreateWorldItemForm,
 	},
 	concepts: {
-		label: 'Conceptos',
-		singular: 'Concepto',
+		label: 'Concepts',
+		singular: 'Concept',
 		icon: Book,
 		color: 'var(--entity-concept)',
 		useQuery: useConcepts,
@@ -101,8 +106,8 @@ const ENTITY_CONFIG = {
 		CreateForm: CreatePromptForm,
 	},
 	notes: {
-		label: 'Notas',
-		singular: 'Nota',
+		label: 'Notes',
+		singular: 'Note',
 		icon: FileText,
 		color: 'var(--entity-note)',
 		useQuery: useNotes,
@@ -160,7 +165,7 @@ function CharacterCard({
 					<div className="flex gap-1">
 						{character.isFavorite && <span style={{ color: 'var(--entity-favorite)' }}>★</span>}
 					</div>
-					<span className="text-muted-foreground text-sm">{character.statistics?.imageCount || 0} imágenes</span>
+					<span className="text-muted-foreground text-sm">{character.statistics?.imageCount || 0} images</span>
 				</div>
 			</CardContent>
 		</>
@@ -187,7 +192,7 @@ function CharacterCard({
 				</div>
 			</div>
 			<div className="flex items-center gap-4">
-				<span className="text-muted-foreground text-sm">{character.statistics?.imageCount || 0} imágenes</span>
+				<span className="text-muted-foreground text-sm">{character.statistics?.imageCount || 0} images</span>
 				<div className="flex gap-1">
 					<Button onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
@@ -219,7 +224,7 @@ function PlaceCard({ place, actions, isGrid }: { place: PlaceWithStats; actions:
 					<div className="flex gap-1">
 						{place.isFavorite && <span style={{ color: 'var(--entity-favorite)' }}>★</span>}
 					</div>
-					<span className="text-muted-foreground text-sm">{place.statistics?.imageCount || 0} imágenes</span>
+					<span className="text-muted-foreground text-sm">{place.statistics?.imageCount || 0} images</span>
 				</div>
 			</CardContent>
 		</>
@@ -246,7 +251,7 @@ function PlaceCard({ place, actions, isGrid }: { place: PlaceWithStats; actions:
 				</div>
 			</div>
 			<div className="flex items-center gap-4">
-				<span className="text-muted-foreground text-sm">{place.statistics?.imageCount || 0} imágenes</span>
+				<span className="text-muted-foreground text-sm">{place.statistics?.imageCount || 0} images</span>
 				<div className="flex gap-1">
 					<Button onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
@@ -278,7 +283,7 @@ function WorldItemCard({ item, actions, isGrid }: { item: WorldItemWithStats; ac
 					<div className="flex gap-1">
 						{item.isFavorite && <span style={{ color: 'var(--entity-favorite)' }}>★</span>}
 					</div>
-					<span className="text-muted-foreground text-sm">{item.statistics?.imageCount || 0} imágenes</span>
+					<span className="text-muted-foreground text-sm">{item.statistics?.imageCount || 0} images</span>
 				</div>
 			</CardContent>
 		</>
@@ -305,7 +310,7 @@ function WorldItemCard({ item, actions, isGrid }: { item: WorldItemWithStats; ac
 				</div>
 			</div>
 			<div className="flex items-center gap-4">
-				<span className="text-muted-foreground text-sm">{item.statistics?.imageCount || 0} imágenes</span>
+				<span className="text-muted-foreground text-sm">{item.statistics?.imageCount || 0} images</span>
 				<div className="flex gap-1">
 					<Button onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
@@ -345,7 +350,7 @@ function ConceptCard({
 					<div className="flex gap-1">
 						{concept.isFavorite && <span style={{ color: 'var(--entity-favorite)' }}>★</span>}
 					</div>
-					<span className="text-muted-foreground text-sm">{concept.statistics?.imageCount || 0} imágenes</span>
+					<span className="text-muted-foreground text-sm">{concept.statistics?.imageCount || 0} images</span>
 				</div>
 			</CardContent>
 		</>
@@ -372,7 +377,7 @@ function ConceptCard({
 				</div>
 			</div>
 			<div className="flex items-center gap-4">
-				<span className="text-muted-foreground text-sm">{concept.statistics?.imageCount || 0} imágenes</span>
+				<span className="text-muted-foreground text-sm">{concept.statistics?.imageCount || 0} images</span>
 				<div className="flex gap-1">
 					<Button onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
@@ -401,10 +406,10 @@ function PromptCard({ prompt, actions, isGrid }: { prompt: PromptWithStats; acti
 					<div className="mt-4 flex items-center justify-between">
 						<span className="text-muted-foreground text-sm">{prompt._count?.images || 0} usos</span>
 						<div className="flex gap-1">
-							<Button onClick={actions.onEdit} size="sm" variant="ghost">
+							<Button aria-label={`Edit ${prompt.name}`} onClick={actions.onEdit} size="sm" variant="ghost">
 								<Edit2 className="h-4 w-4" />
 							</Button>
-							<Button onClick={actions.onDelete} size="sm" variant="ghost">
+							<Button aria-label={`Delete ${prompt.name}`} onClick={actions.onDelete} size="sm" variant="ghost">
 								<Trash2 className="h-4 w-4" />
 							</Button>
 						</div>
@@ -426,10 +431,10 @@ function PromptCard({ prompt, actions, isGrid }: { prompt: PromptWithStats; acti
 			<div className="flex items-center gap-4">
 				<span className="text-muted-foreground text-sm">{prompt._count?.images || 0} usos</span>
 				<div className="flex gap-1">
-					<Button onClick={actions.onEdit} size="sm" variant="ghost">
+					<Button aria-label={`Edit ${prompt.name}`} onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
 					</Button>
-					<Button onClick={actions.onDelete} size="sm" variant="ghost">
+					<Button aria-label={`Delete ${prompt.name}`} onClick={actions.onDelete} size="sm" variant="ghost">
 						<Trash2 className="h-4 w-4" />
 					</Button>
 				</div>
@@ -445,7 +450,7 @@ function NoteCard({ note, actions, isGrid }: { note: NoteWithStats; actions: Car
 				<CardHeader className="pb-3">
 					<div className="flex items-center gap-3">
 						<FileText className="h-5 w-5 text-primary" />
-						<CardTitle className="text-base">{note.name}</CardTitle>
+						<CardTitle className="text-base">{note.title}</CardTitle>
 					</div>
 				</CardHeader>
 				<CardContent>
@@ -455,10 +460,10 @@ function NoteCard({ note, actions, isGrid }: { note: NoteWithStats; actions: Car
 							{note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : 'Nunca'}
 						</span>
 						<div className="flex gap-1">
-							<Button onClick={actions.onEdit} size="sm" variant="ghost">
+							<Button aria-label={`Edit ${note.title}`} onClick={actions.onEdit} size="sm" variant="ghost">
 								<Edit2 className="h-4 w-4" />
 							</Button>
-							<Button onClick={actions.onDelete} size="sm" variant="ghost">
+							<Button aria-label={`Delete ${note.title}`} onClick={actions.onDelete} size="sm" variant="ghost">
 								<Trash2 className="h-4 w-4" />
 							</Button>
 						</div>
@@ -473,7 +478,7 @@ function NoteCard({ note, actions, isGrid }: { note: NoteWithStats; actions: Car
 			<div className="flex min-w-0 flex-1 items-center gap-3">
 				<FileText className="h-5 w-5 text-primary" />
 				<div className="min-w-0">
-					<p className="font-medium">{note.name}</p>
+					<p className="font-medium">{note.title}</p>
 					<p className="truncate text-muted-foreground text-sm">{note.content}</p>
 				</div>
 			</div>
@@ -482,10 +487,10 @@ function NoteCard({ note, actions, isGrid }: { note: NoteWithStats; actions: Car
 					{note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : 'Nunca'}
 				</span>
 				<div className="flex gap-1">
-					<Button onClick={actions.onEdit} size="sm" variant="ghost">
+					<Button aria-label={`Edit ${note.title}`} onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
 					</Button>
-					<Button onClick={actions.onDelete} size="sm" variant="ghost">
+					<Button aria-label={`Delete ${note.title}`} onClick={actions.onDelete} size="sm" variant="ghost">
 						<Trash2 className="h-4 w-4" />
 					</Button>
 				</div>
@@ -526,10 +531,10 @@ function WildcardCard({
 					<div className="flex items-center justify-between">
 						<span className="text-muted-foreground text-sm">{wildcard._count?.images || 0} usos</span>
 						<div className="flex gap-1">
-							<Button onClick={actions.onEdit} size="sm" variant="ghost">
+							<Button aria-label={`Edit ${wildcard.name}`} onClick={actions.onEdit} size="sm" variant="ghost">
 								<Edit2 className="h-4 w-4" />
 							</Button>
-							<Button onClick={actions.onDelete} size="sm" variant="ghost">
+							<Button aria-label={`Delete ${wildcard.name}`} onClick={actions.onDelete} size="sm" variant="ghost">
 								<Trash2 className="h-4 w-4" />
 							</Button>
 						</div>
@@ -557,10 +562,10 @@ function WildcardCard({
 			<div className="flex items-center gap-4">
 				<span className="text-muted-foreground text-sm">{wildcard._count?.images || 0} usos</span>
 				<div className="flex gap-1">
-					<Button onClick={actions.onEdit} size="sm" variant="ghost">
+					<Button aria-label={`Edit ${wildcard.name}`} onClick={actions.onEdit} size="sm" variant="ghost">
 						<Edit2 className="h-4 w-4" />
 					</Button>
-					<Button onClick={actions.onDelete} size="sm" variant="ghost">
+					<Button aria-label={`Delete ${wildcard.name}`} onClick={actions.onDelete} size="sm" variant="ghost">
 						<Trash2 className="h-4 w-4" />
 					</Button>
 				</div>
@@ -573,14 +578,31 @@ function WildcardCard({
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-export function WorldbuildingSettingsModern() {
-	const [activeEntity, setActiveEntity] = useState<EntityType>('characters');
+interface WorldbuildingSettingsModernProps {
+	defaultEntity?: string;
+	onEntityChange?: (itemId: string) => void;
+}
+
+function resolveEntityType(value: string | undefined): EntityType {
+	return value && value in ENTITY_CONFIG ? (value as EntityType) : 'characters';
+}
+
+export function WorldbuildingSettingsModern({ defaultEntity, onEntityChange }: WorldbuildingSettingsModernProps) {
+	const resolvedDefaultEntity = resolveEntityType(defaultEntity);
+	const [activeEntity, setActiveEntity] = useState<EntityType>(resolvedDefaultEntity);
 	const [showForm, setShowForm] = useState(false);
 	const [editingItem, setEditingItem] = useState<AnyEntity | null>(null);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [searchQuery, setSearchQuery] = useState('');
 	const createWildcardMutation = useCreateWildcard();
 	const updateWildcardMutation = useUpdateWildcard();
+
+	useEffect(() => {
+		setActiveEntity(resolvedDefaultEntity);
+		setEditingItem(null);
+		setShowForm(false);
+		setSearchQuery('');
+	}, [resolvedDefaultEntity]);
 
 	const config = ENTITY_CONFIG[activeEntity];
 
@@ -621,7 +643,7 @@ export function WorldbuildingSettingsModern() {
 		return [
 			{ label: 'Total', value: total, icon: config.icon, color: config.color },
 			{ label: 'Favoritos', value: favorites, icon: Users, color: 'var(--amber-500)' },
-			{ label: 'Con imágenes', value: withImages, icon: config.icon, color: 'var(--primary)' },
+			{ label: 'With images', value: withImages, icon: config.icon, color: 'var(--primary)' },
 		];
 	}, [items, config]);
 
@@ -639,19 +661,53 @@ export function WorldbuildingSettingsModern() {
 	const handleSuccess = useCallback(() => {
 		setShowForm(false);
 		setEditingItem(null);
-		toastService.success(editingItem ? 'Actualizado correctamente' : 'Creado correctamente');
+		toastService.success(editingItem ? 'Updated successfully' : 'Created successfully');
 	}, [editingItem]);
 
 	const handleDelete = useCallback(
 		async (id: string) => {
 			try {
-				await currentDeleteMutation.mutateAsync(id);
+				const taxonomyType: TaxonomyArtifactType | null =
+					activeEntity === 'prompts'
+						? 'prompt'
+						: activeEntity === 'notes'
+							? 'note'
+							: activeEntity === 'wildcards'
+								? 'wildcard'
+								: null;
+				let mutationInput:
+					| string
+					| {
+							contentHash?: string;
+							deleteMissingConfirmed?: boolean;
+							id: string;
+							syncStatus?: TaxonomyArtifactDocument['syncStatus'];
+					  } = id;
+				if (taxonomyType) {
+					const artifact = await getTaxonomyArtifactOrNull(taxonomyType, id);
+					let deleteMissingConfirmed = false;
+					if (artifact?.syncStatus === 'missing') {
+						deleteMissingConfirmed = globalThis.confirm(
+							'The canonical file is missing. Also delete the identity and its latest indexed projection?'
+						);
+						if (!deleteMissingConfirmed) return;
+					}
+					mutationInput = {
+						contentHash: artifact?.contentHash,
+						deleteMissingConfirmed,
+						id,
+						syncStatus: artifact?.syncStatus,
+					};
+				}
+				await currentDeleteMutation.mutateAsync(mutationInput as never);
 				toastService.success(`${config.singular} eliminado correctamente`);
 			} catch (err) {
-				toastService.error(`Error al eliminar ${config.singular.toLowerCase()}`);
+				toastService.error(`Could not delete ${config.singular.toLowerCase()}`, {
+					description: err instanceof Error ? err.message : 'Unexpected error.',
+				});
 			}
 		},
-		[currentDeleteMutation, config.singular]
+		[activeEntity, currentDeleteMutation, config.singular]
 	);
 
 	// Render del formulario específico según el tipo de entidad
@@ -662,9 +718,9 @@ export function WorldbuildingSettingsModern() {
 			case 'items':
 				return (
 					<Dialog onOpenChange={setShowForm} open={showForm}>
-						<DialogContent className="sm:max-w-150">
+						<DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-150">
 							<DialogHeader>
-								<DialogTitle>{editingItem ? `Editar ${config.singular}` : `Crear ${config.singular}`}</DialogTitle>
+								<DialogTitle>{editingItem ? `Edit ${config.singular}` : `Create ${config.singular}`}</DialogTitle>
 							</DialogHeader>
 							<CreateWorldItemForm
 								isEditing={!!editingItem}
@@ -679,9 +735,9 @@ export function WorldbuildingSettingsModern() {
 			case 'notes':
 				return (
 					<Dialog onOpenChange={setShowForm} open={showForm}>
-						<DialogContent className="sm:max-w-150">
+						<DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-150">
 							<DialogHeader>
-								<DialogTitle>{editingItem ? `Editar ${config.singular}` : `Crear ${config.singular}`}</DialogTitle>
+								<DialogTitle>{editingItem ? `Edit ${config.singular}` : `Create ${config.singular}`}</DialogTitle>
 							</DialogHeader>
 							<CreateNoteForm
 								isEditing={!!editingItem}
@@ -696,9 +752,9 @@ export function WorldbuildingSettingsModern() {
 			case 'wildcards':
 				return (
 					<Dialog onOpenChange={setShowForm} open={showForm}>
-						<DialogContent className="sm:max-w-150">
+						<DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-150">
 							<DialogHeader>
-								<DialogTitle>{editingItem ? 'Editar Wildcard' : 'Crear Wildcard'}</DialogTitle>
+								<DialogTitle>{editingItem ? 'Edit Wildcard' : 'Create Wildcard'}</DialogTitle>
 							</DialogHeader>
 							<CreateWildcardForm
 								parentWildcards={(queries.wildcards.data?.data as WildcardWithStats[] | undefined) || []}
@@ -726,9 +782,9 @@ export function WorldbuildingSettingsModern() {
 				const FormComponent = config.CreateForm as any;
 				return (
 					<Dialog onOpenChange={setShowForm} open={showForm}>
-						<DialogContent className="sm:max-w-150">
+						<DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-150">
 							<DialogHeader>
-								<DialogTitle>{editingItem ? `Editar ${config.singular}` : `Crear ${config.singular}`}</DialogTitle>
+								<DialogTitle>{editingItem ? `Edit ${config.singular}` : `Create ${config.singular}`}</DialogTitle>
 							</DialogHeader>
 							<FormComponent
 								{...{ [activeEntity.slice(0, -1)]: editingItem }}
@@ -769,7 +825,7 @@ export function WorldbuildingSettingsModern() {
 	return (
 		<div className="space-y-6">
 			<SettingsPageHeader
-				description="Gestiona personajes, lugares, objetos y elementos de tu universo creativo"
+				description="Manage the characters, places, objects, and ideas in your creative universe"
 				title="Worldbuilding"
 			/>
 
@@ -790,7 +846,10 @@ export function WorldbuildingSettingsModern() {
 									: 'border-border/30 bg-muted/30 hover:border-border/50 hover:bg-muted/50'
 							)}
 							key={type}
-							onClick={() => setActiveEntity(type)}
+							onClick={() => {
+								setActiveEntity(type);
+								onEntityChange?.(type === 'items' ? 'world-items' : type);
+							}}
 							type="button"
 						>
 							<div
@@ -846,7 +905,7 @@ export function WorldbuildingSettingsModern() {
 					<input
 						className="w-full rounded-lg border bg-background px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 						onChange={(e) => setSearchQuery(e.target.value)}
-						placeholder={`Buscar ${config.label.toLowerCase()}...`}
+						placeholder={`Search ${config.label.toLowerCase()}...`}
 						type="text"
 						value={searchQuery}
 					/>
@@ -854,6 +913,7 @@ export function WorldbuildingSettingsModern() {
 				<div className="flex flex-wrap items-center gap-2 xl:justify-end">
 					<div className="flex items-center rounded-lg border p-0.5">
 						<Button
+							aria-label="Grid view"
 							className="h-8 w-8 p-0"
 							onClick={() => setViewMode('grid')}
 							size="sm"
@@ -862,6 +922,7 @@ export function WorldbuildingSettingsModern() {
 							<Grid3X3 className="h-4 w-4" />
 						</Button>
 						<Button
+							aria-label="List view"
 							className="h-8 w-8 p-0"
 							onClick={() => setViewMode('list')}
 							size="sm"
@@ -872,7 +933,7 @@ export function WorldbuildingSettingsModern() {
 					</div>
 					<Button className="gap-2" onClick={handleCreate}>
 						<Plus className="h-4 w-4" />
-						Crear {config.singular}
+						Create {config.singular}
 					</Button>
 				</div>
 			</div>
@@ -887,19 +948,19 @@ export function WorldbuildingSettingsModern() {
 					<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 						<config.icon className="h-6 w-6 text-muted-foreground" />
 					</div>
-					<h3 className="font-medium text-lg">No hay {config.label.toLowerCase()}</h3>
+					<h3 className="font-medium text-lg">No {config.label.toLowerCase()} yet</h3>
 					<p className="mt-1 text-muted-foreground text-sm">
 						{searchQuery
-							? 'No se encontraron resultados'
-							: `Comienza creando tu primer ${config.singular.toLowerCase()}`}
+							? 'No results found'
+							: `Start by creating your first ${config.singular.toLowerCase()}`}
 					</p>
 					<div className="mt-4">
 						{searchQuery ? (
 							<Button onClick={() => setSearchQuery('')} variant="outline">
-								Limpiar búsqueda
+								Clear search
 							</Button>
 						) : (
-							<Button onClick={handleCreate}>Crear {config.singular}</Button>
+							<Button onClick={handleCreate}>Create {config.singular}</Button>
 						)}
 					</div>
 				</div>

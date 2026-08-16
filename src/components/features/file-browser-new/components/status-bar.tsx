@@ -27,24 +27,24 @@ export function FileBrowserStatusBar({
 	const canNext = pagination && (pagination.page < pagination.totalPages - 1 || pagination.hasMore);
 	const pageLabel = hasPages ? `${pagination.page + 1}/${pagination.totalPages}` : null;
 	const summaryLabel = `${shownItems.toLocaleString()}/${totalItems.toLocaleString()}`;
-	const selectionLabel = selectedCount > 0 ? `${selectedCount.toLocaleString()} sel.` : null;
+	const selectionLabel = selectedCount > 0 ? `${selectedCount.toLocaleString()} selected` : null;
 	const recoveryLabel = startupRecoveryUnavailable
-		? 'Rec. sin estado'
+		? 'Recovery unavailable'
 		: startupRecovery?.state === 'manual_review_required'
-			? `Rec. ${startupRecovery.manual} revisión`
+			? `Recovery: ${startupRecovery.manual} review`
 			: startupRecovery?.state === 'pending'
-				? `Rec. ${startupRecovery.pending} pendiente${startupRecovery.pending === 1 ? '' : 's'}`
+				? `Recovery: ${startupRecovery.pending} pending`
 				: startupRecovery?.state === 'resolved'
-					? `Rec. ${startupRecovery.completed} resuelta${startupRecovery.completed === 1 ? '' : 's'}`
+					? `Recovery: ${startupRecovery.completed} resolved`
 					: null;
 	const recoveryTitle = startupRecoveryUnavailable
-		? 'No se pudo comprobar el estado de recuperación al iniciar.'
+		? 'Startup recovery status could not be checked.'
 		: startupRecovery?.state === 'manual_review_required'
-			? `La recuperación de inicio requiere revisión manual para ${startupRecovery.manual} ${startupRecovery.manual === 1 ? 'operación' : 'operaciones'}.${startupRecovery.pending > 0 ? ` Además, ${startupRecovery.pending} ${startupRecovery.pending === 1 ? 'operación sigue pendiente' : 'operaciones siguen pendientes'} de reconciliación.` : ''}`
+			? `Startup recovery requires manual review for ${startupRecovery.manual} ${startupRecovery.manual === 1 ? 'operation' : 'operations'}.${startupRecovery.pending > 0 ? ` In addition, ${startupRecovery.pending} ${startupRecovery.pending === 1 ? 'operation remains' : 'operations remain'} pending reconciliation.` : ''}`
 			: startupRecovery?.state === 'pending'
-				? `${startupRecovery.pending} ${startupRecovery.pending === 1 ? 'operación sigue pendiente' : 'operaciones siguen pendientes'} de reconciliación.`
+				? `${startupRecovery.pending} ${startupRecovery.pending === 1 ? 'operation remains' : 'operations remain'} pending reconciliation.`
 				: startupRecovery?.state === 'resolved'
-					? `${startupRecovery.completed} ${startupRecovery.completed === 1 ? 'operación se reconcilió' : 'operaciones se reconciliaron'} al iniciar.`
+					? `${startupRecovery.completed} ${startupRecovery.completed === 1 ? 'operation was' : 'operations were'} reconciled at startup.`
 					: undefined;
 
 	return (
@@ -64,7 +64,7 @@ export function FileBrowserStatusBar({
 
 			{hasPages && (
 				<div className="justify-self-center tabular-nums">
-					<span>Pág. {pageLabel}</span>
+					<span>Page {pageLabel}</span>
 				</div>
 			)}
 
@@ -81,7 +81,7 @@ export function FileBrowserStatusBar({
 							title={recoveryTitle}
 							variant="ghost"
 						>
-							{recoveryRepairing ? 'Revisando…' : recoveryLabel}
+							{recoveryRepairing ? 'Reviewing…' : recoveryLabel}
 						</Button>
 					) : (
 						<span
@@ -109,7 +109,7 @@ export function FileBrowserStatusBar({
 							variant="ghost"
 						>
 							<ChevronLeft className="h-2.5 w-2.5" />
-							<span className="sr-only">Página anterior</span>
+							<span className="sr-only">Previous page</span>
 						</Button>
 						<Button
 							className="h-3.5 w-3.5 rounded-sm p-0 hover:bg-accent/70"
@@ -119,13 +119,13 @@ export function FileBrowserStatusBar({
 							variant="ghost"
 						>
 							<ChevronRight className="h-2.5 w-2.5" />
-							<span className="sr-only">Página siguiente</span>
+							<span className="sr-only">Next page</span>
 						</Button>
 					</>
 				) : isLoading ? (
-					<span className="truncate opacity-80">Cargando…</span>
+					<span className="truncate opacity-80">Loading…</span>
 				) : (
-					!recoveryLabel && <span className="truncate opacity-80">Listo</span>
+					!recoveryLabel && <span className="truncate opacity-80">Ready</span>
 				)}
 			</div>
 		</div>

@@ -435,7 +435,7 @@ export const TagCard = memo(function TagCard({
 
 	return (
 		<motion.article
-			aria-label={`Etiqueta: ${config.name}`}
+			aria-label={`Tag: ${config.name}`}
 			className={getContainerClasses(disabled, interactive, className)}
 			data-tag-id={config.id}
 			onClick={disabled || !interactive ? undefined : onClick}

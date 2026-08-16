@@ -23,7 +23,7 @@ const API_BASE_PATH = '/api/documents';
 export async function getDocumentsFromApi(): Promise<DocumentWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
-		throw new Error('Error al obtener documentos');
+		throw new Error('Could not get documents');
 	}
 	return response.json();
 }
@@ -35,7 +35,7 @@ export async function createDocumentInApi(data: PublicDocumentCreateInput): Prom
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al crear documento');
+		throw new Error('Could not create document');
 	}
 	return response.json();
 }
@@ -47,7 +47,7 @@ export async function updateDocumentInApi(id: string, data: PublicDocumentUpdate
 		body: JSON.stringify(data),
 	});
 	if (!response.ok) {
-		throw new Error('Error al actualizar documento');
+		throw new Error('Could not update document');
 	}
 	return response.json();
 }
@@ -55,6 +55,6 @@ export async function updateDocumentInApi(id: string, data: PublicDocumentUpdate
 export async function deleteDocumentFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
 	if (!response.ok) {
-		throw new Error('Error al eliminar documento');
+		throw new Error('Could not delete document');
 	}
 }

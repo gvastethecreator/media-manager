@@ -62,20 +62,20 @@ export interface EnhancedProgressStatus {
 
 export const REINDEX_STAGES = {
 	1: {
-		name: 'Indexación',
-		description: 'Escaneando archivos y creando entidades básicas',
-		getProgressMessage: (processed: number, total: number) => `Etapa 1/3: Indexando archivos... ${processed}/${total}`,
+		name: 'Indexing',
+		description: 'Scanning files and creating base entities',
+		getProgressMessage: (processed: number, total: number) => `Stage 1/3: Indexing files... ${processed}/${total}`,
 	},
 	2: {
 		name: 'Metadata',
-		description: 'Extrayendo metadata de archivos',
+		description: 'Extracting file metadata',
 		getProgressMessage: (processed: number, total: number) => `Etapa 2/3: Extrayendo metadata... ${processed}/${total}`,
 	},
 	3: {
 		name: 'Thumbnails',
 		description: 'Generando miniaturas',
 		getProgressMessage: (processed: number, total: number) =>
-			`Etapa 3/3: Procesando thumbnails... ${processed}/${total}`,
+			`Stage 3/3: Processing thumbnails... ${processed}/${total}`,
 	},
 } as const;
 

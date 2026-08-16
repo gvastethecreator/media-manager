@@ -16,6 +16,7 @@ import {
 import { type MediaAssetType, resolveMediaAssetReference } from '@/server/security/media-asset-reference';
 import { RootAuthorizationError, type RootPermission } from '@/server/security/authorized-roots';
 import { sanitizeJsonResponses } from '@/server/security/sanitize-public-payload';
+import { assertTaxonomyEntityRootPermissions } from '@/server/security/taxonomy-root-authorization';
 import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType, isCanonicalFavoriteEntityType, type FavoriteWithStats } from '@/types/entities/favorite';
 import { sanitizeLimit, sanitizeOffset } from '../utils/pagination';
@@ -56,6 +57,12 @@ const mediaFavoriteTypes = new Map<FavoriteEntityType, MediaAssetType>([
 	[FavoriteEntityType.FILE_3D, 'file3d'],
 ]);
 
+const taxonomyFavoriteTypes = new Map<FavoriteEntityType, 'note' | 'prompt' | 'wildcard'>([
+	[FavoriteEntityType.NOTE, 'note'],
+	[FavoriteEntityType.PROMPT, 'prompt'],
+	[FavoriteEntityType.WILDCARD, 'wildcard'],
+]);
+
 interface FavoriteRequestContext {
 	app: { locals: Record<string, unknown> };
 }
@@ -80,6 +87,16 @@ async function assertAuthorizedFavoriteTarget(
 	}
 	if (target.entityType === FavoriteEntityType.FOLDER) {
 		for (const permission of permissions) await resolveAuthorizedFolderById(request, target.entityId, permission);
+		return;
+	}
+	const taxonomyType = taxonomyFavoriteTypes.get(target.entityType);
+	if (taxonomyType) {
+		await assertTaxonomyEntityRootPermissions(
+			getAuthorizedRootRegistry(request),
+			taxonomyType,
+			target.entityId,
+			permissions
+		);
 	}
 }
 
@@ -393,7 +410,7 @@ router.put(
 // DELETE /api/favorites/:id - Eliminar favorito
 router.delete(
 	'/:id',
-	authorizeFavoriteById(['read', 'index', 'write']),
+	authorizeFavoriteById(['read', 'index', 'write', 'delete']),
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const { id } = req.params;

@@ -44,7 +44,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '1',
 			type: 'UPLOAD',
-			description: 'Imagen subida: "Amanecer en la montaña"',
+			description: 'Image uploaded: "Mountain sunrise"',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '1',
@@ -53,7 +53,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '2',
 			type: 'TAG',
-			description: 'Etiquetas añadidas a "Retrato familiar"',
+			description: 'Tags added to "Family portrait"',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '2',
@@ -62,7 +62,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '3',
 			type: 'COLLECTION',
-			description: 'Imagen añadida a colección "Vacaciones 2023"',
+			description: 'Image added to collection "Vacation 2023"',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '3',
@@ -71,7 +71,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '4',
 			type: 'EDIT',
-			description: 'Imagen editada: "Vista desde la ventana"',
+			description: 'Image edited: "View from the window"',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '4',
@@ -80,7 +80,7 @@ export const MOCK_STATS: GeneralStats = {
 		{
 			id: '5',
 			type: 'FAVORITE',
-			description: 'Imagen marcada como favorita',
+			description: 'Image marked as favorite',
 			createdAt: getRandomDate(),
 			entityType: 'image',
 			entityId: '5',

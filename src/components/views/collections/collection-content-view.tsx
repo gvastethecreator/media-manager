@@ -56,7 +56,7 @@ export function CollectionContentView() {
 
 	const headerTitle = useMemo(
 		() =>
-			currentCollection?.name ? `Imágenes de la colección: ${currentCollection.name}` : 'Selecciona una colección',
+			currentCollection?.name ? `Collection images: ${currentCollection.name}` : 'Select a collection',
 		[currentCollection?.name]
 	);
 
@@ -65,9 +65,9 @@ export function CollectionContentView() {
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
 					<EmptyState
-						description="Selecciona una colección para ver sus imágenes relacionadas"
+						description="Select a collection to view its related images"
 						icon={Library}
-						title="Sin colección seleccionada"
+						title="No collection selected"
 					/>
 				</div>
 			</BaseContentView>
@@ -91,7 +91,7 @@ export function CollectionContentView() {
 	}
 
 	return (
-		<BaseContentView description={images.length ? `${images.length} imágenes` : undefined} title={headerTitle}>
+		<BaseContentView description={images.length ? `${images.length} images` : undefined} title={headerTitle}>
 			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
 		</BaseContentView>
 	);

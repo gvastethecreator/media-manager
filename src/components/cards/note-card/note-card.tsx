@@ -102,7 +102,7 @@ export const NoteCard = memo(function NoteCard({ noteId, onClick, className, sty
 					className
 				)}
 			>
-				<p className="text-muted-foreground">Cargando nota...</p>
+				<p className="text-muted-foreground">Loading note...</p>
 			</div>
 		);
 	}
@@ -170,7 +170,7 @@ export const NoteCard = memo(function NoteCard({ noteId, onClick, className, sty
 				}
 				primaryColor={primaryColor}
 				subtitle={note.category || 'General'}
-				title={note.title || 'Sin título'}
+				title={note.title || 'Untitled'}
 			/>
 
 			{/* Sección de imágenes */}

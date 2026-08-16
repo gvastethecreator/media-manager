@@ -39,7 +39,7 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 	const allFolders = folders;
 
 	if (isLoading && (!folders || folders.length === 0)) {
-		return <LoadingScreen message="Cargando carpetas..." />;
+		return <LoadingScreen message="Loading folders..." />;
 	}
 
 	if (error) {
@@ -49,12 +49,12 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 					<RefreshCw className="h-8 w-8 text-destructive" />
 				</div>
 				<div className="stack-xs text-center">
-					<h3 className="heading-lg text-destructive">Error al cargar carpetas</h3>
+					<h3 className="heading-lg text-destructive">Could not load folders</h3>
 					<p className="body-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
 				</div>
 				<Button className="mt-2" onClick={handleManualRetry} variant="outline">
 					<RefreshCw className="mr-2 h-4 w-4" />
-					Reintentar
+					Retry
 				</Button>
 			</div>
 		);
@@ -64,24 +64,24 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 	if (!isLoading && allFolders.length === 0) {
 		return (
 			<EmptyState
-				description="No tienes carpetas configuradas. Agrega una carpeta para comenzar a organizar tus archivos."
+				description="No folders are configured. Add a folder to start organizing your files."
 				icon={FolderOpen}
-				title="Sin carpetas"
+				title="No folders"
 			/>
 		);
 	}
 
 	return (
-		<div aria-label="Lista de carpetas" className={`flex h-full flex-col overflow-auto ${className}`} role="region">
+		<div aria-label="Folder list" className={`flex h-full flex-col overflow-auto ${className}`} role="region">
 			<div
-				aria-label={`${allFolders.length} carpetas encontradas`}
+				aria-label={`${allFolders.length} folders found`}
 				className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
 				role="list"
 			>
 				{allFolders.map((folder) => (
 					<div key={folder.id} role="listitem">
 						<FolderCard
-							aria-label={`Carpeta: ${folder.name}`}
+							aria-label={`Folder: ${folder.name}`}
 							className="h-full"
 							folder={folder}
 							interactive={true}

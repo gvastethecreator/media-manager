@@ -4,7 +4,7 @@
  * @description Pipeline de procesamiento, redimensionamiento y conversión de formato
  */
 
-import sharp from 'sharp';
+import sharp, { type Metadata, type OutputInfo, type Sharp } from 'sharp';
 import { imageConfig } from '@/lib/config';
 import { ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
 import { SERVICE_NAME } from './image-utils';
@@ -26,7 +26,7 @@ export interface ImageProcessingOptions {
  */
 export interface ProcessedImage {
 	buffer: Buffer;
-	metadata: sharp.OutputInfo;
+	metadata: OutputInfo;
 }
 
 /**
@@ -68,7 +68,7 @@ export async function processImage(inputPath: string, options: ImageProcessingOp
  * @param options - Opciones de redimensionamiento
  * @returns Pipeline con redimensionamiento aplicado
  */
-function applyResize(pipeline: sharp.Sharp, metadata: sharp.Metadata, options: ImageProcessingOptions): sharp.Sharp {
+function applyResize(pipeline: Sharp, metadata: Metadata, options: ImageProcessingOptions): Sharp {
 	const width = metadata.width ?? 0;
 	const height = metadata.height ?? 0;
 	const hasResize = Boolean(options.width) || Boolean(options.height);
@@ -100,7 +100,7 @@ function applyResize(pipeline: sharp.Sharp, metadata: sharp.Metadata, options: I
  * @param options - Opciones de formato (webp/jpeg/png)
  * @returns Pipeline con conversión de formato aplicada
  */
-function applyFormat(pipeline: sharp.Sharp, options: ImageProcessingOptions): sharp.Sharp {
+function applyFormat(pipeline: Sharp, options: ImageProcessingOptions): Sharp {
 	switch (options.format) {
 		case 'webp':
 			// nearLossless genera archivos mayores; preferimos calidad moderada con esfuerzo razonable

@@ -11,7 +11,7 @@ import {
 import { restrictToParentElement } from '@dnd-kit/modifiers';
 import { horizontalListSortingStrategy, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Cell, flexRender, Header, HeaderGroup, Row } from '@tanstack/react-table';
+import { Cell, flexRender, Header, HeaderGroup, Row, RowData } from '@/lib/tanstack-react-table';
 import { GripVertical } from 'lucide-react';
 import { CSSProperties, Fragment, useId } from 'react';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/data-grid-table';
 import { clientLogger } from '@/lib/logger/client-logger';
 
-function DataGridTableDndHeader<TData>({ header }: { header: Header<TData, unknown> }) {
+function DataGridTableDndHeader<TData extends RowData>({ header }: { header: Header<any, TData, unknown> }) {
 	const { props } = useDataGrid();
 	const { column } = header;
 
@@ -74,7 +74,7 @@ function DataGridTableDndHeader<TData>({ header }: { header: Header<TData, unkno
 	);
 }
 
-function DataGridTableDndCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
+function DataGridTableDndCell<TData extends RowData>({ cell }: { cell: Cell<any, TData, unknown> }) {
 	const { isDragging, setNodeRef, transform, transition } = useSortable({
 		id: cell.column.id,
 	});
@@ -95,7 +95,7 @@ function DataGridTableDndCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
 	);
 }
 
-function DataGridTableDnd<TData>({ handleDragEnd }: { handleDragEnd: (event: DragEndEvent) => void }) {
+function DataGridTableDnd<TData extends RowData>({ handleDragEnd }: { handleDragEnd: (event: DragEndEvent) => void }) {
 	const { table, isLoading, props } = useDataGrid();
 	const pagination = table.getState().pagination;
 
@@ -106,7 +106,7 @@ function DataGridTableDnd<TData>({ handleDragEnd }: { handleDragEnd: (event: Dra
 			<div className="relative">
 				<DataGridTableBase>
 					<DataGridTableHead>
-						{table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>, index) => {
+						{table.getHeaderGroups().map((headerGroup: HeaderGroup<any, TData>, index) => {
 							clientLogger.debug('table.getState().columnOrder:', table.getState().columnOrder);
 
 							return (
@@ -137,11 +137,11 @@ function DataGridTableDnd<TData>({ handleDragEnd }: { handleDragEnd: (event: Dra
 								</DataGridTableBodyRowSkeleton>
 							))
 						) : table.getRowModel().rows.length ? (
-							table.getRowModel().rows.map((row: Row<TData>, index) => {
+							table.getRowModel().rows.map((row: Row<any, any>, index) => {
 								return (
 									<Fragment key={row.id}>
 										<DataGridTableBodyRow key={index} row={row}>
-											{row.getVisibleCells().map((cell: Cell<TData, unknown>) => {
+											{row.getVisibleCells().map((cell) => {
 												return (
 													<SortableContext
 														items={table.getState().columnOrder}

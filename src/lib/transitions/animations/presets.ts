@@ -116,7 +116,7 @@ export const enterPresets: Record<string, AnimationPreset> = {
 	/** Entrada elástica */
 	elasticIn: {
 		name: 'elasticIn',
-		description: 'Entrada con rebote elástico',
+		description: 'Elastic bounce entrance',
 		params: {
 			duration: 600,
 			easing: customEasings.elasticSubtle,
@@ -222,7 +222,7 @@ export const exitPresets: Record<string, AnimationPreset> = {
 	/** Salida con escala */
 	scaleOut: {
 		name: 'scaleOut',
-		description: 'Salida con reducción de escala',
+		description: 'Scale-down exit',
 		params: {
 			duration: 250,
 			easing: customEasings.expoOut,
@@ -242,7 +242,7 @@ export const exitPresets: Record<string, AnimationPreset> = {
 	/** Salida con blur */
 	blurOut: {
 		name: 'blurOut',
-		description: 'Salida desenfocándose',
+		description: 'Blurred exit',
 		params: {
 			duration: 350,
 			easing: customEasings.easeInSuper,
@@ -367,7 +367,7 @@ export const statePresets: Record<string, AnimationPreset> = {
 	/** Press/Active */
 	press: {
 		name: 'press',
-		description: 'Efecto de presión',
+		description: 'Press effect',
 		params: {
 			duration: 100,
 			easing: customEasings.snap,
@@ -385,7 +385,7 @@ export const statePresets: Record<string, AnimationPreset> = {
 	/** Selección */
 	select: {
 		name: 'select',
-		description: 'Efecto de selección',
+		description: 'Selection effect',
 		params: {
 			duration: 200,
 			easing: customEasings.elasticSubtle,
@@ -405,7 +405,7 @@ export const statePresets: Record<string, AnimationPreset> = {
 	/** Loading/Pulse */
 	pulse: {
 		name: 'pulse',
-		description: 'Efecto de pulso/pulsación',
+		description: 'Pulse effect',
 		params: {
 			duration: 1500,
 			easing: customEasings.breathe,
@@ -445,7 +445,7 @@ export const statePresets: Record<string, AnimationPreset> = {
 	/** Success/Bounce */
 	success: {
 		name: 'success',
-		description: 'Efecto de éxito con rebote',
+		description: 'Bouncing success effect',
 		params: {
 			duration: 600,
 			easing: customEasings.elasticMedium,
@@ -469,7 +469,7 @@ export const compositePresets = {
 	/** Tarjeta que se expande */
 	cardExpand: {
 		name: 'cardExpand',
-		description: 'Expansión de tarjeta a vista detalle',
+		description: 'Card expansion into detail view',
 		stages: [
 			{ preset: enterPresets.scaleIn, duration: 0.3 },
 			{ preset: enterPresets.blurIn, duration: 0.4, delay: 0.1 },
@@ -479,7 +479,7 @@ export const compositePresets = {
 	/** Modal que aparece */
 	modalAppear: {
 		name: 'modalAppear',
-		description: 'Aparición de modal con backdrop',
+		description: 'Modal entrance with backdrop',
 		backdrop: enterPresets.fadeIn,
 		content: enterPresets.scaleIn,
 	},
@@ -487,7 +487,7 @@ export const compositePresets = {
 	/** Navegación entre páginas */
 	pageTransition: {
 		name: 'pageTransition',
-		description: 'Transición entre páginas',
+		description: 'Page transition',
 		exit: exitPresets.slideOut,
 		enter: enterPresets.slideIn,
 		overlap: 0.1,

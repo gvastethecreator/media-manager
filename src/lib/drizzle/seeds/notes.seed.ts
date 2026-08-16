@@ -42,7 +42,7 @@ export async function seedNotes(db: LibSQLDatabase<Record<string, never>>) {
 
 		seedLogger.success(`✅ ${sampleNotes.length} notas creadas`);
 	} catch (error) {
-		seedLogger.error('❌ Error creando notas:', error);
+		seedLogger.error('❌ Could not create notes:', error);
 		throw error;
 	}
 }

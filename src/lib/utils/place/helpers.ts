@@ -32,8 +32,8 @@ export function sortPlaces(places: PlaceWithStats[], sortBy = 'name_asc'): Place
 		// Comparar según tipo de valor
 		if (typeof valueA === 'string' && typeof valueB === 'string') {
 			return isDesc
-				? valueB.localeCompare(valueA, 'es', { sensitivity: 'base' })
-				: valueA.localeCompare(valueB, 'es', { sensitivity: 'base' });
+				? valueB.localeCompare(valueA, 'en', { sensitivity: 'base' })
+				: valueA.localeCompare(valueB, 'en', { sensitivity: 'base' });
 		}
 
 		if (typeof valueA === 'number' && typeof valueB === 'number') {

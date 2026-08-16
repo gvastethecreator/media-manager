@@ -53,9 +53,9 @@ export function MoveDialog({ isOpen, items, onConfirm, onCancel, isLoading = fal
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<FolderIcon className="h-5 w-5" />
-						Mover {itemCount} {itemCount === 1 ? 'elemento' : 'elementos'}
+						Move {itemCount} {itemCount === 1 ? 'item' : 'items'}
 					</DialogTitle>
-					<DialogDescription>Selecciona la carpeta destino donde deseas mover los archivos.</DialogDescription>
+					<DialogDescription>Select the destination folder for these files.</DialogDescription>
 				</DialogHeader>
 
 				<div className="py-4">
@@ -85,27 +85,27 @@ export function MoveDialog({ isOpen, items, onConfirm, onCancel, isLoading = fal
 								))}
 							</div>
 						) : (
-							<div className="py-8 text-center text-muted-foreground">No hay carpetas disponibles</div>
+							<div className="py-8 text-center text-muted-foreground">No folders available</div>
 						)}
 					</div>
 
 					{/* Preview de items a mover */}
 					<div className="mt-4 rounded-lg bg-muted p-3">
-						<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">Items a mover</p>
+						<p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">Items to move</p>
 						<div className="space-y-1">
 							{items.slice(0, 3).map((item) => (
 								<div className="flex items-center gap-2 text-sm" key={item.id}>
 									<span className="truncate">{item.name}</span>
 								</div>
 							))}
-							{items.length > 3 && <p className="text-muted-foreground text-xs">... y {items.length - 3} más</p>}
+							{items.length > 3 && <p className="text-muted-foreground text-xs">...and {items.length - 3} more</p>}
 						</div>
 					</div>
 				</div>
 
 				<DialogFooter>
 					<Button disabled={isLoading} onClick={onCancel} variant="outline">
-						Cancelar
+						Cancel
 					</Button>
 					<Button
 						disabled={!selectedFolderId || isLoading}
@@ -114,11 +114,11 @@ export function MoveDialog({ isOpen, items, onConfirm, onCancel, isLoading = fal
 						{isLoading ? (
 							<>
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								Moviendo...
+								Moving...
 							</>
 						) : (
 							<>
-								Mover {itemCount} {itemCount === 1 ? 'item' : 'items'}
+								Move {itemCount} {itemCount === 1 ? 'item' : 'items'}
 							</>
 						)}
 					</Button>

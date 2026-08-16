@@ -6,6 +6,11 @@
  */
 
 import { Data } from 'effect';
+import { errorCauseMessages } from '@/lib/errors/error-cause-chain';
+import {
+	isTaxonomyArtifactInlineMutationError,
+	TaxonomyArtifactInlineMutationError,
+} from '@/services/taxonomy/file-backed/mutation-permit';
 
 // ============= Group Errors =============
 
@@ -96,9 +101,22 @@ export class WildcardDatabaseError extends Data.TaggedError('WildcardDatabaseErr
 
 export const fromUnknownWildcardError = (operation: string, error: unknown): WildcardError => {
 	if (error instanceof Error) {
-		const msg = error.message.toLowerCase();
+		if (isTaxonomyArtifactInlineMutationError(error)) {
+			return new TaxonomyArtifactInlineMutationError({
+				message: 'El Wildcard es file-backed; usa el editor canónico para modificarlo o eliminarlo.',
+			});
+		}
+		const messages = errorCauseMessages(error);
+		const msg = messages[0] ?? '';
 		if (msg.includes('not found')) return new WildcardNotFound({ wildcardId: 'unknown' });
-		if (msg.includes('unique')) return new WildcardNameConflict({ name: 'unknown' });
+		if (
+			messages.some(
+				(message) =>
+					message.includes('unique') && (message.includes('wildcard.name') || message.includes('wildcard_name_key'))
+			)
+		) {
+			return new WildcardNameConflict({ name: 'unknown' });
+		}
 		return new WildcardDatabaseError({ operation, message: error.message });
 	}
 	return new WildcardDatabaseError({ operation, message: String(error) });
@@ -109,6 +127,7 @@ export type WildcardError =
 	| WildcardValidationError
 	| WildcardNameConflict
 	| WildcardHasRelationsError
+	| TaxonomyArtifactInlineMutationError
 	| WildcardDatabaseError;
 
 // ============= Note Errors =============
@@ -126,6 +145,12 @@ export class NoteValidationError extends Data.TaggedError('NoteValidationError')
 	readonly displayMessage = `Note validation failed: ${this.message}`;
 }
 
+export class NoteTitleConflict extends Data.TaggedError('NoteTitleConflict')<{
+	readonly title: string;
+}> {
+	readonly displayMessage = `Note title already exists: ${this.title}`;
+}
+
 export class NoteDatabaseError extends Data.TaggedError('NoteDatabaseError')<{
 	readonly operation: string;
 	readonly message: string;
@@ -135,14 +160,33 @@ export class NoteDatabaseError extends Data.TaggedError('NoteDatabaseError')<{
 
 export const fromUnknownNoteError = (operation: string, error: unknown): NoteError => {
 	if (error instanceof Error) {
-		const msg = error.message.toLowerCase();
+		if (isTaxonomyArtifactInlineMutationError(error)) {
+			return new TaxonomyArtifactInlineMutationError({
+				message: 'La Nota es file-backed; usa el editor canónico para modificarla o eliminarla.',
+			});
+		}
+		const messages = errorCauseMessages(error);
+		const msg = messages[0] ?? '';
 		if (msg.includes('not found')) return new NoteNotFound({ noteId: 'unknown' });
+		if (
+			messages.some(
+				(message) =>
+					message.includes('unique') && (message.includes('note.title') || message.includes('note_title_key'))
+			)
+		) {
+			return new NoteTitleConflict({ title: 'unknown' });
+		}
 		return new NoteDatabaseError({ operation, message: error.message });
 	}
 	return new NoteDatabaseError({ operation, message: String(error) });
 };
 
-export type NoteError = NoteNotFound | NoteValidationError | NoteDatabaseError;
+export type NoteError =
+	| NoteNotFound
+	| NoteValidationError
+	| NoteTitleConflict
+	| TaxonomyArtifactInlineMutationError
+	| NoteDatabaseError;
 
 // ============= Property Errors =============
 

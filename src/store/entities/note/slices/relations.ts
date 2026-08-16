@@ -72,8 +72,8 @@ export const createRelationsSlice: StateCreator<NoteStore, [], [], RelationsSlic
 				entityType,
 			});
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Error al eliminar nota de entidad';
-			relationsLogger.error('❌ Error al eliminar nota de entidad:', error);
+			const message = error instanceof Error ? error.message : 'Could not delete note de entidad';
+			relationsLogger.error('❌ Could not delete note de entidad:', error);
 			set({ error: message, isLoading: false });
 		}
 	},

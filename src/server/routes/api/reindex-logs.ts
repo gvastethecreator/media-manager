@@ -15,7 +15,7 @@ export const reindexLogsRouter = express.Router();
  */
 reindexLogsRouter.get('/stats', (_req, res) => {
 	try {
-		const stats = reindexFileLogger.getLogStats();
+		const stats = reindexFileLogger.getPublicLogStats();
 		res.json({
 			success: true,
 			data: stats,

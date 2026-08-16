@@ -64,7 +64,7 @@ export function useNoteActions() {
 		onError: (error) => {
 			toast({
 				variant: 'destructive',
-				title: 'Error al Crear',
+				title: 'Create failed',
 				description: error.message,
 			});
 		},
@@ -79,7 +79,7 @@ export function useNoteActions() {
 		onError: (error) => {
 			toast({
 				variant: 'destructive',
-				title: 'Error al Actualizar',
+				title: 'Update failed',
 				description: error.message,
 			});
 		},
@@ -94,7 +94,7 @@ export function useNoteActions() {
 		onError: (error) => {
 			toast({
 				variant: 'destructive',
-				title: 'Error al Eliminar',
+				title: 'Delete failed',
 				description: error.message,
 			});
 		},
