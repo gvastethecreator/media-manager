@@ -33,6 +33,5 @@ export type { PlaceFilters, PlaceSearchOptions } from './types';
 
 // --- Tipos Complete ---
 export type { PlaceComplete } from './types';
-// --- 🎨 Enums (Se Mueven a su Propio Archivo) ---
-// TODO: Mover estos enums a un archivo `enums.ts` dedicado.
-export { PlaceCategory, PlaceSortCriteria, PlaceType, PlaceViewMode } from './types';
+// --- 🎨 Enums ---
+export { PlaceCategory, PlaceSortCriteria, PlaceType, PlaceViewMode } from './enums';
