@@ -3,6 +3,11 @@
  * @module types/entities/uploaded-image
  */
 
+export {
+	UploadedFileType,
+	// Alias para retrocompatibilidad
+	UploadedFileType as UploadedImageType,
+} from './enums';
 export type {
 	UploadedImageBase,
 	UploadedImageCreateInput,
@@ -11,11 +16,4 @@ export type {
 	UploadedImageStatistics,
 	UploadedImageUpdateInput,
 	UploadedImageWithStats,
-} from './types';
-
-export {
-	UploadedFileType,
-	// Alias para retrocompatibilidad
-	UploadedFileType as UploadedImageType,
-	UploadedImageSchema,
 } from './types';

@@ -34,10 +34,6 @@ export interface GroupUpdateInput {
 	sortBy?: string;
 }
 
-// Alias retro‑compatibles (si algún código antiguo usa los nombres sin prefijo)
-export type CreateGroupInput = GroupCreateInput; // TODO: eliminar tras migración completa
-export type UpdateGroupInput = GroupUpdateInput; // TODO: eliminar tras migración completa
-
 export type GroupSortKey = 'name' | 'category' | 'createdAt';
 
 export interface GroupFilters {
