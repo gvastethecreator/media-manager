@@ -81,15 +81,19 @@ export function File3DSettings() {
 										<div>
 											<div className="font-medium text-sm">{f.name}</div>
 											<div className="text-muted-foreground text-xs">
-											{f.size ? `${(f.size / 1024).toFixed(1)}KB` : 'Size unavailable'}
+												{f.size ? `${(f.size / 1024).toFixed(1)}KB` : 'Size unavailable'}
 											</div>
 											{f.format && (
-											<div className="text-muted-foreground text-xs">Format: {f.format.toUpperCase()}</div>
+												<div className="text-muted-foreground text-xs">Format: {f.format.toUpperCase()}</div>
 											)}
 											{f.vertices && (
-											<div className="text-muted-foreground text-xs">{f.vertices.toLocaleString('en-US')} vertices</div>
+												<div className="text-muted-foreground text-xs">
+													{f.vertices.toLocaleString('en-US')} vertices
+												</div>
 											)}
-										{f.faces && <div className="text-muted-foreground text-xs">{f.faces.toLocaleString('en-US')} faces</div>}
+											{f.faces && (
+												<div className="text-muted-foreground text-xs">{f.faces.toLocaleString('en-US')} faces</div>
+											)}
 										</div>
 										<div className="flex items-center gap-1">
 											<Button
@@ -99,7 +103,7 @@ export function File3DSettings() {
 													setNameInput(f.name);
 												}}
 												size="icon"
-											title="Edit"
+												title="Edit"
 												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
@@ -108,7 +112,7 @@ export function File3DSettings() {
 												className="h-8 w-8 hover:text-destructive"
 												onClick={() => handleDelete(f.id)}
 												size="icon"
-											title="Delete"
+												title="Delete"
 												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />

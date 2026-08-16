@@ -25,9 +25,7 @@ describe('CodeViewer', () => {
 		expect(screen.getByText('Loading file...')).toBeInTheDocument();
 		expect(screen.queryByTestId('document-content')).not.toBeInTheDocument();
 
-		await waitFor(() =>
-			expect(screen.getByTestId('document-content')).toHaveTextContent('Safe document content')
-		);
+		await waitFor(() => expect(screen.getByTestId('document-content')).toHaveTextContent('Safe document content'));
 	});
 
 	it('shows a recovery action when the authorized source fails', async () => {

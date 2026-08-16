@@ -45,13 +45,13 @@ test('muestra sólo el reindexado canónico por carpeta y conserva su diálogo a
 	await page.goto('/settings?section=files&item=folders', { waitUntil: 'domcontentloaded' });
 	await expect(page.getByTestId('folders-settings')).toBeVisible();
 	await expect(page.getByTestId('reindex-all-button')).toHaveCount(0);
-	await expect(page.getByTestId('reindex-all-guidance')).toHaveText('Reindexa cada carpeta desde su acción.');
+	await expect(page.getByTestId('reindex-all-guidance')).toHaveText('Reindex each folder from its own action.');
 
-	const infoButton = page.getByRole('button', { name: 'Proceso de reindexado' });
+	const infoButton = page.getByRole('button', { name: 'Reindex process' });
 	await infoButton.click();
 	const infoDialog = page.getByRole('dialog');
-	await expect(infoDialog).toContainText('Cada reindexación se ejecuta sobre una carpeta autorizada');
-	await expect(infoDialog).toContainText('No hay un atajo global');
+	await expect(infoDialog).toContainText('Each reindex runs on an authorized folder');
+	await expect(infoDialog).toContainText('There is no global shortcut');
 	expect(await page.evaluate(() => document.activeElement?.closest('[role="dialog"]') !== null)).toBe(true);
 
 	const evidenceDirectory = resolve(
@@ -73,10 +73,10 @@ test('muestra sólo el reindexado canónico por carpeta y conserva su diálogo a
 	const reindexResponse = page.waitForResponse(
 		(response) => response.request().method() === 'POST' && response.url().includes(`/api/folders/${folder.id}/reindex`)
 	);
-	await page.getByRole('button', { name: `Reindexar ${folderName}` }).click();
+	await page.getByRole('button', { name: `Reindex ${folderName}` }).click();
 	expect((await reindexResponse).status()).toBe(200);
-	await page.getByRole('button', { name: 'Cerrar terminal de reindexado' }).click();
-	await expect(page.getByText('Terminal de Reindexado')).toHaveCount(0);
+	await page.getByRole('button', { name: 'Close reindex terminal' }).click();
+	await expect(page.getByText('Reindex Terminal')).toHaveCount(0);
 
 	await page.setViewportSize({ height: 768, width: 1024 });
 	expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);

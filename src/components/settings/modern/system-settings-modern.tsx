@@ -291,10 +291,7 @@ export function SystemSettingsModern() {
 						variant="outlined"
 					>
 						<SettingsGroup title="Performance">
-							<SettingsRow
-								description="Refresh system metrics every 30 seconds"
-								label="Automatic Statistics Refresh"
-							>
+							<SettingsRow description="Refresh system metrics every 30 seconds" label="Automatic Statistics Refresh">
 								<Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
 							</SettingsRow>
 							<SettingsRow description="Cache frequently used queries" label="Query Cache">

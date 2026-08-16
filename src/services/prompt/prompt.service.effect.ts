@@ -291,8 +291,7 @@ const make = (): PromptServiceInterface => {
 	const deleteFileBacked = (
 		id: string,
 		beforeDelete?: (transaction: FavoriteWriteTransaction) => Promise<void>
-	): Effect.Effect<void, PromptError> =>
-		deleteEntity(id, true, beforeDelete);
+	): Effect.Effect<void, PromptError> => deleteEntity(id, true, beforeDelete);
 
 	const toggleFavorite = (id: string): Effect.Effect<Prompt, PromptError> =>
 		Effect.gen(function* () {

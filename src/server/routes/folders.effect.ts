@@ -496,8 +496,7 @@ router.get(
 				const folder = yield* folderService.getById(req.params.id);
 				const max = sanitizePreviewCount(req.query.max);
 				const previewData = yield* Effect.tryPromise({
-					try: () =>
-						getAuthorizedFolderPreviewData(req, req.params.id, max),
+					try: () => getAuthorizedFolderPreviewData(req, req.params.id, max),
 					catch: (err) => new Error(`Failed to fetch authorized folder preview data: ${String(err)}`),
 				});
 

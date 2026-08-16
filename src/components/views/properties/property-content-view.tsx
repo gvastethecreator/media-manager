@@ -67,11 +67,7 @@ export const PropertyContentView = memo(function PropertyContentView({
 				title="Loading property..."
 			>
 				<div className="flex h-full items-center justify-center">
-					<EmptyState
-						description="Retrieving property information."
-						icon={Database}
-						title="Loading property..."
-					/>
+					<EmptyState description="Retrieving property information." icon={Database} title="Loading property..." />
 				</div>
 			</BaseContentView>
 		);

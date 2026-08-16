@@ -261,11 +261,11 @@ export default function MixedView({ className }: MixedViewProps) {
 	if (hasError && allItems.length === 0) {
 		return (
 			<div className="flex h-full flex-col items-center justify-center gap-4">
-					<EmptyState
-						actions={<Button onClick={handleRetry}>Retry</Button>}
-						description="Some file types could not be loaded. Check your connection and try again."
-						icon={Grid}
-						title="Could not load files"
+				<EmptyState
+					actions={<Button onClick={handleRetry}>Retry</Button>}
+					description="Some file types could not be loaded. Check your connection and try again."
+					icon={Grid}
+					title="Could not load files"
 				/>
 			</div>
 		);
@@ -322,11 +322,7 @@ export default function MixedView({ className }: MixedViewProps) {
 				<div className="p-6">
 					{filteredItems.length === 0 ? (
 						<EmptyState
-							description={
-								searchQuery
-									? `No files match "${searchQuery}"`
-									: 'Upload a few files to see them here.'
-							}
+							description={searchQuery ? `No files match "${searchQuery}"` : 'Upload a few files to see them here.'}
 							icon={Grid}
 							title={searchQuery ? 'No files found' : 'No files yet'}
 						/>

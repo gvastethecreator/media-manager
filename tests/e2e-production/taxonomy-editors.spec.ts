@@ -117,8 +117,8 @@ test('edita Prompt, Note y Wildcard desde sus archivos canónicos y recupera un 
 
 	await page.goto('/settings?section=worldbuilding&item=prompts', { waitUntil: 'domcontentloaded' });
 	await expect(page.getByRole('heading', { name: 'Worldbuilding' })).toBeVisible();
-	await page.getByRole('button', { name: `Editar ${promptName}` }).click();
-	await expect(page.getByRole('dialog').getByText('Editar Prompt', { exact: true })).toBeVisible();
+	await page.getByRole('button', { name: `Edit ${promptName}` }).click();
+	await expect(page.getByRole('dialog').getByText('Edit Prompt', { exact: true })).toBeVisible();
 	const promptBody = promptTextarea(page, 'Contenido');
 	await expect(promptBody).toHaveValue('Cuerpo canónico inicial del Prompt');
 
@@ -144,28 +144,28 @@ test('edita Prompt, Note y Wildcard desde sus archivos canónicos y recupera un 
 		(response) =>
 			response.request().method() === 'PUT' && response.url().includes(`/api/taxonomy-artifacts/prompt/${prompt.id}`)
 	);
-	await page.getByRole('dialog').getByRole('button', { name: 'Guardar cambios' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Save changes' }).click();
 	expect((await conflictResponse).status()).toBe(409);
 	await expect(page.getByRole('dialog').getByText('El artefacto cambió desde la última lectura.')).toBeVisible();
 	expect((await apiJson<ArtifactDocument>(request, 'GET', `/api/taxonomy-artifacts/prompt/${prompt.id}`)).body).toBe(
 		externalPromptBody
 	);
 
-	await page.getByRole('dialog').getByRole('button', { name: 'Cancelar' }).click();
-	await page.getByRole('button', { name: `Editar ${promptName}` }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
+	await page.getByRole('button', { name: `Edit ${promptName}` }).click();
 	await expect(promptTextarea(page, 'Contenido')).toHaveValue(externalPromptBody);
 	await promptTextarea(page, 'Contenido').fill('Prompt guardado después de recargar');
-	await page.getByRole('dialog').getByRole('button', { name: 'Guardar cambios' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Save changes' }).click();
 	await expect(page.getByRole('dialog')).toBeHidden();
 	expect((await apiJson<ArtifactDocument>(request, 'GET', `/api/taxonomy-artifacts/prompt/${prompt.id}`)).body).toBe(
 		'Prompt guardado después de recargar'
 	);
 
 	await page.goto('/settings?section=worldbuilding&item=notes');
-	await page.getByRole('button', { name: `Editar ${noteTitle}` }).click();
+	await page.getByRole('button', { name: `Edit ${noteTitle}` }).click();
 	await expect(page.getByRole('dialog').getByLabel('Contenido')).toHaveValue('Cuerpo canónico inicial de la Nota');
 	await page.getByRole('dialog').getByLabel('Contenido').fill('Nota guardada desde el archivo canónico');
-	await page.getByRole('dialog').getByRole('button', { name: 'Guardar Cambios' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Save Changes' }).click();
 	await expect(page.getByRole('dialog')).toBeHidden();
 	expect((await apiJson<ArtifactDocument>(request, 'GET', `/api/taxonomy-artifacts/note/${note.id}`)).body).toBe(
 		'Nota guardada desde el archivo canónico'
@@ -186,7 +186,7 @@ test('edita Prompt, Note y Wildcard desde sus archivos canónicos y recupera un 
 		'utf8'
 	);
 	await page.goto('/settings?section=worldbuilding&item=wildcards');
-	await page.getByRole('button', { name: `Editar ${wildcardName}` }).click();
+	await page.getByRole('button', { name: `Edit ${wildcardName}` }).click();
 	await expect(page.getByRole('dialog').getByPlaceholder('Valor 1')).toHaveValue('externo-uno');
 	await expect(page.getByRole('dialog').getByPlaceholder('Valor 2')).toHaveValue('externo-dos');
 	await assertDialogInsideViewport(page);
@@ -202,7 +202,7 @@ test('edita Prompt, Note y Wildcard desde sus archivos canónicos y recupera un 
 	if (compactEvidence) await page.screenshot({ animations: 'disabled', path: compactEvidence });
 
 	await page.getByRole('dialog').getByPlaceholder('Valor 2').fill('externo-guardado');
-	await page.getByRole('dialog').getByRole('button', { name: 'Guardar cambios' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Save changes' }).click();
 	await expect(page.getByRole('dialog')).toBeHidden();
 	expect(
 		(await apiJson<ArtifactDocument>(request, 'GET', `/api/taxonomy-artifacts/wildcard/${wildcard.entity.id}`)).body

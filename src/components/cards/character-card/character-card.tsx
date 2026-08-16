@@ -189,11 +189,7 @@ function CardShell({
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
 		>
 			<CardContainer
-				className={cn(
-					'ui-motion-standard',
-					isHovered && 'scale-[1.02]',
-					isSelected && 'ring-4 ring-primary/60'
-				)}
+				className={cn('ui-motion-standard', isHovered && 'scale-[1.02]', isSelected && 'ring-4 ring-primary/60')}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 			>

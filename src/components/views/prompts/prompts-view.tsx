@@ -187,11 +187,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 					</motion.div>
 				) : (
 					<EmptyState
-						description={
-							localSearch
-								? `No prompts match "${localSearch}"`
-								: 'No prompts are available'
-						}
+						description={localSearch ? `No prompts match "${localSearch}"` : 'No prompts are available'}
 						icon={MessageSquare}
 						title="No prompts yet"
 					/>

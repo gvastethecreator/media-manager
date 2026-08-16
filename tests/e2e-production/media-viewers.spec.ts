@@ -194,8 +194,8 @@ test('abre un audio desde su fuente autorizada y entrega controles cuando el med
 	await expectMediaReady(dialog.locator('audio'));
 	await expect(dialog.getByRole('alert')).toHaveCount(0);
 	await expect(dialog).not.toContainText(/Infinity|NaN/);
-	const playButton = dialog.getByRole('button', { name: 'Reproducir audio' });
-	const progressSlider = dialog.getByRole('slider', { name: 'Posición de reproducción' });
+	const playButton = dialog.getByRole('button', { name: 'Play audio' });
+	const progressSlider = dialog.getByRole('slider', { name: 'Playback position' });
 	await expect(playButton).toBeEnabled();
 	await expectWithinViewport(page, playButton);
 	await expectWithinViewport(page, progressSlider);
@@ -272,10 +272,10 @@ test('informa un audio ausente en lugar de mantener el visor cargando', async ({
 	expect((await contentResponse).status()).toBe(404);
 	const dialog = page.getByRole('dialog');
 	await expect(dialog).toBeVisible();
-	await expect(dialog.getByRole('alert')).toContainText('No se pudo cargar este audio.');
-	await expect(dialog.getByText('Cargando audio...', { exact: true })).toHaveCount(0);
-	await expectWithinViewport(page, dialog.getByRole('button', { name: 'Reproducir audio' }));
-	await expect(dialog.getByRole('button', { name: 'Reproducir audio' })).toBeDisabled();
+	await expect(dialog.getByRole('alert')).toContainText('Could not load this audio file.');
+	await expect(dialog.getByText('Loading audio...', { exact: true })).toHaveCount(0);
+	await expectWithinViewport(page, dialog.getByRole('button', { name: 'Play audio' }));
+	await expect(dialog.getByRole('button', { name: 'Play audio' })).toBeDisabled();
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('audio-viewer-missing-source.png') });
 	await page.keyboard.press('Escape');
 	await expect(dialog).toBeHidden();
@@ -293,13 +293,12 @@ test('informa un audio ausente en lugar de mantener el visor cargando', async ({
 	).toBe(true);
 	expect(runtime.consoleErrors.some((message) => message.includes('Failed to load resource'))).toBe(true);
 	expect(
-		runtime.consoleErrors.filter((message) => message.includes('[EnhancedAudioViewer] No se pudo cargar el audio'))
+		runtime.consoleErrors.filter((message) => message.includes('[EnhancedAudioViewer] Could not load audio'))
 	).toHaveLength(1);
 	expect(
 		runtime.consoleErrors.every(
 			(message) =>
-				message.includes('Failed to load resource') ||
-				message.includes('[EnhancedAudioViewer] No se pudo cargar el audio')
+				message.includes('Failed to load resource') || message.includes('[EnhancedAudioViewer] Could not load audio')
 		)
 	).toBe(true);
 	expect(runtime.serverErrors).toEqual([]);
@@ -338,10 +337,10 @@ test('renderiza un modelo GLB desde su fuente autorizada sin desbordamiento', as
 	});
 	await page.goto(`/file3d/${file3d.id}`, { waitUntil: 'domcontentloaded' });
 	await expect(page.getByRole('heading', { name: fileName })).toBeVisible();
-	await expect(page.getByText('Cargando modelo 3D...')).toBeHidden({ timeout: 30_000 });
+	await expect(page.getByText('Loading 3D model...')).toBeHidden({ timeout: 30_000 });
 	expect((await contentResponse).status()).toBe(200);
 	await expect(page.locator('canvas')).toBeVisible();
-	await expect(page.getByText('Arrastrar para rotar - Scroll para zoom')).toBeVisible();
+	await expect(page.getByText('Drag to rotate - Scroll to zoom')).toBeVisible();
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('file3d-viewer-desktop.png') });
 	await expectCompactLayout(page, testInfo, 'file3d-viewer');
 	expect(runtime.pageErrors).toEqual([]);

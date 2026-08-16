@@ -85,7 +85,7 @@ export function PromptCardImages({
 								{activeImage && (
 									<div className="relative h-full w-full overflow-hidden">
 										<img
-										alt="Featured image"
+											alt="Featured image"
 											className={cn(
 												'h-full w-full object-cover',
 												tcgMode && 'transition-transform duration-dt-slow ease-dt-out hover:scale-110'
@@ -118,7 +118,7 @@ export function PromptCardImages({
 									<div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 transform items-center justify-center gap-1">
 										{displayImages.map((img, idx) => (
 											<button
-											aria-label={`View image ${idx + 1}`}
+												aria-label={`View image ${idx + 1}`}
 												className={cn(
 													'h-2 w-2 rounded-full transition-all',
 													activeImage === img

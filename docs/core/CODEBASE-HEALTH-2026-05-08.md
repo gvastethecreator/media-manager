@@ -18,18 +18,18 @@ El proyecto queda en mejor estado operativo que el baseline inicial:
 
 ## Iteraciones aplicadas
 
-| Iteracion | Tarea | Resultado |
-| --- | --- | --- |
-| 1 | 🔍 Mapa real | Se reviso estructura, docs, scripts, rutas, servicios y estado Git antes de tocar codigo. |
-| 2 | 📦 Dependencias | Se actualizo `package.json` y `bun.lock`; se alinearon overrides Vite+/Vitest. |
-| 3 | 🧾 Logs solidos | Se reforzaron wrappers y parser para clasificar lint, typecheck, build, test y deps sin falsos positivos. |
-| 4 | 🛡️ Git hygiene | Se ajusto `.gitignore`, se preservo `logs/.gitkeep` y se retiraron artefactos locales/binarios. |
-| 5 | 🏛️ Servicios | Se endurecio el adapter Effect/Express y se tiparon puntos criticos del mapper. |
-| 6 | 🎨 UI viva | Se actualizo Calendar/DayPicker, EntityFilter y el viewer 3D con controles accesibles. |
-| 7 | 🖼️ 3D y previews | Se corrigio soporte real de OBJ/STL y SVG seguro para thumbnails 3D/JSON/documentos. |
-| 8 | 🔁 Pipeline media | Se optimizo reindex incremental, contenido de archivos y descarga/export binario. |
-| 9 | 📚 Docs al dia | Este informe y las guias troncales registran el estado real posterior a la revision. |
-| 10 | ✅ Validacion | `bun run check` queda verde con logs en `logs/check_2026-05-08T22-48-29-917Z.log`. |
+| Iteracion | Tarea             | Resultado                                                                                                 |
+| --------- | ----------------- | --------------------------------------------------------------------------------------------------------- |
+| 1         | 🔍 Mapa real      | Se reviso estructura, docs, scripts, rutas, servicios y estado Git antes de tocar codigo.                 |
+| 2         | 📦 Dependencias   | Se actualizo `package.json` y `bun.lock`; se alinearon overrides Vite+/Vitest.                            |
+| 3         | 🧾 Logs solidos   | Se reforzaron wrappers y parser para clasificar lint, typecheck, build, test y deps sin falsos positivos. |
+| 4         | 🛡️ Git hygiene    | Se ajusto `.gitignore`, se preservo `logs/.gitkeep` y se retiraron artefactos locales/binarios.           |
+| 5         | 🏛️ Servicios      | Se endurecio el adapter Effect/Express y se tiparon puntos criticos del mapper.                           |
+| 6         | 🎨 UI viva        | Se actualizo Calendar/DayPicker, EntityFilter y el viewer 3D con controles accesibles.                    |
+| 7         | 🖼️ 3D y previews  | Se corrigio soporte real de OBJ/STL y SVG seguro para thumbnails 3D/JSON/documentos.                      |
+| 8         | 🔁 Pipeline media | Se optimizo reindex incremental, contenido de archivos y descarga/export binario.                         |
+| 9         | 📚 Docs al dia    | Este informe y las guias troncales registran el estado real posterior a la revision.                      |
+| 10        | ✅ Validacion     | `bun run check` queda verde con logs en `logs/check_2026-05-08T22-48-29-917Z.log`.                        |
 
 ## Correcciones principales
 

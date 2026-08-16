@@ -51,20 +51,13 @@ export function AlbumContentView() {
 		[setSelectedItems, setDetailsPanelVisible]
 	);
 
-	const headerTitle = useMemo(
-		() => (album?.name ? `Album images: ${album.name}` : 'Select an album'),
-		[album?.name]
-	);
+	const headerTitle = useMemo(() => (album?.name ? `Album images: ${album.name}` : 'Select an album'), [album?.name]);
 
 	if (!effectiveAlbumId) {
 		return (
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
-					<EmptyState
-						description="Select an album to view its related images"
-						icon={Album}
-						title="No album selected"
-					/>
+					<EmptyState description="Select an album to view its related images" icon={Album} title="No album selected" />
 				</div>
 			</BaseContentView>
 		);

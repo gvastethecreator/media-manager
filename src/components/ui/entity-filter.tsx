@@ -368,9 +368,9 @@ export function EntityFilter({
 									<CalendarIcon className="mr-2 h-4 w-4" />
 									{filterValues[filter.id]
 										? filterValues[filter.id] instanceof Date
-										? filterValues[filter.id].toLocaleDateString('en-US')
-										: new Date(filterValues[filter.id]).toLocaleDateString('en-US')
-									: filter.placeholder || 'Select a date'}
+											? filterValues[filter.id].toLocaleDateString('en-US')
+											: new Date(filterValues[filter.id]).toLocaleDateString('en-US')
+										: filter.placeholder || 'Select a date'}
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent className="w-auto p-0">
@@ -522,7 +522,7 @@ export function EntityFilter({
 				{activeFiltersCount > 0 && (
 					<Button className="hidden items-center gap-1 sm:flex" onClick={clearAllFilters} size="sm" variant="ghost">
 						<RotateCcw className="mr-1 h-3.5 w-3.5" />
-					Clear filters
+						Clear filters
 					</Button>
 				)}
 			</div>

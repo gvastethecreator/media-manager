@@ -415,10 +415,10 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem className="text-xs" value="pagination">
-											Pages
+												Pages
 											</SelectItem>
 											<SelectItem className="text-xs" value="infinite">
-											Infinite scroll
+												Infinite scroll
 											</SelectItem>
 										</SelectContent>
 									</Select>
@@ -453,7 +453,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 										style={{ borderColor: 'color-mix(in oklab, var(--dt-warning-500), transparent 80%)' }}
 									>
 										<div className="flex h-6 items-center justify-between gap-2 border-none bg-transparent p-0">
-										<Label className="text-[11px] text-muted-foreground">Auto load</Label>
+											<Label className="text-[11px] text-muted-foreground">Auto load</Label>
 											<Switch checked={infiniteScroll.autoLoad} onCheckedChange={toggleInfiniteScrollAutoLoad} />
 										</div>
 										<div className="grid grid-cols-2 gap-2 pt-1">
@@ -536,7 +536,8 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 								Reset local storage
 							</Button>
 							<div className="rounded-md bg-muted/50 p-2 text-[9px] text-muted-foreground leading-relaxed">
-								<strong>Note:</strong> These actions restore factory defaults. Resetting local storage reloads the entire page.
+								<strong>Note:</strong> These actions restore factory defaults. Resetting local storage reloads the
+								entire page.
 							</div>
 						</AccordionContent>
 					</AccordionItem>

@@ -34,13 +34,7 @@ export function toWildcardWithStats(wildcard: WildcardWithCounts): WildcardWithS
 	const counts = normalizeCounts(_count);
 
 	const completenessFields = [rest.description, rest.category];
-	const relationCounts = [
-		counts.images,
-		counts.notes,
-		counts.characters,
-		counts.places,
-		counts.tags,
-	];
+	const relationCounts = [counts.images, counts.notes, counts.characters, counts.places, counts.tags];
 
 	const popularity = relationCounts.reduce((sum, count) => sum + count, 0);
 	const usageDiversity = relationCounts.filter((count) => count > 0).length;

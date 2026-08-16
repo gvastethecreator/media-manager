@@ -55,8 +55,7 @@ export function CollectionContentView() {
 	);
 
 	const headerTitle = useMemo(
-		() =>
-			currentCollection?.name ? `Collection images: ${currentCollection.name}` : 'Select a collection',
+		() => (currentCollection?.name ? `Collection images: ${currentCollection.name}` : 'Select a collection'),
 		[currentCollection?.name]
 	);
 

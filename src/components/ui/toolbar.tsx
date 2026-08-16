@@ -14,58 +14,70 @@ import { cn } from '@/lib/utils';
 
 const useToolbarAnimation = () => {
 	const prefersReducedMotion = useReducedMotion();
-	const animateButtonHover = React.useCallback((element: HTMLElement, isHovering: boolean) => {
-		if (!(element && !prefersReducedMotion)) return;
+	const animateButtonHover = React.useCallback(
+		(element: HTMLElement, isHovering: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
 
-		gsap.to(element, {
-			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
-			scale: isHovering ? 1.02 : 1,
-			duration: 0.15,
-			ease: 'power2.out',
-		});
-	}, [prefersReducedMotion]);
+			gsap.to(element, {
+				backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
+				scale: isHovering ? 1.02 : 1,
+				duration: 0.15,
+				ease: 'power2.out',
+			});
+		},
+		[prefersReducedMotion]
+	);
 
-	const animateButtonPressed = React.useCallback((element: HTMLElement, isPressed: boolean) => {
-		if (!(element && !prefersReducedMotion)) return;
+	const animateButtonPressed = React.useCallback(
+		(element: HTMLElement, isPressed: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
 
-		gsap.to(element, {
-			scale: isPressed ? 0.98 : 1,
-			backgroundColor: isPressed ? 'color-mix(in oklch, var(--accent) 20%, transparent)' : 'transparent',
-			duration: 0.08,
-			ease: 'power2.out',
-		});
-	}, [prefersReducedMotion]);
+			gsap.to(element, {
+				scale: isPressed ? 0.98 : 1,
+				backgroundColor: isPressed ? 'color-mix(in oklch, var(--accent) 20%, transparent)' : 'transparent',
+				duration: 0.08,
+				ease: 'power2.out',
+			});
+		},
+		[prefersReducedMotion]
+	);
 
-	const animateToggle = React.useCallback((element: HTMLElement, isToggled: boolean) => {
-		if (!(element && !prefersReducedMotion)) return;
+	const animateToggle = React.useCallback(
+		(element: HTMLElement, isToggled: boolean) => {
+			if (!(element && !prefersReducedMotion)) return;
 
-		gsap.to(element, {
-			backgroundColor: isToggled ? 'color-mix(in oklch, var(--primary) 15%, transparent)' : 'transparent',
-			borderColor: isToggled
-				? 'color-mix(in oklch, var(--primary) 50%, transparent)'
-				: 'color-mix(in oklch, var(--border) 20%, transparent)',
-			duration: 0.18,
-			ease: 'power2.out',
-		});
-	}, [prefersReducedMotion]);
+			gsap.to(element, {
+				backgroundColor: isToggled ? 'color-mix(in oklch, var(--primary) 15%, transparent)' : 'transparent',
+				borderColor: isToggled
+					? 'color-mix(in oklch, var(--primary) 50%, transparent)'
+					: 'color-mix(in oklch, var(--border) 20%, transparent)',
+				duration: 0.18,
+				ease: 'power2.out',
+			});
+		},
+		[prefersReducedMotion]
+	);
 
-	const animateSeparator = React.useCallback((element: HTMLElement) => {
-		if (!(element && !prefersReducedMotion)) return;
+	const animateSeparator = React.useCallback(
+		(element: HTMLElement) => {
+			if (!(element && !prefersReducedMotion)) return;
 
-		gsap.fromTo(
-			element,
-			{
-				opacity: 0.3,
-			},
-			{
-				opacity: 1,
-				duration: 0.2,
-				ease: 'power1.inOut',
-				yoyo: true,
-				repeat: -1,
-			}
-		);
-	}, [prefersReducedMotion]);
+			gsap.fromTo(
+				element,
+				{
+					opacity: 0.3,
+				},
+				{
+					opacity: 1,
+					duration: 0.2,
+					ease: 'power1.inOut',
+					yoyo: true,
+					repeat: -1,
+				}
+			);
+		},
+		[prefersReducedMotion]
+	);
 
 	return { animateButtonHover, animateButtonPressed, animateToggle, animateSeparator };
 };

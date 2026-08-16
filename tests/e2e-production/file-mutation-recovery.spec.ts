@@ -26,16 +26,10 @@ test('muestra la recuperación durable de inicio sin marcar el explorador como l
 	const statusBar = page.getByTestId('file-browser-status-bar');
 	const recovery = page.getByTestId('file-browser-startup-recovery');
 	await expect(statusBar).toBeVisible();
-	await expect(recovery).toHaveText('Rec. 1 revisión');
-	await expect(recovery).toHaveAttribute(
-		'title',
-		'La recuperación de inicio requiere revisión manual para 1 operación.'
-	);
-	await expect(recovery).toHaveAttribute(
-		'aria-label',
-		'La recuperación de inicio requiere revisión manual para 1 operación.'
-	);
-	await expect(statusBar.getByText('Listo')).toHaveCount(0);
+	await expect(recovery).toHaveText('Recovery: 1 review');
+	await expect(recovery).toHaveAttribute('title', 'Startup recovery requires manual review for 1 operation.');
+	await expect(recovery).toHaveAttribute('aria-label', 'Startup recovery requires manual review for 1 operation.');
+	await expect(statusBar.getByText('Ready')).toHaveCount(0);
 
 	const evidenceDirectory = resolve(
 		process.cwd(),
@@ -49,13 +43,13 @@ test('muestra la recuperación durable de inicio sin marcar el explorador como l
 	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'manual-review-desktop.png') });
 
 	await recovery.click();
-	const reviewDialog = page.getByRole('dialog', { name: 'Revisión de recuperación' });
+	const reviewDialog = page.getByRole('dialog', { name: 'Recovery review' });
 	await expect(reviewDialog).toBeVisible();
-	await expect(reviewDialog).toContainText('Sólo elimina una copia temporal');
-	await expect(reviewDialog.getByRole('button', { name: 'Reintentar reparación' })).toBeVisible();
+	await expect(reviewDialog).toContainText('removes a temporary copy');
+	await expect(reviewDialog.getByRole('button', { name: 'Retry repair' })).toBeVisible();
 
 	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'manual-review-dialog.png') });
-	await reviewDialog.getByRole('button', { name: 'Cancelar' }).click();
+	await reviewDialog.getByRole('button', { name: 'Cancel' }).click();
 	await expect(reviewDialog).toHaveCount(0);
 
 	await page.setViewportSize({ height: 768, width: 1024 });

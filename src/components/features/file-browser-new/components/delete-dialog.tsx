@@ -58,9 +58,7 @@ export function DeleteDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 				<DialogHeader>
 					<div className="flex items-center gap-2 text-destructive">
 						<AlertTriangle className="h-5 w-5" />
-						<DialogTitle>
-							{isSingleItem ? 'Confirm deletion' : `Delete ${itemCount} ${getItemTypeLabel()}`}
-						</DialogTitle>
+						<DialogTitle>{isSingleItem ? 'Confirm deletion' : `Delete ${itemCount} ${getItemTypeLabel()}`}</DialogTitle>
 					</div>
 					<DialogDescription className="pt-2">{getWarningMessage()}</DialogDescription>
 				</DialogHeader>
@@ -91,9 +89,7 @@ export function DeleteDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 							<p className="text-sm">
 								<strong>{itemCount}</strong> {getItemTypeLabel()} selected
 							</p>
-							{hasFolders && (
-								<p className="mt-1 text-destructive text-xs">⚠️ Some folders may contain files</p>
-							)}
+							{hasFolders && <p className="mt-1 text-destructive text-xs">⚠️ Some folders may contain files</p>}
 						</div>
 					</div>
 				)}

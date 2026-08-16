@@ -950,7 +950,11 @@ describe('taxonomy artifact manager', () => {
 		expect(rebuilt).toMatchObject({ error: 0, suppressedReappearances: 0, synced: 1, tombstones: 0 });
 		expect(
 			await db
-				.select({ relativePath: taxonomyArtifacts.relativePath, rootId: taxonomyArtifacts.rootId, syncStatus: taxonomyArtifacts.syncStatus })
+				.select({
+					relativePath: taxonomyArtifacts.relativePath,
+					rootId: taxonomyArtifacts.rootId,
+					syncStatus: taxonomyArtifacts.syncStatus,
+				})
 				.from(taxonomyArtifacts)
 				.where(eq(taxonomyArtifacts.entityId, entityId))
 		).toEqual([

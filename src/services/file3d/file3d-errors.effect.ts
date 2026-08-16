@@ -29,8 +29,4 @@ export class File3DHashConflict extends Data.TaggedError('File3DHashConflict')<{
 	readonly message?: string;
 }> {}
 
-export type File3DError =
-	| File3DNotFound
-	| File3DDatabaseError
-	| File3DValidationError
-	| File3DHashConflict;
+export type File3DError = File3DNotFound | File3DDatabaseError | File3DValidationError | File3DHashConflict;

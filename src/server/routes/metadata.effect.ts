@@ -96,39 +96,45 @@ const router = express.Router();
 /**
  * PUT /metadata/:id - Actualizar metadatos por su ID
  */
-router.put('/:id', effectHandler((req, res) => {
-	const { id } = req.params;
-	const data = req.body;
+router.put(
+	'/:id',
+	effectHandler((req, res) => {
+		const { id } = req.params;
+		const data = req.body;
 
-	if (!data) {
-		res.status(400).json({ error: 'Los datos de metadata son requeridos' });
-		return Effect.succeed(undefined);
-	}
+		if (!data) {
+			res.status(400).json({ error: 'Los datos de metadata son requeridos' });
+			return Effect.succeed(undefined);
+		}
 
-	return Effect.gen(function* () {
-		const service = yield* MetadataServiceTag;
-		return yield* service.updateMetadata(id, data);
-	}).pipe(Effect.provide(MetadataServiceLive));
-}));
+		return Effect.gen(function* () {
+			const service = yield* MetadataServiceTag;
+			return yield* service.updateMetadata(id, data);
+		}).pipe(Effect.provide(MetadataServiceLive));
+	})
+);
 
 /**
  * PUT /metadata/bulk-update - Actualizar metadata en lote
  */
-router.put('/bulk-update', effectHandler((req, res) => {
-	const { updates } = req.body;
+router.put(
+	'/bulk-update',
+	effectHandler((req, res) => {
+		const { updates } = req.body;
 
-	if (!(updates && Array.isArray(updates))) {
-		res.status(400).json({
-			error: 'El campo "updates" (un array de objetos con id y data) es requerido',
-		});
-		return Effect.succeed(undefined);
-	}
+		if (!(updates && Array.isArray(updates))) {
+			res.status(400).json({
+				error: 'El campo "updates" (un array de objetos con id y data) es requerido',
+			});
+			return Effect.succeed(undefined);
+		}
 
-	return Effect.gen(function* () {
-		const service = yield* MetadataServiceTag;
-		return yield* service.updateMultipleMetadata(updates);
-	}).pipe(Effect.provide(MetadataServiceLive));
-}));
+		return Effect.gen(function* () {
+			const service = yield* MetadataServiceTag;
+			return yield* service.updateMultipleMetadata(updates);
+		}).pipe(Effect.provide(MetadataServiceLive));
+	})
+);
 
 export default router;
 export { router as metadataEffectRouter };

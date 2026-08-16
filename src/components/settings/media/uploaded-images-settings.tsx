@@ -13,8 +13,8 @@ export function UploadedImagesSettings() {
 			</CardHeader>
 			<CardContent className="space-y-4 text-sm">
 				<p className="max-w-2xl text-muted-foreground">
-					This screen only accepts files from an authorized media root, preserving source traceability,
-					permissions, and operation recovery.
+					This screen only accepts files from an authorized media root, preserving source traceability, permissions, and
+					operation recovery.
 				</p>
 				<Button asChild>
 					<a href="/files">
