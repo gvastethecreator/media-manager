@@ -32,29 +32,25 @@ bunx effect-solutions open-issue        # Leave feedback
 ### Error handling
 
 ```typescript
-import { Effect } from "effect"
+import { Effect } from 'effect';
 
 Effect.gen(function* () {
-  const user = yield* findUser(id).pipe(
-    Effect.catchTag("NotFound", () => Effect.succeed(null))
-  )
-})
+	const user = yield* findUser(id).pipe(Effect.catchTag('NotFound', () => Effect.succeed(null)));
+});
 ```
 
 ### HTTP client setup
 
 ```typescript
-import { Effect, HttpClient } from "effect"
-import { FetchHttpClient } from "@effect/platform"
+import { Effect, HttpClient } from 'effect';
+import { FetchHttpClient } from '@effect/platform';
 
 const program = Effect.gen(function* () {
-  const http = yield* HttpClient.HttpClient
-  const result = yield* http.get("/api/users")
-})
+	const http = yield* HttpClient.HttpClient;
+	const result = yield* http.get('/api/users');
+});
 
-program.pipe(
-  Effect.provide(FetchHttpClient.layer)
-)
+program.pipe(Effect.provide(FetchHttpClient.layer));
 ```
 
 See [effect.solutions](https://www.effect.solutions) for full patterns and rationale.

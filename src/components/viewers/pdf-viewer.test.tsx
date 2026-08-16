@@ -39,10 +39,7 @@ describe('PdfViewer', () => {
 
 		expect(screen.getByText('Loading...')).toBeInTheDocument();
 		expect(screen.getByTestId('pdf-document')).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: 'Download' })).toHaveAttribute(
-			'href',
-			'/api/documents/document-1/content'
-		);
+		expect(screen.getByRole('link', { name: 'Download' })).toHaveAttribute('href', '/api/documents/document-1/content');
 		expect(screen.getByRole('link', { name: 'Download' })).toHaveAttribute('download', 'example.pdf');
 		fireEvent.click(screen.getByRole('button', { name: 'Complete load' }));
 

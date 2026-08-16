@@ -12,7 +12,7 @@ Check and resume suspended AudioContext before playing.
 
 ```ts
 function playSound() {
-  const ctx = getAudioContext();
+	const ctx = getAudioContext();
 }
 ```
 
@@ -20,9 +20,9 @@ function playSound() {
 
 ```ts
 function playSound() {
-  const ctx = getAudioContext();
-  if (ctx.state === "suspended") {
-    ctx.resume();
-  }
+	const ctx = getAudioContext();
+	if (ctx.state === 'suspended') {
+		ctx.resume();
+	}
 }
 ```

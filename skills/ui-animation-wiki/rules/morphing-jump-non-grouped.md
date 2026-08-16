@@ -12,7 +12,7 @@ When transitioning between icons NOT in the same group, rotation should jump ins
 
 ```tsx
 useEffect(() => {
-  rotation.set(definition.rotation ?? 0);
+	rotation.set(definition.rotation ?? 0);
 }, [definition]);
 ```
 
@@ -20,10 +20,10 @@ useEffect(() => {
 
 ```tsx
 useEffect(() => {
-  if (shouldRotate) {
-    rotation.set(definition.rotation ?? 0);
-  } else {
-    rotation.jump(definition.rotation ?? 0);
-  }
+	if (shouldRotate) {
+		rotation.set(definition.rotation ?? 0);
+	} else {
+		rotation.jump(definition.rotation ?? 0);
+	}
 }, [definition, shouldRotate]);
 ```

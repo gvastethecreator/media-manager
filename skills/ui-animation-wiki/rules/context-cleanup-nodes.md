@@ -19,7 +19,7 @@ source.start();
 ```ts
 source.start();
 source.onended = () => {
-  source.disconnect();
-  gain.disconnect();
+	source.disconnect();
+	gain.disconnect();
 };
 ```

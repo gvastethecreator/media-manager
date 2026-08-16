@@ -12,7 +12,7 @@ Reuse a single AudioContext instance; do not create new ones per sound.
 
 ```ts
 function playSound() {
-  const ctx = new AudioContext();
+	const ctx = new AudioContext();
 }
 ```
 
@@ -22,9 +22,9 @@ function playSound() {
 let audioContext: AudioContext | null = null;
 
 function getAudioContext(): AudioContext {
-  if (!audioContext) {
-    audioContext = new AudioContext();
-  }
-  return audioContext;
+	if (!audioContext) {
+		audioContext = new AudioContext();
+	}
+	return audioContext;
 }
 ```

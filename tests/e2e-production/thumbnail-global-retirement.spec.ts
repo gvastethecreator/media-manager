@@ -8,14 +8,14 @@ test('routes thumbnail maintenance to authorized folders', async ({ page }, test
 	page.on('pageerror', (error) => errors.push(error.message));
 
 	await page.goto('/settings?section=files&item=thumbnails', { waitUntil: 'domcontentloaded' });
-	await expect(page.getByText('Procesamiento por carpeta', { exact: true })).toBeVisible();
-	await expect(page.getByRole('button', { name: 'Ver carpetas autorizadas' })).toBeVisible();
-	await expect(page.getByRole('button', { name: 'Optimizar' })).toHaveCount(0);
-	await expect(page.getByRole('button', { name: 'Reprocesar todo' })).toHaveCount(0);
-	await expect(page.getByRole('button', { name: 'Limpiar huérfanas' })).toHaveCount(0);
+	await expect(page.getByText('Per-folder processing', { exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'View authorized folders' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Optimize' })).toHaveCount(0);
+	await expect(page.getByRole('button', { name: 'Reprocess all' })).toHaveCount(0);
+	await expect(page.getByRole('button', { name: 'Clean orphaned' })).toHaveCount(0);
 	await page.screenshot({ path: testInfo.outputPath('thumbnail-maintenance-by-folder.png'), fullPage: true });
 
-	await page.getByRole('button', { name: 'Ver carpetas autorizadas' }).click();
+	await page.getByRole('button', { name: 'View authorized folders' }).click();
 	await expect(page.getByTestId('folders-settings')).toBeVisible();
 	expect(errors).toEqual([]);
 });

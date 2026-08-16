@@ -12,8 +12,8 @@ Use ::backdrop pseudo-element for dialog/popover backgrounds.
 
 ```tsx
 <>
-  <div className={styles.overlay} onClick={close} />
-  <dialog className={styles.dialog}>{children}</dialog>
+	<div className={styles.overlay} onClick={close} />
+	<dialog className={styles.dialog}>{children}</dialog>
 </>
 ```
 
@@ -21,7 +21,7 @@ Use ::backdrop pseudo-element for dialog/popover backgrounds.
 
 ```css
 dialog::backdrop {
-  background: var(--black-a6);
-  backdrop-filter: blur(4px);
+	background: var(--black-a6);
+	backdrop-filter: blur(4px);
 }
 ```

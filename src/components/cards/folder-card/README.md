@@ -117,7 +117,9 @@ El componente respeta y utiliza los atributos visuales definidos en la entidad F
 - **emoji**: Emoji asociado que se muestra como emblema junto al nombre
 - **featuredImage**: Imagen destacada que se puede mostrar como fondo en la sección de contenido
 - **isFavorite**: Indica si la carpeta está marcada como favorita
+
 <!-- autoReindex eliminado del modelo: la indexación automática ahora se gestiona por lógica de cliente/servicio sin bandera por carpeta -->
+
 - **path**: Ruta que se utiliza para determinar si es una carpeta raíz o subcarpeta
 
 ## 🚀 Rendimiento

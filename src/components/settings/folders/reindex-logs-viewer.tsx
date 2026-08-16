@@ -293,9 +293,7 @@ export default function ReindexLogsViewer() {
 						<div className="space-y-4">
 							<h3 className="mb-4 font-medium text-foreground text-lg">Errors by Source (Last 7 Days)</h3>
 							{Object.keys(summaryQuery.data.data).length === 0 ? (
-								<div className="py-8 text-center text-muted-foreground">
-									No errors recorded in the last 7 days
-								</div>
+								<div className="py-8 text-center text-muted-foreground">No errors recorded in the last 7 days</div>
 							) : (
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 									{Object.entries(summaryQuery.data.data).map(([source, count]) => (
@@ -345,7 +343,7 @@ export default function ReindexLogsViewer() {
 													<p className="mb-2 text-foreground text-sm">{log.message}</p>
 													{log.context && (
 														<details className="text-muted-foreground text-xs">
-													<summary className="cursor-pointer hover:text-foreground">Context</summary>
+															<summary className="cursor-pointer hover:text-foreground">Context</summary>
 															<div className="mt-2">
 																<JsonViewer
 																	content={JSON.stringify(log.context, null, 2)}

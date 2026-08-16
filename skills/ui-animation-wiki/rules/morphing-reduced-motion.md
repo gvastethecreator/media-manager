@@ -22,7 +22,7 @@ function MorphingIcon({ icon }: Props) {
 function MorphingIcon({ icon }: Props) {
   const reducedMotion = useReducedMotion() ?? false;
   const activeTransition = reducedMotion ? { duration: 0 } : transition;
-  
+
   return <motion.line animate={...} transition={activeTransition} />;
 }
 ```

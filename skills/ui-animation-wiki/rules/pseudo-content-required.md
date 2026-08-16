@@ -12,8 +12,8 @@ tags: pseudo, content, before-after
 
 ```css
 .button::before {
-  position: absolute;
-  background: var(--gray-3);
+	position: absolute;
+	background: var(--gray-3);
 }
 ```
 
@@ -21,8 +21,8 @@ tags: pseudo, content, before-after
 
 ```css
 .button::before {
-  content: "";
-  position: absolute;
-  background: var(--gray-3);
+	content: '';
+	position: absolute;
+	background: var(--gray-3);
 }
 ```

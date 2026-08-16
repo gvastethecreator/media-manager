@@ -12,8 +12,8 @@ Interactions must respond within 400ms to feel instant. Above this threshold, us
 
 ```tsx
 async function handleClick() {
-  const data = await fetchData();
-  setResult(data);
+	const data = await fetchData();
+	setResult(data);
 }
 ```
 
@@ -21,9 +21,9 @@ async function handleClick() {
 
 ```tsx
 async function handleClick() {
-  setResult(optimisticData);
-  const data = await fetchData();
-  setResult(data);
+	setResult(optimisticData);
+	const data = await fetchData();
+	setResult(data);
 }
 ```
 

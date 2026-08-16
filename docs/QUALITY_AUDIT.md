@@ -4,18 +4,18 @@ Se aplicaron diez pasadas de calidad al proyecto, registrando evidencia
 observable y dejando abiertos únicamente los gates que requieren un runtime
 externo o una decisión de distribución.
 
-| Pasada | Alcance | Resultado |
-| --- | --- | --- |
-| 1. Contrato de runtime | Bun, scripts, build server, Tauri | ✅ Bun explícito confirmado; no migrar a pnpm |
-| 2. Dependencias | `bun update --latest`, lock y `bun outdated` | ✅ lock actualizado; `bun outdated` sin filas |
-| 3. Tipos | TypeScript 7, Sharp 0.35, TanStack Table 9 | ✅ `bun run tsc` sin errores |
-| 4. Lint | Vite+ Oxlint sobre source/tests/config | ✅ `bun run lint` sin errores; quedan warnings de accesibilidad/tests legacy |
-| 5. Tests | Unit/integración aislados | ✅ 87 archivos / 825 tests pasaron; el wrapper quedó esperando un handshake de limpieza Windows y se limpió el quarantine de forma segura |
-| 6. Build | Vite cliente + servidor Bun | ✅ `bun run build`; cliente y servidor (`7.74 MB`, 2300 módulos) generados |
-| 7. UX/accesibilidad | warnings de handlers no interactivos y labels | ⚠️ deuda existente localizada en file-browser/viewer/cards; no se ocultó |
-| 8. Arquitectura | frontera de tablas y metadatos Next residual | ✅ adapter TanStack v9 y eliminación de metadata Next sin uso |
-| 9. Rendimiento | chunks, polling, caches y residuos de instalación | ✅ se ignoraron árboles `node_modules-*`; build reportó 40% de hooks de plugin (dato para optimización futura) |
-| 10. Documentación/repo | README, docs, `.gitignore`, tasks, `.scratch` | ✅ documentación y tasks actualizados; limpieza selectiva preservando evidencia |
+| Pasada                 | Alcance                                           | Resultado                                                                                                                                 |
+| ---------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Contrato de runtime | Bun, scripts, build server, Tauri                 | ✅ Bun explícito confirmado; no migrar a pnpm                                                                                             |
+| 2. Dependencias        | `bun update --latest`, lock y `bun outdated`      | ✅ lock actualizado; `bun outdated` sin filas                                                                                             |
+| 3. Tipos               | TypeScript 7, Sharp 0.35, TanStack Table 9        | ✅ `bun run tsc` sin errores                                                                                                              |
+| 4. Lint                | Vite+ Oxlint sobre source/tests/config            | ✅ `bun run lint` sin errores; quedan warnings de accesibilidad/tests legacy                                                              |
+| 5. Tests               | Unit/integración aislados                         | ✅ 87 archivos / 825 tests pasaron; el wrapper quedó esperando un handshake de limpieza Windows y se limpió el quarantine de forma segura |
+| 6. Build               | Vite cliente + servidor Bun                       | ✅ `bun run build`; cliente y servidor (`7.74 MB`, 2300 módulos) generados                                                                |
+| 7. UX/accesibilidad    | warnings de handlers no interactivos y labels     | ⚠️ deuda existente localizada en file-browser/viewer/cards; no se ocultó                                                                  |
+| 8. Arquitectura        | frontera de tablas y metadatos Next residual      | ✅ adapter TanStack v9 y eliminación de metadata Next sin uso                                                                             |
+| 9. Rendimiento         | chunks, polling, caches y residuos de instalación | ✅ se ignoraron árboles `node_modules-*`; build reportó 40% de hooks de plugin (dato para optimización futura)                            |
+| 10. Documentación/repo | README, docs, `.gitignore`, tasks, `.scratch`     | ✅ documentación y tasks actualizados; limpieza selectiva preservando evidencia                                                           |
 
 ## Lectura de resultados
 

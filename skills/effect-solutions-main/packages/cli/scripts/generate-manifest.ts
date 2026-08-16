@@ -1,27 +1,27 @@
 #!/usr/bin/env bun
 
-import { readdirSync } from "node:fs"
-import { join } from "node:path"
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
-const DOCS_DIR = join(import.meta.dir, "../../website/docs")
-const OUTPUT_FILE = join(import.meta.dir, "../src/docs-manifest.ts")
+const DOCS_DIR = join(import.meta.dir, '../../website/docs');
+const OUTPUT_FILE = join(import.meta.dir, '../src/docs-manifest.ts');
 
 // Find all .md files in docs directory
 const docFiles = readdirSync(DOCS_DIR)
-  .filter((f) => f.endsWith(".md"))
-  .sort()
+	.filter((f) => f.endsWith('.md'))
+	.sort();
 
 // Generate import statements
 const imports = docFiles.map((filename, i) => {
-  const varName = `DOC__${i.toString().padStart(2, "0")}`
-  return `import ${varName} from "../../website/docs/${filename}" with { type: "text" };`
-})
+	const varName = `DOC__${i.toString().padStart(2, '0')}`;
+	return `import ${varName} from "../../website/docs/${filename}" with { type: "text" };`;
+});
 
 // Generate RAW_DOCS array
 const rawDocsEntries = docFiles.map((filename, i) => {
-  const varName = `DOC__${i.toString().padStart(2, "0")}`
-  return `  { filename: "${filename}", source: ${varName} },`
-})
+	const varName = `DOC__${i.toString().padStart(2, '0')}`;
+	return `  { filename: "${filename}", source: ${varName} },`;
+});
 
 const manifest = `// @ts-nocheck
 import matter from "gray-matter";
@@ -29,7 +29,7 @@ import matter from "gray-matter";
 // Auto-generated manifest - DO NOT EDIT MANUALLY
 // Run: bun run generate:manifest
 
-${imports.join("\n")}
+${imports.join('\n')}
 
 type DocMeta = {
   readonly slug: string;
@@ -45,7 +45,7 @@ type RawDoc = {
 };
 
 const RAW_DOCS: ReadonlyArray<RawDoc> = [
-${rawDocsEntries.join("\n")}
+${rawDocsEntries.join('\n')}
 ];
 
 const filenameToSlug = (filename: string): string => {
@@ -108,8 +108,8 @@ export const DOC_LOOKUP: Record<string, DocMeta> = DOCS.reduce(
   },
   {} as Record<string, DocMeta>,
 );
-`
+`;
 
-await Bun.write(OUTPUT_FILE, manifest)
-console.log(`✓ Generated manifest with ${docFiles.length} docs`)
-console.log(`  → ${OUTPUT_FILE}`)
+await Bun.write(OUTPUT_FILE, manifest);
+console.log(`✓ Generated manifest with ${docFiles.length} docs`);
+console.log(`  → ${OUTPUT_FILE}`);

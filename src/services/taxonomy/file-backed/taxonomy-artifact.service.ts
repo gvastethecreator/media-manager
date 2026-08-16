@@ -93,7 +93,9 @@ export interface TaxonomyArtifactDocument {
  * with the artifact makes the canonical PUT the success boundary for editors;
  * clients do not need a second, failure-prone entity GET before closing a save.
  */
-export interface SaveTaxonomyArtifactResult<TEntity = TaxonomyArtifactEntityProjection> extends TaxonomyArtifactDocument {
+export interface SaveTaxonomyArtifactResult<
+	TEntity = TaxonomyArtifactEntityProjection,
+> extends TaxonomyArtifactDocument {
 	entity: TEntity;
 }
 
@@ -243,11 +245,7 @@ function deletionLedgerWhere(identity: TaxonomyArtifactDeletionLedgerIdentity) {
 async function readDeletionLedger(
 	identity: TaxonomyArtifactDeletionLedgerIdentity
 ): Promise<TaxonomyArtifactDeletionLedgerRow | null> {
-	const [row] = await db
-		.select()
-		.from(taxonomyArtifactDeletionLedger)
-		.where(deletionLedgerWhere(identity))
-		.limit(1);
+	const [row] = await db.select().from(taxonomyArtifactDeletionLedger).where(deletionLedgerWhere(identity)).limit(1);
 	return row ?? null;
 }
 
@@ -272,7 +270,12 @@ function artifactRecoveryKey(
 }
 
 function artifactRecoveryKeyForBinding(binding: TaxonomyArtifactRow): string {
-	return artifactRecoveryKey(binding.rootId, binding.relativePath, binding.entityType as ArtifactFamily, binding.entityId);
+	return artifactRecoveryKey(
+		binding.rootId,
+		binding.relativePath,
+		binding.entityType as ArtifactFamily,
+		binding.entityId
+	);
 }
 
 async function getEntityProjection(

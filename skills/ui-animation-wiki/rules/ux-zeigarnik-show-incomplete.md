@@ -12,7 +12,7 @@ People remember incomplete tasks better than completed ones. Use this to drive e
 
 ```tsx
 function Dashboard() {
-  return <DashboardContent />;
+	return <DashboardContent />;
 }
 ```
 
@@ -20,16 +20,12 @@ function Dashboard() {
 
 ```tsx
 function Dashboard({ profile }) {
-  return (
-    <div>
-      {!profile.isComplete && (
-        <Banner>
-          Complete your profile — {profile.completionPercent}% done
-        </Banner>
-      )}
-      <DashboardContent />
-    </div>
-  );
+	return (
+		<div>
+			{!profile.isComplete && <Banner>Complete your profile — {profile.completionPercent}% done</Banner>}
+			<DashboardContent />
+		</div>
+	);
 }
 ```
 

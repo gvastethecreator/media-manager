@@ -12,8 +12,8 @@ Use ::placeholder for input placeholder styling, not wrapper elements.
 
 ```tsx
 <div className={styles.inputWrapper}>
-  {!value && <span className={styles.placeholder}>Enter text...</span>}
-  <input value={value} />
+	{!value && <span className={styles.placeholder}>Enter text...</span>}
+	<input value={value} />
 </div>
 ```
 
@@ -21,7 +21,7 @@ Use ::placeholder for input placeholder styling, not wrapper elements.
 
 ```css
 input::placeholder {
-  color: var(--gray-9);
-  opacity: 1;
+	color: var(--gray-9);
+	opacity: 1;
 }
 ```

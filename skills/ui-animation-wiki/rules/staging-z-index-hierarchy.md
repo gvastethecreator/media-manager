@@ -12,11 +12,15 @@ Animated elements must respect z-index layering.
 **Incorrect (no z-index):**
 
 ```css
-.tooltip { /* No z-index, may render behind other elements */ }
+.tooltip {
+	/* No z-index, may render behind other elements */
+}
 ```
 
 **Correct (explicit z-index):**
 
 ```css
-.tooltip { z-index: 50; }
+.tooltip {
+	z-index: 50;
+}
 ```

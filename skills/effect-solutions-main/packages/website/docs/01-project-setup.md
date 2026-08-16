@@ -1,6 +1,6 @@
 ---
 title: Project Setup
-description: "Install the Effect Language Service and strict project defaults"
+description: 'Install the Effect Language Service and strict project defaults'
 order: 1
 group: Setup
 ---
@@ -8,6 +8,7 @@ group: Setup
 # Project Setup
 
 This guide covers:
+
 1. **Effect Language Service**: Editor diagnostics and build-time type checking
 2. **Reference Repositories**: Local reference repositories for AI assistance
 
@@ -27,14 +28,14 @@ Add the plugin to `tsconfig.json`:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/Effect-TS/language-service/refs/heads/main/schema.json",
-  "compilerOptions": {
-    "plugins": [
-      {
-        "name": "@effect/language-service"
-      }
-    ]
-  }
+	"$schema": "https://raw.githubusercontent.com/Effect-TS/language-service/refs/heads/main/schema.json",
+	"compilerOptions": {
+		"plugins": [
+			{
+				"name": "@effect/language-service"
+			}
+		]
+	}
 }
 ```
 
@@ -52,8 +53,8 @@ Your editor must use the **workspace** TypeScript version (not its built-in one)
 
 ```json
 {
-  "typescript.tsdk": "./node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+	"typescript.tsdk": "./node_modules/typescript/lib",
+	"typescript.enablePromptUseWorkspaceTsdk": true
 }
 ```
 
@@ -78,9 +79,9 @@ Add to `package.json` to persist across installs:
 
 ```json
 {
-  "scripts": {
-    "prepare": "effect-language-service patch"
-  }
+	"scripts": {
+		"prepare": "effect-language-service patch"
+	}
 }
 ```
 
@@ -97,6 +98,7 @@ git clone --depth 1 https://github.com/Effect-TS/effect-smol.git ~/.local/share/
 To update later: `git -C ~/.local/share/effect-solutions/effect pull --depth 1`
 
 Then add a reference in `CLAUDE.md` or `AGENTS.md`:
+
 ```markdown
 ## Local Effect Source
 

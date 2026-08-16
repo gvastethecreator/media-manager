@@ -11,12 +11,10 @@ Prefer View Transitions API over JavaScript animation libraries for page transit
 **Incorrect (JS-based transition):**
 
 ```tsx
-import { motion } from "motion/react";
+import { motion } from 'motion/react';
 
 function ImageLightbox() {
-  return (
-    <motion.img layoutId="hero" />
-  );
+	return <motion.img layoutId="hero" />;
 }
 ```
 
@@ -24,9 +22,9 @@ function ImageLightbox() {
 
 ```ts
 function openLightbox(img: HTMLImageElement) {
-  img.style.viewTransitionName = "hero";
-  document.startViewTransition(() => {
-    // Native browser transition
-  });
+	img.style.viewTransitionName = 'hero';
+	document.startViewTransition(() => {
+		// Native browser transition
+	});
 }
 ```

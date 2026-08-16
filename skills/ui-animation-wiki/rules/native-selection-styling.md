@@ -12,7 +12,7 @@ Use ::selection for text selection styling.
 
 ```css
 ::selection {
-  background: var(--blue-a5);
-  color: var(--gray-12);
+	background: var(--blue-a5);
+	color: var(--gray-12);
 }
 ```

@@ -12,8 +12,8 @@ Use pseudo-elements or invisible padding to expand clickable areas beyond visibl
 
 ```css
 .link {
-  font-size: 14px;
-  /* Hit area matches text only */
+	font-size: 14px;
+	/* Hit area matches text only */
 }
 ```
 
@@ -21,12 +21,12 @@ Use pseudo-elements or invisible padding to expand clickable areas beyond visibl
 
 ```css
 .link {
-  position: relative;
+	position: relative;
 }
 
 .link::before {
-  content: "";
-  position: absolute;
-  inset: -8px -12px;
+	content: '';
+	position: absolute;
+	inset: -8px -12px;
 }
 ```

@@ -11,15 +11,17 @@ Use text-underline-offset to push underlines below descenders so they look inten
 **Incorrect (underline collides with descenders):**
 
 ```css
-a { text-decoration: underline; }
+a {
+	text-decoration: underline;
+}
 ```
 
 **Correct (offset underline):**
 
 ```css
 a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-skip-ink: auto;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-skip-ink: auto;
 }
 ```

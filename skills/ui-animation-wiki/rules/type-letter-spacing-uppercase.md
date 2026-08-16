@@ -12,8 +12,8 @@ Uppercase and small-caps text needs positive letter-spacing to feel open and rea
 
 ```css
 .label {
-  text-transform: uppercase;
-  font-size: 12px;
+	text-transform: uppercase;
+	font-size: 12px;
 }
 ```
 
@@ -21,8 +21,8 @@ Uppercase and small-caps text needs positive letter-spacing to feel open and rea
 
 ```css
 .label {
-  text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.05em;
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: 0.05em;
 }
 ```

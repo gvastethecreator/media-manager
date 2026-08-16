@@ -12,7 +12,7 @@ Semi-transparent borders adapt to any background color and create subtle, non-ja
 
 ```css
 .card {
-  border: 1px solid #e5e5e5;
+	border: 1px solid #e5e5e5;
 }
 ```
 
@@ -20,6 +20,6 @@ Semi-transparent borders adapt to any background color and create subtle, non-ja
 
 ```css
 .card {
-  border: 1px solid var(--gray-a4);
+	border: 1px solid var(--gray-a4);
 }
 ```

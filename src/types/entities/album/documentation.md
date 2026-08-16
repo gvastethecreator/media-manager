@@ -46,9 +46,7 @@ flowchart TD
 import { transformAlbum, transformAlbumToWithStats } from '@/transformers/album/transformer';
 import type { Album } from '@/types/entities/album';
 
-const rawAlbum: Album = {
-	/* ... */
-};
+const rawAlbum: Album = {/* ... */};
 const albumComplete = transformAlbum(rawAlbum);
 const albumWithStats = transformAlbumToWithStats(albumComplete);
 ```

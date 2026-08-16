@@ -12,7 +12,7 @@ Mode "wait" nearly doubles animation duration; adjust timing accordingly.
 
 ```tsx
 <AnimatePresence mode="wait">
-  <motion.div transition={{ duration: 0.3 }} />
+	<motion.div transition={{ duration: 0.3 }} />
 </AnimatePresence>
 ```
 
@@ -20,6 +20,6 @@ Mode "wait" nearly doubles animation duration; adjust timing accordingly.
 
 ```tsx
 <AnimatePresence mode="wait">
-  <motion.div transition={{ duration: 0.15 }} />
+	<motion.div transition={{ duration: 0.15 }} />
 </AnimatePresence>
 ```

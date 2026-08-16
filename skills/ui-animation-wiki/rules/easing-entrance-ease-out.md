@@ -11,11 +11,15 @@ Entrances must use ease-out (arrive fast, settle gently).
 **Incorrect (ease-in for entrance):**
 
 ```css
-.modal-enter { animation-timing-function: ease-in; }
+.modal-enter {
+	animation-timing-function: ease-in;
+}
 ```
 
 **Correct (ease-out for entrance):**
 
 ```css
-.modal-enter { animation-timing-function: ease-out; }
+.modal-enter {
+	animation-timing-function: ease-out;
+}
 ```

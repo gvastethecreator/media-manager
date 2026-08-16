@@ -12,15 +12,15 @@ Nested AnimatePresence must use propagate prop for coordinated exits.
 
 ```tsx
 <AnimatePresence>
-  {isOpen && (
-    <motion.div exit={{ opacity: 0 }}>
-      <AnimatePresence>
-        {items.map(item => (
-          <motion.div key={item.id} exit={{ scale: 0 }} />
-        ))}
-      </AnimatePresence>
-    </motion.div>
-  )}
+	{isOpen && (
+		<motion.div exit={{ opacity: 0 }}>
+			<AnimatePresence>
+				{items.map((item) => (
+					<motion.div key={item.id} exit={{ scale: 0 }} />
+				))}
+			</AnimatePresence>
+		</motion.div>
+	)}
 </AnimatePresence>
 ```
 
@@ -28,14 +28,14 @@ Nested AnimatePresence must use propagate prop for coordinated exits.
 
 ```tsx
 <AnimatePresence propagate>
-  {isOpen && (
-    <motion.div exit={{ opacity: 0 }}>
-      <AnimatePresence propagate>
-        {items.map(item => (
-          <motion.div key={item.id} exit={{ scale: 0 }} />
-        ))}
-      </AnimatePresence>
-    </motion.div>
-  )}
+	{isOpen && (
+		<motion.div exit={{ opacity: 0 }}>
+			<AnimatePresence propagate>
+				{items.map((item) => (
+					<motion.div key={item.id} exit={{ scale: 0 }} />
+				))}
+			</AnimatePresence>
+		</motion.div>
+	)}
 </AnimatePresence>
 ```

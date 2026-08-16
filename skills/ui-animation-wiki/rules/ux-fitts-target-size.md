@@ -12,9 +12,9 @@ The bigger something is, the easier it is to click. Make interactive elements la
 
 ```css
 .icon-button {
-  width: 16px;
-  height: 16px;
-  padding: 0;
+	width: 16px;
+	height: 16px;
+	padding: 0;
 }
 ```
 
@@ -22,9 +22,9 @@ The bigger something is, the easier it is to click. Make interactive elements la
 
 ```css
 .icon-button {
-  width: 32px;
-  height: 32px;
-  padding: 8px;
+	width: 32px;
+	height: 32px;
+	padding: 8px;
 }
 ```
 

@@ -5,11 +5,13 @@
 Auto-generates `src/docs-manifest.ts` by scanning `packages/website/docs/*.md` files.
 
 **Run manually:**
+
 ```bash
 bun run generate:manifest
 ```
 
 **Auto-runs:**
+
 - Before publishing (`prepublishOnly` hook)
 - Manually when adding/renaming docs
 

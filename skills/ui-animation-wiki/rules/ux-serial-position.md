@@ -12,9 +12,9 @@ Users best remember the first and last items in a sequence. Place the most impor
 
 ```tsx
 <nav>
-  <Link href="/settings">Settings</Link>
-  <Link href="/">Home</Link>
-  <Link href="/about">About</Link>
+	<Link href="/settings">Settings</Link>
+	<Link href="/">Home</Link>
+	<Link href="/about">About</Link>
 </nav>
 ```
 
@@ -22,9 +22,9 @@ Users best remember the first and last items in a sequence. Place the most impor
 
 ```tsx
 <nav>
-  <Link href="/">Home</Link>
-  <Link href="/about">About</Link>
-  <Link href="/settings">Settings</Link>
+	<Link href="/">Home</Link>
+	<Link href="/about">About</Link>
+	<Link href="/settings">Settings</Link>
 </nav>
 ```
 

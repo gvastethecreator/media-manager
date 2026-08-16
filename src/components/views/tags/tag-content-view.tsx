@@ -63,11 +63,7 @@ export function TagContentView() {
 		return (
 			<BaseContentView>
 				<div className="flex h-full items-center justify-center">
-					<EmptyState
-						description="Select a tag to view its content"
-						icon={Tag}
-						title="No tag selected"
-					/>
+					<EmptyState description="Select a tag to view its content" icon={Tag} title="No tag selected" />
 				</div>
 			</BaseContentView>
 		);

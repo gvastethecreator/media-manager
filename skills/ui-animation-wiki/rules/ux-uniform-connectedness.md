@@ -12,13 +12,13 @@ Elements that are visually connected (by lines, color, or frames) are perceived 
 
 ```tsx
 function Steps({ current }) {
-  return (
-    <div>
-      <span>Step 1</span>
-      <span>Step 2</span>
-      <span>Step 3</span>
-    </div>
-  );
+	return (
+		<div>
+			<span>Step 1</span>
+			<span>Step 2</span>
+			<span>Step 3</span>
+		</div>
+	);
 }
 ```
 
@@ -26,17 +26,17 @@ function Steps({ current }) {
 
 ```tsx
 function Steps({ current }) {
-  return (
-    <div className={styles.steps}>
-      {steps.map((step, i) => (
-        <div key={step.id} className={styles.step} data-active={i <= current}>
-          <div className={styles.dot} />
-          {i < steps.length - 1 && <div className={styles.connector} />}
-          <span>{step.label}</span>
-        </div>
-      ))}
-    </div>
-  );
+	return (
+		<div className={styles.steps}>
+			{steps.map((step, i) => (
+				<div key={step.id} className={styles.step} data-active={i <= current}>
+					<div className={styles.dot} />
+					{i < steps.length - 1 && <div className={styles.connector} />}
+					<span>{step.label}</span>
+				</div>
+			))}
+		</div>
+	);
 }
 ```
 

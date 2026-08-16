@@ -12,7 +12,7 @@ A single box-shadow looks flat. Layer multiple shadows with increasing blur and 
 
 ```css
 .card {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 ```
 
@@ -20,10 +20,10 @@ A single box-shadow looks flat. Layer multiple shadows with increasing blur and 
 
 ```css
 .card {
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.06),
-    0 4px 8px rgba(0, 0, 0, 0.04),
-    0 12px 24px rgba(0, 0, 0, 0.03);
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.06),
+		0 4px 8px rgba(0, 0, 0, 0.04),
+		0 12px 24px rgba(0, 0, 0, 0.03);
 }
 ```
 

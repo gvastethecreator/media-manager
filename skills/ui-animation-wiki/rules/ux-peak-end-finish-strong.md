@@ -12,8 +12,8 @@ People judge experiences by their peak moment and their end. Invest in success a
 
 ```tsx
 async function handleSubmit() {
-  await submitForm(data);
-  router.push("/");
+	await submitForm(data);
+	router.push('/');
 }
 ```
 
@@ -21,15 +21,11 @@ async function handleSubmit() {
 
 ```tsx
 async function handleSubmit() {
-  await submitForm(data);
-  setStatus("success");
+	await submitForm(data);
+	setStatus('success');
 }
 
-return status === "success" ? (
-  <SuccessScreen message="You're all set." />
-) : (
-  <Form onSubmit={handleSubmit} />
-);
+return status === 'success' ? <SuccessScreen message="You're all set." /> : <Form onSubmit={handleSubmit} />;
 ```
 
 Reference: [Peak-End Rule](https://lawsofux.com/peak-end-rule/)

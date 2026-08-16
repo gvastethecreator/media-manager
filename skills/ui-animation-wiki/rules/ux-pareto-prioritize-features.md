@@ -12,11 +12,13 @@ tags: ux, pareto, prioritization, features
 
 ```tsx
 function Toolbar() {
-  return (
-    <div>
-      {allFeatures.map(f => <Button key={f.id}>{f.label}</Button>)}
-    </div>
-  );
+	return (
+		<div>
+			{allFeatures.map((f) => (
+				<Button key={f.id}>{f.label}</Button>
+			))}
+		</div>
+	);
 }
 ```
 
@@ -24,12 +26,14 @@ function Toolbar() {
 
 ```tsx
 function Toolbar() {
-  return (
-    <div>
-      {criticalFeatures.map(f => <Button key={f.id}>{f.label}</Button>)}
-      <MoreMenu features={secondaryFeatures} />
-    </div>
-  );
+	return (
+		<div>
+			{criticalFeatures.map((f) => (
+				<Button key={f.id}>{f.label}</Button>
+			))}
+			<MoreMenu features={secondaryFeatures} />
+		</div>
+	);
 }
 ```
 

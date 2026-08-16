@@ -12,8 +12,8 @@ Sound weight should match action importance.
 
 ```tsx
 function handleToggle() {
-  playSound("triumphant-fanfare");
-  setEnabled(!enabled);
+	playSound('triumphant-fanfare');
+	setEnabled(!enabled);
 }
 ```
 
@@ -21,12 +21,12 @@ function handleToggle() {
 
 ```tsx
 function handleToggle() {
-  playSound("soft-click");
-  setEnabled(!enabled);
+	playSound('soft-click');
+	setEnabled(!enabled);
 }
 
 function handlePurchase() {
-  playSound("success-chime");
-  completePurchase();
+	playSound('success-chime');
+	completePurchase();
 }
 ```

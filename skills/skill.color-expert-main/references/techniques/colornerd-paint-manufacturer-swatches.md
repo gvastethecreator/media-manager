@@ -11,29 +11,35 @@ Library of **29,875 color swatches** from 12 major paint and color manufacturers
 
 ## Supported Manufacturers
 
-| Manufacturer | Type |
-|-------------|------|
-| **Behr** | Consumer paint |
-| **Benjamin Moore** | Consumer/pro paint |
-| **Sherwin Williams** | Consumer/pro paint |
-| **PPG** | Paint & coatings |
-| **Dunn Edwards** | Paint |
-| **Hallman Lindsay** | Paint |
-| **Vista** | Paint |
-| **RAL** | Industrial standard |
-| **HKS** | Printing inks |
-| **TOYO** | Printing inks (Japan) |
-| **TRUMATCH** | CMYK color matching |
-| **Avery** | Vinyl/wraps |
+| Manufacturer         | Type                  |
+| -------------------- | --------------------- |
+| **Behr**             | Consumer paint        |
+| **Benjamin Moore**   | Consumer/pro paint    |
+| **Sherwin Williams** | Consumer/pro paint    |
+| **PPG**              | Paint & coatings      |
+| **Dunn Edwards**     | Paint                 |
+| **Hallman Lindsay**  | Paint                 |
+| **Vista**            | Paint                 |
+| **RAL**              | Industrial standard   |
+| **HKS**              | Printing inks         |
+| **TOYO**             | Printing inks (Japan) |
+| **TRUMATCH**         | CMYK color matching   |
+| **Avery**            | Vinyl/wraps           |
 
 ## Usage
 
 ```scss
 // SCSS
-@include "node_modules/colornerd/scss/colornerd";
-a { color: hks("36-K"); }
-a { color: benjamin-moore("HC-172"); }
-a { color: sherwin-williams("SW 6258"); }
+@include 'node_modules/colornerd/scss/colornerd';
+a {
+	color: hks('36-K');
+}
+a {
+	color: benjamin-moore('HC-172');
+}
+a {
+	color: sherwin-williams('SW 6258');
+}
 ```
 
 ```javascript

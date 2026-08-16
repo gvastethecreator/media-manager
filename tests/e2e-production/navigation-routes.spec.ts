@@ -54,8 +54,8 @@ test('resolves the media navigation paths emitted by the interface', async ({ pa
 			if (!imagesResponse) throw new Error('La vista de imágenes debe solicitar sus datos.');
 			expect((await imagesResponse).status()).toBe(200);
 			await expect(page.getByText('Cargando...', { exact: true })).toBeHidden();
-			const imageLink = page.getByRole('link', { name: /^Imágenes/ });
-			await expect(page.getByRole('link', { name: /^Todos los archivos/ })).toHaveAttribute('href', '/files');
+			const imageLink = page.getByRole('link', { name: /^Images/ });
+			await expect(page.getByRole('link', { name: /^All files/ })).toHaveAttribute('href', '/files');
 			await expect(imageLink).toHaveAttribute('href', '/all-images');
 			await expect(imageLink).toHaveAttribute('aria-current', 'page');
 			await expect(page.getByRole('link', { name: /^3D/ })).toHaveAttribute('href', '/file3d');
@@ -63,12 +63,12 @@ test('resolves the media navigation paths emitted by the interface', async ({ pa
 			await expect(imageLink).toBeFocused();
 			await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('navigation-after.png') });
 			await page
-				.getByRole('complementary', { name: 'Panel de navegación principal' })
+				.getByRole('complementary', { name: 'Main navigation panel' })
 				.screenshot({ animations: 'disabled', path: testInfo.outputPath('navigation-links-detail.png') });
 			await page.setViewportSize({ width: 1024, height: 768 });
 			await expect(imageLink).toBeVisible();
 			expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
-			const longFolderLink = page.getByRole('button', { name: `Abrir carpeta ${longFolderName}` });
+			const longFolderLink = page.getByRole('button', { name: `Open folder ${longFolderName}` });
 			const longFolderLabel = longFolderLink.getByText(longFolderName, { exact: true });
 			await expect(longFolderLink).toHaveAttribute('title', longFolderName);
 			await expect(longFolderLabel).toHaveCSS('text-overflow', 'ellipsis');
@@ -82,7 +82,7 @@ test('navega a una nota desde el panel sin perder el prefijo de la ruta', async 
 	const note = await createInlineNote(request, 'Nota de navegación');
 
 	await page.goto('/notes', { waitUntil: 'domcontentloaded' });
-	const toggleNotes = page.getByRole('button', { name: 'Toggle Notas children' });
+	const toggleNotes = page.getByRole('button', { name: 'Toggle Notes children' });
 	await expect(toggleNotes).toBeVisible();
 	await toggleNotes.click();
 	const noteLink = page.getByRole('link', { exact: true, name: note.title });
@@ -91,6 +91,6 @@ test('navega a una nota desde el panel sin perder el prefijo de la ruta', async 
 	await expect(noteLink).toBeFocused();
 	await page.keyboard.press('Enter');
 	await expect(page).toHaveURL(new RegExp(`/notes/${note.id}$`));
-	await expect(page.getByText(`Imágenes de la nota: ${note.title}`, { exact: true })).toBeVisible();
+	await expect(page.getByText(`Note images: ${note.title}`, { exact: true })).toBeVisible();
 	await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('navigation-note-detail.png') });
 });

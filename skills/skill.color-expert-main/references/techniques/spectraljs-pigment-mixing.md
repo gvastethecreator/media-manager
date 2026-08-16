@@ -22,6 +22,7 @@ Lightweight JavaScript library for **realistic color mixing based on Kubelka-Mun
 ## Key Formula
 
 **Kubelka-Munk:** `F(R) = (1 - R)² / 2R = K/S`
+
 - K = absorption coefficient
 - S = scattering coefficient
 - R = reflectance

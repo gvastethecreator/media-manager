@@ -12,13 +12,21 @@ Similar elements must use identical timing values.
 **Incorrect (inconsistent timing):**
 
 ```css
-.button-primary { transition: 200ms; }
-.button-secondary { transition: 150ms; }
+.button-primary {
+	transition: 200ms;
+}
+.button-secondary {
+	transition: 150ms;
+}
 ```
 
 **Correct (consistent timing):**
 
 ```css
-.button-primary { transition: 200ms; }
-.button-secondary { transition: 200ms; }
+.button-primary {
+	transition: 200ms;
+}
+.button-secondary {
+	transition: 200ms;
+}
 ```

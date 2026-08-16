@@ -6,16 +6,16 @@
 pendientes**. El contrato operativo es Bun; la auditoría no lo cambia por
 pnpm porque el backend, los scripts y Tauri dependen explícitamente de Bun.
 
-| Gate | Estado | Evidencia |
-| --- | --- | --- |
-| Dependencias declaradas/lock | ✅ | `package.json` + `bun.lock`; `bun outdated` sin filas |
-| Lint | ✅ | `bun run lint` (sin errores; warnings UX heredados documentados) |
-| TypeScript | ✅ | `bun run tsc` (0 errores) |
-| Check combinado | ✅ | `bun run check` |
-| Unit/integración | ✅ | 87 archivos / 825 tests pasaron; cleanup Windows requirió retirar un quarantine residual |
-| Build cliente/servidor | ✅ | `bun run build`; cliente Vite y servidor Bun generados |
-| E2E | ⚠️ | Playwright agotó `webServer` en 120 s; los puertos llegaron a abrirse, pero no hubo smoke reproducible |
-| Tauri instalable | ⚠️ | compilación y CSP existentes; empaquetado/firma aún no demostrados |
+| Gate                         | Estado | Evidencia                                                                                              |
+| ---------------------------- | ------ | ------------------------------------------------------------------------------------------------------ |
+| Dependencias declaradas/lock | ✅     | `package.json` + `bun.lock`; `bun outdated` sin filas                                                  |
+| Lint                         | ✅     | `bun run lint` (sin errores; warnings UX heredados documentados)                                       |
+| TypeScript                   | ✅     | `bun run tsc` (0 errores)                                                                              |
+| Check combinado              | ✅     | `bun run check`                                                                                        |
+| Unit/integración             | ✅     | 87 archivos / 825 tests pasaron; cleanup Windows requirió retirar un quarantine residual               |
+| Build cliente/servidor       | ✅     | `bun run build`; cliente Vite y servidor Bun generados                                                 |
+| E2E                          | ⚠️     | Playwright agotó `webServer` en 120 s; los puertos llegaron a abrirse, pero no hubo smoke reproducible |
+| Tauri instalable             | ⚠️     | compilación y CSP existentes; empaquetado/firma aún no demostrados                                     |
 
 ## Cambios aplicados
 

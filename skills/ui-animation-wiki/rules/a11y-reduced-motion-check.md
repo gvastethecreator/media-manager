@@ -12,7 +12,7 @@ Respect prefers-reduced-motion as proxy for sound sensitivity.
 
 ```tsx
 function playSound(name: string) {
-  audio.play();
+	audio.play();
 }
 ```
 
@@ -20,11 +20,9 @@ function playSound(name: string) {
 
 ```tsx
 function playSound(name: string) {
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-  
-  if (prefersReducedMotion) return;
-  audio.play();
+	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	if (prefersReducedMotion) return;
+	audio.play();
 }
 ```

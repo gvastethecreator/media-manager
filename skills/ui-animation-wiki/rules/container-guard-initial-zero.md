@@ -12,14 +12,14 @@ On initial render, measured bounds are 0. Guard against this to prevent animatin
 
 ```tsx
 <motion.div animate={{ width: bounds.width }}>
-  <div ref={ref}>{children}</div>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```
 
 **Correct (falls back to auto on first frame):**
 
 ```tsx
-<motion.div animate={{ width: bounds.width > 0 ? bounds.width : "auto" }}>
-  <div ref={ref}>{children}</div>
+<motion.div animate={{ width: bounds.width > 0 ? bounds.width : 'auto' }}>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```

@@ -50,9 +50,11 @@ Run comprehensive checks across multiple dimensions:
 Create a detailed audit report with the following structure:
 
 ### Anti-Patterns Verdict
+
 **Start here.** Pass/fail: Does this look AI-generated? List specific tells from the skill's Anti-Patterns section. Be brutally honest.
 
 ### Executive Summary
+
 - Total issues found (count by severity)
 - Most critical issues (top 3-5)
 - Overall quality score (if applicable)
@@ -61,6 +63,7 @@ Create a detailed audit report with the following structure:
 ### Detailed Findings by Severity
 
 For each issue, document:
+
 - **Location**: Where the issue occurs (component, file, line)
 - **Severity**: Critical / High / Medium / Low
 - **Category**: Accessibility / Performance / Theming / Responsive
@@ -71,20 +74,25 @@ For each issue, document:
 - **Suggested command**: Which command to use (prefer: /normalize, /onboard, /polish, /animate, /clarify, /audit, /quieter, /typeset, /harden, /overdrive, /delight, /arrange, /critique, /colorize, /bolder, /optimize, /adapt, /distill, /extract — or other installed skills you're sure exist)
 
 #### Critical Issues
+
 [Issues that block core functionality or violate WCAG A]
 
-#### High-Severity Issues  
+#### High-Severity Issues
+
 [Significant usability/accessibility impact, WCAG AA violations]
 
 #### Medium-Severity Issues
+
 [Quality issues, WCAG AAA violations, performance concerns]
 
 #### Low-Severity Issues
+
 [Minor inconsistencies, optimization opportunities]
 
 ### Patterns & Systemic Issues
 
 Identify recurring problems:
+
 - "Hard-coded colors appear in 15+ components, should use design tokens"
 - "Touch targets consistently too small (<44px) throughout mobile experience"
 - "Missing focus indicators on all custom interactive components"
@@ -92,12 +100,14 @@ Identify recurring problems:
 ### Positive Findings
 
 Note what's working well:
+
 - Good practices to maintain
 - Exemplary implementations to replicate elsewhere
 
 ### Recommendations by Priority
 
 Create actionable plan:
+
 1. **Immediate**: Critical blockers to fix first
 2. **Short-term**: High-severity issues (this sprint)
 3. **Medium-term**: Quality improvements (next sprint)
@@ -108,6 +118,7 @@ Create actionable plan:
 Map issues to available commands. Prefer these: /normalize, /onboard, /polish, /animate, /clarify, /audit, /quieter, /typeset, /harden, /overdrive, /delight, /arrange, /critique, /colorize, /bolder, /optimize, /adapt, /distill, /extract. You may also suggest other installed skills you're sure exist, but never invent commands.
 
 Examples:
+
 - "Use `/normalize` to align with design system (addresses N theming issues)"
 - "Use `/optimize` to improve performance (addresses N performance issues)"
 - "Use `/harden` to improve resilience (addresses N edge cases)"
@@ -115,6 +126,7 @@ Examples:
 **IMPORTANT**: Be thorough but actionable. Too many low-priority issues creates noise. Focus on what actually matters.
 
 **NEVER**:
+
 - Report issues without explaining impact (why does this matter?)
 - Mix severity levels inconsistently
 - Skip positive findings (celebrate what works)

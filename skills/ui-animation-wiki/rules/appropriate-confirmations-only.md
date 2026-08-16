@@ -12,8 +12,8 @@ Sound is appropriate for confirmations: payments, uploads, form submissions.
 
 ```tsx
 async function handlePayment() {
-  await processPayment();
-  playSound("success");
-  showConfirmation();
+	await processPayment();
+	playSound('success');
+	showConfirmation();
 }
 ```

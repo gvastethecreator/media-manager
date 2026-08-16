@@ -143,9 +143,7 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 						)}
 					</DialogTitle>
 					<DialogDescription>
-						{isSingleItem
-							? 'Enter a new name for the file.'
-							: 'Define a pattern for all selected files.'}
+						{isSingleItem ? 'Enter a new name for the file.' : 'Define a pattern for all selected files.'}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -244,7 +242,9 @@ export function RenameDialog({ isOpen, items, onConfirm, onCancel, isLoading = f
 										</div>
 									))}
 									{items.length > 5 && (
-										<p className="px-4 py-2 text-center text-muted-foreground text-xs">... and {items.length - 5} more</p>
+										<p className="px-4 py-2 text-center text-muted-foreground text-xs">
+											... and {items.length - 5} more
+										</p>
 									)}
 								</div>
 							</div>

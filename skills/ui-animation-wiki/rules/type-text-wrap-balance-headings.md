@@ -11,11 +11,15 @@ Use text-wrap: balance on headings to make lines roughly equal length instead of
 **Incorrect (unbalanced heading):**
 
 ```css
-h1 { /* default text-wrap */ }
+h1 {
+	/* default text-wrap */
+}
 ```
 
 **Correct (balanced):**
 
 ```css
-h1 { text-wrap: balance; }
+h1 {
+	text-wrap: balance;
+}
 ```

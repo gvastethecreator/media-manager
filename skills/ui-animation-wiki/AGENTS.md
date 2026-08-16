@@ -197,13 +197,17 @@ User-initiated animations must complete within 300ms.
 **Incorrect (exceeds 300ms limit):**
 
 ```css
-.button { transition: transform 400ms; }
+.button {
+	transition: transform 400ms;
+}
 ```
 
 **Correct (within 300ms):**
 
 ```css
-.button { transition: transform 200ms; }
+.button {
+	transition: transform 200ms;
+}
 ```
 
 ### 1.2 Consistent Timing for Similar Elements
@@ -213,15 +217,23 @@ Similar elements must use identical timing values.
 **Incorrect (inconsistent timing):**
 
 ```css
-.button-primary { transition: 200ms; }
-.button-secondary { transition: 150ms; }
+.button-primary {
+	transition: 200ms;
+}
+.button-secondary {
+	transition: 150ms;
+}
 ```
 
 **Correct (consistent timing):**
 
 ```css
-.button-primary { transition: 200ms; }
-.button-secondary { transition: 200ms; }
+.button-primary {
+	transition: 200ms;
+}
+.button-secondary {
+	transition: 200ms;
+}
 ```
 
 ### 1.3 No Entrance Animation on Context Menus
@@ -263,13 +275,17 @@ Linear easing should only be used for progress indicators, not motion.
 **Incorrect (linear for motion):**
 
 ```css
-.card { transition: transform 200ms linear; }
+.card {
+	transition: transform 200ms linear;
+}
 ```
 
 **Correct (linear for progress only):**
 
 ```css
-.progress-bar { transition: width 100ms linear; }
+.progress-bar {
+	transition: width 100ms linear;
+}
 ```
 
 ### 1.6 Active State Scale Transform
@@ -279,14 +295,18 @@ Interactive elements must have active/pressed state with scale transform.
 **Incorrect (no active state):**
 
 ```css
-.button:hover { background: var(--gray-3); }
+.button:hover {
+	background: var(--gray-3);
+}
 /* Missing :active state */
 ```
 
 **Correct (active state present):**
 
 ```css
-.button:active { transform: scale(0.98); }
+.button:active {
+	transform: scale(0.98);
+}
 ```
 
 ### 1.7 Subtle Squash and Stretch
@@ -312,13 +332,13 @@ Use springs (not easing) when overshoot-and-settle is needed.
 **Incorrect (easing for bounce):**
 
 ```tsx
-<motion.div transition={{ duration: 0.3, ease: "easeOut" }} />
+<motion.div transition={{ duration: 0.3, ease: 'easeOut' }} />
 ```
 
 **Correct (spring physics):**
 
 ```tsx
-<motion.div transition={{ type: "spring", stiffness: 500, damping: 30 }} />
+<motion.div transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
 ```
 
 ### 1.9 Stagger Under 50ms Per Item
@@ -355,13 +375,17 @@ Modal/dialog backgrounds should dim to direct focus.
 **Incorrect (transparent overlay):**
 
 ```css
-.overlay { background: transparent; }
+.overlay {
+	background: transparent;
+}
 ```
 
 **Correct (dimmed overlay):**
 
 ```css
-.overlay { background: var(--black-a6); }
+.overlay {
+	background: var(--black-a6);
+}
 ```
 
 ### 1.12 Z-Index Layering for Animated Elements
@@ -371,13 +395,17 @@ Animated elements must respect z-index layering.
 **Incorrect (no z-index):**
 
 ```css
-.tooltip { /* No z-index, may render behind other elements */ }
+.tooltip {
+	/* No z-index, may render behind other elements */
+}
 ```
 
 **Correct (explicit z-index):**
 
 ```css
-.tooltip { z-index: 50; }
+.tooltip {
+	z-index: 50;
+}
 ```
 
 ---
@@ -388,12 +416,12 @@ Animated elements must respect z-index layering.
 
 **Decision framework:** Is this motion reacting to the user, or is the system speaking?
 
-| Motion Type | Best Choice | Why |
-|-------------|-------------|-----|
-| User-driven (drag, flick, gesture) | Spring | Survives interruption, preserves velocity |
-| System-driven (state change, feedback) | Easing | Clear start/end, predictable timing |
-| Time representation (progress, loading) | Linear | 1:1 relationship between time and progress |
-| High-frequency (typing, fast toggles) | None | Animation adds noise, feels slower |
+| Motion Type                             | Best Choice | Why                                        |
+| --------------------------------------- | ----------- | ------------------------------------------ |
+| User-driven (drag, flick, gesture)      | Spring      | Survives interruption, preserves velocity  |
+| System-driven (state change, feedback)  | Easing      | Clear start/end, predictable timing        |
+| Time representation (progress, loading) | Linear      | 1:1 relationship between time and progress |
+| High-frequency (typing, fast toggles)   | None        | Animation adds noise, feels slower         |
 
 ### 2.1 Springs for Gesture-Driven Motion
 
@@ -402,19 +430,13 @@ Gesture-driven motion (drag, flick, swipe) must use springs.
 **Incorrect (easing for drag):**
 
 ```tsx
-<motion.div
-  drag="x"
-  transition={{ duration: 0.3, ease: "easeOut" }}
-/>
+<motion.div drag="x" transition={{ duration: 0.3, ease: 'easeOut' }} />
 ```
 
 **Correct (spring for drag):**
 
 ```tsx
-<motion.div
-  drag="x"
-  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-/>
+<motion.div drag="x" transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
 ```
 
 ### 2.2 Springs for Interruptible Motion
@@ -424,19 +446,13 @@ Motion that can be interrupted must use springs.
 **Incorrect (easing for interruptible):**
 
 ```tsx
-<motion.div
-  animate={{ x: isOpen ? 200 : 0 }}
-  transition={{ duration: 0.3 }}
-/>
+<motion.div animate={{ x: isOpen ? 200 : 0 }} transition={{ duration: 0.3 }} />
 ```
 
 **Correct (spring for interruptible):**
 
 ```tsx
-<motion.div
-  animate={{ x: isOpen ? 200 : 0 }}
-  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-/>
+<motion.div animate={{ x: isOpen ? 200 : 0 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }} />
 ```
 
 ### 2.3 Springs Preserve Input Velocity
@@ -493,19 +509,13 @@ System-initiated state changes should use easing curves.
 **Incorrect (spring for announcement):**
 
 ```tsx
-<motion.div
-  animate={{ y: 0 }}
-  transition={{ type: "spring" }}
-/>
+<motion.div animate={{ y: 0 }} transition={{ type: 'spring' }} />
 ```
 
 **Correct (easing for announcement):**
 
 ```tsx
-<motion.div
-  animate={{ y: 0 }}
-  transition={{ duration: 0.2, ease: "easeOut" }}
-/>
+<motion.div animate={{ y: 0 }} transition={{ duration: 0.2, ease: 'easeOut' }} />
 ```
 
 ### 2.6 Ease-Out for Entrances
@@ -515,13 +525,17 @@ Entrances must use ease-out (arrive fast, settle gently).
 **Incorrect (ease-in for entrance):**
 
 ```css
-.modal-enter { animation-timing-function: ease-in; }
+.modal-enter {
+	animation-timing-function: ease-in;
+}
 ```
 
 **Correct (ease-out for entrance):**
 
 ```css
-.modal-enter { animation-timing-function: ease-out; }
+.modal-enter {
+	animation-timing-function: ease-out;
+}
 ```
 
 ### 2.7 Ease-In for Exits
@@ -531,13 +545,17 @@ Exits must use ease-in (build momentum before departure).
 **Incorrect (ease-out for exit):**
 
 ```css
-.modal-exit { animation-timing-function: ease-out; }
+.modal-exit {
+	animation-timing-function: ease-out;
+}
 ```
 
 **Correct (ease-in for exit):**
 
 ```css
-.modal-exit { animation-timing-function: ease-in; }
+.modal-exit {
+	animation-timing-function: ease-in;
+}
 ```
 
 ### 2.8 Ease-In-Out for View Transitions
@@ -547,7 +565,9 @@ View/mode transitions use ease-in-out for neutral attention.
 **Correct:**
 
 ```css
-.page-transition { animation-timing-function: ease-in-out; }
+.page-transition {
+	animation-timing-function: ease-in-out;
+}
 ```
 
 ### 2.9 Linear Easing Only for Progress
@@ -557,13 +577,17 @@ Linear easing only for progress bars and time representation.
 **Incorrect (linear for motion):**
 
 ```css
-.card-slide { transition: transform 200ms linear; }
+.card-slide {
+	transition: transform 200ms linear;
+}
 ```
 
 **Correct (linear for progress):**
 
 ```css
-.progress-bar { transition: width 100ms linear; }
+.progress-bar {
+	transition: width 100ms linear;
+}
 ```
 
 ### 2.10 Press and Hover 120-180ms
@@ -573,13 +597,17 @@ Press and hover interactions should use 120-180ms duration.
 **Incorrect (too slow):**
 
 ```css
-.button:hover { transition: background-color 400ms; }
+.button:hover {
+	transition: background-color 400ms;
+}
 ```
 
 **Correct (appropriate duration):**
 
 ```css
-.button:hover { transition: background-color 150ms; }
+.button:hover {
+	transition: background-color 150ms;
+}
 ```
 
 ### 2.11 Small State Changes 180-260ms
@@ -589,7 +617,9 @@ Small state changes should use 180-260ms duration.
 **Correct:**
 
 ```css
-.toggle { transition: transform 200ms ease; }
+.toggle {
+	transition: transform 200ms ease;
+}
 ```
 
 ### 2.12 Max 300ms for User Actions
@@ -615,13 +645,17 @@ If animation feels slow, shorten duration before adjusting curve.
 **Incorrect (adjusting curve instead):**
 
 ```css
-.element { transition: 400ms cubic-bezier(0, 0.9, 0.1, 1); }
+.element {
+	transition: 400ms cubic-bezier(0, 0.9, 0.1, 1);
+}
 ```
 
 **Correct (shorter duration):**
 
 ```css
-.element { transition: 200ms ease-out; }
+.element {
+	transition: 200ms ease-out;
+}
 ```
 
 ### 2.14 No Animation for High-Frequency Interactions
@@ -632,11 +666,11 @@ High-frequency interactions should have no animation.
 
 ```tsx
 function SearchInput() {
-  return (
-    <motion.div animate={{ scale: [1, 1.02, 1] }}>
-      <input onChange={handleSearch} />
-    </motion.div>
-  );
+	return (
+		<motion.div animate={{ scale: [1, 1.02, 1] }}>
+			<input onChange={handleSearch} />
+		</motion.div>
+	);
 }
 ```
 
@@ -644,7 +678,7 @@ function SearchInput() {
 
 ```tsx
 function SearchInput() {
-  return <input onChange={handleSearch} />;
+	return <input onChange={handleSearch} />;
 }
 ```
 
@@ -656,12 +690,7 @@ Keyboard navigation should be instant, no animation.
 
 ```tsx
 function Menu() {
-  return items.map(item => (
-    <motion.li
-      whileFocus={{ scale: 1.05 }}
-      transition={{ duration: 0.2 }}
-    />
-  ));
+	return items.map((item) => <motion.li whileFocus={{ scale: 1.05 }} transition={{ duration: 0.2 }} />);
 }
 ```
 
@@ -669,9 +698,7 @@ function Menu() {
 
 ```tsx
 function Menu() {
-  return items.map(item => (
-    <li className={styles.menuItem} />
-  ));
+	return items.map((item) => <li className={styles.menuItem} />);
 }
 ```
 
@@ -682,11 +709,7 @@ Context menus should not animate on entrance (exit only).
 **Incorrect (entrance animation):**
 
 ```tsx
-<motion.div
-  initial={{ opacity: 0, scale: 0.95 }}
-  animate={{ opacity: 1, scale: 1 }}
-  exit={{ opacity: 0 }}
-/>
+<motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} />
 ```
 
 **Correct (exit only):**
@@ -697,15 +720,15 @@ Context menus should not animate on entrance (exit only).
 
 **Quick reference:**
 
-| Interaction | Timing | Type |
-|-------------|--------|------|
-| Drag release | Spring | `stiffness: 500, damping: 30` |
-| Button press | 150ms | `ease` |
-| Modal enter | 200ms | `ease-out` |
-| Modal exit | 150ms | `ease-in` |
-| Page transition | 250ms | `ease-in-out` |
-| Progress bar | varies | `linear` |
-| Typing feedback | 0ms | none |
+| Interaction     | Timing | Type                          |
+| --------------- | ------ | ----------------------------- |
+| Drag release    | Spring | `stiffness: 500, damping: 30` |
+| Button press    | 150ms  | `ease`                        |
+| Modal enter     | 200ms  | `ease-out`                    |
+| Modal exit      | 150ms  | `ease-in`                     |
+| Page transition | 250ms  | `ease-in-out`                 |
+| Progress bar    | varies | `linear`                      |
+| Typing feedback | 0ms    | none                          |
 
 ---
 
@@ -720,19 +743,15 @@ Conditional motion elements must be wrapped in AnimatePresence.
 **Incorrect (no wrapper):**
 
 ```tsx
-{isVisible && (
-  <motion.div exit={{ opacity: 0 }} />
-)}
+{
+	isVisible && <motion.div exit={{ opacity: 0 }} />;
+}
 ```
 
 **Correct (wrapped):**
 
 ```tsx
-<AnimatePresence>
-  {isVisible && (
-    <motion.div exit={{ opacity: 0 }} />
-  )}
-</AnimatePresence>
+<AnimatePresence>{isVisible && <motion.div exit={{ opacity: 0 }} />}</AnimatePresence>
 ```
 
 ### 3.2 Exit Prop Required Inside AnimatePresence
@@ -742,24 +761,14 @@ Elements inside AnimatePresence should have exit prop defined.
 **Incorrect (missing exit):**
 
 ```tsx
-<AnimatePresence>
-  {isOpen && (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
-  )}
-</AnimatePresence>
+<AnimatePresence>{isOpen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} />}</AnimatePresence>
 ```
 
 **Correct (exit defined):**
 
 ```tsx
 <AnimatePresence>
-  {isOpen && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    />
-  )}
+	{isOpen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />}
 </AnimatePresence>
 ```
 
@@ -771,9 +780,9 @@ Dynamic lists inside AnimatePresence must have unique keys.
 
 ```tsx
 <AnimatePresence>
-  {items.map((item, index) => (
-    <motion.div key={index} exit={{ opacity: 0 }} />
-  ))}
+	{items.map((item, index) => (
+		<motion.div key={index} exit={{ opacity: 0 }} />
+	))}
 </AnimatePresence>
 ```
 
@@ -781,9 +790,9 @@ Dynamic lists inside AnimatePresence must have unique keys.
 
 ```tsx
 <AnimatePresence>
-  {items.map((item) => (
-    <motion.div key={item.id} exit={{ opacity: 0 }} />
-  ))}
+	{items.map((item) => (
+		<motion.div key={item.id} exit={{ opacity: 0 }} />
+	))}
 </AnimatePresence>
 ```
 
@@ -794,21 +803,13 @@ Exit animation should mirror initial for symmetry.
 **Incorrect (asymmetric exit):**
 
 ```tsx
-<motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  exit={{ scale: 0 }}
-/>
+<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ scale: 0 }} />
 ```
 
 **Correct (symmetric exit):**
 
 ```tsx
-<motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  exit={{ opacity: 0, y: 20 }}
-/>
+<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} />
 ```
 
 ### 3.5 useIsPresent in Child Component
@@ -819,12 +820,8 @@ useIsPresent must be called from child of AnimatePresence, not parent.
 
 ```tsx
 function Parent() {
-  const isPresent = useIsPresent();
-  return (
-    <AnimatePresence>
-      {show && <Child />}
-    </AnimatePresence>
-  );
+	const isPresent = useIsPresent();
+	return <AnimatePresence>{show && <Child />}</AnimatePresence>;
 }
 ```
 
@@ -832,8 +829,8 @@ function Parent() {
 
 ```tsx
 function Child() {
-  const isPresent = useIsPresent();
-  return <motion.div data-exiting={!isPresent} />;
+	const isPresent = useIsPresent();
+	return <motion.div data-exiting={!isPresent} />;
 }
 ```
 
@@ -845,13 +842,13 @@ When using usePresence, always call safeToRemove after async work.
 
 ```tsx
 function AsyncComponent() {
-  const [isPresent, safeToRemove] = usePresence();
+	const [isPresent, safeToRemove] = usePresence();
 
-  useEffect(() => {
-    if (!isPresent) {
-      cleanup();
-    }
-  }, [isPresent]);
+	useEffect(() => {
+		if (!isPresent) {
+			cleanup();
+		}
+	}, [isPresent]);
 }
 ```
 
@@ -859,13 +856,13 @@ function AsyncComponent() {
 
 ```tsx
 function AsyncComponent() {
-  const [isPresent, safeToRemove] = usePresence();
+	const [isPresent, safeToRemove] = usePresence();
 
-  useEffect(() => {
-    if (!isPresent) {
-      cleanup().then(safeToRemove);
-    }
-  }, [isPresent, safeToRemove]);
+	useEffect(() => {
+		if (!isPresent) {
+			cleanup().then(safeToRemove);
+		}
+	}, [isPresent, safeToRemove]);
 }
 ```
 
@@ -877,8 +874,8 @@ Disable interactions on exiting elements using isPresent.
 
 ```tsx
 function Card() {
-  const isPresent = useIsPresent();
-  return <button onClick={handleClick}>Click</button>;
+	const isPresent = useIsPresent();
+	return <button onClick={handleClick}>Click</button>;
 }
 ```
 
@@ -886,12 +883,12 @@ function Card() {
 
 ```tsx
 function Card() {
-  const isPresent = useIsPresent();
-  return (
-    <button onClick={handleClick} disabled={!isPresent}>
-      Click
-    </button>
-  );
+	const isPresent = useIsPresent();
+	return (
+		<button onClick={handleClick} disabled={!isPresent}>
+			Click
+		</button>
+	);
 }
 ```
 
@@ -903,7 +900,7 @@ Mode "wait" nearly doubles animation duration; adjust timing accordingly.
 
 ```tsx
 <AnimatePresence mode="wait">
-  <motion.div transition={{ duration: 0.3 }} />
+	<motion.div transition={{ duration: 0.3 }} />
 </AnimatePresence>
 ```
 
@@ -911,7 +908,7 @@ Mode "wait" nearly doubles animation duration; adjust timing accordingly.
 
 ```tsx
 <AnimatePresence mode="wait">
-  <motion.div transition={{ duration: 0.15 }} />
+	<motion.div transition={{ duration: 0.15 }} />
 </AnimatePresence>
 ```
 
@@ -923,9 +920,9 @@ Mode "sync" causes layout conflicts; position exiting elements absolutely.
 
 ```tsx
 <AnimatePresence mode="sync">
-  {items.map(item => (
-    <motion.div exit={{ opacity: 0 }}>{item}</motion.div>
-  ))}
+	{items.map((item) => (
+		<motion.div exit={{ opacity: 0 }}>{item}</motion.div>
+	))}
 </AnimatePresence>
 ```
 
@@ -933,9 +930,9 @@ Mode "sync" causes layout conflicts; position exiting elements absolutely.
 
 ```tsx
 <AnimatePresence mode="popLayout">
-  {items.map(item => (
-    <motion.div exit={{ opacity: 0 }}>{item}</motion.div>
-  ))}
+	{items.map((item) => (
+		<motion.div exit={{ opacity: 0 }}>{item}</motion.div>
+	))}
 </AnimatePresence>
 ```
 
@@ -947,7 +944,9 @@ Use popLayout mode for list reordering animations.
 
 ```tsx
 <AnimatePresence>
-  {items.map(item => <ListItem key={item.id} />)}
+	{items.map((item) => (
+		<ListItem key={item.id} />
+	))}
 </AnimatePresence>
 ```
 
@@ -955,7 +954,9 @@ Use popLayout mode for list reordering animations.
 
 ```tsx
 <AnimatePresence mode="popLayout">
-  {items.map(item => <ListItem key={item.id} />)}
+	{items.map((item) => (
+		<ListItem key={item.id} />
+	))}
 </AnimatePresence>
 ```
 
@@ -967,15 +968,15 @@ Nested AnimatePresence must use propagate prop for coordinated exits.
 
 ```tsx
 <AnimatePresence>
-  {isOpen && (
-    <motion.div exit={{ opacity: 0 }}>
-      <AnimatePresence>
-        {items.map(item => (
-          <motion.div key={item.id} exit={{ scale: 0 }} />
-        ))}
-      </AnimatePresence>
-    </motion.div>
-  )}
+	{isOpen && (
+		<motion.div exit={{ opacity: 0 }}>
+			<AnimatePresence>
+				{items.map((item) => (
+					<motion.div key={item.id} exit={{ scale: 0 }} />
+				))}
+			</AnimatePresence>
+		</motion.div>
+	)}
 </AnimatePresence>
 ```
 
@@ -983,15 +984,15 @@ Nested AnimatePresence must use propagate prop for coordinated exits.
 
 ```tsx
 <AnimatePresence propagate>
-  {isOpen && (
-    <motion.div exit={{ opacity: 0 }}>
-      <AnimatePresence propagate>
-        {items.map(item => (
-          <motion.div key={item.id} exit={{ scale: 0 }} />
-        ))}
-      </AnimatePresence>
-    </motion.div>
-  )}
+	{isOpen && (
+		<motion.div exit={{ opacity: 0 }}>
+			<AnimatePresence propagate>
+				{items.map((item) => (
+					<motion.div key={item.id} exit={{ scale: 0 }} />
+				))}
+			</AnimatePresence>
+		</motion.div>
+	)}
 </AnimatePresence>
 ```
 
@@ -1003,7 +1004,7 @@ Parent and child exit durations should be coordinated.
 
 ```tsx
 <motion.div exit={{ opacity: 0 }} transition={{ duration: 0.1 }}>
-  <motion.div exit={{ scale: 0 }} transition={{ duration: 0.5 }} />
+	<motion.div exit={{ scale: 0 }} transition={{ duration: 0.5 }} />
 </motion.div>
 ```
 
@@ -1011,7 +1012,7 @@ Parent and child exit durations should be coordinated.
 
 ```tsx
 <motion.div exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-  <motion.div exit={{ scale: 0 }} transition={{ duration: 0.15 }} />
+	<motion.div exit={{ scale: 0 }} transition={{ duration: 0.15 }} />
 </motion.div>
 ```
 
@@ -1031,8 +1032,8 @@ Reference: [Motion AnimatePresence Documentation](https://motion.dev/docs/react-
 
 ```css
 .button::before {
-  position: absolute;
-  background: var(--gray-3);
+	position: absolute;
+	background: var(--gray-3);
 }
 ```
 
@@ -1040,9 +1041,9 @@ Reference: [Motion AnimatePresence Documentation](https://motion.dev/docs/react-
 
 ```css
 .button::before {
-  content: "";
-  position: absolute;
-  background: var(--gray-3);
+	content: '';
+	position: absolute;
+	background: var(--gray-3);
 }
 ```
 
@@ -1054,23 +1055,21 @@ Use pseudo-elements for decorative content instead of extra DOM nodes.
 
 ```tsx
 <button className={styles.button}>
-  <span className={styles.background} />
-  Click me
+	<span className={styles.background} />
+	Click me
 </button>
 ```
 
 **Correct (pseudo-element):**
 
 ```tsx
-<button className={styles.button}>
-  Click me
-</button>
+<button className={styles.button}>Click me</button>
 ```
 
 ```css
 .button::before {
-  content: "";
-  /* decorative background */
+	content: '';
+	/* decorative background */
 }
 ```
 
@@ -1082,9 +1081,9 @@ Parent must have position: relative for absolute pseudo-elements.
 
 ```css
 .button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+	content: '';
+	position: absolute;
+	inset: 0;
 }
 /* .button has no position */
 ```
@@ -1093,13 +1092,13 @@ Parent must have position: relative for absolute pseudo-elements.
 
 ```css
 .button {
-  position: relative;
+	position: relative;
 }
 
 .button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+	content: '';
+	position: absolute;
+	inset: 0;
 }
 ```
 
@@ -1111,10 +1110,10 @@ Pseudo-elements need z-index to layer correctly with content.
 
 ```css
 .button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--gray-3);
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: var(--gray-3);
 }
 ```
 
@@ -1122,16 +1121,16 @@ Pseudo-elements need z-index to layer correctly with content.
 
 ```css
 .button {
-  position: relative;
-  z-index: 1;
+	position: relative;
+	z-index: 1;
 }
 
 .button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--gray-3);
-  z-index: -1;
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: var(--gray-3);
+	z-index: -1;
 }
 ```
 
@@ -1143,7 +1142,7 @@ Use negative inset values to expand hit targets without extra markup.
 
 ```tsx
 <div className={styles.wrapper}>
-  <a className={styles.link}>Link</a>
+	<a className={styles.link}>Link</a>
 </div>
 ```
 
@@ -1151,13 +1150,13 @@ Use negative inset values to expand hit targets without extra markup.
 
 ```css
 .link {
-  position: relative;
+	position: relative;
 }
 
 .link::before {
-  content: "";
-  position: absolute;
-  inset: -8px -12px;
+	content: '';
+	position: absolute;
+	inset: -8px -12px;
 }
 ```
 
@@ -1169,17 +1168,17 @@ Elements participating in view transitions need view-transition-name.
 
 ```ts
 document.startViewTransition(() => {
-  targetImg.src = newSrc;
+	targetImg.src = newSrc;
 });
 ```
 
 **Correct (transition name assigned):**
 
 ```ts
-sourceImg.style.viewTransitionName = "card";
+sourceImg.style.viewTransitionName = 'card';
 document.startViewTransition(() => {
-  sourceImg.style.viewTransitionName = "";
-  targetImg.style.viewTransitionName = "card";
+	sourceImg.style.viewTransitionName = '';
+	targetImg.style.viewTransitionName = 'card';
 });
 ```
 
@@ -1191,7 +1190,7 @@ Each view-transition-name must be unique on the page during transition.
 
 ```css
 .card {
-  view-transition-name: card;
+	view-transition-name: card;
 }
 /* Multiple cards with same name */
 ```
@@ -1209,19 +1208,19 @@ Remove view-transition-name after transition completes.
 **Incorrect (stale name):**
 
 ```ts
-sourceImg.style.viewTransitionName = "card";
+sourceImg.style.viewTransitionName = 'card';
 document.startViewTransition(() => {
-  targetImg.style.viewTransitionName = "card";
+	targetImg.style.viewTransitionName = 'card';
 });
 ```
 
 **Correct (name cleaned up):**
 
 ```ts
-sourceImg.style.viewTransitionName = "card";
+sourceImg.style.viewTransitionName = 'card';
 document.startViewTransition(() => {
-  sourceImg.style.viewTransitionName = "";
-  targetImg.style.viewTransitionName = "card";
+	sourceImg.style.viewTransitionName = '';
+	targetImg.style.viewTransitionName = 'card';
 });
 ```
 
@@ -1232,12 +1231,10 @@ Prefer View Transitions API over JavaScript animation libraries for page transit
 **Incorrect (JS-based transition):**
 
 ```tsx
-import { motion } from "motion/react";
+import { motion } from 'motion/react';
 
 function ImageLightbox() {
-  return (
-    <motion.img layoutId="hero" />
-  );
+	return <motion.img layoutId="hero" />;
 }
 ```
 
@@ -1245,10 +1242,10 @@ function ImageLightbox() {
 
 ```ts
 function openLightbox(img: HTMLImageElement) {
-  img.style.viewTransitionName = "hero";
-  document.startViewTransition(() => {
-    // Native browser transition
-  });
+	img.style.viewTransitionName = 'hero';
+	document.startViewTransition(() => {
+		// Native browser transition
+	});
 }
 ```
 
@@ -1259,15 +1256,17 @@ Style view transition pseudo-elements for custom animations.
 **Incorrect (default crossfade only):**
 
 ```ts
-document.startViewTransition(() => { /* ... */ });
+document.startViewTransition(() => {
+	/* ... */
+});
 ```
 
 **Correct (custom animation):**
 
 ```css
 ::view-transition-group(card) {
-  animation-duration: 300ms;
-  animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+	animation-duration: 300ms;
+	animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 ```
 
@@ -1279,8 +1278,8 @@ Use ::backdrop pseudo-element for dialog/popover backgrounds.
 
 ```tsx
 <>
-  <div className={styles.overlay} onClick={close} />
-  <dialog className={styles.dialog}>{children}</dialog>
+	<div className={styles.overlay} onClick={close} />
+	<dialog className={styles.dialog}>{children}</dialog>
 </>
 ```
 
@@ -1288,8 +1287,8 @@ Use ::backdrop pseudo-element for dialog/popover backgrounds.
 
 ```css
 dialog::backdrop {
-  background: var(--black-a6);
-  backdrop-filter: blur(4px);
+	background: var(--black-a6);
+	backdrop-filter: blur(4px);
 }
 ```
 
@@ -1301,8 +1300,8 @@ Use ::placeholder for input placeholder styling, not wrapper elements.
 
 ```tsx
 <div className={styles.inputWrapper}>
-  {!value && <span className={styles.placeholder}>Enter text...</span>}
-  <input value={value} />
+	{!value && <span className={styles.placeholder}>Enter text...</span>}
+	<input value={value} />
 </div>
 ```
 
@@ -1310,8 +1309,8 @@ Use ::placeholder for input placeholder styling, not wrapper elements.
 
 ```css
 input::placeholder {
-  color: var(--gray-9);
-  opacity: 1;
+	color: var(--gray-9);
+	opacity: 1;
 }
 ```
 
@@ -1323,8 +1322,8 @@ Use ::selection for text selection styling.
 
 ```css
 ::selection {
-  background: var(--blue-a5);
-  color: var(--gray-12);
+	background: var(--blue-a5);
+	color: var(--gray-12);
 }
 ```
 
@@ -1336,9 +1335,9 @@ Use ::marker to style list bullets without extra elements or background-image ha
 
 ```css
 li {
-  list-style: none;
-  background: url("bullet.svg") no-repeat 0 4px;
-  padding-left: 20px;
+	list-style: none;
+	background: url('bullet.svg') no-repeat 0 4px;
+	padding-left: 20px;
 }
 ```
 
@@ -1346,8 +1345,8 @@ li {
 
 ```css
 li::marker {
-  color: var(--gray-8);
-  font-size: 0.8em;
+	color: var(--gray-8);
+	font-size: 0.8em;
 }
 ```
 
@@ -1359,8 +1358,8 @@ Use ::first-line for drop-cap-adjacent styling without JavaScript or hardcoded s
 
 ```tsx
 <p>
-  <span className={styles["first-line"]}>The opening line</span>
-  is styled differently from the rest.
+	<span className={styles['first-line']}>The opening line</span>
+	is styled differently from the rest.
 </p>
 ```
 
@@ -1368,8 +1367,8 @@ Use ::first-line for drop-cap-adjacent styling without JavaScript or hardcoded s
 
 ```css
 .article p:first-of-type::first-line {
-  font-variant-caps: small-caps;
-  font-weight: var(--font-weight-medium);
+	font-variant-caps: small-caps;
+	font-weight: var(--font-weight-medium);
 }
 ```
 
@@ -1389,10 +1388,10 @@ Every audio cue must have a visual equivalent; sound never replaces visual feedb
 
 ```tsx
 function SubmitButton({ onClick }) {
-  const handleClick = () => {
-    playSound("success");
-    onClick();
-  };
+	const handleClick = () => {
+		playSound('success');
+		onClick();
+	};
 }
 ```
 
@@ -1400,15 +1399,15 @@ function SubmitButton({ onClick }) {
 
 ```tsx
 function SubmitButton({ onClick }) {
-  const [status, setStatus] = useState("idle");
+	const [status, setStatus] = useState('idle');
 
-  const handleClick = () => {
-    playSound("success");
-    setStatus("success");
-    onClick();
-  };
+	const handleClick = () => {
+		playSound('success');
+		setStatus('success');
+		onClick();
+	};
 
-  return <button data-status={status}>Submit</button>;
+	return <button data-status={status}>Submit</button>;
 }
 ```
 
@@ -1420,7 +1419,7 @@ Provide explicit toggle to disable sounds in settings.
 
 ```tsx
 function App() {
-  return <SoundProvider>{children}</SoundProvider>;
+	return <SoundProvider>{children}</SoundProvider>;
 }
 ```
 
@@ -1428,12 +1427,8 @@ function App() {
 
 ```tsx
 function App() {
-  const { soundEnabled } = usePreferences();
-  return (
-    <SoundProvider enabled={soundEnabled}>
-      {children}
-    </SoundProvider>
-  );
+	const { soundEnabled } = usePreferences();
+	return <SoundProvider enabled={soundEnabled}>{children}</SoundProvider>;
 }
 ```
 
@@ -1445,7 +1440,7 @@ Respect prefers-reduced-motion as proxy for sound sensitivity.
 
 ```tsx
 function playSound(name: string) {
-  audio.play();
+	audio.play();
 }
 ```
 
@@ -1453,12 +1448,10 @@ function playSound(name: string) {
 
 ```tsx
 function playSound(name: string) {
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
+	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (prefersReducedMotion) return;
-  audio.play();
+	if (prefersReducedMotion) return;
+	audio.play();
 }
 ```
 
@@ -1470,8 +1463,8 @@ Allow volume adjustment independent of system volume.
 
 ```tsx
 function playSound() {
-  audio.volume = 1;
-  audio.play();
+	audio.volume = 1;
+	audio.play();
 }
 ```
 
@@ -1479,9 +1472,9 @@ function playSound() {
 
 ```tsx
 function playSound() {
-  const { volume } = usePreferences();
-  audio.volume = volume;
-  audio.play();
+	const { volume } = usePreferences();
+	audio.volume = volume;
+	audio.play();
 }
 ```
 
@@ -1493,10 +1486,10 @@ Do not add sound to high-frequency interactions (typing, keyboard navigation).
 
 ```tsx
 function Input({ onChange }) {
-  const handleChange = (e) => {
-    playSound("keystroke");
-    onChange(e);
-  };
+	const handleChange = (e) => {
+		playSound('keystroke');
+		onChange(e);
+	};
 }
 ```
 
@@ -1504,7 +1497,7 @@ function Input({ onChange }) {
 
 ```tsx
 function Input({ onChange }) {
-  return <input onChange={onChange} />;
+	return <input onChange={onChange} />;
 }
 ```
 
@@ -1516,9 +1509,9 @@ Sound is appropriate for confirmations: payments, uploads, form submissions.
 
 ```tsx
 async function handlePayment() {
-  await processPayment();
-  playSound("success");
-  showConfirmation();
+	await processPayment();
+	playSound('success');
+	showConfirmation();
 }
 ```
 
@@ -1530,8 +1523,8 @@ Sound is appropriate for errors and warnings that can't be overlooked.
 
 ```tsx
 function handleError(error: Error) {
-  playSound("error");
-  showErrorToast(error.message);
+	playSound('error');
+	showErrorToast(error.message);
 }
 ```
 
@@ -1543,11 +1536,7 @@ Do not add sound to decorative moments with no informational value.
 
 ```tsx
 function Card({ onHover }) {
-  return (
-    <div onMouseEnter={() => playSound("hover")}>
-      {children}
-    </div>
-  );
+	return <div onMouseEnter={() => playSound('hover')}>{children}</div>;
 }
 ```
 
@@ -1559,8 +1548,8 @@ Sound should inform, not punish; avoid harsh sounds for user mistakes.
 
 ```tsx
 function ValidationError() {
-  playSound("loud-buzzer");
-  return <span>Invalid input</span>;
+	playSound('loud-buzzer');
+	return <span>Invalid input</span>;
 }
 ```
 
@@ -1568,8 +1557,8 @@ function ValidationError() {
 
 ```tsx
 function ValidationError() {
-  playSound("gentle-alert");
-  return <span>Invalid input</span>;
+	playSound('gentle-alert');
+	return <span>Invalid input</span>;
 }
 ```
 
@@ -1581,8 +1570,8 @@ Preload audio files to avoid playback delay.
 
 ```tsx
 function playSound(name: string) {
-  const audio = new Audio(`/sounds/${name}.mp3`);
-  audio.play();
+	const audio = new Audio(`/sounds/${name}.mp3`);
+	audio.play();
 }
 ```
 
@@ -1590,15 +1579,15 @@ function playSound(name: string) {
 
 ```tsx
 const sounds = {
-  success: new Audio("/sounds/success.mp3"),
-  error: new Audio("/sounds/error.mp3"),
+	success: new Audio('/sounds/success.mp3'),
+	error: new Audio('/sounds/error.mp3'),
 };
 
-Object.values(sounds).forEach(audio => audio.load());
+Object.values(sounds).forEach((audio) => audio.load());
 
 function playSound(name: keyof typeof sounds) {
-  sounds[name].currentTime = 0;
-  sounds[name].play();
+	sounds[name].currentTime = 0;
+	sounds[name].play();
 }
 ```
 
@@ -1626,7 +1615,7 @@ Reset audio currentTime before replay to allow rapid triggering.
 
 ```tsx
 function playSound() {
-  audio.play();
+	audio.play();
 }
 ```
 
@@ -1634,8 +1623,8 @@ function playSound() {
 
 ```tsx
 function playSound() {
-  audio.currentTime = 0;
-  audio.play();
+	audio.currentTime = 0;
+	audio.play();
 }
 ```
 
@@ -1647,8 +1636,8 @@ Sound weight should match action importance.
 
 ```tsx
 function handleToggle() {
-  playSound("triumphant-fanfare");
-  setEnabled(!enabled);
+	playSound('triumphant-fanfare');
+	setEnabled(!enabled);
 }
 ```
 
@@ -1656,13 +1645,13 @@ function handleToggle() {
 
 ```tsx
 function handleToggle() {
-  playSound("soft-click");
-  setEnabled(!enabled);
+	playSound('soft-click');
+	setEnabled(!enabled);
 }
 
 function handlePurchase() {
-  playSound("success-chime");
-  completePurchase();
+	playSound('success-chime');
+	completePurchase();
 }
 ```
 
@@ -1674,7 +1663,7 @@ Sound duration should match action duration.
 
 ```tsx
 function handleClick() {
-  playSound("long-whoosh"); // 2000ms
+	playSound('long-whoosh'); // 2000ms
 }
 ```
 
@@ -1682,27 +1671,27 @@ function handleClick() {
 
 ```tsx
 function handleClick() {
-  playSound("click"); // 50ms
+	playSound('click'); // 50ms
 }
 
 function handleUpload() {
-  playSound("upload-progress"); // Matches upload duration
+	playSound('upload-progress'); // Matches upload duration
 }
 ```
 
 **Sound appropriateness matrix:**
 
-| Interaction | Sound? | Reason |
-|-------------|--------|--------|
-| Payment success | Yes | Significant confirmation |
-| Form submission | Yes | User needs assurance |
-| Error state | Yes | Can't be overlooked |
-| Notification | Yes | May not be looking at screen |
-| Button click | Maybe | Only for significant buttons |
-| Typing | No | Too frequent |
-| Hover | No | Decorative only |
-| Scroll | No | Too frequent |
-| Navigation | No | Keyboard nav would be noisy |
+| Interaction     | Sound? | Reason                       |
+| --------------- | ------ | ---------------------------- |
+| Payment success | Yes    | Significant confirmation     |
+| Form submission | Yes    | User needs assurance         |
+| Error state     | Yes    | Can't be overlooked          |
+| Notification    | Yes    | May not be looking at screen |
+| Button click    | Maybe  | Only for significant buttons |
+| Typing          | No     | Too frequent                 |
+| Hover           | No     | Decorative only              |
+| Scroll          | No     | Too frequent                 |
+| Navigation      | No     | Keyboard nav would be noisy  |
 
 Reference: [Web Audio API Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API), [prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
 
@@ -1720,7 +1709,7 @@ Reuse a single AudioContext instance; do not create new ones per sound.
 
 ```ts
 function playSound() {
-  const ctx = new AudioContext();
+	const ctx = new AudioContext();
 }
 ```
 
@@ -1730,10 +1719,10 @@ function playSound() {
 let audioContext: AudioContext | null = null;
 
 function getAudioContext(): AudioContext {
-  if (!audioContext) {
-    audioContext = new AudioContext();
-  }
-  return audioContext;
+	if (!audioContext) {
+		audioContext = new AudioContext();
+	}
+	return audioContext;
 }
 ```
 
@@ -1745,7 +1734,7 @@ Check and resume suspended AudioContext before playing.
 
 ```ts
 function playSound() {
-  const ctx = getAudioContext();
+	const ctx = getAudioContext();
 }
 ```
 
@@ -1753,10 +1742,10 @@ function playSound() {
 
 ```ts
 function playSound() {
-  const ctx = getAudioContext();
-  if (ctx.state === "suspended") {
-    ctx.resume();
-  }
+	const ctx = getAudioContext();
+	if (ctx.state === 'suspended') {
+		ctx.resume();
+	}
 }
 ```
 
@@ -1775,8 +1764,8 @@ source.start();
 ```ts
 source.start();
 source.onended = () => {
-  source.disconnect();
-  gain.disconnect();
+	source.disconnect();
+	gain.disconnect();
 };
 ```
 
@@ -1837,7 +1826,7 @@ Use filtered noise for clicks/taps, not oscillators.
 
 ```ts
 const osc = ctx.createOscillator();
-osc.type = "sine";
+osc.type = 'sine';
 ```
 
 **Correct (noise burst for click):**
@@ -1846,7 +1835,7 @@ osc.type = "sine";
 const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.008, ctx.sampleRate);
 const data = buffer.getChannelData(0);
 for (let i = 0; i < data.length; i++) {
-  data[i] = (Math.random() * 2 - 1) * Math.exp(-i / 50);
+	data[i] = (Math.random() * 2 - 1) * Math.exp(-i / 50);
 }
 ```
 
@@ -1881,7 +1870,7 @@ source.connect(gain).connect(ctx.destination);
 
 ```ts
 const filter = ctx.createBiquadFilter();
-filter.type = "bandpass";
+filter.type = 'bandpass';
 filter.frequency.value = 4000;
 filter.Q.value = 3;
 source.connect(filter).connect(gain).connect(ctx.destination);
@@ -1953,14 +1942,14 @@ filter.Q.value = 3;
 
 **Parameter translation table:**
 
-| User Says | Parameter Change |
-|-----------|------------------|
-| "too harsh" | Lower filter frequency, reduce Q |
-| "too muffled" | Higher filter frequency |
-| "too long" | Shorter duration, faster decay |
-| "cuts off abruptly" | Use exponential decay |
-| "more mechanical" | Higher Q, faster decay |
-| "softer" | Lower gain, triangle wave |
+| User Says           | Parameter Change                 |
+| ------------------- | -------------------------------- |
+| "too harsh"         | Lower filter frequency, reduce Q |
+| "too muffled"       | Higher filter frequency          |
+| "too long"          | Shorter duration, faster decay   |
+| "cuts off abruptly" | Use exponential decay            |
+| "more mechanical"   | Higher Q, faster decay           |
+| "softer"            | Lower gain, triangle wave        |
 
 Reference: [Web Audio API - MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 
@@ -1976,22 +1965,26 @@ Reference: [Web Audio API - MDN](https://developer.mozilla.org/en-US/docs/Web/AP
 
 ```ts
 interface IconLine {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  opacity?: number;
+	x1: number;
+	y1: number;
+	x2: number;
+	y2: number;
+	opacity?: number;
 }
 
 interface IconDefinition {
-  lines: [IconLine, IconLine, IconLine];
-  rotation?: number;
-  group?: string;
+	lines: [IconLine, IconLine, IconLine];
+	rotation?: number;
+	group?: string;
 }
 
 const CENTER = 7;
 const collapsed: IconLine = {
-  x1: CENTER, y1: CENTER, x2: CENTER, y2: CENTER, opacity: 0,
+	x1: CENTER,
+	y1: CENTER,
+	x2: CENTER,
+	y2: CENTER,
+	opacity: 0,
 };
 ```
 
@@ -2003,10 +1996,10 @@ Every icon MUST use exactly 3 lines. No more, no fewer.
 
 ```ts
 const checkIcon = {
-  lines: [
-    { x1: 2, y1: 7.5, x2: 5.5, y2: 11 },
-    { x1: 5.5, y1: 11, x2: 12, y2: 3 },
-  ],
+	lines: [
+		{ x1: 2, y1: 7.5, x2: 5.5, y2: 11 },
+		{ x1: 5.5, y1: 11, x2: 12, y2: 3 },
+	],
 };
 ```
 
@@ -2014,11 +2007,7 @@ const checkIcon = {
 
 ```ts
 const checkIcon = {
-  lines: [
-    { x1: 2, y1: 7.5, x2: 5.5, y2: 11 },
-    { x1: 5.5, y1: 11, x2: 12, y2: 3 },
-    collapsed,
-  ],
+	lines: [{ x1: 2, y1: 7.5, x2: 5.5, y2: 11 }, { x1: 5.5, y1: 11, x2: 12, y2: 3 }, collapsed],
 };
 ```
 
@@ -2030,11 +2019,7 @@ Unused lines must use the collapsed constant, not omission or null.
 
 ```ts
 const minusIcon = {
-  lines: [
-    { x1: 2, y1: 7, x2: 12, y2: 7 },
-    null,
-    null,
-  ],
+	lines: [{ x1: 2, y1: 7, x2: 12, y2: 7 }, null, null],
 };
 ```
 
@@ -2042,11 +2027,7 @@ const minusIcon = {
 
 ```ts
 const minusIcon = {
-  lines: [
-    { x1: 2, y1: 7, x2: 12, y2: 7 },
-    collapsed,
-    collapsed,
-  ],
+	lines: [{ x1: 2, y1: 7, x2: 12, y2: 7 }, collapsed, collapsed],
 };
 ```
 
@@ -2083,16 +2064,16 @@ const arrowDown = { lines: [{ x1: 7, y1: 2, x2: 7, y2: 12 }, ...] };
 
 ```ts
 const arrowLines: [IconLine, IconLine, IconLine] = [
-  { x1: 2, y1: 7, x2: 12, y2: 7 },
-  { x1: 7.5, y1: 2.5, x2: 12, y2: 7 },
-  { x1: 7.5, y1: 11.5, x2: 12, y2: 7 },
+	{ x1: 2, y1: 7, x2: 12, y2: 7 },
+	{ x1: 7.5, y1: 2.5, x2: 12, y2: 7 },
+	{ x1: 7.5, y1: 11.5, x2: 12, y2: 7 },
 ];
 
 const icons = {
-  "arrow-right": { lines: arrowLines, rotation: 0, group: "arrow" },
-  "arrow-down": { lines: arrowLines, rotation: 90, group: "arrow" },
-  "arrow-left": { lines: arrowLines, rotation: 180, group: "arrow" },
-  "arrow-up": { lines: arrowLines, rotation: -90, group: "arrow" },
+	'arrow-right': { lines: arrowLines, rotation: 0, group: 'arrow' },
+	'arrow-down': { lines: arrowLines, rotation: 90, group: 'arrow' },
+	'arrow-left': { lines: arrowLines, rotation: 180, group: 'arrow' },
+	'arrow-up': { lines: arrowLines, rotation: -90, group: 'arrow' },
 };
 ```
 
@@ -2111,7 +2092,7 @@ Rotation between grouped icons should use spring physics for natural motion.
 ```tsx
 const rotation = useSpring(definition.rotation ?? 0, activeTransition);
 
-<motion.g style={{ rotate: rotation, transformOrigin: "center" }} />
+<motion.g style={{ rotate: rotation, transformOrigin: 'center' }} />;
 ```
 
 ### 7.6 Reduced Motion Support for Icons
@@ -2145,7 +2126,7 @@ When transitioning between icons NOT in the same group, rotation should jump ins
 
 ```tsx
 useEffect(() => {
-  rotation.set(definition.rotation ?? 0);
+	rotation.set(definition.rotation ?? 0);
 }, [definition]);
 ```
 
@@ -2153,11 +2134,11 @@ useEffect(() => {
 
 ```tsx
 useEffect(() => {
-  if (shouldRotate) {
-    rotation.set(definition.rotation ?? 0);
-  } else {
-    rotation.jump(definition.rotation ?? 0);
-  }
+	if (shouldRotate) {
+		rotation.set(definition.rotation ?? 0);
+	} else {
+		rotation.jump(definition.rotation ?? 0);
+	}
 }, [definition, shouldRotate]);
 ```
 
@@ -2184,13 +2165,17 @@ Icon SVGs should be aria-hidden since they're decorative.
 **Incorrect (no aria attribute):**
 
 ```tsx
-<svg width={size} height={size}>...</svg>
+<svg width={size} height={size}>
+	...
+</svg>
 ```
 
 **Correct (aria-hidden):**
 
 ```tsx
-<svg width={size} height={size} aria-hidden="true">...</svg>
+<svg width={size} height={size} aria-hidden="true">
+	...
+</svg>
 ```
 
 **Common icon patterns:**
@@ -2198,29 +2183,25 @@ Icon SVGs should be aria-hidden since they're decorative.
 ```ts
 // Two-line icons (check, minus, chevron) — one collapsed line
 const check = {
-  lines: [
-    { x1: 2, y1: 7.5, x2: 5.5, y2: 11 },
-    { x1: 5.5, y1: 11, x2: 12, y2: 3 },
-    collapsed,
-  ],
+	lines: [{ x1: 2, y1: 7.5, x2: 5.5, y2: 11 }, { x1: 5.5, y1: 11, x2: 12, y2: 3 }, collapsed],
 };
 
 // Three-line icons (menu, asterisk) — all lines used
 const menu = {
-  lines: [
-    { x1: 2, y1: 3.5, x2: 12, y2: 3.5 },
-    { x1: 2, y1: 7, x2: 12, y2: 7 },
-    { x1: 2, y1: 10.5, x2: 12, y2: 10.5 },
-  ],
+	lines: [
+		{ x1: 2, y1: 3.5, x2: 12, y2: 3.5 },
+		{ x1: 2, y1: 7, x2: 12, y2: 7 },
+		{ x1: 2, y1: 10.5, x2: 12, y2: 10.5 },
+	],
 };
 
 // Point icons (more, grip) — zero-length lines as dots
 const more = {
-  lines: [
-    { x1: 3, y1: 7, x2: 3, y2: 7 },
-    { x1: 7, y1: 7, x2: 7, y2: 7 },
-    { x1: 11, y1: 7, x2: 11, y2: 7 },
-  ],
+	lines: [
+		{ x1: 3, y1: 7, x2: 3, y2: 7 },
+		{ x1: 7, y1: 7, x2: 7, y2: 7 },
+		{ x1: 11, y1: 7, x2: 11, y2: 7 },
+	],
 };
 ```
 
@@ -2228,8 +2209,8 @@ const more = {
 
 ```ts
 const defaultTransition: Transition = {
-  ease: [0.19, 1, 0.22, 1],
-  duration: 0.4,
+	ease: [0.19, 1, 0.22, 1],
+	duration: 0.4,
 };
 ```
 
@@ -2249,12 +2230,12 @@ Use an outer animated div and an inner measured div. Never measure and animate t
 
 ```tsx
 function AnimatedContainer({ children }) {
-  const [ref, bounds] = useMeasure();
-  return (
-    <motion.div ref={ref} animate={{ height: bounds.height }}>
-      {children}
-    </motion.div>
-  );
+	const [ref, bounds] = useMeasure();
+	return (
+		<motion.div ref={ref} animate={{ height: bounds.height }}>
+			{children}
+		</motion.div>
+	);
 }
 ```
 
@@ -2262,12 +2243,12 @@ function AnimatedContainer({ children }) {
 
 ```tsx
 function AnimatedContainer({ children }) {
-  const [ref, bounds] = useMeasure();
-  return (
-    <motion.div animate={{ height: bounds.height }}>
-      <div ref={ref}>{children}</div>
-    </motion.div>
-  );
+	const [ref, bounds] = useMeasure();
+	return (
+		<motion.div animate={{ height: bounds.height }}>
+			<div ref={ref}>{children}</div>
+		</motion.div>
+	);
 }
 ```
 
@@ -2279,15 +2260,15 @@ On initial render, measured bounds are 0. Guard against this to prevent animatin
 
 ```tsx
 <motion.div animate={{ width: bounds.width }}>
-  <div ref={ref}>{children}</div>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```
 
 **Correct (falls back to auto on first frame):**
 
 ```tsx
-<motion.div animate={{ width: bounds.width > 0 ? bounds.width : "auto" }}>
-  <div ref={ref}>{children}</div>
+<motion.div animate={{ width: bounds.width > 0 ? bounds.width : 'auto' }}>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```
 
@@ -2299,14 +2280,14 @@ Use ResizeObserver to track element dimensions. It fires on resize without causi
 
 ```tsx
 function useMeasure(ref) {
-  const [bounds, setBounds] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setBounds({ width: rect.width, height: rect.height });
-    }
-  });
-  return bounds;
+	const [bounds, setBounds] = useState({ width: 0, height: 0 });
+	useEffect(() => {
+		if (ref.current) {
+			const rect = ref.current.getBoundingClientRect();
+			setBounds({ width: rect.width, height: rect.height });
+		}
+	});
+	return bounds;
 }
 ```
 
@@ -2314,23 +2295,23 @@ function useMeasure(ref) {
 
 ```tsx
 function useMeasure() {
-  const [element, setElement] = useState(null);
-  const [bounds, setBounds] = useState({ width: 0, height: 0 });
-  const ref = useCallback((node) => setElement(node), []);
+	const [element, setElement] = useState(null);
+	const [bounds, setBounds] = useState({ width: 0, height: 0 });
+	const ref = useCallback((node) => setElement(node), []);
 
-  useEffect(() => {
-    if (!element) return;
-    const observer = new ResizeObserver(([entry]) => {
-      setBounds({
-        width: entry.contentRect.width,
-        height: entry.contentRect.height,
-      });
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [element]);
+	useEffect(() => {
+		if (!element) return;
+		const observer = new ResizeObserver(([entry]) => {
+			setBounds({
+				width: entry.contentRect.width,
+				height: entry.contentRect.height,
+			});
+		});
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [element]);
 
-  return [ref, bounds];
+	return [ref, bounds];
 }
 ```
 
@@ -2342,15 +2323,15 @@ Set overflow: hidden on the animated outer container to clip content during size
 
 ```tsx
 <motion.div animate={{ height: bounds.height }}>
-  <div ref={ref}>{children}</div>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```
 
 **Correct (clipped during transition):**
 
 ```tsx
-<motion.div animate={{ height: bounds.height }} style={{ overflow: "hidden" }}>
-  <div ref={ref}>{children}</div>
+<motion.div animate={{ height: bounds.height }} style={{ overflow: 'hidden' }}>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```
 
@@ -2371,8 +2352,8 @@ Use a callback ref (not useRef) for measurement hooks so the observer attaches w
 ```tsx
 const ref = useRef(null);
 useEffect(() => {
-  if (!ref.current) return;
-  observer.observe(ref.current);
+	if (!ref.current) return;
+	observer.observe(ref.current);
 }, []);
 ```
 
@@ -2382,9 +2363,9 @@ useEffect(() => {
 const [element, setElement] = useState(null);
 const ref = useCallback((node) => setElement(node), []);
 useEffect(() => {
-  if (!element) return;
-  observer.observe(element);
-  return () => observer.disconnect();
+	if (!element) return;
+	observer.observe(element);
+	return () => observer.disconnect();
 }, [element]);
 ```
 
@@ -2396,11 +2377,11 @@ Add a small delay so the transition feels like it's catching up to the content.
 
 ```tsx
 <motion.div
-  animate={{ height: bounds.height }}
-  transition={{ duration: 0.2, delay: 0.05 }}
-  style={{ overflow: "hidden" }}
+	animate={{ height: bounds.height }}
+	transition={{ duration: 0.2, delay: 0.05 }}
+	style={{ overflow: 'hidden' }}
 >
-  <div ref={ref}>{children}</div>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```
 
@@ -2420,9 +2401,9 @@ The bigger something is, the easier it is to click (Fitts's Law). Make interacti
 
 ```css
 .icon-button {
-  width: 16px;
-  height: 16px;
-  padding: 0;
+	width: 16px;
+	height: 16px;
+	padding: 0;
 }
 ```
 
@@ -2430,9 +2411,9 @@ The bigger something is, the easier it is to click (Fitts's Law). Make interacti
 
 ```css
 .icon-button {
-  width: 32px;
-  height: 32px;
-  padding: 8px;
+	width: 32px;
+	height: 32px;
+	padding: 8px;
 }
 ```
 
@@ -2444,7 +2425,7 @@ Use pseudo-elements or invisible padding to expand clickable areas beyond visibl
 
 ```css
 .link {
-  font-size: 14px;
+	font-size: 14px;
 }
 ```
 
@@ -2452,13 +2433,13 @@ Use pseudo-elements or invisible padding to expand clickable areas beyond visibl
 
 ```css
 .link {
-  position: relative;
+	position: relative;
 }
 
 .link::before {
-  content: "";
-  position: absolute;
-  inset: -8px -12px;
+	content: '';
+	position: absolute;
+	inset: -8px -12px;
 }
 ```
 
@@ -2470,13 +2451,13 @@ Decision time increases logarithmically with the number of choices (Hick's Law).
 
 ```tsx
 function Settings() {
-  return (
-    <div>
-      {allSettings.map(setting => (
-        <SettingRow key={setting.id} {...setting} />
-      ))}
-    </div>
-  );
+	return (
+		<div>
+			{allSettings.map((setting) => (
+				<SettingRow key={setting.id} {...setting} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -2484,19 +2465,19 @@ function Settings() {
 
 ```tsx
 function Settings() {
-  return (
-    <div>
-      {commonSettings.map(setting => (
-        <SettingRow key={setting.id} {...setting} />
-      ))}
-      <details>
-        <summary>Advanced</summary>
-        {advancedSettings.map(setting => (
-          <SettingRow key={setting.id} {...setting} />
-        ))}
-      </details>
-    </div>
-  );
+	return (
+		<div>
+			{commonSettings.map((setting) => (
+				<SettingRow key={setting.id} {...setting} />
+			))}
+			<details>
+				<summary>Advanced</summary>
+				{advancedSettings.map((setting) => (
+					<SettingRow key={setting.id} {...setting} />
+				))}
+			</details>
+		</div>
+	);
 }
 ```
 
@@ -2524,8 +2505,8 @@ Interactions must respond within 400ms to feel instant (Doherty Threshold). Abov
 
 ```tsx
 async function handleClick() {
-  const data = await fetchData();
-  setResult(data);
+	const data = await fetchData();
+	setResult(data);
 }
 ```
 
@@ -2533,9 +2514,9 @@ async function handleClick() {
 
 ```tsx
 async function handleClick() {
-  setResult(optimisticData);
-  const data = await fetchData();
-  setResult(data);
+	setResult(optimisticData);
+	const data = await fetchData();
+	setResult(data);
 }
 ```
 
@@ -2547,9 +2528,9 @@ If you can't make something fast, make it feel fast with optimistic UI, skeleton
 
 ```tsx
 function Page() {
-  const { data, isLoading } = useFetch("/api/data");
-  if (isLoading) return null;
-  return <Content data={data} />;
+	const { data, isLoading } = useFetch('/api/data');
+	if (isLoading) return null;
+	return <Content data={data} />;
 }
 ```
 
@@ -2557,9 +2538,9 @@ function Page() {
 
 ```tsx
 function Page() {
-  const { data, isLoading } = useFetch("/api/data");
-  if (isLoading) return <Skeleton />;
-  return <Content data={data} />;
+	const { data, isLoading } = useFetch('/api/data');
+	if (isLoading) return <Skeleton />;
+	return <Content data={data} />;
 }
 ```
 
@@ -2571,14 +2552,7 @@ Inputs should accept messy human data and normalize it (Postel's Law). Validate 
 
 ```tsx
 function DateInput({ onChange }) {
-  return (
-    <input
-      type="text"
-      placeholder="YYYY-MM-DD"
-      pattern="\d{4}-\d{2}-\d{2}"
-      onChange={onChange}
-    />
-  );
+	return <input type="text" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}" onChange={onChange} />;
 }
 ```
 
@@ -2586,18 +2560,12 @@ function DateInput({ onChange }) {
 
 ```tsx
 function DateInput({ onChange }) {
-  function handleChange(e) {
-    const parsed = parseFlexibleDate(e.target.value);
-    if (parsed) onChange(parsed);
-  }
+	function handleChange(e) {
+		const parsed = parseFlexibleDate(e.target.value);
+		if (parsed) onChange(parsed);
+	}
 
-  return (
-    <input
-      type="text"
-      placeholder="Any date format"
-      onChange={handleChange}
-    />
-  );
+	return <input type="text" placeholder="Any date format" onChange={handleChange} />;
 }
 ```
 
@@ -2609,14 +2577,14 @@ Don't overwhelm users with everything at once. Reveal complexity incrementally a
 
 ```tsx
 function Editor() {
-  return (
-    <div>
-      <BasicTools />
-      <AdvancedTools />
-      <ExpertTools />
-      <DebugTools />
-    </div>
-  );
+	return (
+		<div>
+			<BasicTools />
+			<AdvancedTools />
+			<ExpertTools />
+			<DebugTools />
+		</div>
+	);
 }
 ```
 
@@ -2624,16 +2592,14 @@ function Editor() {
 
 ```tsx
 function Editor() {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  return (
-    <div>
-      <BasicTools />
-      {showAdvanced && <AdvancedTools />}
-      <button onClick={() => setShowAdvanced(!showAdvanced)}>
-        Toggle
-      </button>
-    </div>
-  );
+	const [showAdvanced, setShowAdvanced] = useState(false);
+	return (
+		<div>
+			<BasicTools />
+			{showAdvanced && <AdvancedTools />}
+			<button onClick={() => setShowAdvanced(!showAdvanced)}>Toggle</button>
+		</div>
+	);
 }
 ```
 
@@ -2645,12 +2611,12 @@ Users spend most of their time on other sites. They expect yours to work the sam
 
 ```tsx
 function Nav() {
-  return (
-    <nav>
-      <button onClick={() => navigate("/")}>⬡</button>
-      <button onClick={() => navigate("/search")}>⬢</button>
-    </nav>
-  );
+	return (
+		<nav>
+			<button onClick={() => navigate('/')}>⬡</button>
+			<button onClick={() => navigate('/search')}>⬢</button>
+		</nav>
+	);
 }
 ```
 
@@ -2658,12 +2624,12 @@ function Nav() {
 
 ```tsx
 function Nav() {
-  return (
-    <nav>
-      <Link href="/">Home</Link>
-      <Link href="/search">Search</Link>
-    </nav>
-  );
+	return (
+		<nav>
+			<Link href="/">Home</Link>
+			<Link href="/search">Search</Link>
+		</nav>
+	);
 }
 ```
 
@@ -2675,8 +2641,8 @@ Users perceive aesthetically pleasing design as more usable. Small visual detail
 
 ```css
 .card {
-  border: 1px solid black;
-  padding: 10px;
+	border: 1px solid black;
+	padding: 10px;
 }
 ```
 
@@ -2684,11 +2650,11 @@ Users perceive aesthetically pleasing design as more usable. Small visual detail
 
 ```css
 .card {
-  padding: 16px;
-  background: var(--gray-2);
-  border: 1px solid var(--gray-a4);
-  border-radius: 12px;
-  box-shadow: var(--shadow-1);
+	padding: 16px;
+	background: var(--gray-2);
+	border: 1px solid var(--gray-a4);
+	border-radius: 12px;
+	box-shadow: var(--shadow-1);
 }
 ```
 
@@ -2703,7 +2669,7 @@ Elements near each other are perceived as related (Law of Proximity). Use spacin
 .form input,
 .form .hint,
 .form .divider {
-  margin-bottom: 16px;
+	margin-bottom: 16px;
 }
 ```
 
@@ -2711,15 +2677,15 @@ Elements near each other are perceived as related (Law of Proximity). Use spacin
 
 ```css
 .form label {
-  margin-bottom: 4px;
+	margin-bottom: 4px;
 }
 
 .form input {
-  margin-bottom: 2px;
+	margin-bottom: 2px;
 }
 
 .form .hint {
-  margin-bottom: 24px;
+	margin-bottom: 24px;
 }
 ```
 
@@ -2731,13 +2697,13 @@ Elements that function the same should look the same (Law of Similarity). Visual
 
 ```css
 .save-button {
-  background: blue;
-  border-radius: 8px;
+	background: blue;
+	border-radius: 8px;
 }
 
 .submit-button {
-  background: green;
-  border-radius: 0;
+	background: green;
+	border-radius: 0;
 }
 ```
 
@@ -2745,9 +2711,9 @@ Elements that function the same should look the same (Law of Similarity). Visual
 
 ```css
 .primary-action {
-  background: var(--gray-12);
-  color: var(--gray-1);
-  border-radius: 8px;
+	background: var(--gray-12);
+	color: var(--gray-1);
+	border-radius: 8px;
 }
 ```
 
@@ -2759,14 +2725,14 @@ Elements sharing a clearly defined boundary are perceived as a group (Law of Com
 
 ```tsx
 function Settings() {
-  return (
-    <div>
-      <Toggle label="Dark mode" />
-      <Toggle label="Notifications" />
-      <Input label="Email" />
-      <Input label="Password" />
-    </div>
-  );
+	return (
+		<div>
+			<Toggle label="Dark mode" />
+			<Toggle label="Notifications" />
+			<Input label="Email" />
+			<Input label="Password" />
+		</div>
+	);
 }
 ```
 
@@ -2774,19 +2740,19 @@ function Settings() {
 
 ```tsx
 function Settings() {
-  return (
-    <div>
-      <section className={styles.group}>
-        <h3>Appearance</h3>
-        <Toggle label="Dark mode" />
-      </section>
-      <section className={styles.group}>
-        <h3>Account</h3>
-        <Input label="Email" />
-        <Input label="Password" />
-      </section>
-    </div>
-  );
+	return (
+		<div>
+			<section className={styles.group}>
+				<h3>Appearance</h3>
+				<Toggle label="Dark mode" />
+			</section>
+			<section className={styles.group}>
+				<h3>Account</h3>
+				<Input label="Email" />
+				<Input label="Password" />
+			</section>
+		</div>
+	);
 }
 ```
 
@@ -2798,8 +2764,8 @@ When multiple similar elements are present, the one that differs is most likely 
 
 ```tsx
 <div className={styles.actions}>
-  <button className={styles.button}>Cancel</button>
-  <button className={styles.button}>Delete Account</button>
+	<button className={styles.button}>Cancel</button>
+	<button className={styles.button}>Delete Account</button>
 </div>
 ```
 
@@ -2807,8 +2773,8 @@ When multiple similar elements are present, the one that differs is most likely 
 
 ```tsx
 <div className={styles.actions}>
-  <button className={styles["button-secondary"]}>Cancel</button>
-  <button className={styles["button-danger"]}>Delete Account</button>
+	<button className={styles['button-secondary']}>Cancel</button>
+	<button className={styles['button-danger']}>Delete Account</button>
 </div>
 ```
 
@@ -2820,9 +2786,9 @@ Users best remember the first and last items in a sequence (Serial Position Effe
 
 ```tsx
 <nav>
-  <Link href="/settings">Settings</Link>
-  <Link href="/">Home</Link>
-  <Link href="/about">About</Link>
+	<Link href="/settings">Settings</Link>
+	<Link href="/">Home</Link>
+	<Link href="/about">About</Link>
 </nav>
 ```
 
@@ -2830,9 +2796,9 @@ Users best remember the first and last items in a sequence (Serial Position Effe
 
 ```tsx
 <nav>
-  <Link href="/">Home</Link>
-  <Link href="/about">About</Link>
-  <Link href="/settings">Settings</Link>
+	<Link href="/">Home</Link>
+	<Link href="/about">About</Link>
+	<Link href="/settings">Settings</Link>
 </nav>
 ```
 
@@ -2844,8 +2810,8 @@ People judge experiences by their peak moment and their end (Peak-End Rule). Inv
 
 ```tsx
 async function handleSubmit() {
-  await submitForm(data);
-  router.push("/");
+	await submitForm(data);
+	router.push('/');
 }
 ```
 
@@ -2853,15 +2819,11 @@ async function handleSubmit() {
 
 ```tsx
 async function handleSubmit() {
-  await submitForm(data);
-  setStatus("success");
+	await submitForm(data);
+	setStatus('success');
 }
 
-return status === "success" ? (
-  <SuccessScreen message="You're all set." />
-) : (
-  <Form onSubmit={handleSubmit} />
-);
+return status === 'success' ? <SuccessScreen message="You're all set." /> : <Form onSubmit={handleSubmit} />;
 ```
 
 ### 9.17 Move Complexity to the System
@@ -2871,18 +2833,13 @@ Every system has irreducible complexity (Tesler's Law). The question is who hand
 **Incorrect (complexity pushed to user):**
 
 ```tsx
-<input
-  type="text"
-  placeholder="Enter date as YYYY-MM-DDTHH:mm:ss.sssZ"
-/>
+<input type="text" placeholder="Enter date as YYYY-MM-DDTHH:mm:ss.sssZ" />
 ```
 
 **Correct (system absorbs complexity):**
 
 ```tsx
-<DatePicker
-  onChange={(date) => setDate(date.toISOString())}
-/>
+<DatePicker onChange={(date) => setDate(date.toISOString())} />
 ```
 
 ### 9.18 Show Progress Toward Completion
@@ -2893,7 +2850,7 @@ People accelerate behavior as they approach a goal (Goal-Gradient Effect). Show 
 
 ```tsx
 function Onboarding({ step }) {
-  return <OnboardingStep step={step} />;
+	return <OnboardingStep step={step} />;
 }
 ```
 
@@ -2901,13 +2858,15 @@ function Onboarding({ step }) {
 
 ```tsx
 function Onboarding({ step, totalSteps }) {
-  return (
-    <div>
-      <ProgressBar value={step} max={totalSteps} />
-      <span>Step {step} of {totalSteps}</span>
-      <OnboardingStep step={step} />
-    </div>
-  );
+	return (
+		<div>
+			<ProgressBar value={step} max={totalSteps} />
+			<span>
+				Step {step} of {totalSteps}
+			</span>
+			<OnboardingStep step={step} />
+		</div>
+	);
 }
 ```
 
@@ -2919,7 +2878,7 @@ People remember incomplete tasks better than completed ones (Zeigarnik Effect).
 
 ```tsx
 function Dashboard() {
-  return <DashboardContent />;
+	return <DashboardContent />;
 }
 ```
 
@@ -2927,16 +2886,12 @@ function Dashboard() {
 
 ```tsx
 function Dashboard({ profile }) {
-  return (
-    <div>
-      {!profile.isComplete && (
-        <Banner>
-          Complete your profile — {profile.completionPercent}% done
-        </Banner>
-      )}
-      <DashboardContent />
-    </div>
-  );
+	return (
+		<div>
+			{!profile.isComplete && <Banner>Complete your profile — {profile.completionPercent}% done</Banner>}
+			<DashboardContent />
+		</div>
+	);
 }
 ```
 
@@ -2948,10 +2903,12 @@ People interpret complex visuals as the simplest form possible (Law of Pragnanz)
 
 ```css
 .card {
-  border: 2px dashed red;
-  background: linear-gradient(45deg, #f0f, #0ff);
-  box-shadow: 5px 5px 0 black, 10px 10px 0 gray;
-  outline: 3px dotted blue;
+	border: 2px dashed red;
+	background: linear-gradient(45deg, #f0f, #0ff);
+	box-shadow:
+		5px 5px 0 black,
+		10px 10px 0 gray;
+	outline: 3px dotted blue;
 }
 ```
 
@@ -2959,10 +2916,10 @@ People interpret complex visuals as the simplest form possible (Law of Pragnanz)
 
 ```css
 .card {
-  background: var(--gray-2);
-  border: 1px solid var(--gray-a4);
-  border-radius: 12px;
-  box-shadow: var(--shadow-1);
+	background: var(--gray-2);
+	border: 1px solid var(--gray-a4);
+	border-radius: 12px;
+	box-shadow: var(--shadow-1);
 }
 ```
 
@@ -2974,11 +2931,13 @@ People interpret complex visuals as the simplest form possible (Law of Pragnanz)
 
 ```tsx
 function Toolbar() {
-  return (
-    <div>
-      {allFeatures.map(f => <Button key={f.id}>{f.label}</Button>)}
-    </div>
-  );
+	return (
+		<div>
+			{allFeatures.map((f) => (
+				<Button key={f.id}>{f.label}</Button>
+			))}
+		</div>
+	);
 }
 ```
 
@@ -2986,12 +2945,14 @@ function Toolbar() {
 
 ```tsx
 function Toolbar() {
-  return (
-    <div>
-      {criticalFeatures.map(f => <Button key={f.id}>{f.label}</Button>)}
-      <MoreMenu features={secondaryFeatures} />
-    </div>
-  );
+	return (
+		<div>
+			{criticalFeatures.map((f) => (
+				<Button key={f.id}>{f.label}</Button>
+			))}
+			<MoreMenu features={secondaryFeatures} />
+		</div>
+	);
 }
 ```
 
@@ -3003,20 +2964,20 @@ Remove anything that doesn't help the user complete their task. Decoration, redu
 
 ```tsx
 function DeleteDialog() {
-  return (
-    <dialog>
-      <Icon name="warning" size={64} />
-      <h2>Warning!</h2>
-      <p>Are you absolutely sure you want to delete?</p>
-      <p>This action is permanent and cannot be undone.</p>
-      <p>All associated data will be lost forever.</p>
-      <div>
-        <button>Cancel</button>
-        <button>Delete</button>
-        <button>Learn More</button>
-      </div>
-    </dialog>
-  );
+	return (
+		<dialog>
+			<Icon name="warning" size={64} />
+			<h2>Warning!</h2>
+			<p>Are you absolutely sure you want to delete?</p>
+			<p>This action is permanent and cannot be undone.</p>
+			<p>All associated data will be lost forever.</p>
+			<div>
+				<button>Cancel</button>
+				<button>Delete</button>
+				<button>Learn More</button>
+			</div>
+		</dialog>
+	);
 }
 ```
 
@@ -3024,16 +2985,16 @@ function DeleteDialog() {
 
 ```tsx
 function DeleteDialog() {
-  return (
-    <dialog>
-      <h2>Delete this item?</h2>
-      <p>This can't be undone.</p>
-      <div>
-        <button>Cancel</button>
-        <button>Delete</button>
-      </div>
-    </dialog>
-  );
+	return (
+		<dialog>
+			<h2>Delete this item?</h2>
+			<p>This can't be undone.</p>
+			<div>
+				<button>Cancel</button>
+				<button>Delete</button>
+			</div>
+		</dialog>
+	);
 }
 ```
 
@@ -3045,13 +3006,13 @@ Elements that are visually connected (by lines, color, or frames) are perceived 
 
 ```tsx
 function Steps({ current }) {
-  return (
-    <div>
-      <span>Step 1</span>
-      <span>Step 2</span>
-      <span>Step 3</span>
-    </div>
-  );
+	return (
+		<div>
+			<span>Step 1</span>
+			<span>Step 2</span>
+			<span>Step 3</span>
+		</div>
+	);
 }
 ```
 
@@ -3059,17 +3020,17 @@ function Steps({ current }) {
 
 ```tsx
 function Steps({ current }) {
-  return (
-    <div className={styles.steps}>
-      {steps.map((step, i) => (
-        <div key={step.id} className={styles.step} data-active={i <= current}>
-          <div className={styles.dot} />
-          {i < steps.length - 1 && <div className={styles.connector} />}
-          <span>{step.label}</span>
-        </div>
-      ))}
-    </div>
-  );
+	return (
+		<div className={styles.steps}>
+			{steps.map((step, i) => (
+				<div key={step.id} className={styles.step} data-active={i <= current}>
+					<div className={styles.dot} />
+					{i < steps.length - 1 && <div className={styles.connector} />}
+					<span>{step.label}</span>
+				</div>
+			))}
+		</div>
+	);
 }
 ```
 
@@ -3088,11 +3049,8 @@ Hover prefetching starts too late. Trajectory prediction fires while the cursor 
 **Incorrect (waits for hover):**
 
 ```tsx
-<Link
-  href="/about"
-  onMouseEnter={() => router.prefetch("/about")}
->
-  About
+<Link href="/about" onMouseEnter={() => router.prefetch('/about')}>
+	About
 </Link>
 ```
 
@@ -3100,12 +3058,14 @@ Hover prefetching starts too late. Trajectory prediction fires while the cursor 
 
 ```tsx
 const { elementRef } = useForesight({
-  callback: () => router.prefetch("/about"),
-  hitSlop: 20,
-  name: "about-link",
+	callback: () => router.prefetch('/about'),
+	hitSlop: 20,
+	name: 'about-link',
 });
 
-<Link ref={elementRef} href="/about">About</Link>
+<Link ref={elementRef} href="/about">
+	About
+</Link>;
 ```
 
 ### 10.2 Prefetch by Intent, Not Viewport
@@ -3115,13 +3075,17 @@ Don't prefetch everything visible in the viewport. Prefetch based on user intent
 **Incorrect (prefetch all visible links):**
 
 ```tsx
-<Link href="/page" prefetch={true}>Page</Link>
+<Link href="/page" prefetch={true}>
+	Page
+</Link>
 ```
 
 **Correct (intent-based prefetching):**
 
 ```tsx
-<Link href="/page" prefetch={false}>Page</Link>
+<Link href="/page" prefetch={false}>
+	Page
+</Link>
 ```
 
 ### 10.3 Use hitSlop to Trigger Predictions Earlier
@@ -3132,8 +3096,8 @@ Expand the invisible prediction area around elements with hitSlop to start loadi
 
 ```tsx
 const { elementRef } = useForesight({
-  callback: () => prefetch(),
-  hitSlop: 0,
+	callback: () => prefetch(),
+	hitSlop: 0,
 });
 ```
 
@@ -3141,8 +3105,8 @@ const { elementRef } = useForesight({
 
 ```tsx
 const { elementRef } = useForesight({
-  callback: () => prefetch(),
-  hitSlop: 20,
+	callback: () => prefetch(),
+	hitSlop: 20,
 });
 ```
 
@@ -3154,14 +3118,11 @@ Touch devices have no cursor. Fall back to viewport or touch-start strategies au
 
 ```tsx
 function PrefetchLink({ href, children }) {
-  return (
-    <Link
-      href={href}
-      onMouseMove={() => prefetch(href)}
-    >
-      {children}
-    </Link>
-  );
+	return (
+		<Link href={href} onMouseMove={() => prefetch(href)}>
+			{children}
+		</Link>
+	);
 }
 ```
 
@@ -3169,8 +3130,8 @@ function PrefetchLink({ href, children }) {
 
 ```tsx
 const { elementRef } = useForesight({
-  callback: () => router.prefetch(href),
-  hitSlop: 20,
+	callback: () => router.prefetch(href),
+	hitSlop: 20,
 });
 ```
 
@@ -3182,8 +3143,8 @@ Monitor focus changes and prefetch when the user is a few tab stops away from a 
 
 ```tsx
 const { elementRef } = useForesight({
-  callback: () => router.prefetch("/settings"),
-  name: "settings-link",
+	callback: () => router.prefetch('/settings'),
+	name: 'settings-link',
 });
 ```
 
@@ -3210,13 +3171,17 @@ Use tabular-nums for any numeric data that should align in columns.
 **Incorrect (proportional numbers misalign):**
 
 ```css
-.price { font-variant-numeric: proportional-nums; }
+.price {
+	font-variant-numeric: proportional-nums;
+}
 ```
 
 **Correct (tabular numbers align):**
 
 ```css
-.price { font-variant-numeric: tabular-nums; }
+.price {
+	font-variant-numeric: tabular-nums;
+}
 ```
 
 ### 11.2 Oldstyle Numbers for Body Text
@@ -3226,13 +3191,17 @@ Use oldstyle-nums in body text so numbers blend with lowercase letters. Use lini
 **Correct (prose):**
 
 ```css
-.body-text { font-variant-numeric: oldstyle-nums; }
+.body-text {
+	font-variant-numeric: oldstyle-nums;
+}
 ```
 
 **Correct (data):**
 
 ```css
-.data-table { font-variant-numeric: lining-nums tabular-nums; }
+.data-table {
+	font-variant-numeric: lining-nums tabular-nums;
+}
 ```
 
 ### 11.3 Slashed Zero for Disambiguation
@@ -3242,7 +3211,9 @@ Enable slashed zero in code-adjacent UIs so users never confuse 0 with O.
 **Correct:**
 
 ```css
-.code { font-variant-numeric: slashed-zero; }
+.code {
+	font-variant-numeric: slashed-zero;
+}
 ```
 
 ### 11.4 Enable Contextual Alternates
@@ -3252,7 +3223,9 @@ Keep contextual alternates (calt) enabled. They adjust punctuation and glyph sha
 **Correct (usually on by default — don't disable):**
 
 ```css
-body { font-feature-settings: "calt" 1; }
+body {
+	font-feature-settings: 'calt' 1;
+}
 ```
 
 ### 11.5 Use Disambiguation Stylistic Set for UI
@@ -3262,7 +3235,9 @@ Enable ss02 (or your font's disambiguation set) in code-facing UIs to distinguis
 **Correct:**
 
 ```css
-.code-ui { font-feature-settings: "ss02"; }
+.code-ui {
+	font-feature-settings: 'ss02';
+}
 ```
 
 ### 11.6 Keep Optical Sizing Auto
@@ -3272,13 +3247,17 @@ Leave font-optical-sizing at auto. The font adjusts glyph shapes for the current
 **Incorrect (forced off):**
 
 ```css
-body { font-optical-sizing: none; }
+body {
+	font-optical-sizing: none;
+}
 ```
 
 **Correct (automatic adjustment):**
 
 ```css
-body { font-optical-sizing: auto; }
+body {
+	font-optical-sizing: auto;
+}
 ```
 
 ### 11.7 Use Antialiased Font Smoothing
@@ -3289,8 +3268,8 @@ Set -webkit-font-smoothing: antialiased on retina displays. Default subpixel ren
 
 ```css
 body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 ```
 
@@ -3301,13 +3280,17 @@ Use text-wrap: balance on headings to make lines roughly equal length instead of
 **Incorrect (unbalanced heading):**
 
 ```css
-h1 { /* default text-wrap */ }
+h1 {
+	/* default text-wrap */
+}
 ```
 
 **Correct (balanced):**
 
 ```css
-h1 { text-wrap: balance; }
+h1 {
+	text-wrap: balance;
+}
 ```
 
 ### 11.9 Offset Underlines from Descenders
@@ -3317,16 +3300,18 @@ Use text-underline-offset to push underlines below descenders so they look inten
 **Incorrect (underline collides with descenders):**
 
 ```css
-a { text-decoration: underline; }
+a {
+	text-decoration: underline;
+}
 ```
 
 **Correct (offset underline):**
 
 ```css
 a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-skip-ink: auto;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-skip-ink: auto;
 }
 ```
 
@@ -3339,23 +3324,23 @@ Set font-synthesis: none to prevent the browser from faking bold or italic. Brow
 ```css
 .icon-font,
 .display-font {
-  font-synthesis: none;
+	font-synthesis: none;
 }
 ```
 
 **Typography quick reference:**
 
-| Property | Use Case | Value |
-|----------|----------|-------|
-| `font-variant-numeric: tabular-nums` | Data tables, pricing | Fixed-width digits |
-| `font-variant-numeric: oldstyle-nums` | Body text | Blends with lowercase |
-| `font-variant-numeric: slashed-zero` | Code UIs | Distinguishes 0 from O |
-| `font-feature-settings: "ss02"` | Code UIs | Disambiguates I/l/1 |
-| `font-optical-sizing: auto` | Everywhere | Size-adaptive glyphs |
-| `-webkit-font-smoothing: antialiased` | Retina displays | Thinner, cleaner text |
-| `text-wrap: balance` | Headings | Even line lengths |
-| `text-underline-offset: 3px` | Links | Clear descender space |
-| `font-synthesis: none` | Display/icon fonts | Prevents faux styles |
+| Property                              | Use Case             | Value                  |
+| ------------------------------------- | -------------------- | ---------------------- |
+| `font-variant-numeric: tabular-nums`  | Data tables, pricing | Fixed-width digits     |
+| `font-variant-numeric: oldstyle-nums` | Body text            | Blends with lowercase  |
+| `font-variant-numeric: slashed-zero`  | Code UIs             | Distinguishes 0 from O |
+| `font-feature-settings: "ss02"`       | Code UIs             | Disambiguates I/l/1    |
+| `font-optical-sizing: auto`           | Everywhere           | Size-adaptive glyphs   |
+| `-webkit-font-smoothing: antialiased` | Retina displays      | Thinner, cleaner text  |
+| `text-wrap: balance`                  | Headings             | Even line lengths      |
+| `text-underline-offset: 3px`          | Links                | Clear descender space  |
+| `font-synthesis: none`                | Display/icon fonts   | Prevents faux styles   |
 
 ### 11.11 Use font-display swap
 
@@ -3365,9 +3350,9 @@ Set font-display: swap so text renders immediately with a fallback while the cus
 
 ```css
 @font-face {
-  font-family: "Inter";
-  src: url("/fonts/inter.woff2") format("woff2");
-  font-display: swap;
+	font-family: 'Inter';
+	src: url('/fonts/inter.woff2') format('woff2');
+	font-display: swap;
 }
 ```
 
@@ -3378,8 +3363,12 @@ Variable fonts accept any integer from 100-900, not just standard stops.
 **Correct (precise weight):**
 
 ```css
-.medium { font-weight: 450; }
-.semibold { font-weight: 550; }
+.medium {
+	font-weight: 450;
+}
+.semibold {
+	font-weight: 550;
+}
 ```
 
 ### 11.13 text-wrap pretty for Body Text
@@ -3389,8 +3378,14 @@ Use text-wrap: pretty for body text to reduce orphans. Use balance for headings.
 **Correct:**
 
 ```css
-p { text-wrap: pretty; }
-h1, h2, h3 { text-wrap: balance; }
+p {
+	text-wrap: pretty;
+}
+h1,
+h2,
+h3 {
+	text-wrap: balance;
+}
 ```
 
 ### 11.14 Pair Justified Text with Hyphens
@@ -3400,15 +3395,17 @@ Justified text without hyphens creates rivers of whitespace.
 **Incorrect (rivers):**
 
 ```css
-.article { text-align: justify; }
+.article {
+	text-align: justify;
+}
 ```
 
 **Correct (hyphenation prevents rivers):**
 
 ```css
 .article {
-  text-align: justify;
-  hyphens: auto;
+	text-align: justify;
+	hyphens: auto;
 }
 ```
 
@@ -3420,8 +3417,8 @@ Uppercase and small-caps text needs positive letter-spacing to feel open and rea
 
 ```css
 .label {
-  text-transform: uppercase;
-  font-size: 12px;
+	text-transform: uppercase;
+	font-size: 12px;
 }
 ```
 
@@ -3429,9 +3426,9 @@ Uppercase and small-caps text needs positive letter-spacing to feel open and rea
 
 ```css
 .label {
-  text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.05em;
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: 0.05em;
 }
 ```
 
@@ -3442,7 +3439,9 @@ Enable diagonal-fractions to convert 1/2, 1/3 into proper typographic fractions.
 **Correct:**
 
 ```css
-.recipe { font-variant-numeric: diagonal-fractions; }
+.recipe {
+	font-variant-numeric: diagonal-fractions;
+}
 ```
 
 Reference: [Inter Typeface](https://rsms.me/inter/), [MDN font-feature-settings](https://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings), [MDN font-variant-numeric](https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-numeric)
@@ -3461,12 +3460,12 @@ When nesting rounded elements, inner radius must equal outer radius minus the ga
 
 ```css
 .outer {
-  border-radius: 16px;
-  padding: 8px;
+	border-radius: 16px;
+	padding: 8px;
 }
 
 .inner {
-  border-radius: 16px;
+	border-radius: 16px;
 }
 ```
 
@@ -3474,15 +3473,15 @@ When nesting rounded elements, inner radius must equal outer radius minus the ga
 
 ```css
 .outer {
-  --padding: 8px;
-  --inner-radius: 8px;
+	--padding: 8px;
+	--inner-radius: 8px;
 
-  border-radius: calc(var(--inner-radius) + var(--padding));
-  padding: var(--padding);
+	border-radius: calc(var(--inner-radius) + var(--padding));
+	padding: var(--padding);
 }
 
 .inner {
-  border-radius: var(--inner-radius);
+	border-radius: var(--inner-radius);
 }
 ```
 
@@ -3494,7 +3493,7 @@ A single box-shadow looks flat. Layer multiple shadows with increasing blur and 
 
 ```css
 .card {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 ```
 
@@ -3502,10 +3501,10 @@ A single box-shadow looks flat. Layer multiple shadows with increasing blur and 
 
 ```css
 .card {
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.06),
-    0 4px 8px rgba(0, 0, 0, 0.04),
-    0 12px 24px rgba(0, 0, 0, 0.03);
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.06),
+		0 4px 8px rgba(0, 0, 0, 0.04),
+		0 12px 24px rgba(0, 0, 0, 0.03);
 }
 ```
 
@@ -3516,17 +3515,29 @@ All shadows must share the same offset direction to imply a single light source.
 **Incorrect (conflicting light sources):**
 
 ```css
-.card { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-.modal { box-shadow: 4px 0 8px rgba(0, 0, 0, 0.1); }
-.tooltip { box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1); }
+.card {
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.modal {
+	box-shadow: 4px 0 8px rgba(0, 0, 0, 0.1);
+}
+.tooltip {
+	box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+}
 ```
 
 **Correct (consistent top-down light):**
 
 ```css
-.card { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
-.modal { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
-.tooltip { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+.card {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.modal {
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+.tooltip {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
 ```
 
 ### 12.4 Use Neutral Colors for Shadows
@@ -3537,7 +3548,7 @@ Pure black shadows look harsh. Use deep neutrals or semi-transparent dark colors
 
 ```css
 .card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 ```
 
@@ -3545,7 +3556,7 @@ Pure black shadows look harsh. Use deep neutrals or semi-transparent dark colors
 
 ```css
 .card {
-  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
+	box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
 }
 ```
 
@@ -3557,14 +3568,20 @@ Larger blur and offset means higher elevation. Use a consistent shadow scale.
 
 ```css
 :root {
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12);
+	--shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05);
+	--shadow-2: 0 2px 8px rgba(0, 0, 0, 0.08);
+	--shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-.card { box-shadow: var(--shadow-1); }
-.dropdown { box-shadow: var(--shadow-2); }
-.modal { box-shadow: var(--shadow-3); }
+.card {
+	box-shadow: var(--shadow-1);
+}
+.dropdown {
+	box-shadow: var(--shadow-2);
+}
+.modal {
+	box-shadow: var(--shadow-3);
+}
 ```
 
 ### 12.6 Animate Shadows via Pseudo-Element Opacity
@@ -3575,11 +3592,11 @@ Transitioning box-shadow directly forces expensive repaints. Animate opacity on 
 
 ```css
 .card {
-  box-shadow: var(--shadow-1);
-  transition: box-shadow 0.2s ease;
+	box-shadow: var(--shadow-1);
+	transition: box-shadow 0.2s ease;
 }
 .card:hover {
-  box-shadow: var(--shadow-3);
+	box-shadow: var(--shadow-3);
 }
 ```
 
@@ -3587,22 +3604,22 @@ Transitioning box-shadow directly forces expensive repaints. Animate opacity on 
 
 ```css
 .card {
-  position: relative;
-  box-shadow: var(--shadow-1);
+	position: relative;
+	box-shadow: var(--shadow-1);
 }
 .card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--shadow-3);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-  z-index: -1;
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	box-shadow: var(--shadow-3);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	pointer-events: none;
+	z-index: -1;
 }
 .card:hover::after {
-  opacity: 1;
+	opacity: 1;
 }
 ```
 
@@ -3613,27 +3630,39 @@ Don't use arbitrary pixel values. Define a scale and use it throughout.
 **Incorrect (arbitrary values):**
 
 ```css
-.header { padding: 17px; }
-.card { margin-bottom: 13px; }
-.section { gap: 22px; }
+.header {
+	padding: 17px;
+}
+.card {
+	margin-bottom: 13px;
+}
+.section {
+	gap: 22px;
+}
 ```
 
 **Correct (consistent scale):**
 
 ```css
 :root {
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 24px;
+	--space-6: 32px;
+	--space-7: 48px;
 }
 
-.header { padding: var(--space-4); }
-.card { margin-bottom: var(--space-3); }
-.section { gap: var(--space-5); }
+.header {
+	padding: var(--space-4);
+}
+.card {
+	margin-bottom: var(--space-3);
+}
+.section {
+	gap: var(--space-5);
+}
 ```
 
 ### 12.8 Use Semi-Transparent Borders
@@ -3644,7 +3673,7 @@ Semi-transparent borders adapt to any background color and create subtle, non-ja
 
 ```css
 .card {
-  border: 1px solid #e5e5e5;
+	border: 1px solid #e5e5e5;
 }
 ```
 
@@ -3652,7 +3681,7 @@ Semi-transparent borders adapt to any background color and create subtle, non-ja
 
 ```css
 .card {
-  border: 1px solid var(--gray-a4);
+	border: 1px solid var(--gray-a4);
 }
 ```
 
@@ -3671,9 +3700,9 @@ A polished button uses six layered techniques, not just a single box-shadow:
 
 ```css
 .button {
-  background: var(--gray-12);
-  color: var(--gray-1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	background: var(--gray-12);
+	color: var(--gray-1);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 ```
 
@@ -3681,20 +3710,16 @@ A polished button uses six layered techniques, not just a single box-shadow:
 
 ```css
 .button {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--gray-12) 100%, white 4%),
-    var(--gray-12)
-  );
-  color: var(--gray-1);
-  box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 1px 2px rgba(0, 0, 0, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.06),
-    0 4px 8px rgba(0, 0, 0, 0.03);
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+	background: linear-gradient(to bottom, color-mix(in srgb, var(--gray-12) 100%, white 4%), var(--gray-12));
+	color: var(--gray-1);
+	box-shadow:
+		0 0 0 0.5px rgba(0, 0, 0, 0.3),
+		inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+		inset 0 1px 0 rgba(255, 255, 255, 0.07),
+		0 1px 2px rgba(0, 0, 0, 0.1),
+		0 2px 4px rgba(0, 0, 0, 0.06),
+		0 4px 8px rgba(0, 0, 0, 0.03);
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
 }
 ```
 
@@ -3719,11 +3744,11 @@ components/drawer/index.tsx:23 - [spring-for-gestures] Drag interaction using ea
 
 After findings, output a summary:
 
-| Rule | Count | Severity |
-|------|-------|----------|
-| `timing-under-300ms` | 2 | HIGH |
-| `physics-active-state` | 3 | MEDIUM |
-| `exit-requires-wrapper` | 1 | HIGH |
+| Rule                    | Count | Severity |
+| ----------------------- | ----- | -------- |
+| `timing-under-300ms`    | 2     | HIGH     |
+| `physics-active-state`  | 3     | MEDIUM   |
+| `exit-requires-wrapper` | 1     | HIGH     |
 
 ## References
 

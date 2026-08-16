@@ -12,8 +12,8 @@ When multiple similar elements are present, the one that differs is most likely 
 
 ```tsx
 <div className={styles.actions}>
-  <button className={styles.button}>Cancel</button>
-  <button className={styles.button}>Delete Account</button>
+	<button className={styles.button}>Cancel</button>
+	<button className={styles.button}>Delete Account</button>
 </div>
 ```
 
@@ -21,8 +21,8 @@ When multiple similar elements are present, the one that differs is most likely 
 
 ```tsx
 <div className={styles.actions}>
-  <button className={styles["button-secondary"]}>Cancel</button>
-  <button className={styles["button-danger"]}>Delete Account</button>
+	<button className={styles['button-secondary']}>Cancel</button>
+	<button className={styles['button-danger']}>Delete Account</button>
 </div>
 ```
 

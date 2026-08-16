@@ -12,7 +12,7 @@ Leave font-optical-sizing at auto. The font adjusts glyph shapes for the current
 
 ```css
 body {
-  font-optical-sizing: none;
+	font-optical-sizing: none;
 }
 ```
 
@@ -20,6 +20,6 @@ body {
 
 ```css
 body {
-  font-optical-sizing: auto;
+	font-optical-sizing: auto;
 }
 ```

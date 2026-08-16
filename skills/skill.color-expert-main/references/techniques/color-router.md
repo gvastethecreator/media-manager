@@ -10,13 +10,13 @@ TypeScript color management framework that works like a **smart, interconnected 
 
 ## Core Concept
 
-| Spreadsheet | Color Router |
-|-------------|-------------|
-| Sheets | Palettes (`brand`, `light`, `dark`) |
-| Cells | Named colors (`brand.primary`) |
-| Formulas | Functions (`darken`, `bestContrastWith`) |
-| Cell references | `router.ref('brand.primary')` |
-| Auto-recalculate | Changes cascade through all dependents |
+| Spreadsheet      | Color Router                             |
+| ---------------- | ---------------------------------------- |
+| Sheets           | Palettes (`brand`, `light`, `dark`)      |
+| Cells            | Named colors (`brand.primary`)           |
+| Formulas         | Functions (`darken`, `bestContrastWith`) |
+| Cell references  | `router.ref('brand.primary')`            |
+| Auto-recalculate | Changes cascade through all dependents   |
 
 ## API
 
@@ -37,11 +37,11 @@ router.define('base.contrast', router.func('bestContrastWith', 'base.primary', '
 
 // Palette inheritance
 router.createPalette('dark', {
-  extends: 'light',
-  overrides: {
-    background: router.ref('base.black'),
-    text: router.ref('base.white'),
-  },
+	extends: 'light',
+	overrides: {
+		background: router.ref('base.black'),
+		text: router.ref('base.white'),
+	},
 });
 
 // Change base.primary → everything updates automatically
@@ -50,24 +50,25 @@ router.define('base.primary', '#e74c3c');
 
 ## Built-in Functions
 
-| Function | Purpose |
-|----------|---------|
-| `bestContrastWith(key, palette)` | Find highest-contrast color from palette |
-| `minContrastWith(key, ratio)` | Ensure minimum contrast ratio |
+| Function                          | Purpose                                   |
+| --------------------------------- | ----------------------------------------- |
+| `bestContrastWith(key, palette)`  | Find highest-contrast color from palette  |
+| `minContrastWith(key, ratio)`     | Ensure minimum contrast ratio             |
 | `colorMix(c1, c2, ratio, space?)` | Mix colors (renders to CSS `color-mix()`) |
-| `lighten(key, amount)` | Lighten a color |
-| `darken(key, amount)` | Darken a color |
-| `relativeTo(key, cssTransform)` | CSS relative color syntax |
-| `closestColor(key, palette)` | Find perceptually nearest color |
-| `furthestFrom(palette)` | Find most distant color |
+| `lighten(key, amount)`            | Lighten a color                           |
+| `darken(key, amount)`             | Darken a color                            |
+| `relativeTo(key, cssTransform)`   | CSS relative color syntax                 |
+| `closestColor(key, palette)`      | Find perceptually nearest color           |
+| `furthestFrom(palette)`           | Find most distant color                   |
 
 ## Output Formats
 
 **CSS Variables:**
+
 ```css
 :root {
-  --base-primary: #0066cc;
-  --light-mixed: color-mix(in lab, var(--light-primary) 30%, var(--base-orange));
+	--base-primary: #0066cc;
+	--light-mixed: color-mix(in lab, var(--light-primary) 30%, var(--base-orange));
 }
 ```
 
@@ -79,9 +80,9 @@ router.define('base.primary', '#e74c3c');
 
 ```typescript
 const graph = router.getDependencyGraph();
-graph.dfsTraversal('brand.primary');           // depth-first
+graph.dfsTraversal('brand.primary'); // depth-first
 graph.findShortestPath('brand.primary', 'btn.text'); // path between colors
-graph.hasCycles();                              // detect circular deps
+graph.hasCycles(); // detect circular deps
 ```
 
 ## Why It Matters for Design Systems

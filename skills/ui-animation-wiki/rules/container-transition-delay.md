@@ -12,10 +12,10 @@ Add a small delay to container size animations so the transition feels like it's
 
 ```tsx
 <motion.div
-  animate={{ height: bounds.height }}
-  transition={{ duration: 0.2, delay: 0.05 }}
-  style={{ overflow: "hidden" }}
+	animate={{ height: bounds.height }}
+	transition={{ duration: 0.2, delay: 0.05 }}
+	style={{ overflow: 'hidden' }}
 >
-  <div ref={ref}>{children}</div>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```

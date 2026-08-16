@@ -12,8 +12,8 @@ Sound should inform, not punish; avoid harsh sounds for user mistakes.
 
 ```tsx
 function ValidationError() {
-  playSound("loud-buzzer");
-  return <span>Invalid input</span>;
+	playSound('loud-buzzer');
+	return <span>Invalid input</span>;
 }
 ```
 
@@ -21,7 +21,7 @@ function ValidationError() {
 
 ```tsx
 function ValidationError() {
-  playSound("gentle-alert");
-  return <span>Invalid input</span>;
+	playSound('gentle-alert');
+	return <span>Invalid input</span>;
 }
 ```

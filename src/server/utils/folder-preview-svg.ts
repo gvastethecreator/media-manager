@@ -153,7 +153,9 @@ export function buildFolderPreviewSvg(input: FolderPreviewInput) {
 						const fill = index % 2 === 0 ? 'url(#folderPreviewPhotoA)' : 'url(#folderPreviewPhotoB)';
 						return `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${fill}"/>`;
 					})
-					.join('')}<rect x="${previewX}" y="${previewY}" width="${previewWidth}" height="${previewHeight}" fill="url(#folderPreviewTint)"/></g>`
+					.join(
+						''
+					)}<rect x="${previewX}" y="${previewY}" width="${previewWidth}" height="${previewHeight}" fill="url(#folderPreviewTint)"/></g>`
 			: `<g clip-path="url(#${clipId})"><rect x="${previewX}" y="${previewY}" width="${previewWidth}" height="${previewHeight}" fill="#1e293b"/><path d="M134 150h54l20 22h78c11 0 20 9 20 20v28c0 11-9 20-20 20H134c-11 0-20-9-20-20v-50c0-11 9-20 20-20Z" fill="#fbbf24" fill-opacity="0.92"/></g>`;
 
 	return `<?xml version="1.0" encoding="UTF-8"?>

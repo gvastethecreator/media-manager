@@ -12,12 +12,12 @@ Transitioning box-shadow directly forces expensive repaints. Instead, put the ta
 
 ```css
 .card {
-  box-shadow: var(--shadow-1);
-  transition: box-shadow 0.2s ease;
+	box-shadow: var(--shadow-1);
+	transition: box-shadow 0.2s ease;
 }
 
 .card:hover {
-  box-shadow: var(--shadow-3);
+	box-shadow: var(--shadow-3);
 }
 ```
 
@@ -25,24 +25,24 @@ Transitioning box-shadow directly forces expensive repaints. Instead, put the ta
 
 ```css
 .card {
-  position: relative;
-  box-shadow: var(--shadow-1);
+	position: relative;
+	box-shadow: var(--shadow-1);
 }
 
 .card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--shadow-3);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-  z-index: -1;
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	box-shadow: var(--shadow-3);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	pointer-events: none;
+	z-index: -1;
 }
 
 .card:hover::after {
-  opacity: 1;
+	opacity: 1;
 }
 ```
 

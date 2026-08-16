@@ -11,5 +11,7 @@ Enable ss02 (or your font's disambiguation set) in code-facing UIs to distinguis
 **Correct:**
 
 ```css
-.code-ui { font-feature-settings: "ss02"; }
+.code-ui {
+	font-feature-settings: 'ss02';
+}
 ```

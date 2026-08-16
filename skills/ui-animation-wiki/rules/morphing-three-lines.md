@@ -12,10 +12,10 @@ Every icon MUST use exactly 3 lines. No more, no fewer.
 
 ```ts
 const checkIcon = {
-  lines: [
-    { x1: 2, y1: 7.5, x2: 5.5, y2: 11 },
-    { x1: 5.5, y1: 11, x2: 12, y2: 3 },
-  ],
+	lines: [
+		{ x1: 2, y1: 7.5, x2: 5.5, y2: 11 },
+		{ x1: 5.5, y1: 11, x2: 12, y2: 3 },
+	],
 };
 ```
 
@@ -23,10 +23,6 @@ const checkIcon = {
 
 ```ts
 const checkIcon = {
-  lines: [
-    { x1: 2, y1: 7.5, x2: 5.5, y2: 11 },
-    { x1: 5.5, y1: 11, x2: 12, y2: 3 },
-    collapsed,
-  ],
+	lines: [{ x1: 2, y1: 7.5, x2: 5.5, y2: 11 }, { x1: 5.5, y1: 11, x2: 12, y2: 3 }, collapsed],
 };
 ```

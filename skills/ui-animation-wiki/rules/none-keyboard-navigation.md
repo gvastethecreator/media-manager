@@ -12,12 +12,7 @@ Keyboard navigation should be instant, no animation.
 
 ```tsx
 function Menu() {
-  return items.map(item => (
-    <motion.li
-      whileFocus={{ scale: 1.05 }}
-      transition={{ duration: 0.2 }}
-    />
-  ));
+	return items.map((item) => <motion.li whileFocus={{ scale: 1.05 }} transition={{ duration: 0.2 }} />);
 }
 ```
 
@@ -25,8 +20,6 @@ function Menu() {
 
 ```tsx
 function Menu() {
-  return items.map(item => (
-    <li className={styles.menuItem} />
-  ));
+	return items.map((item) => <li className={styles.menuItem} />);
 }
 ```

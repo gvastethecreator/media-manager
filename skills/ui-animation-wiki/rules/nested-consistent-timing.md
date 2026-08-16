@@ -12,7 +12,7 @@ Parent and child exit durations should be coordinated.
 
 ```tsx
 <motion.div exit={{ opacity: 0 }} transition={{ duration: 0.1 }}>
-  <motion.div exit={{ scale: 0 }} transition={{ duration: 0.5 }} />
+	<motion.div exit={{ scale: 0 }} transition={{ duration: 0.5 }} />
 </motion.div>
 ```
 
@@ -20,6 +20,6 @@ Parent and child exit durations should be coordinated.
 
 ```tsx
 <motion.div exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-  <motion.div exit={{ scale: 0 }} transition={{ duration: 0.15 }} />
+	<motion.div exit={{ scale: 0 }} transition={{ duration: 0.15 }} />
 </motion.div>
 ```

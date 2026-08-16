@@ -12,12 +12,12 @@ When nesting rounded elements, inner radius must equal outer radius minus the ga
 
 ```css
 .outer {
-  border-radius: 16px;
-  padding: 8px;
+	border-radius: 16px;
+	padding: 8px;
 }
 
 .inner {
-  border-radius: 16px;
+	border-radius: 16px;
 }
 ```
 
@@ -25,15 +25,15 @@ When nesting rounded elements, inner radius must equal outer radius minus the ga
 
 ```css
 .outer {
-  --padding: 8px;
-  --inner-radius: 8px;
+	--padding: 8px;
+	--inner-radius: 8px;
 
-  border-radius: calc(var(--inner-radius) + var(--padding));
-  padding: var(--padding);
+	border-radius: calc(var(--inner-radius) + var(--padding));
+	padding: var(--padding);
 }
 
 .inner {
-  border-radius: var(--inner-radius);
+	border-radius: var(--inner-radius);
 }
 ```
 

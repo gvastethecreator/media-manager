@@ -12,7 +12,7 @@ Sound is appropriate for errors and warnings that can't be overlooked.
 
 ```tsx
 function handleError(error: Error) {
-  playSound("error");
-  showErrorToast(error.message);
+	playSound('error');
+	showErrorToast(error.message);
 }
 ```

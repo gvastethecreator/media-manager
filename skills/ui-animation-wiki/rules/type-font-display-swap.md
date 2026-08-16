@@ -12,8 +12,8 @@ Set font-display: swap so text renders immediately with a fallback font while th
 
 ```css
 @font-face {
-  font-family: "Inter";
-  src: url("/fonts/inter.woff2") format("woff2");
+	font-family: 'Inter';
+	src: url('/fonts/inter.woff2') format('woff2');
 }
 ```
 
@@ -21,8 +21,8 @@ Set font-display: swap so text renders immediately with a fallback font while th
 
 ```css
 @font-face {
-  font-family: "Inter";
-  src: url("/fonts/inter.woff2") format("woff2");
-  font-display: swap;
+	font-family: 'Inter';
+	src: url('/fonts/inter.woff2') format('woff2');
+	font-display: swap;
 }
 ```

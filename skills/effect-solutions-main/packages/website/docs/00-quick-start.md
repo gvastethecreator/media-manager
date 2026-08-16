@@ -1,6 +1,6 @@
 ---
 title: Quick Start
-description: "How to get started with Effect Solutions"
+description: 'How to get started with Effect Solutions'
 order: 0
 group: Setup
 ---
@@ -13,7 +13,7 @@ We **highly recommend** that you follow the agent-guided setup below.
 
 ## Agent-Guided Setup
 
-Copy the instructions below and paste them into your agent (`claude`, `codex`, `opencode`, etc.). 
+Copy the instructions below and paste them into your agent (`claude`, `codex`, `opencode`, etc.).
 
 <div className="flex justify-center my-8">
   <LLMInstructionsButton />

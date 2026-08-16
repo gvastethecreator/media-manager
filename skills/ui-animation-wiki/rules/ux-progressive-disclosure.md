@@ -12,14 +12,14 @@ Don't overwhelm users with everything at once. Reveal complexity incrementally a
 
 ```tsx
 function Editor() {
-  return (
-    <div>
-      <BasicTools />
-      <AdvancedTools />
-      <ExpertTools />
-      <DebugTools />
-    </div>
-  );
+	return (
+		<div>
+			<BasicTools />
+			<AdvancedTools />
+			<ExpertTools />
+			<DebugTools />
+		</div>
+	);
 }
 ```
 
@@ -27,15 +27,13 @@ function Editor() {
 
 ```tsx
 function Editor() {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  return (
-    <div>
-      <BasicTools />
-      {showAdvanced && <AdvancedTools />}
-      <button onClick={() => setShowAdvanced(!showAdvanced)}>
-        Toggle
-      </button>
-    </div>
-  );
+	const [showAdvanced, setShowAdvanced] = useState(false);
+	return (
+		<div>
+			<BasicTools />
+			{showAdvanced && <AdvancedTools />}
+			<button onClick={() => setShowAdvanced(!showAdvanced)}>Toggle</button>
+		</div>
+	);
 }
 ```

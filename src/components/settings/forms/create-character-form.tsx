@@ -274,7 +274,7 @@ export function CreateCharacterForm({
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-									<SelectValue placeholder="Select a class" />
+										<SelectValue placeholder="Select a class" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -299,7 +299,7 @@ export function CreateCharacterForm({
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
-									<SelectValue placeholder="Select a race" />
+										<SelectValue placeholder="Select a race" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>

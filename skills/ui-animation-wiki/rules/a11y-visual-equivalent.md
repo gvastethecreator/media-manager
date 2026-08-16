@@ -12,10 +12,10 @@ Every audio cue must have a visual equivalent; sound never replaces visual feedb
 
 ```tsx
 function SubmitButton({ onClick }) {
-  const handleClick = () => {
-    playSound("success");
-    onClick();
-  };
+	const handleClick = () => {
+		playSound('success');
+		onClick();
+	};
 }
 ```
 
@@ -23,14 +23,14 @@ function SubmitButton({ onClick }) {
 
 ```tsx
 function SubmitButton({ onClick }) {
-  const [status, setStatus] = useState("idle");
-  
-  const handleClick = () => {
-    playSound("success");
-    setStatus("success");
-    onClick();
-  };
-  
-  return <button data-status={status}>Submit</button>;
+	const [status, setStatus] = useState('idle');
+
+	const handleClick = () => {
+		playSound('success');
+		setStatus('success');
+		onClick();
+	};
+
+	return <button data-status={status}>Submit</button>;
 }
 ```

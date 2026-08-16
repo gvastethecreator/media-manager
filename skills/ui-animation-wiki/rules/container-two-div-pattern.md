@@ -12,12 +12,12 @@ Use an outer animated div and an inner measured div. Never measure and animate t
 
 ```tsx
 function AnimatedContainer({ children }) {
-  const [ref, bounds] = useMeasure();
-  return (
-    <motion.div ref={ref} animate={{ height: bounds.height }}>
-      {children}
-    </motion.div>
-  );
+	const [ref, bounds] = useMeasure();
+	return (
+		<motion.div ref={ref} animate={{ height: bounds.height }}>
+			{children}
+		</motion.div>
+	);
 }
 ```
 
@@ -25,11 +25,11 @@ function AnimatedContainer({ children }) {
 
 ```tsx
 function AnimatedContainer({ children }) {
-  const [ref, bounds] = useMeasure();
-  return (
-    <motion.div animate={{ height: bounds.height }}>
-      <div ref={ref}>{children}</div>
-    </motion.div>
-  );
+	const [ref, bounds] = useMeasure();
+	return (
+		<motion.div animate={{ height: bounds.height }}>
+			<div ref={ref}>{children}</div>
+		</motion.div>
+	);
 }
 ```

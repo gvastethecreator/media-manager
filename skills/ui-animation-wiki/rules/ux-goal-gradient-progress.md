@@ -12,7 +12,7 @@ People accelerate behavior as they approach a goal. Show how close they are to f
 
 ```tsx
 function Onboarding({ step }) {
-  return <OnboardingStep step={step} />;
+	return <OnboardingStep step={step} />;
 }
 ```
 
@@ -20,13 +20,15 @@ function Onboarding({ step }) {
 
 ```tsx
 function Onboarding({ step, totalSteps }) {
-  return (
-    <div>
-      <ProgressBar value={step} max={totalSteps} />
-      <span>Step {step} of {totalSteps}</span>
-      <OnboardingStep step={step} />
-    </div>
-  );
+	return (
+		<div>
+			<ProgressBar value={step} max={totalSteps} />
+			<span>
+				Step {step} of {totalSteps}
+			</span>
+			<OnboardingStep step={step} />
+		</div>
+	);
 }
 ```
 

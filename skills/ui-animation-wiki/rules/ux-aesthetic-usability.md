@@ -12,8 +12,8 @@ Users perceive aesthetically pleasing design as more usable. Small visual detail
 
 ```css
 .card {
-  border: 1px solid black;
-  padding: 10px;
+	border: 1px solid black;
+	padding: 10px;
 }
 ```
 
@@ -21,11 +21,11 @@ Users perceive aesthetically pleasing design as more usable. Small visual detail
 
 ```css
 .card {
-  padding: 16px;
-  background: var(--gray-2);
-  border: 1px solid var(--gray-a4);
-  border-radius: 12px;
-  box-shadow: var(--shadow-1);
+	padding: 16px;
+	background: var(--gray-2);
+	border: 1px solid var(--gray-a4);
+	border-radius: 12px;
+	box-shadow: var(--shadow-1);
 }
 ```
 

@@ -98,7 +98,7 @@ Valid values: `Setup`, `Core Patterns`, `Ecosystem`
 ```yaml
 ---
 title: Command-Line Interfaces
-description: "Build CLIs with @effect/cli"
+description: 'Build CLIs with @effect/cli'
 order: 13
 group: Ecosystem
 ---
@@ -106,7 +106,7 @@ group: Ecosystem
 
 ### Doc Typechecking Tips
 
-- `bun run typecheck:docs` extracts every ```ts/```typescript code block and compiles it as an isolated module. Keep snippets self-contained.
+- `bun run typecheck:docs` extracts every `ts/`typescript code block and compiles it as an isolated module. Keep snippets self-contained.
 - Use `// hide-start` / `// hide-end` inside code fences to include helper stubs (types, imports, small services) that are needed for typechecking but should not render in the docs. This keeps examples focused while staying type-safe.
 
 ### MDX Components
@@ -206,6 +206,7 @@ Effect-based CLI using:
 - Embedded JSON docs bundle
 
 <!-- effect-solutions:start -->
+
 ## Effect Best Practices
 
 **IMPORTANT:** Always consult effect-solutions before writing Effect code.

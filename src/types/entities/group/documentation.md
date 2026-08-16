@@ -46,9 +46,7 @@ flowchart TD
 import { transformGroup, transformGroupToWithStats } from '@/transformers/group/transformer';
 import type { Group } from '@/types/entities/group';
 
-const rawGroup: Group = {
-	/* ... */
-};
+const rawGroup: Group = {/* ... */};
 const groupComplete = transformGroup(rawGroup);
 const groupWithStats = transformGroupToWithStats(groupComplete);
 ```

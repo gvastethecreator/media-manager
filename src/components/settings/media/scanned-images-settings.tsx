@@ -163,7 +163,7 @@ export function ScannedImagesSettings() {
 													className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive"
 													onClick={() => handleDelete(img.id)}
 													size="sm"
-												title="Delete"
+													title="Delete"
 													variant="ghost"
 												>
 													<Trash className="h-3 w-3" />

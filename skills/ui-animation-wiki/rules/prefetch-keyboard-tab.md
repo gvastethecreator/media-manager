@@ -12,8 +12,8 @@ Monitor focus changes and prefetch when the user is a few tab stops away from a 
 
 ```tsx
 const { elementRef } = useForesight({
-  callback: () => router.prefetch("/settings"),
-  name: "settings-link",
-  // Tab prediction fires when focus approaches
+	callback: () => router.prefetch('/settings'),
+	name: 'settings-link',
+	// Tab prediction fires when focus approaches
 });
 ```

@@ -12,12 +12,16 @@ Interactive elements must have active/pressed state with scale transform.
 **Incorrect (no active state):**
 
 ```css
-.button:hover { background: var(--gray-3); }
+.button:hover {
+	background: var(--gray-3);
+}
 /* Missing :active state */
 ```
 
 **Correct (active state present):**
 
 ```css
-.button:active { transform: scale(0.98); }
+.button:active {
+	transform: scale(0.98);
+}
 ```

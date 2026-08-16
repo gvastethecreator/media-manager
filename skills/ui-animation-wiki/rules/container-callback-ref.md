@@ -13,8 +13,8 @@ Use a callback ref (not useRef) for measurement hooks so the observer attaches w
 ```tsx
 const ref = useRef(null);
 useEffect(() => {
-  if (!ref.current) return;
-  observer.observe(ref.current);
+	if (!ref.current) return;
+	observer.observe(ref.current);
 }, []);
 ```
 
@@ -24,8 +24,8 @@ useEffect(() => {
 const [element, setElement] = useState(null);
 const ref = useCallback((node) => setElement(node), []);
 useEffect(() => {
-  if (!element) return;
-  observer.observe(element);
-  return () => observer.disconnect();
+	if (!element) return;
+	observer.observe(element);
+	return () => observer.disconnect();
 }, [element]);
 ```

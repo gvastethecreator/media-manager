@@ -1,5 +1,5 @@
-import type { Code, Root } from "mdast"
-import { visit } from "unist-util-visit"
+import type { Code, Root } from 'mdast';
+import { visit } from 'unist-util-visit';
 
 /**
  * Remark plugin to hide parts of code blocks from display while keeping them for type checking.
@@ -23,41 +23,41 @@ import { visit } from "unist-util-visit"
  * ```
  */
 export function remarkCodeHide() {
-  return (tree: Root) => {
-    visit(tree, "code", (node: Code) => {
-      if (!node.value) return
+	return (tree: Root) => {
+		visit(tree, 'code', (node: Code) => {
+			if (!node.value) return;
 
-      let lines = node.value.split("\n")
+			let lines = node.value.split('\n');
 
-      // Handle ---cut--- marker (hide everything before)
-      const cutIndex = lines.findIndex((line) => line.trim().match(/^\/\/\s*---cut---\s*$/))
-      if (cutIndex !== -1) {
-        lines = lines.slice(cutIndex + 1)
-      }
+			// Handle ---cut--- marker (hide everything before)
+			const cutIndex = lines.findIndex((line) => line.trim().match(/^\/\/\s*---cut---\s*$/));
+			if (cutIndex !== -1) {
+				lines = lines.slice(cutIndex + 1);
+			}
 
-      // Handle hide-start/hide-end markers
-      const result: string[] = []
-      let hiding = false
+			// Handle hide-start/hide-end markers
+			const result: string[] = [];
+			let hiding = false;
 
-      for (const line of lines) {
-        const trimmed = line.trim()
+			for (const line of lines) {
+				const trimmed = line.trim();
 
-        if (trimmed.match(/^\/\/\s*hide-start\s*$/)) {
-          hiding = true
-          continue
-        }
+				if (trimmed.match(/^\/\/\s*hide-start\s*$/)) {
+					hiding = true;
+					continue;
+				}
 
-        if (trimmed.match(/^\/\/\s*hide-end\s*$/)) {
-          hiding = false
-          continue
-        }
+				if (trimmed.match(/^\/\/\s*hide-end\s*$/)) {
+					hiding = false;
+					continue;
+				}
 
-        if (!hiding) {
-          result.push(line)
-        }
-      }
+				if (!hiding) {
+					result.push(line);
+				}
+			}
 
-      node.value = result.join("\n")
-    })
-  }
+			node.value = result.join('\n');
+		});
+	};
 }

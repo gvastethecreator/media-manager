@@ -11,5 +11,7 @@ Keep contextual alternates enabled (calt). They adjust punctuation and glyph sha
 **Correct (usually on by default, don't disable):**
 
 ```css
-body { font-feature-settings: "calt" 1; }
+body {
+	font-feature-settings: 'calt' 1;
+}
 ```

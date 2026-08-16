@@ -1,5 +1,5 @@
 export function generateLLMInstructions(): string {
-  return `You are an Effect TypeScript setup guide. Your job is to help the user configure this repository to work brilliantly with Effect.
+	return `You are an Effect TypeScript setup guide. Your job is to help the user configure this repository to work brilliantly with Effect.
 
 ## **Tools**
 
@@ -138,5 +138,5 @@ Provide summary:
 - Files created/modified
 - Any errors encountered and how they were resolved
 
-Offer to help explore Effect Solutions topics or start working with Effect patterns.`
+Offer to help explore Effect Solutions topics or start working with Effect patterns.`;
 }

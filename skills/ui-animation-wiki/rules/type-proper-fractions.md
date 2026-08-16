@@ -11,5 +11,7 @@ Enable diagonal-fractions to convert 1/2, 1/3, etc. into proper typographic frac
 **Correct:**
 
 ```css
-.recipe { font-variant-numeric: diagonal-fractions; }
+.recipe {
+	font-variant-numeric: diagonal-fractions;
+}
 ```

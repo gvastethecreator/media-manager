@@ -12,9 +12,9 @@ Dynamic lists inside AnimatePresence must have unique keys.
 
 ```tsx
 <AnimatePresence>
-  {items.map((item, index) => (
-    <motion.div key={index} exit={{ opacity: 0 }} />
-  ))}
+	{items.map((item, index) => (
+		<motion.div key={index} exit={{ opacity: 0 }} />
+	))}
 </AnimatePresence>
 ```
 
@@ -22,8 +22,8 @@ Dynamic lists inside AnimatePresence must have unique keys.
 
 ```tsx
 <AnimatePresence>
-  {items.map((item) => (
-    <motion.div key={item.id} exit={{ opacity: 0 }} />
-  ))}
+	{items.map((item) => (
+		<motion.div key={item.id} exit={{ opacity: 0 }} />
+	))}
 </AnimatePresence>
 ```

@@ -37,7 +37,7 @@ const CONTENT_TYPES: Record<string, string> = {
 export const CLIENT_CONTENT_SECURITY_POLICY = [
 	"default-src 'self'",
 	"base-uri 'none'",
-	"connect-src 'self'",
+	"connect-src 'self' blob: data:",
 	"font-src 'self' data:",
 	"form-action 'self'",
 	"frame-ancestors 'none'",
@@ -45,7 +45,7 @@ export const CLIENT_CONTENT_SECURITY_POLICY = [
 	"img-src 'self' blob: data:",
 	"media-src 'self' blob:",
 	"object-src 'none'",
-	"script-src 'self'",
+	"script-src 'self' 'wasm-unsafe-eval'",
 	"style-src 'self' 'unsafe-inline'",
 	"worker-src 'self' blob:",
 ].join('; ');

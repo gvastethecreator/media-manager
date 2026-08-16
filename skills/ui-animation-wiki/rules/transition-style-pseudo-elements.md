@@ -11,14 +11,16 @@ Style view transition pseudo-elements for custom animations.
 **Incorrect (default crossfade only):**
 
 ```ts
-document.startViewTransition(() => { /* ... */ });
+document.startViewTransition(() => {
+	/* ... */
+});
 ```
 
 **Correct (custom animation):**
 
 ```css
 ::view-transition-group(card) {
-  animation-duration: 300ms;
-  animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+	animation-duration: 300ms;
+	animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 ```

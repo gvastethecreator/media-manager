@@ -82,15 +82,15 @@ Esto implica una realidad importante para mantenimiento:
 
 ### Capas principales
 
-| Capa | Responsabilidad |
-| --- | --- |
-| `components/ui` | primitivas y wrappers de UI |
-| `components/layout` | layout principal y paneles |
-| `components/features` | file browser y file viewer |
-| `components/views` | páginas y vistas por dominio |
-| `store` | estado local/global de UI y entidades |
-| `hooks` | hooks de navegación, consulta y UX |
-| `providers` | infraestructura React compartida |
+| Capa                  | Responsabilidad                       |
+| --------------------- | ------------------------------------- |
+| `components/ui`       | primitivas y wrappers de UI           |
+| `components/layout`   | layout principal y paneles            |
+| `components/features` | file browser y file viewer            |
+| `components/views`    | páginas y vistas por dominio          |
+| `store`               | estado local/global de UI y entidades |
+| `hooks`               | hooks de navegación, consulta y UX    |
+| `providers`           | infraestructura React compartida      |
 
 ### Routing
 
@@ -136,24 +136,24 @@ No existe un mega-store único; el diseño favorece stores por responsabilidad.
 
 ### Familias de routers montadas
 
-| Base | Ruta |
-| --- | --- |
-| Carpetas | `/api/folders` |
-| Imágenes | `/api/images` |
-| Videos | `/api/videos` |
-| Audio | `/api/audio` |
-| Tags | `/api/tags` |
-| Álbumes | `/api/albums` |
-| Colecciones | `/api/collections` |
-| Characters | `/api/characters` |
-| Places/Concepts/Prompts | `/api/places`, `/api/concepts`, `/api/prompts` |
-| Filesystem y descargas | `/api/files`, `/api/download` |
-| Search | `/api/search` y redirección `/search` |
-| Metadata | `/api/metadata`, `/api/metadata-advanced` |
-| Thumbnails | `/api/thumbnails`, `/api/thumbnails/unified` |
-| Settings/Profiles/Favorites | `/api/settings`, `/api/profiles`, `/api/favorites` |
-| Eventing/queue/system | `/api/events`, `/api/queue`, `/api/system`, `/api/stats`, `/api/activity` |
-| Debug y utilidades | `/api/debug`, `/api/reindex`, `/api/reindex-logs` |
+| Base                        | Ruta                                                                      |
+| --------------------------- | ------------------------------------------------------------------------- |
+| Carpetas                    | `/api/folders`                                                            |
+| Imágenes                    | `/api/images`                                                             |
+| Videos                      | `/api/videos`                                                             |
+| Audio                       | `/api/audio`                                                              |
+| Tags                        | `/api/tags`                                                               |
+| Álbumes                     | `/api/albums`                                                             |
+| Colecciones                 | `/api/collections`                                                        |
+| Characters                  | `/api/characters`                                                         |
+| Places/Concepts/Prompts     | `/api/places`, `/api/concepts`, `/api/prompts`                            |
+| Filesystem y descargas      | `/api/files`, `/api/download`                                             |
+| Search                      | `/api/search` y redirección `/search`                                     |
+| Metadata                    | `/api/metadata`, `/api/metadata-advanced`                                 |
+| Thumbnails                  | `/api/thumbnails`, `/api/thumbnails/unified`                              |
+| Settings/Profiles/Favorites | `/api/settings`, `/api/profiles`, `/api/favorites`                        |
+| Eventing/queue/system       | `/api/events`, `/api/queue`, `/api/system`, `/api/stats`, `/api/activity` |
+| Debug y utilidades          | `/api/debug`, `/api/reindex`, `/api/reindex-logs`                         |
 
 ### Patrón de capa de negocio
 

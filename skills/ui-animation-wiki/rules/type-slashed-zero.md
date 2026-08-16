@@ -11,7 +11,11 @@ Enable slashed zero in code-adjacent UIs so users never confuse 0 with O.
 **Correct:**
 
 ```css
-.code { font-variant-numeric: slashed-zero; }
+.code {
+	font-variant-numeric: slashed-zero;
+}
 /* or */
-.code { font-feature-settings: "zero"; }
+.code {
+	font-feature-settings: 'zero';
+}
 ```

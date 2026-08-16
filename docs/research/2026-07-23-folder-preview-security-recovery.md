@@ -50,6 +50,6 @@ asset local.
 - Mantener las pruebas de esta slice en los runners por defecto tras resolver la modificación concurrente del runner
   de tooling.
 - El E2E de desarrollo existente sigue bloqueado fuera de esta slice: `bun run test:e2e --
-  tests/e2e/folder-preview.spec.ts` deja colgada la ruta Vite `/api/folders`, aunque el backend directo responde a
+tests/e2e/folder-preview.spec.ts` deja colgada la ruta Vite `/api/folders`, aunque el backend directo responde a
   `/health`. El smoke de producción hermético sí pasó. Investigar el proxy y la sesión de `dev:full` sin mezclarlo con
   la recuperación de previews.

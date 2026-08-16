@@ -170,12 +170,7 @@ export function ImageDetailView() {
 
 	if (error || !image) {
 		return (
-			<BaseContentView
-				description={error || 'Image not found'}
-				headerControls={headerControls}
-				icon="❌"
-				title="Error"
-			>
+			<BaseContentView description={error || 'Image not found'} headerControls={headerControls} icon="❌" title="Error">
 				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
 						<p className="mb-4 text-destructive">{error || 'Image not found'}</p>

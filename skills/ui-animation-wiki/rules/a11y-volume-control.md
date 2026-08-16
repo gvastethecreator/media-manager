@@ -12,8 +12,8 @@ Allow volume adjustment independent of system volume.
 
 ```tsx
 function playSound() {
-  audio.volume = 1;
-  audio.play();
+	audio.volume = 1;
+	audio.play();
 }
 ```
 
@@ -21,8 +21,8 @@ function playSound() {
 
 ```tsx
 function playSound() {
-  const { volume } = usePreferences();
-  audio.volume = volume;
-  audio.play();
+	const { volume } = usePreferences();
+	audio.volume = volume;
+	audio.play();
 }
 ```

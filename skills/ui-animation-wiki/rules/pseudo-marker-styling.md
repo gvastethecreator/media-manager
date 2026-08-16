@@ -12,9 +12,9 @@ Use ::marker to style list bullets without extra elements or background-image ha
 
 ```css
 li {
-  list-style: none;
-  background: url("bullet.svg") no-repeat 0 4px;
-  padding-left: 20px;
+	list-style: none;
+	background: url('bullet.svg') no-repeat 0 4px;
+	padding-left: 20px;
 }
 ```
 
@@ -22,7 +22,7 @@ li {
 
 ```css
 li::marker {
-  color: var(--gray-8);
-  font-size: 0.8em;
+	color: var(--gray-8);
+	font-size: 0.8em;
 }
 ```

@@ -11,11 +11,15 @@ Icon SVGs should be aria-hidden since they're decorative.
 **Incorrect (no aria attribute):**
 
 ```tsx
-<svg width={size} height={size}>...</svg>
+<svg width={size} height={size}>
+	...
+</svg>
 ```
 
 **Correct (aria-hidden):**
 
 ```tsx
-<svg width={size} height={size} aria-hidden="true">...</svg>
+<svg width={size} height={size} aria-hidden="true">
+	...
+</svg>
 ```

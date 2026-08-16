@@ -12,7 +12,7 @@ Each view-transition-name must be unique on the page during transition.
 
 ```css
 .card {
-  view-transition-name: card;
+	view-transition-name: card;
 }
 /* Multiple cards with same name */
 ```

@@ -11,12 +11,16 @@ Don't prefetch everything visible in the viewport. Prefetch based on user intent
 **Incorrect (prefetch all visible links):**
 
 ```tsx
-<Link href="/page" prefetch={true}>Page</Link>
+<Link href="/page" prefetch={true}>
+	Page
+</Link>
 ```
 
 **Correct (intent-based prefetching):**
 
 ```tsx
-<Link href="/page" prefetch={false}>Page</Link>
+<Link href="/page" prefetch={false}>
+	Page
+</Link>
 // Let trajectory/hover prediction handle it
 ```

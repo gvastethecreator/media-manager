@@ -212,7 +212,13 @@ function DataGridTableBodyRowSkeleton({ children }: { children: ReactNode }) {
 	);
 }
 
-function DataGridTableBodyRowSkeletonCell<TData extends RowData>({ children, column }: { children: ReactNode; column: Column<any, TData> }) {
+function DataGridTableBodyRowSkeletonCell<TData extends RowData>({
+	children,
+	column,
+}: {
+	children: ReactNode;
+	column: Column<any, TData>;
+}) {
 	const { props, table } = useDataGrid();
 	const bodyCellSpacing = bodyCellSpacingVariants({
 		size: props.tableLayout?.dense ? 'dense' : 'default',
@@ -380,7 +386,13 @@ function DataGridTableLoader() {
 	);
 }
 
-function DataGridTableRowSelect<TData extends RowData>({ row, size }: { row: Row<any, TData>; size?: 'sm' | 'md' | 'lg' }) {
+function DataGridTableRowSelect<TData extends RowData>({
+	row,
+	size,
+}: {
+	row: Row<any, TData>;
+	size?: 'sm' | 'md' | 'lg';
+}) {
 	return (
 		<>
 			<div

@@ -12,7 +12,7 @@ Set -webkit-font-smoothing: antialiased on retina displays. The default subpixel
 
 ```css
 body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 ```

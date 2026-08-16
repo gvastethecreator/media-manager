@@ -12,14 +12,14 @@ Set overflow: hidden on the animated outer container to clip content during size
 
 ```tsx
 <motion.div animate={{ height: bounds.height }}>
-  <div ref={ref}>{children}</div>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```
 
 **Correct (clipped during transition):**
 
 ```tsx
-<motion.div animate={{ height: bounds.height }} style={{ overflow: "hidden" }}>
-  <div ref={ref}>{children}</div>
+<motion.div animate={{ height: bounds.height }} style={{ overflow: 'hidden' }}>
+	<div ref={ref}>{children}</div>
 </motion.div>
 ```

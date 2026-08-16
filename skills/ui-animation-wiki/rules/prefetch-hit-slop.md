@@ -12,8 +12,8 @@ Expand the invisible prediction area around elements with hitSlop to start loadi
 
 ```tsx
 const { elementRef } = useForesight({
-  callback: () => prefetch(),
-  hitSlop: 0,
+	callback: () => prefetch(),
+	hitSlop: 0,
 });
 ```
 
@@ -21,7 +21,7 @@ const { elementRef } = useForesight({
 
 ```tsx
 const { elementRef } = useForesight({
-  callback: () => prefetch(),
-  hitSlop: 20,
+	callback: () => prefetch(),
+	hitSlop: 20,
 });
 ```

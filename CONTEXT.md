@@ -109,7 +109,7 @@ Un **Organizer** orientado a presentar y curar visualmente **Assets** en una exp
 _Avoid_: collection genérica, folder, tag
 
 **Collection**:
- Un **Organizer** transversal que agrupa principalmente **Assets** por criterio temático o funcional más allá de la pura presentación visual, sin ocupar por defecto el rol de cluster heterogéneo reservado a **Group**.
+Un **Organizer** transversal que agrupa principalmente **Assets** por criterio temático o funcional más allá de la pura presentación visual, sin ocupar por defecto el rol de cluster heterogéneo reservado a **Group**.
 _Avoid_: album visual, folder físico, tag simple
 
 **Tag**:

@@ -12,13 +12,13 @@ When using usePresence, always call safeToRemove after async work.
 
 ```tsx
 function AsyncComponent() {
-  const [isPresent, safeToRemove] = usePresence();
+	const [isPresent, safeToRemove] = usePresence();
 
-  useEffect(() => {
-    if (!isPresent) {
-      cleanup();
-    }
-  }, [isPresent]);
+	useEffect(() => {
+		if (!isPresent) {
+			cleanup();
+		}
+	}, [isPresent]);
 }
 ```
 
@@ -26,12 +26,12 @@ function AsyncComponent() {
 
 ```tsx
 function AsyncComponent() {
-  const [isPresent, safeToRemove] = usePresence();
+	const [isPresent, safeToRemove] = usePresence();
 
-  useEffect(() => {
-    if (!isPresent) {
-      cleanup().then(safeToRemove);
-    }
-  }, [isPresent, safeToRemove]);
+	useEffect(() => {
+		if (!isPresent) {
+			cleanup().then(safeToRemove);
+		}
+	}, [isPresent, safeToRemove]);
 }
 ```

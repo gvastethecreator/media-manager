@@ -3,13 +3,14 @@
 **Source:** David Briggs — [Dimensions of Color](http://www.huevaluechroma.com/)
 
 ---
+
 ## Page 111
 
 What do Purves and Lotto's Illusions Actually Show?
 PART 11. AFTERTHOUGHTS
 What do Purves and Lotto's Illusions Actually Show? (October, 2017)
 Traditional and Modern Colour Theory: 1 Modern Colour Theory (June, 2015)
-Traditional and Modern Colour Theory: 2  Traditional Colour Theory Strikes Back (June, 2015)
+Traditional and Modern Colour Theory: 2 Traditional Colour Theory Strikes Back (June, 2015)
 What is Color? (Flame Challenge, March, 2014)
 Answers to "What is Color?" Page (March, 2014)
 Colour Constancy Illusions and Painting (October, 2018)
@@ -27,7 +28,7 @@ The Elements of Colour (February, 2024)
 Colours of Objects and Colours of Light (February, 2024)
 11.1 What do Purves and Lotto's Illusions Actually Show?
 Figure 11.1.1
-.  After Figure 6.10 from Dale Purves and R. Beau Lotto's book
+. After Figure 6.10 from Dale Purves and R. Beau Lotto's book
 Why We See What We Do; An Empirical Theory of Vision
 (2003, revised 2011). The
 areas of the image
@@ -51,20 +52,22 @@ In their book Purves and Lotto employ this and other illustrations to supposedly
 images
 representing illuminated objects. We experience visual information pre-processed into estimates of spectral reflectances, illumination and atmosphere, and it requires effort to "flatten" these superimposed perceptions into a two-dimensional, camera-like visual image.
 To sum up, there are three senses in which visual perception is not a veridical (i.e. precise and accurate) representation of physical reality.
+
 1. Colours are ways of seeing physical properties rather than physical properties in themselves, and these ways of seeing are
-imprecise in the sense that they represent only the direction and amount of bias between the long-, middle- and short-wavelength components, rather than all the details, of a spectral distribution.
+   imprecise in the sense that they represent only the direction and amount of bias between the long-, middle- and short-wavelength components, rather than all the details, of a spectral distribution.
 2. The perceived colour of an object can be a somewhat
-inaccurate representation of its spectral reflectance/transmission, as seen in simple simultaneous contrast.
+   inaccurate representation of its spectral reflectance/transmission, as seen in simple simultaneous contrast.
 3. Our
-initial estimates of comparative properties of the visual field such as relative luminance and proportions can be highly inaccurate because our perceptions of properties of objects are so salient that it can be difficult to attend to properties of the visual field itself. For the same reason, perceived comparitive properties in an image representing illuminated objects can be very inaccurate with respect to the physical properties
-of that image
-. In both cases these difficulties can be circumvented by using various devices and strategies familar to painters.
-For a more recent discussion related to the content of this page please see my video presentation
-"Colour Constancy Illusions and Painting"
-.
-Page added October 25, 2017.
+   initial estimates of comparative properties of the visual field such as relative luminance and proportions can be highly inaccurate because our perceptions of properties of objects are so salient that it can be difficult to attend to properties of the visual field itself. For the same reason, perceived comparitive properties in an image representing illuminated objects can be very inaccurate with respect to the physical properties
+   of that image
+   . In both cases these difficulties can be circumvented by using various devices and strategies familar to painters.
+   For a more recent discussion related to the content of this page please see my video presentation
+   "Colour Constancy Illusions and Painting"
+   .
+   Page added October 25, 2017.
 
 ---
+
 ## Page 112
 
 traditional and modern colour theory
@@ -113,8 +116,7 @@ Figure 11.2.2
 . A. Colour wheel from George Field's
 Chromatography
 (2nd edn, 1841). Numbers around the circumference indicate the proportions in which secondary and tertiary colours must be present in order for the three primaries to be balanced. B. Post-Newtonian model of traditional colour theory, in which white light is thought to consist of red, yellow and blue rays. A mixture of yellow and blue paints reflects only the yellow and blue rays, which are detected by yellow and blue receptors in the eye, leading to a mixed sensation of green. C. Three-dimensional colour space proposed in a 1758 lecture by Swedish astronomer Tobias Mayer, in which colours are arranged in a double pyramid according to proportions of red, yellow, blue, black and white components.
-Traditional colour theory readily adopted Newton's hue circle of 1704 in the form of the artists' "colour wheel" with its symmetrically placed historical primaries (e.g. Fig. 11.2.2A). More problematic was Newton's conclusion that lights of all colours are composed of rays of the innumerable but seven-named colours of the spectrum, and that green and orange lights could be physically simple as well as compound. This problem however could be countered by supposing that the spectrum is not continuous, as Newton had thought, but is actually made of separate red, yellow and blue rays that produce the remaining colours by intermixture. The suggestion that our eyes have three kinds of receptors responsible for colour vision was first made based on this hypothesis of red, yellow and blue rays. In this enviably simple view of colour, the historical colourant-mixing primaries coincide with the primaries for mixing coloured lights, with the sensitivities of the visual receptors, and with the psychological primaries of perception. For example in Fig. 11.2.2B, a mixture of yellow and blue paints reflects only the yellow and blue rays, which are detected by yellow and blue receptors in the eye, leading to a mixed sensation of green. The three-ray hypothesis was quite widely accepted in science, and the first three-dimensional colour order systems for classifying object colours were made on the assumption that all such colours are mixtures of red, yellow, blue and white (
-+
+Traditional colour theory readily adopted Newton's hue circle of 1704 in the form of the artists' "colour wheel" with its symmetrically placed historical primaries (e.g. Fig. 11.2.2A). More problematic was Newton's conclusion that lights of all colours are composed of rays of the innumerable but seven-named colours of the spectrum, and that green and orange lights could be physically simple as well as compound. This problem however could be countered by supposing that the spectrum is not continuous, as Newton had thought, but is actually made of separate red, yellow and blue rays that produce the remaining colours by intermixture. The suggestion that our eyes have three kinds of receptors responsible for colour vision was first made based on this hypothesis of red, yellow and blue rays. In this enviably simple view of colour, the historical colourant-mixing primaries coincide with the primaries for mixing coloured lights, with the sensitivities of the visual receptors, and with the psychological primaries of perception. For example in Fig. 11.2.2B, a mixture of yellow and blue paints reflects only the yellow and blue rays, which are detected by yellow and blue receptors in the eye, leading to a mixed sensation of green. The three-ray hypothesis was quite widely accepted in science, and the first three-dimensional colour order systems for classifying object colours were made on the assumption that all such colours are mixtures of red, yellow, blue and white ( +
 black) components in various proportions (Fig. 11.2.2 C). This hypothesis was not overturned until 1852, when the version of it promoted by the Scottish physicist Sir David Brewster was convincingly demolished by the brilliant German physicist and physiologist, Hermann von Helmholtz.
 In subsequent years Helmholtz, his contemporaries including James Clerk Maxwell and Ewald Hering, and their successors collectively transformed our understanding of what colour is and how it works as fundamentally as Darwin transformed our understanding of biology over the same period, and this new understanding in turn led to modern colour printing, colour photography, cinema and television, and eventually to digital photography, painting and rendering. Modern colour theory, as understood on this website, is a system of guidance resting on the legacy of this late 19th century revolution, adapted to the practical needs of painters and teachers of painting.
 Figure 11.2.3
@@ -456,6 +458,7 @@ Traditional and Modern Colour Theory
 Part 2: Traditional colour theory strikes back!
 
 ---
+
 ## Page 113
 
 Traditional and Modern Colour Theory, Itten, primary colours
@@ -474,7 +477,7 @@ Adobe Color CC
 Kuler
 ), which calculates complementary and triadic colour sets using a modified digital hue circle in which the hue angles are intended to conform to the traditional colour wheel (Fig. 11.3.3B). As a result of its half century of ascendancy, many artists today assume that traditional colour theory has dominated art education continuously since its origins, and assume modern colour theory is a very recent intrusion.
 Figure 11.3.2
-. A. Colour star used by Itten as the basis of his teaching at the Bauhaus c. 1921, showing  English translations of the 12 hue divisions he derived from his teacher Adolf Hoelzel. Notice the symmetrical placement of yellow, cyan blue, and a "Purple" (magenta) intermediate between "Crimson" and "Purple violet". B. Traditional hue divisions adopted in
+. A. Colour star used by Itten as the basis of his teaching at the Bauhaus c. 1921, showing English translations of the 12 hue divisions he derived from his teacher Adolf Hoelzel. Notice the symmetrical placement of yellow, cyan blue, and a "Purple" (magenta) intermediate between "Crimson" and "Purple violet". B. Traditional hue divisions adopted in
 The Art of Color
 .
 Itten took many elements of his colour theory from that of his teacher Aldof Hoelzel, but in his book of 1961 he left out almost all of the elements that Hoelzel had derived from late 19th and early 20th century science, and presented a version of traditional colour theory and classification almost entirely fixated at an early 19th-century stage of development. Thus although his "colour star" lithograph of 1921 (Fig. 11.3.2A), which he had used as the basis of his teaching of colour at the Bauhaus (Itten, 1975, p. 33), follows Hoelzel's 12-hue system derived from the scientist Wilhelm von Bezold, in
@@ -537,7 +540,7 @@ Figure 11.3.7
 The colour teaching of Josef Albers is sometimes lumped with that of Itten, but was quite different in many ways. Albers included the Ostwald and Munsell systems (favouring the latter) in his courses, ignored Itten's colour circle and sphere, and was skeptical of schemes of "objective" colour harmony. Albers did treat red, yellow and blue as the painter's primaries, but he also discussed the psychological and additive primaries, and his teaching can certainly not be said to be founded on the historical primaries. Unfortunately but perhaps inevitably, his much less dogmatic and more experience-based approach ultimately had less influence on art and design curricula than Itten's formulaic and self-contained system, which in effect insulates the teacher and the student from the last century and a half of developments in our understanding of colour.
 The revival of traditional colour theory since the 1960s was not based on a successful challenge to the truth of modern colour theory, but must be understood in the context of the concurrent reduction and elimination of other technical elements, such as traditional drawing skills, anatomy and perspective, in art education over the same period. Traditional colour theory anachronistically maintains views of the nature of colour that prevailed before the late 19th century Helmholtz-Maxwell-Hering revolution, and its relationship (or lack of relationship) to modern colour theory is in some ways like that of so-called "Creation Science" to modern biology. The difference is not between science and art, but between the sciences of different eras. Perhaps its most unfortunate effect is that students can become “adapted” to simplistic treatments of colour, making modern colour theory seem unnecessarily complicated. If 90 percent of books treated anatomy or perspective in an extremely simplistic way, you would get a similar shock the first time you saw some real artistic anatomy or perspective.
 Figure 11.3.8
-. A, value 5  plane and B-F, the five hue pages from Albert Munsell's
+. A, value 5 plane and B-F, the five hue pages from Albert Munsell's
 Atlas of the Munsell Color System
 (1915), the forerunner of the modern
 Munsell Book of Color
@@ -550,10 +553,11 @@ Next:
 "What is Color?"
 
 ---
+
 ## Page 114
 
 11.4 "What is Color?"
-This page presents an explanation of  colour for school children, produced in response to the
+This page presents an explanation of colour for school children, produced in response to the
 2014 Flame Challenge
 by actor Alan Alda. Whether it succeeds with its target audience or not, I hope it helps promote a better understanding of colour, and especially of the significance of the
 opponent model
@@ -641,7 +645,7 @@ So the colour "red" is not something we "detect" in light, but is a signal added
 You might be wondering why our eyes and brain would do this, but look what we get when the two colour signals combine:
 Colours form a
 circle
-because the combinations of the four colour signals we create form a continuous loop: RED + YELLOW, YELLOW + GREEN, GREEN + BLUE, BLUE + RED. Single wavelengths of the spectrum can produce most but not all of the  possible combinations.
+because the combinations of the four colour signals we create form a continuous loop: RED + YELLOW, YELLOW + GREEN, GREEN + BLUE, BLUE + RED. Single wavelengths of the spectrum can produce most but not all of the possible combinations.
 Magenta
 is a combination of our blue and red colour signals, produced exactly the same way as the colours of the spectrum, but from mixtures of wavelengths from the two ends.
 My nephew Guy's eyes have only two types of cones
@@ -656,9 +660,11 @@ A bright yellow object like a lemon absorbs blue and violet wavelengths, and ref
 L and M
 cones both respond strongly to these wavelengths, and these responses:
 -
+
 combine
 to create a strong yellow colour signal, and
 -
+
 cancel
 each other from making a strong red or green colour signal.
 [Study
@@ -710,6 +716,7 @@ Dr R. Beau Lotto
 and made publicly available by him for use with proper accreditation.
 
 ---
+
 ## Page 115
 
 11.5 Answers to "What is colour?" page
@@ -887,11 +894,14 @@ March 9, 2014.
 5
 6
 7
->>
+
+> >
+
 Previous:
 "What is Color?"
 
 ---
+
 ## Page 116
 
 What do Purves and Lotto's Illusions Actually Show?
@@ -1013,6 +1023,7 @@ Next:
 The Art Science and History of Colour Quiz
 
 ---
+
 ## Page 117
 
 The Art, Science and History of Colour Quiz
@@ -1046,6 +1057,7 @@ Previous:
 Colour Constancy Illusions and Painting
 
 ---
+
 ## Page 118
 
 What do Purves and Lotto's Illusions Actually Show?
@@ -1310,6 +1322,7 @@ First draft
 of video published January 3 , 2020.
 
 ---
+
 ## Page 119
 
 Where is Colour Education Now?
@@ -1322,6 +1335,7 @@ Page published May 11, 2020.
 Home
 
 ---
+
 ## Page 1110
 
 Color Impact 2020
@@ -1331,9 +1345,9 @@ Jennifer Cohlman Bracchi
 Andreas Schwarz
 Robin Kingsburgh
 Luanne Stovall
-Paul Green-Armytage  1
+Paul Green-Armytage 1
 The colour theory debate
-Paul Green-Armytage  2
+Paul Green-Armytage 2
 Panel discussion
 Maggie Maggio
 Below is my summary of the talks presented at the Inter-Society Color Council virtual symposium Color Impact 2020, originally prepared as a report submitted to a meeting of the National Executive Committee of the
@@ -1401,79 +1415,81 @@ and
 Widening Our Vision
 respectively. The most conspicuous lack of agreement seemed to be over the scope of the term “traditional colour theory”, which the
 first participant
-* characterized as having evolved “as a foundational component of art and design education” but also showed as including works like the
-Handbook of Color Psychology
-of Elliot
-et al.
-(2015), an excellent compendium of current colour science. This latter content had of course not attracted criticism from the Colour Literacy Project. What had come in for criticism is what the second participant,
-Maggie Maggio
-, characterized as the cornerstone of traditional colour theory, namely the simplistic “rehash” of red, yellow and blue primary colours, secondary and tertiary colours, and so on, content that in the first participant's view was something that traditional colour theory has “moved beyond”. The exchange brought out the need for participants in such debates to begin with an agreed set of criteria defining which theories among the multitude involving colour are to be included in the category “traditional colour theory”, to prevent the debate being at cross purposes and to clarify whether the positions being defended by the participants are internally consistent. Robert Hirschler as Chair neatly summed up the consensus expressed by both participants as follows: “Yes, we don’t need that fossilized, simplistic, oversimplified colour theory but we do need to know more about colour so that the exploration and experimentation can be explained somehow”.
-*The first participant subsequently launched an extraordinary series of attacks on my personal and professional reputation on her website beginning on 28/08/2020 (preserved on the archive.org Wayback Machine
-here
-), ostensibly in response to my brief review of the debate, which she incorrectly claimed was biased and defamatory against her. The disparity between my tactful comments here and the far-fetched accusations and abusive retribution they were met with can be confirmed by inspecting the archives of the original and all later versions of our pages preserved on the
-Wayback Machine
-.
-In subsequent revisions the participant very wisely removed her most defamatory statements about me, but persisted in playing the victim, expressing the hope that I "can find a way to treat other academics with respect – as do most within the global academic community – and refrain from denigrating
-ad hominen
-commentary when academic perspectives differ", while continuing on the same page her denigrating
-ad hominem
-commentary directed at me, including for some time the tag
-"DAVID BRIGGS COLOUR FRAUD"
-(
-preserved here
-). The participant
-continues
-to oblige me to provide these links as evidence to separate fact from projection in our respective conduct, but as a courtesy to a colleague of long standing I've removed her name from this page.
-In his second session of hands-on activities Paul demonstrated a more elaborate version of the
-Color Sorting Set
-for more advanced students, and comparable in difficulty with some existing exercises for sorting colours according to NCS nuance. Categories of “very light”, “light muted”, “dark muted”, “very dark” and a weakly chromatic “grey” to the original four, producing a regular grid of nine tint-shade-tone “characters” for each hue, corresponding to relative white, black and colour content rather than lightness and chroma. The
-Color Sorting Set
-uses a new hue scale of nine named hues: red, orange, yellow, lime green, green, blue green, blue, violet and magenta. These named hues lack any hierarchy among themselves and each sits opposite an interval between two named hues, two features that might make the circle more difficult to memorize and hold in the mind than the familiar opponent, traditional, additive-subtractive and Munsell hue circles, but which are employed deliberately with the intention of avoiding commitment to any one of the latter hue scales.
-Next, Luanne Stovall hosted a panel discussion
-Expanding the Focus of Art and Design Education
-involving
-Leslie Mutchler
-, Chair of the Foundation Department at the Pratt Institute,
-Nader Sadoughi
-, a BFA Design student at The University of Texas at Austin, and
-Alicia Keshishian
-, who leads the multidisciplnary education program of the Color Marketing Group. (The fourth scheduled panellist
-Richard Mehl
-of the School of Visual Arts, NYC, was unable to participate).
-The three speakers each described new ways in which colour education is being expanded beyond what is normally included in traditional colour theory, from the point of view of a teacher, a student, and an educator in industry. Leslie described how she had taught colour in different institutions “in a myriad of ways, but always focussed on the spiritual, the slippery and the emotive along with the formal, the scientific, and the concrete”, and emphasized the mutual interaction and enhancement of her teaching and her artistic research and productions, such as
-Intermediate Geochromatic Studies
-(2020) with Jason Urban. Nader described what he saw as a crisis in colour education around the world resulting from an over-reliance on the flawed texts of Albers and Itten and the traditional red-yellow-blue colour wheel, and enthusiastically advocated the application of modern colour order systems such as CIE L*a*b* in classroom education. Alicia described co-teaching multidisciplinary classes for industry professionals addressing colour through design, science and technology, and recorded her astonishment to discover when first teaching these classes that only about 10 percent of colour professionals had an understanding of the basics of the subject. In the ensuing discussion there was agreement with the view that higher education in the United States is generally failing colour professionals (the fully interdisciplinary colour programs at the Pratt Institute and the University of Texas among the few exceptions), and with the observation of a current college student that colour classes are the “bad maths” of most colleges.
-In the final segment
-Maggie Maggio
-introduced the ISCC/AIC Colour Literacy Project and its new website,
-https://colourliteracy.org/.
-The Colour Literacy Project was formed in the wake of the Munsell 2018 symposium to “identify and address the most basic, current misconceptions and misinformation about colour while building a bridge between the art and science of 21st century colour education”. Maggie gave participants a tour of the new website, which is still in its early stages but gives an explanation of the specific objectives of the project, a listing of the team members and project consultants, and two examples of prototype modules for early school level teaching. A
-page of educator resources
-is currently under construction but already includes a link to
-Colour Online
-, a curated collection of some
-500 links to useful colour-related resources
-prepared specifically for the Project by
-David Briggs
-, as well as resources previously produced by team members
-Stephen Westland
-,
-Harald Arnkil
-and
-Andreas Schwarz
-.
-Color Impact 2020 presented a strong challenge to the status quo in colour education, with calls to present colour in new and engaging ways as a fully interdisciplinary subject bridging many areas of the sciences and the arts. Such calls have been made many times in the past and will no doubt be made many times in the future in the ongoing battle against outdated, formulaic and uninspiring “rehash” in colour education.
-David Briggs,
-Vice President and NSW Divisional Chair,
-Colour Society of Australia
-This page published July 17, 2020. Last revised 12/04/2022; previous versions archived
-here
-and
-here
-.
-Home
+
+- characterized as having evolved “as a foundational component of art and design education” but also showed as including works like the
+  Handbook of Color Psychology
+  of Elliot
+  et al.
+  (2015), an excellent compendium of current colour science. This latter content had of course not attracted criticism from the Colour Literacy Project. What had come in for criticism is what the second participant,
+  Maggie Maggio
+  , characterized as the cornerstone of traditional colour theory, namely the simplistic “rehash” of red, yellow and blue primary colours, secondary and tertiary colours, and so on, content that in the first participant's view was something that traditional colour theory has “moved beyond”. The exchange brought out the need for participants in such debates to begin with an agreed set of criteria defining which theories among the multitude involving colour are to be included in the category “traditional colour theory”, to prevent the debate being at cross purposes and to clarify whether the positions being defended by the participants are internally consistent. Robert Hirschler as Chair neatly summed up the consensus expressed by both participants as follows: “Yes, we don’t need that fossilized, simplistic, oversimplified colour theory but we do need to know more about colour so that the exploration and experimentation can be explained somehow”.
+  *The first participant subsequently launched an extraordinary series of attacks on my personal and professional reputation on her website beginning on 28/08/2020 (preserved on the archive.org Wayback Machine
+  here
+  ), ostensibly in response to my brief review of the debate, which she incorrectly claimed was biased and defamatory against her. The disparity between my tactful comments here and the far-fetched accusations and abusive retribution they were met with can be confirmed by inspecting the archives of the original and all later versions of our pages preserved on the
+  Wayback Machine
+  .
+  In subsequent revisions the participant very wisely removed her most defamatory statements about me, but persisted in playing the victim, expressing the hope that I "can find a way to treat other academics with respect – as do most within the global academic community – and refrain from denigrating
+  ad hominen
+  commentary when academic perspectives differ", while continuing on the same page her denigrating
+  ad hominem
+  commentary directed at me, including for some time the tag
+  "DAVID BRIGGS COLOUR FRAUD"
+  (
+  preserved here
+  ). The participant
+  continues
+  to oblige me to provide these links as evidence to separate fact from projection in our respective conduct, but as a courtesy to a colleague of long standing I've removed her name from this page.
+  In his second session of hands-on activities Paul demonstrated a more elaborate version of the
+  Color Sorting Set
+  for more advanced students, and comparable in difficulty with some existing exercises for sorting colours according to NCS nuance. Categories of “very light”, “light muted”, “dark muted”, “very dark” and a weakly chromatic “grey” to the original four, producing a regular grid of nine tint-shade-tone “characters” for each hue, corresponding to relative white, black and colour content rather than lightness and chroma. The
+  Color Sorting Set
+  uses a new hue scale of nine named hues: red, orange, yellow, lime green, green, blue green, blue, violet and magenta. These named hues lack any hierarchy among themselves and each sits opposite an interval between two named hues, two features that might make the circle more difficult to memorize and hold in the mind than the familiar opponent, traditional, additive-subtractive and Munsell hue circles, but which are employed deliberately with the intention of avoiding commitment to any one of the latter hue scales.
+  Next, Luanne Stovall hosted a panel discussion
+  Expanding the Focus of Art and Design Education
+  involving
+  Leslie Mutchler
+  , Chair of the Foundation Department at the Pratt Institute,
+  Nader Sadoughi
+  , a BFA Design student at The University of Texas at Austin, and
+  Alicia Keshishian
+  , who leads the multidisciplnary education program of the Color Marketing Group. (The fourth scheduled panellist
+  Richard Mehl
+  of the School of Visual Arts, NYC, was unable to participate).
+  The three speakers each described new ways in which colour education is being expanded beyond what is normally included in traditional colour theory, from the point of view of a teacher, a student, and an educator in industry. Leslie described how she had taught colour in different institutions “in a myriad of ways, but always focussed on the spiritual, the slippery and the emotive along with the formal, the scientific, and the concrete”, and emphasized the mutual interaction and enhancement of her teaching and her artistic research and productions, such as
+  Intermediate Geochromatic Studies
+  (2020) with Jason Urban. Nader described what he saw as a crisis in colour education around the world resulting from an over-reliance on the flawed texts of Albers and Itten and the traditional red-yellow-blue colour wheel, and enthusiastically advocated the application of modern colour order systems such as CIE L*a*b* in classroom education. Alicia described co-teaching multidisciplinary classes for industry professionals addressing colour through design, science and technology, and recorded her astonishment to discover when first teaching these classes that only about 10 percent of colour professionals had an understanding of the basics of the subject. In the ensuing discussion there was agreement with the view that higher education in the United States is generally failing colour professionals (the fully interdisciplinary colour programs at the Pratt Institute and the University of Texas among the few exceptions), and with the observation of a current college student that colour classes are the “bad maths” of most colleges.
+  In the final segment
+  Maggie Maggio
+  introduced the ISCC/AIC Colour Literacy Project and its new website,
+  https://colourliteracy.org/.
+  The Colour Literacy Project was formed in the wake of the Munsell 2018 symposium to “identify and address the most basic, current misconceptions and misinformation about colour while building a bridge between the art and science of 21st century colour education”. Maggie gave participants a tour of the new website, which is still in its early stages but gives an explanation of the specific objectives of the project, a listing of the team members and project consultants, and two examples of prototype modules for early school level teaching. A
+  page of educator resources
+  is currently under construction but already includes a link to
+  Colour Online
+  , a curated collection of some
+  500 links to useful colour-related resources
+  prepared specifically for the Project by
+  David Briggs
+  , as well as resources previously produced by team members
+  Stephen Westland
+  ,
+  Harald Arnkil
+  and
+  Andreas Schwarz
+  .
+  Color Impact 2020 presented a strong challenge to the status quo in colour education, with calls to present colour in new and engaging ways as a fully interdisciplinary subject bridging many areas of the sciences and the arts. Such calls have been made many times in the past and will no doubt be made many times in the future in the ongoing battle against outdated, formulaic and uninspiring “rehash” in colour education.
+  David Briggs,
+  Vice President and NSW Divisional Chair,
+  Colour Society of Australia
+  This page published July 17, 2020. Last revised 12/04/2022; previous versions archived
+  here
+  and
+  here
+  .
+  Home
 
 ---
+
 ## Page 1111
 
 More than three dimensions
@@ -1547,7 +1563,7 @@ the balance of chromatic (coloured) and white light components perceived in the 
 . A column of digital colour swatches of uniform chroma can be seen to range from lighter swatches emitting lots of relatively whitish light to darker swatches emitting a smaller amount of less whitish or more saturated light.
 A note to the CIE definition of saturation reads that within certain limits, a colour stimulus of a given
 chromaticity
-exhibits approximately constant saturation as the  intensity of light (luminance) varies. Chromaticity refers to the overall balance of long-, middle- and shor-wavelength components in a light, and this would be expected to stay constant when a uniform object such as our cube reflects illumination varying only in intensity. This relationship of constant saturation has been implemented in our cube, so that proceeding from A to B to C the colourfulness of the light increases in step with its brightness.
+exhibits approximately constant saturation as the intensity of light (luminance) varies. Chromaticity refers to the overall balance of long-, middle- and shor-wavelength components in a light, and this would be expected to stay constant when a uniform object such as our cube reflects illumination varying only in intensity. This relationship of constant saturation has been implemented in our cube, so that proceeding from A to B to C the colourfulness of the light increases in step with its brightness.
 [05:54] We might therefore expect that in the
 image
 of our orange cube, the image areas used to depict faces A, B and C should increase in
@@ -1601,6 +1617,7 @@ This page published September 2, 2021.
 Home
 
 ---
+
 ## Page 1112
 
 Shillito portfolio
@@ -1696,6 +1713,7 @@ This page published February 15, 2022.
 Home
 
 ---
+
 ## Page 1113
 
 The Dimensions of Colour Today
@@ -1817,7 +1835,7 @@ I think it’s fair to say that it’s become harder today for people to teach t
 Resources mentioned in the introduction:
 Understanding and Applying Colour
 https://sites.google.com/site/djcbriggs/tmct
-This public programs course of eight weekly 3-hour classes is offered live on Zoom through the National Art School, Sydney,  four times each year  beginning in February, April/May,  July and October.
+This public programs course of eight weekly 3-hour classes is offered live on Zoom through the National Art School, Sydney, four times each year beginning in February, April/May, July and October.
 Colour Society of Australia
 https://coloursociety.org.au/
 Colour Literacy Project
@@ -1884,6 +1902,7 @@ This page published March 31, 2022.
 Home
 
 ---
+
 ## Page 1114
 
 Index of Works
@@ -1910,26 +1929,26 @@ October 1
 , 2023.
 Video recording of presentation:
 https://www.youtube.com/watch?v=ii9dWIG9nOY
-Text of presentation:   Text:
+Text of presentation:  Text:
 http://www.huevaluechroma.com/1118.php
-Briggs, D.J.C., 2023.  The Elements of Colour I: Colour Perceptions, Colour Stimuli, and Colour Measurement.
+Briggs, D.J.C., 2023. The Elements of Colour I: Colour Perceptions, Colour Stimuli, and Colour Measurement.
 Journal of the International Colour Association
 ,
 33
 , 79-96.
 https://aic-color.org/resources/Documents/jaic_v33_06.pdf
-Briggs, D.J.C., 2023. The Elements of Colour II:  The Attributes of Perceived Colour.
+Briggs, D.J.C., 2023. The Elements of Colour II: The Attributes of Perceived Colour.
 Journal of the International Colour Association
 ,
 33
-,  97-118
+, 97-118
 https://aic-color.org/resources/Documents/jaic_v33_07.pdf
 Briggs, D.J.C., 2023.
 The Elements of Colour
 Invited webinar for the Design Institute of Australia, May 18, 2023.
 Video recording of preentation:
 https://www.youtube.com/watch?v=AtrRpGb-7FU
-Text of presentation:   Text:
+Text of presentation:  Text:
 http://www.huevaluechroma.com/1117.php
 Briggs, D.J.C., 2023.
 Controlling Colour: Historical Background
@@ -2056,7 +2075,7 @@ Briggs, D.J.C., 2020 - .
 The Colour Courses
 . Course information and optional further reading links for
 Understanding and Applying Colour
-, my public online course conducted  through the National Art School, Sydney, four times per year beginning in February, April/May, July and October.
+, my public online course conducted through the National Art School, Sydney, four times per year beginning in February, April/May, July and October.
 https://sites.google.com/site/djcbriggs/tmct
 Briggs, D.J.C., 2020.
 Colour Online
@@ -2314,6 +2333,7 @@ The Dimensions of Colour Today
 Home
 
 ---
+
 ## Page 1115
 
 Psychophysical Colour
@@ -2394,8 +2414,7 @@ of lights and objects to cause a perception of red, blue etc., or to cause such 
 [10:55] In defining two senses of the word “colour” the CIE International Lighting Vocabulary in effect expresses a pluralist ontology that acknowledges that we may wish to use the word “colour” either for our perceptions of colour or for the perceivable properties of lights and objects that these perceptions are based on.
 “Psychophysical colour” refers to the colorimetric measures devised to specify the perceiver-dependent property of a light, or of an object viewed in daylight, that determines its
 disposition
-to appear this or that colour. In terms of Hardin’s well-known quote – “Colored objects are illusions, but not unfounded illusions” - “psychophysical colour” specifications identify for practical purposes the properties of lights and objects that our “illusions” of perceived colour are founded on.
-*
+to appear this or that colour. In terms of Hardin’s well-known quote – “Colored objects are illusions, but not unfounded illusions” - “psychophysical colour” specifications identify for practical purposes the properties of lights and objects that our “illusions” of perceived colour are founded on. *
 Colour Constancy Illusions and Painting
 ,
 http://www.huevaluechroma.com/116.php
@@ -2406,6 +2425,7 @@ This page published June 16, 2022.
 Home
 
 ---
+
 ## Page 1116
 
 A Shillito Student Portfolio from the Mid-1940’s
@@ -2482,6 +2502,7 @@ This page published June 16, 2022.
 Home
 
 ---
+
 ## Page 1117
 
 The elements of colour
@@ -2862,6 +2883,7 @@ Colours of Objects and Colours of Light >
 Home
 
 ---
+
 ## Page 1118
 
 Colours of objects and colours of light

@@ -12,12 +12,12 @@ Users spend most of their time on other sites. They expect yours to work the sam
 
 ```tsx
 function Nav() {
-  return (
-    <nav>
-      <button onClick={() => navigate("/")}>⬡</button>
-      <button onClick={() => navigate("/search")}>⬢</button>
-    </nav>
-  );
+	return (
+		<nav>
+			<button onClick={() => navigate('/')}>⬡</button>
+			<button onClick={() => navigate('/search')}>⬢</button>
+		</nav>
+	);
 }
 ```
 
@@ -25,12 +25,12 @@ function Nav() {
 
 ```tsx
 function Nav() {
-  return (
-    <nav>
-      <Link href="/">Home</Link>
-      <Link href="/search">Search</Link>
-    </nav>
-  );
+	return (
+		<nav>
+			<Link href="/">Home</Link>
+			<Link href="/search">Search</Link>
+		</nav>
+	);
 }
 ```
 

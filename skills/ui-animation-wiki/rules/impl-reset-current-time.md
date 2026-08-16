@@ -12,7 +12,7 @@ Reset audio currentTime before replay to allow rapid triggering.
 
 ```tsx
 function playSound() {
-  audio.play();
+	audio.play();
 }
 ```
 
@@ -20,7 +20,7 @@ function playSound() {
 
 ```tsx
 function playSound() {
-  audio.currentTime = 0;
-  audio.play();
+	audio.currentTime = 0;
+	audio.play();
 }
 ```

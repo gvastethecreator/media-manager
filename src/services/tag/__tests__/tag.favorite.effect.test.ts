@@ -8,7 +8,8 @@ import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 import { TagService, TagServiceLive } from '../tag.service.effect';
 
-const runEffect = <A, E>(effect: Effect.Effect<A, E, TagService>) => Effect.runPromise(Effect.either(effect.pipe(Effect.provide(TagServiceLive))));
+const runEffect = <A, E>(effect: Effect.Effect<A, E, TagService>) =>
+	Effect.runPromise(Effect.either(effect.pipe(Effect.provide(TagServiceLive))));
 
 const expectSuccess = async <A, E>(effect: Effect.Effect<A, E, TagService>) => {
 	const either = await runEffect(effect);
@@ -22,7 +23,11 @@ const expectSuccess = async <A, E>(effect: Effect.Effect<A, E, TagService>) => {
 let createdActiveProfileId: string | null = null;
 
 const ensureActiveProfile = async () => {
-	const [activeProfile] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true)).limit(1);
+	const [activeProfile] = await db
+		.select({ id: profiles.id })
+		.from(profiles)
+		.where(eq(profiles.isActive, true))
+		.limit(1);
 
 	if (activeProfile) {
 		return activeProfile.id;

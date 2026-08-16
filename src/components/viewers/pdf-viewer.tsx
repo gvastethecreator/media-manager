@@ -77,9 +77,7 @@ export function PdfViewer({ isOpen, onOpenChange, file }: PdfViewerProps) {
 					)}
 					{error ? (
 						<div className="flex flex-col items-center gap-3 px-4 text-center" role="alert">
-							<p className="text-destructive text-sm">
-								{error} Check that the file is not damaged or protected.
-							</p>
+							<p className="text-destructive text-sm">{error} Check that the file is not damaged or protected.</p>
 							<Button onClick={retryLoad} size="sm" variant="outline">
 								Retry
 							</Button>

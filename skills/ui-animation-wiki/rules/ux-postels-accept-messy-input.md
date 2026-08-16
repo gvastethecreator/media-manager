@@ -12,14 +12,7 @@ Inputs should accept messy human data and normalize it. Validate generously, for
 
 ```tsx
 function DateInput({ onChange }) {
-  return (
-    <input
-      type="text"
-      placeholder="YYYY-MM-DD"
-      pattern="\d{4}-\d{2}-\d{2}"
-      onChange={onChange}
-    />
-  );
+	return <input type="text" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}" onChange={onChange} />;
 }
 ```
 
@@ -27,18 +20,12 @@ function DateInput({ onChange }) {
 
 ```tsx
 function DateInput({ onChange }) {
-  function handleChange(e) {
-    const parsed = parseFlexibleDate(e.target.value);
-    if (parsed) onChange(parsed);
-  }
+	function handleChange(e) {
+		const parsed = parseFlexibleDate(e.target.value);
+		if (parsed) onChange(parsed);
+	}
 
-  return (
-    <input
-      type="text"
-      placeholder="Any date format"
-      onChange={handleChange}
-    />
-  );
+	return <input type="text" placeholder="Any date format" onChange={handleChange} />;
 }
 ```
 

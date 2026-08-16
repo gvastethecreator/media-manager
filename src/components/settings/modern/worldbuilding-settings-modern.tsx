@@ -950,9 +950,7 @@ export function WorldbuildingSettingsModern({ defaultEntity, onEntityChange }: W
 					</div>
 					<h3 className="font-medium text-lg">No {config.label.toLowerCase()} yet</h3>
 					<p className="mt-1 text-muted-foreground text-sm">
-						{searchQuery
-							? 'No results found'
-							: `Start by creating your first ${config.singular.toLowerCase()}`}
+						{searchQuery ? 'No results found' : `Start by creating your first ${config.singular.toLowerCase()}`}
 					</p>
 					<div className="mt-4">
 						{searchQuery ? (

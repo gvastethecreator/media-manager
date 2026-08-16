@@ -12,9 +12,9 @@ Parent must have position: relative for absolute pseudo-elements.
 
 ```css
 .button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+	content: '';
+	position: absolute;
+	inset: 0;
 }
 ```
 
@@ -22,12 +22,12 @@ Parent must have position: relative for absolute pseudo-elements.
 
 ```css
 .button {
-  position: relative;
+	position: relative;
 }
 
 .button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+	content: '';
+	position: absolute;
+	inset: 0;
 }
 ```

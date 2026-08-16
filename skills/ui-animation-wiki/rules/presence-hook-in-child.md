@@ -12,12 +12,8 @@ useIsPresent must be called from child of AnimatePresence, not parent.
 
 ```tsx
 function Parent() {
-  const isPresent = useIsPresent();
-  return (
-    <AnimatePresence>
-      {show && <Child />}
-    </AnimatePresence>
-  );
+	const isPresent = useIsPresent();
+	return <AnimatePresence>{show && <Child />}</AnimatePresence>;
 }
 ```
 
@@ -25,7 +21,7 @@ function Parent() {
 
 ```tsx
 function Child() {
-  const isPresent = useIsPresent();
-  return <motion.div data-exiting={!isPresent} />;
+	const isPresent = useIsPresent();
+	return <motion.div data-exiting={!isPresent} />;
 }
 ```

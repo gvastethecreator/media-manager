@@ -12,11 +12,7 @@ Unused lines must use the collapsed constant, not omission or null.
 
 ```ts
 const minusIcon = {
-  lines: [
-    { x1: 2, y1: 7, x2: 12, y2: 7 },
-    null,
-    null,
-  ],
+	lines: [{ x1: 2, y1: 7, x2: 12, y2: 7 }, null, null],
 };
 ```
 
@@ -24,10 +20,6 @@ const minusIcon = {
 
 ```ts
 const minusIcon = {
-  lines: [
-    { x1: 2, y1: 7, x2: 12, y2: 7 },
-    collapsed,
-    collapsed,
-  ],
+	lines: [{ x1: 2, y1: 7, x2: 12, y2: 7 }, collapsed, collapsed],
 };
 ```

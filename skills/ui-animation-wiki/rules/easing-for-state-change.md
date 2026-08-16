@@ -11,17 +11,11 @@ System-initiated state changes should use easing curves.
 **Incorrect (spring for announcement):**
 
 ```tsx
-<motion.div
-  animate={{ y: 0 }}
-  transition={{ type: "spring" }}
-/>
+<motion.div animate={{ y: 0 }} transition={{ type: 'spring' }} />
 ```
 
 **Correct (easing for announcement):**
 
 ```tsx
-<motion.div
-  animate={{ y: 0 }}
-  transition={{ duration: 0.2, ease: "easeOut" }}
-/>
+<motion.div animate={{ y: 0 }} transition={{ duration: 0.2, ease: 'easeOut' }} />
 ```

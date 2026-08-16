@@ -12,13 +12,13 @@ Elements that function the same should look the same. Visual consistency signals
 
 ```css
 .save-button {
-  background: blue;
-  border-radius: 8px;
+	background: blue;
+	border-radius: 8px;
 }
 
 .submit-button {
-  background: green;
-  border-radius: 0;
+	background: green;
+	border-radius: 0;
 }
 ```
 
@@ -26,9 +26,9 @@ Elements that function the same should look the same. Visual consistency signals
 
 ```css
 .primary-action {
-  background: var(--gray-12);
-  color: var(--gray-1);
-  border-radius: 8px;
+	background: var(--gray-12);
+	color: var(--gray-1);
+	border-radius: 8px;
 }
 ```
 

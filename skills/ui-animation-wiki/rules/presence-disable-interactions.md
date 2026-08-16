@@ -12,8 +12,8 @@ Disable interactions on exiting elements using isPresent.
 
 ```tsx
 function Card() {
-  const isPresent = useIsPresent();
-  return <button onClick={handleClick}>Click</button>;
+	const isPresent = useIsPresent();
+	return <button onClick={handleClick}>Click</button>;
 }
 ```
 
@@ -21,11 +21,11 @@ function Card() {
 
 ```tsx
 function Card() {
-  const isPresent = useIsPresent();
-  return (
-    <button onClick={handleClick} disabled={!isPresent}>
-      Click
-    </button>
-  );
+	const isPresent = useIsPresent();
+	return (
+		<button onClick={handleClick} disabled={!isPresent}>
+			Click
+		</button>
+	);
 }
 ```

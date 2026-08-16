@@ -1,6 +1,6 @@
 ---
 title: TypeScript Configuration
-description: "Recommended TypeScript compiler settings tuned for Effect"
+description: 'Recommended TypeScript compiler settings tuned for Effect'
 order: 2
 group: Setup
 ---
@@ -98,11 +98,11 @@ The key difference between project types is the `module` and `moduleResolution` 
 
 ```jsonc
 {
-  "compilerOptions": {
-    "module": "preserve",
-    "moduleResolution": "bundler",
-    "noEmit": true
-  }
+	"compilerOptions": {
+		"module": "preserve",
+		"moduleResolution": "bundler",
+		"noEmit": true,
+	},
 }
 ```
 
@@ -116,30 +116,33 @@ Use `"module": "preserve"` with `"moduleResolution": "bundler"` when a build too
 
 ```jsonc
 {
-  "compilerOptions": {
-    "module": "NodeNext"
-  }
+	"compilerOptions": {
+		"module": "NodeNext",
+	},
 }
 ```
 
 Use `"module": "NodeNext"` when TypeScript is your compiler. Required for:
+
 - npm packages (libraries)
 - Node.js apps (including those using Bun or other runtimes)
 - CLI tools
 
 This enforces Node.js module resolution rules:
+
 - Requires `.js` file extensions in relative imports
 - Respects package.json `"type"` and `"exports"` fields
 - Works with both ESM and CommonJS
 
 **Additional library settings:**
+
 ```jsonc
 {
-  "compilerOptions": {
-    "declaration": true,
-    "composite": true,      // monorepos only
-    "declarationMap": true  // monorepos only
-  }
+	"compilerOptions": {
+		"declaration": true,
+		"composite": true, // monorepos only
+		"declarationMap": true, // monorepos only
+	},
 }
 ```
 

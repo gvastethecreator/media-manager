@@ -12,13 +12,13 @@ Decision time increases logarithmically with the number of choices. Use progress
 
 ```tsx
 function Settings() {
-  return (
-    <div>
-      {allSettings.map(setting => (
-        <SettingRow key={setting.id} {...setting} />
-      ))}
-    </div>
-  );
+	return (
+		<div>
+			{allSettings.map((setting) => (
+				<SettingRow key={setting.id} {...setting} />
+			))}
+		</div>
+	);
 }
 ```
 
@@ -26,19 +26,19 @@ function Settings() {
 
 ```tsx
 function Settings() {
-  return (
-    <div>
-      {commonSettings.map(setting => (
-        <SettingRow key={setting.id} {...setting} />
-      ))}
-      <details>
-        <summary>Advanced</summary>
-        {advancedSettings.map(setting => (
-          <SettingRow key={setting.id} {...setting} />
-        ))}
-      </details>
-    </div>
-  );
+	return (
+		<div>
+			{commonSettings.map((setting) => (
+				<SettingRow key={setting.id} {...setting} />
+			))}
+			<details>
+				<summary>Advanced</summary>
+				{advancedSettings.map((setting) => (
+					<SettingRow key={setting.id} {...setting} />
+				))}
+			</details>
+		</div>
+	);
 }
 ```
 

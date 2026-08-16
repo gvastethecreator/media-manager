@@ -12,7 +12,7 @@ Provide explicit toggle to disable sounds in settings.
 
 ```tsx
 function App() {
-  return <SoundProvider>{children}</SoundProvider>;
+	return <SoundProvider>{children}</SoundProvider>;
 }
 ```
 
@@ -20,11 +20,7 @@ function App() {
 
 ```tsx
 function App() {
-  const { soundEnabled } = usePreferences();
-  return (
-    <SoundProvider enabled={soundEnabled}>
-      {children}
-    </SoundProvider>
-  );
+	const { soundEnabled } = usePreferences();
+	return <SoundProvider enabled={soundEnabled}>{children}</SoundProvider>;
 }
 ```

@@ -12,8 +12,8 @@ Use ::first-line for drop-cap-adjacent styling without JavaScript or hardcoded s
 
 ```tsx
 <p>
-  <span className={styles["first-line"]}>The opening line of this paragraph</span>
-  is styled differently from the rest.
+	<span className={styles['first-line']}>The opening line of this paragraph</span>
+	is styled differently from the rest.
 </p>
 ```
 
@@ -21,7 +21,7 @@ Use ::first-line for drop-cap-adjacent styling without JavaScript or hardcoded s
 
 ```css
 .article p:first-of-type::first-line {
-  font-variant-caps: small-caps;
-  font-weight: var(--font-weight-medium);
+	font-variant-caps: small-caps;
+	font-weight: var(--font-weight-medium);
 }
 ```

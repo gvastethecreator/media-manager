@@ -13,13 +13,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { toastService } from '@/lib/ui/toast';
 import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
-import {
-	SettingsCard,
-	BentoGrid,
-	SettingsGroup,
-	SettingsPageHeader,
-	SettingsRow,
-} from '../modern/settings-card';
+import { SettingsCard, BentoGrid, SettingsGroup, SettingsPageHeader, SettingsRow } from '../modern/settings-card';
 
 interface PanelConfig {
 	breadcrumbs: {
@@ -94,14 +88,14 @@ export function PanelsSettings() {
 	const handleSave = () => {
 		setPreferences({ panels: panelConfig } as any);
 		setHasChanges(false);
-	toastService.success('Panel settings saved');
+		toastService.success('Panel settings saved');
 	};
 
 	const handleReset = () => {
 		setPanelConfig(defaultPanelConfig);
 		setPreferences({ panels: defaultPanelConfig } as any);
 		setHasChanges(false);
-	toastService.info('Panel settings restored');
+		toastService.info('Panel settings restored');
 	};
 
 	return (
@@ -247,12 +241,7 @@ export function PanelsSettings() {
 				</SettingsCard>
 
 				{/* Barra de Herramientas */}
-				<SettingsCard
-					color="var(--primary)"
-					description="Configure the main toolbar"
-					icon={<Layout />}
-					title="Toolbar"
-				>
+				<SettingsCard color="var(--primary)" description="Configure the main toolbar" icon={<Layout />} title="Toolbar">
 					<SettingsRow description="Show the main toolbar" label="Show toolbar">
 						<Switch
 							checked={panelConfig.toolbar.visible}

@@ -12,7 +12,7 @@ Pure black shadows look harsh and artificial. Use deep neutrals or semi-transpar
 
 ```css
 .card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 ```
 
@@ -20,6 +20,6 @@ Pure black shadows look harsh and artificial. Use deep neutrals or semi-transpar
 
 ```css
 .card {
-  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
+	box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
 }
 ```

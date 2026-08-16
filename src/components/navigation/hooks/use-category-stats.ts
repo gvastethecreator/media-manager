@@ -95,29 +95,27 @@ export function useCategoryStats() {
 				return [];
 			}
 
-			return items.map(
-				(item): CategoryChild => ({
-					id: item.id || '',
-					name: item.name || item.title || '',
-					title: item.title,
-					emoji: item.emoji,
-					color: item.color,
-					path: item.path,
-					description: item.description,
-					itemCount: item.itemCount || item.imageCount || (item._count?.images ?? 0) + (item._count?.videos ?? 0),
-					totalFiles: item.totalFiles || 0,
-					totalSize: item.totalSize || 0,
-					parentId: item.parentId || null,
-					_count: item._count
-						? {
-								images: item._count.images || 0,
-								folders: item._count.folders,
-								collections: item._count.collections,
-								tags: item._count.tags,
-							}
-						: undefined,
-				})
-			);
+			return items.map((item): CategoryChild => ({
+				id: item.id || '',
+				name: item.name || item.title || '',
+				title: item.title,
+				emoji: item.emoji,
+				color: item.color,
+				path: item.path,
+				description: item.description,
+				itemCount: item.itemCount || item.imageCount || (item._count?.images ?? 0) + (item._count?.videos ?? 0),
+				totalFiles: item.totalFiles || 0,
+				totalSize: item.totalSize || 0,
+				parentId: item.parentId || null,
+				_count: item._count
+					? {
+							images: item._count.images || 0,
+							folders: item._count.folders,
+							collections: item._count.collections,
+							tags: item._count.tags,
+						}
+					: undefined,
+			}));
 		},
 		[categoryDataMap]
 	);

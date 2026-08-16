@@ -12,7 +12,7 @@ Sound duration should match action duration.
 
 ```tsx
 function handleClick() {
-  playSound("long-whoosh"); // 2000ms
+	playSound('long-whoosh'); // 2000ms
 }
 ```
 
@@ -20,10 +20,10 @@ function handleClick() {
 
 ```tsx
 function handleClick() {
-  playSound("click"); // 50ms
+	playSound('click'); // 50ms
 }
 
 function handleUpload() {
-  playSound("upload-progress"); // Matches upload duration
+	playSound('upload-progress'); // Matches upload duration
 }
 ```

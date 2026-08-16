@@ -1,6 +1,6 @@
 ---
 title: Service `use` pattern
-description: "Wrapping third-party libraries in Effect services"
+description: 'Wrapping third-party libraries in Effect services'
 order: 14
 draft: true
 ---
@@ -24,33 +24,31 @@ For libraries with only a few methods, consider wrapping each method individuall
 ## The pattern
 
 ```typescript
-import { Effect, Layer, Schema, ServiceMap } from "effect"
-import * as fs_ from "node:fs/promises"
+import { Effect, Layer, Schema, ServiceMap } from 'effect';
+import * as fs_ from 'node:fs/promises';
 
-class FileSystemError extends Schema.TaggedErrorClass("FileSystemError")(
-  "FileSystemError",
-  { cause: Schema.optional(Schema.Unknown) }
-) {}
+class FileSystemError extends Schema.TaggedErrorClass('FileSystemError')('FileSystemError', {
+	cause: Schema.optional(Schema.Unknown),
+}) {}
 
-class FileSystem extends ServiceMap.Service<FileSystem, {
-  readonly use: <A>(
-    fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>
-  ) => Effect.Effect<A, FileSystemError>
-}>()("FileSystem") {
-  static readonly Default = Layer.effect(
-    FileSystem,
-    Effect.gen(function* () {
-      const use = <A>(
-        fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>
-      ): Effect.Effect<A, FileSystemError> =>
-        Effect.tryPromise({
-          try: (signal) => fn(fs_, signal),
-          catch: (cause) => new FileSystemError({ cause }),
-        })
+class FileSystem extends ServiceMap.Service<
+	FileSystem,
+	{
+		readonly use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => Effect.Effect<A, FileSystemError>;
+	}
+>()('FileSystem') {
+	static readonly Default = Layer.effect(
+		FileSystem,
+		Effect.gen(function* () {
+			const use = <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>): Effect.Effect<A, FileSystemError> =>
+				Effect.tryPromise({
+					try: (signal) => fn(fs_, signal),
+					catch: (cause) => new FileSystemError({ cause }),
+				});
 
-      return { use } as const
-    }),
-  )
+			return { use } as const;
+		})
+	);
 }
 ```
 
@@ -63,49 +61,48 @@ The service exposes a single `use` method that:
 ## Usage
 
 ```typescript
-import { Effect, pipe } from "effect"
+import { Effect, pipe } from 'effect';
 // hide-start
-import { Layer, Schema, ServiceMap } from "effect"
-import * as fs_ from "node:fs/promises"
-class FileSystemError extends Schema.TaggedErrorClass("FileSystemError")(
-  "FileSystemError",
-  { cause: Schema.optional(Schema.Unknown) }
-) {}
-class FileSystem extends ServiceMap.Service<FileSystem, {
-  readonly use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => Effect.Effect<A, FileSystemError>
-}>()("FileSystem") {
-  static readonly Default = Layer.effect(FileSystem, Effect.succeed({
-    use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) =>
-      Effect.tryPromise({
-        try: (signal) => fn(fs_, signal),
-        catch: (cause) => new FileSystemError({ cause }),
-      }),
-  }))
+import { Layer, Schema, ServiceMap } from 'effect';
+import * as fs_ from 'node:fs/promises';
+class FileSystemError extends Schema.TaggedErrorClass('FileSystemError')('FileSystemError', {
+	cause: Schema.optional(Schema.Unknown),
+}) {}
+class FileSystem extends ServiceMap.Service<
+	FileSystem,
+	{
+		readonly use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => Effect.Effect<A, FileSystemError>;
+	}
+>()('FileSystem') {
+	static readonly Default = Layer.effect(
+		FileSystem,
+		Effect.succeed({
+			use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) =>
+				Effect.tryPromise({
+					try: (signal) => fn(fs_, signal),
+					catch: (cause) => new FileSystemError({ cause }),
+				}),
+		})
+	);
 }
 // hide-end
 
 const program = Effect.gen(function* () {
-  const fileSystem = yield* FileSystem
+	const fileSystem = yield* FileSystem;
 
-  // Read a file
-  const content = yield* fileSystem.use((fs, signal) =>
-    fs.readFile("config.json", { encoding: "utf-8", signal })
-  )
+	// Read a file
+	const content = yield* fileSystem.use((fs, signal) => fs.readFile('config.json', { encoding: 'utf-8', signal }));
 
-  // Write a file
-  yield* fileSystem.use((fs, signal) =>
-    fs.writeFile("output.txt", content, { signal })
-  )
+	// Write a file
+	yield* fileSystem.use((fs, signal) => fs.writeFile('output.txt', content, { signal }));
 
-  // List directory contents
-  const files = yield* fileSystem.use((fs) =>
-    fs.readdir("./src")
-  )
+	// List directory contents
+	const files = yield* fileSystem.use((fs) => fs.readdir('./src'));
 
-  return files
-})
+	return files;
+});
 
-const main = pipe(program, Effect.provide(FileSystem.Default))
+const main = pipe(program, Effect.provide(FileSystem.Default));
 ```
 
 The callback receives two parameters:
@@ -120,44 +117,41 @@ When the Effect is interrupted, the signal is aborted, allowing operations that 
 For frequently used operations, add typed methods alongside `use`:
 
 ```typescript
-import { Effect, Layer, Schema, ServiceMap } from "effect"
-import * as fs_ from "node:fs/promises"
+import { Effect, Layer, Schema, ServiceMap } from 'effect';
+import * as fs_ from 'node:fs/promises';
 
-class FileSystemError extends Schema.TaggedErrorClass("FileSystemError")(
-  "FileSystemError",
-  { cause: Schema.optional(Schema.Unknown) }
-) {}
+class FileSystemError extends Schema.TaggedErrorClass('FileSystemError')('FileSystemError', {
+	cause: Schema.optional(Schema.Unknown),
+}) {}
 
-class FileSystem extends ServiceMap.Service<FileSystem, {
-  readonly use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => Effect.Effect<A, FileSystemError>
-  readonly readFile: (path: string) => Effect.Effect<string, FileSystemError>
-  readonly writeFile: (path: string, content: string) => Effect.Effect<void, FileSystemError>
-  readonly readdir: (path: string) => Effect.Effect<string[], FileSystemError>
-}>()("FileSystem") {
-  static readonly Default = Layer.effect(
-    FileSystem,
-    Effect.gen(function* () {
-      const use = <A>(
-        fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>
-      ): Effect.Effect<A, FileSystemError> =>
-        Effect.tryPromise({
-          try: (signal) => fn(fs_, signal),
-          catch: (cause) => new FileSystemError({ cause }),
-        })
+class FileSystem extends ServiceMap.Service<
+	FileSystem,
+	{
+		readonly use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => Effect.Effect<A, FileSystemError>;
+		readonly readFile: (path: string) => Effect.Effect<string, FileSystemError>;
+		readonly writeFile: (path: string, content: string) => Effect.Effect<void, FileSystemError>;
+		readonly readdir: (path: string) => Effect.Effect<string[], FileSystemError>;
+	}
+>()('FileSystem') {
+	static readonly Default = Layer.effect(
+		FileSystem,
+		Effect.gen(function* () {
+			const use = <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>): Effect.Effect<A, FileSystemError> =>
+				Effect.tryPromise({
+					try: (signal) => fn(fs_, signal),
+					catch: (cause) => new FileSystemError({ cause }),
+				});
 
-      // Convenience methods for common operations
-      const readFile = (path: string) =>
-        use((fs, signal) => fs.readFile(path, { encoding: "utf-8", signal }))
+			// Convenience methods for common operations
+			const readFile = (path: string) => use((fs, signal) => fs.readFile(path, { encoding: 'utf-8', signal }));
 
-      const writeFile = (path: string, content: string) =>
-        use((fs, signal) => fs.writeFile(path, content, { signal }))
+			const writeFile = (path: string, content: string) => use((fs, signal) => fs.writeFile(path, content, { signal }));
 
-      const readdir = (path: string) =>
-        use((fs) => fs.readdir(path))
+			const readdir = (path: string) => use((fs) => fs.readdir(path));
 
-      return { use, readFile, writeFile, readdir } as const
-    }),
-  )
+			return { use, readFile, writeFile, readdir } as const;
+		})
+	);
 }
 ```
 
@@ -177,33 +171,33 @@ You could expose the underlying client directly, but the callback approach provi
 If you prefer direct access, you can expose both:
 
 ```typescript
-import { Effect, Layer, Schema, ServiceMap } from "effect"
-import * as fs_ from "node:fs/promises"
+import { Effect, Layer, Schema, ServiceMap } from 'effect';
+import * as fs_ from 'node:fs/promises';
 
-class FileSystemError extends Schema.TaggedErrorClass("FileSystemError")(
-  "FileSystemError",
-  { cause: Schema.optional(Schema.Unknown) }
-) {}
+class FileSystemError extends Schema.TaggedErrorClass('FileSystemError')('FileSystemError', {
+	cause: Schema.optional(Schema.Unknown),
+}) {}
 
-class FileSystem extends ServiceMap.Service<FileSystem, {
-  readonly client: typeof fs_
-  readonly use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => Effect.Effect<A, FileSystemError>
-}>()("FileSystem") {
-  static readonly Default = Layer.effect(
-    FileSystem,
-    Effect.gen(function* () {
-      const use = <A>(
-        fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>
-      ): Effect.Effect<A, FileSystemError> =>
-        Effect.tryPromise({
-          try: (signal) => fn(fs_, signal),
-          catch: (cause) => new FileSystemError({ cause }),
-        })
+class FileSystem extends ServiceMap.Service<
+	FileSystem,
+	{
+		readonly client: typeof fs_;
+		readonly use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => Effect.Effect<A, FileSystemError>;
+	}
+>()('FileSystem') {
+	static readonly Default = Layer.effect(
+		FileSystem,
+		Effect.gen(function* () {
+			const use = <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>): Effect.Effect<A, FileSystemError> =>
+				Effect.tryPromise({
+					try: (signal) => fn(fs_, signal),
+					catch: (cause) => new FileSystemError({ cause }),
+				});
 
-      // Expose both for flexibility
-      return { client: fs_, use } as const
-    }),
-  )
+			// Expose both for flexibility
+			return { client: fs_, use } as const;
+		})
+	);
 }
 ```
 
@@ -214,57 +208,57 @@ The trade-off is direct client access loses automatic error wrapping and interru
 Create a test layer that uses in-memory storage:
 
 ```typescript
-import { Effect, Layer, Schema, ServiceMap } from "effect"
-import * as fs_ from "node:fs/promises"
+import { Effect, Layer, Schema, ServiceMap } from 'effect';
+import * as fs_ from 'node:fs/promises';
 
-class FileSystemError extends Schema.TaggedErrorClass("FileSystemError")(
-  "FileSystemError",
-  { cause: Schema.optional(Schema.Unknown) }
-) {}
+class FileSystemError extends Schema.TaggedErrorClass('FileSystemError')('FileSystemError', {
+	cause: Schema.optional(Schema.Unknown),
+}) {}
 
-class FileSystem extends ServiceMap.Service<FileSystem, {
-  readonly use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => Effect.Effect<A, FileSystemError>
-}>()("FileSystem") {
-  static readonly Default = Layer.effect(
-    FileSystem,
-    Effect.gen(function* () {
-      const use = <A>(
-        fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>
-      ): Effect.Effect<A, FileSystemError> =>
-        Effect.tryPromise({
-          try: (signal) => fn(fs_, signal),
-          catch: (cause) => new FileSystemError({ cause }),
-        })
+class FileSystem extends ServiceMap.Service<
+	FileSystem,
+	{
+		readonly use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => Effect.Effect<A, FileSystemError>;
+	}
+>()('FileSystem') {
+	static readonly Default = Layer.effect(
+		FileSystem,
+		Effect.gen(function* () {
+			const use = <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>): Effect.Effect<A, FileSystemError> =>
+				Effect.tryPromise({
+					try: (signal) => fn(fs_, signal),
+					catch: (cause) => new FileSystemError({ cause }),
+				});
 
-      return { use } as const
-    }),
-  )
+			return { use } as const;
+		})
+	);
 
-  static readonly Test = Layer.succeed(FileSystem, {
-    use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => {
-      const files = new Map<string, string>([
-        ["config.json", '{"port": 3000}'],
-        ["data.txt", "hello world"],
-      ])
+	static readonly Test = Layer.succeed(FileSystem, {
+		use: <A>(fn: (fs: typeof fs_, signal: AbortSignal) => Promise<A>) => {
+			const files = new Map<string, string>([
+				['config.json', '{"port": 3000}'],
+				['data.txt', 'hello world'],
+			]);
 
-      const mockFs = {
-        readFile: async (path: string) => {
-          const content = files.get(path)
-          if (!content) throw new Error(`ENOENT: ${path}`)
-          return content
-        },
-        writeFile: async (path: string, content: string) => {
-          files.set(path, content)
-        },
-        readdir: async () => Array.from(files.keys()),
-      }
+			const mockFs = {
+				readFile: async (path: string) => {
+					const content = files.get(path);
+					if (!content) throw new Error(`ENOENT: ${path}`);
+					return content;
+				},
+				writeFile: async (path: string, content: string) => {
+					files.set(path, content);
+				},
+				readdir: async () => Array.from(files.keys()),
+			};
 
-      return Effect.tryPromise({
-        try: (signal) => fn(mockFs as typeof fs_, signal),
-        catch: (cause) => new FileSystemError({ cause }),
-      })
-    },
-  })
+			return Effect.tryPromise({
+				try: (signal) => fn(mockFs as typeof fs_, signal),
+				catch: (cause) => new FileSystemError({ cause }),
+			});
+		},
+	});
 }
 ```
 

@@ -11,18 +11,13 @@ Every system has irreducible complexity. The question is who handles it — the 
 **Incorrect (complexity pushed to user):**
 
 ```tsx
-<input
-  type="text"
-  placeholder="Enter date as YYYY-MM-DDTHH:mm:ss.sssZ"
-/>
+<input type="text" placeholder="Enter date as YYYY-MM-DDTHH:mm:ss.sssZ" />
 ```
 
 **Correct (system absorbs complexity):**
 
 ```tsx
-<DatePicker
-  onChange={(date) => setDate(date.toISOString())}
-/>
+<DatePicker onChange={(date) => setDate(date.toISOString())} />
 ```
 
 Reference: [Tesler's Law](https://lawsofux.com/teslers-law/)

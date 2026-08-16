@@ -18,7 +18,7 @@ source.connect(gain).connect(ctx.destination);
 
 ```ts
 const filter = ctx.createBiquadFilter();
-filter.type = "bandpass";
+filter.type = 'bandpass';
 filter.frequency.value = 4000;
 filter.Q.value = 3;
 source.connect(filter).connect(gain).connect(ctx.destination);

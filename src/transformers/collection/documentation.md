@@ -210,9 +210,7 @@ Para validar el funcionamiento:
 import { fromDrizzleCollection, validateCollectionWithStats } from '@/transformers/collection';
 
 // Datos de prueba
-const mockCollection: CollectionBase = {
-	/* ... */
-};
+const mockCollection: CollectionBase = {/* ... */};
 const mockCounts = { images: 5, videos: 2 /* ... */ };
 
 // Probar transformación

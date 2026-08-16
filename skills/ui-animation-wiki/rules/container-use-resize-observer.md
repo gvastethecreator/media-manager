@@ -12,14 +12,14 @@ Use ResizeObserver to track element dimensions. It fires on resize without causi
 
 ```tsx
 function useMeasure(ref) {
-  const [bounds, setBounds] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setBounds({ width: rect.width, height: rect.height });
-    }
-  });
-  return bounds;
+	const [bounds, setBounds] = useState({ width: 0, height: 0 });
+	useEffect(() => {
+		if (ref.current) {
+			const rect = ref.current.getBoundingClientRect();
+			setBounds({ width: rect.width, height: rect.height });
+		}
+	});
+	return bounds;
 }
 ```
 
@@ -27,22 +27,22 @@ function useMeasure(ref) {
 
 ```tsx
 function useMeasure() {
-  const [element, setElement] = useState(null);
-  const [bounds, setBounds] = useState({ width: 0, height: 0 });
-  const ref = useCallback((node) => setElement(node), []);
+	const [element, setElement] = useState(null);
+	const [bounds, setBounds] = useState({ width: 0, height: 0 });
+	const ref = useCallback((node) => setElement(node), []);
 
-  useEffect(() => {
-    if (!element) return;
-    const observer = new ResizeObserver(([entry]) => {
-      setBounds({
-        width: entry.contentRect.width,
-        height: entry.contentRect.height,
-      });
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [element]);
+	useEffect(() => {
+		if (!element) return;
+		const observer = new ResizeObserver(([entry]) => {
+			setBounds({
+				width: entry.contentRect.width,
+				height: entry.contentRect.height,
+			});
+		});
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [element]);
 
-  return [ref, bounds];
+	return [ref, bounds];
 }
 ```

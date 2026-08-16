@@ -11,11 +11,15 @@ Use oldstyle-nums in body text so numbers blend with lowercase letters. Use lini
 **Correct (prose):**
 
 ```css
-.body-text { font-variant-numeric: oldstyle-nums; }
+.body-text {
+	font-variant-numeric: oldstyle-nums;
+}
 ```
 
 **Correct (data):**
 
 ```css
-.data-table { font-variant-numeric: lining-nums tabular-nums; }
+.data-table {
+	font-variant-numeric: lining-nums tabular-nums;
+}
 ```

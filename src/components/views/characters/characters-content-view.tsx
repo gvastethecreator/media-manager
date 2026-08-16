@@ -132,11 +132,7 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 					</motion.div>
 				) : (
 					<EmptyState
-						description={
-							localSearch
-								? `No characters match "${localSearch}"`
-								: 'No characters are available'
-						}
+						description={localSearch ? `No characters match "${localSearch}"` : 'No characters are available'}
 						icon={Users}
 						title="No characters yet"
 					/>

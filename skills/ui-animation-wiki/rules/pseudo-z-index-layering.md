@@ -12,10 +12,10 @@ Pseudo-elements need z-index to layer correctly with content.
 
 ```css
 .button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--gray-3);
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: var(--gray-3);
 }
 ```
 
@@ -23,15 +23,15 @@ Pseudo-elements need z-index to layer correctly with content.
 
 ```css
 .button {
-  position: relative;
-  z-index: 1;
+	position: relative;
+	z-index: 1;
 }
 
 .button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--gray-3);
-  z-index: -1;
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: var(--gray-3);
+	z-index: -1;
 }
 ```

@@ -275,12 +275,7 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 
 	// Calcular popularidad basada en relaciones
 	const totalRelations =
-		(counts.images) +
-		(counts.videos) +
-		(counts.characters) +
-		(counts.places) +
-		(counts.notes) +
-		(counts.concepts);
+		counts.images + counts.videos + counts.characters + counts.places + counts.notes + counts.concepts;
 
 	const popularityScore = Math.min(
 		100,
@@ -341,7 +336,7 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		hasEffects: effects.length > 0,
 		hasRequirements: requirements.length > 0,
 		hasStats: statsData.length > 0,
-		mediaRichness: (counts.images) + (counts.videos),
+		mediaRichness: counts.images + counts.videos,
 		// Análisis temporal
 		createdThisMonth: daysSinceCreation <= 30,
 		updatedThisWeek: daysSinceLastUpdate <= 7,

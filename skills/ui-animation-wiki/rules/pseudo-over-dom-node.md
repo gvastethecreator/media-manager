@@ -12,21 +12,20 @@ Use pseudo-elements for decorative content instead of extra DOM nodes.
 
 ```tsx
 <button className={styles.button}>
-  <span className={styles.background} />
-  Click me
+	<span className={styles.background} />
+	Click me
 </button>
 ```
 
 **Correct (pseudo-element):**
 
 ```tsx
-<button className={styles.button}>
-  Click me
-</button>
+<button className={styles.button}>Click me</button>
 ```
+
 ```css
 .button::before {
-  content: "";
-  /* decorative background */
+	content: '';
+	/* decorative background */
 }
 ```

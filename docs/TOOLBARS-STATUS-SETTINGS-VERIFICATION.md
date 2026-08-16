@@ -26,16 +26,17 @@
 **Estado:** ✅ **COMPLETAMENTE FUNCIONAL**
 
 **Funcionalidades verificadas:**
-| Feature | Estado | Persistencia |
-|---------|--------|--------------|
-| View Selector (Grid/List/Masonry/Table/Cards) | ✅ Funcional | ✅ localStorage |
-| Item Size Slider | ✅ Funcional | ✅ localStorage |
-| Sort Dropdown | ✅ Funcional | ✅ localStorage |
-| Search | ✅ Funcional | ✅ localStorage |
-| Select All / Clear Selection | ✅ Funcional | ✅ localStorage |
-| Refresh | ✅ Funcional | ✅ localStorage |
-| Debounce | ✅ Implementado | - |
-| E2E Compatible | ✅ data-testids | - |
+
+| Feature                                       | Estado          | Persistencia    |
+| --------------------------------------------- | --------------- | --------------- |
+| View Selector (Grid/List/Masonry/Table/Cards) | ✅ Funcional    | ✅ localStorage |
+| Item Size Slider                              | ✅ Funcional    | ✅ localStorage |
+| Sort Dropdown                                 | ✅ Funcional    | ✅ localStorage |
+| Search                                        | ✅ Funcional    | ✅ localStorage |
+| Select All / Clear Selection                  | ✅ Funcional    | ✅ localStorage |
+| Refresh                                       | ✅ Funcional    | ✅ localStorage |
+| Debounce                                      | ✅ Implementado | -               |
+| E2E Compatible                                | ✅ data-testids | -               |
 
 **Todas las preferencias se guardan automáticamente en `view-options-storage`.**
 

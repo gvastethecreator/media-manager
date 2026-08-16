@@ -12,7 +12,7 @@ Use negative inset values to expand hit targets without extra markup.
 
 ```tsx
 <div className={styles.wrapper}>
-  <a className={styles.link}>Link</a>
+	<a className={styles.link}>Link</a>
 </div>
 ```
 
@@ -20,12 +20,12 @@ Use negative inset values to expand hit targets without extra markup.
 
 ```css
 .link {
-  position: relative;
+	position: relative;
 }
 
 .link::before {
-  content: "";
-  position: absolute;
-  inset: -8px -12px;
+	content: '';
+	position: absolute;
+	inset: -8px -12px;
 }
 ```

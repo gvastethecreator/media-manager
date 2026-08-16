@@ -15,7 +15,7 @@ Elements near each other are perceived as related. Use spacing to create visual 
 .form input,
 .form .hint,
 .form .divider {
-  margin-bottom: 16px;
+	margin-bottom: 16px;
 }
 ```
 
@@ -23,15 +23,15 @@ Elements near each other are perceived as related. Use spacing to create visual 
 
 ```css
 .form label {
-  margin-bottom: 4px;
+	margin-bottom: 4px;
 }
 
 .form input {
-  margin-bottom: 2px;
+	margin-bottom: 2px;
 }
 
 .form .hint {
-  margin-bottom: 24px;
+	margin-bottom: 24px;
 }
 ```
 

@@ -12,9 +12,9 @@ If you can't make something fast, make it feel fast with optimistic UI, skeleton
 
 ```tsx
 function Page() {
-  const { data, isLoading } = useFetch("/api/data");
-  if (isLoading) return null;
-  return <Content data={data} />;
+	const { data, isLoading } = useFetch('/api/data');
+	if (isLoading) return null;
+	return <Content data={data} />;
 }
 ```
 
@@ -22,8 +22,8 @@ function Page() {
 
 ```tsx
 function Page() {
-  const { data, isLoading } = useFetch("/api/data");
-  if (isLoading) return <Skeleton />;
-  return <Content data={data} />;
+	const { data, isLoading } = useFetch('/api/data');
+	if (isLoading) return <Skeleton />;
+	return <Content data={data} />;
 }
 ```

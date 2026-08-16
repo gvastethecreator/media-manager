@@ -140,48 +140,48 @@ Image Manager responde a esto con un modelo híbrido:
 
 ### Ingesta e indexación
 
-| ID | Requerimiento |
-| --- | --- |
-| RF-01 | Registrar carpetas raíz y subcarpetas en el índice local |
-| RF-02 | Detectar tipos de archivo soportados y mapearlos a entidades |
-| RF-03 | Permitir reindexado total y por carpeta |
-| RF-04 | Permitir reindexado incremental cuando el flujo lo soporte |
+| ID    | Requerimiento                                                            |
+| ----- | ------------------------------------------------------------------------ |
+| RF-01 | Registrar carpetas raíz y subcarpetas en el índice local                 |
+| RF-02 | Detectar tipos de archivo soportados y mapearlos a entidades             |
+| RF-03 | Permitir reindexado total y por carpeta                                  |
+| RF-04 | Permitir reindexado incremental cuando el flujo lo soporte               |
 | RF-05 | Mantener previews y metadatos alineados con el estado físico del archivo |
 
 ### Exploración y visualización
 
-| ID | Requerimiento |
-| --- | --- |
+| ID    | Requerimiento                                              |
+| ----- | ---------------------------------------------------------- |
 | RF-06 | Proveer múltiples vistas para navegar entidades y archivos |
-| RF-07 | Mostrar paneles laterales y detalles contextuales |
-| RF-08 | Incluir visores especializados por tipo de contenido |
-| RF-09 | Permitir obtener thumbnail u original cuando aplique |
+| RF-07 | Mostrar paneles laterales y detalles contextuales          |
+| RF-08 | Incluir visores especializados por tipo de contenido       |
+| RF-09 | Permitir obtener thumbnail u original cuando aplique       |
 
 ### Organización semántica
 
-| ID | Requerimiento |
-| --- | --- |
+| ID    | Requerimiento                                                |
+| ----- | ------------------------------------------------------------ |
 | RF-10 | Crear, editar y eliminar tags, álbumes, colecciones y grupos |
-| RF-11 | Relacionar media con entidades de worldbuilding |
-| RF-12 | Marcar favoritos y administrar perfiles/configuraciones |
-| RF-13 | Guardar notas, prompts, wildcards, tasks y propiedades |
+| RF-11 | Relacionar media con entidades de worldbuilding              |
+| RF-12 | Marcar favoritos y administrar perfiles/configuraciones      |
+| RF-13 | Guardar notas, prompts, wildcards, tasks y propiedades       |
 
 ### Búsqueda y consulta
 
-| ID | Requerimiento |
-| --- | --- |
-| RF-14 | Ejecutar búsqueda global por texto |
-| RF-15 | Ofrecer búsqueda FTS cuando esté disponible |
-| RF-16 | Hacer fallback a búsqueda LIKE cuando FTS no esté disponible |
+| ID    | Requerimiento                                                 |
+| ----- | ------------------------------------------------------------- |
+| RF-14 | Ejecutar búsqueda global por texto                            |
+| RF-15 | Ofrecer búsqueda FTS cuando esté disponible                   |
+| RF-16 | Hacer fallback a búsqueda LIKE cuando FTS no esté disponible  |
 | RF-17 | Exponer filtros por carpeta, favoritos y atributos relevantes |
 
 ### Operación del sistema
 
-| ID | Requerimiento |
-| --- | --- |
+| ID    | Requerimiento                                                       |
+| ----- | ------------------------------------------------------------------- |
 | RF-18 | Exponer endpoints de salud, estadísticas, actividad, cola y eventos |
-| RF-19 | Proveer logging estructurado y herramientas de depuración |
-| RF-20 | Permitir operación local web y modo escritorio |
+| RF-19 | Proveer logging estructurado y herramientas de depuración           |
+| RF-20 | Permitir operación local web y modo escritorio                      |
 
 ## 8. Requerimientos no funcionales
 

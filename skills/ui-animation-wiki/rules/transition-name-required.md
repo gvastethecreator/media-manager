@@ -12,16 +12,16 @@ Elements participating in view transitions need view-transition-name.
 
 ```ts
 document.startViewTransition(() => {
-  targetImg.src = newSrc;
+	targetImg.src = newSrc;
 });
 ```
 
 **Correct (transition name assigned):**
 
 ```ts
-sourceImg.style.viewTransitionName = "card";
+sourceImg.style.viewTransitionName = 'card';
 document.startViewTransition(() => {
-  sourceImg.style.viewTransitionName = "";
-  targetImg.style.viewTransitionName = "card";
+	sourceImg.style.viewTransitionName = '';
+	targetImg.style.viewTransitionName = 'card';
 });
 ```

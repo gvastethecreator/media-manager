@@ -13,6 +13,6 @@ Set font-synthesis: none to prevent the browser from faking bold or italic. Brow
 ```css
 .icon-font,
 .display-font {
-  font-synthesis: none;
+	font-synthesis: none;
 }
 ```

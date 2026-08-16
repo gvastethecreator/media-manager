@@ -52,11 +52,10 @@ export interface FolderWithStats extends FolderBase {
 /**
  * 📁 Input para crear una nueva carpeta
  */
-export interface FolderCreateInput
-	extends Pick<
-		FolderBase,
-		'color' | 'description' | 'emoji' | 'featuredImage' | 'name' | 'parentId' | 'path' | 'presetId'
-	> {}
+export interface FolderCreateInput extends Pick<
+	FolderBase,
+	'color' | 'description' | 'emoji' | 'featuredImage' | 'name' | 'parentId' | 'path' | 'presetId'
+> {}
 
 /**
  * 📁 Input para actualizar una carpeta existente

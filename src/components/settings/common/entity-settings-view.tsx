@@ -236,9 +236,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 			setShowForm(false);
 			setSelectedEntity(null);
 			setIsEditing(false);
-			toastService.success(
-				isEditing ? `${entityLabel} updated successfully` : `${entityLabel} created successfully`
-			);
+			toastService.success(isEditing ? `${entityLabel} updated successfully` : `${entityLabel} created successfully`);
 		},
 		[isEditing, entityLabel]
 	);

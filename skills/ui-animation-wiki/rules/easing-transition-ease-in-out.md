@@ -11,5 +11,7 @@ View/mode transitions use ease-in-out for neutral attention.
 **Correct:**
 
 ```css
-.page-transition { animation-timing-function: ease-in-out; }
+.page-transition {
+	animation-timing-function: ease-in-out;
+}
 ```

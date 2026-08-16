@@ -4,23 +4,23 @@ Este documento sirve como **guía de orientación del árbol del proyecto**. Su 
 
 ## 1. Raíz del repositorio
 
-| Ruta | Rol |
-| --- | --- |
-| `README.md` | entrada general del proyecto |
-| `AGENTS.md` | reglas operativas y convenciones del repo |
-| `package.json` | scripts, dependencias y tooling |
-| `vite.config.ts` | build, desarrollo y tests unitarios/integración mediante Vite+ |
-| `playwright.config.ts` | tests E2E |
-| `drizzle.config.ts` | configuración de migraciones/schema |
-| `tailwind.config.ts` | integración visual y tokens |
-| `src/` | código principal |
-| `src-tauri/` | shell desktop |
-| `tests/` | test suite |
-| `scripts/` | automatización y wrappers |
-| `docs/` | documentación y auditorías |
-| `drizzle/` | migraciones generadas |
-| `public/` | assets y uploads |
-| `logs/` | salidas operativas y métricas |
+| Ruta                   | Rol                                                            |
+| ---------------------- | -------------------------------------------------------------- |
+| `README.md`            | entrada general del proyecto                                   |
+| `AGENTS.md`            | reglas operativas y convenciones del repo                      |
+| `package.json`         | scripts, dependencias y tooling                                |
+| `vite.config.ts`       | build, desarrollo y tests unitarios/integración mediante Vite+ |
+| `playwright.config.ts` | tests E2E                                                      |
+| `drizzle.config.ts`    | configuración de migraciones/schema                            |
+| `tailwind.config.ts`   | integración visual y tokens                                    |
+| `src/`                 | código principal                                               |
+| `src-tauri/`           | shell desktop                                                  |
+| `tests/`               | test suite                                                     |
+| `scripts/`             | automatización y wrappers                                      |
+| `docs/`                | documentación y auditorías                                     |
+| `drizzle/`             | migraciones generadas                                          |
+| `public/`              | assets y uploads                                               |
+| `logs/`                | salidas operativas y métricas                                  |
 
 ## 2. `src/` por áreas
 
@@ -55,27 +55,27 @@ src/
 
 El árbol de componentes es amplio y está segmentado por intención.
 
-| Carpeta | Uso principal |
-| --- | --- |
-| `a11y/` | accesibilidad |
-| `cards/` | tarjetas reutilizables |
-| `common/` | bloques compartidos |
-| `core/` | componentes estructurales base |
-| `debug/` | componentes de diagnóstico |
-| `entities/` / `entity/` | piezas por entidad |
-| `error/` | errores y boundaries |
-| `features/` | features complejas |
-| `forms/` | formularios |
-| `layout/` | layout principal y paneles |
-| `loading/` | loaders y placeholders |
-| `navigation/` | navegación y árbol lateral |
-| `panels/` | paneles especializados |
-| `settings/` | interfaz de configuración |
-| `toolbar/` | barras de herramientas |
-| `transitions/` | transiciones/animación |
-| `ui/` | primitivas y wrappers UI |
-| `viewers/` | viewers dedicados |
-| `views/` | páginas/vistas completas |
+| Carpeta                 | Uso principal                  |
+| ----------------------- | ------------------------------ |
+| `a11y/`                 | accesibilidad                  |
+| `cards/`                | tarjetas reutilizables         |
+| `common/`               | bloques compartidos            |
+| `core/`                 | componentes estructurales base |
+| `debug/`                | componentes de diagnóstico     |
+| `entities/` / `entity/` | piezas por entidad             |
+| `error/`                | errores y boundaries           |
+| `features/`             | features complejas             |
+| `forms/`                | formularios                    |
+| `layout/`               | layout principal y paneles     |
+| `loading/`              | loaders y placeholders         |
+| `navigation/`           | navegación y árbol lateral     |
+| `panels/`               | paneles especializados         |
+| `settings/`             | interfaz de configuración      |
+| `toolbar/`              | barras de herramientas         |
+| `transitions/`          | transiciones/animación         |
+| `ui/`                   | primitivas y wrappers UI       |
+| `viewers/`              | viewers dedicados              |
+| `views/`                | páginas/vistas completas       |
 
 ### Features destacadas
 
@@ -121,11 +121,11 @@ Contiene el backend Express.
 
 ### Estructura
 
-| Ruta | Función |
-| --- | --- |
-| `index.ts` | servidor, middleware y montaje de routers |
-| `middleware/` | logging, validación, errores |
-| `routes/` | endpoints REST/SSE/binarios |
+| Ruta          | Función                                   |
+| ------------- | ----------------------------------------- |
+| `index.ts`    | servidor, middleware y montaje de routers |
+| `middleware/` | logging, validación, errores              |
+| `routes/`     | endpoints REST/SSE/binarios               |
 
 ### Inventario de routers relevantes
 
@@ -186,18 +186,18 @@ Es la capa de negocio y sistemas transversales.
 
 Zustand centraliza estado de UI y apoyo a navegación.
 
-| Archivo/carpeta | Responsabilidad |
-| --- | --- |
-| `base.store.ts` | utilidades base |
-| `entities/` | stores por entidad |
-| `selection.store.ts` | selección de elementos |
-| `search.store.ts` | estado de búsqueda |
-| `reindex.store.ts` | progreso de reindexado |
-| `thumbnails.store.ts` | estado/caché relacionado con thumbnails |
-| `ui.store.ts` | estado general de interfaz |
-| `file-view.store.ts` | viewer de archivos |
-| `details-panel.store.ts` | panel de detalles |
-| `entity-catalog-store.ts` | bootstrap de catálogo |
+| Archivo/carpeta                 | Responsabilidad                          |
+| ------------------------------- | ---------------------------------------- |
+| `base.store.ts`                 | utilidades base                          |
+| `entities/`                     | stores por entidad                       |
+| `selection.store.ts`            | selección de elementos                   |
+| `search.store.ts`               | estado de búsqueda                       |
+| `reindex.store.ts`              | progreso de reindexado                   |
+| `thumbnails.store.ts`           | estado/caché relacionado con thumbnails  |
+| `ui.store.ts`                   | estado general de interfaz               |
+| `file-view.store.ts`            | viewer de archivos                       |
+| `details-panel.store.ts`        | panel de detalles                        |
+| `entity-catalog-store.ts`       | bootstrap de catálogo                    |
 | `unified-file-manager.store.ts` | orquestación amplia de archivo/selección |
 
 ## 7. `src/lib/`
@@ -206,22 +206,22 @@ Es la caja de herramientas e infraestructura compartida del proyecto.
 
 ### Submódulos relevantes
 
-| Carpeta | Función |
-| --- | --- |
-| `api/` / `web/` | cliente HTTP y React Query |
-| `contexts/` | contextos React reutilizados |
-| `database/` | cachés y utilidades alrededor de datos |
-| `drizzle/` | ORM, cliente, schema y relaciones |
-| `effect/` | adapters y utilidades Effect-TS |
-| `events/` | eventos compartidos |
-| `filesystem/` | hash, escaneo y acceso a disco |
-| `logger/` | logging cliente/servidor |
-| `server/` | infraestructura del lado servidor |
-| `system/` | utilidades operativas |
-| `tauri/` | helpers de integración desktop |
-| `view-transition/` | soporte visual para transiciones |
-| `styles/` | helpers de color y estilo |
-| `hooks/`, `utils/`, `types/` | utilidades generales |
+| Carpeta                      | Función                                |
+| ---------------------------- | -------------------------------------- |
+| `api/` / `web/`              | cliente HTTP y React Query             |
+| `contexts/`                  | contextos React reutilizados           |
+| `database/`                  | cachés y utilidades alrededor de datos |
+| `drizzle/`                   | ORM, cliente, schema y relaciones      |
+| `effect/`                    | adapters y utilidades Effect-TS        |
+| `events/`                    | eventos compartidos                    |
+| `filesystem/`                | hash, escaneo y acceso a disco         |
+| `logger/`                    | logging cliente/servidor               |
+| `server/`                    | infraestructura del lado servidor      |
+| `system/`                    | utilidades operativas                  |
+| `tauri/`                     | helpers de integración desktop         |
+| `view-transition/`           | soporte visual para transiciones       |
+| `styles/`                    | helpers de color y estilo              |
+| `hooks/`, `utils/`, `types/` | utilidades generales                   |
 
 ## 8. `src/lib/drizzle/schema/`
 
@@ -249,24 +249,24 @@ schema/
 
 ## 9. `src/styles/`
 
-| Archivo | Propósito |
-| --- | --- |
-| `globals.css` | estilos globales |
-| `tokens.css` | tokens semánticos |
-| `design-tokens.css` | paletas y escalas |
-| `transitions.css` | transiciones globales |
-| `view-transition.css` | soporte visual de transiciones |
-| `scrollbar.css` | scrollbar |
-| `selecto.css` | utilidades de selección |
-| `card-animations.css` / `form-animations.css` | animación específica |
-| `utilities/` | utilidades CSS auxiliares |
+| Archivo                                       | Propósito                      |
+| --------------------------------------------- | ------------------------------ |
+| `globals.css`                                 | estilos globales               |
+| `tokens.css`                                  | tokens semánticos              |
+| `design-tokens.css`                           | paletas y escalas              |
+| `transitions.css`                             | transiciones globales          |
+| `view-transition.css`                         | soporte visual de transiciones |
+| `scrollbar.css`                               | scrollbar                      |
+| `selecto.css`                                 | utilidades de selección        |
+| `card-animations.css` / `form-animations.css` | animación específica           |
+| `utilities/`                                  | utilidades CSS auxiliares      |
 
 ## 10. `src-tauri/`
 
-| Ruta | Función |
-| --- | --- |
+| Ruta              | Función                       |
+| ----------------- | ----------------------------- |
 | `tauri.conf.json` | configuración principal Tauri |
-| `src/` | código Rust |
+| `src/`            | código Rust                   |
 
 Es la capa que convierte la app local en aplicación desktop distribuible.
 
@@ -296,14 +296,14 @@ Aquí viven los wrappers y automatizaciones operativas:
 
 ## 13. `docs/`
 
-| Carpeta | Contenido |
-| --- | --- |
-| `core/` | documentación técnica principal |
-| `guides/` | guías temáticas y migraciones |
-| `audits/` | auditorías históricas |
-| `planning/` | documentos de planificación |
-| `archive/` | material antiguo o congelado |
-| `RULES/` | reglas y referencias complementarias |
+| Carpeta     | Contenido                            |
+| ----------- | ------------------------------------ |
+| `core/`     | documentación técnica principal      |
+| `guides/`   | guías temáticas y migraciones        |
+| `audits/`   | auditorías históricas                |
+| `planning/` | documentos de planificación          |
+| `archive/`  | material antiguo o congelado         |
+| `RULES/`    | reglas y referencias complementarias |
 
 ## 14. Ruta de onboarding recomendada
 
