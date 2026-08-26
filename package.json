@@ -8,7 +8,6 @@
 		"dev:full": "bun scripts/dev-full.js",
 		"dev:vite": "bun scripts/dev-vite-headers.js",
 		"dev:vite:app": "vp dev",
-		"dev:vite:original": "vp dev",
 		"dev:server:hot": "bun scripts/dev-server-hot.js",
 		"desktop:dev": "bun scripts/desktop-dev.js",
 		"desktop:build-shell": "bun scripts/build-electron-shell.js",

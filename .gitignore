@@ -59,12 +59,18 @@ tsc_output.txt
 
 # project
 /.scratch/
+/.local/
 .image-cache
 .thumbnail-cache
 /bin/
 /public/uploads/**
 !/public/uploads/.gitkeep
 /reports/generated/
+/reports/photon-thumbnail-benchmark-*/
+# drizzle-kit leftover at repo root; canonical migrations live under src/lib/drizzle/migrations
+/drizzle/
+# retired Fumadocs tree; the public site is docs/index.html
+/content/
 
 # database
 db.sqlite

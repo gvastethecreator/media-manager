@@ -628,7 +628,7 @@ docs/
 
 ### Relacionados
 
-- **Effect-TS Migration**: `docs/EFFECT-TS-MIGRATION-COMPLETE.md`
+- **Effect-TS Migration**: `docs/guides/EFFECT-TS-MIGRATION.md`
 - **Folder Reindex Service**: `src/services/folders/folder-reindex.service.ts`
 - **Content Hash Service**: `src/lib/filesystem/content-hash.service.ts`
 - **File Sync Service**: `src/lib/filesystem/file-sync.service.ts`
