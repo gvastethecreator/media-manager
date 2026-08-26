@@ -1,4 +1,5 @@
-# Base Views
+# Base views
 
-Componentes genéricos para construir las vistas de entidades.
-Incluye `BaseContentView`, `ContentViewProvider` y tipos compartidos.
+These generic components build entity views.
+
+The set includes `BaseContentView`, `ContentViewProvider`, and shared types.

@@ -1,38 +1,44 @@
-# Servicio de Etiquetas (Tag)
+# Tag service (Tag)
 
-## Descripción General
+## Overview
 
-El servicio de etiquetas (Tag) es un componente fundamental del sistema de organización y clasificación que permite categorizar y filtrar contenido mediante palabras clave o términos descriptivos. Las etiquetas proporcionan una forma flexible y transversal de organizar contenido, complementando otros sistemas como carpetas y colecciones pero con un enfoque más orientado a conceptos y características.
+The Tag service is a fundamental component of the organization and classification system.
 
-## Diagrama de Flujo
+The service categorizes and filters content through keywords or descriptive terms.
+
+Tags provide a flexible and cross-cutting way to organize content.
+
+Tags complement other systems such as Folders and Collections, with a focus more oriented to concepts and characteristics.
+
+## Flow diagram
 
 ```mermaid
 graph TD
-    A[Cliente/UI] -->|Petición| B[Server Actions]
-    B -->|Llamada| C[Tag Service]
-    C -->|Transformación| D[Transformers]
-    D -->|Validación| E[Tipos]
-    C -->|Almacenamiento| F[(Base de Datos)]
-    C -->|Eventos| G[Event System]
-    G -->|Notificación| H[Activity Service]
+    A[Client/UI] -->|Request| B[Routes]
+    B -->|Call| C[Tag Service]
+    C -->|Transformation| D[Transformers]
+    D -->|Validation| E[Types]
+    C -->|Storage| F[(Database)]
+    C -->|Events| G[Event System]
+    G -->|Notification| H[Activity Service]
     G -->|Stats| I[Stats Service]
 
-    subgraph "Operaciones con Etiquetas"
-        J[Crear Etiqueta] --> K[Normalizar]
-        K --> L[Validar]
-        L --> M[Guardar]
+    subgraph "Tag operations"
+        J[Create Tag] --> K[Normalize]
+        K --> L[Validate]
+        L --> M[Save]
 
-        N[Obtener Etiquetas] --> O[Filtrar]
-        O --> P[Transformar]
-        P --> Q[Ordenar]
+        N[Get Tags] --> O[Filter]
+        O --> P[Transform]
+        P --> Q[Sort]
 
-        R[Asignar Etiqueta] --> S[Verificar Entidad]
-        S --> T[Crear Relación]
-        T --> U[Actualizar Contador]
+        R[Assign Tag] --> S[Verify entity]
+        S --> T[Create relation]
+        T --> U[Update counter]
 
-        V[Eliminar Etiqueta] --> W[Verificar Referencias]
-        W --> X[Eliminar Relaciones]
-        X --> Y[Eliminar Etiqueta]
+        V[Delete Tag] --> W[Verify references]
+        W --> X[Delete relations]
+        X --> Y[Delete Tag]
     end
 
     style C fill:#d4f1f9,stroke:#333,stroke-width:1px
@@ -40,113 +46,123 @@ graph TD
     style G fill:#e1bee7,stroke:#333,stroke-width:1px
 ```
 
-## Estructura del Módulo
+Routes call services.
 
-### Archivos del Servicio
+## Module structure
+
+### Service files
 
 ```
 src/services/tag/
-├── tag.service.ts    # Implementación principal del servicio
-└── index.ts          # Punto de entrada y exportaciones
+├── tag.service.ts    # Main service implementation
+└── index.ts          # Entry point and exports
 ```
 
-### Archivos de Transformers
+### Transformer files
 
 ```
 src/transformers/tag/
-├── index.ts          # Exportaciones del módulo
-├── mappers.ts        # Funciones para mapear entre objetos
-├── serializers.ts    # Serializadores para distintos formatos
-├── transformer.ts    # Transformador principal
-└── v2/               # Nueva versión del transformer (en desarrollo)
+├── index.ts          # Module exports
+├── mappers.ts        # Functions that map between objects
+├── serializers.ts    # Serializers for different formats
+├── transformer.ts    # Main transformer
+└── v2/               # New transformer version (in development)
 ```
 
-### Tipos de Datos
+### Data types
 
 ```
 src/types/entities/tag/
-├── base.ts           # Tipos básicos para etiquetas
-├── enums.ts          # Enumeraciones para etiquetas
-├── extended.ts       # Tipos extendidos con información adicional
-├── index.ts          # Exportaciones del módulo
-├── schema.ts         # Esquemas de validación
-└── types.ts          # Definiciones de tipos e interfaces
+├── base.ts           # Basic types for Tags
+├── enums.ts          # Enumerations for Tags
+├── extended.ts       # Extended types with extra information
+├── index.ts          # Module exports
+├── schema.ts         # Validation schemas
+└── types.ts          # Type and interface definitions
 ```
 
-### Server Actions
+### Route modules
 
 ```
 src/app/actions/tags/
-├── crud.actions.ts      # Acciones CRUD básicas
-├── index.ts             # Exportaciones del módulo
-├── query.actions.ts     # Consultas y búsquedas
-└── relation.actions.ts  # Gestión de relaciones con otras entidades
+├── crud.actions.ts      # Basic CRUD actions
+├── index.ts             # Module exports
+├── query.actions.ts     # Queries and searches
+└── relation.actions.ts  # Relation management with other entities
 ```
 
-## Funcionalidades Principales
+## Main features
 
-### 1. Gestión de Etiquetas
+### 1. Tag management
 
-- **Crear Etiqueta**: Permite crear nuevas etiquetas con normalización de nombres.
-- **Obtener Etiqueta**: Recupera información detallada de una etiqueta por su ID.
-- **Actualizar Etiqueta**: Modifica propiedades de una etiqueta existente.
-- **Eliminar Etiqueta**: Elimina una etiqueta y sus relaciones de forma segura.
-- **Listar Etiquetas**: Obtiene etiquetas con filtros, ordenación y paginación.
+The service provides the following Tag operations:
 
-### 2. Gestión de Relaciones
+- **Create Tag**: Creates new Tags with name normalization.
+- **Get Tag**: Retrieves detailed Tag information by ID.
+- **Update Tag**: Changes properties of an existing Tag.
+- **Delete Tag**: Deletes a Tag and its relations in a safe way.
+- **List Tags**: Gets Tags with filters, sort, and pagination.
 
-- **Asignar Etiqueta**: Asocia una etiqueta a una entidad (imagen, video, carpeta, etc.).
-- **Eliminar Asignación**: Remueve la asociación entre una etiqueta y una entidad.
-- **Obtener Entidades**: Recupera todas las entidades asociadas a una etiqueta.
-- **Obtener Etiquetas**: Recupera todas las etiquetas asociadas a una entidad.
+### 2. Relation management
 
-### 3. Categorización y Jerarquía
+The service provides the following relation operations:
 
-- **Categorías**: Organización de etiquetas en categorías predefinidas.
-- **Jerarquía**: Soporte opcional para relaciones padre-hijo entre etiquetas.
-- **Etiquetas Relacionadas**: Identificación de etiquetas frecuentemente usadas juntas.
-- **Sinónimos**: Manejo de términos equivalentes para mejorar la búsqueda.
+- **Assign Tag**: Associates a Tag with an entity (image, video, Folder).
+- **Remove assignment**: Removes the association between a Tag and an entity.
+- **Get entities**: Retrieves all entities associated with a Tag.
+- **Get Tags**: Retrieves all Tags associated with an entity.
 
-### 4. Análisis y Estadísticas
+### 3. Categorization and hierarchy
 
-- **Popularidad**: Seguimiento de las etiquetas más utilizadas.
-- **Frecuencia de Uso**: Historial de aplicación de etiquetas.
-- **Recomendaciones**: Sugerencia de etiquetas basadas en contenido similar.
-- **Tendencias**: Análisis de cambios en el uso de etiquetas a lo largo del tiempo.
+The service provides the following organization operations:
 
-## Ejemplos de Uso
+- **Categories**: Organization of Tags in predefined categories.
+- **Hierarchy**: Optional support for parent-child relations between Tags.
+- **Related Tags**: Identification of Tags frequently used together.
+- **Synonyms**: Handling of equivalent terms to improve search.
 
-### Crear una Nueva Etiqueta
+### 4. Analysis and statistics
+
+The service provides the following analysis operations:
+
+- **Popularity**: Tracking of the most used Tags.
+- **Usage frequency**: History of Tag application.
+- **Recommendations**: Suggestion of Tags based on similar content.
+- **Trends**: Analysis of changes in Tag use over time.
+
+## Usage examples
+
+### Create a new Tag
 
 ```typescript
 import { tagService } from '@/services/index';
 
-// Crear una etiqueta simple
+// Create a simple Tag
 const newTag = await tagService.createTag({
-	name: 'paisaje',
-	description: 'Fotografías de paisajes naturales',
+	name: 'landscape',
+	description: 'Photographs of natural landscapes',
 	color: '#4CAF50',
 	category: 'SUBJECT',
 });
 
-// Crear una etiqueta con slug personalizado
+// Create a Tag with a custom slug
 const customTag = await tagService.createTag({
-	name: 'Retrato en Blanco y Negro',
-	slug: 'retrato-bw',
-	description: 'Retratos en formato monocromático',
+	name: 'Black and White Portrait',
+	slug: 'portrait-bw',
+	description: 'Portraits in monochrome format',
 	color: '#607D8B',
 	category: 'STYLE',
 });
 ```
 
-### Obtener Etiquetas con Filtros
+### Get Tags with filters
 
 ```typescript
 import { tagService } from '@/services/index';
 
-// Obtener etiquetas con filtros
+// Get Tags with filters
 const tags = await tagService.getTags({
-	search: 'paisaje',
+	search: 'landscape',
 	categories: ['SUBJECT', 'LOCATION'],
 	sortBy: 'usageCount',
 	sortDirection: 'desc',
@@ -154,126 +170,134 @@ const tags = await tagService.getTags({
 	limit: 20,
 });
 
-// Obtener etiquetas populares
+// Get popular Tags
 const popularTags = await tagService.getPopularTags(10);
 ```
 
-### Actualizar una Etiqueta
+### Update a Tag
 
 ```typescript
 import { tagService } from '@/services/index';
 
-// Actualizar propiedades de una etiqueta
+// Update Tag properties
 const updatedTag = await tagService.updateTag('tag-id-123', {
-	name: 'Paisaje Natural',
-	description: 'Fotografías de paisajes naturales sin intervención humana',
+	name: 'Natural Landscape',
+	description: 'Photographs of natural landscapes without human intervention',
 	color: '#8BC34A',
 	category: 'SUBJECT',
 });
 ```
 
-### Gestionar Relaciones con Entidades
+### Manage relations with entities
 
 ```typescript
 import { tagService } from '@/services/index';
 
-// Asignar etiquetas a una imagen
+// Assign Tags to an image
 await tagService.assignTagsToEntity('image', 'image-id-123', ['tag-id-1', 'tag-id-2', 'tag-id-3']);
 
-// Obtener todas las imágenes con una etiqueta específica
+// Get all images with a specific Tag
 const images = await tagService.getEntitiesWithTag('image', 'tag-id-123', { page: 1, limit: 50 });
 
-// Eliminar una etiqueta de una entidad
+// Remove a Tag from an entity
 await tagService.removeTagFromEntity('image', 'image-id-123', 'tag-id-1');
 ```
 
-### Trabajar con Grupos de Etiquetas
+### Work with Tag groups
 
 ```typescript
 import { tagService } from '@/services/index';
 
-// Obtener etiquetas agrupadas por categoría
+// Get Tags grouped by category
 const groupedTags = await tagService.getTagsByCategory();
 
-// Obtener etiquetas relacionadas
+// Get related Tags
 const relatedTags = await tagService.getRelatedTags('tag-id-123', 5);
 ```
 
-## Relaciones con Otras Entidades
+## Relations with other entities
 
-| Entidad        | Tipo de Relación | Descripción                                        |
+| Entity         | Relation type    | Description                                        |
 | -------------- | ---------------- | -------------------------------------------------- |
-| **Image**      | Muchos a muchos  | Las imágenes pueden tener múltiples etiquetas      |
-| **Video**      | Muchos a muchos  | Los videos pueden tener múltiples etiquetas        |
-| **Folder**     | Muchos a muchos  | Las carpetas pueden tener múltiples etiquetas      |
-| **Album**      | Muchos a muchos  | Los álbumes pueden tener múltiples etiquetas       |
-| **Collection** | Muchos a muchos  | Las colecciones pueden tener múltiples etiquetas   |
-| **Character**  | Muchos a muchos  | Los personajes pueden tener etiquetas descriptivas |
-| **Place**      | Muchos a muchos  | Los lugares pueden tener etiquetas descriptivas    |
-| **Tag**        | Auto-referencial | Las etiquetas pueden tener relaciones jerárquicas  |
-| **Activity**   | Referencial      | Las actividades pueden referenciar etiquetas       |
+| **Image**      | Many to many     | Images can have multiple Tags                      |
+| **Video**      | Many to many     | Videos can have multiple Tags                      |
+| **Folder**     | Many to many     | Folders can have multiple Tags                     |
+| **Album**      | Many to many     | Albums can have multiple Tags                      |
+| **Collection** | Many to many     | Collections can have multiple Tags                 |
+| **Character**  | Many to many     | Characters can have descriptive Tags               |
+| **Place**      | Many to many     | Places can have descriptive Tags                   |
+| **Tag**        | Self-referential | Tags can have hierarchical relations               |
+| **Activity**   | Referential      | Activities can reference Tags                      |
 
-## Modelo de Datos
+## Data model
 
 ```typescript
-// Modelo básico de Tag
+// Basic Tag model
 interface TagBase {
-	id: string; // Identificador único
-	name: string; // Nombre visible de la etiqueta
-	slug: string; // Versión normalizada para URL y búsqueda
-	description?: string; // Descripción opcional
-	color?: string; // Color asociado (hex o nombre)
-	icon?: string; // Icono representativo (nombre o emoji)
-	category?: TagCategory; // Categoría (SUBJECT, STYLE, TECHNICAL, etc.)
-	isSystem: boolean; // Indica si es una etiqueta del sistema
-	parentId?: string; // ID de la etiqueta padre (si es jerárquica)
-	createdAt: Date; // Fecha de creación
-	updatedAt: Date; // Fecha de última actualización
+	id: string; // Unique identifier
+	name: string; // Visible Tag name
+	slug: string; // Normalized version for URL and search
+	description?: string; // Optional description
+	color?: string; // Associated color (hex or name)
+	icon?: string; // Representative icon (name or emoji)
+	category?: TagCategory; // Category (SUBJECT, STYLE, TECHNICAL, etc.)
+	isSystem: boolean; // Indicates whether it is a system Tag
+	parentId?: string; // Parent Tag ID (if hierarchical)
+	createdAt: Date; // Creation date
+	updatedAt: Date; // Last update date
 }
 
-// Extensión con estadísticas
+// Extension with statistics
 interface TagWithStats extends TagBase {
-	usageCount: number; // Número total de usos
-	imageCount: number; // Cantidad de imágenes con esta etiqueta
-	videoCount: number; // Cantidad de videos con esta etiqueta
-	folderCount: number; // Cantidad de carpetas con esta etiqueta
-	albumCount: number; // Cantidad de álbumes con esta etiqueta
-	lastUsed?: Date; // Última vez que se usó la etiqueta
+	usageCount: number; // Total number of uses
+	imageCount: number; // Image count with this Tag
+	videoCount: number; // Video count with this Tag
+	folderCount: number; // Folder count with this Tag
+	albumCount: number; // Album count with this Tag
+	lastUsed?: Date; // Last time the Tag was used
 }
 
-// Extensión con relaciones
+// Extension with relations
 interface TagComplete extends TagWithStats {
-	parent?: TagBase; // Etiqueta padre
-	children: TagBase[]; // Etiquetas hijas
-	relatedTags: TagBase[]; // Etiquetas frecuentemente usadas junto a esta
-	synonyms: string[]; // Términos equivalentes
+	parent?: TagBase; // Parent Tag
+	children: TagBase[]; // Child Tags
+	relatedTags: TagBase[]; // Tags frequently used with this one
+	synonyms: string[]; // Equivalent terms
 }
 ```
 
-## Buenas Prácticas
+## Good practices
 
-1. **Normalización**: Normalice los nombres de etiquetas para evitar duplicados (mayúsculas, espacios, etc.).
-2. **Validación**: Asegúrese de validar y limpiar las entradas para evitar caracteres no deseados.
-3. **Uso de Slugs**: Utilice siempre slugs para búsquedas y URL para mayor consistencia.
-4. **Transacciones**: Use transacciones al modificar relaciones entre etiquetas y entidades.
-5. **Categorización**: Mantenga un sistema coherente de categorías de etiquetas.
-6. **Límites**: Considere límites razonables para la cantidad de etiquetas por entidad.
-7. **Rendimiento**: Optimice las consultas que implican etiquetas mediante índices apropiados.
+Normalize Tag names to avoid duplicates (uppercase, spaces).
 
-## Solución de Problemas Comunes
+Validate and clean inputs to avoid unwanted characters.
 
-| Problema                         | Solución                                                           |
+Always use slugs for searches and URLs for greater consistency.
+
+Use transactions when you modify relations between Tags and entities.
+
+Keep a coherent system of Tag categories.
+
+Consider reasonable limits for the number of Tags per entity.
+
+Optimize queries that involve Tags through appropriate indexes.
+
+## Common troubleshooting
+
+| Problem                          | Solution                                                           |
 | -------------------------------- | ------------------------------------------------------------------ |
-| **Etiquetas duplicadas**         | Utilice `tagService.mergeTags()` para fusionar etiquetas similares |
-| **Etiquetas huérfanas**          | Identifique con `tagService.findUnusedTags()`                      |
-| **Normalización incorrecta**     | Regenere slugs con `tagService.regenerateSlugs()`                  |
-| **Inconsistencia en contadores** | Recalcule con `tagService.recalculateUsageCounts()`                |
-| **Rendimiento en consultas**     | Utilice etiquetas precomputadas para las entidades más accedidas   |
+| **Duplicate Tags**               | Use `tagService.mergeTags()` to merge similar Tags                 |
+| **Orphan Tags**                  | Identify with `tagService.findUnusedTags()`                        |
+| **Incorrect normalization**      | Regenerate slugs with `tagService.regenerateSlugs()`               |
+| **Inconsistent counters**        | Recalculate with `tagService.recalculateUsageCounts()`             |
+| **Query performance**            | Use precomputed Tags for the most accessed entities                |
 
-## Roadmap y Mejoras Futuras
+## Roadmap and future improvements
 
-- Implementación de auto-etiquetado mediante análisis de contenido
-- Soporte para jerarquías más complejas de etiquetas
-- Sistema de sugerencia de etiquetas basado en el contenido
-- Análisis de tendencias y patrones de uso de etiquetas
-- Integración con sistemas de taxonomía externos para enriquecer metadatos
+The following work is planned:
+
+- Implementation of auto-tagging through content analysis
+- Support for more complex Tag hierarchies
+- Tag suggestion system based on content
+- Analysis of trends and Tag usage patterns
+- Integration with external taxonomy systems to enrich metadata

@@ -1,9 +1,11 @@
-# Módulo de Features
+# Features module
 
-Agrupa funcionalidades principales de la aplicación. Contiene los siguientes submódulos:
+This module groups main application features.
 
-- **file-browser/**: Navegación y visualización de archivos con múltiples vistas, selección múltiple, menú contextual y panel de detalles integrado.
-- **file-viewer/**: Componente de visualización individual de archivos (imágenes, videos, etc.).
+The module contains the following submodules:
+
+- **file-browser/**: File navigation and display with multiple views, multi-select, a context menu, and an integrated details panel.
+- **file-viewer/**: Component for individual file display of images and videos.
 
 ```mermaid
 flowchart TD
@@ -15,20 +17,20 @@ flowchart TD
     B --> G[Filters & Search]
 ```
 
-## Arquitectura
+## Architecture
 
 ### FileBrowser
 
-Componente principal que incluye:
+The main component includes the following parts:
 
-- **Views**: Grid, List, Cards, Masonry con virtualización
-- **Context Menu**: Sistema modular con submenús dinámicos
-- **Details Panel**: Panel consolidado con EntityWithStats
-- **Filters**: Sistema de filtrado y búsqueda
-- **Hooks**: Utilidades especializadas para carga de datos y virtualización
+- **Views**: Grid, List, Cards, and Masonry with virtualization
+- **Context Menu**: Modular system with dynamic submenus
+- **Details Panel**: Consolidated panel with EntityWithStats
+- **Filters**: Filter and search system
+- **Hooks**: Specialized utilities for data load and virtualization
 
 ### FileViewer
 
-Componente simple y enfocado para visualización individual de archivos.
+This focused component displays one file at a time.
 
-La documentación técnica detallada se encuentra en `/docs/`.
+Detailed technical documentation lives in `/docs/`.

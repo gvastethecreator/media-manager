@@ -1,12 +1,14 @@
-# 🌍 WorldItem Store
+# WorldItem store
 
-> **Store de Zustand para la gestión de objetos del mundo en el sistema de gestión de imágenes**
+> Zustand store for World Item management in the media management system
 
-## 📋 Descripción
+## Description
 
-El **WorldItem Store** gestiona objetos del mundo tipo RPG/D&D con características especiales como rareza, tipo, categorías y propiedades mágicas. Incluye funcionalidades avanzadas de filtrado, ordenamiento y gestión de relaciones.
+The **WorldItem Store** manages RPG/D&D-style World Items with special features such as rarity, type, categories, and magical properties.
 
-## 🏗️ Arquitectura
+The store includes advanced filter, sort, and relation-management functions.
+
+## Architecture
 
 ```mermaid
 graph TB
@@ -15,7 +17,7 @@ graph TB
     A --> D[Filters Slice]
 
     B --> E[CRUD Operations]
-    B --> F[Server Actions]
+    B --> F[Routes]
     B --> G[Data Management]
 
     C --> H[View Mode]
@@ -34,132 +36,140 @@ graph TB
     Q --> R[Database]
 ```
 
-## 🎯 Características Especiales
+Routes call services.
 
-### 🎮 Sistema RPG/D&D
+## Special features
 
-- **Tipos de objetos**: Armas, armaduras, accesorios, consumibles, materiales, artefactos
-- **Sistema de rareza**: Common, Uncommon, Rare, Epic, Legendary, Mythic, Unique, Artifact
-- **Categorías**: Equipment, Quest, Crafting, Lore, Collectible, Utility, Magical, Technological
-- **Propiedades mágicas**: Atributos, efectos, requisitos, estadísticas
+### RPG/D&D system
 
-### 🔍 Filtrado Avanzado
+The store provides the following RPG features:
 
-- **Búsqueda por texto**: Nombre, descripción, tipo, categoría, rareza
-- **Filtros específicos**: Tipo, categoría, rareza, favoritos
-- **Filtros numéricos**: Nivel mínimo/máximo, valor mínimo/máximo
-- **Filtros de relaciones**: Con imágenes, notas, conceptos, prompts
+- **Item types**: Weapons, armor, accessories, consumables, materials, artifacts
+- **Rarity system**: Common, Uncommon, Rare, Epic, Legendary, Mythic, Unique, Artifact
+- **Categories**: Equipment, Quest, Crafting, Lore, Collectible, Utility, Magical, Technological
+- **Magical properties**: Attributes, effects, requirements, statistics
 
-### 📊 Ordenamiento
+### Advanced filtering
 
-- **Por nombre**: Ascendente/Descendente
-- **Por tipo**: Ascendente/Descendente
-- **Por rareza**: Peso numérico de rareza
-- **Por fechas**: Creación/Actualización
+The store provides the following filter features:
 
-## 🧩 Estructura del Store
+- **Text search**: Name, description, type, category, rarity
+- **Specific filters**: Type, category, rarity, Favorites
+- **Numeric filters**: Minimum or maximum level, minimum or maximum value
+- **Relation filters**: With images, notes, Concepts, Prompts
 
-### 📊 Estado Principal
+### Sort
+
+The store provides the following sort options:
+
+- **By name**: Ascending or descending
+- **By type**: Ascending or descending
+- **By rarity**: Numeric rarity weight
+- **By dates**: Creation or update
+
+## Store structure
+
+### Main state
 
 ```typescript
 interface WorldItemState {
-	worldItems: WorldItem[]; // Lista de objetos del mundo
-	isLoading: boolean; // Estado de carga
-	error: string | null; // Error actual
-	ui: WorldItemUIState; // Estado de interfaz
-	filters: WorldItemFilters; // Filtros activos
+	worldItems: WorldItem[]; // List of World Items
+	isLoading: boolean; // Loading state
+	error: string | null; // Current error
+	ui: WorldItemUIState; // Interface state
+	filters: WorldItemFilters; // Active filters
 }
 ```
 
-### 🎮 Estado de UI
+### UI state
 
 ```typescript
 interface WorldItemUIState {
-	selectedId: string | null; // ID del objeto seleccionado
-	editingId: string | null; // ID del objeto en edición
-	highlightedId: string | null; // ID del objeto resaltado
-	viewMode: WorldItemViewMode; // Modo de visualización
+	selectedId: string | null; // Selected item ID
+	editingId: string | null; // Item ID in edit
+	highlightedId: string | null; // Highlighted item ID
+	viewMode: WorldItemViewMode; // Display mode
 }
 ```
 
-### 🔍 Filtros
+### Filters
 
 ```typescript
 interface WorldItemFilters {
-	sortBy: WorldItemSortCriteria; // Criterio de ordenamiento
-	searchTerm: string | null; // Término de búsqueda
-	type: string | null; // Filtro por tipo
-	category: string | null; // Filtro por categoría
-	rarity: string | null; // Filtro por rareza
-	minLevel?: number; // Nivel mínimo
-	maxLevel?: number; // Nivel máximo
-	minValue?: number; // Valor mínimo
-	maxValue?: number; // Valor máximo
-	isFavorite?: boolean; // Solo favoritos
-	hasImages?: boolean; // Con imágenes
-	hasNotes?: boolean; // Con notas
-	hasConcepts?: boolean; // Con conceptos
-	hasPrompts?: boolean; // Con prompts
+	sortBy: WorldItemSortCriteria; // Sort criterion
+	searchTerm: string | null; // Search term
+	type: string | null; // Filter by type
+	category: string | null; // Filter by category
+	rarity: string | null; // Filter by rarity
+	minLevel?: number; // Minimum level
+	maxLevel?: number; // Maximum level
+	minValue?: number; // Minimum value
+	maxValue?: number; // Maximum value
+	isFavorite?: boolean; // Favorites only
+	hasImages?: boolean; // With images
+	hasNotes?: boolean; // With notes
+	hasConcepts?: boolean; // With Concepts
+	hasPrompts?: boolean; // With Prompts
 }
 ```
 
-## 🔄 Acciones Principales
+## Main actions
 
-### 📥 Gestión de Datos
+### Data management
 
 ```typescript
-// Cargar objetos del mundo
+// Load World Items
 await loadWorldItems();
 
-// Crear nuevo objeto
+// Create a new item
 await createWorldItem(data);
 
-// Actualizar objeto existente
+// Update an existing item
 await updateWorldItem(id, data);
 
-// Eliminar objeto
+// Delete an item
 await deleteWorldItem(id);
 ```
 
-### 🎮 Gestión de UI
+### UI management
 
 ```typescript
-// Seleccionar objeto
+// Select an item
 selectWorldItem(id);
 
-// Iniciar edición
+// Start editing
 startEditing(id);
 
-// Resaltar objeto
+// Highlight an item
 highlightWorldItem(id);
 
-// Cambiar modo de vista
+// Change view mode
 setViewMode(mode);
 
-// Limpiar selección
+// Clear selection
 clearSelection();
 ```
 
-### 🔍 Filtros y Búsqueda
+### Filters and search
 
 ```typescript
-// Actualizar filtros
+// Update filters
 updateFilters({ type: 'weapon', rarity: 'legendary' });
 
-// Buscar por texto
-setSearchQuery('espada mágica');
+// Search by text
+setSearchQuery('magic sword');
 
-// Limpiar filtros
+// Clear filters
 clearFilters();
 
-// Obtener datos filtrados
+// Get filtered data
 const filtered = getFilteredWorldItems();
 const sorted = getSortedWorldItems();
 ```
 
-## 🛠️ Utilidades Disponibles
+## Available utilities
 
-### 📊 Estadísticas
+### Statistics
 
 ```typescript
 import { getWorldItemStats } from '@/utils/world-item';
@@ -175,7 +185,7 @@ const stats = getWorldItemStats(worldItems);
 // }
 ```
 
-### 🔄 Ordenamiento
+### Sort
 
 ```typescript
 import { sortWorldItems } from '@/utils/world-item';
@@ -183,7 +193,7 @@ import { sortWorldItems } from '@/utils/world-item';
 const sorted = sortWorldItems(worldItems, 'rarity:desc');
 ```
 
-### 🏷️ Agrupamiento
+### Grouping
 
 ```typescript
 import { groupWorldItems } from '@/utils/world-item';
@@ -192,7 +202,7 @@ const grouped = groupWorldItems(worldItems, 'type');
 // { weapon: [...], armor: [...], ... }
 ```
 
-### 🎨 Generación Visual
+### Visual generation
 
 ```typescript
 import { generateWorldItemColor, generateWorldItemEmoji } from '@/utils/world-item';
@@ -201,9 +211,9 @@ const color = generateWorldItemColor('legendary'); // '#F59E0B'
 const emoji = generateWorldItemEmoji('weapon'); // '⚔️'
 ```
 
-## 📦 Uso del Store
+## Store use
 
-### 🎯 En Componentes React
+### In React components
 
 ```typescript
 import { useWorldItemStore } from '@/store/entities/world-item'
@@ -240,7 +250,7 @@ function WorldItemList() {
 }
 ```
 
-### 🔍 Filtrado Avanzado
+### Advanced filtering
 
 ```typescript
 function WorldItemFilters() {
@@ -263,20 +273,24 @@ function WorldItemFilters() {
 }
 ```
 
-## 🎨 Personalización Visual
+## Visual customization
 
-### 🌈 Colores por Rareza
+### Colors by rarity
 
-- **Common**: `#9CA3AF` (Gris)
-- **Uncommon**: `#10B981` (Verde)
-- **Rare**: `#3B82F6` (Azul)
-- **Epic**: `#8B5CF6` (Púrpura)
-- **Legendary**: `#F59E0B` (Amarillo)
-- **Mythic**: `#EF4444` (Rojo)
-- **Unique**: `#EC4899` (Rosa)
-- **Artifact**: `#F97316` (Naranja)
+The store uses the following colors:
 
-### 🎭 Emojis por Tipo
+- **Common**: `#9CA3AF` (Gray)
+- **Uncommon**: `#10B981` (Green)
+- **Rare**: `#3B82F6` (Blue)
+- **Epic**: `#8B5CF6` (Purple)
+- **Legendary**: `#F59E0B` (Yellow)
+- **Mythic**: `#EF4444` (Red)
+- **Unique**: `#EC4899` (Pink)
+- **Artifact**: `#F97316` (Orange)
+
+### Emojis by type
+
+The store uses the following emojis:
 
 - **Weapon**: ⚔️
 - **Armor**: 🛡️
@@ -288,36 +302,41 @@ function WorldItemFilters() {
 - **Key Item**: 🗝️
 - **Misc**: 📦
 
-## 🔄 Persistencia
+## Persistence
 
-El store utiliza persistencia automática para:
+The store uses automatic persistence for the following data:
 
-- ✅ **Estado de UI**: Modo de vista, selecciones
-- ✅ **Filtros**: Criterios de búsqueda y filtrado
-- ❌ **Datos**: Se recargan desde el servidor
+- **UI state**: View mode, selections
+- **Filters**: Search and filter criteria
 
-## 🚀 Optimizaciones
+Data reloads from the server.
 
-### ⚡ Performance
+## Optimizations
 
-- **Memoización**: Selectores memoizados para evitar recálculos
-- **Lazy Loading**: Carga bajo demanda de relaciones
-- **Debounce**: Búsqueda con retardo para evitar llamadas excesivas
+### Performance
 
-### 💾 Gestión de Memoria
+The store uses the following performance techniques:
 
-- **Cleanup**: Limpieza automática de referencias
-- **Weak References**: Para evitar memory leaks
-- **Garbage Collection**: Optimizado para objetos grandes
+- **Memoization**: Memoized selectors to avoid recalculation
+- **Lazy loading**: On-demand load of relations
+- **Debounce**: Search with delay to avoid excessive calls
 
-## 📚 Ejemplos de Uso
+### Memory management
 
-### 🎮 Creación de Objeto Mágico
+The store uses the following memory techniques:
+
+- **Cleanup**: Automatic cleanup of references
+- **Weak references**: To avoid memory leaks
+- **Garbage collection**: Optimized for large objects
+
+## Usage examples
+
+### Magical item creation
 
 ```typescript
 const magicalSword = {
-	name: 'Espada del Amanecer',
-	description: 'Una espada legendaria forjada con luz solar',
+	name: 'Sword of Dawn',
+	description: 'A legendary sword forged with sunlight',
 	type: 'weapon',
 	category: 'equipment',
 	rarity: 'legendary',
@@ -325,24 +344,24 @@ const magicalSword = {
 		{ name: 'attack', value: 150, maxValue: 200 },
 		{ name: 'magic', value: 75, maxValue: 100 },
 	]),
-	effects: JSON.stringify([{ name: 'Solar Flare', description: 'Daño adicional durante el día' }]),
+	effects: JSON.stringify([{ name: 'Solar Flare', description: 'Extra damage during the day' }]),
 	isFavorite: true,
 };
 
 await createWorldItem(magicalSword);
 ```
 
-### 🔍 Búsqueda Avanzada
+### Advanced search
 
 ```typescript
-// Buscar armas legendarias con imágenes
+// Search legendary weapons with images
 updateFilters({
 	type: 'weapon',
 	rarity: 'legendary',
 	hasImages: true,
 });
 
-// Buscar objetos por nivel
+// Search items by level
 updateFilters({
 	minLevel: 50,
 	maxLevel: 100,
@@ -351,5 +370,5 @@ updateFilters({
 
 ---
 
-**📝 Última actualización**: Enero 2025
-**🔗 Relacionado**: [Character Store](../character/README.md), [Collection Store](../collection/README.md)
+**Last update**: January 2025
+**Related**: [Character Store](../character/README.md), [Collection Store](../collection/README.md)

@@ -1,21 +1,25 @@
-# Módulo Settings
+# Settings module
 
-## Descripción General
+## Overview
 
-El módulo Settings proporciona una interfaz completa para la gestión y configuración de diferentes entidades y funcionalidades de la aplicación. Está diseñado de forma modular, con componentes específicos para cada tipo de entidad, todos accesibles a través de una **interfaz de navegación vertical** que mejora la experiencia de usuario.
+The Settings module provides a complete interface for management and configuration of different entities and features of the application.
 
-## 🎨 **ACTUALIZACIÓN: Layout Vertical (Diciembre 2024)**
+The module is modular, with specific components for each entity type.
 
-### ✅ **Transformación Completada**
+All components are accessible through a **vertical navigation interface** that improves the user experience.
 
-Se ha rediseñado completamente el componente `SettingsView` de un layout horizontal de pestañas a un **diseño vertical tipo sidebar** más moderno y funcional.
+## Update: vertical layout (December 2024)
 
-### 🔄 **Layout Architecture**
+### Completed transformation
+
+The `SettingsView` component was fully redesigned from a horizontal tab layout to a more modern and functional **vertical sidebar design**.
+
+### Layout architecture
 
 ```mermaid
 graph TD
     A[SettingsView Container] --> B[Horizontal Flex Layout]
-    B --> C[Sidebar Vertical - 256px]
+    B --> C[Vertical sidebar - 256px]
     B --> D[Content Area - flex-1]
 
     C --> E[Vertical TabsList]
@@ -25,69 +29,75 @@ graph TD
     D --> H[TabsContent Areas]
     H --> I[System Settings]
     H --> J[Albums Settings]
-    H --> K[...otros 16 tabs]
+    H --> K[...other 16 tabs]
 ```
 
-### 🎯 **Características del Nuevo Diseño**
+### Features of the new design
 
-#### **Sidebar Vertical**
+#### Vertical sidebar
 
-- ✅ Ancho fijo de 256px (`w-64`)
-- ✅ Border derecho sutil (`border-r-2 border-border/20`)
-- ✅ Fondo semi-transparente con blur (`bg-background/50 backdrop-blur-sm`)
-- ✅ Scroll interno si necesario
+The sidebar includes the following features:
 
-#### **Tab Design Mejorado**
+- Fixed width of 256px (`w-64`)
+- Subtle right border (`border-r-2 border-border/20`)
+- Semi-transparent background with blur (`bg-background/50 backdrop-blur-sm`)
+- Internal scroll if needed
 
-- ✅ Iconos coloreados según esquema temático
-- ✅ Labels con truncado inteligente
-- ✅ Indicador visual del estado activo (barra coloreada)
-- ✅ Animaciones suaves y micro-interacciones
+#### Improved tab design
 
-#### **Responsive & Accessibility**
+The tabs include the following features:
 
-- ✅ Grid adaptativo (1 col mobile / 2 cols XL)
-- ✅ Event listener preservado para navegación programática
-- 🔄 **TODO**: Keyboard navigation y tooltips
+- Colored icons by thematic scheme
+- Labels with intelligent truncation
+- Visual indicator of the active state (colored bar)
+- Smooth animations and micro-interactions
 
-## Estructura General
+#### Responsive and accessibility
+
+The layout includes the following features:
+
+- Adaptive grid (1 col mobile / 2 cols XL)
+- Preserved event listener for programmatic navigation
+- **TODO**: Keyboard navigation and tooltips
+
+## General structure
 
 ```
 src/components/settings/
-├── settings-view.tsx                  # Componente principal que integra todos los módulos
-├── settings-view/                     # Documentación del componente principal
+├── settings-view.tsx                  # Main component that integrates all modules
+├── settings-view/                     # Documentation of the main component
 │   └── README.md
-├── @progress.md                       # Seguimiento del estado de documentación
-├── @toast-service.md                  # Documentación del servicio de notificaciones
-├── README.md                          # Este archivo (documentación general)
-├── albums/                            # Configuración de álbumes
+├── @progress.md                       # Documentation status tracking
+├── @toast-service.md                  # Notification service documentation
+├── README.md                          # This file (general documentation)
+├── albums/                            # Album settings
 │   ├── albums-settings.tsx
 │   └── ...
-├── collections/                       # Configuración de colecciones
+├── collections/                       # Collection settings
 │   ├── collections-settings.tsx
 │   └── ...
-├── concepts/                          # Configuración de conceptos
+├── concepts/                          # Concept settings
 │   ├── concepts-settings.tsx
 │   └── ...
-├── notes/                             # Configuración de notas
+├── notes/                             # Note settings
 │   ├── notes-settings.tsx
 │   └── ...
-├── tags/                              # Configuración de etiquetas
+├── tags/                              # Tag settings
 │   ├── tags-settings.tsx
 │   └── ...
-├── system/                            # Configuración del sistema
+├── system/                            # System settings
 │   ├── system-settings.tsx
 │   └── ...
-└── media/                             # Configuración de media
-    ├── uploaded-images-settings.tsx     # Orienta al explorador autorizado
+└── media/                             # Media settings
+    ├── uploaded-images-settings.tsx     # Points to the authorized explorer
     └── ...
 ```
 
-## Diagrama de Arquitectura
+## Architecture diagram
 
 ```mermaid
 graph TD
-    A[Settings View] --> B[Módulos de Configuración]
+    A[Settings View] --> B[Settings modules]
 
     B --> C1[System Settings]
     B --> C2[Entities Cards Settings]
@@ -120,61 +130,73 @@ graph TD
     C12 --> G1[Media Root Workflow]
 ```
 
-## Componentes Principales
+## Main components
 
-Cada módulo de configuración sigue una estructura similar:
+Each settings module follows a similar structure.
 
-1. **Componente principal** (`*-settings.tsx`): Maneja la lógica de estado, carga de datos y presentación.
-2. **Formulario de creación/edición** (`create-*-form.tsx`): Componente para la creación y edición de entidades.
-3. **Documentación** (`README.md`): Detalles sobre el módulo, su estructura y uso.
+The structure includes the following parts:
 
-## Características Comunes
+1. **Main component** (`*-settings.tsx`): Handles state logic, data load, and presentation.
+2. **Create/edit form** (`create-*-form.tsx`): Component for create and edit of entities.
+3. **Documentation** (`README.md`): Details about the module, its structure, and use.
 
-- **Interfaz unificada**: Todos los módulos mantienen un estilo visual consistente.
-- **Server Actions**: Uso de server actions para operaciones de escritura.
-- **Notificaciones**: Integración con el servicio de notificaciones toast.
-- **Formularios validados**: Validación con zod para asegurar la integridad de los datos.
-- **Funcionalidad de favoritos**: Posibilidad de marcar entidades como favoritas.
-- **Filtros avanzados**: Capacidad de filtrar por diferentes criterios.
+## Common features
 
-## Integración con Server Actions
+The modules share the following features:
 
-Los componentes utilizan server actions para operaciones de servidor:
+- **Unified interface**: All modules keep a consistent visual style.
+- **Routes**: Use of HTTP routes for write operations. Routes call services.
+- **Notifications**: Integration with the toast notification service.
+- **Validated forms**: Validation with zod to ensure data integrity.
+- **Favorite functionality**: Ability to mark entities as Favorites.
+- **Advanced filters**: Ability to filter by different criteria.
+
+## Integration with routes
+
+The components use HTTP routes for server operations.
+
+Routes call services.
 
 ```typescript
-// Ejemplo de integración con server actions
+// Example of integration with routes
 const handleCreate = async (data) => {
 	try {
 		const result = await createEntity(data);
 		if (result.success) {
-			toastService.success('Entidad creada correctamente');
-			// Actualizar estado local
+			toastService.success('Entity created successfully');
+			// Update local state
 		} else {
-			toastService.error(result.error || 'Error al crear la entidad');
+			toastService.error(result.error || 'Error creating the entity');
 		}
 	} catch (error) {
-		// Manejar errores
+		// Handle errors
 	}
 };
 ```
 
-## Servicios Compartidos
+## Shared services
 
-- **Toast Service**: Proporciona notificaciones consistentes en toda la aplicación.
-- **Logger Service**: Registro estructurado de eventos y errores.
+The modules use the following shared services:
 
-## Funcionamiento Básico
+- **Toast Service**: Provides consistent notifications across the application.
+- **Logger Service**: Structured logging of events and errors.
 
-1. El usuario navega a la pantalla de configuración (`settings-view.tsx`).
-2. Selecciona una pestaña correspondiente a la entidad que desea gestionar.
-3. El componente de configuración específico carga los datos existentes.
-4. El usuario puede crear, editar, eliminar o filtrar entidades.
-5. Las operaciones se realizan a través de server actions y se muestran notificaciones de éxito/error.
+## Basic operation
 
-## Ejemplo de Uso
+The user navigates to the settings screen (`settings-view.tsx`).
+
+The user selects a tab that matches the entity to manage.
+
+The specific settings component loads the existing data.
+
+The user can create, edit, delete, or filter entities.
+
+Operations run through routes and show success or error notifications.
+
+## Usage example
 
 ```tsx
-// Incorporación del módulo Settings en una aplicación
+// Inclusion of the Settings module in an application
 import { SettingsView } from '@/components/settings/settings-view';
 
 export default function SettingsPage() {
@@ -186,22 +208,22 @@ export default function SettingsPage() {
 }
 ```
 
-## 🆕 InterfaceSection (Sección de Interfaz)
+## InterfaceSection (interface section)
 
-Permite a los usuarios personalizar la apariencia de la aplicación: tipografía, tema, animaciones y otros aspectos visuales.
+This section lets users customize the application appearance: typography, theme, animations, and other visual aspects.
 
-### Estructura y flujo
+### Structure and flow
 
 ```mermaid
 graph TD
     SettingsView --> InterfaceSection
     InterfaceSection --> useInterfaceSettingsStore
     InterfaceSection --> interfacePreferencesSchema
-    useInterfaceSettingsStore --> PersistenciaLocal
-    InterfaceSection --> UI[Controles de UI]
+    useInterfaceSettingsStore --> LocalPersistence
+    InterfaceSection --> UI[UI controls]
 ```
 
-### Ejemplo de uso
+### Usage example
 
 ```tsx
 import InterfaceSection from './interface-section';
@@ -211,106 +233,126 @@ import InterfaceSection from './interface-section';
 
 ### Best practices
 
-- Validar siempre con Zod antes de persistir cambios.
-- Usar el store Zustand para reactividad y persistencia.
-- Documentar cualquier extensión de preferencias en los tipos y el schema.
+Always validate with Zod before you persist changes.
 
-> Última actualización: 2025-06-17
+Use the Zustand store for reactivity and persistence.
 
-## Mejores Prácticas
+Document any preference extension in the types and the schema.
 
-- **Consistencia**: Mantener la consistencia visual y funcional entre todos los módulos.
-- **Validación**: Implementar validación de formularios para todos los datos de entrada.
-- **Feedback**: Proporcionar feedback claro al usuario sobre las operaciones realizadas.
-- **Rendimiento**: Optimizar el rendimiento cargando solo los datos necesarios.
-- **Accesibilidad**: Asegurar que todos los componentes sean accesibles según WCAG.
+> Last update: 2025-06-17
 
-## Notas de Desarrollo
+## Best practices
 
-- Los módulos comparten una arquitectura común pero cada uno tiene sus particularidades.
-- Para extender la funcionalidad, seguir los patrones establecidos y mantener la consistencia.
-- Todos los módulos utilizan la misma lógica de notificaciones a través del servicio de toast.
+The following practices apply to all modules:
 
-# Settings Components 🛠️
+- **Consistency**: Keep visual and functional consistency across all modules.
+- **Validation**: Implement form validation for all input data.
+- **Feedback**: Provide clear feedback to the user about completed operations.
+- **Performance**: Optimize performance by loading only the needed data.
+- **Accessibility**: Ensure that all components are accessible according to WCAG.
 
-Componentes para la configuración y personalización de la interfaz de usuario del sistema de gestión de imágenes.
+## Development notes
 
-## 📁 Estructura
+The modules share a common architecture, but each one has its particulars.
+
+To extend functionality, follow the established patterns and keep consistency.
+
+All modules use the same notification logic through the toast service.
+
+# Settings components
+
+These components configure and customize the user interface of the media management system.
+
+## Structure
 
 ```
 settings/
-├── interface-section.tsx    # Configuración de interfaz y FileBrowser
-├── README.md               # Esta documentación
-└── [otros componentes]     # Futuras secciones de configuración
+├── interface-section.tsx    # Interface and FileBrowser settings
+├── README.md               # This documentation
+└── [other components]     # Future settings sections
 ```
 
-## 🎛️ InterfaceSection
+## InterfaceSection
 
-Componente principal para configurar todos los aspectos visuales y de comportamiento de la interfaz.
+This main component configures all visual and behavior aspects of the interface.
 
-### ✨ Características
+### Features
 
-#### 🎨 Configuración General
+#### General configuration
 
-- **Tipografía**: Sistema, Serif, Monoespaciada, Redondeada
-- **Tamaño de fuente**: Pequeño, Mediano, Grande
-- **Tema**: Sistema, Claro, Oscuro
-- **Animaciones**: Habilitadas/Deshabilitadas
-- **Thumbnails**: Configuración de aspect ratio, bordes, animaciones
+The general settings include the following options:
 
-#### 👁️ Configuración del FileBrowser
+- **Typography**: System, Serif, Monospaced, Rounded
+- **Font size**: Small, Medium, Large
+- **Theme**: System, Light, Dark
+- **Animations**: Enabled or disabled
+- **Thumbnails**: Configuration of aspect ratio, borders, animations
 
-##### 📋 General
+#### FileBrowser configuration
 
-- Vista por defecto (Grid, Cards, Mosaico, Lista)
-- Elementos por lote (10-200)
-- Carga progresiva
-- Transiciones entre vistas
-- Selección múltiple
-- Arrastrar y soltar
-- Mostrar contador de elementos
-- Mostrar tamaño total
+##### General
 
-##### 🔲 Vista Grid
+The general FileBrowser settings include the following options:
 
-- **Columnas**: Mínimo (1-10), Máximo (2-12)
-- **Tamaño**: Elemento (80-400px), Espaciado (0-32px)
-- **Aspecto**: Relación de aspecto (0.5-3.0)
-- **Interacción**: Info al hover, Animaciones hover
+- Default view (Grid, Cards, Mosaic, List)
+- Items per batch (10-200)
+- Progressive load
+- Transitions between views
+- Multi-select
+- Drag and drop
+- Show item counter
+- Show total size
 
-##### 🗃️ Vista Cards
+##### Grid view
 
-- **Columnas**: Mínimo (1-6), Máximo (2-8)
-- **Dimensiones**: Ancho (200-600px), Alto (250-800px)
-- **Espaciado**: Gap entre tarjetas (8-48px)
-- **Contenido**: Metadatos, Info técnica, Badges
-- **Preview**: Tamaño (Pequeño, Mediano, Grande)
+The grid view includes the following options:
 
-##### 🧱 Vista Masonry/Mosaico
+- **Columns**: Minimum (1-10), Maximum (2-12)
+- **Size**: Item (80-400px), Spacing (0-32px)
+- **Aspect**: Aspect ratio (0.5-3.0)
+- **Interaction**: Info on hover, hover animations
 
-- **Columnas**: Mínimo (2-8), Máximo (3-12)
-- **Dimensiones**: Ancho columna (120-400px)
-- **Espaciado**: Gap columnas (2-24px), Gap filas (2-24px)
-- **Alturas**: Máxima (200-800px), Mínima (80-300px)
-- **Comportamiento**: Respetar aspect ratio, Balanceo automático
+##### Cards view
 
-##### 📋 Vista List
+The cards view includes the following options:
 
-- **Filas**: Altura (40-120px), Gap (0-16px)
-- **Thumbnails**: Mostrar/Ocultar, Tamaño (Pequeño, Mediano, Grande)
-- **Columnas visibles**:
-  - Nombre, Tamaño, Fecha Modificación
-  - Fecha Creación, Tipo, Dimensiones, Etiquetas
-- **Visualización**: Líneas zebra, Modo compacto
+- **Columns**: Minimum (1-6), Maximum (2-8)
+- **Dimensions**: Width (200-600px), Height (250-800px)
+- **Spacing**: Gap between cards (8-48px)
+- **Content**: Metadata, technical info, badges
+- **Preview**: Size (Small, Medium, Large)
 
-##### ⚡ Rendimiento
+##### Masonry/mosaic view
 
-- **Virtualización**: Habilitada/Deshabilitada
-- **Pre-carga**: Elementos (5-100)
-- **Cache**: Habilitado, Límite (50-1000)
-- **Calidad**: Thumbnails (Baja, Media, Alta)
+The masonry view includes the following options:
 
-### 🔧 Uso
+- **Columns**: Minimum (2-8), Maximum (3-12)
+- **Dimensions**: Column width (120-400px)
+- **Spacing**: Column gap (2-24px), row gap (2-24px)
+- **Heights**: Maximum (200-800px), Minimum (80-300px)
+- **Behavior**: Respect aspect ratio, automatic balancing
+
+##### List view
+
+The list view includes the following options:
+
+- **Rows**: Height (40-120px), Gap (0-16px)
+- **Thumbnails**: Show or hide, size (Small, Medium, Large)
+- **Visible columns**:
+  - Name, Size, Modified Date
+  - Created Date, Type, Dimensions, Tags
+- **Display**: Zebra lines, compact mode
+
+##### Performance
+
+The performance settings include the following options:
+
+- **Virtualization**: Enabled or disabled
+- **Preload**: Items (5-100)
+- **Cache**: Enabled, limit (50-1000)
+- **Quality**: Thumbnails (Low, Medium, High)
+
+### Use
 
 ```tsx
 import InterfaceSection from '@/components/settings/interface-section';
@@ -324,56 +366,62 @@ function SettingsPage() {
 }
 ```
 
-### 🏗️ Arquitectura
+### Architecture
 
-#### 📊 Store Integration
+#### Store integration
+
+The section integrates with the following store features:
 
 - **Zustand Store**: `useInterfaceSettingsStore`
-- **Persistencia**: LocalStorage automática
-- **Validación**: Zod schema en tiempo real
-- **Reactividad**: Cambios aplicados inmediatamente
+- **Persistence**: Automatic LocalStorage
+- **Validation**: Zod schema in real time
+- **Reactivity**: Changes applied immediately
 
-#### 🎯 Helpers
+#### Helpers
 
 ```tsx
-// Actualizar configuración general del FileBrowser
+// Update general FileBrowser configuration
 updateFileBrowserConfig(section: string, key: string, value: any)
 
-// Actualizar configuración de vista específica
+// Update configuration of a specific view
 updateViewConfig(viewType: 'grid'|'cards'|'masonry'|'list', key: string, value: any)
 
-// Actualizar columnas visibles en vista lista
+// Update visible columns in list view
 updateListColumn(column: string, visible: boolean)
 ```
 
-#### 🔑 IDs Únicos
+#### Unique IDs
 
-Usa `useId()` para generar IDs únicos para componentes Switch y evitar conflictos.
+Use `useId()` to generate unique IDs for Switch components and avoid conflicts.
 
-### 📱 UI/UX
+### UI/UX
 
-#### 🎨 Componentes UI
+#### UI components
 
-- **Cards**: Secciones organizadas con headers
-- **Tabs**: Navegación entre configuraciones de vistas
-- **Switches**: Controles booleanos
-- **Inputs**: Valores numéricos con validación
-- **Selects**: Opciones predefinidas
-- **Labels**: Asociación semántica con controles
+The section uses the following UI components:
 
-#### 🎯 Iconografía
+- **Cards**: Organized sections with headers
+- **Tabs**: Navigation between view settings
+- **Switches**: Boolean controls
+- **Inputs**: Numeric values with validation
+- **Selects**: Predefined options
+- **Labels**: Semantic association with controls
 
-- **Settings**: Configuración general
-- **Eye**: Visor de archivos
-- **Grid**: Vista grilla
-- **LayoutGrid**: Vista cards
-- **Columns**: Vista mosaico
-- **List**: Vista lista
-- **Zap**: Rendimiento
+#### Iconography
 
-### 🔄 Tipos y Validación
+The section uses the following icons:
 
-#### 📋 Tipos Principales
+- **Settings**: General configuration
+- **Eye**: File viewer
+- **Grid**: Grid view
+- **LayoutGrid**: Cards view
+- **Columns**: Mosaic view
+- **List**: List view
+- **Zap**: Performance
+
+### Types and validation
+
+#### Main types
 
 ```typescript
 interface FileBrowserConfig {
@@ -388,75 +436,81 @@ interface FileBrowserConfig {
 }
 ```
 
-#### ✅ Validación Zod
+#### Zod validation
 
-- Rangos numéricos validados
-- Enums para opciones predefinidas
-- Validación en tiempo real
-- Fallback a valores por defecto
+The schema provides the following validation:
 
-### 🎯 Configuraciones por Vista
+- Validated numeric ranges
+- Enums for predefined options
+- Real-time validation
+- Fallback to default values
 
-#### 🔲 Grid (Óptima para navegación rápida)
+### Configurations by view
 
-- **Propósito**: Vista general rápida de imágenes
-- **Casos de uso**: Navegación, selección múltiple
-- **Optimizaciones**: Aspect ratio consistente, hover info
+#### Grid (optimal for fast navigation)
 
-#### 🗃️ Cards (Rica en información)
+- **Purpose**: Fast general view of images
+- **Use cases**: Navigation, multi-select
+- **Optimizations**: Consistent aspect ratio, hover info
 
-- **Propósito**: Vista detallada con metadatos
-- **Casos de uso**: Revisión de contenido, organización
-- **Optimizaciones**: Badges, info técnica, previews grandes
+#### Cards (rich in information)
 
-#### 🧱 Masonry (Estética visual)
+- **Purpose**: Detailed view with metadata
+- **Use cases**: Content review, organization
+- **Optimizations**: Badges, technical info, large previews
 
-- **Propósito**: Presentación visual atractiva
-- **Casos de uso**: Portfolios, galerías, inspiración
-- **Optimizaciones**: Aspect ratio natural, balanceo automático
+#### Masonry (visual aesthetic)
 
-#### 📋 List (Eficiencia de datos)
+- **Purpose**: Attractive visual presentation
+- **Use cases**: Portfolios, galleries, inspiration
+- **Optimizations**: Natural aspect ratio, automatic balancing
 
-- **Propósito**: Vista tabular con información detallada
-- **Casos de uso**: Gestión de archivos, análisis de datos
-- **Optimizaciones**: Columnas configurables, modo compacto
+#### List (data efficiency)
 
-### 🚀 Optimizaciones de Rendimiento
+- **Purpose**: Tabular view with detailed information
+- **Use cases**: File management, data analysis
+- **Optimizations**: Configurable columns, compact mode
 
-#### ⚡ Virtualización
+### Performance optimizations
 
-- **Propósito**: Renderizar solo elementos visibles
-- **Beneficio**: Manejo de miles de imágenes sin lag
-- **Configuración**: Elementos de pre-carga ajustables
+#### Virtualization
 
-#### 🗄️ Cache de Thumbnails
+- **Purpose**: Render only visible items
+- **Benefit**: Handling of thousands of images without lag
+- **Configuration**: Adjustable preload items
 
-- **Propósito**: Evitar re-generación de miniaturas
-- **Beneficio**: Navegación más fluida
-- **Configuración**: Límite de cache y calidad ajustables
+#### Thumbnail cache
 
-#### 📦 Carga Progresiva
+- **Purpose**: Avoid thumbnail regeneration
+- **Benefit**: Smoother navigation
+- **Configuration**: Adjustable cache limit and quality
 
-- **Propósito**: Cargar contenido en lotes
-- **Beneficio**: Tiempo de carga inicial reducido
-- **Configuración**: Tamaño de lote personalizable
+#### Progressive load
 
-### 🎨 Personalización Avanzada
+- **Purpose**: Load content in batches
+- **Benefit**: Reduced initial load time
+- **Configuration**: Customizable batch size
 
-#### 🖼️ Thumbnails
+### Advanced customization
 
-- **Bordes**: Configurables por vista (0-32px)
-- **Animaciones**: Habilitables/Deshabilitables
-- **Aspect Ratio**: Respeto al original o forzado
-- **Rendimiento**: Modo ultra performance
+#### Thumbnails
 
-#### 🎭 Animaciones
+The thumbnail settings include the following options:
 
-- **Transiciones**: Entre cambios de vista
-- **Hover**: Efectos de interacción
-- **Performance**: Deshabilitables para dispositivos lentos
+- **Borders**: Configurable by view (0-32px)
+- **Animations**: Enable or disable
+- **Aspect Ratio**: Respect the original or force it
+- **Performance**: Ultra performance mode
 
-### 📊 Valores por Defecto
+#### Animations
+
+The animation settings include the following options:
+
+- **Transitions**: Between view changes
+- **Hover**: Interaction effects
+- **Performance**: Disable for slow devices
+
+### Default values
 
 ```typescript
 const defaultFileBrowserConfig = {
@@ -471,51 +525,59 @@ const defaultFileBrowserConfig = {
 };
 ```
 
-### 🔮 Casos de Uso Específicos
+### Specific use cases
 
-#### 📸 Fotógrafo Profesional
+#### Professional photographer
 
-- **Grid**: 6-8 columnas, info al hover
-- **Cards**: Metadatos completos, preview grande
-- **Performance**: Alta calidad, cache amplio
+- **Grid**: 6-8 columns, info on hover
+- **Cards**: Complete metadata, large preview
+- **Performance**: High quality, wide cache
 
-#### 🎨 Diseñador Gráfico
+#### Graphic designer
 
-- **Masonry**: Aspect ratio natural, balanceo automático
-- **Cards**: Badges de proyectos, info técnica
-- **Performance**: Calidad alta, animaciones habilitadas
+- **Masonry**: Natural aspect ratio, automatic balancing
+- **Cards**: Project badges, technical info
+- **Performance**: High quality, animations enabled
 
-#### 📊 Gestor de Contenido
+#### Content manager
 
-- **List**: Todas las columnas visibles, modo compacto
-- **Grid**: Muchas columnas, sin animaciones
-- **Performance**: Virtualización, carga rápida
+- **List**: All columns visible, compact mode
+- **Grid**: Many columns, no animations
+- **Performance**: Virtualization, fast load
 
-### 🛠️ Desarrollo y Extensión
+### Development and extension
 
-#### 🔧 Agregar Nueva Vista
+#### Add a new view
 
-1. Definir tipos en `types.ts`
-2. Agregar schema en `interface.schema.ts`
-3. Configurar valores por defecto en `store.ts`
-4. Implementar tab en `InterfaceSection`
+Define types in `types.ts`.
 
-#### 📋 Agregar Nueva Configuración
+Add the schema in `interface.schema.ts`.
 
-1. Extender interfaces existentes
-2. Actualizar schemas de validación
-3. Agregar controles UI
-4. Documentar casos de uso
+Configure default values in `store.ts`.
 
-## 🎯 Próximas Mejoras
+Implement the tab in `InterfaceSection`.
 
-- [ ] **Presets**: Configuraciones predefinidas por tipo de usuario
-- [ ] **Exportar/Importar**: Configuraciones entre dispositivos
-- [ ] **Temas personalizados**: Colores y estilos avanzados
-- [ ] **Shortcuts**: Atajos de teclado configurables
-- [ ] **Vista híbrida**: Combinación de vistas en pantalla
-- [ ] **Configuración por carpeta**: Settings específicos por ubicación
+#### Add a new setting
+
+Extend the existing interfaces.
+
+Update the validation schemas.
+
+Add UI controls.
+
+Document the use cases.
+
+## Planned improvements
+
+The following improvements are planned:
+
+- [ ] **Presets**: Predefined configurations by user type
+- [ ] **Export/Import**: Configurations between devices
+- [ ] **Custom themes**: Advanced colors and styles
+- [ ] **Shortcuts**: Configurable keyboard shortcuts
+- [ ] **Hybrid view**: Combination of views on screen
+- [ ] **Per-folder configuration**: Specific settings by location
 
 ---
 
-_Documentación actualizada para la versión con configuración completa del FileBrowser_ 🚀
+_Documentation updated for the version with complete FileBrowser configuration_

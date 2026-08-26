@@ -1,48 +1,56 @@
-# Referencia de API
+# API reference
 
-Esta referencia organiza la API por **familias funcionales**. El backend real incluye rutas de negocio, soporte operativo, previews, streams y utilidades de debug.
+This reference groups the API by functional families. The backend includes business routes, operational support, previews, streams, and debug utilities.
 
-## 1. Base y convenciones
+## 1. Base URL and conventions
 
 ### Base URL
 
-- Desarrollo local: `http://localhost:4000`
-- Base API: `http://localhost:4000/api`
+The local development server uses these URLs:
 
-### Endpoints fuera de `/api`
+- Local development: `http://localhost:4000`
+- API base: `http://localhost:4000/api`
+
+### Endpoints outside `/api`
+
+The following routes sit outside `/api`:
 
 - `GET /health`
-- redirección de compatibilidad desde `/search` hacia `/api/search`
+- Compatibility redirect from `/search` to `/api/search`
 
-### Formatos de respuesta
+### Response formats
 
-La API devuelve principalmente:
+The API returns these payload types:
 
 - JSON
-- binarios (originales, thumbnails)
-- SVG de preview
-- streams SSE en endpoints específicos
+- binaries (originals, thumbnails)
+- preview SVG
+- SSE streams on specific endpoints
 
-## 2. Salud y sistema
+## 2. Health and system
 
-### Salud
+### Health
+
+Use this endpoint to check process health:
 
 - `GET /health`
 
-### Sistema y operación
+### System and operations
+
+Use these routes for operational state, metrics, and system utilities:
 
 - `GET /api/system/*`
 - `GET /api/stats`
 - `GET /api/activity`
 - `GET /api/queue/*`
 
-Estas rutas sirven para estado operativo, métricas y utilidades del sistema.
-
-## 3. Carpetas
+## 3. Folders
 
 Base: `/api/folders`
 
-### Endpoints principales observados en imágenes
+### Main endpoints observed in images
+
+The folder family exposes these endpoints:
 
 - `GET /`
 - `GET /tree`
@@ -58,20 +66,24 @@ Base: `/api/folders`
 - `GET /:id/preview`
 - `POST /reindex-all`
 - `POST /:id/reindex`
-- `POST /reindex` (legacy/compatibilidad)
+- `POST /reindex` (legacy/compatibility)
 
-### Rol de esta familia
+### Role of this family
 
-- navegación y estructura de carpetas,
-- previews visuales de carpeta,
-- acceso a contenido agregado,
-- reindexado por carpeta o global.
+This family covers the following work:
 
-## 4. Imágenes
+- folder navigation and structure
+- visual folder previews
+- aggregated folder content
+- folder or global reindex
+
+## 4. Images
 
 Base: `/api/images`
 
-### Endpoints principales observados
+### Main endpoints observed
+
+The image family exposes these endpoints:
 
 - `GET /`
 - `GET /favorites`
@@ -92,26 +104,28 @@ Base: `/api/images`
 - `GET /:id/original`
 - `GET /:id`
 
-### Qué cubre
+### What this family covers
 
-- CRUD de imágenes,
-- favoritos y operaciones batch,
-- thumbnails y original,
-- consultas por carpeta, hash y stats.
+This family covers the following work:
 
-## 5. Videos y audio
+- image CRUD
+- favorites and batch operations
+- thumbnails and original bytes
+- queries by folder, hash, and stats
+
+## 5. Video and audio
 
 ### Videos
 
 Base: `/api/videos`
 
-Incluye operaciones de listado, detalle, favoritos, borrado y endpoints asociados al dominio video.
+This family includes list, detail, favorites, delete, and other video-domain endpoints.
 
 ### Audio
 
 Base: `/api/audio`
 
-Endpoints observados en `audios.effect.ts`:
+Endpoints observed in `audios.effect.ts`:
 
 - `GET /`
 - `GET /favorites`
@@ -129,39 +143,39 @@ Endpoints observados en `audios.effect.ts`:
 - `DELETE /:id`
 - `DELETE /batch`
 
-### Preview especializado de audio
+### Specialized audio preview
 
-Además existe:
+The following preview routes also exist:
 
 - `GET /api/audio-waveforms/:id/waveform`
 - `GET /api/audio-waveforms/:id/info`
 - `GET /api/audio-waveforms/:id/waveform/preview`
 
-## 6. Entidades organizativas
+## 6. Organizers
 
-### Álbumes
+### Albums
 
 Base: `/api/albums`
 
-Patrón observado:
+The observed pattern includes these operations:
 
-- listar,
-- obtener por id,
-- crear,
-- actualizar,
-- eliminar,
-- añadir/quitar relaciones,
-- consultar contenido.
+- list
+- get by id
+- create
+- update
+- delete
+- add or remove relations
+- query content
 
-### Colecciones
+### Collections
 
 Base: `/api/collections`
 
-Patrón equivalente a álbumes.
+The collection pattern matches albums.
 
-### Grupos, wildcards, notas, propiedades, world-items
+### Groups, wildcards, notes, properties, world-items
 
-Base montada a través de `secondary-services.effect.ts`:
+`secondary-services.effect.ts` mounts these bases:
 
 - `/api/groups`
 - `/api/wildcards`
@@ -175,19 +189,19 @@ Base montada a través de `secondary-services.effect.ts`:
 
 Base: `/api/characters`
 
-Patrón observado:
+The observed pattern includes these operations:
 
-- listar,
-- detalle,
-- crear,
-- actualizar,
-- borrar,
-- favoritos,
-- relaciones con imágenes u otras entidades.
+- list
+- detail
+- create
+- update
+- delete
+- favorites
+- relations with images or other entities
 
-### Places y concepts
+### Places and concepts
 
-Bases:
+These families use the following bases:
 
 - `/api/places`
 - `/api/concepts`
@@ -198,44 +212,52 @@ Base:
 
 - `/api/prompts`
 
-Estas tres familias salen desde `worldbuilding.effect.ts`.
+These three families come from `worldbuilding.effect.ts`.
 
-## 8. Documentos, JSON, 3D y uploaded images
+## 8. Documents, JSON, 3D, and uploaded images
 
-La familia `file-services.effect.ts` monta varias sub-APIs.
+`file-services.effect.ts` mounts several sub-APIs.
 
 ### 3D
 
 Base: `/api/file3ds`
 
-- listado,
-- detalle,
-- CRUD,
+This family includes these operations:
+
+- list
+- detail
+- CRUD
 - `GET /:id/thumbnail`
 
 ### Documents
 
 Base: `/api/documents`
 
-- listado,
-- detalle,
-- CRUD,
+This family includes these operations:
+
+- list
+- detail
+- CRUD
 - `GET /:id/preview`
 - `GET /:id/images`
 
-### JSON Files
+### JSON files
 
 Base: `/api/json-files`
 
-- listado,
-- detalle,
-- CRUD,
+This family includes these operations:
+
+- list
+- detail
+- CRUD
 - `GET /:id/preview`
 - `GET /:id/images`
 
 ### Uploaded images
 
 Base: `/api/uploaded-images`
+
+This family exposes these endpoints:
 
 - `GET /stats`
 - `GET /`
@@ -245,13 +267,13 @@ Base: `/api/uploaded-images`
 - `PUT /:id`
 - `DELETE /:id`
 
-## 9. Filesystem y descarga
+## 9. Filesystem and download
 
 ### Filesystem
 
 Base: `/api/files`
 
-Endpoints observados:
+Observed endpoints:
 
 - `GET /directory/:path`
 - `POST /directory`
@@ -260,61 +282,65 @@ Endpoints observados:
 - `POST /move`
 - `GET /content`
 
-### Descargas
+### Downloads
 
 Base: `/api/download`
 
-Operaciones observadas:
+Observed operations:
 
-- `POST /` con body `{ "path": "..." }`
+- `POST /` with body `{ "path": "..." }`
 - `GET /?path=...`
 
-Ambas variantes descargan el binario directamente. El backend devuelve `Content-Type`, `Content-Length`, `Content-Disposition` con nombre codificado y `X-Content-Type-Options: nosniff`.
+Both variants download the binary directly. The backend returns `Content-Type`, `Content-Length`, `Content-Disposition` with an encoded name, and `X-Content-Type-Options: nosniff`.
 
 ## 10. Search
 
 Base: `/api/search`
 
-### Endpoints observados
+### Observed endpoints
+
+The search family exposes these endpoints:
 
 - `GET /`
 - `GET /images`
 - `GET /fts`
 
-### Comportamiento
+### Behavior
 
-- búsqueda global por query,
-- búsqueda específica de imágenes,
-- búsqueda FTS sobre archivos.
+Search supports these modes:
 
-## 11. Metadata y thumbnails
+- global search by query
+- image-specific search
+- FTS search over files
+
+## 11. Metadata and thumbnails
 
 ### Metadata
 
-Bases:
+These families use the following bases:
 
 - `/api/metadata`
 - `/api/metadata-advanced`
 
-Operaciones observadas:
+Observed operations:
 
-- actualización puntual o masiva,
-- extracción/diagnóstico avanzado desde path u objeto.
+- point or bulk update
+- advanced extraction or diagnosis from a path or object
 
 ### Thumbnails
 
-Bases:
+These families use the following bases:
 
 - `/api/thumbnails`
 - `/api/thumbnails/unified`
 - `/api/json`
 - `/api/3d`
 
-El sistema de previews está repartido: no todo sale del mismo router.
+The preview system is split. Not every preview comes from the same router.
 
-## 12. Favoritos, settings, profiles y eventos
+## 12. Favorites, settings, profiles, and events
 
-### Favoritos
+### Favorites
 
 Base: `/api/favorites`
 
@@ -330,19 +356,19 @@ Base: `/api/profiles`
 
 Base: `/api/events`
 
-Operaciones observadas incluyen también `GET /stream`, útil para escenarios tipo SSE/eventing.
+Observed operations also include `GET /stream`, which supports SSE and eventing scenarios.
 
-## 13. Reindex y logs operativos
+## 13. Reindex and operational logs
 
-### Reindex incremental
+### Incremental reindex
 
 Base: `/api/reindex`
 
-### Logs de reindex
+### Reindex logs
 
 Base: `/api/reindex-logs`
 
-Endpoints observados:
+Observed endpoints:
 
 - `GET /stats`
 - `GET /errors`
@@ -351,26 +377,30 @@ Endpoints observados:
 - `POST /cleanup`
 - `GET /recent`
 
-## 14. Debug y testing interno
+## 14. Debug and internal testing
 
-El backend expone rutas auxiliares que no deben confundirse con la API de negocio principal.
+The backend exposes auxiliary routes. Do not treat them as the main product API.
 
-Bases relevantes:
+Relevant bases:
 
 - `/api/debug`
 - `/api/debug-entity-types`
 - `/api/test-characters`
 
-Estas rutas son útiles para desarrollo y diagnóstico, pero no representan la superficie “limpia” del producto.
+These routes help development and diagnosis. They are not the clean product surface.
 
-## 15. Convenciones prácticas para consumidores internos
+## 15. Practical conventions for internal consumers
 
-- Esperar mezcla de JSON, SVG y binarios.
-- Revisar si un endpoint devuelve `data`, `pagination` o binario puro.
-- Distinguir rutas de dominio frente a rutas técnicas.
-- Confirmar si una operación ya tiene soporte batch o preview especializado antes de crear otra.
+Follow these rules when you consume the API:
 
-## 16. Relación con la documentación restante
+- Expect a mix of JSON, SVG, and binaries.
+- Check whether an endpoint returns `data`, `pagination`, or a raw binary.
+- Distinguish domain routes from technical routes.
+- Confirm batch or specialized preview support before you add another operation.
+
+## 16. Related documentation
+
+The following documents complete this reference:
 
 - [`./ARCHITECTURE.md`](./ARCHITECTURE.md)
 - [`./SERVICES-GUIDE.md`](./SERVICES-GUIDE.md)

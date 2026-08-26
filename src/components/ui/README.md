@@ -1,35 +1,38 @@
-# Componentes de UI Reutilizables - Image Manager
+# Reusable UI components - Media Manager
 
-Esta carpeta contiene los componentes de UI reutilizables que pueden ser utilizados en toda la aplicación.
-Los componentes siguen un diseño moderno y coherente, utilizando Tailwind CSS y shadcn/ui como base.
+This folder contains reusable UI components that you can use across the application.
 
-## Estructura de Componentes
+The components follow a modern and coherent design.
 
-Los componentes están organizados de la siguiente manera:
+The components use Tailwind CSS and shadcn/ui as a base.
+
+## Component structure
+
+The components are organized in the following way:
 
 ```
 ui/
-  ├── [componente].tsx        # Componente individual
-  ├── [componente-grupo]/     # Grupo de componentes relacionados
-  |    ├── index.ts           # Exportaciones
-  |    └── [sub-componente].tsx
-  └── README.md               # Documentación
+  ├── [component].tsx        # Individual component
+  ├── [component-group]/     # Group of related components
+  |    ├── index.ts           # Exports
+  |    └── [sub-component].tsx
+  └── README.md               # Documentation
 ```
 
-## Componentes Nuevos
+## New components
 
 ### EntityStats
 
-Un componente flexible para mostrar estadísticas relacionadas con entidades.
+This flexible component shows statistics related to entities.
 
 ```tsx
 import { EntityStats } from '@/components/ui/entity-stats';
 
-// Ejemplo de uso
+// Usage example
 <EntityStats
 	stats={[
-		{ value: 128, label: 'imágenes', icon: <CameraIcon /> },
-		{ value: 12, label: 'vídeos', icon: <FilmIcon /> },
+		{ value: 128, label: 'images', icon: <CameraIcon /> },
+		{ value: 12, label: 'videos', icon: <FilmIcon /> },
 	]}
 	primaryColor="#3b82f6"
 	size="md"
@@ -40,51 +43,51 @@ import { EntityStats } from '@/components/ui/entity-stats';
 
 #### Props
 
-| Prop           | Tipo                   | Default   | Descripción                           |
+| Prop           | Type                   | Default   | Description                           |
 | -------------- | ---------------------- | --------- | ------------------------------------- |
-| `stats`        | `StatItem[]`           | -         | Array de estadísticas a mostrar       |
-| `primaryColor` | `string`               | '#3b82f6' | Color principal para las estadísticas |
-| `size`         | `'sm' \| 'md' \| 'lg'` | 'md'      | Tamaño del componente                 |
-| `animated`     | `boolean`              | `true`    | Activar animación al aparecer         |
-| `asBadges`     | `boolean`              | `false`   | Mostrar como badges en lugar de lista |
-| `className`    | `string`               | -         | Clases adicionales                    |
+| `stats`        | `StatItem[]`           | -         | Array of statistics to display        |
+| `primaryColor` | `string`               | '#3b82f6' | Main color for the statistics         |
+| `size`         | `'sm' \| 'md' \| 'lg'` | 'md'      | Size of the component                 |
+| `animated`     | `boolean`              | `true`    | Enable animation on appear            |
+| `asBadges`     | `boolean`              | `false`   | Show as badges instead of a list      |
+| `className`    | `string`               | -         | Extra classes                         |
 
-#### StatItem Interface
+#### StatItem interface
 
 ```ts
 interface StatItem {
-	value: number; // Valor numérico
-	label: string; // Etiqueta descriptiva
-	icon?: React.ReactNode; // Icono opcional
-	color?: string; // Color personalizado
-	description?: string; // Descripción para tooltip
-	id?: string; // ID único para la estadística
+	value: number; // Numeric value
+	label: string; // Descriptive label
+	icon?: React.ReactNode; // Optional icon
+	color?: string; // Custom color
+	description?: string; // Description for tooltip
+	id?: string; // Unique ID for the statistic
 }
 ```
 
 ### EntityCard
 
-Un componente de tarjeta genérico y reutilizable para mostrar entidades del sistema.
+This generic reusable card component shows system entities.
 
 ```tsx
 import { EntityCard } from '@/components/ui/entity-card';
 
-// Ejemplo de uso básico
+// Basic usage example
 <EntityCard
-  title="Mi carpeta"
-  subtitle="Carpeta"
-  description="Descripción de la carpeta"
+  title="My folder"
+  subtitle="Folder"
+  description="Folder description"
   icon={<FolderIcon />}
   stats={stats}
   primaryColor="#10b981"
-  href="/carpetas/123"
+  href="/folders/123"
 />
 
-// Con modo TCG y animación
+// With TCG mode and animation
 <EntityCard
-  title="Personaje"
+  title="Character"
   subtitle="Worldbuilding"
-  description="Descripción del personaje"
+  description="Character description"
   icon={<UserIcon />}
   stats={stats}
   tcgMode={true}
@@ -95,37 +98,37 @@ import { EntityCard } from '@/components/ui/entity-card';
 
 #### Props
 
-| Prop             | Tipo                            | Default   | Descripción                        |
+| Prop             | Type                            | Default   | Description                        |
 | ---------------- | ------------------------------- | --------- | ---------------------------------- |
-| `title`          | `string`                        | -         | Título de la tarjeta               |
-| `subtitle`       | `string`                        | -         | Subtítulo opcional                 |
-| `description`    | `string`                        | -         | Descripción corta                  |
-| `icon`           | `React.ReactNode`               | -         | Icono para mostrar junto al título |
-| `primaryColor`   | `string`                        | '#3b82f6' | Color principal para la tarjeta    |
-| `secondaryColor` | `string`                        | -         | Color secundario para gradientes   |
-| `href`           | `string`                        | -         | URL para navegación                |
-| `onClick`        | `() => void`                    | -         | Función para manejar clic          |
-| `stats`          | `StatItem[]`                    | -         | Estadísticas a mostrar             |
-| `tcgMode`        | `boolean`                       | `false`   | Activar modo TCG                   |
-| `compact`        | `boolean`                       | `false`   | Modo compacto con menos altura     |
-| `interactive`    | `boolean`                       | `true`    | Si debe ser interactiva            |
-| `thumbnails`     | `string[]`                      | -         | Imágenes en miniatura              |
-| `className`      | `string`                        | -         | Clases adicionales                 |
-| `footer`         | `React.ReactNode`               | -         | Contenido adicional para el pie    |
-| `animationMode`  | `'hover' \| 'always' \| 'none'` | 'hover'   | Modo de animación                  |
+| `title`          | `string`                        | -         | Card title                         |
+| `subtitle`       | `string`                        | -         | Optional subtitle                  |
+| `description`    | `string`                        | -         | Short description                  |
+| `icon`           | `React.ReactNode`               | -         | Icon to show next to the title     |
+| `primaryColor`   | `string`                        | '#3b82f6' | Main color for the card            |
+| `secondaryColor` | `string`                        | -         | Secondary color for gradients      |
+| `href`           | `string`                        | -         | URL for navigation                 |
+| `onClick`        | `() => void`                    | -         | Function that handles a click      |
+| `stats`          | `StatItem[]`                    | -         | Statistics to display              |
+| `tcgMode`        | `boolean`                       | `false`   | Enable TCG mode                    |
+| `compact`        | `boolean`                       | `false`   | Compact mode with less height      |
+| `interactive`    | `boolean`                       | `true`    | Whether the card must be interactive |
+| `thumbnails`     | `string[]`                      | -         | Thumbnail images                   |
+| `className`      | `string`                        | -         | Extra classes                      |
+| `footer`         | `React.ReactNode`               | -         | Extra content for the footer       |
+| `animationMode`  | `'hover' \| 'always' \| 'none'` | 'hover'   | Animation mode                     |
 
 ### EntityList
 
-Componente para mostrar listas de entidades con opciones avanzadas de búsqueda, filtrado, ordenación y visualización.
+This component shows entity lists with advanced search, filter, sort, and display options.
 
 ```jsx
 <EntityList
 	items={entities}
-	title="Mis Imágenes"
-	description="Colección de imágenes personales"
+	title="My Images"
+	description="Personal image collection"
 	onItemClick={(id) => handleImageClick(id)}
-	categoryFilters={['Naturaleza', 'Ciudad', 'Personas']}
-	tagFilters={['favorito', 'vacaciones', 'trabajo']}
+	categoryFilters={['Nature', 'City', 'People']}
+	tagFilters={['favorite', 'vacation', 'work']}
 	showSearch={true}
 	pagination={true}
 	itemsPerPage={12}
@@ -134,52 +137,54 @@ Componente para mostrar listas de entidades con opciones avanzadas de búsqueda,
 
 **Props:**
 
-| Prop                | Tipo                                                               | Default           | Descripción                                      |
+| Prop                | Type                                                               | Default           | Description                                      |
 | ------------------- | ------------------------------------------------------------------ | ----------------- | ------------------------------------------------ |
-| `items`             | `EntityItem[]`                                                     | `[]`              | Array de entidades a mostrar                     |
-| `title`             | `string`                                                           | `'Entidades'`     | Título de la lista                               |
-| `description`       | `string`                                                           | `undefined`       | Descripción opcional                             |
-| `emptyState`        | `ReactNode`                                                        | (predeterminado)  | Contenido personalizado para estado vacío        |
-| `viewType`          | `'grid' \| 'list' \| 'compact'`                                    | `'grid'`          | Tipo de visualización inicial                    |
-| `allowViewChange`   | `boolean`                                                          | `true`            | Permitir cambiar el tipo de vista                |
-| `showSearch`        | `boolean`                                                          | `true`            | Mostrar barra de búsqueda                        |
-| `showFilters`       | `boolean`                                                          | `true`            | Mostrar controles de filtrado                    |
-| `allowSelection`    | `boolean`                                                          | `false`           | Permitir selección múltiple de ítems             |
-| `onSelectionChange` | `(ids: string[]) => void`                                          | `undefined`       | Callback al cambiar la selección                 |
-| `searchPlaceholder` | `string`                                                           | `'Buscar...'`     | Texto del placeholder de búsqueda                |
-| `pagination`        | `boolean`                                                          | `true`            | Activar paginación                               |
-| `itemsPerPage`      | `number`                                                           | `9`               | Ítems a mostrar por página                       |
-| `sortOptions`       | `Array<{label: string, value: string, sortFn?: (a, b) => number}>` | (predeterminados) | Opciones de ordenación                           |
-| `categoryFilters`   | `string[]`                                                         | `[]`              | Categorías disponibles para filtrar              |
-| `tagFilters`        | `string[]`                                                         | `[]`              | Etiquetas disponibles para filtrar               |
-| `className`         | `string`                                                           | `''`              | Clases CSS adicionales                           |
-| `onItemClick`       | `(id: string) => void`                                             | `undefined`       | Función a llamar al hacer clic en un ítem        |
-| `tcgMode`           | `boolean`                                                          | `false`           | Usar modo de tarjeta de trading para EntityCards |
+| `items`             | `EntityItem[]`                                                     | `[]`              | Array of entities to display                     |
+| `title`             | `string`                                                           | `'Entities'`      | List title                                       |
+| `description`       | `string`                                                           | `undefined`       | Optional description                             |
+| `emptyState`        | `ReactNode`                                                        | (default)         | Custom content for the empty state               |
+| `viewType`          | `'grid' \| 'list' \| 'compact'`                                    | `'grid'`          | Initial display type                             |
+| `allowViewChange`   | `boolean`                                                          | `true`            | Allow change of the view type                    |
+| `showSearch`        | `boolean`                                                          | `true`            | Show the search bar                              |
+| `showFilters`       | `boolean`                                                          | `true`            | Show filter controls                             |
+| `allowSelection`    | `boolean`                                                          | `false`           | Allow multi-select of items                      |
+| `onSelectionChange` | `(ids: string[]) => void`                                          | `undefined`       | Callback when the selection changes              |
+| `searchPlaceholder` | `string`                                                           | `'Search...'`     | Search placeholder text                          |
+| `pagination`        | `boolean`                                                          | `true`            | Enable pagination                                |
+| `itemsPerPage`      | `number`                                                           | `9`               | Items to show per page                           |
+| `sortOptions`       | `Array<{label: string, value: string, sortFn?: (a, b) => number}>` | (defaults)        | Sort options                                     |
+| `categoryFilters`   | `string[]`                                                         | `[]`              | Categories available for filter                  |
+| `tagFilters`        | `string[]`                                                         | `[]`              | Tags available for filter                        |
+| `className`         | `string`                                                           | `''`              | Extra CSS classes                                |
+| `onItemClick`       | `(id: string) => void`                                             | `undefined`       | Function that runs on a click on an item         |
+| `tcgMode`           | `boolean`                                                          | `false`           | Use trading-card mode for EntityCards            |
 
 ### TagInput
 
-Un componente avanzado para la entrada de etiquetas, con soporte para autocompletado, validación y personalización.
+This advanced component supports Tag entry with autocomplete, validation, and customization.
 
-[Ver documentación y ejemplos de TagInput](./tag/README.md)
+[See TagInput documentation and examples](./tag/README.md)
 
-## Integración con Sistema de Diseño
+## Integration with the design system
 
-Estos componentes se integran perfectamente con el sistema de diseño de la aplicación:
+These components integrate with the application design system.
 
-1. **Temas:** Soportan modo claro y oscuro automáticamente
-2. **Responsive:** Diseñados para funcionar en todos los tamaños de pantalla
-3. **Accesibilidad:** Incluyen atributos ARIA y navegación por teclado
-4. **Tailwind CSS:** Utilizan clases de Tailwind CSS para estilos
-5. **shadcn/ui:** Extienden componentes base de shadcn/ui
+The integration includes the following points:
 
-## Ejemplos de Uso
+1. **Themes:** Support light and dark mode automatically
+2. **Responsive:** Designed to work on all screen sizes
+3. **Accessibility:** Include ARIA attributes and keyboard navigation
+4. **Tailwind CSS:** Use Tailwind CSS classes for styles
+5. **shadcn/ui:** Extend base shadcn/ui components
 
-Para ver ejemplos completos y variantes, consulta:
+## Usage examples
 
-- `src/examples/EntityCardExample.tsx` - Muestra diferentes configuraciones de tarjetas y estadísticas
-- `src/examples/EntityListExample.tsx` - Muestra ejemplos de uso de EntityList
+For complete examples and variants, see the following files:
 
-## Diagrama de Relaciones
+- `src/examples/EntityCardExample.tsx` - Shows different card and statistics configurations
+- `src/examples/EntityListExample.tsx` - Shows EntityList usage examples
+
+## Relation diagram
 
 ```mermaid
 graph TD
@@ -196,71 +201,88 @@ graph TD
     style D fill:#d4f1f9
 ```
 
-## Modos de Visualización
+## Display modes
 
-### Modo TCG
+### TCG mode
 
-El modo TCG (Trading Card Game) transforma las tarjetas para que se parezcan a cartas coleccionables:
+TCG (Trading Card Game) mode transforms cards so that they look like collectible cards.
 
-- Bordes decorativos en las esquinas
-- Efectos de brillo y animación
-- Integración con ShineButton para efectos de hover
-- Estilos visuales mejorados
+The mode includes the following elements:
 
-### Modo Compacto
+- Decorative borders on the corners
+- Glow and animation effects
+- Integration with ShineButton for hover effects
+- Enhanced visual styles
 
-El modo compacto reduce la altura de las tarjetas y optimiza el contenido para espacios más pequeños:
+### Compact mode
 
-- Altura reducida
-- Descripción limitada a una sola línea
-- Espaciado interno ajustado
+Compact mode reduces card height and optimizes content for smaller spaces.
 
-### Modos de Animación
+The mode includes the following changes:
 
-Los componentes soportan tres modos de animación:
+- Reduced height
+- Description limited to a single line
+- Adjusted internal spacing
 
-- **hover:** Animación solo al pasar el cursor (por defecto)
-- **always:** Animación constante para destacar elementos
-- **none:** Sin animación para interfaces más sobrias
+### Animation modes
 
-## Buenas Prácticas
+The components support three animation modes.
 
-Al utilizar estos componentes:
+The modes are the following:
 
-1. Proporcionar colores consistentes para las entidades
-2. Utilizar iconos apropiados para cada tipo de entidad
-3. Mantener descripciones concisas (idealmente <150 caracteres)
-4. Limitar las estadísticas a las más relevantes (4-5 máximo)
-5. Considerar el modo compacto para listas densas
-6. Reservar el modo TCG para vistas especiales o destacadas
+- **hover:** Animation only on hover (default)
+- **always:** Constant animation to highlight elements
+- **none:** No animation for quieter interfaces
 
-## Personalización
+## Good practices
 
-Ambos componentes son altamente personalizables a través de props. Para casos especiales:
+When you use these components, follow these practices.
 
-- Usa `className` para añadir estilos personalizados
-- Proporciona contenido personalizado a través de `footer`
-- Personaliza los colores con `primaryColor` y `secondaryColor`
-- Ajusta el comportamiento de interacción con `interactive` y `animationMode`
+Provide consistent colors for entities.
 
-# Componentes UI Reutilizables para Entidades
+Use appropriate icons for each entity type.
 
-Este directorio contiene componentes reutilizables para la gestión de entidades, diseñados para proporcionar una experiencia de usuario consistente en toda la aplicación.
+Keep descriptions concise. Keep them under 150 characters.
 
-## 📝 Índice
+Limit statistics to the most relevant items. Use 4 or 5 at most.
 
-- [EntityCard](#entitycard) - Tarjeta para mostrar entidades
-- [EntityList](#entitylist) - Lista o grid de entidades con búsqueda y filtros
-- [EntityStats](#entitystats) - Mostrar estadísticas de entidades
-- [EntityForm](#entityform) - Formulario dinámico para entidades
-- [EntityHeader](#entityheader) - Encabezado de página para entidades
-- [EntityFilter](#entityfilter) - Sistema avanzado de filtros
+Use compact mode for dense lists.
 
-## Diagrama de Componentes
+Reserve TCG mode for special or featured views.
+
+## Customization
+
+Both components are highly customizable through props.
+
+For special cases, use the following options:
+
+- Use `className` to add custom styles
+- Provide custom content through `footer`
+- Customize colors with `primaryColor` and `secondaryColor`
+- Adjust interaction behavior with `interactive` and `animationMode`
+
+# Reusable UI components for entities
+
+This directory contains reusable components for entity management.
+
+The components provide a consistent user experience across the application.
+
+## Index
+
+The directory includes the following components:
+
+- [EntityCard](#entitycard) - Card that shows entities
+- [EntityList](#entitylist) - Entity list or grid with search and filters
+- [EntityStats](#entitystats) - Display of entity statistics
+- [EntityForm](#entityform) - Dynamic form for entities
+- [EntityHeader](#entityheader) - Page header for entities
+- [EntityFilter](#entityfilter) - Advanced filter system
+
+## Component diagram
 
 ```mermaid
 graph TD
-    User[Usuario] --> EntityList
+    User[User] --> EntityList
     User --> EntityForm
     User --> EntityHeader
 
@@ -270,83 +292,93 @@ graph TD
     EntityHeader --> EntityStats
     EntityHeader --> Breadcrumbs
 
-    EntityForm --> Validation[Validación con Zod]
-    EntityFilter --> SavedFilters[Filtros Guardados]
+    EntityForm --> Validation[Validation with Zod]
+    EntityFilter --> SavedFilters[Saved filters]
 ```
 
-## Componentes
+## Components
 
 ### EntityCard
 
-Tarjeta genérica para mostrar información de entidades con soporte para diferentes modos de visualización.
+This generic card shows entity information with support for different display modes.
 
-**Características principales:**
+**Main features:**
 
-- Soporte para modo compacto
-- Modo TCG (Trading Card Game)
-- Animaciones configurables
-- Muestra de estadísticas y miniaturas
+The card provides the following features:
+
+- Support for compact mode
+- TCG (Trading Card Game) mode
+- Configurable animations
+- Display of statistics and thumbnails
 
 ### EntityList
 
-Componente para mostrar listas o grids de entidades con capacidades avanzadas.
+This component shows entity lists or grids with advanced capabilities.
 
-**Características principales:**
+**Main features:**
 
-- Múltiples modos de vista (grid, lista, compacto)
-- Búsqueda y filtrado
-- Ordenación configurable
-- Selección múltiple de elementos
-- Paginación
+The list provides the following features:
+
+- Multiple view modes (grid, list, compact)
+- Search and filter
+- Configurable sort
+- Multi-select of items
+- Pagination
 
 ### EntityStats
 
-Componente para mostrar estadísticas de entidades en diferentes formatos.
+This component shows entity statistics in different formats.
 
-**Características principales:**
+**Main features:**
 
-- Formato de badges o lista
-- Animaciones de números
-- Personalización de colores
-- Diferentes tamaños
+The component provides the following features:
+
+- Badge or list format
+- Number animations
+- Color customization
+- Different sizes
 
 ### EntityForm
 
-Formulario dinámico para la creación y edición de entidades con validación avanzada.
+This dynamic form creates and edits entities with advanced validation.
 
-**Características principales:**
+**Main features:**
 
-- Generación dinámica de formularios
-- Validación con Zod
-- Múltiples tipos de campos
-- Manejo de errores consistente
-- Confirmación antes de enviar
-- Integración con toast
+The form provides the following features:
 
-**Tipos de campos soportados:**
+- Dynamic form generation
+- Validation with Zod
+- Multiple field types
+- Consistent error handling
+- Confirmation before submit
+- Integration with toast
 
-- `text` - Campos de texto simples
-- `textarea` - Áreas de texto
-- `select` - Selector de opciones
-- `multiselect` - Selector múltiple
-- `switch` - Interruptor booleano
-- `color` - Selector de color con picker
-- `emoji` - Selector de emoji
-- `tags` - Campo para etiquetas
-- `date` - Selector de fecha
-- `number` - Campo numérico
-- `url` - Campo para URLs
+**Supported field types:**
 
-**Ejemplo de uso:**
+The form supports the following field types:
+
+- `text` - Simple text fields
+- `textarea` - Text areas
+- `select` - Option selector
+- `multiselect` - Multi selector
+- `switch` - Boolean switch
+- `color` - Color selector with picker
+- `emoji` - Emoji selector
+- `tags` - Field for Tags
+- `date` - Date selector
+- `number` - Numeric field
+- `url` - Field for URLs
+
+**Usage example:**
 
 ```tsx
 import { EntityForm, EntityFormField } from '@/components/ui/entity-form';
 
-// Definir campos
+// Define fields
 const fields: EntityFormField[] = [
 	{
 		name: 'name',
-		label: 'Nombre',
+		label: 'Name',
 		type: 'text',
 		required: true,
 		validation: {
@@ -356,27 +388,27 @@ const fields: EntityFormField[] = [
 	},
 	{
 		name: 'description',
-		label: 'Descripción',
+		label: 'Description',
 		type: 'textarea',
 		fullWidth: true,
 	},
-	// ... más campos
+	// ... more fields
 ];
 
-// Usar en componente
+// Use in a component
 function MyForm() {
 	const handleSubmit = async (data) => {
-		// Procesar datos
+		// Process data
 		console.log(data);
 	};
 
 	return (
 		<EntityForm
-			title="Crear entidad"
-			description="Complete los campos para crear una nueva entidad"
+			title="Create entity"
+			description="Fill in the fields to create a new entity"
 			fields={fields}
 			onSubmit={handleSubmit}
-			initialData={{ name: 'Valor inicial' }}
+			initialData={{ name: 'Initial value' }}
 		/>
 	);
 }
@@ -384,18 +416,20 @@ function MyForm() {
 
 ### EntityHeader
 
-Componente de encabezado para páginas de entidades, que incluye título, descripción, breadcrumbs, acciones y estadísticas.
+This header component for entity pages includes title, description, breadcrumbs, actions, and statistics.
 
-**Características principales:**
+**Main features:**
 
-- Breadcrumbs integrados
-- Acciones principales y secundarias (en menú desplegable)
-- Integración con estadísticas
-- Botón de favorito
-- Imagen destacada
-- Personalización de colores
+The header provides the following features:
 
-**Ejemplo de uso:**
+- Integrated breadcrumbs
+- Primary and secondary actions (in a dropdown menu)
+- Integration with statistics
+- Favorite button
+- Featured image
+- Color customization
+
+**Usage example:**
 
 ```tsx
 import { EntityHeader } from '@/components/ui/entity-header';
@@ -403,28 +437,28 @@ import { EntityHeader } from '@/components/ui/entity-header';
 function EntityDetailPage() {
 	return (
 		<EntityHeader
-			title="Mi Entidad"
-			subtitle="Categoría: General"
-			description="Descripción detallada de la entidad..."
-			backUrl="/entidades"
+			title="My Entity"
+			subtitle="Category: General"
+			description="Detailed description of the entity..."
+			backUrl="/entities"
 			primaryColor="#3b82f6"
 			stats={[
-				{ label: 'Elementos', value: 42 },
-				{ label: 'Vistas', value: 1024 },
+				{ label: 'Items', value: 42 },
+				{ label: 'Views', value: 1024 },
 			]}
 			breadcrumbItems={[
-				{ label: 'Inicio', href: '/' },
-				{ label: 'Entidades', href: '/entidades' },
-				{ label: 'Mi Entidad' },
+				{ label: 'Home', href: '/' },
+				{ label: 'Entities', href: '/entities' },
+				{ label: 'My Entity' },
 			]}
 			actions={[
 				{
-					label: 'Editar',
+					label: 'Edit',
 					icon: <PencilIcon />,
 					onClick: () => handleEdit(),
 				},
 				{
-					label: 'Eliminar',
+					label: 'Delete',
 					variant: 'destructive',
 					inDropdown: true,
 					onClick: () => handleDelete(),
@@ -437,30 +471,34 @@ function EntityDetailPage() {
 
 ### EntityFilter
 
-Componente avanzado para filtros complejos de entidades, con soporte para guardado y reutilización de filtros.
+This advanced component supports complex entity filters with save and reuse of filters.
 
-**Características principales:**
+**Main features:**
 
-- Múltiples tipos de filtros
-- Búsqueda rápida
-- Guardado de filtros personalizados
-- Vista de filtros activos como badges
-- UI adaptable (compacta o normal)
+The filter provides the following features:
 
-**Tipos de filtros soportados:**
+- Multiple filter types
+- Quick search
+- Save of custom filters
+- View of active filters as badges
+- Adaptive UI (compact or normal)
 
-- `text` - Búsqueda por texto
-- `select` - Selector de opciones
-- `multiselect` - Selector múltiple
-- `checkbox` - Lista de checkboxes
-- `radio` - Grupo de radio buttons
-- `date` - Selector de fecha
-- `dateRange` - Rango de fechas
-- `number` - Campo numérico
-- `numberRange` - Rango numérico
-- `boolean` - Filtro booleano
+**Supported filter types:**
 
-**Ejemplo de uso:**
+The filter supports the following types:
+
+- `text` - Search by text
+- `select` - Option selector
+- `multiselect` - Multi selector
+- `checkbox` - Checkbox list
+- `radio` - Radio button group
+- `date` - Date selector
+- `dateRange` - Date range
+- `number` - Numeric field
+- `numberRange` - Numeric range
+- `boolean` - Boolean filter
+
+**Usage example:**
 
 ```tsx
 import { EntityFilter, EntityFilterDefinition } from '@/components/ui/entity-filter';
@@ -468,78 +506,82 @@ import { EntityFilter, EntityFilterDefinition } from '@/components/ui/entity-fil
 function FilteredList() {
 	const [filterValues, setFilterValues] = useState({});
 
-	// Definir filtros
+	// Define filters
 	const filters: EntityFilterDefinition[] = [
 		{
 			id: 'category',
-			label: 'Categoría',
+			label: 'Category',
 			type: 'select',
 			options: [
 				{ label: 'General', value: 'general' },
-				{ label: 'Técnico', value: 'technical' },
+				{ label: 'Technical', value: 'technical' },
 			],
 		},
 		{
 			id: 'isActive',
-			label: 'Activo',
+			label: 'Active',
 			type: 'boolean',
 		},
-		// ... más filtros
+		// ... more filters
 	];
 
 	return (
 		<div>
 			<EntityFilter filters={filters} onChange={setFilterValues} showQuickSearch={true} allowSavedFilters={true} />
 
-			{/* Mostrar resultados filtrados */}
-			<div>Resultados que coinciden con los filtros: {filterValues.toString()}</div>
+			{/* Show filtered results */}
+			<div>Results that match the filters: {filterValues.toString()}</div>
 		</div>
 	);
 }
 ```
 
-## Integración entre componentes
+## Integration between components
 
-Estos componentes están diseñados para trabajar juntos, creando una experiencia de usuario coherente:
+These components are designed to work together and create a coherent user experience.
 
-1. `EntityList` puede usarse para mostrar una colección de `EntityCard`
-2. `EntityHeader` puede usarse en la página de detalle de una entidad
-3. `EntityForm` puede usarse para crear/editar la entidad
-4. `EntityFilter` puede integrarse con `EntityList` para filtrado avanzado
+The integration includes the following uses:
 
-## Personalización
+1. `EntityList` can show a collection of `EntityCard`
+2. `EntityHeader` can be used on the detail page of an entity
+3. `EntityForm` can create or edit the entity
+4. `EntityFilter` can integrate with `EntityList` for advanced filtering
 
-Todos los componentes admiten personalización mediante:
+## Customization
 
-- Props específicos para cada componente
-- Tematización a través de colores
-- Clases CSS adicionales usando `className`
-- Uso de `cn()` para combinar clases condicionales
+All components support customization through the following options:
 
-## Accesibilidad
+- Props specific to each component
+- Theming through colors
+- Extra CSS classes with `className`
+- Use of `cn()` to combine conditional classes
 
-Los componentes siguen las mejores prácticas de accesibilidad:
+## Accessibility
 
-- Etiquetas adecuadas para campos de formulario
-- Mensajes de error descriptivos
-- Soporte para navegación por teclado
-- Atributos ARIA apropiados
-- Contraste adecuado de colores
+The components follow accessibility practices.
 
-## Mejoras futuras
+The practices include the following:
 
-Próximas mejoras planeadas para estos componentes:
+- Adequate labels for form fields
+- Descriptive error messages
+- Support for keyboard navigation
+- Appropriate ARIA attributes
+- Adequate color contrast
+
+## Future improvements
+
+The following improvements are planned for these components:
 
 1. **EntityForm**:
-   - Soporte para validación asíncrona
-   - Campos anidados y arrays
-   - Más tipos de campos especializados
+   - Support for asynchronous validation
+   - Nested fields and arrays
+   - More specialized field types
 
 2. **EntityHeader**:
-   - Modo compacto para espacios reducidos
-   - Soporte para acciones contextuales basadas en estado
+   - Compact mode for reduced spaces
+   - Support for contextual actions based on state
 
 3. **EntityFilter**:
-   - Filtros anidados y combinados
-   - Exportación/importación de filtros
-   - Previsualización de resultados
+   - Nested and combined filters
+   - Export and import of filters
+   - Result preview

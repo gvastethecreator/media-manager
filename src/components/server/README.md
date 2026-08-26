@@ -1,7 +1,9 @@
-# Componentes de Servidor
+# Server components
 
-Componentes que solo deben ejecutarse en el servidor para inicializar datos o realizar operaciones específicas.
+These components run only on the server to initialize data or perform server-specific operations.
 
-- **server-initializer.tsx**: Prepara configuraciones globales antes de renderizar la aplicación.
+The directory includes the following file:
 
-Se importan únicamente en componentes de servidor (`app/` o layouts) para evitar código innecesario en el cliente.
+- **server-initializer.tsx**: Prepares global configuration before the application renders.
+
+Import them only during server initialization so the client does not receive this code.

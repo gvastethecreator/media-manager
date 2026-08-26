@@ -1,47 +1,47 @@
-# 📸 Transformador de Álbumes (Album)
+# Album transformer
 
-Este módulo proporciona funciones para transformar y validar objetos de álbum, asegurando una estructura de datos consistente en toda la aplicación.
+This module transforms and validates Album objects. It keeps a consistent data structure across Media Manager.
 
-## 📋 Descripción general
+## Overview
 
-El transformador de álbumes maneja la conversión entre diferentes formatos de álbum:
+The Album transformer converts Album data between formats. It covers these operations:
 
-- Transformación de objetos de base de datos a objetos de aplicación
-- Validación y normalización de datos
-- Generación de formatos extendidos para interfaces de usuario
-- Cálculo de estadísticas relacionadas con el álbum
+- Transform database objects to application objects
+- Validate and normalize data
+- Build extended formats for user interfaces
+- Calculate Album statistics
 
-## 🔄 Diagrama de flujo
+## Flow diagram
 
 ```mermaid
 flowchart TD
-    A[Entrada: Objeto Album] --> B{Validar}
-    B -->|Válido| C[Transformar a formato estándar]
-    B -->|Inválido| D[Error de transformación]
-    C --> E{¿Formato extendido?}
-    E -->|Sí| F[Añadir propiedades UI]
-    E -->|No| G{¿Con estadísticas?}
+    A[Input: Album object] --> B{Validate}
+    B -->|Valid| C[Transform to standard format]
+    B -->|Invalid| D[Transformation error]
+    C --> E{Extended format?}
+    E -->|Yes| F[Add UI properties]
+    E -->|No| G{With statistics?}
     F --> G
-    G -->|Sí| H[Calcular estadísticas]
-    G -->|No| I[Objeto Album transformado]
+    G -->|Yes| H[Calculate statistics]
+    G -->|No| I[Transformed Album object]
     H --> I
 ```
 
-## 📁 Estructura de archivos
+## File structure
 
 ```
 album/
-├── index.ts           # Punto de entrada principal y exportaciones
-├── transformer.ts     # Funciones principales de transformación
-├── mappers.ts         # Funciones para mapear entre distintos formatos
-├── serializers.ts     # Funciones para serialización/deserialización
-└── README.md          # Documentación (este archivo)
+├── index.ts           # Main entry point and exports
+├── transformer.ts     # Main transformation functions
+├── mappers.ts         # Functions that map between formats
+├── serializers.ts     # Serialization and deserialization functions
+└── README.md          # Documentation (this file)
 ```
 
-## 🧩 Tipos principales
+## Main types
 
 ```typescript
-// Modelo básico de Álbum
+// Basic Album model
 interface Album {
 	id: string;
 	name: string;
@@ -55,20 +55,20 @@ interface Album {
 	featuredImage?: string;
 	createdAt: Date;
 	updatedAt: Date;
-	// ... otras propiedades base
+	// ... other base properties
 }
 
-// Álbum con propiedades extendidas para UI
+// Album with extra UI properties
 interface AlbumExtended extends Album {
 	isSelected?: boolean;
 	isHighlighted?: boolean;
 	isExpanded?: boolean;
 	isEditing?: boolean;
 	displayOrder?: number;
-	// ... propiedades de UI adicionales
+	// ... extra UI properties
 }
 
-// Álbum con estadísticas
+// Album with statistics
 interface AlbumWithStats extends AlbumExtended {
 	imageCount: number;
 	videoCount: number;
@@ -77,135 +77,130 @@ interface AlbumWithStats extends AlbumExtended {
 	totalSize: number;
 	lastUpdated?: Date;
 	distribution?: Array<{ name: string; count: number }>;
-	// ... estadísticas adicionales
+	// ... extra statistics
 }
 ```
 
-## 🛠️ Funciones principales
+## Main functions
 
-### Transformadores básicos
+### Basic transformers
 
 ```typescript
-// Transforma un álbum único
+// Transform a single Album
 transformAlbum(album: unknown): Album
 
-// Transforma un array de álbumes
+// Transform an array of Albums
 transformAlbums(albums: unknown[]): Album[]
 
-// Transforma a formato extendido para UI
+// Transform to the extended UI format
 transformAlbumToExtended(album: Album): AlbumExtended
 
-// Transforma incluyendo estadísticas
+// Transform and include statistics
 transformAlbumToWithStats(album: Album): AlbumWithStats
 ```
 
-### Funciones de búsqueda y persistencia
+### Search and persistence functions
 
 ```typescript
-// Busca álbumes con opciones de filtrado
+// Search Albums with filter options
 searchAlbums(options: AlbumSearchOptions): Promise<AlbumSearchResult>
 
-// Obtiene un álbum por ID con relaciones completas
+// Get an Album by ID with full relations
 getAlbumById(id: string): Promise<AlbumComplete | null>
 
-// Crea un nuevo álbum
+// Create a new Album
 createAlbum(data: AlbumCreateInput): Promise<AlbumComplete>
 
-// Actualiza un álbum existente
+// Update an existing Album
 updateAlbum(id: string, data: AlbumUpdateInput): Promise<AlbumComplete>
 
-// Elimina un álbum
+// Delete an Album
 deleteAlbum(id: string): Promise<void>
 ```
 
-## 📝 Ejemplos de uso
+## Usage examples
 
-### Transformación básica
+### Basic transformation
 
 ```typescript
 import { transformAlbum } from '@/transformers/album';
 
-// Transformar un objeto desconocido a Album
+// Transform an unknown object to Album
 const album = transformAlbum(rawData);
-console.log(album.name); // Acceso seguro a propiedades validadas
+console.log(album.name); // Safe access to validated properties
 ```
 
-### Transformación con estadísticas para UI
+### Transformation with statistics for UI
 
 ```typescript
 import { transformAlbumToWithStats } from '@/transformers/album';
 
-// Obtener un álbum con estadísticas calculadas
+// Get an Album with calculated statistics
 const albumWithStats = transformAlbumToWithStats(album);
-console.log(`Imágenes: ${albumWithStats.imageCount}`);
-console.log(`Última actualización: ${albumWithStats.lastUpdated}`);
+console.log(`Images: ${albumWithStats.imageCount}`);
+console.log(`Last update: ${albumWithStats.lastUpdated}`);
 ```
 
-### Búsqueda de álbumes
+### Album search
 
 ```typescript
 import { searchAlbums } from '@/transformers/album';
 
-// Buscar álbumes con filtros
+// Search Albums with filters
 const result = await searchAlbums({
-	search: 'paisajes',
+	search: 'landscapes',
 	page: 1,
 	pageSize: 10,
 	orderBy: 'createdAt',
 	orderDirection: 'desc',
 	filters: {
-		category: 'estilo',
+		category: 'style',
 		isFavorite: true,
 	},
 });
 
-console.log(`Total encontrados: ${result.total}`);
+console.log(`Total found: ${result.total}`);
 ```
 
-## 🔍 Manejo de errores
+## Error handling
 
-El transformador utiliza un sistema centralizado de manejo de errores que:
+The transformer uses a central error-handling system. The system does this work:
 
-1. Registra detalles del error en el servidor
-2. Lanza `TransformerError` con mensajes descriptivos
-3. Preserva la información del error original en la propiedad `cause`
+1. Log error details on the server
+2. Throw `TransformerError` with descriptive messages
+3. Keep the original error in the `cause` property
 
-Ejemplo de captura:
+Capture example:
 
 ```typescript
 try {
 	const album = transformAlbum(unknownData);
 } catch (error) {
 	if (error instanceof TransformerError) {
-		console.error(`Error de transformación: ${error.message}`);
+		console.error(`Transformation error: ${error.message}`);
 	} else {
-		console.error(`Error inesperado: ${error}`);
+		console.error(`Unexpected error: ${error}`);
 	}
 }
 ```
 
-## ⚙️ Mejores prácticas
+## Practices
 
-1. **Siempre use los transformadores**: Para garantizar datos consistentes, utilice las funciones de transformación incluso cuando crea que los datos ya están en el formato correcto.
+1. **Use the transformers.** Call transformation functions even when the data looks correct. This keeps data consistent.
+2. **Handle errors.** Catch transformation errors. Return useful feedback.
+3. **Avoid direct mutation.** Do not change Album objects in place. Use transformers to create new instances.
+4. **Watch performance.** For large Albums, use selective transformations. Do not load every relation.
+5. **Validate early.** Validate data as soon as the application receives it. This stops problems from spreading.
+6. **Use the store.** Use AlbumStore to manage Album state in client components.
 
-2. **Maneje los errores**: Capture y maneje adecuadamente los errores de transformación para proporcionar feedback útil.
+## Interaction with other components
 
-3. **Evite la manipulación directa**: No modifique objetos Album directamente; en su lugar, utilice las funciones de transformación para crear nuevas instancias.
+Albums relate to several objects in Media Manager. Those objects are:
 
-4. **Considere el rendimiento**: Para álbumes grandes, utilice transformaciones selectivas en lugar de cargar todas las relaciones.
+- **Images**: An Album can contain many images
+- **Videos**: An Album can contain many videos
+- **Tags**: An Album can have associated Tags
+- **Groups**: An Album can be shared with Groups
+- **Collections**: An Album can associate with Collections
 
-5. **Validación temprana**: Valide los datos lo antes posible en el flujo de la aplicación para detectar problemas antes de que se propaguen.
-
-6. **Uso del store**: Utilice el AlbumStore para gestionar el estado de los álbumes en componentes del cliente.
-
-## 🔄 Interacción con otros componentes
-
-Los álbumes se relacionan con varias entidades del sistema:
-
-- **Imágenes**: Los álbumes pueden contener múltiples imágenes
-- **Videos**: Los álbumes pueden contener múltiples videos
-- **Etiquetas**: Los álbumes pueden tener etiquetas asociadas
-- **Grupos**: Los álbumes pueden ser compartidos con grupos
-- **Colecciones**: Los álbumes pueden estar asociadas con colecciones
-
-Para operaciones que involucran estas relaciones, consulte la documentación específica de cada entidad relacionada.
+For operations that use these relations, read the documentation for the related object.

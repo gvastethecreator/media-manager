@@ -1,4 +1,3 @@
-# Servicio de estadísticas
+# Stats service
 
-Utilidades para obtener recuentos y métricas de forma
-eficiente, usadas en paneles y dashboards.
+The stats service returns counts and metrics for panels and dashboards.

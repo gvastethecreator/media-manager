@@ -1,12 +1,14 @@
-# 📝 Documentación de la Entidad Concept
+# Concept entity documentation
 
-## 🏗️ Arquitectura General
+## General architecture
 
-La entidad **Concept** representa conceptos o ideas en la aplicación, permitiendo organizar y gestionar conocimientos, notas y contenido relacionado.
+The **Concept** entity represents concepts or ideas in the application.
+
+The entity lets you organize and manage knowledge, notes, and related content.
 
 ```mermaid
 graph TB
-    subgraph "🏪 Store Layer"
+    subgraph "Store Layer"
         CS[ConceptStore]
         CCS[CoreSlice]
         CFS[FiltersSlice]
@@ -14,21 +16,21 @@ graph TB
         CRS[RelationsSlice]
     end
 
-    subgraph "🔄 Transformers Layer"
+    subgraph "Transformers Layer"
         CM[ConceptMappers]
         CSE[ConceptSerializers]
         CT[ConceptTransformer]
         CI[ConceptIndex]
     end
 
-    subgraph "📊 Types Layer"
+    subgraph "Types Layer"
         CB[ConceptBase]
         CC[ConceptComplete]
         CE[ConceptExtended]
         CWS[ConceptWithStats]
     end
 
-    subgraph "🎯 Actions Layer"
+    subgraph "Actions Layer"
         CA[ConceptActions]
     end
 
@@ -46,41 +48,41 @@ graph TB
     CA --> CM
 ```
 
-## 📁 Estructura de Archivos
+## File structure
 
 ```
 src/store/entities/concept/
-├── README.md                    # Esta documentación
-├── index.ts                     # Store principal y exportaciones
-├── types.ts                     # Tipos específicos del store
+├── README.md                    # This documentation
+├── index.ts                     # Main store and exports
+├── types.ts                     # Types specific to the store
 └── slices/
-    └── core.ts                  # Estado y operaciones básicas
+    └── core.ts                  # State and basic operations
 
 src/transformers/concept/
-├── index.ts                     # Funciones principales y exportaciones
-├── mappers.ts                   # Transformaciones de datos
-├── serializers.ts               # Serialización para UI
-└── transformer.ts               # Transformadores avanzados
+├── index.ts                     # Main functions and exports
+├── mappers.ts                   # Data transformations
+├── serializers.ts               # Serialization for UI
+└── transformer.ts               # Advanced transformers
 
 src/types/entities/concept/
-└── types.ts                     # Tipos canónicos
+└── types.ts                     # Canonical types
 ```
 
-## 🎯 Tipos Principales
+## Main types
 
 ### ConceptBase
 
 ```typescript
 interface ConceptBase {
 	id: string;
-	name: string; // Nombre del concepto
-	emoji: string; // Emoji representativo
-	color: string; // Color del concepto
-	description: string | null; // Descripción breve
-	content: string; // Contenido principal
-	category: string; // Categoría del concepto
-	featuredImage: string | null; // Imagen destacada
-	isFavorite: boolean; // Marcado como favorito
+	name: string; // Concept name
+	emoji: string; // Representative emoji
+	color: string; // Concept color
+	description: string | null; // Brief description
+	content: string; // Main content
+	category: string; // Concept category
+	featuredImage: string | null; // Featured image
+	isFavorite: boolean; // Marked as a Favorite
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -91,9 +93,9 @@ interface ConceptBase {
 ```typescript
 interface ConceptComplete extends ConceptBase {
 	_count?: {
-		images?: number; // Número de imágenes relacionadas
-		notes?: number; // Número de notas relacionadas
-		tags?: number; // Número de tags asociados
+		images?: number; // Number of related images
+		notes?: number; // Number of related notes
+		tags?: number; // Number of associated Tags
 	};
 }
 ```
@@ -102,11 +104,11 @@ interface ConceptComplete extends ConceptBase {
 
 ```typescript
 interface ConceptExtended extends ConceptComplete {
-	isSelected?: boolean; // Estado de selección en UI
-	isHighlighted?: boolean; // Estado de resaltado
-	previewContent?: string; // Vista previa del contenido
-	lastUpdated?: Date; // Última actualización
-	importance?: number; // Nivel de importancia (1-10)
+	isSelected?: boolean; // Selection state in UI
+	isHighlighted?: boolean; // Highlight state
+	previewContent?: string; // Content preview
+	lastUpdated?: Date; // Last update
+	importance?: number; // Importance level (1-10)
 }
 ```
 
@@ -115,21 +117,21 @@ interface ConceptExtended extends ConceptComplete {
 ```typescript
 interface ConceptWithStats extends ConceptComplete {
 	stats: {
-		imageCount: number; // Conteo de imágenes
-		tagCount: number; // Conteo de tags
-		noteCount: number; // Conteo de notas
-		totalContentItems: number; // Total de elementos relacionados
-		lastUpdated: Date; // Última actualización
+		imageCount: number; // Image count
+		tagCount: number; // Tag count
+		noteCount: number; // Note count
+		totalContentItems: number; // Total related items
+		lastUpdated: Date; // Last update
 	};
 }
 ```
 
-## 🏪 API del Store
+## Store API
 
-### Core Slice
+### Core slice
 
 ```typescript
-// Estado
+// State
 interface CoreSlice {
   concepts: ConceptWithStats[];
   selectedConcept: ConceptBase | null;
@@ -137,7 +139,7 @@ interface CoreSlice {
   error: string | null;
 }
 
-// Acciones principales
+// Main actions
 loadConcepts(): Promise<void>
 setConcepts(concepts: ConceptWithStats[]): void
 createConcept(concept: ConceptCreateInput): Promise<void>
@@ -147,12 +149,12 @@ selectConcept(concept: ConceptBase | null): void
 reset(): void
 ```
 
-## 🔄 Transformers
+## Transformers
 
-### Index (Funciones Principales)
+### Index (main functions)
 
 ```typescript
-// Operaciones CRUD
+// CRUD operations
 searchConcepts(options?: ConceptSearchOptions): Promise<ConceptSearchResult>
 getConceptById(id: string): Promise<ConceptComplete | null>
 createConcept(data: ConceptCreateInput): Promise<ConceptComplete>
@@ -160,7 +162,7 @@ updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptComplete>
 deleteConcept(id: string): Promise<void>
 getConceptsByIds(ids: string[]): Promise<ConceptComplete[]>
 
-// Utilidades
+// Utilities
 parseConceptFilters(filtersStr: string): ConceptFilters
 toConceptComplete(concept: any): ConceptComplete
 ```
@@ -168,14 +170,14 @@ toConceptComplete(concept: any): ConceptComplete
 ### Mappers
 
 ```typescript
-// Transformaciones de datos
+// Data transformations
 toCreateConceptData(data: Partial<ConceptBase>): Prisma.ConceptCreateInput
 toUpdateConceptData(data: Partial<ConceptBase>): Prisma.ConceptUpdateInput
 toSearchOptions(options: ConceptSearchOptions): Prisma.ConceptFindManyArgs
 toSearchFilters(filters: ConceptFilters): Prisma.ConceptWhereInput
 toSearchResult(concepts: ConceptComplete[], total: number, options: ConceptSearchOptions): ConceptSearchResult
 
-// Utilidades
+// Utilities
 toPlainConcept(concept: ConceptBase): Record<string, any>
 filterConcepts(concepts: ConceptBase[], filters: ConceptFilters): ConceptBase[]
 ```
@@ -183,39 +185,39 @@ filterConcepts(concepts: ConceptBase[], filters: ConceptFilters): ConceptBase[]
 ### Serializers
 
 ```typescript
-// Serialización desde Prisma
+// Serialization from Prisma
 fromPrismaConcept(prismaConcept: ConceptFromPrisma, options?: FromPrismaConceptOptions): ConceptComplete
 fromPrismaConcepts(prismaConcepts: ConceptFromPrisma[], options?: FromPrismaConceptOptions): ConceptComplete[]
 
-// Validación y transformación
+// Validation and transformation
 validateConcept(data: Partial<ConceptBase>): Partial<ConceptBase>
 extendConcept<T>(concept: T, options?: { includePreview?: boolean }): T & { previewContent?: string }
 toPrismaConcept(data: Partial<ConceptBase>): Prisma.ConceptCreateInput
 
-// Utilidades para tags
+// Tag utilities
 serializeTags(tags: string[]): string
 deserializeTags(tagsJson: string | null): string[]
 ```
 
-### Transformer Principal
+### Main transformer
 
 ```typescript
-// Transformaciones avanzadas
+// Advanced transformations
 transformConcept<T>(input: T, options?: TransformConceptOptions): ConceptComplete
 transformConcepts<T>(inputs: T[], options?: TransformConceptOptions): ConceptComplete[]
 transformConceptToExtended<T>(concept: T): ConceptExtended
 transformConceptToWithStats<T>(concept: T): ConceptWithStats
 ```
 
-## 📊 Flujo de Datos
+## Data flow
 
 ```mermaid
 sequenceDiagram
-    participant UI as 🖥️ UI Component
-    participant Store as 🏪 ConceptStore
-    participant Index as 🔄 ConceptIndex
-    participant API as 🌐 Prisma
-    participant DB as 🗄️ Database
+    participant UI as UI Component
+    participant Store as ConceptStore
+    participant Index as ConceptIndex
+    participant API as Prisma
+    participant DB as Database
 
     UI->>Store: loadConcepts()
     Store->>Store: setLoading(true)
@@ -231,9 +233,9 @@ sequenceDiagram
     Store-->>UI: updated state
 ```
 
-## 🎨 Ejemplos de Uso
+## Usage examples
 
-### Uso Básico del Store
+### Basic use of the store
 
 ```typescript
 import { useConceptStore } from '@/store/entities/concept';
@@ -250,8 +252,8 @@ function ConceptComponent() {
 
   const handleCreateConcept = async () => {
     await createConcept({
-      name: 'Nuevo Concepto',
-      content: 'Contenido del concepto...',
+      name: 'New Concept',
+      content: 'Concept content...',
       category: 'ideas',
       emoji: '💡',
       color: '#3b82f6'
@@ -261,17 +263,17 @@ function ConceptComponent() {
   return (
     <div>
       <button onClick={handleCreateConcept}>
-        Crear Concepto
+        Create Concept
       </button>
 
-      {isLoading && <div>Cargando conceptos...</div>}
+      {isLoading && <div>Loading concepts...</div>}
 
       <div>
         {concepts.map(concept => (
           <div key={concept.id}>
             {concept.emoji} {concept.name}
             <p>{concept.description}</p>
-            <small>Imágenes: {concept._count?.images || 0}</small>
+            <small>Images: {concept._count?.images || 0}</small>
           </div>
         ))}
       </div>
@@ -280,17 +282,17 @@ function ConceptComponent() {
 }
 ```
 
-### Búsqueda y Filtros
+### Search and filters
 
 ```typescript
 import { searchConcepts } from '@/transformers/concept';
 
 async function searchConceptsExample() {
-	// Búsqueda básica
+	// Basic search
 	const results = await searchConcepts({
 		filters: {
-			search: 'inteligencia artificial',
-			category: 'tecnología',
+			search: 'artificial intelligence',
+			category: 'technology',
 			onlyFavorites: false,
 		},
 		page: 1,
@@ -298,17 +300,17 @@ async function searchConceptsExample() {
 		includeRelations: true,
 	});
 
-	console.log(`Encontrados ${results.total} conceptos`);
-	console.log(`Página ${results.page} de ${results.totalPages}`);
+	console.log(`Found ${results.total} concepts`);
+	console.log(`Page ${results.page} of ${results.totalPages}`);
 
 	results.items.forEach((concept) => {
 		console.log(`${concept.emoji} ${concept.name}`);
-		console.log(`Imágenes: ${concept._count?.images || 0}`);
+		console.log(`Images: ${concept._count?.images || 0}`);
 	});
 }
 ```
 
-### Transformaciones
+### Transformations
 
 ```typescript
 import {
@@ -317,11 +319,11 @@ import {
 	transformConceptToWithStats,
 } from '@/transformers/concept/transformer';
 
-// Transformar datos de API
+// Transform API data
 const rawConcept = {
 	id: 'concept-1',
 	name: 'Machine Learning',
-	content: 'El aprendizaje automático es...',
+	content: 'Machine learning is...',
 	emoji: '🤖',
 	color: '#3b82f6',
 	category: 'ai',
@@ -330,70 +332,70 @@ const rawConcept = {
 
 const concept = transformConcept(rawConcept);
 
-// Extender para UI
+// Extend for UI
 const extendedConcept = transformConceptToExtended(concept);
-console.log(extendedConcept.previewContent); // Primeros 100 caracteres
-console.log(extendedConcept.importance); // Nivel calculado 1-10
+console.log(extendedConcept.previewContent); // First 100 characters
+console.log(extendedConcept.importance); // Calculated level 1-10
 
-// Con estadísticas
+// With statistics
 const conceptWithStats = transformConceptToWithStats(concept);
 console.log(conceptWithStats.stats.totalContentItems);
 ```
 
-### Operaciones CRUD
+### CRUD operations
 
 ```typescript
 import { createConcept, updateConcept, deleteConcept, getConceptById } from '@/transformers/concept';
 
-// Crear concepto
+// Create a Concept
 const newConcept = await createConcept({
 	name: 'Quantum Computing',
-	content: 'La computación cuántica utiliza...',
-	category: 'física',
+	content: 'Quantum computing uses...',
+	category: 'physics',
 	emoji: '⚛️',
 	color: '#8b5cf6',
 });
 
-// Obtener por ID
+// Get by ID
 const concept = await getConceptById(newConcept.id);
 
-// Actualizar
+// Update
 if (concept) {
 	const updated = await updateConcept(concept.id, {
-		description: 'Descripción actualizada',
+		description: 'Updated description',
 		isFavorite: true,
 	});
 }
 
-// Eliminar
+// Delete
 await deleteConcept(concept.id);
 ```
 
-## 🔧 Configuración
+## Configuration
 
-### Filtros Disponibles
+### Available filters
 
 ```typescript
 interface ConceptFilters {
-	search?: string; // Búsqueda en nombre, descripción y contenido
-	category?: string | string[]; // Filtro por categoría
-	tags?: string[]; // Filtro por tags
-	onlyFavorites?: boolean; // Solo favoritos
+	search?: string; // Search in name, description, and content
+	category?: string | string[]; // Filter by category
+	tags?: string[]; // Filter by Tags
+	onlyFavorites?: boolean; // Favorites only
 }
 ```
 
-### Opciones de Búsqueda
+### Search options
 
 ```typescript
 interface ConceptSearchOptions {
 	filters?: ConceptFilters;
-	page?: number; // Página actual (1-based)
-	pageSize?: number; // Elementos por página
-	includeRelations?: boolean; // Incluir relaciones
+	page?: number; // Current page (1-based)
+	pageSize?: number; // Items per page
+	includeRelations?: boolean; // Include relations
 }
 ```
 
-### Ordenación
+### Sort
 
 ```typescript
 enum ConceptSortOption {
@@ -406,7 +408,7 @@ enum ConceptSortOption {
 }
 ```
 
-## 🔗 Relaciones con Otras Entidades
+## Relations with other entities
 
 ```mermaid
 graph LR
@@ -426,47 +428,47 @@ graph LR
     U[User/Profile] --> C
 ```
 
-## 📈 Métricas y Estadísticas
+## Metrics and statistics
 
-### Estadísticas Calculadas
+### Calculated statistics
 
 ```typescript
 interface ConceptStats {
-	imageCount: number; // Imágenes relacionadas
-	tagCount: number; // Tags asociados
-	noteCount: number; // Notas relacionadas
-	totalContentItems: number; // Total de elementos
-	lastUpdated: Date; // Última actualización
+	imageCount: number; // Related images
+	tagCount: number; // Associated Tags
+	noteCount: number; // Related notes
+	totalContentItems: number; // Total items
+	lastUpdated: Date; // Last update
 }
 ```
 
-### Cálculo de Importancia
+### Importance calculation
 
 ```typescript
 function calculateImportance(concept: ConceptComplete): number {
-	let importance = 5; // Valor base
+	let importance = 5; // Base value
 
-	// Contenido extenso (+1)
+	// Long content (+1)
 	if (concept.content && concept.content.length > 500) {
 		importance += 1;
 	}
 
-	// Tiene descripción (+1)
+	// Has description (+1)
 	if (concept.description) {
 		importance += 1;
 	}
 
-	// Tiene imagen destacada (+1)
+	// Has featured image (+1)
 	if (concept.featuredImage) {
 		importance += 1;
 	}
 
-	// Es favorito (+1)
+	// Is a Favorite (+1)
 	if (concept.isFavorite) {
 		importance += 1;
 	}
 
-	// Muchas relaciones (+1)
+	// Many relations (+1)
 	const totalRelations = (concept._count?.images || 0) + (concept._count?.notes || 0) + (concept._count?.tags || 0);
 	if (totalRelations > 5) {
 		importance += 1;
@@ -476,17 +478,19 @@ function calculateImportance(concept: ConceptComplete): number {
 }
 ```
 
-## 🚀 Próximas Mejoras
+## Planned improvements
 
-1. **Búsqueda semántica** con IA para conceptos relacionados
-2. **Mapas conceptuales** visuales con relaciones
-3. **Versionado de contenido** con historial de cambios
-4. **Colaboración** en tiempo real para edición
-5. **Exportación** a formatos estándar (Markdown, PDF)
-6. **Plantillas** predefinidas para tipos de conceptos
-7. **Análisis de sentimientos** del contenido
-8. **Recomendaciones** automáticas de conceptos relacionados
+The following improvements are planned:
+
+1. **Semantic search** with AI for related Concepts
+2. **Visual concept maps** with relations
+3. **Content versioning** with change history
+4. **Real-time collaboration** for editing
+5. **Export** to standard formats (Markdown, PDF)
+6. **Predefined templates** for Concept types
+7. **Sentiment analysis** of content
+8. **Automatic recommendations** of related Concepts
 
 ---
 
-_Documentación generada automáticamente - Última actualización: 2024_
+_Documentation generated automatically - Last update: 2024_

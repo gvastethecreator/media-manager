@@ -1,10 +1,14 @@
-# Módulo de Entidades
+# Entity module
 
-Este directorio contiene componentes relacionados con entidades particulares del sistema. Actualmente solo incluye los componentes de **Perfil**.
+This directory holds components for particular system entities.
 
-## Carpetas
+The directory currently includes **Profile** components only.
 
-- **profile/**: Gestión de perfiles de usuario o contexto de trabajo.
+## Folders
+
+The directory contains the following folder:
+
+- **profile/**: User profile management or work context.
 
 ```mermaid
 flowchart TD
@@ -13,11 +17,13 @@ flowchart TD
     C --> D[ProfileManager]
 ```
 
-## Descripción rápida
+## Quick description
 
-- **ProfileCard**: Muestra información básica de un perfil.
-- **ProfileControls**: Botones para crear o seleccionar perfiles.
-- **ProfileList**: Lista de perfiles disponibles.
-- **ProfileManager**: Componente central que integra los demás.
+The profile components have the following roles:
 
-Estos componentes se usan en las vistas de configuración o cuando es necesario cambiar de perfil activo.
+- **ProfileCard**: Shows basic profile information.
+- **ProfileControls**: Buttons that create or select profiles.
+- **ProfileList**: List of available profiles.
+- **ProfileManager**: Central component that integrates the others.
+
+Settings views use these components when the active profile must change.

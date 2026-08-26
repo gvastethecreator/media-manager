@@ -1,4 +1,5 @@
-# Servicio de perfiles
+# Profile service
 
-Maneja la información de perfiles y el cliente API asociado
-para autenticación y preferencias de usuario.
+The profile service manages profile data and the related API client.
+
+The client supports authentication and user preferences.

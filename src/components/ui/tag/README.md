@@ -1,8 +1,10 @@
-# TagInput Component
+# TagInput component
 
-El componente `TagInput` permite a los usuarios introducir y gestionar una lista de etiquetas. Está construido con un patrón de proveedor de contexto para una máxima flexibilidad y composición.
+The `TagInput` component lets users enter and manage a list of Tags.
 
-## Anatomía del Componente
+The component uses a context-provider pattern for flexibility and composition.
+
+## Component anatomy
 
 ```
 <TagInputProvider>
@@ -13,54 +15,66 @@ El componente `TagInput` permite a los usuarios introducir y gestionar una lista
 </TagInputProvider>
 ```
 
-## Componentes y Hooks
+## Components and hooks
 
 ### `TagInputProvider`
 
-Es el componente raíz que envuelve toda la lógica y el estado. Debe ser el padre de cualquier componente de `TagInput`.
+This root component wraps the logic and state.
+
+`TagInputProvider` must be the parent of any `TagInput` component.
 
 **Props**
 
-| Prop           | Tipo                       | Default     | Descripción                                           |
-| -------------- | -------------------------- | ----------- | ----------------------------------------------------- |
-| `value`        | `string[]`                 | `[]`        | Valor controlado para las etiquetas.                  |
-| `defaultValue` | `string[]`                 | `[]`        | Valor inicial para las etiquetas (no controlado).     |
-| `onChange`     | `(tags: string[]) => void` | `undefined` | Callback que se ejecuta cuando las etiquetas cambian. |
-| `disabled`     | `boolean`                  | `false`     | Si el componente está deshabilitado.                  |
-| `children`     | `React.ReactNode`          | `required`  | Los componentes hijos.                                |
+| Prop           | Type                       | Default     | Description                                |
+| -------------- | -------------------------- | ----------- | ------------------------------------------ |
+| `value`        | `string[]`                 | `[]`        | Controlled value for the Tags.             |
+| `defaultValue` | `string[]`                 | `[]`        | Initial value for the Tags (uncontrolled). |
+| `onChange`     | `(tags: string[]) => void` | `undefined` | Callback that runs when the Tags change.   |
+| `disabled`     | `boolean`                  | `false`     | Whether the component is disabled.         |
+| `children`     | `React.ReactNode`          | `required`  | The child components.                      |
 
 ### `useTagInput`
 
-Un hook de React que proporciona acceso al contexto del `TagInput`. Debe ser utilizado dentro de un `TagInputProvider`.
+This React hook provides access to the `TagInput` context.
 
-**Retorna**
+Use this hook inside a `TagInputProvider`.
 
-| Prop                 | Tipo                                                 | Descripción                                       |
-| -------------------- | ---------------------------------------------------- | ------------------------------------------------- |
-| `tags`               | `string[]`                                           | La lista actual de etiquetas.                     |
-| `input`              | `string`                                             | El valor actual del campo de entrada.             |
-| `isFocused`          | `boolean`                                            | Si el campo de entrada está enfocado.             |
-| `addTag`             | `(tag: string) => void`                              | Función para agregar una nueva etiqueta.          |
-| `removeTag`          | `(index: number) => void`                            | Función para eliminar una etiqueta por su índice. |
-| `handleInputChange`  | `(e: React.ChangeEvent<HTMLInputElement>) => void`   | Manejador para el evento `onChange` del input.    |
-| `handleInputKeyDown` | `(e: React.KeyboardEvent<HTMLInputElement>) => void` | Manejador para el evento `onKeyDown` del input.   |
-| `handleInputFocus`   | `() => void`                                         | Manejador para el evento `onFocus` del input.     |
-| `handleInputBlur`    | `() => void`                                         | Manejador para el evento `onBlur` del input.      |
-| `disabled`           | `boolean`                                            | Si el componente está deshabilitado.              |
+**Returns**
+
+| Prop                 | Type                                                 | Description                              |
+| -------------------- | ---------------------------------------------------- | ---------------------------------------- |
+| `tags`               | `string[]`                                           | The current list of Tags.                |
+| `input`              | `string`                                             | The current value of the input field.    |
+| `isFocused`          | `boolean`                                            | Whether the input field is focused.      |
+| `addTag`             | `(tag: string) => void`                              | Function that adds a new Tag.            |
+| `removeTag`          | `(index: number) => void`                            | Function that removes a Tag by index.    |
+| `handleInputChange`  | `(e: React.ChangeEvent<HTMLInputElement>) => void`   | Handler for the input `onChange` event.  |
+| `handleInputKeyDown` | `(e: React.KeyboardEvent<HTMLInputElement>) => void` | Handler for the input `onKeyDown` event. |
+| `handleInputFocus`   | `() => void`                                         | Handler for the input `onFocus` event.   |
+| `handleInputBlur`    | `() => void`                                         | Handler for the input `onBlur` event.    |
+| `disabled`           | `boolean`                                            | Whether the component is disabled.       |
 
 ### `TagInputRoot`
 
-El contenedor principal para los elementos del `TagInput`. Controla el estado de foco y la apariencia general. Se renderiza como un `div`.
+This is the main container for `TagInput` elements.
+
+The container controls focus state and overall appearance.
+
+The container renders as a `div`.
 
 ### `TagList`
 
-Componente que renderiza la lista de etiquetas. Utiliza el componente `Badge` para cada etiqueta.
+This component renders the list of Tags.
+
+The list uses the `Badge` component for each Tag.
 
 ### `TagInput`
 
-El campo de entrada de texto para agregar nuevas etiquetas. Se renderiza como un `Input`.
+This is the text input field for new Tags.
 
-## Ejemplo de Uso
+The field renders as an `Input`.
+
+## Usage example
 
 ```tsx
 import { TagInput, TagInputProvider, TagInputRoot, TagList } from '@/components/ui/tag';
@@ -73,14 +87,14 @@ export function TagInputExample() {
 		<TagInputProvider value={tags} onChange={setTags}>
 			<TagInputRoot>
 				<TagList />
-				<TagInput placeholder="Agrega un nuevo tag..." />
+				<TagInput placeholder="Add a new tag..." />
 			</TagInputRoot>
 		</TagInputProvider>
 	);
 }
 ```
 
-## Diagrama de Flujo
+## Flow diagram
 
 ```mermaid
 graph TD

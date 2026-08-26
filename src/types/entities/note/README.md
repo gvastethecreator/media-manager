@@ -1,16 +1,16 @@
-# 📝 Entidad Note
+# Note entity
 
-## Descripción
+## Purpose
 
-La entidad `Note` representa notas en el sistema, asociables a imágenes, personajes, conceptos y más. Permite organización, documentación y recordatorios avanzados.
+The `Note` entity represents Notes in Media Manager. Notes can associate with images, Characters, Concepts, and more. They support organization, documentation, and advanced reminders.
 
-## Estructura
+## Structure
 
 ```mermaid
 graph TD
     A[Note Entity] --> B[Types]
     A --> C[Transformers]
-    A --> D[Documentación]
+    A --> D[Documentation]
     B --> B1[types.ts]
     C --> C1[mappers.ts]
     C --> C2[serializers.ts]
@@ -18,22 +18,24 @@ graph TD
     D --> D1[documentation.md]
 ```
 
-## Tipos principales
+## Main types
+
+The module uses these types:
 
 - `NoteBase`, `NoteComplete`, `NoteCreateInput`, `NoteUpdateInput`
-- Filtros: `NoteFilters`, `NoteSearchOptions`, `NoteSearchResult`
+- Filters: `NoteFilters`, `NoteSearchOptions`, `NoteSearchResult`
 
-## Ejemplo de uso
+## Usage example
 
 ```typescript
 import { createNote, updateNote, searchNotes } from '@/transformers/note';
 
-const nuevaNota = await createNote({ title: 'Idea', content: 'Texto', category: 'general' });
-const notas = await searchNotes({ filters: { searchQuery: 'Idea' } });
-await updateNote(nuevaNota.id, { content: 'Actualizado' });
+const newNote = await createNote({ title: 'Idea', content: 'Text', category: 'general' });
+const notes = await searchNotes({ filters: { searchQuery: 'Idea' } });
+await updateNote(newNote.id, { content: 'Updated' });
 ```
 
-## Flujo de datos
+## Data flow
 
 ```mermaid
 sequenceDiagram
@@ -49,13 +51,13 @@ sequenceDiagram
     API-->>Client: NoteComplete
 ```
 
-## Mejores prácticas
+## Practices
 
-- Usar siempre los tipos canónicos (`NoteCreateInput`, `NoteUpdateInput`, `NoteComplete`).
-- Validar los datos antes de crear/actualizar (`validateNote`).
-- Usar los mapeadores para relaciones complejas.
-- Mantener la documentación y diagramas actualizados.
+- Use the canonical types (`NoteCreateInput`, `NoteUpdateInput`, `NoteComplete`).
+- Validate data before you create or update (`validateNote`).
+- Use mappers for complex relations.
+- Keep documentation and diagrams current.
 
-## ⚠️ Advertencia
+## Warning
 
-**No importar tipos de base de datos legacy. Usar solo los tipos de `types.ts`.**
+**Do not import legacy database types. Use only the types from `types.ts`.**

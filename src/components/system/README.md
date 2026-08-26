@@ -1,10 +1,12 @@
-# Reindex Logs Viewer
+# Reindex logs viewer
 
-Este módulo contiene el componente `ReindexLogsViewer` que muestra en tiempo real los errores y warnings del sistema de reindexado.
+This module contains the `ReindexLogsViewer` component.
 
-Ruta UI expuesta: `/admin/reindex` (via React Router)
+The component shows reindex errors and warnings in real time.
 
-Depende de los endpoints del servidor:
+Exposed UI route: `/admin/reindex` (through React Router)
+
+The viewer depends on the following server endpoints:
 
 - `GET /api/reindex-logs/stats`
 - `GET /api/reindex-logs/errors` (param `limit`)

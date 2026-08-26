@@ -1,18 +1,20 @@
 # Utils (`src/utils`)
 
-Funciones auxiliares y helpers ligeros. Incluye manejo de rutas, transformaciones
-básicas de datos y pequeñas utilidades independientes del resto de la
-aplicación. Sirven como complemento de `src/lib`.
+This directory holds light helpers for paths, basic data transforms, and small standalone utilities.
 
-Las utilidades de este directorio no dependen de React ni de código de servidor.
-Se pueden importar libremente desde componentes cliente o servidor.
+These helpers complement `src/lib`.
 
-## Ejemplo
+The utilities in this directory do not depend on React or server code.
+
+You can import them from client or server components.
+
+## Example
 
 ```ts
 import { cn } from '@/utils';
 const classes = cn('p-2', condition && 'text-red-500');
 ```
 
-Cuando una utilidad empieza a manejar lógica de negocio o requiere acceder a la
-base de datos, se debe mover a `src/lib` y documentarse en `docs/utils-lib.md`.
+If a utility starts to own business logic or database access, move it to `src/lib`.
+
+Document that move in `docs/utils-lib.md`.

@@ -1,8 +1,8 @@
-# 🧑‍🎤 Character Transformers: Patrón CharacterWithStats
+# Character transformers: CharacterWithStats pattern
 
-Este módulo implementa el **patrón optimizado CharacterWithStats** para la entidad Character, siguiendo las mejores prácticas de rendimiento y arquitectura establecidas en el proyecto.
+This module implements the optimized **CharacterWithStats** pattern for the Character entity. It follows the performance and architecture practices of the project.
 
-## 📦 Estructura Optimizada
+## Optimized structure
 
 ```mermaid
 graph TD
@@ -17,40 +17,42 @@ graph TD
     I --> J[Drizzle Update]
 ```
 
-## 🎯 Patrón CharacterWithStats
+## CharacterWithStats pattern
 
-### Características Principales:
+### Main characteristics
 
-- **📊 Estadísticas Pre-calculadas**: Todos los conteos calculados una vez
-- **⚡ Consultas Optimizadas**: Solo conteos, sin relaciones completas
-- **🎮 Sistema RPG**: Power level y rareza automáticos
-- **🔄 Transformación Eficiente**: Conversión directa desde Drizzle
+The pattern provides:
 
-### Estructura del Tipo:
+- **Pre-calculated statistics**: All counts calculated once
+- **Optimized queries**: Counts only, without full relations
+- **RPG system**: Automatic power level and rarity
+- **Efficient transformation**: Direct conversion from Drizzle
+
+### Type structure
 
 ```typescript
 interface CharacterWithStats extends CharacterBase {
 	_count: {
 		images: number;
 		videos: number;
-		// ... todos los conteos
+		// ... all counts
 	};
 	statistics: {
 		totalImages: number;
 		totalVideos: number;
 		totalAssociations: number;
-		powerLevel: number; // Calculado automáticamente
+		powerLevel: number; // Calculated automatically
 		rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 		lastUpdated: Date;
 	};
 }
 ```
 
-## 🔧 Funciones Principales
+## Main functions
 
 ### `fromDrizzleCharacter()`
 
-Transforma DrizzleCharacterWithCounts a CharacterWithStats con estadísticas optimizadas.
+Transforms DrizzleCharacterWithCounts to CharacterWithStats with optimized statistics.
 
 ```typescript
 const character = await db.query.characters.findFirst({
@@ -59,85 +61,89 @@ const character = await db.query.characters.findFirst({
 });
 
 const transformed = fromDrizzleCharacter(character);
-// ✅ Incluye estadísticas pre-calculadas
-// ✅ Power level automático
-// ✅ Sistema de rareza
+// Includes pre-calculated statistics
+// Automatic power level
+// Rarity system
 ```
 
 ### `calculatePowerLevel()`
 
-Sistema de poder basado en nivel y asociaciones:
+Power system based on level and associations:
 
-- **Fórmula**: `(nivel × 10) + (asociaciones × 2) + bonificación_alto_nivel`
-- **Uso**: Determinar rareza y mostrar en UI
+- **Formula**: `(level × 10) + (associations × 2) + high_level_bonus`
+- **Use**: Determine rarity and display it in the UI
 
 ### `determineRarityLevel()`
 
-Sistema automático de rareza:
+Automatic rarity system:
 
-- **Legendary**: Nivel ≥20 OR Power ≥500 OR Asociaciones ≥100
-- **Epic**: Nivel ≥15 OR Power ≥300 OR Asociaciones ≥50
-- **Rare**: Nivel ≥10 OR Power ≥200 OR Asociaciones ≥25
-- **Uncommon**: Nivel ≥5 OR Power ≥100 OR Asociaciones ≥10
-- **Common**: Resto
+- **Legendary**: Level 20 or higher, or Power 500 or higher, or Associations 100 or higher
+- **Epic**: Level 15 or higher, or Power 300 or higher, or Associations 50 or higher
+- **Rare**: Level 10 or higher, or Power 200 or higher, or Associations 25 or higher
+- **Uncommon**: Level 5 or higher, or Power 100 or higher, or Associations 10 or higher
+- **Common**: Remaining cases
 
-## 📈 Beneficios de Rendimiento
+## Performance benefits
 
-### Antes (CharacterComplete):
+### Before (CharacterComplete):
 
 ```typescript
-// ❌ Carga todas las relaciones
+// Loads all relations
 const character = await db.query.characters.findFirst({
 	where: eq(characters.id, id),
-	with: {/* todas las relaciones */},
+	with: {/* all relations */},
 });
-// 🐌 Lento, consume mucha memoria
+// Slow, uses a lot of memory
 ```
 
-### Ahora (CharacterWithStats):
+### Now (CharacterWithStats):
 
 ```typescript
-// ✅ Solo conteos optimizados
+// Optimized counts only
 const character = await db.query.characters.findFirst({
 	where: eq(characters.id, id),
 	with: CHARACTER_SELECT_WITH_STATS,
 });
 const transformed = fromDrizzleCharacter(character);
-// ⚡ 60-80% más rápido
-// 💾 Menos memoria
+// 60-80% faster
+// Less memory
 ```
 
-## 🎮 Integración RPG
+## RPG integration
 
-### Campos Específicos:
+### Specific fields
 
-- `level`: Nivel del personaje (1-100)
-- `class`: Clase RPG (warrior, mage, rogue, etc.)
-- `race`: Raza del personaje
-- `alignment`: Alineamiento D&D
-- `stats`: Estadísticas JSON (strength, dexterity, etc.)
+The RPG fields are:
 
-### Metadatos de Juego:
+- `level`: Character level (1-100)
+- `class`: RPG class (warrior, mage, rogue, and similar classes)
+- `race`: Character race
+- `alignment`: D&D alignment
+- `stats`: JSON statistics (strength, dexterity, and similar stats)
 
-- `psychologicalProfile`: Perfil psicológico
-- `socialProfile`: Perfil social
-- `abilities`: Habilidades especiales
-- `relatedCharacters`: Relaciones entre personajes
+### Game metadata
 
-## 💡 Ejemplos de Uso
+The game metadata fields are:
 
-### Obtener Personaje Optimizado:
+- `psychologicalProfile`: Psychological profile
+- `socialProfile`: Social profile
+- `abilities`: Special abilities
+- `relatedCharacters`: Relations between Characters
+
+## Usage examples
+
+### Get an optimized Character
 
 ```typescript
 import { getCharacter } from '@/app/actions/characters/character.actions';
 
 const character = await getCharacter(id);
-// ✅ CharacterWithStats con estadísticas
-// ✅ Power level calculado
-// ✅ Rareza determinada
+// CharacterWithStats with statistics
+// Calculated power level
+// Determined rarity
 ```
 
-### Crear Personaje:
+### Create a Character
 
 ```typescript
 import { createCharacter } from '@/app/actions/characters/character.actions';
@@ -146,12 +152,12 @@ const newCharacter = await createCharacter({
 	name: 'Ayla',
 	class: 'warrior',
 	level: 15,
-	// ... otros campos
+	// ... other fields
 });
-// ✅ Automáticamente calcula power level y rareza
+// Automatically calculates power level and rarity
 ```
 
-### Usar en Componentes:
+### Use in components
 
 ```typescript
 import { CharacterCard } from '@/components/cards/character-card';
@@ -160,50 +166,56 @@ import { CharacterCard } from '@/components/cards/character-card';
   character={characterWithStats}
   onClick={() => selectCharacter(character.id)}
 />
-// ✅ Compatible con CharacterWithStats
-// ✅ Muestra estadísticas pre-calculadas
+// Compatible with CharacterWithStats
+// Shows pre-calculated statistics
 ```
 
-## 🔄 Migración desde Legacy
+## Migration from legacy
 
-### Tipos Eliminados:
+### Removed types
 
-- ❌ `CharacterExtended` → ✅ `CharacterWithStats`
-- ❌ `CharacterComplete` → ✅ Solo cuando necesario
-- ❌ `CharacterWithRelations` → ✅ `CharacterWithStats`
+The migration maps these types:
 
-### Funciones Actualizadas:
+- `CharacterExtended` to `CharacterWithStats`
+- `CharacterComplete` only when necessary
+- `CharacterWithRelations` to `CharacterWithStats`
 
-- ✅ `fromDrizzleCharacter()`: Retorna CharacterWithStats
-- ✅ `CHARACTER_SELECT_WITH_STATS`: Consulta optimizada para Drizzle
-- ✅ Store con estructura Record para acceso O(1)
+### Updated functions
 
-## 🏗️ Arquitectura
+The updated functions are:
 
-### Capas del Sistema:
+- `fromDrizzleCharacter()`: Returns CharacterWithStats
+- `CHARACTER_SELECT_WITH_STATS`: Optimized query for Drizzle
+- Store with Record structure for O(1) access
 
-1. **Database**: Drizzle con consultas optimizadas
-2. **Transformers**: Conversión con estadísticas
-3. **Actions**: Server actions con tipos correctos
-4. **Store**: Zustand con Record optimizado
-5. **Components**: UI con datos pre-calculados
+## Architecture
 
-### Flujo de Datos:
+### System layers
+
+The layers are:
+
+1. **Database**: Drizzle with optimized queries
+2. **Transformers**: Conversion with statistics
+3. **Routes**: Routes with correct types. Routes call services.
+4. **Store**: Zustand with an optimized Record
+5. **Components**: UI with pre-calculated data
+
+### Data flow
 
 ```
 Drizzle Query → fromDrizzleCharacter → CharacterWithStats → Store → UI
 ```
 
-## 📋 Checklist de Migración
+## Migration checklist
 
-- [x] ✅ Tipos optimizados (CharacterWithStats)
-- [x] ✅ Transformers con estadísticas
-- [x] ✅ Server actions actualizadas
-- [x] ✅ Store con Record optimizado
-- [x] ✅ Utilidades migradas
-- [x] ✅ Componentes compatibles
-- [x] ✅ Documentación actualizada
+- [x] Optimized types (CharacterWithStats)
+- [x] Transformers with statistics
+- [x] Updated routes
+- [x] Store with optimized Record
+- [x] Migrated utilities
+- [x] Compatible components
+- [x] Updated documentation
 
 ---
 
-> **Patrón Consolidado**: CharacterWithStats es el estándar para Character, proporcionando rendimiento óptimo y funcionalidad completa para la gestión de personajes en el sistema.
+> **Consolidated pattern**: CharacterWithStats is the standard for Character. It provides optimal performance and full functionality for Character management in Media Manager.

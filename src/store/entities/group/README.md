@@ -1,10 +1,12 @@
-# 👥 Store de Group - Gestión de Grupos
+# Group store - Group management
 
-## 📋 Resumen
+## Summary
 
-El store de **Group** gestiona la organización de elementos en grupos temáticos, permitiendo agrupar imágenes, videos, álbumes, colecciones, etiquetas y otros elementos relacionados para facilitar su organización y navegación.
+The **Group** store manages organization of items in thematic Groups.
 
-## 🏗️ Arquitectura del Store
+The store can group images, videos, Albums, Collections, Tags, and other related items to ease organization and navigation.
+
+## Store architecture
 
 ```mermaid
 graph TB
@@ -37,12 +39,12 @@ graph TB
     A --> P
 ```
 
-## 🎯 Tipos Principales
+## Main types
 
-### **Tipos Core**
+### Core types
 
 ```typescript
-// Tipo base del grupo
+// Base Group type
 interface GroupBase {
 	id: string;
 	name: string;
@@ -55,22 +57,22 @@ interface GroupBase {
 	updatedAt: Date;
 }
 
-// Tipo extendido con relaciones
+// Extended type with relations
 interface GroupExtended extends GroupBase {
 	itemsCount: number;
 	tags?: Array<{ id: string; name: string; color: string }>;
 	images?: Array<{ id: string; name: string; path: string }>;
 	collections?: Array<{ id: string; name: string; emoji: string }>;
-	// ... otras relaciones
+	// ... other relations
 
-	// Estados de UI
+	// UI states
 	isSelected?: boolean;
 	isHighlighted?: boolean;
 	isEditing?: boolean;
 	isExpanded?: boolean;
 }
 
-// Tipo completo con contadores
+// Complete type with counters
 interface GroupComplete extends GroupBase {
 	_count: {
 		images?: number;
@@ -87,7 +89,7 @@ interface GroupComplete extends GroupBase {
 }
 ```
 
-### **Tipos de Filtros**
+### Filter types
 
 ```typescript
 interface GroupFilters {
@@ -113,14 +115,14 @@ interface GroupSearchResult {
 }
 ```
 
-## 🔄 Flujo de Datos
+## Data flow
 
 ```mermaid
 sequenceDiagram
     participant UI as UI Component
     participant Store as Group Store
     participant Service as Group Service
-    participant API as Server Actions
+    participant API as Routes
     participant DB as Database
 
     UI->>Store: loadGroups()
@@ -142,29 +144,31 @@ sequenceDiagram
     Store-->>UI: State Updated
 ```
 
-## 🎛️ API del Store
+Routes call services.
 
-### **Core Actions**
+## Store API
+
+### Core actions
 
 ```typescript
-// 📊 Operaciones principales
+// Main operations
 loadGroup: (id: string) => Promise<GroupExtended | undefined>
 loadGroups: () => Promise<GroupExtended[]>
 createGroup: (data: GroupCreateInput) => Promise<GroupExtended>
 updateGroup: (id: string, data: GroupUpdateInput) => Promise<GroupExtended>
 deleteGroup: (id: string) => Promise<void>
 
-// 🔍 Búsqueda y filtros
+// Search and filters
 searchGroups: (filters: GroupFilters) => Promise<GroupSearchResult>
 getFilteredGroups: () => GroupExtended[]
 applyFilters: (groups: GroupExtended[]) => GroupExtended[]
 applySort: (groups: GroupExtended[]) => GroupExtended[]
 ```
 
-### **Filter Actions**
+### Filter actions
 
 ```typescript
-// 🎯 Gestión de filtros
+// Filter management
 setSortBy: (sortBy: GroupSortCriteria) => void
 setSearchQuery: (query: string) => void
 setFilterByType: (type: string | null) => void
@@ -174,10 +178,10 @@ setDateRange: (from: Date | null, to: Date | null) => void
 clearFilters: () => void
 ```
 
-### **UI Actions**
+### UI actions
 
 ```typescript
-// 🎨 Estado de interfaz
+// Interface state
 setSelectedGroups: (ids: string[]) => void
 toggleGroupSelection: (id: string) => void
 setViewMode: (mode: GroupViewMode) => void
@@ -186,24 +190,24 @@ setIsLoading: (loading: boolean) => void
 setError: (error: string | null) => void
 ```
 
-## 🎯 Ejemplos de Uso
+## Usage examples
 
-### **Cargar y Mostrar Grupos**
+### Load and show Groups
 
 ```typescript
-// En un componente React
+// In a React component
 const { groups, isLoading, error, loadGroups, getFilteredGroups } = useGroupStore();
 
-// Cargar grupos al montar
+// Load Groups on mount
 useEffect(() => {
 	loadGroups();
 }, [loadGroups]);
 
-// Obtener grupos filtrados
+// Get filtered Groups
 const filteredGroups = getFilteredGroups();
 ```
 
-### **Crear Nuevo Grupo**
+### Create a new Group
 
 ```typescript
 const { createGroup } = useGroupStore();
@@ -218,75 +222,75 @@ const handleCreateGroup = async (formData: GroupCreateInput) => {
 			description: formData.description,
 		});
 
-		console.log('✅ Grupo creado:', newGroup);
+		console.log('Group created:', newGroup);
 	} catch (error) {
-		console.error('❌ Error creando grupo:', error);
+		console.error('Error creating Group:', error);
 	}
 };
 ```
 
-### **Filtrar y Buscar**
+### Filter and search
 
 ```typescript
 const { setSearchQuery, setFilterByCategory, setFilterFavorites, clearFilters } = useGroupStore();
 
-// Buscar por nombre
+// Search by name
 const handleSearch = (query: string) => {
 	setSearchQuery(query);
 };
 
-// Filtrar por categoría
+// Filter by category
 const handleCategoryFilter = (category: string) => {
 	setFilterByCategory(category);
 };
 
-// Mostrar solo favoritos
+// Show Favorites only
 const handleFavoritesFilter = () => {
 	setFilterFavorites(true);
 };
 
-// Limpiar filtros
+// Clear filters
 const handleClearFilters = () => {
 	clearFilters();
 };
 ```
 
-### **Gestión de Selección**
+### Selection management
 
 ```typescript
 const { selectedGroups, setSelectedGroups, toggleGroupSelection } = useGroupStore();
 
-// Seleccionar múltiples grupos
+// Select multiple Groups
 const handleSelectAll = (groupIds: string[]) => {
 	setSelectedGroups(groupIds);
 };
 
-// Toggle selección individual
+// Toggle individual selection
 const handleToggleGroup = (groupId: string) => {
 	toggleGroupSelection(groupId);
 };
 
-// Obtener grupos seleccionados
+// Get selected Groups
 const selectedGroupsData = groups.filter((g) => selectedGroups.includes(g.id));
 ```
 
-## 🔧 Transformaciones
+## Transformations
 
-### **Extensión de Grupos**
+### Group extension
 
 ```typescript
-// Extender grupo base con propiedades adicionales
+// Extend a base Group with extra properties
 const extendGroup = (group: GroupBase): GroupComplete => ({
 	...group,
 	_count: {
 		images: 0,
 		collections: 0,
 		tags: 0,
-		// ... otros contadores
+		// ... other counters
 	},
 });
 
-// Transformar para UI
+// Transform for UI
 const transformGroupToExtended = (group: GroupComplete, options: { isSelected?: boolean } = {}): GroupExtended => ({
 	...group,
 	itemsCount: Object.values(group._count).reduce((a, b) => a + (b || 0), 0),
@@ -297,7 +301,7 @@ const transformGroupToExtended = (group: GroupComplete, options: { isSelected?: 
 });
 ```
 
-## 📊 Estados de Carga
+## Loading states
 
 ```mermaid
 stateDiagram-v2
@@ -323,48 +327,54 @@ stateDiagram-v2
     Deleting --> Error: Delete Failed
 ```
 
-## 🎨 Integración con UI
+## UI integration
 
-### **Componentes Relacionados**
+### Related components
 
-- `GroupCard` - Tarjeta de grupo individual
-- `GroupList` - Lista de grupos
-- `GroupFilters` - Panel de filtros
-- `GroupCreator` - Formulario de creación
-- `GroupEditor` - Editor de grupos
+The store integrates with the following components:
 
-### **Hooks Personalizados**
+- `GroupCard` - Individual Group card
+- `GroupList` - Group list
+- `GroupFilters` - Filter panel
+- `GroupCreator` - Creation form
+- `GroupEditor` - Group editor
+
+### Custom hooks
 
 ```typescript
-// Hook para grupos filtrados
+// Hook for filtered Groups
 const useFilteredGroups = () => {
 	const { getFilteredGroups } = useGroupStore();
 	return useMemo(() => getFilteredGroups(), [getFilteredGroups]);
 };
 
-// Hook para grupos seleccionados
+// Hook for selected Groups
 const useSelectedGroups = () => {
 	const { groups, selectedGroups } = useGroupStore();
 	return useMemo(() => groups.filter((g) => selectedGroups.includes(g.id)), [groups, selectedGroups]);
 };
 ```
 
-## 🚀 Optimizaciones
+## Optimizations
 
-- **Paginación**: Carga incremental de grupos
-- **Caché**: Almacenamiento en memoria de grupos frecuentes
-- **Debounce**: Búsqueda con retraso para evitar spam
-- **Memoización**: Cálculos de filtros optimizados
-- **Virtualización**: Para listas grandes de grupos
+The store uses the following optimizations:
 
-## 📈 Métricas y Analytics
+- **Pagination**: Incremental load of Groups
+- **Cache**: In-memory storage of frequent Groups
+- **Debounce**: Search with delay to avoid spam
+- **Memoization**: Optimized filter calculations
+- **Virtualization**: For large Group lists
 
-- Total de grupos creados
-- Grupos más utilizados
-- Categorías populares
-- Patrones de organización
-- Rendimiento de búsquedas
+## Metrics and analytics
+
+The store tracks the following metrics:
+
+- Total of Groups created
+- Most used Groups
+- Popular categories
+- Organization patterns
+- Search performance
 
 ---
 
-**📝 Nota**: Esta documentación se actualiza automáticamente con cada cambio en la entidad Group.
+**Note**: This documentation updates automatically with each change in the Group entity.

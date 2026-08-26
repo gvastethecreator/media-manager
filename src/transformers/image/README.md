@@ -1,1 +1,1 @@
-# Image Refactorization Complete
+# Image refactorization complete

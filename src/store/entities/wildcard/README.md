@@ -1,12 +1,14 @@
-# 🃏 Wildcard Store
+# Wildcard store
 
-> **Store de Zustand para la gestión de comodines (wildcards) en el sistema de gestión de imágenes**
+> Zustand store for Wildcard management in the media management system
 
-## 📋 Descripción
+## Description
 
-El **Wildcard Store** gestiona comodines para prompts de IA con funcionalidades avanzadas de jerarquía, categorización y seguimiento de uso. Los wildcards son fragmentos de texto reutilizables que se pueden organizar en estructuras jerárquicas y usar en prompts de generación de imágenes.
+The **Wildcard Store** manages Wildcards for AI prompts with advanced hierarchy, categorization, and usage tracking.
 
-## 🏗️ Arquitectura
+Wildcards are reusable text fragments that you can organize in hierarchical structures and use in image-generation prompts.
+
+## Architecture
 
 ```mermaid
 graph TB
@@ -41,175 +43,183 @@ graph TB
     G --> X[Analytics]
 ```
 
-## 🎯 Características Especiales
+## Special features
 
-### 🌳 Sistema Jerárquico
+### Hierarchical system
 
-- **Estructura de árbol**: Wildcards padre-hijo con múltiples niveles
-- **Navegación jerárquica**: Expansión/colapso de ramas
-- **Movimiento de nodos**: Reorganización por drag & drop
-- **Cálculo de profundidad**: Análisis automático de la estructura
+The store provides the following hierarchy features:
 
-### 🏷️ Categorización Avanzada
+- **Tree structure**: Parent-child Wildcards with multiple levels
+- **Hierarchical navigation**: Expansion and collapse of branches
+- **Node movement**: Reorganization by drag and drop
+- **Depth calculation**: Automatic analysis of the structure
 
-- **Categorías predefinidas**: Character, Style, Pose, Lighting, Background, etc.
-- **Colores por categoría**: Identificación visual automática
-- **Emojis representativos**: Iconografía contextual
-- **Filtrado por categoría**: Búsqueda específica por tipo
+### Advanced categorization
 
-### 📊 Seguimiento de Uso
+The store provides the following categorization features:
 
-- **Contador de uso**: Tracking automático de frecuencia
-- **Estadísticas detalladas**: Análisis de patrones de uso
-- **Wildcards populares**: Identificación de los más utilizados
-- **Histórico de uso**: Seguimiento temporal
+- **Predefined categories**: Character, Style, Pose, Lighting, Background
+- **Colors by category**: Automatic visual identification
+- **Representative emojis**: Contextual iconography
+- **Filter by category**: Specific search by type
 
-### 🔍 Búsqueda y Filtrado
+### Usage tracking
 
-- **Búsqueda textual**: En nombre, descripción, shortcut, replacement
-- **Filtros jerárquicos**: Por nivel, padre, hijos
-- **Filtros de uso**: Por frecuencia de utilización
-- **Filtros de fecha**: Por rango temporal de creación
+The store provides the following tracking features:
 
-## 🧩 Estructura del Store
+- **Usage counter**: Automatic frequency tracking
+- **Detailed statistics**: Analysis of usage patterns
+- **Popular Wildcards**: Identification of the most used
+- **Usage history**: Temporal tracking
 
-### 📊 Estado Principal
+### Search and filtering
+
+The store provides the following search features:
+
+- **Text search**: In name, description, shortcut, replacement
+- **Hierarchical filters**: By level, parent, children
+- **Usage filters**: By frequency of use
+- **Date filters**: By temporal range of creation
+
+## Store structure
+
+### Main state
 
 ```typescript
 interface WildcardState {
 	core: {
-		wildcards: Record<string, WildcardComplete>; // Mapa de wildcards por ID
-		wildcardItems: Record<string, ItemReference[]>; // Items asociados
-		isLoading: boolean; // Estado de carga
-		error: string | null; // Error actual
-		lastUpdated: Date | null; // Última actualización
+		wildcards: Record<string, WildcardComplete>; // Wildcard map by ID
+		wildcardItems: Record<string, ItemReference[]>; // Associated items
+		isLoading: boolean; // Loading state
+		error: string | null; // Current error
+		lastUpdated: Date | null; // Last update
 	};
-	ui: WildcardUIState; // Estado de interfaz
-	filters: WildcardFiltersState; // Filtros activos
+	ui: WildcardUIState; // Interface state
+	filters: WildcardFiltersState; // Active filters
 }
 ```
 
-### 🎮 Estado de UI
+### UI state
 
 ```typescript
 interface WildcardUIState {
-	selectedIds: string[]; // IDs seleccionados
-	viewMode: WildcardViewMode; // Modo de visualización
-	isViewerOpen: boolean; // Visor abierto
-	currentWildcardId: string | null; // Wildcard actual
-	displayState: Record<string, WildcardDisplayState>; // Estados visuales
-	draggedWildcardId: string | null; // Wildcard arrastrado
-	dropTargetWildcardId: string | null; // Objetivo de drop
-	highlightedId: string | null; // Wildcard resaltado
-	expandedIds: string[]; // IDs expandidos
+	selectedIds: string[]; // Selected IDs
+	viewMode: WildcardViewMode; // Display mode
+	isViewerOpen: boolean; // Viewer open
+	currentWildcardId: string | null; // Current Wildcard
+	displayState: Record<string, WildcardDisplayState>; // Visual states
+	draggedWildcardId: string | null; // Dragged Wildcard
+	dropTargetWildcardId: string | null; // Drop target
+	highlightedId: string | null; // Highlighted Wildcard
+	expandedIds: string[]; // Expanded IDs
 }
 ```
 
-### 🔍 Filtros
+### Filters
 
 ```typescript
 interface WildcardFiltersState {
-	sortBy: WildcardSortCriteria; // Criterio de ordenamiento
-	searchQuery: string; // Término de búsqueda
-	filterByCategory: string | null; // Filtro por categoría
-	filterFavorites: boolean; // Solo favoritos
-	parentId: string | null; // Filtro por padre
-	onlyWithChildren: boolean; // Solo con hijos
-	dateRange: { from: Date | null; to: Date | null }; // Rango de fechas
+	sortBy: WildcardSortCriteria; // Sort criterion
+	searchQuery: string; // Search term
+	filterByCategory: string | null; // Filter by category
+	filterFavorites: boolean; // Favorites only
+	parentId: string | null; // Filter by parent
+	onlyWithChildren: boolean; // Only with children
+	dateRange: { from: Date | null; to: Date | null }; // Date range
 }
 ```
 
-## 🔄 Acciones Principales
+## Main actions
 
-### 📥 Gestión de Datos
+### Data management
 
 ```typescript
-// Cargar wildcards
+// Load Wildcards
 await fetchWildcards();
 
-// Crear nuevo wildcard
+// Create a new Wildcard
 await createWildcard({
-	name: 'Nuevo Wildcard',
-	shortcut: '__nuevo__',
-	replacement: 'contenido del wildcard',
+	name: 'New Wildcard',
+	shortcut: '__new__',
+	replacement: 'wildcard content',
 	category: 'character',
 });
 
-// Actualizar wildcard existente
-await updateWildcard(id, { name: 'Nombre actualizado' });
+// Update an existing Wildcard
+await updateWildcard(id, { name: 'Updated name' });
 
-// Eliminar wildcard
+// Delete a Wildcard
 await removeWildcard(id);
 
-// Mover wildcard en jerarquía
+// Move a Wildcard in the hierarchy
 await moveWildcard(id, newParentId);
 ```
 
-### 🌳 Gestión Jerárquica
+### Hierarchical management
 
 ```typescript
-// Obtener hijos de un wildcard
+// Get children of a Wildcard
 const children = getChildWildcards(parentId);
 
-// Obtener jerarquía completa
+// Get the complete hierarchy
 const hierarchy = getWildcardHierarchy();
 
-// Expandir/colapsar ramas
+// Expand or collapse branches
 expandBranch(wildcardId);
 collapseBranch(wildcardId);
 
-// Expandir/colapsar individual
+// Expand or collapse individually
 toggleWildcardExpanded(wildcardId);
 ```
 
-### 🎮 Gestión de UI
+### UI management
 
 ```typescript
-// Selección múltiple
+// Multi-select
 selectWildcard(id);
 selectMultipleWildcards([id1, id2, id3]);
 toggleWildcardSelection(id);
 clearWildcardSelection();
 
-// Visor de wildcards
+// Wildcard viewer
 openViewer(wildcardId);
 closeViewer();
 setCurrentWildcard(wildcardId);
 
-// Drag & drop
+// Drag and drop
 setDraggedWildcard(id);
 setDropTargetWildcard(targetId);
 
-// Estados visuales
+// Visual states
 setWildcardDisplayState(id, { isHighlighted: true });
 resetWildcardDisplayState(id);
 ```
 
-### 🔍 Filtros y Búsqueda
+### Filters and search
 
 ```typescript
-// Actualizar filtros
+// Update filters
 updateFilters({
 	filterByCategory: 'character',
 	filterFavorites: true,
 });
 
-// Buscar por texto
+// Search by text
 setSearchQuery('pose');
 
-// Filtrar por jerarquía
+// Filter by hierarchy
 updateFilters({
 	parentId: 'parent-id',
 	onlyWithChildren: true,
 });
 
-// Limpiar filtros
+// Clear filters
 clearFilters();
 ```
 
-## 🛠️ Utilidades Disponibles
+## Available utilities
 
-### 📊 Estadísticas
+### Statistics
 
 ```typescript
 import { getWildcardStats } from '@/utils/wildcard';
@@ -218,7 +228,7 @@ const stats = getWildcardStats(wildcards);
 // {
 //   total: 150,
 //   byCategory: { character: 45, style: 30, ... },
-//   byUsage: { 'Muy usado': 15, 'Uso moderado': 25, ... },
+//   byUsage: { 'Heavily used': 15, 'Moderate use': 25, ... },
 //   favorites: 12,
 //   totalUsage: 2847,
 //   avgUsage: 18.98,
@@ -227,7 +237,7 @@ const stats = getWildcardStats(wildcards);
 // }
 ```
 
-### 🔄 Ordenamiento
+### Sort
 
 ```typescript
 import { sortWildcards } from '@/utils/wildcard';
@@ -235,7 +245,7 @@ import { sortWildcards } from '@/utils/wildcard';
 const sorted = sortWildcards(wildcards, 'usage:desc');
 ```
 
-### 🏷️ Agrupamiento
+### Grouping
 
 ```typescript
 import { groupWildcards } from '@/utils/wildcard';
@@ -245,22 +255,22 @@ const byUsage = groupWildcards(wildcards, 'usage');
 const byParent = groupWildcards(wildcards, 'parentId');
 ```
 
-### 🌳 Jerarquía
+### Hierarchy
 
 ```typescript
 import { buildWildcardTree, findWildcardDescendants, findWildcardPath } from '@/utils/wildcard';
 
-// Construir árbol jerárquico
+// Build the hierarchical tree
 const tree = buildWildcardTree(wildcards);
 
-// Encontrar todos los descendientes
+// Find all descendants
 const descendants = findWildcardDescendants('parent-id', wildcards);
 
-// Encontrar ruta desde la raíz
+// Find the path from the root
 const path = findWildcardPath('wildcard-id', wildcards);
 ```
 
-### 🎨 Generación Visual
+### Visual generation
 
 ```typescript
 import { generateWildcardColor, generateWildcardEmoji } from '@/utils/wildcard';
@@ -269,9 +279,9 @@ const color = generateWildcardColor('character'); // '#3B82F6'
 const emoji = generateWildcardEmoji('style'); // '🎨'
 ```
 
-## 📦 Uso del Store
+## Store use
 
-### 🎯 En Componentes React
+### In React components
 
 ```typescript
 import { useWildcardStore } from '@/store/entities/wildcard'
@@ -316,7 +326,7 @@ function WildcardTree() {
 }
 ```
 
-### 🔍 Búsqueda y Filtrado
+### Search and filtering
 
 ```typescript
 function WildcardSearch() {
@@ -341,7 +351,7 @@ function WildcardSearch() {
       <SearchInput
         value={filters.searchQuery}
         onChange={handleSearch}
-        placeholder="Buscar wildcards..."
+        placeholder="Search wildcards..."
       />
       <CategoryFilter
         value={filters.filterByCategory}
@@ -353,22 +363,26 @@ function WildcardSearch() {
 }
 ```
 
-## 🎨 Personalización Visual
+## Visual customization
 
-### 🌈 Colores por Categoría
+### Colors by category
 
-- **Character**: `#3B82F6` (Azul)
-- **Style**: `#8B5CF6` (Púrpura)
-- **Pose**: `#10B981` (Verde)
-- **Lighting**: `#F59E0B` (Amarillo)
-- **Background**: `#6B7280` (Gris)
-- **Object**: `#EF4444` (Rojo)
-- **Effect**: `#EC4899` (Rosa)
-- **Mood**: `#F97316` (Naranja)
-- **Technical**: `#06B6D4` (Cian)
-- **Prompt**: `#84CC16` (Lima)
+The store uses the following colors:
 
-### 🎭 Emojis por Categoría
+- **Character**: `#3B82F6` (Blue)
+- **Style**: `#8B5CF6` (Purple)
+- **Pose**: `#10B981` (Green)
+- **Lighting**: `#F59E0B` (Yellow)
+- **Background**: `#6B7280` (Gray)
+- **Object**: `#EF4444` (Red)
+- **Effect**: `#EC4899` (Pink)
+- **Mood**: `#F97316` (Orange)
+- **Technical**: `#06B6D4` (Cyan)
+- **Prompt**: `#84CC16` (Lime)
+
+### Emojis by category
+
+The store uses the following emojis:
 
 - **Character**: 👤
 - **Style**: 🎨
@@ -381,91 +395,97 @@ function WildcardSearch() {
 - **Technical**: ⚙️
 - **Prompt**: 📝
 
-## 🔄 Persistencia
+## Persistence
 
-El store utiliza persistencia selectiva para:
+The store uses selective persistence for the following data:
 
-- ✅ **Estado de UI**: Modo de vista, wildcards expandidos
-- ✅ **Filtros**: Criterios de ordenamiento, filtro por padre
-- ❌ **Datos**: Se recargan desde el servidor
-- ❌ **Selecciones**: Se resetean en cada sesión
+- **UI state**: View mode, expanded Wildcards
+- **Filters**: Sort criteria, filter by parent
 
-## 🚀 Optimizaciones
+Data reloads from the server.
 
-### ⚡ Performance
+Selections reset in each session.
 
-- **Estructura Record**: O(1) para acceso por ID
-- **Memoización**: Selectores memoizados para jerarquía
-- **Lazy Loading**: Carga bajo demanda de relaciones
-- **Debounce**: Búsqueda con retardo
+## Optimizations
 
-### 🌳 Gestión Jerárquica
+### Performance
 
-- **Prevención de ciclos**: Validación automática
-- **Cálculo eficiente**: Algoritmos optimizados para profundidad
-- **Cache de jerarquía**: Resultados cacheados para mejor performance
-- **Expansión inteligente**: Solo carga nodos visibles
+The store uses the following performance techniques:
 
-## 📚 Ejemplos de Uso
+- **Record structure**: O(1) for access by ID
+- **Memoization**: Memoized selectors for hierarchy
+- **Lazy loading**: On-demand load of relations
+- **Debounce**: Search with delay
 
-### 🃏 Creación de Wildcard Jerárquico
+### Hierarchical management
+
+The store uses the following hierarchy techniques:
+
+- **Cycle prevention**: Automatic validation
+- **Efficient calculation**: Optimized algorithms for depth
+- **Hierarchy cache**: Cached results for better performance
+- **Intelligent expansion**: Loads visible nodes only
+
+## Usage examples
+
+### Hierarchical Wildcard creation
 
 ```typescript
-// Crear wildcard padre
+// Create a parent Wildcard
 const characterWildcard = await createWildcard({
-	name: 'Personajes',
+	name: 'Characters',
 	shortcut: '__characters__',
-	replacement: 'personaje, persona',
+	replacement: 'character, person',
 	category: 'character',
 });
 
-// Crear wildcards hijos
+// Create child Wildcards
 await createWildcard({
-	name: 'Guerrero',
+	name: 'Warrior',
 	shortcut: '__warrior__',
-	replacement: 'guerrero, soldado, knight',
+	replacement: 'warrior, soldier, knight',
 	category: 'character',
 	parentId: characterWildcard.id,
 });
 
 await createWildcard({
-	name: 'Mago',
+	name: 'Wizard',
 	shortcut: '__wizard__',
-	replacement: 'mago, hechicero, wizard',
+	replacement: 'mage, sorcerer, wizard',
 	category: 'character',
 	parentId: characterWildcard.id,
 });
 ```
 
-### 🔍 Búsqueda Avanzada con Jerarquía
+### Advanced search with hierarchy
 
 ```typescript
-// Buscar solo wildcards raíz con hijos
+// Search only root Wildcards with children
 updateFilters({
 	parentId: null,
 	onlyWithChildren: true,
 	filterByCategory: 'character',
 });
 
-// Buscar wildcards por rango de uso
+// Search Wildcards by usage range
 const highUsageWildcards = wildcards.filter((w) => (w.usage || 0) > 50);
 
-// Buscar en una rama específica
+// Search in a specific branch
 const branchWildcards = findWildcardDescendants('parent-id', wildcards)
 	.map((id) => wildcards[id])
 	.filter((w) => w.name.toLowerCase().includes('search'));
 ```
 
-### 🎮 Gestión de Estado UI Avanzada
+### Advanced UI state management
 
 ```typescript
-// Selección jerárquica (seleccionar rama completa)
+// Hierarchical selection (select a complete branch)
 const selectBranch = (wildcardId: string) => {
 	const descendants = findWildcardDescendants(wildcardId, Object.values(wildcards));
 	selectMultipleWildcards([wildcardId, ...descendants]);
 };
 
-// Expansión inteligente (expandir hasta un wildcard específico)
+// Intelligent expansion (expand to a specific Wildcard)
 const expandToWildcard = (wildcardId: string) => {
 	const path = findWildcardPath(wildcardId, Object.values(wildcards));
 	path.forEach((id) => expandWildcard(id));
@@ -474,5 +494,5 @@ const expandToWildcard = (wildcardId: string) => {
 
 ---
 
-**📝 Última actualización**: Enero 2025
-**🔗 Relacionado**: [Prompt Store](../prompt/README.md), [Character Store](../character/README.md)
+**Last update**: January 2025
+**Related**: [Prompt Store](../prompt/README.md), [Character Store](../character/README.md)

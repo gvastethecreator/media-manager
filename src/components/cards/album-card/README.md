@@ -1,72 +1,78 @@
-# 📸 AlbumCard
+# AlbumCard
 
-Componente que muestra una tarjeta estilo TCG (Trading Card Game) para representar álbumes de imágenes y videos.
+This component displays a TCG-style card that represents Albums of images and videos.
 
-## 📋 Descripción
+## Description
 
-Este componente forma parte del sistema de tarjetas de entidades, siguiendo el diseño de cartas de juegos como Magic the Gathering, Yu-Gi-Oh y Pokémon. Cada tarjeta incluye:
+This component is part of the entity card system.
 
-- Cabecera con nombre de álbum, emoji y categoría
-- Sección de ilustración con mosaico de imágenes y videos recientes
-- Sección de contenido con descripción y metadatos
-- Pie con estadísticas, rareza y tamaño del álbum
-- Efectos visuales tipo holográfico y decoraciones de TCG
-- Soporte para modo compacto en listados
-- Colores personalizados según la configuración del álbum
-- Sistema de rareza visual basado en el contenido
-- Identificador de carta único estilo TCG
+The design follows cards from Magic the Gathering, Yu-Gi-Oh, and Pokemon.
 
-## 🔄 Flujo de funcionamiento
+Each card includes the following parts:
+
+- Header with Album name, emoji, and category
+- Illustration section with a mosaic of recent images and videos
+- Content section with description and metadata
+- Footer with statistics, rarity, and Album size
+- Holographic visual effects and TCG decorations
+- Support for compact mode in listings
+- Custom colors from the Album configuration
+- Visual rarity system based on content
+- Unique TCG-style card identifier
+
+## Operation flow
 
 ```mermaid
 graph TD
-    A[AlbumCard] --> B[Inicialización]
-    B --> C[Cargar datos y calcular estilos]
-    C --> D[Verificar modo compacto]
-    D --> E{¿Es compacto?}
-    E -->|Sí| F[Renderizar versión reducida]
-    E -->|No| G[Renderizar versión completa]
-    G --> H[Mostrar imágenes y contenido]
-    F --> I[Mostrar solo header y footer]
-    H --> J[Añadir efectos visuales TCG]
+    A[AlbumCard] --> B[Initialization]
+    B --> C[Load data and calculate styles]
+    C --> D[Check compact mode]
+    D --> E{Is it compact?}
+    E -->|Yes| F[Render reduced version]
+    E -->|No| G[Render full version]
+    G --> H[Show images and content]
+    F --> I[Show header and footer only]
+    H --> J[Add TCG visual effects]
     I --> J
-    J --> K{¿Tiene onClick?}
-    K -->|Sí| L[Retornar tarjeta con evento]
-    K -->|No| M[Retornar tarjeta sin evento]
+    J --> K{Does it have onClick?}
+    K -->|Yes| L[Return card with event]
+    K -->|No| M[Return card without event]
 
-    N[AlbumCardImages] --> O[Recibir imágenes por props]
-    O --> P{¿Hay medios?}
-    P -->|Sí| Q[Mostrar grid con indicadores]
-    P -->|No| R[Cargar imágenes por server action]
-    R --> S[Mostrar placeholders si no hay medios]
-    Q --> T[Aplicar efectos holográficos]
+    N[AlbumCardImages] --> O[Receive images through props]
+    O --> P{Are there media?}
+    P -->|Yes| Q[Show grid with indicators]
+    P -->|No| R[Load images through a route]
+    R --> S[Show placeholders if there is no media]
+    Q --> T[Apply holographic effects]
 
-    U[album-server-actions] --> V[Consultar base de datos]
-    V --> W[Obtener datos y medios]
-    W --> X[Calcular tamaño total y estadísticas]
-    X --> Y[Retornar datos enriquecidos]
+    U[album-server-actions] --> V[Query the database]
+    V --> W[Get data and media]
+    W --> X[Calculate total size and statistics]
+    X --> Y[Return enriched data]
 ```
 
-## 🗂️ Estructura de archivos
+## File structure
 
-- **index.ts**: Punto de entrada y exportaciones del componente
-- **album-card.tsx**: Componente principal que renderiza la tarjeta con estilo TCG
-- **album-card-header.tsx**: Componente para la cabecera con estilo de carta TCG
-- **album-card-images.tsx**: Componente para mostrar imágenes y videos con efectos visuales
-- **album-card-content.tsx**: Componente para mostrar la descripción y metadatos
-- **album-card-footer.tsx**: Componente para mostrar estadísticas, rareza y tamaño
-- **album-server-actions.ts**: Acciones del servidor para obtener datos de Prisma
-- **README.md**: Documentación del componente
+The directory includes the following files:
 
-## 🖥️ Ejemplos de uso
+- **index.ts**: Entry point and component exports
+- **album-card.tsx**: Main component that renders the TCG-style card
+- **album-card-header.tsx**: Component for the TCG-style header
+- **album-card-images.tsx**: Component that shows images and videos with visual effects
+- **album-card-content.tsx**: Component that shows the description and metadata
+- **album-card-footer.tsx**: Component that shows statistics, rarity, and size
+- **album-server-actions.ts**: Routes that fetch Prisma data
+- **README.md**: Component documentation
 
-### Uso básico
+## Usage examples
+
+### Basic use
 
 ```tsx
 import { AlbumCard } from '@/components/cards/album-card';
 import { getAlbumCardData } from '@/components/cards/album-card/album-server-actions';
 
-// En un server component
+// In a data-loading component
 async function AlbumsList() {
 	const albums = await getAlbumsForCards({ limit: 10 });
 
@@ -80,7 +86,7 @@ async function AlbumsList() {
 }
 ```
 
-### Uso en modo compacto
+### Use in compact mode
 
 ```tsx
 import { AlbumCard } from '@/components/cards/album-card';
@@ -96,7 +102,7 @@ function CompactAlbumsList({ albums }) {
 }
 ```
 
-### Uso con manejador de eventos personalizado
+### Use with a custom event handler
 
 ```tsx
 import { AlbumCard } from '@/components/cards/album-card';
@@ -112,46 +118,52 @@ function AlbumSelector({ albums, onSelect }) {
 }
 ```
 
-## 🔌 Integración
+## Integration
 
-Este componente se utiliza principalmente en:
+This component is used mainly in the following places:
 
-- Vista de álbumes en el dashboard
-- Selectores de álbumes en formularios
-- Paneles de organización de colecciones
-- Diálogos y modales de selección
-- Vistas compactas en listados relacionados
+- Album view on the dashboard
+- Album selectors in forms
+- Collection organization panels
+- Selection dialogs and modals
+- Compact views in related listings
 
-## 📊 Datos y requisitos
+## Data and requirements
 
-El componente se alinea completamente con el modelo `Album` de Prisma y soporta:
+The component aligns fully with the Prisma `Album` model.
 
-- **Imágenes y videos**: Muestra ambos tipos de medios con indicadores visuales
-- **Relaciones**: Muestra conteos de todas las entidades relacionadas (tags, collections, etc.)
-- **Grupos y Propiedades**: Soporte para las nuevas relaciones con modelos `Group` y `Property`
-- **Wildcards**: Soporte para las nuevas relaciones con el modelo `Wildcard`
-- **Filtros**: Visualización de filtros aplicados al álbum
-- **Metadatos**: Muestra tamaño total, estadísticas y rareza en estilo TCG
+The component supports the following data:
 
-## 🎨 Personalización visual
+- **Images and videos**: Shows both media types with visual indicators
+- **Relations**: Shows counts of all related entities (Tags, Collections)
+- **Groups and Properties**: Support for the new relations with `Group` and `Property` models
+- **Wildcards**: Support for the new relations with the `Wildcard` model
+- **Filters**: Display of filters applied to the Album
+- **Metadata**: Shows total size, statistics, and rarity in TCG style
 
-El componente ahora presenta un estilo más elaborado inspirado en cartas TCG:
+## Visual customization
 
-- **Sistema de rareza**: Visualización de rareza basada en la cantidad de contenido (Común, Poco común, Rara, Mítica)
-- **ID de carta único**: Número de identificación único estilo TCG con código de serie
-- **Indicadores de contenido**: Iconos y contadores para imágenes, videos y entidades relacionadas
-- **Tamaño del álbum**: Muestra el tamaño total en formato legible (KB, MB, GB)
-- **Efectos holográficos**: Gradientes animados y efectos visuales según rareza
-- **Marco decorativo**: Esquinas y bordes decorativos estilo carta coleccionable
-- **Viñeta de rareza**: Barra indicadora de nivel de rareza con colores específicos
-- **Gradientes personalizados**: Fondos con gradientes y efectos visuales según el color del álbum
+The component now presents a more elaborate style inspired by TCG cards.
 
-## 📝 Cambios recientes
+The style includes the following elements:
 
-- Actualización del diseño para alinearse mejor con estilo de cartas TCG
-- Mejora en la visualización de imágenes y videos con indicadores
-- Integración con nuevas entidades (Wildcards, Properties, Groups)
-- Visualización de tamaño total del álbum en formato legible
-- Sistema mejorado de rareza visual con colores específicos
-- Optimización para recibir imágenes directamente por props sin necesidad de server actions adicionales
-- Mayor énfasis en estilos visuales TCG con marcos decorativos y efectos
+- **Rarity system**: Rarity display based on content quantity (Common, Uncommon, Rare, Mythic)
+- **Unique card ID**: Unique TCG-style identification number with a series code
+- **Content indicators**: Icons and counters for images, videos, and related entities
+- **Album size**: Shows the total size in a readable format (KB, MB, GB)
+- **Holographic effects**: Animated gradients and visual effects by rarity
+- **Decorative frame**: Collectible-card corners and borders
+- **Rarity vignette**: Rarity-level indicator bar with specific colors
+- **Custom gradients**: Backgrounds with gradients and visual effects from the Album color
+
+## Recent changes
+
+The following changes are recent:
+
+- Design update to align better with TCG card style
+- Improved display of images and videos with indicators
+- Integration with new entities (Wildcards, Properties, Groups)
+- Display of total Album size in a readable format
+- Improved visual rarity system with specific colors
+- Optimization to receive images directly through props without extra routes
+- Greater emphasis on TCG visual styles with decorative frames and effects

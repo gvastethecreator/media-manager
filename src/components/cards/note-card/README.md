@@ -1,38 +1,40 @@
 # NoteCard
 
-## Descripción
+## Description
 
-Componente de tarjeta para la visualización de notas, inspirado en el diseño de cartas Magic. Muestra información relevante de una nota, incluyendo título, contenido, categoría, prioridad, imágenes relacionadas y estados.
+This card component displays Notes with a Magic-style card design.
 
-## Estructura
+The card shows relevant Note information, including title, content, category, priority, related images, and states.
+
+## Structure
 
 ```
 /note-card
-  ├── index.ts                  # Exportaciones del componente
-  ├── note-card.tsx             # Componente principal
-  ├── note-card-content.tsx     # Contenido central de la tarjeta
-  ├── note-card-footer.tsx      # Pie de la tarjeta con metadatos
-  ├── note-card-header.tsx      # Cabecera (usa el CardHeader común)
-  ├── note-card-images.tsx      # Sección de imágenes
-  ├── note-server-actions.ts    # Acciones del servidor relacionadas
-  └── README.md                 # Esta documentación
+  ├── index.ts                  # Component exports
+  ├── note-card.tsx             # Main component
+  ├── note-card-content.tsx     # Central card content
+  ├── note-card-footer.tsx      # Card footer with metadata
+  ├── note-card-header.tsx      # Header (uses the shared CardHeader)
+  ├── note-card-images.tsx      # Image section
+  ├── note-server-actions.ts    # Related routes
+  └── README.md                 # This documentation
 ```
 
-## Diseño
+## Design
 
-El componente sigue el diseño de una carta Magic con:
+The component follows a Magic card design with the following sections:
 
-1. **Cabecera:** Título de la nota y categoría
-2. **Imágenes:** Miniatura de las últimas 6 imágenes de la nota
-3. **Contenido:** Extracto del contenido, etiquetas y estadísticas
-4. **Pie:** Metadatos como estado, prioridad, fecha y contadores
+1. **Header:** Note title and category
+2. **Images:** Thumbnails of the last 6 images of the Note
+3. **Content:** Content excerpt, Tags, and statistics
+4. **Footer:** Metadata such as status, priority, date, and counters
 
-## Uso
+## Use
 
 ```tsx
 import { NoteCard } from '@/components/cards/note-card';
 
-// Dentro de un componente
+// Inside a component
 <NoteCard note={note} onClick={() => handleNoteClick(note)} />;
 ```
 
@@ -40,30 +42,34 @@ import { NoteCard } from '@/components/cards/note-card';
 
 ### NoteCardProps
 
-| Propiedad | Tipo                     | Descripción                              |
-| --------- | ------------------------ | ---------------------------------------- |
-| note      | Note                     | Objeto con datos de la nota a mostrar    |
-| onClick   | () => void (opcional)    | Función para manejar clics en la tarjeta |
-| className | string (opcional)        | Clases CSS adicionales                   |
-| style     | CSSProperties (opcional) | Estilos inline adicionales               |
+| Property  | Type                     | Description                            |
+| --------- | ------------------------ | -------------------------------------- |
+| note      | Note                     | Object with the Note data to display   |
+| onClick   | () => void (optional)    | Function that handles clicks on the card |
+| className | string (optional)        | Extra CSS classes                      |
+| style     | CSSProperties (optional) | Extra inline styles                    |
 
 ## Features
 
-- 🎨 **Colores dinámicos:** Usa el color definido en la nota para tematizar
-- 🖼️ **Miniaturas:** Muestra las últimas 6 imágenes asociadas
-- 📊 **Estadísticas:** Contadores de elementos relacionados
-- 🏷️ **Etiquetas:** Muestra las etiquetas asociadas a la nota
-- ⚡ **Rendimiento:** Versión memorizada para listas con muchos elementos
-- ♿ **Accesibilidad:** Soporte para navegación por teclado
+The card provides the following features:
 
-## Dependencias
+- **Dynamic colors:** Uses the color defined on the Note for theming
+- **Thumbnails:** Shows the last 6 associated images
+- **Statistics:** Counters of related items
+- **Tags:** Shows the Tags associated with the Note
+- **Performance:** Memoized version for lists with many items
+- **Accessibility:** Support for keyboard navigation
 
-- Lucide React para iconos
-- date-fns para formateo de fechas
-- motion/react para animaciones
-- CardHeader del sistema de componentes común
+## Dependencies
 
-## Diagrama de flujo
+The card depends on the following libraries:
+
+- Lucide React for icons
+- date-fns for date formatting
+- motion/react for animations
+- CardHeader from the shared component system
+
+## Flow diagram
 
 ```mermaid
 graph TD
@@ -76,15 +82,15 @@ graph TD
     D --> H[StatCounter]
 ```
 
-## Ejemplos
+## Examples
 
-### Vista básica
+### Basic view
 
 ```tsx
 <NoteCard note={note} />
 ```
 
-### Con manejo de eventos
+### With event handling
 
 ```tsx
 <NoteCard note={note} onClick={() => navigate(`/notes/${note.id}`)} className="transition-all hover:scale-105" />

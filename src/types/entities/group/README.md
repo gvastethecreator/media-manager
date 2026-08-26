@@ -1,8 +1,8 @@
-# 🗂️ Group: Tipos y Esquemas Canónicos
+# Group: canonical types and schemas
 
-Este módulo define los **tipos canónicos** y el esquema Zod para la entidad `Group`, alineados con el modelo de dominio y las reglas del proyecto.
+This module defines the **canonical types** and the Zod schema for the `Group` entity. The types align with the domain model and project rules.
 
-## 📦 Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -11,27 +11,28 @@ graph TD
     GroupBase --> GroupSchema
 ```
 
-- `GroupBase`: Tipo canónico alineado a la base de datos.
-- `GroupCreateInput`, `GroupUpdateInput`: Inputs para mutaciones.
-- `GroupSchema`: Esquema Zod para validación.
+The module uses these types:
 
-## 🚨 Notas de migración
+- `GroupBase`: Canonical type aligned with the database.
+- `GroupCreateInput`, `GroupUpdateInput`: Inputs for mutations.
+- `GroupSchema`: Zod schema for validation.
 
-- **Legacy eliminado:** Solo se exportan tipos canónicos.
-  \*\*
-- **Validar siempre con GroupSchema antes de persistir.**
+## Migration notes
 
-## 📝 Ejemplo de uso
+- **Legacy removed:** Only canonical types are exported.
+- **Validate with GroupSchema before you persist.**
+
+## Usage example
 
 ```ts
 import type { GroupBase, GroupCreateInput } from '@/types/entities/group';
 import { GroupSchema } from '@/types/entities/group/types';
 
-const nuevo: GroupCreateInput = { name: 'Favoritos', emoji: '⭐', color: '#FFD700' };
-const validado = GroupSchema.parse(nuevo);
+const created: GroupCreateInput = { name: 'Favorites', emoji: '⭐', color: '#FFD700' };
+const validated = GroupSchema.parse(created);
 ```
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

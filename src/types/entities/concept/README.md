@@ -1,8 +1,8 @@
-# 💡 Concept: Tipos y Esquemas Canónicos
+# Concept: canonical types and schemas
 
-Este módulo define los **tipos canónicos** y **esquemas de validación Zod** para la entidad `Concept`, alineados con el modelo de dominio y las reglas del proyecto.
+This module defines the **canonical types** and **Zod validation schemas** for the `Concept` entity. The types align with the domain model and project rules.
 
-## 📦 Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -13,29 +13,30 @@ graph TD
     ConceptExtendedComplete --> ConceptWithRelationsExtendedComplete
 ```
 
-- `ConceptBase`: Tipo canónico alineado a la base de datos.
-- `ConceptExtended`, `ConceptExtendedComplete`: Tipos enriquecidos para UI y relaciones.
-- `ConceptWithRelationsExtendedComplete`: Versión extendida con relaciones y stats.
-- `ConceptCreateInput`, `ConceptUpdateInput`: Inputs para mutaciones.
-- `ConceptSchema`: Esquema Zod para validación.
+The module uses these types:
 
-## 🚨 Notas de migración
+- `ConceptBase`: Canonical type aligned with the database.
+- `ConceptExtended`, `ConceptExtendedComplete`: Types enriched for UI and relations.
+- `ConceptWithRelationsExtendedComplete`: Extended version with relations and stats.
+- `ConceptCreateInput`, `ConceptUpdateInput`: Inputs for mutations.
+- `ConceptSchema`: Zod schema for validation.
 
-- **Legacy eliminado:** Solo se exportan tipos y enums canónicos.
+## Migration notes
 
-- **Validar siempre con ConceptSchema antes de persistir.**
+- **Legacy removed:** Only canonical types and enums are exported.
+- **Validate with ConceptSchema before you persist.**
 
-## 📝 Ejemplo de uso
+## Usage example
 
 ```ts
 import type { ConceptBase, ConceptCreateInput } from '@/types/entities/concept';
 import { ConceptSchema } from '@/types/entities/concept/types';
 
-const nuevo: ConceptCreateInput = { name: 'Magia', content: 'Sistema de magia', category: 'lore' };
-const validado = ConceptSchema.parse(nuevo);
+const created: ConceptCreateInput = { name: 'Magic', content: 'Magic system', category: 'lore' };
+const validated = ConceptSchema.parse(created);
 ```
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

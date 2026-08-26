@@ -1,33 +1,33 @@
-# Guía de frontend
+# Frontend guide
 
-Este documento explica cómo está montada la interfaz del proyecto y cómo se relacionan sus piezas principales.
+This document explains how the project interface is assembled. It also explains how the main pieces relate.
 
-## 1. Boot sequence real
+## 1. Real boot sequence
 
-El arranque del frontend ocurre así:
+Frontend startup runs in this order:
 
 ```mermaid
 flowchart TD
     A[main.tsx] --> B[AppProvider]
     B --> C[App.tsx]
     C --> D[RouterProvider]
-    D --> E[MainLayout + vistas]
+    D --> E[MainLayout + views]
 ```
 
 ### `main.tsx`
 
-Responsabilidades:
+Responsibilities:
 
-- localizar el nodo `root`,
-- crear el root React,
-- montar `AppProvider`,
-- cargar estilos globales.
+- locate the `root` node
+- create the React root
+- mount `AppProvider`
+- load global styles
 
 ### `AppProvider`
 
-Composición de infraestructura base:
+Base infrastructure composition:
 
-- `ThemeProvider` de `src/providers/`
+- `ThemeProvider` from `src/providers/`
 - `SettingsProvider`
 - `QueryProvider`
 - `CacheProvider`
@@ -36,30 +36,34 @@ Composición de infraestructura base:
 
 ### `App.tsx`
 
-Composición UI y runtime:
+UI and runtime composition:
 
-- `ThemeProvider` de `components/ui`
+- `ThemeProvider` from `components/ui`
 - `TooltipProvider`
 - `ViewTransitionProvider`
 - `ReactScanProvider`
 - `FeedbackProvider`
 - `ErrorBoundary`
 - `SkipLink`
-- bootstrap del catálogo y refresco SSE
+- catalog bootstrap and SSE refresh
 - `RouterProvider`
 
 ## 2. Routing
 
-La configuración vive en `src/router.tsx`.
+The configuration lives in `src/router.tsx`.
 
-### Características
+### Characteristics
 
-- `MainLayout` como contenedor de toda la app.
-- mezcla de vistas eager y lazy.
-- rutas por dominio funcional.
-- wrappers para casos de carpeta jerárquica y detalle por entidad.
+Routing has these characteristics:
 
-### Familias de vistas del router
+- `MainLayout` as the container for the whole app
+- a mix of eager and lazy views
+- routes by functional domain
+- wrappers for hierarchical folder cases and entity detail
+
+### Router view families
+
+The router groups these view families:
 
 - dashboard
 - development
@@ -71,53 +75,57 @@ La configuración vive en `src/router.tsx`.
 - search
 - settings
 
-## 3. Organización de componentes
+## 3. Component organization
 
 ### `src/components/ui/`
 
-Primitivas y wrappers reutilizables.
+This folder holds reusable primitives and wrappers.
 
-Ejemplos de responsabilidad:
+Example responsibilities:
 
-- botones,
-- diálogos,
-- tooltips,
-- toaster,
-- providers de UI,
-- accesibilidad.
+- buttons
+- dialogs
+- tooltips
+- toaster
+- UI providers
+- accessibility
 
 ### `src/components/layout/`
 
-Define la estructura principal y paneles del shell de la aplicación.
+This folder defines the main structure and panels of the application shell.
 
 ### `src/components/features/`
 
-Dos features dominantes:
+Two features dominate:
 
 #### `file-browser-new/`
 
-- wrappers para rutas de carpeta,
-- navegación jerárquica,
-- exploración visual,
-- integración con paneles y selección.
+This feature covers:
+
+- wrappers for folder routes
+- hierarchical navigation
+- visual exploration
+- integration with panels and selection
 
 #### `file-viewer/`
 
-- visualización detallada por entidad/archivo,
-- soporte a distintos formatos,
-- interacción con stores de viewer.
+This feature covers:
+
+- detailed viewing by entity or file
+- support for different formats
+- interaction with viewer stores
 
 ### `src/components/views/`
 
-Es el catálogo de páginas funcionales completas. Cada carpeta de vista representa una sección del producto.
+This folder is the catalog of complete functional pages. Each view folder represents a product section.
 
-## 4. Estado en cliente
+## 4. Client state
 
 ### Zustand
 
-Ubicación: `src/store/`
+Location: `src/store/`
 
-Stores relevantes:
+Relevant stores:
 
 - `ui.store.ts`
 - `selection.store.ts`
@@ -128,34 +136,34 @@ Stores relevantes:
 - `details-panel.store.ts`
 - `entity-catalog-store.ts`
 - `unified-file-manager.store.ts`
-- stores por entidad en `entities/`
+- per-entity stores in `entities/`
 
 ### TanStack Query
 
-`QueryProvider` usa `queryClient` de la capa web y sirve para:
+`QueryProvider` uses `queryClient` from the web layer. It serves these needs:
 
-- caché de respuestas,
-- invalidación,
-- soporte devtools en desarrollo,
-- sincronización de estado servidor.
+- response cache
+- invalidation
+- devtools support in development
+- server-state synchronization
 
-## 5. Providers y contextos
+## 5. Providers and contexts
 
-Hay una combinación de contextos ubicados en:
+A combination of contexts lives in:
 
 - `src/providers/`
 - `src/lib/contexts/`
 - `src/components/ui/`
 
-### Implicación importante
+### Important implication
 
-El frontend mantiene una arquitectura funcional pero con herencia de migraciones. Conviene tratar los providers como capas complementarias, no como un único sistema perfectamente consolidado.
+The frontend keeps a working architecture with migration heritage. Treat providers as complementary layers. Do not treat them as one perfectly consolidated system.
 
-## 6. Sistema visual
+## 6. Visual system
 
-### Estilos base
+### Base styles
 
-Se cargan desde:
+Styles load from:
 
 - `src/styles/app-globals.css`
 - `src/styles/globals.css`
@@ -165,76 +173,86 @@ Se cargan desde:
 
 ### Tokens
 
-El sistema visual se apoya en:
+The visual system rests on:
 
 - `tokens.css`
 - `design-tokens.css`
 - `STYLES-AND-THEMES-GUIDE.md`
 
-### Temas
+### Themes
 
-Hay soporte a múltiples temas personalizados y resolución de tema del sistema.
+The app supports multiple custom themes. It also resolves the system theme.
 
-## 7. Interacción con backend
+## 7. Backend interaction
 
-El frontend consume el backend principalmente mediante:
+The frontend consumes the backend mainly through:
 
-- cliente HTTP/Query,
-- stores y hooks,
-- SSE para flujos de refresco/progreso,
-- rutas de preview/thumbnail/original.
+- HTTP and Query client
+- stores and hooks
+- SSE for refresh and progress flows
+- preview, thumbnail, and original routes
 
-## 8. Patrones funcionales del frontend
+## 8. Functional frontend patterns
 
-### Navegación por dominio
+### Navigation by domain
 
-Cada vista mapea una parte del dominio y evita un “todo en una sola página”.
+Each view maps one part of the domain. This avoids a single page for everything.
 
 ### Lazy loading
 
-Se usa para reducir bundle inicial y repartir el coste por sección.
+Lazy loading reduces the initial bundle. It spreads cost by section.
 
-### Bootstrap en background
+### Background bootstrap
 
-`EntityCatalogBootstrapper` precarga el catálogo de entidades.
+`EntityCatalogBootstrapper` preloads the entity catalog.
 
-### Refresh por SSE
+### SSE refresh
 
-`useNavigationRefresh` sincroniza navegación o cambios del lado servidor.
+`useNavigationRefresh` syncs navigation or server-side changes.
 
-## 9. Testing frontend
+## 9. Frontend testing
 
-### Unit/integration
+### Unit and integration
+
+Frontend tests use:
 
 - Vitest
 - jsdom
 - Testing Library
-- setup global en `tests/setup.ts`
+- global setup in `tests/setup.ts`
 
-### Qué prepara el entorno
+### What the environment prepares
+
+The test environment prepares:
 
 - `@testing-library/jest-dom/vitest`
 - `ResizeObserver`
 - `requestAnimationFrame`
 - `IntersectionObserver`
 - `matchMedia`
-- pragmas SQLite para entorno de pruebas
+- SQLite pragmas for the test environment
 
-## 10. Riesgos y deuda visible
+## 10. Visible risks and debt
 
-- Doble sistema de providers/theme composition.
-- Anchura alta del catálogo de vistas.
-- Algunas descripciones históricas de `README` internos del frontend ya no reflejan exactamente el estado del árbol.
-- El browser y viewer concentran bastante complejidad de interacción.
+Watch these risks:
 
-## 11. Recomendaciones para tocar frontend
+- Dual provider and theme composition.
+- High breadth in the view catalog.
+- Some historical frontend README descriptions no longer match the tree exactly.
+- The browser and viewer concentrate a lot of interaction complexity.
 
-- Mirar primero `router.tsx` y la vista involucrada.
-- Identificar si el cambio vive en `components/views`, `features`, `store` o `providers`.
-- Revisar si el dato viene de Query, Zustand o ambos.
-- Confirmar si el flujo ya está cubierto por preview/thumbnail/SSE.
+## 11. Recommendations for frontend changes
 
-## 12. Lecturas relacionadas
+Follow this sequence when you change the frontend:
+
+1. Look first at `router.tsx` and the involved view.
+2. Identify whether the change lives in `components/views`, `features`, `store`, or `providers`.
+3. Check whether the data comes from Query, Zustand, or both.
+4. Confirm whether preview, thumbnail, or SSE already covers the flow.
+
+## 12. Related reading
+
+The following documents complete this frontend view:
 
 - [`./ARCHITECTURE.md`](./ARCHITECTURE.md)
 - [`./REPOSITORY-MAP.md`](./REPOSITORY-MAP.md)

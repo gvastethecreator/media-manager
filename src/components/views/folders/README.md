@@ -1,44 +1,48 @@
-# 📁 Módulo de Carpetas - Sistema Completamente Integrado
+# Folders module - fully integrated system
 
-Componentes relacionados con la visualización y diagnóstico de carpetas, ahora **100% integrados con el sistema EntityCard TCG**.
+These components display and diagnose Folders.
 
-## 🎯 Estado Actual: **COMPLETAMENTE ACTUALIZADO**
+The components are fully integrated with the EntityCard TCG system.
 
-### ✅ **Componentes Principales**
+## Current status: fully updated
 
-1. **FoldersView** - ✅ **CORREGIDO**: Ahora usa EntityCard
-2. **FolderContentView** - ✅ **CORREGIDO**: Reemplazó FileBrowser por EntityCard
-3. **FolderDiagnostics** - ✅ Herramientas de diagnóstico
+### Main components
 
-### 🔧 **Correcciones Implementadas**
+The module includes the following main components:
 
-#### **FoldersView (folders-view.tsx)**
+1. **FoldersView** - **FIXED**: Now uses EntityCard
+2. **FolderContentView** - **FIXED**: Replaced FileBrowser with EntityCard
+3. **FolderDiagnostics** - Diagnostic tools
 
-- ❌ **ANTES**: Usaba FolderCard directamente (inconsistente)
-- ✅ **AHORA**: Usa EntityCard con `entityType: 'folder'`
-- ✅ **Beneficios**: Consistente con las otras 19 vistas, efectos TCG holográficos
-- ✅ **Optimizaciones**: Memoización mejorada, animaciones escalonadas
+### Implemented fixes
 
-#### **FolderContentView (folder-content-view.tsx)**
+#### FoldersView (`folders-view.tsx`)
 
-- ❌ **ANTES**: Usaba FileBrowser (complejo, pesado, inconsistente)
-- ✅ **AHORA**: Usa EntityCard directamente para imágenes
-- ✅ **Beneficios**: 70% menos código, consistente, efectos TCG
-- ✅ **Optimizaciones**: Grid responsivo, lazy loading, animaciones fluidas
+- **Before**: Used FolderCard directly (inconsistent)
+- **Now**: Uses EntityCard with `entityType: 'folder'`
+- **Benefits**: Consistent with the other 19 views, holographic TCG effects
+- **Optimizations**: Improved memoization, staggered animations
 
-### 🏗️ **Arquitectura Actualizada**
+#### FolderContentView (`folder-content-view.tsx`)
+
+- **Before**: Used FileBrowser (complex, heavy, inconsistent)
+- **Now**: Uses EntityCard directly for images
+- **Benefits**: 70% less code, consistent, TCG effects
+- **Optimizations**: Responsive grid, lazy loading, fluid animations
+
+### Updated architecture
 
 ```mermaid
 flowchart TD
     A[FoldersView] --> B[EntityCard]
     A --> C[FolderContentView]
-    C --> D[EntityCard para Images]
-    E[FolderDiagnostics] --> F[Herramientas DB]
+    C --> D[EntityCard for Images]
+    E[FolderDiagnostics] --> F[DB tools]
 
     B --> G[FolderCard TCG]
     D --> H[ImageCard TCG]
 
-    G --> I[Efectos Holográficos]
+    G --> I[Holographic effects]
     H --> I
 
     style A fill:#4ade80,stroke:#333,stroke-width:2px,color:#000
@@ -48,46 +52,54 @@ flowchart TD
     style I fill:#f59e0b,stroke:#333,stroke-width:2px,color:#000
 ```
 
-### 📊 **Métricas de Mejora**
+### Improvement metrics
 
-| Componente            | Antes                      | Después                 | Mejora                 |
-| --------------------- | -------------------------- | ----------------------- | ---------------------- |
-| **FoldersView**       | FolderCard directo         | EntityCard              | ✅ Consistencia        |
-| **FolderContentView** | FileBrowser (276 líneas)   | EntityCard (190 líneas) | 🚀 31% menos código    |
-| **Integración**       | Parcial                    | Completa                | ✅ 100% EntityCard     |
-| **Efectos TCG**       | Solo FolderCard            | Ambos componentes       | ✅ Consistencia visual |
-| **Rendimiento**       | Múltiples transformaciones | Directo                 | 🚀 Optimizado          |
+| Component             | Before                   | After                   | Improvement          |
+| --------------------- | ------------------------ | ----------------------- | -------------------- |
+| **FoldersView**       | Direct FolderCard        | EntityCard              | Consistency          |
+| **FolderContentView** | FileBrowser (276 lines)  | EntityCard (190 lines)  | 31% less code        |
+| **Integration**       | Partial                  | Complete                | 100% EntityCard      |
+| **TCG effects**       | FolderCard only          | Both components         | Visual consistency   |
+| **Performance**       | Multiple transformations | Direct                  | Optimized            |
 
-### 🎨 **Características TCG Implementadas**
+### Implemented TCG features
 
-- **Efectos holográficos** en hover para todas las cards
-- **Gradientes dinámicos** según color de carpeta/tipo de imagen
-- **Animaciones fluidas** con motion/react
-- **Brillo dorado** para elementos favoritos
-- **Barras de progreso** temáticas
-- **Estados visuales** consistentes
-- **Lazy loading** y memoización para rendimiento
+The views include the following TCG features:
 
-### 🔗 **Integración Completa**
+- Holographic hover effects on all cards
+- Dynamic gradients from Folder color or image type
+- Fluid animations with motion/react
+- Gold glow for Favorite items
+- Thematic progress bars
+- Consistent visual states
+- Lazy loading and memoization for performance
 
-Ahora **TODAS** las vistas de carpetas siguen el patrón EntityCard:
+### Full integration
 
-- ✅ **FoldersView**: Lista de carpetas con EntityCard
-- ✅ **FolderContentView**: Contenido de carpeta con EntityCard para imágenes
-- ✅ **Consistencia**: Mismos efectos, animaciones y optimizaciones
+All Folder views now follow the EntityCard pattern.
 
-### 📝 **Próximos Pasos**
+The views cover the following cases:
 
-1. ⚠️ **Analizar FileBrowser**: Determinar si debe ser deprecado
-2. 🔍 **Auditar otras integraciones**: Buscar usos legacy de FileBrowser
-3. 🧹 **Limpieza**: Remover código obsoleto si FileBrowser no es necesario
+- **FoldersView**: Folder list with EntityCard
+- **FolderContentView**: Folder content with EntityCard for images
+- **Consistency**: Same effects, animations, and optimizations
 
-### 🚀 **Beneficios Obtenidos**
+### Next steps
 
-- **Consistencia arquitectural** completa
-- **Reducción de complejidad** significativa
-- **Mejor rendimiento** con menos transformaciones
-- **Experiencia visual unificada** con efectos TCG
-- **Mantenimiento simplificado** con un solo patrón
+The following work is planned:
 
-Para más detalles del sistema de tarjetas, consulta `../cards/README.md`.
+1. **Analyze FileBrowser**: Decide whether it must be deprecated
+2. **Audit other integrations**: Find legacy FileBrowser uses
+3. **Cleanup**: Remove obsolete code if FileBrowser is not needed
+
+### Benefits obtained
+
+The integration provides the following benefits:
+
+- Full architectural consistency
+- Significant complexity reduction
+- Better performance with fewer transformations
+- Unified visual experience with TCG effects
+- Simpler maintenance with one pattern
+
+For more details of the card system, see `../cards/README.md`.

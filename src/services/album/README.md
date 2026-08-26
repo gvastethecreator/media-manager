@@ -1,38 +1,44 @@
-# Servicio de Álbumes (Album)
+# Album service (Album)
 
-## Descripción General
+## Overview
 
-El servicio de álbumes (Album) es un componente fundamental del sistema que permite organizar y presentar colecciones de imágenes y videos de manera visual. A diferencia de las carpetas (que siguen una estructura jerárquica) y las colecciones (que agrupan contenido variado), los álbumes están diseñados específicamente para la presentación y visualización de contenido visual con opciones de personalización para la experiencia de galería.
+The Album service is a fundamental component of the system.
 
-## Diagrama de Flujo
+The service organizes and presents collections of images and videos in a visual way.
+
+Folders follow a hierarchical structure. Collections group mixed content.
+
+Albums are designed specifically for presentation and display of visual content with customization options for the gallery experience.
+
+## Flow diagram
 
 ```mermaid
 graph TD
-    A[Cliente/UI] -->|Petición| B[Server Actions]
-    B -->|Llamada| C[Album Service]
-    C -->|Transformación| D[Transformers]
-    D -->|Validación| E[Tipos]
-    C -->|Almacenamiento| F[(Base de Datos)]
-    C -->|Eventos| G[Event System]
-    G -->|Notificación| H[Activity Service]
+    A[Client/UI] -->|Request| B[Routes]
+    B -->|Call| C[Album Service]
+    C -->|Transformation| D[Transformers]
+    D -->|Validation| E[Types]
+    C -->|Storage| F[(Database)]
+    C -->|Events| G[Event System]
+    G -->|Notification| H[Activity Service]
     G -->|Stats| I[Stats Service]
 
-    subgraph "Operaciones con Álbumes"
-        J[Crear Álbum] --> K[Validar]
-        K --> L[Guardar]
-        L --> M[Notificar]
+    subgraph "Album operations"
+        J[Create Album] --> K[Validate]
+        K --> L[Save]
+        L --> M[Notify]
 
-        N[Gestionar Imágenes] --> O[Verificar]
-        O --> P[Añadir/Remover]
-        P --> Q[Actualizar Stats]
+        N[Manage images] --> O[Verify]
+        O --> P[Add/Remove]
+        P --> Q[Update Stats]
 
-        R[Visualizar Álbum] --> S[Cargar Imágenes]
-        S --> T[Aplicar Filtros]
-        T --> U[Ordenar]
+        R[View Album] --> S[Load images]
+        S --> T[Apply filters]
+        T --> U[Sort]
 
-        V[Compartir Álbum] --> W[Verificar Permisos]
-        W --> X[Generar Enlace]
-        X --> Y[Establecer Acceso]
+        V[Share Album] --> W[Verify permissions]
+        W --> X[Generate link]
+        X --> Y[Set access]
     end
 
     style C fill:#d4f1f9,stroke:#333,stroke-width:1px
@@ -40,99 +46,109 @@ graph TD
     style G fill:#e1bee7,stroke:#333,stroke-width:1px
 ```
 
-## Estructura del Módulo
+Routes call services.
 
-### Archivos del Servicio
+## Module structure
+
+### Service files
 
 ```
 src/services/album/
-├── album.service.ts    # Implementación principal del servicio
-└── index.ts            # Punto de entrada y exportaciones
+├── album.service.ts    # Main service implementation
+└── index.ts            # Entry point and exports
 ```
 
-### Archivos de Transformers
+### Transformer files
 
 ```
 src/transformers/album/
-├── README.md           # Documentación específica de transformers
-├── index.ts            # Exportaciones del módulo
-├── mappers.ts          # Funciones para mapear entre objetos
-├── serializers.ts      # Serializadores para distintos formatos
-└── transformer.ts      # Transformador principal
+├── README.md           # Transformer-specific documentation
+├── index.ts            # Module exports
+├── mappers.ts          # Functions that map between objects
+├── serializers.ts      # Serializers for different formats
+└── transformer.ts      # Main transformer
 ```
 
-### Tipos de Datos
+### Data types
 
 ```
 src/types/entities/album/
-├── enums.ts            # Enumeraciones para álbumes
-├── extended.ts         # Tipos extendidos con información adicional
-├── index.ts            # Exportaciones del módulo
-├── schema.ts           # Esquemas de validación
-├── stats-types.ts      # Tipos relacionados con estadísticas
-└── types.ts            # Definiciones principales de tipos e interfaces
+├── enums.ts            # Enumerations for Albums
+├── extended.ts         # Extended types with extra information
+├── index.ts            # Module exports
+├── schema.ts           # Validation schemas
+├── stats-types.ts      # Types related to statistics
+└── types.ts            # Main type and interface definitions
 ```
 
-### Server Actions
+### Route modules
 
 ```
 src/app/actions/albums/
-├── album.actions.ts       # Acciones principales para álbumes
-├── album-images.actions.ts # Acciones específicas para imágenes en álbumes
-└── index.ts               # Exportaciones del módulo
+├── album.actions.ts       # Main Album operations
+├── album-images.actions.ts # Operations specific to images in Albums
+└── index.ts               # Module exports
 ```
 
-## Funcionalidades Principales
+## Main features
 
-### 1. Gestión de Álbumes
+### 1. Album management
 
-- **Crear Álbum**: Permite crear nuevos álbumes con nombre, descripción y opciones de visualización.
-- **Obtener Álbum**: Recupera información detallada de un álbum por su ID.
-- **Actualizar Álbum**: Modifica propiedades y configuración de un álbum existente.
-- **Eliminar Álbum**: Elimina un álbum manteniendo las imágenes intactas.
-- **Listar Álbumes**: Obtiene álbumes con filtros, ordenación y paginación.
+The service provides the following Album operations:
 
-### 2. Gestión de Contenido
+- **Create Album**: Creates new Albums with name, description, and display options.
+- **Get Album**: Retrieves detailed Album information by ID.
+- **Update Album**: Changes properties and configuration of an existing Album.
+- **Delete Album**: Deletes an Album while the images stay intact.
+- **List Albums**: Gets Albums with filters, sort, and pagination.
 
-- **Añadir Imágenes**: Agrega imágenes o videos a un álbum.
-- **Remover Imágenes**: Elimina imágenes específicas de un álbum.
-- **Reordenar Contenido**: Cambia el orden de visualización de los elementos.
-- **Establecer Imagen Destacada**: Define una imagen principal para representar el álbum.
-- **Filtrar Contenido**: Filtra el contenido del álbum según criterios como fecha, etiquetas, etc.
+### 2. Content management
 
-### 3. Presentación y Visualización
+The service provides the following content operations:
 
-- **Configuración de Visualización**: Define opciones como tamaño de miniaturas, estilo de presentación, etc.
-- **Ordenación Personalizada**: Establece criterios de ordenación para la visualización.
-- **Temas y Estilos**: Personaliza la apariencia visual del álbum con colores y emojis.
-- **Modo Presentación**: Configura opciones para visualización en modo diapositivas.
+- **Add images**: Adds images or videos to an Album.
+- **Remove images**: Removes specific images from an Album.
+- **Reorder content**: Changes the display order of items.
+- **Set featured image**: Defines a main image that represents the Album.
+- **Filter content**: Filters Album content by date or Tags.
 
-### 4. Compartición y Colaboración
+### 3. Presentation and display
 
-- **Compartir Álbum**: Genera enlaces para compartir el álbum con otros usuarios.
-- **Colaboración**: Permite que múltiples usuarios editen un mismo álbum.
-- **Control de Acceso**: Gestiona los permisos de visualización y edición.
-- **Estadísticas de Uso**: Seguimiento de visualizaciones y actividad.
+The service provides the following display operations:
 
-## Ejemplos de Uso
+- **Display configuration**: Defines options such as thumbnail size and presentation style.
+- **Custom sort**: Sets sort criteria for display.
+- **Themes and styles**: Customizes the visual appearance of the Album with colors and emojis.
+- **Presentation mode**: Configures options for slideshow display.
 
-### Crear un Nuevo Álbum
+### 4. Sharing and collaboration
+
+The service provides the following sharing operations:
+
+- **Share Album**: Generates links that share the Album with other users.
+- **Collaboration**: Lets multiple users edit the same Album.
+- **Access control**: Manages view and edit permissions.
+- **Usage statistics**: Tracking of views and activity.
+
+## Usage examples
+
+### Create a new Album
 
 ```typescript
 import { albumService } from '@/services/index';
 
-// Crear un álbum básico
+// Create a basic Album
 const newAlbum = await albumService.createAlbum({
-	name: 'Vacaciones 2023',
-	description: 'Recuerdos de nuestro viaje a la playa',
+	name: 'Vacation 2023',
+	description: 'Memories of our trip to the beach',
 	emoji: '🏖️',
 	color: '#3498db',
 });
 
-// Crear un álbum con configuración avanzada
+// Create an Album with advanced configuration
 const customAlbum = await albumService.createAlbum({
-	name: 'Fotografía de Naturaleza',
-	description: 'Colección de fotos de paisajes naturales',
+	name: 'Nature Photography',
+	description: 'Collection of natural landscape photos',
 	emoji: '🌲',
 	color: '#27ae60',
 	sortBy: 'capturedAt',
@@ -142,18 +158,18 @@ const customAlbum = await albumService.createAlbum({
 });
 ```
 
-### Gestionar Imágenes en un Álbum
+### Manage images in an Album
 
 ```typescript
 import { albumService } from '@/services/index';
 
-// Añadir imágenes a un álbum
+// Add images to an Album
 await albumService.addImagesToAlbum('album-id-123', ['image-id-1', 'image-id-2', 'image-id-3']);
 
-// Establecer una imagen destacada
+// Set a featured image
 await albumService.setFeaturedImage('album-id-123', 'image-id-2');
 
-// Obtener todas las imágenes de un álbum
+// Get all images of an Album
 const albumImages = await albumService.getAlbumImages('album-id-123', {
 	page: 1,
 	limit: 50,
@@ -161,16 +177,16 @@ const albumImages = await albumService.getAlbumImages('album-id-123', {
 	sortDirection: 'desc',
 });
 
-// Eliminar una imagen del álbum
+// Remove an image from the Album
 await albumService.removeImageFromAlbum('album-id-123', 'image-id-3');
 ```
 
-### Configurar la Visualización
+### Configure the display
 
 ```typescript
 import { albumService } from '@/services/index';
 
-// Actualizar configuración de visualización
+// Update display configuration
 await albumService.updateAlbum('album-id-123', {
 	viewMode: 'MASONRY',
 	thumbnailSize: 'LARGE',
@@ -179,10 +195,10 @@ await albumService.updateAlbum('album-id-123', {
 	sortDirection: 'asc',
 });
 
-// Aplicar filtros de visualización
+// Apply display filters
 const filteredImages = await albumService.getAlbumImages('album-id-123', {
 	filters: {
-		tags: ['playa', 'atardecer'],
+		tags: ['beach', 'sunset'],
 		dateRange: {
 			from: new Date('2023-06-01'),
 			to: new Date('2023-06-30'),
@@ -192,122 +208,130 @@ const filteredImages = await albumService.getAlbumImages('album-id-123', {
 });
 ```
 
-### Compartir y Colaborar
+### Share and collaborate
 
 ```typescript
 import { albumService } from '@/services/index';
 
-// Compartir un álbum con un usuario específico
+// Share an Album with a specific user
 await albumService.shareAlbum('album-id-123', 'user-id-456', {
 	accessLevel: 'EDIT',
 });
 
-// Compartir un álbum con un grupo
+// Share an Album with a Group
 await albumService.shareAlbumWithGroup('album-id-123', 'group-id-789', {
 	accessLevel: 'VIEW',
 });
 
-// Generar un enlace público de compartición
+// Generate a public share link
 const shareLink = await albumService.generateShareLink('album-id-123', {
 	expiresIn: '7d',
 	allowDownload: true,
 });
 ```
 
-## Diferencias con Otras Entidades Organizativas
+## Differences from other organizer entities
 
-| Característica             | Album                     | Collection               | Folder                  | Tag                      |
+| Characteristic             | Album                     | Collection               | Folder                  | Tag                      |
 | -------------------------- | ------------------------- | ------------------------ | ----------------------- | ------------------------ |
-| **Propósito principal**    | Presentación visual       | Agrupación temática      | Organización jerárquica | Clasificación conceptual |
-| **Contenido principal**    | Imágenes y videos         | Contenido mixto          | Archivos y carpetas     | Transversal a entidades  |
-| **Experiencia de usuario** | Galería visual            | Agrupación flexible      | Navegación de archivos  | Filtrado por concepto    |
-| **Opciones visuales**      | Extensivas                | Básicas                  | Mínimas                 | No aplica                |
-| **Compartición**           | Orientada a visualización | Orientada a colaboración | Orientada a acceso      | No aplica directamente   |
-| **Ordenación**             | Personalizable            | Limitada                 | Criterios estándar      | Alfabética/frecuencia    |
+| **Main purpose**           | Visual presentation       | Thematic grouping        | Hierarchical organization | Conceptual classification |
+| **Main content**           | Images and videos         | Mixed content            | Files and Folders       | Cross-cutting to entities |
+| **User experience**        | Visual gallery            | Flexible grouping        | File navigation         | Filter by concept        |
+| **Visual options**         | Extensive                 | Basic                    | Minimal                 | Does not apply           |
+| **Sharing**                | Oriented to display       | Oriented to collaboration | Oriented to access     | Does not apply directly  |
+| **Sort**                   | Customizable              | Limited                  | Standard criteria       | Alphabetical/frequency   |
 
-## Relaciones con Otras Entidades
+## Relations with other entities
 
-| Entidad        | Tipo de Relación | Descripción                                    |
+| Entity         | Relation type    | Description                                    |
 | -------------- | ---------------- | ---------------------------------------------- |
-| **Image**      | Muchos a muchos  | Los álbumes pueden contener múltiples imágenes |
-| **Video**      | Muchos a muchos  | Los álbumes pueden contener múltiples videos   |
-| **User**       | Muchos a uno     | Los álbumes pertenecen a usuarios              |
-| **Tag**        | Muchos a muchos  | Los álbumes pueden tener múltiples etiquetas   |
-| **Collection** | Muchos a muchos  | Los álbumes pueden formar parte de colecciones |
-| **Group**      | Muchos a muchos  | Los álbumes pueden compartirse con grupos      |
-| **Activity**   | Referencial      | Las actividades pueden referenciar álbumes     |
+| **Image**      | Many to many     | Albums can contain multiple images             |
+| **Video**      | Many to many     | Albums can contain multiple videos             |
+| **User**       | Many to one      | Albums belong to users                         |
+| **Tag**        | Many to many     | Albums can have multiple Tags                  |
+| **Collection** | Many to many     | Albums can be part of Collections              |
+| **Group**      | Many to many     | Albums can be shared with Groups               |
+| **Activity**   | Referential      | Activities can reference Albums                |
 
-## Modelo de Datos
+## Data model
 
 ```typescript
-// Modelo básico de Album
+// Basic Album model
 interface Album {
-	id: string; // Identificador único
-	name: string; // Nombre del álbum
-	description?: string; // Descripción opcional
-	emoji?: string; // Emoji representativo
-	color?: string; // Color asociado (hex o nombre)
-	viewMode: AlbumViewMode; // Modo de visualización (GRID, MASONRY, SLIDESHOW, etc.)
-	thumbnailSize: ThumbnailSize; // Tamaño de miniaturas (SMALL, MEDIUM, LARGE)
-	sortBy: string; // Campo de ordenación (name, createdAt, etc.)
-	sortDirection: SortDirection; // Dirección de ordenación (asc, desc)
-	isFavorite: boolean; // Indica si está marcado como favorito
-	featuredImageId?: string; // ID de la imagen destacada
-	showCaptions: boolean; // Muestra títulos bajo las imágenes
-	createdAt: Date; // Fecha de creación
-	updatedAt: Date; // Fecha de última actualización
+	id: string; // Unique identifier
+	name: string; // Album name
+	description?: string; // Optional description
+	emoji?: string; // Representative emoji
+	color?: string; // Associated color (hex or name)
+	viewMode: AlbumViewMode; // Display mode (GRID, MASONRY, SLIDESHOW, etc.)
+	thumbnailSize: ThumbnailSize; // Thumbnail size (SMALL, MEDIUM, LARGE)
+	sortBy: string; // Sort field (name, createdAt, etc.)
+	sortDirection: SortDirection; // Sort direction (asc, desc)
+	isFavorite: boolean; // Indicates whether it is marked as a Favorite
+	featuredImageId?: string; // Featured image ID
+	showCaptions: boolean; // Shows titles under the images
+	createdAt: Date; // Creation date
+	updatedAt: Date; // Last update date
 }
 
-// Extensión con estadísticas
+// Extension with statistics
 interface AlbumWithStats extends Album {
 	stats: {
-		imageCount: number; // Cantidad de imágenes
-		videoCount: number; // Cantidad de videos
-		tagCount: number; // Cantidad de etiquetas
-		viewCount: number; // Cantidad de visualizaciones
-		totalSize: number; // Tamaño total en bytes
-		lastUpdated?: Date; // Última actualización de contenido
+		imageCount: number; // Image count
+		videoCount: number; // Video count
+		tagCount: number; // Tag count
+		viewCount: number; // View count
+		totalSize: number; // Total size in bytes
+		lastUpdated?: Date; // Last content update
 		distribution?: {
-			// Distribución por tipo, formato, etc.
+			// Distribution by type, format
 			[key: string]: number;
 		};
 	};
 }
 
-// Relación entre álbum e imagen
+// Relation between Album and image
 interface AlbumImage {
-	albumId: string; // ID del álbum
-	imageId: string; // ID de la imagen
-	order: number; // Orden de visualización
-	addedAt: Date; // Fecha de adición
-	addedBy: string; // ID del usuario que añadió la imagen
+	albumId: string; // Album ID
+	imageId: string; // Image ID
+	order: number; // Display order
+	addedAt: Date; // Date added
+	addedBy: string; // ID of the user who added the image
 }
 ```
 
-## Buenas Prácticas
+## Good practices
 
-1. **Optimización de Imágenes**: Asegúrese de que las imágenes estén optimizadas para el modo de visualización.
-2. **Paginación Eficiente**: Implemente paginación adecuada para álbumes con gran cantidad de imágenes.
-3. **Caché de Visualización**: Utilice estrategias de caché para mejorar la experiencia de visualización.
-4. **Validación de Entradas**: Valide los criterios de ordenación y filtrado para evitar consultas ineficientes.
-5. **Control de Permisos**: Verifique los permisos antes de permitir acceso o modificaciones.
-6. **Manejo de Estadísticas**: Actualice las estadísticas de forma asíncrona para no afectar el rendimiento.
-7. **Experiencia Responsive**: Asegure que las opciones de visualización se adapten a diferentes dispositivos.
+Optimize images for the display mode.
 
-## Solución de Problemas Comunes
+Implement adequate pagination for Albums with a large number of images.
 
-| Problema                           | Solución                                                              |
+Use cache strategies to improve the display experience.
+
+Validate sort and filter criteria to avoid inefficient queries.
+
+Verify permissions before you allow access or modifications.
+
+Update statistics asynchronously so that they do not affect performance.
+
+Ensure that display options adapt to different devices.
+
+## Common troubleshooting
+
+| Problem                            | Solution                                                              |
 | ---------------------------------- | --------------------------------------------------------------------- |
-| **Álbumes vacíos**                 | Utilice `albumService.findEmptyAlbums()` para identificar y gestionar |
-| **Imágenes duplicadas**            | Detecte con `albumService.findDuplicateImages()` antes de añadir      |
-| **Rendimiento en álbumes grandes** | Implemente carga progresiva y visualización virtualizada              |
-| **Inconsistencia de estadísticas** | Recalcule con `albumService.refreshStats()`                           |
-| **Problemas de ordenación**        | Valide y corrija con `albumService.reorderImages()`                   |
+| **Empty Albums**                   | Use `albumService.findEmptyAlbums()` to identify and manage them      |
+| **Duplicate images**               | Detect with `albumService.findDuplicateImages()` before you add       |
+| **Performance in large Albums**    | Implement progressive load and virtualized display                    |
+| **Inconsistent statistics**        | Recalculate with `albumService.refreshStats()`                        |
+| **Sort problems**                  | Validate and correct with `albumService.reorderImages()`              |
 
-## Roadmap y Mejoras Futuras
+## Roadmap and future improvements
 
-- Implementación de álbumes inteligentes basados en criterios automáticos
-- Mejoras en las opciones de presentación con transiciones y efectos visuales
-- Capacidades de edición básica de imágenes dentro del álbum
-- Funcionalidades de colaboración en tiempo real para edición de álbumes
-- Opciones avanzadas de exportación (PDF, libro de fotos, presentación)
+The following work is planned:
+
+- Implementation of smart Albums based on automatic criteria
+- Improvements in presentation options with transitions and visual effects
+- Basic image-edit capabilities inside the Album
+- Real-time collaboration features for Album editing
+- Advanced export options (PDF, photo book, presentation)

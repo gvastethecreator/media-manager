@@ -1,43 +1,49 @@
-# Servicio de Imágenes (Image)
+# Image service (Image)
 
-## Descripción General
+## Overview
 
-El servicio de imágenes (Image) es un componente central del sistema de gestión de imágenes que permite almacenar, organizar y manipular archivos de imagen. Este servicio proporciona funcionalidades para subir, procesar, recuperar, actualizar y eliminar imágenes, así como gestionar sus metadatos, miniaturas y relaciones con otras entidades.
+The Image service is a central component of the image management system.
 
-## Diagrama de Flujo
+The service stores, organizes, and manipulates image files.
+
+The service provides functions to upload, process, retrieve, update, and delete images.
+
+The service also manages metadata, thumbnails, and relations with other entities.
+
+## Flow diagram
 
 ```mermaid
 graph TD
-    A[Cliente/UI] -->|Carga/Petición| B[Server Actions]
-    B -->|Llamada| C[Image Service]
-    C -->|Procesamiento| D[Transformers]
-    D -->|Validación| E[Tipos]
-    C -->|Almacenamiento| F[(Base de Datos)]
-    C -->|Eventos| G[Event System]
-    G -->|Notificación| H[Activity Service]
-    G -->|Actualización| I[Stats Service]
+    A[Client/UI] -->|Upload/Request| B[Routes]
+    B -->|Call| C[Image Service]
+    C -->|Processing| D[Transformers]
+    D -->|Validation| E[Types]
+    C -->|Storage| F[(Database)]
+    C -->|Events| G[Event System]
+    G -->|Notification| H[Activity Service]
+    G -->|Update| I[Stats Service]
 
-    subgraph "Proceso de Carga de Imagen"
-        J[Subir Imagen] --> K[Validar]
-        K --> L[Procesar]
-        L --> M[Generar Thumbnails]
-        M --> N[Extraer Metadatos]
-        N --> O[Almacenar]
-        O --> P[Notificar]
+    subgraph "Image upload process"
+        J[Upload image] --> K[Validate]
+        K --> L[Process]
+        L --> M[Generate Thumbnails]
+        M --> N[Extract metadata]
+        N --> O[Store]
+        O --> P[Notify]
     end
 
-    subgraph "Operaciones con Imágenes"
-        Q[Obtener Imagen] --> R[Transformar]
-        R --> S[Enviar al Cliente]
+    subgraph "Image operations"
+        Q[Get image] --> R[Transform]
+        R --> S[Send to client]
 
-        T[Actualizar Imagen] --> U[Validar]
-        U --> V[Modificar]
-        V --> W[Regenerar Thumbnails]
-        W --> X[Revalidar Paths]
+        T[Update image] --> U[Validate]
+        U --> V[Modify]
+        V --> W[Regenerate Thumbnails]
+        W --> X[Revalidate Paths]
 
-        Y[Eliminar Imagen] --> Z[Verificar Referencias]
-        Z --> AA[Eliminar Archivos]
-        AA --> AB[Eliminar Registros]
+        Y[Delete image] --> Z[Verify references]
+        Z --> AA[Delete files]
+        AA --> AB[Delete records]
     end
 
     style C fill:#d4f1f9,stroke:#333,stroke-width:1px
@@ -45,112 +51,122 @@ graph TD
     style G fill:#e1bee7,stroke:#333,stroke-width:1px
 ```
 
-## Estructura del Módulo
+Routes call services.
 
-### Archivos del Servicio
+## Module structure
+
+### Service files
 
 ```
 src/services/image/
-├── image.service.ts    # Implementación principal del servicio
-└── index.ts            # Punto de entrada y exportaciones
+├── image.service.ts    # Main service implementation
+└── index.ts            # Entry point and exports
 ```
 
-### Archivos de Transformers
+### Transformer files
 
 ```
 src/transformers/image/
-├── index.ts           # Exportaciones del módulo
-├── mappers.ts         # Funciones para mapear entre objetos
-├── serializers.ts     # Serializadores para distintos formatos
-└── transformer.ts     # Transformador principal
+├── index.ts           # Module exports
+├── mappers.ts         # Functions that map between objects
+├── serializers.ts     # Serializers for different formats
+└── transformer.ts     # Main transformer
 ```
 
-### Tipos de Datos
+### Data types
 
 ```
 src/types/entities/image/
-├── base.ts           # Tipos básicos para imágenes
-├── complete.ts       # Tipos completos con todas las relaciones
-├── enums.ts          # Enumeraciones para imágenes
-├── extended.ts       # Tipos extendidos con información adicional
-├── index.ts          # Exportaciones del módulo
-├── transformer.ts    # Tipos específicos para transformers
-└── types.ts          # Definiciones principales de tipos e interfaces
+├── base.ts           # Basic types for images
+├── complete.ts       # Complete types with all relations
+├── enums.ts          # Enumerations for images
+├── extended.ts       # Extended types with extra information
+├── index.ts          # Module exports
+├── transformer.ts    # Types specific to transformers
+└── types.ts          # Main type and interface definitions
 ```
 
-### Server Actions
+### Route modules
 
 ```
 src/app/actions/images/
-├── folder-images.action.ts        # Acciones para imágenes en carpetas
-├── image-access.actions.ts        # Control de acceso a imágenes
-├── image-crud.actions.ts          # Operaciones CRUD básicas
-├── image-processing.actions.ts    # Procesamiento de imágenes
-├── image-stats.actions.ts         # Estadísticas de imágenes
-├── image-thumbnails.actions.ts    # Generación y gestión de miniaturas
-├── image-types.actions.ts         # Acciones relacionadas con tipos de imagen
-├── images-random.action.ts        # Obtención de imágenes aleatorias
-└── index.ts                       # Exportaciones del módulo
+├── folder-images.action.ts        # Actions for images in Folders
+├── image-access.actions.ts        # Image access control
+├── image-crud.actions.ts          # Basic CRUD operations
+├── image-processing.actions.ts    # Image processing
+├── image-stats.actions.ts         # Image statistics
+├── image-thumbnails.actions.ts    # Thumbnail generation and management
+├── image-types.actions.ts         # Actions related to image types
+├── images-random.action.ts        # Retrieval of random images
+└── index.ts                       # Module exports
 ```
 
-## Funcionalidades Principales
+## Main features
 
-### 1. Gestión de Imágenes
+### 1. Image management
 
-- **Subir Imagen**: Permite cargar nuevos archivos de imagen con validación de formatos.
-- **Obtener Imagen**: Recupera información detallada de una imagen por su ID.
-- **Actualizar Imagen**: Modifica propiedades y metadatos de una imagen existente.
-- **Eliminar Imagen**: Elimina una imagen y sus recursos asociados de forma segura.
-- **Listar Imágenes**: Obtiene imágenes con filtros, ordenación y paginación.
+The service provides the following image operations:
 
-### 2. Procesamiento de Imágenes
+- **Upload image**: Loads new image files with format validation.
+- **Get image**: Retrieves detailed image information by ID.
+- **Update image**: Changes properties and metadata of an existing image.
+- **Delete image**: Deletes an image and its associated resources in a safe way.
+- **List images**: Gets images with filters, sort, and pagination.
 
-- **Generación de Miniaturas**: Crea automáticamente versiones reducidas para previsualización.
-- **Extracción de Metadatos**: Obtiene información EXIF, dimensiones, y otros metadatos técnicos.
-- **Optimización**: Compresión y optimización de imágenes para mejorar rendimiento.
-- **Redimensionamiento**: Ajuste de tamaño según necesidades específicas.
+### 2. Image processing
 
-### 3. Organización y Búsqueda
+The service provides the following processing operations:
 
-- **Agrupación en Carpetas**: Organización jerárquica en carpetas.
-- **Etiquetado**: Adición y gestión de etiquetas para clasificación.
-- **Búsqueda Avanzada**: Búsqueda por metadatos, nombres, fechas y otros criterios.
-- **Colecciones**: Agrupación en colecciones temáticas.
+- **Thumbnail generation**: Automatically creates reduced versions for preview.
+- **Metadata extraction**: Gets EXIF information, dimensions, and other technical metadata.
+- **Optimization**: Compression and optimization of images to improve performance.
+- **Resize**: Size adjustment for specific needs.
 
-### 4. Características Avanzadas
+### 3. Organization and search
 
-- **Control de Acceso**: Gestión de permisos y visibilidad de imágenes.
-- **Estadísticas**: Análisis de uso, visualizaciones y descargas.
-- **Favoritos**: Marcado de imágenes favoritas para acceso rápido.
-- **Detección Automática**: Clasificación mediante algoritmos de visión por computadora.
+The service provides the following organization operations:
 
-## Ejemplos de Uso
+- **Grouping in Folders**: Hierarchical organization in Folders.
+- **Tagging**: Addition and management of Tags for classification.
+- **Advanced search**: Search by metadata, names, dates, and other criteria.
+- **Collections**: Grouping in thematic Collections.
 
-### Subir una Nueva Imagen
+### 4. Advanced features
+
+The service provides the following advanced features:
+
+- **Access control**: Management of permissions and image visibility.
+- **Statistics**: Analysis of use, views, and downloads.
+- **Favorites**: Marking of Favorite images for fast access.
+- **Automatic detection**: Classification through computer-vision algorithms.
+
+## Usage examples
+
+### Upload a new image
 
 ```typescript
 import { imageService } from '@/services/index';
 
-// Subir una imagen a una carpeta específica
+// Upload an image to a specific Folder
 const newImage = await imageService.uploadImage({
-	file: imageFile, // Objeto File del navegador
-	name: 'Amanecer en la playa',
-	description: 'Fotografía del amanecer en la playa de Valencia',
+	file: imageFile, // Browser File object
+	name: 'Sunrise at the beach',
+	description: 'Photograph of sunrise at the Valencia beach',
 	folderId: 'folder-id-123',
-	tags: ['amanecer', 'playa', 'naturaleza'],
+	tags: ['sunrise', 'beach', 'nature'],
 	isPrivate: false,
 });
 ```
 
-### Obtener Imágenes con Filtros
+### Get images with filters
 
 ```typescript
 import { imageService } from '@/services/index';
 
-// Obtener imágenes con filtros avanzados
+// Get images with advanced filters
 const images = await imageService.getImages({
-	search: 'playa',
-	tags: ['vacaciones'],
+	search: 'beach',
+	tags: ['vacation'],
 	folderId: 'folder-id-123',
 	minWidth: 1920,
 	minHeight: 1080,
@@ -164,139 +180,151 @@ const images = await imageService.getImages({
 });
 ```
 
-### Actualizar una Imagen
+### Update an image
 
 ```typescript
 import { imageService } from '@/services/index';
 
-// Actualizar propiedades de una imagen
+// Update image properties
 const updatedImage = await imageService.updateImage('image-id-123', {
-	name: 'Nuevo título de imagen',
-	description: 'Descripción actualizada',
+	name: 'New image title',
+	description: 'Updated description',
 	isPrivate: true,
-	tags: ['etiqueta1', 'etiqueta2'],
-	folderId: 'nueva-carpeta-id',
+	tags: ['tag1', 'tag2'],
+	folderId: 'new-folder-id',
 });
 ```
 
-### Generar Miniaturas
+### Generate thumbnails
 
 ```typescript
 import { imageService } from '@/services/index';
 
-// Generar o regenerar miniaturas para una imagen
+// Generate or regenerate thumbnails for an image
 const thumbnails = await imageService.generateThumbnails('image-id-123', {
 	sizes: ['small', 'medium', 'large'],
 	forceRegenerate: true,
 });
 ```
 
-### Obtener Metadatos de una Imagen
+### Get metadata of an image
 
 ```typescript
 import { imageService } from '@/services/index';
 
-// Obtener metadatos técnicos y EXIF de una imagen
+// Get technical and EXIF metadata of an image
 const metadata = await imageService.getImageMetadata('image-id-123');
 
-console.log(`Dimensiones: ${metadata.width}x${metadata.height}`);
-console.log(`Cámara: ${metadata.exif?.make} ${metadata.exif?.model}`);
-console.log(`Fecha de captura: ${metadata.exif?.dateTimeOriginal}`);
+console.log(`Dimensions: ${metadata.width}x${metadata.height}`);
+console.log(`Camera: ${metadata.exif?.make} ${metadata.exif?.model}`);
+console.log(`Capture date: ${metadata.exif?.dateTimeOriginal}`);
 ```
 
-## Relaciones con Otras Entidades
+## Relations with other entities
 
-| Entidad        | Tipo de Relación | Descripción                                   |
+| Entity         | Relation type    | Description                                   |
 | -------------- | ---------------- | --------------------------------------------- |
-| **Folder**     | Muchos a uno     | Las imágenes pertenecen a carpetas            |
-| **Tag**        | Muchos a muchos  | Las imágenes pueden tener múltiples etiquetas |
-| **Album**      | Muchos a muchos  | Las imágenes pueden formar parte de álbumes   |
-| **Collection** | Muchos a muchos  | Las imágenes pueden estar en colecciones      |
-| **Metadata**   | Uno a uno        | Cada imagen tiene metadatos asociados         |
-| **Thumbnail**  | Uno a muchos     | Una imagen puede tener múltiples miniaturas   |
-| **Activity**   | Referencial      | Las actividades pueden referenciar imágenes   |
-| **User**       | Muchos a uno     | Las imágenes pertenecen a usuarios            |
+| **Folder**     | Many to one      | Images belong to Folders                      |
+| **Tag**        | Many to many     | Images can have multiple Tags                 |
+| **Album**      | Many to many     | Images can be part of Albums                  |
+| **Collection** | Many to many     | Images can be in Collections                  |
+| **Metadata**   | One to one       | Each image has associated metadata            |
+| **Thumbnail**  | One to many      | An image can have multiple thumbnails         |
+| **Activity**   | Referential      | Activities can reference images               |
+| **User**       | Many to one      | Images belong to users                        |
 
-## Modelo de Datos
+## Data model
 
 ```typescript
-// Modelo simplificado de Image
+// Simplified Image model
 interface Image {
-	id: string; // Identificador único
-	name: string; // Nombre o título de la imagen
-	description?: string; // Descripción opcional
-	path: string; // Ruta completa en el sistema de archivos
-	originalFilename: string; // Nombre de archivo original
-	mimeType: string; // Tipo MIME (image/jpeg, image/png, etc.)
-	size: number; // Tamaño en bytes
-	width: number; // Ancho en píxeles
-	height: number; // Alto en píxeles
-	format: ImageFormat; // Formato (jpeg, png, gif, etc.)
-	folderId?: string; // ID de la carpeta contenedora
-	isPrivate: boolean; // Indica si la imagen es privada
-	isFavorite: boolean; // Indica si está marcada como favorita
-	status: ImageStatus; // Estado de la imagen (ACTIVE, PROCESSING, etc.)
-	uploadedAt: Date; // Fecha de subida
-	capturedAt?: Date; // Fecha de captura (de EXIF si disponible)
-	createdAt: Date; // Fecha de creación
-	updatedAt: Date; // Fecha de última actualización
+	id: string; // Unique identifier
+	name: string; // Image name or title
+	description?: string; // Optional description
+	path: string; // Full path on the filesystem
+	originalFilename: string; // Original filename
+	mimeType: string; // MIME type (image/jpeg, image/png, etc.)
+	size: number; // Size in bytes
+	width: number; // Width in pixels
+	height: number; // Height in pixels
+	format: ImageFormat; // Format (jpeg, png, gif, etc.)
+	folderId?: string; // Containing Folder ID
+	isPrivate: boolean; // Indicates whether the image is private
+	isFavorite: boolean; // Indicates whether it is marked as a Favorite
+	status: ImageStatus; // Image status (ACTIVE, PROCESSING, etc.)
+	uploadedAt: Date; // Upload date
+	capturedAt?: Date; // Capture date (from EXIF if available)
+	createdAt: Date; // Creation date
+	updatedAt: Date; // Last update date
 }
 
-// Extensión con metadatos
+// Extension with metadata
 interface ImageWithMetadata extends Image {
 	metadata: {
-		exif?: ExifMetadata; // Metadatos EXIF (cámara, configuración, GPS, etc.)
-		colorProfile?: string; // Perfil de color
-		colorSpace?: string; // Espacio de color
-		hasAlpha: boolean; // Indica si tiene canal alfa
-		dpi?: number; // Puntos por pulgada
-		orientation?: number; // Orientación EXIF
+		exif?: ExifMetadata; // EXIF metadata (camera, settings, GPS)
+		colorProfile?: string; // Color profile
+		colorSpace?: string; // Color space
+		hasAlpha: boolean; // Indicates whether it has an alpha channel
+		dpi?: number; // Dots per inch
+		orientation?: number; // EXIF orientation
 	};
 }
 
-// Extensión con relaciones
+// Extension with relations
 interface ImageComplete extends ImageWithMetadata {
-	folder?: Folder; // Carpeta contenedora
-	thumbnails: Thumbnail[]; // Miniaturas asociadas
-	tags: Tag[]; // Etiquetas asociadas
-	albums: Album[]; // Álbumes que contienen esta imagen
-	collections: Collection[]; // Colecciones que contienen esta imagen
-	user: User; // Usuario propietario
+	folder?: Folder; // Containing Folder
+	thumbnails: Thumbnail[]; // Associated thumbnails
+	tags: Tag[]; // Associated Tags
+	albums: Album[]; // Albums that contain this image
+	collections: Collection[]; // Collections that contain this image
+	user: User; // Owner user
 }
 ```
 
-## Buenas Prácticas
+## Good practices
 
-1. **Validación de Archivos**: Verifique tamaño, tipo y formato antes de procesar imágenes.
-2. **Procesamiento Asíncrono**: Use colas para procesamiento de imágenes pesadas.
-3. **Manejo de Errores**: Implemente un sistema robusto de manejo de errores.
-4. **Almacenamiento Eficiente**: Organice los archivos físicos siguiendo una estructura lógica.
-5. **Seguridad**: Verifique permisos antes de permitir acceso a imágenes privadas.
-6. **Revalidación de Caché**: Actualice caché cuando se modifiquen imágenes.
-7. **Metadatos Sensibles**: Elimine datos sensibles de los metadatos EXIF si es necesario.
+Verify size, type, and format before you process images.
 
-## Optimización de Rendimiento
+Use queues for processing of heavy images.
 
-1. **Formatos Modernos**: Utilice formatos como WebP para mejor compresión.
-2. **Carga Responsiva**: Proporcione diferentes tamaños para diferentes dispositivos.
-3. **Carga Diferida**: Implemente lazy loading para imágenes.
-4. **Compresión Inteligente**: Ajuste niveles de compresión según necesidades.
-5. **CDN**: Utilice redes de distribución de contenido para imágenes públicas.
+Implement a robust error-handling system.
 
-## Solución de Problemas Comunes
+Organize physical files with a logical structure.
 
-| Problema                   | Solución                                                |
+Verify permissions before you allow access to private images.
+
+Update cache when images are modified.
+
+Remove sensitive data from EXIF metadata if needed.
+
+## Performance optimization
+
+Use modern formats such as WebP for better compression.
+
+Provide different sizes for different devices.
+
+Implement lazy loading for images.
+
+Adjust compression levels by need.
+
+Use content delivery networks for public images.
+
+## Common troubleshooting
+
+| Problem                    | Solution                                                |
 | -------------------------- | ------------------------------------------------------- |
-| **Imágenes huérfanas**     | Ejecute `imageService.findOrphanImages()` para detectar |
-| **Miniaturas faltantes**   | Use `imageService.regenerateMissingThumbnails()`        |
-| **Corrupción de imágenes** | Valide con `imageService.verifyImageIntegrity()`        |
-| **Metadatos incorrectos**  | Repare con `imageService.refreshMetadata()`             |
-| **Problemas de permisos**  | Verifique con `imageService.validateAccess()`           |
+| **Orphan images**          | Run `imageService.findOrphanImages()` to detect them    |
+| **Missing thumbnails**     | Use `imageService.regenerateMissingThumbnails()`        |
+| **Image corruption**       | Validate with `imageService.verifyImageIntegrity()`     |
+| **Incorrect metadata**     | Repair with `imageService.refreshMetadata()`            |
+| **Permission problems**    | Verify with `imageService.validateAccess()`             |
 
-## Roadmap y Mejoras Futuras
+## Roadmap and future improvements
 
-- Implementación de reconocimiento de objetos y escenas
-- Mejoras en algoritmos de compresión y optimización
-- Búsqueda visual por similitud
-- Edición básica de imágenes desde la interfaz
-- Soporte para metadatos personalizados definidos por el usuario
+The following work is planned:
+
+- Implementation of object and scene recognition
+- Improvements in compression and optimization algorithms
+- Visual search by similarity
+- Basic image editing from the interface
+- Support for custom metadata defined by the user

@@ -1,12 +1,14 @@
-# 📋 Documentación de la Entidad Favorite
+# Favorite entity documentation
 
-## 🏗️ Arquitectura General
+## General architecture
 
-La entidad **Favorite** representa el sistema de favoritos de la aplicación, permitiendo a los usuarios marcar diferentes tipos de entidades como favoritas para acceso rápido.
+The **Favorite** entity represents the Favorite system of the application.
+
+The entity lets users mark different entity types as Favorites for fast access.
 
 ```mermaid
 graph TB
-    subgraph "🏪 Store Layer"
+    subgraph "Store Layer"
         FS[FavoriteStore]
         CS[CoreSlice]
         US[UISlice]
@@ -14,20 +16,20 @@ graph TB
         AS[ApiSlice]
     end
 
-    subgraph "🔄 Transformers Layer"
+    subgraph "Transformers Layer"
         FM[FavoriteMappers]
         FSE[FavoriteSerializers]
         FT[FavoriteTransformer]
     end
 
-    subgraph "📊 Types Layer"
+    subgraph "Types Layer"
         FB[FavoriteBase]
         FE[FavoriteExtended]
         FC[FavoriteComplete]
         FWI[FavoriteWithImage]
     end
 
-    subgraph "🎯 Actions Layer"
+    subgraph "Actions Layer"
         FA[FavoriteActions]
     end
 
@@ -44,40 +46,40 @@ graph TB
     FA --> FM
 ```
 
-## 📁 Estructura de Archivos
+## File structure
 
 ```
 src/store/entities/favorite/
-├── README.md                    # Esta documentación
-├── index.ts                     # Store principal y exportaciones
-├── types.ts                     # Tipos específicos del store
-├── constants.ts                 # Valores por defecto y constantes
+├── README.md                    # This documentation
+├── index.ts                     # Main store and exports
+├── types.ts                     # Types specific to the store
+├── constants.ts                 # Default values and constants
 └── slices/
-    ├── core.slice.ts           # Estado y operaciones básicas
-    ├── ui.slice.ts             # Estado de interfaz de usuario
-    ├── filters.slice.ts        # Filtros y búsqueda
-    └── api.slice.ts            # Operaciones de API
+    ├── core.slice.ts           # State and basic operations
+    ├── ui.slice.ts             # User interface state
+    ├── filters.slice.ts        # Filters and search
+    └── api.slice.ts            # API operations
 
 src/transformers/favorite/
-├── mappers.ts                  # Transformaciones de datos
-├── serializers.ts              # Serialización para UI
-└── transformer.ts              # Transformadores principales
+├── mappers.ts                  # Data transformations
+├── serializers.ts              # Serialization for UI
+└── transformer.ts              # Main transformers
 
 src/types/entities/favorite/
-└── types.ts                    # Tipos canónicos
+└── types.ts                    # Canonical types
 ```
 
-## 🎯 Tipos Principales
+## Main types
 
 ### FavoriteBase
 
 ```typescript
 interface FavoriteBase {
 	id: string;
-	entityId: string; // ID de la entidad marcada como favorita
-	entityType: FavoriteEntityType; // Tipo de entidad
-	userId?: string; // ID del usuario (opcional)
-	profileId?: string; // ID del perfil (opcional)
+	entityId: string; // ID of the entity marked as a Favorite
+	entityType: FavoriteEntityType; // Entity type
+	userId?: string; // User ID (optional)
+	profileId?: string; // Profile ID (optional)
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -87,13 +89,13 @@ interface FavoriteBase {
 
 ```typescript
 interface FavoriteExtended extends FavoriteComplete {
-	entityName?: string; // Nombre de la entidad
-	entityPreview?: string; // Vista previa de la entidad
-	entityIcon?: string; // Icono de la entidad
-	entityColor?: string; // Color de la entidad
-	isSelected?: boolean; // Estado de selección
-	isHovered?: boolean; // Estado de hover
-	_count?: Record<string, number>; // Contadores
+	entityName?: string; // Entity name
+	entityPreview?: string; // Entity preview
+	entityIcon?: string; // Entity icon
+	entityColor?: string; // Entity color
+	isSelected?: boolean; // Selection state
+	isHovered?: boolean; // Hover state
+	_count?: Record<string, number>; // Counters
 }
 ```
 
@@ -114,19 +116,19 @@ enum FavoriteEntityType {
 }
 ```
 
-## 🏪 API del Store
+## Store API
 
-### Core Slice
+### Core slice
 
 ```typescript
-// Estado
+// State
 interface CoreState {
   favorites: FavoriteExtended[];
   isLoading: boolean;
   error: string | null;
 }
 
-// Acciones principales
+// Main actions
 setFavorites(favorites: FavoriteExtended[]): void
 addFavorite(favorite: FavoriteExtended): void
 removeFavorite(id: string): void
@@ -135,10 +137,10 @@ clearFavorites(): void
 isFavorited(id: string): boolean
 ```
 
-### UI Slice
+### UI slice
 
 ```typescript
-// Estado de interfaz
+// Interface state
 interface UIState {
   viewMode: FavoriteViewMode;
   sortCriteria: FavoriteSortCriteria;
@@ -146,7 +148,7 @@ interface UIState {
   selectedIds: string[];
 }
 
-// Acciones de UI
+// UI actions
 setViewMode(mode: FavoriteViewMode): void
 setSortCriteria(criteria: FavoriteSortCriteria): void
 toggleSortDirection(): void
@@ -156,16 +158,16 @@ selectAll(): void
 deselectAll(): void
 ```
 
-### Filters Slice
+### Filters slice
 
 ```typescript
-// Estado de filtros
+// Filter state
 interface FiltersState {
   filters: FavoriteFilters;
   isFilterActive: boolean;
 }
 
-// Acciones de filtros
+// Filter actions
 setFilters(filters: Partial<FavoriteFilters>): void
 clearFilters(): void
 setEntityTypeFilter(types: string[]): void
@@ -174,17 +176,17 @@ setSearchFilter(query: string): void
 getFilteredFavorites(): FavoriteExtended[]
 ```
 
-### API Slice
+### API slice
 
 ```typescript
-// Estado de API
+// API state
 interface ApiState {
   isApiLoading: boolean;
   apiError: string | null;
   lastFetch: Date | null;
 }
 
-// Operaciones de API
+// API operations
 fetchFavorites(): Promise<void>
 createFavorite(entityId: string, entityType: string): Promise<void>
 deleteFavorite(id: string): Promise<void>
@@ -192,12 +194,12 @@ setApiLoading(loading: boolean): void
 setApiError(error: string | null): void
 ```
 
-## 🔄 Transformers
+## Transformers
 
 ### Mappers
 
 ```typescript
-// Transformaciones principales
+// Main transformations
 toFavoriteExtended(favorite: FavoriteBase): FavoriteExtended
 toFavoritesExtended(favorites: FavoriteBase[]): FavoriteExtended[]
 mapFavoriteFiltersToPrisma(filters: FavoriteFilters): any
@@ -209,16 +211,16 @@ groupFavoritesByType(favorites: FavoriteExtended[]): GroupedFavorites[]
 ### Serializers
 
 ```typescript
-// Serialización para UI
+// Serialization for UI
 transformImageToFileItem(image: any): FileItem
 toFavoriteWithImage(favorite: any): FavoriteWithImage
 toFavoritesWithImages(favorites: any[]): FavoriteWithImage[]
 ```
 
-### Transformer Principal
+### Main transformer
 
 ```typescript
-// Transformaciones avanzadas
+// Advanced transformations
 transformFavorite<T>(favorite: T, options?: TransformFavoriteOptions): FavoriteComplete
 transformFavorites<T>(favorites: T[], options?: TransformFavoriteOptions): FavoriteComplete[]
 transformFavoriteToExtended<T>(favorite: T, entityDetails?: any): FavoriteComplete
@@ -226,14 +228,14 @@ groupFavoritesByType(favorites: FavoriteComplete[]): FavoritesByType[]
 calculateFavoriteStats(favorites: FavoriteComplete[], recentLimit?: number): FavoriteStats
 ```
 
-## 📊 Flujo de Datos
+## Data flow
 
 ```mermaid
 sequenceDiagram
-    participant UI as 🖥️ UI Component
-    participant Store as 🏪 FavoriteStore
-    participant API as 🌐 API Layer
-    participant DB as 🗄️ Database
+    participant UI as UI Component
+    participant Store as FavoriteStore
+    participant API as API Layer
+    participant DB as Database
 
     UI->>Store: toggleFavorite(entityId)
     Store->>Store: setApiLoading(true)
@@ -246,9 +248,9 @@ sequenceDiagram
     Store-->>UI: updated state
 ```
 
-## 🎨 Ejemplos de Uso
+## Usage examples
 
-### Uso Básico del Store
+### Basic use of the store
 
 ```typescript
 import { useFavoriteStore } from '@/store/entities/favorite';
@@ -266,7 +268,7 @@ function FavoriteComponent() {
       userId: 'user-1',
       createdAt: new Date(),
       updatedAt: new Date(),
-      entityName: 'Mi Imagen Favorita',
+      entityName: 'My Favorite Image',
       entityIcon: '🖼️',
       entityColor: '#3b82f6'
     };
@@ -277,10 +279,10 @@ function FavoriteComponent() {
   return (
     <div>
       <button onClick={handleAddFavorite}>
-        Agregar Favorito
+        Add Favorite
       </button>
 
-      {isLoading && <div>Cargando...</div>}
+      {isLoading && <div>Loading...</div>}
 
       <div>
         {favorites.map(favorite => (
@@ -294,7 +296,7 @@ function FavoriteComponent() {
 }
 ```
 
-### Filtros y Búsqueda
+### Filters and search
 
 ```typescript
 function FavoriteFilters() {
@@ -309,15 +311,15 @@ function FavoriteFilters() {
       <select
         onChange={(e) => setEntityTypeFilter([e.target.value])}
       >
-        <option value="">Todos los tipos</option>
-        <option value="image">Imágenes</option>
-        <option value="album">Álbumes</option>
-        <option value="collection">Colecciones</option>
+        <option value="">All types</option>
+        <option value="image">Images</option>
+        <option value="album">Albums</option>
+        <option value="collection">Collections</option>
       </select>
 
       <input
         type="text"
-        placeholder="Buscar favoritos..."
+        placeholder="Search favorites..."
         onChange={(e) => setSearchFilter(e.target.value)}
       />
 
@@ -333,12 +335,12 @@ function FavoriteFilters() {
 }
 ```
 
-### Transformaciones
+### Transformations
 
 ```typescript
 import { transformFavorite, groupFavoritesByType } from '@/transformers/favorite/transformer';
 
-// Transformar datos de API
+// Transform API data
 const rawFavorite = {
 	id: 'fav-1',
 	entity_id: 'img-123',
@@ -349,13 +351,13 @@ const rawFavorite = {
 
 const favorite = transformFavorite(rawFavorite);
 
-// Agrupar por tipo
+// Group by type
 const groupedFavorites = groupFavoritesByType(favorites);
 console.log(groupedFavorites);
 // [
 //   {
 //     type: 'image',
-//     displayName: 'Imágenes',
+//     displayName: 'Images',
 //     icon: '🖼️',
 //     color: '#3b82f6',
 //     count: 5,
@@ -364,19 +366,19 @@ console.log(groupedFavorites);
 // ]
 ```
 
-## 🔧 Configuración
+## Configuration
 
-### Constantes por Defecto
+### Default constants
 
 ```typescript
-// Modo de vista por defecto
+// Default view mode
 DEFAULT_VIEW_MODE = FavoriteViewMode.GRID;
 
-// Criterio de ordenación por defecto
+// Default sort criterion
 DEFAULT_SORT_CRITERIA = FavoriteSortCriteria.UPDATED_AT;
 DEFAULT_SORT_DIRECTION = 'desc';
 
-// Filtros por defecto
+// Default filters
 DEFAULT_FILTERS = {
 	entityType: [],
 	createdAfter: null,
@@ -385,15 +387,15 @@ DEFAULT_FILTERS = {
 };
 ```
 
-### Persistencia
+### Persistence
 
-El store persiste automáticamente:
+The store persists the following data automatically:
 
-- Modo de vista
-- Criterios de ordenación
-- Filtros activos
+- View mode
+- Sort criteria
+- Active filters
 
-## 🔗 Relaciones con Otras Entidades
+## Relations with other entities
 
 ```mermaid
 graph LR
@@ -411,40 +413,42 @@ graph LR
     U[User/Profile] --> F
 ```
 
-## 📈 Métricas y Estadísticas
+## Metrics and statistics
 
-### Estadísticas Calculadas
+### Calculated statistics
 
 ```typescript
 interface FavoriteStats {
-	totalCount: number; // Total de favoritos
-	byType: Record<string, number>; // Conteo por tipo
-	recentlyAdded: FavoriteComplete[]; // Favoritos recientes
+	totalCount: number; // Total Favorites
+	byType: Record<string, number>; // Count by type
+	recentlyAdded: FavoriteComplete[]; // Recent Favorites
 }
 ```
 
-### Agrupaciones
+### Groupings
 
 ```typescript
 interface FavoritesByType {
-	type: string; // Tipo de entidad
-	displayName: string; // Nombre para mostrar
-	icon: string; // Icono del tipo
-	color: string; // Color del tipo
-	count: number; // Cantidad de favoritos
-	items: FavoriteComplete[]; // Favoritos del tipo
+	type: string; // Entity type
+	displayName: string; // Display name
+	icon: string; // Type icon
+	color: string; // Type color
+	count: number; // Favorite count
+	items: FavoriteComplete[]; // Favorites of the type
 }
 ```
 
-## 🚀 Próximas Mejoras
+## Planned improvements
 
-1. **Sincronización en tiempo real** con WebSockets
-2. **Favoritos compartidos** entre usuarios
-3. **Categorías personalizadas** de favoritos
-4. **Exportación/importación** de favoritos
-5. **Favoritos inteligentes** basados en IA
-6. **Notificaciones** de cambios en favoritos
+The following improvements are planned:
+
+1. **Real-time synchronization** with WebSockets
+2. **Shared Favorites** among users
+3. **Custom Favorite categories**
+4. **Export/import** of Favorites
+5. **Smart Favorites** based on AI
+6. **Notifications** of changes in Favorites
 
 ---
 
-_Documentación generada automáticamente - Última actualización: 2024_
+_Documentation generated automatically - Last update: 2024_

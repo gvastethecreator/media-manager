@@ -1,14 +1,18 @@
-# Toolbar Principal
+# Main toolbar
 
-Barra de herramientas ubicada en la parte superior de la aplicación.
-Gestiona las acciones masivas sobre archivos y controla el modo de
-visualización.
+This toolbar sits at the top of the application.
 
-- **main-toolbar.tsx**: Contiene botones de acción generales.
-- **entity-details.tsx**: Muestra información de la entidad seleccionada.
+The toolbar manages bulk file actions and the view mode.
 
-La toolbar lee el modo de vista y orden desde el slice `view-options` y
-obtiene la selección de archivos desde `selection.store`. De esta forma,
-FileBrowser y toolbar comparten estado sin acoplarse.
+The directory includes the following files:
 
-Estos componentes suelen ser Server Components y se integran con el layout principal.
+- **main-toolbar.tsx**: Holds general action buttons.
+- **entity-details.tsx**: Shows information for the selected entity.
+
+The toolbar reads view mode and sort order from the `view-options` slice.
+
+The toolbar gets file selection from `selection.store`.
+
+FileBrowser and the toolbar share that state without coupling.
+
+These components integrate with the main layout.

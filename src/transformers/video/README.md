@@ -1,29 +1,31 @@
-# 🎬 Video Transformer - Documentación
+# Video transformer
 
-## 📋 Descripción
+## Purpose
 
-El transformer de Video implementa el patrón **EntityWithStats** para convertir datos de Drizzle en objetos `VideoWithStats` optimizados, incluyendo análisis técnico avanzado, métricas de calidad y estadísticas pre-calculadas.
+The Video transformer implements the **EntityWithStats** pattern. It converts Drizzle data into optimized `VideoWithStats` objects. It includes advanced technical analysis, quality metrics, and pre-calculated statistics.
 
-## 🌟 Características Principales
+## Main characteristics
 
-### 🎯 Análisis Técnico Avanzado
+### Advanced technical analysis
 
-- **Quality Score**: Puntuación 0-100 basada en resolución, duración, bitrate y metadatos
-- **Technical Grade**: Clasificación A-D según calidad técnica y tamaño
-- **Análisis de Formato**: Detección automática de aspectRatio, resolución y qualityLevel
-- **Metadatos Inteligentes**: Parsing de información técnica (codec, bitrate, frameRate)
+The analysis includes:
 
-### 📊 Estadísticas Pre-calculadas
+- **Quality Score**: Score 0-100 based on resolution, duration, bitrate, and metadata
+- **Technical Grade**: Classification A-D by technical quality and size
+- **Format analysis**: Automatic detection of aspectRatio, resolution, and qualityLevel
+- **Intelligent metadata**: Parsing of technical information (codec, bitrate, frameRate)
+
+### Pre-calculated statistics
 
 ```typescript
 interface VideoStatistics {
-	// Conteos de relaciones (12 tipos)
+	// Relation counts (12 types)
 	albumsCount: number;
 	collectionsCount: number;
 	tagsCount: number;
-	// ... más conteos
+	// ... more counts
 
-	// Métricas técnicas
+	// Technical metrics
 	durationMinutes: number;
 	durationHours: number;
 	megabytes: number;
@@ -32,7 +34,7 @@ interface VideoStatistics {
 	resolution: string;
 	qualityLevel: VideoQuality;
 
-	// Análisis de calidad
+	// Quality analysis
 	qualityScore: number; // 0-100
 	technicalGrade: 'A' | 'B' | 'C' | 'D';
 	hasAudio: boolean;
@@ -45,29 +47,31 @@ interface VideoStatistics {
 }
 ```
 
-### 🏷️ Auto-tagging Inteligente
+### Intelligent auto-tagging
 
-- **Tags de Calidad**: ultra-hd, 4k, hd, 1080p, sd, 720p
-- **Tags de Duración**: corto, clip, breve, medio, largo, película
-- **Tags Técnicos**: con-audio, sin-audio, mudo, subtitulado
-- **Tags de Formato**: widescreen, formato-clásico, ultra-wide
-- **Tags de Tamaño**: archivo-grande, archivo-pequeño
+The auto-tags include:
 
-## 🔧 Funciones Principales
+- **Quality tags**: ultra-hd, 4k, hd, 1080p, sd, 720p
+- **Duration tags**: short, clip, brief, medium, long, movie
+- **Technical tags**: with-audio, without-audio, muted, subtitled
+- **Format tags**: widescreen, classic-format, ultra-wide
+- **Size tags**: large-file, small-file
+
+## Main functions
 
 ### `fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts): VideoWithStats`
 
-Función principal que transforma un video de Drizzle a VideoWithStats.
+Main function that transforms a Drizzle video to VideoWithStats.
 
-**Parámetros:**
+**Parameters:**
 
-- `drizzleVideo`: Objeto de video de Drizzle con `_count` incluido
+- `drizzleVideo`: Drizzle video object with `_count` included
 
-**Retorna:**
+**Returns:**
 
-- `VideoWithStats`: Video optimizado con estadísticas calculadas
+- `VideoWithStats`: Optimized video with calculated statistics
 
-**Ejemplo:**
+**Example:**
 
 ```typescript
 const drizzleVideo = await db.query.videos.findFirst({
@@ -86,45 +90,45 @@ console.log(videoWithStats.statistics.technicalGrade); // 'A'
 
 ### `fromDrizzleVideosWithCounts(videos: DrizzleVideoWithCounts[]): VideoWithStats[]`
 
-Transforma múltiples videos de Drizzle.
+Transforms multiple videos from Drizzle.
 
-### Funciones de Store Optimizado
+### Optimized store functions
 
 ```typescript
-// Conversión a Record para acceso O(1)
+// Convert to a Record for O(1) access
 const videosRecord = videosToRecord(videoArray);
 
-// Acceso optimizado por ID
+// Optimized access by ID
 const video = getVideoById(videosRecord, 'video-id');
 
-// Conversión de vuelta a array
+// Convert back to an array
 const allVideos = getAllVideos(videosRecord);
 ```
 
-## 🏆 Sistema de Calidad
+## Quality system
 
-### Quality Score (0-100)
+### Quality score (0-100)
 
-| Componente       | Puntuación Máxima | Criterios                                         |
-| ---------------- | ----------------- | ------------------------------------------------- |
-| **Resolución**   | 30 pts            | 1080p+ (30), 720p (25), 480p (15), Cualquiera (5) |
-| **Duración**     | 20 pts            | 1-120 min (20), Cualquiera (10)                   |
-| **Bitrate**      | 15 pts            | 5-50 MB/min (15), Cualquiera (5)                  |
-| **Metadatos**    | 15 pts            | Metadata (10) + Thumbnail (5)                     |
-| **Asociaciones** | 20 pts            | 10+ (20), 5+ (15), 1+ (10), Base (5)              |
+| Component        | Maximum score | Criteria                                          |
+| ---------------- | ------------- | ------------------------------------------------- |
+| **Resolution**   | 30 pts        | 1080p+ (30), 720p (25), 480p (15), Any (5)        |
+| **Duration**     | 20 pts        | 1-120 min (20), Any (10)                          |
+| **Bitrate**      | 15 pts        | 5-50 MB/min (15), Any (5)                         |
+| **Metadata**     | 15 pts        | Metadata (10) + Thumbnail (5)                     |
+| **Associations** | 20 pts        | 10+ (20), 5+ (15), 1+ (10), Base (5)              |
 
-### Technical Grade
+### Technical grade
 
-| Grado | Criterios                     |
+| Grade | Criteria                      |
 | ----- | ----------------------------- |
-| **A** | Score ≥85 + Ultra HD + ≥100MB |
-| **B** | Score ≥70 + HD + ≥50MB        |
-| **C** | Score ≥50 + Medium quality    |
-| **D** | Resto                         |
+| **A** | Score 85 or higher + Ultra HD + 100MB or more |
+| **B** | Score 70 or higher + HD + 50MB or more        |
+| **C** | Score 50 or higher + Medium quality           |
+| **D** | Remaining cases                               |
 
-## 🎥 Análisis Técnico
+## Technical analysis
 
-### Detección de Quality Level
+### Quality level detection
 
 ```typescript
 enum VideoQuality {
@@ -136,31 +140,33 @@ enum VideoQuality {
 }
 ```
 
-### Cálculo de Aspect Ratio
+### Aspect ratio calculation
 
-- **16:9**: Widescreen estándar
-- **4:3**: Formato clásico
+The aspect ratios are:
+
+- **16:9**: Standard widescreen
+- **4:3**: Classic format
 - **21:9**: Ultra-wide
-- **1:1**: Cuadrado
-- **Personalizado**: Calculado automáticamente
+- **1:1**: Square
+- **Custom**: Calculated automatically
 
-### Formateo de Duración
+### Duration formatting
 
 ```typescript
-// Ejemplos de salida
-'45s'; // < 1 minuto
-'5m 30s'; // < 1 hora
-'2h 15m'; // ≥ 1 hora
-'1h'; // Exacto
+// Output examples
+'45s'; // < 1 minute
+'5m 30s'; // < 1 hour
+'2h 15m'; // >= 1 hour
+'1h'; // Exact
 ```
 
-## 📈 Beneficios de Rendimiento
+## Performance benefits
 
-### Consultas Optimizadas
+### Optimized queries
 
 ```typescript
-// ANTES: Select * y luego conteos manuales (o Drizzle include)
-// DESPUÉS: Drizzle con with y count (más eficiente)
+// BEFORE: Select * and then manual counts (or a Drizzle include)
+// AFTER: Drizzle with `with` and count (more efficient)
 const videosWithCounts = await db.query.videos.findMany({
 	with: {
 		albums: { columns: { id: true } },
@@ -179,25 +185,25 @@ const transformedVideos = videosWithCounts.map((video) => ({
 }));
 ```
 
-### Acceso a Datos
+### Data access
 
 ```typescript
-// ANTES: Array lineal O(n)
+// BEFORE: Linear array O(n)
 const video = videos.find((v) => v.id === id);
 
-// DESPUÉS: Record optimizado O(1)
+// AFTER: Optimized Record O(1)
 const video = videosRecord[id];
 ```
 
-### Memoria Optimizada
+### Optimized memory
 
-- **70% menos datos** transferidos (solo conteos vs relaciones completas)
-- **Estadísticas pre-calculadas** evitan cálculos repetitivos
-- **Campos derivados** listos para UI
+- **70% less data** transferred (counts only versus full relations)
+- **Pre-calculated statistics** avoid repeated calculations
+- **Derived fields** ready for UI
 
-## 🔍 Casos de Uso
+## Use cases
 
-### 1. Listado de Videos
+### 1. Video listing
 
 ```typescript
 const videos = await findVideos({
@@ -206,12 +212,12 @@ const videos = await findVideos({
 
 videos.forEach((video) => {
 	console.log(`${video.statistics.displayName} - ${video.statistics.qualityLabel}`);
-	console.log(`Duración: ${video.statistics.formattedDuration}`);
-	console.log(`Tamaño: ${video.statistics.formattedSize}`);
+	console.log(`Duration: ${video.statistics.formattedDuration}`);
+	console.log(`Size: ${video.statistics.formattedSize}`);
 });
 ```
 
-### 2. Análisis de Calidad
+### 2. Quality analysis
 
 ```typescript
 const highQualityVideos = videos.filter(
@@ -221,25 +227,25 @@ const highQualityVideos = videos.filter(
 const avgQualityScore = videos.reduce((sum, v) => sum + v.statistics.qualityScore, 0) / videos.length;
 ```
 
-### 3. Auto-categorización
+### 3. Auto-categorization
 
 ```typescript
 videos.forEach((video) => {
 	const tags = video.statistics.autoTags;
 
 	if (tags.includes('ultra-hd')) {
-		// Procesar videos 4K
+		// Process 4K videos
 	}
 
-	if (tags.includes('película')) {
-		// Procesar videos largos
+	if (tags.includes('movie')) {
+		// Process long videos
 	}
 });
 ```
 
-## 🚀 Integración
+## Integration
 
-### En Server Actions
+### In routes
 
 ```typescript
 export async function getVideo(id: string): Promise<VideoWithStats | null> {
@@ -256,7 +262,7 @@ export async function getVideo(id: string): Promise<VideoWithStats | null> {
 }
 ```
 
-### En Stores Zustand
+### In Zustand stores
 
 ```typescript
 interface VideoStore {
@@ -267,7 +273,7 @@ interface VideoStore {
 }
 ```
 
-### En Componentes UI
+### In UI components
 
 ```typescript
 function VideoCard({ video }: { video: VideoWithStats }) {
@@ -276,25 +282,25 @@ function VideoCard({ video }: { video: VideoWithStats }) {
   return (
     <div>
       <h3>{statistics.displayName}</h3>
-      <p>Calidad: {statistics.qualityLabel}</p>
-      <p>Duración: {statistics.formattedDuration}</p>
-      <p>Tamaño: {statistics.formattedSize}</p>
+      <p>Quality: {statistics.qualityLabel}</p>
+      <p>Duration: {statistics.formattedDuration}</p>
+      <p>Size: {statistics.formattedSize}</p>
       <div>Tags: {statistics.autoTags.join(', ')}</div>
     </div>
   );
 }
 ```
 
-## 🎯 Próximas Mejoras
+## Next improvements
 
-1. **Detección de Duplicados**: Implementar comparación por hash
-2. **Análisis de Color**: Temperatura de color real
-3. **Métricas de Uso**: Views, likes, downloads reales
-4. **AI Confidence**: Análisis de contenido con IA
-5. **Optimización de Thumbnails**: Generación automática
+1. **Duplicate detection**: Implement comparison by hash
+2. **Color analysis**: Real color temperature
+3. **Usage metrics**: Real views, likes, downloads
+4. **AI Confidence**: Content analysis with AI
+5. **Thumbnail optimization**: Automatic generation
 
 ---
 
-**Última actualización**: 2025-01-27
-**Patrón**: EntityWithStats optimizado
-**Performance**: 60-80% mejora en consultas
+**Last update**: 2025-01-27
+**Pattern**: Optimized EntityWithStats
+**Performance**: 60-80% improvement in queries
