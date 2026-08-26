@@ -1,60 +1,15 @@
 {
   "version": "2.0.0",
   "tasks": [
-    // === ATAJOS COMUNES (nombres cortos) ===
     {
-      "label": "🚀 dev",
+      "label": "Dev",
       "type": "shell",
       "command": "bun run dev:full",
       "isBackground": true,
-      "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "🏗️ build",
-      "type": "shell",
-      "command": "bun run build",
-      "group": "build",
-      "problemMatcher": ["$tsc"]
-    },
-    {
-      "label": "🔎 check",
-      "type": "shell",
-      "command": "bun run check",
-      "group": "test",
-      "problemMatcher": ["$tsc"]
-    },
-    {
-      "label": "🧪 test",
-      "type": "shell",
-      "command": "bun run test:unit",
-      "group": "test",
-      "problemMatcher": []
-    },
-    {
-      "label": "🎭 e2e",
-      "type": "shell",
-      "command": "bun run test:e2e",
-      "group": "test",
-      "problemMatcher": []
-    },
-    {
-      "label": "📦 deps",
-      "type": "shell",
-      "command": "bun run deps:outdated",
-      "group": "build",
-      "problemMatcher": []
-    },
-    // === TAREAS DE DESARROLLO (PRIORIDAD ALTA) ===
-    {
-      "label": "🚀 Desarrollo: Full Stack",
-      "type": "shell",
-      "command": "bun run dev:full",
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "isBackground": true,
       "problemMatcher": {
         "owner": "custom",
         "pattern": {
@@ -63,30 +18,27 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": "🚀 Iniciando desarrollo completo",
-          "endsPattern": "\\[DEV\\] ✅ Desarrollo completo listo\\."
+          "endsPattern": "\\[DEV\\] ✅ Desarrollo completo listo"
         }
       },
       "presentation": {
         "echo": true,
         "reveal": "always",
         "focus": false,
-        "panel": "new",
+        "panel": "dedicated",
         "showReuseMessage": false,
         "clear": false
       },
       "options": {
-        "statusbar": {
-          "label": "🚀 Dev Full",
-          "color": "#00ff00"
-        }
+        "cwd": "${workspaceFolder}"
       }
     },
     {
-      "label": "🌐 Desarrollo: Frontend (Vite+)",
+      "label": "Dev: Vite",
       "type": "shell",
       "command": "bun run dev:vite",
-      "group": "build",
       "isBackground": true,
+      "group": "build",
       "problemMatcher": {
         "owner": "custom",
         "pattern": {
@@ -101,15 +53,18 @@
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "panel": "new"
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
       }
     },
     {
-      "label": "⚙️ Desarrollo: Backend",
+      "label": "Dev: Server",
       "type": "shell",
       "command": "bun run dev:server:hot",
-      "group": "build",
       "isBackground": true,
+      "group": "build",
       "problemMatcher": {
         "owner": "custom",
         "pattern": {
@@ -124,63 +79,158 @@
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "panel": "new"
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
       }
     },
     {
-      "label": "📱 Desarrollo: Tauri",
+      "label": "Desktop: Dev",
       "type": "shell",
-      "command": "bun run dev:tauri",
-      "group": "build",
+      "command": "bun run desktop:dev",
       "isBackground": true,
+      "group": "build",
       "problemMatcher": [],
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "panel": "new"
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
       }
     },
     {
-      "label": "🏗️ Build: Completo",
+      "label": "Build",
       "type": "shell",
       "command": "bun run build",
       "group": "build",
-      "problemMatcher": [
-        "$tsc"
-      ],
+      "problemMatcher": ["$tsc"],
       "presentation": {
         "echo": true,
         "reveal": "always",
         "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
       }
     },
     {
-      "label": "🏗️ Build: Frontend (Vite+)",
+      "label": "Build: Vite",
       "type": "shell",
       "command": "bun run build:vite",
       "group": "build",
-      "problemMatcher": [
-        "$tsc"
-      ]
+      "problemMatcher": ["$tsc"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "🏗️ Build: Backend",
+      "label": "Build: Server",
       "type": "shell",
       "command": "bun run build:server",
       "group": "build",
-      "problemMatcher": [
-        "$tsc"
-      ]
+      "problemMatcher": ["$tsc"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "🏗️ Build: Tauri",
+      "label": "Desktop: Package",
       "type": "shell",
-      "command": "bun run build:tauri",
+      "command": "bun run desktop:package",
       "group": "build",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "🧪 Test: E2E",
+      "label": "Check",
+      "type": "shell",
+      "command": "bun run check",
+      "group": "test",
+      "problemMatcher": ["$tsc"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Format",
+      "type": "shell",
+      "command": "bun run format",
+      "group": "build",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Format: Check",
+      "type": "shell",
+      "command": "bun run format:check",
+      "group": "build",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Lint",
+      "type": "shell",
+      "command": "bun run lint",
+      "group": "build",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Lint: Fix",
+      "type": "shell",
+      "command": "bun run lint:fix",
+      "group": "build",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Typecheck",
+      "type": "shell",
+      "command": "bun run tsc",
+      "group": "build",
+      "problemMatcher": ["$tsc"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Test",
+      "type": "shell",
+      "command": "bun run test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Test: Tooling",
+      "type": "shell",
+      "command": "bun run test:tooling",
+      "group": "test",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Test: E2E",
       "type": "shell",
       "command": "bun run test:e2e",
       "group": "test",
@@ -189,131 +239,123 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
       }
     },
-    // Calidad de código
     {
-      "label": "🧩 Check: Vite+",
+      "label": "Deps",
       "type": "shell",
-      "command": "bun run check",
+      "command": "bun run deps:outdated",
       "group": "build",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "🎨 Format: Check",
-      "type": "shell",
-      "command": "bun run format:check",
-      "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "🎨 Format: Fix",
-      "type": "shell",
-      "command": "bun run format",
-      "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "🔍 Lint: Oxc",
-      "type": "shell",
-      "command": "bun run lint",
-      "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "🔧 Lint: Oxc Fix",
-      "type": "shell",
-      "command": "bun run lint:fix",
-      "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "📝 TypeScript: Check",
-      "type": "shell",
-      "command": "bun run tsc",
-      "group": "build",
-      "problemMatcher": [
-        "$tsc"
-      ]
-    },
-    {
-      "label": "🗃️ DB: Studio",
+      "label": "DB: Studio",
       "type": "shell",
       "command": "bun run db:studio -- --database \"${input:mediaManagerDatabasePath}\"",
-      "detail": "Abre Studio sólo en la base elegida.",
+      "detail": "Opens Studio on the selected database. The file must already exist.",
       "group": "build",
       "isBackground": true,
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "🗃️ DB: Check",
+      "label": "DB: Check",
       "type": "shell",
       "command": "bun run db:check -- --database \"${input:mediaManagerDatabasePath}\"",
-      "detail": "Comprueba una base explícita sin cambiarla.",
+      "detail": "Checks the selected database. Does not write.",
       "group": "build",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "⚠️ DB: Reset disposable (dry-run)",
+      "label": "DB: Reset",
       "type": "shell",
       "command": "bun run db:reset -- --database \"${input:mediaManagerDisposableDatabasePath}\"",
-      "detail": "No borra. Requiere una DB marcada bajo .scratch o temp.",
+      "detail": "Dry-run. Does not delete. Add --confirm RESET-DISPOSABLE only on a marked disposable database.",
       "problemMatcher": [],
       "presentation": {
         "echo": true,
         "reveal": "always",
         "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
       }
     },
     {
-      "label": "🔍 Logs: List",
+      "label": "Logs: List",
       "type": "shell",
       "command": "bun run logs:list",
       "group": "build",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "🧹 Logs: Clean",
+      "label": "Logs: Clean",
       "type": "shell",
       "command": "bun run logs:clean",
       "group": "build",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "⚠️ Check: Errors",
+      "label": "Check: Errors",
       "type": "shell",
       "command": "bun run check:errors",
       "group": "build",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "🎭 Playwright: Install",
+      "label": "Playwright: Install",
       "type": "shell",
       "command": "bun run playwright:install",
       "group": "build",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
-      "label": "🎭 Playwright: Codegen",
+      "label": "Playwright: Codegen",
       "type": "shell",
       "command": "bun run playwright:codegen",
       "group": "test",
       "isBackground": true,
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     }
   ],
   "inputs": [
     {
       "id": "mediaManagerDatabasePath",
       "type": "promptString",
-      "description": "Ruta de la base para Studio o Check",
+      "description": "Database path for Studio or Check",
       "default": "${workspaceFolder}/.scratch/dev.sqlite"
     },
     {
       "id": "mediaManagerDisposableDatabasePath",
       "type": "promptString",
-      "description": "Ruta descartable bajo .scratch o temp para el dry-run de reset",
-      "default": "${workspaceFolder}/.scratch/dev.sqlite"
+      "description": "Disposable database path under .scratch or temp",
+      "default": "${workspaceFolder}/.scratch/disposable.sqlite"
     }
   ]
 }
