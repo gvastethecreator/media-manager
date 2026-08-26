@@ -1,7 +1,7 @@
 /**
  * @file Album Transformer usando Effect
  * @module transformers/album/transformer.effect
- * @description Transformador Effect para la entidad Album usando @effect/schema
+ * @description Effect transformer for Album using Effect Schema
  * @created 2025-10-11 - Fase 2 Effect Implementation
  */
 

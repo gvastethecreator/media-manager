@@ -5,7 +5,7 @@
  * @created 2025-10-11 - Fase 2 Effect Implementation
  */
 
-import { Schema } from '@effect/schema';
+import { Schema } from 'effect';
 import { UUID } from './common';
 import { AbsoluteFilePath, AspectRatio, FileSize, HexColor, NonNegativeInt, PositiveInt } from './primitives';
 

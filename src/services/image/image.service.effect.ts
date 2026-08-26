@@ -20,7 +20,7 @@
  */
 
 import { and, asc, count, desc, eq, inArray, notInArray, or, sql } from 'drizzle-orm';
-import { Effect } from 'effect';
+import { Effect, Context, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import {
 	assets,
@@ -1334,7 +1334,6 @@ export const getOriginalImage = (imageId: string): Effect.Effect<Buffer, ImageEr
 // CONTEXT TAG & LAYER
 // ============================================================================
 
-import { Context, Layer } from 'effect';
 
 /**
  * Interface for ImageService
