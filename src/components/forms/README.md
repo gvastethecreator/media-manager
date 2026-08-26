@@ -1,10 +1,12 @@
-# Componentes de Formularios
+# Form components
 
-Colección de componentes reutilizables para selección de datos.
+This collection provides reusable components for data selection.
 
-- **category-picker.tsx**: Selector de categorías con búsqueda.
-- **color-picker.tsx**: Selector de color basado en Tailwind.
-- **emoji-picker.tsx**: Selector de emojis con filtro rápido.
-- **image-picker.tsx**: Carga y previsualización de imágenes.
+The collection includes the following files:
 
-Estos componentes son usados en distintos formularios de configuración y creación de entidades.
+- **category-picker.tsx**: Category selector with search.
+- **color-picker.tsx**: Color selector based on Tailwind.
+- **emoji-picker.tsx**: Emoji selector with a fast filter.
+- **image-picker.tsx**: Image load and preview.
+
+Settings and entity-creation forms use these components.

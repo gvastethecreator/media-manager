@@ -1,57 +1,61 @@
-# 📁 FolderCard
+# FolderCard
 
-Componente que muestra una tarjeta estilo TCG (Trading Card Game) para representar carpetas de imágenes.
+This component displays a TCG-style card that represents Folders of images.
 
-## 📋 Descripción
+## Description
 
-Este componente forma parte del sistema de tarjetas de entidades, siguiendo el mismo diseño que los otros componentes del sistema. Cada tarjeta tiene un diseño inspirado en cartas de juegos como Magic/Yu-Gi-Oh/Pokémon con:
+This component is part of the entity card system and follows the same design as the other system components.
 
-- Cabecera con nombre de carpeta, emoji y tipo de carpeta
-- Sección de imágenes en un grid con miniaturas
-- Sección de contenido con descripción y metadatos
-- Pie con estadísticas e información adicional
-- Colores personalizados según la configuración de la carpeta
-- Efectos visuales tipo TCG (bordes brillantes, texturas, elementos decorativos)
-- Modo compacto para visualizaciones densas
+Each card uses a design inspired by Magic, Yu-Gi-Oh, and Pokemon with the following parts:
 
-## 🔄 Flujo de funcionamiento
+- Header with Folder name, emoji, and Folder type
+- Image section in a thumbnail grid
+- Content section with description and metadata
+- Footer with statistics and extra information
+- Custom colors from the Folder configuration
+- TCG-style visual effects (shiny borders, textures, decorative elements)
+- Compact mode for dense displays
+
+## Operation flow
 
 ```mermaid
 graph TD
-    A[FolderCard] --> B[Inicialización]
-    B --> C[Cargar datos y estilos]
-    C --> D[Calcular colores primario/secundario]
-    D --> E[Verificar modo compacto]
-    E -->|Compacto| F[Renderizar versión reducida]
-    E -->|Normal| G[Renderizar tarjeta completa]
-    G --> H[Renderizar componentes hijos]
+    A[FolderCard] --> B[Initialization]
+    B --> C[Load data and styles]
+    C --> D[Calculate primary and secondary colors]
+    D --> E[Check compact mode]
+    E -->|Compact| F[Render reduced version]
+    E -->|Normal| G[Render full card]
+    G --> H[Render child components]
 
-    I[FolderCardImages] --> J[Cargar imágenes con server action]
-    J --> K{¿Hay imágenes?}
-    K -->|Sí| L[Mostrar grid de imágenes]
-    K -->|No| M[Mostrar placeholder]
+    I[FolderCardImages] --> J[Load images through a route]
+    J --> K{Are there images?}
+    K -->|Yes| L[Show image grid]
+    K -->|No| M[Show placeholder]
 
-    N[folder-server-actions] --> O[Consultar BD con Prisma]
-    O --> P[Obtener relaciones y contadores]
-    P --> Q[Transformar datos]
-    Q --> R[Retornar datos completos]
+    N[folder-server-actions] --> O[Query the database]
+    O --> P[Get relations and counters]
+    P --> Q[Transform data]
+    Q --> R[Return complete data]
 ```
 
-## 🗂️ Estructura de archivos
+## File structure
 
-- **index.ts**: Punto de entrada y exportaciones del componente
-- **folder-card.tsx**: Componente principal que renderiza la tarjeta
-- **folder-card-header.tsx**: Componente para la cabecera de la tarjeta con estilo TCG
-- **folder-card-images.tsx**: Componente para mostrar las imágenes asociadas
-- **folder-card-content.tsx**: Componente para mostrar el contenido de la carpeta
-- **folder-card-footer.tsx**: Componente para mostrar el pie con estadísticas
-- **folder-server-actions.ts**: Acciones del servidor para obtener datos
-- **folder-card.test.tsx**: Tests del componente
-- **README.md**: Documentación del componente
+The directory includes the following files:
 
-## 🖥️ Ejemplos de uso
+- **index.ts**: Entry point and component exports
+- **folder-card.tsx**: Main component that renders the card
+- **folder-card-header.tsx**: Component for the TCG-style card header
+- **folder-card-images.tsx**: Component that shows associated images
+- **folder-card-content.tsx**: Component that shows Folder content
+- **folder-card-footer.tsx**: Component that shows the footer with statistics
+- **folder-server-actions.ts**: Routes that fetch data
+- **folder-card.test.tsx**: Component tests
+- **README.md**: Component documentation
 
-### Uso básico con navegación automática
+## Usage examples
+
+### Basic use with automatic navigation
 
 ```tsx
 import { FolderCard } from '@/components/cards/folder-card';
@@ -67,7 +71,7 @@ function FoldersList({ folders }) {
 }
 ```
 
-### Uso con manejador de eventos personalizado
+### Use with a custom event handler
 
 ```tsx
 import { FolderCard } from '@/components/cards/folder-card';
@@ -83,7 +87,7 @@ function FolderSelector({ folders, onSelect }) {
 }
 ```
 
-### Uso en modo compacto
+### Use in compact mode
 
 ```tsx
 import { FolderCard } from '@/components/cards/folder-card';
@@ -99,34 +103,36 @@ function FolderCompactList({ folders }) {
 }
 ```
 
-## 🔌 Integración
+## Integration
 
-Este componente se utiliza principalmente en:
+This component is used mainly in the following places:
 
-- Vista de carpetas en el dashboard
-- Explorador de archivos
-- Selectores de carpetas en formularios y al añadir imágenes
-- Navegación entre carpetas
-- Visualizaciones de listado tanto normales como compactas
+- Folder view on the dashboard
+- File explorer
+- Folder selectors in forms and when adding images
+- Navigation between Folders
+- Normal and compact list displays
 
-## 🎨 Personalización visual
+## Visual customization
 
-El componente respeta y utiliza los atributos visuales definidos en la entidad Folder:
+The component uses the visual attributes defined on the Folder entity.
 
-- **color**: Color principal de la carpeta que se utiliza para los bordes, gradientes y efectos
-- **emoji**: Emoji asociado que se muestra como emblema junto al nombre
-- **featuredImage**: Imagen destacada que se puede mostrar como fondo en la sección de contenido
-- **isFavorite**: Indica si la carpeta está marcada como favorita
+The attributes include the following:
 
-<!-- autoReindex eliminado del modelo: la indexación automática ahora se gestiona por lógica de cliente/servicio sin bandera por carpeta -->
+- **color**: Main Folder color used for borders, gradients, and effects
+- **emoji**: Associated emoji shown as an emblem next to the name
+- **featuredImage**: Featured image that can display as a background in the content section
+- **isFavorite**: Indicates whether the Folder is marked as a Favorite
 
-- **path**: Ruta que se utiliza para determinar si es una carpeta raíz o subcarpeta
+<!-- autoReindex was removed from the model: automatic indexing is now managed by client and service logic without a per-folder flag -->
 
-## 🚀 Rendimiento
+- **path**: Path used to determine whether the Folder is a root Folder or a subfolder
 
-El componente utiliza técnicas de optimización:
+## Performance
 
-- Memoización de componentes con `React.memo`
-- Cálculos de estilos usando `useMemo` para evitar recálculos
-- Manejo eficiente de efectos visuales para minimizar el impacto en rendimiento
-- Modo compacto para cuando se necesita mostrar muchas carpetas a la vez
+The component uses the following optimization techniques:
+
+- Component memoization with `React.memo`
+- Style calculations with `useMemo` to avoid recalculation
+- Efficient handling of visual effects to reduce performance impact
+- Compact mode when many Folders must display at once

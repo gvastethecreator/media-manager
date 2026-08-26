@@ -1,10 +1,12 @@
-# 📝 Store de Note - Gestión de Notas
+# Note store - Note management
 
-## 📋 Resumen
+## Summary
 
-El store de **Note** gestiona notas y documentos de texto, permitiendo crear, editar, organizar y relacionar notas con otros elementos del sistema como imágenes, álbumes, personajes, lugares y más.
+The **Note** store manages notes and text documents.
 
-## 🏗️ Arquitectura del Store
+The store lets you create, edit, organize, and relate notes to other system items such as images, Albums, Characters, Places, and more.
+
+## Store architecture
 
 ```mermaid
 graph TB
@@ -47,12 +49,12 @@ graph TB
     A --> X
 ```
 
-## 🎯 Tipos Principales
+## Main types
 
-### **Tipos Core**
+### Core types
 
 ```typescript
-// Tipo base de la nota
+// Base Note type
 interface NoteBase {
 	id: string;
 	title: string;
@@ -67,7 +69,7 @@ interface NoteBase {
 	updatedAt: Date;
 }
 
-// Tipo extendido con relaciones
+// Extended type with relations
 interface NoteExtended extends NoteComplete {
 	isSelected: boolean;
 	isHighlighted: boolean;
@@ -80,7 +82,7 @@ interface NoteExtended extends NoteComplete {
 	totalItems: number;
 }
 
-// Tipo completo con estadísticas
+// Complete type with statistics
 interface NoteWithStats extends NoteComplete {
 	stats: {
 		totalItems: number;
@@ -102,7 +104,7 @@ interface NoteWithStats extends NoteComplete {
 }
 ```
 
-### **Tipos de Filtros**
+### Filter types
 
 ```typescript
 interface NoteFilters {
@@ -124,7 +126,7 @@ interface NoteSearchResult {
 }
 ```
 
-### **Enums**
+### Enums
 
 ```typescript
 enum NoteCategory {
@@ -165,13 +167,13 @@ enum NoteViewMode {
 }
 ```
 
-## 🔄 Flujo de Datos
+## Data flow
 
 ```mermaid
 sequenceDiagram
     participant UI as UI Component
     participant Store as Note Store
-    participant Actions as Server Actions
+    participant Actions as Routes
     participant DB as Database
 
     UI->>Store: loadNotes()
@@ -195,12 +197,14 @@ sequenceDiagram
     Store-->>UI: Filtered Results
 ```
 
-## 🎛️ API del Store
+Routes call services.
 
-### **Core Actions**
+## Store API
+
+### Core actions
 
 ```typescript
-// 📊 Operaciones principales
+// Main operations
 loadNotes: () => Promise<void>
 createNote: (note: NoteCreateInput) => Promise<string | null>
 updateNote: (id: string, note: NoteUpdateInput) => Promise<void>
@@ -209,10 +213,10 @@ selectNote: (noteId: string | null) => void
 reset: () => void
 ```
 
-### **Filter Actions**
+### Filter actions
 
 ```typescript
-// 🎯 Gestión de filtros
+// Filter management
 setFilters: (filters: Partial<NoteFilters>) => void
 setSortBy: (sortBy: NoteSortOption) => void
 setPage: (page: number) => void
@@ -226,10 +230,10 @@ setOnlyFavoritesFilter: (onlyFavorites: boolean) => void
 clearFilters: () => void
 ```
 
-### **Selection Actions**
+### Selection actions
 
 ```typescript
-// 🔍 Gestión de selección
+// Selection management
 selectNote: (id: string) => void
 unselectNote: () => void
 toggleMultiSelectMode: () => void
@@ -239,10 +243,10 @@ clearSelection: () => void
 resetSelection: () => void
 ```
 
-### **UI Actions**
+### UI actions
 
 ```typescript
-// 🎨 Estado de interfaz
+// Interface state
 openCreateModal: () => void
 closeCreateModal: () => void
 openEditModal: () => void
@@ -255,32 +259,32 @@ setViewMode: (mode: NoteViewMode) => void
 resetUI: () => void
 ```
 
-### **Relations Actions**
+### Relations actions
 
 ```typescript
-// 🔗 Gestión de relaciones
+// Relation management
 addNoteToEntity: (noteId: string, entityId: string, entityType: EntityType) => Promise<void>;
 removeNoteFromEntity: (noteId: string, entityId: string, entityType: EntityType) => Promise<void>;
 ```
 
-## 🎯 Ejemplos de Uso
+## Usage examples
 
-### **Cargar y Mostrar Notas**
+### Load and show Notes
 
 ```typescript
-// En un componente React
+// In a React component
 const { notes, isLoading, error, loadNotes } = useNoteStore();
 
-// Cargar notas al montar
+// Load notes on mount
 useEffect(() => {
 	loadNotes();
 }, [loadNotes]);
 
-// Convertir Record a Array para mostrar
+// Convert Record to Array for display
 const notesArray = Object.values(notes);
 ```
 
-### **Crear Nueva Nota**
+### Create a new Note
 
 ```typescript
 const { createNote } = useNoteStore();
@@ -297,46 +301,46 @@ const handleCreateNote = async (formData: NoteCreateInput) => {
 		});
 
 		if (noteId) {
-			console.log('✅ Nota creada:', noteId);
+			console.log('Note created:', noteId);
 		}
 	} catch (error) {
-		console.error('❌ Error creando nota:', error);
+		console.error('Error creating Note:', error);
 	}
 };
 ```
 
-### **Filtrar y Buscar Notas**
+### Filter and search Notes
 
 ```typescript
 const { setSearchFilter, setCategoryFilter, setPriorityFilter, setOnlyFavoritesFilter, clearFilters } = useNoteStore();
 
-// Buscar por texto
+// Search by text
 const handleSearch = (query: string) => {
 	setSearchFilter(query);
 };
 
-// Filtrar por categoría
+// Filter by category
 const handleCategoryFilter = (category: string) => {
 	setCategoryFilter(category);
 };
 
-// Filtrar por prioridad
+// Filter by priority
 const handlePriorityFilter = (priority: number) => {
 	setPriorityFilter(priority);
 };
 
-// Mostrar solo favoritas
+// Show Favorites only
 const handleFavoritesFilter = () => {
 	setOnlyFavoritesFilter(true);
 };
 
-// Limpiar filtros
+// Clear filters
 const handleClearFilters = () => {
 	clearFilters();
 };
 ```
 
-### **Gestión de Selección**
+### Selection management
 
 ```typescript
 const {
@@ -350,33 +354,33 @@ const {
 	clearSelection,
 } = useNoteStore();
 
-// Seleccionar nota individual
+// Select an individual Note
 const handleSelectNote = (noteId: string) => {
 	selectNote(noteId);
 };
 
-// Activar modo multi-selección
+// Enable multi-select mode
 const handleToggleMultiSelect = () => {
 	toggleMultiSelectMode();
 };
 
-// Toggle selección en modo múltiple
+// Toggle selection in multi mode
 const handleToggleNote = (noteId: string) => {
 	toggleNoteSelection(noteId);
 };
 
-// Seleccionar todas
+// Select all
 const handleSelectAll = () => {
 	selectAllNotes();
 };
 
-// Limpiar selección
+// Clear selection
 const handleClearSelection = () => {
 	clearSelection();
 };
 ```
 
-### **Gestión de UI**
+### UI management
 
 ```typescript
 const {
@@ -390,23 +394,23 @@ const {
 	closeEditModal,
 } = useNoteStore();
 
-// Cambiar modo de vista
+// Change view mode
 const handleViewModeChange = (mode: NoteViewMode) => {
 	setViewMode(mode);
 };
 
-// Abrir modal de creación
+// Open the create modal
 const handleOpenCreate = () => {
 	openCreateModal();
 };
 
-// Abrir modal de edición
+// Open the edit modal
 const handleOpenEdit = () => {
 	openEditModal();
 };
 ```
 
-## 📊 Estados de Carga
+## Loading states
 
 ```mermaid
 stateDiagram-v2
@@ -432,57 +436,63 @@ stateDiagram-v2
     Deleting --> Error: Delete Failed
 ```
 
-## 🎨 Integración con UI
+## UI integration
 
-### **Componentes Relacionados**
+### Related components
 
-- `NoteCard` - Tarjeta de nota individual
-- `NoteList` - Lista de notas
-- `NoteEditor` - Editor de contenido
-- `NoteFilters` - Panel de filtros
-- `NoteCreator` - Formulario de creación
-- `NoteViewer` - Visor de nota completa
+The store integrates with the following components:
 
-### **Hooks Personalizados**
+- `NoteCard` - Individual Note card
+- `NoteList` - Note list
+- `NoteEditor` - Content editor
+- `NoteFilters` - Filter panel
+- `NoteCreator` - Creation form
+- `NoteViewer` - Complete Note viewer
+
+### Custom hooks
 
 ```typescript
-// Hook para notas filtradas
+// Hook for filtered notes
 const useFilteredNotes = () => {
 	const { notes, filters } = useNoteStore();
 	return useMemo(() => {
-		// Aplicar filtros a las notas
+		// Apply filters to the notes
 		return Object.values(notes).filter((note) => {
-			// Lógica de filtrado
+			// Filter logic
 			return true;
 		});
 	}, [notes, filters]);
 };
 
-// Hook para notas seleccionadas
+// Hook for selected notes
 const useSelectedNotes = () => {
 	const { notes, selectedNoteIds } = useNoteStore();
 	return useMemo(() => selectedNoteIds.map((id) => notes[id]).filter(Boolean), [notes, selectedNoteIds]);
 };
 ```
 
-## 🚀 Optimizaciones
+## Optimizations
 
-- **Paginación**: Carga incremental de notas
-- **Caché**: Almacenamiento en memoria de notas frecuentes
-- **Debounce**: Búsqueda con retraso para evitar spam
-- **Memoización**: Cálculos de filtros optimizados
-- **Virtualización**: Para listas grandes de notas
-- **Persistencia**: Estado de filtros y vista
+The store uses the following optimizations:
 
-## 📈 Métricas y Analytics
+- **Pagination**: Incremental load of notes
+- **Cache**: In-memory storage of frequent notes
+- **Debounce**: Search with delay to avoid spam
+- **Memoization**: Optimized filter calculations
+- **Virtualization**: For large note lists
+- **Persistence**: Filter and view state
 
-- Total de notas creadas
-- Notas por categoría
-- Notas por prioridad
-- Notas favoritas
-- Tiempo de edición
-- Frecuencia de uso
+## Metrics and analytics
+
+The store tracks the following metrics:
+
+- Total of notes created
+- Notes by category
+- Notes by priority
+- Favorite notes
+- Edit time
+- Usage frequency
 
 ---
 
-**📝 Nota**: Esta documentación se actualiza automáticamente con cada cambio en la entidad Note.
+**Note**: This documentation updates automatically with each change in the Note entity.

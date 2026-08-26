@@ -1,56 +1,60 @@
-# 🌟 CollectionCard
+# CollectionCard
 
-Componente que muestra una tarjeta estilo TCG (Trading Card Game) para representar colecciones de imágenes y otros elementos.
+This component displays a TCG-style card that represents Collections of images and other items.
 
-## 📋 Descripción
+## Description
 
-Este componente forma parte del sistema de tarjetas de entidades, siguiendo el mismo diseño que los otros componentes del sistema. Cada tarjeta tiene un diseño inspirado en cartas de juegos como Magic/Yu-Gi-Oh/Pokémon con:
+This component is part of the entity card system and follows the same design as the other system components.
 
-- Cabecera con nombre de colección, emoji y categoría/plataforma
-- Sección de imágenes en un grid con miniaturas
-- Sección de contenido con descripción, detalles y metadatos externos
-- Pie con estadísticas e información adicional
-- Colores personalizados según la configuración de la colección
-- Efectos visuales tipo TCG (bordes brillantes, texturas, elementos decorativos)
-- Modo compacto para visualizaciones densas
+Each card uses a design inspired by Magic, Yu-Gi-Oh, and Pokemon with the following parts:
 
-## 🔄 Flujo de funcionamiento
+- Header with Collection name, emoji, and category or platform
+- Image section in a thumbnail grid
+- Content section with description, details, and external metadata
+- Footer with statistics and extra information
+- Custom colors from the Collection configuration
+- TCG-style visual effects (shiny borders, textures, decorative elements)
+- Compact mode for dense displays
+
+## Operation flow
 
 ```mermaid
 graph TD
-    A[CollectionCard] --> B[Inicialización]
-    B --> C[Procesar datos JSON]
-    C --> D[Calcular colores primario/secundario]
-    D --> E[Verificar modo compacto]
-    E -->|Compacto| F[Renderizar versión reducida]
-    E -->|Normal| G[Renderizar tarjeta completa]
-    G --> H[Renderizar componentes hijos]
+    A[CollectionCard] --> B[Initialization]
+    B --> C[Process JSON data]
+    C --> D[Calculate primary and secondary colors]
+    D --> E[Check compact mode]
+    E -->|Compact| F[Render reduced version]
+    E -->|Normal| G[Render full card]
+    G --> H[Render child components]
 
-    I[CollectionCardImages] --> J[Cargar imágenes con server action]
-    J --> K{¿Hay imágenes?}
-    K -->|Sí| L[Mostrar grid de imágenes]
-    K -->|No| M[Mostrar placeholder]
+    I[CollectionCardImages] --> J[Load images through a route]
+    J --> K{Are there images?}
+    K -->|Yes| L[Show image grid]
+    K -->|No| M[Show placeholder]
 
-    N[collection-server-actions] --> O[Consultar BD con Prisma]
-    O --> P[Obtener relaciones y contadores]
-    P --> Q[Transformar datos]
-    Q --> R[Retornar datos completos]
+    N[collection-server-actions] --> O[Query the database]
+    O --> P[Get relations and counters]
+    P --> Q[Transform data]
+    Q --> R[Return complete data]
 ```
 
-## 🗂️ Estructura de archivos
+## File structure
 
-- **index.ts**: Punto de entrada y exportaciones del componente
-- **collection-card.tsx**: Componente principal que renderiza la tarjeta
-- **collection-card-header.tsx**: Componente para la cabecera de la tarjeta con estilo TCG
-- **collection-card-images.tsx**: Componente para mostrar las imágenes asociadas
-- **collection-card-content.tsx**: Componente para mostrar el contenido de la colección
-- **collection-card-footer.tsx**: Componente para mostrar el pie con estadísticas
-- **collection-server-actions.ts**: Acciones del servidor para obtener datos
-- **README.md**: Documentación del componente
+The directory includes the following files:
 
-## 🖥️ Ejemplos de uso
+- **index.ts**: Entry point and component exports
+- **collection-card.tsx**: Main component that renders the card
+- **collection-card-header.tsx**: Component for the TCG-style card header
+- **collection-card-images.tsx**: Component that shows associated images
+- **collection-card-content.tsx**: Component that shows Collection content
+- **collection-card-footer.tsx**: Component that shows the footer with statistics
+- **collection-server-actions.ts**: Routes that fetch data
+- **README.md**: Component documentation
 
-### Uso básico con navegación automática
+## Usage examples
+
+### Basic use with automatic navigation
 
 ```tsx
 import { CollectionCard } from '@/components/cards/collection-card';
@@ -66,7 +70,7 @@ function CollectionsList({ collections }) {
 }
 ```
 
-### Uso con manejador de eventos personalizado
+### Use with a custom event handler
 
 ```tsx
 import { CollectionCard } from '@/components/cards/collection-card';
@@ -82,7 +86,7 @@ function CollectionSelector({ collections, onSelect }) {
 }
 ```
 
-### Uso en modo compacto
+### Use in compact mode
 
 ```tsx
 import { CollectionCard } from '@/components/cards/collection-card';
@@ -98,44 +102,48 @@ function CollectionCompactList({ collections }) {
 }
 ```
 
-## 🔌 Integración
+## Integration
 
-Este componente se utiliza principalmente en:
+This component is used mainly in the following places:
 
-- Vista de colecciones en el dashboard
-- Gestores de colecciones NFT o digitales
-- Navegación entre colecciones y galerías
-- Selectores de colecciones en formularios
-- Visualizaciones de listado tanto normales como compactas
+- Collection view on the dashboard
+- NFT or digital Collection managers
+- Navigation between Collections and galleries
+- Collection selectors in forms
+- Normal and compact list displays
 
-## 🎨 Personalización visual
+## Visual customization
 
-El componente respeta y utiliza los atributos visuales definidos en la entidad Collection:
+The component uses the visual attributes defined on the Collection entity.
 
-- **color**: Color principal de la colección que se utiliza para los bordes, gradientes y efectos
-- **emoji**: Emoji asociado que se muestra como emblema junto al nombre
-- **category**: Categoría que se muestra como tipo de carta
-- **platform**: Plataforma asociada que se muestra como subtipo
-- **featuredImage**: Imagen destacada que se puede mostrar como fondo en la sección de contenido
-- **sourceImage**: Imagen alternativa como fondo si no hay featuredImage
-- **isFavorite**: Indica si la colección está marcada como favorita
+The attributes include the following:
 
-## 🌐 Soporte para propiedades externas
+- **color**: Main Collection color used for borders, gradients, and effects
+- **emoji**: Associated emoji shown as an emblem next to the name
+- **category**: Category shown as the card type
+- **platform**: Associated platform shown as a subtype
+- **featuredImage**: Featured image that can display as a background in the content section
+- **sourceImage**: Alternative background image if there is no featuredImage
+- **isFavorite**: Indicates whether the Collection is marked as a Favorite
 
-La tarjeta admite la visualización de propiedades externas específicas para colecciones digitales:
+## Support for external properties
 
-- **url**: URL asociada a la colección
-- **network**: Red blockchain asociada
-- **tokenId**: Identificador del token en la red
-- **price**: Precio asociado a la colección
-- **editions**: Lista de ediciones disponibles para la colección
+The card can display external properties that are specific to digital Collections.
 
-## 🚀 Rendimiento
+The properties include the following:
 
-El componente utiliza técnicas de optimización:
+- **url**: URL associated with the Collection
+- **network**: Associated blockchain network
+- **tokenId**: Token identifier on the network
+- **price**: Price associated with the Collection
+- **editions**: List of editions available for the Collection
 
-- Parseo eficiente de datos JSON almacenados en la base de datos
-- Memoización de componentes con `React.memo`
-- Cálculos de estilos usando `useMemo` para evitar recálculos
-- Manejo eficiente de efectos visuales para minimizar el impacto en rendimiento
-- Modo compacto para cuando se necesita mostrar muchas colecciones a la vez
+## Performance
+
+The component uses the following optimization techniques:
+
+- Efficient parsing of JSON data stored in the database
+- Component memoization with `React.memo`
+- Style calculations with `useMemo` to avoid recalculation
+- Efficient handling of visual effects to reduce performance impact
+- Compact mode when many Collections must display at once

@@ -1,8 +1,8 @@
-# 📁 File: Tipos y Esquemas Canónicos
+# File: canonical types and schemas
 
-Este módulo define los **tipos canónicos** y extendidos para la entidad `File`, alineados con el modelo de dominio y las reglas del proyecto.
+This module defines the **canonical** and extended types for the `File` entity. The types align with the domain model and project rules.
 
-## 📦 Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -14,25 +14,26 @@ graph TD
     EnhancedImageFile --> FileEventType
 ```
 
-- `FileBase`: Tipo canónico alineado a la base de datos.
-- `EnhancedImageFile`: Tipo extendido para imágenes con metadatos enriquecidos.
-- `FileCreateInput`, `FileUpdateInput`: Inputs para mutaciones.
-- `FileType`, `FileErrorCode`, `FileEventType`: Enums para lógica y validación.
+The module uses these types:
 
-## 🚨 Notas de migración
+- `FileBase`: Canonical type aligned with the database.
+- `EnhancedImageFile`: Extended type for images with enriched metadata.
+- `FileCreateInput`, `FileUpdateInput`: Inputs for mutations.
+- `FileType`, `FileErrorCode`, `FileEventType`: Enums for logic and validation.
 
-- **Legacy eliminado:** Solo se exportan tipos y enums canónicos.
-  \*\*
-- **Validar siempre con Zod antes de persistir.**
+## Migration notes
 
-## 📝 Ejemplo de uso
+- **Legacy removed:** Only canonical types and enums are exported.
+- **Validate with Zod before you persist.**
+
+## Usage example
 
 ```ts
 import type { FileBase, FileCreateInput } from '@/types/entities/file';
-// Validar con Zod según lógica de negocio
+// Validate with Zod according to business logic
 ```
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

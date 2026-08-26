@@ -1,37 +1,37 @@
-# 🗺️ Entidad Place (Lugares) - ✅ CORREGIDA
+# Place entity - corrected
 
-## 🎯 Descripción
+## Purpose
 
-La entidad **Place** gestiona todos los lugares del sistema, proporcionando una herramienta completa para modelar ubicaciones, escenarios, regiones y sitios de interés que pueden estar relacionados con imágenes, personajes, conceptos y otros elementos.
+The **Place** entity manages all Places in Media Manager. It models locations, scenes, regions, and sites of interest. Places can relate to images, Characters, Concepts, and other objects.
 
-## ✅ Estado de Corrección
+## Correction status
 
-**COMPLETAMENTE CORREGIDA** - Todos los errores TypeScript han sido resueltos:
+**Fully corrected.** All TypeScript errors are resolved.
 
-### 🔧 Correcciones Realizadas:
+### Corrections made
 
-1. **Mappers Corregidos**:
-   - ✅ Corregido error de sintaxis faltante en `mapCreatePlaceDataToDrizzle`
-   - ✅ Arreglada referencia a `rest.filters` después de destructuring
-   - ✅ Simplificado `PLACE_INCLUDE` para compatibilidad con Drizzle
-   - ✅ Removidas configuraciones `take` y `orderBy` que causaban conflictos
+1. **Corrected mappers**:
+   - Fixed the missing syntax error in `mapCreatePlaceDataToDrizzle`
+   - Fixed the reference to `rest.filters` after destructuring
+   - Simplified `PLACE_INCLUDE` for Drizzle compatibility
+   - Removed `take` and `orderBy` configurations that caused conflicts
 
-2. **Tipos Actualizados**:
-   - ✅ Agregada propiedad `abundance` a `PlaceResource` interface
-   - ✅ Corregido tipo de `description` de `string | null` a `string | undefined`
-   - ✅ Agregadas funciones faltantes al store: `selectPlace`, `getSelectedPlace`
+2. **Updated types**:
+   - Added the `abundance` property to the `PlaceResource` interface
+   - Corrected the `description` type from `string | null` to `string | undefined`
+   - Added missing store functions: `selectPlace`, `getSelectedPlace`
 
-3. **Componentes Corregidos**:
-   - ✅ Corregida conversión de `description` de `null` a `undefined` en PlaceCard
-   - ✅ Mejorada compatibilidad de tipos en PlaceCardContent
-   - ✅ Optimizada estructura de `PLACE_INCLUDE` para mejor rendimiento
+3. **Corrected components**:
+   - Corrected conversion of `description` from `null` to `undefined` in PlaceCard
+   - Improved type compatibility in PlaceCardContent
+   - Optimized the `PLACE_INCLUDE` structure for better performance
 
-4. **Store Mejorado**:
-   - ✅ Agregadas funciones de selección faltantes
-   - ✅ Corregidos tipos de estado para Place
-   - ✅ Mejorada consistencia de tipos en toda la entidad
+4. **Improved store**:
+   - Added missing selection functions
+   - Corrected Place state types
+   - Improved type consistency across the entity
 
-## 🏗️ Arquitectura
+## Architecture
 
 ```mermaid
 graph TD
@@ -41,56 +41,56 @@ graph TD
     A --> E[Components]
     A --> F[Actions]
 
-    B --> B1[types.ts - Tipos base]
-    B --> B2[extended.ts - Tipos extendidos]
-    B --> B3[index.ts - Exportaciones]
+    B --> B1[types.ts - Base types]
+    B --> B2[extended.ts - Extended types]
+    B --> B3[index.ts - Exports]
 
-    C --> C1[mappers.ts - Mapeo Drizzle]
-    C --> C2[serializers.ts - Serialización JSON]
-    C --> C3[transformer.ts - Transformaciones]
-    C --> C4[index.ts - API pública]
+    C --> C1[mappers.ts - Drizzle mapping]
+    C --> C2[serializers.ts - JSON serialization]
+    C --> C3[transformer.ts - Transformations]
+    C --> C4[index.ts - Public API]
 
-    D --> D1[types.ts - Tipos de store]
-    D --> D2[slices/ - Estados modulares]
-    D --> D3[index.ts - Store principal]
+    D --> D1[types.ts - Store types]
+    D --> D2[slices/ - Modular states]
+    D --> D3[index.ts - Main store]
 
-    E --> E1[PlaceCard - Tarjeta principal]
-    E --> E2[PlaceCardContent - Contenido]
-    E --> E3[PlaceCardHeader - Cabecera]
-    E --> E4[PlaceCardFooter - Pie]
+    E --> E1[PlaceCard - Main card]
+    E --> E2[PlaceCardContent - Content]
+    E --> E3[PlaceCardHeader - Header]
+    E --> E4[PlaceCardFooter - Footer]
 
-    F --> F1[place.actions.ts - Server Actions]
+    F --> F1[place.actions.ts - Routes]
 ```
 
-## 🔄 Flujo de Datos
+## Data flow
 
 ```mermaid
 sequenceDiagram
-    participant UI as Componente UI
+    participant UI as UI component
     participant Store as Place Store
-    participant Actions as Server Actions
+    participant Actions as Routes
     participant Transform as Transformers
     participant DB as Database
 
-    UI->>Store: Solicita lugares
+    UI->>Store: Request places
     Store->>Actions: getPlaces()
     Actions->>DB: Drizzle.place.findMany()
-    DB-->>Actions: Datos Drizzle
+    DB-->>Actions: Drizzle data
     Actions->>Transform: fromDrizzlePlace()
     Transform-->>Actions: PlaceComplete[]
-    Actions-->>Store: Lugares transformados
-    Store-->>UI: Estado actualizado
+    Actions-->>Store: Transformed places
+    Store-->>UI: Updated state
 ```
 
-## 📋 Tipos Principales
+## Main types
 
 ### `PlaceBase`
 
-Tipo base con campos fundamentales del lugar.
+Base type with the fundamental fields of the Place.
 
 ### `PlaceComplete`
 
-Tipo completo con relaciones y conteos incluidos.
+Complete type with included relations and counts.
 
 ### `PlaceResource`
 
@@ -99,7 +99,7 @@ interface PlaceResource {
 	name: string;
 	description?: string;
 	quantity: number;
-	abundance: number; // ✅ AGREGADO
+	abundance: number; // Added
 	value: number;
 	renewable: boolean;
 }
@@ -107,53 +107,59 @@ interface PlaceResource {
 
 ### `PlaceFilters`
 
-Filtros para búsqueda y filtrado de lugares.
+Filters for Place search and filtering.
 
-## 🛠️ Funciones Principales
+## Main functions
 
 ### Transformers
 
-- `mapCreatePlaceDataToDrizzle()` - ✅ Corregida
-- `mapUpdatePlaceDataToDrizzle()` - ✅ Validada
-- `fromDrizzlePlace()` - ✅ Funcional
+The transformers provide these functions:
+
+- `mapCreatePlaceDataToDrizzle()` - Corrected
+- `mapUpdatePlaceDataToDrizzle()` - Validated
+- `fromDrizzlePlace()` - Functional
 
 ### Store
 
-- `selectPlace()` - ✅ Agregada
-- `getSelectedPlace()` - ✅ Agregada
-- `setPlaces()`, `addPlace()`, `updatePlace()` - ✅ Validadas
+The store provides these functions:
+
+- `selectPlace()` - Added
+- `getSelectedPlace()` - Added
+- `setPlaces()`, `addPlace()`, `updatePlace()` - Validated
 
 ### Actions
 
-- `getPlaces()` - ✅ Optimizada con PLACE_INCLUDE simplificado
-- `createPlace()`, `updatePlace()`, `deletePlace()` - ✅ Funcionales
+The actions provide these functions:
 
-## 🎨 Componentes
+- `getPlaces()` - Optimized with simplified PLACE_INCLUDE
+- `createPlace()`, `updatePlace()`, `deletePlace()` - Functional
+
+## Components
 
 ### PlaceCard
 
-Tarjeta principal con soporte para:
+Main card with support for:
 
-- ✅ Modo TCG con efectos holográficos
-- ✅ Modo compacto para vistas densas
-- ✅ Gestión correcta de tipos `null/undefined`
-- ✅ Recursos y peligros parseados
+- TCG mode with holographic effects
+- Compact mode for dense views
+- Correct handling of `null/undefined` types
+- Parsed resources and dangers
 
-## 📊 Estadísticas de Corrección
+## Correction statistics
 
-- **Errores corregidos**: 8+ errores TypeScript
-- **Archivos modificados**: 4 archivos principales
-- **Tipos agregados**: 3 propiedades/funciones
-- **Compatibilidad**: 100% con Drizzle y React 19
+- **Errors corrected**: 8+ TypeScript errors
+- **Files modified**: 4 main files
+- **Types added**: 3 properties or functions
+- **Compatibility**: 100% with Drizzle and React 19
 
-## ✨ Mejoras Implementadas
+## Implemented improvements
 
-1. **Rendimiento**: Simplificación de consultas Drizzle
-2. **Tipos**: Mayor seguridad de tipos con `null/undefined`
-3. **UX**: Mejor manejo de estados de carga y error
-4. **Consistencia**: Alineación con patrones del proyecto
+1. **Performance**: Simplification of Drizzle queries
+2. **Types**: Greater type safety with `null/undefined`
+3. **UX**: Better handling of loading and error states
+4. **Consistency**: Alignment with project patterns
 
 ---
 
-**Estado**: ✅ **COMPLETAMENTE CORREGIDA**
-**Próxima entidad**: Continuar con la siguiente entidad según el plan sistemático
+**Status**: Fully corrected
+**Next entity**: Continue with the next entity according to the systematic plan

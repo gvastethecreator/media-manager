@@ -1,24 +1,23 @@
-# Zustand Stores
+# Zustand stores
 
-La carpeta `store` centraliza el estado global de la aplicación mediante
-Zustand. Cada entidad tiene su propio subdirectorio dentro de `entities/` con
-slices que conforman un store unificado.
+The `store` folder centralizes global application state with Zustand.
+
+Each entity has a subdirectory in `entities/` with slices that form one unified store.
 
 ```
 store/
-├── base.store.ts        # configuración común
-├── entities/            # stores por entidad
-│   └── folder/          # ejemplo de entidad
-├── ui/                  # slices de UI compartidos
-└── store.factory.ts     # helpers para crear stores
+├── base.store.ts        # common configuration
+├── entities/            # stores per entity
+│   └── folder/          # example entity
+├── ui/                  # shared UI slices
+└── store.factory.ts     # helpers that create stores
 ```
 
-Los selectores se encuentran en cada `store.ts` para facilitar el acceso
-memorizado desde los componentes.
+Selectors live in each `store.ts` so components can use memoized access.
 
-## Slices destacados
+## Featured slices
 
-- **view-options**: almacena las preferencias de visualización (vista, filtros y
-  orden) con persistencia en `localStorage`.
-- **selection**: centraliza la selección de archivos y es usado por la toolbar y
-  el FileBrowser.
+The following slices are the main shared stores:
+
+- **view-options**: Stores view, filter, and sort preferences in `localStorage`.
+- **selection**: Centralizes file selection for the toolbar and FileBrowser.

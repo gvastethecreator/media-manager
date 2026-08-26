@@ -1,4 +1,5 @@
-# Servicio de configuración
+# Settings service
 
-Administra la persistencia de ajustes globales de la
-aplicación y proporciona helpers para actualizarlos.
+The settings service persists global application settings.
+
+The service also provides helpers that update those settings.

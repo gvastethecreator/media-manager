@@ -1,8 +1,8 @@
-# 🌟 Collection: Tipos y Esquemas Canónicos
+# Collection: canonical types and schemas
 
-Este módulo define los **tipos canónicos** y **esquemas de validación Zod** para la entidad `Collection`, alineados con el modelo de dominio y las reglas del proyecto.
+This module defines the **canonical types** and **Zod validation schemas** for the `Collection` entity. The types align with the domain model and project rules.
 
-## 📦 Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -15,29 +15,30 @@ graph TD
     CollectionExtended --> CollectionCard
 ```
 
-- `CollectionBase`: Tipo canónico alineado a la base de datos.
-- `CollectionExtended`: Tipo enriquecido para UI y relaciones.
-- `CollectionStats`: Estadísticas de la colección.
-- `CollectionCreateInput`, `CollectionUpdateInput`: Inputs para mutaciones.
-- `CollectionSchema`: Esquema Zod para validación.
+The module uses these types:
 
-## 🚨 Notas de migración
+- `CollectionBase`: Canonical type aligned with the database.
+- `CollectionExtended`: Type enriched for UI and relations.
+- `CollectionStats`: Collection statistics.
+- `CollectionCreateInput`, `CollectionUpdateInput`: Inputs for mutations.
+- `CollectionSchema`: Zod schema for validation.
 
-- **Legacy eliminado:** Solo se exportan tipos y enums canónicos.
+## Migration notes
 
-- **Validar siempre con CollectionSchema antes de persistir.**
+- **Legacy removed:** Only canonical types and enums are exported.
+- **Validate with CollectionSchema before you persist.**
 
-## 📝 Ejemplo de uso
+## Usage example
 
 ```ts
 import type { CollectionBase, CollectionCreateInput } from '@/types/entities/collection';
 import { CollectionSchema } from '@/types/entities/collection/types';
 
-const nueva: CollectionCreateInput = { name: 'NFTs', type: 'digital', isFavorite: false };
-const validada = CollectionSchema.parse(nueva);
+const created: CollectionCreateInput = { name: 'NFTs', type: 'digital', isFavorite: false };
+const validated = CollectionSchema.parse(created);
 ```
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

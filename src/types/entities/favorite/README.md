@@ -1,8 +1,8 @@
-# ⭐ Favorite: Tipos y Esquemas Canónicos
+# Favorite: canonical types and schemas
 
-Este módulo define los **tipos canónicos** y extendidos para la entidad `Favorite`, alineados con el modelo de dominio y las reglas del proyecto.
+This module defines the **canonical** and extended types for the `Favorite` entity. The types align with the domain model and project rules.
 
-## 📦 Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -13,25 +13,26 @@ graph TD
     FavoriteExtended --> FavoriteStats
 ```
 
-- `FavoriteBase`: Tipo canónico alineado a la base de datos.
-- `FavoriteExtended`: Tipo enriquecido para UI y relaciones.
-- `FavoritesByType`, `FavoriteStats`: Tipos extendidos para lógica y visualización.
-- `FavoriteCreateInput`, `FavoriteUpdateInput`: Inputs para mutaciones.
+The module uses these types:
 
-## 🚨 Notas de migración
+- `FavoriteBase`: Canonical type aligned with the database.
+- `FavoriteExtended`: Type enriched for UI and relations.
+- `FavoritesByType`, `FavoriteStats`: Extended types for logic and display.
+- `FavoriteCreateInput`, `FavoriteUpdateInput`: Inputs for mutations.
 
-- **Legacy eliminado:** Solo se exportan tipos y enums canónicos.
+## Migration notes
 
-- **Validar siempre con Zod antes de persistir.**
+- **Legacy removed:** Only canonical types and enums are exported.
+- **Validate with Zod before you persist.**
 
-## 📝 Ejemplo de uso
+## Usage example
 
 ```ts
 import type { FavoriteBase, FavoriteCreateInput } from '@/types/entities/favorite';
-// Validar con Zod según lógica de negocio
+// Validate with Zod according to business logic
 ```
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

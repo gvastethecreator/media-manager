@@ -1,43 +1,43 @@
-# File Entity Mapper Service
+# File Entity Mapper service
 
-Servicio modular responsable de mapear archivos físicos a entidades de base de datos en 3 etapas optimizadas.
+This modular service maps physical files to database entities in 3 optimized stages.
 
-## 📁 Estructura
+## Structure
 
 ```
 src/services/file-entity-mapper/
-├── file-entity-mapper.service.ts        # API pública (wrapper legacy)
-├── core.service.ts                      # Orquestador principal
+├── file-entity-mapper.service.ts        # Public API (legacy wrapper)
+├── core.service.ts                      # Main orchestrator
 ├── index.ts                             # Barrel exports
 │
-├── processors/                          # Procesadores especializados
-│   ├── image.processor.ts              # Imágenes (EXIF/IPTC/XMP/AI)
-│   ├── video.processor.ts              # Videos (ffprobe + WebP animado)
+├── processors/                          # Specialized processors
+│   ├── image.processor.ts              # Images (EXIF/IPTC/XMP/AI)
+│   ├── video.processor.ts              # Videos (ffprobe + animated WebP)
 │   ├── audio.processor.ts              # Audio (ID3 tags + waveform)
-│   ├── document.processor.ts           # Documentos (PDF/MD/TXT)
-│   ├── file3d.processor.ts             # Modelos 3D (GLTF/GLB/OBJ)
-│   └── json.processor.ts               # Archivos JSON (validación)
+│   ├── document.processor.ts           # Documents (PDF/MD/TXT)
+│   ├── file3d.processor.ts             # 3D models (GLTF/GLB/OBJ)
+│   └── json.processor.ts               # JSON files (validation)
 │
-└── utils/                               # Utilidades compartidas
+└── utils/                               # Shared utilities
     ├── hash.utils.ts                   # SHA-256 + LRU cache
     ├── metrics.utils.ts                # Performance tracking
     └── file-info.utils.ts              # Type/MIME mapping
 ```
 
-## 🚀 Uso Básico
+## Basic use
 
-### API Legacy (mantiene compatibilidad)
+### Legacy API (keeps compatibility)
 
 ```typescript
 import { FileEntityMapperService } from '@/services/file-entity-mapper';
 
 const mapper = FileEntityMapperService.getInstance();
 
-// Procesar un archivo
+// Process one file
 const result = await mapper.createEntityFromFile('/path/to/image.jpg', 'folder-id');
 console.log(result); // { success: true, entityType: 'image', entityId: 'uuid' }
 
-// Procesar múltiples archivos
+// Process multiple files
 const stats = await mapper.processFiles(
 	['/path/to/image1.jpg', '/path/to/video.mp4', '/path/to/document.pdf'],
 	'folder-id'
@@ -45,67 +45,67 @@ const stats = await mapper.processFiles(
 console.log(stats); // { totalFiles: 3, successful: 3, failed: 0, ... }
 ```
 
-### Nueva API (recomendada para código nuevo)
+### New API (recommended for new code)
 
 ```typescript
 import { FileEntityMapperCore } from '@/services/file-entity-mapper';
 
 const core = FileEntityMapperCore.getInstance();
 
-// Mismo API, arquitectura moderna
+// Same API, modern architecture
 await core.createEntityFromFile(filePath, folderId);
 await core.processFiles(filePaths, folderId);
 ```
 
-### Uso Avanzado (procesadores individuales)
+### Advanced use (individual processors)
 
 ```typescript
 import { ImageProcessor } from '@/services/file-entity-mapper';
 
 const processor = new ImageProcessor();
 
-// Verificar si existe
+// Check whether it exists
 const exists = await processor.checkExists(hash);
 
-// Crear entidad básica
+// Create a basic entity
 const entityId = await processor.createBasicEntity(fileInfo);
 
-// Extraer metadata
+// Extract metadata
 await processor.extractMetadata(filePath, entityId);
 
-// Generar thumbnail
+// Generate a thumbnail
 await processor.generateThumbnail(filePath, entityId);
 ```
 
-## 📊 Flujo de Procesamiento
+## Processing flow
 
-### 3 Etapas Optimizadas
+### 3 optimized stages
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  ETAPA 1: Creación Básica                               │
-│  - Pre-check rápido (stat + extensión)                  │
-│  - Validación de tamaño (skip antes de hash)            │
-│  - Cálculo de hash SHA-256 (con caché LRU)              │
-│  - Verificación de duplicados                           │
-│  - Creación básica en BD (sin metadata)                 │
+│  STAGE 1: Basic creation                                │
+│  - Fast pre-check (stat + extension)                    │
+│  - Size validation (skip before hash)                   │
+│  - SHA-256 hash calculation (with LRU cache)            │
+│  - Duplicate check                                      │
+│  - Basic creation in the DB (no metadata)               │
 └────────────────────┬────────────────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────────────────┐
-│  ETAPA 2: Extracción de Metadata                        │
-│  - Dispatch al procesador especializado                 │
+│  STAGE 2: Metadata extraction                           │
+│  - Dispatch to the specialized processor                │
 │  - Image: EXIF/IPTC/XMP/AI metadata                     │
-│  - Video: ffprobe (duración, resolución, codec)         │
-│  - Audio: ID3 tags (título, artista, álbum)            │
-│  - Document: páginas, palabras, frontmatter             │
-│  - 3D: parse de vértices, caras, materiales            │
-│  - JSON: validación, profundidad, tipo                  │
+│  - Video: ffprobe (duration, resolution, codec)         │
+│  - Audio: ID3 tags (title, artist, album)               │
+│  - Document: pages, words, frontmatter                  │
+│  - 3D: parse of vertices, faces, materials              │
+│  - JSON: validation, depth, type                        │
 └────────────────────┬────────────────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────────────────┐
-│  ETAPA 3: Generación de Thumbnail                       │
-│  - Image: JPEG 320px (base64 en metadata)              │
-│  - Video: WebP animado 12 frames (columna dedicada)    │
+│  STAGE 3: Thumbnail generation                          │
+│  - Image: JPEG 320px (base64 in metadata)               │
+│  - Video: Animated WebP 12 frames (dedicated column)    │
 │  - Audio: SVG waveform                                  │
 │  - Document: SVG preview                                │
 │  - 3D: SVG placeholder                                  │
@@ -113,36 +113,44 @@ await processor.generateThumbnail(filePath, entityId);
 └─────────────────────────────────────────────────────────┘
 ```
 
-## 🎯 Características Principales
+## Main features
 
-### ✅ Performance Optimizado
+### Optimized performance
 
-- **Skip temprano**: Validación de tamaño ANTES de hash costoso
-- **Caché LRU**: Hash reutilizado si mtime/size no cambian
-- **Cola de concurrencia**: Procesamiento paralelo (4 workers por defecto)
-- **Serialización básica**: Orden determinista en tests
+The mapper uses the following performance techniques:
 
-### ✅ Modularidad
+- **Early skip**: Size validation BEFORE an expensive hash
+- **LRU cache**: Hash reused if mtime/size do not change
+- **Concurrency queue**: Parallel processing (4 workers by default)
+- **Basic serialization**: Deterministic order in tests
 
-- **Procesadores especializados**: Un procesador por tipo de media
-- **Single Responsibility**: Cada módulo tiene una responsabilidad clara
-- **Fácil extensión**: Agregar nuevo tipo = nuevo procesador
+### Modularity
 
-### ✅ Observabilidad
+The mapper uses the following modular design:
 
-- **Métricas granulares**: Por fase y por tipo de entidad
-- **Logs en JSONL**: `logs/metrics-media.jsonl`
-- **Tracking de errores**: Errores detallados por archivo
+- **Specialized processors**: One processor per media type
+- **Single responsibility**: Each module has a clear responsibility
+- **Easy extension**: Add a new type as a new processor
 
-### ✅ Compatibilidad
+### Observability
 
-- **API legacy preservada**: Zero breaking changes
-- **Migración gradual**: Código existente funciona sin cambios
-- **Nueva API disponible**: Para código nuevo
+The mapper provides the following observability:
 
-## 📚 Tipos de Entidades Soportados
+- **Granular metrics**: By phase and by entity type
+- **JSONL logs**: `logs/metrics-media.jsonl`
+- **Error tracking**: Detailed errors per file
 
-| Tipo         | Extensiones                                | Procesador        |
+### Compatibility
+
+The mapper keeps the following compatibility:
+
+- **Preserved legacy API**: Zero breaking changes
+- **Gradual migration**: Existing code works without changes
+- **New API available**: For new code
+
+## Supported entity types
+
+| Type         | Extensions                                 | Processor         |
 | ------------ | ------------------------------------------ | ----------------- |
 | **Image**    | .jpg, .jpeg, .png, .gif, .webp, .bmp, .svg | ImageProcessor    |
 | **Video**    | .mp4, .avi, .mov, .mkv, .webm, .flv        | VideoProcessor    |
@@ -151,18 +159,18 @@ await processor.generateThumbnail(filePath, entityId);
 | **3D Model** | .gltf, .glb, .obj, .stl                    | File3DProcessor   |
 | **JSON**     | .json                                      | JsonProcessor     |
 
-## 🛠️ Utilidades
+## Utilities
 
-### Hash Utils
+### Hash utils
 
 ```typescript
 import { calculateFileHash, clearHashCache } from '@/services/file-entity-mapper';
 
 const hash = await calculateFileHash('/path/to/file');
-clearHashCache(); // Para tests
+clearHashCache(); // For tests
 ```
 
-### File Info Utils
+### File info utils
 
 ```typescript
 import { getEntityTypeFromExtension, getMimeTypeFromExtension } from '@/services/file-entity-mapper';
@@ -171,21 +179,21 @@ const type = getEntityTypeFromExtension('.jpg'); // 'image'
 const mime = getMimeTypeFromExtension('.jpg'); // 'image/jpeg'
 ```
 
-### Metrics Collector
+### Metrics collector
 
 ```typescript
 import { MetricsCollector } from '@/services/file-entity-mapper';
 
 const metrics = new MetricsCollector();
 const t0 = Date.now();
-// ... operación ...
+// ... operation ...
 metrics.recordPhase('operation', t0);
-await metrics.flushMetrics(); // Escribe a logs/metrics-media.jsonl
+await metrics.flushMetrics(); // Writes to logs/metrics-media.jsonl
 ```
 
-## 🧪 Testing
+## Testing
 
-### Mock de Procesadores
+### Processor mock
 
 ```typescript
 import { vi } from 'vitest';
@@ -199,7 +207,7 @@ const mockProcessor = {
 };
 ```
 
-### Test de Utilidades
+### Utility test
 
 ```typescript
 import { describe, it, expect } from 'vitest';
@@ -213,9 +221,9 @@ describe('Hash Utils', () => {
 });
 ```
 
-## 📈 Métricas y Logging
+## Metrics and logging
 
-### Formato de Métricas
+### Metrics format
 
 ```json
 {
@@ -229,36 +237,40 @@ describe('Hash Utils', () => {
 }
 ```
 
-### Análisis de Performance
+### Performance analysis
 
 ```bash
-# Ver métricas
+# View metrics
 cat logs/metrics-media.jsonl | jq '.phases'
 
-# Calcular promedio por fase
+# Calculate average per phase
 cat logs/metrics-media.jsonl | jq '.phases.metadata_image | add/length'
 ```
 
-## 🔗 Referencias
+## References
 
-- **Documentación completa**: `docs/REFACTOR-FILE-ENTITY-MAPPER-2025-10-02.md`
-- **Plan de refactorización**: `docs/REFACTOR-ANALYSIS.md`
-- **Código legacy**: `file-entity-mapper.service.legacy.ts`
+The mapper references the following documents:
 
-## 🚀 Roadmap
+- **Complete documentation**: `docs/REFACTOR-FILE-ENTITY-MAPPER-2025-10-02.md`
+- **Refactor plan**: `docs/REFACTOR-ANALYSIS.md`
+- **Legacy code**: `file-entity-mapper.service.legacy.ts`
 
-- [ ] Migrar tests existentes a procesadores individuales
-- [ ] Agregar tests unitarios por procesador
-- [ ] Optimizar caché de metadata (Redis para prod)
-- [ ] Agregar telemetría avanzada
-- [ ] Soporte para más tipos de archivos (Epub, CBZ, etc.)
-- [ ] Thumbnail generation asíncrono en worker threads
-- [ ] Metadata extraction con prioridad configurable
+## Roadmap
+
+The following work is planned:
+
+- [ ] Migrate existing tests to individual processors
+- [ ] Add unit tests per processor
+- [ ] Optimize metadata cache (Redis for prod)
+- [ ] Add advanced telemetry
+- [ ] Support for more file types (Epub, CBZ)
+- [ ] Asynchronous thumbnail generation in worker threads
+- [ ] Metadata extraction with configurable priority
 
 ---
 
-**Última actualización**: 2 de octubre de 2025  
-**Versión**: 2.0.0 (Modular)  
-**Líneas totales**: ~1,500 líneas (antes: 1,266 en un archivo)  
-**Archivos**: 11 módulos especializados  
-**Breaking changes**: ❌ Zero
+**Last update**: October 2, 2025
+**Version**: 2.0.0 (Modular)
+**Total lines**: ~1,500 lines (before: 1,266 in one file)
+**Files**: 11 specialized modules
+**Breaking changes**: Zero

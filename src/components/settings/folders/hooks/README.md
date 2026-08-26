@@ -1,32 +1,36 @@
-# 🗂️ useFolders y hooks relacionados
+# useFolders and related hooks
 
-## Descripción
+## Description
 
-Este módulo contiene el hook principal `useFolders` y los hooks auxiliares para la gestión de carpetas en la configuración de la aplicación. Gestiona el estado, operaciones CRUD, reindexado, polling, eventos en tiempo real y sincronización con el backend.
+This module contains the main `useFolders` hook and helper hooks for Folder management in application settings.
 
-- **Stack:** Vite, React 19, Zustand, React Query, Server Actions, Zod, eventos custom.
-- **Ubicación:** `src/components/settings/folders/hooks/`
+The hooks manage state, CRUD operations, reindex, polling, real-time events, and backend synchronization.
 
-## Hooks incluidos
+- **Stack:** Vite, React 19, Zustand, React Query, HTTP routes, Zod, custom events.
+- **Location:** `src/components/settings/folders/hooks/`
 
-- `useFolders`: Hook principal, orquesta todo el flujo de carpetas.
-- `useFoldersState`: Estado y acciones locales (folders, stats, errores).
-- `useFoldersPolling`: Polling seguro para estado de procesos.
-- `useFoldersEvents`: Suscripción a eventos del backend.
-- `useFoldersOperations`: CRUD y operaciones de negocio.
+## Included hooks
 
-## Diagrama de flujo de actualización en tiempo real
+The module includes the following hooks:
+
+- `useFolders`: Main hook that orchestrates the full Folder flow.
+- `useFoldersState`: Local state and actions (folders, stats, errors).
+- `useFoldersPolling`: Safe polling for process status.
+- `useFoldersEvents`: Subscription to backend events.
+- `useFoldersOperations`: CRUD and business operations.
+
+## Real-time update flow
 
 ```mermaid
 graph TD
-  A[Proceso Backend Termina] --> B[Evento/Callback onComplete]
+  A[Backend process finishes] --> B[Event/Callback onComplete]
   B --> C[setProcessStatus(complete)]
   C --> D[loadFolders() + loadStats()]
-  D --> E[UI Refresca Estado]
-  E --> F[setTimeout Limpia Estado]
+  D --> E[UI refreshes state]
+  E --> F[setTimeout clears state]
 ```
 
-## Ejemplo de uso
+## Usage example
 
 ```tsx
 import { useFolders } from './hooks/use-folders';
@@ -37,18 +41,21 @@ function FoldersSettings() {
     handleAddFolder, handleReindexFolder, ...
   } = useFolders();
 
-  // ...renderizado y lógica
+  // ...render and logic
 }
 ```
 
 ## Best practices
 
-- Siempre validar con Zod antes de persistir datos.
-- Usar los tipos canónicos de `@/app/actions/folders/folder-types.ts`.
-- No importar tipos de Prisma en ningún archivo cliente.
-- Documentar cualquier cambio relevante en este README.
+Always validate with Zod before you persist data.
 
-## Referencias
+Use the canonical types from `@/app/actions/folders/folder-types.ts`.
 
-- [Transformers de Folder](../../../transformers/folder/README.md)
-- [Arquitectura de eventos](../../../lib/events/README.md)
+Do not import Prisma types in any client file.
+
+Document any relevant change in this README.
+
+## References
+
+- [Folder transformers](../../../transformers/folder/README.md)
+- [Event architecture](../../../lib/events/README.md)

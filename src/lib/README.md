@@ -1,20 +1,22 @@
-# Biblioteca de utilidades (`src/lib`)
+# Utility library (`src/lib`)
 
-Contiene funciones y clases compartidas en todo el proyecto. Aquí se encuentran:
+This directory holds functions and classes that the project shares.
 
-- Utilidades de caché como `folder-cache.ts` y `cache.ts`.
-- Helpers de configuración (`config/*`).
-- Manejadores de logs (`logger/*`).
-- Validaciones y tipos auxiliares.
+The library includes the following modules:
+
+- Cache utilities such as `folder-cache.ts` and `cache.ts`.
+- Configuration helpers (`config/*`).
+- Log handlers (`logger/*`).
+- Validation helpers and supporting types.
 
 ```mermaid
 flowchart TD
-    A[Componentes/Stores] --> B[lib]
-    B --> C[Servicios]
+    A[Components/Stores] --> B[lib]
+    B --> C[Services]
     B --> D[Utils]
 ```
 
-Ejemplo de uso:
+The following example writes a folder payload to the cache:
 
 ```ts
 import { folderResponseCache } from '@/lib/folder-cache';

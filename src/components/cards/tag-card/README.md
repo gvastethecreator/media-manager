@@ -1,52 +1,58 @@
-# 🏷️ TagCard
+# TagCard
 
-Componente que muestra una tarjeta estilo Magic para representar etiquetas (tags).
+This component displays a Magic-style card that represents Tags.
 
-## 📋 Descripción
+## Description
 
-Este componente forma parte del sistema de tarjetas de entidades, siguiendo el mismo diseño que `CharacterCard`, `PlaceCard` y `WorldItemCard`. Cada tarjeta tiene un diseño inspirado en cartas de Magic con:
+This component is part of the entity card system.
 
-- Cabecera con nombre de etiqueta e icono
-- Sección de imágenes asociadas
-- Sección de contenido con descripción y metadatos
-- Pie con estadísticas e información adicional
-- Colores personalizados según la configuración de la etiqueta
+The design matches `CharacterCard`, `PlaceCard`, and `WorldItemCard`.
 
-## 🔄 Flujo de funcionamiento
+Each card uses a Magic-inspired design with the following parts:
+
+- Header with Tag name and icon
+- Associated image section
+- Content section with description and metadata
+- Footer with statistics and extra information
+- Custom colors from the Tag configuration
+
+## Operation flow
 
 ```mermaid
 graph TD
-    A[TagCard] --> B[Inicialización]
-    B --> C[Cargar datos y estilos]
-    C --> D[Generar contenido de tarjeta]
-    D --> E{¿Tiene onClick?}
-    E -->|Sí| F[Retornar tarjeta con evento]
-    E -->|No| G[Retornar tarjeta con Link]
+    A[TagCard] --> B[Initialization]
+    B --> C[Load data and styles]
+    C --> D[Generate card content]
+    D --> E{Does it have onClick?}
+    E -->|Yes| F[Return card with event]
+    E -->|No| G[Return card with Link]
 
-    H[TagCardImages] --> I[Cargar imágenes con server action]
-    I --> J{¿Hay imágenes?}
-    J -->|Sí| K[Mostrar grid de imágenes]
-    J -->|No| L[Mostrar placeholder]
+    H[TagCardImages] --> I[Load images through a route]
+    I --> J{Are there images?}
+    J -->|Yes| K[Show image grid]
+    J -->|No| L[Show placeholder]
 
-    M[tag-server-actions] --> N[Consultar base de datos]
-    N --> O[Transformar datos]
-    O --> P[Retornar imágenes e info]
+    M[tag-server-actions] --> N[Query the database]
+    N --> O[Transform data]
+    O --> P[Return images and info]
 ```
 
-## 🗂️ Estructura de archivos
+## File structure
 
-- **index.ts**: Punto de entrada y exportaciones del componente
-- **tag-card.tsx**: Componente principal que renderiza la tarjeta
-- **tag-card-header.tsx**: Componente para la cabecera de la tarjeta
-- **tag-card-images.tsx**: Componente para mostrar las imágenes asociadas
-- **tag-card-content.tsx**: Componente para mostrar el contenido de la etiqueta
-- **tag-card-footer.tsx**: Componente para mostrar el pie con estadísticas
-- **tag-server-actions.ts**: Acciones del servidor para obtener datos
-- **README.md**: Documentación del componente
+The directory includes the following files:
 
-## 🖥️ Ejemplos de uso
+- **index.ts**: Entry point and component exports
+- **tag-card.tsx**: Main component that renders the card
+- **tag-card-header.tsx**: Component for the card header
+- **tag-card-images.tsx**: Component that shows associated images
+- **tag-card-content.tsx**: Component that shows Tag content
+- **tag-card-footer.tsx**: Component that shows the footer with statistics
+- **tag-server-actions.ts**: Routes that fetch data
+- **README.md**: Component documentation
 
-### Uso básico con navegación automática
+## Usage examples
+
+### Basic use with automatic navigation
 
 ```tsx
 import { TagCard } from '@/components/cards/tag-card';
@@ -62,7 +68,7 @@ function TagsList({ tags }) {
 }
 ```
 
-### Uso con manejador de eventos personalizado
+### Use with a custom event handler
 
 ```tsx
 import { TagCard } from '@/components/cards/tag-card';
@@ -78,64 +84,70 @@ function TagSelector({ tags, onSelect }) {
 }
 ```
 
-## 🔌 Integración
+## Integration
 
-Este componente se utiliza principalmente en:
+This component is used mainly in the following places:
 
-- Vista de etiquetas en el dashboard
-- Selectores de etiquetas en formularios
-- Paneles de filtrado y organización
-- Diálogos y modales de selección
+- Tag view on the dashboard
+- Tag selectors in forms
+- Filter and organization panels
+- Selection dialogs and modals
 
-## 🎨 Personalización visual
+## Visual customization
 
-El componente respeta y utiliza los atributos visuales definidos en la entidad Tag:
+The component uses the visual attributes defined on the Tag entity.
 
-- **color**: Color principal de la etiqueta que se utiliza para los bordes y gradientes
-- **emoji**: Emoji asociado que se muestra junto al nombre
-- **texture**: Textura visual (si está definida)
-- **rarity**: Rareza que afecta al diseño visual (common, uncommon, rare, etc.)
+The attributes include the following:
 
-## 🎨 Diseño TCG
+- **color**: Main Tag color used for borders and gradients
+- **emoji**: Associated emoji shown next to the name
+- **texture**: Visual texture (if it is defined)
+- **rarity**: Rarity that affects the visual design (common, uncommon, rare)
 
-El componente presenta información de una etiqueta en formato de carta TCG (Trading Card Game), con efectos visuales y diseño estructurado que muestra metadatos, imágenes relacionadas y estadísticas.
+## TCG design
 
-## 🎨 Características
+The component presents Tag information in TCG (Trading Card Game) format.
 
-- **Diseño TCG**: Efectos visuales que simulan cartas de juegos como Magic, Yu-Gi-Oh o Pokémon
-- **Visualización de rareza**: Muestra visualmente la rareza de la etiqueta basada en la cantidad de relaciones
-- **Imágenes asociadas**: Muestra miniaturas de las imágenes vinculadas a la etiqueta
-- **Estadísticas detalladas**: Contadores de relaciones con otras entidades del sistema
-- **Animaciones**: Efectos de hover y selección para mejorar la experiencia de usuario
-- **Personalizable**: Admite múltiples opciones de personalización (TCG, compacto, interactivo)
-- **Accesible**: Soporte completo para navegación con teclado
+The structured design shows metadata, related images, and statistics.
 
-## 🎨 Uso
+## Features
+
+The card provides the following features:
+
+- **TCG design**: Visual effects that simulate cards from Magic, Yu-Gi-Oh, or Pokemon
+- **Rarity display**: Visual rarity of the Tag based on the number of relations
+- **Associated images**: Thumbnails of images linked to the Tag
+- **Detailed statistics**: Relation counters with other system entities
+- **Animations**: Hover and selection effects that improve the user experience
+- **Customizable**: Multiple customization options (TCG, compact, interactive)
+- **Accessible**: Full support for keyboard navigation
+
+## Use
 
 ```tsx
 import { TagCard } from '@/components/cards/tag-card';
 
-// Dentro de tu componente
+// Inside your component
 <TagCard tag={tagWithRelations} onClick={() => handleTagClick(tag.id)} tcgMode={true} compact={false} />;
 ```
 
-## 🎨 Props
+## Props
 
-| Prop          | Tipo                  | Descripción                                                     |
+| Prop          | Type                  | Description                                                     |
 | ------------- | --------------------- | --------------------------------------------------------------- |
-| `tag`         | `TagWithRelations`    | Objeto de etiqueta con relaciones y contadores                  |
-| `onClick`     | `() => void`          | Función a ejecutar al hacer clic en la tarjeta                  |
-| `className`   | `string`              | Clases CSS adicionales                                          |
-| `style`       | `React.CSSProperties` | Estilos inline adicionales                                      |
-| `tcgMode`     | `boolean`             | Activar/desactivar diseño TCG (por defecto: `true`)             |
-| `isSelected`  | `boolean`             | Indica si la tarjeta está seleccionada                          |
-| `compact`     | `boolean`             | Versión más compacta de la tarjeta                              |
-| `disabled`    | `boolean`             | Deshabilita la interacción                                      |
-| `interactive` | `boolean`             | Habilita/deshabilita efectos interactivos (por defecto: `true`) |
+| `tag`         | `TagWithRelations`    | Tag object with relations and counters                          |
+| `onClick`     | `() => void`          | Function that runs on a click on the card                       |
+| `className`   | `string`              | Extra CSS classes                                               |
+| `style`       | `React.CSSProperties` | Extra inline styles                                             |
+| `tcgMode`     | `boolean`             | Enable or disable TCG design (default: `true`)                  |
+| `isSelected`  | `boolean`             | Indicates whether the card is selected                          |
+| `compact`     | `boolean`             | More compact version of the card                                |
+| `disabled`    | `boolean`             | Disables interaction                                            |
+| `interactive` | `boolean`             | Enables or disables interactive effects (default: `true`)       |
 
-## 🎨 Tipo de Datos
+## Data type
 
-El componente espera un objeto `TagWithRelations` que incluye:
+The component expects a `TagWithRelations` object that includes the following fields:
 
 ```typescript
 interface TagWithRelations {
@@ -169,31 +181,35 @@ interface TagWithRelations {
 }
 ```
 
-## 🎨 Alineación con el esquema Prisma
+## Alignment with the Prisma schema
 
-Esta implementación se alinea con el modelo Tag en el esquema Prisma, incluyendo:
+This implementation aligns with the Tag model in the Prisma schema.
 
-- Propiedades básicas (id, name, emoji, color)
-- Atributos descriptivos (description, category)
-- Configuración visual (featuredImage, isFavorite)
-- Relaciones con otras entidades (albums, collections, characters, etc.)
-- Conteos de relaciones (\_count)
+The alignment includes the following parts:
 
-## 🎨 Componentes auxiliares
+- Basic properties (id, name, emoji, color)
+- Descriptive attributes (description, category)
+- Visual configuration (featuredImage, isFavorite)
+- Relations with other entities (albums, collections, characters)
+- Relation counts (_count)
 
-El componente TagCard utiliza varios componentes auxiliares:
+## Auxiliary components
 
-- `TagCardHeader`: Muestra el título, emoji y categoría
-- `TagCardImages`: Muestra miniaturas de imágenes relacionadas
-- `TagCardContent`: Muestra descripción y estadísticas
-- `TagCardFooter`: Muestra metadatos y contadores
+The TagCard component uses several auxiliary components.
 
-## 🎨 Estilo TCG
+The auxiliary components are the following:
 
-La visualización en modo TCG incluye efectos como:
+- `TagCardHeader`: Shows the title, emoji, and category
+- `TagCardImages`: Shows thumbnails of related images
+- `TagCardContent`: Shows description and statistics
+- `TagCardFooter`: Shows metadata and counters
 
-1. Gradientes y bordes estilizados
-2. Indicadores visuales de rareza
-3. Efectos de brillo basados en la rareza
-4. Animaciones al pasar el cursor
-5. Diseño estructurado similar a cartas de juegos de colección
+## TCG style
+
+TCG mode display includes the following effects:
+
+1. Styled gradients and borders
+2. Visual rarity indicators
+3. Glow effects based on rarity
+4. Animations on hover
+5. Structured design similar to collectible game cards

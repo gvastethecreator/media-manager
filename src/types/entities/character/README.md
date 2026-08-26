@@ -1,8 +1,8 @@
-# 🧑‍🎤 Character: Tipos y Esquemas Canónicos
+# Character: canonical types and schemas
 
-Este módulo define los **tipos canónicos** y **esquemas de validación Zod** para la entidad `Character`, alineados con el modelo de dominio y las reglas del proyecto.
+This module defines the **canonical types** and **Zod validation schemas** for the `Character` entity. The types align with the domain model and project rules.
 
-## 📦 Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -22,30 +22,31 @@ graph TD
     CharacterBase --> CharacterViewConfig
 ```
 
-- `CharacterBase`: Tipo canónico alineado a la base de datos.
-- `CharacterComplete`, `CharacterWithRelations`: Tipos enriquecidos con relaciones y conteos.
-- `CharacterExtended`: Versión deserializada para UI.
-- `CreateCharacterData`, `UpdateCharacterData`: Inputs para mutaciones.
-- `CharacterSchema`: Esquema Zod para validación.
+The module uses these types:
 
-## 🚨 Notas de migración
+- `CharacterBase`: Canonical type aligned with the database.
+- `CharacterComplete`, `CharacterWithRelations`: Types enriched with relations and counts.
+- `CharacterExtended`: Deserialized version for UI.
+- `CreateCharacterData`, `UpdateCharacterData`: Inputs for mutations.
+- `CharacterSchema`: Zod schema for validation.
 
-- **Legacy eliminado:** Todos los tipos legacy (`base.ts`, `extended.ts`, enums locales) han sido eliminados.
-- **Solo tipos canónicos:** Usar siempre los tipos de `types.ts` y `extended.ts`.
+## Migration notes
 
-- **Transformers, server actions y esquemas usan solo tipos canónicos.**
+- **Legacy removed:** All legacy types (`base.ts`, `extended.ts`, local enums) have been removed.
+- **Canonical types only:** Use the types from `types.ts` and `extended.ts`.
+- **Transformers, routes, and schemas use only canonical types.**
 
-## 📝 Ejemplo de uso
+## Usage example
 
 ```ts
 import type { CharacterComplete, CreateCharacterData } from '@/types/entities/character';
 import { CharacterSchema } from '@/types/entities/character/schema';
 
-const nuevo: CreateCharacterData = { name: 'Ayla', class: 'Guerrera', ... };
-const validado = CharacterSchema.parse(nuevo);
+const created: CreateCharacterData = { name: 'Ayla', class: 'Warrior', ... };
+const validated = CharacterSchema.parse(created);
 ```
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

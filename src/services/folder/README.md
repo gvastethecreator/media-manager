@@ -1,37 +1,39 @@
-# 📁 FolderService: Servicio de gestión de carpetas
+# FolderService: Folder management service
 
-## Descripción
+## Description
 
-Servicio central para la gestión de carpetas, indexado, reindexado, borrado y emisión de eventos en tiempo real.
+This central service manages Folders, indexing, reindex, deletion, and real-time event emission.
 
-- **Stack:** Bun Runtime, React, Drizzle ORM, eventos custom, Express.
-- **Ubicación:** `src/services/folder/`
+- **Stack:** Bun Runtime, React, Drizzle ORM, custom events, Express.
+- **Location:** `src/services/folder/`
 
-## 📦 Estructura Modular (Refactorizado)
+## Modular structure (refactored)
 
-El servicio ha sido dividido en módulos especializados para mejorar mantenibilidad:
+The service is split into specialized modules to improve maintainability.
 
-### `folder-api.service.ts` (~105 líneas)
+### `folder-api.service.ts` (~105 lines)
 
-**Responsabilidad**: Operaciones CRUD usando fetch API (cliente)
+**Responsibility**: CRUD operations that use the fetch API (client)
 
-- Funciones: `getFolders`, `getFolder`, `createFolder`, `updateFolder`, `deleteFolder`, `getFoldersWithStats`
-- **Uso**: Componentes React, hooks TanStack Query
+- Functions: `getFolders`, `getFolder`, `createFolder`, `updateFolder`, `deleteFolder`, `getFoldersWithStats`
+- **Use**: React components, TanStack Query hooks
 
-### `folder-stats.service.ts` (~140 líneas)
+### `folder-stats.service.ts` (~140 lines)
 
-**Responsabilidad**: Estadísticas optimizadas con SQL directo
+**Responsibility**: Optimized statistics with direct SQL
 
-- Función principal: `getFolderMediaCountsBatch(folderIds[])` - Conteos batch (evita N+1)
-- **Uso**: Transformadores, servicios backend
+- Main function: `getFolderMediaCountsBatch(folderIds[])` - Batch counts (avoids N+1)
+- **Use**: Transformers, backend services
 
 ### `index.ts`
 
-**Responsabilidad**: Punto de entrada unificado
+**Responsibility**: Unified entry point
 
-- Re-exporta todos los módulos manteniendo API pública sin cambios
+- Re-exports all modules while the public API stays unchanged
 
-## Eventos soportados
+## Supported events
+
+The service emits the following events:
 
 - `PROGRESS` → `folder:progress`
 - `COMPLETE` → `folder:complete`
@@ -39,24 +41,26 @@ El servicio ha sido dividido en módulos especializados para mejorar mantenibili
 - `REINDEX_ALL_PROGRESS` → `folder:reindexAll:progress`
 - `REINDEX_ALL_COMPLETE` → `folder:reindexAll:complete`
 
-## Diagrama de emisión de eventos
+## Event emission diagram
 
 ```mermaid
 graph TD
-  S[Operación de carpeta (index/reindex)] -->|Éxito| C[emitEvent(COMPLETE)]
+  S[Folder operation (index/reindex)] -->|Success| C[emitEvent(COMPLETE)]
   S -->|Error| E[emitEvent(ERROR)]
-  S -->|Progreso| P[emitEvent(PROGRESS)]
-  G[Reindexado global] -->|Progreso| GP[emitEvent(REINDEX_ALL_PROGRESS)]
-  G -->|Finaliza| GC[emitEvent(REINDEX_ALL_COMPLETE)]
+  S -->|Progress| P[emitEvent(PROGRESS)]
+  G[Global reindex] -->|Progress| GP[emitEvent(REINDEX_ALL_PROGRESS)]
+  G -->|Finishes| GC[emitEvent(REINDEX_ALL_COMPLETE)]
 ```
 
-## Flujo de emisión y propagación
+## Emission and propagation flow
 
-1. Al finalizar un proceso, se emite el evento correspondiente (`COMPLETE` o `REINDEX_ALL_COMPLETE`).
-2. El evento se mapea y propaga al sistema central (`folder:complete`, `folder:reindexAll:complete`).
-3. El frontend escucha estos eventos y actualiza la UI en tiempo real.
+When a process finishes, the service emits the matching event (`COMPLETE` or `REINDEX_ALL_COMPLETE`).
 
-## Ejemplo de emisión
+The event is mapped and propagated to the central system (`folder:complete`, `folder:reindexAll:complete`).
+
+The frontend listens to these events and updates the UI in real time.
+
+## Emission example
 
 ```ts
 this.emitEvent(FOLDER_EVENTS.COMPLETE, folderResponse);
@@ -65,6 +69,8 @@ this.emitEvent(FOLDER_EVENTS.REINDEX_ALL_COMPLETE, completionStatus);
 
 ## Best practices
 
-- Emitir SIEMPRE el evento de finalización tras éxito.
-- Emitir `ERROR` en fallos y limpiar estado.
-- Documentar cualquier cambio relevante en este README.
+Always emit the completion event after success.
+
+Emit `ERROR` on failures and clear state.
+
+Document any relevant change in this README.

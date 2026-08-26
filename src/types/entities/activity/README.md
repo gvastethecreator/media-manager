@@ -1,8 +1,8 @@
-# ⚡ Activity: Tipos y Esquemas Canónicos
+# Activity: canonical types and schemas
 
-Este módulo define los **tipos canónicos** y **esquemas de validación Zod** para la entidad `Activity`, alineados con el modelo de dominio y las reglas del proyecto.
+This module defines the **canonical types** and **Zod validation schemas** for the `Activity` entity. The types align with the domain model and project rules.
 
-## 📦 Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -14,29 +14,30 @@ graph TD
     Activity --> ActivityListResponse
 ```
 
-- `ActivityBase`: Tipo canónico alineado a la base de datos.
-- `Activity`: Tipo extendido para UI y relaciones.
-- `ActivityCreateInput`, `ActivityUpdateInput`: Inputs para mutaciones.
-- `ActivityListResponse`: Respuesta para listados.
-- `ActivitySchema`: Esquema Zod para validación.
+The module uses these types:
 
-## 🚨 Notas de migración
+- `ActivityBase`: Canonical type aligned with the database.
+- `Activity`: Extended type for UI and relations.
+- `ActivityCreateInput`, `ActivityUpdateInput`: Inputs for mutations.
+- `ActivityListResponse`: Response for listings.
+- `ActivitySchema`: Zod schema for validation.
 
-- **Legacy eliminado:** Solo se exportan tipos y enums canónicos.
+## Migration notes
 
-- **Validar siempre con ActivitySchema antes de persistir.**
+- **Legacy removed:** Only canonical types and enums are exported.
+- **Validate with ActivitySchema before you persist.**
 
-## 📝 Ejemplo de uso
+## Usage example
 
 ```ts
 import type { Activity, ActivityCreateInput } from '@/types/entities/activity';
 import type { ActivitySchema } from '@/types/entities/activity/types';
 
-const nueva: ActivityCreateInput = { type: 'image_upload', description: 'Subida de imagen' };
-const validada = ActivitySchema.parse(nueva);
+const created: ActivityCreateInput = { type: 'image_upload', description: 'Image upload' };
+const validated = ActivitySchema.parse(created);
 ```
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

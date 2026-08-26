@@ -1,93 +1,97 @@
-# 🎨 Guía de Estilos y Sistema de Themes
+# Styles and theme system guide
 
-Este documento describe el sistema de colores y temas del proyecto, incluyendo las mejores prácticas para mantener la consistencia visual.
+This document describes the color and theme system of the project. It includes practices that keep visual consistency.
 
-## Índice
+## Contents
 
-1. [Arquitectura del Sistema de Themes](#arquitectura-del-sistema-de-themes)
-2. [Variables CSS Semánticas](#variables-css-semánticas)
-3. [Tokens de Color TypeScript](#tokens-de-color-typescript)
-4. [Buenas Prácticas](#buenas-prácticas)
-5. [Migración de Colores Hardcodeados](#migración-de-colores-hardcodeados)
-6. [Ejemplos de Uso](#ejemplos-de-uso)
+1. [Theme system architecture](#theme-system-architecture)
+2. [Semantic CSS variables](#semantic-css-variables)
+3. [TypeScript color tokens](#typescript-color-tokens)
+4. [Practices](#practices)
+5. [Migration of hardcoded colors](#migration-of-hardcoded-colors)
+6. [Usage examples](#usage-examples)
 
 ---
 
-## Arquitectura del Sistema de Themes
+## Theme system architecture
 
-### Estructura de Archivos
+### File structure
 
 ```
 src/
 ├── app/
-│   ├── globals.css          # CSS principal, importa themes y tokens
-│   └── themes.css           # Definición de todos los temas
+│   ├── globals.css          # Main CSS, imports themes and tokens
+│   └── themes.css           # Definition of all themes
 ├── styles/
-│   ├── tokens.css           # Variables CSS semánticas centralizadas
-│   ├── scrollbar.css        # Estilos de scrollbar personalizados
+│   ├── tokens.css           # Centralized semantic CSS variables
+│   ├── scrollbar.css        # Custom scrollbar styles
 │   └── ...
 ├── lib/styles/
-│   ├── color-tokens.ts      # Tokens TypeScript para colores de entidad
-│   └── chart-colors.ts      # Colores para gráficos Recharts
-└── tailwind.config.ts       # Configuración Tailwind con variables CSS
+│   ├── color-tokens.ts      # TypeScript tokens for entity colors
+│   └── chart-colors.ts      # Colors for Recharts charts
+└── tailwind.config.ts       # Tailwind configuration with CSS variables
 ```
 
-### Flujo de Temas
+### Theme flow
 
-1. **Variables Base** → Definidas en `themes.css` usando `oklch()` para mejor percepción de color
-2. **Variables Tailwind** → Mapean a las variables CSS en `globals.css` via `@theme inline`
-3. **Aplicación** → El atributo `data-theme` en `<html>` activa el tema correspondiente
+Theme application follows this sequence:
 
-### Temas Disponibles
+1. **Base variables** are defined in `themes.css` using `oklch()` for better color perception.
+2. **Tailwind variables** map to CSS variables in `globals.css` through `@theme inline`.
+3. **Application** uses the `data-theme` attribute on `<html>` to activate the matching theme.
 
-| Tema          | Descripción                            |
-| ------------- | -------------------------------------- |
-| `light`       | Tema claro con tonos grises            |
-| `dark`        | Tema oscuro estándar                   |
-| `cafe`        | Tonos cálidos marrones                 |
-| `violeta`     | Púrpura oscuro                         |
-| `madera`      | Tonos tierra                           |
-| `nocturno`    | Azul oscuro para reducir fatiga visual |
-| `verde`       | Tonos verdes                           |
-| `atardecer`   | Naranjas y rojos cálidos               |
-| `corporativo` | Azul profesional                       |
-| `carbon`      | Negro profundo con acentos grises      |
-| `teal`        | Verde azulado                          |
-| `citrico`     | Amarillos vibrantes                    |
-| `aurora`      | Inspirado en auroras boreales          |
-| `neon`        | Cyberpunk con colores brillantes       |
+### Available themes
+
+The product includes these themes:
+
+| Theme         | Description                               |
+| ------------- | ----------------------------------------- |
+| `light`       | Light theme with gray tones               |
+| `dark`        | Standard dark theme                       |
+| `cafe`        | Warm brown tones                          |
+| `violeta`     | Dark purple                               |
+| `madera`      | Earth tones                               |
+| `nocturno`    | Dark blue to reduce visual fatigue        |
+| `verde`       | Green tones                               |
+| `atardecer`   | Warm oranges and reds                     |
+| `corporativo` | Professional blue                         |
+| `carbon`      | Deep black with gray accents              |
+| `teal`        | Blue-green                                |
+| `citrico`     | Vibrant yellows                           |
+| `aurora`      | Inspired by auroras borealis              |
+| `neon`        | Cyberpunk with bright colors              |
 
 ---
 
-## Variables CSS Semánticas
+## Semantic CSS variables
 
-### Variables de Theme Base
+### Base theme variables
 
 ```css
-/* Fondos y superficies */
---background          /* Fondo principal */
---foreground          /* Color de texto principal */
---card                /* Fondo de tarjetas */
---card-foreground     /* Texto en tarjetas */
---popover             /* Fondo de popovers */
---popover-foreground  /* Texto en popovers */
+/* Backgrounds and surfaces */
+--background          /* Main background */
+--foreground          /* Main text color */
+--card                /* Card background */
+--card-foreground     /* Text on cards */
+--popover             /* Popover background */
+--popover-foreground  /* Text on popovers */
 
-/* Colores semánticos */
---primary             /* Color principal/acento */
---primary-foreground  /* Texto sobre primary */
---secondary           /* Color secundario */
+/* Semantic colors */
+--primary             /* Main or accent color */
+--primary-foreground  /* Text on primary */
+--secondary           /* Secondary color */
 --secondary-foreground
---muted               /* Elementos atenuados */
+--muted               /* Muted elements */
 --muted-foreground
---accent              /* Acentos visuales */
+--accent              /* Visual accents */
 --accent-foreground
---destructive         /* Acciones destructivas */
+--destructive         /* Destructive actions */
 --destructive-foreground
 
 /* UI */
---border              /* Bordes */
---input               /* Campos de entrada */
---ring                /* Anillo de foco */
+--border              /* Borders */
+--input               /* Input fields */
+--ring                /* Focus ring */
 
 /* Sidebar */
 --sidebar-background
@@ -97,44 +101,44 @@ src/
 --sidebar-border
 --sidebar-ring
 
-/* Gráficos */
---chart-1 a --chart-5 /* Colores para visualizaciones */
+/* Charts */
+--chart-1 to --chart-5 /* Colors for visualizations */
 ```
 
-### Variables de Entidad (tokens.css)
+### Entity variables (`tokens.css`)
 
 ```css
-/* Contenido */
---entity-image        /* Azul - imágenes */
---entity-video        /* Rojo - videos */
+/* Content */
+--entity-image        /* Blue - images */
+--entity-video        /* Red - videos */
 --entity-audio        /* Sky - audio */
---entity-document     /* Slate - documentos */
---entity-folder       /* Amarillo - carpetas */
+--entity-document     /* Slate - documents */
+--entity-folder       /* Yellow - folders */
 
-/* Organización */
---entity-album        /* Violeta - álbumes */
---entity-collection   /* Cyan - colecciones */
---entity-group        /* Teal - grupos */
---entity-favorite     /* Ámbar - favoritos */
+/* Organization */
+--entity-album        /* Violet - albums */
+--entity-collection   /* Cyan - collections */
+--entity-group        /* Teal - groups */
+--entity-favorite     /* Amber - favorites */
 
-/* Creativas */
---entity-character    /* Rosa - personajes */
---entity-place        /* Teal - lugares */
---entity-world-item   /* Lima - objetos de mundo */
---entity-concept      /* Ámbar - conceptos */
+/* Creative */
+--entity-character    /* Pink - characters */
+--entity-place        /* Teal - places */
+--entity-world-item   /* Lime - world items */
+--entity-concept      /* Amber - concepts */
 
-/* Metadatos */
---entity-tag          /* Rosa - tags */
---entity-prompt       /* Esmeralda - prompts */
---entity-note         /* Rojo - notas */
---entity-property     /* Rosa claro - propiedades */
+/* Metadata */
+--entity-tag          /* Pink - tags */
+--entity-prompt       /* Emerald - prompts */
+--entity-note         /* Red - notes */
+--entity-property     /* Light pink - properties */
 ```
 
 ---
 
-## Tokens de Color TypeScript
+## TypeScript color tokens
 
-### Ubicación: `src/lib/styles/color-tokens.ts`
+### Location: `src/lib/styles/color-tokens.ts`
 
 ```typescript
 import {
@@ -146,18 +150,18 @@ import {
 	PRESET_COLORS_HEX,
 } from '@/lib/styles/color-tokens';
 
-// Obtener variable CSS para usar en style
+// Get a CSS variable for use in style
 const color = getEntityColor('image'); // "var(--entity-image)"
 
-// Obtener clases Tailwind para className
+// Get Tailwind classes for className
 const bgClass = getEntityClasses('folder', 'bg'); // "bg-yellow-500"
 const textClass = getEntityClasses('folder', 'text'); // "text-yellow-500"
 
-// Color por defecto para formularios
+// Default color for forms
 const defaultColor = DEFAULT_ENTITY_COLOR; // "#3b82f6"
 ```
 
-### Colores para Gráficos: `src/lib/styles/chart-colors.ts`
+### Chart colors: `src/lib/styles/chart-colors.ts`
 
 ```typescript
 import {
@@ -167,111 +171,115 @@ import {
   getChartColor
 } from '@/lib/styles/chart-colors';
 
-// Uso en Recharts
+// Use in Recharts
 <Line stroke={CHART_COLORS.primary} />
 <Bar fill={METRIC_COLORS.cpu} />
 <Cell fill={FILE_TYPE_COLORS.images} />
 
-// Paleta dinámica por índice
+// Dynamic palette by index
 data.map((_, i) => <Cell fill={getChartColor(i)} />)
 ```
 
 ---
 
-## Buenas Prácticas
+## Practices
 
-### ✅ HACER
+### Do
 
 ```tsx
-// 1. Usar clases Tailwind con variables del tema
+// 1. Use Tailwind classes with theme variables
 <div className="bg-background text-foreground border-border" />
 
-// 2. Usar variables CSS para estilos dinámicos
+// 2. Use CSS variables for dynamic styles
 <div style={{ backgroundColor: 'var(--primary)' }} />
 
-// 3. Usar tokens centralizados para colores de entidad
+// 3. Use centralized tokens for entity colors
 import { getEntityClasses } from '@/lib/styles/color-tokens';
 <div className={getEntityClasses('folder', 'bg')} />
 
-// 4. Usar tokens para gráficos
+// 4. Use tokens for charts
 import { CHART_COLORS } from '@/lib/styles/chart-colors';
 <Line stroke={CHART_COLORS.primary} />
 
-// 5. Usar clases semánticas de Tailwind
-<Button variant="destructive" /> // En lugar de bg-red-500
+// 5. Use semantic Tailwind classes
+<Button variant="destructive" /> // Instead of bg-red-500
 ```
 
-### ❌ NO HACER
+### Do not
 
 ```tsx
-// 1. NUNCA hardcodear colores hex en componentes
-<div style={{ backgroundColor: '#3b82f6' }} /> // ❌
+// 1. NEVER hardcode hex colors in components
+<div style={{ backgroundColor: '#3b82f6' }} /> // no
 
-// 2. NUNCA usar colores hex en className
-<div className="bg-[#3b82f6]" /> // ❌
+// 2. NEVER use hex colors in className
+<div className="bg-[#3b82f6]" /> // no
 
-// 3. NUNCA duplicar definiciones de colores
-const COLORS = { blue: '#3b82f6' }; // ❌ Usa los tokens existentes
+// 3. NEVER duplicate color definitions
+const COLORS = { blue: '#3b82f6' }; // no. Use the existing tokens
 
-// 4. NUNCA usar rgb/rgba directamente para UI
-<div style={{ color: 'rgba(59, 130, 246, 0.5)' }} /> // ❌
-// ✅ Usar: className="text-primary/50"
+// 4. NEVER use rgb/rgba directly for UI
+<div style={{ color: 'rgba(59, 130, 246, 0.5)' }} /> // no
+// Use: className="text-primary/50"
 ```
 
-### Casos Especiales
+### Special cases
 
-#### Canvas Context
+#### Canvas context
 
-Los contextos de canvas (`ctx.fillStyle`) no soportan variables CSS. En estos casos:
+Canvas contexts (`ctx.fillStyle`) do not support CSS variables. In those cases:
 
 ```tsx
-// Documentar el color y su equivalente Tailwind
-ctx.fillStyle = '#3b82f6'; // blue-500, equivale a var(--selection-border)
+// Document the color and its Tailwind equivalent
+ctx.fillStyle = '#3b82f6'; // blue-500, equivalent to var(--selection-border)
 ```
 
-#### Colores Personalizables por Usuario
+#### User-customizable colors
 
-Para propiedades que el usuario puede personalizar (color de tag, color de grupo):
+For properties that the user can customize (tag color, group color):
 
 ```tsx
-// Usar PRESET_COLORS_HEX del token centralizado
+// Use PRESET_COLORS_HEX from the centralized token
 import { PRESET_COLORS_HEX, DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 
-// El color se guarda en DB como hex y se usa en style
+// The color is stored in DB as hex and used in style
 <div style={{ backgroundColor: entity.color ?? DEFAULT_ENTITY_COLOR }} />;
 ```
 
 ---
 
-## Migración de Colores Hardcodeados
+## Migration of hardcoded colors
 
-### Paso 1: Identificar
+### Step 1: Identify
 
-Buscar patrones en el código:
+Search these patterns in the code:
 
 - `#[0-9a-fA-F]{3,8}`
 - `rgb(`, `rgba(`, `hsl(`
 
-### Paso 2: Categorizar
+### Step 2: Categorize
 
-- **UI Temática**: Migrar a variables CSS
-- **Gráficos**: Usar tokens de `chart-colors.ts`
-- **Entidades**: Usar tokens de `color-tokens.ts`
-- **Usuario-personalizable**: Mantener pero usar `DEFAULT_ENTITY_COLOR`
+Use these categories:
 
-### Paso 3: Reemplazar
+- **Thematic UI**: migrate to CSS variables
+- **Charts**: use tokens from `chart-colors.ts`
+- **Entities**: use tokens from `color-tokens.ts`
+- **User-customizable**: keep, but use `DEFAULT_ENTITY_COLOR`
 
-| Antes                          | Después                            |
+### Step 3: Replace
+
+Use this replacement map:
+
+| Before                         | After                              |
 | ------------------------------ | ---------------------------------- |
-| `#3b82f6`                      | `text-blue-500` o `var(--primary)` |
-| `bg-[#ef4444]`                 | `bg-red-500` o `bg-destructive`    |
+| `#3b82f6`                      | `text-blue-500` or `var(--primary)` |
+| `bg-[#ef4444]`                 | `bg-red-500` or `bg-destructive`   |
 | `style={{ color: '#10b981' }}` | `className="text-emerald-500"`     |
 
 ---
 
-## Ejemplos de Uso
+## Usage examples
 
-### Componente con Tema
+### Component with theme
 
 ```tsx
 export function EntityCard({ entity }: Props) {
@@ -284,7 +292,7 @@ export function EntityCard({ entity }: Props) {
 }
 ```
 
-### Gráfico con Colores Consistentes
+### Chart with consistent colors
 
 ```tsx
 import { CHART_COLORS, FILE_TYPE_COLORS } from '@/lib/styles/chart-colors';
@@ -302,20 +310,20 @@ export function FileTypeChart({ data }) {
 }
 ```
 
-### Formulario con Color Picker
+### Form with color picker
 
 ```tsx
 import { ColorPicker } from '@/components/ui/color-picker';
-// ColorPicker ya usa PRESET_COLORS_HEX internamente
+// ColorPicker already uses PRESET_COLORS_HEX internally
 
 <ColorPicker value={formData.color} onChange={(color) => setFormData({ ...formData, color })} />;
 ```
 
 ---
 
-## Transiciones de Tema
+## Theme transitions
 
-El sistema incluye transiciones suaves al cambiar de tema:
+The system includes smooth transitions when the theme changes:
 
 ```css
 html {
@@ -328,20 +336,22 @@ html {
 
 ---
 
-## Checklist de Revisión
+## Review checklist
 
-Antes de hacer commit, verificar:
+Before you commit, verify:
 
-- [ ] No hay colores hex hardcodeados en componentes TSX
-- [ ] Los nuevos colores usan variables CSS o tokens TypeScript
-- [ ] Los gráficos usan colores de `chart-colors.ts`
-- [ ] Los colores de entidad usan tokens de `color-tokens.ts`
-- [ ] El componente se ve correcto en modo claro y oscuro
-- [ ] Las transiciones de tema funcionan sin glitches
+- [ ] There are no hardcoded hex colors in TSX components.
+- [ ] New colors use CSS variables or TypeScript tokens.
+- [ ] Charts use colors from `chart-colors.ts`.
+- [ ] Entity colors use tokens from `color-tokens.ts`.
+- [ ] The component looks correct in light and dark mode.
+- [ ] Theme transitions work without glitches.
 
 ---
 
-## Referencias
+## References
+
+The following references support this guide:
 
 - [Tailwind CSS v4 - Theme Configuration](https://tailwindcss.com/docs/theme)
 - [OKLCH Color Space](https://oklch.com/)

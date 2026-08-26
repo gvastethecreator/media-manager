@@ -1,6 +1,6 @@
-# Albums Views
+# Albums views
 
-Contiene las vistas `AlbumsView` y `AlbumContentView` para mostrar y explorar álbumes.
+This directory contains the `AlbumsView` and `AlbumContentView` views that show and explore Albums.
 
 ```mermaid
 flowchart TD

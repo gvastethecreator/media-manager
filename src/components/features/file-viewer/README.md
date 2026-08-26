@@ -1,23 +1,25 @@
-# File Viewer System
+# File viewer system
 
-Sistema completo de visualización de archivos que soporta múltiples tipos de entidades.
+This system displays files and supports multiple entity types.
 
-## Componentes Implementados
+## Implemented components
 
 ### 1. MultiEntityViewer
 
-**Archivo:** `multi-entity-viewer.tsx`
+**File:** `multi-entity-viewer.tsx`
 
-Viewer principal que determina automáticamente qué viewer específico usar basado en el tipo de entidad.
+This main viewer chooses the specific viewer from the entity type.
 
-**Características:**
+**Features:**
 
-- Soporte para múltiples tipos de entidades
-- Navegación con teclado (flechas, ESC)
-- Transiciones suaves entre viewers
-- Integración con el sistema de tipos EntityStatsType
+The viewer provides the following features:
 
-**Uso:**
+- Support for multiple entity types
+- Keyboard navigation (arrows, ESC)
+- Smooth transitions between viewers
+- Integration with the EntityStatsType type system
+
+**Use:**
 
 ```tsx
 import { MultiEntityViewer } from '@/components/features/file-viewer/multi-entity-viewer';
@@ -33,94 +35,105 @@ import { MultiEntityViewer } from '@/components/features/file-viewer/multi-entit
 
 ### 2. VideoViewer
 
-**Archivo:** `viewers/video-viewer.tsx`
+**File:** `viewers/video-viewer.tsx`
 
-Viewer especializado para archivos de video.
+This specialized viewer displays video files.
 
-**Características:**
+**Features:**
 
-- Controles de reproducción (play/pause, seek, volumen)
-- Pantalla completa
-- Información de metadatos (duración, resolución, codec)
-- Navegación entre videos
-- Descarga de archivos
+The viewer provides the following features:
+
+- Playback controls (play/pause, seek, volume)
+- Full screen
+- Metadata information (duration, resolution, codec)
+- Navigation between videos
+- File download
 
 ### 3. AudioViewer
 
-**Archivo:** `viewers/audio-viewer.tsx`
+**File:** `viewers/audio-viewer.tsx`
 
-Viewer especializado para archivos de audio.
+This specialized viewer displays audio files.
 
-**Características:**
+**Features:**
 
-- Controles de reproducción de audio
-- Visualización de forma de onda (placeholder)
-- Información de metadatos (artista, álbum, duración, bitrate)
-- Lista de reproducción
-- Controles de volumen
+The viewer provides the following features:
+
+- Audio playback controls
+- Waveform display (placeholder)
+- Metadata information (artist, album, duration, bitrate)
+- Playlist
+- Volume controls
 
 ### 4. DocumentViewer
 
-**Archivo:** `viewers/document-viewer.tsx`
+**File:** `viewers/document-viewer.tsx`
 
-Viewer para documentos PDF y archivos de texto.
+This viewer displays PDF documents and text files.
 
-**Características:**
+**Features:**
 
-- Vista previa de PDFs con iframe
-- Navegación por páginas
-- Controles de zoom y rotación
-- Búsqueda en documento
-- Soporte para archivos de texto
-- Información de metadatos (páginas, palabras, autor)
+The viewer provides the following features:
+
+- PDF preview with iframe
+- Page navigation
+- Zoom and rotation controls
+- Document search
+- Support for text files
+- Metadata information (pages, words, author)
 
 ### 5. GenericFileViewer
 
-**Archivo:** `viewers/generic-file-viewer.tsx`
+**File:** `viewers/generic-file-viewer.tsx`
 
-Viewer genérico para tipos de archivo no específicos.
+This generic viewer displays unspecified file types.
 
-**Características:**
+**Features:**
 
-- Categorización automática de archivos
-- Vista previa de contenido para archivos de texto pequeños
-- Iconos específicos por tipo de archivo
-- Información detallada de metadatos
-- Opciones de descarga y apertura externa
+The viewer provides the following features:
 
-## Tipos de Archivo Soportados
+- Automatic file categorization
+- Content preview for small text files
+- Specific icons by file type
+- Detailed metadata information
+- Download and external-open options
 
-### Imágenes
+## Supported file types
 
-- Usa el `FileViewer` existente
-- Formatos: JPG, PNG, GIF, WebP, SVG, etc.
+### Images
+
+The image path uses the existing `FileViewer`.
+
+Formats: JPG, PNG, GIF, WebP, SVG.
 
 ### Videos
 
-- Formatos: MP4, WebM, AVI, MOV, etc.
-- Controles nativos del navegador
+Formats: MP4, WebM, AVI, MOV.
+
+The viewer uses native browser controls.
 
 ### Audio
 
-- Formatos: MP3, WAV, FLAC, AAC, OGG, etc.
-- Controles de audio personalizados
+Formats: MP3, WAV, FLAC, AAC, OGG.
 
-### Documentos
+The viewer uses custom audio controls.
 
-- PDFs: Vista previa con iframe
-- Texto: TXT, MD, JSON, XML, CSV
-- Office: DOC, DOCX, XLS, XLSX, PPT, PPTX (descarga/apertura externa)
+### Documents
 
-### Archivos Genéricos
+- PDFs: Preview with iframe
+- Text: TXT, MD, JSON, XML, CSV
+- Office: DOC, DOCX, XLS, XLSX, PPT, PPTX (download or external open)
 
-- Código: JS, TS, Python, Java, etc.
-- Comprimidos: ZIP, RAR, 7Z, etc.
-- Datos: JSON, XML, CSV, SQL, etc.
-- Ejecutables: EXE, MSI, DMG, etc.
+### Generic files
 
-## Integración con EntityStatsType
+- Code: JS, TS, Python, Java
+- Archives: ZIP, RAR, 7Z
+- Data: JSON, XML, CSV, SQL
+- Executables: EXE, MSI, DMG
 
-El sistema está completamente integrado con el enum `EntityStatsType`:
+## Integration with EntityStatsType
+
+The system is fully integrated with the `EntityStatsType` enum:
 
 ```typescript
 switch (entity.type) {
@@ -137,56 +150,68 @@ switch (entity.type) {
 }
 ```
 
-## Navegación y Controles
+## Navigation and controls
 
-### Teclado
+### Keyboard
 
-- `←` / `→`: Navegar entre archivos
-- `ESC`: Cerrar viewer
+The viewer uses the following keys:
+
+- `←` / `→`: Navigate between files
+- `ESC`: Close the viewer
 - `Space`: Play/Pause (video/audio)
-- `+` / `-`: Zoom (documentos/imágenes)
-- `R`: Reset view (imágenes)
+- `+` / `-`: Zoom (documents/images)
+- `R`: Reset view (images)
 
 ### Mouse
 
-- Click fuera del contenido: Cerrar
-- Rueda del mouse: Zoom (donde aplique)
-- Doble click: Reset view (imágenes)
+The viewer uses the following mouse actions:
 
-## Estructura de Archivos
+- Click outside the content: Close
+- Mouse wheel: Zoom (where it applies)
+- Double click: Reset view (images)
+
+## File structure
 
 ```
 file-viewer/
-├── file-viewer.tsx              # Viewer original para imágenes
-├── multi-entity-viewer.tsx      # Viewer principal multi-tipo
-├── README.md                     # Esta documentación
+├── file-viewer.tsx              # Original viewer for images
+├── multi-entity-viewer.tsx      # Main multi-type viewer
+├── README.md                     # This documentation
 └── viewers/
-    ├── video-viewer.tsx          # Viewer de videos
-    ├── audio-viewer.tsx          # Viewer de audio
-    ├── document-viewer.tsx       # Viewer de documentos
-    └── generic-file-viewer.tsx   # Viewer genérico
+    ├── video-viewer.tsx          # Video viewer
+    ├── audio-viewer.tsx          # Audio viewer
+    ├── document-viewer.tsx       # Document viewer
+    └── generic-file-viewer.tsx   # Generic viewer
 ```
 
-## Próximas Mejoras
+## Planned improvements
 
-1. **Viewer 3D**: Para archivos .obj, .fbx, .gltf
-2. **Viewer de Código**: Syntax highlighting para archivos de código
-3. **Viewer de Archivos**: Explorador de archivos comprimidos
-4. **Mejoras de Accesibilidad**: Mejor soporte para lectores de pantalla
-5. **Thumbnails**: Generación automática de miniaturas
-6. **Streaming**: Soporte para archivos grandes
+The following improvements are planned:
 
-## Dependencias
+1. **3D viewer**: For `.obj`, `.fbx`, `.gltf` files
+2. **Code viewer**: Syntax highlighting for code files
+3. **Archive viewer**: Explorer for compressed files
+4. **Accessibility improvements**: Better support for screen readers
+5. **Thumbnails**: Automatic thumbnail generation
+6. **Streaming**: Support for large files
 
-- `motion`: Animaciones y transiciones
-- `lucide-react`: Iconos
-- Componentes UI: `Button`, `Badge`, `Input`, `Textarea`
-- Tipos de entidades del sistema
+## Dependencies
 
-## Notas de Implementación
+The system depends on the following packages:
 
-- Todos los viewers siguen el mismo patrón de props
-- Manejo consistente de errores y estados de carga
-- Responsive design por defecto
-- Soporte para temas claro/oscuro
-- Optimización de rendimiento con lazy loading
+- `motion`: Animations and transitions
+- `lucide-react`: Icons
+- UI components: `Button`, `Badge`, `Input`, `Textarea`
+- System entity types
+
+## Implementation notes
+
+All viewers follow the same props pattern.
+
+Error handling and loading states stay consistent.
+
+Responsive design is the default.
+
+The viewers support light and dark themes.
+
+Performance optimization uses lazy loading.

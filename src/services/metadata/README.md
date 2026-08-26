@@ -1,4 +1,3 @@
-# Servicio de metadatos
+# Metadata service
 
-Permite obtener y actualizar metadatos asociados a archivos
-y otros elementos del sistema.
+The metadata service gets and updates metadata for files and other system items.

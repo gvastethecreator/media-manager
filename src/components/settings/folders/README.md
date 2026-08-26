@@ -1,174 +1,196 @@
-# Módulo Folders Settings
+# Folders settings module
 
-## Descripción
+## Description
 
-El módulo Folders Settings proporciona una interfaz para gestionar y configurar las carpetas de imágenes monitoreadas por la aplicación. Permite añadir, eliminar y configurar carpetas del sistema de archivos que serán escaneadas para importar imágenes automáticamente.
+The Folders Settings module provides an interface that manages and configures image Folders that the application monitors.
 
-## Estructura de Archivos
+The module lets you add, remove, and configure filesystem Folders that the scanner uses to import images automatically.
+
+## File structure
 
 ```
 src/components/settings/folders/
-├── folders-settings.tsx   # Componente principal con la interfaz de usuario
-└── README.md              # Documentación del módulo
+├── folders-settings.tsx   # Main component with the user interface
+└── README.md              # Module documentation
 ```
 
-## Diagrama de Flujo
+## Flow diagram
 
 ```mermaid
 graph TD
-    A[FoldersSettings Component] --> B{Inicialización}
-    B --> C[Cargar Carpetas]
-    C --> D[getFolders Server Action]
-    D --> E{Resultado}
-    E -->|Éxito| F[Mostrar Lista de Carpetas]
-    E -->|Error| G[Mostrar Error Toast]
+    A[FoldersSettings Component] --> B{Initialization}
+    B --> C[Load Folders]
+    C --> D[getFolders route]
+    D --> E{Result}
+    E -->|Success| F[Show Folder list]
+    E -->|Error| G[Show error toast]
 
     A --> H[handleAddFolder]
-    H --> I[addFolder Server Action]
-    I --> J{Resultado}
-    J -->|Éxito| K[Mostrar Toast Éxito]
-    J -->|Error| L[Mostrar Toast Error]
+    H --> I[addFolder route]
+    I --> J{Result}
+    J -->|Success| K[Show success toast]
+    J -->|Error| L[Show error toast]
     K --> C
 
     A --> M[handleRemoveFolder]
-    M --> N[removeFolder Server Action]
-    N --> O{Resultado}
-    O -->|Éxito| P[Mostrar Toast Éxito]
-    O -->|Error| Q[Mostrar Toast Error]
+    M --> N[removeFolder route]
+    N --> O{Result}
+    O -->|Success| P[Show success toast]
+    O -->|Error| Q[Show error toast]
     P --> C
 
     A --> R[handleScanFolder]
-    R --> S[scanFolder Server Action]
-    S --> T{Resultado}
-    T -->|Éxito| U[Mostrar Toast Éxito y Estadísticas]
-    T -->|Error| V[Mostrar Toast Error]
+    R --> S[scanFolder route]
+    S --> T{Result}
+    T -->|Success| U[Show success toast and statistics]
+    T -->|Error| V[Show error toast]
     U --> C
 ```
 
-## Características
+## Features
 
-- **Gestión de Carpetas de Imágenes**:
-  - Añadir nuevas carpetas para monitoreo
-  - Eliminar carpetas existentes
-  - Ver estadísticas de cada carpeta (total de archivos, imágenes detectadas, etc.)
+The module provides the following features:
 
-- **Escaneo e Importación**:
-  - Escaneo manual de carpetas específicas
-  - Importación automática de nuevas imágenes
-  - Visualización de progreso durante el escaneo
+- **Image Folder management**:
+  - Add new Folders for monitoring
+  - Remove existing Folders
+  - View statistics for each Folder (total files, detected images)
 
-- **Configuración de Opciones**:
-  - Recursividad (incluir subcarpetas)
-  - Filtrado por tipo de archivo
-  - Exclusión de archivos específicos
-  - Monitoreo automático de cambios
+- **Scan and import**:
+  - Manual scan of specific Folders
+  - Automatic import of new images
+  - Progress display during the scan
 
-- **Visualización de Estadísticas**:
-  - Total de carpetas monitoreadas
-  - Espacio en disco utilizado
-  - Número total de archivos detectados
-  - Distribución por tipo de archivo
+- **Option configuration**:
+  - Recursion (include subfolders)
+  - Filter by file type
+  - Exclusion of specific files
+  - Automatic change monitoring
 
-## Integración con Server Actions
+- **Statistics display**:
+  - Total of monitored Folders
+  - Disk space used
+  - Total number of detected files
+  - Distribution by file type
 
-El componente utiliza server actions para operaciones del sistema de archivos:
+## Integration with routes
 
-- `getFolders`: Obtiene la lista de carpetas monitoreadas
-- `addFolder`: Añade una nueva carpeta al sistema
-- `removeFolder`: Elimina una carpeta del sistema
-- `scanFolder`: Escanea una carpeta en busca de nuevas imágenes
+The component uses HTTP routes for filesystem operations.
 
-## Ejemplo de Uso
+Routes call services.
+
+The operations include the following functions:
+
+- `getFolders`: Gets the list of monitored Folders
+- `addFolder`: Adds a new Folder to the system
+- `removeFolder`: Removes a Folder from the system
+- `scanFolder`: Scans a Folder for new images
+
+## Usage example
 
 ```tsx
-// En una página o layout
+// In a page or layout
 import { FoldersSettings } from '@/components/settings/folders/folders-settings';
 
 export default function FoldersPage() {
 	return (
 		<div className="container mx-auto p-4">
-			<h1 className="text-xl font-bold mb-4">Configuración de Carpetas</h1>
+			<h1 className="text-xl font-bold mb-4">Folder Settings</h1>
 			<FoldersSettings />
 		</div>
 	);
 }
 ```
 
-## Servicios Utilizados
+## Services used
 
-- **ToastService**: Para notificaciones de éxito/error en operaciones
-- **FileSystemService**: Para interactuar con el sistema de archivos
-- **ImageProcessingService**: Para procesar imágenes detectadas
+The component uses the following services:
 
-## Operaciones de Carpetas
+- **ToastService**: Success and error notifications for operations
+- **FileSystemService**: Interaction with the filesystem
+- **ImageProcessingService**: Processing of detected images
 
-El componente implementa varias acciones para gestionar carpetas:
+## Folder operations
+
+The component implements several actions that manage Folders:
 
 ```typescript
-// Ejemplo de acción para escanear una carpeta
+// Example action that scans a Folder
 const handleScanFolder = async (folderId: string) => {
 	try {
 		setScanning(folderId);
 		const result = await scanFolder(folderId);
 
 		if (result.success) {
-			toastService.success(`Se han encontrado ${result.stats.newFiles} archivos nuevos`);
-			loadFolders(); // Recargar estadísticas
+			toastService.success(`Found ${result.stats.newFiles} new files`);
+			loadFolders(); // Reload statistics
 		} else {
-			toastService.error(result.error || 'Error al escanear la carpeta');
+			toastService.error(result.error || 'Error scanning the folder');
 		}
 	} catch (error) {
-		toastService.error('Error al escanear la carpeta');
+		toastService.error('Error scanning the folder');
 	} finally {
 		setScanning(null);
 	}
 };
 ```
 
-## Notas de Implementación
+## Implementation notes
 
-- El acceso al sistema de archivos requiere permisos del usuario
-- Las operaciones de escaneo pueden ser intensivas en recursos
-- Se implementa gestión de errores robusta para problemas de acceso a archivos
-- El componente proporciona feedback visual durante operaciones largas
-- Las estadísticas se actualizan automáticamente tras cada operación
+Access to the filesystem requires user permissions.
 
-# 📄 Settings de Carpetas (`folders-settings.tsx`)
+Scan operations can be resource intensive.
 
-## 📁 Migración a Tipos Canónicos
+The component implements robust error handling for file-access problems.
 
-Este módulo y sus hooks han sido migrados en junio 2024 para usar exclusivamente el tipo canónico `FolderComplete`, eliminando cualquier referencia legacy a `ExtendedFolder`. Esto garantiza consistencia, type safety y compatibilidad futura.
+The component provides visual feedback during long operations.
 
-## 📚 Estructura y Flujo Principal
+Statistics refresh automatically after each operation.
 
-- **Carga de carpetas:** Se obtienen todas las carpetas usando el hook `useFolders` y se almacenan en el estado como `FolderComplete[]`.
-- **Selección y edición:** Al seleccionar una carpeta, se muestra el detalle y se puede editar usando el formulario canónico.
-- **Creación y actualización:** Los handlers usan siempre `FolderComplete` y actualizan el estado global tras cada operación.
-- **Eliminación y reindexado:** Los handlers eliminan o reindexan carpetas y actualizan el estado.
+# Folder settings (`folders-settings.tsx`)
 
-## 🔗 Diagrama de Relaciones
+## Migration to canonical types
+
+This module and its hooks migrated in June 2024 to use only the canonical `FolderComplete` type.
+
+The migration removed any legacy reference to `ExtendedFolder`.
+
+This change guarantees consistency, type safety, and future compatibility.
+
+## Structure and main flow
+
+The main flow includes the following steps:
+
+- **Folder load:** The `useFolders` hook gets all Folders and stores them as `FolderComplete[]`.
+- **Selection and edit:** When a Folder is selected, the detail shows and you can edit it with the canonical form.
+- **Create and update:** Handlers always use `FolderComplete` and update global state after each operation.
+- **Delete and reindex:** Handlers delete or reindex Folders and update state.
+
+## Relation diagram
 
 ```mermaid
 graph TD
-    A[folders-settings.tsx] -->|usa| B(FolderComplete)
-    A -->|usa| C(useFolders)
-    A -->|renderiza| D(FolderForm)
-    A -->|renderiza| E(FolderCard)
-    B -->|define| F(Propiedades extendidas)
+    A[folders-settings.tsx] -->|uses| B(FolderComplete)
+    A -->|uses| C(useFolders)
+    A -->|renders| D(FolderForm)
+    A -->|renders| E(FolderCard)
+    B -->|defines| F(Extended properties)
 ```
 
-## 🧩 Ejemplo de Uso
+## Usage example
 
 ```tsx
 <FoldersSettings />
 ```
 
-## 🚦 Notas
+## Notes
 
-- Todos los datos y props usan `FolderComplete`.
-- Se eliminó cualquier import o type assertion legacy.
-- Documentación y migración conforme a las reglas del workspace.
+All data and props use `FolderComplete`.
+
+Any legacy import or type assertion was removed.
+
+Documentation and migration follow the workspace rules.
 
 ---
 
-_Actualizado: junio 2024_
+_Updated: June 2024_

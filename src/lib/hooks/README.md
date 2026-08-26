@@ -1,18 +1,22 @@
-# Hooks personalizados
+# Custom hooks
 
-Este directorio reúne los hooks de React utilizados en toda la aplicación. Se dividen en:
+This directory collects React hooks that the application uses.
 
-- **entities/**: hooks específicos de entidades (por ejemplo, notas o conceptos).
-- **folder/**: lógica relacionada con la navegación y carga de carpetas.
-- Hooks utilitarios como `useMobile`, `useSettings` o `useProfileTheme`.
+The hooks fall into the following groups:
 
-La mayoría de estos hooks consumen _Server Actions_ o servicios y aprovechan React Query para el manejo de datos asíncronos.
+- **entities/**: Entity-specific hooks for notes or concepts.
+- **folder/**: Folder navigation and load logic.
+- Utility hooks such as `useMobile`, `useSettings`, or `useProfileTheme`.
+
+Most of these hooks consume HTTP routes or services.
+
+The hooks use React Query for asynchronous data.
 
 ```mermaid
 flowchart TD
-    A[Componentes] --> B[Hooks]
-    B --> C[Server Actions]
-    C --> D[Servicios]
+    A[Components] --> B[Hooks]
+    B --> C[Routes]
+    C --> D[Services]
 ```
 
 ```tsx

@@ -1,46 +1,46 @@
-# 🔧 Effect-TS Troubleshooting Guide
+# Effect-TS troubleshooting guide
 
-**Fecha:** 11 de octubre de 2025  
-**Versión:** 1.0  
-**Contexto:** Guía de resolución de problemas comunes en implementación Effect-TS
-
----
-
-## 📋 Índice
-
-1. [Drizzle Integration Issues](EFFECT-TROUBLESHOOTING.md#drizzle-integration-issues)
-2. [Test Environment Issues](EFFECT-TROUBLESHOOTING.md#test-environment-issues)
-3. [Schema Validation Issues](EFFECT-TROUBLESHOOTING.md#schema-validation-issues)
-4. [TaggedError Issues](EFFECT-TROUBLESHOOTING.md#taggederror-issues)
-5. [Performance Issues](EFFECT-TROUBLESHOOTING.md#performance-issues)
-6. [Type Issues](EFFECT-TROUBLESHOOTING.md#type-issues)
+**Date:** 11 October 2025  
+**Version:** 1.0  
+**Context:** Guide for common problems in Effect-TS implementation
 
 ---
 
-## 🗃️ Drizzle Integration Issues
+## Contents
 
-### Issue 1: "then is not a function" en Effect.tryPromise
+1. [Drizzle integration issues](#drizzle-integration-issues)
+2. [Test environment issues](#test-environment-issues)
+3. [Schema validation issues](#schema-validation-issues)
+4. [TaggedError issues](#taggederror-issues)
+5. [Performance issues](#performance-issues)
+6. [Type issues](#type-issues)
 
-**Síntoma:**
+---
+
+## Drizzle integration issues
+
+### Issue 1: "then is not a function" in Effect.tryPromise
+
+**Symptom:**
 
 ```
 TypeError: evaluate().then is not a function
 ```
 
-**Causa:**
-Drizzle con driver `libsql` retorna query builders "thenable" (tienen método `.then()`) pero no son verdaderas Promises hasta que se esperan.
+**Cause:**
+Drizzle with the `libsql` driver returns thenable query builders. They have a `.then()` method. They are not true Promises until they are awaited.
 
-**Solución:**
+**Solution:**
 
 ```typescript
-// ❌ INCORRECTO
+// INCORRECT
 const result =
 	yield *
 	Effect.tryPromise({
 		try: () => db.select().from(albums).where(eq(albums.id, id)),
 	});
 
-// ✅ CORRECTO
+// CORRECT
 const result =
 	yield *
 	Effect.tryPromise({
@@ -49,38 +49,38 @@ const result =
 	});
 ```
 
-**Explicación:**
+**Explanation:**
 
-- `async () => await query` fuerza la resolución de la Promise
-- El `await` convierte el thenable en Promise real
-- Effect.tryPromise necesita una función que retorne Promise, no thenable
+- `async () => await query` forces Promise resolution.
+- The `await` converts the thenable into a real Promise.
+- Effect.tryPromise needs a function that returns a Promise, not a thenable.
 
-**Aplicar a:** Todas las operaciones de base de datos con Drizzle + libsql
+**Apply to:** All database operations with Drizzle + libsql
 
 ---
 
-### Issue 2: Query ejecuta pero retorna array vacío
+### Issue 2: Query runs but returns an empty array
 
-**Síntoma:**
+**Symptom:**
 
 ```typescript
 const albums = await service.create({ name: 'Test' });
 console.log(albums); // []
 ```
 
-**Causa:**
-El query se ejecuta pero en base de datos incorrecta (mock en lugar de real).
+**Cause:**
+The query runs against the wrong database (mock instead of real).
 
-**Diagnóstico:**
+**Diagnosis:**
 
 ```typescript
-// Agregar logs temporales
+// Add temporary logs
 console.log('[DEBUG] DB Client type:', db.constructor.name);
 console.log('[DEBUG] Insert result:', result);
 ```
 
-**Solución:**
-Verificar que la detección de environment use DB real en tests:
+**Solution:**
+Verify that environment detection uses the real DB in tests:
 
 ```typescript
 const isServerOrTest =
@@ -90,94 +90,94 @@ const isServerOrTest =
 
 ---
 
-## 🧪 Test Environment Issues
+## Test environment issues
 
-### Issue 3: Tests usan mock DB cuando deberían usar real
+### Issue 3: Tests use a mock DB when they must use a real one
 
-**Síntoma:**
-Tests insertan datos pero queries SELECT retornan vacío. IDs generados como "mock-id-XXX".
+**Symptom:**
+Tests insert data, but SELECT queries return empty. Generated IDs look like "mock-id-XXX".
 
-**Causa:**
-`tests/setup.ts` define `window` global para jsdom, rompiendo la condición `typeof window === 'undefined'`.
+**Cause:**
+`tests/setup.ts` defines a global `window` for jsdom. That breaks the `typeof window === 'undefined'` condition.
 
-**Solución:**
-En `src/lib/drizzle/index.ts`:
+**Solution:**
+In `src/lib/drizzle/index.ts`:
 
 ```typescript
-// ❌ INCORRECTO
+// INCORRECT
 if (typeof window === 'undefined') {
-	// Servidor: usa DB real
+	// Server: uses real DB
 } else {
-	// Browser: usa mock
+	// Browser: uses mock
 }
 
-// ✅ CORRECTO
+// CORRECT
 const isServerOrTest =
 	typeof process !== 'undefined' &&
 	(typeof window === 'undefined' || process.env.NODE_ENV === 'test' || typeof (globalThis as any).Bun !== 'undefined');
 
 if (isServerOrTest) {
-	// Servidor o test: usa DB real
+	// Server or test: uses real DB
 } else {
-	// Browser: usa mock
+	// Browser: uses mock
 }
 ```
 
-**Verificación:**
+**Verification:**
 
 ```bash
 bun test src/services/album/__tests__/album.service.effect.test.ts
 
-# Logs deben mostrar IDs reales:
-# ✅ "juO3ZL-S7P3gZe_xoqQl-"
-# ❌ "mock-id-1234567890"
+# Logs must show real IDs:
+# "juO3ZL-S7P3gZe_xoqQl-"
+# not "mock-id-1234567890"
 ```
 
 ---
 
-### Issue 4: Tests fallan con "window is not defined"
+### Issue 4: Tests fail with "window is not defined"
 
-**Síntoma:**
+**Symptom:**
 
 ```
 ReferenceError: window is not defined
 ```
 
-**Causa:**
-Código ejecutándose en Node.js/Bun intenta acceder a `window`.
+**Cause:**
+Code running in Node.js or Bun tries to access `window`.
 
-**Solución:**
-Usar detección defensiva:
+**Solution:**
+Use defensive detection:
 
 ```typescript
-// ❌ INCORRECTO
+// INCORRECT
 if (window.location.href) {
-	// código browser
+	// browser code
 }
 
-// ✅ CORRECTO
+// CORRECT
 if (typeof window !== 'undefined' && window.location?.href) {
-	// código browser
+	// browser code
 }
 ```
 
 ---
 
-## 📝 Schema Validation Issues
+## Schema validation issues
 
 ### Issue 5: "Expected UUID, actual [nanoid]"
 
-**Síntoma:**
+**Symptom:**
 
 ```
 AlbumValidationError: Expected UUID, actual "juO3ZL-S7P3gZe_xoqQl-"
 ```
 
-**Causa:**
-Schema usa tipo `UUID` estricto (formato `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`) pero la DB genera IDs con nanoid (21 chars alphanumeric).
+**Cause:**
+The schema uses a strict `UUID` type (format `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`). The DB generates IDs with nanoid (21 alphanumeric chars).
 
-**Solución:**
-Crear tipo `ID` genérico en `src/lib/effect/schemas/common.ts`:
+**Solution:**
+Create a generic `ID` type in `src/lib/effect/schemas/common.ts`:
 
 ```typescript
 export const ID = Schema.String.pipe(Schema.minLength(1), Schema.maxLength(30)).annotations({
@@ -187,112 +187,113 @@ export const ID = Schema.String.pipe(Schema.minLength(1), Schema.maxLength(30)).
 });
 ```
 
-Actualizar schemas de entidades:
+Update entity schemas:
 
 ```typescript
-// ❌ INCORRECTO
+// INCORRECT
 export const Album = Schema.Struct({
-	id: UUID, // Muy estricto
+	id: UUID, // Too strict
 	// ...
 });
 
-// ✅ CORRECTO
+// CORRECT
 export const Album = Schema.Struct({
-	id: ID, // Acepta nanoid
+	id: ID, // Accepts nanoid
 	// ...
 });
 ```
 
-**Cuándo usar cada uno:**
+**When to use each one:**
 
-- `ID`: Para primary keys generadas con nanoid (mayoría de casos)
-- `UUID`: Solo si el ID debe ser específicamente UUID v4 format
+- `ID`: For primary keys generated with nanoid (most cases)
+- `UUID`: Only if the ID must be specifically UUID v4 format
 
 ---
 
-### Issue 6: Schema.decodeUnknownSync con Effect.tryPromise
+### Issue 6: Schema.decodeUnknownSync with Effect.tryPromise
 
-**Síntoma:**
+**Symptom:**
 
 ```
 Error: decodeUnknownSync is not async but wrapped in tryPromise
 ```
 
-**Causa:**
-`Schema.decodeUnknownSync` es síncrono, no debe usar `Effect.tryPromise`.
+**Cause:**
+`Schema.decodeUnknownSync` is synchronous. Do not wrap it in `Effect.tryPromise`.
 
-**Solución:**
+**Solution:**
 
 ```typescript
-// ❌ INCORRECTO - tryPromise para sync
+// INCORRECT - tryPromise for sync
 const validated = yield* Effect.tryPromise({
   try: () => Schema.decodeUnknownSync(Album)(data),
   catch: (error) => new ValidationError(...)
 });
 
-// ✅ CORRECTO - Effect.try para sync
+// CORRECT - Effect.try for sync
 const validated = yield* Effect.try({
   try: () => Schema.decodeUnknownSync(Album)(data),
   catch: (error) => new AlbumValidationError({
     field: 'album',
-    message: 'Error validando datos',
+    message: 'Error validating data',
     value: data,
   }),
 });
 ```
 
-**Regla general:**
+**General rule:**
 
-- `Effect.tryPromise` → Operaciones **asíncronas** (DB, HTTP, File I/O)
-- `Effect.try` → Operaciones **síncronas** (validación, parsing, transform)
+- `Effect.tryPromise` for **asynchronous** operations (DB, HTTP, file I/O)
+- `Effect.try` for **synchronous** operations (validation, parsing, transform)
 
 ---
 
-## ⚠️ TaggedError Issues
+## TaggedError issues
 
-### Issue 7: displayMessage retorna string vacío
+### Issue 7: displayMessage returns an empty string
 
-**Síntoma:**
+**Symptom:**
 
 ```typescript
 const error = new AlbumNotFound({ albumId: 'test-123' });
-console.log(error.displayMessage); // ""  ← vacío!
+console.log(error.displayMessage); // ""  ← empty
 ```
 
-**Causa:**
-Campo opcional `message?: string` no existe en instancia si no se provee. El getter falla silenciosamente.
+**Cause:**
+The optional field `message?: string` does not exist on the instance if it is not provided. The getter fails silently.
 
-**Solución:**
+**Solution:**
 
 ```typescript
-// ❌ INCORRECTO - campo opcional causa problemas
+// INCORRECT - optional field causes problems
 export class AlbumNotFound extends Data.TaggedError('AlbumNotFound')<{
 	readonly albumId: string;
-	readonly message?: string; // Opcional problemático
+	readonly message?: string; // Problematic optional
 }> {
 	get displayMessage(): string {
-		return this.message ?? `Album no encontrado: ${this.albumId}`;
+		return this.message ?? `Album not found: ${this.albumId}`;
 	}
 }
 
-// ✅ CORRECTO - solo campos requeridos
+// CORRECT - required fields only
 export class AlbumNotFound extends Data.TaggedError('AlbumNotFound')<{
-	readonly albumId: string; // Solo requerido
+	readonly albumId: string; // Required only
 }> {
 	get displayMessage(): string {
-		return `Album no encontrado: ${this.albumId}`;
+		return `Album not found: ${this.albumId}`;
 	}
 }
 ```
 
-**Regla:**
+**Rule:**
 
-- **NO usar campos opcionales** en getters de TaggedError
-- Si necesitas mensaje custom, hazlo campo **requerido**:
+- Do not use optional fields in TaggedError getters.
+- If you need a custom message, make it a **required** field:
+
   ```typescript
   export class CustomError extends Data.TaggedError('CustomError')<{
   	readonly context: string;
-  	readonly customMessage: string; // Requerido, no opcional
+  	readonly customMessage: string; // Required, not optional
   }> {
   	get displayMessage(): string {
   		return `${this.context}: ${this.customMessage}`;
@@ -302,19 +303,19 @@ export class AlbumNotFound extends Data.TaggedError('AlbumNotFound')<{
 
 ---
 
-### Issue 8: Error no se puede serializar JSON
+### Issue 8: Error cannot be serialized to JSON
 
-**Síntoma:**
+**Symptom:**
 
 ```
 Error: Cannot convert circular structure to JSON
 ```
 
-**Causa:**
-TaggedError con referencias circulares o métodos no serializables.
+**Cause:**
+TaggedError with circular references or methods that cannot be serialized.
 
-**Solución:**
-Agregar método `toJSON`:
+**Solution:**
+Add a `toJSON` method:
 
 ```typescript
 export class AlbumError extends Data.TaggedError('AlbumError')<{
@@ -322,7 +323,7 @@ export class AlbumError extends Data.TaggedError('AlbumError')<{
 	readonly details: unknown;
 }> {
 	get displayMessage(): string {
-		return `Error con álbum: ${this.albumId}`;
+		return `Error with album: ${this.albumId}`;
 	}
 
 	toJSON() {
@@ -330,7 +331,7 @@ export class AlbumError extends Data.TaggedError('AlbumError')<{
 			_tag: this._tag,
 			albumId: this.albumId,
 			message: this.displayMessage,
-			// Evitar serializar 'details' si puede tener referencias circulares
+			// Avoid serializing 'details' if it can have circular references
 		};
 	}
 }
@@ -338,14 +339,14 @@ export class AlbumError extends Data.TaggedError('AlbumError')<{
 
 ---
 
-## 🐌 Performance Issues
+## Performance issues
 
-### Issue 9: Validación muy lenta en requests
+### Issue 9: Validation is very slow in requests
 
-**Síntoma:**
-Request toma >100ms adicionales después de agregar validación Effect.
+**Symptom:**
+The request takes more than 100ms extra after Effect validation is added.
 
-**Diagnóstico:**
+**Diagnosis:**
 
 ```typescript
 const start = performance.now();
@@ -357,60 +358,60 @@ const validated =
 console.log(`Validation took: ${performance.now() - start}ms`);
 ```
 
-**Soluciones:**
+**Solutions:**
 
-**A) Usar decode en lugar de decodeUnknownSync:**
+**A) Use decode instead of decodeUnknownSync:**
 
 ```typescript
-// Más rápido si data ya está parcialmente validada
+// Faster if data is already partially validated
 Schema.decode(Album)(data);
 ```
 
-**B) Cache de schemas compilados:**
+**B) Cache of compiled schemas:**
 
 ```typescript
-// Compilar schema una vez
+// Compile the schema once
 const decodeAlbum = Schema.decodeUnknownSync(Album);
 
-// Reutilizar función compilada
+// Reuse the compiled function
 const validated = decodeAlbum(data);
 ```
 
-**C) Validación lazy para fields grandes:**
+**C) Lazy validation for large fields:**
 
 ```typescript
 export const AlbumWithLargeMetadata = Schema.Struct({
 	id: ID,
 	name: NonEmptyString,
-	metadata: Schema.Lazy(() => LargeMetadataSchema), // Solo valida si se accede
+	metadata: Schema.Lazy(() => LargeMetadataSchema), // Validates only if accessed
 });
 ```
 
 ---
 
-### Issue 10: Memory leak en tests
+### Issue 10: Memory leak in tests
 
-**Síntoma:**
-Tests consumen cada vez más memoria, eventualmente fallan con OOM.
+**Symptom:**
+Tests consume more and more memory. They eventually fail with OOM.
 
-**Causa:**
-Datos no limpiados entre tests, referencias retenidas.
+**Cause:**
+Data is not cleaned between tests. References are retained.
 
-**Solución:**
+**Solution:**
 
 ```typescript
 describe('AlbumService', () => {
 	afterEach(async () => {
-		// Limpiar tablas
+		// Clean tables
 		await db.delete(albums);
 		await db.delete(imageAlbums);
 
-		// Si usas cache o stores
+		// If you use cache or stores
 		cache.clear();
 	});
 
 	afterAll(async () => {
-		// Cerrar conexiones
+		// Close connections
 		await db.close();
 	});
 });
@@ -418,31 +419,31 @@ describe('AlbumService', () => {
 
 ---
 
-## 🔤 Type Issues
+## Type issues
 
-### Issue 11: Type mismatch entre Effect.gen y función normal
+### Issue 11: Type mismatch between Effect.gen and a normal function
 
-**Síntoma:**
+**Symptom:**
 
 ```
 Type 'Effect<Album, AlbumError, AlbumService>' is not assignable to type 'Promise<Album>'
 ```
 
-**Causa:**
-Mezclar Effect y async/await sin conversión.
+**Cause:**
+Mixing Effect and async/await without conversion.
 
-**Solución:**
+**Solution:**
 
 ```typescript
-// ❌ INCORRECTO - Effect sin ejecutar
+// INCORRECT - Effect without execution
 async function getAlbum(id: string): Promise<Album> {
 	return Effect.gen(function* () {
 		const service = yield* AlbumService;
 		return yield* service.getById(id);
-	}); // Retorna Effect, no Promise
+	}); // Returns Effect, not Promise
 }
 
-// ✅ CORRECTO - Ejecutar Effect con runPromise
+// CORRECT - Run Effect with runPromise
 async function getAlbum(id: string): Promise<Album> {
 	const effect = Effect.gen(function* () {
 		const service = yield* AlbumService;
@@ -457,25 +458,25 @@ async function getAlbum(id: string): Promise<Album> {
 
 ### Issue 12: Cannot find name 'yield\*'
 
-**Síntoma:**
+**Symptom:**
 
 ```
 Error: Cannot find name 'yield'
 Property 'yield' does not exist
 ```
 
-**Causa:**
-Función no es generator o falta `function*`.
+**Cause:**
+The function is not a generator, or `function*` is missing.
 
-**Solución:**
+**Solution:**
 
 ```typescript
-// ❌ INCORRECTO - función normal
+// INCORRECT - normal function
 Effect.gen(() => {
-	const service = yield * AlbumService; // Error!
+	const service = yield * AlbumService; // Error
 });
 
-// ✅ CORRECTO - función generator
+// CORRECT - generator function
 Effect.gen(function* () {
 	const service = yield* AlbumService; // OK
 });
@@ -483,45 +484,45 @@ Effect.gen(function* () {
 
 ---
 
-## 📚 Checklist General de Troubleshooting
+## General troubleshooting checklist
 
-Cuando encuentres un error Effect:
+When you find an Effect error:
 
-1. **Verificar tipo de operación:**
-   - [ ] ¿Es async? → `Effect.tryPromise`
-   - [ ] ¿Es sync? → `Effect.try`
-   - [ ] ¿DB query? → Agregar `async () => await`
+1. **Verify the operation type:**
+   - [ ] Is it async? Use `Effect.tryPromise`.
+   - [ ] Is it sync? Use `Effect.try`.
+   - [ ] Is it a DB query? Add `async () => await`.
 
-2. **Verificar environment:**
-   - [ ] ¿Tests usan DB real? → Check `isServerOrTest`
-   - [ ] ¿Logs muestran IDs correctos? → Debe ser nanoid, no "mock-id"
+2. **Verify the environment:**
+   - [ ] Do tests use a real DB? Check `isServerOrTest`.
+   - [ ] Do logs show correct IDs? They must be nanoid, not "mock-id".
 
-3. **Verificar schemas:**
-   - [ ] ¿IDs usan tipo correcto? → `ID` no `UUID`
-   - [ ] ¿Schema compila correctamente? → Test con `Schema.decodeUnknownSync`
+3. **Verify schemas:**
+   - [ ] Do IDs use the correct type? Use `ID`, not `UUID`.
+   - [ ] Does the schema compile correctly? Test with `Schema.decodeUnknownSync`.
 
-4. **Verificar errors:**
-   - [ ] ¿TaggedError sin campos opcionales? → Solo requeridos
-   - [ ] ¿displayMessage funciona? → Test manualmente
+4. **Verify errors:**
+   - [ ] Is TaggedError free of optional fields? Use required fields only.
+   - [ ] Does displayMessage work? Test it manually.
 
-5. **Verificar tests:**
-   - [ ] ¿Cleanup después de cada test? → `afterEach(() => db.delete(...))`
-   - [ ] ¿Helpers reutilizables? → `runEffect` y `runEffectExpectFailure`
+5. **Verify tests:**
+   - [ ] Is there cleanup after each test? Use `afterEach(() => db.delete(...))`.
+   - [ ] Are helpers reusable? Use `runEffect` and `runEffectExpectFailure`.
 
 ---
 
-## 🔗 Referencias
+## References
+
+The following references support this guide:
 
 - [Effect Documentation](https://effect.website/docs/introduction)
 - [Drizzle ORM Docs](https://orm.drizzle.team/docs/overview)
 - [Effect Schema Guide](https://effect.website/docs/schema/introduction)
-- Implementación: `docs/EFFECT-PHASE-2-PLAN.md`
-- Patrones: Sección "Patrones Críticos Descubiertos"
+- Implementation: `docs/EFFECT-PHASE-2-PLAN.md`
+- Patterns: section "Critical patterns discovered"
 
 ---
 
-**Última actualización:** 2025-10-11  
-**Mantenido por:** Equipo Effect Implementation  
-**Contribuir:** Agregar issues encontrados con soluciones verificadas
-
-☄️☄️☄️☄️
+**Last update:** 2025-10-11  
+**Maintained by:** Effect Implementation team  
+**Contribute:** Add found issues with verified solutions

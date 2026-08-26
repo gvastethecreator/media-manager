@@ -1,33 +1,39 @@
-# Editor Markdown minimalista
+# Minimal Markdown editor
 
-Esta vista permite editar y previsualizar archivos Markdown usando `@uiw/react-md-editor`.
+This view edits and previews Markdown files with `@uiw/react-md-editor`.
 
-## Características
+## Features
 
-- Edición WYSIWYG y preview en vivo.
-- Botón de guardar (puede conectarse a persistencia real).
-- Import dinámico para compatibilidad SSR.
+The editor provides the following capabilities:
 
-## Ejemplo de uso
+- WYSIWYG editing and live preview.
+- Save button that can connect to real persistence.
+- Dynamic import for SSR compatibility.
+
+## Usage example
 
 ```tsx
-<MdEditor initialValue={'# Título\nTexto'} onSave={console.log} />
+<MdEditor initialValue={'# Title\nText'} onSave={console.log} />
 ```
 
-## Dependencias
+## Dependencies
 
-- `@uiw/react-md-editor` (agregar con `bun add @uiw/react-md-editor`)
+The editor depends on the following package:
 
-## Extensiones futuras
+- `@uiw/react-md-editor` (add with `bun add @uiw/react-md-editor`)
 
-- Soporte para imágenes, tablas y shortcuts.
-- Integración con persistencia y control de versiones.
+## Future extensions
+
+The following extensions are planned:
+
+- Support for images, tables, and shortcuts.
+- Integration with persistence and version control.
 
 ---
 
 ```mermaid
 graph TD
-    A[MdEditor] --> B[Edición]
+    A[MdEditor] --> B[Editing]
     A --> C[Preview]
     B --> D[onSave]
 ```

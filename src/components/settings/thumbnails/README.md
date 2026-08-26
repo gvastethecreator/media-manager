@@ -1,39 +1,41 @@
-# Módulo Thumbnails Settings
+# Thumbnails settings module
 
-## Descripción
+## Description
 
-El módulo Thumbnails Settings proporciona una interfaz para configurar y gestionar las miniaturas de imágenes en la aplicación. Permite controlar la calidad de las miniaturas, gestionar la animación de miniaturas de video, y realizar operaciones de mantenimiento como optimización, reprocesamiento y limpieza.
+The Thumbnails Settings module provides an interface that configures and manages image thumbnails.
 
-## Estructura de Archivos
+The module controls thumbnail quality, video thumbnail animation, and maintenance operations such as optimize, reprocess, and clean.
+
+## File structure
 
 ```
 src/components/settings/thumbnails/
-├── thumbnails-settings.tsx   # Componente principal con la interfaz de usuario
-└── README.md                 # Documentación del módulo
+├── thumbnails-settings.tsx   # Main component with the user interface
+└── README.md                 # Module documentation
 ```
 
-## Diagrama de Flujo
+## Flow diagram
 
 ```mermaid
 graph TD
-    A[ThumbnailsSettings Component] --> B{Inicialización}
-    B --> C[Cargar Configuración]
+    A[ThumbnailsSettings Component] --> B{Initialization}
+    B --> C[Load configuration]
     C --> D[useSettings Hook]
-    D --> E[Mostrar Opciones]
+    D --> E[Show options]
 
     A --> F[handleQualityChange]
-    F --> G[updateSettings Server Action]
-    G --> H{Resultado}
-    H -->|Éxito| I[Mostrar Toast Éxito]
-    H -->|Error| J[Mostrar Toast Error]
+    F --> G[updateSettings route]
+    G --> H{Result}
+    H -->|Success| I[Show success toast]
+    H -->|Error| J[Show error toast]
 
     A --> K[handleVideoAnimationToggle]
-    K --> L[updateSettings Server Action]
-    L --> M{Resultado}
-    M -->|Éxito| N[Mostrar Toast Éxito]
-    M -->|Error| O[Mostrar Toast Error]
+    K --> L[updateSettings route]
+    L --> M{Result}
+    M -->|Success| N[Show success toast]
+    M -->|Error| O[Show error toast]
 
-    A --> P[Operaciones de Mantenimiento]
+    A --> P[Maintenance operations]
     P --> Q1[handleOptimizeThumbnails]
     P --> Q2[handleReprocessThumbnails]
     P --> Q3[handleCleanThumbnails]
@@ -46,73 +48,81 @@ graph TD
     R2 --> S
     R3 --> S
 
-    S --> T[Mostrar Progreso]
-    T --> U[Actualizar UI]
+    S --> T[Show progress]
+    T --> U[Update UI]
 ```
 
-## Características
+## Features
 
-- **Configuración de Calidad**:
-  - Selección del nivel de calidad de las miniaturas (baja, media, alta, original)
-  - Impacto visual de cada nivel de calidad en tamaño de archivo y nitidez
+The module provides the following features:
 
-- **Configuración de Animación de Videos**:
-  - Activación/desactivación de animaciones en miniaturas de video
-  - Mejora de rendimiento con opciones personalizables
+- **Quality configuration**:
+  - Selection of thumbnail quality (low, medium, high, original)
+  - Visual impact of each quality level on file size and sharpness
 
-- **Operaciones de Mantenimiento**:
-  - Optimización de miniaturas existentes
-  - Reprocesamiento de miniaturas
-  - Limpieza de miniaturas huérfanas o dañadas
+- **Video animation configuration**:
+  - Enable or disable animation on video thumbnails
+  - Performance improvement with customizable options
 
-- **Monitoreo de Progreso**:
-  - Visualización en tiempo real del progreso de operaciones
-  - Estadísticas detalladas de la operación en curso
+- **Maintenance operations**:
+  - Optimization of existing thumbnails
+  - Reprocessing of thumbnails
+  - Cleanup of orphaned or damaged thumbnails
 
-## Integración con la Configuración Global
+- **Progress monitoring**:
+  - Real-time display of operation progress
+  - Detailed statistics of the current operation
 
-El componente utiliza el hook `useSettings` para acceder y modificar la configuración global de la aplicación:
+## Integration with global settings
+
+The component uses the `useSettings` hook to access and change the global application configuration:
 
 ```typescript
 const { settings, updateSettings } = useSettings();
 ```
 
-## Ejemplo de Uso
+## Usage example
 
 ```tsx
-// En una página o layout
+// In a page or layout
 import { ThumbnailsSettings } from '@/components/settings/thumbnails/thumbnails-settings';
 
 export default function ThumbnailsPage() {
 	return (
 		<div className="container mx-auto p-4">
-			<h1 className="text-xl font-bold mb-4">Configuración de Miniaturas</h1>
+			<h1 className="text-xl font-bold mb-4">Thumbnail Settings</h1>
 			<ThumbnailsSettings />
 		</div>
 	);
 }
 ```
 
-## Servicios Utilizados
+## Services used
 
-- **ToastService**: Para notificaciones de éxito/error en operaciones
-- **ThumbnailActions**: Para operaciones específicas de miniaturas (optimizar, reprocesar, limpiar)
-- **SettingsContext**: Para acceder y modificar la configuración global
+The component uses the following services:
 
-## Acciones de Miniaturas
+- **ToastService**: Success and error notifications for operations
+- **ThumbnailActions**: Thumbnail operations (optimize, reprocess, clean)
+- **SettingsContext**: Access and change of global configuration
 
-El componente implementa varias acciones para gestionar las miniaturas:
+## Thumbnail actions
+
+The component implements several actions that manage thumbnails:
 
 ```typescript
-// Ejemplo de acción para optimizar miniaturas
+// Example action that optimizes thumbnails
 const handleOptimizeThumbnails = () =>
-	handleThumbnailProcess((callbacks) => thumbnailActions.optimizeThumbnails(callbacks), 'Optimización');
+	handleThumbnailProcess((callbacks) => thumbnailActions.optimizeThumbnails(callbacks), 'Optimization');
 ```
 
-## Notas de Implementación
+## Implementation notes
 
-- Las operaciones de mantenimiento pueden ser intensivas en recursos y tomar tiempo
-- El componente proporciona feedback visual durante operaciones largas
-- Se implementan mecanismos para cancelar operaciones en progreso
-- Los cambios en la calidad afectan a las nuevas miniaturas generadas
-- El reprocesamiento regenera todas las miniaturas existentes
+Maintenance operations can be resource intensive and take time.
+
+The component provides visual feedback during long operations.
+
+The component implements mechanisms that cancel operations in progress.
+
+Quality changes affect newly generated thumbnails.
+
+Reprocessing regenerates all existing thumbnails.

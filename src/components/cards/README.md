@@ -1,255 +1,273 @@
-# 🎴 Sistema de Tarjetas (Cards) - Image Manager
+# Card system - Media Manager
 
-## 📊 Estado Actual: **20/20 COMPLETADO (100%)**
+## Current status: 20/20 complete (100%)
 
-Este directorio contiene todas las tarjetas de entidad implementadas siguiendo el patrón **TCG (Trading Card Game)** con efectos visuales avanzados y funcionalidades específicas por tipo de entidad.
+This directory contains all implemented entity cards.
 
----
-
-## 🏗️ **Arquitectura del Sistema**
-
-### **Componente Dispatcher**
-
-- **`entity-card.tsx`**: Router principal que selecciona la tarjeta correcta basándose en `entityType`
-- **Mapeo completo**: Todas las 20 entidades están mapeadas correctamente
-
-### **Patrón de Diseño TCG**
-
-Todas las tarjetas siguen un diseño consistente inspirado en cartas de juego:
-
-- **Efectos holográficos** en hover
-- **Gradientes dinámicos** basados en el tipo/formato
-- **Animaciones fluidas** con motion/react
-- **Indicadores de favoritos** con brillo dorado
-- **Estadísticas visuales** en formato de carta
+The cards follow the **TCG (Trading Card Game)** pattern with advanced visual effects and features specific to each entity type.
 
 ---
 
-## ✅ **Entidades Completadas (20/20)**
+## System architecture
 
-### **🎯 Entidades Principales (15/15)**
+### Dispatcher component
 
-#### 1. **ImageCard** - `image-card/` ✅
+The dispatcher has the following roles:
 
-- **Características**: Preview de imagen, metadatos EXIF, zoom
-- **Efectos**: Brillo holográfico, transiciones suaves
-- **Estado**: **Excelente** - Implementación completa
+- **`entity-card.tsx`**: Main router that selects the correct card from `entityType`
+- **Complete mapping**: All 20 entities are mapped correctly
 
-#### 2. **VideoCard** - `video-card/` ✅
+### TCG design pattern
 
-- **Características**: Player integrado, controles, duración
-- **Efectos**: Ondas de reproducción, indicadores de estado
-- **Estado**: **Excelente** - Player funcional
+All cards follow a consistent design inspired by game cards.
 
-#### 3. **AlbumCard** - `album-card/` ✅
+The design includes the following elements:
 
-- **Características**: Grid de imágenes recientes, estadísticas
-- **Efectos**: Mosaico dinámico, contadores animados
-- **Estado**: **Excelente** - Vista de colección
-
-#### 4. **CollectionCard** - `collection-card/` ✅
-
-- **Características**: Preview de contenido, metadatos
-- **Efectos**: Gradientes por categoría, animaciones
-- **Estado**: **Excelente** - Organización visual
-
-#### 5. **CharacterCard** - `character-card/` ✅
-
-- **Características**: Avatar, estadísticas TCG, rareza
-- **Efectos**: Efectos de rareza, brillo especial
-- **Estado**: **Excelente** - Diseño TCG avanzado
-
-#### 6. **ConceptCard** - `concept-card/` ✅
-
-- **Características**: Visualización de ideas, relaciones
-- **Efectos**: Conexiones animadas, mapas mentales
-- **Estado**: **Excelente** - Creatividad visual
-
-#### 7. **NoteCard** - `note-card/` ✅
-
-- **Características**: Preview de contenido, markdown
-- **Efectos**: Papel vintage, tipografía elegante
-- **Estado**: **Excelente** - Estilo cuaderno
-
-#### 8. **PromptCard** - `prompt-card/` ✅
-
-- **Características**: Texto de prompt, tokens, categoría
-- **Efectos**: Efectos de IA, gradientes futuristas
-- **Estado**: **Excelente** - Tema AI/ML
-
-#### 9. **FolderCard** - `folder-card/` ✅
-
-- **Características**: Contenido, jerarquía, navegación
-- **Efectos**: Apertura animada, depth visual
-- **Estado**: **Excelente** - Navegación intuitiva
-
-#### 10. **GroupCard** - `group-card/` ✅
-
-- **Características**: Miembros, estadísticas grupales
-- **Efectos**: Clustering visual, conexiones
-- **Estado**: **Excelente** - Organización social
-
-#### 11. **WorldItemCard** - `world-item-card/` ✅
-
-- **Características**: Objetos 3D, propiedades físicas
-- **Efectos**: Rotación 3D, materiales
-- **Estado**: **Excelente** - Inmersión 3D
-
-#### 12. **PlaceCard** - `place-card/` ✅
-
-- **Características**: Ubicación, coordenadas, mapa
-- **Efectos**: Pin animado, zoom geográfico
-- **Estado**: **Excelente** - Geolocalización
-
-#### 13. **WildcardCard** - `wildcard-card/` ✅
-
-- **Características**: Contenido dinámico, adaptativo
-- **Efectos**: Morphing, adaptación visual
-- **Estado**: **Excelente** - Flexibilidad total
-
-#### 14. **TagCard** - `tag-card/` ✅
-
-- **Características**: Etiquetas, categorización, colores
-- **Efectos**: Bubble effects, agrupación
-- **Estado**: **Excelente** - Sistema de tags
-
-#### 15. **PropertyCard** - `property-card/` ✅
-
-- **Características**: Propiedades clave-valor, tipos
-- **Efectos**: Validación visual, tipos dinámicos
-- **Estado**: **Excelente** - Metadatos estructurados
-
-### **🎵 Entidades de Media (5/5)**
-
-#### 16. **AudioCard** - `audio-card/` ✅ **NUEVA**
-
-- **Características**: Player integrado, waveform, controles
-- **Efectos**: Ondas sonoras, visualización de audio
-- **Formatos**: MP3, WAV, FLAC, OGG, M4A
-- **Estado**: **Excelente** - Player completo
-
-#### 17. **DocumentCard** - `document-card/` ✅ **NUEVA**
-
-- **Características**: Preview, metadatos, acciones
-- **Efectos**: Colores por formato, indicadores de páginas
-- **Formatos**: PDF, DOC, DOCX, TXT, MD
-- **Estado**: **Excelente** - Gestión de documentos
-
-#### 18. **JsonFileCard** - `json-file-card/` ✅ **NUEVA**
-
-- **Características**: Preview JSON, validación, estadísticas
-- **Efectos**: Indicadores de validez, syntax highlighting
-- **Funciones**: Parser integrado, conteo de claves
-- **Estado**: **Excelente** - Manejo de datos
-
-#### 19. **File3DCard** - `file3d-card/` ✅ **NUEVA**
-
-- **Características**: Viewer 3D, rotación, complejidad
-- **Efectos**: Rotación automática, gradientes por formato
-- **Formatos**: GLB, GLTF, OBJ, FBX, DAE, PLY, 3DS
-- **Estado**: **Excelente** - Visualización 3D
-
-#### 20. **UploadedImageCard** - `uploaded-image-card/` ✅ **NUEVA**
-
-- **Características**: Preview, procesamiento, metadatos
-- **Efectos**: Estados de procesamiento, indicadores
-- **Funciones**: Hash, dimensiones, categorización
-- **Estado**: **Excelente** - Gestión de uploads
+- Holographic effects on hover
+- Dynamic gradients based on type or format
+- Fluid animations with motion/react
+- Favorite indicators with a gold glow
+- Visual statistics in card format
 
 ---
 
-## 🎨 **Características Técnicas**
+## Completed entities (20/20)
 
-### **Efectos TCG Implementados**
+### Main entities (15/15)
 
-- ✅ **Gradientes dinámicos** por tipo/formato
-- ✅ **Efectos holográficos** en hover
-- ✅ **Animaciones fluidas** con motion/react
-- ✅ **Brillo dorado** para favoritos
-- ✅ **Barras de progreso** temáticas
-- ✅ **Indicadores de estado** visuales
-- ✅ **Transiciones suaves** entre estados
+#### 1. ImageCard - `image-card/`
 
-### **Funcionalidades Avanzadas**
+- **Features**: Image preview, EXIF metadata, zoom
+- **Effects**: Holographic glow, smooth transitions
+- **Status**: Excellent - complete implementation
 
-- ✅ **Players integrados** (Audio, Video)
-- ✅ **Viewers especializados** (3D, JSON, Imágenes)
-- ✅ **Validación en tiempo real** (JSON, Documentos)
-- ✅ **Metadatos dinámicos** por tipo
-- ✅ **Acciones contextuales** por entidad
-- ✅ **Estados de carga** optimizados
-- ✅ **Gestión de errores** elegante
+#### 2. VideoCard - `video-card/`
 
-### **Optimizaciones de Rendimiento**
+- **Features**: Integrated player, controls, duration
+- **Effects**: Playback waves, status indicators
+- **Status**: Excellent - functional player
 
-- ✅ **Lazy loading** de contenido
-- ✅ **Memoización** de cálculos costosos
-- ✅ **Callbacks optimizados** con useCallback
-- ✅ **Estados de scroll** para virtualización
-- ✅ **Carga condicional** de recursos
+#### 3. AlbumCard - `album-card/`
+
+- **Features**: Recent image grid, statistics
+- **Effects**: Dynamic mosaic, animated counters
+- **Status**: Excellent - Collection view
+
+#### 4. CollectionCard - `collection-card/`
+
+- **Features**: Content preview, metadata
+- **Effects**: Gradients by category, animations
+- **Status**: Excellent - visual organization
+
+#### 5. CharacterCard - `character-card/`
+
+- **Features**: Avatar, TCG statistics, rarity
+- **Effects**: Rarity effects, special glow
+- **Status**: Excellent - advanced TCG design
+
+#### 6. ConceptCard - `concept-card/`
+
+- **Features**: Idea visualization, relations
+- **Effects**: Animated connections, mind maps
+- **Status**: Excellent - visual creativity
+
+#### 7. NoteCard - `note-card/`
+
+- **Features**: Content preview, markdown
+- **Effects**: Vintage paper, elegant typography
+- **Status**: Excellent - notebook style
+
+#### 8. PromptCard - `prompt-card/`
+
+- **Features**: Prompt text, tokens, category
+- **Effects**: AI effects, futuristic gradients
+- **Status**: Excellent - AI/ML theme
+
+#### 9. FolderCard - `folder-card/`
+
+- **Features**: Content, hierarchy, navigation
+- **Effects**: Animated opening, visual depth
+- **Status**: Excellent - intuitive navigation
+
+#### 10. GroupCard - `group-card/`
+
+- **Features**: Members, group statistics
+- **Effects**: Visual clustering, connections
+- **Status**: Excellent - social organization
+
+#### 11. WorldItemCard - `world-item-card/`
+
+- **Features**: 3D objects, physical properties
+- **Effects**: 3D rotation, materials
+- **Status**: Excellent - 3D immersion
+
+#### 12. PlaceCard - `place-card/`
+
+- **Features**: Location, coordinates, map
+- **Effects**: Animated pin, geographic zoom
+- **Status**: Excellent - geolocation
+
+#### 13. WildcardCard - `wildcard-card/`
+
+- **Features**: Dynamic and adaptive content
+- **Effects**: Morphing, visual adaptation
+- **Status**: Excellent - full flexibility
+
+#### 14. TagCard - `tag-card/`
+
+- **Features**: Tags, categorization, colors
+- **Effects**: Bubble effects, grouping
+- **Status**: Excellent - Tag system
+
+#### 15. PropertyCard - `property-card/`
+
+- **Features**: Key-value properties, types
+- **Effects**: Visual validation, dynamic types
+- **Status**: Excellent - structured metadata
+
+### Media entities (5/5)
+
+#### 16. AudioCard - `audio-card/` (new)
+
+- **Features**: Integrated player, waveform, controls
+- **Effects**: Sound waves, audio visualization
+- **Formats**: MP3, WAV, FLAC, OGG, M4A
+- **Status**: Excellent - complete player
+
+#### 17. DocumentCard - `document-card/` (new)
+
+- **Features**: Preview, metadata, actions
+- **Effects**: Colors by format, page indicators
+- **Formats**: PDF, DOC, DOCX, TXT, MD
+- **Status**: Excellent - document management
+
+#### 18. JsonFileCard - `json-file-card/` (new)
+
+- **Features**: JSON preview, validation, statistics
+- **Effects**: Validity indicators, syntax highlighting
+- **Functions**: Integrated parser, key count
+- **Status**: Excellent - data handling
+
+#### 19. File3DCard - `file3d-card/` (new)
+
+- **Features**: 3D viewer, rotation, complexity
+- **Effects**: Automatic rotation, gradients by format
+- **Formats**: GLB, GLTF, OBJ, FBX, DAE, PLY, 3DS
+- **Status**: Excellent - 3D visualization
+
+#### 20. UploadedImageCard - `uploaded-image-card/` (new)
+
+- **Features**: Preview, processing, metadata
+- **Effects**: Processing states, indicators
+- **Functions**: Hash, dimensions, categorization
+- **Status**: Excellent - upload management
 
 ---
 
-## 🚀 **Próximos Pasos**
+## Technical features
 
-### **Componentes de Vista Pendientes**
+### Implemented TCG effects
 
-1. **Auditar componentes de vistas** (`src/components/views/`)
-2. **Verificar integración** con las nuevas cards
-3. **Optimizar rendimiento** en vistas masivas
-4. **Documentar patrones** de uso
+The cards implement the following TCG effects:
 
-### **Mejoras Futuras**
+- Dynamic gradients by type or format
+- Holographic effects on hover
+- Fluid animations with motion/react
+- Gold glow for Favorites
+- Thematic progress bars
+- Visual status indicators
+- Smooth transitions between states
 
-- **Temas personalizables** por usuario
-- **Efectos de rareza** más avanzados
-- **Integración con IA** para recomendaciones
-- **Modo de presentación** full-screen
+### Advanced features
+
+The cards provide the following advanced features:
+
+- Integrated players (Audio, Video)
+- Specialized viewers (3D, JSON, images)
+- Real-time validation (JSON, documents)
+- Dynamic metadata by type
+- Contextual actions by entity
+- Optimized loading states
+- Elegant error management
+
+### Performance optimizations
+
+The cards use the following optimizations:
+
+- Lazy loading of content
+- Memoization of expensive calculations
+- Optimized callbacks with useCallback
+- Scroll states for virtualization
+- Conditional resource loading
 
 ---
 
-## 📝 **Convenciones de Código**
+## Next steps
 
-### **Estructura de Archivos**
+### Pending view components
+
+The following work is pending:
+
+1. Audit view components (`src/components/views/`)
+2. Verify integration with the new cards
+3. Optimize performance in large views
+4. Document usage patterns
+
+### Future improvements
+
+The following improvements are planned:
+
+- User-customizable themes
+- More advanced rarity effects
+- AI integration for recommendations
+- Full-screen presentation mode
+
+---
+
+## Code conventions
+
+### File structure
 
 ```
 cards/
-├── entity-card.tsx          # 🚀 Dispatcher principal
+├── entity-card.tsx          # Main dispatcher
 ├── [entity]-card/
-│   ├── [entity]-card.tsx    # 🎴 Componente principal
-│   ├── [entity]-card-*.tsx  # 🧩 Subcomponentes (opcional)
-│   └── README.md            # 📚 Documentación específica
-└── README.md                # 📖 Este archivo
+│   ├── [entity]-card.tsx    # Main component
+│   ├── [entity]-card-*.tsx  # Subcomponents (optional)
+│   └── README.md            # Specific documentation
+└── README.md                # This file
 ```
 
-### **Props Estándar**
+### Standard props
 
 ```typescript
 interface EntityCardProps {
-	[entity]: EntityWithStats; // 📊 Datos de la entidad
-	compact?: boolean; // 📱 Modo compacto
-	tcgMode?: boolean; // 🎴 Efectos TCG
-	disabled?: boolean; // 🚫 Deshabilitar
-	className?: string; // 🎨 CSS personalizado
-	onClick?: () => void; // 🖱️ Handler de clic
-	isSelected?: boolean; // ✅ Estado seleccionado
-	isActive?: boolean; // 🔥 Estado activo
-	isScrolling?: boolean; // 📜 Optimización scroll
-	shouldLoad?: boolean; // ⚡ Carga condicional
+	[entity]: EntityWithStats; // Entity data
+	compact?: boolean; // Compact mode
+	tcgMode?: boolean; // TCG effects
+	disabled?: boolean; // Disable
+	className?: string; // Custom CSS
+	onClick?: () => void; // Click handler
+	isSelected?: boolean; // Selected state
+	isActive?: boolean; // Active state
+	isScrolling?: boolean; // Scroll optimization
+	shouldLoad?: boolean; // Conditional load
 }
 ```
 
 ---
 
-## 🏆 **Logros Completados**
+## Completed achievements
 
-- ✅ **20/20 entidades** implementadas
-- ✅ **Patrón TCG** consistente
-- ✅ **Dispatcher completo** funcional
-- ✅ **Efectos avanzados** en todas las cards
-- ✅ **Optimizaciones** de rendimiento
-- ✅ **Documentación** completa
-- ✅ **Types seguros** con TypeScript
-- ✅ **Accesibilidad** básica implementada
+The following work is complete:
 
-**🎉 SISTEMA DE CARDS COMPLETADO AL 100%**
+- 20/20 entities implemented
+- Consistent TCG pattern
+- Functional complete dispatcher
+- Advanced effects on all cards
+- Performance optimizations
+- Complete documentation
+- Safe types with TypeScript
+- Basic accessibility implemented
+
+**Card system complete at 100%**

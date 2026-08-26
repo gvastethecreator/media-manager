@@ -1,8 +1,10 @@
-# Componente de Navegación
+# Navigation component
 
-Este componente proporciona la navegación principal de la aplicación, permitiendo al usuario navegar entre diferentes vistas y categorías de contenido.
+This component provides the main application navigation.
 
-## Estructura
+The user can move between views and content categories.
+
+## Structure
 
 ```mermaid
 graph TD
@@ -27,61 +29,75 @@ graph TD
     E --> E1[index.ts]
 ```
 
-## Componentes
+## Components
 
 ### NavPanel
 
-Componente principal que integra todos los elementos de navegación.
+This main component integrates all navigation elements.
 
 ### Hooks
 
-- **useCategoryCollapse**: Maneja el estado de colapso de las categorías.
-- **useCategoryHandlers**: Proporciona manejadores para interacciones con categorías.
-- **useCategoryStats**: Calcula estadísticas para las categorías.
-- **useMainNavigation**: Maneja la navegación principal.
+The following hooks support the panel:
 
-### Componentes Auxiliares
+- **useCategoryCollapse**: Manages category collapse state.
+- **useCategoryHandlers**: Provides handlers for category interactions.
+- **useCategoryStats**: Calculates statistics for categories.
+- **useMainNavigation**: Manages the main navigation.
 
-- **NavCategoryChildren**: Muestra los elementos hijos de una categoría con opciones de visualización (lista o cuadrícula).
-- **NavCategoryItem**: Representa un elemento de categoría.
-- **NavMainNavigation**: Muestra la navegación principal.
-- **NavPanelHeader**: Encabezado del panel de navegación con soporte para modo colapsado/expandido.
+### Auxiliary components
 
-## Características Clave
+The following components support the panel:
 
-- **Panel Colapsable**: El panel completo puede colapsarse para maximizar el espacio de trabajo.
-- **Vistas de Categorías Flexibles**: Las subcategorías pueden visualizarse en modo lista o cuadrícula.
-- **Modo Oscuro/Claro**: Integración con el sistema de temas.
-- **Tooltips Informativos**: Proporciona información adicional al pasar el cursor.
-- **Categorías Colapsables**: Cada categoría puede contraerse individualmente.
+- **NavCategoryChildren**: Shows category children in list or grid view.
+- **NavCategoryItem**: Represents a category item.
+- **NavMainNavigation**: Shows the main navigation.
+- **NavPanelHeader**: Navigation panel header with collapsed and expanded modes.
 
-## Mejoras Recientes
+## Key features
+
+The panel provides the following features:
+
+- **Collapsible panel**: The full panel can collapse to maximize workspace.
+- **Flexible category views**: Subcategories can display in list or grid mode.
+- **Dark and light mode**: Integration with the theme system.
+- **Informative tooltips**: Extra information on hover.
+- **Collapsible categories**: Each category can collapse on its own.
+
+## Recent improvements
 
 ### NavPanelHeader
 
-- **Diseño Adaptativo**: Reordenamiento vertical de elementos cuando el panel está colapsado.
-- **Avatar Prominente**: En modo colapsado, el avatar del usuario se coloca en la parte superior.
-- **Controles Accesibles**: Botones de control claramente separados en modo colapsado.
+The header includes the following improvements:
+
+- **Adaptive layout**: Vertical reorder of elements when the panel is collapsed.
+- **Prominent avatar**: In collapsed mode, the user avatar sits at the top.
+- **Accessible controls**: Control buttons stay clearly separated in collapsed mode.
 
 ### NavCategoryChildren
 
-- **Cambio de Vistas**: Permite alternar entre vista de lista vertical y vista de cuadrícula.
-- **Contadores de Elementos**: Muestra el número de elementos de cada categoría.
-- **Diseño Optimizado para Etiquetas**: Visualización especializada para etiquetas con códigos de color.
-- **Elementos Interactivos**: Todos los elementos tienen estados hover y seleccionados claramente definidos.
+The children list includes the following improvements:
 
-## Tipos
+- **View switch**: Toggle between a vertical list and a grid.
+- **Item counters**: Shows the item count for each category.
+- **Tag-optimized layout**: Specialized display for Tags with color codes.
+- **Interactive items**: All items have clear hover and selected states.
 
-- **CategoryItem**: Representa un elemento de categoría.
-- **CategoryChild**: Representa un elemento hijo dentro de una categoría.
-- **NavPanelProps**: Props para el componente NavPanel.
-- **ViewMode**: Define el modo de visualización ('list' | 'grid') para elementos de categoría.
+## Types
 
-## Constantes
+The module defines the following types:
 
-- **NAVIGATION_CATEGORIES**: Define las categorías principales del panel de navegación.
+- **CategoryItem**: Represents a category item.
+- **CategoryChild**: Represents a child item in a category.
+- **NavPanelProps**: Props for the NavPanel component.
+- **ViewMode**: Defines the display mode (`'list' | 'grid'`) for category items.
 
-## Ejemplo de Uso
+## Constants
+
+The module defines the following constant:
+
+- **NAVIGATION_CATEGORIES**: Defines the main categories of the navigation panel.
+
+## Usage example
 
 ```tsx
 import { NavPanel } from '@/components/navigation/navigation-panel';
@@ -101,17 +117,17 @@ export default async function Layout({ children }: { children: React.ReactNode }
 }
 ```
 
-## Configuración de Visualización
+## Display configuration
 
-El componente permite personalizar cómo se visualizan los elementos:
+The component lets you customize how items display:
 
 ```tsx
-// Cambiar entre modos de visualización
+// Switch display modes
 <Button onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}>
   {viewMode === 'list' ? <Grid /> : <List />}
 </Button>
 
-// Colapsar/expandir panel
+// Collapse or expand the panel
 <Button onClick={onToggleCollapse}>
   {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
 </Button>

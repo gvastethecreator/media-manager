@@ -1,19 +1,21 @@
-# Keyboard Shortcut Manager
+# Keyboard shortcut manager
 
-Sistema de gestión de atajos de teclado para el navegador de archivos.
+This system manages keyboard shortcuts for the file browser.
 
-## Características
+## Features
 
-- ✅ **Gestión centralizada** de atajos de teclado
-- ✅ **Contextos específicos** (file-browser, context-menu, global)
-- ✅ **Navegación por teclado** en menús contextuales
-- ✅ **Shortcuts por defecto** para operaciones comunes
-- ✅ **Integración con React** mediante hooks
-- ✅ **TypeScript** completamente tipado
+The manager provides the following capabilities:
 
-## Uso Básico
+- **Centralized management** of keyboard shortcuts
+- **Specific contexts** (`file-browser`, `context-menu`, `global`)
+- **Keyboard navigation** in context menus
+- **Default shortcuts** for common operations
+- **React integration** through hooks
+- **Fully typed TypeScript** APIs
 
-### En el FileBrowser
+## Basic use
+
+### In FileBrowser
 
 ```typescript
 import { useFileBrowserShortcuts } from '@/lib/keyboard';
@@ -22,24 +24,24 @@ function FileBrowser() {
 	const { register, setContext } = useFileBrowserShortcuts();
 
 	useEffect(() => {
-		// Los shortcuts por defecto ya están registrados
+		// Default shortcuts are already registered
 		setContext('file-browser');
 	}, []);
 
-	// Los shortcuts funcionan automáticamente:
-	// Ctrl+A - Seleccionar todo
-	// Delete - Eliminar seleccionados
-	// F2 - Renombrar
-	// Escape - Cancelar selección
-	// Ctrl+C - Copiar
-	// Ctrl+X - Cortar
-	// Ctrl+V - Pegar
-	// Enter - Abrir seleccionado
-	// Space - Previsualizar
+	// Shortcuts run automatically:
+	// Ctrl+A - Select all
+	// Delete - Delete selected items
+	// F2 - Rename
+	// Escape - Clear selection
+	// Ctrl+C - Copy
+	// Ctrl+X - Cut
+	// Ctrl+V - Paste
+	// Enter - Open selected item
+	// Space - Preview
 }
 ```
 
-### En Menús Contextuales
+### In context menus
 
 ```typescript
 import { useContextMenuNavigation } from '@/lib/keyboard';
@@ -60,38 +62,44 @@ function ContextMenu({ items }) {
     </div>
   );
 
-  // Navegación automática:
-  // ↑↓ - Navegar por items
-  // Enter - Ejecutar acción
-  // Escape - Cerrar menú
+  // Automatic navigation:
+  // ↑↓ - Move through items
+  // Enter - Run the action
+  // Escape - Close the menu
 }
 ```
 
-## Shortcuts por Defecto
+## Default shortcuts
 
-### File Browser
+### File browser
 
-- `Ctrl+A` - Seleccionar todo
-- `Delete` - Eliminar elementos seleccionados
-- `F2` - Renombrar elemento seleccionado
-- `Ctrl+C` - Copiar elementos seleccionados
-- `Ctrl+X` - Cortar elementos seleccionados
-- `Ctrl+V` - Pegar elementos
-- `Enter` - Abrir elemento seleccionado
-- `Space` - Vista previa del elemento seleccionado
+The file browser context uses the following shortcuts:
 
-### Context Menu
+- `Ctrl+A` - Select all
+- `Delete` - Delete selected items
+- `F2` - Rename the selected item
+- `Ctrl+C` - Copy selected items
+- `Ctrl+X` - Cut selected items
+- `Ctrl+V` - Paste items
+- `Enter` - Open the selected item
+- `Space` - Preview the selected item
 
-- `↑` - Navegar hacia arriba
-- `↓` - Navegar hacia abajo
-- `→` - Abrir submenú
-- `←` - Cerrar submenú
-- `Enter` - Ejecutar acción seleccionada
-- `Escape` - Cerrar menú
+### Context menu
+
+The context menu uses the following shortcuts:
+
+- `↑` - Move up
+- `↓` - Move down
+- `→` - Open the submenu
+- `←` - Close the submenu
+- `Enter` - Run the selected action
+- `Escape` - Close the menu
 
 ### Global
 
-- `Escape` - Cancelar selección o cerrar menús
+The global context uses the following shortcut:
+
+- `Escape` - Clear the selection or close menus
 
 ## API
 
@@ -111,57 +119,59 @@ class KeyboardShortcutManager {
 ### Hooks
 
 ```typescript
-// Hook general
+// General hook
 useKeyboardShortcuts(options?: UseKeyboardShortcutsOptions)
 
-// Hook específico para file browser
+// File browser hook
 useFileBrowserShortcuts()
 
-// Hook específico para context menus
+// Context menu hook
 useContextMenuShortcuts()
 
-// Hook para navegación en menús
+// Menu navigation hook
 useContextMenuNavigation(itemCount: number, options?: ContextMenuNavigationOptions)
 ```
 
-## Configuración de Shortcuts
+## Shortcut configuration
 
 ```typescript
 interface KeyboardShortcutConfig {
-	key: string; // Tecla principal
+	key: string; // Primary key
 	modifiers: string[]; // ['ctrl', 'shift', 'alt', 'meta']
-	action: string; // Identificador único
-	context?: string; // Contexto donde aplica
-	description: string; // Descripción para ayuda
-	preventDefault?: boolean; // Prevenir comportamiento por defecto
-	stopPropagation?: boolean; // Detener propagación
+	action: string; // Unique identifier
+	context?: string; // Context where the shortcut applies
+	description: string; // Help description
+	preventDefault?: boolean; // Prevent the default behavior
+	stopPropagation?: boolean; // Stop event propagation
 }
 ```
 
-## Contextos
+## Contexts
 
-- `global` - Aplica en toda la aplicación
-- `file-browser` - Solo en el navegador de archivos
-- `context-menu` - Solo en menús contextuales
-- `file-viewer` - Solo en el visor de archivos
+The manager uses the following contexts:
 
-## Implementación
+- `global` - Applies across the application
+- `file-browser` - Applies only in the file browser
+- `context-menu` - Applies only in context menus
+- `file-viewer` - Applies only in the file viewer
+
+## Implementation
 
 ### 1. KeyboardShortcutManager
 
-Clase principal que gestiona el registro y ejecución de shortcuts.
+This class registers and runs shortcuts.
 
-### 2. React Hooks
+### 2. React hooks
 
-Hooks para integración fácil con componentes React.
+These hooks integrate the manager with React components.
 
-### 3. Context Menu Navigation
+### 3. Context menu navigation
 
-Sistema especializado para navegación por teclado en menús.
+This system provides keyboard navigation in menus.
 
-### 4. Default Shortcuts
+### 4. Default shortcuts
 
-Shortcuts predefinidos para operaciones comunes.
+These shortcuts cover common operations.
 
 ## Testing
 
@@ -169,26 +179,30 @@ Shortcuts predefinidos para operaciones comunes.
 bun test src/lib/keyboard/__tests__/
 ```
 
-Los tests verifican:
+The tests verify the following behavior:
 
-- Registro y ejecución de shortcuts
-- Filtrado por contexto
-- Habilitación/deshabilitación
-- Navegación en menús contextuales
+- Shortcut registration and execution
+- Filtering by context
+- Enable and disable
+- Navigation in context menus
 
-## Integración con FileBrowser
+## Integration with FileBrowser
 
-El sistema está completamente integrado con el FileBrowser existente:
+The system is fully integrated with the existing FileBrowser.
 
-1. **Shortcuts automáticos** - Funcionan sin configuración adicional
-2. **Feedback visual** - Notificaciones toast para acciones
-3. **Context awareness** - Diferentes shortcuts según el contexto
-4. **Navegación fluida** - Integración con file viewer y selection store
+The integration includes the following behavior:
 
-## Próximas Mejoras
+1. **Automatic shortcuts** - Shortcuts work with no extra setup
+2. **Visual feedback** - Toast notifications for actions
+3. **Context awareness** - Different shortcuts per context
+4. **Fluid navigation** - Integration with the file viewer and selection store
 
-- [ ] Shortcuts personalizables por usuario
-- [ ] Ayuda contextual de shortcuts
-- [ ] Shortcuts para diferentes tipos de archivos
-- [ ] Integración con drag & drop
-- [ ] Soporte para secuencias de teclas
+## Planned improvements
+
+The following items are planned:
+
+- [ ] User-customizable shortcuts
+- [ ] Contextual shortcut help
+- [ ] Shortcuts for different file types
+- [ ] Drag-and-drop integration
+- [ ] Support for key sequences

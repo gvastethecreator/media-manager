@@ -1,8 +1,8 @@
-# 🏙️ PlaceCard
+# PlaceCard
 
-Componente de tarjeta para visualizar lugares con estilo de Trading Card Game (TCG).
+This card component displays Places with a Trading Card Game (TCG) style.
 
-## Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -11,41 +11,41 @@ graph TD
     A --> D[PlaceCardContent]
     A --> E[PlaceCardFooter]
 
-    B --> B1[Nombre/Emoji]
-    B --> B2[Región/Tipo]
+    B --> B1[Name/Emoji]
+    B --> B2[Region/Type]
 
-    C --> C1[Galería]
+    C --> C1[Gallery]
 
-    D --> D1[Descripción]
-    D --> D2[Recursos]
-    D --> D3[Peligros]
-    D --> D4[Estadísticas]
+    D --> D1[Description]
+    D --> D2[Resources]
+    D --> D3[Dangers]
+    D --> D4[Statistics]
 
-    E --> E1[Contadores]
-    E --> E2[Pie TCG]
+    E --> E1[Counters]
+    E --> E2[TCG footer]
 ```
 
-## Propiedades
+## Properties
 
-El componente `PlaceCard` acepta las siguientes propiedades:
+The `PlaceCard` component accepts the following properties:
 
-| Propiedad  | Tipo            | Descripción                               |
-| ---------- | --------------- | ----------------------------------------- |
-| place      | `PlaceCardData` | Datos del lugar a mostrar                 |
-| compact    | `boolean`       | Modo compacto con menos información       |
-| tcgMode    | `boolean`       | Activa efectos visuales de carta tipo TCG |
-| disabled   | `boolean`       | Deshabilita interacciones con la tarjeta  |
-| className  | `string`        | Clases CSS adicionales                    |
-| onClick    | `() => void`    | Función para manejar clic en la tarjeta   |
-| isSelected | `boolean`       | Indica si la tarjeta está seleccionada    |
+| Property   | Type            | Description                              |
+| ---------- | --------------- | ---------------------------------------- |
+| place      | `PlaceCardData` | Place data to display                    |
+| compact    | `boolean`       | Compact mode with less information       |
+| tcgMode    | `boolean`       | Enables TCG-style visual effects         |
+| disabled   | `boolean`       | Disables interactions with the card      |
+| className  | `string`        | Extra CSS classes                        |
+| onClick    | `() => void`    | Function that handles a click on the card |
+| isSelected | `boolean`       | Indicates whether the card is selected   |
 
-## Ejemplo de uso
+## Usage example
 
 ```tsx
 import { PlaceCard } from '@/components/cards/place-card';
 import { getPlaceCardData } from '@/components/cards/place-card/place-server-actions';
 
-// En un Server Component
+// In a data-loading component
 const PlaceCardExample = async () => {
 	const placeData = await getPlaceCardData('place-id-here');
 
@@ -53,32 +53,38 @@ const PlaceCardExample = async () => {
 };
 ```
 
-## Server Actions
+## Data loading
 
-El componente utiliza Server Actions para cargar datos:
+The component uses routes that call services to load data.
 
-- `getPlaceCardData(placeId)`: Obtiene datos del lugar incluyendo imágenes y métricas
-- `getRecentPlaceImages(placeId, limit)`: Obtiene imágenes recientes de un lugar
+The following functions load Place data:
 
-## Campos TCG
+- `getPlaceCardData(placeId)`: Gets Place data, including images and metrics
+- `getRecentPlaceImages(placeId, limit)`: Gets recent images of a Place
 
-La tarjeta muestra los siguientes elementos inspirados en juegos de cartas:
+## TCG fields
 
-- **Power**: Nivel de poder del lugar (1-10)
-- **Rareza**: Nivel de rareza calculado según características
-- **Recursos**: Elementos valiosos disponibles en el lugar
-- **Peligros**: Amenazas y riesgos del lugar
-- **Salud**: Resistencia del lugar
-- **Valor**: Importancia estratégica
+The card shows the following elements inspired by card games:
 
-## Diseño Responsivo
+- **Power**: Power level of the Place (1-10)
+- **Rarity**: Rarity level calculated from characteristics
+- **Resources**: Valuable elements available at the Place
+- **Dangers**: Threats and risks of the Place
+- **Health**: Resistance of the Place
+- **Value**: Strategic importance
 
-- Desktop: 320px de ancho
-- Mobile: 300px de ancho
-- Altura adaptativa según modo compacto
+## Responsive design
 
-## Accesibilidad
+The card uses the following widths:
 
-- Soporta navegación por teclado
-- Incluye roles ARIA apropiados
-- Textos alternativos para imágenes
+- Desktop: 320px wide
+- Mobile: 300px wide
+- Adaptive height in compact mode
+
+## Accessibility
+
+The card supports the following accessibility features:
+
+- Keyboard navigation
+- Appropriate ARIA roles
+- Alternative text for images

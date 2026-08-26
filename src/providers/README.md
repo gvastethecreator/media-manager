@@ -1,10 +1,12 @@
 # Providers
 
-Componentes que envuelven a la aplicación y proveen contextos compartidos:
+These components wrap the application and provide shared contexts.
 
-- **AppProvider**: Composición principal con otros providers.
-- **CacheProvider**: Configura React Query y caches del cliente.
-- **ThemeProvider**: Manejo de temas claro/oscuro.
-- **ProfileProvider**: Contexto de perfil de usuario.
+The tree includes the following providers:
 
-Estos providers se importan en `app/layout.tsx` para inicializar la aplicación.
+- **AppProvider**: Root composition of the other providers.
+- **CacheProvider**: Configures React Query and client caches.
+- **ThemeProvider**: Manages light and dark themes.
+- **ProfileProvider**: Provides the user profile context.
+
+`AppProvider` initializes these providers at the application root.

@@ -1,4 +1,3 @@
-# Servicio de actividad
+# Activity service
 
-Registra y consulta eventos del usuario para auditoría y
-seguimiento de acciones.
+The activity service records and queries user events for audit and action tracking.

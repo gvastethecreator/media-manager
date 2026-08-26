@@ -1,10 +1,10 @@
-# 🎭 Store de Character
+# Character store
 
-## 🎯 Propósito
+## Purpose
 
-Gestión centralizada del estado de personajes con Zustand, incluyendo datos, UI, filtros y acciones CRUD especializadas para RPG/D&D.
+This store centralizes Character state with Zustand, including data, UI, filters, and specialized CRUD actions for RPG/D&D.
 
-## 🏗️ Arquitectura
+## Architecture
 
 ```mermaid
 graph TB
@@ -30,7 +30,7 @@ graph TB
         E --> E4[RPG Actions]
     end
 
-    subgraph "Tipos RPG"
+    subgraph "RPG types"
         F[CharacterExtended] --> F1[Stats + Relationships]
         G[CharacterClass] --> G1[Warrior, Mage, Rogue...]
         H[CharacterRace] --> H1[Human, Elf, Dwarf...]
@@ -43,161 +43,171 @@ graph TB
     A --> I
 ```
 
-## 📊 Estado Principal
+## Main state
 
-### **CharacterState**
+### CharacterState
 
 ```typescript
 interface CharacterState {
-	characters: Record<string, CharacterExtended>; // 🎭 Personajes con datos extendidos
+	characters: Record<string, CharacterExtended>; // Characters with extended data
 
 	// UI State
-	viewConfig: CharacterViewConfig; // 🎮 Configuración de vista
-	selectedCharacterId: string | null; // ✅ ID seleccionado
-	hoveredCharacterId: string | null; // 👆 ID con hover
-	expandedCharacterIds: string[]; // 📂 IDs expandidos
+	viewConfig: CharacterViewConfig; // View configuration
+	selectedCharacterId: string | null; // Selected ID
+	hoveredCharacterId: string | null; // Hovered ID
+	expandedCharacterIds: string[]; // Expanded IDs
 
 	// Loading & Errors
-	isLoading: boolean; // ⏳ Estado de carga
-	error: string | null; // ❌ Error actual
+	isLoading: boolean; // Loading state
+	error: string | null; // Current error
 
-	// Filtros y ordenamiento
-	activeFilters: CharacterFilters[]; // 🔍 Filtros activos
-	searchTerm: string; // 🔍 Término de búsqueda
-	defaultSortOption: CharacterSortOption; // 📊 Orden por defecto
-	currentSortOption: CharacterSortOption; // 📊 Orden actual
+	// Filters and sort
+	activeFilters: CharacterFilters[]; // Active filters
+	searchTerm: string; // Search term
+	defaultSortOption: CharacterSortOption; // Default sort
+	currentSortOption: CharacterSortOption; // Current sort
 
-	// Agrupamiento
+	// Grouping
 	groupBy: 'none' | 'class' | 'race' | 'category' | 'level';
 }
 ```
 
-### **CharacterViewConfig**
+### CharacterViewConfig
 
 ```typescript
 interface CharacterViewConfig {
-	viewType: 'grid' | 'list' | 'compact' | 'gallery' | 'card'; // 👁️ Tipo de vista
-	sortBy: 'name' | 'level' | 'race' | 'class' | 'date'; // 📊 Campo de orden
-	sortDirection: 'asc' | 'desc'; // ⬆️⬇️ Dirección
-	showImages: boolean; // 🖼️ Mostrar imágenes
-	imageCount: number; // 🔢 Cantidad de imágenes
-	enableAnimations: boolean; // ✨ Animaciones
-	groupBy?: 'race' | 'class' | 'alignment' | 'category' | null; // 📊 Agrupamiento
-	showStats: boolean; // 📈 Mostrar estadísticas
-	compactView: boolean; // 📱 Vista compacta
+	viewType: 'grid' | 'list' | 'compact' | 'gallery' | 'card'; // View type
+	sortBy: 'name' | 'level' | 'race' | 'class' | 'date'; // Sort field
+	sortDirection: 'asc' | 'desc'; // Direction
+	showImages: boolean; // Show images
+	imageCount: number; // Image count
+	enableAnimations: boolean; // Animations
+	groupBy?: 'race' | 'class' | 'alignment' | 'category' | null; // Grouping
+	showStats: boolean; // Show statistics
+	compactView: boolean; // Compact view
 }
 ```
 
-## 🔄 Flujo de Datos
+## Data flow
 
 ```mermaid
 sequenceDiagram
-    participant UI as Componente UI
+    participant UI as UI component
     participant Store as Character Store
-    participant API as Server Actions
-    participant DB as Base de Datos
+    participant API as Routes
+    participant DB as Database
 
     UI->>Store: loadCharacters()
     Store->>API: getCharacters()
     API->>DB: SELECT * FROM characters
     DB-->>API: CharacterExtended[]
     API-->>Store: CharacterExtended[]
-    Store-->>UI: Estado actualizado
+    Store-->>UI: Updated state
 
     UI->>Store: createCharacter(data)
     Store->>API: createServerCharacter(data)
     API->>DB: INSERT INTO characters
     DB-->>API: CharacterExtended
     API-->>Store: CharacterExtended
-    Store-->>UI: Estado actualizado + Toast
+    Store-->>UI: Updated state + Toast
 ```
 
-## 🎮 Enumeraciones RPG
+Routes call services.
 
-### **CharacterClass**
+## RPG enumerations
 
-- `WARRIOR` ⚔️ - Guerrero
-- `MAGE` 🔮 - Mago
-- `ROGUE` 🗡️ - Pícaro
-- `CLERIC` ✨ - Clérigo
-- `RANGER` 🏹 - Explorador
-- `BARD` 🎭 - Bardo
-- `PALADIN` 🛡️ - Paladín
-- `DRUID` 🌿 - Druida
-- `MONK` 👊 - Monje
-- `WARLOCK` 📜 - Brujo
-- `SORCERER` 🌟 - Hechicero
-- `BARBARIAN` 🪓 - Bárbaro
-- `ARTIFICER` ⚙️ - Artífice
+### CharacterClass
 
-### **CharacterRace**
+The store uses the following classes:
 
-- `HUMAN` 👤 - Humano
-- `ELF` 🧝‍♀️ - Elfo
-- `DWARF` 🧔 - Enano
-- `HALFLING` 🍃 - Mediano
-- `GNOME` 🧙‍♂️ - Gnomo
-- `HALF_ELF` 🧝‍♂️ - Semi-elfo
-- `HALF_ORC` 👹 - Semi-orco
-- `TIEFLING` 😈 - Tiefling
-- `DRAGONBORN` 🐉 - Dracónido
+- `WARRIOR` - Warrior
+- `MAGE` - Mage
+- `ROGUE` - Rogue
+- `CLERIC` - Cleric
+- `RANGER` - Ranger
+- `BARD` - Bard
+- `PALADIN` - Paladin
+- `DRUID` - Druid
+- `MONK` - Monk
+- `WARLOCK` - Warlock
+- `SORCERER` - Sorcerer
+- `BARBARIAN` - Barbarian
+- `ARTIFICER` - Artificer
 
-### **CharacterAlignment**
+### CharacterRace
 
-- `LAWFUL_GOOD` ⚖️✨ - Legal bueno
-- `NEUTRAL_GOOD` ⚖️ - Neutral bueno
-- `CHAOTIC_GOOD` 🌪️✨ - Caótico bueno
-- `LAWFUL_NEUTRAL` ⚖️ - Legal neutral
-- `TRUE_NEUTRAL` ⚖️ - Neutral puro
-- `CHAOTIC_NEUTRAL` 🌪️ - Caótico neutral
-- `LAWFUL_EVIL` ⚖️💀 - Legal malvado
-- `NEUTRAL_EVIL` 💀 - Neutral malvado
-- `CHAOTIC_EVIL` 🌪️💀 - Caótico malvado
+The store uses the following races:
 
-### **CharacterSortOption**
+- `HUMAN` - Human
+- `ELF` - Elf
+- `DWARF` - Dwarf
+- `HALFLING` - Halfling
+- `GNOME` - Gnome
+- `HALF_ELF` - Half-elf
+- `HALF_ORC` - Half-orc
+- `TIEFLING` - Tiefling
+- `DRAGONBORN` - Dragonborn
 
-- `NAME_ASC` / `NAME_DESC` - Por nombre
-- `LEVEL_ASC` / `LEVEL_DESC` - Por nivel
-- `CLASS_ASC` / `CLASS_DESC` - Por clase
-- `RACE_ASC` / `RACE_DESC` - Por raza
-- `DATE_ASC` / `DATE_DESC` - Por fecha
+### CharacterAlignment
 
-## 🔧 Acciones Principales
+The store uses the following alignments:
 
-### **CRUD Operations**
+- `LAWFUL_GOOD` - Lawful good
+- `NEUTRAL_GOOD` - Neutral good
+- `CHAOTIC_GOOD` - Chaotic good
+- `LAWFUL_NEUTRAL` - Lawful neutral
+- `TRUE_NEUTRAL` - True neutral
+- `CHAOTIC_NEUTRAL` - Chaotic neutral
+- `LAWFUL_EVIL` - Lawful evil
+- `NEUTRAL_EVIL` - Neutral evil
+- `CHAOTIC_EVIL` - Chaotic evil
+
+### CharacterSortOption
+
+The store uses the following sort options:
+
+- `NAME_ASC` / `NAME_DESC` - By name
+- `LEVEL_ASC` / `LEVEL_DESC` - By level
+- `CLASS_ASC` / `CLASS_DESC` - By class
+- `RACE_ASC` / `RACE_DESC` - By race
+- `DATE_ASC` / `DATE_DESC` - By date
+
+## Main actions
+
+### CRUD operations
 
 ```typescript
-// Gestión básica
+// Basic management
 addCharacter(character: CharacterBase | CharacterExtended): void
 updateCharacter(id: string, updates: Partial<CharacterBase>): void
 removeCharacter(id: string): void
 
-// Operaciones por lotes
+// Batch operations
 bulkAddCharacters(characters: CharacterExtended[]): void
 bulkUpdateCharacters(updates: Array<{id: string, data: Partial<CharacterBase>}>): void
 bulkRemoveCharacters(ids: string[]): void
 ```
 
-### **RPG Specific Actions**
+### RPG specific actions
 
 ```typescript
-// Operaciones RPG
+// RPG operations
 toggleFavorite(id: string): void
 setFeaturedImage(id: string, imageId: string | null): void
 incrementLevel(id: string): void
 decrementLevel(id: string): void
 
-// Relaciones
+// Relations
 addRelationship(id: string, targetId: string, type: string, strength: number): void
 removeRelationship(id: string, targetId: string): void
 
-// Gestión de grupos/propiedades
+// Group/property management
 addGroupToCharacter(characterId: string, groupId: string): void
 addPropertyToCharacter(characterId: string, propertyId: string): void
 addWildcardToCharacter(characterId: string, wildcardId: string): void
 ```
 
-### **UI Actions**
+### UI actions
 
 ```typescript
 selectCharacter(id: string | null): void
@@ -208,7 +218,7 @@ collapseAllCharacters(): void
 setViewConfig(config: Partial<CharacterViewConfig>): void
 ```
 
-### **Filter Actions**
+### Filter actions
 
 ```typescript
 filterByClass(characterClass: CharacterClass | null): void
@@ -220,79 +230,80 @@ filterByText(searchTerm: string): void
 filterByFavorites(onlyFavorites: boolean): void
 ```
 
-## 🎯 Patrones de Uso
+## Usage patterns
 
-### **Cargar y Mostrar Personajes**
+### Load and show Characters
 
 ```typescript
 const { characters, isLoading } = useCharacterStore();
 
-// Obtener como array
+// Get as an array
 const characterArray = Object.values(characters);
 
-// Filtrar por clase
+// Filter by class
 const warriors = characterArray.filter((char) => char.class === CharacterClass.WARRIOR);
 ```
 
-### **Filtrar por Nivel**
+### Filter by level
 
 ```typescript
 const { filterByLevel, getFilteredCharacters } = useCharacterStore();
 
-// Personajes nivel 5-10
+// Characters level 5-10
 filterByLevel(5, 10);
 const midLevelChars = getFilteredCharacters();
 ```
 
-### **Agrupamiento**
+### Grouping
 
 ```typescript
 const { setGroupBy, getGroupedCharacters } = useCharacterStore();
 
-// Agrupar por clase
+// Group by class
 setGroupBy('class');
 const groupedByClass = getGroupedCharacters();
 // { "Warrior": [...], "Mage": [...], "Rogue": [...] }
 ```
 
-### **Gestión de Nivel**
+### Level management
 
 ```typescript
 const { incrementLevel, decrementLevel } = useCharacterStore();
 
-// Subir de nivel
+// Increase level
 incrementLevel(characterId);
 
-// Bajar de nivel
+// Decrease level
 decrementLevel(characterId);
 ```
 
-## 🔍 Selectores Optimizados
+## Optimized selectors
 
-### **getSortedCharacters()**
+### getSortedCharacters()
 
-Aplica ordenamiento según `currentSortOption`.
+Applies sort according to `currentSortOption`.
 
-### **getGroupedCharacters()**
+### getGroupedCharacters()
 
-Agrupa personajes por criterio activo con conteos.
+Groups Characters by the active criterion with counts.
 
-### **getFilteredCharacters()**
+### getFilteredCharacters()
 
-Aplica todos los filtros activos en tiempo real.
+Applies all active filters in real time.
 
-### **getCharactersByIds()**
+### getCharactersByIds()
 
-Obtiene múltiples personajes por IDs de forma eficiente.
+Gets multiple Characters by IDs in an efficient way.
 
-## 🚀 Optimizaciones
+## Optimizations
 
-### **Estructura Record**
+### Record structure
 
-- `characters: Record<string, CharacterExtended>` para acceso O(1)
-- Selectores memoizados para evitar re-cálculos
+`characters: Record<string, CharacterExtended>` provides O(1) access.
 
-### **Persistencia Selectiva**
+Selectors are memoized to avoid recalculation.
+
+### Selective persistence
 
 ```typescript
 partialize: (state) => ({
@@ -304,49 +315,62 @@ partialize: (state) => ({
 });
 ```
 
-### **Estados Separados**
+### Separate states
 
-- UI state separado para evitar re-renders innecesarios
-- Filtros independientes del estado principal
+UI state stays separate to avoid unnecessary re-renders.
 
-## 🎨 Características Especiales RPG
+Filters stay independent of the main state.
 
-### **Sistema de Niveles**
+## Special RPG features
 
-- Incremento/decremento automático
-- Agrupamiento por rangos de nivel
-- Estadísticas de nivel promedio
+### Level system
 
-### **Gestión de Relaciones**
+The store provides the following level features:
 
-- Relaciones entre personajes con tipos y fuerza
-- Vínculos con grupos, propiedades y wildcards
-- Actualización en lote de relaciones
+- Automatic increment and decrement
+- Grouping by level ranges
+- Average level statistics
 
-### **Filtrado Avanzado**
+### Relation management
 
-- Filtros por atributos RPG (clase, raza, alineamiento)
-- Combinación de múltiples filtros
-- Búsqueda textual en múltiples campos
+The store provides the following relation features:
 
-### **Colores y Emojis por Clase**
+- Relations between Characters with types and strength
+- Links with Groups, Properties, and Wildcards
+- Batch update of relations
 
-- Mapeo automático de colores por clase
-- Emojis temáticos para cada clase
-- Consistencia visual en toda la aplicación
+### Advanced filtering
 
-## 📋 Tipos Relacionados
+The store provides the following filter features:
 
-- `CharacterExtended` - Personaje con campos parseados y UI
-- `CharacterViewConfig` - Configuración de visualización
-- `CharacterClass/Race/Alignment` - Enums RPG
-- `CharacterSortOption` - Opciones de ordenamiento
-- `CharacterFilters` - Filtros de búsqueda
+- Filters by RPG attributes (class, race, alignment)
+- Combination of multiple filters
+- Text search in multiple fields
 
-## 🔗 Dependencias
+### Colors and emojis by class
 
-- `@/types/entities/character` - Tipos canónicos
-- `@/types/entities/character/enums` - Enumeraciones RPG
-- `@/utils/character` - Utilidades y helpers
+The store provides the following visual features:
+
+- Automatic color mapping by class
+- Thematic emojis for each class
+- Visual consistency across the application
+
+## Related types
+
+The store uses the following related types:
+
+- `CharacterExtended` - Character with parsed fields and UI
+- `CharacterViewConfig` - Display configuration
+- `CharacterClass/Race/Alignment` - RPG enums
+- `CharacterSortOption` - Sort options
+- `CharacterFilters` - Search filters
+
+## Dependencies
+
+The store depends on the following modules:
+
+- `@/types/entities/character` - Canonical types
+- `@/types/entities/character/enums` - RPG enumerations
+- `@/utils/character` - Utilities and helpers
 - `@/lib/logger` - Logging
-- `@/lib/ui/toast` - Notificaciones
+- `@/lib/ui/toast` - Notifications

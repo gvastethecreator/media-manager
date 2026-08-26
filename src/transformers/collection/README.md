@@ -1,47 +1,47 @@
-# 🗂️ Transformador de Colecciones (Collection)
+# Collection transformer
 
-Este módulo proporciona funciones para transformar y validar objetos de colección, asegurando una estructura de datos consistente en toda la aplicación.
+This module transforms and validates Collection objects. It keeps a consistent data structure across Media Manager.
 
-## 📋 Descripción general
+## Overview
 
-El transformador de colecciones maneja la conversión entre diferentes formatos de colección:
+The Collection transformer converts Collection data between formats. It covers these operations:
 
-- Transformación de objetos Drizzle a objetos de aplicación
-- Validación y normalización de datos
-- Generación de formatos extendidos para interfaces de usuario
-- Cálculo de estadísticas relacionadas con la colección
+- Transform Drizzle objects to application objects
+- Validate and normalize data
+- Build extended formats for user interfaces
+- Calculate Collection statistics
 
-## 🔄 Diagrama de flujo
+## Flow diagram
 
 ```mermaid
 flowchart TD
-    A[Entrada: Objeto Collection] --> B{Validar}
-    B -->|Válido| C[Transformar a formato estándar]
-    B -->|Inválido| D[Error de transformación]
-    C --> E{¿Formato extendido?}
-    E -->|Sí| F[Añadir propiedades UI]
-    E -->|No| G{¿Con estadísticas?}
+    A[Input: Collection object] --> B{Validate}
+    B -->|Valid| C[Transform to standard format]
+    B -->|Invalid| D[Transformation error]
+    C --> E{Extended format?}
+    E -->|Yes| F[Add UI properties]
+    E -->|No| G{With statistics?}
     F --> G
-    G -->|Sí| H[Calcular estadísticas]
-    G -->|No| I[Objeto Collection transformado]
+    G -->|Yes| H[Calculate statistics]
+    G -->|No| I[Transformed Collection object]
     H --> I
 ```
 
-## 📁 Estructura de archivos
+## File structure
 
 ```
 collection/
-├── index.ts           # Punto de entrada principal y exportaciones
-├── transformer.ts     # Funciones principales de transformación
-├── mappers.ts         # Funciones para mapear entre distintos formatos
-├── serializers.ts     # Funciones para serialización/deserialización
-└── README.md          # Documentación (este archivo)
+├── index.ts           # Main entry point and exports
+├── transformer.ts     # Main transformation functions
+├── mappers.ts         # Functions that map between formats
+├── serializers.ts     # Serialization and deserialization functions
+└── README.md          # Documentation (this file)
 ```
 
-## 🧩 Tipos principales
+## Main types
 
 ```typescript
-// Modelo básico de Colección
+// Basic Collection model
 interface Collection {
 	id: string;
 	name: string;
@@ -53,17 +53,17 @@ interface Collection {
 	isPinned?: boolean;
 	isFavorite?: boolean;
 	parentId?: string;
-	// ... otras propiedades base
+	// ... other base properties
 }
 
-// Colección con propiedades extendidas para UI
+// Collection with extra UI properties
 interface CollectionExtended extends Collection {
 	isSelected?: boolean;
 	isHighlighted?: boolean;
-	// ... propiedades de UI adicionales
+	// ... extra UI properties
 }
 
-// Colección con estadísticas
+// Collection with statistics
 interface CollectionWithStats extends CollectionExtended {
 	imageCount: number;
 	videoCount: number;
@@ -72,69 +72,69 @@ interface CollectionWithStats extends CollectionExtended {
 	groupCount: number;
 	totalSize: number;
 	lastUpdated?: Date;
-	// ... estadísticas adicionales
+	// ... extra statistics
 }
 ```
 
-## 🛠️ Funciones principales
+## Main functions
 
-### Transformadores básicos
+### Basic transformers
 
 ```typescript
-// Transforma una colección única
+// Transform a single Collection
 transformCollection(collection: unknown): Collection
 
-// Transforma un array de colecciones
+// Transform an array of Collections
 transformCollections(collections: unknown[]): Collection[]
 
-// Transforma a formato extendido para UI
+// Transform to the extended UI format
 transformCollectionToExtended(collection: Collection): CollectionExtended
 
-// Transforma incluyendo estadísticas
+// Transform and include statistics
 transformCollectionToWithStats(collection: Collection): CollectionWithStats
 ```
 
-### Funciones de búsqueda y persistencia
+### Search and persistence functions
 
 ```typescript
-// Busca colecciones con opciones de filtrado
+// Search Collections with filter options
 searchCollections(options: CollectionSearchOptions): Promise<CollectionSearchResult>
 
-// Obtiene una colección por ID con relaciones completas
+// Get a Collection by ID with full relations
 getCollectionById(id: string): Promise<CollectionComplete | null>
 ```
 
-## 📝 Ejemplos de uso
+## Usage examples
 
-### Transformación básica
+### Basic transformation
 
 ```typescript
 import { transformCollection } from '@/transformers/collection';
 
-// Transformar un objeto desconocido a Collection
+// Transform an unknown object to Collection
 const collection = transformCollection(rawData);
-console.log(collection.name); // Acceso seguro a propiedades validadas
+console.log(collection.name); // Safe access to validated properties
 ```
 
-### Transformación con estadísticas para UI
+### Transformation with statistics for UI
 
 ```typescript
 import { transformCollectionToWithStats } from '@/transformers/collection';
 
-// Obtener una colección con estadísticas calculadas
+// Get a Collection with calculated statistics
 const collectionWithStats = transformCollectionToWithStats(collection);
-console.log(`Imágenes: ${collectionWithStats.imageCount}`);
-console.log(`Última actualización: ${collectionWithStats.lastUpdated}`);
+console.log(`Images: ${collectionWithStats.imageCount}`);
+console.log(`Last update: ${collectionWithStats.lastUpdated}`);
 ```
 
-### Búsqueda de colecciones
+### Collection search
 
 ```typescript
 import { searchCollections } from '@/transformers/collection';
 
-// Buscar colecciones con filtros
+// Search Collections with filters
 const result = await searchCollections({
-	search: 'naturaleza',
+	search: 'nature',
 	page: 1,
 	pageSize: 10,
 	orderBy: 'createdAt',
@@ -145,67 +145,62 @@ const result = await searchCollections({
 	},
 });
 
-console.log(`Total: ${result.total}, Páginas: ${result.totalPages}`);
+console.log(`Total: ${result.total}, Pages: ${result.totalPages}`);
 ```
 
-## 🔍 Manejo de errores
+## Error handling
 
-El transformador utiliza un sistema centralizado de manejo de errores que:
+The transformer uses a central error-handling system. The system does this work:
 
-1. Registra detalles del error en el servidor
-2. Lanza `TransformerError` con mensajes descriptivos
-3. Preserva la información del error original en la propiedad `cause`
+1. Log error details on the server
+2. Throw `TransformerError` with descriptive messages
+3. Keep the original error in the `cause` property
 
-Ejemplo de captura:
+Capture example:
 
 ```typescript
 try {
 	const collection = transformCollection(unknownData);
 } catch (error) {
 	if (error instanceof TransformerError) {
-		console.error(`Error de transformación: ${error.message}`);
+		console.error(`Transformation error: ${error.message}`);
 	} else {
-		console.error(`Error inesperado: ${error}`);
+		console.error(`Unexpected error: ${error}`);
 	}
 }
 ```
 
-## ⚙️ Mejores prácticas
+## Practices
 
-1. **Siempre use los transformadores**: Para garantizar datos consistentes, utilice las funciones de transformación incluso cuando crea que los datos ya están en el formato correcto.
+1. **Use the transformers.** Call transformation functions even when the data looks correct. This keeps data consistent.
+2. **Handle errors.** Catch transformation errors. Return useful feedback.
+3. **Avoid direct mutation.** Do not change Collection objects in place. Use transformers to create new instances.
+4. **Watch performance.** For large Collections, use selective transformations. Do not load every relation.
+5. **Validate early.** Validate data as soon as the application receives it. This stops problems from spreading.
+6. **Use the store.** Use CollectionStore to manage Collection state in client components.
 
-2. **Maneje los errores**: Capture y maneje adecuadamente los errores de transformación para proporcionar feedback útil.
+## Interaction with other components
 
-3. **Evite la manipulación directa**: No modifique objetos Collection directamente; en su lugar, utilice las funciones de transformación para crear nuevas instancias.
+Collections relate to several objects in Media Manager. Those objects are:
 
-4. **Considere el rendimiento**: Para colecciones grandes, utilice transformaciones selectivas en lugar de cargar todas las relaciones.
+- **Images**: A Collection can contain many images
+- **Videos**: A Collection can contain many videos
+- **Albums**: A Collection can contain or associate with Albums
+- **Tags**: A Collection can have associated Tags
+- **Groups**: A Collection can be shared with Groups
 
-5. **Validación temprana**: Valide los datos lo antes posible en el flujo de la aplicación para detectar problemas antes de que se propaguen.
+For operations that use these relations, read the documentation for the related object.
 
-6. **Uso del store**: Utilice el CollectionStore para gestionar el estado de las colecciones en componentes del cliente.
+## Collection transformer
 
-## 🔄 Interacción con otros componentes
+### Purpose
 
-Las colecciones se relacionan con varias entidades del sistema:
+Transform Collection data between application layers. The conversions are:
 
-- **Imágenes**: Las colecciones pueden contener múltiples imágenes
-- **Videos**: Las colecciones pueden contener múltiples videos
-- **Álbumes**: Las colecciones pueden contener o estar asociadas con álbumes
-- **Etiquetas**: Las colecciones pueden tener etiquetas asociadas
-- **Grupos**: Las colecciones pueden ser compartidas con grupos
+- **Drizzle to CollectionWithStats**: For UI and application logic
+- **CollectionWithStats to Drizzle**: For database persistence
 
-Para operaciones que involucran estas relaciones, consulte la documentación específica de cada entidad relacionada.
-
-## 📚 Collection Transformer
-
-### Propósito
-
-Transformar datos de Collection entre diferentes capas de la aplicación:
-
-- **Drizzle → CollectionWithStats**: Para uso en UI y lógica de negocio
-- **CollectionWithStats → Drizzle**: Para persistencia en base de datos
-
-### Arquitectura
+### Architecture
 
 ```mermaid
 graph TD
@@ -221,7 +216,7 @@ graph TD
     J --> K[Drizzle Update Data]
 ```
 
-### Tipos Principales
+### Main types
 
 #### CollectionWithStats
 
@@ -231,7 +226,7 @@ interface CollectionWithStats extends CollectionBase {
 		images: number;
 		videos: number;
 		albums: number;
-		// ... otros conteos
+		// ... other counts
 	};
 	stats: {
 		totalItems: number;
@@ -243,63 +238,63 @@ interface CollectionWithStats extends CollectionBase {
 }
 ```
 
-### Funciones Principales
+### Main functions
 
 #### `fromDrizzleCollection(DrizzleCollection: DrizzleCollectionWithCounts): CollectionWithStats`
 
-Convierte datos de Drizzle a formato de aplicación con estadísticas calculadas.
+Converts Drizzle data to application format with calculated statistics.
 
-**Características:**
+**Characteristics:**
 
-- ✅ Deserializa JSON (filters, editions, sortBy)
-- ✅ Calcula estadísticas basadas en `_count`
-- ✅ Maneja valores null/undefined
-- ✅ Optimizado para performance
+- Deserializes JSON (`filters`, `editions`, `sortBy`)
+- Calculates statistics based on `_count`
+- Handles null and undefined values
+- Optimized for performance
 
 #### `toDrizzleCollection(collection: CollectionWithStats): DrizzleCollection`
 
-Convierte datos de aplicación a formato Drizzle para persistencia.
+Converts application data to Drizzle format for persistence.
 
 #### `toDrizzleCollectionCreate(input: CollectionCreateInput): DrizzleCollectionCreateInput`
 
-Prepara datos para creación en Drizzle.
+Prepares data for creation in Drizzle.
 
 #### `toDrizzleCollectionUpdate(input: CollectionUpdateInput): DrizzleCollectionUpdateInput`
 
-Prepara datos para actualización en Drizzle.
+Prepares data for update in Drizzle.
 
-### Funciones Server Actions
+### Route functions
 
 #### `getCollectionById(id: string): Promise<CollectionWithStats | null>`
 
-Obtiene una colección por ID con estadísticas calculadas.
+Gets a Collection by ID with calculated statistics.
 
 #### `getCollections(): Promise<CollectionWithStats[]>`
 
-Obtiene todas las colecciones con estadísticas.
+Gets all Collections with statistics.
 
-### Optimizaciones
+### Optimizations
 
-1. **Consultas optimizadas**: Solo `_count`, no relaciones completas
-2. **Cálculo eficiente**: Estadísticas pre-calculadas en transformación
-3. **Serialización correcta**: Manejo adecuado de JSON fields
-4. **Type safety**: Tipado estricto en todas las capas
+1. **Optimized queries**: Only `_count`, not full relations
+2. **Efficient calculation**: Pre-calculated statistics in transformation
+3. **Correct serialization**: Proper handling of JSON fields
+4. **Type safety**: Strict typing in all layers
 
-### Patrones de Uso
+### Usage patterns
 
 ```typescript
-// ✅ Correcto - Usar CollectionWithStats
+// Correct: use CollectionWithStats
 const collections = await getCollections();
 const totalItems = collection.stats.totalItems;
 
-// ❌ Incorrecto - No usar tipos legacy
+// Incorrect: do not use legacy types
 const collection: CollectionComplete = await getCollection(id);
 ```
 
-### Migración Completada
+### Completed migration
 
-- ✅ Eliminados tipos `CollectionComplete` y `CollectionExtended`
-- ✅ Implementado patrón `CollectionWithStats`
-- ✅ Optimizadas consultas de base de datos
-- ✅ Actualizados stores, components y services
-- ✅ Documentación actualizada
+- Removed `CollectionComplete` and `CollectionExtended` types
+- Implemented the `CollectionWithStats` pattern
+- Optimized database queries
+- Updated stores, components, and services
+- Updated documentation
