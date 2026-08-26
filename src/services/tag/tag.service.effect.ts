@@ -5,9 +5,8 @@
  * @created 2025-10-11 - Fase 1 Effect Implementation
  */
 
-import { Schema } from '@effect/schema';
+import { Schema, Context, Effect, Layer, pipe } from 'effect';
 import { and, asc, count, desc, eq, inArray, isNotNull, like, or } from 'drizzle-orm';
-import { Context, Effect, Layer, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
 import { groupTags, images, imageTags, tags, videos, videoTags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';

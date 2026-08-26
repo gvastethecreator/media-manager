@@ -1,7 +1,7 @@
 /**
  * @file Image Transformer usando Effect
  * @module transformers/image/transformer.effect
- * @description Transformador Effect para la entidad Image usando @effect/schema
+ * @description Effect transformer for Image using Effect Schema
  * @created 2025-10-11 - Fase 2 Effect Implementation
  */
 

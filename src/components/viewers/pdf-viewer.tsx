@@ -1,6 +1,8 @@
 import { ChevronLeft, ChevronRight, Download, FileText, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toastService } from '@/lib/ui/toast';

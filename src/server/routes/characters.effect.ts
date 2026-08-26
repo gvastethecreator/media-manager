@@ -5,8 +5,7 @@
  * @created 2025-10-11 - Fase 8.1 CharacterService Effect Implementation
  */
 
-import { Schema } from '@effect/schema';
-import { Effect } from 'effect';
+import { Schema, Effect } from 'effect';
 import express, { type NextFunction, type Response } from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { CharacterCreateInput, CharacterUpdateInput } from '@/lib/effect/schemas/entities';

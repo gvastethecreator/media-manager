@@ -492,7 +492,7 @@ Internal documentation includes:
 External documentation includes:
 
 - **Effect-TS**: https://effect.website/docs
-- **@effect/schema**: https://effect.website/docs/schema
+- **Effect Schema**: https://effect.website/docs/schema
 - **Drizzle ORM**: https://orm.drizzle.team/docs/overview
 
 ---

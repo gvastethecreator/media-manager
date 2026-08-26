@@ -5,7 +5,7 @@
  * @created 2025-10-11 - Fase 2 Effect Implementation
  */
 
-import { Schema } from '@effect/schema';
+import { Schema } from 'effect';
 import { EntityType, ID, TimestampFields } from './common';
 
 // ============= Base Entity =============

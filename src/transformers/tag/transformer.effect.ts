@@ -1,7 +1,7 @@
 /**
  * @file Tag Transformer usando Effect
  * @module transformers/tag/transformer.effect
- * @description Transformador Effect para la entidad Tag usando @effect/schema
+ * @description Effect transformer for Tag using Effect Schema
  * @created 2025-10-11 - Fase 2 Effect Implementation
  */
 
