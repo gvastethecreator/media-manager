@@ -121,7 +121,7 @@ Start with these references when changing a major subsystem:
 
 ## Contributing
 
-Read [`AGENTS.md`](AGENTS.md) and [`.github/copilot-instructions.md`](.github/copilot-instructions.md) before changing the application. Preserve the current Bun workflow and add evidence at the narrowest public seam that can prove the behavior.
+Read [`AGENTS.md`](AGENTS.md) before changing the application. Preserve the current Bun workflow and add evidence at the narrowest public seam that can prove the behavior.
 
 ## Support
 
@@ -129,4 +129,4 @@ If Media Manager saves you time, you can sponsor continued work through [GitHub 
 
 ## License
 
-See the repository license before redistributing the application or bundled assets.
+[MIT](LICENSE)
