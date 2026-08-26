@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   desktop-source:
-    name: Tauri source check (Windows)
+    name: Electron source check (Windows)
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
@@ -25,7 +25,10 @@ jobs:
           bun-version: 1.3.14
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: cargo check --manifest-path src-tauri/Cargo.toml --locked
+      - run: bun run desktop:build-shell
+      - run: bun run desktop:prepare-resources
+      - run: bun test scripts/desktop-contract.test.ts scripts/desktop-data-migrate.test.ts scripts/desktop-supervisor.test.ts scripts/extraresources-inventory.test.ts scripts/apply-production-database.test.ts
+      - run: bun run desktop:inventory
 
   verify:
     name: Check, tests and build

@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { serverLogger } from './server-logger';
 import { sanitizeSensitiveLogOutput, sanitizeSensitiveLogText } from '@/lib/security/sanitize-sensitive-output';
+import { resolveReindexLogDirectory } from './log-directory';
 
 export interface ReindexLogEntry {
 	context?: any;
@@ -34,7 +35,7 @@ export class ReindexFileLogger {
 	private errorLogPath!: string;
 	private warningLogPath!: string;
 
-	constructor(baseDir = path.resolve(process.cwd(), 'logs', 'reindex')) {
+	constructor(baseDir = resolveReindexLogDirectory()) {
 		this.baseDir = path.resolve(baseDir);
 		this.updateLogPaths();
 		this.ensureLogDirectory();

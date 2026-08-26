@@ -465,7 +465,7 @@ Los siguientes archivos fueron actualizados para usar el sistema de themes:
 | --------------------------------------- | ------------------------------------------------------- |
 | `src/styles/tokens.css`                 | Definición de tokens de entidades y colores funcionales |
 | `src/styles/design-tokens.css`          | Paletas de color, sombras, timing, borders              |
-| `src/app/themes.css`                    | Definiciones de los 14 temas personalizados             |
+| `src/styles/themes.css`                 | Definiciones de los 14 temas personalizados             |
 | `src/styles/utilities/theme-system.css` | Sistema de transiciones y utilities                     |
 | `src/components/cards/*`                | Migración de colores hardcodeados a tokens              |
 | `src/components/ui/*.tsx`               | Componentes UI usando variables CSS                     |
@@ -480,7 +480,7 @@ El sistema incluye transiciones fluidas automáticas cuando se cambia entre them
 ### Transiciones Automáticas
 
 ```css
-/* src/app/themes.css - Al final del archivo */
+/* src/styles/themes.css - Al final del archivo */
 html {
 	transition:
 		background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -557,7 +557,7 @@ El sistema respeta la preferencia del usuario de reducir movimiento:
 
 ### Paso 1: Definir las Variables CSS del Tema
 
-Agrega una nueva sección en `src/app/themes.css`:
+Agrega una nueva sección en `src/styles/themes.css`:
 
 ```css
 /* Tema Personalizado - Ejemplo: Ocean */
@@ -694,7 +694,7 @@ export type Theme =
 
 - [Design Tokens CSS](src/styles/design-tokens.css)
 - [Tokens de Entidades](src/styles/tokens.css)
-- [Definiciones de Themes](src/app/themes.css)
+- [Definiciones de Themes](src/styles/themes.css)
 - [Theme System Utilities](src/styles/utilities/theme-system.css)
 - [ThemeProvider](src/providers/theme-provider.tsx)
 - [ThemeToggle](src/components/core/theme/theme-toggle.tsx)

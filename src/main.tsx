@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AppShell } from '@/platform/app-shell/app-shell';
 
-import './app/globals.css';
+import './styles/app-globals.css';
 import './styles/globals.css';
 import './styles/scrollbar.css';
 import './styles/selecto.css';

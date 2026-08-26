@@ -578,10 +578,10 @@ export async function repairSystem(): Promise<SystemResponse> {
 		systemLogger.info('🔧 Iniciando reparación del sistema');
 		const actions: string[] = [];
 
-		await fs.mkdir(path.join(process.cwd(), 'logs'), { recursive: true });
+		await fs.mkdir(process.env.MEDIA_MANAGER_LOG_DIR || path.join(process.cwd(), 'logs'), { recursive: true });
 		actions.push('directorio de logs verificado');
 
-		await fs.mkdir(path.join(process.cwd(), 'public', 'uploads'), { recursive: true });
+		await fs.mkdir(process.env.UPLOADS_DIR || path.join(process.cwd(), 'public', 'uploads'), { recursive: true });
 		actions.push('directorio de uploads verificado');
 
 		const dbClient = getDbClient();

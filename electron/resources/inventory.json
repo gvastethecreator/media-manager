@@ -1,0 +1,55 @@
+{
+  "generatedAt": "2026-08-18T03:17:26.676Z",
+  "root": "electron/extra-resources",
+  "entries": [
+    {
+      "key": "bun-runtime",
+      "path": "bun/bun.exe",
+      "files": 1,
+      "hash": "0187f68d843f825a72ada4a7eca60db896ed753759a7f8252edcd31ac1bf1b9c",
+      "present": true,
+      "required": true
+    },
+    {
+      "key": "client",
+      "path": "client",
+      "files": 304,
+      "hash": "aaf534e47b8ba0dbd39c2c3a0231605c05e240f43f1e53baf9846544be8d52d9",
+      "present": true,
+      "required": false
+    },
+    {
+      "key": "server",
+      "path": "server",
+      "files": 1,
+      "hash": "fe583a46284076ef0311bc88a60a90fd64d84b29d58777ca36500cedae3217fc",
+      "present": true,
+      "required": false
+    },
+    {
+      "key": "migrations",
+      "path": "migrations",
+      "files": 22,
+      "hash": "40403c5b1eca2fd3c69416571dd5dfc2c38e9b5d8874a0a3814d0ce557da1242",
+      "present": true,
+      "required": true
+    },
+    {
+      "key": "sharp",
+      "path": "node_modules",
+      "files": 55,
+      "hash": "324462224ffcea229f6ef8da05c399e72fc1e1ed279adae4312ecd880ab3a8ba",
+      "present": true,
+      "required": true
+    },
+    {
+      "key": "start",
+      "path": "start",
+      "files": 2,
+      "hash": "780ca0440b461f1cba2fe20d3c364cb7422a5ca56fdfded1d4c7812eab8300e7",
+      "present": true,
+      "required": true
+    }
+  ],
+  "sqlite": false
+}

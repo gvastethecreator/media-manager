@@ -10,6 +10,10 @@
 !.yarn/releases
 !.yarn/versions
 /dist
+/electron/dist
+/electron/extra-resources
+/electron/package-staging
+/out
 ~/
 
 # testing

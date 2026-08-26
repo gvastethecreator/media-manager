@@ -4,7 +4,7 @@ This file serves as the primary context and instructional guide for interacting 
 
 ## 1. Project Overview
 
-**Image Manager** is a high-performance, monolithic client-server application for managing large volumes of multimedia files. It runs as a Web App (React/Express) or a Desktop App (Tauri).
+**Image Manager** is a high-performance, monolithic client-server application for managing large volumes of multimedia files. It runs as a Web App (React/Express). Desktop development is moving from Tauri to Electron. Follow `AGENTS.md` for the live desktop commands.
 
 - **Type:** Monolithic Client-Server (Web + Desktop)
 - **Runtime:** [Bun](https://bun.sh) (v1.2+)
@@ -16,9 +16,9 @@ This file serves as the primary context and instructional guide for interacting 
 | :----------- | :--------------------------------------- | :------------------------------------------------ |
 | **Frontend** | React 19, Vite+ (Vite + Rolldown)        | Zustand, TanStack Query, Tailwind CSS 4, Radix UI |
 | **Backend**  | Express 5, Bun                           | Drizzle ORM, Sharp, Effect-TS (partial)           |
-| **Desktop**  | Tauri 2 (Rust)                           |                                                   |
+| **Desktop**  | Electron supervisor + Bun backend (Tauri until cutover) |                          |
 | **Testing**  | Vitest (Unit), Playwright (E2E)          |                                                   |
-| **Tooling**  | Vite+, Oxc (Lint/Format), TypeScript 5.9 |                                                   |
+| **Tooling**  | Vite+, Oxc (Lint/Format), TypeScript 7   |                                                   |
 
 ---
 
@@ -36,7 +36,7 @@ This file serves as the primary context and instructional guide for interacting 
 
 - **Linting:** Use **Oxc** through `bun run lint`, `bun run format`, `bun run check`, and `bun run check:full` when you need a full repo formatting audit.
 - **Imports:** Always use **absolute paths** (e.g., `import { ... } from '@/services/video'`).
-- **No File Parallelism:** Vitest is configured with `fileParallelism: false` to avoid `SQLITE_BUSY` errors.
+- **File Parallelism:** Vitest is configured with `fileParallelism: true`. Each file uses an isolated disposable SQLite database.
 - **Strict Types:** No `any`. Define types in `src/types` or Drizzle schemas.
 
 ---
@@ -76,7 +76,7 @@ The project follows a strict layered architecture. **Do not bypass layers.**
 ### Development
 
 - `bun run dev:full` - Start Frontend + Backend + HMR (Primary dev command).
-- `bun run dev:tauri` - Start Tauri Desktop App.
+- `bun run desktop:dev` - Start the Electron desktop shell.
 
 ### Testing
 
