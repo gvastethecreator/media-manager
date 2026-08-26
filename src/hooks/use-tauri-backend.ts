@@ -1,17 +1,7 @@
-/**
- * Hook para gestionar la comunicación con el backend en entorno Tauri
- */
-
-import { invoke } from '@tauri-apps/api/core';
 import { useEffect, useState } from 'react';
+import { isDesktopRuntime } from '@/platform/detect';
+import { getDesktopBridge } from '@/platform/desktop';
 import { clientLogger } from '@/lib/logger/client-logger';
-
-// --- Constantes ---
-const HEALTH_CHECK_INTERVAL = 900_000; // 15 minutos (900s)
-const TAURI_COMMANDS = {
-	CHECK_HEALTH: 'check_backend_health',
-	GET_APP_DATA_DIR: 'get_app_data_dir',
-} as const;
 
 interface BackendStatus {
 	error: string | null;
@@ -19,111 +9,52 @@ interface BackendStatus {
 	isRunning: boolean;
 }
 
-export function useTauriBackend() {
+export function useDesktopBackend() {
 	const [status, setStatus] = useState<BackendStatus>({
 		isRunning: false,
 		isChecking: true,
 		error: null,
 	});
 
-	const checkBackendHealth = async () => {
-		try {
-			setStatus((prev) => ({ ...prev, isChecking: true, error: null }));
-
-			const result = await invoke<string>(TAURI_COMMANDS.CHECK_HEALTH);
-			clientLogger.debug('Backend health check:', result);
-
-			setStatus({
-				isRunning: true,
-				isChecking: false,
-				error: null,
-			});
-		} catch (error) {
-			clientLogger.warn('Backend not available:', error);
-			setStatus({
-				isRunning: false,
-				isChecking: false,
-				error: String(error),
-			});
-		}
-	};
-
-	const getAppDataDir = async () => {
-		try {
-			const appDataDir = await invoke<string>(TAURI_COMMANDS.GET_APP_DATA_DIR);
-			return appDataDir;
-		} catch (error) {
-			clientLogger.error('Failed to get app data directory:', error);
-			throw error;
-		}
-	};
-
 	useEffect(() => {
-		// Función interna para evitar dependencias
-		const performHealthCheck = async () => {
+		if (!isDesktopRuntime()) {
+			setStatus({ error: null, isChecking: false, isRunning: false });
+			return;
+		}
+		let cancelled = false;
+		const poll = async () => {
 			try {
-				setStatus((prev) => ({ ...prev, isChecking: true, error: null }));
-
-				const result = await invoke<string>(TAURI_COMMANDS.CHECK_HEALTH);
-				clientLogger.debug('Backend health check:', result);
-
-				setStatus({
-					isRunning: true,
-					isChecking: false,
-					error: null,
-				});
+				const next = await getDesktopBridge().getBackendStatus();
+				if (!cancelled) {
+					setStatus({ error: null, isChecking: false, isRunning: next === 'ready' });
+				}
 			} catch (error) {
 				clientLogger.warn('Backend not available:', error);
-				setStatus({
-					isRunning: false,
-					isChecking: false,
-					error: String(error),
-				});
+				if (!cancelled) {
+					setStatus({ error: String(error), isChecking: false, isRunning: false });
+				}
 			}
 		};
-
-		// Verificar salud del backend al cargar
-		performHealthCheck();
-
-		// Verificar salud periódicamente para reducir ruido
-		const interval = setInterval(performHealthCheck, HEALTH_CHECK_INTERVAL);
-
-		return () => clearInterval(interval);
-	}, []);
-
-	return {
-		...status,
-		checkBackendHealth,
-		getAppDataDir,
-	};
-}
-
-/**
- * Hook para detectar si estamos ejecutando en Tauri
- */
-export function useTauriContext() {
-	const [isTauri, setIsTauri] = useState(false);
-
-	useEffect(() => {
-		// Verificar si estamos en Tauri
-		const checkTauri = () => {
-			try {
-				const w = window as unknown as { __TAURI__?: unknown };
-				return typeof window !== 'undefined' && typeof w.__TAURI__ !== 'undefined';
-			} catch {
-				return false;
-			}
+		void poll();
+		const interval = setInterval(() => void poll(), 15_000);
+		return () => {
+			cancelled = true;
+			clearInterval(interval);
 		};
-
-		setIsTauri(checkTauri());
 	}, []);
 
-	return isTauri;
+	return status;
 }
 
-/**
- * Utilidad para obtener la URL base de la API según el contexto
- */
+export function useDesktopContext() {
+	return isDesktopRuntime();
+}
+
+/** @deprecated Use useDesktopBackend */
+export const useTauriBackend = useDesktopBackend;
+/** @deprecated Use useDesktopContext */
+export const useTauriContext = useDesktopContext;
+
 export function getApiBaseUrl(): string {
 	return '/api';
 }

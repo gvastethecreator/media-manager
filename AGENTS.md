@@ -6,15 +6,15 @@ This guide provides essential information for AI agents working in this reposito
 
 ## 📋 Project Overview
 
-**Type**: Monolithic client-server application (web + desktop via Tauri)
+**Type**: Monolithic client-server application (web + desktop via Electron)
 **Purpose**: Intelligent multimedia file management system for large volumes of content
-**Tech Stack**: React 19 + Express + Bun + Drizzle ORM + SQLite + Playwright + Tauri 2
+**Tech Stack**: React 19 + Express + Bun + Drizzle ORM + SQLite + Playwright + Electron
 **Runtime**: Bun 1.2+ (can use Node.js 20+ as fallback)
 
 **Deployment Options**:
 
 - **Web App**: Full-stack (React + Express) via `bun run dev:full`
-- **Desktop App**: Tauri 2 wrapper around the web app via `bun run dev:tauri`
+- **Desktop App**: Electron supervisor around the Bun web app via `bun run desktop:dev`
 
 ---
 
@@ -32,8 +32,8 @@ bun run dev:vite
 # Backend only (Express with HMR)
 bun run dev:server:hot
 
-# Tauri desktop development
-bun run dev:tauri
+# Electron desktop development
+bun run desktop:dev
 ```
 
 ### Build
@@ -48,8 +48,8 @@ bun run build:vite
 # Server build only
 bun run build:server
 
-# Tauri desktop build
-bun run build:tauri
+# Copy extraResources, hash that tree, then package Windows x64
+bun run desktop:package
 ```
 
 ### Testing
@@ -124,25 +124,22 @@ bun run logs:clean
 bun run check:errors
 ```
 
-### Desktop (Tauri)
+### Desktop (Electron)
 
 ```bash
-# Tauri development
-bun run dev:tauri
+# Electron development
+bun run desktop:dev
 
-# Tauri build
-bun run build:tauri
+# Build web artifacts, copy extraResources, hash that tree, package Windows x64
+bun run desktop:package
 ```
 
-**Tauri Integration**:
+**Electron Integration**:
 
-- React frontend runs at `http://localhost:5173` (Vite+ dev server)
-- Express backend runs at `http://localhost:4000` (server)
-- Tauri Rust bridge (`src-tauri/src/`) provides:
-  - `check_backend_health()` - Verify backend is running
-  - `get_app_data_dir()` - Get cross-platform app data directory
-- Tauri config: `src-tauri/tauri.conf.json`
-- Backend resources bundled in Tauri builds (see bundle.resources in config)
+- Development window origin: `http://127.0.0.1:5173`
+- Production window origin: the local broker on loopback
+- Supervisor owns the session token and the `userData/app-data` library
+- See `docs/migration/ARCHITECTURE_ADR.md`
 
 ---
 
@@ -664,29 +661,6 @@ bun run lint:fix
 # Format files
 bun run format
 ```
-
----
-
-## 🎯 Feature Flags
-
-The project uses feature flags for gradual migrations:
-
-```typescript
-// src/config/features.ts
-export const FEATURES = {
-	USE_EFFECT_TAGS: process.env.USE_EFFECT_TAGS !== 'false',
-	USE_EFFECT_IMAGES: process.env.USE_EFFECT_IMAGES !== 'false',
-	USE_EFFECT_VIDEOS: process.env.USE_EFFECT_VIDEOS !== 'false',
-	USE_EFFECT_AUDIOS: process.env.USE_EFFECT_AUDIOS !== 'false',
-	USE_EFFECT_FOLDERS: process.env.USE_EFFECT_FOLDERS === 'true',
-} as const;
-```
-
-**Effect-TS Migration Pattern**:
-
-- Legacy service: `src/services/<entity>/<entity>.service.ts`
-- Effect version: `src/services/<entity>/<entity>.service.effect.ts`
-- Router chooses based on feature flag
 
 ---
 
@@ -1233,81 +1207,11 @@ con compensación durable y una prueba de recuperación.
 
 ---
 
-## 🖥️ Tauri Desktop Integration
+## Desktop (Electron)
 
-### Architecture Overview
+The desktop shell is an Electron supervisor. It starts the existing Bun production runtime. The renderer keeps `/api` and never receives Node, `ipcRenderer`, or a generic invoke bridge.
 
-Tauri wraps the web application as a desktop app with native Rust capabilities.
-
-**Key Components**:
-
-- **Frontend**: React app running at `http://localhost:5173`
-- **Backend**: Express server running at `http://localhost:4000`
-- **Rust Bridge**: `src-tauri/src/` - Native commands
-
-### Tauri Configuration
-
-**File**: `src-tauri/tauri.conf.json`
-
-```json
-{
-	"productName": "Image Manager",
-	"version": "0.1.0",
-	"identifier": "com.imagemanager.app",
-	"build": {
-		"frontendDist": "../dist",
-		"devUrl": "http://localhost:5173",
-		"beforeDevCommand": "bun run dev:vite",
-		"beforeBuildCommand": "bun run build:vite"
-	},
-	"bundle": {
-		"active": true,
-		"targets": "all",
-		"resources": {
-			"../dist/server/index.js": "server/index.js",
-			"../dist/server/wrapper.js": "server/wrapper.js",
-			"../dist/server/db.sqlite": "server/db.sqlite"
-		}
-	}
-}
-```
-
-### Rust Commands
-
-**File**: `src-tauri/src/`
-
-```rust
-// Commands available to frontend
-#[tauri::command]
-async fn check_backend_health() -> Result<bool, String> {
-    // Check if backend is running at localhost:4000
-}
-
-#[tauri::command]
-async fn get_app_data_dir() -> Result<String, String> {
-    // Get cross-platform app data directory
-}
-
-#[tauri::command]
-async fn open_in_explorer(path: String) -> Result<(), String> {
-    // Open file explorer at path
-}
-```
-
-### Desktop vs Web Behavior
-
-**Web Mode**:
-
-- Runs in browser
-- Backend at `localhost:4000` (must be started separately)
-- No native file system access
-
-**Desktop Mode**:
-
-- Runs in Tauri window
-- Backend bundled in app
-- Native file system access via Tauri APIs
-- System tray, native menus, etc.
+See `docs/migration/` for the ADR, inventory, and data restore protocol.
 
 ---
 
@@ -1530,21 +1434,6 @@ NODE_ENV=development
 UPLOADS_DIR=public/uploads
 ```
 
-### Optional (Feature Flags)
-
-```bash
-# Effect-TS features (default: true)
-USE_EFFECT_TAGS=true
-USE_EFFECT_IMAGES=true
-USE_EFFECT_VIDEOS=true
-USE_EFFECT_AUDIOS=true
-
-# Future features (default: false)
-USE_EFFECT_FOLDERS=false
-```
-
----
-
 ## 🛠️ Common Tasks
 
 ### Run Database Migration
@@ -1654,3 +1543,19 @@ bun run dev:full
 ---
 
 **Remember**: Always read existing code patterns before implementing new features. The codebase has established patterns for services, transformers, routes, and components that should be followed.
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues and the linked GitHub Project hold live state. `.scratch/` holds synchronized local mirrors. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, or `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Multi-context monolith: root `CONTEXT.md` plus `CONTEXT-MAP.md` and `docs/adr/`. See `docs/agents/domain.md`.

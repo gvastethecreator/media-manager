@@ -50,7 +50,7 @@ function getManualChunkName(id: string) {
 	if (matchesPackage('@tanstack/react-query')) return 'query';
 	// Los renderizadores pesados deben quedar junto a sus rutas o visores diferidos.
 	// Forzarlos a un chunk global hace que Vite los precargue desde index.html.
-	if (matchesPackage('@radix-ui') || matchesPackage('@base-ui-components')) return 'radix-ui';
+	if (matchesPackage('@radix-ui')) return 'radix-ui';
 	if (matchesPackage('gsap') || matchesPackage('@gsap') || matchesPackage('lucide-react')) return 'ui';
 	if (matchesPackage('zustand') || matchesPackage('lodash') || matchesPackage('date-fns')) return 'vendor';
 	if (matchesPackage('clsx') || matchesPackage('tailwind-merge') || matchesPackage('class-variance-authority'))
@@ -173,7 +173,7 @@ export default defineConfig({
 			'sharp',
 			'http',
 			// Excluir dependencias que causan problemas
-			'@tauri-apps/api',
+
 		],
 		include: [
 			// Pre-bundlear dependencias críticas
@@ -319,9 +319,6 @@ export default defineConfig({
 		tasks: {
 			'build:server': {
 				command: 'bun run build:server',
-			},
-			'build:tauri': {
-				command: 'bun run build:tauri',
 			},
 			'db:check': {
 				command: 'bun run db:check',

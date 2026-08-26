@@ -216,7 +216,7 @@ describe('local API session middleware', () => {
 				readFile(resolve(WORKSPACE_PATH, 'scripts/dev-full.js'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'scripts/dev-server-hot.js'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'scripts/dev-vite-headers.js'), 'utf8'),
-				readFile(resolve(WORKSPACE_PATH, 'scripts/tauri-dev.js'), 'utf8'),
+				readFile(resolve(WORKSPACE_PATH, 'scripts/desktop-dev.js'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'src/lib/hooks/ui/use-thumbnail-events.ts'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'src/lib/image/image-loader.ts'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'src/server/middleware/public-error-handler.ts'), 'utf8'),
@@ -244,6 +244,7 @@ describe('local API session middleware', () => {
 		expect(devServer).toContain('isolated standalone session (use dev:full for a connected UI)');
 		expect(devVite).toContain('isolated standalone session (use dev:full for a connected backend)');
 		expect(tauriDev).toContain('createLocalSessionEnvironment({');
+		expect(tauriDev).toContain('http://127.0.0.1:5173');
 		expect(thumbnailEvents).not.toContain('VITE_API_URL');
 		expect(imageLoader).not.toContain('VITE_API_URL');
 	});

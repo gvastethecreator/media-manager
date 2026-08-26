@@ -1,10 +1,13 @@
 declare global {
 	interface Window {
-		electron?: {
-			openPath: (path: string) => void;
-			downloadFile: (path: string) => void;
-			copyFileToClipboard: (path: string) => void;
-			deleteFile: (path: string) => void;
+		desktop?: {
+			confirmRestore(): Promise<{ status: 'completed' | 'already-completed' | 'no-source' | 'failed'; error?: string }>;
+			getBackendStatus(): Promise<'starting' | 'ready' | 'degraded' | 'stopped'>;
+			getRestoreOffer(): Promise<{ available: boolean; sourceLabel: string }>;
+			getRuntimeInfo(): Promise<{ appVersion: string; dataDirLabel: string; isDesktop: true }>;
+			openLogFolder(): Promise<void>;
+			retryBackend(): Promise<'starting' | 'ready' | 'degraded' | 'stopped'>;
+			skipRestore(): Promise<{ status: 'completed' | 'already-completed' | 'no-source' | 'failed'; error?: string }>;
 		};
 	}
 

@@ -1,12 +1,13 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { applyProductionDatabaseMigrations } from './apply-production-database';
 import { startLocalAppBroker } from '../src/runtime/local-app-broker';
 import { createProductionRuntimeConfig } from '../src/runtime/production-runtime-config';
 import { createRuntimeHealthController } from '../src/runtime/runtime-health';
 
 const { publicHost, publicPort, runtimeEnvironment } = createProductionRuntimeConfig();
-const clientRoot = resolve(process.cwd(), 'dist/client');
-const backendEntry = resolve(process.cwd(), 'dist/server/index.js');
+const clientRoot = resolve(process.env.MEDIA_MANAGER_CLIENT_ROOT || resolve(process.cwd(), 'dist/client'));
+const backendEntry = resolve(process.env.MEDIA_MANAGER_BACKEND_ENTRY || resolve(process.cwd(), 'dist/server/index.js'));
 
 if (!(existsSync(resolve(clientRoot, 'index.html')) && existsSync(backendEntry))) {
 	throw new Error('Faltan artefactos de producción. Ejecuta `bun run build` antes de `bun run start`.');
@@ -60,6 +61,10 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 }
 
 try {
+	const migration = await applyProductionDatabaseMigrations(process.env);
+	console.log(
+		`[runtime] Migraciones aplicadas=${migration.applied.length} omitidas=${migration.skipped.length} dir=${migration.migrationsDirectory}`
+	);
 	broker = startLocalAppBroker({
 		backendOrigin: runtimeEnvironment.MEDIA_MANAGER_API_TARGET,
 		clientRoot,

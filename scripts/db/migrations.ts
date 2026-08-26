@@ -2,6 +2,7 @@
 
 import { Database } from 'bun:sqlite';
 import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { open, readdir, readFile, rm, stat, statfs } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { resolveDatabasePath } from './database-safety';
@@ -69,6 +70,7 @@ type MigrationOptions = {
 	busyTimeoutMs?: number;
 	databasePath: string;
 	migrationsDirectory?: string;
+	schemaContractPath?: string;
 	validateSchema?: boolean;
 };
 
@@ -175,7 +177,8 @@ async function preflightExistingDatabase(
 	allowExistingPending: boolean,
 	busyTimeoutMs: number,
 	migrationsDirectory: string,
-	validateSchema: boolean
+	validateSchema: boolean,
+	schemaContractPath?: string
 ): Promise<void> {
 	const target = await stat(databasePath).catch(() => null);
 	if (!target || target.size === 0) return;
@@ -186,7 +189,7 @@ async function preflightExistingDatabase(
 		const applied = validateMigrationPreconditions(database, migrations, allowExistingPending);
 		assertCanonicalSchemaInvariants(database);
 		if (validateSchema && applied.length === migrations.length) {
-			await validateCanonicalSchema(database, migrationsDirectory);
+			await validateCanonicalSchema(database, migrationsDirectory, schemaContractPath);
 		}
 	} finally {
 		database.clearQueryCache();
@@ -194,9 +197,13 @@ async function preflightExistingDatabase(
 	}
 }
 
-async function validateCanonicalSchema(database: Database, migrationsDirectory: string): Promise<void> {
+async function validateCanonicalSchema(
+	database: Database,
+	migrationsDirectory: string,
+	schemaContractPath?: string
+): Promise<void> {
 	assertCanonicalSchemaInvariants(database);
-	if (resolve(migrationsDirectory) !== resolve(MIGRATIONS_DIRECTORY)) {
+	if (resolve(migrationsDirectory) !== resolve(MIGRATIONS_DIRECTORY) && existsSync(MIGRATIONS_DIRECTORY)) {
 		const [candidate, canonical] = await Promise.all([
 			loadMigrations(migrationsDirectory),
 			loadMigrations(MIGRATIONS_DIRECTORY),
@@ -208,7 +215,7 @@ async function validateCanonicalSchema(database: Database, migrationsDirectory: 
 			return;
 		}
 	}
-	const schema = compareSchema(database, await loadSchemaContract());
+	const schema = compareSchema(database, await loadSchemaContract(schemaContractPath));
 	const unknown = schema.extra.filter((entry) => entry.classification === 'unknown');
 	if (schema.missing.length > 0 || schema.changed.length > 0 || unknown.length > 0) {
 		throw new Error(
@@ -334,6 +341,7 @@ export async function migrateDatabase({
 	busyTimeoutMs = 5_000,
 	databasePath,
 	migrationsDirectory = MIGRATIONS_DIRECTORY,
+	schemaContractPath,
 	validateSchema = true,
 }: MigrationOptions): Promise<{ applied: string[]; skipped: string[] }> {
 	const migrations = await loadMigrations(migrationsDirectory);
@@ -343,7 +351,8 @@ export async function migrateDatabase({
 		allowExistingPending,
 		busyTimeoutMs,
 		migrationsDirectory,
-		validateSchema
+		validateSchema,
+		schemaContractPath
 	);
 	const database = new Database(databasePath, { create: true, strict: true });
 	const applied: string[] = [];
@@ -353,7 +362,7 @@ export async function migrateDatabase({
 		const appliedBeforeMigration = validateMigrationPreconditions(database, migrations, allowExistingPending);
 		assertCanonicalSchemaInvariants(database);
 		if (validateSchema && appliedBeforeMigration.length === migrations.length) {
-			await validateCanonicalSchema(database, migrationsDirectory);
+			await validateCanonicalSchema(database, migrationsDirectory, schemaContractPath);
 		}
 		const journalMode = String(
 			readFirstValue(database.query('PRAGMA journal_mode = WAL').get() as Record<string, unknown> | null) ?? ''
@@ -395,7 +404,7 @@ export async function migrateDatabase({
 				// persist a corrupt earlier migration and only roll back the later one.
 				assertCanonicalSchemaInvariants(database);
 				if (validateSchema && migration.version === migrations.length - 1) {
-					await validateCanonicalSchema(database, migrationsDirectory);
+					await validateCanonicalSchema(database, migrationsDirectory, schemaContractPath);
 				}
 				const durationMs = Math.max(0, Math.round(performance.now() - startedAt));
 				database
@@ -421,7 +430,7 @@ export async function migrateDatabase({
 			);
 		}
 		assertCanonicalSchemaInvariants(database);
-		if (validateSchema) await validateCanonicalSchema(database, migrationsDirectory);
+		if (validateSchema) await validateCanonicalSchema(database, migrationsDirectory, schemaContractPath);
 		return { applied, skipped };
 	} finally {
 		database.clearQueryCache();

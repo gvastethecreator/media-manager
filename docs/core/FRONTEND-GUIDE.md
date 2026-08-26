@@ -157,7 +157,7 @@ El frontend mantiene una arquitectura funcional pero con herencia de migraciones
 
 Se cargan desde:
 
-- `src/app/globals.css`
+- `src/styles/app-globals.css`
 - `src/styles/globals.css`
 - `src/styles/scrollbar.css`
 - `src/styles/selecto.css`
