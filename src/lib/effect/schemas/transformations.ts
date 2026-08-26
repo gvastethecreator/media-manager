@@ -4,10 +4,10 @@
  * @description Utilidades para transformaciones y conversiones entre tipos Effect (versión simplificada)
  * @created 2025-10-11 - Fase 2 Effect Implementation
  * @note Este archivo contiene transformaciones básicas. Para transformaciones avanzadas,
- *       consultar la documentación de @effect/schema en https://effect.website/docs/schema
+ *       see https://effect.website/docs/schema
  */
 
-import { Schema } from '@effect/schema';
+import { Schema } from 'effect';
 
 // ============= NOTA IMPORTANTE =============
 // Las transformaciones avanzadas de Effect Schema requieren `strict: true` en las opciones.

@@ -5,8 +5,7 @@
  * @created 2025-10-11 - Fase 1 Effect Implementation
  */
 
-import { Schema } from '@effect/schema';
-import { Effect } from 'effect';
+import { Schema, Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { filterAuthorizedMediaEntities } from '@/server/security/authorized-root-request';

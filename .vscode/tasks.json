@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Dev",
+      "label": "🚀 Dev",
       "type": "shell",
       "command": "bun run dev:full",
       "isBackground": true,
@@ -34,7 +34,7 @@
       }
     },
     {
-      "label": "Dev: Vite",
+      "label": "🌐 Dev: Vite",
       "type": "shell",
       "command": "bun run dev:vite",
       "isBackground": true,
@@ -60,7 +60,7 @@
       }
     },
     {
-      "label": "Dev: Server",
+      "label": "⚙️ Dev: Server",
       "type": "shell",
       "command": "bun run dev:server:hot",
       "isBackground": true,
@@ -86,7 +86,7 @@
       }
     },
     {
-      "label": "Desktop: Dev",
+      "label": "💻 Desktop: Dev",
       "type": "shell",
       "command": "bun run desktop:dev",
       "isBackground": true,
@@ -102,7 +102,7 @@
       }
     },
     {
-      "label": "Build",
+      "label": "🏗️ Build",
       "type": "shell",
       "command": "bun run build",
       "group": "build",
@@ -117,7 +117,7 @@
       }
     },
     {
-      "label": "Build: Vite",
+      "label": "🏗️ Build: Vite",
       "type": "shell",
       "command": "bun run build:vite",
       "group": "build",
@@ -127,7 +127,7 @@
       }
     },
     {
-      "label": "Build: Server",
+      "label": "🏗️ Build: Server",
       "type": "shell",
       "command": "bun run build:server",
       "group": "build",
@@ -137,7 +137,7 @@
       }
     },
     {
-      "label": "Desktop: Package",
+      "label": "📦 Desktop: Package",
       "type": "shell",
       "command": "bun run desktop:package",
       "group": "build",
@@ -147,7 +147,7 @@
       }
     },
     {
-      "label": "Check",
+      "label": "🔎 Check",
       "type": "shell",
       "command": "bun run check",
       "group": "test",
@@ -157,7 +157,7 @@
       }
     },
     {
-      "label": "Format",
+      "label": "🎨 Format",
       "type": "shell",
       "command": "bun run format",
       "group": "build",
@@ -167,7 +167,7 @@
       }
     },
     {
-      "label": "Format: Check",
+      "label": "🎨 Format: Check",
       "type": "shell",
       "command": "bun run format:check",
       "group": "build",
@@ -177,7 +177,7 @@
       }
     },
     {
-      "label": "Lint",
+      "label": "🔍 Lint",
       "type": "shell",
       "command": "bun run lint",
       "group": "build",
@@ -187,7 +187,7 @@
       }
     },
     {
-      "label": "Lint: Fix",
+      "label": "🔧 Lint: Fix",
       "type": "shell",
       "command": "bun run lint:fix",
       "group": "build",
@@ -197,7 +197,7 @@
       }
     },
     {
-      "label": "Typecheck",
+      "label": "📝 Typecheck",
       "type": "shell",
       "command": "bun run tsc",
       "group": "build",
@@ -207,7 +207,7 @@
       }
     },
     {
-      "label": "Test",
+      "label": "🧪 Test",
       "type": "shell",
       "command": "bun run test",
       "group": {
@@ -220,7 +220,7 @@
       }
     },
     {
-      "label": "Test: Tooling",
+      "label": "🧪 Test: Tooling",
       "type": "shell",
       "command": "bun run test:tooling",
       "group": "test",
@@ -230,7 +230,7 @@
       }
     },
     {
-      "label": "Test: E2E",
+      "label": "🎭 Test: E2E",
       "type": "shell",
       "command": "bun run test:e2e",
       "group": "test",
@@ -245,7 +245,7 @@
       }
     },
     {
-      "label": "Deps",
+      "label": "📦 Deps",
       "type": "shell",
       "command": "bun run deps:outdated",
       "group": "build",
@@ -255,7 +255,7 @@
       }
     },
     {
-      "label": "DB: Studio",
+      "label": "🗃️ DB: Studio",
       "type": "shell",
       "command": "bun run db:studio -- --database \"${input:mediaManagerDatabasePath}\"",
       "detail": "Opens Studio on the selected database. The file must already exist.",
@@ -267,7 +267,7 @@
       }
     },
     {
-      "label": "DB: Check",
+      "label": "🗃️ DB: Check",
       "type": "shell",
       "command": "bun run db:check -- --database \"${input:mediaManagerDatabasePath}\"",
       "detail": "Checks the selected database. Does not write.",
@@ -278,7 +278,7 @@
       }
     },
     {
-      "label": "DB: Reset",
+      "label": "⚠️ DB: Reset",
       "type": "shell",
       "command": "bun run db:reset -- --database \"${input:mediaManagerDisposableDatabasePath}\"",
       "detail": "Dry-run. Does not delete. Add --confirm RESET-DISPOSABLE only on a marked disposable database.",
@@ -293,7 +293,7 @@
       }
     },
     {
-      "label": "Logs: List",
+      "label": "📋 Logs: List",
       "type": "shell",
       "command": "bun run logs:list",
       "group": "build",
@@ -303,7 +303,7 @@
       }
     },
     {
-      "label": "Logs: Clean",
+      "label": "🧹 Logs: Clean",
       "type": "shell",
       "command": "bun run logs:clean",
       "group": "build",
@@ -313,7 +313,7 @@
       }
     },
     {
-      "label": "Check: Errors",
+      "label": "⚠️ Check: Errors",
       "type": "shell",
       "command": "bun run check:errors",
       "group": "build",
@@ -323,7 +323,7 @@
       }
     },
     {
-      "label": "Playwright: Install",
+      "label": "🎭 Playwright: Install",
       "type": "shell",
       "command": "bun run playwright:install",
       "group": "build",
@@ -333,7 +333,7 @@
       }
     },
     {
-      "label": "Playwright: Codegen",
+      "label": "🎭 Playwright: Codegen",
       "type": "shell",
       "command": "bun run playwright:codegen",
       "group": "test",

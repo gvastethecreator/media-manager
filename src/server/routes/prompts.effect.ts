@@ -4,8 +4,7 @@
  * @description Rutas REST para Prompts implementadas con Effect-TS
  */
 
-import { Schema } from '@effect/schema';
-import { Effect } from 'effect';
+import { Schema, Effect } from 'effect';
 import express, { type NextFunction, type Response } from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { PromptCreateInput, PromptUpdateInput } from '@/lib/effect/schemas/entities';

@@ -119,12 +119,12 @@ export const fromUnknownError = (operation: string, error: unknown): ${entityPas
 `;
 
 const createSchemasTemplate = (entityName: string, entityPascal: string): string => `/**
- * @file ${entityName} Schemas con @effect/schema
+ * @file ${entityName} Schemas with Effect Schema
  * @module services/${entityName}/${entityName}-schemas
  * @created ${new Date().toISOString().split('T')[0]}
  */
 
-import { Schema } from '@effect/schema';
+import { Schema } from 'effect';
 
 /**
  * Schema base para ${entityPascal} (desde DB)
@@ -205,8 +205,7 @@ const createServiceTemplate = (entityName: string, entityPascal: string): string
  * @created ${new Date().toISOString().split('T')[0]}
  */
 
-import { Effect, Context, Layer } from 'effect';
-import { Schema } from '@effect/schema';
+import { Context, Effect, Layer, Schema } from 'effect';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { ${toCamelCase(entityName)}s } from '@/lib/drizzle/schema';

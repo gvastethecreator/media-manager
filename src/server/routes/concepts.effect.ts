@@ -4,8 +4,7 @@
  * @description Rutas REST para Concepts implementadas con Effect-TS
  */
 
-import { Schema } from '@effect/schema';
-import { Effect } from 'effect';
+import { Schema, Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { ConceptCreateInput, ConceptUpdateInput } from '@/lib/effect/schemas/entities';

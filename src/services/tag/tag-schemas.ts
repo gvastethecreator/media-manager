@@ -1,12 +1,12 @@
 /**
  * @file Schemas de Effect para Tag
  * @module services/tag/tag-schemas
- * @description Schemas @effect/schema para validación y transformación de Tags
+ * @description Effect Schema contracts for Tag validation and transformation
  * @created 2025-10-11 - Fase 1 Effect Implementation
  * @updated 2025-10-11 - Fase 2: Refactored to use common schemas
  */
 
-import { Schema } from '@effect/schema';
+import { Schema } from 'effect';
 import { Emoji, ID, ThemeColor } from '@/lib/effect/schemas';
 
 /**
