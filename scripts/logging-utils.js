@@ -280,28 +280,24 @@ function detectToolFromCommand(command) {
 	return null;
 }
 export async function cleanOldLogs(days = 7) {
-	try {
-		const files = await readdir(LOGS_DIR);
-		const now = Date.now();
+	const files = await readdir(LOGS_DIR);
+	const now = Date.now();
 
-		await Promise.all(
-			files.map(async (file) => {
-				const filePath = join(LOGS_DIR, file);
-				const stats = await stat(filePath);
+	await Promise.all(
+		files.map(async (file) => {
+			if (!file.endsWith('.log')) {
+				return;
+			}
+			const filePath = join(LOGS_DIR, file);
+			const stats = await stat(filePath);
+			const diffDays = (now - stats.mtimeMs) / (1000 * 60 * 60 * 24);
 
-				// Calcular diferencia en días
-				const diffDays = (now - stats.mtimeMs) / (1000 * 60 * 60 * 24);
-
-				if (diffDays > days) {
-					// Eliminar archivo si es más antiguo que el límite
-					await rm(filePath);
-					console.log(`🗑️ Log eliminado: ${file} (antiguo ${Math.floor(diffDays)} días)`);
-				}
-			})
-		);
-	} catch (error) {
-		console.error('❌ Error al limpiar logs antiguos:', error);
-	}
+			if (diffDays > days) {
+				await rm(filePath);
+				console.log(`Log removed: ${file} (${Math.floor(diffDays)} days old)`);
+			}
+		})
+	);
 }
 
 // Si se ejecuta directamente
@@ -327,7 +323,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 			executeWithLogging(args.slice(1).join(' '), args[0]);
 			break;
 		case 'clean':
-			cleanOldLogs(args[0] ? Number.parseInt(args[0], 10) : 7);
+			cleanOldLogs(args[0] ? Number.parseInt(args[0], 10) : 7).catch((error) => {
+				console.error('Failed to clean old logs:', error);
+				process.exit(1);
+			});
 			break;
 		default:
 			console.log(`
