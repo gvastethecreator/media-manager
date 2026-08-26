@@ -9,7 +9,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Definimos los temas personalizados disponibles
-// Cada tema tiene su definición en src/app/themes.css
+// Cada tema tiene su definición en src/styles/themes.css
 const customThemes = [
 	'light',
 	'dark',

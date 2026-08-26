@@ -33,7 +33,7 @@ The captures below come from the local application with an empty, privacy-safe l
 - Search across filenames, extracted metadata, tags, relationships, and document text.
 - Browse images, video, audio, documents, JSON, and 3D files through one interface.
 - Organize creative context with collections, albums, groups, favorites, characters, places, concepts, prompts, and notes.
-- Run as a local web app or through the optional Tauri desktop shell.
+- Run as a local web app or through the Electron desktop shell.
 - Report partial file-operation outcomes explicitly so recovery stays understandable.
 
 ## Current status
@@ -42,7 +42,7 @@ The captures below come from the local application with an empty, privacy-safe l
 - Bun 1.3.14 owns installation, scripts, the server runtime, and the lockfile.
 - Direct dependencies are current according to `bun outdated`.
 - React 19, TypeScript 7, React Router 7, Vite 8, Express 5, Effect, Drizzle ORM, and SQLite/libsql form the main stack.
-- Windows, macOS, and Linux can run the local web application; the Tauri shell remains an optional desktop path.
+- Windows, macOS, and Linux can run the local web application. The desktop shell is Electron on Windows x64. Signing and macOS installers are not claimed.
 - The repository is under active development. Treat packaging, signing, and installer validation as separate release gates.
 
 ## Quick start
@@ -69,7 +69,8 @@ Copy `.env.example` when you need to customize ports, the database path, CORS, m
 | `bun run dev:full`        | Start the frontend and backend              |
 | `bun run dev:vite`        | Start only the frontend                     |
 | `bun run dev:server:hot`  | Start only the backend                      |
-| `bun run dev:tauri`       | Start the Tauri desktop shell               |
+| `bun run desktop:dev`     | Start the Electron desktop shell            |
+| `bun run desktop:package` | Copy extraResources, hash them, package Windows x64 |
 | `bun run check`           | Run lint and TypeScript checks              |
 | `bun run test`            | Run the isolated unit and integration suite |
 | `bun run test:tooling`    | Verify repository tooling                   |
@@ -97,7 +98,7 @@ bun run build
 | `src/store/`      | Zustand state and entity operations                                                 |
 | `src/lib/`        | Drizzle, filesystem boundaries, logging, Effect adapters, and shared infrastructure |
 | `src/types/`      | Domain types, validation contracts, and view configuration                          |
-| `src-tauri/`      | Optional Rust/Tauri desktop shell                                                   |
+| `electron/`       | Electron supervisor, preload, and extraResources inventory                          |
 | `scripts/`        | Bun automation, isolated tests, builds, and database operations                     |
 | `docs/`           | Product site and detailed engineering references                                    |
 

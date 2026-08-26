@@ -325,15 +325,18 @@ describe('production bootstrap contract', () => {
 		expect(errorBoundary).not.toContain("from '../../../package.json'");
 	});
 
-	it('empaqueta migraciones versionadas y nunca la DB del workspace en Tauri', async () => {
-		const tauriConfig = await readFile(resolve(workspacePath, 'src-tauri/tauri.conf.json'), 'utf8');
-		const tauriBuild = await readFile(resolve(workspacePath, 'scripts/tauri-build.js'), 'utf8');
+	it('empaqueta migraciones versionadas y nunca la DB del workspace en Electron', async () => {
+		const inventory = await readFile(resolve(workspacePath, 'scripts/write-extraresources-inventory.ts'), 'utf8');
+		const prepare = await readFile(resolve(workspacePath, 'scripts/prepare-extraresources.ts'), 'utf8');
+		const packageJson = await readFile(resolve(workspacePath, 'package.json'), 'utf8');
 
-		expect(tauriConfig).toContain('../src/lib/drizzle/migrations/');
-		expect(tauriConfig).not.toContain('dist/server/db.sqlite');
-		expect(tauriBuild).toContain("'0000_baseline.sql'");
-		expect(tauriBuild).not.toContain('MEDIA_MANAGER_DATABASE_PATH');
-		expect(tauriBuild).not.toContain('cpSync(dbSourcePath');
+		expect(prepare).toContain('src/lib/drizzle/migrations');
+		expect(inventory).toContain('.sqlite');
+		expect(inventory).toContain('SQLite file is not allowed in extraResources');
+		expect(inventory).toContain('electron/extra-resources');
+		expect(packageJson).toContain('desktop:inventory');
+		expect(packageJson).toContain('desktop:prepare-resources');
+		expect(packageJson).not.toContain('dist/server/db.sqlite');
 	});
 
 	it('exige DATABASE_URL y mantiene las lecturas de Favorite libres de DDL runtime', async () => {
@@ -353,16 +356,14 @@ describe('production bootstrap contract', () => {
 			'src/server/security/file-mutation-recovery.ts',
 			'src/server/services/system.service.ts',
 			'src/server/services/system/system.stats.ts',
-			'scripts/tauri-dev.js',
+			'scripts/desktop-dev.js',
 		];
 		const sources = await Promise.all(sourceFiles.map((file) => readFile(resolve(workspacePath, file), 'utf8')));
 		for (const source of sources) expect(source).not.toMatch(/DATABASE_URL\s*\|\|\s*['"]file:\.\/db\.sqlite/);
-		const tauriDevSource = sources.at(-1)!;
-		const tauriDevDatabaseSource = await readFile(resolve(workspacePath, 'scripts/tauri-dev-database.js'), 'utf8');
-		expect(tauriDevSource).not.toContain('process.env.DATABASE_URL');
-		expect(tauriDevDatabaseSource).toContain('MEDIA_MANAGER_TAURI_DEV_DATABASE');
-		expect(tauriDevDatabaseSource).toContain('debe permanecer dentro del data dir de desarrollo dedicado');
-		expect(tauriDevDatabaseSource).toContain('isSymbolicLink()');
+		const desktopDevSource = sources.at(-1)!;
+		expect(desktopDevSource).toContain('resolveDesktopLibraryPaths');
+		expect(desktopDevSource).toContain('library.databaseUrl');
+		expect(desktopDevSource).not.toContain("file:./db.sqlite");
 	});
 
 	it('mantiene un solo contexto de tema y protege también el árbol de providers', async () => {

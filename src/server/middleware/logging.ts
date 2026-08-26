@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { sanitizeSensitiveText } from '../../lib/security/sanitize-sensitive-output';
+import { resolveLogDirectory } from '../../lib/logger/log-directory';
 
 /**
  * Interfaz para el logger contextual por-request
@@ -27,7 +28,7 @@ const LOG_TO_CONSOLE = process.env.LOG_TO_CONSOLE !== 'false';
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 
 // Crear directorio de logs si no existe
-const logsDir = path.join(process.cwd(), 'logs');
+const logsDir = resolveLogDirectory();
 if (LOG_TO_FILE && !fs.existsSync(logsDir)) {
 	fs.mkdirSync(logsDir, { recursive: true });
 }

@@ -45,10 +45,9 @@ describe('development server environment precedence', () => {
 		expect(stdout).not.toContain(explicitDatabaseUrl);
 	});
 
-	it('does not emit a configured database URL from the Tauri backend wrapper', async () => {
-		const source = await readFile(resolve(import.meta.dir, 'tauri-build.js'), 'utf8');
-		// The Tauri wrapper does not inspect DATABASE_URL at all. Keep that boundary
-		// explicit instead of requiring a log line that the wrapper never emits.
-		expect(source).not.toContain('DATABASE_URL');
+	it('does not copy a workspace database into extraResources', async () => {
+		const source = await readFile(resolve(import.meta.dir, 'write-extraresources-inventory.ts'), 'utf8');
+		expect(source).toContain('SQLite file is not allowed in extraResources');
+		expect(source).not.toContain('db.sqlite');
 	});
 });
