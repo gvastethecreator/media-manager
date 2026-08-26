@@ -1,42 +1,48 @@
-# Servicio de Videos (Video)
+# Video service (Video)
 
-## Descripción General
+## Overview
 
-El servicio de videos (Video) es un componente especializado del sistema de gestión de medios que permite almacenar, organizar y manipular archivos de video. Este servicio proporciona funcionalidades para subir, procesar, recuperar, actualizar y eliminar videos, así como gestionar sus metadatos, miniaturas, y relaciones con otras entidades.
+The Video service is a specialized component of the media management system.
 
-## Diagrama de Flujo
+The service stores, organizes, and manipulates video files.
+
+The service provides functions to upload, process, retrieve, update, and delete videos.
+
+The service also manages metadata, thumbnails, and relations with other entities.
+
+## Flow diagram
 
 ```mermaid
 graph TD
-    A[Cliente/UI] -->|Carga/Petición| B[Server Actions]
-    B -->|Llamada| C[Video Service]
-    C -->|Procesamiento| D[Transformers]
-    D -->|Validación| E[Tipos]
-    C -->|Almacenamiento| F[(Base de Datos)]
-    C -->|Eventos| G[Event System]
-    G -->|Notificación| H[Activity Service]
-    G -->|Actualización| I[Stats Service]
+    A[Client/UI] -->|Upload/Request| B[Routes]
+    B -->|Call| C[Video Service]
+    C -->|Processing| D[Transformers]
+    D -->|Validation| E[Types]
+    C -->|Storage| F[(Database)]
+    C -->|Events| G[Event System]
+    G -->|Notification| H[Activity Service]
+    G -->|Update| I[Stats Service]
 
-    subgraph "Proceso de Gestión de Videos"
-        J[Subir Video] --> K[Validar]
-        K --> L[Procesar]
-        L --> M[Generar Thumbnails]
-        M --> N[Extraer Metadatos]
-        N --> O[Almacenar]
-        O --> P[Notificar]
+    subgraph "Video management process"
+        J[Upload video] --> K[Validate]
+        K --> L[Process]
+        L --> M[Generate Thumbnails]
+        M --> N[Extract metadata]
+        N --> O[Store]
+        O --> P[Notify]
     end
 
-    subgraph "Funcionalidades Avanzadas"
-        Q[Reproducción] --> R[Control Stream]
-        R --> S[Gestión Calidad]
+    subgraph "Advanced features"
+        Q[Playback] --> R[Stream control]
+        R --> S[Quality management]
 
-        T[Conversión] --> U[Validar Formatos]
-        U --> V[Procesar Conversión]
-        V --> W[Optimizar]
+        T[Conversion] --> U[Validate formats]
+        U --> V[Process conversion]
+        V --> W[Optimize]
 
-        X[Análisis] --> Y[Extraer Frames]
-        Y --> Z[Metadata Técnica]
-        Z --> AA[Generar Preview]
+        X[Analysis] --> Y[Extract frames]
+        Y --> Z[Technical metadata]
+        Z --> AA[Generate preview]
     end
 
     style C fill:#d4f1f9,stroke:#333,stroke-width:1px
@@ -44,105 +50,115 @@ graph TD
     style G fill:#e1bee7,stroke:#333,stroke-width:1px
 ```
 
-## Estructura del Módulo
+Routes call services.
 
-### Archivos del Servicio
+## Module structure
+
+### Service files
 
 ```
 src/services/video/
-├── video.service.ts    # Implementación principal del servicio
-└── index.ts            # Punto de entrada y exportaciones
+├── video.service.ts    # Main service implementation
+└── index.ts            # Entry point and exports
 ```
 
-### Archivos de Transformers
+### Transformer files
 
 ```
 src/transformers/video/
-├── index.ts           # Exportaciones del módulo
-├── mappers.ts         # Funciones para mapear entre objetos
-└── serializers.ts     # Serializadores para distintos formatos
+├── index.ts           # Module exports
+├── mappers.ts         # Functions that map between objects
+└── serializers.ts     # Serializers for different formats
 ```
 
-### Tipos de Datos
+### Data types
 
 ```
 src/types/entities/video/
-├── enums.ts           # Enumeraciones para videos
-├── index.ts           # Exportaciones del módulo
-├── schema.ts          # Esquemas de validación
-└── types.ts           # Definiciones de tipos e interfaces
+├── enums.ts           # Enumerations for videos
+├── index.ts           # Module exports
+├── schema.ts          # Validation schemas
+└── types.ts           # Type and interface definitions
 ```
 
-### Server Actions
+### Route modules
 
 ```
 src/app/actions/videos/
-├── index.ts           # Exportaciones del módulo
-├── stats.actions.ts   # Acciones relacionadas con estadísticas
-└── video.actions.ts   # Acciones principales para videos
+├── index.ts           # Module exports
+├── stats.actions.ts   # Actions related to statistics
+└── video.actions.ts   # Main video actions
 ```
 
-## Funcionalidades Principales
+## Main features
 
-### 1. Gestión de Videos
+### 1. Video management
 
-- **Subir Video**: Permite cargar nuevos archivos de video con validación de formatos.
-- **Obtener Video**: Recupera información detallada de un video por su ID.
-- **Actualizar Video**: Modifica propiedades y metadatos de un video existente.
-- **Eliminar Video**: Elimina un video y sus recursos asociados de forma segura.
-- **Listar Videos**: Obtiene videos con filtros, ordenación y paginación.
+The service provides the following video operations:
 
-### 2. Procesamiento de Videos
+- **Upload video**: Loads new video files with format validation.
+- **Get video**: Retrieves detailed video information by ID.
+- **Update video**: Changes properties and metadata of an existing video.
+- **Delete video**: Deletes a video and its associated resources in a safe way.
+- **List videos**: Gets videos with filters, sort, and pagination.
 
-- **Generación de Miniaturas**: Crea automáticamente previsualización y fotogramas clave.
-- **Extracción de Metadatos**: Obtiene información técnica como resolución, duración, codec, etc.
-- **Transcodificación**: Conversión entre diferentes formatos y calidades.
-- **Optimización**: Compresión y optimización para reproducción en múltiples dispositivos.
+### 2. Video processing
 
-### 3. Organización y Búsqueda
+The service provides the following processing operations:
 
-- **Agrupación en Carpetas**: Organización jerárquica en carpetas.
-- **Etiquetado**: Adición y gestión de etiquetas para clasificación.
-- **Búsqueda Avanzada**: Búsqueda por metadatos, nombres, duración y otros criterios.
-- **Colecciones**: Agrupación en colecciones temáticas.
+- **Thumbnail generation**: Automatically creates preview and key frames.
+- **Metadata extraction**: Gets technical information such as resolution, duration, and codec.
+- **Transcoding**: Conversion between different formats and qualities.
+- **Optimization**: Compression and optimization for playback on multiple devices.
 
-### 4. Características Avanzadas
+### 3. Organization and search
 
-- **Streaming Adaptativo**: Soporte para streaming con múltiples calidades.
-- **Reproducción Parcial**: Acceso a fragmentos específicos de videos.
-- **Análisis de Contenido**: Extracción de fotogramas y detección de escenas.
-- **Estadísticas de Uso**: Seguimiento de reproducciones y tiempo de visualización.
+The service provides the following organization operations:
 
-## Ejemplos de Uso
+- **Grouping in Folders**: Hierarchical organization in Folders.
+- **Tagging**: Addition and management of Tags for classification.
+- **Advanced search**: Search by metadata, names, duration, and other criteria.
+- **Collections**: Grouping in thematic Collections.
 
-### Subir un Nuevo Video
+### 4. Advanced features
+
+The service provides the following advanced features:
+
+- **Adaptive streaming**: Support for streaming with multiple qualities.
+- **Partial playback**: Access to specific fragments of videos.
+- **Content analysis**: Frame extraction and scene detection.
+- **Usage statistics**: Tracking of plays and viewing time.
+
+## Usage examples
+
+### Upload a new video
 
 ```typescript
 import { videoService } from '@/services/index';
 
-// Subir un video a una carpeta específica
+// Upload a video to a specific Folder
 const newVideo = await videoService.uploadVideo({
-	file: videoFile, // Objeto File del navegador
-	title: 'Viaje a la montaña',
-	description: 'Video del viaje familiar a Sierra Nevada',
+	file: videoFile, // Browser File object
+	title: 'Trip to the mountain',
+	description: 'Video of the family trip to Sierra Nevada',
 	folderId: 'folder-id-123',
-	tags: ['viaje', 'montaña', 'familia'],
+	tags: ['trip', 'mountain', 'family'],
 	isPrivate: false,
 });
 ```
 
-### Obtener Videos con Filtros
+### Get videos with filters
 
 ```typescript
 import { videoService } from '@/services/index';
 
-// Obtener videos con filtros avanzados
+// Get videos with advanced filters
 const videos = await videoService.getVideos({
-	search: 'viaje',
-	tags: ['montaña'],
+	search: 'trip',
+	tags: ['mountain'],
 	folderId: 'folder-id-123',
-	minDuration: 60, // En segundos
-	maxDuration: 600, // En segundos
+	minDuration: 60, // In seconds
+	maxDuration: 600, // In seconds
 	minResolution: '720p',
 	formats: ['mp4', 'mov'],
 	dateFrom: new Date('2023-01-01'),
@@ -154,27 +170,27 @@ const videos = await videoService.getVideos({
 });
 ```
 
-### Actualizar un Video
+### Update a video
 
 ```typescript
 import { videoService } from '@/services/index';
 
-// Actualizar propiedades de un video
+// Update video properties
 const updatedVideo = await videoService.updateVideo('video-id-123', {
-	title: 'Nuevo título del video',
-	description: 'Descripción actualizada',
+	title: 'New video title',
+	description: 'Updated description',
 	isPrivate: true,
-	tags: ['etiqueta1', 'etiqueta2'],
-	folderId: 'nueva-carpeta-id',
+	tags: ['tag1', 'tag2'],
+	folderId: 'new-folder-id',
 });
 ```
 
-### Procesar un Video
+### Process a video
 
 ```typescript
 import { videoService } from '@/services/index';
 
-// Generar una versión optimizada del video
+// Generate an optimized version of the video
 const processedVideo = await videoService.processVideo('video-id-123', {
 	generateThumbnails: true,
 	extractMetadata: true,
@@ -183,118 +199,130 @@ const processedVideo = await videoService.processVideo('video-id-123', {
 });
 ```
 
-### Obtener Metadatos de un Video
+### Get metadata of a video
 
 ```typescript
 import { videoService } from '@/services/index';
 
-// Obtener metadatos técnicos de un video
+// Get technical metadata of a video
 const metadata = await videoService.getVideoMetadata('video-id-123');
 
-console.log(`Resolución: ${metadata.width}x${metadata.height}`);
-console.log(`Duración: ${metadata.duration} segundos`);
+console.log(`Resolution: ${metadata.width}x${metadata.height}`);
+console.log(`Duration: ${metadata.duration} seconds`);
 console.log(`Codec: ${metadata.videoCodec}`);
 console.log(`Bitrate: ${metadata.bitrate} kbps`);
 ```
 
-## Relaciones con Otras Entidades
+## Relations with other entities
 
-| Entidad        | Tipo de Relación | Descripción                                 |
+| Entity         | Relation type    | Description                                 |
 | -------------- | ---------------- | ------------------------------------------- |
-| **Folder**     | Muchos a uno     | Los videos pertenecen a carpetas            |
-| **Tag**        | Muchos a muchos  | Los videos pueden tener múltiples etiquetas |
-| **Album**      | Muchos a muchos  | Los videos pueden formar parte de álbumes   |
-| **Collection** | Muchos a muchos  | Los videos pueden estar en colecciones      |
-| **Metadata**   | Uno a uno        | Cada video tiene metadatos asociados        |
-| **Thumbnail**  | Uno a muchos     | Un video puede tener múltiples miniaturas   |
-| **Activity**   | Referencial      | Las actividades pueden referenciar videos   |
-| **User**       | Muchos a uno     | Los videos pertenecen a usuarios            |
+| **Folder**     | Many to one      | Videos belong to Folders                    |
+| **Tag**        | Many to many     | Videos can have multiple Tags               |
+| **Album**      | Many to many     | Videos can be part of Albums                |
+| **Collection** | Many to many     | Videos can be in Collections                |
+| **Metadata**   | One to one       | Each video has associated metadata          |
+| **Thumbnail**  | One to many      | A video can have multiple thumbnails        |
+| **Activity**   | Referential      | Activities can reference videos             |
+| **User**       | Many to one      | Videos belong to users                      |
 
-## Modelo de Datos
+## Data model
 
 ```typescript
-// Modelo simplificado de Video
+// Simplified Video model
 interface Video {
-	id: string; // Identificador único
-	title: string; // Título del video
-	description?: string; // Descripción opcional
-	path: string; // Ruta completa en el sistema de archivos
-	originalFilename: string; // Nombre de archivo original
-	mimeType: string; // Tipo MIME (video/mp4, video/webm, etc.)
-	size: number; // Tamaño en bytes
-	width: number; // Ancho en píxeles
-	height: number; // Alto en píxeles
-	duration: number; // Duración en segundos
-	format: VideoFormat; // Formato (mp4, mov, webm, etc.)
-	folderId?: string; // ID de la carpeta contenedora
-	isPrivate: boolean; // Indica si el video es privado
-	isFavorite: boolean; // Indica si está marcado como favorito
-	status: VideoStatus; // Estado del video (ACTIVE, PROCESSING, etc.)
-	uploadedAt: Date; // Fecha de subida
-	recordedAt?: Date; // Fecha de grabación (si disponible)
-	createdAt: Date; // Fecha de creación
-	updatedAt: Date; // Fecha de última actualización
+	id: string; // Unique identifier
+	title: string; // Video title
+	description?: string; // Optional description
+	path: string; // Full path on the filesystem
+	originalFilename: string; // Original filename
+	mimeType: string; // MIME type (video/mp4, video/webm, etc.)
+	size: number; // Size in bytes
+	width: number; // Width in pixels
+	height: number; // Height in pixels
+	duration: number; // Duration in seconds
+	format: VideoFormat; // Format (mp4, mov, webm, etc.)
+	folderId?: string; // Containing Folder ID
+	isPrivate: boolean; // Indicates whether the video is private
+	isFavorite: boolean; // Indicates whether it is marked as a Favorite
+	status: VideoStatus; // Video status (ACTIVE, PROCESSING, etc.)
+	uploadedAt: Date; // Upload date
+	recordedAt?: Date; // Recording date (if available)
+	createdAt: Date; // Creation date
+	updatedAt: Date; // Last update date
 }
 
-// Extensión con metadatos técnicos
+// Extension with technical metadata
 interface VideoWithMetadata extends Video {
 	metadata: {
-		videoCodec?: string; // Codec de video (H.264, VP9, etc.)
-		audioCodec?: string; // Codec de audio (AAC, MP3, etc.)
-		bitrate?: number; // Tasa de bits total (kbps)
-		videoBitrate?: number; // Tasa de bits de video (kbps)
-		audioBitrate?: number; // Tasa de bits de audio (kbps)
-		frameRate?: number; // Cuadros por segundo
-		audioChannels?: number; // Número de canales de audio
-		audioSampleRate?: number; // Tasa de muestreo de audio (Hz)
-		rotation?: number; // Rotación del video (grados)
-		hasAudio: boolean; // Indica si tiene pista de audio
+		videoCodec?: string; // Video codec (H.264, VP9, etc.)
+		audioCodec?: string; // Audio codec (AAC, MP3, etc.)
+		bitrate?: number; // Total bitrate (kbps)
+		videoBitrate?: number; // Video bitrate (kbps)
+		audioBitrate?: number; // Audio bitrate (kbps)
+		frameRate?: number; // Frames per second
+		audioChannels?: number; // Number of audio channels
+		audioSampleRate?: number; // Audio sample rate (Hz)
+		rotation?: number; // Video rotation (degrees)
+		hasAudio: boolean; // Indicates whether it has an audio track
 	};
 }
 
-// Extensión con relaciones
+// Extension with relations
 interface VideoComplete extends VideoWithMetadata {
-	folder?: Folder; // Carpeta contenedora
-	thumbnails: Thumbnail[]; // Miniaturas asociadas
-	tags: Tag[]; // Etiquetas asociadas
-	albums: Album[]; // Álbumes que contienen este video
-	collections: Collection[]; // Colecciones que contienen este video
-	user: User; // Usuario propietario
+	folder?: Folder; // Containing Folder
+	thumbnails: Thumbnail[]; // Associated thumbnails
+	tags: Tag[]; // Associated Tags
+	albums: Album[]; // Albums that contain this video
+	collections: Collection[]; // Collections that contain this video
+	user: User; // Owner user
 }
 ```
 
-## Buenas Prácticas
+## Good practices
 
-1. **Validación de Archivos**: Verifique tamaño, tipo y formato antes de procesar videos.
-2. **Procesamiento Asíncrono**: Use colas para procesamiento de videos, que suele ser intensivo.
-3. **Estrategia de Almacenamiento**: Considere almacenamiento especializado para archivos grandes.
-4. **Transcodificación Eficiente**: Optimice los parámetros de conversión según el uso previsto.
-5. **Metadatos Completos**: Extraiga y almacene metadatos técnicos detallados para búsqueda.
-6. **Generación de Previsualizaciones**: Cree automáticamente miniaturas para previsualización.
-7. **Gestión de Versiones**: Mantenga versiones diferentes para distintas calidades.
+Verify size, type, and format before you process videos.
 
-## Optimización de Rendimiento
+Use queues for video processing, which is often intensive.
 
-1. **Streaming Adaptativo**: Implemente HLS o DASH para adaptarse a la conexión del usuario.
-2. **Carga Progresiva**: Permita la reproducción antes de que el video se cargue completamente.
-3. **Caché de Fragmentos**: Almacene en caché fragmentos populares para reproducción rápida.
-4. **Compresión Eficiente**: Utilice codecs modernos como H.265/HEVC o AV1 para mejor compresión.
-5. **CDN**: Utilice redes de distribución de contenido para videos públicos.
+Consider specialized storage for large files.
 
-## Solución de Problemas Comunes
+Optimize conversion parameters for the intended use.
 
-| Problema                      | Solución                                                     |
+Extract and store detailed technical metadata for search.
+
+Automatically create thumbnails for preview.
+
+Keep different versions for different qualities.
+
+## Performance optimization
+
+Implement HLS or DASH to adapt to the user connection.
+
+Allow playback before the video loads completely.
+
+Cache popular fragments for fast playback.
+
+Use modern codecs such as H.265/HEVC or AV1 for better compression.
+
+Use content delivery networks for public videos.
+
+## Common troubleshooting
+
+| Problem                       | Solution                                                     |
 | ----------------------------- | ------------------------------------------------------------ |
-| **Videos corruptos**          | Utilice `videoService.verifyVideoIntegrity()` para detección |
-| **Transcodificación fallida** | Revise logs con `videoService.getProcessingLogs()`           |
-| **Miniaturas faltantes**      | Regenere con `videoService.regenerateThumbnails()`           |
-| **Metadatos incorrectos**     | Actualice con `videoService.refreshMetadata()`               |
-| **Problemas de reproducción** | Verifique formato con `videoService.checkCompatibility()`    |
+| **Corrupt videos**            | Use `videoService.verifyVideoIntegrity()` for detection      |
+| **Failed transcoding**        | Review logs with `videoService.getProcessingLogs()`          |
+| **Missing thumbnails**        | Regenerate with `videoService.regenerateThumbnails()`        |
+| **Incorrect metadata**        | Update with `videoService.refreshMetadata()`                 |
+| **Playback problems**         | Verify format with `videoService.checkCompatibility()`       |
 
-## Roadmap y Mejoras Futuras
+## Roadmap and future improvements
 
-- Implementación de transcripción automática
-- Análisis de contenido mediante IA para detección de objetos y escenas
-- Editor básico de video en el navegador
-- Mejoras en algoritmos de compresión
-- Integración con servicios externos de procesamiento de video
+The following work is planned:
+
+- Implementation of automatic transcription
+- Content analysis through AI for object and scene detection
+- Basic video editor in the browser
+- Improvements in compression algorithms
+- Integration with external video-processing services

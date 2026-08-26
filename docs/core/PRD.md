@@ -1,91 +1,105 @@
-# PRD · Image Manager
+# PRD · Media Manager
 
-**Versión documental:** 2026-03-31  
-**Estado del producto:** desarrollo activo  
-**Tipo de producto:** aplicación local web/desktop para gestión multimedia avanzada
+**Document version:** 2026-03-31  
+**Product status:** active development  
+**Product type:** local web and desktop application for advanced media management
 
-## 1. Resumen del producto
+## 1. Product summary
 
-Image Manager es una aplicación local orientada a **catalogar, enriquecer, organizar y navegar colecciones grandes de archivos multimedia** sin exigir moverlos de su ubicación física original. El producto combina un explorador de contenido, un sistema de metadatos enriquecidos y un conjunto amplio de entidades semánticas para organización creativa y worldbuilding.
+Media Manager is a local application. It catalogs, enriches, organizes, and navigates large multimedia file libraries. It does not require you to move files from their original physical location. The product combines a content explorer, an enriched metadata system, and a wide set of semantic entities for creative organization and worldbuilding.
 
-El sistema no se limita a “mostrar carpetas”; su propuesta de valor es unificar:
+The system does more than display folders. Its value unifies these layers:
 
-- organización física del filesystem,
-- organización lógica en base de datos,
-- visualización rica por tipo de archivo,
-- metadatos y relaciones entre entidades,
-- herramientas de mantenimiento como reindexado, thumbnails, cachés y búsqueda.
+- physical filesystem organization
+- logical organization in the database
+- rich viewing by file type
+- metadata and relations among entities
+- maintenance tools such as reindex, thumbnails, caches, and search
 
-## 2. Problema que resuelve
+## 2. Problem it solves
 
-Los usuarios que trabajan con miles de archivos suelen tener tres problemas simultáneos:
+Users who work with thousands of files often face three problems at once:
 
-1. **La estructura de carpetas no basta** para encontrar o clasificar contenido.
-2. **Los metadatos nativos no son suficientes** para flujos creativos complejos.
-3. **Las bibliotecas grandes degradan la experiencia** si no hay virtualización, previews y búsquedas rápidas.
+1. **Folder structure is not enough** to find or classify content.
+2. **Native metadata is not enough** for complex creative flows.
+3. **Large libraries degrade the experience** without virtualization, previews, and fast search.
 
-Image Manager responde a esto con un modelo híbrido:
+Media Manager answers this with a hybrid model:
 
-- respeta la ubicación real de los archivos,
-- guarda conocimiento adicional en SQLite,
-- expone vistas y relaciones ricas por entidad,
-- automatiza parte del trabajo pesado mediante indexación y extracción de metadata.
+- It respects the real file location.
+- It stores extra knowledge in SQLite.
+- It exposes rich views and relations by entity.
+- It automates part of the heavy work through indexing and metadata extraction.
 
-## 3. Usuarios objetivo
+## 3. Target users
 
-### Primarios
+### Primary
 
-- Artistas digitales con bibliotecas de referencias o salidas generadas por IA.
-- Creadores audiovisuales con archivos mixtos: imágenes, video, audio y documentos.
-- Usuarios que necesitan clasificar material por campañas, colecciones o temas.
+The primary users are:
 
-### Secundarios
+- Digital artists with reference libraries or AI-generated outputs.
+- Audiovisual creators with mixed files: images, video, audio, and documents.
+- Users who need to classify material by campaign, collection, or theme.
 
-- Equipos o individuos de worldbuilding: personajes, lugares, conceptos y objetos.
-- Desarrolladores creativos que necesitan relacionar media con entidades narrativas.
-- Usuarios que prefieren una herramienta local, autocontenida y sin dependencia cloud.
+### Secondary
 
-## 4. Objetivos del producto
+The secondary users are:
 
-### Objetivos funcionales
+- Worldbuilding teams or individuals: characters, places, concepts, and objects.
+- Creative developers who need to relate media to narrative entities.
+- Users who prefer a local, self-contained tool with no cloud dependency.
 
-- Importar e indexar carpetas locales con persistencia estructurada.
-- Gestionar múltiples tipos de archivo desde una sola interfaz.
-- Permitir clasificación transversal mediante tags, álbumes, colecciones y grupos.
-- Facilitar la exploración visual mediante thumbnails, vistas, paneles y viewers especializados.
-- Soportar modelos creativos avanzados como worldbuilding y prompts.
+## 4. Product goals
 
-### Objetivos técnicos
+### Functional goals
 
-- Mantener la aplicación operativa sobre bibliotecas medianas o grandes.
-- Reducir trabajo repetitivo con reindexado incremental y utilidades de caché.
-- Asegurar una base extensible con TypeScript, servicios por dominio y esquema Drizzle segmentado.
-- Permitir ejecución tanto en navegador local como en escritorio vía Tauri.
+The product aims to:
 
-## 5. Alcance funcional
+- Import and index local folders with structured persistence.
+- Manage multiple file types from one interface.
+- Allow cross classification through tags, albums, collections, and groups.
+- Support visual exploration through thumbnails, views, panels, and specialized viewers.
+- Support advanced creative models such as worldbuilding and prompts.
 
-### 5.1 Tipos de contenido soportados
+### Technical goals
 
-- Imágenes
+The product also aims to:
+
+- Keep the application usable on medium or large libraries.
+- Reduce repetitive work with incremental reindex and cache utilities.
+- Keep an extensible base with TypeScript, domain services, and a segmented Drizzle schema.
+- Allow local-browser execution and desktop execution through Electron.
+
+## 5. Functional scope
+
+### 5.1 Supported content types
+
+The product supports these content types:
+
+- Images
 - Videos
-- Audios
-- Documentos
+- Audio
+- Documents
 - JSON
-- Archivos 3D
-- Imágenes subidas
+- 3D files
+- Uploaded images
 
-### 5.2 Entidades organizativas
+### 5.2 Organizers
 
-- Carpetas
+The product supports these organizers:
+
+- Folders
 - Tags
-- Álbumes
-- Colecciones
-- Grupos
-- Favoritos
+- Albums
+- Collections
+- Groups
+- Favorites
 - Profiles
 - Settings
 
-### 5.3 Entidades creativas y de conocimiento
+### 5.3 Creative and knowledge entities
+
+The product supports these creative and knowledge entities:
 
 - Characters
 - Places
@@ -97,149 +111,179 @@ Image Manager responde a esto con un modelo híbrido:
 - Tasks
 - Wildcards
 
-### 5.4 Capacidades transversales
+### 5.4 Cross-cutting capabilities
 
-- Reindexado total y por carpeta
-- Reindexado incremental por hashes/cambios
-- Búsqueda global y FTS con fallback
-- Extracción de metadatos
-- Generación y consulta de thumbnails
-- Operaciones sobre archivos y descargas
-- Seguimiento de actividad, cola y eventos
+The product includes these cross-cutting capabilities:
 
-## 6. Casos de uso clave
+- Full reindex and per-folder reindex
+- Incremental reindex by hashes and changes
+- Global search and FTS with fallback
+- Metadata extraction
+- Thumbnail generation and lookup
+- File operations and downloads
+- Activity, queue, and event tracking
 
-### Caso 1 · Explorar una carpeta con previews
+## 6. Key use cases
 
-1. El usuario abre una carpeta indexada.
-2. La app carga archivos y subcarpetas con datos agregados.
-3. Se muestran previews, conteos y accesos a detalles.
-4. El usuario navega sin cargar toda la colección en DOM gracias a virtualización.
+### Case 1 · Explore a folder with previews
 
-### Caso 2 · Organizar contenido con relaciones
+1. The user opens an indexed folder.
+2. The app loads files and subfolders with aggregated data.
+3. The app shows previews, counts, and access to details.
+4. The user navigates without loading the full collection into the DOM because of virtualization.
 
-1. El usuario selecciona imágenes o videos.
-2. Les asigna tags, favoritos, álbumes o relaciones narrativas.
-3. La base de datos conserva esa organización sin alterar la ruta física original.
+### Case 2 · Organize content with relations
 
-### Caso 3 · Reindexar una biblioteca viva
+1. The user selects images or videos.
+2. The user assigns tags, favorites, albums, or narrative relations.
+3. The database keeps that organization without changing the original physical path.
 
-1. Cambian archivos en disco.
-2. El usuario lanza un reindexado.
-3. El sistema detecta contenido nuevo, cambiado o ausente.
-4. Se actualizan hashes, metadatos y thumbnails.
+### Case 3 · Reindex a live library
 
-### Caso 4 · Usar el producto como escritorio local
+1. Files change on disk.
+2. The user starts a reindex.
+3. The system detects new, changed, or missing content.
+4. The system updates hashes, metadata, and thumbnails.
 
-1. El usuario inicia Tauri.
-2. La UI React se ejecuta en WebView.
-3. El backend Express opera como capa de servicios local.
-4. Tauri aporta integración nativa para operaciones del escritorio.
+### Case 4 · Use the product as a local desktop app
 
-## 7. Requerimientos funcionales
+1. The user starts the Electron desktop shell.
+2. The React UI runs in a BrowserWindow.
+3. The Express backend operates as the local service layer under the Bun runtime.
+4. Electron supplies a narrow supervisor surface. The renderer uses `/api` only.
 
-### Ingesta e indexación
+## 7. Functional requirements
 
-| ID    | Requerimiento                                                            |
+### Ingestion and indexing
+
+The following requirements cover ingestion and indexing:
+
+| ID    | Requirement                                                              |
 | ----- | ------------------------------------------------------------------------ |
-| RF-01 | Registrar carpetas raíz y subcarpetas en el índice local                 |
-| RF-02 | Detectar tipos de archivo soportados y mapearlos a entidades             |
-| RF-03 | Permitir reindexado total y por carpeta                                  |
-| RF-04 | Permitir reindexado incremental cuando el flujo lo soporte               |
-| RF-05 | Mantener previews y metadatos alineados con el estado físico del archivo |
+| RF-01 | Register root folders and subfolders in the local index                  |
+| RF-02 | Detect supported file types and map them to entities                     |
+| RF-03 | Allow full reindex and per-folder reindex                                |
+| RF-04 | Allow incremental reindex when the flow supports it                      |
+| RF-05 | Keep previews and metadata aligned with the physical file state          |
 
-### Exploración y visualización
+### Exploration and viewing
 
-| ID    | Requerimiento                                              |
+The following requirements cover exploration and viewing:
+
+| ID    | Requirement                                                |
 | ----- | ---------------------------------------------------------- |
-| RF-06 | Proveer múltiples vistas para navegar entidades y archivos |
-| RF-07 | Mostrar paneles laterales y detalles contextuales          |
-| RF-08 | Incluir visores especializados por tipo de contenido       |
-| RF-09 | Permitir obtener thumbnail u original cuando aplique       |
+| RF-06 | Provide multiple views to navigate entities and files      |
+| RF-07 | Show side panels and contextual details                    |
+| RF-08 | Include specialized viewers by content type                |
+| RF-09 | Allow thumbnail or original retrieval when it applies      |
 
-### Organización semántica
+### Semantic organization
 
-| ID    | Requerimiento                                                |
+The following requirements cover semantic organization:
+
+| ID    | Requirement                                                  |
 | ----- | ------------------------------------------------------------ |
-| RF-10 | Crear, editar y eliminar tags, álbumes, colecciones y grupos |
-| RF-11 | Relacionar media con entidades de worldbuilding              |
-| RF-12 | Marcar favoritos y administrar perfiles/configuraciones      |
-| RF-13 | Guardar notas, prompts, wildcards, tasks y propiedades       |
+| RF-10 | Create, edit, and delete tags, albums, collections, and groups |
+| RF-11 | Relate media to worldbuilding entities                       |
+| RF-12 | Mark favorites and manage profiles and settings              |
+| RF-13 | Store notes, prompts, wildcards, tasks, and properties       |
 
-### Búsqueda y consulta
+### Search and query
 
-| ID    | Requerimiento                                                 |
+The following requirements cover search and query:
+
+| ID    | Requirement                                                   |
 | ----- | ------------------------------------------------------------- |
-| RF-14 | Ejecutar búsqueda global por texto                            |
-| RF-15 | Ofrecer búsqueda FTS cuando esté disponible                   |
-| RF-16 | Hacer fallback a búsqueda LIKE cuando FTS no esté disponible  |
-| RF-17 | Exponer filtros por carpeta, favoritos y atributos relevantes |
+| RF-14 | Run global text search                                        |
+| RF-15 | Offer FTS search when it is available                         |
+| RF-16 | Fall back to LIKE search when FTS is not available            |
+| RF-17 | Expose filters by folder, favorites, and relevant attributes  |
 
-### Operación del sistema
+### System operation
 
-| ID    | Requerimiento                                                       |
+The following requirements cover system operation:
+
+| ID    | Requirement                                                         |
 | ----- | ------------------------------------------------------------------- |
-| RF-18 | Exponer endpoints de salud, estadísticas, actividad, cola y eventos |
-| RF-19 | Proveer logging estructurado y herramientas de depuración           |
-| RF-20 | Permitir operación local web y modo escritorio                      |
+| RF-18 | Expose health, statistics, activity, queue, and event endpoints     |
+| RF-19 | Provide structured logging and debugging tools                      |
+| RF-20 | Allow local web operation and desktop mode                          |
 
-## 8. Requerimientos no funcionales
+## 8. Non-functional requirements
 
-### Rendimiento
+### Performance
 
-- Virtualizar listas o grids voluminosos.
-- Cargar vistas pesadas mediante lazy loading.
-- Mantener thumbnails, cachés y consultas razonablemente eficientes.
-- Evitar bloqueos prolongados de UI durante reindexado o procesamiento.
+The product must meet these performance needs:
 
-### Calidad y mantenibilidad
+- Virtualize large lists or grids.
+- Load heavy views through lazy loading.
+- Keep thumbnails, caches, and queries reasonably efficient.
+- Avoid long UI blocks during reindex or processing.
 
-- TypeScript estricto en frontend y backend.
-- Servicios y rutas segmentados por dominio.
-- Documentación técnica suficiente para mantenimiento.
-- Scripts de build, test, lint y chequeo reproducibles.
+### Quality and maintainability
 
-### Fiabilidad
+The product must meet these quality needs:
 
-- Manejo de errores tipado en la capa Effect donde aplica.
-- Logs útiles para reproducir fallos operativos.
-- Compatibilidad con testing unitario, integración y E2E.
+- Strict TypeScript on frontend and backend.
+- Services and routes segmented by domain.
+- Enough technical documentation for maintenance.
+- Reproducible build, test, lint, and check scripts.
 
-### Portabilidad
+### Reliability
 
-- Soporte local multiplataforma.
-- Modo web local.
-- Empaquetado de escritorio con Tauri.
+The product must meet these reliability needs:
 
-## 9. Restricciones y decisiones de producto
+- Typed error handling in the Effect layer where it applies.
+- Useful logs to reproduce operational failures.
+- Compatibility with unit, integration, and E2E testing.
 
-- La aplicación es **local-first**; no está pensada como SaaS multiusuario.
-- La organización lógica no debe forzar cambios en la organización física.
-- El sistema debe tolerar coexistencia de capas nuevas y heredadas mientras evoluciona.
-- La base de datos es SQLite/libsql, lo que simplifica despliegue local y respaldo.
+### Portability
 
-## 10. Riesgos de producto
+The product must meet these portability needs:
 
-- Complejidad creciente del dominio por la cantidad de entidades.
-- Documentación histórica parcialmente desalineada si no se mantiene una fuente de verdad clara.
-- Convivencia de providers, servicios y utilidades de distintas épocas del proyecto.
-- Coste operacional de thumbnails, reindexados y viewers pesados cuando la biblioteca escala.
+- Local multi-platform support.
+- Local web mode.
+- Desktop packaging with Electron.
 
-## 11. Qué no intenta resolver hoy
+## 9. Constraints and product decisions
 
-- Sincronización cloud colaborativa en tiempo real.
-- Multiusuario remoto con permisos complejos.
-- Plataforma SaaS centralizada.
-- Orquestación distribuida o microservicios.
+The product follows these constraints:
 
-## 12. Indicadores de éxito razonables
+- The application is **local-first**. It is not a multi-user SaaS.
+- Logical organization must not force changes in physical organization.
+- The system must tolerate coexistence of new and inherited layers while it evolves.
+- The database is SQLite/libsql. That choice simplifies local deployment and backup.
 
-- El usuario puede indexar y volver a encontrar contenido sin depender solo del árbol físico.
-- El producto soporta bibliotecas heterogéneas con navegación fluida.
-- El mantenimiento técnico se apoya en rutas, servicios y documentación comprensibles.
-- Las operaciones críticas del sistema pueden auditarse mediante logs, tests y scripts.
+## 10. Product risks
 
-## 13. Documentos relacionados
+Watch these product risks:
+
+- Growing domain complexity from the number of entities.
+- Historical documentation that drifts if there is no clear source of truth.
+- Coexistence of providers, services, and utilities from different project eras.
+- Operational cost of thumbnails, reindexes, and heavy viewers as the library grows.
+
+## 11. What it does not try to solve today
+
+The product does not try to solve these problems today:
+
+- Real-time collaborative cloud sync.
+- Remote multi-user access with complex permissions.
+- A centralized SaaS platform.
+- Distributed orchestration or microservices.
+
+## 12. Reasonable success indicators
+
+Success looks like these outcomes:
+
+- The user can index content and find it again without depending only on the physical tree.
+- The product supports heterogeneous libraries with fluid navigation.
+- Technical maintenance rests on understandable routes, services, and documentation.
+- Critical system operations can be audited through logs, tests, and scripts.
+
+## 13. Related documents
+
+The following documents complete this PRD:
 
 - [`./ARCHITECTURE.md`](./ARCHITECTURE.md)
 - [`./REPOSITORY-MAP.md`](./REPOSITORY-MAP.md)

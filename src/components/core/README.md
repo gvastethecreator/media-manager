@@ -1,30 +1,32 @@
-# Componentes Core
+# Core components
 
-Este módulo agrupa componentes básicos y utilidades compartidas en toda la aplicación.
+This module groups basic components and shared utilities for the application.
 
-## Estructura
+## Structure
 
 ```mermaid
 flowchart TD
     A[data-display] --> B[EmptyState]
-    A --> C[Otros componentes]
+    A --> C[Other components]
     D[feedback] --> E[LoadingScreen]
     F[theme] --> G[ThemeToggle]
     H[global-error-handler]
     I[icons]
 ```
 
-- **data-display/**: Elementos de presentación como `EmptyState`.
-- **feedback/**: Componentes de retroalimentación (pantalla de carga, mensajes, etc.).
-- **theme/**: Manejo de tema claro/oscuro mediante `ThemeToggle`.
-- **error-boundary.tsx** y **global-error-handler.tsx**: Captura de errores de React.
-- **icons.tsx**: Iconos compartidos usados en distintos módulos.
+The module includes the following parts:
 
-## Uso básico
+- **data-display/**: Presentation elements such as `EmptyState`.
+- **feedback/**: Feedback components, including the loading screen and messages.
+- **theme/**: Light and dark theme handling through `ThemeToggle`.
+- **error-boundary.tsx** and **global-error-handler.tsx**: Capture of React errors.
+- **icons.tsx**: Shared icons used across modules.
+
+## Basic use
 
 ```tsx
 import { EmptyState } from '@/components/core/data-display/empty-state';
 import { ThemeToggle } from '@/components/core/theme/theme-toggle';
 ```
 
-Estos componentes pueden usarse en cualquier parte de la aplicación para brindar mensajes de estado y gestión de tema.
+You can use these components anywhere in the application for status messages and theme control.

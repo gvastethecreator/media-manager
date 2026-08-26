@@ -1,60 +1,64 @@
-# 🔄 Sistema de Reindexado Incremental Basado en Hash
+# Incremental hash-based reindex system
 
-**Fecha de creación**: 2025-10-11
-**Estado**: 🟢 Implementado y Listo para Uso
-**Versión**: 1.0.0
-
----
-
-## 📊 Problema Resuelto
-
-### Problema Anterior
-
-- Cada reindexado procesaba **TODOS** los archivos
-- Se reextraía metadata de archivos que no cambiaron
-- Se regeneraban thumbnails de archivos que no cambiaron
-- Tiempos de reindexado excesivos en bibliotecas grandes
-- Sin detección de cambios en tiempo real al abrir archivos
-
-### Solución Implementada
-
-- **Reindexado incremental** basado en hashes SHA-256
-- Solo procesa archivos que han cambiado
-- Detección automática de cambios al abrir archivos
-- Ahorro de tiempo de hasta **95%** en reindexados incrementales
-- API REST para controlar el modo de reindexado
+**Creation date**: 2025-10-11  
+**Status**: Implemented and ready for use  
+**Version**: 1.0.0
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## Problem solved
 
-### Componentes Principales
+### Previous problem
+
+The previous reindex had these problems:
+
+- Each reindex processed **ALL** files
+- Metadata was re-extracted from files that did not change
+- Thumbnails were regenerated for files that did not change
+- Reindex times were excessive on large libraries
+- There was no real-time change detection when opening files
+
+### Implemented solution
+
+The implemented solution is:
+
+- **Incremental reindex** based on SHA-256 hashes
+- Process only files that have changed
+- Automatic change detection when files are opened
+- Time savings of up to **95%** in incremental reindexes
+- REST API to control the reindex mode
+
+---
+
+## System architecture
+
+### Main components
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Sistema Incremental                       │
+│                    Incremental system                        │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │  ContentHashService                                    │  │
-│  │  - Calcula hashes SHA-256                            │  │
-│  │  - Detecta cambios comparando hashes                    │  │
-│  │  - Soporta cálculo en paralelo                         │  │
+│  │  - Calculates SHA-256 hashes                           │  │
+│  │  - Detects changes by comparing hashes                 │  │
+│  │  - Supports parallel calculation                       │  │
 │  └─────────────────────────────────────────────────────────┘  │
 │                           │                                 │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │  ReindexIncrementalService                            │  │
-│  │  - Ejecuta reindexado incremental                    │  │
-│  │  - Detecta archivos cambiados                         │  │
-│  │  - Procesa solo archivos con cambios                   │  │
-│  │  - Calcula estadísticas de ahorro de tiempo            │  │
+│  │  - Runs incremental reindex                           │  │
+│  │  - Detects changed files                              │  │
+│  │  - Processes only files with changes                  │  │
+│  │  - Calculates time-saved statistics                   │  │
 │  └─────────────────────────────────────────────────────────┘  │
 │                           │                                 │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │  FileChangeDetectorService                            │  │
-│  │  - Detecta cambios al abrir archivos                │  │
-│  │  - Actualiza hashes automáticamente                    │  │
-│  │  - Dispara eventos de cambio                        │  │
+│  │  - Detects changes when files are opened              │  │
+│  │  - Updates hashes automatically                       │  │
+│  │  - Emits change events                                │  │
 │  └─────────────────────────────────────────────────────────┘  │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
@@ -62,115 +66,115 @@
 
 ---
 
-## 🔍 Cómo Funciona
+## How it works
 
-### 1. Detección de Cambios por Hash
+### 1. Change detection by hash
 
-**Hash SHA-256**: Cada archivo tiene un hash único basado en su contenido:
+**SHA-256 hash**: Each file has a unique hash based on its content:
 
-- Si el contenido cambia → Hash diferente
-- Si el contenido es igual → Hash igual
+- If the content changes, the hash is different.
+- If the content is equal, the hash is equal.
 
-**Proceso**:
+**Process**:
 
-1. Se lee el archivo del disco
-2. Se calcula su hash SHA-256 actual
-3. Se compara con el hash almacenado en la base de datos
-4. Si son diferentes → El archivo cambió
+1. Read the file from disk.
+2. Calculate its current SHA-256 hash.
+3. Compare it with the hash stored in the database.
+4. If they are different, the file changed.
 
-**Ventajas**:
+**Advantages**:
 
-- Detección precisa de cambios
-- Independiente de fecha de modificación del sistema operativo
-- Funciona con archivos renombrados o movidos
-- Detecta cambios en contenido aunque metadata no cambie
+- Precise change detection
+- Independent of the operating system modification date
+- Works with renamed or moved files
+- Detects content changes even if metadata does not change
 
-### 2. Modo Incremental (Default)
+### 2. Incremental mode (default)
 
-**Solo procesa archivos que cambiaron**:
+**It processes only files that changed**:
 
 ```typescript
-// Archivos en base de datos: 10,000
-// Archivos que cambiaron: 200
-// Archivos sin cambios: 9,800
+// Files in the database: 10,000
+// Files that changed: 200
+// Files without changes: 9,800
 
-// Procesa: Solo 200 archivos (2% del total)
-// Ahorra: 98% de tiempo
+// Processes: Only 200 files (2% of the total)
+// Saves: 98% of time
 ```
 
-**Qué hace**:
+**What it does**:
 
-1. Obtiene todos los archivos de la base de datos
-2. Calcula hashes actuales
-3. Compara con hashes almacenados
-4. Filtra solo archivos cambiados
-5. Procesa: Actualizar hash, regenerar thumbnail, reextraer metadata
+1. Obtains all files from the database.
+2. Calculates current hashes.
+3. Compares them with stored hashes.
+4. Filters only changed files.
+5. Processes: update hash, regenerate thumbnail, re-extract metadata.
 
-**Qué NO hace**:
+**What it does not do**:
 
-- ❌ Recalcular hash de archivos sin cambios
-- ❌ Regenerar thumbnails de archivos sin cambios
-- ❌ Reextraer metadata de archivos sin cambios
-- ❌ Procesar archivos nuevos (esto lo hace Phase 5)
+- Recalculate hash of files without changes
+- Regenerate thumbnails of files without changes
+- Re-extract metadata of files without changes
+- Process new files (Phase 5 does this)
 
-### 3. Modo Completo (Opcional)
+### 3. Full mode (optional)
 
-**Marca el checkbox "Incluir archivos ya reindexados"**:
+Mark the checkbox "Incluir archivos ya reindexados":
 
-- Procesa TODOS los archivos, sin importar el hash
-- Útil para regenerar todos los thumbnails
-- Útil para actualizar metadata global
-- Útil para verificar integridad
+- It processes ALL files, regardless of hash.
+- It is useful to regenerate all thumbnails.
+- It is useful to update global metadata.
+- It is useful to verify integrity.
 
-### 4. Detección Automática al Abrir Archivos
+### 4. Automatic detection when opening files
 
-**Cuando un usuario abre un archivo**:
+When a user opens a file:
 
-1. Se verifica si el hash actual es diferente al almacenado
-2. Si cambió:
-   - Se actualiza el hash en la base de datos
-   - Se dispara evento `file:changed`
-   - Otros servicios pueden reaccionar al evento
-3. Si no cambió:
-   - No se hace nada (archivo actualizado)
+1. The system checks whether the current hash differs from the stored hash.
+2. If it changed:
+   - The hash is updated in the database.
+   - A `file:changed` event is emitted.
+   - Other services can react to the event.
+3. If it did not change:
+   - Nothing is done (file is current).
 
-**Ventajas**:
+**Advantages**:
 
-- Detección en tiempo real de cambios
-- Actualización automática de metadata
-- No requiere reindexado manual
-- Oportunidad para actualizar caches y otros datos
+- Real-time change detection
+- Automatic metadata update
+- No manual reindex required
+- Opportunity to update caches and other data
 
 ---
 
-## 📝 Uso del Sistema
+## Using the system
 
-### Endpoint API: Reindexado Incremental
+### API endpoint: Incremental reindex
 
-#### Reindexar Solo Cambios (Default)
+#### Reindex only changes (default)
 
 ```bash
 POST /api/reindex/incremental
 ```
 
-**Body** (opcional):
+**Body** (optional):
 
 ```json
 {
-	"folderId": null, // null = todas las carpetas
-	"includeSubfolders": true, // incluir subcarpetas
+	"folderId": null, // null = all folders
+	"includeSubfolders": true, // include subfolders
 	"fileTypes": [
-		// tipos de archivos a procesar
+		// file types to process
 		"image",
 		"video",
 		"audio",
 		"document",
 		"file3d"
 	],
-	"concurrency": 5, // concurrencia (default: 5)
-	"skipThumbnails": false, // saltar thumbnails
-	"skipMetadata": false, // saltar metadata
-	"dryRun": false // simular sin hacer cambios
+	"concurrency": 5, // concurrency (default: 5)
+	"skipThumbnails": false, // skip thumbnails
+	"skipMetadata": false, // skip metadata
+	"dryRun": false // simulate without making changes
 }
 ```
 
@@ -193,17 +197,17 @@ POST /api/reindex/incremental
 }
 ```
 
-#### Reindexar Completo (Todos los Archivos)
+#### Full reindex (all files)
 
 ```bash
 POST /api/reindex/full
 ```
 
-**Body** (opcional):
+**Body** (optional):
 
 ```json
 {
-	"forceFullReindex": true, // reindexar todo sin importar hash
+	"forceFullReindex": true, // reindex everything regardless of hash
 	"folderId": null,
 	"includeSubfolders": true,
 	"fileTypes": ["image", "video"],
@@ -218,16 +222,16 @@ POST /api/reindex/full
 	"success": true,
 	"stats": {
 		"totalFiles": 10000,
-		"changedFiles": 10000, // Todos los archivos
+		"changedFiles": 10000, // All files
 		"unchangedFiles": 0,
 		"duration": 120000,
-		"timeSavedPercentage": 0 // Sin ahorro
+		"timeSavedPercentage": 0 // No savings
 	},
 	"message": "Reindexado completo finalizado: 10000 archivos procesados"
 }
 ```
 
-### Endpoint API: Verificar Archivo
+### API endpoint: Check file
 
 ```bash
 POST /api/reindex/check-file
@@ -254,7 +258,7 @@ POST /api/reindex/check-file
 }
 ```
 
-### Endpoint API: Detectar Cambio al Abrir Archivo
+### API endpoint: Detect change when opening a file
 
 ```bash
 POST /api/file-changes/check-on-open
@@ -277,11 +281,11 @@ POST /api/file-changes/check-on-open
 	"fileId": "uuid-123-456",
 	"entityType": "image",
 	"needsReindex": false,
-	"message": "Archivo mi_imagen.jpg está actualizado"
+	"message": "File mi_imagen.jpg is up to date"
 }
 ```
 
-**Si cambió**:
+**If it changed**:
 
 ```json
 {
@@ -289,118 +293,120 @@ POST /api/file-changes/check-on-open
 	"fileId": "uuid-123-456",
 	"entityType": "image",
 	"needsReindex": true,
-	"message": "Archivo mi_imagen.jpg cambió y necesita reindexado"
+	"message": "File mi_imagen.jpg changed and needs reindex"
 }
 ```
 
 ---
 
-## 🎛️ Checkbox en UI
+## Checkbox in UI
 
-### Ubicación
+### Location
 
-El checkbox debe agregarse en el diálogo de "Reindexar" o "Actualizar Biblioteca".
+Add the checkbox in the **Reindex** or **Update library** dialog.
 
-### Etiqueta
-
-```
-[✓] Incluir archivos ya reindexados (modo completo)
-[ ] Solo archivos con cambios nuevos (modo incremental) ← default
-```
-
-### Comportamiento
-
-- **Default desmarcado**: Modo incremental (solo cambios)
-- **Marcado**: Modo completo (todos los archivos)
-- **Mostrar estadísticas de ahorro** después de cada reindexado
-
-### Estadísticas a Mostrar
+### Label
 
 ```
-Reindexado Finalizado:
+[✓] Include files already reindexed (full mode)
+[ ] Only files with new changes (incremental mode) ← default
+```
 
-📊 Estadísticas:
+### Behavior
+
+Checkbox behavior is:
+
+- **Default unchecked**: Incremental mode (changes only)
+- **Checked**: Full mode (all files)
+- **Show savings statistics** after each reindex
+
+### Statistics to show
+
+```
+Reindex finished:
+
+Statistics:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Total archivos:       10,000
-  Cambiados:           200
-  Sin cambios:          9,800
-  Nuevos:              50
-  Eliminados:          10
+  Total files:          10,000
+  Changed:             200
+  Unchanged:            9,800
+  New:                 50
+  Deleted:             10
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-⏱️ Tiempo:
-  Duración:            15.2 segundos
-  Ahorrado:            97.5%
-  Tiempo estimado sin ahorro: 2 minutos
+Time:
+  Duration:            15.2 seconds
+  Saved:               97.5%
+  Estimated time without savings: 2 minutes
 
-✨ El modo incremental ahorró 1 minuto 45 segundos
+Incremental mode saved 1 minute 45 seconds
 ```
 
 ---
 
-## 🚀 Integración con Servicios Existentes
+## Integration with existing services
 
-### 1. FolderReindexService (Legacy)
+### 1. FolderReindexService (legacy)
 
-**Antes**:
+**Before**:
 
-- Phase 5: Indexaba todos los archivos
-- Phase 6: Generaba thumbnails de todos los archivos
-- Phase 7: Extraía metadata de todos los archivos
+- Phase 5: Indexed all files
+- Phase 6: Generated thumbnails of all files
+- Phase 7: Extracted metadata of all files
 
-**Ahora** (usando ReindexIncrementalService):
+**Now** (using ReindexIncrementalService):
 
-- Phase 5: Indexa archivos nuevos (ya existía)
-- Phase 6: Genera thumbnails SOLO de archivos cambiados
-- Phase 7: Extrae metadata SOLO de archivos cambiados
+- Phase 5: Indexes new files (already existed)
+- Phase 6: Generates thumbnails ONLY of changed files
+- Phase 7: Extracts metadata ONLY of changed files
 
-**Integración**:
+**Integration**:
 
 ```typescript
-// En folder-reindex.service.ts
+// In folder-reindex.service.ts
 import { ReindexIncrementalService } from '@/services/folders/reindex-incremental.service.effect';
 
-// En Phase 6 (Thumbnails):
+// In Phase 6 (Thumbnails):
 const incrementalStats =
 	yield *
 	reindexService.executeIncrementalReindex({
 		mode: 'incremental',
-		skipMetadata: true, // Solo thumbnails
+		skipMetadata: true, // Thumbnails only
 	});
 
 const changedFiles = incrementalStats.changedFiles;
-// Generar thumbnails solo de changedFiles
+// Generate thumbnails only of changedFiles
 ```
 
 ### 2. FileSyncService
 
-**Antes**:
+**Before**:
 
-- Detectaba archivos nuevos y eliminados
-- No detectaba cambios en archivos existentes
+- Detected new and deleted files
+- Did not detect changes in existing files
 
-**Ahora**:
+**Now**:
 
-- Detecta archivos nuevos y eliminados (igual)
-- Permite verificar cambios con `checkFileHashChanged`
+- Detects new and deleted files (same)
+- Allows change checks with `checkFileHashChanged`
 
 ### 3. ThumbnailService
 
-**Antes**:
+**Before**:
 
-- Regeneraba thumbnails de TODOS los archivos
+- Regenerated thumbnails of ALL files
 
-**Ahora**:
+**Now**:
 
-- Recibe lista de archivos cambiados
-- Regenera thumbnails SOLO de esos archivos
+- Receives a list of changed files
+- Regenerates thumbnails ONLY of those files
 
-**Integración**:
+**Integration**:
 
 ```typescript
-// Escuchar evento de archivo cambiado
+// Listen for the file-changed event
 emitter.on('file:changed', async ({ entityId, entityType, oldHash, newHash }) => {
-	// El archivo cambió, regenerar thumbnail
+	// The file changed, regenerate thumbnail
 	if (entityType === 'image') {
 		await thumbnailService.regenerateThumbnail(entityId);
 	}
@@ -409,224 +415,226 @@ emitter.on('file:changed', async ({ entityId, entityType, oldHash, newHash }) =>
 
 ---
 
-## 📊 Tablas de Base de Datos
+## Database tables
 
-### Campos de Hash
+### Hash fields
 
-Todas las tablas de archivos tienen el campo `hash`:
+All file tables have the `hash` field:
 
-| Tabla      | Campo Hash       | Índice                 |
+| Table      | Hash field       | Index                  |
 | ---------- | ---------------- | ---------------------- |
-| `Image`    | ✅ `hash` (text) | ✅ `Image_hash_idx`    |
-| `Video`    | ✅ `hash` (text) | ✅ `Video_hash_idx`    |
-| `Audio`    | ✅ `hash` (text) | ✅ `Audio_hash_idx`    |
-| `Document` | ✅ `hash` (text) | ✅ `Document_hash_idx` |
-| `File3D`   | ✅ `hash` (text) | ✅ `File3D_hash_idx`   |
-| `File`     | ✅ `hash` (text) | ✅ `File_hash_idx`     |
+| `Image`    | `hash` (text)    | `Image_hash_idx`       |
+| `Video`    | `hash` (text)    | `Video_hash_idx`       |
+| `Audio`    | `hash` (text)    | `Audio_hash_idx`       |
+| `Document` | `hash` (text)    | `Document_hash_idx`    |
+| `File3D`   | `hash` (text)    | `File3D_hash_idx`      |
+| `File`     | `hash` (text)    | `File_hash_idx`        |
 
-### Índices Optimizados
+### Optimized indexes
 
 ```sql
--- Índices simples (ya existían)
+-- Simple indexes (already existed)
 CREATE INDEX Image_hash_idx ON Image (hash);
 CREATE INDEX Video_hash_idx ON Video (hash);
 
--- Índices compuestos (NUEVOS - mejoran rendimiento de reindexado)
+-- Composite indexes (NEW - improve reindex performance)
 CREATE INDEX Image_folderId_hash_idx ON Image (folderId, hash);
 CREATE INDEX Video_folderId_hash_idx ON Video (folderId, hash);
 ```
 
-**Ventajas de índices compuestos**:
+**Advantages of composite indexes**:
 
-- Búsquedas por folderId + hash son mucho más rápidas
-- Reindexado incremental es más eficiente
-- Menor consumo de CPU y memoria
+- Lookups by folderId + hash are much faster
+- Incremental reindex is more efficient
+- Lower CPU and memory consumption
 
 ---
 
-## 🔧 Configuración y Tuning
+## Configuration and tuning
 
-### Parámetros de Rendimiento
+### Performance parameters
 
 ```typescript
 interface IncrementalReindexOptions {
-	// Modo de reindexado
+	// Reindex mode
 	mode?: 'incremental' | 'full'; // Default: 'incremental'
 
-	// Nivel de concurrencia (cálculo de hashes en paralelo)
+	// Concurrency level (parallel hash calculation)
 	concurrency?: number; // Default: 5
 
-	// Tipos de archivos a procesar
+	// File types to process
 	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'file3d'>;
 
-	// Control de procesamiento
+	// Processing control
 	skipThumbnails?: boolean; // Default: false
 	skipMetadata?: boolean; // Default: false
 	dryRun?: boolean; // Default: false
 }
 ```
 
-### Recomendaciones por Tamaño de Biblioteca
+### Recommendations by library size
 
-#### Biblioteca Pequeña (< 1,000 archivos)
+#### Small library (fewer than 1,000 files)
 
 - Concurrency: `10`
-- Mode: `full` o `incremental`
-- Impacto de modo incremental: ~80% ahorro
+- Mode: `full` or `incremental`
+- Incremental-mode impact: ~80% savings
 
-#### Biblioteca Mediana (1,000 - 10,000 archivos)
+#### Medium library (1,000 - 10,000 files)
 
 - Concurrency: `5`
 - Mode: `incremental` (default)
-- Impacto de modo incremental: ~90% ahorro
+- Incremental-mode impact: ~90% savings
 
-#### Biblioteca Grande (> 10,000 archivos)
+#### Large library (more than 10,000 files)
 
 - Concurrency: `3`
 - Mode: `incremental` (default)
-- Impacto de modo incremental: ~95-98% ahorro
+- Incremental-mode impact: ~95-98% savings
 
 ---
 
-## 🧪 Testing
+## Testing
 
-### Test 1: Reindexado Incremental
+### Test 1: Incremental reindex
 
 ```typescript
-// Dados: 100 archivos, 10 cambiados
+// Given: 100 files, 10 changed
 const stats = await reindexService.executeIncrementalReindex({
 	mode: 'incremental',
 });
 
-// Esperado:
+// Expected:
 assert(stats.totalFiles === 100);
 assert(stats.changedFiles === 10);
 assert(stats.unchangedFiles === 90);
 assert(stats.timeSavedPercentage === 90);
 ```
 
-### Test 2: Detección de Cambio
+### Test 2: Change detection
 
 ```typescript
-// Dado: Archivo con hash original
+// Given: File with original hash
 const originalHash = 'abc123';
 await db.update(images).set({ hash: originalHash }).where(...);
 
-// Modificar archivo
+// Modify file
 await fs.writeFile(path, newContent);
 
-// Verificar
+// Verify
 const checkResult = await contentHashService.checkFileHashChanged(path, originalHash);
 
-// Esperado:
+// Expected:
 assert(checkResult.hasChanged === true);
 assert(checkResult.hash !== originalHash);
 ```
 
-### Test 3: Detección al Abrir Archivo
+### Test 3: Detection on file open
 
 ```typescript
-// Abrir archivo que no cambió
+// Open a file that did not change
 const result1 = await fileChangeDetector.checkFileOnOpen(fileId, 'image');
 
-// Esperado:
+// Expected:
 assert(result1.hasChanged === false);
 assert(result1.needsReindex === false);
 ```
 
 ---
 
-## 📈 Métricas de Rendimiento
+## Performance metrics
 
-### Benchmark: Biblioteca de 10,000 Imágenes
+### Benchmark: Library of 10,000 images
 
-| Modo                          | Archivos Procesados | Tiempo       | Ahorro  |
-| ----------------------------- | ------------------- | ------------ | ------- |
-| **Full** (antiguo)            | 10,000              | 120s (2 min) | 0%      |
-| **Full** (nuevo)              | 10,000              | 115s (1:55)  | 4%      |
-| **Incremental** (200 cambios) | 200                 | 8s           | **93%** |
-| **Incremental** (100 cambios) | 100                 | 4s           | **96%** |
-| **Incremental** (50 cambios)  | 50                  | 2s           | **98%** |
+| Mode                          | Files processed | Time         | Savings |
+| ----------------------------- | --------------- | ------------ | ------- |
+| **Full** (old)                | 10,000          | 120s (2 min) | 0%      |
+| **Full** (new)                | 10,000          | 115s (1:55)  | 4%      |
+| **Incremental** (200 changes) | 200             | 8s           | **93%** |
+| **Incremental** (100 changes) | 100             | 4s           | **96%** |
+| **Incremental** (50 changes)  | 50              | 2s           | **98%** |
 
-**Conclusión**:
+**Conclusion**:
 
-- El modo incremental ahorra entre **93% y 98%** de tiempo
-- Mejora significativa en bibliotecas grandes
-- El overhead de calcular hashes es mínimo
-
----
-
-## 🐛 Problemas Conocidos y Soluciones
-
-### Problema 1: Archivos muy grandes
-
-- **Problema**: Calcular hash de archivos grandes (100MB+) es lento
-- **Solución**: Usar streaming de lectura de archivos
-- **Estado**: ✅ Implementado (Node.js readFile es eficiente)
-
-### Problema 2: Hashes iguales con contenido diferente
-
-- **Problema**: Colisiones de hash SHA-256 (muy improbables)
-- **Solución**: No es práctico, probabilidad ~2^-256
-- **Estado**: ✅ No es problema real
-
-### Problema 3: Archivos sin hash
-
-- **Problema**: Algunos archivos antiguos no tienen hash
-- **Solución**: `checkNeedsReindex` detecta archivos sin hash
-- **Estado**: ✅ Implementado
+- Incremental mode saves between **93% and 98%** of time.
+- Improvement is significant on large libraries.
+- The overhead of calculating hashes is minimal.
 
 ---
 
-## 🚀 Roadmap Futuro
+## Known problems and solutions
 
-### V1.1 (Corto Plazo)
+### Problem 1: Very large files
 
-- [ ] Agregar soporte para reindexado paralelo entre carpetas
-- [ ] Optimizar cálculo de hashes con Web Workers
-- [ ] Caché de hashes en memoria para archivos frecuentemente accedidos
+- **Problem**: Calculating hash of large files (100MB+) is slow
+- **Solution**: Use streaming file reads
+- **Status**: Implemented (Node.js readFile is efficient)
 
-### V1.2 (Medio Plazo)
+### Problem 2: Equal hashes with different content
 
-- [ ] Reindexado incremental inteligente (por tiempo desde último cambio)
-- [ ] Detección de cambios en tiempo real con file watchers
-- [ ] Métricas detalladas de rendimiento de reindexado
+- **Problem**: SHA-256 hash collisions (very improbable)
+- **Solution**: Not practical. Probability is about 2^-256
+- **Status**: Not a real problem
 
-### V2.0 (Largo Plazo)
+### Problem 3: Files without hash
 
-- [ ] Sistema de versionado de hashes
-- [ ] Diferencia de cambios a nivel de bytes
-- [ ] Sincronización incremental entre múltiples instancias
+- **Problem**: Some old files do not have a hash
+- **Solution**: `checkNeedsReindex` detects files without hash
+- **Status**: Implemented
 
 ---
 
-## 📖 Referencias
+## Future roadmap
 
-### Archivos del Sistema
+### V1.1 (short term)
+
+- [ ] Add support for parallel reindex among folders
+- [ ] Optimize hash calculation with Web Workers
+- [ ] In-memory hash cache for frequently accessed files
+
+### V1.2 (medium term)
+
+- [ ] Intelligent incremental reindex (by time since last change)
+- [ ] Real-time change detection with file watchers
+- [ ] Detailed reindex performance metrics
+
+### V2.0 (long term)
+
+- [ ] Hash versioning system
+- [ ] Change difference at byte level
+- [ ] Incremental sync among multiple instances
+
+---
+
+## References
+
+### System files
 
 ```
 src/lib/filesystem/
-  content-hash.service.ts                  # Servicio de hash de contenido
+  content-hash.service.ts                  # Content hash service
 
 src/services/folders/
-  reindex-incremental.service.effect.ts     # Servicio de reindexado incremental
-  reindex-incremental-types.ts             # Tipos para reindexado incremental
+  reindex-incremental.service.effect.ts     # Incremental reindex service
+  reindex-incremental-types.ts             # Types for incremental reindex
 
 src/services/file-changes/
-  file-change-detector.service.effect.ts    # Detector de cambios al abrir archivos
+  file-change-detector.service.effect.ts    # Change detector on file open
 
 src/server/routes/
-  api/reindex-incremental.ts               # API endpoints de reindexado
-  file-changes.ts                          # API endpoints de detección de cambios
+  api/reindex-incremental.ts               # Reindex API endpoints
+  file-changes.ts                          # Change-detection API endpoints
 
 drizzle/migrations/
-  0002_add_reindex_indexes.sql            # Migración de índices optimizados
+  0002_add_reindex_indexes.sql            # Optimized index migration
 
 docs/
-  REINDEX-INCREMENTAL.md                     # Este documento
+  REINDEX-INCREMENTAL.md                     # This document
 ```
 
-### Relacionados
+### Related
+
+Related documents and files:
 
 - **Effect-TS Migration**: `docs/guides/EFFECT-TS-MIGRATION.md`
 - **Folder Reindex Service**: `src/services/folders/folder-reindex.service.ts`
@@ -635,22 +643,22 @@ docs/
 
 ---
 
-## 🎉 Conclusión
+## Conclusion
 
-El **sistema de reindexado incremental basado en hash** está completamente implementado y listo para uso. Ofrece:
+The **hash-based incremental reindex system** is fully implemented and ready for use. It offers:
 
-✅ **Ahorro de tiempo significativo**: 93-98% en reindexados incrementales
-✅ **Detección precisa de cambios**: Basada en hashes SHA-256
-✅ **Detección automática**: Actualiza hashes al abrir archivos
-✅ **Flexibilidad**: Modo incremental y completo según necesidad
-✅ **Integración con Effect-TS**: Arquitectura funcional y mantenible
-✅ **API REST completa**: Endpoints para todos los casos de uso
-✅ **UI simple**: Un checkbox para controlar el modo
+- **Significant time savings**: 93-98% in incremental reindexes
+- **Precise change detection**: Based on SHA-256 hashes
+- **Automatic detection**: Updates hashes when files are opened
+- **Flexibility**: Incremental and full mode as needed
+- **Effect-TS integration**: Functional and maintainable architecture
+- **Complete REST API**: Endpoints for all use cases
+- **Simple UI**: One checkbox to control the mode
 
-El proyecto ahora tiene un sistema inteligente de reindexado que minimiza tiempos de procesamiento sin sacrificar calidad ni precisión.
+The project now has an intelligent reindex system. It minimizes processing time without sacrificing quality or precision.
 
-**Estado**: 🟢 IMPLEMENTADO Y LISTO PARA USO
+**Status**: IMPLEMENTED AND READY FOR USE
 
 ---
 
-_Generado el 2025-10-11 por AI Assistant_
+_Generated on 2025-10-11 by AI Assistant_

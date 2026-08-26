@@ -1,8 +1,10 @@
-# Configuración de librerías
+# Library configuration
 
-Archivos con parámetros usados por utilidades internas:
+These files store parameters that internal utilities use.
 
-- `image.config.ts` define tamaños y calidad de imagen.
-- `thumbnail.config.ts` controla opciones de miniaturas.
-- `cache.config.ts` configura el comportamiento de la caché.
-- `settings.json` almacena valores generados en tiempo de build.
+The files cover the following areas:
+
+- `image.config.ts` defines image sizes and quality.
+- `thumbnail.config.ts` controls thumbnail options.
+- `cache.config.ts` configures cache behavior.
+- `settings.json` stores values that the build generates.

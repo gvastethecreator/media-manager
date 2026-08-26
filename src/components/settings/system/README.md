@@ -1,92 +1,105 @@
-# Módulo System Settings
+# System settings module
 
-## Descripción
+## Description
 
-El módulo System Settings proporciona una interfaz para visualizar estadísticas del sistema y realizar operaciones de mantenimiento como reparación del sistema y reseteo de la base de datos.
+The System Settings module provides an interface that shows system statistics.
 
-## Estructura de Archivos
+The module also runs maintenance operations such as system repair and database reset.
+
+## File structure
 
 ```
 src/components/settings/system/
-├── system-settings.tsx     # Componente principal con la interfaz de usuario
-└── README.md               # Documentación del módulo
+├── system-settings.tsx     # Main component with the user interface
+└── README.md               # Module documentation
 ```
 
-## Diagrama de Flujo
+## Flow diagram
 
 ```mermaid
 graph TD
-    A[SystemSettings Component] --> B{Inicialización}
+    A[SystemSettings Component] --> B{Initialization}
     B --> C[loadSystemStats]
-    C --> D[getSystemStats Server Action]
-    D --> E{Resultado}
-    E -->|Éxito| F[Mostrar Estadísticas]
-    E -->|Error| G[Mostrar Error Toast]
+    C --> D[getSystemStats route]
+    D --> E{Result}
+    E -->|Success| F[Show statistics]
+    E -->|Error| G[Show error toast]
 
     A --> H[handleRepair]
-    H --> I[repairSystem Server Action]
-    I --> J{Resultado}
-    J -->|Éxito| K[Mostrar Toast Éxito]
-    J -->|Error| L[Mostrar Toast Error]
+    H --> I[repairSystem route]
+    I --> J{Result}
+    J -->|Success| K[Show success toast]
+    J -->|Error| L[Show error toast]
     K --> C
 
     A --> M[handleReset]
-    M --> N[resetDatabase Server Action]
-    N --> O{Resultado}
-    O -->|Éxito| P[Mostrar Toast Éxito]
-    O -->|Error| Q[Mostrar Toast Error]
+    M --> N[resetDatabase route]
+    N --> O{Result}
+    O -->|Success| P[Show success toast]
+    O -->|Error| Q[Show error toast]
     P --> C
 ```
 
-## Características
+## Features
 
-- **Visualización de Estadísticas del Sistema**:
-  - Uso de CPU
-  - Uso de Memoria
-  - Tamaño de Caché
-  - Información de la base de datos
-  - Información del servidor
+The module provides the following features:
 
-- **Operaciones de Mantenimiento**:
-  - Reparación del sistema
-  - Reseteo de la base de datos (con confirmación)
+- **System statistics display**:
+  - CPU use
+  - Memory use
+  - Cache size
+  - Database information
+  - Server information
 
-## Integración con Server Actions
+- **Maintenance operations**:
+  - System repair
+  - Database reset (with confirmation)
 
-El componente utiliza server actions para operaciones que requieren acceso directo a recursos del servidor:
+## Integration with routes
 
-- `getSystemStats`: Obtiene estadísticas actuales del sistema
-- `repairSystem`: Realiza operaciones de reparación/mantenimiento
-- `resetDatabase`: Reinicia la base de datos a su estado inicial
+The component uses HTTP routes for operations that need direct access to server resources.
 
-## Ejemplo de Uso
+The routes include the following operations:
+
+- `getSystemStats`: Gets current system statistics
+- `repairSystem`: Runs repair and maintenance operations
+- `resetDatabase`: Resets the database to its initial state
+
+## Usage example
 
 ```tsx
-// En una página o layout
+// In a page or layout
 import { SystemSettings } from '@/components/settings/system/system-settings';
 
 export default function SystemPage() {
 	return (
 		<div className="container mx-auto p-4">
-			<h1 className="text-xl font-bold mb-4">Configuración del Sistema</h1>
+			<h1 className="text-xl font-bold mb-4">System Settings</h1>
 			<SystemSettings />
 		</div>
 	);
 }
 ```
 
-## Animaciones
+## Animations
 
-El componente utiliza `motion/react` para animaciones suaves que mejoran la experiencia del usuario al cargar los datos y mostrar las estadísticas.
+The component uses `motion/react` for smooth animations.
 
-## Servicios Utilizados
+The animations improve the experience when data loads and statistics display.
 
-- **ToastService**: Para notificaciones de éxito/error en operaciones
-- **ServerLogger**: Para registro de errores y eventos en el servidor
+## Services used
 
-## Notas de Implementación
+The component uses the following services:
 
-- Las estadísticas se actualizan automáticamente cada minuto
-- Las operaciones de mantenimiento muestran feedback inmediato al usuario
-- Se utilizan confirmaciones para operaciones destructivas
-- Los componentes UI provienen de la librería Shadcn/UI
+- **ToastService**: Success and error notifications for operations
+- **ServerLogger**: Server-side logging of errors and events
+
+## Implementation notes
+
+Statistics refresh automatically every minute.
+
+Maintenance operations show immediate feedback to the user.
+
+Destructive operations use confirmations.
+
+The UI components come from the Shadcn/UI library.

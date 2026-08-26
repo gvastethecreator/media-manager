@@ -1,38 +1,44 @@
-# Servicio de Grupos (Group)
+# Group service (Group)
 
-## Descripción General
+## Overview
 
-El servicio de grupos (Group) es un componente central del sistema de gestión de permisos y colaboración que permite organizar usuarios y administrar el acceso a recursos compartidos. Los grupos facilitan la asignación colectiva de permisos y la colaboración entre usuarios con intereses o proyectos comunes, proporcionando una capa intermedia entre usuarios individuales y recursos compartidos.
+The Group service is a central component of the permission and collaboration system.
 
-## Diagrama de Flujo
+The service organizes users and manages access to shared resources.
+
+Groups ease collective permission assignment and collaboration among users with common interests or projects.
+
+Groups provide an intermediate layer between individual users and shared resources.
+
+## Flow diagram
 
 ```mermaid
 graph TD
-    A[Cliente/UI] -->|Petición| B[Server Actions]
-    B -->|Llamada| C[Group Service]
-    C -->|Transformación| D[Transformers]
-    D -->|Validación| E[Tipos]
-    C -->|Almacenamiento| F[(Base de Datos)]
-    C -->|Eventos| G[Event System]
-    G -->|Notificación| H[Activity Service]
+    A[Client/UI] -->|Request| B[Routes]
+    B -->|Call| C[Group Service]
+    C -->|Transformation| D[Transformers]
+    D -->|Validation| E[Types]
+    C -->|Storage| F[(Database)]
+    C -->|Events| G[Event System]
+    G -->|Notification| H[Activity Service]
     G -->|Stats| I[Stats Service]
 
-    subgraph "Operaciones con Grupos"
-        J[Crear Grupo] --> K[Validar]
-        K --> L[Guardar]
-        L --> M[Asignar Creador]
+    subgraph "Group operations"
+        J[Create Group] --> K[Validate]
+        K --> L[Save]
+        L --> M[Assign creator]
 
-        N[Gestionar Miembros] --> O[Verificar Permisos]
-        O --> P[Modificar Membresía]
-        P --> Q[Notificar]
+        N[Manage members] --> O[Verify permissions]
+        O --> P[Modify membership]
+        P --> Q[Notify]
 
-        R[Compartir Recursos] --> S[Verificar Acceso]
-        S --> T[Establecer Relación]
-        T --> U[Actualizar Permisos]
+        R[Share resources] --> S[Verify access]
+        S --> T[Set relation]
+        T --> U[Update permissions]
 
-        V[Buscar Grupos] --> W[Filtrar]
-        W --> X[Transformar]
-        X --> Y[Paginar Resultados]
+        V[Search Groups] --> W[Filter]
+        W --> X[Transform]
+        X --> Y[Paginate results]
     end
 
     style C fill:#d4f1f9,stroke:#333,stroke-width:1px
@@ -40,165 +46,175 @@ graph TD
     style G fill:#e1bee7,stroke:#333,stroke-width:1px
 ```
 
-## Estructura del Módulo
+Routes call services.
 
-### Archivos del Servicio
+## Module structure
+
+### Service files
 
 ```
 src/services/group/
-├── group.service.ts    # Implementación principal del servicio
-└── index.ts            # Punto de entrada y exportaciones
+├── group.service.ts    # Main service implementation
+└── index.ts            # Entry point and exports
 ```
 
-### Archivos de Transformers
+### Transformer files
 
 ```
 src/transformers/group/
-├── index.ts            # Exportaciones del módulo
-├── mappers.ts          # Funciones para mapear entre objetos
-├── serializers.ts      # Serializadores para distintos formatos
-└── transformer.ts      # Transformador principal
+├── index.ts            # Module exports
+├── mappers.ts          # Functions that map between objects
+├── serializers.ts      # Serializers for different formats
+└── transformer.ts      # Main transformer
 ```
 
-### Tipos de Datos
+### Data types
 
 ```
 src/types/entities/group/
-├── index.ts            # Exportaciones del módulo
-├── schema.ts           # Esquemas de validación
-└── types.ts            # Definiciones de tipos e interfaces
+├── index.ts            # Module exports
+├── schema.ts           # Validation schemas
+└── types.ts            # Type and interface definitions
 ```
 
-### Server Actions
+### Route modules
 
 ```
 src/app/actions/groups/
-├── group.actions.ts    # Acciones para todas las operaciones
-└── index.ts            # Exportaciones del módulo
+├── group.actions.ts    # Actions for all operations
+└── index.ts            # Module exports
 ```
 
-## Funcionalidades Principales
+## Main features
 
-### 1. Gestión de Grupos
+### 1. Group management
 
-- **Crear Grupo**: Permite crear nuevos grupos con nombre, descripción y configuración inicial.
-- **Obtener Grupo**: Recupera información detallada de un grupo por su ID.
-- **Actualizar Grupo**: Modifica propiedades y configuración de un grupo existente.
-- **Eliminar Grupo**: Elimina un grupo y sus relaciones de forma segura.
-- **Listar Grupos**: Obtiene grupos con filtros, ordenación y paginación.
+The service provides the following Group operations:
 
-### 2. Gestión de Miembros
+- **Create Group**: Creates new Groups with name, description, and initial configuration.
+- **Get Group**: Retrieves detailed Group information by ID.
+- **Update Group**: Changes properties and configuration of an existing Group.
+- **Delete Group**: Deletes a Group and its relations in a safe way.
+- **List Groups**: Gets Groups with filters, sort, and pagination.
 
-- **Añadir Miembro**: Agrega un usuario a un grupo con un rol específico.
-- **Remover Miembro**: Elimina un usuario de un grupo.
-- **Actualizar Rol**: Modifica el rol de un miembro dentro del grupo.
-- **Listar Miembros**: Obtiene todos los miembros de un grupo con sus roles.
-- **Verificar Pertenencia**: Comprueba si un usuario es miembro de un grupo específico.
+### 2. Member management
 
-### 3. Control de Acceso y Compartición
+The service provides the following member operations:
 
-- **Compartir Recurso**: Concede acceso a un recurso para todos los miembros del grupo.
-- **Revocar Acceso**: Elimina el acceso de un grupo a un recurso específico.
-- **Verificar Permiso**: Comprueba si un grupo tiene permisos sobre un recurso.
-- **Listar Recursos**: Obtiene todos los recursos compartidos con un grupo.
-- **Obtener Grupos con Acceso**: Lista todos los grupos que tienen acceso a un recurso.
+- **Add member**: Adds a user to a Group with a specific role.
+- **Remove member**: Removes a user from a Group.
+- **Update role**: Changes the role of a member inside the Group.
+- **List members**: Gets all members of a Group with their roles.
+- **Verify membership**: Checks whether a user is a member of a specific Group.
 
-### 4. Características Avanzadas
+### 3. Access control and sharing
 
-- **Jerarquías de Grupos**: Soporte para grupos anidados y herencia de permisos.
-- **Roles Personalizados**: Definición de roles con conjuntos específicos de permisos.
-- **Invitaciones**: Sistema para invitar usuarios a unirse a grupos.
-- **Estadísticas**: Análisis de actividad y uso de recursos dentro del grupo.
+The service provides the following access operations:
 
-## Ejemplos de Uso
+- **Share resource**: Grants access to a resource for all Group members.
+- **Revoke access**: Removes Group access to a specific resource.
+- **Verify permission**: Checks whether a Group has permissions on a resource.
+- **List resources**: Gets all resources shared with a Group.
+- **Get Groups with access**: Lists all Groups that have access to a resource.
 
-### Crear un Nuevo Grupo
+### 4. Advanced features
+
+The service provides the following advanced features:
+
+- **Group hierarchies**: Support for nested Groups and permission inheritance.
+- **Custom roles**: Definition of roles with specific permission sets.
+- **Invitations**: System that invites users to join Groups.
+- **Statistics**: Analysis of activity and resource use inside the Group.
+
+## Usage examples
+
+### Create a new Group
 
 ```typescript
 import { groupService } from '@/services/index';
 
-// Crear un grupo básico
+// Create a basic Group
 const newGroup = await groupService.createGroup({
-	name: 'Equipo de Diseño',
-	description: 'Grupo para colaboración del equipo de diseño gráfico',
+	name: 'Design Team',
+	description: 'Group for collaboration of the graphic design team',
 	isPrivate: false,
 	avatarUrl: 'https://example.com/avatars/design-team.png',
 });
 
-// Crear un grupo con configuración avanzada
+// Create a Group with advanced configuration
 const projectGroup = await groupService.createGroup({
-	name: 'Proyecto XYZ',
-	description: 'Grupo exclusivo para el desarrollo del Proyecto XYZ',
+	name: 'Project XYZ',
+	description: 'Private group for the development of Project XYZ',
 	isPrivate: true,
 	joinPolicy: 'INVITE_ONLY',
 	features: ['STORAGE_QUOTA_10GB', 'MAX_MEMBERS_15'],
 });
 ```
 
-### Gestionar Miembros del Grupo
+### Manage Group members
 
 ```typescript
 import { groupService } from '@/services/index';
 
-// Añadir un miembro al grupo
+// Add a member to the Group
 await groupService.addMember('group-id-123', 'user-id-456', {
 	role: 'EDITOR',
 	addedBy: 'admin-user-id',
 });
 
-// Obtener todos los miembros de un grupo
+// Get all members of a Group
 const members = await groupService.getGroupMembers('group-id-123', {
 	includeRoles: true,
 	page: 1,
 	limit: 50,
 });
 
-// Actualizar el rol de un miembro
+// Update the role of a member
 await groupService.updateMemberRole('group-id-123', 'user-id-456', 'ADMIN');
 
-// Remover un miembro del grupo
+// Remove a member from the Group
 await groupService.removeMember('group-id-123', 'user-id-456');
 ```
 
-### Compartir Recursos con el Grupo
+### Share resources with the Group
 
 ```typescript
 import { groupService } from '@/services/index';
 
-// Compartir una colección con un grupo
+// Share a Collection with a Group
 await groupService.shareResource('group-id-123', {
 	resourceType: 'COLLECTION',
 	resourceId: 'collection-id-789',
 	accessLevel: 'READ_WRITE',
 });
 
-// Obtener todas las colecciones compartidas con un grupo
+// Get all Collections shared with a Group
 const collections = await groupService.getGroupResources('group-id-123', {
 	resourceType: 'COLLECTION',
 	page: 1,
 	limit: 20,
 });
 
-// Actualizar permisos de un recurso
+// Update permissions of a resource
 await groupService.updateResourceAccess('group-id-123', 'collection-id-789', {
 	accessLevel: 'READ_ONLY',
 });
 
-// Revocar acceso a un recurso
+// Revoke access to a resource
 await groupService.revokeResourceAccess('group-id-123', {
 	resourceType: 'COLLECTION',
 	resourceId: 'collection-id-789',
 });
 ```
 
-### Buscar y Filtrar Grupos
+### Search and filter Groups
 
 ```typescript
 import { groupService } from '@/services/index';
 
-// Buscar grupos con filtros
+// Search Groups with filters
 const groups = await groupService.findGroups({
-	search: 'diseño',
+	search: 'design',
 	isPrivate: false,
 	memberCount: { min: 5 },
 	sortBy: 'activityLevel',
@@ -207,89 +223,97 @@ const groups = await groupService.findGroups({
 	limit: 20,
 });
 
-// Obtener grupos a los que pertenece un usuario
+// Get Groups that a user belongs to
 const userGroups = await groupService.getUserGroups('user-id-456', {
 	roles: ['ADMIN', 'EDITOR'],
 	includePrivate: true,
 });
 ```
 
-## Relaciones con Otras Entidades
+## Relations with other entities
 
-| Entidad        | Tipo de Relación | Descripción                                             |
+| Entity         | Relation type    | Description                                             |
 | -------------- | ---------------- | ------------------------------------------------------- |
-| **User**       | Muchos a muchos  | Los usuarios pueden pertenecer a múltiples grupos       |
-| **Collection** | Muchos a muchos  | Las colecciones pueden compartirse con grupos           |
-| **Album**      | Muchos a muchos  | Los álbumes pueden compartirse con grupos               |
-| **Folder**     | Muchos a muchos  | Las carpetas pueden compartirse con grupos              |
-| **Image**      | Muchos a muchos  | Las imágenes pueden compartirse con grupos directamente |
-| **Video**      | Muchos a muchos  | Los videos pueden compartirse con grupos directamente   |
-| **Activity**   | Referencial      | Las actividades pueden referenciar grupos               |
-| **Group**      | Auto-referencial | Los grupos pueden estar anidados (grupo padre-hijo)     |
+| **User**       | Many to many     | Users can belong to multiple Groups                     |
+| **Collection** | Many to many     | Collections can be shared with Groups                   |
+| **Album**      | Many to many     | Albums can be shared with Groups                        |
+| **Folder**     | Many to many     | Folders can be shared with Groups                       |
+| **Image**      | Many to many     | Images can be shared with Groups directly               |
+| **Video**      | Many to many     | Videos can be shared with Groups directly               |
+| **Activity**   | Referential      | Activities can reference Groups                         |
+| **Group**      | Self-referential | Groups can be nested (parent-child Group)               |
 
-## Modelo de Datos
+## Data model
 
 ```typescript
-// Modelo básico de Group
+// Basic Group model
 interface Group {
-	id: string; // Identificador único
-	name: string; // Nombre del grupo
-	description?: string; // Descripción opcional
-	isPrivate: boolean; // Indica si el grupo es privado
-	avatarUrl?: string; // URL de la imagen de perfil del grupo
-	joinPolicy: GroupJoinPolicy; // Política de unión (OPEN, APPROVAL, INVITE_ONLY)
-	memberCount: number; // Número total de miembros
-	parentId?: string; // ID del grupo padre (si es un subgrupo)
-	features: string[]; // Características o capacidades habilitadas
-	createdAt: Date; // Fecha de creación
-	updatedAt: Date; // Fecha de última actualización
+	id: string; // Unique identifier
+	name: string; // Group name
+	description?: string; // Optional description
+	isPrivate: boolean; // Indicates whether the Group is private
+	avatarUrl?: string; // URL of the Group profile image
+	joinPolicy: GroupJoinPolicy; // Join policy (OPEN, APPROVAL, INVITE_ONLY)
+	memberCount: number; // Total number of members
+	parentId?: string; // Parent Group ID (if it is a subgroup)
+	features: string[]; // Enabled features or capabilities
+	createdAt: Date; // Creation date
+	updatedAt: Date; // Last update date
 }
 
-// Membresía de Grupo
+// Group membership
 interface GroupMembership {
-	groupId: string; // ID del grupo
-	userId: string; // ID del usuario miembro
-	role: GroupRole; // Rol del usuario (ADMIN, EDITOR, VIEWER)
-	joinedAt: Date; // Fecha de unión al grupo
-	addedBy?: string; // ID del usuario que añadió al miembro
-	status: MembershipStatus; // Estado (ACTIVE, PENDING, BLOCKED)
+	groupId: string; // Group ID
+	userId: string; // Member user ID
+	role: GroupRole; // User role (ADMIN, EDITOR, VIEWER)
+	joinedAt: Date; // Date joined the Group
+	addedBy?: string; // ID of the user who added the member
+	status: MembershipStatus; // Status (ACTIVE, PENDING, BLOCKED)
 }
 
-// Acceso a recurso
+// Resource access
 interface GroupResourceAccess {
-	groupId: string; // ID del grupo
-	resourceType: ResourceType; // Tipo de recurso (COLLECTION, ALBUM, FOLDER, etc.)
-	resourceId: string; // ID del recurso
-	accessLevel: AccessLevel; // Nivel de acceso (READ, READ_WRITE, ADMIN)
-	grantedAt: Date; // Fecha en que se concedió el acceso
-	grantedBy: string; // ID del usuario que concedió el acceso
+	groupId: string; // Group ID
+	resourceType: ResourceType; // Resource type (COLLECTION, ALBUM, FOLDER, etc.)
+	resourceId: string; // Resource ID
+	accessLevel: AccessLevel; // Access level (READ, READ_WRITE, ADMIN)
+	grantedAt: Date; // Date the access was granted
+	grantedBy: string; // ID of the user who granted the access
 }
 ```
 
-## Buenas Prácticas
+## Good practices
 
-1. **Control de Permisos**: Verifique siempre los permisos antes de realizar operaciones en grupos.
-2. **Transacciones**: Use transacciones para operaciones que modifican múltiples relaciones.
-3. **Propagación Jerárquica**: Implemente correctamente la propagación de permisos en grupos anidados.
-4. **Límites**: Establezca límites razonables en el número de miembros y recursos por grupo.
-5. **Notificaciones**: Notifique a los miembros relevantes sobre cambios importantes en el grupo.
-6. **Historial**: Mantenga un registro de cambios significativos en la membresía y permisos.
-7. **Rendimiento**: Optimice las consultas para grupos con gran número de miembros o recursos.
+Always verify permissions before you run operations on Groups.
 
-## Solución de Problemas Comunes
+Use transactions for operations that modify multiple relations.
 
-| Problema                    | Solución                                                                                     |
+Implement permission propagation correctly in nested Groups.
+
+Set reasonable limits on the number of members and resources per Group.
+
+Notify relevant members about important changes in the Group.
+
+Keep a record of significant changes in membership and permissions.
+
+Optimize queries for Groups with a large number of members or resources.
+
+## Common troubleshooting
+
+| Problem                     | Solution                                                                                     |
 | --------------------------- | -------------------------------------------------------------------------------------------- |
-| **Conflictos de roles**     | Implemente una política clara de precedencia cuando un usuario tiene múltiples roles         |
-| **Grupos abandonados**      | Configure limpieza automática de grupos inactivos sin miembros o con solo miembros inactivos |
-| **Sobrecarga de permisos**  | Utilice roles predefinidos en lugar de permisos granulares para simplificar la gestión       |
-| **Escalabilidad**           | Implemente caché de permisos y verifique en lotes para mejorar rendimiento                   |
-| **Invitaciones pendientes** | Establezca un tiempo de expiración para invitaciones no aceptadas                            |
+| **Role conflicts**          | Implement a clear precedence policy when a user has multiple roles                           |
+| **Abandoned Groups**        | Configure automatic cleanup of inactive Groups with no members or only inactive members      |
+| **Permission overload**     | Use predefined roles instead of granular permissions to simplify management                  |
+| **Scalability**             | Implement permission cache and batch verification to improve performance                     |
+| **Pending invitations**     | Set an expiration time for unaccepted invitations                                            |
 
-## Roadmap y Mejoras Futuras
+## Roadmap and future improvements
 
-- Implementación de políticas de gobierno más avanzadas para grupos grandes
-- Sistema de plantillas para crear grupos con configuraciones predefinidas
-- Capacidades de auditoría y cumplimiento para actividades dentro del grupo
-- Métricas y análisis de colaboración y uso de recursos
-- Integración con sistemas externos de autenticación y directorios de usuarios
+The following work is planned:
+
+- Implementation of more advanced governance policies for large Groups
+- Template system to create Groups with predefined configurations
+- Audit and compliance capabilities for activities inside the Group
+- Metrics and analysis of collaboration and resource use
+- Integration with external authentication systems and user directories

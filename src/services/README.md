@@ -1,96 +1,109 @@
-# Capa de Servicios
+# Service layer
 
-Los servicios encapsulan la lógica de negocio y acceso a datos. Son consumidos
-por las **Server Actions** y en ocasiones directamente por componentes del lado
-servidor.
+Services encapsulate business logic and data access.
 
-Cada directorio dentro de `src/services` corresponde a una entidad o módulo del
-sistema (por ejemplo, `folder`, `image`, `group`). Estos servicios exponen
-funciones como `getFolders`, `createImage` o `updateGroup`, dependiendo de la
-entidad.
+Routes call services. Server components can also call services directly.
+
+Each directory in `src/services` maps to an entity or module of the system.
+
+Examples include `folder`, `image`, and `group`.
+
+These services expose functions such as `getFolders`, `createImage`, or `updateGroup`, depending on the entity.
 
 ```mermaid
 flowchart TD
-    A[Server Actions] --> B[Services]
+    A[Routes] --> B[Services]
     B --> C[Drizzle/DB]
 ```
 
-## Estructura Actual (Reorganizada)
+## Current structure (reorganized)
 
-### Entidades Base
+### Base entities
 
-- `album/` - Gestión de álbumes de imágenes
-- `file/` - Operaciones de archivos del sistema
-- `folder/` - Gestión de carpetas
-- `group/` - Agrupación de elementos
-- `image/` - Procesamiento de imágenes
-- `tag/` - Sistema de etiquetado
-- `video/` - Procesamiento de videos (placeholder)
+The following directories hold the base entity services:
 
-### Entidades Organizacionales
+- `album/` - Album management
+- `file/` - Filesystem file operations
+- `folder/` - Folder management
+- `group/` - Group membership
+- `image/` - Image processing
+- `tag/` - Tag system
+- `video/` - Video processing (placeholder)
 
-- `collection/` - Colecciones de elementos
-- `profile/` - Perfiles de usuario
+### Organizational entities
 
-### Entidades de Contenido
+The following directories hold organizational services:
 
-- `audio/` - Archivos de audio
-- `concept/` - Conceptos y ideas
-- `document/` - Documentos de texto
-- `file3d/` - Archivos 3D
-- `json-file/` - Archivos JSON
-- `note/` - Notas y anotaciones
-- `place/` - Lugares y ubicaciones
-- `workflow/` - Flujos de trabajo
-- `world-item/` - Elementos del mundo
+- `collection/` - Collections of items
+- `profile/` - User profiles
 
-### Servicios del Sistema
+### Content entities
 
-- `settings/` - Configuración de la aplicación
-- `stats/` - Estadísticas y métricas
-- `toast/` - Notificaciones temporales
+The following directories hold content services:
 
-### Servicios Especializados
+- `audio/` - Audio files
+- `concept/` - Concepts and ideas
+- `document/` - Text documents
+- `file3d/` - 3D files
+- `json-file/` - JSON files
+- `note/` - Notes and annotations
+- `place/` - Places and locations
+- `workflow/` - Workflows
+- `world-item/` - World items
 
-- `activity/` - Registro de actividades
-- `character/` - Personajes
-- `metadata/` - Metadatos de archivos
-- `property/` - Propiedades personalizadas
-- `queue-job/` - Trabajos en cola
-- `wildcard/` - Patrones y comodines
+### System services
 
-## Estructura de Cada Servicio
+The following directories hold system services:
+
+- `settings/` - Application configuration
+- `stats/` - Statistics and metrics
+- `toast/` - Temporary notifications
+
+### Specialized services
+
+The following directories hold specialized services:
+
+- `activity/` - Activity records
+- `character/` - Characters
+- `metadata/` - File metadata
+- `property/` - Custom properties
+- `queue-job/` - Queued jobs
+- `wildcard/` - Patterns and wildcards
+
+## Structure of each service
 
 ```text
-src/services/<entidad>/
-├── <entidad>.service.ts   # Implementación principal
-├── index.ts               # Exportaciones públicas
-└── README.md              # Documentación específica (opcional)
+src/services/<entity>/
+├── <entity>.service.ts   # main implementation
+├── index.ts               # public exports
+└── README.md              # specific documentation (optional)
 ```
 
-### Servicios Especiales
+### Special services
 
-Algunos servicios tienen archivos adicionales:
+Some services include extra files:
 
-- `collection/events.service.ts` - Eventos específicos de colecciones
-- `image/converter.service.ts` - Conversión de imágenes
+- `collection/events.service.ts` - Collection-specific events
+- `image/converter.service.ts` - Image conversion
 
-## Importación
+## Import
 
 ```typescript
-// ✅ Correcto - Importar desde la carpeta
+// ✅ Correct - Import from the folder
 import { noteService } from '@/services/note';
 import { statsEventEmitter } from '@/services/stats';
 
-// ❌ Incorrecto - Rutas legacy eliminadas
+// ❌ Incorrect - Removed legacy paths
 import { noteService } from '@/services/note.service';
 import { statsEventEmitter } from '@/services/stats.service';
 ```
 
-## Migración Completada
+## Completed migration
 
-- ✅ Movimiento de servicios sueltos a carpetas organizadas
-- ✅ Eliminación de archivos legacy (`*-service-export.ts`)
-- ✅ Actualización de exportaciones en `index.ts`
-- ✅ Actualización automática de todas las importaciones (68 archivos)
-- ✅ Validación de errores de TypeScript
+The following work is complete:
+
+- Move loose services into organized folders
+- Remove legacy files (`*-service-export.ts`)
+- Update exports in `index.ts`
+- Update all imports automatically (68 files)
+- Validate TypeScript errors

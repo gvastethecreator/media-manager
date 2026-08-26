@@ -1,52 +1,54 @@
-# 🎨 Guía del Sistema de Themes
+# Theme system guide
 
-Guía completa del sistema de themes de Image Manager con 14 temas personalizados, design tokens y mejores prácticas.
-
----
-
-## 📑 Tabla de Contenidos
-
-1. [Resumen del Sistema de Themes](#resumen-del-sistema-de-themes)
-2. [Uso de Variables CSS](#uso-de-variables-css)
-3. [Mejores Prácticas](#mejores-prácticas)
-4. [Migración de Colores Hardcodeados](#migración-de-colores-hardcodeados)
-5. [Transiciones de Tema](#transiciones-de-tema)
-6. [Cómo Agregar un Nuevo Tema](#cómo-agregar-un-nuevo-tema)
+Complete guide to the Media Manager theme system with 14 custom themes, design tokens, and practices.
 
 ---
 
-## Resumen del Sistema de Themes
+## Contents
 
-Image Manager cuenta con un sistema de themes robusto y flexible que permite personalizar completamente la apariencia de la aplicación.
+1. [Theme system summary](#theme-system-summary)
+2. [Using CSS variables](#using-css-variables)
+3. [Practices](#practices)
+4. [Migration of hardcoded colors](#migration-of-hardcoded-colors)
+5. [Theme transitions](#theme-transitions)
+6. [How to add a new theme](#how-to-add-a-new-theme)
 
-### 14 Temas Personalizados Disponibles
+---
 
-| Tema          | Descripción                   | Ideal para                      |
-| ------------- | ----------------------------- | ------------------------------- |
-| `light`       | Tema claro con grises suaves  | Uso diurno, oficina             |
-| `dark`        | Tema oscuro por defecto       | Uso nocturno, ahorro de batería |
-| `cafe`        | Tonos marrones cálidos        | Ambiente relajado               |
-| `violeta`     | Púrpuras oscuros              | Creatividad, diseño             |
-| `madera`      | Tonos madera neutros          | Natural, orgánico               |
-| `nocturno`    | Azulado para fatiga visual    | Lectura prolongada              |
-| `verde`       | Esmeralda oscuro              | Naturaleza, calma               |
-| `atardecer`   | Naranjas y rojos cálidos      | Creatividad, energía            |
-| `corporativo` | Azul profesional              | Entornos empresariales          |
-| `carbon`      | Negro carbón minimalista      | Alto contraste                  |
-| `teal`        | Verde azulado                 | Frescura, modernidad            |
-| `citrico`     | Amarillos vibrantes           | Energía, positividad            |
-| `aurora`      | Inspirado en auroras boreales | Fantasía, creatividad           |
-| `neon`        | Estilo cyberpunk/neón         | Gaming, moderno                 |
+## Theme system summary
 
-### ThemeProvider con Soporte para 'system'
+Media Manager has a robust and flexible theme system. It lets you customize the full appearance of the application.
 
-El `ThemeProvider` proporciona un contexto completo para gestionar themes:
+### 14 custom themes available
+
+The product includes these themes:
+
+| Theme         | Description                    | Best for                         |
+| ------------- | ------------------------------ | -------------------------------- |
+| `light`       | Light theme with soft grays    | Daytime use, office              |
+| `dark`        | Default dark theme             | Night use, battery saving        |
+| `cafe`        | Warm brown tones               | Relaxed environment              |
+| `violeta`     | Dark purples                   | Creativity, design               |
+| `madera`      | Neutral wood tones             | Natural, organic                 |
+| `nocturno`    | Bluish, for visual fatigue     | Prolonged reading                |
+| `verde`       | Dark emerald                   | Nature, calm                     |
+| `atardecer`   | Warm oranges and reds          | Creativity, energy               |
+| `corporativo` | Professional blue              | Business environments            |
+| `carbon`      | Minimal charcoal black         | High contrast                    |
+| `teal`        | Blue-green                     | Freshness, modernity             |
+| `citrico`     | Vibrant yellows                | Energy, positivity               |
+| `aurora`      | Inspired by auroras borealis   | Fantasy, creativity              |
+| `neon`        | Cyberpunk/neon style           | Gaming, modern                   |
+
+### ThemeProvider with `system` support
+
+`ThemeProvider` supplies a complete context to manage themes:
 
 ```tsx
 // src/providers/theme-provider.tsx
 import { ThemeProvider } from '@/providers/theme-provider';
 
-// En tu aplicación
+// In your application
 function App() {
 	return (
 		<ThemeProvider defaultTheme="system" storageKey="theme">
@@ -56,20 +58,20 @@ function App() {
 }
 ```
 
-**Características:**
+**Characteristics:**
 
-- Soporte para tema `system` que detecta automáticamente la preferencia del OS
-- Persistencia en localStorage
-- Transiciones fluidas entre themes
-- Clases CSS aplicadas automáticamente (`light`, `dark`, `system`)
+- Support for the `system` theme that detects the OS preference automatically
+- Persistence in localStorage
+- Smooth transitions between themes
+- CSS classes applied automatically (`light`, `dark`, `system`)
 
-### ThemeToggle para Cambiar Entre Themes
+### ThemeToggle to change themes
 
 ```tsx
 // src/components/core/theme/theme-toggle.tsx
 import { ThemeToggle } from '@/components/core/theme/theme-toggle';
 
-// Uso en cualquier componente
+// Use in any component
 function Header() {
 	return (
 		<header>
@@ -79,14 +81,14 @@ function Header() {
 }
 ```
 
-**Features del toggle:**
+**Toggle features:**
 
-- Dropdown con todos los themes disponibles
-- Indicador visual del tema actual
-- Animaciones suaves entre iconos (sol/luna)
-- Accesible (ARIA labels)
+- Dropdown with all available themes
+- Visual indicator of the current theme
+- Smooth animations between icons (sun/moon)
+- Accessible (ARIA labels)
 
-### Hook useTheme
+### useTheme hook
 
 ```tsx
 import { useTheme } from '@/components/ui/theme-provider';
@@ -94,16 +96,16 @@ import { useTheme } from '@/components/ui/theme-provider';
 function MyComponent() {
 	const { theme, setTheme, themes, resolvedTheme } = useTheme();
 
-	// theme: tema actual seleccionado (incluye 'system')
-	// resolvedTheme: tema resuelto ('light' o 'dark') cuando theme es 'system'
-	// themes: array con todos los themes disponibles
-	// setTheme: función para cambiar el tema
+	// theme: currently selected theme (includes 'system')
+	// resolvedTheme: resolved theme ('light' or 'dark') when theme is 'system'
+	// themes: array with all available themes
+	// setTheme: function to change the theme
 
 	return (
 		<div>
-			<p>Tema actual: {theme}</p>
-			<p>Tema resuelto: {resolvedTheme}</p>
-			<button onClick={() => setTheme('dark')}>Cambiar a dark</button>
+			<p>Current theme: {theme}</p>
+			<p>Resolved theme: {resolvedTheme}</p>
+			<button onClick={() => setTheme('dark')}>Switch to dark</button>
 		</div>
 	);
 }
@@ -111,38 +113,38 @@ function MyComponent() {
 
 ---
 
-## Uso de Variables CSS
+## Using CSS variables
 
-El sistema de themes se basa en variables CSS que se actualizan dinámicamente según el tema seleccionado.
+The theme system is based on CSS variables. They update dynamically according to the selected theme.
 
-### Variables Semánticas (shadcn/ui compatible)
+### Semantic variables (shadcn/ui compatible)
 
-Variables principales que cambian según el tema:
+Main variables that change with the theme:
 
 ```css
-/* Variables base de UI */
---background        /* Fondo principal */
---foreground        /* Texto principal */
---card              /* Fondo de tarjetas */
---card-foreground   /* Texto en tarjetas */
---popover           /* Fondo de popovers */
---popover-foreground/* Texto en popovers */
---primary           /* Color primario (botones, enlaces) */
---primary-foreground/* Texto sobre color primario */
---secondary         /* Color secundario */
---secondary-foreground /* Texto sobre secundario */
---muted             /* Fondo de elementos muted */
---muted-foreground  /* Texto muted */
---accent            /* Color de acento */
---accent-foreground /* Texto sobre acento */
---destructive       /* Color para acciones destructivas */
---destructive-foreground /* Texto sobre destructivo */
---border            /* Color de bordes */
---input             /* Color de inputs */
---ring              /* Color de focus rings */
+/* Base UI variables */
+--background        /* Main background */
+--foreground        /* Main text */
+--card              /* Card background */
+--card-foreground   /* Text on cards */
+--popover           /* Popover background */
+--popover-foreground/* Text on popovers */
+--primary           /* Primary color (buttons, links) */
+--primary-foreground/* Text on primary color */
+--secondary         /* Secondary color */
+--secondary-foreground /* Text on secondary */
+--muted             /* Background of muted elements */
+--muted-foreground  /* Muted text */
+--accent            /* Accent color */
+--accent-foreground /* Text on accent */
+--destructive       /* Color for destructive actions */
+--destructive-foreground /* Text on destructive */
+--border            /* Border color */
+--input             /* Input color */
+--ring              /* Focus ring color */
 ```
 
-**Uso en Tailwind:**
+**Use in Tailwind:**
 
 ```tsx
 <div className="bg-background text-foreground">
@@ -150,147 +152,160 @@ Variables principales que cambian según el tema:
 </div>
 ```
 
-**Uso en CSS inline:**
+**Use in inline CSS:**
 
 ```tsx
 <div style={{ backgroundColor: 'var(--background)' }}>
-	<span style={{ color: 'var(--primary)' }}>Texto</span>
+	<span style={{ color: 'var(--primary)' }}>Text</span>
 </div>
 ```
 
-### Design Tokens (--dt-\*)
+### Design tokens (`--dt-*`)
 
-Sistema completo de tokens de diseño en `src/styles/design-tokens.css`:
+Complete design-token system in `src/styles/design-tokens.css`:
 
-#### Paletas de Color
+#### Color palettes
 
 ```css
-/* Primary (Azul) */
---dt-primary-50 a --dt-primary-950
+/* Primary (Blue) */
+--dt-primary-50 to --dt-primary-950
 
-/* Neutral (Grises) */
---dt-neutral-50 a --dt-neutral-950
+/* Neutral (Grays) */
+--dt-neutral-50 to --dt-neutral-950
 
-/* Success (Verde) */
---dt-success-50 a --dt-success-900
+/* Success (Green) */
+--dt-success-50 to --dt-success-900
 
-/* Warning (Ámbar) */
---dt-warning-50 a --dt-warning-900
+/* Warning (Amber) */
+--dt-warning-50 to --dt-warning-900
 
-/* Danger (Rojo) */
---dt-danger-50 a --dt-danger-900
+/* Danger (Red) */
+--dt-danger-50 to --dt-danger-900
 ```
 
-#### Sombras
+#### Shadows
 
 ```css
---dt-shadow-0    /* Sin sombra */
---dt-shadow-1    /* Sutil (inputs, botones) */
---dt-shadow-2    /* Media (cards, dropdowns) */
---dt-shadow-3    /* Alta (popovers, tooltips) */
---dt-shadow-4    /* Máxima (modales) */
---dt-inset-1     /* Sombra interna sutil */
---dt-inset-2     /* Sombra interna pronunciada */
+--dt-shadow-0    /* No shadow */
+--dt-shadow-1    /* Subtle (inputs, buttons) */
+--dt-shadow-2    /* Medium (cards, dropdowns) */
+--dt-shadow-3    /* High (popovers, tooltips) */
+--dt-shadow-4    /* Maximum (modals) */
+--dt-inset-1     /* Subtle inner shadow */
+--dt-inset-2     /* Strong inner shadow */
 ```
 
-#### Timing y Easing
+#### Timing and easing
 
 ```css
---dt-duration-instant: 50ms /* Micro-interacciones */ --dt-duration-fast: 150ms /* Hover, focus */
-	--dt-duration-normal: 250ms /* Transiciones estándar */ --dt-duration-slow: 400ms /* Animaciones elaboradas */
-	--dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1) --dt-ease-in: cubic-bezier(0.4, 0, 1, 1)
-	--dt-ease-out: cubic-bezier(0, 0, 0.2, 1) --dt-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+--dt-duration-instant: 50ms; /* Micro-interactions */
+--dt-duration-fast: 150ms; /* Hover, focus */
+--dt-duration-normal: 250ms; /* Standard transitions */
+--dt-duration-slow: 400ms; /* Elaborated animations */
+--dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+--dt-ease-in: cubic-bezier(0.4, 0, 1, 1);
+--dt-ease-out: cubic-bezier(0, 0, 0.2, 1);
+--dt-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 ```
 
-#### Bordes y Radius
+#### Borders and radius
 
 ```css
---dt-border-width: 2px --dt-border-width-thin: 1px --dt-border-soft --dt-border-medium --dt-border-strong
-	--dt-border-focus --dt-radius-xs: 2px --dt-radius-sm: 4px --dt-radius-md: 6px --dt-radius-lg: 8px --dt-radius-xl: 12px
-	--dt-radius-full: 9999px;
+--dt-border-width: 2px;
+--dt-border-width-thin: 1px;
+--dt-border-soft;
+--dt-border-medium;
+--dt-border-strong;
+--dt-border-focus;
+--dt-radius-xs: 2px;
+--dt-radius-sm: 4px;
+--dt-radius-md: 6px;
+--dt-radius-lg: 8px;
+--dt-radius-xl: 12px;
+--dt-radius-full: 9999px;
 ```
 
-### Tokens de Entidades
+### Entity tokens
 
-Colores específicos para cada tipo de entidad en `src/styles/tokens.css`:
+Specific colors for each entity type in `src/styles/tokens.css`:
 
 ```css
-/* Entidades de contenido */
---entity-image: oklch(0.59 0.2 255); /* Azul */
---entity-video: oklch(0.63 0.24 29); /* Rojo */
+/* Content entities */
+--entity-image: oklch(0.59 0.2 255); /* Blue */
+--entity-video: oklch(0.63 0.24 29); /* Red */
 --entity-audio: oklch(0.68 0.16 201); /* Sky */
 --entity-document: oklch(0.55 0.1 250); /* Slate */
---entity-file-3d: oklch(0.65 0.15 277); /* Índigo */
---entity-json: oklch(0.7 0.15 350); /* Rosa */
+--entity-file-3d: oklch(0.65 0.15 277); /* Indigo */
+--entity-json: oklch(0.7 0.15 350); /* Pink */
 
-/* Entidades de organización */
---entity-folder: oklch(0.75 0.18 85); /* Amarillo */
---entity-album: oklch(0.59 0.23 293); /* Violeta */
+/* Organization entities */
+--entity-folder: oklch(0.75 0.18 85); /* Yellow */
+--entity-album: oklch(0.59 0.23 293); /* Violet */
 --entity-collection: oklch(0.63 0.2 195); /* Cyan */
 --entity-group: oklch(0.64 0.17 175); /* Teal */
---entity-favorite: oklch(0.75 0.18 85); /* Ámbar */
+--entity-favorite: oklch(0.75 0.18 85); /* Amber */
 
-/* Entidades creativas */
---entity-character: oklch(0.7 0.2 350); /* Rosa */
+/* Creative entities */
+--entity-character: oklch(0.7 0.2 350); /* Pink */
 --entity-place: oklch(0.64 0.17 175); /* Teal */
---entity-world-item: oklch(0.72 0.2 130); /* Lima */
---entity-concept: oklch(0.72 0.18 65); /* Ámbar */
+--entity-world-item: oklch(0.72 0.2 130); /* Lime */
+--entity-concept: oklch(0.72 0.18 65); /* Amber */
 
-/* Entidades de metadatos */
---entity-tag: oklch(0.7 0.2 350); /* Rosa */
---entity-prompt: oklch(0.64 0.17 165); /* Esmeralda */
---entity-note: oklch(0.63 0.24 29); /* Rojo */
---entity-property: oklch(0.7 0.15 350); /* Rosa claro */
---entity-wildcard: oklch(0.7 0.2 350); /* Rosa */
+/* Metadata entities */
+--entity-tag: oklch(0.7 0.2 350); /* Pink */
+--entity-prompt: oklch(0.64 0.17 165); /* Emerald */
+--entity-note: oklch(0.63 0.24 29); /* Red */
+--entity-property: oklch(0.7 0.15 350); /* Light pink */
+--entity-wildcard: oklch(0.7 0.2 350); /* Pink */
 
-/* Entidades de sistema */
---entity-system: oklch(0.55 0.12 240); /* Azul grisáceo */
+/* System entities */
+--entity-system: oklch(0.55 0.12 240); /* Gray-blue */
 ```
 
-**Uso práctico:**
+**Practical use:**
 
 ```tsx
-// En componentes React
-<div style={{ color: 'var(--entity-image)' }}>Imagen</div>
+// In React components
+<div style={{ color: 'var(--entity-image)' }}>Image</div>
 <div style={{ color: 'var(--entity-video)' }}>Video</div>
 
-// Con Tailwind (usando arbitrary values)
-<div className="text-[color:var(--entity-folder)]">Carpeta</div>
+// With Tailwind (using arbitrary values)
+<div className="text-[color:var(--entity-folder)]">Folder</div>
 ```
 
 ---
 
-## Mejores Prácticas
+## Practices
 
-### ❌ NUNCA Usar Colores Hardcodeados
+### Never use hardcoded colors
 
 ```tsx
-// MAL - Nunca hacer esto
+// BAD - Never do this
 <div style={{ color: '#3b82f6' }} />
 <div className="text-[#3b82f6]" />
 <div style={{ background: 'rgba(255, 255, 255, 0.3)' }} />
 <div className="bg-blue-500" />
 
-// MAL - No usar colores hex en CSS
+// BAD - Do not use hex colors in CSS
 .custom-class {
   color: #3b82f6;
   background: rgba(255, 255, 255, 0.5);
 }
 ```
 
-### ✅ SIEMPRE Usar Variables CSS
+### Always use CSS variables
 
 ```tsx
-// BIEN - Usar variables CSS semánticas
+// GOOD - Use semantic CSS variables
 <div className="text-primary" />
 <div className="bg-background" />
 <div className="border-border" />
 
-// BIEN - Usar design tokens
+// GOOD - Use design tokens
 <div className="bg-dt-primary-500" />
 <div className="text-dt-success-600" />
 
-// BIEN - En CSS
+// GOOD - In CSS
 .custom-class {
   color: var(--primary);
   background: var(--background);
@@ -298,31 +313,31 @@ Colores específicos para cada tipo de entidad en `src/styles/tokens.css`:
 }
 ```
 
-### Usar color-mix para Opacidades
+### Use color-mix for opacities
 
-Cuando necesites ajustar la opacidad de un color, usa `color-mix()`:
+When you need to adjust the opacity of a color, use `color-mix()`:
 
 ```tsx
-// BIEN - Usar color-mix para opacidad
+// GOOD - Use color-mix for opacity
 <div style={{
   background: 'color-mix(in oklch, var(--primary) 30%, transparent)'
 }} />
 
-// BIEN - Combinar colores
+// GOOD - Combine colors
 <div style={{
   background: 'color-mix(in oklch, var(--entity-image) 20%, var(--background))'
 }} />
 
-// BIEN - En CSS con oklch(from)
+// GOOD - In CSS with oklch(from)
 --panel-bg-overlay: oklch(from var(--background) l c h / 0.4);
 ```
 
-### Ejemplos de Código: Bueno vs Malo
+### Code examples: good versus bad
 
-#### Ejemplo 1: Botón con hover
+#### Example 1: Button with hover
 
 ```tsx
-// ❌ MAL
+// BAD
 <button
   style={{
     background: '#3b82f6',
@@ -334,33 +349,33 @@ Cuando necesites ajustar la opacidad de un color, usa `color-mix()`:
   Click
 </button>
 
-// ✅ BIEN
+// GOOD
 import { Button } from '@/components/ui/button';
 
 <Button variant="default">
   Click
 </Button>
 
-// O usando clases de Tailwind
+// Or using Tailwind classes
 <button className="bg-primary text-primary-foreground hover:bg-primary/90">
   Click
 </button>
 ```
 
-#### Ejemplo 2: Tarjeta con borde
+#### Example 2: Card with border
 
 ```tsx
-// ❌ MAL
+// BAD
 <div style={{
   border: '1px solid #e5e7eb',
   background: '#ffffff',
   boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
 }} />
 
-// ✅ BIEN
+// GOOD
 <div className="border bg-card shadow-dt-1" />
 
-// O con CSS
+// Or with CSS
 <div style={{
   border: '1px solid var(--border)',
   background: 'var(--card)',
@@ -368,119 +383,119 @@ import { Button } from '@/components/ui/button';
 }} />
 ```
 
-#### Ejemplo 3: Badge de entidad
+#### Example 3: Entity badge
 
 ```tsx
-// ❌ MAL
+// BAD
 <div style={{
   background: 'rgba(59, 130, 246, 0.2)',
   color: '#3b82f6',
   border: '1px solid rgba(59, 130, 246, 0.4)'
 }}>
-  Imagen
+  Image
 </div>
 
-// ✅ BIEN
+// GOOD
 <div style={{
   background: 'color-mix(in oklch, var(--entity-image) 20%, transparent)',
   color: 'var(--entity-image)',
   border: '1px solid color-mix(in oklch, var(--entity-image) 40%, transparent)'
 }}>
-  Imagen
+  Image
 </div>
 
-// O usando clases de Tailwind con color-mix
+// Or using Tailwind classes with color-mix
 <div className="bg-[color:color-mix(in_oklch,var(--entity-image)_20%,transparent)]
                 text-[color:var(--entity-image)]">
-  Imagen
+  Image
 </div>
 ```
 
 ---
 
-## Migración de Colores Hardcodeados
+## Migration of hardcoded colors
 
-Durante la migración al sistema de themes, se corrigieron múltiples archivos que utilizaban colores hardcodeados.
+During the migration to the theme system, multiple files that used hardcoded colors were corrected.
 
-### Patrones de Migración Comunes
+### Common migration patterns
 
-#### 1. Colores Hex → Variables CSS
+#### 1. Hex colors to CSS variables
 
 ```tsx
-// ANTES
+// BEFORE
 <div style={{ color: '#3b82f6' }} />
 
-// DESPUÉS
+// AFTER
 <div style={{ color: 'var(--primary)' }} />
-// o
+// or
 <div className="text-primary" />
 ```
 
-#### 2. RGBA → color-mix
+#### 2. RGBA to color-mix
 
 ```tsx
-// ANTES
+// BEFORE
 <div style={{ background: 'rgba(59, 130, 246, 0.2)' }} />
 
-// DESPUÉS
+// AFTER
 <div style={{
   background: 'color-mix(in oklch, var(--primary) 20%, transparent)'
 }} />
 ```
 
-#### 3. Colores de entidad hardcodeados → Tokens
+#### 3. Hardcoded entity colors to tokens
 
 ```tsx
-// ANTES
+// BEFORE
 const entityColors = {
   image: '#3b82f6',
   video: '#ef4444',
   folder: '#eab308'
 };
 
-// DESPUÉS
-// Usar las variables CSS directamente
+// AFTER
+// Use the CSS variables directly
 <div style={{ color: 'var(--entity-image)' }} />
 <div style={{ color: 'var(--entity-video)' }} />
 <div style={{ color: 'var(--entity-folder)' }} />
 ```
 
-#### 4. Sombras hardcodeadas → Design tokens
+#### 4. Hardcoded shadows to design tokens
 
 ```tsx
-// ANTES
+// BEFORE
 <div style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }} />
 
-// DESPUÉS
+// AFTER
 <div style={{ boxShadow: 'var(--dt-shadow-1)' }} />
-// o
+// or
 <div className="shadow-dt-1" />
 ```
 
-### Archivos Clave en la Migración
+### Key files in the migration
 
-Los siguientes archivos fueron actualizados para usar el sistema de themes:
+The following files were updated to use the theme system:
 
-| Archivo                                 | Cambios Principales                                     |
-| --------------------------------------- | ------------------------------------------------------- |
-| `src/styles/tokens.css`                 | Definición de tokens de entidades y colores funcionales |
-| `src/styles/design-tokens.css`          | Paletas de color, sombras, timing, borders              |
-| `src/styles/themes.css`                 | Definiciones de los 14 temas personalizados             |
-| `src/styles/utilities/theme-system.css` | Sistema de transiciones y utilities                     |
-| `src/components/cards/*`                | Migración de colores hardcodeados a tokens              |
-| `src/components/ui/*.tsx`               | Componentes UI usando variables CSS                     |
-| `src/components/views/*`                | Vistas usando tokens de entidades                       |
+| File                                    | Main changes                                          |
+| --------------------------------------- | ----------------------------------------------------- |
+| `src/styles/tokens.css`                 | Definition of entity tokens and functional colors     |
+| `src/styles/design-tokens.css`          | Color palettes, shadows, timing, borders              |
+| `src/styles/themes.css`                 | Definitions of the 14 custom themes                   |
+| `src/styles/utilities/theme-system.css` | Transition system and utilities                       |
+| `src/components/cards/*`                | Migration of hardcoded colors to tokens               |
+| `src/components/ui/*.tsx`               | UI components using CSS variables                     |
+| `src/components/views/*`                | Views using entity tokens                             |
 
 ---
 
-## Transiciones de Tema
+## Theme transitions
 
-El sistema incluye transiciones fluidas automáticas cuando se cambia entre themes.
+The system includes automatic smooth transitions when you change themes.
 
-### Transiciones Automáticas
+### Automatic transitions
 
 ```css
-/* src/styles/themes.css - Al final del archivo */
+/* src/styles/themes.css - At the end of the file */
 html {
 	transition:
 		background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -494,12 +509,12 @@ html {
 }
 ```
 
-### Clase theme-transitioning
+### `theme-transitioning` class
 
-Para transiciones más controladas, usa la clase `theme-transitioning`:
+For more controlled transitions, use the `theme-transitioning` class:
 
 ```tsx
-// Aplica transiciones a todos los elementos hijos
+// Apply transitions to all child elements
 <div className="theme-transitioning">
 	<Card />
 	<Button />
@@ -507,7 +522,7 @@ Para transiciones más controladas, usa la clase `theme-transitioning`:
 </div>
 ```
 
-**Definición en CSS:**
+**CSS definition:**
 
 ```css
 /* src/styles/utilities/theme-system.css */
@@ -525,9 +540,9 @@ Para transiciones más controladas, usa la clase `theme-transitioning`:
 }
 ```
 
-### Duración: 300ms
+### Duration: 300ms
 
-La duración estándar de transiciones de tema es **300ms**:
+The standard duration of theme transitions is **300ms**:
 
 ```css
 :root {
@@ -536,9 +551,9 @@ La duración estándar de transiciones de tema es **300ms**:
 }
 ```
 
-### Soporte para Reduced Motion
+### Reduced motion support
 
-El sistema respeta la preferencia del usuario de reducir movimiento:
+The system respects the user preference to reduce motion:
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -553,16 +568,16 @@ El sistema respeta la preferencia del usuario de reducir movimiento:
 
 ---
 
-## Cómo Agregar un Nuevo Tema
+## How to add a new theme
 
-### Paso 1: Definir las Variables CSS del Tema
+### Step 1: Define the theme CSS variables
 
-Agrega una nueva sección en `src/styles/themes.css`:
+Add a new section in `src/styles/themes.css`:
 
 ```css
-/* Tema Personalizado - Ejemplo: Ocean */
+/* Custom theme - Example: Ocean */
 html[data-theme='ocean'] {
-	/* Variables base */
+	/* Base variables */
 	--background: oklch(0.2 0.04 220);
 	--foreground: oklch(0.95 0.01 220);
 	--card: oklch(0.25 0.05 220);
@@ -570,13 +585,13 @@ html[data-theme='ocean'] {
 	--popover: oklch(0.25 0.05 220);
 	--popover-foreground: oklch(0.95 0.01 220);
 
-	/* Colores principales */
+	/* Main colors */
 	--primary: oklch(0.6 0.18 220);
 	--primary-foreground: oklch(0.1 0.01 220);
 	--secondary: oklch(0.3 0.06 220);
 	--secondary-foreground: oklch(0.95 0.01 220);
 
-	/* Estados */
+	/* States */
 	--muted: oklch(0.3 0.05 220);
 	--muted-foreground: oklch(0.7 0.03 220);
 	--accent: oklch(0.55 0.12 220);
@@ -599,7 +614,7 @@ html[data-theme='ocean'] {
 	--sidebar-border: oklch(0.3 0.04 220);
 	--sidebar-ring: oklch(0.6 0.18 220);
 
-	/* Gráficos */
+	/* Charts */
 	--chart-1: oklch(0.6 0.18 220);
 	--chart-2: oklch(0.55 0.15 240);
 	--chart-3: oklch(0.65 0.12 200);
@@ -608,9 +623,9 @@ html[data-theme='ocean'] {
 }
 ```
 
-### Paso 2: Registrar el Tema en ThemeProvider
+### Step 2: Register the theme in ThemeProvider
 
-Agrega el tema a la lista en `src/providers/theme-provider.tsx`:
+Add the theme to the list in `src/providers/theme-provider.tsx`:
 
 ```tsx
 const customThemes = [
@@ -628,28 +643,28 @@ const customThemes = [
 	'citrico',
 	'aurora',
 	'neon',
-	'ocean', // <-- Nuevo tema
+	'ocean', // <-- New theme
 ];
 ```
 
-### Paso 3: Agregar Dark Mode Overrides (Opcional)
+### Step 3: Add dark mode overrides (optional)
 
-Si tu tema necesita ajustes específicos en modo oscuro, agrégalos en `src/styles/design-tokens.css`:
+If your theme needs specific dark-mode adjustments, add them in `src/styles/design-tokens.css`:
 
 ```css
 html[data-theme='ocean'] {
-	/* Ajustes específicos para tema ocean */
+	/* Specific adjustments for ocean theme */
 	--dt-shadow-color: oklch(0 0 0 / 0.3);
 	--dt-border-soft: var(--dt-border-width) solid oklch(1 0 0 / 0.06);
 }
 ```
 
-### Paso 4: Actualizar el Contexto (Opcional)
+### Step 4: Update the context (optional)
 
-Si necesitas soporte específico en el contexto de themes, actualiza `src/lib/contexts/theme-context.tsx`:
+If you need specific support in the theme context, update `src/lib/contexts/theme-context.tsx`:
 
 ```tsx
-// Asegúrate de que el tipo incluya el nuevo tema
+// Make sure the type includes the new theme
 export type Theme =
 	| 'light'
 	| 'dark'
@@ -669,44 +684,50 @@ export type Theme =
 	| 'ocean';
 ```
 
-### Paso 5: Probar el Tema
+### Step 5: Test the theme
 
-1. Inicia la aplicación: `bun run dev:full`
-2. Abre el ThemeToggle
-3. Selecciona tu nuevo tema "Ocean"
-4. Verifica que:
-   - Los colores se aplican correctamente
-   - Las transiciones funcionan
-   - Todos los componentes se ven bien
-   - No hay contrastes problemáticos
+Follow this sequence:
 
-### Tips para Crear un Buen Tema
+1. Start the application: `bun run dev:full`
+2. Open ThemeToggle.
+3. Select your new theme "Ocean".
+4. Verify that:
+   - The colors apply correctly.
+   - The transitions work.
+   - All components look good.
+   - There are no problematic contrasts.
 
-1. **Usa OKLCH**: Los colores en OKLCH son más consistentes perceptualmente
-2. **Mantén el contraste**: Asegúrate de que foreground tenga buen contraste con background
-3. **Sé consistente**: Usa la misma hue (matiz) para variables relacionadas
-4. **Prueba en ambos modos**: Si tu tema es oscuro, verifica las overrides necesarias
-5. **Considera las entidades**: Los colores de entidades deben ser distinguibles en tu tema
+### Tips to create a good theme
+
+Follow these tips:
+
+1. **Use OKLCH**. Colors in OKLCH are more consistent perceptually.
+2. **Keep contrast**. Make sure foreground has good contrast with background.
+3. **Be consistent**. Use the same hue for related variables.
+4. **Test in both modes**. If your theme is dark, verify the needed overrides.
+5. **Consider the entities**. Entity colors must remain distinguishable in your theme.
 
 ---
 
-## Referencias
+## References
+
+The following files support this guide:
 
 - [Design Tokens CSS](src/styles/design-tokens.css)
-- [Tokens de Entidades](src/styles/tokens.css)
-- [Definiciones de Themes](src/styles/themes.css)
-- [Theme System Utilities](src/styles/utilities/theme-system.css)
+- [Entity tokens](src/styles/tokens.css)
+- [Theme definitions](src/styles/themes.css)
+- [Theme system utilities](src/styles/utilities/theme-system.css)
 - [ThemeProvider](src/providers/theme-provider.tsx)
 - [ThemeToggle](src/components/core/theme/theme-toggle.tsx)
-- [Theme Context](src/lib/contexts/theme-context.tsx)
+- [Theme context](src/lib/contexts/theme-context.tsx)
 
 ---
 
-## Soporte
+## Support
 
-Si encuentras problemas con el sistema de themes o necesitas ayuda para crear uno nuevo, revisa:
+If you find problems with the theme system, or you need help to create a new one, review:
 
-1. La consola del navegador (el ThemeProvider tiene debug logging)
-2. Que todas las variables CSS estén definidas
-3. Que el tema esté registrado en el array `customThemes`
-4. Las transiciones no interfieran con el layout
+1. The browser console (ThemeProvider has debug logging).
+2. That all CSS variables are defined.
+3. That the theme is registered in the `customThemes` array.
+4. That transitions do not interfere with layout.

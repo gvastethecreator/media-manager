@@ -1,10 +1,10 @@
-# 🖼️ Store de Image - Gestión de Imágenes
+# Image store - image management
 
-## 📋 Descripción
+## Description
 
-Store para la gestión completa de imágenes en el sistema, incluyendo operaciones CRUD, visualización, filtrado y agrupamiento.
+This store provides complete image management in the system, including CRUD operations, display, filter, and grouping.
 
-## 🏗️ Arquitectura
+## Architecture
 
 ```mermaid
 graph TD
@@ -14,7 +14,7 @@ graph TD
     A --> E[Grouping Slice]
 
     B --> B1[CRUD Operations]
-    B --> B2[Server Actions]
+    B --> B2[Routes]
     B --> B3[State Management]
 
     C --> C1[Selection]
@@ -30,13 +30,15 @@ graph TD
     E --> E3[Statistics]
 ```
 
-## 🔧 Slices Implementados
+Routes call services.
 
-### 1. **Core Slice** - Operaciones CRUD
+## Implemented slices
+
+### 1. Core slice - CRUD operations
 
 ```typescript
 interface ImageCoreSlice {
-	// Estado
+	// State
 	images: Record<string, ImageExtended>;
 	isLoading: boolean;
 	error: string | null;
@@ -46,13 +48,13 @@ interface ImageCoreSlice {
 	getImages: () => ImageExtended[];
 	getImagesByFolder: (folderId: string) => ImageExtended[];
 
-	// Operaciones síncronas
+	// Synchronous operations
 	addImage: (image: ImageExtended) => void;
 	addImages: (images: ImageExtended[]) => void;
 	updateImage: (id: string, data: Partial<ImageExtended>) => void;
 	deleteImage: (id: string) => void;
 
-	// Operaciones asíncronas
+	// Asynchronous operations
 	fetchImage: (id: string) => Promise<ImageExtended | undefined>;
 	fetchImages: (options?) => Promise<ImageExtended[]>;
 	createImage: (data: CreateImageData) => Promise<ImageExtended | undefined>;
@@ -61,63 +63,71 @@ interface ImageCoreSlice {
 }
 ```
 
-### 2. **UI Slice** - Interfaz de Usuario
+### 2. UI slice - user interface
 
 ```typescript
 interface ImageUISlice {
-	// Selección
+	// Selection
 	selectImage: (id: string | null) => void;
 	toggleImageSelection: (id: string) => void;
 	clearSelection: () => void;
 	isImageSelected: (id: string) => boolean;
 
-	// Visor
+	// Viewer
 	openViewer: (imageId: string) => void;
 	closeViewer: () => void;
 	nextImage: () => void;
 	previousImage: () => void;
 
-	// Vista
+	// View
 	setViewMode: (viewMode: ImageViewMode) => void;
 	getViewMode: () => ImageViewMode;
 }
 ```
 
-## 🎯 Características Especiales
+## Special features
 
-### **Gestión de Thumbnails**
+### Thumbnail management
 
-- Optimización automática de thumbnails
-- Carga lazy de imágenes
-- Gestión de errores de thumbnail
+The store provides the following thumbnail features:
 
-### **Modos de Visualización**
+- Automatic thumbnail optimization
+- Lazy image loading
+- Thumbnail error management
 
-- `grid`: Vista en cuadrícula
-- `list`: Vista en lista
-- `masonry`: Vista tipo Pinterest
-- `timeline`: Vista cronológica
-- `map`: Vista en mapa (con geolocalización)
-- `slideshow`: Presentación automática
+### Display modes
 
-### **Filtrado Avanzado**
+The store supports the following view modes:
 
-- Por carpeta, etiquetas, álbumes
-- Rango de fechas
-- Tamaño y resolución
-- Favoritos y públicas/privadas
+- `grid`: Grid view
+- `list`: List view
+- `masonry`: Pinterest-style view
+- `timeline`: Chronological view
+- `map`: Map view (with geolocation)
+- `slideshow`: Automatic presentation
 
-### **Agrupamiento Inteligente**
+### Advanced filtering
 
-- Por carpeta
-- Por fecha
-- Por etiquetas
-- Por tamaño
+The store filters by the following criteria:
 
-## 📊 Tipos Principales
+- Folder, Tags, Albums
+- Date range
+- Size and resolution
+- Favorites and public or private
+
+### Intelligent grouping
+
+The store groups by the following criteria:
+
+- Folder
+- Date
+- Tags
+- Size
+
+## Main types
 
 ```typescript
-// Tipo base de imagen
+// Base image type
 interface ImageBase {
 	id: string;
 	name: string;
@@ -132,7 +142,7 @@ interface ImageBase {
 	addedAt: Date;
 }
 
-// Imagen extendida con relaciones
+// Extended image with relations
 interface ImageExtended extends ImageBase {
 	tags?: any[];
 	collections?: any[];
@@ -143,7 +153,7 @@ interface ImageExtended extends ImageBase {
 	folder?: any;
 }
 
-// Criterios de ordenamiento
+// Sort criteria
 type ImageSortCriteria =
 	| 'name_asc'
 	| 'name_desc'
@@ -159,120 +169,130 @@ type ImageSortCriteria =
 	| 'favorite_last';
 ```
 
-## 🔄 Flujo de Datos
+## Data flow
 
 ```mermaid
 sequenceDiagram
-    participant UI as Componente UI
+    participant UI as UI component
     participant Store as ImageStore
-    participant API as Server Actions
-    participant DB as Base de Datos
+    participant API as Routes
+    participant DB as Database
 
     UI->>Store: fetchImages()
     Store->>API: getImages()
-    API->>DB: Consulta Prisma
-    DB-->>API: Imágenes raw
+    API->>DB: Query
+    DB-->>API: Raw images
     API-->>Store: ImageComplete[]
     Store->>Store: extendImage()
     Store-->>UI: ImageExtended[]
-    UI->>UI: Renderizar galería
+    UI->>UI: Render gallery
 ```
 
-## 🎨 Patrones de Uso
+## Usage patterns
 
-### **Cargar Imágenes por Carpeta**
+### Load images by Folder
 
 ```typescript
 const { fetchImages } = useImageStore();
 
-// Cargar imágenes de carpetas específicas
+// Load images of specific Folders
 await fetchImages({
 	folderIds: ['folder-1', 'folder-2'],
 	refresh: true,
 });
 ```
 
-### **Gestión de Selección**
+### Selection management
 
 ```typescript
 const { selectImage, toggleImageSelection, getSelectedImages, clearSelection } = useImageStore();
 
-// Seleccionar imagen
+// Select an image
 selectImage('image-id');
 
-// Alternar selección
+// Toggle selection
 toggleImageSelection('image-id');
 
-// Obtener seleccionadas
+// Get selected images
 const selected = getSelectedImages();
 ```
 
-### **Visor de Imágenes**
+### Image viewer
 
 ```typescript
 const { openViewer, closeViewer, nextImage, previousImage } = useImageStore();
 
-// Abrir visor
+// Open the viewer
 openViewer('image-id');
 
-// Navegación
+// Navigation
 nextImage();
 previousImage();
 ```
 
-### **Filtrado y Búsqueda**
+### Filter and search
 
 ```typescript
 import { sortImages, groupImages, filterImagesBySearch } from '@/utils/image';
 
 const images = getImages();
 
-// Ordenar
+// Sort
 const sorted = sortImages(images, 'date_desc');
 
-// Agrupar
+// Group
 const grouped = groupImages(images, 'folder');
 
-// Filtrar por búsqueda
+// Filter by search
 const filtered = filterImagesBySearch(images, 'vacation');
 ```
 
-## 🚀 Optimizaciones
+## Optimizations
 
-### **Performance**
+### Performance
 
-- Uso de Record<string, ImageExtended> para acceso O(1)
-- Lazy loading de thumbnails
-- Virtualización en listas grandes
-- Memoización de cálculos costosos
+The store uses the following performance techniques:
 
-### **UX**
+- Use of Record<string, ImageExtended> for O(1) access
+- Lazy loading of thumbnails
+- Virtualization in large lists
+- Memoization of expensive calculations
 
-- Transiciones suaves entre modos de vista
-- Previsualización rápida con thumbnails
-- Selección múltiple con Shift/Ctrl
-- Navegación con teclado en visor
+### UX
 
-### **Persistencia**
+The store provides the following UX features:
 
-- Solo se persiste configuración de vista
-- Imágenes se recargan en cada sesión
-- Cache inteligente de thumbnails
+- Smooth transitions between view modes
+- Fast preview with thumbnails
+- Multi-select with Shift/Ctrl
+- Keyboard navigation in the viewer
 
-## 🔗 Relaciones
+### Persistence
 
-- **Folder**: Organización jerárquica
-- **Album**: Agrupaciones temáticas
-- **Collection**: Colecciones NFT/Blockchain
-- **Tag**: Etiquetado flexible
-- **Character**: Personajes en imágenes
-- **Place**: Ubicaciones geográficas
+Only view configuration persists.
 
-## 📈 Métricas y Estadísticas
+Images reload in each session.
 
-- Total de imágenes y tamaño
-- Distribución por carpetas
-- Resoluciones más comunes
-- Imágenes favoritas
-- Imágenes con/sin thumbnails
-- Estadísticas de uso del visor
+Thumbnail cache is intelligent.
+
+## Relations
+
+The store relates to the following entities:
+
+- **Folder**: Hierarchical organization
+- **Album**: Thematic groupings
+- **Collection**: NFT/blockchain Collections
+- **Tag**: Flexible tagging
+- **Character**: Characters in images
+- **Place**: Geographic locations
+
+## Metrics and statistics
+
+The store tracks the following metrics:
+
+- Total images and size
+- Distribution by Folders
+- Most common resolutions
+- Favorite images
+- Images with and without thumbnails
+- Viewer usage statistics

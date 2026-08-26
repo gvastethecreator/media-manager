@@ -1,12 +1,14 @@
-# Paneles de la Aplicación
+# Application panels
 
-Conjunto de paneles laterales utilizados en el layout principal y módulos complementarios.
+This set of side panels supports the main layout and complementary modules.
 
-## Carpetas
+## Folders
 
-- **bottom-panel/**: Panel inferior con información contextual.
-- **right-panel/**: Panel lateral derecho, usualmente con herramientas adicionales.
-- **stats/**: Panel de estadísticas con componentes cliente/servidor.
+The directory includes the following folders:
+
+- **bottom-panel/**: Bottom panel with contextual information.
+- **right-panel/**: Right side panel, usually with extra tools.
+- **stats/**: Statistics panel with client and server components.
 
 ```mermaid
 flowchart TD

@@ -1,30 +1,32 @@
 # PromptCard
 
-Componente para mostrar un prompt con diseño inspirado en cartas de TCG (Trading Card Game) como Magic the Gathering, Yu-Gi-Oh o Pokémon.
+This component displays a Prompt with a TCG (Trading Card Game) design inspired by Magic the Gathering, Yu-Gi-Oh, or Pokemon.
 
-## Características
+## Features
 
-- Diseño tipo carta TCG con efectos visuales
-- Soporte para parámetros y propósito
-- Visualización de relaciones con otras entidades
-- Contador de etiquetas y elementos relacionados
-- Modo compacto para listas densas
-- Efectos holográficos y visuales al estilo TCG
+The card provides the following features:
 
-## Estructura del Componente
+- TCG-style card design with visual effects
+- Support for parameters and purpose
+- Display of relations with other entities
+- Counter of Tags and related items
+- Compact mode for dense lists
+- Holographic and TCG-style visual effects
+
+## Component structure
 
 ```
 PromptCard/
-├── prompt-card.tsx (Componente principal)
-├── prompt-card-content.tsx (Contenido central)
-├── prompt-card-footer.tsx (Pie con estadísticas)
-├── prompt-card-images.tsx (Galería de imágenes)
-├── prompt-card-grid.tsx (Grid de tarjetas)
-├── prompt-server-actions.ts (Acciones del servidor)
-└── index.ts (Exportaciones)
+├── prompt-card.tsx (Main component)
+├── prompt-card-content.tsx (Central content)
+├── prompt-card-footer.tsx (Footer with statistics)
+├── prompt-card-images.tsx (Image gallery)
+├── prompt-card-grid.tsx (Card grid)
+├── prompt-server-actions.ts (Routes)
+└── index.ts (Exports)
 ```
 
-## Flujo de Datos
+## Data flow
 
 ```mermaid
 graph TD
@@ -35,9 +37,9 @@ graph TD
     A --> F[CardContainer]
 ```
 
-## Modelo de Datos
+## Data model
 
-El componente PromptCard consume el siguiente modelo de datos:
+The PromptCard component consumes the following data model:
 
 ```typescript
 interface PromptCardData {
@@ -76,52 +78,52 @@ interface PromptCardData {
 }
 ```
 
-## Ejemplos de Uso
+## Usage examples
 
-### Uso Básico
+### Basic use
 
 ```tsx
 import { PromptCard } from '@/components/cards/prompt-card';
 import { getPromptById } from '@/components/cards/prompt-card/prompt-server-actions';
 
-// En un componente o página
+// In a component or page
 const prompt = await getPromptById('prompt-id');
 
 return (
 	<div>
-		<h2>Ejemplo de Prompt</h2>
+		<h2>Prompt example</h2>
 		{prompt && <PromptCard prompt={prompt} />}
 	</div>
 );
 ```
 
-### Modo Compacto
+### Compact mode
 
 ```tsx
 <PromptCard prompt={prompt} compact={true} />
 ```
 
-### Con Manejador de Clic
+### With a click handler
 
 ```tsx
 <PromptCard prompt={prompt} onClick={() => handleSelectPrompt(prompt.id)} isSelected={selectedPromptId === prompt.id} />
 ```
 
-### Sin Efectos TCG
+### Without TCG effects
 
 ```tsx
 <PromptCard prompt={prompt} tcgMode={false} />
 ```
 
-## Propiedades
+## Properties
 
-| Propiedad  | Tipo                | Descripción                                  |
+| Property   | Type                | Description                                  |
 | ---------- | ------------------- | -------------------------------------------- |
-| prompt     | PromptCardData      | Datos del prompt a mostrar                   |
-| tcgMode    | boolean             | Habilita efectos visuales de carta TCG       |
-| compact    | boolean             | Mostrar en modo compacto (menos información) |
-| disabled   | boolean             | Deshabilitar interacciones                   |
-| onClick    | () => void          | Función al hacer clic                        |
-| isSelected | boolean             | Indica si la tarjeta está seleccionada       |
-| className  | string              | Clases CSS adicionales                       |
-| style      | React.CSSProperties | Estilos CSS adicionales                      |
+| prompt     | PromptCardData      | Prompt data to display                       |
+| tcgMode    | boolean             | Enables TCG card visual effects              |
+| compact    | boolean             | Show in compact mode (less information)      |
+| disabled   | boolean             | Disable interactions                         |
+| onClick    | () => void          | Function that runs on click                  |
+| isSelected | boolean             | Indicates whether the card is selected       |
+| className  | string              | Extra CSS classes                            |
+| style      | React.CSSProperties | Extra CSS styles                             |

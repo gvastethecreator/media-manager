@@ -1,8 +1,8 @@
-# 🖼️ Image: Tipos y Esquemas Canónicos
+# Image: canonical types and schemas
 
-Este módulo define los **tipos canónicos** y el esquema Zod para la entidad `Image`, alineados con el modelo de dominio y las reglas del proyecto.
+This module defines the **canonical types** and the Zod schema for the `Image` entity. The types align with the domain model and project rules.
 
-## 📦 Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -23,26 +23,27 @@ graph TD
     ImageBase --> ImageSchema
 ```
 
-- `ImageBase`: Tipo canónico alineado a la base de datos.
-- `ImageComplete`, `ImageExtended`: Tipos enriquecidos para relaciones y UI.
-- `ImageCreateInput`, `ImageUpdateInput`: Inputs para mutaciones.
-- `ImageSchema`: Esquema Zod para validación.
+The module uses these types:
 
-## 🚨 Notas de migración
+- `ImageBase`: Canonical type aligned with the database.
+- `ImageComplete`, `ImageExtended`: Types enriched for relations and UI.
+- `ImageCreateInput`, `ImageUpdateInput`: Inputs for mutations.
+- `ImageSchema`: Zod schema for validation.
 
-- **Legacy eliminado:** Solo se exportan tipos canónicos.
+## Migration notes
 
-- **Validar siempre con ImageSchema antes de persistir.**
+- **Legacy removed:** Only canonical types are exported.
+- **Validate with ImageSchema before you persist.**
 
-## 📝 Ejemplo de uso
+## Usage example
 
 ```ts
 import type { ImageBase, ImageCreateInput } from '@/types/entities/image';
 import { ImageSchema } from '@/types/entities/image/types';
 
-const nueva: ImageCreateInput = {
-	name: 'Foto',
-	path: '/fotos/1.jpg',
+const created: ImageCreateInput = {
+	name: 'Photo',
+	path: '/photos/1.jpg',
 	hash: 'abc',
 	size: 123,
 	width: 800,
@@ -51,10 +52,10 @@ const nueva: ImageCreateInput = {
 	sortBy: 'name',
 	filters: '',
 };
-const validada = ImageSchema.parse(nueva);
+const validated = ImageSchema.parse(created);
 ```
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

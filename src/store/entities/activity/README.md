@@ -1,10 +1,12 @@
-# 📋 Entidad Activity (Actividades)
+# Activity entity (Activities)
 
-## 🎯 Descripción
+## Description
 
-La entidad **Activity** gestiona el registro y seguimiento de todas las actividades del sistema, proporcionando un historial completo de acciones realizadas por los usuarios y procesos automáticos.
+The **Activity** entity manages recording and tracking of all system activities.
 
-## 🏗️ Arquitectura
+The entity provides a complete history of actions performed by users and automatic processes.
+
+## Architecture
 
 ```mermaid
 graph TB
@@ -13,23 +15,23 @@ graph TB
 
         subgraph "Core Slice"
             AC[ActivityCoreSlice]
-            AC --> |gestiona| AD[Activities Data]
-            AC --> |controla| AL[Loading State]
-            AC --> |maneja| AE[Error State]
+            AC --> |manages| AD[Activities Data]
+            AC --> |controls| AL[Loading State]
+            AC --> |handles| AE[Error State]
         end
 
         subgraph "UI Slice"
             AU[ActivityUISlice]
-            AU --> |controla| SEL[Selection]
-            AU --> |gestiona| EXP[Expansion]
-            AU --> |maneja| MOD[Modal Details]
+            AU --> |controls| SEL[Selection]
+            AU --> |manages| EXP[Expansion]
+            AU --> |handles| MOD[Modal Details]
         end
 
         subgraph "Filters Slice"
             AF[ActivityFiltersSlice]
-            AF --> |aplica| SORT[Sorting]
-            AF --> |filtra| CAT[Categories]
-            AF --> |busca| SEARCH[Search Query]
+            AF --> |applies| SORT[Sorting]
+            AF --> |filters| CAT[Categories]
+            AF --> |searches| SEARCH[Search Query]
         end
     end
 
@@ -58,35 +60,35 @@ graph TB
     AA --> ASRV
 ```
 
-## 📁 Estructura de Archivos
+## File structure
 
 ```
 src/store/entities/activity/
-├── 📄 index.ts              # Store principal combinado
-├── 📄 types.ts              # Tipos del store
-├── 📄 selectors.ts          # Selectores optimizados
-├── 📄 README.md             # Esta documentación
+├── index.ts              # Combined main store
+├── types.ts              # Store types
+├── selectors.ts          # Optimized selectors
+├── README.md             # This documentation
 └── slices/
-    ├── 📄 core.ts           # Slice principal de datos
-    ├── 📄 ui.ts             # Slice de interfaz de usuario
-    └── 📄 filters.ts        # Slice de filtros y búsqueda
+    ├── core.ts           # Main data slice
+    ├── ui.ts             # User interface slice
+    └── filters.ts        # Filter and search slice
 
 src/types/entities/activity/
-├── 📄 index.ts              # Exportaciones principales
-├── 📄 types.ts              # Tipos canónicos
-└── 📄 enums.ts              # Enumeraciones
+├── index.ts              # Main exports
+├── types.ts              # Canonical types
+└── enums.ts              # Enumerations
 
 src/transformers/activity/
-├── 📄 mappers.ts            # Mapeo de datos
-├── 📄 serializers.ts        # Serialización
-├── 📄 validators.ts         # Validaciones
-└── 📄 schema.ts             # Esquemas Zod
+├── mappers.ts            # Data mapping
+├── serializers.ts        # Serialization
+├── validators.ts         # Validations
+└── schema.ts             # Zod schemas
 
 src/utils/activity/
-└── 📄 helpers.ts            # Utilidades específicas
+└── helpers.ts            # Specific utilities
 ```
 
-## 🔧 Tipos Principales
+## Main types
 
 ### ActivityBase
 
@@ -128,93 +130,93 @@ interface ActivityState {
 }
 ```
 
-## 🎮 API del Store
+## Store API
 
-### Core Slice
+### Core slice
 
 ```typescript
-// 📊 Getters
+// Getters
 getActivity(id: string): ActivityComplete | undefined
 getActivities(): ActivityComplete[]
 getActivitiesByImageId(imageId: string): ActivityComplete[]
 
-// ✏️ Operaciones
+// Operations
 addActivity(activity: ActivityBase): void
 addActivities(activities: ActivityBase[]): void
 deleteActivity(id: string): void
 clearActivities(): void
 
-// 🔄 Estado
+// State
 setLoading(isLoading: boolean): void
 setError(error: string | null): void
 
-// 🌐 Async Actions
+// Async Actions
 fetchActivity(id: string): Promise<ActivityComplete | undefined>
 fetchActivities(filters?: ActivityFilters): Promise<ActivityListResponse | undefined>
 createActivity(data: CreateActivityData): Promise<ActivityComplete | undefined>
 removeActivity(id: string): Promise<boolean>
 ```
 
-### UI Slice
+### UI slice
 
 ```typescript
-// 🎯 Selección
+// Selection
 selectActivity(id: string | null): void
 unselectActivity(id: string): void
 toggleActivitySelection(id: string): void
 selectMultipleActivities(ids: string[]): void
 clearSelection(): void
 
-// 📖 Expansión
+// Expansion
 expandActivity(id: string): void
 collapseActivity(id: string): void
 toggleActivityExpansion(id: string): void
 collapseAllActivities(): void
 
-// 🔍 Modal
+// Modal
 openDetailModal(id: string): void
 closeDetailModal(): void
 
-// ✨ Resaltado
+// Highlight
 highlightActivity(id: string | null): void
 
-// 📅 Agrupación
+// Grouping
 toggleGroupByDate(): void
 setGroupByDate(groupByDate: boolean): void
 ```
 
-### Filters Slice
+### Filters slice
 
 ```typescript
-// 🔤 Ordenación
+// Sort
 setSortCriteria(criteria: ActivitySortCriteria): void
 
-// 🔍 Búsqueda
+// Search
 setSearchQuery(query: string): void
 
-// 🏷️ Categorías
+// Categories
 addCategoryFilter(category: ActivityCategory): void
 removeCategoryFilter(category: ActivityCategory): void
 toggleCategoryFilter(category: ActivityCategory): void
 clearCategoryFilters(): void
 
-// 📅 Fechas
+// Dates
 setDateRange(from: Date | null, to: Date | null): void
 clearDateRange(): void
 
-// 🚨 Especiales
+// Special
 setAlertFilter(onlyAlerts: boolean): void
 setImageIdFilter(imageId: string | null): void
 
-// 🔄 Reset
+// Reset
 resetAllFilters(): void
 buildActivityFilters(): ActivityFilters
 ```
 
-## 📊 Selectores Principales
+## Main selectors
 
 ```typescript
-// Datos básicos
+// Basic data
 selectActivities(state): ActivityComplete[]
 selectIsLoading(state): boolean
 selectError(state): string | null
@@ -224,31 +226,31 @@ selectSelectedActivities(state): ActivityComplete[]
 selectIsActivitySelected(id)(state): boolean
 selectDetailActivity(state): ActivityComplete | null
 
-// Filtros computados
+// Computed filters
 selectFilteredActivities(state): ActivityComplete[]
 selectSortedActivities(state): ActivityComplete[]
 selectActivitiesByDay(state): Record<string, ActivityComplete[]>
 selectActivitiesByType(state): Record<string, ActivityComplete[]>
 ```
 
-## 🔄 Ejemplos de Uso
+## Usage examples
 
-### Uso Básico del Store
+### Basic use of the store
 
 ```typescript
 import { useActivityStore } from '@/store/entities/activity';
 
 function ActivityComponent() {
-  // Acceder al store
+  // Access the store
   const activities = useActivityStore(state => state.getActivities());
   const isLoading = useActivityStore(state => state.core.isLoading);
   const addActivity = useActivityStore(state => state.addActivity);
 
-  // Crear nueva actividad
+  // Create a new activity
   const handleCreateActivity = async () => {
     await useActivityStore.getState().createActivity({
       type: 'user_action',
-      description: 'Usuario realizó una acción',
+      description: 'User performed an action',
       imageId: 'image-123'
     });
   };
@@ -256,7 +258,7 @@ function ActivityComponent() {
   return (
     <div>
       {isLoading ? (
-        <div>Cargando...</div>
+        <div>Loading...</div>
       ) : (
         activities.map(activity => (
           <div key={activity.id}>{activity.description}</div>
@@ -267,14 +269,14 @@ function ActivityComponent() {
 }
 ```
 
-### Uso con Selectores
+### Use with selectors
 
 ```typescript
 import { useActivityStore } from '@/store/entities/activity';
 import { selectSortedActivities, selectActivitiesByDay } from '@/store/entities/activity/selectors';
 
 function ActivityList() {
-  // Usar selectores para datos computados
+  // Use selectors for computed data
   const sortedActivities = useActivityStore(selectSortedActivities);
   const activitiesByDay = useActivityStore(selectActivitiesByDay);
 
@@ -293,7 +295,7 @@ function ActivityList() {
 }
 ```
 
-### Gestión de Filtros
+### Filter management
 
 ```typescript
 function ActivityFilters() {
@@ -307,44 +309,48 @@ function ActivityFilters() {
 
   const handleFilterChange = () => {
     setSortCriteria(ActivitySortCriteria.DATE_DESC);
-    setSearchQuery('usuario');
+    setSearchQuery('user');
     addCategoryFilter(ActivityCategory.USER);
     setDateRange(new Date('2024-01-01'), new Date());
   };
 
   return (
     <div>
-      <button onClick={handleFilterChange}>Aplicar Filtros</button>
-      <button onClick={resetAllFilters}>Limpiar Filtros</button>
+      <button onClick={handleFilterChange}>Apply Filters</button>
+      <button onClick={resetAllFilters}>Clear Filters</button>
     </div>
   );
 }
 ```
 
-## 🔗 Relaciones
+## Relations
 
-### Con Imágenes
+### With images
 
-- Una actividad puede estar relacionada con una imagen específica
-- Se almacena el `imageId` para la relación
-- Se puede filtrar por imagen específica
+An activity can be related to a specific image.
 
-### Con Sistema de Eventos
+The relation stores `imageId`.
 
-- Las actividades se crean automáticamente por eventos del sistema
-- Tipos de eventos: `system_error`, `system_warning`, `system_info`
+You can filter by a specific image.
 
-### Con Acciones de Usuario
+### With the event system
 
-- Las actividades registran acciones de usuario
-- Tipos de usuario: `user_login`, `user_logout`, `user_settings_update`
+Activities are created automatically by system events.
 
-## ⚡ Optimizaciones
+Event types: `system_error`, `system_warning`, `system_info`
 
-### Persistencia Selectiva
+### With user actions
+
+Activities record user actions.
+
+User types: `user_login`, `user_logout`, `user_settings_update`
+
+## Optimizations
+
+### Selective persistence
 
 ```typescript
-// Solo se persisten configuraciones de usuario
+// Only user configurations persist
 partialize: (state) => ({
 	ui: {
 		groupByDate: state.ui.groupByDate,
@@ -356,50 +362,54 @@ partialize: (state) => ({
 });
 ```
 
-### Memoización
+### Memoization
 
-- Los selectores están optimizados para evitar re-renders innecesarios
-- Se usan funciones de agrupación eficientes
-- Datos computados se cachean automáticamente
+Selectors are optimized to avoid unnecessary re-renders.
 
-### Carga Lazy
+The store uses efficient grouping functions.
 
-- Las actividades se cargan bajo demanda
-- Paginación automática para grandes volúmenes
-- Filtros aplicados en el servidor cuando es posible
+Computed data is cached automatically.
 
-## 🚀 Estado Actual
+### Lazy load
 
-✅ **Completado:**
+Activities load on demand.
 
-- ✅ Tipos canónicos definidos
-- ✅ Store con slices separados
-- ✅ Selectores optimizados
-- ✅ Validaciones con Zod
-- ✅ Transformers básicos
-- ✅ Utilidad de arrays creada
+Pagination is automatic for large volumes.
 
-🔄 **En Progreso:**
+Filters apply on the server when possible.
 
-- 🔄 Integración con server actions
-- 🔄 Tests unitarios
-- 🔄 Optimizaciones de rendimiento
+## Current status
 
-📋 **Pendiente:**
+**Completed:**
 
-- ⏳ Implementación de server actions reales
-- ⏳ Integración con sistema de notificaciones
-- ⏳ Métricas y analytics de actividades
+- Canonical types defined
+- Store with separate slices
+- Optimized selectors
+- Validations with Zod
+- Basic transformers
+- Array utility created
 
-## 🔧 Comandos de Desarrollo
+**In progress:**
+
+- Integration with HTTP routes
+- Unit tests
+- Performance optimizations
+
+**Pending:**
+
+- Implementation of real HTTP routes
+- Integration with the notification system
+- Activity metrics and analytics
+
+## Development commands
 
 ```bash
-# Verificar tipos
+# Verify types
 bunx tsc --noEmit src/store/entities/activity/**/*.ts
 
-# Ejecutar tests
+# Run tests
 bun test -- src/store/entities/activity
 
-# Generar documentación
+# Generate documentation
 bun run docs:activity
 ```

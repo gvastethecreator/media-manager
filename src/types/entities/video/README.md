@@ -1,115 +1,127 @@
-# 🎬 Video - Entidad Completamente Refactorizada
+# Video - fully refactored entity
 
-## 📊 **ESTADO ACTUAL: ✅ EXCELENTE (96/100)**
+## Current status: excellent (96/100)
 
-### 🎯 **Patrón EntityWithStats Implementado**
+### EntityWithStats pattern implemented
 
-- ✅ **VideoWithStats**: Tipo principal optimizado con 25+ estadísticas pre-calculadas
-- ✅ **Record optimizado**: `Record<string, VideoWithStats>` para acceso O(1)
-- ✅ **Transformer avanzado**: Análisis técnico completo con quality score
-- ✅ **Server Actions**: CRUD completo con consultas optimizadas
-- ✅ **Store Zustand**: Migrado completamente a patrón optimizado
-- ✅ **VideoCard TCG**: Componente completo con efectos holográficos
+The implementation includes:
+
+- **VideoWithStats**: Main optimized type with 25+ pre-calculated statistics
+- **Optimized Record**: `Record<string, VideoWithStats>` for O(1) access
+- **Advanced transformer**: Complete technical analysis with quality score
+- **Routes**: Complete CRUD with optimized queries. Routes call services.
+- **Zustand store**: Fully migrated to the optimized pattern
+- **VideoCard TCG**: Complete component with holographic effects
 
 ---
 
-## 🏗️ **ARQUITECTURA IMPLEMENTADA**
+## Implemented architecture
 
-### 1. **Tipos Canónicos** (`src/types/entities/video/types.ts`)
+### 1. Canonical types (`src/types/entities/video/types.ts`)
 
 ```typescript
-// TIPO PRINCIPAL - USAR ESTE
+// MAIN TYPE - USE THIS
 export interface VideoWithStats extends VideoBase {
-	statistics: VideoStatistics; // 25+ métricas pre-calculadas
+	statistics: VideoStatistics; // 25+ pre-calculated metrics
 	_count?: VideoCountsFromDrizzle;
 	relations?: Partial<VideoRelations>;
 }
 
-// Solo para casos especiales
+// Only for special cases
 export interface VideoComplete extends VideoBase, VideoRelations {
 	_count?: VideoCountsFromDrizzle;
 }
 ```
 
-### 2. **Transformer Avanzado** (`src/transformers/video/transformer.ts`)
+### 2. Advanced transformer (`src/transformers/video/transformer.ts`)
 
-**Función principal**: `fromDrizzleVideoWithCounts()`
+**Main function**: `fromDrizzleVideoWithCounts()`
 
-**Análisis técnico implementado**:
+**Technical analysis implemented**:
 
-- **Quality Score**: 0-100 basado en resolución, duración, bitrate, metadatos
-- **Technical Grade**: A (≥85 + Ultra HD), B (≥70 + HD), C (≥50), D (resto)
-- **Auto-tagging**: 20+ tags automáticos (ultra-hd, 4k, hd, corto, largo, etc.)
-- **Aspect Ratio**: Cálculo automático (16:9, 4:3, 21:9, personalizado)
-- **Quality Level**: ULTRA (≥1080p), HIGH (≥720p), MEDIUM (≥480p), LOW
+- **Quality Score**: 0-100 based on resolution, duration, bitrate, metadata
+- **Technical Grade**: A (85 or higher + Ultra HD), B (70 or higher + HD), C (50 or higher), D (remaining)
+- **Auto-tagging**: 20+ automatic tags (ultra-hd, 4k, hd, short, long)
+- **Aspect Ratio**: Automatic calculation (16:9, 4:3, 21:9, custom)
+- **Quality Level**: ULTRA (1080p or higher), HIGH (720p or higher), MEDIUM (480p or higher), LOW
 
-### 3. **Store Optimizado** (`src/store/entities/video/`)
+### 3. Optimized store (`src/store/entities/video/`)
 
 ```typescript
 interface VideoState {
-	videos: Record<string, VideoWithStats>; // Record optimizado
+	videos: Record<string, VideoWithStats>; // Optimized Record
 	getVideo: (id: string) => VideoWithStats | undefined; // O(1)
 	getVideosByFolder: (folderId: string) => VideoWithStats[];
 }
 ```
 
-### 4. **Server Actions** (`src/app/actions/videos/video.actions.ts`)
+### 4. Routes (`src/app/actions/videos/video.actions.ts`)
 
-- `getVideo()`: Retorna `VideoWithStats`
-- `findVideos()`: Con filtros avanzados y paginación
-- `createVideo()`, `updateVideo()`, `deleteVideo()`: CRUD completo
+The routes are:
+
+- `getVideo()`: Returns `VideoWithStats`
+- `findVideos()`: With advanced filters and pagination
+- `createVideo()`, `updateVideo()`, `deleteVideo()`: Complete CRUD
 - `toggleVideoFavorite()`, `setVideoVisibility()`, `moveVideoToFolder()`
 
-### 5. **VideoCard TCG** (`src/components/cards/video-card/`)
+### 5. VideoCard TCG (`src/components/cards/video-card/`)
 
-- **VideoCard**: Componente principal con diseño TCG
-- **VideoCardHeader**: Header con duración y calidad
-- **VideoCardThumbnail**: Thumbnail con efectos holográficos
-- **VideoCardContent**: Estadísticas técnicas avanzadas
-- **VideoCardFooter**: Conteos y stats TCG
+The TCG components are:
 
----
-
-## 🚀 **BENEFICIOS ALCANZADOS**
-
-### **Performance**
-
-- **60-80% más rápido** en consultas (Record vs Array)
-- **70% menos memoria** (estadísticas pre-calculadas)
-- **Acceso O(1)** a videos por ID
-
-### **Funcionalidad**
-
-- **Sistema de calidad automático** (A, B, C, D grades)
-- **20+ tags automáticos** por análisis técnico
-- **Quality score 0-100** basado en múltiples factores
-- **Aspect ratio automático** y detección de calidad
-
-### **Consistencia**
-
-- **Tipo único**: `VideoWithStats` en toda la aplicación
-- **Patrón consolidado**: EntityWithStats aplicado correctamente
-- **Transformers optimizados**: Legacy + optimizado disponibles
+- **VideoCard**: Main component with TCG design
+- **VideoCardHeader**: Header with duration and quality
+- **VideoCardThumbnail**: Thumbnail with holographic effects
+- **VideoCardContent**: Advanced technical statistics
+- **VideoCardFooter**: Counts and TCG stats
 
 ---
 
-## 🔧 **FUNCIONES PRINCIPALES**
+## Benefits achieved
 
-### **Transformer**
+### Performance
+
+The performance benefits are:
+
+- **60-80% faster** in queries (Record versus Array)
+- **70% less memory** (pre-calculated statistics)
+- **O(1) access** to videos by ID
+
+### Functionality
+
+The functionality benefits are:
+
+- **Automatic quality system** (A, B, C, D grades)
+- **20+ automatic tags** by technical analysis
+- **Quality score 0-100** based on multiple factors
+- **Automatic aspect ratio** and quality detection
+
+### Consistency
+
+The consistency benefits are:
+
+- **Single type**: `VideoWithStats` across the application
+- **Consolidated pattern**: EntityWithStats applied correctly
+- **Optimized transformers**: Legacy plus optimized available
+
+---
+
+## Main functions
+
+### Transformer
 
 ```typescript
-// PRINCIPAL - Usar este
+// MAIN - Use this
 fromDrizzleVideoWithCounts(video: any): VideoWithStats
 
-// Legacy - Solo para compatibilidad
+// Legacy - Compatibility only
 fromDrizzleVideo(video: any): VideoComplete
 
-// Auxiliares
+// Helpers
 videosToRecord(videos: VideoWithStats[]): Record<string, VideoWithStats>
 getVideoById(videos: Record<string, VideoWithStats>, id: string): VideoWithStats
 ```
 
-### **Store**
+### Store
 
 ```typescript
 // Getters O(1)
@@ -117,38 +129,38 @@ getVideo(id: string): VideoWithStats | undefined
 getVideosByFolder(folderId: string): VideoWithStats[]
 getFilteredVideos(): VideoWithStats[]
 
-// Operaciones
+// Operations
 addVideo(video: VideoWithStats): void
 updateVideo(id: string, data: Partial<VideoWithStats>): void
 ```
 
 ---
 
-## 📈 **ESTADÍSTICAS TÉCNICAS**
+## Technical statistics
 
-### **VideoStatistics Interface**
+### VideoStatistics interface
 
 ```typescript
 interface VideoStatistics {
-	// Conteos de relaciones (12 tipos)
+	// Relation counts (12 types)
 	albumsCount: number;
 	collectionsCount: number;
 	tagsCount: number;
-	// ... 9 más
+	// ... 9 more
 	totalRelations: number;
 
-	// Métricas técnicas
+	// Technical metrics
 	durationMinutes: number;
 	aspectRatio: string;
 	resolution: string;
 	qualityLevel: VideoQuality;
 
-	// Análisis de calidad
+	// Quality analysis
 	qualityScore: number; // 0-100
 	technicalGrade: 'A' | 'B' | 'C' | 'D';
-	autoTags: string[]; // 20+ tags automáticos
+	autoTags: string[]; // 20+ automatic tags
 
-	// Campos derivados
+	// Derived fields
 	formattedDuration: string; // "5m 30s", "2h 15m"
 	formattedSize: string; // "156.7 MB", "2.3 GB"
 	qualityLabel: string; // "Ultra HD 4K", "HD 1080p"
@@ -157,21 +169,23 @@ interface VideoStatistics {
 
 ---
 
-## 🎮 **COMPONENTES TCG**
+## TCG components
 
-### **VideoCard Features**
+### VideoCard features
 
-- **Colores dinámicos** basados en technical grade
-- **Efectos holográficos** para videos de alta calidad
-- **Rareza calculada** por quality score
-- **Stats TCG** con conteos de relaciones
-- **Thumbnail inteligente** con indicadores técnicos
+The VideoCard features are:
 
-### **Integración**
+- **Dynamic colors** based on technical grade
+- **Holographic effects** for high-quality videos
+- **Rarity calculated** by quality score
+- **TCG stats** with relation counts
+- **Intelligent thumbnail** with technical indicators
+
+### Integration
 
 ```typescript
 // En entity-card.tsx
-video: VideoCard, // ✅ Integrado correctamente
+video: VideoCard, // Integrated correctly
 
 // Uso directo
 <VideoCard
@@ -183,43 +197,43 @@ video: VideoCard, // ✅ Integrado correctamente
 
 ---
 
-## ✅ **CORRECCIONES COMPLETADAS**
+## Completed corrections
 
-1. **✅ Transformers Legacy**: Actualizados `prompt/transformer.ts` y `world-item/transformer.ts`
-2. **✅ Tipos Consistentes**: `VideoWithStats` en toda la aplicación
-3. **✅ VideoCard Completo**: Todos los componentes implementados
-4. **✅ Store Optimizado**: Record en lugar de arrays
-5. **✅ Server Actions**: Patrón EntityWithStats aplicado
-6. **✅ Documentación**: README completo con ejemplos
-
----
-
-## 🎯 **PRÓXIMAS ENTIDADES**
-
-**Entidades Completadas (8/13)**:
-
-1. ✅ Group - EXCELENTE (95/100)
-2. ✅ Album - EXCELENTE (92/100)
-3. ✅ Collection - EXCELENTE (90/100)
-4. ✅ Tag - EXCELENTE (94/100)
-5. ✅ Character - EXCELENTE (96/100)
-6. ✅ Note - EXCELENTE (88/100)
-7. ✅ Image - EXCELENTE (98/100)
-8. ✅ **Video - EXCELENTE (96/100)** 🎉
-
-**Entidades Pendientes (5/13)**: 9. ⏳ Prompt 10. ⏳ Task 11. ⏳ Workflow 12. ⏳ Place 13. ⏳ Folder (parcial)
+1. **Legacy transformers**: Updated `prompt/transformer.ts` and `world-item/transformer.ts`
+2. **Consistent types**: `VideoWithStats` across the application
+3. **Complete VideoCard**: All components implemented
+4. **Optimized store**: Record instead of arrays
+5. **Routes**: EntityWithStats pattern applied
+6. **Documentation**: Complete README with examples
 
 ---
 
-## 📝 **NOTAS IMPORTANTES**
+## Next entities
 
-- **USAR `VideoWithStats`** como tipo principal en toda la aplicación
-- **VideoComplete** solo para casos especiales que requieren relaciones completas
-- **Record optimizado** para mejor performance en stores
-- **Quality score automático** basado en análisis técnico completo
-- **Auto-tagging inteligente** con 20+ tags específicos de video
+**Completed entities (8/13)**:
+
+1. Group - Excellent (95/100)
+2. Album - Excellent (92/100)
+3. Collection - Excellent (90/100)
+4. Tag - Excellent (94/100)
+5. Character - Excellent (96/100)
+6. Note - Excellent (88/100)
+7. Image - Excellent (98/100)
+8. **Video - Excellent (96/100)**
+
+**Pending entities (5/13)**: 9. Prompt 10. Task 11. Workflow 12. Place 13. Folder (partial)
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+## Important notes
+
+- **Use `VideoWithStats`** as the main type across the application
+- **VideoComplete** only for special cases that require full relations
+- **Optimized Record** for better performance in stores
+- **Automatic quality score** based on complete technical analysis
+- **Intelligent auto-tagging** with 20+ video-specific tags
+
+---
+
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

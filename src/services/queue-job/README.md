@@ -1,4 +1,3 @@
-# Servicio de trabajos en cola
+# Queue job service
 
-Encapsula la creación y consulta de jobs para procesos
-asincrónicos y tareas programadas.
+The queue job service creates and queries jobs for asynchronous processes and scheduled tasks.

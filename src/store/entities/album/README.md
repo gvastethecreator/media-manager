@@ -1,10 +1,10 @@
-# 📚 Store de Album
+# Album store
 
-## 🎯 Propósito
+## Purpose
 
-Gestión centralizada del estado de álbumes con Zustand, incluyendo datos, UI, filtros y acciones CRUD.
+This store centralizes Album state with Zustand, including data, UI, filters, and CRUD actions.
 
-## 🏗️ Arquitectura
+## Architecture
 
 ```mermaid
 graph TB
@@ -29,10 +29,10 @@ graph TB
         E --> E3[Filter Actions]
     end
 
-    subgraph "Tipos"
+    subgraph "Types"
         F[AlbumComplete] --> F1[AlbumBase + Parsed Fields]
-        G[AlbumFiltersState] --> G1[Filtros + UI State]
-        H[AlbumUIState] --> H1[Estado Visual]
+        G[AlbumFiltersState] --> G1[Filters + UI State]
+        H[AlbumUIState] --> H1[Visual state]
     end
 
     A --> F
@@ -40,145 +40,153 @@ graph TB
     A --> H
 ```
 
-## 📊 Estado Principal
+## Main state
 
-### **AlbumState**
+### AlbumState
 
 ```typescript
 interface AlbumState {
-	albums: AlbumComplete[]; // 📚 Álbumes con campos parseados
-	isLoading: boolean; // ⏳ Estado de carga
-	error: string | null; // ❌ Error actual
-	lastUpdated: number | null; // 🕐 Última actualización
+	albums: AlbumComplete[]; // Albums with parsed fields
+	isLoading: boolean; // Loading state
+	error: string | null; // Current error
+	lastUpdated: number | null; // Last update
 
-	ui: AlbumUIState; // 🎮 Estado de interfaz
-	filters: AlbumFiltersState; // 🔍 Estado de filtros
+	ui: AlbumUIState; // Interface state
+	filters: AlbumFiltersState; // Filter state
 
-	// Selectores
+	// Selectors
 	getAlbumById: (id: string) => AlbumComplete | undefined;
 	getFilteredAlbums: () => AlbumComplete[];
 	getSortedAlbums: () => AlbumComplete[];
 }
 ```
 
-### **AlbumUIState**
+### AlbumUIState
 
 ```typescript
 interface AlbumUIState {
-	selectedIds: string[]; // ✅ IDs seleccionados
-	viewMode: AlbumViewMode; // 👁️ Modo de vista (grid, list, etc.)
-	isViewerOpen: boolean; // 🖼️ Visor abierto
-	currentAlbumId: string | null; // 📍 Álbum actual
-	displayState: Record<string, AlbumDisplayState>; // 📊 Estados de display
-	draggedAlbumId: string | null; // 🔄 Álbum siendo arrastrado
-	dropTargetAlbumId: string | null; // 🎯 Target de drop
-	highlightedId: string | null; // ⭐ Álbum resaltado
-	expandedIds: string[]; // 📂 Álbumes expandidos
+	selectedIds: string[]; // Selected IDs
+	viewMode: AlbumViewMode; // View mode (grid, list)
+	isViewerOpen: boolean; // Viewer open
+	currentAlbumId: string | null; // Current Album
+	displayState: Record<string, AlbumDisplayState>; // Display states
+	draggedAlbumId: string | null; // Album being dragged
+	dropTargetAlbumId: string | null; // Drop target
+	highlightedId: string | null; // Highlighted Album
+	expandedIds: string[]; // Expanded Albums
 }
 ```
 
-### **AlbumFiltersState**
+### AlbumFiltersState
 
 ```typescript
 interface AlbumFiltersState {
-	// Búsqueda
-	query: string; // 🔍 Query principal
-	searchQuery: string; // 🔍 Alias para compatibilidad
+	// Search
+	query: string; // Main query
+	searchQuery: string; // Alias for compatibility
 
-	// Ordenamiento y filtros
-	sortBy: AlbumSortCriteria; // 📊 Criterio de ordenamiento
-	filterByType: AlbumType | null; // 🏷️ Filtro por tipo
-	filterByParentId: string | null; // 👨‍👩‍👧‍👦 Filtro por padre
-	filterFavorites: boolean; // ⭐ Solo favoritos
-	filterShared: boolean; // 🤝 Solo compartidos
-	filterArchived: boolean; // 📦 Solo archivados
+	// Sort and filters
+	sortBy: AlbumSortCriteria; // Sort criterion
+	filterByType: AlbumType | null; // Filter by type
+	filterByParentId: string | null; // Filter by parent
+	filterFavorites: boolean; // Favorites only
+	filterShared: boolean; // Shared only
+	filterArchived: boolean; // Archived only
 
-	// Filtros de contenido
-	hasImages?: boolean; // 🖼️ Tiene imágenes
-	hasVideos?: boolean; // 🎬 Tiene videos
-	categories?: string[]; // 🏷️ Categorías
-	types?: string[]; // 📝 Tipos
+	// Content filters
+	hasImages?: boolean; // Has images
+	hasVideos?: boolean; // Has videos
+	categories?: string[]; // Categories
+	types?: string[]; // Types
 
-	// Rango de fechas
+	// Date range
 	dateRange: {
-		from: Date | null; // 📅 Fecha desde
-		to: Date | null; // 📅 Fecha hasta
+		from: Date | null; // Date from
+		to: Date | null; // Date to
 	};
 }
 ```
 
-## 🔄 Flujo de Datos
+## Data flow
 
 ```mermaid
 sequenceDiagram
-    participant UI as Componente UI
+    participant UI as UI component
     participant Store as Album Store
-    participant API as Server Actions
-    participant DB as Base de Datos
+    participant API as Routes
+    participant DB as Database
 
     UI->>Store: loadAlbums()
     Store->>API: getAlbums()
     API->>DB: SELECT * FROM albums
     DB-->>API: AlbumComplete[]
     API-->>Store: AlbumComplete[]
-    Store-->>UI: Estado actualizado
+    Store-->>UI: Updated state
 
     UI->>Store: createAlbum(data)
     Store->>API: createServerAlbum(data)
     API->>DB: INSERT INTO albums
     DB-->>API: AlbumComplete
     API-->>Store: AlbumComplete
-    Store-->>UI: Estado actualizado + Toast
+    Store-->>UI: Updated state + Toast
 ```
 
-## 🎮 Modos de Vista
+Routes call services.
 
-### **AlbumViewMode**
+## View modes
 
-- `GRID` - Vista en rejilla (por defecto)
-- `LIST` - Vista en lista
-- `COMPACT` - Vista compacta
-- `COVER_FLOW` - Vista cover flow
-- `MASONRY` - Vista masonry
+### AlbumViewMode
 
-### **AlbumDisplayState**
+The store supports the following view modes:
 
-- `COLLAPSED` - Colapsado
-- `EXPANDED` - Expandido
-- `COVER_ONLY` - Solo portada
-- `DETAILS` - Con detalles
+- `GRID` - Grid view (default)
+- `LIST` - List view
+- `COMPACT` - Compact view
+- `COVER_FLOW` - Cover flow view
+- `MASONRY` - Masonry view
 
-## 📊 Criterios de Ordenamiento
+### AlbumDisplayState
 
-### **AlbumSortCriteria**
+The store supports the following display states:
 
-- `NAME_ASC` / `NAME_DESC` - Por nombre
-- `DATE_CREATED_ASC` / `DATE_CREATED_DESC` - Por fecha de creación
-- `DATE_UPDATED_ASC` / `DATE_UPDATED_DESC` - Por fecha de actualización
-- `ITEM_COUNT_ASC` / `ITEM_COUNT_DESC` - Por cantidad de items
-- `SIZE_ASC` / `SIZE_DESC` - Por tamaño
-- `CUSTOM` - Ordenamiento personalizado
+- `COLLAPSED` - Collapsed
+- `EXPANDED` - Expanded
+- `COVER_ONLY` - Cover only
+- `DETAILS` - With details
 
-## 🔧 Acciones Principales
+## Sort criteria
 
-### **CRUD Operations**
+### AlbumSortCriteria
+
+The store supports the following sort criteria:
+
+- `NAME_ASC` / `NAME_DESC` - By name
+- `DATE_CREATED_ASC` / `DATE_CREATED_DESC` - By creation date
+- `DATE_UPDATED_ASC` / `DATE_UPDATED_DESC` - By update date
+- `ITEM_COUNT_ASC` / `ITEM_COUNT_DESC` - By item count
+- `SIZE_ASC` / `SIZE_DESC` - By size
+- `CUSTOM` - Custom sort
+
+## Main actions
+
+### CRUD operations
 
 ```typescript
-// Carga
+// Load
 loadAlbums(): Promise<void>
 loadAlbumById(id: string): Promise<AlbumComplete | undefined>
 
-// Gestión
+// Management
 createAlbum(album: AlbumCreateInput): Promise<void>
 updateAlbum(id: string, album: AlbumUpdateInput): Promise<void>
 deleteAlbum(id: string): Promise<void>
 
-// Imágenes
+// Images
 addImageToAlbum(albumId: string, imageId: string): Promise<void>
 removeImageFromAlbum(albumId: string, imageId: string): Promise<void>
 ```
 
-### **UI Actions**
+### UI actions
 
 ```typescript
 selectAlbum(id: string | null): void
@@ -187,7 +195,7 @@ toggleSelection(id: string): void
 clearSelection(): void
 ```
 
-### **Filter Actions**
+### Filter actions
 
 ```typescript
 updateFilters(filters: Partial<AlbumFiltersState>): void
@@ -195,9 +203,9 @@ clearFilters(): void
 setSearchQuery(query: string): void
 ```
 
-## 🎯 Patrones de Uso
+## Usage patterns
 
-### **Cargar y Mostrar Álbumes**
+### Load and show Albums
 
 ```typescript
 const { albums, loadAlbums, isLoading } = useAlbumStore()
@@ -210,92 +218,105 @@ if (isLoading) return <Loading />
 return <AlbumGrid albums={albums} />
 ```
 
-### **Filtrar Álbumes**
+### Filter Albums
 
 ```typescript
 const { getFilteredAlbums, updateFilters, filters } = useAlbumStore();
 
 const filteredAlbums = getFilteredAlbums();
 
-// Filtrar por favoritos
+// Filter by Favorites
 updateFilters({ filterFavorites: true });
 
-// Buscar por nombre
-updateFilters({ searchQuery: 'vacaciones' });
+// Search by name
+updateFilters({ searchQuery: 'vacation' });
 ```
 
-### **Selección Múltiple**
+### Multi-select
 
 ```typescript
 const { selectedIds, selectMultipleAlbums, toggleSelection, clearSelection } = useAlbumStore();
 
-// Seleccionar todos
+// Select all
 selectMultipleAlbums(albums.map((a) => a.id));
 
 // Toggle individual
 toggleSelection(albumId);
 
-// Limpiar selección
+// Clear selection
 clearSelection();
 ```
 
-## 🔍 Selectores Optimizados
+## Optimized selectors
 
-### **getFilteredAlbums()**
+### getFilteredAlbums()
 
-Aplica filtros de búsqueda y favoritos en tiempo real.
+Applies search and Favorite filters in real time.
 
-### **getSortedAlbums()**
+### getSortedAlbums()
 
-Combina filtrado y ordenamiento según criterio activo.
+Combines filter and sort according to the active criterion.
 
-### **getAlbumById(id)**
+### getAlbumById(id)
 
-Búsqueda O(n) por ID, optimizable con Record si es necesario.
+O(n) search by ID, optimizable with Record if needed.
 
-## 🚀 Optimizaciones
+## Optimizations
 
-### **Persistencia**
+### Persistence
 
-- Store persistido en localStorage como `album-store`
-- Hidratación automática al cargar la aplicación
+The store persists in localStorage as `album-store`.
 
-### **Performance**
+Hydration is automatic when the application loads.
 
-- Selectores memoizados con Zustand
-- Filtrado y ordenamiento optimizado
-- Estados UI separados para evitar re-renders
+### Performance
 
-## 🎨 Características Especiales
+Selectors are memoized with Zustand.
 
-### **Gestión de Imágenes**
+Filter and sort are optimized.
 
-- Agregar/quitar imágenes de álbumes
-- Portadas automáticas (featuredImage)
-- Conteo de items en tiempo real
+UI states stay separate to avoid re-renders.
 
-### **Categorización**
+## Special features
 
-- Filtros por categoría y tipo
-- Agrupamiento visual
-- Shortcuts de teclado personalizables
+### Image management
 
-### **Estado Visual**
+The store provides the following image features:
 
-- Drag & drop entre álbumes
-- Estados expandido/colapsado por álbum
-- Resaltado dinámico
+- Add or remove images from Albums
+- Automatic covers (featuredImage)
+- Real-time item count
 
-## 📋 Tipos Relacionados
+### Categorization
 
-- `AlbumComplete` - Álbum con campos parseados (filtros, sortBy)
-- `AlbumCreateInput` / `AlbumUpdateInput` - DTOs para CRUD
-- `AlbumViewMode` / `AlbumDisplayState` - Estados de UI
-- `AlbumSortCriteria` - Opciones de ordenamiento
+The store provides the following categorization features:
 
-## 🔗 Dependencias
+- Filters by category and type
+- Visual grouping
+- Customizable keyboard shortcuts
 
-- `@/types/entities/album` - Tipos canónicos
-- `@/app/actions/albums` - Server actions
+### Visual state
+
+The store provides the following visual features:
+
+- Drag and drop between Albums
+- Expanded or collapsed states per Album
+- Dynamic highlighting
+
+## Related types
+
+The store uses the following related types:
+
+- `AlbumComplete` - Album with parsed fields (filters, sortBy)
+- `AlbumCreateInput` / `AlbumUpdateInput` - DTOs for CRUD
+- `AlbumViewMode` / `AlbumDisplayState` - UI states
+- `AlbumSortCriteria` - Sort options
+
+## Dependencies
+
+The store depends on the following modules:
+
+- `@/types/entities/album` - Canonical types
+- `@/app/actions/albums` - Route modules
 - `@/lib/logger` - Logging
-- `@/lib/ui/toast` - Notificaciones
+- `@/lib/ui/toast` - Notifications

@@ -1,50 +1,52 @@
-# Guía de Animaciones - Image Manager
+# Animations guide
 
-## Resumen Ejecutivo
+## Executive summary
 
-Este documento establece el estándar para el sistema de animaciones en Image Manager para asegurar consistencia, performance y mantenibilidad.
+This document sets the standard for the animation system in Media Manager. The goal is consistency, performance, and maintainability.
 
-## ⚠️ ESTANDARIZACIÓN OBLIGATORIA
+## Mandatory standardization
 
-**REGLA CRÍTICA**: Todos los componentes deben usar **una sola** de estas tres opciones:
+**Critical rule**: All components must use **one** of these three options:
 
-1. **`@/components/ui/motion-shim`** (RECOMENDADO para compatibilidad declarativa)
-2. **`@/lib/anime`** (Para animaciones complejas con timeline)
-3. **CSS Animations** (Para animaciones simples hover/estados)
+1. **`@/components/ui/motion-shim`** (recommended for declarative compatibility)
+2. **`@/lib/anime`** (for complex timeline animations)
+3. **CSS animations** (for simple hover and state animations)
 
-**❌ PROHIBIDO**:
+**Forbidden**:
 
-- Mezclar múltiples sistemas en un mismo componente
-- Importar otra librería de animación directamente si ya existe solución en `motion-shim` o `@/lib/anime`
-- Reintroducir librerías de animación adicionales en componentes nuevos
+- Mix multiple systems in the same component.
+- Import another animation library directly if a solution already exists in `motion-shim` or `@/lib/anime`.
+- Reintroduce extra animation libraries in new components.
 
 ---
 
-## 📦 Opción 1: Motion Shim (Recomendado)
+## Option 1: Motion shim (recommended)
 
-### Cuándo usar
+### When to use
 
-- Componentes React que necesitan animaciones de entrada/salida
-- Reemplazo de APIs declarativas de motion
-- Animaciones hover/tap/exit
-- Grids con stagger animations
+Use the shim for:
+
+- React components that need enter and exit animations
+- Replacement of declarative motion APIs
+- Hover, tap, and exit animations
+- Grids with stagger animations
 
 ### API
 
 ```typescript
 import { motion, AnimatePresence } from '@/components/ui/motion-shim';
 
-// Componente básico
+// Basic component
 <motion.div
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
   exit={{ opacity: 0, y: -20 }}
   transition={{ duration: 0.3, ease: 'easeOut' }}
 >
-  Contenido
+  Content
 </motion.div>
 
-// Con variants
+// With variants
 const variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 }
@@ -52,11 +54,11 @@ const variants = {
 
 <motion.div variants={variants} initial="hidden" animate="visible" />
 
-// AnimatePresence para mount/unmount
+// AnimatePresence for mount/unmount
 <AnimatePresence>
   {isVisible && (
     <motion.div exit={{ opacity: 0 }}>
-      Contenido
+      Content
     </motion.div>
   )}
 </AnimatePresence>
@@ -68,44 +70,48 @@ const variants = {
 />
 ```
 
-### Componentes disponibles
+### Available components
 
 ```typescript
 (motion.div, motion.button, motion.span, motion.img);
 (motion.section, motion.article, motion.header);
 (motion.footer, motion.nav, motion.main);
-// ... y más (ver motion-shim.tsx)
+// ... and more (see motion-shim.tsx)
 ```
 
-### Props soportadas
+### Supported props
 
-- `initial`: Estado inicial
-- `animate`: Estado objetivo
-- `exit`: Estado al desmontar (requiere AnimatePresence)
-- `whileHover`: Estado en hover
-- `whileTap`: Estado en click
-- `transition`: Configuración { duration, ease, delay, type }
-- `variants`: Variantes nombradas
-- `layout`: Boolean para animaciones de layout
-- `layoutId`: String para shared layout animations
+Supported props include:
+
+- `initial`: initial state
+- `animate`: target state
+- `exit`: state on unmount (requires AnimatePresence)
+- `whileHover`: state on hover
+- `whileTap`: state on click
+- `transition`: configuration `{ duration, ease, delay, type }`
+- `variants`: named variants
+- `layout`: boolean for layout animations
+- `layoutId`: string for shared layout animations
 
 ---
 
-## 📦 Opción 2: Lib Anime (Para casos avanzados)
+## Option 2: Lib anime (for advanced cases)
 
-### Cuándo usar
+### When to use
 
-- Animaciones con timeline complejas
-- Stagger animations programáticas
-- Animaciones que necesitan control (play/pause/seek)
-- Integración con sistema de transiciones morph/flip
+Use `@/lib/anime` for:
+
+- Complex timeline animations
+- Programmatic stagger animations
+- Animations that need control (play, pause, seek)
+- Integration with the morph and flip transition system
 
 ### API
 
 ```typescript
 import { anime, animate, createTimeline, stagger } from '@/lib/anime';
 
-// Animación simple
+// Simple animation
 await animate({
 	targets: '.element',
 	translateX: 250,
@@ -128,25 +134,27 @@ await stagger('.items', {
 
 ---
 
-## 📦 Opción 3: CSS Animations
+## Option 3: CSS animations
 
-### Cuándo usar
+### When to use
 
-- Animaciones simples de hover/focus
-- Estados de loading
-- Transiciones básicas
-- Cuando no se necesita JavaScript
+Use CSS animations for:
 
-### Clases disponibles
+- Simple hover and focus animations
+- Loading states
+- Basic transitions
+- Cases that do not need JavaScript
+
+### Available classes
 
 ```css
-/* Entrada */
+/* Enter */
 .animate-fade-in
 .animate-slide-up
 .animate-scale-in
 .animate-zoom-bounce
 
-/* Énfasis */
+/* Emphasis */
 .dt-pulse-subtle
 .dt-bounce-soft
 .dt-shake
@@ -162,7 +170,7 @@ await stagger('.items', {
 .motion-reduce:animate-none
 ```
 
-### Uso en Tailwind
+### Use in Tailwind
 
 ```html
 <div class="transition-all duration-dt-fast ease-dt-out hover:scale-105" />
@@ -171,23 +179,27 @@ await stagger('.items', {
 
 ---
 
-## 🎨 Design Tokens para Animaciones
+## Design tokens for animations
 
-### Duraciones
-
-```css
---dt-duration-instant: 50ms /* Micro-interacciones */ --dt-duration-fast: 150ms /* Hover, focus */
-	--dt-duration-normal: 250ms /* Transiciones UI */ --dt-duration-slow: 400ms /* Entradas, modals */;
-```
-
-### Timing Functions
+### Durations
 
 ```css
---dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1) --dt-ease-in: cubic-bezier(0.4, 0, 1, 1)
-	--dt-ease-out: cubic-bezier(0, 0, 0.2, 1) --dt-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+--dt-duration-instant: 50ms; /* Micro-interactions */
+--dt-duration-fast: 150ms; /* Hover, focus */
+--dt-duration-normal: 250ms; /* UI transitions */
+--dt-duration-slow: 400ms; /* Entries, modals */
 ```
 
-### Tailwind Classes
+### Timing functions
+
+```css
+--dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+--dt-ease-in: cubic-bezier(0.4, 0, 1, 1);
+--dt-ease-out: cubic-bezier(0, 0, 0.2, 1);
+--dt-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+```
+
+### Tailwind classes
 
 ```
 duration-dt-instant, duration-dt-fast, duration-dt-normal, duration-dt-slow
@@ -196,15 +208,15 @@ ease-dt-default, ease-dt-in, ease-dt-out, ease-dt-bounce
 
 ---
 
-## ♿ Accesibilidad - Reduced Motion
+## Accessibility: reduced motion
 
-**SIEMPRE** respetar `prefers-reduced-motion`:
+Always respect `prefers-reduced-motion`.
 
-### Con Motion Shim
+### With motion shim
 
 ```typescript
-// Ya manejado automáticamente en shim
-// Pero para animaciones complejas:
+// Already handled automatically in the shim
+// For complex animations:
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 <motion.div
@@ -212,7 +224,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 />
 ```
 
-### Con CSS
+### With CSS
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -222,55 +234,61 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   }
 }
 
-/* O usar clases de Tailwind */
+/* Or use Tailwind classes */
 .motion-reduce:animate-none
 .motion-reduce:transition-none
 ```
 
 ---
 
-## 📊 Performance
+## Performance
 
-### Mejores prácticas
+### Practices
 
-1. **Usar `transform` y `opacity`** - Son las propiedades más performantes
-2. **Evitar animar `width`, `height`, `top`, `left`** - Causan reflow
-3. **Usar `will-change` con moderación** - Solo en elementos animados frecuentemente
-4. **Centralización del runtime** - El shim concentra la semántica declarativa sobre GSAP
-5. **Debounce/throttle** - Para animaciones basadas en scroll/mouse
+Follow these practices:
 
-### Métricas objetivo
+1. **Use `transform` and `opacity`**. They are the most performant properties.
+2. **Avoid animating `width`, `height`, `top`, and `left`**. They cause reflow.
+3. **Use `will-change` with moderation**. Use it only on elements that animate often.
+4. **Centralize the runtime**. The shim concentrates declarative semantics on GSAP.
+5. **Debounce or throttle**. Use this for scroll or mouse animations.
 
-- **First Contentful Paint**: < 1.8s
-- **Largest Contentful Paint**: < 2.5s
-- **Animation frame rate**: 60fps consistente
+### Target metrics
+
+Target metrics are:
+
+- **First Contentful Paint**: less than 1.8s
+- **Largest Contentful Paint**: less than 2.5s
+- **Animation frame rate**: consistent 60fps
 
 ---
 
-## 🔄 Migración desde APIs declarativas previas
+## Migration from previous declarative APIs
 
-### Cambios necesarios
+### Required changes
 
 ```typescript
-// ❌ Antes (otra librería de animación)
+// Before (another animation library)
 import { motion, AnimatePresence } from 'some-other-motion-library';
 
-// ✅ Después (motion-shim)
+// After (motion-shim)
 import { motion, AnimatePresence } from '@/components/ui/motion-shim';
 ```
 
-### Diferencias
+### Differences
 
-1. **Easing**: El shim acepta nombres declarativos y los traduce a GSAP
-2. **Spring**: El shim simplifica casos comunes; para física avanzada usa GSAP directo
-3. **Layout animations**: Soporte limitado en shim (usar `layout`/`layoutId` cuando aplique)
-4. **Drag**: La API de compatibilidad es acotada; para casos avanzados usar una integración específica
+The shim differs in these ways:
+
+1. **Easing**: The shim accepts declarative names and translates them to GSAP.
+2. **Spring**: The shim simplifies common cases. For advanced physics, use GSAP directly.
+3. **Layout animations**: Support is limited in the shim. Use `layout` or `layoutId` when it applies.
+4. **Drag**: The compatibility API is limited. For advanced cases, use a specific integration.
 
 ---
 
-## 📝 Ejemplos por Caso de Uso
+## Examples by use case
 
-### Grid de cards con stagger
+### Card grid with stagger
 
 ```typescript
 {items.map((item, index) => (
@@ -297,7 +315,7 @@ import { motion, AnimatePresence } from '@/components/ui/motion-shim';
 </motion.button>
 ```
 
-### Página con entrada suave
+### Page with a soft enter
 
 ```typescript
 <motion.div
@@ -309,7 +327,7 @@ import { motion, AnimatePresence } from '@/components/ui/motion-shim';
 </motion.div>
 ```
 
-### Modal con backdrop
+### Modal with backdrop
 
 ```typescript
 <AnimatePresence>
@@ -336,57 +354,63 @@ import { motion, AnimatePresence } from '@/components/ui/motion-shim';
 
 ---
 
-## 🔍 Debugging
+## Debugging
 
-### Herramientas útiles
+### Useful tools
 
-1. **React Scan** - Ya instalado en el proyecto (detecta re-renders)
-2. **Chrome DevTools > Animations** - Inspeccionar animaciones CSS
-3. **Chrome DevTools > Performance** - Medir FPS y tiempos
+Useful tools include:
 
-### Logs de desarrollo
+1. **React Scan**. Already installed in the project. It detects re-renders.
+2. **Chrome DevTools > Animations**. Inspect CSS animations.
+3. **Chrome DevTools > Performance**. Measure FPS and times.
+
+### Development logs
 
 ```typescript
 import { clientLogger } from '@/lib/logger/client-logger';
 
-// Log cuando inicia animación
+// Log when an animation starts
 clientLogger.debug('Animation started', { element: 'card', type: 'fade-in' });
 ```
 
 ---
 
-## 📚 Referencias
+## References
+
+The following references support this guide:
 
 - [GSAP Documentation](https://gsap.com/docs/v3/)
-- [Motion API patterns](https://www.framer.com/motion/) (solo como referencia conceptual de ergonomía)
+- [Motion API patterns](https://www.framer.com/motion/) (conceptual ergonomics reference only)
 - [MDN: prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
 - [Design Tokens CSS](../styles/design-tokens.css)
 
 ---
 
-## ✅ Checklist de Implementación
+## Implementation checklist
 
-Antes de entregar un componente con animaciones:
+Before you deliver a component with animations:
 
-- [ ] Usa el sistema estándar (shim/lib/CSS)
-- [ ] No mezcla múltiples sistemas
-- [ ] Respeta `prefers-reduced-motion`
-- [ ] Usa design tokens para duraciones/timing
-- [ ] Anima solo `transform` y `opacity` cuando sea posible
-- [ ] Tiene fallback sin JS si aplica
-- [ ] Documenta cualquier comportamiento especial
-
----
-
-## 🚀 Próximos Pasos
-
-1. **Audit completo** - Revisar componentes nuevos para mantener GSAP como estándar único
-2. **Componentes v3** - Actualizar a usar siempre el shim o `@/lib/anime`
-3. **Testing** - Agregar tests de accesibilidad para reduced-motion
-4. **Documentación** - Mantener actualizada esta guía
+- [ ] It uses the standard system (shim, lib, or CSS).
+- [ ] It does not mix multiple systems.
+- [ ] It respects `prefers-reduced-motion`.
+- [ ] It uses design tokens for durations and timing.
+- [ ] It animates only `transform` and `opacity` when possible.
+- [ ] It has a no-JS fallback when it applies.
+- [ ] It documents any special behavior.
 
 ---
 
-**Última actualización**: 2025-01-31
-**Versión**: 1.0
-**Autor**: Sistema de UX/UI Image Manager
+## Next steps
+
+The next work is:
+
+1. **Complete audit**. Review new components to keep GSAP as the single standard.
+2. **v3 components**. Update them to always use the shim or `@/lib/anime`.
+3. **Testing**. Add accessibility tests for reduced motion.
+4. **Documentation**. Keep this guide current.
+
+---
+
+**Last update**: 2025-01-31  
+**Version**: 1.0  
+**Author**: Media Manager UX/UI system

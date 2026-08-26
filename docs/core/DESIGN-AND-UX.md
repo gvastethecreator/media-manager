@@ -1,75 +1,75 @@
-# Diseño y UX del producto
+# Product design and UX
 
-Este documento resume la lógica visual y de interacción del proyecto desde una perspectiva de producto y arquitectura de interfaz.
+This document summarizes the visual and interaction logic of the project. It covers product and interface architecture.
 
-## 1. Naturaleza de la interfaz
+## 1. Nature of the interface
 
-Image Manager no es una landing, ni una app CRUD mínima. La UI está pensada como un **workspace denso** para explorar bibliotecas grandes de contenido.
+Media Manager is not a landing page. It is not a minimal CRUD app. The UI is a **dense workspace** for exploring large content libraries.
 
-Eso explica varias decisiones:
+That nature explains these decisions:
 
-- layout con paneles,
-- navegación lateral,
-- toolbar contextual,
-- vistas por dominio,
-- panel de detalles,
-- previews y viewers integrados.
+- panel layout
+- side navigation
+- contextual toolbar
+- views by domain
+- details panel
+- integrated previews and viewers
 
-## 2. Shell principal
+## 2. Main shell
 
-La aplicación gira en torno a `MainLayout` y a una navegación tipo panel.
+The application turns around `MainLayout` and panel-style navigation.
 
 ```mermaid
 flowchart LR
-    A[Panel izquierdo] --> B[Área central de trabajo]
-    B --> C[Toolbar contextual]
-    B --> D[Vista activa]
-    D --> E[Panel derecho / detalles]
+    A[Left panel] --> B[Central work area]
+    B --> C[Contextual toolbar]
+    B --> D[Active view]
+    D --> E[Right panel / details]
 ```
 
-### Panel izquierdo
+### Left panel
 
-Responsabilidades típicas:
+Typical responsibilities:
 
-- navegación jerárquica,
-- acceso a secciones,
-- cambio rápido entre dominios.
+- hierarchical navigation
+- access to sections
+- fast change among domains
 
-### Área central
+### Central area
 
-Responsabilidades típicas:
+Typical responsibilities:
 
-- mostrar vistas completas,
-- soportar distintos modos de exploración,
-- alojar la toolbar y el contenido principal.
+- show complete views
+- support different exploration modes
+- host the toolbar and the main content
 
-### Panel derecho
+### Right panel
 
-Responsabilidades típicas:
+Typical responsibilities:
 
-- detalles de entidad,
-- acciones contextuales,
-- información complementaria.
+- entity details
+- contextual actions
+- complementary information
 
-## 3. Filosofía visual
+## 3. Visual philosophy
 
-La UI mezcla dos necesidades:
+The UI mixes two needs:
 
-1. **densidad funcional**, porque el dominio es amplio;
-2. **expresividad visual**, porque el producto tiene un componente creativo fuerte.
+1. **functional density**, because the domain is broad
+2. **visual expression**, because the product has a strong creative component
 
-Por eso conviven:
+For that reason these pieces coexist:
 
-- tokens semánticos,
-- múltiples temas,
-- cards y vistas con identidad visual,
-- transiciones y feedback visibles.
+- semantic tokens
+- multiple themes
+- cards and views with visual identity
+- visible transitions and feedback
 
-## 4. Sistema de temas
+## 4. Theme system
 
-El proyecto soporta múltiples temas personalizados además de `light`, `dark` y `system`.
+The project supports multiple custom themes in addition to `light`, `dark`, and `system`.
 
-Temas observados:
+Observed themes:
 
 - light
 - dark
@@ -86,79 +86,89 @@ Temas observados:
 - aurora
 - neon
 
-## 5. Diseño basado en tokens
+## 5. Token-based design
 
-La base del sistema visual se apoya en:
+The visual system rests on these files:
 
 - `tokens.css`
 - `design-tokens.css`
 - `globals.css`
 - `view-transition.css`
 
-### Qué aportan
+### What they provide
 
-- colores semánticos,
-- escalas reutilizables,
-- consistencia entre entidades,
-- soporte de múltiples temas sin reescribir componentes.
+These files provide:
 
-## 6. Comportamiento por vistas
+- semantic colors
+- reusable scales
+- consistency among entities
+- support for multiple themes without rewriting components
 
-La UI no usa una sola vista para todo. Cada dominio tiene su propia sección y puede expresarse de forma diferente según el tipo de contenido.
+## 6. Behavior by view
 
-### Ejemplos
+The UI does not use one view for everything. Each domain has its own section. Each section can look different by content type.
 
-- carpetas y exploración jerárquica,
-- grids o listados de media,
-- vistas de entidades creativas,
-- paneles de configuración,
-- resultados de búsqueda.
+### Examples
 
-## 7. Relación entre UX y arquitectura
+Examples include:
 
-La arquitectura del frontend condiciona la UX de varias maneras:
+- folders and hierarchical exploration
+- media grids or listings
+- creative-entity views
+- settings panels
+- search results
 
-- lazy loading para reducir coste inicial,
-- stores por responsabilidad para sostener interacciones complejas,
-- Query para mantener datos sincronizados,
-- SSE y refresco para procesos de larga duración,
-- viewers especializados para evitar salir del contexto.
+## 7. Relation between UX and architecture
 
-## 8. Feedback y operación
+Frontend architecture conditions UX in these ways:
 
-El producto necesita comunicar muchos estados:
+- lazy loading to reduce initial cost
+- stores by responsibility to support complex interactions
+- Query to keep data in sync
+- SSE and refresh for long-running processes
+- specialized viewers so the user stays in context
 
-- carga,
-- errores,
-- éxito de operaciones,
-- progreso de reindexado,
-- previews faltantes o generados,
-- cambios de selección y navegación.
+## 8. Feedback and operation
 
-Por eso aparecen:
+The product needs to communicate many states:
 
-- toasts,
-- paneles,
-- progress updates,
-- logging para operación técnica,
-- stores y providers de feedback.
+- loading
+- errors
+- operation success
+- reindex progress
+- missing or generated previews
+- selection and navigation changes
 
-## 9. Riesgos UX derivados del dominio
+For that reason these surfaces appear:
 
-- demasiadas entidades pueden elevar la carga cognitiva,
-- exceso de rutas o vistas puede dificultar onboarding,
-- coexistencia de features antiguas y nuevas puede generar diferencias de comportamiento,
-- los procesos largos requieren feedback claro para no sentirse rotos.
+- toasts
+- panels
+- progress updates
+- logging for technical operation
+- feedback stores and providers
 
-## 10. Qué conviene preservar al evolucionar la UI
+## 9. UX risks from the domain
 
-- consistencia entre shell, toolbar y paneles,
-- uso de tokens en lugar de colores hardcodeados,
-- separación clara entre navegación, contenido y detalle,
-- soporte a bibliotecas grandes,
-- visibilidad del estado del sistema.
+Watch these UX risks:
 
-## 11. Documentos relacionados
+- too many entities can raise cognitive load
+- too many routes or views can make onboarding harder
+- coexistence of old and new features can create behavior differences
+- long processes need clear feedback so they do not feel broken
+
+## 10. What to preserve as the UI evolves
+
+Preserve these qualities:
+
+- consistency among shell, toolbar, and panels
+- use of tokens instead of hardcoded colors
+- a clear split among navigation, content, and detail
+- support for large libraries
+- visibility of system state
+
+## 11. Related documents
+
+The following documents complete this design view:
 
 - [`./FRONTEND-GUIDE.md`](./FRONTEND-GUIDE.md)
 - [`./ARCHITECTURE.md`](./ARCHITECTURE.md)

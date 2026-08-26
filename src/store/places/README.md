@@ -1,7 +1,9 @@
-# Places Store
+# Places store
 
-Maneja la colección de lugares y su configuración visual.
-Persistido con `zustand/persist` para conservar vista y filtros.
+This store manages the Place collection and its visual configuration.
 
-Incluye acciones para cargar, seleccionar y expandir lugares, así
-como filtros y ordenación.
+The store persists view and filter state with `zustand/persist`.
+
+The store includes actions that load, select, and expand Places.
+
+The store also includes filters and sort order.

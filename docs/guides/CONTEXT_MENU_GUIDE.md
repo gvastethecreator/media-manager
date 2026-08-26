@@ -1,87 +1,101 @@
-# Menú Contextual - Guía de Uso
+# Context menu guide
 
-## 📋 Funcionalidad Implementada
+## Implemented functionality
 
-- Se activa al hacer click derecho en cualquier item del file browser
+The menu activates on right-click of any item in the file browser.
 
-✅ **Opciones Principales del Menú:**
+**Main menu options:**
 
-- **Abrir** - Abre el/los items seleccionados
-- **Vista previa** - Previsualiza el item
-- **Copiar** - Copia los items seleccionados
-- **Renombrar** - Renombra un item individual (deshabilitado para múltiple selección)
-- **Descargar** - Descarga los items
-- **Eliminar** - Elimina los items (con estilo destructivo en rojo)
+- **Open** - Opens the selected item or items
+- **Preview** - Previews the item
+- **Copy** - Copies the selected items
+- **Rename** - Renames a single item (disabled for multiple selection)
+- **Download** - Downloads the items
+- **Delete** - Deletes the items (with destructive red styling)
 
-✅ **Submenú "Agregar a..." con todas las entidades solicitadas:**
+**"Add to..." submenu with all requested entities:**
 
-- 📸 Album
-- 📦 Colección
-- 👥 Grupo
-- 🏷️ Tag
-- ✨ World Item
-- 👤 Characters
-- 💡 Concept
-- 📝 Notes
-- 📍 Places
-- 🎯 Prompts
-- ⚙️ Properties
-- 🪄 Wildcards
-- ❤️ Favorites
+- Album
+- Collection
+- Group
+- Tag
+- World Item
+- Characters
+- Concept
+- Notes
+- Places
+- Prompts
+- Properties
+- Wildcards
+- Favorites
 
-## 🎯 Comportamiento del Menú
+## Menu behavior
 
-### Selección Automática
+### Automatic selection
 
-- Si haces click derecho en un item no seleccionado, se selecciona automáticamente
-- Si el item ya está seleccionado, mantiene la selección múltiple existente
-- Muestra el número de items seleccionados en la opción "Abrir"
+Selection behavior is:
 
-### Interacción
+- If you right-click an unselected item, it is selected automatically.
+- If the item is already selected, the existing multiple selection is kept.
+- The **Open** option shows the number of selected items.
 
-- El menú se posiciona en las coordenadas del cursor
-- Se cierra automáticamente al hacer click fuera o presionar Escape
-- Las opciones tienen hover effects y feedback visual
+### Interaction
 
-### Submenús
+Interaction behavior is:
 
-- El submenú "Agregar a..." se despliega al hacer hover
-- Incluye separadores visuales para organizar las opciones
-- Todas las entidades tienen iconos distintivos
+- The menu is positioned at the cursor coordinates.
+- It closes automatically on outside click or Escape.
+- Options have hover effects and visual feedback.
 
-## 🔧 Implementación Técnica
+### Submenus
 
-### Archivos Modificados/Creados:
+Submenu behavior is:
 
-1. **`extended-context-menu.tsx`** - Nuevo componente de menú contextual
-2. **`file-canvas.tsx`** - Integrado el menú contextual con handlers de eventos
+- The **Add to...** submenu opens on hover.
+- It includes visual separators to organize the options.
+- All entities have distinctive icons.
 
-### Estados Gestionados:
+## Technical implementation
 
-- **Posición del menú** - Coordenadas x,y del cursor
-- **Items seleccionados** - Array de MediaItems para el contexto
-- **Visibilidad** - Estado abierto/cerrado del menú
+### Modified or created files
 
-### Eventos:
+These files were modified or created:
 
-- **onContextMenu** - Captura click derecho y calcula posición
-- **onAction** - Handler para las acciones del menú (por implementar)
-- **onClose** - Cierre del menú con cleanup de estados
+1. **`extended-context-menu.tsx`** - New context menu component
+2. **`file-canvas.tsx`** - Context menu integrated with event handlers
 
-## 🚧 Próximos Pasos (TODO)
+### Managed state
 
-Los handlers de las acciones están preparados pero necesitan implementación:
+Managed state includes:
 
-- Conectar con las APIs de cada entidad
-- Implementar diálogos de selección para elegir album/colección específica
-- Manejar operaciones de copia/movimiento de archivos
-- Integrar con sistema de favoritos existente
+- **Menu position** - Cursor x,y coordinates
+- **Selected items** - Array of MediaItems for the context
+- **Visibility** - Open or closed state of the menu
 
-## 🎨 Uso en la Aplicación
+### Events
 
-1. **Navega** a cualquier vista del file browser (grid, list, table, etc.)
-2. **Haz click derecho** en cualquier imagen o archivo
-3. **Selecciona** una opción del menú o explora "Agregar a..."
-4. **Observa** los logs en la consola para ver qué acción se ejecutó
+Events include:
 
-¡El menú contextual está completamente funcional y listo para conectar con la lógica de negocio!
+- **onContextMenu** - Captures right-click and calculates position
+- **onAction** - Handler for menu actions (to implement)
+- **onClose** - Menu close with state cleanup
+
+## Next steps (TODO)
+
+The action handlers are prepared. They still need implementation:
+
+- Connect with the APIs of each entity.
+- Implement selection dialogs to choose a specific album or collection.
+- Handle copy and move file operations.
+- Integrate with the existing favorites system.
+
+## Use in the application
+
+Follow this sequence:
+
+1. Navigate to any file browser view (grid, list, table, or similar).
+2. Right-click any image or file.
+3. Select a menu option, or explore **Add to...**.
+4. Observe the console logs to see which action ran.
+
+The context menu is functional and ready to connect with business logic.

@@ -1,8 +1,8 @@
-# 📂 Folder: Tipos y Esquemas Canónicos
+# Folder: canonical types and schemas
 
-Este módulo define los **tipos canónicos** y enums para la entidad `Folder`, alineados con el modelo de dominio y las reglas del proyecto.
+This module defines the **canonical types** and enums for the `Folder` entity. The types align with the domain model and project rules.
 
-## 📦 Estructura
+## Structure
 
 ```mermaid
 graph TD
@@ -13,28 +13,29 @@ graph TD
     FolderBase --> FolderViewMode
 ```
 
-- `FolderBase`: Tipo canónico alineado a la base de datos.
-- `FolderCreateInput`, `FolderUpdateInput`: Inputs para mutaciones.
-- `FolderSortBy`, `FolderType`, `FolderViewMode`: Enums para lógica y visualización.
-- `FolderSchema`: Esquema Zod para validación.
+The module uses these types:
 
-## 🚨 Notas de migración
+- `FolderBase`: Canonical type aligned with the database.
+- `FolderCreateInput`, `FolderUpdateInput`: Inputs for mutations.
+- `FolderSortBy`, `FolderType`, `FolderViewMode`: Enums for logic and display.
+- `FolderSchema`: Zod schema for validation.
 
-- **Legacy eliminado:** Solo se exportan tipos y enums canónicos.
+## Migration notes
 
-- **Validar siempre con FolderSchema antes de persistir.**
+- **Legacy removed:** Only canonical types and enums are exported.
+- **Validate with FolderSchema before you persist.**
 
-## 📝 Ejemplo de uso
+## Usage example
 
 ```ts
 import type { FolderBase, FolderCreateInput } from '@/types/entities/folder';
 import type { FolderSchema } from '@/types/entities/folder/types';
 
-const nueva: FolderCreateInput = { name: 'Proyectos', path: '/proyectos' };
-const validada = FolderSchema.parse(nueva);
+const created: FolderCreateInput = { name: 'Projects', path: '/projects' };
+const validated = FolderSchema.parse(created);
 ```
 
 ---
 
-> Última actualización: 2025-06-18
-> Responsable: migración y limpieza de tipos canónicos
+> Last update: 2025-06-18
+> Owner: migration and cleanup of canonical types

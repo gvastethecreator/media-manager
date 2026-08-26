@@ -1,61 +1,61 @@
-# 🎯 Vistas Principales - Sistema Completo
+# Main views - complete system
 
-Este directorio contiene las vistas principales del sistema de gestión de imágenes y sus componentes relacionados.
+This directory contains the main views of the media management system and their related components.
 
-## 📋 Estado Actual
+## Current status
 
-### ✅ **Vistas Completamente Optimizadas**
+### Fully optimized views
 
-| Vista           | Entidad    | Card Usada     | Store | Estado        |
-| --------------- | ---------- | -------------- | ----- | ------------- |
-| AllImagesView   | Image      | EntityCard     | ✅    | ✅ Optimizada |
-| AlbumsView      | Album      | AlbumCard      | ✅    | ✅ Optimizada |
-| AudioView       | Audio      | AudioCard      | ✅    | ✅ Optimizada |
-| CharactersView  | Character  | CharacterCard  | ✅    | ✅ Optimizada |
-| CollectionsView | Collection | CollectionCard | ✅    | ✅ Optimizada |
-| ConceptsView    | Concept    | ConceptCard    | ✅    | ✅ Optimizada |
-| DocumentsView   | Document   | DocumentCard   | ✅    | ✅ Optimizada |
-| FavoritesView   | Mixed      | EntityCard     | ✅    | ✅ Optimizada |
-| File3DView      | File3D     | File3DCard     | ✅    | ✅ Optimizada |
-| GroupsView      | Group      | GroupCard      | ✅    | ✅ Optimizada |
-| JsonFilesView   | JsonFile   | JsonFileCard   | ✅    | ✅ Optimizada |
-| NotesView       | Note       | NoteCard       | ✅    | ✅ Optimizada |
-| PlacesView      | Place      | PlaceCard      | ✅    | ✅ Optimizada |
-| PromptsView     | Prompt     | PromptCard     | ✅    | ✅ Optimizada |
-| PropertiesView  | Property   | PropertyCard   | ✅    | ✅ Optimizada |
-| SearchView      | Mixed      | EntityCard     | ✅    | ✅ Optimizada |
-| TagsView        | Tag        | TagCard        | ✅    | ✅ Optimizada |
-| WildcardsView   | Wildcard   | WildcardCard   | ✅    | ✅ Optimizada |
-| WorkflowsView   | Workflow   | WorkflowCard   | ✅    | ✅ Optimizada |
+| View            | Entity     | Card used      | Store | Status      |
+| --------------- | ---------- | -------------- | ----- | ----------- |
+| AllImagesView   | Image      | EntityCard     | Yes   | Optimized   |
+| AlbumsView      | Album      | AlbumCard      | Yes   | Optimized   |
+| AudioView       | Audio      | AudioCard      | Yes   | Optimized   |
+| CharactersView  | Character  | CharacterCard  | Yes   | Optimized   |
+| CollectionsView | Collection | CollectionCard | Yes   | Optimized   |
+| ConceptsView    | Concept    | ConceptCard    | Yes   | Optimized   |
+| DocumentsView   | Document   | DocumentCard   | Yes   | Optimized   |
+| FavoritesView   | Mixed      | EntityCard     | Yes   | Optimized   |
+| File3DView      | File3D     | File3DCard     | Yes   | Optimized   |
+| GroupsView      | Group      | GroupCard      | Yes   | Optimized   |
+| JsonFilesView   | JsonFile   | JsonFileCard   | Yes   | Optimized   |
+| NotesView       | Note       | NoteCard       | Yes   | Optimized   |
+| PlacesView      | Place      | PlaceCard      | Yes   | Optimized   |
+| PromptsView     | Prompt     | PromptCard     | Yes   | Optimized   |
+| PropertiesView  | Property   | PropertyCard   | Yes   | Optimized   |
+| SearchView      | Mixed      | EntityCard     | Yes   | Optimized   |
+| TagsView        | Tag        | TagCard        | Yes   | Optimized   |
+| WildcardsView   | Wildcard   | WildcardCard   | Yes   | Optimized   |
+| WorkflowsView   | Workflow   | WorkflowCard   | Yes   | Optimized   |
 
-## 🏗️ **Arquitectura Unificada**
+## Unified architecture
 
-### **Patrón Consistente**
+### Consistent pattern
 
-Todas las vistas siguen el mismo patrón arquitectural:
+All views follow the same architectural pattern:
 
 ```typescript
-// Patrón estándar para todas las vistas
+// Standard pattern for all views
 export function EntityView(_props: ViewProps) {
-  // 1. Store Zustand
+  // 1. Zustand store
   const { entities, isLoading, error, loadEntities, getSortedEntities } = useEntityStore();
 
-  // 2. Carga inicial
+  // 2. Initial load
   useEffect(() => {
     if (isEmpty(entities)) loadEntities();
   }, []);
 
-  // 3. Handlers optimizados
+  // 3. Optimized handlers
   const handleEntityClick = useCallback((entity) => {
-    // Lógica de navegación
+    // Navigation logic
   }, []);
 
-  // 4. Estados de UI
+  // 4. UI states
   if (error) return <ErrorState />;
   if (isLoading) return <LoadingScreen />;
   if (isEmpty(entities)) return <EmptyState />;
 
-  // 5. Grid responsivo con animaciones
+  // 5. Responsive grid with animations
   return (
     <ScrollArea>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -70,52 +70,54 @@ export function EntityView(_props: ViewProps) {
 }
 ```
 
-### **Características Comunes**
+### Common features
 
-- ✅ **Store Zustand**: Gestión de estado optimizada
-- ✅ **EntityCard TCG**: Cards con efectos holográficos
-- ✅ **Animaciones Motion**: Transiciones fluidas
-- ✅ **Grid Responsivo**: Adaptable a todos los dispositivos
-- ✅ **Lazy Loading**: Carga optimizada de datos
-- ✅ **Memoización**: Prevención de re-renders innecesarios
-- ✅ **Estados de UI**: Loading, Error, Empty consistentes
-- ✅ **TypeScript**: Tipado fuerte y seguro
+The views share the following features:
 
-## 📁 **Estructura de Archivos**
+- **Zustand store**: Optimized state management
+- **EntityCard TCG**: Cards with holographic effects
+- **Motion animations**: Fluid transitions
+- **Responsive grid**: Adaptable to all devices
+- **Lazy loading**: Optimized data load
+- **Memoization**: Prevention of unnecessary re-renders
+- **UI states**: Consistent Loading, Error, and Empty states
+- **TypeScript**: Strong and safe typing
+
+## File structure
 
 ```
 views/
-├── types.ts              # Tipos compartidos
-├── index.ts              # Exportaciones
-├── view-container.tsx    # Router de vistas
-├── README.md            # Esta documentación
-├── all-images/          # Vista principal de imágenes
-├── albums/              # Vista de álbumes
-├── audio/               # Vista de archivos de audio
-├── characters/          # Vista de personajes
-├── collections/         # Vista de colecciones
-├── concepts/            # Vista de conceptos
-├── documents/           # Vista de documentos
-├── favorites/           # Vista de favoritos
-├── file3d/              # Vista de archivos 3D
-├── groups/              # Vista de grupos
-├── json-files/          # Vista de archivos JSON
-├── notes/               # Vista de notas
-├── places/              # Vista de lugares
-├── prompts/             # Vista de prompts
-├── properties/          # Vista de propiedades
-├── search/              # Vista de búsqueda
-├── tags/                # Vista de etiquetas
-├── wildcards/           # Vista de wildcards
-└── workflows/           # Vista de workflows
+├── types.ts              # Shared types
+├── index.ts              # Exports
+├── view-container.tsx    # View router
+├── README.md            # This documentation
+├── all-images/          # Main image view
+├── albums/              # Album view
+├── audio/               # Audio file view
+├── characters/          # Character view
+├── collections/         # Collection view
+├── concepts/            # Concept view
+├── documents/           # Document view
+├── favorites/           # Favorite view
+├── file3d/              # 3D file view
+├── groups/              # Group view
+├── json-files/          # JSON file view
+├── notes/               # Note view
+├── places/              # Place view
+├── prompts/             # Prompt view
+├── properties/          # Property view
+├── search/              # Search view
+├── tags/                # Tag view
+├── wildcards/           # Wildcard view
+└── workflows/           # Workflow view
 ```
 
-## 🔄 **ViewContainer - Router Central**
+## ViewContainer - central router
 
-El `ViewContainer` maneja el enrutamiento de todas las vistas:
+`ViewContainer` handles routing of all views:
 
 ```typescript
-// Mapeo completo de 20 vistas
+// Complete mapping of 20 views
 const viewMapping: Record<ViewType, ComponentType> = {
 	'all-images': AllImagesView,
 	albums: AlbumsView,
@@ -139,55 +141,61 @@ const viewMapping: Record<ViewType, ComponentType> = {
 };
 ```
 
-## 🎨 **Efectos Visuales TCG**
+## TCG visual effects
 
-Todas las vistas implementan:
+All views implement the following effects:
 
-- **Efectos holográficos** en hover
-- **Gradientes dinámicos** por tipo de entidad
-- **Animaciones fluidas** con motion/react
-- **Brillo dorado** para elementos favoritos
-- **Escalado suave** en interacciones
-- **Perspectiva 3D** para profundidad visual
+- Holographic effects on hover
+- Dynamic gradients by entity type
+- Fluid animations with motion/react
+- Gold glow for Favorite items
+- Smooth scaling on interactions
+- 3D perspective for visual depth
 
-## 📊 **Métricas de Rendimiento**
+## Performance metrics
 
-- **Tiempo de carga**: < 200ms por vista
-- **Animaciones**: 60fps constantes
-- **Memoria**: Gestión eficiente con memoización
-- **Re-renders**: Minimizados con React.memo
-- **Lazy loading**: Carga bajo demanda
+The views target the following metrics:
 
-## 🔄 **Integración con Stores**
+- **Load time**: < 200ms per view
+- **Animations**: Constant 60fps
+- **Memory**: Efficient management with memoization
+- **Re-renders**: Minimized with React.memo
+- **Lazy loading**: On-demand load
 
-Cada vista se integra con su store Zustand correspondiente:
+## Integration with stores
 
-- **Carga automática** de datos
-- **Estados optimistas** para UI reactiva
-- **Caché inteligente** para evitar peticiones duplicadas
-- **Sincronización** en tiempo real
+Each view integrates with its corresponding Zustand store.
 
-## 🚀 **Próximas Mejoras**
+The integration includes the following behavior:
 
-1. **Virtualización** para listas muy grandes
-2. **Filtros avanzados** por vista
-3. **Búsqueda en tiempo real**
-4. **Ordenación personalizable**
-5. **Vistas personalizadas** por usuario
+- Automatic data load
+- Optimistic states for a reactive UI
+- Intelligent cache to avoid duplicate requests
+- Real-time synchronization
+
+## Planned improvements
+
+The following improvements are planned:
+
+1. **Virtualization** for very large lists
+2. **Advanced filters** per view
+3. **Real-time search**
+4. **Customizable sort**
+5. **Custom views** per user
 
 ---
 
-## 📝 **Documentación Técnica**
+## Technical documentation
 
-Para más detalles sobre implementación específica, consultar:
+For more details on specific implementation, see the following files:
 
-- `src/components/cards/README.md` - Sistema de cards
-- `src/store/entities/README.md` - Gestión de estado
-- `src/types/entities.ts` - Tipos TypeScript
+- `src/components/cards/README.md` - Card system
+- `src/store/entities/README.md` - State management
+- `src/types/entities.ts` - TypeScript types
 
 ```mermaid
 flowchart TD
-    A[ViewContainer] --> B[Vistas de entidades]
+    A[ViewContainer] --> B[Entity views]
     B --> C[Albums]
     B --> D[Collections]
     B --> E[Groups]

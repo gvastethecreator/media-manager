@@ -1,4 +1,3 @@
-# Servicio de archivos
+# File service
 
-Abstrae operaciones de lectura y escritura de archivos en el
-sistema de almacenamiento.
+The file service abstracts read and write operations on the storage system.

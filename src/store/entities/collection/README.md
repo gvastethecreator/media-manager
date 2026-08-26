@@ -1,70 +1,74 @@
-# 📚 Collection Store
+# Collection store
 
-## 📋 Descripción
+## Description
 
-Store de Zustand para la gestión del estado de colecciones en la aplicación de gestión de imágenes. Maneja datos de colecciones NFT/blockchain, configuración de UI, filtros y ordenamiento.
+This Zustand store manages Collection state in the media management application.
 
-## 🏗️ Arquitectura
+The store handles NFT/blockchain Collection data, UI configuration, filters, and sort.
 
-### Estructura de Slices
+## Architecture
+
+### Slice structure
 
 ```
 collection/
-├── index.ts           # Store principal con persistencia
-├── types.ts          # Tipos específicos del store
+├── index.ts           # Main store with persistence
+├── types.ts          # Types specific to the store
 ├── slices/
-│   ├── core.ts       # CRUD y operaciones principales con Server Actions
-│   └── filters.ts    # Filtrado y ordenamiento
-└── README.md         # Esta documentación
+│   ├── core.ts       # CRUD and main operations with routes
+│   └── filters.ts    # Filter and sort
+└── README.md         # This documentation
 ```
 
-### Flujo de Datos
+### Data flow
 
 ```mermaid
 graph TD
     A[CollectionStore] --> B[Core Slice]
     A --> C[Filters Slice]
 
-    B --> D[Server Actions]
+    B --> D[Routes]
     B --> E[CRUD Operations]
-    B --> F[Estado de Carga]
+    B --> F[Loading state]
 
-    C --> G[Filtrado por Categoría]
-    C --> H[Filtrado por Rareza]
-    C --> I[Filtrado por Precio]
-    C --> J[Ordenamiento]
-    C --> K[Agrupamiento]
+    C --> G[Filter by category]
+    C --> H[Filter by rarity]
+    C --> I[Filter by price]
+    C --> J[Sort]
+    C --> K[Grouping]
 
-    L[React Query] -.-> |"Datos del servidor"| D
+    L[React Query] -.-> |"Server data"| D
     M[Collection Actions] --> D
 ```
 
-## 🔧 Tipos Principales
+Routes call services.
+
+## Main types
 
 ### CollectionState
 
 ```typescript
 interface CollectionState {
-	// Datos principales - usando Record para mejor performance
+	// Main data - using Record for better performance
 	collections: Record<string, CollectionExtended>;
 
-	// Estado UI
+	// UI state
 	viewConfig: CollectionViewConfig;
 	selectedCollectionId: string | null;
 	hoveredCollectionId: string | null;
 	expandedCollectionIds: string[];
 
-	// Estado de carga y errores
+	// Loading and error state
 	isLoading: boolean;
 	error: string | null;
 
-	// Filtrado y ordenamiento
+	// Filter and sort
 	activeFilters: CollectionFilter[];
 	searchTerm: string;
 	defaultSortOption: string;
 	currentSortOption: string;
 
-	// Agrupamiento
+	// Grouping
 	groupBy: 'category' | 'rarity' | 'platform' | null;
 }
 ```
@@ -73,51 +77,51 @@ interface CollectionState {
 
 ```typescript
 interface CollectionExtended extends CollectionBase {
-	// Estados de UI (no persistidos)
+	// UI states (not persisted)
 	isHovered?: boolean;
 	isOpen?: boolean;
 	isLoading?: boolean;
 	hasError?: boolean;
 
-	// Datos calculados
+	// Calculated data
 	imageCount?: number;
 	videoCount?: number;
 	tagCount?: number;
 	groupCount?: number;
 	propertyCount?: number;
 
-	// Filtros parseados para UI
+	// Parsed filters for UI
 	parsedFilters?: CollectionFilter[];
 
-	// Propiedad de rareza (derivada de category o metadatos)
+	// Rarity property (derived from category or metadata)
 	rarity?: string;
 }
 ```
 
-## 🎛️ Slices
+## Slices
 
-### 1. Core Slice
+### 1. Core slice
 
-Maneja operaciones CRUD y comunicación con Server Actions:
+This slice handles CRUD operations and communication with routes:
 
 ```typescript
-// Operaciones de consulta
+// Query operations
 getCollectionById(id: string): CollectionExtended | undefined
 getCollections(): CollectionExtended[]
 getSelectedCollection(): CollectionExtended | undefined
 
-// Operaciones de mutación
+// Mutation operations
 setCollections(collections: CollectionExtended[])
 addCollection(collection: CollectionExtended)
 updateCollection(id: string, data: Partial<CollectionExtended>)
 removeCollection(id: string)
 selectCollection(id: string | null)
 
-// Estado de carga y errores
+// Loading and error state
 setLoading(isLoading: boolean)
 setError(error: string | null)
 
-// Acciones asíncronas con Server Actions
+// Asynchronous actions with routes
 fetchCollection(id: string): Promise<CollectionExtended | undefined>
 fetchCollections(): Promise<CollectionExtended[]>
 createCollectionServer(data: CollectionCreateInput): Promise<CollectionExtended | undefined>
@@ -125,181 +129,194 @@ updateCollectionServer(id: string, data: Partial<CollectionUpdateInput>): Promis
 removeCollectionServer(id: string): Promise<boolean>
 ```
 
-### 2. Filters Slice
+### 2. Filters slice
 
-Maneja filtrado, ordenamiento y agrupamiento:
+This slice handles filter, sort, and grouping:
 
 ```typescript
-// Filtros por criterios
+// Filters by criteria
 filterByCategory(category: string | null): CollectionExtended[]
 filterByRarity(rarity: string | null): CollectionExtended[]
 filterByPrice(minPrice: number | null, maxPrice: number | null): CollectionExtended[]
 filterByName(searchTerm: string): CollectionExtended[]
 
-// Obtener datos procesados
+// Get processed data
 getSortedCollections(sortOption?: string): CollectionExtended[]
 getGroupedCollections(groupBy?: 'category' | 'rarity' | 'platform' | null): Record<string, CollectionExtended[]>
 
-// Operaciones avanzadas de filtrado
+// Advanced filter operations
 addFilter(filter: CollectionFilter)
 removeFilter(index: number)
 clearFilters()
 applyFilters(filters: CollectionFilter[]): CollectionExtended[]
 
-// Configuraciones
+// Configurations
 setDefaultSortOption(option: string)
 setDefaultGroupBy(groupBy: 'category' | 'rarity' | 'platform' | null)
 ```
 
-## 📊 Persistencia
+## Persistence
 
-El store persiste automáticamente:
+The store persists the following data automatically:
 
-- ✅ `collections` - Datos de colecciones
-- ✅ `viewConfig` - Configuración de visualización
-- ✅ `selectedCollectionId` - Colección seleccionada
-- ✅ `defaultSortOption` - Opción de ordenamiento por defecto
-- ✅ `currentSortOption` - Opción de ordenamiento actual
-- ✅ `groupBy` - Criterio de agrupamiento
-- ❌ Estados temporales (loading, error, hover, expandido)
+- `collections` - Collection data
+- `viewConfig` - Display configuration
+- `selectedCollectionId` - Selected Collection
+- `defaultSortOption` - Default sort option
+- `currentSortOption` - Current sort option
+- `groupBy` - Grouping criterion
 
-## 🎯 Selectores Útiles
+Temporary states (loading, error, hover, expanded) do not persist.
+
+## Useful selectors
 
 ```typescript
-// Obtener colección específica
+// Get a specific Collection
 const collection = selectCollectionById('collection-id')(state);
 
-// Obtener colecciones procesadas
+// Get processed Collections
 const sortedCollections = selectSortedCollections(state);
 const groupedCollections = selectGroupedCollections(state);
 const favoriteCollections = selectFavoriteCollections(state);
 const allCollections = selectAllCollections(state);
 
-// Estado actual
+// Current state
 const currentCollection = selectCurrentCollection(state);
 const collectionCount = selectCollectionCount(state);
 ```
 
-## 🔄 Patrones de Uso
+## Usage patterns
 
-### Obtener y Mostrar Colecciones
+### Get and show Collections
 
 ```typescript
-// ✅ CORRECTO - Usar métodos del store con Server Actions
+// CORRECT - Use store methods with routes
 const store = useCollectionStore();
 const collections = await store.fetchCollections();
 
-// ✅ CORRECTO - Obtener datos locales
+// CORRECT - Get local data
 const localCollections = store.getCollections();
 ```
 
-### Crear/Modificar Colecciones
+### Create or modify Collections
 
 ```typescript
-// ✅ CORRECTO - Usar Server Actions
+// CORRECT - Use routes
 const store = useCollectionStore();
 const newCollection = await store.createCollectionServer({
-	name: 'Mi Colección',
+	name: 'My Collection',
 	emoji: '🎨',
 	color: '#3B82F6',
-	// ... otros campos
+	// ... other fields
 });
 
-// ✅ CORRECTO - Actualizar colección
+// CORRECT - Update Collection
 const updated = await store.updateCollectionServer('collection-id', {
-	name: 'Nuevo Nombre',
+	name: 'New Name',
 });
 ```
 
-### Filtrar y Ordenar
+### Filter and sort
 
 ```typescript
-// ✅ CORRECTO - Usar filtros del store
+// CORRECT - Use store filters
 const store = useCollectionStore();
 const nftCollections = store.filterByCategory('nft');
 const expensiveCollections = store.filterByPrice(100, null);
 const sortedByName = store.getSortedCollections('name_asc');
 ```
 
-### Gestionar Estado UI
+### Manage UI state
 
 ```typescript
-// ✅ CORRECTO - Selección y configuración
+// CORRECT - Selection and configuration
 const store = useCollectionStore();
 store.selectCollection('collection-id');
 store.setDefaultSortOption('price_desc');
 store.setDefaultGroupBy('category');
 ```
 
-## 🚨 Características Especiales
+## Special features
 
-### Integración NFT/Blockchain
+### NFT/blockchain integration
 
-Las colecciones soportan metadatos específicos de NFT:
+Collections support NFT-specific metadata.
 
-- `platform` - OpenSea, Rarible, etc.
-- `network` - Ethereum, Polygon, etc.
+The metadata includes the following fields:
+
+- `platform` - OpenSea, Rarible
+- `network` - Ethereum, Polygon
 - `tokenId`, `tokenAddress`, `contractAddress`
-- `price` - Precio en la moneda nativa
-- `editions` - Información de ediciones (JSON serializado)
+- `price` - Price in the native currency
+- `editions` - Edition information (serialized JSON)
 
-### Conversión de Tipos
+### Type conversion
 
-El store maneja automáticamente la conversión entre `CollectionComplete` (del servidor) y `CollectionExtended` (del cliente):
+The store automatically handles conversion between `CollectionComplete` (from the server) and `CollectionExtended` (from the client):
 
 ```typescript
-// Conversión automática en fetchCollection
+// Automatic conversion in fetchCollection
 const extendedCollection: CollectionExtended = {
 	...serverCollection,
 	imageCount: serverCollection._count?.images || 0,
 	videoCount: serverCollection._count?.videos || 0,
 	tagCount: serverCollection._count?.tags || 0,
-	// ... otros conteos calculados
+	// ... other calculated counts
 };
 ```
 
-### Filtros Avanzados
+### Advanced filters
 
-Soporte para operadores de filtro completos:
+The store supports complete filter operators.
+
+The operators include the following:
 
 - `equals`, `contains`, `startsWith`, `endsWith`
 - `gt`, `gte`, `lt`, `lte`, `between`
 
-## 🔗 Relaciones
+## Relations
 
-### Dependencias
+### Dependencies
 
-- `@/types/entities/collection` - Tipos canónicos
-- `@/utils/collection` - Utilidades de ordenamiento y agrupamiento
-- `@/app/actions/collections/collection.actions` - Server Actions
-- `zustand` - Gestión de estado
+The store depends on the following modules:
 
-### Entidades Relacionadas
+- `@/types/entities/collection` - Canonical types
+- `@/utils/collection` - Sort and grouping utilities
+- `@/app/actions/collections/collection.actions` - Route modules
+- `zustand` - State management
 
-- `Image` - Imágenes en colecciones
-- `Video` - Videos en colecciones
-- `Tag` - Etiquetas de colecciones
-- `Group` - Grupos de colecciones
-- `Property` - Propiedades personalizadas
-- `Album` - Álbumes relacionados
+### Related entities
 
-## 📈 Métricas y Performance
+The store relates to the following entities:
 
-### Optimizaciones Aplicadas
+- `Image` - Images in Collections
+- `Video` - Videos in Collections
+- `Tag` - Collection Tags
+- `Group` - Collection Groups
+- `Property` - Custom properties
+- `Album` - Related Albums
 
-- ✅ Uso de Record en lugar de Array para acceso O(1)
-- ✅ Persistencia selectiva (solo datos necesarios)
-- ✅ Conversión automática de tipos servidor/cliente
-- ✅ Filtros aplicados en memoria (eficiente para <1000 colecciones)
+## Metrics and performance
 
-### Consideraciones de Performance
+### Applied optimizations
 
-- Los datos se almacenan como Record para acceso rápido por ID
-- Las operaciones de filtrado se optimizan para colecciones pequeñas/medianas
-- La persistencia excluye estados temporales para mejor rendimiento
+The store uses the following optimizations:
+
+- Use of Record instead of Array for O(1) access
+- Selective persistence (only needed data)
+- Automatic server/client type conversion
+- Filters applied in memory (efficient for fewer than 1000 Collections)
+
+### Performance considerations
+
+Data is stored as Record for fast access by ID.
+
+Filter operations are optimized for small and medium Collections.
+
+Persistence excludes temporary states for better performance.
 
 ---
 
-**Última actualización**: Enero 2025
-**Versión**: 1.0 (Server Actions Integration)
-**Mantenedor**: AI Assistant
+**Last update**: January 2025
+**Version**: 1.0 (Route integration)
+**Maintainer**: AI Assistant

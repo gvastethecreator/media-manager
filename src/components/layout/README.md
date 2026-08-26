@@ -1,33 +1,37 @@
-# Layout Principal
+# Main layout
 
-Define la estructura base de la aplicación con paneles laterales y contenedor central.
+This layout defines the base structure of the application with side panels and a central container.
 
-Archivos clave:
+The key files are the following:
 
-- **main-layout.tsx**: Componente de layout con panel de navegación y panel derecho.
-- **nav-panel-collapsed.css** y **right-panel-collapsed.css**: Estilos para estados colapsados.
+- **main-layout.tsx**: Layout component with the navigation panel and the right panel.
+- **nav-panel-collapsed.css** and **right-panel-collapsed.css**: Styles for collapsed states.
 
 ```mermaid
 flowchart TD
-    A[main-layout] --> B[Navegación]
-    A --> C[Contenido]
-    A --> D[Panel Derecho]
+    A[main-layout] --> B[Navigation]
+    A --> C[Content]
+    A --> D[Right panel]
 ```
 
 ---
 
-## ⚠️ Requerimiento crítico para grids virtualizados (FileBrowser, etc.)
+## Critical requirement for virtualized grids (FileBrowser)
 
-> **Todos los ancestros del área central (CentralPanel, ResizablePanel, PanelGroup, etc.) deben tener:**
->
-> - `h-full w-full min-h-0 min-w-0 flex-1 flex flex-col`
->
-> Esto es indispensable para que los componentes virtualizados (como FileBrowser) reciban un tamaño válido y no caigan en fallback o errores de containerWidth=0.
->
-> Si algún ancestro omite estas clases, el grid puede fallar en el cálculo de tamaño y mostrar errores o skeletons.
+All ancestors of the central area, including CentralPanel, ResizablePanel, and PanelGroup, must have the following classes:
 
-### Buenas prácticas
+- `h-full w-full min-h-0 min-w-0 flex-1 flex flex-col`
 
-- Revisar siempre la cadena de layout al agregar nuevos wrappers.
-- Documentar cualquier excepción o layout especial.
-- Consultar este README y el de FileBrowser ante dudas de integración.
+Virtualized components such as FileBrowser need a valid size.
+
+Without these classes, the grid can fail size calculation and show errors or skeletons.
+
+If an ancestor omits these classes, the grid can report `containerWidth=0`.
+
+### Good practices
+
+Inspect the layout chain when you add new wrappers.
+
+Document any exception or special layout.
+
+Check this README and the FileBrowser README when integration is unclear.

@@ -1,38 +1,44 @@
-# Servicio de Colecciones (Collection)
+# Collection service (Collection)
 
-## Descripción General
+## Overview
 
-El servicio de colecciones (Collection) es un componente central del sistema de organización de medios que permite agrupar y clasificar diferentes tipos de contenido bajo criterios temáticos o funcionales. A diferencia de los álbumes (que agrupan principalmente imágenes) y carpetas (que siguen una estructura jerárquica), las colecciones ofrecen una forma flexible de organizar contenido variado con propiedades personalizables.
+The Collection service is a central component of the media organization system.
 
-## Diagrama de Flujo
+The service groups and classifies different content types under thematic or functional criteria.
+
+Albums group images mainly. Folders follow a hierarchical structure.
+
+Collections offer a flexible way to organize mixed content with customizable properties.
+
+## Flow diagram
 
 ```mermaid
 graph TD
-    A[Cliente/UI] -->|Petición| B[Server Actions]
-    B -->|Llamada| C[Collection Service]
-    C -->|Transformación| D[Transformers]
-    D -->|Validación| E[Tipos]
-    C -->|Almacenamiento| F[(Base de Datos)]
-    C -->|Eventos| G[Event System]
-    G -->|Notificación| H[Activity Service]
+    A[Client/UI] -->|Request| B[Routes]
+    B -->|Call| C[Collection Service]
+    C -->|Transformation| D[Transformers]
+    D -->|Validation| E[Types]
+    C -->|Storage| F[(Database)]
+    C -->|Events| G[Event System]
+    G -->|Notification| H[Activity Service]
     G -->|Stats| I[Stats Service]
 
-    subgraph "Operaciones con Colecciones"
-        J[Crear Colección] --> K[Validar]
-        K --> L[Guardar]
-        L --> M[Notificar]
+    subgraph "Collection operations"
+        J[Create Collection] --> K[Validate]
+        K --> L[Save]
+        L --> M[Notify]
 
-        N[Obtener Colecciones] --> O[Filtrar]
-        O --> P[Transformar]
-        P --> Q[Calcular Stats]
+        N[Get Collections] --> O[Filter]
+        O --> P[Transform]
+        P --> Q[Calculate Stats]
 
-        R[Actualizar Colección] --> S[Validar]
-        S --> T[Guardar]
-        T --> U[Revalidar]
+        R[Update Collection] --> S[Validate]
+        S --> T[Save]
+        T --> U[Revalidate]
 
-        V[Añadir Items] --> W[Verificar]
-        W --> X[Relacionar]
-        X --> Y[Notificar]
+        V[Add items] --> W[Verify]
+        W --> X[Relate]
+        X --> Y[Notify]
     end
 
     style C fill:#d4f1f9,stroke:#333,stroke-width:1px
@@ -40,87 +46,97 @@ graph TD
     style G fill:#e1bee7,stroke:#333,stroke-width:1px
 ```
 
-## Estructura del Módulo
+Routes call services.
 
-### Archivos del Servicio
+## Module structure
+
+### Service files
 
 ```
 src/services/collection/
-├── collection.service.ts    # Implementación principal del servicio
-└── index.ts                 # Punto de entrada y exportaciones
+├── collection.service.ts    # Main service implementation
+└── index.ts                 # Entry point and exports
 ```
 
-### Archivos de Transformers
+### Transformer files
 
 ```
 src/transformers/collection/
-├── README.md               # Documentación específica de transformers
-├── index.ts                # Exportaciones del módulo
-├── mappers.ts              # Funciones para mapear entre objetos
-├── serializers.ts          # Serializadores para distintos formatos
-└── transformer.ts          # Transformador principal
+├── README.md               # Transformer-specific documentation
+├── index.ts                # Module exports
+├── mappers.ts              # Functions that map between objects
+├── serializers.ts          # Serializers for different formats
+└── transformer.ts          # Main transformer
 ```
 
-### Tipos de Datos
+### Data types
 
 ```
 src/types/entities/collection/
-├── base.ts                 # Tipos básicos para colecciones
-├── enums.ts                # Enumeraciones para colecciones
-├── extended.ts             # Tipos extendidos con información adicional
-├── index.ts                # Exportaciones del módulo
-└── types.ts                # Definiciones principales de tipos e interfaces
+├── base.ts                 # Basic types for Collections
+├── enums.ts                # Enumerations for Collections
+├── extended.ts             # Extended types with extra information
+├── index.ts                # Module exports
+└── types.ts                # Main type and interface definitions
 ```
 
-### Server Actions
+### Route modules
 
 ```
 src/app/actions/collections/
-├── collection.actions.ts   # Acciones para todas las operaciones
-└── index.ts                # Exportaciones del módulo
+├── collection.actions.ts   # Actions for all operations
+└── index.ts                # Module exports
 ```
 
-## Funcionalidades Principales
+## Main features
 
-### 1. Gestión de Colecciones
+### 1. Collection management
 
-- **Crear Colección**: Permite crear nuevas colecciones con propiedades personalizables.
-- **Obtener Colección**: Recupera información detallada de una colección por su ID.
-- **Obtener Colecciones**: Lista todas las colecciones con filtros y estadísticas.
-- **Actualizar Colección**: Modifica propiedades de una colección existente.
-- **Eliminar Colección**: Elimina una colección manteniendo sus elementos intactos.
+The service provides the following Collection operations:
 
-### 2. Gestión de Elementos
+- **Create Collection**: Creates new Collections with customizable properties.
+- **Get Collection**: Retrieves detailed Collection information by ID.
+- **Get Collections**: Lists all Collections with filters and statistics.
+- **Update Collection**: Changes properties of an existing Collection.
+- **Delete Collection**: Deletes a Collection while its items stay intact.
 
-- **Añadir Elementos**: Agrega imágenes y otros elementos a una colección.
-- **Eliminar Elementos**: Remueve elementos específicos de una colección.
-- **Obtener Elementos**: Recupera los elementos asociados a una colección.
-- **Vaciar Colección**: Elimina todos los elementos de una colección.
+### 2. Item management
 
-### 3. Organización y Categorización
+The service provides the following item operations:
 
-- **Categorías**: Asignación de categorías predefinidas (PERSONAL, TRABAJO, PROYECTO, etc.).
-- **Personalización**: Asignación de emojis y colores para identificación visual.
-- **Priorización**: Marcado de colecciones como destacadas o favoritas.
-- **Visibilidad**: Control de colecciones públicas y privadas.
+- **Add items**: Adds images and other items to a Collection.
+- **Remove items**: Removes specific items from a Collection.
+- **Get items**: Retrieves the items associated with a Collection.
+- **Empty Collection**: Removes all items from a Collection.
 
-### 4. Interacción y Estadísticas
+### 3. Organization and categorization
 
-- **Cálculo de Estadísticas**: Número de elementos, tamaño total, última actualización, etc.
-- **Notificaciones**: Sistema de eventos para notificar cambios en colecciones.
-- **Integración con UI**: Propiedades extendidas para visualización y selección.
+The service provides the following organization operations:
 
-## Ejemplos de Uso
+- **Categories**: Assignment of predefined categories (PERSONAL, TRABAJO, PROYECTO).
+- **Customization**: Assignment of emojis and colors for visual identification.
+- **Prioritization**: Marking of Collections as featured or Favorites.
+- **Visibility**: Control of public and private Collections.
 
-### Crear una Nueva Colección
+### 4. Interaction and statistics
+
+The service provides the following interaction operations:
+
+- **Statistics calculation**: Number of items, total size, last update.
+- **Notifications**: Event system that notifies Collection changes.
+- **UI integration**: Extended properties for display and selection.
+
+## Usage examples
+
+### Create a new Collection
 
 ```typescript
 import { collectionService } from '@/services/index';
 
-// Crear una colección
+// Create a Collection
 const newCollection = await collectionService.createCollection({
-	name: 'Lugares Favoritos',
-	description: 'Colección de mis lugares preferidos para visitar',
+	name: 'Favorite Places',
+	description: 'Collection of my preferred places to visit',
 	emoji: '🏞️',
 	color: '#3498db',
 	category: 'PERSONAL',
@@ -129,150 +145,158 @@ const newCollection = await collectionService.createCollection({
 });
 ```
 
-### Obtener Colecciones con Estadísticas
+### Get Collections with statistics
 
 ```typescript
 import { collectionService } from '@/services/index';
 
-// Obtener todas las colecciones
+// Get all Collections
 const collections = await collectionService.getCollections();
 
-// Trabajar con las estadísticas
+// Work with the statistics
 collections.forEach((collection) => {
-	console.log(`${collection.name}: ${collection.stats.imageCount} imágenes, ${collection.stats.videoCount} videos`);
-	console.log(`Tamaño total: ${collection.stats.totalSize} bytes`);
+	console.log(`${collection.name}: ${collection.stats.imageCount} images, ${collection.stats.videoCount} videos`);
+	console.log(`Total size: ${collection.stats.totalSize} bytes`);
 });
 ```
 
-### Actualizar una Colección
+### Update a Collection
 
 ```typescript
 import { collectionService } from '@/services/index';
 
-// Actualizar propiedades de una colección
+// Update Collection properties
 const updatedCollection = await collectionService.updateCollection('collection-id-123', {
-	name: 'Destinos de Viaje',
-	description: 'Actualizada con nuevos destinos para visitar',
+	name: 'Travel Destinations',
+	description: 'Updated with new destinations to visit',
 	emoji: '✈️',
 	color: '#e74c3c',
 	isPinned: true,
 });
 ```
 
-### Añadir una Imagen a una Colección
+### Add an image to a Collection
 
 ```typescript
 import { collectionService } from '@/services/index';
 
-// Añadir una imagen a la colección
+// Add an image to the Collection
 await collectionService.addImageToCollection('collection-id-123', 'image-id-456');
 
-// Verificar la imagen añadida
+// Verify the added image
 const collectionImages = await collectionService.getCollectionImages('collection-id-123');
-console.log(`La colección ahora tiene ${collectionImages.length} imágenes`);
+console.log(`The collection now has ${collectionImages.length} images`);
 ```
 
-### Eliminar una Imagen de una Colección
+### Remove an image from a Collection
 
 ```typescript
 import { collectionService } from '@/services/index';
 
-// Eliminar una imagen de la colección
+// Remove an image from the Collection
 await collectionService.removeImageFromCollection('collection-id-123', 'image-id-456');
 ```
 
-## Diferencias con Otras Entidades Organizativas
+## Differences from other organizer entities
 
-| Característica          | Collection                     | Album                   | Folder                  | Tag                        |
+| Characteristic          | Collection                     | Album                   | Folder                  | Tag                        |
 | ----------------------- | ------------------------------ | ----------------------- | ----------------------- | -------------------------- |
-| **Propósito principal** | Agrupación flexible por tema   | Agrupación de imágenes  | Organización jerárquica | Clasificación por concepto |
-| **Estructura**          | Plana con posible anidación    | Plana                   | Jerárquica              | Plana                      |
-| **Personalización**     | Alta (emoji, color, categoría) | Media                   | Baja                    | Mínima                     |
-| **Tipos de contenido**  | Múltiples                      | Principalmente imágenes | Archivos y carpetas     | Cualquiera                 |
-| **Jerarquía**           | Opcional                       | No                      | Obligatoria             | No                         |
-| **Visualización UI**    | Personalizable                 | Orientada a galería     | Estructura de árbol     | Lista o nube de etiquetas  |
+| **Main purpose**        | Flexible grouping by theme     | Image grouping          | Hierarchical organization | Classification by concept |
+| **Structure**           | Flat with possible nesting     | Flat                    | Hierarchical            | Flat                       |
+| **Customization**       | High (emoji, color, category)  | Medium                  | Low                     | Minimal                    |
+| **Content types**       | Multiple                       | Mainly images           | Files and Folders       | Any                        |
+| **Hierarchy**           | Optional                       | No                      | Required                | No                         |
+| **UI display**          | Customizable                   | Gallery-oriented        | Tree structure          | Tag list or cloud          |
 
-## Relaciones con Otras Entidades
+## Relations with other entities
 
-| Entidad      | Tipo de Relación | Descripción                                           |
+| Entity       | Relation type    | Description                                           |
 | ------------ | ---------------- | ----------------------------------------------------- |
-| **Image**    | Muchos a muchos  | Las colecciones pueden contener múltiples imágenes    |
-| **Video**    | Muchos a muchos  | Las colecciones pueden contener múltiples videos      |
-| **Album**    | Muchos a muchos  | Las colecciones pueden contener o referenciar álbumes |
-| **Tag**      | Muchos a muchos  | Las colecciones pueden tener múltiples etiquetas      |
-| **Group**    | Muchos a muchos  | Las colecciones pueden compartirse con grupos         |
-| **User**     | Muchos a uno     | Las colecciones pertenecen a usuarios                 |
-| **Activity** | Referencial      | Las actividades pueden referenciar colecciones        |
+| **Image**    | Many to many     | Collections can contain multiple images               |
+| **Video**    | Many to many     | Collections can contain multiple videos               |
+| **Album**    | Many to many     | Collections can contain or reference Albums           |
+| **Tag**      | Many to many     | Collections can have multiple Tags                    |
+| **Group**    | Many to many     | Collections can be shared with Groups                 |
+| **User**     | Many to one      | Collections belong to users                           |
+| **Activity** | Referential      | Activities can reference Collections                  |
 
-## Modelo de Datos
+## Data model
 
 ```typescript
-// Modelo básico de Collection
+// Basic Collection model
 interface CollectionBase {
-	id: string; // Identificador único
-	name: string; // Nombre de la colección
-	description?: string; // Descripción opcional
-	emoji?: string; // Emoji representativo
-	color?: string; // Color asociado (hex o nombre)
-	category?: CollectionCategory; // Categoría (PERSONAL, WORK, PROJECT, OTHER)
-	isPublic: boolean; // Indica si la colección es pública
-	isPinned: boolean; // Indica si está fijada en la UI
-	isFavorite: boolean; // Indica si está marcada como favorita
-	parentId?: string; // ID de la colección padre (si es anidada)
-	createdAt: Date; // Fecha de creación
-	updatedAt: Date; // Fecha de última actualización
+	id: string; // Unique identifier
+	name: string; // Collection name
+	description?: string; // Optional description
+	emoji?: string; // Representative emoji
+	color?: string; // Associated color (hex or name)
+	category?: CollectionCategory; // Category (PERSONAL, WORK, PROJECT, OTHER)
+	isPublic: boolean; // Indicates whether the Collection is public
+	isPinned: boolean; // Indicates whether it is pinned in the UI
+	isFavorite: boolean; // Indicates whether it is marked as a Favorite
+	parentId?: string; // Parent Collection ID (if nested)
+	createdAt: Date; // Creation date
+	updatedAt: Date; // Last update date
 }
 
-// Extensión con estadísticas
+// Extension with statistics
 interface CollectionWithStats extends CollectionBase {
 	stats: {
-		imageCount: number; // Cantidad de imágenes
-		videoCount: number; // Cantidad de videos
-		albumCount: number; // Cantidad de álbumes
-		tagCount: number; // Cantidad de etiquetas
-		groupCount: number; // Cantidad de grupos relacionados
-		totalSize: number; // Tamaño total en bytes
-		lastUpdated?: Date; // Última actualización de contenido
+		imageCount: number; // Image count
+		videoCount: number; // Video count
+		albumCount: number; // Album count
+		tagCount: number; // Tag count
+		groupCount: number; // Related Group count
+		totalSize: number; // Total size in bytes
+		lastUpdated?: Date; // Last content update
 	};
 }
 
-// Extensión completa con relaciones
+// Complete extension with relations
 interface CollectionComplete extends CollectionWithStats {
-	parent?: CollectionBase; // Colección padre
-	children: CollectionBase[]; // Colecciones hijas
-	images: Image[]; // Imágenes en la colección
-	videos: Video[]; // Videos en la colección
-	albums: Album[]; // Álbumes en la colección
-	tags: Tag[]; // Etiquetas de la colección
-	groups: Group[]; // Grupos con acceso a la colección
-	user: User; // Usuario propietario
+	parent?: CollectionBase; // Parent Collection
+	children: CollectionBase[]; // Child Collections
+	images: Image[]; // Images in the Collection
+	videos: Video[]; // Videos in the Collection
+	albums: Album[]; // Albums in the Collection
+	tags: Tag[]; // Tags of the Collection
+	groups: Group[]; // Groups with access to the Collection
+	user: User; // Owner user
 }
 ```
 
-## Buenas Prácticas
+## Good practices
 
-1. **Validación de Nombres**: Asegúrese de validar los nombres de colecciones para evitar duplicados.
-2. **Uso de Transformers**: Utilice siempre las funciones de transformación para mantener la consistencia de datos.
-3. **Manejo de Eventos**: Implemente correctamente las notificaciones de cambios en colecciones.
-4. **Control de Acceso**: Verifique los permisos antes de permitir acceso a colecciones privadas.
-5. **Optimización de Carga**: Cargue las relaciones solo cuando sea necesario para mejorar el rendimiento.
-6. **Categorización Consistente**: Utilice un conjunto coherente de categorías para facilitar la navegación.
-7. **Personalización Visual**: Aproveche las propiedades de emoji y color para mejorar la experiencia de usuario.
+Validate Collection names to avoid duplicates.
 
-## Solución de Problemas Comunes
+Always use the transformation functions to keep data consistency.
 
-| Problema                           | Solución                                                          |
+Implement Collection change notifications correctly.
+
+Verify permissions before you allow access to private Collections.
+
+Load relations only when needed to improve performance.
+
+Use a coherent set of categories to ease navigation.
+
+Use emoji and color properties to improve the user experience.
+
+## Common troubleshooting
+
+| Problem                            | Solution                                                          |
 | ---------------------------------- | ----------------------------------------------------------------- |
-| **Colecciones huérfanas**          | Verifique y repare las referencias a colecciones padre eliminadas |
-| **Elementos duplicados**           | Utilice la función `collectionService.deduplicateItems()`         |
-| **Colecciones sin elementos**      | Identifique con `collectionService.findEmptyCollections()`        |
-| **Inconsistencia de estadísticas** | Recalcule con `collectionService.refreshStats()`                  |
-| **Conflictos de nombres**          | Implemente validación previa o añada sufijo para diferenciar      |
+| **Orphan Collections**             | Verify and repair references to deleted parent Collections        |
+| **Duplicate items**                | Use the `collectionService.deduplicateItems()` function           |
+| **Collections without items**      | Identify with `collectionService.findEmptyCollections()`          |
+| **Inconsistent statistics**        | Recalculate with `collectionService.refreshStats()`               |
+| **Name conflicts**                 | Implement prior validation or add a suffix to differentiate       |
 
-## Roadmap y Mejoras Futuras
+## Roadmap and future improvements
 
-- Implementación de colecciones inteligentes basadas en reglas automáticas
-- Mejoras en el sistema de categorización con subcategorías personalizables
-- Funcionalidades de colaboración para edición compartida de colecciones
-- Exportación e importación de colecciones completas
-- Recomendaciones automáticas de elementos para colecciones existentes
+The following work is planned:
+
+- Implementation of smart Collections based on automatic rules
+- Improvements in the categorization system with customizable subcategories
+- Collaboration features for shared Collection editing
+- Export and import of complete Collections
+- Automatic item recommendations for existing Collections

@@ -1,43 +1,47 @@
-# 🎴 WorldItemCard
+# WorldItemCard
 
-Un componente de tarjeta para mostrar información de objetos del mundo con un diseño inspirado en cartas de juegos de colección (TCG).
+This card component shows World Item information with a collectible-card (TCG) design.
 
-## 📋 Descripción
+## Description
 
-El componente `WorldItemCard` presenta información de objetos del mundo en formato de carta TCG (Trading Card Game), con efectos visuales y diseño estructurado que muestra propiedades, atributos, estadísticas e imágenes relacionadas.
+The `WorldItemCard` component presents World Item information in TCG (Trading Card Game) format.
 
-## 🔄 Flujo de funcionamiento
+The structured design shows properties, attributes, statistics, and related images.
+
+## Operation flow
 
 ```mermaid
 graph TD
-    A[WorldItemCard] --> B[Inicialización]
-    B --> C[Determinar colores por tipo]
-    C --> D[Generar contenido de tarjeta]
-    D --> E{¿Tiene onClick?}
-    E -->|Sí| F[Retornar tarjeta con evento]
-    E -->|No| G[Retornar tarjeta con Link]
+    A[WorldItemCard] --> B[Initialization]
+    B --> C[Determine colors by type]
+    C --> D[Generate card content]
+    D --> E{Does it have onClick?}
+    E -->|Yes| F[Return card with event]
+    E -->|No| G[Return card with Link]
 
-    H[WorldItemCardImages] --> I[Cargar imágenes con server action]
-    I --> J{¿Hay imágenes?}
-    J -->|Sí| K[Mostrar grid de imágenes]
-    J -->|No| L[Mostrar placeholder]
+    H[WorldItemCardImages] --> I[Load images through a route]
+    I --> J{Are there images?}
+    J -->|Yes| K[Show image grid]
+    J -->|No| L[Show placeholder]
 
-    M[world-item-server-actions] --> N[Consultar base de datos]
-    N --> O[Transformar datos]
-    O --> P[Retornar imágenes]
+    M[world-item-server-actions] --> N[Query the database]
+    N --> O[Transform data]
+    O --> P[Return images]
 ```
 
-## 🗂️ Estructura de archivos
+## File structure
 
-- **index.tsx**: Punto de entrada y exportaciones del componente
-- **world-item-card.tsx**: Componente principal que renderiza la tarjeta
-- **world-item-card-images.tsx**: Componente para mostrar las imágenes del objeto
-- **world-item-server-actions.ts**: Acciones del servidor para obtener datos
-- **world-item-card.test.tsx**: Tests del componente
+The directory includes the following files:
 
-## 🖥️ Ejemplos de uso
+- **index.tsx**: Entry point and component exports
+- **world-item-card.tsx**: Main component that renders the card
+- **world-item-card-images.tsx**: Component that shows the item images
+- **world-item-server-actions.ts**: Routes that fetch data
+- **world-item-card.test.tsx**: Component tests
 
-### Uso básico con navegación automática
+## Usage examples
+
+### Basic use with automatic navigation
 
 ```tsx
 import { WorldItemCard } from '@/components/cards/world-item-card';
@@ -53,7 +57,7 @@ function WorldItemsList({ worldItems }) {
 }
 ```
 
-### Uso con manejador de eventos personalizado
+### Use with a custom event handler
 
 ```tsx
 import { WorldItemCard } from '@/components/cards/world-item-card';
@@ -69,39 +73,43 @@ function WorldItemsSelector({ worldItems, onSelect }) {
 }
 ```
 
-## 🔌 Integración
+## Integration
 
-Este componente se utiliza principalmente en:
+This component is used mainly in the following places:
 
-- `WorldItemsView`: Vista principal de objetos del mundo
-- Selectores de objetos en formularios
-- Diálogos y modales de selección
+- `WorldItemsView`: Main World Item view
+- Item selectors in forms
+- Selection dialogs and modals
 
-## 🎨 Personalización visual
+## Visual customization
 
-Los colores y el icono del componente se determinan automáticamente según el tipo de objeto:
+Colors and the icon of the component are determined automatically from the item type.
 
-- **ARTIFACT**: Colores púrpura/violeta con icono de gema
-- **BOOK**: Colores azul/turquesa con icono de libro
-- **CONSUMABLE**: Colores verde/naranja con icono de tienda
-- **Otros tipos**: Colores azul oscuro con icono de caja genérico
+The types use the following styles:
 
-## Características
+- **ARTIFACT**: Purple and violet colors with a gem icon
+- **BOOK**: Blue and turquoise colors with a book icon
+- **CONSUMABLE**: Green and orange colors with a shop icon
+- **Other types**: Dark blue colors with a generic box icon
 
-- **Diseño TCG**: Efectos visuales que simulan cartas de juegos como Magic, Yu-Gi-Oh o Pokémon
-- **Visualización de rareza**: Muestra visualmente la rareza del objeto con efectos apropiados
-- **Imágenes asociadas**: Muestra miniaturas de las imágenes vinculadas al objeto
-- **Estadísticas detalladas**: Muestra propiedades, atributos, efectos y requisitos
-- **Animaciones**: Efectos de hover y selección para mejorar la experiencia de usuario
-- **Personalizable**: Admite múltiples opciones de personalización (TCG, compacto, interactivo)
-- **Accesible**: Soporte completo para navegación con teclado
+## Features
 
-## Uso
+The card provides the following features:
+
+- **TCG design**: Visual effects that simulate cards from Magic, Yu-Gi-Oh, or Pokemon
+- **Rarity display**: Visual rarity of the item with appropriate effects
+- **Associated images**: Thumbnails of images linked to the item
+- **Detailed statistics**: Properties, attributes, effects, and requirements
+- **Animations**: Hover and selection effects that improve the user experience
+- **Customizable**: Multiple customization options (TCG, compact, interactive)
+- **Accessible**: Full support for keyboard navigation
+
+## Use
 
 ```tsx
 import { WorldItemCard } from '@/components/cards/world-item-card';
 
-// Dentro de tu componente
+// Inside your component
 <WorldItemCard
 	worldItem={worldItemWithRelations}
 	onClick={() => handleWorldItemClick(worldItem.id)}
@@ -112,21 +120,21 @@ import { WorldItemCard } from '@/components/cards/world-item-card';
 
 ## Props
 
-| Prop          | Tipo                     | Descripción                                                     |
+| Prop          | Type                     | Description                                                     |
 | ------------- | ------------------------ | --------------------------------------------------------------- |
-| `worldItem`   | `WorldItemWithRelations` | Objeto con relaciones y contadores                              |
-| `onClick`     | `() => void`             | Función a ejecutar al hacer clic en la tarjeta                  |
-| `className`   | `string`                 | Clases CSS adicionales                                          |
-| `style`       | `React.CSSProperties`    | Estilos inline adicionales                                      |
-| `tcgMode`     | `boolean`                | Activar/desactivar diseño TCG (por defecto: `true`)             |
-| `isSelected`  | `boolean`                | Indica si la tarjeta está seleccionada                          |
-| `compact`     | `boolean`                | Versión más compacta de la tarjeta                              |
-| `disabled`    | `boolean`                | Deshabilita la interacción                                      |
-| `interactive` | `boolean`                | Habilita/deshabilita efectos interactivos (por defecto: `true`) |
+| `worldItem`   | `WorldItemWithRelations` | Object with relations and counters                              |
+| `onClick`     | `() => void`             | Function that runs on a click on the card                       |
+| `className`   | `string`                 | Extra CSS classes                                               |
+| `style`       | `React.CSSProperties`    | Extra inline styles                                             |
+| `tcgMode`     | `boolean`                | Enable or disable TCG design (default: `true`)                  |
+| `isSelected`  | `boolean`                | Indicates whether the card is selected                          |
+| `compact`     | `boolean`                | More compact version of the card                                |
+| `disabled`    | `boolean`                | Disables interaction                                            |
+| `interactive` | `boolean`                | Enables or disables interactive effects (default: `true`)       |
 
-## Tipo de Datos
+## Data type
 
-El componente espera un objeto `WorldItemWithRelations` que incluye:
+The component expects a `WorldItemWithRelations` object that includes the following fields:
 
 ```typescript
 interface WorldItemWithRelations {
@@ -168,33 +176,37 @@ interface WorldItemWithRelations {
 }
 ```
 
-## Alineación con el esquema Prisma
+## Alignment with the Prisma schema
 
-Esta implementación se alinea con el modelo WorldItem en el esquema Prisma, incluyendo:
+This implementation aligns with the WorldItem model in the Prisma schema.
 
-- Propiedades básicas (id, name, emoji, color)
-- Atributos específicos (type, rarity, size, origin)
-- Datos estructurados JSON (attributes, effects, requirements, stats, properties)
-- Configuración visual (featuredImage, isFavorite)
-- Relaciones con otras entidades (albums, collections, characters, etc.)
-- Conteos de relaciones (\_count)
+The alignment includes the following parts:
 
-## Componentes auxiliares
+- Basic properties (id, name, emoji, color)
+- Specific attributes (type, rarity, size, origin)
+- Structured JSON data (attributes, effects, requirements, stats, properties)
+- Visual configuration (featuredImage, isFavorite)
+- Relations with other entities (albums, collections, characters)
+- Relation counts (_count)
 
-El componente WorldItemCard utiliza varios componentes auxiliares:
+## Auxiliary components
 
-- `CardHeader`: Muestra el título, icono y tipo de objeto
-- `WorldItemCardImages`: Muestra miniaturas de imágenes relacionadas
-- `WorldItemCardContent`: Muestra descripción, propiedades, efectos y estadísticas
-- `WorldItemCardFooter`: Muestra metadatos y contadores
+The WorldItemCard component uses several auxiliary components.
 
-## Estilo TCG
+The auxiliary components are the following:
 
-La visualización en modo TCG incluye efectos como:
+- `CardHeader`: Shows the title, icon, and item type
+- `WorldItemCardImages`: Shows thumbnails of related images
+- `WorldItemCardContent`: Shows description, properties, effects, and statistics
+- `WorldItemCardFooter`: Shows metadata and counters
 
-1. Gradientes y bordes estilizados según el tipo de objeto
-2. Indicadores visuales de rareza (común, poco común, raro, épico, legendario)
-3. Efectos de brillo basados en la rareza
-4. Animaciones al pasar el cursor
-5. Iconos específicos según el tipo de objeto
-6. Colores temáticos basados en el tipo y rareza del objeto
+## TCG style
+
+TCG mode display includes the following effects:
+
+1. Gradients and styled borders by item type
+2. Visual rarity indicators (common, uncommon, rare, epic, legendary)
+3. Glow effects based on rarity
+4. Animations on hover
+5. Specific icons by item type
+6. Thematic colors based on the item type and rarity
