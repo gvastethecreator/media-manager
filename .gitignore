@@ -103,6 +103,7 @@ db.sqlite-wal
 
 # IDE / local tooling
 .idea/
+.code-review-graph/
 
 # windows reserved names
 nul
