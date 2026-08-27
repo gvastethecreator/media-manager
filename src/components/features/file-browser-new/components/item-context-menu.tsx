@@ -1,10 +1,6 @@
 /**
- * @file Menú contextual extendido para items del File Browser
- * @module file-browser-new/components/item-context-menu
- *
- * Implementa todas las funcionalidades descritas en CONTEXT_MENU_GUIDE.md:
- * - Abrir, Vista previa, Copiar, Renombrar, Descargar, Eliminar
- * - Submenú "Agregar a..." con todas las entidades
+ * File browser item context menu: open, preview, copy, rename, download, delete,
+ * and Add to... for related entities.
  */
 
 import {
