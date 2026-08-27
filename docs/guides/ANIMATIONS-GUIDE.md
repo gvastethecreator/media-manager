@@ -1,8 +1,6 @@
 # Animations guide
 
-## Executive summary
-
-This document sets the standard for the animation system in Media Manager. The goal is consistency, performance, and maintainability.
+This document sets the standard for the animation system in Media Manager. Use one animation path per component.
 
 ## Mandatory standardization
 
@@ -382,7 +380,7 @@ The following references support this guide:
 - [GSAP Documentation](https://gsap.com/docs/v3/)
 - [Motion API patterns](https://www.framer.com/motion/) (conceptual ergonomics reference only)
 - [MDN: prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
-- [Design Tokens CSS](../styles/design-tokens.css)
+- [Design Tokens CSS](../../src/styles/design-tokens.css)
 
 ---
 
