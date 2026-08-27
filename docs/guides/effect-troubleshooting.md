@@ -1,8 +1,6 @@
-# Effect-TS troubleshooting guide
+# Effect-TS troubleshooting
 
-**Date:** 11 October 2025  
-**Version:** 1.0  
-**Context:** Guide for common problems in Effect-TS implementation
+This guide covers common Effect-TS problems in this repository.
 
 ---
 

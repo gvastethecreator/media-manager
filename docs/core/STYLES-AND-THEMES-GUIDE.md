@@ -1,358 +1,166 @@
-# Styles and theme system guide
+# Styles and theme system
 
-This document describes the color and theme system of the project. It includes practices that keep visual consistency.
+Media Manager themes rest on CSS variables, design tokens, and TypeScript helpers. Components should use those tokens instead of hardcoded colors.
 
-## Contents
+## File structure
 
-1. [Theme system architecture](#theme-system-architecture)
-2. [Semantic CSS variables](#semantic-css-variables)
-3. [TypeScript color tokens](#typescript-color-tokens)
-4. [Practices](#practices)
-5. [Migration of hardcoded colors](#migration-of-hardcoded-colors)
-6. [Usage examples](#usage-examples)
-
----
-
-## Theme system architecture
-
-### File structure
+Theme files live under `src/styles/`:
 
 ```
-src/
-├── app/
-│   ├── globals.css          # Main CSS, imports themes and tokens
-│   └── themes.css           # Definition of all themes
-├── styles/
-│   ├── tokens.css           # Centralized semantic CSS variables
-│   ├── scrollbar.css        # Custom scrollbar styles
-│   └── ...
-├── lib/styles/
-│   ├── color-tokens.ts      # TypeScript tokens for entity colors
-│   └── chart-colors.ts      # Colors for Recharts charts
-└── tailwind.config.ts       # Tailwind configuration with CSS variables
+src/styles/
+├── app-globals.css
+├── globals.css
+├── themes.css
+├── tokens.css
+├── design-tokens.css
+├── scrollbar.css
+├── selecto.css
+├── view-transition.css
+├── utilities/theme-system.css
+src/lib/styles/
+├── color-tokens.ts
+└── chart-colors.ts
+src/providers/theme-provider.tsx
+src/components/core/theme/theme-toggle.tsx
 ```
-
-### Theme flow
 
 Theme application follows this sequence:
 
-1. **Base variables** are defined in `themes.css` using `oklch()` for better color perception.
-2. **Tailwind variables** map to CSS variables in `globals.css` through `@theme inline`.
-3. **Application** uses the `data-theme` attribute on `<html>` to activate the matching theme.
+1. `themes.css` defines base variables in `oklch()`.
+2. Tailwind maps those variables in `globals.css` through `@theme inline`.
+3. The app sets `data-theme` on `<html>` to activate the matching theme.
 
-### Available themes
+## Available themes
 
-The product includes these themes:
+The product includes these theme keys:
 
-| Theme         | Description                               |
-| ------------- | ----------------------------------------- |
-| `light`       | Light theme with gray tones               |
-| `dark`        | Standard dark theme                       |
-| `cafe`        | Warm brown tones                          |
-| `violeta`     | Dark purple                               |
-| `madera`      | Earth tones                               |
-| `nocturno`    | Dark blue to reduce visual fatigue        |
-| `verde`       | Green tones                               |
-| `atardecer`   | Warm oranges and reds                     |
-| `corporativo` | Professional blue                         |
-| `carbon`      | Deep black with gray accents              |
-| `teal`        | Blue-green                                |
-| `citrico`     | Vibrant yellows                           |
-| `aurora`      | Inspired by auroras borealis              |
-| `neon`        | Cyberpunk with bright colors              |
+| Theme         | Description                        |
+| ------------- | ---------------------------------- |
+| `light`       | Light theme with gray tones        |
+| `dark`        | Standard dark theme                |
+| `cafe`        | Warm brown tones                   |
+| `violeta`     | Dark purple                        |
+| `madera`      | Earth tones                        |
+| `nocturno`    | Dark blue                          |
+| `verde`       | Green tones                        |
+| `atardecer`   | Warm oranges and reds              |
+| `corporativo` | Professional blue                  |
+| `carbon`      | Deep black with gray accents       |
+| `teal`        | Blue-green                         |
+| `citrico`     | Vibrant yellows                    |
+| `aurora`      | Aurora-inspired                    |
+| `neon`        | Bright high-contrast               |
 
----
+`ThemeProvider` also supports `system`, which follows the operating-system preference and persists the choice in localStorage.
+
+```tsx
+import { ThemeProvider } from '@/providers/theme-provider';
+import { ThemeToggle } from '@/components/core/theme/theme-toggle';
+import { useTheme } from '@/components/ui/theme-provider';
+```
+
+`useTheme` exposes `theme`, `resolvedTheme`, `themes`, and `setTheme`.
 
 ## Semantic CSS variables
 
-### Base theme variables
+These variables change with the selected theme:
 
 ```css
-/* Backgrounds and surfaces */
---background          /* Main background */
---foreground          /* Main text color */
---card                /* Card background */
---card-foreground     /* Text on cards */
---popover             /* Popover background */
---popover-foreground  /* Text on popovers */
-
-/* Semantic colors */
---primary             /* Main or accent color */
---primary-foreground  /* Text on primary */
---secondary           /* Secondary color */
---secondary-foreground
---muted               /* Muted elements */
---muted-foreground
---accent              /* Visual accents */
---accent-foreground
---destructive         /* Destructive actions */
---destructive-foreground
-
-/* UI */
---border              /* Borders */
---input               /* Input fields */
---ring                /* Focus ring */
-
-/* Sidebar */
---sidebar-background
---sidebar-foreground
---sidebar-primary
---sidebar-accent
---sidebar-border
---sidebar-ring
-
-/* Charts */
---chart-1 to --chart-5 /* Colors for visualizations */
+--background --foreground
+--card --card-foreground
+--popover --popover-foreground
+--primary --primary-foreground
+--secondary --secondary-foreground
+--muted --muted-foreground
+--accent --accent-foreground
+--destructive --destructive-foreground
+--border --input --ring
+--sidebar-background --sidebar-foreground
+--sidebar-primary --sidebar-accent
+--sidebar-border --sidebar-ring
+--chart-1 to --chart-5
 ```
 
-### Entity variables (`tokens.css`)
+Use them through Tailwind classes (`bg-background`, `text-foreground`, `border-border`) or `var(--primary)`.
+
+### Design tokens (`--dt-*`)
+
+`src/styles/design-tokens.css` defines palettes, shadows, timing, and radius:
+
+- palettes: `--dt-primary-*`, `--dt-neutral-*`, `--dt-success-*`, `--dt-warning-*`, `--dt-danger-*`
+- shadows: `--dt-shadow-0` through `--dt-shadow-4`, `--dt-inset-1`, `--dt-inset-2`
+- timing: `--dt-duration-instant` (50ms), `--dt-duration-fast` (150ms), `--dt-duration-normal` (250ms), `--dt-duration-slow` (400ms)
+- easing: `--dt-ease-default`, `--dt-ease-in`, `--dt-ease-out`, `--dt-ease-bounce`
+
+### Entity tokens (`tokens.css`)
 
 ```css
-/* Content */
---entity-image        /* Blue - images */
---entity-video        /* Red - videos */
---entity-audio        /* Sky - audio */
---entity-document     /* Slate - documents */
---entity-folder       /* Yellow - folders */
-
-/* Organization */
---entity-album        /* Violet - albums */
---entity-collection   /* Cyan - collections */
---entity-group        /* Teal - groups */
---entity-favorite     /* Amber - favorites */
-
-/* Creative */
---entity-character    /* Pink - characters */
---entity-place        /* Teal - places */
---entity-world-item   /* Lime - world items */
---entity-concept      /* Amber - concepts */
-
-/* Metadata */
---entity-tag          /* Pink - tags */
---entity-prompt       /* Emerald - prompts */
---entity-note         /* Red - notes */
---entity-property     /* Light pink - properties */
+--entity-image --entity-video --entity-audio --entity-document
+--entity-file-3d --entity-json --entity-folder
+--entity-album --entity-collection --entity-group --entity-favorite
+--entity-character --entity-place --entity-world-item --entity-concept
+--entity-tag --entity-prompt --entity-note --entity-property --entity-wildcard
+--entity-system
 ```
 
----
+Prefer `getEntityColor` and `getEntityClasses` from `@/lib/styles/color-tokens` over copying these values.
 
-## TypeScript color tokens
-
-### Location: `src/lib/styles/color-tokens.ts`
+## TypeScript tokens
 
 ```typescript
 import {
-	ENTITY_COLOR_VARS,
-	ENTITY_TAILWIND_CLASSES,
 	getEntityColor,
 	getEntityClasses,
 	DEFAULT_ENTITY_COLOR,
 	PRESET_COLORS_HEX,
 } from '@/lib/styles/color-tokens';
-
-// Get a CSS variable for use in style
-const color = getEntityColor('image'); // "var(--entity-image)"
-
-// Get Tailwind classes for className
-const bgClass = getEntityClasses('folder', 'bg'); // "bg-yellow-500"
-const textClass = getEntityClasses('folder', 'text'); // "text-yellow-500"
-
-// Default color for forms
-const defaultColor = DEFAULT_ENTITY_COLOR; // "#3b82f6"
+import { CHART_COLORS, FILE_TYPE_COLORS, getChartColor } from '@/lib/styles/chart-colors';
 ```
 
-### Chart colors: `src/lib/styles/chart-colors.ts`
-
-```typescript
-import {
-  CHART_COLORS,
-  METRIC_COLORS,
-  FILE_TYPE_COLORS,
-  getChartColor
-} from '@/lib/styles/chart-colors';
-
-// Use in Recharts
-<Line stroke={CHART_COLORS.primary} />
-<Bar fill={METRIC_COLORS.cpu} />
-<Cell fill={FILE_TYPE_COLORS.images} />
-
-// Dynamic palette by index
-data.map((_, i) => <Cell fill={getChartColor(i)} />)
-```
-
----
+`getEntityColor('image')` returns `var(--entity-image)`. Chart helpers feed Recharts fills and strokes.
 
 ## Practices
 
-### Do
+Do:
 
-```tsx
-// 1. Use Tailwind classes with theme variables
-<div className="bg-background text-foreground border-border" />
+- Use theme Tailwind classes and CSS variables.
+- Use `color-tokens.ts` for entity colors and `chart-colors.ts` for charts.
+- Use `color-mix(in oklch, var(--primary) 30%, transparent)` when you need opacity.
+- Use `PRESET_COLORS_HEX` and `DEFAULT_ENTITY_COLOR` for user-chosen colors stored as hex.
 
-// 2. Use CSS variables for dynamic styles
-<div style={{ backgroundColor: 'var(--primary)' }} />
+Do not:
 
-// 3. Use centralized tokens for entity colors
-import { getEntityClasses } from '@/lib/styles/color-tokens';
-<div className={getEntityClasses('folder', 'bg')} />
+- Hardcode hex, `rgb()`, or `rgba()` in UI components.
+- Duplicate color maps in a component.
+- Use `bg-blue-500` when a semantic token already exists.
 
-// 4. Use tokens for charts
-import { CHART_COLORS } from '@/lib/styles/chart-colors';
-<Line stroke={CHART_COLORS.primary} />
-
-// 5. Use semantic Tailwind classes
-<Button variant="destructive" /> // Instead of bg-red-500
-```
-
-### Do not
-
-```tsx
-// 1. NEVER hardcode hex colors in components
-<div style={{ backgroundColor: '#3b82f6' }} /> // no
-
-// 2. NEVER use hex colors in className
-<div className="bg-[#3b82f6]" /> // no
-
-// 3. NEVER duplicate color definitions
-const COLORS = { blue: '#3b82f6' }; // no. Use the existing tokens
-
-// 4. NEVER use rgb/rgba directly for UI
-<div style={{ color: 'rgba(59, 130, 246, 0.5)' }} /> // no
-// Use: className="text-primary/50"
-```
-
-### Special cases
-
-#### Canvas context
-
-Canvas contexts (`ctx.fillStyle`) do not support CSS variables. In those cases:
-
-```tsx
-// Document the color and its Tailwind equivalent
-ctx.fillStyle = '#3b82f6'; // blue-500, equivalent to var(--selection-border)
-```
-
-#### User-customizable colors
-
-For properties that the user can customize (tag color, group color):
-
-```tsx
-// Use PRESET_COLORS_HEX from the centralized token
-import { PRESET_COLORS_HEX, DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
-
-// The color is stored in DB as hex and used in style
-<div style={{ backgroundColor: entity.color ?? DEFAULT_ENTITY_COLOR }} />;
-```
-
----
-
-## Migration of hardcoded colors
-
-### Step 1: Identify
-
-Search these patterns in the code:
-
-- `#[0-9a-fA-F]{3,8}`
-- `rgb(`, `rgba(`, `hsl(`
-
-### Step 2: Categorize
-
-Use these categories:
-
-- **Thematic UI**: migrate to CSS variables
-- **Charts**: use tokens from `chart-colors.ts`
-- **Entities**: use tokens from `color-tokens.ts`
-- **User-customizable**: keep, but use `DEFAULT_ENTITY_COLOR`
-
-### Step 3: Replace
-
-Use this replacement map:
-
-| Before                         | After                              |
-| ------------------------------ | ---------------------------------- |
-| `#3b82f6`                      | `text-blue-500` or `var(--primary)` |
-| `bg-[#ef4444]`                 | `bg-red-500` or `bg-destructive`   |
-| `style={{ color: '#10b981' }}` | `className="text-emerald-500"`     |
-
----
-
-## Usage examples
-
-### Component with theme
-
-```tsx
-export function EntityCard({ entity }: Props) {
-	return (
-		<div className="bg-card text-card-foreground border border-border rounded-lg">
-			<div className="w-4 h-4 rounded-full" style={{ backgroundColor: entity.color ?? DEFAULT_ENTITY_COLOR }} />
-			<span className="text-foreground">{entity.name}</span>
-		</div>
-	);
-}
-```
-
-### Chart with consistent colors
-
-```tsx
-import { CHART_COLORS, FILE_TYPE_COLORS } from '@/lib/styles/chart-colors';
-
-export function FileTypeChart({ data }) {
-	return (
-		<PieChart>
-			<Pie data={data}>
-				{data.map((entry, i) => (
-					<Cell key={entry.name} fill={FILE_TYPE_COLORS[entry.type] ?? getChartColor(i)} />
-				))}
-			</Pie>
-		</PieChart>
-	);
-}
-```
-
-### Form with color picker
-
-```tsx
-import { ColorPicker } from '@/components/ui/color-picker';
-// ColorPicker already uses PRESET_COLORS_HEX internally
-
-<ColorPicker value={formData.color} onChange={(color) => setFormData({ ...formData, color })} />;
-```
-
----
+Canvas `ctx.fillStyle` does not read CSS variables. If you must pass a hex value, document the matching token next to it.
 
 ## Theme transitions
 
-The system includes smooth transitions when the theme changes:
+`themes.css` transitions `background-color`, `color`, and `border-color` on `html`. `theme-transitioning` in `utilities/theme-system.css` extends that transition to descendants. The standard duration is `--dt-theme-transition-duration: 300ms`.
+
+Reduced-motion users get a near-zero duration:
 
 ```css
-html {
-	transition:
-		background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-		color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-		border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+@media (prefers-reduced-motion: reduce) {
+	.theme-transitioning,
+	.theme-transitioning * {
+		transition-duration: 0.01ms !important;
+	}
 }
 ```
 
----
+## Add a theme
 
-## Review checklist
+1. Define `html[data-theme='ocean']` variables in `src/styles/themes.css`.
+2. Add `'ocean'` to the `customThemes` list in `src/providers/theme-provider.tsx`.
+3. Optional: add `--dt-*` overrides for that theme in `src/styles/design-tokens.css`.
+4. Optional: extend the `Theme` union in `src/lib/contexts/theme-context.tsx`.
+5. Run `bun run dev:full`, open ThemeToggle, and check contrast, entity colors, and transitions.
 
-Before you commit, verify:
+## Related reading
 
-- [ ] There are no hardcoded hex colors in TSX components.
-- [ ] New colors use CSS variables or TypeScript tokens.
-- [ ] Charts use colors from `chart-colors.ts`.
-- [ ] Entity colors use tokens from `color-tokens.ts`.
-- [ ] The component looks correct in light and dark mode.
-- [ ] Theme transitions work without glitches.
-
----
-
-## References
-
-The following references support this guide:
-
-- [Tailwind CSS v4 - Theme Configuration](https://tailwindcss.com/docs/theme)
-- [OKLCH Color Space](https://oklch.com/)
-- [Recharts Customization](https://recharts.org/en-US/guide/customize)
+- [`./FRONTEND-GUIDE.md`](./FRONTEND-GUIDE.md)
+- [Tailwind CSS theme configuration](https://tailwindcss.com/docs/theme)
+- [OKLCH](https://oklch.com/)

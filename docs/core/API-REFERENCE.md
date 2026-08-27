@@ -48,7 +48,7 @@ Use these routes for operational state, metrics, and system utilities:
 
 Base: `/api/folders`
 
-### Main endpoints observed in images
+### Folder endpoints
 
 The folder family exposes these endpoints:
 
@@ -81,7 +81,7 @@ This family covers the following work:
 
 Base: `/api/images`
 
-### Main endpoints observed
+### Image endpoints
 
 The image family exposes these endpoints:
 
@@ -125,7 +125,7 @@ This family includes list, detail, favorites, delete, and other video-domain end
 
 Base: `/api/audio`
 
-Endpoints observed in `audios.effect.ts`:
+Endpoints in `audios.effect.ts`:
 
 - `GET /`
 - `GET /favorites`
@@ -157,7 +157,7 @@ The following preview routes also exist:
 
 Base: `/api/albums`
 
-The observed pattern includes these operations:
+Album operations include:
 
 - list
 - get by id
@@ -189,7 +189,7 @@ The collection pattern matches albums.
 
 Base: `/api/characters`
 
-The observed pattern includes these operations:
+Character operations include:
 
 - list
 - detail
@@ -269,35 +269,44 @@ This family exposes these endpoints:
 
 ## 9. Filesystem and download
 
+The client never sends a raw filesystem path. Routes take an authorized root reference or an asset identity.
+
 ### Filesystem
 
 Base: `/api/files`
 
-Observed endpoints:
+Live endpoints:
 
-- `GET /directory/:path`
+- `GET /roots`
+- `GET /directory` with an authorized query reference
+- `GET /content` with `assetId` and `assetType`, or an authorized query reference
+- `POST /assets/move` with `assets` and `targetFolderId`
+- `GET /recovery-status`
+- `POST /recovery/reconcile`
+
+These raw mutations return `410` with `DOMAIN_OPERATION_REQUIRED`:
+
 - `POST /directory`
 - `PUT /rename`
 - `POST /copy`
 - `POST /move`
-- `GET /content`
+
+Move assets with `POST /api/files/assets/move` and a `targetFolderId`.
 
 ### Downloads
 
 Base: `/api/download`
 
-Observed operations:
+- `POST /` with `{ "asset": { "assetId", "assetType" } }` or an authorized `source`
+- `GET /` with `assetId` and `assetType`, or an authorized query reference
 
-- `POST /` with body `{ "path": "..." }`
-- `GET /?path=...`
-
-Both variants download the binary directly. The backend returns `Content-Type`, `Content-Length`, `Content-Disposition` with an encoded name, and `X-Content-Type-Options: nosniff`.
+Both flows return `Content-Type`, `Content-Length`, `Content-Disposition` with an encoded name, and `X-Content-Type-Options: nosniff`.
 
 ## 10. Search
 
 Base: `/api/search`
 
-### Observed endpoints
+### Search endpoints
 
 The search family exposes these endpoints:
 
@@ -322,7 +331,7 @@ These families use the following bases:
 - `/api/metadata`
 - `/api/metadata-advanced`
 
-Observed operations:
+Operations include:
 
 - point or bulk update
 - advanced extraction or diagnosis from a path or object
@@ -356,7 +365,7 @@ Base: `/api/profiles`
 
 Base: `/api/events`
 
-Observed operations also include `GET /stream`, which supports SSE and eventing scenarios.
+`GET /stream` supports SSE.
 
 ## 13. Reindex and operational logs
 
@@ -368,7 +377,7 @@ Base: `/api/reindex`
 
 Base: `/api/reindex-logs`
 
-Observed endpoints:
+Reindex-log endpoints:
 
 - `GET /stats`
 - `GET /errors`
