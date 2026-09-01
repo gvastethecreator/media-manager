@@ -95,7 +95,7 @@ bun run test
 bun run build
 ```
 
-## Architecture
+## Repository layout
 
 The main areas of the repository are the following:
 
@@ -109,16 +109,13 @@ The main areas of the repository are the following:
 | `src/types/`      | Domain types, validation contracts, and view configuration                          |
 | `electron/`       | Electron supervisor, preload, and extraResources inventory                          |
 | `scripts/`        | Bun automation, isolated tests, builds, and database operations                     |
-| `docs/`           | Product site and detailed engineering references                                    |
+| `docs/`           | Product site and contributor guides                                    |
 
 Start with these references when you change a major subsystem:
 
-- [`docs/core/ARCHITECTURE.md`](docs/core/ARCHITECTURE.md)
-- [`docs/core/DATABASE-SCHEMA.md`](docs/core/DATABASE-SCHEMA.md)
 - [`docs/core/FRONTEND-GUIDE.md`](docs/core/FRONTEND-GUIDE.md)
-- [`docs/core/SERVICES-GUIDE.md`](docs/core/SERVICES-GUIDE.md)
 - [`docs/core/API-REFERENCE.md`](docs/core/API-REFERENCE.md)
-- [`docs/project-readiness.md`](docs/project-readiness.md)
+- [`docs/core/STYLES-AND-THEMES-GUIDE.md`](docs/core/STYLES-AND-THEMES-GUIDE.md)
 
 ## Security and data boundaries
 

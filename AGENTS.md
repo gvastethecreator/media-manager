@@ -2,17 +2,14 @@
 
 Media Manager is a local-first workbench for large creative libraries. The web app is React 19 + Express on Bun 1.3.14. Desktop is an Electron supervisor around that Bun runtime. The renderer uses `/api` only. It does not receive Node, `ipcRenderer`, or a generic invoke bridge.
 
-Committed docs and UI strings are English. Session talk with Cristian is Spanish.
+Committed docs and UI strings are English.
 
 ## Before you change code
 
-1. Read `CONTEXT.md` for product words.
-2. Read `CONTEXT-MAP.md` for context boundaries.
-3. Read `docs/adr/` for accepted decisions in the area you will change.
-4. Read `docs/codemap/codemap.md` for callers. If the map cannot answer, refresh it before product edits.
-5. Use the existing service, transformer, and route files. Do not add barrel `index.ts` files in those folders.
+1. Read `README.md` for product purpose, status, and commands.
+2. Use the existing service, transformer, and route files. Do not add barrel `index.ts` files in those folders.
 
-Done when you can name the owning context, the service file, and the HTTP or test seam that will prove the change.
+Done when you can name the service file and the HTTP or test seam that will prove the change.
 
 ## Hard rules
 
@@ -23,7 +20,6 @@ Done when you can name the owning context, the service file, and the HTTP or tes
 - `bun run test` creates an isolated disposable SQLite database per file. Do not point tests at a personal database.
 - CAUTION: `bun run db:reset` deletes a database. Run it only on a marked disposable DB, with the exact confirmation the command prints.
 - Do not rewrite git history. Do not commit secrets, personal databases, uploads, or logs.
-- Tickets live in GitHub Issues and `.scratch/media-manager/issues/`. Never write tickets under `docs/`.
 
 ## Commands
 
@@ -52,22 +48,5 @@ If the change is UI, exercise the real route in the browser. A screenshot of fir
 ## Docs
 
 - Product entry: `README.md`
-- Architecture, schema, API, services, frontend: `docs/core/`
-- Desktop cutover evidence: `docs/migration/`
-- Context ownership: `docs/planning/context-architecture/`
-- Tracker contracts: `docs/agents/`
-- Local work (ignored): `.scratch/`
-
-## Agent skills
-
-### Issue tracker
-
-GitHub Issues and the linked GitHub Project hold live state. `.scratch/` holds synchronized local mirrors. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Use `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, or `wontfix`. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Multi-context monolith: root `CONTEXT.md` plus `CONTEXT-MAP.md` and `docs/adr/`. See `docs/agents/domain.md`.
+- API: `docs/core/API-REFERENCE.md`
+- Frontend: `docs/core/FRONTEND-GUIDE.md`
