@@ -1,6 +1,6 @@
 # Styles and theme system
 
-Media Manager themes rest on CSS variables, design tokens, and TypeScript helpers. Components should use those tokens instead of hardcoded colors.
+Use CSS variables, design tokens, and TypeScript helpers. Do not hardcode colors in components.
 
 ## File structure
 
@@ -24,15 +24,11 @@ src/providers/theme-provider.tsx
 src/components/core/theme/theme-toggle.tsx
 ```
 
-Theme application follows this sequence:
-
 1. `themes.css` defines base variables in `oklch()`.
 2. Tailwind maps those variables in `globals.css` through `@theme inline`.
 3. The app sets `data-theme` on `<html>` to activate the matching theme.
 
 ## Available themes
-
-The product includes these theme keys:
 
 | Theme         | Description                        |
 | ------------- | ---------------------------------- |
