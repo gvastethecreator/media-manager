@@ -20,8 +20,6 @@ Preserve these qualities when the UI changes:
 
 ## Boot sequence
 
-Frontend startup runs in this order:
-
 ```mermaid
 flowchart TD
     A[main.tsx] --> B[AppProvider]
@@ -87,6 +85,5 @@ Frontend tests use Vitest, jsdom, Testing Library, and `tests/setup.ts`. Setup i
 
 ## Related reading
 
-- [`./ARCHITECTURE.md`](./ARCHITECTURE.md)
-- [`./REPOSITORY-MAP.md`](./REPOSITORY-MAP.md)
 - [`./STYLES-AND-THEMES-GUIDE.md`](./STYLES-AND-THEMES-GUIDE.md)
+- [`./API-REFERENCE.md`](./API-REFERENCE.md)

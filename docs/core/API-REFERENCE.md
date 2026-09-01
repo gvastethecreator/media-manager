@@ -1,56 +1,31 @@
 # API reference
 
-This reference groups the API by functional families. The backend includes business routes, operational support, previews, streams, and debug utilities.
+Local development API: `http://localhost:4000/api`. Responses are JSON, binaries (originals and thumbnails), preview SVG, or SSE on specific endpoints.
 
-## 1. Base URL and conventions
+## Base URL and conventions
 
-### Base URL
-
-The local development server uses these URLs:
-
-- Local development: `http://localhost:4000`
+- Local server: `http://localhost:4000`
 - API base: `http://localhost:4000/api`
 
-### Endpoints outside `/api`
-
-The following routes sit outside `/api`:
+Routes outside `/api`:
 
 - `GET /health`
 - Compatibility redirect from `/search` to `/api/search`
 
-### Response formats
-
-The API returns these payload types:
-
-- JSON
-- binaries (originals, thumbnails)
-- preview SVG
-- SSE streams on specific endpoints
-
-## 2. Health and system
-
-### Health
-
-Use this endpoint to check process health:
+## Health and system
 
 - `GET /health`
 
-### System and operations
-
-Use these routes for operational state, metrics, and system utilities:
+Operational state, metrics, and system utilities:
 
 - `GET /api/system/*`
 - `GET /api/stats`
 - `GET /api/activity`
 - `GET /api/queue/*`
 
-## 3. Folders
+## Folders
 
 Base: `/api/folders`
-
-### Folder endpoints
-
-The folder family exposes these endpoints:
 
 - `GET /`
 - `GET /tree`
@@ -68,22 +43,11 @@ The folder family exposes these endpoints:
 - `POST /:id/reindex`
 - `POST /reindex` (legacy/compatibility)
 
-### Role of this family
+This family covers folder navigation and structure, visual folder previews, aggregated folder content, and folder or global reindex.
 
-This family covers the following work:
-
-- folder navigation and structure
-- visual folder previews
-- aggregated folder content
-- folder or global reindex
-
-## 4. Images
+## Images
 
 Base: `/api/images`
-
-### Image endpoints
-
-The image family exposes these endpoints:
 
 - `GET /`
 - `GET /favorites`
@@ -104,16 +68,9 @@ The image family exposes these endpoints:
 - `GET /:id/original`
 - `GET /:id`
 
-### What this family covers
+This family covers image CRUD, favorites and batch operations, thumbnails and original bytes, and queries by folder, hash, and stats.
 
-This family covers the following work:
-
-- image CRUD
-- favorites and batch operations
-- thumbnails and original bytes
-- queries by folder, hash, and stats
-
-## 5. Video and audio
+## Video and audio
 
 ### Videos
 
@@ -143,29 +100,19 @@ Endpoints in `audios.effect.ts`:
 - `DELETE /:id`
 - `DELETE /batch`
 
-### Specialized audio preview
-
-The following preview routes also exist:
+Preview routes:
 
 - `GET /api/audio-waveforms/:id/waveform`
 - `GET /api/audio-waveforms/:id/info`
 - `GET /api/audio-waveforms/:id/waveform/preview`
 
-## 6. Organizers
+## Organizers
 
 ### Albums
 
 Base: `/api/albums`
 
-Album operations include:
-
-- list
-- get by id
-- create
-- update
-- delete
-- add or remove relations
-- query content
+Album operations include list, get by id, create, update, delete, add or remove relations, and query content.
 
 ### Collections
 
@@ -183,38 +130,26 @@ The collection pattern matches albums.
 - `/api/properties`
 - `/api/world-items`
 
-## 7. Worldbuilding
+## Worldbuilding
 
 ### Characters
 
 Base: `/api/characters`
 
-Character operations include:
-
-- list
-- detail
-- create
-- update
-- delete
-- favorites
-- relations with images or other entities
+Character operations include list, detail, create, update, delete, favorites, and relations with images or other entities.
 
 ### Places and concepts
-
-These families use the following bases:
 
 - `/api/places`
 - `/api/concepts`
 
 ### Prompts
 
-Base:
-
 - `/api/prompts`
 
 These three families come from `worldbuilding.effect.ts`.
 
-## 8. Documents, JSON, 3D, and uploaded images
+## Documents, JSON, 3D, and uploaded images
 
 `file-services.effect.ts` mounts several sub-APIs.
 
@@ -222,42 +157,23 @@ These three families come from `worldbuilding.effect.ts`.
 
 Base: `/api/file3ds`
 
-This family includes these operations:
-
-- list
-- detail
-- CRUD
-- `GET /:id/thumbnail`
+Operations: list, detail, CRUD, and `GET /:id/thumbnail`.
 
 ### Documents
 
 Base: `/api/documents`
 
-This family includes these operations:
-
-- list
-- detail
-- CRUD
-- `GET /:id/preview`
-- `GET /:id/images`
+Operations: list, detail, CRUD, `GET /:id/preview`, and `GET /:id/images`.
 
 ### JSON files
 
 Base: `/api/json-files`
 
-This family includes these operations:
-
-- list
-- detail
-- CRUD
-- `GET /:id/preview`
-- `GET /:id/images`
+Operations: list, detail, CRUD, `GET /:id/preview`, and `GET /:id/images`.
 
 ### Uploaded images
 
 Base: `/api/uploaded-images`
-
-This family exposes these endpoints:
 
 - `GET /stats`
 - `GET /`
@@ -267,7 +183,7 @@ This family exposes these endpoints:
 - `PUT /:id`
 - `DELETE /:id`
 
-## 9. Filesystem and download
+## Filesystem and download
 
 The client never sends a raw filesystem path. Routes take an authorized root reference or an asset identity.
 
@@ -302,43 +218,26 @@ Base: `/api/download`
 
 Both flows return `Content-Type`, `Content-Length`, `Content-Disposition` with an encoded name, and `X-Content-Type-Options: nosniff`.
 
-## 10. Search
+## Search
 
 Base: `/api/search`
-
-### Search endpoints
-
-The search family exposes these endpoints:
 
 - `GET /`
 - `GET /images`
 - `GET /fts`
 
-### Behavior
+Search supports global search by query, image-specific search, and FTS search over files.
 
-Search supports these modes:
-
-- global search by query
-- image-specific search
-- FTS search over files
-
-## 11. Metadata and thumbnails
+## Metadata and thumbnails
 
 ### Metadata
-
-These families use the following bases:
 
 - `/api/metadata`
 - `/api/metadata-advanced`
 
-Operations include:
-
-- point or bulk update
-- advanced extraction or diagnosis from a path or object
+Operations include point or bulk update and advanced extraction or diagnosis from a path or object.
 
 ### Thumbnails
-
-These families use the following bases:
 
 - `/api/thumbnails`
 - `/api/thumbnails/unified`
@@ -347,27 +246,16 @@ These families use the following bases:
 
 The preview system is split. Not every preview comes from the same router.
 
-## 12. Favorites, settings, profiles, and events
+## Favorites, settings, profiles, and events
 
-### Favorites
-
-Base: `/api/favorites`
-
-### Settings
-
-Base: `/api/settings`
-
-### Profiles
-
-Base: `/api/profiles`
-
-### Events
-
-Base: `/api/events`
+- Favorites: `/api/favorites`
+- Settings: `/api/settings`
+- Profiles: `/api/profiles`
+- Events: `/api/events`
 
 `GET /stream` supports SSE.
 
-## 13. Reindex and operational logs
+## Reindex and operational logs
 
 ### Incremental reindex
 
@@ -377,8 +265,6 @@ Base: `/api/reindex`
 
 Base: `/api/reindex-logs`
 
-Reindex-log endpoints:
-
 - `GET /stats`
 - `GET /errors`
 - `GET /warnings`
@@ -386,31 +272,17 @@ Reindex-log endpoints:
 - `POST /cleanup`
 - `GET /recent`
 
-## 14. Debug and internal testing
+## Debug and internal testing
 
-The backend exposes auxiliary routes. Do not treat them as the main product API.
-
-Relevant bases:
+These routes help development and diagnosis. They are not the product API:
 
 - `/api/debug`
 - `/api/debug-entity-types`
 - `/api/test-characters`
 
-These routes help development and diagnosis. They are not the clean product surface.
-
-## 15. Practical conventions for internal consumers
-
-Follow these rules when you consume the API:
+## Consumer conventions
 
 - Expect a mix of JSON, SVG, and binaries.
 - Check whether an endpoint returns `data`, `pagination`, or a raw binary.
 - Distinguish domain routes from technical routes.
 - Confirm batch or specialized preview support before you add another operation.
-
-## 16. Related documentation
-
-The following documents complete this reference:
-
-- [`./ARCHITECTURE.md`](./ARCHITECTURE.md)
-- [`./SERVICES-GUIDE.md`](./SERVICES-GUIDE.md)
-- [`./IMPLEMENTATION-DETAILS.md`](./IMPLEMENTATION-DETAILS.md)

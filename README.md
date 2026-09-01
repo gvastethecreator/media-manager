@@ -29,8 +29,6 @@ The captures below come from the local application with an empty, privacy-safe l
 
 ## Why it exists
 
-Media Manager does the following:
-
 - Index existing folders without forcing a second managed copy.
 - Search across filenames, extracted metadata, tags, relationships, and document text.
 - Browse images, video, audio, documents, JSON, and 3D files through one interface.
@@ -39,8 +37,6 @@ Media Manager does the following:
 - Report partial file-operation outcomes explicitly so recovery stays understandable.
 
 ## Current status
-
-Current product status is the following:
 
 - The user-facing application, validation messages, recovery states, and primary error paths are English.
 - Bun 1.3.14 owns installation, scripts, the server runtime, and the lockfile.
@@ -97,8 +93,6 @@ bun run build
 
 ## Repository layout
 
-The main areas of the repository are the following:
-
 | Area              | Responsibility                                                                      |
 | ----------------- | ----------------------------------------------------------------------------------- |
 | `src/components/` | Application shell, views, panels, cards, and file workflows                         |
@@ -109,7 +103,7 @@ The main areas of the repository are the following:
 | `src/types/`      | Domain types, validation contracts, and view configuration                          |
 | `electron/`       | Electron supervisor, preload, and extraResources inventory                          |
 | `scripts/`        | Bun automation, isolated tests, builds, and database operations                     |
-| `docs/`           | Product site and contributor guides                                    |
+| `docs/`           | Product site and contributor guides                                                 |
 
 Start with these references when you change a major subsystem:
 
@@ -118,8 +112,6 @@ Start with these references when you change a major subsystem:
 - [`docs/core/STYLES-AND-THEMES-GUIDE.md`](docs/core/STYLES-AND-THEMES-GUIDE.md)
 
 ## Security and data boundaries
-
-The following boundaries apply:
 
 - Filesystem mutations use authorized media roots and canonical asset identities.
 - Recovery and partial-success states must remain visible to the user.

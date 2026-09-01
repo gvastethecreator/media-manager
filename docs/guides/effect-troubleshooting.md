@@ -1,8 +1,6 @@
 # Effect-TS troubleshooting
 
-This guide covers common Effect-TS problems in this repository.
-
----
+Common Effect-TS problems in this repository.
 
 ## Contents
 
@@ -12,8 +10,6 @@ This guide covers common Effect-TS problems in this repository.
 4. [TaggedError issues](#taggederror-issues)
 5. [Performance issues](#performance-issues)
 6. [Type issues](#type-issues)
-
----
 
 ## Drizzle integration issues
 
@@ -47,15 +43,11 @@ const result =
 	});
 ```
 
-**Explanation:**
-
 - `async () => await query` forces Promise resolution.
 - The `await` converts the thenable into a real Promise.
 - Effect.tryPromise needs a function that returns a Promise, not a thenable.
 
-**Apply to:** All database operations with Drizzle + libsql
-
----
+Apply to all database operations with Drizzle + libsql.
 
 ### Issue 2: Query runs but returns an empty array
 
@@ -72,7 +64,6 @@ The query runs against the wrong database (mock instead of real).
 **Diagnosis:**
 
 ```typescript
-// Add temporary logs
 console.log('[DEBUG] DB Client type:', db.constructor.name);
 console.log('[DEBUG] Insert result:', result);
 ```
@@ -85,8 +76,6 @@ const isServerOrTest =
 	typeof process !== 'undefined' &&
 	(typeof window === 'undefined' || process.env.NODE_ENV === 'test' || typeof (globalThis as any).Bun !== 'undefined');
 ```
-
----
 
 ## Test environment issues
 
@@ -131,8 +120,6 @@ bun test src/services/album/__tests__/album.service.effect.test.ts
 # not "mock-id-1234567890"
 ```
 
----
-
 ### Issue 4: Tests fail with "window is not defined"
 
 **Symptom:**
@@ -145,7 +132,6 @@ ReferenceError: window is not defined
 Code running in Node.js or Bun tries to access `window`.
 
 **Solution:**
-Use defensive detection:
 
 ```typescript
 // INCORRECT
@@ -158,8 +144,6 @@ if (typeof window !== 'undefined' && window.location?.href) {
 	// browser code
 }
 ```
-
----
 
 ## Schema validation issues
 
@@ -201,12 +185,8 @@ export const Album = Schema.Struct({
 });
 ```
 
-**When to use each one:**
-
 - `ID`: For primary keys generated with nanoid (most cases)
 - `UUID`: Only if the ID must be specifically UUID v4 format
-
----
 
 ### Issue 6: Schema.decodeUnknownSync with Effect.tryPromise
 
@@ -239,12 +219,8 @@ const validated = yield* Effect.try({
 });
 ```
 
-**General rule:**
-
-- `Effect.tryPromise` for **asynchronous** operations (DB, HTTP, file I/O)
-- `Effect.try` for **synchronous** operations (validation, parsing, transform)
-
----
+- `Effect.tryPromise` for asynchronous operations (DB, HTTP, file I/O)
+- `Effect.try` for synchronous operations (validation, parsing, transform)
 
 ## TaggedError issues
 
@@ -283,23 +259,18 @@ export class AlbumNotFound extends Data.TaggedError('AlbumNotFound')<{
 }
 ```
 
-**Rule:**
+Do not use optional fields in TaggedError getters. If you need a custom message, make it a required field:
 
-- Do not use optional fields in TaggedError getters.
-- If you need a custom message, make it a **required** field:
-
-  ```typescript
-  export class CustomError extends Data.TaggedError('CustomError')<{
-  	readonly context: string;
-  	readonly customMessage: string; // Required, not optional
-  }> {
-  	get displayMessage(): string {
-  		return `${this.context}: ${this.customMessage}`;
-  	}
-  }
-  ```
-
----
+```typescript
+export class CustomError extends Data.TaggedError('CustomError')<{
+	readonly context: string;
+	readonly customMessage: string; // Required, not optional
+}> {
+	get displayMessage(): string {
+		return `${this.context}: ${this.customMessage}`;
+	}
+}
+```
 
 ### Issue 8: Error cannot be serialized to JSON
 
@@ -334,8 +305,6 @@ export class AlbumError extends Data.TaggedError('AlbumError')<{
 	}
 }
 ```
-
----
 
 ## Performance issues
 
@@ -385,8 +354,6 @@ export const AlbumWithLargeMetadata = Schema.Struct({
 });
 ```
 
----
-
 ### Issue 10: Memory leak in tests
 
 **Symptom:**
@@ -414,8 +381,6 @@ describe('AlbumService', () => {
 	});
 });
 ```
-
----
 
 ## Type issues
 
@@ -452,9 +417,7 @@ async function getAlbum(id: string): Promise<Album> {
 }
 ```
 
----
-
-### Issue 12: Cannot find name 'yield\*'
+### Issue 12: Cannot find name 'yield*'
 
 **Symptom:**
 
@@ -480,47 +443,33 @@ Effect.gen(function* () {
 });
 ```
 
----
-
-## General troubleshooting checklist
+## Checklist
 
 When you find an Effect error:
 
-1. **Verify the operation type:**
+1. Verify the operation type:
    - [ ] Is it async? Use `Effect.tryPromise`.
    - [ ] Is it sync? Use `Effect.try`.
    - [ ] Is it a DB query? Add `async () => await`.
 
-2. **Verify the environment:**
+2. Verify the environment:
    - [ ] Do tests use a real DB? Check `isServerOrTest`.
    - [ ] Do logs show correct IDs? They must be nanoid, not "mock-id".
 
-3. **Verify schemas:**
+3. Verify schemas:
    - [ ] Do IDs use the correct type? Use `ID`, not `UUID`.
    - [ ] Does the schema compile correctly? Test with `Schema.decodeUnknownSync`.
 
-4. **Verify errors:**
+4. Verify errors:
    - [ ] Is TaggedError free of optional fields? Use required fields only.
    - [ ] Does displayMessage work? Test it manually.
 
-5. **Verify tests:**
+5. Verify tests:
    - [ ] Is there cleanup after each test? Use `afterEach(() => db.delete(...))`.
    - [ ] Are helpers reusable? Use `runEffect` and `runEffectExpectFailure`.
 
----
-
 ## References
-
-The following references support this guide:
 
 - [Effect Documentation](https://effect.website/docs/introduction)
 - [Drizzle ORM Docs](https://orm.drizzle.team/docs/overview)
 - [Effect Schema Guide](https://effect.website/docs/schema/introduction)
-- Implementation: `docs/EFFECT-PHASE-2-PLAN.md`
-- Patterns: section "Critical patterns discovered"
-
----
-
-**Last update:** 2025-10-11  
-**Maintained by:** Effect Implementation team  
-**Contribute:** Add found issues with verified solutions
