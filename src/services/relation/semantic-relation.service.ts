@@ -125,6 +125,15 @@ function validateEndpoint(endpoint: SemanticRelationEndpoint): void {
 	}
 }
 
+export async function getActiveAssetType(id: string): Promise<string | null> {
+	const [asset] = await db
+		.select({ assetType: assets.assetType })
+		.from(assets)
+		.where(and(eq(assets.id, id), ne(assets.status, 'deleted')))
+		.limit(1);
+	return asset?.assetType ?? null;
+}
+
 async function endpointExists(endpoint: SemanticRelationEndpoint): Promise<boolean> {
 	switch (endpoint.type) {
 		case 'asset':

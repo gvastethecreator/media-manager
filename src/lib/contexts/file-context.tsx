@@ -1,7 +1,9 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import { moveAuthorizedAssets } from '@/hooks/use-move';
 import { useLogActivity } from '@/lib/api/activity';
+import { toMediaAssetType } from '@/lib/api/authorized-roots';
 import {
 	useAddTags,
 	useAddToCollection,
@@ -26,7 +28,6 @@ interface FileContextType {
 	addTags: (fileIds: string[], tags: string[]) => void;
 	addToCollection: (fileIds: string[], collectionId: string) => void;
 	clearSelection: () => void;
-	copyFiles: (fileIds: string[], targetPath: string) => void;
 	currentItems: EntityWithStats[];
 	deselectFiles: (fileIds: string[]) => void;
 	downloadFiles: (fileIds: string[]) => Promise<void>;
@@ -36,7 +37,7 @@ interface FileContextType {
 	handleSelectItem: (item: EntityWithStats) => void;
 	isLoading: boolean;
 	loading: boolean;
-	moveFiles: (fileIds: string[], targetPath: string) => void;
+	moveFiles: (fileIds: string[], targetFolderId: string) => Promise<void>;
 	removeFiles: (fileIds: string[]) => void;
 	removeFromCollection: (fileIds: string[], collectionId: string) => void;
 	removeTags: (fileIds: string[], tags: string[]) => void;
@@ -101,27 +102,26 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	// Métodos del contexto de src/context/file-context.tsx
+	const logActivityMutateAsync = logActivity.mutateAsync;
+
 	const handleSelectItem = useCallback(
 		async (item: EntityWithStats) => {
-			// Seleccionar el item
 			selectFiles([item.id]);
 
-			// Registrar actividad de vista usando API hook
 			try {
-				await logActivity.mutateAsync({
+				await logActivityMutateAsync({
 					type: 'view',
 					entityType: 'file',
 					entityId: item.id,
 					action: 'view',
-					userId: 'anonymous', // TODO: obtener del contexto de usuario
+					userId: 'anonymous',
 					description: `View of ${item.name}`,
 				});
 			} catch (err) {
-				// No bloquear la UI por errores de logging
 				fileCtxLogger.error('Error recording activity', { error: err });
 			}
 		},
-		[selectFiles, logActivity]
+		[selectFiles, logActivityMutateAsync]
 	);
 
 	const toggleItemSelection = useCallback(
@@ -241,44 +241,25 @@ export function FileProvider({ children }: { children: ReactNode }) {
 		[removeTagsMutate]
 	);
 
-	// Resto de funciones del contexto original
-	const moveFiles = useCallback((fileIds: string[], targetPath: string) => {
-		try {
-			setLoading(true);
-			// Implementar lógica de movimiento de archivos
-			setFiles((prev) =>
-				prev.map((file) =>
-					fileIds.includes(file.id)
-						? { ...file, ...((file as any).path ? { path: `${targetPath}/${file.name}` } : {}) }
-						: file
-				)
-			);
-		} catch (err) {
-			setError('Error moving files');
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	const copyFiles = useCallback(
-		(fileIds: string[], targetPath: string) => {
+	const moveFiles = useCallback(
+		async (fileIds: string[], targetFolderId: string) => {
+			const assets = files.flatMap((file) => {
+				if (!fileIds.includes(file.id)) return [];
+				const assetType = toMediaAssetType(file.entityType);
+				return assetType ? [{ assetId: file.id, assetType }] : [];
+			});
 			try {
 				setLoading(true);
-				// Implementar lógica de copia de archivos
-				const filesToCopy = files.filter((file) => fileIds.includes(file.id));
-				const copiedFiles = filesToCopy.map((file) => ({
-					...file,
-					id: crypto.randomUUID(),
-					...((file as any).path ? { path: `${targetPath}/${file.name}` } : {}),
-				}));
-				addFiles(copiedFiles);
+				setError(null);
+				await moveAuthorizedAssets({ assets, targetFolderId });
 			} catch (err) {
-				setError('Error copying files');
+				setError(err instanceof Error ? err.message : 'Could not move files');
+				throw err;
 			} finally {
 				setLoading(false);
 			}
 		},
-		[files, addFiles]
+		[files]
 	);
 
 	const renameFile = useCallback((fileId: string, newName: string) => {
@@ -406,47 +387,80 @@ export function FileProvider({ children }: { children: ReactNode }) {
 		});
 	}, [files, sortBy, sortOrder]);
 
-	// Compatibilidad con contexto original
 	const currentItems = files;
-	const selectedItems = files.filter((file) => selectedFiles.includes(file.id));
+	const selectedItems = useMemo(
+		() => files.filter((file) => selectedFiles.includes(file.id)),
+		[files, selectedFiles]
+	);
 	const isLoading = loading;
 
-	const value = {
-		files,
-		selectedFiles,
-		currentItems,
-		selectedItems,
-		isLoading,
-		sortBy,
-		sortOrder,
-		viewMode,
-		thumbnailSize,
-		loading,
-		error,
-		setFiles,
-		addFiles,
-		removeFiles,
-		selectFiles,
-		deselectFiles,
-		clearSelection,
-		handleSelectItem,
-		toggleItemSelection,
-		setSortBy,
-		setSortOrder,
-		setViewMode,
-		setThumbnailSize,
-		toggleFavorite,
-		addToCollection,
-		removeFromCollection,
-		addTags,
-		removeTags,
-		moveFiles,
-		copyFiles,
-		renameFile,
-		uploadFiles,
-		downloadFiles,
-		getSortedFiles,
-	};
+	const value = useMemo(
+		() => ({
+			files,
+			selectedFiles,
+			currentItems,
+			selectedItems,
+			isLoading,
+			sortBy,
+			sortOrder,
+			viewMode,
+			thumbnailSize,
+			loading,
+			error,
+			setFiles,
+			addFiles,
+			removeFiles,
+			selectFiles,
+			deselectFiles,
+			clearSelection,
+			handleSelectItem,
+			toggleItemSelection,
+			setSortBy,
+			setSortOrder,
+			setViewMode,
+			setThumbnailSize,
+			toggleFavorite,
+			addToCollection,
+			removeFromCollection,
+			addTags,
+			removeTags,
+			moveFiles,
+			renameFile,
+			uploadFiles,
+			downloadFiles,
+			getSortedFiles,
+		}),
+		[
+			files,
+			selectedFiles,
+			currentItems,
+			selectedItems,
+			isLoading,
+			sortBy,
+			sortOrder,
+			viewMode,
+			thumbnailSize,
+			loading,
+			error,
+			addFiles,
+			removeFiles,
+			selectFiles,
+			deselectFiles,
+			clearSelection,
+			handleSelectItem,
+			toggleItemSelection,
+			toggleFavorite,
+			addToCollection,
+			removeFromCollection,
+			addTags,
+			removeTags,
+			moveFiles,
+			renameFile,
+			uploadFiles,
+			downloadFiles,
+			getSortedFiles,
+		]
+	);
 
 	return <FileContext.Provider value={value}>{children}</FileContext.Provider>;
 }

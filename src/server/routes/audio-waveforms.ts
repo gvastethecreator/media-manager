@@ -3,12 +3,10 @@
  * @module server/routes/audio-waveforms
  */
 
-import { eq } from 'drizzle-orm';
 import express from 'express';
 import { Effect } from 'effect';
-import { db } from '@/lib/drizzle/index.js';
-import { audios } from '@/lib/drizzle/schema/index.js';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { getAudioRecordById } from '@/services/audio/audio-record.service';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
 import { authorizeMediaAssetParam } from '@/server/security/authorized-root-request';
@@ -241,13 +239,11 @@ router.get(
 						showAxis: req.query.showAxis === 'true',
 					};
 
-					const audioRecords = await db.select({ metadata: audios.metadata }).from(audios).where(eq(audios.id, id));
+					const audio = await getAudioRecordById(id);
 
-					if (audioRecords.length === 0) {
+					if (!audio) {
 						throw Object.assign(new Error('Audio not found'), { _tag: 'FileNotFound' });
 					}
-
-					const audio = audioRecords[0];
 					let metadata: any = null;
 
 					if (audio.metadata) {
@@ -300,16 +296,11 @@ router.get(
 			try: async () => {
 				const { id } = req.params;
 
-				const audioRecords = await db
-					.select({ path: audios.path, metadata: audios.metadata })
-					.from(audios)
-					.where(eq(audios.id, id));
+				const audio = await getAudioRecordById(id);
 
-				if (audioRecords.length === 0) {
+				if (!audio) {
 					throw Object.assign(new Error('Audio file not found'), { _tag: 'FileNotFound' });
 				}
-
-				const audio = audioRecords[0];
 
 				if (audio.metadata) {
 					try {
@@ -359,16 +350,11 @@ router.get(
 						showAxis: false,
 					};
 
-					const audioRecords = await db
-						.select({ path: audios.path, metadata: audios.metadata })
-						.from(audios)
-						.where(eq(audios.id, id));
+					const audio = await getAudioRecordById(id);
 
-					if (audioRecords.length === 0) {
+					if (!audio) {
 						throw Object.assign(new Error('Audio not found'), { _tag: 'FileNotFound' });
 					}
-
-					const audio = audioRecords[0];
 					const waveformData = await extractWaveformFromAudio(audio.path, 50);
 
 					if (waveformData) {

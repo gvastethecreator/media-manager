@@ -1,0 +1,3364 @@
+{
+  "generated_at": "2026-09-05T05:06:00Z",
+  "generated_from_commit": "0b9c124bb40060f3634a7624bbb1ed8abd7250a6",
+  "scope": [
+    "."
+  ],
+  "nodes": [
+    {
+      "id": "electron",
+      "path": "electron",
+      "type": "module",
+      "boundary": "Electron",
+      "entrypoints": [
+        "electron/main/index.ts:resolveUserDataFromArgv"
+      ],
+      "tests": [
+        "scripts/desktop-contract.test.ts",
+        "scripts/desktop-data-migrate.test.ts",
+        "scripts/desktop-supervisor.test.ts"
+      ],
+      "callers": [
+        {
+          "id": "scripts",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "scripts",
+          "type": "imports"
+        },
+        {
+          "id": "src-runtime",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "electron/main/index.ts",
+            "symbol": "resolveUserDataFromArgv"
+          }
+        ]
+      }
+    },
+    {
+      "id": "external-dependencies",
+      "path": "drizzle.config.ts",
+      "type": "external",
+      "boundary": "External",
+      "entrypoints": [
+        "drizzle.config.ts:drizzle-kit"
+      ],
+      "tests": [],
+      "callers": [
+        {
+          "id": "electron",
+          "type": "imports"
+        },
+        {
+          "id": "other-modules",
+          "type": "imports"
+        },
+        {
+          "id": "scripts",
+          "type": "imports"
+        },
+        {
+          "id": "src",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-platform",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-transformers",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        },
+        {
+          "id": "vite-config",
+          "type": "imports"
+        }
+      ],
+      "callees": [],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "drizzle.config.ts",
+            "symbol": "drizzle-kit"
+          }
+        ]
+      }
+    },
+    {
+      "id": "other-modules",
+      "path": "drizzle.config.ts",
+      "type": "module",
+      "boundary": "Other Modules",
+      "entrypoints": [
+        "drizzle.config.ts:import 'dotenv/config';"
+      ],
+      "tests": [],
+      "callers": [
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "drizzle.config.ts",
+            "symbol": "import 'dotenv/config';"
+          }
+        ]
+      }
+    },
+    {
+      "id": "repository",
+      "path": "package.json",
+      "type": "module",
+      "boundary": "Repository",
+      "entrypoints": [
+        "package.json:{"
+      ],
+      "tests": [],
+      "callers": [],
+      "callees": [
+        {
+          "id": "scripts",
+          "type": "calls"
+        },
+        {
+          "id": "scripts-db",
+          "type": "calls"
+        },
+        {
+          "id": "src-server",
+          "type": "calls"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "package.json",
+            "symbol": "{"
+          }
+        ]
+      }
+    },
+    {
+      "id": "scripts",
+      "path": "scripts",
+      "type": "service",
+      "boundary": "Scripts",
+      "entrypoints": [
+        "scripts/apply-production-database.ts:resolveProductionMigrationsDirectory"
+      ],
+      "tests": [
+        "scripts/apply-production-database.test.ts",
+        "scripts/desktop-data-migrate.test.ts",
+        "scripts/local-session-security.test.ts",
+        "scripts/run-tests-isolated.test.ts",
+        "scripts/safety-contracts.test.ts"
+      ],
+      "callers": [
+        {
+          "id": "electron",
+          "type": "imports"
+        },
+        {
+          "id": "repository",
+          "type": "calls"
+        },
+        {
+          "id": "src-runtime",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "electron",
+          "type": "imports"
+        },
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "scripts-db",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-runtime",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/apply-production-database.ts",
+            "symbol": "resolveProductionMigrationsDirectory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "scripts-db",
+      "path": "scripts/db",
+      "type": "database",
+      "boundary": "Scripts",
+      "entrypoints": [
+        "scripts/db/backup-retention.ts:isInside"
+      ],
+      "tests": [
+        "scripts/db/backup-retention.test.ts",
+        "scripts/db/canonical-asset-schema.test.ts",
+        "scripts/db/database-safety.test.ts",
+        "scripts/db/export-schema.test.ts",
+        "scripts/db/image-asset-link-schema.test.ts"
+      ],
+      "callers": [
+        {
+          "id": "repository",
+          "type": "calls"
+        },
+        {
+          "id": "scripts",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/db/backup-retention.ts",
+            "symbol": "isInside"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src",
+      "path": "src",
+      "type": "module",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/App.tsx:SSENavigationRefresher"
+      ],
+      "tests": [],
+      "callers": [
+        {
+          "id": "src-platform",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-platform",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/App.tsx",
+            "symbol": "SSENavigationRefresher"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-components",
+      "path": "src/components",
+      "type": "interface",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/components/ui/index.ts:/**"
+      ],
+      "tests": [
+        "src/components/features/file-browser-new/components/file-operation-dialogs.test.tsx",
+        "src/components/features/file-browser-new/components/folder-browser-visual.test.tsx",
+        "src/components/features/file-browser-new/components/status-bar.test.tsx",
+        "src/components/features/file-browser-new/hooks/use-delete.test.ts",
+        "src/components/settings/common/dynamic-create-form.test.tsx"
+      ],
+      "callers": [
+        {
+          "id": "src",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-platform",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "other-modules",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-platform",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-transformers",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/ui/index.ts",
+            "symbol": "/**"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-config",
+      "path": "src/config",
+      "type": "module",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/config/empty.ts:Stats"
+      ],
+      "tests": [
+        "scripts/safety-contracts.test.ts",
+        "tests/unit/entity-type-configs.spec.ts"
+      ],
+      "callers": [
+        {
+          "id": "scripts",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "vite-config",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/config/empty.ts",
+            "symbol": "Stats"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-hooks",
+      "path": "src/hooks",
+      "type": "module",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/hooks/index.ts:/**"
+      ],
+      "tests": [
+        "src/hooks/__tests__/use-list-view-config.test.tsx",
+        "src/hooks/__tests__/use-thumbnail.test.tsx",
+        "src/hooks/use-move.test.ts"
+      ],
+      "callers": [
+        {
+          "id": "src",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-platform",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/index.ts",
+            "symbol": "/**"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-lib",
+      "path": "src/lib",
+      "type": "module",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/lib/index.ts:/**"
+      ],
+      "tests": [
+        "scripts/apply-production-database.test.ts",
+        "scripts/audio-canonical-http.test.ts",
+        "scripts/authorized-file-mutation.test.ts",
+        "scripts/authorized-files-routes.test.ts",
+        "scripts/db/relation-catalog.test.ts"
+      ],
+      "callers": [
+        {
+          "id": "other-modules",
+          "type": "imports"
+        },
+        {
+          "id": "scripts",
+          "type": "imports"
+        },
+        {
+          "id": "scripts-db",
+          "type": "imports"
+        },
+        {
+          "id": "src",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-transformers",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "other-modules",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-platform",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-transformers",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/index.ts",
+            "symbol": "/**"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-platform",
+      "path": "src/platform",
+      "type": "module",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/platform/app-shell-structure-plan.ts:APP_SHELL_STRUCTURE_VERSION"
+      ],
+      "tests": [],
+      "callers": [
+        {
+          "id": "src",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/platform/app-shell-structure-plan.ts",
+            "symbol": "APP_SHELL_STRUCTURE_VERSION"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-providers",
+      "path": "src/providers",
+      "type": "module",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/providers/ViewTransitionProvider.tsx:ViewTransitionProvider"
+      ],
+      "tests": [],
+      "callers": [
+        {
+          "id": "src",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-platform",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/providers/ViewTransitionProvider.tsx",
+            "symbol": "ViewTransitionProvider"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-runtime",
+      "path": "src/runtime",
+      "type": "service",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/runtime/http-limits.ts:API_JSON_BODY_LIMIT"
+      ],
+      "tests": [
+        "scripts/http-input-limits.test.ts",
+        "scripts/local-app-broker.test.ts"
+      ],
+      "callers": [
+        {
+          "id": "electron",
+          "type": "imports"
+        },
+        {
+          "id": "scripts",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "scripts",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/runtime/http-limits.ts",
+            "symbol": "API_JSON_BODY_LIMIT"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-server",
+      "path": "src/server",
+      "type": "service",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/server/index.ts:shutdown"
+      ],
+      "tests": [
+        "scripts/audio-canonical-http.test.ts",
+        "scripts/authorized-file-mutation.test.ts",
+        "scripts/authorized-files-routes.test.ts",
+        "scripts/authorized-roots.test.ts",
+        "scripts/document-canonical-http.test.ts"
+      ],
+      "callers": [
+        {
+          "id": "repository",
+          "type": "calls"
+        },
+        {
+          "id": "scripts",
+          "type": "imports"
+        },
+        {
+          "id": "scripts-db",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-runtime",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-transformers",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/server/index.ts",
+            "symbol": "shutdown"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-services",
+      "path": "src/services",
+      "type": "service",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/services/file-entity-mapper/metadata/index.ts:export * from './audio-metadata.extractor';"
+      ],
+      "tests": [
+        "scripts/audio-canonical-http.test.ts",
+        "scripts/db/media-specialization-query-plan.test.ts",
+        "scripts/document-canonical-http.test.ts",
+        "scripts/image-canonical-http.test.ts",
+        "scripts/image-canonical-root-registry.test.ts"
+      ],
+      "callers": [
+        {
+          "id": "scripts",
+          "type": "imports"
+        },
+        {
+          "id": "scripts-db",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-transformers",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/services/file-entity-mapper/metadata/index.ts",
+            "symbol": "export * from './audio-metadata.extractor';"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-store",
+      "path": "src/store",
+      "type": "database",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/store/index.ts:export * from './selection.store';"
+      ],
+      "tests": [
+        "tests/unit/file-browser-store.spec.ts"
+      ],
+      "callers": [
+        {
+          "id": "src",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "other-modules",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-transformers",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/store/index.ts",
+            "symbol": "export * from './selection.store';"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-transformers",
+      "path": "src/transformers",
+      "type": "module",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/transformers/activity/index.ts:/**"
+      ],
+      "tests": [
+        "tests/unit/sort-media-items.spec.ts",
+        "tests/unit/transformers/image.transformer.spec.ts"
+      ],
+      "callers": [
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-types",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/transformers/activity/index.ts",
+            "symbol": "/**"
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-types",
+      "path": "src/types",
+      "type": "module",
+      "boundary": "Src",
+      "entrypoints": [
+        "src/types/entities/index.ts:/**"
+      ],
+      "tests": [
+        "src/components/settings/forms/create-note-form.test.tsx",
+        "src/lib/api/taxonomy-artifacts.test.ts",
+        "src/lib/utils/folder/hierarchical-navigation.test.ts",
+        "src/services/album/__tests__/album.favorite.effect.test.ts",
+        "src/services/album/__tests__/album.service.effect.test.ts"
+      ],
+      "callers": [
+        {
+          "id": "other-modules",
+          "type": "imports"
+        },
+        {
+          "id": "src-components",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        },
+        {
+          "id": "src-hooks",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-providers",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-transformers",
+          "type": "imports"
+        }
+      ],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-lib",
+          "type": "imports"
+        },
+        {
+          "id": "src-server",
+          "type": "imports"
+        },
+        {
+          "id": "src-services",
+          "type": "imports"
+        },
+        {
+          "id": "src-store",
+          "type": "imports"
+        },
+        {
+          "id": "src-transformers",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/types/entities/index.ts",
+            "symbol": "/**"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vite-config",
+      "path": "vite.config.ts",
+      "type": "module",
+      "boundary": "Vite.Config",
+      "entrypoints": [
+        "vite.config.ts:getManualChunkName"
+      ],
+      "tests": [],
+      "callers": [],
+      "callees": [
+        {
+          "id": "external-dependencies",
+          "type": "imports"
+        },
+        {
+          "id": "src-config",
+          "type": "imports"
+        }
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "vite.config.ts",
+            "symbol": "getManualChunkName"
+          }
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "electron",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "electron/main/index.ts",
+            "symbol": "electron"
+          },
+          {
+            "path": "electron/preload/index.ts",
+            "symbol": "electron"
+          }
+        ]
+      }
+    },
+    {
+      "from": "electron",
+      "to": "scripts",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "electron/main/data-migrate.ts",
+            "symbol": "../../scripts/apply-production-database"
+          }
+        ]
+      }
+    },
+    {
+      "from": "electron",
+      "to": "src-runtime",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "electron/main/supervisor.ts",
+            "symbol": "../../src/runtime/production-runtime-config"
+          }
+        ]
+      }
+    },
+    {
+      "from": "other-modules",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "drizzle.config.ts",
+            "symbol": "drizzle-kit"
+          },
+          {
+            "path": "oxlint.config.ts",
+            "symbol": "oxlint"
+          },
+          {
+            "path": "playwright.config.ts",
+            "symbol": "@playwright/test"
+          }
+        ]
+      }
+    },
+    {
+      "from": "other-modules",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/scripts/test-audio-gen.ts",
+            "symbol": "@/lib/utils/video/ffmpeg-thumbnails"
+          },
+          {
+            "path": "src/scripts/test-ffmpeg-gen.ts",
+            "symbol": "@/lib/utils/video/ffmpeg-thumbnails"
+          }
+        ]
+      }
+    },
+    {
+      "from": "other-modules",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/utils/place.ts",
+            "symbol": "../types/entities/place"
+          }
+        ]
+      }
+    },
+    {
+      "from": "repository",
+      "to": "scripts",
+      "type": "calls",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "package.json",
+            "symbol": "scripts/dev-full.js"
+          },
+          {
+            "path": "package.json",
+            "symbol": "scripts/dev-vite-headers.js"
+          },
+          {
+            "path": "package.json",
+            "symbol": "scripts/dev-server-hot.js"
+          }
+        ]
+      }
+    },
+    {
+      "from": "repository",
+      "to": "scripts-db",
+      "type": "calls",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "package.json",
+            "symbol": "scripts/db/studio.js"
+          },
+          {
+            "path": "package.json",
+            "symbol": "scripts/db/migrations.ts"
+          },
+          {
+            "path": "package.json",
+            "symbol": "scripts/db/legacy-adoption.ts"
+          }
+        ]
+      }
+    },
+    {
+      "from": "repository",
+      "to": "src-server",
+      "type": "calls",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "package.json",
+            "symbol": "src/server/index.ts"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts",
+      "to": "electron",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/desktop-contract.test.ts",
+            "symbol": "../electron/shared/ipc-contract"
+          },
+          {
+            "path": "scripts/desktop-contract.test.ts",
+            "symbol": "../electron/main/data-dir"
+          },
+          {
+            "path": "scripts/desktop-contract.test.ts",
+            "symbol": "../electron/main/runtime-mode"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/audio-canonical-http.test.ts",
+            "symbol": "drizzle-orm"
+          },
+          {
+            "path": "scripts/audio-canonical-http.test.ts",
+            "symbol": "express"
+          },
+          {
+            "path": "scripts/audio-canonical-http.test.ts",
+            "symbol": "supertest"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts",
+      "to": "scripts-db",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/apply-production-database.ts",
+            "symbol": "./db/database-safety"
+          },
+          {
+            "path": "scripts/apply-production-database.ts",
+            "symbol": "./db/migrations"
+          },
+          {
+            "path": "scripts/run-production-smoke.ts",
+            "symbol": "./db/migrations"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts",
+      "to": "src-config",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/safety-contracts.test.ts",
+            "symbol": "../src/config/local-runtime-security"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/apply-production-database.test.ts",
+            "symbol": "../src/lib/logger/log-directory"
+          },
+          {
+            "path": "scripts/audio-canonical-http.test.ts",
+            "symbol": "../src/lib/drizzle"
+          },
+          {
+            "path": "scripts/audio-canonical-http.test.ts",
+            "symbol": "../src/lib/drizzle/schema"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts",
+      "to": "src-runtime",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/http-input-limits.test.ts",
+            "symbol": "../src/runtime/http-limits"
+          },
+          {
+            "path": "scripts/local-app-broker.test.ts",
+            "symbol": "../src/runtime/local-app-broker"
+          },
+          {
+            "path": "scripts/local-app-broker.test.ts",
+            "symbol": "../src/runtime/production-runtime-config"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts",
+      "to": "src-server",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/audio-canonical-http.test.ts",
+            "symbol": "../src/server/routes/audios.effect"
+          },
+          {
+            "path": "scripts/audio-canonical-http.test.ts",
+            "symbol": "../src/server/security/authorized-roots"
+          },
+          {
+            "path": "scripts/authorized-file-mutation.test.ts",
+            "symbol": "../src/server/security/authorized-file-mutation"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts",
+      "to": "src-services",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/audio-canonical-http.test.ts",
+            "symbol": "../src/services/media-core/media-root-registry.service"
+          },
+          {
+            "path": "scripts/diagnose-thumbnails.js",
+            "symbol": "../src/services/file-entity-mapper/core.service.js"
+          },
+          {
+            "path": "scripts/document-canonical-http.test.ts",
+            "symbol": "../src/services/media-core/media-root-registry.service"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts-db",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/db/image-asset-reconciliation.ts",
+            "symbol": "../../src/lib/filesystem/path-containment"
+          },
+          {
+            "path": "scripts/db/media-specialization-asset-reconciliation.ts",
+            "symbol": "../../src/lib/filesystem/path-containment"
+          },
+          {
+            "path": "scripts/db/orphan-inventory.ts",
+            "symbol": "../../src/lib/drizzle/schema/relations/catalog"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts-db",
+      "to": "src-server",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/db/image-asset-reconciliation.ts",
+            "symbol": "../../src/server/security/authorized-roots"
+          },
+          {
+            "path": "scripts/db/media-specialization-asset-reconciliation.ts",
+            "symbol": "../../src/server/security/authorized-roots"
+          }
+        ]
+      }
+    },
+    {
+      "from": "scripts-db",
+      "to": "src-services",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "scripts/db/media-specialization-query-plan.test.ts",
+            "symbol": "../../src/services/audio/audio.service.effect"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/App.tsx",
+            "symbol": "react"
+          },
+          {
+            "path": "src/App.tsx",
+            "symbol": "react-router-dom"
+          },
+          {
+            "path": "src/main.tsx",
+            "symbol": "react"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src",
+      "to": "src-components",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/App.tsx",
+            "symbol": "./components/core/error-boundary"
+          },
+          {
+            "path": "src/App.tsx",
+            "symbol": "./components/core/interface-synchronizer"
+          },
+          {
+            "path": "src/App.tsx",
+            "symbol": "./components/ui/feedback-provider"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src",
+      "to": "src-hooks",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/App.tsx",
+            "symbol": "@/hooks/use-navigation-refresh"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/App.tsx",
+            "symbol": "./lib/dev/react-scan"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src",
+      "to": "src-platform",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/main.tsx",
+            "symbol": "@/platform/app-shell/app-shell"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src",
+      "to": "src-providers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/App.tsx",
+            "symbol": "./providers/ViewTransitionProvider"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src",
+      "to": "src-store",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/App.tsx",
+            "symbol": "@/store/entity-catalog-store"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/a11y/skip-links.tsx",
+            "symbol": "react"
+          },
+          {
+            "path": "src/components/cards/album-card/album-card-header.tsx",
+            "symbol": "lucide-react"
+          },
+          {
+            "path": "src/components/cards/album-card/album-card-images.tsx",
+            "symbol": "lucide-react"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "other-modules",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/debug/include-subfolders-debug.tsx",
+            "symbol": "@/utils/debug-localStorage"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "src-config",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/features/file-browser-new/components/media-thumbnail/media-thumbnail.tsx",
+            "symbol": "@/config/thumbnail-generators"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "src-hooks",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/cards/card-transitions.tsx",
+            "symbol": "@/hooks/transitions"
+          },
+          {
+            "path": "src/components/cards/tcg-entity-card.tsx",
+            "symbol": "@/hooks/use-entity-type-config"
+          },
+          {
+            "path": "src/components/common/thumbnails/entity-thumbnail.tsx",
+            "symbol": "@/hooks/use-entity-type-config"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/a11y/skip-links.tsx",
+            "symbol": "@/lib/utils"
+          },
+          {
+            "path": "src/components/cards/album-card/album-card-content.tsx",
+            "symbol": "@/lib/utils"
+          },
+          {
+            "path": "src/components/cards/album-card/album-card-footer.tsx",
+            "symbol": "@/lib/utils"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "src-platform",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/desktop/desktop-recovery-page.tsx",
+            "symbol": "@/platform/desktop"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "src-providers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/transitions/view-transition.tsx",
+            "symbol": "@/providers/ViewTransitionProvider"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "src-services",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/settings/forms/create-tag-form.tsx",
+            "symbol": "@/services/toast/toast.service"
+          },
+          {
+            "path": "src/components/settings/profiles/profiles-settings.tsx",
+            "symbol": "@/services/profile/client"
+          },
+          {
+            "path": "src/components/views/development/services/system-stats.ts",
+            "symbol": "@/services/image/image-lifecycle-query"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "src-store",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/cards/tag-card/tag-card-content.tsx",
+            "symbol": "@/store/entities/tag/types"
+          },
+          {
+            "path": "src/components/cards/tag-card/tag-card-footer.tsx",
+            "symbol": "@/store/entities/tag/types"
+          },
+          {
+            "path": "src/components/cards/tag-card/tag-card-header.tsx",
+            "symbol": "@/store/entities/tag/types"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "src-transformers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/views/tags/tags-content-view.tsx",
+            "symbol": "@/transformers/tag"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-components",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/components/cards/album-card/album-card-content.tsx",
+            "symbol": "@/types/entities/album"
+          },
+          {
+            "path": "src/components/cards/album-card/album-card-footer.tsx",
+            "symbol": "@/types/entities/album"
+          },
+          {
+            "path": "src/components/cards/album-card/album-card-header.tsx",
+            "symbol": "@/types/entities/album"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-config",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/config/empty.ts",
+            "symbol": "path"
+          },
+          {
+            "path": "src/config/entity-type-configs.ts",
+            "symbol": "lucide-react"
+          },
+          {
+            "path": "src/config/thumbs.ts",
+            "symbol": "path"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-config",
+      "to": "src-components",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/config/entity-type-configs.ts",
+            "symbol": "@/components/features/file-browser-new/components/item-context-menu"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-config",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/config/env.ts",
+            "symbol": "@/lib/logger/server-logger"
+          },
+          {
+            "path": "src/config/thumbnail-generators.ts",
+            "symbol": "@/lib/config/thumbnail.config"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-config",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/config/entity-type-configs.ts",
+            "symbol": "@/types/entities"
+          },
+          {
+            "path": "src/config/entity-type-configs.ts",
+            "symbol": "@/types/file-browser/entity-stats"
+          },
+          {
+            "path": "src/config/thumbnail-generators.ts",
+            "symbol": "@/types/entities"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-hooks",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/__tests__/use-list-view-config.test.tsx",
+            "symbol": "@testing-library/react"
+          },
+          {
+            "path": "src/hooks/__tests__/use-list-view-config.test.tsx",
+            "symbol": "vitest"
+          },
+          {
+            "path": "src/hooks/__tests__/use-thumbnail.test.tsx",
+            "symbol": "@testing-library/react"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-components",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/index.ts",
+            "symbol": "@/components/ui/confirm-dialog"
+          },
+          {
+            "path": "src/hooks/index.ts",
+            "symbol": "@/components/ui/feedback-provider"
+          },
+          {
+            "path": "src/hooks/index.ts",
+            "symbol": "@/components/ui/toast"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-config",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/use-entity-type-config.ts",
+            "symbol": "@/config/entity-type-configs"
+          },
+          {
+            "path": "src/hooks/use-entity-type-config.ts",
+            "symbol": "@/config/thumbnail-generators"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/transitions/index.ts",
+            "symbol": "@/lib/transitions/types"
+          },
+          {
+            "path": "src/hooks/transitions/use-enter-exit.ts",
+            "symbol": "@/lib/transitions/core/enter-exit-coordinator"
+          },
+          {
+            "path": "src/hooks/transitions/use-enter-exit.ts",
+            "symbol": "@/lib/transitions/types"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-platform",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/use-tauri-backend.ts",
+            "symbol": "@/platform/detect"
+          },
+          {
+            "path": "src/hooks/use-tauri-backend.ts",
+            "symbol": "@/platform/desktop"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-providers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/use-transition-navigation.ts",
+            "symbol": "@/providers/ViewTransitionProvider"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-services",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/use-cache.ts",
+            "symbol": "../services/cache/cache-manager"
+          },
+          {
+            "path": "src/hooks/use-download-manager.ts",
+            "symbol": "@/services/download/download.service"
+          },
+          {
+            "path": "src/hooks/use-folder-details.ts",
+            "symbol": "@/services/folder/folder-api.service"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-store",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/use-advanced-selection.ts",
+            "symbol": "@/store/selection.store"
+          },
+          {
+            "path": "src/hooks/use-apply-interface-preferences.ts",
+            "symbol": "@/store/entities/settings/store"
+          },
+          {
+            "path": "src/hooks/use-cards-view-config.ts",
+            "symbol": "@/store/ui/view-options.slice"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-hooks",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/hooks/use-advanced-selection.ts",
+            "symbol": "@/types/entities"
+          },
+          {
+            "path": "src/hooks/use-auto-folder-indexing.ts",
+            "symbol": "@/types/entities/folder"
+          },
+          {
+            "path": "src/hooks/use-cache.ts",
+            "symbol": "../types/file-browser/entity-stats"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/animation/index.ts",
+            "symbol": "gsap"
+          },
+          {
+            "path": "src/lib/api/__tests__/favorite-cache.test.ts",
+            "symbol": "@tanstack/react-query"
+          },
+          {
+            "path": "src/lib/api/activity.ts",
+            "symbol": "@tanstack/react-query"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "other-modules",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/utils/entity-loading.utils.ts",
+            "symbol": "@/constants/entities"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-components",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/api/services/characters.ts",
+            "symbol": "@/components/cards/character-card/character-card.types"
+          },
+          {
+            "path": "src/lib/hooks/system/use-console-capture.ts",
+            "symbol": "@/components/ui/log-viewer"
+          },
+          {
+            "path": "src/lib/hooks/ui/use-toast.ts",
+            "symbol": "@/components/ui/toast"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-config",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/image/thumbnail.ts",
+            "symbol": "@/config/thumbs"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-hooks",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/contexts/file-context.tsx",
+            "symbol": "@/hooks/use-move"
+          },
+          {
+            "path": "src/lib/view-transition/index.ts",
+            "symbol": "@/hooks/use-transition-navigation"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-platform",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/tauri-config.ts",
+            "symbol": "@/platform/detect"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-providers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/hooks/utils/use-profile-theme.tsx",
+            "symbol": "@/providers/profile-provider"
+          },
+          {
+            "path": "src/lib/view-transition/index.ts",
+            "symbol": "@/providers/ViewTransitionProvider"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-server",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/effect/adapters/express.adapter.ts",
+            "symbol": "@/server/security/sanitize-public-payload"
+          },
+          {
+            "path": "src/lib/filesystem/adapters/fs-db-filesystem-sync.adapter.ts",
+            "symbol": "@/server/security/configured-media-source"
+          },
+          {
+            "path": "src/lib/filesystem/file-sync.service.ts",
+            "symbol": "@/server/security/authorized-roots"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-services",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/api/queue.ts",
+            "symbol": "@/services/queue-job/queue-job.service"
+          },
+          {
+            "path": "src/lib/contexts/settings-context.tsx",
+            "symbol": "@/services/profile/client"
+          },
+          {
+            "path": "src/lib/contexts/settings-context.tsx",
+            "symbol": "@/services/toast/toast.service"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-store",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/hooks/entities/concept/use-concept-actions.ts",
+            "symbol": "@/store/entities/concept"
+          },
+          {
+            "path": "src/lib/hooks/entities/concept/use-concept-filters.ts",
+            "symbol": "@/store/entities/concept"
+          },
+          {
+            "path": "src/lib/hooks/entities/concept/use-concept-ui.ts",
+            "symbol": "@/store/entities/concept"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-transformers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/hooks/entities/concept/use-concepts.ts",
+            "symbol": "@/transformers/concept/mappers"
+          },
+          {
+            "path": "src/lib/hooks/utils/use-profile-theme.tsx",
+            "symbol": "@/transformers/profile/profile-transformers"
+          },
+          {
+            "path": "src/lib/metadata.ts",
+            "symbol": "@/transformers/settings/schema"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-lib",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/lib/api/albums.ts",
+            "symbol": "@/types/entities/album"
+          },
+          {
+            "path": "src/lib/api/albums.ts",
+            "symbol": "@/types/entities/image"
+          },
+          {
+            "path": "src/lib/api/audio.ts",
+            "symbol": "@/types/entities/audio"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-platform",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/platform/app-shell/app-shell.tsx",
+            "symbol": "react"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-platform",
+      "to": "src",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/platform/app-shell/app-shell.tsx",
+            "symbol": "@/App"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-platform",
+      "to": "src-components",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/platform/app-shell/app-shell.tsx",
+            "symbol": "@/components/desktop/desktop-recovery-page"
+          },
+          {
+            "path": "src/platform/app-shell/app-shell.tsx",
+            "symbol": "@/components/desktop/restore-library-dialog"
+          },
+          {
+            "path": "src/platform/app-shell/app-shell.tsx",
+            "symbol": "@/components/core/global-error-handler"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-platform",
+      "to": "src-providers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/platform/app-shell/app-shell.tsx",
+            "symbol": "@/providers/app-provider"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-providers",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/providers/ViewTransitionProvider.tsx",
+            "symbol": "react"
+          },
+          {
+            "path": "src/providers/app-provider.tsx",
+            "symbol": "react"
+          },
+          {
+            "path": "src/providers/cache-provider.tsx",
+            "symbol": "react"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-providers",
+      "to": "src-components",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/providers/app-provider.tsx",
+            "symbol": "@/components/theme-sync"
+          },
+          {
+            "path": "src/providers/app-provider.tsx",
+            "symbol": "@/components/ui/sonner"
+          },
+          {
+            "path": "src/providers/app-provider.tsx",
+            "symbol": "@/components/ui/theme-provider"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-providers",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/providers/ViewTransitionProvider.tsx",
+            "symbol": "@/lib/view-transition/utils"
+          },
+          {
+            "path": "src/providers/app-provider.tsx",
+            "symbol": "@/lib/contexts/file-context"
+          },
+          {
+            "path": "src/providers/app-provider.tsx",
+            "symbol": "@/lib/contexts/settings-context"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-providers",
+      "to": "src-store",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/providers/profile-provider.tsx",
+            "symbol": "@/store/entities/profile/profile-store"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-providers",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/providers/ViewTransitionProvider.tsx",
+            "symbol": "@/types/view-transition"
+          },
+          {
+            "path": "src/providers/profile-provider.tsx",
+            "symbol": "@/types/entities/profile"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-runtime",
+      "to": "scripts",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/runtime/production-runtime-config.ts",
+            "symbol": "../../scripts/local-session-environment.js"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-server",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/server/index.ts",
+            "symbol": "express"
+          },
+          {
+            "path": "src/server/index.ts",
+            "symbol": "path"
+          },
+          {
+            "path": "src/server/index.ts",
+            "symbol": "helmet"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-server",
+      "to": "src-config",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/server/index.ts",
+            "symbol": "@/config/local-runtime-security"
+          },
+          {
+            "path": "src/server/route-registry.ts",
+            "symbol": "@/config/local-runtime-security"
+          },
+          {
+            "path": "src/server/services/thumbnail.service.ts",
+            "symbol": "@/config/thumbs"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-server",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/server/index.ts",
+            "symbol": "@/lib/drizzle"
+          },
+          {
+            "path": "src/server/index.ts",
+            "symbol": "@/lib/logger/init-file-logging"
+          },
+          {
+            "path": "src/server/index.ts",
+            "symbol": "@/lib/system/reindex-monitor"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-server",
+      "to": "src-runtime",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/server/index.ts",
+            "symbol": "@/runtime/runtime-health"
+          },
+          {
+            "path": "src/server/index.ts",
+            "symbol": "@/runtime/http-limits"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-server",
+      "to": "src-services",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/server/index.ts",
+            "symbol": "@/services/media-core/media-root-registry.service"
+          },
+          {
+            "path": "src/server/routes/activity.ts",
+            "symbol": "../../services/activity/activity.service"
+          },
+          {
+            "path": "src/server/routes/albums.effect.ts",
+            "symbol": "@/services/album/album.service.effect"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-server",
+      "to": "src-transformers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/server/routes/queue.ts",
+            "symbol": "@/transformers/queue-job"
+          },
+          {
+            "path": "src/server/services/system.service.ts",
+            "symbol": "@/transformers/settings/schema"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-server",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/server/routes/activity.ts",
+            "symbol": "@/types/entities/activity/types"
+          },
+          {
+            "path": "src/server/routes/albums.effect.ts",
+            "symbol": "@/types/entities/favorite"
+          },
+          {
+            "path": "src/server/routes/characters.effect.ts",
+            "symbol": "@/types/entities/favorite"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-services",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/services/activity/activity.service.ts",
+            "symbol": "drizzle-orm"
+          },
+          {
+            "path": "src/services/album/__tests__/album.favorite.effect.test.ts",
+            "symbol": "drizzle-orm"
+          },
+          {
+            "path": "src/services/album/__tests__/album.favorite.effect.test.ts",
+            "symbol": "effect"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-services",
+      "to": "src-config",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/services/file-entity-mapper/core.service.ts",
+            "symbol": "@/config/media-processing"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-services",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/services/activity/activity.service.ts",
+            "symbol": "@/lib/drizzle"
+          },
+          {
+            "path": "src/services/activity/activity.service.ts",
+            "symbol": "@/lib/drizzle/schema/index"
+          },
+          {
+            "path": "src/services/activity/activity.service.ts",
+            "symbol": "@/lib/logger/server-logger"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-services",
+      "to": "src-server",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/services/audio/__tests__/audio.service.effect.test.ts",
+            "symbol": "@/server/services/search.service"
+          },
+          {
+            "path": "src/services/audio/__tests__/audio.service.effect.test.ts",
+            "symbol": "@/server/services/stats/stats.queries"
+          },
+          {
+            "path": "src/services/audio/__tests__/audio.service.effect.test.ts",
+            "symbol": "@/server/services/system/system.navigation"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-services",
+      "to": "src-store",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/services/drag-selection/drag-selection-manager.ts",
+            "symbol": "@/store/selection.store"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-services",
+      "to": "src-transformers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/services/collection/collection-search.service.ts",
+            "symbol": "@/transformers/collection/transformer"
+          },
+          {
+            "path": "src/services/concept/concept.service.effect.ts",
+            "symbol": "@/transformers/common/counts"
+          },
+          {
+            "path": "src/services/file/file.service.ts",
+            "symbol": "@/transformers/file"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-services",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/services/activity/activity.service.ts",
+            "symbol": "@/types/entities/activity"
+          },
+          {
+            "path": "src/services/album/__tests__/album.favorite.effect.test.ts",
+            "symbol": "@/types/entities/favorite"
+          },
+          {
+            "path": "src/services/album/__tests__/album.service.effect.test.ts",
+            "symbol": "@/types/entities/favorite"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-store",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/store/details-panel.store.ts",
+            "symbol": "zustand"
+          },
+          {
+            "path": "src/store/details-panel.store.ts",
+            "symbol": "zustand/middleware"
+          },
+          {
+            "path": "src/store/entities/activity/index.ts",
+            "symbol": "zustand"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-store",
+      "to": "other-modules",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/store/places/index.ts",
+            "symbol": "../../utils/place"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-store",
+      "to": "src-components",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/store/ui/file-viewer.slice.ts",
+            "symbol": "@/components/features/file-viewer/file-viewer.types"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-store",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/store/entities/activity/index.ts",
+            "symbol": "@/lib/api/client/activity.client"
+          },
+          {
+            "path": "src/store/entities/activity/index.ts",
+            "symbol": "@/lib/logger/client-logger"
+          },
+          {
+            "path": "src/store/entities/activity/selectors.ts",
+            "symbol": "@/lib/utils/array.utils"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-store",
+      "to": "src-services",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/store/entities/note/slices/core.ts",
+            "symbol": "@/services/toast/toast.service"
+          },
+          {
+            "path": "src/store/settings.store.ts",
+            "symbol": "@/services/settings/settings.client"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-store",
+      "to": "src-transformers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/store/entities/activity/index.ts",
+            "symbol": "@/transformers/activity"
+          },
+          {
+            "path": "src/store/entities/file/slices/core.slice.ts",
+            "symbol": "@/transformers/file/mappers"
+          },
+          {
+            "path": "src/store/entities/file/slices/filters.slice.ts",
+            "symbol": "@/transformers/file"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-store",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/store/details-panel.store.ts",
+            "symbol": "@/types/entities"
+          },
+          {
+            "path": "src/store/entities/activity/index.ts",
+            "symbol": "@/types/entities/activity"
+          },
+          {
+            "path": "src/store/entities/activity/selectors.ts",
+            "symbol": "@/types/entities/activity"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-transformers",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/transformers/activity/schema.ts",
+            "symbol": "zod"
+          },
+          {
+            "path": "src/transformers/album/schema.ts",
+            "symbol": "zod"
+          },
+          {
+            "path": "src/transformers/album/transformer.effect.ts",
+            "symbol": "drizzle-orm"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-transformers",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/transformers/album/mappers.ts",
+            "symbol": "@/lib/utils"
+          },
+          {
+            "path": "src/transformers/audio/serializers.ts",
+            "symbol": "@/lib/utils"
+          },
+          {
+            "path": "src/transformers/audio/transformer.ts",
+            "symbol": "../../lib/errors/transformer-error"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-transformers",
+      "to": "src-types",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/transformers/activity/mappers.ts",
+            "symbol": "../../types/entities/activity/index"
+          },
+          {
+            "path": "src/transformers/activity/schema.ts",
+            "symbol": "../../types/entities/activity"
+          },
+          {
+            "path": "src/transformers/activity/serializers.ts",
+            "symbol": "../../types/entities/activity"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-types",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/types/ambient/react-virtuoso.d.ts",
+            "symbol": "react"
+          },
+          {
+            "path": "src/types/ambient/virtuoso-masonry.d.ts",
+            "symbol": "react"
+          },
+          {
+            "path": "src/types/common/base.ts",
+            "symbol": "zod"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-types",
+      "to": "src-lib",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/types/common/transformer.ts",
+            "symbol": "@/lib/utils/transformers/common"
+          },
+          {
+            "path": "src/types/entities/file/types.ts",
+            "symbol": "@/lib/filesystem/folder-scanner"
+          },
+          {
+            "path": "src/types/entities/image/schema.ts",
+            "symbol": "@/lib/utils/folder-id-generator"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-types",
+      "to": "src-server",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/types/express.d.ts",
+            "symbol": "../server/middleware/logging"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-types",
+      "to": "src-services",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/types/entities/audio/base.ts",
+            "symbol": "@/services/media-core/canonical-media-persistence"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-types",
+      "to": "src-store",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/types/entities/property/schema.ts",
+            "symbol": "@/store/entities/property/types"
+          },
+          {
+            "path": "src/types/entities/tag/index.ts",
+            "symbol": "@/store/entities/tag/types"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src-types",
+      "to": "src-transformers",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "src/types/entities/document.ts",
+            "symbol": "@/transformers/document/validators"
+          },
+          {
+            "path": "src/types/entities/document/index.ts",
+            "symbol": "../../../transformers/document/validators"
+          },
+          {
+            "path": "src/types/file-browser/cards-view-config.ts",
+            "symbol": "@/transformers/settings/schema"
+          }
+        ]
+      }
+    },
+    {
+      "from": "vite-config",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "vite.config.ts",
+            "symbol": "@vitejs/plugin-react"
+          },
+          {
+            "path": "vite.config.ts",
+            "symbol": "path"
+          },
+          {
+            "path": "vite.config.ts",
+            "symbol": "vite"
+          }
+        ]
+      }
+    },
+    {
+      "from": "vite-config",
+      "to": "src-config",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "vite.config.ts",
+            "symbol": "./src/config/local-runtime-security.ts"
+          }
+        ]
+      }
+    }
+  ],
+  "flows": []
+}

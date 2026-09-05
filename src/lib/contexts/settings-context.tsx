@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
 import {
 	type CreateProfileInput,
@@ -8,6 +8,7 @@ import {
 	profileClient,
 	type UpdateProfileInput,
 } from '@/services/profile/client';
+import { SETTINGS_TOASTS } from '@/lib/contexts/settings-copy';
 import { toastService } from '@/services/toast/toast.service';
 import type { ThumbnailQuality } from '@/types/thumbnails';
 import type { ThumbnailAdvancedConfig } from '@/types/thumbnails-advanced.config';
@@ -102,9 +103,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				}));
 			}
 		} catch (err) {
-			setError('Error loading settings');
+			setError(SETTINGS_TOASTS.settingsLoadFailed);
 			console.error('Failed to load settings:', err);
-			toastService.error('Settings could not be loaded');
+			toastService.error(SETTINGS_TOASTS.settingsLoadFailed);
 		} finally {
 			setIsLoading(false);
 		}
@@ -129,7 +130,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			}));
 		} catch (err) {
 			console.error('Error loading profiles:', err);
-			toastService.error('No se pudieron cargar los perfiles');
+			toastService.error(SETTINGS_TOASTS.profileLoadFailed);
 		}
 	}, []);
 
@@ -164,28 +165,24 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		}
 	}, [settings, isLoading]);
 
-	// Actualizar configuraciones
-	const updateSettings = async (newSettings: Partial<Settings>) => {
-		// no-op para cumplir reglas de async/await
+	const updateSettings = useCallback(async (newSettings: Partial<Settings>) => {
 		await Promise.resolve();
 		try {
 			setSettings((prev) => ({ ...prev, ...newSettings }));
 			return Promise.resolve();
 		} catch (err) {
 			console.error('Error updating settings:', err);
-			toastService.error('Settings could not be updated');
+			toastService.error(SETTINGS_TOASTS.settingsUpdateFailed);
 			return Promise.reject(err);
 		}
-	};
+	}, []);
 
-	// Resetear configuraciones
-	const resetSettings = () => {
+	const resetSettings = useCallback(() => {
 		setSettings(defaultSettings);
 		localStorage.removeItem('appSettings');
-	};
+	}, []);
 
-	// Actualizar perfil
-	const updateProfile = async (id: string | null, data: CreateProfileInput | UpdateProfileInput) => {
+	const updateProfile = useCallback(async (id: string | null, data: CreateProfileInput | UpdateProfileInput) => {
 		try {
 			if (id) {
 				await profileClient.updateProfile(id, data as UpdateProfileInput);
@@ -194,50 +191,51 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			}
 			// Recargar los perfiles para obtener la lista actualizada
 			await loadProfiles();
-			toastService.success('Profile updated successfully');
+			toastService.success(SETTINGS_TOASTS.profileUpdated);
 		} catch (err) {
 			console.error('Error updating profile:', err);
-			toastService.error('Profile could not be updated');
+			toastService.error(SETTINGS_TOASTS.profileUpdateFailed);
 			throw err;
 		}
-	};
+	}, [loadProfiles]);
 
-	// Establecer perfil activo
-	const setActiveProfile = async (id: string) => {
+	const setActiveProfile = useCallback(async (id: string) => {
 		try {
 			await profileClient.setActiveProfile(id);
 			await loadProfiles();
-			toastService.success('Active profile updated successfully');
+			toastService.success(SETTINGS_TOASTS.activeProfileUpdated);
 		} catch (err) {
 			console.error('Error setting active profile:', err);
-			toastService.error('No se pudo establecer el perfil activo');
+			toastService.error(SETTINGS_TOASTS.activeProfileFailed);
 			throw err;
 		}
-	};
+	}, [loadProfiles]);
 
-	// Eliminar perfil
-	const deleteProfile = async (id: string) => {
+	const deleteProfile = useCallback(async (id: string) => {
 		try {
 			await profileClient.deleteProfile(id);
 			await loadProfiles();
-			toastService.success('Perfil eliminado correctamente');
+			toastService.success(SETTINGS_TOASTS.profileDeleted);
 		} catch (err) {
 			console.error('Error deleting profile:', err);
-			toastService.error('Profile could not be deleted');
+			toastService.error(SETTINGS_TOASTS.profileDeleteFailed);
 			throw err;
 		}
-	};
+	}, [loadProfiles]);
 
-	const value = {
-		settings,
-		updateSettings,
-		resetSettings,
-		isLoading,
-		error,
-		updateProfile,
-		setActiveProfile,
-		deleteProfile,
-	};
+	const value = useMemo(
+		() => ({
+			settings,
+			updateSettings,
+			resetSettings,
+			isLoading,
+			error,
+			updateProfile,
+			setActiveProfile,
+			deleteProfile,
+		}),
+		[settings, updateSettings, resetSettings, isLoading, error, updateProfile, setActiveProfile, deleteProfile]
+	);
 
 	return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 }

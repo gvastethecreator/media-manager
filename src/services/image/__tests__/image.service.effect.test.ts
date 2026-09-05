@@ -112,15 +112,15 @@ const createTestCanonicalSource = async (relativePath: string, absolutePath = re
 
 const createTestImage = async (folderId: string, overrides?: Partial<typeof images.$inferInsert>) => {
 	const now = new Date();
-	const timestamp = Date.now().toString();
-	const validHash = timestamp.padStart(64, '0'); // SHA-256: exactly 64 hex chars
+	const uniqueId = crypto.randomUUID();
+	const validHash = uniqueId.replaceAll('-', '').padStart(64, '0');
 
 	const [image] = await db
 		.insert(images)
 		.values({
-			id: crypto.randomUUID(),
-			name: `test-image-${Date.now()}.jpg`,
-			path: `/test/image-${Date.now()}.jpg`,
+			id: uniqueId,
+			name: `test-image-${uniqueId}.jpg`,
+			path: `/test/image-${uniqueId}.jpg`,
 			hash: validHash,
 			size: 1_024_000, // 1MB
 			width: 1920,

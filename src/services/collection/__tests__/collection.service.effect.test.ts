@@ -168,8 +168,8 @@ const createTestImage = async () => {
 			.insert(folders)
 			.values({
 				id: crypto.randomUUID(),
-				name: `test-folder-${Date.now()}`,
-				path: `/test/folder-${Date.now()}`,
+				name: `test-folder-${crypto.randomUUID()}`,
+				path: `/test/folder-${crypto.randomUUID()}`,
 				depth: 0,
 				parentId: null,
 				isFavorite: false,
@@ -183,17 +183,17 @@ const createTestImage = async () => {
 	await wait(10);
 
 	// Generate a valid SHA-256 hash (64 hex characters)
-	const timestamp = Date.now().toString();
-	const validHash = timestamp.padStart(64, '0'); // Pad with zeros to 64 chars
+	const uniqueId = crypto.randomUUID();
+	const validHash = uniqueId.replaceAll('-', '').padStart(64, '0');
 
 	const createdImages = (await withSqliteRetry(() =>
 		db
 			.insert(images)
 			.values({
-				id: crypto.randomUUID(),
-				name: `test-image-${Date.now()}.jpg`,
-				path: `/test/image-${Date.now()}.jpg`,
-				url: `http://localhost/test/image-${Date.now()}.jpg`,
+				id: uniqueId,
+				name: `test-image-${uniqueId}.jpg`,
+				path: `/test/image-${uniqueId}.jpg`,
+				url: `http://localhost/test/image-${uniqueId}.jpg`,
 				size: 1024,
 				width: 800,
 				height: 600,

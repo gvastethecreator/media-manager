@@ -57,15 +57,15 @@ const withCanonicalSource = <T extends { name: string }>(
 
 const createTestJsonFile = async (folderId: string, overrides?: Partial<typeof jsonFiles.$inferInsert>) => {
 	const now = new Date();
-	const timestamp = Date.now().toString();
-	const validHash = timestamp.padStart(64, '0');
+	const uniqueId = crypto.randomUUID();
+	const validHash = uniqueId.replaceAll('-', '').padStart(64, '0');
 
 	const [jsonFile] = await db
 		.insert(jsonFiles)
 		.values({
-			id: crypto.randomUUID(),
-			name: `test-config-${Date.now()}.json`,
-			path: `/test/config-${Date.now()}.json`,
+			id: uniqueId,
+			name: `test-config-${uniqueId}.json`,
+			path: `/test/config-${uniqueId}.json`,
 			hash: validHash,
 			size: 1024,
 			mimeType: 'application/json',

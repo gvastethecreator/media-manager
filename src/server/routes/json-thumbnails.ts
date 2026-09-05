@@ -3,11 +3,9 @@
  * @module server/routes/json-thumbnails
  */
 
-import { eq } from 'drizzle-orm';
 import express from 'express';
 import { Effect } from 'effect';
-import { db } from '@/lib/drizzle/index.js';
-import { jsonFiles } from '@/lib/drizzle/schema/index.js';
+import { getJsonFileMetadataById } from '@/services/json-file/json-file-metadata.service';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
@@ -214,16 +212,11 @@ router.get(
 						showLineNumbers: req.query.showLineNumbers === 'true',
 					};
 
-					const jsonRecords = await db
-						.select({ metadata: jsonFiles.metadata })
-						.from(jsonFiles)
-						.where(eq(jsonFiles.id, id));
+					const jsonFile = await getJsonFileMetadataById(id);
 
-					if (jsonRecords.length === 0) {
+					if (!jsonFile) {
 						throw Object.assign(new Error('JSON file not found'), { _tag: 'FileNotFound' });
 					}
-
-					const jsonFile = jsonRecords[0];
 					let metadata: any = null;
 
 					if (jsonFile.metadata) {

@@ -51,15 +51,15 @@ const withCanonicalSource = async <T extends { name: string }>(folder: typeof fo
 
 const createTestDocument = async (folderId: string, overrides?: Partial<typeof documents.$inferInsert>) => {
 	const now = new Date();
-	const timestamp = Date.now().toString();
-	const validHash = timestamp.padStart(64, '0');
+	const uniqueId = crypto.randomUUID();
+	const validHash = uniqueId.replaceAll('-', '').padStart(64, '0');
 
 	const [document] = await db
 		.insert(documents)
 		.values({
-			id: crypto.randomUUID(),
-			name: `test-doc-${Date.now()}.pdf`,
-			path: `/test/doc-${Date.now()}.pdf`,
+			id: uniqueId,
+			name: `test-doc-${uniqueId}.pdf`,
+			path: `/test/doc-${uniqueId}.pdf`,
 			hash: validHash,
 			size: 1_024_000,
 			mimeType: 'application/pdf',

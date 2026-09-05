@@ -39,7 +39,7 @@ export interface UseMoveResult {
 
 export async function moveAuthorizedAssets(options: MoveFilesOptions): Promise<FileMutationSummary> {
 	const { assets, targetFolderId } = options;
-	if (assets.length === 0) throw new Error('No hay archivos compatibles para mover');
+	if (assets.length === 0) throw new Error('No compatible files to move');
 	const summary: FileMutationSummary = {
 		applied: 0,
 		cleanupPending: 0,
@@ -55,12 +55,12 @@ export async function moveAuthorizedAssets(options: MoveFilesOptions): Promise<F
 				success: true;
 			}>('/files/assets/move', { assets: [asset], targetFolderId });
 			const moved = response.data.moved[0];
-			if (!moved) throw new Error('El servidor no confirmó el asset movido.');
+			if (!moved) throw new Error('The server did not confirm the moved asset.');
 			addFileMutationResult(summary, moved);
 		}
 	} catch (error) {
 		throw new PartialFileMutationError(
-			error instanceof Error ? error.message : 'No se pudieron mover todos los archivos.',
+			error instanceof Error ? error.message : 'Could not move every file.',
 			summary,
 			error
 		);
@@ -93,12 +93,12 @@ export function useMove(): UseMoveResult {
 			const reconciliation = pendingFileMutationDescription(summary);
 			toast(
 				reconciliation
-					? { title: '⚠️ Movimiento aplicado con tareas pendientes', description: reconciliation }
+					? { title: 'Move applied with pending tasks', description: reconciliation }
 					: {
-							title: '✅ Archivos movidos',
+							title: 'Files moved',
 							description: reindexed
-								? `${assets.length} archivo${assets.length > 1 ? 's' : ''} movido${assets.length > 1 ? 's' : ''} y reindexado${assets.length > 1 ? 's' : ''}`
-								: `${assets.length} archivo${assets.length > 1 ? 's' : ''} movido${assets.length > 1 ? 's' : ''}; la reindexación quedó pendiente`,
+								? `${assets.length} ${assets.length === 1 ? 'file was' : 'files were'} moved and reindexed`
+								: `${assets.length} ${assets.length === 1 ? 'file was' : 'files were'} moved; reindex is still pending`,
 						}
 			);
 		},
@@ -118,12 +118,12 @@ export function useMove(): UseMoveResult {
 			const reconciliation = partial ? pendingFileMutationDescription(partial) : null;
 			toast({
 				variant: 'destructive',
-				title: partial?.applied ? '⚠️ Movimiento parcialmente aplicado' : '❌ Error al mover',
+				title: partial?.applied ? 'Move partly applied' : 'Could not move files',
 				description: partial?.applied
 					? [
-							`${partial.applied} de ${partial.total} archivos fueron movidos antes del fallo. Revisa el destino antes de reintentar.`,
+							`${partial.applied} of ${partial.total} files moved before the failure. Check the destination before retrying.`,
 							reconciliation,
-							reindexPending ? 'La reindexación del destino quedó pendiente.' : null,
+							reindexPending ? 'Destination reindex is still pending.' : null,
 						]
 							.filter(Boolean)
 							.join(' ')

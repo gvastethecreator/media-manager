@@ -1,0 +1,95 @@
+{
+  "source_commit": "0b9c124bb40060f3634a7624bbb1ed8abd7250a6",
+  "working_tree_dirty": true,
+  "generated_at": "2026-09-05T05:06:00Z",
+  "scanned_scope": [
+    "."
+  ],
+  "excluded_directories": [
+    ".agents",
+    ".cache",
+    ".git",
+    ".hg",
+    ".next",
+    ".nuxt",
+    ".obsidian",
+    ".svn",
+    ".turbo",
+    ".venv",
+    ".vscode",
+    "__pycache__",
+    "build",
+    "coverage",
+    "dist",
+    "docs/codemap",
+    "generated",
+    "node_modules",
+    "out",
+    "target",
+    "vendor",
+    "venv"
+  ],
+  "fingerprint_algorithm": "sha256-path-content-v2",
+  "modules": [
+    {
+      "id": ".",
+      "path": ".",
+      "file_count": 30,
+      "fingerprint": "d3c440f8f939fd8ae7b0b396f55ef9ba6970e3cac76efca7383da16583e133ba"
+    },
+    {
+      "id": ".github",
+      "path": ".github",
+      "file_count": 4,
+      "fingerprint": "a12680befd5b70c07fad13bd370898dd2fd5d2161fb76088ebaf26dd5d8fc21e"
+    },
+    {
+      "id": "docs",
+      "path": "docs",
+      "file_count": 13,
+      "fingerprint": "ec99b8dc0d190b9cf2305beccf9c63feaff2fa718b3dcad7e1fc3379bcf5ee0b"
+    },
+    {
+      "id": "electron",
+      "path": "electron",
+      "file_count": 15,
+      "fingerprint": "e9e76ca268c266c8a5907cb6c041bcf4125baa0140186eb75d523d63e939c8e5"
+    },
+    {
+      "id": "logs",
+      "path": "logs",
+      "file_count": 1,
+      "fingerprint": "fe6e1db79f1cb74aabf3a1bfb505d0b3f3866d50f2bd869af991f074b442aa71"
+    },
+    {
+      "id": "public",
+      "path": "public",
+      "file_count": 5,
+      "fingerprint": "4c7359afc65c3850ce8360c692ad6408b92118c9766aa35802da1f0588a4270f"
+    },
+    {
+      "id": "scripts",
+      "path": "scripts",
+      "file_count": 123,
+      "fingerprint": "04b3e52d3d7ba203f70cb16df6b9bdce52730113ceecd5618bc3666edae07b35"
+    },
+    {
+      "id": "src",
+      "path": "src",
+      "file_count": 1975,
+      "fingerprint": "4597d65d20324b7234fc7c23f87757b24e3bb480fa9defb1dc0b38af7ca74b1a"
+    },
+    {
+      "id": "test-files",
+      "path": "test-files",
+      "file_count": 8,
+      "fingerprint": "3fadf0f23b8dfe2774398844154dab860076b293834d9d3604f728f52050a6f4"
+    },
+    {
+      "id": "tests",
+      "path": "tests",
+      "file_count": 46,
+      "fingerprint": "8d0820ff02f1eca05a3b3210f42c1618ff7cffba719bce9e507860d9738306e7"
+    }
+  ]
+}

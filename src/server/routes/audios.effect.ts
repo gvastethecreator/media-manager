@@ -5,12 +5,10 @@
  * @created 2025-01-10 - Phase 6.3 AudioService Effect Implementation
  */
 
-import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
 import express from 'express';
-import { db } from '@/lib/drizzle/index.js';
-import { audios } from '@/lib/drizzle/schema/index.js';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
+import { getAudioRecordById } from '@/services/audio/audio-record.service';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
 import {
@@ -288,14 +286,12 @@ router.get('/:id/waveform', authorizeMediaAssetParam({ assetType: 'audio' }), as
 		};
 
 		// Obtener audio de la base de datos
-		const audioRecords = await db.select({ metadata: audios.metadata }).from(audios).where(eq(audios.id, id));
+		const audio = await getAudioRecordById(id);
 
-		if (audioRecords.length === 0) {
+		if (!audio) {
 			res.status(404).json({ error: 'Audio not found' });
 			return;
 		}
-
-		const audio = audioRecords[0];
 		let metadata: any = null;
 
 		// Parsear metadata si existe

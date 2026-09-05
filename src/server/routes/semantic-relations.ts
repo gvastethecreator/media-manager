@@ -1,8 +1,5 @@
-import { and, eq, ne } from 'drizzle-orm';
 import { type NextFunction, Router, type Response } from 'express';
 import { z } from 'zod';
-import { db } from '@/lib/drizzle';
-import { assets } from '@/lib/drizzle/schema/media-core/assets';
 import { SEMANTIC_RELATION_ENTITY_TYPES } from '@/lib/drizzle/schema/relations/semantic';
 import {
 	getAuthorizedRootRegistry,
@@ -20,6 +17,7 @@ import { assertTaxonomyEntityRootPermissions } from '@/server/security/taxonomy-
 import {
 	createSemanticRelation,
 	deleteSemanticRelation,
+	getActiveAssetType,
 	getSemanticRelation,
 	listRelationRoles,
 	listSemanticRelations,
@@ -79,18 +77,14 @@ async function assertAuthorizedEndpoint(
 	permissions: readonly Exclude<RootPermission, 'export'>[] = RELATION_READ_PERMISSIONS
 ): Promise<void> {
 	if (endpoint.type === 'asset') {
-		const [asset] = await db
-			.select({ assetType: assets.assetType })
-			.from(assets)
-			.where(and(eq(assets.id, endpoint.id), ne(assets.status, 'deleted')))
-			.limit(1);
-		if (!asset) throw new SemanticRelationError('RELATION_ENDPOINT_NOT_FOUND', 'Asset no encontrado.', 404);
+		const assetType = await getActiveAssetType(endpoint.id);
+		if (!assetType) throw new SemanticRelationError('RELATION_ENDPOINT_NOT_FOUND', 'Asset no encontrado.', 404);
 		for (const permission of permissions) {
 			await resolveMediaAssetReference(
 				registry,
 				{
 					assetId: endpoint.id,
-					assetType: asset.assetType as 'audio' | 'document' | 'file3d' | 'image' | 'json' | 'video',
+					assetType: assetType as 'audio' | 'document' | 'file3d' | 'image' | 'json' | 'video',
 				},
 				permission
 			);

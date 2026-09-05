@@ -123,15 +123,15 @@ const createCanonicalAudio = async (folder: typeof folders.$inferSelect, overrid
 
 const createTestAudio = async (folderId: string, overrides?: Partial<typeof audios.$inferInsert>) => {
 	const now = new Date();
-	const timestamp = Date.now().toString();
-	const validHash = timestamp.padStart(64, '0'); // SHA-256: exactly 64 hex chars
+	const uniqueId = crypto.randomUUID();
+	const validHash = uniqueId.replaceAll('-', '').padStart(64, '0');
 
 	const [audio] = await db
 		.insert(audios)
 		.values({
-			id: crypto.randomUUID(),
-			name: `test-audio-${Date.now()}.mp3`,
-			path: `/test/audio-${Date.now()}.mp3`,
+			id: uniqueId,
+			name: `test-audio-${uniqueId}.mp3`,
+			path: `/test/audio-${uniqueId}.mp3`,
 			hash: validHash,
 			size: 5_000_000, // 5MB
 			mimeType: 'audio/mpeg',
