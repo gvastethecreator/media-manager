@@ -5,11 +5,9 @@
  * @created 2025-01-10 - Phase 6.2 VideoService Effect Implementation
  */
 
-import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
 import express from 'express';
-import { db } from '@/lib/drizzle';
-import { videos } from '@/lib/drizzle/schema';
+import { persistGeneratedVideoThumbnail } from '@/services/video/video-thumbnail-persist.service';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
@@ -514,16 +512,12 @@ router.get(
 					if (thumbnailBuffer) {
 						// Guardar el thumbnail generado en la base de datos para futuras solicitudes
 						try {
-							await db
-								.update(videos)
-								.set({
-									thumbnail: thumbnailBuffer.toString('base64'),
-									thumbnailSize: thumbnailBuffer.length,
-									thumbnailWidth: 320,
-									thumbnailHeight: 240,
-									updatedAt: new Date(),
-								})
-								.where(eq(videos.id, id));
+							await persistGeneratedVideoThumbnail({
+								height: 240,
+								id,
+								thumbnail: thumbnailBuffer,
+								width: 320,
+							});
 						} catch (saveError) {
 							logger.warn('No se pudo guardar el thumbnail en la base de datos', { error: saveError });
 						}

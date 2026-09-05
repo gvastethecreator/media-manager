@@ -507,7 +507,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 										<Info className="h-3.5 w-3.5 text-(--meta-iptc)" />
 									</div>
 									<span className="min-w-0 flex-1 truncate font-black text-[9.5px] uppercase tracking-tight">
-										Propiedades
+										Properties
 									</span>
 								</div>
 							</AccordionTrigger>

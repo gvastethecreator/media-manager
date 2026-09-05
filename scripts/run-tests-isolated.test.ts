@@ -7,6 +7,7 @@ import { join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
 	cleanupOrphanedTestRuns,
+	isolatedVitestCommand,
 	ORPHANED_TEST_RUN_MINIMUM_AGE_MS,
 	runIsolatedCommand,
 	setCleanupIdentityInterlockForTests,
@@ -293,7 +294,7 @@ async function runSignalShutdownCase(signal: 'SIGINT' | 'SIGTERM', expectedExitC
 		expect(isProcessAlive(childProcessId)).toBe(true);
 		expect(isProcessAlive(supervisorProcessId)).toBe(true);
 		const fixtureProcesses = await waitForValue(
-			'el árbol de procesos de bun x vp test',
+			'el árbol de procesos de bun x vitest',
 			SIGNAL_TEST_START_TIMEOUT_MS,
 			async () => {
 				try {
@@ -777,6 +778,14 @@ afterEach(async () => {
 	for (const directory of temporaryDirectories.splice(0)) {
 		await rm(directory, { force: true, recursive: true });
 	}
+});
+
+describe('isolatedVitestCommand', () => {
+	test('runs the project Vitest 5 CLI instead of vite-plus vp test', () => {
+		const command = isolatedVitestCommand(['--run', '--silent=true']);
+		expect(command).toEqual([process.execPath, 'x', 'vitest', '--run', '--silent=true']);
+		expect(command).not.toContain('vp');
+	});
 });
 
 describe('cleanupOrphanedTestRuns', () => {

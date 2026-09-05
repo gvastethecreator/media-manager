@@ -168,13 +168,13 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 		},
 		{
 			icon: BoxIcon,
-			label: 'Objetos del mundo',
+			label: 'World items',
 			value: stats.totalWorldItems.toLocaleString(),
 			color: 'text-[color:var(--entity-world-item)]',
 		},
 		{
 			icon: SparklesIcon,
-			label: 'Favoritos',
+			label: 'Favorites',
 			value: stats.totalFavorites.toLocaleString(),
 			color: 'text-[color:var(--entity-favorite)]',
 		},
@@ -184,7 +184,7 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 	const activityStats = [
 		{
 			icon: FileTextIcon,
-			label: 'Actividades',
+			label: 'Activities',
 			value: stats.totalActivities.toLocaleString(),
 			color: 'text-[color:var(--status-info)]',
 		},
@@ -208,10 +208,10 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 
 	return (
 		<div className="stack-sm max-h-full w-full overflow-y-auto p-3">
-			<StatsGrid items={contentStats} title="📁 Contenido Principal" />
-			<StatsGrid items={worldStats} title="🌍 Worldbuilding" />
-			<StatsGrid items={activityStats} title="📊 Actividad" />
-			<StatsGrid items={storageStats} title="💾 Almacenamiento" />
+			<StatsGrid items={contentStats} title="Library" />
+			<StatsGrid items={worldStats} title="Worldbuilding" />
+			<StatsGrid items={activityStats} title="Activity" />
+			<StatsGrid items={storageStats} title="Storage" />
 		</div>
 	);
 });

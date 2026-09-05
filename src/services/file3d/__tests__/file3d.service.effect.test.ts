@@ -54,15 +54,15 @@ const withCanonicalSource = <T extends { name: string }>(
 
 const createTestFile3D = async (folderId: string, overrides?: Partial<typeof file3Ds.$inferInsert>) => {
 	const now = new Date();
-	const timestamp = Date.now().toString();
-	const validHash = timestamp.padStart(64, '0');
+	const uniqueId = crypto.randomUUID();
+	const validHash = uniqueId.replaceAll('-', '').padStart(64, '0');
 
 	const [file3d] = await db
 		.insert(file3Ds)
 		.values({
-			id: crypto.randomUUID(),
-			name: `test-model-${Date.now()}.glb`,
-			path: `/test/model-${Date.now()}.glb`,
+			id: uniqueId,
+			name: `test-model-${uniqueId}.glb`,
+			path: `/test/model-${uniqueId}.glb`,
 			hash: validHash,
 			size: 5_000_000,
 			mimeType: 'model/gltf-binary',

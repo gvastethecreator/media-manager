@@ -16,7 +16,7 @@ function createSummary(): FileMutationSummary {
 }
 
 describe('file mutation results', () => {
-	it('cuenta una sola operación cuando la limpieza y el journal están pendientes', () => {
+	it('counts one operation when cleanup and the journal are both pending', () => {
 		const summary = createSummary();
 		addFileMutationResult(summary, { cleanupPending: true, recoveryPending: true });
 
@@ -27,16 +27,16 @@ describe('file mutation results', () => {
 			recoveryPending: 1,
 		});
 		expect(pendingFileMutationDescription(summary)).toBe(
-			'1 operación queda pendiente de reconciliación. 1 copia de origen sigue pendiente de retirar. El registro de recuperación de 1 operación requiere verificación al reiniciar.'
+			'1 operation remains pending reconciliation. 1 source copy is still waiting to be removed. The recovery record for 1 operation needs a check on restart.'
 		);
 	});
 
-	it('distingue las operaciones distintas que necesitan reconciliación', () => {
+	it('keeps distinct operations that need reconciliation', () => {
 		const summary = createSummary();
 		addFileMutationResult(summary, { cleanupPending: true, recoveryPending: false });
 		addFileMutationResult(summary, { cleanupPending: false, recoveryPending: true });
 
 		expect(summary.reconciliationPending).toBe(2);
-		expect(pendingFileMutationDescription(summary)).toContain('2 operaciones quedan pendientes de reconciliación.');
+		expect(pendingFileMutationDescription(summary)).toContain('2 operations remain pending reconciliation.');
 	});
 });

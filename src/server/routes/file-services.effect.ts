@@ -10,7 +10,9 @@ import { Effect } from 'effect';
 import express from 'express';
 import { db } from '@/lib/drizzle/index.js';
 import { metadatas } from '@/lib/drizzle/schema/core/metadatas.js';
-import { documents, file3Ds, jsonFiles } from '@/lib/drizzle/schema/index.js';
+import { documents } from '@/lib/drizzle/schema/index.js';
+import { getFile3dMetadataById } from '@/services/file3d/file3d-metadata.service';
+import { getJsonFileMetadataById } from '@/services/json-file/json-file-metadata.service';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
@@ -165,14 +167,12 @@ file3dsEffectRouter.get('/:id/thumbnail', authorizeMediaAssetParam({ assetType: 
 		};
 
 		// Obtener modelo 3D de la base de datos
-		const model3DRecords = await db.select({ metadata: file3Ds.metadata }).from(file3Ds).where(eq(file3Ds.id, id));
+		const model3D = await getFile3dMetadataById(id);
 
-		if (model3DRecords.length === 0) {
+		if (!model3D) {
 			res.status(404).json({ error: '3D model not found' });
 			return;
 		}
-
-		const model3D = model3DRecords[0];
 		let metadata: any = null;
 
 		// Parsear metadata si existe
@@ -469,18 +469,12 @@ jsonFilesEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
 			height: Number.parseInt(req.query.height as string, 10) || 400,
 		};
 
-		// Obtener JSON file de la base de datos
-		const jsonFileRecords = await db
-			.select({ metadata: jsonFiles.metadata })
-			.from(jsonFiles)
-			.where(eq(jsonFiles.id, id));
+		const jsonFile = await getJsonFileMetadataById(id);
 
-		if (jsonFileRecords.length === 0) {
+		if (!jsonFile) {
 			res.status(404).json({ error: 'JSON file not found' });
 			return;
 		}
-
-		const jsonFile = jsonFileRecords[0];
 		let metadata: any = null;
 
 		// Parsear metadata si existe

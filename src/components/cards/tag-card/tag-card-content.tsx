@@ -211,13 +211,13 @@ export function TagCardContent({
 						{renderStatBar(<Folder className="h-4 w-4" />, collectionsCount, 'Collections')}
 						{renderStatBar(<UserSquare className="h-4 w-4" />, charactersCount, 'Characters')}
 						{renderStatBar(<MapPin className="h-4 w-4" />, placesCount, 'Places')}
-						{renderStatBar(<Package className="h-4 w-4" />, worldItemsCount, 'Objetos')}
-						{renderStatBar(<BookOpen className="h-4 w-4" />, conceptsCount, 'Conceptos')}
+						{renderStatBar(<Package className="h-4 w-4" />, worldItemsCount, 'World items')}
+						{renderStatBar(<BookOpen className="h-4 w-4" />, conceptsCount, 'Concepts')}
 						{renderStatBar(<MessageSquare className="h-4 w-4" />, promptsCount, 'Prompts')}
-						{renderStatBar(<FileText className="h-4 w-4" />, notesCount, 'Notas')}
+						{renderStatBar(<FileText className="h-4 w-4" />, notesCount, 'Notes')}
 						{renderStatBar(<FileImage className="h-4 w-4" />, wildcardsCount, 'Wildcards')}
-						{renderStatBar(<ListChecks className="h-4 w-4" />, propertiesCount, 'Propiedades')}
-						{renderStatBar(<PanelTop className="h-4 w-4" />, groupsCount, 'Grupos')}
+						{renderStatBar(<ListChecks className="h-4 w-4" />, propertiesCount, 'Properties')}
+						{renderStatBar(<PanelTop className="h-4 w-4" />, groupsCount, 'Groups')}
 					</div>
 				)}
 
@@ -226,7 +226,7 @@ export function TagCardContent({
 					<div className={cn('mt-auto', !tcgMode && 'pt-2')}>
 						<div className="flex items-center gap-1 text-sm">
 							<Keyboard className="h-4 w-4 text-muted-foreground" />
-							<span className="font-medium text-muted-foreground">Atajo:</span>
+							<span className="font-medium text-muted-foreground">Shortcut:</span>
 							<code
 								className="rounded px-1.5 py-0.5 font-mono text-sm"
 								style={{

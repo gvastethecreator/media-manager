@@ -34,14 +34,14 @@ export function pendingFileMutationDescription(summary: FileMutationSummary): st
 	if (summary.cleanupPending > 0) {
 		details.push(
 			summary.cleanupPending === 1
-				? '1 copia de origen sigue pendiente de retirar.'
-				: `${summary.cleanupPending} copias de origen siguen pendientes de retirar.`
+				? '1 source copy is still waiting to be removed.'
+				: `${summary.cleanupPending} source copies are still waiting to be removed.`
 		);
 	}
 	if (summary.recoveryPending > 0) {
 		details.push(
-			`El registro de recuperación de ${summary.recoveryPending} ${summary.recoveryPending === 1 ? 'operación' : 'operaciones'} requiere verificación al reiniciar.`
+			`The recovery record for ${summary.recoveryPending} ${summary.recoveryPending === 1 ? 'operation' : 'operations'} needs a check on restart.`
 		);
 	}
-	return `${summary.reconciliationPending} ${summary.reconciliationPending === 1 ? 'operación queda pendiente' : 'operaciones quedan pendientes'} de reconciliación. ${details.join(' ')}`;
+	return `${summary.reconciliationPending} ${summary.reconciliationPending === 1 ? 'operation remains' : 'operations remain'} pending reconciliation. ${details.join(' ')}`;
 }

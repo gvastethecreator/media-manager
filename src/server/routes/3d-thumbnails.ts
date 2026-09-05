@@ -3,11 +3,9 @@
  * @module server/routes/3d-thumbnails
  */
 
-import { eq } from 'drizzle-orm';
 import express from 'express';
 import { Effect } from 'effect';
-import { db } from '@/lib/drizzle/index.js';
-import { file3Ds } from '@/lib/drizzle/schema/index.js';
+import { getFile3dMetadataById } from '@/services/file3d/file3d-metadata.service';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { setAuthorizedAssetCacheHeaders } from '@/server/security/authorized-asset-cache';
@@ -187,16 +185,11 @@ router.get(
 						autoRotate: req.query.autoRotate === 'true',
 					};
 
-					const model3DRecords = await db
-						.select({ metadata: file3Ds.metadata })
-						.from(file3Ds)
-						.where(eq(file3Ds.id, id));
+					const model3D = await getFile3dMetadataById(id);
 
-					if (model3DRecords.length === 0) {
+					if (!model3D) {
 						throw Object.assign(new Error('3D model not found'), { _tag: 'FileNotFound' });
 					}
-
-					const model3D = model3DRecords[0];
 					let metadata: any = null;
 
 					if (model3D.metadata) {
@@ -253,16 +246,11 @@ router.get(
 			try: async () => {
 				const { id } = req.params;
 
-				const model3DRecords = await db
-					.select({ path: file3Ds.path, metadata: file3Ds.metadata })
-					.from(file3Ds)
-					.where(eq(file3Ds.id, id));
+				const model3D = await getFile3dMetadataById(id);
 
-				if (model3DRecords.length === 0) {
+				if (!model3D) {
 					throw Object.assign(new Error('3D model not found'), { _tag: 'FileNotFound' });
 				}
-
-				const model3D = model3DRecords[0];
 
 				if (model3D.metadata) {
 					try {
