@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { type ProxyOptions } from 'vite';
 import { defineConfig } from 'vite-plus';
 import svgr from 'vite-plugin-svgr';
+import { shouldForceViteOptimizeDeps } from './src/config/vite-dev-optimize.ts';
 import { resolveLocalServiceHost } from './src/config/local-runtime-security.ts';
 
 const testMaxWorkers = Math.max(1, Number.parseInt(process.env.VITEST_MAX_WORKERS ?? '2', 10) || 2);
@@ -190,8 +191,7 @@ export default defineConfig({
 			'clsx',
 			'tailwind-merge',
 		],
-		// Forzar re-optimizaci?n en desarrollo
-		force: nodeEnvironment === 'development',
+		force: shouldForceViteOptimizeDeps(nodeEnvironment),
 	},
 	resolve: {
 		tsconfigPaths: true,
@@ -230,6 +230,7 @@ export default defineConfig({
 			'tests/integration/**/*.{test,spec}.{ts,tsx}',
 		],
 		globals: true,
+		clearMocks: true,
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],

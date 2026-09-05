@@ -77,15 +77,15 @@ const createTestFolder = async (path = `/test/folder-${Date.now()}-${crypto.rand
 
 const createTestVideo = async (folderId: string, overrides?: Partial<typeof videos.$inferInsert>) => {
 	const now = new Date();
-	const timestamp = Date.now().toString();
-	const validHash = timestamp.padStart(64, '0'); // SHA-256: exactly 64 hex chars
+	const uniqueId = crypto.randomUUID();
+	const validHash = uniqueId.replaceAll('-', '').padStart(64, '0');
 
 	const [video] = await db
 		.insert(videos)
 		.values({
-			id: crypto.randomUUID(),
-			name: `test-video-${Date.now()}.mp4`,
-			path: `/test/video-${Date.now()}.mp4`,
+			id: uniqueId,
+			name: `test-video-${uniqueId}.mp4`,
+			path: `/test/video-${uniqueId}.mp4`,
 			hash: validHash,
 			size: 10_000_000, // 10MB
 			duration: 120, // 2m

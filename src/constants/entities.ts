@@ -35,13 +35,13 @@ export const ENTITY_DISPLAY_NAMES: Record<EntityType, string> = {
 	albums: 'Albums',
 	characters: 'Characters',
 	places: 'Places',
-	worldItems: 'Objetos del mundo',
+	worldItems: 'World items',
 	prompts: 'Prompts',
-	notes: 'Notas',
+	notes: 'Notes',
 	concepts: 'Concepts',
 	groups: 'Groups',
-	properties: 'Propiedades',
-	wildcards: 'Comodines',
+	properties: 'Properties',
+	wildcards: 'Wildcards',
 };
 
 // Mapeo de entidades a sus tabs correspondientes en SettingsView

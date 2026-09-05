@@ -6,7 +6,6 @@ export function useFileActions() {
 		selectedFiles,
 		clearSelection,
 		moveFiles,
-		copyFiles,
 		removeFiles,
 		downloadFiles,
 		addToCollection,
@@ -23,25 +22,14 @@ export function useFileActions() {
 	}, [selectedFiles, removeFiles, clearSelection]);
 
 	const handleMove = useCallback(
-		async (targetPath: string) => {
+		async (targetFolderId: string) => {
 			if (selectedFiles.length === 0) {
 				return;
 			}
-			await moveFiles(selectedFiles, targetPath);
+			await moveFiles(selectedFiles, targetFolderId);
 			clearSelection();
 		},
 		[selectedFiles, moveFiles, clearSelection]
-	);
-
-	const handleCopy = useCallback(
-		async (targetPath: string) => {
-			if (selectedFiles.length === 0) {
-				return;
-			}
-			await copyFiles(selectedFiles, targetPath);
-			clearSelection();
-		},
-		[selectedFiles, copyFiles, clearSelection]
 	);
 
 	const handleDownload = useCallback(async () => {
@@ -84,7 +72,6 @@ export function useFileActions() {
 		selectedCount: selectedFiles.length,
 		handleDelete,
 		handleMove,
-		handleCopy,
 		handleDownload,
 		handleAddToCollection,
 		handleAddTags,

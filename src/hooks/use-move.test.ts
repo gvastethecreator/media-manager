@@ -26,6 +26,12 @@ afterEach(() => {
 });
 
 describe('moveAuthorizedAssets', () => {
+	it('rejects an empty asset list in English', async () => {
+		await expect(moveAuthorizedAssets({ assets: [], targetFolderId: 'folder-target' })).rejects.toThrow(
+			'No compatible files to move'
+		);
+	});
+
 	it('uses one authorized mutation per asset and retains pending recovery counts', async () => {
 		const fetchMock = vi
 			.fn()
@@ -154,11 +160,11 @@ describe('moveAuthorizedAssets', () => {
 		);
 		expect(toastMock).toHaveBeenCalledWith(
 			expect.objectContaining({
-				description: expect.stringContaining('1 de 2 archivos fueron movidos antes del fallo.'),
-				title: '⚠️ Movimiento parcialmente aplicado',
+				description: expect.stringContaining('1 of 2 files moved before the failure.'),
+				title: 'Move partly applied',
 				variant: 'destructive',
 			})
 		);
-		expect(toastMock.mock.calls[0][0].description).toContain('1 operación queda pendiente de reconciliación.');
+		expect(toastMock.mock.calls[0][0].description).toContain('1 operation remains pending reconciliation.');
 	});
 });

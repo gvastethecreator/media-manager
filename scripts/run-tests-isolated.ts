@@ -1476,6 +1476,10 @@ export async function runIsolatedCommand({
 	}
 }
 
+export function isolatedVitestCommand(testArguments: string[]): string[] {
+	return [process.execPath, 'x', 'vitest', ...testArguments];
+}
+
 if (import.meta.main) {
 	if (process.argv[2] === SUPERVISOR_ARGUMENT) {
 		try {
@@ -1489,7 +1493,7 @@ if (import.meta.main) {
 	} else {
 		const testArguments = process.argv.slice(2);
 		const exitCode = await runIsolatedCommand({
-			command: [process.execPath, 'x', 'vp', 'test', ...testArguments],
+			command: isolatedVitestCommand(testArguments),
 		});
 		process.exitCode = exitCode;
 	}

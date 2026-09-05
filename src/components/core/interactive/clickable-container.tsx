@@ -9,7 +9,15 @@ interface ClickableContainerProps extends React.ButtonHTMLAttributes<HTMLButtonE
 export const ClickableContainer = React.forwardRef<HTMLButtonElement, ClickableContainerProps>(
 	({ children, className, type = 'button', ...props }, ref) => {
 		return (
-			<button className={cn('focus:outline-none', className)} ref={ref} type={type} {...props}>
+			<button
+				className={cn(
+					'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+					className
+				)}
+				ref={ref}
+				type={type}
+				{...props}
+			>
 				{children}
 			</button>
 		);

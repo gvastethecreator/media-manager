@@ -36,12 +36,12 @@ const PropertiesContentView = () => {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Propiedades</h2>
+				<h2 className="mb-4 font-bold text-xl">Properties</h2>
 				{items.length === 0 ? (
 					<EmptyState
 						description="You have not created any properties yet."
 						icon={SearchIcon}
-						title="Sin propiedades"
+						title="No properties yet"
 					/>
 				) : (
 					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">

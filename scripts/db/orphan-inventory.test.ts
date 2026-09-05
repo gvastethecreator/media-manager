@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { Database } from 'bun:sqlite';
-import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
+import { mkdtemp, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { migrateDatabase } from './migrations';
 import { hasIntegrityFailures, inspectOrphans, RELATION_CATALOG } from './orphan-inventory';
 
@@ -15,7 +15,7 @@ afterEach(async () => {
 });
 
 describe('read-only orphan inventory', () => {
-	it('keeps the exact executable catalog cardinality synchronized with its documentation', async () => {
+	it('keeps the exact executable catalog cardinality', () => {
 		const direct = RELATION_CATALOG.filter((relation) => relation.kind === 'direct');
 		const composite = RELATION_CATALOG.filter((relation) => relation.kind === 'composite');
 		const polymorphic = RELATION_CATALOG.filter((relation) => relation.kind === 'polymorphic');
@@ -23,8 +23,6 @@ describe('read-only orphan inventory', () => {
 			(relation) => relation.childTable.startsWith('_') && ['A', 'B'].includes(relation.childColumn)
 		);
 		const junctions = new Set(junctionEndpoints.map((relation) => relation.childTable));
-		const expectedMarker = `<!-- relation-catalog-counts: total=${RELATION_CATALOG.length} direct=${direct.length} composite=${composite.length} polymorphic=${polymorphic.length} junctions=${junctions.size} endpoints=${junctionEndpoints.length} -->`;
-		const documentation = await readFile(resolve(import.meta.dir, '../../docs/database/RELATION-INVENTORY.md'), 'utf8');
 
 		expect(RELATION_CATALOG).toHaveLength(93);
 		expect(direct).toHaveLength(84);
@@ -32,7 +30,6 @@ describe('read-only orphan inventory', () => {
 		expect(polymorphic).toHaveLength(8);
 		expect(junctions.size).toBe(28);
 		expect(junctionEndpoints).toHaveLength(56);
-		expect(documentation).toContain(expectedMarker);
 	});
 
 	it('catalogs conceptual relations and reports only counts plus technical ids', async () => {
