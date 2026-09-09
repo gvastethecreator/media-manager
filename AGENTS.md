@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Media Manager is a local-first workbench for large creative libraries. The web app is React 19 + Express on Bun 1.3.14. Desktop is an Electron supervisor around that Bun runtime. The renderer uses `/api` only. It does not receive Node, `ipcRenderer`, or a generic invoke bridge.
+Media Manager is a local-first workbench for large creative libraries. The web app is React 19 + Express on Bun 1.4.0. Desktop is an Electron supervisor around that Bun runtime. The renderer uses `/api` only. It does not receive Node, `ipcRenderer`, or a generic invoke bridge.
 
 Committed docs and UI strings are English.
 
