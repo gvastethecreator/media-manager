@@ -1,5 +1,5 @@
 # Usar la imagen oficial de Bun
-FROM oven/bun:1-alpine AS base
+FROM oven/bun:1.4.0-alpine AS base
 
 # Configurar variables de entorno
 ENV NODE_ENV=production
@@ -13,7 +13,7 @@ RUN chown -R bun:bun /app
 USER bun
 
 # Copiar archivos de configuración de dependencias
-COPY --chown=bun:bun package.json bun.lock* bunfig.toml ./
+COPY --chown=bun:bun package.json bun.lock ./
 
 # Instalar dependencias
 RUN bun install --frozen-lockfile --production
