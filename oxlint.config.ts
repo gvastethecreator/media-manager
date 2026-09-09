@@ -28,7 +28,6 @@ export default defineConfig({
 		'*.sqlite3',
 		'*.sqlite-journal',
 		'.vscode/**',
-		'src/components/features/file-browser/file-browser-backup.tsx',
 		'**/*.backup.*',
 	],
 	settings: {

@@ -21,6 +21,7 @@
 /test-results/
 /playwright-report/
 /playwright/.cache/
+.vitest/
 
 
 # production
@@ -104,6 +105,12 @@ db.sqlite-wal
 # IDE / local tooling
 .idea/
 .code-review-graph/
+
+# code map generation scratch
+/docs/codemap/.review/
+/docs/codemap/.staging/
+/docs/codemap/.publication/
+/docs/codemap/.publisher.lock
 
 # windows reserved names
 nul
