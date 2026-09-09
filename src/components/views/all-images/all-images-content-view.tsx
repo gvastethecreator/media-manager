@@ -1,7 +1,7 @@
 import { FolderUp } from 'lucide-react';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
-import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser/types/item.types';
 import { Button } from '@/components/ui/button';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { ImageWithStats } from '@/types/entities/image';

@@ -1,5 +1,5 @@
 // 🎯 Servicio optimizado de estadísticas migrado a Drizzle ORM
-// filepath: d:\DEV\image-manager\src\services\stats\optimized-stats.service.ts
+// filepath: src/services/stats/optimized-stats.service.ts
 
 import { sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';

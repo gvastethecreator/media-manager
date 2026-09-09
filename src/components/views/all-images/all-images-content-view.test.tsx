@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import AllImagesContentView from './all-images-content-view';
 
-vi.mock('@/components/features/file-browser-new/file-browser', () => ({
+vi.mock('@/components/features/file-browser/file-browser', () => ({
 	FileBrowser: () => <div data-testid="file-browser" />,
 }));
 

@@ -13,7 +13,7 @@ export async function seedAudios(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: 'aud-seed-001',
 				name: 'test-audio.wav',
-				path: 'D:\\DEV\\image-manager\\test-files\\test-audio.wav',
+				path: 'C:\\media-manager\\test-files\\test-audio.wav',
 				size: 5120,
 				hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b860',
 				mimeType: 'audio/wav',
@@ -24,7 +24,7 @@ export async function seedAudios(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: 'aud-seed-002',
 				name: 'test-mp3.mp3',
-				path: 'D:\\DEV\\image-manager\\test-files\\test-mp3.mp3',
+				path: 'C:\\media-manager\\test-files\\test-mp3.mp3',
 				size: 3072,
 				hash: 'f3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b861',
 				mimeType: 'audio/mpeg',

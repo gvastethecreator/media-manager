@@ -1,8 +1,8 @@
 import { memo, useMemo } from 'react';
-import { FolderBrowserVisual } from '@/components/features/file-browser-new/components/folder-browser-visual';
+import { FolderBrowserVisual } from '@/components/features/file-browser/components/folder-browser-visual';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { BrowserItem } from '@/components/features/file-browser-new/types/item.types';
+import type { BrowserItem } from '@/components/features/file-browser/types/item.types';
 
 export interface FolderCardImagesProps {
 	featuredImage?: string | null;
