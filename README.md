@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/gvastethecreator/media-manager/actions/workflows/quality.yml"><img alt="Quality gates" src="https://shieldcn.dev/github/ci/gvastethecreator/media-manager.svg?workflow=quality&branch=main&variant=secondary&size=xs" /></a>
   <a href="https://gvastethecreator.github.io/media-manager/"><img alt="Project site" src="https://shieldcn.dev/badge/site-pages-d37a52.svg?logo=githubpages&variant=branded&size=xs" /></a>
-  <a href="https://bun.sh/"><img alt="Bun 1.3.14" src="https://shieldcn.dev/badge/Bun-1.3.14-14151a.svg?logo=bun&variant=branded&size=xs" /></a>
+  <a href="https://bun.sh/"><img alt="Bun 1.4.0" src="https://shieldcn.dev/badge/Bun-1.4.0-14151a.svg?logo=bun&variant=branded&size=xs" /></a>
   <a href="https://react.dev/"><img alt="React 19" src="https://shieldcn.dev/badge/React-19-149eca.svg?logo=react&variant=branded&size=xs" /></a>
   <a href="https://github.com/gvastethecreator/media-manager/stargazers"><img alt="GitHub stars" src="https://shieldcn.dev/github/stars/gvastethecreator/media-manager.svg?variant=secondary&size=xs" /></a>
 </p>
@@ -39,7 +39,7 @@ The captures below come from the local application with an empty, privacy-safe l
 ## Current status
 
 - The user-facing application, validation messages, recovery states, and primary error paths are English.
-- Bun 1.3.14 owns installation, scripts, the server runtime, and the lockfile.
+- Bun 1.4.0 owns installation, scripts, the server runtime, and the lockfile.
 - Direct dependencies are current according to `bun outdated`.
 - React 19, TypeScript 7, React Router 7, Vite 8, Express 5, Effect, Drizzle ORM, and SQLite/libsql form the main stack.
 - Windows, macOS, and Linux can run the local web application.
@@ -50,7 +50,7 @@ The captures below come from the local application with an empty, privacy-safe l
 
 Requirements:
 
-- Bun 1.3.14 or newer
+- Bun 1.4.0 or newer
 - Node.js 20 or newer for auxiliary tooling
 - Optional FFmpeg support for selected thumbnail and metadata flows
 
