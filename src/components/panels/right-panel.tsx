@@ -7,7 +7,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 
 // Lazy load InterfaceSection para no impactar bundle inicial
 const FileBrowserSettings = lazy(
-	() => import('@/components/features/file-browser-new/components/settings/file-browser-settings')
+	() => import('@/components/features/file-browser/components/settings/file-browser-settings')
 );
 
 // Componente para manejar la carga perezosa del StatsPanel

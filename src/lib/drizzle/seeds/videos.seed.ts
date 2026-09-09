@@ -22,7 +22,7 @@ export async function seedVideos(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: 'vid-seed-002',
 				name: 'test-video.mp4',
-				path: 'D:\\DEV\\image-manager\\test-files\\test-video.mp4',
+				path: 'C:\\media-manager\\test-files\\test-video.mp4',
 				hash: 'd3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b859',
 				size: 20_480,
 				duration: 120,

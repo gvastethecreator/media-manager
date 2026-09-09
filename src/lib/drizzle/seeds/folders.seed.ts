@@ -22,7 +22,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				id: 'test-files',
 				name: 'Test Files',
 				description: 'Test files for development',
-				path: 'D:\\DEV\\image-manager\\test-files',
+				path: 'C:\\media-manager\\test-files',
 				emoji: '🧪',
 				totalFiles: 0,
 				totalSize: 0,

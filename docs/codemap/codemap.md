@@ -1,13 +1,13 @@
 # Code map: media-manager
 
-Generated: 2026-09-09T16:36:28Z | Commit: `81979a3e501d` | Schema: 2
-Generation: `7288ababb08d34a4984af65b4cec30e3ff73a25834f8f8a2e7f8456262e8cabd`
+Generated: 2026-09-09T17:03:24Z | Commit: `2f24acfca626` | Schema: 2
+Generation: `2708501f1155f82bfcfd139c2506bb9a2b37d4960b915bc0c6bae4a515d1f6b5`
 Scope: . | Inventory: working-tree
 Nodes: 2171 | Edges: 12051 | Flows: 5
 
 ## Coverage
 
-- Analysis: **partial**; 2030 analyzed of 2056 included files.
+- Analysis: **partial**; 2030 analyzed of 2099 included files.
 - Configuration files: 2; omitted untracked files: 0.
 - Unresolved references and analysis limits: 11809.
 - Static references and call paths do not prove runtime execution or test coverage.
@@ -115,8 +115,8 @@ Nodes: 2171 | Edges: 12051 | Flows: 5
 
 ## Architecture changes
 
-- Nodes: +2171 / -0; edges: +12051 / -0.
-- Boundary changes: 0; new cycles: 14.
+- Nodes: +60 / -60; edges: +541 / -541.
+- Boundary changes: 0; new cycles: 0.
 
 ## Read next
 

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
-import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser/types/item.types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import type { ViewProps } from '../types';

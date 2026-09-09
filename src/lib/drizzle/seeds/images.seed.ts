@@ -33,7 +33,7 @@ export async function seedImages(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: 'img-seed-003',
 				name: 'test-photo.png',
-				path: 'D:\\DEV\\image-manager\\test-files\\test-photo.png',
+				path: 'C:\\media-manager\\test-files\\test-photo.png',
 				hash: 'c3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b858',
 				size: 3072,
 				width: 500,
