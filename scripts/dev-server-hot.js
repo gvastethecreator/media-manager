@@ -47,13 +47,11 @@ function loadEnvFile(filePath) {
 
 // Cargar variables de entorno
 const defaultEnv = loadEnvFile(join(rootDir, '.env'));
-const tauriEnv = loadEnvFile(join(rootDir, '.env.tauri'));
 
-// Combinar variables de entorno (prioridad: process.env > tauri > default).
+// Combinar variables de entorno (prioridad: process.env > default).
 // Un supervisor/test debe poder fijar DATABASE_URL y grants sin que un archivo local lo redirija a otra base.
 const configuredServerEnv = {
 	...defaultEnv,
-	...tauriEnv,
 	...process.env,
 };
 const inheritedSupervisorSession =

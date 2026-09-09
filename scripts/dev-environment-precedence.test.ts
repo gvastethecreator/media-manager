@@ -7,10 +7,9 @@ describe('development server environment precedence', () => {
 		const source = await readFile(resolve(import.meta.dir, 'dev-server-hot.js'), 'utf8');
 		const merge = source.match(/const configuredServerEnv = \{([\s\S]*?)\n\};/)?.[1] ?? '';
 		expect(merge).toContain('...defaultEnv');
-		expect(merge).toContain('...tauriEnv');
 		expect(merge).toContain('...process.env');
-		expect(merge.indexOf('...defaultEnv')).toBeLessThan(merge.indexOf('...tauriEnv'));
-		expect(merge.indexOf('...tauriEnv')).toBeLessThan(merge.indexOf('...process.env'));
+		expect(merge).not.toContain('...tauriEnv');
+		expect(merge.indexOf('...defaultEnv')).toBeLessThan(merge.indexOf('...process.env'));
 		expect(source).not.toContain('${serverEnv.DATABASE_URL ||');
 		expect(source).not.toMatch(/databaseUrl\s*:\s*serverEnv\.DATABASE_URL/);
 	});

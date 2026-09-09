@@ -35,4 +35,9 @@ describe('metadata multi tipo extendido', () => {
 			expect(getEntityTypeFromExtension(ext)).toBe(EntityType.DOCUMENT);
 		}
 	});
+
+	it('detecta FILE3D para .gltf y UNKNOWN para una extensión no soportada', () => {
+		expect(getEntityTypeFromExtension('.gltf')).toBe(EntityType.FILE3D);
+		expect(getEntityTypeFromExtension('.xyz')).toBe(EntityType.UNKNOWN);
+	});
 });
