@@ -12,7 +12,7 @@ const FolderContentView = lazy(() =>
 	import('@/components/views/folders/folder-content-view').then((m) => ({ default: m.FolderContentView }))
 );
 const HierarchicalFolderWrapper = lazy(() =>
-	import('@/components/features/file-browser-new/wrappers/hierarchical-folder-wrapper').then((m) => ({
+	import('@/components/features/file-browser/wrappers/hierarchical-folder-wrapper').then((m) => ({
 		default: m.HierarchicalFolderWrapper,
 	}))
 );

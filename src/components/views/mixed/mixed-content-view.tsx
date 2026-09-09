@@ -1,7 +1,7 @@
 import { RefreshCw } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
-import { type BrowserItem } from '@/components/features/file-browser-new/types/item.types';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { type BrowserItem } from '@/components/features/file-browser/types/item.types';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';

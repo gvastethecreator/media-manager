@@ -12,10 +12,14 @@ export function findTauriLibraryCandidates(env: NodeJS.ProcessEnv = process.env)
 	}
 	const roots: Array<string | undefined> = [
 		env.MEDIA_MANAGER_TAURI_DATA_DIR,
+		env.LOCALAPPDATA ? join(env.LOCALAPPDATA, 'com.gvaste.mediamanager') : undefined,
+		env.APPDATA ? join(env.APPDATA, 'com.gvaste.mediamanager') : undefined,
 		env.LOCALAPPDATA ? join(env.LOCALAPPDATA, 'com.imagemanager.app') : undefined,
 		env.APPDATA ? join(env.APPDATA, 'com.imagemanager.app') : undefined,
 		env.LOCALAPPDATA ? join(env.LOCALAPPDATA, 'Image Manager') : undefined,
 		env.APPDATA ? join(env.APPDATA, 'Image Manager') : undefined,
+		env.LOCALAPPDATA ? join(env.LOCALAPPDATA, 'Media Manager') : undefined,
+		env.APPDATA ? join(env.APPDATA, 'Media Manager') : undefined,
 	];
 	for (const root of roots) {
 		if (!root) continue;

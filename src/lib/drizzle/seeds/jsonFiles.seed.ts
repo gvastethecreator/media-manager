@@ -13,7 +13,7 @@ export async function seedJsonFiles(db: LibSQLDatabase<Record<string, never>>) {
 			{
 				id: 'json-seed-001',
 				name: 'test-json.json',
-				path: 'D:\\DEV\\image-manager\\test-files\\test-json.json',
+				path: 'C:\\media-manager\\test-files\\test-json.json',
 				size: 2048,
 				hash: 'c3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b864',
 				mimeType: 'application/json',

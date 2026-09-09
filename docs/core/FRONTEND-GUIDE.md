@@ -48,7 +48,7 @@ View families include dashboard, development, folders, all-files, all-images, vi
 | --- | --- |
 | `src/components/ui/` | Primitives and wrappers: buttons, dialogs, tooltips, toaster, UI providers, accessibility |
 | `src/components/layout/` | Application shell and panels |
-| `src/components/features/file-browser-new/` | Folder routes, hierarchical navigation, exploration, selection |
+| `src/components/features/file-browser/` | Folder routes, hierarchical navigation, exploration, selection |
 | `src/components/features/file-viewer/` | Per-type viewing and viewer stores |
 | `src/components/views/` | Product pages. Each folder is one section |
 
