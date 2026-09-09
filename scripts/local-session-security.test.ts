@@ -209,7 +209,7 @@ describe('local API session middleware', () => {
 	});
 
 	it('monta el gate antes de parsers y rutas y mantiene el token fuera de React', async () => {
-		const [server, vite, devFull, devServer, devVite, tauriDev, thumbnailEvents, imageLoader, publicErrorHandler] =
+		const [server, vite, devFull, devServer, devVite, desktopDev, thumbnailEvents, imageLoader, publicErrorHandler] =
 			await Promise.all([
 				readFile(resolve(WORKSPACE_PATH, 'src/server/index.ts'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'vite.config.ts'), 'utf8'),
@@ -243,8 +243,8 @@ describe('local API session middleware', () => {
 		expect(devFull).toContain('createLocalSessionEnvironment()');
 		expect(devServer).toContain('isolated standalone session (use dev:full for a connected UI)');
 		expect(devVite).toContain('isolated standalone session (use dev:full for a connected backend)');
-		expect(tauriDev).toContain('createLocalSessionEnvironment({');
-		expect(tauriDev).toContain('http://127.0.0.1:5173');
+		expect(desktopDev).toContain('createLocalSessionEnvironment({');
+		expect(desktopDev).toContain('http://127.0.0.1:5173');
 		expect(thumbnailEvents).not.toContain('VITE_API_URL');
 		expect(imageLoader).not.toContain('VITE_API_URL');
 	});

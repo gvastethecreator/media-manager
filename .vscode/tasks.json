@@ -2,11 +2,10 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "🚀 Dev",
+      "label": "▶️ Dev",
       "type": "shell",
       "command": "bun run dev:full",
       "isBackground": true,
-      "group": "build",
       "problemMatcher": {
         "owner": "custom",
         "pattern": {
@@ -31,11 +30,10 @@
       }
     },
     {
-      "label": "🌐 Dev: Vite",
+      "label": "▶️ Dev: Vite",
       "type": "shell",
       "command": "bun run dev:vite",
       "isBackground": true,
-      "group": "build",
       "problemMatcher": {
         "owner": "custom",
         "pattern": {
@@ -57,11 +55,10 @@
       }
     },
     {
-      "label": "⚙️ Dev: Server",
+      "label": "▶️ Dev: Server",
       "type": "shell",
       "command": "bun run dev:server:hot",
       "isBackground": true,
-      "group": "build",
       "problemMatcher": {
         "owner": "custom",
         "pattern": {
@@ -87,7 +84,6 @@
       "type": "shell",
       "command": "bun run desktop:dev",
       "isBackground": true,
-      "group": "build",
       "problemMatcher": [],
       "presentation": {
         "echo": true,
@@ -140,7 +136,6 @@
       "label": "🔎 Check",
       "type": "shell",
       "command": "bun run check",
-      "group": "test",
       "problemMatcher": [
         "$tsc"
       ],
@@ -149,20 +144,18 @@
       }
     },
     {
-      "label": "🔍 Lint",
+      "label": "🧹 Lint",
       "type": "shell",
       "command": "bun run lint",
-      "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
       }
     },
     {
-      "label": "🔧 Lint: Fix",
+      "label": "🧹 Lint: Fix",
       "type": "shell",
       "command": "bun run lint:fix",
-      "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -172,17 +165,6 @@
       "label": "🎨 Format",
       "type": "shell",
       "command": "bun run format",
-      "group": "build",
-      "problemMatcher": [],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      }
-    },
-    {
-      "label": "🎨 Format: Check",
-      "type": "shell",
-      "command": "bun run format:check",
-      "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -192,7 +174,6 @@
       "label": "📝 Typecheck",
       "type": "shell",
       "command": "bun run tsc",
-      "group": "build",
       "problemMatcher": [
         "$tsc"
       ],
@@ -258,7 +239,6 @@
       "label": "📦 Deps",
       "type": "shell",
       "command": "bun run deps:outdated",
-      "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -269,7 +249,6 @@
       "type": "shell",
       "command": "bun run db:studio -- --database \"${input:mediaManagerDatabasePath}\"",
       "detail": "Opens Studio on the selected database. The file must already exist.",
-      "group": "build",
       "isBackground": true,
       "problemMatcher": [],
       "options": {
@@ -281,7 +260,6 @@
       "type": "shell",
       "command": "bun run db:check -- --database \"${input:mediaManagerDatabasePath}\"",
       "detail": "Checks the selected database. Does not write.",
-      "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -306,7 +284,6 @@
       "label": "📋 Logs: List",
       "type": "shell",
       "command": "bun run logs:list",
-      "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -316,7 +293,6 @@
       "label": "🧹 Logs: Clean",
       "type": "shell",
       "command": "bun run logs:clean",
-      "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -326,7 +302,6 @@
       "label": "⚠️ Check: Errors",
       "type": "shell",
       "command": "bun run check:errors",
-      "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -336,7 +311,6 @@
       "label": "🎭 Playwright: Install",
       "type": "shell",
       "command": "bun run playwright:install",
-      "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -346,7 +320,6 @@
       "label": "🎭 Playwright: Codegen",
       "type": "shell",
       "command": "bun run playwright:codegen",
-      "group": "test",
       "isBackground": true,
       "problemMatcher": [],
       "options": {

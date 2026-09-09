@@ -82,7 +82,6 @@ const toolingIgnorePatterns = [
 	'*.sqlite3',
 	'*.sqlite-journal',
 	'.vscode/**',
-	'src/components/features/file-browser/file-browser-backup.tsx',
 	'**/*.backup.*',
 ];
 
@@ -235,7 +234,7 @@ export default defineConfig({
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],
 			reportsDirectory: './coverage',
-			exclude: ['node_modules/**', 'dist/**', 'tests/**', '**/*.d.ts', '**/*.config.*', 'src-tauri/**', 'scripts/**'],
+			exclude: ['node_modules/**', 'dist/**', 'tests/**', '**/*.d.ts', '**/*.config.*', 'scripts/**'],
 			thresholds: {
 				statements: 50,
 			},
