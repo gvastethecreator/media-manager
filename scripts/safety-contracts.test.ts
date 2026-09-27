@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { Database } from 'bun:sqlite';
 import { existsSync } from 'node:fs';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rm, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -56,6 +56,10 @@ describe('run-with-log exit contract', () => {
 
 	it('preserva exit code 0', async () => {
 		const cwd = await createTemporaryDirectory();
+		const oldLog = join(cwd, 'logs', 'old.log');
+		await mkdir(join(cwd, 'logs'));
+		await writeFile(oldLog, 'keep diagnostic history');
+		await utimes(oldLog, new Date(0), new Date(0));
 		const result = await runProcess(
 			[process.execPath, runnerPath, 'contract-success', process.execPath, exitFixturePath, '0'],
 			cwd
@@ -63,6 +67,7 @@ describe('run-with-log exit contract', () => {
 
 		expect(result.exitCode).toBe(0);
 		expect(result.stdout).toContain('Comando ejecutado exitosamente');
+		expect(await readFile(oldLog, 'utf8')).toBe('keep diagnostic history');
 	});
 
 	it('preserva exit code no-cero por defecto', async () => {
@@ -363,7 +368,7 @@ describe('production bootstrap contract', () => {
 		const desktopDevSource = sources.at(-1)!;
 		expect(desktopDevSource).toContain('resolveDesktopLibraryPaths');
 		expect(desktopDevSource).toContain('library.databaseUrl');
-		expect(desktopDevSource).not.toContain("file:./db.sqlite");
+		expect(desktopDevSource).not.toContain('file:./db.sqlite');
 	});
 
 	it('mantiene un solo contexto de tema y protege también el árbol de providers', async () => {

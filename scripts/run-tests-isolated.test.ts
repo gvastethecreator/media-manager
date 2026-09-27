@@ -1166,6 +1166,21 @@ describe('cleanupOrphanedTestRuns', () => {
 		expect(exitCode).toBe(143);
 		expect(existsSync(orphanDirectory)).toBe(false);
 		expect(await readdir(testRoot)).toEqual([]);
+
+		const blockedExitCode = await runIsolatedCommand({
+			command: [
+				process.execPath,
+				'-e',
+				`import { renameSync } from 'node:fs';
+				 import { join } from 'node:path';
+				 import { fileURLToPath } from 'node:url';
+				 renameSync(fileURLToPath(process.env.DATABASE_URL), join(process.env.MEDIA_MANAGER_TEST_DB_ROOT, 'preserved.sqlite'));`,
+			],
+			cwd: workspacePath,
+			testRootPath: testRoot,
+		});
+		expect(blockedExitCode).toBe(1);
+		expect((await readdir(testRoot)).filter((entry) => entry.startsWith('run-'))).toHaveLength(1);
 	}, 60_000);
 
 	test('rechaza un testRoot junction y conserva todos los datos externos', async () => {

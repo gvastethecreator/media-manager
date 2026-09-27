@@ -281,9 +281,11 @@ public static class MediaManagerIsolatedTestJob
 				}
 				Thread.Sleep(PollIntervalMilliseconds);
 			}
-			if (File.ReadAllText(controlPath, Encoding.UTF8).Trim() != "delete")
+			// The complete control file is published by rename; allow that rename handle to close.
+			using (FileStream control = new FileStream(controlPath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
+			using (StreamReader reader = new StreamReader(control, Encoding.UTF8))
 			{
-				return 2;
+				if (reader.ReadToEnd().Trim() != "delete") return 2;
 			}
 
 			DeleteDirectoryContentsLocked(rootPath);
