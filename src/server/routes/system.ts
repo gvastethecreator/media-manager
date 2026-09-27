@@ -9,7 +9,6 @@ import { RootAuthorizationError } from '@/server/security/authorized-roots';
 import { filterAuthorizedTaxonomyEntities } from '@/services/taxonomy/file-backed/taxonomy-artifact.service';
 import { circuitBreakerRegistry } from '@/lib/system/circuit-breaker';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
-import { getSystemStats } from '../services/stats.service';
 import { getNavigationData } from '../services/system';
 import {
 	createDefaultSettingsData,
