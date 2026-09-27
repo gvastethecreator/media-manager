@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "source_commit": "2f24acfca6269bcbbea5adf985ce319f79dbdd2e",
-  "working_tree_dirty": true,
-  "generated_at": "2026-09-09T17:03:24Z",
-  "generation_id": "2708501f1155f82bfcfd139c2506bb9a2b37d4960b915bc0c6bae4a515d1f6b5",
+  "source_commit": "0bb623bb11013d1cbfa69f62b6958490b9aa080a",
+  "working_tree_dirty": false,
+  "generated_at": "2026-09-27T22:53:18Z",
+  "generation_id": "0a935a92b51085c024dcaf0ee9765a39a8e887c78cd13c81a2885aebc1d6a260",
   "analysis": {
     "version": "syntax-1",
-    "digest": "277e322054c030f72811f774ad4e959bcf8d1244bfb70c076e298cf824ccdc3c"
+    "digest": "f254907343def68e42baabf08b179db9817a145bc24eaad26add0adf05d75581"
   },
   "inventory": {
     "policy": {
@@ -172,8 +172,8 @@
         "path": "package.json",
         "origin": "tracked",
         "state": "present",
-        "digest": "f2704a90bcf28894eb94a1878e4be313330b55843be511c1cbc789bb4b48349c",
-        "size": 9863
+        "digest": "1e4bc5ea8ee069bf4452d974821bef631296ad551997c06571f4e3c84c19047f",
+        "size": 9264
       },
       {
         "path": "playwright.config.ts",
@@ -200,8 +200,8 @@
         "path": "scripts/apply-production-database.test.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "1b7bf78c51be8029c13de4fd53ca57b17b552755b44cf41beb77617e5a393d6d",
-        "size": 2455
+        "digest": "379cb921e0ccef65965ab424f24a159ab6b93b85e621e6d706c28f5c9f665134",
+        "size": 3701
       },
       {
         "path": "scripts/apply-production-database.ts",
@@ -389,8 +389,8 @@
         "path": "scripts/db/image-asset-backfill.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "14e6bf94b698421ddfe80f65260ae58513c4839c14e0b56fbf4c290f0ceae4a5",
-        "size": 2223
+        "digest": "39dab24adb7c84eea488a5c6f442196c34a75bf55f54d28adb9fb5b740b1394b",
+        "size": 2955
       },
       {
         "path": "scripts/db/image-asset-link-schema.test.ts",
@@ -410,8 +410,8 @@
         "path": "scripts/db/image-asset-reconciliation.test.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "5f074bccff467ba8d88e4d6d4312c94054662dc4be56207515a0c61b3c10db63",
-        "size": 12181
+        "digest": "ebb90ff262fc90d78f67719e150f22d387c33d0c33df7372015773308a3b6b94",
+        "size": 12291
       },
       {
         "path": "scripts/db/image-asset-reconciliation.ts",
@@ -550,8 +550,8 @@
         "path": "scripts/db/schema-fingerprint.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "3f62599210bb0bfd04ec66ce8ed418c6227757f10c7cc7a2e284c9baaa6b8fc9",
-        "size": 7377
+        "digest": "ff27756ccbd18d1563a4339cd31edf5a1f0fb138fa012510924a1d51b9d20670",
+        "size": 9973
       },
       {
         "path": "scripts/db/semantic-relation-schema.test.ts",
@@ -655,8 +655,8 @@
         "path": "scripts/dev-server-hot.js",
         "origin": "tracked",
         "state": "present",
-        "digest": "7c651b94f823abebaf3cfa1b3a75b13664137e198ad3021321769bb10181ec80",
-        "size": 6596
+        "digest": "a10d0c28c483f06c97bb49d58942d2817f7542b4bdcbbea3d058176e96394085",
+        "size": 6578
       },
       {
         "path": "scripts/dev-vite-headers.js",
@@ -834,6 +834,13 @@
         "size": 18091
       },
       {
+        "path": "scripts/metadata-http.test.ts",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "754619aba04e6a8378b0ee1be2d2fb15401fc8682129d6042cc76d995b6e152c",
+        "size": 1525
+      },
+      {
         "path": "scripts/output-redaction-security.test.ts",
         "origin": "tracked",
         "state": "present",
@@ -851,8 +858,8 @@
         "path": "scripts/prepare-extraresources.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "7297fbe78e102d84aa55ddda17b00bfa909ec11e430fb0ad4cde2ca82ccfa9f7",
-        "size": 3737
+        "digest": "f36593d055cf14611445fb61d4f0aeb0d28ca99d6f30d4c792e610b307bc590c",
+        "size": 3855
       },
       {
         "path": "scripts/public-media-api-contract.test.ts",
@@ -872,29 +879,29 @@
         "path": "scripts/run-production-smoke.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "9cde4e184528858d0c68aec5e33258b2d497ec8347474c7134eb407e7b64b10a",
-        "size": 6804
+        "digest": "ba940f880fb3629dea16dc75d548b786a5cc855decabe1c77c993e9afd20f53e",
+        "size": 6843
       },
       {
         "path": "scripts/run-tests-isolated.test.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "1f633c988c488c16d8ff970d260d19f949be49c458c1c86985901abdf531595d",
-        "size": 47691
+        "digest": "323085c14d24f58e112dd7951d44c04c3e3c3185d4e321feeb6dc02552dcafd7",
+        "size": 49567
       },
       {
         "path": "scripts/run-tests-isolated.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "c8240ced6ed50e28ea7de6445ea1cce55aa6f87cb8c7979d545fb35cfbb91433",
-        "size": 48518
+        "digest": "2093e569dbb285a25c0dc8c80bb250c1b53ccc4c5fd755be656d9b760b7a15b1",
+        "size": 48846
       },
       {
         "path": "scripts/run-tooling-tests-isolated.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "cd00313bac44f06c7f11ccdb2a553804cd3d10a47c834b9d5aa39e9a7763d06c",
-        "size": 2749
+        "digest": "dc9bd4b6a7efef920a1fa43cf38ed7e9c0108485dfffc1053dda2c9e621f57ea",
+        "size": 3754
       },
       {
         "path": "scripts/run-with-log-tolerant.js",
@@ -907,15 +914,15 @@
         "path": "scripts/run-with-log.js",
         "origin": "tracked",
         "state": "present",
-        "digest": "088aa0ccdefe751185b9437214a8f94fe4e5a6358ab965775662cfa0c1b4004e",
-        "size": 8851
+        "digest": "c971748b48089e81ab65f85ed7ed99808ae83a1cb45497761894fb5bed1fd638",
+        "size": 8648
       },
       {
         "path": "scripts/safety-contracts.test.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "fe7b02427f39d345b9ca6cbe0df8e518b6dfd096af26fa4fcf25440b93809691",
-        "size": 16887
+        "digest": "efdc5f4328bf519d6ffceff1db2a34b40290f5562d2eae0ee7689eee847fc065",
+        "size": 17154
       },
       {
         "path": "scripts/scaffold-effect-service.ts",
@@ -1026,8 +1033,8 @@
         "path": "scripts/windows-test-job.cs",
         "origin": "tracked",
         "state": "present",
-        "digest": "ec408cffd366335a6f78c7a31fff0d593378a522c1685e7f7cdf65352c25d470",
-        "size": 23177
+        "digest": "2bb1b2d44ca267f4d2daa67c4b87c2f4d114bc887a52e2d6158e491cbe327b50",
+        "size": 23442
       },
       {
         "path": "scripts/windows-test-job.ps1",
@@ -1772,841 +1779,421 @@
         "size": 4333
       },
       {
-        "path": "src/components/features/file-browser-new/components/delete-dialog.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/empty-state.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/error-state.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/file-operation-dialogs.test.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/folder-browser-visual.test.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/folder-browser-visual.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/item-context-menu.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/item-renderer.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/load-more-button.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/loading-state.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/media-item.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/media-thumbnail/media-thumbnail.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/media-thumbnail/types.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/move-dialog.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/rename-dialog.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/settings/file-browser-settings.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/settings/settings-barrel.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/settings/settings.components.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/settings/settings.constants.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/settings/settings.hooks.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/settings/settings.types.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/status-bar.test.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/status-bar.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/tcg-cards/index.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/tcg-cards/tcg-3d-card.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/tcg-cards/tcg-audio-card.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/tcg-cards/tcg-card-base.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/tcg-cards/tcg-document-card.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/tcg-cards/tcg-folder-card.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/tcg-cards/tcg-image-card.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/tcg-cards/tcg-json-card.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/tcg-cards/tcg-video-card.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/components/toolbar.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/core/constants.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/core/context.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/core/provider.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/file-browser.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-add-to-entity.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-data-source.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-delete.test.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-delete.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-file-browser.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-folder-files-paginated.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-keyboard.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-pagination.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-rename.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/hooks/use-selection.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/types/item.types.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/types/props.types.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/types/view.types.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/utils/filtering.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/utils/grouping.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/utils/sorting.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/views/cards.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/views/grid.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/views/list.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/views/masonry.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/views/table.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/views/view-registry.ts",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
-        "path": "src/components/features/file-browser-new/wrappers/hierarchical-folder-wrapper.tsx",
-        "origin": "tracked",
-        "state": "missing",
-        "digest": null,
-        "size": 0
-      },
-      {
         "path": "src/components/features/file-browser/components/delete-dialog.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "baba49d58b1faa337b8cfa5d99ab49afa05c93084277d094b29e033b94092953",
         "size": 3566
       },
       {
         "path": "src/components/features/file-browser/components/empty-state.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "b5ea2170aa7f38cb0c2c577d8b42058d4df9e3daee4c1a9d5df354c8cafcb8cf",
         "size": 833
       },
       {
         "path": "src/components/features/file-browser/components/error-state.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "bb5c3808ea7ef4036c10436d3429ee5f06751d27dec232be04bfa0bdbea7ab3d",
         "size": 1248
       },
       {
         "path": "src/components/features/file-browser/components/file-operation-dialogs.test.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "9a9dae7475ccb1c9217861be4241e9b7d4fdb27924f98aea86d944f3b16d2a1c",
         "size": 1938
       },
       {
         "path": "src/components/features/file-browser/components/folder-browser-visual.test.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "0f992f6695d2775893c31695f14e367d6ee10f786ffd5add981e9b59c15dda78",
         "size": 1359
       },
       {
         "path": "src/components/features/file-browser/components/folder-browser-visual.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "f44baf434ad5291088a7e34bc01574697b032d1058160c0f0d96dfd1f601f886",
         "size": 6564
       },
       {
         "path": "src/components/features/file-browser/components/item-context-menu.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "cd5ac3c514314cad07b79261b65437ece0c6cb41944539facc486167567475a9",
         "size": 17133
       },
       {
         "path": "src/components/features/file-browser/components/item-renderer.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "7f2866da12e5758e116f8fd42a27c0a57ddaee82ef21e663b622ea33754625cc",
         "size": 5553
       },
       {
         "path": "src/components/features/file-browser/components/load-more-button.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "6450adfa0504478ad57eb30dc6939d362ab5937b39957e84e0a5d9e329da7d2e",
         "size": 1478
       },
       {
         "path": "src/components/features/file-browser/components/loading-state.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "0ec5c4c73f3b9c731155ae862e12340dbaadffd72a4d29dc8ae2f77a2bd5f368",
         "size": 1928
       },
       {
         "path": "src/components/features/file-browser/components/media-item.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "f7e9c4f85b91512a8e250105a6a9fc9c8941fd73bebf35f11e549fb70eb29f71",
         "size": 10693
       },
       {
         "path": "src/components/features/file-browser/components/media-thumbnail/media-thumbnail.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "b63fd1b7272c4878be9853872750ff412ea1cf2c50e340698f4611aff34ad6c1",
         "size": 17305
       },
       {
         "path": "src/components/features/file-browser/components/media-thumbnail/types.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "6b6a6c518bee7f7eaff5fe2b2e74a9053c55fbc088a6265bf07caf716f39bdcd",
         "size": 1441
       },
       {
         "path": "src/components/features/file-browser/components/move-dialog.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "e6be7818ee17395239ad3164391cf93194fa2ae02241bc30db2723de93496d39",
         "size": 4186
       },
       {
         "path": "src/components/features/file-browser/components/rename-dialog.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "0562cc1cee0b7f7ed70c8d4057bdc2daa51e3f04dcda935b2361acd5592d2405",
         "size": 8148
       },
       {
         "path": "src/components/features/file-browser/components/settings/file-browser-settings.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "eff29119596c041cc977848c42cd181ceb58f1f7da42989a3c8390f7b39f3216",
         "size": 20777
       },
       {
         "path": "src/components/features/file-browser/components/settings/settings-barrel.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "ea1d6885890a89490a8e01e185b4d33fdd791759c2c4960f31776b8f5aa69735",
         "size": 454
       },
       {
         "path": "src/components/features/file-browser/components/settings/settings.components.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "7b171ad760604f1d69a762ab0dc6c5a51645d545d8a96325f58460de971b1ded",
         "size": 2074
       },
       {
         "path": "src/components/features/file-browser/components/settings/settings.constants.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "199776b1e53d71850ac328edb2953dd3be95a20a51bdb3b0fc5e36e2880bcba7",
         "size": 1412
       },
       {
         "path": "src/components/features/file-browser/components/settings/settings.hooks.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "02ded421141d7b22d11161f7ce46750f70e3d9f27645998f9eda0295f7af0dc4",
         "size": 4313
       },
       {
         "path": "src/components/features/file-browser/components/settings/settings.types.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "d9d3e809c2c9ece66030cfd1619bd98a4d65b19487b20fc05c2cdbc741ff6d89",
         "size": 550
       },
       {
         "path": "src/components/features/file-browser/components/status-bar.test.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "7c436cf4c34a6490555c6ce6be83f2445d75bb256c705084546533dd3a813cc0",
         "size": 2021
       },
       {
         "path": "src/components/features/file-browser/components/status-bar.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "cb2440a3084950d432ab38257511881fa78fba92870d3c74c6984998850d5919",
         "size": 5074
       },
       {
         "path": "src/components/features/file-browser/components/tcg-cards/index.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "9dea88ed08177aac531c105dfbe661faa6c7f72bfbbdec3d1f7a15fb49377491",
         "size": 3166
       },
       {
         "path": "src/components/features/file-browser/components/tcg-cards/tcg-3d-card.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "f3b9b18105f9ff357c622a18633455f260e79970b99389f04116103ae5324296",
         "size": 7659
       },
       {
         "path": "src/components/features/file-browser/components/tcg-cards/tcg-audio-card.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "b46bd31a988e7bdb8f24cfd9332617b75538263c7e15ed038055232fee7b5ef5",
         "size": 7153
       },
       {
         "path": "src/components/features/file-browser/components/tcg-cards/tcg-card-base.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "75799be7080e77bd96f10db3616ade8bfc1c5c98ccf289cf8631cce03fa129fb",
         "size": 6939
       },
       {
         "path": "src/components/features/file-browser/components/tcg-cards/tcg-document-card.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "f6e2bdeb699a3a764b199469a753853c328752a4ba51caec23879e601beb8386",
         "size": 7095
       },
       {
         "path": "src/components/features/file-browser/components/tcg-cards/tcg-folder-card.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "bbae589e435c25bc5fca7403855efefa5bf64d4ec585eae360dd6acec90e24a7",
         "size": 11190
       },
       {
         "path": "src/components/features/file-browser/components/tcg-cards/tcg-image-card.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "ebec1ef7da4804d4cd34705149a77837f8ce3eb5b043d959b3dbadc8c1f93389",
         "size": 6432
       },
       {
         "path": "src/components/features/file-browser/components/tcg-cards/tcg-json-card.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "c2d9619163b9b88efc53dab7f5b25d5eefcc3a62a0148e2a80bd99a98cfb3230",
         "size": 6796
       },
       {
         "path": "src/components/features/file-browser/components/tcg-cards/tcg-video-card.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "dc4af8fc966074c4276c898155ab96244b8744203891b4f07fbdbb0b71be035c",
         "size": 6949
       },
       {
         "path": "src/components/features/file-browser/components/toolbar.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "5f4b86a5b742853d48abc9a72714250affaa1d2883c1a7a943a0181354d8ea1c",
         "size": 7568
       },
       {
         "path": "src/components/features/file-browser/core/constants.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "cdff568191154198a3a82d27f06a92b58ca94644b13a25c65ef7f7e496b961eb",
         "size": 2541
       },
       {
         "path": "src/components/features/file-browser/core/context.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "de966b203322f28fbdff37313deffc6aec1cf48a614db28bec58d656ab399734",
         "size": 5286
       },
       {
         "path": "src/components/features/file-browser/core/provider.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "85f5b5e55aaca60904a1632ee9fbe6cecde896ff417829e5d6a118ec7cfa5d04",
         "size": 2805
       },
       {
         "path": "src/components/features/file-browser/file-browser.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "70991fbb12304ff22435ed5772367fd607dba7332dda88f999e7f88a1c812945",
         "size": 24486
       },
       {
         "path": "src/components/features/file-browser/hooks/use-add-to-entity.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "482e5fd53352268218442ef633de736b7e48a4dac84fdbb67c6bcf94e6bf3f18",
         "size": 8401
       },
       {
         "path": "src/components/features/file-browser/hooks/use-data-source.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "56fbcafdebf473973108b816b4d1d3066f6f274f1c920fe2e2f2e7a79e691451",
         "size": 6385
       },
       {
         "path": "src/components/features/file-browser/hooks/use-delete.test.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "9d6da3ae1bbf08e47f6b3f9a55c775f071d3bb76f0c13ef57796358ce4af7069",
         "size": 2519
       },
       {
         "path": "src/components/features/file-browser/hooks/use-delete.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "7d6e3fb8cc6771a04a45f44fa6c75421dc255e030d2bd8adfd19db9d4b342972",
         "size": 4245
       },
       {
         "path": "src/components/features/file-browser/hooks/use-file-browser.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "c83d056e600c7270c1d197afe629a11746c656971403911c378cc38901e281ed",
         "size": 13218
       },
       {
         "path": "src/components/features/file-browser/hooks/use-folder-files-paginated.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "83c620b80fbc84434ce57b6f4cd2bb07027d4da211f1a3ddc196036841b01852",
         "size": 8988
       },
       {
         "path": "src/components/features/file-browser/hooks/use-keyboard.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "d9bd92828aea19b7a5e17a899eb8f03407f43538cf94e0c260c089f53561dc8c",
         "size": 6824
       },
       {
         "path": "src/components/features/file-browser/hooks/use-pagination.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "8386403428bbe22af2232e668f4b4bed41192d479ff1b1c2110c1d9e481df48d",
         "size": 4971
       },
       {
         "path": "src/components/features/file-browser/hooks/use-rename.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "2e618cb780533453b3ce98c49603cce967be3b7b97a5b8caa32b2852ee80a7fe",
         "size": 6523
       },
       {
         "path": "src/components/features/file-browser/hooks/use-selection.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "2ed76e305b3a594a6580d7efb669603f9b0aff08f61ff28db0706ae7344ace95",
         "size": 4938
       },
       {
         "path": "src/components/features/file-browser/types/item.types.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "1654cc1352f5aa9820f6deefe3f5240ac04507c8695b89c010cbfbe4703e42a2",
         "size": 11062
       },
       {
         "path": "src/components/features/file-browser/types/props.types.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "9cf75841233c73904b177710452a98f2bcb341e37779d7be00f5a990f5be4523",
         "size": 5211
       },
       {
         "path": "src/components/features/file-browser/types/view.types.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "b7e972e73ec6066734d9dfd6eb2aecb10e0488f5b652b2e8ac7675b115dc3121",
         "size": 3360
       },
       {
         "path": "src/components/features/file-browser/utils/filtering.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "fab362388b7e9895b688aec8149fab73d37c3a3ccd751e47d3cc3099016f7ef4",
         "size": 3570
       },
       {
         "path": "src/components/features/file-browser/utils/grouping.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "709d488018e090f53d34df848385bd35b2fc3ce134e2e01803c4119ef19154d7",
         "size": 4373
       },
       {
         "path": "src/components/features/file-browser/utils/sorting.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "1cd50a159dfec53e67a181e3c4c6bb0d128d1a1da6006aeb3d4e4c279c73ad3d",
         "size": 2932
       },
       {
         "path": "src/components/features/file-browser/views/cards.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "bf758c47f7d5ee1bfbd1dc07f9f03244c6eb467da9fcd0763a0a2b85995b968a",
         "size": 8814
       },
       {
         "path": "src/components/features/file-browser/views/grid.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "3a1f301e6d46d4681f1635ed90fed9fbad1f7330caab37cf19eaf9e5e986f934",
         "size": 8048
       },
       {
         "path": "src/components/features/file-browser/views/list.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "bdc821dd61e94ad7a54109a033b56fd20a5238f0d7c841d427e5c79fca677634",
         "size": 8313
       },
       {
         "path": "src/components/features/file-browser/views/masonry.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "24cb6a4f2ea44425ae51fee910ff19b766dc8358df92d095d8d2486ebeb5baae",
         "size": 15390
       },
       {
         "path": "src/components/features/file-browser/views/table.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "7794f6b9d69f692da02371d173cdc53a70d07724326a3d7096d5c727d890f546",
         "size": 10866
       },
       {
         "path": "src/components/features/file-browser/views/view-registry.ts",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "e307eb1fe9ea4eb81ce5e8a43ef6a77bc78fda1c1c04281d5a755d2fd70bd7fe",
         "size": 2415
       },
       {
         "path": "src/components/features/file-browser/wrappers/hierarchical-folder-wrapper.tsx",
-        "origin": "untracked",
+        "origin": "tracked",
         "state": "present",
         "digest": "2b099512a9b9a11abc5162e7dcfe24ca3007a33567055b493b83a93ebc074f54",
         "size": 4528
@@ -3137,116 +2724,11 @@
         "size": 8669
       },
       {
-        "path": "src/components/settings/folders/common/folder-badges.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "59c76393871d0aae0c9fa4bc052fa20f04adce5ffb44a9fe78a29d74a03fef1f",
-        "size": 3150
-      },
-      {
-        "path": "src/components/settings/folders/common/simple-tooltip.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "47ad52c0612281a0aede2e2d6f25004064ad1d4598bcf6d463b25e1da63e7e4b",
-        "size": 975
-      },
-      {
-        "path": "src/components/settings/folders/components/folders-grid.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d91e413745dada2f10533aa7dd59f266ff7874b5c09603cfe56c9a0b08b4c61e",
-        "size": 5671
-      },
-      {
-        "path": "src/components/settings/folders/components/folders-table.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "8dad8e200b7954b7c5a388177d3dfc1ab139db840e3fd055f3c7555735e47d75",
-        "size": 17756
-      },
-      {
-        "path": "src/components/settings/folders/components/micro-cell.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "63af8fc325a0b6fd172014e2add471cf3d9dc34b89bef83e6bbbc40b888a9de9",
-        "size": 852
-      },
-      {
-        "path": "src/components/settings/folders/components/ui-primitives.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "4636f833a2bff08a35f015b8da5f224b0680b7f39d26444e3d1c65ec61ea6cd7",
-        "size": 2119
-      },
-      {
-        "path": "src/components/settings/folders/folder-card-action-controls.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "63eac3621906bc501d8d0797ba41d1bfec8e2dc42eeb8acd612a70eaa0f37829",
-        "size": 5929
-      },
-      {
-        "path": "src/components/settings/folders/folder-card-edit-controls.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "83c2b4ddf42ab7e57811dc2fa2830edab065c80020cc37a76e7e0c112f88439f",
-        "size": 1727
-      },
-      {
-        "path": "src/components/settings/folders/folder-card-error-display.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "cd24ddb9effc8b23813a38d15729951a9d442479cc94b313185a9ba52a7183f5",
-        "size": 722
-      },
-      {
-        "path": "src/components/settings/folders/folder-card-expanded-subfolders.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "09d2c6ecb9b25a85e88dc2b6635ff45a067c6f03dddfe83c84c5705c98c5d053",
-        "size": 1130
-      },
-      {
-        "path": "src/components/settings/folders/folder-card-index-status-badge.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "0df0cfad5ade22b56a76cf714f3dcbf800409703630a6c5417a70709360e6b3e",
-        "size": 2951
-      },
-      {
-        "path": "src/components/settings/folders/folder-card-stats-display.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "975a6732a54fe3603db55517b98795a6b4a1e09c1ad7df8563ae461dc596aecf",
-        "size": 6247
-      },
-      {
-        "path": "src/components/settings/folders/folder-card-thumbnail-grid.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "7e5201c50b2a2929811e3b342129dedebec9470bc3bbf95573a2543aa6a4efd5",
-        "size": 2565
-      },
-      {
-        "path": "src/components/settings/folders/folder-card.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b59424ecc6a9373e043d6acc01451bdd8bdb389c72c04fe793f4571d490251f8",
-        "size": 15265
-      },
-      {
         "path": "src/components/settings/folders/folder-types.ts",
         "origin": "tracked",
         "state": "present",
         "digest": "b042c0bdde4aa22638fc5bc49371494d59e7bf732f26c014bcc5376935d2821d",
         "size": 3954
-      },
-      {
-        "path": "src/components/settings/folders/folder-utils.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "9908f9a964e23fafc18cbccf0322cc56d388fca885bea1f85418c324c8b74456",
-        "size": 1301
       },
       {
         "path": "src/components/settings/folders/folders-form.tsx",
@@ -3256,88 +2738,11 @@
         "size": 5414
       },
       {
-        "path": "src/components/settings/folders/folders-stats.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "df36b75973fd685878e421947016b26e7bd90afd5e9c8778ac83b50bcca7b910",
-        "size": 6143
-      },
-      {
         "path": "src/components/settings/folders/global-reindex-terminal.tsx",
         "origin": "tracked",
         "state": "present",
         "digest": "f0870445ba489b7f8350faee5cd218da04e88eb59ecb3e80042478c271179915",
         "size": 3066
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-complete-status.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "09100abdcc9922d0f44cc509922d0b7a91e59f46679792b9574a53a8316ccba7",
-        "size": 773
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-edit-values.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "119ebdb2069aec86f90aa16f849e32fe3e02bed571220e794c5f3488536c1b65",
-        "size": 779
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-folder-stats.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d1db45c7319a26ab13d6899454a792e50da4a73ddc9947ee770367221666324f",
-        "size": 1206
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-folders-events.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "a450308a45e0b3ad1ec6ec1f0310c12cd92ec5caf60516d71e22f272bd380415",
-        "size": 13107
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-folders-operations.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "14c972daa8c0adbb4a40ba46911a4a864c3be2832cc07f71f550371ba771f9d7",
-        "size": 8115
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-folders-polling.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "fb522e2895e46c8ce176a4f15208509914a39a5520a35b990bb6e2ecfacf8ebd",
-        "size": 617
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-folders-state.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "4c33299f367c72fd149489a12faca3efd4299a45b8133dcff9c880f6dc2bf1e0",
-        "size": 4613
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-folders.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "2a25e8f009555357e01ef7a529bc70ed7bf5fd6ea57cdf80fe1a9800bfed516b",
-        "size": 18212
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-progress-tracking.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "fe16f4112f53806401d2d066d6a8f1b7b4db2994f9422b99c1645114cbc7cc87",
-        "size": 1506
-      },
-      {
-        "path": "src/components/settings/folders/hooks/use-table-filters.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "46523077846014e29dcddca8673002dedafee63ade4e8b602999a8872df7d134",
-        "size": 1111
       },
       {
         "path": "src/components/settings/folders/reindex-logs-viewer.tsx",
@@ -3354,39 +2759,11 @@
         "size": 17548
       },
       {
-        "path": "src/components/settings/folders/utils/common-styles.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "9404f38995c45c2fb901f69ef78fd90a764f76a856d1ba3d2e02aa341a6e4949",
-        "size": 2632
-      },
-      {
-        "path": "src/components/settings/folders/utils/folder-helpers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "7bcab6d763c78bf99ed2c138afa5e9ef72edf42d4bba74aeb364c90bf265d724",
-        "size": 3167
-      },
-      {
-        "path": "src/components/settings/folders/utils/hierarchical-order.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "49a030a7057fe1f8bcfb9e2b5b4654a5b6daedd235f21fbe4980712822b0a0aa",
-        "size": 2474
-      },
-      {
         "path": "src/components/settings/folders/utils/is-reindexing.ts",
         "origin": "tracked",
         "state": "present",
         "digest": "71ca513ba155a7153fe239ba57066f952021481735a776e220ab7ffa9860fb66",
         "size": 1062
-      },
-      {
-        "path": "src/components/settings/folders/utils/status-message.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f6adf5fe2bcf090c3f3f62608ec43bbc47962454abf6562aa7884567809c2d14",
-        "size": 718
       },
       {
         "path": "src/components/settings/forms/create-album-form.tsx",
@@ -3961,104 +3338,6 @@
         "state": "present",
         "digest": "30ba7f31791ef9a0ebb30ec27d61665ca81b979da8c4fc97838d0ffb82bf04f8",
         "size": 6964
-      },
-      {
-        "path": "src/components/ui/data-grid-column-filter.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "eaa3fd645a91683e63e2ea84a1041ac286e5d0e2b962fa3dbe5765bc4e926d3e",
-        "size": 3941
-      },
-      {
-        "path": "src/components/ui/data-grid-column-header.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "96328a9c0d63bfa16a3202578f407c6c18a6c481522573aaf52046dd3d307c7b",
-        "size": 8833
-      },
-      {
-        "path": "src/components/ui/data-grid-column-visibility.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5c2b5c0bbbb18796ab80f9ecc38e416526caca024c94c212f4d26e24821d2c7e",
-        "size": 1244
-      },
-      {
-        "path": "src/components/ui/data-grid-pagination.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6dba54a48c0548ce50b8020151b02537ec9a3e23d9a33c6131f8e418b0f25945",
-        "size": 5845
-      },
-      {
-        "path": "src/components/ui/data-grid-table-dnd-rows.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "0acf40f1829549cc9ddda47a244e23d38d904ecd35f362602195a0ca13e6b58a",
-        "size": 4580
-      },
-      {
-        "path": "src/components/ui/data-grid-table-dnd.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "54e5da714321e1bacb404c2e21910ce03620268f82f2467e794e240f7c254f08",
-        "size": 5671
-      },
-      {
-        "path": "src/components/ui/data-grid-table.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "90877c1ec6eb0c18dbee8247667d15e018558c40038a2fed6d4f32af1eb4d7e3",
-        "size": 15391
-      },
-      {
-        "path": "src/components/ui/data-grid.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "458bc6aad9746d408ff6421bde1fcf71e370f523848909836f7045ccc433285e",
-        "size": 4094
-      },
-      {
-        "path": "src/components/ui/data-table-column-header.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d3528657f5dedb86e6f78b7dff72c98501dceabaf186fea1b7ee759fc4ddb3ea",
-        "size": 1792
-      },
-      {
-        "path": "src/components/ui/data-table-pagination.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "e7c19067fe986fccf26a43a01dc1f556ef6580ba39fc7a354c5d056694c1d1d7",
-        "size": 2893
-      },
-      {
-        "path": "src/components/ui/data-table-row-actions.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "10f4157cfe0fda06033fafd066a3242af54e5283d1e740e63a9e4eba7085477e",
-        "size": 1313
-      },
-      {
-        "path": "src/components/ui/data-table-toolbar.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5614bd3f97948c1180eeabebe0c9ec4e1fd2be6772131aeb9086114a9568fc5a",
-        "size": 1177
-      },
-      {
-        "path": "src/components/ui/data-table-view-options.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "fa62f6821042ff4915f71112519a9764885c6ff7844965b3964892d6fadb36e4",
-        "size": 1387
-      },
-      {
-        "path": "src/components/ui/data-table.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "9ceeda2c5a7f54370db1b840401652fe92bdbcd72f0afeea0b253c5f13e1fbcb",
-        "size": 3291
       },
       {
         "path": "src/components/ui/dialog.tsx",
@@ -5265,13 +4544,6 @@
         "size": 3419
       },
       {
-        "path": "src/components/views/tags/tags-content-view.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5c88bd5be69c005b7c463d0932ff51320220d8232973a899202e7a570ed44795",
-        "size": 1794
-      },
-      {
         "path": "src/components/views/tags/tags-view.tsx",
         "origin": "tracked",
         "state": "present",
@@ -5384,20 +4656,6 @@
         "size": 1475
       },
       {
-        "path": "src/config/vite-dev-optimize.test.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "ddd791a2ccc2b0fb2791e1609e285b52306018f1ab2ccf033458c6deaef492e5",
-        "size": 432
-      },
-      {
-        "path": "src/config/vite-dev-optimize.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "c0a344c1e67d6dc0a15594689def00aa191817543d0bd5716b01d62e57965da5",
-        "size": 88
-      },
-      {
         "path": "src/constants/entities.test.ts",
         "origin": "tracked",
         "state": "present",
@@ -5480,13 +4738,6 @@
         "state": "present",
         "digest": "8ec199449a9a01e1d380680c2cffdfd1c57859f00709fe5e9028881b0b89ef5e",
         "size": 11433
-      },
-      {
-        "path": "src/hooks/use-cache.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5905f66262e97694779262025683ee37d3cfe9e3fed653e2fd7d96007152f661",
-        "size": 11707
       },
       {
         "path": "src/hooks/use-cards-view-config.ts",
@@ -6273,13 +5524,6 @@
         "size": 5527
       },
       {
-        "path": "src/lib/client.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "0e190792a95c9c27bcff5dce4384e43afdeb6dd4ec9264afcb6196f7fc72c07f",
-        "size": 765
-      },
-      {
         "path": "src/lib/client/events.client.ts",
         "origin": "tracked",
         "state": "present",
@@ -6343,20 +5587,6 @@
         "size": 1321
       },
       {
-        "path": "src/lib/contexts/file-context.test.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6f04516101f45938db5d769755208a9637b43fd0db7902e3b87207601d65d03e",
-        "size": 4031
-      },
-      {
-        "path": "src/lib/contexts/file-context.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "ff4dcbef5190ade1e62cb3ee43d12a757d2af755bdfdaa8fe25c255725cd544f",
-        "size": 13383
-      },
-      {
         "path": "src/lib/contexts/settings-context.tsx",
         "origin": "tracked",
         "state": "present",
@@ -6376,20 +5606,6 @@
         "state": "present",
         "digest": "408e65383c601eb902d34565ea1646c6c7d2bddef7e6aa76e887b98e22e8056c",
         "size": 522
-      },
-      {
-        "path": "src/lib/database/cache.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "aeeb59d2f57683324f2812b1f531bfa6d05d1c9c9ffc071ad53a49c1357f7d6a",
-        "size": 6889
-      },
-      {
-        "path": "src/lib/database/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "dff60939801853c908d9ed40cf0f9d4c4111acce96d61b14e7b791258dfc64da",
-        "size": 286
       },
       {
         "path": "src/lib/dev/index.ts",
@@ -6444,8 +5660,8 @@
         "path": "src/lib/drizzle/fts5.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "55e8aec14c36b6151a6ae7fc35de206bcef9e1af08ca67fcc976512d92d6ad89",
-        "size": 8017
+        "digest": "3f8ca6ef524ba6205b52401897a0160e533d6e2de9d55fadc3b946f65020abc3",
+        "size": 8270
       },
       {
         "path": "src/lib/drizzle/helpers/in-list.ts",
@@ -7067,15 +6283,8 @@
         "path": "src/lib/effect/adapters/express.adapter.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "230dd06344600d337ecb6c59b7f05f3ea18535aa3f8584c7d03666434ec1fb76",
-        "size": 11383
-      },
-      {
-        "path": "src/lib/effect/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1c2fa1d36d02f5ec2dc66c2f0879ae2a6b1ad83edea24c49e0ec00fbfc07f07c",
-        "size": 333
+        "digest": "a9f6124e467923d442609ce233eea16e2152688bab2397d958f7680d0f4dac89",
+        "size": 11486
       },
       {
         "path": "src/lib/effect/runtime/runtime.ts",
@@ -7113,13 +6322,6 @@
         "size": 1336
       },
       {
-        "path": "src/lib/effect/schemas/pagination.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1c4ade5d8d1ff8a626e6603361577072474d93507077e61e5d1d4fffc667dda3",
-        "size": 11597
-      },
-      {
         "path": "src/lib/effect/schemas/primitives.ts",
         "origin": "tracked",
         "state": "present",
@@ -7134,25 +6336,11 @@
         "size": 2524
       },
       {
-        "path": "src/lib/effect/schemas/transformations.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "799ebc46dde23b896d3c4ffbef2713e4686ee5cc14c4be796294ad1e4d164c24",
-        "size": 9898
-      },
-      {
         "path": "src/lib/effect/schemas/wildcard.ts",
         "origin": "tracked",
         "state": "present",
         "digest": "c2a5bf7ef18eb65adb6d7501b8e10c7e4c6d7547917fc09689b830264eae3572",
         "size": 2555
-      },
-      {
-        "path": "src/lib/effect/services/drizzle.service.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "868ff4e714c1ae281841d824fdc8ad2870f6d585734a7b570659788683457b56",
-        "size": 4678
       },
       {
         "path": "src/lib/errors.ts",
@@ -7365,13 +6553,6 @@
         "size": 1480
       },
       {
-        "path": "src/lib/hooks/entities/concept/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "0c1a752d87c303b1f41f484e640cf560ba1210df429ecc0b5872335edccc7e4f",
-        "size": 144
-      },
-      {
         "path": "src/lib/hooks/entities/concept/use-concept-actions.ts",
         "origin": "tracked",
         "state": "present",
@@ -7391,13 +6572,6 @@
         "state": "present",
         "digest": "11f192384ac2eb5e72f452e76b1d296fb3fc0f46a1375a359a79d1f6e048c157",
         "size": 2823
-      },
-      {
-        "path": "src/lib/hooks/entities/concept/use-concepts.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "14af936265f644fd8f4f64ed5160a891ba3d4cac5cc9847c902dcc030b97fbd7",
-        "size": 1475
       },
       {
         "path": "src/lib/hooks/entities/note/index.ts",
@@ -7456,34 +6630,6 @@
         "size": 3002
       },
       {
-        "path": "src/lib/hooks/files/use-file-actions.test.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "43c3f7c010895e2fc776e9022ad8dd2171c753138b96da1d9c01fff674904586",
-        "size": 918
-      },
-      {
-        "path": "src/lib/hooks/files/use-file-actions.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1ff6417c4378115341666d3eabb81dc4eb6fe5fbeb7031a2b45cd86b203ced4d",
-        "size": 1692
-      },
-      {
-        "path": "src/lib/hooks/files/use-file-drop.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "dd0539488d508619829bb15f849a4bc34a5f316be8ac01b60302984fd5bde115",
-        "size": 1330
-      },
-      {
-        "path": "src/lib/hooks/files/use-file-list.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "a314a3eadaf7d2478ae47391470af58d8a95877d29129fc070e57d6f0a01a1c2",
-        "size": 2677
-      },
-      {
         "path": "src/lib/hooks/files/use-folder-images.ts",
         "origin": "tracked",
         "state": "present",
@@ -7491,25 +6637,11 @@
         "size": 4109
       },
       {
-        "path": "src/lib/hooks/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "047220f150976fb6ee41709a69f1218986bd20bf3d8b925658a24ff6149e27f2",
-        "size": 1250
-      },
-      {
         "path": "src/lib/hooks/system/use-console-capture.ts",
         "origin": "tracked",
         "state": "present",
         "digest": "2e50d454c5e6930d6c7e45e281fab63f5077f1e33434551a44b478cf7d0283ee",
         "size": 2908
-      },
-      {
-        "path": "src/lib/hooks/system/use-navigation.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1c0418bb03f4652aa6f00e167a1621b4e8b1fc8a8a51a2c94129a62faeb2ba29",
-        "size": 8150
       },
       {
         "path": "src/lib/hooks/system/use-stats-service.ts",
@@ -7538,13 +6670,6 @@
         "state": "present",
         "digest": "a102de972c90f9b20d3e1beeefbffb1f4f8b6324b68b113bd9d80f44a629f851",
         "size": 1566
-      },
-      {
-        "path": "src/lib/hooks/ui/use-selection.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "dd515add63c2b9328ba067c86743ce71bd910be1aace59bec4ce57ad518e8938",
-        "size": 7629
       },
       {
         "path": "src/lib/hooks/ui/use-thumbnail-events.ts",
@@ -7629,13 +6754,6 @@
         "state": "present",
         "digest": "2a2cc28c404d8197a771f40d30e602b0fb3bff96d6c1e02f5695e4ed11a20e0a",
         "size": 11042
-      },
-      {
-        "path": "src/lib/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "3ff0f40bf9232a21418f8cc4a1c5d69f962b62f89e7579e97abd6fb9afc16756",
-        "size": 875
       },
       {
         "path": "src/lib/keyboard/__tests__/integration.test.ts",
@@ -7911,13 +7029,6 @@
         "size": 367
       },
       {
-        "path": "src/lib/tanstack-react-table.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "2241b5a896a2094a883e4936e00e97ee2ca4037babd4ae299715994d9ac46227",
-        "size": 2971
-      },
-      {
         "path": "src/lib/tauri/database-config.ts",
         "origin": "tracked",
         "state": "present",
@@ -8007,20 +7118,6 @@
         "state": "present",
         "digest": "3dbc6ef6a21ba88b704256122c932fc114b8450e423eadb8900b55409133aef1",
         "size": 574
-      },
-      {
-        "path": "src/lib/utils/activity/helpers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "46272c21b0385c98164dd2f9506cce524f867100c62d8e61c981dfee6a1d9479",
-        "size": 5589
-      },
-      {
-        "path": "src/lib/utils/activity/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "147bfdd431800efcd39784b1c7ee19ea215cd963dab4fd2df141280813ab8cf1",
-        "size": 137
       },
       {
         "path": "src/lib/utils/activity/validators.ts",
@@ -8740,15 +7837,8 @@
         "path": "src/providers/app-provider.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "a4d7c55053f4a5b34d262265254375fa8c3a80fd542f8cac1497c7a584982b0a",
-        "size": 932
-      },
-      {
-        "path": "src/providers/cache-provider.tsx",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f7b9aa9f32e9685aaee442176614cdf27d2b4dcf9b4d66071cd5bfb5cfb6b27e",
-        "size": 1111
+        "digest": "da4cf8d0304cf197885e86d89793d53837820d8070dfcd86a8e75dac3db9f4bd",
+        "size": 722
       },
       {
         "path": "src/providers/profile-provider.tsx",
@@ -9006,8 +8096,8 @@
         "path": "src/server/routes/images.effect.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "d7fe424c8744b9e42313765fbdcd2c808a5e82648a86179025af6a2586562ed0",
-        "size": 14438
+        "digest": "55e4e161bcfeaa532cfce0e3176a12cc9336103ad20c6c2843ad45dfc51c9fd8",
+        "size": 14454
       },
       {
         "path": "src/server/routes/json-thumbnails.ts",
@@ -9027,8 +8117,8 @@
         "path": "src/server/routes/metadata.effect.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "4bab199319e81a320e649a7a95f1576b9904c8b9f991d3d08c08ef5113e88509",
-        "size": 4035
+        "digest": "c51943a506f758d06d3bdec064f3a8da9a9437025f579eaa27bf248a1ddb710f",
+        "size": 1760
       },
       {
         "path": "src/server/routes/places.effect.ts",
@@ -9062,8 +8152,8 @@
         "path": "src/server/routes/search.effect.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "65f71f50598cbe24f1e35b56fdddf6f3e32536ffb3676219888838692903dd1f",
-        "size": 9786
+        "digest": "b70639fc30e16c53fb3800372acd5e6230f57c439505c62403c55eaad648902d",
+        "size": 10114
       },
       {
         "path": "src/server/routes/secondary-services.effect.ts",
@@ -9090,15 +8180,15 @@
         "path": "src/server/routes/stats.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "c80e2aa120d85e334e53e60a0763671ef4ffccbe6dcf1b576945219eae955853",
-        "size": 4923
+        "digest": "b0c1a1becec31b765465984088dc7133ce2207009addbf749e6f3e72ee52f430",
+        "size": 310
       },
       {
         "path": "src/server/routes/system.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "747524efa40bda9ac82f8218baa2d783e7e0e174574a848d57026f78d7c22749",
-        "size": 8278
+        "digest": "bc6399290c96bbc1027f05f2c8279605aa5b593dffbde9ef1867b7731efcd8a3",
+        "size": 8218
       },
       {
         "path": "src/server/routes/tags.effect.ts",
@@ -9255,13 +8345,6 @@
         "size": 5260
       },
       {
-        "path": "src/server/services/metadata.service.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "9950bef839d1b9c97e0d472572ab66ce3b30d21a1c880b3247ac83740eb58169",
-        "size": 7720
-      },
-      {
         "path": "src/server/services/metadata/c2pa-parser.service.ts",
         "origin": "tracked",
         "state": "present",
@@ -9325,18 +8408,11 @@
         "size": 12631
       },
       {
-        "path": "src/server/services/metadata/parsers.service.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d4ec33a7013b2f18e21932ba8a5ad24e67337008e2867c93375ff3ddafa229f3",
-        "size": 13325
-      },
-      {
         "path": "src/server/services/metadata/png-parser.service.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "f8b85ddb8fe199dc39cff3645b3866bda0d268802802939fe18f51afad031a1f",
-        "size": 19843
+        "digest": "715d243e06e81387b31dcdccff66ed6ca8fab54359dc8752f459c2bd5b4d84eb",
+        "size": 19774
       },
       {
         "path": "src/server/services/metadata/sd-parser.service.ts",
@@ -9356,15 +8432,8 @@
         "path": "src/server/services/search.service.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "b96411797f7112346ef088c4eba1aee01e79b9e5515b5059b6da77bf95c1d5a2",
-        "size": 7007
-      },
-      {
-        "path": "src/server/services/stats.service.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "2394dd24b1b9d0a5c4de4dd70c08a28babf93c6bbf8fc67a979f91379f2f7c34",
-        "size": 25154
+        "digest": "fee7655bed25e37dd96b6dae3ff83c4613173876fd9d9158c0b3cbc02529bc81",
+        "size": 7047
       },
       {
         "path": "src/server/services/stats/index.ts",
@@ -9605,20 +8674,6 @@
         "size": 40775
       },
       {
-        "path": "src/services/cache/cache-manager.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "be48dc12db0669655e8c96385f95b19601eaf77765957ce0275f7e4973c99673",
-        "size": 12390
-      },
-      {
-        "path": "src/services/cache/file-browser-cache.service.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "e33e793e98e6bc026a597527f26e87500d079341c091c6f7b771aee938a8b7b6",
-        "size": 11917
-      },
-      {
         "path": "src/services/character/__tests__/character.favorite.effect.test.ts",
         "origin": "tracked",
         "state": "present",
@@ -9701,13 +8756,6 @@
         "state": "present",
         "digest": "469aac5602756ffbb1432c67cdbf77762c0d3b1123d63fd69d6daebe703735b0",
         "size": 2010
-      },
-      {
-        "path": "src/services/collection/collection-search.service.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "fbbc46bd5c8d807b648ed013e28cbdbbc4150059b9d826b228edcfcc1e08226d",
-        "size": 4349
       },
       {
         "path": "src/services/collection/collection-simple.service.ts",
@@ -9822,13 +8870,6 @@
         "size": 9229
       },
       {
-        "path": "src/services/drag-selection/drag-selection-manager.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "645bd6e7aa75d7881edac6f1dd03819393cd3946b3fb4f388db89ceef44dc727",
-        "size": 16635
-      },
-      {
         "path": "src/services/favorite/__tests__/favorite-entity-atomicity.test.ts",
         "origin": "tracked",
         "state": "present",
@@ -9899,62 +8940,6 @@
         "size": 2498
       },
       {
-        "path": "src/services/file-entity-mapper/metadata/audio-metadata.extractor.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "32e12379069eb5983fceb399683394167daf75fa811ad18694b3fd29cff3744a",
-        "size": 3046
-      },
-      {
-        "path": "src/services/file-entity-mapper/metadata/document-metadata.extractor.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "16fcc65f11d7d05effff9b5e130d098714f2c239f6826aa062bc2bcc6c4a2f8d",
-        "size": 5372
-      },
-      {
-        "path": "src/services/file-entity-mapper/metadata/file3d-metadata.extractor.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6d91f3957c4d83d895a0ab3eaebec1e6e50f9b44b55c97219ac2157b36baac60",
-        "size": 5937
-      },
-      {
-        "path": "src/services/file-entity-mapper/metadata/image-metadata.extractor.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "3feb7b771b39751fe41a59878d5c6657867fce6bc4bb226e0c999d0d3b63e0fa",
-        "size": 3041
-      },
-      {
-        "path": "src/services/file-entity-mapper/metadata/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5dda984123a738e1e15a596d60359be5bca6fb084fd34fdaea9e01e2acd5f960",
-        "size": 317
-      },
-      {
-        "path": "src/services/file-entity-mapper/metadata/json-metadata.extractor.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "be1123d181ef5da1c896c9beb6e3e32a4eb19ca04968058b1c802980711a1a47",
-        "size": 5337
-      },
-      {
-        "path": "src/services/file-entity-mapper/metadata/unified-image-metadata.service.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b57510d74ba75c9765ab3088302b305422c32a29c2c1651613a13ee561a1a70f",
-        "size": 4845
-      },
-      {
-        "path": "src/services/file-entity-mapper/metadata/video-metadata.extractor.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "057e730107eb8d4763b6cdf7d3ac69aeb47572bb3b9310619ae7ab364736c832",
-        "size": 2072
-      },
-      {
         "path": "src/services/file-entity-mapper/processors/audio.processor.ts",
         "origin": "tracked",
         "state": "present",
@@ -9995,20 +8980,6 @@
         "state": "present",
         "digest": "6ec8ceed97089f0891b62b11640750714e8894031186aa7e235a8db2c75cde94",
         "size": 10760
-      },
-      {
-        "path": "src/services/file-entity-mapper/thumbnail/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "901a28079f40b49cb6f47717db1188ab8db746052c9f3ea9403ac45b4b470ca1",
-        "size": 154
-      },
-      {
-        "path": "src/services/file-entity-mapper/thumbnail/thumbnail-generator.service.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "dfbea0cbee8e35c6633249a96cf50e059f39b54a284c19d4586ff1ed8ca92ef0",
-        "size": 7521
       },
       {
         "path": "src/services/file-entity-mapper/utils/canonical-source.utils.ts",
@@ -10226,69 +9197,6 @@
         "state": "present",
         "digest": "0f80ccce04d07bc9bc163cb2045f3337c5dc870b65eec2f93cf2fe862129d79f",
         "size": 11991
-      },
-      {
-        "path": "src/services/folder/reindex/reindex-phases/phase1-analyze.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d7d95bf992bb7e85a3404893eabafdb800e86334246d77ffe695041b3d48e028",
-        "size": 4079
-      },
-      {
-        "path": "src/services/folder/reindex/reindex-phases/phase2-existence.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "2138617bd3c5394ab68b867a8ced1f4116ab5126937d761ec8691863ca42222a",
-        "size": 1425
-      },
-      {
-        "path": "src/services/folder/reindex/reindex-phases/phase3-deletion.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "01fb671be88efab65b9c74808ba6d03a3f9a9f3f4749a0f08bea3a2b2d1cd6c0",
-        "size": 3051
-      },
-      {
-        "path": "src/services/folder/reindex/reindex-phases/phase4-structure.test.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b0650a9e39242c3f6dcec8b6b8f9da7d35c3d88794e279722d05021de70b4faf",
-        "size": 2814
-      },
-      {
-        "path": "src/services/folder/reindex/reindex-phases/phase4-structure.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f7f746b85efbb18cdabc588a5bd50227d228d6e0640baf2c28d62dc699868bc6",
-        "size": 3651
-      },
-      {
-        "path": "src/services/folder/reindex/reindex-phases/phase5-indexing.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "8d4c648f6e45c49821c18baa02e53ebc527a051732232a1bcd3b15aef9d6e52c",
-        "size": 4395
-      },
-      {
-        "path": "src/services/folder/reindex/reindex-phases/phase6-thumbnails.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "66b41c015d7f020cd57a15316041946028e5636c76d92d9b188db7f15305d797",
-        "size": 6980
-      },
-      {
-        "path": "src/services/folder/reindex/reindex-phases/phase7-metadata.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "95e9f8de2ed87abc4572ce4fc7c25e8e94b9d0a67d48daee4c1e2bab35cf21c1",
-        "size": 2454
-      },
-      {
-        "path": "src/services/folder/reindex/reindex-phases/phase8-verification.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b9c578c962c23c4b0ee22e7877ec5c24e3f0b8d6b12e895973b46e96a5ded768",
-        "size": 2552
       },
       {
         "path": "src/services/group/group-events.ts",
@@ -10809,27 +9717,6 @@
         "size": 46918
       },
       {
-        "path": "src/services/world-item/world-item-errors.effect.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "22fe7cda2f585c356fb1eb1c01a2586083bbd4e0856fd5c74f4edf8ea44439bd",
-        "size": 2233
-      },
-      {
-        "path": "src/services/world-item/world-item-events.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "4e29ce29eed744f0f8673412c198804342146ff4eb313f2d706c995283697486",
-        "size": 373
-      },
-      {
-        "path": "src/services/world-item/world-item.service.effect.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b9163f40f9144df2c0a5569b33a83ba9971013945b277b067469cb408eb81763",
-        "size": 15565
-      },
-      {
         "path": "src/services/worldbuilding/worldbuilding-errors.effect.ts",
         "origin": "tracked",
         "state": "present",
@@ -10842,20 +9729,6 @@
         "state": "present",
         "digest": "8fd410fc86cfe22892bc9d3c7d8e73efc67f64c6d160aa22716eda9b34536727",
         "size": 3131
-      },
-      {
-        "path": "src/store/entities/activity/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f547352a4c7d3578d731bd8db5a6713e370a1c3da79296a7e09b0c768ca7ed29",
-        "size": 13085
-      },
-      {
-        "path": "src/store/entities/activity/selectors.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5de4f003e38f4f6d9644b318cf37366caac919d0fbba0e4d7b0ae1c64afc0746",
-        "size": 6348
       },
       {
         "path": "src/store/entities/activity/types.ts",
@@ -11810,13 +10683,6 @@
         "size": 1845
       },
       {
-        "path": "src/store/places/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b4a8807e784d1e0bbb3b197fbe1fed838d9787700af48a07342cef334e525198",
-        "size": 6225
-      },
-      {
         "path": "src/store/reindex.store.ts",
         "origin": "tracked",
         "state": "present",
@@ -11887,244 +10753,6 @@
         "size": 13206
       },
       {
-        "path": "src/store/unified-file-manager-queue.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "31be82dfe7042e415e2d4e13ba00dc7f85e255f6d6c264b74bc089d22b45ba49",
-        "size": 4229
-      },
-      {
-        "path": "src/store/unified-file-manager-types.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f60abf9bf6a9e7c59edf461b5ff9ee9e44e03c68c8407573ecf9a60f20312a87",
-        "size": 3997
-      },
-      {
-        "path": "src/store/unified-file-manager.store.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f588e83a4dc939c9ea79b12f58a0ec759a2e1b205809b4f27b77b703042c202a",
-        "size": 24461
-      },
-      {
-        "path": "src/transformers/activity/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "fdebec2965d001323cd39d97341739bbd9b45cd1e1f9540beb4254400798d9e4",
-        "size": 471
-      },
-      {
-        "path": "src/transformers/activity/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5e7430ce4dbd743ff5da4264ffeffa147ec20249e3bb295c1de439fee7f77491",
-        "size": 6547
-      },
-      {
-        "path": "src/transformers/activity/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d0c8dabb8101fe2ec4d39f3074b736d255c73136d9e31f42fbbf60d719102a5a",
-        "size": 2999
-      },
-      {
-        "path": "src/transformers/activity/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1a31d8cc928717a16f2c8519098187eb9a80a44369f648197922b7474512c026",
-        "size": 12292
-      },
-      {
-        "path": "src/transformers/activity/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "238f3e146a3ff6f899214e06bc2c18a506f1151580c9ec9bbabe90c04e5214c9",
-        "size": 3542
-      },
-      {
-        "path": "src/transformers/album/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "236eaeeb5ec551651e1338d762c411dd064dd6ac3f6c23552c7333414af8d02b",
-        "size": 613
-      },
-      {
-        "path": "src/transformers/album/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b38e8bc4d4566d2359cf8fa601f69c6d4da972d4570b98d63fe262945c16503b",
-        "size": 6418
-      },
-      {
-        "path": "src/transformers/album/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "82f372c7cefe6a43b1973271e4019ca6e04a641248a5b8697f6a927d8b0432ca",
-        "size": 2535
-      },
-      {
-        "path": "src/transformers/album/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "4bc2631ee6616cd8b89f6886ff4ce91b35efbe2d03f0e94d3b890ed758c3b24e",
-        "size": 5151
-      },
-      {
-        "path": "src/transformers/album/transformer.effect.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "36d4b3248e9cc8626f5b7b92cd930e9d5e8ac8a6e5462e9ff4b881d3a592a4f0",
-        "size": 10727
-      },
-      {
-        "path": "src/transformers/album/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "a07e7e47bdeabc1a72fb1422d6433cc2c92642cf6b3e024a7be538327d891058",
-        "size": 3024
-      },
-      {
-        "path": "src/transformers/audio/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "843f79ae0624e394dde4932574de62f73b96f28080646ebbda49f2d1bccebedd",
-        "size": 498
-      },
-      {
-        "path": "src/transformers/audio/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "352849baa28dcc117b2c572ed6df5c08b67706364657aeab5d53c24ee2a73293",
-        "size": 3593
-      },
-      {
-        "path": "src/transformers/audio/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f7c869463df9b6f509dd678e57e6f18456bad8d5d209d4d5cde090ffaad8ae2f",
-        "size": 3429
-      },
-      {
-        "path": "src/transformers/audio/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "33ae5f716b1d014534af2f78ea9ca8cbd2eae90c60b9b3b0f0a309863d6d247c",
-        "size": 2208
-      },
-      {
-        "path": "src/transformers/audio/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "de347658f5a9ebbcdd6e4ff211f3b34b122b245b11959792da7fea02ecead486",
-        "size": 2359
-      },
-      {
-        "path": "src/transformers/audio/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "bed5ea37d89920993930b8f25f39873d678d8d6e37608c50f7155e0d15c912ff",
-        "size": 4186
-      },
-      {
-        "path": "src/transformers/base/error-handlers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "996632a56f19cad8d0364b5d5b5c5c51db0708f1632cdcdad5a15d3232a1407e",
-        "size": 3382
-      },
-      {
-        "path": "src/transformers/character/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "86c002aca769094a0582970fa4890ad08738dcfef05a62dc3cc3608cd9228307",
-        "size": 522
-      },
-      {
-        "path": "src/transformers/character/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d2a7ce6d21295627089c948a480aef2dba9d060d50ca9a44266f1f89a25122b2",
-        "size": 5160
-      },
-      {
-        "path": "src/transformers/character/mappers/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "7e6d992c88e5b742047c35187cbd2af0fb903a8f3b5e24d968db24f0d9eb598a",
-        "size": 192
-      },
-      {
-        "path": "src/transformers/character/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6444a9953b20edd44e7e299731ae498e0e1588a31198376a64a1ba1025ef5ef0",
-        "size": 4584
-      },
-      {
-        "path": "src/transformers/character/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "0a5fdd36c032344e315692fbe88519ca568a1a1d76c5f6538dddadeac8b2399b",
-        "size": 5209
-      },
-      {
-        "path": "src/transformers/character/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "09d0d059db593cc116d9d4d1c305f11832d0786f03d00694077fcebcd4597a0e",
-        "size": 9706
-      },
-      {
-        "path": "src/transformers/character/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "e3fc9884baa7dbbb75388fdfeb8b0ad70d5c94afc621ed2c6ed4044150046362",
-        "size": 4806
-      },
-      {
-        "path": "src/transformers/collection/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "98eaefe1603f2e55b6578042e633bbadf1d0aeedf5d9b5cebfbc951706869be5",
-        "size": 1219
-      },
-      {
-        "path": "src/transformers/collection/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "46916b8ede0fd1e15c835c59d6aa4d09c5bb55ff0eaaf26e2e436bfd44d37fde",
-        "size": 1851
-      },
-      {
-        "path": "src/transformers/collection/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b7a7f2d5a37947be71ab9128967e55b1d0bd7de6f5ab26c96336af16de5d6050",
-        "size": 3701
-      },
-      {
-        "path": "src/transformers/collection/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "496ea35146dcf9e42628fa4cbf9d13d3317e177f8fd6a716a78adf4c8bb3deda",
-        "size": 6552
-      },
-      {
-        "path": "src/transformers/collection/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "3dbb53b71f6a10b5fe0300ef2315e31771d78d6bbca3c658856976d4114702fb",
-        "size": 3372
-      },
-      {
-        "path": "src/transformers/collection/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "954cd7fe7d68ff512fe8a3b2b2e08867ddcf4959d8213211cdb98f2c8dd2031f",
-        "size": 5714
-      },
-      {
         "path": "src/transformers/common/counts.ts",
         "origin": "tracked",
         "state": "present",
@@ -12132,123 +10760,11 @@
         "size": 3127
       },
       {
-        "path": "src/transformers/concept/adapter.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "aafccff07b1d738d8707e8162c38f20dfaa8cb579ce6a30c9ebd59a332da7e56",
-        "size": 5715
-      },
-      {
-        "path": "src/transformers/concept/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1dbc84263796e453a2c8716484ff7b45b45b81127fb6fde1ac2a290b43bd224c",
-        "size": 1450
-      },
-      {
-        "path": "src/transformers/concept/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "cab9de9bb63343b16e41b3f17e287663e571a38825b38135682f414bd7faddd2",
-        "size": 8833
-      },
-      {
-        "path": "src/transformers/concept/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "41f1a6a24fffa3ad476e8ec9c536b952ff94c7b85ee11d1e220ad5df6e07219e",
-        "size": 4875
-      },
-      {
-        "path": "src/transformers/concept/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "4ba7f464fc04308ca409b385a7e828ba4d36b1813e2f7418c2b9cb8a1d3c31e0",
-        "size": 914
-      },
-      {
-        "path": "src/transformers/concept/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "3e494940196dded9ea68b0589a4458f71b0ca30fb9d149ad996ccd98bdc88ddf",
-        "size": 3583
-      },
-      {
-        "path": "src/transformers/concept/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f6e8c1e70c4685b9abba5dfa5b103e56738d60ad9579e78393bf170a20f9405b",
-        "size": 7409
-      },
-      {
-        "path": "src/transformers/document/adapter.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "c9aea5821e18714a0bc6d5e4c8627ef612021b06a2998507208d75207f8fb544",
-        "size": 5905
-      },
-      {
-        "path": "src/transformers/document/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "9144aa3f381e1e40d9aae0e4b8899eb990061636b73d046ae8520dcd77c4adde",
-        "size": 1028
-      },
-      {
-        "path": "src/transformers/document/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b6a01b58749515984edd57e4102abfbe7990fded9ea8cdebda3e568d11fcec49",
-        "size": 1969
-      },
-      {
-        "path": "src/transformers/document/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "76f1efab0fb3269df4d62ee43af3bdae0663623236c221cc5a8dfa986f5b1d58",
-        "size": 2804
-      },
-      {
         "path": "src/transformers/document/validators.ts",
         "origin": "tracked",
         "state": "present",
         "digest": "089a560aa437a952a36bc644c478e543b6f0df0fc99c62ec6e884805950a5a8f",
         "size": 3227
-      },
-      {
-        "path": "src/transformers/favorite/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "a80d5eb0aa03536ebec3234613b826673f8e09e839f625dc6ff828f4e73d3872",
-        "size": 1099
-      },
-      {
-        "path": "src/transformers/favorite/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "0ffdfbc6dcf4d88f046e4cb9e36d01b25fc10513fcb5a9328325815d8526d5d6",
-        "size": 3417
-      },
-      {
-        "path": "src/transformers/favorite/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6b3a5d01b0fcdb08f832bd910c40e832d53b8cbbb9722287e01969754b166517",
-        "size": 2751
-      },
-      {
-        "path": "src/transformers/favorite/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "c507e07db1b4643ac35f0aa41b3a15596b73aa2a48cadc26ba1bccf75307c882",
-        "size": 3853
-      },
-      {
-        "path": "src/transformers/favorite/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6c21fb458583ca737aa934b977cecb18a563316c475523e208ecbe35ae135a4c",
-        "size": 2542
       },
       {
         "path": "src/transformers/file/filters.ts",
@@ -12286,13 +10802,6 @@
         "size": 2078
       },
       {
-        "path": "src/transformers/file/utils.server.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b90625983afaebc3be4677a1c577829f7643f7adc4fa9eb9fd34de9376f44c8c",
-        "size": 1407
-      },
-      {
         "path": "src/transformers/file/utils.ts",
         "origin": "tracked",
         "state": "present",
@@ -12305,41 +10814,6 @@
         "state": "present",
         "digest": "a3d2055e6b6c2533a24bd8a2be45d00fff84010ccb095d1ad92d8d08ba3ae728",
         "size": 3497
-      },
-      {
-        "path": "src/transformers/file3d/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f39ebe6991f3155ae0cd86e586563662c2db8297a806eefe65dd24e9c4c8be06",
-        "size": 498
-      },
-      {
-        "path": "src/transformers/file3d/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b0fb44c5fa6dd684c49c4a4eaa4c1fc329fd7a0d8351c20024165fa046161edb",
-        "size": 2652
-      },
-      {
-        "path": "src/transformers/file3d/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "42a330d5a9dd44a1d5a37e2d9840d3759a89d0ec657b8b539d817ae3edcc3442",
-        "size": 2210
-      },
-      {
-        "path": "src/transformers/file3d/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "79eebf5e53de56cb87399a9bffced0abaea6eec1d2ba9d5a2a71003fc6339b14",
-        "size": 2178
-      },
-      {
-        "path": "src/transformers/file3d/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "54caeb0b3ea4f5285f895e48e9e81779d63a8894cf4cd6bdef6f7509fc55da19",
-        "size": 3276
       },
       {
         "path": "src/transformers/folder/index.ts",
@@ -12384,151 +10858,11 @@
         "size": 3473
       },
       {
-        "path": "src/transformers/group/adapter.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "70821c2b1c62593c5ec91dda19db2ded144455eca73478b30baf24572888379e",
-        "size": 5488
-      },
-      {
-        "path": "src/transformers/group/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1e60612fe536900a600c40f90845b3e44f3a230053e937f20ff45fcb9ff8c6f5",
-        "size": 713
-      },
-      {
-        "path": "src/transformers/group/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b27857cea85d758fe52a90a1f01ce9eeefe7513233b92d13534b0d9490426b43",
-        "size": 2749
-      },
-      {
-        "path": "src/transformers/group/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "660def1742228b54a157d9203ef6e4f4939c6280bc45c484d281fdc4a2a50c79",
-        "size": 2007
-      },
-      {
-        "path": "src/transformers/group/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "c3a2c70610e84df4dead873896e0690c39e14cec7695c6209436972fc84a4ee5",
-        "size": 961
-      },
-      {
-        "path": "src/transformers/group/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "284cad16163f8c10330162b29cde4576d2a5d1d3b136619299d1eb6aa94fac12",
-        "size": 2891
-      },
-      {
-        "path": "src/transformers/group/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "2a7fdad3c98b49756d87850910e9901212b9c176ce4ec580012358bab279e537",
-        "size": 1516
-      },
-      {
-        "path": "src/transformers/image/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "af6021454ca2d856e226e4a23f101c686699f4b4b21026ef96199424e813177e",
-        "size": 407
-      },
-      {
         "path": "src/transformers/image/mappers.ts",
         "origin": "tracked",
         "state": "present",
         "digest": "b892538e67356133cb03f6a7a65c8898d1651063dede7e3cdccbcc4b8936de93",
         "size": 2984
-      },
-      {
-        "path": "src/transformers/image/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "ee58ac00ca9e4e3ac29ded2a0fa8f0b9b61293f0608942e17c56a004b94c9920",
-        "size": 1449
-      },
-      {
-        "path": "src/transformers/image/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "8fb9fd5bae80dd9707b6de561ced4f66f22a747bd1fd637da9315ae0a262a626",
-        "size": 5446
-      },
-      {
-        "path": "src/transformers/image/transformer.effect.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "ca1484d7176901e55dc3fb53cec1e722373e4267ff28f8e3266ee5a34a287b12",
-        "size": 11556
-      },
-      {
-        "path": "src/transformers/image/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "ac8ed54130d4dcaabe7cb358236b65287f6b0ded83bd4673d8a2f8a6b483d790",
-        "size": 13005
-      },
-      {
-        "path": "src/transformers/image/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "14d320e0f4e4fa20c17a4f479b2e2ed062666681013146ac9875f3a095cb28a0",
-        "size": 1443
-      },
-      {
-        "path": "src/transformers/json-file/adapter.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "389720a2fb28547cf516f8291c8f75feea181a39eb6c590fe6652e86ee20e5dd",
-        "size": 6792
-      },
-      {
-        "path": "src/transformers/json-file/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "09bb2b22e1e618985cd0a65abfd6938ff5255c3e6f5859aaff8b833914057262",
-        "size": 510
-      },
-      {
-        "path": "src/transformers/json-file/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "c925122196f8d2a2924cc3c794fc5af513e14443d91e2babd367f2334dcbf2cc",
-        "size": 1132
-      },
-      {
-        "path": "src/transformers/json-file/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5b9209154a3b14fdb002b7d68b96f8005b419d48eee20e10d536e0f45d3d6f1e",
-        "size": 1019
-      },
-      {
-        "path": "src/transformers/json-file/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "7e136579a152eae376b540428ac942ea9e1e420fc0f3c6fa69c31aa5a42b607f",
-        "size": 3518
-      },
-      {
-        "path": "src/transformers/json-file/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "98adb963693f0e036928bddcc31d890c1719a53d3ea0734b91c4e46278f4ba13",
-        "size": 3464
-      },
-      {
-        "path": "src/transformers/json-file/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "a3ee2b63b2527333c30c54a77a2f2970f810befbaf1c8efd1669d7d4eeec66f2",
-        "size": 1157
       },
       {
         "path": "src/transformers/metadata/index.ts",
@@ -12545,41 +10879,6 @@
         "size": 1149
       },
       {
-        "path": "src/transformers/metadata/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "ff6083a83388a6ff7531aaef9e6c7f4dac7573240b10af32c5594c41b633a922",
-        "size": 942
-      },
-      {
-        "path": "src/transformers/metadata/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "bf065a0f974b50108470a619d1a0c24eed20d576b986a778c5b8f80754ac8027",
-        "size": 812
-      },
-      {
-        "path": "src/transformers/metadata/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "804636be77fc7da9b8a90f72ef229f5ca4947e13d929d6f6112ef4a45780f106",
-        "size": 989
-      },
-      {
-        "path": "src/transformers/note/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "117ca0cf24ce2324a15ad911cf728e4eedd4eee022d3c24ad2fd5b2771cac463",
-        "size": 1673
-      },
-      {
-        "path": "src/transformers/note/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "10600e985b443ff04f9e1f9450545b2e019330f5ef934857d902cc1ac3cd3c72",
-        "size": 8687
-      },
-      {
         "path": "src/transformers/note/note-adapter.ts",
         "origin": "tracked",
         "state": "present",
@@ -12587,130 +10886,11 @@
         "size": 6826
       },
       {
-        "path": "src/transformers/note/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "746ee8e51d08a46be3a95a38254bd6910b2a12b3c8c215087068ea91e723b74e",
-        "size": 1221
-      },
-      {
-        "path": "src/transformers/note/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "21de1a9a5f80f123b7c414a9b681d7fe8c5c2451ec39ef00d3adfa45b5202269",
-        "size": 4851
-      },
-      {
-        "path": "src/transformers/note/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "47a941ac968b7879e3fe864b7f9c65f038f3bad514f022f8778fb3a33dcef67c",
-        "size": 8275
-      },
-      {
-        "path": "src/transformers/note/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "3e7d619c3fb3772a73be1d209b107678e7e738a7a1ef1eecf82649d62391012c",
-        "size": 1610
-      },
-      {
-        "path": "src/transformers/place/adapter.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "9dc01bffeae4bf84b238b2981bef82ea331dacc0aab4df11ab539101387acd31",
-        "size": 1835
-      },
-      {
-        "path": "src/transformers/place/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5fb80e625f1d4067924c1fdbeaf7fd1499d5d6cc7dc446f5e9ada99f2650fcd9",
-        "size": 757
-      },
-      {
-        "path": "src/transformers/place/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "62678a117c4abc01f5f3202ab705cd1d8705956f2d885c79091346727f5a50a6",
-        "size": 8456
-      },
-      {
-        "path": "src/transformers/place/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "3b2960f293d76e787d7fd1b12d786562a901dbd12aba8f3fa6a7a8e4207eb564",
-        "size": 1361
-      },
-      {
-        "path": "src/transformers/place/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "376153b91484a1b2e386b1b507709c30f573bfbc74620c451d33206946be74bd",
-        "size": 1300
-      },
-      {
-        "path": "src/transformers/place/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d27bcab726c6ee68587ac39bc4b7c8bc593bd823c284659580f40458e0df700a",
-        "size": 4266
-      },
-      {
-        "path": "src/transformers/place/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6d7b0309cf91f929e69bfacaee38481aa2976f635c1352842b7429b031bb9684",
-        "size": 1683
-      },
-      {
-        "path": "src/transformers/profile/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "ff68cfe56967f8efbfb06eff01f84284e6f79ab245beff360969654fbfb78d98",
-        "size": 525
-      },
-      {
-        "path": "src/transformers/profile/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5177160dd789c7d1324d322081c2d4b6f098c6eeccda7f6d91b7a51cbc2c8fb9",
-        "size": 1217
-      },
-      {
         "path": "src/transformers/profile/profile-transformers.ts",
         "origin": "tracked",
         "state": "present",
         "digest": "093bf9ddb9d7754a7afce1a448785eb814063740cf3e2c4e5c3a75e2f61cae93",
         "size": 7489
-      },
-      {
-        "path": "src/transformers/profile/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "fac61865183d529e585bcb141f09641e51cd4239bcc6a9aacf03314b4296b064",
-        "size": 1175
-      },
-      {
-        "path": "src/transformers/profile/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1270e68f6bb475c177dbeab1c7c3800e0d45fb57d9a050c4ee4aaefb3bc991e5",
-        "size": 1414
-      },
-      {
-        "path": "src/transformers/profile/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1cdc0a013fb935a666036fe49bd4d10aa1180d5fdf2c669ff407b9ede03bc2ef",
-        "size": 2648
-      },
-      {
-        "path": "src/transformers/profile/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f52d6cbf57b469872af6452b2da3ff62ff435a7e1f90b1418b7d4f11a9e43ec3",
-        "size": 1452
       },
       {
         "path": "src/transformers/prompt/adapter.ts",
@@ -12762,55 +10942,6 @@
         "size": 1280
       },
       {
-        "path": "src/transformers/property/adapter.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "2854f11b88969361b767f06352bf068cfe85bac926d025c842c9d21ae20c40f3",
-        "size": 2880
-      },
-      {
-        "path": "src/transformers/property/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "809ebafea0bf5ee9ab92d58c6b394d51c22461efa94e725635c7521f8c4cdf1a",
-        "size": 444
-      },
-      {
-        "path": "src/transformers/property/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1f2a6db83a4088dffc61c76c093f1e5c0bf769463e8d3666690d009e9fb1f55d",
-        "size": 2486
-      },
-      {
-        "path": "src/transformers/property/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "cfea2244583e0e7257734a93c4dc435eb381e67be8c6909d310e8f36b5d088b3",
-        "size": 1098
-      },
-      {
-        "path": "src/transformers/property/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "7a4d12fe5e4d2495bf24a6ddddd9f3ee6c7f7176046a1ecd72da238f1848348f",
-        "size": 1373
-      },
-      {
-        "path": "src/transformers/property/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "c92156595cb2da901ea0c91938faa2f4a3f1532b8a0b52ff2837f68c73fe8d38",
-        "size": 4358
-      },
-      {
-        "path": "src/transformers/property/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "c17a0508c04d98b73179cdff98cce1a60e6500fb105381ec05e0be1475ac0c00",
-        "size": 1325
-      },
-      {
         "path": "src/transformers/queue-job/index.ts",
         "origin": "tracked",
         "state": "present",
@@ -12825,25 +10956,11 @@
         "size": 5658
       },
       {
-        "path": "src/transformers/queue-job/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "9b9d1f21f1065f468cf969a44108771d987c04b291cb40aaffda3f1cd461998c",
-        "size": 1892
-      },
-      {
         "path": "src/transformers/settings/index.ts",
         "origin": "tracked",
         "state": "present",
         "digest": "55f527f2feb4b75afee9f8b67ba827bc1f28dac33612963fe0f03a76494c5b37",
         "size": 539
-      },
-      {
-        "path": "src/transformers/settings/internal.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1865459069ff440c082c37f149e8501624fcc8b20b2dab5b438c6041c154c408",
-        "size": 3924
       },
       {
         "path": "src/transformers/settings/mappers.ts",
@@ -12879,286 +10996,6 @@
         "state": "present",
         "digest": "981fe4651e23ed281b42cc9da5e97c096c4d8dd78cbb5f0879674eadcafaee75",
         "size": 6014
-      },
-      {
-        "path": "src/transformers/tag/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "522c9766a6713503a012c09cd7458ff6018ea09333db95bc560412ce1ed69362",
-        "size": 395
-      },
-      {
-        "path": "src/transformers/tag/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "db71d52c2954a2c7c3467da314e17647687a922460e4c158805ab8b3ee759103",
-        "size": 2742
-      },
-      {
-        "path": "src/transformers/tag/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b614a046506edaa3ec7aaf3dece9a1201cd247bc2692696be67af137200e118b",
-        "size": 3783
-      },
-      {
-        "path": "src/transformers/tag/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "74179a9eeb12414df7e62b121d1a45eeb017f10c2a360508c4131aa7414578cf",
-        "size": 3826
-      },
-      {
-        "path": "src/transformers/tag/transformer.effect.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "05827d21354248a0a0c213b7d90c658e177966a71eec35cf42e7fc777ef8080a",
-        "size": 9580
-      },
-      {
-        "path": "src/transformers/tag/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "4d02fc782df8b15f7cfd323d2d284eed0907dba2e5ee7ae0e73d7561a9042370",
-        "size": 3795
-      },
-      {
-        "path": "src/transformers/tag/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "3b5fbfe9c7f327fdfc1a9d282f575a0d39c5a7c917cc044afe62775b7ade6ecb",
-        "size": 6423
-      },
-      {
-        "path": "src/transformers/thumbnail/base.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6a25db5548d906fa383434b48e2da1609bd42319c76f45497ced62d20ea9cea1",
-        "size": 1827
-      },
-      {
-        "path": "src/transformers/thumbnail/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "5169d2360b1bd36309a7cca8867de1161f491a381d41547a7c64c6310a6ef736",
-        "size": 584
-      },
-      {
-        "path": "src/transformers/thumbnail/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "a950ecda1dd7665defb8dd44fd509657debc71bb173ecc1c1ca7389a08cbc323",
-        "size": 2285
-      },
-      {
-        "path": "src/transformers/thumbnail/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b78933a7b0d55a0117bcccc718b22b3b792313ec833972bfe251204dd78b7f86",
-        "size": 1571
-      },
-      {
-        "path": "src/transformers/thumbnail/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1f5155a9f1428665899e66d046751b162bf21547b3c0855a892b321607df6391",
-        "size": 1650
-      },
-      {
-        "path": "src/transformers/thumbnail/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "51ae34b8d788b23c97f280074756c8f5138691e48722d0736ca5cc5d6d583c50",
-        "size": 3147
-      },
-      {
-        "path": "src/transformers/thumbnail/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f469c32fad6d279132d06affb5d1d6592b72d10b82c22ccef95ff5d47e4b91e9",
-        "size": 1556
-      },
-      {
-        "path": "src/transformers/uploaded-image/adapter.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "afe06d1a4f5779a22bb9cba7ff52d1c9c85537755730d3e95d6ae9cdff4500c1",
-        "size": 2302
-      },
-      {
-        "path": "src/transformers/uploaded-image/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "38b320c544eb07ef2c7105f6a1dfca8a2fc440a16c820be8f4c0c4b3600c39d6",
-        "size": 847
-      },
-      {
-        "path": "src/transformers/uploaded-image/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "bae83169adb1b54888526f0549be2e4a0935a258c99455e2a03074a2bda7347c",
-        "size": 3169
-      },
-      {
-        "path": "src/transformers/uploaded-image/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "36cfa0eb4851bd0025582841a0ac070675324d9d4947ce6b0e9bec97b92096c3",
-        "size": 1610
-      },
-      {
-        "path": "src/transformers/uploaded-image/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "8cb2862627b55ac8334ac2ac7c494eef1b1f6b65cd83c0f79631b2dc00c662e0",
-        "size": 278
-      },
-      {
-        "path": "src/transformers/uploaded-image/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "48ffdbdbe51ec0c1d38d4c96e939d97d6a14448ffee93279ab16d5e7b2862a4d",
-        "size": 2800
-      },
-      {
-        "path": "src/transformers/uploaded-image/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "f8356be4c1314ed93e215b6d1f1343c0370b60dcdcac62901679eb6aa96a72fb",
-        "size": 1682
-      },
-      {
-        "path": "src/transformers/video/adapter.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "3201d4ccc41e09acfc94b1ec5f28776211cbb0c417bf371c4b153caafe6c2e1c",
-        "size": 1018
-      },
-      {
-        "path": "src/transformers/video/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "8095ed9132a1fd011a4a8b6b8d8c268e1408cfea9b24a111ec29d46024cb1b95",
-        "size": 690
-      },
-      {
-        "path": "src/transformers/video/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "cf1b215caacaff15de274ab18ca963017079b7c57d00da1f6e3b9912cb1bf87d",
-        "size": 9550
-      },
-      {
-        "path": "src/transformers/video/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "1b8481781a9c3ee0d1c5563e26e6f14bcc2b86ae7443e5ac4a4d548d85236ecd",
-        "size": 1871
-      },
-      {
-        "path": "src/transformers/video/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "aceada461944eba49a9825cb37f6d8665dc71bfb53e42c1196f31702e4abf862",
-        "size": 1791
-      },
-      {
-        "path": "src/transformers/video/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "590fe71a2214d55efad13ec37a036963448be6cc18770c5651a9b2798497d5a4",
-        "size": 17654
-      },
-      {
-        "path": "src/transformers/video/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "bd9e505124fa228ef23eaedb1297db81f3f5adcbdb958c8fd1395bcac6e9d33b",
-        "size": 1425
-      },
-      {
-        "path": "src/transformers/wildcard/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "cf2bbff5c4753c83deccfe547c147c55a850d66baa187da7eb17ed68dd2cd2cb",
-        "size": 442
-      },
-      {
-        "path": "src/transformers/wildcard/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "fd310b516eec17498a2cb195cbc702dcf649312cb9005b7e98bf5c3afd38c7da",
-        "size": 5118
-      },
-      {
-        "path": "src/transformers/wildcard/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d581b27c7b7ed2dd9f0dc6e355b537ff417d62c7e0f2d8a4849f0fa57a448550",
-        "size": 1217
-      },
-      {
-        "path": "src/transformers/wildcard/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "4efbe8b99da31de0b710de15a0b1ff1f5c1acce04c1c4ca5ae3a0cf0eed9f7fa",
-        "size": 1998
-      },
-      {
-        "path": "src/transformers/wildcard/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6fa096e991e97a739e5fe91b0b806a1723d95507485bbf8d1ac58c03b19625ea",
-        "size": 1854
-      },
-      {
-        "path": "src/transformers/wildcard/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "0da3919781db786c153a4a64cac234edc0c653e073e63fe247561d46353fa18a",
-        "size": 1521
-      },
-      {
-        "path": "src/transformers/world-item/index.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "6ea22a9ad8cf3d58458e28fced5c28f1adfba113bc470b2f64fe7de84429b876",
-        "size": 507
-      },
-      {
-        "path": "src/transformers/world-item/mappers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "c40c1f6062710e3aa83b5c8b12ccf43f83e4d429787741a1bf8d4db380988512",
-        "size": 11756
-      },
-      {
-        "path": "src/transformers/world-item/schema.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b0d921a0215e2f0b81b5f8e1cc1dce8af30051b34b90d753aee00caee7d226eb",
-        "size": 1400
-      },
-      {
-        "path": "src/transformers/world-item/serializers.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "460822c49ed5661e608edf4bc23d76c1ddf652d9c3f3774bbd4b7a9dc5a20742",
-        "size": 3949
-      },
-      {
-        "path": "src/transformers/world-item/transformer.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "d74923e6e345a7af8e4df1728cd9cbefa26ba60309817e515d0af69affd58c5e",
-        "size": 6387
-      },
-      {
-        "path": "src/transformers/world-item/validators.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "daf3a0d4288ce688ce725460895c8f02aa372e302b1e6ebaf2bd393407771ee9",
-        "size": 1554
       },
       {
         "path": "src/types/ambient/react-virtuoso.d.ts",
@@ -14232,13 +12069,6 @@
         "size": 2456
       },
       {
-        "path": "src/types/png-itxt.d.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "c5e2195418494c1152aa2acf6b08791aa8118e7a7cf004f94350a19a89b4a67f",
-        "size": 292
-      },
-      {
         "path": "src/types/process.ts",
         "origin": "tracked",
         "state": "present",
@@ -14410,8 +12240,8 @@
         "path": "tests/e2e-production/canonical-reindex.spec.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "adfec4fb7318ac78c965487a039f58733a5f814549bec14e37da7b54fa4e3bad",
-        "size": 3963
+        "digest": "15cdf9b7376959a6cbfec55a2d165cef003ba574dc8ae463d3589a7abe319ace",
+        "size": 5658
       },
       {
         "path": "tests/e2e-production/document-viewer.spec.ts",
@@ -14526,34 +12356,6 @@
         "size": 5695
       },
       {
-        "path": "tests/e2e/search-fts-disable-env.spec.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "b765f9dee641d26dbb801e174cf9ff24270aea3f604da647eb5d4f8e40661911",
-        "size": 1120
-      },
-      {
-        "path": "tests/e2e/search-fts-fallback.spec.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "8a0d76aeef8d62aa40c1c545b493b892def8f2eb173d01b04d537e1e26d601b6",
-        "size": 753
-      },
-      {
-        "path": "tests/e2e/search-fts-require-flag.spec.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "79da9b8ad415f4e0e83b3b6d6468dcbabce82fca060b8e97be499d0c9d775548",
-        "size": 858
-      },
-      {
-        "path": "tests/e2e/search-fts-score.spec.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "4fe168b4b919e81ac77aed4a38d568effe19fc39995f39e96533e82d5036f609",
-        "size": 652
-      },
-      {
         "path": "tests/factories/index.ts",
         "origin": "tracked",
         "state": "present",
@@ -14573,6 +12375,13 @@
         "state": "present",
         "digest": "c4082b6e692168787d6dca874b5e6724f823bdb7eb24163d62acf4da3222f5ed",
         "size": 2492
+      },
+      {
+        "path": "tests/integration/search-fts.spec.ts",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "90832c6956f895557930d98ce676b400ef0951cb02793d1a7e6abe985ead7142",
+        "size": 3717
       },
       {
         "path": "tests/safety/prepare-worker-database.ts",
@@ -14615,13 +12424,6 @@
         "state": "present",
         "digest": "171bb5eb13470e6d043d4d8aa73113ea1ad105f56a32aa103a353f0a066ec3a6",
         "size": 1173
-      },
-      {
-        "path": "tests/unit/drizzle/media-schema-compat.spec.ts",
-        "origin": "tracked",
-        "state": "present",
-        "digest": "166d995dd5623dca6fab856042b90ebbe795c5fb4a1c8e1e8b8204c3d6b91d70",
-        "size": 1706
       },
       {
         "path": "tests/unit/entity-guards.spec.ts",
@@ -14732,16 +12534,16 @@
         "path": "vite.config.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "501e64481dded0208527b65f70b2926d7dc203161b35475e586b1ca1162d3b8f",
-        "size": 9623
+        "digest": "e1d2a467356e956fcd22b428b22e3e771d34b79e9a12adda425d4595924dd2df",
+        "size": 9502
       }
     ],
-    "digest": "0ccec9838687e3f0af774374cb2c9350b2d8772192aa3bbb8a8cd20f9a1bf381"
+    "digest": "b753b42dc2d9f9bed08e568fbe7f921acb67cebc538939b4b877e4b5e36e37df"
   },
-  "source_digest": "ae75f3550b80a0e18c529ef9c15fcdf9b593be668f699800402c85ef76b09346",
+  "source_digest": "066ac24bfc86019bcf11d1db7495ba329b00b53217e5c959165b1fa3fe0041ed",
   "artifact_hashes": {
-    "codemap.json": "09e71f0ce6989bdbca46de5188c060818f3ff66dc018807d3e7b6a7d8740ab74",
-    "codemap.md": "efc691b82c480fd9bac99ba98413cac35247a336072a1787f28e75e1b99a3b63",
-    "codemap.html": "2b081291834049c4146c870b8ab41fdc8eec4786376194dcdf061637d8b2f649"
+    "codemap.json": "271ae1dd339ff16568fbeff67d54007583c0590a314c90b3d6b7c7c71a912808",
+    "codemap.md": "693d1368f9d6dd42beb8da45814237e7e34696859d84f0c6c911b785a4ea4eb9",
+    "codemap.html": "bd4b2bf129848f304521aeb7d8148c8f1c30d2947080ccccccfe5d1253bea000"
   }
 }
