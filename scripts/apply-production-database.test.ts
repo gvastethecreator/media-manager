@@ -21,8 +21,42 @@ describe('applyProductionDatabaseMigrations', () => {
 		});
 		expect(result.applied.length).toBeGreaterThan(0);
 		expect(result.skipped).toEqual([]);
+		const runtime = Bun.spawn(
+			[
+				process.execPath,
+				'--eval',
+				`
+			const { ensureDatabaseReady, closeDatabaseGracefully } = await import('./src/lib/drizzle');
+			const { ensureFts5Ready } = await import('./src/lib/drizzle/fts5');
+			await ensureDatabaseReady();
+			await ensureFts5Ready();
+			await closeDatabaseGracefully();
+		`,
+			],
+			{
+				cwd: workspaceRoot,
+				env: { ...process.env, DATABASE_URL: pathToFileURL(databasePath).href, NODE_ENV: 'test', DISABLE_FTS5: '0' },
+				stdout: 'pipe',
+				stderr: 'pipe',
+			}
+		);
+		const [exitCode, stdout, stderr] = await Promise.all([
+			runtime.exited,
+			new Response(runtime.stdout).text(),
+			new Response(runtime.stderr).text(),
+		]);
+		expect(exitCode, `${stdout}\n${stderr}`).toBe(0);
+		const repeated = await applyProductionDatabaseMigrations({ DATABASE_URL: pathToFileURL(databasePath).href });
+		expect(repeated.applied).toEqual([]);
 		const database = new Database(databasePath, { readonly: true });
 		try {
+			expect(
+				database
+					.query(
+						"SELECT count(*) AS count FROM sqlite_schema WHERE type = 'trigger' AND name IN ('images_ai', 'images_ad', 'images_au', 'videos_ai', 'videos_ad', 'videos_au', 'audios_ai', 'audios_ad', 'audios_au', 'documents_ai', 'documents_ad', 'documents_au')"
+					)
+					.get()
+			).toEqual({ count: 12 });
 			const favorite = database.query('PRAGMA table_info("Favorite")').all() as Array<{ name: string }>;
 			expect(favorite.some((column) => column.name === 'profileId')).toBe(true);
 			expect(favorite.some((column) => column.name === 'entityType')).toBe(true);

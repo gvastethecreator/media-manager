@@ -16,6 +16,7 @@ import {
 } from '@/server/security/authorized-root-request';
 import { RootAuthorizationError } from '@/server/security/authorized-roots';
 import { sanitizeJsonResponses } from '@/server/security/sanitize-public-payload';
+import { sendEffectHttpError } from '@/server/utils/content-delivery';
 import {
 	performSearch,
 	SearchFilesResult,
@@ -257,49 +258,59 @@ router.get(
  */
 router.get(
 	'/fts',
-	effectHandler((req, res) =>
-		Effect.gen(function* () {
-			const q = typeof req.query.q === 'string' ? req.query.q : undefined;
-			const limit = sanitizeLimit(req.query.limit, 50);
-			const offset = sanitizeOffset(req.query.offset);
+	effectHandler(
+		(req, res) =>
+			Effect.gen(function* () {
+				const q = typeof req.query.q === 'string' ? req.query.q : undefined;
+				const limit = sanitizeLimit(req.query.limit, 50);
+				const offset = sanitizeOffset(req.query.offset);
 
-			if (!q || q.trim().length === 0) {
-				res.status(400).json({ error: 'El parámetro q es requerido' });
-				return undefined;
-			}
+				if (!q || q.trim().length === 0) {
+					res.status(400).json({ error: 'El parámetro q es requerido' });
+					return undefined;
+				}
 
-			const ftsRequired = process.env.SEARCH_FTS_REQUIRE === '1';
+				const ftsRequired = process.env.SEARCH_FTS_REQUIRE === '1';
 
-			const searchService = yield* SearchService;
-			const authorizedItems: SearchFilesResult['items'] = [];
-			const registry = getAuthorizedRootRegistry(req);
-			let rawOffset = 0;
-			let engine = 'like';
-			let took = 0;
-			while (true) {
-				const result = yield* searchService.searchFilesFts(q, 500, rawOffset, ftsRequired);
-				engine = result.engine;
-				took += result.took;
-				const decisions = yield* Effect.promise(() =>
-					Promise.all(
-						result.items.map(async (item) => {
-							try {
-								await registry.authorizeAbsolutePath(item.path, 'read');
-								await registry.authorizeAbsolutePath(item.path, 'index');
-								return true;
-							} catch (error) {
-								if (error instanceof RootAuthorizationError) return false;
-								throw error;
-							}
-						})
-					)
-				);
-				authorizedItems.push(...result.items.filter((_item, index) => decisions[index]));
-				rawOffset += result.items.length;
-				if (result.items.length === 0 || rawOffset >= result.total) break;
-			}
-			return { engine, took, items: authorizedItems.slice(offset, offset + limit), total: authorizedItems.length };
-		}).pipe(Effect.provide(SearchServiceLive))
+				const searchService = yield* SearchService;
+				const authorizedItems: SearchFilesResult['items'] = [];
+				const registry = getAuthorizedRootRegistry(req);
+				let rawOffset = 0;
+				let engine = 'like';
+				let took = 0;
+				while (true) {
+					const result = yield* searchService.searchFilesFts(q, 500, rawOffset, ftsRequired);
+					engine = result.engine;
+					took += result.took;
+					const decisions = yield* Effect.promise(() =>
+						Promise.all(
+							result.items.map(async (item) => {
+								try {
+									await registry.authorizeAbsolutePath(item.path, 'read');
+									await registry.authorizeAbsolutePath(item.path, 'index');
+									return true;
+								} catch (error) {
+									if (error instanceof RootAuthorizationError) return false;
+									throw error;
+								}
+							})
+						)
+					);
+					authorizedItems.push(...result.items.filter((_item, index) => decisions[index]));
+					rawOffset += result.items.length;
+					if (result.items.length === 0 || rawOffset >= result.total) break;
+				}
+				return { engine, took, items: authorizedItems.slice(offset, offset + limit), total: authorizedItems.length };
+			}).pipe(Effect.provide(SearchServiceLive)),
+		{
+			onError: (error, res) => {
+				if (error instanceof FtsNotAvailable) {
+					res.status(503).json({ error: error.message, required: true });
+				} else {
+					sendEffectHttpError(res, error);
+				}
+			},
+		}
 	)
 );
 

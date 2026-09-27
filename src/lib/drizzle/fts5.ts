@@ -5,6 +5,7 @@ const log = serverLogger.withContext('FTS5');
 
 let supported: boolean | null = null; // null = desconocido
 let initialized = false;
+let initialization: Promise<void> | null = null;
 let hardDisabled = false;
 let firstErrorLogged = false;
 
@@ -237,7 +238,7 @@ function buildBackfillFn(client: any) {
 async function createAndSeed(client: any) {
 	await client.execute(CREATE_TABLE);
 	await client.execute(INSERT_INITIAL);
-	await client.execute(TRIGGERS);
+	await client.executeMultiple(TRIGGERS);
 	supported = true;
 	initialized = true;
 	log.info('FTS5 inicializado');
@@ -257,7 +258,7 @@ function handleInitError(e: any) {
 	}
 }
 
-export async function ensureFts5Ready({ backfill = false } = {}) {
+async function initializeFts5({ backfill = false } = {}) {
 	const client = getDbClient();
 	if (!client) {
 		return;
@@ -272,6 +273,7 @@ export async function ensureFts5Ready({ backfill = false } = {}) {
 	}
 	try {
 		if (await tableExists()) {
+			await client.executeMultiple(TRIGGERS);
 			if (backfill) {
 				await buildBackfillFn(client)();
 			}
@@ -283,6 +285,11 @@ export async function ensureFts5Ready({ backfill = false } = {}) {
 	} catch (e) {
 		handleInitError(e);
 	}
+}
+
+export async function ensureFts5Ready(options = { backfill: false }) {
+	if (!initialization) initialization = initializeFts5(options);
+	await initialization;
 }
 
 export function getFts5Status() {

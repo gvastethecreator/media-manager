@@ -45,6 +45,28 @@ const FTS_TRIGGER_SQL_HASHES = new Map([
 	['videos_au', '13e316ed25a6c25157a86e0c1b1ad85a590b1b5fe42389ddadc1b0e93ac2cc9e'],
 ]);
 
+// Current runtime index. Keep the historical media_fts contract for existing libraries.
+const FILES_FTS_SQL_HASHES = new Map([
+	['table:files_fts:files_fts', '3e77aa8fc2ed5f1ba2d03004a44bbd41e3e8828644584770b330e3ddfe84a2ac'],
+	['table:files_fts_config:files_fts_config', '3ad29d0ee113f37dca21e7510a82874aee7093507d33387d6579c0f9f80944a8'],
+	['table:files_fts_content:files_fts_content', 'bcc5acc10c331c6ba81e72daea9333683295c78597b35b9f8949ebc335511c22'],
+	['table:files_fts_data:files_fts_data', '4c0d2ca2e1f88df754b0b60fb4021ec37810f13b5667b86a7f128de1f667d8fd'],
+	['table:files_fts_docsize:files_fts_docsize', '571ba040ef6b4941b8f8f4eea43a9e9037c7eab39a5ef7eb7fe3383fbc35b5af'],
+	['table:files_fts_idx:files_fts_idx', '4803cab27be24f262be4c201ea206d49c218d1c9921ef6d5627013ee031a42c2'],
+	['trigger:audios_ad:Audio', 'a36e2c52344e21b85b3a67471ec937ca83476e62bfb97d90dce55dced937c12b'],
+	['trigger:audios_ai:Audio', '1dd2b81774aa90fd15575610ce5e0f4ea9eb19a5b8fd3b8c006d5aab1c116c38'],
+	['trigger:audios_au:Audio', 'ae5994dc4fdf71a03cd81c9949b2aeaf361c60b7c2702bbc125cb2f5c6f0aa9d'],
+	['trigger:documents_ad:Document', '5d5cc93153433a0608cc6a8bc0ddbcc23a3cd9a847f89c1369cdee087098d3ba'],
+	['trigger:documents_ai:Document', 'e1ead04ed23e3e9e0d2ad2520f5d034a23374d2c5a6611d5c9e9bdd025eeda49'],
+	['trigger:documents_au:Document', '2f8459c7eb72cd73553c05f5f900767b19ed8c1bc81557dc9c79f7fc48ededed'],
+	['trigger:images_ad:Image', 'd4fc08065bc42c4a8899371c9904b46c73d46b1863bc9f51f77ce424d9e1b8eb'],
+	['trigger:images_ai:Image', 'ba265cf351a505f0d1481da77d37f5e9bdc080fbb5199aa559b74d638fefde04'],
+	['trigger:images_au:Image', '75c33b2e74ad7328b4b96b5802d4ac3bb3d100313082da656d351c3dbfb52082'],
+	['trigger:videos_ad:Video', 'f652515ed1a2be7bb5d0b5696435398a9b83764204a8710234c47b4f74f93413'],
+	['trigger:videos_ai:Video', 'c43c9e782478bb76b0d20d0c4d2443029dadc31735d06cc340038a04839229c7'],
+	['trigger:videos_au:Video', 'aab74af4a6d2730dbbd372eb388aa225dd402042a3a267a5d58173727f6517b7'],
+]);
+
 export type SchemaObject = {
 	name: string;
 	sqlHash: string;
@@ -96,23 +118,41 @@ function hash(value: string): string {
 	return createHash('sha256').update(value).digest('hex');
 }
 
-function hasValidFtsRoot(rows: SqliteSchemaRow[]): boolean {
-	const root = rows.find((row) => row.type === 'table' && row.name === 'media_fts' && row.tableName === 'media_fts');
-	return Boolean(root && hash(normalizeSql(root.sql)) === FTS_ROOT_SQL_HASH);
+function hasValidFtsRoot(rows: SqliteSchemaRow[], name = 'media_fts'): boolean {
+	const root = rows.find((row) => row.type === 'table' && row.name === name && row.tableName === name);
+	const expected = name === 'media_fts' ? FTS_ROOT_SQL_HASH : FILES_FTS_SQL_HASHES.get('table:files_fts:files_fts');
+	return Boolean(root && hash(normalizeSql(root.sql)) === expected);
 }
 
-function isFtsExtension(row: SqliteSchemaRow, validFtsRoot: boolean): boolean {
+function isFtsExtension(row: SqliteSchemaRow, validFtsRoot: boolean, validFilesFtsRoot: boolean): boolean {
+	if (
+		validFilesFtsRoot &&
+		FILES_FTS_SQL_HASHES.get(`${row.type}:${row.name}:${row.tableName}`) === hash(normalizeSql(row.sql))
+	)
+		return true;
 	if (!(validFtsRoot && FTS_EXTENSION_OBJECTS.has(`${row.type}:${row.name}:${row.tableName}`))) return false;
 	if (row.type !== 'trigger') return true;
 	return hash(normalizeSql(row.sql)) === FTS_TRIGGER_SQL_HASHES.get(row.name);
 }
 
-function isManagedObject(row: SqliteSchemaRow, validFtsRoot: boolean): boolean {
-	return row.name !== MIGRATION_TABLE && !row.name.startsWith('sqlite_') && !isFtsExtension(row, validFtsRoot);
+function isManagedObject(row: SqliteSchemaRow, validFtsRoot: boolean, validFilesFtsRoot: boolean): boolean {
+	return (
+		row.name !== MIGRATION_TABLE &&
+		!row.name.startsWith('sqlite_') &&
+		!isFtsExtension(row, validFtsRoot, validFilesFtsRoot)
+	);
 }
 
-function classifyExtra(row: SqliteSchemaRow, validFtsRoot: boolean): 'extension' | 'legacy' | 'unknown' {
-	if (row.name.startsWith('sqlite_') || row.name === MIGRATION_TABLE || isFtsExtension(row, validFtsRoot)) {
+function classifyExtra(
+	row: SqliteSchemaRow,
+	validFtsRoot: boolean,
+	validFilesFtsRoot: boolean
+): 'extension' | 'legacy' | 'unknown' {
+	if (
+		row.name.startsWith('sqlite_') ||
+		row.name === MIGRATION_TABLE ||
+		isFtsExtension(row, validFtsRoot, validFilesFtsRoot)
+	) {
 		return 'extension';
 	}
 	if (LEGACY_OBJECTS.has(row.name) || LEGACY_OBJECTS.has(row.tableName)) return 'legacy';
@@ -130,8 +170,9 @@ export function readSchemaObjects(database: Database): SchemaObject[] {
 		.all() as SqliteSchemaRow[];
 
 	const validFtsRoot = hasValidFtsRoot(rows);
+	const validFilesFtsRoot = hasValidFtsRoot(rows, 'files_fts');
 	return rows
-		.filter((row) => isManagedObject(row, validFtsRoot))
+		.filter((row) => isManagedObject(row, validFtsRoot, validFilesFtsRoot))
 		.map((row) => ({
 			name: row.name,
 			sqlHash: hash(normalizeSql(row.sql)),
@@ -175,8 +216,9 @@ export function compareSchema(database: Database, contract: SchemaContract): Sch
 		)
 		.all() as SqliteSchemaRow[];
 	const validFtsRoot = hasValidFtsRoot(rows);
+	const validFilesFtsRoot = hasValidFtsRoot(rows, 'files_fts');
 	const actualManaged = rows
-		.filter((row) => isManagedObject(row, validFtsRoot))
+		.filter((row) => isManagedObject(row, validFtsRoot, validFilesFtsRoot))
 		.map((row) => ({
 			name: row.name,
 			sqlHash: hash(normalizeSql(row.sql)),
@@ -196,7 +238,11 @@ export function compareSchema(database: Database, contract: SchemaContract): Sch
 	const expectedNames = new Set(contract.objects.map((entry) => `${entry.type}:${entry.name}`));
 	const extra = rows
 		.filter((row) => !expectedNames.has(`${row.type}:${row.name}`))
-		.map((row) => ({ classification: classifyExtra(row, validFtsRoot), name: row.name, type: row.type }));
+		.map((row) => ({
+			classification: classifyExtra(row, validFtsRoot, validFilesFtsRoot),
+			name: row.name,
+			type: row.type,
+		}));
 
 	return {
 		actualFingerprint: fingerprintSchemaObjects(
