@@ -1,109 +1,27 @@
 # Service layer
 
-Services encapsulate business logic and data access.
+Routes call services, services own Drizzle access, and transformers own DTO conversion. Import from the existing `@/` file path. Do not add barrel `index.ts` files to services, routes, or transformers.
 
-Routes call services. Server components can also call services directly.
+## Follow a request
 
-Each directory in `src/services` maps to an entity or module of the system.
+Start at the mounted route in `src/server/routes/`. Its imports identify the implementation in `src/services/` or `src/server/services/`. Some files in `src/services/`, such as `folder/folder-api.service.ts`, are HTTP clients; check the file before importing it into the renderer.
 
-Examples include `folder`, `image`, and `group`.
+Domain services cover media, organizers, worldbuilding entities, settings, and background work. Use the [API reference](../../docs/core/API-REFERENCE.md) for exposed operations. A service method or domain type does not establish that a route exists.
 
-These services expose functions such as `getFolders`, `createImage`, or `updateGroup`, depending on the entity.
+## Indexing and metadata
 
-```mermaid
-flowchart TD
-    A[Routes] --> B[Services]
-    B --> C[Drizzle/DB]
-```
+Folder reindexing enters `folder/reindex/folder-reindex.service.ts` and uses `folder/reindex/canonical-folder-reindex.ts` for canonical synchronization. Preserve authorized roots, asset identities, progress events, and per-file outcomes.
 
-## Current structure (reorganized)
+The [file entity mapper](file-entity-mapper/README.md) dispatches media processing. Metadata parsers live in `src/server/services/metadata/`; the active parser entry point is `unified-parser.service.ts`. Keep extraction separate from DTO formatting and UI state.
 
-### Base entities
+## Effect boundaries
 
-The following directories hold the base entity services:
+Existing Effect services use `Effect.try` for synchronous parsing or validation and `Effect.tryPromise` for asynchronous work. An asynchronous Drizzle callback must return a Promise; existing services use `async () => await query`. Execute or provide the Effect at the existing adapter boundary. Do not return an unevaluated Effect from a function declared to return a Promise.
 
-- `album/` - Album management
-- `file/` - Filesystem file operations
-- `folder/` - Folder management
-- `group/` - Group membership
-- `image/` - Image processing
-- `tag/` - Tag system
-- `video/` - Video processing (placeholder)
+Keep entity IDs in their domain type; do not assume every ID is a UUID. Reuse current error types and response handling instead of introducing a second conversion layer.
 
-### Organizational entities
+## Data and verification
 
-The following directories hold organizational services:
+Preserve the SQL migration history and upgrade, adoption, and recovery tooling. Removing an unused TypeScript implementation does not prove that an existing database can lose its columns or migration records.
 
-- `collection/` - Collections of items
-- `profile/` - User profiles
-
-### Content entities
-
-The following directories hold content services:
-
-- `audio/` - Audio files
-- `concept/` - Concepts and ideas
-- `document/` - Text documents
-- `file3d/` - 3D files
-- `json-file/` - JSON files
-- `note/` - Notes and annotations
-- `place/` - Places and locations
-- `workflow/` - Workflows
-- `world-item/` - World items
-
-### System services
-
-The following directories hold system services:
-
-- `settings/` - Application configuration
-- `stats/` - Statistics and metrics
-- `toast/` - Temporary notifications
-
-### Specialized services
-
-The following directories hold specialized services:
-
-- `activity/` - Activity records
-- `character/` - Characters
-- `metadata/` - File metadata
-- `property/` - Custom properties
-- `queue-job/` - Queued jobs
-- `wildcard/` - Patterns and wildcards
-
-## Structure of each service
-
-```text
-src/services/<entity>/
-├── <entity>.service.ts   # main implementation
-├── index.ts               # public exports
-└── README.md              # specific documentation (optional)
-```
-
-### Special services
-
-Some services include extra files:
-
-- `collection/events.service.ts` - Collection-specific events
-- `image/converter.service.ts` - Image conversion
-
-## Import
-
-```typescript
-// ✅ Correct - Import from the folder
-import { noteService } from '@/services/note';
-import { statsEventEmitter } from '@/services/stats';
-
-// ❌ Incorrect - Removed legacy paths
-import { noteService } from '@/services/note.service';
-import { statsEventEmitter } from '@/services/stats.service';
-```
-
-## Completed migration
-
-The following work is complete:
-
-- Move loose services into organized folders
-- Remove legacy files (`*-service-export.ts`)
-- Update exports in `index.ts`
-- Update all imports automatically (68 files)
-- Validate TypeScript errors
+Use `bun run test` for isolated domain tests and `bun run test:tooling` for the existing HTTP, migration, and runner checks. Never point tests at a personal database. Choose the public seam that observes the changed behavior and preserve failure output.

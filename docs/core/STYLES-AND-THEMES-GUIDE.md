@@ -20,7 +20,7 @@ src/styles/
 src/lib/styles/
 ├── color-tokens.ts
 └── chart-colors.ts
-src/providers/theme-provider.tsx
+src/components/ui/theme-provider.tsx
 src/components/core/theme/theme-toggle.tsx
 ```
 
@@ -50,7 +50,7 @@ src/components/core/theme/theme-toggle.tsx
 `ThemeProvider` also supports `system`, which follows the operating-system preference and persists the choice in localStorage.
 
 ```tsx
-import { ThemeProvider } from '@/providers/theme-provider';
+import { ThemeProvider } from '@/components/ui/theme-provider';
 import { ThemeToggle } from '@/components/core/theme/theme-toggle';
 import { useTheme } from '@/components/ui/theme-provider';
 ```
@@ -108,7 +108,7 @@ import {
 	getEntityColor,
 	getEntityClasses,
 	DEFAULT_ENTITY_COLOR,
-	PRESET_COLORS_HEX,
+	PRESET_COLORS_CSS,
 } from '@/lib/styles/color-tokens';
 import { CHART_COLORS, FILE_TYPE_COLORS, getChartColor } from '@/lib/styles/chart-colors';
 ```
@@ -117,12 +117,10 @@ import { CHART_COLORS, FILE_TYPE_COLORS, getChartColor } from '@/lib/styles/char
 
 ## Practices
 
-Do:
-
 - Use theme Tailwind classes and CSS variables.
 - Use `color-tokens.ts` for entity colors and `chart-colors.ts` for charts.
 - Use `color-mix(in oklch, var(--primary) 30%, transparent)` when you need opacity.
-- Use `PRESET_COLORS_HEX` and `DEFAULT_ENTITY_COLOR` for user-chosen colors stored as hex.
+- Use `PRESET_COLORS_CSS` and `DEFAULT_ENTITY_COLOR` for entity color choices. These values contain CSS variables; the deprecated `PRESET_COLORS_HEX` alias does not return hex colors.
 
 Do not:
 
@@ -150,10 +148,9 @@ Reduced-motion users get a near-zero duration:
 ## Add a theme
 
 1. Define `html[data-theme='ocean']` variables in `src/styles/themes.css`.
-2. Add `'ocean'` to the `customThemes` list in `src/providers/theme-provider.tsx`.
+2. Add `'ocean'` to the `customThemes` list in `src/components/ui/theme-provider.tsx`.
 3. Optional: add `--dt-*` overrides for that theme in `src/styles/design-tokens.css`.
-4. Optional: extend the `Theme` union in `src/lib/contexts/theme-context.tsx`.
-5. Run `bun run dev:full`, open ThemeToggle, and check contrast, entity colors, and transitions.
+4. Run `bun run dev:full`, open ThemeToggle, and check contrast, entity colors, and transitions.
 
 ## Related reading
 
