@@ -88,7 +88,7 @@ console.log();
 
 const SERVER_SRC = 'src/server/index.ts';
 const SERVER_DIR = 'src/server';
-const REQUIRED_DEPS = ['music-metadata', 'ffprobe-static'];
+const REQUIRED_DEPS = ['music-metadata'];
 const SERVER_PORT = Number(serverEnv.API_PORT || serverEnv.PORT || 4000);
 
 let serverProcess = null;
