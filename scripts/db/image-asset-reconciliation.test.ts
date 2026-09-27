@@ -229,6 +229,7 @@ describe('Image canonical copy-only backfill', () => {
 		expect(result.exitCode, result.stderr).toBe(0);
 		expect(await sha256(sourcePath)).toBe(sourceBefore);
 		expect(existsSync(outputPath)).toBe(true);
+		expect((await readdir(directory)).filter((name) => name.includes('.image-backfill-partial-'))).toEqual([]);
 		expect((await readdir(backupDirectory)).some((name) => name.endsWith('.sqlite'))).toBe(true);
 		const output = new Database(outputPath, { readonly: true });
 		expect(output.query('SELECT id, assetId FROM Image').all()).toEqual([{ assetId: 'image-cli', id: 'image-cli' }]);
