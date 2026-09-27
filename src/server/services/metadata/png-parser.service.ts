@@ -4,7 +4,7 @@
  * Soporta Automatic1111, ComfyUI, SwarmUI, Midjourney y otros engines
  */
 
-// Reemplazo mínimo: lector interno de chunks PNG para evitar dependencia rota de 'png-itxt'
+// Read PNG text chunks directly.
 function readPngChunks(buffer: Buffer): Array<{ type: string; data: Buffer }> {
 	const chunks: Array<{ type: string; data: Buffer }> = [];
 	try {
@@ -98,7 +98,7 @@ export async function extractPngTextChunks(buffer: Buffer): Promise<PngChunksRes
 	try {
 		logger.info('🖼️ PNG PARSER: Iniciando extracción de text chunks', { bufferSize: buffer.length });
 
-		// Usar png-itxt para extraer chunks
+		// Extract PNG text chunks.
 		const chunks = readPngChunks(buffer);
 		const textChunks: PngTextChunk[] = [];
 
