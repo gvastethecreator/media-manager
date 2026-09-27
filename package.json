@@ -28,7 +28,7 @@
 		"format:check": "bun scripts/run-with-log.js oxfmt-check vp fmt --check",
 		"lint": "bun scripts/run-with-log.js oxlint vp lint",
 		"lint:fix": "bun scripts/run-with-log.js oxlint-fix vp lint --fix",
-		"tsc": "bun scripts/run-with-log.js tsc bunx tsc --noEmit --pretty",
+		"tsc": "bun scripts/run-with-log.js tsc bunx tsc --noEmit --incremental false --pretty",
 		"test": "bun scripts/run-with-log.js test bun scripts/run-tests-isolated.ts --run --silent=true",
 		"test:watch": "bun scripts/run-with-log.js test-watch bun scripts/run-tests-isolated.ts",
 		"test:ci": "bun scripts/run-with-log.js test-ci bun scripts/run-tests-isolated.ts --run --coverage --silent=true",

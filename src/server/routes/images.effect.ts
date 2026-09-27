@@ -45,7 +45,7 @@ const rejectImagePlacementMutation: express.RequestHandler = (req, res, next) =>
 	}
 	next();
 };
-const authorizeImageRestore: express.RequestHandler = async (req, res, next) => {
+const authorizeImageRestore: express.RequestHandler<{ id: string }> = async (req, res, next) => {
 	try {
 		const registry = getAuthorizedRootRegistry(req);
 		for (const permission of ['read', 'write'] as const) {
