@@ -19,9 +19,10 @@ Routes outside `/api`:
 Operational state, metrics, and system utilities:
 
 - `GET /api/system/*`
-- `GET /api/stats`
 - `GET /api/activity`
 - `GET /api/queue/*`
+
+Global `/api/stats/*` and `/api/system/stats` requests return `410` with `AUTHORIZED_SCOPE_REQUIRED`. Global aggregates remain unavailable until they can respect authorized media roots.
 
 ## Folders
 
@@ -35,7 +36,6 @@ Base: `/api/folders`
 - `PUT /:id`
 - `DELETE /:id`
 - `GET /:id/ancestors`
-- `POST /:id/favorite`
 - `GET /:id/files`
 - `GET /:id/files/stats`
 - `GET /:id/preview`
@@ -57,9 +57,7 @@ Base: `/api/images`
 - `POST /`
 - `GET /:id/stats`
 - `PATCH /:id`
-- `POST /:id/favorite`
 - `POST /:id/tags`
-- `POST /batch/favorite`
 - `DELETE /:id`
 - `DELETE /batch`
 - `POST /:id/thumbnail/generate`
@@ -94,8 +92,6 @@ Endpoints in `audios.effect.ts`:
 - `GET /:id`
 - `GET /:id/stats`
 - `POST /`
-- `POST /:id/favorite`
-- `POST /batch/favorite`
 - `PATCH /:id`
 - `DELETE /:id`
 - `DELETE /batch`
@@ -226,7 +222,7 @@ Base: `/api/search`
 - `GET /images`
 - `GET /fts`
 
-Search supports global search by query, image-specific search, and FTS search over files.
+Search supports global search by query, image-specific search, and FTS search over files. The FTS response contains `items`, `total`, and `engine`. FTS results include a numeric `score` in ascending ranking order. `DISABLE_FTS5=1` selects the LIKE fallback; `SEARCH_FTS_REQUIRE=1` returns `503` with `required: true` when FTS is unavailable. Results remain filtered by root permissions.
 
 ## Metadata and thumbnails
 
@@ -235,7 +231,7 @@ Search supports global search by query, image-specific search, and FTS search ov
 - `/api/metadata`
 - `/api/metadata-advanced`
 
-Operations include point or bulk update and advanced extraction or diagnosis from a path or object.
+`PUT /api/metadata/:id` updates one record. `PUT /api/metadata/bulk-update` accepts `{ updates: [{ id, data }] }` and returns `{ updated, errors }`. Advanced extraction and diagnosis remain under `/api/metadata-advanced`.
 
 ### Thumbnails
 
@@ -253,7 +249,9 @@ The preview system is split. Not every preview comes from the same router.
 - Profiles: `/api/profiles`
 - Events: `/api/events`
 
-`GET /stream` supports SSE.
+Use `POST /api/favorites/toggle` with `{ entityType, entityId }`, or `PUT /api/favorites/state` with an explicit `isFavorite` value. Former entity-specific `/:id/favorite` and `/batch/favorite` routes return `410` and identify `/api/favorites/toggle` as their successor.
+
+`GET /api/events/stream` supports SSE.
 
 ## Reindex and operational logs
 
