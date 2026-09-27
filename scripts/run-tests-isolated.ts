@@ -791,6 +791,7 @@ async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, director
 	const handshakeNonce = randomUUID();
 	const readyPath = resolve(testRoot, `.test-delete-ready-${handshakeNonce}`);
 	const controlPath = resolve(testRoot, `.test-delete-control-${handshakeNonce}`);
+	const pendingControlPath = `${controlPath}.tmp`;
 	let deleter: ReturnType<typeof Bun.spawn> | undefined;
 	try {
 		const helperKind: NativeHelperKind = process.platform === 'win32' ? 'windows-test-job' : 'posix-test-tree';
@@ -836,7 +837,8 @@ async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, director
 			interlockPassed = false;
 			console.error(`Borrado bloqueado por el interlock de identidad: ${String(error)}`);
 		}
-		await writeFile(controlPath, interlockPassed ? 'delete' : 'abort', 'utf8');
+		await writeFile(pendingControlPath, interlockPassed ? 'delete' : 'abort', 'utf8');
+		await rename(pendingControlPath, controlPath);
 		const deleterExitCode = await waitForNativeHelperExit(deleter, 30_000);
 		if (deleterExitCode === undefined) {
 			if (process.platform === 'win32') {
@@ -861,6 +863,7 @@ async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, director
 	} finally {
 		await rm(readyPath, { force: true });
 		await rm(controlPath, { force: true });
+		await rm(pendingControlPath, { force: true });
 	}
 }
 
@@ -1218,6 +1221,7 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 	};
 	let child: ReturnType<typeof Bun.spawn> | undefined;
 	let childTreeStopped = true;
+	let exitCode = 1;
 
 	try {
 		await writeTestRunMarker(markerPath, marker);
@@ -1320,34 +1324,36 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 					nativeChildProcessId
 				);
 				childTreeStopped = completion.stopped;
-				return completion.stopped ? completion.exitCode : 1;
-			}
+				exitCode = completion.stopped ? completion.exitCode : 1;
+			} else {
+				const result = await Promise.race([
+					child.exited.then(() => ({ kind: 'helper' as const })),
+					ownerChannel.disconnected.then(() => ({ kind: 'owner' as const })),
+				]);
+				debugWindowsJob(`evento terminal recibido (${result.kind})`);
+				if (result.kind === 'owner') {
+					await writeFile(nativeTreeStopPath, config.cleanupNonce, 'utf8');
+				}
 
-			const result = await Promise.race([
-				child.exited.then(() => ({ kind: 'helper' as const })),
-				ownerChannel.disconnected.then(() => ({ kind: 'owner' as const })),
-			]);
-			debugWindowsJob(`evento terminal recibido (${result.kind})`);
-			if (result.kind === 'owner') {
-				await writeFile(nativeTreeStopPath, config.cleanupNonce, 'utf8');
+				const completion = await confirmNativeTreeCompletion(
+					child,
+					nativeTreeStatusPath,
+					config.cleanupNonce,
+					nativeChildProcessId
+				);
+				debugWindowsJob(`confirmación leída (${completion.stopped})`);
+				childTreeStopped = completion.stopped;
+				exitCode = result.kind === 'owner' ? 143 : completion.stopped ? completion.exitCode : 1;
 			}
-
-			const completion = await confirmNativeTreeCompletion(
-				child,
-				nativeTreeStatusPath,
-				config.cleanupNonce,
-				nativeChildProcessId
+		} else {
+			childTreeStopped = false;
+			throw new Error(
+				`No hay contención durable del árbol de tests para ${process.platform}; el run queda preservado.`
 			);
-			debugWindowsJob(`confirmación leída (${completion.stopped})`);
-			childTreeStopped = completion.stopped;
-			return result.kind === 'owner' ? 143 : completion.stopped ? completion.exitCode : 1;
 		}
-
-		childTreeStopped = false;
-		throw new Error(`No hay contención durable del árbol de tests para ${process.platform}; el run queda preservado.`);
 	} catch (error) {
 		console.error(`Supervisor de tests falló: ${String(error)}`);
-		return 1;
+		exitCode = 1;
 	} finally {
 		if (child && !childTreeStopped) {
 			childTreeStopped = await stopNativeHelperAsFallback(child);
@@ -1355,6 +1361,7 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 
 		if (!childTreeStopped) {
 			console.error(`Cleanup bloqueado: el árbol de tests no confirmó su cierre para ${runDirectory}`);
+			if (exitCode === 0) exitCode = 1;
 		} else {
 			debugWindowsJob('iniciando cleanup');
 			const cleanupResult = await cleanupSupervisorRun(
@@ -1372,9 +1379,11 @@ async function runIsolatedTestSupervisor(config: TestRunSupervisorConfig): Promi
 				debugWindowsJob('cleanup terminado');
 			} else {
 				console.error(`Cleanup bloqueado para el run de tests: ${runDirectory}`);
+				if (exitCode === 0) exitCode = 1;
 			}
 		}
 	}
+	return exitCode;
 }
 
 function encodeSupervisorConfig(config: TestRunSupervisorConfig): string {

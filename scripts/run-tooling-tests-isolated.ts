@@ -3,6 +3,12 @@
 import { runIsolatedCommand } from './run-tests-isolated';
 
 const toolingTestFiles = [
+	'scripts/run-tests-isolated.test.ts',
+	'scripts/debug-route-safety.test.ts',
+	'scripts/http-input-limits.test.ts',
+	'scripts/thumbnail-global-retirement-http.test.ts',
+	'scripts/uploaded-images-retirement-http.test.ts',
+	'scripts/db/canonical-asset-schema.test.ts',
 	'scripts/safety-contracts.test.ts',
 	'scripts/favorite-public-cutover.test.ts',
 	'scripts/taxonomy-artifact-http.test.ts',
@@ -59,8 +65,22 @@ const toolingTestFiles = [
 const requestedTestFiles = process.argv.slice(2);
 const selectedTestFiles = requestedTestFiles.length > 0 ? requestedTestFiles : toolingTestFiles;
 
-const exitCode = await runIsolatedCommand({
-	command: [process.execPath, 'test', '--timeout', '120000', ...selectedTestFiles],
-});
+// These lifecycle tests own their databases and deliberately corrupt the native helper cache.
+// They cannot run inside another supervisor that is using that executable.
+const supervisorTest = 'scripts/run-tests-isolated.test.ts';
+if (selectedTestFiles.includes(supervisorTest)) {
+	const child = Bun.spawn([process.execPath, 'test', '--timeout', '120000', supervisorTest], {
+		stdin: 'inherit',
+		stdout: 'inherit',
+		stderr: 'inherit',
+	});
+	const exitCode = await child.exited;
+	if (exitCode !== 0) process.exit(exitCode);
+}
 
-process.exitCode = exitCode;
+const isolatedFiles = selectedTestFiles.filter((file) => file !== supervisorTest);
+if (isolatedFiles.length > 0) {
+	process.exitCode = await runIsolatedCommand({
+		command: [process.execPath, 'test', '--timeout', '120000', ...isolatedFiles],
+	});
+}

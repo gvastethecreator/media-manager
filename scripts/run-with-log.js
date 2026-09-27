@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { spawn } from 'child_process';
 import { copyFileSync, createWriteStream, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { cleanOldLogs, generatePostExecutionSummary } from './logging-utils.js';
+import { generatePostExecutionSummary } from './logging-utils.js';
 
 // Regex extraídos a nivel superior (performance + lint)
 const RE_CANNOT_FIND_MODULE = /Cannot find module/;
@@ -86,14 +86,6 @@ const isTolerantCommand = process.env.RUN_WITH_LOG_TOLERANT === '1';
 const logsDir = join(process.cwd(), 'logs');
 if (!existsSync(logsDir)) {
 	mkdirSync(logsDir, { recursive: true });
-}
-
-try {
-	await cleanOldLogs();
-} catch (error) {
-	console.warn(
-		chalk.yellow(`⚠️  No se pudieron rotar logs antiguos: ${error instanceof Error ? error.message : String(error)}`)
-	);
 }
 
 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
