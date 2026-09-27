@@ -3,6 +3,7 @@
 import { runIsolatedCommand } from './run-tests-isolated';
 
 const toolingTestFiles = [
+	'scripts/metadata-http.test.ts',
 	'scripts/run-tests-isolated.test.ts',
 	'scripts/debug-route-safety.test.ts',
 	'scripts/http-input-limits.test.ts',
