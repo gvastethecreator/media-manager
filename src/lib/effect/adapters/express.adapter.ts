@@ -7,7 +7,7 @@
 
 import { Effect, Either } from 'effect';
 import type { NextFunction, Request, Response } from 'express';
-import type { RequestHandler } from 'express-serve-static-core';
+import type { ParamsDictionary, ParamsFlatDictionary, RequestHandler } from 'express-serve-static-core';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { sanitizePublicPayload } from '@/server/security/sanitize-public-payload';
 import { runPromise, runPromiseEither } from '../runtime/runtime';
@@ -294,16 +294,16 @@ function respondWithMappedError(
  * ));
  * ```
  */
-export const effectHandler = <A, E>(
-	fn: (req: Request, res: Response) => Effect.Effect<A, E, never>,
+export const effectHandler = <A, E, P extends ParamsDictionary = ParamsFlatDictionary>(
+	fn: (req: Request<P>, res: Response) => Effect.Effect<A, E, never>,
 	options?: {
 		/** Handler de éxito personalizado */
 		onSuccess?: (data: A, res: Response) => void;
 		/** Handler de error personalizado */
 		onError?: (error: E, res: Response) => void;
 	}
-): RequestHandler => {
-	const handler = async (req: Request, res: Response, next: NextFunction) => {
+): RequestHandler<P> => {
+	const handler = async (req: Request<P>, res: Response, next: NextFunction) => {
 		try {
 			const effect = fn(req, res);
 			const outcome = await runPromiseEither(effect);
@@ -334,7 +334,7 @@ export const effectHandler = <A, E>(
 			respondWithMappedError(error, res, 'Effect handler defect', { method: req.method });
 		}
 	};
-	return handler as RequestHandler;
+	return handler as RequestHandler<P>;
 };
 
 /**
