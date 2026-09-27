@@ -1,90 +1,50 @@
 # Frontend guide
 
-The UI is a dense workspace for large libraries. It is not a landing page and not a minimal CRUD app. The shell splits navigation, content, and detail.
+The workspace separates navigation, content, and details. Preserve large-library browsing, visible loading and error states, and consistent controls across the shell, toolbar, and panels.
 
-```mermaid
-flowchart LR
-    A[Left panel] --> B[Central work area]
-    B --> C[Contextual toolbar]
-    B --> D[Active view]
-    D --> E[Right panel / details]
-```
+## Entry points
 
-Preserve these qualities when the UI changes:
+`src/main.tsx` mounts `AppShell` and loads global styles. The shell handles desktop readiness and recovery before opening `App.tsx` and the router.
 
-- consistency among shell, toolbar, and panels
-- tokens instead of hardcoded colors
-- a clear split among navigation, content, and detail
-- support for large libraries
-- visible system state (loading, errors, reindex, missing previews)
+`src/providers/app-provider.tsx` composes `ThemeProvider` from `components/ui`, `SettingsProvider`, `ThemeSync`, `QueryProvider`, and `Toaster`. TanStack Query owns server response caching.
 
-## Boot sequence
+`src/router.tsx` defines the routes and eager or lazy views. Start there, then follow the view's imports. `App.tsx` also installs tooltips, view transitions, error handling, catalog bootstrap, and SSE refresh.
 
-```mermaid
-flowchart TD
-    A[main.tsx] --> B[AppShell]
-    B --> C[AppProvider]
-    C --> D[Desktop readiness and recovery]
-    D --> E[App.tsx and RouterProvider]
-    E --> F[MainLayout and views]
-```
+## Component ownership
 
-`main.tsx` mounts `AppShell` and loads global styles. The shell handles desktop readiness and restore before opening the application.
-
-`AppProvider` owns the single `ThemeProvider` from `components/ui`, `SettingsProvider`, `ThemeSync`, `QueryProvider`, and `Toaster`.
-
-`App.tsx` adds tooltips, view transitions, development inspection, feedback, error handling, catalog bootstrap, SSE refresh, and routing.
-
-The file browser owns its navigation, selection, and view state through its current hooks and stores. TanStack Query owns server response caching.
-
-## Routing
-
-Configuration lives in `src/router.tsx`. `MainLayout` wraps the app. Routes mix eager and lazy views by domain, with wrappers for hierarchical folders and entity detail.
-
-View families include dashboard, development, folders, all-files, all-images, videos, audios, documents, json-files, file3d, favorites, collections, albums, groups, tags, characters, places, world-items, concepts, wildcards, prompts, notes, properties, search, and settings.
-
-## Component organization
-
-| Path | Role |
+| Path | Responsibility |
 | --- | --- |
-| `src/components/ui/` | Primitives and wrappers: buttons, dialogs, tooltips, toaster, UI providers, accessibility |
-| `src/components/layout/` | Application shell and panels |
-| `src/components/features/file-browser/` | Folder routes, hierarchical navigation, exploration, selection |
-| `src/components/features/file-viewer/` | Per-type viewing and viewer stores |
-| `src/components/views/` | Product pages. Each folder is one section |
+| `src/components/layout/` and `panels/` | Workspace layout, navigation, and details |
+| `src/components/views/` | Route-level pages and entity views |
+| `src/components/features/file-browser/` | Browsing, navigation, selection, and view modes |
+| `src/components/features/file-viewer/` | Media display, focus, and viewer controls |
+| `src/components/cards/` | Entity cards; use each component's current props |
+| `src/components/settings/` | Settings views and their active hooks |
+| `src/components/ui/` | Shared controls, dialogs, tooltips, and accessibility |
+| `src/components/forms/` | Form controls and entity inputs |
 
-## Client state
+Use current component and domain types instead of copying an old entity example. The [tag input guide](../../src/components/ui/tag/README.md) covers its required provider composition; the [viewer guide](../../src/components/features/file-viewer/README.md) identifies media rendering entry points.
 
-Zustand stores live in `src/store/`: `ui.store.ts`, `selection.store.ts`, `search.store.ts`, `reindex.store.ts`, `thumbnails.store.ts`, `file-view.store.ts`, `details-panel.store.ts`, `entity-catalog-store.ts`, and per-entity stores in `entities/`.
+## Layout and keyboard behavior
 
-TanStack Query, through `QueryProvider`, caches responses, invalidates queries, and syncs server state. Devtools are available in development.
+Virtualized grids require a measurable container. Their layout ancestors must provide full size, a shrinking flex child, and a column layout: `h-full w-full min-h-0 min-w-0 flex-1 flex flex-col`. Inspect CentralPanel, ResizablePanel, and PanelGroup when a new wrapper produces zero width or a stuck skeleton. Document exceptions and check the rendered grid.
 
-Contexts also live in `src/providers/`, `src/lib/contexts/`, and `src/components/ui/`.
+FileBrowser navigation uses `features/file-browser/hooks/use-keyboard.ts`. Shared shortcut registration lives separately in [the keyboard module](../../src/lib/keyboard/README.md). A configured shortcut alone does not prove that a product action is connected.
 
-## Visual system
+## State and data
 
-Styles load from `src/styles/app-globals.css`, `globals.css`, `scrollbar.css`, `selecto.css`, and `view-transition.css`. Tokens live in `tokens.css` and `design-tokens.css`.
+Use [Zustand stores](../../src/store/README.md) for existing UI and entity state. Check whether the affected flow uses a store, Query, or both before changing it. Keep selection and view preferences with their current owners.
 
-The app supports multiple custom themes and resolves the system theme. See [`STYLES-AND-THEMES-GUIDE.md`](./STYLES-AND-THEMES-GUIDE.md).
+The renderer uses `/api` over HTTP. It has no Node API, `ipcRenderer`, or generic invoke bridge. SSE refreshes navigation and progress; preview, thumbnail, and original routes serve media. `EntityCatalogBootstrapper` loads the entity catalog, and `useNavigationRefresh` responds to server changes.
 
-## Backend interaction
+The client must not send raw filesystem paths. Move assets through `POST /api/files/assets/move` with `targetFolderId`. Preserve authorization and partial-success or recovery states. Do not expose undo, redo, pause, or cancel without a server mutation and durable compensation. See the [API reference](API-REFERENCE.md).
 
-The frontend talks to the backend through HTTP and the Query client, stores and hooks, SSE for refresh and progress, and preview, thumbnail, and original routes.
+## Styles
 
-`EntityCatalogBootstrapper` preloads the entity catalog. `useNavigationRefresh` syncs navigation after server-side changes. Lazy routes keep the initial bundle smaller.
+Use semantic tokens and the existing theme provider. [Styles and themes](STYLES-AND-THEMES-GUIDE.md) covers colors and theme registration; [animations](../guides/ANIMATIONS-GUIDE.md) describes the current motion implementation and its limits.
 
-## Testing
+## Verification
 
-Frontend tests use Vitest, jsdom, Testing Library, and `tests/setup.ts`. Setup includes `@testing-library/jest-dom/vitest`, `ResizeObserver`, `requestAnimationFrame`, `IntersectionObserver`, `matchMedia`, and SQLite pragmas for the test environment.
+Reuse the affected tests. `bun run test` isolates databases; frontend cases use Vitest, jsdom, Testing Library, and `tests/setup.ts`.
 
-## How to change the frontend
-
-1. Start at `router.tsx` and the involved view.
-2. Decide whether the change lives in `components/views`, `features`, `store`, or `providers`.
-3. Check whether the data comes from Query, Zustand, or both.
-4. Confirm whether preview, thumbnail, or SSE already covers the flow.
-
-## Related reading
-
-- [`./STYLES-AND-THEMES-GUIDE.md`](./STYLES-AND-THEMES-GUIDE.md)
-- [`./API-REFERENCE.md`](./API-REFERENCE.md)
+For UI behavior, exercise the real route in a browser. Verify navigation, selection, settings, loading and error states, and any affected server mutation. A first-paint screenshot does not prove the flow. Use `bun run test:e2e` for the existing browser suite when that scope is needed.

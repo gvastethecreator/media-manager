@@ -2,6 +2,8 @@
 
 Local development API: `http://localhost:4000/api`. Responses are JSON, binaries (originals and thumbnails), preview SVG, or SSE on specific endpoints.
 
+This page describes exposed route families. Resolve exact payloads and status codes from the mounted module in `src/server/routes/` and its existing HTTP tests. A method in a service is not automatically a public endpoint.
+
 ## Base URL and conventions
 
 - Local server: `http://localhost:4000`
@@ -277,6 +279,10 @@ These routes help development and diagnosis. They are not the product API:
 - `/api/debug`
 - `/api/debug-entity-types`
 - `/api/test-characters`
+
+## Types and service boundaries
+
+Routes call services; services own Drizzle access; transformers own DTO conversion. Import the current entity contracts from `src/types/entities/<entity>/types.ts` and the existing schema files where present. Do not import legacy database types or assume that all entity families expose the same enriched shape. Preserve domain IDs, nullable fields, and serialization at the active route boundary.
 
 ## Consumer conventions
 

@@ -38,9 +38,7 @@ The captures below come from the local application with an empty, privacy-safe l
 
 ## Current status
 
-- The user-facing application, validation messages, recovery states, and primary error paths are English.
 - Bun 1.4.0 owns installation, scripts, the server runtime, and the lockfile.
-- Direct dependencies are current according to `bun outdated`.
 - React 19, TypeScript 7, React Router 7, Vite 8, Express 5, Effect, Drizzle ORM, and SQLite/libsql form the main stack.
 - Windows, macOS, and Linux can run the local web application.
 - The desktop shell is Electron on Windows x64. Signing and macOS installers are not claimed.
@@ -50,7 +48,7 @@ The captures below come from the local application with an empty, privacy-safe l
 
 Requirements:
 
-- Bun 1.4.0 or newer
+- Bun 1.4.0, matching the repository and CI pin
 - Node.js 20 or newer for auxiliary tooling
 - Optional FFmpeg support for selected thumbnail and metadata flows
 
@@ -110,14 +108,18 @@ Start with these references when you change a major subsystem:
 - [`docs/core/FRONTEND-GUIDE.md`](docs/core/FRONTEND-GUIDE.md)
 - [`docs/core/API-REFERENCE.md`](docs/core/API-REFERENCE.md)
 - [`docs/core/STYLES-AND-THEMES-GUIDE.md`](docs/core/STYLES-AND-THEMES-GUIDE.md)
+- [Service boundaries and indexing](src/services/README.md)
+- [Generated code map](docs/codemap/codemap.md)
 
 ## Security and data boundaries
 
 - Filesystem mutations use authorized media roots and canonical asset identities.
 - Recovery and partial-success states must remain visible to the user.
 - The test runner refuses to start without an isolated disposable database.
-- Dependency overrides in `package.json` pin patched transitive releases when an upstream range still resolves a vulnerable version.
+- Dependency overrides in `package.json` control transitive versions; review them with their consumers when changing dependencies.
 - Do not commit personal databases, uploads, generated logs, or private library paths.
+
+Keep SQL migration history intact. Database adoption, upgrade, and recovery remain necessary for existing libraries; use an explicit disposable database for migration checks.
 
 ## Contributing
 
