@@ -51,7 +51,7 @@ export async function searchFilesFts(query: string, limit = 50, offset = 0): Pro
 		}
 		const match = query.replace(/"/g, '');
 		const querySql =
-			'SELECT f.id, f.name, f.path, f.tags, bm25(files_fts) as score FROM files_fts ft JOIN File f ON f.rowid = ft.rowid WHERE ft MATCH ? ORDER BY score LIMIT ? OFFSET ?';
+			'SELECT f.id, f.name, f.path, f.tags, bm25(files_fts) as score FROM files_fts ft JOIN File f ON f.id = ft.entity_id AND f.fileType = ft.entity_type WHERE files_fts MATCH ? ORDER BY score LIMIT ? OFFSET ?';
 		const result = await client.execute({ sql: querySql, args: [match, limit, offset] });
 		rows = result.rows.map((r: any) => ({
 			id: String(r[0]),
