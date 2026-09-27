@@ -1,15 +1,15 @@
 # Code map: media-manager
 
-Generated: 2026-09-09T17:03:24Z | Commit: `2f24acfca626` | Schema: 2
-Generation: `2708501f1155f82bfcfd139c2506bb9a2b37d4960b915bc0c6bae4a515d1f6b5`
+Generated: 2026-09-27T22:53:18Z | Commit: `0bb623bb1101` | Schema: 2
+Generation: `0a935a92b51085c024dcaf0ee9765a39a8e887c78cd13c81a2885aebc1d6a260`
 Scope: . | Inventory: working-tree
-Nodes: 2171 | Edges: 12051 | Flows: 5
+Nodes: 1912 | Edges: 11067 | Flows: 5
 
 ## Coverage
 
-- Analysis: **partial**; 2030 analyzed of 2099 included files.
+- Analysis: **partial**; 1776 analyzed of 1785 included files.
 - Configuration files: 2; omitted untracked files: 0.
-- Unresolved references and analysis limits: 11809.
+- Unresolved references and analysis limits: 9703.
 - Static references and call paths do not prove runtime execution or test coverage.
 
 ## Modules
@@ -17,7 +17,7 @@ Nodes: 2171 | Edges: 12051 | Flows: 5
 - `docs/site.js` | module | Repository | callers: none | callees: none | tests: 0 | entry: none
 - `drizzle.config.ts` | module | Repository | callers: none | callees: external:javascript:dotenv, external:javascript:drizzle-kit, external:javascript:drizzle-kit | tests: 0 | entry: none
 - `electron/main/data-dir.ts` | module | Repository | callers: electron/main/index.ts, electron/main/index.ts, electron/main/supervisor.ts, electron/main/supervisor.ts | callees: external:javascript:node:fs, external:javascript:node:fs, external:javascript:node:path, external:javascript:node:path | tests: 1 | entry: none
-- `electron/main/data-migrate-marker.ts` | module | Repository | callers: electron/main/data-migrate.ts, electron/main/data-migrate.ts, electron/main/restore-source.ts, electron/main/restore-source.ts | callees: electron/main/migration-marker.ts, external:javascript:node:fs, external:javascript:node:fs, external:javascript:node:path | tests: 0 | entry: none
+- `electron/main/data-migrate-marker.ts` | module | Repository | callers: electron/main/data-migrate.ts, electron/main/data-migrate.ts, electron/main/restore-source.ts, electron/main/restore-source.ts | callees: electron/main/migration-marker.ts, external:javascript:node:fs, external:javascript:node:fs, external:javascript:node:path | tests: 1 | entry: none
 - `electron/main/data-migrate.ts` | module | Repository | callers: scripts/desktop-data-migrate.test.ts, scripts/desktop-data-migrate.test.ts | callees: electron/main/data-migrate-marker.ts, electron/main/data-migrate-marker.ts, electron/main/migration-marker.ts, external:javascript:bun:sqlite | tests: 1 | entry: none
 - `electron/main/desktop-log.ts` | module | Repository | callers: electron/main/index.ts, electron/main/index.ts | callees: external:javascript:node:fs, external:javascript:node:fs, external:javascript:node:path, external:javascript:node:path | tests: 0 | entry: none
 - `electron/main/index.ts` | module | Repository | callers: none | callees: electron/main/data-dir.ts, electron/main/data-dir.ts, electron/main/desktop-log.ts, electron/main/desktop-log.ts | tests: 0 | entry: none
@@ -30,11 +30,11 @@ Nodes: 2171 | Edges: 12051 | Flows: 5
 - `electron/preload/index.ts` | module | Repository | callers: none | callees: electron/shared/desktop-api.ts, electron/shared/ipc-contract.ts, external:javascript:electron, external:javascript:node:module | tests: 0 | entry: none
 - `electron/shared/desktop-api.ts` | module | Repository | callers: electron/preload/index.ts | callees: electron/shared/ipc-contract.ts | tests: 0 | entry: none
 - `electron/shared/ipc-contract.ts` | module | Repository | callers: electron/main/index.ts, electron/main/index.ts, electron/main/security.ts, electron/main/security.ts | callees: none | tests: 1 | entry: none
-- `external:javascript:@dnd-kit/core` | external | External | callers: src/components/ui/data-grid-table-dnd-rows.tsx, src/components/ui/data-grid-table-dnd-rows.tsx, src/components/ui/data-grid-table-dnd.tsx, src/components/ui/data-grid-table-dnd.tsx | callees: none | tests: 0 | entry: none
-- `external:javascript:@dnd-kit/modifiers` | external | External | callers: src/components/ui/data-grid-table-dnd-rows.tsx, src/components/ui/data-grid-table-dnd.tsx | callees: none | tests: 0 | entry: none
-- `external:javascript:@dnd-kit/sortable` | external | External | callers: src/components/ui/data-grid-table-dnd-rows.tsx, src/components/ui/data-grid-table-dnd-rows.tsx, src/components/ui/data-grid-table-dnd.tsx, src/components/ui/data-grid-table-dnd.tsx | callees: none | tests: 0 | entry: none
-- `external:javascript:@dnd-kit/utilities` | external | External | callers: src/components/ui/data-grid-table-dnd-rows.tsx, src/components/ui/data-grid-table-dnd.tsx | callees: none | tests: 0 | entry: none
-- Showing 20 of 2171 nodes. Query `impact --module <path>` or open the HTML hierarchy for the rest.
+- `external:csharp:System` | external | External | callers: scripts/windows-test-job.cs | callees: none | tests: 0 | entry: none
+- `external:javascript:@electron/packager` | external | External | callers: scripts/desktop-package.ts | callees: none | tests: 0 | entry: none
+- `external:javascript:@gsap/react` | external | External | callers: src/components/settings/common/entity-settings-view.tsx, src/components/settings/common/entity-settings-view.tsx, src/components/settings/modern/files-settings-modern.tsx, src/components/settings/modern/files-settings-modern.tsx | callees: none | tests: 0 | entry: none
+- `external:javascript:@headless-tree/core` | external | External | callers: src/components/ui/tree.tsx | callees: none | tests: 0 | entry: none
+- Showing 20 of 1912 nodes. Query `impact --module <path>` or open the HTML hierarchy for the rest.
 
 ## Edges
 
@@ -88,7 +88,7 @@ Nodes: 2171 | Edges: 12051 | Flows: 5
 - `electron/main/index.ts` -> `external:javascript:node:fs` | imports
 - `electron/main/index.ts` -> `external:javascript:node:module` | calls
 - `electron/main/index.ts` -> `external:javascript:node:module` | imports
-- Showing 50 of 12051 edges; JSON contains every edge and its evidence.
+- Showing 50 of 11067 edges; JSON contains every edge and its evidence.
 
 ## Unknown
 
@@ -115,7 +115,7 @@ Nodes: 2171 | Edges: 12051 | Flows: 5
 
 ## Architecture changes
 
-- Nodes: +60 / -60; edges: +541 / -541.
+- Nodes: +0 / -0; edges: +0 / -0.
 - Boundary changes: 0; new cycles: 0.
 
 ## Read next
