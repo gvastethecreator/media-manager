@@ -1,11 +1,18 @@
 #!/usr/bin/env bun
 
 import { Database } from 'bun:sqlite';
-import { readFile, rm } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { link, readFile, rm, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { backfillImageAssets, type ImageRootMapping, validateImageRootMappings } from './image-asset-reconciliation';
 import { upgradeDatabase } from './upgrade';
+
+async function removeDatabaseArtifacts(databasePath: string): Promise<void> {
+	for (const path of [databasePath, `${databasePath}-shm`, `${databasePath}-wal`, `${databasePath}-journal`]) {
+		await rm(path, { force: true, maxRetries: 40, retryDelay: 100 });
+	}
+}
 
 async function readAppVersion(): Promise<string> {
 	const packageJson = JSON.parse(await readFile(resolve(process.cwd(), 'package.json'), 'utf8')) as {
@@ -34,31 +41,37 @@ async function run(): Promise<void> {
 	const roots = await validateImageRootMappings(
 		JSON.parse(await readFile(resolve(values.roots), 'utf8')) as ImageRootMapping[]
 	);
+	const outputPath = resolve(values.output);
+	if (await stat(outputPath).catch(() => null)) {
+		throw new Error(`La salida final ya existe y no será sobrescrita: ${outputPath}`);
+	}
+	const stagingOutputPath = `${outputPath}.image-backfill-partial-${randomUUID().slice(0, 8)}`;
 	const upgraded = await upgradeDatabase({
 		appVersion: await readAppVersion(),
 		backupDirectory: values['backup-dir'],
 		databasePath: values.database,
-		outputPath: values.output,
+		outputPath: stagingOutputPath,
 		rootReferences: roots.map((root) => root.id),
 		workspaceRoot: process.cwd(),
 	});
-	const database = new Database(upgraded.outputPath, { strict: true });
-	database.exec('PRAGMA foreign_keys = ON');
+	let database: Database | undefined;
 	try {
+		database = new Database(upgraded.outputPath, { strict: true });
+		database.exec('PRAGMA foreign_keys = ON');
 		const result = await backfillImageAssets(database, roots);
-		console.log(
-			values.json
-				? JSON.stringify({ ...result, outputPath: upgraded.outputPath })
-				: `Backfill verificado: ${upgraded.outputPath}`
-		);
-	} catch (error) {
+		database.exec('PRAGMA wal_checkpoint(TRUNCATE)');
 		database.clearQueryCache();
 		database.close();
-		await rm(upgraded.outputPath, { force: true, maxRetries: 40, retryDelay: 100 });
+		database = undefined;
+		await link(stagingOutputPath, outputPath);
+		await removeDatabaseArtifacts(stagingOutputPath);
+		console.log(values.json ? JSON.stringify({ ...result, outputPath }) : `Backfill verificado: ${outputPath}`);
+	} catch (error) {
+		database?.clearQueryCache();
+		database?.close();
+		await removeDatabaseArtifacts(stagingOutputPath);
 		throw error;
 	}
-	database.clearQueryCache();
-	database.close();
 }
 
 run().catch((error) => {
