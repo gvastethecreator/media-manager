@@ -22,19 +22,20 @@ Preserve these qualities when the UI changes:
 
 ```mermaid
 flowchart TD
-    A[main.tsx] --> B[AppProvider]
-    B --> C[App.tsx]
-    C --> D[RouterProvider]
-    D --> E[MainLayout + views]
+    A[main.tsx] --> B[AppShell]
+    B --> C[AppProvider]
+    C --> D[Desktop readiness and recovery]
+    D --> E[App.tsx and RouterProvider]
+    E --> F[MainLayout and views]
 ```
 
-`main.tsx` locates `#root`, creates the React root, mounts `AppProvider`, and loads global styles.
+`main.tsx` mounts `AppShell` and loads global styles. The shell handles desktop readiness and restore before opening the application.
 
-`AppProvider` composes `ThemeProvider` from `src/providers/`, `SettingsProvider`, `QueryProvider`, `CacheProvider`, `FileProvider`, and `Toaster`.
+`AppProvider` owns the single `ThemeProvider` from `components/ui`, `SettingsProvider`, `ThemeSync`, `QueryProvider`, and `Toaster`.
 
-`App.tsx` then composes `ThemeProvider` from `components/ui`, `TooltipProvider`, `ViewTransitionProvider`, `ReactScanProvider`, `FeedbackProvider`, `ErrorBoundary`, `SkipLink`, catalog bootstrap, SSE refresh, and `RouterProvider`.
+`App.tsx` adds tooltips, view transitions, development inspection, feedback, error handling, catalog bootstrap, SSE refresh, and routing.
 
-Treat those two provider layers as complementary. They are not one consolidated system.
+The file browser owns its navigation, selection, and view state through its current hooks and stores. TanStack Query owns server response caching.
 
 ## Routing
 
@@ -54,7 +55,7 @@ View families include dashboard, development, folders, all-files, all-images, vi
 
 ## Client state
 
-Zustand stores live in `src/store/`: `ui.store.ts`, `selection.store.ts`, `search.store.ts`, `reindex.store.ts`, `thumbnails.store.ts`, `file-view.store.ts`, `details-panel.store.ts`, `entity-catalog-store.ts`, `unified-file-manager.store.ts`, and per-entity stores in `entities/`.
+Zustand stores live in `src/store/`: `ui.store.ts`, `selection.store.ts`, `search.store.ts`, `reindex.store.ts`, `thumbnails.store.ts`, `file-view.store.ts`, `details-panel.store.ts`, `entity-catalog-store.ts`, and per-entity stores in `entities/`.
 
 TanStack Query, through `QueryProvider`, caches responses, invalidates queries, and syncs server state. Devtools are available in development.
 
