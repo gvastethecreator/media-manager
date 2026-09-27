@@ -17,10 +17,10 @@ function assertNoSqlite(target: string) {
 	}
 }
 
-function copyDir(source: string, destination: string) {
+function copyDir(source: string, destination: string, filter?: (source: string) => boolean) {
 	if (!existsSync(source)) return false;
 	mkdirSync(destination, { recursive: true });
-	cpSync(source, destination, { recursive: true });
+	cpSync(source, destination, { recursive: true, filter });
 	assertNoSqlite(destination);
 	return true;
 }
@@ -41,7 +41,7 @@ export function prepareExtraResources(options?: { destRoot?: string; workspaceRo
 	cpSync(bunExecutable, join(bunDestDir, bunName));
 
 	const migrationsSource = resolve(root, 'src/lib/drizzle/migrations');
-	if (!copyDir(migrationsSource, join(dest, 'migrations'))) {
+	if (!copyDir(migrationsSource, join(dest, 'migrations'), (source) => !source.endsWith('_snapshot.json'))) {
 		throw new Error('Missing required extraResource: migrations');
 	}
 	const schemaContract = resolve(root, 'src/lib/drizzle/schema-contract.json');
@@ -68,17 +68,25 @@ export function prepareExtraResources(options?: { destRoot?: string; workspaceRo
 	const startOut = join(dest, 'start', 'start-production.js');
 	const migrateOut = join(dest, 'start', 'migrate-library.js');
 	mkdirSync(join(dest, 'start'), { recursive: true });
-	const startBuild = spawnSync(bunExecutable, ['build', resolve(root, 'scripts/start-production.ts'), '--outfile', startOut, '--target', 'bun'], {
-		cwd: root,
-		encoding: 'utf8',
-	});
+	const startBuild = spawnSync(
+		bunExecutable,
+		['build', resolve(root, 'scripts/start-production.ts'), '--outfile', startOut, '--target', 'bun'],
+		{
+			cwd: root,
+			encoding: 'utf8',
+		}
+	);
 	if (startBuild.status !== 0) {
 		throw new Error(`Failed to bundle start-production: ${startBuild.stderr || startBuild.stdout}`);
 	}
-	const migrateBuild = spawnSync(bunExecutable, ['build', resolve(root, 'electron/main/data-migrate.ts'), '--outfile', migrateOut, '--target', 'bun'], {
-		cwd: root,
-		encoding: 'utf8',
-	});
+	const migrateBuild = spawnSync(
+		bunExecutable,
+		['build', resolve(root, 'electron/main/data-migrate.ts'), '--outfile', migrateOut, '--target', 'bun'],
+		{
+			cwd: root,
+			encoding: 'utf8',
+		}
+	);
 	if (migrateBuild.status !== 0) {
 		throw new Error(`Failed to bundle migrate-library: ${migrateBuild.stderr || migrateBuild.stdout}`);
 	}
