@@ -1,4 +1,5 @@
-import { mkdir } from 'node:fs/promises';
+import { access, mkdir } from 'node:fs/promises';
+import sharp from 'sharp';
 import { resolve } from 'node:path';
 import { expect, type APIRequestContext, test } from '@playwright/test';
 
@@ -42,6 +43,9 @@ test('muestra sólo el reindexado canónico por carpeta y conserva su diálogo a
 		source: { relativePath, rootId: 'smoke-root' },
 	});
 
+	await sharp({ create: { width: 16, height: 16, channels: 3, background: '#4588aa' } })
+		.png()
+		.toFile(resolve(mediaRoot, relativePath, 'cleanup-move.png'));
 	await page.goto('/settings?section=files&item=folders', { waitUntil: 'domcontentloaded' });
 	await expect(page.getByTestId('folders-settings')).toBeVisible();
 	await expect(page.getByTestId('reindex-all-button')).toHaveCount(0);
@@ -82,7 +86,31 @@ test('muestra sólo el reindexado canónico por carpeta y conserva su diálogo a
 	expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
 	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'folders-compact.png') });
 
-	await page.waitForTimeout(500);
+	await page.setViewportSize({ height: 900, width: 1440 });
+	await page.goto(`/folders/${folder.id}`, { waitUntil: 'domcontentloaded' });
+	const file = page.getByRole('button', { name: /cleanup-move/ });
+	await expect(file).toBeVisible();
+	await file.click();
+	const assetId = await file.getAttribute('data-item-id');
+	expect(assetId).toBeTruthy();
+	await expect(page.getByRole('button', { name: 'Clear' })).toBeVisible();
+	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'cleanup-selection.png') });
+
+	const destinationPath = 'cleanup-move-destination';
+	await mkdir(resolve(mediaRoot, destinationPath));
+	const destination = await apiJson<FolderResponse>(request, 'POST', '/api/folders', {
+		name: 'Cleanup move destination',
+		source: { relativePath: destinationPath, rootId: 'smoke-root' },
+	});
+	await apiJson(request, 'POST', '/api/files/assets/move', {
+		assets: [{ assetId, assetType: 'image' }],
+		targetFolderId: destination.id,
+	});
+	await access(resolve(mediaRoot, destinationPath, 'cleanup-move.png'));
+	await expect(access(resolve(mediaRoot, relativePath, 'cleanup-move.png'))).rejects.toThrow();
+	await page.goto(`/folders/${destination.id}`, { waitUntil: 'domcontentloaded' });
+	await expect(page.getByRole('button', { name: /cleanup-move/ })).toBeVisible();
+	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'cleanup-moved.png') });
 	expect(pageErrors).toEqual([]);
 	expect(consoleErrors).toEqual([]);
 	expect(serverErrors).toEqual([]);

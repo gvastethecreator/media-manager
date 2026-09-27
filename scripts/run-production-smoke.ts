@@ -52,7 +52,7 @@ async function proveOccupiedBackendFailsCleanly(
 	publicPort: number,
 	backendPort: number
 ): Promise<void> {
-	const occupiedBackend = createServer();
+	const occupiedBackend = createServer((socket) => socket.destroy());
 	await new Promise<void>((done, reject) => {
 		occupiedBackend.once('error', reject);
 		occupiedBackend.listen(backendPort, '127.0.0.1', done);
@@ -82,7 +82,7 @@ async function proveOccupiedBackendFailsCleanly(
 		if (failureCode === 0) throw new Error('El runtime aceptó un puerto interno ya ocupado.');
 		const output = `${stdout}\n${stderr}`;
 		if (!(output.includes(backendPort.toString()) && output.includes('no pudo escuchar'))) {
-			throw new Error('El fallo por puerto interno ocupado no produjo un diagnóstico accionable.');
+			throw new Error(`El fallo por puerto interno ocupado no produjo un diagnóstico accionable.\n${output}`);
 		}
 		await waitUntilPortIsReusable(publicPort);
 	} finally {
