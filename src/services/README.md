@@ -16,6 +16,8 @@ The [file entity mapper](file-entity-mapper/README.md) dispatches media processi
 
 ## Effect boundaries
 
+Documents, 3D files, and JSON use the canonical `document/document.service.effect.ts`, `file3d/file3d.service.effect.ts`, and `json-file/json-file.service.effect.ts` services. Their file processors execute `create` with `Effect.runPromise`.
+
 Existing Effect services use `Effect.try` for synchronous parsing or validation and `Effect.tryPromise` for asynchronous work. An asynchronous Drizzle callback must return a Promise; existing services use `async () => await query`. Execute or provide the Effect at the existing adapter boundary. Do not return an unevaluated Effect from a function declared to return a Promise.
 
 Keep entity IDs in their domain type; do not assume every ID is a UUID. Reuse current error types and response handling instead of introducing a second conversion layer.

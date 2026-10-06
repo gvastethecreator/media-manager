@@ -2,7 +2,7 @@
 
 Local development API: `http://localhost:4000/api`. Responses are JSON, binaries (originals and thumbnails), preview SVG, or SSE on specific endpoints.
 
-This page describes exposed route families. Resolve exact payloads and status codes from the mounted module in `src/server/routes/` and its existing HTTP tests. A method in a service is not automatically a public endpoint.
+This page describes mounted route families and their main contracts. [route-registry.ts](../../src/server/route-registry.ts) owns API mounts; [index.ts](../../src/server/index.ts) owns `/health`. Resolve exact payloads and status codes from the mounted module in `src/server/routes/` and its existing HTTP tests. A service method does not establish a public endpoint.
 
 ## Base URL and conventions
 
@@ -14,15 +14,13 @@ Routes outside `/api`:
 - `GET /health`
 - Compatibility redirect from `/search` to `/api/search`
 
-## Health and system
+## System and background work
 
-- `GET /health`
-
-Operational state, metrics, and system utilities:
-
-- `GET /api/system/*`
-- `GET /api/activity`
-- `GET /api/queue/*`
+| Base | Route module | Purpose |
+| --- | --- | --- |
+| `/api/system` | `system.ts` | System health and utilities |
+| `/api/activity` | `activity.ts` | Activity |
+| `/api/queue` | `queue.ts` | Background work |
 
 Global `/api/stats/*` and `/api/system/stats` requests return `410` with `AUTHORIZED_SCOPE_REQUIRED`. Global aggregates remain unavailable until they can respect authorized media roots.
 
@@ -41,11 +39,18 @@ Base: `/api/folders`
 - `GET /:id/files`
 - `GET /:id/files/stats`
 - `GET /:id/preview`
-- `POST /reindex-all`
 - `POST /:id/reindex`
-- `POST /reindex` (legacy/compatibility)
 
-This family covers folder navigation and structure, visual folder previews, aggregated folder content, and folder or global reindex.
+This family covers folder navigation, structure, previews, content, and reindexing by authorized folder ID.
+
+`POST /api/folders/:id/reindex` requires an authorized folder with index permission. It returns `400` with `UNSUPPORTED_REINDEX_OPTION` if `skipThumbnails` or `skipMetadata` is `true`.
+
+Retired reindex endpoints return `410`:
+
+| Endpoint | Code | Successor |
+| --- | --- | --- |
+| `POST /api/folders/reindex-all` | `AUTHORIZED_ROOTS_REQUIRED` | Reindex an authorized folder by ID |
+| `POST /api/folders/reindex` | `LEGACY_REINDEX_RETIRED` | `POST /api/folders/:id/reindex` |
 
 ## Images
 
@@ -104,48 +109,18 @@ Preview routes:
 - `GET /api/audio-waveforms/:id/info`
 - `GET /api/audio-waveforms/:id/waveform/preview`
 
-## Organizers
+## Organizers and worldbuilding
 
-### Albums
+| Base | Mounted module | Operations |
+| --- | --- | --- |
+| `/api/albums` | `albums.effect.ts` | List, detail, CRUD, relations, and content |
+| `/api/collections` | `collections.effect.ts` | List, detail, CRUD, relations, and content |
+| `/api/characters` | `characters.effect.ts` | List, detail, CRUD, favorites, and relations |
+| `/api/places` | `places.effect.ts` | Place operations |
+| `/api/concepts` | `concepts.effect.ts` | Concept operations |
+| `/api/prompts` | `prompts.effect.ts` | Prompt operations |
 
-Base: `/api/albums`
-
-Album operations include list, get by id, create, update, delete, add or remove relations, and query content.
-
-### Collections
-
-Base: `/api/collections`
-
-The collection pattern matches albums.
-
-### Groups, wildcards, notes, properties, world-items
-
-`secondary-services.effect.ts` mounts these bases:
-
-- `/api/groups`
-- `/api/wildcards`
-- `/api/notes`
-- `/api/properties`
-- `/api/world-items`
-
-## Worldbuilding
-
-### Characters
-
-Base: `/api/characters`
-
-Character operations include list, detail, create, update, delete, favorites, and relations with images or other entities.
-
-### Places and concepts
-
-- `/api/places`
-- `/api/concepts`
-
-### Prompts
-
-- `/api/prompts`
-
-These three families come from `worldbuilding.effect.ts`.
+`secondary-services.effect.ts` supplies the routers for `/api/groups`, `/api/wildcards`, `/api/notes`, `/api/properties`, and `/api/world-items`. Check each router before assuming that entity families share payloads or operations.
 
 ## Documents, JSON, 3D, and uploaded images
 
@@ -161,7 +136,7 @@ Operations: list, detail, CRUD, and `GET /:id/thumbnail`.
 
 Base: `/api/documents`
 
-Operations: list, detail, CRUD, `GET /:id/preview`, and `GET /:id/images`.
+Operations: list, detail, CRUD, `GET /:id/preview`, `GET /:id/images`, `GET /:id/content`, and `GET /:id/download`. Content serves the authorized original inline; download serves it as an attachment.
 
 ### JSON files
 
@@ -274,7 +249,7 @@ Base: `/api/reindex-logs`
 
 ## Debug and internal testing
 
-These routes help development and diagnosis. They are not the product API:
+The registry mounts these diagnostic routes only when `shouldEnableDevelopmentRoutes` permits them. They are not the product API:
 
 - `/api/debug`
 - `/api/debug-entity-types`

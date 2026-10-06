@@ -9,11 +9,13 @@
 3. Extract metadata through the media-specific processor.
 4. Generate the thumbnail or preview through that processor.
 
-`createEntityFromFile` runs the sequence; `processFiles` queues multiple files. `MEDIA_MANAGER_INGEST_CONCURRENCY` is interpreted by `resolveFileEntityMapperConcurrency`. Reuse the current result types from `src/types/file-entity-mapper.ts` and inspect partial outcomes.
+`createEntityFromFile` runs the sequence; `processFiles` queues multiple files. `MEDIA_MANAGER_INGEST_CONCURRENCY` is interpreted by `resolveFileEntityMapperConcurrency`. Reuse the result types from `src/types/file-entity-mapper.ts`.
+
+If metadata extraction or thumbnail generation fails after creation, the core logs the failure and returns entity-creation success. That success flag does not prove that metadata or a preview is available. Existing entities skip the later stages except for deferred image metadata checks.
 
 ## Integration constraints
 
-Import `FileEntityMapperCore` from `@/services/file-entity-mapper/core.service`. The older `file-entity-mapper.service.ts` wrapper still has callers; its presence does not justify restoring removed exports.
+Import `FileEntityMapperCore` from `@/services/file-entity-mapper/core.service`. Keep `file-entity-mapper.service.ts` for its existing callers; use the core's current methods and types.
 
 Canonical source resolution lives in `utils/canonical-source.utils.ts`. Image creation requires an authorized canonical source. Filesystem paths used inside the server are not a renderer API: browser requests still use authorized references and asset identities.
 
