@@ -50,7 +50,7 @@ Requirements:
 
 - Bun 1.4.0, matching the repository and CI pin
 - Node.js 20 or newer for auxiliary tooling
-- Optional FFmpeg support for selected thumbnail and metadata flows
+- FFmpeg on PATH for video thumbnails, audio waveforms, and the media tooling tests
 
 ```bash
 bun install --frozen-lockfile
@@ -59,26 +59,28 @@ bun run dev:full
 
 Open `http://localhost:5173`. The local API uses `http://localhost:4000` by default.
 
+Set `VITE_PORT` and `API_PORT` to use different ports. Development fails when a requested port is occupied. The supervisor allows up to two minutes for each server to become ready and stops both processes if either fails. Bun watches imported backend modules; Vite serves HMR on its frontend port.
+
 Copy `.env.example` when you need to customize ports, the database path, CORS, media limits, or logging. Do not point tests at a personal database. `bun run test` creates and removes isolated SQLite databases automatically.
 
 ## Development commands
 
 `package.json` is the command list. Do not invent scripts.
 
-| Command                   | Purpose                                     |
-| ------------------------- | ------------------------------------------- |
-| `bun run dev:full`        | Start the frontend and backend              |
-| `bun run dev:vite`        | Start only the frontend                     |
-| `bun run dev:server:hot`  | Start only the backend                      |
-| `bun run desktop:dev`     | Start the Electron desktop shell            |
+| Command                   | Purpose                                             |
+| ------------------------- | --------------------------------------------------- |
+| `bun run dev:full`        | Start the frontend and backend                      |
+| `bun run dev:vite`        | Start only the frontend                             |
+| `bun run dev:server:hot`  | Start only the backend                              |
+| `bun run desktop:dev`     | Start the Electron desktop shell                    |
 | `bun run desktop:package` | Copy extraResources, hash them, package Windows x64 |
-| `bun run check`           | Run lint and TypeScript checks              |
-| `bun run test`            | Run the isolated unit and integration suite |
-| `bun run test:tooling`    | Verify repository tooling                   |
-| `bun run test:e2e`        | Run Playwright browser coverage             |
-| `bun run build`           | Build the frontend and Bun server           |
-| `bun run db:schema:check` | Verify the generated schema contract        |
-| `bun run deps:outdated`   | Check direct dependency freshness           |
+| `bun run check`           | Run lint and TypeScript checks                      |
+| `bun run test`            | Run the isolated unit and integration suite         |
+| `bun run test:tooling`    | Verify repository tooling                           |
+| `bun run test:e2e`        | Run Playwright browser coverage                     |
+| `bun run build`           | Build the frontend and Bun server                   |
+| `bun run db:schema:check` | Verify the generated schema contract                |
+| `bun run deps:outdated`   | Check direct dependency freshness                   |
 
 The broad local gate is:
 
