@@ -21,96 +21,61 @@ import { CollectionHasContentError, CollectionNotFound, CollectionValidationErro
 
 // ============= Test Helpers =============
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const isSqliteBusyError = (error: unknown) => {
-	if (!(error instanceof Error)) {
-		return false;
-	}
-
-	return error.message.includes('SQLITE_BUSY') || error.message.includes('database is locked');
+const cleanupTestData = async () => {
+	await db.delete(favorites).where(eq(favorites.entityType, 'collection'));
+	await db.delete(imageCollections);
+	await db.delete(images);
+	await db.delete(collections);
+	await db.delete(folders);
 };
-
-const withSqliteRetry = async <T>(operation: () => Promise<T>, retries = 20): Promise<T> => {
-	let lastError: unknown;
-
-	for (let attempt = 0; attempt <= retries; attempt++) {
-		try {
-			return await operation();
-		} catch (error) {
-			lastError = error;
-			if (!isSqliteBusyError(error) || attempt === retries) {
-				throw error;
-			}
-
-			await wait(50 * (attempt + 1));
-		}
-	}
-
-	throw lastError;
-};
-
-const cleanupTestData = () =>
-	withSqliteRetry(async () => {
-		await wait(50);
-		await db.delete(favorites).where(eq(favorites.entityType, 'collection'));
-		await db.delete(imageCollections);
-		await db.delete(images);
-		await db.delete(collections);
-		await db.delete(folders);
-		await wait(50);
-	});
 
 let previousActiveProfileIds: string[] = [];
 let createdActiveProfileId: string | null = null;
 
-const suspendActiveProfiles = () =>
-	withSqliteRetry(async () => {
-		const activeProfiles = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true));
-		previousActiveProfileIds = activeProfiles.map((profile: { id: string }) => profile.id);
+const suspendActiveProfiles = async () => {
+	const activeProfiles = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.isActive, true));
+	previousActiveProfileIds = activeProfiles.map((profile: { id: string }) => profile.id);
 
-		if (previousActiveProfileIds.length > 0) {
-			await db.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
-		}
+	if (previousActiveProfileIds.length > 0) {
+		await db.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
+	}
+};
+
+const restoreActiveProfiles = async () => {
+	if (previousActiveProfileIds.length > 0) {
+		await db.update(profiles).set({ isActive: true }).where(inArray(profiles.id, previousActiveProfileIds));
+	}
+
+	previousActiveProfileIds = [];
+};
+
+const ensureActiveProfile = async () => {
+	const [activeProfile] = await db
+		.select({ id: profiles.id })
+		.from(profiles)
+		.where(eq(profiles.isActive, true))
+		.limit(1);
+
+	if (activeProfile) {
+		return activeProfile.id;
+	}
+
+	const profileId = `collection-service-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+	createdActiveProfileId = profileId;
+
+	await db.insert(profiles).values({
+		id: profileId,
+		name: 'Collection Service Active Profile',
+		emoji: '📚',
+		color: '#3b82f6',
+		description: 'Perfil activo para tests canónicos de Collection',
+		isActive: true,
+		settingsId: null,
+		imageId: null,
 	});
 
-const restoreActiveProfiles = () =>
-	withSqliteRetry(async () => {
-		if (previousActiveProfileIds.length > 0) {
-			await db.update(profiles).set({ isActive: true }).where(inArray(profiles.id, previousActiveProfileIds));
-		}
-
-		previousActiveProfileIds = [];
-	});
-
-const ensureActiveProfile = () =>
-	withSqliteRetry(async () => {
-		const [activeProfile] = await db
-			.select({ id: profiles.id })
-			.from(profiles)
-			.where(eq(profiles.isActive, true))
-			.limit(1);
-
-		if (activeProfile) {
-			return activeProfile.id;
-		}
-
-		const profileId = `collection-service-test-profile-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-		createdActiveProfileId = profileId;
-
-		await db.insert(profiles).values({
-			id: profileId,
-			name: 'Collection Service Active Profile',
-			emoji: '📚',
-			color: '#3b82f6',
-			description: 'Perfil activo para tests canónicos de Collection',
-			isActive: true,
-			settingsId: null,
-			imageId: null,
-		});
-
-		return profileId;
-	});
+	return profileId;
+};
 
 /**
  * Ejecuta un Effect con el CollectionService en el contexto
@@ -133,29 +98,27 @@ const createTestCollection = async (data: {
 	description?: string | null;
 	isFavorite?: boolean;
 	parentId?: string | null;
+	createdAt?: Date;
 }) => {
-	const now = new Date();
-	const createdCollections = (await withSqliteRetry(() =>
-		db
-			.insert(collections)
-			.values({
-				id: crypto.randomUUID(),
-				name: data.name,
-				emoji: data.emoji ?? null,
-				color: data.color ?? null,
-				description: data.description ?? null,
-				featuredImage: null,
-				isFavorite: data.isFavorite ?? false,
-				lastImageAddedAt: null,
-				lastVideoAddedAt: null,
-				parentId: data.parentId ?? null,
-				createdAt: now,
-				updatedAt: now,
-			})
-			.returning()
-	)) as Array<typeof collections.$inferSelect>;
+	const now = data.createdAt ?? new Date();
+	const createdCollections = (await db
+		.insert(collections)
+		.values({
+			id: crypto.randomUUID(),
+			name: data.name,
+			emoji: data.emoji ?? null,
+			color: data.color ?? null,
+			description: data.description ?? null,
+			featuredImage: null,
+			isFavorite: data.isFavorite ?? false,
+			lastImageAddedAt: null,
+			lastVideoAddedAt: null,
+			parentId: data.parentId ?? null,
+			createdAt: now,
+			updatedAt: now,
+		})
+		.returning()) as Array<typeof collections.$inferSelect>;
 	const [collection] = createdCollections;
-	await wait(10);
 	return collection;
 };
 
@@ -163,70 +126,60 @@ const createTestImage = async () => {
 	const now = new Date();
 
 	// Create a dummy folder first (required by folderId NOT NULL constraint)
-	const createdFolders = (await withSqliteRetry(() =>
-		db
-			.insert(folders)
-			.values({
-				id: crypto.randomUUID(),
-				name: `test-folder-${crypto.randomUUID()}`,
-				path: `/test/folder-${crypto.randomUUID()}`,
-				depth: 0,
-				parentId: null,
-				isFavorite: false,
-				presetId: null,
-				createdAt: now,
-				updatedAt: now,
-			})
-			.returning()
-	)) as Array<typeof folders.$inferSelect>;
+	const createdFolders = (await db
+		.insert(folders)
+		.values({
+			id: crypto.randomUUID(),
+			name: `test-folder-${crypto.randomUUID()}`,
+			path: `/test/folder-${crypto.randomUUID()}`,
+			depth: 0,
+			parentId: null,
+			isFavorite: false,
+			presetId: null,
+			createdAt: now,
+			updatedAt: now,
+		})
+		.returning()) as Array<typeof folders.$inferSelect>;
 	const [folder] = createdFolders;
-	await wait(10);
 
 	// Generate a valid SHA-256 hash (64 hex characters)
 	const uniqueId = crypto.randomUUID();
 	const validHash = uniqueId.replaceAll('-', '').padStart(64, '0');
 
-	const createdImages = (await withSqliteRetry(() =>
-		db
-			.insert(images)
-			.values({
-				id: uniqueId,
-				name: `test-image-${uniqueId}.jpg`,
-				path: `/test/image-${uniqueId}.jpg`,
-				url: `http://localhost/test/image-${uniqueId}.jpg`,
-				size: 1024,
-				width: 800,
-				height: 600,
-				format: 'jpg',
-				entityType: 'image',
-				hash: validHash, // SHA-256 format: exactly 64 hex characters
-				folderId: folder.id, // Assign folderId to satisfy NOT NULL constraint
-				createdAt: now,
-				updatedAt: now,
-			})
-			.returning()
-	)) as Array<typeof images.$inferSelect>;
+	const createdImages = (await db
+		.insert(images)
+		.values({
+			id: uniqueId,
+			name: `test-image-${uniqueId}.jpg`,
+			path: `/test/image-${uniqueId}.jpg`,
+			url: `http://localhost/test/image-${uniqueId}.jpg`,
+			size: 1024,
+			width: 800,
+			height: 600,
+			format: 'jpg',
+			entityType: 'image',
+			hash: validHash, // SHA-256 format: exactly 64 hex characters
+			folderId: folder.id, // Assign folderId to satisfy NOT NULL constraint
+			createdAt: now,
+			updatedAt: now,
+		})
+		.returning()) as Array<typeof images.$inferSelect>;
 	const [image] = createdImages;
-	await wait(10);
 	return image;
 };
 
 const linkImageToCollection = async (imageId: string, collectionId: string) =>
-	withSqliteRetry(() =>
-		db.insert(imageCollections).values({
-			A: imageId,
-			B: collectionId,
-		})
-	);
+	db.insert(imageCollections).values({
+		A: imageId,
+		B: collectionId,
+	});
 
 const linkImagesToCollection = async (pairs: Array<{ imageId: string; collectionId: string }>) =>
-	withSqliteRetry(() =>
-		db.insert(imageCollections).values(
-			pairs.map(({ imageId, collectionId }) => ({
-				A: imageId,
-				B: collectionId,
-			}))
-		)
+	db.insert(imageCollections).values(
+		pairs.map(({ imageId, collectionId }) => ({
+			A: imageId,
+			B: collectionId,
+		}))
 	);
 
 // ============= Cleanup =============
@@ -242,7 +195,7 @@ afterEach(async () => {
 
 	const profileIdToDelete = createdActiveProfileId;
 	if (profileIdToDelete) {
-		await withSqliteRetry(() => db.delete(profiles).where(eq(profiles.id, profileIdToDelete)));
+		await db.delete(profiles).where(eq(profiles.id, profileIdToDelete));
 		createdActiveProfileId = null;
 	}
 
@@ -498,12 +451,9 @@ describe('CollectionService - CRUD Operations', () => {
 		});
 
 		it('should order by createdAt descending (default)', async () => {
-			const first = await createTestCollection({ name: 'First' });
-			// Small delay to ensure different timestamps
-			await new Promise((resolve) => setTimeout(resolve, 10));
-			const second = await createTestCollection({ name: 'Second' });
-			await new Promise((resolve) => setTimeout(resolve, 10));
-			const third = await createTestCollection({ name: 'Third' });
+			const first = await createTestCollection({ name: 'First', createdAt: new Date('2026-01-01T00:00:00Z') });
+			const second = await createTestCollection({ name: 'Second', createdAt: new Date('2026-01-02T00:00:00Z') });
+			const third = await createTestCollection({ name: 'Third', createdAt: new Date('2026-01-03T00:00:00Z') });
 
 			const result = await runEffect(Effect.flatMap(CollectionService, (service) => service.getAll()));
 

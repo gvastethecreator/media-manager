@@ -21,8 +21,8 @@ describe('KeyboardShortcutManager', () => {
 
 	it('should register and execute shortcuts', () => {
 		const shortcut = {
-			key: 'a',
-			modifiers: ['ctrl'] as const,
+			key: 'A',
+			modifiers: ['shift', 'ctrl'] as const,
 			action: 'test-action',
 			description: 'Test shortcut',
 		};
@@ -33,6 +33,7 @@ describe('KeyboardShortcutManager', () => {
 		const event = new KeyboardEvent('keydown', {
 			key: 'a',
 			ctrlKey: true,
+			shiftKey: true,
 		});
 		Object.defineProperty(event, 'target', { value: document.body, writable: false });
 

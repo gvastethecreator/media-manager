@@ -64,18 +64,14 @@ const ensureActiveProfile = async () => {
 describe('FolderService Effect', () => {
 	// Cleanup después de cada test
 	afterEach(async () => {
-		try {
-			await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.FOLDER));
-			await db.delete(documents);
-			// Borrar TODAS las carpetas de test
-			await db.delete(folders);
+		await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.FOLDER));
+		await db.delete(documents);
+		// Borrar TODAS las carpetas de test
+		await db.delete(folders);
 
-			if (createdActiveProfileId) {
-				await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
-				createdActiveProfileId = null;
-			}
-		} catch (error) {
-			console.error('[Test Cleanup] Error cleaning folders:', error);
+		if (createdActiveProfileId) {
+			await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
+			createdActiveProfileId = null;
 		}
 	});
 

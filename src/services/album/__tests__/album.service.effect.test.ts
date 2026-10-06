@@ -61,23 +61,19 @@ describe('AlbumService Effect', () => {
 	// Cleanup después de cada test
 	afterEach(async () => {
 		// Limpiar TODOS los albums creados durante los tests
-		try {
-			await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.ALBUM));
-			// Primero borrar relaciones
-			if (createdAlbumIds.length > 0) {
-				await db.delete(imageAlbums);
-			}
-			// Luego borrar todos los albums de test
-			await db.delete(albums);
-			if (createdActiveProfileId) {
-				await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
-				createdActiveProfileId = null;
-			}
-			// Clear array
-			createdAlbumIds.length = 0;
-		} catch (error) {
-			console.error('[Test Cleanup] Error cleaning albums:', error);
+		await db.delete(favorites).where(eq(favorites.entityType, FavoriteEntityType.ALBUM));
+		// Primero borrar relaciones
+		if (createdAlbumIds.length > 0) {
+			await db.delete(imageAlbums);
 		}
+		// Luego borrar todos los albums de test
+		await db.delete(albums);
+		if (createdActiveProfileId) {
+			await db.delete(profiles).where(eq(profiles.id, createdActiveProfileId));
+			createdActiveProfileId = null;
+		}
+		// Clear array
+		createdAlbumIds.length = 0;
 	});
 
 	describe('CRUD Operations', () => {

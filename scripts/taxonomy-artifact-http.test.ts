@@ -1,3 +1,4 @@
+import { createServer } from 'node:http';
 import { afterEach, describe, expect, it } from 'bun:test';
 import { mkdtemp, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -22,9 +23,10 @@ import taxonomyArtifactsRouter from '../src/server/routes/taxonomy-artifacts';
 import { createAuthorizedRootRegistry } from '../src/server/security/authorized-roots';
 import { sanitizeJsonResponses } from '../src/server/security/sanitize-public-payload';
 
+const ownedServers: ReturnType<typeof createServer>[] = [];
 const temporaryDirectories: string[] = [];
 
-function createApp(registry: Awaited<ReturnType<typeof createAuthorizedRootRegistry>>) {
+async function createApp(registry: Awaited<ReturnType<typeof createAuthorizedRootRegistry>>) {
 	const app = express();
 	app.locals.authorizedRootRegistry = registry;
 	app.use(express.json());
@@ -34,10 +36,16 @@ function createApp(registry: Awaited<ReturnType<typeof createAuthorizedRootRegis
 	app.use('/api/notes', notesEffectRouter);
 	app.use('/api/prompts', promptsEffectRouter);
 	app.use('/api/wildcards', wildcardsEffectRouter);
-	return app;
+	const server = createServer(app);
+	ownedServers.push(server);
+	await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+	return server;
 }
 
 afterEach(async () => {
+	for (const server of ownedServers.splice(0)) {
+		await new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+	}
 	await db.delete(imagePrompts);
 	await db.delete(taxonomyArtifacts);
 	await db.delete(notes);
@@ -53,7 +61,7 @@ afterEach(async () => {
 
 describe('taxonomy artifact HTTP contract', () => {
 	it('round-trips inline Prompt content and portable editor metadata', async () => {
-		const app = createApp(await createAuthorizedRootRegistry([]));
+		const app = await createApp(await createAuthorizedRootRegistry([]));
 		const metadata = JSON.stringify({
 			parameters: [{ custom: false, key: 'subject', type: 'text' }],
 			purpose: 'Preserve the inline editor contract',
@@ -126,7 +134,7 @@ describe('taxonomy artifact HTTP contract', () => {
 		const registry = await createAuthorizedRootRegistry([
 			{ id: allowedRootId, path: allowedPath, permissions: ['read', 'index'] },
 		]);
-		const app = createApp(registry);
+		const app = await createApp(registry);
 
 		const search = await request(app).get('/api/taxonomy-artifacts/search').query({ q: 'Secret' });
 		expect(search.status).toBe(200);
@@ -199,7 +207,7 @@ describe('taxonomy artifact HTTP contract', () => {
 		const registry = await createAuthorizedRootRegistry([
 			{ id: rootId, path: rootPath, permissions: ['read', 'write', 'delete', 'index'] },
 		]);
-		const app = createApp(registry);
+		const app = await createApp(registry);
 		const created = await request(app)
 			.put(`/api/taxonomy-artifacts/note/${noteId}`)
 			.send({ body: 'Canonical body', metadata: { title: '100% literal' }, rootId });
@@ -260,7 +268,12 @@ describe('taxonomy artifact HTTP contract', () => {
 				.from(taxonomyArtifacts)
 				.where(and(eq(taxonomyArtifacts.entityType, 'note'), eq(taxonomyArtifacts.entityId, noteId)))
 		).toEqual([]);
-		await expect(stat(join(rootPath, created.body.relativePath))).rejects.toMatchObject({ code: 'ENOENT' });
+		expect(
+			await stat(join(rootPath, created.body.relativePath)).then(
+				() => null,
+				(error: NodeJS.ErrnoException) => ({ code: error.code })
+			)
+		).toMatchObject({ code: 'ENOENT' });
 	});
 
 	it('preserves authored path-like text through both JSON sanitizers without exposing the configured root', async () => {
@@ -275,7 +288,7 @@ describe('taxonomy artifact HTTP contract', () => {
 		const registry = await createAuthorizedRootRegistry([
 			{ id: rootId, path: rootPath, permissions: ['read', 'write', 'delete', 'index'] },
 		]);
-		const app = createApp(registry);
+		const app = await createApp(registry);
 
 		const saved = await request(app)
 			.put(`/api/taxonomy-artifacts/note/${noteId}`)
@@ -310,7 +323,7 @@ describe('taxonomy artifact HTTP contract', () => {
 			{ id: rootId, path: rootPath, permissions: ['read', 'index'] },
 		]);
 
-		const response = await request(createApp(registry))
+		const response = await request(await createApp(registry))
 			.put(`/api/taxonomy-artifacts/note/${noteId}`)
 			.send({ body: 'Denied', metadata: { title: 'Denied' }, rootId });
 		expect(response.status).toBe(403);
@@ -344,7 +357,7 @@ describe('taxonomy artifact HTTP contract', () => {
 		const registry = await createAuthorizedRootRegistry([
 			{ id: rootId, path: rootPath, permissions: ['read', 'write', 'delete', 'index'] },
 		]);
-		const app = createApp(registry);
+		const app = await createApp(registry);
 		const created = await request(app)
 			.put(`/api/taxonomy-artifacts/prompt/${promptId}`)
 			.send({
@@ -374,7 +387,12 @@ describe('taxonomy artifact HTTP contract', () => {
 			.send({ expectedHash: created.body.contentHash });
 		expect(deleted.status, JSON.stringify(deleted.body)).toBe(204);
 		expect(await db.select({ id: prompts.id }).from(prompts).where(eq(prompts.id, promptId))).toEqual([]);
-		await expect(stat(join(rootPath, created.body.relativePath))).rejects.toMatchObject({ code: 'ENOENT' });
+		expect(
+			await stat(join(rootPath, created.body.relativePath)).then(
+				() => null,
+				(error: NodeJS.ErrnoException) => ({ code: error.code })
+			)
+		).toMatchObject({ code: 'ENOENT' });
 	});
 
 	it('creates Wildcards file-backed by default and keeps operational fields in the same projection commit', async () => {
@@ -385,7 +403,7 @@ describe('taxonomy artifact HTTP contract', () => {
 		const registry = await createAuthorizedRootRegistry([
 			{ id: rootId, path: rootPath, permissions: ['read', 'write', 'delete', 'index'] },
 		]);
-		const app = createApp(registry);
+		const app = await createApp(registry);
 		const rejected = await request(app)
 			.post('/api/taxonomy-artifacts/wildcard')
 			.send({ body: 'duplicado\nduplicado', metadata: { title: 'Invalid' }, rootId });
@@ -434,6 +452,11 @@ describe('taxonomy artifact HTTP contract', () => {
 			.send({ expectedHash: updated.body.contentHash });
 		expect(deleted.status, JSON.stringify(deleted.body)).toBe(204);
 		expect(await db.select({ id: wildcards.id }).from(wildcards).where(eq(wildcards.id, entityId))).toEqual([]);
-		await expect(stat(join(rootPath, updated.body.relativePath))).rejects.toMatchObject({ code: 'ENOENT' });
+		expect(
+			await stat(join(rootPath, updated.body.relativePath)).then(
+				() => null,
+				(error: NodeJS.ErrnoException) => ({ code: error.code })
+			)
+		).toMatchObject({ code: 'ENOENT' });
 	});
 });

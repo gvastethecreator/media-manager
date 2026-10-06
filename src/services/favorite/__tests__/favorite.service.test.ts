@@ -35,51 +35,47 @@ describe('favoriteService', () => {
 	});
 
 	afterEach(async () => {
-		try {
-			if (createdTagIds.length > 0) {
-				await db.delete(tags).where(inArray(tags.id, createdTagIds));
-				createdTagIds.length = 0;
-			}
+		if (createdTagIds.length > 0) {
+			await db.delete(tags).where(inArray(tags.id, createdTagIds));
+			createdTagIds.length = 0;
+		}
 
-			if (createdPropertyIds.length > 0) {
-				await db.delete(properties).where(inArray(properties.id, createdPropertyIds));
-				createdPropertyIds.length = 0;
-			}
+		if (createdPropertyIds.length > 0) {
+			await db.delete(properties).where(inArray(properties.id, createdPropertyIds));
+			createdPropertyIds.length = 0;
+		}
 
-			if (createdImageIds.length > 0) {
-				await db.delete(imageAlbums).where(inArray(imageAlbums.A, createdImageIds));
-				await db.delete(images).where(inArray(images.id, createdImageIds));
-				createdImageIds.length = 0;
-			}
+		if (createdImageIds.length > 0) {
+			await db.delete(imageAlbums).where(inArray(imageAlbums.A, createdImageIds));
+			await db.delete(images).where(inArray(images.id, createdImageIds));
+			createdImageIds.length = 0;
+		}
 
-			if (createdAlbumIds.length > 0) {
-				await db.delete(albums).where(inArray(albums.id, createdAlbumIds));
-				createdAlbumIds.length = 0;
-			}
+		if (createdAlbumIds.length > 0) {
+			await db.delete(albums).where(inArray(albums.id, createdAlbumIds));
+			createdAlbumIds.length = 0;
+		}
 
-			if (createdNoteIds.length > 0) {
-				await db.delete(notes).where(inArray(notes.id, createdNoteIds));
-				createdNoteIds.length = 0;
-			}
+		if (createdNoteIds.length > 0) {
+			await db.delete(notes).where(inArray(notes.id, createdNoteIds));
+			createdNoteIds.length = 0;
+		}
 
-			if (createdFolderIds.length > 0) {
-				await db.delete(folders).where(inArray(folders.id, createdFolderIds));
-				createdFolderIds.length = 0;
-			}
+		if (createdFolderIds.length > 0) {
+			await db.delete(folders).where(inArray(folders.id, createdFolderIds));
+			createdFolderIds.length = 0;
+		}
 
-			if (createdProfileIds.length > 0) {
-				await db.delete(favorites).where(inArray(favorites.profileId, createdProfileIds));
-				await db.delete(profiles).where(inArray(profiles.id, createdProfileIds));
-				createdProfileIds.length = 0;
-			}
+		if (createdProfileIds.length > 0) {
+			await db.delete(favorites).where(inArray(favorites.profileId, createdProfileIds));
+			await db.delete(profiles).where(inArray(profiles.id, createdProfileIds));
+			createdProfileIds.length = 0;
+		}
 
-			await db.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
+		await db.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
 
-			for (const profileId of originalActiveProfileIds) {
-				await db.update(profiles).set({ isActive: true }).where(eq(profiles.id, profileId));
-			}
-		} catch (error) {
-			console.error('[FavoriteService test cleanup] Error cleaning profiles/favorites:', error);
+		for (const profileId of originalActiveProfileIds) {
+			await db.update(profiles).set({ isActive: true }).where(eq(profiles.id, profileId));
 		}
 	});
 

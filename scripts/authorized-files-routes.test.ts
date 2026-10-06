@@ -1,3 +1,4 @@
+import { createServer } from 'node:http';
 import { describe, expect, it } from 'bun:test';
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -19,6 +20,7 @@ import { sanitizeJsonResponses } from '../src/server/security/sanitize-public-pa
 async function withApp(
 	run: (fixture: {
 		app: express.Express;
+		server: ReturnType<typeof createServer>;
 		outside: string;
 		primary: string;
 		registry: Awaited<ReturnType<typeof createAuthorizedRootRegistry>>;
@@ -60,9 +62,12 @@ async function withApp(
 	});
 	app.use('/api/files', filesRouter);
 	app.use('/api/download', downloadRouter);
+	const server = createServer(app);
+	await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
 	try {
-		await run({ app, outside, primary, registry, secondary });
+		await run({ app, server, outside, primary, registry, secondary });
 	} finally {
+		await new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
 		await rm(container, { force: true, recursive: true });
 	}
 }
@@ -166,9 +171,9 @@ describe('authorized filesystem HTTP contract', () => {
 	});
 
 	it('lista roots y directorios sin filtrar paths absolutos', async () => {
-		await withApp(async ({ app, primary }) => {
-			const roots = await request(app).get('/api/files/roots');
-			const directory = await request(app).get('/api/files/directory').query({ rootId: 'primary', path: '' });
+		await withApp(async ({ server, primary }) => {
+			const roots = await request(server).get('/api/files/roots');
+			const directory = await request(server).get('/api/files/directory').query({ rootId: 'primary', path: '' });
 			expect(roots.status).toBe(200);
 			expect(roots.body.roots[0]).toMatchObject({ id: 'primary', label: 'Primary' });
 			expect(directory.status).toBe(200);
@@ -178,9 +183,9 @@ describe('authorized filesystem HTTP contract', () => {
 	});
 
 	it('expone sólo el resumen seguro de la recuperación de inicio', async () => {
-		await withApp(async ({ app, primary }) => {
+		await withApp(async ({ app, server, primary }) => {
 			app.locals.startupFileMutationRecovery = { completed: 2, manual: 1, pending: 3 };
-			const response = await request(app).get('/api/files/recovery-status');
+			const response = await request(server).get('/api/files/recovery-status');
 
 			expect(response.status).toBe(200);
 			expect(response.body).toEqual({
@@ -195,11 +200,11 @@ describe('authorized filesystem HTTP contract', () => {
 	});
 
 	it('vuelve a evaluar la recuperación sin publicar el journal ni rutas locales', async () => {
-		await withApp(async ({ app, primary }) => {
+		await withApp(async ({ server, primary }) => {
 			const previousJournalPath = process.env.MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL;
 			process.env.MEDIA_MANAGER_FILE_MUTATION_RECOVERY_JOURNAL = resolve(primary, 'recovery.jsonl');
 			try {
-				const response = await request(app).post('/api/files/recovery/reconcile');
+				const response = await request(server).post('/api/files/recovery/reconcile');
 
 				expect(response.status).toBe(200);
 				expect(response.body).toEqual({
@@ -216,10 +221,10 @@ describe('authorized filesystem HTTP contract', () => {
 	});
 
 	it('sirve contenido y downloads sólo mediante referencias autorizadas', async () => {
-		await withApp(async ({ app, primary }) => {
-			const content = await request(app).get('/api/files/content').query({ rootId: 'primary', path: 'inside.txt' });
-			const download = await request(app).get('/api/download').query({ rootId: 'primary', path: 'inside.txt' });
-			const legacyAbsolute = await request(app)
+		await withApp(async ({ server, primary }) => {
+			const content = await request(server).get('/api/files/content').query({ rootId: 'primary', path: 'inside.txt' });
+			const download = await request(server).get('/api/download').query({ rootId: 'primary', path: 'inside.txt' });
+			const legacyAbsolute = await request(server)
 				.get('/api/files/content')
 				.query({ path: resolve(primary, 'inside.txt') });
 			expect(content.status).toBe(200);
@@ -230,7 +235,7 @@ describe('authorized filesystem HTTP contract', () => {
 			expect(content.headers.etag).toBeDefined();
 			expect(
 				(
-					await request(app)
+					await request(server)
 						.get('/api/files/content')
 						.query({ rootId: 'primary', path: 'inside.txt' })
 						.set('If-None-Match', content.headers.etag)
@@ -244,7 +249,7 @@ describe('authorized filesystem HTTP contract', () => {
 			expect(download.headers.etag).toBeDefined();
 			expect(
 				(
-					await request(app)
+					await request(server)
 						.get('/api/download')
 						.query({ rootId: 'primary', path: 'inside.txt' })
 						.set('If-None-Match', download.headers.etag)
@@ -256,23 +261,23 @@ describe('authorized filesystem HTTP contract', () => {
 	});
 
 	it('retira mutaciones filesystem crudas que podían desincronizar la base', async () => {
-		await withApp(async ({ app, primary }) => {
-			const created = await request(app)
+		await withApp(async ({ server, primary }) => {
+			const created = await request(server)
 				.post('/api/files/directory')
 				.send({ target: { rootId: 'primary', relativePath: 'new' } });
-			const copied = await request(app)
+			const copied = await request(server)
 				.post('/api/files/copy')
 				.send({
 					destination: { rootId: 'primary', relativePath: 'new/copied.txt' },
 					source: { rootId: 'primary', relativePath: 'inside.txt' },
 				});
-			const renamed = await request(app)
+			const renamed = await request(server)
 				.put('/api/files/rename')
 				.send({
 					destination: { rootId: 'primary', relativePath: 'new/renamed.txt' },
 					source: { rootId: 'primary', relativePath: 'new/copied.txt' },
 				});
-			const moved = await request(app)
+			const moved = await request(server)
 				.post('/api/files/move')
 				.send({
 					destination: { rootId: 'primary', relativePath: 'moved.txt' },
@@ -283,18 +288,25 @@ describe('authorized filesystem HTTP contract', () => {
 				expect(response.body.code).toBe('DOMAIN_OPERATION_REQUIRED');
 				expect(JSON.stringify(response.body)).not.toContain(primary);
 			}
-			await expect(readFile(resolve(primary, 'moved.txt'), 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
+			expect(
+				await readFile(resolve(primary, 'moved.txt'), 'utf8').then(
+					() => null,
+					(error: NodeJS.ErrnoException) => ({ code: error.code })
+				)
+			).toMatchObject({ code: 'ENOENT' });
 		});
 	});
 
 	it('bloquea permisos faltantes y mantiene retiradas las mutaciones legacy', async () => {
 		await withApp(
-			async ({ app, primary }) => {
-				const createDenied = await request(app)
+			async ({ server, primary }) => {
+				const createDenied = await request(server)
 					.post('/api/files/directory')
 					.send({ target: { rootId: 'primary', relativePath: 'denied' } });
-				const downloadDenied = await request(app).get('/api/download').query({ rootId: 'primary', path: 'inside.txt' });
-				const legacyBody = await request(app)
+				const downloadDenied = await request(server)
+					.get('/api/download')
+					.query({ rootId: 'primary', path: 'inside.txt' });
+				const legacyBody = await request(server)
 					.post('/api/files/directory')
 					.send({ path: resolve(primary, 'legacy') });
 				expect(createDenied.status).toBe(410);
@@ -304,22 +316,27 @@ describe('authorized filesystem HTTP contract', () => {
 			{ permissions: ['read', 'index'] }
 		);
 
-		await withApp(async ({ app, secondary }) => {
-			const crossRoot = await request(app)
+		await withApp(async ({ server, secondary }) => {
+			const crossRoot = await request(server)
 				.post('/api/files/copy')
 				.send({
 					destination: { rootId: 'secondary', relativePath: 'copied.txt' },
 					source: { rootId: 'primary', relativePath: 'inside.txt' },
 				});
 			expect(crossRoot.status).toBe(410);
-			await expect(readFile(resolve(secondary, 'copied.txt'), 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
+			expect(
+				await readFile(resolve(secondary, 'copied.txt'), 'utf8').then(
+					() => null,
+					(error: NodeJS.ErrnoException) => ({ code: error.code })
+				)
+			).toMatchObject({ code: 'ENOENT' });
 		});
 	});
 
 	it('bloquea un junction/symlink de lectura que escapa del fixture', async () => {
-		await withApp(async ({ app, outside, primary }) => {
+		await withApp(async ({ server, outside, primary }) => {
 			await symlink(outside, resolve(primary, 'escape'), process.platform === 'win32' ? 'junction' : 'dir');
-			const response = await request(app)
+			const response = await request(server)
 				.get('/api/files/content')
 				.query({ rootId: 'primary', path: 'escape/secret.txt' });
 			expect(response.status).toBe(403);
@@ -329,14 +346,14 @@ describe('authorized filesystem HTTP contract', () => {
 	});
 
 	it('conserva source opaco para persistencia canónica, resuelve path sólo en servidor y rechaza path legacy', async () => {
-		await withApp(async ({ app, primary }) => {
-			const authorized = await request(app)
+		await withApp(async ({ server, primary }) => {
+			const authorized = await request(server)
 				.post('/api/probe/file')
 				.send({ name: 'inside', source: { rootId: 'primary', relativePath: 'inside.txt' } });
-			const legacy = await request(app)
+			const legacy = await request(server)
 				.post('/api/probe/file')
 				.send({ path: resolve(primary, 'inside.txt') });
-			const metadataOnlyUpdate = await request(app).patch('/api/probe/file').send({ description: 'safe update' });
+			const metadataOnlyUpdate = await request(server).patch('/api/probe/file').send({ description: 'safe update' });
 			expect(authorized.status).toBe(200);
 			expect(authorized.body).toEqual({
 				authorized: true,
@@ -349,8 +366,8 @@ describe('authorized filesystem HTTP contract', () => {
 	});
 
 	it('elimina paths físicos de payloads públicos sin destruir referencias autorizadas', async () => {
-		await withApp(async ({ app, primary }) => {
-			const response = await request(app).get('/api/probe/public-payload');
+		await withApp(async ({ server, primary }) => {
+			const response = await request(server).get('/api/probe/public-payload');
 			expect(response.status).toBe(200);
 			expect(response.body).toEqual({
 				arbitrary: ['[redacted-path]', { location: '[redacted-path]' }],
@@ -378,7 +395,7 @@ describe('authorized filesystem HTTP contract', () => {
 	});
 
 	it('filtra listados legacy por path autorizado y falla cerrado para lecturas directas', async () => {
-		await withApp(async ({ app, outside, primary, registry }) => {
+		await withApp(async ({ app, server, outside, primary, registry }) => {
 			const [{ db }, { folders, images }] = await Promise.all([
 				import('../src/lib/drizzle'),
 				import('../src/lib/drizzle/schema'),

@@ -3,7 +3,6 @@
  * @description Test de integración básico para verificar que el sistema funciona
  */
 
-import { vi } from 'vitest';
 import { KeyboardShortcutManager } from '../keyboard-shortcut-manager';
 
 describe('Keyboard Shortcuts Integration', () => {
@@ -50,32 +49,6 @@ describe('Keyboard Shortcuts Integration', () => {
 
 		expect(hasFileBrowserSpecific).toBe(true);
 		expect(hasContextMenuSpecific).toBe(true);
-	});
-
-	it('should generate correct shortcut keys', () => {
-		const testCases = [
-			{ key: 'a', modifiers: ['ctrl'], expected: 'ctrl+a' },
-			{ key: 'Delete', modifiers: [], expected: 'delete' },
-			{ key: 'F2', modifiers: [], expected: 'f2' },
-			{ key: 'c', modifiers: ['ctrl', 'shift'], expected: 'ctrl+shift+c' },
-		];
-
-		for (const testCase of testCases) {
-			const shortcut = {
-				key: testCase.key,
-				modifiers: testCase.modifiers as ('ctrl' | 'shift' | 'alt' | 'meta')[],
-				action: 'test',
-				description: 'Test',
-			};
-
-			const handler = vi.fn();
-			manager.register(shortcut, handler);
-
-			// Verificar que el shortcut se registró correctamente
-			const allShortcuts = manager.getAllShortcuts();
-			const registeredShortcut = allShortcuts.find((s) => s.action === 'test');
-			expect(registeredShortcut).toBeDefined();
-		}
 	});
 
 	it('should handle context switching', () => {

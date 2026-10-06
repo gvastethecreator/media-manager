@@ -20,7 +20,10 @@ async function apiJson<T>(request: APIRequestContext, method: 'POST', path: stri
 	return JSON.parse(text) as T;
 }
 
-test('muestra sólo el reindexado canónico por carpeta y conserva su diálogo accesible', async ({ page, request }) => {
+test('muestra sólo el reindexado canónico por carpeta y conserva su diálogo accesible', async ({
+	page,
+	request,
+}, testInfo) => {
 	const mediaRoot = process.env.MEDIA_MANAGER_SMOKE_ROOT_PATH;
 	if (!mediaRoot) throw new Error('MEDIA_MANAGER_SMOKE_ROOT_PATH es obligatorio para el smoke de reindexado.');
 
@@ -58,14 +61,7 @@ test('muestra sólo el reindexado canónico por carpeta y conserva su diálogo a
 	await expect(infoDialog).toContainText('There is no global shortcut');
 	expect(await page.evaluate(() => document.activeElement?.closest('[role="dialog"]') !== null)).toBe(true);
 
-	const evidenceDirectory = resolve(
-		process.cwd(),
-		'.scratch',
-		'planning',
-		'2026-07-14-complete-recovery',
-		'artifacts',
-		'canonical-reindex'
-	);
+	const evidenceDirectory = testInfo.outputPath('canonical-reindex');
 	await mkdir(evidenceDirectory, { recursive: true });
 	await page.screenshot({ animations: 'disabled', path: resolve(evidenceDirectory, 'dialog-desktop.png') });
 
