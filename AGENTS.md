@@ -21,32 +21,19 @@ Done when you can name the service file and the HTTP or test seam that will prov
 - CAUTION: `bun run db:reset` deletes a database. Run it only on a marked disposable DB, with the exact confirmation the command prints.
 - Do not rewrite git history. Do not commit secrets, personal databases, uploads, or logs.
 
-## Commands
+## Commands and proof
 
-`package.json` is the command list. Do not invent scripts.
+Use the commands in `package.json`; [README.md](README.md#development-commands) explains the common ones. Install with `bun install --frozen-lockfile`.
 
-| Command | Purpose |
-| --- | --- |
-| `bun run dev:full` | Frontend and backend |
-| `bun run desktop:dev` | Electron shell |
-| `bun run check` | Lint and typecheck |
-| `bun run test` | Isolated unit and integration tests |
-| `bun run test:tooling` | Tooling tests |
-| `bun run test:e2e` | Playwright |
-| `bun run build` | Vite client and Bun server |
-| `bun run db:migrate -- --database <path>` | Versioned migrations |
-| `bun run db:studio -- --database <path>` | Studio on an explicit DB |
-
-Install with `bun install --frozen-lockfile`.
-
-## Proof
+For migrations or Studio, use `bun run db:migrate -- --database <path>` or `bun run db:studio -- --database <path>` with an explicit database path.
 
 Prove the changed behavior at the cheapest public seam. A failing test is not done. Record the exact command you ran.
 
 If the change is UI, exercise the real route in the browser. A screenshot of first paint is not proof.
 
-## Docs
+## Context pointers
 
-- Product entry: `README.md`
-- API: `docs/core/API-REFERENCE.md`
-- Frontend: `docs/core/FRONTEND-GUIDE.md`
+- Product, startup, and commands: [README.md](README.md).
+- HTTP routes, payloads, and authorization: [API reference](docs/core/API-REFERENCE.md).
+- UI layout, state, and browser proof: [Frontend guide](docs/core/FRONTEND-GUIDE.md).
+- Service boundaries, indexing, and Effect execution: [Service layer](src/services/README.md).
