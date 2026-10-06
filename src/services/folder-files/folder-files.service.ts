@@ -4,7 +4,7 @@
  * @description Servicio unificado para obtener todos los tipos de archivos de una carpeta con paginación optimizada
  */
 
-import { and, count, eq, like, not, or, sql } from 'drizzle-orm';
+import { and, eq, like, not, or, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -521,104 +521,28 @@ async function getTotalFileCount(
 	fileTypes: string[] = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d']
 ): Promise<number> {
 	try {
-		const countQueries: Promise<number>[] = [];
-
-		// Construir consultas de conteo para cada tipo
-		if (fileTypes.includes('image')) {
-			countQueries.push(
-				db
-					.select({ count: count() })
-					.from(images)
-					.where(
-						and(
-							buildWhereConditions(context, includeSubfolders, search, images),
-							visibleAssetLifecycleCondition(images.assetId)
-						)
-					)
-					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
+		const tables: Array<[string, FileTable]> = [
+			['image', images],
+			['video', videos],
+			['audio', audios],
+			['document', documents],
+			['jsonFile', jsonFiles],
+			['file3d', file3Ds],
+		];
+		const queries = tables
+			.filter(([type]) => fileTypes.includes(type))
+			.map(
+				([, table]) =>
+					sql`SELECT COUNT(*) AS count FROM ${table} WHERE ${and(
+						buildWhereConditions(context, includeSubfolders, search, table),
+						visibleAssetLifecycleCondition(table.assetId)
+					)}`
 			);
-		}
-
-		if (fileTypes.includes('video')) {
-			countQueries.push(
-				db
-					.select({ count: count() })
-					.from(videos)
-					.where(
-						and(
-							buildWhereConditions(context, includeSubfolders, search, videos),
-							visibleAssetLifecycleCondition(videos.assetId)
-						)
-					)
-					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
-			);
-		}
-
-		if (fileTypes.includes('audio')) {
-			countQueries.push(
-				db
-					.select({ count: count() })
-					.from(audios)
-					.where(
-						and(
-							buildWhereConditions(context, includeSubfolders, search, audios),
-							visibleAssetLifecycleCondition(audios.assetId)
-						)
-					)
-					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
-			);
-		}
-
-		if (fileTypes.includes('document')) {
-			countQueries.push(
-				db
-					.select({ count: count() })
-					.from(documents)
-					.where(
-						and(
-							buildWhereConditions(context, includeSubfolders, search, documents),
-							visibleAssetLifecycleCondition(documents.assetId)
-						)
-					)
-					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
-			);
-		}
-
-		if (fileTypes.includes('jsonFile')) {
-			countQueries.push(
-				db
-					.select({ count: count() })
-					.from(jsonFiles)
-					.where(
-						and(
-							buildWhereConditions(context, includeSubfolders, search, jsonFiles),
-							visibleAssetLifecycleCondition(jsonFiles.assetId)
-						)
-					)
-					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
-			);
-		}
-
-		if (fileTypes.includes('file3d')) {
-			countQueries.push(
-				db
-					.select({ count: count() })
-					.from(file3Ds)
-					.where(
-						and(
-							buildWhereConditions(context, includeSubfolders, search, file3Ds),
-							visibleAssetLifecycleCondition(file3Ds.assetId)
-						)
-					)
-					.then((result: Array<{ count: number }>) => result[0]?.count || 0)
-			);
-		}
-
-		// Ejecutar todas las consultas de conteo en paralelo
-		const counts = await Promise.all(countQueries);
-
-		// Sumar todos los totales
-		return counts.reduce((total, count) => total + count, 0);
+		if (queries.length === 0) return 0;
+		const result: Array<{ total: number }> = await db.all(
+			sql`SELECT SUM(count) AS total FROM (${sql.join(queries, sql` UNION ALL `)})`
+		);
+		return Number(result[0]?.total ?? 0);
 	} catch (error) {
 		logger.error('Error getting total file count:', error);
 		return 0;

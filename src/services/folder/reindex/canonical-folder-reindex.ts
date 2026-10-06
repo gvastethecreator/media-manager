@@ -84,11 +84,10 @@ async function reconcilePhysicalFolderStructure(
 	const newRows: FolderRow[] = [];
 
 	if (includeSubfolders) {
-		const orderedDirectories = [...directories].sort((left, right) => {
-			const leftDepth = relative(rootPath, left.path).split(sep).filter(Boolean).length;
-			const rightDepth = relative(rootPath, right.path).split(sep).filter(Boolean).length;
-			return leftDepth - rightDepth;
-		});
+		const orderedDirectories = directories
+			.map((directory) => ({ directory, depth: relative(rootPath, directory.path).split(sep).filter(Boolean).length }))
+			.sort((left, right) => left.depth - right.depth)
+			.map(({ directory }) => directory);
 		for (const directory of orderedDirectories) {
 			if (!isPathInsideDirectory(rootPath, directory.path)) {
 				throw new Error('El escaneo devolvió una subcarpeta fuera del Folder autorizado.');
@@ -115,10 +114,11 @@ async function reconcilePhysicalFolderStructure(
 		}
 	}
 
+	const foldersById = new Map(allFolders.map((folder) => [folder.id, folder]));
 	const physicalIds = new Set([...physicalByPath.values()].map((folder) => folder.id));
 	const missingFolderIds = [...logicalScope].filter((id) => !physicalIds.has(id));
 	for (const missingFolderId of missingFolderIds) {
-		const missingFolder = allFolders.find((folder) => folder.id === missingFolderId);
+		const missingFolder = foldersById.get(missingFolderId);
 		if (!missingFolder || !isPathInsideDirectory(rootPath, missingFolder.path)) {
 			throw new Error(`El Folder descendiente ${missingFolderId} no pertenece a la raíz física autorizada.`);
 		}

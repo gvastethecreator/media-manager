@@ -195,14 +195,13 @@ async function listAuthorizedFavorites(
 	},
 	permissions: FavoriteRootPermission[] = ['read', 'index']
 ): Promise<{ hasMore: boolean; items: FavoriteWithStats[]; total: number }> {
+	// Authorization determines the public total and must precede pagination.
+	const result = await favoriteService.list({ ...filters, limit: Number.MAX_SAFE_INTEGER, offset: 0 });
 	const authorized: FavoriteWithStats[] = [];
-	let rawOffset = 0;
-	const chunkSize = 250;
-	while (true) {
-		const page = await favoriteService.list({ ...filters, limit: chunkSize, offset: rawOffset });
-		authorized.push(...(await filterAuthorizedFavorites(request, page.items, permissions)));
-		rawOffset += page.items.length;
-		if (!page.hasMore || page.items.length === 0) break;
+	for (let offset = 0; offset < result.items.length; offset += 250) {
+		authorized.push(
+			...(await filterAuthorizedFavorites(request, result.items.slice(offset, offset + 250), permissions))
+		);
 	}
 	return {
 		hasMore: filters.offset + filters.limit < authorized.length,

@@ -71,10 +71,10 @@ const normalizeAlbumRow = (album: typeof albums.$inferSelect) => ({
 
 const projectAlbumFavoriteState = <TAlbum extends { id: string; isFavorite: boolean }>(
 	album: TAlbum,
-	favoriteEntityIds: readonly string[]
+	favoriteEntityIds: ReadonlySet<string>
 ): TAlbum => ({
 	...album,
-	isFavorite: favoriteEntityIds.includes(album.id),
+	isFavorite: favoriteEntityIds.has(album.id),
 });
 
 /**
@@ -244,8 +244,9 @@ const make = (): AlbumServiceInterface => {
 			}
 
 			const favoriteEntityIds = yield* getAlbumFavoriteIds();
+			const favoriteIds = new Set(favoriteEntityIds);
 			const normalizedAlbum = normalizeAlbumRow(result[0]);
-			const projectedAlbum = projectAlbumFavoriteState(normalizedAlbum, favoriteEntityIds);
+			const projectedAlbum = projectAlbumFavoriteState(normalizedAlbum, favoriteIds);
 
 			logger.info('✅ Álbum encontrado:', projectedAlbum);
 
@@ -367,6 +368,7 @@ const make = (): AlbumServiceInterface => {
 			logger.info('🎞️ Obteniendo álbumes', { options });
 
 			const favoriteEntityIds = yield* getAlbumFavoriteIds();
+			const favoriteIds = new Set(favoriteEntityIds);
 
 			// Construir condiciones de filtrado
 			const conditions: any[] = [];
@@ -428,12 +430,35 @@ const make = (): AlbumServiceInterface => {
 
 			const total = countResult[0]?.count ?? 0;
 
+			const imageCountsByAlbum = new Map<string, number>();
+			for (let offset = 0; offset < albumsResult.length; offset += 500) {
+				const imageCounts = yield* Effect.tryPromise<Array<{ albumId: string; count: number }>, AlbumError>({
+					try: () =>
+						db
+							.select({ albumId: imageAlbums.B, count: count() })
+							.from(imageAlbums)
+							.innerJoin(images, eq(imageAlbums.A, images.id))
+							.where(
+								and(
+									inArray(
+										imageAlbums.B,
+										albumsResult.slice(offset, offset + 500).map((album) => album.id)
+									),
+									visibleImageLifecycleCondition()
+								)
+							)
+							.groupBy(imageAlbums.B),
+					catch: (error: unknown) => fromUnknownError('getAll.countImages', error),
+				});
+				for (const row of imageCounts) imageCountsByAlbum.set(row.albumId, row.count);
+			}
+
 			// Enriquecer con stats
 			const albumsWithStats = yield* Effect.all(
 				albumsResult.map((albumRow) => {
 					return Effect.gen(function* () {
 						const normalizedAlbum = normalizeAlbumRow(albumRow);
-						const projectedAlbum = projectAlbumFavoriteState(normalizedAlbum, favoriteEntityIds);
+						const projectedAlbum = projectAlbumFavoriteState(normalizedAlbum, favoriteIds);
 						const validated = yield* Effect.try({
 							try: () => Schema.decodeUnknownSync(Album)(projectedAlbum),
 							catch: () =>
@@ -443,7 +468,21 @@ const make = (): AlbumServiceInterface => {
 									value: projectedAlbum,
 								}),
 						});
-						const counts = yield* getRelationsCounts(validated.id);
+						const counts: AlbumCounts = {
+							images: imageCountsByAlbum.get(validated.id) ?? 0,
+							videos: 0,
+							collections: 0,
+							tags: 0,
+							characters: 0,
+							places: 0,
+							worldItems: 0,
+							concepts: 0,
+							prompts: 0,
+							notes: 0,
+							wildcards: 0,
+							properties: 0,
+							groups: 0,
+						};
 						return buildAlbumWithStats(validated, counts);
 					});
 				}),

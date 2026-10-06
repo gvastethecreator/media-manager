@@ -250,18 +250,14 @@ async function validateFavoriteProfileScopeSchema(): Promise<void> {
 	return favoriteSchemaValidatedPromise;
 }
 
-function buildFavoriteStats(entityType: FavoriteEntityType, addedAt: Date) {
+function buildFavoriteStats(entityType: FavoriteEntityType, addedAt: Date, dateFormatter: Intl.DateTimeFormat) {
 	const normalizedAddedAt = new Date(addedAt);
 	const daysSinceAdded = Math.floor((Date.now() - normalizedAddedAt.getTime()) / (1000 * 60 * 60 * 24));
 
 	return {
 		daysSinceAdded,
 		entityTypeName: FAVORITE_ENTITY_DISPLAY_NAMES[entityType] ?? entityType,
-		formattedAddedAt: normalizedAddedAt.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-		}),
+		formattedAddedAt: dateFormatter.format(normalizedAddedAt),
 		isRecent: daysSinceAdded <= 7,
 		isOld: daysSinceAdded > 30,
 	};
@@ -362,15 +358,52 @@ async function withFavoriteMutationLock<TResult>(key: string, operation: () => P
 	}
 }
 
-async function enrichFavorite(favorite: FavoriteRecord): Promise<FavoriteWithStats> {
-	const entityData = await getEntityData(favorite.entityType, favorite.entityId);
-
-	return {
-		...favorite,
-		entityName: entityData?.name || FAVORITE_ENTITY_DISPLAY_NAMES[favorite.entityType] || 'Desconocido',
-		entityThumbnail: entityData?.thumbnail || null,
-		stats: buildFavoriteStats(favorite.entityType, favorite.addedAt),
-	};
+async function enrichFavorites(records: FavoriteRecord[]): Promise<FavoriteWithStats[]> {
+	const entitiesByType = new Map<FavoriteEntityType, Map<string, { name: string; thumbnail: string | null }>>();
+	const dateFormatter = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+	const types = new Set(records.map((favorite) => favorite.entityType));
+	await Promise.all(
+		[...types].map(async (entityType) => {
+			const table = entityTableMap[entityType];
+			if (!table) return;
+			try {
+				const ids = records
+					.filter((favorite) => favorite.entityType === entityType)
+					.map((favorite) => favorite.entityId);
+				const entities = new Map<string, { name: string; thumbnail: string | null }>();
+				entitiesByType.set(entityType, entities);
+				for (let offset = 0; offset < ids.length; offset += 500) {
+					const rows: Array<{
+						id: string;
+						name?: string;
+						title?: string;
+						thumbnailPath?: string;
+						featuredImage?: string;
+						path?: string;
+					}> = await db
+						.select()
+						.from(table)
+						.where(inArray(table.id, ids.slice(offset, offset + 500)));
+					for (const entity of rows)
+						entities.set(entity.id, {
+							name: entity.name || entity.title || `${entityType} ${entity.id.slice(0, 8)}`,
+							thumbnail: entity.thumbnailPath || entity.featuredImage || entity.path || null,
+						});
+				}
+			} catch (error) {
+				favoriteLogger.error('Error al obtener datos de entidad:', error);
+			}
+		})
+	);
+	return records.map((favorite) => {
+		const entityData = entitiesByType.get(favorite.entityType)?.get(favorite.entityId);
+		return {
+			...favorite,
+			entityName: entityData?.name || FAVORITE_ENTITY_DISPLAY_NAMES[favorite.entityType] || 'Desconocido',
+			entityThumbnail: entityData?.thumbnail || null,
+			stats: buildFavoriteStats(favorite.entityType, favorite.addedAt, dateFormatter),
+		};
+	});
 }
 
 function favoriteMatchesSearch(favorite: FavoriteWithStats, rawSearch: string): boolean {
@@ -726,7 +759,7 @@ export const favoriteService = {
 
 			if (search?.trim()) {
 				const allItems = await db.select().from(favorites).where(whereClause).orderBy(orderByClause);
-				const enrichedItems = await Promise.all(allItems.map((favorite: FavoriteRecord) => enrichFavorite(favorite)));
+				const enrichedItems = await enrichFavorites(allItems);
 				const filteredItems = enrichedItems.filter((favorite) => favoriteMatchesSearch(favorite, search));
 				const paginatedItems = filteredItems.slice(offset, offset + limit);
 
@@ -745,7 +778,7 @@ export const favoriteService = {
 			const total = totalResult[0]?.count ?? 0;
 
 			// Enriquecer con datos de la entidad
-			const enrichedItems = await Promise.all(items.map((favorite: FavoriteRecord) => enrichFavorite(favorite)));
+			const enrichedItems = await enrichFavorites(items);
 
 			return {
 				items: enrichedItems,
@@ -780,7 +813,7 @@ export const favoriteService = {
 
 		if (result.length === 0) return null;
 
-		return enrichFavorite(result[0] as FavoriteRecord);
+		return (await enrichFavorites([result[0] as FavoriteRecord]))[0];
 	},
 
 	/**
