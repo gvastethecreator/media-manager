@@ -1,15 +1,15 @@
 # Code map: media-manager
 
-Generated: 2026-09-27T22:53:18Z | Commit: `0bb623bb1101` | Schema: 2
-Generation: `0a935a92b51085c024dcaf0ee9765a39a8e887c78cd13c81a2885aebc1d6a260`
+Generated: 2026-10-06T06:53:36Z | Commit: `23e2038303dc` | Schema: 2
+Generation: `c233a9cdb391b6c930450eb18580791d2d126443fdf903208b27d50dd09a0c50`
 Scope: . | Inventory: working-tree
-Nodes: 1912 | Edges: 11067 | Flows: 5
+Nodes: 1842 | Edges: 10756 | Flows: 5
 
 ## Coverage
 
-- Analysis: **partial**; 1776 analyzed of 1785 included files.
-- Configuration files: 2; omitted untracked files: 0.
-- Unresolved references and analysis limits: 9703.
+- Analysis: **partial**; 1710 analyzed of 1717 included files.
+- Configuration files: 1; omitted untracked files: 0.
+- Unresolved references and analysis limits: 9578.
 - Static references and call paths do not prove runtime execution or test coverage.
 
 ## Modules
@@ -34,7 +34,7 @@ Nodes: 1912 | Edges: 11067 | Flows: 5
 - `external:javascript:@electron/packager` | external | External | callers: scripts/desktop-package.ts | callees: none | tests: 0 | entry: none
 - `external:javascript:@gsap/react` | external | External | callers: src/components/settings/common/entity-settings-view.tsx, src/components/settings/common/entity-settings-view.tsx, src/components/settings/modern/files-settings-modern.tsx, src/components/settings/modern/files-settings-modern.tsx | callees: none | tests: 0 | entry: none
 - `external:javascript:@headless-tree/core` | external | External | callers: src/components/ui/tree.tsx | callees: none | tests: 0 | entry: none
-- Showing 20 of 1912 nodes. Query `impact --module <path>` or open the HTML hierarchy for the rest.
+- Showing 20 of 1842 nodes. Query `impact --module <path>` or open the HTML hierarchy for the rest.
 
 ## Edges
 
@@ -88,7 +88,7 @@ Nodes: 1912 | Edges: 11067 | Flows: 5
 - `electron/main/index.ts` -> `external:javascript:node:fs` | imports
 - `electron/main/index.ts` -> `external:javascript:node:module` | calls
 - `electron/main/index.ts` -> `external:javascript:node:module` | imports
-- Showing 50 of 11067 edges; JSON contains every edge and its evidence.
+- Showing 50 of 10756 edges; JSON contains every edge and its evidence.
 
 ## Unknown
 
@@ -115,7 +115,7 @@ Nodes: 1912 | Edges: 11067 | Flows: 5
 
 ## Architecture changes
 
-- Nodes: +0 / -0; edges: +0 / -0.
+- Nodes: +0 / -1; edges: +0 / -0.
 - Boundary changes: 0; new cycles: 0.
 
 ## Read next
