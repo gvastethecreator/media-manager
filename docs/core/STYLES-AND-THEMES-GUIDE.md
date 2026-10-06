@@ -4,28 +4,20 @@ Use CSS variables, design tokens, and TypeScript helpers. Do not hardcode colors
 
 ## File structure
 
-Theme files live under `src/styles/`:
-
-```
-src/styles/
-├── app-globals.css
-├── globals.css
-├── themes.css
-├── tokens.css
-├── design-tokens.css
-├── scrollbar.css
-├── selecto.css
-├── view-transition.css
-├── utilities/theme-system.css
-src/lib/styles/
-├── color-tokens.ts
-└── chart-colors.ts
-src/components/ui/theme-provider.tsx
-src/components/core/theme/theme-toggle.tsx
-```
+| Path | Responsibility |
+| --- | --- |
+| `src/styles/app-globals.css` | CSS imports and Tailwind token mapping through `@theme inline` |
+| `src/styles/themes.css` | Theme variables |
+| `src/styles/tokens.css` | Entity tokens |
+| `src/styles/design-tokens.css` | Palettes, shadows, timing, and radius |
+| `src/styles/utilities/theme-system.css` | Theme transitions |
+| `src/styles/globals.css`, `src/styles/scrollbar.css`, `src/styles/selecto.css`, `src/styles/view-transition.css` | Supporting UI styles |
+| `src/lib/styles/color-tokens.ts`, `src/lib/styles/chart-colors.ts` | Entity and chart color helpers |
+| `src/components/ui/theme-provider.tsx` | Theme selection and persistence |
+| `src/components/core/theme/theme-toggle.tsx` | Theme control |
 
 1. `themes.css` defines base variables in `oklch()`.
-2. Tailwind maps those variables in `globals.css` through `@theme inline`.
+2. Tailwind maps those variables in `app-globals.css` through `@theme inline`.
 3. The app sets `data-theme` on `<html>` to activate the matching theme.
 
 ## Available themes
