@@ -1,128 +1,103 @@
 #!/usr/bin/env bun
-
-/**
- * Script para ejecutar frontend (Vite) y backend (Express) simultáneamente
- * Ejecuta ambos servidores en paralelo con logs diferenciados
- */
-
-import chalk from 'chalk';
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
+import { createServer } from 'node:net';
 import { createLocalSessionEnvironment } from './local-session-environment.js';
 
+const environment = createLocalSessionEnvironment();
 const processes = [];
-const localSessionEnvironment = createLocalSessionEnvironment();
-let isCleaningUp = false;
+let stopping = false;
 
-// Función para manejar la salida con colores
-function logWithPrefix(prefix, color, data) {
-	const lines = data
-		.toString()
-		.split('\n')
-		.filter((line) => line.trim());
-	for (const line of lines) {
-		console.log(chalk[color](`[${prefix}]`), line);
-	}
+async function assertPortAvailable(url) {
+	const address = new URL(url);
+	const probe = createServer();
+	await new Promise((resolve, reject) => {
+		probe.once('error', reject);
+		probe.listen(Number(address.port), address.hostname, resolve);
+	});
+	await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
 }
 
-// Función para limpiar procesos al salir
-function cleanup() {
-	if (isCleaningUp) return;
-	isCleaningUp = true;
-
-	console.log(chalk.yellow('\n🛑 Cerrando servidores...'));
-	for (const proc of processes) {
-		if (proc && !proc.killed) {
-			proc.kill('SIGTERM');
+function stop(code) {
+	if (stopping) return;
+	stopping = true;
+	process.exitCode = code;
+	for (const child of processes) {
+		if (child.exitCode !== null || child.killed) continue;
+		if (process.platform === 'win32') {
+			const cleanup = spawn('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], {
+				stdio: 'ignore',
+				windowsHide: true,
+			});
+			cleanup.on('error', (error) => {
+				console.error(`Could not stop development process ${child.pid}: ${error.message}`);
+				process.exitCode = 1;
+			});
+		} else {
+			child.kill('SIGTERM');
 		}
 	}
 }
 
-// Manejar señales de cierre
-process.on('SIGINT', () => {
-	cleanup();
-	process.exit(0);
-});
-process.on('SIGTERM', () => {
-	cleanup();
-	process.exit(0);
-});
+function launch(script, prefix) {
+	const child = spawn(process.execPath, [script], {
+		cwd: process.cwd(),
+		env: environment,
+		stdio: ['inherit', 'pipe', 'pipe'],
+	});
+	processes.push(child);
+	for (const stream of [child.stdout, child.stderr]) {
+		stream.on('data', (data) => {
+			for (const line of data.toString().split(/\r?\n/).filter(Boolean)) console.log(`[${prefix}] ${line}`);
+		});
+	}
+	child.on('error', (error) => {
+		console.error(`[${prefix}] ${error.message}`);
+		stop(1);
+	});
+	child.on('close', (code) => {
+		if (!stopping) stop(code ?? 1);
+	});
+	return child;
+}
 
-console.log(chalk.blue('🚀 Iniciando desarrollo completo...'));
-console.log(chalk.gray('   Frontend: http://localhost:5173'));
-console.log(chalk.gray(`   Backend:  ${localSessionEnvironment.MEDIA_MANAGER_API_TARGET}\n`));
-// Utilidad: esperar a que el backend esté listo antes de lanzar Vite
-async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
-	for (let i = 0; i < retries; i++) {
+async function waitForReady(url) {
+	const deadline = Date.now() + 120_000;
+	while (Date.now() < deadline && !stopping) {
 		try {
-			const res = await fetch(url, { method: 'GET' });
-			if (res.ok) return true;
+			const response = await fetch(url, { signal: AbortSignal.timeout(1000) });
+			await response.body?.cancel();
+			if (response.ok) return true;
 		} catch {
-			// ignorar mientras arranca
+			// Readiness can fail while the child starts.
 		}
-		await new Promise((r) => setTimeout(r, intervalMs));
+		await new Promise((resolve) => setTimeout(resolve, 250));
 	}
 	return false;
 }
 
-(async () => {
-	// Ejecutar backend (Express con hot reload) una sola vez
-	const serverProcess = spawn('bun', ['run', 'dev:server:hot'], {
-		stdio: 'pipe',
-		shell: true,
-		cwd: process.cwd(),
-		env: localSessionEnvironment,
-	});
-
-	serverProcess.stdout.on('data', (data) => {
-		logWithPrefix('SERVER', 'green', data);
-	});
-
-	serverProcess.stderr.on('data', (data) => {
-		logWithPrefix('SERVER', 'red', data);
-	});
-
-	serverProcess.on('error', (error) => {
-		console.error(chalk.red(`[SERVER] Error: ${error.message}`));
-	});
-
-	processes.push(serverProcess);
-
-	const backendUrl = localSessionEnvironment.MEDIA_MANAGER_API_TARGET;
-	const ok = await waitForHealth(`${backendUrl}/health`);
-	if (!ok) {
-		console.warn(chalk.yellow('[DEV] Backend no respondió al health check a tiempo, lanzando Vite de todas formas...'));
-	} else {
-		console.log(chalk.green(`[DEV] ✅ Backend listo en ${backendUrl}`));
+for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => stop(0));
+console.log('Starting development servers.');
+const backendUrl = environment.MEDIA_MANAGER_API_TARGET;
+const frontendUrl = `http://${environment.VITE_HOST || '127.0.0.1'}:${environment.VITE_PORT || '5173'}`;
+try {
+	await assertPortAvailable(backendUrl);
+	await assertPortAvailable(frontendUrl);
+} catch (error) {
+	console.error(`[DEV] Development port is unavailable: ${error.message}`);
+	process.exit(1);
+}
+launch('scripts/dev-server-hot.js', 'SERVER');
+if (await waitForReady(`${backendUrl}/health`)) {
+	if (!stopping) {
+		launch('scripts/dev-vite-headers.js', 'VITE');
+		if (await waitForReady(frontendUrl)) {
+			if (!stopping) console.log(`[DEV] Development ready. Frontend: ${frontendUrl} Backend: ${backendUrl}`);
+		} else if (!stopping) {
+			console.error('[DEV] Frontend did not become ready.');
+			stop(1);
+		}
 	}
-
-	// Ejecutar frontend (Vite) una vez que el backend esté arriba (o tras timeout)
-	const viteProcess = spawn('bun', ['run', 'dev:vite'], {
-		stdio: 'pipe',
-		shell: true,
-		cwd: process.cwd(),
-		env: localSessionEnvironment,
-	});
-
-	viteProcess.stdout.on('data', (data) => {
-		logWithPrefix('VITE', 'cyan', data);
-	});
-
-	viteProcess.stderr.on('data', (data) => {
-		logWithPrefix('VITE', 'red', data);
-	});
-
-	viteProcess.on('error', (error) => {
-		console.error(chalk.red(`[VITE] Error: ${error.message}`));
-	});
-
-	processes.push(viteProcess);
-
-	const viteReady = await waitForHealth('http://localhost:5173', { retries: 80, intervalMs: 250 });
-	if (viteReady) {
-		console.log(
-			chalk.green(`[DEV] ✅ Desarrollo completo listo. Frontend: http://localhost:5173 · Backend: ${backendUrl}`)
-		);
-	}
-
-	console.log(chalk.yellow('⌨️  Presiona Ctrl+C para detener ambos servidores\n'));
-})();
+} else if (!stopping) {
+	console.error('[DEV] Backend did not become ready.');
+	stop(1);
+}

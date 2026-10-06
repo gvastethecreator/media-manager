@@ -3,8 +3,8 @@
   "tasks": [
     {
       "label": "▶️ Dev",
-      "type": "shell",
-      "command": "bun run dev:full",
+      "type": "process",
+      "command": "bun",
       "isBackground": true,
       "problemMatcher": {
         "owner": "custom",
@@ -13,8 +13,8 @@
         },
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "🚀 Iniciando desarrollo completo",
-          "endsPattern": "\\[DEV\\] ✅ Desarrollo completo listo"
+          "beginsPattern": "Starting development servers",
+          "endsPattern": "\\[DEV\\] Development ready"
         }
       },
       "presentation": {
@@ -27,12 +27,16 @@
       },
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "dev:full"
+      ]
     },
     {
       "label": "▶️ Dev: Vite",
-      "type": "shell",
-      "command": "bun run dev:vite",
+      "type": "process",
+      "command": "bun",
       "isBackground": true,
       "problemMatcher": {
         "owner": "custom",
@@ -42,7 +46,7 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": "🚀 Iniciando Vite\\+",
-          "endsPattern": "✅ Frontend listo en http://localhost:5173"
+          "endsPattern": "Frontend ready at http://"
         }
       },
       "presentation": {
@@ -52,12 +56,16 @@
       },
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "dev:vite"
+      ]
     },
     {
       "label": "▶️ Dev: Server",
-      "type": "shell",
-      "command": "bun run dev:server:hot",
+      "type": "process",
+      "command": "bun",
       "isBackground": true,
       "problemMatcher": {
         "owner": "custom",
@@ -66,8 +74,8 @@
         },
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "🌟 Iniciando desarrollo del servidor",
-          "endsPattern": "✅ Backend listo en http://localhost:4000"
+          "beginsPattern": "Starting backend",
+          "endsPattern": "Backend ready at http://"
         }
       },
       "presentation": {
@@ -77,12 +85,16 @@
       },
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "dev:server:hot"
+      ]
     },
     {
       "label": "💻 Desktop: Dev",
-      "type": "shell",
-      "command": "bun run desktop:dev",
+      "type": "process",
+      "command": "bun",
       "isBackground": true,
       "problemMatcher": [],
       "presentation": {
@@ -92,12 +104,16 @@
       },
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "desktop:dev"
+      ]
     },
     {
       "label": "🧪 Test",
-      "type": "shell",
-      "command": "bun run test",
+      "type": "process",
+      "command": "bun",
       "group": {
         "kind": "test",
         "isDefault": true
@@ -105,22 +121,30 @@
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "test"
+      ]
     },
     {
       "label": "🧪 Test: Tooling",
-      "type": "shell",
-      "command": "bun run test:tooling",
+      "type": "process",
+      "command": "bun",
       "group": "test",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "test:tooling"
+      ]
     },
     {
       "label": "🎭 Test: E2E",
-      "type": "shell",
-      "command": "bun run test:e2e",
+      "type": "process",
+      "command": "bun",
       "group": "test",
       "problemMatcher": [],
       "presentation": {
@@ -130,61 +154,85 @@
       },
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "test:e2e"
+      ]
     },
     {
       "label": "🔎 Check",
-      "type": "shell",
-      "command": "bun run check",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [
         "$tsc"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "check"
+      ]
     },
     {
       "label": "🧹 Lint",
-      "type": "shell",
-      "command": "bun run lint",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "lint"
+      ]
     },
     {
       "label": "🧹 Lint: Fix",
-      "type": "shell",
-      "command": "bun run lint:fix",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "lint:fix"
+      ]
     },
     {
       "label": "🎨 Format",
-      "type": "shell",
-      "command": "bun run format",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "format"
+      ]
     },
     {
       "label": "📝 Typecheck",
-      "type": "shell",
-      "command": "bun run tsc",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [
         "$tsc"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "tsc"
+      ]
     },
     {
       "label": "🏗️ Build",
-      "type": "shell",
-      "command": "bun run build",
+      "type": "process",
+      "command": "bun",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -199,76 +247,110 @@
       },
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "build"
+      ]
     },
     {
       "label": "🏗️ Build: Vite",
-      "type": "shell",
-      "command": "bun run build:vite",
+      "type": "process",
+      "command": "bun",
       "group": "build",
       "problemMatcher": [
         "$tsc"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "build:vite"
+      ]
     },
     {
       "label": "🏗️ Build: Server",
-      "type": "shell",
-      "command": "bun run build:server",
+      "type": "process",
+      "command": "bun",
       "group": "build",
       "problemMatcher": [
         "$tsc"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "build:server"
+      ]
     },
     {
       "label": "📦 Desktop: Package",
-      "type": "shell",
-      "command": "bun run desktop:package",
+      "type": "process",
+      "command": "bun",
       "group": "build",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "desktop:package"
+      ]
     },
     {
       "label": "📦 Deps",
-      "type": "shell",
-      "command": "bun run deps:outdated",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "deps:outdated"
+      ]
     },
     {
       "label": "🗃️ DB: Studio",
-      "type": "shell",
-      "command": "bun run db:studio -- --database \"${input:mediaManagerDatabasePath}\"",
+      "type": "process",
+      "command": "bun",
       "detail": "Opens Studio on the selected database. The file must already exist.",
       "isBackground": true,
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "db:studio",
+        "--",
+        "--database",
+        "${input:mediaManagerDatabasePath}"
+      ]
     },
     {
       "label": "🗃️ DB: Check",
-      "type": "shell",
-      "command": "bun run db:check -- --database \"${input:mediaManagerDatabasePath}\"",
+      "type": "process",
+      "command": "bun",
       "detail": "Checks the selected database. Does not write.",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "db:check",
+        "--",
+        "--database",
+        "${input:mediaManagerDatabasePath}"
+      ]
     },
     {
       "label": "⚠️ DB: Reset",
-      "type": "shell",
-      "command": "bun run db:reset -- --database \"${input:mediaManagerDisposableDatabasePath}\"",
+      "type": "process",
+      "command": "bun",
       "detail": "Dry-run. Does not delete. Add --confirm RESET-DISPOSABLE only on a marked disposable database.",
       "problemMatcher": [],
       "presentation": {
@@ -278,53 +360,80 @@
       },
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "db:reset",
+        "--",
+        "--database",
+        "${input:mediaManagerDisposableDatabasePath}"
+      ]
     },
     {
       "label": "📋 Logs: List",
-      "type": "shell",
-      "command": "bun run logs:list",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "logs:list"
+      ]
     },
     {
       "label": "🧹 Logs: Clean",
-      "type": "shell",
-      "command": "bun run logs:clean",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "logs:clean"
+      ]
     },
     {
       "label": "⚠️ Check: Errors",
-      "type": "shell",
-      "command": "bun run check:errors",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "check:errors"
+      ]
     },
     {
       "label": "🎭 Playwright: Install",
-      "type": "shell",
-      "command": "bun run playwright:install",
+      "type": "process",
+      "command": "bun",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "playwright:install"
+      ]
     },
     {
       "label": "🎭 Playwright: Codegen",
-      "type": "shell",
-      "command": "bun run playwright:codegen",
+      "type": "process",
+      "command": "bun",
       "isBackground": true,
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
-      }
+      },
+      "args": [
+        "run",
+        "playwright:codegen"
+      ]
     }
   ],
   "inputs": [

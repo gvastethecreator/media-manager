@@ -5,6 +5,9 @@ import { defineConfig } from 'vite-plus';
 import svgr from 'vite-plugin-svgr';
 import { resolveLocalServiceHost } from './src/config/local-runtime-security.ts';
 
+const vitePort = Number(process.env.VITE_PORT || '5173');
+if (!Number.isInteger(vitePort) || vitePort < 1 || vitePort > 65535) throw new Error('Invalid VITE_PORT.');
+
 const testMaxWorkers = Math.max(1, Number.parseInt(process.env.VITEST_MAX_WORKERS ?? '2', 10) || 2);
 
 const emptyModule = resolve(import.meta.dirname, 'src/config/empty.ts');
@@ -96,13 +99,12 @@ export default defineConfig({
 		}),
 	],
 	server: {
-		port: 5173,
+		port: vitePort,
+		strictPort: true,
 		host: viteHost,
 		// Optimizaci?n HMR para Bun
 		hmr: {
-			port: 5175,
 			// Mejorar compatibilidad con Bun
-			clientPort: 5175,
 			host: viteHost,
 		},
 		// Configuraci?n adicional para mejorar compatibilidad con Bun

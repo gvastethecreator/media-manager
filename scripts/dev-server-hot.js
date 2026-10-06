@@ -7,7 +7,6 @@
 
 import chalk from 'chalk';
 import { spawn } from 'child_process';
-import chokidar from 'chokidar';
 import { existsSync, readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -86,136 +85,49 @@ console.log(`- NODE_ENV: ${serverEnv.NODE_ENV || 'undefined'}`);
 console.log('- API session: isolated standalone session (use dev:full for a connected UI)');
 console.log();
 
-const SERVER_SRC = 'src/server/index.ts';
-const SERVER_DIR = 'src/server';
-const REQUIRED_DEPS = ['music-metadata'];
-const SERVER_PORT = Number(serverEnv.API_PORT || serverEnv.PORT || 4000);
-
-let serverProcess = null;
-let bootSequence = 0;
-
-// NOTE:
-// En desarrollo, preferimos ejecutar el entrypoint TS directamente.
-// Esto evita fallos sutiles del bundler (orden de inicialización / exports undefined)
-// y acelera el ciclo de feedback cuando el servidor se reinicia por cambios.
-
-function checkRequiredDependencies() {
-	const missing = [];
-	for (const dep of REQUIRED_DEPS) {
-		// Verifica existencia del directorio del paquete en node_modules
-		if (!existsSync(join(rootDir, 'node_modules', dep))) {
-			missing.push(dep);
-		}
-	}
-	if (missing.length > 0) {
-		console.log(chalk.red('❌ Dependencias faltantes detectadas:'), missing.join(', '));
-		console.log(chalk.yellow('👉 Ejecuta: bun install'));
-		return false;
-	}
-	return true;
-}
-
-async function waitForHealth(url, currentBoot, { retries = 50, intervalMs = 250 } = {}) {
-	for (let i = 0; i < retries; i++) {
-		if (currentBoot !== bootSequence) {
-			return false;
-		}
-
-		try {
-			const response = await fetch(url, { method: 'GET' });
-			if (response.ok) {
-				return true;
-			}
-		} catch {
-			// seguir intentando mientras arranca
-		}
-
-		await new Promise((resolve) => setTimeout(resolve, intervalMs));
-	}
-
-	return false;
-}
-
-// Función para iniciar el servidor
-function startServer() {
-	bootSequence += 1;
-	const currentBoot = bootSequence;
-	const healthUrl = `http://localhost:${SERVER_PORT}/health`;
-
-	if (serverProcess) {
-		console.log(chalk.yellow('🔄 Reiniciando servidor...'));
-		serverProcess.kill();
-	}
-
-	if (!existsSync(SERVER_SRC)) {
-		console.log(chalk.red('❌ Entry point no encontrado:', SERVER_SRC));
-		return;
-	}
-
-	console.log(chalk.green('🚀 Iniciando servidor (TS) con variables de entorno...'));
-
-	serverProcess = spawn('bun', [SERVER_SRC], {
-		stdio: 'inherit',
-		shell: true,
-		env: serverEnv, // Usar las variables de entorno cargadas
-	});
-
-	serverProcess.on('error', (error) => {
-		console.error(chalk.red('❌ Error ejecutando servidor:'), error);
-	});
-
-	serverProcess.on('close', (code) => {
-		if (code !== 0 && code !== null) {
-			console.log(chalk.red(`❌ Servidor terminó con código ${code}`));
-		}
-	});
-
-	void waitForHealth(healthUrl, currentBoot).then((isReady) => {
-		if (isReady) {
-			console.log(chalk.green(`✅ Backend listo en http://localhost:${SERVER_PORT}`));
-		}
+console.log('Starting backend with Bun watch.');
+const serverProcess = spawn(process.execPath, ['--watch', 'src/server/index.ts'], {
+	cwd: rootDir,
+	stdio: 'inherit',
+	env: serverEnv,
+});
+let stopped = false;
+let requestedStop = false;
+serverProcess.on('error', (error) => {
+	stopped = true;
+	console.error('Failed to start backend:', error.message);
+	process.exitCode = 1;
+});
+serverProcess.on('close', (code) => {
+	stopped = true;
+	process.exitCode = requestedStop ? 0 : (code ?? 1);
+});
+for (const signal of ['SIGINT', 'SIGTERM']) {
+	process.on(signal, () => {
+		requestedStop = true;
+		stopped = true;
+		serverProcess.kill(signal);
 	});
 }
-
-// Función principal
-async function main() {
-	console.log(chalk.cyan('🌟 Iniciando desarrollo del servidor con Bun hot reload'));
-
+const backendUrl = serverEnv.MEDIA_MANAGER_API_TARGET;
+let ready = false;
+const readinessDeadline = Date.now() + 120_000;
+while (Date.now() < readinessDeadline && !stopped) {
 	try {
-		if (!checkRequiredDependencies()) {
-			process.exit(1);
+		const response = await fetch(`${backendUrl}/health`, { signal: AbortSignal.timeout(1000) });
+		await response.body?.cancel();
+		if (response.ok && !stopped) {
+			console.log(`Backend ready at ${backendUrl}`);
+			ready = true;
+			break;
 		}
-		startServer();
-
-		// Configurar watcher
-		console.log(chalk.blue('👀 Monitoreando cambios en', SERVER_DIR));
-
-		const watcher = chokidar.watch(SERVER_DIR, {
-			ignored: ['**/node_modules/**', '**/.git/**'],
-			persistent: true,
-			ignoreInitial: true,
-		});
-
-		watcher.on('change', async (path) => {
-			console.log(chalk.yellow(`📝 Cambio detectado: ${path}`));
-			startServer();
-		});
-
-		// Manejar cierre graceful
-		process.on('SIGINT', () => {
-			console.log(chalk.yellow('\n🛑 Cerrando servidor...'));
-			if (serverProcess) {
-				serverProcess.kill();
-			}
-			watcher.close();
-			process.exit(0);
-		});
-
-		console.log(chalk.green('✅ Hot reload activo. Presiona Ctrl+C para salir.'));
-	} catch (error) {
-		console.error(chalk.red('❌ Error iniciando desarrollo:'), error);
-		process.exit(1);
+	} catch {
+		// The child may still be starting.
 	}
+	await new Promise((resolve) => setTimeout(resolve, 250));
 }
-
-main();
+if (!ready && !stopped) {
+	console.error('Backend did not become ready.');
+	serverProcess.kill('SIGTERM');
+	process.exitCode = 1;
+}

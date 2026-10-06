@@ -6,32 +6,30 @@
  */
 
 const { spawn } = require('child_process');
-const { randomBytes } = require('node:crypto');
+const { createLocalSessionEnvironment } = require('./local-session-environment.js');
 
 let frontendReadyLogged = false;
+let stopped = false;
+let requestedStop = false;
+const frontendUrl = `http://${process.env.VITE_HOST || '127.0.0.1'}:${process.env.VITE_PORT || '5173'}`;
 
 // Configurar variables de entorno para manejar headers grandes
 // Aumentamos a 128KB para asegurar que cookies grandes no bloqueen la carga
 process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --max-http-header-size=131072`;
 if (process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR !== '1' || !process.env.MEDIA_MANAGER_SESSION_TOKEN) {
-	const apiHost = process.env.API_HOST?.trim() || '127.0.0.1';
-	const apiPort = process.env.API_PORT?.trim() || process.env.PORT?.trim() || '4000';
-	const vitePort = process.env.VITE_PORT?.trim() || '5173';
-	process.env.MEDIA_MANAGER_API_TARGET = `http://${apiHost}:${apiPort}`;
-	process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR = '1';
-	process.env.MEDIA_MANAGER_SESSION_TOKEN = randomBytes(32).toString('base64url');
-	process.env.MEDIA_MANAGER_SESSION_ALLOWED_HOSTS = `${apiHost}:${apiPort}`;
-	process.env.MEDIA_MANAGER_SESSION_ALLOWED_ORIGINS = `http://127.0.0.1:${vitePort},http://localhost:${vitePort},http://${apiHost}:${apiPort}`;
+	Object.assign(process.env, createLocalSessionEnvironment());
 }
 
 console.log('🚀 Iniciando Vite+ con soporte para headers grandes (128KB)...');
 console.log('🔧 NODE_OPTIONS:', process.env.NODE_OPTIONS);
 console.log('🔒 API session: isolated standalone session (use dev:full for a connected backend)');
 
-async function waitForFrontend(url, { retries = 80, intervalMs = 250 } = {}) {
-	for (let i = 0; i < retries; i++) {
+async function waitForFrontend(url) {
+	const deadline = Date.now() + 120_000;
+	while (Date.now() < deadline && !stopped) {
 		try {
-			const response = await fetch(url, { method: 'GET' });
+			const response = await fetch(url, { signal: AbortSignal.timeout(1000) });
+			await response.body?.cancel();
 			if (response.ok) {
 				return true;
 			}
@@ -39,16 +37,15 @@ async function waitForFrontend(url, { retries = 80, intervalMs = 250 } = {}) {
 			// seguir intentando mientras arranca
 		}
 
-		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+		await new Promise((resolve) => setTimeout(resolve, 250));
 	}
 
 	return false;
 }
 
 // Ejecutar Vite+ (vp dev)
-const viteProcess = spawn('bun', ['run', 'dev:vite:app'], {
+const viteProcess = spawn(process.execPath, ['run', 'dev:vite:app'], {
 	stdio: 'pipe',
-	shell: true,
 	cwd: process.cwd(),
 	env: process.env,
 });
@@ -62,29 +59,39 @@ viteProcess.stderr.on('data', (data) => {
 });
 
 viteProcess.on('error', (error) => {
+	stopped = true;
 	console.error('❌ Error al iniciar Vite:', error);
 	process.exit(1);
 });
 
 viteProcess.on('close', (code) => {
+	stopped = true;
 	console.log(`🔚 Vite+ terminó con código: ${code}`);
-	process.exit(code);
+	process.exitCode = requestedStop ? 0 : (code ?? 1);
 });
 
-void waitForFrontend('http://localhost:5173').then((isReady) => {
-	if (isReady && !frontendReadyLogged) {
+void waitForFrontend(frontendUrl).then((isReady) => {
+	if (isReady && !stopped && !frontendReadyLogged) {
 		frontendReadyLogged = true;
-		console.log('✅ Frontend listo en http://localhost:5173');
+		console.log(`Frontend ready at ${frontendUrl}`);
+	} else if (!stopped) {
+		console.error('Frontend did not become ready.');
+		viteProcess.kill('SIGTERM');
+		process.exitCode = 1;
 	}
 });
 
 // Manejar señales de terminación
 process.on('SIGINT', () => {
+	stopped = true;
+	requestedStop = true;
 	console.log('\n👋 Deteniendo Vite+...');
 	viteProcess.kill('SIGINT');
 });
 
 process.on('SIGTERM', () => {
+	stopped = true;
+	requestedStop = true;
 	console.log('\n👋 Deteniendo Vite+...');
 	viteProcess.kill('SIGTERM');
 });
