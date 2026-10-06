@@ -1,9 +1,9 @@
+import { Effect } from 'effect';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createJsonFile } from '@/services/json-file/json-file.service';
-import type { CreateJsonFileInput } from '@/services/json-file/json-file.service.effect';
+import { create as createJsonFile, type CreateJsonFileInput } from '@/services/json-file/json-file.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
 import { isCanonicalSourceIndexed } from '../utils/canonical-source.utils';
@@ -51,7 +51,7 @@ export class JsonProcessor {
 			source: extendAuthorizedPathInput(fileInfo.source, { fileModifiedAt: fileInfo.lastModified }),
 		};
 
-		const json = await createJsonFile(jsonData);
+		const json = await Effect.runPromise(createJsonFile(jsonData));
 		return json.id as string;
 	}
 

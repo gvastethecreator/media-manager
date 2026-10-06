@@ -1,9 +1,9 @@
+import { Effect } from 'effect';
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createFile3D } from '@/services/file3d/file3d.service';
-import type { CreateFile3DInput } from '@/services/file3d/file3d.service.effect';
+import { create as createFile3D, type CreateFile3DInput } from '@/services/file3d/file3d.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
 import { isCanonicalSourceIndexed } from '../utils/canonical-source.utils';
@@ -97,7 +97,7 @@ export class File3DProcessor {
 			source: extendAuthorizedPathInput(fileInfo.source, { fileModifiedAt: fileInfo.lastModified }),
 		};
 
-		const file3d = await createFile3D(file3dData);
+		const file3d = await Effect.runPromise(createFile3D(file3dData));
 		return file3d.id;
 	}
 

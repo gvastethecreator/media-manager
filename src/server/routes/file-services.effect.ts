@@ -5,12 +5,10 @@
  * @created 2025-10-11 - Fase 10 Effect Implementation
  */
 
-import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
+import { getMetadataById } from '@/services/metadata/metadata.service';
+import { getById as getDocumentById } from '@/services/document/document.service.effect';
 import express from 'express';
-import { db } from '@/lib/drizzle/index.js';
-import { metadatas } from '@/lib/drizzle/schema/core/metadatas.js';
-import { documents } from '@/lib/drizzle/schema/index.js';
 import { getFile3dMetadataById } from '@/services/file3d/file3d-metadata.service';
 import { getJsonFileMetadataById } from '@/services/json-file/json-file-metadata.service';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
@@ -77,11 +75,9 @@ async function sendDocumentSource(
 	disposition: 'attachment' | 'inline'
 ): Promise<void> {
 	try {
-		const [document] = await db
-			.select({ mimeType: documents.mimeType, name: documents.name })
-			.from(documents)
-			.where(eq(documents.id, request.params.id))
-			.limit(1);
+		const document = await Effect.runPromise(
+			getDocumentById(request.params.id).pipe(Effect.catchTag('DocumentNotFound', () => Effect.succeed(null)))
+		);
 		if (!document) {
 			response.status(404).json({ error: 'Document not found' });
 			return;
@@ -310,13 +306,9 @@ documentsEffectRouter.get('/:id/preview', authorizeMediaAssetParam({ assetType: 
 
 		// Obtener thumbnail de la tabla metadatas
 		const thumbnailId = `${id}-thumbnail`;
-		const metadataRecords = await db
-			.select({ type: metadatas.type, value: metadatas.value })
-			.from(metadatas)
-			.where(eq(metadatas.id, thumbnailId));
+		const record = await getMetadataById(thumbnailId);
 
-		if (metadataRecords.length > 0) {
-			const record = metadataRecords[0];
+		if (record) {
 			const thumbnailSvg = decodePersistedSvgThumbnail(record.value, record.type === 'base64' ? 'base64' : 'auto');
 			if (thumbnailSvg) {
 				sendSvg(res, thumbnailSvg, 'revalidate');

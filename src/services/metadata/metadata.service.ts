@@ -182,7 +182,7 @@ export async function getMetadataById(id: string): Promise<MetadataExtended | nu
 		return transformMetadata(transformedMetadata as any);
 	} catch (error) {
 		serverLogger.error(`Error al obtener metadatos ${id}:`, error);
-		return null;
+		throw error;
 	}
 }
 

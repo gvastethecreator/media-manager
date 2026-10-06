@@ -1,9 +1,9 @@
+import { Effect } from 'effect';
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { extendAuthorizedPathInput } from '@/lib/filesystem/authorized-path-proof';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createDocument } from '@/services/document/document.service';
-import type { CreateDocumentInput } from '@/services/document/document.service.effect';
+import { create as createDocument, type CreateDocumentInput } from '@/services/document/document.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
 import { isCanonicalSourceIndexed } from '../utils/canonical-source.utils';
@@ -61,7 +61,7 @@ export class DocumentProcessor {
 			source: extendAuthorizedPathInput(fileInfo.source, { fileModifiedAt: fileInfo.lastModified }),
 		};
 
-		const document = await createDocument(documentData);
+		const document = await Effect.runPromise(createDocument(documentData));
 		return document.id;
 	}
 
