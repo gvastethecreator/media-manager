@@ -69,7 +69,7 @@
 		"logs:clean": "bun scripts/logging-utils.js clean",
 		"check:errors": "bun scripts/check-errors.js",
 		"deps:outdated": "bun scripts/run-with-log.js deps-outdated bun outdated",
-		"deps:update": "bun scripts/run-with-log.js deps-update \"bun update --latest\"",
+		"deps:update": "bun scripts/run-with-log.js deps-update bun update --latest",
 		"playwright:install": "bunx playwright install",
 		"playwright:codegen": "bunx playwright codegen http://localhost:5173",
 		"audit": "bun run check && bun run test"

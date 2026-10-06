@@ -40,7 +40,7 @@ function resolveCommandTypeHeader(isLint, isTest, isCheck) {
 const [, , logName, ...commandArgs] = process.argv;
 
 if (!logName || commandArgs.length === 0) {
-	console.error('Uso: bun scripts/run-with-log.js <nombre-log> <comando-completo>');
+	console.error('Usage: bun scripts/run-with-log.js <log-name> <executable> [arguments...]');
 	console.error('');
 	console.error('🚀 Script Universal de Logging');
 	console.error('');
@@ -114,10 +114,7 @@ const logHeader = [
 
 logStream.write(logHeader);
 
-// Ejecutar el comando completo a través del shell
-const isWindows = process.platform === 'win32';
-
-const child = spawn(isWindows ? 'cmd.exe' : 'sh', isWindows ? ['/c', fullCommand] : ['-c', fullCommand], {
+const child = spawn(commandArgs[0], commandArgs.slice(1), {
 	stdio: ['inherit', 'pipe', 'pipe'],
 });
 
@@ -209,11 +206,19 @@ child.stderr.on('data', (data) => {
 });
 
 child.on('error', (error) => {
+	hasRealErrors = true;
 	const errorMsg = `❌ Error al iniciar el proceso: ${error.message}`;
 	console.error(chalk.red.bold(errorMsg));
 	logStream.write(`\n--- ERROR DE SPAWN ---\n${error.stack}`);
-	logStream.end();
 	process.exitCode = 1;
+});
+
+let logFailed = false;
+logStream.on('error', (error) => {
+	logFailed = true;
+	console.error(`Failed to write command log: ${error.message}`);
+	process.exitCode = 1;
+	child.kill();
 });
 
 function logTolerantOutcome(exitCode) {
@@ -227,7 +232,12 @@ function logTolerantOutcome(exitCode) {
 }
 
 child.on('close', (code) => {
-	logStream.end();
+	logStream.end(() => finishLog(code));
+});
+
+function finishLog(code) {
+	if (logFailed) return;
+	code = code === 0 ? 0 : typeof code === 'number' && code > 0 ? code : 1;
 
 	console.log(chalk.gray('═'.repeat(50)));
 
@@ -261,4 +271,4 @@ child.on('close', (code) => {
 		}
 		process.exitCode = code ?? 1;
 	}
-});
+}

@@ -56,17 +56,22 @@ describe('run-with-log exit contract', () => {
 
 	it('preserva exit code 0', async () => {
 		const cwd = await createTemporaryDirectory();
+		const argvFixture = join(cwd, 'argv fixture.ts');
+		const argument = 'spaces & metacharacters; $literal';
+		await writeFile(argvFixture, 'console.log(process.argv[2]);');
 		const oldLog = join(cwd, 'logs', 'old.log');
 		await mkdir(join(cwd, 'logs'));
 		await writeFile(oldLog, 'keep diagnostic history');
 		await utimes(oldLog, new Date(0), new Date(0));
 		const result = await runProcess(
-			[process.execPath, runnerPath, 'contract-success', process.execPath, exitFixturePath, '0'],
+			[process.execPath, runnerPath, 'contract-success', process.execPath, argvFixture, argument],
 			cwd
 		);
 
 		expect(result.exitCode).toBe(0);
 		expect(result.stdout).toContain('Comando ejecutado exitosamente');
+		const outputLog = (await readdir(join(cwd, 'logs'))).find((file) => file.startsWith('contract-success_'))!;
+		expect(await readFile(join(cwd, 'logs', outputLog), 'utf8')).toContain(argument);
 		expect(await readFile(oldLog, 'utf8')).toBe('keep diagnostic history');
 	});
 

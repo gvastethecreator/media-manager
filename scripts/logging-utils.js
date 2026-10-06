@@ -102,59 +102,6 @@ function logErrorSummary(error) {
 	}
 }
 
-// Función para categorizar líneas por tipo
-function categorizeByType(line, lowerLine, categories) {
-	if (lowerLine.includes('error') || lowerLine.includes('✘')) {
-		categories.errors.push(line);
-	} else if (lowerLine.includes('warning') || lowerLine.includes('warn')) {
-		categories.warnings.push(line);
-	} else if (lowerLine.includes('info')) {
-		categories.info.push(line);
-	}
-}
-
-// Función para categorizar líneas por herramienta
-function categorizeByTool(line, lowerLine, categories) {
-	if (line.includes('.ts') || line.includes('.tsx') || lowerLine.includes('typescript')) {
-		categories.typescript.push(line);
-	} else if (lowerLine.includes('eslint')) {
-		categories.eslint.push(line);
-	} else if (lowerLine.includes('oxlint') || lowerLine.includes('oxfmt') || lowerLine.includes('vite+')) {
-		categories.oxc.push(line);
-	} else if (line.trim()) {
-		categories.other.push(line);
-	}
-}
-
-// Función para parsear logs por categorías
-export function parseLogsByCategory(logFile) {
-	if (!existsSync(logFile)) {
-		console.error(`❌ Archivo de log no encontrado: ${logFile}`);
-		return null;
-	}
-
-	const content = readFileSync(logFile, 'utf8');
-	const categories = {
-		errors: [],
-		warnings: [],
-		info: [],
-		typescript: [],
-		eslint: [],
-		oxc: [],
-		other: [],
-	};
-
-	const lines = content.split('\n');
-
-	for (const line of lines) {
-		const lowerLine = line.toLowerCase();
-		categorizeByType(line, lowerLine, categories);
-		categorizeByTool(line, lowerLine, categories);
-	}
-
-	return categories;
-}
-
 // Función para mostrar resumen de logs usando el nuevo parser
 export function showLogSummary(logFile) {
 	console.log(`\n📄 Analizando: ${logFile}`);
