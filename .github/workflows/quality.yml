@@ -42,6 +42,8 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run check
       - run: bun run db:schema:check
+      - name: Install media test dependency
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ffmpeg
       - run: bun run test:tooling
       - run: bun run test
       - run: bun run build
