@@ -55,7 +55,7 @@ function getManualChunkName(id: string) {
 	// Forzarlos a un chunk global hace que Vite los precargue desde index.html.
 	if (matchesPackage('@radix-ui')) return 'radix-ui';
 	if (matchesPackage('gsap') || matchesPackage('@gsap') || matchesPackage('lucide-react')) return 'ui';
-	if (matchesPackage('zustand') || matchesPackage('lodash') || matchesPackage('date-fns')) return 'vendor';
+	if (matchesPackage('zustand') || matchesPackage('date-fns')) return 'vendor';
 	if (matchesPackage('clsx') || matchesPackage('tailwind-merge') || matchesPackage('class-variance-authority'))
 		return 'utils';
 
@@ -185,7 +185,6 @@ export default defineConfig({
 			'@tanstack/react-query',
 			'zustand',
 			'lucide-react',
-			'lodash',
 			'date-fns',
 			'clsx',
 			'tailwind-merge',
