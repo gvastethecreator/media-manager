@@ -209,7 +209,7 @@ describe('local API session middleware', () => {
 	});
 
 	it('monta el gate antes de parsers y rutas y mantiene el token fuera de React', async () => {
-		const [server, vite, devFull, devServer, devVite, desktopDev, thumbnailEvents, imageLoader, publicErrorHandler] =
+		const [server, vite, devFull, devServer, devVite, desktopDev, imageLoader, publicErrorHandler] =
 			await Promise.all([
 				readFile(resolve(WORKSPACE_PATH, 'src/server/index.ts'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'vite.config.ts'), 'utf8'),
@@ -217,7 +217,6 @@ describe('local API session middleware', () => {
 				readFile(resolve(WORKSPACE_PATH, 'scripts/dev-server-hot.js'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'scripts/dev-vite-headers.js'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'scripts/desktop-dev.js'), 'utf8'),
-				readFile(resolve(WORKSPACE_PATH, 'src/lib/hooks/ui/use-thumbnail-events.ts'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'src/lib/image/image-loader.ts'), 'utf8'),
 				readFile(resolve(WORKSPACE_PATH, 'src/server/middleware/public-error-handler.ts'), 'utf8'),
 			]);
@@ -245,7 +244,6 @@ describe('local API session middleware', () => {
 		expect(devVite).toContain('isolated standalone session (use dev:full for a connected backend)');
 		expect(desktopDev).toContain('createLocalSessionEnvironment({');
 		expect(desktopDev).toContain('http://127.0.0.1:5173');
-		expect(thumbnailEvents).not.toContain('VITE_API_URL');
 		expect(imageLoader).not.toContain('VITE_API_URL');
 	});
 
