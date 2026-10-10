@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { normalize, sep } from 'path';
+import { normalize } from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 const pathUtilsLogger = serverLogger.withContext('PathUtils');
@@ -10,18 +10,8 @@ const pathUtilsLogger = serverLogger.withContext('PathUtils');
  * @returns Ruta normalizada
  */
 export function normalizePath(path: string): string {
-	// Normalizar separadores según el sistema operativo
-	let normalized = normalize(path)
-		.replace(/[/\\]+/g, sep) // Reemplazar múltiples separadores con el separador del sistema
-		.trim();
-
-	// Normalizar variaciones comunes en rutas
-	normalized = normalized
-		.replace(/outpu+ts/gi, 'outputs') // Variantes como 'outputs', 'outpuuts', etc.
-		.replace(/out[p]+uts/gi, 'outputs') // Variantes como 'outpputs'
-		.replace(/s+dmatrix/gi, 'sdmatrix'); // Variantes de SDMatrix
-
-	return normalized;
+	// Normalize syntax only: spelling, case and whitespace belong to the real path.
+	return normalize(path);
 }
 
 /**
